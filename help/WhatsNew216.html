@@ -77,7 +77,7 @@
 <li><span class="rvts22">Newppu - fix bug in scroll reg logic causing mis-scrolls in p'radikus conflict</span></li>
 <li><span class="rvts22">A bit of latest mapper changes from fceu-mm</span></li>
 <li><span class="rvts22">Fixed mappers 242, 227, 115, 248, 12, 164, 15, 253, 23, 178</span></li>
-<li><span class="rvts22">Added mappers 176, 116</span></li>
+<li><span class="rvts22">Added mappers 176, 116, 156</span></li>
 <li><span class="rvts22">Straighten out bandai m159/m016 handling and add valid null-EEPROM emulation to get those games booting.</span></li>
 <li><span class="rvts22">Add ability for CNROM games to choose whether they have bus conflicts (fixes Colorful Dragon (Unl) (Sachen), since it flakes out if bus conflicts are emulated)</span></li>
 <li><span class="rvts22">Fixed bus conflict emulation, no kage no densetsu bug anymore</span></li>
@@ -87,6 +87,7 @@
 <p><span class="rvts24">Movies</span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
 <li><span class="rvts22">Fixed old bug in "Play Movie From Beginning"</span></li>
+<li><span class="rvts22">Fixed movie savestates logic, loading post-movie savestates is not allowed in read-only</span></li>
 <li><span class="rvts22">Fixed savestates filenaming bug when working with a movie</span></li>
 <li><span class="rvts22">Added support for HUD recording in AVI dumping</span></li>
 <li><span class="rvts22">Rerecords counter display</span></li>
@@ -159,6 +160,8 @@
 <li><span class="rvts22">Added "Cycles counter exceeds N" and "Instructions counter exceeds N" type of breakpoints</span></li>
 <li><span class="rvts22">Doubleclick on the disassembly prompts "Add Execute breakpoint here" dialog</span></li>
 <li><span class="rvts22">"Display ROM offsets" option shows real ROM addresses in the Disassembly window</span></li>
+<li><span class="rvts22">Fixed conditional breakpoints bug: the error message didn't appear when editing a breakpoint</span></li>
+<li><span class="rvts22">Cleaned up and updated debugging documentation</span></li>
 </ul>
 <p><span class="rvts24"><br/></span></p>
 <p><span class="rvts23">Trace Logger</span></p>

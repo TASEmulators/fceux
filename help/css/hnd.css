@@ -230,128 +230,138 @@ a.rvts44, span.rvts44
  text-decoration: underline;
 }
 a.rvts44:hover { color: #0000ff; }
-span.rvts45
+span.rvts45 /* Font Style */
+{
+ font-size: 18pt;
+}
+span.rvts46
+{
+ font-size: 11pt;
+ font-weight: bold;
+}
+span.rvts47
 {
  font-size: 22pt;
  text-decoration: underline;
 }
-a.rvts46, span.rvts46
+a.rvts48, span.rvts48
 {
  font-size: 12pt;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts46:hover { color: #0000ff; }
-span.rvts47
-{
- font-size: 18pt;
- font-weight: bold;
-}
-span.rvts48
-{
- font-size: 12pt;
- font-family: 'Courier New', 'Courier', monospace;
- font-weight: bold;
-}
+a.rvts48:hover { color: #0000ff; }
 span.rvts49
 {
- font-size: 14pt;
+ font-size: 18pt;
  font-weight: bold;
 }
 span.rvts50
 {
  font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
- color: #000080;
+ font-weight: bold;
 }
 span.rvts51
 {
- font-size: 12pt;
- font-family: 'Courier New', 'Courier', monospace;
- color: #333399;
+ font-size: 14pt;
+ font-weight: bold;
 }
 span.rvts52
 {
+ font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
  color: #000080;
 }
 span.rvts53
 {
- font-size: 16pt;
+ font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
- font-weight: bold;
+ color: #333399;
 }
 span.rvts54
 {
- font-size: 11pt;
  font-family: 'Courier New', 'Courier', monospace;
- font-weight: bold;
+ color: #000080;
 }
 span.rvts55
 {
+ font-size: 16pt;
  font-family: 'Courier New', 'Courier', monospace;
  font-weight: bold;
 }
 span.rvts56
 {
+ font-size: 11pt;
  font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
 }
 span.rvts57
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts58
+{
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts59
 {
  font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
  color: #000080;
 }
-a.rvts58, span.rvts58
+a.rvts60, span.rvts60
 {
  font-family: 'Courier New', 'Courier', monospace;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts58:hover { color: #0000ff; }
-span.rvts59
+a.rvts60:hover { color: #0000ff; }
+span.rvts61
 {
  font-size: 14pt;
  font-weight: bold;
 }
-span.rvts60 /* Font Style */
+span.rvts62 /* Font Style */
 {
  font-size: 14pt;
 }
-a.rvts61, span.rvts61
+span.rvts63
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+ text-decoration: underline;
+}
+a.rvts64, span.rvts64
 {
  font-size: 12pt;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts61:hover { color: #0000ff; }
-span.rvts62
+a.rvts64:hover { color: #0000ff; }
+span.rvts65
 {
  font-family: 'Lucida Console', 'Monaco', monospace;
  text-decoration: underline;
 }
-span.rvts63
-{
- font-weight: bold;
- text-decoration: underline;
-}
-span.rvts64
-{
- font-size: 11pt;
- text-decoration: underline;
-}
-span.rvts65
-{
- font-size: 5pt;
-}
 span.rvts66
 {
- font-size: 5pt;
  font-weight: bold;
+ text-decoration: underline;
 }
 span.rvts67
 {
  font-size: 11pt;
+ text-decoration: underline;
+}
+span.rvts68
+{
+ font-size: 5pt;
+}
+span.rvts69
+{
+ font-size: 5pt;
  font-weight: bold;
 }
 /* ========== Para Styles ========== */
@@ -382,4 +392,13 @@ p,ul,ol /* Paragraph Style */
 }
 .rvps4 /* Paragraph Style */
 {
+}
+.rvps5
+{
+ text-indent: 48px;
+}
+.rvps6
+{
+ text-indent: 48px;
+ margin: 0px 0px 0px 48px;
 }
