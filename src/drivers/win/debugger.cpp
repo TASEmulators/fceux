@@ -298,7 +298,7 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 						case IDOK:
 							if (WP_edit >= 0) {
 								int tmp = NewBreakWindows(hwndDlg,WP_edit,(BOOL)(watchpoint[WP_edit].flags&WP_E));
-								if (tmp == INVALID_BREAKPOINT_CONDITION)
+								if (tmp == 2 || tmp == INVALID_BREAKPOINT_CONDITION)
 								{
 									MessageBox(hwndDlg, "Invalid breakpoint condition", "Error", MB_OK);
 									break;

@@ -34,7 +34,7 @@
 * Primitive -> Number | Address | Register | Flag | PC Bank | '(' Connect ')'
 * Number    -> '#' [1-9A-F]*
 * Address   -> '$' [1-9A-F]* | '$' '[' Connect ']'
-* Register  -> 'A' | 'X' | 'Y' | 'R'
+* Register  -> 'A' | 'X' | 'Y' | 'P'
 * Flag      -> 'N' | 'C' | 'Z' | 'I' | 'B' | 'V'
 * PC Bank   -> 'K'
 */
