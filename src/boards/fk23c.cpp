@@ -176,9 +176,8 @@ static DECLFW(BMCFK23CWrite)
 
 		//this is an actual mapping reg. i think reg0 controls what happens when reg1 is written. anyway, we have to immediately remap these
 		remap |= (A&3)==1; 
-
-		//don't think this will end up being necessary
-		//remap |= (A&3)==2; 
+		//this too.
+		remap |= (A&3)==2; 
 
 		if(remap)
 		{
