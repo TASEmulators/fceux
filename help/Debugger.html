@@ -85,7 +85,33 @@
 <p><br/></p>
 <p>The Pause hotkey will break execution or resume it. The Frame Advance hotkey will run the emulator for one frame then break.</p>
 <p><br/></p>
-<p>Just below these buttons is a "Seek To" button that will navigate to the specified address. When execution is paused, the disassembly view will begin with the memory at the currengt program counter location (PC) at the top of the window. You can scroll the disassembly up or down to observe the code. Then you can click "Seek PC" to return to the program counter at any time.</p>
+<p>When execution is paused, the disassembly view will begin with the memory at the current program counter location (PC) at the top of the window. You can scroll the disassembly up or down to observe the code. Then you can click "Seek PC" to return to the program counter at any time.</p>
+<p><br/></p>
+<p>You can also use "Seek To" button that will navigate to the specified address. When entering the address, these convenient strings may be used instead of the hexadecimal memory address:</p>
+<p><br/></p>
+<p>NES special addresses:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>NMI/VBL - non-maskable interrupt vector (at FFFA)</li>
+<li>RST &nbsp; &nbsp; - reset vector (at FFFC)</li>
+<li>IRQ &nbsp; &nbsp; - interrupt vector (at FFFE)</li>
+</ul>
+<p><br/></p>
+<p>FDS special addresses:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>NMI1 - non-maskable interrupt vector (at DFF6)</li>
+<li>NMI2 - non-maskable interrupt vector (at DFF8)</li>
+<li>NMI3 - non-maskable interrupt vector (at DFFA)</li>
+<li>RST &nbsp;- reset vector (at DFFC)</li>
+<li>IRQ &nbsp;- interrupt vector (at DFFE)</li>
+</ul>
+<p><br/></p>
+<p>NSF special addresses:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>LOAD - NSF LOAD address</li>
+<li>INIT - NSF INIT address</li>
+<li>PLAY - NSF PLAY address</li>
+</ul>
+<p><br/></p>
 <p><br/></p>
 <p>While execution is broken, the program counter (PC) can be edited, as well as the three registers A/X/Y, and the status flags. Normally they should be left as-is, but changing them at runtime can be useful for more advanced debugging.</p>
 <p><br/></p>
@@ -132,7 +158,9 @@
 <p><br/></p>
 <p>Breakpoints will break execution when chosen conditions are met. To create a breakpoint, click the Add button in the BreakPoints frame in the upper right corner of the debugger.</p>
 <p><br/></p>
-<p>Each breakpoint has an address range to watch (use only the left address field if you wish to watch a single byte address). Check one or more of the options to watch for Read, Write, or Execute at an address. Note that fetching of code from an address will not break as a Read; use the Execute box for this. Breakpoints can be given a name that will appear in the breakpoint window. The condition field can be used to break only on particular conditions; see "Conditional Breakpoints" below.</p>
+<p>Each breakpoint has an address range to watch (use only the left address field if you wish to watch a single byte address). When entering the address of a breakpoint, you can also use convenient strings (such as IRQ) instead of hexadecimal memory addresses.</p>
+<p><br/></p>
+<p>Check one or more of the options to watch for Read, Write, or Execute at an address. Note that fetching of code from an address will not break as a Read; use the Execute box for this. Breakpoints can be given a name that will appear in the breakpoint window. The condition field can be used to break only on particular conditions; see "Conditional Breakpoints" below.</p>
 <p><br/></p>
 <p>Double click on a breakpoint in the BreakPoints list to quickly disable or enable it. So you don't have to delete breakpoints to stop them from causing the debugger to halt the game.</p>
 <p><br/></p>
@@ -160,31 +188,6 @@
 <li>X &nbsp; &nbsp;- execute</li>
 <li>F &nbsp; &nbsp;- Forbid</li>
 <li>nnnn - name of breakpoint</li>
-</ul>
-<p><br/></p>
-<p>When entering the address of a breakpoint, these convenient strings may be used instead of the hexadecimal memory address:</p>
-<p><br/></p>
-<p>NES special addresses:</p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li>NMI/VBL - non-maskable interrupt vector (at FFFA)</li>
-<li>RST &nbsp; &nbsp; - reset vector (at FFFC)</li>
-<li>IRQ &nbsp; &nbsp; - interrupt vector (at FFFE)</li>
-</ul>
-<p><br/></p>
-<p>FDS special addresses:</p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li>NMI1 - non-maskable interrupt vector (at DFF6)</li>
-<li>NMI2 - non-maskable interrupt vector (at DFF8)</li>
-<li>NMI3 - non-maskable interrupt vector (at DFFA)</li>
-<li>RST &nbsp;- reset vector (at DFFC)</li>
-<li>IRQ &nbsp;- interrupt vector (at DFFE)</li>
-</ul>
-<p><br/></p>
-<p>NSF special addresses:</p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li>LOAD - NSF LOAD address</li>
-<li>INIT - NSF INIT address</li>
-<li>PLAY - NSF PLAY address</li>
 </ul>
 <p><br/></p>
 <p><br/></p>
@@ -231,7 +234,7 @@
 <p><br/></p>
 <p><span class="rvts45">Bookmarks</span></p>
 <p><br/></p>
-<p>A list of bookmark addresses can be kept in the Bookmark frame to make memory navigation easier. Simply type an address and click "Add" to add it to your bookmarks. Next time you wish to go to this address just double click on the bookmark.</p>
+<p>A list of bookmark addresses can be kept in the Bookmark frame to make memory navigation easier. Simply type a hexadecimal address (or a convenient string, such as NMI) and click "Add" to add it to your bookmarks. Next time you wish to go to this address just double click on the bookmark.</p>
 <p><br/></p>
 <p>When you exit the emulator, bookmarks are saved in a .deb file. Next time you return to debugging the list of bookmarks will be automatically loaded from the file.</p>
 <p><br/></p>
