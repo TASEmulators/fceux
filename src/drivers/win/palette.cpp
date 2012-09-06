@@ -4,7 +4,7 @@
 #include "window.h"
 #include "gui.h"
 
-uint8 cpalette[192];
+uint8 cpalette[192] = {0};
 
 bool SetPalette(const char* nameo)
 {
@@ -80,7 +80,8 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			if(force_grayscale)
 				CheckDlgButton(hwndDlg, CHECK_PALETTE_GRAYSCALE, BST_CHECKED);
 
-			EnableWindow(GetDlgItem(hwndDlg, BTN_PALETTE_RESET), (eoptions & EO_CPALETTE) ? 1 : 0);
+			if (eoptions & EO_CPALETTE)
+				CheckDlgButton(hwndDlg, CHECK_PALETTE_CUSTOM, BST_CHECKED);
 
 			CenterWindowOnScreen(hwndDlg);
 
@@ -113,16 +114,24 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 					case BTN_PALETTE_LOAD:
 						if(LoadPaletteFile())
-						{
-							EnableWindow(GetDlgItem(hwndDlg, BTN_PALETTE_RESET), 1);
-						}
+							CheckDlgButton(hwndDlg, CHECK_PALETTE_CUSTOM, BST_CHECKED);
 						break;
 
-					case BTN_PALETTE_RESET:
-						FCEUI_SetPaletteArray(0);
-						eoptions &= ~EO_CPALETTE;
-						EnableWindow(GetDlgItem(hwndDlg, BTN_PALETTE_RESET), 0);
+					case CHECK_PALETTE_CUSTOM:
+					{
+						if (eoptions & EO_CPALETTE)
+						{
+							// switch back to default palette
+							FCEUI_SetPaletteArray(0);
+							eoptions &= ~EO_CPALETTE;
+						} else
+						{
+							// switch to custom, even if it isn't loaded yet
+							FCEUI_SetPaletteArray(cpalette);
+							eoptions |= EO_CPALETTE;
+						}
 						break;
+					}
 
 					case BUTTON_CLOSE:
 gornk:

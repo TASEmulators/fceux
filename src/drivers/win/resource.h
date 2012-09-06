@@ -49,7 +49,6 @@
 #define IDC_ROMPATCHER_OFFSET           102
 #define IDC_NTVIEW_SCANLINE             102
 #define IDC_ASSEMBLER_PATCH_DISASM      102
-#define CHECK_PALETTE_ENABLED2          102
 #define CHECK_PALETTE_GRAYSCALE         102
 #define BTN_CDLOGGER_RESET              103
 #define LBL_PPUVIEW_TILE1               103
@@ -73,6 +72,8 @@
 #define IDC_ADDBP_MODE_X                104
 #define IDC_ROMPATCHER_CURRENT_DATA_BOX 104
 #define IDC_NTVIEW_PROPERTIES_LINE_2    104
+#define CHECK_PALETTE_GRAYSCALE2        104
+#define CHECK_PALETTE_CUSTOM            104
 #define COMBO_PAD2                      105
 #define CB_SET_HIGH_PRIORITY            105
 #define BTN_CDLOGGER_START_PAUSE        105
