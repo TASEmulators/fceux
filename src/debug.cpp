@@ -20,7 +20,7 @@ int vblankPixel = 0;		//Used to calculate the pixels in vblank
 
 int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 {
-	int offset = 0;
+	int offset = -1;
 
 	if (sscanf(offsetBuffer,"%4X",&offset) == EOF)
 	{

@@ -371,6 +371,13 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 		// PC pointer
 		if (addr > 0xFFFF) break;
 
+// ################################## Start of SP CODE ###########################
+
+		if (symbDebugEnabled)
+			decorateAddress(addr, str);
+		
+// ################################## End of SP CODE ###########################
+
 		if (addr == X.PC)
 			strcat(str, ">");
 		else
@@ -390,13 +397,12 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 			sprintf(chr, "  :%04X", addr);
 		}
 		
-// ################################## Start of SP CODE ###########################
+		// Add address
+		strcat(str, chr);
+		strcat(str, ":");
 
-		decorateAddress(addr, str, chr, symbDebugEnabled);
-		
-// ################################## End of SP CODE ###########################
-
-		if ((size = opsize[GetMem(addr)]) == 0) {
+		if ((size = opsize[GetMem(addr)]) == 0)
+		{
 			sprintf(chr, "%02X        UNDEFINED", GetMem(addr++));
 			strcat(str,chr);
 		}
@@ -431,7 +437,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 			
 // ################################## End of SP CODE ###########################
 
-			strcat(strcat(str," "),a);
+			strcat(strcat(str," "), a);
 		}
 		strcat(str,"\r\n");
 	}
@@ -1689,18 +1695,22 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								}
 								break;
 							case IDC_DEBUGGER_SEEK_TO:
+							{
 								//mbg merge 7/18/06 changed pausing check
 								if (FCEUI_EmulationPaused()) UpdateRegs(hwndDlg);
 								GetDlgItemText(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,str,5);
-								if (((ret = sscanf(str,"%4X",&tmp)) == EOF) || (ret != 1)) tmp = 0;
-								sprintf(str,"%04X",tmp);
-								SetDlgItemText(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,str);
-								Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, tmp);
-								// "Address Bookmark Add" follows the address
-								sprintf(str,"%04X", si.nPos);
-								SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
+								tmp = offsetStringToInt(BT_C, str);
+								if (tmp != -1)
+								{
+									sprintf(str,"%04X", tmp);
+									SetDlgItemText(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,str);
+									Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, tmp);
+									// "Address Bookmark Add" follows the address
+									sprintf(str,"%04X", si.nPos);
+									SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
+								}
 								break;
-
+							}
 							case IDC_DEBUGGER_BREAK_ON_BAD_OP: //Break on bad opcode
 								FCEUI_Debugger().badopbreak ^= 1;
 								break;

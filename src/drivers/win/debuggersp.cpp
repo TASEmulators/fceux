@@ -614,50 +614,44 @@ void loadNameFiles()
 * 
 * @param addr Address of the currently processed line
 * @param str Disassembly output string
-* @param chr Address in string format
-* @param decorate Flag that indicates whether label and comment should actually be added
 **/
-void decorateAddress(unsigned int addr, char* str, const char* chr, UINT decorate)
+void decorateAddress(unsigned int addr, char* str)
 {
-	if (decorate)
+	Name* n;
+		
+	char temp_chr[40];
+	sprintf(temp_chr, "$%04X", addr);
+
+	if (addr < 0x8000)
 	{
-		Name* n;
+		// Search address definition node for a RAM address
+		n = searchNode(ramBankNames, temp_chr);
+	}
+	else
+	{
+		// Search address definition node for a ROM address
+		n = addr >= 0xC000 ? searchNode(lastBankNames, temp_chr) : searchNode(loadedBankNames, temp_chr);
+	}
 		
-		if (addr < 0x8000)
+	// If a node was found there's a name or comment to add do so
+	if (n && (n->name || n->comment))
+	{
+		// Add name
+		if (n->name && *n->name)
 		{
-			// Search address definition node for a RAM address
-			n = searchNode(ramBankNames, chr);
+			strcat(str, "Name: ");
+			strcat(str, n->name);
+			strcat(str,"\r\n");
 		}
-		else
-		{
-			// Search address definition node for a ROM address
-			n = addr >= 0xC000 ? searchNode(lastBankNames, chr) : searchNode(loadedBankNames, chr);
-		}
-		
-		// If a node was found there's a name or comment to add do so
-		if (n && (n->name || n->comment))
-		{
-			// Add name
-			if (n->name && *n->name)
-			{
-				strcat(str, "Name: ");
-				strcat(str, n->name);
-				strcat(str,"\r\n");
-			}
 			
-			// Add comment
-			if (n->comment && *n->comment)
-			{
-				strcat(str, "Comment: ");
-				strcat(str, n->comment);
-				strcat(str, "\r\n");
-			}
+		// Add comment
+		if (n->comment && *n->comment)
+		{
+			strcat(str, "Comment: ");
+			strcat(str, n->comment);
+			strcat(str, "\r\n");
 		}
 	}
-	
-	// Add address
-	strcat(str, chr);
-	strcat(str, ":");
 }
 
 /**
@@ -671,11 +665,9 @@ unsigned int getBookmarkAddress(HWND hwnd, unsigned int index)
 {
 	int n;
 	char buffer[5] = {0};
-	
+
 	SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_GETTEXT, index, (LPARAM)buffer);
-	
-	sscanf(buffer, "%x", &n);
-	
+	n = offsetStringToInt(BT_C, buffer);
 	return n;
 }
 
@@ -730,21 +722,17 @@ void AddDebuggerBookmark2(HWND hwnd, char* buffer)
 **/
 void AddDebuggerBookmark(HWND hwnd)
 {
-	int result;
 	unsigned int n;
 	char buffer[5] = {0};
 	
 	GetDlgItemText(hwnd, IDC_DEBUGGER_BOOKMARK, buffer, 5);
-		
-	result = sscanf(buffer, "%x", &n);
-	
+	n = offsetStringToInt(BT_C, buffer);
 	// Make sure the offset is valid
-	if (result != 1 || n > 0xFFFF)
+	if (n == -1 || n > 0xFFFF)
 	{
 		MessageBox(hwnd, "Invalid offset", "Error", MB_OK | MB_ICONERROR);
 		return;
 	}
-	
 	AddDebuggerBookmark2(hwnd, buffer);
 }
 
