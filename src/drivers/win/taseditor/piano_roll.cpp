@@ -1864,8 +1864,11 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					selection.JumpPrevMarker(zDelta / WHEEL_DELTA);
 			} else if (fwKeys & MK_RBUTTON)
 			{
-				// Right button + wheel = rewind/forward
-				int destination_frame = currFrameCounter - (zDelta / WHEEL_DELTA);
+				// Right button + wheel = rewind/forward Playback
+				int delta = zDelta / WHEEL_DELTA;
+				if (delta < -1 || delta > 1)
+					delta *= PLAYBACK_WHEEL_BOOST;
+				int destination_frame = currFrameCounter - delta;
 				if (destination_frame < 0) destination_frame = 0;
 				int lastCursor = currFrameCounter;
 				playback.jump(destination_frame);

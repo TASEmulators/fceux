@@ -38,8 +38,8 @@ public:
 
 	void copyHotChanges(INPUTLOG* source_of_hotchanges, int limit_frame_of_source = -1);
 	void inheritHotChanges(INPUTLOG* source_of_hotchanges);
-	void inheritHotChanges_DeleteSelection(INPUTLOG* source_of_hotchanges);
-	void inheritHotChanges_InsertSelection(INPUTLOG* source_of_hotchanges);
+	void inheritHotChanges_DeleteSelection(INPUTLOG* source_of_hotchanges, SelectionFrames* frameset);
+	void inheritHotChanges_InsertSelection(INPUTLOG* source_of_hotchanges, SelectionFrames* frameset);
 	void inheritHotChanges_DeleteNum(INPUTLOG* source_of_hotchanges, int start, int frames, bool fade_old);
 	void inheritHotChanges_InsertNum(INPUTLOG* source_of_hotchanges, int start, int frames, bool fade_old);
 	void inheritHotChanges_PasteInsert(INPUTLOG* source_of_hotchanges, SelectionFrames* inserted_set);

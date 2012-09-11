@@ -663,10 +663,6 @@ SelectionFrames* SELECTION::MakeStrobe()
 	temp_selection = selections_history[(history_start_pos + history_cursor_pos) % history_size];
 	return &temp_selection;
 }
-SelectionFrames& SELECTION::GetStrobedSelection()
-{
-	return temp_selection;
-}
 
 // this getter is private
 SelectionFrames& SELECTION::CurrentSelection()

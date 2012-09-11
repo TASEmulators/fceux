@@ -61,7 +61,6 @@ public:
 	int GetCurrentSelectionEnd();
 	bool CheckFrameSelected(int frame);
 	SelectionFrames* MakeStrobe();
-	SelectionFrames& GetStrobedSelection();
 
 	bool must_find_current_marker;
 	int shown_marker;

@@ -1,3 +1,6 @@
+11-Aug-2012 - AnS - Debugger: deleting a breakpoint leaves selection in the Breakpoints list
+06-Aug-2012 - AnS - added "Use Custom Palette" checkbox to Palette config
+06-Aug-2012 - AnS - Debugger: special strings (NMI/IRQ/etc) can be also used in "Seek To" field and Bookmarks
 01-Sep-2012 - AnS - fixed movie savestates logic, loading post-movie savestates is not allowed in read-only
 31-Aug-2012 - zeromus - update mapper 156 from fceu-mm sources
 30-Aug-2012 - AnS - fixed savestates filenaming bug when working with a movie

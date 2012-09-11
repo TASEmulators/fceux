@@ -139,7 +139,7 @@ void SPLICER::CloneFrames()
 		} else frames++;
 	}
 	// check and register changes
-	int first_changes = history.RegisterChanges(MODTYPE_CLONE, *current_selection->begin());
+	int first_changes = history.RegisterChanges(MODTYPE_CLONE, *current_selection->begin(), -1, 0, NULL, 0, current_selection);
 	if (first_changes >= 0)
 	{
 		greenzone.InvalidateAndCheck(first_changes);
@@ -187,7 +187,7 @@ void SPLICER::InsertFrames()
 		} else frames++;
 	}
 	// check and register changes
-	int first_changes = history.RegisterChanges(MODTYPE_INSERT, *current_selection->begin());
+	int first_changes = history.RegisterChanges(MODTYPE_INSERT, *current_selection->begin(), -1, 0, NULL, 0, current_selection);
 	if (first_changes >= 0)
 	{
 		greenzone.InvalidateAndCheck(first_changes);
@@ -277,7 +277,7 @@ void SPLICER::DeleteFrames()
 	// reduce Piano Roll
 	piano_roll.UpdateItemCount();
 	// check and register changes
-	int result = history.RegisterChanges(MODTYPE_DELETE, start_index);
+	int result = history.RegisterChanges(MODTYPE_DELETE, start_index, -1, 0, NULL, 0, current_selection);
 	if (result >= 0)
 	{
 		greenzone.InvalidateAndCheck(result);

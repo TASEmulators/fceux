@@ -855,8 +855,19 @@ void DeleteBreak(int sel)
 	myNumWPs--;
 // ################################## End of SP CODE ###########################
 	SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_DELETESTRING,sel,0);
-	EnableWindow(GetDlgItem(hDebug,IDC_DEBUGGER_BP_DEL),FALSE);
-	EnableWindow(GetDlgItem(hDebug,IDC_DEBUGGER_BP_EDIT),FALSE);
+	// select next item in the list
+	if (numWPs)
+	{
+		if (sel >= (numWPs - 1))
+			// select last item
+			SendDlgItemMessage(hDebug, IDC_DEBUGGER_BP_LIST, LB_SETCURSEL, numWPs - 1, 0);
+		else
+			SendDlgItemMessage(hDebug, IDC_DEBUGGER_BP_LIST, LB_SETCURSEL, sel, 0);
+	} else
+	{
+		EnableWindow(GetDlgItem(hDebug,IDC_DEBUGGER_BP_DEL),FALSE);
+		EnableWindow(GetDlgItem(hDebug,IDC_DEBUGGER_BP_EDIT),FALSE);
+	}
 	UpdateBreakpointsCaption();
 }
 

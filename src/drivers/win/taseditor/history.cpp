@@ -382,6 +382,17 @@ int HISTORY::JumpInTime(int new_pos)
 	if (first_change >= 0)
 	{
 		snapshots[real_pos].inputlog.toMovie(currMovieData, first_change);
+		// but Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
+		for (int i = 0; i < first_change; ++i)
+		{
+			// if old info != new info
+			if (greenzone.laglog.GetLagInfoAtFrame(i) != snapshots[real_pos].laglog.GetLagInfoAtFrame(i))
+			{
+				// Greenzone should be invalidated from the frame
+				first_change = i;
+				break;
+			}
+		}
 		greenzone.laglog = snapshots[real_pos].laglog;
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
 		project.SetProjectChanged();
@@ -597,9 +608,9 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 			{
 				snap.end_frame = end;
 			}
-
-			// for lag-affecting operations only
-			if (first_changes > start && end == -1 && taseditor_config.adjust_input_due_to_lag)
+			int first_input_changes = first_changes;
+			// for lag-affecting operations only: Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
+			if (first_changes > start && end == -1)
 			{
 				// check if LagLogs of these snapshots differ before the "first_changes" frame
 				for (int i = start; i < first_changes; ++i)
@@ -642,7 +653,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 				if (taseditor_config.enable_hot_changes)
 				{
 					snap.inputlog.copyHotChanges(&snapshots[real_pos].inputlog);
-					snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, first_changes, end);
+					snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, first_input_changes, end);
 				}
 				// replace current snapshot with this cloned snapshot and truncate history here
 				snapshots[real_pos] = snap;
@@ -675,11 +686,11 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 					switch (mod_type)
 					{
 						case MODTYPE_DELETE:
-							snap.inputlog.inheritHotChanges_DeleteSelection(&snapshots[real_pos].inputlog);
+							snap.inputlog.inheritHotChanges_DeleteSelection(&snapshots[real_pos].inputlog, frameset);
 							break;
 						case MODTYPE_INSERT:
 						case MODTYPE_CLONE:
-							snap.inputlog.inheritHotChanges_InsertSelection(&snapshots[real_pos].inputlog);
+							snap.inputlog.inheritHotChanges_InsertSelection(&snapshots[real_pos].inputlog, frameset);
 							break;
 						case MODTYPE_INSERTNUM:
 							snap.inputlog.inheritHotChanges_InsertNum(&snapshots[real_pos].inputlog, start, size, true);
@@ -691,7 +702,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 						case MODTYPE_PASTE:
 						case MODTYPE_PATTERN:
 							snap.inputlog.inheritHotChanges(&snapshots[real_pos].inputlog);
-							snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, first_changes, end);
+							snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, first_input_changes, end);
 							break;
 						case MODTYPE_PASTEINSERT:
 							snap.inputlog.inheritHotChanges_PasteInsert(&snapshots[real_pos].inputlog, frameset);
@@ -791,6 +802,17 @@ int HISTORY::RegisterBranching(int slot, bool markers_changed)
 			snap.inputlog.copyHotChanges(&bookmarks.bookmarks_array[slot].snapshot.inputlog);
 		AddItemToHistory(snap, branches.GetCurrentBranch());
 		project.SetProjectChanged();
+		// but Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
+		for (int i = 0; i < first_changes; ++i)
+		{
+			// if old info != new info
+			if (snapshots[real_pos].laglog.GetLagInfoAtFrame(i) != greenzone.laglog.GetLagInfoAtFrame(i))
+			{
+				// Greenzone should be invalidated from the frame
+				first_changes = i;
+				break;
+			}
+		}
 	} else if (markers_changed)
 	{
 		// fill description: modification type + time of the Branch
@@ -977,6 +999,20 @@ int HISTORY::RegisterLuaChanges(const char* name, int start, bool InsertionDelet
 				// easy way: snap.size is equal to currentsnapshot.size, so we can simply inherit hotchanges
 				snap.inputlog.inheritHotChanges(&snapshots[real_pos].inputlog);
 				snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, first_changes);
+			}
+		}
+		// for lag-affecting operations only: Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
+		if (first_changes > start && InsertionDeletion_was_made)
+		{
+			// check if LagLogs of these snapshots differ before the "first_changes" frame
+			for (int i = start; i < first_changes; ++i)
+			{
+				if (snap.laglog.GetLagInfoAtFrame(i) != snapshots[real_pos].laglog.GetLagInfoAtFrame(i))
+				{
+					// Greenzone should be invalidated from the frame
+					first_changes = i;
+					break;
+				}
 			}
 		}
 		AddItemToHistory(snap);

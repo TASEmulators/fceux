@@ -412,6 +412,7 @@ int TASEDITOR_LUA::applyinputchanges(const char* name)
 					{
 						InsertionDeletion_was_made = true;
 						currMovieData.insertEmpty(pending_changes[i].frame, pending_changes[i].data);
+						greenzone.laglog.InsertFrame(pending_changes[i].frame, false, pending_changes[i].data);
 						if (taseditor_config.bind_markers)
 							markers_manager.insertEmpty(pending_changes[i].frame, pending_changes[i].data);
 						break;
@@ -423,6 +424,7 @@ int TASEDITOR_LUA::applyinputchanges(const char* name)
 						{
 							if (pending_changes[i].frame < (int)currMovieData.getNumRecords())
 								currMovieData.records.erase(currMovieData.records.begin() + pending_changes[i].frame);
+							greenzone.laglog.EraseFrame(pending_changes[i].frame);
 							if (taseditor_config.bind_markers)
 								markers_manager.EraseMarker(pending_changes[i].frame);
 						}

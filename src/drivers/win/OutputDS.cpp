@@ -282,10 +282,14 @@ void OAKRA_Module_OutputDS::update() {
 	//that way, the voice's death callback won't occur within the driver lock
 	unlock();
 
-	//kill those voices
-	for(int i=0;i<(int)deaders.size();i++) {
-		deaders[i]->callbackDied();
-		freeVoice(deaders[i]);
+	// kill those voices
+	if (deaders.size())
+	{
+		for (int i = 0; i < (int)deaders.size(); i++)
+		{
+			deaders[i]->callbackDied();
+			freeVoice(deaders[i]);
+		}
 	}
 }
 

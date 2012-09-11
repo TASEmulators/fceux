@@ -526,7 +526,7 @@ void INPUTLOG::inheritHotChanges(INPUTLOG* source_of_hotchanges)
 		FadeHotChanges();
 	}
 } 
-void INPUTLOG::inheritHotChanges_DeleteSelection(INPUTLOG* source_of_hotchanges)
+void INPUTLOG::inheritHotChanges_DeleteSelection(INPUTLOG* source_of_hotchanges, SelectionFrames* frameset)
 {
 	// copy hot changes from source InputLog, but omit deleted frames (which are represented by current selection)
 	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
@@ -534,10 +534,11 @@ void INPUTLOG::inheritHotChanges_DeleteSelection(INPUTLOG* source_of_hotchanges)
 		int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 		int frame = 0, pos = 0, source_pos = 0;
 		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
-		SelectionFrames::iterator it(selection.GetStrobedSelection().begin());
+		SelectionFrames::iterator it(frameset->begin());
+		SelectionFrames::iterator current_selection_end(frameset->end());
 		while (pos < this_size && source_pos < source_size)
 		{
-			if (it != selection.GetStrobedSelection().end() && frame == *it)
+			if (it != current_selection_end && frame == *it)
 			{
 				// this frame is selected
 				it++;
@@ -555,16 +556,16 @@ void INPUTLOG::inheritHotChanges_DeleteSelection(INPUTLOG* source_of_hotchanges)
 		FadeHotChanges();
 	}
 } 
-void INPUTLOG::inheritHotChanges_InsertSelection(INPUTLOG* source_of_hotchanges)
+void INPUTLOG::inheritHotChanges_InsertSelection(INPUTLOG* source_of_hotchanges, SelectionFrames* frameset)
 {
 	// copy hot changes from source InputLog, but insert filled lines for inserted frames (which are represented by current selection)
+	SelectionFrames::iterator it(frameset->begin());
+	SelectionFrames::iterator current_selection_end(frameset->end());
 	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
 	{
 		int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 		int frame = 0, region_len = 0, pos = 0, source_pos = 0;
 		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
-		SelectionFrames::iterator it(selection.GetStrobedSelection().begin());
-		SelectionFrames::iterator current_selection_end(selection.GetStrobedSelection().end());
 		while (pos < this_size)
 		{
 			if (it != current_selection_end && frame == *it)
@@ -593,8 +594,6 @@ void INPUTLOG::inheritHotChanges_InsertSelection(INPUTLOG* source_of_hotchanges)
 		int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 		int frame = 0, region_len = 0, pos = 0;
 		int this_size = hot_changes.size();
-		SelectionFrames::iterator it(selection.GetStrobedSelection().begin());
-		SelectionFrames::iterator current_selection_end(selection.GetStrobedSelection().end());
 		while (pos < this_size)
 		{
 			if (it != current_selection_end && frame == *it)
