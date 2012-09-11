@@ -109,7 +109,6 @@ else:
       # If we're POSIX, we use LUA_USE_LINUX since that combines usual lua posix defines with dlfcn calls for dynamic library loading.
       # Should work on any *nix
       env.Append(CCFLAGS = ["-DLUA_USE_LINUX"])
-      env.Append(LINKFLAGS = ["-ldl"])
       if conf.CheckLib('lua5.1'):
         env.Append(LINKFLAGS = ["-ldl", "-llua5.1"])
       elif conf.CheckLib('lua'):
