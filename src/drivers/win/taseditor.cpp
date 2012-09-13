@@ -68,10 +68,16 @@ extern void UpdateCheckedMenuItems();
 extern void TaseditorAutoFunction();
 extern void TaseditorManualFunction();
 
+// returns true if Taseditor is engaged at the end of the function
 bool EnterTasEditor()
 {
-	if (!FCEU_IsValidUI(FCEUI_TASEDITOR)) return false;
-	if (!taseditor_window.hwndTasEditor)
+	if (taseditor_window.hwndTasEditor)
+	{
+		// TAS Editor is already engaged, just set focus to its window
+		ShowWindow(taseditor_window.hwndTasEditor, SW_SHOWNORMAL);
+		SetForegroundWindow(taseditor_window.hwndTasEditor);
+		return true;
+	} else if (FCEU_IsValidUI(FCEUI_TASEDITOR))
 	{
 		// start TAS Editor
 		// create window
@@ -144,8 +150,16 @@ bool EnterTasEditor()
 			FCEU_DispMessage("TAS Editor engaged", 0);
 			taseditor_window.RedrawTaseditor();
 			return true;
-		} else return false;
-	} else return true;
+		} else
+		{
+			// couldn't init window
+			return false;
+		}
+	} else
+	{
+		// right now TAS Editor launch is not allowed by emulator
+		return true;
+	}
 }
 
 bool ExitTasEditor()
@@ -185,20 +199,9 @@ bool ExitTasEditor()
 // everyframe function
 void UpdateTasEditor()
 {
-	if (!taseditor_window.hwndTasEditor)
+	if (taseditor_window.hwndTasEditor)
 	{
-		// TAS Editor is not engaged... but we still should run Lua auto function
-		TaseditorAutoFunction();
-		if (emulator_must_run_taseditor)
-		{
-			char fullname[512];
-			strcpy(fullname, curMovieFilename);
-			if (EnterTasEditor())
-				LoadProject(fullname);
-			emulator_must_run_taseditor = false;
-		}
-	} else
-	{
+		// TAS Editor is engaged
 		// update all modules that need to be updated every frame
 		// the order is somewhat important, e.g. Greenzone must update before Bookmark Set, Piano Roll must update before Selection
 		taseditor_window.update();
@@ -214,7 +217,6 @@ void UpdateTasEditor()
 		splicer.update();
 		history.update();
 		project.update();
-	
 		// run Lua functions if needed
 		if (taseditor_config.enable_auto_function)
 			TaseditorAutoFunction();
@@ -222,6 +224,18 @@ void UpdateTasEditor()
 		{
 			TaseditorManualFunction();
 			must_call_manual_lua_function = false;
+		}
+	} else
+	{
+		// TAS Editor is not engaged
+		TaseditorAutoFunction();	// but we still should run Lua auto function
+		if (emulator_must_run_taseditor)
+		{
+			char fullname[512];
+			strcpy(fullname, curMovieFilename);
+			if (EnterTasEditor())
+				LoadProject(fullname);
+			emulator_must_run_taseditor = false;
 		}
 	}
 }

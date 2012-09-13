@@ -648,7 +648,8 @@ void ShowLogDirDialog(void){
  return;
 }
 
-void DoTracer(){
+void DoTracer()
+{
 
 	if (!GameInfo) {
 		FCEUD_PrintError("You must have a game loaded before you can use the Trace Logger.");
@@ -659,10 +660,14 @@ void DoTracer(){
 	//	return;
 	//}
 
-	if(!hTracer){
+	if(!hTracer)
+	{
 		CreateDialog(fceu_hInstance,"TRACER",NULL,TracerCallB);
 		//hTracer gets set in WM_INITDIALOG
-	} else {
-		SetWindowPos(hTracer,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+	} else
+	{
+		//SetWindowPos(hTracer,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+		ShowWindow(hTracer, SW_SHOWNORMAL);
+		SetForegroundWindow(hTracer);
 	}
 }

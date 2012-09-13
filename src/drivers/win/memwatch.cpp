@@ -968,7 +968,8 @@ void CreateMemWatch()
 
 	if(hwndMemWatch) //If already open, give focus
 	{
-		SetFocus(hwndMemWatch);
+		ShowWindow(hwndMemWatch, SW_SHOWNORMAL);
+		SetForegroundWindow(hwndMemWatch);
 		return;
 	}
 

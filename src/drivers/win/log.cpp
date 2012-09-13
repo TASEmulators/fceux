@@ -125,7 +125,8 @@ void MakeLogWindow(void)
 		RedoText(); // XXX jeblanchard Why didn't this work in WM_INITDIALOG?
 	} else
 	{
-		SetFocus(logwin);
+		ShowWindow(logwin, SW_SHOWNORMAL);
+		SetForegroundWindow(logwin);
 	}
 }
 

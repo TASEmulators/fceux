@@ -1050,7 +1050,6 @@ bool FCEU_IsValidUI(EFCEUI ui)
 
 	case FCEUI_TASEDITOR:
 		if(!GameInfo) return false;
-		if(FCEUMOV_Mode(MOVIEMODE_TASEDITOR)) return false;		// can't run two TAS Editors
 		break;
 
 	case FCEUI_RESET:

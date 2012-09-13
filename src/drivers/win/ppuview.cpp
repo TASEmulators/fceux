@@ -348,7 +348,8 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
         return FALSE;
 }
 
-void DoPPUView() {
+void DoPPUView()
+{
         if(!GameInfo) {
                 FCEUD_PrintError("You must have a game loaded before you can use the PPU Viewer.");
                 return;
@@ -359,9 +360,12 @@ void DoPPUView() {
         }
 
         if(!hPPUView) hPPUView = CreateDialog(fceu_hInstance,"PPUVIEW",NULL,PPUViewCallB);
-        if(hPPUView) {
-                SetWindowPos(hPPUView,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
-                FCEUD_UpdatePPUView(-1,1);
-                PPUViewDoBlit();
+        if(hPPUView)
+		{
+			//SetWindowPos(hPPUView,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+			ShowWindow(hPPUView, SW_SHOWNORMAL);
+			SetForegroundWindow(hPPUView);
+			FCEUD_UpdatePPUView(-1,1);
+			PPUViewDoBlit();
         }
 }

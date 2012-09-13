@@ -58,7 +58,7 @@ void GREENZONE::reset()
 void GREENZONE::update()
 {
 	// keep collecting savestates, this function should be called at the end of every frame
-	if (greenZoneCount <= currFrameCounter || (int)savestates.size() <= currFrameCounter || !savestates[currFrameCounter].size() || laglog.GetSize() <= currFrameCounter)
+	if (greenZoneCount <= currFrameCounter || (int)savestates.size() <= currFrameCounter || !savestates[currFrameCounter].size() || laglog.GetSize() < currFrameCounter)
 		CollectCurrentState();
 
 	// run cleaning from time to time
@@ -85,33 +85,17 @@ void GREENZONE::CollectCurrentState()
 	{
 		// lagFlag indicates that lag was in previous frame
 		int old_lagFlag = laglog.GetLagInfoAtFrame(currFrameCounter - 1);
-		// Auto-adjust Input due to lag
+		// Auto-adjust Input according to lag
 		if (taseditor_config.adjust_input_due_to_lag)
 		{
 			if (old_lagFlag && !lagFlag)
 			{
 				// there's no more lag on previous frame - shift Input up
 				splicer.AdjustUp(currFrameCounter - 1);
-				// since AdjustUp didn't restore Playback cursor, we must rewind here
-				bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
-				int saved_pause_frame = playback.GetPauseFrame();
-				playback.jump(currFrameCounter - 1);	// rewind
-				if (saved_pause_frame >= 0)
-					playback.SeekingStart(saved_pause_frame);
-				if (emu_was_paused)
-					playback.PauseEmulation();
 			} else if (!old_lagFlag && lagFlag)
 			{
 				// there's new lag on previous frame - shift Input down
 				splicer.AdjustDown(currFrameCounter - 1);
-				// since AdjustDown didn't restore Playback cursor, we must rewind here
-				bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
-				int saved_pause_frame = playback.GetPauseFrame();
-				playback.jump(currFrameCounter - 1);	// rewind
-				if (saved_pause_frame >= 0)
-					playback.SeekingStart(saved_pause_frame);
-				if (emu_was_paused)
-					playback.PauseEmulation();
 			} else
 			{
 				// old_lagFlag == lagFlag

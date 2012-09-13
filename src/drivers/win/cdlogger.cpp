@@ -289,7 +289,8 @@ void SaveCDLogFile(){ //todo make this button work before you've saved as
 	return;
 }
 
-void DoCDLogger(){
+void DoCDLogger()
+{
 	if (!GameInfo) {
 		FCEUD_PrintError("You must have a game loaded before you can use the Code Data Logger.");
 		return;
@@ -299,10 +300,14 @@ void DoCDLogger(){
 	//	return;
 	//}
 
-	if(!hCDLogger){
+	if(!hCDLogger)
+	{
 		CreateDialog(fceu_hInstance,"CDLOGGER",NULL,CDLoggerCallB);
-	}	else {
-		SetWindowPos(hCDLogger,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+	} else
+	{
+		//SetWindowPos(hCDLogger,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+		ShowWindow(hCDLogger, SW_SHOWNORMAL);
+		SetForegroundWindow(hCDLogger);
 	}
 }
 

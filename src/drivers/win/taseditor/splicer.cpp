@@ -694,9 +694,17 @@ void SPLICER::AdjustUp(int at)
 		playback.StartFromZero();
 	// reduce Piano Roll
 	piano_roll.UpdateItemCount();
-	// check and register changes
-	history.RegisterChanges(MODTYPE_ADJUST_LAG, at, -1, -1);
+	// register changes
+	history.RegisterAdjustLag(at, -1);
 	greenzone.Invalidate(at);
+	// rewind, because maybe next frame also needs lag removal
+	bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
+	int saved_pause_frame = playback.GetPauseFrame();
+	playback.jump(currFrameCounter - 1);
+	if (saved_pause_frame >= 0)
+		playback.SeekingStart(saved_pause_frame);
+	if (emu_was_paused)
+		playback.PauseEmulation();
 	if (markers_changed)
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
 }
@@ -713,9 +721,22 @@ void SPLICER::AdjustDown(int at)
 		if (markers_manager.insertEmpty(at, 1))
 			markers_changed = true;
 	}
-	// check and register changes
-	history.RegisterChanges(MODTYPE_ADJUST_LAG, at, -1, 1);
+	// register changes
+	history.RegisterAdjustLag(at, +1);
+	greenzone.Invalidate(at + 1);
+	/*
+	// this would be needed if "changes of Input in lag frames" were affecting game Output
+	// but since they don't affect it, we can keep current frame savestate in the Greenzone, and only truncate the Greenzone starting from next frame
 	greenzone.Invalidate(at);
+	// rewind
+	bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
+	int saved_pause_frame = playback.GetPauseFrame();
+	playback.jump(currFrameCounter - 1);
+	if (saved_pause_frame >= 0)
+		playback.SeekingStart(saved_pause_frame);
+	if (emu_was_paused)
+		playback.PauseEmulation();
+	*/
 	if (markers_changed)
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
 }

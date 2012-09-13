@@ -1870,15 +1870,19 @@ void updateGameDependentMenusDebugger(unsigned int enable) {
 	//EnableWindow(GetDlgItem(hDebug,DEBUGLOADDEB),(enable ? 0 : 1));
 }
 
-void DoDebug(uint8 halt) {
-	if (!debugger_open) {
+void DoDebug(uint8 halt)
+{
+	if (!debugger_open)
+	{
 		hDebug = CreateDialog(fceu_hInstance,"DEBUGGER",NULL,DebuggerCallB);
 		if(DbgSizeX != -1 && DbgSizeY != -1)
 			SetWindowPos(hDebug,0,0,0,DbgSizeX,DbgSizeY,SWP_NOMOVE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 	}
 	if (hDebug)
 	{
-		SetWindowPos(hDebug,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+		//SetWindowPos(hDebug,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+		ShowWindow(hDebug, SW_SHOWNORMAL);
+		SetForegroundWindow(hDebug);
 		
 		updateGameDependentMenusDebugger(GameInfo != 0);
 

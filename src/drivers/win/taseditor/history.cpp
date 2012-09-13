@@ -102,8 +102,7 @@ char modCaptions[MODTYPES_TOTAL][20] = {" Initialization",
 										" LUA Marker Set",
 										" LUA Marker Remove",
 										" LUA Marker Rename",
-										" LUA Change",
-										" AdjustLag" };
+										" LUA Change" };
 char LuaCaptionPrefix[6] = " LUA ";
 char joypadCaptions[4][5] = {"(1P)", "(2P)", "(3P)", "(4P)"};
 
@@ -415,29 +414,14 @@ int HISTORY::JumpInTime(int new_pos)
 
 void HISTORY::undo()
 {
-	int step = -1;
-	if (taseditor_config.adjust_input_due_to_lag)
-	{
-		// if we're undoing an AdjustLag operation then undo two operations
-		if (GetCurrentSnapshot().mod_type == MODTYPE_ADJUST_LAG)
-			step = -2;
-	}
-	int result = JumpInTime(history_cursor_pos + step);
+	int result = JumpInTime(history_cursor_pos - 1);
 	if (result >= 0)
 		greenzone.InvalidateAndCheck(result);
 	return;
 }
 void HISTORY::redo()
 {
-	int step = 1;
-	if (taseditor_config.adjust_input_due_to_lag)
-	{
-		// if we're redoing an operation followed by AdjustLag then redo two operations
-		if (history_cursor_pos + 2 <= history_total_items)
-			if (snapshots[(history_start_pos + history_cursor_pos + 2) % history_size].mod_type == MODTYPE_ADJUST_LAG)
-				step = 2;
-	}
-	int result = JumpInTime(history_cursor_pos + step);
+	int result = JumpInTime(history_cursor_pos + 1);
 	if (result >= 0)
 		greenzone.InvalidateAndCheck(result);
 	return;
@@ -525,7 +509,6 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 			case MODTYPE_CLONE:
 			case MODTYPE_DELETE:
 			case MODTYPE_PATTERN:
-			case MODTYPE_ADJUST_LAG:
 			{
 				// for these changes user prefers to see frame of attempted change (Selection cursor position), not frame of actual differences
 				snap.keyframe = start;
@@ -533,43 +516,44 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 			}
 		}
 		// set start_frame, end_frame, consecutive_tag
-		if (snap.mod_type == MODTYPE_ADJUST_LAG)
+		// normal operations
+		snap.start_frame = start;
+		if (mod_type == MODTYPE_INSERTNUM)
 		{
-			// special operation: AdjustLag
-			snap.start_frame = snap.end_frame = start;
-			snap.consecutive_tag = size;		// -1 for Adjust Up, +1 for Adjust Down
-			// combine Adjustment with previous snapshot if needed
-			bool combine = false;
-			if (snapshots[real_pos].mod_type == MODTYPE_ADJUST_LAG)
-				combine = true;
-			if (combine)
-			{
-				if (snap.keyframe > snapshots[real_pos].keyframe)
-					snap.keyframe = snapshots[real_pos].keyframe;
-				if (snap.start_frame > snapshots[real_pos].start_frame)
-					snap.start_frame = snapshots[real_pos].start_frame;
-				if (snap.end_frame < snapshots[real_pos].end_frame)
-					snap.end_frame = snapshots[real_pos].end_frame;
-				snap.consecutive_tag += snapshots[real_pos].consecutive_tag;
-			}
-			// set hotchanges
-			if (taseditor_config.enable_hot_changes)
-			{
-				if (size < 0)
-					// it was Adjust Up
-					snap.inputlog.inheritHotChanges_DeleteNum(&snapshots[real_pos].inputlog, start, 1, !combine);
-				else
-					// it was Adjust Down
-					snap.inputlog.inheritHotChanges_InsertNum(&snapshots[real_pos].inputlog, start, 1, !combine);
-			}
-			// add "consecutive size" to description
-			strcat(snap.description, " [");
-			if (snap.consecutive_tag > 0)
-				strcat(snap.description, "+");
-			_itoa(snap.consecutive_tag, framenum, 10);
+			snap.end_frame = start + size - 1;
+			_itoa(size, framenum, 10);
 			strcat(snap.description, framenum);
-			strcat(snap.description, "] ");
+		} else
+		{
+			snap.end_frame = end;
+		}
+		int first_input_changes = first_changes;
+		// for lag-affecting operations only: Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
+		if (first_changes > start && end == -1)
+		{
+			// check if LagLogs of these snapshots differ before the "first_changes" frame
+			for (int i = start; i < first_changes; ++i)
+			{
+				if (snap.laglog.GetLagInfoAtFrame(i) != snapshots[real_pos].laglog.GetLagInfoAtFrame(i))
+				{
+					// Greenzone should be invalidated from the frame
+					first_changes = i;
+					break;
+				}
+			}
+		}
+		snap.consecutive_tag = consecutive_tag;
+		if (consecutive_tag && taseditor_config.combine_consecutive && snapshots[real_pos].mod_type == snap.mod_type && snapshots[real_pos].consecutive_tag == snap.consecutive_tag)
+		{
+			// combine Drawing with previous snapshot
+			if (snap.keyframe > snapshots[real_pos].keyframe)
+				snap.keyframe = snapshots[real_pos].keyframe;
+			if (snap.start_frame > snapshots[real_pos].start_frame)
+				snap.start_frame = snapshots[real_pos].start_frame;
+			if (snap.end_frame < snapshots[real_pos].end_frame)
+				snap.end_frame = snapshots[real_pos].end_frame;
 			// add upper and lower frame to description
+			strcat(snap.description, " ");
 			_itoa(snap.start_frame, framenum, 10);
 			strcat(snap.description, framenum);
 			if (snap.end_frame > snap.start_frame)
@@ -584,142 +568,117 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 				strcat(snap.description, " ");
 				strncat(snap.description, comment, SNAPSHOT_DESC_MAX_LENGTH - strlen(snap.description) - 1);
 			}
-			if (combine)
+			// set hotchanges
+			if (taseditor_config.enable_hot_changes)
 			{
-				// replace current snapshot with this cloned snapshot and truncate history here
-				snapshots[real_pos] = snap;
-				history_total_items = history_cursor_pos+1;
-				UpdateHistoryList();
-				RedrawHistoryList();
-			} else
-			{
-				AddItemToHistory(snap);
+				snap.inputlog.copyHotChanges(&snapshots[real_pos].inputlog);
+				snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, first_input_changes, end);
 			}
+			// replace current snapshot with this cloned snapshot and truncate history here
+			snapshots[real_pos] = snap;
+			history_total_items = history_cursor_pos+1;
+			UpdateHistoryList();
+			RedrawHistoryList();
 		} else
 		{
-			// normal operations
-			snap.start_frame = start;
-			if (mod_type == MODTYPE_INSERTNUM)
+			// don't combine
+			// add upper and lower frame to description
+			strcat(snap.description, " ");
+			_itoa(snap.start_frame, framenum, 10);
+			strcat(snap.description, framenum);
+			if (snap.end_frame > snap.start_frame)
 			{
-				snap.end_frame = start + size - 1;
-				_itoa(size, framenum, 10);
+				strcat(snap.description, "-");
+				_itoa(snap.end_frame, framenum, 10);
 				strcat(snap.description, framenum);
-			} else
-			{
-				snap.end_frame = end;
 			}
-			int first_input_changes = first_changes;
-			// for lag-affecting operations only: Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
-			if (first_changes > start && end == -1)
+			// add comment if there is one specified
+			if (comment)
 			{
-				// check if LagLogs of these snapshots differ before the "first_changes" frame
-				for (int i = start; i < first_changes; ++i)
+				strcat(snap.description, " ");
+				strncat(snap.description, comment, SNAPSHOT_DESC_MAX_LENGTH - strlen(snap.description) - 1);
+			}
+			// set hotchanges
+			if (taseditor_config.enable_hot_changes)
+			{
+				// inherit previous hotchanges and set new changes
+				switch (mod_type)
 				{
-					if (snap.laglog.GetLagInfoAtFrame(i) != snapshots[real_pos].laglog.GetLagInfoAtFrame(i))
-					{
-						// Greenzone should be invalidated from the frame
-						first_changes = i;
+					case MODTYPE_DELETE:
+						snap.inputlog.inheritHotChanges_DeleteSelection(&snapshots[real_pos].inputlog, frameset);
 						break;
-					}
+					case MODTYPE_INSERT:
+					case MODTYPE_CLONE:
+						snap.inputlog.inheritHotChanges_InsertSelection(&snapshots[real_pos].inputlog, frameset);
+						break;
+					case MODTYPE_INSERTNUM:
+						snap.inputlog.inheritHotChanges_InsertNum(&snapshots[real_pos].inputlog, start, size, true);
+						break;
+					case MODTYPE_SET:
+					case MODTYPE_UNSET:
+					case MODTYPE_CLEAR:
+					case MODTYPE_CUT:
+					case MODTYPE_PASTE:
+					case MODTYPE_PATTERN:
+						snap.inputlog.inheritHotChanges(&snapshots[real_pos].inputlog);
+						snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, first_input_changes, end);
+						break;
+					case MODTYPE_PASTEINSERT:
+						snap.inputlog.inheritHotChanges_PasteInsert(&snapshots[real_pos].inputlog, frameset);
+						break;
+					case MODTYPE_TRUNCATE:
+						snap.inputlog.copyHotChanges(&snapshots[real_pos].inputlog);
+						// do not add new hotchanges and do not fade old hotchanges, because there was nothing added
+						break;
 				}
 			}
-			snap.consecutive_tag = consecutive_tag;
-			if (consecutive_tag && taseditor_config.combine_consecutive && snapshots[real_pos].mod_type == snap.mod_type && snapshots[real_pos].consecutive_tag == snap.consecutive_tag)
-			{
-				// combine Drawing with previous snapshot
-				if (snap.keyframe > snapshots[real_pos].keyframe)
-					snap.keyframe = snapshots[real_pos].keyframe;
-				if (snap.start_frame > snapshots[real_pos].start_frame)
-					snap.start_frame = snapshots[real_pos].start_frame;
-				if (snap.end_frame < snapshots[real_pos].end_frame)
-					snap.end_frame = snapshots[real_pos].end_frame;
-				// add upper and lower frame to description
-				strcat(snap.description, " ");
-				_itoa(snap.start_frame, framenum, 10);
-				strcat(snap.description, framenum);
-				if (snap.end_frame > snap.start_frame)
-				{
-					strcat(snap.description, "-");
-					_itoa(snap.end_frame, framenum, 10);
-					strcat(snap.description, framenum);
-				}
-				// add comment if there is one specified
-				if (comment)
-				{
-					strcat(snap.description, " ");
-					strncat(snap.description, comment, SNAPSHOT_DESC_MAX_LENGTH - strlen(snap.description) - 1);
-				}
-				// set hotchanges
-				if (taseditor_config.enable_hot_changes)
-				{
-					snap.inputlog.copyHotChanges(&snapshots[real_pos].inputlog);
-					snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, first_input_changes, end);
-				}
-				// replace current snapshot with this cloned snapshot and truncate history here
-				snapshots[real_pos] = snap;
-				history_total_items = history_cursor_pos+1;
-				UpdateHistoryList();
-				RedrawHistoryList();
-			} else
-			{
-				// don't combine
-				// add upper and lower frame to description
-				strcat(snap.description, " ");
-				_itoa(snap.start_frame, framenum, 10);
-				strcat(snap.description, framenum);
-				if (snap.end_frame > snap.start_frame)
-				{
-					strcat(snap.description, "-");
-					_itoa(snap.end_frame, framenum, 10);
-					strcat(snap.description, framenum);
-				}
-				// add comment if there is one specified
-				if (comment)
-				{
-					strcat(snap.description, " ");
-					strncat(snap.description, comment, SNAPSHOT_DESC_MAX_LENGTH - strlen(snap.description) - 1);
-				}
-				// set hotchanges
-				if (taseditor_config.enable_hot_changes)
-				{
-					// inherit previous hotchanges and set new changes
-					switch (mod_type)
-					{
-						case MODTYPE_DELETE:
-							snap.inputlog.inheritHotChanges_DeleteSelection(&snapshots[real_pos].inputlog, frameset);
-							break;
-						case MODTYPE_INSERT:
-						case MODTYPE_CLONE:
-							snap.inputlog.inheritHotChanges_InsertSelection(&snapshots[real_pos].inputlog, frameset);
-							break;
-						case MODTYPE_INSERTNUM:
-							snap.inputlog.inheritHotChanges_InsertNum(&snapshots[real_pos].inputlog, start, size, true);
-							break;
-						case MODTYPE_SET:
-						case MODTYPE_UNSET:
-						case MODTYPE_CLEAR:
-						case MODTYPE_CUT:
-						case MODTYPE_PASTE:
-						case MODTYPE_PATTERN:
-							snap.inputlog.inheritHotChanges(&snapshots[real_pos].inputlog);
-							snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, first_input_changes, end);
-							break;
-						case MODTYPE_PASTEINSERT:
-							snap.inputlog.inheritHotChanges_PasteInsert(&snapshots[real_pos].inputlog, frameset);
-							break;
-						case MODTYPE_TRUNCATE:
-							snap.inputlog.copyHotChanges(&snapshots[real_pos].inputlog);
-							// do not add new hotchanges and do not fade old hotchanges, because there was nothing added
-							break;
-					}
-				}
-				AddItemToHistory(snap);
-			}
+			AddItemToHistory(snap);
 		}
 		branches.ChangesMadeSinceBranch();
 		project.SetProjectChanged();
 	}
 	return first_changes;
+}
+void HISTORY::RegisterAdjustLag(int start, int size)
+{
+	// create new shanshot
+	SNAPSHOT snap;
+	snap.init(currMovieData, taseditor_config.enable_hot_changes);
+	// check if there are Input differences from latest snapshot
+	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
+	SNAPSHOT& current_snap = snapshots[real_pos];
+	int first_changes = snap.inputlog.findFirstChange(current_snap.inputlog, start, -1);
+	if (first_changes >= 0)
+	{
+		// differences found - combine Adjustment with current snapshot
+		// copy all properties of current snapshot
+		snap.keyframe = current_snap.keyframe;
+		snap.start_frame = current_snap.start_frame;
+		snap.end_frame = current_snap.end_frame;
+		snap.consecutive_tag = current_snap.consecutive_tag;
+		// make sure that consecutive Recordings work even when there's AdjustUp inbetween
+		//if (current_snap.mod_type == MODTYPE_RECORD && size < 0 && current_snap.consecutive_tag == first_changes)
+		//	snap.consecutive_tag--;
+		snap.rec_joypad_diff_bits = current_snap.rec_joypad_diff_bits;
+		snap.mod_type = current_snap.mod_type;
+		strcpy(snap.description, current_snap.description);
+		// set hotchanges
+		if (taseditor_config.enable_hot_changes)
+		{
+			if (size < 0)
+				// it was Adjust Up
+				snap.inputlog.inheritHotChanges_DeleteNum(&snapshots[real_pos].inputlog, start, 1, false);
+			else
+				// it was Adjust Down
+				snap.inputlog.inheritHotChanges_InsertNum(&snapshots[real_pos].inputlog, start, 1, false);
+		}
+		// replace current snapshot with this cloned snapshot and don't truncate history
+		snapshots[real_pos] = snap;
+		UpdateHistoryList();
+		RedrawHistoryList();
+		branches.ChangesMadeSinceBranch();
+		project.SetProjectChanged();
+	}
 }
 void HISTORY::RegisterMarkersChange(int mod_type, int start, int end, const char* comment)
 {
@@ -1292,8 +1251,6 @@ int HISTORY::GetCategoryOfOperation(int mod_type)
 		case MODTYPE_LUA_MARKER_RENAME:
 			return CATEGORY_MARKERS_CHANGE;
 		case MODTYPE_LUA_CHANGE:
-			return CATEGORY_INPUT_MARKERS_CHANGE;
-		case MODTYPE_ADJUST_LAG:
 			return CATEGORY_INPUT_MARKERS_CHANGE;
 
 	}

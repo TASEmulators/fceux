@@ -633,14 +633,17 @@ void ConfigCheats(HWND hParent) {
 	//	return;
 	//}
 
-	if (!CheatWindow) {
+	if (!CheatWindow) 
+	{
 		selcheat=-1;
 		CheatWindow=1;
 		if (CheatStyle) pwindow = hCheat = CreateDialog(fceu_hInstance,"CHEATCONSOLE",NULL,CheatConsoleCallB);
 		else DialogBox(fceu_hInstance,"CHEATCONSOLE",hParent,CheatConsoleCallB);
+	} else
+	{
+		ShowWindow(hCheat, SW_SHOWNORMAL);
+		SetForegroundWindow(hCheat);
 	}
-	else
-	 SetFocus(hCheat);
 }
 
 void UpdateCheatList()
@@ -908,9 +911,16 @@ void SetGGConvFocus(int address,int compare){
 	return;
 }
 
-void DoGGConv(){
-	if(hGGConv)return;
-	hGGConv = CreateDialog(fceu_hInstance,"GGCONV",NULL,GGConvCallB);
+void DoGGConv()
+{
+	if (hGGConv)
+	{
+		ShowWindow(hGGConv, SW_SHOWNORMAL);
+		SetForegroundWindow(hGGConv);
+	} else
+	{
+		hGGConv = CreateDialog(fceu_hInstance,"GGCONV",NULL,GGConvCallB);
+	}
 	return;
 }
 

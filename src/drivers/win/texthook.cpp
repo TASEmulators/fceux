@@ -1607,8 +1607,11 @@ void DoTextHooker()
 	CheckDlgButton( hTextHooker, 342, BST_CHECKED );
 	CheckDlgButton( hTextHooker, 343, BST_CHECKED );
 
-	if (hTextHooker) {
-		SetWindowPos(hTextHooker,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+	if (hTextHooker)
+	{
+		//SetWindowPos(hTextHooker,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+		ShowWindow(hTextHooker, SW_SHOWNORMAL);
+		SetForegroundWindow(hTextHooker);
 		UpdateTextHooker();
 		TextHookerDoBlit();
 	}

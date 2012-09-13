@@ -536,7 +536,8 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
-void DoNTView() {
+void DoNTView()
+{
 	if (!GameInfo) {
 		FCEUD_PrintError("You must have a game loaded before you can use the Name Table Viewer.");
 		return;
@@ -546,12 +547,16 @@ void DoNTView() {
 		return;
 	}
 
-	if (!hNTView) {
+	if (!hNTView)
+	{
 		hNTView = CreateDialog(fceu_hInstance,"NTVIEW",NULL,NTViewCallB);
 		new(cache) NTCache[4]; //reinitialize NTCache
 	}
-	if (hNTView) {
-		SetWindowPos(hNTView,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+	if (hNTView)
+	{
+		//SetWindowPos(hNTView,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+		ShowWindow(hNTView, SW_SHOWNORMAL);
+		SetForegroundWindow(hNTView);
 		FCEUD_UpdateNTView(-1,true);
 		NTViewDoBlit(1);
 	}

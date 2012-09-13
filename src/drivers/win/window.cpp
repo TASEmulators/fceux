@@ -1687,11 +1687,14 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			//Lua submenu
 			case ID_FILE_OPENLUAWINDOW:
-				if(!LuaConsoleHWnd)
+				if (!LuaConsoleHWnd)
+				{
 					LuaConsoleHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_LUA), hWnd, (DLGPROC) DlgLuaScriptDialog);
-				else
+				} else
+				{
 					ShowWindow(LuaConsoleHWnd, SW_SHOWNORMAL);
 					SetForegroundWindow(LuaConsoleHWnd);
+				}
 				break;
 			case FCEUX_CONTEXT_CLOSELUAWINDOWS:
 			case ID_FILE_CLOSELUAWINDOWS:
@@ -1921,9 +1924,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				if(!RamSearchHWnd)
 				{
 					OpenRamSearch();
-				}
-				else
+				} else
+				{
+					ShowWindow(RamSearchHWnd, SW_SHOWNORMAL);
 					SetForegroundWindow(RamSearchHWnd);
+				}
 				break;
 
 			case ID_RAM_WATCH:

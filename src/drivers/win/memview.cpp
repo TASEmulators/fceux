@@ -1684,7 +1684,8 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 
 
-void DoMemView() {
+void DoMemView()
+{
 	WNDCLASSEX     wndclass ;
 	//static RECT al;
 
@@ -1724,7 +1725,9 @@ void DoMemView() {
 		UpdateCaption();
 	} else
 	{
-		SetWindowPos(hMemView, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+		//SetWindowPos(hMemView, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+		ShowWindow(hMemView, SW_SHOWNORMAL);
+		SetForegroundWindow(hMemView);
 		UpdateCaption();
 	}
 
