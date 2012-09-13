@@ -2642,6 +2642,15 @@ int emu_lagged (lua_State *L) {
 	return 1;
 }
 
+//emu_setlagflag(bool value)
+//
+//Returns true if the game is currently on a lag frame
+int emu_setlagflag(lua_State *L)
+{
+	FCEUI_SetLagFlag(lua_toboolean(L, 1) == 1);
+	return 0;
+}
+
 // boolean emu.emulating()
 int emu_emulating(lua_State *L) {
 	lua_pushboolean(L, GameInfo != NULL);
@@ -5199,6 +5208,7 @@ static const struct luaL_reg emulib [] = {
 	{"framecount", emu_framecount},
 	{"lagcount", emu_lagcount},
 	{"lagged", emu_lagged},
+	{"setlagflag", emu_setlagflag},
 	{"emulating", emu_emulating},
 	{"registerbefore", emu_registerbefore},
 	{"registerafter", emu_registerafter},

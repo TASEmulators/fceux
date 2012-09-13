@@ -82,6 +82,7 @@ bool FCEUMOV_ShouldPause(void);
 int FCEUMOV_GetFrame(void);
 int FCEUI_GetLagCount(void);
 bool FCEUI_GetLagged(void);
+void FCEUI_SetLagFlag(bool value);
 
 int FCEUMOV_WriteState(EMUFILE* os);
 bool FCEUMOV_ReadState(EMUFILE* is, uint32 size);

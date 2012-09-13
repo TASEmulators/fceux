@@ -622,7 +622,8 @@ void UpdateDebugger()
 		return;
 
 	//but if the debugger IS visible, then focus it
-	SetActiveWindow(hDebug);
+	ShowWindow(hDebug, SW_SHOWNORMAL);
+	SetForegroundWindow(hDebug);
 
 	char str[512] = {0}, str2[512] = {0}, chr[8];
 	int tmp,ret,i;

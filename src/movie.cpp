@@ -498,8 +498,14 @@ int FCEUI_GetLagCount(void)
 
 bool FCEUI_GetLagged(void)
 {
-	if (lagFlag) return true;
-	else return false;
+	if (lagFlag)
+		return true;
+	else
+		return false;
+}
+void FCEUI_SetLagFlag(bool value)
+{
+	lagFlag = (value) ? 1 : 0;
 }
 
 bool FCEUMOV_ShouldPause(void)
