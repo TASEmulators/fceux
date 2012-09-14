@@ -106,7 +106,7 @@ public:
 	void redo();
 
 	int RegisterChanges(int mod_type, int start = 0, int end =-1, int size = 0, const char* comment = NULL, int consecutive_tag = 0, SelectionFrames* frameset = NULL);
-	void RegisterAdjustLag(int start, int size);
+	int RegisterAdjustLag(int start, int size);
 	void RegisterMarkersChange(int mod_type, int start = 0, int end =-1, const char* comment = 0);
 
 	void RegisterBookmarkSet(int slot, BOOKMARK& backup_copy, int old_current_branch);

@@ -27,9 +27,11 @@ Greenzone - Access zone
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_PROJECT project;
 extern PLAYBACK playback;
+extern HISTORY history;
 extern BOOKMARKS bookmarks;
+extern MARKERS_MANAGER markers_manager;
 extern PIANO_ROLL piano_roll;
-extern SPLICER splicer;
+extern SELECTION selection;
 
 extern char lagFlag;
 
@@ -57,9 +59,8 @@ void GREENZONE::reset()
 }
 void GREENZONE::update()
 {
-	// keep collecting savestates, this function should be called at the end of every frame
-	if (greenZoneCount <= currFrameCounter || (int)savestates.size() <= currFrameCounter || !savestates[currFrameCounter].size() || laglog.GetSize() < currFrameCounter)
-		CollectCurrentState();
+	// keep collecting savestates, this function must be called at the end of every frame
+	CollectCurrentState();
 
 	// run cleaning from time to time
 	if (clock() > next_cleaning_time)
@@ -75,10 +76,13 @@ void GREENZONE::CollectCurrentState()
 	if ((int)savestates.size() < greenZoneCount)
 		savestates.resize(greenZoneCount);
 
-	// if frame changed - log savestate
-	EMUFILE_MEMORY ms(&savestates[currFrameCounter]);
-	FCEUSS_SaveMS(&ms, Z_DEFAULT_COMPRESSION);
-	ms.trim();
+	// if frame is not saved - log savestate
+	if (!savestates[currFrameCounter].size())
+	{
+		EMUFILE_MEMORY ms(&savestates[currFrameCounter]);
+		FCEUSS_SaveMS(&ms, Z_DEFAULT_COMPRESSION);
+		ms.trim();
+	}
 
 	// also log lag frames
 	if (currFrameCounter > 0)
@@ -91,11 +95,11 @@ void GREENZONE::CollectCurrentState()
 			if (old_lagFlag && !lagFlag)
 			{
 				// there's no more lag on previous frame - shift Input up
-				splicer.AdjustUp(currFrameCounter - 1);
+				AdjustUp();
 			} else if (!old_lagFlag && lagFlag)
 			{
 				// there's new lag on previous frame - shift Input down
-				splicer.AdjustDown(currFrameCounter - 1);
+				AdjustDown();
 			} else
 			{
 				// old_lagFlag == lagFlag
@@ -380,6 +384,81 @@ error:
 	reset();
 	playback.StartFromZero();		// reset Playback cursor to frame 0
 	return true;
+}
+// -------------------------------------------------------------------------------------------------
+void GREENZONE::AdjustUp()
+{
+	int at = currFrameCounter - 1;		// at = the frame above currFrameCounter
+	bool markers_changed = false;
+	// delete one frame of lag
+	currMovieData.records.erase(currMovieData.records.begin() + at);
+	laglog.EraseFrame(at);
+	if (taseditor_config.bind_markers)
+	{
+		if (markers_manager.EraseMarker(at))
+			markers_changed = true;
+	}
+	// check if user deleted all frames
+	if (!currMovieData.getNumRecords())
+		playback.StartFromZero();
+	// reduce Piano Roll
+	piano_roll.UpdateItemCount();
+	// register changes
+	int first_input_chanes = history.RegisterAdjustLag(at, -1);
+	// if Input in the frame above currFrameCounter has changed then invalidate Greenzone (rewind 1 frame back)
+	// also if the frame above currFrameCounter is lag frame then rewind 1 frame (invalidate Greenzone), because maybe this frame also needs lag removal
+	if ((first_input_chanes >= 0 && first_input_chanes < currFrameCounter) || (laglog.GetLagInfoAtFrame(at)))
+	{
+		// custom invalidation procedure, not retriggering LostPosition/PauseFrame
+		Invalidate(at);
+		bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
+		int saved_pause_frame = playback.GetPauseFrame();
+		playback.jump(at);
+		if (saved_pause_frame >= 0)
+			playback.SeekingStart(saved_pause_frame);
+		if (emu_was_paused)
+			playback.PauseEmulation();
+	} else
+	{
+		// just invalidate Greenzone after currFrameCounter
+		Invalidate(currFrameCounter);
+	}
+	if (markers_changed)
+		selection.must_find_current_marker = playback.must_find_current_marker = true;
+}
+void GREENZONE::AdjustDown()
+{
+	int at = currFrameCounter - 1;
+	bool markers_changed = false;
+	// insert blank frame with lag
+	currMovieData.insertEmpty(at, 1);
+	laglog.InsertFrame(at, true, 1);
+	if (taseditor_config.bind_markers)
+	{
+		if (markers_manager.insertEmpty(at, 1))
+			markers_changed = true;
+	}
+	// register changes
+	int first_input_chanes = history.RegisterAdjustLag(at, +1);
+	// if Input in the frame above currFrameCounter has changed then invalidate Greenzone (rewind 1 frame back)
+	if (first_input_chanes >= 0 && first_input_chanes < currFrameCounter)
+	{
+		// custom invalidation procedure, not retriggering LostPosition/PauseFrame
+		Invalidate(at);
+		bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
+		int saved_pause_frame = playback.GetPauseFrame();
+		playback.jump(at);
+		if (saved_pause_frame >= 0)
+			playback.SeekingStart(saved_pause_frame);
+		if (emu_was_paused)
+			playback.PauseEmulation();
+	} else
+	{
+		// just invalidate Greenzone after currFrameCounter
+		Invalidate(currFrameCounter);
+	}
+	if (markers_changed)
+		selection.must_find_current_marker = playback.must_find_current_marker = true;
 }
 // -------------------------------------------------------------------------------------------------
 // invalidate and restore playback

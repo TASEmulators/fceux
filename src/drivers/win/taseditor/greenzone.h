@@ -25,6 +25,9 @@ public:
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is, bool really_load = true);
 
+	void AdjustUp();
+	void AdjustDown();
+
 	bool loadTasSavestate(int frame);
 
 	void RunGreenzoneCleaning();

@@ -639,7 +639,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 	}
 	return first_changes;
 }
-void HISTORY::RegisterAdjustLag(int start, int size)
+int HISTORY::RegisterAdjustLag(int start, int size)
 {
 	// create new shanshot
 	SNAPSHOT snap;
@@ -656,9 +656,7 @@ void HISTORY::RegisterAdjustLag(int start, int size)
 		snap.start_frame = current_snap.start_frame;
 		snap.end_frame = current_snap.end_frame;
 		snap.consecutive_tag = current_snap.consecutive_tag;
-		// make sure that consecutive Recordings work even when there's AdjustUp inbetween
-		//if (current_snap.mod_type == MODTYPE_RECORD && size < 0 && current_snap.consecutive_tag == first_changes)
-		//	snap.consecutive_tag--;
+		//if (current_snap.mod_type == MODTYPE_RECORD && size < 0 && current_snap.consecutive_tag == first_changes) snap.consecutive_tag--;		// make sure that consecutive Recordings work even when there's AdjustUp inbetween
 		snap.rec_joypad_diff_bits = current_snap.rec_joypad_diff_bits;
 		snap.mod_type = current_snap.mod_type;
 		strcpy(snap.description, current_snap.description);
@@ -679,6 +677,7 @@ void HISTORY::RegisterAdjustLag(int start, int size)
 		branches.ChangesMadeSinceBranch();
 		project.SetProjectChanged();
 	}
+	return first_changes;
 }
 void HISTORY::RegisterMarkersChange(int mod_type, int start, int end, const char* comment)
 {
