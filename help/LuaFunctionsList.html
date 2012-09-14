@@ -117,6 +117,12 @@
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">Returns true if currently in a lagframe, false otherwise.</span></p>
 <p><span class="rvts37"><br/></span></p>
+<p><span class="rvts52">emu.setlagflag(bool value)</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37">Sets current value of lag flag.</span></p>
+<p><span class="rvts37">Some games poll input even in lag frames, so standard way of detecting lag (used by FCEUX and other emulators) does not work for those games, and you have to determine lag frames manually.</span></p>
+<p><span class="rvts37">First, find RAM addresses that help you distinguish between lag and non-lag frames (e.g. an in-game frame counter that only increments in non-lag frames). Then register memory hooks that will change lag flag when needed.</span></p>
+<p><span class="rvts37"><br/></span></p>
 <p><span class="rvts52">bool emu.emulating()</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">Returns true if emulation has started, or false otherwise. Certain operations such as using savestates are invalid to attempt before emulation has started. You probably won't need to use this function unless you want to make your script extra-robust to being started too early.</span></p>
