@@ -482,8 +482,27 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 	snap.init(currMovieData, taseditor_config.enable_hot_changes);
 	// check if there are Input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
-	int first_changes = snap.inputlog.findFirstChange(snapshots[real_pos].inputlog, start, end);
-	if (first_changes >= 0)
+	int first_input_changes = snap.inputlog.findFirstChange(snapshots[real_pos].inputlog, start, end);
+
+	// for lag-affecting operations only: Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
+	int first_changes = first_input_changes;
+	if (end == -1 && (first_changes > start || first_changes == -1))
+	{
+		// check if LagLogs of these snapshots differ before the "first_input_changes" frame
+		if (first_changes < 0)
+			first_changes = snap.inputlog.size;
+		for (int i = start; i < first_changes; ++i)
+		{
+			if (snap.laglog.GetLagInfoAtFrame(i) != snapshots[real_pos].laglog.GetLagInfoAtFrame(i))
+			{
+				// Greenzone should be invalidated from the frame
+				first_changes = i;
+				break;
+			}
+		}
+	}
+
+	if (first_input_changes >= 0)
 	{
 		// differences found
 		char framenum[11];
@@ -499,7 +518,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 			case MODTYPE_CLEAR:
 			case MODTYPE_CUT:
 			{
-				snap.keyframe = first_changes;
+				snap.keyframe = first_input_changes;
 				break;
 			}
 			case MODTYPE_INSERT:
@@ -526,21 +545,6 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 		} else
 		{
 			snap.end_frame = end;
-		}
-		int first_input_changes = first_changes;
-		// for lag-affecting operations only: Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
-		if (first_changes > start && end == -1)
-		{
-			// check if LagLogs of these snapshots differ before the "first_changes" frame
-			for (int i = start; i < first_changes; ++i)
-			{
-				if (snap.laglog.GetLagInfoAtFrame(i) != snapshots[real_pos].laglog.GetLagInfoAtFrame(i))
-				{
-					// Greenzone should be invalidated from the frame
-					first_changes = i;
-					break;
-				}
-			}
 		}
 		snap.consecutive_tag = consecutive_tag;
 		if (consecutive_tag && taseditor_config.combine_consecutive && snapshots[real_pos].mod_type == snap.mod_type && snapshots[real_pos].consecutive_tag == snap.consecutive_tag)
