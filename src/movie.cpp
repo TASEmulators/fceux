@@ -126,12 +126,12 @@ void MovieData::insertEmpty(int at, int frames)
 
 void MovieData::cloneRegion(int at, int frames)
 {
-	if(at == -1) return;
+	if (at < 0) return;
 	
 	records.insert(records.begin() + at, frames, MovieRecord());
 
 	for(int i = 0; i < frames; i++)
-		records[i+at].Clone(records[i + at + frames]);
+		records[i + at].Clone(records[i + at + frames]);
 }
 // ----------------------------------------------------------------------------
 MovieRecord::MovieRecord()

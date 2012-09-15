@@ -430,8 +430,8 @@ void GREENZONE::AdjustDown()
 {
 	int at = currFrameCounter - 1;
 	bool markers_changed = false;
-	// insert blank frame with lag
-	currMovieData.insertEmpty(at, 1);
+	// clone frame and insert lag
+	currMovieData.cloneRegion(at, 1);
 	laglog.InsertFrame(at, true, 1);
 	if (taseditor_config.bind_markers)
 	{
