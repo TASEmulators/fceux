@@ -430,6 +430,27 @@ void SELECTION::AddNewSelectionToHistory()
 	// add
 	selections_history[(history_start_pos + history_cursor_pos) % history_size] = selectionFrames;
 }
+void SELECTION::AddCurrentSelectionToHistory()
+{
+	// create the copy of current selection
+	SelectionFrames selectionFrames = selections_history[(history_start_pos + history_cursor_pos) % history_size];
+	// increase current position
+	// history uses conveyor of selections (vector with fixed size) to avoid resizing
+	if (history_cursor_pos+1 >= history_size)
+	{
+		// reached the end of available history_size - move history_start_pos (thus deleting oldest selection)
+		history_cursor_pos = history_size-1;
+		history_start_pos = (history_start_pos + 1) % history_size;
+	} else
+	{
+		// didn't reach the end of history yet
+		history_cursor_pos++;
+		if (history_cursor_pos >= history_total_items)
+			history_total_items = history_cursor_pos+1;
+	}
+	// add
+	selections_history[(history_start_pos + history_cursor_pos) % history_size] = selectionFrames;
+}
 
 void SELECTION::JumpInTime(int new_pos)
 {

@@ -200,7 +200,7 @@ void InitControls(HWND hwndDlg)
 	LOGFONT lf;
 	HFONT hFont = (HFONT)SendMessage(hwndDlg, WM_GETFONT, 0, 0);
 	GetObject(hFont, sizeof(LOGFONT), &lf);
-	strcpy(lf.lfFaceName,"Courier");
+	strcpy(lf.lfFaceName,"Courier New");
 	hNewFont = CreateFontIndirect(&lf);
 
 //	HFONT hFont = CreateFont(0, 0, 0, 0, FW_THIN, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 0, PROOF_QUALITY, DEFAULT_PITCH | FF_MODERN, "Courier New" ); 

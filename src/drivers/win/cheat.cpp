@@ -170,7 +170,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			//setup font
 			hFont = (HFONT)SendMessage(hwndDlg, WM_GETFONT, 0, 0);
 			GetObject(hFont, sizeof(LOGFONT), &lf);
-			strcpy(lf.lfFaceName,"Courier");
+			strcpy(lf.lfFaceName,"Courier New");
 			hNewFont = CreateFontIndirect(&lf);
 
 			SendDlgItemMessage(hwndDlg,IDC_CHEAT_ADDR,WM_SETFONT,(WPARAM)hNewFont,FALSE);

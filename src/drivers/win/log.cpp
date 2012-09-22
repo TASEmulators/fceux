@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "common.h"
+#include "tracer.h"
 
 static HWND logwin = 0;
 
@@ -209,7 +210,7 @@ void AddLogText(const char *text, unsigned int add_newline)
 	}
 
 	// Add a final newline if requested
-	if(add_newline)
+	if (add_newline)
 	{
 		*msg_iterator = '\r';
 		msg_iterator++;
@@ -219,6 +220,13 @@ void AddLogText(const char *text, unsigned int add_newline)
 
 	// Terminating 0-byte
 	*msg_iterator = 0;
+
+	// also log the text into Trace Logger log if needed
+	if (logging && (logging_options & LOG_MESSAGES))
+	{
+		OutputLogLine(strdup(logtext[truncated_logcount()]), add_newline);
+		log_old_emu_paused = false;		// force Trace Logger update
+	}
 
 	// Keep track of the added log
 	logcount++;

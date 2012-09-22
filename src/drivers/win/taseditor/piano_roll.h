@@ -80,6 +80,7 @@ enum DRAG_MODES
 	DRAG_MODE_SET,
 	DRAG_MODE_UNSET,
 	DRAG_MODE_SELECTION,
+	DRAG_MODE_DESELECTION,
 };
 
 // when there's too many button columns, there's need for 2nd Frame# column at the end
@@ -181,6 +182,7 @@ public:
 	void StartDraggingPlaybackCursor();
 	void StartDraggingMarker(int mouse_x, int mouse_y, int row_index, int column_index);
 	void StartSelectingDrag(int start_frame);
+	void StartDeselectingDrag(int start_frame);
 
 	void GetDispInfo(NMLVDISPINFO* nmlvDispInfo);
 	LONG CustomDraw(NMLVCUSTOMDRAW* msg);

@@ -43,15 +43,28 @@ using namespace std;
 //#define LOG_SKIP_UNMAPPED 4
 //#define LOG_ADD_PERIODS 8
 
+// ################################## Start of SP CODE ###########################
+
+#include "debuggersp.h"
+
+extern Name* lastBankNames;
+extern Name* loadedBankNames;
+extern Name* ramBankNames;
+extern int lastBank;
+extern int loadedBank;
+extern int myNumWPs;
+
+// ################################## End of SP CODE ###########################
+
 //int logaxy = 1, logopdata = 1; //deleteme
-int logging_options = LOG_REGISTERS | LOG_PROCESSOR_STATUS;
+int logging_options = LOG_REGISTERS | LOG_PROCESSOR_STATUS | LOG_TO_THE_LEFT | LOG_MESSAGES | LOG_BREAKPOINTS | LOG_CODE_TABBING;
 int log_update_window = 0;
 //int tracer_open=0;
 volatile int logtofile = 0, logging = 0;
 HWND hTracer;
-HFONT hlogFont, hlogNewFont;
-int log_optn_intlst[LOG_OPTION_SIZE]  = {10000,8000,6000,4000,2000,1000,700,400,200,100};
-char *log_optn_strlst[LOG_OPTION_SIZE] = {"10000","8000","6000","4000","2000","1000","700","400","200","100"};
+int log_optn_intlst[LOG_OPTION_SIZE]  = {3000000, 1000000, 300000, 100000, 30000, 10000, 3000, 1000, 300, 100};
+char *log_optn_strlst[LOG_OPTION_SIZE] = {"3 000 000", "1 000 000", "300 000", "100 000", "30 000", "10 000", "3000", "1000", "300", "100"};
+int log_lines_option = 5;	// 10000 lines by default
 char *logfilename = 0;
 int oldcodecount, olddatacount;
 
@@ -60,11 +73,14 @@ char **tracelogbuf;
 int tracelogbufsize, tracelogbufpos;
 int tracelogbufusedsize;
 
-bool tracer_lines_tabbing = true;
-bool tracer_statuses_to_the_left = false;
+char str_axystate[LOG_AXYSTATE_MAX_LEN] = {0}, str_procstatus[LOG_PROCSTATUS_MAX_LEN] = {0};
+char str_tabs[LOG_TABS_MASK+1] = {0}, str_address[LOG_ADDRESS_MAX_LEN] = {0}, str_data[LOG_DATA_MAX_LEN] = {0}, str_disassembly[LOG_DISASSEMBLY_MAX_LEN] = {0};
+char str_temp[LOG_LINE_MAX_LEN] = {0};
+char str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + NL_MAX_NAME_LEN + 10] = {0};
 
-bool old_emu_paused = true;		// thanks to this flag the window only updates once after the game is paused
+bool log_old_emu_paused = true;		// thanks to this flag the window only updates once after the game is paused
 extern bool JustFrameAdvanced;
+extern int currFrameCounter;
 
 FILE *LOG_FP;
 
@@ -73,7 +89,6 @@ int Tracer_wndx=0, Tracer_wndy=0;
 void ShowLogDirDialog(void);
 void BeginLoggingSequence(void);
 void LogInstruction(void);
-void OutputLogLine(char *str);
 void EndLoggingSequence(void);
 //void PauseLoggingSequence(void);
 void UpdateLogWindow(void);
@@ -84,61 +99,69 @@ int PromptForCDLogger(void);
 BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	int i;
-	LOGFONT lf;
-	switch(uMsg) {
-		case WM_MOVE: {
-			if (!IsIconic(hwndDlg)) {
-			RECT wrect;
-			GetWindowRect(hwndDlg,&wrect);
-			Tracer_wndx = wrect.left;
-			Tracer_wndy = wrect.top;
-
-			#ifdef WIN32
-			WindowBoundsCheckNoResize(Tracer_wndx,Tracer_wndy,wrect.right);
-			#endif
+	switch(uMsg)
+	{
+		case WM_MOVE:
+		{
+			if (!IsIconic(hwndDlg))
+			{
+				RECT wrect;
+				GetWindowRect(hwndDlg,&wrect);
+				Tracer_wndx = wrect.left;
+				Tracer_wndy = wrect.top;
+				WindowBoundsCheckNoResize(Tracer_wndx,Tracer_wndy,wrect.right);
 			}
 			break;
-		};
+		}
 		case WM_INITDIALOG:
+		{
 			if (Tracer_wndx==-32000) Tracer_wndx=0; //Just in case
 			if (Tracer_wndy==-32000) Tracer_wndy=0;
 			SetWindowPos(hwndDlg,0,Tracer_wndx,Tracer_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			hTracer = hwndDlg;
 
-			//setup font
-			hlogFont = (HFONT)SendMessage(hwndDlg, WM_GETFONT, 0, 0);
-			GetObject(hlogFont, sizeof(LOGFONT), &lf);
-			strcpy(lf.lfFaceName,"Courier New");
-			hlogNewFont = CreateFontIndirect(&lf);
-			SendDlgItemMessage(hwndDlg,IDC_TRACER_LOG,WM_SETFONT,(WPARAM)hlogNewFont,FALSE);
-			
+			// setup font
+			SendDlgItemMessage(hwndDlg, IDC_TRACER_LOG, WM_SETFONT, (WPARAM)debugSystem->hFixedFont, FALSE);
+
+			// calculate tracesi.nPage
+			RECT wrect;
+			GetClientRect(GetDlgItem(hwndDlg, IDC_TRACER_LOG), &wrect);
+			tracesi.nPage = wrect.bottom / debugSystem->fixedFontHeight;
+
 			//check the disabled radio button
 			CheckRadioButton(hwndDlg,IDC_RADIO_LOG_LAST,IDC_RADIO_LOG_TO_FILE,IDC_RADIO_LOG_LAST);
 
 			//EnableWindow(GetDlgItem(hwndDlg,IDC_SCRL_TRACER_LOG),FALSE);
 			//fill in the options for the log size
-			for(i = 0;i < LOG_OPTION_SIZE;i++){
-				SendDlgItemMessage(hwndDlg,IDC_TRACER_LOG_SIZE,CB_INSERTSTRING,-1,(LPARAM)(LPSTR)log_optn_strlst[i]);
+			for(i = 0;i < LOG_OPTION_SIZE;i++)
+			{
+				SendDlgItemMessage(hwndDlg, IDC_TRACER_LOG_SIZE, CB_INSERTSTRING, -1, (LPARAM)(LPSTR)log_optn_strlst[i]);
 			}
-			SendDlgItemMessage(hwndDlg,IDC_TRACER_LOG_SIZE,CB_SETCURSEL,0,0);
+			SendDlgItemMessage(hwndDlg, IDC_TRACER_LOG_SIZE, CB_SETCURSEL, (WPARAM)log_lines_option, 0);
 			SetDlgItemText(hwndDlg, IDC_TRACER_LOG, "Welcome to the Trace Logger.");
 			logtofile = 0;
 
-
-			CheckDlgButton(hwndDlg, IDC_CHECK_LINES_TABBING, tracer_lines_tabbing ? BST_CHECKED : BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_STATUSES_TO_THE_LEFT, tracer_statuses_to_the_left ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_REGISTERS, (logging_options & LOG_REGISTERS) ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_PROCESSOR_STATUS, (logging_options & LOG_PROCESSOR_STATUS) ? BST_CHECKED : BST_UNCHECKED);
-			EnableWindow(GetDlgItem(hwndDlg,IDC_TRACER_LOG_SIZE),TRUE);
-			EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_LOG_BROWSE),FALSE);
+			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_NEW_INSTRUCTIONS, (logging_options & LOG_NEW_INSTRUCTIONS) ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_NEW_DATA, (logging_options & LOG_NEW_DATA) ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_STATUSES_TO_THE_LEFT, (logging_options & LOG_TO_THE_LEFT) ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_FRAME_NUMBER, (logging_options & LOG_FRAME_NUMBER) ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_MESSAGES, (logging_options & LOG_MESSAGES) ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_BREAKPOINTS, (logging_options & LOG_BREAKPOINTS) ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_SYMBOLIC_TRACING, (logging_options & LOG_SYMBOLIC) ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_CODE_TABBING, (logging_options & LOG_CODE_TABBING) ? BST_CHECKED : BST_UNCHECKED);
+			
+			EnableWindow(GetDlgItem(hwndDlg, IDC_TRACER_LOG_SIZE), TRUE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_BTN_LOG_BROWSE), FALSE);
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_UPDATE_WINDOW, log_update_window ? BST_CHECKED : BST_UNCHECKED);
 			EnableTracerMenuItems();
 			break;
+		}
 		case WM_CLOSE:
 		case WM_QUIT:
-			if(logging)EndLoggingSequence();
-			DeleteObject(hlogNewFont);
-			logging_options &= 3;
+			if(logging)
+				EndLoggingSequence();
 			hTracer = 0;
 			EndDialog(hwndDlg,0);
 			break;
@@ -161,30 +184,48 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 							break;
 						case IDC_CHECK_LOG_REGISTERS:
 							logging_options ^= LOG_REGISTERS;
+							CheckDlgButton(hwndDlg, IDC_CHECK_LOG_REGISTERS, (logging_options & LOG_REGISTERS) ? BST_CHECKED : BST_UNCHECKED);
 							break;
 						case IDC_CHECK_LOG_PROCESSOR_STATUS:
 							logging_options ^= LOG_PROCESSOR_STATUS;
+							CheckDlgButton(hwndDlg, IDC_CHECK_LOG_PROCESSOR_STATUS, (logging_options & LOG_PROCESSOR_STATUS) ? BST_CHECKED : BST_UNCHECKED);
 							break;
 						case IDC_CHECK_LOG_STATUSES_TO_THE_LEFT:
-							tracer_statuses_to_the_left ^= 1;
+							logging_options ^= LOG_TO_THE_LEFT;
+							CheckDlgButton(hwndDlg, IDC_CHECK_LOG_STATUSES_TO_THE_LEFT, (logging_options & LOG_TO_THE_LEFT) ? BST_CHECKED : BST_UNCHECKED);
 							break;
-						case IDC_CHECK_LINES_TABBING:
-							tracer_lines_tabbing ^= 1;
+						case IDC_CHECK_LOG_FRAME_NUMBER:
+							logging_options ^= LOG_FRAME_NUMBER;
+							CheckDlgButton(hwndDlg, IDC_CHECK_LOG_FRAME_NUMBER, (logging_options & LOG_FRAME_NUMBER) ? BST_CHECKED : BST_UNCHECKED);
+							break;
+						case IDC_CHECK_LOG_MESSAGES:
+							logging_options ^= LOG_MESSAGES;
+							CheckDlgButton(hwndDlg, IDC_CHECK_LOG_MESSAGES, (logging_options & LOG_MESSAGES) ? BST_CHECKED : BST_UNCHECKED);
+							break;
+						case IDC_CHECK_LOG_BREAKPOINTS:
+							logging_options ^= LOG_BREAKPOINTS;
+							CheckDlgButton(hwndDlg, IDC_CHECK_LOG_BREAKPOINTS, (logging_options & LOG_BREAKPOINTS) ? BST_CHECKED : BST_UNCHECKED);
+							break;
+						case IDC_CHECK_SYMBOLIC_TRACING:
+							logging_options ^= LOG_SYMBOLIC;
+							CheckDlgButton(hwndDlg, IDC_CHECK_SYMBOLIC_TRACING, (logging_options & LOG_SYMBOLIC) ? BST_CHECKED : BST_UNCHECKED);
+							break;
+						case IDC_CHECK_CODE_TABBING:
+							logging_options ^= LOG_CODE_TABBING;
+							CheckDlgButton(hwndDlg, IDC_CHECK_CODE_TABBING, (logging_options & LOG_CODE_TABBING) ? BST_CHECKED : BST_UNCHECKED);
 							break;
 						case IDC_CHECK_LOG_NEW_INSTRUCTIONS:
 							logging_options ^= LOG_NEW_INSTRUCTIONS;
-							if(logging && (!PromptForCDLogger())){
-								logging_options ^= LOG_NEW_INSTRUCTIONS; //turn it back off
-								CheckDlgButton(hTracer, IDC_CHECK_LOG_NEW_INSTRUCTIONS, BST_UNCHECKED);
-							}
+							if(logging && (!PromptForCDLogger()))
+								logging_options &= ~LOG_NEW_INSTRUCTIONS; //turn it back off
+							CheckDlgButton(hwndDlg, IDC_CHECK_LOG_NEW_INSTRUCTIONS, (logging_options & LOG_NEW_INSTRUCTIONS) ? BST_CHECKED : BST_UNCHECKED);
 							//EnableTracerMenuItems();
 							break;
 						case IDC_CHECK_LOG_NEW_DATA:
 							logging_options ^= LOG_NEW_DATA;
-							if(logging && (!PromptForCDLogger())){
-								logging_options ^= LOG_NEW_DATA; //turn it back off
-								CheckDlgButton(hTracer, IDC_CHECK_LOG_NEW_DATA, BST_UNCHECKED);
-							}
+							if(logging && (!PromptForCDLogger()))
+								logging_options &= ~LOG_NEW_DATA; //turn it back off
+							CheckDlgButton(hwndDlg, IDC_CHECK_LOG_NEW_DATA, (logging_options & LOG_NEW_DATA) ? BST_CHECKED : BST_UNCHECKED);
 							break;
 						case IDC_CHECK_LOG_UPDATE_WINDOW:
 						{
@@ -225,20 +266,22 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					if(!FCEUI_EmulationPaused() && !log_update_window) break; //mbg merge 7/19/06 changd to use EmulationPaused()
 
 					GetScrollInfo((HWND)lParam,SB_CTL,&tracesi);
-					switch(LOWORD(wParam)) {
+					switch(LOWORD(wParam))
+					{
 						case SB_ENDSCROLL:
 						case SB_TOP:
 						case SB_BOTTOM: break;
 						case SB_LINEUP: tracesi.nPos--; break;
 						case SB_LINEDOWN:tracesi.nPos++; break;
-						case SB_PAGEUP: tracesi.nPos-=tracesi.nPage; break;
-						case SB_PAGEDOWN: tracesi.nPos+=tracesi.nPage; break;
+						case SB_PAGEUP: tracesi.nPos -= tracesi.nPage; break;
+						case SB_PAGEDOWN: tracesi.nPos += tracesi.nPage; break;
 						case SB_THUMBPOSITION: //break;
 						case SB_THUMBTRACK: tracesi.nPos = tracesi.nTrackPos; break;
 					}
-					if(tracesi.nPos < tracesi.nMin) tracesi.nPos = tracesi.nMin;
-					if((tracesi.nPos+(int)tracesi.nPage) > tracesi.nMax) tracesi.nPos = tracesi.nMax-(int)tracesi.nPage; //mbg merge 7/19/06 added casts
-					if(tracesi.nPos < 0)tracesi.nPos = 0; //this fixes a bad crash that occurs if you scroll up when only a few isntructions were logged
+					if ((tracesi.nPos + (int)tracesi.nPage) > tracesi.nMax)
+						tracesi.nPos = tracesi.nMax - (int)tracesi.nPage;
+					if (tracesi.nPos < tracesi.nMin)
+						tracesi.nPos = tracesi.nMin;
 					SetScrollInfo((HWND)lParam,SB_CTL,&tracesi,TRUE);
 					UpdateLogText();
 				}
@@ -268,9 +311,12 @@ void BeginLoggingSequence(void)
 		fprintf(LOG_FP,FCEU_NAME_AND_VERSION" - Trace Log File\n"); //mbg merge 7/19/06 changed string
 	} else
 	{
+		log_lines_option = SendDlgItemMessage(hTracer, IDC_TRACER_LOG_SIZE, CB_GETCURSEL, 0, 0);
+		if (log_lines_option == CB_ERR)
+			log_lines_option = 0;
 		strcpy(str,"Allocating Memory...\r\n");
 		SetDlgItemText(hTracer, IDC_TRACER_LOG, str);
-		tracelogbufsize = j = log_optn_intlst[SendDlgItemMessage(hTracer,IDC_TRACER_LOG_SIZE,CB_GETCURSEL,0,0)];
+		tracelogbufsize = j = log_optn_intlst[log_lines_option];
 		tracelogbuf = (char**)malloc(j*sizeof(char *)); //mbg merge 7/19/06 added cast
 		for(i = 0;i < j;i++)
 		{
@@ -332,83 +378,132 @@ done:
 }*/
 
 //todo: really speed this up
-void FCEUD_TraceInstruction(){
-	if(!logging) return;
+void FCEUD_TraceInstruction()
+{
+	if (!logging)
+		return;
 
-	char str_tabs[LOG_TABS_MASK+1], address[7], data[11], disassembly[LOG_DISASSEMBLY_MAX_LEN], axystate[21], procstatus[12];
-	char str[LOG_LINE_MAX_LEN];
-	int addr=X.PC;
+	unsigned int addr = X.PC;
 	int size, j;
 	uint8 opcode[3], tmp;
 	static int unloggedlines;
 
 	if(((logging_options & LOG_NEW_INSTRUCTIONS) && (oldcodecount != codecount)) ||
-	   ((logging_options & LOG_NEW_DATA) && (olddatacount != datacount))){//something new was logged
+	   ((logging_options & LOG_NEW_DATA) && (olddatacount != datacount)))
+	{
+		//something new was logged
 		oldcodecount = codecount;
 		olddatacount = datacount;
-		if(unloggedlines > 0){
-			sprintf(str,"(%d lines skipped)",unloggedlines);
-			OutputLogLine(str);
+		if(unloggedlines > 0)
+		{
+			sprintf(str_temp, "(%d lines skipped)", unloggedlines);
+			OutputLogLine(str_temp);
 			unloggedlines = 0;
 		}
-	} else {
-		if((logging_options & LOG_NEW_INSTRUCTIONS) ||
-			(logging_options & LOG_NEW_DATA)){
-			if(FCEUI_GetLoggingCD())unloggedlines++;
-			return;
-			}
-	}
-
-	sprintf(address, "$%04X:", addr);
-	axystate[0] = str[0] = 0;
-	size = opsize[GetMem(addr)];
-
-	if ((addr+size) > 0xFFFF)
-	{
-		sprintf(data, "%02X        ", GetMem(addr&0xFFFF));
-		sprintf(disassembly,"OVERFLOW");
 	} else
 	{
-		switch(size)
+		if((logging_options & LOG_NEW_INSTRUCTIONS) ||
+			(logging_options & LOG_NEW_DATA))
+		{
+			if(FCEUI_GetLoggingCD())
+				unloggedlines++;
+			return;
+		}
+	}
+	sprintf(str_address, "$%04X:", addr);
+
+	size = opsize[GetMem(addr)];
+	if ((addr+size) > 0xFFFF)
+	{
+		sprintf(str_data, "%02X        ", GetMem(addr&0xFFFF));
+		sprintf(str_disassembly, "OVERFLOW");
+	} else
+	{
+		char* a;
+		switch (size)
 		{
 			case 0:
-				sprintf(data, "%02X        ", GetMem(addr));
-				sprintf(disassembly,"UNDEFINED");
+				sprintf(str_data, "%02X        ", GetMem(addr));
+				sprintf(str_disassembly,"UNDEFINED");
 				break;
 			case 1:
 				opcode[0]=GetMem(addr++);
-				sprintf(data, "%02X        ", opcode[0]);
-				strcpy(disassembly,Disassemble(addr,opcode));
+				sprintf(str_data, "%02X        ", opcode[0]);
+				a = Disassemble(addr, opcode);
 				break;
 			case 2:
 				opcode[0]=GetMem(addr++);
 				opcode[1]=GetMem(addr++);
-				sprintf(data, "%02X %02X     ", opcode[0],opcode[1]);
-				strcpy(disassembly,Disassemble(addr,opcode));
+				sprintf(str_data, "%02X %02X     ", opcode[0],opcode[1]);
+				a = Disassemble(addr, opcode);
 				break;
 			case 3:
 				opcode[0]=GetMem(addr++);
 				opcode[1]=GetMem(addr++);
 				opcode[2]=GetMem(addr++);
-				sprintf(data, "%02X %02X %02X  ", opcode[0],opcode[1],opcode[2]);
-				strcpy(disassembly,Disassemble(addr,opcode));
+				sprintf(str_data, "%02X %02X %02X  ", opcode[0],opcode[1],opcode[2]);
+				a = Disassemble(addr, opcode);
 				break;
 		}
+
+		if (logging_options & LOG_SYMBOLIC)
+		{
+			loadNameFiles();
+
+			// Insert Name and Comment line if needed
+			str_decoration[0] = 0;
+			decorateAddress(X.PC, str_decoration);
+			if (str_decoration[0])
+			{
+				// divide the str_decoration into strings (Name, Comment1, Comment2, ...)
+				char* start_pos = str_decoration;
+				char* end_pos = strstr(str_decoration, "\r");
+				while (end_pos)
+				{
+					end_pos[0] = 0;		// set \0 instead of \r
+					OutputLogLine(start_pos, true);
+					end_pos += 2;
+					start_pos = end_pos;
+					end_pos = strstr(end_pos, "\r");
+				}
+			}
+
+			replaceNames(ramBankNames, a);
+			replaceNames(loadedBankNames, a);
+			replaceNames(lastBankNames, a);
+		}
+
+		strcpy(str_disassembly, a);
+
 	}
 	//stretch the disassembly string out if we have to output other stuff.
-	if((logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)) && !tracer_statuses_to_the_left)
+	if ((logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)) && !(logging_options & LOG_TO_THE_LEFT))
 	{
-		for(j = strlen(disassembly);j < LOG_DISASSEMBLY_MAX_LEN - 1;j++)disassembly[j] = ' ';
-		disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+		for(j = strlen(str_disassembly);j < LOG_DISASSEMBLY_MAX_LEN - 1;j++)
+			str_disassembly[j] = ' ';
+		str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
 	}
 
-	if(logging_options & LOG_REGISTERS){
-		sprintf(axystate,"A:%02X X:%02X Y:%02X S:%02X",(X.A),(X.X),(X.Y),(X.S));
+	// Start filling the str_temp line: Frame number, AXYS state, Processor status, Tabs, Address, Data, Disassembly
+
+
+	if (logging_options & LOG_FRAME_NUMBER)
+	{
+		sprintf(str_temp, "%06u: ", currFrameCounter);
+	} else
+	{
+		str_temp[0] = 0;
+	}
+
+	if (logging_options & LOG_REGISTERS)
+	{
+		sprintf(str_axystate,"A:%02X X:%02X Y:%02X S:%02X ",(X.A),(X.X),(X.Y),(X.S));
 	}
 	
-	if(logging_options & LOG_PROCESSOR_STATUS){
+	if (logging_options & LOG_PROCESSOR_STATUS)
+	{
 		tmp = X.P^0xFF;
-		sprintf(procstatus,"P:%c%c%c%c%c%c%c%c",
+		sprintf(str_procstatus,"P:%c%c%c%c%c%c%c%c ",
 			'N'|(tmp&0x80)>>2,
 			'V'|(tmp&0x40)>>1,
 			'U'|(tmp&0x20),
@@ -420,59 +515,64 @@ void FCEUD_TraceInstruction(){
 			);
 	}
 
-	if (tracer_statuses_to_the_left)
+	if (logging_options & LOG_TO_THE_LEFT)
 	{
 		if (logging_options & LOG_REGISTERS)
-			strcat(str, axystate);
-		if ((logging_options & LOG_REGISTERS) && (logging_options & LOG_PROCESSOR_STATUS))
-			strcat(str, " ");
+			strcat(str_temp, str_axystate);
 		if (logging_options & LOG_PROCESSOR_STATUS)
-			strcat(str, procstatus);
-		if ((logging_options & LOG_REGISTERS) || (logging_options & LOG_PROCESSOR_STATUS))
-			strcat(str, " ");
+			strcat(str_temp, str_procstatus);
 	}
 
-	if (tracer_lines_tabbing)
+	if (logging_options & LOG_CODE_TABBING)
 	{
 		// add spaces at the beginning of the line according to stack pointer
 		int spaces = (0xFF - X.S) & LOG_TABS_MASK;
 		for (int i = 0; i < spaces; i++)
 			str_tabs[i] = ' ';
 		str_tabs[spaces] = 0;
-		strcat(str, str_tabs);
+		strcat(str_temp, str_tabs);
 	}
 
-	strcat(str, address);
-	strcat(str, data);
-	strcat(str, disassembly);
+	strcat(str_temp, str_address);
+	strcat(str_temp, str_data);
+	strcat(str_temp, str_disassembly);
 
-	if (!tracer_statuses_to_the_left)
+	if (!(logging_options & LOG_TO_THE_LEFT))
 	{
 		if (logging_options & LOG_REGISTERS)
-			strcat(str,axystate);
-		if ((logging_options & LOG_REGISTERS) && (logging_options & LOG_PROCESSOR_STATUS))
-			strcat(str," ");
+			strcat(str_temp, str_axystate);
 		if (logging_options & LOG_PROCESSOR_STATUS)
-			strcat(str,procstatus);
+			strcat(str_temp, str_procstatus);
 	}
 
-	OutputLogLine(str);
-
+	OutputLogLine(str_temp);
 	return;
 }
 
-void OutputLogLine(char *str){
-	if(logtofile){
-		strcat(str,"\n");
-		fputs(str,LOG_FP);
+void OutputLogLine(const char *str, bool add_newline)
+{
+	if(logtofile)
+	{
+		fputs(str, LOG_FP);
+		if (add_newline)
+			fputs("\n", LOG_FP);
 		fflush(LOG_FP);
-	}else{
-		strcat(str,"\r\n");
-		if(strlen(str) < LOG_LINE_MAX_LEN)
-			strcpy(tracelogbuf[tracelogbufpos],str);
+	} else
+	{
+		if (add_newline)
+		{
+			strncpy(tracelogbuf[tracelogbufpos], str, LOG_LINE_MAX_LEN - 3);
+			tracelogbuf[tracelogbufpos][LOG_LINE_MAX_LEN - 3] = 0;
+			strcat(tracelogbuf[tracelogbufpos], "\r\n");
+		} else
+		{
+			strncpy(tracelogbuf[tracelogbufpos], str, LOG_LINE_MAX_LEN - 1);
+			tracelogbuf[tracelogbufpos][LOG_LINE_MAX_LEN - 1] = 0;
+		}
 		tracelogbufpos++;
-		if(tracelogbufusedsize < tracelogbufsize)tracelogbufusedsize++;
-		tracelogbufpos%=tracelogbufsize;
+		if (tracelogbufusedsize < tracelogbufsize)
+			tracelogbufusedsize++;
+		tracelogbufpos %= tracelogbufsize;
 	}
 }
 
@@ -496,34 +596,35 @@ void EndLoggingSequence(void){
 //void PauseLoggingSequence(void){
 void UpdateLogWindow(void)
 {
-	//we don't want to continue if the trace logger isn't logging, or if its logging to  a file.
+	//we don't want to continue if the trace logger isn't logging, or if its logging to a file.
 	if ((!logging) || logtofile)
 		return; 
 
 	// only update the window when some emulation occured
 	// and only update the window when emulator is paused or log_update_window=true
 	bool emu_paused = (FCEUI_EmulationPaused() != 0);
-	if ((!emu_paused && !log_update_window) || (old_emu_paused && !JustFrameAdvanced))	//mbg merge 7/19/06 changd to use EmulationPaused()
+	if ((!emu_paused && !log_update_window) || (log_old_emu_paused && !JustFrameAdvanced))	//mbg merge 7/19/06 changd to use EmulationPaused()
 	{
-		old_emu_paused = emu_paused;
+		log_old_emu_paused = emu_paused;
 		return;
 	}
-	old_emu_paused = emu_paused;
+	log_old_emu_paused = emu_paused;
 
 	tracesi.cbSize = sizeof(SCROLLINFO);
 	tracesi.fMask = SIF_ALL;
-	tracesi.nPage = 21;
 	tracesi.nMin = 0;
-	tracesi.nMax = tracelogbufusedsize; //todo: try -2
-	tracesi.nPos = tracesi.nMax-tracesi.nPage;
-	if (tracesi.nPos < tracesi.nMin) tracesi.nPos = tracesi.nMin;
+	tracesi.nMax = tracelogbufusedsize;
+	tracesi.nPos = tracesi.nMax - tracesi.nPage;
+	if (tracesi.nPos < tracesi.nMin)
+		tracesi.nPos = tracesi.nMin;
 	SetScrollInfo(GetDlgItem(hTracer,IDC_SCRL_TRACER_LOG),SB_CTL,&tracesi,TRUE);
 	UpdateLogText();
 
 	return;
 }
 
-void UpdateLogText(void){
+void UpdateLogText(void)
+{
 	int i, j;
 	char str[3000];
 	str[0] = 0;
@@ -535,9 +636,11 @@ void UpdateLogText(void){
 	}
 	*/
 
-	for(i = tracesi.nPos;i < std::min(tracesi.nMax,tracesi.nPos+21);i++){
+	for(i = tracesi.nPos;i < std::min(tracesi.nMax,tracesi.nPos+21);i++)
+	{
 		j = i;
-		if(tracelogbufusedsize == tracelogbufsize){
+		if(tracelogbufusedsize == tracelogbufsize)
+		{
 			j = (tracelogbufpos+i)%tracelogbufsize;
 		}
 		strcat(str,tracelogbuf[j]);

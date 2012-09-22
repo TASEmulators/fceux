@@ -5,6 +5,9 @@
 #include <windows.h>
 //#include "debug.h"
 
+// this is default value, but use debugSystem->fixedFontHeight in calculations
+#define FIXED_FONT_HEIGHT 14
+
 // TODO: Maybe change breakpoint array to std::vector
 // Maximum number of breakpoints supported
 #define MAXIMUM_NUMBER_OF_BREAKPOINTS 64
@@ -28,6 +31,7 @@ void UpdatePatcher(HWND hwndDlg);
 int GetEditHex(HWND hwndDlg, int id);
 
 extern void AddBreakList();
+extern char* BreakToText(unsigned int num);
 
 void UpdateDebugger();
 void DoDebug(uint8 halt);

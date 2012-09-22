@@ -543,7 +543,7 @@ void breakpoint()
 
 	//if the current instruction is bad, and we are breaking on bad opcodes, then hit the breakpoint
 	if(dbgstate.badopbreak && (opsize[opcode[0]] == 0))
-		BreakHit(BREAK_TYPE_STEP, true);
+		BreakHit(BREAK_TYPE_BADOP, true);
 
 	//if we're stepping out, track the nest level
 	if (dbgstate.stepout) {

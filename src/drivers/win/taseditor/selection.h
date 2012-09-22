@@ -31,6 +31,7 @@ public:
 	void ItemChanged(NMLISTVIEW* info);
 
 	void AddNewSelectionToHistory();
+	void AddCurrentSelectionToHistory();
 
 	void undo();
 	void redo();

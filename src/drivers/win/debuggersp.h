@@ -18,7 +18,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
- #include <windows.h>
+#include <windows.h>
+
+#define NL_MAX_NAME_LEN 50
+#define NL_MAX_MULTILINE_COMMENT_LEN 1024
 
 //mbg merge 7/17/06 made struct sane c++
 struct Name 

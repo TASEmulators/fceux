@@ -373,6 +373,7 @@ void TASEDITOR_WINDOW::update()
 			case DRAG_MODE_SET:
 			case DRAG_MODE_UNSET:
 			case DRAG_MODE_SELECTION:
+			case DRAG_MODE_DESELECTION:
 				// user is drawing/selecting - show normal arrow
 				break;
 		}
@@ -911,7 +912,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case ID_EDIT_DESELECT:
 				case ID_SELECTED_DESELECT:
-					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 						selection.ClearSelection();
 					break;
 				case ID_EDIT_SELECTALL:
@@ -919,7 +920,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, -1); 
 					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1); 
-					else if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+					else if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 						selection.SelectAll();
 					break;
 				case ACCEL_CTRL_X:
@@ -1176,12 +1177,12 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, -1);
 					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1);
-					else if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+					else if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 						selection.SelectBetweenMarkers();
 					break;
 				case ID_EDIT_SELECTMIDMARKERS:
 				case ID_SELECTED_SELECTMIDMARKERS:
-					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 						selection.SelectBetweenMarkers();
 					break;
 				case ACCEL_CTRL_INSERT:
@@ -1213,7 +1214,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case ID_EDIT_SELECTIONUNDO:
 				case ACCEL_CTRL_Q:
 					{
-						if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+						if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 						{
 							selection.undo();
 							piano_roll.FollowSelection();
@@ -1223,7 +1224,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case ID_EDIT_SELECTIONREDO:
 				case ACCEL_CTRL_W:
 					{
-						if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+						if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 						{
 							selection.redo();
 							piano_roll.FollowSelection();
@@ -1233,7 +1234,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case ID_EDIT_RESELECTCLIPBOARD:
 				case ACCEL_CTRL_B:
 					{
-						if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+						if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 						{
 							selection.ReselectClipboard();
 							piano_roll.FollowSelection();
@@ -1328,7 +1329,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case ACCEL_CTRL_HOME:
 				{
 					// transpose Selection to the beginning and scroll to it
-					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 					{
 						int selection_beginning = selection.GetCurrentSelectionBeginning();
 						if (selection_beginning >= 0)
@@ -1342,7 +1343,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case ACCEL_CTRL_END:
 				{
 					// transpose Selection to the end and scroll to it
-					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 					{
 						int selection_end = selection.GetCurrentSelectionEnd();
 						if (selection_end >= 0)
@@ -1354,16 +1355,16 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				}
 				case ACCEL_CTRL_PGUP:
-					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 						selection.JumpPrevMarker();
 					break;
 				case ACCEL_CTRL_PGDN:
-					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 						selection.JumpNextMarker();
 					break;
 				case ACCEL_CTRL_UP:
 					// transpose Selection 1 frame up and scroll to it
-					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 					{
 						selection.Transpose(-1);
 						int selection_beginning = selection.GetCurrentSelectionBeginning();
@@ -1373,7 +1374,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case ACCEL_CTRL_DOWN:
 					// transpose Selection 1 frame down and scroll to it
-					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 					{
 						selection.Transpose(1);
 						int selection_end = selection.GetCurrentSelectionEnd();
@@ -1493,7 +1494,7 @@ LRESULT APIENTRY IDC_SELECTION_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam
 	{
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONDBLCLK:
-			if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+			if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 				piano_roll.FollowSelection();
 			if (GetFocus() != hWnd)
 				SetFocus(hWnd);

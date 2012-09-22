@@ -718,6 +718,27 @@ void PIANO_ROLL::update()
 			}
 			break;
 		}
+		case DRAG_MODE_DESELECTION:
+		{
+			int new_drag_selection_ending_frame = real_row_under_mouse;
+			// if trying to deselect above Piano Roll, deselect from frame 0
+			if (new_drag_selection_ending_frame < 0)
+				new_drag_selection_ending_frame = 0;
+			else if (new_drag_selection_ending_frame >= currMovieData.getNumRecords())
+				new_drag_selection_ending_frame = currMovieData.getNumRecords() - 1;
+			if (new_drag_selection_ending_frame >= 0 && new_drag_selection_ending_frame != drag_selection_ending_frame)
+			{
+				// change Deselection shape
+				if (new_drag_selection_ending_frame >= drag_selection_starting_frame)
+					// deselecting from upper to lower
+					selection.ClearRegionSelection(drag_selection_starting_frame, new_drag_selection_ending_frame + 1);
+				else
+					// deselecting from lower to upper
+					selection.ClearRegionSelection(new_drag_selection_ending_frame, drag_selection_starting_frame + 1);
+				drag_selection_ending_frame = new_drag_selection_ending_frame;
+			}
+			break;
+		}
 	}
 	// update MarkerDragBox when it's flying away
 	if (hwndMarkerDragBox && drag_mode != DRAG_MODE_MARKER)
@@ -1067,6 +1088,15 @@ void PIANO_ROLL::StartSelectingDrag(int start_frame)
 		drag_mode = DRAG_MODE_SELECTION;
 		drag_selection_starting_frame = start_frame;
 		drag_selection_ending_frame = drag_selection_starting_frame;	// assuming that start_frame is already selected
+	}
+}
+void PIANO_ROLL::StartDeselectingDrag(int start_frame)
+{
+	if (drag_mode == DRAG_MODE_NONE)
+	{
+		drag_mode = DRAG_MODE_DESELECTION;
+		drag_selection_starting_frame = start_frame;
+		drag_selection_ending_frame = drag_selection_starting_frame;	// assuming that start_frame is already deselected
 	}
 }
 
@@ -1767,6 +1797,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 								else
 									selection.SetRegionSelection(row_index, selection_beginning + 1);
 							}
+							piano_roll.StartSelectingDrag(row_index);
 						} else if (alt_pressed)
 						{
 							// make Selection by Pattern
@@ -1779,18 +1810,30 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 								else
 									selection.SetRegionSelectionPattern(row_index, selection_beginning);
 							}
+							if (selection.GetRowSelection(row_index))
+								piano_roll.StartDeselectingDrag(row_index);
+							else
+								piano_roll.StartSelectingDrag(row_index);
 						} else if (fwKeys & MK_CONTROL)
 						{
+							// clone current selection, so that user will be able to revert
+							if (selection.GetCurrentSelectionSize() > 0)
+								selection.AddCurrentSelectionToHistory();
 							if (selection.GetRowSelection(row_index))
+							{
 								selection.ClearRowSelection(row_index);
-							else
+								piano_roll.StartDeselectingDrag(row_index);
+							} else
+							{
 								selection.SetRowSelection(row_index);
+								piano_roll.StartSelectingDrag(row_index);
+							}
 						} else	// just click
 						{
 							selection.ClearSelection();
 							selection.SetRowSelection(row_index);
+							piano_roll.StartSelectingDrag(row_index);
 						}
-						piano_roll.StartSelectingDrag(row_index);
 					}
 				}
 			} else if (column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)

@@ -196,10 +196,10 @@ int parseLine(char* line, Name* n)
 
 	*pos = 0;
 	
-	// The only requirement for a name of an address is that it's not of size 0
-	
 	if (*line)
 	{
+		if (strlen(line) > NL_MAX_NAME_LEN)
+			line[NL_MAX_NAME_LEN] = 0;
 		n->name = (char*)malloc(strlen(line) + 1);
 		strcpy(n->name, line);
 	}
@@ -216,6 +216,8 @@ int parseLine(char* line, Name* n)
 
 	if (*line > 0x0D)
 	{
+		if (strlen(line) > NL_MAX_MULTILINE_COMMENT_LEN)
+			line[NL_MAX_MULTILINE_COMMENT_LEN] = 0;
 		n->comment = (char*)malloc(strlen(line) + 1);
 		strcpy(n->comment, line);
 	}
@@ -626,8 +628,7 @@ void decorateAddress(unsigned int addr, char* str)
 	{
 		// Search address definition node for a RAM address
 		n = searchNode(ramBankNames, temp_chr);
-	}
-	else
+	} else
 	{
 		// Search address definition node for a ROM address
 		n = addr >= 0xC000 ? searchNode(lastBankNames, temp_chr) : searchNode(loadedBankNames, temp_chr);

@@ -89,9 +89,8 @@ extern int PPUViewPosX,PPUViewPosY;
 extern int MainWindow_wndx, MainWindow_wndy;
 extern int MemWatch_wndx, MemWatch_wndy;
 extern int Monitor_wndx, Monitor_wndy;
-extern bool tracer_lines_tabbing;
-extern bool tracer_statuses_to_the_left;
 extern int logging_options;
+extern int log_lines_option;
 extern int Tracer_wndx, Tracer_wndy;
 extern int CDLogger_wndx, CDLogger_wndy;
 extern int GGConv_wndx, GGConv_wndy;
@@ -286,9 +285,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(MemWatch_wndy),
 	AC(Monitor_wndx),
 	AC(Monitor_wndy),
-	AC(tracer_lines_tabbing),
-	AC(tracer_statuses_to_the_left),
 	AC(logging_options),
+	AC(log_lines_option),
 	AC(Tracer_wndx),
 	AC(Tracer_wndy),
 	AC(CDLogger_wndx),

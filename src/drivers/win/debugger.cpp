@@ -354,7 +354,8 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 	
 // ################################## Start of SP CODE ###########################
 
-	loadNameFiles();
+	if (symbDebugEnabled)
+		loadNameFiles();
 
 // ################################## End of SP CODE ###########################
 
@@ -364,7 +365,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 	//figure out how many lines we can draw
 	RECT rect;
 	GetClientRect(hWnd,&rect);
-	int lines = (rect.bottom-rect.top)/14;
+	int lines = (rect.bottom-rect.top) / debugSystem->fixedFontHeight;
 
 	for (int i = 0; i < lines; i++)
 	{
@@ -405,8 +406,8 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 		{
 			sprintf(chr, "%02X        UNDEFINED", GetMem(addr++));
 			strcat(str,chr);
-		}
-		else {
+		} else
+		{
 			char* a;
 			if ((addr+size) > 0x10000) { //should this be 0xFFFF?
 				while (addr < 0x10000) {
@@ -426,7 +427,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 			
 // ################################## Start of SP CODE ###########################
 
-			a = Disassemble(addr,opcode);
+			a = Disassemble(addr, opcode);
 			
 			if (symbDebugEnabled)
 			{
@@ -576,8 +577,35 @@ bool inDebugger = false;
 //this code enters the debugger when a breakpoint was hit
 void FCEUD_DebugBreakpoint(int bp_num)
 {
+	// log the Breakpoint Hit into Trace Logger log if needed
+	if (logging && (logging_options & LOG_MESSAGES))
+	{
+		char str_temp[500];
+		if (bp_num >= 0)
+		{
+			// normal breakpoint
+			sprintf(str_temp, "Breakpoint %u Hit at $%04X: ", bp_num, X.PC);
+			strcat(str_temp, BreakToText(bp_num));
+			//watchpoint[num].condText
+			OutputLogLine(str_temp);
+		} else if (bp_num == BREAK_TYPE_BADOP)
+		{
+			sprintf(str_temp, "Bad Opcode Breakpoint Hit at $%04X", X.PC);
+			OutputLogLine(str_temp);
+		} else if (bp_num == BREAK_TYPE_CYCLES_EXCEED)
+		{
+			sprintf(str_temp, "Breakpoint Hit at $%04X: cycles count %lu exceeds %lu", X.PC, (long)(timestampbase + timestamp - total_cycles_base), (long)break_cycles_limit);
+			OutputLogLine(str_temp);
+		} else if (bp_num == BREAK_TYPE_INSTRUCTIONS_EXCEED)
+		{
+			sprintf(str_temp, "Breakpoint Hit at $%04X: instructions count %lu exceeds %lu", X.PC, (long)total_instructions, (long)break_instructions_limit);
+			OutputLogLine(str_temp);
+		}
+	}
+
 	UpdateDebugger();
-	
+	UpdateOtherDebuggingDialogs(); // Keeps the debugging windows updating smoothly when stepping
+
 	if (bp_num >= 0)
 	{
 		// highlight bp_num item in IDC_DEBUGGER_BP_LIST
@@ -596,9 +624,10 @@ void FCEUD_DebugBreakpoint(int bp_num)
 		else if (bp_num == BREAK_TYPE_INSTRUCTIONS_EXCEED)
 			SendMessage(GetDlgItem(hDebug, IDC_DEBUGGER_VAL_INSTRUCTIONS_COUNT), EM_SETSEL, 0, -1);
 	}
-	UpdateOtherDebuggingDialogs(); // Keeps the debugging windows updating smoothly when stepping
+
 	void win_debuggerLoop(); // HACK to let user interact with the Debugger while emulator isn't updating
 	win_debuggerLoop();
+
 	// since we unfreezed emulation, reset delta_cycles counter
 	ResetDebugStatisticsDeltaCounters();
 }
@@ -755,15 +784,16 @@ void UpdateDebugger()
 	DebuggerWasUpdated = true;
 }
 
-char *BreakToText(unsigned int num) {
-	static char str[230],chr[8];
+char* BreakToText(unsigned int num)
+{
+	static char str[300], chr[8];
 
 	sprintf(str, "$%04X", watchpoint[num].address);
 	if (watchpoint[num].endaddress) {
-		sprintf(chr, "-$%04X", watchpoint[num].endaddress);
+		sprintf(chr, "-%04X", watchpoint[num].endaddress);
 		strcat(str,chr);
 	}
-	if (watchpoint[num].flags&WP_E) strcat(str,": E"); else strcat(str,": -");
+	if (watchpoint[num].flags&WP_E) strcat(str,":E"); else strcat(str,":-");
 	if (watchpoint[num].flags&BT_P) strcat(str,"P"); else if (watchpoint[num].flags&BT_S) strcat(str,"S"); else strcat(str,"C");
 	if (watchpoint[num].flags&WP_R) strcat(str,"R"); else strcat(str,"-");
 	if (watchpoint[num].flags&WP_W) strcat(str,"W"); else strcat(str,"-");
@@ -771,10 +801,18 @@ char *BreakToText(unsigned int num) {
 	if (watchpoint[num].flags&WP_F) strcat(str,"F"); else strcat(str,"-");
 	
 // ################################## Start of SP CODE ###########################
-	if (watchpoint[num].desc)
+
+	if (watchpoint[num].desc && strlen(watchpoint[num].desc))
 	{
-		strcat(str, " : ");
+		strcat(str, " ");
 		strcat(str, watchpoint[num].desc);
+		strcat(str, " ");
+	}
+
+	if (watchpoint[num].condText && strlen(watchpoint[num].condText))
+	{
+		strcat(str, " Condition:");
+		strcat(str, watchpoint[num].condText);
 	}
 // ################################## End of SP CODE ###########################
 
@@ -1184,7 +1222,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 			// select the text
 			CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, uMsg, wParam, lParam);
 			int mouse_y = GET_Y_LPARAM(lParam);
-			int tmp = mouse_y / 14, tmp2;
+			int tmp = mouse_y / debugSystem->fixedFontHeight, tmp2;
 			int i = si.nPos;
 			while (tmp > 0)
 			{
@@ -1259,8 +1297,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PC,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_STACK_CONTENTS,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
-			//SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
-			//SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 
 			//text limits
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_A,EM_SETLIMITTEXT,2,0);
@@ -1531,7 +1568,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				//mbg merge 7/18/06 changed pausing check
 				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10) && (mouse_y < 538))
 				{
-					tmp = (mouse_y - 10) / 14;
+					tmp = (mouse_y - 10) / debugSystem->fixedFontHeight;
 // ################################## End of SP CODE ###########################
 					i = si.nPos;
 					while (tmp > 0) {
@@ -1558,7 +1595,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				//mbg merge 7/18/06 changed pausing check
 				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10) && (mouse_y < 538))
 				{
-					tmp = (mouse_y - 10) / 14;
+					tmp = (mouse_y - 10) / debugSystem->fixedFontHeight;
 					i = si.nPos;
 					while (tmp > 0) {
 						if ((tmp2=opsize[GetMem(i)]) == 0) tmp2++;
@@ -1584,7 +1621,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				//mbg merge 7/18/06 changed pausing check
 				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10) && (mouse_y < 538))
 				{
-					tmp = (mouse_y - 10) / 14;
+					tmp = (mouse_y - 10) / debugSystem->fixedFontHeight;
 					i = si.nPos;
 					while (tmp > 0) {
 						if ((tmp2=opsize[GetMem(i)]) == 0) tmp2++;
@@ -1896,7 +1933,7 @@ DebugSystem* debugSystem;
 
 DebugSystem::DebugSystem()
 {
-	hFixedFont = CreateFont(14, 8, /*Height,Width*/
+	hFixedFont = CreateFont(FIXED_FONT_HEIGHT, 8, /*Height,Width*/
 		0,0, /*escapement,orientation*/
 		FW_REGULAR,FALSE,FALSE,FALSE, /*weight, italic, underline, strikeout*/
 		ANSI_CHARSET,OUT_DEVICE_PRECIS,CLIP_MASK, /*charset, precision, clipping*/
