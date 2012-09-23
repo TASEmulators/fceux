@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Нейтральный resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
@@ -1563,31 +1563,37 @@ BEGIN
     DEFPUSHBUTTON   "&OK",IDOK,67,52,50,14
 END
 
-CDLOGGER DIALOGEX 0, 0, 315, 218
+CDLOGGER DIALOGEX 0, 0, 315, 264
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
 CAPTION "Code Data Logger"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "Load...",BTN_CDLOGGER_LOAD,7,81,50,14
-    PUSHBUTTON      "Save",BTN_CDLOGGER_SAVE,257,81,50,14
-    GROUPBOX        "Code Data Log Status",-1,3,4,308,131,BS_CENTER
-    PUSHBUTTON      "Start",BTN_CDLOGGER_START_PAUSE,129,81,50,14
-    GROUPBOX        "Address Label Logger",65534,3,136,308,79,BS_CENTER
+    DEFPUSHBUTTON   "Load...",BTN_CDLOGGER_LOAD,7,105,50,14
+    PUSHBUTTON      "Save",BTN_CDLOGGER_SAVE,257,105,50,14
+    GROUPBOX        "Code/Data Log Status",-1,3,4,308,173,BS_CENTER
+    PUSHBUTTON      "Start",BTN_CDLOGGER_START_PAUSE,129,105,50,14
+    GROUPBOX        "Address Label Logger",65534,2,180,308,79,BS_CENTER
     PUSHBUTTON      "Load...",111,7,190,50,14,WS_DISABLED
     PUSHBUTTON      "Start",112,127,189,50,14,WS_DISABLED
     PUSHBUTTON      "Save...",113,256,189,50,14,WS_DISABLED
     LTEXT           "4067 - 29.5%",LBL_CDLOGGER_CODECOUNT,38,31,68,11
-    GROUPBOX        "Bytes Logged As Code",65533,29,20,84,27
-    GROUPBOX        "Bytes Logged as data",65532,117,20,84,27
+    GROUPBOX        "PRG Logged as Code",65533,29,20,84,27
+    GROUPBOX        "PRG Logged as Data",65532,117,20,84,27
     LTEXT           "7092 - 37.2%",LBL_CDLOGGER_DATACOUNT,128,31,65,9
-    GROUPBOX        "Bytes Not Logged",65531,205,20,79,27
+    GROUPBOX        "PRG not Logged",65531,205,20,79,27
     LTEXT           "6072 - 32.7%",LBL_CDLOGGER_UNDEFCOUNT,210,31,60,8
-    LTEXT           "Itsa me the Code Data Logger! Press Start to play!",65530,69,56,172,12
-    PUSHBUTTON      "Reset Log",BTN_CDLOGGER_RESET,7,66,50,14
-    PUSHBUTTON      "Save as...",BTN_CDLOGGER_SAVE_AS,257,66,50,14
-    PUSHBUTTON      "Save Stripped iNes Rom...",BTN_CDLOGGER_SAVE_STRIPPED,208,102,99,14
-    PUSHBUTTON      "Save Unused Data...",BTN_CDLOGGER_SAVE_UNUSED,208,117,99,14
+    LTEXT           "Itsa me the Code/Data Logger! Press Start to play!",65530,69,80,172,12
+    PUSHBUTTON      "Reset Log",BTN_CDLOGGER_RESET,7,90,50,14
+    PUSHBUTTON      "Save as...",BTN_CDLOGGER_SAVE_AS,257,90,50,14
+    PUSHBUTTON      "Save Stripped iNes Rom...",BTN_CDLOGGER_SAVE_STRIPPED,208,126,99,14
+    PUSHBUTTON      "Save Unused Data...",BTN_CDLOGGER_SAVE_UNUSED,208,141,99,14
+    LTEXT           "4067 - 29.5%",LBL_CDLOGGER_RENDERCOUNT,37,60,68,11
+    GROUPBOX        "CHR Rendered",-1,29,50,84,27
+    GROUPBOX        "CHR Logged as Data",-1,117,50,84,27
+    LTEXT           "7092 - 37.2%",LBL_CDLOGGER_VROMREADCOUNT,127,60,65,9
+    GROUPBOX        "CHR not Logged",-1,205,50,79,27
+    LTEXT           "6072 - 32.7%",LBL_CDLOGGER_UNDEFVROMCOUNT,209,60,60,8
 END
 
 PPUVIEW DIALOGEX 44, 38, 355, 246
@@ -2073,7 +2079,7 @@ BEGIN
 
     "CDLOGGER", DIALOG
     BEGIN
-        BOTTOMMARGIN, 213
+        BOTTOMMARGIN, 259
     END
 
     "PPUVIEW", DIALOG
@@ -2118,12 +2124,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Нейтральный resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Английский (США) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -2357,7 +2363,7 @@ IDB_BITMAP_SELECTED17   BITMAP                  "res\\te_17_selected.bmp"
 IDB_BITMAP_SELECTED18   BITMAP                  "res\\te_18_selected.bmp"
 IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
-#endif    // Английский (США) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

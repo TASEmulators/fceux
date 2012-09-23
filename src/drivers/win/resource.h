@@ -119,6 +119,7 @@
 #define IDC_CHECK_LOG_REGISTERS         110
 #define IDC_DEBUGGER_BREAK_ON_BAD_OP    110
 #define IDC_ROMPATCHER_BTN_APPLY        110
+#define LBL_CDLOGGER_RENDERCOUNT        110
 #define MENU_LOAD_STATE                 111
 #define CB_DISABLE_SCREEN_SAVER         111
 #define BTN_FAM                         111
@@ -133,11 +134,13 @@
 #define IDC_CHECK_LOG_NEW_INSTRUCTIONS  114
 #define IDD_DIALOG1                     114
 #define IDC_DEBUGGER_RUN_LINE           114
+#define LBL_CDLOGGER_VROMREADCOUNT      114
 #define LBL_AUTO_HOLD                   115
 #define IDC_CHECK_LOG_NEW_DATA          115
 #define IDD_DIALOG2                     115
 #define IDC_DEBUGGER_STEP_OUT3          115
 #define IDC_DEBUGGER_RUN_FRAME2         115
+#define LBL_CDLOGGER_UNDEFVROMCOUNT     115
 #define LBL_CLEAR_AH                    116
 #define IDC_CHECK_LOG_UPDATE_WINDOW     116
 #define IDC_DEBUGGER_RESET_CYCLES_COUNTER 116

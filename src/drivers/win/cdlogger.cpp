@@ -43,6 +43,11 @@ void SaveStrippedRom(int invert);
 extern iNES_HEADER head; //defined in ines.c
 extern uint8 *trainerpoo;
 
+//---------CDLogger VROM
+extern volatile int rendercount, vromreadcount, undefinedvromcount;
+extern unsigned char *cdloggervdata;
+extern int newppu;
+
 int CDLogger_wndx=0, CDLogger_wndy=0;
 
 //extern uint8 *ROM;
@@ -110,10 +115,13 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			if (CDLogger_wndy==-32000) CDLogger_wndy=0;
 			SetWindowPos(hwndDlg,0,CDLogger_wndx,CDLogger_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			hCDLogger = hwndDlg;
-			codecount = datacount = 0;
+			codecount = datacount = rendercount = vromreadcount = 0;
 			undefinedcount = PRGsize[0];
+			undefinedvromcount = CHRsize[0];
 			cdloggerdata = (unsigned char*)malloc(PRGsize[0]); //mbg merge 7/18/06 added cast
+			cdloggervdata = (unsigned char*)malloc(CHRsize[0]);
 			ZeroMemory(cdloggerdata,PRGsize[0]);
+			ZeroMemory(cdloggervdata,CHRsize[0]);
 			break;
 		case WM_CLOSE:
 		case WM_QUIT:
@@ -126,7 +134,9 @@ MB_OK);
 								}
 			FCEUI_SetLoggingCD(0);
 			free(cdloggerdata);
+			free(cdloggervdata);
 			cdloggerdata=0;
+			cdloggervdata=0;
 			hCDLogger = 0;
 			EndDialog(hwndDlg,0);
 			break;
@@ -135,9 +145,11 @@ MB_OK);
 				case BN_CLICKED:
 					switch(LOWORD(wParam)) {
 						case BTN_CDLOGGER_RESET:
-							codecount = datacount = 0;
+							codecount = datacount = rendercount = vromreadcount = 0;
 							undefinedcount = PRGsize[0];
+							undefinedvromcount = CHRsize[0];
 							ZeroMemory(cdloggerdata,PRGsize[0]);
+							ZeroMemory(cdloggervdata,CHRsize[0]);
 							UpdateCDLogger();
 							break;
 						case BTN_CDLOGGER_LOAD:
@@ -157,6 +169,16 @@ MB_OK);
 								SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Start");
 							}
 							else{
+								if(!newppu)
+								{
+									if(MessageBox(hCDLogger,
+"In order for CHR data logging to take effect, the New PPU engine logger must also be enabled.\
+ Would you like to enable new PPU engine now?","Enable new PPU engine?",
+										MB_YESNO) == IDYES)
+									{
+										FCEU_TogglePPU();
+									}
+								}
 								FCEUI_SetLoggingCD(1);
 								EnableTracerMenuItems();
 								SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Pause");
@@ -190,23 +212,12 @@ void LoadCDLog (const char* nameo)
 	int i,j;
 
 	strcpy(loadedcdfile,nameo);
-	//FCEUD_PrintError(loadedcdfile);
-	
-	//fseek(FP,0,SEEK_SET);
-	//codecount = datacount = 0;
-	//undefinedcount = PRGsize[0];
-
-	//cdloggerdata = malloc(PRGsize[0]);
-	
 
 	FP = fopen(loadedcdfile,"rb");
 	if(FP == NULL){
 		FCEUD_PrintError("Error Opening File");
 		return;
 	}
-
-	//codecount = datacount = 0;
-	//undefinedcount = PRGsize[0];
 
 	for(i = 0;i < (int)PRGsize[0];i++){
 		j = fgetc(FP);
@@ -216,6 +227,16 @@ void LoadCDLog (const char* nameo)
 		if((j & 3) && !(cdloggerdata[i] & 3))undefinedcount--; //the appropriate counter.
 		cdloggerdata[i] |= j;
 	}
+
+	for(i = 0;i < (int)CHRsize[0];i++){
+		j = fgetc(FP);
+		if(j == EOF)break;
+		if((j & 1) && !(cdloggervdata[i] & 1))rendercount++; //if the new byte has something logged and
+		if((j & 2) && !(cdloggervdata[i] & 2))vromreadcount++; //if the new byte has something logged and
+		if((j & 3) && !(cdloggervdata[i] & 3))undefinedvromcount--; //the appropriate counter.
+		cdloggervdata[i] |= j;
+	}
+
 	fclose(FP);
 	UpdateCDLogger();
 	return;
@@ -285,6 +306,7 @@ void SaveCDLogFile(){ //todo make this button work before you've saved as
 		return;
 	}
 	fwrite(cdloggerdata,PRGsize[0],1,FP);
+	fwrite(cdloggervdata,CHRsize[0],1,FP);
 	fclose(FP);
 	return;
 }
@@ -315,8 +337,14 @@ void UpdateCDLogger(){
 	if(!hCDLogger)return;
 	
 	char str[50];
-	float fcodecount = codecount, fdatacount = datacount,
-		fundefinedcount = undefinedcount, fromsize = PRGsize[0];
+	float fcodecount = codecount;
+	float fdatacount = datacount;
+	float frendercount = rendercount;
+	float fvromreadcount = vromreadcount;
+	float fundefinedcount = undefinedcount;
+	float fundefinedvromcount = undefinedvromcount;
+	float fromsize = PRGsize[0];
+	float fvromsize = CHRsize[0];
 	
 	sprintf(str,"0x%06x %.2f%%",codecount,fcodecount/fromsize*100);
 	SetDlgItemText(hCDLogger,LBL_CDLOGGER_CODECOUNT,str);
@@ -324,6 +352,13 @@ void UpdateCDLogger(){
 	SetDlgItemText(hCDLogger,LBL_CDLOGGER_DATACOUNT,str);
 	sprintf(str,"0x%06x %.2f%%",undefinedcount,fundefinedcount/fromsize*100);
 	SetDlgItemText(hCDLogger,LBL_CDLOGGER_UNDEFCOUNT,str);
+
+	sprintf(str,"0x%06x %.2f%%",rendercount,frendercount/fvromsize*100);
+	SetDlgItemText(hCDLogger,LBL_CDLOGGER_RENDERCOUNT,str);
+	sprintf(str,"0x%06x %.2f%%",vromreadcount,fvromreadcount/fvromsize*100);
+	SetDlgItemText(hCDLogger,LBL_CDLOGGER_VROMREADCOUNT,str);
+	sprintf(str,"0x%06x %.2f%%",undefinedvromcount,fundefinedvromcount/fvromsize*100);
+	SetDlgItemText(hCDLogger,LBL_CDLOGGER_UNDEFVROMCOUNT,str);
 	return;
 }
 
@@ -414,9 +449,15 @@ void SaveStrippedRom(int invert){ //this is based off of iNesSave()
 				pchar = invert?ROM[i]:0;
 			fputc(pchar, fp);
 		}
-		//fwrite(ROM,0x4000,head.ROM_size,fp);
 
-		if(head.VROM_size)fwrite(VROM,0x2000,head.VROM_size,fp);
+		for(i = 0;i < head.VROM_size*0x2000;i++){
+			unsigned char vchar;
+			if(cdloggervdata[i] & 1)
+				vchar = invert?0:VROM[i];
+			else
+				vchar = invert?VROM[i]:0;
+			fputc(vchar, fp);
+		}
 	}
 	fclose(fp);
 }
