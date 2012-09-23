@@ -38,7 +38,8 @@
 #include  "state.h"
 #include  "video.h"
 #include  "input.h"
-#include "driver.h"
+#include  "driver.h"
+#include  "debug.h"
 
 
 #define VBlankON  (PPU[0]&0x80)   //Generate VBlank NMI
