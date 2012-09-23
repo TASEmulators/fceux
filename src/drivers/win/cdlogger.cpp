@@ -47,19 +47,14 @@ extern uint8 *trainerpoo;
 extern volatile int rendercount, vromreadcount, undefinedvromcount;
 extern unsigned char *cdloggervdata;
 extern int newppu;
+extern uint32 VROM_size;
 
 int CDLogger_wndx=0, CDLogger_wndy=0;
-
-//extern uint8 *ROM;
-//extern uint8 *VROM;
 
 extern uint8 *NSFDATA;
 extern int NSFMaxBank;
 static uint8 NSFLoadLow;
 static uint8 NSFLoadHigh;
-
-//volatile int loggingcodedata;
-//int cdlogger_open;
 
 HWND hCDLogger;
 char loadedcdfile[1024];
@@ -117,11 +112,14 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			hCDLogger = hwndDlg;
 			codecount = datacount = rendercount = vromreadcount = 0;
 			undefinedcount = PRGsize[0];
-			undefinedvromcount = CHRsize[0];
 			cdloggerdata = (unsigned char*)malloc(PRGsize[0]); //mbg merge 7/18/06 added cast
-			cdloggervdata = (unsigned char*)malloc(CHRsize[0]);
 			ZeroMemory(cdloggerdata,PRGsize[0]);
-			ZeroMemory(cdloggervdata,CHRsize[0]);
+			if(VROM_size)
+			{
+				undefinedvromcount = CHRsize[0];
+				cdloggervdata = (unsigned char*)malloc(CHRsize[0]);
+				ZeroMemory(cdloggervdata,CHRsize[0]);
+			}
 			break;
 		case WM_CLOSE:
 		case WM_QUIT:
@@ -147,9 +145,12 @@ MB_OK);
 						case BTN_CDLOGGER_RESET:
 							codecount = datacount = rendercount = vromreadcount = 0;
 							undefinedcount = PRGsize[0];
-							undefinedvromcount = CHRsize[0];
 							ZeroMemory(cdloggerdata,PRGsize[0]);
-							ZeroMemory(cdloggervdata,CHRsize[0]);
+							if(VROM_size)
+							{
+								undefinedvromcount = CHRsize[0];
+								ZeroMemory(cdloggervdata,CHRsize[0]);
+							}
 							UpdateCDLogger();
 							break;
 						case BTN_CDLOGGER_LOAD:
@@ -228,13 +229,16 @@ void LoadCDLog (const char* nameo)
 		cdloggerdata[i] |= j;
 	}
 
-	for(i = 0;i < (int)CHRsize[0];i++){
-		j = fgetc(FP);
-		if(j == EOF)break;
-		if((j & 1) && !(cdloggervdata[i] & 1))rendercount++; //if the new byte has something logged and
-		if((j & 2) && !(cdloggervdata[i] & 2))vromreadcount++; //if the new byte has something logged and
-		if((j & 3) && !(cdloggervdata[i] & 3))undefinedvromcount--; //the appropriate counter.
-		cdloggervdata[i] |= j;
+	if(VROM_size)
+	{
+		for(i = 0;i < (int)CHRsize[0];i++){
+			j = fgetc(FP);
+			if(j == EOF)break;
+			if((j & 1) && !(cdloggervdata[i] & 1))rendercount++; //if the new byte has something logged and
+			if((j & 2) && !(cdloggervdata[i] & 2))vromreadcount++; //if the new byte has something logged and
+			if((j & 3) && !(cdloggervdata[i] & 3))undefinedvromcount--; //the appropriate counter.
+			cdloggervdata[i] |= j;
+		}
 	}
 
 	fclose(FP);
@@ -261,10 +265,7 @@ void LoadCDLogFile(){
 }
 
 void SaveCDLogFileAs(){
-	//don't be stupid
 	const char filter[]="Code Data Log File (*.CDL)\0*.cdl\0All Files (*.*)\0*.*\0\0";
-	//this feature not for select desired file extension for saved filename
-	//this feature only for filter file list only for desired file extension.
 	char nameo[2048]; 
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -273,23 +274,12 @@ void SaveCDLogFileAs(){
 	ofn.lpstrTitle="Save Code Data Log File As...";
 	ofn.lpstrFilter=filter;
 	strcpy(nameo,GetRomName());
-	//don't be stupid, 
 	ofn.lpstrDefExt = "cdl";
-	//do this automatically with system function, it is doing exactly what it written for
-	//why do you need to do this one more time? All we need here, filled extension in dialog window
-	//BEFORE saving it, there is no other options.
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.hwndOwner = hCDLogger;
-	//after that we will get complete file with ext added automatically from DefExt string
-	//change ext in Save Dialog and it will be saved 
 	if(!GetSaveFileName(&ofn))return;
-	//there is bad if something is written AFTER i selectdesired file extension in Save Dialog
-	//when I want NOT to have any extension, it will write me default one, that is stupid,
-	//in addition, this is silently forcing default extension to file, but user didn't know about it at all
-
-	//that's all what needed to work. I checked this and it works exactly what it should
 	strcpy(loadedcdfile,nameo);
 	SaveCDLogFile();
 	return;
@@ -297,8 +287,6 @@ void SaveCDLogFileAs(){
 
 void SaveCDLogFile(){ //todo make this button work before you've saved as
 	FILE *FP;
-	//if(loadedcdfile[0] == 0)SaveCDLogFileAs();
-	//FCEUD_PrintError(loadedcdfile);
 
 	FP = fopen(loadedcdfile,"wb");
 	if(FP == NULL){
@@ -306,7 +294,8 @@ void SaveCDLogFile(){ //todo make this button work before you've saved as
 		return;
 	}
 	fwrite(cdloggerdata,PRGsize[0],1,FP);
-	fwrite(cdloggervdata,CHRsize[0],1,FP);
+	if(VROM_size)
+		fwrite(cdloggervdata,CHRsize[0],1,FP);
 	fclose(FP);
 	return;
 }
@@ -317,17 +306,12 @@ void DoCDLogger()
 		FCEUD_PrintError("You must have a game loaded before you can use the Code Data Logger.");
 		return;
 	}
-	//if (GameInfo->type==GIT_NSF) { //todo: NSF support!
-	//	FCEUD_PrintError("Sorry, you can't yet use the Code Data Logger with NSFs.");
-	//	return;
-	//}
 
 	if(!hCDLogger)
 	{
 		CreateDialog(fceu_hInstance,"CDLOGGER",NULL,CDLoggerCallB);
 	} else
 	{
-		//SetWindowPos(hCDLogger,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 		ShowWindow(hCDLogger, SW_SHOWNORMAL);
 		SetForegroundWindow(hCDLogger);
 	}
@@ -344,7 +328,7 @@ void UpdateCDLogger(){
 	float fundefinedcount = undefinedcount;
 	float fundefinedvromcount = undefinedvromcount;
 	float fromsize = PRGsize[0];
-	float fvromsize = CHRsize[0];
+	float fvromsize = VROM_size ? CHRsize[0] : 1;
 	
 	sprintf(str,"0x%06x %.2f%%",codecount,fcodecount/fromsize*100);
 	SetDlgItemText(hCDLogger,LBL_CDLOGGER_CODECOUNT,str);
@@ -441,7 +425,7 @@ void SaveStrippedRom(int invert){ //this is based off of iNesSave()
 			fwrite(trainerpoo,512,1,fp);
 		}
 
-		for(i = 0;i < head.ROM_size*0x4000;i++){
+		for(i = 0; i < (int)PRGsize[0]; i++){
 			unsigned char pchar;
 			if(cdloggerdata[i] & 3)
 				pchar = invert?0:ROM[i];
@@ -450,13 +434,16 @@ void SaveStrippedRom(int invert){ //this is based off of iNesSave()
 			fputc(pchar, fp);
 		}
 
-		for(i = 0;i < head.VROM_size*0x2000;i++){
-			unsigned char vchar;
-			if(cdloggervdata[i] & 1)
-				vchar = invert?0:VROM[i];
-			else
-				vchar = invert?VROM[i]:0;
-			fputc(vchar, fp);
+		if(VROM_size)
+		{
+			for(i = 0; i < (int)CHRsize[0]; i++){
+				unsigned char vchar;
+				if(cdloggervdata[i] & 1)
+					vchar = invert?0:VROM[i];
+				else
+					vchar = invert?VROM[i]:0;
+				fputc(vchar, fp);
+			}
 		}
 	}
 	fclose(fp);

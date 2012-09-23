@@ -438,10 +438,12 @@ inline void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
 
 volatile int rendercount, vromreadcount, undefinedvromcount, LogAddress = -1;
 unsigned char *cdloggervdata;
+extern uint32 VROM_size;
 
 int GetCHRAddress(int A){
 	int result;
 	if((A > 0x1fff))return -1;
+	if(!VROM_size)return -1;
 	result = &VPage[A>>10][A]-CHRptr[0];
 	if((result > (int)CHRsize[0]) || (result < 0))return -1;
 	else return result;
