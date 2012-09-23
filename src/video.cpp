@@ -194,10 +194,10 @@ void FCEU_PutImage(void)
 		//Some messages need to be displayed before the avi is dumped
 		DrawMessage(true);
 
-		#ifdef _S9XLUA_H
-		//Lua gui should draw before the avi is dumped.
+#ifdef _S9XLUA_H
+		// Lua gui should draw before the avi is dumped.
 		FCEU_LuaGui(XBuf);
-		#endif
+#endif
 
 		//Save snapshot
 		if(dosnapsave==1)

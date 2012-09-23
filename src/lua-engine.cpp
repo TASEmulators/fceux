@@ -230,7 +230,8 @@ static const char* toCString(lua_State* L, int idx=0);
 /**
  * Resets emulator speed / pause states after script exit.
  */
-static void FCEU_LuaOnStop() {
+static void FCEU_LuaOnStop() 
+{
 	luaRunning = FALSE;
 	for (int i = 0 ; i < 4 ; i++ ){
 		luajoypads1[i]= 0xFF;	// Set these back to pass-through
@@ -5418,9 +5419,9 @@ void CallExitFunction() {
 		HandleCallbackError(L);
 }
 
-void FCEU_LuaFrameBoundary() {
-
-//	printf("Lua Frame\n");
+void FCEU_LuaFrameBoundary()
+{
+	//printf("Lua Frame\n");
 
 	// HA!
 	if (!L || !luaRunning)
@@ -5738,15 +5739,14 @@ int FCEU_LuaRerecordCountSkip() {
 	return L && luaRunning && skipRerecords;
 }
 
-
 /**
  * Given an 8-bit screen with the indicated resolution,
  * draw the current GUI onto it.
  *
  * Currently we only support 256x* resolutions.
  */
-void FCEU_LuaGui(uint8 *XBuf) {
-
+void FCEU_LuaGui(uint8 *XBuf)
+{
 	if (!L/* || !luaRunning*/)
 		return;
 
@@ -5777,14 +5777,24 @@ void FCEU_LuaGui(uint8 *XBuf) {
 	if (gui_used == GUI_CLEAR)
 		return;
 
+	if (gui_used == GUI_USED_SINCE_LAST_FRAME && !FCEUI_EmulationPaused())
+	{
+		memset(gui_data, 0, LUA_SCREEN_WIDTH*LUA_SCREEN_HEIGHT*4);
+		gui_used = GUI_CLEAR;
+		return;
+	}
+
 	gui_used = GUI_USED_SINCE_LAST_FRAME;
 
 	int x, y;
 
-	for (y = 0; y < LUA_SCREEN_HEIGHT; y++) {
-		for (x=0; x < LUA_SCREEN_WIDTH; x++) {
+	for (y = 0; y < LUA_SCREEN_HEIGHT; y++)
+	{
+		for (x=0; x < LUA_SCREEN_WIDTH; x++)
+		{
 			const uint8 gui_alpha = gui_data[(y*LUA_SCREEN_WIDTH+x)*4+3];
-			if (gui_alpha == 0) {
+			if (gui_alpha == 0)
+			{
 				// do nothing
 				continue;
 			}

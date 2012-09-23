@@ -37,6 +37,7 @@ Name* ramBankNames = 0;
 int lastBank = -1;
 int loadedBank = -1;
 extern char LoadedRomFName[2048];
+char NLfilename[2048];
 char symbDebugEnabled = 0;
 int debuggerWasActive = 0;
 
@@ -538,76 +539,60 @@ Name* searchNode(Name* node, const char* offs)
 void loadNameFiles()
 {
 	int cb;
-	char* fn = (char*)malloc(strlen(LoadedRomFName) + 20);
 
 	if (ramBankNames)
 		free(ramBankNames);
 		
 	// The NL file for the RAM addresses has the name nesrom.nes.ram.nl
-	strcpy(fn, LoadedRomFName);
-	strcat(fn, ".ram.nl");
+	strcpy(NLfilename, LoadedRomFName);
+	strcat(NLfilename, ".ram.nl");
 
 	// Load the address descriptions for the RAM addresses
-	ramBankNames = parseNameFile(fn);
+	ramBankNames = parseNameFile(NLfilename);
 			
-	free(fn);
-
 	// Find out which bank is loaded at 0xC000
 	cb = getBank(0xC000);
-	
 	if (cb == -1) // No bank was loaded at that offset
 	{
 		free(lastBankNames);
 		lastBankNames = 0;
-	}
-	else if (cb != lastBank)
+	} else if (cb != lastBank)
 	{
-		char* fn = (char*)malloc(strlen(LoadedRomFName) + 12);
-
 		// If the bank changed since loading the NL files the last time it's necessary
 		// to load the address descriptions of the new bank.
-		
 		lastBank = cb;
 
 		// Get the name of the NL file
-		sprintf(fn, "%s.%X.nl", LoadedRomFName, lastBank);
+		sprintf(NLfilename, "%s.%X.nl", LoadedRomFName, lastBank);
 
 		if (lastBankNames)
 			freeList(lastBankNames);
 
 		// Load new address definitions
-		lastBankNames = parseNameFile(fn);
-				
-		free(fn);
+		lastBankNames = parseNameFile(NLfilename);
 	}
 	
 	// Find out which bank is loaded at 0x8000
 	cb = getBank(0x8000);
-	
 	if (cb == -1) // No bank is loaded at that offset
 	{
 		free(loadedBankNames);
 		loadedBankNames = 0;
-	}
-	else if (cb != loadedBank)
+	} else if (cb != loadedBank)
 	{
-		char* fn = (char*)malloc(strlen(LoadedRomFName) + 12);
-
 		// If the bank changed since loading the NL files the last time it's necessary
 		// to load the address descriptions of the new bank.
 		
 		loadedBank = cb;
 		
 		// Get the name of the NL file
-		sprintf(fn, "%s.%X.nl", LoadedRomFName, loadedBank);
+		sprintf(NLfilename, "%s.%X.nl", LoadedRomFName, loadedBank);
 		
 		if (loadedBankNames)
 			freeList(loadedBankNames);
 			
 		// Load new address definitions
-		loadedBankNames = parseNameFile(fn);
-				
-		free(fn);
+		loadedBankNames = parseNameFile(NLfilename);
 	}
 }
 

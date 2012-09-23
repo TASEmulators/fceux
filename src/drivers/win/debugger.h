@@ -33,7 +33,7 @@ int GetEditHex(HWND hwndDlg, int id);
 extern void AddBreakList();
 extern char* BreakToText(unsigned int num);
 
-void UpdateDebugger();
+void UpdateDebugger(bool jump_to_pc = true);
 void DoDebug(uint8 halt);
 void DebuggerExit();
 

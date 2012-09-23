@@ -448,9 +448,7 @@ void FCEUD_TraceInstruction()
 
 		if (logging_options & LOG_SYMBOLIC)
 		{
-			loadNameFiles();
-
-			// Insert Name and Comment line if needed
+			// Insert Name and Comment lines if needed
 			str_decoration[0] = 0;
 			decorateAddress(X.PC, str_decoration);
 			if (str_decoration[0])
@@ -467,7 +465,6 @@ void FCEUD_TraceInstruction()
 					end_pos = strstr(end_pos, "\r");
 				}
 			}
-
 			replaceNames(ramBankNames, a);
 			replaceNames(loadedBankNames, a);
 			replaceNames(lastBankNames, a);
@@ -479,7 +476,7 @@ void FCEUD_TraceInstruction()
 	//stretch the disassembly string out if we have to output other stuff.
 	if ((logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)) && !(logging_options & LOG_TO_THE_LEFT))
 	{
-		for(j = strlen(str_disassembly);j < LOG_DISASSEMBLY_MAX_LEN - 1;j++)
+		for (j = strlen(str_disassembly); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
 			str_disassembly[j] = ' ';
 		str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
 	}
@@ -618,6 +615,10 @@ void UpdateLogWindow(void)
 	if (tracesi.nPos < tracesi.nMin)
 		tracesi.nPos = tracesi.nMin;
 	SetScrollInfo(GetDlgItem(hTracer,IDC_SCRL_TRACER_LOG),SB_CTL,&tracesi,TRUE);
+
+	if (logging_options & LOG_SYMBOLIC)
+		loadNameFiles();
+
 	UpdateLogText();
 
 	return;

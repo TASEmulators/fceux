@@ -21,7 +21,7 @@
 // Disassembly - 63
 // EOL (/0) - 1
 // ------------------------
-// 150 symbols total
+// 128 symbols total
 #define LOG_AXYSTATE_MAX_LEN 21
 #define LOG_PROCSTATUS_MAX_LEN 12
 #define LOG_TABS_MASK 31

@@ -20,8 +20,8 @@
  
 #include <windows.h>
 
-#define NL_MAX_NAME_LEN 50
-#define NL_MAX_MULTILINE_COMMENT_LEN 1024
+#define NL_MAX_NAME_LEN 30
+#define NL_MAX_MULTILINE_COMMENT_LEN 1000
 
 //mbg merge 7/17/06 made struct sane c++
 struct Name 
