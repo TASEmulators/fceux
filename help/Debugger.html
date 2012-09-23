@@ -119,7 +119,7 @@
 <p><br/></p>
 <p>The current PPU memory address, sprite memory address, scanline, and rendering pixel are displayed below the stack and status flags.</p>
 <p><br/></p>
-<p>Examples of Scanline number: -1 it means Prerender time, 240 is Idle scanline, 0-239 are visible scanlines, 241-260/310 are VBlank scanlines.</p>
+<p><span class="rvts15">Examples of Scanline number:</span> -1 it means Prerender time, 240 is Idle scanline, 0-239 are visible scanlines, 241-260/310 are VBlank scanlines.</p>
 <p><br/></p>
 <p>To the right from PPU section there's Cycles counter and Instructions counter that keep counting while the game is running. You can use the information for keeping statistics, for code profiling or writing PPU-synchronized code (e.g. raster effects). You can also make the debugger break automatically based on the counters values. The "Reset counters" button resets both counters to 0.</p>
 <p><br/></p>
@@ -149,9 +149,11 @@
 <p><br/></p>
 <p>When debugging an NSF program, the bank designation will be a 4k NSF bank instead of the 16k iNES bank.</p>
 <p><br/></p>
-<p>A single instruction may be one to three bytes, and will all appear on the line before the assembly code description of that instruction. An instruction with "= #$xx" at the end indicates the value currently in memory at the address referenced by the instruction (before it executes).</p>
+<p>A single instruction may be one to three bytes, and will all appear on the line before the assembly code description of that instruction. An instruction with "= #$xx" at the end indicates the value currently in memory at the address referenced by the instruction.</p>
 <p><br/></p>
-<p>There is an empty column to the left of the memory view. Hovering the mouse here will display at the bottom of the window more detailed information about the location of this code in the iNES file. Left clicking on this column will open the Inline Assembler, which allows you to patch the ROM at runtime. Right clicking on this column will open the Hex Editor, which allows you to directly edit the ROM. Middle-clicking on this column will bring up the <a class="rvts18" href="GameGenieEncoderDecoder.html">Game Genie Encoder</a> at that address, so you can easily make Game Genie codes.</p>
+<p>Hovering the mouse over the disassembly will display at the bottom of the window more detailed information about the location of this code in the iNES file.</p>
+<p><br/></p>
+<p>There is an empty column to the left of the memory view. Left clicking on this column will open the Inline Assembler, which allows you to patch the ROM at runtime. Right clicking on this column will open the Hex Editor, which allows you to directly edit the ROM. Middle-clicking on this column will bring up the <a class="rvts18" href="GameGenieEncoderDecoder.html">Game Genie Encoder</a> at that address, so you can easily make Game Genie codes.</p>
 <p><br/></p>
 <p><br/></p>
 <p><span class="rvts45">Breakpoints</span></p>
@@ -166,7 +168,7 @@
 <p><br/></p>
 <p>A special kind of breakpoints with the Forbid option will prevent any breakpoints from occurring within the specified memory address range. This can be enabled and disabled like other breakpoints.</p>
 <p><br/></p>
-<p>A quicker way to add PC breakpoints is to double click on the Disassembly where you want to set the breakpoint. Example: when you need to quickly advance emulation to a given line of code, doubleclick on the line in Disassembly window, and the "Add Execute breakpoint here" dialog will appear, click "OK" and then hit "Run", Debugger will break at this line of code.</p>
+<p>A quicker way to add PC breakpoints is to double click on any address in the Disassembly when you want to set the breakpoint to that address. <span class="rvts15">Example:</span> when you need to quickly advance emulation to a given line of code, double-click on the address part of the line, and the "Add Execute breakpoint here" dialog will appear, click "OK" and then hit "Run", Debugger will break at this line of code.</p>
 <p><br/></p>
 <p>There is also an option to "Break on Bad Opcode" which will halt execution if a bad instruction opcode is reached.</p>
 <p><br/></p>
@@ -217,7 +219,7 @@
 <p><br/></p>
 <p>Connecting operators || or &amp;&amp; combine boolean terms. Parentheses dictate order of operations.</p>
 <p><br/></p>
-<p>Example conditions:</p>
+<p><span class="rvts15">Example conditions:</span></p>
 <p><br/></p>
 <p>Break if register A is less than value at memory address $0005:</p>
 <p><span class="rvts46">A &lt; $0005</span></p>
@@ -252,8 +254,8 @@
 <p><br/></p>
 <p>This feature makes it possible to rename addresses in the disassembly window (e.g. $C022) to easily understandable names (e.g. AddHealthpoints). You can also add comments to lines in the disassembly window. You can enable symbolic debugging by clicking the checkbox "Symbolic Debugging".</p>
 <p><br/></p>
-<p>To use this feature, create name list files (Filename should be like this: *.(bank).nl / *.ram.nl, Example: NES Test Cart (PD).nes.0.nl, NES Test Cart (PD).nes.ram.nl) which contain all names and comments you wish to display in the disassembly window. These are ASCII files.</p>
-<p>Example of contents of a NL file:</p>
+<p>To use this feature, create name list files (Filename should be like this: *.(bank).nl / *.ram.nl, <span class="rvts15">Example:</span> NES Test Cart (PD).nes.0.nl, NES Test Cart (PD).nes.ram.nl) which contain all names and comments you wish to display in the disassembly window. These are ASCII files.</p>
+<p><span class="rvts15">Example of contents of a NL file:</span></p>
 <p><br/></p>
 <p>$C000#NewName1#Comment1</p>
 <p>$C002##Comment2</p>
