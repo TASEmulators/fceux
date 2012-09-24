@@ -70,6 +70,7 @@ void RECORDER::init()
 void RECORDER::reset()
 {
 	movie_readonly = true;
+	state_was_loaded_in_readwrite_mode = false;
 	multitrack_recording_joypad = MULTITRACK_RECORDING_ALL;
 	pattern_offset = 0;
 	must_increase_pattern_offset = false;
@@ -121,6 +122,8 @@ void RECORDER::update()
 	{
 		Button_SetCheck(hwndRecCheckbox, movie_readonly?BST_UNCHECKED : BST_CHECKED);
 		old_movie_readonly = movie_readonly;
+		if (movie_readonly)
+			state_was_loaded_in_readwrite_mode = false;
 	}
 	// reset pattern_offset if current_pattern has changed
 	if (old_current_pattern != taseditor_config.current_pattern)

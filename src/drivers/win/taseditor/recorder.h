@@ -35,6 +35,7 @@ public:
 	int multitrack_recording_joypad;
 	int pattern_offset;
 	std::vector<uint8> current_joy;
+	bool state_was_loaded_in_readwrite_mode;
 
 private:
 	int old_multitrack_recording_joypad;

@@ -616,78 +616,127 @@ void breakpoint()
 		case 0x60: stackopstartaddr=X.S+1; stackopendaddr=X.S+2; stackop=WP_R; StackAddrBackup = X.S; StackNextIgnorePC=(GetMem(stackopstartaddr|0x0100)|GetMem(stackopendaddr|0x0100)<<8)+1; break;
 	}
 
-	for (i = 0; i < numWPs; i++) {
+	for (i = 0; i < numWPs; i++)
+	{
 // ################################## Start of SP CODE ###########################
-		if (condition(&watchpoint[i]))
+		if ((watchpoint[i].flags & WP_E) && condition(&watchpoint[i]))
 		{
 // ################################## End of SP CODE ###########################
-			if (watchpoint[i].flags & BT_P) { //PPU Mem breaks
-				if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & brk_type) && ((A >= 0x2000) && (A < 0x4000)) && ((A&7) == 7)) {
-					if (watchpoint[i].endaddress) {
-						if ((watchpoint[i].address <= RefreshAddr) && (watchpoint[i].endaddress >= RefreshAddr)) BreakHit(i);
+			if (watchpoint[i].flags & BT_P)
+			{
+				// PPU Mem breaks
+				if ((watchpoint[i].flags & brk_type) && ((A >= 0x2000) && (A < 0x4000)) && ((A&7) == 7))
+				{
+					if (watchpoint[i].endaddress)
+					{
+						if ((watchpoint[i].address <= RefreshAddr) && (watchpoint[i].endaddress >= RefreshAddr))
+							BreakHit(i);
+					} else
+					{
+						if (watchpoint[i].address == RefreshAddr)
+							BreakHit(i);
 					}
-					else if (watchpoint[i].address == RefreshAddr) BreakHit(i);
 				}
-			}
-			else if (watchpoint[i].flags & BT_S) { //Sprite Mem breaks
-				if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & brk_type) && ((A >= 0x2000) && (A < 0x4000)) && ((A&7) == 4)) {
-					if (watchpoint[i].endaddress) {
-						if ((watchpoint[i].address <= PPU[3]) && (watchpoint[i].endaddress >= PPU[3])) BreakHit(i);
+			} else if (watchpoint[i].flags & BT_S)
+			{
+				// Sprite Mem breaks
+				if ((watchpoint[i].flags & brk_type) && ((A >= 0x2000) && (A < 0x4000)) && ((A&7) == 4))
+				{
+					if (watchpoint[i].endaddress)
+					{
+						if ((watchpoint[i].address <= PPU[3]) && (watchpoint[i].endaddress >= PPU[3]))
+							BreakHit(i);
+					} else
+					{
+						if (watchpoint[i].address == PPU[3])
+						BreakHit(i);
 					}
-					else if (watchpoint[i].address == PPU[3]) BreakHit(i);
+				} else if ((watchpoint[i].flags & WP_W) && (A == 0x4014))
+				{
+					// Sprite DMA! :P
+					BreakHit(i);
 				}
-				else if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & WP_W) && (A == 0x4014)) BreakHit(i); //Sprite DMA! :P
-			}
-			else { //CPU mem breaks
-				if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & brk_type)) {
-					if (watchpoint[i].endaddress) {
+			} else
+			{
+				// CPU mem breaks
+				if ((watchpoint[i].flags & brk_type))
+				{
+					if (watchpoint[i].endaddress)
+					{
 						if (((watchpoint[i].flags & (WP_R | WP_W)) && (watchpoint[i].address <= A) && (watchpoint[i].endaddress >= A)) ||
-							((watchpoint[i].flags & WP_X) && (watchpoint[i].address <= _PC) && (watchpoint[i].endaddress >= _PC))) BreakHit(i);
+							((watchpoint[i].flags & WP_X) && (watchpoint[i].address <= _PC) && (watchpoint[i].endaddress >= _PC)))
+							BreakHit(i);
+					} else
+					{
+						if (((watchpoint[i].flags & (WP_R | WP_W)) && (watchpoint[i].address == A)) ||
+							((watchpoint[i].flags & WP_X) && (watchpoint[i].address == _PC)))
+							BreakHit(i);
 					}
-					else if (((watchpoint[i].flags & (WP_R | WP_W)) && (watchpoint[i].address == A)) ||
-							((watchpoint[i].flags & WP_X) && (watchpoint[i].address == _PC))) BreakHit(i);
-				}
-				else if (watchpoint[i].flags & WP_E) {
-					//brk_type independant coding
-
-					if (stackop>0) {
-						//Announced stack mem breaks
-						//PHA, PLA, PHP, and PLP affect the stack data.
-						//TXS and TSX only deal with the pointer.
-						if (watchpoint[i].flags & stackop) {
-							for (j = (stackopstartaddr|0x0100); j <= (stackopendaddr|0x0100); j++) {
-								if (watchpoint[i].endaddress) {
-									if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j)) BreakHit(i);
+				} else
+				{
+					// brk_type independant coding
+					if (stackop > 0)
+					{
+						// Announced stack mem breaks
+						// PHA, PLA, PHP, and PLP affect the stack data.
+						// TXS and TSX only deal with the pointer.
+						if (watchpoint[i].flags & stackop)
+						{
+							for (j = (stackopstartaddr|0x0100); j <= (stackopendaddr|0x0100); j++)
+							{
+								if (watchpoint[i].endaddress)
+								{
+									if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j))
+										BreakHit(i);
+								} else
+								{
+									if (watchpoint[i].address == j)
+										BreakHit(i);
 								}
-								else if (watchpoint[i].address == j) BreakHit(i);
 							}
 						}
 					}
-					if (StackNextIgnorePC==_PC) {
-						//Used to make it ignore the unannounced stack code one time
+					if (StackNextIgnorePC == _PC)
+					{
+						// Used to make it ignore the unannounced stack code one time
 						StackNextIgnorePC = 0xFFFF;
 					} else 
 					{
-						if ((X.S < StackAddrBackup) && (stackop==0)) {
-							//Unannounced stack mem breaks
-							//Pushes to stack
-							if (watchpoint[i].flags & WP_W) {
-								for (j = (X.S|0x0100); j < (StackAddrBackup|0x0100); j++) {
-									if (watchpoint[i].endaddress) {
-										if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j)) BreakHit(i);
+						if ((X.S < StackAddrBackup) && (stackop==0))
+						{
+							// Unannounced stack mem breaks
+							// Pushes to stack
+							if (watchpoint[i].flags & WP_W)
+							{
+								for (j = (X.S|0x0100); j < (StackAddrBackup|0x0100); j++)
+								{
+									if (watchpoint[i].endaddress)
+									{
+										if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j))
+											BreakHit(i);
+									} else
+									{
+										if (watchpoint[i].address == j)
+											BreakHit(i);
 									}
-									else if (watchpoint[i].address == j) BreakHit(i);
 								}
 							}
-						}
-						else if ((StackAddrBackup < X.S) && (stackop==0)) {
-							//Pulls from stack
-							if (watchpoint[i].flags & WP_R) {
-								for (j = (StackAddrBackup|0x0100); j < (X.S|0x0100); j++) {
-									if (watchpoint[i].endaddress) {
-										if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j)) BreakHit(i);
+						} else if ((StackAddrBackup < X.S) && (stackop==0))
+						{
+							// Pulls from stack
+							if (watchpoint[i].flags & WP_R)
+							{
+								for (j = (StackAddrBackup|0x0100); j < (X.S|0x0100); j++)
+								{
+									if (watchpoint[i].endaddress)
+									{
+										if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j))
+											BreakHit(i);
+									} else
+									{
+										if (watchpoint[i].address == j)
+											BreakHit(i);
 									}
-									else if (watchpoint[i].address == j) BreakHit(i);
 								}
 							}
 						}

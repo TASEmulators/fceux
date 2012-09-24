@@ -76,7 +76,7 @@ void BRANCHES::init()
 	hOldBitmap1 = (HBITMAP)SelectObject(hBufferDC, buffer_hbitmap);
 	normal_brush = CreateSolidBrush(0x000000);
 	border_brush = CreateSolidBrush(0xb99d7f);
-	selected_slot_brush = CreateSolidBrush(0x6161E4);
+	selected_slot_brush = CreateSolidBrush(0x5656CA);
 	// prepare bg gradient
 	vertex[0].x     = 0;
 	vertex[0].y     = 0;

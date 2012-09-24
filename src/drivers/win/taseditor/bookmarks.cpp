@@ -32,6 +32,7 @@ extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
 extern POPUP_DISPLAY popup_display;
 extern PLAYBACK playback;
+extern RECORDER recorder;
 extern SELECTION selection;
 extern GREENZONE greenzone;
 extern TASEDITOR_PROJECT project;
@@ -398,6 +399,7 @@ void BOOKMARKS::jump(int slot)
 
 void BOOKMARKS::deploy(int slot)
 {
+	recorder.state_was_loaded_in_readwrite_mode = true;
 	if (taseditor_config.old_branching_controls && movie_readonly)
 	{
 		jump(slot);

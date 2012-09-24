@@ -801,7 +801,7 @@ void ApplyMovieInputConfig()
 // this getter contains formula to decide whether to record or replay movie
 bool TaseditorIsRecording()
 {
-	if (movie_readonly || playback.GetPauseFrame() >= 0)
+	if (movie_readonly || playback.GetPauseFrame() >= 0 || (taseditor_config.old_branching_controls && !recorder.state_was_loaded_in_readwrite_mode))
 		return false;		// replay
 	return true;			// record
 }
