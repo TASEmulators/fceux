@@ -410,7 +410,6 @@ void FCEUD_TraceInstruction()
 			return;
 		}
 	}
-	sprintf(str_address, "$%04X:", addr);
 
 	size = opsize[GetMem(addr)];
 	if ((addr+size) > 0xFFFF)
@@ -427,10 +426,21 @@ void FCEUD_TraceInstruction()
 				sprintf(str_disassembly,"UNDEFINED");
 				break;
 			case 1:
+			{
 				opcode[0]=GetMem(addr++);
 				sprintf(str_data, "%02X        ", opcode[0]);
 				a = Disassemble(addr, opcode);
+				// special case: an RTS opcode
+				if (opcode[0] == 0x60)
+				{
+					// add the beginning address of the subroutine that we exit from
+					unsigned int caller_addr = GetMem(((X.S) + 1)|0x0100) + (GetMem(((X.S) + 2)|0x0100) << 8) - 0x2;
+					unsigned int call_addr = GetMem(caller_addr + 1) + (GetMem(caller_addr + 2) << 8);
+					sprintf(str_decoration, " (from $%04X)", call_addr);
+					strcat(a, str_decoration);
+				}
 				break;
+			}
 			case 2:
 				opcode[0]=GetMem(addr++);
 				opcode[1]=GetMem(addr++);
@@ -473,12 +483,24 @@ void FCEUD_TraceInstruction()
 		strcpy(str_disassembly, a);
 
 	}
-	//stretch the disassembly string out if we have to output other stuff.
-	if ((logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)) && !(logging_options & LOG_TO_THE_LEFT))
+
+	// special case: an RTS opcode
+	if (size == 1 && GetMem(addr - 1) == 0x60)
 	{
-		for (j = strlen(str_disassembly); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
-			str_disassembly[j] = ' ';
+		// add "----------" to emphasize the end of subroutine
+		strcat(str_disassembly, " ");
+		for (int j = strlen(str_disassembly); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
+			str_disassembly[j] = '-';
 		str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+	} else
+	{
+		// stretch the disassembly string out if we have to output other stuff.
+		if ((logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)) && !(logging_options & LOG_TO_THE_LEFT))
+		{
+			for (j = strlen(str_disassembly); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
+				str_disassembly[j] = ' ';
+			str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+		}
 	}
 
 	// Start filling the str_temp line: Frame number, AXYS state, Processor status, Tabs, Address, Data, Disassembly
@@ -530,6 +552,7 @@ void FCEUD_TraceInstruction()
 		strcat(str_temp, str_tabs);
 	}
 
+	sprintf(str_address, "$%04X:", X.PC);
 	strcat(str_temp, str_address);
 	strcat(str_temp, str_data);
 	strcat(str_temp, str_disassembly);

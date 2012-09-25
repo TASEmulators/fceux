@@ -1001,6 +1001,10 @@ void FCEUMOV_AddInputState()
 		if(currFrameCounter >= (int)currMovieData.records.size())
 		{
 			FinishPlayback();
+			//tell all drivers to poll input and set up their logical states
+			for(int port=0;port<2;port++)
+				joyports[port].driver->Update(port,joyports[port].ptr,joyports[port].attrib);
+			portFC.driver->Update(portFC.ptr,portFC.attrib);
 		}
 		else
 		{

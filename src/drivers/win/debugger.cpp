@@ -357,6 +357,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 	char chr[40] = {0};
 	int size;
 	uint8 opcode[3];
+	unsigned int instruction_addr;
 
 	disassembly_addresses.resize(0);
 	
@@ -380,6 +381,8 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 	{
 		// PC pointer
 		if (addr > 0xFFFF) break;
+
+		instruction_addr = addr;
 
 // ################################## Start of SP CODE ###########################
 
@@ -440,8 +443,10 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 		} else
 		{
 			char* a;
-			if ((addr+size) > 0x10000) { //should this be 0xFFFF?
-				while (addr < 0x10000) {
+			if ((addr + size) > 0xFFFF)
+			{
+				while (addr < 0xFFFF)
+				{
 					sprintf(chr, "%02X        OVERFLOW\r\n", GetMem(addr++));
 					strcat(debug_str, chr);
 				}
@@ -471,6 +476,17 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 			
 // ################################## End of SP CODE ###########################
 
+			// special case: an RTS opcode
+			if (GetMem(instruction_addr) == 0x60)
+			{
+				// add "----------" to emphasize the end of subroutine
+				strcat(a, " ");
+				for (int j = strlen(a); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
+					a[j] = '-';
+				a[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+			}
+
+			// append the disassembly to current line
 			strcat(strcat(debug_str, " "), a);
 		}
 		strcat(debug_str, "\r\n");
@@ -786,7 +802,7 @@ void UpdateDebugger(bool jump_to_pc)
 			tmp++;
 			if (tmp > 0x1FF)
 				break;
-			if ((i%4) == 0)
+			if ((i & 3) == 0)
 				sprintf(chr, ",\r\n%02X", GetMem(tmp));
 			else
 				sprintf(chr, ",%02X", GetMem(tmp));
@@ -1260,7 +1276,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 			// set the selection cursor
 			CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, WM_LBUTTONDOWN, wParam, lParam);
 			// debug_str contains the text in the disassembly window
-			DWORD sel_start, sel_end;
+			int sel_start, sel_end;
 			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
 			// find the ":" or "$" before sel_start
 			int i = sel_start - 1;
@@ -1295,7 +1311,6 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 		}
 		case WM_MOUSEMOVE:
 		{
-			RECT wrect;
 			char str[256] = {0}, *ptr, dotdot[4];
 			int tmp, i;
 			int mouse_x, mouse_y;
@@ -1336,8 +1351,8 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	RECT wrect;
-	char str[256] = {0}, *ptr, dotdot[4];
-	int tmp,tmp2;
+	char str[256] = {0};
+	int tmp;
 	int mouse_x, mouse_y;
 	int i;
 
