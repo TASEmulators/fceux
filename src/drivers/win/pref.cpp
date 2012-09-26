@@ -22,10 +22,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "debuggersp.h"
-#include "memviewsp.h"
 #include "common.h"
 #include "debugger.h"
+#include "debuggersp.h"
+#include "memviewsp.h"
 #include "../../debug.h"
 
 extern bool break_on_cycles;
@@ -44,15 +44,25 @@ extern char symbDebugEnabled;
 int storeDebuggerPreferences(FILE* f)
 {
 	int i;
+	unsigned int size, len;
 	uint8 tmp;
 
 	// Flag that says whether symbolic debugging should be enabled
 	if (fwrite(&symbDebugEnabled, 1, 1, f) != 1) return 1;
 
-	// Write the number of active CPU bookmarks
-	if (fwrite(&bookmarks, sizeof(unsigned int), 1, f) != 1) return 1;
-	// Write the addresses of those bookmarks
-	if (fwrite(bookmarkData, sizeof(unsigned short), bookmarks, f) != bookmarks) return 1;
+	// Write the number of CPU bookmarks
+	size = bookmarks_addr.size();
+	bookmarks_name.resize(size);
+	if (fwrite(&size, sizeof(unsigned int), 1, f) != 1) return 1;
+	// Write the data of those bookmarks
+	char buffer[256];
+	for (i = 0; i < (int)size; ++i)
+	{
+		if (fwrite(&bookmarks_addr[i], sizeof(unsigned int), 1, f) != 1) return 1;
+		len = bookmarks_name[i].size();
+		if (fwrite(&len, sizeof(unsigned int), 1, f) != 1) return 1;
+		if (fwrite(bookmarks_name[i].c_str(), 1, len, f) != len) return 1;
+	}
 
 	// Write all breakpoints
 	for (i=0;i<65;i++)
@@ -204,18 +214,11 @@ int storePreferences(char* romname)
 
 void DoDebuggerDataReload()
 {
-	if (debuggerSaveLoadDEBFiles == false) {
+	if (debuggerSaveLoadDEBFiles == false)
 		return;
-	}
 	
 	extern HWND hDebug;
 	LoadGameDebuggerData(hDebug);
-	
-//	if (wasinDebugger){
-//		DebuggerExit();
-//		DoDebug(0);
-//	}
-
 }
 
 int myNumWPs = 0;
@@ -229,25 +232,29 @@ int loadDebugDataFailed = 0;
 **/	
 int loadDebuggerPreferences(FILE* f)
 {
-	unsigned int i;
+	unsigned int i, size, len;
 	uint8 tmp;
 
 	// Read flag that says if symbolic debugging is enabled
 	if (fread(&symbDebugEnabled, sizeof(symbDebugEnabled), 1, f) != 1) return 1;
 	
 	// Read the number of CPU bookmarks
-	if (fread(&bookmarks, sizeof(bookmarks), 1, f) != 1) return 1;
-	
-	bookmarkData = (unsigned short*)malloc(bookmarks * sizeof(unsigned short));
-	
-	// Read the offsets of the bookmarks
-	for (i=0;i<bookmarks;i++)
+	if (fread(&size, sizeof(unsigned int), 1, f) != 1) return 1;
+	bookmarks_addr.resize(size);
+	bookmarks_name.resize(size);
+	// Read the data of those bookmarks
+	char buffer[256];
+	for (i = 0; i < (int)size; ++i)
 	{
-		if (fread(&bookmarkData[i], sizeof(bookmarkData[i]), 1, f) != 1) return 1;
+		if (fread(&bookmarks_addr[i], sizeof(unsigned int), 1, f) != 1) return 1;
+		if (fread(&len, sizeof(unsigned int), 1, f) != 1) return 1;
+		if (len >= 256) return 1;
+		if (fread(&buffer, 1, len, f) != len) return 1;
+		buffer[len] = 0;
+		bookmarks_name[i] = buffer;
 	}
-	
+
 	myNumWPs = 0;
-	
 	// Ugetab:
 	// This took far too long to figure out...
 	// Nullifying the data is better than using free(), because
@@ -349,7 +356,8 @@ int loadHexPreferences(FILE* f)
 	int i;
 
 	// Read number of bookmarks
-	fread(&nextBookmark, sizeof(nextBookmark), 1, f);
+	if (fread(&nextBookmark, sizeof(nextBookmark), 1, f) != 1) return 1;
+	if (nextBookmark >= 64) return 1;
 
 	for (i=0;i<nextBookmark;i++)
 	{
@@ -391,10 +399,22 @@ int loadPreferences(char* romname)
 	f = fopen(filename, "rb");
 	free(filename);
 	
-	result = f ? loadDebuggerPreferences(f) || loadHexPreferences(f) : 0;
-
-	if (f) {
+	if (f)
+	{
+		result = loadDebuggerPreferences(f) || loadHexPreferences(f);
+		if (result)
+		{
+			// there was error when loading the .deb, reset the data to default
+			DeleteAllDebuggerBookmarks();
+			myNumWPs = 0;
+			break_on_instructions = break_on_cycles = FCEUI_Debugger().badopbreak = false;
+			break_instructions_limit = break_cycles_limit = 0;
+			nextBookmark = 0;
+		}
 		fclose(f);
+	} else
+	{
+		result = 0;
 	}
 
 	// This prevents information from traveling between debugger interations.

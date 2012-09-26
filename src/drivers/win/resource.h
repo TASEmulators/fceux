@@ -153,6 +153,8 @@
 #define CHEAT_CONTEXT_POKECHEATVALUE    118
 #define IDC_DEBUGGER_RESET_ON_BP0       118
 #define IDC_CHECK_LOG_STATUSES_TO_THE_LEFT 118
+#define IDC_DEBUGGER_BOOKMARK_DEL2      118
+#define IDC_DEBUGGER_BOOKMARK_NAME      118
 #define CHEAT_CONTEXT_GOTOINHEXEDITOR   119
 #define IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS 119
 #define IDC_CHECK_LOG_FRAME_NUMBER      119
@@ -1140,6 +1142,7 @@
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
+#define IDC_BOOKMARK_NAME_TEXT          65535
 
 // Next default values for new objects
 // 

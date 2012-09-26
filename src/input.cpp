@@ -662,6 +662,7 @@ void ToggleFullscreen();
 static void TaseditorRewindOn(void);
 static void TaseditorRewindOff(void);
 static void TaseditorCommand(void);
+extern void FCEUI_ToggleShowFPS();
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
 {
@@ -792,6 +793,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_TASEDITOR_SWITCH_AUTORESTORING,		EMUCMDTYPE_TASEDITOR,	TaseditorCommand, 0, 0, "Switch Auto-restore last position", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_TASEDITOR_SWITCH_MULTITRACKING,		EMUCMDTYPE_TASEDITOR,	TaseditorCommand, 0, 0, "Switch current Multitracking mode", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_TASEDITOR_RUN_MANUAL_LUA,		EMUCMDTYPE_TASEDITOR,	TaseditorCommand, 0, 0, "Run Manual Lua function", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_FPS_DISPLAY_TOGGLE,			EMUCMDTYPE_MISC,	FCEUI_ToggleShowFPS, 0, 0, "Toggle FPS Display", EMUCMDFLAG_TASEDITOR },
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))

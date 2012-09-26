@@ -1912,8 +1912,13 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				int delta = zDelta / WHEEL_DELTA;
 				if (delta < -1 || delta > 1)
 					delta *= PLAYBACK_WHEEL_BOOST;
-				int destination_frame = currFrameCounter - delta;
-				if (destination_frame < 0) destination_frame = 0;
+				int destination_frame;
+				if (FCEUI_EmulationPaused() || playback.GetPauseFrame() < 0)
+					destination_frame = currFrameCounter - delta;
+				else
+					destination_frame = playback.GetPauseFrame() - delta;
+				if (destination_frame < 0)
+					destination_frame = 0;
 				int lastCursor = currFrameCounter;
 				playback.jump(destination_frame);
 				if (lastCursor != currFrameCounter)

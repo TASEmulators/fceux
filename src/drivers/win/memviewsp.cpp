@@ -70,8 +70,6 @@ BOOL CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			break;
 		case WM_CLOSE:
 		case WM_QUIT:
-			// Update the bookmark description
-			GetDlgItemText(hwndDlg, IDC_BOOKMARK_DESCRIPTION, bookmarkDescription, 50);
 			EndDialog(hwndDlg, 0);
 			break;
 		case WM_COMMAND:
@@ -81,10 +79,15 @@ BOOL CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 					switch(LOWORD(wParam))
 					{
 						case IDOK:
-							SendMessage(hwndDlg, WM_QUIT, 0, 0);
+						{
+							// Update the bookmark description
+							GetDlgItemText(hwndDlg, IDC_BOOKMARK_DESCRIPTION, bookmarkDescription, 50);
+							EndDialog(hwndDlg, 1);
 							break;
+						}
 					}
 			}
+			break;
 	}
 	
 	return FALSE;
@@ -101,8 +104,8 @@ int addBookmark(HWND hwnd, unsigned int address)
 	{
 		sprintf(bookmarkDescription, "%04X", address);
 	
-		// Show the bookmark name dialog	
-		DialogBox(fceu_hInstance,"NAMEBOOKMARKDLG",hwnd,nameBookmarkCallB);
+		// Show the bookmark name dialog
+		DialogBox(fceu_hInstance, "NAMEBOOKMARKDLG", hwnd, nameBookmarkCallB);
 		
 		// Update the bookmark description
 		hexBookmarks[nextBookmark].address = address;

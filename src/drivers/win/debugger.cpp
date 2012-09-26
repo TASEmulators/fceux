@@ -885,23 +885,11 @@ void EditBreakList() {
 	SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_SETCURSEL,WP_edit,0);
 }
 
-void FillBreakList(HWND hwndDlg) {
-	int i;
-
-	for (i = 0; i < numWPs; i++) {
-			SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_DELETESTRING,i,0);
-	}
-
-	for (i = 0; i < numWPs; i++) {
-		SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_INSERTSTRING,-1,(LPARAM)(LPSTR)BreakToText(i));
-	}
-}
-
-void ClearBreakList(HWND hwndDlg) {
-	
+void FillBreakList(HWND hwndDlg)
+{
 	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_RESETCONTENT,0,0);
-
-	numWPs = 0;
+	for (int i = 0; i < numWPs; i++)
+		SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_INSERTSTRING,-1,(LPARAM)(LPSTR)BreakToText(i));
 }
 
 void EnableBreak(int sel)
@@ -1232,38 +1220,13 @@ BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 	return TRUE;
 }
 
-void LoadGameDebuggerData(HWND hwndDlg = hDebug) {
-	
-	extern int loadDebugDataFailed;
-	
+void LoadGameDebuggerData(HWND hwndDlg = hDebug)
+{
 	if (!hwndDlg)
 		return;
 
-	if (!loadDebugDataFailed)
-	{
-		ClearDebuggerBookmarkListbox(hwndDlg);
-		if (bookmarks)
-		{
-
-			unsigned int i;
-			for (i=0;i<bookmarks;i++)
-			{
-				char buffer[5];
-				sprintf(buffer, "%X", bookmarkData[i]);
-				AddDebuggerBookmark2(hwndDlg, buffer);
-			}
-		}
-		
-		ClearBreakList(hwndDlg);
-
-		numWPs = myNumWPs;
-		
-	}
-	else
-	{
-		bookmarks = 0;
-	}
-	
+	numWPs = myNumWPs;
+	FillDebuggerBookmarkListbox(hwndDlg);
 	FillBreakList(hwndDlg);
 }
 
@@ -1273,17 +1236,15 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 	{
 		case WM_LBUTTONDBLCLK:
 		{
-			// set the selection cursor
-			CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, WM_LBUTTONDOWN, wParam, lParam);
 			// debug_str contains the text in the disassembly window
 			int sel_start, sel_end;
 			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
 			// find the ":" or "$" before sel_start
 			int i = sel_start - 1;
-			for (; i > sel_start - 5; i--)
+			for (; i > sel_start - 6; i--)
 				if (i >= 0 && debug_str[i] == ':' || debug_str[i] == '$')
 					break;
-			if (i > sel_start - 5)
+			if (i > sel_start - 6)
 			{
 				char offsetBuffer[5];
 				strncpy(offsetBuffer, debug_str + i + 1, 4);
@@ -1308,6 +1269,44 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 				}
 			}
 			return 0;
+		}
+		case WM_LBUTTONUP:
+		{
+			// debug_str contains the text in the disassembly window
+			int sel_start, sel_end;
+			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
+			// only continue if there's no selection in the Disassembly window
+			if (sel_start == sel_end)
+			{
+				// find the ":" or "$" before sel_start
+				int i = sel_start - 1;
+				for (; i > sel_start - 6; i--)
+					if (i >= 0 && debug_str[i] == ':' || debug_str[i] == '$')
+						break;
+				if (i > sel_start - 6)
+				{
+					char offsetBuffer[5] = {0};
+					strncpy(offsetBuffer, debug_str + i + 1, 4);
+					offsetBuffer[4] = 0;
+					// truncate the string if a space or \r is found
+					char* firstspace = strstr(offsetBuffer, " ");
+					if (!firstspace)
+						firstspace = strstr(offsetBuffer, "\r");
+					if (firstspace)
+						firstspace[0] = 0;
+					unsigned int offset;
+					if (sscanf(offsetBuffer, "%4X", &offset) != EOF)
+					{
+						// select the text
+						SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(i + 1), (LPARAM)(i + 1 + strlen(offsetBuffer)));
+						// send the address to "Seek To" field
+						SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_PCSEEK, offsetBuffer);
+						// send the address to "Bookmark Add" field
+						SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, offsetBuffer);
+					}
+				}
+			}
+			break;
 		}
 		case WM_MOUSEMOVE:
 		{
@@ -1869,6 +1868,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							}
 							case IDC_DEBUGGER_BOOKMARK_ADD: AddDebuggerBookmark(hwndDlg); break;
 							case IDC_DEBUGGER_BOOKMARK_DEL: DeleteDebuggerBookmark(hwndDlg); break;
+							case IDC_DEBUGGER_BOOKMARK_NAME: NameDebuggerBookmark(hwndDlg); break;
 							case IDC_DEBUGGER_ENABLE_SYMBOLIC: UpdateDebugger(false); break;
 							
 // ################################## End of SP CODE ###########################

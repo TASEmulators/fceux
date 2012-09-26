@@ -41,6 +41,9 @@ char NLfilename[2048];
 char symbDebugEnabled = 0;
 int debuggerWasActive = 0;
 
+extern BOOL CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+extern char bookmarkDescription[];
+
 /**
 * Tests whether a char is a valid hexadecimal character.
 * 
@@ -640,6 +643,10 @@ void decorateAddress(unsigned int addr, char* str)
 	}
 }
 
+// bookmarks
+std::vector<unsigned int> bookmarks_addr;
+std::vector<std::string> bookmarks_name;
+
 /**
 * Returns the bookmark address of a CPU bookmark identified by its index.
 * The caller must make sure that the index is valid.
@@ -647,38 +654,12 @@ void decorateAddress(unsigned int addr, char* str)
 * @param hwnd HWND of the debugger window
 * @param index Index of the bookmark
 **/
-unsigned int getBookmarkAddress(HWND hwnd, unsigned int index)
+unsigned int getBookmarkAddress(unsigned int index)
 {
-	int n;
-	char buffer[5] = {0};
-
-	SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_GETTEXT, index, (LPARAM)buffer);
-	n = offsetStringToInt(BT_C, buffer);
-	return n;
-}
-
-unsigned int bookmarks;
-unsigned short* bookmarkData = 0;
-
-/**
-* Stores all CPU bookmarks in a simple array to be able to store
-* them between debugging sessions.
-*
-* @param hwnd HWND of the debugger window.
-**/
-void dumpBookmarks(HWND hwnd)
-{
-	unsigned int i;
-	if (bookmarkData)
-		free(bookmarkData);
-		
-	bookmarks = SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_GETCOUNT, 0, 0);
-	bookmarkData = (unsigned short*)malloc(bookmarks * sizeof(unsigned short));
-	
-	for (i=0;i<bookmarks;i++)
-	{
-		bookmarkData[i] = getBookmarkAddress(hwnd, i);
-	}
+	if (index < bookmarks_addr.size())
+		return bookmarks_addr[index];
+	else
+		return 0;
 }
 
 /**
@@ -687,17 +668,16 @@ void dumpBookmarks(HWND hwnd)
 * @param hwnd HWMD of the debugger window
 * @param buffer Text of the debugger bookmark
 **/
-void AddDebuggerBookmark2(HWND hwnd, char* buffer)
+void AddDebuggerBookmark2(HWND hwnd, unsigned int addr)
 {
-	if (!buffer)
-	{
-		MessageBox(0, "Error: Invalid parameter \"buffer\" in function AddDebuggerBookmark2", "Error", MB_OK | MB_ICONERROR);
-		return;
-	}
-	
+	int index = bookmarks_addr.size();
+	bookmarks_addr.push_back(addr);
+	bookmarks_name.push_back("");
+	char buffer[256];
+	sprintf(buffer, "%04X %s", bookmarks_addr[index], bookmarks_name[index].c_str());
 	SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_ADDSTRING, 0, (LPARAM)buffer);
-	
-	dumpBookmarks(hwnd);
+	// select this item
+	SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_SETCURSEL, index, 0);
 }
 
 /**
@@ -719,7 +699,7 @@ void AddDebuggerBookmark(HWND hwnd)
 		MessageBox(hwnd, "Invalid offset", "Error", MB_OK | MB_ICONERROR);
 		return;
 	}
-	AddDebuggerBookmark2(hwnd, buffer);
+	AddDebuggerBookmark2(hwnd, n);
 }
 
 /**
@@ -736,28 +716,75 @@ void DeleteDebuggerBookmark(HWND hwnd)
 	{
 		MessageBox(hwnd, "Please select a bookmark from the list", "Error", MB_OK | MB_ICONERROR);
 		return;
-	}
-	else
+	} else
 	{
-		// Remove the selected bookmark
-		
+		// Erase the selected bookmark
+		bookmarks_addr.erase(bookmarks_addr.begin() + selectedItem);
+		bookmarks_name.erase(bookmarks_name.begin() + selectedItem);
 		SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_DELETESTRING, selectedItem, 0);
-		dumpBookmarks(hwnd);
+		// Select next item
+		if (selectedItem >= (bookmarks_addr.size() - 1))
+			// select last item
+			SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_SETCURSEL, bookmarks_addr.size() - 1, 0);
+		else
+			SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_SETCURSEL, selectedItem, 0);
+
 	}
 }
 
-/**
-* Removes all debugger bookmarks
-* 
-* @param hwnd HWND of the debugger window
-**/
-void ClearDebuggerBookmarkListbox(HWND hwnd)
+void NameDebuggerBookmark(HWND hwnd)
+{
+	// Get the selected bookmark
+	int selectedItem = SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_GETCURSEL, 0, 0);
+	if (selectedItem == LB_ERR || selectedItem >= (int)bookmarks_name.size())
+	{
+		MessageBox(hwnd, "Please select a bookmark from the list", "Error", MB_OK | MB_ICONERROR);
+		return;
+	} else
+	{
+		strcpy(bookmarkDescription, bookmarks_name[selectedItem].c_str());
+		// try to find the same address in bookmarks
+		for (int i = bookmarks_addr.size() - 1; i>= 0; i--)
+		{
+			if (i != selectedItem && bookmarks_addr[i] == bookmarks_addr[selectedItem])
+			{
+				strcpy(bookmarkDescription, bookmarks_name[i].c_str());
+				break;
+			}
+		}
+		// Show the bookmark name dialog
+		if (DialogBox(fceu_hInstance, "NAMEBOOKMARKDLG", hwnd, nameBookmarkCallB))
+		{
+			// Rename the selected bookmark
+			bookmarks_name[selectedItem] = bookmarkDescription;
+			SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_DELETESTRING, selectedItem, 0);
+			char buffer[256];
+			sprintf(buffer, "%04X %s", bookmarks_addr[selectedItem], bookmarks_name[selectedItem].c_str());
+			SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_INSERTSTRING, selectedItem, (LPARAM)buffer);
+			// Reselect the item (selection disappeared when it was deleted)
+			SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_SETCURSEL, selectedItem, 0);
+		}
+	}
+}
+
+void DeleteAllDebuggerBookmarks()
+{
+	bookmarks_addr.resize(0);
+	bookmarks_name.resize(0);
+}
+
+void FillDebuggerBookmarkListbox(HWND hwnd)
 {		
 	SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_RESETCONTENT, 0, 0);
-	//dumpBookmarks(hwnd);
+	char buffer[256];
+	for (unsigned int i = 0; i < bookmarks_addr.size(); ++i)
+	{
+		sprintf(buffer, "%04X %s", bookmarks_addr[i], bookmarks_name[i].c_str());
+		SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_ADDSTRING, 0, (LPARAM)buffer);
+	}
 }
 
-void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr);
+extern void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr);
 
 /**
 * Shows the code at the bookmark address in the disassembly window
@@ -766,13 +793,9 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr);
 **/
 void GoToDebuggerBookmark(HWND hwnd)
 {
-	unsigned int n;
 	int selectedItem = SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_GETCURSEL, 0, 0);
-	
 	// If no bookmark is selected just return
 	if (selectedItem == LB_ERR) return;
-	
-	n = getBookmarkAddress(hwnd, selectedItem);
-	
+	unsigned int n = getBookmarkAddress(selectedItem);
 	Disassemble(hwnd, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, n);
 }

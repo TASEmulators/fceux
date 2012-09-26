@@ -1842,7 +1842,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				FCEUD_ToggleStatusIcon();
 				break;
 			case ID_DISPLAY_FPS:
-				FCEUI_SetShowFPS(FCEUI_ShowFPS() ^ 1);
+				FCEUI_ToggleShowFPS();
 				break;
 			case MENU_DISPLAY_BG:
 			case MENU_DISPLAY_OBJ:
@@ -2850,6 +2850,11 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_ICON_DISPLAY_TOGGLE]);
 	combined = "&Movie status icon\t" + combo;
 	ChangeMenuItemText(ID_DISPLAY_MOVIESTATUSICON, combined);
+
+	//FPS counter
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_FPS_DISPLAY_TOGGLE]);
+	combined = "FPS\t" + combo;
+	ChangeMenuItemText(ID_DISPLAY_FPS, combined);
 
 	//Graphics: BG
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_DISPLAY_BG_TOGGLE]);

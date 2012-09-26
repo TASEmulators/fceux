@@ -51,7 +51,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	view_branches_tree = false;
 	branch_scr_hud = true;
 	restore_position = false;
-	adjust_input_due_to_lag = true;
+	adjust_input_due_to_lag = false;
 	greenzone_capacity = GREENZONE_CAPACITY_DEFAULT;
 	undo_levels = UNDO_LEVELS_DEFAULT;
 	autosave_period = AUTOSAVE_PERIOD_DEFAULT;

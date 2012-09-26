@@ -33,8 +33,8 @@ struct Name
 };
 
 extern char symbDebugEnabled;
-extern unsigned int bookmarks;
-extern unsigned short* bookmarkData;
+extern std::vector<unsigned int> bookmarks_addr;
+extern std::vector<std::string> bookmarks_name;
 extern int debuggerWasActive;
 
 int checkCondition(const char* buffer, int num);
@@ -42,10 +42,11 @@ void loadNameFiles();
 void decorateAddress(unsigned int addr, char* str);
 void replaceNames(Name* list, char* str);
 void AddDebuggerBookmark(HWND hwnd);
-void AddDebuggerBookmark2(HWND hwnd, char* buffer);
+void AddDebuggerBookmark2(HWND hwnd, unsigned int addr);
 void DeleteDebuggerBookmark(HWND hwnd);
-void ClearDebuggerBookmarkListbox(HWND hwnd);
+void NameDebuggerBookmark(HWND hwnd);
+void DeleteAllDebuggerBookmarks();
+void FillDebuggerBookmarkListbox(HWND hwnd);
 
 void GoToDebuggerBookmark(HWND hwnd);
-void dumpBookmarks(HWND hwmd);
 int isHex(char c);
