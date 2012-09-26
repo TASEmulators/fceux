@@ -62,7 +62,7 @@
 <li>Execution - a small set of controls for controlling the execution of code.</li>
 <li>CPU State - display of registers, flags, the execution stack, and the PPU state.</li>
 <li>Memory disassembly - displays a disassembly of the bytes currently accessible by the CPU data bus.</li>
-<li>BreakPoints - a list of breakpoints for debugging.</li>
+<li>Breakpoints - a list of breakpoints for debugging.</li>
 <li>Bookmarks - a list of addresses for quick navigation.</li>
 <li>Other - buttons for controlling symbolic debugging, rom patching, etc.</li>
 </ul>
@@ -87,7 +87,8 @@
 <p><br/></p>
 <p>When execution is paused, the disassembly view will begin with the memory at the current program counter location (PC) at the top of the window. You can scroll the disassembly up or down to observe the code. Then you can click "Seek PC" to return to the program counter at any time.</p>
 <p><br/></p>
-<p>You can also use "Seek To" button that will navigate to the specified address. When entering the address, these convenient strings may be used instead of the hexadecimal memory address:</p>
+<p>You can also use "Seek To" button that will navigate to the specified address. Either type a hexadecimal address to the text field or simply left-click on any address in the Disassembly window.</p>
+<p>When entering the address, these convenient strings may be used instead of the hexadecimal memory address:</p>
 <p><br/></p>
 <p>NES special addresses:</p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
@@ -236,8 +237,9 @@
 <p><br/></p>
 <p><span class="rvts45">Bookmarks</span></p>
 <p><br/></p>
-<p>A list of bookmark addresses can be kept in the Bookmark frame to make memory navigation easier. Simply type a hexadecimal address (or a convenient string, such as NMI) and click "Add" to add it to your bookmarks. Next time you wish to go to this address just double click on the bookmark.</p>
-<p><br/></p>
+<p>A list of bookmark addresses can be kept in the Address Bookmarks frame to make memory navigation easier. Simply type a hexadecimal address (or a convenient string, such as "NMI") and click "Add" to add it to your bookmarks. Alternatively, just click on any address in the Disassembly window, and the address will appear in the Bookmark Add field, so you don't have to type it.</p>
+<p>Next time you wish to go to this address just double click on the bookmark.</p>
+<p>You can also name bookmarks.</p>
 <p>When you exit the emulator, bookmarks are saved in a .deb file. Next time you return to debugging the list of bookmarks will be automatically loaded from the file.</p>
 <p><br/></p>
 <p><br/></p>
@@ -293,7 +295,7 @@
 <p><br/></p>
 <p>There is a "Rom Patcher" button that may be used to apply a small patch to a ROM.</p>
 <p><br/></p>
-<p>The "Display ROM offsets" option will display ROM offsets instead of CPU addresses in the Disassembly window.</p>
+<p>The "ROM offsets" option will display ROM offsets instead of CPU addresses in the Disassembly window.</p>
 <p><br/></p>
 <p>The "Restore Original Window Size" button will restore the original size of the debugger window if you resized it manually.</p>
 <p><br/></p>

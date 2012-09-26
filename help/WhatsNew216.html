@@ -67,7 +67,7 @@
 <li><span class="rvts22">Fixed wrong default palette entry</span></li>
 <li><span class="rvts22">Fixed bug when loading UNF games</span></li>
 <li><span class="rvts22">Improved HUD text rendering wrapping</span></li>
-<li><span class="rvts22">Display FPS option</span></li>
+<li><span class="rvts22">"Display FPS" option</span></li>
 </ul>
 <p><span class="rvts24"><br/></span></p>
 <p><span class="rvts24">Emulation</span></p>
@@ -87,6 +87,7 @@
 <p><span class="rvts24">Movies</span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
 <li><span class="rvts22">Fixed old bug in "Play Movie From Beginning"</span></li>
+<li><span class="rvts22">Fixed replay engine bug that doubles the last input of the movie</span></li>
 <li><span class="rvts22">Fixed movie savestates logic, loading post-movie savestates is not allowed in read-only</span></li>
 <li><span class="rvts22">Fixed savestates filenaming bug when working with a movie</span></li>
 <li><span class="rvts22">Added support for HUD recording in AVI dumping</span></li>
@@ -151,26 +152,30 @@
 <p><span class="rvts23">Debugger</span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
 <li><span class="rvts22">General window layout cleanup; bigger font; ".DEB files" can be switched off; etc</span></li>
-<li><span class="rvts22">Deleting a breakpoint leaves selection in the Breakpoints list</span></li>
+<li><span class="rvts22">Deleting a breakpoint/bookmark leaves selection in the Breakpoints list</span></li>
 <li><span class="rvts22">Fixed mysterious out of bounds condition while editing breakpoints</span></li>
 <li><span class="rvts22">Fixed RAM peek by a rightclick on left pane</span></li>
 <li><span class="rvts22">Allow Frame Advancing when Debugger is in breakpoint state</span></li>
-<li><span class="rvts22">When a breakpoint is triggered it becomes highlighed (selected) in the breakpoints list</span></li>
+<li><span class="rvts22">Disabled breakpoints now don't impose slowdown</span></li>
+<li><span class="rvts22">When a breakpoint is hit, it becomes highlighed (selected) in the breakpoints list</span></li>
 <li><span class="rvts22">Show the number of breakpoints (enabled and total) above the breakpoints list</span></li>
 <li><span class="rvts22">"&gt;" shows current line in disassembly</span></li>
 <li><span class="rvts22">Improved stack display</span></li>
 <li><span class="rvts22">Added "CPU cycles" and "Instructions" counters (cumulative and delta)</span></li>
 <li><span class="rvts22">Added "Cycles counter exceeds N" and "Instructions counter exceeds N" type of breakpoints</span></li>
+<li><span class="rvts22">Single click on any address copies this address to the "Seek To" field and "Bookmark Add" field</span></li>
 <li><span class="rvts22">Double-click on any address prompts "Add Breakpoint here" dialog</span></li>
-<li><span class="rvts22">"Display ROM offsets" option shows real ROM addresses in the Disassembly window</span></li>
+<li><span class="rvts22">"ROM offsets" option shows real ROM addresses in the Disassembly window</span></li>
 <li><span class="rvts22">Fixed conditional breakpoints bug: the error message didn't appear when editing a breakpoint</span></li>
-<li><span class="rvts22">Fixed Symbolic Debugging (Names and Comments display)</span></li>
+<li><span class="rvts22">Fixed Symbolic debug (Names and Comments display)</span></li>
+<li><span class="rvts22">Added Bookmark naming</span></li>
 <li><span class="rvts22">Cleaned up and improved debugging documentation</span></li>
 </ul>
 <p><span class="rvts24"><br/></span></p>
 <p><span class="rvts23">Trace Logger</span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Added "Symbolic tracing"</span></li>
+<li><span class="rvts22">Added "Symbolic trace"</span></li>
+<li><span class="rvts22">"RTS" instructions output caller address/name</span></li>
 <li><span class="rvts22">Added "Use Stack Pointer for code tabbing (nesting visualization)" option</span></li>
 <li><span class="rvts22">Added "To the left from disassembly text" option for log format customization</span></li>
 <li><span class="rvts22">Added "Log current Frame number" option</span></li>

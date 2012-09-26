@@ -65,9 +65,16 @@
 <p><br/></p>
 <p>Normally, when logging to a window, the Tracer only shows the log is if you pause emulator by Pause/Frame Advance hotkey or by snapping the Debugger. But there is the option to automatically update the log window will keep the window updating while the game runs; this is normally useless unless it is working with the Code/Data Logger to only show newly-executed instructions.</p>
 <p><br/></p>
-<p>You can specify the format of output in the log: whether to log registers state for every instruction, and where to put the data in every text line (to the left or to the right from the code disassembly).</p>
+<p>You can specify the format of output in the log:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>whether to log registers state for every instruction, and where to put the data in every text line (to the left or to the right from the code disassembly)</li>
+<li>whether to log current frame number</li>
+<li>whether to log emulator messages (such as "State loaded"</li>
+<li>whether to log Breakpoint Hits (when you use debugger while tracing)</li>
+<li>whether to apply Symbolic data from *.nl files. See <a class="rvts18" href="Debugger.html">Debugger</a> section for details</li>
+</ul>
 <p><br/></p>
-<p>For nice visualization of JSRs nesting you can use Stack Pointer for lines tabbing. Since NES games mostly use stack for subroutine calls, this option will produce structurized disassembly that is easier to track back visually. With this option you may also want to put registers text to the left from disassembly text.</p>
+<p>For nice visualization of JSRs nesting you can use Stack Pointer for lines tabbing. Since NES games mostly use stack for subroutine calls (and rarely store variables in the stack), this option will likely produce a structurized disassembly that is much easier to track back visually. With this option you may also want to put registers data to the left from disassembly text.</p>
 <p><br/></p>
 <p>The Trace Logger has extra options which work with the Code/Data Logger so that it only shows instructions executed for the first time, or those which access data for the first time. This can be quite useful for finding certain key routines or finding otherwise impossible-to-find data in almost any game. &nbsp;The best way to use this feature is in conjunction with the option to automatically update the window while logging. Then, as you play the game, you can watch new results appear at once. If you're searching for something specific, try to get everything (EXCEPT what you're looking for) to execute, then watch closely as what you're looking for executes for the first time.</p>
 <p><br/></p>
