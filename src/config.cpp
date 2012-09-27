@@ -18,12 +18,12 @@ char *FCEUI_GetAboutString() {
 	const char *aboutTemplate = 
 	FCEU_NAME_AND_VERSION "\n\n\
 Administrators:\n\
-zeromus, adelikat\n\n\
+zeromus, adelikat, AnS\n\n\
 Current Contributors:\n\
 punkrockguy318 (Lukas Sabota)\n\
 Plombo (Bryan Cain)\n\
 qeed, QFox, Shinydoofy, ugetab\n\
-CaH4e3, gocha, Acmlm, DWEdit, AnS\n\
+CaH4e3, gocha, Acmlm, DWEdit\n\
 \n\
 FCEUX 2.0:\n\
 mz, nitsujrehtona, Lukas Sabota,\n\
