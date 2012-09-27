@@ -742,14 +742,20 @@ void NameDebuggerBookmark(HWND hwnd)
 		return;
 	} else
 	{
-		strcpy(bookmarkDescription, bookmarks_name[selectedItem].c_str());
-		// try to find the same address in bookmarks
-		for (int i = bookmarks_addr.size() - 1; i>= 0; i--)
+		if (bookmarks_name[selectedItem].size())
 		{
-			if (i != selectedItem && bookmarks_addr[i] == bookmarks_addr[selectedItem])
+			strcpy(bookmarkDescription, bookmarks_name[selectedItem].c_str());
+		} else
+		{
+			bookmarkDescription[0] = 0;
+			// try to find the same address in bookmarks
+			for (int i = bookmarks_addr.size() - 1; i>= 0; i--)
 			{
-				strcpy(bookmarkDescription, bookmarks_name[i].c_str());
-				break;
+				if (i != selectedItem && bookmarks_addr[i] == bookmarks_addr[selectedItem] && bookmarks_name[i].size())
+				{
+					strcpy(bookmarkDescription, bookmarks_name[i].c_str());
+					break;
+				}
 			}
 		}
 		// Show the bookmark name dialog
