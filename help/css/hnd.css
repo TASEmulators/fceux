@@ -244,66 +244,56 @@ span.rvts47
  font-size: 22pt;
  text-decoration: underline;
 }
-a.rvts48, span.rvts48
+span.rvts48
+{
+ color: #00be00;
+}
+span.rvts49
+{
+ color: #a08c00;
+}
+span.rvts50
+{
+ color: #0000c3;
+}
+span.rvts51
+{
+ color: #0082a0;
+}
+span.rvts52
+{
+ color: #d2be00;
+}
+span.rvts53
+{
+ color: #0a0aff;
+}
+span.rvts54
+{
+ color: #05ff05;
+}
+a.rvts55, span.rvts55
 {
  font-size: 12pt;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts48:hover { color: #0000ff; }
-span.rvts49
+a.rvts55:hover { color: #0000ff; }
+span.rvts56
 {
  font-size: 18pt;
  font-weight: bold;
 }
-span.rvts50
-{
- font-size: 12pt;
- font-family: 'Courier New', 'Courier', monospace;
- font-weight: bold;
-}
-span.rvts51
-{
- font-size: 14pt;
- font-weight: bold;
-}
-span.rvts52
-{
- font-size: 12pt;
- font-family: 'Courier New', 'Courier', monospace;
- color: #000080;
-}
-span.rvts53
-{
- font-size: 12pt;
- font-family: 'Courier New', 'Courier', monospace;
- color: #333399;
-}
-span.rvts54
-{
- font-family: 'Courier New', 'Courier', monospace;
- color: #000080;
-}
-span.rvts55
-{
- font-size: 16pt;
- font-family: 'Courier New', 'Courier', monospace;
- font-weight: bold;
-}
-span.rvts56
-{
- font-size: 11pt;
- font-family: 'Courier New', 'Courier', monospace;
- font-weight: bold;
-}
 span.rvts57
 {
+ font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
  font-weight: bold;
 }
 span.rvts58
 {
- font-family: 'Courier New', 'Courier', monospace;
+ font-size: 14pt;
+ font-weight: bold;
 }
 span.rvts59
 {
@@ -311,55 +301,93 @@ span.rvts59
  font-family: 'Courier New', 'Courier', monospace;
  color: #000080;
 }
-a.rvts60, span.rvts60
+span.rvts60
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #333399;
+}
+span.rvts61
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000080;
+}
+span.rvts62
+{
+ font-size: 16pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts63
+{
+ font-size: 11pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts64
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts65
+{
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts66
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000080;
+}
+a.rvts67, span.rvts67
 {
  font-family: 'Courier New', 'Courier', monospace;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts60:hover { color: #0000ff; }
-span.rvts61
+a.rvts67:hover { color: #0000ff; }
+span.rvts68
 {
  font-size: 14pt;
  font-weight: bold;
 }
-span.rvts62 /* Font Style */
+span.rvts69 /* Font Style */
 {
  font-size: 14pt;
 }
-span.rvts63
+span.rvts70
 {
  font-family: 'Courier New', 'Courier', monospace;
  font-weight: bold;
  text-decoration: underline;
 }
-a.rvts64, span.rvts64
+a.rvts71, span.rvts71
 {
  font-size: 12pt;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts64:hover { color: #0000ff; }
-span.rvts65
+a.rvts71:hover { color: #0000ff; }
+span.rvts72
 {
  font-family: 'Lucida Console', 'Monaco', monospace;
  text-decoration: underline;
 }
-span.rvts66
+span.rvts73
 {
  font-weight: bold;
  text-decoration: underline;
 }
-span.rvts67
+span.rvts74
 {
  font-size: 11pt;
  text-decoration: underline;
 }
-span.rvts68
+span.rvts75
 {
  font-size: 5pt;
 }
-span.rvts69
+span.rvts76
 {
  font-size: 5pt;
  font-weight: bold;

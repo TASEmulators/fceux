@@ -70,9 +70,21 @@
 <li>combine with (external) Disassembler to help it separate code from data</li>
 </ul>
 <p><br/></p>
-<p>See, it is very useful for finding specific code and data by using it with the <a class="rvts18" href="TraceLogger.html">Trace Logger</a>. Furthermore, while it is running, the Hex Editor will color-code bytes depending on whether they were logged as code or data. And it can also be used to create a stripped NES ROM.</p>
+<p>See, it is very useful for finding specific code and data by using it with the <a class="rvts18" href="TraceLogger.html">Trace Logger</a>.</p>
+<p>Furthermore, while it is running, the <a class="rvts18" href="HexEditor.html">Hex Editor</a> will color-code bytes depending on whether they were logged as code or data. </p>
 <p><br/></p>
-<p>A "stripped" NES ROM is one in which everything that was not logged by the code/data logger is removed. This may be just a novelty feature, however it can be useful because you can view the ROM in a Hex Editor or a Tile Viewer, and you'll see only the parts that were used while playing. Furthermore, you could use it to create a demo ROM by only playing through the parts you would like others to see.</p>
+<p>For PRG ROM:</p>
+<p><span class="rvts49">Dark-yellow</span> - the byte is code</p>
+<p><span class="rvts50">Blue</span> - the byte is data</p>
+<p><span class="rvts51">Cyan</span> - the byte is PCM audio data</p>
+<p><span class="rvts48">Green</span> - the byte is both code and data</p>
+<p><br/></p>
+<p>For CHR ROM:</p>
+<p><span class="rvts52">Yellow</span> - the byte was rendered</p>
+<p><span class="rvts53">Light-blue</span> - the byte was read programmatically</p>
+<p><span class="rvts54">Light-green</span> - the byte was both rendered and read programmatically</p>
+<p><br/></p>
+<p>The Code/Data Logger can also be used to create a stripped NES ROM. A "stripped" NES ROM is one in which everything that was not logged by the code/data logger is removed. It can be useful in many ways, for example, you can view the ROM in a Hex Editor or a Tile Viewer, and you'll see only the parts that were used while playing. Furthermore, you could use it to create a demo ROM by only playing through the parts you would like others to see.</p>
 <p><br/></p>
 <p>1. Open the Code/Data Logger, and press Start to begin logging. If you want to also log accesses to VROM, enable New PPU before starting.</p>
 <p>2. Perform a soft and a hard reset while logging, in order to capture the ROM's startup sequence. If you don't do so, you can distribute a save-state file so they will start from within the game.</p>
