@@ -173,8 +173,8 @@ MB_OK);
 								if(!newppu)
 								{
 									if(MessageBox(hCDLogger,
-"In order for CHR data logging to take effect, the New PPU engine logger must also be enabled.\
- Would you like to enable new PPU engine now?","Enable new PPU engine?",
+"In order for CHR data logging to take effect, the New PPU engine must also be enabled.\
+ Would you like to enable New PPU engine now?","Enable New PPU engine?",
 										MB_YESNO) == IDYES)
 									{
 										FCEU_TogglePPU();
@@ -264,7 +264,8 @@ void LoadCDLogFile(){
 	LoadCDLog(nameo);
 }
 
-void SaveCDLogFileAs(){
+void SaveCDLogFileAs()
+{
 	const char filter[]="Code Data Log File (*.CDL)\0*.cdl\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048]; 
 	OPENFILENAME ofn;
@@ -287,10 +288,10 @@ void SaveCDLogFileAs(){
 
 void SaveCDLogFile(){ //todo make this button work before you've saved as
 	FILE *FP;
-
 	FP = fopen(loadedcdfile,"wb");
-	if(FP == NULL){
-		FCEUD_PrintError("Error Opening File");
+	if(FP == NULL)
+	{
+		SaveCDLogFileAs();
 		return;
 	}
 	fwrite(cdloggerdata,PRGsize[0],1,FP);
@@ -436,13 +437,21 @@ void SaveStrippedRom(int invert){ //this is based off of iNesSave()
 
 		if(VROM_size)
 		{
-			for(i = 0; i < (int)CHRsize[0]; i++){
-				unsigned char vchar;
-				if(cdloggervdata[i] & 1)
-					vchar = invert?0:VROM[i];
-				else
-					vchar = invert?VROM[i]:0;
-				fputc(vchar, fp);
+			if(!newppu)
+			{
+				for(i = 0; i < (int)CHRsize[0]; i++)
+				{
+					unsigned char vchar;
+					if(cdloggervdata[i] & 1)
+						vchar = invert?0:VROM[i];
+					else
+						vchar = invert?VROM[i]:0;
+					fputc(vchar, fp);
+				}
+			} else
+			{
+				// since old ppu doesn't log VROM access, just dump it to the file
+				fwrite(VROM,CHRsize[0],1,fp);
 			}
 		}
 	}

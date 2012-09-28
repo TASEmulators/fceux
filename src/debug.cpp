@@ -268,7 +268,7 @@ uint8 GetMem(uint16 A) {
 			case 7: return VRAMBuffer;
 		}
 	}
-	else if ((A >= 0x4000) && (A < 0x6000)) return 0xFF; //fix me
+	//else if ((A >= 0x4000) && (A < 0x6000)) return 0xFF;	// AnS: removed the dummy
 	if (GameInfo) return ARead[A](A);					 //adelikat: 11/17/09: Prevent crash if this is called with no game loaded.
 	else return 0;
 }

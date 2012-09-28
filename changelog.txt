@@ -1,9 +1,14 @@
+28-Sep-2012 - AnS - CDLogger: fixed VROM dumping in old ppu mode
+28-Sep-2012 - AnS - Hexeditor: Ctrl+F opens Find dialog
+28-Sep-2012 - AnS - Hexeditor: display 0x4000-0x5FFF properly
+28-Sep-2012 - AnS - Tracer: fixed crash when logging undefined opcodes
 26-Sep-2012 - AnS - Debugger: "Name" button in Bookmarks, total revamp of Bookmarks
 26-Sep-2012 - AnS - Debugger: single click on any address copies this address to the "Seek To" field and "Bookmark Add" field
 26-Sep-2012 - AnS - Fixed replay engine bug that doubles the last input of the movie
 26-Sep-2012 - AnS - Tracer: RTS instructions output caller address/name
 23-Sep-2012 - AnS - Lua: clear previous frame drawings at the beginning of every frame
 23-Sep-2012 - AnS - Debugger: fixed mouseover when using Symbolic debug; mouseover works for the disassembly window too
+23-Sep-2012 - CaH4e3 - CDLogger: Now can log VROM access (CHR banks of the ROM) when NewPPU is enabled
 22-Sep-2012 - AnS - Tracer: added "Symbolic trace", "Log current Frame number", "Log emulator messages", "Log breakpoint hits" options
 11-Sep-2012 - AnS - new Lua function: emu.setlagflag()
 11-Sep-2012 - AnS - Debugger: deleting a breakpoint leaves selection in the Breakpoints list

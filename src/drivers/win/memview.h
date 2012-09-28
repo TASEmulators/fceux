@@ -9,5 +9,5 @@ void UndoLastPatch();
 
 void SetHexEditorAddress(int gotoaddress);
 
-extern HWND hMemView;
+extern HWND hMemView, hMemFind;
 extern int EditingMode;

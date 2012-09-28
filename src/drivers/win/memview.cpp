@@ -521,12 +521,12 @@ void UpdateMemoryView(int draw_all)
 void UpdateCaption()
 {
 	char str[100];
-	char EditString[3][20] = {"RAM","PPU Memory","ROM"};
+	char EditString[3][20] = {"RAM","PPU","ROM"};
 
 	if(CursorEndAddy == -1){
-		sprintf(str,"Hex Editor - Editing %s Offset 0x%06x",EditString[EditingMode],CursorStartAddy);
+		sprintf(str,"Hex Editor - %s Offset 0x%06x",EditString[EditingMode],CursorStartAddy);
 	} else {
-		sprintf(str,"Hex Editor - Editing %s Offset 0x%06x - 0x%06x, 0x%x bytes selected ",
+		sprintf(str,"Hex Editor - %s Offset 0x%06x - 0x%06x, 0x%x bytes selected ",
 			EditString[EditingMode],CursorStartAddy,CursorEndAddy,CursorEndAddy-CursorStartAddy+1);
 	}
 	SetWindowText(hMemView,str);
@@ -775,8 +775,13 @@ void InputData(char *input){
 	for(i = 0;i < datasize;i++){
 		addr = CursorStartAddy+i;
 
-		if(EditingMode == 0)BWrite[addr](addr,data[i]);
-		if(EditingMode == 1){
+		if (EditingMode == 0)
+		{
+			// RAM (system bus)
+			BWrite[addr](addr,data[i]);
+		} else if (EditingMode == 1)
+		{
+			// PPU
 			addr &= 0x3FFF;
 			if(addr < 0x2000)
 				VPage[addr>>10][addr] = data[i]; //todo: detect if this is vrom and turn it red if so
@@ -784,8 +789,9 @@ void InputData(char *input){
 				vnapage[(addr>>10)&0x3][addr&0x3FF] = data[i]; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
 			if((addr >= 0x3F00) && (addr < 0x3FFF))
 				PALRAM[addr&0x1F] = data[i];
-		}
-		if(EditingMode == 2){
+		} else if (EditingMode == 2)
+		{
+			// ROM
 			ApplyPatch(addr,datasize,data);
 			break;
 		}
@@ -1126,6 +1132,8 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		// Fall through to Ctrl+G
 	case 0x47: //Ctrl+G
 		GotoAddress(hwnd); break;
+	case 0x46: //Ctrl+F
+		OpenFindDialog(); break;
 			}
 		}
 
@@ -1622,6 +1630,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			for(i = 0;i < DataAmount;i++)OldValues[i] = -1;
 
 			UpdateColorTable();
+			UpdateCaption();
 			return 0;
 
 			// ################################## Start of SP CODE ###########################
@@ -1905,8 +1914,14 @@ void FindNext(){
 }
 
 
-void OpenFindDialog() {
-	if((!hMemView) || (hMemFind))return;
-	hMemFind = CreateDialog(fceu_hInstance,"MEMVIEWFIND",hMemView,MemFindCallB);
+void OpenFindDialog()
+{
+	if (!hMemView)
+		return;
+	if (hMemFind)
+		// set focus to the text field
+		SendMessage(hMemFind, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMemFind, IDC_MEMVIEWFIND_WHAT), true);
+	else
+		hMemFind = CreateDialog(fceu_hInstance,"MEMVIEWFIND",hMemView,MemFindCallB);
 	return;
 }

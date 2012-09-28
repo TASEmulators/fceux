@@ -418,7 +418,7 @@ void FCEUD_TraceInstruction()
 		sprintf(str_disassembly, "OVERFLOW");
 	} else
 	{
-		char* a;
+		char* a = 0;
 		switch (size)
 		{
 			case 0:
@@ -456,37 +456,38 @@ void FCEUD_TraceInstruction()
 				break;
 		}
 
-		if (logging_options & LOG_SYMBOLIC)
+		if (a)
 		{
-			// Insert Name and Comment lines if needed
-			str_decoration[0] = 0;
-			decorateAddress(X.PC, str_decoration);
-			if (str_decoration[0])
+			if (logging_options & LOG_SYMBOLIC)
 			{
-				// divide the str_decoration into strings (Name, Comment1, Comment2, ...)
-				char* start_pos = str_decoration;
-				char* end_pos = strstr(str_decoration, "\r");
-				while (end_pos)
+				// Insert Name and Comment lines if needed
+				str_decoration[0] = 0;
+				decorateAddress(X.PC, str_decoration);
+				if (str_decoration[0])
 				{
-					end_pos[0] = 0;		// set \0 instead of \r
-					OutputLogLine(start_pos, true);
-					end_pos += 2;
-					start_pos = end_pos;
-					end_pos = strstr(end_pos, "\r");
+					// divide the str_decoration into strings (Name, Comment1, Comment2, ...)
+					char* start_pos = str_decoration;
+					char* end_pos = strstr(str_decoration, "\r");
+					while (end_pos)
+					{
+						end_pos[0] = 0;		// set \0 instead of \r
+						OutputLogLine(start_pos, true);
+						end_pos += 2;
+						start_pos = end_pos;
+						end_pos = strstr(end_pos, "\r");
+					}
 				}
+				replaceNames(ramBankNames, a);
+				replaceNames(loadedBankNames, a);
+				replaceNames(lastBankNames, a);
 			}
-			replaceNames(ramBankNames, a);
-			replaceNames(loadedBankNames, a);
-			replaceNames(lastBankNames, a);
+			strcpy(str_disassembly, a);
 		}
-
-		strcpy(str_disassembly, a);
-
 	}
 
-	// special case: an RTS opcode
 	if (size == 1 && GetMem(addr - 1) == 0x60)
 	{
+		// special case: an RTS opcode
 		// add "----------" to emphasize the end of subroutine
 		strcat(str_disassembly, " ");
 		for (int j = strlen(str_disassembly); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
@@ -504,8 +505,6 @@ void FCEUD_TraceInstruction()
 	}
 
 	// Start filling the str_temp line: Frame number, AXYS state, Processor status, Tabs, Address, Data, Disassembly
-
-
 	if (logging_options & LOG_FRAME_NUMBER)
 	{
 		sprintf(str_temp, "%06u: ", currFrameCounter);

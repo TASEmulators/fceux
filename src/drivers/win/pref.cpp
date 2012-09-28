@@ -55,7 +55,6 @@ int storeDebuggerPreferences(FILE* f)
 	bookmarks_name.resize(size);
 	if (fwrite(&size, sizeof(unsigned int), 1, f) != 1) return 1;
 	// Write the data of those bookmarks
-	char buffer[256];
 	for (i = 0; i < (int)size; ++i)
 	{
 		if (fwrite(&bookmarks_addr[i], sizeof(unsigned int), 1, f) != 1) return 1;

@@ -317,18 +317,23 @@ int BlockingCheck()
 			if(hCheat)
 				if(IsChild(hCheat, msg.hwnd))
 					handled = IsDialogMessage(hCheat, &msg);
-			if(hwndMemWatch)
+			if(!handled && hMemFind)
+			{
+				if(IsChild(hMemFind, msg.hwnd))
+					handled = IsDialogMessage(hMemFind, &msg);
+			}
+			if(!handled && hwndMemWatch)
 			{
 				if(IsChild(hwndMemWatch,msg.hwnd))
 					handled = TranslateAccelerator(hwndMemWatch,fceu_hAccel,&msg);
 				if(!handled)
 					handled = IsDialogMessage(hwndMemWatch,&msg);
 			}
-			if(RamSearchHWnd)
+			if(!handled && RamSearchHWnd)
 			{
-				handled |= IsDialogMessage(RamSearchHWnd, &msg);
+				handled = IsDialogMessage(RamSearchHWnd, &msg);
 			}
-			if(RamWatchHWnd)
+			if(!handled && RamWatchHWnd)
 			{
 				if(IsDialogMessage(RamWatchHWnd, &msg))
 				{
