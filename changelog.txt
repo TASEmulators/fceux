@@ -1,6 +1,6 @@
 28-Sep-2012 - AnS - CDLogger: fixed VROM dumping in old ppu mode
 28-Sep-2012 - AnS - Hexeditor: Ctrl+F opens Find dialog
-28-Sep-2012 - AnS - Hexeditor: display 0x4000-0x5FFF properly
+28-Sep-2012 - AnS - Hexeditor: display 0x5000-0x5FFF contents
 28-Sep-2012 - AnS - Tracer: fixed crash when logging undefined opcodes
 26-Sep-2012 - AnS - Debugger: "Name" button in Bookmarks, total revamp of Bookmarks
 26-Sep-2012 - AnS - Debugger: single click on any address copies this address to the "Seek To" field and "Bookmark Add" field

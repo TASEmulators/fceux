@@ -337,7 +337,7 @@ BEGIN
     BEGIN
         MENUITEM "&NES Memory",                 MENU_MV_VIEW_RAM, CHECKED
         MENUITEM "&PPU Memory",                 MENU_MV_VIEW_PPU
-        MENUITEM "&Rom File",                   MENU_MV_VIEW_ROM
+        MENUITEM "&ROM File",                   MENU_MV_VIEW_ROM
     END
     POPUP "&Bookmarks"
     BEGIN

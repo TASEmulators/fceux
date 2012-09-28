@@ -169,6 +169,8 @@ int FindAsText;
 int FindDirectionUp;
 char FindTextBox[60];
 
+uint32 temp_offset;
+
 extern iNES_HEADER head;
 
 //undo structure
@@ -584,12 +586,53 @@ void UpdateColorTable(){
 	if(EditingMode == 0)FCEUI_ListCheats(UpdateCheatColorCallB,0);
 
 	if(EditingMode == 2){
-		if(cdloggerdata) {
-			for(i = 0;i < DataAmount;i++){
-				if(((uint32)CurOffset+i >= 16) && ((uint32)CurOffset+i < 16+PRGsize[0])) {
-					if((cdloggerdata[i+CurOffset-16]&3) == 3)TextColorList[i]=RGB(0,192,0);
-					if((cdloggerdata[i+CurOffset-16]&3) == 1)TextColorList[i]=RGB(192,192,0);
-					if((cdloggerdata[i+CurOffset-16]&3) == 2)TextColorList[i]=RGB(0,0,192);
+		if(cdloggerdata)
+		{
+			for(i = 0;i < DataAmount;i++)
+			{
+				temp_offset = CurOffset + i - 16;	// (minus iNES header)
+				if (temp_offset >= 0)
+				{
+					if (temp_offset < PRGsize[0])
+					{
+						// PRG
+						if ((cdloggerdata[temp_offset] & 3) == 3)
+						{
+							// the byte is both Code and Data
+							TextColorList[i]=RGB(0,190,0);
+						} else if((cdloggerdata[temp_offset] & 3) == 1)
+						{
+							// the byte is Code - dark-yellow
+							TextColorList[i]=RGB(160,140,0);
+						} else if((cdloggerdata[temp_offset] & 3) == 2)
+						{
+							// the byte is Data - blue/cyan
+							if (cdloggerdata[temp_offset] & 0x40)
+								// PCM data - cyan
+								TextColorList[i]=RGB(0,130,160);
+							else
+								// non-PCM data - blue
+								TextColorList[i]=RGB(0,0,195);
+						}
+					} else
+					{
+						temp_offset -= PRGsize[0];
+						if ((temp_offset < CHRsize[0]))
+						// CHR
+						if ((cdloggerdata[temp_offset] & 3) == 3)
+						{
+							// the byte was both rendered and read programmatically - light-green
+							TextColorList[i]=RGB(5,255,5);
+						} else if((cdloggerdata[temp_offset] & 3) == 1)
+						{
+							// the byte was rendered - yellow
+							TextColorList[i]=RGB(210,190,0);
+						} else if((cdloggerdata[temp_offset] & 3) == 2)
+						{
+							// the byte was read programmatically - light-blue
+							TextColorList[i]=RGB(10,10,255);
+						}
+					}
 				}
 			}
 		}

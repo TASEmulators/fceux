@@ -267,8 +267,7 @@ uint8 GetMem(uint16 A) {
 			case 6: return RefreshAddr&0xFF;
 			case 7: return VRAMBuffer;
 		}
-	}
-	//else if ((A >= 0x4000) && (A < 0x6000)) return 0xFF;	// AnS: removed the dummy
+	} else if ((A >= 0x4000) && (A < 0x5000)) return 0xFF;	// AnS: changed the range, so MMC5 ExRAM can be watched in the Hexeditor
 	if (GameInfo) return ARead[A](A);					 //adelikat: 11/17/09: Prevent crash if this is called with no game loaded.
 	else return 0;
 }
