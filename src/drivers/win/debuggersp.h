@@ -39,7 +39,7 @@ extern int debuggerWasActive;
 
 int checkCondition(const char* buffer, int num);
 void loadNameFiles();
-void decorateAddress(unsigned int addr, char* str);
+void decorateAddress(unsigned int addr, char** str_name, char** str_comment);
 void replaceNames(Name* list, char* str);
 void AddDebuggerBookmark(HWND hwnd);
 void AddDebuggerBookmark2(HWND hwnd, unsigned int addr);

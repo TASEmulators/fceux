@@ -76,7 +76,10 @@ int tracelogbufusedsize;
 char str_axystate[LOG_AXYSTATE_MAX_LEN] = {0}, str_procstatus[LOG_PROCSTATUS_MAX_LEN] = {0};
 char str_tabs[LOG_TABS_MASK+1] = {0}, str_address[LOG_ADDRESS_MAX_LEN] = {0}, str_data[LOG_DATA_MAX_LEN] = {0}, str_disassembly[LOG_DISASSEMBLY_MAX_LEN] = {0};
 char str_temp[LOG_LINE_MAX_LEN] = {0};
-char str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + NL_MAX_NAME_LEN + 10] = {0};
+char* tracer_decoration_name;
+char* tracer_decoration_comment;
+char str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + 2] = {0};
+char str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 2] = {0};
 
 bool log_old_emu_paused = true;		// thanks to this flag the window only updates once after the game is paused
 extern bool JustFrameAdvanced;
@@ -385,7 +388,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			case 1:
 			{
 				sprintf(str_data, "%02X        ", opcode[0]);
-				a = Disassemble(addr, opcode);
+				a = Disassemble(addr + 1, opcode);
 				// special case: an RTS opcode
 				if (opcode[0] == 0x60)
 				{
@@ -399,11 +402,11 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			}
 			case 2:
 				sprintf(str_data, "%02X %02X     ", opcode[0],opcode[1]);
-				a = Disassemble(addr, opcode);
+				a = Disassemble(addr + 2, opcode);
 				break;
 			case 3:
 				sprintf(str_data, "%02X %02X %02X  ", opcode[0],opcode[1],opcode[2]);
-				a = Disassemble(addr, opcode);
+				a = Disassemble(addr + 3, opcode);
 				break;
 		}
 
@@ -412,20 +415,32 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			if (logging_options & LOG_SYMBOLIC)
 			{
 				// Insert Name and Comment lines if needed
-				str_decoration[0] = 0;
-				decorateAddress(addr, str_decoration);
-				if (str_decoration[0])
+				tracer_decoration_name = 0;
+				tracer_decoration_comment = 0;
+				decorateAddress(addr, &tracer_decoration_name, &tracer_decoration_comment);
+				if (tracer_decoration_name)
 				{
-					// divide the str_decoration into strings (Name, Comment1, Comment2, ...)
-					char* start_pos = str_decoration;
-					char* end_pos = strstr(str_decoration, "\r");
+					strcpy(str_decoration, tracer_decoration_name);
+					strcat(str_decoration, ": ");
+					OutputLogLine(str_decoration, true);
+				}
+				if (tracer_decoration_comment)
+				{
+					// make a copy
+					strcpy(str_decoration_comment, tracer_decoration_comment);
+					strcat(str_decoration_comment, "\r\n");
+					tracer_decoration_comment = str_decoration_comment;
+					// divide the str_decoration_comment into strings (Comment1, Comment2, ...)
+					char* end_pos = strstr(tracer_decoration_comment, "\r");
 					while (end_pos)
 					{
 						end_pos[0] = 0;		// set \0 instead of \r
-						OutputLogLine(start_pos, true);
+						strcpy(str_decoration, "// ");
+						strcat(str_decoration, tracer_decoration_comment);
+						OutputLogLine(str_decoration, true);
 						end_pos += 2;
-						start_pos = end_pos;
-						end_pos = strstr(end_pos, "\r");
+						tracer_decoration_comment = end_pos;
+						end_pos = strstr(tracer_decoration_comment, "\r");
 					}
 				}
 				replaceNames(ramBankNames, a);
@@ -601,8 +616,11 @@ void UpdateLogText(void)
 	int i, j;
 	char str[3000];
 	str[0] = 0;
+	int last_line = tracesi.nPos + tracesi.nPage;
+	if (last_line > tracesi.nMax)
+		last_line = tracesi.nMax;
 
-	for(i = tracesi.nPos;i < std::min(tracesi.nMax,tracesi.nPos+21);i++)
+	for(i = tracesi.nPos; i < last_line; i++)
 	{
 		j = i;
 		if(tracelogbufusedsize == tracelogbufsize)

@@ -86,7 +86,9 @@ bool debuggerSaveLoadDEBFiles = true;
 bool debuggerDisplayROMoffsets = false;
 
 char debug_str[35000] = {0};
-char debug_str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + NL_MAX_NAME_LEN + 10] = {0};
+char* debug_decoration_name;
+char* debug_decoration_comment;
+char debug_str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 2] = {0};
 
 // this is used to keep track of addresses that lines of Disassembly window correspont to
 std::vector<unsigned int> disassembly_addresses;
@@ -390,21 +392,34 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 		if (symbDebugEnabled)
 		{
 			// Insert Name and Comment lines if needed
-			debug_str_decoration[0] = 0;
-			decorateAddress(addr, debug_str_decoration);
-			if (debug_str_decoration[0])
+			debug_decoration_name = 0;
+			debug_decoration_comment = 0;
+			decorateAddress(addr, &debug_decoration_name, &debug_decoration_comment);
+			if (debug_decoration_name)
 			{
-				// divide the str_decoration into strings (Name, Comment1, Comment2, ...)
-				char* start_pos = debug_str_decoration;
-				char* end_pos = strstr(debug_str_decoration, "\r");
+				strcat(debug_str, debug_decoration_name);
+				strcat(debug_str, ": \r\n");
+				// we added one line to the disassembly window
+				disassembly_addresses.push_back(addr);
+				i++;
+			}
+			if (debug_decoration_comment)
+			{
+				// make a copy
+				strcpy(debug_str_decoration_comment, debug_decoration_comment);
+				strcat(debug_str_decoration_comment, "\r\n");
+				debug_decoration_comment = debug_str_decoration_comment;
+				// divide the debug_str_decoration_comment into strings (Comment1, Comment2, ...)
+				char* end_pos = strstr(debug_decoration_comment, "\r");
 				while (end_pos)
 				{
 					end_pos[0] = 0;		// set \0 instead of \r
-					strcat(debug_str, start_pos);
+					strcat(debug_str, "// ");
+					strcat(debug_str, debug_decoration_comment);
 					strcat(debug_str, "\r\n");
 					end_pos += 2;
-					start_pos = end_pos;
-					end_pos = strstr(end_pos, "\r");
+					debug_decoration_comment = end_pos;
+					end_pos = strstr(debug_decoration_comment, "\r");
 					// we added one line to the disassembly window
 					disassembly_addresses.push_back(addr);
 					i++;
