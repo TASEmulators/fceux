@@ -281,7 +281,7 @@ int loadDebuggerPreferences(FILE* f)
 		// Read the flags of the BP
 		if (fread(&flags, sizeof(flags), 1, f) != 1) return 1;
 		
-		// Read the length of the BP description
+		// Read the length of the BP condition
 		if (fread(&len, sizeof(len), 1, f) != 1) return 1;
 		
 		// Delete eventual older conditions
@@ -294,7 +294,6 @@ int loadDebuggerPreferences(FILE* f)
 		{
 			// Read the breakpoint condition
 			if (fread(watchpoint[myNumWPs].condText, 1, len, f) != len) return 1;
-			
 			// TODO: Check return value
 			checkCondition(watchpoint[myNumWPs].condText, myNumWPs);
 		}

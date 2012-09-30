@@ -40,7 +40,7 @@ extern bool turbo;
 char *ParseArgies(int argc, char *argv[])
 {         
         static ARGPSTRUCT FCEUArgs[]={
-         {"-pal",0,&pal_emulation,0},
+         {"-pal",&pal_setting_specified,&pal_emulation,0},
          {"-noicon",0,&status_icon,0},
          {"-gg",0,&genie,0},
          {"-no8lim",0,&eoptions,0x8000|EO_NOSPRLIM},

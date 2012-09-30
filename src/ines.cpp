@@ -867,6 +867,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	if(OverwriteVidMode)
 	{
 		if(strstr(name,"(E)") || strstr(name,"(e)")
+			|| strstr(name,"(Europe)") || strstr(name,"(PAL)")
 			|| strstr(name,"(F)") || strstr(name,"(f)")
 			|| strstr(name,"(G)") || strstr(name,"(g)")
 			|| strstr(name,"(I)") || strstr(name,"(i)"))

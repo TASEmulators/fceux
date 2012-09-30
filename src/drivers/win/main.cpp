@@ -144,6 +144,7 @@ double saspectw = 1, saspecth = 1;
 double winsizemulx = 1, winsizemuly = 1;
 int genie = 0;
 int pal_emulation = 0;
+int pal_setting_specified = 0;
 int ntsccol = 0, ntsctint, ntschue;
 std::string BaseDirectory;
 int PauseAfterLoad;
@@ -643,19 +644,19 @@ int main(int argc,char *argv[])
 	// Parse the commandline arguments
 	t = ParseArgies(argc, argv);
 
-	if (ConfigToLoad) cfgFile.assign(ConfigToLoad);
+	int saved_pal_setting = !!pal_emulation;
 
-	//initDirectories();
-
-	// Load the config information
-	sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
-	LoadConfig(TempArray);
+	if (ConfigToLoad)
+	{
+		cfgFile.assign(ConfigToLoad);
+		//initDirectories();
+		// Load the config information
+		sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
+		LoadConfig(TempArray);
+	}
 
 	//Bleh, need to find a better place for this.
 	{
-        pal_emulation = !!pal_emulation;
-        FCEUI_SetVidSystem(pal_emulation);
-
         FCEUI_SetGameGenie(genie!=0);
 
         fullscreen = !!fullscreen;
@@ -676,6 +677,12 @@ int main(int argc,char *argv[])
 		FCEUI_SetSquare2Volume(soundSquare2vol);
 		FCEUI_SetNoiseVolume(soundNoisevol);
 		FCEUI_SetPCMVolume(soundPCMvol);
+	}
+
+	if (!ConfigToLoad)
+	{
+		sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
+		LoadConfig(TempArray);
 	}
 
 	//Since a game doesn't have to be loaded before the GUI can be used, make
@@ -749,6 +756,13 @@ int main(int argc,char *argv[])
 	else if(eoptions & EO_FOAFTERSTART)
 	{
 		LoadNewGamey(hAppWnd, 0);
+	}
+
+	if (pal_setting_specified)
+	{
+		// Force the PAL setting specified in the command line
+        pal_emulation = saved_pal_setting;
+        FCEUI_SetVidSystem(pal_emulation);
 	}
 
 	if(PaletteToLoad)

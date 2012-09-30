@@ -110,24 +110,22 @@ int checkCondition(const char* condition, int num)
 		++b;
 	}
 	
-	// Remove the old breakpoint condition before
-	// adding a new condition.
-	
-	if (watchpoint[num].cond)
-	{
-		freeTree(watchpoint[num].cond);
-		free(watchpoint[num].condText);
 		
-		watchpoint[num].cond = 0;
-		watchpoint[num].condText = 0;
-	}
-			
 	// If there's an actual condition create the BP condition object now
 	
 	if (*condition && !onlySpaces)
 	{
 		Condition* c = generateCondition(condition);
-		
+
+		// Remove the old breakpoint condition before adding a new condition.
+		if (watchpoint[num].cond)
+		{
+			freeTree(watchpoint[num].cond);
+			free(watchpoint[num].condText);
+			watchpoint[num].cond = 0;
+			watchpoint[num].condText = 0;
+		}
+
 		// If the creation of the BP condition object was succesful
 		// the condition is apparently valid. It can be added to the
 		// breakpoint now.
@@ -149,6 +147,14 @@ int checkCondition(const char* condition, int num)
 	}
 	else
 	{
+		// Remove the old breakpoint condition
+		if (watchpoint[num].cond)
+		{
+			freeTree(watchpoint[num].cond);
+			free(watchpoint[num].condText);
+			watchpoint[num].cond = 0;
+			watchpoint[num].condText = 0;
+		}
 		return 0;
 	}
 }
