@@ -596,7 +596,7 @@ int FCEUI_DecodePAR(const char *str, int *a, int *v, int *c, int *type)
 /* name can be NULL if the name isn't going to be changed. */
 /* same goes for a, v, and s(except the values of each one must be <0) */
 
-int FCEUI_SetCheat(uint32 which, const char *name, int32 a, int32 v, int compare,int s, int type)
+int FCEUI_SetCheat(uint32 which, const char *name, int32 a, int32 v, int c, int s, int type)
 {
 	struct CHEATF *next=cheats;
 	uint32 x=0;
@@ -608,8 +608,7 @@ int FCEUI_SetCheat(uint32 which, const char *name, int32 a, int32 v, int compare
 			if(name)
 			{
 				char *t;
-
-				if((t=(char *)realloc(next->name,strlen(name)+1)))
+				if((t=(char *)realloc(next->name, strlen(name)+1)))
 				{
 					next->name=t;
 					strcpy(next->name,name);
@@ -623,8 +622,8 @@ int FCEUI_SetCheat(uint32 which, const char *name, int32 a, int32 v, int compare
 				next->val=v;
 			if(s>=0)
 				next->status=s;
-			if(compare>=0)
-				next->compare=compare;
+			if(c>=-1)
+				next->compare=c;
 			next->type=type;
 
 			savecheats=1;

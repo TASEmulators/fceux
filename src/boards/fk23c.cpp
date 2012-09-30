@@ -217,7 +217,6 @@ static void BMCFK23CPower(void)
   GenMMC3Power();
   EXPREGS[0]=EXPREGS[1]=EXPREGS[2]=EXPREGS[3]=0;
   EXPREGS[4]=EXPREGS[5]=EXPREGS[6]=EXPREGS[7]=0xFF;
-  GenMMC3Power();
   SetWriteHandler(0x5000,0x5fff,BMCFK23CWrite);
   SetWriteHandler(0x8000,0xFFFF,BMCFK23CHiWrite);
   FixMMC3PRG(MMC3_cmd);
@@ -226,8 +225,8 @@ static void BMCFK23CPower(void)
 
 static void BMCFK23CAPower(void)
 {
-  GenMMC3Power();
   dipswitch = 0;
+  GenMMC3Power();
   EXPREGS[0]=EXPREGS[1]=EXPREGS[2]=EXPREGS[3]=0;
   EXPREGS[4]=EXPREGS[5]=EXPREGS[6]=EXPREGS[7]=0xFF;
   SetWriteHandler(0x5000,0x5fff,BMCFK23CWrite);

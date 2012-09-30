@@ -126,6 +126,8 @@
 #define IDC_CHECK_LOG_PROCESSOR_STATUS  111
 #define IDC_DEBUGGER_RELOAD_SYMS        111
 #define IDC_ROMPATCHER_BTN_SAVE         111
+#define IDC_CHEAT_VAL2                  111
+#define IDC_CHEAT_COM                   111
 #define BTN_AUTO_HOLD                   112
 #define IDC_BTN_LOG_BROWSE              112
 #define IDC_DEBUGGER_BOOKMARK_ADD       112

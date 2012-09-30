@@ -60,6 +60,8 @@ char GGcode[10];
 int GGlist[GGLISTSIZE];
 static int dontupdateGG; //this eliminates recursive crashing
 
+bool dodecode;
+
 HWND hGGConv;
 
 void EncodeGG(char *str, int a, int v, int c);
@@ -91,13 +93,19 @@ char *U8ToStr(uint8 a) {
 
 static HWND hwndLB;
 //int RedoCheatsCallB(char *name, uint32 a, uint8 v, int s) { //bbit edited: this commented out line was changed to the below for the new fceud
-int RedoCheatsCallB(char *name, uint32 a, uint8 v, int compare,int s,int type,void*data) {
+int RedoCheatsCallB(char *name, uint32 a, uint8 v, int c, int s, int type, void*data) {
 	char str[259] = { 0 };
 
-	//strcpy(str,(s?"* ":"  "));
-	//strcat(str,name);
-	if(name[0] == 0)sprintf(str,"%s%04X=%02X",s?"* ":"  ",(int)a,(int)v);
-	else sprintf(str,"%s%s",s?"* ":"  ",name);
+	strcpy(str,(s?"* ":"  "));
+	if(name[0] == 0) {
+		if(a >= 0x8000) {
+			EncodeGG(str+2, a, v, c);
+		} else {
+			if(c == -1) sprintf(str+2,"%04X:%02X",(int)a,(int)v);
+			else sprintf(str+2,"%04X?%02X:%02X",(int)a,(int)c,(int)v);
+		}
+	}
+	else strcat(str,name);
 
 	SendDlgItemMessage(hwndLB,IDC_LIST_CHEATS,LB_ADDSTRING,0,(LPARAM)(LPSTR)str);
 	return 1;
@@ -157,6 +165,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 	char *name;
 	uint32 a;
 	uint8 v;
+	int c;
 	int s;
 
 	switch (uMsg) {
@@ -175,6 +184,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 			SendDlgItemMessage(hwndDlg,IDC_CHEAT_ADDR,WM_SETFONT,(WPARAM)hNewFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_CHEAT_VAL,WM_SETFONT,(WPARAM)hNewFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_CHEAT_COM,WM_SETFONT,(WPARAM)hNewFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_CHEAT_VAL_KNOWN,WM_SETFONT,(WPARAM)hNewFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST_POSSIBILITIES,WM_SETFONT,(WPARAM)hNewFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_CHEAT_VAL_NE_BY,WM_SETFONT,(WPARAM)hNewFont,FALSE);
@@ -184,6 +194,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			//text limits
 			SendDlgItemMessage(hwndDlg,IDC_CHEAT_ADDR,EM_SETLIMITTEXT,4,0);
 			SendDlgItemMessage(hwndDlg,IDC_CHEAT_VAL,EM_SETLIMITTEXT,2,0);
+			SendDlgItemMessage(hwndDlg,IDC_CHEAT_COM,EM_SETLIMITTEXT,2,0);
 			SendDlgItemMessage(hwndDlg,IDC_CHEAT_NAME,EM_SETLIMITTEXT,256,0);
 			SendDlgItemMessage(hwndDlg,IDC_CHEAT_VAL_KNOWN,EM_SETLIMITTEXT,2,0);
 			SendDlgItemMessage(hwndDlg,IDC_CHEAT_VAL_NE_BY,EM_SETLIMITTEXT,2,0);
@@ -402,14 +413,34 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							}
 						break;
 						case IDC_BTN_CHEAT_ADD:
+							dodecode = true;
+
 							GetDlgItemText(hwndDlg,IDC_CHEAT_ADDR,str,5);
+							if(str[0] != 0) dodecode = false;
 							a=StrToU16(str);
 							GetDlgItemText(hwndDlg,IDC_CHEAT_VAL,str,3);
+							if(str[0] != 0) dodecode = false;
 							v=StrToU8(str);
+							GetDlgItemText(hwndDlg,IDC_CHEAT_COM,str,3);
+							if(str[0] != 0) dodecode = false;
+							c=(str[0] == 0)?-1:StrToU8(str);
 							GetDlgItemText(hwndDlg,IDC_CHEAT_NAME,str,256);
+							if(dodecode && (strlen(str) == 6 || strlen(str) == 8)) {
+								if(FCEUI_DecodeGG(str, &GGaddr, &GGval, &GGcomp)) {
+									a = GGaddr;
+									v = GGval;
+									c = GGcomp;
+								}
+							}
 //							if (FCEUI_AddCheat(str,a,v)) { //bbit edited: replaced this with the line below
-							if (FCEUI_AddCheat(str,a,v,-1,1)) {
-							if(str[0] == 0)sprintf(str,"%04X=%02X",(int)a,(int)v); //bbit edited: added this line to give your cheat a name if you didn't supply one
+							if (FCEUI_AddCheat(str,a,v,c,1)) {
+								if(str[0] == 0) {
+									if(a >= 0x8000) EncodeGG(str, a, v, c);
+									else {
+										if(c == -1) sprintf(str,"%04X:%02X",(int)a,(int)v); //bbit edited: added this line to give your cheat a name if you didn't supply one
+										else sprintf(str,"%04X?%02X:%02X",(int)a,(int)c,(int)v);
+									}
+								}
 								strcpy(str2,"* ");
 								strcat(str2,str);
 								SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_ADDSTRING,0,(LPARAM)(LPSTR)str2);
@@ -417,9 +448,11 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 								SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_SETCURSEL,selcheat,0);
 								SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_SETSEL,(WPARAM)1,selcheat);
 
-								SetDlgItemText(hwndDlg,IDC_CHEAT_ADDR,(LPTSTR)U16ToStr(a));
-								SetDlgItemText(hwndDlg,IDC_CHEAT_VAL,(LPTSTR)U8ToStr(v));
-
+								SetDlgItemText(hwndDlg,IDC_CHEAT_ADDR,(LPTSTR)"");
+								SetDlgItemText(hwndDlg,IDC_CHEAT_VAL,(LPTSTR)"");
+								SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)"");
+								SetDlgItemText(hwndDlg,IDC_CHEAT_NAME,(LPTSTR)"");
+								
 								EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_DEL),TRUE);
 								EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_UPD),TRUE);
 							}
@@ -439,6 +472,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 									}
 									SetDlgItemText(hwndDlg,IDC_CHEAT_ADDR,(LPTSTR)"");
 									SetDlgItemText(hwndDlg,IDC_CHEAT_VAL,(LPTSTR)"");
+									SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)"");
 									SetDlgItemText(hwndDlg,IDC_CHEAT_NAME,(LPTSTR)"");
 									EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_DEL),FALSE);
 									EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_UPD),FALSE);
@@ -452,6 +486,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 									selcheat=-1;
 									SetDlgItemText(hwndDlg,IDC_CHEAT_ADDR,(LPTSTR)"");
 									SetDlgItemText(hwndDlg,IDC_CHEAT_VAL,(LPTSTR)"");
+									SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)"");
 									SetDlgItemText(hwndDlg,IDC_CHEAT_NAME,(LPTSTR)"");
 								}
 								EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_DEL),FALSE);
@@ -461,19 +496,38 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							}
 							break;
 						case IDC_BTN_CHEAT_UPD:
-							if (selcheat < 0) break;
+							dodecode = true;
 
+							if (selcheat < 0) break;
 							GetDlgItemText(hwndDlg,IDC_CHEAT_ADDR,str,5);
+							if(str[0] != 0) dodecode = false;
 							a=StrToU16(str);
 							GetDlgItemText(hwndDlg,IDC_CHEAT_VAL,str,3);
+							if(str[0] != 0) dodecode = false;
 							v=StrToU8(str);
+							GetDlgItemText(hwndDlg,IDC_CHEAT_COM,str,3);
+							if(str[0] != 0) dodecode = false;
+							c=(str[0] == 0)?-1:StrToU8(str);
 							GetDlgItemText(hwndDlg,IDC_CHEAT_NAME,str,256);
+							if(dodecode && (strlen(str) == 6 || strlen(str) == 8)) {
+								if(FCEUI_DecodeGG(str, &GGaddr, &GGval, &GGcomp)) {
+									a = GGaddr;
+									v = GGval;
+									c = GGcomp;
+								}
+							}
 //							FCEUI_SetCheat(selcheat,str,a,v,-1); //bbit edited: replaced this with the line below
-							FCEUI_SetCheat(selcheat,str,a,v,-1,-1,1);
+							FCEUI_SetCheat(selcheat,str,a,v,c,-1,1);
 //							FCEUI_GetCheat(selcheat,&name,&a,&v,&s); //bbit edited: replaced this with the line below
-							FCEUI_GetCheat(selcheat,&name,&a,&v,NULL,&s,NULL);
+							FCEUI_GetCheat(selcheat,&name,&a,&v,&c,&s,NULL);
 							strcpy(str2,(s?"* ":"  "));
-							if(str[0] == 0)sprintf(str,"%04X=%02X",(int)a,(int)v); //bbit edited: added this line to give your cheat a name if you didn't supply one
+							if(str[0] == 0) {
+								if(a >= 0x8000) EncodeGG(str, a, v, c);
+								else {
+									if(c == -1) sprintf(str,"%04X:%02X",(int)a,(int)v); //bbit edited: added this line to give your cheat a name if you didn't supply one
+									else sprintf(str,"%04X?%02X:%02X",(int)a,(int)c,(int)v);
+								}
+							}
 							strcat(str2,str);
 
 							SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_DELETESTRING,selcheat,0);
@@ -483,6 +537,8 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 							SetDlgItemText(hwndDlg,IDC_CHEAT_ADDR,(LPTSTR)U16ToStr(a));
 							SetDlgItemText(hwndDlg,IDC_CHEAT_VAL,(LPTSTR)U8ToStr(v));
+							if(c == -1)	SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)"");
+							else SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)U8ToStr(c));
 							if(hMemView)UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
 							break;
 						case IDC_BTN_CHEAT_RESET:
@@ -554,13 +610,18 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							for (int selcheattemp=SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_GETCOUNT,0,0)-1;selcheattemp>=0;selcheattemp--) {
 								if (SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_GETSEL,selcheattemp,0)) {
 //									FCEUI_GetCheat(selcheattemp,&name,&a,&v,&s); //bbit edited: replaced this with the line below
-									FCEUI_GetCheat(selcheattemp,&name,&a,&v,NULL,&s,NULL);
+									FCEUI_GetCheat(selcheattemp,&name,&a,&v,&c,&s,NULL);
 //									FCEUI_SetCheat(selcheattemp,0,-1,-1,s^=1);//bbit edited: replaced this with the line below
 									FCEUI_SetCheat(selcheattemp,0,-1,-1,-1,s^=1,1);
-									if(name[0] == 0)sprintf(str,"%s%04X=%02X",s?"* ":"  ",(unsigned int)a,(unsigned int)v);
-									else sprintf(str,"%s%s",s?"* ":"  ",name);
-									//strcpy(str,(s?"* ":"  "));
-									//strcat(str,name);
+									strcpy(str,(s?"* ":"  "));
+									if(name[0] == 0) {
+										if(a >= 0x8000) EncodeGG(str+2, a, v, c);
+										else {
+											if(c == -1) sprintf(str+2,"%04X:%02X",(int)a,(int)v); //bbit edited: added this line to give your cheat a name if you didn't supply one
+											else sprintf(str+2,"%04X?%02X:%02X",(int)a,(int)c,(int)v);
+										}
+									}
+									else strcat(str,name);
 									SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_DELETESTRING,selcheattemp,0);
 									SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_INSERTSTRING,selcheattemp,(LPARAM)(LPSTR)str);
 								}
@@ -579,10 +640,12 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							selcheatcount = SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_GETSELCOUNT,0,0);
 							if (selcheat < 0) break;
 
-							FCEUI_GetCheat(selcheat,&name,&a,&v,NULL,&s,NULL);
+							FCEUI_GetCheat(selcheat,&name,&a,&v,&c,&s,NULL);
 							SetDlgItemText(hwndDlg,IDC_CHEAT_NAME,(LPTSTR)name);
 							SetDlgItemText(hwndDlg,IDC_CHEAT_ADDR,(LPTSTR)U16ToStr(a));
 							SetDlgItemText(hwndDlg,IDC_CHEAT_VAL,(LPTSTR)U8ToStr(v));
+							if(c == -1)	SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)"");
+							else SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)U8ToStr(c));
 
 							EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_DEL),TRUE);
 							EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_UPD),TRUE);
@@ -601,6 +664,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							SetDlgItemText(hwndDlg,IDC_CHEAT_ADDR,(LPTSTR)str2);
 							strcpy(str2,str+13);
 							SetDlgItemText(hwndDlg,IDC_CHEAT_VAL,(LPTSTR)str2);
+							SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)"");
 							break;
 					}
 					break;
@@ -802,6 +866,8 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 									SetDlgItemText(hCheat,IDC_CHEAT_ADDR,(LPTSTR)U16ToStr(GGaddr));
 									SetDlgItemText(hCheat,IDC_CHEAT_VAL,(LPTSTR)U8ToStr(GGval));
+									if(GGcomp == -1) SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)"");
+									else SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)U8ToStr(GGcomp));
 
 									EnableWindow(GetDlgItem(hCheat,IDC_BTN_CHEAT_DEL),TRUE);
 									EnableWindow(GetDlgItem(hCheat,IDC_BTN_CHEAT_UPD),TRUE);
