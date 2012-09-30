@@ -38,6 +38,5 @@ extern bool log_old_emu_paused;
 void EnableTracerMenuItems(void);
 void LogInstruction(void);
 void DoTracer();
-//void PauseLoggingSequence();
 void UpdateLogWindow(void);
 void OutputLogLine(const char *str, bool add_newline = true);

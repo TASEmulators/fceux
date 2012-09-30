@@ -69,10 +69,9 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				UINT len;
 				char *ftmp;
 
-				len=DragQueryFile((HDROP)wParam,0,0,0)+1; 
-				if((ftmp=(char*)malloc(len))) 
-				{
-					DragQueryFile((HDROP)wParam,0,ftmp,len); 
+				len=DragQueryFile((HDROP)wParam,0,0,0)+1;
+				if((ftmp=(char*)malloc(len))) {
+					DragQueryFile((HDROP)wParam,0,ftmp,len);
 					string fileDropped = ftmp;
 					//adelikat:  Drag and Drop only checks file extension, the internal functions are responsible for file error checking
 					//-------------------------------------------------------
@@ -87,7 +86,7 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						std::string str = "Could not open " + fileDropped;
 						MessageBox(hwndDlg, str.c_str(), "File error", 0);
 					}
-				}            
+				}
 			}
 
 			break;
@@ -126,8 +125,7 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								if((logging) && (logging_options & LOG_NEW_INSTRUCTIONS)){
 									MessageBox(hCDLogger,
 "The Trace logger is currently using this for some of its features.\
- Please turn the trace logger off and try again.","Unable to Pause Code/Data Logger",
-MB_OK);
+ Please turn the trace logger off and try again.","Unable to Pause Code/Data Logger", MB_OK);
 									break;
 								}
 			FCEUI_SetLoggingCD(0);
@@ -161,8 +159,7 @@ MB_OK);
 								if((logging) && (logging_options & LOG_NEW_INSTRUCTIONS)){
 									MessageBox(hCDLogger,
 "The Trace logger is currently using this for some of its features.\
- Please turn the trace logger off and try again.","Unable to Pause Code/Data Logger",
-MB_OK);
+ Please turn the trace logger off and try again.","Unable to Pause Code/Data Logger", MB_OK);
 									break;
 								}
 								FCEUI_SetLoggingCD(0);
@@ -267,7 +264,7 @@ void LoadCDLogFile(){
 void SaveCDLogFileAs()
 {
 	const char filter[]="Code Data Log File (*.CDL)\0*.cdl\0All Files (*.*)\0*.*\0\0";
-	char nameo[2048]; 
+	char nameo[2048];
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
@@ -280,25 +277,24 @@ void SaveCDLogFileAs()
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.hwndOwner = hCDLogger;
-	if(!GetSaveFileName(&ofn))return;
+	if(!GetSaveFileName(&ofn))
+		return;
 	strcpy(loadedcdfile,nameo);
 	SaveCDLogFile();
-	return;
 }
 
 void SaveCDLogFile(){ //todo make this button work before you've saved as
 	FILE *FP;
 	FP = fopen(loadedcdfile,"wb");
-	if(FP == NULL)
+	if(FP == NULL) // removed deadly recurrence
 	{
-		SaveCDLogFileAs();
+		FCEUD_PrintError("Error Saving File");
 		return;
 	}
 	fwrite(cdloggerdata,PRGsize[0],1,FP);
 	if(VROM_size)
 		fwrite(cdloggervdata,CHRsize[0],1,FP);
 	fclose(FP);
-	return;
 }
 
 void DoCDLogger()
@@ -320,7 +316,7 @@ void DoCDLogger()
 
 void UpdateCDLogger(){
 	if(!hCDLogger)return;
-	
+
 	char str[50];
 	float fcodecount = codecount;
 	float fdatacount = datacount;
@@ -330,7 +326,7 @@ void UpdateCDLogger(){
 	float fundefinedvromcount = undefinedvromcount;
 	float fromsize = PRGsize[0];
 	float fvromsize = VROM_size ? CHRsize[0] : 1;
-	
+
 	sprintf(str,"0x%06x %.2f%%",codecount,fcodecount/fromsize*100);
 	SetDlgItemText(hCDLogger,LBL_CDLOGGER_CODECOUNT,str);
 	sprintf(str,"0x%06x %.2f%%",datacount,fdatacount/fromsize*100);
@@ -392,7 +388,7 @@ void SaveStrippedRom(int invert){ //this is based off of iNesSave()
 		//static uint16 LoadAddr;
 		//LoadAddr=NSFHeader.LoadAddressLow;
 		//LoadAddr|=(NSFHeader.LoadAddressHigh&0x7F)<<8;
-		
+
 		//Simple store/restore for writing a working NSF header
 		NSFLoadLow = NSFHeader.LoadAddressLow;
 		NSFLoadHigh = NSFHeader.LoadAddressHigh;
@@ -401,7 +397,7 @@ void SaveStrippedRom(int invert){ //this is based off of iNesSave()
 		fwrite(&NSFHeader,1,0x8,fp);
 		NSFHeader.LoadAddressLow = NSFLoadLow;
 		NSFHeader.LoadAddressHigh = NSFLoadHigh;
-		
+
 		fseek(fp,0x8,SEEK_SET);
 		for(i = 0;i < ((NSFMaxBank+1)*4096);i++){
 			unsigned char pchar;
@@ -437,21 +433,14 @@ void SaveStrippedRom(int invert){ //this is based off of iNesSave()
 
 		if(VROM_size)
 		{
-			if(!newppu)
-			{
-				for(i = 0; i < (int)CHRsize[0]; i++)
-				{
-					unsigned char vchar;
-					if(cdloggervdata[i] & 1)
-						vchar = invert?0:VROM[i];
-					else
-						vchar = invert?VROM[i]:0;
-					fputc(vchar, fp);
-				}
-			} else
-			{
-				// since old ppu doesn't log VROM access, just dump it to the file
-				fwrite(VROM,CHRsize[0],1,fp);
+			// since an old ppu at least log the 2007 ppu read accesses, so need to save anyway...
+			for(i = 0; i < (int)CHRsize[0]; i++) {
+				unsigned char vchar;
+				if(cdloggervdata[i] & 3)
+					vchar = invert?0:VROM[i];
+				else
+					vchar = invert?VROM[i]:0;
+				fputc(vchar, fp);
 			}
 		}
 	}

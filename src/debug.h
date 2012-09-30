@@ -73,7 +73,7 @@ uint8 GetPPUMem(uint8 A);
 
 //---------CDLogger
 void LogCDVectors(int which);
-void LogCDData();
+void LogCDData(uint8 *opcode, uint16 A, int size);
 extern volatile int codecount, datacount, undefinedcount;
 extern unsigned char *cdloggerdata;
 

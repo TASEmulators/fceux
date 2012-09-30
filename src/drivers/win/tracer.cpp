@@ -88,9 +88,7 @@ int Tracer_wndx=0, Tracer_wndy=0;
 
 void ShowLogDirDialog(void);
 void BeginLoggingSequence(void);
-void LogInstruction(void);
 void EndLoggingSequence(void);
-//void PauseLoggingSequence(void);
 void UpdateLogWindow(void);
 void UpdateLogText(void);
 void EnableTracerMenuItems(void);
@@ -240,7 +238,6 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 								string pauseMessage = m1 + m2 + m3;
 								SetDlgItemText(hTracer, IDC_TRACER_LOG, pauseMessage.c_str());
 							}
-							//PauseLoggingSequence();
 							break;
 						}
 						case IDC_BTN_LOG_BROWSE:
@@ -255,39 +252,35 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 
 
-	//if (logging && !logtofile) {
-		switch(uMsg) {
-			case WM_VSCROLL:
-				if (lParam) {
-					//if ((!logging) || (logging && logtofile))break;
-					//if(!(logging && !logtofile))break;
-					if ((!logging) || logtofile) break;
+	switch(uMsg) {
+		case WM_VSCROLL:
+			if (lParam) {
+				if ((!logging) || logtofile) break;
 
-					if(!FCEUI_EmulationPaused() && !log_update_window) break; //mbg merge 7/19/06 changd to use EmulationPaused()
+				if(!FCEUI_EmulationPaused() && !log_update_window) break; //mbg merge 7/19/06 changd to use EmulationPaused()
 
-					GetScrollInfo((HWND)lParam,SB_CTL,&tracesi);
-					switch(LOWORD(wParam))
-					{
-						case SB_ENDSCROLL:
-						case SB_TOP:
-						case SB_BOTTOM: break;
-						case SB_LINEUP: tracesi.nPos--; break;
-						case SB_LINEDOWN:tracesi.nPos++; break;
-						case SB_PAGEUP: tracesi.nPos -= tracesi.nPage; break;
-						case SB_PAGEDOWN: tracesi.nPos += tracesi.nPage; break;
-						case SB_THUMBPOSITION: //break;
-						case SB_THUMBTRACK: tracesi.nPos = tracesi.nTrackPos; break;
-					}
-					if ((tracesi.nPos + (int)tracesi.nPage) > tracesi.nMax)
-						tracesi.nPos = tracesi.nMax - (int)tracesi.nPage;
-					if (tracesi.nPos < tracesi.nMin)
-						tracesi.nPos = tracesi.nMin;
-					SetScrollInfo((HWND)lParam,SB_CTL,&tracesi,TRUE);
-					UpdateLogText();
+				GetScrollInfo((HWND)lParam,SB_CTL,&tracesi);
+				switch(LOWORD(wParam))
+				{
+					case SB_ENDSCROLL:
+					case SB_TOP:
+					case SB_BOTTOM: break;
+					case SB_LINEUP: tracesi.nPos--; break;
+					case SB_LINEDOWN:tracesi.nPos++; break;
+					case SB_PAGEUP: tracesi.nPos -= tracesi.nPage; break;
+					case SB_PAGEDOWN: tracesi.nPos += tracesi.nPage; break;
+					case SB_THUMBPOSITION: //break;
+					case SB_THUMBTRACK: tracesi.nPos = tracesi.nTrackPos; break;
 				}
-				break;
-		}
-	//}
+				if ((tracesi.nPos + (int)tracesi.nPage) > tracesi.nMax)
+					tracesi.nPos = tracesi.nMax - (int)tracesi.nPage;
+				if (tracesi.nPos < tracesi.nMin)
+					tracesi.nPos = tracesi.nMin;
+				SetScrollInfo((HWND)lParam,SB_CTL,&tracesi,TRUE);
+				UpdateLogText();
+			}
+			break;
+	}
 	return FALSE;
 }
 
@@ -342,50 +335,15 @@ void BeginLoggingSequence(void)
 	SetDlgItemText(hTracer, IDC_BTN_START_STOP_LOGGING,"Stop Logging");
 	return;
 }
-/*
-void LogInstructionOld(){
-	char str[96], chr[32];
-	int addr=X.PC;
-	int size, j;
-	uint8 opcode[3];
-
-	sprintf(str, "$%04X:", addr);
-	if ((size = opsize[GetMem(addr)]) == 0) {
-		sprintf(chr, "%02X        UNDEFINED", GetMem(addr)); addr++;
-		strcat(str,chr);
-	}
-	else {
-		if ((addr+size) > 0xFFFF) {
-			sprintf(chr, "%02X        OVERFLOW", GetMem(addr));
-			strcat(str,chr);
-			goto done;
-		}
-		for (j = 0; j < size; j++) {
-			sprintf(chr, "%02X ", opcode[j] = GetMem(addr)); addr++;
-			strcat(str,chr);
-		}
-		while (size < 3) {
-			strcat(str,"   "); //pad output to align ASM
-			size++;
-		}
-		strcat(strcat(str," "),BinToASM(addr,opcode));
-	}
-done:
-	strcat(str,"\n");
-	if(logtofile){
-		fprintf(LOG_FP,str);
-	}
-}*/
 
 //todo: really speed this up
-void FCEUD_TraceInstruction()
+void FCEUD_TraceInstruction(uint8 *opcode, int size)
 {
 	if (!logging)
 		return;
 
 	unsigned int addr = X.PC;
-	int size, j;
-	uint8 opcode[3], tmp;
+	uint8 tmp;
 	static int unloggedlines;
 
 	if(((logging_options & LOG_NEW_INSTRUCTIONS) && (oldcodecount != codecount)) ||
@@ -411,10 +369,9 @@ void FCEUD_TraceInstruction()
 		}
 	}
 
-	size = opsize[GetMem(addr)];
-	if ((addr+size) > 0xFFFF)
+	if ((addr + size) > 0xFFFF)
 	{
-		sprintf(str_data, "%02X        ", GetMem(addr&0xFFFF));
+		sprintf(str_data, "%02X        ", opcode[0]);
 		sprintf(str_disassembly, "OVERFLOW");
 	} else
 	{
@@ -422,12 +379,11 @@ void FCEUD_TraceInstruction()
 		switch (size)
 		{
 			case 0:
-				sprintf(str_data, "%02X        ", GetMem(addr));
+				sprintf(str_data, "%02X        ", opcode[0]);
 				sprintf(str_disassembly,"UNDEFINED");
 				break;
 			case 1:
 			{
-				opcode[0]=GetMem(addr++);
 				sprintf(str_data, "%02X        ", opcode[0]);
 				a = Disassemble(addr, opcode);
 				// special case: an RTS opcode
@@ -442,15 +398,10 @@ void FCEUD_TraceInstruction()
 				break;
 			}
 			case 2:
-				opcode[0]=GetMem(addr++);
-				opcode[1]=GetMem(addr++);
 				sprintf(str_data, "%02X %02X     ", opcode[0],opcode[1]);
 				a = Disassemble(addr, opcode);
 				break;
 			case 3:
-				opcode[0]=GetMem(addr++);
-				opcode[1]=GetMem(addr++);
-				opcode[2]=GetMem(addr++);
 				sprintf(str_data, "%02X %02X %02X  ", opcode[0],opcode[1],opcode[2]);
 				a = Disassemble(addr, opcode);
 				break;
@@ -462,7 +413,7 @@ void FCEUD_TraceInstruction()
 			{
 				// Insert Name and Comment lines if needed
 				str_decoration[0] = 0;
-				decorateAddress(X.PC, str_decoration);
+				decorateAddress(addr, str_decoration);
 				if (str_decoration[0])
 				{
 					// divide the str_decoration into strings (Name, Comment1, Comment2, ...)
@@ -490,16 +441,16 @@ void FCEUD_TraceInstruction()
 		// special case: an RTS opcode
 		// add "----------" to emphasize the end of subroutine
 		strcat(str_disassembly, " ");
-		for (int j = strlen(str_disassembly); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
-			str_disassembly[j] = '-';
+		for (int i = strlen(str_disassembly); i < (LOG_DISASSEMBLY_MAX_LEN - 1); ++i)
+			str_disassembly[i] = '-';
 		str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
 	} else
 	{
 		// stretch the disassembly string out if we have to output other stuff.
 		if ((logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)) && !(logging_options & LOG_TO_THE_LEFT))
 		{
-			for (j = strlen(str_disassembly); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
-				str_disassembly[j] = ' ';
+			for (int i = strlen(str_disassembly); i < (LOG_DISASSEMBLY_MAX_LEN - 1); ++i)
+				str_disassembly[i] = ' ';
 			str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
 		}
 	}
@@ -551,7 +502,7 @@ void FCEUD_TraceInstruction()
 		strcat(str_temp, str_tabs);
 	}
 
-	sprintf(str_address, "$%04X:", X.PC);
+	sprintf(str_address, "$%04X:", addr);
 	strcat(str_temp, str_address);
 	strcat(str_temp, str_data);
 	strcat(str_temp, str_disassembly);
@@ -612,7 +563,6 @@ void EndLoggingSequence(void){
 
 }
 
-//void PauseLoggingSequence(void){
 void UpdateLogWindow(void)
 {
 	//we don't want to continue if the trace logger isn't logging, or if its logging to a file.
@@ -651,13 +601,6 @@ void UpdateLogText(void)
 	int i, j;
 	char str[3000];
 	str[0] = 0;
-	/*
-	for(i = 21;i > 0;i--){
-		j = tracelogbufpos-i-1;
-		if((tracelogbufusedsize == tracelogbufsize) && (j < 0))j = tracelogbufsize+j;	
-		if(j >= 0)strcat(str,tracelogbuf[j]);
-	}
-	*/
 
 	for(i = tracesi.nPos;i < std::min(tracesi.nMax,tracesi.nPos+21);i++)
 	{
@@ -675,14 +618,6 @@ void UpdateLogText(void)
 }
 
 void EnableTracerMenuItems(void){
-
-	//if(logging_options & LOG_NEW_INSTRUCTIONS){
-		//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_DATA),TRUE);
-	//} else {
-	//	CheckDlgButton(hTracer, IDC_CHECK_LOG_NEW_DATA, BST_UNCHECKED);
-		//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_DATA),FALSE);
-	//}
-
 	if(logging)
 	{
 		EnableWindow(GetDlgItem(hTracer,IDC_RADIO_LOG_LAST),FALSE);
@@ -711,21 +646,6 @@ void EnableTracerMenuItems(void){
 		EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_UPDATE_WINDOW),TRUE);
 	}
 
-/*
-	if(FCEUI_GetLoggingCD()){
-			EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_INSTRUCTIONS),TRUE);
-		if(logging_options & LOG_NEW_INSTRUCTIONS){
-			EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_DATA),TRUE);
-		} else EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_DATA),FALSE);
-	}
-	else{
-			EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_INSTRUCTIONS),FALSE);
-			EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_DATA),FALSE);
-			CheckDlgButton(hTracer, IDC_CHECK_LOG_NEW_INSTRUCTIONS, BST_UNCHECKED);
-			CheckDlgButton(hTracer, IDC_CHECK_LOG_NEW_DATA, BST_UNCHECKED);
-			logging_options &= 3;
-	}
-*/
 	return;
 }
 
@@ -736,47 +656,45 @@ int PromptForCDLogger(void){
  the Code/Data Logger must also be running.\
  Would you like to Start the Code/Data Logger Now?","Start Code/Data Logger?",
 			MB_YESNO) == IDYES){
-				DoCDLogger();
-				FCEUI_SetLoggingCD(1);
-				//EnableTracerMenuItems();
-				SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Pause");
-				return 1;
-			}
+			DoCDLogger();
+			FCEUI_SetLoggingCD(1);
+			SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Pause");
+			return 1;
+		}
 		return 0; //user selected no so 0 is returned
 	}
 	return 1;
 }
 
 void ShowLogDirDialog(void){
- const char filter[]="6502 Trace Log File (*.log)\0*.log;*.txt\0" "6502 Trace Log File (*.txt)\0*.log;*.txt\0All Files (*.*)\0*.*\0\0"; //'" "' used to prevent octal conversion on the numbers
- char nameo[2048];
- OPENFILENAME ofn;
- memset(&ofn,0,sizeof(ofn));
- ofn.lStructSize=sizeof(ofn);
- ofn.hInstance=fceu_hInstance;
- ofn.lpstrTitle="Log Trace As...";
- ofn.lpstrFilter=filter;
- strcpy(nameo,GetRomName());
- ofn.lpstrFile=nameo;
- ofn.nMaxFile=256;
- ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
- ofn.hwndOwner = hTracer;
- if(GetSaveFileName(&ofn)){
-	if (ofn.nFilterIndex == 1)
-		AddExtensionIfMissing(nameo, sizeof(nameo), ".log");
-	else if (ofn.nFilterIndex == 2)
-		AddExtensionIfMissing(nameo, sizeof(nameo), ".txt");
-
-	if(logfilename)free(logfilename);
-	logfilename = (char*)malloc(strlen(nameo)+1); //mbg merge 7/19/06 added cast
-	strcpy(logfilename,nameo);
- }
- return;
+	const char filter[]="6502 Trace Log File (*.log)\0*.log;*.txt\0" "6502 Trace Log File (*.txt)\0*.log;*.txt\0All Files (*.*)\0*.*\0\0"; //'" "' used to prevent octal conversion on the numbers
+	char nameo[2048];
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=fceu_hInstance;
+	ofn.lpstrTitle="Log Trace As...";
+	ofn.lpstrFilter=filter;
+	strcpy(nameo,GetRomName());
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
+	ofn.hwndOwner = hTracer;
+	if(GetSaveFileName(&ofn)){
+		if (ofn.nFilterIndex == 1)
+			AddExtensionIfMissing(nameo, sizeof(nameo), ".log");
+		else if (ofn.nFilterIndex == 2)
+			AddExtensionIfMissing(nameo, sizeof(nameo), ".txt");
+		if(logfilename)
+			free(logfilename);
+		logfilename = (char*)malloc(strlen(nameo)+1); //mbg merge 7/19/06 added cast
+		strcpy(logfilename,nameo);
+	}
+	return;
 }
 
 void DoTracer()
 {
-
 	if (!GameInfo) {
 		FCEUD_PrintError("You must have a game loaded before you can use the Trace Logger.");
 		return;
@@ -792,7 +710,6 @@ void DoTracer()
 		//hTracer gets set in WM_INITDIALOG
 	} else
 	{
-		//SetWindowPos(hTracer,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 		ShowWindow(hTracer, SW_SHOWNORMAL);
 		SetForegroundWindow(hTracer);
 	}

@@ -220,7 +220,8 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	char str[8] = {0};
 	int tmp;
 				
-	switch(uMsg) {
+	switch(uMsg)
+	{
 		case WM_INITDIALOG:
 			CenterWindow(hwndDlg);
 			SendDlgItemMessage(hwndDlg,IDC_ADDBP_ADDR_START,EM_SETLIMITTEXT,4,0);
@@ -600,16 +601,6 @@ int *GetEditHexData(HWND hwndDlg, int id){
 	data[j>>1]=-1;
 	return data;
 }
-
-/*
-int GetEditStack(HWND hwndDlg) {
-	char str[85];
-	int tmp;
-	GetDlgItemText(hwndDlg,IDC_DEBUGGER_STACK_CONTENTS,str,85);
-	sscanf(str,"%2x,%2x,%2x,%2x,\r\n",&tmp);
-	return tmp;
-}
-*/
 
 void UpdateRegs(HWND hwndDlg) {
 	if (DebuggerWasUpdated) {
@@ -1123,9 +1114,10 @@ BOOL CALLBACK PatcherCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 				case BN_CLICKED:
 					switch(LOWORD(wParam)) {
 						case IDC_ROMPATCHER_BTN_EDIT: //todo: maybe get rid of this button and cause iapoffset to update every time you change the text
-							if(IsDlgButtonChecked(hwndDlg,IDC_ROMPATCHER_DOTNES_OFFSET) == BST_CHECKED){
+							if(IsDlgButtonChecked(hwndDlg,IDC_ROMPATCHER_DOTNES_OFFSET) == BST_CHECKED)
 								iapoffset = GetEditHex(hwndDlg,IDC_ROMPATCHER_OFFSET);
-							} else iapoffset = GetNesFileAddress(GetEditHex(hwndDlg,IDC_ROMPATCHER_OFFSET));
+							else
+								iapoffset = GetNesFileAddress(GetEditHex(hwndDlg,IDC_ROMPATCHER_OFFSET));
 							if((iapoffset < 16) && (iapoffset != -1)){
 								MessageBox(hDebug, "Sorry, iNes Header editing isn't supported", "Error", MB_OK);
 								iapoffset = -1;
@@ -1477,13 +1469,13 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			break;
 		case WM_MOVE:
 			if (!IsIconic(hwndDlg)) {
-			GetWindowRect(hwndDlg,&wrect);
-			DbgPosX = wrect.left;
-			DbgPosY = wrect.top;
+				GetWindowRect(hwndDlg,&wrect);
+				DbgPosX = wrect.left;
+				DbgPosY = wrect.top;
 
-			#ifdef WIN32
-			WindowBoundsCheckResize(DbgPosX,DbgPosY,DbgSizeX,wrect.right);
-			#endif
+				#ifdef WIN32
+				WindowBoundsCheckResize(DbgPosX,DbgPosY,DbgSizeX,wrect.right);
+				#endif
 			}
 			break;
 
@@ -1607,11 +1599,6 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 			case WM_KEYDOWN:
 				MessageBox(hwndDlg,"Die!","I'm dead!",MB_YESNO|MB_ICONINFORMATION);
-				//i=0;
-				//if(uMsg == WM_KEYDOWN){
-				//	if(wParam == VK_PRIOR) i = -1;
-				//	if(wParam == VK_NEXT) i = 1;
-				//}
 				break;
 
 			case WM_MOUSEMOVE:
@@ -1739,18 +1726,16 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								}
 								break;
 							case IDC_DEBUGGER_STEP_IN:
-								if (FCEUI_EmulationPaused()) {
+								if (FCEUI_EmulationPaused())
 									UpdateRegs(hwndDlg);
-								}
 								FCEUI_Debugger().step = true;
 								FCEUI_SetEmulationPaused(0);
 								UpdateOtherDebuggingDialogs();
 								
 								break;
 							case IDC_DEBUGGER_RUN_LINE:
-								if (FCEUI_EmulationPaused()) {
+								if (FCEUI_EmulationPaused())
 									UpdateRegs(hwndDlg);
-								}
 								FCEUI_Debugger().runline = true;
 								{
 									uint64 ts=timestampbase;
@@ -1764,9 +1749,8 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								UpdateOtherDebuggingDialogs();
 								break;
 							case IDC_DEBUGGER_RUN_FRAME2:
-								if (FCEUI_EmulationPaused()) {
+								if (FCEUI_EmulationPaused())
 									UpdateRegs(hwndDlg);
-								}
 								FCEUI_Debugger().runline = true;
 								{
 									uint64 ts=timestampbase;

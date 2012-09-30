@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Нейтральный resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
@@ -1586,8 +1586,8 @@ BEGIN
     LTEXT           "Itsa me the Code/Data Logger! Press Start to play!",65530,69,80,172,12
     PUSHBUTTON      "Reset Log",BTN_CDLOGGER_RESET,7,90,50,14
     PUSHBUTTON      "Save as...",BTN_CDLOGGER_SAVE_AS,257,90,50,14
-    PUSHBUTTON      "Save Stripped iNes Rom...",BTN_CDLOGGER_SAVE_STRIPPED,208,126,99,14
-    PUSHBUTTON      "Save Unused Data...",BTN_CDLOGGER_SAVE_UNUSED,208,141,99,14
+    PUSHBUTTON      "Save Stripped iNes Rom...",BTN_CDLOGGER_SAVE_STRIPPED,208,125,99,14
+    PUSHBUTTON      "Save Unused Data...",BTN_CDLOGGER_SAVE_UNUSED,208,140,99,14
     LTEXT           "4067 - 29.5%",LBL_CDLOGGER_RENDERCOUNT,40,60,68,11
     GROUPBOX        "CHR Rendered",-1,29,50,84,27
     GROUPBOX        "CHR Logged as Data",-1,117,50,84,27
@@ -2124,12 +2124,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Нейтральный resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Английский (США) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -2363,7 +2363,7 @@ IDB_BITMAP_SELECTED17   BITMAP                  "res\\te_17_selected.bmp"
 IDB_BITMAP_SELECTED18   BITMAP                  "res\\te_18_selected.bmp"
 IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
-#endif    // Английский (США) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

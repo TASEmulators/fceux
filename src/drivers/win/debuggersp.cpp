@@ -710,7 +710,7 @@ void AddDebuggerBookmark(HWND hwnd)
 void DeleteDebuggerBookmark(HWND hwnd)
 {
 	// Get the selected bookmark
-	int selectedItem = SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_GETCURSEL, 0, 0);
+	unsigned int selectedItem = SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_GETCURSEL, 0, 0);
 	
 	if (selectedItem == LB_ERR)
 	{
