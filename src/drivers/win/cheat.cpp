@@ -612,7 +612,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 //									FCEUI_GetCheat(selcheattemp,&name,&a,&v,&s); //bbit edited: replaced this with the line below
 									FCEUI_GetCheat(selcheattemp,&name,&a,&v,&c,&s,NULL);
 //									FCEUI_SetCheat(selcheattemp,0,-1,-1,s^=1);//bbit edited: replaced this with the line below
-									FCEUI_SetCheat(selcheattemp,0,-1,-1,-1,s^=1,1);
+									FCEUI_SetCheat(selcheattemp,0,-1,-1,-2,s^=1,1);
 									strcpy(str,(s?"* ":"  "));
 									if(name[0] == 0) {
 										if(a >= 0x8000) EncodeGG(str+2, a, v, c);

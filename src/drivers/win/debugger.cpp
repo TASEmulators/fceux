@@ -414,7 +414,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 				while (end_pos)
 				{
 					end_pos[0] = 0;		// set \0 instead of \r
-					strcat(debug_str, "// ");
+					strcat(debug_str, "; ");
 					strcat(debug_str, debug_decoration_comment);
 					strcat(debug_str, "\r\n");
 					end_pos += 2;

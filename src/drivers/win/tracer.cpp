@@ -435,7 +435,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 					while (end_pos)
 					{
 						end_pos[0] = 0;		// set \0 instead of \r
-						strcpy(str_decoration, "// ");
+						strcpy(str_decoration, "; ");
 						strcat(str_decoration, tracer_decoration_comment);
 						OutputLogLine(str_decoration, true);
 						end_pos += 2;
