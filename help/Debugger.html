@@ -254,9 +254,10 @@
 <p><br/></p>
 <p><span class="rvts45">Symbolic Debugging</span></p>
 <p><br/></p>
-<p>This feature makes it possible to rename addresses in the disassembly window (e.g. $C022) to easily understandable names (e.g. AddHealthpoints). You can also add comments to lines in the disassembly window. You can enable symbolic debugging by clicking the checkbox "Symbolic Debugging".</p>
+<p>This feature makes it possible to rename addresses in the disassembly window (e.g. $C022) to easily understandable names (e.g. AddHealthpoints). You can also add comments to lines in the disassembly window. You can enable symbolic debugging by clicking the checkbox "Symbolic Debug".</p>
 <p><br/></p>
-<p>To use this feature, create name list files (Filename should be like this: *.(bank).nl / *.ram.nl, <span class="rvts15">Example:</span> NES Test Cart (PD).nes.0.nl, NES Test Cart (PD).nes.ram.nl) which contain all names and comments you wish to display in the disassembly window. These are ASCII files.</p>
+<p>To use this feature, create name list files (Filename should be like this: *.(bank).nl / *.ram.nl, <span class="rvts15">Example:</span> NES Test Cart (PD).nes.0.nl, NES Test Cart (PD).nes.ram.nl) which contain names and comments you wish to display in the disassembly window. These files are simple ASCII text files.</p>
+<p><br/></p>
 <p><span class="rvts15">Example of contents of a NL file:</span></p>
 <p><br/></p>
 <p>$C000#NewName1#Comment1</p>
@@ -280,7 +281,7 @@
 <p>mygame.nes.2.nl</p>
 <p>mygame.nes.3.nl</p>
 <p><br/></p>
-<p>All NL files must be into the same directory as the ROM file itself.</p>
+<p>All NL files must be in the same directory as the ROM file itself.</p>
 <p><br/></p>
 <p>In the *.ram.nl file you can name and comment RAM addresses instead of ROM addresses. In this case, you might use a line such as:</p>
 <p><br/></p>

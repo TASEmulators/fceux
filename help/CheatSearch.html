@@ -88,9 +88,11 @@
 <p><br/></p>
 <p>The Active cheats window on the left contains the list of cheats for the currently loaded game. Existing cheats can be selected, edited, and updated using the "Update" button.</p>
 <p><br/></p>
-<p>Each entry in the list is in the format of: &nbsp;* Address = Value</p>
+<p>Each entry in the list can be named. If you didn't provide a name, it will be automatically named using this format:</p>
+<p>For simple "Substitute" type of cheats: * Address:Value</p>
+<p>For "Compare" type of cheats: * Address?Compare:Value</p>
 <p><br/></p>
-<p>The address is the location in the 6502's address space. &nbsp;The * denotes that the current cheat is active (double clicking will toggle on/off). &nbsp;Value is the value (in hex) that the addresses has been locked into.</p>
+<p>The "Address" is the location in the 6502's address space. &nbsp;The * denotes that the current cheat is active (double clicking will toggle on/off). "Value" is the value (in hex) that is written to the addresses on each update. "Compare" it the value that must be at the address, or else the Value won't be written there. This allows making cheats more safe.</p>
 <p><br/></p>
 <p>You can add, delete, and update cheats in the active cheats window with the boxes below.</p>
 <p>To find an address use the cheat search portion of the window.</p>
