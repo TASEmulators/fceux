@@ -312,7 +312,7 @@ void PLAYBACK::MiddleButtonClick()
 					jump(selection_beginning);
 					SeekingStart(saved_currFrameCounter);
 				}
-			} else if (GetLostPosition() > currFrameCounter && greenzone.SavestateIsEmpty(GetLostPosition()))
+			} else if (GetLostPosition() >= greenzone.GetSize())
 			{
 				RestorePosition();
 			} else

@@ -641,6 +641,11 @@ int main(int argc,char *argv[])
 	// Get the base directory
 	GetBaseDirectory();
 
+	// load fceux.cfg
+	sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
+	LoadConfig(TempArray);
+	//initDirectories();
+
 	// Parse the commandline arguments
 	t = ParseArgies(argc, argv);
 
@@ -648,8 +653,8 @@ int main(int argc,char *argv[])
 
 	if (ConfigToLoad)
 	{
+		// alternative config file specified
 		cfgFile.assign(ConfigToLoad);
-		//initDirectories();
 		// Load the config information
 		sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
 		LoadConfig(TempArray);
@@ -677,12 +682,6 @@ int main(int argc,char *argv[])
 		FCEUI_SetSquare2Volume(soundSquare2vol);
 		FCEUI_SetNoiseVolume(soundNoisevol);
 		FCEUI_SetPCMVolume(soundPCMvol);
-	}
-
-	if (!ConfigToLoad)
-	{
-		sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
-		LoadConfig(TempArray);
 	}
 
 	//Since a game doesn't have to be loaded before the GUI can be used, make
