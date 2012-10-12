@@ -260,7 +260,6 @@ span.rvts44 /* Font Style */
 span.rvts45
 {
  font-size: 11pt;
- font-weight: bold;
  color: #000000;
 }
 span.rvts46
@@ -336,109 +335,115 @@ span.rvts59
 {
  color: #000000;
 }
-a.rvts60, span.rvts60
+span.rvts60
 {
  font-size: 11pt;
- color: #0000ff;
- text-decoration: underline;
+ font-weight: bold;
+ color: #000000;
 }
-a.rvts60:hover { color: #0000ff; }
 a.rvts61, span.rvts61
 {
+ font-size: 11pt;
  color: #0000ff;
  text-decoration: underline;
 }
 a.rvts61:hover { color: #0000ff; }
-span.rvts62
+a.rvts62, span.rvts62
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts62:hover { color: #0000ff; }
+span.rvts63
 {
  font-size: 11pt;
  text-decoration: underline;
 }
-span.rvts63
+span.rvts64
 {
 }
-span.rvts64
+span.rvts65
 {
  font-size: 11pt;
  color: #0a8200;
 }
-span.rvts65
+span.rvts66
 {
  font-size: 9pt;
  font-weight: bold;
 }
-a.rvts66, span.rvts66
+a.rvts67, span.rvts67
 {
  font-size: 9pt;
  font-weight: bold;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts66:hover { color: #0000ff; }
-span.rvts67
+a.rvts67:hover { color: #0000ff; }
+span.rvts68
 {
  font-weight: bold;
  color: #ffffff;
 }
-span.rvts68
+span.rvts69
 {
  font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
  color: #000080;
 }
-span.rvts69 /* Font Style */
+span.rvts70 /* Font Style */
 {
  font-size: 11pt;
  font-style: italic;
  color: #243f60;
 }
-span.rvts70 /* Font Style */
+span.rvts71 /* Font Style */
 {
  font-size: 11pt;
  color: #333399;
 }
-a.rvts71, span.rvts71
+a.rvts72, span.rvts72
 {
  font-size: 11pt;
  font-weight: bold;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts71:hover { color: #0000ff; }
-span.rvts72
+a.rvts72:hover { color: #0000ff; }
+span.rvts73
 {
  font-size: 11pt;
  font-style: italic;
  font-weight: bold;
-}
-span.rvts73
-{
- font-size: 24pt;
- text-decoration: underline;
 }
 span.rvts74
 {
  font-size: 24pt;
  text-decoration: underline;
 }
-a.rvts75, span.rvts75
+span.rvts75
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+a.rvts76, span.rvts76
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts75:hover { color: #0000ff; }
-a.rvts76, span.rvts76
+a.rvts76:hover { color: #0000ff; }
+a.rvts77, span.rvts77
 {
  font-weight: bold;
  color: #ffffff;
  text-decoration: underline;
 }
-a.rvts76:hover { color: #0000ff; }
-span.rvts77
+a.rvts77:hover { color: #0000ff; }
+span.rvts78
 {
  color: #ffffff;
 }
-span.rvts78
+span.rvts79
 {
  color: #333399;
 }

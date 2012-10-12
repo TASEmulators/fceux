@@ -57,11 +57,11 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">Первоначально TAS Editor базировался на коде экспериментального инструмента TASEdit из FCEUX 2.1.5.</span></p>
 <p class="rvps10"><span class="rvts22">TASEdit представлял из себя редактор Ввода (в духе TAS Movie Editor), встроенный в эмулятор, чтобы сократить время между редактированием и просмотром участков. Так как при разработке TASEdit не проводилось исследование принципов и закономерностей ТАСинга, у авторов TASEdit не было чёткого видения финального инструмента, и имеющийся код не был расширяемым. Поэтому вскоре после начала разработки TAS Editor его код был полностью переписан, чтобы облегчить дальнейшее расширение функционала.</span></p>
-<p class="rvps10"><span class="rvts22">Архитектура Тасэдитора спроектирована, исходя из авторских представлений о методическом ТАСинге и о необходимом функционале для облегчения такого ТАСинга.</span></p>
+<p class="rvps10"><span class="rvts22">Нижеописанная архитектура Тасэдитора спроектирована, исходя из авторских представлений о методическом ТАСинге и о необходимом функционале для облегчения такого ТАСинга.</span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
-<p class="rvps10"><span class="rvts74">Программные модули (классы)</span></p>
+<p class="rvps10"><span class="rvts75">Программные модули (классы)</span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">taseditor.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Main – главный шлюз между эмулятором и Тасэдитором (Main gate between emulator and Taseditor)</span></p>
@@ -329,7 +329,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
-<p class="rvps10"><span class="rvts74">Модификация эмулятора</span></p>
+<p class="rvps10"><span class="rvts75">Модификация эмулятора</span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">Тасэдитор требует внесения следующих модификаций в код самого эмулятора.</span></p>
@@ -339,7 +339,7 @@
 <li class="rvps10"><span class="rvts22">вызывать центральную функцию Тасэдитора после эмуляции каждого кадра, а также, когда эмулятор на паузе. Частота вызова должна быть не менее 20 раз в секунду (это требуется для плавности анимаций)</span></li>
 <li class="rvps10"><span class="rvts22">передавать системные сообщения окну Тасэдитора, в том числе сообщения клавиатурных акселераторов</span></li>
 <li class="rvps10"><span class="rvts22">если эмулятор не использует колесо мыши, он должен пересылать WM_MOUSEWHEEL Тасэдитору, а не игнорировать это сообщение. То же самое с обработкой средней кнопки</span></li>
-<li class="rvps10"><span class="rvts22">при выходе из эмулятора, если запущен Тасэдитор, необходимо вызывать функцию AskSave(), чтобы Тасэдитор проверил наличие несохранённых изменений и позволил пользователю сохранить их. Если функция AskSave() возвращает </span><span class="rvts70">false</span><span class="rvts22">, отменять выход из эмулятора (это означает, что пользователь выбрал Отмену)</span></li>
+<li class="rvps10"><span class="rvts22">при выходе из эмулятора, если запущен Тасэдитор, необходимо вызывать функцию AskSave(), чтобы Тасэдитор проверил наличие несохранённых изменений и позволил пользователю сохранить их. Если функция AskSave() возвращает </span><span class="rvts71">false</span><span class="rvts22">, отменять выход из эмулятора (это означает, что пользователь выбрал Отмену)</span></li>
 </ul>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В модуль, ответственный за </span><span class="rvts26">Movie</span><span class="rvts22">:</span></p>
@@ -371,8 +371,8 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В модуль, ответственный за </span><span class="rvts26">Config</span><span class="rvts22">:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts22">при запуске эмулятор должен загружать данные </span><span class="rvts70">taseditor_config</span><span class="rvts22"> из файла общих настроек эмулятора, если же файл не найден, не трогать </span><span class="rvts70">taseditor_config</span><span class="rvts22"> (тогда в нём останутся настроки по умолчанию)</span></li>
-<li class="rvps10"><span class="rvts22">при выходе эмулятор должен сохранять данные </span><span class="rvts70">taseditor_config</span><span class="rvts22"> в файл общих настроек</span></li>
+<li class="rvps10"><span class="rvts22">при запуске эмулятор должен загружать данные </span><span class="rvts71">taseditor_config</span><span class="rvts22"> из файла общих настроек эмулятора, если же файл не найден, не трогать </span><span class="rvts71">taseditor_config</span><span class="rvts22"> (тогда в нём останутся настроки по умолчанию)</span></li>
+<li class="rvps10"><span class="rvts22">при выходе эмулятор должен сохранять данные </span><span class="rvts71">taseditor_config</span><span class="rvts22"> в файл общих настроек</span></li>
 </ul>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В модуль, ответственный за </span><span class="rvts26">Lua engine</span><span class="rvts22">:</span></p>

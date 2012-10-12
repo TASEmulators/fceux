@@ -167,32 +167,32 @@ span.rvts32
 }
 span.rvts33
 {
+ font-weight: bold;
+}
+span.rvts34
+{
  font-size: 16pt;
  text-decoration: underline;
 }
-a.rvts34, span.rvts34
+a.rvts35, span.rvts35
 {
  font-size: 12pt;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts34:hover { color: #0000ff; }
-span.rvts35
+a.rvts35:hover { color: #0000ff; }
+span.rvts36
 {
  font-size: 24pt;
 }
-span.rvts36
+span.rvts37
 {
  font-size: 14pt;
  text-decoration: underline;
 }
-span.rvts37
-{
- font-family: 'Courier New', 'Courier', monospace;
-}
 span.rvts38
 {
- font-weight: bold;
+ font-family: 'Courier New', 'Courier', monospace;
 }
 span.rvts39
 {

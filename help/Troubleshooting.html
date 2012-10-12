@@ -59,10 +59,12 @@
 <p><br/></p>
 <p><span class="rvts41">Slow emulation / Sound crackle</span></p>
 <p><br/></p>
-<p>FCEUX may not run well on slower CPU's. &nbsp;You can improve performance by setting sound to low quality in the<a class="rvts18" href="SoundOptions.html"> Sound Dialog</a>. &nbsp;In addition, for windowed mode try enabling hardware acceleration in the <a class="rvts18" href="Video.html">Video config</a> dialog.</p>
+<p>FCEUX may not run well on slower CPU's. &nbsp;You can improve performance by setting sound to low quality in the<a class="rvts18" href="SoundOptions.html"> Sound Dialog</a>.</p>
+<p>In addition, for windowed mode try enabling hardware acceleration in the <a class="rvts18" href="Video.html">Video config</a> dialog.</p>
+<p>Also ensure that you're using the Old PPU, because the New PPU engine is very slow. Check Config -&gt; PPU -&gt; Old PPU.</p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts41">Emulated picture is kinda blurred</span></p>
+<p><span class="rvts41">Emulated picture is blurred</span></p>
 <p><br/></p>
 <p>Disable hardware acceleration in the <a class="rvts18" href="Video.html">Video config</a> dialog.</p>
 <p><br/></p>
@@ -74,7 +76,8 @@
 <p><br/></p>
 <p><span class="rvts41">"The colors in game X do not look right"</span></p>
 <p><br/></p>
-<p>FCEUX uses the color palette of the old FCEU / FCEUXD branches. &nbsp;However, FCEUX comes pre-packaged with several additional color palettes. &nbsp;For more information see <a class="rvts18" href="Palette.html">Palette config</a> and <a class="rvts18" href="PaletteOptions.html">Palette options</a>.</p>
+<p>There's no such thing as a universally right palette for NES games.</p>
+<p>FCEUX uses the color palette of the old FCEU / FCEUXD branches. Also FCEUX comes pre-packaged with several additional color palettes. For more information see <a class="rvts18" href="Palette.html">Palette config</a> and <a class="rvts18" href="PaletteOptions.html">Palette options</a>.</p>
 <p><br/></p>
 <p><br/></p>
 <p><span class="rvts41">"I converted a .fcm file to .fm2 but the .fm2 desyncs"</span></p>
@@ -84,21 +87,11 @@
 <p>In addition, the .fm2 conversion tool has had some issues on certain operating systems including Vista and Mac.</p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts41">"When I attempt to load a Lua script I get an error / crash"</span></p>
-<p><br/></p>
-<p>Double check you have the Lua .dll files that came packaged with FCEUX 2.1. &nbsp;They must be in the /dll folder from the root directory (where fceux.exe is stored).</p>
-<p><br/></p>
-<p> </p>
-<p><span class="rvts41">"Directdraw: Error creating secondary surface"</span></p>
-<p><br/></p>
-<p>Currently this error will happen when attempting to do Full screen mode on Windows Vista. &nbsp;In addition, there has been one reported case of this happening on the 32-bit version of Windows XP. &nbsp;This is a known issue with FCEUX that has not yet been resolved.</p>
-<p><br/></p>
-<p><br/></p>
 <p><span class="rvts41">"Can't find FDS Bios image when I attempt to load a .fds game!"</span></p>
 <p><br/></p>
-<p>FCEUX requires the FDS Bios to be named disksys.rom. &nbsp;It must be located in the root directory (where fceux.exe is stored) or in the folder of the FDS Directory override (see <a class="rvts18" href="Directories.html">Directory overrides</a>).</p>
+<p>FCEUX requires the FDS Bios to be named <span class="rvts33">disksys.rom</span>. &nbsp;It must be located in the root directory (where fceux.exe is stored) or in the folder of the FDS Directory override (see <a class="rvts18" href="Directories.html">Directory overrides</a>).</p>
 <p><br/></p>
-<p>In addition, there are some bad versions of disksys.rom. &nbsp;The one FDS requires is 8192 bytes.</p>
+<p>In addition, there are some bad versions of disksys.rom. &nbsp;The one FDS requires is 8192 bytes in size.</p>
 <p><br/></p>
 <p><br/></p>
 <p><span class="rvts41">"How can I use Netplay / Where can I get FCEU Server?"</span></p>
@@ -108,7 +101,7 @@
 <p><br/></p>
 <p><span class="rvts41">"I have a Game Genie rom, how can I use it with FCEUX?" </span></p>
 <p><br/></p>
-<p>While FCEUX has a <a class="rvts18" href="GameGenieEncoderDecoder.html">Game Genie code converter</a>, you can also use game genie codes with the game genie rom. &nbsp;It must be named gg.rom and be placed in the root directory (where fceux.exe is stored). &nbsp;You must also check NES &gt; Game Genie in the main menu.</p>
+<p>While FCEUX has a <a class="rvts18" href="GameGenieEncoderDecoder.html">Game Genie code converter</a>, you can also use game genie codes with the game genie rom. &nbsp;It must be named gg.rom and be placed in the root directory (where fceux.exe is stored). &nbsp;You must also check NES -&gt; Game Genie in the main menu.</p>
 <p><br/></p>
 <p><br/></p>
 <p><br/></p>
