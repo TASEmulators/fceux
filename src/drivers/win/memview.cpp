@@ -60,7 +60,8 @@ using namespace std;
 
 string memviewhelp = "{06F7BBD5-399E-4CA0-8E4E-75BE0ACC525A}"; //Hex Editor Help Page
 
-int HexRowHeightBorder = 0;	//adelikat:  This will determine the number of pixels between rows in the hex editor, to alter this, the user can change it in the .cfg file, changing one will revert to the way FCEUX2.1.0 did it
+int HexRowHeightBorder = 0;		//adelikat:  This will determine the number of pixels between rows in the hex editor, to alter this, the user can change it in the .cfg file, changing one will revert to the way FCEUX2.1.0 did it
+int HexCharSpacing = 1;		// pixels between chars
 
 // Partial List of Color Definitions
 int HexBackColorR = 255;	// White
@@ -401,14 +402,13 @@ void UnloadTableFile(){
 void UpdateMemoryView(int draw_all)
 {
 	if (!hMemView) return;
-	int MemFontWidth = debugSystem->fixedFontWidth;
-	int MemFontHeight = debugSystem->fixedFontHeight + HexRowHeightBorder;
+	int MemFontWidth = debugSystem->HexeditorFontWidth + HexCharSpacing;
+	int MemFontHeight = debugSystem->HexeditorFontHeight + HexRowHeightBorder;
 
 	int i, j;
 	//LPVOID lpMsgBuf;
 	//int curlength;
 	char str[100];
-	char str2[100];
 	
 	/*
 	if(draw_all){
@@ -430,42 +430,57 @@ void UpdateMemoryView(int draw_all)
 	TextOut(HDataDC,0,0,str,strlen(str));
 	}
 	} else {*/
-	for(i = CurOffset;i < CurOffset+DataAmount;i+=16){
-		if((OldCurOffset != CurOffset) || draw_all){
+	for(i = CurOffset;i < CurOffset+DataAmount;i+=16)
+	{
+		if((OldCurOffset != CurOffset) || draw_all)
+		{
 			MoveToEx(HDataDC,0,MemFontHeight*((i-CurOffset)/16),NULL);
 			SetTextColor(HDataDC,RGB(HexForeColorR,HexForeColorG,HexForeColorB));	//addresses text color			000 = black, 255255255 = white
 			SetBkColor(HDataDC,RGB(HexBackColorR,HexBackColorG,HexBackColorB));		//addresses back color
 			sprintf(str,"%06X: ",i);
 			TextOut(HDataDC,0,0,str,strlen(str));
 		}
-		for(j = 0;j < 16;j++){
-			if((CursorEndAddy == -1) && (CursorStartAddy == i+j)){ //print up single highlighted text
-				sprintf(str,"%02X",GetMemViewData(CursorStartAddy));
+		for(j = 0;j < 16;j++)
+		{
+			if((CursorEndAddy == -1) && (CursorStartAddy == i+j))
+			{
+				//print up single highlighted text
 				OldValues[i+j-CurOffset] = -1; //set it to redraw this one next time
-				MoveToEx(HDataDC,8*MemFontWidth+(j*3*MemFontWidth),MemFontHeight*((i-CurOffset)/16),NULL);
-				if(TempData != -1){
-					// Typing New Data
-					sprintf(str2,"%X",TempData);
+				MoveToEx(HDataDC, 8 * MemFontWidth + (j * 3 * MemFontWidth), MemFontHeight * ((i - CurOffset) / 16), NULL);
+				if(TempData != -1)
+				{
+					// User is typing New Data
+					// 1st nybble
+					sprintf(str,"%X",TempData);
 					SetBkColor(HDataDC,RGB(255,255,255));
 					SetTextColor(HDataDC,RGB(255,0,0));
-					TextOut(HDataDC,0,0,str2,1);
+					TextOut(HDataDC,0,0,str,1);
+					// 2nd nybble
+					MoveToEx(HDataDC, MemFontWidth + 8 * MemFontWidth + (j * 3 * MemFontWidth), MemFontHeight * ((i - CurOffset) / 16), NULL);
+					sprintf(str,"%X",GetMemViewData(CursorStartAddy) % 16);
 					SetTextColor(HDataDC,RGB(HexBackColorR,HexBackColorG,HexBackColorB));
 					SetBkColor(HDataDC,RGB(HexForeColorR,HexForeColorG,HexForeColorB));
-					TextOut(HDataDC,0,0,&str[1],1);
-				} else {
+					TextOut(HDataDC, 0, 0, str, 1);
+				} else
+				{
 					// Selecting a Single Byte
+					sprintf(str,"%X",(int)(GetMemViewData(CursorStartAddy) / 16));
 					SetTextColor(HDataDC,RGB(255,255,255));		//single address highlight
 					SetBkColor(HDataDC,RGB(0,0,0));
 					TextOut(HDataDC,0,0,str,1);
+					// 2nd nybble
+					MoveToEx(HDataDC, MemFontWidth + 8 * MemFontWidth + (j * 3 * MemFontWidth), MemFontHeight * ((i - CurOffset) / 16), NULL);
+					sprintf(str,"%X",GetMemViewData(CursorStartAddy) % 16);
 					SetTextColor(HDataDC,TextColorList[i+j-CurOffset]);	//single address highlight 2nd address
 					SetBkColor(HDataDC,RGB(HexBackColorR,HexBackColorG,HexBackColorB));
-					TextOut(HDataDC,0,0,&str[1],1);
+					TextOut(HDataDC,0,0,str,1);
 				}
-				TextOut(HDataDC,0,0," ",1);
+				//TextOut(HDataDC,0,0," ",1);
 
-				SetTextColor(HDataDC,RGB(255,255,255));			//single addres highlight - right column
+				//single addres highlight - right column
+				SetTextColor(HDataDC,RGB(255,255,255));
 				SetBkColor(HDataDC,RGB(0,0,0));
-				MoveToEx(HDataDC,(59+j)*MemFontWidth,MemFontHeight*((i-CurOffset)/16),NULL); //todo: try moving this above the for loop
+				MoveToEx(HDataDC, (59 + j) * MemFontWidth, MemFontHeight * ((i - CurOffset) / 16), NULL); //todo: try moving this above the for loop
 				str[0] = chartable[GetMemViewData(i+j)];
 				if(str[0] < 0x20)str[0] = 0x2E;
 				if(str[0] > 0x7e)str[0] = 0x2E;
@@ -474,12 +489,16 @@ void UpdateMemoryView(int draw_all)
 
 				continue;
 			}
-			if((OldValues[i+j-CurOffset] != GetMemViewData(i+j)) || draw_all){
-				MoveToEx(HDataDC,8*MemFontWidth+(j*3*MemFontWidth),MemFontHeight*((i-CurOffset)/16),NULL);
+			if((OldValues[i+j-CurOffset] != GetMemViewData(i+j)) || draw_all)
+			{
+				MoveToEx(HDataDC, 8 * MemFontWidth + (j * 3 * MemFontWidth), MemFontHeight * ((i - CurOffset) / 16),NULL);
 				SetTextColor(HDataDC,TextColorList[i+j-CurOffset]);//(8+j*3)*MemFontWidth
 				SetBkColor(HDataDC,BGColorList[i+j-CurOffset]);
-				sprintf(str,"%02X ",GetMemViewData(i+j));
-				TextOut(HDataDC,0,0,str,strlen(str));
+				sprintf(str,"%X", (int)(GetMemViewData(i+j) / 16));
+				TextOut(HDataDC, 0, 0, str, 1);
+				MoveToEx(HDataDC, MemFontWidth + 8 * MemFontWidth + (j * 3 * MemFontWidth), MemFontHeight * ((i - CurOffset) / 16),NULL);
+				sprintf(str,"%X", GetMemViewData(i+j) % 16);
+				TextOut(HDataDC, 0, 0, str, 1);
 
 				MoveToEx(HDataDC,(59+j)*MemFontWidth,MemFontHeight*((i-CurOffset)/16),NULL); //todo: try moving this above the for loop
 				str[0] = chartable[GetMemViewData(i+j)];
@@ -490,7 +509,8 @@ void UpdateMemoryView(int draw_all)
 				if(CursorStartAddy != i+j)OldValues[i+j-CurOffset] = GetMemViewData(i+j);
 			}
 		}
-		if(draw_all){
+		if(draw_all)
+		{
 			MoveToEx(HDataDC,56*MemFontWidth,MemFontHeight*((i-CurOffset)/16),NULL);
 			SetTextColor(HDataDC,RGB(HexForeColorR,HexForeColorG,HexForeColorB));	//Column separator
 			SetBkColor(HDataDC,RGB(HexBackColorR,HexBackColorG,HexBackColorB));
@@ -928,12 +948,14 @@ void ChangeMemViewFocus(int newEditingMode, int StartOffset,int EndOffset){
 }
 
 
-int GetHexScreenCoordx(int offset){
-	return (8*debugSystem->fixedFontWidth)+((offset%16)*3*debugSystem->fixedFontWidth); //todo: add Curoffset to this and to below function
+int GetHexScreenCoordx(int offset)
+{
+	return (8 * (debugSystem->HexeditorFontWidth + HexCharSpacing)) + ((offset % 16) * 3 * (debugSystem->HexeditorFontWidth + HexCharSpacing)); //todo: add Curoffset to this and to below function
 }
 
-int GetHexScreenCoordy(int offset){
-	return (offset/16)*(debugSystem->fixedFontHeight+HexRowHeightBorder);
+int GetHexScreenCoordy(int offset)
+{
+	return (offset / 16) * (debugSystem->HexeditorFontHeight + HexRowHeightBorder);
 }
 
 //0000E0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  : ................
@@ -942,8 +964,8 @@ int GetHexScreenCoordy(int offset){
 //if the mouse wasn't in any range, this function returns -1
 int GetAddyFromCoord(int x,int y)
 {
-	int MemFontWidth = debugSystem->fixedFontWidth;
-	int MemFontHeight = debugSystem->fixedFontHeight + HexRowHeightBorder;
+	int MemFontWidth = debugSystem->HexeditorFontWidth + HexCharSpacing;
+	int MemFontHeight = debugSystem->HexeditorFontHeight + HexRowHeightBorder;
 
 	if(y < 0)y = 0;
 	if(x < 8*MemFontWidth)x = 8*MemFontWidth+1;
@@ -1016,8 +1038,8 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	SCROLLINFO si;
 	int x, y, i, j;
 	int tempAddy;
-	const int MemFontWidth = debugSystem->fixedFontWidth;
-	const int MemFontHeight = debugSystem->fixedFontHeight + HexRowHeightBorder;
+	const int MemFontWidth = debugSystem->HexeditorFontWidth;
+	const int MemFontHeight = debugSystem->HexeditorFontHeight + HexRowHeightBorder;
 
 	char c[2];
 	char str[100];
@@ -1045,7 +1067,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		// ################################## End of SP CODE ###########################
 		mDC = GetDC(hwnd);
 		HDataDC = mDC;//deleteme
-		SelectObject (HDataDC, debugSystem->hFixedFont);
+		SelectObject (HDataDC, debugSystem->hHexeditorFont);
 		SetTextAlign(HDataDC,TA_UPDATECP | TA_TOP | TA_LEFT);
 
 		GetTextMetrics (HDataDC, &tm);

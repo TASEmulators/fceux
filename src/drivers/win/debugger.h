@@ -50,6 +50,11 @@ public:
 	HFONT hFixedFont;
 	int fixedFontWidth;
 	int fixedFontHeight;
+
+	HFONT hHexeditorFont;
+	int HexeditorFontWidth;
+	int HexeditorFontHeight;
+
 } *debugSystem;
 
 

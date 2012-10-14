@@ -2014,15 +2014,26 @@ DebugSystem::DebugSystem()
 		ANSI_CHARSET,OUT_DEVICE_PRECIS,CLIP_MASK, /*charset, precision, clipping*/
 		DEFAULT_QUALITY, DEFAULT_PITCH, /*quality, and pitch*/
 		"Courier New"); /*font name*/
- 
+
+	hHexeditorFont = CreateFont(14, 8, /*Height,Width*/
+		0,0, /*escapement,orientation*/
+		FW_REGULAR,FALSE,FALSE,FALSE, /*weight, italic, underline, strikeout*/
+		ANSI_CHARSET,OUT_DEVICE_PRECIS,CLIP_MASK, /*charset, precision, clipping*/
+		DEFAULT_QUALITY, DEFAULT_PITCH, /*quality, and pitch*/
+		"Courier New"); /*font name*/
+
 	HDC hdc = GetDC(GetDesktopWindow());
 	HGDIOBJ old = SelectObject(hdc,hFixedFont);
 	TEXTMETRIC tm;
 	GetTextMetrics(hdc,&tm);
 	fixedFontHeight = tm.tmHeight;
 	fixedFontWidth = tm.tmAveCharWidth;
-	printf("fixed font height: %d\n",fixedFontHeight);
-	printf("fixed font width: %d\n",fixedFontWidth);
+	//printf("fixed font height: %d\n",fixedFontHeight);
+	//printf("fixed font width: %d\n",fixedFontWidth);
+	SelectObject(hdc, hHexeditorFont);
+	GetTextMetrics(hdc,&tm);
+	HexeditorFontHeight = tm.tmHeight;
+	HexeditorFontWidth = tm.tmAveCharWidth;
 	SelectObject(hdc,old);
 	DeleteDC(hdc);
 }
@@ -2030,5 +2041,6 @@ DebugSystem::DebugSystem()
 DebugSystem::~DebugSystem()
 {
 	DeleteObject(hFixedFont);
+	DeleteObject(hHexeditorFont);
 }
 
