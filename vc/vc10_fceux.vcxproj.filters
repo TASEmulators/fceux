@@ -973,6 +973,12 @@
     <ClCompile Include="..\src\mappers\156.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\boards\cityfighter.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\ks7057.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">
@@ -1488,7 +1494,6 @@
       <Filter>drivers\win\res</Filter>
     </None>
     <None Include="..\src\pputile.inc" />
-    <None Include="ClassDiagram1.cd" />
     <None Include="..\src\drivers\win\res\branch_spritesheet.bmp">
       <Filter>pix</Filter>
     </None>
