@@ -9,6 +9,8 @@ extern PALETTEENTRY *color_palette;
 //extern WAVEFORMATEX wf;
 //extern int soundo;
 
+extern int soundrate;
+
 #define VIDEO_STREAM	0
 #define AUDIO_STREAM	1
 
@@ -48,6 +50,9 @@ static struct AVIFile
 	int					end_scanline;
 	
 	long				tBytes, ByteBuffer;
+
+	u8					audio_buffer[44100*2*2]; // ~ 1 second buffer
+	int					audio_buffer_pos;
 } *avi_file = NULL;
 
 struct VideoSystemInfo
@@ -89,6 +94,15 @@ static void avi_create(struct AVIFile** avi_out)
 	AVIFileInit();
 }
 
+static int avi_audiosegment_size(struct AVIFile* avi_out)
+{
+	if(!avi_out || !avi_out->valid || !avi_out->sound_added)
+		return 0;
+
+	assert(avi_out->wave_format.nAvgBytesPerSec <= sizeof(avi_out->audio_buffer));
+	return avi_out->wave_format.nAvgBytesPerSec;
+}
+
 static void avi_destroy(struct AVIFile** avi_out)
 {
 	if(!(*avi_out))
@@ -98,6 +112,18 @@ static void avi_destroy(struct AVIFile** avi_out)
 	{
 		if((*avi_out)->compressed_streams[AUDIO_STREAM])
 		{
+			if ((*avi_out)->audio_buffer_pos > 0) {
+				if(FAILED(AVIStreamWrite(avi_file->compressed_streams[AUDIO_STREAM],
+				                         avi_file->sound_samples, (*avi_out)->audio_buffer_pos / (*avi_out)->wave_format.nBlockAlign,
+				                         (*avi_out)->audio_buffer, (*avi_out)->audio_buffer_pos, 0, NULL, &avi_file->ByteBuffer)))
+				{
+					avi_file->valid = 0;
+				}
+				(*avi_out)->sound_samples += (*avi_out)->audio_buffer_pos / (*avi_out)->wave_format.nBlockAlign;
+				(*avi_out)->tBytes += avi_file->ByteBuffer;
+				(*avi_out)->audio_buffer_pos = 0;
+			}
+
 			LONG test = AVIStreamClose((*avi_out)->compressed_streams[AUDIO_STREAM]);
 			(*avi_out)->compressed_streams[AUDIO_STREAM] = NULL;
 			(*avi_out)->streams[AUDIO_STREAM] = NULL;				// compressed_streams[AUDIO_STREAM] is just a copy of streams[AUDIO_STREAM]
@@ -164,8 +190,10 @@ static int avi_open(const char* filename, const BITMAPINFOHEADER* pbmih, const W
 		// set video size and framerate
 		avi_file->start_scanline = vsi->start_scanline;
 		avi_file->end_scanline = vsi->end_scanline;
-		avi_file->fps = vsi->fps;
-		avi_file->fps_scale = 16777216-1;
+		//zero 20-oct-2012 - AVIFileClose has bugs in it which cause overflows in the calculation of dwTotalFrames, so some programs are unhappy with the resulting files.
+		//so I reduced the precision here by the minimum number of shifts necessary to make it not overflow
+		avi_file->fps = vsi->fps >> 3;
+		avi_file->fps_scale = (16 * 1024 * 1024) >> 3;
 		avi_file->convert_buffer = (uint8*)malloc(VIDEO_WIDTH*(vsi->end_scanline-vsi->start_scanline)*3);
 
 		// open the file
@@ -239,6 +267,7 @@ static int avi_open(const char* filename, const BITMAPINFOHEADER* pbmih, const W
 		avi_file->sound_samples = 0;
 		avi_file->tBytes = 0;
 		avi_file->ByteBuffer = 0;
+		avi_file->audio_buffer_pos = 0;
 
 		// success
 		error = 0;
@@ -318,7 +347,7 @@ int FCEUI_AviBegin(const char* fname)
 	vsi.end_scanline++;
 
 	memset(&bi, 0, sizeof(bi));
-	bi.biSize = 0x28;    
+	bi.biSize = sizeof(BITMAPINFOHEADER);    
 	bi.biPlanes = 1;
 	bi.biBitCount = 24;
 	bi.biWidth = VIDEO_WIDTH;
@@ -326,7 +355,6 @@ int FCEUI_AviBegin(const char* fname)
 	bi.biSizeImage = 3 * bi.biWidth * bi.biHeight;
 
 	//mbg 6/27/08 -- this was originally labeled as hacky..
-	extern int soundrate;
 	WAVEFORMATEX wf;
 	wf.cbSize = sizeof(WAVEFORMATEX);
 	wf.nAvgBytesPerSec = soundrate * 2;
@@ -400,22 +428,31 @@ void FCEUI_AviVideoUpdate(const unsigned char* buffer)
 
 void FCEUI_AviSoundUpdate(void* soundData, int soundLen)
 {
-	int nBytes;
-
 	if(!avi_file || !avi_file->valid || !avi_file->sound_added)
 		return;
 
-	nBytes = soundLen * avi_file->wave_format.nBlockAlign;
-    if(FAILED(AVIStreamWrite(avi_file->compressed_streams[AUDIO_STREAM],
-                             avi_file->sound_samples, soundLen,
-                             soundData, nBytes, 0, NULL, &avi_file->ByteBuffer)))
-	{
-		avi_file->valid = 0;
-		return;
-	}
+	const int audioSegmentSize = avi_audiosegment_size(avi_file);
+	const int samplesPerSegment = audioSegmentSize / avi_file->wave_format.nBlockAlign;
+	const int soundSize = soundLen * avi_file->wave_format.nBlockAlign;
+	int nBytes = soundSize;
+	while (avi_file->audio_buffer_pos + nBytes > audioSegmentSize) {
+		const int bytesToTransfer = audioSegmentSize - avi_file->audio_buffer_pos;
+		memcpy(&avi_file->audio_buffer[avi_file->audio_buffer_pos], &((u8*)soundData)[soundSize - nBytes], bytesToTransfer);
+		nBytes -= bytesToTransfer;
 
-	avi_file->sound_samples += soundLen;
-	avi_file->tBytes += avi_file->ByteBuffer;
+		if(FAILED(AVIStreamWrite(avi_file->compressed_streams[AUDIO_STREAM],
+		                         avi_file->sound_samples, samplesPerSegment,
+		                         avi_file->audio_buffer, audioSegmentSize, 0, NULL, &avi_file->ByteBuffer)))
+		{
+			avi_file->valid = 0;
+			return;
+		}
+		avi_file->sound_samples += samplesPerSegment;
+		avi_file->tBytes += avi_file->ByteBuffer;
+		avi_file->audio_buffer_pos = 0;
+	}
+	memcpy(&avi_file->audio_buffer[avi_file->audio_buffer_pos], &((u8*)soundData)[soundSize - nBytes], nBytes);
+	avi_file->audio_buffer_pos += nBytes;
 }
 
 void FCEUI_AviEnd()
