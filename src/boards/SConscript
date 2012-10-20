@@ -49,6 +49,7 @@ bmc64in1nr.cpp
 bmc70in1.cpp
 bonza.cpp
 bs-5.cpp
+cityfighter.cpp
 datalatch.cpp
 deirom.cpp
 dream.cpp
@@ -63,6 +64,7 @@ karaoke.cpp
 kof97.cpp
 konami-qtai.cpp
 ks7032.cpp
+ks7057.cpp
 malee.cpp
 mmc1.cpp
 mmc3.cpp
