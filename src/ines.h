@@ -75,7 +75,7 @@ struct TMasterRomInfo
 	const char* params;
 };
 
-class TMasterRomInfoParams : public std::map<std::string,std::string> 
+class TMasterRomInfoParams : public std::map<std::string,std::string>
 {
 public:
 	bool ContainsKey(const std::string& key) { return find(key) != end(); }

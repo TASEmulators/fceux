@@ -70,7 +70,7 @@ int FCEUI_NetplayStart(int nlocal, int divisor)
 {
 	FCEU_FlushGameCheats(0, 0);  //Save our pre-netplay cheats.
 	FCEU_LoadGameCheats(0);    // Load them again, for pre-multiplayer action.
-	
+
 	FCEUnetplay = 1;
 	memset(netjoy,0,sizeof(netjoy));
 	numlocal = nlocal;
@@ -89,7 +89,7 @@ int FCEUNET_SendCommand(uint8 cmd, uint32 len)
 	buf[0] = 0xFF;
 	FCEU_en32lsb(&buf[numlocal], len);
 	buf[numlocal + 4] = cmd;
-	if(!FCEUD_SendData(buf,numlocal + 1 + 4)) 
+	if(!FCEUD_SendData(buf,numlocal + 1 + 4))
 	{
 		NetError();
 		return(0);
@@ -155,7 +155,7 @@ static FILE *FetchFile(uint32 remlen)
 	uint32 clen = remlen;
 	char *cbuf;
 	uLongf len;
-	char *buf;  
+	char *buf;
 	FILE *fp;
 
 	if(clen > 500000)  // Sanity check
@@ -203,7 +203,7 @@ void NetplayUpdate(uint8 *joyp)
 	memcpy(joypb,joyp,4);
 
 	/* This shouldn't happen, but just in case.  0xFF is used as a command escape elsewhere. */
-	if(joypb[0] == 0xFF) 
+	if(joypb[0] == 0xFF)
 		joypb[0] = 0xF;
 	if(!netdcount)
 		if(!FCEUD_SendData(joypb,numlocal))
@@ -247,7 +247,7 @@ void NetplayUpdate(uint8 *joyp)
 					free(tbuf);
 				}
 				break;
-			case FCEUNPCMD_SAVESTATE:	
+			case FCEUNPCMD_SAVESTATE:
 				{
 					//mbg todo netplay
 					//char *fn;
@@ -310,7 +310,7 @@ void NetplayUpdate(uint8 *joyp)
 				if(!fp) return;
 				if(FCEUSS_LoadFP(fp,SSLOADPARAM_BACKUP))
 			 {
-			 fclose(fp);				
+			 fclose(fp);
 			 FCEU_DispMessage("Remote state loaded.",0);
 			 } else FCEUD_PrintError("File error.  (K)ill, (M)aim, (D)estroy?");
 			 }

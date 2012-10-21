@@ -64,7 +64,7 @@ static DECLFR(S74LS374NRead)
 {
   uint8 ret;
   if((A&0x4100)==0x4100)
-//    ret=(X.DB&0xC0)|((~cmd)&0x3F);
+//	  ret=(X.DB&0xC0)|((~cmd)&0x3F);
     ret=((~cmd)&0x3F)^dip;
   else
     ret=X.DB;

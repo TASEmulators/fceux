@@ -77,7 +77,7 @@ static void UNLCC21Sync(void)
 }
 
 void UNLCC21_Init(CartInfo *info)
-{ 
+{
   Latch_Init(info, UNLCC21Sync, 0, 0, 0x8000, 0xFFFF);
 }
 
@@ -108,11 +108,11 @@ static DECLFR(BMCD1038Read)
 static void BMCD1038Reset(void)
 {
   dipswitch++;
-  dipswitch&=3; 
+  dipswitch&=3;
 }
 
 void BMCD1038_Init(CartInfo *info)
-{ 
+{
   Latch_Init(info, BMCD1038Sync, BMCD1038Read, 0, 0x8000, 0xFFFF);
   info->Reset=BMCD1038Reset;
   AddExState(&dipswitch, 1, 0, "DIPSW");
@@ -151,7 +151,7 @@ static void M200Sync(void)
 }
 
 void Mapper200_Init(CartInfo *info)
-{ 
+{
   Latch_Init(info, M200Sync, 0, 0xff, 0x8000, 0xFFFF);
 }
 
@@ -166,7 +166,7 @@ static void BMC190in1Sync(void)
 }
 
 void BMC190in1_Init(CartInfo *info)
-{ 
+{
   Latch_Init(info, BMC190in1Sync, 0, 0, 0x8000, 0xFFFF);
 }
 

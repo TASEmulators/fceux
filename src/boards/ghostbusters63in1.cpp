@@ -53,7 +53,7 @@ static DECLFW(BMCGhostbusters63in1Write)
 {
   reg[A&1]=V;
   bank=((reg[0]&0x80)>>7)|((reg[1]&1)<<1);
-//  FCEU_printf("reg[0]=%02x, reg[1]=%02x, bank=%02x\n",reg[0],reg[1],bank);
+//	FCEU_printf("reg[0]=%02x, reg[1]=%02x, bank=%02x\n",reg[0],reg[1],bank);
   Sync();
 }
 

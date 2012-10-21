@@ -275,7 +275,7 @@ static INLINE uint32 FetchDuff(uint32 P, uint32 envelope)
 static void DoNamcoSoundHQ(void)
 {
   uint32 V; //mbg merge 7/17/06 made uint32
-  int32 P; 
+  int32 P;
   int32 cyclesuck=(((IRAM[0x7F]>>4)&7)+1)*15;
 
   for(P=7;P>=(7-((IRAM[0x7F]>>4)&7));P--)

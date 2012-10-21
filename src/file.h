@@ -20,7 +20,7 @@ struct FCEUFILE {
 
 	//a weirdly derived value.. maybe a path to a file, or maybe a path to a file which doesnt exist but which is in an archive in the same directory
 	std::string logicalPath;
-	
+
 	//the filename of the archive (maybe "" if it is not in an archive)
 	std::string archiveFilename;
 
@@ -43,7 +43,7 @@ struct FCEUFILE {
 		: stream(0)
 		, archiveCount(-1)
 	{}
-	
+
 	~FCEUFILE()
 	{
 		if(stream) delete stream;
@@ -58,8 +58,8 @@ struct FCEUFILE {
 
 		EMUFILE_MEMORY* ret = dynamic_cast<EMUFILE_MEMORY*>(stream);
 		if(ret) return ret;
-		
-		//nope, we need to create it: copy the contents 
+
+		//nope, we need to create it: copy the contents
 		ret = new EMUFILE_MEMORY(size);
 		stream->fread(ret->buf(),size);
 		delete stream;
@@ -95,11 +95,11 @@ struct FileBaseInfo {
 		filebase = fb;
 		ext = ex;
 	}
-	
+
 };
 
 struct ArchiveScanRecord
-{	
+{
 	ArchiveScanRecord()
 		: type(-1)
 		, numFilesInArchive(0)

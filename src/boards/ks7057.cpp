@@ -54,9 +54,9 @@ static DECLFW(UNLKS7057Write)
    case 0x8001:
    case 0x8002:
    case 0x8003:
-   case 0x9000: 
-   case 0x9001: 
-   case 0x9002: 
+   case 0x9000:
+   case 0x9001:
+   case 0x9002:
    case 0x9003: mirror = V & 1; Sync(); break;
    case 0xB000: reg[0] = (reg[0] & 0xF0) | (V & 0x0F); Sync(); break;
    case 0xB001: reg[0] = (reg[0] & 0x0F) | (V << 4); Sync(); break;

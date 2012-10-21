@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  * 700in1 and 400in1 carts
  */
- 
+
 
 #include "mapinc.h"
 
@@ -40,29 +40,29 @@ static void Sync(void)
     if(cmd&0x100)
     {
       setprg16(0x8000,((cmd&0xe0)>>2)|bank);
-      setprg16(0xC000,((cmd&0xe0)>>2)|7);  
+      setprg16(0xC000,((cmd&0xe0)>>2)|7);
     }
     else
     {
       setprg16(0x8000,((cmd&0xe0)>>2)|(bank&6));
-      setprg16(0xC000,((cmd&0xe0)>>2)|((bank&6)|1));  
+      setprg16(0xC000,((cmd&0xe0)>>2)|((bank&6)|1));
     }
   }
   else
   {
     setprg16(0x8000,((cmd&0xe0)>>2)|bank);
     setprg16(0xC000,((cmd&0xe0)>>2)|bank);
-  }  
+  }
 }
 
 static DECLFW(UNLN625092WriteCommand)
 {
-  cmd=A;  
+  cmd=A;
   Sync();
 }
 
 static DECLFW(UNLN625092WriteBank)
-{ 
+{
   bank=A&7;
   Sync();
 }

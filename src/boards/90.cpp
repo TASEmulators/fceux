@@ -26,7 +26,7 @@
 // Mapper 209 much compicated hardware with decribed above features disabled by default and switchable by command
 // Mapper 211 the same mapper 209 but with forced nametable control
 
-static int is209; 
+static int is209;
 static int is211;
 
 static uint8 IRQMode;        // from $c001
@@ -287,7 +287,7 @@ static DECLFW(M90ModeWrite)
     tekprom();
     tekvrom();
     mira();
-    
+
 #ifdef DEBUG90
   switch (A&3)
   {
@@ -390,7 +390,7 @@ static void M90PPU(uint32 A)
     }
     lastread=A;
   }
-  
+
   if(is209)
   {
     uint8 l,h;

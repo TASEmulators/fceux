@@ -1,5 +1,5 @@
 /* FCE Ultra - NES/Famicom Emulator
-* 
+*
 * Copyright notice for this file:
 *  Copyright (C) 2002,2003 Xodnizel
 *
@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h> 
+#include <math.h>
 #include <string.h>
 
 
@@ -50,7 +50,7 @@ bool force_grayscale = false;
 
 /* These are dynamically filled/generated palettes: */
 pal palettei[64];       // Custom palette for an individual game.
-pal palettec[64];       // Custom "global" palette.  
+pal palettec[64];       // Custom "global" palette.
 pal paletten[64];       // Mathematically generated palette.
 
 static void CalculatePalette(void);
@@ -69,7 +69,7 @@ static pal *palpoint[8]=
 };
 
 void FCEUI_SetPaletteArray(uint8 *pal)
-{    
+{
 	if(!pal)
 		palpoint[0]=palette;
 	else
@@ -125,18 +125,18 @@ void SetNESDeemph(uint8 d, int force)
 		for(x=0;x<0x40;x++)
 		{
 			uint32 m,n,o;
-			m=palo[x].r; 
-			n=palo[x].g; 
-			o=palo[x].b; 
-			m=(m*r)>>15; 
-			n=(n*g)>>15; 
-			o=(o*b)>>15; 
+			m=palo[x].r;
+			n=palo[x].g;
+			o=palo[x].b;
+			m=(m*r)>>15;
+			n=(n*g)>>15;
+			o=(o*b)>>15;
 			if(m>0xff) m=0xff;
 			if(n>0xff) n=0xff;
 			if(o>0xff) o=0xff;
 			FCEUD_SetPalette(x|0xC0,m,n,o);
 		}
-	} 
+	}
 	if(!d) return; /* No deemphasis, so return. */
 
 	r=rtmul[d-1];
@@ -166,7 +166,7 @@ void SetNESDeemph(uint8 d, int force)
 	#endif
 }
 
-// Converted from Kevin Horton's qbasic palette generator. 
+// Converted from Kevin Horton's qbasic palette generator.
 static void CalculatePalette(void)
 {
 	int x,z;
@@ -175,7 +175,7 @@ static void CalculatePalette(void)
 	static uint8 cols[16]={0,24,21,18,15,12,9,6,3,0,33,30,27,0,0,0};
 	static uint8 br1[4]={6,9,12,12};
 	static double br2[4]={.29,.45,.73,.9};
-	static double br3[4]={0,.24,.47,.77}; 
+	static double br3[4]={0,.24,.47,.77};
 
 	for(x=0;x<=3;x++)
 		for(z=0;z<16;z++)
@@ -211,7 +211,7 @@ static void CalculatePalette(void)
 		WritePalette();
 }
 
-static int ipalette=0; 
+static int ipalette=0;
 
 void FCEU_LoadGamePalette(void)
 {
@@ -228,7 +228,7 @@ void FCEU_LoadGamePalette(void)
 		int x;
 		fread(ptmp,1,192,fp);
 		fclose(fp);
-		for(x=0;x<64;x++) 
+		for(x=0;x<64;x++)
 		{
 			palettei[x].r=ptmp[x+x+x];
 			palettei[x].g=ptmp[x+x+x+1];
@@ -244,7 +244,7 @@ void FCEU_ResetPalette(void)
 	if(GameInfo)
 	{
 		ChoosePalette();
-		WritePalette(); 
+		WritePalette();
 	}
 }
 
@@ -253,7 +253,7 @@ static void ChoosePalette(void)
 	if(GameInfo->type==GIT_NSF)
 		palo=0;
 	else if(ipalette)
-		palo=palettei;  
+		palo=palettei;
 	else if(ntsccol && !PAL && GameInfo->type!=GIT_VSUNI)
 	{
 		palo=paletten;
@@ -278,7 +278,7 @@ void WritePalette(void)
 		// FCEUD_SetPalette(x,x,0,x);
 	}
 	else
-	{   
+	{
 		for(x=0;x<64;x++)
 			FCEUD_SetPalette(128+x,palo[x].r,palo[x].g,palo[x].b);
 		SetNESDeemph(lastd,1);
@@ -289,7 +289,7 @@ void FCEUI_GetNTSCTH(int *tint, int *hue)
 {
 	*tint = ntsctint;
 	*hue = ntschue;
-} 
+}
 
 static int controlselect=0;
 static int controllength=0;
@@ -312,7 +312,7 @@ void FCEUI_NTSCDEC(void)
 				CalculatePalette();
 			}
 			controllength=360;
-		}   
+		}
 	}
 }
 
@@ -381,6 +381,6 @@ void FCEU_DrawNTSCControlBars(uint8 *XBuf)
 	for(;x<256;x+=2)
 	{
 		for(x2=2;x2>=-2;x2--)
-			XBaf[x-256*x2]=0x85;   
+			XBaf[x-256*x2]=0x85;
 	}
 }

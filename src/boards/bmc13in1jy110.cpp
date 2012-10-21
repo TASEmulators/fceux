@@ -32,7 +32,7 @@ static SFORMAT StateRegs[]=
 
 static void Sync(void)
 {
-  FCEU_printf("%02x: %02x %02x\n", bank_mode, bank_value, prgb[0]);  
+  FCEU_printf("%02x: %02x %02x\n", bank_mode, bank_value, prgb[0]);
   switch(bank_mode&7)
   {
     case 0:

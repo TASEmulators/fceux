@@ -80,14 +80,14 @@ typedef struct __cartdata {
   uint8 size;
 } cartdata;
 
-#define Sprite16  (PPU[0]&0x20)   //Sprites 8x16/8x8 
+#define Sprite16  (PPU[0]&0x20)   //Sprites 8x16/8x8
 //#define MMC5SPRVRAMADR(V)      &MMC5SPRVPage[(V)>>10][(V)]
 static inline uint8 *  MMC5BGVRAMADR(uint32 A)
 {
 	if(!Sprite16) {
 		if(mmc5ABMode==0)
 			return &MMC5SPRVPage[(A)>>10][(A)];
-		else 
+		else
 			return &MMC5BGVPage[(A)>>10][(A)];
 	} else return &MMC5BGVPage[(A)>>10][(A)];
 }
@@ -107,7 +107,7 @@ static void mmc5_PPUWrite(uint32 A, uint8 V) {
 		{
 			if(PPUCHRRAM&(1<<(tmp>>10)))
 				VPage[tmp>>10][tmp]=V;
-		}   
+		}
 		else
 		{
 			if(PPUNTARAM&(1<<((tmp&0xF00)>>10)))
@@ -123,7 +123,7 @@ uint8 FASTCALL mmc5_PPURead(uint32 A) {
 		else return MMC5SPRVPage[(A)>>10][(A)];
 	}
 	else
-	{   
+	{
 		return vnapage[(A>>10)&0x3][A&0x3FF];
 	}
 }
@@ -188,11 +188,11 @@ static void BuildWRAMSizeTable(void)
 		case 1: MMC5WRAMIndex[x]=(x>3)?255:0; break; //0,0,0,0,X,X,X,X
 		case 2: MMC5WRAMIndex[x]=(x&4)>>2; break; //0,0,0,0,1,1,1,1
 		case 4: MMC5WRAMIndex[x]=(x>3)?255:(x&3); break; //0,1,2,3,X,X,X,X
-		case 8: MMC5WRAMIndex[x]=x; break; //0,1,2,3,4,5,6,7,8  
+		case 8: MMC5WRAMIndex[x]=x; break; //0,1,2,3,4,5,6,7,8
 			//mbg 8/6/08 - i added this to support 64KB of wram
 			//now, I have at least one example (laser invasion) which actually uses size 1 but isnt in the crc list
 			//so, whereas before my change on 8/4/08 we would have selected size 1, now we select size 8
-			//this means that we could have just introduced an emulation bug, in case those games happened to 
+			//this means that we could have just introduced an emulation bug, in case those games happened to
 			//address, say, page 3. with size 1 that would resolve to [0] but in size 8 it resolves to [3].
 			//so, you know what to do if there are problems.
 		}
@@ -442,7 +442,7 @@ static DECLFW(MMC5_WriteROMRAM)
   if(A>=0x8000)
     if(MMC5ROMWrProtect[(A-0x8000)>>13]) return;
   if(MMC5MemIn[(A-0x6000)>>13])
-    if(((WRAMMaskEnable[0]&3)|((WRAMMaskEnable[1]&3)<<2)) == 6) 
+    if(((WRAMMaskEnable[0]&3)|((WRAMMaskEnable[1]&3)<<2)) == 6)
 		Page[A>>11][A]=V;
 }
 

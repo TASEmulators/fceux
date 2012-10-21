@@ -71,7 +71,7 @@ static void M175Power(void)
   SetReadHandler(0x8000,0xFFFF,M175Read);
   SetWriteHandler(0x8000,0x8000,M175Write1);
   SetWriteHandler(0xA000,0xA000,M175Write2);
-  Sync();     
+  Sync();
 }
 
 static void StateRestore(int version)

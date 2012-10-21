@@ -37,7 +37,7 @@ static void Sync()
     case 0x26: EXPREGS[7] = 0; EXPREGS[0]=EXPREGS[6]; break;
     case 0x2B: EXPREGS[7] = 1; EXPREGS[0]=EXPREGS[6]; break;
     case 0x2C: EXPREGS[7] = 1; if(EXPREGS[6]) EXPREGS[0]=EXPREGS[6]; break;
-    case 0x3C: 
+    case 0x3C:
     case 0x3F: EXPREGS[7] = 1; EXPREGS[0]=EXPREGS[6]; break;
     case 0x28: EXPREGS[7] = 0; EXPREGS[1]=EXPREGS[6]; break;
     case 0x2A: EXPREGS[7] = 0; EXPREGS[2]=EXPREGS[6]; break;

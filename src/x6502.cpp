@@ -56,11 +56,11 @@ static INLINE void WrMem(unsigned int A, uint8 V)
 	#endif
 }
 
-static INLINE uint8 RdRAM(unsigned int A) 
+static INLINE uint8 RdRAM(unsigned int A)
 {
   //bbit edited: this was changed so cheat substituion would work
   return(_DB=ARead[A](A));
-  // return(_DB=RAM[A]); 
+  // return(_DB=RAM[A]);
 }
 
 static INLINE void WrRAM(unsigned int A, uint8 V)
@@ -91,7 +91,7 @@ void X6502_DMW(uint32 A, uint8 V)
  uint8 VTMP=V;  \
  WrRAM(0x100+_S,VTMP);  \
  _S--;  \
-}       
+}
 
 #define POP() RdRAM(0x100+(++_S))
 
@@ -194,7 +194,7 @@ static uint8 ZNTable[256];
      _P|=l;  \
      X_ZNT(x);  \
 		}
-		 
+
 /* Icky icky thing for some undocumented instructions.  Can easily be
    broken if names of local variables are changed.
 */
@@ -333,7 +333,7 @@ static uint8 ZNTable[256];
 #define ST_IY(r)  {unsigned int A; GetIYWR(A); WrMem(A,r); break; }
 
 static uint8 CycTable[256] =
-{                             
+{
 /*0x00*/ 7,6,2,8,3,3,5,5,3,2,2,2,4,4,6,6,
 /*0x10*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
 /*0x20*/ 6,6,2,8,3,3,5,5,4,2,2,2,4,4,6,6,
@@ -368,7 +368,7 @@ void TriggerNMI(void)
 }
 
 void TriggerNMI2(void)
-{ 
+{
  _IRQlow|=FCEU_IQNMI2;
 }
 

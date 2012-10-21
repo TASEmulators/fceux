@@ -459,7 +459,7 @@ uint8 FASTCALL FFCEUX_PPURead_Default(uint32 A) {
 		if(debug_loggingCD)
 		{
 			int addr = GetCHRAddress(tmp);
-			if(addr != -1) 
+			if(addr != -1)
 			{
 				if(!(cdloggervdata[addr] & 1))
 				{
@@ -772,7 +772,7 @@ static DECLFR(A2007)
 
 	if(debug_loggingCD)
 	{
-		if(!DummyRead && (LogAddress != -1)) 
+		if(!DummyRead && (LogAddress != -1))
 		{
 			if(!(cdloggervdata[LogAddress] & 2))
 			{

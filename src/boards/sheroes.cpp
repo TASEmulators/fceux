@@ -56,7 +56,7 @@ static DECLFR(MSHRead)
 static void MSHReset(void)
 {
   MMC3RegReset();
-  tekker^=0xFF; 
+  tekker^=0xFF;
 }
 
 static void MSHPower(void)

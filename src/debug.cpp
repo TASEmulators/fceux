@@ -1,4 +1,4 @@
-/// \file 
+/// \file
 /// \brief Implements core debugging facilities
 
 #include <stdlib.h>
@@ -94,11 +94,11 @@ int getValue(int type)
 int checkCondition(const char* condition, int num)
 {
 	const char* b = condition;
-	
+
 	// Check if the condition isn't just all spaces.
-	
+
 	int onlySpaces = 1;
-	
+
 	while (*b)
 	{
 		if (*b != ' ')
@@ -106,13 +106,13 @@ int checkCondition(const char* condition, int num)
 			onlySpaces = 0;
 			break;
 		}
-		
+
 		++b;
 	}
-	
-		
+
+
 	// If there's an actual condition create the BP condition object now
-	
+
 	if (*condition && !onlySpaces)
 	{
 		Condition* c = generateCondition(condition);
@@ -129,7 +129,7 @@ int checkCondition(const char* condition, int num)
 		// If the creation of the BP condition object was succesful
 		// the condition is apparently valid. It can be added to the
 		// breakpoint now.
-		
+
 		if (c)
 		{
 			watchpoint[num].cond = c;
@@ -142,7 +142,7 @@ int checkCondition(const char* condition, int num)
 		{
 			watchpoint[num].cond = 0;
 		}
-		
+
 		return watchpoint[num].cond == 0 ? 2 : 0;
 	}
 	else
@@ -164,7 +164,7 @@ int checkCondition(const char* condition, int num)
 *
 * @param hwndDlg Handle of the debugger window
 * @param num Number of the breakpoint
-* @param 
+* @param
 **/
 unsigned int NewBreak(const char* name, int start, int end, unsigned int type, const char* condition, unsigned int num, bool enable)
 {
@@ -199,7 +199,7 @@ unsigned int NewBreak(const char* name, int start, int end, unsigned int type, c
 
 	watchpoint[num].desc = (char*)malloc(strlen(name) + 1);
 	strcpy(watchpoint[num].desc, name);
-	
+
 	return checkCondition(condition, num);
 }
 
@@ -215,7 +215,7 @@ int GetPRGAddress(int A){
 * Returns the bank for a given offset.
 * Technically speaking this function does not calculate the actual bank
 * where the offset resides but the 0x4000 bytes large chunk of the ROM of the offset.
-* 
+*
 * @param offs The offset
 * @return The bank of that offset or -1 if the offset is not part of the ROM.
 **/
@@ -383,7 +383,7 @@ void LogCDVectors(int which){
 		if(!(cdloggerdata[j] & 1))undefinedcount--;
 	}
 	j++;
-	
+
 	if(!(cdloggerdata[j] & 2)){
 		cdloggerdata[j] |= 0x0E;
 		datacount++;
@@ -395,13 +395,13 @@ void LogCDData(uint8 *opcode, uint16 A, int size) {
 	int i, j;
 	uint8 memop = 0;
 
-	if((j = GetPRGAddress(_PC)) != -1) 
+	if((j = GetPRGAddress(_PC)) != -1)
 		for (i = 0; i < size; i++) {
 			if(cdloggerdata[j+i] & 1)continue; //this has been logged so skip
 			cdloggerdata[j+i] |= 1;
 			cdloggerdata[j+i] |=((_PC+i)>>11)&0x0c;
 			if(indirectnext)cdloggerdata[j+i] |= 0x10;
-			codecount++; 
+			codecount++;
 			if(!(cdloggerdata[j+i] & 2))undefinedcount--;
 		}
 
@@ -421,7 +421,7 @@ void LogCDData(uint8 *opcode, uint16 A, int size) {
 			cdloggerdata[j] |= 2;
 			cdloggerdata[j] |=(A>>11)&0x0c;
 			cdloggerdata[j] |= memop;
-			datacount++; 
+			datacount++;
 			if(!(cdloggerdata[j] & 1))undefinedcount--;
 		}
 	}
@@ -469,7 +469,7 @@ void IncrementInstructionsCounters()
 void BreakHit(int bp_num, bool force = false)
 {
 	if(!force) {
-		
+
 		//check to see whether we fall in any forbid zone
 		for (int i = 0; i < numWPs; i++) {
 			watchpointinfo& wp = watchpoint[i];
@@ -490,8 +490,8 @@ void BreakHit(int bp_num, bool force = false)
 	}
 
 	FCEUI_SetEmulationPaused(1); //mbg merge 7/19/06 changed to use EmulationPaused()
-	
-#ifdef WIN32	
+
+#ifdef WIN32
 	FCEUD_DebugBreakpoint(bp_num);
 #endif
 }
@@ -658,7 +658,7 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 					{
 						// Used to make it ignore the unannounced stack code one time
 						StackNextIgnorePC = 0xFFFF;
-					} else 
+					} else
 					{
 						if ((X.S < StackAddrBackup) && (stackop==0))
 						{
@@ -734,8 +734,8 @@ void DebugCycle()
 	}
 	else
 		vblankScanLines = 0;
-	
-	if (GameInfo->type==GIT_NSF)  
+
+	if (GameInfo->type==GIT_NSF)
 	{
 		if ((_PC >= 0x3801) && (_PC <= 0x3824)) return;
 	}
@@ -774,9 +774,9 @@ void DebugCycle()
 
 	if(debug_loggingCD)
 		LogCDData(opcode, A, size);
-	
+
 #ifdef WIN32
-	//This needs to be windows only or else the linux build system will fail since logging is declared in a 
+	//This needs to be windows only or else the linux build system will fail since logging is declared in a
 	//windows source file
 	FCEUD_TraceInstruction(opcode, size);
 #endif

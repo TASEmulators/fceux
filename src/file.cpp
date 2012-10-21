@@ -173,11 +173,11 @@ FileBaseInfo DetermineFileBase(const char *f) {
 
 	char drv[PATH_MAX], dir[PATH_MAX], name[PATH_MAX], ext[PATH_MAX];
 	splitpath(f,drv,dir,name,ext);
- 
+
         if(dir[0] == 0) strcpy(dir,".");
 
-	return FileBaseInfo((std::string)drv + dir,name,ext);	
-	
+	return FileBaseInfo((std::string)drv + dir,name,ext);
+
 }
 
 inline FileBaseInfo DetermineFileBase(const std::string& str) { return DetermineFileBase(str.c_str()); }
@@ -235,7 +235,7 @@ zpfail:
 
 		unz_file_info ufo;
 		unzGetCurrentFileInfo(tz,&ufo,0,0,0,0,0,0);
-		
+
 		int size = ufo.uncompressed_size;
 		EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(size);
 		unzReadCurrentFile(tz,ms->buf(),ufo.uncompressed_size);
@@ -246,7 +246,7 @@ zpfail:
 		fceufp->stream = ms;
 		fceufp->size = size;
 		return fceufp;
-		
+
 	}
 
 	return 0;
@@ -267,7 +267,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 
 	std::string archive,fname,fileToOpen;
 	FCEU_SplitArchiveFilename(path,archive,fname,fileToOpen);
-	
+
 
 	//try to setup the ips file
 	if(ipsfn && read)
@@ -301,14 +301,14 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 			//try to read a gzipped file
 			{
 				uint32 magic;
-				
+
 				magic = fp->fgetc();
 				magic|=fp->fgetc()<<8;
 				magic|=fp->fgetc()<<16;
 				fp->fseek(0,SEEK_SET);
 
 				if(magic==0x088b1f) {
-					 // maybe gzip... 
+					 // maybe gzip...
 
 					gzFile gzfile = gzopen(fileToOpen.c_str(),"rb");
 					if(gzfile) {
@@ -333,7 +333,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 				}
 			}
 
-		
+
 			//open a plain old file
 			fceufp = new FCEUFILE();
 			fceufp->filename = fileToOpen;
@@ -352,7 +352,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 			if(archive == "")
 				if(index != -1)
 					fceufp = FCEUD_OpenArchiveIndex(asr, fileToOpen, index);
-				else 
+				else
 					fceufp = FCEUD_OpenArchive(asr, fileToOpen, 0);
 			else
 				fceufp = FCEUD_OpenArchive(asr, archive, &fname);
@@ -571,7 +571,7 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 	switch(type)
 	{
 		case FCEUMKF_MOVIE:
-			struct stat fileInfo; 
+			struct stat fileInfo;
 			do {
 				if(odirs[FCEUIOD_MOVIES])
 					sprintf(ret,"%s"PSS"%s-%d.fm2",odirs[FCEUIOD_MOVIES],FileBase, id1);
@@ -586,18 +586,18 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 					mfnString = GetMfn();
 				else
 					mfnString = "";
-				
+
 				if (mfnString.length() <= MAX_MOVIEFILENAME_LEN)
 				{
-					mfn = mfnString.c_str();	
+					mfn = mfnString.c_str();
 				} else
 				{
-					//This caps the movie filename length before adding it to the savestate filename.  
+					//This caps the movie filename length before adding it to the savestate filename.
 					//This helps prevent possible crashes from savestate filenames of excessive length.
 					mfnString = mfnString.substr(0, MAX_MOVIEFILENAME_LEN);
 					mfn = mfnString.c_str();
 				}
-				
+
 				if(odirs[FCEUIOD_STATES])
 				{
 					sprintf(ret,"%s"PSS"%s%s.fc%d",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
@@ -699,7 +699,7 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 				sprintf(ret,"%s"PSS"fcs"PSS"%s*.fc?",BaseDirectory.c_str(),FileBase);
 			break;
 	}
-	
+
 	//convert | to . for archive filenames.
 	return mass_replace(ret,"|",".");
 }

@@ -64,7 +64,7 @@ private:
 void CallRegisteredLuaSaveFunctions(int savestateNumber, LuaSaveData& saveData);
 void CallRegisteredLuaLoadFunctions(int savestateNumber, const LuaSaveData& saveData);
 
-// Just forward function declarations 
+// Just forward function declarations
 
 void FCEU_LuaFrameBoundary();
 int FCEU_LoadLuaCode(const char *filename, const char *arg=NULL);

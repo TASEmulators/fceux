@@ -196,7 +196,7 @@
    {0xcfb224e6,-1,1}, /* Dragon Ninja (J) [p1][!].nes */
    {0xf46ef39a,37,-1}, /* Super Mario Bros. + Tetris + Nintendo World Cup (E) [!] */
    {0x0f05ff0a,181,-1}, /* Seicross  (redump) */
-   
+
    {0x054bd3e9,74,-1}, /* Di 4 Ci - Ji Qi Ren Dai Zhan (As) */
    {0x496ac8f7,74,-1}, /* Ji Jia Zhan Shi (As) */
    {0xae854cef,74,-1}, /* Jia A Fung Yun (Chinese) */
@@ -224,7 +224,7 @@
    {0x44c20420,199,-1},/* San Guo Zhi 2 (C) */
 
    {0xa1dc16c0,116,-1},
-   
+
    {0xcc868d4e,149,-1}, /* 16 Mahjong [p1][!] */
    {0x48239b42,146,-1}, /* Mahjong Companion (Sachen) [!] */
    {0xb6a727fa,146,-1}, /* Papillion (As) [!] */
@@ -236,22 +236,22 @@
    {0x40dbf7a2,150,-1},
    {0x5aefbc94,133,-1}, /* Jovial Race (Sachen) [a1][!] */
    {0x58152b42,160,1},  /* Pipe 5 (Sachen) */
-   
+
    {0x22d6d5bd,4,1},
    {0x6a03d3f3,114,-1},
    {0x0d98db53,114,-1}, /* Pocahontas */
    {0x4e7729ff,114,-1}, /* Super Donkey Kong */
-   
+
    {0x02c41438,176,-1}, /* Xing He Zhan Shi (C) */
    {0xfb2b6b10,241,-1}, /* Fan Kong Jing Ying (Ch) */
    {0xb5e83c9a,241,-1}, /* Xing Ji Zheng Ba (Ch) */
    {0x081caaff,163,-1}, /* Commandos (Ch) */
-   
+
    {0x0da5e32e,101,-1}, /* new Uruusey Yatsura */
    {0x4f2f1846,-1,1}, /* Famista '89 - Kaimaku Han!! (J) */
    {0x6c71feae,45,-1}, /* Kunio 8-in-1 */
 //   {0xbdbe3c96,238,-1}, /* Contra Fighter iNES version */
 
 	 {0xd97c31b0,4,1}, //Rasaaru Ishii no Childs Quest (J)
-   
+
    {0,-1,-1}

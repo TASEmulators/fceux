@@ -87,7 +87,7 @@ static DECLFW(M23Write)
     if(UNIFchrrama)
       big_bank=(V&8)<<2;                    // my personally many-in-one feature ;) just for support pirate cart 2-in-1
     else
-    {    
+    {
       uint16 i=((A>>1)&1)|((A-0xB000)>>11);
       chrreg[i]&=(0xF0)>>((A&1)<<2);
       chrreg[i]|=(V&0xF)<<((A&1)<<2);
@@ -97,18 +97,18 @@ static DECLFW(M23Write)
   else
     switch(A&0xF003)
     {
-      case 0x8000: 
-      case 0x8001: 
-      case 0x8002: 
-      case 0x8003: if(is23) 
-                     prgreg[0]=V&0x1F; 
-                   Sync(); 
+      case 0x8000:
+      case 0x8001:
+      case 0x8002:
+      case 0x8003: if(is23)
+                     prgreg[0]=V&0x1F;
+                   Sync();
                    break;
-      case 0xA000: 
-      case 0xA001: 
-      case 0xA002: 
-      case 0xA003: if(is23) 
-                     prgreg[1]=V&0x1F; 
+      case 0xA000:
+      case 0xA001:
+      case 0xA002:
+      case 0xA003: if(is23)
+                     prgreg[1]=V&0x1F;
                    else
                    {
                      prgreg[0]=(V<<1)&0x1F;
@@ -118,7 +118,7 @@ static DECLFW(M23Write)
                    break;
       case 0x9000:
       case 0x9001: if(V!=0xFF) mirr=V; Sync(); break;
-      case 0x9002: 
+      case 0x9002:
       case 0x9003: regcmd=V; Sync(); break;
       case 0xF000: X6502_IRQEnd(FCEU_IQEXT); IRQLatch&=0xF0; IRQLatch|=V&0xF; break;
       case 0xF001: X6502_IRQEnd(FCEU_IQEXT); IRQLatch&=0x0F; IRQLatch|=V<<4; break;
@@ -129,7 +129,7 @@ static DECLFW(M23Write)
 
 static void M23Power(void)
 {
-  big_bank=0x20;  
+  big_bank=0x20;
   Sync();
   setprg8r(0x10,0x6000,0);              // another many-in-one code, WRAM actually contain only WaiWaiWorld game
   SetReadHandler(0x6000,0x7FFF,CartBR);
@@ -154,7 +154,7 @@ void M23IRQHook(int a)
       {
         acount-=LCYCS;
         IRQCount++;
-        if(IRQCount&0x100) 
+        if(IRQCount&0x100)
         {
           X6502_IRQBegin(FCEU_IQEXT);
           IRQCount=IRQLatch;

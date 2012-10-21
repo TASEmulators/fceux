@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- * 
+ *
  * SL12 Protected 3-in-1 mapper hardware (VRC2, MMC3, MMC1)
  * the same as 603-5052 board (TODO: add reading registers, merge)
  * SL1632 2-in-1 protected board, similar to SL12 (TODO: find difference)
@@ -272,7 +272,7 @@ static DECLFW(UNLSL12Write)
          mmc1_buffer = mmc1_shift = 0;
          switch(n) {
           case 0: SyncMIR();
-          case 2: SyncCHR(); 
+          case 2: SyncCHR();
           case 3:
           case 1: SyncPRG();
          }

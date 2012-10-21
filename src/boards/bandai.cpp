@@ -23,7 +23,7 @@
  */
 
 //Famicom Jump 2 should get transformed to m153
-//All other games are not supporting EEPROM saving right now. 
+//All other games are not supporting EEPROM saving right now.
 //We may need to distinguish between 16 and 159 in order to know the EEPROM configuration.
 //Until then, we just return 0x00 from the EEPROM read
 

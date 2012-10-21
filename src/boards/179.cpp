@@ -54,7 +54,7 @@ static DECLFW(M179WriteLo)
 static void M179Power(void)
 {
   reg[0]=reg[1]=0;
-  Sync();     
+  Sync();
   SetWriteHandler(0x4020,0x5fff,M179WriteLo);
   SetReadHandler(0x6000,0x7fff,CartBR);
   SetWriteHandler(0x6000,0x7fff,CartBW);

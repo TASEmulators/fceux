@@ -69,7 +69,7 @@ struct INPUTCFC
 extern struct JOYPORT
 {
 	JOYPORT(int _w)
-		: w(_w) 
+		: w(_w)
 	{}
 
 	int w;
@@ -111,7 +111,7 @@ enum EMUCMD
 	EMUCMD_SCREENSHOT,
 	EMUCMD_HIDE_MENU_TOGGLE,
 	//fixed: current command key handling handle only command table record index with
-	//the same as cmd enumerarot index, or else does wrong key mapping, fixed it but placed this enum here anyway 
+	//the same as cmd enumerarot index, or else does wrong key mapping, fixed it but placed this enum here anyway
 	//...i returned it back.
 	//adelikat, try to find true cause of problem before reversing it
 	EMUCMD_EXIT,
@@ -202,10 +202,10 @@ enum EMUCMD
 	EMUCMD_MISC_DISPLAY_BG_TOGGLE,
 	EMUCMD_MISC_DISPLAY_OBJ_TOGGLE,
 	EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE,
-	
+
 	//Currently Windows only------
 	EMUCMD_MISC_OPENTASEDITOR,
-	EMUCMD_TOOL_OPENMEMORYWATCH, 
+	EMUCMD_TOOL_OPENMEMORYWATCH,
 	EMUCMD_TOOL_OPENCHEATS,
 	EMUCMD_TOOL_OPENDEBUGGER,
 	EMUCMD_TOOL_OPENHEX,

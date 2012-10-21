@@ -64,14 +64,14 @@ static void MBS5Reset(void)
 {
   dip_switch++;
   dip_switch&=3;
-  reg_prg[0]=reg_prg[1]=reg_prg[2]=reg_prg[3]=~0;     
+  reg_prg[0]=reg_prg[1]=reg_prg[2]=reg_prg[3]=~0;
   Sync();
 }
 
 static void MBS5Power(void)
 {
   dip_switch=0;
-  reg_prg[0]=reg_prg[1]=reg_prg[2]=reg_prg[3]=~0;     
+  reg_prg[0]=reg_prg[1]=reg_prg[2]=reg_prg[3]=~0;
   Sync();
   SetReadHandler(0x8000,0xFFFF,CartBR);
   SetWriteHandler(0x8000,0xFFFF,MBS5Write);

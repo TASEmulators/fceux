@@ -44,7 +44,7 @@ static DECLFW(MNNNWrite)
 
 static void MNNNPower(void)
 {
-//  SetReadHandler(0x6000,0x7fff,CartBR);
+//	SetReadHandler(0x6000,0x7fff,CartBR);
 // SetWriteHandler(0x6000,0x7fff,CartBW);
   SetReadHandler(0x8000,0xFFFF,CartBR);
   SetWriteHandler(0x8000,0xFFFF,MNNNWrite);
@@ -79,7 +79,7 @@ void MapperNNN_Init(CartInfo *info)
 {
   info->Reset=MNNNReset;
   info->Power=MNNNPower;
-//  info->Close=MNNNClose;
+//	info->Close=MNNNClose;
   GameHBIRQHook=MNNNIRQHook;
   GameStateRestore=StateRestore;
 /*

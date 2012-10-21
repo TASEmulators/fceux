@@ -54,7 +54,7 @@ static void SuperReset(void)
 {
   SetWriteHandler(0x6000,0x7FFF,SuperWrite);
   SetWriteHandler(0x8000,0xFFFF,SuperHi);
-  SetReadHandler(0x6000,0xFFFF,CartBR);  
+  SetReadHandler(0x6000,0xFFFF,CartBR);
   cmd0=cmd1=0;
   setprg32r(4,0x8000,0);
   setchr8(0);

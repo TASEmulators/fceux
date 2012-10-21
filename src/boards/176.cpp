@@ -47,7 +47,7 @@ static void Sync(void)
 }
 
 static DECLFW(M176Write_5001)
-{ 
+{
 	printf("%04X = $%02X\n",A,V);
 	if(sbw)
 	{
@@ -60,14 +60,14 @@ static DECLFW(M176Write_5001)
 }
 
 static DECLFW(M176Write_5010)
-{ 
+{
 	printf("%04X = $%02X\n",A,V);
 	if(V == 0x24) sbw = 1;
   Sync();
 }
 
 static DECLFW(M176Write_5011)
-{ 
+{
 	printf("%04X = $%02X\n",A,V);
 	V >>= 1;
 	if(sbw)
@@ -81,7 +81,7 @@ static DECLFW(M176Write_5011)
 }
 
 static DECLFW(M176Write_5FF1)
-{ 
+{
 	printf("%04X = $%02X\n",A,V);
   V >>= 1;
 	prg[0] = V*4;
@@ -92,7 +92,7 @@ static DECLFW(M176Write_5FF1)
 }
 
 static DECLFW(M176Write_5FF2)
-{ 
+{
 	printf("%04X = $%02X\n",A,V);
   chr = V;
   Sync();
@@ -120,7 +120,7 @@ static void M176Power(void)
 	SetWriteHandler(0x5011,0x5011,M176Write_5011);
   SetWriteHandler(0x5ff1,0x5ff1,M176Write_5FF1);
   SetWriteHandler(0x5ff2,0x5ff2,M176Write_5FF2);
-	
+
 	we_sram = 0;
 	sbw = 0;
 	prg[0] = 0;

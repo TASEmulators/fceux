@@ -79,7 +79,7 @@
 #undef ENABLE_SSE2
 #endif
 
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
 #define strcasecmp(x,y) _stricmp(x,y)
 #define snprintf _snprintf
 #else
@@ -146,7 +146,7 @@
 #define FORCEINLINE __forceinline
 #define MSC_FORCEINLINE __forceinline
 #else
-#define FORCEINLINE inline __attribute__((always_inline)) 
+#define FORCEINLINE inline __attribute__((always_inline))
 #define MSC_FORCEINLINE
 #endif
 #endif
@@ -340,12 +340,12 @@ inline float u32_to_float(u32 u) {
 
 ///stores a 32bit value into the provided byte array in guaranteed little endian form
 inline void en32lsb(u8 *buf, u32 morp)
-{ 
+{
 	buf[0]=(u8)(morp);
 	buf[1]=(u8)(morp>>8);
 	buf[2]=(u8)(morp>>16);
 	buf[3]=(u8)(morp>>24);
-} 
+}
 
 inline void en16lsb(u8* buf, u16 morp)
 {
@@ -413,7 +413,7 @@ char (*BLAHBLAHBLAH( UNALIGNED T (&)[N] ))[N];
 //8-bit constants max value 0x11111111, always fits in unsigned long
 #define HEX__(n) 0x##n##LU
 
-//8-bit conversion function 
+//8-bit conversion function
 #define B8__(x) ((x&0x0000000FLU)?1:0) \
 +((x&0x000000F0LU)?2:0) \
 +((x&0x00000F00LU)?4:0) \
@@ -449,7 +449,7 @@ char (*BLAHBLAHBLAH( UNALIGNED T (&)[N] ))[N];
 static const char hexValid[23] = {"0123456789ABCDEFabcdef"};
 
 
-template<typename T> inline void reconstruct(T* t) { 
+template<typename T> inline void reconstruct(T* t) {
 	t->~T();
 	new(t) T();
 }

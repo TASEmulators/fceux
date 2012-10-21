@@ -125,7 +125,7 @@ static void MMC1PRG(void)
 
 static void MMC1MIRROR(void)
 {
-  if(!is171) 
+  if(!is171)
   switch(DRegs[0]&3)
   {
     case 2: setmirror(MI_V); break;

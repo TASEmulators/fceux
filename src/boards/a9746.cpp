@@ -37,23 +37,23 @@ static SFORMAT StateRegs[]=
 static void Sync(void)
 {
   setprg8(0x8000, prg_reg[0]);
-  setprg8(0xA000, prg_reg[1]); 
-  setprg8(0xC000, prg_reg[2]); 
+  setprg8(0xA000, prg_reg[1]);
+  setprg8(0xC000, prg_reg[2]);
   setprg8(0xE000, prg_reg[3]);
-    
+
   setchr2(0x0000, chr_reg[0]);
-  setchr2(0x0800, chr_reg[1]); 
-  setchr1(0x1000, chr_reg[2]); 
+  setchr2(0x0800, chr_reg[1]);
+  setchr1(0x1000, chr_reg[2]);
   setchr1(0x1400, chr_reg[3]);
   setchr1(0x1800, chr_reg[4]);
-  setchr1(0x1c00, chr_reg[5]); 
-  
+  setchr1(0x1c00, chr_reg[5]);
+
   setmirror(mirror);
 }
 
 static DECLFW(UNLA9746Write)
 {
-   uint8 bits_rev;    
+   uint8 bits_rev;
 //   FCEU_printf("write raw %04x:%02x\n",A,V);
    switch (A&0xE003)
    {
@@ -139,8 +139,8 @@ static DECLFW(UNLA9746Write)
                     switch(EXPREGS[0])
                     {
                       case 0x26: setprg8(0x8000, bits_rev); break;
-                      case 0x25: setprg8(0xA000, bits_rev); break; 
-                      case 0x24: setprg8(0xC000, bits_rev); break; 
+                      case 0x25: setprg8(0xA000, bits_rev); break;
+                      case 0x24: setprg8(0xC000, bits_rev); break;
                       case 0x23: setprg8(0xE000, bits_rev); break;
                     }
                     switch(EXPREGS[1])

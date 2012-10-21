@@ -106,16 +106,16 @@ bool CheckFileExists(const char* filename)
 	if (!filename) return false;
 	fstream test;
 	test.open(filename,fstream::in);
-		
+
 	if (test.fail())
 	{
 		test.close();
-		return false; 
+		return false;
 	}
 	else
 	{
 		test.close();
-		return true; 
+		return true;
 	}
 }
 
@@ -180,7 +180,7 @@ static void FCEU_CloseGame(void)
 
 		delete GameInfo;
 		GameInfo = NULL;
-				
+
 		currFrameCounter = 0;
 
 		//Reset flags for Undo/Redo/Auto Savestating //adelikat: TODO: maybe this stuff would be cleaner as a struct or class
@@ -598,7 +598,7 @@ void SetAutoFireOffset(int offset)
 void AutoFire(void)
 {
 	static int counter = 0;
-	if (justLagged == false) 
+	if (justLagged == false)
 		counter = (counter + 1) % (8*7*5*3);
 	//If recording a movie, use the frame # for the autofire so the offset
 	//doesn't get screwed up when loading.

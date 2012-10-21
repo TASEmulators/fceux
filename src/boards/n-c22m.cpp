@@ -65,7 +65,7 @@ static DECLFW(MCN22MWrite)
 static void MCN22MPower(void)
 {
   reg[0]=reg[1]=reg[2]=0;
-  Sync();  
+  Sync();
   SetReadHandler(0x8000,0xFFFF,CartBR);
   SetWriteHandler(0x8000,0xFFFF,MCN22MWrite);
 }

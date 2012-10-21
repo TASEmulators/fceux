@@ -15,10 +15,10 @@ using namespace std;
 // FCM\x1a
 #define MOVIE_MAGIC             0x1a4d4346
 
-// still at 2 since the format itself is still compatible 
-// to detect which version the movie was made with, check the fceu version stored in the movie header 
+// still at 2 since the format itself is still compatible
+// to detect which version the movie was made with, check the fceu version stored in the movie header
 // (e.g against FCEU_VERSION_NUMERIC)
-#define MOVIE_VERSION           2 
+#define MOVIE_VERSION           2
 
 //-------
 //this is just supposed to be a comment describing the disk format
@@ -223,7 +223,7 @@ static void FCEUI_LoadMovie_v1(char *fname, int _read_only);
 //			}
 //
 //			//don't really load, just load to find what's there then load backup
-//			if(!FCEUSS_LoadFP(fp,SSLOADPARAM_DUMMY)) return 0; 
+//			if(!FCEUSS_LoadFP(fp,SSLOADPARAM_DUMMY)) return 0;
 //		}
 //
 //		fclose(fp);
@@ -519,7 +519,7 @@ static void _addjoy()
 		// This fixes a bug in movies recorded before version 0.98.11
 		// It's probably not necessary, but it may keep away CRAZY PEOPLE who recorded
 		// movies on <= 0.98.10 and don't work on playback.
-		if(tmpfix == 1 && !nextts) 
+		if(tmpfix == 1 && !nextts)
 		{nextts |= movie_readchar()<<8; }
 		else if(tmpfix == 2 && !nextts) {nextts |= movie_readchar()<<16; }
 
@@ -575,7 +575,7 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 		return FCM_CONVERTRESULT_UNSUPPORTEDVERSION;
 	}
 
-	
+
 	fp->fread((char*)&flags,4);
 	read32le(&framecount, fp);
 	read32le(&rerecord_count, fp);

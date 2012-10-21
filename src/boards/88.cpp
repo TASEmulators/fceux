@@ -72,7 +72,7 @@ static void StateRestore(int version)
 
 void Mapper88_Init(CartInfo *info)
 {
-  is154=0;  
+  is154=0;
   info->Power=M88Power;
   GameStateRestore=StateRestore;
   AddExState(&StateRegs, ~0, 0, 0);

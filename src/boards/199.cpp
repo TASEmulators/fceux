@@ -65,7 +65,7 @@ static DECLFW(M199Write)
     FixMMC3PRG(MMC3_cmd);
     FixMMC3CHR(MMC3_cmd);
   }
-  else    
+  else
     if(A<0xC000)
       MMC3_CMDWrite(A,V);
     else

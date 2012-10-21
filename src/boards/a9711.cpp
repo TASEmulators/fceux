@@ -31,14 +31,14 @@ static void UNLA9711PW(uint32 A, uint8 V)
     setprg8(0xA000, 0x13);
     setprg8(0xC000, 0x13);
     setprg8(0xE000, 0x0);
-//    uint8 bank=EXPREGS[0]&0x1F;
-//   if(EXPREGS[0]&0x20)
-//      setprg32(0x8000,bank>>2);
-//    else
-//    {
-//      setprg16(0x8000,bank);
-//      setprg16(0xC000,bank);
-//    }
+//	  uint8 bank=EXPREGS[0]&0x1F;
+//	 if(EXPREGS[0]&0x20)
+//	    setprg32(0x8000,bank>>2);
+//	  else
+//	  {
+//	    setprg16(0x8000,bank);
+//	    setprg16(0xC000,bank);
+//	  }
   }
   else
     setprg8(A,V&0x3F);
@@ -46,12 +46,12 @@ static void UNLA9711PW(uint32 A, uint8 V)
 
 //static DECLFW(UNLA9711Write8000)
 //{
-//  FCEU_printf("bs %04x %02x\n",A,V);
-//  if(V&0x80)
-//    MMC3_CMDWrite(A,V);
-//  else
-//    MMC3_CMDWrite(A,m_perm[V&7]);
-//  if(V!=0x86) MMC3_CMDWrite(A,V);
+//	FCEU_printf("bs %04x %02x\n",A,V);
+//	if(V&0x80)
+//	  MMC3_CMDWrite(A,V);
+//	else
+//	  MMC3_CMDWrite(A,m_perm[V&7]);
+//	if(V!=0x86) MMC3_CMDWrite(A,V);
 //}
 
 static DECLFW(UNLA9711WriteLo)
@@ -66,7 +66,7 @@ static void UNLA9711Power(void)
   EXPREGS[0]=EXPREGS[1]=EXPREGS[2]=0;
   GenMMC3Power();
   SetWriteHandler(0x5000,0x5FFF,UNLA9711WriteLo);
-//  SetWriteHandler(0x8000,0xbfff,UNLA9711Write8000);
+//	SetWriteHandler(0x8000,0xbfff,UNLA9711Write8000);
 }
 
 void UNLA9711_Init(CartInfo *info)

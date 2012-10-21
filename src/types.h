@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */  
+ */
 
 #ifndef __FCEU_TYPES
 #define __FCEU_TYPES
@@ -79,7 +79,7 @@ typedef uint32_t uint32;
 #elif MSVC
  typedef __int64 int64;
  typedef unsigned __int64 uint64;
- #define __restrict__ 
+ #define __restrict__
  #define INLINE __inline
  #define GINLINE			/* Can't declare a function INLINE
 					   and global in MSVC.  Bummer.
@@ -88,7 +88,7 @@ typedef uint32_t uint32;
 					   other than Windows/DOS targets?
 					*/
 
- #if _MSC_VER >= 1300 
+ #if _MSC_VER >= 1300
   #pragma warning(disable:4244) //warning C4244: '=' : conversion from 'uint32' to 'uint8', possible loss of data
   #pragma warning(disable:4996) //'strdup' was declared deprecated
 #endif
@@ -120,7 +120,7 @@ typedef uint32_t uint32;
 
 #else
 
-#error PSS_STYLE undefined or invalid; see "types.h" for possible values, and add as compile-time option.  
+#error PSS_STYLE undefined or invalid; see "types.h" for possible values, and add as compile-time option.
 
 #endif
 

@@ -295,7 +295,7 @@ void setchr8r(int r, unsigned int V)
 	if(CHRram[r])
 		PPUCHRRAM|=(255);
 	else
-		PPUCHRRAM=0; 
+		PPUCHRRAM=0;
 }
 
 void setchr1(unsigned int A, unsigned int V)
@@ -435,7 +435,7 @@ static uint8 *GENIEROM=0;
 
 void FixGenieMap(void);
 
-// Called when a game(file) is opened successfully. 
+// Called when a game(file) is opened successfully.
 void OpenGenie(void)
 {
 	FILE *fp;

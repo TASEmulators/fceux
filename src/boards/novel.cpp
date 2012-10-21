@@ -37,7 +37,7 @@ static DECLFW(NovelWrite)
 static void NovelReset(void)
 {
   SetWriteHandler(0x8000,0xFFFF,NovelWrite);
-  SetReadHandler(0x8000,0xFFFF,CartBR);  
+  SetReadHandler(0x8000,0xFFFF,CartBR);
   setprg32(0x8000,0);
   setchr8(0);
 }

@@ -184,7 +184,7 @@ void FCEU_PutImage(void)
 			ReallySnap();
 			dosnapsave=0;
 		}
-	} 
+	}
 	else
 	{
 		//Save backbuffer before overlay stuff is written.
@@ -228,14 +228,14 @@ void FCEU_PutImage(void)
 		extern uint32 JSAutoHeld;
 		uint32 held;
 
-		int controller, c, ci, color; 
+		int controller, c, ci, color;
 		int i, j;
 		uint32 on  = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0x90:0xA7;	//Standard, or Gray depending on movie mode
 		uint32 oni = 0xA0;		//Color for immediate keyboard buttons
 		uint32 blend = 0xB6;		//Blend of immiate and last held buttons
 		uint32 ahold = 0x87;		//Auto hold
 		uint32 off = 0xCF;
-		
+
 		uint8 *t = XBuf+(FSettings.LastSLine-9)*256 + 20;		//mbg merge 7/17/06 changed t to uint8*
 		if(input_display > 4) input_display = 4;
 		for(controller = 0; controller < input_display; controller++, t += 56)
@@ -265,8 +265,8 @@ void FCEU_PutImage(void)
 			//adelikat: I apologize to anyone who ever sifts through this color assignment
 			//A
 			if (held&1)	{ //If auto-hold
-				if (!(ci&1) ) color = ahold;	
-				else 
+				if (!(ci&1) ) color = ahold;
+				else
 					color = (c&1) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
 			}
 			else {
@@ -284,8 +284,8 @@ void FCEU_PutImage(void)
 			}
 			//B
 			if (held&2)	{ //If auto-hold
-				if (!(ci&2) ) color = ahold;	
-				else 
+				if (!(ci&2) ) color = ahold;
+				else
 					color = (c&2) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
 			}
 			else {
@@ -303,8 +303,8 @@ void FCEU_PutImage(void)
 			}
 			//Select
 			if (held&4)	{ //If auto-hold
-				if (!(ci&4) ) color = ahold;	
-				else 
+				if (!(ci&4) ) color = ahold;
+				else
 					color = (c&4) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
 			}
 			else {
@@ -318,8 +318,8 @@ void FCEU_PutImage(void)
 			}
 			//Start
 			if (held&8)	{ //If auto-hold
-				if (!(ci&8) ) color = ahold;	
-				else 
+				if (!(ci&8) ) color = ahold;
+				else
 					color = (c&8) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
 			}
 			else {
@@ -333,8 +333,8 @@ void FCEU_PutImage(void)
 			}
 			//Up
 			if (held&16)	{ //If auto-hold
-				if (!(ci&16) ) color = ahold;	
-				else 
+				if (!(ci&16) ) color = ahold;
+				else
 					color = (c&16) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
 			}
 			else {
@@ -350,7 +350,7 @@ void FCEU_PutImage(void)
 			}
 			//Down
 			if (held&32)	{ //If auto-hold
-				if (!(ci&32) ) color = ahold;	
+				if (!(ci&32) ) color = ahold;
 				else
 					color = (c&32) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
 			}
@@ -367,8 +367,8 @@ void FCEU_PutImage(void)
 			}
 			//Left
 			if (held&64)	{ //If auto-hold
-				if (!(ci&64) ) color = ahold;	
-				else 
+				if (!(ci&64) ) color = ahold;
+				else
 					color = (c&64) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
 			}
 			else {
@@ -384,8 +384,8 @@ void FCEU_PutImage(void)
 			}
 			//Right
 			if (held&128)	{ //If auto-hold
-				if (!(ci&128) ) color = ahold;	
-				else 
+				if (!(ci&128) ) color = ahold;
+				else
 					color = (c&128) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
 			}
 			else {
@@ -513,7 +513,7 @@ static int WritePNGChunk(FILE *fp, uint32 size, char *type, uint8 *data)
 }
 
 uint32 GetScreenPixel(int x, int y, bool usebackup) {
-	
+
 	uint8 r,g,b;
 
 	if (((x < 0) || (x > 255)) || ((y < 0) || (y > 255)))
@@ -614,7 +614,7 @@ int SaveSnapshot(void)
 			*dest=0;			// No filter.
 			dest++;
 			for(x=256;x;x--,tmp++,dest++)
-				*dest=*tmp; 	
+				*dest=*tmp;
 		}
 
 		if(compress(compmem,&compmemsize,mork,(totallines<<8)+totallines)!=Z_OK)
@@ -707,7 +707,7 @@ int SaveSnapshot(char fileName[512])
 			*dest=0;			// No filter.
 			dest++;
 			for(x=256;x;x--,tmp++,dest++)
-				*dest=*tmp; 	
+				*dest=*tmp;
 		}
 
 		if(compress(compmem,&compmemsize,mork,(totallines<<8)+totallines)!=Z_OK)
@@ -756,7 +756,7 @@ static uint64 boop[60];
 static int boopcount = 0;
 
 void ShowFPS(void)
-{ 
+{
 	if(Show_FPS == false)
 		return;
 	uint64 da = FCEUD_GetTime() - boop[boopcount];

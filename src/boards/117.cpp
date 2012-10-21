@@ -37,13 +37,13 @@ static SFORMAT StateRegs[]=
 static void Sync(void)
 {
   int i;
-  setprg8(0x8000,prgreg[0]);     
-  setprg8(0xa000,prgreg[1]);     
-  setprg8(0xc000,prgreg[2]);     
+  setprg8(0x8000,prgreg[0]);
+  setprg8(0xa000,prgreg[1]);
+  setprg8(0xc000,prgreg[2]);
   setprg8(0xe000,prgreg[3]);
   for(i=0; i<8; i++)
-     setchr1(i<<10,chrreg[i]);     
-  setmirror(mirror^1);   
+     setchr1(i<<10,chrreg[i]);
+  setmirror(mirror^1);
 }
 
 static DECLFW(M117Write)
@@ -52,7 +52,7 @@ static DECLFW(M117Write)
   {
     prgreg[A&3]=V;
     Sync();
-  }  
+  }
   else if((A>=0xA000)&&(A<=0xA007))
   {
     chrreg[A&7]=V;

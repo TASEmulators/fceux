@@ -77,7 +77,7 @@ enum ESIFC
 	SIFC_OEKAKIDS	= 11,
 	SIFC_BWORLD		= 12,
 	SIFC_TOPRIDER	= 13,
-	
+
 	SIFC_COUNT = SIFC_TOPRIDER
 };
 
@@ -118,12 +118,12 @@ struct FCEUGI
 	uint8 *name;	//Game name, UTF8 encoding
 	int mappernum;
 
-	EGIT type;      
+	EGIT type;
 	EGIV vidsys;     //Current emulated video system;
 	ESI input[2];   //Desired input for emulated input ports 1 and 2; -1 for unknown desired input.
 	ESIFC inputfc;  //Desired Famicom expansion port device. -1 for unknown desired input.
 	ESIS cspecial;  //Special cart expansion: DIP switches, barcode reader, etc.
-	
+
 	MD5DATA MD5;
 
 	//mbg 6/8/08 - ???

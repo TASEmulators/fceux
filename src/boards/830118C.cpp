@@ -32,8 +32,8 @@ static void BMC830118CCW(uint32 A, uint8 V)
 
 static void BMC830118CPW(uint32 A, uint8 V)
 {
-      if((EXPREGS[0]&0x0C)==0x0C) 
-      {  
+      if((EXPREGS[0]&0x0C)==0x0C)
+      {
          if(A==0x8000)
          {
            setprg8(A,(V&0x0F)|((EXPREGS[0]&0x0c)<<2));

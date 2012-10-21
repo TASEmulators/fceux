@@ -61,27 +61,27 @@ void SexyFilter(int32 *in, int32 *out, int32 count)
  else vmul*=2;			/* TODO:  Increase volume in low quality sound rendering code itself */
 
  while(count)
- {    
+ {
   int64 ino=(int64)*in*vmul;
   acc1+=((ino-acc1)*mul1)>>16;
   acc2+=((ino-acc1-acc2)*mul2)>>16;
   //printf("%d ",*in);
-  *in=0;  
-  {   
+  *in=0;
+  {
    int32 t=(acc1-ino+acc2)>>16;
    //if(t>32767 || t<-32768) printf("Flow: %d\n",t);
    if(t>32767) t=32767;
-   if(t<-32768) t=-32768;   
+   if(t<-32768) t=-32768;
    *out=t;
-  }  
-  in++;  
-  out++;  
-  count--; 
+  }
+  in++;
+  out++;
+  count--;
  }
 }
 
 /* Returns number of samples written to out. */
-/* leftover is set to the number of samples that need to be copied 
+/* leftover is set to the number of samples that need to be copied
    from the end of in to the beginning of in.
 */
 
@@ -111,7 +111,7 @@ int32 NeoFilterSound(int32 *in, int32 *out, uint32 inlen, int32 *leftover)
 			int32 acc=0,acc2=0;
 			unsigned int c;
 			int32 *S,*D;
-         
+
 			for(c=SQ2NCOEFFS,S=&in[(x>>16)-SQ2NCOEFFS],D=sq2coeffs;c;c--,D++)
 			{
 				acc+=(S[c]**D)>>6;
@@ -120,8 +120,8 @@ int32 NeoFilterSound(int32 *in, int32 *out, uint32 inlen, int32 *leftover)
 
 			acc=((int64)acc*(65536-(x&65535))+(int64)acc2*(x&65535))>>(16+11);
 			*out=acc;
-			out++;   
-			count++; 
+			out++;
+			count++;
         }
 	else
 		for(x=mrindex;x<max;x+=mrratio)
@@ -129,14 +129,14 @@ int32 NeoFilterSound(int32 *in, int32 *out, uint32 inlen, int32 *leftover)
 			int32 acc=0,acc2=0;
 			unsigned int c;
 			const int32 *S,*D;
- 
+
 			for(c=NCOEFFS,S=&in[(x>>16)-NCOEFFS],D=coeffs;c;c--,D++)
 			{
 				acc+=(S[c]**D)>>6;
 				acc2+=(S[1+c]**D)>>6;
 			}
- 
-			acc=((int64)acc*(65536-(x&65535))+(int64)acc2*(x&65535))>>(16+11);  
+
+			acc=((int64)acc*(65536-(x&65535))+(int64)acc2*(x&65535))>>(16+11);
 			*out=acc;
 			out++;
 			count++;

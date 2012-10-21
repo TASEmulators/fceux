@@ -24,7 +24,7 @@
 static DECLFW(UNLKOF97CMDWrite)
 {
   V=(V&0xD8)|((V&0x20)>>4)|((V&4)<<3)|((V&2)>>1)|((V&1)<<2);  //76143502
-  if(A==0x9000) A=0x8001;  
+  if(A==0x9000) A=0x8001;
   MMC3_CMDWrite(A,V);
 }
 

@@ -86,7 +86,7 @@ void UNL22211_Init(CartInfo *info)
 
 void Mapper172_Init(CartInfo *info)
 {
-  is172=1;  
+  is172=1;
   is173=0;
   info->Power=UNL22211Power;
   GameStateRestore=StateRestore;
@@ -95,7 +95,7 @@ void Mapper172_Init(CartInfo *info)
 
 void Mapper173_Init(CartInfo *info)
 {
-  is172=0;  
+  is172=0;
   is173=1;
   info->Power=UNL22211Power;
   GameStateRestore=StateRestore;

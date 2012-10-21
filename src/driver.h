@@ -98,7 +98,7 @@ void FCEUI_GetRenderPlanes(bool& sprites, bool& bg);
 //name=path and file to load.  returns null if it failed
 FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode);
 
-//same as FCEUI_LoadGame, except that it can load from a tempfile. 
+//same as FCEUI_LoadGame, except that it can load from a tempfile.
 //name is the logical path to open; archiveFilename is the archive which contains name
 FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode);
 
@@ -203,8 +203,8 @@ void FCEUI_CheatSearchSetCurrentAsOriginal(void);
 
 //.rom
 #define FCEUIOD_ROMS    0	//Roms
-#define FCEUIOD_NV      1	//NV = nonvolatile. save data.	
-#define FCEUIOD_STATES  2	//savestates	
+#define FCEUIOD_NV      1	//NV = nonvolatile. save data.
+#define FCEUIOD_STATES  2	//savestates
 #define FCEUIOD_FDSROM  3	//disksys.rom
 #define FCEUIOD_SNAPS   4	//screenshots
 #define FCEUIOD_CHEATS  5	//cheats

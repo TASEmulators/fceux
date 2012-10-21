@@ -66,8 +66,8 @@ static DECLFW(UNLCITYFIGHTWrite)
     case 0x9008:
     case 0x900C:
       if(A&0x800)
-        pcmwrite(0x4011,(V&0xf)<<3);         
-      else  
+        pcmwrite(0x4011,(V&0xf)<<3);
+      else
         prg_reg=V&0xC;
       break;
     case 0xC000:

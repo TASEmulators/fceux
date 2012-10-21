@@ -86,7 +86,7 @@ static void Sync(void)
 
 static DECLFW(UNLOneBusWrite20XX)
 {
-//  FCEU_printf("PPU %04x:%04x\n",A,V);
+//	FCEU_printf("PPU %04x:%04x\n",A,V);
   if(A == 0x201A)
     regs[0xd] = V;
   else if(A == 0x2018)
@@ -96,26 +96,26 @@ static DECLFW(UNLOneBusWrite20XX)
 
 static DECLFW(UNLOneBusWriteExp)
 {
-//  FCEU_printf("EXP %04x:%04x\n",A,V);
-//  switch(A & 0x0F)
-//  {
-//  case 2: pcm_latch = pcm_clock; FCEU_printf("write %04x:%04x\n",A,V); break;
-//  case 3: pcm_irqa = 0; X6502_IRQEnd(FCEU_IQEXT); pcm_irq = 0; FCEU_printf("write %04x:%04x\n",A,V); break;
-//  case 4: pcm_irqa = 1; FCEU_printf("write %04x:%04x\n",A,V); break;
-//  default:
+//	FCEU_printf("EXP %04x:%04x\n",A,V);
+//	switch(A & 0x0F)
+//	{
+//	case 2: pcm_latch = pcm_clock; FCEU_printf("write %04x:%04x\n",A,V); break;
+//	case 3: pcm_irqa = 0; X6502_IRQEnd(FCEU_IQEXT); pcm_irq = 0; FCEU_printf("write %04x:%04x\n",A,V); break;
+//	case 4: pcm_irqa = 1; FCEU_printf("write %04x:%04x\n",A,V); break;
+//	default:
    regs[A & 0x0F] = V;
    Sync();
-//  }
+//	}
 }
 
 static DECLFW(UNLOneBusWriteDebug)
 {
-//  FCEU_printf("write %04x:%04x\n",A,V);
+//	FCEU_printf("write %04x:%04x\n",A,V);
 }
 
 static DECLFW(UNLOneBusWriteMMC)
 {
-//  FCEU_printf("MMC %04x:%04x\n",A,V);
+//	FCEU_printf("MMC %04x:%04x\n",A,V);
   switch(A&0xE001)
   {
   case 0x8000: regs[0xf] = V; Sync(); break;
@@ -173,27 +173,27 @@ static void UNLOneBusIRQHook(void)
 
 static DECLFW(UNLOneBusWriteAPU2)
 {
-//  FCEU_printf("APU2 %04x:%04x\n",A,V);
+//	FCEU_printf("APU2 %04x:%04x\n",A,V);
    CartBW(A&0xffdf,V);
 }
 
 static DECLFW(UNLOneBusWrite4012)
 {
-//  FCEU_printf("write %04x:%04x\n",A,V);
+//	FCEU_printf("write %04x:%04x\n",A,V);
   pcm_addr = V << 6;
   old4012write(A,V);
 }
 
 static DECLFW(UNLOneBusWrite4013)
 {
-//  FCEU_printf("write %04x:%04x\n",A,V);
+//	FCEU_printf("write %04x:%04x\n",A,V);
   pcm_size = (V << 4) + 1;
   old4013write(A,V);
 }
 
 static DECLFW(UNLOneBusWrite4015)
 {
-//  FCEU_printf("write %04x:%04x\n",A,V);
+//	FCEU_printf("write %04x:%04x\n",A,V);
   pcm_enable = V&0x10;
   if(pcm_irq)
   {
@@ -208,7 +208,7 @@ static DECLFW(UNLOneBusWrite4015)
 static DECLFR(UNLOneBusRead4015)
 {
   uint8 result = (old4015read(A) & 0x7F)|pcm_irq;
-//  FCEU_printf("read %04x, %02x\n",A,result);
+//	FCEU_printf("read %04x, %02x\n",A,result);
   return result;
 }
 
@@ -263,8 +263,8 @@ static void UNLOneBusPower(void)
 
   SetReadHandler(0x8000,0xFFFF,CartBR);
   SetWriteHandler(0x2009,0x2fff,UNLOneBusWrite20XX);
-//  SetWriteHandler(0x4020,0xffff,UNLOneBusWriteDebug);
-//  SetWriteHandler(0x4020,0x4040,UNLOneBusWriteAPU2);
+//	SetWriteHandler(0x4020,0xffff,UNLOneBusWriteDebug);
+//	SetWriteHandler(0x4020,0x4040,UNLOneBusWriteAPU2);
   SetWriteHandler(0x4100,0x410f,UNLOneBusWriteExp);
   SetWriteHandler(0x8000,0xefff,UNLOneBusWriteMMC);
   Sync();
@@ -291,7 +291,7 @@ void UNLOneBus_Init(CartInfo *info)
   info->Power=UNLOneBusPower;
   info->Reset=UNLOneBusReset;
   GameHBIRQHook=UNLOneBusIRQHook;
-//  MapIRQHook=UNLOneBusCpuHook;
+//	MapIRQHook=UNLOneBusCpuHook;
   GameStateRestore=StateRestore;
   AddExState(&StateRegs, ~0, 0, 0);
 }

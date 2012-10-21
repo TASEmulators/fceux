@@ -21,7 +21,7 @@
 #include "mapinc.h"
 
 static uint8 chrlo[8], chrhi[8], prg[2], mirr, vlock;
-static int32 IRQa, IRQCount, IRQLatch, IRQClock; 
+static int32 IRQa, IRQCount, IRQLatch, IRQClock;
 static uint8 *WRAM=NULL;
 static uint32 WRAMSIZE;
 static uint8 *CHRRAM=NULL;
@@ -127,18 +127,18 @@ static void M253Close(void)
 
 static void M253IRQ(int cycles)
 {
-  if(IRQa&2) 
+  if(IRQa&2)
   {
-    if((IRQClock+=cycles)>=0x72) 
+    if((IRQClock+=cycles)>=0x72)
     {
       IRQClock -= 0x72;
-      if(IRQCount==0xFF)  
+      if(IRQCount==0xFF)
       {
         IRQCount = IRQLatch;
         IRQa = IRQa|((IRQa&1)<<1);
         X6502_IRQBegin(FCEU_IQEXT);
       }
-      else 
+      else
         IRQCount++;
     }
   }

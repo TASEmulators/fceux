@@ -48,7 +48,7 @@ static DECLFW(M177Write)
 static void M177Power(void)
 {
   reg=0;
-  Sync();     
+  Sync();
   SetReadHandler(0x6000,0x7fff,CartBR);
   SetWriteHandler(0x6000,0x7fff,CartBW);
   SetReadHandler(0x8000,0xFFFF,CartBR);

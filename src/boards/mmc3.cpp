@@ -534,7 +534,7 @@ static DECLFW(M45Write)
  }
  EXPREGS[EXPREGS[4]]=V;
  EXPREGS[4]=(EXPREGS[4]+1)&3;
-// if(!EXPREGS[4]) 
+// if(!EXPREGS[4])
 // {
 //   FCEU_printf("CHROR %02x, PRGOR %02x, CHRAND %02x, PRGAND %02x\n",EXPREGS[0],EXPREGS[1],EXPREGS[2],EXPREGS[3]);
 //   FCEU_printf("CHR0 %03x, CHR1 %03x, PRG0 %03x, PRG1 %03x\n",

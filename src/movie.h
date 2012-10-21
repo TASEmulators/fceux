@@ -20,7 +20,7 @@ enum EMOVIE_FLAG
 	//an ARCHAIC flag which means the movie was recorded from a soft reset.
 	//WHY would you do this?? do not create any new movies with this flag
 	MOVIE_FLAG_FROM_RESET = (1<<1),
-	
+
 	MOVIE_FLAG_PAL = (1<<2),
 
 	//movie was recorded from poweron. the alternative is from a savestate (or from reset)
@@ -101,7 +101,7 @@ class MovieRecord
 public:
 	MovieRecord();
 	ValueArray<uint8,4> joysticks;
-	
+
 	struct {
 		uint8 x,y,b,bogo;
 		uint64 zaphit;
@@ -145,14 +145,14 @@ public:
 	bool Compare(MovieRecord& compareRec);
 	void Clone(MovieRecord& sourceRec);
 	void clear();
-	
+
 	void parse(MovieData* md, EMUFILE* is);
 	bool parseBinary(MovieData* md, EMUFILE* is);
 	void dump(MovieData* md, EMUFILE* os, int index);
 	void dumpBinary(MovieData* md, EMUFILE* os, int index);
 	void parseJoy(EMUFILE* is, uint8& joystate);
 	void dumpJoy(EMUFILE* os, uint8 joystate);
-	
+
 	static const char mnemonics[8];
 
 private:
@@ -192,7 +192,7 @@ public:
 	bool fourscore;
 	//whether microphone is enabled
 	bool microphone;
-	
+
 	int getNumRecords() { return records.size(); }
 
 	class TDictionary : public std::map<std::string,std::string>
@@ -230,7 +230,7 @@ public:
 	void clearRecordRange(int start, int len);
 	void insertEmpty(int at, int frames);
 	void cloneRegion(int at, int frames);
-	
+
 	static bool loadSavestateFrom(std::vector<uint8>* buf);
 	static void dumpSavestateTo(std::vector<uint8>* buf, int compressionLevel);
 

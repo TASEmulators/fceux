@@ -25,7 +25,7 @@ static uint8 lut[4] = { 0x00, 0x02, 0x02, 0x03 };
 
 static DECLFW(UNL6035052ProtWrite)
 {
-  EXPREGS[0]=lut[V&3];  
+  EXPREGS[0]=lut[V&3];
 }
 
 static DECLFR(UNL6035052ProtRead)

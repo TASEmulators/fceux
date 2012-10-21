@@ -125,7 +125,7 @@ static DECLFW(M190Write)
 // FCEU_printf("write %04x:%04x %d, %d\n",A,V,scanline,timestamp);
   regs[(A&0x0F00)>>8]=V;
   switch(A)
-  {  
+  {
     case 0xd600:IRQLatch&=0xFF00;IRQLatch|=V;break;
     case 0xd700:IRQLatch&=0x00FF;IRQLatch|=V<<8;break;
     case 0xd900:IRQCount=IRQLatch;IRQa=V&2;K4IRQ=V&1;X6502_IRQEnd(FCEU_IQEXT);break;
@@ -185,7 +185,7 @@ static void M190Power(void)
   test[5]=5;
   test[6]=6;
   test[7]=7;
-*/  
+*/
   setprg4r(0x10,0x7000,2);
 
   old2007wrap=GetWriteHandler(0x2007);

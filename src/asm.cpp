@@ -15,7 +15,7 @@ int Assemble(unsigned char *output, int addr, char *str) {
 	//unsigned char opcode[3] = { 0,0,0 };
 	output[0] = output[1] = output[2] = 0;
 	char astr[128],ins[4];
-	int len = strlen(str); 
+	int len = strlen(str);
 	if ((!len) || (len > 0x127)) return 1;
 
 	strcpy(astr,str);
@@ -40,7 +40,7 @@ int Assemble(unsigned char *output, int addr, char *str) {
 	// 1) Sets opcode[0] on success, else returns 1.
 	// 2) Parses text in *astr to build the rest of the assembled
 	//    data in 'opcode', else returns 1 on error.
-	
+
 	if (!strlen(astr)) {
 		//Implied instructions
 			 if (!strcmp(ins,"BRK")) output[0] = 0x00;
@@ -517,6 +517,6 @@ char *Disassemble(int addr, uint8 *opcode) {
 		default: strcpy(str,"ERROR"); break;
 
 	}
-	
+
 	return str;
 }

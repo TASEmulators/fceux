@@ -100,6 +100,7 @@ void BMCGhostbusters63in1_Init(CartInfo *info);
 void BMCBS5_Init(CartInfo *info);
 
 void DreamTech01_Init(CartInfo *info);
+void UNLFS304_Init(CartInfo *info);
 void Mapper190_Init(CartInfo *info);
 void UNLCC21_Init(CartInfo *info);
 void UNLCN22M_Init(CartInfo *info);

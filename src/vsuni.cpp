@@ -32,7 +32,7 @@
 
 #define IOPTION_GUN       0x1
 #define IOPTION_SWAPDIRAB       0x2
-  
+
 #define IOPTION_PREDIP    0x10
 typedef struct
 {
@@ -65,7 +65,7 @@ void FCEUI_VSUniSetDIP(int w, int state)
  if(((vsdip >> w) & 1) != state)
   FCEUI_VSUniToggleDIP(w);
 }
- 
+
 uint8 FCEUI_VSUniGetDIPs(void)
 {
  return(vsdip);
@@ -90,14 +90,14 @@ static uint8 secdata[2][32]=
 static uint8 *secptr;
 
 static uint8 VSindex;
-         
+
 static DECLFR(VSSecRead)
 {
  switch(A)
  {
   case 0x5e00: VSindex=0;return X.DB;
   case 0x5e01: return(secptr[(VSindex++)&0x1F]);
- }       
+ }
  return(0x00);
 }
 uint8 coinon=0;
@@ -111,7 +111,7 @@ static int curppu;
 static int64 curmd5;
 
 #define RP2C04_001      1
-#define RP2C04_002      2 
+#define RP2C04_002      2
 #define RP2C04_003      3
 #define RP2C05_004      4
 #define RCP2C03B  5
@@ -186,7 +186,7 @@ void FCEU_VSUniPower(void)
 
  if(curppu == RC2C05_04)
  {
-  OldReadPPU = GetReadHandler(0x2002);  
+  OldReadPPU = GetReadHandler(0x2002);
   SetReadHandler(0x2002, 0x2002, A2002_Topgun);
  }
  else if(curppu == RC2C05_03)
@@ -224,17 +224,17 @@ void FCEU_VSUniPower(void)
    this list as "this game must use this PPU".
 
 RP2C04-001:
-- Baseball   
+- Baseball
 - Freedom Force
 - Gradius
 - Hogan's Alley
 - Mach Rider (Japan, Fighting Course)
 - Pinball
-- Platoon  
+- Platoon
 - Super Xevious
 
 RP2C04-002:
-- Castlevania 
+- Castlevania
 - Ladies golf
 - Mach Rider (Endurance Course)
 - Raid on Bungeling Bay (Japan)
@@ -253,7 +253,7 @@ RP2c05-004:
 - Clu Clu Land
 - Excite Bike (Japan)
 - Ice Climber
-- Ice Climber Dual (Japan)  
+- Ice Climber Dual (Japan)
 - Super Mario Bros.
 
 Rcp2c03b:
@@ -262,7 +262,7 @@ Rcp2c03b:
 - Mahjang
 - Pinball (Japan)
 - Rbi Baseball
-- Star Luster 
+- Star Luster
 - Stroke and Match Golf (Japan)
 - Super Skykid
 - Tennis
@@ -275,9 +275,9 @@ RC2C05-02:
 - Mighty Bomb Jack (Japan)
 
 RC2C05-03:
-- Gumshoe   
+- Gumshoe
 
-RC2C05-04: 
+RC2C05-04:
 - Top Gun
 */
 
@@ -348,9 +348,9 @@ void FCEU_VSUniCheck(uint64 md5partial, int *MapperNo, uint8 *Mirroring)
    {
     static int64 tko=0x6e1ee06171d8ce3aULL, rbi=0x6a02d345812938afULL;
     if(md5partial == tko)
-     secptr=secdata[0]; 
+     secptr=secdata[0];
     if(md5partial == rbi)
-     secptr = secdata[1]; 
+     secptr = secdata[1];
    }
 
    vsdip = 0x0;
@@ -384,10 +384,10 @@ void FCEU_VSUniDraw(uint8 *XBuf)
   dest=(uint32 *)(XBuf+256*12+164);
   for(y=24;y;y--,dest+=(256-72)>>2)
   {
-   for(x=72>>2;x;x--,dest++) 
+   for(x=72>>2;x;x--,dest++)
     *dest=0;
   }
-   
+
   dest=(uint32 *)(XBuf+256*(12+4)+164+6 );
   for(y=16;y;y--,dest+=(256>>2)-16)
    for(x=8;x;x--)
@@ -405,13 +405,13 @@ void FCEU_VSUniDraw(uint8 *XBuf)
     da+=(256>>2)*10;
    for(y=4;y;y--,da+=256>>2)
     *da=0;
-  } 
+  }
 }
 
 
 SFORMAT FCEUVSUNI_STATEINFO[]={
   { &vsdip, 1, "vsdp"},
-  { &coinon, 1, "vscn"}, 
+  { &coinon, 1, "vscn"},
   { &VSindex, 1, "vsin"},
   { 0}
 };

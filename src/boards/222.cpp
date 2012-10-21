@@ -45,7 +45,7 @@ static void M222IRQ(void)
     if(IRQCount>=238)
     {
       X6502_IRQBegin(FCEU_IQEXT);
-//      IRQa=0;
+//	    IRQa=0;
     }
   }
 }
@@ -75,11 +75,11 @@ static DECLFW(M222Write)
     case 0xD002: chr_reg[5]=V; break;
     case 0xE000: chr_reg[6]=V; break;
     case 0xE002: chr_reg[7]=V; break;
-//    case 0xF000: FCEU_printf("%04x:%02x %d\n",A,V,scanline); IRQa=V; if(!V)IRQPre=0; X6502_IRQEnd(FCEU_IQEXT); break;
-//  /  case 0xF001: FCEU_printf("%04x:%02x %d\n",A,V,scanline); IRQCount=V; break;
-//    case 0xF002: FCEU_printf("%04x:%02x %d\n",A,V,scanline); break;
-//    case 0xD001: IRQa=V; X6502_IRQEnd(FCEU_IQEXT); FCEU_printf("%04x:%02x %d\n",A,V,scanline); break;
-//    case 0xC001: IRQPre=16; FCEU_printf("%04x:%02x %d\n",A,V,scanline); break;
+//	  case 0xF000: FCEU_printf("%04x:%02x %d\n",A,V,scanline); IRQa=V; if(!V)IRQPre=0; X6502_IRQEnd(FCEU_IQEXT); break;
+//	/  case 0xF001: FCEU_printf("%04x:%02x %d\n",A,V,scanline); IRQCount=V; break;
+//	  case 0xF002: FCEU_printf("%04x:%02x %d\n",A,V,scanline); break;
+//	  case 0xD001: IRQa=V; X6502_IRQEnd(FCEU_IQEXT); FCEU_printf("%04x:%02x %d\n",A,V,scanline); break;
+//	  case 0xC001: IRQPre=16; FCEU_printf("%04x:%02x %d\n",A,V,scanline); break;
     case 0xF000: IRQa=IRQCount=V; if(scanline<240) IRQCount-=8; else IRQCount+=4; X6502_IRQEnd(FCEU_IQEXT); break;
   }
   Sync();

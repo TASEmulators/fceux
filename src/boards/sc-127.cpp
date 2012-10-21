@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- * 
+ *
  * Wario Land II (Kirby hack)
  */
 
@@ -51,7 +51,7 @@ static DECLFW(UNLSC127Write)
 {
   switch(A)
   {
-    case 0x8000: reg[0] = V; break; 
+    case 0x8000: reg[0] = V; break;
     case 0x8001: reg[1] = V; break;
     case 0x8002: reg[2] = V; break;
     case 0x9000: chr[0] = V; break;

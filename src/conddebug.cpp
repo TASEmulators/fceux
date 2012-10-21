@@ -25,7 +25,7 @@
 * http://www.engr.mun.ca/~theo/Misc/exp_parsing.htm
 *
 * Grammar of the parser:
-* 
+*
 * P         -> Connect
 * Connect   -> Compare {('||' | '&&') Compare}
 * Compare   -> Sum {('==' | '!=' | '<=' | '>=' | '<' | '>') Sum}
@@ -152,7 +152,7 @@ int getNumber(unsigned int* number, const char** str)
 	{
 		return 0;
 	}
-	
+
 // Older, inferior version which doesn't work with leading zeros
 //	sprintf(buffer, "%X", *number);
 //	*str += strlen(buffer);
@@ -358,7 +358,7 @@ Condition* Term(const char** str)
 
 		if (!(mid = (Condition*)FCEU_dmalloc(sizeof(Condition))))
             return NULL;
-        
+
 		memset(mid, 0, sizeof(Condition));
 
 		mid->lhs = t;

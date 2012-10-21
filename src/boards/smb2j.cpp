@@ -66,7 +66,7 @@ static void UNLSMB2JPower(void)
 }
 
 static void UNLSMB2JReset(void)
-{ 
+{
   prg=~0;
   Sync();
 }

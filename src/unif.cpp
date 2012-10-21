@@ -402,6 +402,7 @@ static BMAPPING bmap[] = {
 	{ "8157", UNL8157_Init,0},
 	{ "T-262", BMCT262_Init,0},
 	{ "FK23C", BMCFK23C_Init,0},
+	{ "FS304", UNLFS304_Init,0},
 	{ "A65AS", BMCA65AS_Init,0},
 	{ "C-N22M", UNLCN22M_Init,0},
 	{ "EDU2000", UNLEDU2000_Init,0},
@@ -441,8 +442,8 @@ static BMAPPING bmap[] = {
 
 	{ "TEK90", Mapper90_Init,0},
 
- { "FK23C", BMCFK23C_Init,BMCFLAG_EXPCHRR},
- { "FK23CA", BMCFK23CA_Init,BMCFLAG_EXPCHRR},
+	{ "FK23C", BMCFK23C_Init,BMCFLAG_EXPCHRR},
+	{ "FK23CA", BMCFK23CA_Init,BMCFLAG_EXPCHRR},
 
 	{0,0,0}
 };

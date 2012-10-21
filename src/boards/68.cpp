@@ -92,7 +92,7 @@ static DECLFR(M68Read)
 static DECLFW(M68WriteLo)
 {
   if(!V)
-  { 
+  {
     count = 0;
     setprg16r((PRGptr[1])?kogame:0,0x8000,prg_reg);
   }
@@ -106,13 +106,13 @@ static DECLFW(M68WriteCHR)
 
 static DECLFW(M68WriteNT1)
 {
-  nt1 = V;            
+  nt1 = V;
   M68NTfix();
 }
 
 static DECLFW(M68WriteNT2)
 {
-  nt2 = V;            
+  nt2 = V;
   M68NTfix();
 }
 

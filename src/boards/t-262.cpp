@@ -33,7 +33,7 @@ static SFORMAT StateRegs[]=
 
 static void Sync(void)
 {
-  uint16 base=((addrreg&0x60)>>2)|((addrreg&0x100)>>3);  
+  uint16 base=((addrreg&0x60)>>2)|((addrreg&0x100)>>3);
   setprg16(0x8000,(datareg&7)|base);
   setprg16(0xC000,7|base);
   setmirror(((addrreg&2)>>1)^1);

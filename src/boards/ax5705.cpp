@@ -60,8 +60,8 @@ static void Sync(void)
   setprg8(0xC000,~1);
   setprg8(0xE000,~0);
   for(i=0; i<8; i++)
-     setchr1(i<<10,chr_reg[i]);     
-  setmirror(mirr^1);   
+     setchr1(i<<10,chr_reg[i]);
+  setmirror(mirr^1);
 }
 
 static DECLFW(UNLAX5705Write)
@@ -73,7 +73,7 @@ static DECLFW(UNLAX5705Write)
 //    chr_reg[ind]=(chr_reg[ind]&(0xF0>>sar))|((V&0x0F)<<sar);
 //    SyncChr();
 //  }
-//  else 
+//  else
   switch(A&0xF00F)
   {
     case 0x8000: prg_reg[0]=((V&2)<<2)|((V&8)>>2)|(V&5); break; // EPROM dump have mixed PRG and CHR banks, data lines to mapper seems to be mixed
