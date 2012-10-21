@@ -16,68 +16,118 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
  * Panda prince pirate.
- * MK4, MK6, A9711 board, MAPPER 187 the same!
- * UNL6035052_Init seems to be the same too, but with prot array in reverse
+ * MK4, MK6, A9711/A9713 board
+ * 6035052 seems to be the same too, but with prot array in reverse
+ * A9746  seems to be the same too, check
+ * 187 seems to be the same too, check (A98402 board)
+ *
  */
 
 #include "mapinc.h"
 #include "mmc3.h"
 
-static uint8 readbyte = 0;
+static void Sync()
+{
+  switch(EXPREGS[5]&0x3F)
+  {
+    case 0x20: EXPREGS[7] = 1; EXPREGS[0]=EXPREGS[6]; break;
+    case 0x29: EXPREGS[7] = 1; EXPREGS[0]=EXPREGS[6]; break;
+    case 0x26: EXPREGS[7] = 0; EXPREGS[0]=EXPREGS[6]; break;
+    case 0x2B: EXPREGS[7] = 1; EXPREGS[0]=EXPREGS[6]; break;
+    case 0x2C: EXPREGS[7] = 1; if(EXPREGS[6]) EXPREGS[0]=EXPREGS[6]; break;
+    case 0x3C: 
+    case 0x3F: EXPREGS[7] = 1; EXPREGS[0]=EXPREGS[6]; break;
+    case 0x28: EXPREGS[7] = 0; EXPREGS[1]=EXPREGS[6]; break;
+    case 0x2A: EXPREGS[7] = 0; EXPREGS[2]=EXPREGS[6]; break;
+    case 0x2F: break;
+    default:   EXPREGS[5] = 0; break;
+  }
+}
+
+static void M121CW(uint32 A, uint8 V)
+{
+  if(PRGsize[0] == CHRsize[0]) // A9713 multigame extension hack!
+  {
+    setchr1(A,V|((EXPREGS[3]&0x80)<<1));
+  }
+  else
+  {
+    if((A&0x1000)==((MMC3_cmd&0x80)<<5))
+      setchr1(A,V|0x100);
+    else
+      setchr1(A,V);
+  }
+}
+
+static void M121PW(uint32 A, uint8 V)
+{
+  if(EXPREGS[5]&0x3F)
+  {
+//    FCEU_printf("prot banks: %02x %02x %02x %02x\n",V,EXPREGS[2],EXPREGS[1],EXPREGS[0]);
+    setprg8(A,(V&0x1F)|((EXPREGS[3]&0x80)>>2));
+    setprg8(0xE000,(EXPREGS[0])|((EXPREGS[3]&0x80)>>2));
+    setprg8(0xC000,(EXPREGS[1])|((EXPREGS[3]&0x80)>>2));
+    setprg8(0xA000,(EXPREGS[2])|((EXPREGS[3]&0x80)>>2));
+  }
+  else
+  {
+//    FCEU_printf("gen banks: %04x %02x\n",A,V);
+    setprg8(A,(V&0x1F)|((EXPREGS[3]&0x80)>>2));
+  }
+}
 
 static DECLFW(M121Write)
 {
 //  FCEU_printf("write: %04x:%04x\n",A&0xE003,V);
-  if((A&0xF003)==0x8003)
+  switch(A&0xE003)
   {
-//    FCEU_printf("       prot write");
-//    FCEU_printf("write: %04x:%04x\n",A,V);
-    if     (V==0xAB) setprg8(0xE000,7);
-    else if(V==0x26) setprg8(0xE000,8);
-//    else if(V==0x26) setprg8(0xE000,1); // MK3
-//    else if(V==0x26) setprg8(0xE000,0x15); // sonic 3D blast, 8003 - command (0x26), 8001 - data 0x2A (<<1 = 0x15)
-    else if(V==0xFF) setprg8(0xE000,9);
-    else if(V==0x28) setprg8(0xC000,0xC);
-    else if(V==0xEC) setprg8(0xE000,0xD); 
-//    else if(V==0xEC) setprg8(0xE000,0xC);//MK3
-    else if(V==0xEF) setprg8(0xE000,0xD); // damn mess, need real hardware to figure out bankswitching
-    else if(V==0x2A) setprg8(0xA000,0x0E);
-//    else if(V==0x2A) setprg8(0xE000,0x0C); // MK3
-    else if(V==0x20) setprg8(0xE000,0x13);
-    else if(V==0x29) setprg8(0xE000,0x1B);
-    else 
-    {
-//      FCEU_printf(" unknown");
-      FixMMC3PRG(MMC3_cmd);
-      MMC3_CMDWrite(A,V);
-    }
-//      FCEU_printf("\n");
-  }
-  else
-  {
-//    FixMMC3PRG(MMC3_cmd);
-    MMC3_CMDWrite(A,V);
+    case 0x8000: //EXPREGS[5] = 0;
+//                 FCEU_printf("gen: %02x\n",V);
+                 MMC3_CMDWrite(A,V);
+                 FixMMC3PRG(MMC3_cmd);
+                 break;
+    case 0x8001: EXPREGS[6] = ((V&1)<<5)|((V&2)<<3)|((V&4)<<1)|((V&8)>>1)|((V&0x10)>>3)|((V&0x20)>>5);
+//                 FCEU_printf("bank: %02x (%02x)\n",V,EXPREGS[6]);
+                 if(!EXPREGS[7]) Sync();
+                 MMC3_CMDWrite(A,V);
+                 FixMMC3PRG(MMC3_cmd);
+                 break;
+    case 0x8003: EXPREGS[5] = V;
+//                 EXPREGS[7] = 0;
+//                 FCEU_printf("prot: %02x\n",EXPREGS[5]);
+                 Sync();
+                 MMC3_CMDWrite(0x8000,V);
+                 FixMMC3PRG(MMC3_cmd);
+                 break;
   }
 }
 
 static uint8 prot_array[16] = { 0x83, 0x83, 0x42, 0x00 };
 static DECLFW(M121LoWrite)
 {
-  EXPREGS[0] = prot_array[V&3];  // 0x100 bit in address seems to be switch arrays 0, 2, 2, 3 (Contra Fighter)
+  EXPREGS[4] = prot_array[V&3];  // 0x100 bit in address seems to be switch arrays 0, 2, 2, 3 (Contra Fighter)
+  if((A & 0x5180) == 0x5180)     // A9713 multigame extension
+  {
+    EXPREGS[3] = V;
+    FixMMC3PRG(MMC3_cmd);
+    FixMMC3CHR(MMC3_cmd);
+  }
 //  FCEU_printf("write: %04x:%04x\n",A,V);
 }
 
 static DECLFR(M121Read)
-{ 
-//  FCEU_printf("read:  %04x\n",A);
-  return EXPREGS[0];
+{
+//  FCEU_printf("read:  %04x->\n",A,EXPREGS[0]);
+  return EXPREGS[4];
 }
 
 static void M121Power(void)
 {
+  EXPREGS[3] = 0x80;
+  EXPREGS[5] = 0;
   GenMMC3Power();
-//  Write_IRQFM(0x4017,0x40);
   SetReadHandler(0x5000,0x5FFF,M121Read);
   SetWriteHandler(0x5000,0x5FFF,M121LoWrite);
   SetWriteHandler(0x8000,0x9FFF,M121Write);
@@ -86,6 +136,8 @@ static void M121Power(void)
 void Mapper121_Init(CartInfo *info)
 {
   GenMMC3_Init(info, 128, 256, 8, 0);
+  pwrap=M121PW;
+  cwrap=M121CW;
   info->Power=M121Power;
-  AddExState(EXPREGS, 2, 0, "EXPR");
+  AddExState(EXPREGS, 8, 0, "EXPR");
 }
