@@ -650,9 +650,6 @@
     <ClCompile Include="..\src\mappers\151.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\mappers\16.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\mappers\17.cpp">
       <Filter>mappers</Filter>
     </ClCompile>

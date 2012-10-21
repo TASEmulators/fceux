@@ -64,7 +64,7 @@ static DECLFW(M15Write)
 {
   latchea=A;
   latched=V;
-	printf("%04X = %02X\n",A,V);
+//  printf("%04X = %02X\n",A,V);
   Sync();
 }
 

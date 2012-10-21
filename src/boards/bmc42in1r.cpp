@@ -18,25 +18,28 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * BMC 42-in-1
- * it seems now, mapper not reset-based,
- * tested on real hardware and it does menus switch by pressing just Select, not Reset
- * new registers behaviour proven this too
+ * BMC 42-in-1 "reset switch" + "select switch"
  *
  */
 
 #include "mapinc.h"
 
-static uint8 latche[2];
+static uint8 isresetbased = 0;
+static uint8 latche[2], reset;
 static SFORMAT StateRegs[]=
 {
-  {&latche, sizeof(latche), "LATCHE"},
+  {&reset, 1, "RST"},
+  {latche, 2, "LATC"},
   {0}
 };
 
 static void Sync(void)
 {
-  uint8 bank = (latche[0]&0x1f)|((latche[0]&0x80)>>2)|((latche[1]&1))<<6;
+  uint8 bank;
+  if(isresetbased)
+    bank = (latche[0]&0x1f)|(reset<<5)|((latche[1]&1)<<6);
+  else
+    bank = (latche[0]&0x1f)|((latche[0]&0x80)>>2)|((latche[1]&1)<<6);
   if(!(latche[0] & 0x20))
       setprg32(0x8000,bank >> 1);
   else
@@ -56,7 +59,7 @@ static DECLFW(M226Write)
 
 static void M226Power(void)
 {
-  latche[0] = latche[1] = 0;
+  latche[0] = latche[1] = reset = 0;
   Sync();
   SetWriteHandler(0x8000,0xFFFF,M226Write);
   SetReadHandler(0x8000,0xFFFF,CartBR);
@@ -69,8 +72,23 @@ static void StateRestore(int version)
 
 void Mapper226_Init(CartInfo *info)
 {
+  isresetbased = 0;
   info->Power=M226Power;
   AddExState(&StateRegs, ~0, 0, 0);
   GameStateRestore=StateRestore;
 }
 
+static void BMC42in1Reset(void)
+{
+  reset ^= 1;
+  Sync();
+}
+
+void BMC42in1r_Init(CartInfo *info)
+{
+  isresetbased = 1;
+  info->Power=M226Power;
+  info->Reset=BMC42in1Reset;
+  AddExState(&StateRegs, ~0, 0, 0);
+  GameStateRestore=StateRestore;
+}

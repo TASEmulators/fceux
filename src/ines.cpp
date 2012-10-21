@@ -612,7 +612,8 @@ static BMAPPINGLocal bmap[] = {
 	{"",					154, Mapper154_Init},
 	{"",					155, Mapper155_Init},
 	{"",					156, Mapper156_Init},
-	{"",					159, Mapper159_Init},
+	{"",					157, Mapper157_Init},
+	{"",					159, Mapper16_Init},	// Obsolete, remove me!
     {"SA009",				160, SA009_Init},
 	{"",					162, UNLFS304_Init},
 	{"",					163, Mapper163_Init},
@@ -1216,7 +1217,7 @@ void (*MapInitTab[256])(void)=
 	0, //Mapper154_init,
 	0,
 	0,
-	Mapper157_init,
+	0, //Mapper157_init,
 	0, //Mapper158_init, removed
 	0,
 	0,

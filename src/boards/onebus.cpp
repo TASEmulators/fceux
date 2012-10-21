@@ -17,140 +17,161 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * OneBus system
+ * VR02/VT03 Console and OneBus System
+ *
  * Street Dance (Dance pad) (Unl)
  * 101-in-1 Arcade Action II
- * DreamGEAR 75-in-1
+ * DreamGEAR 75-in-1, etc.
+ *
  */
 
 #include "mapinc.h"
 
-static uint8 isDance;
-static uint8 regs[16],regc[6];
-static uint8 IRQCount,IRQLatch,IRQa, IRQReload, pcm_enable = 0, pcm_irq = 0;
+// General Purpose Registers
+static uint8 cpu410x[16], ppu201x[16], apu40xx[64];
+
+// IRQ Registers
+static uint8 IRQCount, IRQa, IRQReload;
+#define IRQLatch cpu410x[0x1]
+
+// MMC3 Registers
+static uint8 inv_hack = 0; // some OneBus Systems have swapped PRG reg commans in MMC3 inplementation,
+                           // trying to autodetect unusual behavior, due not to add a new mapper.
+#define mmc3cmd  cpu410x[0x5]
+#define mirror   cpu410x[0x6]
+
+// APU Registers
+static uint8 pcm_enable = 0, pcm_irq = 0;
 static int16 pcm_addr, pcm_size, pcm_latch, pcm_clock = 0xF6;
-static writefunc old4011write, old4012write, old4013write, old4015write;
-static readfunc old4015read;
+
+static writefunc defapuwrite[64];
+static readfunc defapuread[64];
 
 static SFORMAT StateRegs[]=
 {
-  {regc, 6, "REGC"},
-  {regs, 16, "REGS"},
+  {cpu410x, 16, "REGC"},
+  {ppu201x, 16, "REGS"},
+  {apu40xx, 64, "REGA"},
   {&IRQReload, 1, "IRQR"},
   {&IRQCount, 1, "IRQC"},
-  {&IRQLatch, 1, "IRQL"},
   {&IRQa, 1, "IRQA"},
   {&pcm_enable, 1, "PCME"},
-  {&pcm_irq, 1, "PCMIRQ"},
-  {&pcm_addr, 2, "PCMADDR"},
-  {&pcm_size, 2, "PCMSIZE"},
-  {&pcm_latch, 2, "PCMLATCH"},
-  {&pcm_clock, 2, "PCMCLOCK"},
+  {&pcm_irq, 1, "PCMI"},
+  {&pcm_addr, 2, "PCMA"},
+  {&pcm_size, 2, "PCMS"},
+  {&pcm_latch, 2, "PCML"},
+  {&pcm_clock, 2, "PCMC"},
   {0}
 };
 
-static void Sync(void)
+static void PSync(void)
 {
-  uint16 cswap = (regs[0xf] & 0x80) << 5;
-  uint16 pswap = (regs[0xd]&1)?((regs[0xf] & 0x40) << 8):0;
-  uint16 pbase = (regs[0]&0xf0)<<4;
-  uint16 cbase = (((regs[0]&0x0f)<<8)|(regs[0xc]<<1)|((regs[0xd]&0xf8)>>3))<<3;
-  uint16 pmask = 0x3f>>(regs[0xb]&0xf);
+  uint8  bankmode = cpu410x[0xb] & 7;
+  uint8  mask  = (bankmode == 0x7)?(0xff):(0x3f >> bankmode);
+  uint32 block = ((cpu410x[0x0] & 0xf0) << 4) + (cpu410x[0xa] & (~mask));
+  uint32 pswap = (mmc3cmd & 0x40) << 8;
 
-  setchr1(cswap^0x0000,cbase|(regc[0]&(~1)));
-  setchr1(cswap^0x0400,cbase|(regc[0]|1));
-  setchr1(cswap^0x0800,cbase|(regc[1]&(-1)));
-  setchr1(cswap^0x0c00,cbase|(regc[1]|1));
-  setchr1(cswap^0x1000,cbase|(regc[2]));
-  setchr1(cswap^0x1400,cbase|(regc[3]));
-  setchr1(cswap^0x1800,cbase|(regc[4]));
-  setchr1(cswap^0x1c00,cbase|(regc[5]));
+//  uint8 bank0  = (cpu410x[0xb] & 0x40)?(~1):(cpu410x[0x7]);
+//  uint8 bank1  = cpu410x[0x8];
+//  uint8 bank2  = (cpu410x[0xb] & 0x40)?(cpu410x[0x9]):(~1);
+//  uint8 bank3  = ~0;
+  uint8 bank0  = cpu410x[0x7^inv_hack];
+  uint8 bank1  = cpu410x[0x8^inv_hack];
+  uint8 bank2  = (cpu410x[0xb] & 0x40)?(cpu410x[0x9]):(~1);
+  uint8 bank3  = ~0;
 
-  if(regs[0xd]&2)
-  {
-    setprg8(pswap^0x8000, pbase|(regs[0x7]&pmask)|(regs[0xa]&(~pmask)));
-    setprg8(      0xA000, pbase|(regs[0x8]&pmask)|(regs[0xa]&(~pmask)));
-    setprg8(pswap^0xC000, pbase|(regs[0x9]&pmask)|(regs[0xa]&(~pmask)));
-    setprg8(      0xE000, pbase|regs[0xa]);
-  }
-  else
-  {
-    setprg8(pswap^0x8000, pbase|(regs[0x7]&pmask)|(regs[0xa]&(~pmask)));
-    setprg8(      0xA000, pbase|(regs[0x8]&pmask)|(regs[0xa]&(~pmask)));
-    setprg8(pswap^0xC000, pbase|((~1)&pmask)|(regs[0xa]&(~pmask)));
-    setprg8(      0xE000, pbase|((~0)&pmask)|(regs[0xa]&(~pmask)));
-  }
-
-  setmirror(regs[0xe]);
+//  FCEU_printf(" PRG: %04x [%02x]",0x8000^pswap,block | (bank0 & mask));
+  setprg8(0x8000^pswap, block | (bank0 & mask));
+//  FCEU_printf(" %04x [%02x]",0xa000^pswap,block | (bank1 & mask));
+  setprg8(0xa000,       block | (bank1 & mask));
+//  FCEU_printf(" %04x [%02x]",0xc000^pswap,block | (bank2 & mask));
+  setprg8(0xc000^pswap, block | (bank2 & mask));
+//  FCEU_printf(" %04x [%02x]\n",0xe000^pswap,block | (bank3 & mask));
+  setprg8(0xe000,       block | (bank3 & mask));
 }
 
-static DECLFW(UNLOneBusWrite20XX)
+static void CSync(void)
 {
-//	FCEU_printf("PPU %04x:%04x\n",A,V);
-  if(A == 0x201A)
-    regs[0xd] = V;
-  else if(A == 0x2018)
-    regs[0xc] = V;
+  static const uint8 midx[8] = {0, 1, 2, 0, 3, 4, 5, 0 };
+  uint8  mask  = 0xff >> midx[ppu201x[0xa] & 7];
+  uint32 block = ((cpu410x[0x0] & 0x0f) << 11) + ((ppu201x[0x8] & 0x70) << 4) + (ppu201x[0xa] & (~mask));
+  uint32 cswap = (mmc3cmd & 0x80) << 5;
+
+  uint8 bank0  = ppu201x[0x6]&(~1);
+  uint8 bank1  = ppu201x[0x6]|1;
+  uint8 bank2  = ppu201x[0x7]&(~1);
+  uint8 bank3  = ppu201x[0x7]|1;
+  uint8 bank4  = ppu201x[0x2];
+  uint8 bank5  = ppu201x[0x3];
+  uint8 bank6  = ppu201x[0x4];
+  uint8 bank7  = ppu201x[0x5];
+
+  setchr1(0x0000^cswap, block | (bank0 & mask));
+  setchr1(0x0400^cswap, block | (bank1 & mask));
+  setchr1(0x0800^cswap, block | (bank2 & mask));
+  setchr1(0x0c00^cswap, block | (bank3 & mask));
+  setchr1(0x1000^cswap, block | (bank4 & mask));
+  setchr1(0x1400^cswap, block | (bank5 & mask));
+  setchr1(0x1800^cswap, block | (bank6 & mask));
+  setchr1(0x1c00^cswap, block | (bank7 & mask));
+
+  setmirror((mirror & 1) ^ 1);
+}
+
+static void Sync(void)
+{
+  PSync();
+  CSync();
+}
+
+static DECLFW(UNLOneBusWriteCPU410X)
+{
+//  FCEU_printf("CPU %04x:%04x\n",A,V);
+  switch(A & 0xf)
+  {
+  case 0x1: IRQLatch = V & 0xfe; break;
+  case 0x2: IRQReload = 1; break;
+  case 0x3: X6502_IRQEnd(FCEU_IQEXT); IRQa = 0; break;
+  case 0x4: IRQa = 1; break;
+  default:
+    cpu410x[A & 0xf] = V;
+    Sync();
+  }
+}
+
+static DECLFW(UNLOneBusWritePPU201X)
+{
+//  FCEU_printf("PPU %04x:%04x\n",A,V);
+  ppu201x[A & 0x0f] = V;
   Sync();
 }
 
-static DECLFW(UNLOneBusWriteExp)
+static DECLFW(UNLOneBusWriteMMC3)
 {
-//	FCEU_printf("EXP %04x:%04x\n",A,V);
-//	switch(A & 0x0F)
-//	{
-//	case 2: pcm_latch = pcm_clock; FCEU_printf("write %04x:%04x\n",A,V); break;
-//	case 3: pcm_irqa = 0; X6502_IRQEnd(FCEU_IQEXT); pcm_irq = 0; FCEU_printf("write %04x:%04x\n",A,V); break;
-//	case 4: pcm_irqa = 1; FCEU_printf("write %04x:%04x\n",A,V); break;
-//	default:
-   regs[A & 0x0F] = V;
-   Sync();
-//	}
-}
-
-static DECLFW(UNLOneBusWriteDebug)
-{
-//	FCEU_printf("write %04x:%04x\n",A,V);
-}
-
-static DECLFW(UNLOneBusWriteMMC)
-{
-//	FCEU_printf("MMC %04x:%04x\n",A,V);
-  switch(A&0xE001)
+//  FCEU_printf("MMC %04x:%04x\n",A,V);
+  switch(A&0xe001)
   {
-  case 0x8000: regs[0xf] = V; Sync(); break;
+  case 0x8000: mmc3cmd = (mmc3cmd & 0x38) | (V & 0xc7); Sync(); break;
   case 0x8001:
   {
-    uint8 mask = 0xff, mmc3cmd = regs[0xf]&7;
-    switch(mmc3cmd)
+    switch(mmc3cmd & 7)
     {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-      if(regs[0xd]&4)
-        mask = 0x0f;
-      else
-        mask >>= ((regs[0xb]&0xf0)>>4);
-      regc[mmc3cmd] = V&mask;
-      break;
-    case 6:
-    case 7:
-      mask = (mask&0x3f)>>(regs[0xb]&0xf);
-      regs[mmc3cmd+1] = (regs[mmc3cmd+1]&(~mask))|(V&mask);
-      break;
+    case 0: ppu201x[0x6] = V; CSync(); break;
+    case 1: ppu201x[0x7] = V; CSync(); break;
+    case 2: ppu201x[0x2] = V; CSync(); break;
+    case 3: ppu201x[0x3] = V; CSync(); break;
+    case 4: ppu201x[0x4] = V; CSync(); break;
+    case 5: ppu201x[0x5] = V; CSync(); break;
+    case 6: cpu410x[0x7] = V; PSync(); break;
+    case 7: cpu410x[0x8] = V; PSync(); break;
     }
-
-    Sync();
     break;
   }
-  case 0xA000: regs[0xe] = (V & 1)^1; Sync(); break;
-  case 0xC000: IRQLatch = V&0xfe; break;
-  case 0xC001: IRQReload = 1; break;
-  case 0xE000: X6502_IRQEnd(FCEU_IQEXT); IRQa = 0; break;
-  case 0xE001: IRQa = 1; break;
+  case 0xa000: mirror = V; CSync(); break;
+  case 0xc000: IRQLatch = V & 0xfe; break;
+  case 0xc001: IRQReload = 1; break;
+  case 0xe000: X6502_IRQEnd(FCEU_IQEXT); IRQa = 0; break;
+  case 0xe001: IRQa = 1; break;
   }
 }
 
@@ -171,44 +192,51 @@ static void UNLOneBusIRQHook(void)
  }
 }
 
-static DECLFW(UNLOneBusWriteAPU2)
+static DECLFW(UNLOneBusWriteAPU40XX)
 {
-//	FCEU_printf("APU2 %04x:%04x\n",A,V);
-   CartBW(A&0xffdf,V);
-}
-
-static DECLFW(UNLOneBusWrite4012)
-{
-//	FCEU_printf("write %04x:%04x\n",A,V);
-  pcm_addr = V << 6;
-  old4012write(A,V);
-}
-
-static DECLFW(UNLOneBusWrite4013)
-{
-//	FCEU_printf("write %04x:%04x\n",A,V);
-  pcm_size = (V << 4) + 1;
-  old4013write(A,V);
-}
-
-static DECLFW(UNLOneBusWrite4015)
-{
-//	FCEU_printf("write %04x:%04x\n",A,V);
-  pcm_enable = V&0x10;
-  if(pcm_irq)
+//  FCEU_printf("APU %04x:%04x\n",A,V);
+  apu40xx[A & 0x3f] = V;
+  switch(A & 0x3f)
   {
-    X6502_IRQEnd(FCEU_IQEXT);
-    pcm_irq = 0;
+  case 0x12:
+    if(apu40xx[0x30] & 0x10)
+    {
+      pcm_addr = V << 6;
+    }
+  case 0x13:
+    if(apu40xx[0x30] & 0x10)
+    {
+      pcm_size = (V << 4) + 1;
+    }
+  case 0x15:
+    if(apu40xx[0x30] & 0x10)
+    {
+      pcm_enable = V&0x10;
+      if(pcm_irq)
+      {
+        X6502_IRQEnd(FCEU_IQEXT);
+        pcm_irq = 0;
+      }
+      if(pcm_enable)
+        pcm_latch = pcm_clock;
+      V &= 0xef;
+    }
   }
-  if(pcm_enable)
-    pcm_latch = pcm_clock;
-  old4015write(A,V&0xEF);
+  defapuwrite[A & 0x3f](A, V);
 }
 
-static DECLFR(UNLOneBusRead4015)
+static DECLFR(UNLOneBusReadAPU40XX)
 {
-  uint8 result = (old4015read(A) & 0x7F)|pcm_irq;
-//	FCEU_printf("read %04x, %02x\n",A,result);
+  uint8 result = defapuread[A & 0x3f](A);
+//  FCEU_printf("read %04x, %02x\n",A,result);
+  switch(A & 0x3f)
+  {
+  case 0x15:
+    if(apu40xx[0x30] & 0x10)
+    {
+      result = (result & 0x7f) | pcm_irq;
+    }
+  }
   return result;
 }
 
@@ -230,7 +258,7 @@ static void UNLOneBusCpuHook(int a)
 	  else
  	  {
 	    uint8 raw_pcm = ARead[pcm_addr](pcm_addr) >> 1;
-	    old4011write(0x4011,raw_pcm);
+	    defapuwrite[0x11](0x4011,raw_pcm);
 		pcm_addr++;
 		pcm_addr&=0x7FFF;
 	  }
@@ -240,43 +268,39 @@ static void UNLOneBusCpuHook(int a)
 
 static void UNLOneBusPower(void)
 {
-  IRQCount=IRQLatch=IRQa==0;
-  regs[0]=regs[1]=regs[1]=regs[2]=regs[3]=regs[4]=regs[5]=regs[6]=0;
-  regs[7]=regs[8]=regs[11]=regs[12]=regs[13]=regs[14]=regs[15]=0;
-  regs[0x09]=0x3E;
-  regs[0x0A]=0x3F;
+  uint32 i;
+  IRQReload = IRQCount = IRQa = 0;
 
-  SetupCartCHRMapping(0,PRGptr[0],4096 * 1024,0);
+  memset(cpu410x, 0x00, sizeof(cpu410x));
+  memset(ppu201x, 0x00, sizeof(ppu201x));
+  memset(apu40xx, 0x00, sizeof(apu40xx));
 
-  if(isDance) // quick workaround, TODO: figure out how it works together
+  SetupCartCHRMapping(0, PRGptr[0], PRGsize[0], 0);
+
+  for(i=0; i<64; i++)
   {
-    old4015read=GetReadHandler(0x4015);
-    SetReadHandler(0x4015,0x4015,UNLOneBusRead4015);
-    old4011write=GetWriteHandler(0x4011);
-    old4012write=GetWriteHandler(0x4012);
-    SetWriteHandler(0x4012,0x4012,UNLOneBusWrite4012);
-    old4013write=GetWriteHandler(0x4013);
-    SetWriteHandler(0x4013,0x4013,UNLOneBusWrite4013);
-    old4015write=GetWriteHandler(0x4015);
-    SetWriteHandler(0x4015,0x4015,UNLOneBusWrite4015);
+    defapuread[i] = GetReadHandler(0x4000|i);
+    defapuwrite[i] = GetWriteHandler(0x4000|i);
   }
+  SetReadHandler(0x4000,0x403f,UNLOneBusReadAPU40XX);
+  SetWriteHandler(0x4000,0x403f,UNLOneBusWriteAPU40XX);
 
   SetReadHandler(0x8000,0xFFFF,CartBR);
-  SetWriteHandler(0x2009,0x2fff,UNLOneBusWrite20XX);
-//	SetWriteHandler(0x4020,0xffff,UNLOneBusWriteDebug);
-//	SetWriteHandler(0x4020,0x4040,UNLOneBusWriteAPU2);
-  SetWriteHandler(0x4100,0x410f,UNLOneBusWriteExp);
-  SetWriteHandler(0x8000,0xefff,UNLOneBusWriteMMC);
+  SetWriteHandler(0x2010,0x201f,UNLOneBusWritePPU201X);
+  SetWriteHandler(0x4100,0x410f,UNLOneBusWriteCPU410X);
+  SetWriteHandler(0x8000,0xffff,UNLOneBusWriteMMC3);
+
   Sync();
 }
 
 static void UNLOneBusReset(void)
 {
-  IRQCount=IRQLatch=IRQa=0;
-  regs[0]=regs[1]=regs[1]=regs[2]=regs[3]=regs[4]=regs[5]=regs[6]=0;
-  regs[7]=regs[8]=regs[11]=regs[12]=regs[13]=regs[14]=regs[15]=0;
-  regs[0x09]=0x3E;
-  regs[0x0A]=0x3F;
+  IRQReload = IRQCount = IRQa = 0;
+
+  memset(cpu410x, 0x00, sizeof(cpu410x));
+  memset(ppu201x, 0x00, sizeof(ppu201x));
+  memset(apu40xx, 0x00, sizeof(apu40xx));
+
   Sync();
 }
 
@@ -287,20 +311,13 @@ static void StateRestore(int version)
 
 void UNLOneBus_Init(CartInfo *info)
 {
-  isDance = 0;
   info->Power=UNLOneBusPower;
   info->Reset=UNLOneBusReset;
-  GameHBIRQHook=UNLOneBusIRQHook;
-//	MapIRQHook=UNLOneBusCpuHook;
-  GameStateRestore=StateRestore;
-  AddExState(&StateRegs, ~0, 0, 0);
-}
 
-void UNLDANCE_Init(CartInfo *info)
-{
-  isDance = 1;
-  info->Power=UNLOneBusPower;
-  info->Reset=UNLOneBusReset;
+  if(((*(uint32*)&(info->MD5)) == 0x305fcdc3) || // PowerJoy Supermax Carts
+     ((*(uint32*)&(info->MD5)) == 0x6abfce8e) )
+    inv_hack = 0xf;
+
   GameHBIRQHook=UNLOneBusIRQHook;
   MapIRQHook=UNLOneBusCpuHook;
   GameStateRestore=StateRestore;

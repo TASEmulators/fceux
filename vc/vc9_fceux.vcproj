@@ -2218,10 +2218,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\mappers\16.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\mappers\17.cpp"
 				>
 			</File>

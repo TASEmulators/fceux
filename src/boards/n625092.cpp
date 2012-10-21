@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  * 700in1 and 400in1 carts
  */
-
+ 
 
 #include "mapinc.h"
 
@@ -39,26 +39,36 @@ static void Sync(void)
   {
     if(cmd&0x100)
     {
-      setprg16(0x8000,((cmd&0xe0)>>2)|bank);
-      setprg16(0xC000,((cmd&0xe0)>>2)|7);
+      setprg16(0x8000,((cmd&0xfc)>>2)|bank);
+      setprg16(0xC000,((cmd&0xfc)>>2)|7);
     }
     else
     {
-      setprg16(0x8000,((cmd&0xe0)>>2)|(bank&6));
-      setprg16(0xC000,((cmd&0xe0)>>2)|((bank&6)|1));
+      setprg16(0x8000,((cmd&0xfc)>>2)|(bank&6));
+      setprg16(0xC000,((cmd&0xfc)>>2)|((bank&6)|1));
     }
   }
   else
   {
-    setprg16(0x8000,((cmd&0xe0)>>2)|bank);
-    setprg16(0xC000,((cmd&0xe0)>>2)|bank);
-  }
+    setprg16(0x8000,((cmd&0xfc)>>2)|bank);
+    setprg16(0xC000,((cmd&0xfc)>>2)|bank);
+  }  
 }
+
+static uint16 ass = 0;
 
 static DECLFW(UNLN625092WriteCommand)
 {
   cmd=A;
-  Sync();
+  if(A==0x80F8)
+    {
+        setprg16(0x8000,ass);
+        setprg16(0xC000,ass);
+    }
+    else
+    {
+        Sync();
+    }
 }
 
 static DECLFW(UNLN625092WriteBank)
@@ -81,6 +91,8 @@ static void UNLN625092Reset(void)
 {
   cmd=0;
   bank=0;
+  ass++;
+  FCEU_printf("%04x\n",ass);
 }
 
 static void StateRestore(int version)

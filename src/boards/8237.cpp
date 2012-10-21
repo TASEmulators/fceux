@@ -181,7 +181,7 @@ void UNL8237_Init(CartInfo *info)
   pwrap=UNL8237PW;
   info->Power=UNL8237Power;
   AddExState(EXPREGS, 3, 0, "EXPR");
-  AddExState(&cmdin, 1, 0, "CMDIN");
+  AddExState(&cmdin, 1, 0, "CMDI");
 }
 
 void UNL8237A_Init(CartInfo *info)
@@ -191,5 +191,5 @@ void UNL8237A_Init(CartInfo *info)
   pwrap=UNL8237APW;
   info->Power=UNL8237Power;
   AddExState(EXPREGS, 3, 0, "EXPR");
-  AddExState(&cmdin, 1, 0, "CMDIN");
+  AddExState(&cmdin, 1, 0, "CMDI");
 }

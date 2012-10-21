@@ -67,5 +67,5 @@ void Mapper188_Init(CartInfo *info)
 {
   info->Power=Power;
   GameStateRestore=StateRestore;
-  AddExState(&latche, 1, 0, "LATCH");
+  AddExState(&latche, 1, 0, "LATC");
 }

@@ -23,7 +23,7 @@
 static uint16 cmdreg;
 static SFORMAT StateRegs[]=
 {
-  {&cmdreg, 2, "CMDREG"},
+  {&cmdreg, 2, "CREG"},
   {0}
 };
 

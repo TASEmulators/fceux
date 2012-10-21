@@ -29,11 +29,11 @@ static uint32 CHRRAMSIZE;
 
 static SFORMAT StateRegs[]=
 {
-  {chrlo, 8, "CHRLO"},
-  {chrhi, 8, "CHRHI"},
+  {chrlo, 8, "CHRL"},
+  {chrhi, 8, "CHRH"},
   {prg, 2, "PRGR"},
   {&mirr, 1, "MIRR"},
-  {&vlock, 1, "VLOCK"},
+  {&vlock, 1, "VLCK"},
   {&IRQa, 4, "IRQA"},
   {&IRQCount, 4, "IRQC"},
   {&IRQLatch, 4, "IRQL"},

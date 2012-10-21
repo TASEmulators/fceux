@@ -32,8 +32,8 @@ static SFORMAT StateRegs[]=
   {&nt2, 1, "NT2"},
   {&mirr, 1, "MIRR"},
   {&prg_reg, 1, "PRG"},
-  {&kogame, 1, "KOGAME"},
-  {&count, 4, "COUNT"},
+  {&kogame, 1, "KGME"},
+  {&count, 4, "CNT"},
   {chr_reg, 4, "CHR"},
   {0}
 };

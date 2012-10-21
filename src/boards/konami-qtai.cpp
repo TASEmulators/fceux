@@ -40,7 +40,7 @@ static SFORMAT StateRegs[]=
   {&IRQCount, 1, "IRQC"},
   {&IRQLatch, 1, "IRQL"},
   {&IRQa, 1, "IRQA"},
-  {&K4IRQ, 1, "K4IRQ"},
+  {&K4IRQ, 1, "KIRQ"},
   {regs, 16, "REGS"},
   {0}
 };
@@ -226,7 +226,7 @@ void Mapper190_Init(CartInfo *info)
 
   CHRRAM=(uint8*)FCEU_gmalloc(CHRSIZE);
   SetupCartCHRMapping(0x10,CHRRAM,CHRSIZE,1);
-  AddExState(CHRRAM, CHRSIZE, 0, "CHRRAM");
+  AddExState(CHRRAM, CHRSIZE, 0, "CRAM");
 
   WRAM=(uint8*)FCEU_gmalloc(WRAMSIZE);
   SetupCartPRGMapping(0x10,WRAM,WRAMSIZE,1);

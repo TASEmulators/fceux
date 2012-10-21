@@ -33,13 +33,13 @@ static uint32 WRAMSIZE;
 
 static SFORMAT StateRegs[]=
 {
-  {prgreg, 2, "PRGREGS"},
-  {chrreg, 8, "CHRREGS"},
-  {&regcmd, 1, "REGCMD"},
-  {&irqcmd, 1, "IRQCMD"},
+  {prgreg, 2, "PREG"},
+  {chrreg, 8, "CREG"},
+  {&regcmd, 1, "CMDR"},
+  {&irqcmd, 1, "CMDI"},
   {&mirr, 1, "MIRR"},
   {&big_bank, 1, "BIGB"},
-  {&IRQCount, 2, "IRCN"},
+  {&IRQCount, 2, "IRQC"},
   {&IRQLatch, 1, "IRQL"},
   {&IRQa, 1, "IRQA"},
   {0}
@@ -136,10 +136,6 @@ static void M23Power(void)
   SetWriteHandler(0x6000,0x7FFF,CartBW);
   SetReadHandler(0x8000,0xFFFF,CartBR);
   SetWriteHandler(0x8000,0xFFFF,M23Write);
-}
-
-static void M23Reset(void)
-{
 }
 
 void M23IRQHook(int a)

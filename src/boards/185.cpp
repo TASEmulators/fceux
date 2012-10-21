@@ -32,7 +32,7 @@ static SFORMAT StateRegs[]=
   {0}
 };
 
-//	 on    off
+//   on    off
 //1  0x0F, 0xF0 - Bird Week
 //2  0x33, 0x00 - B-Wings
 //3  0x11, 0x00 - Mighty Bomb Jack

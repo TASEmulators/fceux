@@ -28,7 +28,7 @@ static uint32 WRAMSIZE;
 static SFORMAT StateRegs[]=
 {
   {&IRQa, 1, "IRQA"},
-  {&IRQCount, 4, "IRQCOUNT"},
+  {&IRQCount, 4, "IRQC"},
   {reg, 16, "REGS"},
   {0}
 };

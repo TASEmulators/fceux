@@ -25,7 +25,7 @@ static uint8 invalid_data;
 static SFORMAT StateRegs[]=
 {
   {&invalid_data, 1, "INVD"},
-  {&cmdreg, 2, "CMDREG"},
+  {&cmdreg, 2, "CREG"},
   {0}
 };
 

@@ -32,8 +32,8 @@ static SFORMAT StateRegs[]=
 {
   {prg, 4, "PRG"},
   {chr, 8, "CHR"},
-  {&IRQCount, 1, "IRQCOUNT"},
-  {&IRQPre, 1, "IRQPRE"},
+  {&IRQCount, 1, "IRQC"},
+  {&IRQPre, 1, "IRQP"},
   {&IRQa, 1, "IRQA"},
   {0}
 };
@@ -64,7 +64,7 @@ static DECLFW(M183Write)
 {
   if(((A&0xF80C)>=0xB000)&&((A&0xF80C)<=0xE00C))
   {
-    uint8 index=(((A>>11)-6)|(A>>3))&7;
+    int index=(((A>>11)-6)|(A>>3))&7;
     chr[index]=(chr[index]&(0xF0>>(A&4)))|((V&0x0F)<<(A&4));
     SyncChr();
   }

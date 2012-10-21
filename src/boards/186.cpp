@@ -29,7 +29,7 @@ static uint8 regs[4];
 static SFORMAT StateRegs[]=
 {
   {regs, 4, "DREG"},
-  {SWRAM, 2816, "SWRAM"},
+  {SWRAM, 2816, "SWRM"},
   {0}
 };
 

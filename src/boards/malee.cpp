@@ -38,5 +38,5 @@ void MALEE_Init(CartInfo *info)
 {
   info->Power=MALEEPower;
   SetupCartPRGMapping(0x10, WRAM, 2048, 1);
-  AddExState(WRAM, 2048, 0,"RAM");
+  AddExState(WRAM, 2048, 0,"WRAM");
 }

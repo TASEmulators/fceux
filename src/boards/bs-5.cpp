@@ -26,8 +26,8 @@ static uint8 dip_switch;
 
 static SFORMAT StateRegs[]=
 {
-  {reg_prg, 4, "PREGS"},
-  {reg_chr, 4, "CREGS"},
+  {reg_prg, 4, "PREG"},
+  {reg_chr, 4, "CREG"},
   {0}
 };
 

@@ -37,8 +37,8 @@ static void Sync(void)
 
 static DECLFW(M108Write)
 {
-   reg=V;
-   Sync();
+  reg=V;
+  Sync();
 }
 
 static void M108Power(void)
@@ -46,7 +46,8 @@ static void M108Power(void)
   Sync();
   SetReadHandler(0x6000,0x7FFF,CartBR);
   SetReadHandler(0x8000,0xFFFF,CartBR);
-  SetWriteHandler(0x8FFF,0x8FFF,M108Write);
+  SetWriteHandler(0x8000,0x8FFF,M108Write); // regular 108
+  SetWriteHandler(0xF000,0xFFFF,M108Write); // simplified Kaiser BB Hack
 }
 
 static void StateRestore(int version)

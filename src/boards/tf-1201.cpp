@@ -35,8 +35,8 @@ static SFORMAT StateRegs[]=
   {&mirr, 1, "MIRR"},
   {&swap, 1, "SWAP"},
   {chr, 8, "CHR"},
-  {&IRQCount, 1, "IRQCOUNT"},
-  {&IRQPre, 1, "IRQPRE"},
+  {&IRQCount, 1, "IRQC"},
+  {&IRQPre, 1, "IRQP"},
   {&IRQa, 1, "IRQA"},
   {0}
 };

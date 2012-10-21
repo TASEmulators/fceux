@@ -88,7 +88,9 @@ static DECLFR(Namco_Read4800)
 {
   uint8 ret=IRAM[dopol&0x7f];
   /* Maybe I should call NamcoSoundHack() here? */
+  #ifdef FCEUDEF_DEBUGGER
   if(!fceuindbg)
+  #endif
     if(dopol&0x80)
       dopol=(dopol&0x80)|((dopol+1)&0x7f);
   return ret;

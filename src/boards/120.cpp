@@ -48,8 +48,7 @@ static void M120Power(void)
 {
   reg=0;
   Sync();
-  SetReadHandler(0x6000,0x7FFF,CartBR);
-  SetReadHandler(0x8000,0xFFFF,CartBR);
+  SetReadHandler(0x6000,0xFFFF,CartBR);
   SetWriteHandler(0x4100,0x5FFF,M120Write);
 }
 

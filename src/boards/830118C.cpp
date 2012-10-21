@@ -23,8 +23,6 @@
 #include "mapinc.h"
 #include "mmc3.h"
 
-static uint8 reset_flag = 0;
-
 static void BMC830118CCW(uint32 A, uint8 V)
 {
     setchr1(A,(V&0x7F)|((EXPREGS[0]&0x0c)<<5));

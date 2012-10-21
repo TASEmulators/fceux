@@ -25,7 +25,7 @@
 static uint8 chrcmd[8], prg0, prg1, bbrk, mirr, swap;
 static SFORMAT StateRegs[]=
 {
-  {chrcmd, 8, "CHRCMD"},
+  {chrcmd, 8, "CHRC"},
   {&prg0, 1, "PRG0"},
   {&prg1, 1, "PRG1"},
   {&bbrk, 1, "BRK"},
@@ -110,7 +110,6 @@ static void StateRestore(int version)
 static void UNLSL1632Power(void)
 {
   GenMMC3Power();
-  SetReadHandler(0x8000,0xFFFF,CartBR);
   SetWriteHandler(0x4100,0xFFFF,UNLSL1632CMDWrite);
 }
 

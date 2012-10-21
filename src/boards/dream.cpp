@@ -52,5 +52,5 @@ void DreamTech01_Init(CartInfo *info)
 {
   GameStateRestore=Restore;
   info->Power=DREAMPower;
-  AddExState(&latche, 1, 0, "LATCH");
+  AddExState(&latche, 1, 0, "LATC");
 }

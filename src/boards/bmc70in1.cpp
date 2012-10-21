@@ -29,7 +29,7 @@ static uint8 mirroring;
 static SFORMAT StateRegs[]=
 {
   {&large_bank, 1, "LB"},
-  {&hw_switch, 1, "DIPSW"},
+  {&hw_switch, 1, "DPSW"},
   {&prg_bank, 1, "PRG"},
   {&chr_bank, 1, "CHR"},
   {&bank_mode, 1, "BM"},
@@ -59,10 +59,10 @@ static void Sync(void)
 static DECLFR(BMC70in1Read)
 {
   if(bank_mode==0x10)
-//	  if(is_large_banks)
+//    if(is_large_banks)
       return CartBR((A&0xFFF0)|hw_switch);
-//	  else
-//	    return CartBR((A&0xFFF0)|hw_switch);
+//    else
+//      return CartBR((A&0xFFF0)|hw_switch);
   else
     return CartBR(A);
 }

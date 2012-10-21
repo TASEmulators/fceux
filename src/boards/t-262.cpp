@@ -25,8 +25,8 @@ static uint8 datareg;
 static uint8 busy;
 static SFORMAT StateRegs[]=
 {
-  {&addrreg, 2, "ADDRREG"},
-  {&datareg, 1, "DATAREG"},
+  {&addrreg, 2, "AREG"},
+  {&datareg, 1, "DREG"},
   {&busy, 1, "BUSY"},
   {0}
 };

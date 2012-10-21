@@ -104,7 +104,7 @@ static DECLFW(RAMBO1_write)
   switch(A&0xF001)
   {
     case 0xa000: mir=V&1;
-//	               if(!nomirror)
+//                 if(!nomirror)
                    setmirror(mir^1);
                  break;
     case 0x8000: cmd = V;
@@ -138,7 +138,7 @@ static DECLFW(RAMBO1_write)
 static void RAMBO1_Restore(int version)
 {
   Synco();
-//	if(!nomirror)
+//  if(!nomirror)
     setmirror(mir^1);
 }
 
@@ -148,7 +148,7 @@ static void RAMBO1_init(void)
   for(x=0;x<11;x++)
      DRegs[x]=~0;
   cmd=mir=0;
-//	if(!nomirror)
+//  if(!nomirror)
     setmirror(1);
   Synco();
   GameHBIRQHook=RAMBO1_hb;
@@ -166,7 +166,7 @@ static void CHRWrap(unsigned int A, unsigned int V)
 void Mapper64_init(void)
 {
   setchr1wrap=CHRWrap;
-//	nomirror=0;
+//  nomirror=0;
   RAMBO1_init();
 }
 /*

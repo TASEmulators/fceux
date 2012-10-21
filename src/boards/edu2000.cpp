@@ -35,12 +35,12 @@ static void Sync(void)
   setchr8(0);
   setprg8r(0x10,0x6000,(reg&0xC0)>>6);
   setprg32(0x8000,reg&0x1F);
-//	setmirror(((reg&0x20)>>5));
+//  setmirror(((reg&0x20)>>5));
 }
 
 static DECLFW(UNLEDU2000HiWrite)
 {
-//	FCEU_printf("%04x:%02x\n",A,V);
+//  FCEU_printf("%04x:%02x\n",A,V);
   reg=V;
   Sync();
 }
@@ -76,8 +76,8 @@ void UNLEDU2000_Init(CartInfo *info)
   SetupCartPRGMapping(0x10,WRAM,32768,1);
   if(info->battery)
   {
-  info->SaveGame[0]=WRAM;
-  info->SaveGameLen[0]=32768;
+    info->SaveGame[0]=WRAM;
+    info->SaveGameLen[0]=32768;
   }
   AddExState(WRAM, 32768, 0, "WRAM");
   AddExState(StateRegs, ~0, 0, 0);

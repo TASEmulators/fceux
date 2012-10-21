@@ -253,8 +253,8 @@ void BMCFK23C_Init(CartInfo *info)
   info->Power=BMCFK23CPower;
   info->Reset=BMCFK23CReset;
   AddExState(EXPREGS, 8, 0, "EXPR");
-  AddExState(&unromchr, 1, 0, "UNCHR");
-  AddExState(&dipswitch, 1, 0, "DIPSW");
+  AddExState(&unromchr, 1, 0, "UCHR");
+  AddExState(&dipswitch, 1, 0, "DPSW");
 
 	prg_bonus = 1;
 	if(MasterRomInfoParams.find("bonus") != MasterRomInfoParams.end())
@@ -280,8 +280,8 @@ void BMCFK23CA_Init(CartInfo *info)
   AddExState(CHRRAM, CHRRAMSize, 0, "CRAM");
 
   AddExState(EXPREGS, 8, 0, "EXPR");
-  AddExState(&unromchr, 1, 0, "UNCHR");
-  AddExState(&dipswitch, 1, 0, "DIPSW");
+  AddExState(&unromchr, 1, 0, "UCHR");
+  AddExState(&dipswitch, 1, 0, "DPSW");
 
 	prg_bonus = 1;
 	if(MasterRomInfoParams.find("bonus") != MasterRomInfoParams.end())

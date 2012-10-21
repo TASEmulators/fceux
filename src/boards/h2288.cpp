@@ -61,23 +61,14 @@ static DECLFW(H2288WriteLo)
   }
 }
 
-static DECLFR(H2288Read)
-{
-  int bit;
-  bit=(A&1)^1;
-  bit&=((A>>8)&1);
-  bit^=1;
-  return((X.DB&0xFE)|bit);
-}
-
 static void H2288Power(void)
 {
   EXPREGS[0]=EXPREGS[1]=0;
   GenMMC3Power();
-  SetReadHandler(0x5000,0x5FFF,H2288Read);
+//  SetReadHandler(0x5000,0x5FFF,H2288Read);
   SetReadHandler(0x8000,0xFFFF,CartBR);
   SetWriteHandler(0x5000,0x5FFF,H2288WriteLo);
-  SetWriteHandler(0x8000,0x8FFF,H2288WriteHi);
+  SetWriteHandler(0x8000,0x9FFF,H2288WriteHi);
 }
 
 void UNLH2288_Init(CartInfo *info)

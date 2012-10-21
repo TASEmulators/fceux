@@ -27,7 +27,7 @@ static uint8 hrd_flag;
 
 static SFORMAT StateRegs[]=
 {
-  {&hrd_flag, 1, "DIPSW"},
+  {&hrd_flag, 1, "DPSW"},
   {&prg_reg, 1, "PRG"},
   {&chr_reg, 1, "CHR"},
   {0}

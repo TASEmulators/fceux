@@ -18,6 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  * Super Mario Bros 2 J alt version
  * as well as "Voleyball" FDS conversion, bank layot is similar but no bankswitching and CHR ROM present
+ *
+ * mapper seems wrongly researched by me ;( it should be mapper 43 modification
  */
 
 #include "mapinc.h"

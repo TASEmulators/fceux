@@ -20,7 +20,7 @@
 
 #include "mapinc.h"
 
-static uint8 reg[8], cmd, IRQa;
+static uint8 reg[8], cmd, IRQa = 0, isirqused = 0;
 static int32 IRQCount;
 
 static SFORMAT StateRegs[]=
@@ -44,15 +44,15 @@ static void Sync(void)
 
 static DECLFW(UNLKS7032Write)
 {
-//	FCEU_printf("bs %04x %02x\n",A,V);
-  switch(A)
+//  FCEU_printf("bs %04x %02x\n",A,V);
+  switch(A&0xF000)
   {
-//	  case 0x8FFF: reg[4]=V; Sync(); break;
-    case 0x8000: X6502_IRQEnd(FCEU_IQEXT); IRQCount=(IRQCount&0x000F)|(V&0x0F); break;
-    case 0x9000: X6502_IRQEnd(FCEU_IQEXT); IRQCount=(IRQCount&0x00F0)|((V&0x0F)<<4); break;
-    case 0xA000: X6502_IRQEnd(FCEU_IQEXT); IRQCount=(IRQCount&0x0F00)|((V&0x0F)<<8); break;
-    case 0xB000: X6502_IRQEnd(FCEU_IQEXT); IRQCount=(IRQCount&0xF000)|(V<<12); break;
-    case 0xC000: X6502_IRQEnd(FCEU_IQEXT); IRQa=1; break;
+//    case 0x8FFF: reg[4]=V; Sync(); break;
+    case 0x8000: X6502_IRQEnd(FCEU_IQEXT); IRQCount=(IRQCount&0x000F)|(V&0x0F); isirqused = 1; break;
+    case 0x9000: X6502_IRQEnd(FCEU_IQEXT); IRQCount=(IRQCount&0x00F0)|((V&0x0F)<<4); isirqused = 1; break;
+    case 0xA000: X6502_IRQEnd(FCEU_IQEXT); IRQCount=(IRQCount&0x0F00)|((V&0x0F)<<8); isirqused = 1; break;
+    case 0xB000: X6502_IRQEnd(FCEU_IQEXT); IRQCount=(IRQCount&0xF000)|(V<<12); isirqused = 1; break;
+    case 0xC000: if(isirqused) { X6502_IRQEnd(FCEU_IQEXT); IRQa=1; } break;
     case 0xE000: cmd=V&7; break;
     case 0xF000: reg[cmd]=V; Sync(); break;
   }

@@ -27,7 +27,7 @@ static readfunc defread;
 
 static DECLFW(LatchWrite)
 {
-  FCEU_printf("%04x:%02x\n",A,V);
+//  FCEU_printf("%04x:%02x\n",A,V);
   latche=A;
   WSync();
 }
@@ -119,6 +119,41 @@ void BMCD1038_Init(CartInfo *info)
 }
 
 
+//------------------ UNL43272 ---------------------------
+// mapper much complex, including 16K bankswitching 
+static void UNL43272Sync(void)
+{
+  if((latche&0x81) == 0x81)
+  {
+    setprg32(0x8000,(latche&0x38)>>3);
+  }
+  else
+    FCEU_printf("unrecognized command %04!\n",latche);
+  setchr8(0);
+  setmirror(0);
+}
+
+static DECLFR(UNL43272Read)
+{
+  if(latche&0x400)
+    return CartBR(A & 0xFE);
+  else
+    return CartBR(A);
+}
+
+static void UNL43272Reset(void)
+{
+  latche = 0;
+  UNL43272Sync();
+}
+
+void UNL43272_Init(CartInfo *info)
+{ 
+  Latch_Init(info, UNL43272Sync, UNL43272Read, 0x81, 0x8000, 0xFFFF);
+  info->Reset=UNL43272Reset;
+  AddExState(&dipswitch, 1, 0, "DIPSW");
+}
+
 //------------------ Map 058 ---------------------------
 
 static void BMCGK192Sync(void)
@@ -137,6 +172,39 @@ static void BMCGK192Sync(void)
 void BMCGK192_Init(CartInfo *info)
 {
   Latch_Init(info, BMCGK192Sync, 0, 0, 0x8000, 0xFFFF);
+}
+
+//------------------ Map 092 ---------------------------
+// Another two-in-one mapper, two Jaleco carts uses similar
+// hardware, but with different wiring.
+// Original code provided by LULU
+// Additionally, PCB contains DSP extra sound chip, used for voice samples (unemulated)
+
+static void M92Sync(void)
+{
+  uint8 reg = latche & 0xF0;
+  setprg16(0x8000,0);
+  if(latche>=0x9000)
+  {
+    switch (reg)
+    {
+      case 0xD0: setprg16(0xc000, latche & 15); break;
+      case 0xE0: setchr8(latche & 15); break;
+    }
+  }
+  else
+  {
+    switch (reg)
+    {
+      case 0xB0: setprg16(0xc000, latche & 15); break;
+      case 0x70: setchr8(latche & 15); break;
+    }
+  }
+}
+
+void Mapper92_Init(CartInfo *info)
+{
+  Latch_Init(info, M92Sync, 0, 0x80B0, 0x8000, 0xFFFF);
 }
 
 //------------------ Map 200 ---------------------------
@@ -170,3 +238,49 @@ void BMC190in1_Init(CartInfo *info)
   Latch_Init(info, BMC190in1Sync, 0, 0, 0x8000, 0xFFFF);
 }
 
+//-------------- BMC810544-C-A1 ------------------------
+
+static void BMC810544CA1Sync(void)
+{
+  uint32 bank = latche>>7;
+  if(latche&0x40)
+    setprg32(0x8000,bank);
+  else
+  {
+    setprg16(0x8000,(bank<<1)|((latche>>5)&1));
+    setprg16(0xC000,(bank<<1)|((latche>>5)&1));
+  }
+  setchr8(latche&0x0f);
+  setmirror(((latche>>4)&1)^1);
+}
+
+void BMC810544CA1_Init(CartInfo *info)
+{ 
+  Latch_Init(info, BMC810544CA1Sync, 0, 0, 0x8000, 0xFFFF);
+}
+
+//-------------- BMCNTD-03 ------------------------
+
+static void BMCNTD03Sync(void)
+{
+  // 1PPP Pmcc spxx xccc
+  // 1000 0000 0000 0000 v
+  // 1001 1100 0000 0100 h
+  // 1011 1010 1100 0100
+  uint32 prg = ((latche>>10)&0x1e);
+  uint32 chr = ((latche&0x0300)>>5)|(latche&7);
+  if(latche&0x80)
+  {
+    setprg16(0x8000,prg|((latche>>6)&1));
+    setprg16(0xC000,prg|((latche>>6)&1));
+  }
+  else
+    setprg32(0x8000,prg>>1);
+  setchr8(chr);
+  setmirror(((latche>>10)&1)^1);
+}
+
+void BMCNTD03_Init(CartInfo *info)
+{ 
+  Latch_Init(info, BMCNTD03Sync, 0, 0, 0x8000, 0xFFFF);
+}

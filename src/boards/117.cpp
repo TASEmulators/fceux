@@ -28,8 +28,8 @@ static SFORMAT StateRegs[]=
   {&IRQa, 1, "IRQA"},
   {&IRQCount, 1, "IRQC"},
   {&IRQLatch, 1, "IRQL"},
-  {prgreg, 4, "PREGS"},
-  {chrreg, 8, "CREGS"},
+  {prgreg, 4, "PREG"},
+  {chrreg, 8, "CREG"},
   {&mirror, 1, "MREG"},
   {0}
 };
