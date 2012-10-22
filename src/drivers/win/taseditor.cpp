@@ -92,8 +92,6 @@ bool EnterTasEditor()
 			// "Set high-priority thread"
 			eoptions |= EO_HIGHPRIO;
 			DoPriority();
-			// clear "Disable speed throttling"
-			eoptions &= ~EO_NOTHROTTLE;
 			// switch off autosaves
 			saved_EnableAutosave = EnableAutosave;
 			EnableAutosave = 0;

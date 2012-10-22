@@ -483,7 +483,7 @@ bool PLAYBACK::JumpToFrame(int index)
 
 void PLAYBACK::SetLostPosition(int frame)
 {
-	if ((lost_position_frame - 1 < frame) || (lost_position_frame - 1 > frame && !lost_position_is_stable))
+	if ((lost_position_frame - 1 < frame) || (lost_position_frame - 1 >= frame && !lost_position_is_stable))
 	{
 		if (lost_position_frame)
 			piano_roll.RedrawRow(lost_position_frame - 1);
