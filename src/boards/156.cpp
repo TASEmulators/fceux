@@ -15,26 +15,20 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * DIS23C01 DAOU ROM CONTROLLER, Korea
- * Metal Force (K)
- * Buzz and Waldog (K)
- * General's Son (K)
- *
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "mapinc.h"
 
 static uint8 chrlo[8], chrhi[8], prg, mirr, mirrisused = 0;
-// uint8 *WRAM=NULL;
+static uint8 *WRAM=NULL;
 static uint32 WRAMSIZE;
 
 static SFORMAT StateRegs[]=
 {
   {&prg, 1, "PREG"},
-  {chrlo, 8, "CRLO"},
-  {chrhi, 8, "CRHI"},
+  {chrlo, 8, "CRGL"},
+  {chrhi, 8, "CRGH"},
   {&mirr, 1, "MIRR"},
   {0}
 };
@@ -77,26 +71,26 @@ static DECLFW(M156Write)
   }
 }
 
-static void M1566Reset()
+static void M156Reset(void)
 {
-	for(int i=0;i<8;i++)
-	{
-		chrlo[i]=0;
-		chrhi[i]=0;
-	}
-	prg=0;
-	mirr=0;
-	mirrisused = 0;
+  uint32 i;
+  for(i=0;i<8;i++)
+  {
+    chrlo[i]=0;
+    chrhi[i]=0;
+  }
+  prg=0;
+  mirr=0;
+  mirrisused = 0;
 }
 
 static void M156Power(void)
 {
+  M156Reset();
   Sync();
   SetReadHandler(0x6000,0xFFFF,CartBR);
   SetWriteHandler(0x6000,0x7FFF,CartBW);
   SetWriteHandler(0xC000,0xCFFF,M156Write);
-
-	M1566Reset();
 }
 
 static void M156Close(void)
@@ -113,6 +107,7 @@ static void StateRestore(int version)
 
 void Mapper156_Init(CartInfo *info)
 {
+  info->Power=M156Reset;
   info->Power=M156Power;
   info->Close=M156Close;
 

@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2003 CaH4e3
+ *  Copyright (C) 2011 CaH4e3
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,19 +20,34 @@
 
 #include "mapinc.h"
 
-static DECLFW(Mapper244_write_1)
-{
-  ROM_BANK32((A-0x8065)&0x03);
-}
+static uint8 prg_perm[4][4] = {
+       {0, 1, 2, 3,},
+       {3, 2, 1, 0,},
+       {0, 2, 1, 3,},
+       {3, 1, 2, 0,},
+};
 
-static DECLFW(Mapper244_write_2)
+static uint8 chr_perm[8][8] = {
+       {0, 1, 2, 3, 4, 5, 6, 7,},
+       {0, 2, 1, 3, 4, 6, 5, 7,},
+       {0, 1, 4, 5, 2, 3, 6, 7,},
+       {0, 4, 1, 5, 2, 6, 3, 7,},
+       {0, 4, 2, 6, 1, 5, 3, 7,},
+       {0, 2, 4, 6, 1, 3, 5, 7,},
+       {7, 6, 5, 4, 3, 2, 1, 0,},
+       {7, 6, 5, 4, 3, 2, 1, 0,},
+};
+
+static DECLFW(Mapper244_write)
 {
-  VROM_BANK8((A-0x80A5)&0x07);
+  if(V&8)
+    VROM_BANK8(chr_perm[(V>>4)&7][V&7]);
+  else
+    ROM_BANK32(prg_perm[(V>>4)&3][V&3]);
 }
 
 void Mapper244_init(void)
 {
   ROM_BANK32(0);
-  SetWriteHandler(0x8065,0x80a4,Mapper244_write_1);
-  SetWriteHandler(0x80a5,0x80e4,Mapper244_write_2);
+  SetWriteHandler(0x8000,0xffff,Mapper244_write);
 }

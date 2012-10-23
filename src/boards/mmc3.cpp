@@ -34,7 +34,7 @@ uint32 CHRRAMSize;
 uint8 DRegBuf[8];
 uint8 EXPREGS[8];    /* For bootleg games, mostly. */
 uint8 A000B,A001B;
-int mmc3opts=0;
+uint8 mmc3opts=0;
 
 #undef IRQCount
 #undef IRQLatch

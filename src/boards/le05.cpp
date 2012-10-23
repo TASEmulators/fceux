@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2003 CaH4e3
+ *  Copyright (C) 2011 CaH4e3
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,28 +16,51 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * FDS Conversion
+ *
  */
 
 #include "mapinc.h"
 
-static DECLFW(Mapper212_write)
+static uint8 chr;
+static SFORMAT StateRegs[]=
 {
-  if((A&0x4000)==0x4000)
-   {
-     ROM_BANK32((A&6)>>1);
-   }
-  else
-   {
-     ROM_BANK16(0x8000,A&7);
-     ROM_BANK16(0xc000,A&7);
-   }
- VROM_BANK8(A&7);
- MIRROR_SET((A>>3)&1);
+  {&chr, 1, "CHR"},
+  {0}
+};
+
+static void Sync(void)
+{
+  setprg2r(0,0xE000,0);
+  setprg2r(0,0xE800,0);
+  setprg2r(0,0xF000,0);
+  setprg2r(0,0xF800,0);
+
+  setprg8r(1,0x6000,3);
+  setprg8r(1,0x8000,0);
+  setprg8r(1,0xA000,1);
+  setprg8r(1,0xC000,2);
+
+  setchr8(chr & 1);
+  setmirror(MI_V);
 }
 
-void Mapper212_init(void)
+static DECLFW(LE05Write)
 {
- ROM_BANK32(~0);
- VROM_BANK8(~0);
- SetWriteHandler(0x8000,0xFFFF,Mapper212_write);
+  chr = V;
+  Sync();
+}
+
+static void LE05Power(void)
+{
+  Sync();
+  SetReadHandler(0x6000,0xFFFF,CartBR);
+  SetWriteHandler(0x8000,0xFFFF,LE05Write);
+}
+
+void LE05_Init(CartInfo *info)
+{
+  info->Power=LE05Power;
+  AddExState(&StateRegs, ~0, 0, 0);
 }

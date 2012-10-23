@@ -236,23 +236,33 @@
     <ClCompile Include="..\src\boards\117.cpp" />
     <ClCompile Include="..\src\boards\120.cpp" />
     <ClCompile Include="..\src\boards\121.cpp" />
+    <ClCompile Include="..\src\boards\12in1.cpp" />
     <ClCompile Include="..\src\boards\15.cpp" />
+    <ClCompile Include="..\src\boards\151.cpp" />
+    <ClCompile Include="..\src\boards\156.cpp" />
     <ClCompile Include="..\src\boards\164.cpp" />
+    <ClCompile Include="..\src\boards\168.cpp" />
+    <ClCompile Include="..\src\boards\17.cpp" />
+    <ClCompile Include="..\src\boards\170.cpp" />
     <ClCompile Include="..\src\boards\175.cpp" />
     <ClCompile Include="..\src\boards\176.cpp" />
     <ClCompile Include="..\src\boards\177.cpp" />
     <ClCompile Include="..\src\boards\178.cpp" />
+    <ClCompile Include="..\src\boards\18.cpp" />
     <ClCompile Include="..\src\boards\183.cpp" />
     <ClCompile Include="..\src\boards\185.cpp" />
     <ClCompile Include="..\src\boards\186.cpp" />
     <ClCompile Include="..\src\boards\187.cpp" />
     <ClCompile Include="..\src\boards\189.cpp" />
+    <ClCompile Include="..\src\boards\193.cpp" />
     <ClCompile Include="..\src\boards\199.cpp" />
     <ClCompile Include="..\src\boards\208.cpp" />
     <ClCompile Include="..\src\boards\222.cpp" />
+    <ClCompile Include="..\src\boards\225.cpp" />
     <ClCompile Include="..\src\boards\23.cpp" />
     <ClCompile Include="..\src\boards\235.cpp" />
     <ClCompile Include="..\src\boards\253.cpp" />
+    <ClCompile Include="..\src\boards\34.cpp" />
     <ClCompile Include="..\src\boards\3d-block.cpp" />
     <ClCompile Include="..\src\boards\411120-c.cpp" />
     <ClCompile Include="..\src\boards\43.cpp" />
@@ -260,14 +270,36 @@
     <ClCompile Include="..\src\boards\603-5052.cpp" />
     <ClCompile Include="..\src\boards\68.cpp" />
     <ClCompile Include="..\src\boards\8157.cpp" />
+    <ClCompile Include="..\src\boards\82.cpp" />
     <ClCompile Include="..\src\boards\8237.cpp" />
     <ClCompile Include="..\src\boards\830118C.cpp" />
     <ClCompile Include="..\src\boards\88.cpp" />
     <ClCompile Include="..\src\boards\90.cpp" />
+    <ClCompile Include="..\src\boards\91.cpp" />
     <ClCompile Include="..\src\boards\95.cpp" />
+    <ClCompile Include="..\src\boards\96.cpp" />
+    <ClCompile Include="..\src\boards\99.cpp" />
+    <ClCompile Include="..\src\boards\ac-08.cpp" />
+    <ClCompile Include="..\src\boards\bb.cpp" />
     <ClCompile Include="..\src\boards\cityfighter.cpp" />
+    <ClCompile Include="..\src\boards\dance2000.cpp" />
+    <ClCompile Include="..\src\boards\famicombox.cpp" />
+    <ClCompile Include="..\src\boards\ks7012.cpp" />
+    <ClCompile Include="..\src\boards\ks7013.cpp" />
+    <ClCompile Include="..\src\boards\ks7017.cpp" />
+    <ClCompile Include="..\src\boards\ks7030.cpp" />
+    <ClCompile Include="..\src\boards\ks7031.cpp" />
+    <ClCompile Include="..\src\boards\ks7037.cpp" />
     <ClCompile Include="..\src\boards\ks7057.cpp" />
+    <ClCompile Include="..\src\boards\le05.cpp" />
+    <ClCompile Include="..\src\boards\lh32.cpp" />
+    <ClCompile Include="..\src\boards\lh53.cpp" />
     <ClCompile Include="..\src\boards\onebus.cpp" />
+    <ClCompile Include="..\src\boards\pec-586.cpp" />
+    <ClCompile Include="..\src\boards\sa-9602b.cpp" />
+    <ClCompile Include="..\src\boards\transformer.cpp" />
+    <ClCompile Include="..\src\boards\vrc7.cpp" />
+    <ClCompile Include="..\src\boards\yoko.cpp" />
     <ClCompile Include="..\src\boards\__dummy_mapper.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -537,11 +569,6 @@
     <ClCompile Include="..\src\input\suborkb.cpp" />
     <ClCompile Include="..\src\input\toprider.cpp" />
     <ClCompile Include="..\src\input\zapper.cpp" />
-    <ClCompile Include="..\src\mappers\151.cpp" />
-    <ClCompile Include="..\src\mappers\156.cpp" />
-    <ClCompile Include="..\src\mappers\17.cpp" />
-    <ClCompile Include="..\src\mappers\18.cpp" />
-    <ClCompile Include="..\src\mappers\193.cpp" />
     <ClCompile Include="..\src\mappers\201.cpp" />
     <ClCompile Include="..\src\mappers\202.cpp" />
     <ClCompile Include="..\src\mappers\203.cpp" />
@@ -550,10 +577,7 @@
     <ClCompile Include="..\src\mappers\212.cpp" />
     <ClCompile Include="..\src\mappers\213.cpp" />
     <ClCompile Include="..\src\mappers\214.cpp" />
-    <ClCompile Include="..\src\mappers\215.cpp" />
-    <ClCompile Include="..\src\mappers\217.cpp" />
     <ClCompile Include="..\src\mappers\22.cpp" />
-    <ClCompile Include="..\src\mappers\225.cpp" />
     <ClCompile Include="..\src\mappers\227.cpp" />
     <ClCompile Include="..\src\mappers\228.cpp" />
     <ClCompile Include="..\src\mappers\229.cpp" />
@@ -579,7 +603,6 @@
     <ClCompile Include="..\src\mappers\51.cpp" />
     <ClCompile Include="..\src\mappers\59.cpp" />
     <ClCompile Include="..\src\mappers\6.cpp" />
-    <ClCompile Include="..\src\mappers\60.cpp" />
     <ClCompile Include="..\src\mappers\61.cpp" />
     <ClCompile Include="..\src\mappers\62.cpp" />
     <ClCompile Include="..\src\mappers\65.cpp" />
@@ -592,17 +615,8 @@
     <ClCompile Include="..\src\mappers\76.cpp" />
     <ClCompile Include="..\src\mappers\77.cpp" />
     <ClCompile Include="..\src\mappers\79.cpp" />
-    <ClCompile Include="..\src\mappers\8.cpp" />
     <ClCompile Include="..\src\mappers\80.cpp" />
-    <ClCompile Include="..\src\mappers\82.cpp" />
-    <ClCompile Include="..\src\mappers\83.cpp" />
     <ClCompile Include="..\src\mappers\85.cpp" />
-    <ClCompile Include="..\src\mappers\86.cpp" />
-    <ClCompile Include="..\src\mappers\89.cpp" />
-    <ClCompile Include="..\src\mappers\91.cpp" />
-    <ClCompile Include="..\src\mappers\92.cpp" />
-    <ClCompile Include="..\src\mappers\97.cpp" />
-    <ClCompile Include="..\src\mappers\99.cpp" />
     <ClCompile Include="..\src\mappers\emu2413.c">
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
@@ -616,7 +630,6 @@
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
     </ClCompile>
     <ClCompile Include="..\src\mappers\mmc2and4.cpp" />
-    <ClCompile Include="..\src\mappers\simple.cpp" />
     <ClCompile Include="..\src\utils\ConvertUTF.c" />
     <ClCompile Include="..\src\utils\crc32.cpp">
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>

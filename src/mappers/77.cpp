@@ -32,7 +32,7 @@ static DECLFW(Mapper77_write)
 static void Mapper77_StateRestore(int version)
 {
  int x;
- 
+
  if(version>=7200)
  {
   ROM_BANK32(mapbyte1[0]&0x7);

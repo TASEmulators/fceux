@@ -28,7 +28,7 @@ static void Fudou_PPU(uint32 A)
 {
  static int last=-1;
  static uint8 z;
-  
+
  if(A>=0x2000) return;
 
  A>>=10;

@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2003 CaH4e3
+ *  Copyright (C) 2012 CaH4e3
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,24 +20,46 @@
 
 #include "mapinc.h"
 
-static DECLFW(Mapper212_write)
+static uint8 latch;
+static writefunc old4016;
+
+static SFORMAT StateRegs[]=
 {
-  if((A&0x4000)==0x4000)
-   {
-     ROM_BANK32((A&6)>>1);
-   }
-  else
-   {
-     ROM_BANK16(0x8000,A&7);
-     ROM_BANK16(0xc000,A&7);
-   }
- VROM_BANK8(A&7);
- MIRROR_SET((A>>3)&1);
+  {&latch, 1, "LATC"},
+  {0}
+};
+
+static void Sync(void)
+{
+  setchr8((latch >> 2) & 1);
+  setprg32(0x8000,0);
+  setprg8(0x8000,latch & 4);        /* Special for VS Gumshoe */
 }
 
-void Mapper212_init(void)
+static DECLFW(M99Write)
 {
- ROM_BANK32(~0);
- VROM_BANK8(~0);
- SetWriteHandler(0x8000,0xFFFF,Mapper212_write);
+  latch = V;
+  Sync();
+  old4016(A,V);
+}
+
+static void M99Power(void)
+{
+  latch = 0;
+  Sync();
+  old4016=GetWriteHandler(0x4016);
+  SetWriteHandler(0x4016,0x4016,M99Write);
+  SetReadHandler(0x8000,0xFFFF,CartBR);
+}
+
+static void StateRestore(int version)
+{
+  Sync();
+}
+
+void Mapper99_Init(CartInfo *info)
+{
+  info->Power=M99Power;
+  GameStateRestore=StateRestore;
+  AddExState(&StateRegs, ~0, 0, 0);
 }

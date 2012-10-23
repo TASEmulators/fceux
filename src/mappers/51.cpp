@@ -26,7 +26,7 @@
 static uint32 Get8K(uint32 A)
 {
  uint32 bank;
- 
+
  bank=(page<<2)|((A>>13)&1);
 
  if(A&0x4000 && !(mode&1)) bank|=0xC;

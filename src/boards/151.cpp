@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2003 CaH4e3
+ *  Copyright (C) 2012 CaH4e3
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,24 +20,45 @@
 
 #include "mapinc.h"
 
-static DECLFW(Mapper212_write)
+static uint8 regs[8];
+
+static SFORMAT StateRegs[]=
 {
-  if((A&0x4000)==0x4000)
-   {
-     ROM_BANK32((A&6)>>1);
-   }
-  else
-   {
-     ROM_BANK16(0x8000,A&7);
-     ROM_BANK16(0xc000,A&7);
-   }
- VROM_BANK8(A&7);
- MIRROR_SET((A>>3)&1);
+  {regs, 8, "REGS"},
+  {0}
+};
+
+static void Sync(void)
+{
+  setprg8(0x8000,regs[0]);
+  setprg8(0xA000,regs[2]);
+  setprg8(0xC000,regs[4]);
+  setprg8(0xE000,~0);
+  setchr4(0x0000,regs[6]);
+  setchr4(0x1000,regs[7]);
 }
 
-void Mapper212_init(void)
+static DECLFW(M151Write)
 {
- ROM_BANK32(~0);
- VROM_BANK8(~0);
- SetWriteHandler(0x8000,0xFFFF,Mapper212_write);
+  regs[(A >> 12)&7] = V;
+  Sync();
+}
+
+static void M151Power(void)
+{
+  Sync();
+  SetReadHandler(0x8000,0xFFFF,CartBR);
+  SetWriteHandler(0x8000,0xFFFF,M151Write);
+}
+
+static void StateRestore(int version)
+{
+  Sync();
+}
+
+void Mapper151_Init(CartInfo *info)
+{
+  info->Power=M151Power;
+  GameStateRestore=StateRestore;
+  AddExState(&StateRegs, ~0, 0, 0);
 }

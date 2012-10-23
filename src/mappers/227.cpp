@@ -20,39 +20,36 @@
 
 #include "mapinc.h"
 
-//zero 14-apr-2012 - redid this entirely to match bizhawk
-
 #define rg mapbyte1
 
 static void DoSync(uint32 A)
 {
-	int S = A & 1;
-	int M_horz = (A>>1)&1;
-	int p = (A >> 2) & 0x1F;
+	uint32 S = A & 1;
+	uint32 p = (A >> 2) & 0x1F;
 	p += (A&0x100) ? 0x20 : 0;
-	bool o = (A>>7)&1;
-	bool L = (A>>9)&1;
+	uint32 o = (A>>7)&1;
+	uint32 L = (A>>9)&1;
 
-	if (o && !S )	
-	{
+	if (o && !S )
+    {
 		ROM_BANK16(0x8000,p);
 		ROM_BANK16(0xC000,p);
-	}
+    }
 	if (o && S )
-	{
+    {
 		ROM_BANK16(0x8000,p);
 		ROM_BANK16(0xC000,p+1);
-	}
+    }
 	if (!o && !S && !L )
-	{
+    {
 		ROM_BANK16(0x8000,p);
 		ROM_BANK16(0xC000,p&0x38);
-	}
+    }
 	if (!o && S && !L )
-	{
+    {
 		ROM_BANK16(0x8000,p&0x3E);
 		ROM_BANK16(0xC000,p&0x38);
-	}
+    }
 	if (!o && !S && L)
 	{
 		ROM_BANK16(0x8000,p);
@@ -64,31 +61,31 @@ static void DoSync(uint32 A)
 		ROM_BANK16(0xC000,p|7);
 	}
 
- rg[0]=A;
- rg[1]=A>>8;
+    rg[0]=A;
+    rg[1]=A>>8;
 
- MIRROR_SET((A>>1)&1);
+    MIRROR_SET((A>>1)&1);
 }
 
 static DECLFW(Mapper227_write)
 {
- DoSync(A);
+    DoSync(A);
 }
 
 static void M227Reset(void)
 {
- DoSync(0);
+    DoSync(0);
 }
 
 static void M227Restore(int version)
 {
- DoSync(rg[0]|(rg[1]<<8));
+    DoSync(rg[0]|(rg[1]<<8));
 }
 
 void Mapper227_init(void)
 {
-  SetWriteHandler(0x8000,0xffff,Mapper227_write);
-  MapperReset=M227Reset;
-  GameStateRestore=M227Restore;
-  M227Reset();
+    SetWriteHandler(0x8000,0xffff,Mapper227_write);
+    MapperReset=M227Reset;
+    GameStateRestore=M227Restore;
+    M227Reset();
 }

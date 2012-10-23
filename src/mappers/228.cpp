@@ -26,7 +26,7 @@ static uint8 mapper228_ram[4];
 
 static SFORMAT StateRegs[]=
 {
-  { mapper228_ram, 4, "MAPPER_RAM" },
+  { mapper228_ram, 4, "MRAM" },
   { 0 }
 };
 

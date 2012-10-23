@@ -156,81 +156,73 @@ static void SetInput(void)
 {
 	static struct INPSEL moo[]=
 	{
-		{0x3a1694f9,SI_GAMEPAD,SI_GAMEPAD,SIFC_4PLAYER},       // Nekketsu Kakutou Densetsu
-
-		{0xc3c0811d,SI_GAMEPAD,SI_GAMEPAD,SIFC_OEKAKIDS},  // The two "Oeka Kids" games
-		{0x9d048ea4,SI_GAMEPAD,SI_GAMEPAD,SIFC_OEKAKIDS},  //
-
-		{0xaf4010ea,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // World Class Track Meet
-		{0xd74b2719,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // Super Team Games
-		{0x61d86167,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // Street Cop
-		{0x6435c095,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // Short Order/Eggsplode
-
-
-		{0x47232739,SI_GAMEPAD,SI_GAMEPAD,SIFC_TOPRIDER},  // Top Rider
-
-		{0x48ca0ee1,SI_GAMEPAD,SI_GAMEPAD,SIFC_BWORLD},    // Barcode World
-		{0x9f8f200a,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Super Mogura Tataki!! - Pokkun Moguraa
-		{0x9044550e,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Rairai Kyonshizu
-		{0x2f128512,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Jogging Race
-		{0x60ad090a,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Athletic World
-
-		{0x8a12a7d9,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Totsugeki Fuuun Takeshi Jou
-		{0xea90f3e2,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Running Stadium
-		{0x370ceb65,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Meiro Dai Sakusen
-		// Bad dump? {0x69ffb014,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Fuun Takeshi Jou 2
-		{0x6cca1c1f,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Dai Undoukai
-		{0x29de87af,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  // Aerobics Studio
-		{0xbba58be5,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  // Family Trainer: Manhattan Police
-		{0xea90f3e2,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  // Family Trainer:  Running Stadium
-
-		{0xd9f45be9,SI_GAMEPAD,SI_GAMEPAD,SIFC_QUIZKING},  // Gimme a Break ...
-		{0x1545bd13,SI_GAMEPAD,SI_GAMEPAD,SIFC_QUIZKING},  // Gimme a Break ... 2
-
-		{0x7b44fb2a,SI_GAMEPAD,SI_GAMEPAD,SIFC_MAHJONG},  // Ide Yousuke Meijin no Jissen Mahjong 2
-		{0x9fae4d46,SI_GAMEPAD,SI_GAMEPAD,SIFC_MAHJONG},  // Ide Yousuke Meijin no Jissen Mahjong
-
-		{0x980be936,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, // Hyper Olympic
-		{0x21f85681,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, // Hyper Olympic (Gentei Ban)
-		{0x915a53a7,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, // Hyper Sports
-		{0xad9c63e2,SI_GAMEPAD,SI_UNSET,SIFC_SHADOW},  // Space Shadow
-
-		{0x24598791,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Duck Hunt
-		{0xff24d794,SI_UNSET,SI_ZAPPER,SIFC_NONE},   // Hogan's Alley
-		{0xbeb8ab01,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Gumshoe
-		{0xde8fd935,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // To the Earth
-		{0xedc3662b,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Operation Wolf
-		{0x2a6559a1,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Operation Wolf (J)
-	    {0x4e959173,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Gotcha! - The Sport!
-
-		{0x23d17f5e,SI_GAMEPAD,SI_ZAPPER,SIFC_NONE},  // The Lone Ranger
-		{0xb8b9aca3,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Wild Gunman
-		{0x5112dc21,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Wild Gunman
-		{0x4318a2f8,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Barker Bill's Trick Shooting
-		{0x5ee6008e,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Mechanized Attack
-		{0x3e58a87e,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Freedom Force
-		{0xe9a7fe9e,SI_UNSET,SI_MOUSE,SIFC_NONE}, // Educational Computer 2000  //mbg merge 7/17/06 added -- appears to be from newer MM build
-		{0x851eb9be,SI_GAMEPAD,SI_ZAPPER,SIFC_NONE},  // Shooting Range
-		{0x74bea652,SI_GAMEPAD,SI_ZAPPER,SIFC_NONE},  // Supergun 3-in-1
-		{0x32fb0583,SI_UNSET,SI_ARKANOID,SIFC_NONE}, // Arkanoid(NES)
-		{0xd89e5a67,SI_UNSET,SI_UNSET,SIFC_ARKANOID}, // Arkanoid (J)
-		{0x0f141525,SI_UNSET,SI_UNSET,SIFC_ARKANOID}, // Arkanoid 2(J)
-
-		{0x912989dc,SI_UNSET,SI_UNSET,SIFC_FKB},  // Playbox BASIC
-		{0xf7606810,SI_UNSET,SI_UNSET,SIFC_FKB},  // Family BASIC 2.0A
-		{0x895037bc,SI_UNSET,SI_UNSET,SIFC_FKB},  // Family BASIC 2.1a
-		{0xb2530afc,SI_UNSET,SI_UNSET,SIFC_FKB},  // Family BASIC 3.0
-		{0x82f1fb96,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Subor 1.0 Russian
-		{0xabb2f974,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Study and Game 32-in-1
-		{0xd5d6eac4,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Edu (As)
-		{0x589b6b0d,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // SuporV20
-		{0x5e073a1b,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Supor English (Chinese)
-		{0x8b265862,SI_UNSET,SI_UNSET,SIFC_SUBORKB},
-		{0x41401c6d,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // SuporV40
-		{0x41ef9ac4,SI_UNSET,SI_UNSET,SIFC_SUBORKB},
-		{0x368c19a8,SI_UNSET,SI_UNSET,SIFC_SUBORKB},   // LIKO Study Cartridge
-		{0x543ab532,SI_UNSET,SI_UNSET,SIFC_SUBORKB},   // LIKO Color Lines
-		{0,SI_UNSET,SI_UNSET,SIFC_UNSET}
+		{0x29de87af,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_FTRAINERB	},	// Aerobics Studio
+		{0xd89e5a67,	SI_UNSET,		SI_UNSET,		SIFC_ARKANOID	},	// Arkanoid (J)
+		{0x0f141525,	SI_UNSET,		SI_UNSET,		SIFC_ARKANOID	},	// Arkanoid 2(J)
+		{0x32fb0583,	SI_UNSET,		SI_ARKANOID,	SIFC_NONE		},	// Arkanoid(NES)
+		{0x60ad090a,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_FTRAINERA	},	// Athletic World
+		{0x48ca0ee1,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_BWORLD		},	// Barcode World
+		{0x4318a2f8,	SI_UNSET,		SI_ZAPPER,		SIFC_NONE		},	// Barker Bill's Trick Shooting
+		{0x6cca1c1f,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_FTRAINERB	},	// Dai Undoukai
+		{0x24598791,	SI_UNSET,		SI_ZAPPER,		SIFC_NONE		},	// Duck Hunt
+		{0xd5d6eac4,	SI_UNSET,		SI_UNSET,		SIFC_SUBORKB	},	// Edu (As)
+		{0xe9a7fe9e,	SI_UNSET,		SI_MOUSE,		SIFC_NONE		},	// Educational Computer 2000
+		{0x8f7b1669,	SI_UNSET,		SI_UNSET,		SIFC_SUBORKB	},	// FP BASIC 3.3 by maxzhou88
+		{0xf7606810,	SI_UNSET,		SI_UNSET,		SIFC_FKB		},	// Family BASIC 2.0A
+		{0x895037bc,	SI_UNSET,		SI_UNSET,		SIFC_FKB		},	// Family BASIC 2.1a
+		{0xb2530afc,	SI_UNSET,		SI_UNSET,		SIFC_FKB		},	// Family BASIC 3.0
+		{0xea90f3e2,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_FTRAINERB	},	// Family Trainer:  Running Stadium
+		{0xbba58be5,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_FTRAINERB	},	// Family Trainer: Manhattan Police
+		{0x3e58a87e,	SI_UNSET,		SI_ZAPPER,		SIFC_NONE		},	// Freedom Force
+		{0xd9f45be9,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_QUIZKING	},	// Gimme a Break ...
+		{0x1545bd13,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_QUIZKING	},	// Gimme a Break ... 2
+		{0x4e959173,	SI_UNSET,		SI_ZAPPER,		SIFC_NONE		},	// Gotcha! - The Sport!
+		{0xbeb8ab01,	SI_UNSET,		SI_ZAPPER,		SIFC_NONE		},	// Gumshoe
+		{0xff24d794,	SI_UNSET,		SI_ZAPPER,		SIFC_NONE		},	// Hogan's Alley
+		{0x21f85681,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_HYPERSHOT	},	// Hyper Olympic (Gentei Ban)
+		{0x980be936,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_HYPERSHOT	},	// Hyper Olympic
+		{0x915a53a7,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_HYPERSHOT	},	// Hyper Sports
+		{0x9fae4d46,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_MAHJONG	},	// Ide Yousuke Meijin no Jissen Mahjong
+		{0x7b44fb2a,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_MAHJONG	},	// Ide Yousuke Meijin no Jissen Mahjong 2
+		{0x2f128512,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_FTRAINERA	},	// Jogging Race
+		{0xbb33196f,	SI_UNSET,		SI_UNSET,		SIFC_FKB		},	// Keyboard Transformer
+		{0x8587ee00,	SI_UNSET,		SI_UNSET,		SIFC_FKB		},	// Keyboard Transformer
+		{0x543ab532,	SI_UNSET,		SI_UNSET,		SIFC_SUBORKB	},	// LIKO Color Lines
+		{0x368c19a8,	SI_UNSET,		SI_UNSET,		SIFC_SUBORKB	},	// LIKO Study Cartridge
+		{0x5ee6008e,	SI_UNSET,		SI_ZAPPER,		SIFC_NONE		},	// Mechanized Attack
+		{0x370ceb65,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_FTRAINERB	},	// Meiro Dai Sakusen
+		{0x3a1694f9,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_4PLAYER	},	// Nekketsu Kakutou Densetsu
+		{0x9d048ea4,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_OEKAKIDS	},	// Oeka Kids
+		{0x2a6559a1,	SI_UNSET,		SI_ZAPPER,		SIFC_NONE		},	// Operation Wolf (J)
+		{0xedc3662b,	SI_UNSET,		SI_ZAPPER,		SIFC_NONE		},	// Operation Wolf
+		{0x912989dc,	SI_UNSET,		SI_UNSET,		SIFC_FKB		},	// Playbox BASIC
+		{0x9044550e,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_FTRAINERA	},	// Rairai Kyonshizu
+		{0xea90f3e2,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_FTRAINERB	},	// Running Stadium
+		{0x851eb9be,	SI_GAMEPAD,		SI_ZAPPER,		SIFC_NONE		},	// Shooting Range
+		{0x6435c095,	SI_GAMEPAD,		SI_POWERPADB,	SIFC_UNSET		},	// Short Order/Eggsplode
+		{0xc043a8df,	SI_UNSET,		SI_MOUSE,		SIFC_NONE		},	// Shu Qi Yu - Shu Xue Xiao Zhuan Yuan (Ch)
+		{0x2cf5db05,	SI_UNSET,		SI_MOUSE,		SIFC_NONE		},	// Shu Qi Yu - Zhi Li Xiao Zhuan Yuan (Ch)
+		{0xad9c63e2,	SI_GAMEPAD,		SI_UNSET,		SIFC_SHADOW		},	// Space Shadow
+		{0x61d86167,	SI_GAMEPAD,		SI_POWERPADB,	SIFC_UNSET		},	// Street Cop
+		{0xabb2f974,	SI_UNSET,		SI_UNSET,		SIFC_SUBORKB	},	// Study and Game 32-in-1
+		{0x41ef9ac4,	SI_UNSET,		SI_UNSET,		SIFC_SUBORKB	},	// Subor
+		{0x8b265862,	SI_UNSET,		SI_UNSET,		SIFC_SUBORKB	},	// Subor
+		{0x82f1fb96,	SI_UNSET,		SI_UNSET,		SIFC_SUBORKB	},	// Subor 1.0 Russian
+		{0x9f8f200a,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_FTRAINERA	},	// Super Mogura Tataki!! - Pokkun Moguraa
+		{0xd74b2719,	SI_GAMEPAD,		SI_POWERPADB,	SIFC_UNSET		},	// Super Team Games
+		{0x74bea652,	SI_GAMEPAD,		SI_ZAPPER,		SIFC_NONE		},	// Supergun 3-in-1
+		{0x5e073a1b,	SI_UNSET,		SI_UNSET,		SIFC_SUBORKB	},	// Supor English (Chinese)
+		{0x589b6b0d,	SI_UNSET,		SI_UNSET,		SIFC_SUBORKB	},	// SuporV20
+		{0x41401c6d,	SI_UNSET,		SI_UNSET,		SIFC_SUBORKB	},	// SuporV40
+		{0x23d17f5e,	SI_GAMEPAD,		SI_ZAPPER,		SIFC_NONE		},	// The Lone Ranger
+		{0xc3c0811d,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_OEKAKIDS	},	// The two "Oeka Kids" games
+		{0xde8fd935,	SI_UNSET,		SI_ZAPPER,		SIFC_NONE		},	// To the Earth
+		{0x47232739,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_TOPRIDER	},	// Top Rider
+		{0x8a12a7d9,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_FTRAINERB	},	// Totsugeki Fuuun Takeshi Jou
+		{0xb8b9aca3,	SI_UNSET,		SI_ZAPPER,		SIFC_NONE		},	// Wild Gunman
+		{0x5112dc21,	SI_UNSET,		SI_ZAPPER,		SIFC_NONE		},	// Wild Gunman
+		{0xaf4010ea,	SI_GAMEPAD,		SI_POWERPADB,	SIFC_UNSET		},	// World Class Track Meet
+		{0x00000000,	SI_UNSET,		SI_UNSET,		SIFC_UNSET		}
 	};
 	int x=0;
 
@@ -246,7 +238,6 @@ static void SetInput(void)
 		x++;
 	}
 }
-
 #define INESB_INCOMPLETE  1
 #define INESB_CORRUPT     2
 #define INESB_HACKED      4
@@ -533,72 +524,149 @@ typedef struct {
 } BMAPPINGLocal;
 
 static BMAPPINGLocal bmap[] = {
-	{"NROM",				0,   NROM_Init},
-	{"MMC1",    			1,	 Mapper1_Init},
-	{"UNROM",				2,   UNROM_Init},
-	{"CNROM",				3,   CNROM_Init},
-	{"MMC3",				4,   Mapper4_Init},
-	{"MMC5",				5,   Mapper5_Init},
-	{"ANROM",				7,   ANROM_Init},
-	{"Color Dreams",		11,  Mapper11_Init},
-	{"",					12,  Mapper12_Init},
-	{"CPROM",				13,  CPROM_Init},
-    {"100-in1",				15,  Mapper15_Init},
-    {"Bandai",				16,  Mapper16_Init},
-	{"Namcot 106",			19,  Mapper19_Init},
-    {"Konami VRC2 type B",	23,  Mapper23_Init},
-    {"Wario Land 2", 		35,  UNLSC127_Init}, // Wario Land 2
-    {"TXC Policeman",		36,  Mapper36_Init}, // TXC Policeman
-	{"",					37,  Mapper37_Init},
-    {"Bit Corp. Crime Busters",	38,  Mapper38_Init}, // Bit Corp. Crime Busters
-	{"",					43,  Mapper43_Init},
-	{"",					44,  Mapper44_Init},
-	{"",					45,  Mapper45_Init},
-	{"",					47,  Mapper47_Init},
-	{"",					49,  Mapper49_Init},
-	{"",					52,  Mapper52_Init},
-	{"",					57,  Mapper57_Init},
-	{"",					58,  BMCGK192_Init},
-	{"",					60,  BMCD1038_Init},
-	{"MHROM",				66,  MHROM_Init},
-    {"Sunsoft Mapper #4",	68,  Mapper68_Init},
-	{"",					70,  Mapper70_Init},
-	{"",					74,  Mapper74_Init},
-	{"Irem 74HC161/32",		78,  Mapper78_Init},
-	{"",					87,  Mapper87_Init},
-	{"",					88,  Mapper88_Init},
-	{"",					90,  Mapper90_Init},
-	{"Sunsoft UNROM",		93,  SUNSOFT_UNROM_Init},
-	{"",					94,  Mapper94_Init},
-	{"",					95,  Mapper95_Init},
-    {"",					101, Mapper101_Init},
-    {"",					103, Mapper103_Init},
+	{"NROM",				  0, NROM_Init},
+	{"MMC1",				  1, Mapper1_Init},
+	{"UNROM",				  2, UNROM_Init},
+	{"CNROM",				  3, CNROM_Init},
+	{"MMC3",				  4, Mapper4_Init},
+	{"MMC5",				  5, Mapper5_Init},
+//	{"",					  6, Mapper6_Init},
+	{"ANROM",				  7, ANROM_Init},
+	{"",					  8, Mapper8_Init}, // Nogaems, it's worthless
+//	{"",					  9, Mapper9_Init},
+//	{"",					 10, Mapper10_Init},
+	{"Color Dreams",		 11, Mapper11_Init},
+	{"",					 12, Mapper12_Init},
+	{"CPROM",				 13, CPROM_Init},
+//	{"",					 14, Mapper14_Init},
+	{"100-in-1",			 15, Mapper15_Init},
+	{"Bandai",				 16, Mapper16_Init},
+	{"",					 17, Mapper17_Init},
+	{"",					 18, Mapper18_Init},
+	{"Namcot 106",			 19, Mapper19_Init},
+//	{"",					 20, Mapper20_Init},
+//	{"",					 21, Mapper21_Init},
+//	{"",					 22, Mapper22_Init},
+	{"Konami VRC2 type B",	 23, Mapper23_Init},
+//	{"",					 24, Mapper24_Init},
+//	{"",					 25, Mapper25_Init},
+//	{"",					 26, Mapper26_Init},
+//	{"",					 27, Mapper27_Init},
+//	{"",					 28, Mapper28_Init},
+//	{"",					 29, Mapper29_Init},
+//	{"",					 30, Mapper30_Init},
+//	{"",					 31, Mapper31_Init},
+//	{"",					 32, Mapper32_Init},
+//	{"",					 33, Mapper33_Init},
+	{"",					 34, Mapper34_Init},
+	{"Wario Land 2",		 35, UNLSC127_Init}, // Wario Land 2
+	{"TXC Policeman",		 36, Mapper36_Init}, // TXC Policeman
+	{"",					 37, Mapper37_Init},
+	{"Bit Corp.",			 38, Mapper38_Init}, // Bit Corp. Crime Busters
+//	{"",					 39, Mapper39_Init},
+//	{"",					 40, Mapper40_Init},
+//	{"",					 41, Mapper41_Init},
+//	{"",					 42, Mapper42_Init},
+	{"",					 43, Mapper43_Init},
+	{"",					 44, Mapper44_Init},
+	{"",					 45, Mapper45_Init},
+//	{"",					 46, Mapper46_Init},
+	{"",					 47, Mapper47_Init},
+//	{"",					 48, Mapper48_Init},
+	{"",					 49, Mapper49_Init},
+//	{"",					 50, Mapper50_Init},
+//	{"",					 51, Mapper51_Init},
+	{"",					 52, Mapper52_Init},
+//	{"",					 53, Mapper53_Init},
+//	{"",					 54, Mapper54_Init},
+//	{"",					 55, Mapper55_Init},
+//	{"",					 56, Mapper56_Init},
+	{"",					 57, Mapper57_Init},
+	{"",					 58, BMCGK192_Init},
+//	{"",					 59, Mapper59_Init},
+	{"",					 60, BMCD1038_Init},
+//	{"",					 61, Mapper61_Init},
+//	{"",					 62, Mapper62_Init},
+//	{"",					 63, Mapper63_Init},
+//	{"",					 64, Mapper64_Init},
+//	{"",					 65, Mapper65_Init},
+	{"MHOM",				 66, MHROM_Init},
+//	{"",					 67, Mapper67_Init},
+	{"Sunsoft Mapper #4",	 68, Mapper68_Init},
+//	{"",					 69, Mapper69_Init},
+	{"",					 70, Mapper70_Init},
+//	{"",					 71, Mapper71_Init},
+//	{"",					 72, Mapper72_Init},
+//	{"",					 73, Mapper73_Init},
+	{"",					 74, Mapper74_Init},
+//	{"",					 75, Mapper75_Init},
+//	{"",					 76, Mapper76_Init},
+//	{"",					 77, Mapper77_Init},
+	{"Irem 74HC161/32",		 78, Mapper78_Init},
+//	{"",					 79, Mapper79_Init},
+//	{"",					 80, Mapper80_Init},
+//	{"",					 81, Mapper81_Init},
+	{"",					 82, Mapper82_Init},
+	{"",					 83, Mapper83_Init},
+//	{"",					 84, Mapper84_Init},
+//	{"",					 85, Mapper85_Init},
+	{"",					 86, Mapper86_Init},
+	{"",					 87, Mapper87_Init},
+	{"",					 88, Mapper88_Init},
+	{"",					 89, Mapper89_Init},
+	{"",					 90, Mapper90_Init},
+	{"",					 91, Mapper91_Init},
+	{"",					 92, Mapper92_Init},
+	{"Sunsoft UNROM",		 93, SUNSOFT_UNROM_Init},
+	{"",					 94, Mapper94_Init},
+	{"",					 95, Mapper95_Init},
+	{"",					 96, Mapper96_Init},
+	{"",					 97, Mapper97_Init},
+//	{"",					 98, Mapper98_Init},
+	{"",					 99, Mapper99_Init},
+//	{"",					100, Mapper100_Init},
+	{"",					101, Mapper101_Init},
+//	{"",					102, Mapper102_Init},
+	{"",					103, Mapper103_Init},
+//	{"",					104, Mapper104_Init},
 	{"",					105, Mapper105_Init},
-    {"",					106, Mapper106_Init},
+	{"",					106, Mapper106_Init},
 	{"",					107, Mapper107_Init},
-    {"",					108, Mapper108_Init},
+	{"",					108, Mapper108_Init},
+//	{"",					109, Mapper109_Init},
+//	{"",					110, Mapper110_Init},
+//	{"",					111, Mapper111_Init},
 	{"",					112, Mapper112_Init},
 	{"",					113, Mapper113_Init},
 	{"",					114, Mapper114_Init},
 	{"",					115, Mapper115_Init},
-	{"",					116, Mapper116_Init},
-//    {116, UNLSL1632_Init},
+	{"",					116, UNLSL12_Init},
 	{"",					117, Mapper117_Init},
 	{"TSKROM",				118, TKSROM_Init},
 	{"",					119, Mapper119_Init},
-    {"",					120, Mapper120_Init},
-    {"",					121, Mapper121_Init},
-    {"UNLH2288",			123, UNLH2288_Init},
+	{"",					120, Mapper120_Init},
+	{"",					121, Mapper121_Init},
+//	{"",					122, Mapper122_Init},
+	{"UNLH2288",			123, UNLH2288_Init},
+//	{"",					124, Mapper124_Init},
+	{"",					125, LH32_Init},
+//	{"",					126, Mapper126_Init},
+//	{"",					127, Mapper127_Init},
+//	{"",					128, Mapper128_Init},
+//	{"",					129, Mapper129_Init},
+//	{"",					130, Mapper130_Init},
+//	{"",					131, Mapper131_Init},
 	{"UNL22211",			132, UNL22211_Init},
 	{"SA72008",				133, SA72008_Init},
-    {"",					134, Mapper134_Init},
-    {"TCU02",				136, TCU02_Init},
+	{"",					134, Mapper134_Init},
+//	{"",					135, Mapper135_Init},
+	{"TCU02",				136, TCU02_Init},
 	{"S8259D",				137, S8259D_Init},
 	{"S8259B",				138, S8259B_Init},
 	{"S8259C",				139, S8259C_Init},
 	{"",					140, Mapper140_Init},
 	{"S8259A",				141, S8259A_Init},
-    {"UNLKS7032",			142, UNLKS7032_Init},
+	{"UNLKS7032",			142, UNLKS7032_Init},
 	{"TCA01",				143, TCA01_Init},
 	{"",					144, Mapper144_Init},
 	{"SA72007",				145, SA72007_Init},
@@ -607,30 +675,38 @@ static BMAPPINGLocal bmap[] = {
 	{"SA0037",				148, SA0037_Init},
 	{"SA0036",				149, SA0036_Init},
 	{"S74LS374N",			150, S74LS374N_Init},
+	{"",					151, Mapper151_Init},
 	{"",					152, Mapper152_Init},
-    {"",					153, Mapper153_Init},
+	{"",					153, Mapper153_Init},
 	{"",					154, Mapper154_Init},
 	{"",					155, Mapper155_Init},
 	{"",					156, Mapper156_Init},
 	{"",					157, Mapper157_Init},
-	{"",					159, Mapper16_Init},	// Obsolete, remove me!
-    {"SA009",				160, SA009_Init},
+//	{"",					158, Mapper158_Init},
+//	{"",					159, Mapper159_Init},
+	{"SA009",				160, SA009_Init},
+//	{"",					161, Mapper161_Init},
 	{"",					162, UNLFS304_Init},
 	{"",					163, Mapper163_Init},
 	{"",					164, Mapper164_Init},
 	{"",					165, Mapper165_Init},
-//    {169, Mapper169_Init},
-    {"",					171, Mapper171_Init},
-    {"",					172, Mapper172_Init},
-    {"",					173, Mapper173_Init},
-    {"",					175, Mapper175_Init},
-    {"BMCFK23C",			176, BMCFK23C_Init}, //zero 26-may-2012 - well, i have some WXN junk games that use 176 for instance 水浒神兽. i dont know what game uses this BMCFK23C as mapper 176. we'll have to make a note when we find it.
-		//{"BMCFK23C",			176, Mapper176_Init}, 
-    {"",					177, Mapper177_Init},
-    {"",					178, Mapper178_Init},
+//	{"",					166, Mapper166_Init},
+//	{"",					167, Mapper167_Init},
+	{"",					168, Mapper168_Init},
+//	{"",					169, Mapper169_Init},
+	{"",					170, Mapper170_Init},
+	{"",					171, Mapper171_Init},
+	{"",					172, Mapper172_Init},
+	{"",					173, Mapper173_Init},
+//	{"",					174, Mapper174_Init},
+	{"",					175, Mapper175_Init},
+	{"BMCFK23C",			176, BMCFK23C_Init}, //zero 26-may-2012 - well, i have some WXN junk games that use 176 for instance ????. i dont know what game uses this BMCFK23C as mapper 176. we'll have to make a note when we find it.
+	{"",					177, Mapper177_Init},
+	{"",					178, Mapper178_Init},
+//	{"",					179, Mapper179_Init},
 	{"",					180, Mapper180_Init},
 	{"",					181, Mapper181_Init},
-//	{"",					182, Mapper182_Init},	// identical to 114
+//	{"",					182, Mapper182_Init}, // Removed
 	{"",					183, Mapper183_Init},
 	{"",					184, Mapper184_Init},
 	{"",					185, Mapper185_Init},
@@ -638,39 +714,73 @@ static BMAPPINGLocal bmap[] = {
 	{"",					187, Mapper187_Init},
 	{"",					188, Mapper188_Init},
 	{"",					189, Mapper189_Init},
+//	{"",					190, Mapper190_Init},
 	{"",					191, Mapper191_Init},
 	{"",					192, Mapper192_Init},
+	{"",					193, Mapper193_Init},
 	{"",					194, Mapper194_Init},
 	{"",					195, Mapper195_Init},
-    {"",					196, Mapper196_Init},
-    {"",					197, Mapper197_Init},
+	{"",					196, Mapper196_Init},
+	{"",					197, Mapper197_Init},
 	{"",					198, Mapper198_Init},
 	{"",					199, Mapper199_Init},
 	{"",					200, Mapper200_Init},
+//	{"",					201, Mapper201_Init},
+//	{"",					202, Mapper202_Init},
+//	{"",					203, Mapper203_Init},
+//	{"",					204, Mapper204_Init},
 	{"",					205, Mapper205_Init},
 	{"DEIROM",				206, DEIROM_Init},
+//	{"",					207, Mapper207_Init},
 	{"",					208, Mapper208_Init},
 	{"",					209, Mapper209_Init},
 	{"",					210, Mapper210_Init},
 	{"",					211, Mapper211_Init},
+//	{"",					212, Mapper212_Init},
+//	{"",					213, Mapper213_Init},
+//	{"",					214, Mapper214_Init},
 	{"",					215, UNL8237_Init},
 	{"",					216, Mapper216_Init},
-//	{"",					217, Mapper217_Init},
+//	{"",					217, UNL8237A_Init},
+//	{"",					218, Mapper218_Init},
 	{"UNLA9746",			219, UNLA9746_Init},
-	{"Debug Mapper",	    220, UNLKS7057_Init},
-    {"UNLN625092",			221, UNLN625092_Init},
+	{"Debug Mapper",		220, UNLKS7057_Init}, // DEBUG mapper
+	{"UNLN625092",			221, UNLN625092_Init},
 	{"",					222, Mapper222_Init},
+//	{"",					223, Mapper223_Init},
+//	{"",					224, Mapper224_Init},
+	{"",					225, Mapper225_Init},
 	{"",					226, Mapper226_Init},
+//	{"",					227, Mapper227_Init},
+//	{"",					228, Mapper228_Init},
+//	{"",					229, Mapper229_Init},
+//	{"",					230, Mapper230_Init},
+//	{"",					231, Mapper231_Init},
+//	{"",					232, Mapper232_Init},
+	{"",					233, BMC42in1r_Init},
+//	{"",					234, Mapper234_Init},
 	{"",					235, Mapper235_Init},
-    {"UNL6035052",			238, UNL6035052_Init},
+//	{"",					236, Mapper236_Init},
+//	{"",					237, Mapper237_Init},
+	{"UNL6035052",			238, UNL6035052_Init},
+//	{"",					239, Mapper239_Init},
 	{"",					240, Mapper240_Init},
+//	{"",					241, Mapper241_Init},
+//	{"",					242, Mapper242_Init},
 	{"S74LS374NA",			243, S74LS374NA_Init},
+//	{"",					244, Mapper244_Init},
 	{"",					245, Mapper245_Init},
+//	{"",					246, Mapper246_Init},
+//	{"",					247, Mapper247_Init},
+//	{"",					248, Mapper248_Init},
 	{"",					249, Mapper249_Init},
 	{"",					250, Mapper250_Init},
-    {"",					253, Mapper253_Init},
+//	{"",					251, Mapper251_Init},
+//	{"",					252, Mapper252_Init},
+	{"",					253, Mapper253_Init},
 	{"",					254, Mapper254_Init},
-	{"",  0,        0}
+//	{"",					255, Mapper255_Init},
+	{"",					  0, NULL}
 };
 
 
@@ -1058,6 +1168,7 @@ static void NONE_init(void)
 	else
 		setvram8(CHRRAM);
 }
+
 void (*MapInitTab[256])(void)=
 {
 	0,
@@ -1067,23 +1178,23 @@ void (*MapInitTab[256])(void)=
 	0,
 	0,
 	Mapper6_init,
-	0,//Mapper7_init,
-	Mapper8_init,
+	0, //Mapper7_init,
+	0, //Mapper8_init,
 	Mapper9_init,
 	Mapper10_init,
 	0, //Mapper11_init,
 	0,
 	0, //Mapper13_init,
 	0,
-    0, //Mapper15_init,
-    0, //Mapper16_init,
-	Mapper17_init,
-	Mapper18_init,
+	0, //Mapper15_init,
+	0, //Mapper16_init,
+	0, //Mapper17_init,
+	0, //Mapper18_init,
 	0,
 	0,
 	Mapper21_init,
 	Mapper22_init,
-    0, //Mapper23_init,
+	0, //Mapper23_init,
 	Mapper24_init,
 	Mapper25_init,
 	Mapper26_init,
@@ -1094,7 +1205,7 @@ void (*MapInitTab[256])(void)=
 	0,
 	Mapper32_init,
 	Mapper33_init,
-	Mapper34_init,
+	0, //Mapper34_init,
 	0,
 	0,
 	0,
@@ -1117,20 +1228,20 @@ void (*MapInitTab[256])(void)=
 	0,
 	0,
 	0,
-	0,//    Mapper57_init,
-	0,//    Mapper58_init,
+	0, //Mapper57_init,
+	0, //Mapper58_init,
 	Mapper59_init,
-	0,// Mapper60_init,
+	0, //Mapper60_init,
 	Mapper61_init,
 	Mapper62_init,
 	0,
 	Mapper64_init,
 	Mapper65_init,
-	0,//Mapper66_init,
+	0, //Mapper66_init,
 	Mapper67_init,
-    0,//Mapper68_init,
+	0, //Mapper68_init,
 	Mapper69_init,
-	0,//Mapper70_init,
+	0, //Mapper70_init,
 	Mapper71_init,
 	Mapper72_init,
 	Mapper73_init,
@@ -1142,24 +1253,24 @@ void (*MapInitTab[256])(void)=
 	Mapper79_init,
 	Mapper80_init,
 	0,
-	Mapper82_init,
-	Mapper83_init,
+	0, //Mapper82_init,
+	0, //Mapper83_init,
 	0,
 	Mapper85_init,
-	Mapper86_init,
+	0, //Mapper86_init,
 	0, //Mapper87_init,
 	0, //Mapper88_init,
-	Mapper89_init,
+	0, //Mapper89_init,
 	0,
-	Mapper91_init,
-	Mapper92_init,
+	0, //Mapper91_init,
+	0, //Mapper92_init,
 	0, //Mapper93_init,
 	0, //Mapper94_init,
 	0,
-	Mapper96_init,
-	Mapper97_init,
+	0, //Mapper96_init,
+	0, //Mapper97_init,
 	0,
-	Mapper99_init,
+	0, //Mapper99_init,
 	0,
 	0,
 	0,
@@ -1173,7 +1284,7 @@ void (*MapInitTab[256])(void)=
 	0,
 	0,
 	0,
-	0, // Mapper113_init,
+	0, //Mapper113_init,
 	0,
 	0,
 	0, //Mapper116_init,
@@ -1211,12 +1322,12 @@ void (*MapInitTab[256])(void)=
 	0,
 	0,
 	0,
-	Mapper151_init,
+	0, //Mapper151_init,
 	0, //Mapper152_init,
-    0, //Mapper153_init,
+	0, //Mapper153_init,
 	0, //Mapper154_init,
 	0,
-	0,
+	0, //Mapper156_init,
 	0, //Mapper157_init,
 	0, //Mapper158_init, removed
 	0,
@@ -1253,7 +1364,7 @@ void (*MapInitTab[256])(void)=
 	0,
 	0, //Mapper191_init,
 	0,
-	Mapper193_init,
+	0, //Mapper193_init,
 	0,
 	0,
 	0,
@@ -1285,7 +1396,7 @@ void (*MapInitTab[256])(void)=
 	0,
 	0,
 	0,
-	Mapper225_init,
+	0, //Mapper225_init,
 	0, //Mapper226_init,
 	Mapper227_init,
 	Mapper228_init,
