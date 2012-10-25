@@ -122,7 +122,7 @@ void iNESGI(GI h) //bbit edited: removed static keyword
 		break;
 	case GI_POWER:
 		iNES_ExecPower();
-	
+
 		break;
 	case GI_CLOSE:
 		{
@@ -395,10 +395,10 @@ static void CheckHInfo(void)
 		const TMasterRomInfo& info = sMasterRomInfo[i];
 		if(info.md5lower != partialmd5)
 			continue;
-		
+
 		MasterRomInfo = &info;
 		if(!info.params) break;
-		
+
 		std::vector<std::string> toks = tokenize_str(info.params,",");
 		for(int j=0;j<(int)toks.size();j++)
 		{
@@ -583,7 +583,7 @@ static BMAPPINGLocal bmap[] = {
 //	{"",					 56, Mapper56_Init},
 	{"",					 57, Mapper57_Init},
 	{"",					 58, BMCGK192_Init},
-//	{"",					 59, Mapper59_Init},
+	{"",					 59, Mapper59_Init},	// check this out
 	{"",					 60, BMCD1038_Init},
 //	{"",					 61, Mapper61_Init},
 //	{"",					 62, Mapper62_Init},
@@ -725,10 +725,10 @@ static BMAPPINGLocal bmap[] = {
 	{"",					198, Mapper198_Init},
 	{"",					199, Mapper199_Init},
 	{"",					200, Mapper200_Init},
-//	{"",					201, Mapper201_Init},
-//	{"",					202, Mapper202_Init},
-//	{"",					203, Mapper203_Init},
-//	{"",					204, Mapper204_Init},
+	{"",					201, Mapper201_Init},
+	{"",					202, Mapper202_Init},
+	{"",					203, Mapper203_Init},
+	{"",					204, Mapper204_Init},
 	{"",					205, Mapper205_Init},
 	{"DEIROM",				206, DEIROM_Init},
 //	{"",					207, Mapper207_Init},
@@ -736,9 +736,9 @@ static BMAPPINGLocal bmap[] = {
 	{"",					209, Mapper209_Init},
 	{"",					210, Mapper210_Init},
 	{"",					211, Mapper211_Init},
-//	{"",					212, Mapper212_Init},
-//	{"",					213, Mapper213_Init},
-//	{"",					214, Mapper214_Init},
+	{"",					212, Mapper212_Init},
+	{"",					213, Mapper213_Init},
+	{"",					214, Mapper214_Init},
 	{"",					215, UNL8237_Init},
 	{"",					216, Mapper216_Init},
 //	{"",					217, UNL8237A_Init},
@@ -751,11 +751,11 @@ static BMAPPINGLocal bmap[] = {
 //	{"",					224, Mapper224_Init},
 	{"",					225, Mapper225_Init},
 	{"",					226, Mapper226_Init},
-//	{"",					227, Mapper227_Init},
+	{"",					227, Mapper227_Init},
 //	{"",					228, Mapper228_Init},
-//	{"",					229, Mapper229_Init},
+	{"",					229, Mapper229_Init},
 //	{"",					230, Mapper230_Init},
-//	{"",					231, Mapper231_Init},
+	{"",					231, Mapper231_Init},
 //	{"",					232, Mapper232_Init},
 	{"",					233, BMC42in1r_Init},
 //	{"",					234, Mapper234_Init},
@@ -765,8 +765,8 @@ static BMAPPINGLocal bmap[] = {
 	{"UNL6035052",			238, UNL6035052_Init},
 //	{"",					239, Mapper239_Init},
 	{"",					240, Mapper240_Init},
-//	{"",					241, Mapper241_Init},
-//	{"",					242, Mapper242_Init},
+	{"",					241, Mapper241_Init},
+	{"",					242, Mapper242_Init},
 	{"S74LS374NA",			243, S74LS374NA_Init},
 //	{"",					244, Mapper244_Init},
 	{"",					245, Mapper245_Init},
@@ -780,7 +780,7 @@ static BMAPPINGLocal bmap[] = {
 	{"",					253, Mapper253_Init},
 	{"",					254, Mapper254_Init},
 //	{"",					255, Mapper255_Init},
-	{"",					  0, NULL}
+	{"",						0, NULL}
 };
 
 
@@ -1230,7 +1230,7 @@ void (*MapInitTab[256])(void)=
 	0,
 	0, //Mapper57_init,
 	0, //Mapper58_init,
-	Mapper59_init,
+	0, //Mapper59_init,
 	0, //Mapper60_init,
 	Mapper61_init,
 	Mapper62_init,
@@ -1372,10 +1372,10 @@ void (*MapInitTab[256])(void)=
 	0,
 	0,
 	0, //Mapper200_init,
-	Mapper201_init,
-	Mapper202_init,
-	Mapper203_init,
-	Mapper204_init,
+	0, //Mapper201_init,
+	0, //Mapper202_init,
+	0, //Mapper203_init,
+	0, //Mapper204_init,
 	0,
 	0,
 	Mapper207_init,
@@ -1383,9 +1383,9 @@ void (*MapInitTab[256])(void)=
 	0,
 	0,
 	0, //Mapper211_init,
-	Mapper212_init,
-	Mapper213_init,
-	Mapper214_init,
+	0, //Mapper212_init,
+	0, //Mapper213_init,
+	0, //Mapper214_init,
 	0,
 	0,
 	0,
@@ -1398,11 +1398,11 @@ void (*MapInitTab[256])(void)=
 	0,
 	0, //Mapper225_init,
 	0, //Mapper226_init,
-	Mapper227_init,
+	0, //Mapper227_init,
 	Mapper228_init,
-	Mapper229_init,
+	0, //Mapper229_init,
 	Mapper230_init,
-	Mapper231_init,
+	0, //Mapper231_init,
 	Mapper232_init,
 	0,
 	Mapper234_init,
@@ -1412,8 +1412,8 @@ void (*MapInitTab[256])(void)=
 	0,
 	0,
 	0, //Mapper240_init,
-	Mapper241_init,
-	Mapper242_init,
+	0, //Mapper241_init,
+	0, //Mapper242_init,
 	0,
 	Mapper244_init,
 	0,

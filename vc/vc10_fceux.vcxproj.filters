@@ -647,58 +647,22 @@
     <ClCompile Include="..\src\lua\src\print.c">
       <Filter>drivers\win\lua</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\mappers\201.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\202.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\203.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\204.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\mappers\21.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\212.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\213.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\214.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\mappers\22.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\mappers\227.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\mappers\228.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\mappers\229.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\mappers\230.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\231.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\mappers\232.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\mappers\234.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\241.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\242.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\mappers\244.cpp">
@@ -741,9 +705,6 @@
       <Filter>mappers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\mappers\51.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\59.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\mappers\6.cpp">
