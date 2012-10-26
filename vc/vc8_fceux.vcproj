@@ -586,23 +586,35 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\12in1.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\15.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\src\mappers\156.cpp"
+				RelativePath="..\src\boards\151.cpp"
 				>
-				<FileConfiguration
-					Name="Release Fastbuild|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						WarningLevel="4"
-					/>
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\src\boards\156.cpp"
+				>
 			</File>
 			<File
 				RelativePath="..\src\boards\164.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\168.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\17.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\170.cpp"
 				>
 			</File>
 			<File
@@ -626,6 +638,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\18.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\183.cpp"
 				>
 			</File>
@@ -646,6 +662,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\193.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\199.cpp"
 				>
 			</File>
@@ -655,6 +675,10 @@
 			</File>
 			<File
 				RelativePath="..\src\boards\222.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\225.cpp"
 				>
 			</File>
 			<File
@@ -724,6 +748,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\src\boards\34.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\3d-block.cpp"
 				>
 			</File>
@@ -752,6 +780,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\82.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\8237.cpp"
 				>
 			</File>
@@ -768,7 +800,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\91.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\95.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\96.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\99.cpp"
 				>
 			</File>
 			<File
@@ -777,6 +821,10 @@
 			</File>
 			<File
 				RelativePath="..\src\boards\a9746.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\ac-08.cpp"
 				>
 			</File>
 			<File
@@ -789,6 +837,10 @@
 			</File>
 			<File
 				RelativePath="..\src\boards\bandai.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\bb.cpp"
 				>
 			</File>
 			<File
@@ -816,6 +868,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\cityfighter.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\dance2000.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\datalatch.cpp"
 				>
 			</File>
@@ -829,6 +889,10 @@
 			</File>
 			<File
 				RelativePath="..\src\boards\edu2000.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\famicombox.cpp"
 				>
 			</File>
 			<File
@@ -864,7 +928,47 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\ks7012.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\ks7013.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\ks7017.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\ks7030.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\ks7031.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\ks7032.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\ks7037.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\ks7057.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\le05.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\lh32.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\lh53.cpp"
 				>
 			</File>
 			<File
@@ -901,6 +1005,14 @@
 			</File>
 			<File
 				RelativePath="..\src\boards\onebus.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\pec-586.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\sa-9602b.cpp"
 				>
 			</File>
 			<File
@@ -949,6 +1061,18 @@
 			</File>
 			<File
 				RelativePath="..\src\boards\tf-1201.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\transformer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\vrc7.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\yoko.cpp"
 				>
 			</File>
 		</Filter>
@@ -4001,51 +4125,7 @@
 			Name="mappers"
 			>
 			<File
-				RelativePath="..\src\mappers\151.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\17.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\18.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\193.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\201.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\202.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\203.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\204.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\mappers\21.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\212.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\213.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\214.cpp"
 				>
 			</File>
 			<File
@@ -4061,27 +4141,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\mappers\225.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\227.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\mappers\228.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\src\mappers\229.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\mappers\230.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\231.cpp"
 				>
 			</File>
 			<File
@@ -4090,14 +4154,6 @@
 			</File>
 			<File
 				RelativePath="..\src\mappers\234.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\241.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\242.cpp"
 				>
 			</File>
 			<File
@@ -4157,10 +4213,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\mappers\59.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\mappers\6.cpp"
 				>
 			</File>
@@ -4217,47 +4269,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\mappers\8.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\mappers\80.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\src\mappers\82.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\83.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\mappers\85.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\86.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\89.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\91.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\92.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\97.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\99.cpp"
 				>
 			</File>
 			<File
@@ -4335,10 +4351,6 @@
 			</File>
 			<File
 				RelativePath="..\src\mappers\mmc2and4.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\simple.cpp"
 				>
 			</File>
 			<File
