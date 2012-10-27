@@ -259,7 +259,6 @@
     <ClCompile Include="..\src\boards\208.cpp" />
     <ClCompile Include="..\src\boards\222.cpp" />
     <ClCompile Include="..\src\boards\225.cpp" />
-    <ClCompile Include="..\src\boards\23.cpp" />
     <ClCompile Include="..\src\boards\235.cpp" />
     <ClCompile Include="..\src\boards\253.cpp" />
     <ClCompile Include="..\src\boards\34.cpp" />
@@ -298,6 +297,7 @@
     <ClCompile Include="..\src\boards\pec-586.cpp" />
     <ClCompile Include="..\src\boards\sa-9602b.cpp" />
     <ClCompile Include="..\src\boards\transformer.cpp" />
+    <ClCompile Include="..\src\boards\vrc2and4.cpp" />
     <ClCompile Include="..\src\boards\vrc7.cpp" />
     <ClCompile Include="..\src\boards\yoko.cpp" />
     <ClCompile Include="..\src\boards\__dummy_mapper.cpp">
@@ -569,8 +569,6 @@
     <ClCompile Include="..\src\input\suborkb.cpp" />
     <ClCompile Include="..\src\input\toprider.cpp" />
     <ClCompile Include="..\src\input\zapper.cpp" />
-    <ClCompile Include="..\src\mappers\21.cpp" />
-    <ClCompile Include="..\src\mappers\22.cpp" />
     <ClCompile Include="..\src\mappers\228.cpp" />
     <ClCompile Include="..\src\mappers\230.cpp" />
     <ClCompile Include="..\src\mappers\232.cpp" />
@@ -578,7 +576,6 @@
     <ClCompile Include="..\src\mappers\244.cpp" />
     <ClCompile Include="..\src\mappers\246.cpp" />
     <ClCompile Include="..\src\mappers\24and26.cpp" />
-    <ClCompile Include="..\src\mappers\25.cpp" />
     <ClCompile Include="..\src\mappers\255.cpp" />
     <ClCompile Include="..\src\mappers\27.cpp" />
     <ClCompile Include="..\src\mappers\32.cpp" />

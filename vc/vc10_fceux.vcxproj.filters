@@ -121,9 +121,6 @@
     <ClCompile Include="..\src\boards\222.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\boards\23.cpp">
-      <Filter>boards</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\235.cpp">
       <Filter>boards</Filter>
     </ClCompile>
@@ -647,12 +644,6 @@
     <ClCompile Include="..\src\lua\src\print.c">
       <Filter>drivers\win\lua</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\mappers\21.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\22.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\mappers\228.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
@@ -672,9 +663,6 @@
       <Filter>mappers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\mappers\24and26.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\25.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\mappers\255.cpp">
@@ -974,6 +962,9 @@
       <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\boards\225.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\vrc2and4.cpp">
       <Filter>boards</Filter>
     </ClCompile>
   </ItemGroup>

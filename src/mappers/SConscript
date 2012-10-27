@@ -1,6 +1,4 @@
 my_list =   Split("""
-21.cpp
-22.cpp
 228.cpp
 230.cpp
 232.cpp
@@ -8,7 +6,6 @@ my_list =   Split("""
 244.cpp
 246.cpp
 24and26.cpp
-25.cpp
 255.cpp
 27.cpp
 32.cpp

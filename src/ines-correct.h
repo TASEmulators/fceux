@@ -81,6 +81,7 @@
 	{0x6e68e31a,	 16,		8},	/* Dragon Ball 3*/
 	{0x183859d2,	 16,	   -1},
 	{0x33b899c9,	 16,	   -1},	/* Dragon Ball - Dai Maou Fukkatsu (J) [!] */
+	{0x286fcd20,     23,	   -1}, /* Ganbare Goemon Gaiden 2 - Tenka no Zaihou (J) [!] */
 	{0x5555fca3,	 32,		8},
 	{0x283ad224,	 32,		8},	/* Ai Sensei no Oshiete */
 	{0x243a8735,	 32,   0x10|4},	/* Major League */

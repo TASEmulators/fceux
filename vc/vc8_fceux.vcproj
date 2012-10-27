@@ -682,7 +682,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\boards\23.cpp"
+				RelativePath="..\src\boards\vrc2and4.cpp"
 				>
 			</File>
 			<File
@@ -4125,19 +4125,11 @@
 			Name="mappers"
 			>
 			<File
-				RelativePath="..\src\mappers\21.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\mappers\215.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\src\mappers\217.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\22.cpp"
 				>
 			</File>
 			<File
@@ -4166,10 +4158,6 @@
 			</File>
 			<File
 				RelativePath="..\src\mappers\24and26.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\25.cpp"
 				>
 			</File>
 			<File

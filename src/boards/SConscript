@@ -32,7 +32,6 @@ my_list =  Split("""
 208.cpp
 222.cpp
 225.cpp
-23.cpp
 235.cpp
 253.cpp
 34.cpp
@@ -117,6 +116,7 @@ t-262.cpp
 tengen.cpp
 tf-1201.cpp
 transformer.cpp
+vrc2and4.cpp
 vrc7.cpp
 yoko.cpp
 """)
