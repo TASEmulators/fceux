@@ -389,7 +389,6 @@ static void CheckHInfo(void)
 	CheckBad(partialmd5);
 
 	MasterRomInfo = NULL;
-	MasterRomInfoParams = TMasterRomInfoParams();
 	for(int i=0;i<ARRAY_SIZE(sMasterRomInfo);i++)
 	{
 		const TMasterRomInfo& info = sMasterRomInfo[i];

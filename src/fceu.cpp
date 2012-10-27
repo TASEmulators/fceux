@@ -426,6 +426,9 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 
 	ResetGameLoaded();
 
+	//reset parameters so theyre cleared just in case a format's loader doesnt know to do the clearing
+	MasterRomInfoParams = TMasterRomInfoParams();
+
 	if (!AutosaveStatus)
 		AutosaveStatus = (int*)FCEU_dmalloc(sizeof(int)*AutosaveQty);
 	for (AutosaveIndex=0; AutosaveIndex<AutosaveQty; ++AutosaveIndex)
