@@ -421,6 +421,16 @@ void FCEUD_LoadStateFrom ()
 }
 
 /**
+* Hook for transformer board
+*/
+unsigned int *GetKeyboard(void)                                                     
+{
+  int size = 256;
+  Uint8* keystate = SDL_GetKeyState(&size);
+  return (unsigned int*)(keystate);
+}
+
+/**
  * Parse keyboard commands and execute accordingly.
  */
 static void KeyboardCommands ()

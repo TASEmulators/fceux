@@ -23,7 +23,7 @@
 static uint8 *WRAM=NULL;
 static uint32 WRAMSIZE;
 
-unsigned int *GetKeyboard(void);	// FIXME: not so much portable, don't know really how to solve this correctly here...
+unsigned int *GetKeyboard(void);	// FIXME: 10/28 - now implemented in SDL as well.  should we rename this to a FCEUI_* function?
 
 static unsigned int *TransformerKeys, oldkeys[256];
 static int TransformerCycleCount, TransformerChar = 0;
