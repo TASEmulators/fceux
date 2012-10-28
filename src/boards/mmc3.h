@@ -1,5 +1,3 @@
-#include "mapinc.h"
-
 extern uint8 MMC3_cmd;
 extern uint8 mmc3opts;
 extern uint8 A000B;
