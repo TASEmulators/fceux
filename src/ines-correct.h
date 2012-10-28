@@ -81,7 +81,9 @@
 	{0x6e68e31a,	 16,		8},	/* Dragon Ball 3*/
 	{0x183859d2,	 16,	   -1},
 	{0x33b899c9,	 16,	   -1},	/* Dragon Ball - Dai Maou Fukkatsu (J) [!] */
-	{0x286fcd20,     23,	   -1}, /* Ganbare Goemon Gaiden 2 - Tenka no Zaihou (J) [!] */
+	{0x286fcd20,	 23,	   -1}, /* Ganbare Goemon Gaiden 2 - Tenka no Zaihou (J) [!] */
+	{0xe4a291ce,	 23,	   -1}, /* World Hero (Unl) [!] */
+	{0x51e9cd33,	 23,	   -1}, /* World Hero (Unl) [b1] */
 	{0x5555fca3,	 32,		8},
 	{0x283ad224,	 32,		8},	/* Ai Sensei no Oshiete */
 	{0x243a8735,	 32,   0x10|4},	/* Major League */
@@ -91,6 +93,7 @@
 	{0xf46ef39a,	 37,	   -1},	/* Super Mario Bros. + Tetris + Nintendo World Cup (E) [!] */
 	{0x7ccb12a3,	 43,	   -1},	/* SMB2j */
 	{0x6c71feae,	 45,	   -1},	/* Kunio 8-in-1 */
+	{0xe2c94bc2,	 48,	   -1}, /* Super Bros 8 (Unl) [!] */
 	{0xaebd6549,	 48,		8},	/* Bakushou!! Jinsei Gekijou 3 */
 	{0x6cdc0cd9,	 48,		8},	/* Bubble Bobble 2 */
 	{0x99c395f9,	 48,		8},	/* Captain Saver */

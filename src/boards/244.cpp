@@ -1,8 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2005 CaH4e3
- *  Copyright (C) 2009 qeed
+ *  Copyright (C) 2012 CaH4e3
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,47 +16,53 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * BMC 42-in-1 "reset switch" + "select switch"
- *
  */
 
 #include "mapinc.h"
 
-static uint8 isresetbased = 0;
-static uint8 latche[2], reset;
+static uint8 preg, creg;
 static SFORMAT StateRegs[] =
 {
-	{ &reset, 1, "RST" },
-	{ latche, 2, "LATC" },
+	{ &preg, 1, "PREG" },
+	{ &creg, 1, "CREG" },
 	{ 0 }
 };
 
+static uint8 prg_perm[4][4] = {
+	{ 0, 1, 2, 3, },
+	{ 3, 2, 1, 0, },
+	{ 0, 2, 1, 3, },
+	{ 3, 1, 2, 0, },
+};
+
+static uint8 chr_perm[8][8] = {
+	{ 0, 1, 2, 3, 4, 5, 6, 7, },
+	{ 0, 2, 1, 3, 4, 6, 5, 7, },
+	{ 0, 1, 4, 5, 2, 3, 6, 7, },
+	{ 0, 4, 1, 5, 2, 6, 3, 7, },
+	{ 0, 4, 2, 6, 1, 5, 3, 7, },
+	{ 0, 2, 4, 6, 1, 3, 5, 7, },
+	{ 7, 6, 5, 4, 3, 2, 1, 0, },
+	{ 7, 6, 5, 4, 3, 2, 1, 0, },
+};
+
 static void Sync(void) {
-	uint8 bank;
-	if (isresetbased)
-		bank = (latche[0] & 0x1f) | (reset << 5) | ((latche[1] & 1) << 6);
+	setprg32(0x8000, preg);
+	setchr8(creg);
+}
+
+static DECLFW(M244Write) {
+	if (V & 8)
+		creg = chr_perm[(V >> 4) & 7][V & 7];
 	else
-		bank = (latche[0] & 0x1f) | ((latche[0] & 0x80) >> 2) | ((latche[1] & 1) << 6);
-	if (!(latche[0] & 0x20))
-		setprg32(0x8000, bank >> 1);
-	else{
-		setprg16(0x8000, bank);
-		setprg16(0xC000, bank);
-	}
-	setmirror((latche[0] >> 6) & 1);
-	setchr8(0);
-}
-
-static DECLFW(M226Write) {
-	latche[A & 1] = V;
+		preg = prg_perm[(V >> 4) & 3][V & 3];
 	Sync();
 }
 
-static void M226Power(void) {
-	latche[0] = latche[1] = reset = 0;
+static void M244Power(void) {
+	preg = creg = 0;
 	Sync();
-	SetWriteHandler(0x8000, 0xFFFF, M226Write);
+	SetWriteHandler(0x8000, 0xFFFF, M244Write);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
 }
 
@@ -65,22 +70,8 @@ static void StateRestore(int version) {
 	Sync();
 }
 
-void Mapper226_Init(CartInfo *info) {
-	isresetbased = 0;
-	info->Power = M226Power;
-	AddExState(&StateRegs, ~0, 0, 0);
-	GameStateRestore = StateRestore;
-}
-
-static void M233Reset(void) {
-	reset ^= 1;
-	Sync();
-}
-
-void Mapper233_Init(CartInfo *info) {
-	isresetbased = 1;
-	info->Power = M226Power;
-	info->Reset = M233Reset;
+void Mapper244_Init(CartInfo *info) {
+	info->Power = M244Power;
 	AddExState(&StateRegs, ~0, 0, 0);
 	GameStateRestore = StateRestore;
 }

@@ -2508,23 +2508,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\mappers\emutypes.h"
-				>
-			</File>
-			<File
 				RelativePath="..\src\mappers\mapinc.h"
 				>
 			</File>
 			<File
 				RelativePath="..\src\mappers\mmc2and4.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\simple.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\vrc7tone.h"
 				>
 			</File>
 		</Filter>

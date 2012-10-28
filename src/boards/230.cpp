@@ -18,46 +18,51 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * BMC 42-in-1 "reset switch" + "select switch"
+ * 22 + Contra Reset based custom mapper...
  *
  */
 
 #include "mapinc.h"
 
-static uint8 isresetbased = 0;
-static uint8 latche[2], reset;
+static uint8 latche, reset;
 static SFORMAT StateRegs[] =
 {
 	{ &reset, 1, "RST" },
-	{ latche, 2, "LATC" },
+	{ &latche, 1, "LATC" },
 	{ 0 }
 };
 
 static void Sync(void) {
-	uint8 bank;
-	if (isresetbased)
-		bank = (latche[0] & 0x1f) | (reset << 5) | ((latche[1] & 1) << 6);
-	else
-		bank = (latche[0] & 0x1f) | ((latche[0] & 0x80) >> 2) | ((latche[1] & 1) << 6);
-	if (!(latche[0] & 0x20))
-		setprg32(0x8000, bank >> 1);
-	else{
-		setprg16(0x8000, bank);
-		setprg16(0xC000, bank);
+	if(reset) {
+		setprg16(0x8000, latche & 7);
+		setprg16(0xC000, 7);
+		setmirror(MI_V);
+	} else {
+		uint32 bank = (latche & 0x1F) + 8;
+		if (latche & 0x20) {
+			setprg16(0x8000, bank);
+			setprg16(0xC000, bank);
+		} else
+			setprg32(0x8000, bank >> 1);
+		setmirror((latche >> 6) & 1);
 	}
-	setmirror((latche[0] >> 6) & 1);
 	setchr8(0);
 }
 
-static DECLFW(M226Write) {
-	latche[A & 1] = V;
+static DECLFW(M230Write) {
+	latche = V;
 	Sync();
 }
 
-static void M226Power(void) {
-	latche[0] = latche[1] = reset = 0;
+static void M230Reset(void) {
+	reset ^= 1;
 	Sync();
-	SetWriteHandler(0x8000, 0xFFFF, M226Write);
+}
+
+static void M230Power(void) {
+	latche = reset = 0;
+	Sync();
+	SetWriteHandler(0x8000, 0xFFFF, M230Write);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
 }
 
@@ -65,22 +70,9 @@ static void StateRestore(int version) {
 	Sync();
 }
 
-void Mapper226_Init(CartInfo *info) {
-	isresetbased = 0;
-	info->Power = M226Power;
-	AddExState(&StateRegs, ~0, 0, 0);
-	GameStateRestore = StateRestore;
-}
-
-static void M233Reset(void) {
-	reset ^= 1;
-	Sync();
-}
-
-void Mapper233_Init(CartInfo *info) {
-	isresetbased = 1;
-	info->Power = M226Power;
-	info->Reset = M233Reset;
+void Mapper230_Init(CartInfo *info) {
+	info->Power = M230Power;
+	info->Reset = M230Reset;
 	AddExState(&StateRegs, ~0, 0, 0);
 	GameStateRestore = StateRestore;
 }

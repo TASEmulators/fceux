@@ -1,15 +1,5 @@
 my_list =   Split("""
-228.cpp
-230.cpp
-232.cpp
-234.cpp
-244.cpp
-246.cpp
 24and26.cpp
-255.cpp
-27.cpp
-32.cpp
-33.cpp
 40.cpp
 41.cpp
 42.cpp
@@ -35,12 +25,9 @@ emu2413.c
 mmc2and4.cpp
 """)
 #
-# vrc7tone.h
-#
 # emu2413.h
 # mapinc.h
 #
-# emutypes.h
 for x in range(len(my_list)):
   my_list[x] = 'mappers/' + my_list[x]
 Return('my_list')

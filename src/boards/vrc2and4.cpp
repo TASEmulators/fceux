@@ -23,10 +23,11 @@
 static uint8 isPirate, is22;
 static uint16 IRQCount;
 static uint8 IRQLatch, IRQa;
-static uint8 prgreg[2];
-static uint8 chrreg[8];
+static uint8 prgreg[2], chrreg[8];
+static uint16 chrhi[8];
 static uint8 regcmd, irqcmd, mirr, big_bank;
 static uint16 acount = 0;
+static uint16 weirdo = 0;
 
 static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
@@ -35,6 +36,7 @@ static SFORMAT StateRegs[] =
 {
 	{ prgreg, 2, "PREG" },
 	{ chrreg, 8, "CREG" },
+	{ chrhi, 16, "CRGH" },
 	{ &regcmd, 1, "CMDR" },
 	{ &irqcmd, 1, "CMDI" },
 	{ &mirr, 1, "MIRR" },
@@ -49,7 +51,7 @@ static void Sync(void) {
 	if (regcmd & 2) {
 		setprg8(0xC000, prgreg[0] | big_bank);
 		setprg8(0x8000, ((~1) & 0x1F) | big_bank);
-	}else {
+	} else {
 		setprg8(0x8000, prgreg[0] | big_bank);
 		setprg8(0xC000, ((~1) & 0x1F) | big_bank);
 	}
@@ -59,8 +61,15 @@ static void Sync(void) {
 		setchr8(0);
 	else{
 		uint8 i;
-		for (i = 0; i < 8; i++)
-			setchr1(i << 10, chrreg[i] >> is22);
+		if(!weirdo)
+			for (i = 0; i < 8; i++)
+				setchr1(i << 10, (chrhi[i] | chrreg[i]) >> is22);
+		else {
+			setchr1(0x0000, 0xFC);
+			setchr1(0x0400, 0xFD);
+			setchr1(0x0800, 0xFF);
+			weirdo--;
+		}
 	}
 	switch (mirr & 0x3) {
 	case 0: setmirror(MI_V); break;
@@ -77,11 +86,14 @@ static DECLFW(VRC24Write) {
 			big_bank = (V & 8) << 2;							// my personally many-in-one feature ;) just for support pirate cart 2-in-1
 		else{
 			uint16 i = ((A >> 1) & 1) | ((A - 0xB000) >> 11);
-			chrreg[i] &= (0xF0) >> ((A & 1) << 2);
-			chrreg[i] |= (V & 0xF) << ((A & 1) << 2);
+			uint16 nibble = ((A & 1) << 2);
+			chrreg[i] &= (0xF0) >> nibble;
+			chrreg[i] |= (V & 0xF) << nibble;
+			if(nibble)
+				chrhi[i] = (V & 0x10) << 4;       				// another one many in one feature from pirate carts
 		}
 		Sync();
-	}else
+	} else
 		switch (A & 0xF003) {
 		case 0x8000:
 		case 0x8001:
@@ -99,8 +111,8 @@ static DECLFW(VRC24Write) {
 			if (!isPirate)
 				prgreg[1] = V & 0x1F;
 			else{
-				prgreg[0] = (V << 1) & 0x1F;
-				prgreg[1] = ((V << 1) & 0x1F) | 1;
+				prgreg[0] = (V & 0x1F) << 1;
+				prgreg[1] = ((V & 0x1F) << 1) | 1;
 			}
 			Sync();
 			break;
@@ -122,7 +134,11 @@ static DECLFW(M21Write) {
 }
 
 static DECLFW(M22Write) {
-    A |= ((A >> 2) & 0x3);										// It's just swapped lines from 21 mapper
+	if (A == 0xC007) {                                          // Ganbare Goemon Gaiden does strange things!!! at the end credits
+		weirdo = 8;												// quick dirty hack, seems there is no other games with such PCB, so
+																// we never know if it will not work for something else lol
+	}
+	A |= ((A >> 2) & 0x3);										// It's just swapped lines from 21 mapper
 																//
 	VRC24Write((A & 0xF000) | ((A >> 1) & 1) | ((A << 1) & 2), V);
 }
@@ -212,10 +228,7 @@ void Mapper22_Init(CartInfo *info) {
 	AddExState(&StateRegs, ~0, 0, 0);
 }
 
-void Mapper23_Init(CartInfo *info) {
-	isPirate = 0;
-	is22 = 0;
-	info->Power = M23Power;
+void VRC24_Init(CartInfo *info) {
 	info->Close = VRC24Close;
 	MapIRQHook = VRC24IRQHook;
 	GameStateRestore = StateRestore;
@@ -231,31 +244,25 @@ void Mapper23_Init(CartInfo *info) {
 	}
 
 	AddExState(&StateRegs, ~0, 0, 0);
+}
+
+void Mapper23_Init(CartInfo *info) {
+	isPirate = 0;
+	is22 = 0;
+	info->Power = M23Power;
+	VRC24_Init(info);
 }
 
 void Mapper25_Init(CartInfo *info) {
 	isPirate = 0;
 	is22 = 0;
 	info->Power = M25Power;
-	info->Close = VRC24Close;
-	MapIRQHook = VRC24IRQHook;
-	GameStateRestore = StateRestore;
-
-	WRAMSIZE = 8192;
-	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
-	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
-
-	if(info->battery) {
-		info->SaveGame[0]=WRAM;
-		info->SaveGameLen[0]=WRAMSIZE;
-	}
-
-	AddExState(&StateRegs, ~0, 0, 0);
+	VRC24_Init(info);
 }
 
 void UNLT230_Init(CartInfo *info) {
 	isPirate = 1;
 	is22 = 0;
-	Mapper23_Init(info);
+	info->Power = M23Power;
+	VRC24_Init(info);
 }

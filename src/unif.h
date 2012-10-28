@@ -24,7 +24,6 @@ void BMC12IN1_Init(CartInfo *info);
 void BMC13in1JY110_Init(CartInfo *info);
 void BMC190in1_Init(CartInfo *info);
 void BMC411120C_Init(CartInfo *info);
-void BMC42in1r_Init(CartInfo *info);
 void BMC64in1nr_Init(CartInfo *info);
 void BMC70in1B_Init(CartInfo *info);
 void BMC70in1_Init(CartInfo *info);
@@ -142,5 +141,5 @@ void UNLVRC7_Init(CartInfo *info);
 void UNLYOKO_Init(CartInfo *info);
 void UNROM_Init(CartInfo *info);
 
-extern uint8 *UNIFchrrama;  // Meh.  So I can stop CHR RAM
-         // bank switcherooing with certain boards...
+extern uint8 *UNIFchrrama;	// Meh.  So I can stop CHR RAM
+							// bank switcherooing with certain boards...

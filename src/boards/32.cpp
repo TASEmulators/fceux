@@ -20,81 +20,83 @@
 
 #include "mapinc.h"
 
-static uint8 reg[8];
-static uint8 IRQa;
-static int16 IRQCount, IRQLatch;
-/*
+static uint8 preg[2], creg[8], mirr;
+
 static uint8 *WRAM=NULL;
 static uint32 WRAMSIZE;
-static uint8 *CHRRAM=NULL;
-static uint32 CHRRAMSIZE;
-*/
 
 static SFORMAT StateRegs[] =
 {
-	{ reg, 8, "REGS" },
-	{ &IRQa, 1, "IRQA" },
-	{ &IRQCount, 2, "IRQC" },
-	{ &IRQLatch, 2, "IRQL" },
+	{ preg, 4, "PREG" },
+	{ creg, 8, "CREG" },
+	{ &mirr, 1, "MIRR" },
 	{ 0 }
 };
 
 static void Sync(void) {
+	uint16 swap = ((mirr & 2) << 13);
+	setmirror((mirr & 1) ^ 1);
+	setprg8r(0x10, 0x6000, 0);
+	setprg8(0x8000 ^ swap, preg[0]);
+	setprg8(0xA000, preg[1]);
+	setprg8(0xC000 ^ swap, ~1);
+	setprg8(0xE000, ~0);
+	uint8 i;
+	for (i = 0; i < 8; i++)
+		setchr1(i << 10, creg[i]);
 }
 
-static DECLFW(MNNNWrite) {
+static DECLFW(M32Write0) {
+	preg[0] = V;
+	Sync();
 }
 
-static void MNNNPower(void) {
-//	SetReadHandler(0x6000,0x7fff,CartBR);
-//	SetWriteHandler(0x6000,0x7fff,CartBW);
+static DECLFW(M32Write1) {
+	mirr = V;
+	Sync();
+}
+
+static DECLFW(M32Write2) {
+	preg[1] = V;
+	Sync();
+}
+
+static DECLFW(M32Write3) {
+	creg[A & 7] = V;
+	Sync();
+}
+
+static void M32Power(void) {
+	Sync();
+	SetReadHandler(0x6000,0x7fff,CartBR);
+	SetWriteHandler(0x6000,0x7fff,CartBW);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
-	SetWriteHandler(0x8000, 0xFFFF, MNNNWrite);
+	SetWriteHandler(0x8000, 0x8FFF, M32Write0);
+	SetWriteHandler(0x9000, 0x9FFF, M32Write1);
+	SetWriteHandler(0xA000, 0xAFFF, M32Write2);
+	SetWriteHandler(0xB000, 0xBFFF, M32Write3);
 }
 
-static void MNNNReset(void) {
-}
-
-/*
-static void MNNNClose(void)
+static void M32Close(void)
 {
 	if (WRAM)
 		FCEU_gfree(WRAM);
-	if (CHRRAM)
-		FCEU_gfree(CHRRAM);
-	WRAM = CHRRAM = NULL;
-}
-*/
-
-static void MNNNIRQHook() {
-	X6502_IRQBegin(FCEU_IQEXT);
+	WRAM = NULL;
 }
 
 static void StateRestore(int version) {
 	Sync();
 }
 
-void MapperNNN_Init(CartInfo *info) {
-	info->Reset = MNNNReset;
-	info->Power = MNNNPower;
-//	info->Close = MNNNClose;
-	GameHBIRQHook = MNNNIRQHook;
+void Mapper32_Init(CartInfo *info) {
+	info->Power = M32Power;
+	info->Close = M32Close;
 	GameStateRestore = StateRestore;
-/*
-	CHRRAMSIZE = 8192;
-	CHRRAM = (uint8*)FCEU_gmalloc(CHRRAMSIZE);
-	SetupCartCHRMapping(0x10, CHRRAM, CHRRAMSIZE, 1);
-	AddExState(CHRRAM, CHRRAMSIZE, 0, "CRAM");
-*/
-/*
+
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
-	if (info->battery) {
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = WRAMSIZE;
-	}
-*/
+
 	AddExState(&StateRegs, ~0, 0, 0);
 }

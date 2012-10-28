@@ -682,6 +682,38 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\228.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\230.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\232.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\234.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\244.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\246.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\32.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\33.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\vrc2and4.cpp"
 				>
 			</File>
@@ -4133,47 +4165,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\mappers\228.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\230.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\232.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\234.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\244.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\246.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\mappers\24and26.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\255.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\27.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\32.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\33.cpp"
 				>
 			</File>
 			<File
@@ -4330,19 +4322,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\mappers\emutypes.h"
-				>
-			</File>
-			<File
 				RelativePath="..\src\mappers\mapinc.h"
 				>
 			</File>
 			<File
 				RelativePath="..\src\mappers\mmc2and4.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\vrc7tone.h"
 				>
 			</File>
 		</Filter>

@@ -644,37 +644,7 @@
     <ClCompile Include="..\src\lua\src\print.c">
       <Filter>drivers\win\lua</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\mappers\228.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\230.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\232.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\234.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\244.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\246.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\mappers\24and26.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\255.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\27.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\32.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\33.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\mappers\40.cpp">
@@ -965,6 +935,30 @@
       <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\boards\vrc2and4.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\32.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\33.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\228.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\230.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\232.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\234.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\244.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\246.cpp">
       <Filter>boards</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1290,13 +1284,7 @@
     <ClInclude Include="..\src\mappers\emu2413.h">
       <Filter>mappers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\mappers\emutypes.h">
-      <Filter>mappers</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\mappers\mapinc.h">
-      <Filter>mappers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\mappers\vrc7tone.h">
       <Filter>mappers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\movie.h">
