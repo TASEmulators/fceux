@@ -65,7 +65,7 @@
 <li><span class="rvts22">Soft reset and power switch messages</span></li>
 <li><span class="rvts22">All onscreen messages are now logged to Message Log</span></li>
 <li><span class="rvts22">Fixed wrong default palette entry</span></li>
-<li><span class="rvts22">Fixed bug when loading UNF games</span></li>
+<li><span class="rvts22">Fixed bug when loading UNIF games</span></li>
 <li><span class="rvts22">Improved HUD text rendering wrapping</span></li>
 <li><span class="rvts22">"Display FPS" option</span></li>
 </ul>
@@ -75,9 +75,9 @@
 <li><span class="rvts22">PAL/NTSC noise bug fixed</span></li>
 <li><span class="rvts22">Fixed newppu bug which prevented metroid from booting, CHR RAM was not getting initialized to anything</span></li>
 <li><span class="rvts22">Newppu - fix bug in scroll reg logic causing mis-scrolls in p'radikus conflict</span></li>
-<li><span class="rvts22">A bit of latest mapper changes from fceu-mm</span></li>
-<li><span class="rvts22">Fixed mappers 242, 227, 115, 248, 12, 164, 15, 253, 23, 178, 90</span></li>
-<li><span class="rvts22">Added mappers 176, 116, 156</span></li>
+<li><span class="rvts22">All latest mapper changes from fceu-mm</span></li>
+<li><span class="rvts22">Also added mappers 176, 116, 156</span></li>
+<li><span class="rvts22">Fixed mappers 242, 227, 115, 248, 12, 164, 15, 253, 23, 178, 90, 73</span></li>
 <li><span class="rvts22">Straighten out bandai m159/m016 handling and add valid null-EEPROM emulation to get those games booting.</span></li>
 <li><span class="rvts22">Add ability for CNROM games to choose whether they have bus conflicts (fixes Colorful Dragon (Unl) (Sachen), since it flakes out if bus conflicts are emulated)</span></li>
 <li><span class="rvts22">Fixed bus conflict emulation, no kage no densetsu bug anymore</span></li>
@@ -88,7 +88,7 @@
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
 <li><span class="rvts22">Fixed old bug in "Play Movie From Beginning"</span></li>
 <li><span class="rvts22">Fixed replay engine bug that doubles the last input of the movie</span></li>
-<li><span class="rvts22">Fixed movie savestates logic, loading post-movie savestates is not allowed in read-only</span></li>
+<li><span class="rvts22">Fixed movie savestates logic, loading post-movie savestates from different timeline is not allowed in read-only</span></li>
 <li><span class="rvts22">Fixed savestates filenaming bug when working with a movie</span></li>
 <li><span class="rvts22">Added support for HUD recording in AVI dumping</span></li>
 <li><span class="rvts22">Rerecords counter display</span></li>
@@ -112,8 +112,9 @@
 <p><span class="rvts22"><br/></span></p>
 <p><span class="rvts22">New scripts:</span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">BoulderDash.lua</span></li>
+<li><span class="rvts22">BoulderDash_AmoebaAI.lua</span></li>
 <li><span class="rvts22">ButtonCount.lua</span></li>
+<li><span class="rvts22">CustomLagIndicator_RvT.lua</span></li>
 <li><span class="rvts22">RBIBaseball.lua</span></li>
 <li><span class="rvts22">SoundDisplay.lua</span></li>
 <li><span class="rvts22">SoundDisplay2.lua</span></li>
