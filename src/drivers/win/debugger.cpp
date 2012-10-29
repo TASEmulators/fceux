@@ -2018,9 +2018,9 @@ DebugSystem::DebugSystem()
 	hHexeditorFont = CreateFont(14, 8, /*Height,Width*/
 		0,0, /*escapement,orientation*/
 		FW_REGULAR,FALSE,FALSE,FALSE, /*weight, italic, underline, strikeout*/
-		ANSI_CHARSET,OUT_DEVICE_PRECIS,CLIP_MASK, /*charset, precision, clipping*/
+		OEM_CHARSET,OUT_DEVICE_PRECIS,CLIP_MASK, /*charset, precision, clipping*/
 		DEFAULT_QUALITY, DEFAULT_PITCH, /*quality, and pitch*/
-		"Courier New"); /*font name*/
+		"Terminal"); /*font name*/
 
 	HDC hdc = GetDC(GetDesktopWindow());
 	HGDIOBJ old = SelectObject(hdc,hFixedFont);

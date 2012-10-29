@@ -38,6 +38,8 @@ extern GREENZONE greenzone;
 extern PIANO_ROLL piano_roll;
 extern BOOKMARKS bookmarks;
 
+extern void Update_RAM_Search();
+
 LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 WNDPROC playbackMarkerEdit_oldWndproc;
 
@@ -442,23 +444,32 @@ void PLAYBACK::jump(int frame, bool execute_lua, bool follow_cursor)
 	if (frame < 0) return;
 	if (JumpToFrame(frame))
 	{
+		// since the game state was changed by this jump, we must update possible Lua callbacks and other tools that would normally only update in FCEUI_Emulate
 		if (execute_lua)
 			ForceExecuteLuaFrameFunctions();
 		if (follow_cursor)
 			piano_roll.FollowPlaybackIfNeeded();
+		Update_RAM_Search(); // Update_RAM_Watch() is also called.
 	}
 }
 // internal interface
-// returns true if a jump to the frame is made, false if started seeking outside Greenzone or if nothing's done
+// returns true if the game state was changed (loaded)
 bool PLAYBACK::JumpToFrame(int index)
 {
 	if (index >= greenzone.GetSize())
 	{
 		// make jump outside Greenzone
-		if (currFrameCounter == greenzone.GetSize() - 1 || JumpToFrame(greenzone.GetSize() - 1))
-			// seek there from the end of greenzone
+		if (currFrameCounter == greenzone.GetSize() - 1)
+		{
+			// seek there from the end of Greenzone
 			SeekingStart(index);
-		return false;
+			return false;	// game state was not changed
+		} else if (JumpToFrame(greenzone.GetSize() - 1))
+		{
+			// seek there from the end of Greenzone
+			SeekingStart(index);
+			return true;	// game state was loaded
+		}
 	}
 	// make jump inside greenzone
 	if (greenzone.loadTasSavestate(index))

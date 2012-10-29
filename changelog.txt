@@ -1,3 +1,4 @@
+29-Oct-2012 - AnS - Taseditor: update RAM Search and RAM Watch when jumping causes game state to change
 30-Sep-2012 - AnS - added "(Europe)" and "(PAL)" strings to region detection
 28-Sep-2012 - AnS - Hexeditor: Ctrl+F opens Find dialog
 28-Sep-2012 - AnS - Hexeditor: display 0x5000-0x5FFF contents
