@@ -90,7 +90,7 @@ static DECLFW(VRC24Write) {
 			chrreg[i] &= (0xF0) >> nibble;
 			chrreg[i] |= (V & 0xF) << nibble;
 			if(nibble)
-				chrhi[i] = (V & 0x10) << 4;       				// another one many in one feature from pirate carts
+				chrhi[i] = (V & 0x10) << 4;						// another one many in one feature from pirate carts
 		}
 		Sync();
 	} else
@@ -128,13 +128,13 @@ static DECLFW(VRC24Write) {
 }
 
 static DECLFW(M21Write) {
-	A = (A & 0xF000) | ((A >> 1) & 0x3);    					// Ganbare Goemon Gaiden 2 - Tenka no Zaihou (J) [!] isn't mapper 21 actually,
+	A = (A & 0xF000) | ((A >> 1) & 0x3);						// Ganbare Goemon Gaiden 2 - Tenka no Zaihou (J) [!] isn't mapper 21 actually,
 																// it's mapper 23 by wirings
 	VRC24Write(A, V);
 }
 
 static DECLFW(M22Write) {
-	if (A == 0xC007) {                                          // Ganbare Goemon Gaiden does strange things!!! at the end credits
+	if (A == 0xC007) {											// Ganbare Goemon Gaiden does strange things!!! at the end credits
 		weirdo = 8;												// quick dirty hack, seems there is no other games with such PCB, so
 																// we never know if it will not work for something else lol
 	}

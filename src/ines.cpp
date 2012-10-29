@@ -531,7 +531,7 @@ static BMAPPINGLocal bmap[] = {
 	{"MMC5",				  5, Mapper5_Init},
 //	{"",					  6, Mapper6_Init},
 	{"ANROM",				  7, ANROM_Init},
-	{"",					  8, Mapper8_Init}, // Nogaems, it's worthless
+	{"",					  8, Mapper8_Init},		// Nogaems, it's worthless
 //	{"",					  9, Mapper9_Init},
 //	{"",					 10, Mapper10_Init},
 	{"Color Dreams",		 11, Mapper11_Init},
@@ -550,7 +550,7 @@ static BMAPPINGLocal bmap[] = {
 //	{"",					 24, Mapper24_Init},
 	{"Konami VRC2/VRC4",	 25, Mapper25_Init},
 //	{"",					 26, Mapper26_Init},
-//	{"",					 27, Mapper27_Init}, // Deprecated, dupe for VRC2/VRC4 mapper
+//	{"",					 27, Mapper27_Init},	// Deprecated, dupe for VRC2/VRC4 mapper
 //	{"",					 28, Mapper28_Init},
 //	{"",					 29, Mapper29_Init},
 //	{"",					 30, Mapper30_Init},
@@ -558,10 +558,10 @@ static BMAPPINGLocal bmap[] = {
 	{"IREM G-101",			 32, Mapper32_Init},
 	{"TC0190FMC/TC0350FMR",	 33, Mapper33_Init},
 	{"",					 34, Mapper34_Init},
-	{"Wario Land 2",		 35, UNLSC127_Init}, // Wario Land 2
-	{"TXC Policeman",		 36, Mapper36_Init}, // TXC Policeman
+	{"Wario Land 2",		 35, UNLSC127_Init},
+	{"TXC Policeman",		 36, Mapper36_Init},
 	{"",					 37, Mapper37_Init},
-	{"Bit Corp.",			 38, Mapper38_Init}, // Bit Corp. Crime Busters
+	{"Bit Corp.",			 38, Mapper38_Init},	// Crime Busters
 //	{"",					 39, Mapper39_Init},
 //	{"",					 40, Mapper40_Init},
 //	{"",					 41, Mapper41_Init},
@@ -576,13 +576,13 @@ static BMAPPINGLocal bmap[] = {
 //	{"",					 50, Mapper50_Init},
 //	{"",					 51, Mapper51_Init},
 	{"",					 52, Mapper52_Init},
-//	{"",					 53, Mapper53_Init},
+//	{"",					 53, Mapper53_Init},	// iNES version of complex UNIF board, can't emulate properly as iNES
 //	{"",					 54, Mapper54_Init},
 //	{"",					 55, Mapper55_Init},
 //	{"",					 56, Mapper56_Init},
 	{"",					 57, Mapper57_Init},
 	{"",					 58, BMCGK192_Init},
-	{"",					 59, Mapper59_Init},	// check this out
+	{"",					 59, Mapper59_Init},	// Check this out
 	{"",					 60, BMCD1038_Init},
 //	{"",					 61, Mapper61_Init},
 //	{"",					 62, Mapper62_Init},
@@ -699,13 +699,13 @@ static BMAPPINGLocal bmap[] = {
 	{"",					173, Mapper173_Init},
 //	{"",					174, Mapper174_Init},
 	{"",					175, Mapper175_Init},
-	{"BMCFK23C",			176, BMCFK23C_Init}, //zero 26-may-2012 - well, i have some WXN junk games that use 176 for instance ????. i dont know what game uses this BMCFK23C as mapper 176. we'll have to make a note when we find it.
+	{"BMCFK23C",			176, BMCFK23C_Init},	//zero 26-may-2012 - well, i have some WXN junk games that use 176 for instance ????. i dont know what game uses this BMCFK23C as mapper 176. we'll have to make a note when we find it.
 	{"",					177, Mapper177_Init},
 	{"",					178, Mapper178_Init},
 //	{"",					179, Mapper179_Init},
 	{"",					180, Mapper180_Init},
 	{"",					181, Mapper181_Init},
-//	{"",					182, Mapper182_Init}, // Removed
+//	{"",					182, Mapper182_Init},	// Deprecated, dupe
 	{"",					183, Mapper183_Init},
 	{"",					184, Mapper184_Init},
 	{"",					185, Mapper185_Init},
@@ -743,7 +743,7 @@ static BMAPPINGLocal bmap[] = {
 //	{"",					217, UNL8237A_Init},
 //	{"",					218, Mapper218_Init},
 	{"UNLA9746",			219, UNLA9746_Init},
-	{"Debug Mapper",		220, UNLKS7057_Init}, // DEBUG mapper
+	{"Debug Mapper",		220, UNLKS7057_Init},
 	{"UNLN625092",			221, UNLN625092_Init},
 	{"",					222, Mapper222_Init},
 //	{"",					223, Mapper223_Init},
@@ -775,10 +775,10 @@ static BMAPPINGLocal bmap[] = {
 	{"",					249, Mapper249_Init},
 	{"",					250, Mapper250_Init},
 //	{"",					251, Mapper251_Init},
-//	{"",					252, Mapper252_Init},
-	{"",					253, Mapper253_Init},
+	{"SAN GUO ZHI PIRATE",	252, Mapper252_Init},
+	{"DRAGON BALL PIRATE",	253, Mapper253_Init},
 	{"",					254, Mapper254_Init},
-//	{"",					255, Mapper255_Init},   // doesn't have any good dump for this mapper
+//	{"",					255, Mapper255_Init},	// Doesn't have any good dump for this mapper
 	{"",					0, NULL}
 };
 
