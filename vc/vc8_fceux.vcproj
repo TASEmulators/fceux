@@ -698,6 +698,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\235.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\244.cpp"
 				>
 			</File>
@@ -706,19 +710,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\boards\32.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\boards\33.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\boards\vrc2and4.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\boards\235.cpp"
+				RelativePath="..\src\boards\252.cpp"
 				>
 			</File>
 			<File
@@ -778,6 +770,14 @@
 						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\src\boards\32.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\33.cpp"
+				>
 			</File>
 			<File
 				RelativePath="..\src\boards\34.cpp"
@@ -1097,6 +1097,10 @@
 			</File>
 			<File
 				RelativePath="..\src\boards\transformer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\vrc2and4.cpp"
 				>
 			</File>
 			<File
