@@ -406,7 +406,7 @@ void X6502_Init(void)
 void X6502_Power(void)
 {
  _count=_tcount=_IRQlow=_PC=_A=_X=_Y=_P=_PI=_DB=_jammed=0;
- _S=0xFF;
+ _S=0xFD;
  timestamp=0;
  X6502_Reset();
 }
