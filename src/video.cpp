@@ -445,12 +445,14 @@ void FCEU_DispMessage(char *format, int disppos=0, ...)
 
 	va_start(ap,disppos);
 	vsnprintf(guiMessage.errmsg,sizeof(guiMessage.errmsg),format,ap);
+	va_end(ap);
 	// also log messages
 	char temp[2048];
+	va_start(ap,disppos);
 	vsnprintf(temp,sizeof(temp),format,ap);
+	va_end(ap);
 	strcat(temp, "\n");
 	FCEU_printf(temp);
-	va_end(ap);
 
 	guiMessage.howlong = 180;
 	guiMessage.isMovieMessage = false;
