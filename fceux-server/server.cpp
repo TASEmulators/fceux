@@ -47,7 +47,7 @@
 #define DEFAULT_MAX 100
 #define DEFAULT_TIMEOUT 5
 #define DEFAULT_FRAMEDIVISOR 1
-#define DEFAULT_CONFIG "/etc/fceu-server.conf"
+#define DEFAULT_CONFIG "/etc/fceux-server.conf"
 
 // MSG_NOSIGNAL and SOL_TCP have been depreciated on osx
 #if defined (__APPLE__) || defined(BSD)
