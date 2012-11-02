@@ -1663,7 +1663,7 @@ void loadGameGenie ()
 		GtkWidget* d;
 		enableGameGenie(TRUE);
 		d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, 
-			("Game Genie ROM copied to " + fn_out).c_str());
+     		"Game Genie ROM copied to: '%s'.", fn_out.c_str());
 		gtk_dialog_run(GTK_DIALOG(d));
 		gtk_widget_destroy(d);
 
