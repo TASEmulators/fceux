@@ -1298,204 +1298,219 @@ void PIANO_ROLL::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 
 LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 {
-	int cell_x, cell_y;
 	switch(msg->nmcd.dwDrawStage)
 	{
-	case CDDS_PREPAINT:
-		return CDRF_NOTIFYITEMDRAW;
-	case CDDS_ITEMPREPAINT:
-		return CDRF_NOTIFYSUBITEMDRAW;
-	case CDDS_SUBITEMPREPAINT:
-		cell_x = msg->iSubItem;
-		cell_y = msg->nmcd.dwItemSpec;
-		if (cell_x > COLUMN_ICONS)
+		case CDDS_PREPAINT:
+			return CDRF_NOTIFYITEMDRAW;
+		case CDDS_ITEMPREPAINT:
+			return CDRF_NOTIFYSUBITEMDRAW;
+		case CDDS_SUBITEMPREPAINT:
 		{
-			// text color
-			if (taseditor_config.enable_hot_changes && cell_x >= COLUMN_JOYPAD1_A && cell_x <= COLUMN_JOYPAD4_R)
-				msg->clrText = hot_changes_colors[history.GetCurrentSnapshot().inputlog.GetHotChangeInfo(cell_y, cell_x - COLUMN_JOYPAD1_A)];
-			else
-				msg->clrText = NORMAL_TEXT_COLOR;
-			// bg color and text font
-			if (cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
+			int cell_x = msg->iSubItem;
+			int cell_y = msg->nmcd.dwItemSpec;
+			if (cell_x > COLUMN_ICONS)
 			{
-				// font
-				if (markers_manager.GetMarker(cell_y))
-					SelectObject(msg->nmcd.hdc, hMainListSelectFont);
+				int frame_lag = greenzone.laglog.GetLagInfoAtFrame(cell_y);
+				// text color
+				if (taseditor_config.enable_hot_changes && cell_x >= COLUMN_JOYPAD1_A && cell_x <= COLUMN_JOYPAD4_R)
+					msg->clrText = hot_changes_colors[history.GetCurrentSnapshot().inputlog.GetHotChangeInfo(cell_y, cell_x - COLUMN_JOYPAD1_A)];
 				else
-					SelectObject(msg->nmcd.hdc, hMainListFont);
-				// bg
-				// frame number
-				if (cell_y == history.GetUndoHint())
+					msg->clrText = NORMAL_TEXT_COLOR;
+				// bg color and text font
+				if (cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
 				{
-					// undo hint here
-					if (markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
+					// font
+					if (markers_manager.GetMarker(cell_y))
+						SelectObject(msg->nmcd.hdc, hMainListSelectFont);
+					else
+						SelectObject(msg->nmcd.hdc, hMainListFont);
+					// bg
+					// frame number
+					if (cell_y == history.GetUndoHint())
 					{
-						msg->clrTextBk = (taseditor_config.bind_markers) ? BINDMARKED_UNDOHINT_FRAMENUM_COLOR : MARKED_UNDOHINT_FRAMENUM_COLOR;
+						// undo hint here
+						if (markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
+						{
+							msg->clrTextBk = (taseditor_config.bind_markers) ? BINDMARKED_UNDOHINT_FRAMENUM_COLOR : MARKED_UNDOHINT_FRAMENUM_COLOR;
+						} else
+						{
+							msg->clrTextBk = UNDOHINT_FRAMENUM_COLOR;
+						}
+					} else if (cell_y == currFrameCounter || cell_y == (playback.GetFlashingPauseFrame() - 1))
+					{
+						// this is current frame
+						if (markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
+						{
+							msg->clrTextBk = (taseditor_config.bind_markers) ? CUR_BINDMARKED_FRAMENUM_COLOR : CUR_MARKED_FRAMENUM_COLOR;
+						} else
+						{
+							msg->clrTextBk = CUR_FRAMENUM_COLOR;
+						}
+					} else if (markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
+					{
+						// this is marked frame
+						msg->clrTextBk = (taseditor_config.bind_markers) ? BINDMARKED_FRAMENUM_COLOR : MARKED_FRAMENUM_COLOR;
+					} else if (cell_y < greenzone.GetSize())
+					{
+						if (!greenzone.SavestateIsEmpty(cell_y))
+						{
+							// the frame is normal Greenzone frame
+							if (frame_lag == LAGGED_YES)
+								msg->clrTextBk = LAG_FRAMENUM_COLOR;
+							else
+								msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
+						} else if ((!greenzone.SavestateIsEmpty(cell_y & EVERY16TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY16TH) + 16))
+							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY8TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY8TH) + 8))
+							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY4TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY4TH) + 4))
+							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
+						{
+							// the frame is in a gap (in Greenzone tail)
+							if (frame_lag == LAGGED_YES)
+								msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
+							else
+								msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
+						} else 
+						{
+							// the frame is above Greenzone tail
+							if (frame_lag == LAGGED_YES)
+								msg->clrTextBk = VERY_PALE_LAG_FRAMENUM_COLOR;
+							else if (frame_lag == LAGGED_NO)
+								msg->clrTextBk = VERY_PALE_GREENZONE_FRAMENUM_COLOR;
+							else
+								msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
+						}
 					} else
 					{
-						msg->clrTextBk = UNDOHINT_FRAMENUM_COLOR;
-					}
-				} else if (cell_y == currFrameCounter || cell_y == (playback.GetFlashingPauseFrame() - 1))
-				{
-					// this is current frame
-					if (markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
-					{
-						msg->clrTextBk = (taseditor_config.bind_markers) ? CUR_BINDMARKED_FRAMENUM_COLOR : CUR_MARKED_FRAMENUM_COLOR;
-					} else
-					{
-						msg->clrTextBk = CUR_FRAMENUM_COLOR;
-					}
-				} else if (markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
-				{
-					// this is marked frame
-					msg->clrTextBk = (taseditor_config.bind_markers) ? BINDMARKED_FRAMENUM_COLOR : MARKED_FRAMENUM_COLOR;
-				} else if (cell_y < greenzone.GetSize())
-				{
-					if (!greenzone.SavestateIsEmpty(cell_y))
-					{
-						// the frame is normal Greenzone frame
-						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
-							msg->clrTextBk = LAG_FRAMENUM_COLOR;
-						else
-							msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
-					} else if ((!greenzone.SavestateIsEmpty(cell_y & EVERY16TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY16TH) + 16))
-						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY8TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY8TH) + 8))
-						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY4TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY4TH) + 4))
-						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
-					{
-						// the frame is in a gap (in Greenzone tail)
-						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
-							msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
-						else
-							msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
-					} else 
-					{
-						// the frame is above Greenzone tail
-						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
+						// the frame is below Greenzone head
+						if (frame_lag == LAGGED_YES)
 							msg->clrTextBk = VERY_PALE_LAG_FRAMENUM_COLOR;
-						else
+						else if (frame_lag == LAGGED_NO)
 							msg->clrTextBk = VERY_PALE_GREENZONE_FRAMENUM_COLOR;
+						else
+							msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
 					}
-				} else
+				} else if ((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
 				{
-					// the frame is below Greenzone head
-					if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
-						msg->clrTextBk = VERY_PALE_LAG_FRAMENUM_COLOR;
+					// pad 1 or 3
+					// font: empty cells have "SelectFont" (so that "-" is wide), non-empty have normal font
+					int joy = (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+					int bit = (cell_x - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+					if ((int)currMovieData.records.size() <= cell_y ||
+						((currMovieData.records[cell_y].joysticks[joy]) & (1<<bit)) )
+						SelectObject(msg->nmcd.hdc, hMainListFont);
 					else
-						msg->clrTextBk = VERY_PALE_GREENZONE_FRAMENUM_COLOR;
-				}
-			} else if ((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
-			{
-				// pad 1 or 3
-				// font: empty cells have "SelectFont" (so that "-" is wide), non-empty have normal font
-				int joy = (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
-				int bit = (cell_x - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-				if ((int)currMovieData.records.size() <= cell_y ||
-					((currMovieData.records[cell_y].joysticks[joy]) & (1<<bit)) )
-					SelectObject(msg->nmcd.hdc, hMainListFont);
-				else
-					SelectObject(msg->nmcd.hdc, hMainListSelectFont);
-				// bg
-				if (cell_y == history.GetUndoHint())
-				{
-					// undo hint here
-					msg->clrTextBk = UNDOHINT_INPUT_COLOR1;
-				} else if (cell_y == currFrameCounter || cell_y == (playback.GetFlashingPauseFrame() - 1))
-				{
-					// this is current frame
-					msg->clrTextBk = CUR_INPUT_COLOR1;
-				} else if (cell_y < greenzone.GetSize())
-				{
-					if (!greenzone.SavestateIsEmpty(cell_y))
+						SelectObject(msg->nmcd.hdc, hMainListSelectFont);
+					// bg
+					if (cell_y == history.GetUndoHint())
 					{
-						// the frame is normal Greenzone frame
-						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
-							msg->clrTextBk = LAG_INPUT_COLOR1;
-						else
-							msg->clrTextBk = GREENZONE_INPUT_COLOR1;
-					} else if ((!greenzone.SavestateIsEmpty(cell_y & EVERY16TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY16TH) + 16))
-						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY8TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY8TH) + 8))
-						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY4TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY4TH) + 4))
-						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
+						// undo hint here
+						msg->clrTextBk = UNDOHINT_INPUT_COLOR1;
+					} else if (cell_y == currFrameCounter || cell_y == (playback.GetFlashingPauseFrame() - 1))
 					{
-						// the frame is in a gap (in Greenzone tail)
-						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
-							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;
-						else
-							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR1;
+						// this is current frame
+						msg->clrTextBk = CUR_INPUT_COLOR1;
+					} else if (cell_y < greenzone.GetSize())
+					{
+						if (!greenzone.SavestateIsEmpty(cell_y))
+						{
+							// the frame is normal Greenzone frame
+							if (frame_lag == LAGGED_YES)
+								msg->clrTextBk = LAG_INPUT_COLOR1;
+							else
+								msg->clrTextBk = GREENZONE_INPUT_COLOR1;
+						} else if ((!greenzone.SavestateIsEmpty(cell_y & EVERY16TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY16TH) + 16))
+							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY8TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY8TH) + 8))
+							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY4TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY4TH) + 4))
+							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
+						{
+							// the frame is in a gap (in Greenzone tail)
+							if (frame_lag == LAGGED_YES)
+								msg->clrTextBk = PALE_LAG_INPUT_COLOR1;
+							else
+								msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR1;
+						} else
+						{
+							// the frame is above Greenzone tail
+							if (frame_lag == LAGGED_YES)
+								msg->clrTextBk = VERY_PALE_LAG_INPUT_COLOR1;
+							else if (frame_lag == LAGGED_NO)
+								msg->clrTextBk = VERY_PALE_GREENZONE_INPUT_COLOR1;
+							else
+								msg->clrTextBk = NORMAL_INPUT_COLOR1;
+						}
 					} else
 					{
-						// the frame is above Greenzone tail
-						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
+						// the frame is below Greenzone head
+						if (frame_lag == LAGGED_YES)
 							msg->clrTextBk = VERY_PALE_LAG_INPUT_COLOR1;
-						else
+						else if (frame_lag == LAGGED_NO)
 							msg->clrTextBk = VERY_PALE_GREENZONE_INPUT_COLOR1;
+						else
+							msg->clrTextBk = NORMAL_INPUT_COLOR1;
 					}
-				} else
+				} else if ((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
 				{
-					// the frame is below Greenzone head
-					if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
-						msg->clrTextBk = VERY_PALE_LAG_INPUT_COLOR1;
+					// pad 2 or 4
+					// font: empty cells have "SelectFont", non-empty have normal font
+					int joy = (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+					int bit = (cell_x - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+					if ((int)currMovieData.records.size() <= cell_y ||
+						((currMovieData.records[cell_y].joysticks[joy]) & (1<<bit)) )
+						SelectObject(msg->nmcd.hdc, hMainListFont);
 					else
-						msg->clrTextBk = VERY_PALE_GREENZONE_INPUT_COLOR1;
-				}
-			} else if ((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
-			{
-				// pad 2 or 4
-				// font: empty cells have "SelectFont", non-empty have normal font
-				int joy = (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
-				int bit = (cell_x - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-				if ((int)currMovieData.records.size() <= cell_y ||
-					((currMovieData.records[cell_y].joysticks[joy]) & (1<<bit)) )
-					SelectObject(msg->nmcd.hdc, hMainListFont);
-				else
-					SelectObject(msg->nmcd.hdc, hMainListSelectFont);
-				// bg
-				if (cell_y == history.GetUndoHint())
-				{
-					// undo hint here
-					msg->clrTextBk = UNDOHINT_INPUT_COLOR2;
-				} else if (cell_y == currFrameCounter || cell_y == (playback.GetFlashingPauseFrame() - 1))
-				{
-					// this is current frame
-					msg->clrTextBk = CUR_INPUT_COLOR2;
-				} else if (cell_y < greenzone.GetSize())
-				{
-					if (!greenzone.SavestateIsEmpty(cell_y))
+						SelectObject(msg->nmcd.hdc, hMainListSelectFont);
+					// bg
+					if (cell_y == history.GetUndoHint())
 					{
-						// the frame is normal Greenzone frame
-						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
-							msg->clrTextBk = LAG_INPUT_COLOR2;
-						else
-							msg->clrTextBk = GREENZONE_INPUT_COLOR2;
-					} else if ((!greenzone.SavestateIsEmpty(cell_y & EVERY16TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY16TH) + 16))
-						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY8TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY8TH) + 8))
-						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY4TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY4TH) + 4))
-						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
+						// undo hint here
+						msg->clrTextBk = UNDOHINT_INPUT_COLOR2;
+					} else if (cell_y == currFrameCounter || cell_y == (playback.GetFlashingPauseFrame() - 1))
 					{
-						// the frame is in a gap (in Greenzone tail)
-						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
-							msg->clrTextBk = PALE_LAG_INPUT_COLOR2;
-						else
-							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR2;
+						// this is current frame
+						msg->clrTextBk = CUR_INPUT_COLOR2;
+					} else if (cell_y < greenzone.GetSize())
+					{
+						if (!greenzone.SavestateIsEmpty(cell_y))
+						{
+							// the frame is normal Greenzone frame
+							if (frame_lag == LAGGED_YES)
+								msg->clrTextBk = LAG_INPUT_COLOR2;
+							else
+								msg->clrTextBk = GREENZONE_INPUT_COLOR2;
+						} else if ((!greenzone.SavestateIsEmpty(cell_y & EVERY16TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY16TH) + 16))
+							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY8TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY8TH) + 8))
+							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY4TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY4TH) + 4))
+							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
+						{
+							// the frame is in a gap (in Greenzone tail)
+							if (frame_lag == LAGGED_YES)
+								msg->clrTextBk = PALE_LAG_INPUT_COLOR2;
+							else
+								msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR2;
+						} else
+						{
+							// the frame is above Greenzone tail
+							if (frame_lag == LAGGED_YES)
+								msg->clrTextBk = VERY_PALE_LAG_INPUT_COLOR2;
+							else if (frame_lag == LAGGED_NO)
+								msg->clrTextBk = VERY_PALE_GREENZONE_INPUT_COLOR2;
+							else
+								msg->clrTextBk = NORMAL_INPUT_COLOR2;
+						}
 					} else
 					{
-						// the frame is above Greenzone tail
-						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
+						// the frame is below Greenzone head
+						if (frame_lag == LAGGED_YES)
 							msg->clrTextBk = VERY_PALE_LAG_INPUT_COLOR2;
-						else
+						else if (frame_lag == LAGGED_NO)
 							msg->clrTextBk = VERY_PALE_GREENZONE_INPUT_COLOR2;
+						else
+							msg->clrTextBk = NORMAL_INPUT_COLOR2;
 					}
-				} else
-				{
-					// the frame is below Greenzone head
-					if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
-						msg->clrTextBk = VERY_PALE_LAG_INPUT_COLOR2;
-					else
-						msg->clrTextBk = VERY_PALE_GREENZONE_INPUT_COLOR2;
 				}
 			}
 		}
+		return CDRF_DODEFAULT;
 	default:
 		return CDRF_DODEFAULT;
 	}
@@ -1556,6 +1571,17 @@ void PIANO_ROLL::RightClick(LVHITTESTINFO& info)
 	}
 }
 
+bool PIANO_ROLL::CheckIfTheresAnyIconAtFrame(int frame)
+{
+	if (frame == currFrameCounter)
+		return true;
+	if (frame == playback.GetLostPosition())
+		return true;
+	if (bookmarks.FindBookmarkAtFrame(frame) >= 0)
+		return true;
+	return false;
+}
+
 void PIANO_ROLL::CrossGaps(int zDelta)
 {
 	POINT p;
@@ -1573,9 +1599,49 @@ void PIANO_ROLL::CrossGaps(int zDelta)
 			ListView_SubItemHitTest(hwndList, &info);
 			int row_index = info.iItem;
 			int column_index = info.iSubItem;
-			if (row_index >= 0 && column_index >= COLUMN_FRAMENUM && column_index <= COLUMN_FRAMENUM2)
+			if (row_index >= 0 && column_index >= COLUMN_ICONS && column_index <= COLUMN_FRAMENUM2)
 			{
-				if (column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
+				if (column_index == COLUMN_ICONS)
+				{
+					// cross gaps in Icons
+					if (zDelta < 0)
+					{
+						// search down
+						int last_frame = currMovieData.getNumRecords() - 1;
+						if (row_index < last_frame)
+						{
+							int frame = row_index + 1;
+							bool result_of_closest_frame = CheckIfTheresAnyIconAtFrame(frame);
+							while ((++frame) <= last_frame)
+							{
+								if (CheckIfTheresAnyIconAtFrame(frame) != result_of_closest_frame)
+								{
+									// found different result, so we crossed the gap
+									ListView_Scroll(hwndList, 0, list_row_height * (frame - row_index));
+									break;
+								}
+							}
+						}
+					} else
+					{
+						// search up
+						int first_frame = 0;
+						if (row_index > first_frame)
+						{
+							int frame = row_index - 1;
+							bool result_of_closest_frame = CheckIfTheresAnyIconAtFrame(frame);
+							while ((--frame) >= first_frame)
+							{
+								if (CheckIfTheresAnyIconAtFrame(frame) != result_of_closest_frame)
+								{
+									// found different result, so we crossed the gap
+									ListView_Scroll(hwndList, 0, list_row_height * (frame - row_index));
+									break;
+								}
+							}
+						}
+					}
+				} else if (column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
 				{
 					// cross gaps in Markers
 					if (zDelta < 0)

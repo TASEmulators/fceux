@@ -35,7 +35,7 @@ void LAGLOG::compress_data()
 	if (len)
 	{
 		uLongf comprlen = (len>>9)+12 + len;
-		lag_log_compressed.resize(comprlen);
+		lag_log_compressed.resize(comprlen, LAGGED_DONTKNOW);
 		compress(&lag_log_compressed[0], &comprlen, (uint8*)&lag_log[0], len);
 		lag_log_compressed.resize(comprlen);
 	} else
@@ -75,7 +75,7 @@ bool LAGLOG::load(EMUFILE *is)
 	if (read32le(&size, is))
 	{
 		already_compressed = true;
-		lag_log.resize(size);
+		lag_log.resize(size, LAGGED_DONTKNOW);
 		if (size)
 		{
 			// read and uncompress array
@@ -113,15 +113,24 @@ bool LAGLOG::skipLoad(EMUFILE *is)
 	return true;
 }
 // -------------------------------------------------------------------------------------------------
+void LAGLOG::InvalidateFrom(int frame)
+{
+	if (frame >= 0 && frame < (int)lag_log.size())
+	{
+		lag_log.resize(frame);
+		already_compressed = false;
+	}
+}
+
 void LAGLOG::SetLagInfo(int frame, bool lagFlag)
 {
 	if ((int)lag_log.size() <= frame)
-		lag_log.resize(frame + 1);
+		lag_log.resize(frame + 1, LAGGED_DONTKNOW);
 
 	if (lagFlag)
-		lag_log[frame] = 1;
+		lag_log[frame] = LAGGED_YES;
 	else
-		lag_log[frame] = 0;
+		lag_log[frame] = LAGGED_NO;
 
 	already_compressed = false;
 }
@@ -129,15 +138,25 @@ void LAGLOG::EraseFrame(int frame)
 {
 	if (frame < (int)lag_log.size())
 		lag_log.erase(lag_log.begin() + frame);
+
+	already_compressed = false;
 }
 void LAGLOG::InsertFrame(int frame, bool lagFlag, int frames)
 {
 	if (frame < (int)lag_log.size())
+	{
 		// insert
-		lag_log.insert(lag_log.begin() + frame, frames, (lagFlag) ? 1 : 0);
-	else
+		lag_log.insert(lag_log.begin() + frame, frames, (lagFlag) ? LAGGED_YES : LAGGED_NO);
+	} else
+	{
 		// append
-		lag_log.resize(frame + 1, (lagFlag) ? 1 : 0);
+		lag_log.resize(frame + 1, LAGGED_DONTKNOW);
+		if (lagFlag)
+			lag_log[frame] = LAGGED_YES;
+		else
+			lag_log[frame] = LAGGED_NO;
+	}
+	already_compressed = false;
 }
 
 // getters
@@ -145,11 +164,33 @@ int LAGLOG::GetSize()
 {
 	return lag_log.size();
 }
-bool LAGLOG::GetLagInfoAtFrame(int frame)
+int LAGLOG::GetLagInfoAtFrame(int frame)
 {
 	if (frame < (int)lag_log.size())
-		return (lag_log[frame] != 0);
+		return lag_log[frame];
 	else
-		return false;
+		return LAGGED_DONTKNOW;
 }
+
+int LAGLOG::findFirstChange(LAGLOG& their_log, int end)
+{
+	// search for differences to the specified end (or to the end of this or their LagLog, whichever is less)
+	if (end < 0 || end >= (int)lag_log.size()) end = lag_log.size() - 1;
+	int their_log_end = their_log.GetSize() - 1;
+	if (end > their_log_end)
+		end = their_log_end;
+
+	uint8 my_lag_info, their_lag_info;
+	for (int i = 0; i <= end; ++i)
+	{
+		// if old info != new info and both infos are known
+		my_lag_info = lag_log[i];
+		their_lag_info = their_log.GetLagInfoAtFrame(i);
+		if ((my_lag_info == LAGGED_YES && their_lag_info == LAGGED_NO) || (my_lag_info == LAGGED_NO && their_lag_info == LAGGED_YES))
+			return i;
+	}
+	// no difference was found
+	return -1;
+}
+
 

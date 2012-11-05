@@ -90,26 +90,22 @@ void GREENZONE::CollectCurrentState()
 		// lagFlag indicates that lag was in previous frame
 		int old_lagFlag = laglog.GetLagInfoAtFrame(currFrameCounter - 1);
 		// Auto-adjust Input according to lag
-		if (taseditor_config.adjust_input_due_to_lag)
+		if (taseditor_config.adjust_input_due_to_lag && old_lagFlag != LAGGED_DONTKNOW)
 		{
-			if (old_lagFlag && !lagFlag)
+			if ((old_lagFlag == LAGGED_YES) && !lagFlag)
 			{
 				// there's no more lag on previous frame - shift Input up
 				AdjustUp();
-			} else if (!old_lagFlag && lagFlag)
+			} else if ((old_lagFlag == LAGGED_NO) && lagFlag)
 			{
 				// there's new lag on previous frame - shift Input down
 				AdjustDown();
-			} else
-			{
-				// old_lagFlag == lagFlag
-				laglog.SetLagInfo(currFrameCounter - 1, (lagFlag != 0));
 			}
 		} else
 		{
-			if (lagFlag)
+			if (lagFlag && (old_lagFlag != LAGGED_YES))
 				laglog.SetLagInfo(currFrameCounter - 1, true);
-			else
+			else if (old_lagFlag != LAGGED_NO)
 				laglog.SetLagInfo(currFrameCounter - 1, false);
 		}
 	}
@@ -407,7 +403,7 @@ void GREENZONE::AdjustUp()
 	int first_input_chanes = history.RegisterAdjustLag(at, -1);
 	// if Input in the frame above currFrameCounter has changed then invalidate Greenzone (rewind 1 frame back)
 	// also if the frame above currFrameCounter is lag frame then rewind 1 frame (invalidate Greenzone), because maybe this frame also needs lag removal
-	if ((first_input_chanes >= 0 && first_input_chanes < currFrameCounter) || (laglog.GetLagInfoAtFrame(at)))
+	if ((first_input_chanes >= 0 && first_input_chanes < currFrameCounter) || (laglog.GetLagInfoAtFrame(at) != LAGGED_NO))
 	{
 		// custom invalidation procedure, not retriggering LostPosition/PauseFrame
 		Invalidate(at);

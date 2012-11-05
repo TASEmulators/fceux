@@ -381,18 +381,8 @@ int HISTORY::JumpInTime(int new_pos)
 	if (first_change >= 0)
 	{
 		snapshots[real_pos].inputlog.toMovie(currMovieData, first_change);
-		// but Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
-		for (int i = 0; i < first_change; ++i)
-		{
-			// if old info != new info
-			if (greenzone.laglog.GetLagInfoAtFrame(i) != snapshots[real_pos].laglog.GetLagInfoAtFrame(i))
-			{
-				// Greenzone should be invalidated from the frame
-				first_change = i;
-				break;
-			}
-		}
-		greenzone.laglog = snapshots[real_pos].laglog;
+		if (markers_changed)
+			markers_manager.update();
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
 		project.SetProjectChanged();
 		// Piano Roll Redraw will be called by Greenzone invalidation
@@ -407,6 +397,17 @@ int HISTORY::JumpInTime(int new_pos)
 		// when using Hot Changes, Piano Roll should be always redrawn, because old changes become less hot
 		piano_roll.RedrawList();
 	}
+
+	// but Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
+	int first_lag_changes = greenzone.laglog.findFirstChange(snapshots[real_pos].laglog, first_change);
+	if (first_lag_changes >= 0 && first_change > first_lag_changes)
+		first_change = first_lag_changes;
+	// if old Greenzone's LagLog size is less than new LagLog size then replace it
+	if (greenzone.laglog.GetSize() < snapshots[real_pos].laglog.GetSize())
+		greenzone.laglog = snapshots[real_pos].laglog;
+	// but then also invalidate it after the point of difference
+	greenzone.laglog.InvalidateFrom(first_change);
+
 	piano_roll.UpdateItemCount();
 	piano_roll.FollowUndo();
 	return first_change;
@@ -764,17 +765,6 @@ int HISTORY::RegisterBranching(int slot, bool markers_changed)
 			snap.inputlog.copyHotChanges(&bookmarks.bookmarks_array[slot].snapshot.inputlog);
 		AddItemToHistory(snap, branches.GetCurrentBranch());
 		project.SetProjectChanged();
-		// but Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
-		for (int i = 0; i < first_changes; ++i)
-		{
-			// if old info != new info
-			if (snapshots[real_pos].laglog.GetLagInfoAtFrame(i) != greenzone.laglog.GetLagInfoAtFrame(i))
-			{
-				// Greenzone should be invalidated from the frame
-				first_changes = i;
-				break;
-			}
-		}
 	} else if (markers_changed)
 	{
 		// fill description: modification type + time of the Branch
@@ -790,6 +780,10 @@ int HISTORY::RegisterBranching(int slot, bool markers_changed)
 		AddItemToHistory(snap, branches.GetCurrentBranch());
 		project.SetProjectChanged();
 	}
+	// but Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
+	int first_lag_changes = greenzone.laglog.findFirstChange(bookmarks.bookmarks_array[slot].snapshot.laglog, first_changes);
+	if (first_lag_changes >= 0 && first_changes > first_lag_changes)
+		return first_lag_changes;
 	return first_changes;
 }
 void HISTORY::RegisterRecording(int frame_of_change)

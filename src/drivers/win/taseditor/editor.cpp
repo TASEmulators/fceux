@@ -204,7 +204,7 @@ void EDITOR::InputSetPattern(int start, int end, int joy, int button, int consec
 	for (int i = start; i <= end; ++i)
 	{
 		// skip lag frames
-		if (taseditor_config.pattern_skips_lag && greenzone.laglog.GetLagInfoAtFrame(i))
+		if (taseditor_config.pattern_skips_lag && greenzone.laglog.GetLagInfoAtFrame(i) == LAGGED_YES)
 			continue;
 		value = (autofire_patterns[current_pattern][pattern_offset] != 0);
 		if (currMovieData.records[i].checkBit(joy, button) != value)
@@ -285,7 +285,7 @@ bool EDITOR::FrameColumnSetPattern()
 	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 	{
 		// skip lag frames
-		if (taseditor_config.pattern_skips_lag && greenzone.laglog.GetLagInfoAtFrame(*it))
+		if (taseditor_config.pattern_skips_lag && greenzone.laglog.GetLagInfoAtFrame(*it) == LAGGED_YES)
 			continue;
 		if (autofire_patterns[current_pattern][pattern_offset])
 		{
@@ -370,7 +370,7 @@ bool EDITOR::InputColumnSetPattern(int joy, int button)
 	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 	{
 		// skip lag frames
-		if (taseditor_config.pattern_skips_lag && greenzone.laglog.GetLagInfoAtFrame(*it))
+		if (taseditor_config.pattern_skips_lag && greenzone.laglog.GetLagInfoAtFrame(*it) == LAGGED_YES)
 			continue;
 		currMovieData.records[*it].setBitValue(joy, button, autofire_patterns[current_pattern][pattern_offset] != 0);
 		pattern_offset++;

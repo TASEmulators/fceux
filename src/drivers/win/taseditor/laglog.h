@@ -1,5 +1,9 @@
 // Specification file for LagLog class
 
+#define LAGGED_NO 0
+#define LAGGED_YES 1
+#define LAGGED_DONTKNOW 2
+
 class LAGLOG
 {
 public:
@@ -14,12 +18,16 @@ public:
 	bool load(EMUFILE *is);
 	bool skipLoad(EMUFILE *is);
 
+	void InvalidateFrom(int frame);
+
 	void SetLagInfo(int frame, bool lagFlag);
 	void EraseFrame(int frame);
 	void InsertFrame(int frame, bool lagFlag, int frames = 1);
 
 	int GetSize();
-	bool GetLagInfoAtFrame(int frame);
+	int GetLagInfoAtFrame(int frame);
+
+	int findFirstChange(LAGLOG& their_log, int end);
 
 private:
 	// saved data

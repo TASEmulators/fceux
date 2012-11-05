@@ -626,9 +626,13 @@ void Import()
 			strcat(name, ext);
 			int result = history.RegisterImport(md, name);
 			if (result >= 0)
+			{
 				greenzone.InvalidateAndCheck(result);
-			else
+				greenzone.laglog.InvalidateFrom(result);
+			} else
+			{
 				MessageBox(taseditor_window.hwndTasEditor, "Imported movie has the same Input.\nNo changes were made.", "TAS Editor", MB_OK);
+			}
 		} else
 		{
 			FCEUD_PrintError("Error loading movie data!");

@@ -433,8 +433,6 @@ void BOOKMARKS::deploy(int slot)
 		// add empty frame at the end (at keyframe)
 		currMovieData.insertEmpty(-1, 1);
 	}
-	// revert Greenzone's LagLog to the Bookmarked state
-	greenzone.laglog = bookmarks_array[slot].snapshot.laglog;
 
 	int first_change = history.RegisterBranching(slot, markers_changed);
 	if (first_change >= 0)
@@ -453,6 +451,13 @@ void BOOKMARKS::deploy(int slot)
 		// didn't change anything in current movie
 		bookmarks_array[slot].jumped();
 	}
+
+	// if Greenzone's LagLog size is less than Bookmarked LagLog size then replace it
+	if (greenzone.laglog.GetSize() < bookmarks_array[slot].snapshot.laglog.GetSize())
+		greenzone.laglog = bookmarks_array[slot].snapshot.laglog;
+	// but then also invalidate it after the point of difference
+	greenzone.laglog.InvalidateFrom(first_change);
+
 	// jump to the target (bookmarked frame)
 	if (greenzone.SavestateIsEmpty(keyframe))
 		greenzone.WriteSavestate(keyframe, bookmarks_array[slot].savestate);
@@ -664,7 +669,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					if (!greenzone.SavestateIsEmpty(frame))
 					{
-						if (greenzone.laglog.GetLagInfoAtFrame(frame))
+						if (greenzone.laglog.GetLagInfoAtFrame(frame) == LAGGED_YES)
 							msg->clrTextBk = LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
@@ -673,7 +678,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.SavestateIsEmpty(frame & EVERY4TH) && !greenzone.SavestateIsEmpty((frame & EVERY4TH) + 4))
 						|| (!greenzone.SavestateIsEmpty(frame & EVERY2ND) && !greenzone.SavestateIsEmpty((frame & EVERY2ND) + 2)))
 					{
-						if (greenzone.laglog.GetLagInfoAtFrame(frame))
+						if (greenzone.laglog.GetLagInfoAtFrame(frame) == LAGGED_YES)
 							msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
@@ -695,7 +700,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					if (!greenzone.SavestateIsEmpty(frame))
 					{
-						if (greenzone.laglog.GetLagInfoAtFrame(frame))
+						if (greenzone.laglog.GetLagInfoAtFrame(frame) == LAGGED_YES)
 							msg->clrTextBk = LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR1;
@@ -704,7 +709,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.SavestateIsEmpty(frame & EVERY4TH) && !greenzone.SavestateIsEmpty((frame & EVERY4TH) + 4))
 						|| (!greenzone.SavestateIsEmpty(frame & EVERY2ND) && !greenzone.SavestateIsEmpty((frame & EVERY2ND) + 2)))
 					{
-						if (greenzone.laglog.GetLagInfoAtFrame(frame))
+						if (greenzone.laglog.GetLagInfoAtFrame(frame) == LAGGED_YES)
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR1;
