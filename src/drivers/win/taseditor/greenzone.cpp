@@ -105,7 +105,7 @@ void GREENZONE::CollectCurrentState()
 		{
 			if (lagFlag && (old_lagFlag != LAGGED_YES))
 				laglog.SetLagInfo(currFrameCounter - 1, true);
-			else if (old_lagFlag != LAGGED_NO)
+			else if (!lagFlag && old_lagFlag != LAGGED_NO)
 				laglog.SetLagInfo(currFrameCounter - 1, false);
 		}
 	}
