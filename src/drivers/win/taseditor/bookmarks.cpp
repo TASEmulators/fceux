@@ -411,13 +411,10 @@ void BOOKMARKS::deploy(int slot)
 	int keyframe = bookmarks_array[slot].snapshot.keyframe;
 	bool markers_changed = false;
 	// revert Markers to the Bookmarked state
-	//if (taseditor_config.bind_markers)
+	if (bookmarks_array[slot].snapshot.MarkersDifferFromCurrent())
 	{
-		if (bookmarks_array[slot].snapshot.MarkersDifferFromCurrent())
-		{
-			bookmarks_array[slot].snapshot.copyToMarkers();
-			markers_changed = true;
-		}
+		bookmarks_array[slot].snapshot.copyToMarkers();
+		markers_changed = true;
 	}
 	// revert current movie data to the Bookmarked state
 	if (taseditor_config.branch_full_movie)
@@ -434,7 +431,7 @@ void BOOKMARKS::deploy(int slot)
 		currMovieData.insertEmpty(-1, 1);
 	}
 
-	int first_change = history.RegisterBranching(slot, markers_changed);
+	int first_change = history.RegisterBranching(slot, markers_changed);	// this also reverts Greenzone's LagLog if needed
 	if (first_change >= 0)
 	{
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
@@ -444,19 +441,12 @@ void BOOKMARKS::deploy(int slot)
 	} else if (markers_changed)
 	{
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
-		piano_roll.RedrawList();
 		bookmarks_array[slot].deployed();
 	} else
 	{
 		// didn't change anything in current movie
 		bookmarks_array[slot].jumped();
 	}
-
-	// if Greenzone's LagLog size is less than Bookmarked LagLog size then replace it
-	if (greenzone.laglog.GetSize() < bookmarks_array[slot].snapshot.laglog.GetSize())
-		greenzone.laglog = bookmarks_array[slot].snapshot.laglog;
-	// but then also invalidate it after the point of difference
-	greenzone.laglog.InvalidateFrom(first_change);
 
 	// jump to the target (bookmarked frame)
 	if (greenzone.SavestateIsEmpty(keyframe))
@@ -473,6 +463,7 @@ void BOOKMARKS::deploy(int slot)
 		RedrawChangedBookmarks(keyframe);
 	}
 	FCEU_DispMessage("Branch %d loaded.", 0, slot);
+	piano_roll.RedrawList();	// even though the Greenzone invalidation most likely have already sent the command to redraw
 }
 
 void BOOKMARKS::save(EMUFILE *os, bool really_save)

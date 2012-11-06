@@ -27,7 +27,7 @@ public:
 	int GetSize();
 	int GetLagInfoAtFrame(int frame);
 
-	int findFirstChange(LAGLOG& their_log, int end);
+	int findFirstChange(LAGLOG& their_log);
 
 private:
 	// saved data

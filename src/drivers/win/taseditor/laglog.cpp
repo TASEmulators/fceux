@@ -172,10 +172,10 @@ int LAGLOG::GetLagInfoAtFrame(int frame)
 		return LAGGED_DONTKNOW;
 }
 
-int LAGLOG::findFirstChange(LAGLOG& their_log, int end)
+int LAGLOG::findFirstChange(LAGLOG& their_log)
 {
-	// search for differences to the specified end (or to the end of this or their LagLog, whichever is less)
-	if (end < 0 || end >= (int)lag_log.size()) end = lag_log.size() - 1;
+	// search for differences to the end of this or their LagLog, whichever is less
+	int end = lag_log.size() - 1;
 	int their_log_end = their_log.GetSize() - 1;
 	if (end > their_log_end)
 		end = their_log_end;

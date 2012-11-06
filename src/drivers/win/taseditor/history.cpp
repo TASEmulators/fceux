@@ -367,6 +367,7 @@ int HISTORY::JumpInTime(int new_pos)
 	show_undo_hint = true;
 
 	real_pos = (history_start_pos + history_cursor_pos) % history_size;
+
 	// update Markers
 	bool markers_changed = false;
 	if (snapshots[real_pos].MarkersDifferFromCurrent())
@@ -376,41 +377,46 @@ int HISTORY::JumpInTime(int new_pos)
 		markers_changed = true;
 	}
 
-	// update current movie data and Greenzone's LagLog
-	int first_change = snapshots[real_pos].inputlog.findFirstChange(currMovieData);
-	if (first_change >= 0)
+	// revert current movie data
+	int first_changes = snapshots[real_pos].inputlog.findFirstChange(currMovieData);
+	if (first_changes >= 0)
 	{
-		snapshots[real_pos].inputlog.toMovie(currMovieData, first_change);
+		snapshots[real_pos].inputlog.toMovie(currMovieData, first_changes);
 		if (markers_changed)
 			markers_manager.update();
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
 		project.SetProjectChanged();
-		// Piano Roll Redraw will be called by Greenzone invalidation
 	} else if (markers_changed)
 	{
 		markers_manager.update();
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
 		project.SetProjectChanged();
-		piano_roll.RedrawList();
-	} else if (taseditor_config.enable_hot_changes)
-	{
-		// when using Hot Changes, Piano Roll should be always redrawn, because old changes become less hot
-		piano_roll.RedrawList();
 	}
 
-	// but Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
-	int first_lag_changes = greenzone.laglog.findFirstChange(snapshots[real_pos].laglog, first_change);
-	if (first_lag_changes >= 0 && first_change > first_lag_changes)
-		first_change = first_lag_changes;
-	// if old Greenzone's LagLog size is less than new LagLog size then replace it
-	if (greenzone.laglog.GetSize() < snapshots[real_pos].laglog.GetSize())
+	// revert Greenzone's LagLog
+	// but if Greenzone's LagLog has the same data + more lag data of the same timeline, then don't revert but truncate
+	int first_lag_changes = greenzone.laglog.findFirstChange(snapshots[real_pos].laglog);
+	int greenzone_log_size = greenzone.laglog.GetSize();
+	int new_log_size = snapshots[real_pos].laglog.GetSize();
+	if ((first_lag_changes < 0 || (first_lag_changes > new_log_size && first_lag_changes > greenzone_log_size)) && greenzone_log_size > new_log_size)
+	{
+		if (first_changes >= 0 && (first_lag_changes > first_changes || first_lag_changes < 0))
+			// truncate after the timeline starts to differ
+			first_lag_changes = first_changes;
+		greenzone.laglog.InvalidateFrom(first_lag_changes);
+	} else
+	{
 		greenzone.laglog = snapshots[real_pos].laglog;
-	// but then also invalidate it after the point of difference
-	greenzone.laglog.InvalidateFrom(first_change);
+	}
 
 	piano_roll.UpdateItemCount();
 	piano_roll.FollowUndo();
-	return first_change;
+	piano_roll.RedrawList();	// even though the Greenzone invalidation most likely will also sent the command to redraw
+
+	// Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
+	if (first_lag_changes >= 0 && first_changes > first_lag_changes)
+		first_changes = first_lag_changes;
+	return first_changes;
 }
 
 void HISTORY::undo()
@@ -483,27 +489,14 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 	snap.init(currMovieData, taseditor_config.enable_hot_changes);
 	// check if there are Input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
-	int first_input_changes = snap.inputlog.findFirstChange(snapshots[real_pos].inputlog, start, end);
+	int first_changes = snap.inputlog.findFirstChange(snapshots[real_pos].inputlog, start, end);
+	// for lag-affecting operations only:
+	// Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
+	int first_lag_changes = -1;
+	if (end == -1)
+		first_lag_changes = snap.laglog.findFirstChange(snapshots[real_pos].laglog);
 
-	// for lag-affecting operations only: Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
-	int first_changes = first_input_changes;
-	if (end == -1 && (first_changes > start || first_changes == -1))
-	{
-		// check if LagLogs of these snapshots differ before the "first_input_changes" frame
-		if (first_changes < 0)
-			first_changes = snap.inputlog.size;
-		for (int i = start; i < first_changes; ++i)
-		{
-			if (snap.laglog.GetLagInfoAtFrame(i) != snapshots[real_pos].laglog.GetLagInfoAtFrame(i))
-			{
-				// Greenzone should be invalidated from the frame
-				first_changes = i;
-				break;
-			}
-		}
-	}
-
-	if (first_input_changes >= 0)
+	if (first_changes >= 0)
 	{
 		// differences found
 		char framenum[11];
@@ -519,7 +512,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 			case MODTYPE_CLEAR:
 			case MODTYPE_CUT:
 			{
-				snap.keyframe = first_input_changes;
+				snap.keyframe = first_changes;
 				break;
 			}
 			case MODTYPE_INSERT:
@@ -577,7 +570,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 			if (taseditor_config.enable_hot_changes)
 			{
 				snap.inputlog.copyHotChanges(&snapshots[real_pos].inputlog);
-				snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, first_input_changes, end);
+				snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, first_changes, end);
 			}
 			// replace current snapshot with this cloned snapshot and truncate history here
 			snapshots[real_pos] = snap;
@@ -626,7 +619,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 					case MODTYPE_PASTE:
 					case MODTYPE_PATTERN:
 						snap.inputlog.inheritHotChanges(&snapshots[real_pos].inputlog);
-						snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, first_input_changes, end);
+						snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, first_changes, end);
 						break;
 					case MODTYPE_PASTEINSERT:
 						snap.inputlog.inheritHotChanges_PasteInsert(&snapshots[real_pos].inputlog, frameset);
@@ -642,6 +635,8 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 		branches.ChangesMadeSinceBranch();
 		project.SetProjectChanged();
 	}
+	if (first_lag_changes >= 0 && first_changes > first_lag_changes)
+		first_changes = first_lag_changes;
 	return first_changes;
 }
 int HISTORY::RegisterAdjustLag(int start, int size)
@@ -780,10 +775,26 @@ int HISTORY::RegisterBranching(int slot, bool markers_changed)
 		AddItemToHistory(snap, branches.GetCurrentBranch());
 		project.SetProjectChanged();
 	}
-	// but Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
-	int first_lag_changes = greenzone.laglog.findFirstChange(bookmarks.bookmarks_array[slot].snapshot.laglog, first_changes);
+	// revert Greenzone's LagLog (and snap's LagLog too) to bookmarked state
+	// but if Greenzone's LagLog has the same data + more lag data of the same timeline, then don't revert but truncate
+	int first_lag_changes = greenzone.laglog.findFirstChange(bookmarks.bookmarks_array[slot].snapshot.laglog);
+	int greenzone_log_size = greenzone.laglog.GetSize();
+	int bookmarked_log_size = bookmarks.bookmarks_array[slot].snapshot.laglog.GetSize();
+	if ((first_lag_changes < 0 || (first_lag_changes > bookmarked_log_size && first_lag_changes > greenzone_log_size)) && greenzone_log_size > bookmarked_log_size)
+	{
+		if (first_changes >= 0 && (first_lag_changes > first_changes || first_lag_changes < 0))
+			// truncate after the timeline starts to differ
+			first_lag_changes = first_changes;
+		greenzone.laglog.InvalidateFrom(first_lag_changes);
+		snap.laglog.InvalidateFrom(first_lag_changes);
+	} else
+	{
+		greenzone.laglog = bookmarks.bookmarks_array[slot].snapshot.laglog;
+		snap.laglog = greenzone.laglog;
+	}
+	// Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
 	if (first_lag_changes >= 0 && first_changes > first_lag_changes)
-		return first_lag_changes;
+		first_changes = first_lag_changes;
 	return first_changes;
 }
 void HISTORY::RegisterRecording(int frame_of_change)
@@ -904,6 +915,12 @@ int HISTORY::RegisterLuaChanges(const char* name, int start, bool InsertionDelet
 	// check if there are Input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 	int first_changes = snap.inputlog.findFirstChange(snapshots[real_pos].inputlog, start);
+	// for lag-affecting operations only:
+	// Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
+	int first_lag_changes = -1;
+	if (InsertionDeletion_was_made)
+		first_lag_changes = snap.laglog.findFirstChange(snapshots[real_pos].laglog);
+
 	if (first_changes >= 0)
 	{
 		// differences found
@@ -957,24 +974,12 @@ int HISTORY::RegisterLuaChanges(const char* name, int start, bool InsertionDelet
 				snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, first_changes);
 			}
 		}
-		// for lag-affecting operations only: Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
-		if (first_changes > start && InsertionDeletion_was_made)
-		{
-			// check if LagLogs of these snapshots differ before the "first_changes" frame
-			for (int i = start; i < first_changes; ++i)
-			{
-				if (snap.laglog.GetLagInfoAtFrame(i) != snapshots[real_pos].laglog.GetLagInfoAtFrame(i))
-				{
-					// Greenzone should be invalidated from the frame
-					first_changes = i;
-					break;
-				}
-			}
-		}
 		AddItemToHistory(snap);
 		branches.ChangesMadeSinceBranch();
 		project.SetProjectChanged();
 	}
+	if (first_lag_changes >= 0 && first_changes > first_lag_changes)
+		first_changes = first_lag_changes;
 	return first_changes;
 }
 
