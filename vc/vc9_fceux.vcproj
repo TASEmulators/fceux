@@ -462,15 +462,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\boards\vrc2and4.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\boards\235.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\src\boards\253.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\28.cpp"
 				>
 			</File>
 			<File
@@ -707,6 +707,10 @@
 			</File>
 			<File
 				RelativePath="..\src\boards\tf-1201.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\vrc2and4.cpp"
 				>
 			</File>
 		</Filter>

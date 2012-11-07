@@ -772,6 +772,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\src\boards\28.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\32.cpp"
 				>
 			</File>
