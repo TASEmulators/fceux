@@ -1577,6 +1577,8 @@ bool PIANO_ROLL::CheckIfTheresAnyIconAtFrame(int frame)
 		return true;
 	if (frame == playback.GetLostPosition())
 		return true;
+	if (frame == playback.GetPauseFrame())
+		return true;
 	if (bookmarks.FindBookmarkAtFrame(frame) >= 0)
 		return true;
 	return false;

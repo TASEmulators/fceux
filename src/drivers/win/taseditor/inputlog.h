@@ -9,8 +9,17 @@ enum Input_types
 	NUM_SUPPORTED_INPUT_TYPES
 };
 
-#define BYTES_PER_JOYSTICK 1		// 1 byte per 1 joystick (8 buttons)
-#define HOTCHANGE_BYTES_PER_JOY 4		// 4 bytes per 8 buttons
+#define BUTTONS_PER_JOYSTICK 8
+#define BYTES_PER_JOYSTICK 1			// 1 byte per 1 joystick (8 buttons)
+
+#define HOTCHANGE_BITS_PER_VALUE 4		// any HotChange value takes 4 bits
+#define HOTCHANGE_BITMASK 0xF			// "1111"
+#define HOTCHANGE_MAX_VALUE 0xF			// "1111" max
+#define HOTCHANGE_VALUES_PER_BYTE 2		// hence 2 HotChange values fit into 1 byte
+#define BYTE_VALUE_CONTAINING_MAX_HOTCHANGES ((HOTCHANGE_MAX_VALUE << HOTCHANGE_BITS_PER_VALUE) | HOTCHANGE_MAX_VALUE)	// "0xFF"
+#define BYTE_VALUE_CONTAINING_MAX_HOTCHANGE_HI (HOTCHANGE_MAX_VALUE << HOTCHANGE_BITS_PER_VALUE)						// "0xF0"
+#define BYTE_VALUE_CONTAINING_MAX_HOTCHANGE_LO HOTCHANGE_MAX_VALUE														// "0x0F"
+#define HOTCHANGE_BYTES_PER_JOY (BYTES_PER_JOYSTICK * HOTCHANGE_BITS_PER_VALUE)	// 4 bytes per 8 buttons
 
 class INPUTLOG
 {
@@ -26,7 +35,7 @@ public:
 	void compress_data();
 	bool Get_already_compressed();
 
-	uint32 INPUTLOG::fillJoypadsDiff(INPUTLOG& their_log, int frame);
+	uint32 fillJoypadsDiff(INPUTLOG& their_log, int frame);
 	int findFirstChange(INPUTLOG& their_log, int start = 0, int end = -1);
 	int findFirstChange(MovieData& md, int start = 0, int end = -1);
 
@@ -35,6 +44,8 @@ public:
 
 	void insertFrames(int at, int frames);
 	void eraseFrame(int frame);
+
+	void Init_HotChanges();
 
 	void copyHotChanges(INPUTLOG* source_of_hotchanges, int limit_frame_of_source = -1);
 	void inheritHotChanges(INPUTLOG* source_of_hotchanges);
@@ -58,9 +69,9 @@ public:
 	bool has_hot_changes;
 
 	// not saved data
+	std::vector<uint8> hot_changes;		// Format: buttons01joy0-for-frame0, buttons23joy0-for-frame0, buttons45joy0-for-frame0, buttons67joy0-for-frame0, buttons01joy1-for-frame0, ...
 	std::vector<uint8> joysticks;		// Format: joy0-for-frame0, joy1-for-frame0, joy2-for-frame0, joy3-for-frame0, joy0-for-frame1, joy1-for-frame1, ...
 	std::vector<uint8> commands;		// Format: commands-for-frame0, commands-for-frame1, ...
-	std::vector<uint8> hot_changes;		// Format: buttons01joy0-for-frame0, buttons23joy0-for-frame0, buttons45joy0-for-frame0, buttons67joy0-for-frame0, buttons01joy1-for-frame0, ...
 
 private:
 	

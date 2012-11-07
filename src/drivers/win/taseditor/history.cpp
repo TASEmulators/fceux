@@ -960,7 +960,7 @@ int HISTORY::RegisterLuaChanges(const char* name, int start, bool InsertionDelet
 					} else
 					{
 						hotchanges_snapshot.inputlog.has_hot_changes = true;
-						hotchanges_snapshot.inputlog.hot_changes.resize(joysticks_per_frame[snap.inputlog.input_type] * hotchanges_snapshot.inputlog.size * HOTCHANGE_BYTES_PER_JOY);
+						hotchanges_snapshot.inputlog.Init_HotChanges();
 					}
 					// insert/delete frames in hotchanges_snapshot, so that it will be the same size as the snap
 					taseditor_lua.InsertDelete_rows_to_Snaphot(hotchanges_snapshot);

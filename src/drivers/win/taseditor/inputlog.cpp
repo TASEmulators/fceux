@@ -39,50 +39,22 @@ void INPUTLOG::init(MovieData& md, bool hotchanges, int force_input_type)
 		input_type = GetInputType(md);
 	else
 		input_type = force_input_type;
+	int num_joys = joysticks_per_frame[input_type];
 	// retrieve Input data from movie data
 	size = md.getNumRecords();
-	joysticks.resize(BYTES_PER_JOYSTICK * joysticks_per_frame[input_type] * size);		// it's much faster to have this format than have [frame][joy] or other structures
+	joysticks.resize(BYTES_PER_JOYSTICK * num_joys * size);		// it's much faster to have this format than have [frame][joy] or other structures
 	commands.resize(size);				// commands take 1 byte per frame
 	if (has_hot_changes)
-		hot_changes.resize(joysticks_per_frame[input_type] * size * HOTCHANGE_BYTES_PER_JOY);
+		Init_HotChanges();
 
 	// fill Input vector
-	int pos = 0;
-	switch(input_type)
+	int joy;
+	for (int frame = 0; frame < size; ++frame)
 	{
-		case INPUT_TYPE_FOURSCORE:
-		{
-			for (int frame = 0; frame < size; ++frame)
-			{
-				joysticks[pos++] = md.records[frame].joysticks[0];
-				joysticks[pos++] = md.records[frame].joysticks[1];
-				joysticks[pos++] = md.records[frame].joysticks[2];
-				joysticks[pos++] = md.records[frame].joysticks[3];
-				commands[frame] = md.records[frame].commands;
-			}
-			break;
-		}
-		case INPUT_TYPE_2P:
-		{
-			for (int frame = 0; frame < size; ++frame)
-			{
-				joysticks[pos++] = md.records[frame].joysticks[0];
-				joysticks[pos++] = md.records[frame].joysticks[1];
-				commands[frame] = md.records[frame].commands;
-			}
-			break;
-		}
-		case INPUT_TYPE_1P:
-		{
-			for (int frame = 0; frame < size; ++frame)
-			{
-				joysticks[pos++] = md.records[frame].joysticks[0];
-				commands[frame] = md.records[frame].commands;
-			}
-			break;
-		}
+		for (joy = num_joys - 1; joy >= 0; joy--)
+			joysticks[frame * num_joys * BYTES_PER_JOYSTICK + joy * BYTES_PER_JOYSTICK] = md.records[frame].joysticks[joy];
+		commands[frame] = md.records[frame].commands;
 	}
-
 	already_compressed = false;
 }
 
@@ -91,42 +63,13 @@ void INPUTLOG::toMovie(MovieData& md, int start, int end)
 	if (end < 0 || end >= size) end = size - 1;
 	// write Input data to movie data
 	md.records.resize(end + 1);
-	switch(input_type)
+	int num_joys = joysticks_per_frame[input_type];
+	int joy;
+	for (int frame = start; frame <= end; ++frame)
 	{
-		case INPUT_TYPE_FOURSCORE:
-		{
-			int pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type];
-			for (int frame = start; frame <= end; ++frame)
-			{
-				md.records[frame].joysticks[0] = joysticks[pos++];
-				md.records[frame].joysticks[1] = joysticks[pos++];
-				md.records[frame].joysticks[2] = joysticks[pos++];
-				md.records[frame].joysticks[3] = joysticks[pos++];
-				md.records[frame].commands = commands[frame];
-			}
-			break;
-		}
-		case INPUT_TYPE_2P:
-		{
-			int pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type];
-			for (int frame = start; frame <= end; ++frame)
-			{
-				md.records[frame].joysticks[0] = joysticks[pos++];
-				md.records[frame].joysticks[1] = joysticks[pos++];
-				md.records[frame].commands = commands[frame];
-			}
-			break;
-		}
-		case INPUT_TYPE_1P:
-		{
-			int pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type];
-			for (int frame = start; frame <= end; ++frame)
-			{
-				md.records[frame].joysticks[0] = joysticks[pos++];
-				md.records[frame].commands = commands[frame];
-			}
-			break;
-		}
+		for (joy = num_joys - 1; joy >= 0; joy--)
+			md.records[frame].joysticks[joy] = joysticks[frame * num_joys * BYTES_PER_JOYSTICK + joy * BYTES_PER_JOYSTICK];
+		md.records[frame].commands = commands[frame];
 	}
 }
 
@@ -265,25 +208,13 @@ uint32 INPUTLOG::fillJoypadsDiff(INPUTLOG& their_log, int frame)
 {
 	uint32 joypad_diff_bits = 0;
 	uint32 current_mask = 1;
-	switch(input_type)
+	if (frame < their_log.size)
 	{
-		case INPUT_TYPE_FOURSCORE:
-		case INPUT_TYPE_2P:
-		case INPUT_TYPE_1P:
+		for (int joy = 0; joy < joysticks_per_frame[input_type]; ++joy)
 		{
-			int pos = frame * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type];
-			for (int i = 0; i < BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; ++i)
-			{
-				if (pos < (their_log.size * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]))
-				{
-					if (joysticks[pos+i] != their_log.joysticks[pos+i]) joypad_diff_bits |= current_mask;
-				} else
-				{
-					if (joysticks[pos+i]) joypad_diff_bits |= current_mask;
-				}
-				current_mask <<= 1;
-			}
-			break;
+			if (GetJoystickInfo(frame, joy) != their_log.GetJoystickInfo(frame, joy))
+				joypad_diff_bits |= current_mask;
+			current_mask <<= 1;
 		}
 	}
 	return joypad_diff_bits;
@@ -291,82 +222,20 @@ uint32 INPUTLOG::fillJoypadsDiff(INPUTLOG& their_log, int frame)
 // return number of first frame of difference between two InputLogs
 int INPUTLOG::findFirstChange(INPUTLOG& their_log, int start, int end)
 {
-	// if these two InputLogs have different input_type (abnormal situation) then refuse to search and return the beginning
-	if (their_log.input_type != input_type)
-		return start;
-
 	// search for differences to the specified end (or to the end of this InputLog)
 	if (end < 0 || end >= size) end = size-1;
 	int their_log_end = their_log.size;
-	switch(input_type)
+
+	int joy;
+	int num_joys = joysticks_per_frame[input_type];
+	for (int frame = start; frame <= end; ++frame)
 	{
-		case INPUT_TYPE_FOURSCORE:
-		{
-			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
-			{
-				// return the frame if found different byte, or found emptiness in their_log when there's non-zero value here
-				if (frame < their_log_end)
-				{
-					if (joysticks[pos] != their_log.joysticks[pos]) return frame;
-					pos++;
-					if (joysticks[pos] != their_log.joysticks[pos]) return frame;
-					pos++;
-					if (joysticks[pos] != their_log.joysticks[pos]) return frame;
-					pos++;
-					if (joysticks[pos] != their_log.joysticks[pos]) return frame;
-					pos++;
-					if (commands[frame] != their_log.commands[frame]) return frame;
-				} else
-				{
-					if (joysticks[pos++]) return frame;
-					if (joysticks[pos++]) return frame;
-					if (joysticks[pos++]) return frame;
-					if (joysticks[pos++]) return frame;
-					if (commands[frame]) return frame;
-				}
-			}
-			break;
-		}
-		case INPUT_TYPE_2P:
-		{
-			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
-			{
-				// return the frame if found different byte, or found emptiness in their_log when there's non-zero value here
-				if (frame < their_log_end)
-				{
-					if (joysticks[pos] != their_log.joysticks[pos]) return frame;
-					pos++;
-					if (joysticks[pos] != their_log.joysticks[pos]) return frame;
-					pos++;
-					if (commands[frame] != their_log.commands[frame]) return frame;
-				} else
-				{
-					if (joysticks[pos++]) return frame;
-					if (joysticks[pos++]) return frame;
-					if (commands[frame]) return frame;
-				}
-			}
-			break;
-		}
-		case INPUT_TYPE_1P:
-		{
-			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
-			{
-				// return the frame if found different byte, or found emptiness in their_log when there's non-zero value here
-				if (frame < their_log_end)
-				{
-					if (joysticks[pos] != their_log.joysticks[pos]) return frame;
-					pos++;
-					if (commands[frame] != their_log.commands[frame]) return frame;
-				} else
-				{
-					if (joysticks[pos++]) return frame;
-					if (commands[frame]) return frame;
-				}
-			}
-			break;
-		}
+		for (joy = num_joys - 1; joy >= 0; joy--)
+			if (GetJoystickInfo(frame, joy) != their_log.GetJoystickInfo(frame, joy)) return frame;
+		if (GetCommandsInfo(frame) != their_log.GetCommandsInfo(frame)) return frame;
 	}
+	// no difference was found
+
 	// if my_size is less then their_size, return last frame + 1 (= size) as the frame of difference
 	if (size < their_log_end) return size;
 	// no changes were found
@@ -375,70 +244,41 @@ int INPUTLOG::findFirstChange(INPUTLOG& their_log, int start, int end)
 // return number of first frame of difference between this InputLog and MovieData
 int INPUTLOG::findFirstChange(MovieData& md, int start, int end)
 {
-	// search for differences to the specified end (or to the end of this InputLog / to the end of the movie)
-	if (end < 0 || end >= size) end = size-1;
-	if (end >= md.getNumRecords()) end = md.getNumRecords()-1;
+	// search for differences to the specified end (or to the end of this InputLog / to the end of the movie data)
+	if (end < 0 || end >= size) end = size - 1;
+	if (end >= md.getNumRecords()) end = md.getNumRecords() - 1;
 
-	switch(input_type)
+	int joy;
+	int num_joys = joysticks_per_frame[input_type];
+	for (int frame = start; frame <= end; ++frame)
 	{
-		case INPUT_TYPE_FOURSCORE:
-		{
-			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
-			{
-				if (joysticks[pos++] != md.records[frame].joysticks[0]) return frame;
-				if (joysticks[pos++] != md.records[frame].joysticks[1]) return frame;
-				if (joysticks[pos++] != md.records[frame].joysticks[2]) return frame;
-				if (joysticks[pos++] != md.records[frame].joysticks[3]) return frame;
-				if (commands[frame] != md.records[frame].commands) return frame;
-			}
-			break;
-		}
-		case INPUT_TYPE_2P:
-		{
-			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
-			{
-				if (joysticks[pos++] != md.records[frame].joysticks[0]) return frame;
-				if (joysticks[pos++] != md.records[frame].joysticks[1]) return frame;
-				if (commands[frame] != md.records[frame].commands) return frame;
-			}
-			break;
-		}
-		case INPUT_TYPE_1P:
-		{
-			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
-			{
-				if (joysticks[pos++] != md.records[frame].joysticks[0]) return frame;
-				if (commands[frame] != md.records[frame].commands) return frame;
-			}
-			break;
-		}
+		for (joy = num_joys - 1; joy >= 0; joy--)
+			if (GetJoystickInfo(frame, joy) != md.records[frame].joysticks[joy]) return frame;
+		if (GetCommandsInfo(frame) != md.records[frame].commands) return frame;
 	}
+	// no difference was found
+
 	// if sizes differ, return last frame + 1 from the lesser of them
-	if (size < md.getNumRecords() && end >= size-1)
+	if (size < md.getNumRecords() && end >= size - 1)
 		return size;
-	else if (size > md.getNumRecords() && end >= md.getNumRecords()-1)
+	else if (size > md.getNumRecords() && end >= md.getNumRecords() - 1)
 		return md.getNumRecords();
 
-	return -1;	// no changes were found
+	return -1;
 }
 
 int INPUTLOG::GetJoystickInfo(int frame, int joy)
 {
-	if (frame < 0 || frame >= size) return 0;
-	switch(input_type)
-	{
-		case INPUT_TYPE_FOURSCORE:
-		case INPUT_TYPE_2P:
-		case INPUT_TYPE_1P:
-		{
-			return joysticks[frame * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type] + joy];
-		}
-	}
-	return 0;
+	if (frame < 0 || frame >= size)
+		return 0;
+	if (joy > joysticks_per_frame[input_type])
+		return 0;
+	return joysticks[frame * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type] + joy];
 }
 int INPUTLOG::GetCommandsInfo(int frame)
 {
-	if (frame < 0 || frame >= size) return 0;
+	if (frame < 0 || frame >= size)
+		return 0;
 	return commands[frame];
 }
 
@@ -456,7 +296,7 @@ void INPUTLOG::insertFrames(int at, int frames)
 			// fill new hotchanges with max value
 			int lower_limit = joysticks_per_frame[input_type] * (size - frames) * HOTCHANGE_BYTES_PER_JOY;
 			for (int i = hot_changes.size() - 1; i >= lower_limit; i--)
-				hot_changes[i] = 0xFF;
+				hot_changes[i] = BYTE_VALUE_CONTAINING_MAX_HOTCHANGES;
 		}
 	} else
 	{
@@ -470,7 +310,7 @@ void INPUTLOG::insertFrames(int at, int frames)
 		{
 			// insert X bytes of hot_changes
 			bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
-			hot_changes.insert(hot_changes.begin() + (at * bytes), frames * bytes, 0xFF);
+			hot_changes.insert(hot_changes.begin() + (at * bytes), frames * bytes, BYTE_VALUE_CONTAINING_MAX_HOTCHANGES);
 		}
 	}
 	// data was changed
@@ -493,24 +333,26 @@ void INPUTLOG::eraseFrame(int frame)
 	// data was changed
 	already_compressed = false;
 }
-// --------------------------------------------------------
+// -----------------------------------------------------------------------------------------------
+void INPUTLOG::Init_HotChanges()
+{
+	hot_changes.resize(joysticks_per_frame[input_type] * size * HOTCHANGE_BYTES_PER_JOY);
+}
+
 void INPUTLOG::copyHotChanges(INPUTLOG* source_of_hotchanges, int limit_frame_of_source)
 {
 	// copy hot changes from source InputLog
 	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
 	{
-		int min = hot_changes.size();
-		if (min > (int)source_of_hotchanges->hot_changes.size())
-			min = source_of_hotchanges->hot_changes.size();
-
+		int frames_to_copy = source_of_hotchanges->size;
+		if (frames_to_copy > size)
+			frames_to_copy = size;
 		// special case for Branches: if limit_frame if specified, then copy only hotchanges from 0 to limit_frame
-		if (limit_frame_of_source >= 0)
-		{
-			if (min > limit_frame_of_source * joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY)
-				min = limit_frame_of_source * joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
-		}
+		if (limit_frame_of_source >= 0 && frames_to_copy > limit_frame_of_source)
+			frames_to_copy = limit_frame_of_source;
 
-		memcpy(&hot_changes[0], &source_of_hotchanges->hot_changes[0], min);
+		int bytes_to_copy = frames_to_copy * joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
+		memcpy(&hot_changes[0], &source_of_hotchanges->hot_changes[0], bytes_to_copy);
 	}
 } 
 void INPUTLOG::inheritHotChanges(INPUTLOG* source_of_hotchanges)
@@ -518,31 +360,31 @@ void INPUTLOG::inheritHotChanges(INPUTLOG* source_of_hotchanges)
 	// copy hot changes from source InputLog and fade them
 	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
 	{
-		int min = hot_changes.size();
-		if (min > (int)source_of_hotchanges->hot_changes.size())
-			min = source_of_hotchanges->hot_changes.size();
+		int frames_to_copy = source_of_hotchanges->size;
+		if (frames_to_copy > size)
+			frames_to_copy = size;
 
-		memcpy(&hot_changes[0], &source_of_hotchanges->hot_changes[0], min);
+		int bytes_to_copy = frames_to_copy * joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
+		memcpy(&hot_changes[0], &source_of_hotchanges->hot_changes[0], bytes_to_copy);
 		FadeHotChanges();
 	}
 } 
 void INPUTLOG::inheritHotChanges_DeleteSelection(INPUTLOG* source_of_hotchanges, SelectionFrames* frameset)
 {
-	// copy hot changes from source InputLog, but omit deleted frames (which are represented by current selection)
+	// copy hot changes from source InputLog, but omit deleted frames (which are represented by the "frameset")
 	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
 	{
 		int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 		int frame = 0, pos = 0, source_pos = 0;
 		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
 		SelectionFrames::iterator it(frameset->begin());
-		SelectionFrames::iterator current_selection_end(frameset->end());
+		SelectionFrames::iterator frameset_end(frameset->end());
 		while (pos < this_size && source_pos < source_size)
 		{
-			if (it != current_selection_end && frame == *it)
+			if (it != frameset_end && frame == *it)
 			{
-				// this frame is selected
-				it++;
 				// omit the frame
+				it++;
 				source_pos += bytes;
 			} else
 			{
@@ -558,9 +400,9 @@ void INPUTLOG::inheritHotChanges_DeleteSelection(INPUTLOG* source_of_hotchanges,
 } 
 void INPUTLOG::inheritHotChanges_InsertSelection(INPUTLOG* source_of_hotchanges, SelectionFrames* frameset)
 {
-	// copy hot changes from source InputLog, but insert filled lines for inserted frames (which are represented by current selection)
+	// copy hot changes from source InputLog, but insert filled lines for inserted frames (which are represented by the "frameset")
 	SelectionFrames::iterator it(frameset->begin());
-	SelectionFrames::iterator current_selection_end(frameset->end());
+	SelectionFrames::iterator frameset_end(frameset->end());
 	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
 	{
 		int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
@@ -568,16 +410,16 @@ void INPUTLOG::inheritHotChanges_InsertSelection(INPUTLOG* source_of_hotchanges,
 		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
 		while (pos < this_size)
 		{
-			if (it != current_selection_end && frame == *it)
+			if (it != frameset_end && frame == *it)
 			{
-				// this frame is selected
+				// omit the frame
 				it++;
 				region_len++;
 				// set filled line to the frame
-				memset(&hot_changes[pos], 0xFF, bytes);
+				memset(&hot_changes[pos], BYTE_VALUE_CONTAINING_MAX_HOTCHANGES, bytes);
 			} else if (source_pos < source_size)
 			{
-				// this frame is not selected
+				// this frame should be copied
 				frame -= region_len;
 				region_len = 0;
 				// copy hotchanges of this frame
@@ -590,21 +432,21 @@ void INPUTLOG::inheritHotChanges_InsertSelection(INPUTLOG* source_of_hotchanges,
 		}
 	} else
 	{
-		// no old data, just fill selected lines
+		// no old data, just fill "frameset" lines
 		int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 		int frame = 0, region_len = 0, pos = 0;
 		int this_size = hot_changes.size();
 		while (pos < this_size)
 		{
-			if (it != current_selection_end && frame == *it)
+			if (it != frameset_end && frame == *it)
 			{
 				// this frame is selected
 				it++;
 				region_len++;
 				// set filled line to the frame
-				memset(&hot_changes[pos], 0xFF, bytes);
+				memset(&hot_changes[pos], BYTE_VALUE_CONTAINING_MAX_HOTCHANGES, bytes);
 				// exit loop when all frames in the Selection are handled
-				if (it == current_selection_end) break;
+				if (it == frameset_end) break;
 			} else
 			{
 				// this frame is not selected
@@ -661,11 +503,11 @@ void INPUTLOG::inheritHotChanges_InsertNum(INPUTLOG* source_of_hotchanges, int s
 			FadeHotChanges();
 	}
 	// fill the gap with max_hot lines on frames from "start" to "start+frames"
-	memset(&hot_changes[bytes * start], 0xFF, bytes * frames);
+	memset(&hot_changes[bytes * start], BYTE_VALUE_CONTAINING_MAX_HOTCHANGES, bytes * frames);
 }
 void INPUTLOG::inheritHotChanges_PasteInsert(INPUTLOG* source_of_hotchanges, SelectionFrames* inserted_set)
 {
-	// copy hot changes from source InputLog and insert filled lines for inserted frames (which are represented by inserted_set)
+	// copy hot changes from source InputLog and insert filled lines for inserted frames (which are represented by "inserted_set")
 	int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 	int frame = 0, pos = 0;
 	int this_size = hot_changes.size();
@@ -683,7 +525,7 @@ void INPUTLOG::inheritHotChanges_PasteInsert(INPUTLOG* source_of_hotchanges, Sel
 				// this frame was inserted
 				it++;
 				// set filled line to the frame
-				memset(&hot_changes[pos], 0xFF, bytes);
+				memset(&hot_changes[pos], BYTE_VALUE_CONTAINING_MAX_HOTCHANGES, bytes);
 			} else if (source_pos < source_size)
 			{
 				// copy hotchanges of this frame
@@ -704,7 +546,7 @@ void INPUTLOG::inheritHotChanges_PasteInsert(INPUTLOG* source_of_hotchanges, Sel
 				// this frame was inserted
 				it++;
 				// set filled line to the frame
-				memset(&hot_changes[pos], 0xFF, bytes);
+				memset(&hot_changes[pos], BYTE_VALUE_CONTAINING_MAX_HOTCHANGES, bytes);
 				pos += bytes;
 				// exit loop when all inserted_set frames are handled
 				if (it == inserted_set_end) break;
@@ -719,96 +561,18 @@ void INPUTLOG::inheritHotChanges_PasteInsert(INPUTLOG* source_of_hotchanges, Sel
 } 
 void INPUTLOG::fillHotChanges(INPUTLOG& their_log, int start, int end)
 {
-	// if these two InputLogs have different input_type (abnormal situation) then refuse to compare
-	if (their_log.input_type != input_type)
-		return;
-
 	// compare InputLogs to the specified end (or to the end of this InputLog)
 	if (end < 0 || end >= size) end = size-1;
-	int their_log_end = their_log.size;
-	switch(input_type)
+	uint8 my_joy, their_joy;
+	for (int joy = joysticks_per_frame[input_type] - 1; joy >= 0; joy--)
 	{
-		case INPUT_TYPE_FOURSCORE:
+		for (int frame = start; frame <= end; ++frame)
 		{
-			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
-			{
-				// consider changed if found different byte, or found emptiness in their_log when there's non-zero value here
-				if (frame < their_log_end)
-				{
-					if (joysticks[pos] != their_log.joysticks[pos])
-						SetMaxHotChange_Bits(frame, 0, joysticks[pos] ^ their_log.joysticks[pos]);
-					pos++;
-					if (joysticks[pos] != their_log.joysticks[pos])
-						SetMaxHotChange_Bits(frame, 1, joysticks[pos] ^ their_log.joysticks[pos]);
-					pos++;
-					if (joysticks[pos] != their_log.joysticks[pos])
-						SetMaxHotChange_Bits(frame, 2, joysticks[pos] ^ their_log.joysticks[pos]);
-					pos++;
-					if (joysticks[pos] != their_log.joysticks[pos])
-						SetMaxHotChange_Bits(frame, 3, joysticks[pos] ^ their_log.joysticks[pos]);
-					pos++;
-				} else
-				{
-					if (joysticks[pos])
-						SetMaxHotChange_Bits(frame, 0, joysticks[pos]);
-					pos++;
-					if (joysticks[pos])
-						SetMaxHotChange_Bits(frame, 1, joysticks[pos]);
-					pos++;
-					if (joysticks[pos])
-						SetMaxHotChange_Bits(frame, 2, joysticks[pos]);
-					pos++;
-					if (joysticks[pos])
-						SetMaxHotChange_Bits(frame, 3, joysticks[pos]);
-					pos++;
-				}
-			}
-			break;
-		}
-		case INPUT_TYPE_2P:
-		{
-			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
-			{
-				// consider changed if found different byte, or found emptiness in their_log when there's non-zero value here
-				if (frame < their_log_end)
-				{
-					if (joysticks[pos] != their_log.joysticks[pos])
-						SetMaxHotChange_Bits(frame, 0, joysticks[pos] ^ their_log.joysticks[pos]);
-					pos++;
-					if (joysticks[pos] != their_log.joysticks[pos])
-						SetMaxHotChange_Bits(frame, 1, joysticks[pos] ^ their_log.joysticks[pos]);
-					pos++;
-				} else
-				{
-					if (joysticks[pos])
-						SetMaxHotChange_Bits(frame, 0, joysticks[pos]);
-					pos++;
-					if (joysticks[pos])
-						SetMaxHotChange_Bits(frame, 1, joysticks[pos]);
-					pos++;
-				}
-			}
-			break;
-		}
-		case INPUT_TYPE_1P:
-		{
-			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
-			{
-				// consider changed if found different byte, or found emptiness in their_log when there's non-zero value here
-				if (frame < their_log_end)
-				{
-					if (joysticks[pos] != their_log.joysticks[pos])
-						SetMaxHotChange_Bits(frame, 0, joysticks[pos] ^ their_log.joysticks[pos]);
-					pos++;
-				} else
-				{
-					if (joysticks[pos])
-						SetMaxHotChange_Bits(frame, 0, joysticks[pos]);
-					pos++;
-				}
-			}
-			break;
-		}
+			my_joy = GetJoystickInfo(frame, joy);
+			their_joy = their_log.GetJoystickInfo(frame, joy);
+			if (my_joy != their_joy)
+				SetMaxHotChange_Bits(frame, joy, my_joy ^ their_joy);
+		}						
 	}
 }
 
@@ -816,53 +580,21 @@ void INPUTLOG::SetMaxHotChange_Bits(int frame, int joypad, uint8 joy_bits)
 {
 	uint8 mask = 1;
 	// check all 8 buttons and set max hot_changes for bits that are set
-	for (int i = 0; i < 8; ++i)
+	for (int i = 0; i < BUTTONS_PER_JOYSTICK; ++i)
 	{
 		if (joy_bits & mask)
-			SetMaxHotChange(frame, joypad * 8 + i);
+			SetMaxHotChange(frame, joypad * BUTTONS_PER_JOYSTICK + i);
 		mask <<= 1;
 	}
 }
 void INPUTLOG::SetMaxHotChange(int frame, int absolute_button)
 {
 	if (frame < 0 || frame >= size || !has_hot_changes) return;
-	// set max value (15) to the button hotness
-	switch(input_type)
-	{
-		case INPUT_TYPE_FOURSCORE:
-		{
-			// 32 buttons = 16bytes
-			if (absolute_button & 1)
-				// odd buttons (B, T, D, R) - set upper 4 bits of the byte 
-				hot_changes[(frame << 4) | (absolute_button >> 1)] |= 0xF0;
-			else
-				// even buttons (A, S, U, L) - set lower 4 bits of the byte 
-				hot_changes[(frame << 4) | (absolute_button >> 1)] |= 0x0F;
-			break;
-		}
-		case INPUT_TYPE_2P:
-		{
-			// 16 buttons = 8bytes
-			if (absolute_button & 1)
-				// odd buttons (B, T, D, R) - set upper 4 bits of the byte 
-				hot_changes[(frame << 3) | (absolute_button >> 1)] |= 0xF0;
-			else
-				// even buttons (A, S, U, L) - set lower 4 bits of the byte 
-				hot_changes[(frame << 3) | (absolute_button >> 1)] |= 0x0F;
-			break;
-		}
-		case INPUT_TYPE_1P:
-		{
-			// 8 buttons = 4bytes
-			if (absolute_button & 1)
-				// odd buttons (B, T, D, R) - set upper 4 bits of the byte 
-				hot_changes[(frame << 2) | (absolute_button >> 1)] |= 0xF0;
-			else
-				// even buttons (A, S, U, L) - set lower 4 bits of the byte 
-				hot_changes[(frame << 2) | (absolute_button >> 1)] |= 0x0F;
-			break;
-		}
-	}
+	// set max value to the button hotness
+	if (absolute_button & 1)
+		hot_changes[frame * (HOTCHANGE_BYTES_PER_JOY * joysticks_per_frame[input_type]) + (absolute_button >> 1)] |= BYTE_VALUE_CONTAINING_MAX_HOTCHANGE_HI;
+	else
+		hot_changes[frame * (HOTCHANGE_BYTES_PER_JOY * joysticks_per_frame[input_type]) + (absolute_button >> 1)] |= BYTE_VALUE_CONTAINING_MAX_HOTCHANGE_LO;
 }
 
 void INPUTLOG::FadeHotChanges(int start_byte, int end_byte)
@@ -874,11 +606,11 @@ void INPUTLOG::FadeHotChanges(int start_byte, int end_byte)
 	{
 		if (hot_changes[i])
 		{
-			hi_half = hot_changes[i] >> 4;
-			low_half = hot_changes[i] & 15;
+			hi_half = hot_changes[i] >> HOTCHANGE_BITS_PER_VALUE;
+			low_half = hot_changes[i] & HOTCHANGE_BITMASK;
 			if (hi_half) hi_half--;
 			if (low_half) low_half--;
-			hot_changes[i] = (hi_half << 4) | low_half;
+			hot_changes[i] = (hi_half << HOTCHANGE_BITS_PER_VALUE) | low_half;
 		}
 	}
 }
@@ -888,34 +620,13 @@ int INPUTLOG::GetHotChangeInfo(int frame, int absolute_button)
 	if (!has_hot_changes || frame < 0 || frame >= size || absolute_button < 0 || absolute_button >= NUM_JOYPAD_BUTTONS * joysticks_per_frame[input_type])
 		return 0;
 
-	uint8 val;
-	switch(input_type)
-	{
-		case INPUT_TYPE_FOURSCORE:
-		{
-			// 32 buttons, 16bytes
-			val = hot_changes[(frame << 4) + (absolute_button >> 1)];
-			break;
-		}
-		case INPUT_TYPE_2P:
-		{
-			// 16 buttons, 8bytes
-			val = hot_changes[(frame << 3) + (absolute_button >> 1)];
-			break;
-		}
-		case INPUT_TYPE_1P:
-		{
-			// 8 buttons, 4bytes
-			val = hot_changes[(frame << 2) + (absolute_button >> 1)];
-			break;
-		}
-	}
+	uint8 val = hot_changes[frame * (HOTCHANGE_BYTES_PER_JOY * joysticks_per_frame[input_type]) + (absolute_button >> 1)];
 
 	if (absolute_button & 1)
-		// odd buttons (B, T, D, R) - upper 4 bits of the byte 
-		return val >> 4;
+		// odd buttons (B, T, D, R) take upper 4 bits of the byte 
+		return val >> HOTCHANGE_BITS_PER_VALUE;
 	else
-		// even buttons (A, S, U, L) - lower 4 bits of the byte 
-		return val & 15;
+		// even buttons (A, S, U, L) take lower 4 bits of the byte 
+		return val & HOTCHANGE_BITMASK;
 }
 
