@@ -400,10 +400,10 @@ void GREENZONE::AdjustUp()
 	// reduce Piano Roll
 	piano_roll.UpdateItemCount();
 	// register changes
-	int first_input_chanes = history.RegisterAdjustLag(at, -1);
+	int first_input_changes = history.RegisterAdjustLag(at, -1);
 	// if Input in the frame above currFrameCounter has changed then invalidate Greenzone (rewind 1 frame back)
 	// also if the frame above currFrameCounter is lag frame then rewind 1 frame (invalidate Greenzone), because maybe this frame also needs lag removal
-	if ((first_input_chanes >= 0 && first_input_chanes < currFrameCounter) || (laglog.GetLagInfoAtFrame(at) != LAGGED_NO))
+	if ((first_input_changes >= 0 && first_input_changes < currFrameCounter) || (laglog.GetLagInfoAtFrame(at) != LAGGED_NO))
 	{
 		// custom invalidation procedure, not retriggering LostPosition/PauseFrame
 		Invalidate(at);

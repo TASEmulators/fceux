@@ -1,4 +1,9 @@
+05-Nov-2012 - zeromus - support mapper 028
+05-Nov-2012 - AnS - Taseditor: fixed lag adjustments when dealing with previously unknown lag state
+30-Oct-2012 - zeromus - default stack pointer to $FD instead of $FF
+29-Oct-2012 - CaH4e3 - mapper 252 added
 29-Oct-2012 - AnS - Taseditor: update RAM Search and RAM Watch when jumping causes game state to change
+21-Oct-2012 - CaH4e3 - sync mappers with fceu-mm
 30-Sep-2012 - AnS - added "(Europe)" and "(PAL)" strings to region detection
 28-Sep-2012 - AnS - Hexeditor: Ctrl+F opens Find dialog
 28-Sep-2012 - AnS - Hexeditor: display 0x5000-0x5FFF contents
@@ -6,7 +11,7 @@
 26-Sep-2012 - AnS - Debugger: "Name" button in Bookmarks, total revamp of Bookmarks
 26-Sep-2012 - AnS - Debugger: single click on any address copies this address to the "Seek To" field and "Bookmark Add" field
 26-Sep-2012 - AnS - Fixed replay engine bug that doubles the last input of the movie
-26-Sep-2012 - AnS - Tracer: RTS instructions output caller address/name
+26-Sep-2012 - AnS - Tracer: "RTS" instructions now output the subroutine address/name
 23-Sep-2012 - AnS - Lua: clear previous frame drawings at the beginning of every frame
 23-Sep-2012 - AnS - Debugger: fixed mouseover when using Symbolic debug; mouseover works for the disassembly window too
 23-Sep-2012 - CaH4e3 - CDLogger: Now can log VROM access (CHR banks of the ROM) when NewPPU is enabled
@@ -39,7 +44,7 @@
 08-Aug-2012 - AnS - Debugger: improved stack display
 08-Aug-2012 - AnS - Debugger: doubleclick on the disassembly prompts "Add Execute breakpoint" dialog
 08-Aug-2012 - AnS - Debugger: fixed RAM peek by a rightclick on left pane
-08-Aug-2012 - AnS - Debugger: ">" shows current line in disassembly
+08-Aug-2012 - AnS - Debugger: ">" points at current line in disassembly
 08-Aug-2012 - AnS - Debugger: show the number of breakpoints (enabled and total) above the breakpoints list
 06-Aug-2012 - CaH4e3 - fixed bug when loading UNF games (#525 )
 06-Aug-2012 - AnS - Tracer also updates its window when user pauses the game, not just when Debugger snaps

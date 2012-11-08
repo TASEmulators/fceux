@@ -1,6 +1,6 @@
 //#include <windows.h>
 //
-void DoCDLogger();
+bool DoCDLogger();
 void UpdateCDLogger();
 //void LogPCM(int romaddress); //No longer used
 //

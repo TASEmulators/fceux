@@ -668,18 +668,24 @@ void EnableTracerMenuItems(void){
 }
 
 //this returns 1 if the CD logger is activated when needed, or 0 if the user selected no, not to activate it
-int PromptForCDLogger(void){
-	if((logging_options & (LOG_NEW_INSTRUCTIONS|LOG_NEW_DATA)) && (!FCEUI_GetLoggingCD())){
-		if(MessageBox(hTracer,"In order for some of the features you have selected to take effect,\
+int PromptForCDLogger(void)
+{
+	if ((logging_options & (LOG_NEW_INSTRUCTIONS|LOG_NEW_DATA)) && (!FCEUI_GetLoggingCD()))
+	{
+		if (MessageBox(hTracer,"In order for some of the features you have selected to take effect,\
  the Code/Data Logger must also be running.\
  Would you like to Start the Code/Data Logger Now?","Start Code/Data Logger?",
-			MB_YESNO) == IDYES){
-			DoCDLogger();
-			FCEUI_SetLoggingCD(1);
-			SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Pause");
-			return 1;
+			MB_YESNO) == IDYES)
+		{
+			if (DoCDLogger())
+			{
+				FCEUI_SetLoggingCD(1);
+				SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Pause");
+				return 1;
+			}
+			return 0; // CDLogger couldn't start, probably because the game is closed
 		}
-		return 0; //user selected no so 0 is returned
+		return 0; // user selected no so 0 is returned
 	}
 	return 1;
 }

@@ -297,11 +297,13 @@ void SaveCDLogFile(){ //todo make this button work before you've saved as
 	fclose(FP);
 }
 
-void DoCDLogger()
+// returns false if refused to start
+bool DoCDLogger()
 {
-	if (!GameInfo) {
+	if (!GameInfo)
+	{
 		FCEUD_PrintError("You must have a game loaded before you can use the Code Data Logger.");
-		return;
+		return false;
 	}
 
 	if(!hCDLogger)
@@ -312,9 +314,11 @@ void DoCDLogger()
 		ShowWindow(hCDLogger, SW_SHOWNORMAL);
 		SetForegroundWindow(hCDLogger);
 	}
+	return true;
 }
 
-void UpdateCDLogger(){
+void UpdateCDLogger()
+{
 	if(!hCDLogger)return;
 
 	char str[50];
@@ -343,8 +347,10 @@ void UpdateCDLogger(){
 	return;
 }
 
-void SaveStrippedRom(int invert){ //this is based off of iNesSave()
-	//todo: make this support nsfs
+void SaveStrippedRom(int invert)
+{
+	//this is based off of iNesSave()
+	//todo: make this support NSFs
 	const char NESfilter[]="Stripped iNes Rom file (*.NES)\0*.nes\0All Files (*.*)\0*.*\0\0";
 	const char NSFfilter[]="Stripped NSF file (*.NSF)\0*.nsf\0All Files (*.*)\0*.*\0\0";
 	char sromfilename[MAX_PATH];
@@ -352,12 +358,17 @@ void SaveStrippedRom(int invert){ //this is based off of iNesSave()
 	OPENFILENAME ofn;
 	int i;
 
-	if (GameInfo->type==GIT_NSF) {
+	if (!GameInfo)
+		return;
+
+	if (GameInfo->type==GIT_NSF)
+	{
 		MessageBox(NULL, "Sorry, you're not allowed to save optimized NSFs yet. Please don't optimize individual banks, as there are still some issues with several NSFs to be fixed, and it is easier to fix those issues with as much of the bank data intact as possible.", "Disallowed", MB_OK);
 		return;
 	}
 
-	if(codecount == 0){
+	if(codecount == 0)
+	{
 		MessageBox(NULL, "Unable to Generate Stripped Rom. Get Something Logged and try again.", "Error", MB_OK);
 		return;
 	}
