@@ -94,11 +94,11 @@ void GREENZONE::CollectCurrentState()
 		{
 			if ((old_lagFlag == LAGGED_YES) && !lagFlag)
 			{
-				// there's no more lag on previous frame - shift Input up
+				// there's no more lag on previous frame - shift Input up 1 or more frames
 				AdjustUp();
 			} else if ((old_lagFlag == LAGGED_NO) && lagFlag)
 			{
-				// there's new lag on previous frame - shift Input down
+				// there's new lag on previous frame - shift Input down 1 frame
 				AdjustDown();
 			}
 		} else
@@ -135,7 +135,7 @@ void GREENZONE::RunGreenzoneCleaning()
 	{
 		if ((i & 0x1) && savestates[i].size())
 		{
-			ClearSavestate(i);
+			ClearSavestateAndFreeMemory(i);
 			changed = true;
 		}
 	}
@@ -147,7 +147,7 @@ void GREENZONE::RunGreenzoneCleaning()
 	{
 		if ((i & 0x3) && savestates[i].size())
 		{
-			ClearSavestate(i);
+			ClearSavestateAndFreeMemory(i);
 			changed = true;
 		}
 	}
@@ -159,7 +159,7 @@ void GREENZONE::RunGreenzoneCleaning()
 	{
 		if ((i & 0x7) && savestates[i].size())
 		{
-			ClearSavestate(i);
+			ClearSavestateAndFreeMemory(i);
 			changed = true;
 		}
 	}
@@ -171,7 +171,7 @@ void GREENZONE::RunGreenzoneCleaning()
 	{
 		if ((i & 0xF) && savestates[i].size())
 		{
-			ClearSavestate(i);
+			ClearSavestateAndFreeMemory(i);
 			changed = true;
 		}
 	}
@@ -180,7 +180,7 @@ void GREENZONE::RunGreenzoneCleaning()
 	{
 		if (savestates[i].size())
 		{
-			ClearSavestate(i);
+			ClearSavestateAndFreeMemory(i);
 			changed = true;
 		}
 	}
@@ -197,6 +197,11 @@ finish:
 void GREENZONE::ClearSavestate(int index)
 {
     savestates[index].resize(0);
+}
+
+void GREENZONE::ClearSavestateAndFreeMemory(int index)
+{
+    savestates[index].swap(std::vector<uint8>());
 }
 
 void GREENZONE::save(EMUFILE *os, bool really_save)
@@ -385,42 +390,51 @@ error:
 void GREENZONE::AdjustUp()
 {
 	int at = currFrameCounter - 1;		// at = the frame above currFrameCounter
-	bool markers_changed = false;
-	// delete one frame of lag
-	currMovieData.records.erase(currMovieData.records.begin() + at);
-	laglog.EraseFrame(at);
-	if (taseditor_config.bind_markers)
+	// find how many consequent lag frames there are
+	int num_frames_to_erase = 0;
+	while (laglog.GetLagInfoAtFrame(at++) == LAGGED_YES)
+		num_frames_to_erase++;
+
+	if (num_frames_to_erase > 0)
 	{
-		if (markers_manager.EraseMarker(at))
-			markers_changed = true;
+		bool markers_changed = false;
+		// delete these frames of lag
+		currMovieData.records.erase(currMovieData.records.begin() + (currFrameCounter - 1), currMovieData.records.begin() + (currFrameCounter - 1 + num_frames_to_erase));
+		laglog.EraseFrame(currFrameCounter - 1, num_frames_to_erase);
+		if (taseditor_config.bind_markers)
+		{
+			if (markers_manager.EraseMarker(currFrameCounter - 1, num_frames_to_erase))
+				markers_changed = true;
+		}
+		// update movie data size, because Playback cursor must always be inside the movie
+		// if movie length is less or equal to currFrame, pad it with empty frames
+		if (((int)currMovieData.records.size() - 1) <= currFrameCounter)
+			currMovieData.insertEmpty(-1, currFrameCounter - ((int)currMovieData.records.size() - 1));
+		// update Piano Roll (reduce it if needed)
+		piano_roll.UpdateItemCount();
+		// register changes
+		int first_input_changes = history.RegisterAdjustLag(currFrameCounter - 1, 0 - num_frames_to_erase);
+		// if Input in the frame above currFrameCounter has changed then invalidate Greenzone (rewind 1 frame back)
+		// also if the frame above currFrameCounter is lag frame then rewind 1 frame (invalidate Greenzone), because maybe this frame also needs lag removal
+		if ((first_input_changes >= 0 && first_input_changes < currFrameCounter) || (laglog.GetLagInfoAtFrame(currFrameCounter - 1) != LAGGED_NO))
+		{
+			// custom invalidation procedure, not retriggering LostPosition/PauseFrame
+			Invalidate(first_input_changes);
+			bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
+			int saved_pause_frame = playback.GetPauseFrame();
+			playback.jump(first_input_changes);
+			if (saved_pause_frame >= 0)
+				playback.SeekingStart(saved_pause_frame);
+			if (emu_was_paused)
+				playback.PauseEmulation();
+		} else
+		{
+			// just invalidate Greenzone after currFrameCounter (this is necessary in order to force user to re-emulate everything after the point, because the lag log data after the currFrameCounter is now in unknown state and it should be collected again)
+			Invalidate(currFrameCounter);
+		}
+		if (markers_changed)
+			selection.must_find_current_marker = playback.must_find_current_marker = true;
 	}
-	// check if user deleted all frames
-	if (!currMovieData.getNumRecords())
-		playback.StartFromZero();
-	// reduce Piano Roll
-	piano_roll.UpdateItemCount();
-	// register changes
-	int first_input_changes = history.RegisterAdjustLag(at, -1);
-	// if Input in the frame above currFrameCounter has changed then invalidate Greenzone (rewind 1 frame back)
-	// also if the frame above currFrameCounter is lag frame then rewind 1 frame (invalidate Greenzone), because maybe this frame also needs lag removal
-	if ((first_input_changes >= 0 && first_input_changes < currFrameCounter) || (laglog.GetLagInfoAtFrame(at) != LAGGED_NO))
-	{
-		// custom invalidation procedure, not retriggering LostPosition/PauseFrame
-		Invalidate(at);
-		bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
-		int saved_pause_frame = playback.GetPauseFrame();
-		playback.jump(at);
-		if (saved_pause_frame >= 0)
-			playback.SeekingStart(saved_pause_frame);
-		if (emu_was_paused)
-			playback.PauseEmulation();
-	} else
-	{
-		// just invalidate Greenzone after currFrameCounter
-		Invalidate(currFrameCounter);
-	}
-	if (markers_changed)
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
 }
 void GREENZONE::AdjustDown()
 {
@@ -436,14 +450,16 @@ void GREENZONE::AdjustDown()
 	}
 	// register changes
 	int first_input_chanes = history.RegisterAdjustLag(at, +1);
-	// if Input in the frame above currFrameCounter has changed then invalidate Greenzone (rewind 1 frame back)
+	// If Input in the frame above currFrameCounter has changed then invalidate Greenzone (rewind 1 frame back)
+	// This should never actually happen, because we clone the frame, so the Input doesn't change
+	// But the check should remain, in case we decide to insert blank frame instead of cloning
 	if (first_input_chanes >= 0 && first_input_chanes < currFrameCounter)
 	{
 		// custom invalidation procedure, not retriggering LostPosition/PauseFrame
-		Invalidate(at);
+		Invalidate(first_input_chanes);
 		bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
 		int saved_pause_frame = playback.GetPauseFrame();
-		playback.jump(at);
+		playback.jump(first_input_chanes);
 		if (saved_pause_frame >= 0)
 			playback.SeekingStart(saved_pause_frame);
 		if (emu_was_paused)

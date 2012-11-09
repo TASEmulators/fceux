@@ -46,7 +46,7 @@ public:
 	void ClearMarker(int frame);
 	void ToggleMarker(int frame);
 
-	bool EraseMarker(int frame);
+	bool EraseMarker(int frame, int frames = 1);
 	bool insertEmpty(int at, int frames);
 
 	int GetNotesSize();

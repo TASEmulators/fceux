@@ -134,12 +134,24 @@ void LAGLOG::SetLagInfo(int frame, bool lagFlag)
 
 	already_compressed = false;
 }
-void LAGLOG::EraseFrame(int frame)
+void LAGLOG::EraseFrame(int frame, int frames)
 {
 	if (frame < (int)lag_log.size())
-		lag_log.erase(lag_log.begin() + frame);
-
-	already_compressed = false;
+	{
+		if (frames == 1)
+		{
+			// erase 1 frame
+			lag_log.erase(lag_log.begin() + frame);
+			already_compressed = false;
+		} else if (frames > 1)
+		{
+			// erase many frames
+			if (frame + frames > (int)lag_log.size())
+				frames = (int)lag_log.size() - frame;
+			lag_log.erase(lag_log.begin() + frame, lag_log.begin() + (frame + frames));
+			already_compressed = false;
+		}
+	}
 }
 void LAGLOG::InsertFrame(int frame, bool lagFlag, int frames)
 {

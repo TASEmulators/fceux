@@ -32,6 +32,7 @@ public:
 
 	void RunGreenzoneCleaning();
 	void ClearSavestate(int index);
+	void ClearSavestateAndFreeMemory(int index);
 
 	void InvalidateAndCheck(int after);
 	void Invalidate(int after);

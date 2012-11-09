@@ -665,7 +665,7 @@ int HISTORY::RegisterAdjustLag(int start, int size)
 		{
 			if (size < 0)
 				// it was Adjust Up
-				snap.inputlog.inheritHotChanges_DeleteNum(&snapshots[real_pos].inputlog, start, 1, false);
+				snap.inputlog.inheritHotChanges_DeleteNum(&snapshots[real_pos].inputlog, start, 0 - size, false);
 			else
 				// it was Adjust Down
 				snap.inputlog.inheritHotChanges_InsertNum(&snapshots[real_pos].inputlog, start, 1, false);

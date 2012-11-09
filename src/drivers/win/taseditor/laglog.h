@@ -21,7 +21,7 @@ public:
 	void InvalidateFrom(int frame);
 
 	void SetLagInfo(int frame, bool lagFlag);
-	void EraseFrame(int frame);
+	void EraseFrame(int frame, int frames = 1);
 	void InsertFrame(int frame, bool lagFlag, int frames = 1);
 
 	int GetSize();

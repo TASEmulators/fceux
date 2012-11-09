@@ -965,11 +965,11 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 void FCEUMOV_AddInputState()
 {
 #ifdef _WIN32
-	if(movieMode == MOVIEMODE_TASEDITOR)
+	if (movieMode == MOVIEMODE_TASEDITOR)
 	{
 		// if movie length is less or equal to currFrame, pad it with empty frames
-		if((int)currMovieData.records.size()-1 <= currFrameCounter)
-			currMovieData.insertEmpty(-1, 2 + currFrameCounter - (int)currMovieData.records.size());
+		if (((int)currMovieData.records.size() - 1) < (currFrameCounter + 1))
+			currMovieData.insertEmpty(-1, (currFrameCounter + 1) - ((int)currMovieData.records.size() - 1));
 
 		MovieRecord* mr = &currMovieData.records[currFrameCounter];
 		if (TaseditorIsRecording())

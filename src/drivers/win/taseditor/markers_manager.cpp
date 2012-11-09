@@ -212,22 +212,43 @@ void MARKERS_MANAGER::ToggleMarker(int frame)
 	}
 }
 
-bool MARKERS_MANAGER::EraseMarker(int frame)
+bool MARKERS_MANAGER::EraseMarker(int frame, int frames)
 {
 	bool markers_changed = false;
 	if (frame < (int)markers.markers_array.size())
 	{
-		// if there's a Marker, first clear it
-		if (markers.markers_array[frame])
+		if (frames == 1)
 		{
-			ClearMarker(frame);
-			markers_changed = true;
+			// erase 1 frame
+			// if there's a Marker, first clear it
+			if (markers.markers_array[frame])
+			{
+				ClearMarker(frame);
+				markers_changed = true;
+			}
+			// erase 1 frame
+			markers.markers_array.erase(markers.markers_array.begin() + frame);
+		} else
+		{
+			// erase many frames
+			if (frame + frames > (int)markers.markers_array.size())
+				frames = (int)markers.markers_array.size() - frame;
+			// if there are Markers at those frames, first clear them
+			for (int i = frame; i < (frame + frames); ++i)
+			{
+				if (markers.markers_array[i])
+				{
+					ClearMarker(i);
+					markers_changed = true;
+				}
+			}
+			// erase frames
+			markers.markers_array.erase(markers.markers_array.begin() + frame, markers.markers_array.begin() + (frame + frames));
 		}
-		// erase 1 frame
-		markers.markers_array.erase(markers.markers_array.begin() + frame);
+		// check if there were some Markers after this frame
+		// since these Markers were shifted, markers_changed should be set to true
 		if (!markers_changed)
 		{
-			// check if there were some Markers after this frame
 			for (int i = markers.markers_array.size() - 1; i >= frame; i--)
 			{
 				if (markers.markers_array[i])
