@@ -178,6 +178,7 @@
 	{0x5b457641,	157,		8},	/* Datach Ultraman Club */
 	{0xf51a7f46,	157,		8},	/* Datach Yuu Yuu Hakusho */
 	{0x58152b42,	160,		1},	/* Pipe 5 (Sachen) */
+	{0x1c098942,	162,	   -1}, /* Xi You Ji Hou Zhuan (Ch) */
 	{0x081caaff,	163,	   -1},	/* Commandos (Ch) */
 	{0x02c41438,	176,	   -1},	/* Xing He Zhan Shi (C) */
 	{0x558c0dc3,	178,	   -1},	/* Super 2in1 (unl)[!] {mapper unsupported} */
@@ -226,11 +227,21 @@
 	{0xd323b806,	210,		1},	/* Wagyan Land 3 */
 	{0xbd523011,	210,		2},	/* Dream Master */
 	{0x5daae69a,	211,	   -1},	/* Aladdin - Return of Jaffar, The (Unl) [!] */
+	{0x046d70cc,    217,       -1}, /* 500-in-1 (Anim Splash, Alt Mapper)[p1][!] */
+	{0x12f86a4d,    217,       -1}, /* 500-in-1 (Static Splash, Alt Mapper)[p1][!] */
+	{0xd09f778d,    217,       -1}, /* 9999999-in-1 (Static Splash, Alt Mapper)[p1][!] */
 	{0x62ef6c79,	232,		8},	/* Quattro Sports -Aladdin */
 	{0x2705eaeb,	234,	   -1},	/* Maxi 15 */
 	{0x6f12afc5,	235,	   -1},	/* Golden Game 150-in-1 */
 	{0xfb2b6b10,	241,	   -1},	/* Fan Kong Jing Ying (Ch) */
 	{0xb5e83c9a,	241,	   -1},	/* Xing Ji Zheng Ba (Ch) */
+	{0x2537b3e6,    241,       -1}, /* Dance Xtreme - Prima (Unl) */
+	{0x11611e89,    241,       -1}, /* Darkseed (Unl) [p1] */
+	{0x81a37827,    241,       -1}, /* Darkseed (Unl) [p1][b1] */
+	{0xc2730c30,    241,       -1}, /* Deadly Towers (U) [!] */
+	{0x368c19a8,    241,       -1}, /* LIKO Study Cartridge 3-in-1 (Unl) [!] */
+	{0xa21e675c,    241,       -1}, /* Mashou (J) [!] */
+	{0x54d98b79,    241,       -1}, /* Titanic 1912 (Unl) */
 	{0x6bea1235,	245,	   -1},	/* MMC3 cart, but with nobanking applied to CHR-RAM, so let it be there */
 	{0x345ee51a,	245,	   -1},	/* DQ4c */
 	{0x57514c6c,	245,	   -1},	/* Yong Zhe Dou E Long - Dragon Quest VI (Ch) */

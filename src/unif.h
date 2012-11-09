@@ -20,6 +20,7 @@
 
 void AC08_Init(CartInfo *info);
 void ANROM_Init(CartInfo *info);
+void BMC11160_Init(CartInfo *info);
 void BMC12IN1_Init(CartInfo *info);
 void BMC13in1JY110_Init(CartInfo *info);
 void BMC190in1_Init(CartInfo *info);
@@ -34,6 +35,7 @@ void BMCBS5_Init(CartInfo *info);
 void BMCD1038_Init(CartInfo *info);
 void BMCFK23CA_Init(CartInfo *info);
 void BMCFK23C_Init(CartInfo *info);
+void BMCG146_Init(CartInfo *info);
 void BMCGK192_Init(CartInfo *info);
 void BMCGS2004_Init(CartInfo *info);
 void BMCGS2013_Init(CartInfo *info);

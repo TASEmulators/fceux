@@ -42,7 +42,7 @@ static void LatchPower(void) {
 	if (WRAM) {
 		SetReadHandler(0x6000, 0xFFFF, CartBR);
 		SetWriteHandler(0x6000, 0x7FFF, CartBW);
-	}else {
+	} else {
 		SetReadHandler(0x8000, 0xFFFF, CartBR);
 	}
 	SetWriteHandler(addrreg0, addrreg1, LatchWrite);
@@ -226,7 +226,7 @@ void Mapper38_Init(CartInfo *info) {
 //------------------ Map 66 ---------------------------
 
 static void MHROMSync(void) {
-	
+
 	setprg32(0x8000, latche >> 4);
 	setchr8(latche & 0xf);
 }
@@ -478,3 +478,16 @@ void BMCA65AS_Init(CartInfo *info) {
 	Latch_Init(info, BMCA65ASSync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
+//------------------ BMC-11160 ---------------------------
+// Simple BMC discrete mapper by TXC
+
+static void BMC11160Sync(void) {
+	uint32 bank = (latche >> 4) & 7;
+	setprg32(0x8000, bank);
+	setchr8((bank << 2) | (latche & 3));
+	setmirror((latche >> 7) & 1);
+}
+
+void BMC11160_Init(CartInfo *info) {
+	Latch_Init(info, BMC11160Sync, 0, 0x8000, 0xFFFF, 0, 0);
+}

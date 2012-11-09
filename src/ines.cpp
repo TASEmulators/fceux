@@ -551,7 +551,7 @@ static BMAPPINGLocal bmap[] = {
 	{"Konami VRC2/VRC4",	 25, Mapper25_Init},
 //	{"",					 26, Mapper26_Init},
 //	{"",					 27, Mapper27_Init},	// Deprecated, dupe for VRC2/VRC4 mapper
-	{"INL-ROM",					 28, Mapper28_Init},
+	{"INL-ROM",				 28, Mapper28_Init},
 //	{"",					 29, Mapper29_Init},
 //	{"",					 30, Mapper30_Init},
 //	{"",					 31, Mapper31_Init},
@@ -740,7 +740,7 @@ static BMAPPINGLocal bmap[] = {
 	{"",					214, Mapper214_Init},
 	{"",					215, UNL8237_Init},
 	{"",					216, Mapper216_Init},
-//	{"",					217, UNL8237A_Init},
+	{"",					217, Mapper217_Init},	// Redefined to a new Discrete BMC mapper
 //	{"",					218, Mapper218_Init},
 	{"UNLA9746",			219, UNLA9746_Init},
 	{"Debug Mapper",		220, UNLKS7057_Init},
@@ -774,11 +774,11 @@ static BMAPPINGLocal bmap[] = {
 //	{"",					248, Mapper248_Init},
 	{"",					249, Mapper249_Init},
 	{"",					250, Mapper250_Init},
-//	{"",					251, Mapper251_Init},
+//	{"",					251, Mapper251_Init},	// No good dumps for this mapper, use UNIF version
 	{"SAN GUO ZHI PIRATE",	252, Mapper252_Init},
 	{"DRAGON BALL PIRATE",	253, Mapper253_Init},
 	{"",					254, Mapper254_Init},
-//	{"",					255, Mapper255_Init},	// Doesn't have any good dump for this mapper
+//	{"",					255, Mapper255_Init},	// No good dumps for this mapper
 	{"",					0, NULL}
 };
 
