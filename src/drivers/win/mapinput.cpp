@@ -455,7 +455,9 @@ void PopulateConflictTable(int* conflictTable)
 		for(unsigned int j = i + 1; j < EMUCMD_MAX; ++j)
 		{
 			if(FCEUD_CommandMapping[i] &&
-				FCEUD_CommandMapping[i] == FCEUD_CommandMapping[j])
+				FCEUD_CommandMapping[i] == FCEUD_CommandMapping[j] &&
+				 // AnS: added the condition that both commands must have the same EMUCMDFLAG_TASEDITOR, or else they are not considered conflicting
+				 (FCEUI_CommandTable[i].flags & EMUCMDFLAG_TASEDITOR) == (FCEUI_CommandTable[j].flags & EMUCMDFLAG_TASEDITOR))
 			{
 				conflictTable[i] = 1;
 				conflictTable[j] = 1;

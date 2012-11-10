@@ -75,7 +75,7 @@ void KeyboardUpdateState(void)
 	int notAlternateThrottle = !(soundoptions&SO_OLDUP) && soundo && ((NoWaiting&1)?(256*16):fps_scale) >= 64;
 #define KEY_REPEAT_INITIAL_DELAY ((!notAlternateThrottle) ? (16) : (64)) // must be >= 0 and <= 255
 #define KEY_REPEAT_REPEATING_DELAY (6) // must be >= 1 and <= 255
-#define KEY_JUST_DOWN_DURATION (4) // must be >= 1 and <= 255
+#define KEY_JUST_DOWN_DURATION (1) // must be >= 1 and <= 255	// AnS: changed to 1 to disallow unwanted hits of e.g. F1 after pressing Shift+F1 and quickly releasing Shift
 
 	for(int i = 0 ; i < 256 ; i++)
 		if(tk[i])
