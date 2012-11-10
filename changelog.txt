@@ -1,3 +1,5 @@
+10-Nov-2012 - AnS - win32 hotkeys mapping: added the condition that both commands must have the same EMUCMDFLAG_TASEDITOR, or else they are not considered conflicting
+10-Nov-2012 - AnS - win32 hotkeys: disallow unwanted hits of e.g. F1 after pressing Shift+F1 and quickly releasing Shift
 05-Nov-2012 - zeromus - support mapper 028
 05-Nov-2012 - AnS - Taseditor: fixed lag adjustments when dealing with previously unknown lag state
 30-Oct-2012 - zeromus - default stack pointer to $FD instead of $FF
