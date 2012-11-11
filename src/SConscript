@@ -35,7 +35,6 @@ fir
 input
 utils
 mappers
-lua
 """)
 #palettes
 
@@ -44,6 +43,8 @@ Export('env')
 
 if env['LUA']:
   file_list.append('lua-engine.cpp')
+  if env['SYSTEM_LUA'] == 0:
+    subdirs.append('lua')
 
 if env['CREATE_AVI']:
   subdirs.append('drivers/videolog')

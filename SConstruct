@@ -3,6 +3,8 @@
 #
 # You can adjust the BoolVariables below to include/exclude features at compile-time
 #
+# You may need to wipe the scons cache ("scons -c") and recompile for some options to take effect.
+#
 # Use "scons" to compile and "scons install" to install.
 #
 
@@ -17,9 +19,10 @@ opts.AddVariables(
   BoolVariable('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
   BoolVariable('DEBUG',     'Build with debugging symbols', 1),
   BoolVariable('LUA',       'Enable Lua support', 1),
+  BoolVariable('SYSTEM_LUA','Use system lua instead of static lua provided with fceux', 1),
   BoolVariable('NEWPPU',    'Enable new PPU core', 1),
   BoolVariable('CREATE_AVI', 'Enable avi creation support (SDL only)', 1),
-  BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', '1'),
+  BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', 1),
   BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 1),
   BoolVariable('GTK3', 'Enable GTK3 GUI (SDL only)', 0),
   BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 0)
