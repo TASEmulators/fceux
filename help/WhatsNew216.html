@@ -56,7 +56,7 @@
 <p>Released -- ???? 2012</p>
 <p><br/></p>
 <p><br/></p>
-<p>The 2.1.6 release fixes a lot of bugs and adds many new features to prior releases, <span class="rvts22">increasing game compatibility and enhancing usability of both Windows and SDL ports</span>. The most notable features of Windows version are proper fullscreen support and major improvement of debugging tools. This version also introduces new powerful toolset – TAS Editor v1.0 – created to boost efficiency and ease of Tool-Assisted Speedrunning.</p>
+<p>The 2.1.6 release fixes a lot of bugs and adds many new features to prior releases, <span class="rvts22">increasing game compatibility and enhancing usability of both Windows and SDL ports</span>. Some of the most notable features of Windows version are proper fullscreen support and major improvement of debugging tools. This version also introduces the new powerful toolset – TAS Editor v1.0 – created to boost efficiency and ease of Tool-Assisted Speedrunning.</p>
 <p><span class="rvts24"><br/></span></p>
 <p><span class="rvts23">Common </span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
@@ -72,16 +72,15 @@
 <p><span class="rvts24"><br/></span></p>
 <p><span class="rvts24">Emulation</span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">PAL/NTSC noise bug fixed</span></li>
-<li><span class="rvts22">Fixed newppu bug which prevented metroid from booting, CHR RAM was not getting initialized to anything</span></li>
-<li><span class="rvts22">Newppu - fix bug in scroll reg logic causing mis-scrolls in p'radikus conflict</span></li>
+<li><span class="rvts22">PAL/NTSC noise channel bug fixed</span></li>
 <li><span class="rvts22">All latest mapper changes from fceu-mm</span></li>
-<li><span class="rvts22">Also added mappers 176, 116, 156</span></li>
-<li><span class="rvts22">Fixed mappers 242, 227, 115, 248, 12, 164, 15, 253, 23, 178, 90, 73</span></li>
+<li><span class="rvts22">Also added mappers 176, 116, 156, 252, 28</span></li>
+<li><span class="rvts22">Fixed mappers 242, 227, 115, 248, 12, 164, 15, 253, 23, 178, 90, 73 and many others</span></li>
 <li><span class="rvts22">Straighten out bandai m159/m016 handling and add valid null-EEPROM emulation to get those games booting.</span></li>
 <li><span class="rvts22">Add ability for CNROM games to choose whether they have bus conflicts (fixes Colorful Dragon (Unl) (Sachen), since it flakes out if bus conflicts are emulated)</span></li>
 <li><span class="rvts22">Fixed bus conflict emulation, no kage no densetsu bug anymore</span></li>
-<li><span class="rvts22">Datalatch mapper - fix bug where wramless games would be able to do something to unmapped host emulator memory</span></li>
+<li><span class="rvts22">Fixed newppu bug which prevented metroid from booting, CHR RAM was not getting initialized to anything</span></li>
+<li><span class="rvts22">Newppu - fix bug in scroll reg logic causing mis-scrolls in p'radikus conflict</span></li>
 </ul>
 <p><span class="rvts24"><br/></span></p>
 <p><span class="rvts24">Movies</span></p>
@@ -153,31 +152,31 @@
 <p><span class="rvts24"><br/></span></p>
 <p><span class="rvts23">Debugger</span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">General window layout cleanup; bigger font; ".DEB files" can be switched off; etc</span></li>
-<li><span class="rvts22">Deleting a breakpoint/bookmark leaves selection in the Breakpoints list</span></li>
+<li><span class="rvts22">General window layout cleanup; different font; ".DEB files" can be switched off; etc</span></li>
+<li><span class="rvts22">Deleting a breakpoint/bookmark leaves selection in the list</span></li>
 <li><span class="rvts22">Fixed mysterious out of bounds condition while editing breakpoints</span></li>
 <li><span class="rvts22">Fixed RAM peek by a rightclick on left pane</span></li>
 <li><span class="rvts22">Allow Frame Advancing when Debugger is in breakpoint state</span></li>
 <li><span class="rvts22">Disabled breakpoints now don't impose slowdown</span></li>
 <li><span class="rvts22">When a breakpoint is hit, it becomes highlighed (selected) in the breakpoints list</span></li>
 <li><span class="rvts22">Show the number of breakpoints (enabled and total) above the breakpoints list</span></li>
-<li><span class="rvts22">"&gt;" shows current line in disassembly</span></li>
+<li><span class="rvts22">"&gt;" points at current line in disassembly</span></li>
 <li><span class="rvts22">Improved stack display</span></li>
 <li><span class="rvts22">Added "CPU cycles" and "Instructions" counters (cumulative and delta)</span></li>
 <li><span class="rvts22">Added "Cycles counter exceeds N" and "Instructions counter exceeds N" type of breakpoints</span></li>
 <li><span class="rvts22">Single click on any address copies this address to the "Seek To" field and "Bookmark Add" field</span></li>
 <li><span class="rvts22">Double-click on any address prompts "Add Breakpoint here" dialog</span></li>
-<li><span class="rvts22">"ROM offsets" option shows real ROM addresses in the Disassembly window</span></li>
+<li><span class="rvts22">"ROM offsets" option displays real ROM addresses in the Disassembly window</span></li>
 <li><span class="rvts22">Fixed conditional breakpoints bug: the error message didn't appear when editing a breakpoint</span></li>
-<li><span class="rvts22">Fixed Symbolic debug (Names and Comments display)</span></li>
-<li><span class="rvts22">Added Bookmark naming</span></li>
-<li><span class="rvts22">Cleaned up and improved debugging documentation</span></li>
+<li><span class="rvts22">Fixed and improved Symbolic debug (Names and Comments display)</span></li>
+<li><span class="rvts22">Added Bookmarks naming</span></li>
+<li><span class="rvts22">Cleaned up and vastly improved debugging documentation</span></li>
 </ul>
 <p><span class="rvts24"><br/></span></p>
 <p><span class="rvts23">Trace Logger</span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Added "Symbolic trace"</span></li>
-<li><span class="rvts22">"RTS" instructions output caller address/name</span></li>
+<li><span class="rvts22">Added "Symbolic trace" option</span></li>
+<li><span class="rvts22">"RTS" instructions now output the subroutine address/name</span></li>
 <li><span class="rvts22">Added "Use Stack Pointer for code tabbing (nesting visualization)" option</span></li>
 <li><span class="rvts22">Added "To the left from disassembly text" option for log format customization</span></li>
 <li><span class="rvts22">Added "Log current Frame number" option</span></li>
