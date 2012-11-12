@@ -69,6 +69,8 @@ extern uint32 cur_input_display;
 
 bool oldInputDisplay = false;
 
+unsigned int lastu = 0;
+
 std::string AsSnapshotName ="";			//adelikat:this will set the snapshot name when for s savesnapshot as function
 
 void FCEUI_SetSnapshotAsName(std::string name) { AsSnapshotName = name; }
@@ -544,8 +546,6 @@ int GetScreenPixelPalette(int x, int y, bool usebackup) {
 
 int SaveSnapshot(void)
 {
-	unsigned int lastu=0;
-
 	int totallines=FSettings.LastSLine-FSettings.FirstSLine+1;
 	int x,u,y;
 	FILE *pp=NULL;
@@ -555,14 +555,13 @@ int SaveSnapshot(void)
 	if(!(compmem=(uint8 *)FCEU_malloc(compmemsize)))
 		return 0;
 
-	for(u=lastu;u<99999;u++)
+	for (u = lastu; u < 99999; ++u)
 	{
 		pp=FCEUD_UTF8fopen(FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str(),"rb");
 		if(pp==NULL) break;
 		fclose(pp);
 	}
-
-	lastu=u;
+	lastu = u;
 
 	if(!(pp=FCEUD_UTF8fopen(FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str(),"wb")))
 	{
@@ -737,6 +736,12 @@ PNGerr:
 		fclose(pp);
 	return(0);
 }
+// called when another ROM is opened
+void ResetScreenshotsCounter()
+{
+	lastu = 0;
+}
+
 uint64 FCEUD_GetTime(void);
 uint64 FCEUD_GetTimeFreq(void);
 bool Show_FPS = false;

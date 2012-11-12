@@ -507,6 +507,8 @@ endlseq:
 	DoDebuggerDataReload(); // Reloads data without reopening window
 #endif
 
+	ResetScreenshotsCounter();
+
 	return GameInfo;
 }
 
