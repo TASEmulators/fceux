@@ -13,7 +13,7 @@ Project - Manager of working project
 * stores the info about current project filename and about having unsaved changes
 * implements saving and loading project files from filesystem
 * implements autosave function
-* stores resources: autosave period scale, default filename
+* stores resources: autosave period scale, default filename, fm3 format offsets
 ------------------------------------------------------------------------------------ */
 
 #include "taseditor_project.h"
@@ -128,23 +128,44 @@ bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool 
 		currMovieData.loadFrameCount = currMovieData.records.size();
 		currMovieData.emuVersion = FCEU_VERSION_NUMERIC;
 		currMovieData.dump(ofs, save_binary);
+		unsigned int taseditor_data_offset = ofs->ftell();
 		// save header: fm3 version + saved_stuff
 		write32le(PROJECT_FILE_CURRENT_VERSION, ofs);
-		unsigned int saved_stuff = 0;
-		if (save_markers) saved_stuff |= MARKERS_SAVED;
-		if (save_bookmarks) saved_stuff |= BOOKMARKS_SAVED;
-		if (save_greenzone) saved_stuff |= GREENZONE_SAVED;
-		if (save_history) saved_stuff |= HISTORY_SAVED;
-		if (save_piano_roll) saved_stuff |= PIANO_ROLL_SAVED;
-		if (save_selection) saved_stuff |= SELECTION_SAVED;
-		write32le(saved_stuff, ofs);
+		unsigned int saved_stuff_map = 0;
+		if (save_markers) saved_stuff_map |= MARKERS_SAVED;
+		if (save_bookmarks) saved_stuff_map |= BOOKMARKS_SAVED;
+		if (save_greenzone) saved_stuff_map |= GREENZONE_SAVED;
+		if (save_history) saved_stuff_map |= HISTORY_SAVED;
+		if (save_piano_roll) saved_stuff_map |= PIANO_ROLL_SAVED;
+		if (save_selection) saved_stuff_map |= SELECTION_SAVED;
+		write32le(saved_stuff_map, ofs);
+		unsigned int number_of_pointers = DEFAULT_NUMBER_OF_POINTERS;
+		write32le(saved_stuff_map, ofs);
+		// write dummy zeros to the file, where the offsets will be
+		for (unsigned int i = 0; i < number_of_pointers; ++i)
+			write32le(0, ofs);
 		// save specified modules
+		unsigned int markers_offset = ofs->ftell();
 		markers_manager.save(ofs, save_markers);
+		unsigned int bookmarks_offset = ofs->ftell();
 		bookmarks.save(ofs, save_bookmarks);
+		unsigned int greenzone_offset = ofs->ftell();
 		greenzone.save(ofs, save_greenzone);
+		unsigned int history_offset = ofs->ftell();
 		history.save(ofs, save_history);
+		unsigned int piano_roll_offset = ofs->ftell();
 		piano_roll.save(ofs, save_piano_roll);
+		unsigned int selection_offset = ofs->ftell();
 		selection.save(ofs, save_selection);
+		// now write offsets (pointers)
+		ofs->fseek(taseditor_data_offset + PROJECT_FILE_OFFSET_OF_POINTERS_DATA, SEEK_SET);
+		write32le(markers_offset, ofs);
+		write32le(bookmarks_offset, ofs);
+		write32le(greenzone_offset, ofs);
+		write32le(history_offset, ofs);
+		write32le(piano_roll_offset, ofs);
+		write32le(selection_offset, ofs);
+		// finish
 		delete ofs;
 		playback.updateProgressbar();
 		// also set project.changed to false, unless it was SaveCompact
@@ -161,6 +182,7 @@ bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool 
 bool TASEDITOR_PROJECT::load(const char* fullname)
 {
 	bool load_all = true;
+	unsigned int taseditor_data_offset = 0;
 	EMUFILE_FILE ifs(fullname, "rb");
 
 	if (ifs.fail())
@@ -206,6 +228,7 @@ bool TASEDITOR_PROJECT::load(const char* fullname)
 					return false;
 			}
 		}
+		taseditor_data_offset = ifs.ftell();
 		// load fm3 version from header and check it
 		unsigned int file_version;
 		if (read32le(&file_version, &ifs))
@@ -253,16 +276,60 @@ bool TASEDITOR_PROJECT::load(const char* fullname)
 		return false;
 	}
 
-	unsigned int saved_stuff;
+	unsigned int saved_stuff = 0;
+	unsigned int number_of_pointers = 0;
+	unsigned int data_offset = 0;
+	unsigned int pointer_offset = taseditor_data_offset + PROJECT_FILE_OFFSET_OF_POINTERS_DATA;
 	if (load_all)
+	{
 		read32le(&saved_stuff, &ifs);
-	// load modules
-	markers_manager.load(&ifs, load_all);
-	bookmarks.load(&ifs, load_all);
-	greenzone.load(&ifs, load_all);
-	history.load(&ifs, load_all);
-	piano_roll.load(&ifs, load_all);
-	selection.load(&ifs, load_all);
+		read32le(&number_of_pointers, &ifs);
+		// load modules
+		if (number_of_pointers-- && !(ifs.fseek(pointer_offset, SEEK_SET)) && read32le(&data_offset, &ifs))
+			pointer_offset += sizeof(unsigned int);
+		else
+			data_offset = 0;
+		markers_manager.load(&ifs, data_offset);
+
+		if (number_of_pointers-- && !(ifs.fseek(pointer_offset, SEEK_SET)) && read32le(&data_offset, &ifs))
+			pointer_offset += sizeof(unsigned int);
+		else
+			data_offset = 0;
+		bookmarks.load(&ifs, data_offset);
+
+		if (number_of_pointers-- && !(ifs.fseek(pointer_offset, SEEK_SET)) && read32le(&data_offset, &ifs))
+			pointer_offset += sizeof(unsigned int);
+		else
+			data_offset = 0;
+		greenzone.load(&ifs, data_offset);
+
+		if (number_of_pointers-- && !(ifs.fseek(pointer_offset, SEEK_SET)) && read32le(&data_offset, &ifs))
+			pointer_offset += sizeof(unsigned int);
+		else
+			data_offset = 0;
+		history.load(&ifs, data_offset);
+
+		if (number_of_pointers-- && !(ifs.fseek(pointer_offset, SEEK_SET)) && read32le(&data_offset, &ifs))
+			pointer_offset += sizeof(unsigned int);
+		else
+			data_offset = 0;
+		piano_roll.load(&ifs, data_offset);
+
+		if (number_of_pointers-- && !(ifs.fseek(pointer_offset, SEEK_SET)) && read32le(&data_offset, &ifs))
+			pointer_offset += sizeof(unsigned int);
+		else
+			data_offset = 0;
+		selection.load(&ifs, data_offset);
+	} else
+	{
+		// reset modules
+		markers_manager.load(&ifs, 0);
+		bookmarks.load(&ifs, 0);
+		greenzone.load(&ifs, 0);
+		history.load(&ifs, 0);
+		piano_roll.load(&ifs, 0);
+		selection.load(&ifs, 0);
+	}
 	// reset other modules
 	playback.reset();
 	recorder.reset();

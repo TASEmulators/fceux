@@ -267,9 +267,12 @@ void SELECTION::save(EMUFILE *os, bool really_save)
 	}
 }
 // returns true if couldn't load
-bool SELECTION::load(EMUFILE *is, bool really_load)
+bool SELECTION::load(EMUFILE *is, unsigned int offset)
 {
-	if (!really_load)
+	if (offset)
+	{
+		if (is->fseek(offset, SEEK_SET)) goto error;
+	} else
 	{
 		reset();
 		return false;

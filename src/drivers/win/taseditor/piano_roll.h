@@ -158,7 +158,7 @@ public:
 	void update();
 
 	void save(EMUFILE *os, bool really_save = true);
-	bool load(EMUFILE *is, bool really_load = true);
+	bool load(EMUFILE *is, unsigned int offset);
 
 	void RedrawList();
 	void RedrawRow(int index);

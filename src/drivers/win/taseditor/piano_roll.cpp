@@ -841,7 +841,7 @@ void PIANO_ROLL::save(EMUFILE *os, bool really_save)
 {
 	if (really_save)
 	{
-		update();
+		UpdateItemCount();
 		// write "PIANO_ROLL" string
 		os->fwrite(piano_roll_save_id, PIANO_ROLL_ID_LEN);
 		// write current top item
@@ -854,11 +854,14 @@ void PIANO_ROLL::save(EMUFILE *os, bool really_save)
 	}
 }
 // returns true if couldn't load
-bool PIANO_ROLL::load(EMUFILE *is, bool really_load)
+bool PIANO_ROLL::load(EMUFILE *is, unsigned int offset)
 {
 	reset();
-	update();
-	if (!really_load)
+	UpdateItemCount();
+	if (offset)
+	{
+		if (is->fseek(offset, SEEK_SET)) goto error;
+	} else
 	{
 		// scroll to the beginning
 		ListView_EnsureVisible(hwndList, 0, FALSE);

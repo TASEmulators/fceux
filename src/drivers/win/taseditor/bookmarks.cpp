@@ -484,9 +484,12 @@ void BOOKMARKS::save(EMUFILE *os, bool really_save)
 	}
 }
 // returns true if couldn't load
-bool BOOKMARKS::load(EMUFILE *is, bool really_load)
+bool BOOKMARKS::load(EMUFILE *is, unsigned int offset)
 {
-	if (!really_load)
+	if (offset)
+	{
+		if (is->fseek(offset, SEEK_SET)) goto error;
+	} else
 	{
 		reset();
 		branches.reset();
@@ -514,7 +517,7 @@ bool BOOKMARKS::load(EMUFILE *is, bool really_load)
 	RedrawBookmarksCaption();
 	return false;
 error:
-	FCEU_printf("Error loading bookmarks\n");
+	FCEU_printf("Error loading Bookmarks\n");
 	reset();
 	branches.reset();
 	return true;

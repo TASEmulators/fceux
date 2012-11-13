@@ -255,10 +255,13 @@ void GREENZONE::save(EMUFILE *os, bool really_save)
 	}
 }
 // returns true if couldn't load
-bool GREENZONE::load(EMUFILE *is, bool really_load)
+bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 {
 	free();
-	if (!really_load)
+	if (offset)
+	{
+		if (is->fseek(offset, SEEK_SET)) goto error;
+	} else
 	{
 		reset();
 		playback.StartFromZero();		// reset Playback cursor to frame 0

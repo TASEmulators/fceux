@@ -82,9 +82,12 @@ void MARKERS_MANAGER::save(EMUFILE *os, bool really_save)
 	}
 }
 // returns true if couldn't load
-bool MARKERS_MANAGER::load(EMUFILE *is, bool really_load)
+bool MARKERS_MANAGER::load(EMUFILE *is, unsigned int offset)
 {
-	if (!really_load)
+	if (offset)
+	{
+		if (is->fseek(offset, SEEK_SET)) goto error;
+	} else
 	{
 		reset();
 		return false;

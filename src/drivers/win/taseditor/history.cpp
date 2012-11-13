@@ -1013,23 +1013,27 @@ void HISTORY::save(EMUFILE *os, bool really_save)
 	}
 }
 // returns true if couldn't load
-bool HISTORY::load(EMUFILE *is, bool really_load)
+bool HISTORY::load(EMUFILE *is, unsigned int offset)
 {
-	if (!really_load)
+	int i = -1;
+	SNAPSHOT snap;
+	BOOKMARK bookm;
+
+	if (offset)
+	{
+		if (is->fseek(offset, SEEK_SET)) goto error;
+	} else
 	{
 		reset();
 		return false;
 	}
-	int i = -1;
-	SNAPSHOT snap;
-	BOOKMARK bookm;
 	// read "HISTORY" string
 	char save_id[HISTORY_ID_LEN];
 	if ((int)is->fread(save_id, HISTORY_ID_LEN) < HISTORY_ID_LEN) goto error;
 	if (!strcmp(history_skipsave_id, save_id))
 	{
 		// string says to skip loading History
-		FCEU_printf("No history in the file\n");
+		FCEU_printf("No History in the file\n");
 		reset();
 		return false;
 	}
@@ -1092,7 +1096,7 @@ bool HISTORY::load(EMUFILE *is, bool really_load)
 	RedrawHistoryList();
 	return false;
 error:
-	FCEU_printf("Error loading history\n");
+	FCEU_printf("Error loading History\n");
 	reset();
 	return true;
 }
