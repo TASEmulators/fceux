@@ -397,7 +397,7 @@ int NSFLoad(const char *name, FCEUFILE *fp);
 
 //char lastLoadedGameName [2048] = {0,}; // hack for movie WRAM clearing on record from poweron
 
-
+//name should be UTF-8, hopefully, or else there may be trouble
 FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 {
 	//mbg merge 7/17/07 - why is this here
@@ -780,8 +780,14 @@ void PowerNES(void)
 
 	GeniePower();
 
-	FCEU_MemoryRand(RAM,0x800);
+	//dont do this, it breaks some games: Cybernoid; Minna no Taabou no Nakayoshi Daisakusen; and maybe mechanized attack
 	//memset(RAM,0xFF,0x800);
+	//this fixes the above, but breaks Huang Di, which expects $100 to be non-zero or else it believes it has debug cheats enabled, giving you moon jump and other great but likely unwanted things
+	//FCEU_MemoryRand(RAM,0x800);
+	//this should work better, based on observational evidence. fixes all of the above:
+	//for(int i=0;i<0x800;i++) if(i&1) RAM[i] = 0xAA; else RAM[i] = 0x55;
+	//but we're leaving this for now until we collect some more data
+	FCEU_MemoryRand(RAM,0x800);
 
 	SetReadHandler(0x0000,0xFFFF,ANull);
 	SetWriteHandler(0x0000,0xFFFF,BNull);
