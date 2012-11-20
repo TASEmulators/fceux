@@ -68,6 +68,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	findnote_search_up = false;
 	enable_auto_function = true;
 	draw_input = true;
+	enable_greenzoning = true;
 	silent_autosave = true;
 	autopause_at_finish = true;
 	tooltips = true;

@@ -243,7 +243,9 @@ int TASEDITOR_LUA::getplaybacktarget()
 void TASEDITOR_LUA::setplayback(int frame)
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		playback.jump(frame, false, true);
+		// force reload if sending to the same frame as current frame
+		// but don't trigger lua registered functions
+		playback.jump(frame, true, false, true);
 }
 
 // taseditor.stopseeking()

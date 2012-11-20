@@ -564,6 +564,7 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckMenuItem(hmenu, ID_VIEW_ENABLEHOTCHANGES, taseditor_config.enable_hot_changes?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_JUMPWHENMAKINGUNDO, taseditor_config.jump_to_undo?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_FOLLOWMARKERNOTECONTEXT, taseditor_config.follow_note_context?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hmenu, ID_CONFIG_ENABLEGREENZONING, taseditor_config.enable_greenzoning?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_SILENTAUTOSAVE, taseditor_config.silent_autosave?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_PATTERNSKIPSLAG, taseditor_config.pattern_skips_lag?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_ADJUSTLAG, taseditor_config.adjust_input_due_to_lag?MF_CHECKED : MF_UNCHECKED);
@@ -923,6 +924,12 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					else if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 						selection.SelectAll();
 					break;
+				case ID_SELECTED_UNGREENZONE:
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
+					{
+						greenzone.UnGreenzoneSelectedFrames();
+					}
+					break;
 				case ACCEL_CTRL_X:
 				case ID_EDIT_CUT:
 					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
@@ -1089,6 +1096,14 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 						}
 						break;
 					}
+				case ID_CONFIG_ENABLEGREENZONING:
+					taseditor_config.enable_greenzoning ^= 1;
+					taseditor_window.UpdateCheckedItems();
+					break;
+				case ID_CONFIG_SILENTAUTOSAVE:
+					taseditor_config.silent_autosave ^= 1;
+					taseditor_window.UpdateCheckedItems();
+					break;
 				case ID_CONFIG_BRANCHESRESTOREFULLMOVIE:
 					taseditor_config.branch_full_movie ^= 1;
 					taseditor_window.UpdateCheckedItems();
@@ -1129,10 +1144,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case ID_CONFIG_DRAWINPUTBYDRAGGING:
 					taseditor_config.draw_input ^= 1;
-					taseditor_window.UpdateCheckedItems();
-					break;
-				case ID_CONFIG_SILENTAUTOSAVE:
-					taseditor_config.silent_autosave ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ID_CONFIG_AUTOPAUSEATTHEENDOFMOVIE:

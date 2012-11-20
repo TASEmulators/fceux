@@ -1141,6 +1141,9 @@
 #define ID_CONFIG_PATTERNSKIPSLAG       40568
 #define CLEAR_LOG                       40569
 #define CLOSE_LOG                       40570
+#define ID_SELECTED_UNGREENZONE         40571
+#define ID_SELECTED_F                   40572
+#define ID_CONFIG_ENABLEGREENZONING     40573
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1151,7 +1154,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        289
-#define _APS_NEXT_COMMAND_VALUE         40571
+#define _APS_NEXT_COMMAND_VALUE         40574
 #define _APS_NEXT_CONTROL_VALUE         1282
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

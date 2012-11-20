@@ -116,7 +116,7 @@ bool EnterTasEditor()
 			history.init();
 			taseditor_lua.init();
 			// either start new movie or use current movie
-			if (FCEUMOV_Mode(MOVIEMODE_INACTIVE) || currMovieData.savestate.size() != 0)
+			if (!FCEUMOV_Mode(MOVIEMODE_RECORD|MOVIEMODE_PLAY) || currMovieData.savestate.size() != 0)
 			{
 				if (currMovieData.savestate.size() != 0)
 					FCEUD_PrintError("This version of TAS Editor doesn't work with movies starting from savestate.");
@@ -131,6 +131,9 @@ bool EnterTasEditor()
 				FCEUI_StopMovie();
 				movieMode = MOVIEMODE_TASEDITOR;
 			}
+			// if movie length is less or equal to currFrame, pad it with empty frames
+			if (((int)currMovieData.records.size() - 1) < currFrameCounter)
+				currMovieData.insertEmpty(-1, currFrameCounter - ((int)currMovieData.records.size() - 1));
 			// ensure that movie has correct set of ports/fourscore
 			SetInputType(currMovieData, GetInputType(currMovieData));
 			// force the input configuration stored in the movie to apply to FCEUX config

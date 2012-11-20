@@ -240,7 +240,7 @@ void PLAYBACK::update()
 }
 
 // called after saving the project, because saving uses the progressbar for itself
-void PLAYBACK::updateProgressbar()
+void PLAYBACK::UpdateProgressbar()
 {
 	if (pause_frame)
 	{
@@ -438,11 +438,10 @@ void PLAYBACK::StartFromZero()
 		currMovieData.insertEmpty(-1, 1);
 }
 
-// external interface for sending Playback cursor
-void PLAYBACK::jump(int frame, bool execute_lua, bool follow_cursor)
+void PLAYBACK::EnsurePlaybackIsInsideGreenzone(bool execute_lua, bool follow_cursor)
 {
-	if (frame < 0) return;
-	if (JumpToFrame(frame))
+	// set the Playback cursor to the frame or at least above the frame
+	if (SetPlaybackAboveOrToFrame(greenzone.GetSize() - 1))
 	{
 		// since the game state was changed by this jump, we must update possible Lua callbacks and other tools that would normally only update in FCEUI_Emulate
 		if (execute_lua)
@@ -452,44 +451,63 @@ void PLAYBACK::jump(int frame, bool execute_lua, bool follow_cursor)
 		Update_RAM_Search(); // Update_RAM_Watch() is also called.
 	}
 }
-// internal interface
-// returns true if the game state was changed (loaded)
-bool PLAYBACK::JumpToFrame(int index)
+
+// an interface for sending Playback cursor to any frame
+void PLAYBACK::jump(int frame, bool force_reload, bool execute_lua, bool follow_cursor)
 {
-	if (index >= greenzone.GetSize())
+	if (frame < 0) return;
+
+	// 1 - set the Playback cursor to the frame or at least above the frame
+	if (SetPlaybackAboveOrToFrame(frame, force_reload))
 	{
-		// make jump outside Greenzone
-		if (currFrameCounter == greenzone.GetSize() - 1)
+		// since the game state was changed by this jump, we must update possible Lua callbacks and other tools that would normally only update in FCEUI_Emulate
+		if (execute_lua)
+			ForceExecuteLuaFrameFunctions();
+		if (follow_cursor)
+			piano_roll.FollowPlaybackIfNeeded();
+		Update_RAM_Search(); // Update_RAM_Watch() is also called.
+	}
+
+	// 2 - seek from the current frame if we still aren't at the needed frame
+	if (frame > currFrameCounter)
+	{
+		SeekingStart(frame);
+	} else
+	{
+		// the Playback is already at the needed frame
+		if (pause_frame)	// if Playback was seeking, pause emulation right here
+			SeekingStop();
+	}
+}
+
+// returns true if the game state was changed (loaded)
+bool PLAYBACK::SetPlaybackAboveOrToFrame(int frame, bool force_reload)
+{
+	bool state_changed = false;
+	// search backwards for an earlier frame with valid savestate
+	int i = greenzone.GetSize() - 1;
+	if (i > frame)
+		i = frame;
+	for (; i >= 0; i--)
+	{
+		if (!force_reload && !state_changed && i == currFrameCounter)
 		{
-			// seek there from the end of Greenzone
-			SeekingStart(index);
-			return false;	// game state was not changed
-		} else if (JumpToFrame(greenzone.GetSize() - 1))
+			// we can remain at current game state
+			break;
+		} else if (!greenzone.SavestateIsEmpty(i))
 		{
-			// seek there from the end of Greenzone
-			SeekingStart(index);
-			return true;	// game state was loaded
+			state_changed = true;	// after we once tried loading a savestate, we cannot use currFrameCounter state anymore, because the game state might have been corrupted by this loading attempt
+			if (greenzone.LoadSavestate(i))
+				break;
 		}
 	}
-	// make jump inside greenzone
-	if (greenzone.loadTasSavestate(index))
-	{
-		// successfully restored emulator state at this frame
-		// if Playback was seeking, pause emulation right here
-		if (pause_frame)
-			SeekingStop();
-		return true;
-	}
-	// search for an earlier frame with savestate
-	int i = (index > 0) ? index-1 : 0;
-	for (; i >= 0; i--)
-		if (greenzone.loadTasSavestate(i)) break;
 	if (i < 0)
-		StartFromZero();	// couldn't find a savestate
-	// continue from the frame
-	if (index != currFrameCounter)
-		SeekingStart(index);
-	return true;
+	{
+		// couldn't find a savestate
+		StartFromZero();
+		state_changed = true;
+	}
+	return state_changed;
 }
 
 void PLAYBACK::SetLostPosition(int frame)

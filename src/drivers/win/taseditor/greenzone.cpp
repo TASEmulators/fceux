@@ -59,30 +59,20 @@ void GREENZONE::reset()
 }
 void GREENZONE::update()
 {
-	// keep collecting savestates, this function must be called at the end of every frame
-	CollectCurrentState();
+	// keep collecting savestates, this code must be executed at the end of every frame
+	if (taseditor_config.enable_greenzoning)
+	{
+		CollectCurrentState();
+	} else
+	{
+		// just update Greenzone upper limit
+		if (greenZoneCount <= currFrameCounter)
+			greenZoneCount = currFrameCounter + 1;
+	}
 
 	// run cleaning from time to time
 	if (clock() > next_cleaning_time)
 		RunGreenzoneCleaning();
-}
-
-void GREENZONE::CollectCurrentState()
-{
-	// update Greenzone upper limit if needed
-	if (greenZoneCount <= currFrameCounter)
-		greenZoneCount = currFrameCounter + 1;
-
-	if ((int)savestates.size() < greenZoneCount)
-		savestates.resize(greenZoneCount);
-
-	// if frame is not saved - log savestate
-	if (!savestates[currFrameCounter].size())
-	{
-		EMUFILE_MEMORY ms(&savestates[currFrameCounter]);
-		FCEUSS_SaveMS(&ms, Z_DEFAULT_COMPRESSION);
-		ms.trim();
-	}
 
 	// also log lag frames
 	if (currFrameCounter > 0)
@@ -111,21 +101,33 @@ void GREENZONE::CollectCurrentState()
 	}
 }
 
-bool GREENZONE::loadTasSavestate(int frame)
+void GREENZONE::CollectCurrentState()
 {
-	if (frame < 0 || frame >= currMovieData.getNumRecords())
-		return false;
-	if ((int)savestates.size() <= frame || !savestates[frame].size())
-		return false;
+	if ((int)savestates.size() <= currFrameCounter)
+		savestates.resize(currFrameCounter + 1);
+	// if frame is not saved - log savestate
+	if (!savestates[currFrameCounter].size())
+	{
+		EMUFILE_MEMORY ms(&savestates[currFrameCounter]);
+		FCEUSS_SaveMS(&ms, Z_DEFAULT_COMPRESSION);
+		ms.trim();
+	}
+	if (greenZoneCount <= currFrameCounter)
+		greenZoneCount = currFrameCounter + 1;
+}
 
+bool GREENZONE::LoadSavestate(unsigned int frame)
+{
+	if (frame >= savestates.size() || !savestates[frame].size())
+		return false;
 	EMUFILE_MEMORY ms(&savestates[frame]);
 	return FCEUSS_LoadFP(&ms, SSLOADPARAM_NOBACKUP);
 }
 
 void GREENZONE::RunGreenzoneCleaning()
 {
-	int i = currFrameCounter - taseditor_config.greenzone_capacity;
 	bool changed = false;
+	int i = currFrameCounter - taseditor_config.greenzone_capacity;
 	if (i <= 0) goto finish;	// zeroth frame should not be cleaned
 	int limit;
 	// 2x of 1/2
@@ -133,11 +135,8 @@ void GREENZONE::RunGreenzoneCleaning()
 	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
-		if ((i & 0x1) && savestates[i].size())
-		{
-			ClearSavestateAndFreeMemory(i);
-			changed = true;
-		}
+		if (i & 0x1)
+			changed = changed | ClearSavestateAndFreeMemory(i);
 	}
 	if (i < 0) goto finish;
 	// 4x of 1/4
@@ -145,11 +144,8 @@ void GREENZONE::RunGreenzoneCleaning()
 	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
-		if ((i & 0x3) && savestates[i].size())
-		{
-			ClearSavestateAndFreeMemory(i);
-			changed = true;
-		}
+		if (i & 0x3)
+			changed = changed | ClearSavestateAndFreeMemory(i);
 	}
 	if (i < 0) goto finish;
 	// 8x of 1/8
@@ -157,11 +153,8 @@ void GREENZONE::RunGreenzoneCleaning()
 	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
-		if ((i & 0x7) && savestates[i].size())
-		{
-			ClearSavestateAndFreeMemory(i);
-			changed = true;
-		}
+		if (i & 0x7)
+			changed = changed | ClearSavestateAndFreeMemory(i);
 	}
 	if (i < 0) goto finish;
 	// 16x of 1/16
@@ -169,20 +162,13 @@ void GREENZONE::RunGreenzoneCleaning()
 	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
-		if ((i & 0xF) && savestates[i].size())
-		{
-			ClearSavestateAndFreeMemory(i);
-			changed = true;
-		}
+		if (i & 0xF)
+			changed = changed | ClearSavestateAndFreeMemory(i);
 	}
 	// clear all remaining
 	for (; i > 0; i--)
 	{
-		if (savestates[i].size())
-		{
-			ClearSavestateAndFreeMemory(i);
-			changed = true;
-		}
+		changed = changed | ClearSavestateAndFreeMemory(i);
 	}
 finish:
 	if (changed)
@@ -194,14 +180,48 @@ finish:
 	next_cleaning_time = clock() + TIME_BETWEEN_CLEANINGS;
 }
 
-void GREENZONE::ClearSavestate(int index)
+// returns true if actually cleared savestate data
+bool GREENZONE::ClearSavestate(unsigned int index)
 {
-    savestates[index].resize(0);
+	if (index < savestates.size() && savestates[index].size())
+	{
+	    savestates[index].resize(0);
+		return true;
+	} else
+	{
+		return false;
+	}
 }
 
-void GREENZONE::ClearSavestateAndFreeMemory(int index)
+bool GREENZONE::ClearSavestateAndFreeMemory(unsigned int index)
 {
-    savestates[index].swap(std::vector<uint8>());
+	if (index < savestates.size() && savestates[index].size())
+	{
+	    savestates[index].swap(std::vector<uint8>());
+		return true;
+	} else
+	{
+		return false;
+	}
+}
+
+void GREENZONE::UnGreenzoneSelectedFrames()
+{
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	if (current_selection->size() == 0) return;
+	bool changed = false;
+	int size = savestates.size();
+	int start_index = *current_selection->begin();
+	int end_index = *current_selection->rbegin();
+	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
+	// degreenzone frames, going backwards
+	for (SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
+		changed = changed | ClearSavestateAndFreeMemory(*it);
+	if (changed)
+	{
+		piano_roll.RedrawList();
+		bookmarks.RedrawBookmarksList();
+	}
 }
 
 void GREENZONE::save(EMUFILE *os, bool really_save)
@@ -216,10 +236,12 @@ void GREENZONE::save(EMUFILE *os, bool really_save)
 		write32le(greenZoneCount, os);
 		// write Playback cursor position
 		write32le(currFrameCounter, os);
+		CollectCurrentState();
 		// write savestates
 		int frame, size;
 		int last_tick = 0;
 		RunGreenzoneCleaning();
+		if (greenZoneCount > (int)savestates.size()) greenZoneCount = savestates.size();
 		for (frame = 0; frame < greenZoneCount; ++frame)
 		{
 			// update TASEditor progressbar from time to time
@@ -248,6 +270,7 @@ void GREENZONE::save(EMUFILE *os, bool really_save)
 		if (currFrameCounter > 0)
 		{
 			// write ONE savestate for currFrameCounter
+			CollectCurrentState();
 			int size = savestates[currFrameCounter].size();
 			write32le(size, os);
 			os->fwrite(&savestates[currFrameCounter][0], size);
@@ -291,7 +314,7 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 					savestates[frame].resize(size);
 					if (is->fread(&savestates[frame][0], size) == size)
 					{
-						if (loadTasSavestate(currFrameCounter))
+						if (LoadSavestate(currFrameCounter))
 						{
 							FCEU_printf("No Greenzone in the file\n");
 							return false;
@@ -359,12 +382,12 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 			if (prev_frame+1 == greenZoneCount)
 			{
 				// everything went fine - load savestate at cursor position
-				if (loadTasSavestate(currFrameCounter))
+				if (LoadSavestate(currFrameCounter))
 					return false;
 			}
 			// uh, okay, but maybe we managed to read at least something useful from the file
 			// first see if original position of currFrameCounter was read successfully
-			if (loadTasSavestate(currFrameCounter))
+			if (LoadSavestate(currFrameCounter))
 			{
 				greenZoneCount = prev_frame+1;		// cut greenZoneCount to last good frame
 				FCEU_printf("Greenzone loaded partially\n");
@@ -373,7 +396,7 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 			// then at least jump to some frame that was read successfully
 			for (; prev_frame >= 0; prev_frame--)
 			{
-				if (loadTasSavestate(prev_frame))
+				if (LoadSavestate(prev_frame))
 				{
 					currFrameCounter = prev_frame;
 					greenZoneCount = prev_frame+1;		// cut greenZoneCount to this good frame
@@ -425,7 +448,7 @@ void GREENZONE::AdjustUp()
 			Invalidate(first_input_changes);
 			bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
 			int saved_pause_frame = playback.GetPauseFrame();
-			playback.jump(first_input_changes);
+			playback.EnsurePlaybackIsInsideGreenzone();
 			if (saved_pause_frame >= 0)
 				playback.SeekingStart(saved_pause_frame);
 			if (emu_was_paused)
@@ -462,7 +485,7 @@ void GREENZONE::AdjustDown()
 		Invalidate(first_input_chanes);
 		bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
 		int saved_pause_frame = playback.GetPauseFrame();
-		playback.jump(first_input_chanes);
+		playback.EnsurePlaybackIsInsideGreenzone();
 		if (saved_pause_frame >= 0)
 			playback.SeekingStart(saved_pause_frame);
 		if (emu_was_paused)
@@ -483,17 +506,14 @@ void GREENZONE::InvalidateAndCheck(int after)
 	{
 		if (after >= currMovieData.getNumRecords())
 			after = currMovieData.getNumRecords() - 1;
+		// clear all savestates that became irrelevant
+		for (int i = savestates.size() - 1; i > after; i--)
+			ClearSavestate(i);
 		if (greenZoneCount > after + 1 || currFrameCounter > after)
 		{
-			// clear all savestates that became irrelevant
-			for (int i = greenZoneCount - 1; i > after; i--)
-			{
-				if (savestates[i].size())
-					ClearSavestate(i);
-			}
 			greenZoneCount = after + 1;
 			currMovieData.rerecordCount++;
-			// either set Playback cursor to the end of Greenzone or run seeking to restore Playback cursor position
+			// either set Playback cursor to be inside the Greenzone or run seeking to restore Playback cursor position
 			if (currFrameCounter >= greenZoneCount)
 			{
 				if (playback.GetPauseFrame() >= 0 && !FCEUI_EmulationPaused())
@@ -504,10 +524,10 @@ void GREENZONE::InvalidateAndCheck(int after)
 				{
 					playback.SetLostPosition(currFrameCounter);
 					if (taseditor_config.restore_position)
-						// start seeking
+						// start seeking to the green arrow
 						playback.jump(playback.GetLostPosition());
 					else
-						playback.jump(greenZoneCount - 1);
+						playback.EnsurePlaybackIsInsideGreenzone();
 				}
 			}
 		}
@@ -523,14 +543,11 @@ void GREENZONE::Invalidate(int after)
 	{
 		if (after >= currMovieData.getNumRecords())
 			after = currMovieData.getNumRecords() - 1;
+		// clear all savestates that became irrelevant
+		for (int i = savestates.size() - 1; i > after; i--)
+			ClearSavestate(i);
 		if (greenZoneCount > after + 1)
 		{
-			// clear all savestates that became irrelevant
-			for (int i = greenZoneCount - 1; i > after; i--)
-			{
-				if (savestates[i].size())
-					ClearSavestate(i);
-			}
 			greenZoneCount = after + 1;
 			currMovieData.rerecordCount++;
 		}
@@ -568,9 +585,9 @@ void GREENZONE::WriteSavestate(int frame, std::vector<uint8>& savestate)
 		greenZoneCount = frame + 1;
 }
 
-bool GREENZONE::SavestateIsEmpty(int frame)
+bool GREENZONE::SavestateIsEmpty(unsigned int frame)
 {
-	if (frame < greenZoneCount && frame < (int)savestates.size() && savestates[frame].size())
+	if ((int)frame < greenZoneCount && frame < savestates.size() && savestates[frame].size())
 		return false;
 	else
 		return true;

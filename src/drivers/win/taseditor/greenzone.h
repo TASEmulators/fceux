@@ -25,14 +25,11 @@ public:
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is, unsigned int offset);
 
-	void AdjustUp();
-	void AdjustDown();
-
-	bool loadTasSavestate(int frame);
+	bool LoadSavestate(unsigned int frame);
 
 	void RunGreenzoneCleaning();
-	void ClearSavestate(int index);
-	void ClearSavestateAndFreeMemory(int index);
+
+	void UnGreenzoneSelectedFrames();
 
 	void InvalidateAndCheck(int after);
 	void Invalidate(int after);
@@ -42,13 +39,18 @@ public:
 	int GetSize();
 	std::vector<uint8>& GetSavestate(int frame);
 	void WriteSavestate(int frame, std::vector<uint8>& savestate);
-	bool SavestateIsEmpty(int frame);
+	bool SavestateIsEmpty(unsigned int frame);
 
 	// saved data
 	LAGLOG laglog;
 
 private:
 	void CollectCurrentState();
+	bool ClearSavestate(unsigned int index);
+	bool ClearSavestateAndFreeMemory(unsigned int index);
+
+	void AdjustUp();
+	void AdjustDown();
 
 	// saved data
 	int greenZoneCount;

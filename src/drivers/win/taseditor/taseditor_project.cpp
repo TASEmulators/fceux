@@ -167,7 +167,7 @@ bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool 
 		write32le(selection_offset, ofs);
 		// finish
 		delete ofs;
-		playback.updateProgressbar();
+		playback.UpdateProgressbar();
 		// also set project.changed to false, unless it was SaveCompact
 		if (!different_name)
 			reset();

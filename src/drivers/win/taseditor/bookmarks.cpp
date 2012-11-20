@@ -451,7 +451,7 @@ void BOOKMARKS::deploy(int slot)
 	// jump to the target (bookmarked frame)
 	if (greenzone.SavestateIsEmpty(keyframe))
 		greenzone.WriteSavestate(keyframe, bookmarks_array[slot].savestate);
-	playback.jump(keyframe);
+	playback.jump(keyframe, true);
 	// switch current branch to this branch
 	int old_current_branch = branches.GetCurrentBranch();
 	branches.HandleBookmarkDeploy(slot);

@@ -66,6 +66,7 @@ public:
 	bool findnote_search_up;
 	bool enable_auto_function;
 	bool draw_input;
+	bool enable_greenzoning;
 	bool silent_autosave;
 	bool autopause_at_finish;
 	bool tooltips;
