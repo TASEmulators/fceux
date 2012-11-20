@@ -42,7 +42,7 @@ static void LatchPower(void) {
 	latche = latcheinit;
 	WSync();
 	if (WRAM) {
-		SetReadHandler(0x6000, 0x7FFF, CartBR);
+		SetReadHandler(0x6000, 0xFFFF, CartBR);
 		SetWriteHandler(0x6000, 0x7FFF, CartBW);
 	} else
 		SetReadHandler(0x6000, 0xFFFF, defread);
