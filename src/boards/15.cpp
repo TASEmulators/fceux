@@ -53,7 +53,7 @@ static void Sync(void)
         unsigned int b;
         b=latched&0x7F;
         if(i>=2 && !(latchea&0x2))
-          i=0x7F;
+          b=0x7F;
         setprg8(0x8000+(i<<13),(i&1)+((b<<1)^(latched>>7)));
       }
       break;
