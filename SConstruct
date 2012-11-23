@@ -108,6 +108,10 @@ else:
     if env['PLATFORM'] == 'darwin':
       # Define LUA_USE_MACOSX otherwise we can't bind external libs from lua
       env.Append(CCFLAGS = ["-DLUA_USE_MACOSX"])    
+      if conf.CheckLib('lua5.1'):
+        env.Append(LINKFLAGS = ["-ldl", "-llua5.1"])
+      elif conf.CheckLib('lua'):
+        env.Append(LINKFLAGS = ["-ldl", "-llua"])
     if env['PLATFORM'] == 'posix':
       # If we're POSIX, we use LUA_USE_LINUX since that combines usual lua posix defines with dlfcn calls for dynamic library loading.
       # Should work on any *nix
