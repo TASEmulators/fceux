@@ -4,7 +4,7 @@ By Lukas Sabota (sf: punkrockguy318)
 
 http://www.fceux.com
 
-Last Modified: March 6, 2012
+Last Modified: November 23, 2012
 
 Table of Contents
 -----------------
@@ -25,7 +25,7 @@ Table of Contents
 * libgtk2.0 (optional) - version >= 2.24 recommended
 * libgtk3.0 (optional) - this compiles as of fceux 2.1.6.
 * liblua5.1 (optional)
-* g++ - fceux requires g++ from the gcc.  llvm-clang is known to not compile fceux (patches welcome).
+* c++ compiler -- you may use g++ from gcc or clang++ from llvm.
 
 2 - Installation
 ----------------
@@ -58,7 +58,7 @@ tweak some of these options.
 -------
 You can enable the GTK GUI by setting GTK to 1 in the SConstruct build file. 
 GfceuX is deprecatiated in favor of the new GTK GUI.  You can disable the GTK GUI at
-run-time by passing the --nogui option, or disable it at build=time by setting
+run-time by passing the --nogui option, or disable it at build-time by setting
 GTK to 0 in the SConstruct file.  If you prefer GTK3 to GTK2, you can set the
 GTK3 BoolVariable to 1 in the SConstruct.
 
