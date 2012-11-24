@@ -25,7 +25,7 @@ opts.AddVariables(
   BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', 1),
   BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 1),
   BoolVariable('GTK3', 'Enable GTK3 GUI (SDL only)', 0),
-  BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 0)
+  BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 1)
 )
 AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', metavar='DIR', help='installation prefix')
 
@@ -108,18 +108,20 @@ else:
     if env['PLATFORM'] == 'darwin':
       # Define LUA_USE_MACOSX otherwise we can't bind external libs from lua
       env.Append(CCFLAGS = ["-DLUA_USE_MACOSX"])    
-      if conf.CheckLib('lua5.1'):
-        env.Append(LINKFLAGS = ["-ldl", "-llua5.1"])
-      elif conf.CheckLib('lua'):
-        env.Append(LINKFLAGS = ["-ldl", "-llua"])
     if env['PLATFORM'] == 'posix':
       # If we're POSIX, we use LUA_USE_LINUX since that combines usual lua posix defines with dlfcn calls for dynamic library loading.
       # Should work on any *nix
       env.Append(CCFLAGS = ["-DLUA_USE_LINUX"])
-      if conf.CheckLib('lua5.1'):
-        env.Append(LINKFLAGS = ["-ldl", "-llua5.1"])
-      elif conf.CheckLib('lua'):
-        env.Append(LINKFLAGS = ["-ldl", "-llua"])
+    lua_available = False
+    if conf.CheckLib('lua5.1'):
+      env.Append(LINKFLAGS = ["-ldl", "-llua5.1"])
+      lua_available = True
+    elif conf.CheckLib('lua'):
+      env.Append(LINKFLAGS = ["-ldl", "-llua"])
+      lua_available = True
+    if lua_available == False:
+      print 'Could not find liblua, exiting!'
+      Exit(1)
   # "--as-needed" no longer available on OSX (probably BSD as well? TODO: test)
   if env['PLATFORM'] != 'darwin':
     env.Append(LINKFLAGS=['-Wl,--as-needed'])

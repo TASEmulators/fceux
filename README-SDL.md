@@ -46,6 +46,10 @@ You can choose to install the lua scripts (located in output/luaScripts) to a di
 
 	cp -R output/luaScripts /usr/local/some/directory/that/i/will/find/later
 
+If you would like to clean the temporary scons files to perform a 'make clean' like function, you can do the following:
+
+	scons -c && rm -rf .scon*
+
 3 - Compile-time options
 ------------------------
 You can enable and disable certain features of fceux at build time. 
