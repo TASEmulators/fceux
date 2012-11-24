@@ -1381,14 +1381,21 @@ void enableFullscreen ()
 }
 void recordMovie()
 {
-	char* movie_fname = const_cast<char*>(FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str());
-	FCEUI_printf("Recording movie to %s\n", movie_fname);
-	FCEUI_SaveMovie(movie_fname, MOVIE_FLAG_NONE, L"");
+	if(isloaded)
+	{
+		char* movie_fname = const_cast<char*>(FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str());
+		FCEUI_printf("Recording movie to %s\n", movie_fname);
+		FCEUI_SaveMovie(movie_fname, MOVIE_FLAG_NONE, L"");
+	}
     
 	return;
 }
 void recordMovieAs ()
 {
+	if(!isloaded)
+	{
+		return;
+	}
 	GtkWidget* fileChooser;
 	
 	GtkFileFilter* filterFm2;
