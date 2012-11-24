@@ -113,6 +113,24 @@ void MovieData::clearRecordRange(int start, int len)
 	}
 }
 
+void MovieData::eraseRecords(int at, int frames)
+{
+	if (at < (int)records.size())
+	{
+		if (frames == 1)
+		{
+			// erase 1 frame
+			records.erase(records.begin() + at);
+		} else
+		{
+			// erase many frames
+			if (at + frames > (int)records.size())
+				frames = (int)records.size() - at;
+			records.erase(records.begin() + at, records.begin() + (at + frames));
+		}
+	}
+}
+
 void MovieData::insertEmpty(int at, int frames)
 {
 	if (at == -1)

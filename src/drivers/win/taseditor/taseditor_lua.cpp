@@ -425,7 +425,7 @@ int TASEDITOR_LUA::applyinputchanges(const char* name)
 						for (int t = pending_changes[i].data; t > 0; t--)
 						{
 							if (pending_changes[i].frame < (int)currMovieData.getNumRecords())
-								currMovieData.records.erase(currMovieData.records.begin() + pending_changes[i].frame);
+								currMovieData.eraseRecords(pending_changes[i].frame);
 							greenzone.laglog.EraseFrame(pending_changes[i].frame);
 							if (taseditor_config.bind_markers)
 								markers_manager.EraseMarker(pending_changes[i].frame);

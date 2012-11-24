@@ -185,23 +185,22 @@ string gettingstartedhelp = "{C76AEBD9-1E27-4045-8A37-69E5A52D0F9A}";//Getting S
 //********************************************************************************
 void SetMainWindowText()
 {
+	string str = FCEU_NAME_AND_VERSION;
+	if (newppu)
+		str.append(" (New PPU)");
 	if (GameInfo)
 	{
 		//Add the filename to the window caption
 		extern char FileBase[];
-		string str = FCEU_NAME_AND_VERSION;
 		str.append(": ");
 		str.append(FileBase);
-		
 		if (FCEUMOV_IsLoaded())
 		{
 			str.append(" Playing: ");
 			str.append(StripPath(FCEUI_GetMovieName()));
 		}
-		SetWindowText(hAppWnd, str.c_str());
 	}
-	else
-		SetWindowText(hAppWnd, FCEU_NAME_AND_VERSION);
+	SetWindowText(hAppWnd, str.c_str());
 }
 
 bool HasRecentFiles()

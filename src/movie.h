@@ -228,6 +228,7 @@ public:
 	int dump(EMUFILE* os, bool binary);
 
 	void clearRecordRange(int start, int len);
+	void eraseRecords(int at, int frames = 1);
 	void insertEmpty(int at, int frames);
 	void cloneRegion(int at, int frames);
 

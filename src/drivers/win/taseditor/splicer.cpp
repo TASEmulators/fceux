@@ -263,7 +263,7 @@ void SPLICER::DeleteFrames()
 	// delete frames on each selection, going backwards
 	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
 	{
-		currMovieData.records.erase(currMovieData.records.begin() + *it);
+		currMovieData.eraseRecords(*it);
 		greenzone.laglog.EraseFrame(*it);
 		if (taseditor_config.bind_markers)
 		{

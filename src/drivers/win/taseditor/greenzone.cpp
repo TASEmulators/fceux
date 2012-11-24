@@ -425,7 +425,7 @@ void GREENZONE::AdjustUp()
 	{
 		bool markers_changed = false;
 		// delete these frames of lag
-		currMovieData.records.erase(currMovieData.records.begin() + (currFrameCounter - 1), currMovieData.records.begin() + (currFrameCounter - 1 + num_frames_to_erase));
+		currMovieData.eraseRecords(currFrameCounter - 1, num_frames_to_erase);
 		laglog.EraseFrame(currFrameCounter - 1, num_frames_to_erase);
 		if (taseditor_config.bind_markers)
 		{

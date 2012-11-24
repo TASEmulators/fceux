@@ -54,6 +54,7 @@
 #include "drivers/win/pref.h"
 
 extern void ResetDebugStatisticsCounters();
+extern void SetMainWindowText();
 
 extern bool TaseditorIsRecording();
 #endif
@@ -132,6 +133,9 @@ void FCEU_TogglePPU(void)
 		FCEU_DispMessage("Old PPU loaded", 0);
 		FCEUI_printf("Old PPU loaded");
 	}
+#ifdef WIN32
+	SetMainWindowText();
+#endif
 }
 
 static void FCEU_CloseGame(void)
