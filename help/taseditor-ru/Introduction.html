@@ -3,7 +3,7 @@
 <head>
 	<title>1. Введение</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.6.0.345">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.7.1.482">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
@@ -19,15 +19,18 @@
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/hnd.js"></script>
 	<script type="text/javascript">
-		if (top.frames.length == 0)
+		$(document).ready(function()
 		{
-			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-			top.location.href = "index.html?" + sTopicUrl;
-		}
-		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-		{
-			top.FrameTOC.SelectTocItem("Introduction");
-		}
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "index.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("Introduction");
+			}
+		});
 	</script>
 </head>
 
@@ -52,6 +55,7 @@
 		</div>
 	<div id="topic_content">
 		
+<p></p>
 <p><span class="rvts20">Введение</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
@@ -68,29 +72,29 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">Разработка инструментального комплекса под названием "TAS Editor" преследует две основные цели:</span></p>
 <ol style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps15"><span class="rvts22">понизить порог вхождения в ТАСинг</span></li>
-<li class="rvps15"><span class="rvts22">повысить объективность анализа игрового процесса</span></li>
+<li class="rvps14"><span class="rvts22">понизить порог вхождения в ТАСинг</span></li>
+<li class="rvps14"><span class="rvts22">повысить объективность анализа игрового процесса</span></li>
 </ol>
-<p class="rvps15"><span class="rvts22"><br/></span></p>
+<p class="rvps14"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">Первая цель достигается с помощью детальной визуализации важнейших аспектов ТАСинга.</span></p>
 <p class="rvps10"><span class="rvts22">Вторая цель достигается с помощью </span><span class="rvts22">перехода от линейного переписывания отрезков мувика к нелинейному редактированию Ввода. Более высокий уровень абстрагирования от правил проходимой игры </span><span class="rvts22">достигается за счёт появления у ТАСера новых возможностей:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps14"><span class="rvts0"><span class="rvts22">изменять Ввод в произвольной последовательности (а не только в той последовательности, в которой протекают события игры) </span></span><span class="rvts0"><span class="rvts30">–</span></span><span class="rvts0"><span class="rvts22"> благодаря интерфейсу Piano Roll</span></span></li>
-<li class="rvps14"><span class="rvts0"><span class="rvts22">просматривать игровые события в произвольном порядке (а не только кадр за кадром) </span></span><span class="rvts0"><span class="rvts30">–</span></span><span class="rvts0"><span class="rvts22"> благодаря Гринзоне</span></span></li>
-<li class="rvps14"><span class="rvts0"><span class="rvts22">акцентировать причинно-следственную связь между </span></span><span class="rvts0"><span class="rvts22">Ввод</span></span><span class="rvts0"><span class="rvts22">ом и его отдалёнными последствиями (а не только ближайшими) </span></span><span class="rvts0"><span class="rvts30">–</span></span><span class="rvts0"><span class="rvts22"> благодаря функции турбо-добегания</span></span></li>
-<li class="rvps14"><span class="rvts0"><span class="rvts22">возможность реализовать собственное логическое разбиение мувика на составные части (а не только на TV-кадры или на уровни игры) </span></span><span class="rvts0"><span class="rvts30">–</span></span><span class="rvts0"><span class="rvts22"> благодаря Маркерам</span></span></li>
+<li class="rvps15"><span class="rvts0"><span class="rvts22">изменять Ввод в произвольной последовательности (а не только в той последовательности, в которой протекают события игры) </span></span><span class="rvts0"><span class="rvts30">–</span></span><span class="rvts0"><span class="rvts22"> благодаря интерфейсу Piano Roll</span></span></li>
+<li class="rvps15"><span class="rvts0"><span class="rvts22">просматривать игровые события в произвольном порядке (а не только кадр за кадром) </span></span><span class="rvts0"><span class="rvts30">–</span></span><span class="rvts0"><span class="rvts22"> благодаря Гринзоне</span></span></li>
+<li class="rvps15"><span class="rvts0"><span class="rvts22">акцентировать причинно-следственную связь между </span></span><span class="rvts0"><span class="rvts22">Ввод</span></span><span class="rvts0"><span class="rvts22">ом и его отдалёнными последствиями (а не только ближайшими) </span></span><span class="rvts0"><span class="rvts30">–</span></span><span class="rvts0"><span class="rvts22"> благодаря функции турбо-добегания</span></span></li>
+<li class="rvps15"><span class="rvts0"><span class="rvts22">возможность реализовать собственное логическое разбиение мувика на составные части (а не только на TV-кадры или на уровни игры) </span></span><span class="rvts0"><span class="rvts30">–</span></span><span class="rvts0"><span class="rvts22"> благодаря Маркерам</span></span></li>
 </ul>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">Кроме того, в TAS Editor 1.0 некоторые старые инструменты ТАСинга выведены на новый уровень:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps15"><span class="rvts22">журнал Лага – эволюция Счётчика Лага</span></li>
-<li class="rvps15"><span class="rvts22">журнал Ввода – эволюция Индикатора </span><span class="rvts22">Ввод</span><span class="rvts22">а</span></li>
-<li class="rvps15"><span class="rvts22">пошаговый откат – в дополнение к загрузкам старого состояния мувика</span></li>
-<li class="rvps15"><span class="rvts22">встроенный редактор – вместо хекс-редактора и Блокнота</span></li>
-<li class="rvps15"><span class="rvts22">авто-идентификация текущего логического блока – в дополнение к индикатору текущего кадра</span></li>
-<li class="rvps15"><span class="rvts22">счётчик Выделения (линейка) – в дополнение к счётчику кадров</span></li>
-<li class="rvps15"><span class="rvts22">шаблоны – вместо настроек Autofire</span></li>
-<li class="rvps15"><span class="rvts22">Superimpose (наложение) – вместо настроек Auto-hold</span></li>
+<li class="rvps14"><span class="rvts22">журнал Лага – эволюция Счётчика Лага</span></li>
+<li class="rvps14"><span class="rvts22">журнал Ввода – эволюция Индикатора </span><span class="rvts22">Ввод</span><span class="rvts22">а</span></li>
+<li class="rvps14"><span class="rvts22">пошаговый откат – в дополнение к загрузкам старого состояния мувика</span></li>
+<li class="rvps14"><span class="rvts22">встроенный редактор – вместо хекс-редактора и Блокнота</span></li>
+<li class="rvps14"><span class="rvts22">авто-идентификация текущего логического блока – в дополнение к индикатору текущего кадра</span></li>
+<li class="rvps14"><span class="rvts22">счётчик Выделения (линейка) – в дополнение к счётчику кадров</span></li>
+<li class="rvps14"><span class="rvts22">шаблоны – вместо настроек Autofire</span></li>
+<li class="rvps14"><span class="rvts22">Superimpose (наложение) – вместо настроек Auto-hold</span></li>
 </ul>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">Запуская Тасэдитор, приготовьтесь к управлению игрой с высоты птичьего полёта. Следующие главы этого учебного курса расскажут вам почти всё, что нужно знать продуктивному ТАСеру. Если вы уже имеете опыт ТАСинга традиционным способом, некоторые аспекты обучения покажутся вам проще, а некоторые сложнее, чем для новичка. Так или иначе, постарайтесь прочитать этот учебник до конца, вы наверняка узнаете много нового о ТАСинге в целом.</span></p>
@@ -104,10 +108,10 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">Интересные факты:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps15"><span class="rvts22">Во время разработки Тасэдитора на написание кода.ушло меньше времени, чем на продумывание способов усовершенствования рабочего процесса.</span></li>
-<li class="rvps15"><span class="rvts22">Большинство действий в Тасэдиторе можно совершить несколькими способами.</span></li>
-<li class="rvps15"><span class="rvts22">Любую совершённую операцию можно откатить или повторить.</span></li>
-<li class="rvps15"><span class="rvts22">Можно полностью игнорировать любую часть функционала Тасэдитора, используя только приглянувшиеся фичи.</span></li>
+<li class="rvps10"><span class="rvts22">Во время разработки Тасэдитора на написание кода.ушло меньше времени, чем на продумывание способов усовершенствования рабочего процесса.</span></li>
+<li class="rvps10"><span class="rvts22">Большинство действий в Тасэдиторе можно совершить несколькими способами.</span></li>
+<li class="rvps10"><span class="rvts22">Любую совершённую операцию можно откатить или повторить.</span></li>
+<li class="rvps10"><span class="rvts22">Можно полностью игнорировать любую часть функционала Тасэдитора, используя только приглянувшиеся фичи.</span></li>
 </ul>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">Особое внимание было уделено пользовательскому интерфейсу. Когда наберётесь опыта, сможете совершать многие действия машинально, не отвлекаясь от анализа игровой ситуации.</span></p>
@@ -118,7 +122,7 @@
 <p class="rvps10"><span class="rvts22">У программистов есть ценная традиция – повышение читабельности кода с помощью комментариев. Это позволяет держать в голове более чёткую картину проекта и обходиться без постоянной перепроверки результатов, потому что в большинстве случаев результат весьма предсказуем, когда известен контекст.</span></p>
 <p class="rvps10"><span class="rvts22">Более того, высокая читабельность кода позволяет при возвращении к отложенному проекту быстро освежить все необходимые воспоминания. Конечно, если этот проект добросовестно документировался.</span></p>
 <p class="rvps10"><span class="rvts22">Тасэдитор помогает непринуждённо документировать свою работу прямо в процессе создания – на лету писать комментарии, присваивать структурам (шаблонам и блокам </span><span class="rvts22">Ввод</span><span class="rvts22">а) понятные имена, тестировать различные версии кода в отдельных ветках репозитория (Дерева ответвлений), продуктивно работать в соавторстве. При этом от пользователя не требуется соблюдать какие-либо конвенции. Вы сами определяете правила оформления своего проекта. Например, если вы не поленились в первом уровне дать название использованному трюку, в следующих уровнях вы сможете продублировать нужную последовательность кнопок всего несколькими нажатиями клавиш, если поленились – придётся отыскать место выполнения трюка вручную. В простеньких ТАСах можно обойтись без комментариев и долгосрочных планов, однако в сложных проектах этот функционал Тасэдитора может весьма пригодиться.</span></p>
-<p class="rvps10"><span class="rvts22">Сайт </span><a class="rvts28" href="http://tasvideos.org" target="_blank">TASVideos.org</a><span class="rvts22"> поддерживает загрузку проектов Тасэдитора (fm3-файлов), так что вы можете делиться не только готовым мувиком, но и своими наработками, поощряя атмосферу открытости и взаимопомощи. Если не хотите делиться, можете экспортировать данные в формат fm2 и опубликовать только его.</span></p>
+<p class="rvps10"><span class="rvts22">Сайт </span><a class="rvts28" href="http://tasvideos.org" target="_blank">TASVideos.org</a><span class="rvts22"> поддерживает загрузку и публикацию проектов Тасэдитора (fm3-файлов), так что вы можете делиться не только готовым мувиком, но и своими наработками, поощряя атмосферу открытости и взаимопомощи. Если не хотите делиться, можете экспортировать данные в формат fm2 и опубликовать только его.</span></p>
 <p class="rvps10"><span class="rvts22">FM3-файлы проигрываются эмулятором FCEUX начиная с версии 2.2.0 точно так же, как FM2-файлы. В более ранних версиях FCEUX fm3-файлы также можно проиграть, предварительно поменяв расширение файла на fm2.</span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В следующей главе: </span><a class="rvts29" href="ProgramInterface.html">обучение основам обращения с программой</a><span class="rvts22">.</span></p>
@@ -127,6 +131,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
+<p></p>
 <p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com/feature-tour/iphone-website-generation">Easily create iPhone documentation</a></p>
 </div>
 	

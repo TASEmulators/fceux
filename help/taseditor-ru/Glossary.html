@@ -3,7 +3,7 @@
 <head>
 	<title>Глоссарий</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.6.0.345">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.7.1.482">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
@@ -19,15 +19,18 @@
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/hnd.js"></script>
 	<script type="text/javascript">
-		if (top.frames.length == 0)
+		$(document).ready(function()
 		{
-			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-			top.location.href = "index.html?" + sTopicUrl;
-		}
-		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-		{
-			top.FrameTOC.SelectTocItem("Glossary");
-		}
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "index.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("Glossary");
+			}
+		});
 	</script>
 </head>
 
@@ -52,6 +55,7 @@
 		</div>
 	<div id="topic_content">
 		
+<p></p>
 <p><span class="rvts20">Глоссарий</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
@@ -94,8 +98,8 @@
 <p class="rvps10"><span class="rvts22">Благодаря редактированию Ввода ТАСер освобождается от некоторых человеческих ограничений (например, слабой реакции) и может направить все усилия на создание крайне неординарных прохождений видеоигр. Это может быть не только спидран, но и развлекательный видеоролик (playaround).</span></p>
 <p class="rvps10"><span class="rvts22">ТАСы распространяются:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps15"><span class="rvts22">в виде готовых видеороликов с Выводом (youtube, AVI-файлы &nbsp;и т.д.) – удобно смотреть</span></li>
-<li class="rvps15"><span class="rvts22">в виде исходных мувиков с Вводом (fm2 и т.д.) – удобно редактировать</span></li>
+<li class="rvps10"><span class="rvts22">в виде готовых видеороликов с Выводом (youtube, AVI-файлы &nbsp;и т.д.) – удобно смотреть</span></li>
+<li class="rvps10"><span class="rvts22">в виде исходных мувиков с Вводом (fm2 и т.д.) – удобно редактировать</span></li>
 </ul>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts26">Movie – Мувик</span><span class="rvts22"> (фильм)</span></p>
@@ -220,10 +224,10 @@
 <p class="rvps10"><span class="rvts22">Маркером можно отметить любой кадр в Piano Roll. С помощью установки и удаления Маркеров можно повысить наглядность и удобство работы.</span></p>
 <p class="rvps10"><span class="rvts22">Цели использования Маркеров:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps15"><span class="rvts22">структуризация Ввода</span></li>
-<li class="rvps15"><span class="rvts22">формализация знаний (с помощью Заметок)</span></li>
-<li class="rvps15"><span class="rvts22">ускорение навигации</span></li>
-<li class="rvps15"><span class="rvts22">быстрое выделение участков (</span><span class="rvts34">Ctrl + A</span><span class="rvts22">)</span></li>
+<li class="rvps10"><span class="rvts22">структуризация Ввода</span></li>
+<li class="rvps10"><span class="rvts22">формализация знаний (с помощью Заметок)</span></li>
+<li class="rvps10"><span class="rvts22">ускорение навигации</span></li>
+<li class="rvps10"><span class="rvts22">быстрое выделение участков (</span><span class="rvts34">Ctrl + A</span><span class="rvts22">)</span></li>
 </ul>
 <p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="PianoRoll.html#markers">Интерфейс Piano Roll</a><span class="rvts22">, </span><a class="rvts28" href="Ideas.html#Markers">Спецификации Маркеров</a></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
@@ -242,10 +246,10 @@
 <p class="rvps10"><span class="rvts22">При желании текущий мувик может быть заменён на это ответвление, тем самым восстанавливается состояние мувика из копии.</span></p>
 <p class="rvps10"><span class="rvts22">С помощью ответвлений можно одновременно хранить в проекте несколько разных мувиков и мгновенно переключаться между ними:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps15"><span class="rvts22">для сравнения альтернативных стратегий прохождения</span></li>
-<li class="rvps15"><span class="rvts22">для хранения текущего лучшего варианта при тестировании других вариантов на участке</span></li>
-<li class="rvps15"><span class="rvts22">для запоминания ещё неиспользованных трюков, которые могут пригодиться в будущем</span></li>
-<li class="rvps15"><span class="rvts22">для сравнения своего мувика с чужим (при создании обгона)</span></li>
+<li class="rvps10"><span class="rvts22">для сравнения альтернативных стратегий прохождения</span></li>
+<li class="rvps10"><span class="rvts22">для хранения текущего лучшего варианта при тестировании других вариантов на участке</span></li>
+<li class="rvps10"><span class="rvts22">для запоминания ещё неиспользованных трюков, которые могут пригодиться в будущем</span></li>
+<li class="rvps10"><span class="rvts22">для сравнения своего мувика с чужим (при создании обгона)</span></li>
 </ul>
 <p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="Toolbox.html#bookmarks">Панель инструментов</a><span class="rvts22">, </span><a class="rvts28" href="ProgramCustomization.html#BranchesrestoreentireMovie">Настройка программы</a><span class="rvts22">, </span><a class="rvts28" href="Ideas.html#BookmarksBranches">Спецификации ответвлений</a></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
@@ -273,6 +277,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
+<p></p>
 <p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com">Free EBook and documentation generator</a></p>
 </div>
 	

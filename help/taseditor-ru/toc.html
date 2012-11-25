@@ -2,9 +2,9 @@
 <html>
 
 <head>
-	<title>TAS Editor Manual Rus- Table of Contents</title>
+	<title>TAS Editor Manual, Russian Version- Table of Contents</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.6.0.345">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.7.1.482">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/silver-theme/jquery-ui-1.8.12.custom.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/dynatree/chm/ui.dynatree.css" />
@@ -32,7 +32,9 @@
 	
 		$(document).ready(function()
 		{
-			var sAnchorName = top.location.href.substring(top.location.href.lastIndexOf("#") + 1, top.location.href.length);
+			var sAnchorName = '';
+			try { sAnchorName = top.location.href.substring(top.location.href.lastIndexOf("#") + 1, top.location.href.length); }
+			catch(err) { sAnchorName = ''; }
 			var nSelectedTab = 0;
 			if (sAnchorName == '_index') nSelectedTab = 1
 			else if (sAnchorName == '_search') nSelectedTab = 2;			

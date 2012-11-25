@@ -264,19 +264,18 @@ span.rvts45
 }
 span.rvts46
 {
+ font-size: 11pt;
  font-weight: bold;
+ color: #008817;
+ text-decoration: underline;
 }
 span.rvts47
 {
-}
-a.rvts48, span.rvts48
-{
- font-size: 11pt;
  font-weight: bold;
- color: #0000ff;
- text-decoration: underline;
 }
-a.rvts48:hover { color: #0000ff; }
+span.rvts48
+{
+}
 a.rvts49, span.rvts49
 {
  font-size: 11pt;
@@ -293,157 +292,165 @@ a.rvts50, span.rvts50
  text-decoration: underline;
 }
 a.rvts50:hover { color: #0000ff; }
-span.rvts51
+a.rvts51, span.rvts51
+{
+ font-size: 11pt;
+ font-weight: bold;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts51:hover { color: #0000ff; }
+span.rvts52
 {
  font-size: 12pt;
  font-weight: bold;
 }
-span.rvts52 /* Font Style */
+span.rvts53 /* Font Style */
 {
  font-size: 11pt;
  color: #4f81bd;
 }
-span.rvts53
+span.rvts54
 {
  font-size: 11pt;
  font-weight: bold;
 }
-span.rvts54
+span.rvts55
 {
  font-size: 11pt;
 }
-span.rvts55
+span.rvts56
 {
  color: #004000;
 }
-a.rvts56, span.rvts56
+a.rvts57, span.rvts57
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts56:hover { color: #0000ff; }
-span.rvts57
+a.rvts57:hover { color: #0000ff; }
+span.rvts58
 {
  font-size: 6pt;
 }
-span.rvts58
+span.rvts59
 {
  font-size: 16pt;
  text-decoration: underline;
 }
-span.rvts59
+span.rvts60
 {
  color: #000000;
 }
-span.rvts60
+span.rvts61
 {
  font-size: 11pt;
  font-weight: bold;
  color: #000000;
 }
-a.rvts61, span.rvts61
-{
- font-size: 11pt;
- color: #0000ff;
- text-decoration: underline;
-}
-a.rvts61:hover { color: #0000ff; }
 a.rvts62, span.rvts62
 {
+ font-size: 11pt;
  color: #0000ff;
  text-decoration: underline;
 }
 a.rvts62:hover { color: #0000ff; }
-span.rvts63
+a.rvts63, span.rvts63
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts63:hover { color: #0000ff; }
+span.rvts64
 {
  font-size: 11pt;
  text-decoration: underline;
 }
-span.rvts64
+span.rvts65
 {
 }
-span.rvts65
+span.rvts66
 {
  font-size: 11pt;
  color: #0a8200;
 }
-span.rvts66
+span.rvts67
 {
  font-size: 9pt;
  font-weight: bold;
 }
-a.rvts67, span.rvts67
+a.rvts68, span.rvts68
 {
  font-size: 9pt;
  font-weight: bold;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts67:hover { color: #0000ff; }
-span.rvts68
+a.rvts68:hover { color: #0000ff; }
+span.rvts69
 {
  font-weight: bold;
  color: #ffffff;
 }
-span.rvts69
+span.rvts70
 {
  font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
  color: #000080;
 }
-span.rvts70 /* Font Style */
+span.rvts71 /* Font Style */
 {
  font-size: 11pt;
  font-style: italic;
  color: #243f60;
 }
-span.rvts71 /* Font Style */
+span.rvts72 /* Font Style */
 {
  font-size: 11pt;
  color: #333399;
 }
-a.rvts72, span.rvts72
+a.rvts73, span.rvts73
 {
  font-size: 11pt;
  font-weight: bold;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts72:hover { color: #0000ff; }
-span.rvts73
+a.rvts73:hover { color: #0000ff; }
+span.rvts74
 {
  font-size: 11pt;
  font-style: italic;
  font-weight: bold;
-}
-span.rvts74
-{
- font-size: 24pt;
- text-decoration: underline;
 }
 span.rvts75
 {
  font-size: 24pt;
  text-decoration: underline;
 }
-a.rvts76, span.rvts76
+span.rvts76
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+a.rvts77, span.rvts77
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts76:hover { color: #0000ff; }
-a.rvts77, span.rvts77
+a.rvts77:hover { color: #0000ff; }
+a.rvts78, span.rvts78
 {
  font-weight: bold;
  color: #ffffff;
  text-decoration: underline;
 }
-a.rvts77:hover { color: #0000ff; }
-span.rvts78
+a.rvts78:hover { color: #0000ff; }
+span.rvts79
 {
  color: #ffffff;
 }
-span.rvts79
+span.rvts80
 {
  color: #333399;
 }
@@ -516,14 +523,14 @@ p,ul,ol /* Paragraph Style */
 }
 .rvps14
 {
- text-align: left;
  text-indent: 30px;
- padding: 0px 0px 0px 0px;
- margin: 0px 0px 0px 0px;
 }
 .rvps15
 {
+ text-align: justify;
  text-indent: 30px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
 }
 .rvps16 /* Paragraph Style */
 {
@@ -558,16 +565,44 @@ p,ul,ol /* Paragraph Style */
 }
 .rvps24
 {
- text-indent: 20px;
+ text-align: justify;
 }
-.rvps25 /* Paragraph Style */
+.rvps25
 {
+ text-align: justify;
+ margin: 0px 0px 0px 50px;
 }
-.rvps26 /* Paragraph Style */
+.rvps26
 {
+ text-align: justify;
 }
 .rvps27
 {
+ text-align: justify;
+}
+.rvps28
+{
+ text-indent: 20px;
+}
+.rvps29
+{
+ text-align: justify;
+ text-indent: 20px;
+}
+.rvps30 /* Paragraph Style */
+{
+}
+.rvps31 /* Paragraph Style */
+{
+}
+.rvps32
+{
+ text-indent: 30px;
+ margin: 0px 0px 0px 30px;
+}
+.rvps33
+{
+ text-align: justify;
  text-indent: 30px;
  margin: 0px 0px 0px 30px;
 }

@@ -3,7 +3,7 @@
 <head>
 	<title>2.1. Piano Roll</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.6.0.345">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.7.1.482">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
@@ -19,15 +19,18 @@
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/hnd.js"></script>
 	<script type="text/javascript">
-		if (top.frames.length == 0)
+		$(document).ready(function()
 		{
-			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-			top.location.href = "index.html?" + sTopicUrl;
-		}
-		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-		{
-			top.FrameTOC.SelectTocItem("PianoRoll");
-		}
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "index.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("PianoRoll");
+			}
+		});
 	</script>
 </head>
 
@@ -52,6 +55,7 @@
 		</div>
 	<div id="topic_content">
 		
+<p></p>
 <p><span class="rvts20">Piano Roll</span></p>
 <p class="rvps5"><span class="rvts39"><br/></span></p>
 <p class="rvps5"><img alt="" style="padding : 1px;" src="lib/taseditor-smb.png"/></p>
@@ -71,14 +75,14 @@
 <p class="rvps10"><span class="rvts22">Чтобы добавлять и изменять </span><span class="rvts22">Ввод</span><span class="rvts22"> мувика, щёлкайте мышкой по клеткам в столбцах, находящихся правее столбика с номерами кадров. Если щёлкнуть по пустой клетке, то на ней появится символ, соответствующий кнопке реального джойстика эмулируемой приставки (NES).</span></p>
 <div class="rvps21"><table width="600" border="0" cellpadding="6" cellspacing="0" style="border-width: 0px;">
 <tr valign="middle">
-<td style="width: 586px; height: 14px;"><p class="rvps15"><span class="rvts26">A</span><span class="rvts22"> – кнопка </span><span class="rvts32">A</span></p>
-<p class="rvps15"><span class="rvts26">B</span><span class="rvts22"> – кнопка </span><span class="rvts32">B</span></p>
-<p class="rvps15"><span class="rvts26">S</span><span class="rvts22"> – кнопка </span><span class="rvts32">Select</span></p>
-<p class="rvps15"><span class="rvts26">T</span><span class="rvts22"> – кнопка </span><span class="rvts32">Start</span></p>
-<p class="rvps15"><span class="rvts26">U</span><span class="rvts22"> – крестовина </span><span class="rvts32">Вверх</span></p>
-<p class="rvps15"><span class="rvts26">D</span><span class="rvts22"> – </span><span class="rvts22">крестовина</span><span class="rvts22"> </span><span class="rvts32">Вниз</span></p>
-<p class="rvps15"><span class="rvts26">L</span><span class="rvts22"> – </span><span class="rvts22">крестовина</span><span class="rvts22"> </span><span class="rvts32">Влево</span></p>
-<p class="rvps15"><span class="rvts26">R</span><span class="rvts22"> – </span><span class="rvts22">крестовина</span><span class="rvts22"> </span><span class="rvts32">Вправо</span></p>
+<td style="width: 586px; height: 14px;"><p class="rvps14"><span class="rvts26">A</span><span class="rvts22"> – кнопка </span><span class="rvts32">A</span></p>
+<p class="rvps14"><span class="rvts26">B</span><span class="rvts22"> – кнопка </span><span class="rvts32">B</span></p>
+<p class="rvps14"><span class="rvts26">S</span><span class="rvts22"> – кнопка </span><span class="rvts32">Select</span></p>
+<p class="rvps14"><span class="rvts26">T</span><span class="rvts22"> – кнопка </span><span class="rvts32">Start</span></p>
+<p class="rvps14"><span class="rvts26">U</span><span class="rvts22"> – крестовина </span><span class="rvts32">Вверх</span></p>
+<p class="rvps14"><span class="rvts26">D</span><span class="rvts22"> – </span><span class="rvts22">крестовина</span><span class="rvts22"> </span><span class="rvts32">Вниз</span></p>
+<p class="rvps14"><span class="rvts26">L</span><span class="rvts22"> – </span><span class="rvts22">крестовина</span><span class="rvts22"> </span><span class="rvts32">Влево</span></p>
+<p class="rvps14"><span class="rvts26">R</span><span class="rvts22"> – </span><span class="rvts22">крестовина</span><span class="rvts22"> </span><span class="rvts32">Вправо</span></p>
 </td>
 <td style="width: 258px; height: 178px;"><p class="rvps5"><img alt="" style="padding : 1px;" src="lib/NES-controller.png"/></p>
 </td>
@@ -137,7 +141,8 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
-<p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com">Full featured Documentation generator</a></p>
+<p></p>
+<p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com">Full-featured Documentation generator</a></p>
 </div>
 	
 	<div id="topic_footer">

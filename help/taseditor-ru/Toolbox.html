@@ -3,7 +3,7 @@
 <head>
 	<title>2.2. Панель инструментов</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.6.0.345">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.7.1.482">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
@@ -19,15 +19,18 @@
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/hnd.js"></script>
 	<script type="text/javascript">
-		if (top.frames.length == 0)
+		$(document).ready(function()
 		{
-			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-			top.location.href = "index.html?" + sTopicUrl;
-		}
-		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-		{
-			top.FrameTOC.SelectTocItem("Toolbox");
-		}
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "index.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("Toolbox");
+			}
+		});
 	</script>
 </head>
 
@@ -52,6 +55,7 @@
 		</div>
 	<div id="topic_content">
 		
+<p></p>
 <p><span class="rvts20">Панель инструментов</span></p>
 <p class="rvps5"><span class="rvts39"><br/></span></p>
 <p class="rvps5"><img alt="" style="padding : 1px;" src="lib/taseditor-smb.png"/></p>
@@ -59,13 +63,13 @@
 <p class="rvps10"><span class="rvts22">Панель инструментов содержит 7 разделов:</span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps15"><a class="rvts40" href="Toolbox.html#playback">Playback – Проигрыватель</a></li>
-<li class="rvps15"><a class="rvts40" href="Toolbox.html#recorder">Recorder – Рекордер</a></li>
-<li class="rvps15"><a class="rvts40" href="Toolbox.html#splicer">Splicer – Монтажный инструмент</a></li>
-<li class="rvps15"><a class="rvts40" href="Toolbox.html#lua">Lua – Луа-автоматизация</a></li>
-<li class="rvps15"><a class="rvts40" href="Toolbox.html#bookmarks">Bookmarks – Закладки</a></li>
-<li class="rvps15"><a class="rvts40" href="Toolbox.html#history">History – Журнал Истории</a></li>
-<li class="rvps15"><a class="rvts40" href="Toolbox.html#selection">кнопки навигации Курсором Выделения</a></li>
+<li class="rvps14"><a class="rvts40" href="Toolbox.html#playback">Playback – Проигрыватель</a></li>
+<li class="rvps14"><a class="rvts40" href="Toolbox.html#recorder">Recorder – Рекордер</a></li>
+<li class="rvps14"><a class="rvts40" href="Toolbox.html#splicer">Splicer – Монтажный инструмент</a></li>
+<li class="rvps14"><a class="rvts40" href="Toolbox.html#lua">Lua – Луа-автоматизация</a></li>
+<li class="rvps14"><a class="rvts40" href="Toolbox.html#bookmarks">Bookmarks – Закладки</a></li>
+<li class="rvps14"><a class="rvts40" href="Toolbox.html#history">History – Журнал Истории</a></li>
+<li class="rvps14"><a class="rvts40" href="Toolbox.html#selection">кнопки навигации Курсором Выделения</a></li>
 </ul>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
@@ -135,16 +139,16 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">По сути это стандартные возможности любого текстового редактора, но в Тасэдиторе их можно применять к </span><span class="rvts22">Ввод</span><span class="rvts22">у прямо во время эмуляции игры, что позволяет на лету анализировать результаты их применения и гибко перестраивать свои планы.</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps15"><span class="rvts23">Copy </span><span class="rvts22">(</span><span class="rvts34">Ctrl + C</span><span class="rvts22">) – копирует весь выделенный </span><span class="rvts22">Ввод</span><span class="rvts22"> в Буфер Обмена.</span></li>
-<li class="rvps15"><span class="rvts23">Paste </span><span class="rvts22">(</span><span class="rvts34">Ctrl + V</span><span class="rvts22">) – вставляет </span><span class="rvts22">Ввод</span><span class="rvts22"> из Буфера Обмена в мувик, начиная с кадра, где стоит Курсор Выделения. Старые данные мувика на этом месте затираются новыми, либо объединяются, если у Рекордера установлена галочка "Superimpose".</span></li>
-<li class="rvps15"><span class="rvts23">Paste Insert </span><span class="rvts22">(</span><span class="rvts34">Ctrl + </span><span class="rvts34">Shift</span><span class="rvts34"> + </span><span class="rvts34">V</span><span class="rvts22">) – раздвигает мувик и вставляет данные из Буфера Обмена, начиная с кадра, где стоит Курсор Выделения. Старые данные мувика отодвигаются вниз.</span></li>
-<li class="rvps15"><span class="rvts23">Clear </span><span class="rvts22">(</span><span class="rvts34">Delete</span><span class="rvts22">) – очищает выделенные кадры, удаляя с них нажатия всех кнопок.</span></li>
-<li class="rvps15"><span class="rvts23">Cut </span><span class="rvts22">(</span><span class="rvts34">Ctrl + X</span><span class="rvts22">) = </span><span class="rvts23">Copy</span><span class="rvts22"> + </span><span class="rvts23">Clear</span><span class="rvts22"> – копирует </span><span class="rvts22">Ввод</span><span class="rvts22"> из выделенного участка мувика и очищает этот участок.</span></li>
-<li class="rvps15"><span class="rvts23">Delete </span><span class="rvts22">(</span><span class="rvts34">Ctrl + Delete</span><span class="rvts22">) – удаляет выделенные кадры из мувика, сдвигая последующие кадры на их место. Очень удобно таким образом перемещать </span><span class="rvts22">Ввод</span><span class="rvts22"> вверх.</span></li>
-<li class="rvps15"><span class="rvts23">Insert </span><span class="rvts22">(</span><span class="rvts34">Ctrl + Shift + Insert</span><span class="rvts22">) – вставляет в мувик пустой кадр перед каждым выделенным кадром, сдвигая существующий Ввод вперёд. Удобно таким образом перемещать </span><span class="rvts22">Ввод</span><span class="rvts22"> вниз.</span></li>
-<li class="rvps15"><span class="rvts23">Clone </span><span class="rvts22">(</span><span class="rvts34">Ctrl + Insert</span><span class="rvts22">) – аналог </span><span class="rvts23">Insert</span><span class="rvts22">, но вместо пустоты в мувик вставляются копии выделенных кадров. Зачастую этот способ предпочтительнее.</span></li>
-<li class="rvps15"><span class="rvts23">Insert number of frames </span><span class="rvts22">(</span><span class="rvts34">Insert</span><span class="rvts22">) – позволяет вставить на место Курсора Выделения любое желаемое количество пустых кадров. При нажатии клавиши </span><span class="rvts34">Insert</span><span class="rvts22"> появляется окошко для ввода требуемого количества кадров, нужно напечатать число и нажать OK. Если передумали, можно нажать Cancel (Esc) для убирания окошка.</span></li>
-<li class="rvps15"><span class="rvts23">Truncate</span><span class="rvts22"> – удаляет все кадры мувика, начиная со следующего за Курсором Выделения. Редко используемая функция, поэтому у неё нет хоткея, она доступна только через меню программы или меню по правой кнопке мыши.</span></li>
+<li class="rvps10"><span class="rvts23">Copy </span><span class="rvts22">(</span><span class="rvts34">Ctrl + C</span><span class="rvts22">) – копирует весь выделенный </span><span class="rvts22">Ввод</span><span class="rvts22"> в Буфер Обмена.</span></li>
+<li class="rvps10"><span class="rvts23">Paste </span><span class="rvts22">(</span><span class="rvts34">Ctrl + V</span><span class="rvts22">) – вставляет </span><span class="rvts22">Ввод</span><span class="rvts22"> из Буфера Обмена в мувик, начиная с кадра, где стоит Курсор Выделения. Старые данные мувика на этом месте затираются новыми, либо объединяются, если у Рекордера установлена галочка "Superimpose".</span></li>
+<li class="rvps10"><span class="rvts23">Paste Insert </span><span class="rvts22">(</span><span class="rvts34">Ctrl + </span><span class="rvts34">Shift</span><span class="rvts34"> + </span><span class="rvts34">V</span><span class="rvts22">) – раздвигает мувик и вставляет данные из Буфера Обмена, начиная с кадра, где стоит Курсор Выделения. Старые данные мувика отодвигаются вниз.</span></li>
+<li class="rvps10"><span class="rvts23">Clear </span><span class="rvts22">(</span><span class="rvts34">Delete</span><span class="rvts22">) – очищает выделенные кадры, удаляя с них нажатия всех кнопок.</span></li>
+<li class="rvps10"><span class="rvts23">Cut </span><span class="rvts22">(</span><span class="rvts34">Ctrl + X</span><span class="rvts22">) = </span><span class="rvts23">Copy</span><span class="rvts22"> + </span><span class="rvts23">Clear</span><span class="rvts22"> – копирует </span><span class="rvts22">Ввод</span><span class="rvts22"> из выделенного участка мувика и очищает этот участок.</span></li>
+<li class="rvps10"><span class="rvts23">Delete </span><span class="rvts22">(</span><span class="rvts34">Ctrl + Delete</span><span class="rvts22">) – удаляет выделенные кадры из мувика, сдвигая последующие кадры на их место. Очень удобно таким образом перемещать </span><span class="rvts22">Ввод</span><span class="rvts22"> вверх.</span></li>
+<li class="rvps10"><span class="rvts23">Insert </span><span class="rvts22">(</span><span class="rvts34">Ctrl + Shift + Insert</span><span class="rvts22">) – вставляет в мувик пустой кадр перед каждым выделенным кадром, сдвигая существующий Ввод вперёд. Удобно таким образом перемещать </span><span class="rvts22">Ввод</span><span class="rvts22"> вниз.</span></li>
+<li class="rvps10"><span class="rvts23">Clone </span><span class="rvts22">(</span><span class="rvts34">Ctrl + Insert</span><span class="rvts22">) – аналог </span><span class="rvts23">Insert</span><span class="rvts22">, но вместо пустоты в мувик вставляются копии выделенных кадров. Зачастую этот способ предпочтительнее.</span></li>
+<li class="rvps10"><span class="rvts23">Insert number of frames </span><span class="rvts22">(</span><span class="rvts34">Insert</span><span class="rvts22">) – позволяет вставить на место Курсора Выделения любое желаемое количество пустых кадров. При нажатии клавиши </span><span class="rvts34">Insert</span><span class="rvts22"> появляется окошко для ввода требуемого количества кадров, нужно напечатать число и нажать OK. Если передумали, можно нажать Cancel (Esc) для убирания окошка.</span></li>
+<li class="rvps10"><span class="rvts23">Truncate</span><span class="rvts22"> – удаляет все кадры мувика, начиная со следующего за Курсором Выделения. Редко используемая функция, поэтому у неё нет хоткея, она доступна только через меню программы или меню по правой кнопке мыши.</span></li>
 </ul>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">Наиболее часто во время ТАСинга в Тасэдиторе вы будете использовать </span><span class="rvts34">Ctrl + Delete</span><span class="rvts22"> (</span><span class="rvts23">Delete Frames</span><span class="rvts22">) и </span><span class="rvts34">Ctrl + Insert</span><span class="rvts22"> (</span><span class="rvts23">Clone Frames</span><span class="rvts22">) для быстрого перемещения редактируемых участков вверх/вниз по &nbsp;списку кадров, тем самым совершая в игре определённые действия раньше или позже по времени.</span></p>
@@ -258,6 +262,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
+<p></p>
 <p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com/feature-tour">Easily create Help documents</a></p>
 </div>
 	
