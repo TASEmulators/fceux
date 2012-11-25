@@ -414,7 +414,7 @@ int HISTORY::JumpInTime(int new_pos)
 	piano_roll.RedrawList();	// even though the Greenzone invalidation most likely will also sent the command to redraw
 
 	// Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
-	if (first_lag_changes >= 0 && first_changes > first_lag_changes)
+	if (first_lag_changes >= 0 && (first_changes > first_lag_changes || first_changes < 0))
 		first_changes = first_lag_changes;
 	return first_changes;
 }
@@ -635,7 +635,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, int size, const c
 		branches.ChangesMadeSinceBranch();
 		project.SetProjectChanged();
 	}
-	if (first_lag_changes >= 0 && first_changes > first_lag_changes)
+	if (first_lag_changes >= 0 && (first_changes > first_lag_changes || first_changes < 0))
 		first_changes = first_lag_changes;
 	return first_changes;
 }
@@ -793,7 +793,7 @@ int HISTORY::RegisterBranching(int slot, bool markers_changed)
 		snap.laglog = greenzone.laglog;
 	}
 	// Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
-	if (first_lag_changes >= 0 && first_changes > first_lag_changes)
+	if (first_lag_changes >= 0 && (first_changes > first_lag_changes || first_changes < 0))
 		first_changes = first_lag_changes;
 	return first_changes;
 }
@@ -978,7 +978,7 @@ int HISTORY::RegisterLuaChanges(const char* name, int start, bool InsertionDelet
 		branches.ChangesMadeSinceBranch();
 		project.SetProjectChanged();
 	}
-	if (first_lag_changes >= 0 && first_changes > first_lag_changes)
+	if (first_lag_changes >= 0 && (first_changes > first_lag_changes || first_changes < 0))
 		first_changes = first_lag_changes;
 	return first_changes;
 }

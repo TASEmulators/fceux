@@ -21,6 +21,7 @@ Main - Main gate between emulator and Taseditor
 #include "utils/xstring.h"
 #include "main.h"			// for GetRomName
 #include "taseditor.h"
+#include "window.h"
 #include "../../input.h"
 #include "../keyboard.h"
 #include "../joystick.h"
@@ -63,7 +64,6 @@ extern int EnableAutosave;
 int saved_frame_display;
 // FCEUX
 extern EMOVIEMODE movieMode;	// maybe we need normal setter for movieMode, to encapsulate it
-extern void UpdateCheckedMenuItems();
 // lua engine
 extern void TaseditorAutoFunction();
 extern void TaseditorManualFunction();
@@ -801,6 +801,9 @@ void ApplyMovieInputConfig()
 	PushCurrentVideoSettings();
 	// update PPU type
 	newppu = currMovieData.PPUflag;
+	SetMainWindowText();
+	// return focus to TAS Editor window
+	SetFocus(taseditor_window.hwndTasEditor);
 }
 
 // this getter contains formula to decide whether to record or replay movie

@@ -667,10 +667,10 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 							msg->clrTextBk = LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
-					} else if ((!greenzone.SavestateIsEmpty(frame & EVERY16TH) && !greenzone.SavestateIsEmpty((frame & EVERY16TH) + 16))
-						|| (!greenzone.SavestateIsEmpty(frame & EVERY8TH) && !greenzone.SavestateIsEmpty((frame & EVERY8TH) + 8))
-						|| (!greenzone.SavestateIsEmpty(frame & EVERY4TH) && !greenzone.SavestateIsEmpty((frame & EVERY4TH) + 4))
-						|| (!greenzone.SavestateIsEmpty(frame & EVERY2ND) && !greenzone.SavestateIsEmpty((frame & EVERY2ND) + 2)))
+					} else if (!greenzone.SavestateIsEmpty(cell_y & EVERY16TH)
+						|| !greenzone.SavestateIsEmpty(cell_y & EVERY8TH)
+						|| !greenzone.SavestateIsEmpty(cell_y & EVERY4TH)
+						|| !greenzone.SavestateIsEmpty(cell_y & EVERY2ND))
 					{
 						if (greenzone.laglog.GetLagInfoAtFrame(frame) == LAGGED_YES)
 							msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
@@ -698,10 +698,10 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 							msg->clrTextBk = LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR1;
-					} else if ((!greenzone.SavestateIsEmpty(frame & EVERY16TH) && !greenzone.SavestateIsEmpty((frame & EVERY16TH) + 16))
-						|| (!greenzone.SavestateIsEmpty(frame & EVERY8TH) && !greenzone.SavestateIsEmpty((frame & EVERY8TH) + 8))
-						|| (!greenzone.SavestateIsEmpty(frame & EVERY4TH) && !greenzone.SavestateIsEmpty((frame & EVERY4TH) + 4))
-						|| (!greenzone.SavestateIsEmpty(frame & EVERY2ND) && !greenzone.SavestateIsEmpty((frame & EVERY2ND) + 2)))
+					} else if (!greenzone.SavestateIsEmpty(cell_y & EVERY16TH)
+						|| !greenzone.SavestateIsEmpty(cell_y & EVERY8TH)
+						|| !greenzone.SavestateIsEmpty(cell_y & EVERY4TH)
+						|| !greenzone.SavestateIsEmpty(cell_y & EVERY2ND))
 					{
 						if (greenzone.laglog.GetLagInfoAtFrame(frame) == LAGGED_YES)
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;

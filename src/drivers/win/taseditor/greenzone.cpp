@@ -475,14 +475,14 @@ void GREENZONE::AdjustDown()
 			markers_changed = true;
 	}
 	// register changes
-	int first_input_chanes = history.RegisterAdjustLag(at, +1);
+	int first_input_changes = history.RegisterAdjustLag(at, +1);
 	// If Input in the frame above currFrameCounter has changed then invalidate Greenzone (rewind 1 frame back)
 	// This should never actually happen, because we clone the frame, so the Input doesn't change
 	// But the check should remain, in case we decide to insert blank frame instead of cloning
-	if (first_input_chanes >= 0 && first_input_chanes < currFrameCounter)
+	if (first_input_changes >= 0 && first_input_changes < currFrameCounter)
 	{
 		// custom invalidation procedure, not retriggering LostPosition/PauseFrame
-		Invalidate(first_input_chanes);
+		Invalidate(first_input_changes);
 		bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
 		int saved_pause_frame = playback.GetPauseFrame();
 		playback.EnsurePlaybackIsInsideGreenzone();

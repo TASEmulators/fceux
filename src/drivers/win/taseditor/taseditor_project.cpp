@@ -140,7 +140,7 @@ bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool 
 		if (save_selection) saved_stuff_map |= SELECTION_SAVED;
 		write32le(saved_stuff_map, ofs);
 		unsigned int number_of_pointers = DEFAULT_NUMBER_OF_POINTERS;
-		write32le(saved_stuff_map, ofs);
+		write32le(number_of_pointers, ofs);
 		// write dummy zeros to the file, where the offsets will be
 		for (unsigned int i = 0; i < number_of_pointers; ++i)
 			write32le(0, ofs);
