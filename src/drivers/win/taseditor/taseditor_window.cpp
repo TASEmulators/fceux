@@ -925,10 +925,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 						selection.SelectAll();
 					break;
 				case ID_SELECTED_UNGREENZONE:
-					if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
-					{
-						greenzone.UnGreenzoneSelectedFrames();
-					}
+					greenzone.UnGreenzoneSelectedFrames();
 					break;
 				case ACCEL_CTRL_X:
 				case ID_EDIT_CUT:
