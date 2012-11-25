@@ -3,7 +3,7 @@ copy ..\output\fceux.exe .
 upx ..\output\fceux.exe
 IF ERRORLEVEL 1 IF NOT ERRORLEVEL 2 GOTO UPXFailed
 cd ..\output
-..\vc\zip -X -9 -r ..\vc\fceux.zip fceux.exe fceux.chm 7z.dll *.dll palettes luaScripts tools
+..\vc\zip -X -9 -r ..\vc\fceux.zip fceux.exe fceux.chm taseditor.chm 7z.dll *.dll palettes luaScripts tools
 move /y ..\vc\fceux.exe .
 ..\vc\zip -X -9 -r ..\vc\fceux.zip auxlib.lua
 cd ..
