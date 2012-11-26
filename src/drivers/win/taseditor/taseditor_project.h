@@ -20,6 +20,12 @@
 #include "editor.h"
 #include "popup_display.h"
 
+
+//not available unless we #define _WIN32_WINNT >= 0x501 (XP) and we're trying very hard to keep 2000 support.
+#ifndef LVS_EX_DOUBLEBUFFER
+#define LVS_EX_DOUBLEBUFFER     0x00010000
+#endif
+
 #define AUTOSAVE_PERIOD_SCALE 60000		// = 1 minute in milliseconds
 
 #define MARKERS_SAVED 1
