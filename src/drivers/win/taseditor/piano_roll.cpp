@@ -130,7 +130,7 @@ void PIANO_ROLL::init()
 
 	hwndList = GetDlgItem(taseditor_window.hwndTasEditor, IDC_LIST1);
 	// prepare the main listview
-	ListView_SetExtendedListViewStyleEx(hwndList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
+	ListView_SetExtendedListViewStyleEx(hwndList, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
 	// subclass the header
 	hwndHeader = ListView_GetHeader(hwndList);
 	hwndHeader_oldWndproc = (WNDPROC)SetWindowLong(hwndHeader, GWL_WNDPROC, (LONG)HeaderWndProc);
@@ -903,7 +903,7 @@ void PIANO_ROLL::RedrawRow(int index)
 }
 void PIANO_ROLL::RedrawHeader()
 {
-	InvalidateRect(hwndHeader, 0, FALSE);
+	InvalidateRect(hwndHeader, 0, false);
 }
 
 // -------------------------------------------------------------------------
