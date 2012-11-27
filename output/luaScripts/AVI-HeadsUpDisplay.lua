@@ -1,4 +1,4 @@
--- Script by amaurea, andymac and feos for FCEUX 2.1.6 and earlier versions.
+-- Script by amaurea, andymac and feos for FCEUX 2.2.0 and earlier versions.
 -- Allows customizable recording of Frame, Lag, Timer and Input display to AVI dump.
 -- Drag and drop HUD items with mouse, use Numpad 1-6 to switch them on/off.
 

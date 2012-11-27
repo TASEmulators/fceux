@@ -1,3 +1,6 @@
+24-Nov-2012 - AnS - when the New PPU is on, it displays "(NewPPU)" in the window caption
+20-Nov-2012 - AnS - Taseditor: added "Ungreenzone" item to context menu; added "Config->Enable Greenzoning"
+13-Nov-2012 - AnS - Taseditor: changed fm3 format to version 3
 10-Nov-2012 - AnS - win32 hotkeys mapping: added the condition that both commands must have the same EMUCMDFLAG_TASEDITOR, or else they are not considered conflicting
 10-Nov-2012 - AnS - win32 hotkeys: disallow unwanted hits of e.g. F1 after pressing Shift+F1 and quickly releasing Shift
 05-Nov-2012 - zeromus - support mapper 028
