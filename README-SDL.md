@@ -1,4 +1,4 @@
-FCEUX SDL 2.1.6 SDL README
+FCEUX SDL 2.2.0 SDL README
 ==========================
 By Lukas Sabota (sf: punkrockguy318)
 
@@ -23,7 +23,7 @@ Table of Contents
 	version of sdl (1.2.15 at the time of writing).
 * scons - Required to build fceux.
 * libgtk2.0 (optional) - version >= 2.24 recommended
-* libgtk3.0 (optional) - this compiles as of fceux 2.1.6.
+* libgtk3.0 (optional) - this compiles as of fceux 2.2.0
 * liblua5.1 (optional)
 * c++ compiler -- you may use g++ from gcc or clang++ from llvm.
 

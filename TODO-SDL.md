@@ -7,23 +7,21 @@ Features
 GTK
 ===
 	* Better on-the-fly video resizing with window resize / video config
-	Done! * Hotkey remapping GUI
-	* Smarter video config (disable widgets that are incompatible with openGL)
+	* Smarter video config (disable widgets that are not used when openGL is enabled)
 	* Options to investigate:
 		* bpp
 		* scanlines
-	* Cheat editor
+	* GUI Cheat editor
 
 SDL 1.3
 =======
 	* segfaults when opening a second game
 	* segfaults on fullscreen entry
 	* havent tested this in a while
-	* not a 2.1.6 target
+	* not a 2.2.0 target
 
 BUGS
 ====
-	* Zipped rom support borked?
 	* F1 from terminal-less gui fceux process hangs fceux (since input is required from console in cheat editor)
 
 OS X
