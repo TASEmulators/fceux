@@ -25,7 +25,7 @@ opts.AddVariables(
   BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', 1),
   BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 1),
   BoolVariable('GTK3', 'Enable GTK3 GUI (SDL only)', 0),
-  BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 1)
+  BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 0)
 )
 AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', metavar='DIR', help='installation prefix')
 
