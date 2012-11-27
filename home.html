@@ -44,7 +44,7 @@
 	<img alt="Super Mario Bros 3 in FCEUX" height="278" src="assets/FCEUX-main.png" width="248" class="style1" /></p>
 	<p><img alt="Nintendo" height="46" src="assets/NES.png" width="76" /><img alt="Famicom" height="44" src="assets/Famicom.jpg" width="70" /></p>
 	<p>FCEUX is a Nintendo Entertainment System (NES), Famicom,  and Famicom Disk System (FDS) emulator.  It supports both PAL (European) and NTSC (USA/JPN) modes.  It supports both Windows and SDL versions for cross compatibility.</p>
-	<p>the FCEUX concept is that of an "all in one" emulator that offers accurate emulation and the best options for both casual play and a variety of more advanced emulator functions.
+	<p>The FCEUX concept is that of an "all in one" emulator that offers accurate emulation and the best options for both casual play and a variety of more advanced emulator functions.
 	For pro users, FCEUX offers tools for debugging, rom-hacking, map making, Tool-assisted movies, and Lua scripting</p>
 	<p>FCEUX is an evolution of the original FCE Ultra emulator.  Over time FCE Ultra had separated into many distinct branches.</p>
 	<p>The concept behind FCEUX is to merge elements from FCEU Ultra, FCEU rerecording, FCEUXD, FCEUXDSP, FCEUXDSP CE, and FCEU-mm into a single branch of FCEU.</p>
@@ -53,28 +53,32 @@
 
 	<p>For more details see the <a href="version.html">version history</a></p>
 	
-	<p>You can find out what we've been up to since the last release by checking the <a href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/changelog.txt">changelog</a> directly.<br>
+	<p>You can find out what we've been up to since the last release by checking the <a href="https://sourceforge.net/p/fceultra/code/2769/tree/fceu/changelog.txt">changelog</a> directly.<br>
 	We also have and IRC channel #fceu on freenode.net</p>
 	
 	<p>&nbsp;</p>
 		
 	<h1>Latest Release</h1>
-	<p><span class="largerfont">FCEUX 2.1.5</span><br/>
-	04 June 2011</p>
-	<p>The 2.1.5 release fixes a lot of bugs and brings various improvements to the prior 2.1.4a release. In addition, the SDL port has improved signficantly; completely overhauling the GTK2 GUI, fixing many sound issues, and fixing a variety of bugs.</p>
-	<p><a href="pressrelease-2.1.5.html">Full changelog</a></p>
+	<p><span class="largerfont">FCEUX 2.2.0</span><br/>
+	27 November 2012</p>
+	<p>The 2.2.0 release fixes a lot of bugs and adds many new features to prior releases, increasing game compatibility and enhancing usability of both Windows and SDL ports. The Windows version also includes major improvement of debugging tools and introduces the new powerful toolset - TAS Editor v1.0 - created to boost efficiency and ease of Tool-Assisted Speedrunning.</p>
+	<p><a href="pressrelease-2.2.0.html">Full changelog</a></p>
 	<h3>Notable changes</h3>
 	<ul>
-		<li>Completely overhauled GTK2 GUI: new options, revamped dialogs, and more.</li>
-		<li>Improved compatibility.</li>
-		<li>Movie performance increases.</li>
-		<li>New lua functions.</li>
-		<li>GTK_LITE build option depreciated in favor of "--nogui 1".</li>
-		<li>Improved sound support for SDL.</li>
-		<li>Win32 - Debugger - Fixed some crashes and make RAM search only display valid addresses.</li>
-		<li>Win32 - Fixed some minor GUI issues.</li>
-		<li>Win32 - TASEdit - Overall cleanup; fixed crash when truncating while turbo is enabled</li>
-	</ul>	
+		<li>Huge mappers overhaul, all latest mappers from fceu-mm</li>
+		<li>Win32: Bug fixes</li>
+		<li>Win32: Proper fullscreen support and correct aspect ratio</li>
+		<li>Win32: Major improvement of debugging tools</li>
+		<li>Win32: TAS Editor 1.0</li>
+		<li>Various bugfixes in movies/replay engine</li>
+		<li>Improved Lua drawing, new Lua functions and scripts</li>
+		<li>Win32: fixed compare-type cheats and game genie codes</li>
+		<li>"Display FPS" option</li>
+		<li>Win32: "Force Grayscale" option</li>
+		<li>Win32: Support for HUD recording in AVI dumping</li>
+		<li>SDL: fixed various segfaults and build issues</li>
+		<li>SDL: added gtk hotkey configuration dialog</li>
+	</ul><br><br>
 	</div>
 </div>
 <div id="footer">
