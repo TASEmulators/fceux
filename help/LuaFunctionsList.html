@@ -3,7 +3,7 @@
 <head>
 	<title>Lua Functions List</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.6.0.345">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.7.1.482">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
@@ -19,15 +19,18 @@
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/hnd.js"></script>
 	<script type="text/javascript">
-		if (top.frames.length == 0)
+		$(document).ready(function()
 		{
-			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-			top.location.href = "fceux.html?" + sTopicUrl;
-		}
-		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-		{
-			top.FrameTOC.SelectTocItem("LuaFunctionsList");
-		}
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("LuaFunctionsList");
+			}
+		});
 	</script>
 </head>
 
@@ -52,6 +55,7 @@
 		</div>
 	<div id="topic_content">
 		
+<p></p>
 <p><span class="rvts17">Lua Functions</span></p>
 <p><br/></p>
 <p>The following functions are available in FCEUX, in addition to standard LUA capabilities:</p>
@@ -315,7 +319,7 @@
 <p><span class="rvts38"><br/></span></p>
 <p><span class="rvts38">Returns a table of every game button, where each entry is true if that button is held at the moment of calling the function, or false if it is not held. This function polls keyboard input immediately, allowing Lua to interact with user even when emulator is paused.</span></p>
 <p><span class="rvts38"><br/></span></p>
-<p><span class="rvts38">As of FCEUX 2.1.6, the function only works in Windows. In Linux this function will return nil.</span></p>
+<p><span class="rvts38">As of FCEUX 2.2.0, the function only works in Windows. In Linux this function will return nil.</span></p>
 <p><span class="rvts38"><br/></span></p>
 <p><span class="rvts59">table joypad.getdown(int player)</span></p>
 <p><span class="rvts59">table joypad.readdown(int player)</span></p>
@@ -768,6 +772,7 @@
 <p><span class="rvts38"><br/></span></p>
 <p><span class="rvts38">For transparancy use "clear".</span></p>
 <p><span class="rvts38"><br/></span></p>
+<p></p>
 <p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour">Easily create EPub books</a></p>
 </div>
 	

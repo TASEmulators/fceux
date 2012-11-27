@@ -1,9 +1,9 @@
 ﻿<html>
 	
 <head>
-	<title>What's New? 2.1.6 (changelog)</title>
+	<title>What's New? 2.2.0 (changelog)</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.6.0.345">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.7.1.482">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
@@ -19,15 +19,18 @@
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/hnd.js"></script>
 	<script type="text/javascript">
-		if (top.frames.length == 0)
+		$(document).ready(function()
 		{
-			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-			top.location.href = "fceux.html?" + sTopicUrl;
-		}
-		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-		{
-			top.FrameTOC.SelectTocItem("WhatsNew216");
-		}
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("WhatsNew216");
+			}
+		});
 	</script>
 </head>
 
@@ -35,7 +38,7 @@
 
 	<div id="topic_header">
 			<div id="topic_header_content">
-				<h1>What's New? 2.1.6 (changelog)</h1>
+				<h1>What's New? 2.2.0 (changelog)</h1>
 				
 				<div id="topic_breadcrumb">
 					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
@@ -52,11 +55,12 @@
 		</div>
 	<div id="topic_content">
 		
-<p><span class="rvts17">What's New? </span><span class="rvts21">2.1.6</span></p>
-<p>Released -- ???? 2012</p>
+<p></p>
+<p><span class="rvts17">What's New? </span><span class="rvts21">2.2.0</span></p>
+<p>Released -- 27 November 2012</p>
 <p><br/></p>
 <p><br/></p>
-<p>The 2.1.6 release fixes a lot of bugs and adds many new features to prior releases, <span class="rvts22">increasing game compatibility and enhancing usability of both Windows and SDL ports</span>. Some of the most notable features of Windows version are proper fullscreen support and major improvement of debugging tools. This version also introduces the new powerful toolset – TAS Editor v1.0 – created to boost efficiency and ease of Tool-Assisted Speedrunning.</p>
+<p>The 2.2.0 release fixes a lot of bugs and adds many new features to prior releases, <span class="rvts22">increasing game compatibility and enhancing usability of both Windows and SDL ports</span>. The Windows version also includes major improvement of debugging tools and introduces the new powerful toolset – TAS Editor v1.0 – created to boost efficiency and ease of Tool-Assisted Speedrunning.</p>
 <p><span class="rvts24"><br/></span></p>
 <p><span class="rvts23">Common </span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
@@ -212,8 +216,28 @@
 <li><span class="rvts22">Parse cheat files with non-ASCII characters properly</span></li>
 </ul>
 <p><span class="rvts24"><br/></span></p>
+<p><span class="rvts24">SDL</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts22">gtk 2.24 now recommended</span></li>
+<li><span class="rvts22">added gtk hotkey configuration dialog</span></li>
+<li><span class="rvts22">updated/added various gui elements for options</span></li>
+<li><span class="rvts22">new option: SDL.ShowFPS</span></li>
+<li><span class="rvts22">new option: SDL.Input..EnableOppositeDirectional - allow/disallow simultaneous right+left/up+down input</span></li>
+<li><span class="rvts22">fixed various build issues</span></li>
+<li><span class="rvts22">fixed segfault occuring during particular sequences in the cheat menu</span></li>
+<li><span class="rvts22">fixed potential segfault with gui</span></li>
+<li><span class="rvts22">fixed segfault issue on debian/ubuntu with proprietary nvidia drivers</span></li>
+<li><span class="rvts22">now compatible with llvm/clang++ </span></li>
+<li><span class="rvts22">added build option to dynamically link lua</span></li>
+<li><span class="rvts22">updated default server configuration file to "fceux-server.conf" (from "fceu-server.conf")</span></li>
+<li><span class="rvts22">updated manpage and documentation</span></li>
+</ul>
 <p><span class="rvts22"><br/></span></p>
 <p><span class="rvts22"><br/></span></p>
+<p><span class="rvts22"><br/></span></p>
+<p><span class="rvts22"><br/></span></p>
+<p><span class="rvts22"><br/></span></p>
+<p></p>
 <p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com">Free Web Help generator</a></p>
 </div>
 	
