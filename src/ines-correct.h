@@ -191,6 +191,7 @@
 	{0xa9115bc1,	192,	   -1},
 	{0x4c7bbb0e,	192,	   -1},
 	{0x98c1cd4b,	192,	   -1},	/* Ying Lie Qun Xia Zhuan (Chinese) */
+	{0xee810d55,	192,	   -1},	/* You Ling Xing Dong (China) (Unl) */
 	{0x442f1a29,	192,	   -1},	/* Young chivalry */
 	{0x637134e8,	193,		1},	/* Fighting Hero */
 	{0xa925226c,	194,	   -1},	/* Dai-2-Ji - Super Robot Taisen (As) */

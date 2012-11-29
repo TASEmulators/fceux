@@ -736,6 +736,7 @@ void Mapper52_Init(CartInfo *info)
 
 static void M74CW(uint32 A, uint8 V)
 {
+  //printf("%04X = %02X\n",A,V);
   if((V==8)||(V==9)) //Di 4 Ci - Ji Qi Ren Dai Zhan (As).nes, Ji Jia Zhan Shi (As).nes
     setchr1r(0x10,A,V);
   else
@@ -1030,7 +1031,9 @@ void Mapper191_Init(CartInfo *info)
 
 static void M192CW(uint32 A, uint8 V)
 {
-  if((V==8)||(V==9)||(V==0xA)||(V==0xB)) //Ying Lie Qun Xia Zhuan (Chinese),
+  //Ying Lie Qun Xia Zhuan (Chinese),
+  //You Ling Xing Dong (China) (Unl) [this will be mistakenly headered as m074 sometimes]
+  if((V==8)||(V==9)||(V==0xA)||(V==0xB)) 
     setchr1r(0x10,A,V);
   else
     setchr1r(0,A,V);
