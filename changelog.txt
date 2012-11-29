@@ -1,3 +1,8 @@
+29-Nov-2012 - zeromus - fix "you ling xing dong" by assigning to mapper 192
+
+---r2768 - FCEUX 2.2.0 Released---
+---November 27 2012---
+
 24-Nov-2012 - AnS - when the New PPU is on, it displays "(NewPPU)" in the window caption
 20-Nov-2012 - AnS - Taseditor: added "Ungreenzone" item to context menu; added "Config->Enable Greenzoning"
 13-Nov-2012 - AnS - Taseditor: changed fm3 format to version 3
