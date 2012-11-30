@@ -153,7 +153,7 @@ void CNROM_Init(CartInfo *info) {
 //------------------ Map 7 ---------------------------
 
 static void ANROMSync() {
-	setprg32(0x8000, latche & 0xf);
+	setprg32(0x8000, latche & 0xF);
 	setmirror(MI_0 + ((latche >> 4) & 1));
 	setchr8(0);
 }
@@ -177,7 +177,7 @@ void Mapper8_Init(CartInfo *info) {
 //------------------ Map 11 ---------------------------
 
 static void M11Sync(void) {
-	setprg32(0x8000, latche & 0xf);
+	setprg32(0x8000, latche & 0xF);
 	setchr8(latche >> 4);
 }
 
@@ -201,17 +201,6 @@ void CPROM_Init(CartInfo *info) {
 	Latch_Init(info, CPROMSync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
-//------------------ Map 36 ---------------------------
-
-static void M36Sync(void) {
-	setprg32(0x8000, latche >> 4);
-	setchr8((latche) & 0xF);
-}
-
-void Mapper36_Init(CartInfo *info) {
-	Latch_Init(info, M36Sync, 0, 0x8400, 0xfffe, 0, 0);
-}
-
 //------------------ Map 38 ---------------------------
 
 static void M38Sync(void) {
@@ -228,7 +217,7 @@ void Mapper38_Init(CartInfo *info) {
 static void MHROMSync(void) {
 
 	setprg32(0x8000, latche >> 4);
-	setchr8(latche & 0xf);
+	setchr8(latche & 0xF);
 }
 
 void MHROM_Init(CartInfo *info) {
@@ -432,7 +421,7 @@ void Mapper203_Init(CartInfo *info) {
 static void M240Sync(void) {
 	setprg8r(0x10, 0x6000, 0);
 	setprg32(0x8000, latche >> 4);
-	setchr8(latche & 0xf);
+	setchr8(latche & 0xF);
 }
 
 void Mapper240_Init(CartInfo *info) {

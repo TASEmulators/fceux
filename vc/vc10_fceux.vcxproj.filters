@@ -160,9 +160,6 @@
     <ClCompile Include="..\src\boards\90.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\boards\95.cpp">
-      <Filter>boards</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\a9746.cpp">
       <Filter>boards</Filter>
     </ClCompile>
@@ -194,9 +191,6 @@
       <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\boards\datalatch.cpp">
-      <Filter>boards</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\boards\deirom.cpp">
       <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\boards\dream.cpp">
@@ -647,31 +641,7 @@
     <ClCompile Include="..\src\mappers\24and26.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\mappers\40.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\41.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\42.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\46.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\50.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\51.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\mappers\6.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\61.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\62.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\mappers\65.cpp">
@@ -681,30 +651,6 @@
       <Filter>mappers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\mappers\69.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\71.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\72.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\73.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\75.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\76.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\77.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\79.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\80.cpp">
       <Filter>mappers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\mappers\85.cpp">
@@ -965,6 +911,54 @@
       <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\boards\28.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\36.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\40.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\41.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\42.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\46.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\50.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\51.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\62.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\71.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\72.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\77.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\79.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\80.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\206.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\vrc1.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\vrc3.cpp">
       <Filter>boards</Filter>
     </ClCompile>
   </ItemGroup>

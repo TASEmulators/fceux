@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2006 CaH4e3
+ *  Copyright (C) 2012 CaH4e3
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * FDS Conversion
+ *
  */
-
-//ccording to nestopia, BTL_SMB2_C, otherwise known as UNL-SMB2J
 
 #include "mapinc.h"
 
@@ -34,52 +35,51 @@ static SFORMAT StateRegs[] =
 };
 
 static void Sync(void) {
-	setprg4(0x5000, 16);    // Only YS-612 advdnced version
-	setprg8(0x6000, 2);
-	setprg8(0x8000, 1);
-	setprg8(0xa000, 0);
+	setprg8(0x6000, ~1);
+	setprg8(0x8000, ~3);
+	setprg8(0xa000, ~2);
 	setprg8(0xc000, reg);
-	setprg8(0xe000, 9);
+	setprg8(0xe000, ~0);
 	setchr8(0);
 }
 
-static DECLFW(M43Write) {
-//	int transo[8]={4,3,4,4,4,7,5,6};
-	int transo[8] = { 4, 3, 5, 3, 6, 3, 7, 3 };  // According to hardware tests
-	switch (A & 0xf1ff) {
-	case 0x4022: reg = transo[V & 7]; Sync(); break;
-	case 0x8122:                                                                // hacked version
-	case 0x4122: IRQa = V & 1; X6502_IRQEnd(FCEU_IQEXT); IRQCount = 0; break;   // original version
+static DECLFW(M40Write) {
+	switch (A & 0xe000) {
+	case 0x8000: IRQa = 0; IRQCount = 0; X6502_IRQEnd(FCEU_IQEXT); break;
+	case 0xa000: IRQa = 1; break;
+	case 0xe000: reg = V & 7; Sync(); break;
 	}
 }
 
-static void M43Power(void) {
+static void M40Power(void) {
 	reg = 0;
 	Sync();
-	SetReadHandler(0x5000, 0xffff, CartBR);
-	SetWriteHandler(0x4020, 0xffff, M43Write);
+	SetReadHandler(0x6000, 0xffff, CartBR);
+	SetWriteHandler(0x8000, 0xffff, M40Write);
 }
 
-static void M43Reset(void) {
+static void M40Reset(void) {
 }
 
-static void M43IRQHook(int a) {
-	IRQCount += a;
-	if (IRQa)
-		if (IRQCount >= 4096) {
+static void M40IRQHook(int a) {
+	if (IRQa) {
+		if (IRQCount < 4096)
+			IRQCount += a;
+		else{
 			IRQa = 0;
 			X6502_IRQBegin(FCEU_IQEXT);
 		}
+	}
 }
 
 static void StateRestore(int version) {
 	Sync();
 }
 
-void Mapper43_Init(CartInfo *info) {
-	info->Reset = M43Reset;
-	info->Power = M43Power;
-	MapIRQHook = M43IRQHook;
+void Mapper40_Init(CartInfo *info) {
+	info->Reset = M40Reset;
+	info->Power = M40Power;
+	MapIRQHook = M40IRQHook;
 	GameStateRestore = StateRestore;
 	AddExState(&StateRegs, ~0, 0, 0);
 }

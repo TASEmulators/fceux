@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2005 CaH4e3
+ *  Copyright (C) 2002 Xodnizel
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,61 +20,58 @@
 
 #include "mapinc.h"
 
-static uint8 reg[8];
-static uint8 mirror, cmd, is154;
+static uint8 cmd;
+static uint8 DRegs[8];
 
 static SFORMAT StateRegs[] =
 {
 	{ &cmd, 1, "CMD" },
-	{ &mirror, 1, "MIRR" },
-	{ reg, 8, "REGS" },
+	{ DRegs, 8, "DREG" },
 	{ 0 }
 };
 
 static void Sync(void) {
-	setchr2(0x0000, reg[0] >> 1);
-	setchr2(0x0800, reg[1] >> 1);
-	setchr1(0x1000, reg[2] | 0x40);
-	setchr1(0x1400, reg[3] | 0x40);
-	setchr1(0x1800, reg[4] | 0x40);
-	setchr1(0x1C00, reg[5] | 0x40);
-	setprg8(0x8000, reg[6]);
-	setprg8(0xA000, reg[7]);
-	setprg8(0xC000, ~1);
-	setprg8(0xE000, ~0);
-}
-
-static void MSync(void) {
-	if (is154) setmirror(MI_0 + (mirror & 1));
-}
-
-static DECLFW(M88Write) {
-	switch (A & 0x8001) {
-	case 0x8000: cmd = V & 7; mirror = V >> 6; MSync(); break;
-	case 0x8001: reg[cmd] = V; Sync(); break;
-	}
-}
-
-static void M88Power(void) {
-	SetReadHandler(0x8000, 0xFFFF, CartBR);
-	SetWriteHandler(0x8000, 0xFFFF, M88Write);
+	setchr2(0x0000, DRegs[0]);
+	setchr2(0x0800, DRegs[1]);
+	int x;
+	for (x = 0; x < 4; x++)
+		setchr1(0x1000 + (x << 10), DRegs[2 + x]);
+	setprg8(0x8000, DRegs[6]);
+	setprg8(0xa000, DRegs[7]);
 }
 
 static void StateRestore(int version) {
 	Sync();
-	MSync();
 }
 
-void Mapper88_Init(CartInfo *info) {
-	is154 = 0;
-	info->Power = M88Power;
-	GameStateRestore = StateRestore;
-	AddExState(&StateRegs, ~0, 0, 0);
+static DECLFW(M206Write) {
+	switch (A & 0x8001) {
+	case 0x8000: cmd = V & 0x07; break;
+	case 0x8001:
+		if (cmd <= 0x05)
+			V &= 0x3F;
+		else
+			V &= 0x0F;
+		if (cmd <= 0x01) V >>= 1;
+		DRegs[cmd & 0x07] = V;
+		Sync();
+		break;
+	}
 }
 
-void Mapper154_Init(CartInfo *info) {
-	is154 = 1;
-	info->Power = M88Power;
+static void M206Power(void) {
+	setprg8(0xc000, 0xE);
+	setprg8(0xe000, 0xF);
+	cmd = 0;
+	memset(DRegs, 0, 8);
+	Sync();
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	SetWriteHandler(0x8000, 0xFFFF, M206Write);
+}
+
+
+void Mapper206_Init(CartInfo *info) {
+	info->Power = M206Power;
 	GameStateRestore = StateRestore;
 	AddExState(&StateRegs, ~0, 0, 0);
 }

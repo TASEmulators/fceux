@@ -20,81 +20,56 @@
 
 #include "mapinc.h"
 
-static uint8 reg[8];
-static uint8 IRQa;
-static int16 IRQCount, IRQLatch;
-/*
-static uint8 *WRAM=NULL;
-static uint32 WRAMSIZE;
+static uint8 latche;
+
 static uint8 *CHRRAM=NULL;
 static uint32 CHRRAMSIZE;
-*/
 
 static SFORMAT StateRegs[] =
 {
-	{ reg, 8, "REGS" },
-	{ &IRQa, 1, "IRQA" },
-	{ &IRQCount, 2, "IRQC" },
-	{ &IRQLatch, 2, "IRQL" },
+	{ &latche, 1, "LATC" },
 	{ 0 }
 };
 
 static void Sync(void) {
+	setprg32(0x8000, latche & 7);
+	setchr2(0x0000, latche >> 4);
+	setchr2r(0x10, 0x0800, 2);
+	setchr4r(0x10, 0x1000, 0);
 }
 
-static DECLFW(MNNNWrite) {
+static DECLFW(M77Write) {
+	latche = V;
+	Sync();
 }
 
-static void MNNNPower(void) {
-//	SetReadHandler(0x6000, 0x7fff, CartBR);
-//	SetWriteHandler(0x6000, 0x7fff, CartBW);
+static void M77Power(void) {
+	latche = 0;
+	Sync();
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
-	SetWriteHandler(0x8000, 0xFFFF, MNNNWrite);
+	SetWriteHandler(0x8000, 0xFFFF, M77Write);
 }
 
-static void MNNNReset(void) {
-}
-
-/*
-static void MNNNClose(void)
+static void M77Close(void)
 {
-	if (WRAM)
-		FCEU_gfree(WRAM);
 	if (CHRRAM)
 		FCEU_gfree(CHRRAM);
-	WRAM = CHRRAM = NULL;
-}
-*/
-
-static void MNNNIRQHook() {
-	X6502_IRQBegin(FCEU_IQEXT);
+	CHRRAM = NULL;
 }
 
 static void StateRestore(int version) {
 	Sync();
 }
 
-void MapperNNN_Init(CartInfo *info) {
-	info->Reset = MNNNReset;
-	info->Power = MNNNPower;
-//	info->Close = MNNNClose;
-	GameHBIRQHook = MNNNIRQHook;
+void Mapper77_Init(CartInfo *info) {
+	info->Power = M77Power;
+	info->Close = M77Close;
 	GameStateRestore = StateRestore;
-/*
-	CHRRAMSIZE = 8192;
+
+	CHRRAMSIZE = 6 * 1024;
 	CHRRAM = (uint8*)FCEU_gmalloc(CHRRAMSIZE);
 	SetupCartCHRMapping(0x10, CHRRAM, CHRRAMSIZE, 1);
 	AddExState(CHRRAM, CHRRAMSIZE, 0, "CRAM");
-*/
-/*
-	WRAMSIZE = 8192;
-	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
-	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
-	if (info->battery) {
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = WRAMSIZE;
-	}
-*/
+
 	AddExState(&StateRegs, ~0, 0, 0);
 }

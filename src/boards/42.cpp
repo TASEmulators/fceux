@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2006 CaH4e3
+ *  Copyright (C) 2012 CaH4e3
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,70 +16,68 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * FDS Conversion
+ *
  */
-
-//ccording to nestopia, BTL_SMB2_C, otherwise known as UNL-SMB2J
 
 #include "mapinc.h"
 
-static uint8 reg;
+static uint8 preg, creg, mirr;
 static uint32 IRQCount, IRQa;
 
 static SFORMAT StateRegs[] =
 {
+	{ &preg, 1, "PREG" },
+	{ &creg, 1, "CREG" },
+	{ &mirr, 1, "MIRR" },
 	{ &IRQCount, 4, "IRQC" },
 	{ &IRQa, 4, "IRQA" },
-	{ &reg, 1, "REG" },
 	{ 0 }
 };
 
 static void Sync(void) {
-	setprg4(0x5000, 16);    // Only YS-612 advdnced version
-	setprg8(0x6000, 2);
-	setprg8(0x8000, 1);
-	setprg8(0xa000, 0);
-	setprg8(0xc000, reg);
-	setprg8(0xe000, 9);
-	setchr8(0);
+	setprg8(0x6000, preg);
+	setprg32(0x8000, ~0);
+	setchr8(creg);
+	setmirror(mirr);
 }
 
-static DECLFW(M43Write) {
-//	int transo[8]={4,3,4,4,4,7,5,6};
-	int transo[8] = { 4, 3, 5, 3, 6, 3, 7, 3 };  // According to hardware tests
-	switch (A & 0xf1ff) {
-	case 0x4022: reg = transo[V & 7]; Sync(); break;
-	case 0x8122:                                                                // hacked version
-	case 0x4122: IRQa = V & 1; X6502_IRQEnd(FCEU_IQEXT); IRQCount = 0; break;   // original version
+static DECLFW(M42Write) {
+	switch (A & 0xE003) {
+	case 0x8000: creg = V; Sync(); break;
+	case 0xE000: preg = V & 0x0F; Sync(); break;
+	case 0xE001: mirr = ((V >> 3) & 1 ) ^ 1; Sync(); break;
+	case 0xE002: IRQa = V & 2; if (!IRQa) IRQCount = 0; X6502_IRQEnd(FCEU_IQEXT); break;
 	}
 }
 
-static void M43Power(void) {
-	reg = 0;
+static void M42Power(void) {
+	preg = 0;
+	mirr = 1;   // Ai Senshi Nicol actually has fixed mirroring, but mapper forcing it's default value now
 	Sync();
-	SetReadHandler(0x5000, 0xffff, CartBR);
-	SetWriteHandler(0x4020, 0xffff, M43Write);
+	SetReadHandler(0x6000, 0xffff, CartBR);
+	SetWriteHandler(0x6000, 0xffff, M42Write);
 }
 
-static void M43Reset(void) {
-}
-
-static void M43IRQHook(int a) {
-	IRQCount += a;
-	if (IRQa)
-		if (IRQCount >= 4096) {
-			IRQa = 0;
+static void M42IRQHook(int a) {
+	if (IRQa) {
+		IRQCount += a;
+		if (IRQCount >= 32768) IRQCount -= 32768;
+		if (IRQCount >= 24576)
 			X6502_IRQBegin(FCEU_IQEXT);
-		}
+		else
+			X6502_IRQEnd(FCEU_IQEXT);
+	}
 }
 
 static void StateRestore(int version) {
 	Sync();
 }
 
-void Mapper43_Init(CartInfo *info) {
-	info->Reset = M43Reset;
-	info->Power = M43Power;
-	MapIRQHook = M43IRQHook;
+void Mapper42_Init(CartInfo *info) {
+	info->Power = M42Power;
+	MapIRQHook = M42IRQHook;
 	GameStateRestore = StateRestore;
 	AddExState(&StateRegs, ~0, 0, 0);
 }

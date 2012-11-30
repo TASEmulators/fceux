@@ -5,6 +5,9 @@
 	{0x82f204ae,	 -1,		1},	/* Liang Shan Ying Xiong (NJ023) (Ch) [!] */
 	{0x684afccd,	 -1,		1},	/* Space Hunter (J) */
 	{0xad9c63e2,	 -1,		1},	/* Space Shadow (J) */
+	{0xaf5d7aa2,	 -1,		0},	/* Clu Clu Land */
+	{0xcfb224e6,	 -1,		1},	/* Dragon Ninja (J) [p1][!].nes */
+	{0x4f2f1846,	 -1,		1},	/* Famista '89 - Kaimaku Han!! (J) */
 	{0xfcdaca80,	  0,		0},	/* Elevator Action */
 	{0xc05a365b,	  0,		0},	/* Exed Exes (J) */
 	{0x32fa246f,	  0,		0},	/* Tag Team Pro Wrestling */
@@ -72,9 +75,6 @@
 	{0xf518dd58,	  7,		8},	/* Captain Skyhawk */
 	{0x84382231,	  9,		0},	/* Punch Out (J) */
 	{0xbe939fce,	  9,		1},	/* Punchout*/
-	{0xaf5d7aa2,	 -1,		0},	/* Clu Clu Land */
-	{0xcfb224e6,	 -1,		1},	/* Dragon Ninja (J) [p1][!].nes */
-	{0x4f2f1846,	 -1,		1},	/* Famista '89 - Kaimaku Han!! (J) */
 	{0x345d3a1a,	 11,		1},	/* Castle of Deceit */
 	{0x5e66eaea,	 13,		1},	/* Videomation */
 	{0xbfc7a2e9,	 16,		8},
@@ -87,6 +87,7 @@
 	{0x5555fca3,	 32,		8},
 	{0x283ad224,	 32,		8},	/* Ai Sensei no Oshiete */
 	{0x243a8735,	 32,   0x10|4},	/* Major League */
+	{0xbc7b1d0f,	 33,	   -1}, /* Bakushou!! Jinsei Gekijou 2 (J) [!] */
 	{0xc2730c30,	 34,		0},	/* Deadly Towers */
 	{0x4c7c1af3,	 34,		1},	/* Caesar's Palace */
 	{0x932ff06e,	 34,		1},	/* Classic Concentration */
@@ -191,7 +192,7 @@
 	{0xa9115bc1,	192,	   -1},
 	{0x4c7bbb0e,	192,	   -1},
 	{0x98c1cd4b,	192,	   -1},	/* Ying Lie Qun Xia Zhuan (Chinese) */
-	{0xee810d55,	192,	   -1},	/* You Ling Xing Dong (China) (Unl) */
+	{0xee810d55,	192,	   -1}, /* You Ling Xing Dong (Ch) */
 	{0x442f1a29,	192,	   -1},	/* Young chivalry */
 	{0x637134e8,	193,		1},	/* Fighting Hero */
 	{0xa925226c,	194,	   -1},	/* Dai-2-Ji - Super Robot Taisen (As) */
@@ -228,21 +229,22 @@
 	{0xd323b806,	210,		1},	/* Wagyan Land 3 */
 	{0xbd523011,	210,		2},	/* Dream Master */
 	{0x5daae69a,	211,	   -1},	/* Aladdin - Return of Jaffar, The (Unl) [!] */
-	{0x046d70cc,    217,       -1}, /* 500-in-1 (Anim Splash, Alt Mapper)[p1][!] */
-	{0x12f86a4d,    217,       -1}, /* 500-in-1 (Static Splash, Alt Mapper)[p1][!] */
-	{0xd09f778d,    217,       -1}, /* 9999999-in-1 (Static Splash, Alt Mapper)[p1][!] */
+	{0x1ec1dfeb,	217,	   -1}, /* 255-in-1 (Cut version) [p1] */
+	{0x046d70cc,	217,	   -1}, /* 500-in-1 (Anim Splash, Alt Mapper)[p1][!] */
+	{0x12f86a4d,	217,	   -1}, /* 500-in-1 (Static Splash, Alt Mapper)[p1][!] */
+	{0xd09f778d,	217,	   -1}, /* 9999999-in-1 (Static Splash, Alt Mapper)[p1][!] */
 	{0x62ef6c79,	232,		8},	/* Quattro Sports -Aladdin */
 	{0x2705eaeb,	234,	   -1},	/* Maxi 15 */
 	{0x6f12afc5,	235,	   -1},	/* Golden Game 150-in-1 */
 	{0xfb2b6b10,	241,	   -1},	/* Fan Kong Jing Ying (Ch) */
 	{0xb5e83c9a,	241,	   -1},	/* Xing Ji Zheng Ba (Ch) */
-	{0x2537b3e6,    241,       -1}, /* Dance Xtreme - Prima (Unl) */
-	{0x11611e89,    241,       -1}, /* Darkseed (Unl) [p1] */
-	{0x81a37827,    241,       -1}, /* Darkseed (Unl) [p1][b1] */
-	{0xc2730c30,    241,       -1}, /* Deadly Towers (U) [!] */
-	{0x368c19a8,    241,       -1}, /* LIKO Study Cartridge 3-in-1 (Unl) [!] */
-	{0xa21e675c,    241,       -1}, /* Mashou (J) [!] */
-	{0x54d98b79,    241,       -1}, /* Titanic 1912 (Unl) */
+	{0x2537b3e6,	241,	   -1}, /* Dance Xtreme - Prima (Unl) */
+	{0x11611e89,	241,	   -1}, /* Darkseed (Unl) [p1] */
+	{0x81a37827,	241,	   -1}, /* Darkseed (Unl) [p1][b1] */
+	{0xc2730c30,	241,	   -1}, /* Deadly Towers (U) [!] */
+	{0x368c19a8,	241,	   -1}, /* LIKO Study Cartridge 3-in-1 (Unl) [!] */
+	{0xa21e675c,	241,	   -1}, /* Mashou (J) [!] */
+	{0x54d98b79,	241,	   -1}, /* Titanic 1912 (Unl) */
 	{0x6bea1235,	245,	   -1},	/* MMC3 cart, but with nobanking applied to CHR-RAM, so let it be there */
 	{0x345ee51a,	245,	   -1},	/* DQ4c */
 	{0x57514c6c,	245,	   -1},	/* Yong Zhe Dou E Long - Dragon Quest VI (Ch) */

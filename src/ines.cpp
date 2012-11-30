@@ -1,23 +1,23 @@
 /* FCE Ultra - NES/Famicom Emulator
-*
-* Copyright notice for this file:
-*  Copyright (C) 1998 BERO
-*  Copyright (C) 2002 Xodnizel
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ *
+ * Copyright notice for this file:
+ *  Copyright (C) 1998 BERO
+ *  Copyright (C) 2002 Xodnizel
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -322,55 +322,39 @@ static void CheckHInfo(void)
 
 	static uint64 savie[]=
 	{
-		0x498c10dc463cfe95LL,  /* Battle Fleet */
-		0x6917ffcaca2d8466LL,  /* Famista '90 */
-
-		0xd63dcc68c2b20adcLL,    /* Final Fantasy J */
-		0x012df596e2b31174LL,    /* Final Fantasy 1+2 */
-		0xf6b359a720549ecdLL,    /* Final Fantasy 2 */
-		0x5a30da1d9b4af35dLL,    /* Final Fantasy 3 */
-
-		0x2ee3417ba8b69706LL,  /* Hydlide 3*/
-
-		0xebbce5a54cf3ecc0LL,  /* Justbreed */
-
-		0x6a858da551ba239eLL,  /* Kaijuu Monogatari */
-		0xa40666740b7d22feLL,  /* Mindseeker */
-
-		0x77b811b2760104b9LL,    /* Mouryou Senki Madara */
-
-		0x11b69122efe86e8cLL,  /* RPG Jinsei Game */
-
-		0xa70b495314f4d075LL,  /* Ys 3 */
-
-
-		0xc04361e499748382LL,  /* AD&D Heroes of the Lance */
-		0xb72ee2337ced5792LL,  /* AD&D Hillsfar */
-		0x2b7103b7a27bd72fLL,  /* AD&D Pool of Radiance */
-
-		0x854d7947a3177f57LL,    /* Crystalis */
-
-		0xb0bcc02c843c1b79LL,  /* DW */
-		0x4a1f5336b86851b6LL,  /* DW */
-
-		0x2dcf3a98c7937c22LL,  /* DW 2 */
-		0x733026b6b72f2470LL,  /* Dw 3 */
-		0x98e55e09dfcc7533LL,  /* DW 4*/
-		0x8da46db592a1fcf4LL,  /* Faria */
-		0x91a6846d3202e3d6LL,  /* Final Fantasy */
-		0xedba17a2c4608d20LL,  /* ""    */
-
-		0x94b9484862a26cbaLL,    /* Legend of Zelda */
-		0x04a31647de80fdabLL,    /*      ""      */
-
-		0x9aa1dc16c05e7de5LL,    /* Startropics */
-		0x1b084107d0878bd0LL,    /* Startropics 2*/
-
-		0x836c0ff4f3e06e45LL,    /* Zelda 2 */
-
-		0x82000965f04a71bbLL,    /* Mirai Shinwa Jarvas */
-
-		0      /* Abandon all hope if the game has 0 in the lower 64-bits of its MD5 hash */
+		0xc04361e499748382LL,	/* AD&D Heroes of the Lance */
+		0xb72ee2337ced5792LL,	/* AD&D Hillsfar */
+		0x2b7103b7a27bd72fLL,	/* AD&D Pool of Radiance */
+		0x498c10dc463cfe95LL,	/* Battle Fleet */
+		0x854d7947a3177f57LL,	/* Crystalis */
+		0x4a1f5336b86851b6LL,	/* DW */
+		0xb0bcc02c843c1b79LL,	/* DW */
+		0x2dcf3a98c7937c22LL,	/* DW 2 */
+		0x98e55e09dfcc7533LL,	/* DW 4*/
+		0x733026b6b72f2470LL,	/* Dw 3 */
+		0x6917ffcaca2d8466LL,	/* Famista '90 */
+		0x8da46db592a1fcf4LL,	/* Faria */
+		0xedba17a2c4608d20LL,	/* Final Fantasy */
+		0x91a6846d3202e3d6LL,	/* Final Fantasy */
+		0x012df596e2b31174LL,	/* Final Fantasy 1+2 */
+		0xf6b359a720549ecdLL,	/* Final Fantasy 2 */
+		0x5a30da1d9b4af35dLL,	/* Final Fantasy 3 */
+		0xd63dcc68c2b20adcLL,	/* Final Fantasy J */
+		0x2ee3417ba8b69706LL,	/* Hydlide 3*/
+		0xebbce5a54cf3ecc0LL,	/* Justbreed */
+		0x6a858da551ba239eLL,	/* Kaijuu Monogatari */
+		0x2db8f5d16c10b925LL,	/* Kyonshiizu 2 */
+		0x04a31647de80fdabLL,	/* Legend of Zelda */
+		0x94b9484862a26cbaLL,	/* Legend of Zelda */
+		0xa40666740b7d22feLL,	/* Mindseeker */
+		0x82000965f04a71bbLL,	/* Mirai Shinwa Jarvas */
+		0x77b811b2760104b9LL,	/* Mouryou Senki Madara */
+		0x11b69122efe86e8cLL,	/* RPG Jinsei Game */
+		0x9aa1dc16c05e7de5LL,	/* Startropics */
+		0x1b084107d0878bd0LL,	/* Startropics 2*/
+		0xa70b495314f4d075LL,	/* Ys 3 */
+		0x836c0ff4f3e06e45LL,	/* Zelda 2 */
+		0						/* Abandon all hope if the game has 0 in the lower 64-bits of its MD5 hash */
 	};
 
 	static struct CHINF moo[]=
@@ -551,7 +535,7 @@ static BMAPPINGLocal bmap[] = {
 	{"Konami VRC2/VRC4",	 25, Mapper25_Init},
 //	{"",					 26, Mapper26_Init},
 //	{"",					 27, Mapper27_Init},	// Deprecated, dupe for VRC2/VRC4 mapper
-	{"INL-ROM",				 28, Mapper28_Init},
+//	{"",					 28, Mapper28_Init},
 //	{"",					 29, Mapper29_Init},
 //	{"",					 30, Mapper30_Init},
 //	{"",					 31, Mapper31_Init},
@@ -563,18 +547,18 @@ static BMAPPINGLocal bmap[] = {
 	{"",					 37, Mapper37_Init},
 	{"Bit Corp.",			 38, Mapper38_Init},	// Crime Busters
 //	{"",					 39, Mapper39_Init},
-//	{"",					 40, Mapper40_Init},
-//	{"",					 41, Mapper41_Init},
-//	{"",					 42, Mapper42_Init},
+	{"SMB2j FDS",			 40, Mapper40_Init},
+	{"CALTRON 6-in-1",		 41, Mapper41_Init},
+	{"BIO MIRACLE FDS",		 42, Mapper42_Init},
 	{"",					 43, Mapper43_Init},
 	{"",					 44, Mapper44_Init},
 	{"",					 45, Mapper45_Init},
-//	{"",					 46, Mapper46_Init},
+	{"RUMBLESTATION 15-in-1",46, Mapper46_Init},
 	{"",					 47, Mapper47_Init},
 	{"TAITO TCxxx",			 48, Mapper48_Init},
 	{"",					 49, Mapper49_Init},
-//	{"",					 50, Mapper50_Init},
-//	{"",					 51, Mapper51_Init},
+	{"SMB2j FDS REV A",		 50, Mapper50_Init},
+	{"11-in-1 BALL SERIES",	 51, Mapper51_Init},    // 1993 year version
 	{"",					 52, Mapper52_Init},
 //	{"",					 53, Mapper53_Init},	// iNES version of complex UNIF board, can't emulate properly as iNES
 //	{"",					 54, Mapper54_Init},
@@ -584,8 +568,8 @@ static BMAPPINGLocal bmap[] = {
 	{"",					 58, BMCGK192_Init},
 	{"",					 59, Mapper59_Init},	// Check this out
 	{"",					 60, BMCD1038_Init},
-//	{"",					 61, Mapper61_Init},
-//	{"",					 62, Mapper62_Init},
+	{"20-in-1 KAISER REV A", 61, Mapper61_Init},
+	{"700-in-1",			 62, Mapper62_Init},
 //	{"",					 63, Mapper63_Init},
 //	{"",					 64, Mapper64_Init},
 //	{"",					 65, Mapper65_Init},
@@ -594,16 +578,16 @@ static BMAPPINGLocal bmap[] = {
 	{"Sunsoft Mapper #4",	 68, Mapper68_Init},
 //	{"",					 69, Mapper69_Init},
 	{"",					 70, Mapper70_Init},
-//	{"",					 71, Mapper71_Init},
-//	{"",					 72, Mapper72_Init},
-//	{"",					 73, Mapper73_Init},
+	{"CAMERICA BF9093",		 71, Mapper71_Init},
+	{"JALECO JF-17",		 72, Mapper72_Init},
+	{"KONAMI VRC3",			 73, Mapper73_Init},
 	{"",					 74, Mapper74_Init},
-//	{"",					 75, Mapper75_Init},
-//	{"",					 76, Mapper76_Init},
-//	{"",					 77, Mapper77_Init},
+	{"KONAMI VRC1",			 75, Mapper75_Init},
+	{"NAMCOT 108 VER. A",	 76, Mapper76_Init},
+	{"IREM LROG017",		 77, Mapper77_Init},
 	{"Irem 74HC161/32",		 78, Mapper78_Init},
-//	{"",					 79, Mapper79_Init},
-//	{"",					 80, Mapper80_Init},
+	{"AVE/C&E/TXC BOARD",	 79, Mapper79_Init},
+	{"TAITO X1-005 VER. A",	 80, Mapper80_Init},
 //	{"",					 81, Mapper81_Init},
 	{"",					 82, Mapper82_Init},
 	{"",					 83, Mapper83_Init},
@@ -618,7 +602,7 @@ static BMAPPINGLocal bmap[] = {
 	{"",					 92, Mapper92_Init},
 	{"Sunsoft UNROM",		 93, SUNSOFT_UNROM_Init},
 	{"",					 94, Mapper94_Init},
-	{"",					 95, Mapper95_Init},
+	{"NAMCOT 108 VER. B",	 95, Mapper95_Init},
 	{"",					 96, Mapper96_Init},
 	{"",					 97, Mapper97_Init},
 //	{"",					 98, Mapper98_Init},
@@ -729,8 +713,8 @@ static BMAPPINGLocal bmap[] = {
 	{"",					203, Mapper203_Init},
 	{"",					204, Mapper204_Init},
 	{"",					205, Mapper205_Init},
-	{"DEIROM",				206, DEIROM_Init},
-//	{"",					207, Mapper207_Init},
+	{"NAMCOT 108 VER. C",	206, Mapper206_Init},   // Deprecated, Used to be "DEIROM" whatever it means, but actually simple version of MMC3
+	{"TAITO X1-005 VER. B",	207, Mapper207_Init},
 	{"",					208, Mapper208_Init},
 	{"",					209, Mapper209_Init},
 	{"",					210, Mapper210_Init},
@@ -816,22 +800,22 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	//    ROM_size = head.ROM_size;
 	VROM_size = head.VROM_size;
 
-    int round = true;
-    for (int i = 0; i != sizeof(not_power2)/sizeof(not_power2[0]); ++i)
-    {
-        //for games not to the power of 2, so we just read enough
-        //prg rom from it, but we have to keep ROM_size to the power of 2
-        //since PRGCartMapping wants ROM_size to be to the power of 2
-        //so instead if not to power of 2, we just use head.ROM_size when
-        //we use FCEU_read
-        if (not_power2[i] == MapperNo)
-        {
-            round = false;
-            break;
-        }
-    }
+	int round = true;
+	for (int i = 0; i != sizeof(not_power2)/sizeof(not_power2[0]); ++i)
+	{
+		//for games not to the power of 2, so we just read enough
+		//prg rom from it, but we have to keep ROM_size to the power of 2
+		//since PRGCartMapping wants ROM_size to be to the power of 2
+		//so instead if not to power of 2, we just use head.ROM_size when
+		//we use FCEU_read
+		if (not_power2[i] == MapperNo)
+		{
+			round = false;
+			break;
+		}
+	}
 
-    if(VROM_size)
+	if(VROM_size)
 		VROM_size=uppow2(VROM_size);
 
 
@@ -860,9 +844,9 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	ResetExState(0,0);
 
 	SetupCartPRGMapping(0,ROM,ROM_size*0x4000,0);
-   // SetupCartPRGMapping(1,WRAM,8192,1);
+//	SetupCartPRGMapping(1,WRAM,8192,1);
 
-    FCEU_fread(ROM,0x4000,(round) ? ROM_size : head.ROM_size,fp);
+	FCEU_fread(ROM,0x4000,(round) ? ROM_size : head.ROM_size,fp);
 
 	if(VROM_size)
 		FCEU_fread(VROM,0x2000,head.VROM_size,fp);
@@ -883,7 +867,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	iNESCart.CRC32=iNESGameCRC32;
 
 	FCEU_printf(" PRG ROM:  %3d x 16KiB\n CHR ROM:  %3d x  8KiB\n ROM CRC32:  0x%08lx\n",
-                (round) ? ROM_size : head.ROM_size, head.VROM_size,iNESGameCRC32);
+				(round) ? ROM_size : head.ROM_size, head.VROM_size,iNESGameCRC32);
 
 	{
 		int x;
@@ -908,7 +892,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 
 	FCEU_printf(" Battery-backed: %s\n", (head.ROM_type&2)?"Yes":"No");
 	FCEU_printf(" Trained: %s\n", (head.ROM_type&4)?"Yes":"No");
-	// (head.ROM_type&8) = Mirroring: None(Four-screen)
+//	(head.ROM_type&8) = Mirroring: None(Four-screen)
 
 	SetInput();
 	CheckHInfo();
@@ -939,12 +923,12 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	iNESCart.battery=(head.ROM_type&2)?1:0;
 	iNESCart.mirror=Mirroring;
 
-	//if(MapperNo != 18) {
-	//  if(ROM) free(ROM);
-	//  if(VROM) free(VROM);
-	//  ROM=VROM=0;
-	//  return(0);
-	// }
+//	if(MapperNo != 18) {
+//		if(ROM) free(ROM);
+//		if(VROM) free(VROM);
+//		ROM=VROM=0;
+//		return(0);
+//	}
 
 
 	GameInfo->mappernum = MapperNo;
@@ -981,7 +965,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 }
 
 
-//bbit edited: the whole function below was added
+// bbit edited: the whole function below was added
 int iNesSave(){
 	FILE *fp;
 	char name[2048];
@@ -1210,18 +1194,18 @@ void (*MapInitTab[256])(void)=
 	0,
 	0,
 	0,
-	Mapper40_init,
-	Mapper41_init,
-	Mapper42_init,
+	0, //Mapper40_init,
+	0, //Mapper41_init,
+	0, //Mapper42_init,
 	0, //Mapper43_init,
 	0,
 	0,
-	Mapper46_init,
+	0, //Mapper46_init,
 	0,
 	0, //Mapper48_init,
 	0,
-	Mapper50_init,
-	Mapper51_init,
+	0, //Mapper50_init,
+	0, //Mapper51_init,
 	0,
 	0,
 	0,
@@ -1231,8 +1215,8 @@ void (*MapInitTab[256])(void)=
 	0, //Mapper58_init,
 	0, //Mapper59_init,
 	0, //Mapper60_init,
-	Mapper61_init,
-	Mapper62_init,
+	0, //Mapper61_init,
+	0, //Mapper62_init,
 	0,
 	Mapper64_init,
 	Mapper65_init,
@@ -1241,16 +1225,16 @@ void (*MapInitTab[256])(void)=
 	0, //Mapper68_init,
 	Mapper69_init,
 	0, //Mapper70_init,
-	Mapper71_init,
-	Mapper72_init,
-	Mapper73_init,
+	0, //Mapper71_init,
+	0, //Mapper72_init,
+	0, //Mapper73_init,
 	0,
-	Mapper75_init,
-	Mapper76_init,
-	Mapper77_init,
+	0, //Mapper75_init,
+	0, //Mapper76_init,
+	0, //Mapper77_init,
 	0, //Mapper78_init,
-	Mapper79_init,
-	Mapper80_init,
+	0, //Mapper79_init,
+	0, //Mapper80_init,
 	0,
 	0, //Mapper82_init,
 	0, //Mapper83_init,
@@ -1377,7 +1361,7 @@ void (*MapInitTab[256])(void)=
 	0, //Mapper204_init,
 	0,
 	0,
-	Mapper207_init,
+	0, //Mapper207_init,
 	0,
 	0,
 	0,

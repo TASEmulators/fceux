@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2005 CaH4e3
+ *  Copyright (C) 2012 CaH4e3
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,61 +20,50 @@
 
 #include "mapinc.h"
 
-static uint8 reg[8];
-static uint8 mirror, cmd, is154;
+static uint8 mainreg, chrreg, mirror;
 
 static SFORMAT StateRegs[] =
 {
-	{ &cmd, 1, "CMD" },
+	{ &mainreg, 1, "MREG" },
+	{ &chrreg, 1, "CREG" },
 	{ &mirror, 1, "MIRR" },
-	{ reg, 8, "REGS" },
 	{ 0 }
 };
 
 static void Sync(void) {
-	setchr2(0x0000, reg[0] >> 1);
-	setchr2(0x0800, reg[1] >> 1);
-	setchr1(0x1000, reg[2] | 0x40);
-	setchr1(0x1400, reg[3] | 0x40);
-	setchr1(0x1800, reg[4] | 0x40);
-	setchr1(0x1C00, reg[5] | 0x40);
-	setprg8(0x8000, reg[6]);
-	setprg8(0xA000, reg[7]);
-	setprg8(0xC000, ~1);
-	setprg8(0xE000, ~0);
+	setprg32(0x8000, mainreg & 7);
+	setchr8(chrreg);
+	setmirror(mirror);
 }
 
-static void MSync(void) {
-	if (is154) setmirror(MI_0 + (mirror & 1));
+static DECLFW(M41Write0) {
+	mainreg = A & 0xFF;
+	mirror = ((A >> 5) & 1) ^ 1;
+	chrreg = (chrreg & 3) | ((A >> 1) & 0xC);
+	Sync();
 }
 
-static DECLFW(M88Write) {
-	switch (A & 0x8001) {
-	case 0x8000: cmd = V & 7; mirror = V >> 6; MSync(); break;
-	case 0x8001: reg[cmd] = V; Sync(); break;
+static DECLFW(M41Write1) {
+	if (mainreg & 0x4) {
+		chrreg = (chrreg & 0xC) | (A & 3);
+		Sync();
 	}
 }
 
-static void M88Power(void) {
+static void M41Power(void) {
+	mainreg = chrreg = 0;
+	Sync();
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
-	SetWriteHandler(0x8000, 0xFFFF, M88Write);
+	SetWriteHandler(0x6000, 0x67FF, M41Write0);
+	SetWriteHandler(0x8000, 0xFFFF, M41Write1);
 }
 
 static void StateRestore(int version) {
 	Sync();
-	MSync();
 }
 
-void Mapper88_Init(CartInfo *info) {
-	is154 = 0;
-	info->Power = M88Power;
-	GameStateRestore = StateRestore;
-	AddExState(&StateRegs, ~0, 0, 0);
-}
-
-void Mapper154_Init(CartInfo *info) {
-	is154 = 1;
-	info->Power = M88Power;
+void Mapper41_Init(CartInfo *info) {
+	info->Power = M41Power;
 	GameStateRestore = StateRestore;
 	AddExState(&StateRegs, ~0, 0, 0);
 }

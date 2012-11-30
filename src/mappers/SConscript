@@ -1,27 +1,10 @@
 my_list =   Split("""
 24and26.cpp
-40.cpp
-41.cpp
-42.cpp
-46.cpp
-50.cpp
-51.cpp
 6.cpp
-61.cpp
-62.cpp
 65.cpp
 67.cpp
 69.cpp
-71.cpp
-72.cpp
-73.cpp
-75.cpp
-76.cpp
-77.cpp
-79.cpp
-80.cpp
 85.cpp
-emu2413.c
 mmc2and4.cpp
 """)
 #
