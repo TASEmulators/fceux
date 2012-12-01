@@ -1,36 +1,8 @@
-my_list =  Split("""
-lapi.c
-lauxlib.c
-lbaselib.c
-lcode.c
-ldblib.c
-ldebug.c
-ldo.c
-ldump.c
-lfunc.c
-lgc.c
-linit.c
-liolib.c
-llex.c
-lmathlib.c
-lmem.c
-loadlib.c
-lobject.c
-lopcodes.c
-loslib.c
-lparser.c
-lstate.c
-lstring.c
-lstrlib.c
-ltable.c
-ltablib.c
-ltm.c
-lundump.c
-lvm.c
-lzio.c
-print.c
-""")
+import glob                                                                                   
+source_list = glob.glob('src/*.c')
+source_list.remove('src/lua.c')
+source_list.remove('src/luac.c')
 
-for x in range(len(my_list)):
-  my_list[x] = 'lua/src/' + my_list[x]
-Return('my_list')
+for x in range(len(source_list)):
+  source_list[x] = 'lua/' + source_list[x]
+Return('source_list')

@@ -1,32 +1,6 @@
-file_list = Split("""
-asm.cpp
-cart.cpp
-cheat.cpp
-conddebug.cpp
-config.cpp
-debug.cpp
-drawing.cpp
-emufile.cpp
-fceu.cpp
-fds.cpp
-file.cpp 
-filter.cpp 
-ines.cpp
-input.cpp
-netplay.cpp
-nsf.cpp
-oldmovie.cpp
-palette.cpp
-ppu.cpp
-sound.cpp
-state.cpp
-unif.cpp
-video.cpp
-vsuni.cpp
-wave.cpp
-x6502.cpp
-movie.cpp
-""")
+import glob
+file_list = glob.glob('*.cpp')
+file_list.remove('lua-engine.cpp') # use logic below for this
 
 subdirs = Split("""
 boards

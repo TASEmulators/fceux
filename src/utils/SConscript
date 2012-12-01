@@ -1,14 +1,6 @@
-my_list =   Split("""
-crc32.cpp
-endian.cpp
-general.cpp
-guid.cpp
-md5.cpp
-memory.cpp
-unzip.cpp
-xstring.cpp
-""")
+import glob                                                                                   
+source_list = glob.glob('*.cpp')
 
-for x in range(len(my_list)):
-  my_list[x] = 'utils/' + my_list[x]
-Return('my_list')
+for x in range(len(source_list)):
+  source_list[x] = 'utils/' + source_list[x]
+Return('source_list')

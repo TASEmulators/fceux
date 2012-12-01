@@ -1,7 +1,6 @@
-Import('file_list')
-my_list =  Split("""
-""")
-for x in range(len(my_list)):
-  my_list[x] = 'palettes/' + my_list[x]
-file_list = my_list + file_list
-Export('file_list')
+import glob
+source_list = glob.glob('*.c')
+
+for x in range(len(source_list)):
+  source_list[x] = 'palettes/' + source_list[x]
+Return('source_list')

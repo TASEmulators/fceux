@@ -1,16 +1,6 @@
-my_list =   Split("""
-24and26.cpp
-6.cpp
-65.cpp
-67.cpp
-69.cpp
-85.cpp
-mmc2and4.cpp
-""")
-#
-# emu2413.h
-# mapinc.h
-#
-for x in range(len(my_list)):
-  my_list[x] = 'mappers/' + my_list[x]
-Return('my_list')
+import glob                                                                                   
+source_list = glob.glob('*.cpp') + glob.glob('*.c')
+
+for x in range(len(source_list)):
+  source_list[x] = 'mappers/' + source_list[x]
+Return('source_list')
