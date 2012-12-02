@@ -4,7 +4,7 @@ Import('env')
 env.ParseConfig('pkg-config --cflags --libs x11')
 Export('env')
 
-my_list =  Split("""
+source_list =  Split("""
 input.cpp
 config.cpp
 sdl.cpp
@@ -17,8 +17,8 @@ unix-netplay.cpp
 
 Import('env')
 if 'GL' in env['LIBS']:
-  my_list.append('sdl-opengl.cpp')
+  source_list.append('sdl-opengl.cpp')
 
-for x in range(len(my_list)):
-  my_list[x] = 'drivers/sdl/' + my_list[x]
-Return('my_list')
+for x in range(len(source_list)):
+  source_list[x] = 'drivers/sdl/' + source_list[x]
+Return('source_list')
