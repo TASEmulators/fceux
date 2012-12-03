@@ -262,9 +262,6 @@
     <ClCompile Include="..\src\boards\sl1632.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\boards\smb2j.cpp">
-      <Filter>boards</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\subor.cpp">
       <Filter>boards</Filter>
     </ClCompile>
@@ -959,6 +956,9 @@
       <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\boards\vrc3.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\09-034a.cpp">
       <Filter>boards</Filter>
     </ClCompile>
   </ItemGroup>

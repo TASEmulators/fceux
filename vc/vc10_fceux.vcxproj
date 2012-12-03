@@ -228,6 +228,7 @@
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessToFile>
       <PreprocessSuppressLineNumbers Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessSuppressLineNumbers>
     </ClCompile>
+    <ClCompile Include="..\src\boards\09-034a.cpp" />
     <ClCompile Include="..\src\boards\103.cpp" />
     <ClCompile Include="..\src\boards\106.cpp" />
     <ClCompile Include="..\src\boards\108.cpp" />
@@ -362,7 +363,6 @@
     <ClCompile Include="..\src\boards\sc-127.cpp" />
     <ClCompile Include="..\src\boards\sheroes.cpp" />
     <ClCompile Include="..\src\boards\sl1632.cpp" />
-    <ClCompile Include="..\src\boards\smb2j.cpp" />
     <ClCompile Include="..\src\boards\subor.cpp" />
     <ClCompile Include="..\src\boards\super24.cpp" />
     <ClCompile Include="..\src\boards\supervision.cpp" />
