@@ -240,6 +240,8 @@
 #define IDC_NTVIEW_REFRESH_TRACKBAR     201
 #define IDC_ASSEMBLER_APPLY             201
 #define IDI_ICON4                       201
+#define BTN_CLEAR2                      201
+#define BTN_OK                          201
 #define MENU_EJECT_DISK                 202
 #define TXT_FAM                         202
 #define MENU_MV_EDIT_PASTE              202

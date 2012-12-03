@@ -32,6 +32,7 @@ using namespace std;
 bool emulator_must_run_taseditor = false;
 bool Taseditor_rewind_now = false;
 bool must_call_manual_lua_function = false;
+bool taseditor_accelerator_keys = false;
 
 // all Taseditor functional modules
 TASEDITOR_CONFIG taseditor_config;
@@ -913,15 +914,17 @@ void Taseditor_EMUCMD(int command)
 
 	}
 }
-// these functions allow/disallow some FCEUX hotkeys
+// these functions allow/disallow some FCEUX hotkeys and TAS Editor accelerators
 void SetTaseditorInput()
 {
+	taseditor_accelerator_keys = true;
 	// set "Background TAS Editor input"
 	KeyboardSetBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
 	JoystickSetBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
 }
 void ClearTaseditorInput()
 {
+	taseditor_accelerator_keys = false;
 	// clear "Background TAS Editor input"
 	KeyboardClearBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
 	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);

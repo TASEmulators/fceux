@@ -74,6 +74,7 @@
 #include "taseditor/taseditor_window.h"
 
 extern TASEDITOR_WINDOW taseditor_window;
+extern bool taseditor_accelerator_keys;
 
 //---------------------------
 //mbg merge 6/29/06 - new aboutbox
@@ -344,7 +345,7 @@ int BlockingCheck()
 				}
 			}
 
-			if(!handled && taseditor_window.hwndTasEditor)
+			if(!handled && taseditor_window.hwndTasEditor && taseditor_accelerator_keys)
 			{
 				if(IsChild(taseditor_window.hwndTasEditor, msg.hwnd))
 					handled = TranslateAccelerator(taseditor_window.hwndTasEditor, fceu_hAccel, &msg);

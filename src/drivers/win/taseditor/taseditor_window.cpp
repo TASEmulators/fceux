@@ -917,11 +917,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 						selection.ClearSelection();
 					break;
 				case ID_EDIT_SELECTALL:
-					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, -1); 
-					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1); 
-					else if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 						selection.SelectAll();
 					break;
 				case ID_SELECTED_UNGREENZONE:
@@ -929,39 +925,19 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case ACCEL_CTRL_X:
 				case ID_EDIT_CUT:
-					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						SendMessage(playback.hwndPlaybackMarkerEdit, WM_CUT, 0, 0); 
-					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						SendMessage(selection.hwndSelectionMarkerEdit, WM_CUT, 0, 0); 
-					else
-						splicer.Cut();
+					splicer.Cut();
 					break;
 				case ACCEL_CTRL_C:
 				case ID_EDIT_COPY:
-					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						SendMessage(playback.hwndPlaybackMarkerEdit, WM_COPY, 0, 0); 
-					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						SendMessage(selection.hwndSelectionMarkerEdit, WM_COPY, 0, 0); 
-					else
-						splicer.Copy();
+					splicer.Copy();
 					break;
 				case ACCEL_CTRL_V:
 				case ID_EDIT_PASTE:
-					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						SendMessage(playback.hwndPlaybackMarkerEdit, WM_PASTE, 0, 0); 
-					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						SendMessage(selection.hwndSelectionMarkerEdit, WM_PASTE, 0, 0); 
-					else
-						splicer.Paste();
+					splicer.Paste();
 					break;
 				case ACCEL_CTRL_SHIFT_V:
 				case ID_EDIT_PASTEINSERT:
-					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						SendMessage(playback.hwndPlaybackMarkerEdit, WM_PASTE, 0, 0); 
-					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						SendMessage(selection.hwndSelectionMarkerEdit, WM_PASTE, 0, 0); 
-					else
-						splicer.PasteInsert();
+					splicer.PasteInsert();
 					break;
 				case ACCEL_CTRL_DELETE:
 				case ID_EDIT_DELETE:
@@ -983,22 +959,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					splicer.InsertFrames();
 					break;
 				case ACCEL_DEL:
-					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-					{
-						DWORD sel_start, sel_end;
-						SendMessage(playback.hwndPlaybackMarkerEdit, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
-						if (sel_start == sel_end)
-							SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, sel_start, sel_start + 1);
-						SendMessage(playback.hwndPlaybackMarkerEdit, WM_CLEAR, 0, 0); 
-					} else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-					{
-						DWORD sel_start, sel_end;
-						SendMessage(selection.hwndSelectionMarkerEdit, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
-						if (sel_start == sel_end)
-							SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, sel_start, sel_start + 1);
-						SendMessage(selection.hwndSelectionMarkerEdit, WM_CLEAR, 0, 0); 
-					} else
-						splicer.ClearFrames();
+					splicer.ClearFrames();
 					break;
 				case ID_EDIT_CLEAR:
 				case ID_CONTEXT_SELECTED_CLEARFRAMES:
@@ -1181,11 +1142,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ACCEL_CTRL_A:
-					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, -1);
-					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1);
-					else if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION && piano_roll.drag_mode != DRAG_MODE_DESELECTION)
 						selection.SelectBetweenMarkers();
 					break;
 				case ID_EDIT_SELECTMIDMARKERS:
@@ -1200,25 +1157,12 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case ACCEL_CTRL_Z:
 				case ID_EDIT_UNDO:
-					{
-						if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						{
-							SendMessage(playback.hwndPlaybackMarkerEdit, WM_UNDO, 0, 0); 
-						} else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						{
-							SendMessage(selection.hwndSelectionMarkerEdit, WM_UNDO, 0, 0); 
-						} else
-						{
-							history.undo();
-						}
-						break;
-					}
+					history.undo();
+					break;
 				case ACCEL_CTRL_Y:
 				case ID_EDIT_REDO:
-					{
-						history.redo();
-						break;
-					}
+					history.redo();
+					break;
 				case ID_EDIT_SELECTIONUNDO:
 				case ACCEL_CTRL_Q:
 					{
@@ -1300,30 +1244,14 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case ACCEL_HOME:
 				{
-					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, 0); 
-					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, 0); 
-					else
-						// scroll Piano Roll to the beginning
-						ListView_Scroll(piano_roll.hwndList, 0, -piano_roll.list_row_height * ListView_GetTopIndex(piano_roll.hwndList));
+					// scroll Piano Roll to the beginning
+					ListView_Scroll(piano_roll.hwndList, 0, -piano_roll.list_row_height * ListView_GetTopIndex(piano_roll.hwndList));
 					break;
 				}
 				case ACCEL_END:
 				{
-					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-					{
-						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, -1); 
-						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, -1, -1); 
-					} else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-					{
-						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1); 
-						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, -1, -1); 
-					} else
-					{
-						// scroll Piano Roll to the end
-						ListView_Scroll(piano_roll.hwndList, 0, piano_roll.list_row_height * currMovieData.getNumRecords());
-					}
+					// scroll Piano Roll to the end
+					ListView_Scroll(piano_roll.hwndList, 0, piano_roll.list_row_height * currMovieData.getNumRecords());
 					break;
 				}
 				case ACCEL_PGUP:
@@ -1392,9 +1320,11 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case ACCEL_CTRL_LEFT:
 				case ACCEL_SHIFT_LEFT:
+				{
 					// scroll Piano Roll horizontally to the left
 					ListView_Scroll(piano_roll.hwndList, -COLUMN_BUTTON_WIDTH, 0);
 					break;
+				}
 				case ACCEL_CTRL_RIGHT:
 				case ACCEL_SHIFT_RIGHT:
 					// scroll Piano Roll horizontally to the right
