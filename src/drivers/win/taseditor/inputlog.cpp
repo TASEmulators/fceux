@@ -58,6 +58,43 @@ void INPUTLOG::init(MovieData& md, bool hotchanges, int force_input_type)
 	already_compressed = false;
 }
 
+// this function only updates one frame of Input Log and Hot Changes data
+// the function should only be used when combining consecutive Recordings
+void INPUTLOG::reinit(MovieData& md, bool hotchanges, int frame_of_change)
+{
+	has_hot_changes = hotchanges;
+	int num_joys = joysticks_per_frame[input_type];
+	int joy;
+	// retrieve Input data from movie data
+	size = md.getNumRecords();
+	joysticks.resize(BYTES_PER_JOYSTICK * num_joys * size, 0);
+	commands.resize(size);
+	if (has_hot_changes)
+	{
+		// resize Hot Changes
+		Init_HotChanges();
+		// compare current movie data at the frame_of_change to current state of InputLog at the frame_of_change
+		uint8 my_joy, their_joy;
+		for (joy = num_joys - 1; joy >= 0; joy--)
+		{
+			my_joy = GetJoystickInfo(frame_of_change, joy);
+			their_joy = md.records[frame_of_change].joysticks[joy];
+			if (my_joy != their_joy)
+				SetMaxHotChange_Bits(frame_of_change, joy, my_joy ^ their_joy);
+		}
+	} else
+	{
+		// if user switches Hot Changes off inbetween two consecutive Recordings
+		hot_changes.resize(0);
+	}
+
+	// update Input vector
+	for (joy = num_joys - 1; joy >= 0; joy--)
+		joysticks[frame_of_change * num_joys * BYTES_PER_JOYSTICK + joy * BYTES_PER_JOYSTICK] = md.records[frame_of_change].joysticks[joy];
+	commands[frame_of_change] = md.records[frame_of_change].commands;
+	already_compressed = false;
+}
+
 void INPUTLOG::toMovie(MovieData& md, int start, int end)
 {
 	if (end < 0 || end >= size) end = size - 1;
@@ -203,22 +240,6 @@ bool INPUTLOG::skipLoad(EMUFILE *is)
 	return false;
 }
 // --------------------------------------------------------------------------------------------
-// fills map of bits judging on which joypads differ (this function is only used by "Record" modtype)
-uint32 INPUTLOG::fillJoypadsDiff(INPUTLOG& their_log, int frame)
-{
-	uint32 joypad_diff_bits = 0;
-	uint32 current_mask = 1;
-	if (frame < their_log.size)
-	{
-		for (int joy = 0; joy < joysticks_per_frame[input_type]; ++joy)
-		{
-			if (GetJoystickInfo(frame, joy) != their_log.GetJoystickInfo(frame, joy))
-				joypad_diff_bits |= current_mask;
-			current_mask <<= 1;
-		}
-	}
-	return joypad_diff_bits;
-}
 // return number of first frame of difference between two InputLogs
 int INPUTLOG::findFirstChange(INPUTLOG& their_log, int start, int end)
 {

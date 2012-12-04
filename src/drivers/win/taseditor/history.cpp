@@ -104,7 +104,7 @@ char modCaptions[MODTYPES_TOTAL][20] = {" Initialization",
 										" LUA Marker Rename",
 										" LUA Change" };
 char LuaCaptionPrefix[6] = " LUA ";
-char joypadCaptions[4][5] = {"(1P)", "(2P)", "(3P)", "(4P)"};
+char joypadCaptions[5][11] = {"(Commands)", "(1P)", "(2P)", "(3P)", "(4P)"};
 
 HISTORY::HISTORY()
 {
@@ -797,65 +797,69 @@ int HISTORY::RegisterBranching(int slot, bool markers_changed)
 		first_changes = first_lag_changes;
 	return first_changes;
 }
-void HISTORY::RegisterRecording(int frame_of_change)
+void HISTORY::RegisterRecording(int frame_of_change, uint32 joypad_diff_bits)
 {
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
-	SNAPSHOT snap;
-	snap.init(currMovieData, taseditor_config.enable_hot_changes);
-	snap.rec_joypad_diff_bits = snap.inputlog.fillJoypadsDiff(snapshots[real_pos].inputlog, frame_of_change);
-	// fill description:
-	snap.mod_type = MODTYPE_RECORD;
-	strcat(snap.description, modCaptions[MODTYPE_RECORD]);
-	char framenum[11];
 	// check if current snapshot is also Recording and maybe it is consecutive recording
 	if (taseditor_config.combine_consecutive
-		&& snapshots[real_pos].mod_type == MODTYPE_RECORD							// a) also Recording
-		&& snapshots[real_pos].consecutive_tag == frame_of_change - 1				// b) consecutive (previous frame)
-		&& snapshots[real_pos].rec_joypad_diff_bits == snap.rec_joypad_diff_bits)	// c) recorded same set of joysticks
+		&& snapshots[real_pos].mod_type == MODTYPE_RECORD					// a) also Recording
+		&& snapshots[real_pos].consecutive_tag == frame_of_change - 1		// b) consecutive (previous frame)
+		&& snapshots[real_pos].rec_joypad_diff_bits == joypad_diff_bits)	// c) recorded same set of joysticks/commands
 	{
-		// clone this snapshot and continue chain of recorded frames
-		snap.keyframe = snapshots[real_pos].keyframe;
-		snap.start_frame = snapshots[real_pos].keyframe;
-		snap.end_frame = frame_of_change;
-		snap.consecutive_tag = frame_of_change;
-		// add info which joypads were affected
-		int num = joysticks_per_frame[snap.inputlog.input_type];
+		// reinit current snapshot and set hotchanges
+		SNAPSHOT* snap = &snapshots[real_pos];
+		snap->reinit(currMovieData, taseditor_config.enable_hot_changes, frame_of_change);
+		// refill description
+		strcat(snap->description, modCaptions[MODTYPE_RECORD]);
+		char framenum[11];
+		snap->end_frame = frame_of_change;
+		snap->consecutive_tag = frame_of_change;
+		// add info if Commands were affected
 		uint32 current_mask = 1;
+		if ((snap->rec_joypad_diff_bits & current_mask))
+			strcat(snap->description, joypadCaptions[0]);
+		// add info which joypads were affected
+		int num = joysticks_per_frame[snap->inputlog.input_type];
+		current_mask <<= 1;
 		for (int i = 0; i < num; ++i)
 		{
-			if ((snap.rec_joypad_diff_bits & current_mask))
-				strcat(snap.description, joypadCaptions[i]);
+			if ((snap->rec_joypad_diff_bits & current_mask))
+				strcat(snap->description, joypadCaptions[i + 1]);
 			current_mask <<= 1;
 		}
 		// add upper and lower frame to description
-		strcat(snap.description, " ");
-		_itoa(snap.start_frame, framenum, 10);
-		strcat(snap.description, framenum);
-		strcat(snap.description, "-");
-		_itoa(snap.end_frame, framenum, 10);
-		strcat(snap.description, framenum);
-		// set hotchanges
-		if (taseditor_config.enable_hot_changes)
-		{
-			snap.inputlog.copyHotChanges(&snapshots[real_pos].inputlog);
-			snap.inputlog.fillHotChanges(snapshots[real_pos].inputlog, frame_of_change, frame_of_change);
-		}
-		// replace current snapshot with this cloned snapshot and truncate history here
-		snapshots[real_pos] = snap;
+		strcat(snap->description, " ");
+		_itoa(snap->start_frame, framenum, 10);
+		strcat(snap->description, framenum);
+		strcat(snap->description, "-");
+		_itoa(snap->end_frame, framenum, 10);
+		strcat(snap->description, framenum);
+		// truncate history here
 		history_total_items = history_cursor_pos+1;
 		UpdateHistoryList();
 		RedrawHistoryList();
 	} else
 	{
-		// not consecutive - add new snapshot to history
+		// not consecutive - create new snapshot and add it to history
+		SNAPSHOT snap;
+		snap.init(currMovieData, taseditor_config.enable_hot_changes);
+		snap.rec_joypad_diff_bits = joypad_diff_bits;
+		// fill description:
+		snap.mod_type = MODTYPE_RECORD;
+		strcat(snap.description, modCaptions[MODTYPE_RECORD]);
+		char framenum[11];
 		snap.keyframe = snap.start_frame = snap.end_frame = snap.consecutive_tag = frame_of_change;
+		// add info if Commands were affected
+		uint32 current_mask = 1;
+		if ((snap.rec_joypad_diff_bits & current_mask))
+			strcat(snap.description, joypadCaptions[0]);
 		// add info which joypads were affected
 		int num = joysticks_per_frame[snap.inputlog.input_type];
-		uint32 current_mask = 1;
+		current_mask <<= 1;
 		for (int i = 0; i < num; ++i)
 		{
 			if ((snap.rec_joypad_diff_bits & current_mask))
-				strcat(snap.description, joypadCaptions[i]);
+				strcat(snap.description, joypadCaptions[i + 1]);
 			current_mask <<= 1;
 		}
 		// add upper frame to description

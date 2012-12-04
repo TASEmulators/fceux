@@ -240,6 +240,7 @@ void RECORDER::RecheckRecordingRadioButtons()
 void RECORDER::InputChanged()
 {
 	bool changes_made = false;
+	uint32 joypad_diff_bits = 0;
 	int num_joys = joysticks_per_frame[GetInputType(currMovieData)];
 	// take previous values from current snapshot, new Input from current movie
 	for (int i = 0; i < num_joys; ++i)
@@ -266,6 +267,7 @@ void RECORDER::InputChanged()
 			if (new_joy[i] != old_joy[i])
 			{
 				changes_made = true;
+				joypad_diff_bits |= (1 << (i + 1));		// bit 0 = Commands, bit 1 = Joypad 1, bit 2 = Joypad 2, bit 3 = Joypad 3, bit 4 = Joypad 4
 				// set lights for changed buttons
 				for (int button = 0; button < NUM_JOYPAD_BUTTONS; ++button)
 					if ((new_joy[i] & (1 << button)) && !(old_joy[i] & (1 << button)))
@@ -289,6 +291,7 @@ void RECORDER::InputChanged()
 		if (new_joy[joy] != old_joy[joy])
 		{
 			changes_made = true;
+			joypad_diff_bits |= (1 << (joy + 1));		// bit 0 = Commands, bit 1 = Joypad 1, bit 2 = Joypad 2, bit 3 = Joypad 3, bit 4 = Joypad 4
 			// set lights for changed buttons
 			for (int button = 0; button < NUM_JOYPAD_BUTTONS; ++button)
 				if ((new_joy[joy] & (1 << button)) && !(old_joy[joy] & (1 << button)))
@@ -296,17 +299,17 @@ void RECORDER::InputChanged()
 		}
 	}
 
-	if (!changes_made)
+	// check if new commands were recorded
+	if (currMovieData.records[currFrameCounter].commands != history.GetCurrentSnapshot().inputlog.GetCommandsInfo(currFrameCounter))
 	{
-		// check if new commands were recorded
-		if (currMovieData.records[currFrameCounter].commands != history.GetCurrentSnapshot().inputlog.GetCommandsInfo(currFrameCounter))
-			changes_made = true;
+		changes_made = true;
+		joypad_diff_bits |= 1;		// bit 0 = Commands, bit 1 = Joypad 1, bit 2 = Joypad 2, bit 3 = Joypad 3, bit 4 = Joypad 4
 	}
 
 	// register changes
 	if (changes_made)
 	{
-		history.RegisterRecording(currFrameCounter);
+		history.RegisterRecording(currFrameCounter, joypad_diff_bits);
 		greenzone.Invalidate(currFrameCounter);
 	}
 }

@@ -49,6 +49,23 @@ void SNAPSHOT::init(MovieData& md, bool hotchanges, int force_input_type)
 	strftime(description, 10, "%H:%M:%S", timeinfo);
 }
 
+void SNAPSHOT::reinit(MovieData& md, bool hotchanges, int frame_of_change)
+{
+	inputlog.reinit(md, hotchanges, frame_of_change);
+
+	// take a copy from greenzone.laglog
+	laglog = greenzone.laglog;
+	laglog.Reset_already_compressed();
+
+	// Markers are supposed to be the same, because this is consecutive Recording
+
+	// save current time to description
+	time_t raw_time;
+	time(&raw_time);
+	struct tm * timeinfo = localtime(&raw_time);
+	strftime(description, 10, "%H:%M:%S", timeinfo);
+}
+
 bool SNAPSHOT::MarkersDifferFromCurrent()
 {
 	return markers_manager.checkMarkersDiff(markers);

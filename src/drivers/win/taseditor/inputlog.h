@@ -26,6 +26,7 @@ class INPUTLOG
 public:
 	INPUTLOG();
 	void init(MovieData& md, bool hotchanges, int force_input_type = -1);
+	void reinit(MovieData& md, bool hotchanges, int frame_of_change);		// used when combining consecutive Recordings
 	void toMovie(MovieData& md, int start = 0, int end = -1);
 
 	void save(EMUFILE *os);
@@ -35,7 +36,6 @@ public:
 	void compress_data();
 	bool Get_already_compressed();
 
-	uint32 fillJoypadsDiff(INPUTLOG& their_log, int frame);
 	int findFirstChange(INPUTLOG& their_log, int start = 0, int end = -1);
 	int findFirstChange(MovieData& md, int start = 0, int end = -1);
 

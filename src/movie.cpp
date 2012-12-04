@@ -105,6 +105,8 @@ MovieData currMovieData;
 MovieData defaultMovieData;
 int currRerecordCount;
 
+char lagcounterbuf[32] = {0};
+
 void MovieData::clearRecordRange(int start, int len)
 {
 	for(int i=0;i<len;i++)
@@ -1138,18 +1140,13 @@ void FCEU_DrawMovies(uint8 *XBuf)
 
 void FCEU_DrawLagCounter(uint8 *XBuf)
 {
-	uint8 color;
-
-	if (lagFlag) color = 0x16+0x80; //If currently lagging display red
-	else color = 0x2A+0x80;         //else display green
-
-	if(lagCounterDisplay)
+	if (lagCounterDisplay)
 	{
-		char counterbuf[32] = {0};
-		sprintf(counterbuf,"%d",lagCounter);
-
-		if(counterbuf[0])
-			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(40)+1, 256, (uint8*)counterbuf, color); //0x20+0x80
+		// If currently lagging - display red, else display green
+		uint8 color = (lagFlag) ? (0x16+0x80) : (0x2A+0x80);
+		sprintf(lagcounterbuf, "%d", lagCounter);
+		if(lagcounterbuf[0])
+			DrawTextTrans(ClipSidesOffset + XBuf + FCEU_TextScanlineOffsetFromBottom(40) + 1, 256, (uint8*)lagcounterbuf, color);
 	}
 }
 
