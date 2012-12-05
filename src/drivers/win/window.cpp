@@ -1111,27 +1111,56 @@ void LoadNewGamey(HWND hParent, const char *initialdir)
 
 void GetMouseData(uint32 (&md)[3])
 {
-	md[0] = mousex;
-	md[1] = mousey;
+	extern RECT resizable_surface_rect;
 
-	if(!fullscreen)
+	if (eoptions & EO_BESTFIT && (resizable_surface_rect.top || resizable_surface_rect.left))
 	{
-		if(ismaximized)
+		if (mousex <= resizable_surface_rect.left)
 		{
-			RECT t;
-			GetClientRect(hAppWnd, &t);
-			md[0] = md[0] * VNSWID / (t.right ? t.right : 1);
-			md[1] = md[1] * FSettings.TotalScanlines() / (t.bottom ? t.bottom : 1);
-		}
-		else
+			md[0] = 0;
+		} else if (mousex >= resizable_surface_rect.right)
 		{
-			md[0] /= winsizemulx;
-			md[1] /= winsizemuly;
+			md[0] = VNSWID;
+		} else
+		{
+			md[0] = VNSWID * (mousex - resizable_surface_rect.left) / (resizable_surface_rect.right - resizable_surface_rect.left);
 		}
-
-		md[0] += VNSCLIP;
+		if (mousey <= resizable_surface_rect.top)
+		{
+			md[1] = 0;
+		} else if (mousey >= resizable_surface_rect.bottom)
+		{
+			md[1] = FSettings.TotalScanlines();
+		} else
+		{
+			md[1] = FSettings.TotalScanlines() * (mousey - resizable_surface_rect.top) / (resizable_surface_rect.bottom - resizable_surface_rect.top);
+		}
+	} else
+	{
+		RECT client_rect;
+		GetClientRect(hAppWnd, &client_rect);
+		if (mousex <= client_rect.left)
+		{
+			md[0] = 0;
+		} else if (mousex >= client_rect.right)
+		{
+			md[0] = VNSWID;
+		} else
+		{
+			md[0] = VNSWID * (mousex - client_rect.left) / (client_rect.right - client_rect.left);
+		}
+		if (mousey <= client_rect.top)
+		{
+			md[1] = 0;
+		} else if (mousey >= client_rect.bottom)
+		{
+			md[1] = FSettings.TotalScanlines();
+		} else
+		{
+			md[1] = FSettings.TotalScanlines() * (mousey - client_rect.top) / (client_rect.bottom - client_rect.top);
+		}
 	}
-
+	md[0] += VNSCLIP;
 	md[1] += FSettings.FirstSLine;
 	md[2] = ((mouseb == MK_LBUTTON) ? 1 : 0) | (( mouseb == MK_RBUTTON ) ? 2 : 0);
 }
