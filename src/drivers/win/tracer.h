@@ -27,7 +27,7 @@
 #define LOG_TABS_MASK 31
 #define LOG_ADDRESS_MAX_LEN 7
 #define LOG_DATA_MAX_LEN 11
-#define LOG_DISASSEMBLY_MAX_LEN 64
+#define LOG_DISASSEMBLY_MAX_LEN 34
 
 extern HWND hTracer;
 extern int log_update_window;
