@@ -11,23 +11,23 @@
 #define LOG_SYMBOLIC        256
 #define LOG_CODE_TABBING    512
 
-#define LOG_LINE_MAX_LEN 150
+#define LOG_LINE_MAX_LEN 128
 // Frame number - 7+1 symbols
 // AXYS state - 20
 // Processor status - 11
 // Tabs - 31
 // Address - 6
 // Data - 10
-// Disassembly - 63
+// Disassembly - 35
 // EOL (/0) - 1
 // ------------------------
-// 128 symbols total
+// 122 symbols total
 #define LOG_AXYSTATE_MAX_LEN 21
 #define LOG_PROCSTATUS_MAX_LEN 12
 #define LOG_TABS_MASK 31
 #define LOG_ADDRESS_MAX_LEN 7
 #define LOG_DATA_MAX_LEN 11
-#define LOG_DISASSEMBLY_MAX_LEN 34
+#define LOG_DISASSEMBLY_MAX_LEN 36
 
 extern HWND hTracer;
 extern int log_update_window;

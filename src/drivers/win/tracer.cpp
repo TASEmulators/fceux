@@ -515,6 +515,9 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			str_tabs[i] = ' ';
 		str_tabs[spaces] = 0;
 		strcat(str_temp, str_tabs);
+	} else if (logging_options & LOG_TO_THE_LEFT)
+	{
+		strcat(str_temp, " ");
 	}
 
 	sprintf(str_address, "$%04X:", addr);
