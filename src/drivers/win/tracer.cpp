@@ -349,26 +349,30 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 	uint8 tmp;
 	static int unloggedlines;
 
-	if(((logging_options & LOG_NEW_INSTRUCTIONS) && (oldcodecount != codecount)) ||
-	   ((logging_options & LOG_NEW_DATA) && (olddatacount != datacount)))
-	{
-		//something new was logged
-		oldcodecount = codecount;
-		olddatacount = datacount;
-		if(unloggedlines > 0)
+	// if instruction executed from the RAM, skip this, log all instead
+	// TODO: loops folding mame-lyke style
+	if(GetPRGAddress(addr) != -1) {
+		if(((logging_options & LOG_NEW_INSTRUCTIONS) && (oldcodecount != codecount)) ||
+		   ((logging_options & LOG_NEW_DATA) && (olddatacount != datacount)))
 		{
-			sprintf(str_temp, "(%d lines skipped)", unloggedlines);
-			OutputLogLine(str_temp);
-			unloggedlines = 0;
-		}
-	} else
-	{
-		if((logging_options & LOG_NEW_INSTRUCTIONS) ||
-			(logging_options & LOG_NEW_DATA))
+			//something new was logged
+			oldcodecount = codecount;
+			olddatacount = datacount;
+			if(unloggedlines > 0)
+			{
+				sprintf(str_temp, "(%d lines skipped)", unloggedlines);
+				OutputLogLine(str_temp);
+				unloggedlines = 0;
+			}
+		} else
 		{
-			if(FCEUI_GetLoggingCD())
-				unloggedlines++;
-			return;
+			if((logging_options & LOG_NEW_INSTRUCTIONS) ||
+				(logging_options & LOG_NEW_DATA))
+			{
+				if(FCEUI_GetLoggingCD())
+					unloggedlines++;
+				return;
+			}
 		}
 	}
 

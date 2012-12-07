@@ -205,10 +205,13 @@ unsigned int NewBreak(const char* name, int start, int end, unsigned int type, c
 
 int GetPRGAddress(int A){
 	int result;
-	if((A < 0x8000) || (A > 0xFFFF))return -1;
+	if(A > 0xFFFF)
+		return -1;
 	result = &Page[A>>11][A]-PRGptr[0];
-	if((result > (int)PRGsize[0]) || (result < 0))return -1;
-	else return result;
+	if((result > (int)PRGsize[0]) || (result < 0))
+		return -1;
+	else
+		return result;
 }
 
 /**
