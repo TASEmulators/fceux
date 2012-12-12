@@ -820,7 +820,7 @@ static INLINE int16 calc(OPLL * opll) {
 	return (int16)out;
 }
 
-void moocow(OPLL* opll, int32 *buf, int32 len, int shift) {
+void OPLL_fillbuf(OPLL* opll, int32 *buf, int32 len, int shift) {
 	while (len > 0) {
 		*buf += (calc(opll) + 32768) << shift;
 		buf++;

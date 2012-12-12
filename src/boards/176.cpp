@@ -31,7 +31,7 @@ static SFORMAT StateRegs[]=
 {
   {prg, 4, "PRG"},
   {&chr, 1, "CHR"},
-	{&sbw, 1, "SBW"},
+  {&sbw, 1, "SBW"},
   {0}
 };
 

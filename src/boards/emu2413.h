@@ -130,7 +130,7 @@ uint32 OPLL_setMask(OPLL *, uint32 mask);
 uint32 OPLL_toggleMask(OPLL *, uint32 mask);
 
 
-void moocow(OPLL* opll, int32 *buf, int32 len, int shift);
+void OPLL_fillbuf(OPLL* opll, int32 *buf, int32 len, int shift);
 
 #ifdef __cplusplus
 }

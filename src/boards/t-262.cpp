@@ -20,65 +20,52 @@
 
 #include "mapinc.h"
 
-static uint16 addrreg;
-static uint8 datareg;
-static uint8 busy;
-static SFORMAT StateRegs[]=
+static uint8 bank, base, lock, mirr;
+static SFORMAT StateRegs[] =
 {
-  {&addrreg, 2, "AREG"},
-  {&datareg, 1, "DREG"},
-  {&busy, 1, "BUSY"},
-  {0}
+	{ &bank, 1, "BANK" },
+	{ &base, 1, "BASE" },
+	{ &lock, 1, "LOCK" },
+	{ &mirr, 1, "MIRR" },
+	{ 0 }
 };
 
-static void Sync(void)
-{
-  uint16 base=((addrreg&0x60)>>2)|((addrreg&0x100)>>3);
-  setprg16(0x8000,(datareg&7)|base);
-  setprg16(0xC000,7|base);
-  setmirror(((addrreg&2)>>1)^1);
+static void Sync(void) {
+	setchr8(0);
+	setprg16(0x8000, base | bank);
+	setprg16(0xC000, base | 7);
+	setmirror(mirr);
 }
 
-static DECLFW(BMCT262Write)
-{
-  if(busy||(A==0x8000))
-    datareg=V;
-  else
-  {
-    addrreg=A;
-    busy=1;
-  }
-  Sync();
+static DECLFW(BMCT262Write) {
+	if (!lock) {
+		base = ((A & 0x60) >> 2) | ((A & 0x100) >> 3);
+		mirr = ((A & 2) >> 1) ^ 1;
+		lock = (A & 0x2000) >> 13;
+	}
+	bank = V & 7;
+	Sync();
 }
 
-static void BMCT262Power(void)
-{
-  setchr8(0);
-  SetWriteHandler(0x8000,0xFFFF,BMCT262Write);
-  SetReadHandler(0x8000,0xFFFF,CartBR);
-  busy=0;
-  addrreg=0;
-  datareg=0xff;
-  Sync();
+static void BMCT262Power(void) {
+	lock = bank = base = 0;
+	Sync();
+	SetWriteHandler(0x8000, 0xFFFF, BMCT262Write);
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
 }
 
-static void BMCT262Reset(void)
-{
-  busy=0;
-  addrreg=0;
-  datareg=0;
-  Sync();
+static void BMCT262Reset(void) {
+	lock = bank = base = 0;
+	Sync();
 }
 
-static void BMCT262Restore(int version)
-{
-  Sync();
+static void BMCT262Restore(int version) {
+	Sync();
 }
 
-void BMCT262_Init(CartInfo *info)
-{
-  info->Power=BMCT262Power;
-  info->Reset=BMCT262Reset;
-  GameStateRestore=BMCT262Restore;
-  AddExState(&StateRegs, ~0, 0, 0);
+void BMCT262_Init(CartInfo *info) {
+	info->Power = BMCT262Power;
+	info->Reset = BMCT262Reset;
+	GameStateRestore = BMCT262Restore;
+	AddExState(&StateRegs, ~0, 0, 0);
 }

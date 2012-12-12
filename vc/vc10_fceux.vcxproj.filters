@@ -37,9 +37,6 @@
     <Filter Include="input">
       <UniqueIdentifier>{5f356733-cee3-4440-aa40-cf138dcfbd8c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="mappers">
-      <UniqueIdentifier>{13cb7bca-c196-4896-b88a-581e99d86457}</UniqueIdentifier>
-    </Filter>
     <Filter Include="palettes">
       <UniqueIdentifier>{2a047eb3-7b56-41d4-b228-5df54bc1809d}</UniqueIdentifier>
     </Filter>
@@ -635,29 +632,8 @@
     <ClCompile Include="..\src\lua\src\print.c">
       <Filter>drivers\win\lua</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\mappers\24and26.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\6.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\65.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\67.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\69.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\85.cpp">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\emu2413.c">
-      <Filter>mappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappers\mmc2and4.cpp">
-      <Filter>mappers</Filter>
+    <ClCompile Include="..\src\boards\emu2413.c">
+      <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\movie.cpp" />
     <ClCompile Include="..\src\netplay.cpp" />
@@ -782,9 +758,6 @@
       <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\boards\12in1.cpp">
-      <Filter>boards</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\boards\17.cpp">
       <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\boards\18.cpp">
@@ -959,6 +932,27 @@
       <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\boards\09-034a.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\65.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\67.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\69.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\vrc7p.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\ffe.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\mmc2and4.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\vrc6.cpp">
       <Filter>boards</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1281,12 +1275,6 @@
     <ClInclude Include="..\src\lua\src\lzio.h">
       <Filter>drivers\win\lua</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\mappers\emu2413.h">
-      <Filter>mappers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\mappers\mapinc.h">
-      <Filter>mappers</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\movie.h">
       <Filter>include files</Filter>
     </ClInclude>
@@ -1455,6 +1443,9 @@
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditor\laglog.h">
       <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\boards\emu2413.h">
+      <Filter>include files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -8,7 +8,6 @@ drivers/common
 fir
 input
 utils
-mappers
 """)
 #palettes
 
