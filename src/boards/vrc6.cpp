@@ -231,7 +231,7 @@ static void DoSawV(void) {
 }
 
 static INLINE void DoSQVHQ(int x) {
-	int32 V;
+	uint32 V;
 	int32 amp = ((vpsg1[x << 2] & 15) << 8) * 6 / 8;
 
 	if (vpsg1[(x << 2) | 0x2] & 0x80) {
@@ -265,7 +265,7 @@ static void DoSQV2HQ(void) {
 static void DoSawVHQ(void) {
 	static uint8 b3 = 0;
 	static int32 phaseacc = 0;
-	int32 V;
+	uint32 V;
 
 	if (vpsg2[2] & 0x80) {
 		for (V = cvbc[2]; V < SOUNDTS; V++) {

@@ -361,7 +361,6 @@
     <ClCompile Include="..\src\boards\mmc1.cpp" />
     <ClCompile Include="..\src\boards\mmc3.cpp" />
     <ClCompile Include="..\src\boards\mmc5.cpp" />
-    <ClCompile Include="..\src\boards\n-c22m.cpp" />
     <ClCompile Include="..\src\boards\n106.cpp" />
     <ClCompile Include="..\src\boards\n625092.cpp" />
     <ClCompile Include="..\src\boards\novel.cpp" />

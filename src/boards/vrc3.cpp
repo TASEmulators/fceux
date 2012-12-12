@@ -74,7 +74,7 @@ static DECLFW(M73Write) {
 }
 
 static void M73IRQHook(int a) {
-	uint32 i;
+	int32 i;
 	if (!IRQa) return;
 	for (i = 0; i < a; i++) {
 		if (IRQm) {

@@ -21,49 +21,43 @@
 #include "mapinc.h"
 
 static uint8 reg, mirr;
-static SFORMAT StateRegs[]=
+static SFORMAT StateRegs[] =
 {
-  {&reg, 1, "REGS"},
-  {&mirr, 1, "MIRR"},
-  {0}
+	{ &reg, 1, "REGS" },
+	{ &mirr, 1, "MIRR" },
+	{ 0 }
 };
 
-static void Sync(void)
-{
-  setprg8r(1,0x6000,0);
-  setprg32(0x8000,reg);
-  setchr8(0);
+static void Sync(void) {
+	setprg8r(1, 0x6000, 0);
+	setprg32(0x8000, reg);
+	setchr8(0);
 }
 
-static DECLFW(BMCGS2004Write)
-{
-  reg=V;
-  Sync();
+static DECLFW(BMCGS2004Write) {
+	reg = V;
+	Sync();
 }
 
-static void BMCGS2004Power(void)
-{
-  reg=~0;
-  Sync();
-  SetReadHandler(0x6000,0x7FFF,CartBR);
-  SetReadHandler(0x8000,0xFFFF,CartBR);
-  SetWriteHandler(0x8000,0xFFFF,BMCGS2004Write);
+static void BMCGS2004Power(void) {
+	reg = ~0;
+	Sync();
+	SetReadHandler(0x6000, 0x7FFF, CartBR);
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	SetWriteHandler(0x8000, 0xFFFF, BMCGS2004Write);
 }
 
-static void BMCGS2004Reset(void)
-{
-  reg=~0;
+static void BMCGS2004Reset(void) {
+	reg = ~0;
 }
 
-static void StateRestore(int version)
-{
-  Sync();
+static void StateRestore(int version) {
+	Sync();
 }
 
-void BMCGS2004_Init(CartInfo *info)
-{
-  info->Reset=BMCGS2004Reset;
-  info->Power=BMCGS2004Power;
-  GameStateRestore=StateRestore;
-  AddExState(&StateRegs, ~0, 0, 0);
+void BMCGS2004_Init(CartInfo *info) {
+	info->Reset = BMCGS2004Reset;
+	info->Power = BMCGS2004Power;
+	GameStateRestore = StateRestore;
+	AddExState(&StateRegs, ~0, 0, 0);
 }

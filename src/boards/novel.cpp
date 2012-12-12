@@ -22,34 +22,29 @@
 
 static uint8 latch;
 
-static void DoNovel(void)
-{
-  setprg32(0x8000,latch&3);
-  setchr8(latch&7);
+static void DoNovel(void) {
+	setprg32(0x8000, latch & 3);
+	setchr8(latch & 7);
 }
 
-static DECLFW(NovelWrite)
-{
-  latch=A&0xFF;
-  DoNovel();
+static DECLFW(NovelWrite) {
+	latch = A & 0xFF;
+	DoNovel();
 }
 
-static void NovelReset(void)
-{
-  SetWriteHandler(0x8000,0xFFFF,NovelWrite);
-  SetReadHandler(0x8000,0xFFFF,CartBR);
-  setprg32(0x8000,0);
-  setchr8(0);
+static void NovelReset(void) {
+	SetWriteHandler(0x8000, 0xFFFF, NovelWrite);
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	setprg32(0x8000, 0);
+	setchr8(0);
 }
 
-static void NovelRestore(int version)
-{
-  DoNovel();
+static void NovelRestore(int version) {
+	DoNovel();
 }
 
-void Novel_Init(CartInfo *info)
-{
-  AddExState(&latch, 1, 0,"L1");
-  info->Power=NovelReset;
-  GameStateRestore=NovelRestore;
+void Novel_Init(CartInfo *info) {
+	AddExState(&latch, 1, 0, "L1");
+	info->Power = NovelReset;
+	GameStateRestore = NovelRestore;
 }

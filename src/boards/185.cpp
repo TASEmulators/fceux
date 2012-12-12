@@ -21,15 +21,15 @@
 
 #include "mapinc.h"
 
-static uint8 *DummyCHR=NULL;
+static uint8 *DummyCHR = NULL;
 static uint8 datareg;
-static void(*Sync)(void);
+static void (*Sync)(void);
 
 
-static SFORMAT StateRegs[]=
+static SFORMAT StateRegs[] =
 {
-  {&datareg, 1, "DREG"},
-  {0}
+	{ &datareg, 1, "DREG" },
+	{ 0 }
 };
 
 //   on    off
@@ -41,75 +41,67 @@ static SFORMAT StateRegs[]=
 //6  0x21, 0x13 - Spy vs Spy
 //7  0x20, 0x21 - Seicross
 
-static void Sync185(void)
-{
-  // little dirty eh? ;_)
-  if((datareg&3)&&(datareg!=0x13)) // 1, 2, 3, 4, 5, 6
-   setchr8(0);
-  else
-   setchr8r(0x10,0);
+static void Sync185(void) {
+	// little dirty eh? ;_)
+	if ((datareg & 3) && (datareg != 0x13)) // 1, 2, 3, 4, 5, 6
+		setchr8(0);
+	else
+		setchr8r(0x10, 0);
 }
 
-static void Sync181(void)
-{
-  if(!(datareg&1))                      // 7
-   setchr8(0);
-  else
-   setchr8r(0x10,0);
+static void Sync181(void) {
+	if (!(datareg & 1))                   // 7
+		setchr8(0);
+	else
+		setchr8r(0x10, 0);
 }
 
-static DECLFW(MWrite)
-{
-  datareg=V;
-  Sync();
+static DECLFW(MWrite) {
+	datareg = V;
+	Sync();
 }
 
-static void MPower(void)
-{
-  datareg=0;
-  Sync();
-  setprg16(0x8000,0);
-  setprg16(0xC000,~0);
-  SetWriteHandler(0x8000,0xFFFF,MWrite);
-  SetReadHandler(0x8000,0xFFFF,CartBR);
+static void MPower(void) {
+	datareg = 0;
+	Sync();
+	setprg16(0x8000, 0);
+	setprg16(0xC000, ~0);
+	SetWriteHandler(0x8000, 0xFFFF, MWrite);
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
 }
 
-static void MClose(void)
-{
-  if(DummyCHR)
-    FCEU_gfree(DummyCHR);
-  DummyCHR=NULL;
+static void MClose(void) {
+	if (DummyCHR)
+		FCEU_gfree(DummyCHR);
+	DummyCHR = NULL;
 }
 
-static void MRestore(int version)
-{
-  Sync();
+static void MRestore(int version) {
+	Sync();
 }
 
-void Mapper185_Init(CartInfo *info)
-{
-  int x;
-  Sync=Sync185;
-  info->Power=MPower;
-  info->Close=MClose;
-  GameStateRestore=MRestore;
-  DummyCHR=(uint8*)FCEU_gmalloc(8192);
-  for(x=0;x<8192;x++)
-     DummyCHR[x]=0xff;
-  SetupCartCHRMapping(0x10,DummyCHR,8192,0);
-  AddExState(StateRegs, ~0, 0, 0);
+void Mapper185_Init(CartInfo *info) {
+	Sync = Sync185;
+	info->Power = MPower;
+	info->Close = MClose;
+	GameStateRestore = MRestore;
+	DummyCHR = (uint8*)FCEU_gmalloc(8192);
+	int x;
+	for (x = 0; x < 8192; x++)
+		DummyCHR[x] = 0xff;
+	SetupCartCHRMapping(0x10, DummyCHR, 8192, 0);
+	AddExState(StateRegs, ~0, 0, 0);
 }
 
-void Mapper181_Init(CartInfo *info)
-{
-  int x;
-  Sync=Sync181;
-  info->Power=MPower;
-  info->Close=MClose;
-  GameStateRestore=MRestore;
-  DummyCHR=(uint8*)FCEU_gmalloc(8192);
-  for(x=0;x<8192;x++)
-     DummyCHR[x]=0xff;
-  SetupCartCHRMapping(0x10,DummyCHR,8192,0);
-  AddExState(StateRegs, ~0, 0, 0);
+void Mapper181_Init(CartInfo *info) {
+	Sync = Sync181;
+	info->Power = MPower;
+	info->Close = MClose;
+	GameStateRestore = MRestore;
+	DummyCHR = (uint8*)FCEU_gmalloc(8192);
+	int x;
+	for (x = 0; x < 8192; x++)
+		DummyCHR[x] = 0xff;
+	SetupCartCHRMapping(0x10, DummyCHR, 8192, 0);
+	AddExState(StateRegs, ~0, 0, 0);
 }

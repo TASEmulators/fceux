@@ -87,7 +87,7 @@ void M67IRQ(int a) {
 		if (IRQCount <= 0) {
 			X6502_IRQBegin(FCEU_IQEXT);
 			IRQa = 0;
-			IRQCount = 0xFFFF;
+			IRQCount = -1;
 		}
 	}
 }

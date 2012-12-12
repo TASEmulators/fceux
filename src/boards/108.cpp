@@ -22,42 +22,37 @@
 
 static uint8 reg;
 
-static SFORMAT StateRegs[]=
+static SFORMAT StateRegs[] =
 {
-  {&reg, 1, "REG"},
-  {0}
+	{ &reg, 1, "REG" },
+	{ 0 }
 };
 
-static void Sync(void)
-{
-  setprg8(0x6000,reg);
-  setprg32(0x8000,~0);
-  setchr8(0);
+static void Sync(void) {
+	setprg8(0x6000, reg);
+	setprg32(0x8000, ~0);
+	setchr8(0);
 }
 
-static DECLFW(M108Write)
-{
-  reg=V;
-  Sync();
+static DECLFW(M108Write) {
+	reg = V;
+	Sync();
 }
 
-static void M108Power(void)
-{
-  Sync();
-  SetReadHandler(0x6000,0x7FFF,CartBR);
-  SetReadHandler(0x8000,0xFFFF,CartBR);
-  SetWriteHandler(0x8000,0x8FFF,M108Write); // regular 108
-  SetWriteHandler(0xF000,0xFFFF,M108Write); // simplified Kaiser BB Hack
+static void M108Power(void) {
+	Sync();
+	SetReadHandler(0x6000, 0x7FFF, CartBR);
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	SetWriteHandler(0x8000, 0x8FFF, M108Write); // regular 108
+	SetWriteHandler(0xF000, 0xFFFF, M108Write); // simplified Kaiser BB Hack
 }
 
-static void StateRestore(int version)
-{
-  Sync();
+static void StateRestore(int version) {
+	Sync();
 }
 
-void Mapper108_Init(CartInfo *info)
-{
-  info->Power=M108Power;
-  GameStateRestore=StateRestore;
-  AddExState(&StateRegs, ~0, 0, 0);
+void Mapper108_Init(CartInfo *info) {
+	info->Power = M108Power;
+	GameStateRestore = StateRestore;
+	AddExState(&StateRegs, ~0, 0, 0);
 }

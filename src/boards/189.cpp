@@ -21,28 +21,24 @@
 #include "mapinc.h"
 #include "mmc3.h"
 
-static void M189PW(uint32 A, uint8 V)
-{
-  setprg32(0x8000,EXPREGS[0]&7);
+static void M189PW(uint32 A, uint8 V) {
+	setprg32(0x8000, EXPREGS[0] & 7);
 }
 
-static DECLFW(M189Write)
-{
-  EXPREGS[0]=V|(V>>4); //actually, there is a two versions of 189 mapper with hi or lo bits bankswitching.
-  FixMMC3PRG(MMC3_cmd);
+static DECLFW(M189Write) {
+	EXPREGS[0] = V | (V >> 4); //actually, there is a two versions of 189 mapper with hi or lo bits bankswitching.
+	FixMMC3PRG(MMC3_cmd);
 }
 
-static void M189Power(void)
-{
-  EXPREGS[0]=EXPREGS[1]=0;
-  GenMMC3Power();
-  SetWriteHandler(0x4120,0x7FFF,M189Write);
+static void M189Power(void) {
+	EXPREGS[0] = EXPREGS[1] = 0;
+	GenMMC3Power();
+	SetWriteHandler(0x4120, 0x7FFF, M189Write);
 }
 
-void Mapper189_Init(CartInfo *info)
-{
-  GenMMC3_Init(info, 256, 256, 0, 0);
-  pwrap=M189PW;
-  info->Power=M189Power;
-  AddExState(EXPREGS, 2, 0, "EXPR");
+void Mapper189_Init(CartInfo *info) {
+	GenMMC3_Init(info, 256, 256, 0, 0);
+	pwrap = M189PW;
+	info->Power = M189Power;
+	AddExState(EXPREGS, 2, 0, "EXPR");
 }

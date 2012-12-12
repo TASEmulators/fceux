@@ -24,43 +24,39 @@
 #include "mapinc.h"
 
 static uint8 chr;
-static SFORMAT StateRegs[]=
+static SFORMAT StateRegs[] =
 {
-  {&chr, 1, "CHR"},
-  {0}
+	{ &chr, 1, "CHR" },
+	{ 0 }
 };
 
-static void Sync(void)
-{
-  setprg2r(0,0xE000,0);
-  setprg2r(0,0xE800,0);
-  setprg2r(0,0xF000,0);
-  setprg2r(0,0xF800,0);
+static void Sync(void) {
+	setprg2r(0, 0xE000, 0);
+	setprg2r(0, 0xE800, 0);
+	setprg2r(0, 0xF000, 0);
+	setprg2r(0, 0xF800, 0);
 
-  setprg8r(1,0x6000,3);
-  setprg8r(1,0x8000,0);
-  setprg8r(1,0xA000,1);
-  setprg8r(1,0xC000,2);
+	setprg8r(1, 0x6000, 3);
+	setprg8r(1, 0x8000, 0);
+	setprg8r(1, 0xA000, 1);
+	setprg8r(1, 0xC000, 2);
 
-  setchr8(chr & 1);
-  setmirror(MI_V);
+	setchr8(chr & 1);
+	setmirror(MI_V);
 }
 
-static DECLFW(LE05Write)
-{
-  chr = V;
-  Sync();
+static DECLFW(LE05Write) {
+	chr = V;
+	Sync();
 }
 
-static void LE05Power(void)
-{
-  Sync();
-  SetReadHandler(0x6000,0xFFFF,CartBR);
-  SetWriteHandler(0x8000,0xFFFF,LE05Write);
+static void LE05Power(void) {
+	Sync();
+	SetReadHandler(0x6000, 0xFFFF, CartBR);
+	SetWriteHandler(0x8000, 0xFFFF, LE05Write);
 }
 
-void LE05_Init(CartInfo *info)
-{
-  info->Power=LE05Power;
-  AddExState(&StateRegs, ~0, 0, 0);
+void LE05_Init(CartInfo *info) {
+	info->Power = LE05Power;
+	AddExState(&StateRegs, ~0, 0, 0);
 }

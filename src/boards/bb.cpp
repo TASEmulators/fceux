@@ -22,47 +22,42 @@
 
 static uint8 reg, chr;
 
-static SFORMAT StateRegs[]=
+static SFORMAT StateRegs[] =
 {
-  {&reg, 1, "REG"},
-  {&chr, 1, "CHR"},
-  {0}
+	{ &reg, 1, "REG" },
+	{ &chr, 1, "CHR" },
+	{ 0 }
 };
 
-static void Sync(void)
-{
-  setprg8(0x6000,reg&3);
-  setprg32(0x8000,~0);
-  setchr8(chr&3);
+static void Sync(void) {
+	setprg8(0x6000, reg & 3);
+	setprg32(0x8000, ~0);
+	setchr8(chr & 3);
 }
 
-static DECLFW(UNLBBWrite)
-{
-  if((A & 0x9000) == 0x8000)
-    reg=chr=V;
-  else
-    chr=V&1;      // hacky hacky, ProWres simplified FDS conversion 2-in-1 mapper
-  Sync();
+static DECLFW(UNLBBWrite) {
+	if ((A & 0x9000) == 0x8000)
+		reg = chr = V;
+	else
+		chr = V & 1;  // hacky hacky, ProWres simplified FDS conversion 2-in-1 mapper
+	Sync();
 }
 
-static void UNLBBPower(void)
-{
-  chr = 0;
-  reg = ~0;
-  Sync();
-  SetReadHandler(0x6000,0x7FFF,CartBR);
-  SetReadHandler(0x8000,0xFFFF,CartBR);
-  SetWriteHandler(0x8000,0xFFFF,UNLBBWrite);
+static void UNLBBPower(void) {
+	chr = 0;
+	reg = ~0;
+	Sync();
+	SetReadHandler(0x6000, 0x7FFF, CartBR);
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	SetWriteHandler(0x8000, 0xFFFF, UNLBBWrite);
 }
 
-static void StateRestore(int version)
-{
-  Sync();
+static void StateRestore(int version) {
+	Sync();
 }
 
-void UNLBB_Init(CartInfo *info)
-{
-  info->Power=UNLBBPower;
-  GameStateRestore=StateRestore;
-  AddExState(&StateRegs, ~0, 0, 0);
+void UNLBB_Init(CartInfo *info) {
+	info->Power = UNLBBPower;
+	GameStateRestore = StateRestore;
+	AddExState(&StateRegs, ~0, 0, 0);
 }

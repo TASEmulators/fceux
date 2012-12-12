@@ -22,44 +22,38 @@
 
 static uint8 reg;
 
-static SFORMAT StateRegs[]=
+static SFORMAT StateRegs[] =
 {
-  {&reg, 1, "REG"},
-  {0}
+	{ &reg, 1, "REG" },
+	{ 0 }
 };
 
-static void Sync(void)
-{
-  setprg8(0x6000,reg);
-  setprg32(0x8000,2);
-  setchr8(0);
+static void Sync(void) {
+	setprg8(0x6000, reg);
+	setprg32(0x8000, 2);
+	setchr8(0);
 }
 
-static DECLFW(M120Write)
-{
-   if(A==0x41FF)
-   {
-     reg=V&7;
-     Sync();
-   }
+static DECLFW(M120Write) {
+	if (A == 0x41FF) {
+		reg = V & 7;
+		Sync();
+	}
 }
 
-static void M120Power(void)
-{
-  reg=0;
-  Sync();
-  SetReadHandler(0x6000,0xFFFF,CartBR);
-  SetWriteHandler(0x4100,0x5FFF,M120Write);
+static void M120Power(void) {
+	reg = 0;
+	Sync();
+	SetReadHandler(0x6000, 0xFFFF, CartBR);
+	SetWriteHandler(0x4100, 0x5FFF, M120Write);
 }
 
-static void StateRestore(int version)
-{
-  Sync();
+static void StateRestore(int version) {
+	Sync();
 }
 
-void Mapper120_Init(CartInfo *info)
-{
-  info->Power=M120Power;
-  GameStateRestore=StateRestore;
-  AddExState(&StateRegs, ~0, 0, 0);
+void Mapper120_Init(CartInfo *info) {
+	info->Power = M120Power;
+	GameStateRestore = StateRestore;
+	AddExState(&StateRegs, ~0, 0, 0);
 }

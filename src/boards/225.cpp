@@ -22,75 +22,65 @@
 
 static uint8 prot[4], prg, mode, chr, mirr;
 
-static SFORMAT StateRegs[]=
+static SFORMAT StateRegs[] =
 {
-  {prot, 4, "PROT"},
-  {&prg, 1, "PRG"},
-  {&chr, 1, "CHR"},
-  {&mode, 1, "MODE"},
-  {&mirr, 1, "MIRR"},
-  {0}
+	{ prot, 4, "PROT" },
+	{ &prg, 1, "PRG" },
+	{ &chr, 1, "CHR" },
+	{ &mode, 1, "MODE" },
+	{ &mirr, 1, "MIRR" },
+	{ 0 }
 };
 
-static void Sync(void)
-{
-  if(mode)
-  {
-    setprg16(0x8000,prg);
-    setprg16(0xC000,prg);
-  }
-  else
-    setprg32(0x8000,prg>>1);
-  setchr8(chr);
-  setmirror(mirr);
+static void Sync(void) {
+	if (mode) {
+		setprg16(0x8000, prg);
+		setprg16(0xC000, prg);
+	} else
+		setprg32(0x8000, prg >> 1);
+	setchr8(chr);
+	setmirror(mirr);
 }
 
-static DECLFW(M225Write)
-{
-  uint32 bank = (A >> 14) & 1;
-  mirr = (A >> 13) & 1;
-  mode = (A >> 12) & 1;
-  chr = (A & 0x3f) | (bank << 6);
-  prg = ((A >> 6) & 0x3f) | (bank << 6);
-  Sync();
+static DECLFW(M225Write) {
+	uint32 bank = (A >> 14) & 1;
+	mirr = (A >> 13) & 1;
+	mode = (A >> 12) & 1;
+	chr = (A & 0x3f) | (bank << 6);
+	prg = ((A >> 6) & 0x3f) | (bank << 6);
+	Sync();
 }
 
-static DECLFW(M225LoWrite)
-{
+static DECLFW(M225LoWrite) {
 }
 
-static DECLFR(M225LoRead)
-{
-  return 0;
+static DECLFR(M225LoRead) {
+	return 0;
 }
 
-static void M225Power(void)
-{
-  prg = 0;
-  mode = 0;
-  Sync();
-  SetReadHandler(0x5000,0x5fff,M225LoRead);
-  SetWriteHandler(0x5000,0x5fff,M225LoWrite);
-  SetReadHandler(0x8000,0xFFFF,CartBR);
-  SetWriteHandler(0x8000,0xFFFF,M225Write);
+static void M225Power(void) {
+	prg = 0;
+	mode = 0;
+	Sync();
+	SetReadHandler(0x5000, 0x5FFF, M225LoRead);
+	SetWriteHandler(0x5000, 0x5FFF, M225LoWrite);
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	SetWriteHandler(0x8000, 0xFFFF, M225Write);
 }
 
-static void M225Reset(void)
-{
-  prg = 0;
-  mode = 0;
-  Sync();
+static void M225Reset(void) {
+	prg = 0;
+	mode = 0;
+	Sync();
 }
 
-static void StateRestore(int version)
-{
-  Sync();
+static void StateRestore(int version) {
+	Sync();
 }
 
-void Mapper225_Init(CartInfo *info)
-{
-  info->Reset=M225Reset;
-  info->Power=M225Power;
-  GameStateRestore=StateRestore;
-  AddExState(&StateRegs, ~0, 0, 0);
+void Mapper225_Init(CartInfo *info) {
+	info->Reset = M225Reset;
+	info->Power = M225Power;
+	GameStateRestore = StateRestore;
+	AddExState(&StateRegs, ~0, 0, 0);
 }

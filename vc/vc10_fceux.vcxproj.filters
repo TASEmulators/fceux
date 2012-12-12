@@ -235,9 +235,6 @@
     <ClCompile Include="..\src\boards\mmc5.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\boards\n-c22m.cpp">
-      <Filter>boards</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\n106.cpp">
       <Filter>boards</Filter>
     </ClCompile>

@@ -22,66 +22,59 @@
 
 static uint8 reg;
 
-static uint8 *WRAM=NULL;
+static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
 
-static SFORMAT StateRegs[]=
+static SFORMAT StateRegs[] =
 {
-  {&reg, 1, "REG"},
-  {0}
+	{ &reg, 1, "REG" },
+	{ 0 }
 };
 
-static void Sync(void)
-{
-  setchr8(0);
-  setprg8r(0x10,0x6000,0);
-  setprg32(0x8000,reg&0x1f);
-  setmirror(((reg&0x20)>>5)^1);
+static void Sync(void) {
+	setchr8(0);
+	setprg8r(0x10, 0x6000, 0);
+	setprg32(0x8000, reg & 0x1f);
+	setmirror(((reg & 0x20) >> 5) ^ 1);
 }
 
-static DECLFW(M177Write)
-{
-  reg=V;
-  Sync();
+static DECLFW(M177Write) {
+	reg = V;
+	Sync();
 }
 
-static void M177Power(void)
-{
-  reg=0;
-  Sync();
-  SetReadHandler(0x6000,0x7fff,CartBR);
-  SetWriteHandler(0x6000,0x7fff,CartBW);
-  SetReadHandler(0x8000,0xFFFF,CartBR);
-  SetWriteHandler(0x8000,0xFFFF,M177Write);
+static void M177Power(void) {
+	reg = 0;
+	Sync();
+	SetReadHandler(0x6000, 0x7fff, CartBR);
+	SetWriteHandler(0x6000, 0x7fff, CartBW);
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	SetWriteHandler(0x8000, 0xFFFF, M177Write);
 }
 
-static void M177Close(void)
-{
-  if(WRAM)
-    FCEU_gfree(WRAM);
-  WRAM=NULL;
+static void M177Close(void) {
+	if (WRAM)
+		FCEU_gfree(WRAM);
+	WRAM = NULL;
 }
 
-static void StateRestore(int version)
-{
-  Sync();
+static void StateRestore(int version) {
+	Sync();
 }
 
-void Mapper177_Init(CartInfo *info)
-{
-  info->Power=M177Power;
-  info->Close=M177Close;
-  GameStateRestore=StateRestore;
+void Mapper177_Init(CartInfo *info) {
+	info->Power = M177Power;
+	info->Close = M177Close;
+	GameStateRestore = StateRestore;
 
-  WRAMSIZE=8192;
-  WRAM=(uint8*)FCEU_gmalloc(WRAMSIZE);
-  SetupCartPRGMapping(0x10,WRAM,WRAMSIZE,1);
-  AddExState(WRAM, WRAMSIZE, 0, "WRAM");
-  if(info->battery)
-  {
-    info->SaveGame[0]=WRAM;
-    info->SaveGameLen[0]=WRAMSIZE;
-  }
+	WRAMSIZE = 8192;
+	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
+	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
+	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
+	if (info->battery) {
+		info->SaveGame[0] = WRAM;
+		info->SaveGameLen[0] = WRAMSIZE;
+	}
 
-  AddExState(&StateRegs, ~0, 0, 0);
+	AddExState(&StateRegs, ~0, 0, 0);
 }

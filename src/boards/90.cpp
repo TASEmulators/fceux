@@ -49,26 +49,26 @@ static uint8 chr[2];
 static uint16 names[4];
 static uint8 tekker;
 
-static SFORMAT Tek_StateRegs[]={
-  {&IRQMode, 1, "IRQM"},
-  {&IRQPre, 1, "IRQP"},
-  {&IRQPreSize, 1, "IRQR"},
-  {&IRQCount, 1, "IRQC"},
-  {&IRQXOR, 1, "IRQX"},
-  {&IRQa, 1, "IRQA"},
-  {mul, 2, "MUL"},
-  {&regie, 1, "REGI"},
-  {tkcom, 4, "TKCO"},
-  {prgb, 4, "PRGB"},
-  {chr, 2, "CLTC"},
-  {chrlow, 4, "CHRL"},
-  {chrhigh, 8, "CHRH"},
-  {&names[0], 2|FCEUSTATE_RLSB, "NMS0"},
-  {&names[1], 2|FCEUSTATE_RLSB, "NMS1"},
-  {&names[2], 2|FCEUSTATE_RLSB, "NMS2"},
-  {&names[3], 2|FCEUSTATE_RLSB, "NMS3"},
-  {&tekker, 1, "TEKR"},
-  {0}
+static SFORMAT Tek_StateRegs[] = {
+	{ &IRQMode, 1, "IRQM" },
+	{ &IRQPre, 1, "IRQP" },
+	{ &IRQPreSize, 1, "IRQR" },
+	{ &IRQCount, 1, "IRQC" },
+	{ &IRQXOR, 1, "IRQX" },
+	{ &IRQa, 1, "IRQA" },
+	{ mul, 2, "MUL" },
+	{ &regie, 1, "REGI" },
+	{ tkcom, 4, "TKCO" },
+	{ prgb, 4, "PRGB" },
+	{ chr, 2, "CLTC" },
+	{ chrlow, 4, "CHRL" },
+	{ chrhigh, 8, "CHRH" },
+	{ &names[0], 2 | FCEUSTATE_RLSB, "NMS0" },
+	{ &names[1], 2 | FCEUSTATE_RLSB, "NMS1" },
+	{ &names[2], 2 | FCEUSTATE_RLSB, "NMS2" },
+	{ &names[3], 2 | FCEUSTATE_RLSB, "NMS3" },
+	{ &tekker, 1, "TEKR" },
+	{ 0 }
 };
 
 static void mira(void)

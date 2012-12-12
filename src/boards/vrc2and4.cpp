@@ -87,8 +87,7 @@ static DECLFW(VRC24Write) {
 		else{
 			uint16 i = ((A >> 1) & 1) | ((A - 0xB000) >> 11);
 			uint16 nibble = ((A & 1) << 2);
-			chrreg[i] &= (0xF0) >> nibble;
-			chrreg[i] |= (V & 0xF) << nibble;
+			chrreg[i] = (chrreg[i] & (0xF0 >> nibble)) | ((V & 0xF) << nibble);
 			if(nibble)
 				chrhi[i] = (V & 0x10) << 4;						// another one many in one feature from pirate carts
 		}

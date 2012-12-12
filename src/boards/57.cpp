@@ -25,68 +25,60 @@ static uint8 prg_reg;
 static uint8 chr_reg;
 static uint8 hrd_flag;
 
-static SFORMAT StateRegs[]=
+static SFORMAT StateRegs[] =
 {
-  {&hrd_flag, 1, "DPSW"},
-  {&prg_reg, 1, "PRG"},
-  {&chr_reg, 1, "CHR"},
-  {0}
+	{ &hrd_flag, 1, "DPSW" },
+	{ &prg_reg, 1, "PRG" },
+	{ &chr_reg, 1, "CHR" },
+	{ 0 }
 };
 
-static void Sync(void)
-{
-  if(prg_reg&0x80)
-    setprg32(0x8000,prg_reg>>6);
-  else
-  {
-    setprg16(0x8000,(prg_reg>>5)&3);
-    setprg16(0xC000,(prg_reg>>5)&3);
-  }
-  setmirror((prg_reg&8)>>3);
-  setchr8((chr_reg&3)|(prg_reg&7)|((prg_reg&0x10)>>1));
+static void Sync(void) {
+	if (prg_reg & 0x80)
+		setprg32(0x8000, prg_reg >> 6);
+	else{
+		setprg16(0x8000, (prg_reg >> 5) & 3);
+		setprg16(0xC000, (prg_reg >> 5) & 3);
+	}
+	setmirror((prg_reg & 8) >> 3);
+	setchr8((chr_reg & 3) | (prg_reg & 7) | ((prg_reg & 0x10) >> 1));
 }
 
-static DECLFR(M57Read)
-{
-  return hrd_flag;
+static DECLFR(M57Read) {
+	return hrd_flag;
 }
 
-static DECLFW(M57Write)
-{
-  if((A&0x8800)==0x8800)
-    prg_reg=V;
-  else
-    chr_reg=V;
-  Sync();
+static DECLFW(M57Write) {
+	if ((A & 0x8800) == 0x8800)
+		prg_reg = V;
+	else
+		chr_reg = V;
+	Sync();
 }
 
-static void M57Power(void)
-{
-  prg_reg=0;
-  chr_reg=0;
-  hrd_flag=0;
-  SetReadHandler(0x8000,0xFFFF,CartBR);
-  SetWriteHandler(0x8000,0xFFFF,M57Write);
-  SetReadHandler(0x6000,0x6000,M57Read);
-  Sync();
+static void M57Power(void) {
+	prg_reg = 0;
+	chr_reg = 0;
+	hrd_flag = 0;
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	SetWriteHandler(0x8000, 0xFFFF, M57Write);
+	SetReadHandler(0x6000, 0x6000, M57Read);
+	Sync();
 }
 
-static void M57Reset()
-{
-  hrd_flag++;
-  hrd_flag&=3;
-  FCEU_printf("Select Register = %02x\n",hrd_flag);
+static void M57Reset() {
+	hrd_flag++;
+	hrd_flag &= 3;
+	FCEU_printf("Select Register = %02x\n", hrd_flag);
 }
 
-static void StateRestore(int version)
-{
-  Sync();
+static void StateRestore(int version) {
+	Sync();
 }
 
-void Mapper57_Init(CartInfo *info)
-{
-  info->Power=M57Power;
-  info->Reset=M57Reset;
-  GameStateRestore=StateRestore;
-  AddExState(&StateRegs, ~0, 0, 0);
+void Mapper57_Init(CartInfo *info) {
+	info->Power = M57Power;
+	info->Reset = M57Reset;
+	GameStateRestore = StateRestore;
+	AddExState(&StateRegs, ~0, 0, 0);
 }

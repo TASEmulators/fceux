@@ -20,7 +20,7 @@
 
 #include "mapinc.h"
 
-static uint8 *WRAM=NULL;
+static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
 
 unsigned int *GetKeyboard(void);	// FIXME: 10/28 - now implemented in SDL as well.  should we rename this to a FCEUI_* function?
@@ -28,76 +28,69 @@ unsigned int *GetKeyboard(void);	// FIXME: 10/28 - now implemented in SDL as wel
 static unsigned int *TransformerKeys, oldkeys[256];
 static int TransformerCycleCount, TransformerChar = 0;
 
-static void TransformerIRQHook(int a)
-{
- TransformerCycleCount+=a;
- if(TransformerCycleCount >= 1000)
- {
-   uint32 i;
-   TransformerCycleCount -= 1000;
-   TransformerKeys = GetKeyboard();
+static void TransformerIRQHook(int a) {
+	TransformerCycleCount += a;
+	if (TransformerCycleCount >= 1000) {
+		uint32 i;
+		TransformerCycleCount -= 1000;
+		TransformerKeys = GetKeyboard();
 
-   for(i=0; i<256; i++) {
-     if(oldkeys[i] != TransformerKeys[i]) {
-       if(oldkeys[i] == 0)
-         TransformerChar = i;
-       else
-         TransformerChar = i | 0x80;
-       X6502_IRQBegin(FCEU_IQEXT);
-       memcpy((void *)&oldkeys[0], (void *)TransformerKeys, 256);
-       break;
-     }
-   }
- }
+		for (i = 0; i < 256; i++) {
+			if (oldkeys[i] != TransformerKeys[i]) {
+				if (oldkeys[i] == 0)
+					TransformerChar = i;
+				else
+					TransformerChar = i | 0x80;
+				X6502_IRQBegin(FCEU_IQEXT);
+				memcpy((void*)&oldkeys[0], (void*)TransformerKeys, sizeof(oldkeys));
+				break;
+			}
+		}
+	}
 }
 
-static DECLFR(TransformerRead)
-{
-  uint8 ret = 0;
-  switch(A&3) {
-    case 0: ret = TransformerChar & 15; break;
-    case 1: ret = (TransformerChar >> 4); break;
-    case 2: break;
-    case 4: break;
-  }
-  X6502_IRQEnd(FCEU_IQEXT);
-  return ret;
+static DECLFR(TransformerRead) {
+	uint8 ret = 0;
+	switch (A & 3) {
+	case 0: ret = TransformerChar & 15; break;
+	case 1: ret = (TransformerChar >> 4); break;
+	case 2: break;
+	case 4: break;
+	}
+	X6502_IRQEnd(FCEU_IQEXT);
+	return ret;
 }
 
-static void TransformerPower(void)
-{
-  setprg8r(0x10,0x6000,0);
-  setprg16(0x8000,0);
-  setprg16(0xC000,~0);
-  setchr8(0);
+static void TransformerPower(void) {
+	setprg8r(0x10, 0x6000, 0);
+	setprg16(0x8000, 0);
+	setprg16(0xC000, ~0);
+	setchr8(0);
 
-  SetReadHandler(0x5000,0x5004,TransformerRead);
-  SetReadHandler(0x6000,0x7FFF,CartBR);
-  SetWriteHandler(0x6000,0x7FFF,CartBW);
-  SetReadHandler(0x8000,0xFFFF,CartBR);
+	SetReadHandler(0x5000, 0x5004, TransformerRead);
+	SetReadHandler(0x6000, 0x7FFF, CartBR);
+	SetWriteHandler(0x6000, 0x7FFF, CartBW);
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
 
-  MapIRQHook=TransformerIRQHook;
+	MapIRQHook = TransformerIRQHook;
 }
 
-static void TransformerClose(void)
-{
-  if(WRAM)
-    FCEU_gfree(WRAM);
-  WRAM=NULL;
+static void TransformerClose(void) {
+	if (WRAM)
+		FCEU_gfree(WRAM);
+	WRAM = NULL;
 }
 
-void Transformer_Init(CartInfo *info)
-{
-  info->Power=TransformerPower;
-  info->Close=TransformerClose;
+void Transformer_Init(CartInfo *info) {
+	info->Power = TransformerPower;
+	info->Close = TransformerClose;
 
-  WRAMSIZE=8192;
-  WRAM=(uint8*)FCEU_gmalloc(WRAMSIZE);
-  SetupCartPRGMapping(0x10,WRAM,WRAMSIZE,1);
-  if(info->battery)
-  {
-    info->SaveGame[0]=WRAM;
-    info->SaveGameLen[0]=WRAMSIZE;
-  }
-  AddExState(WRAM, WRAMSIZE, 0, "WRAM");
+	WRAMSIZE = 8192;
+	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
+	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
+	if (info->battery) {
+		info->SaveGame[0] = WRAM;
+		info->SaveGameLen[0] = WRAMSIZE;
+	}
+	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 }

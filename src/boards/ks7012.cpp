@@ -21,71 +21,63 @@
 #include "mapinc.h"
 
 static uint8 reg;
-static uint8 *WRAM=NULL;
+static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
 
-static SFORMAT StateRegs[]=
+static SFORMAT StateRegs[] =
 {
-  {&reg, 1, "REGS"},
-  {0}
+	{ &reg, 1, "REGS" },
+	{ 0 }
 };
 
-static void Sync(void)
-{
-  setprg8r(0x10,0x6000,0);
-  setprg32(0x8000,reg&1);
-  setchr8(0);
+static void Sync(void) {
+	setprg8r(0x10, 0x6000, 0);
+	setprg32(0x8000, reg & 1);
+	setchr8(0);
 }
 
-static DECLFW(UNLKS7012Write)
-{
-//  FCEU_printf("bs %04x %02x\n",A,V);
-  switch(A)
-  {
-    case 0xE0A0: reg=0; Sync(); break;
-    case 0xEE36: reg=1; Sync(); break;
-  }
+static DECLFW(UNLKS7012Write) {
+//	FCEU_printf("bs %04x %02x\n",A,V);
+	switch (A) {
+	case 0xE0A0: reg = 0; Sync(); break;
+	case 0xEE36: reg = 1; Sync(); break;
+	}
 }
 
-static void UNLKS7012Power(void)
-{
-  reg = ~0;
-  Sync();
-  SetReadHandler(0x6000,0x7FFF,CartBR);
-  SetWriteHandler(0x6000,0x7FFF,CartBW);
-  SetReadHandler(0x8000,0xFFFF,CartBR);
-  SetWriteHandler(0x8000,0xFFFF,UNLKS7012Write);
+static void UNLKS7012Power(void) {
+	reg = ~0;
+	Sync();
+	SetReadHandler(0x6000, 0x7FFF, CartBR);
+	SetWriteHandler(0x6000, 0x7FFF, CartBW);
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	SetWriteHandler(0x8000, 0xFFFF, UNLKS7012Write);
 }
 
-static void UNLKS7012Reset(void)
-{
-  reg = ~0;
-  Sync();
+static void UNLKS7012Reset(void) {
+	reg = ~0;
+	Sync();
 }
 
-static void StateRestore(int version)
-{
-  Sync();
+static void StateRestore(int version) {
+	Sync();
 }
 
-static void UNLKS7012Close(void)
-{
-  if(WRAM)
-    FCEU_gfree(WRAM);
-  WRAM=NULL;
+static void UNLKS7012Close(void) {
+	if (WRAM)
+		FCEU_gfree(WRAM);
+	WRAM = NULL;
 }
 
-void UNLKS7012_Init(CartInfo *info)
-{
-  info->Power=UNLKS7012Power;
-  info->Reset=UNLKS7012Reset;
-  info->Close=UNLKS7012Close;
+void UNLKS7012_Init(CartInfo *info) {
+	info->Power = UNLKS7012Power;
+	info->Reset = UNLKS7012Reset;
+	info->Close = UNLKS7012Close;
 
-  WRAMSIZE=8192;
-  WRAM=(uint8*)FCEU_gmalloc(WRAMSIZE);
-  SetupCartPRGMapping(0x10,WRAM,WRAMSIZE,1);
-  AddExState(WRAM, WRAMSIZE, 0, "WRAM");
+	WRAMSIZE = 8192;
+	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
+	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
+	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
-  GameStateRestore=StateRestore;
-  AddExState(&StateRegs, ~0, 0, 0);
+	GameStateRestore = StateRestore;
+	AddExState(&StateRegs, ~0, 0, 0);
 }

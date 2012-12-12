@@ -22,35 +22,30 @@
 
 static uint8 latche;
 
-static void Sync(void)
-{
-  setprg16(0x8000,latche);
-  setprg16(0xC000,8);
+static void Sync(void) {
+	setprg16(0x8000, latche);
+	setprg16(0xC000, 8);
 }
 
-static DECLFW(DREAMWrite)
-{
-  latche=V&7;
-  Sync();
+static DECLFW(DREAMWrite) {
+	latche = V & 7;
+	Sync();
 }
 
-static void DREAMPower(void)
-{
-  latche=0;
-  Sync();
-  setchr8(0);
-  SetReadHandler(0x8000,0xFFFF,CartBR);
-  SetWriteHandler(0x5020,0x5020,DREAMWrite);
+static void DREAMPower(void) {
+	latche = 0;
+	Sync();
+	setchr8(0);
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	SetWriteHandler(0x5020, 0x5020, DREAMWrite);
 }
 
-static void Restore(int version)
-{
-  Sync();
+static void Restore(int version) {
+	Sync();
 }
 
-void DreamTech01_Init(CartInfo *info)
-{
-  GameStateRestore=Restore;
-  info->Power=DREAMPower;
-  AddExState(&latche, 1, 0, "LATC");
+void DreamTech01_Init(CartInfo *info) {
+	GameStateRestore = Restore;
+	info->Power = DREAMPower;
+	AddExState(&latche, 1, 0, "LATC");
 }

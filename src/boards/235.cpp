@@ -21,50 +21,43 @@
 #include "mapinc.h"
 
 static uint16 cmdreg;
-static SFORMAT StateRegs[]=
+static SFORMAT StateRegs[] =
 {
-  {&cmdreg, 2, "CREG"},
-  {0}
+	{ &cmdreg, 2, "CREG" },
+	{ 0 }
 };
 
-static void Sync(void)
-{
-  if(cmdreg&0x400)
-    setmirror(MI_0);
-  else
-    setmirror(((cmdreg>>13)&1)^1);
-  if(cmdreg&0x800)
-  {
-    setprg16(0x8000,((cmdreg&0x300)>>3)|((cmdreg&0x1F)<<1)|((cmdreg>>12)&1));
-    setprg16(0xC000,((cmdreg&0x300)>>3)|((cmdreg&0x1F)<<1)|((cmdreg>>12)&1));
-  }
-  else
-    setprg32(0x8000,((cmdreg&0x300)>>4)|(cmdreg&0x1F));
+static void Sync(void) {
+	if (cmdreg & 0x400)
+		setmirror(MI_0);
+	else
+		setmirror(((cmdreg >> 13) & 1) ^ 1);
+	if (cmdreg & 0x800) {
+		setprg16(0x8000, ((cmdreg & 0x300) >> 3) | ((cmdreg & 0x1F) << 1) | ((cmdreg >> 12) & 1));
+		setprg16(0xC000, ((cmdreg & 0x300) >> 3) | ((cmdreg & 0x1F) << 1) | ((cmdreg >> 12) & 1));
+	} else
+		setprg32(0x8000, ((cmdreg & 0x300) >> 4) | (cmdreg & 0x1F));
 }
 
-static DECLFW(M235Write)
-{
-  cmdreg=A;
-  Sync();
+static DECLFW(M235Write) {
+	cmdreg = A;
+	Sync();
 }
 
-static void M235Power(void)
-{
-  setchr8(0);
-  SetWriteHandler(0x8000,0xFFFF,M235Write);
-  SetReadHandler(0x8000,0xFFFF,CartBR);
-  cmdreg=0;
-  Sync();
+static void M235Power(void) {
+	setchr8(0);
+	SetWriteHandler(0x8000, 0xFFFF, M235Write);
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	cmdreg = 0;
+	Sync();
 }
 
-static void M235Restore(int version)
-{
-  Sync();
+static void M235Restore(int version) {
+	Sync();
 }
 
-void Mapper235_Init(CartInfo *info)
-{
-  info->Power=M235Power;
-  GameStateRestore=M235Restore;
-  AddExState(&StateRegs, ~0, 0, 0);
+void Mapper235_Init(CartInfo *info) {
+	info->Power = M235Power;
+	GameStateRestore = M235Restore;
+	AddExState(&StateRegs, ~0, 0, 0);
 }

@@ -22,60 +22,53 @@
 
 static uint16 cmdreg;
 static uint8 invalid_data;
-static SFORMAT StateRegs[]=
+static SFORMAT StateRegs[] =
 {
-  {&invalid_data, 1, "INVD"},
-  {&cmdreg, 2, "CREG"},
-  {0}
+	{ &invalid_data, 1, "INVD" },
+	{ &cmdreg, 2, "CREG" },
+	{ 0 }
 };
 
-static void Sync(void)
-{
-  setprg16r((cmdreg&0x060)>>5,0x8000,(cmdreg&0x01C)>>2);
-  setprg16r((cmdreg&0x060)>>5,0xC000,(cmdreg&0x200)?(~0):0);
-  setmirror(((cmdreg&2)>>1)^1);
+static void Sync(void) {
+	setprg16r((cmdreg & 0x060) >> 5, 0x8000, (cmdreg & 0x01C) >> 2);
+	setprg16r((cmdreg & 0x060) >> 5, 0xC000, (cmdreg & 0x200) ? (~0) : 0);
+	setmirror(((cmdreg & 2) >> 1) ^ 1);
 }
 
-static DECLFR(UNL8157Read)
-{
-  if(invalid_data&&cmdreg&0x100)
-    return 0xFF;
-  else
-    return CartBR(A);
+static DECLFR(UNL8157Read) {
+	if (invalid_data && cmdreg & 0x100)
+		return 0xFF;
+	else
+		return CartBR(A);
 }
 
-static DECLFW(UNL8157Write)
-{
-  cmdreg=A;
-  Sync();
+static DECLFW(UNL8157Write) {
+	cmdreg = A;
+	Sync();
 }
 
-static void UNL8157Power(void)
-{
-  setchr8(0);
-  SetWriteHandler(0x8000,0xFFFF,UNL8157Write);
-  SetReadHandler(0x8000,0xFFFF,UNL8157Read);
-  cmdreg=0x200;
-  invalid_data=1;
-  Sync();
+static void UNL8157Power(void) {
+	setchr8(0);
+	SetWriteHandler(0x8000, 0xFFFF, UNL8157Write);
+	SetReadHandler(0x8000, 0xFFFF, UNL8157Read);
+	cmdreg = 0x200;
+	invalid_data = 1;
+	Sync();
 }
 
-static void UNL8157Reset(void)
-{
-  cmdreg=0;
-  invalid_data^=1;
-  Sync();
+static void UNL8157Reset(void) {
+	cmdreg = 0;
+	invalid_data ^= 1;
+	Sync();
 }
 
-static void UNL8157Restore(int version)
-{
-  Sync();
+static void UNL8157Restore(int version) {
+	Sync();
 }
 
-void UNL8157_Init(CartInfo *info)
-{
-  info->Power=UNL8157Power;
-  info->Reset=UNL8157Reset;
-  GameStateRestore=UNL8157Restore;
-  AddExState(&StateRegs, ~0, 0, 0);
+void UNL8157_Init(CartInfo *info) {
+	info->Power = UNL8157Power;
+	info->Reset = UNL8157Reset;
+	GameStateRestore = UNL8157Restore;
+	AddExState(&StateRegs, ~0, 0, 0);
 }

@@ -166,7 +166,7 @@ static void DoAYSQ(int x) {
 }
 
 static void DoAYSQHQ(int x) {
-	int32 V;
+	uint32 V;
 	int32 freq = ((sreg[x << 1] | ((sreg[(x << 1) + 1] & 15) << 8)) + 1) << 4;
 	int32 amp = (sreg[0x8 + x] & 15) << 6;
 

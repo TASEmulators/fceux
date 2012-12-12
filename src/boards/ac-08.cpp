@@ -22,53 +22,47 @@
 
 static uint8 reg, mirr;
 
-static SFORMAT StateRegs[]=
+static SFORMAT StateRegs[] =
 {
-  {&reg, 1, "REG"},
-  {&mirr, 1, "MIRR"},
-  {0}
+	{ &reg, 1, "REG" },
+	{ &mirr, 1, "MIRR" },
+	{ 0 }
 };
 
-static void Sync(void)
-{
-  setprg8(0x6000, reg);
-  setprg32r(1, 0x8000, 0);
-  setchr8(0);
-  setmirror(mirr);
+static void Sync(void) {
+	setprg8(0x6000, reg);
+	setprg32r(1, 0x8000, 0);
+	setchr8(0);
+	setmirror(mirr);
 }
 
-static DECLFW(AC08Mirr)
-{
-  mirr = ((V&8)>>3)^1;
-  Sync();
+static DECLFW(AC08Mirr) {
+	mirr = ((V & 8) >> 3) ^ 1;
+	Sync();
 }
 
-static DECLFW(AC08Write)
-{
-  if(A == 0x8001)              // Green Berret bank switching is only 100x xxxx xxxx xxx1 mask
-   reg = (V >> 1) & 0xf;
-  else
-   reg = V & 0xf;              // Sad But True, 2-in-1 mapper, Green Berret need value shifted left one byte, Castlevania doesn't
-  Sync();
+static DECLFW(AC08Write) {
+	if (A == 0x8001)             // Green Berret bank switching is only 100x xxxx xxxx xxx1 mask
+		reg = (V >> 1) & 0xf;
+	else
+		reg = V & 0xf;          // Sad But True, 2-in-1 mapper, Green Berret need value shifted left one byte, Castlevania doesn't
+	Sync();
 }
 
-static void AC08Power(void)
-{
-  reg = 0;
-  Sync();
-  SetReadHandler(0x6000,0xFFFF,CartBR);
-  SetWriteHandler(0x4025,0x4025,AC08Mirr);
-  SetWriteHandler(0x8000,0xFFFF,AC08Write);
+static void AC08Power(void) {
+	reg = 0;
+	Sync();
+	SetReadHandler(0x6000, 0xFFFF, CartBR);
+	SetWriteHandler(0x4025, 0x4025, AC08Mirr);
+	SetWriteHandler(0x8000, 0xFFFF, AC08Write);
 }
 
-static void StateRestore(int version)
-{
-  Sync();
+static void StateRestore(int version) {
+	Sync();
 }
 
-void AC08_Init(CartInfo *info)
-{
-  info->Power=AC08Power;
-  GameStateRestore=StateRestore;
-  AddExState(&StateRegs, ~0, 0, 0);
+void AC08_Init(CartInfo *info) {
+	info->Power = AC08Power;
+	GameStateRestore = StateRestore;
+	AddExState(&StateRegs, ~0, 0, 0);
 }

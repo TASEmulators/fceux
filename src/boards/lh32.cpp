@@ -24,61 +24,55 @@
 #include "mapinc.h"
 
 static uint8 reg;
-static uint8 *WRAM=NULL;
+static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
 
-static SFORMAT StateRegs[]=
+static SFORMAT StateRegs[] =
 {
-  {&reg, 1, "REG"},
-  {0}
+	{ &reg, 1, "REG" },
+	{ 0 }
 };
 
-static void Sync(void)
-{
-  setprg8(0x6000,reg);
-  setprg8(0x8000,~3);
-  setprg8(0xa000,~2);
-  setprg8r(0x10,0xc000,0);
-  setprg8(0xe000,~0);
-  setchr8(0);
+static void Sync(void) {
+	setprg8(0x6000, reg);
+	setprg8(0x8000, ~3);
+	setprg8(0xa000, ~2);
+	setprg8r(0x10, 0xc000, 0);
+	setprg8(0xe000, ~0);
+	setchr8(0);
 }
 
-static DECLFW(LH32Write)
-{
-  reg=V;
-  Sync();
+static DECLFW(LH32Write) {
+	reg = V;
+	Sync();
 }
 
-static void LH32Power(void)
-{
-  Sync();
-  SetReadHandler(0x6000,0xFFFF,CartBR);
-  SetWriteHandler(0xC000,0xDFFF,CartBW);
-  SetWriteHandler(0x6000,0x6000,LH32Write);
+static void LH32Power(void) {
+	Sync();
+	SetReadHandler(0x6000, 0xFFFF, CartBR);
+	SetWriteHandler(0xC000, 0xDFFF, CartBW);
+	SetWriteHandler(0x6000, 0x6000, LH32Write);
 }
 
-static void LH32Close(void)
-{
-  if(WRAM)
-    FCEU_gfree(WRAM);
-  WRAM=NULL;
+static void LH32Close(void) {
+	if (WRAM)
+		FCEU_gfree(WRAM);
+	WRAM = NULL;
 }
 
-static void StateRestore(int version)
-{
-  Sync();
+static void StateRestore(int version) {
+	Sync();
 }
 
-void LH32_Init(CartInfo *info)
-{
-  info->Power=LH32Power;
-  info->Close=LH32Close;
+void LH32_Init(CartInfo *info) {
+	info->Power = LH32Power;
+	info->Close = LH32Close;
 
-  WRAMSIZE=8192;
-  WRAM=(uint8*)FCEU_gmalloc(WRAMSIZE);
-  SetupCartPRGMapping(0x10,WRAM,WRAMSIZE,1);
-  AddExState(WRAM, WRAMSIZE, 0, "WRAM");
+	WRAMSIZE = 8192;
+	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
+	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
+	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
-  GameStateRestore=StateRestore;
-  AddExState(&StateRegs, ~0, 0, 0);
+	GameStateRestore = StateRestore;
+	AddExState(&StateRegs, ~0, 0, 0);
 }
