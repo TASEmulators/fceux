@@ -25,10 +25,12 @@
 
 static uint64 tmethod,tfreq;
 static uint64 desiredfps;
-
-static int32 fps_scale_table[]=
-{ 3, 3, 4, 8, 16, 32, 64, 128, 192, 256, 384, 512, 768, 1024, 2048, 4096, 8192, 16384, 16384};
 int32 fps_scale = 256;
+int32 fps_scale_unpaused = 256;
+int32 fps_scale_frameadvance = 0;
+
+static int32 fps_scale_table[] = { 3, 3, 4, 8, 16, 32, 64, 128, 192, 256, 384, 512, 768, 1024, 2048, 4096, 8192, 16384, 16384};
+#define fps_table_size		(sizeof(fps_scale_table) / sizeof(fps_scale_table[0]))
 
 void RefreshThrottleFPS(void)
 {
@@ -118,35 +120,32 @@ uint64 FCEUD_GetTimeFreq(void)
 static void IncreaseEmulationSpeed(void)
 {
  int i;
- for(i=1; fps_scale_table[i]<fps_scale; i++)
+ for(i = 1; fps_scale_table[i] < fps_scale_unpaused; i++)
   ;
- fps_scale = fps_scale_table[i+1];
+ fps_scale = fps_scale_unpaused = fps_scale_table[i+1];
 }
 
 static void DecreaseEmulationSpeed(void)
 {
  int i;
- for(i=1; fps_scale_table[i]<fps_scale; i++)
+ for(i = 1; fps_scale_table[i] < fps_scale_unpaused; i++)
   ;
- fps_scale = fps_scale_table[i-1];
+ fps_scale = fps_scale_unpaused = fps_scale_table[i-1];
 }
-
-#define fps_table_size		(sizeof(fps_scale_table)/sizeof(fps_scale_table[0]))
 
 void FCEUD_SetEmulationSpeed(int cmd)
 {
 	switch(cmd)
 	{
-	case EMUSPEED_SLOWEST:	fps_scale=fps_scale_table[0];  break;
+	case EMUSPEED_SLOWEST:	fps_scale = fps_scale_unpaused = fps_scale_table[0];  break;
 	case EMUSPEED_SLOWER:	DecreaseEmulationSpeed(); break;
-	case EMUSPEED_NORMAL:	fps_scale=256; break;
+	case EMUSPEED_NORMAL:	fps_scale = fps_scale_unpaused = 256; break;
 	case EMUSPEED_FASTER:	IncreaseEmulationSpeed(); break;
-	case EMUSPEED_FASTEST:	fps_scale=fps_scale_table[fps_table_size-1]; break;
+	case EMUSPEED_FASTEST:	fps_scale = fps_scale_unpaused = fps_scale_table[fps_table_size - 1]; break;
 	default:
 		return;
 	}
 
 	RefreshThrottleFPS();
-
-	FCEU_DispMessage("emulation speed %d%%",0,(fps_scale*100)>>8);
+	FCEU_DispMessage("Emulation speed %d%%", 0, (fps_scale_unpaused * 100) >> 8);
 }

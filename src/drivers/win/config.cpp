@@ -46,6 +46,7 @@ extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];
 extern CFGSTRUCT HotkeyConfig[];
 extern int autoHoldKey, autoHoldClearKey;
+extern int frameAdvance_Delay;
 extern int EnableAutosave, AutosaveQty, AutosaveFrequency;
 extern int AFon, AFoff, AutoFireOffset;
 extern int DesynchAutoFire;
@@ -71,6 +72,7 @@ extern bool Show_FPS;
 extern bool oldInputDisplay;
 extern bool fullSaveStateLoads;
 extern int frameSkipAmt;
+extern int32 fps_scale_frameadvance;
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern char* recent_projects[];
@@ -251,6 +253,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(MemWatchLoadFileOnStart),
 	AC(MemWCollapsed),
 	AC(BindToMain),
+	AC(frameAdvance_Delay),
 	AC(EnableAutosave),
 	AC(AutosaveQty),
 	AC(AutosaveFrequency),
@@ -261,6 +264,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(debuggerDisplayROMoffsets),
 	AC(fullSaveStateLoads),
 	AC(frameSkipAmt),
+	AC(fps_scale_frameadvance),
 
 	//window positions
 	AC(ChtPosX),

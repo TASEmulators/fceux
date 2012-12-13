@@ -240,7 +240,6 @@
 #define IDC_NTVIEW_REFRESH_TRACKBAR     201
 #define IDC_ASSEMBLER_APPLY             201
 #define IDI_ICON4                       201
-#define BTN_CLEAR2                      201
 #define BTN_OK                          201
 #define MENU_EJECT_DISK                 202
 #define TXT_FAM                         202
@@ -1146,6 +1145,10 @@
 #define ID_SELECTED_UNGREENZONE         40571
 #define ID_SELECTED_F                   40572
 #define ID_CONFIG_ENABLEGREENZONING     40573
+#define ID_EMULATIONSPEED_SETFRAMEADVANCEDELAY 40574
+#define ID_Menu40575                    40575
+#define ID_EMULATIONSPEED_SETCUSTOMSPEEDFORFRAMEADVANCE 40576
+#define ID_EMULATIONSPEED_CUSTOMSPEED   40577
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1156,7 +1159,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        289
-#define _APS_NEXT_COMMAND_VALUE         40574
+#define _APS_NEXT_COMMAND_VALUE         40578
 #define _APS_NEXT_CONTROL_VALUE         1282
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

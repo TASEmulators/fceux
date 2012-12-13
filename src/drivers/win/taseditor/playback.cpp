@@ -22,6 +22,7 @@ Playback - Player of emulation states
 
 #include "taseditor_project.h"
 #include "../taseditor.h"
+#include "../../../fceu.h"
 
 #ifdef _S9XLUA_H
 extern void ForceExecuteLuaFrameFunctions();
@@ -266,7 +267,7 @@ void PLAYBACK::ToggleEmulationPause()
 }
 void PLAYBACK::PauseEmulation()
 {
-	FCEUI_SetEmulationPaused(1);
+	FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
 }
 void PLAYBACK::UnpauseEmulation()
 {

@@ -80,6 +80,9 @@
 extern TASEDITOR_WINDOW taseditor_window;
 extern PLAYBACK playback;
 
+#include "Win32InputBox.h"
+extern int32 fps_scale_unpaused;
+
 //extern void ToggleFullscreen();
 
 using namespace std;
@@ -1793,7 +1796,54 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case ID_NES_NORMALSPEED:
 				FCEUD_SetEmulationSpeed(2);
 				break;
-						
+			case ID_EMULATIONSPEED_CUSTOMSPEED:
+			{
+				int new_value = fps_scale / 2.56;
+				if ((CWin32InputBox::GetInteger("Emulation Speed", "Enter a number of percents from 1 to 1000.", new_value, hWnd) == IDOK))
+				{
+					fps_scale_unpaused = new_value * 2.56 + 1;
+					if (fps_scale_unpaused / 2.56 > 1000 || fps_scale_unpaused <= 0)
+						fps_scale_unpaused = 256;
+					fps_scale = fps_scale_unpaused;
+					RefreshThrottleFPS();
+					FCEU_DispMessage("Emulation speed %d%%", 0, (fps_scale_unpaused * 100) >> 8);
+				}
+				break;
+			}
+
+			case ID_EMULATIONSPEED_SETFRAMEADVANCEDELAY:
+			{
+				extern int frameAdvance_Delay;
+				int new_value = frameAdvance_Delay;
+				if((CWin32InputBox::GetInteger("FrameAdvance Delay", "How much time should elapse before\nholding the Frame Advance\nunpauses emulation?", new_value, hWnd) == IDOK))
+				{
+					if (new_value < 0)
+						new_value = FRAMEADVANCE_DELAY_DEFAULT;
+					frameAdvance_Delay = new_value;
+				}
+				break;
+			}
+			case ID_EMULATIONSPEED_SETCUSTOMSPEEDFORFRAMEADVANCE:
+			{
+				extern int32 fps_scale_frameadvance;
+				int new_value = fps_scale_frameadvance / 2.56;
+				if ((CWin32InputBox::GetInteger("FrameAdvance Custom Speed", "Enter 0 to use the current emulation speed when\nthe Frame Advance is held. Or enter the number\nof percents (1-1000) to use different speed.", new_value, hWnd) == IDOK))
+				{
+					if (new_value > 1000)
+						new_value = 1000;
+					if (new_value > 0)
+					{
+						fps_scale_frameadvance = new_value * 2.56 + 1;
+					} else
+					{
+						fps_scale_frameadvance = 0;
+						fps_scale = fps_scale_unpaused;
+						RefreshThrottleFPS();
+					}
+				}
+				break;
+			}
+
 			//Config Menu-----------------------------------------------------------
 			case FCEUX_CONTEXT_UNHIDEMENU:
 			case MENU_HIDE_MENU:

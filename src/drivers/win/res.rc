@@ -103,6 +103,10 @@ BEGIN
             MENUITEM "&Slowest Speed",              ID_NES_SLOWESTSPEED
             MENUITEM "&Normal Speed",               ID_NES_NORMALSPEED
             MENUITEM "&Turbo",                      ID_NES_TURBO
+            MENUITEM "Set &Custom Speed",           ID_EMULATIONSPEED_CUSTOMSPEED
+            MENUITEM SEPARATOR
+            MENUITEM "Set FrameAdvance Delay",      ID_EMULATIONSPEED_SETFRAMEADVANCEDELAY
+            MENUITEM "Set custom speed for FrameAdvance", ID_EMULATIONSPEED_SETCUSTOMSPEEDFORFRAMEADVANCE
         END
     END
     POPUP "&Config"

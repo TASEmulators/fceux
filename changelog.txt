@@ -1,10 +1,14 @@
+13-Dec-2012 - AnS - win32: added Emulation Speed->Set custom speed for FrameAdvance
+13-Dec-2012 - AnS - win32: added NES->Emulation Speed->Set FrameAdvance Delay
+13-Dec-2012 - AnS - win32: added NES->Emulation Speed->Set Custom Speed
+12-Dec-2012 - CaH4e3 - finish with mapper to boards conversion
+07-Dec-2012 - CaH4e3 - Tracer: fixed RAM-located code logging when CDLogger options are enabled
 05-Dec-2012 - AnS - fixed zapper and mouse positioning in fullscreen and bestfit mode
 04-Dec-2012 - AnS - speed up HUD text drawing
 04-Dec-2012 - AnS - Taseditor: speed up consecutive Recordings (when combining)
 03-Dec-2012 - AnS - Taseditor: fixed accelerators when editing Notes
 03-Dec-2012 - AnS - fixed "X" button in the "Enter New Input" dialog (Hotkey Mapping); changed "Cancel" button to "OK"
 03-Dec-2012 - CaH4e3 - fixed mapper 99
-30-Nov-2012 - CaH4e3 - more mappers to boards conversion
 29-Nov-2012 - zeromus - fix "you ling xing dong" by assigning to mapper 192
 
 ---r2768 - FCEUX 2.2.0 Released---

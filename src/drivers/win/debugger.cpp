@@ -1350,6 +1350,11 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 			}
 			break;
 		}
+		case WM_MOUSEWHEEL:
+		{
+			SendMessage(GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY_VSCR), uMsg, wParam, lParam);
+			return 0;
+		}
 	}
 	return CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, uMsg, wParam, lParam);
 }

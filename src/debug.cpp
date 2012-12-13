@@ -492,7 +492,7 @@ void BreakHit(int bp_num, bool force = false)
 		}
 	}
 
-	FCEUI_SetEmulationPaused(1); //mbg merge 7/19/06 changed to use EmulationPaused()
+	FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED); //mbg merge 7/19/06 changed to use EmulationPaused()
 
 #ifdef WIN32
 	FCEUD_DebugBreakpoint(bp_num);

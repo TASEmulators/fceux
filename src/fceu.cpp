@@ -57,6 +57,11 @@ extern void ResetDebugStatisticsCounters();
 extern void SetMainWindowText();
 
 extern bool TaseditorIsRecording();
+
+extern int32 fps_scale;
+extern int32 fps_scale_unpaused;
+extern int32 fps_scale_frameadvance;
+extern void RefreshThrottleFPS();
 #endif
 
 #include <fstream>
@@ -200,8 +205,9 @@ static int RWWrap = 0;
 //bit0 indicates whether emulation is paused
 //bit1 indicates whether emulation is in frame step mode
 int EmulationPaused = 0;
-bool frameAdvanceRequested = false;
-int frameAdvanceDelay;
+bool frameAdvanceRequested=false;
+int frameAdvance_Delay_count = 0;
+int frameAdvance_Delay = FRAMEADVANCE_DELAY_DEFAULT;
 
 //indicates that the emulation core just frame advanced (consumed the frame advance state and paused)
 bool JustFrameAdvanced = false;
@@ -578,23 +584,47 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	JustFrameAdvanced = false;
 
-	if (frameAdvanceRequested) {
-		if (frameAdvanceDelay == 0 || frameAdvanceDelay >= 10)
-			EmulationPaused = 3;
-		if (frameAdvanceDelay == 0 || frameAdvanceDelay < 10)
-			frameAdvanceDelay++;
+	if (frameAdvanceRequested)
+	{
+		if (frameAdvance_Delay_count == 0 || frameAdvance_Delay_count >= frameAdvance_Delay)
+			EmulationPaused = EMULATIONPAUSED_FA;
+		if (frameAdvance_Delay_count < frameAdvance_Delay)
+			frameAdvance_Delay_count++;
 	}
 
-	if (EmulationPaused & 2)
-		EmulationPaused &= ~1;        // clear paused flag temporarily (frame advance)
-	else if ((EmulationPaused & 1)) {
-		memcpy(XBuf, XBackBuf, 256 * 256);
-		FCEU_PutImage();
-		*pXBuf = XBuf;
-		*SoundBuf = WaveFinal;
-		*SoundBufSize = 0;
-
-		return;
+	if (EmulationPaused & EMULATIONPAUSED_FA)
+	{
+		// the user is holding Frame Advance key
+		// clear paused flag temporarily
+		EmulationPaused &= ~EMULATIONPAUSED_PAUSED;
+#ifdef WIN32
+		// different emulation speed when holding Frame Advance
+		if (fps_scale_frameadvance > 0)
+		{
+			fps_scale = fps_scale_frameadvance;
+			RefreshThrottleFPS();
+		}
+#endif
+	} else
+	{
+#ifdef WIN32
+		if (fps_scale_frameadvance > 0)
+		{
+			// restore emulation speed when Frame Advance is not held
+			fps_scale = fps_scale_unpaused;
+			RefreshThrottleFPS();
+		}
+#endif
+		if (EmulationPaused & EMULATIONPAUSED_PAUSED)
+		{
+			// emulator is paused
+			memcpy(XBuf, XBackBuf, 256*256);
+			FCEU_PutImage();
+			*pXBuf = XBuf;
+			*SoundBuf = WaveFinal;
+			*SoundBufSize = 0;
+			return;
+		}
 	}
 
 	AutoFire();
@@ -644,9 +674,11 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 		*SoundBufSize = ssize;
 	}
 
-	if (EmulationPaused & 2 && (!frameAdvanceLagSkip || !lagFlag)) {
-		//Lots of conditions here.  EmulationPaused&2 must be true.  In addition frameAdvanceLagSkip or lagFlag must be false
-		EmulationPaused = 1;           // restore paused flag
+	if ((EmulationPaused & EMULATIONPAUSED_FA) && (!frameAdvanceLagSkip || !lagFlag))
+	//Lots of conditions here.  EmulationPaused & EMULATIONPAUSED_FA must be true.  In addition frameAdvanceLagSkip or lagFlag must be false
+	// When Frame Advance is held, emulator is automatically paused after emulating one frame (or several lag frames)
+	{
+		EmulationPaused = EMULATIONPAUSED_PAUSED;		   // restore EMULATIONPAUSED_PAUSED flag and clear EMULATIONPAUSED_FA flag
 		JustFrameAdvanced = true;
 		#ifdef WIN32
 		if (soundoptions & SO_MUTEFA)  //mute the frame advance if the user requested it
@@ -854,16 +886,19 @@ int32 FCEUI_GetDesiredFPS(void) {
 		return(1008307711);  // ~60.1
 }
 
-int FCEUI_EmulationPaused(void) {
-	return(EmulationPaused & 1);
+int FCEUI_EmulationPaused(void)
+{
+	return (EmulationPaused & EMULATIONPAUSED_PAUSED);
 }
 
-int FCEUI_EmulationFrameStepped() {
-	return(EmulationPaused & 2);
+int FCEUI_EmulationFrameStepped()
+{
+	return (EmulationPaused & EMULATIONPAUSED_FA);
 }
 
-void FCEUI_ClearEmulationFrameStepped() {
-	EmulationPaused &= ~2;
+void FCEUI_ClearEmulationFrameStepped()
+{
+	EmulationPaused &= ~EMULATIONPAUSED_FA;
 }
 
 //mbg merge 7/18/06 added
@@ -872,8 +907,9 @@ void FCEUI_SetEmulationPaused(int val) {
 	EmulationPaused = val;
 }
 
-void FCEUI_ToggleEmulationPause(void) {
-	EmulationPaused = (EmulationPaused & 1) ^ 1;
+void FCEUI_ToggleEmulationPause(void)
+{
+	EmulationPaused = (EmulationPaused & EMULATIONPAUSED_PAUSED) ^ EMULATIONPAUSED_PAUSED;
 	DebuggerWasUpdated = false;
 }
 
@@ -883,7 +919,7 @@ void FCEUI_FrameAdvanceEnd(void) {
 
 void FCEUI_FrameAdvance(void) {
 	frameAdvanceRequested = true;
-	frameAdvanceDelay = 0;
+	frameAdvance_Delay_count = 0;
 }
 
 static int AutosaveCounter = 0;

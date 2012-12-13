@@ -141,3 +141,8 @@ extern uint8 vsdip;
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
 
+#define EMULATIONPAUSED_PAUSED 1
+#define EMULATIONPAUSED_FA 2
+
+#define FRAMEADVANCE_DELAY_DEFAULT 10
+
