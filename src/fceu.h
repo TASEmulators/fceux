@@ -5,6 +5,9 @@ extern int fceuindbg;
 extern int newppu;
 void ResetGameLoaded(void);
 
+extern bool AutoResumePlay;
+extern char rom_name_when_closing_emulator[];
+
 #define DECLFR(x) uint8 x (uint32 A)
 #define DECLFW(x) void x (uint32 A, uint8 V)
 

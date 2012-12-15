@@ -422,6 +422,7 @@ void UpdateCheckedMenuItems()
 	CheckMenuItem(fceumenu, MENU_CONFIG_BINDSAVES, bindSavestate?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_ENABLE_BACKUPSAVESTATES, backupSavestates?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_ENABLE_COMPRESSSAVESTATES, compressSavestates?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, ID_ENABLE_AUTORESUME, AutoResumePlay?MF_CHECKED : MF_UNCHECKED);
 
 	//Config - Display SubMenu
 	CheckMenuItem(fceumenu, MENU_DISPLAY_LAGCOUNTER, lagCounterDisplay?MF_CHECKED : MF_UNCHECKED);
@@ -1882,7 +1883,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				compressSavestates ^=1;
 				UpdateCheckedMenuItems();
 				break;
-			
+			case ID_ENABLE_AUTORESUME:
+				AutoResumePlay ^=1;
+				UpdateCheckedMenuItems();
+				break;
+
 			//Display submenu
 			case MENU_INPUTDISPLAY_0: //Input display off
 				input_display = 0;

@@ -418,11 +418,10 @@ void DoFCEUExit()
 	if(exiting)    //Eh, oops.  I'll need to try to fix this later.
 		return;
 
-#ifdef WIN32
-	//If user was asked to save changes in TAS Editor and chose cancel, don't close FCEUX
+	// If user was asked to save changes in TAS Editor and chose cancel, don't close FCEUX
 	extern bool ExitTasEditor();
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR) && !ExitTasEditor()) return;
-#endif
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR) && !ExitTasEditor())
+		return;
 
 	if (CloseMemoryWatch() && AskSave())		//If user was asked to save changes in the memory watch dialog or ram watch, and chose cancel, don't close FCEUX!
 	{
@@ -449,12 +448,22 @@ void DoFCEUExit()
 
 		FCEUI_StopMovie();
 		FCEUD_AviStop();
-		#ifdef _S9XLUA_H
+#ifdef _S9XLUA_H
 		FCEU_LuaStop(); // kill lua script before the gui dies
-		#endif
+#endif
 
 		exiting = 1;
 		closeGame = true;//mbg 6/30/06 - for housekeeping purposes we need to exit after the emulation cycle finishes
+		// remember the ROM name
+		extern char LoadedRomFName[2048];
+		if (GameInfo)
+		{
+			strncpy(rom_name_when_closing_emulator, LoadedRomFName, 128);
+			rom_name_when_closing_emulator[128] = 0;
+		} else
+		{
+			rom_name_when_closing_emulator[0] = 0;
+		}
 	}
 }
 
@@ -745,13 +754,15 @@ int main(int argc,char *argv[])
 
 	InitSpeedThrottle();
 
-	if(t)
+	if (t)
 	{
 		ALoad(t);
-	}
-	else if(eoptions & EO_FOAFTERSTART)
+	} else
 	{
-		LoadNewGamey(hAppWnd, 0);
+		if (AutoResumePlay && rom_name_when_closing_emulator && rom_name_when_closing_emulator[0])
+			ALoad(rom_name_when_closing_emulator);
+		if (eoptions & EO_FOAFTERSTART)
+			LoadNewGamey(hAppWnd, 0);
 	}
 
 	if (pal_setting_specified)
@@ -843,7 +854,7 @@ doloopy:
 			FCEUD_Update(gfx, sound, ssize); //update displays and debug tools
 
 			//mbg 6/30/06 - close game if we were commanded to by calls nested in FCEUI_Emulate()
-			if(closeGame)
+			if (closeGame)
 			{
 				FCEUI_CloseGame();
 				GameInfo = NULL;

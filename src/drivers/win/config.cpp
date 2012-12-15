@@ -76,8 +76,9 @@ extern int32 fps_scale_frameadvance;
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern char* recent_projects[];
-// Hacky fix for taseditor_config.last_author
+// Hacky fix for taseditor_config.last_author and rom_name_when_closing_emulator
 char* taseditor_config_last_author;
+char* ResumeROM;
 
 //window positions and sizes:
 extern int ChtPosX,ChtPosY;
@@ -117,8 +118,8 @@ extern int RomFreezeColorB;
 char* ramWatchRecent[] = {0, 0, 0, 0, 0};
 
 //Structure that contains configuration information
-static CFGSTRUCT fceuconfig[] = {
-
+static CFGSTRUCT fceuconfig[] =
+{
 	ACS(recent_files[0]),
 	ACS(recent_files[1]),
 	ACS(recent_files[2]),
@@ -164,6 +165,9 @@ static CFGSTRUCT fceuconfig[] = {
 	ACS(recent_projects[7]),
 	ACS(recent_projects[8]),
 	ACS(recent_projects[9]),
+
+	AC(AutoResumePlay),
+	ACS(ResumeROM),
 
 	AC(gNoBGFillColor),
 	AC(ntsccol),AC(ntsctint),AC(ntschue),
@@ -416,8 +420,9 @@ void SaveConfig(const char *filename)
 	{
 		ramWatchRecent[x] = rw_recent_files[x];
 	}
-	// Hacky fix for taseditor_config.last_author
+	// Hacky fix for taseditor_config.last_author and rom_name_when_closing_emulator
 	taseditor_config_last_author = taseditor_config.last_author;
+	ResumeROM = rom_name_when_closing_emulator;
 	//-----------------------------------
 
 	SaveFCEUConfig(filename,fceuconfig);
@@ -445,11 +450,16 @@ void LoadConfig(const char *filename)
 			rw_recent_files[x][0] = 0;
 		}
 	}
-	// Hacky fix for taseditor_config.last_author
+	// Hacky fix for taseditor_config.last_author and rom_name_when_closing_emulator
 	if (taseditor_config_last_author)
 		strncpy(taseditor_config.last_author, taseditor_config_last_author, AUTHOR_MAX_LEN-1);
 	else
 		taseditor_config.last_author[0] = 0;
+	if (ResumeROM)
+		strncpy(rom_name_when_closing_emulator, ResumeROM, 128);
+	else
+		rom_name_when_closing_emulator[0] = 0;
+
 	//-----------------------------------
 }
 

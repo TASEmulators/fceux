@@ -1716,7 +1716,9 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			case WM_INITMENU:
 				break;
 			case WM_COMMAND:
-				switch(HIWORD(wParam)) {
+			{
+				switch(HIWORD(wParam))
+				{
 					case BN_CLICKED:
 						switch(LOWORD(wParam)) {
 							case IDC_DEBUGGER_RESTORESIZE: 
@@ -1927,6 +1929,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						break;
 				}
 				break;
+			}
 		}
 	}
 	

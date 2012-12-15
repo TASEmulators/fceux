@@ -92,6 +92,8 @@ bool frameAdvanceLagSkip = false; //If this is true, frame advance will skip ove
 bool AutoSS = false;        //Flagged true when the first auto-savestate is made while a game is loaded, flagged false on game close
 bool movieSubtitles = true; //Toggle for displaying movie subtitles
 bool DebuggerWasUpdated = false; //To prevent the debugger from updating things without being updated.
+bool AutoResumePlay = true;		// maybe this should be in "eoptions"...
+char rom_name_when_closing_emulator[129] = {0};
 
 FCEUGI::FCEUGI()
 	: filename(0)
@@ -133,13 +135,20 @@ void FCEU_TogglePPU(void) {
 #endif
 }
 
-static void FCEU_CloseGame(void) {
-	if (GameInfo) {
-#ifdef WIN32
-//SP CODE
-		extern char LoadedRomFName[2048];
+static void FCEU_CloseGame(void)
+{
+	if (GameInfo)
+	{
+		if (AutoResumePlay)
+		{
+			// save "-resume" savestate
+			FCEUSS_Save(FCEU_MakeFName(FCEUMKF_RESUMESTATE, 0, 0).c_str());
+		}
 
-		if (storePreferences(LoadedRomFName)) {
+#ifdef WIN32
+		extern char LoadedRomFName[2048];
+		if (storePreferences(LoadedRomFName))
+		{
 			FCEUD_PrintError("Couldn't store debugging data");
 		}
 #endif
@@ -372,12 +381,8 @@ int NSFLoad(const char *name, FCEUFILE *fp);
 //char lastLoadedGameName [2048] = {0,}; // hack for movie WRAM clearing on record from poweron
 
 //name should be UTF-8, hopefully, or else there may be trouble
-FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode) {
-	//mbg merge 7/17/07 - why is this here
-	//#ifdef WIN32
-	//	StopSound();
-	//#endif
-
+FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
+{
 	//----------
 	//attempt to open the files
 	FCEUFILE *fp;
@@ -479,6 +484,15 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode) {
 #if defined (WIN32) || defined (WIN64)
 	DoDebuggerDataReload(); // Reloads data without reopening window
 #endif
+
+	if (AutoResumePlay)
+	{
+		// load "-resume" savestate
+		if (FCEUSS_Load(FCEU_MakeFName(FCEUMKF_RESUMESTATE, 0, 0).c_str()))
+			FCEU_DispMessage("Game resumed from savestate.", 0);
+		else
+			FCEU_DispMessage("Couldn't resume game from savestate.", 0);
+	}
 
 	ResetScreenshotsCounter();
 
@@ -657,6 +671,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	Update_RAM_Search(); // Update_RAM_Watch() is also called.
 	RamChange();
 	//FCEUI_AviVideoUpdate(XBuf);
+
 	extern int KillFCEUXonFrame;
 	if (KillFCEUXonFrame && (FCEUMOV_GetFrame() >= KillFCEUXonFrame))
 		DoFCEUExit();

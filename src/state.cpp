@@ -524,7 +524,7 @@ void FCEUSS_Save(const char *fname)
 		SaveStateStatus[CurrentState]=1;
 		FCEU_DispMessage("State %d saved.",0,CurrentState);
 	}
-		redoSS = false;					//we have a new savestate so redo is not possible
+	redoSS = false;					//we have a new savestate so redo is not possible
 }
 
 int FCEUSS_LoadFP_old(EMUFILE* is, ENUM_SSLOADPARAMS params)

@@ -601,8 +601,7 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 				if(odirs[FCEUIOD_STATES])
 				{
 					sprintf(ret,"%s"PSS"%s%s.fc%d",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
-				}
-				else
+				} else
 				{
 					sprintf(ret,"%s"PSS"fcs"PSS"%s%s.fc%d",BaseDirectory.c_str(),FileBase,mfn,id1);
 				}
@@ -611,10 +610,30 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 					if(odirs[FCEUIOD_STATES])
 					{
 						sprintf(ret,"%s"PSS"%s%s.fc%d",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
-					}
-					else
+					} else
 					{
 						sprintf(ret,"%s"PSS"fcs"PSS"%s%s.fc%d",BaseDirectory.c_str(),FileBase,mfn,id1);
+					}
+				}
+			}
+			break;
+		case FCEUMKF_RESUMESTATE:
+			{
+				if(odirs[FCEUIOD_STATES])
+				{
+					sprintf(ret,"%s"PSS"%s-resume.fcs",odirs[FCEUIOD_STATES],FileBase);
+				} else
+				{
+					sprintf(ret,"%s"PSS"fcs"PSS"%s-resume.fcs",BaseDirectory.c_str(),FileBase);
+				}
+				if(stat(ret,&tmpstat)==-1)
+				{
+					if(odirs[FCEUIOD_STATES])
+					{
+						sprintf(ret,"%s"PSS"%s-resume.fcs",odirs[FCEUIOD_STATES],FileBase);
+					} else
+					{
+						sprintf(ret,"%s"PSS"fcs"PSS"%s-resume.fcs",BaseDirectory.c_str(),FileBase);
 					}
 				}
 			}
@@ -646,12 +665,21 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 			break;
 		case FCEUMKF_AUTOSTATE:
 			mfnString = GetMfn();
-			mfn = mfnString.c_str();
+			if (mfnString.length() <= MAX_MOVIEFILENAME_LEN)
+			{
+				mfn = mfnString.c_str();
+			} else
+			{
+				//This caps the movie filename length before adding it to the savestate filename.
+				//This helps prevent possible crashes from savestate filenames of excessive length.
+				mfnString = mfnString.substr(0, MAX_MOVIEFILENAME_LEN);
+				mfn = mfnString.c_str();
+			}
+
 			if(odirs[FCEUIOD_STATES])
 			{
 				sprintf(ret,"%s"PSS"%s%s-autosave%d.fcs",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
-			}
-			else
+			} else
 			{
 				sprintf(ret,"%s"PSS"fcs"PSS"%s%s-autosave%d.fcs",BaseDirectory.c_str(),FileBase,mfn,id1);
 			}
@@ -660,8 +688,7 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 				if(odirs[FCEUIOD_STATES])
 				{
 					sprintf(ret,"%s"PSS"%s%s-autosave%d.fcs",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
-				}
-				else
+				} else
 				{
 					sprintf(ret,"%s"PSS"fcs"PSS"%s%s-autosave%d.fcs",BaseDirectory.c_str(),FileBase,mfn,id1);
 				}
