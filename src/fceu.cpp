@@ -314,19 +314,16 @@ void SetWriteHandler(int32 start, int32 end, writefunc func) {
 			BWrite[x] = func;
 }
 
-uint8 *GameMemBlock;
 uint8 *RAM;
 
 //---------
 //windows might need to allocate these differently, so we have some special code
 
 static void AllocBuffers() {
-	GameMemBlock = (uint8*)FCEU_gmalloc(GAME_MEM_BLOCK_SIZE);
 	RAM = (uint8*)FCEU_gmalloc(0x800);
 }
 
 static void FreeBuffers() {
-	FCEU_free(GameMemBlock);
 	FCEU_free(RAM);
 }
 //------

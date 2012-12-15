@@ -24,21 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <map>
-#ifdef INESPRIV
-
-/* This order is necessary */
-#define WRAM               (GameMemBlock)
-#define sizeofWRAM         8192
-
-/* for the MMC5 code to work properly.  It might be fixed later... */
-#define CHRRAM             (GameMemBlock + sizeofWRAM)
-#define sizeofCHRRAM       8192
-
-#define ExtraNTARAM        (GameMemBlock + sizeofWRAM + sizeofCHRRAM)
-#define sizeofExtraNTARAM  2048
-
-#else
-#endif
 
 struct TMasterRomInfo
 {
@@ -57,6 +42,7 @@ extern uint8 *ROM;
 extern uint8 *VROM;
 extern uint32 VROM_size;
 extern uint32 ROM_size;
+extern uint8 *ExtraNTARAM;
 extern int iNesSave(); //bbit Edited: line added
 extern int iNesSaveAs(char* name);
 extern char LoadedRomFName[2048]; //bbit Edited: line added

@@ -29,7 +29,6 @@
 #include "cart.h"
 #include "ppu.h"
 
-#define INESPRIV
 #include "ines.h"
 #include "unif.h"
 #include "state.h"
@@ -49,6 +48,7 @@ extern SFORMAT FCEUVSUNI_STATEINFO[];
 uint8 *trainerpoo = 0;
 uint8 *ROM = NULL;
 uint8 *VROM = NULL;
+uint8 *ExtraNTARAM = NULL;
 iNES_HEADER head;
 
 static CartInfo iNESCart;
@@ -113,8 +113,12 @@ void iNESGI(GI h) { //bbit edited: removed static keyword
 			VROM = NULL;
 		}
 		if (trainerpoo) {
-			FCEU_gfree(trainerpoo);
+			free(trainerpoo);
 			trainerpoo = NULL;
+		}
+		if (ExtraNTARAM) {
+			free(ExtraNTARAM);
+			ExtraNTARAM = NULL;
 		}
 	}
 	break;
@@ -737,7 +741,10 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 		}
 	}
 
-	if (head.ROM_type & 8) Mirroring = 2;
+	if (head.ROM_type & 8) {
+		Mirroring = 2;
+		ExtraNTARAM = (uint8*)FCEU_gmalloc(2048);
+	}
 
 	if ((ROM = (uint8*)FCEU_malloc(ROM_size << 14)) == NULL)
 		return 0;
