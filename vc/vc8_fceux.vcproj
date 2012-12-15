@@ -614,10 +614,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\boards\17.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\boards\170.cpp"
 				>
 			</File>
@@ -635,10 +631,6 @@
 			</File>
 			<File
 				RelativePath="..\src\boards\178.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\boards\179.cpp"
 				>
 			</File>
 			<File
@@ -848,7 +840,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\65.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\67.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\68.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\69.cpp"
 				>
 			</File>
 			<File
@@ -980,7 +984,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\emu2413.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\emu2413.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\famicombox.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\ffe.cpp"
 				>
 			</File>
 			<File
@@ -1068,15 +1084,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\mmc2and4.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\mmc3.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\src\boards\mmc5.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\boards\n-c22m.cpp"
 				>
 			</File>
 			<File
@@ -1164,7 +1180,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\vrc6.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\vrc7.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\vrc7p.cpp"
 				>
 			</File>
 			<File
@@ -4214,107 +4238,6 @@
 			</File>
 			<File
 				RelativePath="..\src\input\zapper.cpp"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="mappers"
-			>
-			<File
-				RelativePath="..\src\mappers\24and26.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\6.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\65.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\67.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\69.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\85.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\emu2413.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-						CompileAs="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-						CompileAs="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release Fastbuild|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-						CompileAs="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release Fastbuild|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\src\mappers\emu2413.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\mapinc.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\mappers\mmc2and4.cpp"
 				>
 			</File>
 		</Filter>
