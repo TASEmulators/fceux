@@ -699,6 +699,14 @@
     <ClCompile Include="..\src\x6502.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\asm.h" />
+    <ClInclude Include="..\src\cart.h" />
+    <ClInclude Include="..\src\cheat.h" />
+    <ClInclude Include="..\src\conddebug.h" />
+    <ClInclude Include="..\src\config.h" />
+    <ClInclude Include="..\src\debug.h" />
+    <ClInclude Include="..\src\drawing.h" />
+    <ClInclude Include="..\src\driver.h" />
     <ClInclude Include="..\src\drivers\common\args.h" />
     <ClInclude Include="..\src\drivers\common\cheat.h" />
     <ClInclude Include="..\src\drivers\common\config.h" />
@@ -782,30 +790,26 @@
     <ClInclude Include="..\src\drivers\win\lua\include\luaconf.h" />
     <ClInclude Include="..\src\drivers\win\lua\include\lualib.h" />
     <ClInclude Include="..\src\emufile.h" />
-    <ClInclude Include="..\src\fir\c44100ntsc.h" />
-    <ClInclude Include="..\src\fir\c44100pal.h" />
-    <ClInclude Include="..\src\fir\c48000ntsc.h" />
-    <ClInclude Include="..\src\fir\c48000pal.h" />
-    <ClInclude Include="..\src\fir\c96000ntsc.h" />
-    <ClInclude Include="..\src\fir\c96000pal.h" />
-    <ClInclude Include="..\src\cart.h" />
-    <ClInclude Include="..\src\cdlogger.h" />
-    <ClInclude Include="..\src\cheat.h" />
-    <ClInclude Include="..\src\conddebug.h" />
-    <ClInclude Include="..\src\debug.h" />
-    <ClInclude Include="..\src\drawing.h" />
-    <ClInclude Include="..\src\driver.h" />
+    <ClInclude Include="..\src\emufile_types.h" />
     <ClInclude Include="..\src\fceu.h" />
     <ClInclude Include="..\src\fceulua.h" />
     <ClInclude Include="..\src\fcoeffs.h" />
     <ClInclude Include="..\src\fds.h" />
     <ClInclude Include="..\src\file.h" />
     <ClInclude Include="..\src\filter.h" />
+    <ClInclude Include="..\src\fir\c44100ntsc.h" />
+    <ClInclude Include="..\src\fir\c44100pal.h" />
+    <ClInclude Include="..\src\fir\c48000ntsc.h" />
+    <ClInclude Include="..\src\fir\c48000pal.h" />
+    <ClInclude Include="..\src\fir\c96000ntsc.h" />
+    <ClInclude Include="..\src\fir\c96000pal.h" />
     <ClInclude Include="..\src\git.h" />
     <ClInclude Include="..\src\ines-bad.h" />
     <ClInclude Include="..\src\ines-correct.h" />
     <ClInclude Include="..\src\ines.h" />
     <ClInclude Include="..\src\input.h" />
+    <ClInclude Include="..\src\input\share.h" />
+    <ClInclude Include="..\src\input\suborkb.h" />
     <ClInclude Include="..\src\movie.h" />
     <ClInclude Include="..\src\netplay.h" />
     <ClInclude Include="..\src\nsf.h" />
@@ -814,17 +818,9 @@
     <ClInclude Include="..\src\ppu.h" />
     <ClInclude Include="..\src\sound.h" />
     <ClInclude Include="..\src\state.h" />
-    <ClInclude Include="..\src\tracer.h" />
+    <ClInclude Include="..\src\types-des.h" />
     <ClInclude Include="..\src\types.h" />
     <ClInclude Include="..\src\unif.h" />
-    <ClInclude Include="..\src\video.h" />
-    <ClInclude Include="..\src\vsuni.h" />
-    <ClInclude Include="..\src\wave.h" />
-    <ClInclude Include="..\src\x6502.h" />
-    <ClInclude Include="..\src\x6502struct.h" />
-    <ClInclude Include="..\src\input\share.h" />
-    <ClInclude Include="..\src\input\suborkb.h" />
-    <ClInclude Include="..\src\boards\emu2413.h" />
     <ClInclude Include="..\src\utils\ConvertUTF.h" />
     <ClInclude Include="..\src\utils\crc32.h" />
     <ClInclude Include="..\src\utils\endian.h" />
@@ -863,6 +859,13 @@
     <ClInclude Include="..\src\lua\src\lundump.h" />
     <ClInclude Include="..\src\lua\src\lvm.h" />
     <ClInclude Include="..\src\lua\src\lzio.h" />
+    <ClInclude Include="..\src\version.h" />
+    <ClInclude Include="..\src\video.h" />
+    <ClInclude Include="..\src\vsuni.h" />
+    <ClInclude Include="..\src\wave.h" />
+    <ClInclude Include="..\src\x6502.h" />
+    <ClInclude Include="..\src\x6502abbrev.h" />
+    <ClInclude Include="..\src\x6502struct.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\src\drivers\win\res.rc" />
@@ -991,6 +994,7 @@
     <None Include="..\src\drivers\win\res\te_piano_9.bmp" />
     <None Include="..\src\drivers\win\res\te_piano_9_lostpos.bmp" />
     <None Include="..\src\drivers\win\res\te_piano_9_playback.bmp" />
+    <None Include="..\src\ops.inc" />
     <None Include="..\src\pputile.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

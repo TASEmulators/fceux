@@ -954,27 +954,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\cart.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\cdlogger.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\cheat.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\conddebug.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\debug.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drawing.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\driver.h">
-      <Filter>include files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\drivers\common\args.h">
       <Filter>drivers\common</Filter>
     </ClInclude>
@@ -1146,24 +1125,6 @@
     <ClInclude Include="..\src\drivers\win\window.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\fceu.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\fceulua.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\fcoeffs.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\fds.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\file.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\filter.h">
-      <Filter>include files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\fir\c44100ntsc.h">
       <Filter>fir</Filter>
     </ClInclude>
@@ -1181,21 +1142,6 @@
     </ClInclude>
     <ClInclude Include="..\src\fir\c96000pal.h">
       <Filter>fir</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\git.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\ines-bad.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\ines-correct.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\ines.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\input.h">
-      <Filter>include files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\input\share.h">
       <Filter>input</Filter>
@@ -1272,21 +1218,6 @@
     <ClInclude Include="..\src\lua\src\lzio.h">
       <Filter>drivers\win\lua</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\movie.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\netplay.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\nsf.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\oldmovie.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\palette.h">
-      <Filter>include files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\palettes\palettes.h">
       <Filter>palettes</Filter>
     </ClInclude>
@@ -1301,24 +1232,6 @@
     </ClInclude>
     <ClInclude Include="..\src\palettes\rp2c05004.h">
       <Filter>palettes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\ppu.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\sound.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\state.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\tracer.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\types.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\unif.h">
-      <Filter>include files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\utils\ConvertUTF.h">
       <Filter>utils</Filter>
@@ -1350,22 +1263,6 @@
     <ClInclude Include="..\src\utils\xstring.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\video.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\vsuni.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\wave.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\x6502.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\x6502struct.h">
-      <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\emufile.h" />
     <ClInclude Include="..\src\drivers\common\nes_ntsc.h">
       <Filter>drivers\common</Filter>
     </ClInclude>
@@ -1441,7 +1338,121 @@
     <ClInclude Include="..\src\drivers\win\taseditor\laglog.h">
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\boards\emu2413.h">
+    <ClInclude Include="..\src\x6502struct.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\asm.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\cart.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\cheat.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\conddebug.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\config.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debug.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drawing.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\driver.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\emufile.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\emufile_types.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\fceu.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\fceulua.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\fcoeffs.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\fds.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\file.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\filter.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\git.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ines.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ines-bad.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ines-correct.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\input.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\movie.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\netplay.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\nsf.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\oldmovie.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\palette.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ppu.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\sound.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\state.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\types.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\types-des.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\unif.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\version.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\video.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\vsuni.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\wave.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\x6502.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\x6502abbrev.h">
       <Filter>include files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1779,6 +1790,7 @@
     <None Include="..\src\drivers\win\res\taseditor-icon32.ico">
       <Filter>drivers\win\res</Filter>
     </None>
+    <None Include="..\src\ops.inc" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\auxlib.lua" />
