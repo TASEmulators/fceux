@@ -148,8 +148,8 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "PPU"
         BEGIN
-            MENUITEM "New PPU",                     ID_NEWPPU
             MENUITEM "Old PPU",                     ID_OLDPPU
+            MENUITEM "New PPU (slow!)",             ID_NEWPPU
         END
         MENUITEM "&Directories...",             MENU_DIRECTORIES
         MENUITEM "&GUI...",                     MENU_GUI_OPTIONS

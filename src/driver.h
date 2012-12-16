@@ -96,11 +96,11 @@ void FCEUI_SetRenderPlanes(bool sprites, bool bg);
 void FCEUI_GetRenderPlanes(bool& sprites, bool& bg);
 
 //name=path and file to load.  returns null if it failed
-FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode);
+FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode, bool silent = false);
 
 //same as FCEUI_LoadGame, except that it can load from a tempfile.
 //name is the logical path to open; archiveFilename is the archive which contains name
-FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode);
+FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silent = false);
 
 //general purpose emulator initialization. returns true if successful
 bool FCEUI_Initialize();

@@ -413,7 +413,7 @@ void DrawTextTransWH(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor, i
 	if (max_w > 256) max_w = 256;
 	if (max_h >  64) max_h =  64;
 
-	int ch, wid, nx, ny, max_x = x, offs;
+	int ch = 0, wid = 0, nx = 0, ny = 0, max_x = x, offs = 0;
 	int pixel_color;
 	for(; *textmsg; ++textmsg)
 	{

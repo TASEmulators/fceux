@@ -139,7 +139,7 @@ static void FCEU_CloseGame(void)
 {
 	if (GameInfo)
 	{
-		if (AutoResumePlay)
+		if (AutoResumePlay && (GameInfo->type != GIT_NSF))
 		{
 			// save "-resume" savestate
 			FCEUSS_Save(FCEU_MakeFName(FCEUMKF_RESUMESTATE, 0, 0).c_str());
@@ -378,7 +378,7 @@ int NSFLoad(const char *name, FCEUFILE *fp);
 //char lastLoadedGameName [2048] = {0,}; // hack for movie WRAM clearing on record from poweron
 
 //name should be UTF-8, hopefully, or else there may be trouble
-FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
+FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silent)
 {
 	//----------
 	//attempt to open the files
@@ -389,8 +389,10 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 	const char* romextensions[] = { "nes", "fds", 0 };
 	fp = FCEU_fopen(name, 0, "rb", 0, -1, romextensions);
 
-	if (!fp) {
-		FCEU_PrintError("Error opening \"%s\"!", name);
+	if (!fp)
+	{
+		if (!silent)
+			FCEU_PrintError("Error opening \"%s\"!", name);
 		return 0;
 	}
 
@@ -439,7 +441,8 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 	if (FDSLoad(name, fp))
 		goto endlseq;
 
-	FCEU_PrintError("An error occurred while loading the file.");
+	if (!silent)
+		FCEU_PrintError("An error occurred while loading the file.");
 	FCEU_fclose(fp);
 
 	delete GameInfo;
@@ -457,7 +460,8 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 	extern int loadDebugDataFailed;
 
 	if ((loadDebugDataFailed = loadPreferences(LoadedRomFName)))
-		FCEU_printf("Couldn't load debugging data.\n");
+		if (!silent)
+			FCEU_printf("Couldn't load debugging data.\n");
 
 // ################################## End of SP CODE ###########################
 #endif
@@ -482,13 +486,13 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 	DoDebuggerDataReload(); // Reloads data without reopening window
 #endif
 
-	if (AutoResumePlay)
+	if (AutoResumePlay && (GameInfo->type != GIT_NSF))
 	{
 		// load "-resume" savestate
 		if (FCEUSS_Load(FCEU_MakeFName(FCEUMKF_RESUMESTATE, 0, 0).c_str()))
-			FCEU_DispMessage("Game resumed from savestate.", 0);
+			FCEU_DispMessage("Old play session resumed.", 0);
 		else
-			FCEU_DispMessage("Couldn't resume game from savestate.", 0);
+			FCEU_DispMessage("", 0);
 	}
 
 	ResetScreenshotsCounter();
@@ -496,8 +500,9 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 	return GameInfo;
 }
 
-FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode) {
-	return FCEUI_LoadGameVirtual(name, OverwriteVidMode);
+FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode, bool silent)
+{
+	return FCEUI_LoadGameVirtual(name, OverwriteVidMode, silent);
 }
 
 

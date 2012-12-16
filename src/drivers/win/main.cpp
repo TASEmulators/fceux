@@ -760,7 +760,7 @@ int main(int argc,char *argv[])
 	} else
 	{
 		if (AutoResumePlay && rom_name_when_closing_emulator && rom_name_when_closing_emulator[0])
-			ALoad(rom_name_when_closing_emulator);
+			ALoad(rom_name_when_closing_emulator, 0, true);
 		if (eoptions & EO_FOAFTERSTART)
 			LoadNewGamey(hAppWnd, 0);
 	}

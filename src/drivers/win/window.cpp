@@ -1018,13 +1018,13 @@ void CloseGame()
 	}
 }
 
-bool ALoad(const char *nameo, char* innerFilename)
+bool ALoad(const char *nameo, char* innerFilename, bool silent)
 {
-  int oldPaused = EmulationPaused;
+	int oldPaused = EmulationPaused;
 
 	if (GameInfo) FCEUI_CloseGame();
 
-	if(FCEUI_LoadGameVirtual(nameo, 1))
+	if (FCEUI_LoadGameVirtual(nameo, 1, silent))
 	{
 		pal_emulation = FCEUI_GetCurrentVidSystem(0, 0);
 

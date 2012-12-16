@@ -1,3 +1,4 @@
+15-Dec-2012 - AnS - win32: added Config->Enable->Auto-resume old play session
 13-Dec-2012 - AnS - win32: added Emulation Speed->Set custom speed for FrameAdvance
 13-Dec-2012 - AnS - win32: added NES->Emulation Speed->Set FrameAdvance Delay
 13-Dec-2012 - AnS - win32: added NES->Emulation Speed->Set Custom Speed
