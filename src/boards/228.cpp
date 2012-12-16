@@ -61,6 +61,7 @@ static DECLFW(M228Write) {
 static void M228Reset(void) {
 	areg = 0x8000;
 	vreg = 0;
+	memset(mram, 0, sizeof(mram));
 	Sync();
 }
 
