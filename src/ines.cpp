@@ -743,7 +743,6 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 
 	if (head.ROM_type & 8) {
 		Mirroring = 2;
-		ExtraNTARAM = (uint8*)FCEU_gmalloc(2048);
 	}
 
 	if ((ROM = (uint8*)FCEU_malloc(ROM_size << 14)) == NULL)
@@ -832,9 +831,10 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	if (VROM_size)
 		SetupCartCHRMapping(0, VROM, VROM_size * 0x2000, 0);
 
-	if (Mirroring == 2)
+	if (Mirroring == 2) {
+		ExtraNTARAM = (uint8*)FCEU_gmalloc(2048);
 		SetupCartMirroring(4, 1, ExtraNTARAM);
-	else if (Mirroring >= 0x10)
+	} else if (Mirroring >= 0x10)
 		SetupCartMirroring(2 + (Mirroring & 1), 1, 0);
 	else
 		SetupCartMirroring(Mirroring & 1, (Mirroring & 4) >> 2, 0);
