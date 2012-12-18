@@ -23,6 +23,8 @@
 static uint8 preg[4], creg[8];
 static uint8 IRQa, mirr;
 static int32 IRQCount, IRQLatch;
+static uint8 *WRAM = NULL;
+static uint32 WRAMSIZE;
 
 static SFORMAT StateRegs[] =
 {
@@ -38,6 +40,7 @@ static SFORMAT StateRegs[] =
 static void Sync(void) {
 	int i;
 	for (i = 0; i < 8; i++) setchr1(i << 10, creg[i]);
+	setprg8r(0x10, 0x6000, 0);
 	setprg8(0x8000, preg[0]);
 	setprg8(0xA000, preg[1]);
 	setprg8(0xC000, preg[2]);
@@ -75,12 +78,14 @@ static DECLFW(M18WriteChr) {
 }
 
 static void M18Power(void) {
+	IRQa = 0;
 	preg[0] = 0;
 	preg[1] = 1;
 	preg[2] = ~1;
 	preg[3] = ~0;
 	Sync();
-	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	SetReadHandler(0x6000, 0xFFFF, CartBR);
+	SetWriteHandler(0x6000, 0x7FFF, CartBW);
 	SetWriteHandler(0x8000, 0x9FFF, M18WritePrg);
 	SetWriteHandler(0xA000, 0xDFFF, M18WriteChr);
 	SetWriteHandler(0xE000, 0xFFFF, M18WriteIRQ);
@@ -97,14 +102,31 @@ static void M18IRQHook(int a) {
 	}
 }
 
+static void M18Close(void)
+{
+	if (WRAM)
+		FCEU_gfree(WRAM);
+	WRAM = NULL;
+}
+
 static void StateRestore(int version) {
 	Sync();
 }
 
 void Mapper18_Init(CartInfo *info) {
 	info->Power = M18Power;
+	info->Close = M18Close;
 	MapIRQHook = M18IRQHook;
 	GameStateRestore = StateRestore;
+
+	WRAMSIZE = 8192;
+	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
+	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
+	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
+	if (info->battery) {
+		info->SaveGame[0] = WRAM;
+		info->SaveGameLen[0] = WRAMSIZE;
+	}
 
 	AddExState(&StateRegs, ~0, 0, 0);
 }

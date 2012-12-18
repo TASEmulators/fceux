@@ -436,7 +436,7 @@ typedef struct {
 //size
 static int not_power2[] =
 {
-	228
+	198, 228
 };
 typedef struct {
 	char *name;
@@ -463,7 +463,7 @@ static BMAPPINGLocal bmap[] = {
 	{"100-in-1",			 15, Mapper15_Init},
 	{"Bandai",				 16, Mapper16_Init},
 	{"",					 17, Mapper17_Init},
-	{"",					 18, Mapper18_Init},
+	{"JALECO SS880006",		 18, Mapper18_Init},	// JF-NNX (EB89018-30007) boards
 	{"Namcot 106",			 19, Mapper19_Init},
 //	{"",					 20, Mapper20_Init},
 	{"Konami VRC2/VRC4 A",	 21, Mapper21_Init},
@@ -643,7 +643,7 @@ static BMAPPINGLocal bmap[] = {
 	{"TW MMC3+VRAM VER. D",	195, Mapper195_Init},
 	{"",					196, Mapper196_Init},
 	{"",					197, Mapper197_Init},
-	{"",					198, Mapper198_Init},
+	{"TW MMC3+VRAM VER. E",	198, Mapper198_Init},
 	{"",					199, Mapper199_Init},
 	{"",					200, Mapper200_Init},
 	{"",					201, Mapper201_Init},
@@ -748,6 +748,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 
 	if ((ROM = (uint8*)FCEU_malloc(ROM_size << 14)) == NULL)
 		return 0;
+	memset(ROM, 0xFF, ROM_size << 14);
 
 	if (VROM_size) {
 		if ((VROM = (uint8*)FCEU_malloc(VROM_size << 13)) == NULL) {
@@ -755,9 +756,9 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 			ROM = NULL;
 			return 0;
 		}
+		memset(VROM, 0xFF, VROM_size << 13);
 	}
-	memset(ROM, 0xFF, ROM_size << 14);
-	if (VROM_size) memset(VROM, 0xFF, VROM_size << 13);
+
 	if (head.ROM_type & 4) { /* Trainer */
 		trainerpoo = (uint8*)FCEU_gmalloc(512);
 		FCEU_fread(trainerpoo, 512, 1, fp);
@@ -766,12 +767,12 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	ResetCartMapping();
 	ResetExState(0, 0);
 
-	SetupCartPRGMapping(0, ROM, ROM_size * 0x4000, 0);
+	SetupCartPRGMapping(0, ROM, ROM_size << 14, 0);
 
 	FCEU_fread(ROM, 0x4000, (round) ? ROM_size : head.ROM_size, fp);
 
 	if (VROM_size)
-		FCEU_fread(VROM, 0x2000, head.VROM_size, fp);
+		FCEU_fread(VROM, 0x2000, VROM_size, fp);
 
 	md5_starts(&md5);
 	md5_update(&md5, ROM, ROM_size << 14);
