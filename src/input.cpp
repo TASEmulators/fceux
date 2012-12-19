@@ -1171,7 +1171,7 @@ void ToggleFullscreen()
 	changerecursive=1;
 
 	int oldmode = fullscreen;
-	if(!SetVideoMode(oldmode ^1))
+	if(!SetVideoMode(oldmode ^ 1))
 		SetVideoMode(oldmode);
 	changerecursive=0;
 #endif

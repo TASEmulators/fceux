@@ -27,7 +27,7 @@ void SetMainWindowText();
 void HideFWindow(int h);
 void SetMainWindowStuff();
 int GetClientAbsRect(LPRECT lpRect);
-void FixWXY(int pref);
+void FixWXY(int pref, bool shift_held = false);
 void ByebyeWindow();
 void DoTimingConfigFix();
 int CreateMainWindow();

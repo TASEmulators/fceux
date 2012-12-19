@@ -112,7 +112,7 @@ extern bool turbo;				//Is game in turbo mode?
 void ResetVideo(void);
 void ShowCursorAbs(int w);
 void HideFWindow(int h);
-void FixWXY(int pref);
+void FixWXY(int pref, bool shift_held);
 void SetMainWindowStuff(void);
 int GetClientAbsRect(LPRECT lpRect);
 void UpdateFCEUWindow(void);
@@ -174,7 +174,7 @@ static char TempArray[2048];
 static int exiting = 0;
 static volatile int moocow = 0;
 
-int windowedfailed;
+int windowedfailed = 0;
 int fullscreen = 0;	//Windows files only, variable that keeps track of fullscreen status
 
 static volatile int _userpause = 0; //mbg merge 7/18/06 changed tasbuild was using this only in a couple of places

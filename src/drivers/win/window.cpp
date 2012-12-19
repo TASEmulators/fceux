@@ -965,7 +965,7 @@ void HideFWindow(int h)
 {
 	LONG desa;
 
-	if(h)  /* Full-screen. */
+	if (h)  /* Full-screen. */
 	{
 		RECT bo;
 		GetWindowRect(hAppWnd, &bo);
@@ -974,8 +974,7 @@ void HideFWindow(int h)
 
 		SetMenu(hAppWnd, 0);
 		desa=WS_POPUP | WS_CLIPSIBLINGS;  
-	}
-	else
+	} else
 	{
 		desa = WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS;
 		HideMenu(tog);
@@ -984,8 +983,8 @@ void HideFWindow(int h)
 		SetWindowPos(hAppWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOREPOSITION | SWP_NOSIZE);
 	}
 
-	SetWindowLong(hAppWnd, GWL_STYLE ,desa | ( GetWindowLong(hAppWnd, GWL_STYLE) & WS_VISIBLE ));
-	SetWindowPos(hAppWnd, 0 ,0 ,0 ,0 ,0 ,SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOREPOSITION | SWP_NOSIZE | SWP_NOZORDER);
+	SetWindowLong(hAppWnd, GWL_STYLE, desa | ( GetWindowLong(hAppWnd, GWL_STYLE) & WS_VISIBLE ));
+	SetWindowPos(hAppWnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOREPOSITION | SWP_NOSIZE | SWP_NOZORDER);
 }
 
 //Toggles the display status of the main menu.
@@ -1119,20 +1118,20 @@ void GetMouseData(uint32 (&md)[3])
 
 	if (eoptions & EO_BESTFIT && (resizable_surface_rect.top || resizable_surface_rect.left))
 	{
-		if (mousex <= resizable_surface_rect.left)
+		if ((int)mousex <= resizable_surface_rect.left)
 		{
 			md[0] = 0;
-		} else if (mousex >= resizable_surface_rect.right)
+		} else if ((int)mousex >= resizable_surface_rect.right)
 		{
 			md[0] = VNSWID;
 		} else
 		{
 			md[0] = VNSWID * (mousex - resizable_surface_rect.left) / (resizable_surface_rect.right - resizable_surface_rect.left);
 		}
-		if (mousey <= resizable_surface_rect.top)
+		if ((int)mousey <= resizable_surface_rect.top)
 		{
 			md[1] = 0;
-		} else if (mousey >= resizable_surface_rect.bottom)
+		} else if ((int)mousey >= resizable_surface_rect.bottom)
 		{
 			md[1] = FSettings.TotalScanlines();
 		} else
@@ -1143,20 +1142,20 @@ void GetMouseData(uint32 (&md)[3])
 	{
 		RECT client_rect;
 		GetClientRect(hAppWnd, &client_rect);
-		if (mousex <= client_rect.left)
+		if ((int)mousex <= client_rect.left)
 		{
 			md[0] = 0;
-		} else if (mousex >= client_rect.right)
+		} else if ((int)mousex >= client_rect.right)
 		{
 			md[0] = VNSWID;
 		} else
 		{
 			md[0] = VNSWID * (mousex - client_rect.left) / (client_rect.right - client_rect.left);
 		}
-		if (mousey <= client_rect.top)
+		if ((int)mousey <= client_rect.top)
 		{
 			md[1] = 0;
-		} else if (mousey >= client_rect.bottom)
+		} else if ((int)mousey >= client_rect.bottom)
 		{
 			md[1] = FSettings.TotalScanlines();
 		} else
@@ -1371,9 +1370,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		goto proco;
 
 	case WM_SIZE:
-		if(!fullscreen && !changerecursive)
-			switch(wParam)
+		if (!fullscreen && !changerecursive && !windowedfailed)
 		{
+			switch(wParam)
+			{
 			case SIZE_MAXIMIZED: 
 				ismaximized = 1;
 				SetMainWindowStuff();
@@ -1382,6 +1382,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				ismaximized = 0;
 				SetMainWindowStuff();
 				break;
+			}
 		}
 		break;
 	case WM_SIZING:
@@ -1404,10 +1405,12 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				winsizemulx*= (double)w/winwidth;
 			if(how & 2)
 				winsizemuly*= (double)h/winheight;
+
+			bool shift_held = (GetAsyncKeyState(VK_SHIFT) < 0);
 			if(how & 1)
-				FixWXY(0);
+				FixWXY(0, shift_held);
 			else
-				FixWXY(1);
+				FixWXY(1, shift_held);
 
 			CalcWindowSize(&srect);
 			winwidth=srect.right;
@@ -2405,7 +2408,7 @@ proco:
 	return 0;
 }
 
-void FixWXY(int pref)
+void FixWXY(int pref, bool shift_held)
 {
 	if(eoptions&EO_FORCEASPECT)
 	{
@@ -2430,47 +2433,12 @@ void FixWXY(int pref)
 		}
 	}
 
-	// AnS: removed unnecessary restrictions of window size
-	/*
-	if(winspecial)
-	{
-		// -Video Modes Tag-
-		int mult;
-		if(winspecial >= 1 && winspecial <= 3) mult = 2;
-		else mult = 3;
-		if(winsizemulx < mult)
-		{
-			if(eoptions&EO_FORCEASPECT)
-				winsizemuly *= mult / winsizemulx;
-
-			if (winsizemulx < mult)
-				winsizemulx = mult;
-		}
-		if(winsizemuly < mult && mult < 3) //11/14/2008, adelikat: added && mult < 3 and extra code to meet mult >=3 conditions
-		{
-			if(eoptions&EO_FORCEASPECT)
-				winsizemulx *= mult / winsizemuly;
-			
-			if (winsizemuly < mult)
-				winsizemuly = mult;
-
-		}
-		else if (winsizemuly < mult&& mult >= 3) { //11/14/2008, adelikat: This was probably a hacky solution.  But when special scalar = 3 and aspect correction is on,
-			if(eoptions&EO_FORCEASPECT)			//then x is corrected to a wider ratio (.5 of what this code seems to expect) so I added a special circumstance for these 2 situations
-				winsizemulx *= (mult+0.5) / winsizemuly;	//And adjusted the special scaling by .5
-
-			if (winsizemuly < mult)
-				winsizemuly = mult;
-		}
-	}
-	*/
-
 	if(winsizemulx<0.1)
 		winsizemulx=0.1;
 	if(winsizemuly<0.1)
 		winsizemuly=0.1;
 
-	if(eoptions & EO_FORCEISCALE)
+	if (((eoptions & EO_FORCEISCALE) && !shift_held) || (!(eoptions & EO_FORCEISCALE) && shift_held))
 	{
 		int x,y;
 
@@ -2593,7 +2561,7 @@ void SetMainWindowStuff()
 
 	GetWindowRect(hAppWnd, &tmp);
 
-	if(ismaximized)
+	if (ismaximized)
 	{
 		winwidth = tmp.right - tmp.left;
 		winheight = tmp.bottom - tmp.top;

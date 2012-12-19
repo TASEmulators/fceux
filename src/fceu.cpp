@@ -92,7 +92,7 @@ bool frameAdvanceLagSkip = false; //If this is true, frame advance will skip ove
 bool AutoSS = false;        //Flagged true when the first auto-savestate is made while a game is loaded, flagged false on game close
 bool movieSubtitles = true; //Toggle for displaying movie subtitles
 bool DebuggerWasUpdated = false; //To prevent the debugger from updating things without being updated.
-bool AutoResumePlay = false;		// maybe this should be in "eoptions"...
+bool AutoResumePlay = false;
 char rom_name_when_closing_emulator[129] = {0};
 
 FCEUGI::FCEUGI()

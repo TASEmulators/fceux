@@ -23,6 +23,10 @@
 #include "gui.h"
 #include "../../fceu.h"
 #include "../../video.h"
+#include "input.h"
+#include "mapinput.h"
+
+extern bool fullscreenByDoubleclick;
 
 static int RecalcCustom(void);
 void InputScreenChanged(int fs);
@@ -45,8 +49,9 @@ int winspecial = 0;
 int NTSCwinspecial = 0;
 int vmod = 0;
 
-vmdef vmodes[11]={
-	{0,0,0,VMDF_DXBLT|VMDF_STRFS,1,1,0},	// Custom - set to current resolution at first run
+vmdef vmodes[11] =
+{
+	{0,0,0,VMDF_DXBLT|VMDF_STRFS,1,1,0},	// Custom - set to current resolution at the first launch
 	{320,240,8,0,1,1,0}, //1
 	{512,384,8,0,1,1,0}, //2
 	{640,480,32,0,1,1,0}, //3
@@ -1207,10 +1212,13 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 	switch(uMsg)
 	{
-	case WM_INITDIALOG:      
+	case WM_INITDIALOG:
+	{
+		/*
 		for(x=0;x<11;x++)
 			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_MODE,CB_ADDSTRING,0,(LPARAM)(LPSTR)vmstr[x]);
 		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_MODE,CB_SETCURSEL,vmod,(LPARAM)(LPSTR)0);
+		*/
 
 		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_ADDSTRING,0,(LPARAM)(LPSTR)"8");
 		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_ADDSTRING,0,(LPARAM)(LPSTR)"16");
@@ -1221,20 +1229,19 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XRES,vmodes[0].x,0);
 		SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YRES,vmodes[0].y,0);
 
-		SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XSCALE,vmodes[0].xscale,0);
-		SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YSCALE,vmodes[0].yscale,0);
-		CheckRadioButton(hwndDlg,IDC_RADIO_SCALE,IDC_RADIO_STRETCH,(vmodes[0].flags&VMDF_STRFS)?IDC_RADIO_STRETCH:IDC_RADIO_SCALE);
+		//SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XSCALE,vmodes[0].xscale,0);
+		//SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YSCALE,vmodes[0].yscale,0);
+		//CheckRadioButton(hwndDlg,IDC_RADIO_SCALE,IDC_RADIO_STRETCH,(vmodes[0].flags&VMDF_STRFS)?IDC_RADIO_STRETCH:IDC_RADIO_SCALE);
 
+		// -Video Modes Tag-
+		char *str[]={"<none>","hq2x","Scale2x","NTSC 2x","hq3x","Scale3x"};
+		int x;
+		for(x=0;x<6;x++)
 		{
-			// -Video Modes Tag-
-			char *str[]={"<none>","hq2x","Scale2x","NTSC 2x","hq3x","Scale3x"};
-			int x;
-			for(x=0;x<6;x++)
-			{
-				SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
-				SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
-			}
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
 		}
+
 		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_SETCURSEL,vmodes[0].special,(LPARAM)(LPSTR)0);
 		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_SETCURSEL,winspecial,(LPARAM)(LPSTR)0);
 
@@ -1274,8 +1281,8 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 		SetDlgItemDouble(hwndDlg, IDC_WINSIZE_MUL_X, winsizemulx);
 		SetDlgItemDouble(hwndDlg, IDC_WINSIZE_MUL_Y, winsizemuly);
-		SetDlgItemDouble(hwndDlg, IDC_VIDEOCONFIG_ASPECT_X, saspectw);
-		SetDlgItemDouble(hwndDlg, IDC_VIDEOCONFIG_ASPECT_Y, saspecth);
+		//SetDlgItemDouble(hwndDlg, IDC_VIDEOCONFIG_ASPECT_X, saspectw);
+		//SetDlgItemDouble(hwndDlg, IDC_VIDEOCONFIG_ASPECT_Y, saspecth);
 
 		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)"<none>");
 		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"<none>");
@@ -1293,7 +1300,23 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		if(eoptions&EO_NOSPRLIM)
 			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_NO8LIM,BST_CHECKED);
 
+		char buf[1024] = "Full Screen";
+		int c = FCEUD_CommandMapping[EMUCMD_MISC_TOGGLEFULLSCREEN];
+		if (c)
+		{
+			strcat(buf, " (");
+			strcat(buf, GetKeyComboName(c));
+			if (fullscreenByDoubleclick)
+				strcat(buf, " or double-click)");
+			else
+				strcat(buf, ")");
+		} else if (fullscreenByDoubleclick)
+		{
+			strcat(buf, " (double-click anywhere)");
+		}
+		SetDlgItemText(hwndDlg, IDC_VIDEOCONFIG_FS, buf);
 		break;
+	}
 	case WM_CLOSE:
 	case WM_QUIT: goto gornk;
 	case WM_COMMAND:
@@ -1343,18 +1366,19 @@ gornk:
 
 				UpdateRendBounds();
 
+				/*
 				if(IsDlgButtonChecked(hwndDlg,IDC_RADIO_STRETCH)==BST_CHECKED)
 					vmodes[0].flags |= VMDF_STRFS|VMDF_DXBLT;
 				else
 					vmodes[0].flags &= ~(VMDF_STRFS|VMDF_DXBLT);
-
 				vmod=SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_MODE,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
+				*/
 				vmodes[0].x=GetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XRES,0,0);
 				vmodes[0].y=GetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YRES,0,0);
 				vmodes[0].bpp=(SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_GETCURSEL,0,(LPARAM)(LPSTR)0)+1)<<3;
 
-				vmodes[0].xscale=GetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XSCALE,0,0);
-				vmodes[0].yscale=GetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YSCALE,0,0);
+				//vmodes[0].xscale=GetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XSCALE,0,0);
+				//vmodes[0].yscale=GetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YSCALE,0,0);
 				vmodes[0].special=SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
 
 				winspecial = SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
@@ -1389,8 +1413,8 @@ gornk:
 
 				winsizemulx=GetDlgItemDouble(hwndDlg, IDC_WINSIZE_MUL_X);
 				winsizemuly=GetDlgItemDouble(hwndDlg, IDC_WINSIZE_MUL_Y);
-				saspectw=GetDlgItemDouble(hwndDlg, IDC_VIDEOCONFIG_ASPECT_X);
-				saspecth=GetDlgItemDouble(hwndDlg, IDC_VIDEOCONFIG_ASPECT_Y);
+				//saspectw=GetDlgItemDouble(hwndDlg, IDC_VIDEOCONFIG_ASPECT_X);
+				//saspecth=GetDlgItemDouble(hwndDlg, IDC_VIDEOCONFIG_ASPECT_Y);
 				FixWXY(0);
 
 				winsync=SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
