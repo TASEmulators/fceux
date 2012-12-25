@@ -1208,7 +1208,7 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		"1600x1200 6x,5y",
 		"800x600 Stretched"
 	};
-	int x;
+	//int x;
 
 	switch(uMsg)
 	{

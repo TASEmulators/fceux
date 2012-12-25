@@ -228,6 +228,7 @@ void GREENZONE::save(EMUFILE *os, bool really_save)
 {
 	if (really_save)
 	{
+		CollectCurrentState();		// in case the project is being saved before the greenzone.update() was called within current frame
 		// write "GREENZONE" string
 		os->fwrite(greenzone_save_id, GREENZONE_ID_LEN);
 		// write LagLog
@@ -236,7 +237,6 @@ void GREENZONE::save(EMUFILE *os, bool really_save)
 		write32le(greenZoneCount, os);
 		// write Playback cursor position
 		write32le(currFrameCounter, os);
-		CollectCurrentState();
 		// write savestates
 		int frame, size;
 		int last_tick = 0;
@@ -374,6 +374,8 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 				} else
 				{
 					// load this savestate
+					if ((int)savestates.size() <= frame)
+						savestates.resize(frame + 1);
 					savestates[frame].resize(size);
 					if ((int)is->fread(&savestates[frame][0], size) < size) break;
 					prev_frame = frame;			// successfully read one Greenzone frame info
