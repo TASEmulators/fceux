@@ -45,16 +45,23 @@
 	#include "stdint.h"
 #endif
 
+bool ShowROM = false;
+
 bool IsHardwareAddressValid(HWAddressType address)
 {
 	if (!GameInfo)
 		return false;
 
-	if ((address <= 0x07ff) || (address >= 0x6000 && address <= 0x7FFF))
-		return true;
+	if(!ShowROM)
+		if ((address >= 0x0000 && address < 0x0800) || (address >= 0x6000 && address < 0x8000))
+			return true;
+		else
+			return false;
 	else
-		return false;
-
+		if (address >= 0x8000 && address < 0x10000)
+			return true;
+		else
+			return false;
 }
 #define INVALID_HARDWARE_ADDRESS	((HWAddressType) -1)
 
@@ -1469,6 +1476,7 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			s_prevValuesNeedUpdate = true;
 
 			SendDlgItemMessage(hDlg,IDC_C_AUTOSEARCH,BM_SETCHECK,AutoSearch?BST_CHECKED:BST_UNCHECKED,0);
+			SendDlgItemMessage(hDlg,IDC_C_SEARCHROM,BM_SETCHECK,ShowROM?BST_CHECKED:BST_UNCHECKED,0);
 			//const char* names[5] = {"Address","Value","Previous","Changes","Notes"};
 			//int widths[5] = {62,64,64,55,55};
 			const char* names[] = {"Address","Value","Previous","Changes"};
@@ -1766,6 +1774,8 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 					}
 				}	{rv = true; break;}
+				case IDC_C_SEARCHROM:
+					ShowROM = SendDlgItemMessage(hDlg, IDC_C_SEARCHROM, BM_GETCHECK, 0, 0) != 0;
 				case IDC_C_RESET:
 				{
 					RamSearchSaveUndoStateIfNotTooBig(RamSearchHWnd);

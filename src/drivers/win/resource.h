@@ -681,7 +681,7 @@
 #define IDC_EDIT_LUAARGS                1256
 #define CB_PARTIALVISUALTHEME           1257
 #define DEBUGLOADDEB                    1258
-#define IDC_CHECK2                      1258
+#define IDC_C_SEARCHROM                 1258
 #define IDC_SINGLEINSTANCE              1258
 #define IDC_MOVIE_CLOSEAFTERPLAYBACK    1258
 #define IDC_C_WATCH_SEPARATE            1259
