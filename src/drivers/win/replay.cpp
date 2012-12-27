@@ -730,23 +730,35 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		}
 
 	case WM_CTLCOLORSTATIC:
-		if((HWND)lParam == GetDlgItem(hwndDlg, IDC_LABEL_CURRCHECKSUM))
+		if ((HWND)lParam == GetDlgItem(hwndDlg, IDC_LABEL_CURRCHECKSUM))
 		{
 			// draw the md5 sum in red if it's different from the md5 of the rom used in the replay
 			HDC hdcStatic = (HDC)wParam;
 			char szMd5Text[35];
-
 			GetDlgItemText(hwndDlg, IDC_LABEL_ROMCHECKSUM, szMd5Text, 35);
-			if(!strlen(szMd5Text) || !strcmp(szMd5Text, "unknown") || !strcmp(szMd5Text, "00000000000000000000000000000000") || !strcmp(szMd5Text, md5_asciistr(GameInfo->MD5)))
+			if (!strlen(szMd5Text) || !strcmp(szMd5Text, "unknown") || !strcmp(szMd5Text, "00000000000000000000000000000000") || !strcmp(szMd5Text, md5_asciistr(GameInfo->MD5)))
 				SetTextColor(hdcStatic, RGB(0,0,0));		// use black color for a match (or no comparison)
 			else
 				SetTextColor(hdcStatic, RGB(255,0,0));		// use red for a mismatch
-		
 			SetBkMode((HDC)wParam,TRANSPARENT);
 			return (BOOL)GetSysColorBrush(COLOR_BTNFACE);
-		}
-		else
+		} else if ((HWND)lParam == GetDlgItem(hwndDlg, IDC_LABEL_NEWPPUUSED))
+		{
+			HDC hdcStatic = (HDC)wParam;
+			char szMd5Text[35];
+			GetDlgItemText(hwndDlg, IDC_LABEL_NEWPPUUSED, szMd5Text, 35);
+			bool want_newppu = (bool)strcmp(szMd5Text, "Off");
+			extern int newppu;
+			if ((want_newppu && newppu) || (!want_newppu && !newppu))
+				SetTextColor(hdcStatic, RGB(0,0,0));		// use black color for a match
+			else
+				SetTextColor(hdcStatic, RGB(255,0,0));		// use red for a mismatch
+			SetBkMode((HDC)wParam,TRANSPARENT);
+			return (BOOL)GetSysColorBrush(COLOR_BTNFACE);
+		} else
+		{
 			return FALSE;
+		}
 	}
 
 	return FALSE;
