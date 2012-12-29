@@ -25,6 +25,7 @@
 #include "debugger.h"
 #include "../../fceu.h"
 #include "../../cart.h"
+#include "../../cheat.h" // For FCEU_LoadGameCheats()
 
 static HWND pwindow = 0;	    //Handle to Cheats dialog
 HWND hCheat = 0;			    //mbg merge 7/19/06 had to add
@@ -541,6 +542,39 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							else SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)U8ToStr(c));
 							if(hMemView)UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
 							break;
+						case IDC_BTN_CHEAT_ADDFROMFILE:
+						{
+							OPENFILENAME ofn;
+							memset(&ofn, 0, sizeof(ofn));
+							ofn.lStructSize = sizeof(ofn);
+							ofn.hwndOwner = hwndDlg;
+							ofn.hInstance = fceu_hInstance;
+							ofn.lpstrTitle = "Open Cheats file";
+							const char filter[] = "Cheat files (*.cht)\0*.cht\0All Files (*.*)\0*.*\0\0";
+							ofn.lpstrFilter = filter;
+
+							char nameo[2048] = {0};
+							ofn.lpstrFile = nameo;							
+							ofn.nMaxFile = 2048;
+							ofn.Flags = OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_FILEMUSTEXIST;
+							std::string initdir = FCEU_GetPath(FCEUMKF_CHEAT);
+							ofn.lpstrInitialDir = initdir.c_str();
+
+							if (GetOpenFileName(&ofn))
+							{
+								FILE* file = FCEUD_UTF8fopen(nameo, "rb");
+								if (file)
+								{
+									FCEU_LoadGameCheats(file);
+									EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_DEL),TRUE);
+									EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_UPD),TRUE);
+									if (hMemView) UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
+									UpdateCheatsAdded();
+									savecheats = 1;
+								}
+							}
+							break;
+						}
 						case IDC_BTN_CHEAT_RESET:
 							FCEUI_CheatSearchBegin();
 							ShowResults(hwndDlg);
@@ -726,19 +760,20 @@ void InitializeCheatsAdded(HWND hwndDlg)
 	char temp[64];
 	if (FrozenAddressCount < 256)
 			sprintf(temp,"Active Cheats %d", FrozenAddressCount);
-		
-		else if (FrozenAddressCount == 256)
-		{
-			sprintf(temp,"Active Cheats %d (Max Limit)", FrozenAddressCount);
-			EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_ADD),FALSE);
-		}
-		else
-		{
-			sprintf(temp,"%d Error: Too many cheats loaded!", FrozenAddressCount);
-			EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_ADD),FALSE);
-		}
-		SetDlgItemText(hwndDlg,201,temp);
-		RedoCheatsLB(hwndDlg);
+	else if (FrozenAddressCount == 256)
+	{
+		sprintf(temp,"Active Cheats %d (Max Limit)", FrozenAddressCount);
+		EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_ADD),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_ADDFROMFILE),FALSE);
+	}
+	else
+	{
+		sprintf(temp,"%d Error: Too many cheats loaded!", FrozenAddressCount);
+		EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_ADD),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_ADDFROMFILE),FALSE);
+	}
+	SetDlgItemText(hwndDlg,201,temp);
+	RedoCheatsLB(hwndDlg);
 }
 
 //Used by cheats and external dialogs such as hex editor to update items in the cheat search dialog
@@ -756,11 +791,13 @@ void UpdateCheatsAdded()
 		{
 			sprintf(temp,"Active Cheats %d (Max Limit)", FrozenAddressCount);
 			EnableWindow(GetDlgItem(hCheat,IDC_BTN_CHEAT_ADD),FALSE);
+			EnableWindow(GetDlgItem(hCheat,IDC_BTN_CHEAT_ADDFROMFILE),FALSE);
 		}
 		else
 		{
 			sprintf(temp,"%d Error: Too many cheats loaded!", FrozenAddressCount);
 			EnableWindow(GetDlgItem(hCheat,IDC_BTN_CHEAT_ADD),FALSE);
+			EnableWindow(GetDlgItem(hCheat,IDC_BTN_CHEAT_ADDFROMFILE),FALSE);
 		}
 		SetDlgItemText(hCheat,201,temp);
 		RedoCheatsLB(hCheat);

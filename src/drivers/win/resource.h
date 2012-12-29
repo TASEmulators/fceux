@@ -403,6 +403,8 @@
 #define MENU_PAL                        311
 #define IDC_DEBUGGER_VAL_SPR            311
 #define IDC_LABEL_TWEAKCOUNT            311
+#define IDC_BTN_CHEAT_UPD2              311
+#define IDC_BTN_CHEAT_ADDFROMFILE       311
 #define IDC_DEBUGGER_BOOKMARK           312
 #define IDC_DEBUGGER_CYCLES_EXCEED      313
 #define IDC_DEBUGGER_INSTRUCTIONS_EXCEED 314
