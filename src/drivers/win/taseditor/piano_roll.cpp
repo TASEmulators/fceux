@@ -68,7 +68,7 @@ PIANO_ROLL::PIANO_ROLL()
 	wincl.hInstance = fceu_hInstance;
 	wincl.lpszClassName = markerDragBoxClassName;
 	wincl.lpfnWndProc = MarkerDragBoxWndProc;
-	wincl.style = CS_DBLCLKS;
+	wincl.style = CS_SAVEBITS| CS_DBLCLKS;
 	wincl.cbSize = sizeof(WNDCLASSEX);
 	wincl.hIcon = 0;
 	wincl.hIconSm = 0;

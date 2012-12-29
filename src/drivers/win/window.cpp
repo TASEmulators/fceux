@@ -1359,8 +1359,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			goto proco;
 
 	case WM_PAINT:
-		if(xbsave)
+		if (xbsave)
 		{
+			InvalidateRect(hWnd, NULL, false);		// AnS: HACK in order to force the entire client area to be redrawn; this fixes the bug with DIRECTDRAWCLIPPER sometimes calculating wrong region
 			PAINTSTRUCT ps;
 			BeginPaint(hWnd,&ps);
 			FCEUD_BlitScreen(xbsave);
@@ -2500,7 +2501,7 @@ int CreateMainWindow()
 
 	memset(&winclass, 0, sizeof(winclass));
 	winclass.cbSize = sizeof(WNDCLASSEX);
-	winclass.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW | CS_SAVEBITS | CS_DBLCLKS;
+	winclass.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;	// AnS: removed CS_SAVEBITS
 	winclass.lpfnWndProc = AppWndProc;
 	winclass.cbClsExtra = 0;
 	winclass.cbWndExtra = 0;

@@ -701,8 +701,10 @@ void ConfigCheats(HWND hParent) {
 	{
 		selcheat=-1;
 		CheatWindow=1;
-		if (CheatStyle) pwindow = hCheat = CreateDialog(fceu_hInstance,"CHEATCONSOLE",NULL,CheatConsoleCallB);
-		else DialogBox(fceu_hInstance,"CHEATCONSOLE",hParent,CheatConsoleCallB);
+		if (CheatStyle)
+			pwindow = hCheat = CreateDialog(fceu_hInstance,"CHEATCONSOLE",NULL,CheatConsoleCallB);
+		else
+			DialogBox(fceu_hInstance,"CHEATCONSOLE",hParent,CheatConsoleCallB);
 	} else
 	{
 		ShowWindow(hCheat, SW_SHOWNORMAL);
