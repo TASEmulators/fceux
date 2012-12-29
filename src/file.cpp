@@ -477,66 +477,90 @@ void FCEUI_SetDirOverride(int which, char *n)
 
 std::string  FCEU_GetPath(int type)
 {
-	char ret[FILENAME_MAX];
-	switch(type)
+	switch (type)
 	{
 		case FCEUMKF_STATE:
+		{
 			if(odirs[FCEUIOD_STATES])
 				return (odirs[FCEUIOD_STATES]);
 			else
 				return BaseDirectory + PSS + "fcs";
 			break;
+		}
+		case FCEUMKF_CHEAT:
+		{
+			if(odirs[FCEUIOD_CHEATS])
+				return (odirs[FCEUIOD_CHEATS]);
+			else
+				return BaseDirectory + PSS + "cheats";
+			break;
+		}
 		case FCEUMKF_MOVIE:
+		{
 			if(odirs[FCEUIOD_MOVIES])
 				return (odirs[FCEUIOD_MOVIES]);
 			else
 				return BaseDirectory + PSS + "movies";
 			break;
+		}
 		case FCEUMKF_MEMW:
+		{
 			if(odirs[FCEUIOD_MEMW])
 				return (odirs[FCEUIOD_MEMW]);
 			else
 				return "";	//adelikat: 03/02/09 - return null so it defaults to last directory used
 				//return BaseDirectory + PSS + "tools";
 			break;
+		}
 		//adelikat: TODO: this no longer exist and could be removed (but that would require changing a lot of other directory arrays
 		case FCEUMKF_BBOT:
+		{
 			if(odirs[FCEUIOD_BBOT])
 				return (odirs[FCEUIOD_BBOT]);
 			else
 				return BaseDirectory + PSS + "tools";
 			break;
+		}
 		case FCEUMKF_ROMS:
+		{
 			if(odirs[FCEUIOD_ROMS])
 				return (odirs[FCEUIOD_ROMS]);
 			else
 				return "";	//adelikat: removing base directory return, should return null it goes to last used directory
 			break;
+		}
 		case FCEUMKF_INPUT:
+		{
 			if(odirs[FCEUIOD_INPUT])
 				return (odirs[FCEUIOD_INPUT]);
 			else
 				return BaseDirectory + PSS + "tools";
 			break;
+		}
 		case FCEUMKF_LUA:
+		{
 			if(odirs[FCEUIOD_LUA])
 				return (odirs[FCEUIOD_LUA]);
 			else
 				return "";	//adelikat: 03/02/09 - return null so it defaults to last directory used //return BaseDirectory + PSS + "tools";
 			break;
+		}
 		case FCEUMKF_AVI:
+		{
 			if(odirs[FCEUIOD_AVI])
 				return (odirs[FCEUIOD_AVI]);
 			else
 				return "";		//adelikat - 03/02/09 - if no override, should return null and allow the last directory to be used intead
 				//return BaseDirectory + PSS + "tools";
 			break;
+		}
 		case FCEUMKF_TASEDITOR:
+		{
 			return BaseDirectory + PSS + "tools";
-
+			break;
+		}
 	}
-
-	return ret;
+	return "";
 }
 
 std::string FCEU_MakePath(int type, const char* filebase)
