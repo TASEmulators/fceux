@@ -60,15 +60,16 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	savecompact_binary = true;
 	savecompact_markers = true;
 	savecompact_bookmarks = true;
-	savecompact_greenzone = false;
 	savecompact_history = false;
 	savecompact_piano_roll = true;
 	savecompact_selection = false;
+	savecompact_greenzone = SAVECOMPACT_GREENZONE_NO;
 	findnote_matchcase = false;
 	findnote_search_up = false;
 	enable_auto_function = true;
 	draw_input = true;
 	enable_greenzoning = true;
+	compact_quicksaving = false;
 	silent_autosave = true;
 	autopause_at_finish = true;
 	tooltips = true;

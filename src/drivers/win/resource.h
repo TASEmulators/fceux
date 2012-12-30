@@ -403,7 +403,6 @@
 #define MENU_PAL                        311
 #define IDC_DEBUGGER_VAL_SPR            311
 #define IDC_LABEL_TWEAKCOUNT            311
-#define IDC_BTN_CHEAT_UPD2              311
 #define IDC_BTN_CHEAT_ADDFROMFILE       311
 #define IDC_DEBUGGER_BOOKMARK           312
 #define IDC_DEBUGGER_CYCLES_EXCEED      313
@@ -1154,6 +1153,7 @@
 #define ID_EMULATIONSPEED_CUSTOMSPEED   40577
 #define ID_ENABLE_AUTO                  40578
 #define ID_ENABLE_AUTORESUME            40579
+#define ID_CONFIG_COMPACTQUICKSAVING    40580
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1164,7 +1164,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        289
-#define _APS_NEXT_COMMAND_VALUE         40580
+#define _APS_NEXT_COMMAND_VALUE         40581
 #define _APS_NEXT_CONTROL_VALUE         1282
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -122,6 +122,7 @@ const unsigned int MAX_NUMBER_OF_RECENT_PROJECTS = sizeof(recent_projects)/sizeo
 // Patterns Menu
 const unsigned int MENU_FIRST_PATTERN = MENU_FIRST_RECENT_PROJECT + MAX_NUMBER_OF_RECENT_PROJECTS;
 
+char temp_buf1[1024] = {0}, temp_buf2[1024] = {0};
 // resources
 char windowCaptioBase[] = "TAS Editor";
 char patterns_menu_prefix[] = "Pattern: ";
@@ -199,6 +200,7 @@ void TASEDITOR_WINDOW::init()
 	// menus and checked items
 	hmenu = GetMenu(hwndTasEditor);
 	UpdateCheckedItems();
+	UpdateMenuCaptions();
 	patterns_menu = GetSubMenu(hmenu, PATTERNS_MENU_POS);
 	// tooltips
 	for (int i = 0; i < TASEDITOR_WINDOW_TOTAL_ITEMS; ++i)
@@ -565,6 +567,7 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckMenuItem(hmenu, ID_VIEW_JUMPWHENMAKINGUNDO, taseditor_config.jump_to_undo?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_FOLLOWMARKERNOTECONTEXT, taseditor_config.follow_note_context?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_ENABLEGREENZONING, taseditor_config.enable_greenzoning?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hmenu, ID_CONFIG_COMPACTQUICKSAVING, taseditor_config.compact_quicksaving?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_SILENTAUTOSAVE, taseditor_config.silent_autosave?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_PATTERNSKIPSLAG, taseditor_config.pattern_skips_lag?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_ADJUSTLAG, taseditor_config.adjust_input_due_to_lag?MF_CHECKED : MF_UNCHECKED);
@@ -579,6 +582,32 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckMenuItem(hmenu, ID_CONFIG_HUDINBRANCHSCREENSHOTS, taseditor_config.branch_scr_hud?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_AUTOPAUSEATTHEENDOFMOVIE, taseditor_config.autopause_at_finish?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_HELP_TOOLTIPS, taseditor_config.tooltips?MF_CHECKED : MF_UNCHECKED);
+}
+void TASEDITOR_WINDOW::UpdateMenuCaptions()
+{
+	// change "Save" and "Save Compact" keyboard shortcut hints
+	if (taseditor_config.compact_quicksaving)
+	{
+		strcpy(temp_buf1, "Save");
+		strcpy(temp_buf2, "Save Compact\t~[Ctrl+S]");
+	} else
+	{
+		strcpy(temp_buf1, "Save\tCtrl+S");
+		strcpy(temp_buf2, "Save Compact");
+	}
+	MENUITEMINFO moo;
+	moo.cbSize = sizeof(moo);
+	moo.fMask = MIIM_TYPE;
+	moo.cch = NULL;
+	GetMenuItemInfo(hmenu, ID_FILE_SAVEPROJECT, FALSE, &moo);
+	moo.dwTypeData = (LPSTR)temp_buf1;
+	SetMenuItemInfo(hmenu, ID_FILE_SAVEPROJECT, FALSE, &moo);
+	moo.cbSize = sizeof(moo);
+	moo.fMask = MIIM_TYPE;
+	moo.cch = NULL;
+	GetMenuItemInfo(hmenu, ID_FILE_SAVECOMPACT, FALSE, &moo);
+	moo.dwTypeData = (LPSTR)temp_buf2;
+	SetMenuItemInfo(hmenu, ID_FILE_SAVECOMPACT, FALSE, &moo);
 }
 
 // --------------------------------------------------------------------------------------------
@@ -893,6 +922,8 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					OpenProject();
 					break;
 				case ACCEL_CTRL_S:
+					SaveProject(taseditor_config.compact_quicksaving);
+					break;
 				case ID_FILE_SAVEPROJECT:
 					SaveProject();
 					break;
@@ -1057,6 +1088,11 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case ID_CONFIG_ENABLEGREENZONING:
 					taseditor_config.enable_greenzoning ^= 1;
 					taseditor_window.UpdateCheckedItems();
+					break;
+				case ID_CONFIG_COMPACTQUICKSAVING:
+					taseditor_config.compact_quicksaving ^= 1;
+					taseditor_window.UpdateCheckedItems();
+					taseditor_window.UpdateMenuCaptions();
 					break;
 				case ID_CONFIG_SILENTAUTOSAVE:
 					taseditor_config.silent_autosave ^= 1;

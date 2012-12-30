@@ -41,6 +41,7 @@ public:
 	void RedrawTaseditor();
 
 	void UpdateCheckedItems();
+	void UpdateMenuCaptions();
 
 	void UpdateRecentProjectsMenu();
 	void UpdateRecentProjectsArray(const char* addString);

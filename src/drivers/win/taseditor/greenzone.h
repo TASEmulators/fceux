@@ -22,7 +22,7 @@ public:
 	void free();
 	void update();
 
-	void save(EMUFILE *os, bool really_save = true);
+	void save(EMUFILE *os, int save_type = SAVECOMPACT_GREENZONE_ALL);
 	bool load(EMUFILE *is, unsigned int offset);
 
 	bool LoadSavestate(unsigned int frame);

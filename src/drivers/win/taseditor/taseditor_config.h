@@ -12,6 +12,17 @@
 #define AUTOSAVE_PERIOD_MAX 1440		// 24 hours
 #define AUTOSAVE_PERIOD_DEFAULT 15		// in minutes
 
+enum
+{
+	SAVECOMPACT_GREENZONE_ALL,
+	SAVECOMPACT_GREENZONE_16TH,
+	SAVECOMPACT_GREENZONE_MARKED,
+	SAVECOMPACT_GREENZONE_NO,
+
+	// ...
+	SAVECOMPACT_GREENZONE_TOTAL
+};
+
 #define AUTHOR_MAX_LEN 100
 
 class TASEDITOR_CONFIG
@@ -58,15 +69,16 @@ public:
 	bool savecompact_binary;
 	bool savecompact_markers;
 	bool savecompact_bookmarks;
-	bool savecompact_greenzone;
 	bool savecompact_history;
 	bool savecompact_piano_roll;
 	bool savecompact_selection;
+	int savecompact_greenzone;
 	bool findnote_matchcase;
 	bool findnote_search_up;
 	bool enable_auto_function;
 	bool draw_input;
 	bool enable_greenzoning;
+	bool compact_quicksaving;
 	bool silent_autosave;
 	bool autopause_at_finish;
 	bool tooltips;

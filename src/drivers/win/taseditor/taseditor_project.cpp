@@ -36,8 +36,8 @@ extern SPLICER splicer;
 extern FCEUGI *GameInfo;
 
 extern void FCEU_PrintError(char *format, ...);
-extern bool SaveProject();
-extern bool SaveProjectAs();
+extern bool SaveProject(bool save_compact = false);
+extern bool SaveProjectAs(bool save_compact = false);
 extern int GetInputType(MovieData& md);
 extern void SetInputType(MovieData& md, int new_input_type);
 
@@ -63,15 +63,15 @@ void TASEDITOR_PROJECT::update()
 	if (changed && taseditor_window.TASEditor_focus && taseditor_config.autosave_period && !projectFile.empty() && clock() >= next_save_shedule && piano_roll.drag_mode == DRAG_MODE_NONE)
 	{
 		if (taseditor_config.silent_autosave)
-			SaveProject();
+			SaveProject(taseditor_config.compact_quicksaving);
 		else
-			SaveProjectAs();
+			SaveProjectAs(taseditor_config.compact_quicksaving);
 		// in case user pressed Cancel, postpone saving to next time
 		SheduleNextAutosave();
 	}
 }
 
-bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool save_markers, bool save_bookmarks, bool save_greenzone, bool save_history, bool save_piano_roll, bool save_selection)
+bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool save_markers, bool save_bookmarks, int save_greenzone, bool save_history, bool save_piano_roll, bool save_selection)
 {
 	if (!different_name && GetProjectFile().empty())
 		// no different name specified, and there's no current filename of the project
@@ -134,7 +134,7 @@ bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool 
 		unsigned int saved_stuff_map = 0;
 		if (save_markers) saved_stuff_map |= MARKERS_SAVED;
 		if (save_bookmarks) saved_stuff_map |= BOOKMARKS_SAVED;
-		if (save_greenzone) saved_stuff_map |= GREENZONE_SAVED;
+		if (save_greenzone != SAVECOMPACT_GREENZONE_NO) saved_stuff_map |= GREENZONE_SAVED;
 		if (save_history) saved_stuff_map |= HISTORY_SAVED;
 		if (save_piano_roll) saved_stuff_map |= PIANO_ROLL_SAVED;
 		if (save_selection) saved_stuff_map |= SELECTION_SAVED;

@@ -224,11 +224,14 @@ void GREENZONE::UnGreenzoneSelectedFrames()
 	}
 }
 
-void GREENZONE::save(EMUFILE *os, bool really_save)
+void GREENZONE::save(EMUFILE *os, int save_type)
 {
-	if (really_save)
+	if (save_type != SAVECOMPACT_GREENZONE_NO)
 	{
 		CollectCurrentState();		// in case the project is being saved before the greenzone.update() was called within current frame
+		RunGreenzoneCleaning();
+		if (greenZoneCount > (int)savestates.size())
+			greenZoneCount = savestates.size();
 		// write "GREENZONE" string
 		os->fwrite(greenzone_save_id, GREENZONE_ID_LEN);
 		// write LagLog
@@ -237,43 +240,101 @@ void GREENZONE::save(EMUFILE *os, bool really_save)
 		write32le(greenZoneCount, os);
 		// write Playback cursor position
 		write32le(currFrameCounter, os);
-		// write savestates
-		int frame, size;
-		int last_tick = 0;
-		RunGreenzoneCleaning();
-		if (greenZoneCount > (int)savestates.size()) greenZoneCount = savestates.size();
-		for (frame = 0; frame < greenZoneCount; ++frame)
-		{
-			// update TASEditor progressbar from time to time
-			if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
-			{
-				playback.SetProgressbar(frame, greenZoneCount);
-				last_tick = frame / PROGRESSBAR_UPDATE_RATE;
-			}
-			if (!savestates[frame].size()) continue;
-			write32le(frame, os);
-			// write savestate
-			size = savestates[frame].size();
-			write32le(size, os);
-			os->fwrite(&savestates[frame][0], size);
-		}
-		// write -1 as eof for greenzone
-		write32le(-1, os);
-	} else
+	}
+	int frame, size;
+	int last_tick = 0;
+
+	switch (save_type)
 	{
-		// write "GREENZONX" string
-		os->fwrite(greenzone_skipsave_id, GREENZONE_ID_LEN);
-		// write LagLog
-		laglog.save(os);
-		// write Playback cursor position
-		write32le(currFrameCounter, os);
-		if (currFrameCounter > 0)
+		case SAVECOMPACT_GREENZONE_ALL:
 		{
-			// write ONE savestate for currFrameCounter
-			CollectCurrentState();
-			int size = savestates[currFrameCounter].size();
-			write32le(size, os);
-			os->fwrite(&savestates[currFrameCounter][0], size);
+			// write savestates
+			for (frame = 0; frame < greenZoneCount; ++frame)
+			{
+				// update TASEditor progressbar from time to time
+				if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
+				{
+					playback.SetProgressbar(frame, greenZoneCount);
+					last_tick = frame / PROGRESSBAR_UPDATE_RATE;
+				}
+				if (!savestates[frame].size()) continue;
+				write32le(frame, os);
+				// write savestate
+				size = savestates[frame].size();
+				write32le(size, os);
+				os->fwrite(&savestates[frame][0], size);
+			}
+			// write -1 as eof for greenzone
+			write32le(-1, os);
+			break;
+		}
+		case SAVECOMPACT_GREENZONE_16TH:
+		{
+			// write savestates
+			for (frame = 0; frame < greenZoneCount; ++frame)
+			{
+				if (!(frame & 0xF) || frame == currFrameCounter)
+				{
+					// update TASEditor progressbar from time to time
+					if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
+					{
+						playback.SetProgressbar(frame, greenZoneCount);
+						last_tick = frame / PROGRESSBAR_UPDATE_RATE;
+					}
+					if (!savestates[frame].size()) continue;
+					write32le(frame, os);
+					// write savestate
+					size = savestates[frame].size();
+					write32le(size, os);
+					os->fwrite(&savestates[frame][0], size);
+				}
+			}
+			// write -1 as eof for greenzone
+			write32le(-1, os);
+			break;
+		}
+		case SAVECOMPACT_GREENZONE_MARKED:
+		{
+			// write savestates
+			for (frame = 0; frame < greenZoneCount; ++frame)
+			{
+				if (markers_manager.GetMarker(frame) || frame == currFrameCounter)
+				{
+					// update TASEditor progressbar from time to time
+					if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
+					{
+						playback.SetProgressbar(frame, greenZoneCount);
+						last_tick = frame / PROGRESSBAR_UPDATE_RATE;
+					}
+					if (!savestates[frame].size()) continue;
+					write32le(frame, os);
+					// write savestate
+					size = savestates[frame].size();
+					write32le(size, os);
+					os->fwrite(&savestates[frame][0], size);
+				}
+			}
+			// write -1 as eof for greenzone
+			write32le(-1, os);
+			break;
+		}
+		case SAVECOMPACT_GREENZONE_NO:
+		{
+			// write "GREENZONX" string
+			os->fwrite(greenzone_skipsave_id, GREENZONE_ID_LEN);
+			// write LagLog
+			laglog.save(os);
+			// write Playback cursor position
+			write32le(currFrameCounter, os);
+			if (currFrameCounter > 0)
+			{
+				// write ONE savestate for currFrameCounter
+				CollectCurrentState();
+				int size = savestates[currFrameCounter].size();
+				write32le(size, os);
+				os->fwrite(&savestates[currFrameCounter][0], size);
+			}
+			break;
 		}
 	}
 }

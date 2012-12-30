@@ -414,7 +414,7 @@ bool LoadProject(const char* fullname)
 }
 
 // Saves current project
-bool SaveProjectAs()
+bool SaveProjectAs(bool save_compact)
 {
 	const char filter[] = "TAS Editor Projects (*.fm3)\0*.fm3\0All Files (*.*)\0*.*\0\0";
 	OPENFILENAME ofn;
@@ -448,58 +448,58 @@ bool SaveProjectAs()
 	if (GetSaveFileName(&ofn))								// if it is a valid filename
 	{
 		project.RenameProject(nameo, true);
-		project.save();
+		if (save_compact)
+			project.save(nameo, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_piano_roll, taseditor_config.savecompact_selection);
+		else
+			project.save();
 		taseditor_window.UpdateRecentProjectsArray(nameo);
 		// saved successfully - remove * mark from caption
 		taseditor_window.UpdateCaption();
 	} else return false;
 	return true;
 }
-bool SaveProject()
+bool SaveProject(bool save_compact)
 {
 	if (project.GetProjectFile().empty())
 	{
-		return SaveProjectAs();
+		return SaveProjectAs(save_compact);
 	} else
 	{
-		project.save();
+		if (save_compact)
+			project.save(0, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_piano_roll, taseditor_config.savecompact_selection);
+		else
+			project.save();
 		taseditor_window.UpdateCaption();
 	}
 	return true;
 }
 
-void SaveCompact_GetCheckboxes(HWND hwndDlg)
+void SaveCompact_SetDialogItems(HWND hwndDlg)
+{
+	CheckDlgButton(hwndDlg, IDC_CHECK_BINARY, taseditor_config.savecompact_binary?MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_MARKERS, taseditor_config.savecompact_markers?MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_BOOKMARKS, taseditor_config.savecompact_bookmarks?MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, taseditor_config.savecompact_history?MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_PIANO_ROLL, taseditor_config.savecompact_piano_roll?MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, taseditor_config.savecompact_selection?MF_CHECKED : MF_UNCHECKED);
+	CheckRadioButton(hwndDlg, IDC_RADIO1, IDC_RADIO4, IDC_RADIO1 + (taseditor_config.savecompact_greenzone % SAVECOMPACT_GREENZONE_TOTAL));
+}
+void SaveCompact_GetDialogItems(HWND hwndDlg)
 {
 	taseditor_config.savecompact_binary = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BINARY, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	taseditor_config.savecompact_markers = (SendDlgItemMessage(hwndDlg, IDC_CHECK_MARKERS, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	taseditor_config.savecompact_bookmarks = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BOOKMARKS, BM_GETCHECK, 0, 0) == BST_CHECKED);
-	taseditor_config.savecompact_greenzone = (SendDlgItemMessage(hwndDlg, IDC_CHECK_GREENZONE, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	taseditor_config.savecompact_history = (SendDlgItemMessage(hwndDlg, IDC_CHECK_HISTORY, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	taseditor_config.savecompact_piano_roll = (SendDlgItemMessage(hwndDlg, IDC_CHECK_PIANO_ROLL, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	taseditor_config.savecompact_selection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
-}
-
-BOOL CALLBACK AboutProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message)
-	{
-		case WM_INITDIALOG:
-		{
-			SendMessage(GetDlgItem(hWnd, IDC_TASEDITOR_NAME), WM_SETFONT, (WPARAM)piano_roll.hTaseditorAboutFont, 0);
-			break;
-		}
-		case WM_COMMAND:
-		{
-			switch (LOWORD(wParam))
-			{
-				case IDCANCEL:
-					EndDialog(hWnd, 0);
-					return TRUE;
-			}
-			break;
-		}
-	}
-	return FALSE; 
+	if (SendDlgItemMessage(hwndDlg, IDC_RADIO1, BM_GETCHECK, 0, 0) == BST_CHECKED)
+		taseditor_config.savecompact_greenzone = SAVECOMPACT_GREENZONE_ALL;
+	else if (SendDlgItemMessage(hwndDlg, IDC_RADIO2, BM_GETCHECK, 0, 0) == BST_CHECKED)
+		taseditor_config.savecompact_greenzone = SAVECOMPACT_GREENZONE_16TH;
+	else if (SendDlgItemMessage(hwndDlg, IDC_RADIO3, BM_GETCHECK, 0, 0) == BST_CHECKED)
+		taseditor_config.savecompact_greenzone = SAVECOMPACT_GREENZONE_MARKED;
+	else
+		taseditor_config.savecompact_greenzone = SAVECOMPACT_GREENZONE_NO;
 }
 
 BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -509,13 +509,7 @@ BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM 
 		case WM_INITDIALOG:
 		{
 			SetWindowPos(hwndDlg, 0, taseditor_config.wndx + 100, taseditor_config.wndy + 200, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-			CheckDlgButton(hwndDlg, IDC_CHECK_BINARY, taseditor_config.savecompact_binary?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_MARKERS, taseditor_config.savecompact_markers?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_BOOKMARKS, taseditor_config.savecompact_bookmarks?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_GREENZONE, taseditor_config.savecompact_greenzone?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, taseditor_config.savecompact_history?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_PIANO_ROLL, taseditor_config.savecompact_piano_roll?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, taseditor_config.savecompact_selection?MF_CHECKED : MF_UNCHECKED);
+			SaveCompact_SetDialogItems(hwndDlg);
 			return TRUE;
 		}
 		case WM_COMMAND:
@@ -523,11 +517,11 @@ BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM 
 			switch (LOWORD(wParam))
 			{
 				case IDOK:
-					SaveCompact_GetCheckboxes(hwndDlg);
+					SaveCompact_GetDialogItems(hwndDlg);
 					EndDialog(hwndDlg, 1);
 					return TRUE;
 				case IDCANCEL:
-					SaveCompact_GetCheckboxes(hwndDlg);
+					SaveCompact_GetDialogItems(hwndDlg);
 					EndDialog(hwndDlg, 0);
 					return TRUE;
 			}
@@ -536,7 +530,7 @@ BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM 
 		case WM_CLOSE:
 		case WM_QUIT:
 		{
-			SaveCompact_GetCheckboxes(hwndDlg);
+			SaveCompact_GetDialogItems(hwndDlg);
 			break;
 		}
 	}
@@ -642,6 +636,29 @@ void Import()
 			FCEUD_PrintError("Error loading movie data!");
 		}
 	}
+}
+
+BOOL CALLBACK AboutProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+		case WM_INITDIALOG:
+		{
+			SendMessage(GetDlgItem(hWnd, IDC_TASEDITOR_NAME), WM_SETFONT, (WPARAM)piano_roll.hTaseditorAboutFont, 0);
+			break;
+		}
+		case WM_COMMAND:
+		{
+			switch (LOWORD(wParam))
+			{
+				case IDCANCEL:
+					EndDialog(hWnd, 0);
+					return TRUE;
+			}
+			break;
+		}
+	}
+	return FALSE; 
 }
 
 BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)

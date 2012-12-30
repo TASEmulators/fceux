@@ -1109,16 +1109,7 @@ void PIANO_ROLL::DragPlaybackCursor()
 	if (target_frame < 0)
 		target_frame = 0;
 	if (currFrameCounter != target_frame)
-	{
-		int lastCursor = currFrameCounter;
 		playback.jump(target_frame);
-		if (lastCursor != currFrameCounter)
-		{
-			// redraw row where Playback cursor was (in case there's two or more drags before playback.update())
-			RedrawRow(lastCursor);
-			bookmarks.RedrawChangedBookmarks(lastCursor);
-		}
-	}
 }
 
 void PIANO_ROLL::FinishDrag()
@@ -1990,14 +1981,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					destination_frame = playback.GetPauseFrame() - delta;
 				if (destination_frame < 0)
 					destination_frame = 0;
-				int lastCursor = currFrameCounter;
 				playback.jump(destination_frame);
-				if (lastCursor != currFrameCounter)
-				{
-					// redraw row where Playback cursor was (in case there's two or more WM_MOUSEWHEEL messages before playback.update())
-					piano_roll.RedrawRow(lastCursor);
-					bookmarks.RedrawChangedBookmarks(lastCursor);
-				}
 			} else if (history.CursorOverHistoryList())
 			{
 				return SendMessage(history.hwndHistoryList, WM_MOUSEWHEEL_RESENT, wParam, lParam);

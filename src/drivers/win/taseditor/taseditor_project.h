@@ -51,7 +51,7 @@ public:
 	void reset();
 	void update();
 
-	bool save(const char* different_name = 0, bool save_binary = true, bool save_markers = true, bool save_bookmarks = true, bool save_greenzone = true, bool save_history = true, bool save_piano_roll = true, bool save_selection = true);
+	bool save(const char* different_name = 0, bool save_binary = true, bool save_markers = true, bool save_bookmarks = true, int save_greenzone = SAVECOMPACT_GREENZONE_ALL, bool save_history = true, bool save_piano_roll = true, bool save_selection = true);
 	bool load(const char* fullname);
 
 	void RenameProject(const char* new_fullname, bool filename_is_correct);

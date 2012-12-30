@@ -375,17 +375,10 @@ void PLAYBACK::RewindFull(int speed)
 			if (markers_manager.GetMarker(index)) break;
 		speed--;
 	}
-	int lastCursor = currFrameCounter;
 	if (index >= 0)
 		jump(index);						// jump to the Marker
 	else
 		jump(0);							// jump to the beginning of Piano Roll
-	if (lastCursor != currFrameCounter)
-	{
-		// redraw row where Playback cursor was (in case there's two or more RewindFulls before playback.update())
-		piano_roll.RedrawRow(lastCursor);
-		bookmarks.RedrawChangedBookmarks(lastCursor);
-	}
 }
 void PLAYBACK::ForwardFull(int speed)
 {
@@ -398,17 +391,10 @@ void PLAYBACK::ForwardFull(int speed)
 			if (markers_manager.GetMarker(index)) break;
 		speed--;
 	}
-	int lastCursor = currFrameCounter;
 	if (index <= last_frame)
 		jump(index);								// jump to Marker
 	else
 		jump(currMovieData.getNumRecords() - 1);	// jump to the end of Piano Roll
-	if (lastCursor != currFrameCounter)
-	{
-		// redraw row where Playback cursor was (in case there's two or more ForwardFulls before playback.update())
-		piano_roll.RedrawRow(lastCursor);
-		bookmarks.RedrawChangedBookmarks(lastCursor);
-	}
 }
 
 void PLAYBACK::RedrawMarker()
@@ -458,6 +444,8 @@ void PLAYBACK::jump(int frame, bool force_reload, bool execute_lua, bool follow_
 {
 	if (frame < 0) return;
 
+	int lastCursor = currFrameCounter;
+
 	// 1 - set the Playback cursor to the frame or at least above the frame
 	if (SetPlaybackAboveOrToFrame(frame, force_reload))
 	{
@@ -478,6 +466,14 @@ void PLAYBACK::jump(int frame, bool force_reload, bool execute_lua, bool follow_
 		// the Playback is already at the needed frame
 		if (pause_frame)	// if Playback was seeking, pause emulation right here
 			SeekingStop();
+	}
+
+	// redraw respective Piano Roll lines if needed
+	if (lastCursor != currFrameCounter)
+	{
+		// redraw row where Playback cursor was (in case there's two or more drags before playback.update())
+		piano_roll.RedrawRow(lastCursor);
+		bookmarks.RedrawChangedBookmarks(lastCursor);
 	}
 }
 

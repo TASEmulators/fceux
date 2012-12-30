@@ -362,6 +362,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(taseditor_config.findnote_search_up),
 	AC(taseditor_config.draw_input),
 	AC(taseditor_config.enable_greenzoning),
+	AC(taseditor_config.compact_quicksaving),
 	AC(taseditor_config.silent_autosave),
 	AC(taseditor_config.autopause_at_finish),
 	AC(taseditor_config.tooltips),
