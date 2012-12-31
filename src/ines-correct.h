@@ -213,6 +213,7 @@
 	{0x44c20420,	199,	   -1},	/* San Guo Zhi 2 (C) */
 	{0x4e1c1e3c,	206,		0},	/* Karnov */
 	{0x276237b3,	206,		0},	/* Karnov */
+	{0xe1526228,	206,	   -1}, /* Quest of Ki */
 	{0x7678f1d5,	207,		8},	/* Fudou Myouou Den */
 	{0x07eb2c12,	208,	   -1},	/* Street Fighter IV */
 	{0xdd8ced31,	209,	   -1},	/* Power Rangers 3 */
