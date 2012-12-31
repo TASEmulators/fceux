@@ -5,6 +5,7 @@
 	{0x82f204ae,	 -1,		1},	/* Liang Shan Ying Xiong (NJ023) (Ch) [!] */
 	{0x684afccd,	 -1,		1},	/* Space Hunter (J) */
 	{0xad9c63e2,	 -1,		1},	/* Space Shadow (J) */
+	{0xe1526228,	 -1,		1}, /* Quest of Ki */
 	{0xaf5d7aa2,	 -1,		0},	/* Clu Clu Land */
 	{0xcfb224e6,	 -1,		1},	/* Dragon Ninja (J) [p1][!].nes */
 	{0x4f2f1846,	 -1,		1},	/* Famista '89 - Kaimaku Han!! (J) */
@@ -213,7 +214,6 @@
 	{0x44c20420,	199,	   -1},	/* San Guo Zhi 2 (C) */
 	{0x4e1c1e3c,	206,		0},	/* Karnov */
 	{0x276237b3,	206,		0},	/* Karnov */
-	{0xe1526228,	206,	   -1}, /* Quest of Ki */
 	{0x7678f1d5,	207,		8},	/* Fudou Myouou Den */
 	{0x07eb2c12,	208,	   -1},	/* Street Fighter IV */
 	{0xdd8ced31,	209,	   -1},	/* Power Rangers 3 */
