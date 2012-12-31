@@ -733,10 +733,13 @@ void Mapper114_Init(CartInfo *info) {
 // ---------------------------- Mapper 115 KN-658 board ------------------------------
 
 static void M115PW(uint32 A, uint8 V) {
-	//zero 09-apr-2012 - #3515357 - changed to support Bao Qing Tian (mapper 248) which was missing BG gfx. 115 game(s?) seem still to work OK.
 	setprg8(A, V);
-	if (A == 0x8000 && EXPREGS[0] & 0x80)
-		setprg16(0x8000, (EXPREGS[0] & 0xF));
+	if (EXPREGS[0] & 0x80) {
+		if (EXPREGS[0] & 0x40)
+			setprg32(0x8000, (EXPREGS[0] & 0x0F) >> 1); // looks like another 2-in-1, Thunderbolt need it
+		else
+			setprg16(0x8000, (EXPREGS[0] & 0x0F));
+	}
 }
 
 static void M115CW(uint32 A, uint8 V) {
