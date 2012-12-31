@@ -693,15 +693,20 @@ static void KeyboardCommands ()
   //if(_keyonly(Hotkeys[HK_POWER])) {
   //    FCEUI_PowerNES();
   //}
-
-  // TODO add comment i'm on the phone
-  if (noGui == 1)
-    {
-      if (_keyonly (Hotkeys[HK_QUIT]))
+	if (_keyonly (Hotkeys[HK_QUIT]))
 	{
-	  CloseGame ();
-	}
+		if (noGui == 1)
+		{
+			CloseGame ();
+		}
+		else
+		{
+			FCEUI_Kill();
+			SDL_Quit();
+			exit(0);
+		}
     }
+	else
 
 #ifdef _S9XLUA_H
   if (_keyonly (Hotkeys[HK_LOAD_LUA]))
