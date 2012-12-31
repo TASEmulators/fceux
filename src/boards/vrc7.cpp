@@ -22,8 +22,8 @@
 
 static uint8 vrc7idx, preg[3], creg[8], mirr;
 static uint8 IRQLatch, IRQa, IRQd;
-static uint32 IRQCount, CycleCount;
-static uint8 *WRAM=NULL;
+static int32 IRQCount, CycleCount;
+static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
 
 static SFORMAT StateRegs[] =
@@ -163,14 +163,12 @@ static void VRC7Close(void)
 static void VRC7IRQHook(int a) {
 	if (IRQa) {
 		CycleCount += a * 3;
-		if (CycleCount >= 341) {
-			while(CycleCount >= 341) {
-				CycleCount -= 341;
-				IRQCount++;
-				if (IRQCount & 0x100) {
-					IRQCount = IRQLatch;
-					X6502_IRQBegin(FCEU_IQEXT);
-				}
+		while(CycleCount >= 341) {
+			CycleCount -= 341;
+			IRQCount++;
+			if (IRQCount == 0x100) {
+				IRQCount = IRQLatch;
+				X6502_IRQBegin(FCEU_IQEXT);
 			}
 		}
 	}

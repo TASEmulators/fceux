@@ -22,7 +22,7 @@
 
 static uint8 preg[2], creg[8], mirr;
 
-static uint8 *WRAM=NULL;
+static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
 
 static SFORMAT StateRegs[] =

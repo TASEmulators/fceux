@@ -28,7 +28,7 @@ static uint8 IRQx;	//autoenable
 static uint8 IRQm;	//mode
 static uint8 IRQa;
 static uint16 IRQReload, IRQCount;
-static uint8 *WRAM=NULL;
+static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
 
 static SFORMAT StateRegs[] =

@@ -24,7 +24,7 @@
 
 static uint8 prg[3], chr[8], mirr;
 static uint8 IRQLatch, IRQa, IRQd;
-static uint32 IRQCount, CycleCount;
+static int32 IRQCount, CycleCount;
 
 static SFORMAT StateRegs[] =
 {
@@ -69,10 +69,7 @@ static DECLFW(UNLVRC7Write) {
 	case 0xd000: chr[6] = V; Sync(); break;
 	case 0xd008: chr[7] = V; Sync(); break;
 	case 0xe000: mirr = V; Sync(); break;
-	case 0xe008:
-		IRQLatch = V;
-		X6502_IRQEnd(FCEU_IQEXT);
-		break;
+	case 0xe008: IRQLatch = V; X6502_IRQEnd(FCEU_IQEXT); break;
 	case 0xf000:
 		IRQa = V & 2;
 		IRQd = V & 1;
@@ -104,8 +101,8 @@ static void UNLVRC7IRQHook(int a) {
 			CycleCount -= 341;
 			IRQCount++;
 			if (IRQCount == 248) {
-				X6502_IRQBegin(FCEU_IQEXT);
 				IRQCount = IRQLatch;
+				X6502_IRQBegin(FCEU_IQEXT);
 			}
 		}
 	}

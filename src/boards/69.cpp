@@ -23,7 +23,7 @@
 static uint8 cmdreg, preg[4], creg[8], mirr;
 static uint8 IRQa;
 static int32 IRQCount;
-static uint8 *WRAM=NULL;
+static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
 
 static SFORMAT StateRegs[] =

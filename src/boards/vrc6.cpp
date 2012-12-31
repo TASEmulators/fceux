@@ -26,7 +26,9 @@
 static uint8 is26;
 static uint8 prg[2], chr[8], mirr;
 static uint8 IRQLatch, IRQa, IRQd;
-static uint32 IRQCount, CycleCount;
+static int32 IRQCount, CycleCount;
+static uint8 *WRAM = NULL;
+static uint32 WRAMSIZE;
 
 static SFORMAT StateRegs[] =
 {
@@ -42,21 +44,23 @@ static SFORMAT StateRegs[] =
 };
 
 static void(*sfun[3]) (void);
+static uint8 vpsg1[8];
 static uint8 vpsg2[4];
-static uint8 vpsg1[4];
 static int32 cvbc[3];
 static int32 vcount[3];
 static int32 dcount[2];
 
 static SFORMAT SStateRegs[] =
 {
-	{ vpsg1, 4, "PSG1" },
+	{ vpsg1, 8, "PSG1" },
 	{ vpsg2, 4, "PSG2" },
 	{ 0 }
 };
 
 static void Sync(void) {
 	uint8 i;
+	if (is26)
+		setprg8r(0x10, 0x6000, 0);
 	setprg16(0x8000, prg[0]);
 	setprg8(0xc000, prg[1]);
 	setprg8(0xe000, ~0);
@@ -103,14 +107,13 @@ static DECLFW(VRC6Write) {
 	case 0xE001: chr[5] = V; Sync(); break;
 	case 0xE002: chr[6] = V; Sync(); break;
 	case 0xE003: chr[7] = V; Sync(); break;
-	case 0xF000: IRQLatch = V; break;
+	case 0xF000: IRQLatch = V; X6502_IRQEnd(FCEU_IQEXT); break;
 	case 0xF001:
 		IRQa = V & 2;
 		IRQd = V & 1;
-		if (V & 2) {
+		if (V & 2)
 			IRQCount = IRQLatch;
-			CycleCount = 0;
-		}
+		CycleCount = 0;
 		X6502_IRQEnd(FCEU_IQEXT);
 		break;
 	case 0xF002:
@@ -121,24 +124,30 @@ static DECLFW(VRC6Write) {
 
 static void VRC6Power(void) {
 	Sync();
-	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	SetReadHandler(0x6000, 0xFFFF, CartBR);
+	SetWriteHandler(0x6000, 0x7FFF, CartBW);
 	SetWriteHandler(0x8000, 0xFFFF, VRC6Write);
 }
 
 static void VRC6IRQHook(int a) {
 	if (IRQa) {
 		CycleCount += a * 3;
-		if (CycleCount >= 341) {
-			while(CycleCount >= 341) {
-				CycleCount -= 341;
-				IRQCount++;
-				if (IRQCount == 0x100) {
-					X6502_IRQBegin(FCEU_IQEXT);
-					IRQCount = IRQLatch;
-				}
+		while(CycleCount >= 341) {
+			CycleCount -= 341;
+			IRQCount++;
+			if (IRQCount == 0x100) {
+				IRQCount = IRQLatch;
+				X6502_IRQBegin(FCEU_IQEXT);
 			}
 		}
 	}
+}
+
+static void VRC6Close(void)
+{
+	if (WRAM)
+		FCEU_gfree(WRAM);
+	WRAM = NULL;
 }
 
 static void StateRestore(int version) {
@@ -231,7 +240,7 @@ static void DoSawV(void) {
 }
 
 static INLINE void DoSQVHQ(int x) {
-	uint32 V;
+	int32 V;
 	int32 amp = ((vpsg1[x << 2] & 15) << 8) * 6 / 8;
 
 	if (vpsg1[(x << 2) | 0x2] & 0x80) {
@@ -265,7 +274,7 @@ static void DoSQV2HQ(void) {
 static void DoSawVHQ(void) {
 	static uint8 b3 = 0;
 	static int32 phaseacc = 0;
-	uint32 V;
+	int32 V;
 
 	if (vpsg2[2] & 0x80) {
 		for (V = cvbc[2]; V < SOUNDTS; V++) {
@@ -345,9 +354,20 @@ void Mapper24_Init(CartInfo *info) {
 void Mapper26_Init(CartInfo *info) {
 	is26 = 1;
 	info->Power = VRC6Power;
+	info->Close = VRC6Close;
 	MapIRQHook = VRC6IRQHook;
 	VRC6_ESI();
 	GameStateRestore = StateRestore;
+
+	WRAMSIZE = 8192;
+	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
+	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
+	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
+	if (info->battery) {
+		info->SaveGame[0] = WRAM;
+		info->SaveGameLen[0] = WRAMSIZE;
+	}
+
 	AddExState(&StateRegs, ~0, 0, 0);
 }
 

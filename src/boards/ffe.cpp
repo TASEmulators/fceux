@@ -26,7 +26,7 @@
 static uint8 preg[4], creg[8], latch, ffemode;
 static uint8 IRQa, mirr;
 static int32 IRQCount, IRQLatch;
-static uint8 *WRAM=NULL;
+static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
 
 static SFORMAT StateRegs[] =

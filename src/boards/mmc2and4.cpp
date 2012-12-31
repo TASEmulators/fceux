@@ -23,7 +23,7 @@
 
 static uint8 is10;
 static uint8 creg[4], latch0, latch1, preg, mirr;
-static uint8 *WRAM=NULL;
+static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
 
 static SFORMAT StateRegs[] =

@@ -21,7 +21,7 @@
 #include "mapinc.h"
 
 static uint8 latch;
-static uint8 *WRAM=NULL;
+static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
 static writefunc old4016;
 
