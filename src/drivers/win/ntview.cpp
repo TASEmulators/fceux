@@ -169,8 +169,11 @@ void ChangeMirroring(){
 		case NT_FOUR_SCREEN:
 			vnapage[0] = &NTARAM[0x000];
 			vnapage[1] = &NTARAM[0x400];
-			vnapage[2] = ExtraNTARAM;
-			vnapage[3] = ExtraNTARAM+0x400;
+			if(ExtraNTARAM)
+			{
+				vnapage[2] = ExtraNTARAM;
+				vnapage[3] = ExtraNTARAM + 0x400;
+			}
 			break;
 		case NT_SINGLE_SCREEN_TABLE_0:
 			vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = &NTARAM[0x000];
@@ -179,10 +182,12 @@ void ChangeMirroring(){
 			vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = &NTARAM[0x400];
 			break;
 		case NT_SINGLE_SCREEN_TABLE_2:
-			vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = ExtraNTARAM;
+			if(ExtraNTARAM)
+				vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = ExtraNTARAM;
 			break;
 		case NT_SINGLE_SCREEN_TABLE_3:
-			vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = ExtraNTARAM+0x400;
+			if(ExtraNTARAM)
+				vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = ExtraNTARAM + 0x400;
 			break;
 	}
 	return;
@@ -218,7 +223,11 @@ INLINE void DrawChr(uint8 *pbitmap,uint8 *chr,int pal){
 void DrawNameTable(int scanline, int ntnum, bool invalidateCache) {
 
 	NTCache &c = cache[ntnum];
-	uint8 *bitmap = c.bitmap, *table = vnapage[ntnum], *tablecache = c.cache;
+	uint8 *bitmap = c.bitmap, *tablecache = c.cache;
+
+	uint8 *table = vnapage[ntnum];
+	if(table == NULL)
+		table = vnapage[ntnum&1];
 
 	int a, ptable=0;
 	uint8 *pbitmap = bitmap;
