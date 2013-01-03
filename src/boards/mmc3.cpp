@@ -733,13 +733,15 @@ void Mapper114_Init(CartInfo *info) {
 // ---------------------------- Mapper 115 KN-658 board ------------------------------
 
 static void M115PW(uint32 A, uint8 V) {
-	setprg8(A, V);
 	if (EXPREGS[0] & 0x80) {
-		if (EXPREGS[0] & 0x40)
-			setprg32(0x8000, (EXPREGS[0] & 0x0F) >> 1); // looks like another 2-in-1, Thunderbolt need it
-		else
+		if (EXPREGS[0] & 0x20)
+			setprg32(0x8000, (EXPREGS[0] & 0x0F) >> 1); // real hardware tests, info 100% now lol
+		else {
 			setprg16(0x8000, (EXPREGS[0] & 0x0F));
-	}
+			setprg16(0xC000, (EXPREGS[0] & 0x0F));
+		}
+	} else
+		setprg8(A, V);
 }
 
 static void M115CW(uint32 A, uint8 V) {
@@ -747,7 +749,6 @@ static void M115CW(uint32 A, uint8 V) {
 }
 
 static DECLFW(M115Write) {
-//	FCEU_printf("%04x:%04x\n",A,V);
 	if (A == 0x5080) EXPREGS[2] = V;
 	if (A == 0x6000)
 		EXPREGS[0] = V;
