@@ -122,14 +122,25 @@ static void MooMirroring(void) {
 }
 
 static int DoMirroring(FCEUFILE *fp) {
-	uint8 t;
-	t = FCEU_fgetc(fp);
-	mirrortodo = t;
-
-	{
-		static char *stuffo[6] = { "Horizontal", "Vertical", "$2000", "$2400", "\"Four-screen\"", "Controlled by Mapper Hardware" };
-		if (t < 6)
-			FCEU_printf(" Name/Attribute Table Mirroring: %s\n", stuffo[t]);
+	uint8 t, i;
+	if(uchead.info == 1) {
+		if ((t = FCEU_fgetc(fp)) == EOF)
+			return(0);
+		mirrortodo = t;
+		{
+			static char *stuffo[6] = { "Horizontal", "Vertical", "$2000", "$2400", "\"Four-screen\"", "Controlled by Mapper Hardware" };
+			if (t < 6)
+				FCEU_printf(" Name/Attribute Table Mirroring: %s\n", stuffo[t]);
+		}
+	} else {
+		FCEU_printf(" Incorrect Mirroring Chunk Size (%d). Data is:", uchead.info);
+		for(i = 0; i < uchead.info; i++) {
+			if ((t = FCEU_fgetc(fp)) == EOF)
+				return(0);
+			FCEU_printf(" %02x", t);
+		}
+		FCEU_printf("\n Default Name/Attribute Table Mirroring: Horizontal\n", uchead.info);
+		mirrortodo = 0;
 	}
 	return(1);
 }
@@ -188,19 +199,29 @@ static int DINF(FCEUFILE *fp) {
 }
 
 static int CTRL(FCEUFILE *fp) {
-	int t;
+	int t, i;
+	if(uchead.info == 1) {
+		if ((t = FCEU_fgetc(fp)) == EOF)
+			return(0);
+		/* The information stored in this byte isn't very helpful, but it's
+		better than nothing...maybe.
+		*/
 
-	if ((t = FCEU_fgetc(fp)) == EOF)
-		return(0);
-	/* The information stored in this byte isn't very helpful, but it's
-	better than nothing...maybe.
-	*/
-
-	if (t & 1) GameInfo->input[0] = GameInfo->input[1] = SI_GAMEPAD;
-	else GameInfo->input[0] = GameInfo->input[1] = SI_NONE;
-
-	if (t & 2) GameInfo->input[1] = SI_ZAPPER;
-
+		if (t & 1)
+			GameInfo->input[0] = GameInfo->input[1] = SI_GAMEPAD;
+		else
+			GameInfo->input[0] = GameInfo->input[1] = SI_NONE;
+		if (t & 2)
+			GameInfo->input[1] = SI_ZAPPER;
+	} else {
+		FCEU_printf(" Incorrect Control Chunk Size (%d). Data is:", uchead.info);
+		for(i = 0; i < uchead.info; i++) {
+			t = FCEU_fgetc(fp);
+			FCEU_printf(" %02x", t);
+		}
+		FCEU_printf("\n");
+		GameInfo->input[0] = GameInfo->input[1] = SI_GAMEPAD;
+	}
 	return(1);
 }
 
