@@ -14,13 +14,13 @@
 
 enum
 {
-	SAVECOMPACT_GREENZONE_ALL,
-	SAVECOMPACT_GREENZONE_16TH,
-	SAVECOMPACT_GREENZONE_MARKED,
-	SAVECOMPACT_GREENZONE_NO,
+	SAVE_GREENZONE_ALL,
+	SAVE_GREENZONE_16TH,
+	SAVE_GREENZONE_MARKED,
+	SAVE_GREENZONE_NO,
 
 	// ...
-	SAVECOMPACT_GREENZONE_TOTAL
+	SAVE_GREENZONE_TOTAL
 };
 
 #define AUTHOR_MAX_LEN 100
@@ -63,9 +63,15 @@ public:
 	bool adjust_input_due_to_lag;
 	int greenzone_capacity;
 	int undo_levels;
-	int autosave_period;
 	int last_export_type;
 	bool last_export_subtitles;
+	bool save_binary;
+	bool save_markers;
+	bool save_bookmarks;
+	bool save_history;
+	bool save_piano_roll;
+	bool save_selection;
+	int save_greenzone;
 	bool savecompact_binary;
 	bool savecompact_markers;
 	bool savecompact_bookmarks;
@@ -78,7 +84,8 @@ public:
 	bool enable_auto_function;
 	bool draw_input;
 	bool enable_greenzoning;
-	bool compact_quicksaving;
+	bool enable_autosave;
+	int autosave_period;
 	bool silent_autosave;
 	bool autopause_at_finish;
 	bool tooltips;

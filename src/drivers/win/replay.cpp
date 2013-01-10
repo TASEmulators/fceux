@@ -747,7 +747,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			HDC hdcStatic = (HDC)wParam;
 			char szMd5Text[35];
 			GetDlgItemText(hwndDlg, IDC_LABEL_NEWPPUUSED, szMd5Text, 35);
-			bool want_newppu = (bool)strcmp(szMd5Text, "Off");
+			bool want_newppu = (strcmp(szMd5Text, "Off") != 0);
 			extern int newppu;
 			if ((want_newppu && newppu) || (!want_newppu && !newppu))
 				SetTextColor(hdcStatic, RGB(0,0,0));		// use black color for a match

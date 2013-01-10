@@ -60,12 +60,12 @@ void TASEDITOR_PROJECT::reset()
 void TASEDITOR_PROJECT::update()
 {
 	// if it's time to autosave - pop Save As dialog
-	if (changed && taseditor_window.TASEditor_focus && taseditor_config.autosave_period && !projectFile.empty() && clock() >= next_save_shedule && piano_roll.drag_mode == DRAG_MODE_NONE)
+	if (changed && taseditor_window.TASEditor_focus && taseditor_config.enable_autosave && !projectFile.empty() && clock() >= next_save_shedule && piano_roll.drag_mode == DRAG_MODE_NONE)
 	{
 		if (taseditor_config.silent_autosave)
-			SaveProject(taseditor_config.compact_quicksaving);
+			SaveProject();
 		else
-			SaveProjectAs(taseditor_config.compact_quicksaving);
+			SaveProjectAs();
 		// in case user pressed Cancel, postpone saving to next time
 		SheduleNextAutosave();
 	}
@@ -134,7 +134,7 @@ bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool 
 		unsigned int saved_stuff_map = 0;
 		if (save_markers) saved_stuff_map |= MARKERS_SAVED;
 		if (save_bookmarks) saved_stuff_map |= BOOKMARKS_SAVED;
-		if (save_greenzone != SAVECOMPACT_GREENZONE_NO) saved_stuff_map |= GREENZONE_SAVED;
+		if (save_greenzone != SAVE_GREENZONE_NO) saved_stuff_map |= GREENZONE_SAVED;
 		if (save_history) saved_stuff_map |= HISTORY_SAVED;
 		if (save_piano_roll) saved_stuff_map |= PIANO_ROLL_SAVED;
 		if (save_selection) saved_stuff_map |= SELECTION_SAVED;
@@ -385,7 +385,6 @@ bool TASEDITOR_PROJECT::GetProjectChanged()
 
 void TASEDITOR_PROJECT::SheduleNextAutosave()
 {
-	if (taseditor_config.autosave_period)
-		next_save_shedule = clock() + taseditor_config.autosave_period * AUTOSAVE_PERIOD_SCALE;
+	next_save_shedule = clock() + taseditor_config.autosave_period * AUTOSAVE_PERIOD_SCALE;
 }
 

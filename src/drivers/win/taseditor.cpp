@@ -451,7 +451,7 @@ bool SaveProjectAs(bool save_compact)
 		if (save_compact)
 			project.save(nameo, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_piano_roll, taseditor_config.savecompact_selection);
 		else
-			project.save();
+			project.save(nameo, taseditor_config.save_binary, taseditor_config.save_markers, taseditor_config.save_bookmarks, taseditor_config.save_greenzone, taseditor_config.save_history, taseditor_config.save_piano_roll, taseditor_config.save_selection);
 		taseditor_window.UpdateRecentProjectsArray(nameo);
 		// saved successfully - remove * mark from caption
 		taseditor_window.UpdateCaption();
@@ -468,21 +468,21 @@ bool SaveProject(bool save_compact)
 		if (save_compact)
 			project.save(0, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_piano_roll, taseditor_config.savecompact_selection);
 		else
-			project.save();
+			project.save(0, taseditor_config.save_binary, taseditor_config.save_markers, taseditor_config.save_bookmarks, taseditor_config.save_greenzone, taseditor_config.save_history, taseditor_config.save_piano_roll, taseditor_config.save_selection);
 		taseditor_window.UpdateCaption();
 	}
 	return true;
 }
-
+// --------------------------------------------------
 void SaveCompact_SetDialogItems(HWND hwndDlg)
 {
-	CheckDlgButton(hwndDlg, IDC_CHECK_BINARY, taseditor_config.savecompact_binary?MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(hwndDlg, IDC_CHECK_MARKERS, taseditor_config.savecompact_markers?MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(hwndDlg, IDC_CHECK_BOOKMARKS, taseditor_config.savecompact_bookmarks?MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, taseditor_config.savecompact_history?MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(hwndDlg, IDC_CHECK_PIANO_ROLL, taseditor_config.savecompact_piano_roll?MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, taseditor_config.savecompact_selection?MF_CHECKED : MF_UNCHECKED);
-	CheckRadioButton(hwndDlg, IDC_RADIO1, IDC_RADIO4, IDC_RADIO1 + (taseditor_config.savecompact_greenzone % SAVECOMPACT_GREENZONE_TOTAL));
+	CheckDlgButton(hwndDlg, IDC_CHECK_BINARY, taseditor_config.savecompact_binary?BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_MARKERS, taseditor_config.savecompact_markers?BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_BOOKMARKS, taseditor_config.savecompact_bookmarks?BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, taseditor_config.savecompact_history?BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_PIANO_ROLL, taseditor_config.savecompact_piano_roll?BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, taseditor_config.savecompact_selection?BST_CHECKED : BST_UNCHECKED);
+	CheckRadioButton(hwndDlg, IDC_RADIO1, IDC_RADIO4, IDC_RADIO1 + (taseditor_config.savecompact_greenzone % SAVE_GREENZONE_TOTAL));
 }
 void SaveCompact_GetDialogItems(HWND hwndDlg)
 {
@@ -493,15 +493,14 @@ void SaveCompact_GetDialogItems(HWND hwndDlg)
 	taseditor_config.savecompact_piano_roll = (SendDlgItemMessage(hwndDlg, IDC_CHECK_PIANO_ROLL, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	taseditor_config.savecompact_selection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	if (SendDlgItemMessage(hwndDlg, IDC_RADIO1, BM_GETCHECK, 0, 0) == BST_CHECKED)
-		taseditor_config.savecompact_greenzone = SAVECOMPACT_GREENZONE_ALL;
+		taseditor_config.savecompact_greenzone = SAVE_GREENZONE_ALL;
 	else if (SendDlgItemMessage(hwndDlg, IDC_RADIO2, BM_GETCHECK, 0, 0) == BST_CHECKED)
-		taseditor_config.savecompact_greenzone = SAVECOMPACT_GREENZONE_16TH;
+		taseditor_config.savecompact_greenzone = SAVE_GREENZONE_16TH;
 	else if (SendDlgItemMessage(hwndDlg, IDC_RADIO3, BM_GETCHECK, 0, 0) == BST_CHECKED)
-		taseditor_config.savecompact_greenzone = SAVECOMPACT_GREENZONE_MARKED;
+		taseditor_config.savecompact_greenzone = SAVE_GREENZONE_MARKED;
 	else
-		taseditor_config.savecompact_greenzone = SAVECOMPACT_GREENZONE_NO;
+		taseditor_config.savecompact_greenzone = SAVE_GREENZONE_NO;
 }
-
 BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -536,7 +535,6 @@ BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM 
 	}
 	return FALSE; 
 }
-
 void SaveCompact()
 {
 	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_SAVECOMPACT), taseditor_window.hwndTasEditor, SaveCompactProc) > 0)
@@ -575,7 +573,7 @@ void SaveCompact()
 		}
 	}
 }
-
+// --------------------------------------------------
 // returns false if user doesn't want to exit
 bool AskSaveProject()
 {
@@ -653,6 +651,71 @@ BOOL CALLBACK AboutProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				case IDCANCEL:
 					EndDialog(hWnd, 0);
+					return TRUE;
+			}
+			break;
+		}
+	}
+	return FALSE; 
+}
+
+BOOL CALLBACK SavingOptionsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+		case WM_INITDIALOG:
+		{
+			CheckDlgButton(hwndDlg, IDC_AUTOSAVE_PROJECT, taseditor_config.enable_autosave?BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_SILENT_AUTOSAVE, taseditor_config.silent_autosave?BST_CHECKED : BST_UNCHECKED);
+			char buf[16] = {0};
+			sprintf(buf, "%u", taseditor_config.autosave_period);
+			SetDlgItemText(hwndDlg, IDC_AUTOSAVE_PERIOD, buf);
+			CheckDlgButton(hwndDlg, IDC_CHECK_BINARY, taseditor_config.save_binary?BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_MARKERS, taseditor_config.save_markers?BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_BOOKMARKS, taseditor_config.save_bookmarks?BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, taseditor_config.save_history?BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_PIANO_ROLL, taseditor_config.save_piano_roll?BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, taseditor_config.save_selection?BST_CHECKED : BST_UNCHECKED);
+			CheckRadioButton(hwndDlg, IDC_RADIO1, IDC_RADIO4, IDC_RADIO1 + (taseditor_config.save_greenzone % SAVE_GREENZONE_TOTAL));
+			return TRUE;
+		}
+		case WM_COMMAND:
+		{
+			switch (LOWORD(wParam))
+			{
+				case IDOK:
+				{
+					taseditor_config.enable_autosave = (SendDlgItemMessage(hwndDlg, IDC_AUTOSAVE_PROJECT, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					taseditor_config.silent_autosave = (SendDlgItemMessage(hwndDlg, IDC_SILENT_AUTOSAVE, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					char buf[16] = {0};
+					GetDlgItemText(hwndDlg, IDC_AUTOSAVE_PERIOD, buf, 16 * sizeof(char));
+					int new_period = taseditor_config.autosave_period;
+					sscanf(buf, "%u", &new_period);
+					if (new_period < AUTOSAVE_PERIOD_MIN)
+						new_period = AUTOSAVE_PERIOD_MIN;
+					else if (new_period > AUTOSAVE_PERIOD_MAX)
+						new_period = AUTOSAVE_PERIOD_MAX;
+					taseditor_config.autosave_period = new_period;
+					project.SheduleNextAutosave();	
+					taseditor_config.save_binary = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BINARY, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					taseditor_config.save_markers = (SendDlgItemMessage(hwndDlg, IDC_CHECK_MARKERS, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					taseditor_config.save_bookmarks = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BOOKMARKS, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					taseditor_config.save_history = (SendDlgItemMessage(hwndDlg, IDC_CHECK_HISTORY, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					taseditor_config.save_piano_roll = (SendDlgItemMessage(hwndDlg, IDC_CHECK_PIANO_ROLL, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					taseditor_config.save_selection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					if (SendDlgItemMessage(hwndDlg, IDC_RADIO1, BM_GETCHECK, 0, 0) == BST_CHECKED)
+						taseditor_config.save_greenzone = SAVE_GREENZONE_ALL;
+					else if (SendDlgItemMessage(hwndDlg, IDC_RADIO2, BM_GETCHECK, 0, 0) == BST_CHECKED)
+						taseditor_config.save_greenzone = SAVE_GREENZONE_16TH;
+					else if (SendDlgItemMessage(hwndDlg, IDC_RADIO3, BM_GETCHECK, 0, 0) == BST_CHECKED)
+						taseditor_config.save_greenzone = SAVE_GREENZONE_MARKED;
+					else
+						taseditor_config.save_greenzone = SAVE_GREENZONE_NO;
+					EndDialog(hwndDlg, 1);
+					return TRUE;
+				}
+				case IDCANCEL:
+					EndDialog(hwndDlg, 0);
 					return TRUE;
 			}
 			break;

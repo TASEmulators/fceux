@@ -226,7 +226,7 @@ void GREENZONE::UnGreenzoneSelectedFrames()
 
 void GREENZONE::save(EMUFILE *os, int save_type)
 {
-	if (save_type != SAVECOMPACT_GREENZONE_NO)
+	if (save_type != SAVE_GREENZONE_NO)
 	{
 		CollectCurrentState();		// in case the project is being saved before the greenzone.update() was called within current frame
 		RunGreenzoneCleaning();
@@ -246,7 +246,7 @@ void GREENZONE::save(EMUFILE *os, int save_type)
 
 	switch (save_type)
 	{
-		case SAVECOMPACT_GREENZONE_ALL:
+		case SAVE_GREENZONE_ALL:
 		{
 			// write savestates
 			for (frame = 0; frame < greenZoneCount; ++frame)
@@ -268,7 +268,7 @@ void GREENZONE::save(EMUFILE *os, int save_type)
 			write32le(-1, os);
 			break;
 		}
-		case SAVECOMPACT_GREENZONE_16TH:
+		case SAVE_GREENZONE_16TH:
 		{
 			// write savestates
 			for (frame = 0; frame < greenZoneCount; ++frame)
@@ -293,7 +293,7 @@ void GREENZONE::save(EMUFILE *os, int save_type)
 			write32le(-1, os);
 			break;
 		}
-		case SAVECOMPACT_GREENZONE_MARKED:
+		case SAVE_GREENZONE_MARKED:
 		{
 			// write savestates
 			for (frame = 0; frame < greenZoneCount; ++frame)
@@ -318,7 +318,7 @@ void GREENZONE::save(EMUFILE *os, int save_type)
 			write32le(-1, os);
 			break;
 		}
-		case SAVECOMPACT_GREENZONE_NO:
+		case SAVE_GREENZONE_NO:
 		{
 			// write "GREENZONX" string
 			os->fwrite(greenzone_skipsave_id, GREENZONE_ID_LEN);

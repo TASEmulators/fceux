@@ -351,6 +351,7 @@
 #define IDB_BITMAP_SELECTED17           286
 #define IDB_BITMAP_SELECTED18           287
 #define IDB_BITMAP_SELECTED19           288
+#define IDD_TASEDITOR_SAVINGOPTIONS     289
 #define MENU_HIDE_MENU                  300
 #define COMBO_FILTER                    300
 #define IDC_EDIT_AUTHORINFO             300
@@ -556,6 +557,7 @@
 #define IDC_EDIT1                       1147
 #define IDC_SELECTION_MARKER_EDIT       1147
 #define IDC_NOTE_TO_FIND                1147
+#define IDC_AUTOSAVE_PERIOD             1147
 #define IDC_BUTTON9                     1148
 #define TASEDITOR_FIND_NEXT_SIMILAR_MARKER 1148
 #define IDC_HISTORYLIST                 1149
@@ -714,6 +716,9 @@
 #define IDC_HISTORY_BOX                 1279
 #define IDC_TASEDITOR_NAME              1280
 #define ID_CANCEL                       1281
+#define IDC_AUTOSAVE_PROJECT            1282
+#define IDC_AUTOSAVE_PROJECT2           1283
+#define IDC_SILENT_AUTOSAVE             1283
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1154,6 +1159,7 @@
 #define ID_ENABLE_AUTO                  40578
 #define ID_ENABLE_AUTORESUME            40579
 #define ID_CONFIG_COMPACTQUICKSAVING    40580
+#define ID_CONFIG_SAVING_OPTIONS        40581
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1163,9 +1169,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        289
-#define _APS_NEXT_COMMAND_VALUE         40581
-#define _APS_NEXT_CONTROL_VALUE         1282
+#define _APS_NEXT_RESOURCE_VALUE        290
+#define _APS_NEXT_COMMAND_VALUE         40582
+#define _APS_NEXT_CONTROL_VALUE         1283
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
