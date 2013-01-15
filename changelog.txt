@@ -1,3 +1,12 @@
+15-Jan-2013 - AnS - Lua: removed "shadow pixels" from gui.text(), made gui.parsecolor() function available for users
+10-Jan-2013 - AnS - Taseditor: Config->Project file saving options
+01-Jan-2013 - zeromus - NameTableViewer: do something reasonable if a 4-screen, table2, table3 mirror mode is chosen when the corresponding nametable ram is not available on the cart (instead of crashing)
+31-Dec-2012 - CaH4e3 - fixed mappers 24, 26, 115
+29-Dec-2012 - AnS - Taseditor: Changed "Compact save" dialog, added 4 options of Greenzone saving
+29-Dec-2012 - AnS - Cheats: added "Add from CHT file..." button
+29-Dec-2012 - AnS - win32: force the entire client area to be invalidated at the beginning of WM_PAINT; this fixes the rare bug with DIRECTDRAWCLIPPER sometimes calculating wrong region (was noticed on some video cards)
+27-Dec-2012 - AnS - Play movie dialog shows New PPU in red if the required setting does not match
+27-Dec-2012 - thezlomus - RAM Search: added "Search ROM" checkbox
 19-Dec-2012 - AnS - win32: remodel "Video config" dialog
 19-Dec-2012 - AnS - win32: fixed restoring maximized window after switching from fullscreen
 18-Dec-2012 - CaH4e3 - fixed mapper 018 and 198

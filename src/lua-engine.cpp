@@ -3781,7 +3781,7 @@ static void LuaDisplayString (const char *string, int y, int x, uint32 color, ui
 
 static uint8 FCEUFont[792] =
 {
-	6,  0,  0,  0,  0,  0,  0,  0,
+	6,  0,  0,  0,  0,  0,  0,  0,	// 0x20 - Spacebar
 	3, 64, 64, 64, 64, 64,  0, 64,
 	5, 80, 80, 80,  0,  0,  0,  0,
 	6, 80, 80,248, 80,248, 80, 80,
@@ -3797,7 +3797,7 @@ static uint8 FCEUFont[792] =
 	5,  0,  0,  0,240,  0,  0,  0,
 	3,  0,  0,  0,  0,  0,  0, 64,
 	5, 16, 16, 32, 32, 32, 64, 64,
-	6,112,136,136,136,136,136,112, //0
+	6,112,136,136,136,136,136,112,	// 0x30 - 0
 	6, 32, 96, 32, 32, 32, 32, 32,
 	6,112,136,  8, 48, 64,128,248,
 	6,112,136,  8, 48,  8,136,112,
@@ -3812,9 +3812,9 @@ static uint8 FCEUFont[792] =
 	4,  0, 32, 64,128, 64, 32,  0,
 	5,  0,  0,240,  0,240,  0,  0,
 	4,  0,128, 64, 32, 64,128,  0,
-	5,112,136,  8, 16, 32,  0, 32,
-	6,112,136,136,184,176,128,112,
-	6,112,136,136,248,136,136,136, //A
+	6,112,136,  8, 16, 32,  0, 32,	// 0x3F - ?
+	6,112,136,136,184,176,128,112,	// 0x40 - @
+	6,112,136,136,248,136,136,136,	// 0x41 - A
 	6,240,136,136,240,136,136,240,
 	6,112,136,128,128,128,136,112,
 	6,224,144,136,136,136,144,224,
@@ -3846,7 +3846,7 @@ static uint8 FCEUFont[792] =
 	4, 64,160,  0,  0,  0,  0,  0,
 	6,  0,  0,  0,  0,  0,  0,248,
 	3,128, 64,  0,  0,  0,  0,  0,
-	5,  0,  0, 96, 16,112,144,112, //a
+	5,  0,  0, 96, 16,112,144,112,	// 0x61 - a
 	5,128,128,224,144,144,144,224,
 	5,  0,  0,112,128,128,128,112,
 	5, 16, 16,112,144,144,144,112,
@@ -3943,11 +3943,13 @@ void LuaDrawTextTransWH(const char *str, size_t l, int &x, int y, uint32 color, 
 					gui_drawpixel_internal(x+x2, y+y2, backcolor);
 			}
 		}
+		/*
 		// shadows :P
 		if (diffy >= 7) for(int x2 = 0; x2 < wid; x2++)
 			gui_drawpixel_internal(x+x2, y+7, LUA_BUILD_PIXEL(defaultAlpha, 0, 0, 0));
 		if (*str == '\0' || *str == '\n') for(int y2 = 0; y2 < diffy; y2++)
 			gui_drawpixel_internal(x+wid, y+y2, LUA_BUILD_PIXEL(defaultAlpha, 0, 0, 0));
+		*/
 
 		x += wid;
 		len--;
@@ -5340,6 +5342,8 @@ static const struct luaL_reg guilib[] = {
 	{"line", gui_line},
 	{"box", gui_box},
 	{"text", gui_text},
+
+	{"parsecolor", gui_parsecolor},
 
 	{"savescreenshot",   gui_savescreenshot},
 	{"savescreenshotas", gui_savescreenshotas},
