@@ -633,32 +633,36 @@ bool inDebugger = false;
 void FCEUD_DebugBreakpoint(int bp_num)
 {
 	// log the Breakpoint Hit into Trace Logger log if needed
-	if (logging && (logging_options & LOG_MESSAGES))
+	if (logging)
 	{
-		char str_temp[500];
-		if (bp_num >= 0)
+		log_old_emu_paused = false;		// force Trace Logger update
+		if (logging_options & LOG_MESSAGES)
 		{
-			// normal breakpoint
-			sprintf(str_temp, "Breakpoint %u Hit at $%04X: ", bp_num, X.PC);
-			strcat(str_temp, BreakToText(bp_num));
-			//watchpoint[num].condText
-			OutputLogLine(str_temp);
-		} else if (bp_num == BREAK_TYPE_BADOP)
-		{
-			sprintf(str_temp, "Bad Opcode Breakpoint Hit at $%04X", X.PC);
-			OutputLogLine(str_temp);
-		} else if (bp_num == BREAK_TYPE_CYCLES_EXCEED)
-		{
-			sprintf(str_temp, "Breakpoint Hit at $%04X: cycles count %lu exceeds %lu", X.PC, (long)(timestampbase + timestamp - total_cycles_base), (long)break_cycles_limit);
-			OutputLogLine(str_temp);
-		} else if (bp_num == BREAK_TYPE_INSTRUCTIONS_EXCEED)
-		{
-			sprintf(str_temp, "Breakpoint Hit at $%04X: instructions count %lu exceeds %lu", X.PC, (long)total_instructions, (long)break_instructions_limit);
-			OutputLogLine(str_temp);
+			char str_temp[500];
+			if (bp_num >= 0)
+			{
+				// normal breakpoint
+				sprintf(str_temp, "Breakpoint %u Hit at $%04X: ", bp_num, X.PC);
+				strcat(str_temp, BreakToText(bp_num));
+				//watchpoint[num].condText
+				OutputLogLine(str_temp);
+			} else if (bp_num == BREAK_TYPE_BADOP)
+			{
+				sprintf(str_temp, "Bad Opcode Breakpoint Hit at $%04X", X.PC);
+				OutputLogLine(str_temp);
+			} else if (bp_num == BREAK_TYPE_CYCLES_EXCEED)
+			{
+				sprintf(str_temp, "Breakpoint Hit at $%04X: cycles count %lu exceeds %lu", X.PC, (long)(timestampbase + timestamp - total_cycles_base), (long)break_cycles_limit);
+				OutputLogLine(str_temp);
+			} else if (bp_num == BREAK_TYPE_INSTRUCTIONS_EXCEED)
+			{
+				sprintf(str_temp, "Breakpoint Hit at $%04X: instructions count %lu exceeds %lu", X.PC, (long)total_instructions, (long)break_instructions_limit);
+				OutputLogLine(str_temp);
+			}
 		}
 	}
 
-	UpdateDebugger(true);
+	DoDebug(0);
 	UpdateOtherDebuggingDialogs(); // Keeps the debugging windows updating smoothly when stepping
 
 	if (bp_num >= 0)

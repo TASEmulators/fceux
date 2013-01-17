@@ -455,23 +455,22 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		}
 	}
 
-	if (size == 1 && GetMem(addr - 1) == 0x60)
+	if (size == 1 && GetMem(addr) == 0x60)
 	{
 		// special case: an RTS opcode
 		// add "----------" to emphasize the end of subroutine
 		strcat(str_disassembly, " ");
-		for (int i = strlen(str_disassembly); i < (LOG_DISASSEMBLY_MAX_LEN - 1); ++i)
+		int i = strlen(str_disassembly);
+		for (; i < (LOG_DISASSEMBLY_MAX_LEN - 2); ++i)
 			str_disassembly[i] = '-';
-		str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
-	} else
+		str_disassembly[i] = 0;
+	}
+	// stretch the disassembly string out if we have to output other stuff.
+	if ((logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)) && !(logging_options & LOG_TO_THE_LEFT))
 	{
-		// stretch the disassembly string out if we have to output other stuff.
-		if ((logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)) && !(logging_options & LOG_TO_THE_LEFT))
-		{
-			for (int i = strlen(str_disassembly); i < (LOG_DISASSEMBLY_MAX_LEN - 1); ++i)
-				str_disassembly[i] = ' ';
-			str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
-		}
+		for (int i = strlen(str_disassembly); i < (LOG_DISASSEMBLY_MAX_LEN - 1); ++i)
+			str_disassembly[i] = ' ';
+		str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
 	}
 
 	// Start filling the str_temp line: Frame number, AXYS state, Processor status, Tabs, Address, Data, Disassembly
