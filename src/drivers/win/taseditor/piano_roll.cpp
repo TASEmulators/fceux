@@ -541,12 +541,7 @@ void PIANO_ROLL::update()
 	{
 		case DRAG_MODE_PLAYBACK:
 		{
-			if (playback.GetPauseFrame() < 0 || can_drag_when_seeking)
-			{
-				DragPlaybackCursor();
-				// after first seeking is finished (if there was any seeking), it now becomes possible to drag when seeking
-				can_drag_when_seeking = true;
-			}
+			DragPlaybackCursor();
 			break;
 		}
 		case DRAG_MODE_MARKER:
@@ -943,9 +938,20 @@ void PIANO_ROLL::FollowPlayback()
 {
 	CenterListAt(currFrameCounter);
 }
-void PIANO_ROLL::FollowPlaybackIfNeeded()
+void PIANO_ROLL::FollowPlaybackIfNeeded(bool follow_pauseframe)
 {
-	if (taseditor_config.follow_playback) ListView_EnsureVisible(hwndList,currFrameCounter,FALSE);
+	if (taseditor_config.follow_playback)
+	{
+		if (playback.GetPauseFrame() < 0)
+			ListView_EnsureVisible(hwndList, currFrameCounter, FALSE);
+		else if (follow_pauseframe)
+			ListView_EnsureVisible(hwndList, playback.GetPauseFrame(), FALSE);
+	}
+}
+void PIANO_ROLL::FollowPauseframe()
+{
+	if (playback.GetPauseFrame() >= 0)
+		CenterListAt(playback.GetPauseFrame());
 }
 void PIANO_ROLL::FollowUndo()
 {
@@ -985,11 +991,6 @@ void PIANO_ROLL::FollowSelection()
 		// oh well, just center at selection_start
 		CenterListAt(selection_start);
 	}
-}
-void PIANO_ROLL::FollowPauseframe()
-{
-	if (playback.GetPauseFrame() >= 0)
-		CenterListAt(playback.GetPauseFrame());
 }
 void PIANO_ROLL::FollowMarker(int marker_id)
 {
@@ -1057,7 +1058,6 @@ void PIANO_ROLL::StartDraggingPlaybackCursor()
 	if (drag_mode == DRAG_MODE_NONE)
 	{
 		drag_mode = DRAG_MODE_PLAYBACK;
-		can_drag_when_seeking = false;
 		// call it once
 		DragPlaybackCursor();
 	}

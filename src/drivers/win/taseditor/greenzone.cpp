@@ -581,14 +581,14 @@ void GREENZONE::InvalidateAndCheck(int after)
 			{
 				if (playback.GetPauseFrame() >= 0 && !FCEUI_EmulationPaused())
 				{
-					// emulator was running, so continue seeking
-					playback.jump(playback.GetPauseFrame());
+					// emulator was running, so continue seeking, but don't follow the Playback cursor
+					playback.jump(playback.GetPauseFrame(), false, true, false);
 				} else
 				{
 					playback.SetLostPosition(currFrameCounter);
 					if (taseditor_config.restore_position)
-						// start seeking to the green arrow
-						playback.jump(playback.GetLostPosition());
+						// start seeking to the green arrow, but don't follow the Playback cursor
+						playback.jump(playback.GetLostPosition(), false, true, false);
 					else
 						playback.EnsurePlaybackIsInsideGreenzone();
 				}

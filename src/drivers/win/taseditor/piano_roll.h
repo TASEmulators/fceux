@@ -168,10 +168,10 @@ public:
 	bool CheckItemVisible(int frame);
 
 	void FollowPlayback();
-	void FollowPlaybackIfNeeded();
+	void FollowPlaybackIfNeeded(bool follow_pauseframe = true);
+	void FollowPauseframe();
 	void FollowUndo();
 	void FollowSelection();
-	void FollowPauseframe();
 	void FollowMarker(int marker_id);
 	void EnsureVisible(int row_index);
 
@@ -204,7 +204,6 @@ public:
 
 	unsigned int drag_mode;
 	bool rbutton_drag_mode;
-	bool can_drag_when_seeking;
 	int marker_drag_box_dx, marker_drag_box_dy;
 	int marker_drag_box_x, marker_drag_box_y;
 	int marker_drag_countdown;

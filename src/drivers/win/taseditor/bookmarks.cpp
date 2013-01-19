@@ -392,7 +392,6 @@ void BOOKMARKS::jump(int slot)
 	{
 		int frame = bookmarks_array[slot].snapshot.keyframe;
 		playback.jump(frame);
-		piano_roll.FollowPauseframe();
 		bookmarks_array[slot].jumped();
 	}
 }

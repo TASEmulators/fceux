@@ -86,6 +86,7 @@ void PLAYBACK::reset()
 }
 void PLAYBACK::update()
 {
+	// controls:
 	// update < and > buttons
 	old_rewind_button_state = rewind_button_state;
 	rewind_button_state = ((Button_GetState(hwndRewind) & BST_PUSHED) != 0 || Taseditor_rewind_now);
@@ -141,6 +142,38 @@ void PLAYBACK::update()
 		}
 	}
 
+	// update the Playback cursor
+	if (currFrameCounter != lastCursor)
+	{
+		// update gfx of the old and new rows
+		piano_roll.RedrawRow(lastCursor);
+		bookmarks.RedrawChangedBookmarks(lastCursor);
+		piano_roll.RedrawRow(currFrameCounter);
+		bookmarks.RedrawChangedBookmarks(currFrameCounter);
+		lastCursor = currFrameCounter;
+		// follow the Playback cursor, but in case of seeking don't follow it
+		piano_roll.FollowPlaybackIfNeeded(false);
+		// enforce redrawing now
+		UpdateWindow(piano_roll.hwndList);
+		// lazy update of "Playback's Marker text"
+		int current_marker = markers_manager.GetMarkerUp(currFrameCounter);
+		if (shown_marker != current_marker)
+		{
+			markers_manager.UpdateMarkerNote();
+			shown_marker = current_marker;
+			RedrawMarker();
+			must_find_current_marker = false;
+		}
+	}
+	// [non-lazy] update "Playback's Marker text" if needed
+	if (must_find_current_marker)
+	{
+		markers_manager.UpdateMarkerNote();
+		shown_marker = markers_manager.GetMarkerUp(currFrameCounter);
+		RedrawMarker();
+		must_find_current_marker = false;
+	}
+
 	// pause when seeking hits pause_frame
 	if (pause_frame && currFrameCounter + 1 >= pause_frame)
 		SeekingStop();
@@ -193,7 +226,7 @@ void PLAYBACK::update()
 		}
 	}
 
-	// prepare to stop at the end of the movie if user unpauses emulator
+	// prepare to stop at the end of the movie in case user unpauses emulator
 	if (emu_paused)
 	{
 		if (currFrameCounter < currMovieData.getNumRecords() - 1)
@@ -202,41 +235,9 @@ void PLAYBACK::update()
 			must_autopause_at_the_end = false;
 	}
 
-	// update the Playback cursor
-	if (currFrameCounter != lastCursor)
-	{
-		// update gfx of the old and new rows
-		piano_roll.RedrawRow(lastCursor);
-		bookmarks.RedrawChangedBookmarks(lastCursor);
-		piano_roll.RedrawRow(currFrameCounter);
-		bookmarks.RedrawChangedBookmarks(currFrameCounter);
-		lastCursor = currFrameCounter;
-		piano_roll.FollowPlaybackIfNeeded();
-		// enforce redrawing now
-		UpdateWindow(piano_roll.hwndList);
-		// lazy update of "Playback's Marker text"
-		int current_marker = markers_manager.GetMarkerUp(currFrameCounter);
-		if (shown_marker != current_marker)
-		{
-			markers_manager.UpdateMarkerNote();
-			shown_marker = current_marker;
-			RedrawMarker();
-			must_find_current_marker = false;
-		}
-	}
-
-	// [non-lazy] update "Playback's Marker text" if needed
-	if (must_find_current_marker)
-	{
-		markers_manager.UpdateMarkerNote();
-		shown_marker = markers_manager.GetMarkerUp(currFrameCounter);
-		RedrawMarker();
-		must_find_current_marker = false;
-	}
-
-	// This logic is very important for adequate "green arrow" and "Restore position"
+	// this little statement is very important for adequate work of the "green arrow" and "Restore last position"
 	if (!emu_paused)
-		// when emulating, lost_position_frame becomes unstable
+		// when emulating, lost_position_frame becomes unstable (which means that it's probably not equal to the end of current segment anymore)
 		lost_position_is_stable = false;
 }
 
@@ -315,7 +316,7 @@ void PLAYBACK::MiddleButtonClick()
 					jump(selection_beginning);
 					SeekingStart(saved_currFrameCounter);
 				}
-			} else if (GetLostPosition() >= greenzone.GetSize())
+			} else if (GetPauseFrame() < 0 && GetLostPosition() >= greenzone.GetSize())
 			{
 				RestorePosition();
 			} else
@@ -355,14 +356,16 @@ void PLAYBACK::RewindFrame()
 		jump(currFrameCounter - 1);
 	else
 		// cursor is at frame 0 - can't rewind, but still must make cursor visible if needed
-		piano_roll.FollowPlaybackIfNeeded();
-	if (!pause_frame) PauseEmulation();
+		piano_roll.FollowPlaybackIfNeeded(true);
+	if (!pause_frame)
+		PauseEmulation();
 }
 void PLAYBACK::ForwardFrame()
 {
 	if (pause_frame && !emu_paused) return;
 	jump(currFrameCounter + 1);
-	if (!pause_frame) PauseEmulation();
+	if (!pause_frame)
+		PauseEmulation();
 	turbo = false;
 }
 void PLAYBACK::RewindFull(int speed)
@@ -425,7 +428,7 @@ void PLAYBACK::StartFromZero()
 		currMovieData.insertEmpty(-1, 1);
 }
 
-void PLAYBACK::EnsurePlaybackIsInsideGreenzone(bool execute_lua, bool follow_cursor)
+void PLAYBACK::EnsurePlaybackIsInsideGreenzone(bool execute_lua)
 {
 	// set the Playback cursor to the frame or at least above the frame
 	if (SetPlaybackAboveOrToFrame(greenzone.GetSize() - 1))
@@ -433,27 +436,25 @@ void PLAYBACK::EnsurePlaybackIsInsideGreenzone(bool execute_lua, bool follow_cur
 		// since the game state was changed by this jump, we must update possible Lua callbacks and other tools that would normally only update in FCEUI_Emulate
 		if (execute_lua)
 			ForceExecuteLuaFrameFunctions();
-		if (follow_cursor)
-			piano_roll.FollowPlaybackIfNeeded();
 		Update_RAM_Search(); // Update_RAM_Watch() is also called.
 	}
+	// follow the Playback cursor, but in case of seeking don't follow it
+	piano_roll.FollowPlaybackIfNeeded(false);
 }
 
 // an interface for sending Playback cursor to any frame
-void PLAYBACK::jump(int frame, bool force_reload, bool execute_lua, bool follow_cursor)
+void PLAYBACK::jump(int frame, bool force_state_reload, bool execute_lua, bool follow_pauseframe)
 {
 	if (frame < 0) return;
 
 	int lastCursor = currFrameCounter;
 
 	// 1 - set the Playback cursor to the frame or at least above the frame
-	if (SetPlaybackAboveOrToFrame(frame, force_reload))
+	if (SetPlaybackAboveOrToFrame(frame, force_state_reload))
 	{
 		// since the game state was changed by this jump, we must update possible Lua callbacks and other tools that would normally only update in FCEUI_Emulate
 		if (execute_lua)
 			ForceExecuteLuaFrameFunctions();
-		if (follow_cursor)
-			piano_roll.FollowPlaybackIfNeeded();
 		Update_RAM_Search(); // Update_RAM_Watch() is also called.
 	}
 
@@ -468,6 +469,9 @@ void PLAYBACK::jump(int frame, bool force_reload, bool execute_lua, bool follow_
 			SeekingStop();
 	}
 
+	// follow the Playback cursor, and optionally follow pauseframe (if seeking was launched)
+	piano_roll.FollowPlaybackIfNeeded(follow_pauseframe);
+
 	// redraw respective Piano Roll lines if needed
 	if (lastCursor != currFrameCounter)
 	{
@@ -478,7 +482,7 @@ void PLAYBACK::jump(int frame, bool force_reload, bool execute_lua, bool follow_
 }
 
 // returns true if the game state was changed (loaded)
-bool PLAYBACK::SetPlaybackAboveOrToFrame(int frame, bool force_reload)
+bool PLAYBACK::SetPlaybackAboveOrToFrame(int frame, bool force_state_reload)
 {
 	bool state_changed = false;
 	// search backwards for an earlier frame with valid savestate
@@ -487,7 +491,7 @@ bool PLAYBACK::SetPlaybackAboveOrToFrame(int frame, bool force_reload)
 		i = frame;
 	for (; i >= 0; i--)
 	{
-		if (!force_reload && !state_changed && i == currFrameCounter)
+		if (!force_state_reload && !state_changed && i == currFrameCounter)
 		{
 			// we can remain at current game state
 			break;

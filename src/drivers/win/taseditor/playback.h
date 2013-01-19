@@ -16,8 +16,8 @@ public:
 	void reset();
 	void update();
 
-	void EnsurePlaybackIsInsideGreenzone(bool execute_lua = true, bool follow_cursor = true);
-	void jump(int frame, bool force_reload = false, bool execute_lua = true, bool follow_cursor = true);
+	void EnsurePlaybackIsInsideGreenzone(bool execute_lua = true);
+	void jump(int frame, bool force_state_reload = false, bool execute_lua = true, bool follow_pauseframe = true);
 
 	void UpdateProgressbar();
 
@@ -56,7 +56,7 @@ public:
 	HWND hwndPlaybackMarker, hwndPlaybackMarkerEdit;
 
 private:
-	bool SetPlaybackAboveOrToFrame(int frame, bool force_reload = false);
+	bool SetPlaybackAboveOrToFrame(int frame, bool force_state_reload = false);
 
 	int pause_frame;
 	int lost_position_frame;
