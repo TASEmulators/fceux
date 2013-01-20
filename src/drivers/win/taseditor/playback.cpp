@@ -177,7 +177,7 @@ void PLAYBACK::update()
 	// pause when seeking hits pause_frame
 	if (pause_frame && currFrameCounter + 1 >= pause_frame)
 		SeekingStop();
-	else if (currFrameCounter >= GetLostPosition() && currFrameCounter >= currMovieData.getNumRecords() - 1 && must_autopause_at_the_end && taseditor_config.autopause_at_finish)
+	else if (currFrameCounter >= GetLostPosition() && currFrameCounter >= currMovieData.getNumRecords() - 1 && must_autopause_at_the_end && taseditor_config.autopause_at_finish && !TaseditorIsRecording())
 		// pause at the end of the movie
 		PauseEmulation();
 

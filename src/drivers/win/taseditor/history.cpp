@@ -436,24 +436,24 @@ void HISTORY::redo()
 // ----------------------------
 void HISTORY::AddItemToHistory(SNAPSHOT &snap, int cur_branch)
 {
+	history_cursor_pos++;
+	history_total_items = history_cursor_pos + 1;
 	// history uses conveyor of items (vector with fixed size) to aviod frequent reallocations caused by vector resizing, which would be awfully expensive with such large objects as SNAPSHOT and BOOKMARK
 	if (history_total_items >= history_size)
 	{
-		// reached the end of available history_size - move history_start_pos (thus deleting oldest snapshot)
-		history_cursor_pos = history_size-1;
+		// reached the end of available history_size
+		// move history_start_pos (thus deleting oldest snapshot)
 		history_start_pos = (history_start_pos + 1) % history_size;
-	} else
-	{
-		// didn't reach the end of history yet
-		history_cursor_pos++;
-		history_total_items = history_cursor_pos+1;
-		UpdateHistoryList();
+		// and restore history_cursor_pos and history_total_items
+		history_cursor_pos--;
+		history_total_items--;
 	}
 	// write data
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 	snapshots[real_pos] = snap;
 	backup_bookmarks[real_pos].free();
 	backup_current_branch[real_pos] = cur_branch;
+	UpdateHistoryList();
 	RedrawHistoryList();
 }
 void HISTORY::AddItemToHistory(SNAPSHOT &snap, int cur_branch, BOOKMARK &bookm)
