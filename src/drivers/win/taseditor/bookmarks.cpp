@@ -214,12 +214,13 @@ void BOOKMARKS::init()
 	// time column
 	lvc.cx = BOOKMARKSLIST_COLUMN_TIME_WIDTH;
 	ListView_InsertColumn(hwndBookmarksList, 2, &lvc);
+	// create 10 rows
 	ListView_SetItemCountEx(hwndBookmarksList, TOTAL_BOOKMARKS, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
 
 	reset();
 	selected_slot = DEFAULT_SLOT;
-	// find rows top/height (for mouseover hittest calculations)
-	RECT temp_rect;
+	// find the top/height of the "Time" cell of the 1st row (for mouseover hittest calculations)
+	RECT temp_rect, wrect;
 	if (ListView_GetSubItemRect(hwndBookmarksList, 0, 2, LVIR_BOUNDS, &temp_rect) && temp_rect.bottom != temp_rect.top)
 	{
 		list_row_top = temp_rect.top;
@@ -232,6 +233,17 @@ void BOOKMARKS::init()
 		list_row_left = BOOKMARKSLIST_COLUMN_ICONS_WIDTH + BOOKMARKSLIST_COLUMN_FRAMENUM_WIDTH;
 		list_row_height = 14;
 	}
+	// calculate the needed height of client area (so that all 10 rows fir the screen)
+	int total_list_height = list_row_top + list_row_height * TOTAL_BOOKMARKS;
+	// find the difference between Bookmarks List window and Bookmarks List client area
+	GetWindowRect(hwndBookmarksList, &wrect);
+	GetClientRect(hwndBookmarksList, &temp_rect);
+	total_list_height += (wrect.bottom - wrect.top) - (temp_rect.bottom - temp_rect.top);
+	// change the height
+	taseditor_window.ChangeBookmarksListHeight(total_list_height);
+
+
+
 	RedrawBookmarksCaption();
 }
 void BOOKMARKS::free()

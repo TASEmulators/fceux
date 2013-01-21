@@ -129,48 +129,51 @@ char patterns_menu_prefix[] = "Pattern: ";
 char taseditor_help_filename[] = "\\taseditor.chm";
 // all items of the window (used for resising) and their default x,y,w,h
 // actual x,y,w,h are calculated at the beginning from screen
+// "x < 0" means that the coordinate is counted from the right border of the window (right-aligned)
+// "y < 0" means that the coordinate is counted from the lower border of the window (bottom-aligned)
+// The items in this array MUST be sorted by the same order as the Window_items_enum!
 Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
-	IDC_PROGRESS_BUTTON, -1, 0, 0, 0, "Click here when you want to abort seeking", "", false, EMUCMD_TASEDITOR_CANCEL_SEEKING, 0,
-	IDC_BRANCHES_BUTTON, -1, 0, 0, 0, "Click here to switch between Bookmarks List and Branches Tree", "", false, 0, 0,
-	IDC_LIST1, 0, 0, -1, -1, "", "", false, 0, 0,
-	IDC_PLAYBACK_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
-	IDC_RECORDER_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
-	IDC_SPLICER_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
-	IDC_LUA_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
-	IDC_BOOKMARKS_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
-	IDC_HISTORY_BOX, -1, 0, 0, -1, "", "", false, 0, 0,
-	TASEDITOR_REWIND_FULL, -1, 0, 0, 0, "Send Playback to previous Marker (mouse: Shift+Wheel up) (hotkey: Shift+PageUp)", "", false, 0, 0,
-	TASEDITOR_REWIND, -1, 0, 0, 0, "Rewind 1 frame (mouse: Right button+Wheel up) (hotkey: Shift+Up)", "", false, EMUCMD_TASEDITOR_REWIND, 0,
-	TASEDITOR_PLAYSTOP, -1, 0, 0, 0, "Pause/Unpause Emulation (mouse: Middle button)", "", false, EMUCMD_PAUSE, 0,
-	TASEDITOR_FORWARD, -1, 0, 0, 0, "Advance 1 frame (mouse: Right button+Wheel down) (hotkey: Shift+Down)", "", false, EMUCMD_FRAME_ADVANCE, 0,
-	TASEDITOR_FORWARD_FULL, -1, 0, 0, 0, "Send Playback to next Marker (mouse: Shift+Wheel down) (hotkey: Shift+PageDown)", "", false, 0, 0,
-	IDC_PROGRESS1, -1, 0, 0, 0, "", "", false, 0, 0,
-	CHECK_FOLLOW_CURSOR, -1, 0, 0, 0, "The Piano Roll will follow Playback cursor movements", "", false, 0, 0,
-	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "Whenever you change Input above Playback cursor, the cursor returns to where it was before the change", "", false, EMUCMD_TASEDITOR_SWITCH_AUTORESTORING, 0,
-	IDC_BOOKMARKSLIST, -1, 0, 0, 0, "Right click = set Bookmark, Left click = jump to Bookmark or load Branch", "", false, 0, 0,
-	IDC_HISTORYLIST, -1, 0, 0, -1, "Click to revert the project back to that time", "", false, 0, 0,
-	IDC_RADIO_ALL, -1, 0, 0, 0, "Switch off Multitracking", "", false, 0, 0,
-	IDC_RADIO_1P, -1, 0, 0, 0, "Select Joypad 1 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
-	IDC_RADIO_2P, -1, 0, 0, 0, "Select Joypad 2 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
-	IDC_RADIO_3P, -1, 0, 0, 0, "Select Joypad 3 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
-	IDC_RADIO_4P, -1, 0, 0, 0, "Select Joypad 4 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
-	IDC_SUPERIMPOSE, -1, 0, 0, 0, "Allows to superimpose old Input with new buttons, instead of overwriting", "", false, 0, 0,
-	IDC_USEPATTERN, -1, 0, 0, 0, "Applies current Autofire Pattern to Input recording", "", false, 0, 0,
-	TASEDITOR_PREV_MARKER, -1, -1, 0, -1, "Send Selection to previous Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageUp)", "", false, 0, 0,
-	TASEDITOR_FIND_BEST_SIMILAR_MARKER, -1, -1, 0, -1, "Auto-search for Marker Note", "", false, 0, 0,
-	TASEDITOR_FIND_NEXT_SIMILAR_MARKER, -1, -1, 0, -1, "Continue Auto-search", "", false, 0, 0,
-	TASEDITOR_NEXT_MARKER, -1, -1, 0, -1, "Send Selection to next Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageDown)", "", false, 0, 0,
-	IDC_PLAYBACK_MARKER_EDIT, 0, 0, -1, 0, "Click to edit text", "", false, 0, 0,
-	IDC_PLAYBACK_MARKER, 0, 0, 0, 0, "Click here to scroll Piano Roll to Playback cursor (hotkey: tap Shift twice)", "", false, 0, 0,
-	IDC_SELECTION_MARKER_EDIT, 0, -1, -1, -1, "Click to edit text", "", false, 0, 0,
-	IDC_SELECTION_MARKER, 0, -1, 0, -1, "Click here to scroll Piano Roll to Selection (hotkey: tap Ctrl twice)", "", false, 0, 0,
-	IDC_BRANCHES_BITMAP, -1, 0, 0, 0, "Right click = set Bookmark, single Left click = jump to Bookmark, double Left click = load Branch", "", false, 0, 0,
-	CHECK_TURBO_SEEK, -1, 0, 0, 0, "Uncheck when you need to watch seeking in slow motion", "", false, 0, 0,
-	IDC_TEXT_SELECTION, -1, 0, 0, 0, "Current size of Selection", "", false, 0, 0,
-	IDC_TEXT_CLIPBOARD, -1, 0, 0, 0, "Current size of Input in the Clipboard", "", false, 0, 0,
-	IDC_RECORDING, -1, 0, 0, 0, "Switch Input Recording on/off", "", false, EMUCMD_MOVIE_READONLY_TOGGLE, 0,
-	TASEDITOR_RUN_MANUAL, -1, 0, 0, 0, "Press the button to execute Lua Manual Function", "", false, EMUCMD_TASEDITOR_RUN_MANUAL_LUA, 0,
-	IDC_RUN_AUTO, -1, 0, 0, 0, "Enable Lua Auto Function (but first it must be registered by Lua script)", "", false, 0, 0,
+	WINDOWITEMS_PIANO_ROLL, IDC_LIST1, 0, 0, -1, -1, "", "", false, 0, 0,
+	WINDOWITEMS_PLAYBACK_MARKER, IDC_PLAYBACK_MARKER, 0, 0, 0, 0, "Click here to scroll Piano Roll to Playback cursor (hotkey: tap Shift twice)", "", false, 0, 0,
+	WINDOWITEMS_PLAYBACK_MARKER_EDIT, IDC_PLAYBACK_MARKER_EDIT, 0, 0, -1, 0, "Click to edit text", "", false, 0, 0,
+	WINDOWITEMS_SELECTION_MARKER, IDC_SELECTION_MARKER, 0, -1, 0, -1, "Click here to scroll Piano Roll to Selection (hotkey: tap Ctrl twice)", "", false, 0, 0,
+	WINDOWITEMS_SELECTION_MARKER_EDIT, IDC_SELECTION_MARKER_EDIT, 0, -1, -1, -1, "Click to edit text", "", false, 0, 0,
+	WINDOWITEMS_PLAYBACK_BOX, IDC_PLAYBACK_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
+	WINDOWITEMS_PROGRESS_BUTTON, IDC_PROGRESS_BUTTON, -1, 0, 0, 0, "Click here when you want to abort seeking", "", false, EMUCMD_TASEDITOR_CANCEL_SEEKING, 0,
+	WINDOWITEMS_REWIND_FULL, TASEDITOR_REWIND_FULL, -1, 0, 0, 0, "Send Playback to previous Marker (mouse: Shift+Wheel up) (hotkey: Shift+PageUp)", "", false, 0, 0,
+	WINDOWITEMS_REWIND, TASEDITOR_REWIND, -1, 0, 0, 0, "Rewind 1 frame (mouse: Right button+Wheel up) (hotkey: Shift+Up)", "", false, EMUCMD_TASEDITOR_REWIND, 0,
+	WINDOWITEMS_PAUSE, TASEDITOR_PLAYSTOP, -1, 0, 0, 0, "Pause/Unpause Emulation (mouse: Middle button)", "", false, EMUCMD_PAUSE, 0,
+	WINDOWITEMS_FORWARD, TASEDITOR_FORWARD, -1, 0, 0, 0, "Advance 1 frame (mouse: Right button+Wheel down) (hotkey: Shift+Down)", "", false, EMUCMD_FRAME_ADVANCE, 0,
+	WINDOWITEMS_FORWARD_FULL, TASEDITOR_FORWARD_FULL, -1, 0, 0, 0, "Send Playback to next Marker (mouse: Shift+Wheel down) (hotkey: Shift+PageDown)", "", false, 0, 0,
+	WINDOWITEMS_PROGRESS_BAR, IDC_PROGRESS1, -1, 0, 0, 0, "", "", false, 0, 0,
+	WINDOWITEMS_FOLLOW_CURSOR, CHECK_FOLLOW_CURSOR, -1, 0, 0, 0, "The Piano Roll will follow Playback cursor movements", "", false, 0, 0,
+	WINDOWITEMS_TURBO_SEEK, CHECK_TURBO_SEEK, -1, 0, 0, 0, "Uncheck when you need to watch seeking in slow motion", "", false, 0, 0,
+	WINDOWITEMS_AUTORESTORE_PLAYBACK, CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "Whenever you change Input above Playback cursor, the cursor returns to where it was before the change", "", false, EMUCMD_TASEDITOR_SWITCH_AUTORESTORING, 0,
+	WINDOWITEMS_RECORDER_BOX, IDC_RECORDER_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
+	WINDOWITEMS_RECORDING, IDC_RECORDING, -1, 0, 0, 0, "Switch Input Recording on/off", "", false, EMUCMD_MOVIE_READONLY_TOGGLE, 0,
+	WINDOWITEMS_RECORD_ALL, IDC_RADIO_ALL, -1, 0, 0, 0, "Switch off Multitracking", "", false, 0, 0,
+	WINDOWITEMS_RECORD_1P, IDC_RADIO_1P, -1, 0, 0, 0, "Select Joypad 1 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
+	WINDOWITEMS_RECORD_2P, IDC_RADIO_2P, -1, 0, 0, 0, "Select Joypad 2 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
+	WINDOWITEMS_RECORD_3P, IDC_RADIO_3P, -1, 0, 0, 0, "Select Joypad 3 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
+	WINDOWITEMS_RECORD_4P, IDC_RADIO_4P, -1, 0, 0, 0, "Select Joypad 4 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
+	WINDOWITEMS_SUPERIMPOSE, IDC_SUPERIMPOSE, -1, 0, 0, 0, "Allows to superimpose old Input with new buttons, instead of overwriting", "", false, 0, 0,
+	WINDOWITEMS_USE_PATTERN, IDC_USEPATTERN, -1, 0, 0, 0, "Applies current Autofire Pattern to Input recording", "", false, 0, 0,
+	WINDOWITEMS_SPLICER_BOX, IDC_SPLICER_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
+	WINDOWITEMS_SELECTION_TEXT, IDC_TEXT_SELECTION, -1, 0, 0, 0, "Current size of Selection", "", false, 0, 0,
+	WINDOWITEMS_CLIPBOARD_TEXT, IDC_TEXT_CLIPBOARD, -1, 0, 0, 0, "Current size of Input in the Clipboard", "", false, 0, 0,
+	WINDOWITEMS_LUA_BOX, IDC_LUA_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
+	WINDOWITEMS_RUN_MANUAL, TASEDITOR_RUN_MANUAL, -1, 0, 0, 0, "Press the button to execute Lua Manual Function", "", false, EMUCMD_TASEDITOR_RUN_MANUAL_LUA, 0,
+	WINDOWITEMS_RUN_AUTO, IDC_RUN_AUTO, -1, 0, 0, 0, "Enable Lua Auto Function (but first it must be registered by Lua script)", "", false, 0, 0,
+	WINDOWITEMS_BRANCHES_BUTTON, IDC_BRANCHES_BUTTON, -1, 0, 0, 0, "Click here to switch between Bookmarks List and Branches Tree", "", false, 0, 0,
+	WINDOWITEMS_BOOKMARKS_BOX, IDC_BOOKMARKS_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
+	WINDOWITEMS_BOOKMARKS_LIST, IDC_BOOKMARKSLIST, -1, 0, 0, 0, "Right click = set Bookmark, Left click = jump to Bookmark or load Branch", "", false, 0, 0,
+	WINDOWITEMS_BRANCHES_BITMAP, IDC_BRANCHES_BITMAP, -1, 0, 0, 0, "Right click = set Bookmark, single Left click = jump to Bookmark, double Left click = load Branch", "", false, 0, 0,
+	WINDOWITEMS_HISTORY_BOX, IDC_HISTORY_BOX, -1, 0, 0, -1, "", "", false, 0, 0,
+	WINDOWITEMS_HISTORY_LIST, IDC_HISTORYLIST, -1, 0, 0, -1, "Click to revert the project back to that time", "", false, 0, 0,
+	WINDOWITEMS_PREVIOUS_MARKER, TASEDITOR_PREV_MARKER, -1, -1, 0, -1, "Send Selection to previous Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageUp)", "", false, 0, 0,
+	WINDOWITEMS_SIMILAR, TASEDITOR_FIND_BEST_SIMILAR_MARKER, -1, -1, 0, -1, "Auto-search for Marker Note", "", false, 0, 0,
+	WINDOWITEMS_MORE, TASEDITOR_FIND_NEXT_SIMILAR_MARKER, -1, -1, 0, -1, "Continue Auto-search", "", false, 0, 0,
+	WINDOWITEMS_NEXT_MARKER, TASEDITOR_NEXT_MARKER, -1, -1, 0, -1, "Send Selection to next Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageDown)", "", false, 0, 0,
 };
 
 TASEDITOR_WINDOW::TASEDITOR_WINDOW()
@@ -431,13 +434,13 @@ void TASEDITOR_WINDOW::CalculateItems()
 			// width is right-aligned (may be dynamic width)
 			window_items[i].width = -(main_width - (p.x + (r.right - r.left)));
 		else
-			// normal width
+			// fixed width
 			window_items[i].width = r.right - r.left;
 		if (window_items[i].height < 0)
 			// height is bottom-aligned (may be dynamic height)
 			window_items[i].height = -(main_height - (p.y + (r.bottom - r.top)));
 		else
-			// normal height
+			// fixed height
 			window_items[i].height = r.bottom - r.top;
 	}
 	ready_for_resizing = true;
@@ -502,6 +505,36 @@ void TASEDITOR_WINDOW::WindowMovedOrResized()
 		taseditor_config.saved_wndwidth = taseditor_config.wndwidth;
 		taseditor_config.saved_wndheight = taseditor_config.wndheight;
 	}
+}
+
+void TASEDITOR_WINDOW::ChangeBookmarksListHeight(int new_height)
+{
+	// the Bookmarks List height should not be lett than the height of the Branches Bitmap, because they are switchable
+	if (new_height < BRANCHES_BITMAP_HEIGHT)
+		new_height = BRANCHES_BITMAP_HEIGHT;
+
+	int delta = new_height - window_items[WINDOWITEMS_BOOKMARKS_LIST].height;
+	if (!delta)
+		return;
+	// shift down all items that are below the Bookmarks List
+	int BookmarksList_bottom = window_items[WINDOWITEMS_BOOKMARKS_LIST].y + window_items[WINDOWITEMS_BOOKMARKS_LIST].height;
+	for (int i = 0; i < TASEDITOR_WINDOW_TOTAL_ITEMS; ++i)
+	{
+		if (window_items[i].y > BookmarksList_bottom)
+			window_items[i].y += delta;
+	}
+	// adjust Bookmarks List size
+	window_items[WINDOWITEMS_BOOKMARKS_LIST].height += delta;
+	window_items[WINDOWITEMS_BOOKMARKS_BOX].height += delta;
+	// adjust window size
+	min_height += delta;
+	taseditor_config.wndheight += delta;
+	taseditor_config.saved_wndheight += delta;
+	// apply changes
+	bool wndmaximized = taseditor_config.wndmaximized;
+	SetWindowPos(hwndTasEditor, HWND_TOP, taseditor_config.wndx, taseditor_config.wndy, taseditor_config.wndwidth, taseditor_config.wndheight, SWP_NOOWNERZORDER);
+	if (wndmaximized)
+		ShowWindow(hwndTasEditor, SW_SHOWMAXIMIZED);
 }
 
 void TASEDITOR_WINDOW::UpdateTooltips()
@@ -1365,9 +1398,9 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 			RECT wrect;
 			GetWindowRect(piano_roll.hwndList, &wrect);
 			if (x > 0
-				&& x <= window_items[PIANOROLL_IN_WINDOWITEMS].x
-				&& y > window_items[PIANOROLL_IN_WINDOWITEMS].y
-				&& y < window_items[PIANOROLL_IN_WINDOWITEMS].y + (wrect.bottom - wrect.top))
+				&& x <= window_items[WINDOWITEMS_PIANO_ROLL].x
+				&& y > window_items[WINDOWITEMS_PIANO_ROLL].y
+				&& y < window_items[WINDOWITEMS_PIANO_ROLL].y + (wrect.bottom - wrect.top))
 			{
 				piano_roll.StartDraggingPlaybackCursor();
 			}

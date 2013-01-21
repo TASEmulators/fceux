@@ -75,7 +75,8 @@ bool EnterTasEditor()
 	if (taseditor_window.hwndTasEditor)
 	{
 		// TAS Editor is already engaged, just set focus to its window
-		ShowWindow(taseditor_window.hwndTasEditor, SW_SHOWNORMAL);
+		if (!taseditor_config.wndmaximized)
+			ShowWindow(taseditor_window.hwndTasEditor, SW_SHOWNORMAL);
 		SetForegroundWindow(taseditor_window.hwndTasEditor);
 		return true;
 	} else if (FCEU_IsValidUI(FCEUI_TASEDITOR))
