@@ -49,6 +49,7 @@ extern int eoptions;
 #define EO_BESTFIT     65536
 #define EO_BGCOLOR    131072
 #define EO_HIDEMOUSE  262144
+#define EO_TVASPECT   524288
 
 bool directoryExists(const char* dirname);
 void WindowBoundsCheckResize(int &windowPosX, int &windowPosY, int windowSizeX, long windowRight);

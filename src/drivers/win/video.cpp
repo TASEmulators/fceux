@@ -274,6 +274,8 @@ void RecreateResizableSurface(int width, int height)
 	// calculate resizable_surface_rect
 	double current_aspectratio = (double)width / (double)height;
 	double needed_aspectratio = (double)(VNSWID) / (double)(FSettings.TotalScanlines());
+	if (eoptions & EO_TVASPECT)
+		needed_aspectratio = ((double)VNSWID / 256) * ((double)4 / 3);
 	if (current_aspectratio == needed_aspectratio)
 	{
 		resizable_surface_rect.left = 0;
@@ -286,18 +288,18 @@ void RecreateResizableSurface(int width, int height)
 		resizable_surface_rect.top = 0;
 		resizable_surface_rect.bottom = height;
 		int center_x = width / 2;
-		width = (double)((double)height * needed_aspectratio);
-		resizable_surface_rect.left = center_x - (width / 2);
-		resizable_surface_rect.right = center_x + (width / 2);
+		double new_width = ((double)height * needed_aspectratio);
+		resizable_surface_rect.left = center_x - (new_width / 2);
+		resizable_surface_rect.right = resizable_surface_rect.left + new_width;
 	} else
 	{
 		// the window is taller than emulated screen
 		resizable_surface_rect.left = 0;
 		resizable_surface_rect.right = width;
 		int center_y = height / 2;
-		height = (double)((double)width / needed_aspectratio);
-		resizable_surface_rect.top = center_y - (height / 2);
-		resizable_surface_rect.bottom = center_y + (height / 2);
+		double new_height = ((double)width / needed_aspectratio);
+		resizable_surface_rect.top = center_y - (new_height / 2);
+		resizable_surface_rect.bottom = resizable_surface_rect.top + new_height;
 	}
 }
 
@@ -448,18 +450,6 @@ int SetVideoMode(int fs)
 		}
 		HideFWindow(1);
 
-		if ((vmodes[vmod].flags & VMDF_STRFS) && (eoptions & EO_BESTFIT))
-		{
-			ddrval = IDirectDraw7_SetCooperativeLevel ( lpDD7, hAppWnd, DDSCL_NORMAL);
-			if (ddrval != DD_OK)
-			{
-				//ShowDDErr("Error setting cooperative level.");
-				FCEU_printf("Error setting cooperative level.\n");
-				return 0;
-			}
-			RecreateResizableSurface(vmodes[vmod].x, vmodes[vmod].y);
-		}
-
 		ddrval = IDirectDraw7_SetCooperativeLevel ( lpDD7, hAppWnd,DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN | DDSCL_ALLOWREBOOT);
 		if (ddrval != DD_OK)
 		{
@@ -496,6 +486,12 @@ int SetVideoMode(int fs)
 				return 0;
 			}
 		}
+
+		if ((vmodes[vmod].flags & VMDF_STRFS) && (eoptions & EO_BESTFIT))
+		{
+			RecreateResizableSurface(vmodes[vmod].x, vmodes[vmod].y);
+		}
+
 
 		// create foreground surface
 
@@ -722,7 +718,7 @@ static void BlitScreenFull(uint8 *XBuf)
 	char *ScreenLoc;
 	//unsigned long x; //mbg merge 7/17/06 removed
 	//uint8 y; //mbg merge 7/17/06 removed
-	RECT srect,drect;
+	RECT srect, drect;
 	LPDIRECTDRAWSURFACE7 lpDDSVPrimary;
 	int specmul;    // Special scaler size multiplier
 	// -Video Modes Tag-
@@ -971,7 +967,7 @@ static void BlitScreenFull(uint8 *XBuf)
 
 		if (eoptions & EO_BESTFIT && (resizable_surface_rect.top || resizable_surface_rect.left) && !vmod)
 		{
-			// clear lpDDSResizable surface 
+			// clear lpDDSResizable surface
 			RecolorResizableSurface();
 			// blit from lpDDSBack to lpDDSResizable using best fit
 			if (IDirectDrawSurface7_Blt(lpDDSResizable, &resizable_surface_rect, lpDDSBack, &srect, DDBLT_ASYNC, 0) != DD_OK)
@@ -1257,6 +1253,9 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		if(eoptions&EO_BESTFIT)
 			CheckDlgButton(hwndDlg, IDC_VIDEOCONFIG_BESTFIT, BST_CHECKED);
 
+		if(eoptions&EO_TVASPECT)
+			CheckDlgButton(hwndDlg, IDC_VIDEOCONFIG_TVASPECT, BST_CHECKED);
+
 		if(eoptions&EO_BGCOLOR)
 			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_CONSOLE_BGCOLOR,BST_CHECKED);
 
@@ -1341,6 +1340,11 @@ gornk:
 					eoptions |= EO_BESTFIT;
 				else
 					eoptions &= ~EO_BESTFIT;
+
+				if (IsDlgButtonChecked(hwndDlg, IDC_VIDEOCONFIG_TVASPECT) == BST_CHECKED)
+					eoptions |= EO_TVASPECT;
+				else
+					eoptions &= ~EO_TVASPECT;
 
 				if (IsDlgButtonChecked(hwndDlg, IDC_VIDEOCONFIG_CONSOLE_BGCOLOR) == BST_CHECKED)
 					eoptions |= EO_BGCOLOR;

@@ -111,6 +111,8 @@
 #define IDC_ADDBP_MODE_X2               109
 #define IDC_ADDBP_MODE_F                109
 #define BTN_CDLOGGER_SAVE_UNUSED        109
+#define IDC_VIDEOCONFIG_43              109
+#define IDC_VIDEOCONFIG_TVASPECT        109
 #define IDC_CHEAT_VAL_LT_BY             110
 #define MENU_SAVE_STATE                 110
 #define CB_ASK_EXIT                     110
@@ -717,7 +719,6 @@
 #define IDC_TASEDITOR_NAME              1280
 #define ID_CANCEL                       1281
 #define IDC_AUTOSAVE_PROJECT            1282
-#define IDC_AUTOSAVE_PROJECT2           1283
 #define IDC_SILENT_AUTOSAVE             1283
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041

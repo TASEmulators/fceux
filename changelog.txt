@@ -1,3 +1,7 @@
+02-Feb-2013 - AnS - Added "TV Aspect (4:3)" to Video Config
+21-Jan-2013 - AnS - Taseditor: fixed Bookmarks List height on Windows 7
+21-Jan-2013 - AnS - Taseditor: fixed bug with adding new item to History Log
+20-Jan-2013 - AnS - Taseditor: changed the logic by which the Piano Roll follows Playback cursor, now it doesn't follow it while seeking
 15-Jan-2013 - AnS - Lua: removed "shadow pixels" from gui.text(), made gui.parsecolor() function available for users
 10-Jan-2013 - AnS - Taseditor: Config->Project file saving options
 01-Jan-2013 - zeromus - NameTableViewer: do something reasonable if a 4-screen, table2, table3 mirror mode is chosen when the corresponding nametable ram is not available on the cart (instead of crashing)
@@ -16,7 +20,7 @@
 13-Dec-2012 - AnS - win32: added NES->Emulation Speed->Set Custom Speed
 12-Dec-2012 - CaH4e3 - finish with mapper to boards conversion
 07-Dec-2012 - CaH4e3 - Tracer: fixed RAM-located code logging when CDLogger options are enabled
-05-Dec-2012 - AnS - fixed zapper and mouse positioning in fullscreen and bestfit mode
+05-Dec-2012 - AnS - fixed zapper and mouse positioning in fullscreen
 04-Dec-2012 - AnS - speed up HUD text drawing
 04-Dec-2012 - AnS - Taseditor: speed up consecutive Recordings (when combining)
 03-Dec-2012 - AnS - Taseditor: fixed accelerators when editing Notes

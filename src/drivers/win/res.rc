@@ -1764,9 +1764,9 @@ BEGIN
     EDITTEXT        IDC_WINSIZE_MUL_X,244,20,44,12,ES_AUTOHSCROLL
     EDITTEXT        IDC_WINSIZE_MUL_Y,295,20,44,12,ES_AUTOHSCROLL
     CONTROL         "Force integral scaling factors",IDC_FORCE_INT_VIDEO_SCALARS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,189,36,145,12
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,196,50,136,12
     CONTROL         "Force aspect ratio correction",IDC_FORCE_ASPECT_CORRECTION,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,189,50,145,12
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,196,64,136,12
     LTEXT           "Special scaler:",65429,189,91,51,9
     COMBOBOX        IDC_VIDEOCONFIG_SCALER_WIN,245,89,93,47,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Sync method:",65437,189,108,51,9
@@ -1788,12 +1788,13 @@ BEGIN
     CONTROL         "Allow more than 8 sprites per scanline",IDC_VIDEOCONFIG_NO8LIM,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,359,124,138,11
     GROUPBOX        "Emulation",65430,351,113,154,27,WS_GROUP
-    CONTROL         "Always maintain correct aspect ratio",IDC_VIDEOCONFIG_BESTFIT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,359,14,136,12
+    CONTROL         "Best Fit",IDC_VIDEOCONFIG_BESTFIT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,359,14,66,12
     CONTROL         "Hide mouse cursor",IDC_VIDEOCONFIG_HIDEMOUSE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,43,87,12
-    GROUPBOX        "Best Fit",65495,351,3,154,42,WS_GROUP
+    GROUPBOX        "Aspect ratio",65495,351,3,154,42,WS_GROUP
     CONTROL         "Use console BG color for empty areas",IDC_VIDEOCONFIG_CONSOLE_BGCOLOR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,359,28,136,12
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,359,28,137,12
+    CONTROL         "TV Aspect (4:3)",IDC_VIDEOCONFIG_TVASPECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,431,14,66,12
+    GROUPBOX        "When resizing the window",65431,188,38,152,43,WS_GROUP
 END
 
 IDD_RAMSEARCH DIALOGEX 0, 0, 287, 292

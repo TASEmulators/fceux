@@ -336,9 +336,16 @@ static void ConvertFCM(HWND hwndOwner)
 void CalcWindowSize(RECT *al)
 {
 	al->left = 0;
-	al->right = VNSWID * winsizemulx;
 	al->top = 0;
-	al->bottom = (FSettings.TotalScanlines() * winsizemuly) + menuYoffset;
+
+	al->bottom = FSettings.TotalScanlines();
+	if (eoptions & EO_TVASPECT)
+		al->right = al->bottom * winsizemulx * ((double)VNSWID / 256) * ((double)4 / 3);
+	else
+		al->right = VNSWID * winsizemulx;
+	al->bottom *= winsizemuly;
+	al->bottom += menuYoffset;
+
 
 	AdjustWindowRectEx(al,
 		GetWindowLong(hAppWnd, GWL_STYLE),
@@ -1377,11 +1384,15 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			{
 			case SIZE_MAXIMIZED: 
 				ismaximized = 1;
+				changerecursive = 1;
 				SetMainWindowStuff();
+				changerecursive = 0;
 				break;
 			case SIZE_RESTORED: 
 				ismaximized = 0;
+				changerecursive = 1;
 				SetMainWindowStuff();
+				changerecursive = 0;
 				break;
 			}
 		}
@@ -2411,7 +2422,7 @@ proco:
 
 void FixWXY(int pref, bool shift_held)
 {
-	if(eoptions&EO_FORCEASPECT)
+	if (eoptions & EO_FORCEASPECT)
 	{
 		/* First, make sure the ratio is valid, and if it's not, change
 		it so that it doesn't break everything.
@@ -2427,8 +2438,7 @@ void FixWXY(int pref, bool shift_held)
 		if(!pref)
 		{
 			winsizemuly = winsizemulx * (saspecth / saspectw);
-		}
-		else
+		} else
 		{
 			winsizemulx = winsizemuly * (saspectw / saspecth);
 		}
@@ -2439,6 +2449,7 @@ void FixWXY(int pref, bool shift_held)
 	if(winsizemuly<0.1)
 		winsizemuly=0.1;
 
+	// round to integer values
 	if (((eoptions & EO_FORCEISCALE) && !shift_held) || (!(eoptions & EO_FORCEISCALE) && shift_held))
 	{
 		int x,y;
@@ -2604,6 +2615,7 @@ void SetMainWindowStuff()
 
 		ShowWindow(hAppWnd, SW_SHOWNORMAL);
 	}
+
 	if (eoptions & EO_BESTFIT && !windowedfailed)
 	{
 		RECT client_recr;
