@@ -1121,29 +1121,29 @@ void LoadNewGamey(HWND hParent, const char *initialdir)
 
 void GetMouseData(uint32 (&md)[3])
 {
-	extern RECT resizable_surface_rect;
+	extern RECT bestfitRect;
 
-	if (eoptions & EO_BESTFIT && (resizable_surface_rect.top || resizable_surface_rect.left))
+	if (eoptions & EO_BESTFIT && (bestfitRect.top || bestfitRect.left))
 	{
-		if ((int)mousex <= resizable_surface_rect.left)
+		if ((int)mousex <= bestfitRect.left)
 		{
 			md[0] = 0;
-		} else if ((int)mousex >= resizable_surface_rect.right)
+		} else if ((int)mousex >= bestfitRect.right)
 		{
 			md[0] = VNSWID;
 		} else
 		{
-			md[0] = VNSWID * (mousex - resizable_surface_rect.left) / (resizable_surface_rect.right - resizable_surface_rect.left);
+			md[0] = VNSWID * (mousex - bestfitRect.left) / (bestfitRect.right - bestfitRect.left);
 		}
-		if ((int)mousey <= resizable_surface_rect.top)
+		if ((int)mousey <= bestfitRect.top)
 		{
 			md[1] = 0;
-		} else if ((int)mousey >= resizable_surface_rect.bottom)
+		} else if ((int)mousey >= bestfitRect.bottom)
 		{
 			md[1] = FSettings.TotalScanlines();
 		} else
 		{
-			md[1] = FSettings.TotalScanlines() * (mousey - resizable_surface_rect.top) / (resizable_surface_rect.bottom - resizable_surface_rect.top);
+			md[1] = FSettings.TotalScanlines() * (mousey - bestfitRect.top) / (bestfitRect.bottom - bestfitRect.top);
 		}
 	} else
 	{
@@ -2620,7 +2620,7 @@ void SetMainWindowStuff()
 	{
 		RECT client_recr;
 		GetClientRect(hAppWnd, &client_recr);
-		RecreateResizableSurface(client_recr.right - client_recr.left, client_recr.bottom - client_recr.top);
+		recalculateBestFitRect(client_recr.right - client_recr.left, client_recr.bottom - client_recr.top);
 	}
 }
 
