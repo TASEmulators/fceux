@@ -92,12 +92,18 @@ else:
       print 'Could not find libgtk-2.0, exiting!'
       Exit(1)
     # Add compiler and linker flags from pkg-config
-    env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
+    config_string = 'pkg-config --cflags --libs gtk+-2.0'
+    if env['PLATFORM'] == 'darwin':
+      config_string = 'PKG_CONFIG_PATH=/opt/X11/lib/pkgconfig/ ' + config_string
+    env.ParseConfig(config_string)
     env.Append(CPPDEFINES=["_GTK2"])
     env.Append(CCFLAGS = ["-D_GTK"])
   if env['GTK3']:
     # Add compiler and linker flags from pkg-config
-    env.ParseConfig('pkg-config --cflags --libs gtk+-3.0')
+    config_string = 'pkg-config --cflags --libs gtk+-3.0'
+    if env['PLATFORM'] == 'darwin':
+      config_string = 'PKG_CONFIG_PATH=/opt/X11/lib/pkgconfig/ ' + config_string
+    env.ParseConfig(config_string)
     env.Append(CPPDEFINES=["_GTK3"])
     env.Append(CCFLAGS = ["-D_GTK"])
 
