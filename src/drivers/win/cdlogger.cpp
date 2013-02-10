@@ -47,7 +47,6 @@ extern uint8 *trainerpoo;
 extern volatile int rendercount, vromreadcount, undefinedvromcount;
 extern unsigned char *cdloggervdata;
 extern int newppu;
-extern uint32 VROM_size;
 
 int CDLogger_wndx=0, CDLogger_wndy=0;
 
@@ -113,7 +112,7 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			undefinedcount = PRGsize[0];
 			cdloggerdata = (unsigned char*)malloc(PRGsize[0]); //mbg merge 7/18/06 added cast
 			ZeroMemory(cdloggerdata,PRGsize[0]);
-			if(VROM_size)
+			if(CHRsize[0] != 0)
 			{
 				undefinedvromcount = CHRsize[0];
 				cdloggervdata = (unsigned char*)malloc(CHRsize[0]);
@@ -144,7 +143,7 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							codecount = datacount = rendercount = vromreadcount = 0;
 							undefinedcount = PRGsize[0];
 							ZeroMemory(cdloggerdata,PRGsize[0]);
-							if(VROM_size)
+							if(CHRsize[0] != 0)
 							{
 								undefinedvromcount = CHRsize[0];
 								ZeroMemory(cdloggervdata,CHRsize[0]);
@@ -226,7 +225,7 @@ void LoadCDLog (const char* nameo)
 		cdloggerdata[i] |= j;
 	}
 
-	if(VROM_size)
+	if(CHRsize[0] != 0)
 	{
 		for(i = 0;i < (int)CHRsize[0];i++){
 			j = fgetc(FP);
@@ -292,7 +291,7 @@ void SaveCDLogFile(){ //todo make this button work before you've saved as
 		return;
 	}
 	fwrite(cdloggerdata,PRGsize[0],1,FP);
-	if(VROM_size)
+	if(CHRsize[0] != 0)
 		fwrite(cdloggervdata,CHRsize[0],1,FP);
 	fclose(FP);
 }
@@ -329,7 +328,7 @@ void UpdateCDLogger()
 	float fundefinedcount = undefinedcount;
 	float fundefinedvromcount = undefinedvromcount;
 	float fromsize = PRGsize[0];
-	float fvromsize = VROM_size ? CHRsize[0] : 1;
+	float fvromsize = CHRsize[0] != 0 ? CHRsize[0] : 1;
 
 	sprintf(str,"0x%06x %.2f%%",codecount,fcodecount/fromsize*100);
 	SetDlgItemText(hCDLogger,LBL_CDLOGGER_CODECOUNT,str);
@@ -356,6 +355,7 @@ void SaveStrippedRom(int invert)
 	char sromfilename[MAX_PATH];
 	FILE *fp;
 	OPENFILENAME ofn;
+	iNES_HEADER cdlhead;
 	int i;
 
 	if (!GameInfo)
@@ -422,35 +422,34 @@ void SaveStrippedRom(int invert)
 	}
 	else
 	{
-		if(fwrite(&head,1,16,fp)!=16)
-		{
-			fclose(fp);
-			return;
-		}
+		cdlhead.ID[0] = 'N';
+		cdlhead.ID[1] = 'E';
+		cdlhead.ID[2] = 'S';
+		cdlhead.ID[3] = 0x1A;
 
-		if(head.ROM_type&4) 	/* Trainer */
-		{
-			fwrite(trainerpoo,512,1,fp);
-		}
+		cdlhead.ROM_size = PRGsize[0] >> 14;
+		cdlhead.VROM_size = CHRsize[0] >> 13;
+
+		fwrite(&cdlhead,1,16,fp);
 
 		for(i = 0; i < (int)PRGsize[0]; i++){
 			unsigned char pchar;
 			if(cdloggerdata[i] & 3)
-				pchar = invert?0:ROM[i];
+				pchar = invert?0:PRGptr[0][i];
 			else
-				pchar = invert?ROM[i]:0;
+				pchar = invert?PRGptr[0][i]:0;
 			fputc(pchar, fp);
 		}
 
-		if(VROM_size)
+		if(CHRsize[0] != 0)
 		{
 			// since an old ppu at least log the 2007 ppu read accesses, so need to save anyway...
 			for(i = 0; i < (int)CHRsize[0]; i++) {
 				unsigned char vchar;
 				if(cdloggervdata[i] & 3)
-					vchar = invert?0:VROM[i];
+					vchar = invert?0:CHRptr[0][i];
 				else
-					vchar = invert?VROM[i]:0;
+					vchar = invert?CHRptr[0][i]:0;
 				fputc(vchar, fp);
 			}
 		}

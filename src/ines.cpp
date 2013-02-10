@@ -511,7 +511,7 @@ static BMAPPINGLocal bmap[] = {
 //	{"",					 63, Mapper63_Init},
 	{"TENGEN RAMBO1",		 64, Mapper64_Init},
 	{"IREM-H3001",			 65, Mapper65_Init},
-	{"MHOM",				 66, MHROM_Init},
+	{"MHROM",				 66, MHROM_Init},
 	{"SUNSOFT-FZII",		 67, Mapper67_Init},
 	{"Sunsoft Mapper #4",	 68, Mapper68_Init},
 	{"SUNSOFT-5/FME-7",		 69, Mapper69_Init},
