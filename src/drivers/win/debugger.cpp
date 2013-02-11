@@ -1158,7 +1158,8 @@ BOOL CALLBACK PatcherCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 							UpdatePatcher(hwndDlg);
 							break;
 						case IDC_ROMPATCHER_BTN_SAVE:
-							if(!iNesSave())MessageBox(NULL,"Error Saving","Error",MB_OK);
+							if (!iNesSave())
+								MessageBox(NULL, "Error Saving", "Error", MB_OK);
 							break;
 					}
 					break;

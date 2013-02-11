@@ -120,6 +120,7 @@ BEGIN
             MENUITEM "&Frame Adv. - Skip Lag",      MENU_DISPLAY_FA_LAGSKIP
             MENUITEM "Backup Savestates",           ID_ENABLE_BACKUPSAVESTATES
             MENUITEM "Compress Savestates",         ID_ENABLE_COMPRESSSAVESTATES
+            MENUITEM "&Game Genie ROM",             MENU_GAME_GENIE
             MENUITEM "Auto-resume old play session", ID_ENABLE_AUTORESUME
         END
         POPUP "&Display"
@@ -143,14 +144,13 @@ BEGIN
             MENUITEM "Graphics: &OBJ",              MENU_DISPLAY_OBJ
         END
         MENUITEM SEPARATOR
-        MENUITEM "&Game Genie",                 MENU_GAME_GENIE
         MENUITEM "&PAL Emulation",              MENU_PAL
-        MENUITEM SEPARATOR
         POPUP "PPU"
         BEGIN
             MENUITEM "Old PPU",                     ID_OLDPPU
             MENUITEM "New PPU (slow!)",             ID_NEWPPU
         END
+        MENUITEM SEPARATOR
         MENUITEM "&Directories...",             MENU_DIRECTORIES
         MENUITEM "&GUI...",                     MENU_GUI_OPTIONS
         MENUITEM "&Input...",                   MENU_INPUT
