@@ -1,7 +1,10 @@
 # Fix compliation error about 'XKeysymToString' by linking X11 explicitly
 # Thanks Antonio Ospite!
 Import('env')
-env.ParseConfig('pkg-config --cflags --libs x11')
+config_string = 'pkg-config --cflags --libs x11'
+if env['PLATFORM'] == 'darwin':
+  config_string = 'PKG_CONFIG_PATH=/opt/X11/lib/pkgconfig/ ' + config_string
+env.ParseConfig(config_string)
 Export('env')
 
 source_list =  Split("""
