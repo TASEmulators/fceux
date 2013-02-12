@@ -163,23 +163,6 @@ static void ShowUsage(char *prog)
 }
 
 /**
- * Prints an error string to STDOUT.
- */
-void
-FCEUD_PrintError(char *s)
-{
-	puts(s);
-}
-
-/**
- * Prints the given string to STDOUT.
- */
-void FCEUD_Message(char *s)
-{
-	fputs(s, stdout);
-}
-
-/**
  * Loads a game, given a full path/filename.  The driver code must be
  * initialized after the game is loaded, because the emulator code
  * provides data necessary for the driver code(number of scanlines to
@@ -894,11 +877,20 @@ void FCEUD_Message(const char *text)
 /**
 * Shows an error message in a message box.
 * (For now: prints to stderr.)
+* 
+* If running in GTK mode, display a dialog message box of the error.
 *
 * @param errormsg Text of the error message.
 **/
 void FCEUD_PrintError(const char *errormsg)
 {
+#ifdef GTK
+	GtkWidget* d;
+	d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL,        GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, errormsg);
+	gtk_dialog_run(GTK_DIALOG(d));
+	gtk_widget_destroy(d);
+#endif
+
 	fprintf(stderr, "%s\n", errormsg);
 }
 
