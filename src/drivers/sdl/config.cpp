@@ -36,12 +36,18 @@ LoadCPalette(const std::string &file)
 	FILE *fp;
 
 	if(!(fp = FCEUD_UTF8fopen(file.c_str(), "rb"))) {
-		printf(" Error loading custom palette from file: %s\n", file.c_str());
+		char errorMsg[256];
+		strcpy(errorMsg, "Error loading custom palette from file: ");
+		strcat(errorMsg, file.c_str());
+		FCEUD_PrintError(errorMsg);
 		return 0;
 	}
 	size_t result = fread(tmpp, 1, 192, fp);
 	if(result != 192) {
-		printf(" Error reading custom palette from file: %s\n", file.c_str());
+		char errorMsg[256];
+		strcpy(errorMsg, "Error loading custom palette from file: ");
+		strcat(errorMsg, file.c_str());
+		FCEUD_PrintError(errorMsg);
 		return 0;
 	}
 	FCEUI_SetPaletteArray(tmpp);

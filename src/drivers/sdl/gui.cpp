@@ -51,6 +51,7 @@ GtkWidget* padNoCombo = NULL;
 GtkWidget* configNoCombo = NULL;
 GtkWidget* buttonMappings[10];
 GtkRadioAction* stateSlot = NULL;
+bool gtkIsStarted = false;
 
 // check to see if a particular GTK version is available
 // 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,24);
@@ -233,15 +234,7 @@ void loadPalette (GtkWidget* w, gpointer p)
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		g_config->setOption("SDL.Palette", filename);
 		g_config->setOption("SDL.SDL.NTSCpalette", 0);
-		if(LoadCPalette(filename) == 0)
-		{
-			GtkWidget* msgbox;
-			msgbox = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-			"Failed to load the palette.");
-			
-			gtk_dialog_run(GTK_DIALOG(msgbox));
-			gtk_widget_hide(msgbox);
-		}
+		LoadCPalette(filename);
 		
 		gtk_entry_set_text(GTK_ENTRY(p), filename);
 		
@@ -1362,14 +1355,7 @@ void hardReset ()
 		closeGame();
 		const char* lastFile;
 		g_config->getOption("SDL.LastOpenFile", &lastFile);
-		if(LoadGame(lastFile) == 0)
-		{
-			GtkWidget* d;
-			d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, 
-				"Error opening the ROM file.");
-			gtk_dialog_run(GTK_DIALOG(d));
-			gtk_widget_destroy(d);
-		}
+		LoadGame(lastFile) == 0;
 		resizeGtkWindow();
 	}
 }
@@ -1523,6 +1509,7 @@ void loadLua ()
 		gtk_widget_destroy(fileChooser);
 		if(FCEU_LoadLuaCode(filename) == 0)
 		{
+			// This is necessary because lua scripts do not use FCEUD_PrintError to print errors.
 			GtkWidget* d;
 			d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, 
 				"Could not open the selected lua script.");
@@ -1720,7 +1707,9 @@ void loadNSF ()
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		gtk_widget_destroy (fileChooser);
-		if(LoadGame(filename) == 0)
+		LoadGame(filename);
+		// no longer required with GTK FCEUD_PrintError implementation
+		/*if(LoadGame(filename) == 0)
 		{
 			
 			GtkWidget* d;
@@ -1728,7 +1717,7 @@ void loadNSF ()
 				"Could not open the selected NSF file.");
 			gtk_dialog_run(GTK_DIALOG(d));
 			gtk_widget_destroy(d);
-		}
+		}*/
 		g_config->setOption("SDL.LastOpenNSF", filename);
 		g_free(filename);
 	}
@@ -1811,7 +1800,9 @@ void loadGame ()
 		gtk_widget_destroy (fileChooser);
 		g_config->setOption("SDL.LastOpenFile", filename);
 		closeGame();
-		if(LoadGame(filename) == 0)
+		LoadGame(filename);
+		// Error dialog no longer required with GTK implementation of FCEUD_PrintError()
+		/*if(LoadGame(filename) == 0)
 		{
 			
 			GtkWidget* d;
@@ -1819,7 +1810,7 @@ void loadGame ()
 				"Could not open the selected ROM file.");
 			gtk_dialog_run(GTK_DIALOG(d));
 			gtk_widget_destroy(d);
-		}
+		}*/
 		resizeGtkWindow();
 		g_free(filename);
 	}
@@ -2477,6 +2468,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	GtkRequisition req;
 	gtk_widget_size_request(GTK_WIDGET(MainWindow), &req);
 	gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
+	gtkIsStarted = true;
 	 
 	return 0;
 }

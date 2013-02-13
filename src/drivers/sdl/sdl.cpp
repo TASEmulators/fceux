@@ -885,10 +885,14 @@ void FCEUD_Message(const char *text)
 void FCEUD_PrintError(const char *errormsg)
 {
 #ifdef GTK
-	GtkWidget* d;
-	d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL,        GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, errormsg);
-	gtk_dialog_run(GTK_DIALOG(d));
-	gtk_widget_destroy(d);
+	//if(noGui == 0)
+	if(gtkIsStarted == true)
+	{
+		GtkWidget* d;
+		d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL,        GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, errormsg);
+		gtk_dialog_run(GTK_DIALOG(d));
+		gtk_widget_destroy(d);
+	}
 #endif
 
 	fprintf(stderr, "%s\n", errormsg);

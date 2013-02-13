@@ -25,6 +25,7 @@ extern GtkWidget* MainWindow;
 extern GtkWidget* evbox;
 extern GtkRadioAction* stateSlot;
 extern int GtkMouseData[3];
+extern bool gtkIsStarted;
 int InitGTKSubsystem(int argc, char** argv);
 void pushOutputToGTK(const char* str);
 void showGui(bool b);
