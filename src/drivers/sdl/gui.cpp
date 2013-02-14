@@ -1534,7 +1534,7 @@ void loadFdsBios ()
 	
 	filterDiskSys = gtk_file_filter_new();
 	gtk_file_filter_add_pattern(filterDiskSys, "disksys.rom");
-	gtk_file_filter_set_name(filterDiskSys, "FDS BIOS");
+	gtk_file_filter_set_name(filterDiskSys, "disksys.rom");
 	
 	filterRom = gtk_file_filter_new();
 	gtk_file_filter_add_pattern(filterRom, "*.rom");
@@ -1558,22 +1558,24 @@ void loadFdsBios ()
 		char* filename;
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		// copy BIOS file to proper place (~/.fceux/disksys.rom)
-		std::ifstream f1 (filename,std::fstream::binary);
-		std::string fn_out = FCEU_MakeFName(FCEUMKF_FDSROM, 0, "");
-		std::ofstream f2 (fn_out.c_str(),std::fstream::trunc|std::fstream::binary);
-		gtk_widget_destroy (fileChooser);
-		GtkWidget* d;
-		d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, 
+		std::ifstream fdsBios (filename,std::fstream::binary);
+		std::string output_filename = FCEU_MakeFName(FCEUMKF_FDSROM, 0, "");
+		std::ofstream outFile (output_filename.c_str(),std::fstream::trunc|std::fstream::binary);
+		outFile<<fdsBios.rdbuf();
+		if(outFile.fail())
+		{
+			FCEUD_PrintError("Error copying the FDS BIOS file.");
+		}
+		else
+		{	
+			GtkWidget* d;
+			d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, 
 			"Famicom Disk System BIOS loaded.  If you are you having issues, make sure your BIOS file is 8KB in size.");
-		gtk_dialog_run(GTK_DIALOG(d));
-		gtk_widget_destroy(d);
-	
-		f2<<f1.rdbuf();
-		g_free(filename);
+			gtk_dialog_run(GTK_DIALOG(d));
+			gtk_widget_destroy(d);
+		}
 	}
-	else
-		gtk_widget_destroy (fileChooser);
-
+	gtk_widget_destroy (fileChooser);
 }
 
 // TODO: is there somewhere else we can move this?  works for now though
