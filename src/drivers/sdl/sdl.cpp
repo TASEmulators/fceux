@@ -885,8 +885,7 @@ void FCEUD_Message(const char *text)
 void FCEUD_PrintError(const char *errormsg)
 {
 #ifdef GTK
-	//if(noGui == 0)
-	if(gtkIsStarted == true)
+	if(gtkIsStarted == true && noGui == 0)
 	{
 		GtkWidget* d;
 		d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL,        GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, errormsg);
