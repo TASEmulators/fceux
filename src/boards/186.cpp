@@ -22,14 +22,14 @@
 
 #include "mapinc.h"
 
-static uint8 SWRAM[2816];
+static uint8 SWRAM[3072];
 static uint8 *WRAM = NULL;
 static uint8 regs[4];
 
 static SFORMAT StateRegs[] =
 {
 	{ regs, 4, "DREG" },
-	{ SWRAM, 2816, "SWRM" },
+	{ SWRAM, 3072, "SWRM" },
 	{ 0 }
 };
 
@@ -67,8 +67,8 @@ static void M186Power(void) {
 	SetWriteHandler(0x6000, 0xFFFF, CartBW);
 	SetReadHandler(0x4200, 0x43FF, M186Read);
 	SetWriteHandler(0x4200, 0x43FF, M186Write);
-	SetReadHandler(0x4400, 0x4EFF, ASWRAM);
-	SetWriteHandler(0x4400, 0x4EFF, BSWRAM);
+	SetReadHandler(0x4400, 0x4FFF, ASWRAM);
+	SetWriteHandler(0x4400, 0x4FFF, BSWRAM);
 	regs[0] = regs[1] = regs[2] = regs[3];
 	Sync();
 }

@@ -74,7 +74,7 @@ static uint8 *malloced[32];
 static uint32 mallocedsizes[32];
 
 static int FixRomSize(uint32 size, uint32 minimum) {
-	uint32 x = 1; //mbg merge 7/17/06 made uint
+	uint32 x = 1;
 
 	if (size < minimum)
 		return minimum;
@@ -348,6 +348,7 @@ static BMAPPING bmap[] = {
 	{ "DANCE", UNLOneBus_Init, 0 }, // redundant
 	{ "DANCE2000", UNLD2000_Init, 0 },
 	{ "DREAMTECH01", DreamTech01_Init, 0 },
+	{ "DSOUNDV1", UNLDSOUNDV1_Init, 0 },
 	{ "EDU2000", UNLEDU2000_Init, 0 },
 	{ "EKROM", EKROM_Init, 0 },
 	{ "ELROM", ELROM_Init, 0 },
@@ -377,6 +378,7 @@ static BMAPPING bmap[] = {
 	{ "LH10", LH10_Init, 0 },
 	{ "LH32", LH32_Init, 0 },
 	{ "LH53", LH53_Init, 0 },
+	{ "MALISB", UNLMaliSB_Init, 0 },
 	{ "MARIO1-MALEE2", MALEE_Init, 0 },
 	{ "MHROM", MHROM_Init, 0 },
 	{ "N625092", UNLN625092_Init, 0 },

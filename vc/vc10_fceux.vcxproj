@@ -308,6 +308,7 @@
     <ClCompile Include="..\src\boards\bb.cpp" />
     <ClCompile Include="..\src\boards\cityfighter.cpp" />
     <ClCompile Include="..\src\boards\dance2000.cpp" />
+    <ClCompile Include="..\src\boards\dsoundv1.cpp" />
     <ClCompile Include="..\src\boards\famicombox.cpp" />
     <ClCompile Include="..\src\boards\ffe.cpp" />
     <ClCompile Include="..\src\boards\ks7012.cpp" />

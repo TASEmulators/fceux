@@ -38,6 +38,8 @@ static void Sync(void) {
 		setchr1(0x1000 + (x << 10), DRegs[2 + x]);
 	setprg8(0x8000, DRegs[6]);
 	setprg8(0xa000, DRegs[7]);
+	setprg8(0xc000, ~1);
+	setprg8(0xe000, ~0);
 }
 
 static void StateRestore(int version) {
@@ -60,10 +62,9 @@ static DECLFW(M206Write) {
 }
 
 static void M206Power(void) {
-	setprg8(0xc000, 0xE);
-	setprg8(0xe000, 0xF);
 	cmd = 0;
-	memset(DRegs, 0, 8);
+	DRegs[6] = 0;
+	DRegs[7] = 1;
 	Sync();
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
 	SetWriteHandler(0x8000, 0xFFFF, M206Write);

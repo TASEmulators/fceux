@@ -154,7 +154,7 @@ static void DoAYSQ(int x) {
 	CAYBC[x] = end;
 
 	if (amp && !(sreg[0x7] & (1 << x)))
- 		for (V = start; V < end; V++) {
+		for (V = start; V < end; V++) {
 			if (dcount[x])
 				Wave[V >> 4] += amp;
 			vcount[x] -= nesincsize;

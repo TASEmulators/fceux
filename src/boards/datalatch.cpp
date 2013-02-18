@@ -435,7 +435,10 @@ void Mapper240_Init(CartInfo *info) {
 static void M241Sync(void) {
 	setchr8(0);
 	setprg8r(0x10, 0x6000, 0);
-	setprg32(0x8000, latche);
+	if(latche & 0x80)
+		setprg32(0x8000, latche | 8);   // no 241 actually, but why not afterall?
+	else
+		setprg32(0x8000, latche);
 }
 
 void Mapper241_Init(CartInfo *info) {

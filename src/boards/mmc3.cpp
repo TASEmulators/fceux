@@ -749,8 +749,9 @@ static void M115CW(uint32 A, uint8 V) {
 }
 
 static DECLFW(M115Write) {
-	if (A == 0x5080) EXPREGS[2] = V;
-	if (A == 0x6000)
+	if (A == 0x5080)
+		EXPREGS[2] = V; // Extra prot hardware 2-in-1 mode
+	else if (A == 0x6000)
 		EXPREGS[0] = V;
 	else if (A == 0x6001)
 		EXPREGS[1] = V;
@@ -772,7 +773,7 @@ void Mapper115_Init(CartInfo *info) {
 	cwrap = M115CW;
 	pwrap = M115PW;
 	info->Power = M115Power;
-	AddExState(EXPREGS, 2, 0, "EXPR");
+	AddExState(EXPREGS, 3, 0, "EXPR");
 }
 
 // ---------------------------- Mapper 118 ------------------------------
@@ -986,17 +987,11 @@ void Mapper195_Init(CartInfo *info) {
 // game
 
 static void M196PW(uint32 A, uint8 V) {
-	if (EXPREGS[0]) // Tenchi o Kurau II - Shokatsu Koumei Den (J) (C).nes
+	if (EXPREGS[0])
 		setprg32(0x8000, EXPREGS[1]);
 	else
 		setprg8(A, V);
-//	setprg8(A,(V&3)|((V&8)>>1)|((V&4)<<1));    // Mali Splash Bomb
 }
-
-//static void M196CW(uint32 A, uint8 V)
-//{
-//	setchr1(A,(V&0xDD)|((V&0x20)>>4)|((V&2)<<4));
-//}
 
 static DECLFW(Mapper196Write) {
 	if (A >= 0xC000) {
@@ -1004,7 +999,6 @@ static DECLFW(Mapper196Write) {
 		MMC3_IRQWrite(A, V);
 	} else {
 		A = (A & 0xFFFE) | ((A >> 2) & 1) | ((A >> 3) & 1) | ((A >> 1) & 1);
-//		A=(A&0xFFFE)|((A>>3)&1);                        // Mali Splash Bomb
 		MMC3_CMDWrite(A, V);
 	}
 }
@@ -1025,8 +1019,42 @@ static void Mapper196Power(void) {
 void Mapper196_Init(CartInfo *info) {
 	GenMMC3_Init(info, 128, 128, 0, 0);
 	pwrap = M196PW;
-//	cwrap=M196CW;    // Mali Splash Bomb
 	info->Power = Mapper196Power;
+}
+
+// ---------------------------- Mali Splash Bomb----------------------------
+// The same board as for 196 mapper games, but with additional data bit swap
+// Also, it is impossible to work on the combined 196 mapper source with
+// all data bits merged, because it's using one of them as 8000 reg...
+
+static void UNLMaliSBPW(uint32 A, uint8 V) {
+	setprg8(A, (V & 3)|((V & 8) >> 1)|((V & 4) << 1));
+}
+
+static void UNLMaliSBCW(uint32 A, uint8 V) {
+	setchr1(A, (V & 0xDD) | ((V & 0x20) >> 4) | ((V & 2) << 4));
+}
+
+static DECLFW(UNLMaliSBWrite) {
+	if (A >= 0xC000) {
+		A = (A & 0xFFFE) | ((A >> 2) & 1) | ((A >> 3) & 1);
+		MMC3_IRQWrite(A, V);
+	} else {
+		A = (A & 0xFFFE) | ((A >> 3) & 1);
+		MMC3_CMDWrite(A, V);
+	}
+}
+
+static void UNLMaliSBPower(void) {
+	GenMMC3Power();
+	SetWriteHandler(0x8000, 0xFFFF, UNLMaliSBWrite);
+}
+
+void UNLMaliSB_Init(CartInfo *info) {
+	GenMMC3_Init(info, 128, 128, 0, 0);
+	pwrap = UNLMaliSBPW;
+	cwrap = UNLMaliSBCW;
+	info->Power = UNLMaliSBPower;
 }
 
 // ---------------------------- Mapper 197 -------------------------------

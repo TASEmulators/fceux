@@ -63,9 +63,10 @@ static DECLFR(M208ProtRead) {
 static void M208Power(void) {
 	EXPREGS[5] = 3;
 	GenMMC3Power();
-	SetWriteHandler(0x4800, 0x4FFF, M208Write);
+	SetWriteHandler(0x4800, 0x4fff, M208Write);
+	SetWriteHandler(0x6800, 0x6fff, M208Write);
 	SetWriteHandler(0x5000, 0x5fff, M208ProtWrite);
-	SetReadHandler(0x5800, 0x5FFF, M208ProtRead);
+	SetReadHandler(0x5800, 0x5fff, M208ProtRead);
 	SetReadHandler(0x8000, 0xffff, CartBR);
 }
 

@@ -45,7 +45,7 @@
 extern SFORMAT FCEUVSUNI_STATEINFO[];
 
 //mbg merge 6/29/06 - these need to be global
-uint8 *trainerpoo = 0;
+uint8 *trainerpoo = NULL;
 uint8 *ROM = NULL;
 uint8 *VROM = NULL;
 uint8 *ExtraNTARAM = NULL;
@@ -233,7 +233,6 @@ struct BADINF {
 	char *name;
 	uint32 type;
 };
-
 
 static struct BADINF BadROMImages[] =
 {
@@ -719,7 +718,10 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 
 	MapperNo = (head.ROM_type >> 4);
 	MapperNo |= (head.ROM_type2 & 0xF0);
-	Mirroring = (head.ROM_type & 1);
+	if (head.ROM_type & 8) {
+		Mirroring = 2;
+	} else
+		Mirroring = (head.ROM_type & 1);
 
 	if (!head.ROM_size)
 		ROM_size = 256;
@@ -739,10 +741,6 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 			round = false;
 			break;
 		}
-	}
-
-	if (head.ROM_type & 8) {
-		Mirroring = 2;
 	}
 
 	if ((ROM = (uint8*)FCEU_malloc(ROM_size << 14)) == NULL)
