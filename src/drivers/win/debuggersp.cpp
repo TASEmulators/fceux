@@ -67,7 +67,8 @@ int isHex(char c)
 **/
 void replaceString(char* src, const char* r, const char* w)
 {
-	char buff[1001] = {0};
+	static char buff[1001];
+	buff[0] = 0;
 	char* pos = src;
 	char* beg = src;
 

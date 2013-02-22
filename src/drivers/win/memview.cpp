@@ -31,12 +31,17 @@
 #include "debugger.h"
 #include "cdlogger.h"
 #include "memviewsp.h"
+#include "debuggersp.h"
 #include "cheat.h"
 #include <assert.h>
 #include "main.h"
 #include "string.h"
 #include "help.h"
 #include "Win32InputBox.h"
+
+extern Name* lastBankNames;
+extern Name* loadedBankNames;
+extern Name* ramBankNames;
 
 using namespace std;
 
@@ -540,16 +545,53 @@ void UpdateMemoryView(int draw_all)
 	return;
 }
 
+char EditString[3][20] = {"RAM","PPU","ROM"};
+
 void UpdateCaption()
 {
-	char str[100];
-	char EditString[3][20] = {"RAM","PPU","ROM"};
+	static char str[1000];
+	static char addrName[1000];
+	static char addrNameCopy[1000];
 
-	if(CursorEndAddy == -1){
-		sprintf(str,"Hex Editor - %s Offset 0x%06x",EditString[EditingMode],CursorStartAddy);
-	} else {
-		sprintf(str,"Hex Editor - %s Offset 0x%06x - 0x%06x, 0x%x bytes selected ",
-			EditString[EditingMode],CursorStartAddy,CursorEndAddy,CursorEndAddy-CursorStartAddy+1);
+	if (CursorEndAddy == -1)
+	{
+		sprintf(str, "Hex Editor - %s Offset 0x%06x",
+			EditString[EditingMode], CursorStartAddy);
+		if (EditingMode == 0 && symbDebugEnabled)
+		{
+			// when watching RAM we may as well see symbolic names
+			sprintf(addrName, "$%04X", CursorStartAddy);
+			strcpy(addrNameCopy, addrName);
+			// try to find the name for this address in loadedBankNames
+			replaceNames(ramBankNames, addrName);
+			if (strcmp(addrName, addrNameCopy))
+			{
+				strcat(str, " - ");
+				strcat(str, addrName);
+			} else
+			{
+				// name was not found in ramBankNames, try loadedBankNames
+				replaceNames(loadedBankNames, addrName);
+				if (strcmp(addrName, addrNameCopy))
+				{
+					strcat(str, " - ");
+					strcat(str, addrName);
+				} else
+				{
+					// name was not found in ramBankNames, try loadedBankNames
+					replaceNames(lastBankNames, addrName);
+					if (strcmp(addrName, addrNameCopy))
+					{
+						strcat(str, " - ");
+						strcat(str, addrName);
+					}
+				}
+			}
+		}
+	} else
+	{
+		sprintf(str, "Hex Editor - %s Offset 0x%06x - 0x%06x, 0x%x bytes selected ",
+			EditString[EditingMode], CursorStartAddy, CursorEndAddy, CursorEndAddy - CursorStartAddy + 1);
 	}
 	SetWindowText(hMemView,str);
 	return;
