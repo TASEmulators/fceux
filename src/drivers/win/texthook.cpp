@@ -683,7 +683,7 @@ int TextHookerSaveTableFile(){
 
 	//init the "Save File" dialogue
 	const char filter[]="Table Files (*.THT)\0*.tht\0All Files (*.*)\0*.*\0\0";
-	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
+	char nameo[2048];
 	OPENFILENAME ofn;
 	//StopSound(); //mbg merge 6/30/08
 	memset(&ofn,0,sizeof(ofn));

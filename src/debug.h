@@ -76,6 +76,7 @@ void LogCDVectors(int which);
 void LogCDData(uint8 *opcode, uint16 A, int size);
 extern volatile int codecount, datacount, undefinedcount;
 extern unsigned char *cdloggerdata;
+extern unsigned int cdloggerdataSize;
 
 extern int debug_loggingCD;
 static INLINE void FCEUI_SetLoggingCD(int val) { debug_loggingCD = val; }

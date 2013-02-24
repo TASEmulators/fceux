@@ -370,6 +370,7 @@ int condition(watchpointinfo* wp)
 
 volatile int codecount, datacount, undefinedcount;
 unsigned char *cdloggerdata;
+unsigned int cdloggerdataSize = 0;
 static int indirectnext;
 
 int debug_loggingCD;

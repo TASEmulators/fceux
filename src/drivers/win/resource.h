@@ -611,12 +611,15 @@
 #define IDC_NOTES_TO_SUBTITLES          1203
 #define IDC_MATCH_CASE                  1203
 #define IDC_COPY_INPUT                  1203
+#define IDC_AUTORESUMECDLOGGING         1203
 #define IDC_VOLUMEGROUP                 1204
 #define IDC_OMITBLANK                   1204
 #define IDC_CHECK3                      1204
 #define IDC_CHECK_MARKERS               1204
 #define IDC_RECORDING                   1204
 #define IDC_COPY_MARKERS                1204
+#define IDC_AUTORESUMECDLOGGING2        1204
+#define IDC_AUTOSAVECDL                 1204
 #define IDC_RAMLIST                     1205
 #define IDC_CHECK4                      1205
 #define IDC_CHECK_BOOKMARKS             1205
@@ -720,6 +723,10 @@
 #define ID_CANCEL                       1281
 #define IDC_AUTOSAVE_PROJECT            1282
 #define IDC_SILENT_AUTOSAVE             1283
+#define ID_CHR1                         1283
+#define ID_CHR2                         1284
+#define ID_CHR3                         1285
+#define ID_STATIC                       1286
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1161,18 +1168,20 @@
 #define ID_ENABLE_AUTORESUME            40579
 #define ID_CONFIG_COMPACTQUICKSAVING    40580
 #define ID_CONFIG_SAVING_OPTIONS        40581
+#define ID_CDLFILENAME                  40582
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define IDC_BOOKMARK_NAME_TEXT          65535
+#define ID_CDL                          65535
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        290
-#define _APS_NEXT_COMMAND_VALUE         40582
-#define _APS_NEXT_CONTROL_VALUE         1283
+#define _APS_NEXT_COMMAND_VALUE         40583
+#define _APS_NEXT_CONTROL_VALUE         1287
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

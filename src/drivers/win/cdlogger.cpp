@@ -35,10 +35,20 @@
 
 using namespace std;
 
+bool LoadCDLog(const char* nameo);
 void LoadCDLogFile();
 void SaveCDLogFileAs();
 void SaveCDLogFile();
 void SaveStrippedRom(int invert);
+void CDLoggerROMClosed();
+void CDLoggerROMChanged();
+void CDLoggerPPUChanged();
+bool PauseLogging();
+void StartLogging();
+void FreeLog();
+void InitLog();
+void ResetLog();
+void RenameLog(const char* newName);
 
 extern iNES_HEADER head; //defined in ines.c
 extern uint8 *trainerpoo;
@@ -46,9 +56,12 @@ extern uint8 *trainerpoo;
 //---------CDLogger VROM
 extern volatile int rendercount, vromreadcount, undefinedvromcount;
 extern unsigned char *cdloggervdata;
+extern unsigned int cdloggerVideoDataSize;
 extern int newppu;
 
 int CDLogger_wndx=0, CDLogger_wndy=0;
+bool autosaveCDL = true;
+bool autoresumeCDLogging = true;
 
 extern uint8 *NSFDATA;
 extern int NSFMaxBank;
@@ -56,20 +69,20 @@ static uint8 NSFLoadLow;
 static uint8 NSFLoadHigh;
 
 HWND hCDLogger;
-char loadedcdfile[1024];
+char loadedcdfile[2048] = {0};
 
-//Prototypes
-void LoadCDLog (const char* nameo);
-
-BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	switch(uMsg) {
+BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch(uMsg)
+	{
 		case WM_DROPFILES:
 			{
 				UINT len;
 				char *ftmp;
 
 				len=DragQueryFile((HDROP)wParam,0,0,0)+1;
-				if((ftmp=(char*)malloc(len))) {
+				if((ftmp=(char*)malloc(len)))
+				{
 					DragQueryFile((HDROP)wParam,0,ftmp,len);
 					string fileDropped = ftmp;
 					//adelikat:  Drag and Drop only checks file extension, the internal functions are responsible for file error checking
@@ -90,16 +103,15 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 			break;
 
-		case WM_MOVE: {
-			if (!IsIconic(hwndDlg)) {
-			RECT wrect;
-			GetWindowRect(hwndDlg,&wrect);
-			CDLogger_wndx = wrect.left;
-			CDLogger_wndy = wrect.top;
-
-			#ifdef WIN32
-			WindowBoundsCheckNoResize(CDLogger_wndx,CDLogger_wndy,wrect.right);
-			#endif
+		case WM_MOVE:
+		{
+			if (!IsIconic(hwndDlg))
+			{
+				RECT wrect;
+				GetWindowRect(hwndDlg,&wrect);
+				CDLogger_wndx = wrect.left;
+				CDLogger_wndy = wrect.top;
+				WindowBoundsCheckNoResize(CDLogger_wndx,CDLogger_wndy,wrect.right);
 			}
 			break;
 		};
@@ -108,78 +120,45 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			if (CDLogger_wndy==-32000) CDLogger_wndy=0;
 			SetWindowPos(hwndDlg,0,CDLogger_wndx,CDLogger_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			hCDLogger = hwndDlg;
-			codecount = datacount = rendercount = vromreadcount = 0;
-			undefinedcount = PRGsize[0];
-			cdloggerdata = (unsigned char*)malloc(PRGsize[0]); //mbg merge 7/18/06 added cast
-			ZeroMemory(cdloggerdata,PRGsize[0]);
-			if(CHRsize[0] != 0)
-			{
-				undefinedvromcount = CHRsize[0];
-				cdloggervdata = (unsigned char*)malloc(CHRsize[0]);
-				ZeroMemory(cdloggervdata,CHRsize[0]);
-			}
+			InitLog();
+			ResetLog();
+			RenameLog("");
+			SetDlgItemText(hCDLogger, ID_CDLFILENAME, loadedcdfile);
+			CheckDlgButton(hCDLogger, IDC_AUTOSAVECDL, autosaveCDL ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hCDLogger, IDC_AUTORESUMECDLOGGING, autoresumeCDLogging ? BST_CHECKED : BST_UNCHECKED);
+			CDLoggerPPUChanged();
 			break;
 		case WM_CLOSE:
 		case WM_QUIT:
-								if((logging) && (logging_options & LOG_NEW_INSTRUCTIONS)){
-									MessageBox(hCDLogger,
-"The Trace logger is currently using this for some of its features.\
- Please turn the trace logger off and try again.","Unable to Pause Code/Data Logger", MB_OK);
-									break;
-								}
-			FCEUI_SetLoggingCD(0);
-			free(cdloggerdata);
-			free(cdloggervdata);
-			cdloggerdata=0;
-			cdloggervdata=0;
-			hCDLogger = 0;
-			EndDialog(hwndDlg,0);
+			if (PauseLogging())
+			{
+				FreeLog();
+				RenameLog("");
+				hCDLogger = 0;
+				EndDialog(hwndDlg,0);
+			}
 			break;
 		case WM_COMMAND:
-			switch(HIWORD(wParam)) {
+			switch(HIWORD(wParam))
+			{
 				case BN_CLICKED:
-					switch(LOWORD(wParam)) {
+				{
+					switch(LOWORD(wParam))
+					{
 						case BTN_CDLOGGER_RESET:
-							codecount = datacount = rendercount = vromreadcount = 0;
-							undefinedcount = PRGsize[0];
-							ZeroMemory(cdloggerdata,PRGsize[0]);
-							if(CHRsize[0] != 0)
-							{
-								undefinedvromcount = CHRsize[0];
-								ZeroMemory(cdloggervdata,CHRsize[0]);
-							}
+						{
+							ResetLog();
 							UpdateCDLogger();
 							break;
+						}
 						case BTN_CDLOGGER_LOAD:
 							LoadCDLogFile();
 							break;
 						case BTN_CDLOGGER_START_PAUSE:
-							if(FCEUI_GetLoggingCD()){
-								if((logging) && (logging_options & LOG_NEW_INSTRUCTIONS)){
-									MessageBox(hCDLogger,
-"The Trace logger is currently using this for some of its features.\
- Please turn the trace logger off and try again.","Unable to Pause Code/Data Logger", MB_OK);
-									break;
-								}
-								FCEUI_SetLoggingCD(0);
-								EnableTracerMenuItems();
-								SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Start");
-							}
-							else{
-								if(!newppu)
-								{
-									if(MessageBox(hCDLogger,
-"In order for CHR data logging to take effect, the New PPU engine must also be enabled.\
- Would you like to enable New PPU engine now?","Enable New PPU engine?",
-										MB_YESNO) == IDYES)
-									{
-										FCEU_TogglePPU();
-									}
-								}
-								FCEUI_SetLoggingCD(1);
-								EnableTracerMenuItems();
-								SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Pause");
-							}
+							if (FCEUI_GetLoggingCD())
+								PauseLogging();
+							else
+								StartLogging();
 							break;
 						case BTN_CDLOGGER_SAVE_AS:
 							SaveCDLogFileAs();
@@ -193,8 +172,15 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						case BTN_CDLOGGER_SAVE_UNUSED:
 							SaveStrippedRom(1);
 							break;
+						case IDC_AUTOSAVECDL:
+							autosaveCDL = (IsDlgButtonChecked(hCDLogger, IDC_AUTOSAVECDL) == BST_CHECKED);
+							break;
+						case IDC_AUTORESUMECDLOGGING:
+							autoresumeCDLogging = (IsDlgButtonChecked(hCDLogger, IDC_AUTORESUMECDLOGGING) == BST_CHECKED);
+							break;
 					}
 					break;
+				}
 			}
 			break;
 		case WM_MOVING:
@@ -203,31 +189,36 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	return FALSE;
 }
 
-void LoadCDLog (const char* nameo)
+bool LoadCDLog(const char* nameo)
 {
 	FILE *FP;
 	int i,j;
 
-	strcpy(loadedcdfile,nameo);
-
-	FP = fopen(loadedcdfile,"rb");
-	if(FP == NULL){
-		FCEUD_PrintError("Error Opening File");
-		return;
+	FP = fopen(nameo, "rb");
+	if (FP == NULL)
+	{
+		FCEUD_PrintError("Error Opening CDL File!");
+		return false;
 	}
 
-	for(i = 0;i < (int)PRGsize[0];i++){
+	for(i = 0;i < (int)cdloggerdataSize;i++)
+	{
 		j = fgetc(FP);
-		if(j == EOF)break;
-		if((j & 1) && !(cdloggerdata[i] & 1))codecount++; //if the new byte has something logged and
-		if((j & 2) && !(cdloggerdata[i] & 2))datacount++; //and the old one doesn't. Then increment
-		if((j & 3) && !(cdloggerdata[i] & 3))undefinedcount--; //the appropriate counter.
+		if (j == EOF)
+			break;
+		if ((j & 1) && !(cdloggerdata[i] & 1))
+			codecount++; //if the new byte has something logged and
+		if ((j & 2) && !(cdloggerdata[i] & 2))
+			datacount++; //and the old one doesn't. Then increment
+		if ((j & 3) && !(cdloggerdata[i] & 3))
+			undefinedcount--; //the appropriate counter.
 		cdloggerdata[i] |= j;
 	}
 
-	if(CHRsize[0] != 0)
+	if(cdloggerVideoDataSize != 0)
 	{
-		for(i = 0;i < (int)CHRsize[0];i++){
+		for(i = 0;i < (int)cdloggerVideoDataSize;i++)
+		{
 			j = fgetc(FP);
 			if(j == EOF)break;
 			if((j & 1) && !(cdloggervdata[i] & 1))rendercount++; //if the new byte has something logged and
@@ -238,11 +229,13 @@ void LoadCDLog (const char* nameo)
 	}
 
 	fclose(FP);
+	RenameLog(nameo);
 	UpdateCDLogger();
-	return;
+	return true;
 }
 
-void LoadCDLogFile(){
+void LoadCDLogFile()
+{
 	const char filter[]="Code Data Log File (*.CDL)\0*.cdl\0\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
@@ -256,43 +249,60 @@ void LoadCDLogFile(){
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.hwndOwner = hCDLogger;
-	if(!GetOpenFileName(&ofn))return;
+	if (!GetOpenFileName(&ofn))
+		return;
 	LoadCDLog(nameo);
 }
 
 void SaveCDLogFileAs()
 {
 	const char filter[]="Code Data Log File (*.CDL)\0*.cdl\0All Files (*.*)\0*.*\0\0";
-	char nameo[2048];
+	char nameo[2048] = {0};
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Code Data Log File As...";
 	ofn.lpstrFilter=filter;
-	strcpy(nameo,GetRomName());
+	if (loadedcdfile[0])
+	{
+		strcpy(nameo, loadedcdfile);
+	} else
+	{
+		strcpy(nameo, LoadedRomFName);
+		strcat(nameo, ".cdl");
+	}
 	ofn.lpstrDefExt = "cdl";
-	ofn.lpstrFile=nameo;
-	ofn.nMaxFile=256;
-	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
+	ofn.lpstrFile = nameo;
+	ofn.nMaxFile = 256;
+	ofn.Flags = OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.hwndOwner = hCDLogger;
-	if(!GetSaveFileName(&ofn))
+	if (!GetSaveFileName(&ofn))
 		return;
-	strcpy(loadedcdfile,nameo);
+	RenameLog(nameo);
 	SaveCDLogFile();
 }
 
-void SaveCDLogFile(){ //todo make this button work before you've saved as
+void SaveCDLogFile()
+{
+	if (loadedcdfile[0] == 0)
+	{
+		char nameo[2048];
+		strcpy(nameo, LoadedRomFName);
+		strcat(nameo, ".cdl");
+		RenameLog(nameo);
+	}
+
 	FILE *FP;
-	FP = fopen(loadedcdfile,"wb");
-	if(FP == NULL) // removed deadly recurrence
+	FP = fopen(loadedcdfile, "wb");
+	if (FP == NULL)
 	{
 		FCEUD_PrintError("Error Saving File");
 		return;
 	}
-	fwrite(cdloggerdata,PRGsize[0],1,FP);
-	if(CHRsize[0] != 0)
-		fwrite(cdloggervdata,CHRsize[0],1,FP);
+	fwrite(cdloggerdata, cdloggerdataSize, 1, FP);
+	if(cdloggerVideoDataSize != 0)
+		fwrite(cdloggervdata, cdloggerVideoDataSize, 1, FP);
 	fclose(FP);
 }
 
@@ -318,7 +328,7 @@ bool DoCDLogger()
 
 void UpdateCDLogger()
 {
-	if(!hCDLogger)return;
+	if(!hCDLogger) return;
 
 	char str[50];
 	float fcodecount = codecount;
@@ -327,22 +337,22 @@ void UpdateCDLogger()
 	float fvromreadcount = vromreadcount;
 	float fundefinedcount = undefinedcount;
 	float fundefinedvromcount = undefinedvromcount;
-	float fromsize = PRGsize[0];
-	float fvromsize = CHRsize[0] != 0 ? CHRsize[0] : 1;
+	float fromsize = cdloggerdataSize;
+	float fvromsize = (cdloggerVideoDataSize != 0) ? cdloggerVideoDataSize : 1;
 
-	sprintf(str,"0x%06x %.2f%%",codecount,fcodecount/fromsize*100);
-	SetDlgItemText(hCDLogger,LBL_CDLOGGER_CODECOUNT,str);
-	sprintf(str,"0x%06x %.2f%%",datacount,fdatacount/fromsize*100);
-	SetDlgItemText(hCDLogger,LBL_CDLOGGER_DATACOUNT,str);
-	sprintf(str,"0x%06x %.2f%%",undefinedcount,fundefinedcount/fromsize*100);
-	SetDlgItemText(hCDLogger,LBL_CDLOGGER_UNDEFCOUNT,str);
+	sprintf(str,"0x%06x  %.2f%%", codecount, (fcodecount / fromsize) * 100);
+	SetDlgItemText(hCDLogger, LBL_CDLOGGER_CODECOUNT, str);
+	sprintf(str,"0x%06x  %.2f%%", datacount,(fdatacount / fromsize) * 100);
+	SetDlgItemText(hCDLogger, LBL_CDLOGGER_DATACOUNT, str);
+	sprintf(str,"0x%06x  %.2f%%", undefinedcount, (fundefinedcount / fromsize) * 100);
+	SetDlgItemText(hCDLogger, LBL_CDLOGGER_UNDEFCOUNT, str);
 
-	sprintf(str,"0x%06x %.2f%%",rendercount,frendercount/fvromsize*100);
-	SetDlgItemText(hCDLogger,LBL_CDLOGGER_RENDERCOUNT,str);
-	sprintf(str,"0x%06x %.2f%%",vromreadcount,fvromreadcount/fvromsize*100);
-	SetDlgItemText(hCDLogger,LBL_CDLOGGER_VROMREADCOUNT,str);
-	sprintf(str,"0x%06x %.2f%%",undefinedvromcount,fundefinedvromcount/fvromsize*100);
-	SetDlgItemText(hCDLogger,LBL_CDLOGGER_UNDEFVROMCOUNT,str);
+	sprintf(str,"0x%06x  %.2f%%", rendercount, (frendercount / fvromsize) * 100);
+	SetDlgItemText(hCDLogger, LBL_CDLOGGER_RENDERCOUNT, str);
+	sprintf(str,"0x%06x  %.2f%%", vromreadcount, (fvromreadcount / fvromsize) * 100);
+	SetDlgItemText(hCDLogger, LBL_CDLOGGER_VROMREADCOUNT, str);
+	sprintf(str,"0x%06x  %.2f%%", undefinedvromcount, (fundefinedvromcount / fvromsize) * 100);
+	SetDlgItemText(hCDLogger, LBL_CDLOGGER_UNDEFVROMCOUNT, str);
 	return;
 }
 
@@ -369,7 +379,7 @@ void SaveStrippedRom(int invert)
 
 	if(codecount == 0)
 	{
-		MessageBox(NULL, "Unable to Generate Stripped Rom. Get Something Logged and try again.", "Error", MB_OK);
+		MessageBox(NULL, "Unable to Generate Stripped ROM. Get Something Logged and try again.", "Error", MB_OK);
 		return;
 	}
 	memset(&ofn,0,sizeof(ofn));
@@ -441,9 +451,9 @@ void SaveStrippedRom(int invert)
 			fputc(pchar, fp);
 		}
 
-		if(CHRsize[0] != 0)
+		if(cdloggerVideoDataSize != 0)
 		{
-			// since an old ppu at least log the 2007 ppu read accesses, so need to save anyway...
+			// since the OldPPU at least logs the $2007 read accesses, we should save the data anyway
 			for(i = 0; i < (int)CHRsize[0]; i++) {
 				unsigned char vchar;
 				if(cdloggervdata[i] & 3)
@@ -457,3 +467,122 @@ void SaveStrippedRom(int invert)
 	fclose(fp);
 }
 
+void CDLoggerROMClosed()
+{
+	if (hCDLogger)
+	{
+		PauseLogging();
+		if (autosaveCDL)
+			SaveCDLogFile();
+	}
+}
+void CDLoggerROMChanged()
+{
+	if (hCDLogger)
+	{
+		FreeLog();
+		InitLog();
+		ResetLog();
+		RenameLog("");
+		UpdateCDLogger();
+	}
+
+	if (!autoresumeCDLogging)
+		return;
+
+	// try to load respective CDL file
+	char nameo[2048];
+	strcpy(nameo, LoadedRomFName);
+	strcat(nameo, ".cdl");
+
+	/*
+	// if the new CDL is the same (and arrays size is the same), don't do anything
+	if (hCDLogger
+		&& strcmp(loadedcdfile, nameo) == 0
+		&& PRGsize[0] == cdloggerdataSize
+		&& CHRsize[0] == cdloggerVideoDataSize)
+		return;
+	*/
+
+	FILE *FP;
+	FP = fopen(nameo, "rb");
+	if (FP != NULL)
+	{
+		// .cdl file with this ROM name exists
+		fclose(FP);
+		if (!hCDLogger)
+			DoCDLogger();
+		if (LoadCDLog(nameo))
+			StartLogging();
+	}
+}
+void CDLoggerPPUChanged()
+{
+	if (newppu)
+		SetDlgItemText(hCDLogger, ID_CHR1, "CHR Rendered");
+	else
+		SetDlgItemText(hCDLogger, ID_CHR1, "!!! Enable NewPPU !!!");
+}
+
+bool PauseLogging()
+{
+	// can't pause while Trace Logger is using
+	if ((logging) && (logging_options & LOG_NEW_INSTRUCTIONS))
+	{
+		MessageBox(hCDLogger, "The Trace Logger is currently using this for some of its features.\nPlease turn the Trace Logger off and try again.","Unable to Pause Code/Data Logger", MB_OK);
+		return false;
+	}
+	FCEUI_SetLoggingCD(0);
+	EnableTracerMenuItems();
+	SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Start");
+	return true;
+}
+void StartLogging()
+{
+	FCEUI_SetLoggingCD(1);
+	EnableTracerMenuItems();
+	SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Pause");
+}
+
+void FreeLog()
+{
+	if (cdloggerdata)
+	{
+		free(cdloggerdata);
+		cdloggerdata = 0;
+		cdloggerdataSize = 0;
+	}
+	if (cdloggervdata)
+	{
+		free(cdloggervdata);
+		cdloggervdata = 0;
+		cdloggerVideoDataSize = 0;
+	}
+}
+void InitLog()
+{
+	cdloggerdataSize = PRGsize[0];
+	cdloggerdata = (unsigned char*)malloc(cdloggerdataSize);
+	cdloggerVideoDataSize = CHRsize[0];
+	if(cdloggerVideoDataSize != 0)
+		cdloggervdata = (unsigned char*)malloc(cdloggerVideoDataSize);
+}
+void ResetLog()
+{
+	codecount = datacount = rendercount = vromreadcount = 0;
+	undefinedcount = cdloggerdataSize;
+	ZeroMemory(cdloggerdata, cdloggerdataSize);
+	if(cdloggerVideoDataSize != 0)
+	{
+		undefinedvromcount = cdloggerVideoDataSize;
+		ZeroMemory(cdloggervdata, cdloggerVideoDataSize);
+	}
+}
+void RenameLog(const char* newName)
+{
+	strcpy(loadedcdfile, newName);
+	if (hCDLogger)
+	{
+		SetDlgItemText(hCDLogger, ID_CDLFILENAME, loadedcdfile);
+	}
+}

@@ -53,9 +53,11 @@
 #ifdef WIN32
 #include "drivers/win/pref.h"
 
+extern void CDLoggerROMClosed();
+extern void CDLoggerROMChanged();
 extern void ResetDebugStatisticsCounters();
 extern void SetMainWindowText();
-
+extern void CDLoggerPPUChanged();
 extern bool TaseditorIsRecording();
 
 extern int32 fps_scale;
@@ -132,6 +134,7 @@ void FCEU_TogglePPU(void) {
 	}
 #ifdef WIN32
 	SetMainWindowText();
+	CDLoggerPPUChanged();
 #endif
 }
 
@@ -151,6 +154,7 @@ static void FCEU_CloseGame(void)
 		{
 			FCEUD_PrintError("Couldn't store debugging data");
 		}
+		CDLoggerROMClosed();
 #endif
 
 		if (FCEUnetplay) {
@@ -484,6 +488,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 
 #if defined (WIN32) || defined (WIN64)
 	DoDebuggerDataReload(); // Reloads data without reopening window
+	CDLoggerROMChanged();
 #endif
 
 	if (AutoResumePlay && (GameInfo->type != GIT_NSF))

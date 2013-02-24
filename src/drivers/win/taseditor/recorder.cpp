@@ -34,8 +34,8 @@ extern PIANO_ROLL piano_roll;
 extern EDITOR editor;
 
 // resources
-const char recordingCheckbox[10] = "Recording";
-const char recordingCheckboxBlankPattern[16] = "Recording blank";
+const char recordingCheckbox[11] = " Recording";
+const char recordingCheckboxBlankPattern[17] = " Recording blank";
 
 const char recordingModes[5][4] = {	"All",
 								"1P",

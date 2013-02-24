@@ -438,6 +438,7 @@ inline void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
 
 volatile int rendercount, vromreadcount, undefinedvromcount, LogAddress = -1;
 unsigned char *cdloggervdata;
+unsigned int cdloggerVideoDataSize = 0;
 
 int GetCHRAddress(int A){
 	int result;

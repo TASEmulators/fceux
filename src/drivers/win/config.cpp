@@ -96,6 +96,8 @@ extern int logging_options;
 extern int log_lines_option;
 extern int Tracer_wndx, Tracer_wndy;
 extern int CDLogger_wndx, CDLogger_wndy;
+extern bool autoresumeCDLogging;
+extern bool autosaveCDL;
 extern int GGConv_wndx, GGConv_wndy;
 extern int MetaPosX,MetaPosY;
 extern int MLogPosX,MLogPosY;
@@ -299,6 +301,8 @@ static CFGSTRUCT fceuconfig[] =
 	AC(Tracer_wndy),
 	AC(CDLogger_wndx),
 	AC(CDLogger_wndy),
+	AC(autosaveCDL),
+	AC(autoresumeCDLogging),
 	AC(GGConv_wndx),
 	AC(GGConv_wndy),
 	AC(TextHookerPosX),
