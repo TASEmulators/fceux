@@ -145,51 +145,46 @@ uint8 FASTCALL mmc5_PPURead(uint32 A) {
 	}
 }
 
-
-
-// ELROM seems to have 8KB of RAM
-// ETROM seems to have 16KB of WRAM
-// EWROM seems to have 32KB of WRAM
-
 cartdata MMC5CartList[] =
 {
-	{ 0x9c18762b, 2 }, /* L'Empereur */
-	{ 0x26533405, 2 },
-	{ 0x6396b988, 2 },
-	{ 0xaca15643, 2 }, /* Uncharted Waters */
-	{ 0xfe3488d1, 2 }, /* Dai Koukai Jidai */
-	{ 0x15fe6d0f, 2 }, /* BKAC             */
-	{ 0x39f2ce4b, 2 }, /* Suikoden              */
-	{ 0x8ce478db, 2 }, /* Nobunaga's Ambition 2 */
-	{ 0xeee9a682, 2 },
-	{ 0xf9b4240f, 2 },
+	{ 0x6f4e4312, 4 }, /* Aoki Ookami to Shiroki Mejika - Genchou Hishi */
+	{ 0x15fe6d0f, 2 }, /* Bandit Kings of Ancient China */
+	{ 0x671f23a8, 0 }, /* Castlevania III - Dracula's Curse (E) */
+	{ 0xcd4e7430, 0 }, /* Castlevania III - Dracula's Curse (KC) */
+	{ 0xed2465be, 0 }, /* Castlevania III - Dracula's Curse (U) */
+	{ 0xfe3488d1, 2 }, /* Daikoukai Jidai */
+	{ 0x0ec6c023, 1 }, /* Gemfire */
+	{ 0x0afb395e, 0 }, /* Gun Sight */
 	{ 0x1ced086f, 2 }, /* Ishin no Arashi */
-	{ 0xf540677b, 4 }, /* Nobunaga...Bushou Fuuun Roku */
-	{ 0x6f4e4312, 4 }, /* Aoki Ookami..Genchou */
-	{ 0xf011e490, 4 }, /* Romance of the 3 Kingdoms 2 */
-	{ 0x184c2124, 4 }, /* Sangokushi 2 */
-	{ 0xee8e6553, 4 },
+	{ 0x9cbadc25, 1 }, /* Just Breed */
+	{ 0x6396b988, 2 }, /* L'Empereur (J) */
+	{ 0x9c18762b, 2 }, /* L'Empereur (U) */
+	{ 0xb0480ae9, 0 }, /* Laser Invasion */
+	{ 0xb4735fac, 0 }, /* Metal Slader Glory */
+	{ 0xf540677b, 4 }, /* Nobunaga no Yabou - Bushou Fuuun Roku */
+	{ 0xeee9a682, 2 }, /* Nobunaga no Yabou - Sengoku Gunyuu Den (J) (PRG0) */
+	{ 0xf9b4240f, 2 }, /* Nobunaga no Yabou - Sengoku Gunyuu Den (J) (PRG1) */
+	{ 0x8ce478db, 2 }, /* Nobunaga's Ambition 2 */
+	{ 0xf011e490, 4 }, /* Romance of The Three Kingdoms II */
+	{ 0xbc80fb52, 1 }, /* Royal Blood */
+	{ 0x184c2124, 4 }, /* Sangokushi II (J) (PRG0) */
+	{ 0xee8e6553, 4 }, /* Sangokushi II (J) (PRG1) */
+	{ 0xd532e98f, 1 }, /* Shin 4 Nin Uchi Mahjong - Yakuman Tengoku */
+	{ 0x39f2ce4b, 2 }, /* Suikoden - Tenmei no Chikai */
+	{ 0xbb7f829a, 0 }, /* Uchuu Keibitai SDF */
+	{ 0xaca15643, 2 }, /* Uncharted Waters */
 };
 
-#define MMC5_NOCARTS        (sizeof(MMC5CartList) / sizeof(MMC5CartList[0]))
+#define MMC5_NOCARTS (sizeof(MMC5CartList) / sizeof(MMC5CartList[0]))
 int DetectMMC5WRAMSize(uint32 crc32) {
 	int x;
 	for (x = 0; x < MMC5_NOCARTS; x++) {
 		if (crc32 == MMC5CartList[x].crc32) {
-			FCEU_printf(" >8KB external WRAM present.  Use UNIF if you hack the ROM image.\n");
+			if(MMC5CartList[x].size > 1)
+				FCEU_printf(" >8KB external WRAM present.  Use UNIF if you hack the ROM image.\n");
 			return(MMC5CartList[x].size * 8);
 		}
 	}
-
-	//mbg 04-aug-08 - previously, this was returning 8KB
-	//but I changed it to return 64 because unlisted carts are probably homebrews, and they should probably use 64 (why not use it all?)
-	//ch4 10-dec-08 - then f***ng for what all this shit above? let's give em all this 64k shit! Damn
-	//               homebrew must use it's own emulators or standart features.
-	//adelikat 20-dec-08 - reverting back to return 64, sounds like it was changed back to 8 simply on principle.  FCEUX is all encompassing, and that include
-	//rom-hacking.  We want it to be the best emulator for such purposes.  So unless return 64 harms compatibility with anything else, I see now reason not to have it
-	//mbg 29-mar-09 - I should note that mmc5 is in principle capable of 64KB, even if no real carts ever supported it.
-	//This does not in principle break any games which share this mapper, and it should be OK for homebrew.
-	//if there are games which need 8KB instead of 64KB default then lets add them to the list
 	return 64;
 }
 
@@ -197,17 +192,11 @@ static void BuildWRAMSizeTable(void) {
 	int x;
 	for (x = 0; x < 8; x++) {
 		switch (MMC5WRAMsize) {
-		case 0: MMC5WRAMIndex[x] = 255; break; //X,X,X,X,X,X,X,X
-		case 1: MMC5WRAMIndex[x] = (x > 3) ? 255 : 0; break; //0,0,0,0,X,X,X,X
-		case 2: MMC5WRAMIndex[x] = (x & 4) >> 2; break; //0,0,0,0,1,1,1,1
-		case 4: MMC5WRAMIndex[x] = (x > 3) ? 255 : (x & 3); break; //0,1,2,3,X,X,X,X
-		case 8: MMC5WRAMIndex[x] = x; break; //0,1,2,3,4,5,6,7,8
-			//mbg 8/6/08 - i added this to support 64KB of wram
-			//now, I have at least one example (laser invasion) which actually uses size 1 but isnt in the crc list
-			//so, whereas before my change on 8/4/08 we would have selected size 1, now we select size 8
-			//this means that we could have just introduced an emulation bug, in case those games happened to
-			//address, say, page 3. with size 1 that would resolve to [0] but in size 8 it resolves to [3].
-			//so, you know what to do if there are problems.
+		case 0: MMC5WRAMIndex[x] = 255; break;                      //X,X,X,X,X,X,X,X
+		case 1: MMC5WRAMIndex[x] = (x > 3) ? 255 : 0; break;        //0,0,0,0,X,X,X,X
+		case 2: MMC5WRAMIndex[x] = (x & 4) >> 2; break;             //0,0,0,0,1,1,1,1
+		case 4: MMC5WRAMIndex[x] = (x > 3) ? 255 : (x & 3); break;  //0,1,2,3,X,X,X,X
+		case 8: MMC5WRAMIndex[x] = x; break; 						//0,1,2,3,4,5,6,7
 		}
 	}
 }
@@ -277,7 +266,6 @@ static void MMC5CHRB(void) {
 }
 
 static void MMC5WRAM(uint32 A, uint32 V) {
-	//printf("%02x\n",V);
 	V = MMC5WRAMIndex[V & 7];
 	if (V != 255) {
 		setprg8r(0x10, A, V);
@@ -349,12 +337,31 @@ static void MMC5PRG(void) {
 }
 
 static DECLFW(Mapper5_write) {
-	if (A >= 0x5120 && A <= 0x5127) {
-		mmc5ABMode = 0;
-		CHRBanksA[A & 7] = V | ((MMC50x5130 & 0x3) << 8); //if we had a test case for this then we could test this, but it hasnt been verified
-		//CHRBanksA[A&7]=V;
-		MMC5CHRA();
-	} else switch (A) {
+	switch (A) {
+		case 0x5100:
+			mmc5psize = V;
+			MMC5PRG();
+			break;
+		case 0x5101:
+			mmc5vsize = V;
+			if (!mmc5ABMode) {
+				MMC5CHRB();
+				MMC5CHRA();
+			} else {
+				MMC5CHRA();
+				MMC5CHRB();
+			}
+			break;
+		case 0x5102:
+			WRAMMaskEnable[0] = V;
+			break;
+		case 0x5103:
+			WRAMMaskEnable[1] = V;
+			break;
+		case 0x5104:
+			CHRMode = V;
+			MMC5HackCHRMode = V & 3;
+			break;
 		case 0x5105:
 		{
 			int x;
@@ -369,53 +376,50 @@ static DECLFW(Mapper5_write) {
 			NTAMirroring = V;
 			break;
 		}
-		case 0x5113: WRAMPage = V; MMC5WRAM(0x6000, V & 7); break;
-		case 0x5100: mmc5psize = V; MMC5PRG(); break;
-		case 0x5101:
-			mmc5vsize = V;
-			if (!mmc5ABMode) {
-				MMC5CHRB();
-				MMC5CHRA();
-			} else {
-				MMC5CHRA();
-				MMC5CHRB();
+		case 0x5106:
+			if (V != NTFill)
+				FCEU_dwmemset(MMC5fill, (V | (V << 8) | (V << 16) | (V << 24)), 0x3c0);
+			NTFill = V;
+			break;
+		case 0x5107:
+			if (V != ATFill) {
+				unsigned char moop = V | (V << 2) | (V << 4) | (V << 6);
+				FCEU_dwmemset(MMC5fill + 0x3c0, moop | (moop << 8) | (moop << 16) | (moop << 24), 0x40);
 			}
+			ATFill = V;
+			break;
+		case 0x5113:
+			WRAMPage = V;
+			MMC5WRAM(0x6000, V & 7);
 			break;
 		case 0x5114:
 		case 0x5115:
 		case 0x5116:
-		case 0x5117: PRGBanks[A & 3] = V; MMC5PRG(); break;
+		case 0x5117:
+			PRGBanks[A & 3] = V;
+			MMC5PRG();
+			break;
+		case 0x5120:
+		case 0x5121:
+		case 0x5122:
+		case 0x5123:
+		case 0x5124:
+		case 0x5125:
+		case 0x5126:
+		case 0x5127:
+			mmc5ABMode = 0;
+			CHRBanksA[A & 7] = V | ((MMC50x5130 & 0x3) << 8);
+			MMC5CHRA();
+			break;
 		case 0x5128:
 		case 0x5129:
 		case 0x512a:
 		case 0x512b:
 			mmc5ABMode = 1;
-			CHRBanksB[A & 3] = V;
+			CHRBanksB[A & 3] = V | ((MMC50x5130 & 0x3) << 8);
 			MMC5CHRB();
 			break;
-		case 0x5102: WRAMMaskEnable[0] = V; break;
-		case 0x5103: WRAMMaskEnable[1] = V; break;
-		case 0x5104: CHRMode = V; MMC5HackCHRMode = V & 3; break;
-		case 0x5106:
-			if (V != NTFill) {
-				uint32 t;
-				t = V | (V << 8) | (V << 16) | (V << 24);
-				FCEU_dwmemset(MMC5fill, t, 0x3c0);
-		}
-			NTFill = V;
-			break;
-		case 0x5107:
-			if (V != ATFill) {
-				unsigned char moop;
-				uint32 t;
-				moop = V | (V << 2) | (V << 4) | (V << 6);
-				t = moop | (moop << 8) | (moop << 16) | (moop << 24);
-				FCEU_dwmemset(MMC5fill + 0x3c0, t, 0x40);
-		}
-			ATFill = V;
-			break;
 		case 0x5130: MMC50x5130 = V; break;
-
 		case 0x5200: MMC5HackSPMode = V; break;
 		case 0x5201: MMC5HackSPScroll = (V >> 3) & 0x1F; break;
 		case 0x5202: MMC5HackSPPage = V & 0x3F; break;
@@ -434,10 +438,11 @@ static DECLFR(MMC5_ReadROMRAM) {
 }
 
 static DECLFW(MMC5_WriteROMRAM) {
-	if (A >= 0x8000)
-		if (MMC5ROMWrProtect[(A - 0x8000) >> 13]) return;
+	if ((A >= 0x8000) && (MMC5ROMWrProtect[(A - 0x8000) >> 13]))
+			return;
 	if (MMC5MemIn[(A - 0x6000) >> 13])
-		if (((WRAMMaskEnable[0] & 3) | ((WRAMMaskEnable[1] & 3) << 2)) == 6) Page[A >> 11][A] = V;
+		if (((WRAMMaskEnable[0] & 3) | ((WRAMMaskEnable[1] & 3) << 2)) == 6)
+			Page[A >> 11][A] = V;
 }
 
 static DECLFW(MMC5_ExRAMWr) {
@@ -446,17 +451,12 @@ static DECLFW(MMC5_ExRAMWr) {
 }
 
 static DECLFR(MMC5_ExRAMRd) {
-	// Not sure if this is correct, so I'll comment it out for now.
-//	if(MMC5HackCHRMode>=2)
-		return ExRAM[A & 0x3ff];
-//	else
-//		return(X.DB);
+	return ExRAM[A & 0x3ff];
 }
 
 static DECLFR(MMC5_read) {
 	switch (A) {
-	case 0x5204:
-	{
+	case 0x5204: {
 		uint8 x;
 		X6502_IRQEnd(FCEU_IQEXT);
 		x = MMC5IRQR;
@@ -466,8 +466,10 @@ static DECLFR(MMC5_read) {
 		MMC5IRQR &= 0x40;
 		return x;
 		}
-	case 0x5205: return(mul[0] * mul[1]);
-	case 0x5206: return((mul[0] * mul[1]) >> 8);
+	case 0x5205:
+		return(mul[0] * mul[1]);
+	case 0x5206:
+		return((mul[0] * mul[1]) >> 8);
 	}
 	return(X.DB);
 }
@@ -492,17 +494,10 @@ void MMC5Synco(void) {
 		MMC5CHRA();
 		MMC5CHRB();
 	}
+	FCEU_dwmemset(MMC5fill, NTFill | (NTFill << 8) | (NTFill << 16) | (NTFill << 24), 0x3c0);
 	{
-		uint32 t;
-		t = NTFill | (NTFill << 8) | (NTFill << 16) | (NTFill << 24);
-		FCEU_dwmemset(MMC5fill, t, 0x3c0);
-	}
-	{
-		unsigned char moop;
-		uint32 t;
-		moop = ATFill | (ATFill << 2) | (ATFill << 4) | (ATFill << 6);
-		t = moop | (moop << 8) | (moop << 16) | (moop << 24);
-		FCEU_dwmemset(MMC5fill + 0x3c0, t, 0x40);
+		unsigned char moop = ATFill | (ATFill << 2) | (ATFill << 4) | (ATFill << 6);
+		FCEU_dwmemset(MMC5fill + 0x3c0, moop | (moop << 8) | (moop << 16) | (moop << 24), 0x40);
 	}
 	X6502_IRQEnd(FCEU_IQEXT);
 	MMC5HackCHRMode = CHRMode & 3;
@@ -560,7 +555,7 @@ static void Do5PCM() {
 }
 
 static void Do5PCMHQ() {
-	uint32 V; //mbg merge 7/17/06 made uint32
+	uint32 V;
 	if (!(MMC5Sound.rawcontrol & 0x40) && MMC5Sound.raw)
 		for (V = MMC5Sound.BC[2]; V < SOUNDTS; V++)
 			WaveHi[V] += MMC5Sound.raw << 5;
@@ -643,7 +638,7 @@ static void Do5SQ(int P) {
 
 static void Do5SQHQ(int P) {
 	static int tal[4] = { 1, 2, 4, 6 };
-	uint32 V; //mbg merge 7/17/06 made uint32
+	uint32 V;
 	int32 amp, rthresh, wl;
 
 	wl = MMC5Sound.wl[P] + 1;
@@ -835,24 +830,22 @@ void Mapper5_Init(CartInfo *info) {
 }
 
 // ELROM seems to have 0KB of WRAM
-// EKROM seems to have 8KB of WRAM
-// ETROM seems to have 16KB of WRAM
-// EWROM seems to have 32KB of WRAM
-
-// ETROM and EWROM are battery-backed, EKROM isn't.
-
-void ETROM_Init(CartInfo *info) {
-	GenMMC5_Init(info, 16, info->battery);
-}
+// EKROM seems to have 8KB of WRAM, battery-backed
+// ETROM seems to have 16KB of WRAM, battery-backed
+// EWROM seems to have 32KB of WRAM, battery-backed
 
 void ELROM_Init(CartInfo *info) {
 	GenMMC5_Init(info, 0, 0);
 }
 
-void EWROM_Init(CartInfo *info) {
-	GenMMC5_Init(info, 32, info->battery);
-}
-
 void EKROM_Init(CartInfo *info) {
 	GenMMC5_Init(info, 8, info->battery);
+}
+
+void ETROM_Init(CartInfo *info) {
+	GenMMC5_Init(info, 16, info->battery);
+}
+
+void EWROM_Init(CartInfo *info) {
+	GenMMC5_Init(info, 32, info->battery);
 }
