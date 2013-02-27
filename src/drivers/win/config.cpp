@@ -98,6 +98,7 @@ extern int Tracer_wndx, Tracer_wndy;
 extern int CDLogger_wndx, CDLogger_wndy;
 extern bool autoresumeCDLogging;
 extern bool autosaveCDL;
+extern bool autoloadCDL;
 extern int GGConv_wndx, GGConv_wndy;
 extern int MetaPosX,MetaPosY;
 extern int MLogPosX,MLogPosY;
@@ -182,7 +183,7 @@ static CFGSTRUCT fceuconfig[] =
 	NAC("sound",soundo),
 	NAC("sicon",status_icon),
 
-    AC(newppu),
+	AC(newppu),
 
 	NACS("odroms",directory_names[0]),
 	NACS("odnonvol",directory_names[1]),
@@ -302,6 +303,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(CDLogger_wndx),
 	AC(CDLogger_wndy),
 	AC(autosaveCDL),
+	AC(autoloadCDL),
 	AC(autoresumeCDLogging),
 	AC(GGConv_wndx),
 	AC(GGConv_wndy),

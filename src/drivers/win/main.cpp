@@ -1082,3 +1082,25 @@ char *GetRomName()
 
 	return mystring;
 }
+
+char *GetRomPath()
+{
+	//The purpose of this function is to format the ROM name stored in LoadedRomFName
+	//And return a char array with just the name with path or extension
+	//The purpose of this function is to populate a save as dialog with the ROM name as a default filename
+	extern char LoadedRomFName[2048];	//Contains full path of ROM
+	std::string Rom;					//Will contain the formatted path
+	if(GameInfo)						//If ROM is loaded
+		{
+		char drv[PATH_MAX], dir[PATH_MAX], name[PATH_MAX], ext[PATH_MAX];
+		splitpath(LoadedRomFName,drv,dir,name,ext);	//Extract components of the ROM path
+		Rom = drv;						//Pull out the Path only
+		Rom.append(dir);
+		}
+	else
+		Rom = "";
+	char*mystring = (char*)malloc(2048*sizeof(char));
+	strcpy(mystring, Rom.c_str());		//Convert string to char*
+
+	return mystring;
+}

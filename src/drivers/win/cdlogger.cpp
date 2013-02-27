@@ -61,7 +61,8 @@ extern int newppu;
 
 int CDLogger_wndx=0, CDLogger_wndy=0;
 bool autosaveCDL = true;
-bool autoresumeCDLogging = true;
+bool autoloadCDL = true;
+bool autoresumeCDLogging = false;
 
 extern uint8 *NSFDATA;
 extern int NSFMaxBank;
@@ -91,7 +92,8 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					//-------------------------------------------------------
 					if (!(fileDropped.find(".cdl") == string::npos) && (fileDropped.find(".cdl") == fileDropped.length()-4))
 					{
-						LoadCDLog(fileDropped.c_str());
+						if(!LoadCDLog(fileDropped.c_str()))
+							FCEUD_PrintError("Error Opening CDL File!");
 					}
 					else
 					{
@@ -123,13 +125,23 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			InitLog();
 			ResetLog();
 			RenameLog("");
+			if (autoloadCDL) {
+				char nameo[2048];
+				strcpy(nameo, GetRomPath());
+				strcat(nameo, GetRomName());
+				strcat(nameo, ".cdl");
+				LoadCDLog(nameo);
+			}
 			SetDlgItemText(hCDLogger, ID_CDLFILENAME, loadedcdfile);
 			CheckDlgButton(hCDLogger, IDC_AUTOSAVECDL, autosaveCDL ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hCDLogger, IDC_AUTOLOADCDL, autoloadCDL ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hCDLogger, IDC_AUTORESUMECDLOGGING, autoresumeCDLogging ? BST_CHECKED : BST_UNCHECKED);
 			CDLoggerPPUChanged();
 			break;
 		case WM_CLOSE:
 		case WM_QUIT:
+			if (autosaveCDL)
+				SaveCDLogFile();
 			if (PauseLogging())
 			{
 				FreeLog();
@@ -175,6 +187,9 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						case IDC_AUTOSAVECDL:
 							autosaveCDL = (IsDlgButtonChecked(hCDLogger, IDC_AUTOSAVECDL) == BST_CHECKED);
 							break;
+						case IDC_AUTOLOADCDL:
+							autoloadCDL = (IsDlgButtonChecked(hCDLogger, IDC_AUTOLOADCDL) == BST_CHECKED);
+							break;
 						case IDC_AUTORESUMECDLOGGING:
 							autoresumeCDLogging = (IsDlgButtonChecked(hCDLogger, IDC_AUTORESUMECDLOGGING) == BST_CHECKED);
 							break;
@@ -196,10 +211,7 @@ bool LoadCDLog(const char* nameo)
 
 	FP = fopen(nameo, "rb");
 	if (FP == NULL)
-	{
-		FCEUD_PrintError("Error Opening CDL File!");
 		return false;
-	}
 
 	for(i = 0;i < (int)cdloggerdataSize;i++)
 	{
@@ -251,7 +263,8 @@ void LoadCDLogFile()
 	ofn.hwndOwner = hCDLogger;
 	if (!GetOpenFileName(&ofn))
 		return;
-	LoadCDLog(nameo);
+	if(!LoadCDLog(nameo))
+		FCEUD_PrintError("Error Opening CDL File!");
 }
 
 void SaveCDLogFileAs()
@@ -269,7 +282,7 @@ void SaveCDLogFileAs()
 		strcpy(nameo, loadedcdfile);
 	} else
 	{
-		strcpy(nameo, LoadedRomFName);
+		strcpy(nameo, GetRomName());
 		strcat(nameo, ".cdl");
 	}
 	ofn.lpstrDefExt = "cdl";
@@ -288,7 +301,8 @@ void SaveCDLogFile()
 	if (loadedcdfile[0] == 0)
 	{
 		char nameo[2048];
-		strcpy(nameo, LoadedRomFName);
+		strcpy(nameo, GetRomPath());
+		strcat(nameo, GetRomName());
 		strcat(nameo, ".cdl");
 		RenameLog(nameo);
 	}
@@ -386,7 +400,7 @@ void SaveStrippedRom(int invert)
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Stripped File As...";
-	strcpy(sromfilename,GetRomName());
+	strcpy(sromfilename, GetRomName());
 	if (GameInfo->type==GIT_NSF) {
 		ofn.lpstrFilter=NSFfilter;
 		ofn.lpstrDefExt = "nsf";
@@ -476,6 +490,7 @@ void CDLoggerROMClosed()
 			SaveCDLogFile();
 	}
 }
+
 void CDLoggerROMChanged()
 {
 	if (hCDLogger)
@@ -492,7 +507,8 @@ void CDLoggerROMChanged()
 
 	// try to load respective CDL file
 	char nameo[2048];
-	strcpy(nameo, LoadedRomFName);
+	strcpy(nameo, GetRomPath());
+	strcat(nameo, GetRomName());
 	strcat(nameo, ".cdl");
 
 	/*
