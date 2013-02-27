@@ -39,16 +39,16 @@ bool LoadCDLog(const char* nameo);
 void LoadCDLogFile();
 void SaveCDLogFileAs();
 void SaveCDLogFile();
-void SaveStrippedRom(int invert);
+void SaveStrippedROM(int invert);
 void CDLoggerROMClosed();
 void CDLoggerROMChanged();
 void CDLoggerPPUChanged();
-bool PauseLogging();
-void StartLogging();
-void FreeLog();
-void InitLog();
-void ResetLog();
-void RenameLog(const char* newName);
+bool PauseCDLogging();
+void StartCDLogging();
+void FreeCDLog();
+void InitCDLog();
+void ResetCDLog();
+void RenameCDLog(const char* newName);
 
 extern iNES_HEADER head; //defined in ines.c
 extern uint8 *trainerpoo;
@@ -59,17 +59,16 @@ extern unsigned char *cdloggervdata;
 extern unsigned int cdloggerVideoDataSize;
 extern int newppu;
 
-int CDLogger_wndx=0, CDLogger_wndy=0;
-bool autosaveCDL = true;
-bool autoloadCDL = true;
-bool autoresumeCDLogging = false;
-
 extern uint8 *NSFDATA;
 extern int NSFMaxBank;
 static uint8 NSFLoadLow;
 static uint8 NSFLoadHigh;
 
 HWND hCDLogger;
+int CDLogger_wndx=0, CDLogger_wndy=0;
+bool autosaveCDL = true;
+bool autoloadCDL = true;
+bool autoresumeCDLogging = false;
 char loadedcdfile[2048] = {0};
 
 BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -120,12 +119,13 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		case WM_INITDIALOG:
 			if (CDLogger_wndx==-32000) CDLogger_wndx=0; //Just in case
 			if (CDLogger_wndy==-32000) CDLogger_wndy=0;
-			SetWindowPos(hwndDlg,0,CDLogger_wndx,CDLogger_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
+			SetWindowPos(hwndDlg, 0, CDLogger_wndx, CDLogger_wndy, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			hCDLogger = hwndDlg;
-			InitLog();
-			ResetLog();
-			RenameLog("");
-			if (autoloadCDL) {
+			InitCDLog();
+			ResetCDLog();
+			RenameCDLog("");
+			if (autoloadCDL)
+			{
 				char nameo[2048];
 				strcpy(nameo, GetRomPath());
 				strcat(nameo, GetRomName());
@@ -140,14 +140,14 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			break;
 		case WM_CLOSE:
 		case WM_QUIT:
-			if (autosaveCDL)
-				SaveCDLogFile();
-			if (PauseLogging())
+			if (PauseCDLogging())
 			{
-				FreeLog();
-				RenameLog("");
+				if (autosaveCDL)
+					SaveCDLogFile();
+				FreeCDLog();
+				RenameCDLog("");
 				hCDLogger = 0;
-				EndDialog(hwndDlg,0);
+				EndDialog(hwndDlg, 0);
 			}
 			break;
 		case WM_COMMAND:
@@ -159,7 +159,7 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					{
 						case BTN_CDLOGGER_RESET:
 						{
-							ResetLog();
+							ResetCDLog();
 							UpdateCDLogger();
 							break;
 						}
@@ -168,9 +168,9 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							break;
 						case BTN_CDLOGGER_START_PAUSE:
 							if (FCEUI_GetLoggingCD())
-								PauseLogging();
+								PauseCDLogging();
 							else
-								StartLogging();
+								StartCDLogging();
 							break;
 						case BTN_CDLOGGER_SAVE_AS:
 							SaveCDLogFileAs();
@@ -179,10 +179,10 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							SaveCDLogFile();
 							break;
 						case BTN_CDLOGGER_SAVE_STRIPPED:
-							SaveStrippedRom(0);
+							SaveStrippedROM(0);
 							break;
 						case BTN_CDLOGGER_SAVE_UNUSED:
-							SaveStrippedRom(1);
+							SaveStrippedROM(1);
 							break;
 						case IDC_AUTOSAVECDL:
 							autosaveCDL = (IsDlgButtonChecked(hCDLogger, IDC_AUTOSAVECDL) == BST_CHECKED);
@@ -241,7 +241,7 @@ bool LoadCDLog(const char* nameo)
 	}
 
 	fclose(FP);
-	RenameLog(nameo);
+	RenameCDLog(nameo);
 	UpdateCDLogger();
 	return true;
 }
@@ -292,7 +292,7 @@ void SaveCDLogFileAs()
 	ofn.hwndOwner = hCDLogger;
 	if (!GetSaveFileName(&ofn))
 		return;
-	RenameLog(nameo);
+	RenameCDLog(nameo);
 	SaveCDLogFile();
 }
 
@@ -304,7 +304,7 @@ void SaveCDLogFile()
 		strcpy(nameo, GetRomPath());
 		strcat(nameo, GetRomName());
 		strcat(nameo, ".cdl");
-		RenameLog(nameo);
+		RenameCDLog(nameo);
 	}
 
 	FILE *FP;
@@ -370,7 +370,7 @@ void UpdateCDLogger()
 	return;
 }
 
-void SaveStrippedRom(int invert)
+void SaveStrippedROM(int invert)
 {
 	//this is based off of iNesSave()
 	//todo: make this support NSFs
@@ -485,7 +485,7 @@ void CDLoggerROMClosed()
 {
 	if (hCDLogger)
 	{
-		PauseLogging();
+		PauseCDLogging();
 		if (autosaveCDL)
 			SaveCDLogFile();
 	}
@@ -495,10 +495,10 @@ void CDLoggerROMChanged()
 {
 	if (hCDLogger)
 	{
-		FreeLog();
-		InitLog();
-		ResetLog();
-		RenameLog("");
+		FreeCDLog();
+		InitCDLog();
+		ResetCDLog();
+		RenameCDLog("");
 		UpdateCDLogger();
 	}
 
@@ -529,7 +529,7 @@ void CDLoggerROMChanged()
 		if (!hCDLogger)
 			DoCDLogger();
 		if (LoadCDLog(nameo))
-			StartLogging();
+			StartCDLogging();
 	}
 }
 void CDLoggerPPUChanged()
@@ -540,7 +540,7 @@ void CDLoggerPPUChanged()
 		SetDlgItemText(hCDLogger, ID_CHR1, "!!! Enable NewPPU !!!");
 }
 
-bool PauseLogging()
+bool PauseCDLogging()
 {
 	// can't pause while Trace Logger is using
 	if ((logging) && (logging_options & LOG_NEW_INSTRUCTIONS))
@@ -553,14 +553,14 @@ bool PauseLogging()
 	SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Start");
 	return true;
 }
-void StartLogging()
+void StartCDLogging()
 {
 	FCEUI_SetLoggingCD(1);
 	EnableTracerMenuItems();
 	SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Pause");
 }
 
-void FreeLog()
+void FreeCDLog()
 {
 	if (cdloggerdata)
 	{
@@ -575,7 +575,7 @@ void FreeLog()
 		cdloggerVideoDataSize = 0;
 	}
 }
-void InitLog()
+void InitCDLog()
 {
 	cdloggerdataSize = PRGsize[0];
 	cdloggerdata = (unsigned char*)malloc(cdloggerdataSize);
@@ -583,7 +583,7 @@ void InitLog()
 	if(cdloggerVideoDataSize != 0)
 		cdloggervdata = (unsigned char*)malloc(cdloggerVideoDataSize);
 }
-void ResetLog()
+void ResetCDLog()
 {
 	codecount = datacount = rendercount = vromreadcount = 0;
 	undefinedcount = cdloggerdataSize;
@@ -594,7 +594,7 @@ void ResetLog()
 		ZeroMemory(cdloggervdata, cdloggerVideoDataSize);
 	}
 }
-void RenameLog(const char* newName)
+void RenameCDLog(const char* newName)
 {
 	strcpy(loadedcdfile, newName);
 	if (hCDLogger)
