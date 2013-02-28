@@ -1,3 +1,15 @@
+28-Feb-2013 - AnS - PPU/PAL/Input type changing is now disabled when a movie is playing
+28-Feb-2013 - AnS - Cheats: update the window when ROM is changed
+28-Feb-2013 - AnS - show the number of active cheats when a ROM is loaded
+27-Feb-2013 - CaH4e3 - CDLogger: added "Auto-load .CDL when opening the window" option
+27-Feb-2013 - CaH4e3 - MMC5 refixed
+24-Feb-2013 - AnS - CDLogger: added "Auto-save .CDL when closing ROMs" and "Auto-resume logging when loading ROMs" options
+23-Feb-2013 - AnS - Hexeditor: show symbolic names in the window caption
+18-Feb-2013 - CaH4e3 - various mapper improvements; UNIF MALISB - Mali Splash Bomb dump; mapper 19 - Dream Master mirror fix
+18-Feb-2013 - CaH4e3 - fixed mapper 69 low quality sound issue
+11-Feb-2013 - AnS - fixed possible crash when saving the ROM in Hex Editor
+11-Feb-2013 - AnS - Moved "Config->Game Genie" to "Config->Enable->Game Genie ROM"
+03-Feb-2013 - AnS - win32: speed up screen blitting
 02-Feb-2013 - AnS - Added "TV Aspect (4:3)" to Video Config
 21-Jan-2013 - AnS - Taseditor: fixed Bookmarks List height on Windows 7
 21-Jan-2013 - AnS - Taseditor: fixed bug with adding new item to History Log

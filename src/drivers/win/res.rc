@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Нейтральный resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
@@ -1574,45 +1574,47 @@ BEGIN
     DEFPUSHBUTTON   "&OK",IDOK,67,52,50,14
 END
 
-CDLOGGER DIALOGEX 0, 0, 307, 253
+CDLOGGER DIALOGEX 0, 0, 307, 254
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
 CAPTION "Code Data Logger"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    PUSHBUTTON      "Load...",BTN_CDLOGGER_LOAD,7,123,50,14
-    PUSHBUTTON      "Save",BTN_CDLOGGER_SAVE,249,107,50,14
-    GROUPBOX        "Code/Data Log Status",ID_CDL,3,7,300,183,BS_CENTER
-    DEFPUSHBUTTON   "Start",BTN_CDLOGGER_START_PAUSE,127,107,50,14
-    GROUPBOX        "Address Label Logger",65534,3,192,300,59,BS_CENTER
+    PUSHBUTTON      "Load...",BTN_CDLOGGER_LOAD,7,122,50,14
+    PUSHBUTTON      "Save",BTN_CDLOGGER_SAVE,249,105,50,14
+    GROUPBOX        "Code/Data Log Status",ID_CDL,3,5,300,195,BS_CENTER
+    DEFPUSHBUTTON   "Start",BTN_CDLOGGER_START_PAUSE,127,105,50,14
+    GROUPBOX        "Address Label Logger",65534,3,201,300,49,BS_CENTER
     PUSHBUTTON      "Load...",111,7,231,50,14,WS_DISABLED
     PUSHBUTTON      "Start",112,127,231,50,14,WS_DISABLED
     PUSHBUTTON      "Save...",113,249,231,50,14,WS_DISABLED
-    LTEXT           "4067 - 29.5%",LBL_CDLOGGER_CODECOUNT,34,29,72,11
-    GROUPBOX        "PRG Logged as Code",65533,25,18,84,27
-    GROUPBOX        "PRG Logged as Data",65532,113,18,84,27
-    LTEXT           "7092 - 37.2%",LBL_CDLOGGER_DATACOUNT,122,29,71,9
-    GROUPBOX        "PRG not Logged",65531,201,18,79,27
-    LTEXT           "6072 - 32.7%",LBL_CDLOGGER_UNDEFCOUNT,210,29,66,8
-    LTEXT           "Itsa me, the Code/Data Logger! Press Start to play!",65530,67,80,172,11
-    PUSHBUTTON      "Reset Log",BTN_CDLOGGER_RESET,7,107,50,14
-    PUSHBUTTON      "Save as...",BTN_CDLOGGER_SAVE_AS,250,123,50,14
-    PUSHBUTTON      "Save Stripped Data...",BTN_CDLOGGER_SAVE_STRIPPED,117,170,89,14
-    PUSHBUTTON      "Save Unused Data...",BTN_CDLOGGER_SAVE_UNUSED,210,170,89,14
-    LTEXT           "4067 - 29.5%",LBL_CDLOGGER_RENDERCOUNT,34,58,72,11
-    GROUPBOX        "CHR Rendered",ID_CHR1,25,47,84,27
-    GROUPBOX        "CHR Logged as Data",ID_CHR2,113,47,84,27
-    LTEXT           "7092 - 37.2%",LBL_CDLOGGER_VROMREADCOUNT,122,58,71,9
-    GROUPBOX        "CHR not Logged",ID_CHR3,201,47,79,27
-    LTEXT           "6072 - 32.7%",LBL_CDLOGGER_UNDEFVROMCOUNT,210,58,66,9
-    LTEXT           "CDL file:",ID_STATIC,12,94,29,11
-    LTEXT           "",ID_CDLFILENAME,43,94,252,11,SS_PATHELLIPSIS
+    LTEXT           "4067 - 29.5%",LBL_CDLOGGER_CODECOUNT,34,27,72,11
+    GROUPBOX        "PRG Logged as Code",65533,25,16,84,27
+    GROUPBOX        "PRG Logged as Data",65532,113,16,84,27
+    LTEXT           "7092 - 37.2%",LBL_CDLOGGER_DATACOUNT,122,27,71,9
+    GROUPBOX        "PRG not Logged",65531,201,16,79,27
+    LTEXT           "6072 - 32.7%",LBL_CDLOGGER_UNDEFCOUNT,210,27,66,8
+    LTEXT           "Itsa me, the Code/Data Logger! Press Start to play!",65530,67,78,172,11
+    PUSHBUTTON      "Reset Log",BTN_CDLOGGER_RESET,7,105,50,14
+    PUSHBUTTON      "Save as...",BTN_CDLOGGER_SAVE_AS,250,122,50,14
+    PUSHBUTTON      "Save Stripped Data...",BTN_CDLOGGER_SAVE_STRIPPED,204,158,90,14
+    PUSHBUTTON      "Save Unused Data...",BTN_CDLOGGER_SAVE_UNUSED,204,175,90,14
+    LTEXT           "4067 - 29.5%",LBL_CDLOGGER_RENDERCOUNT,34,56,72,11
+    GROUPBOX        "CHR Rendered",ID_CHR1,25,45,84,27
+    GROUPBOX        "CHR Logged as Data",ID_CHR2,113,45,84,27
+    LTEXT           "7092 - 37.2%",LBL_CDLOGGER_VROMREADCOUNT,122,56,71,9
+    GROUPBOX        "CHR not Logged",ID_CHR3,201,45,79,27
+    LTEXT           "6072 - 32.7%",LBL_CDLOGGER_UNDEFVROMCOUNT,210,56,66,9
+    LTEXT           "CDL file:",ID_STATIC,12,92,29,11
+    LTEXT           "",ID_CDLFILENAME,43,92,252,11,SS_PATHELLIPSIS
     CONTROL         " Auto-resume logging when loading ROMs",IDC_AUTORESUMECDLOGGING,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,148,142,149,12
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,179,153,11
     CONTROL         " Auto-save .CDL when closing ROMs",IDC_AUTOSAVECDL,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,142,133,12
-    CONTROL         " Auto-load .CDL when opening CDLogger",IDC_AUTOLOADCDL,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,155,144,12
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,153,143,11
+    CONTROL         " Auto-load .CDL when opening the window",IDC_AUTOLOADCDL,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,166,154,11
+    GROUPBOX        "Generate ROM",ID_CDL,199,148,99,46
+    GROUPBOX        "Logging workflow options",ID_CDL,8,142,162,52
 END
 
 PPUVIEW DIALOGEX 44, 38, 355, 246
@@ -2132,12 +2134,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // Нейтральный resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Russian (Russia) resources
+// Русский (Россия) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
 LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
@@ -2190,12 +2192,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Russian (Russia) resources
+#endif    // Русский (Россия) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// Английский (США) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -2429,7 +2431,7 @@ IDB_BITMAP_SELECTED17   BITMAP                  "res\\te_17_selected.bmp"
 IDB_BITMAP_SELECTED18   BITMAP                  "res\\te_18_selected.bmp"
 IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
-#endif    // English (United States) resources
+#endif    // Английский (США) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

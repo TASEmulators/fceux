@@ -1238,45 +1238,34 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		);
 
 		// Initialize the auto key controls
-
 		extern int autoHoldKey, autoHoldClearKey;
 		char btext[128];
-
-		if(autoHoldKey)
+		if (autoHoldKey)
 		{
-			if(!GetKeyNameText(autoHoldKey << 16, btext, 128))
-			{
+			if (!GetKeyNameText(autoHoldKey << 16, btext, 128))
 				sprintf(btext, "KB: %d", autoHoldKey);
-			}
-		}
-		else
+		} else
 		{
 			sprintf(btext, "not assigned");
 		}
-
 		SetDlgItemText(hwndDlg, LBL_AUTO_HOLD, btext);
 
-		if(autoHoldClearKey)
+		if (autoHoldClearKey)
 		{
-			if(!GetKeyNameText(autoHoldClearKey << 16, btext, 128))
-			{
+			if (!GetKeyNameText(autoHoldClearKey << 16, btext, 128))
 				sprintf(btext, "KB: %d", autoHoldClearKey);
-			}
-		}
-		else
+		} else
 		{
 			sprintf(btext, "not assigned");
 		}
-
 		SetDlgItemText(hwndDlg, LBL_CLEAR_AH, btext);
 
 		CenterWindowOnScreen(hwndDlg);
-
 		UpdateFourscoreState(hwndDlg);
 
-		if(FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
+		if (!FCEUMOV_Mode(MOVIEMODE_INACTIVE))
 		{
-			// disable changing fourscore and ports
+			// disable changing fourscore and Input ports while a movie is recorded/played
 			EnableWindow(GetDlgItem(hwndDlg, CHECK_ENABLE_FOURSCORE), false);
 			EnableWindow(GetDlgItem(hwndDlg, CHECK_ENABLE_MICROPHONE), false);
 			EnableWindow(GetDlgItem(hwndDlg, COMBO_PAD1), false);

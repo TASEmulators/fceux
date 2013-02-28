@@ -145,7 +145,7 @@ static int vchanged = 0;
 int menuYoffset = 0;
 bool wasPausedByCheats = false;		//For unpausing the emulator if paused by the cheats dialog
 bool rightClickEnabled = true;		//If set to false, the right click context menu will be disabled.
-bool fullscreenByDoubleclick = true;
+bool fullscreenByDoubleclick = false;
 
 //Function Prototypes
 void ChangeMenuItemText(int menuitem, string text);			//Alters a menu item name
@@ -2394,24 +2394,31 @@ adelikat: Outsourced this to a remappable hotkey
 		EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_WAV,MF_BYCOMMAND | (loggingSound?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,ID_FILE_CLOSELUAWINDOWS,MF_BYCOMMAND | (LuaConsoleHWnd?MF_ENABLED:MF_GRAYED));
-		if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
+		// PAL and PPU should not be changed while a movie is recorded/played
+		if (FCEUMOV_Mode(MOVIEMODE_INACTIVE))
+		{
+			EnableMenuItem(fceumenu, MENU_PAL, MF_ENABLED);
+			EnableMenuItem(fceumenu, ID_NEWPPU, MF_ENABLED);
+			EnableMenuItem(fceumenu, ID_OLDPPU, MF_ENABLED);
+		} else
 		{
 			EnableMenuItem(fceumenu, MENU_PAL, MF_GRAYED);
 			EnableMenuItem(fceumenu, ID_NEWPPU, MF_GRAYED);
 			EnableMenuItem(fceumenu, ID_OLDPPU, MF_GRAYED);
+		}
+		CheckMenuRadioItem(fceumenu, ID_NEWPPU, ID_OLDPPU, newppu ? ID_NEWPPU : ID_OLDPPU, MF_BYCOMMAND);
+		// when TASEditor is engaged, some settings should not be changeable
+		if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
+		{
 			EnableMenuItem(fceumenu, MENU_ENABLE_AUTOSAVE, MF_GRAYED);
 			EnableMenuItem(fceumenu, ID_ENABLE_BACKUPSAVESTATES, MF_GRAYED);
 			EnableMenuItem(fceumenu, ID_ENABLE_COMPRESSSAVESTATES, MF_GRAYED);
 		} else
 		{
-			EnableMenuItem(fceumenu, MENU_PAL, MF_ENABLED);
-			EnableMenuItem(fceumenu, ID_NEWPPU, MF_ENABLED);
-			EnableMenuItem(fceumenu, ID_OLDPPU, MF_ENABLED);
 			EnableMenuItem(fceumenu, MENU_ENABLE_AUTOSAVE, MF_ENABLED);
 			EnableMenuItem(fceumenu, ID_ENABLE_BACKUPSAVESTATES, MF_ENABLED);
 			EnableMenuItem(fceumenu, ID_ENABLE_COMPRESSSAVESTATES, MF_ENABLED);
 		}
-		CheckMenuRadioItem(fceumenu, ID_NEWPPU, ID_OLDPPU, newppu ? ID_NEWPPU : ID_OLDPPU, MF_BYCOMMAND);
 
 	default:
 proco:
