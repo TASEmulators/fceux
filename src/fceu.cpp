@@ -76,6 +76,7 @@ extern void RefreshThrottleFPS();
 //TODO - we really need some kind of global platform-specific options api
 #ifdef WIN32
 #include "drivers/win/main.h"
+#include "drivers/win/memview.h"
 #include "drivers/win/cheat.h"
 #include "drivers/win/texthook.h"
 #include "drivers/win/ram_search.h"
@@ -486,11 +487,6 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	if (GameInfo->type != GIT_NSF)
 		FCEU_LoadGameCheats(0);
 
-#if defined (WIN32) || defined (WIN64)
-	DoDebuggerDataReload(); // Reloads data without reopening window
-	CDLoggerROMChanged();
-#endif
-
 	if (AutoResumePlay && (GameInfo->type != GIT_NSF))
 	{
 		// load "-resume" savestate
@@ -501,6 +497,15 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	}
 
 	ResetScreenshotsCounter();
+
+#if defined (WIN32) || defined (WIN64)
+	DoDebuggerDataReload(); // Reloads data without reopening window
+	CDLoggerROMChanged();
+	if (hMemView) UpdateColorTable();
+	if (hCheat) UpdateCheatsAdded();
+	if (FrozenAddressCount)
+		FCEU_DispMessage("%d cheats active", 0, FrozenAddressCount);
+#endif
 
 	return GameInfo;
 }
