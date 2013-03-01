@@ -1292,6 +1292,7 @@ void quit ()
 	// this is not neccesary to be explicitly called
 	// it raises a GTK-Critical when its called
 	//gtk_main_quit();
+	FCEUI_CloseGame();
 	FCEUI_Kill();
 	// LoadGame() checks for an IP and if it finds one begins a network session
 	// clear the NetworkIP field so this doesn't happen unintentionally
