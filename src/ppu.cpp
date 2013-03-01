@@ -441,12 +441,14 @@ unsigned char *cdloggervdata;
 unsigned int cdloggerVideoDataSize = 0;
 
 int GetCHRAddress(int A){
-	int result;
-	if((A > 0x1fff))return -1;
-	if(CHRsize[0] == 0)return -1;
-	result = &VPage[A>>10][A]-CHRptr[0];
-	if((result > (int)CHRsize[0]) || (result < 0))return -1;
-	else return result;
+	if(A < 0x2000) {	// Mapper 90 can map nametables from the VROM
+		if(cdloggerVideoDataSize) {
+			int result = &VPage[A>>10][A] - CHRptr[0];
+			if((result >= 0) && (result < (int)cdloggerVideoDataSize))
+				return result;
+		}
+	}
+	return -1;
 }
 
 uint8 FASTCALL FFCEUX_PPURead_Default(uint32 A) {

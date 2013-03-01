@@ -34,6 +34,9 @@ DECLFR(CartBROB);
 DECLFR(CartBR);
 DECLFW(CartBW);
 
+extern uint8 PRGram[32];
+extern uint8 CHRram[32];
+
 extern uint8 *PRGptr[32];
 extern uint8 *CHRptr[32];
 

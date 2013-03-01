@@ -46,8 +46,8 @@ uint8 *MMC5BGVPage[8];
 static uint8 PRGIsRAM[32];  /* This page is/is not PRG RAM. */
 
 /* 16 are (sort of) reserved for UNIF/iNES and 16 to map other stuff. */
-static int CHRram[32];
-static int PRGram[32];
+uint8 CHRram[32];
+uint8 PRGram[32];
 
 uint8 *PRGptr[32];
 uint8 *CHRptr[32];

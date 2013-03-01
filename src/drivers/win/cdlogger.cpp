@@ -451,12 +451,12 @@ void SaveStrippedROM(int invert)
 		cdlhead.ID[2] = 'S';
 		cdlhead.ID[3] = 0x1A;
 
-		cdlhead.ROM_size = PRGsize[0] >> 14;
-		cdlhead.VROM_size = CHRsize[0] >> 13;
+		cdlhead.ROM_size = cdloggerdataSize >> 14;
+		cdlhead.VROM_size = cdloggerVideoDataSize >> 13;
 
 		fwrite(&cdlhead,1,16,fp);
 
-		for(i = 0; i < (int)PRGsize[0]; i++){
+		for(i = 0; i < (int)cdloggerdataSize; i++){
 			unsigned char pchar;
 			if(cdloggerdata[i] & 3)
 				pchar = invert?0:PRGptr[0][i];
@@ -468,7 +468,7 @@ void SaveStrippedROM(int invert)
 		if(cdloggerVideoDataSize != 0)
 		{
 			// since the OldPPU at least logs the $2007 read accesses, we should save the data anyway
-			for(i = 0; i < (int)CHRsize[0]; i++) {
+			for(i = 0; i < (int)cdloggerVideoDataSize; i++) {
 				unsigned char vchar;
 				if(cdloggervdata[i] & 3)
 					vchar = invert?0:CHRptr[0][i];
@@ -511,15 +511,6 @@ void CDLoggerROMChanged()
 	strcat(nameo, GetRomName());
 	strcat(nameo, ".cdl");
 
-	/*
-	// if the new CDL is the same (and arrays size is the same), don't do anything
-	if (hCDLogger
-		&& strcmp(loadedcdfile, nameo) == 0
-		&& PRGsize[0] == cdloggerdataSize
-		&& CHRsize[0] == cdloggerVideoDataSize)
-		return;
-	*/
-
 	FILE *FP;
 	FP = fopen(nameo, "rb");
 	if (FP != NULL)
@@ -532,6 +523,7 @@ void CDLoggerROMChanged()
 			StartCDLogging();
 	}
 }
+
 void CDLoggerPPUChanged()
 {
 	if (newppu)
@@ -553,6 +545,7 @@ bool PauseCDLogging()
 	SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Start");
 	return true;
 }
+
 void StartCDLogging()
 {
 	FCEUI_SetLoggingCD(1);
@@ -575,14 +568,18 @@ void FreeCDLog()
 		cdloggerVideoDataSize = 0;
 	}
 }
+
 void InitCDLog()
 {
 	cdloggerdataSize = PRGsize[0];
 	cdloggerdata = (unsigned char*)malloc(cdloggerdataSize);
-	cdloggerVideoDataSize = CHRsize[0];
-	if(cdloggerVideoDataSize != 0)
+	if(!CHRram[0] || (CHRptr[0] == PRGptr[0])) {	// Some kind of workaround for my OneBus VRAM hack, will remove it if I find another solution for that
+		cdloggerVideoDataSize = CHRsize[0];
 		cdloggervdata = (unsigned char*)malloc(cdloggerVideoDataSize);
+	} else
+		cdloggerVideoDataSize = 0;
 }
+
 void ResetCDLog()
 {
 	codecount = datacount = rendercount = vromreadcount = 0;
@@ -594,6 +591,7 @@ void ResetCDLog()
 		ZeroMemory(cdloggervdata, cdloggerVideoDataSize);
 	}
 }
+
 void RenameCDLog(const char* newName)
 {
 	strcpy(loadedcdfile, newName);

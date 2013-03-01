@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Нейтральный resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
@@ -1582,7 +1582,7 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     PUSHBUTTON      "Load...",BTN_CDLOGGER_LOAD,7,122,50,14
     PUSHBUTTON      "Save",BTN_CDLOGGER_SAVE,249,105,50,14
-    GROUPBOX        "Code/Data Log Status",ID_CDL,3,5,300,195,BS_CENTER
+    GROUPBOX        "Code/Data Log Status",-1,3,5,300,195,BS_CENTER
     DEFPUSHBUTTON   "Start",BTN_CDLOGGER_START_PAUSE,127,105,50,14
     GROUPBOX        "Address Label Logger",65534,3,201,300,49,BS_CENTER
     PUSHBUTTON      "Load...",111,7,231,50,14,WS_DISABLED
@@ -1597,8 +1597,8 @@ BEGIN
     LTEXT           "Itsa me, the Code/Data Logger! Press Start to play!",65530,67,78,172,11
     PUSHBUTTON      "Reset Log",BTN_CDLOGGER_RESET,7,105,50,14
     PUSHBUTTON      "Save as...",BTN_CDLOGGER_SAVE_AS,250,122,50,14
-    PUSHBUTTON      "Save Stripped Data...",BTN_CDLOGGER_SAVE_STRIPPED,204,158,90,14
-    PUSHBUTTON      "Save Unused Data...",BTN_CDLOGGER_SAVE_UNUSED,204,175,90,14
+    PUSHBUTTON      "Save Stripped Data...",BTN_CDLOGGER_SAVE_STRIPPED,196,155,90,14
+    PUSHBUTTON      "Save Unused Data...",BTN_CDLOGGER_SAVE_UNUSED,196,172,90,14
     LTEXT           "4067 - 29.5%",LBL_CDLOGGER_RENDERCOUNT,34,56,72,11
     GROUPBOX        "CHR Rendered",ID_CHR1,25,45,84,27
     GROUPBOX        "CHR Logged as Data",ID_CHR2,113,45,84,27
@@ -1611,10 +1611,10 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,179,153,11
     CONTROL         " Auto-save .CDL when closing ROMs",IDC_AUTOSAVECDL,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,153,143,11
-    CONTROL         " Auto-load .CDL when opening the window",IDC_AUTOLOADCDL,
+    CONTROL         " Auto-load .CDL when opening this window",IDC_AUTOLOADCDL,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,166,154,11
-    GROUPBOX        "Generate ROM",ID_CDL,199,148,99,46
-    GROUPBOX        "Logging workflow options",ID_CDL,8,142,162,52
+    GROUPBOX        "Generate ROM",65529,183,142,116,52
+    GROUPBOX        "Logging workflow options",65528,8,142,171,52
 END
 
 PPUVIEW DIALOGEX 44, 38, 355, 246
@@ -2134,12 +2134,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Нейтральный resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Русский (Россия) resources
+// Russian (Russia) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
 LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
@@ -2192,12 +2192,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Русский (Россия) resources
+#endif    // Russian (Russia) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Английский (США) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -2431,7 +2431,7 @@ IDB_BITMAP_SELECTED17   BITMAP                  "res\\te_17_selected.bmp"
 IDB_BITMAP_SELECTED18   BITMAP                  "res\\te_18_selected.bmp"
 IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
-#endif    // Английский (США) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
