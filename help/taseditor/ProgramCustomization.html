@@ -3,7 +3,7 @@
 <head>
 	<title>5. Program customization</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.7.1.482">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
@@ -118,6 +118,14 @@
 <p class="rvps10"><span class="rvts21">And the View settings are over. During your future work you likely won't need to change these checkboxes.</span></p>
 <p class="rvps10"><img align="left" alt="" style="padding : 6px;" src="lib/config-menu.png"/></p>
 <p class="rvps10"><span class="rvts21">Now open the "Config" submenu. Options listed in this menu affect Taseditor workflow more significantly. You may need reconfiguring some of them more than once.</span></p>
+<p class="rvps10"><a name="Projectfilesavingoptions"></a>
+<span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Config -&gt; Project file saving options</span></p>
+<p class="rvps10"><span class="rvts21">Opens the dialog window where you can configure the autosave function and </span><span class="rvts21">select which aspects should be saved to FM3 files.</span></p>
+<p class="rvps10"><span class="rvts21">Taseditor has the feature of automatically saving current project to disk when user doesn't save it manually </span><span class="rvts21">(</span><span class="rvts30">Ctrl + S</span><span class="rvts21">)</span><span class="rvts21"> for too long. Before Taseditor, TASers saved their movie to disk every time they saved a savestate. But Taseditor projects store much more data, and saving FM3 files can take several seconds, so it's not reasonable to resave them too often.</span></p>
+<p class="rvps10"><span class="rvts21">The default autosave period is 15 minutes. This means, if you've made some substantial changes to the project (e.g. you edited Input, and an asterisk appeared in the TAS Editor window caption), and then didn't save project for 15 minutes, Taseditor will remind you about that or just execute saving itself, depending on the state of the "silently" checkbox. </span><span class="rvts21">If the checkbox is enabled, Taseditor silently saves the project to disk under the same filename. If it is disabled, Taseditor brings up the "Save As" dialog, where you can confirm the saving or cancel it. In the latter case Taseditor will wait another period of time until reminding you about the unsaved data.</span></p>
+<p class="rvps10"><span class="rvts21">The autosave function only works when current project already has a filename.</span></p>
+<p class="rvps10"><span class="rvts21">Maximum possible value of the period is 1440 minutes (24 hours). You can disable this function by switching off the "Autosave project" checkbox, but that's not recommended.</span></p>
 <p class="rvps10"><a name="SetGreenzonecapacity"></a>
 <span class="rvts21"><br/></span></p>
 <p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/greenzone-capacity.png"/></p>
@@ -139,29 +147,12 @@
 <p class="rvps10"><span class="rvts21">Specifies</span><span class="rvts21"> the maximum number of undo steps, how many times you can restore previous state of the project by pressing </span><span class="rvts30">Ctrl + Z</span><span class="rvts21">.</span></p>
 <p class="rvps10"><span class="rvts21">The History Log needs a lot of computer memory and takes some disk space to save FM3 files. The whole Log is stored in project files in compressed state. The compression is done in background – when the emulator is idle, Taseditor &nbsp;gradually compresses new items of the History Log. Thanks to this behavior, the History Log size doesn't affect FM3 saving time much.</span></p>
 <p class="rvps10"><span class="rvts21">With this setting you can adjust the amount of memory occupied by History Log. By default you have 100 undo levels, which means you can revert up to hundred of recent movie edits. It's not very much, because during real TASing you make lots of various edits within a small time span, as the time runs imperceptibly. If your computer has enough RAM, you can increase the "max undo levels" value up to the maximum possible number – 1000.</span></p>
-<p class="rvps10"><a name="SetAutosaveperiod"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Set Autosave period</span></p>
-<p class="rvps10"><span class="rvts21">Specifies how many minutes the project can be left with unsaved changes.</span></p>
-<p class="rvps10"><span class="rvts21">Taseditor has the feature of automatically saving current project to disk when user doesn't save it manually </span><span class="rvts21">(</span><span class="rvts30">Ctrl + S</span><span class="rvts21">)</span><span class="rvts21"> for too long. Before Taseditor, TASers saved their movie to disk every time they saved a savestate. But Taseditor projects store much more data, and saving FM3 files can take several seconds, so it's not reasonable to resave them too often.</span></p>
-<p class="rvps10"><span class="rvts21">The default autosave period is 15 minutes. This means, if you've made some substantial changes to the project (e.g. you edited Input, and an asterisk appeared in the TAS Editor window caption), and then didn't save project for 15 minutes, Taseditor will remind you about that or just execute autosaving itself (see </span><span class="rvts21">"</span><a class="rvts27" href="ProgramCustomization.html#SilentAutosave">Silent autosave</a><span class="rvts21">"</span><span class="rvts21">).</span></p>
-<p class="rvps10"><span class="rvts21">The autosave function only works when current project already has a filename.</span></p>
-<p class="rvps10"><span class="rvts21">Maximum possible value for this parameter is 1440 minutes (24 hours). You can disable this function by specifying 0 as an autosave period, but that's not recommended.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The above were numeric settings of Taseditor, next go the checkboxes.</span></p>
 <p class="rvps10"><a name="EnableGreenzoning"></a>
 <span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts22">Config -&gt; Enable Greenzoning</span></p>
 <p class="rvps10"><span class="rvts21">Controls the process of collecting data to the Greenzone.</span></p>
 <p class="rvps10"><span class="rvts21">If the option is enabled, every new frame is saved into the Greenzone right after it has been emulated. This is intended behavior of Taseditor, so the option is enabled by default.</span></p>
 <p class="rvps10"><span class="rvts21">Disabling this option may be useful in rare cases, for example, when running bots which need high performance. But in normal situations it's recommended to have this function enabled.</span></p>
-<p class="rvps10"><a name="SilentAutosave"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Silent Autosave</span></p>
-<p class="rvps10"><span class="rvts21">Defines the behavior of the autosave function.</span></p>
-<p class="rvps10"><span class="rvts21">If the option is enabled, after the </span><a class="rvts27" href="ProgramCustomization.html#SetAutosaveperiod">autosave period</a><span class="rvts21"> is over, Taseditor silently saves the project to disk under the same filename.</span></p>
-<p class="rvps10"><span class="rvts21">If the option is disabled, after the autosave period, Taseditor brings up the "Save As" dialog, where you can confirm the saving or cancel it. In the latter case Taseditor will wait another "autosave period" of time until reminding you about the unsaved data.</span></p>
-<p class="rvps10"><span class="rvts21">This option is enabled by default. </span><span class="rvts21">If you want complete control over project (e.g. to prevent saving any accidental changes done while watching somebody else's fm3), disable it. But when you're TASing it's recommended to let Taseditor use silent autosave.</span></p>
 <p class="rvps10"><a name="AutofirePatternskipsLag"></a>
 <span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts22">Config -&gt; Autofire Pattern skips Lag</span></p>

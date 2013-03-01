@@ -3,7 +3,7 @@
 <head>
 	<title>Debugger</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.7.1.482">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
@@ -59,7 +59,7 @@
 <p><span class="rvts17">Debugger</span></p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts45">Introduction</span></p>
+<p><span class="rvts44">Introduction</span></p>
 <p><br/></p>
 <p>The debugger is a tool for inspecting and manipulating machine instructions and their execution. The debugger window has several components:</p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
@@ -72,7 +72,7 @@
 </ul>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts45">Execution and CPU State</span></p>
+<p><span class="rvts44">Execution and CPU State</span></p>
 <p><br/></p>
 <p>Execution is controlled by a series of buttons at the top-middle of the window. These allow you to break (pause) execution and inspect the current state of the NES.</p>
 <p><br/></p>
@@ -129,7 +129,7 @@
 <p>To the right from PPU section there's Cycles counter and Instructions counter that keep counting while the game is running. You can use the information for keeping statistics, for code profiling or writing PPU-synchronized code (e.g. raster effects). You can also make the debugger break automatically based on the counters values. The "Reset counters" button resets both counters to 0.</p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts45">Disassembly</span></p>
+<p><span class="rvts44">Disassembly</span></p>
 <p><br/></p>
 <p>This large frame takes up the left side of the debugger window. It displays the current contents of memory accessible by the CPU with an automatic disassembly of that data into assembly instructions. The following memory ranges may contain useful data for inspection:</p>
 <p><br/></p>
@@ -142,8 +142,8 @@
 <p><br/></p>
 <p>Memory contents are displayed in this form:</p>
 <p><br/></p>
-<p><span class="rvts46">0F:C0A8:24 1F &nbsp; &nbsp; BIT $001F = #$80</span></p>
-<p><span class="rvts46">bb:mmmm:dd dd dd &nbsp;iiiiiiiiiiiii...</span></p>
+<p><span class="rvts45">0F:C0A8:24 1F &nbsp; &nbsp; BIT $001F = #$80</span></p>
+<p><span class="rvts45">bb:mmmm:dd dd dd &nbsp;iiiiiiiiiiiii...</span></p>
 <p><br/></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
 <li>bb &nbsp; - 16k iNES bank, designates which 16k bank from the iNES file is mapped here. Note that the number may be not the same as mapper bankswitching current bank.</li>
@@ -161,7 +161,7 @@
 <p>There is an empty column to the left of the memory view. Left clicking on this column will open the Inline Assembler, which allows you to patch the ROM at runtime. Right clicking on this column will open the Hex Editor, which allows you to directly edit the ROM. Middle-clicking on this column will bring up the <a class="rvts18" href="GameGenieEncoderDecoder.html">Game Genie Encoder</a> at that address, so you can easily make Game Genie codes.</p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts45">Breakpoints</span></p>
+<p><span class="rvts44">Breakpoints</span></p>
 <p><br/></p>
 <p>Breakpoints will break execution when chosen conditions are met. To create a breakpoint, click the Add button in the BreakPoints frame in the upper right corner of the debugger.</p>
 <p><br/></p>
@@ -183,8 +183,8 @@
 <p><br/></p>
 <p>Breakpoints are listed in the following form:</p>
 <p><br/></p>
-<p><span class="rvts46">aaaa: EmRWXF : nnnn</span></p>
-<p><span class="rvts46">aaaa-aaaa: EmRWXF : nnnn</span></p>
+<p><span class="rvts45">aaaa: EmRWXF : nnnn</span></p>
+<p><span class="rvts45">aaaa-aaaa: EmRWXF : nnnn</span></p>
 <p><br/></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
 <li>aaaa - address of breakpoint</li>
@@ -198,7 +198,7 @@
 </ul>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts45">Conditional Breakpoints</span></p>
+<p><span class="rvts44">Conditional Breakpoints</span></p>
 <p><br/></p>
 <p>Breakpoints may also have a conditional statement that causes them to execute only if that statement evaluates to true. The conditional breakpoint grammar has this form:</p>
 <p><br/></p>
@@ -227,19 +227,19 @@
 <p><span class="rvts15">Example conditions:</span></p>
 <p><br/></p>
 <p>Break if register A is less than value at memory address $0005:</p>
-<p><span class="rvts46">A &lt; $0005</span></p>
+<p><span class="rvts45">A &lt; $0005</span></p>
 <p><br/></p>
 <p>Break if the program counter is 8123:</p>
-<p><span class="rvts46">P == #8123</span></p>
+<p><span class="rvts45">P == #8123</span></p>
 <p><br/></p>
 <p>Break if the value at the indirect address on zeropage $10 is not equal to FF:</p>
-<p><span class="rvts46">#FF != $[$10+($11*#100)]</span></p>
+<p><span class="rvts45">#FF != $[$10+($11*#100)]</span></p>
 <p><br/></p>
 <p>Break if flag N is clear or A is not equal to 00:</p>
-<p><span class="rvts46">(N==#0 || A!=#0)</span></p>
+<p><span class="rvts45">(N==#0 || A!=#0)</span></p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts45">Bookmarks</span></p>
+<p><span class="rvts44">Bookmarks</span></p>
 <p><br/></p>
 <p>A list of bookmark addresses can be kept in the Address Bookmarks frame to make memory navigation easier. Simply type a hexadecimal address (or a convenient string, such as "NMI") and click "Add" to add it to your bookmarks. Alternatively, just click on any address in the Disassembly window, and the address will appear in the Bookmark Add field, so you don't have to type it.</p>
 <p>Next time you wish to go to this address just double click on the bookmark.</p>
@@ -247,7 +247,7 @@
 <p>When you exit the emulator, bookmarks are saved in a .deb file. Next time you return to debugging the list of bookmarks will be automatically loaded from the file.</p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts45">Inline Assembler</span></p>
+<p><span class="rvts44">Inline Assembler</span></p>
 <p><br/></p>
 <p>Open the inline assembler by left-clicking in the empty column to the left of the memory view.</p>
 <p><br/></p>
@@ -256,11 +256,11 @@
 <p>Click Apply to apply your patch to the ROM in memory. Click Undo to remove the last assembled line. After applying a patch, clicking Save will allow you to save this patch directly to the ROM file.</p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts45">Symbolic Debugging</span></p>
+<p><span class="rvts44">Symbolic Debugging</span></p>
 <p><br/></p>
-<p>This feature makes it possible to rename addresses in the disassembly window (e.g. $C022) to easily understandable names (e.g. AddHealthpoints). You can also add comments to lines in the disassembly window. You can enable symbolic debugging by clicking the checkbox "Symbolic Debug".</p>
+<p>This feature makes it possible to rename addresses in the disassembly window (e.g. $C022) to easily understandable names (e.g. AddHealthpoints). You can also add comments to lines in the disassembly window. You can enable symbolic debugging by clicking the checkbox "Symbolic debug".</p>
 <p><br/></p>
-<p>To use this feature, create name list files (Filename should be like this: *.(bank).nl / *.ram.nl, <span class="rvts15">Example:</span> NES Test Cart (PD).nes.0.nl, NES Test Cart (PD).nes.ram.nl) which contain names and comments you wish to display in the disassembly window. These files are simple ASCII text files.</p>
+<p>To use this feature, create "name list files" in any text editor like Notepad (Filename should be like this: *.(bank).nl / *.ram.nl, <span class="rvts15">Example:</span> NES Test Cart (PD).nes.0.nl, NES Test Cart (PD).nes.ram.nl) which contain names and comments you wish to display in the disassembly window. These files are simple ASCII text files.</p>
 <p><br/></p>
 <p><span class="rvts15">Example of contents of a NL file:</span></p>
 <p><br/></p>
@@ -293,8 +293,10 @@
 <p><br/></p>
 <p>To reload the NL files of the currently active ROM file press the "Reload Symbols" button.</p>
 <p><br/></p>
+<p>When the "Symbolic debug" option is enabled, both the Debugger and Hex Editor will display symbolic names instead of specified addresses, so the debugging process becomes much easier.</p>
 <p><br/></p>
-<p><span class="rvts45">Other</span></p>
+<p><br/></p>
+<p><span class="rvts44">Other</span></p>
 <p><br/></p>
 <p>If the ".DEB files" checkbox in the lower right corner of the debugger window is checked, the emulator will automatically save debug settings such as breakpoints and bookmarks in a .deb file alongside the NES ROM, and load these settings next time you open the ROM.</p>
 <p><br/></p>
