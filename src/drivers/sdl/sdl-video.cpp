@@ -219,8 +219,10 @@ InitVideo(FCEUGI *gi)
     
 	// check if we are rendering fullscreen
 	if(s_fullscreen) {
+		int no_cursor;
+		g_config->getOption("SDL.NoFullscreenCursor", &no_cursor);
 		flags |= SDL_FULLSCREEN;
-		SDL_ShowCursor(0);
+		SDL_ShowCursor(!no_cursor);
 	}
 	else {
 		SDL_ShowCursor(1);
