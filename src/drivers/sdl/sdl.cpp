@@ -615,9 +615,44 @@ int main(int argc, char *argv[])
 	  SDL_Quit();
 	  return 0;
 	}
+
+	// If x/y res set to 0, store current display res in SDL.LastX/YRes
+	int yres, xres;
+	g_config->getOption("SDL.XResolution", &xres);
+	g_config->getOption("SDL.YResolution", &yres);
+	const SDL_VideoInfo* vid_info = SDL_GetVideoInfo();
+	if(xres == 0) 
+    {
+        if(vid_info != NULL)
+        {
+			g_config->setOption("SDL.LastXRes", vid_info->current_w);
+        }
+        else
+        {
+			g_config->setOption("SDL.LastXRes", 512);
+        }
+    }
+	else
+	{
+		g_config->setOption("SDL.LastXRes", xres);
+	}	
+    if(yres == 0)
+    {
+        if(vid_info != NULL)
+        {
+			g_config->setOption("SDL.LastYRes", vid_info->current_h);
+        }
+        else
+        {
+			g_config->setOption("SDL.LastYRes", 448);
+        }
+    } 
+	else
+	{
+		g_config->setOption("SDL.LastYRes", yres);
+	}	
 	
 	int autoResume;
-
 	g_config->getOption("SDL.AutoResume", &autoResume);
 	if(autoResume)
 	{

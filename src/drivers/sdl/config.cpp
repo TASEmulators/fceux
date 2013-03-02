@@ -156,20 +156,14 @@ InitConfig()
 	config->addOption("slstart", "SDL.ScanLineStart", 0);
 	config->addOption("slend", "SDL.ScanLineEnd", 239);
 
-	const SDL_VideoInfo* vid_info = SDL_GetVideoInfo();
 	// video controls
 	config->addOption('f', "fullscreen", "SDL.Fullscreen", 0);
-	// if we can detect the screen resolultion, use that for the default fullscreen res
-	if(vid_info != NULL)
-	{
-		config->addOption('x', "xres", "SDL.XResolution", vid_info->current_w);
-		config->addOption('y', "yres", "SDL.YResolution", vid_info->current_h);
-	}
-	else
-	{
-		config->addOption('x', "xres", "SDL.XResolution", 512);
-		config->addOption('y', "yres", "SDL.YResolution", 448);
-	}
+
+	// set x/y res to 0 for automatic fullscreen resolution detection (no change)
+	config->addOption('x', "xres", "SDL.XResolution", 0);
+	config->addOption('y', "yres", "SDL.YResolution", 0);
+	config->addOption("SDL.LastXRes", 0);
+	config->addOption("SDL.LastYRes", 0);
 	config->addOption('b', "bpp", "SDL.BitsPerPixel", 32);
 	config->addOption("doublebuf", "SDL.DoubleBuffering", 0);
 	config->addOption("autoscale", "SDL.AutoScale", 1);

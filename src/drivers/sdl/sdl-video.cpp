@@ -170,8 +170,8 @@ InitVideo(FCEUGI *gi)
 	g_config->getOption("SDL.SpecialFilter", &s_sponge);
 	g_config->getOption("SDL.XStretch", &xstretch);
 	g_config->getOption("SDL.YStretch", &ystretch);
-	g_config->getOption("SDL.XResolution", &xres);
-	g_config->getOption("SDL.YResolution", &yres);
+	g_config->getOption("SDL.LastXRes", &xres);
+	g_config->getOption("SDL.LastYRes", &yres);
 	g_config->getOption("SDL.ClipSides", &s_clipSides);
 	g_config->getOption("SDL.NoFrame", &noframe);
 	g_config->getOption("SDL.ShowFPS", &show_fps);
@@ -179,7 +179,9 @@ InitVideo(FCEUGI *gi)
 	// check the starting, ending, and total scan lines
 	FCEUI_GetCurrentVidSystem(&s_srendline, &s_erendline);
 	s_tlines = s_erendline - s_srendline + 1;
-    
+
+	// check if we should auto-set x/y resolution
+
     // check for OpenGL and set the global flags
 #if OPENGL
 	if(s_useOpenGL && !s_sponge) {
