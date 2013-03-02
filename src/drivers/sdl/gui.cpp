@@ -2254,7 +2254,7 @@ static GtkActionEntry normal_entries[] = {
 // Menu items with a check box that can be toggled on or off
 static GtkToggleActionEntry toggle_entries[] = {
 	{"GameGenieToggleAction", NULL, "Enable Game _Genie", NULL, NULL, G_CALLBACK(toggleGameGenie), FALSE},
-	{"AutoResumeAction", NULL, "Auto-Resume", NULL, NULL, G_CALLBACK(toggleAutoResume), FALSE},
+	{"AutoResumeAction", NULL, "Auto-Resume Play", NULL, NULL, G_CALLBACK(toggleAutoResume), FALSE},
 };
 
 // Menu items for selecting a save state slot using radio buttons
