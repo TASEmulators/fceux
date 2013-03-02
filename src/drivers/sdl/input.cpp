@@ -195,25 +195,19 @@ void
 TogglePause ()
 {
 	FCEUI_ToggleEmulationPause ();
-	int x;
-	g_config->getOption ("SDL.Fullscreen", &x);
 
-	if (x == 0)
-		return;
-
-	g_config->getOption ("SDL.NoFullscreenCursor", &x);
-
-	if (x == 1)
-		return;
+	int no_cursor;
+	g_config->getOption("SDL.NoFullscreenCursor", &no_cursor);
 
 	if (FCEUI_EmulationPaused () == 0)
 	{
-		SDL_ShowCursor (0);
 		SDL_WM_GrabInput (SDL_GRAB_ON);
+		if(no_cursor)
+			SDL_ShowCursor (0);
 	}
 	else {
-		SDL_ShowCursor (1);
 		SDL_WM_GrabInput (SDL_GRAB_OFF);
+		SDL_ShowCursor (1);
 	}
 
 	return;
