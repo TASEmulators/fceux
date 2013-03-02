@@ -43,6 +43,9 @@ extern Name* lastBankNames;
 extern Name* loadedBankNames;
 extern Name* ramBankNames;
 
+extern unsigned char *cdloggervdata;
+extern unsigned int cdloggerVideoDataSize;
+
 using namespace std;
 
 #define MODE_NES_MEMORY   0
@@ -373,7 +376,8 @@ int LoadTable(const char* nameo)
 }
 
 //should return -1, otherwise returns the line number it had the error on
-int LoadTableFile(){
+int LoadTableFile()
+{
 	const char filter[]="Table Files (*.TBL)\0*.tbl\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
@@ -386,7 +390,7 @@ int LoadTableFile(){
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
-	ofn.hwndOwner = hCDLogger;
+	ofn.hwndOwner = hMemView;
 	if(!GetOpenFileName(&ofn))return -1;
 
 	int result = LoadTable(nameo);
@@ -550,13 +554,24 @@ char EditString[3][20] = {"RAM","PPU","ROM"};
 void UpdateCaption()
 {
 	static char str[1000];
-	static char addrName[1000];
-	static char addrNameCopy[1000];
+	static char addrName[500];
+	static char addrNameCopy[500];
 
 	if (CursorEndAddy == -1)
 	{
-		sprintf(str, "Hex Editor - %s Offset 0x%06x",
-			EditString[EditingMode], CursorStartAddy);
+		if (EditingMode == 2)
+		{
+			if (CursorStartAddy < 16)
+				sprintf(str, "Hex Editor - ROM Header Offset 0x%06x", CursorStartAddy);
+			else if (CursorStartAddy - 16 < (int)PRGsize[0])
+				sprintf(str, "Hex Editor - (PRG) ROM Offset 0x%06x", CursorStartAddy);
+			else if (CursorStartAddy - 16 - PRGsize[0] < (int)CHRsize[0])
+				sprintf(str, "Hex Editor - (CHR) ROM Offset 0x%06x", CursorStartAddy);
+		} else
+		{
+			sprintf(str, "Hex Editor - %s Offset 0x%06x", EditString[EditingMode], CursorStartAddy);
+		}
+
 		if (EditingMode == 0 && symbDebugEnabled)
 		{
 			// when watching RAM we may as well see symbolic names
@@ -645,22 +660,24 @@ void UpdateColorTable(){
 	// ################################## End of SP CODE ###########################
 
 	//mbg merge 6/29/06 - added argument
-	if(EditingMode == 0)FCEUI_ListCheats(UpdateCheatColorCallB,0);
+	if (EditingMode == 0)
+		FCEUI_ListCheats(UpdateCheatColorCallB, 0);
 
-	if(EditingMode == 2){
-		if(cdloggerdata)
+	if(EditingMode == 2)
+	{
+		if (cdloggerdataSize)
 		{
-			for(i = 0;i < DataAmount;i++)
+			for (i = 0; i < DataAmount; i++)
 			{
 				temp_offset = CurOffset + i - 16;	// (minus iNES header)
 				if (temp_offset >= 0)
 				{
-					if (temp_offset < PRGsize[0])
+					if (temp_offset < cdloggerdataSize)
 					{
 						// PRG
 						if ((cdloggerdata[temp_offset] & 3) == 3)
 						{
-							// the byte is both Code and Data
+							// the byte is both Code and Data - green
 							TextColorList[i]=RGB(0,190,0);
 						} else if((cdloggerdata[temp_offset] & 3) == 1)
 						{
@@ -674,33 +691,36 @@ void UpdateColorTable(){
 								TextColorList[i]=RGB(0,130,160);
 							else
 								// non-PCM data - blue
-								TextColorList[i]=RGB(0,0,195);
+								TextColorList[i]=RGB(0,0,210);
 						}
 					} else
 					{
-						temp_offset -= PRGsize[0];
-						if ((temp_offset < CHRsize[0]))
-						// CHR
-						if ((cdloggerdata[temp_offset] & 3) == 3)
+						temp_offset -= cdloggerdataSize;
+						if ((temp_offset < cdloggerVideoDataSize))
 						{
-							// the byte was both rendered and read programmatically - light-green
-							TextColorList[i]=RGB(5,255,5);
-						} else if((cdloggerdata[temp_offset] & 3) == 1)
-						{
-							// the byte was rendered - yellow
-							TextColorList[i]=RGB(210,190,0);
-						} else if((cdloggerdata[temp_offset] & 3) == 2)
-						{
-							// the byte was read programmatically - light-blue
-							TextColorList[i]=RGB(10,10,255);
+							// CHR
+							if ((cdloggervdata[temp_offset] & 3) == 3)
+							{
+								// the byte was both rendered and read programmatically - light-green
+								TextColorList[i]=RGB(5,255,5);
+							} else if ((cdloggervdata[temp_offset] & 3) == 1)
+							{
+								// the byte was rendered - yellow
+								TextColorList[i]=RGB(210,190,0);
+							} else if ((cdloggervdata[temp_offset] & 3) == 2)
+							{
+								// the byte was read programmatically - light-blue
+								TextColorList[i]=RGB(15,15,255);
+							}
 						}
 					}
 				}
 			}
 		}
 
-		tmp=undo_list;
-		while(tmp!= 0){
+		tmp = undo_list;
+		while(tmp!= 0)
+		{
 			//if((tmp->addr < CurOffset+DataAmount) && (tmp->addr+tmp->size > CurOffset))
 			for(i = tmp->addr;i < tmp->addr+tmp->size;i++){
 				if((i > CurOffset) && (i < CurOffset+DataAmount))
@@ -1609,7 +1629,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		case MENU_MV_FILE_LOAD_TBL:
 			if((i = LoadTableFile()) != -1){
 				sprintf(str,"Error Loading Table File At Line %d",i);
-				MessageBox(hMemView,str,"error", MB_OK);
+				MessageBox(hMemView, str, "error", MB_OK);
 			}
 			UpdateColorTable();
 			return 0;
