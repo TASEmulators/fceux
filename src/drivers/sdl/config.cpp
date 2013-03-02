@@ -220,6 +220,8 @@ InitConfig()
     
 	// overwrite the config file?
 	config->addOption("no-config", "SDL.NoConfig", 0);
+
+	config->addOption("autoresume", "SDL.AutoResume", 0);
     
 	// video playback
 	config->addOption("playmov", "SDL.Movie", "");

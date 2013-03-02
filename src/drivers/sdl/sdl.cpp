@@ -616,6 +616,17 @@ int main(int argc, char *argv[])
 	  return 0;
 	}
 	
+	int autoResume;
+
+	g_config->getOption("SDL.AutoResume", &autoResume);
+	if(autoResume)
+	{
+		AutoResumePlay = true;
+	}
+	else
+	{
+		AutoResumePlay = false;
+	}
 	// check to see if recording HUD to AVI is enabled
 	int rh;
 	g_config->getOption("SDL.RecordHUD", &rh);

@@ -1366,6 +1366,15 @@ void enableFullscreen ()
 	if(isloaded)
 		ToggleFS();
 }
+
+void toggleAutoResume (GtkToggleAction *action)
+{
+	bool autoResume = gtk_toggle_action_get_active(action);
+
+	g_config->setOption("SDL.AutoResume", (int)autoResume);
+	AutoResumePlay = autoResume;
+}
+
 void recordMovie()
 {
 	if(isloaded)
@@ -2159,6 +2168,7 @@ static char* menuXml =
 	"      <menuitem action='VideoConfigAction' />"
 	"      <menuitem action='PaletteConfigAction' />"
 	"      <menuitem action='NetworkConfigAction' />"
+	"      <menuitem action='AutoResumeAction' />"
 	"      <separator />"
 	"      <menuitem action='FullscreenAction' />"
 	"    </menu>"
@@ -2218,8 +2228,7 @@ static GtkActionEntry normal_entries[] = {
 	{"VideoConfigAction", "video-display", "_Video Config", NULL, NULL, G_CALLBACK(openVideoConfig)},
 	{"PaletteConfigAction", GTK_STOCK_SELECT_COLOR, "_Palette Config", NULL, NULL, G_CALLBACK(openPaletteConfig)},
 	{"NetworkConfigAction", GTK_STOCK_NETWORK, "_Network Config", NULL, NULL, G_CALLBACK(openNetworkConfig)},
-	{"FullscreenAction", GTK_STOCK_FULLSCREEN, "_Fullscreen", "<alt>Return", NULL, G_CALLBACK(enableFullscreen)},
-	
+	{"FullscreenAction", GTK_STOCK_FULLSCREEN, "_Fullscreen", "<alt>Return", NULL, G_CALLBACK(enableFullscreen)},	
 	{"EmulationMenuAction", NULL, "_Emulation"},
 	{"PowerAction", NULL, "P_ower", NULL, NULL, G_CALLBACK(FCEUI_PowerNES)},
 	{"SoftResetAction", GTK_STOCK_REFRESH, "_Soft Reset", NULL, NULL, G_CALLBACK(emuReset)},
@@ -2245,6 +2254,7 @@ static GtkActionEntry normal_entries[] = {
 // Menu items with a check box that can be toggled on or off
 static GtkToggleActionEntry toggle_entries[] = {
 	{"GameGenieToggleAction", NULL, "Enable Game _Genie", NULL, NULL, G_CALLBACK(toggleGameGenie), FALSE},
+	{"AutoResumeAction", NULL, "Auto-Resume", NULL, NULL, G_CALLBACK(toggleAutoResume), FALSE},
 };
 
 // Menu items for selecting a save state slot using radio buttons
@@ -2295,6 +2305,10 @@ static GtkWidget* CreateMenubar( GtkWidget* window)
 	state = gtk_action_group_get_action (action_group, "State0Action");
 	if (state && GTK_IS_RADIO_ACTION (state))
 		stateSlot = GTK_RADIO_ACTION (state);
+
+	/* Set the autoResume checkbox */
+	GtkCheckMenuItem* auto_resume_chk = (GtkCheckMenuItem*) gtk_ui_manager_get_widget ( ui_manager, "/Menubar/OptionsMenuAction/AutoResumeAction");
+	gtk_check_menu_item_set_active (auto_resume_chk, (bool)AutoResumePlay);
     
 	/* Finally, return the actual menu bar created by the UIManager. */
 	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
@@ -2422,8 +2436,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	Menubar = CreateMenubar(MainWindow);
 	// turn of game genie by default, since its off by default in the menu
 	enableGameGenie(0); 
-		
-	
+
 	gtk_box_pack_start (GTK_BOX(vbox), Menubar, FALSE, TRUE, 0);
 		
 	// PRG: this code here is the the windowID "hack" to render SDL
