@@ -36,24 +36,24 @@ a.rvts5, span.rvts5 /* Jump 2 */
 }
 span.rvts6
 {
- color: #a0a0a0;
+ color: #aca899;
 }
 span.rvts7
 {
  font-size: 15pt;
  font-family: 'Tahoma', 'Geneva', sans-serif;
  font-weight: bold;
- color: #696969;
+ color: #716f64;
 }
 span.rvts8
 {
  font-weight: bold;
- color: #a0a0a0;
+ color: #aca899;
 }
 span.rvts9
 {
  font-style: italic;
- color: #a0a0a0;
+ color: #aca899;
 }
 span.rvts10
 {
@@ -359,31 +359,37 @@ span.rvts69
 }
 a.rvts70, span.rvts70
 {
- font-size: 12pt;
  color: #0000ff;
  text-decoration: underline;
 }
 a.rvts70:hover { color: #0000ff; }
-span.rvts71
+a.rvts71, span.rvts71
+{
+ font-size: 12pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts71:hover { color: #0000ff; }
+span.rvts72
 {
  font-family: 'Lucida Console', 'Monaco', monospace;
  text-decoration: underline;
 }
-span.rvts72
+span.rvts73
 {
  font-weight: bold;
  text-decoration: underline;
 }
-span.rvts73
+span.rvts74
 {
  font-size: 11pt;
  text-decoration: underline;
 }
-span.rvts74
+span.rvts75
 {
  font-size: 5pt;
 }
-span.rvts75
+span.rvts76
 {
  font-size: 5pt;
  font-weight: bold;
