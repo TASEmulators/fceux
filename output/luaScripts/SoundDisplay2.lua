@@ -36,20 +36,20 @@ function Draw()
 
 	-- update the first indices for volume tables
 	-- shift the previous ones farther
-	table.insert(channels.Square1.vol, 1, snd.rp2a03.square1.volume*15)
-	table.insert(channels.Square2.vol, 1, snd.rp2a03.square2.volume*15)
+	table.insert(channels.Square1.vol,  1, snd.rp2a03.square1.volume*15)
+	table.insert(channels.Square2.vol,  1, snd.rp2a03.square2.volume*15)
 	table.insert(channels.Triangle.vol, 1, snd.rp2a03.triangle.volume*15)
-	table.insert(channels.Noise.vol, 1, snd.rp2a03.noise.volume*15)
-	table.insert(channels.DPCM.vol, 1, snd.rp2a03.dpcm.volume*15)
+	table.insert(channels.Noise.vol,    1, snd.rp2a03.noise.volume*15)
+	table.insert(channels.DPCM.vol,     1, snd.rp2a03.dpcm.volume*15)
 
 	-- get duty and midikey for proper channels
 	channels.Square1.duty = snd.rp2a03.square1.duty
 	channels.Square2.duty = snd.rp2a03.square2.duty
 	
-	channels.Square1.midi = snd.rp2a03.square1.midikey
-	channels.Square2.midi = snd.rp2a03.square2.midikey
+	channels.Square1.midi  = snd.rp2a03.square1.midikey
+	channels.Square2.midi  = snd.rp2a03.square2.midikey
 	channels.Triangle.midi = snd.rp2a03.triangle.midikey
-	channels.Noise.midi = snd.rp2a03.noise.midikey
+	channels.Noise.midi    = snd.rp2a03.noise.midikey
 
 	-- guess notes
 	for name, chan in pairs(channels) do
@@ -63,9 +63,9 @@ function Draw()
 	end
 	
 	-- notes display
-	gui.text(kb.x+203, kb.y,  "S1: "..channels.Square1.semitone..channels.Square1.octave,   "#ff0000ff", "#000000ff")
-	gui.text(kb.x+203, kb.y+9,    "S2: "..channels.Square2.semitone..channels.Square2.octave,   "#aa00ccff", "#000000ff")
-	gui.text(kb.x+204, kb.y+18,  "Tr: "..channels.Triangle.semitone..channels.Triangle.octave, "#00aaffff", "#000000ff")
+	gui.text(kb.x+203, kb.y,    "S1: "..channels.Square1.semitone..channels.Square1.octave,   "#ff0000ff", "#000000ff")
+	gui.text(kb.x+203, kb.y+9,  "S2: "..channels.Square2.semitone..channels.Square2.octave,   "#aa00ccff", "#000000ff")
+	gui.text(kb.x+204, kb.y+18, "Tr: "..channels.Triangle.semitone..channels.Triangle.octave, "#00aaffff", "#000000ff")
 	gui.text(kb.x+204, kb.y+27, "Ns: "..channels.Noise.semitone..channels.Noise.octave,       "#ffffffff", "#000000ff")
 
 -----------------
@@ -78,7 +78,7 @@ function Draw()
 	yhh2 = 18
 	
 	if channels.Noise.vol[1] > 0 then 
-		if channels.Noise.octave >= 8 and channels.Noise.octave <= 13 then
+		if channels.Noise.octave >= 9 and channels.Noise.octave <= 12 then
 			colorhh = "#ffaa00"
 			if channels.Noise.vol[2] - channels.Noise.vol[1] < 4
 			and channels.Noise.vol[2] > 0
@@ -147,8 +147,8 @@ function Draw()
 		-- draw accidental keys
 		gui.box(kb.x-3, kb.y, kb.x-5, kb.y+10, "#00000000")		
 		for oct = 0, 6 do
-			gui.box(kb.x+3+28*oct, kb.y, kb.x+5+28*oct, kb.y+10, "#00000000")
-			gui.box(kb.x+7+28*oct, kb.y, kb.x+9+28*oct, kb.y+10, "#00000000")
+			gui.box(kb.x+3+28*oct,  kb.y, kb.x+5+28*oct,  kb.y+10, "#00000000")
+			gui.box(kb.x+7+28*oct,  kb.y, kb.x+9+28*oct,  kb.y+10, "#00000000")
 			gui.box(kb.x+15+28*oct, kb.y, kb.x+17+28*oct, kb.y+10, "#00000000")
 			gui.box(kb.x+19+28*oct, kb.y, kb.x+21+28*oct, kb.y+10, "#00000000")
 			gui.box(kb.x+23+28*oct, kb.y, kb.x+25+28*oct, kb.y+10, "#00000000")			
@@ -172,17 +172,17 @@ function Draw()
 		
 		grey = "#aaaaaaaa"	
 		for oct = 0, 6 do					
-			gui.line(kb.x+3+28*oct, kb.y+10, kb.x+5+28*oct, kb.y+10, grey)
-			gui.line(kb.x+7+28*oct, kb.y+10, kb.x+9+28*oct, kb.y+10, grey)
+			gui.line(kb.x+3+28*oct,  kb.y+10, kb.x+5+28*oct,  kb.y+10, grey)
+			gui.line(kb.x+7+28*oct,  kb.y+10, kb.x+9+28*oct,  kb.y+10, grey)
 			gui.line(kb.x+15+28*oct, kb.y+10, kb.x+17+28*oct, kb.y+10, grey)
 			gui.line(kb.x+19+28*oct, kb.y+10, kb.x+21+28*oct, kb.y+10, grey)
 			gui.line(kb.x+23+28*oct, kb.y+10, kb.x+25+28*oct, kb.y+10, grey)
 		end
-		gui.line(kb.x-3, kb.y+10, kb.x-5, kb.y+10, grey)
-		gui.line(kb.x-8, kb.y, kb.x+200, kb.y, "#00000088")
-		gui.line(kb.x-8, kb.y+16, kb.x+200, kb.y+16, "#00000088")
-		gui.line(kb.x-8, kb.y, kb.x-8, kb.y+16, "#00000088")
-		gui.line(kb.x+200, kb.y, kb.x+200, kb.y+16, "#00000088")
+		gui.line(kb.x-3,   kb.y+10, kb.x-5,   kb.y+10, grey)
+		gui.line(kb.x-8,   kb.y,    kb.x+200, kb.y,    "#00000088")
+		gui.line(kb.x-8,   kb.y+16, kb.x+200, kb.y+16, "#00000088")
+		gui.line(kb.x-8,   kb.y,    kb.x-8,   kb.y+16, "#00000088")
+		gui.line(kb.x+200, kb.y,    kb.x+200, kb.y+16, "#00000088")
 	else
 		-- capture leftclicks
 		if keys.xmouse <= 256 and keys.xmouse >= 205 and keys.ymouse >= 154 and keys.ymouse <= 181 then
