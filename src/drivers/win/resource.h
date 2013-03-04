@@ -728,6 +728,8 @@
 #define ID_CHR2                         1284
 #define ID_CHR3                         1285
 #define ID_STATIC                       1286
+#define ID_CDL_OPTIONS                  1287
+#define ID_CDL_GENERATEROM              1288
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1182,7 +1184,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        290
 #define _APS_NEXT_COMMAND_VALUE         40583
-#define _APS_NEXT_CONTROL_VALUE         1287
+#define _APS_NEXT_CONTROL_VALUE         1289
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

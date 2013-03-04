@@ -1,6 +1,6 @@
 // Specification file for RECORDER class
 
-enum
+enum MULTITRACK_RECORDING_MODES
 {
 	MULTITRACK_RECORDING_ALL = 0,
 	MULTITRACK_RECORDING_1P = 1,
@@ -9,7 +9,7 @@ enum
 	MULTITRACK_RECORDING_4P = 4,
 };
 
-enum
+enum SUPERIMPOSE_OPTIONS
 {
 	SUPERIMPOSE_UNCHECKED = 0,
 	SUPERIMPOSE_CHECKED = 1,
@@ -24,28 +24,28 @@ public:
 	void reset();
 	void update();
 
-	void UncheckRecordingRadioButtons();
-	void RecheckRecordingRadioButtons();
+	void uncheckRecordingRadioButtons();
+	void recheckRecordingRadioButtons();
 
-	void InputChanged();
+	void recordInput();
 
-	const char* GetRecordingMode();
-	const char* GetRecordingCaption();
+	const char* getRecordingMode();
+	const char* getRecordingCaption();
 	
-	int multitrack_recording_joypad;
-	int pattern_offset;
-	std::vector<uint8> current_joy;
-	bool state_was_loaded_in_readwrite_mode;
+	int multitrackRecordingJoypadNumber;
+	int patternOffset;
+	std::vector<uint8> currentJoypadData;
+	bool stateWasLoadedInReadWriteMode;
 
 private:
-	int old_multitrack_recording_joypad;
-	int old_current_pattern, old_pattern_offset;
-	bool must_increase_pattern_offset;
-	bool old_movie_readonly;
+	int oldMultitrackRecordingJoypadNumber;
+	int oldCurrentPattern, oldPatternOffset;
+	bool oldStateOfMovieReadonly;
+	bool mustIncreasePatternOffset;
 
-	HWND hwndRecCheckbox, hwndRB_RecAll, hwndRB_Rec1P, hwndRB_Rec2P, hwndRB_Rec3P, hwndRB_Rec4P;
+	HWND hwndRecordingCheckbox, hwndRadioButtonRecordAll, hwndRadioButtonRecord1P, hwndRadioButtonRecord2P, hwndRadioButtonRecord3P, hwndRadioButtonRecord4P;
 
 	// temps
-	std::vector<uint8> old_joy;
-	std::vector<uint8> new_joy;
+	std::vector<uint8> oldJoyData;
+	std::vector<uint8> newJoyData;
 };

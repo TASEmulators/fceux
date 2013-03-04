@@ -77,7 +77,7 @@
 
 #include "taseditor/taseditor_window.h"
 #include "taseditor/playback.h"
-extern TASEDITOR_WINDOW taseditor_window;
+extern TASEDITOR_WINDOW taseditorWindow;
 extern PLAYBACK playback;
 
 #include "Win32InputBox.h"
@@ -1290,15 +1290,15 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_MOUSEWHEEL:
 	{
 		// send the message to TAS Editor
-		if (taseditor_window.hwndTasEditor)
-			SendMessage(taseditor_window.hwndTasEditor, msg, wParam, lParam);
+		if (taseditorWindow.hwndTASEditor)
+			SendMessage(taseditorWindow.hwndTASEditor, msg, wParam, lParam);
 		return 0;
 	}
 
 	case WM_MBUTTONDOWN:
 	{
 		if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-			playback.MiddleButtonClick();
+			playback.handleMiddleButtonClick();
 		return 0;
 	}
 
@@ -1525,12 +1525,12 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					if (GameInfo && !(fileDropped.find(".fm3") == string::npos))
 					{
 						//.fm3 is at the end of the filename so that must be the extension
-						extern bool EnterTasEditor();
-						extern bool LoadProject(const char* fullname);
-						extern bool AskSaveProject();
-						if (EnterTasEditor())					//We are convinced it is a TAS Editor project file, attempt to load in TAS Editor
-							if (AskSaveProject())		// in case there's unsaved project
-								LoadProject(fileDropped.c_str());
+						extern bool enterTASEditor();
+						extern bool loadProject(const char* fullname);
+						extern bool askToSaveProject();
+						if (enterTASEditor())					//We are convinced it is a TAS Editor project file, attempt to load in TAS Editor
+							if (askToSaveProject())		// in case there's unsaved project
+								loadProject(fileDropped.c_str());
 					}
 				}
 				//-------------------------------------------------------
@@ -2042,8 +2042,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//	break;
 			//  Removing this tool since it is redundant to both 
 			case MENU_TASEDITOR:
-				extern bool EnterTasEditor();
-				EnterTasEditor();
+				extern bool enterTASEditor();
+				enterTASEditor();
 				break;
 			case MENU_CONVERT_MOVIE:
 				ConvertFCM(hWnd);

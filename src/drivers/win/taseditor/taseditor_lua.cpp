@@ -18,16 +18,16 @@ Lua - Manager of Lua features
 
 #include "taseditor_project.h"
 
-extern TASEDITOR_CONFIG taseditor_config;
-extern TASEDITOR_WINDOW taseditor_window;
+extern TASEDITOR_CONFIG taseditorConfig;
+extern TASEDITOR_WINDOW taseditorWindow;
 extern HISTORY history;
-extern MARKERS_MANAGER markers_manager;
+extern MARKERS_MANAGER markersManager;
 extern BOOKMARKS bookmarks;
 extern BRANCHES branches;
 extern RECORDER recorder;
 extern PLAYBACK playback;
 extern GREENZONE greenzone;
-extern PIANO_ROLL piano_roll;
+extern PIANO_ROLL pianoRoll;
 extern SELECTION selection;
 
 extern void TaseditorDisableManualFunctionIfNeeded();
@@ -41,7 +41,7 @@ TASEDITOR_LUA::TASEDITOR_LUA()
 void TASEDITOR_LUA::init()
 {
 	pending_changes.resize(0);
-	hwndRunFunction = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_RUN_MANUAL);
+	hwndRunFunctionButton = GetDlgItem(taseditorWindow.hwndTASEditor, TASEDITOR_RUN_MANUAL);
 	reset();
 }
 void TASEDITOR_LUA::reset()
@@ -53,21 +53,21 @@ void TASEDITOR_LUA::update()
 
 }
 
-void TASEDITOR_LUA::EnableRunFunction(const char* caption)
+void TASEDITOR_LUA::enableRunFunction(const char* caption)
 {
 	if (caption)
-		SetWindowText(hwndRunFunction, caption);
+		SetWindowText(hwndRunFunctionButton, caption);
 	else
-		SetWindowText(hwndRunFunction, defaultRunFunctionCaption);
-	EnableWindow(hwndRunFunction, true);
+		SetWindowText(hwndRunFunctionButton, defaultRunFunctionCaption);
+	EnableWindow(hwndRunFunctionButton, true);
 }
-void TASEDITOR_LUA::DisableRunFunction()
+void TASEDITOR_LUA::disableRunFunction()
 {
-	SetWindowText(hwndRunFunction, defaultRunFunctionCaption);
-	EnableWindow(hwndRunFunction, false);
+	SetWindowText(hwndRunFunctionButton, defaultRunFunctionCaption);
+	EnableWindow(hwndRunFunctionButton, false);
 }
 
-void TASEDITOR_LUA::InsertDelete_rows_to_Snaphot(SNAPSHOT& snapshot)
+void TASEDITOR_LUA::insertAndDeleteRowsInSnaphot(SNAPSHOT& snapshot)
 {
 	int size = pending_changes.size();
 	if (size)
@@ -112,7 +112,7 @@ bool TASEDITOR_LUA::engaged()
 bool TASEDITOR_LUA::markedframe(int frame)
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		return markers_manager.GetMarker(frame) != 0;
+		return markersManager.getMarkerAtFrame(frame) != 0;
 	else
 		return false;
 }
@@ -121,7 +121,7 @@ bool TASEDITOR_LUA::markedframe(int frame)
 int TASEDITOR_LUA::getmarker(int frame)
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		return markers_manager.GetMarkerUp(frame);
+		return markersManager.getMarkerAboveFrame(frame);
 	else
 		return -1;
 }
@@ -131,17 +131,17 @@ int TASEDITOR_LUA::setmarker(int frame)
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
-		int marker_id = markers_manager.GetMarker(frame);
+		int marker_id = markersManager.getMarkerAtFrame(frame);
 		if (!marker_id)
 		{
-			marker_id = markers_manager.SetMarker(frame);
+			marker_id = markersManager.setMarkerAtFrame(frame);
 			if (marker_id)
 			{
 				// new Marker was created - register changes in TAS Editor
-				history.RegisterMarkersChange(MODTYPE_LUA_MARKER_SET, frame);
-				selection.must_find_current_marker = playback.must_find_current_marker = true;
-				piano_roll.RedrawRow(frame);
-				piano_roll.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+				history.registerMarkersChange(MODTYPE_LUA_MARKER_SET, frame);
+				selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
+				pianoRoll.redrawRow(frame);
+				pianoRoll.setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 			}
 		}
 		return marker_id;
@@ -154,14 +154,14 @@ void TASEDITOR_LUA::removemarker(int frame)
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
-		if (markers_manager.GetMarker(frame))
+		if (markersManager.getMarkerAtFrame(frame))
 		{
-			markers_manager.ClearMarker(frame);
+			markersManager.removeMarkerFromFrame(frame);
 			// Marker was deleted - register changes in TAS Editor
-			history.RegisterMarkersChange(MODTYPE_LUA_MARKER_REMOVE, frame);
-			selection.must_find_current_marker = playback.must_find_current_marker = true;
-			piano_roll.RedrawRow(frame);
-			piano_roll.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+			history.registerMarkersChange(MODTYPE_LUA_MARKER_REMOVE, frame);
+			selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
+			pianoRoll.redrawRow(frame);
+			pianoRoll.setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 		}
 	}
 }
@@ -171,7 +171,7 @@ const char* TASEDITOR_LUA::getnote(int index)
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
-		return strdup(markers_manager.GetNote(index).c_str());
+		return strdup(markersManager.getNoteCopy(index).c_str());
 	} else
 		return NULL;
 }
@@ -184,12 +184,12 @@ void TASEDITOR_LUA::setnote(int index, const char* newtext)
 		// rename only if newtext is different from old text
 		char text[MAX_NOTE_LEN];
 		strncpy(text, newtext, MAX_NOTE_LEN - 1);
-		if (strcmp(markers_manager.GetNote(index).c_str(), text))
+		if (strcmp(markersManager.getNoteCopy(index).c_str(), text))
 		{
 			// text differs from old Note - rename
-			markers_manager.SetNote(index, text);
-			history.RegisterMarkersChange(MODTYPE_LUA_MARKER_RENAME, markers_manager.GetMarkerFrame(index), -1, text);
-			selection.must_find_current_marker = playback.must_find_current_marker = true;
+			markersManager.setNote(index, text);
+			history.registerMarkersChange(MODTYPE_LUA_MARKER_RENAME, markersManager.getMarkerFrameNumber(index), -1, text);
+			selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
 		}
 	}
 }
@@ -198,7 +198,7 @@ void TASEDITOR_LUA::setnote(int index, const char* newtext)
 int TASEDITOR_LUA::getcurrentbranch()
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		return branches.GetCurrentBranch();
+		return branches.getCurrentBranch();
 	else
 		return -1;
 }
@@ -207,7 +207,7 @@ int TASEDITOR_LUA::getcurrentbranch()
 const char* TASEDITOR_LUA::getrecordermode()
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		return recorder.GetRecordingMode();
+		return recorder.getRecordingMode();
 	else
 		return NULL;
 }
@@ -216,7 +216,7 @@ const char* TASEDITOR_LUA::getrecordermode()
 int TASEDITOR_LUA::getsuperimpose()
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		return taseditor_config.superimpose;
+		return taseditorConfig.superimpose;
 	else
 		return -1;
 }
@@ -225,7 +225,7 @@ int TASEDITOR_LUA::getsuperimpose()
 int TASEDITOR_LUA::getlostplayback()
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		return playback.GetLostPosition();
+		return playback.getLastPosition();
 	else
 		return -1;
 }
@@ -234,7 +234,7 @@ int TASEDITOR_LUA::getlostplayback()
 int TASEDITOR_LUA::getplaybacktarget()
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		return playback.GetPauseFrame();
+		return playback.getPauseFrame();
 	else
 		return -1;
 }
@@ -252,7 +252,7 @@ void TASEDITOR_LUA::setplayback(int frame)
 void TASEDITOR_LUA::stopseeking()
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		playback.SeekingStop();
+		playback.stopSeeking();
 }
 
 // table taseditor.getselection()
@@ -260,14 +260,14 @@ void TASEDITOR_LUA::getselection(std::vector<int>& placeholder)
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
-		SelectionFrames* current_selection = selection.MakeStrobe();
+		RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
 		int frames = current_selection->size();
 		if (!frames) return;
 
 		placeholder.resize(frames);
-		SelectionFrames::iterator current_selection_end(current_selection->end());
+		RowsSelection::iterator current_selection_end(current_selection->end());
 		int i = 0;
-		for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; ++it)
+		for(RowsSelection::iterator it(current_selection->begin()); it != current_selection_end; ++it)
 			placeholder[i++] = *it;
 	}
 }
@@ -277,9 +277,9 @@ void TASEDITOR_LUA::setselection(std::vector<int>& new_set)
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
-		selection.ClearSelection();
+		selection.clearAllRowsSelection();
 		for (int i = new_set.size() - 1; i >= 0; i--)
-			selection.SetRowSelection(new_set[i]);
+			selection.setRowSelection(new_set[i]);
 	}
 }
 
@@ -383,7 +383,7 @@ int TASEDITOR_LUA::applyinputchanges(const char* name)
 				{
 					// expand movie to fit the frame
 					currMovieData.insertEmpty(-1, 1 + pending_changes[i].frame - currMovieData.getNumRecords());
-					markers_manager.update();
+					markersManager.update();
 					InsertionDeletion_was_made = true;
 				}
 				switch (pending_changes[i].type)
@@ -414,9 +414,9 @@ int TASEDITOR_LUA::applyinputchanges(const char* name)
 					{
 						InsertionDeletion_was_made = true;
 						currMovieData.insertEmpty(pending_changes[i].frame, pending_changes[i].data);
-						greenzone.laglog.InsertFrame(pending_changes[i].frame, false, pending_changes[i].data);
-						if (taseditor_config.bind_markers)
-							markers_manager.insertEmpty(pending_changes[i].frame, pending_changes[i].data);
+						greenzone.lagLog.insertFrame(pending_changes[i].frame, false, pending_changes[i].data);
+						if (taseditorConfig.bindMarkersToInput)
+							markersManager.insertEmpty(pending_changes[i].frame, pending_changes[i].data);
 						break;
 					}
 					case LUA_CHANGE_TYPE_DELETEFRAMES:
@@ -426,28 +426,28 @@ int TASEDITOR_LUA::applyinputchanges(const char* name)
 						{
 							if (pending_changes[i].frame < (int)currMovieData.getNumRecords())
 								currMovieData.eraseRecords(pending_changes[i].frame);
-							greenzone.laglog.EraseFrame(pending_changes[i].frame);
-							if (taseditor_config.bind_markers)
-								markers_manager.EraseMarker(pending_changes[i].frame);
+							greenzone.lagLog.eraseFrame(pending_changes[i].frame);
+							if (taseditorConfig.bindMarkersToInput)
+								markersManager.eraseMarker(pending_changes[i].frame);
 						}
 						break;
 					}
 				}
 			}
-			if (taseditor_config.bind_markers)
-				selection.must_find_current_marker = playback.must_find_current_marker = true;
+			if (taseditorConfig.bindMarkersToInput)
+				selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
 			// check if user deleted all frames
 			if (!currMovieData.getNumRecords())
-				playback.StartFromZero();
+				playback.restartPlaybackFromZeroGround();
 			// reduce Piano Roll
-			piano_roll.UpdateItemCount();
+			pianoRoll.updateLinesCount();
 			// check actual changes
-			int result = history.RegisterLuaChanges(name, start_index, InsertionDeletion_was_made);
+			int result = history.registerLuaChanges(name, start_index, InsertionDeletion_was_made);
 			if (result >= 0)
-				greenzone.InvalidateAndCheck(result);
+				greenzone.invalidateAndUpdatePlayback(result);
 			else
 				// check for special case: user deleted empty frames of the movie
-				greenzone.InvalidateAndCheck(currMovieData.getNumRecords() - 1);
+				greenzone.invalidateAndUpdatePlayback(currMovieData.getNumRecords() - 1);
 
 			pending_changes.resize(0);
 			return result;

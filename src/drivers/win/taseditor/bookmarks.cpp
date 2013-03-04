@@ -28,17 +28,17 @@ Bookmarks/Branches - Manager of Bookmarks
 LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 WNDPROC hwndBookmarksList_oldWndProc;
 
-extern TASEDITOR_CONFIG taseditor_config;
-extern TASEDITOR_WINDOW taseditor_window;
-extern POPUP_DISPLAY popup_display;
+extern TASEDITOR_CONFIG taseditorConfig;
+extern TASEDITOR_WINDOW taseditorWindow;
+extern POPUP_DISPLAY popupDisplay;
 extern PLAYBACK playback;
 extern RECORDER recorder;
 extern SELECTION selection;
 extern GREENZONE greenzone;
 extern TASEDITOR_PROJECT project;
 extern HISTORY history;
-extern PIANO_ROLL piano_roll;
-extern MARKERS_MANAGER markers_manager;
+extern PIANO_ROLL pianoRoll;
+extern MARKERS_MANAGER markersManager;
 extern BRANCHES branches;
 
 // resources
@@ -46,7 +46,7 @@ char bookmarks_save_id[BOOKMARKS_ID_LEN] = "BOOKMARKS";
 char bookmarks_skipsave_id[BOOKMARKS_ID_LEN] = "BOOKMARKX";
 char bookmarksCaption[3][23] = { " Bookmarks ", " Bookmarks / Branches ", " Branches " };
 // color tables for flashing when saving/loading bookmarks
-COLORREF bookmark_flash_colors[TOTAL_COMMANDS][FLASH_PHASE_MAX+1] = {
+COLORREF bookmark_flash_colors[TOTAL_BOOKMARK_COMMANDS][FLASH_PHASE_MAX+1] = {
 	// set
 	//0x122330, 0x1b3541, 0x254753, 0x2e5964, 0x376b75, 0x417e87, 0x4a8f97, 0x53a1a8, 0x5db3b9, 0x66c5cb, 0x70d7dc, 0x79e9ed, 
 	0x0d1241, 0x111853, 0x161e64, 0x1a2575, 0x1f2b87, 0x233197, 0x2837a8, 0x2c3db9, 0x3144cb, 0x354adc, 0x3a50ed, 0x3f57ff, 
@@ -61,145 +61,145 @@ BOOKMARKS::BOOKMARKS()
 	tme.cbSize = sizeof(tme);
 	tme.dwFlags = TME_LEAVE;
 	tme.hwndTrack = NULL;
-	list_tme.cbSize = sizeof(tme);
-	list_tme.dwFlags = TME_LEAVE;
-	list_tme.hwndTrack = NULL;
+	tmeList.cbSize = sizeof(tme);
+	tmeList.dwFlags = TME_LEAVE;
+	tmeList.hwndTrack = NULL;
 }
 
 void BOOKMARKS::init()
 {
 	free();
-	hwndBookmarksList = GetDlgItem(taseditor_window.hwndTasEditor, IDC_BOOKMARKSLIST);
-	hwndBranchesBitmap = GetDlgItem(taseditor_window.hwndTasEditor, IDC_BRANCHES_BITMAP);
-	hwndBookmarks = GetDlgItem(taseditor_window.hwndTasEditor, IDC_BOOKMARKS_BOX);
+	hwndBookmarksList = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_BOOKMARKSLIST);
+	hwndBranchesBitmap = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_BRANCHES_BITMAP);
+	hwndBookmarks = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_BOOKMARKS_BOX);
 
 	// prepare bookmarks listview
 	ListView_SetExtendedListViewStyleEx(hwndBookmarksList, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
 	// subclass the listview
 	hwndBookmarksList_oldWndProc = (WNDPROC)SetWindowLong(hwndBookmarksList, GWL_WNDPROC, (LONG)BookmarksListWndProc);
 	// setup images for the listview
-	himglist = ImageList_Create(11, 13, ILC_COLOR8 | ILC_MASK, 1, 1);
+	hImgList = ImageList_Create(11, 13, ILC_COLOR8 | ILC_MASK, 1, 1);
 	HBITMAP bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP0));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP1));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP2));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP3));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP4));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP5));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP6));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP7));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP8));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP9));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP10));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP11));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP12));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP13));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP14));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP15));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP16));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP17));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP18));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP19));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED0));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED1));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED2));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED3));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED4));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED5));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED6));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED7));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED8));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED9));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED10));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED11));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED12));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED13));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED14));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED15));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED16));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED17));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED18));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED19));
-	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
-	ListView_SetImageList(hwndBookmarksList, himglist, LVSIL_SMALL);
+	ListView_SetImageList(hwndBookmarksList, hImgList, LVSIL_SMALL);
 	// setup columns
 	LVCOLUMN lvc;
 	// icons column
@@ -212,47 +212,47 @@ void BOOKMARKS::init()
 	lvc.cx = BOOKMARKSLIST_COLUMN_FRAMENUM_WIDTH;
 	ListView_InsertColumn(hwndBookmarksList, 1, &lvc);
 	// time column
-	lvc.cx = BOOKMARKSLIST_COLUMN_TIME_WIDTH;
+	lvc.cx = BOOKMARKSLIST_COLUMN_TIMESTAMP_WIDTH;
 	ListView_InsertColumn(hwndBookmarksList, 2, &lvc);
 	// create 10 rows
 	ListView_SetItemCountEx(hwndBookmarksList, TOTAL_BOOKMARKS, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
 
 	reset();
-	selected_slot = DEFAULT_SLOT;
+	selectedSlot = DEFAULT_SLOT;
 	// find the top/height of the "Time" cell of the 1st row (for mouseover hittest calculations)
 	RECT temp_rect, wrect;
 	if (ListView_GetSubItemRect(hwndBookmarksList, 0, 2, LVIR_BOUNDS, &temp_rect) && temp_rect.bottom != temp_rect.top)
 	{
-		list_row_top = temp_rect.top;
-		list_row_left = temp_rect.left;
-		list_row_height = temp_rect.bottom - temp_rect.top;
+		listTopMargin = temp_rect.top;
+		listRowLeft = temp_rect.left;
+		listRowHeight = temp_rect.bottom - temp_rect.top;
 	} else
 	{
 		// couldn't get rect, set default values
-		list_row_top = 0;
-		list_row_left = BOOKMARKSLIST_COLUMN_ICONS_WIDTH + BOOKMARKSLIST_COLUMN_FRAMENUM_WIDTH;
-		list_row_height = 14;
+		listTopMargin = 0;
+		listRowLeft = BOOKMARKSLIST_COLUMN_ICONS_WIDTH + BOOKMARKSLIST_COLUMN_FRAMENUM_WIDTH;
+		listRowHeight = 14;
 	}
 	// calculate the needed height of client area (so that all 10 rows fir the screen)
-	int total_list_height = list_row_top + list_row_height * TOTAL_BOOKMARKS;
+	int total_list_height = listTopMargin + listRowHeight * TOTAL_BOOKMARKS;
 	// find the difference between Bookmarks List window and Bookmarks List client area
 	GetWindowRect(hwndBookmarksList, &wrect);
 	GetClientRect(hwndBookmarksList, &temp_rect);
 	total_list_height += (wrect.bottom - wrect.top) - (temp_rect.bottom - temp_rect.top);
 	// change the height
-	taseditor_window.ChangeBookmarksListHeight(total_list_height);
+	taseditorWindow.changeBookmarksListHeight(total_list_height);
 
 
 
-	RedrawBookmarksCaption();
+	redrawBookmarksSectionCaption();
 }
 void BOOKMARKS::free()
 {
-	bookmarks_array.resize(0);
-	if (himglist)
+	bookmarksArray.resize(0);
+	if (hImgList)
 	{
-		ImageList_Destroy(himglist);
-		himglist = 0;
+		ImageList_Destroy(hImgList);
+		hImgList = 0;
 	}
 }
 void BOOKMARKS::reset()
@@ -260,20 +260,20 @@ void BOOKMARKS::reset()
 	// delete all commands if there are any
 	commands.resize(0);
 	// init bookmarks
-	bookmarks_array.resize(0);
-	bookmarks_array.resize(TOTAL_BOOKMARKS);
+	bookmarksArray.resize(0);
+	bookmarksArray.resize(TOTAL_BOOKMARKS);
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
-		bookmarks_array[i].init();
+		bookmarksArray[i].init();
 	reset_vars();
 }
 void BOOKMARKS::reset_vars()
 {
-	mouse_x = mouse_y = -1;
-	item_under_mouse = ITEM_UNDER_MOUSE_NONE;
-	mouse_over_bitmap = false;
-	must_check_item_under_mouse = true;
-	bookmark_leftclicked = bookmark_rightclicked = ITEM_UNDER_MOUSE_NONE;
-	check_flash_shedule = clock() + BOOKMARKS_FLASH_TICK;
+	mouseX = mouseY = -1;
+	itemUnderMouse = ITEM_UNDER_MOUSE_NONE;
+	mouseOverBranchesBitmap = false;
+	mustCheckItemUnderMouse = true;
+	bookmarkLeftclicked = bookmarkRightclicked = ITEM_UNDER_MOUSE_NONE;
+	nextFlashUpdateTime = clock() + BOOKMARKS_FLASH_TICK;
 }
 
 void BOOKMARKS::update()
@@ -295,12 +295,12 @@ void BOOKMARKS::update()
 				deploy(slot);
 				break;
 			case COMMAND_SELECT:
-				if (selected_slot != slot)
+				if (selectedSlot != slot)
 				{
-					int old_selected_slot = selected_slot;
-					selected_slot = slot;
-					RedrawBookmark(old_selected_slot);
-					RedrawBookmark(selected_slot);
+					int old_selected_slot = selectedSlot;
+					selectedSlot = slot;
+					redrawBookmark(old_selected_slot);
+					redrawBookmark(selectedSlot);
 				}
 				break;
 		}
@@ -308,41 +308,41 @@ void BOOKMARKS::update()
 	commands.resize(0);
 
 	// once per 100 milliseconds update bookmark flashes
-	if (clock() > check_flash_shedule)
+	if (clock() > nextFlashUpdateTime)
 	{
-		check_flash_shedule = clock() + BOOKMARKS_FLASH_TICK;
+		nextFlashUpdateTime = clock() + BOOKMARKS_FLASH_TICK;
 		for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 		{
-			if (bookmark_rightclicked == i || bookmark_leftclicked == i)
+			if (bookmarkRightclicked == i || bookmarkLeftclicked == i)
 			{
-				if (bookmarks_array[i].flash_phase != FLASH_PHASE_BUTTONHELD)
+				if (bookmarksArray[i].flashPhase != FLASH_PHASE_BUTTONHELD)
 				{
-					bookmarks_array[i].flash_phase = FLASH_PHASE_BUTTONHELD;
-					RedrawBookmark(i);
-					branches.must_redraw_branches_tree = true;		// because border of branch digit has changed
+					bookmarksArray[i].flashPhase = FLASH_PHASE_BUTTONHELD;
+					redrawBookmark(i);
+					branches.mustRedrawBranchesBitmap = true;		// because border of branch digit has changed
 				}
 			} else
 			{
-				if (bookmarks_array[i].flash_phase > 0)
+				if (bookmarksArray[i].flashPhase > 0)
 				{
-					bookmarks_array[i].flash_phase--;
-					RedrawBookmark(i);
-					branches.must_redraw_branches_tree = true;		// because border of branch digit has changed
+					bookmarksArray[i].flashPhase--;
+					redrawBookmark(i);
+					branches.mustRedrawBranchesBitmap = true;		// because border of branch digit has changed
 				}
 			}
 		}
 	}
 
 	// controls
-	if (must_check_item_under_mouse)
+	if (mustCheckItemUnderMouse)
 	{
-		if (edit_mode == EDIT_MODE_BRANCHES)
-			item_under_mouse = branches.FindItemUnderMouse(mouse_x, mouse_y);
-		else if (edit_mode == EDIT_MODE_BOTH)
-			item_under_mouse = FindItemUnderMouse();
+		if (editMode == EDIT_MODE_BRANCHES)
+			itemUnderMouse = branches.findItemUnderMouse(mouseX, mouseY);
+		else if (editMode == EDIT_MODE_BOTH)
+			itemUnderMouse = findItemUnderMouse();
 		else
-			item_under_mouse = ITEM_UNDER_MOUSE_NONE;
-		must_check_item_under_mouse = false;
+			itemUnderMouse = ITEM_UNDER_MOUSE_NONE;
+		mustCheckItemUnderMouse = false;
 	}
 }
 
@@ -350,7 +350,7 @@ void BOOKMARKS::update()
 void BOOKMARKS::command(int command_id, int slot)
 {
 	if (slot < 0)
-		slot = selected_slot;
+		slot = selectedSlot;
 	if (slot >= 0 && slot < TOTAL_BOOKMARKS)
 	{
 		commands.push_back(command_id);
@@ -363,36 +363,36 @@ void BOOKMARKS::set(int slot)
 	if (slot < 0 || slot >= TOTAL_BOOKMARKS) return;
 
 	// First save changes in edited note (in case it's being currently edited)
-	markers_manager.UpdateMarkerNote();
+	markersManager.updateEditedMarkerNote();
 
-	int previous_frame = bookmarks_array[slot].snapshot.keyframe;
-	if (bookmarks_array[slot].checkDiffFromCurrent())
+	int previous_frame = bookmarksArray[slot].snapshot.keyFrame;
+	if (bookmarksArray[slot].isDifferentFromCurrentMovie())
 	{
-		BOOKMARK backup_copy(bookmarks_array[slot]);
-		bookmarks_array[slot].set();
+		BOOKMARK backup_copy(bookmarksArray[slot]);
+		bookmarksArray[slot].set();
 		// rebuild Branches Tree
-		int old_current_branch = branches.GetCurrentBranch();
-		branches.HandleBookmarkSet(slot);
+		int old_current_branch = branches.getCurrentBranch();
+		branches.handleBookmarkSet(slot);
 		if (slot != old_current_branch && old_current_branch != ITEM_UNDER_MOUSE_CLOUD)
 		{
 			// current_branch was switched to slot, redraw Bookmarks List to change the color of digits
-			piano_roll.RedrawRow(bookmarks_array[old_current_branch].snapshot.keyframe);
-			RedrawChangedBookmarks(bookmarks_array[old_current_branch].snapshot.keyframe);
+			pianoRoll.redrawRow(bookmarksArray[old_current_branch].snapshot.keyFrame);
+			redrawChangedBookmarks(bookmarksArray[old_current_branch].snapshot.keyFrame);
 		}
 		// also redraw List rows
 		if (previous_frame >= 0 && previous_frame != currFrameCounter)
 		{
-			piano_roll.RedrawRow(previous_frame);
-			RedrawChangedBookmarks(previous_frame);
+			pianoRoll.redrawRow(previous_frame);
+			redrawChangedBookmarks(previous_frame);
 		}
-		piano_roll.RedrawRow(currFrameCounter);
-		RedrawChangedBookmarks(currFrameCounter);
+		pianoRoll.redrawRow(currFrameCounter);
+		redrawChangedBookmarks(currFrameCounter);
 		// if screenshot of the slot is currently shown - reinit and redraw the picture
-		if (popup_display.screenshot_currently_shown == slot)
-			popup_display.screenshot_currently_shown = ITEM_UNDER_MOUSE_NONE;
+		if (popupDisplay.currentlyDisplayedBookmark == slot)
+			popupDisplay.currentlyDisplayedBookmark = ITEM_UNDER_MOUSE_NONE;
 
-		history.RegisterBookmarkSet(slot, backup_copy, old_current_branch);
-		must_check_item_under_mouse = true;
+		history.registerBookmarkSet(slot, backup_copy, old_current_branch);
+		mustCheckItemUnderMouse = true;
 		FCEU_DispMessage("Branch %d saved.", 0, slot);
 	}
 }
@@ -400,81 +400,81 @@ void BOOKMARKS::set(int slot)
 void BOOKMARKS::jump(int slot)
 {
 	if (slot < 0 || slot >= TOTAL_BOOKMARKS) return;
-	if (bookmarks_array[slot].not_empty)
+	if (bookmarksArray[slot].notEmpty)
 	{
-		int frame = bookmarks_array[slot].snapshot.keyframe;
+		int frame = bookmarksArray[slot].snapshot.keyFrame;
 		playback.jump(frame);
-		bookmarks_array[slot].jumped();
+		bookmarksArray[slot].handleJump();
 	}
 }
 
 void BOOKMARKS::deploy(int slot)
 {
-	recorder.state_was_loaded_in_readwrite_mode = true;
-	if (taseditor_config.old_branching_controls && movie_readonly)
+	recorder.stateWasLoadedInReadWriteMode = true;
+	if (taseditorConfig.oldControlSchemeForBranching && movie_readonly)
 	{
 		jump(slot);
 		return;
 	}
 	if (slot < 0 || slot >= TOTAL_BOOKMARKS) return;
-	if (!bookmarks_array[slot].not_empty) return;
+	if (!bookmarksArray[slot].notEmpty) return;
 
-	int keyframe = bookmarks_array[slot].snapshot.keyframe;
+	int keyframe = bookmarksArray[slot].snapshot.keyFrame;
 	bool markers_changed = false;
 	// revert Markers to the Bookmarked state
-	if (bookmarks_array[slot].snapshot.MarkersDifferFromCurrent())
+	if (bookmarksArray[slot].snapshot.areMarkersDifferentFromCurrentMarkers())
 	{
-		bookmarks_array[slot].snapshot.copyToMarkers();
+		bookmarksArray[slot].snapshot.copyToCurrentMarkers();
 		markers_changed = true;
 	}
 	// revert current movie data to the Bookmarked state
-	if (taseditor_config.branch_full_movie)
+	if (taseditorConfig.branchesRestoreEntireMovie)
 	{
-		bookmarks_array[slot].snapshot.inputlog.toMovie(currMovieData);
+		bookmarksArray[slot].snapshot.inputlog.toMovie(currMovieData);
 	} else
 	{
 		// restore movie up to and not including bookmarked frame (simulating old TASing method)
 		if (keyframe)
-			bookmarks_array[slot].snapshot.inputlog.toMovie(currMovieData, 0, keyframe - 1);
+			bookmarksArray[slot].snapshot.inputlog.toMovie(currMovieData, 0, keyframe - 1);
 		else
 			currMovieData.truncateAt(0);
 		// add empty frame at the end (at keyframe)
 		currMovieData.insertEmpty(-1, 1);
 	}
 
-	int first_change = history.RegisterBranching(slot, markers_changed);	// this also reverts Greenzone's LagLog if needed
+	int first_change = history.registerBranching(slot, markers_changed);	// this also reverts Greenzone's LagLog if needed
 	if (first_change >= 0)
 	{
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
-		piano_roll.UpdateItemCount();
-		greenzone.Invalidate(first_change);
-		bookmarks_array[slot].deployed();
+		selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
+		pianoRoll.updateLinesCount();
+		greenzone.invalidate(first_change);
+		bookmarksArray[slot].handleDeploy();
 	} else if (markers_changed)
 	{
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
-		bookmarks_array[slot].deployed();
+		selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
+		bookmarksArray[slot].handleDeploy();
 	} else
 	{
 		// didn't change anything in current movie
-		bookmarks_array[slot].jumped();
+		bookmarksArray[slot].handleJump();
 	}
 
 	// jump to the target (bookmarked frame)
-	if (greenzone.SavestateIsEmpty(keyframe))
-		greenzone.WriteSavestate(keyframe, bookmarks_array[slot].savestate);
+	if (greenzone.isSavestateEmpty(keyframe))
+		greenzone.writeSavestateForFrame(keyframe, bookmarksArray[slot].savestate);
 	playback.jump(keyframe, true);
 	// switch current branch to this branch
-	int old_current_branch = branches.GetCurrentBranch();
-	branches.HandleBookmarkDeploy(slot);
+	int old_current_branch = branches.getCurrentBranch();
+	branches.handleBookmarkDeploy(slot);
 	if (slot != old_current_branch && old_current_branch != ITEM_UNDER_MOUSE_CLOUD)
 	{
-		piano_roll.RedrawRow(bookmarks_array[old_current_branch].snapshot.keyframe);
-		RedrawChangedBookmarks(bookmarks_array[old_current_branch].snapshot.keyframe);
-		piano_roll.RedrawRow(keyframe);
-		RedrawChangedBookmarks(keyframe);
+		pianoRoll.redrawRow(bookmarksArray[old_current_branch].snapshot.keyFrame);
+		redrawChangedBookmarks(bookmarksArray[old_current_branch].snapshot.keyFrame);
+		pianoRoll.redrawRow(keyframe);
+		redrawChangedBookmarks(keyframe);
 	}
 	FCEU_DispMessage("Branch %d loaded.", 0, slot);
-	piano_roll.RedrawList();	// even though the Greenzone invalidation most likely have already sent the command to redraw
+	pianoRoll.redraw();	// even though the Greenzone invalidation most likely have already sent the command to redraw
 }
 
 void BOOKMARKS::save(EMUFILE *os, bool really_save)
@@ -485,7 +485,7 @@ void BOOKMARKS::save(EMUFILE *os, bool really_save)
 		os->fwrite(bookmarks_save_id, BOOKMARKS_ID_LEN);
 		// write all 10 bookmarks
 		for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
-			bookmarks_array[i].save(os);
+			bookmarksArray[i].save(os);
 		// write branches
 		branches.save(os);
 	} else
@@ -520,12 +520,12 @@ bool BOOKMARKS::load(EMUFILE *is, unsigned int offset)
 	if (strcmp(bookmarks_save_id, save_id)) goto error;		// string is not valid
 	// read all 10 bookmarks
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
-		if (bookmarks_array[i].load(is)) goto error;
+		if (bookmarksArray[i].load(is)) goto error;
 	// read branches
 	if (branches.load(is)) goto error;
 	// all ok
 	reset_vars();
-	RedrawBookmarksCaption();
+	redrawBookmarksSectionCaption();
 	return false;
 error:
 	FCEU_printf("Error loading Bookmarks\n");
@@ -534,115 +534,115 @@ error:
 	return true;
 }
 // ----------------------------------------------------------
-void BOOKMARKS::RedrawBookmarksCaption()
+void BOOKMARKS::redrawBookmarksSectionCaption()
 {
-	int prev_edit_mode = edit_mode;
-	if (taseditor_config.view_branches_tree)
+	int prev_edit_mode = editMode;
+	if (taseditorConfig.displayBranchesTree)
 	{
-		edit_mode = EDIT_MODE_BRANCHES;
+		editMode = EDIT_MODE_BRANCHES;
 		ShowWindow(hwndBookmarksList, SW_HIDE);
 		ShowWindow(hwndBranchesBitmap, SW_SHOW);
-	} else if (taseditor_config.old_branching_controls && movie_readonly)
+	} else if (taseditorConfig.oldControlSchemeForBranching && movie_readonly)
 	{
-		edit_mode = EDIT_MODE_BOOKMARKS;
+		editMode = EDIT_MODE_BOOKMARKS;
 		ShowWindow(hwndBranchesBitmap, SW_HIDE);
 		ShowWindow(hwndBookmarksList, SW_SHOW);
-		RedrawBookmarksList();
+		redrawBookmarksList();
 	} else
 	{
-		edit_mode = EDIT_MODE_BOTH;
+		editMode = EDIT_MODE_BOTH;
 		ShowWindow(hwndBranchesBitmap, SW_HIDE);
 		ShowWindow(hwndBookmarksList, SW_SHOW);
-		RedrawBookmarksList();
+		redrawBookmarksList();
 	}
-	if (prev_edit_mode != edit_mode)
-		must_check_item_under_mouse = true;
-	SetWindowText(hwndBookmarks, bookmarksCaption[edit_mode]);
+	if (prev_edit_mode != editMode)
+		mustCheckItemUnderMouse = true;
+	SetWindowText(hwndBookmarks, bookmarksCaption[editMode]);
 }
-void BOOKMARKS::RedrawBookmarksList(bool erase_bg)
+void BOOKMARKS::redrawBookmarksList(bool eraseBG)
 {
-	if (edit_mode != EDIT_MODE_BRANCHES)
-		InvalidateRect(hwndBookmarksList, 0, erase_bg);
+	if (editMode != EDIT_MODE_BRANCHES)
+		InvalidateRect(hwndBookmarksList, 0, eraseBG);
 }
-void BOOKMARKS::RedrawChangedBookmarks(int frame)
+void BOOKMARKS::redrawChangedBookmarks(int frame)
 {
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 	{
-		if (bookmarks_array[i].snapshot.keyframe == frame)
-			RedrawBookmark(i);
+		if (bookmarksArray[i].snapshot.keyFrame == frame)
+			redrawBookmark(i);
 	}
 }
-void BOOKMARKS::RedrawBookmark(int bookmark_number)
+void BOOKMARKS::redrawBookmark(int bookmarkNumber)
 {
-	RedrawListRow((bookmark_number + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+	redrawBookmarksListRow((bookmarkNumber + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
 }
-void BOOKMARKS::RedrawListRow(int row_index)
+void BOOKMARKS::redrawBookmarksListRow(int rowIndex)
 {
-	ListView_RedrawItems(hwndBookmarksList, row_index, row_index);
+	ListView_RedrawItems(hwndBookmarksList, rowIndex, rowIndex);
 }
 
-void BOOKMARKS::MouseMove(int new_x, int new_y)
+void BOOKMARKS::handleMouseMove(int newX, int newY)
 {
-	mouse_x = new_x;
-	mouse_y = new_y;
-	must_check_item_under_mouse = true;
+	mouseX = newX;
+	mouseY = newY;
+	mustCheckItemUnderMouse = true;
 }
-int BOOKMARKS::FindItemUnderMouse()
+int BOOKMARKS::findItemUnderMouse()
 {
 	int item = ITEM_UNDER_MOUSE_NONE;
 	RECT wrect;
 	GetClientRect(hwndBookmarksList, &wrect);
-	if (mouse_x >= list_row_left && mouse_x < wrect.right - wrect.left && mouse_y >= list_row_top && mouse_y < wrect.bottom - wrect.top)
+	if (mouseX >= listRowLeft && mouseX < wrect.right - wrect.left && mouseY >= listTopMargin && mouseY < wrect.bottom - wrect.top)
 	{
-		int row_under_mouse = (mouse_y - list_row_top) / list_row_height;
+		int row_under_mouse = (mouseY - listTopMargin) / listRowHeight;
 		if (row_under_mouse >= 0 && row_under_mouse < TOTAL_BOOKMARKS)
 			item = (row_under_mouse + 1) % TOTAL_BOOKMARKS;
 	}
 	return item;
 }
 
-int BOOKMARKS::GetSelectedSlot()
+int BOOKMARKS::getSelectedSlot()
 {
-	return selected_slot;
+	return selectedSlot;
 }
 // ----------------------------------------------------------------------------------------
-void BOOKMARKS::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
+void BOOKMARKS::getDispInfo(NMLVDISPINFO* nmlvDispInfo)
 {
 	LVITEM& item = nmlvDispInfo->item;
 	if (item.mask & LVIF_TEXT)
 	{
 		switch(item.iSubItem)
 		{
-			case BOOKMARKS_COLUMN_ICON:
+			case BOOKMARKSLIST_COLUMN_ICON:
 			{
-				if ((item.iItem + 1) % TOTAL_BOOKMARKS == branches.GetCurrentBranch())
+				if ((item.iItem + 1) % TOTAL_BOOKMARKS == branches.getCurrentBranch())
 					item.iImage = ((item.iItem + 1) % TOTAL_BOOKMARKS) + TOTAL_BOOKMARKS;
 				else
 					item.iImage = (item.iItem + 1) % TOTAL_BOOKMARKS;
-				if (taseditor_config.old_branching_controls)
+				if (taseditorConfig.oldControlSchemeForBranching)
 				{
-					if ((item.iItem + 1) % TOTAL_BOOKMARKS == selected_slot)
-						item.iImage += BOOKMARKS_SELECTED;
+					if ((item.iItem + 1) % TOTAL_BOOKMARKS == selectedSlot)
+						item.iImage += BOOKMARKS_BITMAPS_SELECTED;
 				}
 				break;
 			}
-			case BOOKMARKS_COLUMN_FRAME:
+			case BOOKMARKSLIST_COLUMN_FRAME:
 			{
-				if (bookmarks_array[(item.iItem + 1) % TOTAL_BOOKMARKS].not_empty)
-					U32ToDecStr(item.pszText, bookmarks_array[(item.iItem + 1) % TOTAL_BOOKMARKS].snapshot.keyframe, DIGITS_IN_FRAMENUM);
+				if (bookmarksArray[(item.iItem + 1) % TOTAL_BOOKMARKS].notEmpty)
+					U32ToDecStr(item.pszText, bookmarksArray[(item.iItem + 1) % TOTAL_BOOKMARKS].snapshot.keyFrame, DIGITS_IN_FRAMENUM);
 				break;
 			}
-			case BOOKMARKS_COLUMN_TIME:
+			case BOOKMARKSLIST_COLUMN_TIME:
 			{
-				if (bookmarks_array[(item.iItem + 1) % TOTAL_BOOKMARKS].not_empty)
-					strcpy(item.pszText, bookmarks_array[(item.iItem + 1) % TOTAL_BOOKMARKS].snapshot.description);
+				if (bookmarksArray[(item.iItem + 1) % TOTAL_BOOKMARKS].notEmpty)
+					strcpy(item.pszText, bookmarksArray[(item.iItem + 1) % TOTAL_BOOKMARKS].snapshot.description);
 			}
 			break;
 		}
 	}
 }
 
-LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
+LONG BOOKMARKS::handleCustomDraw(NMLVCUSTOMDRAW* msg)
 {
 	int cell_x, cell_y;
 	switch(msg->nmcd.dwDrawStage)
@@ -656,65 +656,65 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 		cell_y = (msg->nmcd.dwItemSpec + 1) % TOTAL_BOOKMARKS;
 		
 		// flash with text color when needed
-		if (bookmarks_array[cell_y].flash_phase)
-			msg->clrText = bookmark_flash_colors[bookmarks_array[cell_y].flash_type][bookmarks_array[cell_y].flash_phase];
+		if (bookmarksArray[cell_y].flashPhase)
+			msg->clrText = bookmark_flash_colors[bookmarksArray[cell_y].flashType][bookmarksArray[cell_y].flashPhase];
 
-		if (cell_x == BOOKMARKS_COLUMN_FRAME || (taseditor_config.old_branching_controls && movie_readonly && cell_x == BOOKMARKS_COLUMN_TIME))
+		if (cell_x == BOOKMARKSLIST_COLUMN_FRAME || (taseditorConfig.oldControlSchemeForBranching && movie_readonly && cell_x == BOOKMARKSLIST_COLUMN_TIME))
 		{
-			if (bookmarks_array[cell_y].not_empty)
+			if (bookmarksArray[cell_y].notEmpty)
 			{
 				// frame number
-				SelectObject(msg->nmcd.hdc, piano_roll.hMainListFont);
-				int frame = bookmarks_array[cell_y].snapshot.keyframe;
-				if (frame == currFrameCounter || frame == (playback.GetFlashingPauseFrame() - 1))
+				SelectObject(msg->nmcd.hdc, pianoRoll.hMainListFont);
+				int frame = bookmarksArray[cell_y].snapshot.keyFrame;
+				if (frame == currFrameCounter || frame == (playback.getFlashingPauseFrame() - 1))
 				{
 					// current frame
 					msg->clrTextBk = CUR_FRAMENUM_COLOR;
-				} else if (frame < greenzone.GetSize())
+				} else if (frame < greenzone.getSize())
 				{
-					if (!greenzone.SavestateIsEmpty(frame))
+					if (!greenzone.isSavestateEmpty(frame))
 					{
-						if (greenzone.laglog.GetLagInfoAtFrame(frame) == LAGGED_YES)
+						if (greenzone.lagLog.getLagInfoAtFrame(frame) == LAGGED_YES)
 							msg->clrTextBk = LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
-					} else if (!greenzone.SavestateIsEmpty(cell_y & EVERY16TH)
-						|| !greenzone.SavestateIsEmpty(cell_y & EVERY8TH)
-						|| !greenzone.SavestateIsEmpty(cell_y & EVERY4TH)
-						|| !greenzone.SavestateIsEmpty(cell_y & EVERY2ND))
+					} else if (!greenzone.isSavestateEmpty(cell_y & EVERY16TH)
+						|| !greenzone.isSavestateEmpty(cell_y & EVERY8TH)
+						|| !greenzone.isSavestateEmpty(cell_y & EVERY4TH)
+						|| !greenzone.isSavestateEmpty(cell_y & EVERY2ND))
 					{
-						if (greenzone.laglog.GetLagInfoAtFrame(frame) == LAGGED_YES)
+						if (greenzone.lagLog.getLagInfoAtFrame(frame) == LAGGED_YES)
 							msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
 					} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
 				} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
 			} else msg->clrTextBk = NORMAL_BACKGROUND_COLOR;	// empty bookmark
-		} else if (cell_x == BOOKMARKS_COLUMN_TIME)
+		} else if (cell_x == BOOKMARKSLIST_COLUMN_TIME)
 		{
-			if (bookmarks_array[cell_y].not_empty)
+			if (bookmarksArray[cell_y].notEmpty)
 			{
 				// frame number
-				SelectObject(msg->nmcd.hdc, piano_roll.hMainListFont);
-				int frame = bookmarks_array[cell_y].snapshot.keyframe;
-				if (frame == currFrameCounter || frame == (playback.GetFlashingPauseFrame() - 1))
+				SelectObject(msg->nmcd.hdc, pianoRoll.hMainListFont);
+				int frame = bookmarksArray[cell_y].snapshot.keyFrame;
+				if (frame == currFrameCounter || frame == (playback.getFlashingPauseFrame() - 1))
 				{
 					// current frame
 					msg->clrTextBk = CUR_INPUT_COLOR1;
-				} else if (frame < greenzone.GetSize())
+				} else if (frame < greenzone.getSize())
 				{
-					if (!greenzone.SavestateIsEmpty(frame))
+					if (!greenzone.isSavestateEmpty(frame))
 					{
-						if (greenzone.laglog.GetLagInfoAtFrame(frame) == LAGGED_YES)
+						if (greenzone.lagLog.getLagInfoAtFrame(frame) == LAGGED_YES)
 							msg->clrTextBk = LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR1;
-					} else if (!greenzone.SavestateIsEmpty(cell_y & EVERY16TH)
-						|| !greenzone.SavestateIsEmpty(cell_y & EVERY8TH)
-						|| !greenzone.SavestateIsEmpty(cell_y & EVERY4TH)
-						|| !greenzone.SavestateIsEmpty(cell_y & EVERY2ND))
+					} else if (!greenzone.isSavestateEmpty(cell_y & EVERY16TH)
+						|| !greenzone.isSavestateEmpty(cell_y & EVERY8TH)
+						|| !greenzone.isSavestateEmpty(cell_y & EVERY4TH)
+						|| !greenzone.isSavestateEmpty(cell_y & EVERY2ND))
 					{
-						if (greenzone.laglog.GetLagInfoAtFrame(frame) == LAGGED_YES)
+						if (greenzone.lagLog.getLagInfoAtFrame(frame) == LAGGED_YES)
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR1;
@@ -727,28 +727,28 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 	}
 }
 
-void BOOKMARKS::LeftClick()
+void BOOKMARKS::handleLeftClick()
 {
-	if (column_clicked <= BOOKMARKS_COLUMN_FRAME || (taseditor_config.old_branching_controls && movie_readonly))
-		command(COMMAND_JUMP, bookmark_leftclicked);
-	else if (column_clicked == BOOKMARKS_COLUMN_TIME && (!taseditor_config.old_branching_controls || !movie_readonly))
-		command(COMMAND_DEPLOY, bookmark_leftclicked);
+	if (columnClicked <= BOOKMARKSLIST_COLUMN_FRAME || (taseditorConfig.oldControlSchemeForBranching && movie_readonly))
+		command(COMMAND_JUMP, bookmarkLeftclicked);
+	else if (columnClicked == BOOKMARKSLIST_COLUMN_TIME && (!taseditorConfig.oldControlSchemeForBranching || !movie_readonly))
+		command(COMMAND_DEPLOY, bookmarkLeftclicked);
 }
-void BOOKMARKS::RightClick()
+void BOOKMARKS::handleRightClick()
 {
-	if (bookmark_rightclicked >= 0)
-		command(COMMAND_SET, bookmark_rightclicked);
+	if (bookmarkRightclicked >= 0)
+		command(COMMAND_SET, bookmarkRightclicked);
 }
 
-int BOOKMARKS::FindBookmarkAtFrame(int frame)
+int BOOKMARKS::findBookmarkAtFrame(int frame)
 {
-	int cur_bookmark = branches.GetCurrentBranch();
-	if (cur_bookmark != ITEM_UNDER_MOUSE_CLOUD && bookmarks_array[cur_bookmark].snapshot.keyframe == frame)
+	int cur_bookmark = branches.getCurrentBranch();
+	if (cur_bookmark != ITEM_UNDER_MOUSE_CLOUD && bookmarksArray[cur_bookmark].snapshot.keyFrame == frame)
 		return cur_bookmark + TOTAL_BOOKMARKS;	// blue digit has highest priority when drawing
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 	{
 		cur_bookmark = (i + 1) % TOTAL_BOOKMARKS;
-		if (bookmarks_array[cur_bookmark].not_empty && bookmarks_array[cur_bookmark].snapshot.keyframe == frame)
+		if (bookmarksArray[cur_bookmark].notEmpty && bookmarksArray[cur_bookmark].snapshot.keyFrame == frame)
 			return cur_bookmark;	// green digit
 	}
 	return -1;		// no Bookmarks at the frame
@@ -767,19 +767,19 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			return 0;
 		case WM_MOUSEMOVE:
 		{
-			if (!bookmarks.mouse_over_bookmarkslist)
+			if (!bookmarks.mouseOverBookmarksList)
 			{
-				bookmarks.mouse_over_bookmarkslist = true;
-				bookmarks.list_tme.hwndTrack = hWnd;
-				TrackMouseEvent(&bookmarks.list_tme);
+				bookmarks.mouseOverBookmarksList = true;
+				bookmarks.tmeList.hwndTrack = hWnd;
+				TrackMouseEvent(&bookmarks.tmeList);
 			}
-			bookmarks.MouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			bookmarks.handleMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 			break;
 		}
 		case WM_MOUSELEAVE:
 		{
-			bookmarks.mouse_over_bookmarkslist = false;
-			bookmarks.MouseMove(-1, -1);
+			bookmarks.mouseOverBookmarksList = false;
+			bookmarks.handleMouseMove(-1, -1);
 			break;
 		}
 		case WM_LBUTTONDOWN:
@@ -791,14 +791,14 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			info.pt.x = GET_X_LPARAM(lParam);
 			info.pt.y = GET_Y_LPARAM(lParam);
 			ListView_SubItemHitTest(hWnd, (LPARAM)&info);
-			if (info.iItem >= 0 && bookmarks.bookmark_rightclicked < 0)
+			if (info.iItem >= 0 && bookmarks.bookmarkRightclicked < 0)
 			{
-				bookmarks.bookmark_leftclicked = (info.iItem + 1) % TOTAL_BOOKMARKS;
-				bookmarks.column_clicked = info.iSubItem;
-				if (bookmarks.column_clicked <= BOOKMARKS_COLUMN_FRAME || (taseditor_config.old_branching_controls && movie_readonly))
-					bookmarks.bookmarks_array[bookmarks.bookmark_leftclicked].flash_type = FLASH_TYPE_JUMP;
-				else if (bookmarks.column_clicked == BOOKMARKS_COLUMN_TIME && (!taseditor_config.old_branching_controls || !movie_readonly))
-					bookmarks.bookmarks_array[bookmarks.bookmark_leftclicked].flash_type = FLASH_TYPE_DEPLOY;
+				bookmarks.bookmarkLeftclicked = (info.iItem + 1) % TOTAL_BOOKMARKS;
+				bookmarks.columnClicked = info.iSubItem;
+				if (bookmarks.columnClicked <= BOOKMARKSLIST_COLUMN_FRAME || (taseditorConfig.oldControlSchemeForBranching && movie_readonly))
+					bookmarks.bookmarksArray[bookmarks.bookmarkLeftclicked].flashType = FLASH_TYPE_JUMP;
+				else if (bookmarks.columnClicked == BOOKMARKSLIST_COLUMN_TIME && (!taseditorConfig.oldControlSchemeForBranching || !movie_readonly))
+					bookmarks.bookmarksArray[bookmarks.bookmarkLeftclicked].flashType = FLASH_TYPE_DEPLOY;
 				SetCapture(hWnd);
 			}
 			return 0;
@@ -813,11 +813,11 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			if (info.pt.x >= 0 && info.pt.x < wrect.right - wrect.left && info.pt.y >= 0 && info.pt.y < wrect.bottom - wrect.top)
 			{
 				ListView_SubItemHitTest(hWnd, (LPARAM)&info);
-				if (bookmarks.bookmark_leftclicked == (info.iItem + 1) % TOTAL_BOOKMARKS && bookmarks.column_clicked == info.iSubItem)
-					bookmarks.LeftClick();
+				if (bookmarks.bookmarkLeftclicked == (info.iItem + 1) % TOTAL_BOOKMARKS && bookmarks.columnClicked == info.iSubItem)
+					bookmarks.handleLeftClick();
 			}
 			ReleaseCapture();
-			bookmarks.bookmark_leftclicked = -1;
+			bookmarks.bookmarkLeftclicked = -1;
 			return 0;
 		}
 		case WM_RBUTTONDOWN:
@@ -829,11 +829,11 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			info.pt.x = GET_X_LPARAM(lParam);
 			info.pt.y = GET_Y_LPARAM(lParam);
 			ListView_SubItemHitTest(hWnd, (LPARAM)&info);
-			if (info.iItem >= 0 && bookmarks.bookmark_leftclicked < 0)
+			if (info.iItem >= 0 && bookmarks.bookmarkLeftclicked < 0)
 			{
-				bookmarks.bookmark_rightclicked = (info.iItem + 1) % TOTAL_BOOKMARKS;
-				bookmarks.column_clicked = info.iSubItem;
-				bookmarks.bookmarks_array[bookmarks.bookmark_rightclicked].flash_type = FLASH_TYPE_SET;
+				bookmarks.bookmarkRightclicked = (info.iItem + 1) % TOTAL_BOOKMARKS;
+				bookmarks.columnClicked = info.iSubItem;
+				bookmarks.bookmarksArray[bookmarks.bookmarkRightclicked].flashType = FLASH_TYPE_SET;
 				SetCapture(hWnd);
 			}
 			return 0;
@@ -848,11 +848,11 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			if (info.pt.x >= 0 && info.pt.x < wrect.right - wrect.left && info.pt.y >= 0 && info.pt.y < wrect.bottom - wrect.top)
 			{
 				ListView_SubItemHitTest(hWnd, (LPARAM)&info);
-				if (bookmarks.bookmark_rightclicked == (info.iItem + 1) % TOTAL_BOOKMARKS && bookmarks.column_clicked == info.iSubItem)
-					bookmarks.RightClick();
+				if (bookmarks.bookmarkRightclicked == (info.iItem + 1) % TOTAL_BOOKMARKS && bookmarks.columnClicked == info.iSubItem)
+					bookmarks.handleRightClick();
 			}
 			ReleaseCapture();
-			bookmarks.bookmark_rightclicked = ITEM_UNDER_MOUSE_NONE;
+			bookmarks.bookmarkRightclicked = ITEM_UNDER_MOUSE_NONE;
 			return 0;
 		}
 		case WM_MBUTTONDOWN:
@@ -860,13 +860,13 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		{
 			if (GetFocus() != hWnd)
 				SetFocus(hWnd);
-			playback.MiddleButtonClick();
+			playback.handleMiddleButtonClick();
 			return 0;
 		}
 		case WM_MOUSEWHEEL:
 		{
-			bookmarks.bookmark_rightclicked = ITEM_UNDER_MOUSE_NONE;	// ensure that accidental rightclick on BookmarksList won't set Bookmarks when user does rightbutton + wheel
-			return SendMessage(piano_roll.hwndList, msg, wParam, lParam);
+			bookmarks.bookmarkRightclicked = ITEM_UNDER_MOUSE_NONE;	// ensure that accidental rightclick on BookmarksList won't set Bookmarks when user does rightbutton + wheel
+			return SendMessage(pianoRoll.hwndList, msg, wParam, lParam);
 		}
 	}
 	return CallWindowProc(hwndBookmarksList_oldWndProc, hWnd, msg, wParam, lParam);

@@ -29,35 +29,36 @@ Main - Main gate between emulator and Taseditor
 using namespace std;
 
 // TAS Editor data
-bool emulator_must_run_taseditor = false;
-bool Taseditor_rewind_now = false;
-bool must_call_manual_lua_function = false;
-bool taseditor_accelerator_keys = false;
+bool mustEngageTaseditor = false;
+bool mustRewindNow = false;
+bool mustCallManualLuaFunction = false;
+bool taseditorEnableAcceleratorKeys = false;
 
 // all Taseditor functional modules
-TASEDITOR_CONFIG taseditor_config;
-TASEDITOR_WINDOW taseditor_window;
+TASEDITOR_CONFIG taseditorConfig;
+TASEDITOR_WINDOW taseditorWindow;
 TASEDITOR_PROJECT project;
 HISTORY history;
 PLAYBACK playback;
 RECORDER recorder;
 GREENZONE greenzone;
-MARKERS_MANAGER markers_manager;
+MARKERS_MANAGER markersManager;
 BOOKMARKS bookmarks;
 BRANCHES branches;
-POPUP_DISPLAY popup_display;
-PIANO_ROLL piano_roll;
+POPUP_DISPLAY popupDisplay;
+PIANO_ROLL pianoRoll;
 TASEDITOR_LUA taseditor_lua;
 SELECTION selection;
 SPLICER splicer;
 EDITOR editor;
 
-extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
+extern int joysticksPerFrame[INPUT_TYPES_TOTAL];
 extern bool turbo;
 extern int pal_emulation;
 extern int newppu;
 extern void PushCurrentVideoSettings();
 extern void RefreshThrottleFPS();
+extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
 // temporarily saved FCEUX config
 int saved_eoptions;
 int saved_EnableAutosave;
@@ -70,23 +71,23 @@ extern void TaseditorAutoFunction();
 extern void TaseditorManualFunction();
 
 // returns true if Taseditor is engaged at the end of the function
-bool EnterTasEditor()
+bool enterTASEditor()
 {
-	if (taseditor_window.hwndTasEditor)
+	if (taseditorWindow.hwndTASEditor)
 	{
 		// TAS Editor is already engaged, just set focus to its window
-		if (!taseditor_config.wndmaximized)
-			ShowWindow(taseditor_window.hwndTasEditor, SW_SHOWNORMAL);
-		SetForegroundWindow(taseditor_window.hwndTasEditor);
+		if (!taseditorConfig.windowIsMaximized)
+			ShowWindow(taseditorWindow.hwndTASEditor, SW_SHOWNORMAL);
+		SetForegroundWindow(taseditorWindow.hwndTASEditor);
 		return true;
 	} else if (FCEU_IsValidUI(FCEUI_TASEDITOR))
 	{
 		// start TAS Editor
 		// create window
-		taseditor_window.init();
-		if (taseditor_window.hwndTasEditor)
+		taseditorWindow.init();
+		if (taseditorWindow.hwndTASEditor)
 		{
-			SetTaseditorInput();
+			enableGeneralKeyboardInput();
 			// save "eoptions"
 			saved_eoptions = eoptions;
 			// set "Run in background"
@@ -104,17 +105,17 @@ bool EnterTasEditor()
 			
 			// init modules
 			editor.init();
-			piano_roll.init();
+			pianoRoll.init();
 			selection.init();
 			splicer.init();
 			playback.init();
 			greenzone.init();
 			recorder.init();
-			markers_manager.init();
+			markersManager.init();
 			project.init();
 			bookmarks.init();
 			branches.init();
-			popup_display.init();
+			popupDisplay.init();
 			history.init();
 			taseditor_lua.init();
 			// either start new movie or use current movie
@@ -126,7 +127,7 @@ bool EnterTasEditor()
 				FCEUI_StopMovie();
 				movieMode = MOVIEMODE_TASEDITOR;
 				FCEUMOV_CreateCleanMovie();
-				playback.StartFromZero();
+				playback.restartPlaybackFromZeroGround();
 			} else
 			{
 				// use current movie to create a new project
@@ -137,21 +138,21 @@ bool EnterTasEditor()
 			if (((int)currMovieData.records.size() - 1) < currFrameCounter)
 				currMovieData.insertEmpty(-1, currFrameCounter - ((int)currMovieData.records.size() - 1));
 			// ensure that movie has correct set of ports/fourscore
-			SetInputType(currMovieData, GetInputType(currMovieData));
+			setInputType(currMovieData, getInputType(currMovieData));
 			// force the input configuration stored in the movie to apply to FCEUX config
-			ApplyMovieInputConfig();
+			applyMovieInputConfig();
 			// reset some modules that need MovieData info
-			piano_roll.reset();
+			pianoRoll.reset();
 			recorder.reset();
 			// create initial snapshot in history
 			history.reset();
 			// reset Taseditor variables
-			must_call_manual_lua_function = false;
+			mustCallManualLuaFunction = false;
 			
 			SetFocus(history.hwndHistoryList);		// set focus only once, to show blue selection cursor
-			SetFocus(piano_roll.hwndList);
+			SetFocus(pianoRoll.hwndList);
 			FCEU_DispMessage("TAS Editor engaged", 0);
-			taseditor_window.RedrawTaseditor();
+			taseditorWindow.redraw();
 			return true;
 		} else
 		{
@@ -165,23 +166,23 @@ bool EnterTasEditor()
 	}
 }
 
-bool ExitTasEditor()
+bool exitTASEditor()
 {
-	if (!AskSaveProject()) return false;
+	if (!askToSaveProject()) return false;
 
 	// destroy window
-	taseditor_window.exit();
-	ClearTaseditorInput();
+	taseditorWindow.exit();
+	disableGeneralKeyboardInput();
 	// release memory
 	editor.free();
-	piano_roll.free();
-	markers_manager.free();
+	pianoRoll.free();
+	markersManager.free();
 	greenzone.free();
 	bookmarks.free();
 	branches.free();
-	popup_display.free();
+	popupDisplay.free();
 	history.free();
-	playback.SeekingStop();
+	playback.stopSeeking();
 	selection.free();
 
 	// restore "eoptions"
@@ -200,69 +201,69 @@ bool ExitTasEditor()
 }
 
 // everyframe function
-void UpdateTasEditor()
+void updateTASEditor()
 {
-	if (taseditor_window.hwndTasEditor)
+	if (taseditorWindow.hwndTASEditor)
 	{
 		// TAS Editor is engaged
 		// update all modules that need to be updated every frame
 		// the order is somewhat important, e.g. Greenzone must update before Bookmark Set, Piano Roll must update before Selection
-		taseditor_window.update();
+		taseditorWindow.update();
 		greenzone.update();
 		recorder.update();
-		piano_roll.update();
-		markers_manager.update();
+		pianoRoll.update();
+		markersManager.update();
 		playback.update();
 		bookmarks.update();
 		branches.update();
-		popup_display.update();
+		popupDisplay.update();
 		selection.update();
 		splicer.update();
 		history.update();
 		project.update();
 		// run Lua functions if needed
-		if (taseditor_config.enable_auto_function)
+		if (taseditorConfig.enableLuaAutoFunction)
 			TaseditorAutoFunction();
-		if (must_call_manual_lua_function)
+		if (mustCallManualLuaFunction)
 		{
 			TaseditorManualFunction();
-			must_call_manual_lua_function = false;
+			mustCallManualLuaFunction = false;
 		}
 	} else
 	{
 		// TAS Editor is not engaged
 		TaseditorAutoFunction();	// but we still should run Lua auto function
-		if (emulator_must_run_taseditor)
+		if (mustEngageTaseditor)
 		{
-			char fullname[512];
+			char fullname[1000];
 			strcpy(fullname, curMovieFilename);
-			if (EnterTasEditor())
-				LoadProject(fullname);
-			emulator_must_run_taseditor = false;
+			if (enterTASEditor())
+				loadProject(fullname);
+			mustEngageTaseditor = false;
 		}
 	}
 }
 
-BOOL CALLBACK NewProjectProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK newProjectProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static struct NewProjectParameters* p = NULL;
 	switch (message)
 	{
 		case WM_INITDIALOG:
 			p = (struct NewProjectParameters*)lParam;
-			p->input_type = GetInputType(currMovieData);
-			p->copy_current_input = p->copy_current_markers = false;
-			if (strlen(taseditor_config.last_author))
+			p->inputType = getInputType(currMovieData);
+			p->copyCurrentInput = p->copyCurrentMarkers = false;
+			if (strlen(taseditorConfig.lastAuthorName))
 			{
 				// convert UTF8 char* string to Unicode wstring
-				wchar_t saved_author_name[AUTHOR_MAX_LEN] = {0};
-				MultiByteToWideChar(CP_UTF8, 0, taseditor_config.last_author, -1, saved_author_name, AUTHOR_MAX_LEN);
-				p->author_name = saved_author_name;
+				wchar_t savedAuthorName[AUTHOR_NAME_MAX_LEN] = {0};
+				MultiByteToWideChar(CP_UTF8, 0, taseditorConfig.lastAuthorName, -1, savedAuthorName, AUTHOR_NAME_MAX_LEN);
+				p->authorName = savedAuthorName;
 			} else
 			{
-				p->author_name = L"";
+				p->authorName = L"";
 			}
-			switch (p->input_type)
+			switch (p->inputType)
 			{
 			case INPUT_TYPE_1P:
 				{
@@ -281,39 +282,39 @@ BOOL CALLBACK NewProjectProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 				}
 			}
 			SendMessage(GetDlgItem(hwndDlg, IDC_EDIT_AUTHOR), CCM_SETUNICODEFORMAT, TRUE, 0);
-			SetDlgItemTextW(hwndDlg, IDC_EDIT_AUTHOR, (LPCWSTR)(p->author_name.c_str()));
+			SetDlgItemTextW(hwndDlg, IDC_EDIT_AUTHOR, (LPCWSTR)(p->authorName.c_str()));
 			return 0;
 		case WM_COMMAND:
 			switch (LOWORD(wParam))
 			{
 				case IDC_RADIO_1PLAYER:
-					p->input_type = INPUT_TYPE_1P;
+					p->inputType = INPUT_TYPE_1P;
 					break;
 				case IDC_RADIO_2PLAYERS:
-					p->input_type = INPUT_TYPE_2P;
+					p->inputType = INPUT_TYPE_2P;
 					break;
 				case IDC_RADIO_FOURSCORE:
-					p->input_type = INPUT_TYPE_FOURSCORE;
+					p->inputType = INPUT_TYPE_FOURSCORE;
 					break;
 				case IDC_COPY_INPUT:
-					p->copy_current_input ^= 1;
-					CheckDlgButton(hwndDlg, IDC_COPY_INPUT, p->copy_current_input?MF_CHECKED : MF_UNCHECKED);
+					p->copyCurrentInput ^= 1;
+					CheckDlgButton(hwndDlg, IDC_COPY_INPUT, p->copyCurrentInput?MF_CHECKED : MF_UNCHECKED);
 					break;
 				case IDC_COPY_MARKERS:
-					p->copy_current_markers ^= 1;
-					CheckDlgButton(hwndDlg, IDC_COPY_MARKERS, p->copy_current_markers?MF_CHECKED : MF_UNCHECKED);
+					p->copyCurrentMarkers ^= 1;
+					CheckDlgButton(hwndDlg, IDC_COPY_MARKERS, p->copyCurrentMarkers?MF_CHECKED : MF_UNCHECKED);
 					break;
 				case IDOK:
 				{
 					// save author name in params and in taseditor_config (converted to multibyte char*)
-					wchar_t author_name[AUTHOR_MAX_LEN] = {0};
-					GetDlgItemTextW(hwndDlg, IDC_EDIT_AUTHOR, (LPWSTR)author_name, AUTHOR_MAX_LEN);
-					p->author_name = author_name;
-					if (p->author_name == L"")
-						taseditor_config.last_author[0] = 0;
+					wchar_t authorName[AUTHOR_NAME_MAX_LEN] = {0};
+					GetDlgItemTextW(hwndDlg, IDC_EDIT_AUTHOR, (LPWSTR)authorName, AUTHOR_NAME_MAX_LEN);
+					p->authorName = authorName;
+					if (p->authorName == L"")
+						taseditorConfig.lastAuthorName[0] = 0;
 					else
 						// convert Unicode wstring to UTF8 char* string
-						WideCharToMultiByte(CP_UTF8, 0, (p->author_name).c_str(), -1, taseditor_config.last_author, AUTHOR_MAX_LEN, 0, 0);
+						WideCharToMultiByte(CP_UTF8, 0, (p->authorName).c_str(), -1, taseditorConfig.lastAuthorName, AUTHOR_NAME_MAX_LEN, 0, 0);
 					EndDialog(hwndDlg, 1);
 					return TRUE;
 				}
@@ -326,54 +327,54 @@ BOOL CALLBACK NewProjectProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 	return FALSE; 
 }
 
-void NewProject()
+void createNewProject()
 {
-	if (!AskSaveProject()) return;
+	if (!askToSaveProject()) return;
 
 	static struct NewProjectParameters params;
-	if (DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_NEWPROJECT), taseditor_window.hwndTasEditor, NewProjectProc, (LPARAM)&params) > 0)
+	if (DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_NEWPROJECT), taseditorWindow.hwndTASEditor, newProjectProc, (LPARAM)&params) > 0)
 	{
 		FCEUMOV_CreateCleanMovie();
 		// apply selected options
-		SetInputType(currMovieData, params.input_type);
-		ApplyMovieInputConfig();
-		if (params.copy_current_input)
+		setInputType(currMovieData, params.inputType);
+		applyMovieInputConfig();
+		if (params.copyCurrentInput)
 			// copy Input from current snapshot (from history)
-			history.GetCurrentSnapshot().inputlog.toMovie(currMovieData);
-		if (!params.copy_current_markers)
-			markers_manager.reset();
-		if (params.author_name != L"") currMovieData.comments.push_back(L"author " + params.author_name);
+			history.getCurrentSnapshot().inputlog.toMovie(currMovieData);
+		if (!params.copyCurrentMarkers)
+			markersManager.reset();
+		if (params.authorName != L"") currMovieData.comments.push_back(L"author " + params.authorName);
 		
 		// reset Taseditor
 		project.init();			// new project has blank name
 		greenzone.reset();
-		if (params.copy_current_input)
+		if (params.copyCurrentInput)
 			// copy LagLog from current snapshot (from history)
-			greenzone.laglog = history.GetCurrentSnapshot().laglog;
+			greenzone.lagLog = history.getCurrentSnapshot().laglog;
 		playback.reset();
-		playback.StartFromZero();
+		playback.restartPlaybackFromZeroGround();
 		bookmarks.reset();
 		branches.reset();
 		history.reset();
-		piano_roll.reset();
+		pianoRoll.reset();
 		selection.reset();
 		editor.reset();
 		splicer.reset();
 		recorder.reset();
-		popup_display.reset();
-		taseditor_window.RedrawTaseditor();
-		taseditor_window.UpdateCaption();
+		popupDisplay.reset();
+		taseditorWindow.redraw();
+		taseditorWindow.updateCaption();
 	}
 }
 
-void OpenProject()
+void openProject()
 {
-	if (!AskSaveProject()) return;
+	if (!askToSaveProject()) return;
 
 	OPENFILENAME ofn;
 	memset(&ofn, 0, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = taseditor_window.hwndTasEditor;
+	ofn.hwndOwner = taseditorWindow.hwndTASEditor;
 	ofn.hInstance = fceu_hInstance;
 	ofn.lpstrTitle = "Open TAS Editor Project";
 	const char filter[] = "TAS Editor Projects (*.fm3)\0*.fm3\0All Files (*.*)\0*.*\0\0";
@@ -390,44 +391,44 @@ void OpenProject()
 
 	if (GetOpenFileName(&ofn))							// If it is a valid filename
 	{
-		LoadProject(nameo);
+		loadProject(nameo);
 	}
 }
-bool LoadProject(const char* fullname)
+bool loadProject(const char* fullname)
 {
 	// try to load project
 	if (project.load(fullname))
 	{
 		// loaded successfully
-		ApplyMovieInputConfig();
+		applyMovieInputConfig();
 		// add new file to Recent menu
-		taseditor_window.UpdateRecentProjectsArray(fullname);
-		taseditor_window.RedrawTaseditor();
-		taseditor_window.UpdateCaption();
+		taseditorWindow.updateRecentProjectsArray(fullname);
+		taseditorWindow.redraw();
+		taseditorWindow.updateCaption();
 		return true;
 	} else
 	{
 		// failed to load
-		taseditor_window.RedrawTaseditor();
-		taseditor_window.UpdateCaption();
+		taseditorWindow.redraw();
+		taseditorWindow.updateCaption();
 		return false;
 	}
 }
 
 // Saves current project
-bool SaveProjectAs(bool save_compact)
+bool saveProjectAs(bool save_compact)
 {
 	const char filter[] = "TAS Editor Projects (*.fm3)\0*.fm3\0All Files (*.*)\0*.*\0\0";
 	OPENFILENAME ofn;
 	memset(&ofn, 0, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = taseditor_window.hwndTasEditor;
+	ofn.hwndOwner = taseditorWindow.hwndTASEditor;
 	ofn.hInstance = fceu_hInstance;
 	ofn.lpstrTitle = "Save TAS Editor Project As...";
 	ofn.lpstrFilter = filter;
 
 	char nameo[2048];
-	if (project.GetProjectName().empty())
+	if (project.getProjectName().empty())
 	{
 		// suggest ROM name for this project
 		strcpy(nameo, mass_replace(GetRomName(), "|", ".").c_str());	//convert | to . for archive filenames
@@ -436,7 +437,7 @@ bool SaveProjectAs(bool save_compact)
 	} else
 	{
 		// suggest current name
-		strncpy(nameo, project.GetProjectName().c_str(), 2047);
+		strncpy(nameo, project.getProjectName().c_str(), 2047);
 	}
 
 	ofn.lpstrFile = nameo;
@@ -448,59 +449,59 @@ bool SaveProjectAs(bool save_compact)
 
 	if (GetSaveFileName(&ofn))								// if it is a valid filename
 	{
-		project.RenameProject(nameo, true);
+		project.renameProject(nameo, true);
 		if (save_compact)
-			project.save(nameo, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_piano_roll, taseditor_config.savecompact_selection);
+			project.save(nameo, taseditorConfig.saveCompact_SaveInBinary, taseditorConfig.saveCompact_SaveMarkers, taseditorConfig.saveCompact_SaveBookmarks, taseditorConfig.saveCompact_GreenzoneSavingMode, taseditorConfig.saveCompact_SaveHistory, taseditorConfig.saveCompact_SavePianoRoll, taseditorConfig.saveCompact_SaveSelection);
 		else
-			project.save(nameo, taseditor_config.save_binary, taseditor_config.save_markers, taseditor_config.save_bookmarks, taseditor_config.save_greenzone, taseditor_config.save_history, taseditor_config.save_piano_roll, taseditor_config.save_selection);
-		taseditor_window.UpdateRecentProjectsArray(nameo);
+			project.save(nameo, taseditorConfig.projectSavingOptions_SaveInBinary, taseditorConfig.projectSavingOptions_SaveMarkers, taseditorConfig.projectSavingOptions_SaveBookmarks, taseditorConfig.projectSavingOptions_GreenzoneSavingMode, taseditorConfig.projectSavingOptions_SaveHistory, taseditorConfig.projectSavingOptions_SavePianoRoll, taseditorConfig.projectSavingOptions_SaveSelection);
+		taseditorWindow.updateRecentProjectsArray(nameo);
 		// saved successfully - remove * mark from caption
-		taseditor_window.UpdateCaption();
+		taseditorWindow.updateCaption();
 	} else return false;
 	return true;
 }
-bool SaveProject(bool save_compact)
+bool saveProject(bool save_compact)
 {
-	if (project.GetProjectFile().empty())
+	if (project.getProjectFile().empty())
 	{
-		return SaveProjectAs(save_compact);
+		return saveProjectAs(save_compact);
 	} else
 	{
 		if (save_compact)
-			project.save(0, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_piano_roll, taseditor_config.savecompact_selection);
+			project.save(0, taseditorConfig.saveCompact_SaveInBinary, taseditorConfig.saveCompact_SaveMarkers, taseditorConfig.saveCompact_SaveBookmarks, taseditorConfig.saveCompact_GreenzoneSavingMode, taseditorConfig.saveCompact_SaveHistory, taseditorConfig.saveCompact_SavePianoRoll, taseditorConfig.saveCompact_SaveSelection);
 		else
-			project.save(0, taseditor_config.save_binary, taseditor_config.save_markers, taseditor_config.save_bookmarks, taseditor_config.save_greenzone, taseditor_config.save_history, taseditor_config.save_piano_roll, taseditor_config.save_selection);
-		taseditor_window.UpdateCaption();
+			project.save(0, taseditorConfig.projectSavingOptions_SaveInBinary, taseditorConfig.projectSavingOptions_SaveMarkers, taseditorConfig.projectSavingOptions_SaveBookmarks, taseditorConfig.projectSavingOptions_GreenzoneSavingMode, taseditorConfig.projectSavingOptions_SaveHistory, taseditorConfig.projectSavingOptions_SavePianoRoll, taseditorConfig.projectSavingOptions_SaveSelection);
+		taseditorWindow.updateCaption();
 	}
 	return true;
 }
 // --------------------------------------------------
 void SaveCompact_SetDialogItems(HWND hwndDlg)
 {
-	CheckDlgButton(hwndDlg, IDC_CHECK_BINARY, taseditor_config.savecompact_binary?BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(hwndDlg, IDC_CHECK_MARKERS, taseditor_config.savecompact_markers?BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(hwndDlg, IDC_CHECK_BOOKMARKS, taseditor_config.savecompact_bookmarks?BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, taseditor_config.savecompact_history?BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(hwndDlg, IDC_CHECK_PIANO_ROLL, taseditor_config.savecompact_piano_roll?BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, taseditor_config.savecompact_selection?BST_CHECKED : BST_UNCHECKED);
-	CheckRadioButton(hwndDlg, IDC_RADIO1, IDC_RADIO4, IDC_RADIO1 + (taseditor_config.savecompact_greenzone % SAVE_GREENZONE_TOTAL));
+	CheckDlgButton(hwndDlg, IDC_CHECK_BINARY, taseditorConfig.saveCompact_SaveInBinary?BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_MARKERS, taseditorConfig.saveCompact_SaveMarkers?BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_BOOKMARKS, taseditorConfig.saveCompact_SaveBookmarks?BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, taseditorConfig.saveCompact_SaveHistory?BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_PIANO_ROLL, taseditorConfig.saveCompact_SavePianoRoll?BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, taseditorConfig.saveCompact_SaveSelection?BST_CHECKED : BST_UNCHECKED);
+	CheckRadioButton(hwndDlg, IDC_RADIO1, IDC_RADIO4, IDC_RADIO1 + (taseditorConfig.saveCompact_GreenzoneSavingMode % GREENZONE_SAVING_MODES_TOTAL));
 }
 void SaveCompact_GetDialogItems(HWND hwndDlg)
 {
-	taseditor_config.savecompact_binary = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BINARY, BM_GETCHECK, 0, 0) == BST_CHECKED);
-	taseditor_config.savecompact_markers = (SendDlgItemMessage(hwndDlg, IDC_CHECK_MARKERS, BM_GETCHECK, 0, 0) == BST_CHECKED);
-	taseditor_config.savecompact_bookmarks = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BOOKMARKS, BM_GETCHECK, 0, 0) == BST_CHECKED);
-	taseditor_config.savecompact_history = (SendDlgItemMessage(hwndDlg, IDC_CHECK_HISTORY, BM_GETCHECK, 0, 0) == BST_CHECKED);
-	taseditor_config.savecompact_piano_roll = (SendDlgItemMessage(hwndDlg, IDC_CHECK_PIANO_ROLL, BM_GETCHECK, 0, 0) == BST_CHECKED);
-	taseditor_config.savecompact_selection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	taseditorConfig.saveCompact_SaveInBinary = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BINARY, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	taseditorConfig.saveCompact_SaveMarkers = (SendDlgItemMessage(hwndDlg, IDC_CHECK_MARKERS, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	taseditorConfig.saveCompact_SaveBookmarks = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BOOKMARKS, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	taseditorConfig.saveCompact_SaveHistory = (SendDlgItemMessage(hwndDlg, IDC_CHECK_HISTORY, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	taseditorConfig.saveCompact_SavePianoRoll = (SendDlgItemMessage(hwndDlg, IDC_CHECK_PIANO_ROLL, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	taseditorConfig.saveCompact_SaveSelection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	if (SendDlgItemMessage(hwndDlg, IDC_RADIO1, BM_GETCHECK, 0, 0) == BST_CHECKED)
-		taseditor_config.savecompact_greenzone = SAVE_GREENZONE_ALL;
+		taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_ALL;
 	else if (SendDlgItemMessage(hwndDlg, IDC_RADIO2, BM_GETCHECK, 0, 0) == BST_CHECKED)
-		taseditor_config.savecompact_greenzone = SAVE_GREENZONE_16TH;
+		taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_16TH;
 	else if (SendDlgItemMessage(hwndDlg, IDC_RADIO3, BM_GETCHECK, 0, 0) == BST_CHECKED)
-		taseditor_config.savecompact_greenzone = SAVE_GREENZONE_MARKED;
+		taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_MARKED;
 	else
-		taseditor_config.savecompact_greenzone = SAVE_GREENZONE_NO;
+		taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_NO;
 }
 BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -508,7 +509,7 @@ BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM 
 	{
 		case WM_INITDIALOG:
 		{
-			SetWindowPos(hwndDlg, 0, taseditor_config.wndx + 100, taseditor_config.wndy + 200, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+			SetWindowPos(hwndDlg, 0, taseditorConfig.windowX + 100, taseditorConfig.windowY + 200, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 			SaveCompact_SetDialogItems(hwndDlg);
 			return TRUE;
 		}
@@ -536,26 +537,26 @@ BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM 
 	}
 	return FALSE; 
 }
-void SaveCompact()
+void saveCompact()
 {
-	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_SAVECOMPACT), taseditor_window.hwndTasEditor, SaveCompactProc) > 0)
+	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_SAVECOMPACT), taseditorWindow.hwndTASEditor, SaveCompactProc) > 0)
 	{
 		const char filter[] = "TAS Editor Projects (*.fm3)\0*.fm3\0All Files (*.*)\0*.*\0\0";
 		OPENFILENAME ofn;
 		memset(&ofn, 0, sizeof(ofn));
 		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner = taseditor_window.hwndTasEditor;
+		ofn.hwndOwner = taseditorWindow.hwndTASEditor;
 		ofn.hInstance = fceu_hInstance;
 		ofn.lpstrTitle = "Save Compact";
 		ofn.lpstrFilter = filter;
 
 		char nameo[2048];
-		if (project.GetProjectName().empty())
+		if (project.getProjectName().empty())
 			// suggest ROM name for this project
 			strcpy(nameo, mass_replace(GetRomName(), "|", ".").c_str());	//convert | to . for archive filenames
 		else
 			// suggest current name
-			strcpy(nameo, project.GetProjectName().c_str());
+			strcpy(nameo, project.getProjectName().c_str());
 		// add "-compact" if there's no such suffix
 		if (!strstr(nameo, "-compact"))
 			strcat(nameo, "-compact");
@@ -569,37 +570,37 @@ void SaveCompact()
 
 		if (GetSaveFileName(&ofn))
 		{
-			project.save(nameo, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_piano_roll, taseditor_config.savecompact_selection);
-			taseditor_window.UpdateCaption();
+			project.save(nameo, taseditorConfig.saveCompact_SaveInBinary, taseditorConfig.saveCompact_SaveMarkers, taseditorConfig.saveCompact_SaveBookmarks, taseditorConfig.saveCompact_GreenzoneSavingMode, taseditorConfig.saveCompact_SaveHistory, taseditorConfig.saveCompact_SavePianoRoll, taseditorConfig.saveCompact_SaveSelection);
+			taseditorWindow.updateCaption();
 		}
 	}
 }
 // --------------------------------------------------
 // returns false if user doesn't want to exit
-bool AskSaveProject()
+bool askToSaveProject()
 {
-	bool changes_found = false;
-	if (project.GetProjectChanged()) changes_found = true;
+	bool changesFound = false;
+	if (project.getProjectChanged())
+		changesFound = true;
 
 	// ask saving project
-	if (changes_found)
+	if (changesFound)
 	{
-		int answer = MessageBox(taseditor_window.hwndTasEditor, "Save Project changes?", "TAS Editor", MB_YESNOCANCEL);
+		int answer = MessageBox(taseditorWindow.hwndTASEditor, "Save Project changes?", "TAS Editor", MB_YESNOCANCEL);
 		if (answer == IDYES)
-			return SaveProject();
+			return saveProject();
 		return (answer != IDCANCEL);
 	}
 	return true;
 }
 
-extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
-void Import()
+void importInputData()
 {
 	const char filter[] = "FCEUX Movie Files (*.fm2), TAS Editor Projects (*.fm3)\0*.fm2;*.fm3\0All Files (*.*)\0*.*\0\0";
 	OPENFILENAME ofn;
 	memset(&ofn, 0, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = taseditor_window.hwndTasEditor;
+	ofn.hwndOwner = taseditorWindow.hwndTASEditor;
 	ofn.hInstance = fceu_hInstance;
 	ofn.lpstrTitle = "Import";
 	ofn.lpstrFilter = filter;
@@ -621,14 +622,14 @@ void Import()
 			char drv[512], dir[512], name[1024], ext[512];
 			splitpath(nameo, drv, dir, name, ext);
 			strcat(name, ext);
-			int result = history.RegisterImport(md, name);
+			int result = history.registerImport(md, name);
 			if (result >= 0)
 			{
-				greenzone.InvalidateAndCheck(result);
-				greenzone.laglog.InvalidateFrom(result);
+				greenzone.invalidateAndUpdatePlayback(result);
+				greenzone.lagLog.invalidateFromFrame(result);
 			} else
 			{
-				MessageBox(taseditor_window.hwndTasEditor, "Imported movie has the same Input.\nNo changes were made.", "TAS Editor", MB_OK);
+				MessageBox(taseditorWindow.hwndTASEditor, "Imported movie has the same Input.\nNo changes were made.", "TAS Editor", MB_OK);
 			}
 		} else
 		{
@@ -637,13 +638,13 @@ void Import()
 	}
 }
 
-BOOL CALLBACK AboutProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK aboutWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
 		case WM_INITDIALOG:
 		{
-			SendMessage(GetDlgItem(hWnd, IDC_TASEDITOR_NAME), WM_SETFONT, (WPARAM)piano_roll.hTaseditorAboutFont, 0);
+			SendMessage(GetDlgItem(hWnd, IDC_TASEDITOR_NAME), WM_SETFONT, (WPARAM)pianoRoll.hTaseditorAboutFont, 0);
 			break;
 		}
 		case WM_COMMAND:
@@ -660,24 +661,24 @@ BOOL CALLBACK AboutProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return FALSE; 
 }
 
-BOOL CALLBACK SavingOptionsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK savingOptionsWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
 		case WM_INITDIALOG:
 		{
-			CheckDlgButton(hwndDlg, IDC_AUTOSAVE_PROJECT, taseditor_config.enable_autosave?BST_CHECKED : BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_SILENT_AUTOSAVE, taseditor_config.silent_autosave?BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_AUTOSAVE_PROJECT, taseditorConfig.autosaveEnabled?BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_SILENT_AUTOSAVE, taseditorConfig.autosaveSilent?BST_CHECKED : BST_UNCHECKED);
 			char buf[16] = {0};
-			sprintf(buf, "%u", taseditor_config.autosave_period);
+			sprintf(buf, "%u", taseditorConfig.autosavePeriod);
 			SetDlgItemText(hwndDlg, IDC_AUTOSAVE_PERIOD, buf);
-			CheckDlgButton(hwndDlg, IDC_CHECK_BINARY, taseditor_config.save_binary?BST_CHECKED : BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_MARKERS, taseditor_config.save_markers?BST_CHECKED : BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_BOOKMARKS, taseditor_config.save_bookmarks?BST_CHECKED : BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, taseditor_config.save_history?BST_CHECKED : BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_PIANO_ROLL, taseditor_config.save_piano_roll?BST_CHECKED : BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, taseditor_config.save_selection?BST_CHECKED : BST_UNCHECKED);
-			CheckRadioButton(hwndDlg, IDC_RADIO1, IDC_RADIO4, IDC_RADIO1 + (taseditor_config.save_greenzone % SAVE_GREENZONE_TOTAL));
+			CheckDlgButton(hwndDlg, IDC_CHECK_BINARY, taseditorConfig.projectSavingOptions_SaveInBinary?BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_MARKERS, taseditorConfig.projectSavingOptions_SaveMarkers?BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_BOOKMARKS, taseditorConfig.projectSavingOptions_SaveBookmarks?BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, taseditorConfig.projectSavingOptions_SaveHistory?BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_PIANO_ROLL, taseditorConfig.projectSavingOptions_SavePianoRoll?BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, taseditorConfig.projectSavingOptions_SaveSelection?BST_CHECKED : BST_UNCHECKED);
+			CheckRadioButton(hwndDlg, IDC_RADIO1, IDC_RADIO4, IDC_RADIO1 + (taseditorConfig.projectSavingOptions_GreenzoneSavingMode % GREENZONE_SAVING_MODES_TOTAL));
 			return TRUE;
 		}
 		case WM_COMMAND:
@@ -686,32 +687,32 @@ BOOL CALLBACK SavingOptionsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARA
 			{
 				case IDOK:
 				{
-					taseditor_config.enable_autosave = (SendDlgItemMessage(hwndDlg, IDC_AUTOSAVE_PROJECT, BM_GETCHECK, 0, 0) == BST_CHECKED);
-					taseditor_config.silent_autosave = (SendDlgItemMessage(hwndDlg, IDC_SILENT_AUTOSAVE, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					taseditorConfig.autosaveEnabled = (SendDlgItemMessage(hwndDlg, IDC_AUTOSAVE_PROJECT, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					taseditorConfig.autosaveSilent = (SendDlgItemMessage(hwndDlg, IDC_SILENT_AUTOSAVE, BM_GETCHECK, 0, 0) == BST_CHECKED);
 					char buf[16] = {0};
 					GetDlgItemText(hwndDlg, IDC_AUTOSAVE_PERIOD, buf, 16 * sizeof(char));
-					int new_period = taseditor_config.autosave_period;
+					int new_period = taseditorConfig.autosavePeriod;
 					sscanf(buf, "%u", &new_period);
 					if (new_period < AUTOSAVE_PERIOD_MIN)
 						new_period = AUTOSAVE_PERIOD_MIN;
 					else if (new_period > AUTOSAVE_PERIOD_MAX)
 						new_period = AUTOSAVE_PERIOD_MAX;
-					taseditor_config.autosave_period = new_period;
-					project.SheduleNextAutosave();	
-					taseditor_config.save_binary = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BINARY, BM_GETCHECK, 0, 0) == BST_CHECKED);
-					taseditor_config.save_markers = (SendDlgItemMessage(hwndDlg, IDC_CHECK_MARKERS, BM_GETCHECK, 0, 0) == BST_CHECKED);
-					taseditor_config.save_bookmarks = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BOOKMARKS, BM_GETCHECK, 0, 0) == BST_CHECKED);
-					taseditor_config.save_history = (SendDlgItemMessage(hwndDlg, IDC_CHECK_HISTORY, BM_GETCHECK, 0, 0) == BST_CHECKED);
-					taseditor_config.save_piano_roll = (SendDlgItemMessage(hwndDlg, IDC_CHECK_PIANO_ROLL, BM_GETCHECK, 0, 0) == BST_CHECKED);
-					taseditor_config.save_selection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					taseditorConfig.autosavePeriod = new_period;
+					project.sheduleNextAutosave();	
+					taseditorConfig.projectSavingOptions_SaveInBinary = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BINARY, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					taseditorConfig.projectSavingOptions_SaveMarkers = (SendDlgItemMessage(hwndDlg, IDC_CHECK_MARKERS, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					taseditorConfig.projectSavingOptions_SaveBookmarks = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BOOKMARKS, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					taseditorConfig.projectSavingOptions_SaveHistory = (SendDlgItemMessage(hwndDlg, IDC_CHECK_HISTORY, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					taseditorConfig.projectSavingOptions_SavePianoRoll = (SendDlgItemMessage(hwndDlg, IDC_CHECK_PIANO_ROLL, BM_GETCHECK, 0, 0) == BST_CHECKED);
+					taseditorConfig.projectSavingOptions_SaveSelection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
 					if (SendDlgItemMessage(hwndDlg, IDC_RADIO1, BM_GETCHECK, 0, 0) == BST_CHECKED)
-						taseditor_config.save_greenzone = SAVE_GREENZONE_ALL;
+						taseditorConfig.projectSavingOptions_GreenzoneSavingMode = GREENZONE_SAVING_MODE_ALL;
 					else if (SendDlgItemMessage(hwndDlg, IDC_RADIO2, BM_GETCHECK, 0, 0) == BST_CHECKED)
-						taseditor_config.save_greenzone = SAVE_GREENZONE_16TH;
+						taseditorConfig.projectSavingOptions_GreenzoneSavingMode = GREENZONE_SAVING_MODE_16TH;
 					else if (SendDlgItemMessage(hwndDlg, IDC_RADIO3, BM_GETCHECK, 0, 0) == BST_CHECKED)
-						taseditor_config.save_greenzone = SAVE_GREENZONE_MARKED;
+						taseditorConfig.projectSavingOptions_GreenzoneSavingMode = GREENZONE_SAVING_MODE_MARKED;
 					else
-						taseditor_config.save_greenzone = SAVE_GREENZONE_NO;
+						taseditorConfig.projectSavingOptions_GreenzoneSavingMode = GREENZONE_SAVING_MODE_NO;
 					EndDialog(hwndDlg, 1);
 					return TRUE;
 				}
@@ -730,8 +731,8 @@ BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 	switch (message)
 	{
 		case WM_INITDIALOG:
-			SetWindowPos(hwndDlg, 0, taseditor_config.wndx + 100, taseditor_config.wndy + 200, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-			switch (taseditor_config.last_export_type)
+			SetWindowPos(hwndDlg, 0, taseditorConfig.windowX + 100, taseditorConfig.windowY + 200, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+			switch (taseditorConfig.lastExportedInputType)
 			{
 			case INPUT_TYPE_1P:
 				{
@@ -749,23 +750,23 @@ BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 					break;
 				}
 			}
-			CheckDlgButton(hwndDlg, IDC_NOTES_TO_SUBTITLES, taseditor_config.last_export_subtitles?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_NOTES_TO_SUBTITLES, taseditorConfig.lastExportedSubtitlesStatus?MF_CHECKED : MF_UNCHECKED);
 			return TRUE;
 		case WM_COMMAND:
 			switch (LOWORD(wParam))
 			{
 				case IDC_RADIO_1PLAYER:
-					taseditor_config.last_export_type = INPUT_TYPE_1P;
+					taseditorConfig.lastExportedInputType = INPUT_TYPE_1P;
 					break;
 				case IDC_RADIO_2PLAYERS:
-					taseditor_config.last_export_type = INPUT_TYPE_2P;
+					taseditorConfig.lastExportedInputType = INPUT_TYPE_2P;
 					break;
 				case IDC_RADIO_FOURSCORE:
-					taseditor_config.last_export_type = INPUT_TYPE_FOURSCORE;
+					taseditorConfig.lastExportedInputType = INPUT_TYPE_FOURSCORE;
 					break;
 				case IDC_NOTES_TO_SUBTITLES:
-					taseditor_config.last_export_subtitles ^= 1;
-					CheckDlgButton(hwndDlg, IDC_NOTES_TO_SUBTITLES, taseditor_config.last_export_subtitles?MF_CHECKED : MF_UNCHECKED);
+					taseditorConfig.lastExportedSubtitlesStatus ^= 1;
+					CheckDlgButton(hwndDlg, IDC_NOTES_TO_SUBTITLES, taseditorConfig.lastExportedSubtitlesStatus?MF_CHECKED : MF_UNCHECKED);
 					break;
 				case IDOK:
 					EndDialog(hwndDlg, 1);
@@ -779,17 +780,17 @@ BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 	return FALSE; 
 } 
 
-void Export()
+void exportToFM2()
 {
-	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_EXPORT), taseditor_window.hwndTasEditor, ExportProc) > 0)
+	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_EXPORT), taseditorWindow.hwndTASEditor, ExportProc) > 0)
 	{
 		const char filter[] = "FCEUX Movie File (*.fm2)\0*.fm2\0All Files (*.*)\0*.*\0\0";
 		char fname[2048];
-		strcpy(fname, project.GetFM2Name().c_str());
+		strcpy(fname, project.getFM2Name().c_str());
 		OPENFILENAME ofn;
 		memset(&ofn, 0, sizeof(ofn));
 		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner = taseditor_window.hwndTasEditor;
+		ofn.hwndOwner = taseditorWindow.hwndTASEditor;
 		ofn.hInstance = fceu_hInstance;
 		ofn.lpstrTitle = "Export to FM2";
 		ofn.lpstrFilter = filter;
@@ -805,24 +806,24 @@ void Export()
 			// create copy of current movie data
 			MovieData temp_md = currMovieData;
 			// modify the copy according to selected type of export
-			SetInputType(temp_md, taseditor_config.last_export_type);
+			setInputType(temp_md, taseditorConfig.lastExportedInputType);
 			temp_md.loadFrameCount = -1;
 			// also add subtitles if needed
-			if (taseditor_config.last_export_subtitles)
+			if (taseditorConfig.lastExportedSubtitlesStatus)
 			{
 				// convert Marker Notes to Movie Subtitles
 				char framenum[11];
 				std::string subtitle;
-				int marker_id;
-				for (int i = 0; i < markers_manager.GetMarkersSize(); ++i)
+				int markerID;
+				for (int i = 0; i < markersManager.getMarkersArraySize(); ++i)
 				{
-					marker_id = markers_manager.GetMarker(i);
-					if (marker_id)
+					markerID = markersManager.getMarkerAtFrame(i);
+					if (markerID)
 					{
 						_itoa(i, framenum, 10);
 						strcat(framenum, " ");
 						subtitle = framenum;
-						subtitle.append(markers_manager.GetNote(marker_id));
+						subtitle.append(markersManager.getNoteCopy(markerID));
 						temp_md.subtitles.push_back(subtitle);
 					}
 				}
@@ -835,7 +836,7 @@ void Export()
 	}
 }
 
-int GetInputType(MovieData& md)
+int getInputType(MovieData& md)
 {
 	if (md.fourscore)
 		return INPUT_TYPE_FOURSCORE;
@@ -844,9 +845,9 @@ int GetInputType(MovieData& md)
 	else
 		return INPUT_TYPE_1P;
 }
-void SetInputType(MovieData& md, int new_input_type)
+void setInputType(MovieData& md, int newInputType)
 {
-	switch (new_input_type)
+	switch (newInputType)
 	{
 		case INPUT_TYPE_1P:
 		{
@@ -872,7 +873,7 @@ void SetInputType(MovieData& md, int new_input_type)
 	}
 }
 
-void ApplyMovieInputConfig()
+void applyMovieInputConfig()
 {
 	// update FCEUX input config
 	FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
@@ -885,23 +886,23 @@ void ApplyMovieInputConfig()
 	newppu = currMovieData.PPUflag;
 	SetMainWindowText();
 	// return focus to TAS Editor window
-	SetFocus(taseditor_window.hwndTasEditor);
+	SetFocus(taseditorWindow.hwndTASEditor);
 }
 
 // this getter contains formula to decide whether to record or replay movie
-bool TaseditorIsRecording()
+bool isTaseditorRecording()
 {
-	if (movie_readonly || playback.GetPauseFrame() >= 0 || (taseditor_config.old_branching_controls && !recorder.state_was_loaded_in_readwrite_mode))
+	if (movie_readonly || playback.getPauseFrame() >= 0 || (taseditorConfig.oldControlSchemeForBranching && !recorder.stateWasLoadedInReadWriteMode))
 		return false;		// replay
 	return true;			// record
 }
-void Taseditor_RecordInput()
+void recordInputByTaseditor()
 {
-	recorder.InputChanged();
+	recorder.recordInput();
 }
 
 // this gate handles some FCEUX hotkeys (EMUCMD)
-void Taseditor_EMUCMD(int command)
+void handleEmuCmdByTaseditor(int command)
 {
 	switch (command)
 	{
@@ -916,7 +917,7 @@ void Taseditor_EMUCMD(int command)
 		case EMUCMD_SAVE_SLOT_8:
 		case EMUCMD_SAVE_SLOT_9:
 		{
-			if (taseditor_config.old_branching_controls)
+			if (taseditorConfig.oldControlSchemeForBranching)
 				bookmarks.command(COMMAND_SELECT, command - EMUCMD_SAVE_SLOT_0);
 			else
 				bookmarks.command(COMMAND_JUMP, command - EMUCMD_SAVE_SLOT_0);
@@ -924,14 +925,14 @@ void Taseditor_EMUCMD(int command)
 		}
 		case EMUCMD_SAVE_SLOT_NEXT:
 		{
-			int slot = bookmarks.GetSelectedSlot() + 1;
+			int slot = bookmarks.getSelectedSlot() + 1;
 			if (slot >= TOTAL_BOOKMARKS) slot = 0;
 			bookmarks.command(COMMAND_SELECT, slot);
 			break;
 		}
 		case EMUCMD_SAVE_SLOT_PREV:
 		{
-			int slot = bookmarks.GetSelectedSlot() - 1;
+			int slot = bookmarks.getSelectedSlot() - 1;
 			if (slot < 0) slot = TOTAL_BOOKMARKS - 1;
 			bookmarks.command(COMMAND_SELECT, slot);
 			break;
@@ -971,41 +972,41 @@ void Taseditor_EMUCMD(int command)
 			playback.jump(0);
 			break;
 		case EMUCMD_RELOAD:
-			taseditor_window.LoadRecentProject(0);
+			taseditorWindow.loadRecentProject(0);
 			break;
 		case EMUCMD_TASEDITOR_RESTORE_PLAYBACK:
-			playback.RestorePosition();
+			playback.restoreLastPosition();
 			break;
 		case EMUCMD_TASEDITOR_CANCEL_SEEKING:
-			playback.CancelSeeking();
+			playback.cancelSeeking();
 			break;
 		case EMUCMD_TASEDITOR_SWITCH_AUTORESTORING:
-			taseditor_config.restore_position ^= 1;
-			taseditor_window.UpdateCheckedItems();
+			taseditorConfig.autoRestoreLastPlaybackPosition ^= 1;
+			taseditorWindow.updateCheckedItems();
 			break;
 		case EMUCMD_TASEDITOR_SWITCH_MULTITRACKING:
-			recorder.multitrack_recording_joypad++;
-			if (recorder.multitrack_recording_joypad > joysticks_per_frame[GetInputType(currMovieData)])
-				recorder.multitrack_recording_joypad = 0;
+			recorder.multitrackRecordingJoypadNumber++;
+			if (recorder.multitrackRecordingJoypadNumber > joysticksPerFrame[getInputType(currMovieData)])
+				recorder.multitrackRecordingJoypadNumber = 0;
 			break;
 		case EMUCMD_TASEDITOR_RUN_MANUAL_LUA:
 			// the function will be called in next window update
-			must_call_manual_lua_function = true;
+			mustCallManualLuaFunction = true;
 			break;
 
 	}
 }
 // these functions allow/disallow some FCEUX hotkeys and TAS Editor accelerators
-void SetTaseditorInput()
+void enableGeneralKeyboardInput()
 {
-	taseditor_accelerator_keys = true;
+	taseditorEnableAcceleratorKeys = true;
 	// set "Background TAS Editor input"
 	KeyboardSetBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
 	JoystickSetBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
 }
-void ClearTaseditorInput()
+void disableGeneralKeyboardInput()
 {
-	taseditor_accelerator_keys = false;
+	taseditorEnableAcceleratorKeys = false;
 	// clear "Background TAS Editor input"
 	KeyboardClearBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
 	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);

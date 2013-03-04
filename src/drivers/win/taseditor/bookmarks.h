@@ -4,14 +4,14 @@
 
 #define TOTAL_BOOKMARKS 10
 
-enum
+enum BOOKMARKS_EDIT_MODES
 {
 	EDIT_MODE_BOOKMARKS = 0,
 	EDIT_MODE_BOTH = 1,
 	EDIT_MODE_BRANCHES = 2,
 };
 
-enum COMMANDS
+enum BOOKMARK_COMMANDS
 {
 	COMMAND_SET = 0,
 	COMMAND_JUMP = 1,
@@ -19,30 +19,32 @@ enum COMMANDS
 	COMMAND_SELECT = 3,
 	COMMAND_DELETE = 4,			// not implemented, probably useless
 
-	TOTAL_COMMANDS
+	// ...
+	TOTAL_BOOKMARK_COMMANDS
 };
 
 #define BOOKMARKSLIST_COLUMN_ICONS_WIDTH 15
 #define BOOKMARKSLIST_COLUMN_FRAMENUM_WIDTH 74
-#define BOOKMARKSLIST_COLUMN_TIME_WIDTH 80
+#define BOOKMARKSLIST_COLUMN_TIMESTAMP_WIDTH 80
 
-#define BOOKMARKS_SELECTED 20
+#define BOOKMARKS_BITMAPS_SELECTED 20
 
-#define ITEM_UNDER_MOUSE_NONE -2
-#define ITEM_UNDER_MOUSE_CLOUD -1
+#define ITEM_UNDER_MOUSE_NONE (-2)
+#define ITEM_UNDER_MOUSE_CLOUD (-1)
+#define ITEM_UNDER_MOUSE_FIREBALL (TOTAL_BOOKMARKS)
 
 #define BOOKMARKS_FLASH_TICK 100		// in milliseconds
 
 // listview columns
 enum
 {
-	BOOKMARKS_COLUMN_ICON = 0,
-	BOOKMARKS_COLUMN_FRAME = 1,
-	BOOKMARKS_COLUMN_TIME = 2,
+	BOOKMARKSLIST_COLUMN_ICON = 0,
+	BOOKMARKSLIST_COLUMN_FRAME = 1,
+	BOOKMARKSLIST_COLUMN_TIME = 2,
 };
 
 #define BOOKMARKS_ID_LEN 10
-#define TIME_DESC_LENGTH 9		// "HH:MM:SS"
+#define TIMESTAMP_LENGTH 9		// "HH:MM:SS"
 
 #define DEFAULT_SLOT 1
 
@@ -61,37 +63,37 @@ public:
 
 	void command(int command_id, int slot = -1);
 
-	void GetDispInfo(NMLVDISPINFO* nmlvDispInfo);
-	LONG CustomDraw(NMLVCUSTOMDRAW* msg);
-	void LeftClick();
-	void RightClick();
+	void getDispInfo(NMLVDISPINFO* nmlvDispInfo);
+	LONG handleCustomDraw(NMLVCUSTOMDRAW* msg);
+	void handleLeftClick();
+	void handleRightClick();
 
-	int FindBookmarkAtFrame(int frame);
+	int findBookmarkAtFrame(int frame);
 
-	void RedrawBookmarksCaption();
-	void RedrawBookmarksList(bool erase_bg = false);
-	void RedrawChangedBookmarks(int frame);
-	void RedrawBookmark(int bookmark_number);
-	void RedrawListRow(int row_index);
+	void redrawBookmarksSectionCaption();
+	void redrawBookmarksList(bool eraseBG = false);
+	void redrawChangedBookmarks(int frame);
+	void redrawBookmark(int bookmarkNumber);
+	void redrawBookmarksListRow(int rowIndex);
 
-	void MouseMove(int new_x, int new_y);
-	int FindItemUnderMouse();
+	void handleMouseMove(int newX, int newY);
+	int findItemUnderMouse();
 
-	int GetSelectedSlot();
+	int getSelectedSlot();
 
 	// saved vars
-	std::vector<BOOKMARK> bookmarks_array;
+	std::vector<BOOKMARK> bookmarksArray;
 
 	// not saved vars
-	int edit_mode;
-	bool must_check_item_under_mouse;
-	bool mouse_over_bitmap, mouse_over_bookmarkslist;
-	int item_under_mouse;
-	TRACKMOUSEEVENT tme, list_tme;
-	int bookmark_leftclicked, bookmark_rightclicked, column_clicked;
-	int list_row_top;
-	int list_row_left;
-	int list_row_height;
+	int editMode;
+	bool mustCheckItemUnderMouse;
+	bool mouseOverBranchesBitmap, mouseOverBookmarksList;
+	int itemUnderMouse;
+	TRACKMOUSEEVENT tme, tmeList;
+	int bookmarkLeftclicked, bookmarkRightclicked, columnClicked;
+	int listTopMargin;
+	int listRowLeft;
+	int listRowHeight;
 
 	HWND hwndBookmarksList, hwndBranchesBitmap, hwndBookmarks;
 
@@ -102,12 +104,12 @@ private:
 
 	// not saved vars
 	std::vector<int> commands;
-	int selected_slot;
-	int check_flash_shedule;
-	int mouse_x, mouse_y;
+	int selectedSlot;
+	int nextFlashUpdateTime;
+	int mouseX, mouseY;
 
 	// GDI stuff
 	HFONT hBookmarksFont;
-	HIMAGELIST himglist;
+	HIMAGELIST hImgList;
 
 };

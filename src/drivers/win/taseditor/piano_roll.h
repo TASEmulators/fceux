@@ -28,9 +28,9 @@
 
 #define DRAG_SCROLLING_BORDER_SIZE 10		// in pixels
 
-#define DOUBLETAP_COUNT 3			// 1:quick press, 2 - quick release, 3 - quick press
+#define DOUBLETAP_COUNT 3			// 3 actions: 1 = quick press, 2 = quick release, 3 = quick press
 
-enum
+enum PIANO_ROLL_COLUMNS
 {
 	COLUMN_ICONS,
 	COLUMN_FRAMENUM,
@@ -86,8 +86,7 @@ enum DRAG_MODES
 // when there's too many button columns, there's need for 2nd Frame# column at the end
 #define NUM_COLUMNS_NEED_2ND_FRAMENUM COLUMN_JOYPAD4_R
 
-#define DIGITS_IN_FRAMENUM 7
-
+#define DIGITS_IN_FRAMENUM 7			// should be enough for any TAS movie
 #define BOOKMARKS_WITH_BLUE_ARROW 20
 #define BOOKMARKS_WITH_GREEN_ARROW 40
 #define BLUE_ARROW_IMAGE_ID 60
@@ -156,90 +155,90 @@ public:
 	void free();
 	void reset();
 	void update();
+	void redraw();
 
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is, unsigned int offset);
 
-	void RedrawList();
-	void RedrawRow(int index);
-	void RedrawHeader();
+	void redrawRow(int index);
+	void redrawHeader();
 
-	void UpdateItemCount();
-	bool CheckItemVisible(int frame);
+	void updateLinesCount();
+	bool isLineVisible(int frame);
 
-	void FollowPlayback();
-	void FollowPlaybackIfNeeded(bool follow_pauseframe = true);
-	void FollowPauseframe();
-	void FollowUndo();
-	void FollowSelection();
-	void FollowMarker(int marker_id);
-	void EnsureVisible(int row_index);
+	void followPlaybackCursor();
+	void followPlaybackCursorIfNeeded(bool followPauseframe = true);
+	void followPauseframe();
+	void followUndoHint();
+	void followSelection();
+	void followMarker(int markerID);
+	void ensureTheLineIsVisible(int rowIndex);
 
-	void ColumnSet(int column, bool alt_pressed);
+	void handleColumnSet(int column, bool altPressed);
 
-	void SetHeaderColumnLight(int column, int level);
+	void setLightInHeaderColumn(int column, int level);
 
-	void StartDraggingPlaybackCursor();
-	void StartDraggingMarker(int mouse_x, int mouse_y, int row_index, int column_index);
-	void StartSelectingDrag(int start_frame);
-	void StartDeselectingDrag(int start_frame);
+	void startDraggingPlaybackCursor();
+	void startDraggingMarker(int mouseX, int mouseY, int rowIndex, int columnIndex);
+	void startSelectingDrag(int startFrame);
+	void startDeselectingDrag(int startFrame);
 
-	void GetDispInfo(NMLVDISPINFO* nmlvDispInfo);
-	LONG CustomDraw(NMLVCUSTOMDRAW* msg);
-	LONG HeaderCustomDraw(NMLVCUSTOMDRAW* msg);
+	void getDispInfo(NMLVDISPINFO* nmlvDispInfo);
+	LONG handleCustomDraw(NMLVCUSTOMDRAW* msg);
+	LONG handleHeaderCustomDraw(NMLVCUSTOMDRAW* msg);
 
-	void RightClick(LVHITTESTINFO& info);
+	void handleRightClick(LVHITTESTINFO& info);
 
-	bool CheckIfTheresAnyIconAtFrame(int frame);
-	void CrossGaps(int zDelta);
+	bool checkIfTheresAnIconAtFrame(int frame);
+	void crossGaps(int zDelta);
 
-	int header_item_under_mouse;
+	int headerItemUnderMouse;
 	HWND hwndList, hwndHeader;
 	TRACKMOUSEEVENT tme;
 
-	int list_row_top, list_row_height, list_header_height;
+	int listTopMargin, listRowHeight, listHeaderHeight;
 
-	bool must_check_item_under_mouse;
-	int row_under_mouse, real_row_under_mouse, column_under_mouse;
+	bool mustCheckItemUnderMouse;
 
-	unsigned int drag_mode;
-	bool rbutton_drag_mode;
-	int marker_drag_box_dx, marker_drag_box_dy;
-	int marker_drag_box_x, marker_drag_box_y;
-	int marker_drag_countdown;
-	int marker_drag_framenum;
-	int drawing_last_x, drawing_last_y;
-	int drawing_start_time;
-	int drag_selection_starting_frame;
-	int drag_selection_ending_frame;
+	int rowUnderMouse, realRowUnderMouse, columnUnderMouse;
+	unsigned int dragMode;
+	bool rightButtonDragMode;
+	int markerDragBoxDX, markerDragBoxDY;
+	int markerDragBoxX, markerDragBoxY;
+	int markerDragCountdown;
+	int markerDragFrameNumber;
+	int drawingLastX, drawingLastY;
+	int drawingStartTimestamp;
+	int dragSelectionStartingFrame;
+	int dragSelectionEndingFrame;
 
-	bool shift_held, ctrl_held, alt_held;
-	int shift_timer, ctrl_timer;
-	int shift_count, ctrl_count;
+	bool shiftHeld, ctrlHeld, altHeld;
+	int shiftTimer, ctrlTimer;
+	int shiftActions—ount, ctrlActions—ount;
 
 	HWND hwndMarkerDragBox, hwndMarkerDragBoxText;
 	// GDI stuff
 	HFONT hMainListFont, hMainListSelectFont, hMarkersFont, hMarkersEditFont, hTaseditorAboutFont;
-	HBRUSH bg_brush, marker_drag_box_brush, marker_drag_box_brush_bind;
+	HBRUSH bgBrush, markerDragBoxBrushNormal, markerDragBoxBrushBind;
 
 private:
-	void CenterListAt(int frame);
+	void centerListAroundLine(int rowIndex);
 
-	void DragPlaybackCursor();
-	void FinishDrag();
+	void handlePlaybackCursorDragging();
+	void finishDrag();
 
-	std::vector<uint8> header_colors;
-	int num_columns;
-	int next_header_update_time;
+	std::vector<uint8> headerColors;
+	int numColumns;
+	int nextHeaderUpdateTime;
 
-	bool must_redraw_list;
+	bool mustRedrawList;
 
-	HMENU hrmenu;
+	HMENU hrMenu;
 
 	// GDI stuff
-	HIMAGELIST himglist;
+	HIMAGELIST hImgList;
 
-	WNDCLASSEX wincl;
+	WNDCLASSEX winCl;
 	BLENDFUNCTION blend;
 
 };

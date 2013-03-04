@@ -10,7 +10,7 @@ struct PENDING_CHANGES
 	int data;
 };
 
-enum
+enum LUA_CHANGE_TYPES
 {
 	LUA_CHANGE_TYPE_INPUTCHANGE,
 	LUA_CHANGE_TYPE_INSERTFRAMES,
@@ -34,10 +34,10 @@ public:
 	void reset();
 	void update();
 
-	void EnableRunFunction(const char* caption = NULL);
-	void DisableRunFunction();
+	void enableRunFunction(const char* caption = NULL);
+	void disableRunFunction();
 
-	void InsertDelete_rows_to_Snaphot(SNAPSHOT& snapshot);
+	void insertAndDeleteRowsInSnaphot(SNAPSHOT& snapshot);
 
 	// Taseditor Lua library
 	bool engaged();
@@ -66,6 +66,6 @@ public:
 private:
 	std::vector<PENDING_CHANGES> pending_changes;
 
-	HWND hwndRunFunction;
+	HWND hwndRunFunctionButton;
 
 };

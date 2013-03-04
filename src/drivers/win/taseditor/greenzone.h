@@ -11,7 +11,7 @@
 #define EVERY4TH 0xFFFFFFFC
 #define EVERY2ND 0xFFFFFFFE
 
-#define PROGRESSBAR_UPDATE_RATE 1000	// progressbar is updated after every 1000 savestates loaded from fm3
+#define PROGRESSBAR_UPDATE_RATE 1000	// progressbar is updated after every 1000 savestates loaded from FM3 file
 
 class GREENZONE
 {
@@ -22,41 +22,41 @@ public:
 	void free();
 	void update();
 
-	void save(EMUFILE *os, int save_type = SAVE_GREENZONE_ALL);
+	void save(EMUFILE *os, int save_type = GREENZONE_SAVING_MODE_ALL);
 	bool load(EMUFILE *is, unsigned int offset);
 
-	bool LoadSavestate(unsigned int frame);
+	bool loadSavestateOfFrame(unsigned int frame);
 
-	void RunGreenzoneCleaning();
+	void runGreenzoneCleaning();
 
-	void UnGreenzoneSelectedFrames();
+	void ungreenzoneSelectedFrames();
 
-	void InvalidateAndCheck(int after);
-	void Invalidate(int after);
+	void invalidate(int after);
+	void invalidateAndUpdatePlayback(int after);
 
-	int FindBeginningOfGreenZone(int starting_index = 0);
+	int findFirstGreenzonedFrame(int startingFrame = 0);
 
-	int GetSize();
-	std::vector<uint8>& GetSavestate(int frame);
-	void WriteSavestate(int frame, std::vector<uint8>& savestate);
-	bool SavestateIsEmpty(unsigned int frame);
+	int getSize();
+	std::vector<uint8>& getSavestateOfFrame(int frame);
+	void writeSavestateForFrame(int frame, std::vector<uint8>& savestate);
+	bool isSavestateEmpty(unsigned int frame);
 
 	// saved data
-	LAGLOG laglog;
+	LAGLOG lagLog;
 
 private:
-	void CollectCurrentState();
-	bool ClearSavestate(unsigned int index);
-	bool ClearSavestateAndFreeMemory(unsigned int index);
+	void collectCurrentState();
+	bool clearSavestateOfFrame(unsigned int frame);
+	bool clearSavestateAndFreeMemory(unsigned int frame);
 
-	void AdjustUp();
-	void AdjustDown();
+	void adjustUp();
+	void adjustDown();
 
 	// saved data
-	int greenZoneCount;
+	int greenzoneSize;
 	std::vector<std::vector<uint8>> savestates;
 
 	// not saved data
-	int next_cleaning_time;
+	int nextCleaningTime;
 	
 };

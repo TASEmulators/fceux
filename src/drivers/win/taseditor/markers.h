@@ -11,18 +11,18 @@ public:
 	bool load(EMUFILE *is);
 	bool skipLoad(EMUFILE *is);
 
-	void compress_data();
-	bool Get_already_compressed();
-	void Reset_already_compressed();
+	void compressData();
+	bool isAalreadyCompressed();
+	void resetCompressedStatus();
 
 	// saved data
 	std::vector<std::string> notes;		// Format: 0th - note for intro (Marker 0), 1st - note for Marker1, 2nd - note for Marker2, ...
 	// not saved data
-	std::vector<int> markers_array;		// Format: 0th = Marker num (id) for frame 0, 1st = Marker num for frame 1, ...
+	std::vector<int> markersArray;		// Format: 0th = Marker number (id) for frame 0, 1st = Marker number for frame 1, ...
 
 private:
 	// also saved data
-	std::vector<uint8> markers_array_compressed;
+	std::vector<uint8> compressedMarkersArray;
 
-	bool already_compressed;			// to compress only once
+	bool alreadyCompressed;			// to compress only once
 };

@@ -8,27 +8,27 @@ public:
 	void reset();
 	void update();
 
-	void CloneFrames();
-	void InsertFrames();
-	void InsertNumFrames();
-	void DeleteFrames();
-	void ClearFrames(SelectionFrames* current_selection = 0);
-	void Truncate();
-	bool Copy(SelectionFrames* current_selection = 0);
-	void Cut();
-	bool Paste();
-	bool PasteInsert();
+	void cloneSelectedFrames();
+	void insertSelectedFrames();
+	void insertNumberOfFrames();
+	void deleteSelectedFrames();
+	void clearSelectedFrames(RowsSelection* currentSelectionOverride = 0);
+	void truncateMovie();
+	bool copySelectedInputToClipboard(RowsSelection* currentSelectionOverride = 0);
+	void cutSelectedInputToClipboard();
+	bool pasteInputFromClipboard();
+	bool pasteInsertInputFromClipboard();
 
-	void RedrawTextClipboard();
+	void redrawInfoAboutClipboard();
 
-	SelectionFrames& GetClipboardSelection();
+	RowsSelection& getClipboardSelection();
 
-	bool must_redraw_selection_text;
+	bool mustRedrawInfoAboutSelection;
 
 private:
-	void CheckClipboard();
+	void checkClipboardContents();
 
-	SelectionFrames clipboard_selection;
-	HWND hwndTextSelection, hwndTextClipboard;
+	RowsSelection clipboardSelection;
+	HWND hwndSelectionInfo, hwndClipboardInfo;
 
 };

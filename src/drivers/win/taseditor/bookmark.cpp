@@ -18,7 +18,7 @@ Bookmark - Single Bookmark data
 #include "taseditor_project.h"
 #include "zlib.h"
 
-extern TASEDITOR_CONFIG taseditor_config;
+extern TASEDITOR_CONFIG taseditorConfig;
 extern GREENZONE greenzone;
 extern HISTORY history;
 
@@ -27,7 +27,7 @@ extern uint8 *XBackBuf;
 
 BOOKMARK::BOOKMARK()
 {
-	not_empty = false;
+	notEmpty = false;
 }
 
 void BOOKMARK::init()
@@ -36,24 +36,24 @@ void BOOKMARK::init()
 }
 void BOOKMARK::free()
 {
-	not_empty = false;
-	flash_type = flash_phase = floating_phase = 0;
+	notEmpty = false;
+	flashType = flashPhase = floatingPhase = 0;
 	SNAPSHOT tmp;
 	snapshot = tmp;
 	savestate.resize(0);
-	saved_screenshot.resize(0);
+	savedScreenshot.resize(0);
 }
 
-bool BOOKMARK::checkDiffFromCurrent()
+bool BOOKMARK::isDifferentFromCurrentMovie()
 {
 	// check if the Bookmark data differs from current project/MovieData/Markers/settings
-	if (not_empty && snapshot.keyframe == currFrameCounter)
+	if (notEmpty && snapshot.keyFrame == currFrameCounter)
 	{
 		if (snapshot.inputlog.size == currMovieData.getNumRecords() && snapshot.inputlog.findFirstChange(currMovieData) < 0)
 		{
-			if (!snapshot.MarkersDifferFromCurrent())
+			if (!snapshot.areMarkersDifferentFromCurrentMarkers())
 			{
-				if (snapshot.inputlog.has_hot_changes == taseditor_config.enable_hot_changes)
+				if (snapshot.inputlog.hasHotChanges == taseditorConfig.enableHotChanges)
 				{
 					return false;
 				}
@@ -66,42 +66,42 @@ bool BOOKMARK::checkDiffFromCurrent()
 void BOOKMARK::set()
 {
 	// copy Input and Hotchanges
-	snapshot.init(currMovieData, taseditor_config.enable_hot_changes);
-	snapshot.keyframe = currFrameCounter;
-	if (taseditor_config.enable_hot_changes)
-		snapshot.inputlog.copyHotChanges(&history.GetCurrentSnapshot().inputlog);
+	snapshot.init(currMovieData, taseditorConfig.enableHotChanges);
+	snapshot.keyFrame = currFrameCounter;
+	if (taseditorConfig.enableHotChanges)
+		snapshot.inputlog.copyHotChanges(&history.getCurrentSnapshot().inputlog);
 	// copy savestate
-	savestate = greenzone.GetSavestate(currFrameCounter);
+	savestate = greenzone.getSavestateOfFrame(currFrameCounter);
 	// save screenshot
 	uLongf comprlen = (SCREENSHOT_SIZE>>9)+12 + SCREENSHOT_SIZE;
-	saved_screenshot.resize(comprlen);
+	savedScreenshot.resize(comprlen);
 	// compress screenshot data
-	if (taseditor_config.branch_scr_hud)
-		compress(&saved_screenshot[0], &comprlen, XBuf, SCREENSHOT_SIZE);
+	if (taseditorConfig.HUDInBranchScreenshots)
+		compress(&savedScreenshot[0], &comprlen, XBuf, SCREENSHOT_SIZE);
 	else
-		compress(&saved_screenshot[0], &comprlen, XBackBuf, SCREENSHOT_SIZE);
-	saved_screenshot.resize(comprlen);
+		compress(&savedScreenshot[0], &comprlen, XBackBuf, SCREENSHOT_SIZE);
+	savedScreenshot.resize(comprlen);
 
-	not_empty = true;
-	flash_phase = FLASH_PHASE_MAX;
-	flash_type = FLASH_TYPE_SET;
+	notEmpty = true;
+	flashPhase = FLASH_PHASE_MAX;
+	flashType = FLASH_TYPE_SET;
 }
 
-void BOOKMARK::jumped()
+void BOOKMARK::handleJump()
 {
-	flash_phase = FLASH_PHASE_MAX;
-	flash_type = FLASH_TYPE_JUMP;
+	flashPhase = FLASH_PHASE_MAX;
+	flashType = FLASH_TYPE_JUMP;
 }
 
-void BOOKMARK::deployed()
+void BOOKMARK::handleDeploy()
 {
-	flash_phase = FLASH_PHASE_MAX;
-	flash_type = FLASH_TYPE_DEPLOY;
+	flashPhase = FLASH_PHASE_MAX;
+	flashType = FLASH_TYPE_DEPLOY;
 }
 
 void BOOKMARK::save(EMUFILE *os)
 {
-	if (not_empty)
+	if (notEmpty)
 	{
 		write8le(1, os);
 		// write snapshot
@@ -111,9 +111,9 @@ void BOOKMARK::save(EMUFILE *os)
 		write32le(size, os);
 		os->fwrite(&savestate[0], size);
 		// write saved_screenshot
-		size = saved_screenshot.size();
+		size = savedScreenshot.size();
 		write32le(size, os);
-		os->fwrite(&saved_screenshot[0], size);
+		os->fwrite(&savedScreenshot[0], size);
 	} else write8le((uint8)0, os);
 }
 // returns true if couldn't load
@@ -121,8 +121,8 @@ bool BOOKMARK::load(EMUFILE *is)
 {
 	uint8 tmp;
 	if (!read8le(&tmp, is)) return true;
-	not_empty = (tmp != 0);
-	if (not_empty)
+	notEmpty = (tmp != 0);
+	if (notEmpty)
 	{
 		// read snapshot
 		if (snapshot.load(is)) return true;
@@ -133,14 +133,14 @@ bool BOOKMARK::load(EMUFILE *is)
 		if ((int)is->fread(&savestate[0], size) < size) return true;
 		// read saved_screenshot
 		if (!read32le(&size, is)) return true;
-		saved_screenshot.resize(size);
-		if ((int)is->fread(&saved_screenshot[0], size) < size) return true;
+		savedScreenshot.resize(size);
+		if ((int)is->fread(&savedScreenshot[0], size) < size) return true;
 	} else
 	{
 		free();
 	}
 	// all ok - reset vars
-	flash_type = flash_phase = floating_phase = 0;
+	flashType = flashPhase = floatingPhase = 0;
 	return false;
 }
 bool BOOKMARK::skipLoad(EMUFILE *is)

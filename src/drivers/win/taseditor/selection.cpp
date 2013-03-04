@@ -25,15 +25,15 @@ Selection - Manager of selections
 #include "taseditor_project.h"
 #include "../taseditor.h"
 
-extern TASEDITOR_CONFIG taseditor_config;
-extern TASEDITOR_WINDOW taseditor_window;
-extern MARKERS_MANAGER markers_manager;
-extern PIANO_ROLL piano_roll;
+extern TASEDITOR_CONFIG taseditorConfig;
+extern TASEDITOR_WINDOW taseditorWindow;
+extern MARKERS_MANAGER markersManager;
+extern PIANO_ROLL pianoRoll;
 extern SPLICER splicer;
 extern EDITOR editor;
 extern GREENZONE greenzone;
 
-extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
+extern int joysticksPerFrame[INPUT_TYPES_TOTAL];
 
 LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 WNDPROC selectionMarkerEdit_oldWndproc;
@@ -49,199 +49,199 @@ SELECTION::SELECTION()
 
 void SELECTION::init()
 {
-	hwndPrevMarker = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_PREV_MARKER);
-	hwndNextMarker = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_NEXT_MARKER);
-	hwndSelectionMarker = GetDlgItem(taseditor_window.hwndTasEditor, IDC_SELECTION_MARKER);
-	SendMessage(hwndSelectionMarker, WM_SETFONT, (WPARAM)piano_roll.hMarkersFont, 0);
-	hwndSelectionMarkerEdit = GetDlgItem(taseditor_window.hwndTasEditor, IDC_SELECTION_MARKER_EDIT);
-	SendMessage(hwndSelectionMarkerEdit, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
-	SendMessage(hwndSelectionMarkerEdit, WM_SETFONT, (WPARAM)piano_roll.hMarkersEditFont, 0);
+	hwndPreviousMarkerButton = GetDlgItem(taseditorWindow.hwndTASEditor, TASEDITOR_PREV_MARKER);
+	hwndNextMarkerButton = GetDlgItem(taseditorWindow.hwndTASEditor, TASEDITOR_NEXT_MARKER);
+	hwndSelectionMarkerNumber = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_SELECTION_MARKER);
+	SendMessage(hwndSelectionMarkerNumber, WM_SETFONT, (WPARAM)pianoRoll.hMarkersFont, 0);
+	hwndSelectionMarkerEditField = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_SELECTION_MARKER_EDIT);
+	SendMessage(hwndSelectionMarkerEditField, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
+	SendMessage(hwndSelectionMarkerEditField, WM_SETFONT, (WPARAM)pianoRoll.hMarkersEditFont, 0);
 	// subclass the edit control
-	selectionMarkerEdit_oldWndproc = (WNDPROC)SetWindowLong(hwndSelectionMarkerEdit, GWL_WNDPROC, (LONG)LowerMarkerEditWndProc);
+	selectionMarkerEdit_oldWndproc = (WNDPROC)SetWindowLong(hwndSelectionMarkerEditField, GWL_WNDPROC, (LONG)LowerMarkerEditWndProc);
 
 	reset();
 }
 void SELECTION::free()
 {
 	// clear history
-	selections_history.resize(0);
-	history_total_items = 0;
-	temp_selection.clear();
+	rowsSelectionHistory.resize(0);
+	historyTotalItems = 0;
+	tempRowsSelection.clear();
 }
 void SELECTION::reset()
 {
 	free();
 	// init vars
-	shown_marker = 0;
-	last_selection_beginning = -1;
-	history_size = taseditor_config.undo_levels + 1;
-	selections_history.resize(history_size);
-	history_start_pos = 0;
-	history_cursor_pos = -1;
+	displayedMarkerNumber = 0;
+	lastSelectionBeginning = -1;
+	historySize = taseditorConfig.maxUndoLevels + 1;
+	rowsSelectionHistory.resize(historySize);
+	historyStartPos = 0;
+	historyCursorPos = -1;
 	// create initial selection
-	AddNewSelectionToHistory();
-	track_selection_changes = true;
+	addNewSelectionToHistory();
+	trackSelectionChanges = true;
 	reset_vars();
 }
 void SELECTION::reset_vars()
 {
-	old_prev_marker_button_state = prev_marker_button_state = false;
-	old_next_marker_button_state = next_marker_button_state = false;
-	must_find_current_marker = true;
+	previousMarkerButtonOldState = previousMarkerButtonState = false;
+	nextMarkerButtonOldState = nextMarkerButtonState = false;
+	mustFindCurrentMarker = true;
 }
 void SELECTION::update()
 {
-	UpdateSelectionSize();
+	updateSelectionSize();
 
 	// update << and >> buttons
-	old_prev_marker_button_state = prev_marker_button_state;
-	prev_marker_button_state = ((Button_GetState(hwndPrevMarker) & BST_PUSHED) != 0);
-	if (prev_marker_button_state)
+	previousMarkerButtonOldState = previousMarkerButtonState;
+	previousMarkerButtonState = ((Button_GetState(hwndPreviousMarkerButton) & BST_PUSHED) != 0);
+	if (previousMarkerButtonState)
 	{
-		if (!old_prev_marker_button_state)
+		if (!previousMarkerButtonOldState)
 		{
-			button_hold_time = clock();
-			JumpPrevMarker();
-		} else if (button_hold_time + HOLD_REPEAT_DELAY < clock())
+			buttonHoldTimer = clock();
+			jumpToPreviousMarker();
+		} else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
 		{
-			JumpPrevMarker();
+			jumpToPreviousMarker();
 		}
 	}
-	old_next_marker_button_state = next_marker_button_state;
-	next_marker_button_state = (Button_GetState(hwndNextMarker) & BST_PUSHED) != 0;
-	if (next_marker_button_state)
+	nextMarkerButtonOldState = nextMarkerButtonState;
+	nextMarkerButtonState = (Button_GetState(hwndNextMarkerButton) & BST_PUSHED) != 0;
+	if (nextMarkerButtonState)
 	{
-		if (!old_next_marker_button_state)
+		if (!nextMarkerButtonOldState)
 		{
-			button_hold_time = clock();
-			JumpNextMarker();
-		} else if (button_hold_time + HOLD_REPEAT_DELAY < clock())
+			buttonHoldTimer = clock();
+			jumpToNextMarker();
+		} else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
 		{
-			JumpNextMarker();
+			jumpToNextMarker();
 		}
 	}
 
 	// track changes of Selection beginning (Selection cursor)
-	if (last_selection_beginning != GetCurrentSelectionBeginning())
+	if (lastSelectionBeginning != getCurrentRowsSelectionBeginning())
 	{
-		last_selection_beginning = GetCurrentSelectionBeginning();
-		must_find_current_marker = true;
+		lastSelectionBeginning = getCurrentRowsSelectionBeginning();
+		mustFindCurrentMarker = true;
 	}
 
 	// update "Selection's Marker text" if needed
-	if (must_find_current_marker)
+	if (mustFindCurrentMarker)
 	{
-		markers_manager.UpdateMarkerNote();
-		shown_marker = markers_manager.GetMarkerUp(last_selection_beginning);
-		RedrawMarker();
-		must_find_current_marker = false;
+		markersManager.updateEditedMarkerNote();
+		displayedMarkerNumber = markersManager.getMarkerAboveFrame(lastSelectionBeginning);
+		redrawMarkerData();
+		mustFindCurrentMarker = false;
 	}
 
 }
 
-void SELECTION::UpdateSelectionSize()
+void SELECTION::updateSelectionSize()
 {
 	// keep Selection within Piano Roll limits
-	if (CurrentSelection().size())
+	if (getCurrentRowsSelection().size())
 	{
 		int delete_index;
 		int movie_size = currMovieData.getNumRecords();
 		while (true)
 		{
-			delete_index = *CurrentSelection().rbegin();
+			delete_index = *getCurrentRowsSelection().rbegin();
 			if (delete_index < movie_size) break;
-			CurrentSelection().erase(delete_index);
-			if (!CurrentSelection().size()) break;
+			getCurrentRowsSelection().erase(delete_index);
+			if (!getCurrentRowsSelection().size()) break;
 		}
 	}
 }
 
-void SELECTION::HistorySizeChanged()
+void SELECTION::updateHistoryLogSize()
 {
-	int new_history_size = taseditor_config.undo_levels + 1;
-	std::vector<SelectionFrames> new_selections_history(new_history_size);
-	int pos = history_cursor_pos, source_pos = history_cursor_pos;
+	int new_history_size = taseditorConfig.maxUndoLevels + 1;
+	std::vector<RowsSelection> new_selections_history(new_history_size);
+	int pos = historyCursorPos, source_pos = historyCursorPos;
 	if (pos >= new_history_size)
 		pos = new_history_size - 1;
 	int new_history_cursor_pos = pos;
 	// copy old "undo" snapshots
 	while (pos >= 0)
 	{
-		new_selections_history[pos] = selections_history[(history_start_pos + source_pos) % history_size];
+		new_selections_history[pos] = rowsSelectionHistory[(historyStartPos + source_pos) % historySize];
 		pos--;
 		source_pos--;
 	}
 	// copy old "redo" snapshots
-	int num_redo_snapshots = history_total_items - (history_cursor_pos + 1);
+	int num_redo_snapshots = historyTotalItems - (historyCursorPos + 1);
 	int space_available = new_history_size - (new_history_cursor_pos + 1);
 	int i = (num_redo_snapshots <= space_available) ? num_redo_snapshots : space_available;
 	int new_history_total_items = new_history_cursor_pos + i + 1;
 	for (; i > 0; i--)
-		new_selections_history[new_history_cursor_pos + i] = selections_history[(history_start_pos + history_cursor_pos + i) % history_size];
+		new_selections_history[new_history_cursor_pos + i] = rowsSelectionHistory[(historyStartPos + historyCursorPos + i) % historySize];
 	// finish
-	selections_history = new_selections_history;
-	history_size = new_history_size;
-	history_start_pos = 0;
-	history_cursor_pos = new_history_cursor_pos;
-	history_total_items = new_history_total_items;
+	rowsSelectionHistory = new_selections_history;
+	historySize = new_history_size;
+	historyStartPos = 0;
+	historyCursorPos = new_history_cursor_pos;
+	historyTotalItems = new_history_total_items;
 }
 
-void SELECTION::RedrawMarker()
+void SELECTION::redrawMarkerData()
 {
 	// redraw Marker num
 	char new_text[MAX_NOTE_LEN] = {0};
-	if (shown_marker <= 9999)		// if there's too many digits in the number then don't show the word "Marker" before the number
+	if (displayedMarkerNumber <= 9999)		// if there's too many digits in the number then don't show the word "Marker" before the number
 		strcpy(new_text, lowerMarkerText);
 	char num[11];
-	_itoa(shown_marker, num, 10);
+	_itoa(displayedMarkerNumber, num, 10);
 	strcat(new_text, num);
 	strcat(new_text, " ");
-	SetWindowText(hwndSelectionMarker, new_text);
+	SetWindowText(hwndSelectionMarkerNumber, new_text);
 	// change Marker Note
-	strcpy(new_text, markers_manager.GetNote(shown_marker).c_str());
-	SetWindowText(hwndSelectionMarkerEdit, new_text);
+	strcpy(new_text, markersManager.getNoteCopy(displayedMarkerNumber).c_str());
+	SetWindowText(hwndSelectionMarkerEditField, new_text);
 }
 
-void SELECTION::JumpPrevMarker(int speed)
+void SELECTION::jumpToPreviousMarker(int speed)
 {
 	// if nothing is selected, consider Playback cursor as current selection
-	int index = GetCurrentSelectionBeginning();
+	int index = getCurrentRowsSelectionBeginning();
 	if (index < 0) index = currFrameCounter;
 	// jump trough "speed" amount of previous Markers
 	while (speed > 0)
 	{
 		for (index--; index >= 0; index--)
-			if (markers_manager.GetMarker(index)) break;
+			if (markersManager.getMarkerAtFrame(index)) break;
 		speed--;
 	}
 	if (index >= 0)
-		JumpToFrame(index);							// jump to the Marker
+		jumpToFrame(index);							// jump to the Marker
 	else
-		JumpToFrame(0);								// jump to the beginning of Piano Roll
+		jumpToFrame(0);								// jump to the beginning of Piano Roll
 }
-void SELECTION::JumpNextMarker(int speed)
+void SELECTION::jumpToNextMarker(int speed)
 {
 	// if nothing is selected, consider Playback cursor as current selection
-	int index = GetCurrentSelectionBeginning();
+	int index = getCurrentRowsSelectionBeginning();
 	if (index < 0) index = currFrameCounter;
 	int last_frame = currMovieData.getNumRecords() - 1;		// the end of Piano Roll
 	// jump trough "speed" amount of previous Markers
 	while (speed > 0)
 	{
 		for (++index; index <= last_frame; ++index)
-			if (markers_manager.GetMarker(index)) break;
+			if (markersManager.getMarkerAtFrame(index)) break;
 		speed--;
 	}
 	if (index <= last_frame)
-		JumpToFrame(index);			// jump to Marker
+		jumpToFrame(index);			// jump to Marker
 	else
-		JumpToFrame(last_frame);	// jump to the end of Piano Roll
+		jumpToFrame(last_frame);	// jump to the end of Piano Roll
 }
-void SELECTION::JumpToFrame(int frame)
+void SELECTION::jumpToFrame(int frame)
 {
-	ClearSelection();
-	SetRowSelection(frame);
-	piano_roll.FollowSelection();
+	clearAllRowsSelection();
+	setRowSelection(frame);
+	pianoRoll.followSelection();
 }
 // ----------------------------------------------------------
 void SELECTION::save(EMUFILE *os, bool really_save)
@@ -251,15 +251,15 @@ void SELECTION::save(EMUFILE *os, bool really_save)
 		// write "SELECTION" string
 		os->fwrite(selection_save_id, SELECTION_ID_LEN);
 		// write vars
-		write32le(history_cursor_pos, os);
-		write32le(history_total_items, os);
+		write32le(historyCursorPos, os);
+		write32le(historyTotalItems, os);
 		// write selections starting from history_start_pos
-		for (int i = 0; i < history_total_items; ++i)
+		for (int i = 0; i < historyTotalItems; ++i)
 		{
-			saveSelection(selections_history[(history_start_pos + i) % history_size], os);
+			saveSelection(rowsSelectionHistory[(historyStartPos + i) % historySize], os);
 		}
 		// write clipboard_selection
-		saveSelection(splicer.GetClipboardSelection(), os);
+		saveSelection(splicer.getClipboardSelection(), os);
 	} else
 	{
 		// write "SELECTIOX" string
@@ -289,45 +289,45 @@ bool SELECTION::load(EMUFILE *is, unsigned int offset)
 	}
 	if (strcmp(selection_save_id, save_id)) goto error;		// string is not valid
 	// read vars
-	if (!read32le(&history_cursor_pos, is)) goto error;
-	if (!read32le(&history_total_items, is)) goto error;
-	if (history_cursor_pos > history_total_items) goto error;
-	history_start_pos = 0;
+	if (!read32le(&historyCursorPos, is)) goto error;
+	if (!read32le(&historyTotalItems, is)) goto error;
+	if (historyCursorPos > historyTotalItems) goto error;
+	historyStartPos = 0;
 	// read selections
 	int i;
-	int total = history_total_items;
-	if (history_total_items > history_size)
+	int total = historyTotalItems;
+	if (historyTotalItems > historySize)
 	{
 		// user can't afford that much undo levels, skip some selections
-		int num_selections_to_skip = history_total_items - history_size;
+		int num_selections_to_skip = historyTotalItems - historySize;
 		// first try to skip selections over history_cursor_pos (future selections), because "redo" is less important than "undo"
-		int num_redo_selections = history_total_items-1 - history_cursor_pos;
+		int num_redo_selections = historyTotalItems-1 - historyCursorPos;
 		if (num_selections_to_skip >= num_redo_selections)
 		{
 			// skip all redo selections
-			history_total_items = history_cursor_pos+1;
+			historyTotalItems = historyCursorPos+1;
 			num_selections_to_skip -= num_redo_selections;
 			// and still need to skip some undo selections
 			for (i = 0; i < num_selections_to_skip; ++i)
-				if (skiploadSelection(is)) goto error;
+				if (skipLoadSelection(is)) goto error;
 			total -= num_selections_to_skip;
-			history_cursor_pos -= num_selections_to_skip;
+			historyCursorPos -= num_selections_to_skip;
 		}
-		history_total_items -= num_selections_to_skip;
+		historyTotalItems -= num_selections_to_skip;
 	}
 	// load selections
-	for (i = 0; i < history_total_items; ++i)
+	for (i = 0; i < historyTotalItems; ++i)
 	{
-		if (loadSelection(selections_history[i], is)) goto error;
+		if (loadSelection(rowsSelectionHistory[i], is)) goto error;
 	}
 	// skip redo selections if needed
 	for (; i < total; ++i)
-		if (skiploadSelection(is)) goto error;
+		if (skipLoadSelection(is)) goto error;
 	
 	// read clipboard_selection
-	if (loadSelection(splicer.GetClipboardSelection(), is)) goto error;
+	if (loadSelection(splicer.getClipboardSelection(), is)) goto error;
 	// all ok
-	EnforceSelectionToList();
+	enforceRowsSelectionToList();
 	reset_vars();
 	return false;
 error:
@@ -336,16 +336,16 @@ error:
 	return true;
 }
 
-void SELECTION::saveSelection(SelectionFrames& selection, EMUFILE *os)
+void SELECTION::saveSelection(RowsSelection& selection, EMUFILE *os)
 {
 	write32le(selection.size(), os);
 	if (selection.size())
 	{
-		for(SelectionFrames::iterator it(selection.begin()); it != selection.end(); it++)
+		for(RowsSelection::iterator it(selection.begin()); it != selection.end(); it++)
 			write32le(*it, os);
 	}
 }
-bool SELECTION::loadSelection(SelectionFrames& selection, EMUFILE *is)
+bool SELECTION::loadSelection(RowsSelection& selection, EMUFILE *is)
 {
 	int temp_int, temp_size;
 	if (!read32le(&temp_size, is)) return true;
@@ -357,7 +357,7 @@ bool SELECTION::loadSelection(SelectionFrames& selection, EMUFILE *is)
 	}
 	return false;
 }
-bool SELECTION::skiploadSelection(EMUFILE *is)
+bool SELECTION::skipLoadSelection(EMUFILE *is)
 {
 	int temp_size;
 	if (!read32le(&temp_size, is)) return true;
@@ -366,21 +366,21 @@ bool SELECTION::skiploadSelection(EMUFILE *is)
 }
 // ----------------------------------------------------------
 // used to track selection
-void SELECTION::ItemRangeChanged(NMLVODSTATECHANGE* info)
+void SELECTION::noteThatItemRangeChanged(NMLVODSTATECHANGE* info)
 {
 	bool ON = !(info->uOldState & LVIS_SELECTED) && (info->uNewState & LVIS_SELECTED);
 	bool OFF = (info->uOldState & LVIS_SELECTED) && !(info->uNewState & LVIS_SELECTED);
 
 	if (ON)
 		for(int i = info->iFrom; i <= info->iTo; ++i)
-			CurrentSelection().insert(i);
+			getCurrentRowsSelection().insert(i);
 	else
 		for(int i = info->iFrom; i <= info->iTo; ++i)
-			CurrentSelection().erase(i);
+			getCurrentRowsSelection().erase(i);
 
-	splicer.must_redraw_selection_text = true;
+	splicer.mustRedrawInfoAboutSelection = true;
 }
-void SELECTION::ItemChanged(NMLISTVIEW* info)
+void SELECTION::noteThatItemChanged(NMLISTVIEW* info)
 {
 	int item = info->iItem;
 	
@@ -393,169 +393,174 @@ void SELECTION::ItemChanged(NMLISTVIEW* info)
 		if (OFF)
 		{
 			// clear all (actually add new empty Selection to history)
-			if (CurrentSelection().size() && track_selection_changes)
-				AddNewSelectionToHistory();
+			if (getCurrentRowsSelection().size() && trackSelectionChanges)
+				addNewSelectionToHistory();
 		} else if (ON)
 		{
 			// select all
 			for(int i = currMovieData.getNumRecords() - 1; i >= 0; i--)
-				CurrentSelection().insert(i);
+				getCurrentRowsSelection().insert(i);
 		}
 	} else
 	{
 		if (ON)
-			CurrentSelection().insert(item);
+			getCurrentRowsSelection().insert(item);
 		else if (OFF) 
-			CurrentSelection().erase(item);
+			getCurrentRowsSelection().erase(item);
 	}
 
-	splicer.must_redraw_selection_text = true;
+	splicer.mustRedrawInfoAboutSelection = true;
 }
 // ----------------------------------------------------------
-void SELECTION::AddNewSelectionToHistory()
+void SELECTION::addNewSelectionToHistory()
 {
 	// create new empty selection
-	SelectionFrames selectionFrames;
+	RowsSelection selectionFrames;
 	// increase current position
-	// history uses conveyor of selections (vector with fixed size) to avoid resizing
-	if (history_cursor_pos+1 >= history_size)
+	// history uses ring buffer (vector with fixed size) to avoid resizing
+	if (historyCursorPos+1 >= historySize)
 	{
 		// reached the end of available history_size - move history_start_pos (thus deleting oldest selection)
-		history_cursor_pos = history_size-1;
-		history_start_pos = (history_start_pos + 1) % history_size;
+		historyCursorPos = historySize-1;
+		historyStartPos = (historyStartPos + 1) % historySize;
 	} else
 	{
 		// didn't reach the end of history yet
-		history_cursor_pos++;
-		if (history_cursor_pos >= history_total_items)
-			history_total_items = history_cursor_pos+1;
+		historyCursorPos++;
+		if (historyCursorPos >= historyTotalItems)
+			historyTotalItems = historyCursorPos+1;
 	}
 	// add
-	selections_history[(history_start_pos + history_cursor_pos) % history_size] = selectionFrames;
+	rowsSelectionHistory[(historyStartPos + historyCursorPos) % historySize] = selectionFrames;
 }
-void SELECTION::AddCurrentSelectionToHistory()
+void SELECTION::addCurrentSelectionToHistory()
 {
 	// create the copy of current selection
-	SelectionFrames selectionFrames = selections_history[(history_start_pos + history_cursor_pos) % history_size];
+	RowsSelection selectionFrames = rowsSelectionHistory[(historyStartPos + historyCursorPos) % historySize];
 	// increase current position
-	// history uses conveyor of selections (vector with fixed size) to avoid resizing
-	if (history_cursor_pos+1 >= history_size)
+	// history uses ring buffer (vector with fixed size) to avoid resizing
+	if (historyCursorPos+1 >= historySize)
 	{
 		// reached the end of available history_size - move history_start_pos (thus deleting oldest selection)
-		history_cursor_pos = history_size-1;
-		history_start_pos = (history_start_pos + 1) % history_size;
+		historyCursorPos = historySize-1;
+		historyStartPos = (historyStartPos + 1) % historySize;
 	} else
 	{
 		// didn't reach the end of history yet
-		history_cursor_pos++;
-		if (history_cursor_pos >= history_total_items)
-			history_total_items = history_cursor_pos+1;
+		historyCursorPos++;
+		if (historyCursorPos >= historyTotalItems)
+			historyTotalItems = historyCursorPos+1;
 	}
 	// add
-	selections_history[(history_start_pos + history_cursor_pos) % history_size] = selectionFrames;
+	rowsSelectionHistory[(historyStartPos + historyCursorPos) % historySize] = selectionFrames;
 }
 
-void SELECTION::JumpInTime(int new_pos)
+void SELECTION::jumpInTime(int new_pos)
 {
-	if (new_pos < 0) new_pos = 0; else if (new_pos >= history_total_items) new_pos = history_total_items-1;
-	if (new_pos == history_cursor_pos) return;
+	if (new_pos < 0) new_pos = 0; else if (new_pos >= historyTotalItems) new_pos = historyTotalItems-1;
+	if (new_pos == historyCursorPos) return;
 
 	// make jump
-	history_cursor_pos = new_pos;
+	historyCursorPos = new_pos;
 	// update Piano Roll items
-	EnforceSelectionToList();
+	enforceRowsSelectionToList();
 	// also keep Selection within Piano Roll
-	UpdateSelectionSize();
+	updateSelectionSize();
 }
 void SELECTION::undo()
 {
-	JumpInTime(history_cursor_pos - 1);
+	jumpInTime(historyCursorPos - 1);
 }
 void SELECTION::redo()
 {
-	JumpInTime(history_cursor_pos + 1);
+	jumpInTime(historyCursorPos + 1);
 }
 // ----------------------------------------------------------
-bool SELECTION::GetRowSelection(int index)
+bool SELECTION::isRowSelected(int index)
 {
-	return ListView_GetItemState(piano_roll.hwndList, index, LVIS_SELECTED) != 0;
+	/*
+	if (CurrentSelection().find(frame) == CurrentSelection().end())
+		return false;
+	return true;
+	*/
+	return ListView_GetItemState(pianoRoll.hwndList, index, LVIS_SELECTED) != 0;
 }
 
-void SELECTION::ClearSelection()
+void SELECTION::clearAllRowsSelection()
 {
-	ListView_SetItemState(piano_roll.hwndList, -1, 0, LVIS_SELECTED);
+	ListView_SetItemState(pianoRoll.hwndList, -1, 0, LVIS_SELECTED);
 }
-void SELECTION::ClearRowSelection(int index)
+void SELECTION::clearSingleRowSelection(int index)
 {
-	ListView_SetItemState(piano_roll.hwndList, index, 0, LVIS_SELECTED);
+	ListView_SetItemState(pianoRoll.hwndList, index, 0, LVIS_SELECTED);
 }
-void SELECTION::ClearRegionSelection(int start, int end)
+void SELECTION::clearRegionOfRowsSelection(int start, int end)
 {
 	for (int i = start; i < end; ++i)
-		ListView_SetItemState(piano_roll.hwndList, i, 0, LVIS_SELECTED);
+		ListView_SetItemState(pianoRoll.hwndList, i, 0, LVIS_SELECTED);
 }
 
-void SELECTION::SelectAll()
+void SELECTION::selectAllRows()
 {
-	ListView_SetItemState(piano_roll.hwndList, -1, LVIS_SELECTED, LVIS_SELECTED);
+	ListView_SetItemState(pianoRoll.hwndList, -1, LVIS_SELECTED, LVIS_SELECTED);
 }
-void SELECTION::SetRowSelection(int index)
+void SELECTION::setRowSelection(int index)
 {
-	ListView_SetItemState(piano_roll.hwndList, index, LVIS_SELECTED, LVIS_SELECTED);
+	ListView_SetItemState(pianoRoll.hwndList, index, LVIS_SELECTED, LVIS_SELECTED);
 }
-void SELECTION::SetRegionSelection(int start, int end)
+void SELECTION::setRegionOfRowsSelection(int start, int end)
 {
 	for (int i = start; i < end; ++i)
-		ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+		ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 }
 
-void SELECTION::SetRegionSelectionPattern(int start, int end)
+void SELECTION::setRegionOfRowsSelectionUsingPattern(int start, int end)
 {
-	int pattern_offset = 0, current_pattern = taseditor_config.current_pattern;
+	int pattern_offset = 0, current_pattern = taseditorConfig.currentPattern;
 	for (int i = start; i <= end; ++i)
 	{
 		// skip lag frames
-		if (taseditor_config.pattern_skips_lag && greenzone.laglog.GetLagInfoAtFrame(i) == LAGGED_YES)
+		if (taseditorConfig.autofirePatternSkipsLag && greenzone.lagLog.getLagInfoAtFrame(i) == LAGGED_YES)
 			continue;
-		if (editor.autofire_patterns[current_pattern][pattern_offset])
+		if (editor.patterns[current_pattern][pattern_offset])
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		} else
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, 0, LVIS_SELECTED);
+			ListView_SetItemState(pianoRoll.hwndList, i, 0, LVIS_SELECTED);
 		}
 		pattern_offset++;
-		if (pattern_offset >= (int)editor.autofire_patterns[current_pattern].size())
-			pattern_offset -= editor.autofire_patterns[current_pattern].size();
+		if (pattern_offset >= (int)editor.patterns[current_pattern].size())
+			pattern_offset -= editor.patterns[current_pattern].size();
 	}
 }
-void SELECTION::SelectBetweenMarkers()
+void SELECTION::selectAllRowsBetweenMarkers()
 {
 	int center, upper_border, lower_border;
 	int upper_marker, lower_marker;
 	int movie_size = currMovieData.getNumRecords();
 
 	// if nothing is selected then Playback cursor serves as Selection cursor
-	if (CurrentSelection().size())
+	if (getCurrentRowsSelection().size())
 	{
-		upper_border = center = *CurrentSelection().begin();
-		lower_border = *CurrentSelection().rbegin();
+		upper_border = center = *getCurrentRowsSelection().begin();
+		lower_border = *getCurrentRowsSelection().rbegin();
 	} else lower_border = upper_border = center = currFrameCounter;
 
 	// find Markers
 	// searching up starting from center-0
 	for (upper_marker = center; upper_marker >= 0; upper_marker--)
-		if (markers_manager.GetMarker(upper_marker)) break;
+		if (markersManager.getMarkerAtFrame(upper_marker)) break;
 	// searching down starting from center+1
 	for (lower_marker = center+1; lower_marker < movie_size; ++lower_marker)
-		if (markers_manager.GetMarker(lower_marker)) break;
+		if (markersManager.getMarkerAtFrame(lower_marker)) break;
 
-	ClearSelection();
+	clearAllRowsSelection();
 
 	// special case
 	if (upper_marker == -1 && lower_marker == movie_size)
 	{
-		SelectAll();
+		selectAllRows();
 		return;
 	}
 
@@ -566,14 +571,14 @@ void SELECTION::SelectBetweenMarkers()
 		if (upper_marker < 0) upper_marker = 0;
 		for (int i = upper_marker; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker && lower_border == lower_marker-1)
 	{
 		// 2 - selected all between Markers and upper Marker selected too: select all between Markers, not including Markers
 		for (int i = upper_marker+1; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker-1)
 	{
@@ -581,7 +586,7 @@ void SELECTION::SelectBetweenMarkers()
 		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
 		for (int i = upper_marker+1; i <= lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker)
 	{
@@ -590,7 +595,7 @@ void SELECTION::SelectBetweenMarkers()
 		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
 		for (int i = upper_marker; i <= lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else
 	{
@@ -598,100 +603,94 @@ void SELECTION::SelectBetweenMarkers()
 		if (upper_marker < 0) upper_marker = 0;
 		for (int i = upper_marker; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	}
 }
-void SELECTION::ReselectClipboard()
+void SELECTION::reselectClipboard()
 {
-	SelectionFrames clipboard_selection = splicer.GetClipboardSelection();
+	RowsSelection clipboard_selection = splicer.getClipboardSelection();
 	if (clipboard_selection.size() == 0) return;
 
-	ClearSelection();
-	CurrentSelection() = clipboard_selection;
-	EnforceSelectionToList();
+	clearAllRowsSelection();
+	getCurrentRowsSelection() = clipboard_selection;
+	enforceRowsSelectionToList();
 	// also keep Selection within Piano Roll
-	UpdateSelectionSize();
+	updateSelectionSize();
 }
 
-void SELECTION::Transpose(int shift)
+void SELECTION::transposeVertically(int shift)
 {
 	if (!shift) return;
-	SelectionFrames* current_selection = MakeStrobe();
+	RowsSelection* current_selection = getCopyOfCurrentRowsSelection();
 	if (current_selection->size())
 	{
-		ClearSelection();
+		clearAllRowsSelection();
 		int pos;
 		if (shift > 0)
 		{
 			int movie_size = currMovieData.getNumRecords();
-			SelectionFrames::reverse_iterator current_selection_rend(current_selection->rend());
-			for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
+			RowsSelection::reverse_iterator current_selection_rend(current_selection->rend());
+			for(RowsSelection::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
 			{
 				pos = (*it) + shift;
 				if (pos < movie_size)
-					ListView_SetItemState(piano_roll.hwndList, pos, LVIS_SELECTED, LVIS_SELECTED);
+					ListView_SetItemState(pianoRoll.hwndList, pos, LVIS_SELECTED, LVIS_SELECTED);
 			}
 		} else
 		{
-			SelectionFrames::iterator current_selection_end(current_selection->end());
-			for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
+			RowsSelection::iterator current_selection_end(current_selection->end());
+			for(RowsSelection::iterator it(current_selection->begin()); it != current_selection_end; it++)
 			{
 				pos = (*it) + shift;
 				if (pos >= 0)
-					ListView_SetItemState(piano_roll.hwndList, pos, LVIS_SELECTED, LVIS_SELECTED);
+					ListView_SetItemState(pianoRoll.hwndList, pos, LVIS_SELECTED, LVIS_SELECTED);
 			}
 		}
 	}
 }
 
-void SELECTION::EnforceSelectionToList()
+void SELECTION::enforceRowsSelectionToList()
 {
-	track_selection_changes = false;
-	ClearSelection();
-	for(SelectionFrames::reverse_iterator it(CurrentSelection().rbegin()); it != CurrentSelection().rend(); it++)
+	trackSelectionChanges = false;
+	clearAllRowsSelection();
+	for(RowsSelection::reverse_iterator it(getCurrentRowsSelection().rbegin()); it != getCurrentRowsSelection().rend(); it++)
 	{
-		ListView_SetItemState(piano_roll.hwndList, *it, LVIS_SELECTED, LVIS_SELECTED);
+		ListView_SetItemState(pianoRoll.hwndList, *it, LVIS_SELECTED, LVIS_SELECTED);
 	}
-	track_selection_changes = true;
+	trackSelectionChanges = true;
 }
 
 // getters
-int SELECTION::GetCurrentSelectionSize()
+int SELECTION::getCurrentRowsSelectionSize()
 {
-	return selections_history[(history_start_pos + history_cursor_pos) % history_size].size();
+	return rowsSelectionHistory[(historyStartPos + historyCursorPos) % historySize].size();
 }
-int SELECTION::GetCurrentSelectionBeginning()
+int SELECTION::getCurrentRowsSelectionBeginning()
 {
-	if (selections_history[(history_start_pos + history_cursor_pos) % history_size].size())
-		return *selections_history[(history_start_pos + history_cursor_pos) % history_size].begin();
+	if (rowsSelectionHistory[(historyStartPos + historyCursorPos) % historySize].size())
+		return *rowsSelectionHistory[(historyStartPos + historyCursorPos) % historySize].begin();
 	else
 		return -1;
 }
-int SELECTION::GetCurrentSelectionEnd()
+int SELECTION::getCurrentRowsSelectionEnd()
 {
-	if (selections_history[(history_start_pos + history_cursor_pos) % history_size].size())
-		return *selections_history[(history_start_pos + history_cursor_pos) % history_size].rbegin();
+	if (rowsSelectionHistory[(historyStartPos + historyCursorPos) % historySize].size())
+		return *rowsSelectionHistory[(historyStartPos + historyCursorPos) % historySize].rbegin();
 	else
 		return -1;
 }
-bool SELECTION::CheckFrameSelected(int frame)
-{
-	if (CurrentSelection().find(frame) == CurrentSelection().end())
-		return false;
-	return true;
-}
-SelectionFrames* SELECTION::MakeStrobe()
+RowsSelection* SELECTION::getCopyOfCurrentRowsSelection()
 {
 	// copy current Selection to temp_selection
-	temp_selection = selections_history[(history_start_pos + history_cursor_pos) % history_size];
-	return &temp_selection;
+	tempRowsSelection = rowsSelectionHistory[(historyStartPos + historyCursorPos) % historySize];
+	return &tempRowsSelection;
 }
 
 // this getter is private
-SelectionFrames& SELECTION::CurrentSelection()
+RowsSelection& SELECTION::getCurrentRowsSelection()
 {
-	return selections_history[(history_start_pos + history_cursor_pos) % history_size];
+	return rowsSelectionHistory[(historyStartPos + historyCursorPos) % historySize];
 }
 // -------------------------------------------------------------------------
 LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -702,50 +701,50 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	{
 		case WM_SETFOCUS:
 		{
-			markers_manager.marker_note_edit = MARKER_NOTE_EDIT_LOWER;
+			markersManager.markerNoteEditMode = MARKER_NOTE_EDIT_LOWER;
 			// enable editing
-			SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, false, 0); 
+			SendMessage(selection.hwndSelectionMarkerEditField, EM_SETREADONLY, false, 0); 
 			// disable FCEUX keyboard
-			ClearTaseditorInput();
+			disableGeneralKeyboardInput();
 			break;
 		}
 		case WM_KILLFOCUS:
 		{
-			if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+			if (markersManager.markerNoteEditMode == MARKER_NOTE_EDIT_LOWER)
 			{
-				markers_manager.UpdateMarkerNote();
-				markers_manager.marker_note_edit = MARKER_NOTE_EDIT_NONE;
+				markersManager.updateEditedMarkerNote();
+				markersManager.markerNoteEditMode = MARKER_NOTE_EDIT_NONE;
 			}
 			// disable editing (make the bg grayed)
-			SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, true, 0); 
+			SendMessage(selection.hwndSelectionMarkerEditField, EM_SETREADONLY, true, 0); 
 			// enable FCEUX keyboard
-			if (taseditor_window.TASEditor_focus)
-				SetTaseditorInput();
+			if (taseditorWindow.TASEditorIsInFocus)
+				enableGeneralKeyboardInput();
 			break;
 		}
 		case WM_CHAR:
 		case WM_KEYDOWN:
 		{
-			if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+			if (markersManager.markerNoteEditMode == MARKER_NOTE_EDIT_LOWER)
 			{
 				switch(wParam)
 				{
 					case VK_ESCAPE:
 						// revert text to original note text
-						SetWindowText(selection.hwndSelectionMarkerEdit, markers_manager.GetNote(selection.shown_marker).c_str());
-						SetFocus(piano_roll.hwndList);
+						SetWindowText(selection.hwndSelectionMarkerEditField, markersManager.getNoteCopy(selection.displayedMarkerNumber).c_str());
+						SetFocus(pianoRoll.hwndList);
 						return 0;
 					case VK_RETURN:
 						// exit and save text changes
-						SetFocus(piano_roll.hwndList);
+						SetFocus(pianoRoll.hwndList);
 						return 0;
 					case VK_TAB:
 					{
 						// switch to upper edit control (also exit and save text changes)
-						SetFocus(playback.hwndPlaybackMarkerEdit);
+						SetFocus(playback.hwndPlaybackMarkerEditField);
 						// scroll to the Marker
-						if (taseditor_config.follow_note_context)
-							piano_roll.FollowMarker(playback.shown_marker);
+						if (taseditorConfig.followMarkerNoteContext)
+							pianoRoll.followMarker(playback.displayedMarkerNumber);
 						return 0;
 					}
 				}
@@ -755,15 +754,15 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
 		{
-			playback.MiddleButtonClick();
+			playback.handleMiddleButtonClick();
 			return 0;
 		}
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
 		{
 			// scroll to the Marker
-			if (taseditor_config.follow_note_context)
-				piano_roll.FollowMarker(selection.shown_marker);
+			if (taseditorConfig.followMarkerNoteContext)
+				pianoRoll.followMarker(selection.displayedMarkerNumber);
 			break;
 		}
 	}

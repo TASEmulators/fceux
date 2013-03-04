@@ -1,12 +1,13 @@
 // Specification file for InputLog class
 
-enum Input_types
+enum INPUT_TYPES
 {
 	INPUT_TYPE_1P,
 	INPUT_TYPE_2P,
 	INPUT_TYPE_FOURSCORE,
 
-	NUM_SUPPORTED_INPUT_TYPES
+	// ...
+	INPUT_TYPES_TOTAL
 };
 
 #define BUTTONS_PER_JOYSTICK 8
@@ -33,54 +34,52 @@ public:
 	bool load(EMUFILE *is);
 	bool skipLoad(EMUFILE *is);
 
-	void compress_data();
-	bool Get_already_compressed();
+	void compressData();
+	bool isAlreadyCompressed();
 
-	int findFirstChange(INPUTLOG& their_log, int start = 0, int end = -1);
+	int findFirstChange(INPUTLOG& theirLog, int start = 0, int end = -1);
 	int findFirstChange(MovieData& md, int start = 0, int end = -1);
 
-	int GetJoystickInfo(int frame, int joy);
-	int GetCommandsInfo(int frame);
+	int getJoystickData(int frame, int joy);
+	int getCommandsData(int frame);
 
 	void insertFrames(int at, int frames);
 	void eraseFrame(int frame);
 
-	void Init_HotChanges();
+	void initHotChanges();
 
-	void copyHotChanges(INPUTLOG* source_of_hotchanges, int limit_frame_of_source = -1);
-	void inheritHotChanges(INPUTLOG* source_of_hotchanges);
-	void inheritHotChanges_DeleteSelection(INPUTLOG* source_of_hotchanges, SelectionFrames* frameset);
-	void inheritHotChanges_InsertSelection(INPUTLOG* source_of_hotchanges, SelectionFrames* frameset);
-	void inheritHotChanges_DeleteNum(INPUTLOG* source_of_hotchanges, int start, int frames, bool fade_old);
-	void inheritHotChanges_InsertNum(INPUTLOG* source_of_hotchanges, int start, int frames, bool fade_old);
-	void inheritHotChanges_PasteInsert(INPUTLOG* source_of_hotchanges, SelectionFrames* inserted_set);
-	void fillHotChanges(INPUTLOG& their_log, int start = 0, int end = -1);
+	void copyHotChanges(INPUTLOG* sourceOfHotChanges, int limiterFrameOfSource = -1);
+	void inheritHotChanges(INPUTLOG* sourceOfHotChanges);
+	void inheritHotChanges_DeleteSelection(INPUTLOG* sourceOfHotChanges, RowsSelection* frameset);
+	void inheritHotChanges_InsertSelection(INPUTLOG* sourceOfHotChanges, RowsSelection* frameset);
+	void inheritHotChanges_DeleteNum(INPUTLOG* sourceOfHotChanges, int start, int frames, bool fadeOld);
+	void inheritHotChanges_InsertNum(INPUTLOG* sourceOfHotChanges, int start, int frames, bool fadeOld);
+	void inheritHotChanges_PasteInsert(INPUTLOG* sourceOfHotChanges, RowsSelection* insertedSet);
+	void fillHotChanges(INPUTLOG& theirLog, int start = 0, int end = -1);
 
-	void SetMaxHotChange_Bits(int frame, int joypad, uint8 joy_bits);
-	void SetMaxHotChange(int frame, int absolute_button);
+	void setMaxHotChangeBits(int frame, int joypad, uint8 joyBits);
+	void setMaxHotChanges(int frame, int absoluteButtonNumber);
 
-	void FadeHotChanges(int start_byte = 0, int end_byte = -1);
+	void fadeHotChanges(int startByte = 0, int endByte = -1);
 
-	int GetHotChangeInfo(int frame, int absolute_button);
+	int getHotChangesInfo(int frame, int absoluteButtonNumber);
 
 	// saved data
 	int size;						// in frames
-	int input_type;						// theoretically TAS Editor can support any other Input types
-	bool has_hot_changes;
-
-	// not saved data
-	std::vector<uint8> hot_changes;		// Format: buttons01joy0-for-frame0, buttons23joy0-for-frame0, buttons45joy0-for-frame0, buttons67joy0-for-frame0, buttons01joy1-for-frame0, ...
-	std::vector<uint8> joysticks;		// Format: joy0-for-frame0, joy1-for-frame0, joy2-for-frame0, joy3-for-frame0, joy0-for-frame1, joy1-for-frame1, ...
-	std::vector<uint8> commands;		// Format: commands-for-frame0, commands-for-frame1, ...
+	int inputType;						// theoretically TAS Editor can support any other Input types
+	bool hasHotChanges;
 
 private:
 	
 	// also saved data
-	std::vector<uint8> joysticks_compressed;
-	std::vector<uint8> commands_compressed;
-	std::vector<uint8> hot_changes_compressed;
+	std::vector<uint8> compressedJoysticks;
+	std::vector<uint8> compressedCommands;
+	std::vector<uint8> compressedHotChanges;
 
 	// not saved data
-	bool already_compressed;			// to compress only once
+	std::vector<uint8> hotChanges;		// Format: buttons01joy0-for-frame0, buttons23joy0-for-frame0, buttons45joy0-for-frame0, buttons67joy0-for-frame0, buttons01joy1-for-frame0, ...
+	std::vector<uint8> joysticks;		// Format: joy0-for-frame0, joy1-for-frame0, joy2-for-frame0, joy3-for-frame0, joy0-for-frame1, joy1-for-frame1, ...
+	std::vector<uint8> commands;		// Format: commands-for-frame0, commands-for-frame1, ...
+	bool alreadyCompressed;			// to compress only once
 };
 

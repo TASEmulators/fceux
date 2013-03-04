@@ -58,7 +58,7 @@ extern void CDLoggerROMChanged();
 extern void ResetDebugStatisticsCounters();
 extern void SetMainWindowText();
 extern void CDLoggerPPUChanged();
-extern bool TaseditorIsRecording();
+extern bool isTaseditorRecording();
 
 extern int32 fps_scale;
 extern int32 fps_scale_unpaused;
@@ -1033,7 +1033,7 @@ bool FCEU_IsValidUI(EFCEUI ui) {
 		if (!GameInfo) return false;
 		if (FCEUMOV_Mode(MOVIEMODE_RECORD)) return true;
 #ifdef WIN32
-		if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR) && TaseditorIsRecording()) return true;
+		if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR) && isTaseditorRecording()) return true;
 #endif
 		if (!FCEUMOV_Mode(MOVIEMODE_INACTIVE)) return false;
 		break;

@@ -264,7 +264,7 @@ static void DoNamcoSoundHQ(void) {
 			lengo = LengthCache[P];
 
 			duff2 = FetchDuff(P, envelope);
-			for (V = CVBC << 1; V < SOUNDTS << 1; V++) {
+			for (V = CVBC << 1; V < (int)SOUNDTS << 1; V++) {
 				WaveHi[V >> 1] += duff2;
 				if (!vco) {
 					PlayIndex[P] += freq;

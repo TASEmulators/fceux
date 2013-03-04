@@ -3,7 +3,7 @@
 #define FLASH_PHASE_MAX 11
 #define FLASH_PHASE_BUTTONHELD 6
 
-enum
+enum FLASH_TYPES
 {
 	FLASH_TYPE_SET = 0,
 	FLASH_TYPE_JUMP = 1,
@@ -21,25 +21,26 @@ public:
 	void init();
 	void free();
 
-	bool checkDiffFromCurrent();
+	bool isDifferentFromCurrentMovie();
+
 	void set();
-	void jumped();
-	void deployed();
+	void handleJump();
+	void handleDeploy();
 
 	void save(EMUFILE *os);
 	bool load(EMUFILE *is);
 	bool skipLoad(EMUFILE *is);
 
 	// saved vars
-	bool not_empty;
+	bool notEmpty;
 	SNAPSHOT snapshot;
 	std::vector<uint8> savestate;
-	std::vector<uint8> saved_screenshot;
+	std::vector<uint8> savedScreenshot;
 
 	// not saved vars
-	int flash_phase;
-	int flash_type;
-	int floating_phase;
+	int flashPhase;
+	int flashType;
+	int floatingPhase;
 
 private:
 

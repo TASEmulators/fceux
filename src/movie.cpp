@@ -41,7 +41,7 @@
 extern void AddRecentMovieFile(const char *filename);
 
 #include "./drivers/win/taseditor.h"
-extern bool emulator_must_run_taseditor;
+extern bool mustEngageTaseditor;
 #endif
 
 using namespace std;
@@ -992,13 +992,13 @@ void FCEUMOV_AddInputState()
 			currMovieData.insertEmpty(-1, (currFrameCounter + 1) - ((int)currMovieData.records.size() - 1));
 
 		MovieRecord* mr = &currMovieData.records[currFrameCounter];
-		if (TaseditorIsRecording())
+		if (isTaseditorRecording())
 		{
 			// record commands and buttons
 			mr->commands |= _currCommand;
 			joyports[0].log(mr);
 			joyports[1].log(mr);
-			Taseditor_RecordInput();
+			recordInputByTaseditor();
 		}
 		// replay buttons
 		joyports[0].load(mr);
@@ -1191,7 +1191,7 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 #ifdef WIN32
 			int result = MessageBox(hAppWnd, "This movie is a TAS Editor project file.\nIt can be modified in TAS Editor only.\n\nOpen it in TAS Editor now?", "Movie Replay", MB_YESNO);
 			if (result == IDYES)
-				emulator_must_run_taseditor = true;
+				mustEngageTaseditor = true;
 #else
 			FCEUI_printf("This movie is a TAS Editor project file! It can be modified in TAS Editor only.\nMovie is now Read-Only.\n");
 #endif
@@ -1496,7 +1496,7 @@ void FCEUI_MoviePlayFromBeginning(void)
 	if (movieMode == MOVIEMODE_TASEDITOR)
 	{
 #ifdef WIN32
-		Taseditor_EMUCMD(EMUCMD_MOVIE_PLAY_FROM_BEGINNING);
+		handleEmuCmdByTaseditor(EMUCMD_MOVIE_PLAY_FROM_BEGINNING);
 #endif
 	} else if (movieMode != MOVIEMODE_INACTIVE)
 	{

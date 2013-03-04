@@ -5,7 +5,7 @@
 #define PAUSEFRAME_BLINKING_PERIOD_WHEN_SEEKING 100
 #define PAUSEFRAME_BLINKING_PERIOD_WHEN_PAUSED 250
 
-#define HOLD_REPEAT_DELAY 250			// in milliseconds
+#define BUTTON_HOLD_REPEAT_DELAY 250			// in milliseconds
 
 
 class PLAYBACK
@@ -16,63 +16,63 @@ public:
 	void reset();
 	void update();
 
-	void EnsurePlaybackIsInsideGreenzone(bool execute_lua = true);
-	void jump(int frame, bool force_state_reload = false, bool execute_lua = true, bool follow_pauseframe = true);
+	void ensurePlaybackIsInsideGreenzone(bool executeLua = true);
+	void jump(int frame, bool forceStateReload = false, bool executeLua = true, bool followPauseframe = true);
 
-	void UpdateProgressbar();
+	void updateProgressbar();
 
-	void SeekingStart(int finish_frame);
-	void SeekingStop();
+	void startSeekingToFrame(int frame);
+	void stopSeeking();
+	void cancelSeeking();
 
-	void ToggleEmulationPause();
-	void PauseEmulation();
-	void UnpauseEmulation();
+	void toggleEmulationPause();
+	void pauseEmulation();
+	void unpauseEmulation();
 
-	void RestorePosition();
-	void MiddleButtonClick();
+	void restoreLastPosition();
+	void handleMiddleButtonClick();
 
-	void RewindFrame();
-	void ForwardFrame();
-	void RewindFull(int speed = 1);
-	void ForwardFull(int speed = 1);
+	void handleRewindFrame();
+	void handleForwardFrame();
+	void handleRewindFull(int speed = 1);
+	void handleForwardFull(int speed = 1);
 
-	void RedrawMarker();
+	void redrawMarkerData();
 
-	void StartFromZero();
+	void restartPlaybackFromZeroGround();
 
-	void SetLostPosition(int frame);
-	int GetLostPosition();		// actually returns lost_position_frame-1
+	int getLastPosition();		// actually returns lost_position_frame-1
+	void setLastPosition(int frame);
 
-	int GetPauseFrame();
-	int GetFlashingPauseFrame();
+	int getPauseFrame();
+	int getFlashingPauseFrame();
 
-	void SetProgressbar(int a, int b);
-	void CancelSeeking();
+	void setProgressbar(int a, int b);
 
-	bool must_find_current_marker;
-	int shown_marker;
+	bool mustFindCurrentMarker;
+	int displayedMarkerNumber;
 
 	HWND hwndProgressbar, hwndRewind, hwndForward, hwndRewindFull, hwndForwardFull;
-	HWND hwndPlaybackMarker, hwndPlaybackMarkerEdit;
+	HWND hwndPlaybackMarkerNumber, hwndPlaybackMarkerEditField;
 
 private:
-	bool SetPlaybackAboveOrToFrame(int frame, bool force_state_reload = false);
+	bool setPlaybackAboveOrToFrame(int frame, bool forceStateReload = false);
 
-	int pause_frame;
-	int lost_position_frame;
-	bool lost_position_is_stable;	// for when Greenzone invalidates several times, but the end of current segment must remain the same
+	int pauseFrame;
+	int lastPositionFrame;
+	bool lastPositionIsStable;	// for when Greenzone invalidates several times, but the end of current segment must remain the same
 
-	bool must_autopause_at_the_end;
-	bool old_emu_paused, emu_paused;
-	int old_pauseframe;
-	bool old_show_pauseframe, show_pauseframe;
-	int lastCursor;		// but for currentCursor we use external variable currFrameCounter
+	bool mustAutopauseAtTheEnd;
+	bool emuPausedState, emuPausedOldState;
+	int oldPauseFrame;
+	bool showPauseFrame, oldStateOfShowPauseFrame;
+	int lastCursorPos;		// but for currentCursor we use external variable currFrameCounter
 
-	bool old_rewind_button_state, rewind_button_state;
-	bool old_forward_button_state, forward_button_state;
-	bool old_rewind_full_button_state, rewind_full_button_state;
-	bool old_forward_full_button_state, forward_full_button_state;
-	int button_hold_time;
-	int seeking_start_frame;
+	bool rewindButtonState, rewindButtonOldState;
+	bool forwardButtonState, forwardButtonOldState;
+	bool rewindFullButtonState, rewindFullButtonOldState;
+	bool forwardFullButtonState, forwardFullButtonOldState;
+	int buttonHoldTimer;
+	int seekingBeginningFrame;
 
 };

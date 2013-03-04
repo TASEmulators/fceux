@@ -215,7 +215,8 @@ static int CTRL(FCEUFILE *fp) {
 			GameInfo->input[1] = SI_ZAPPER;
 	} else {
 		FCEU_printf(" Incorrect Control Chunk Size (%d). Data is:", uchead.info);
-		for(i = 0; i < uchead.info; i++) {
+		for(i = 0; i < (int)uchead.info; i++)
+		{
 			t = FCEU_fgetc(fp);
 			FCEU_printf(" %02x", t);
 		}

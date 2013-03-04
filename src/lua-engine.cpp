@@ -1895,9 +1895,9 @@ void TaseditorDisableManualFunctionIfNeeded()
 		// check if LUACALL_TASEDITOR_MANUAL function is not nil
 		lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
 		if (!lua_isfunction(L, -1))
-			taseditor_lua.DisableRunFunction();
+			taseditor_lua.disableRunFunction();
 		lua_pop(L, 1);
-	} else taseditor_lua.DisableRunFunction();
+	} else taseditor_lua.disableRunFunction();
 }
 #endif
 
@@ -4342,7 +4342,7 @@ static int taseditor_registermanual(lua_State *L)
 	lua_insert(L,1);
 	lua_setfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
 #ifdef WIN32
-	taseditor_lua.EnableRunFunction(caption);
+	taseditor_lua.enableRunFunction(caption);
 #endif
 	return 1;
 }

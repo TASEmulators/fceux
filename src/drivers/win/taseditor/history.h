@@ -97,64 +97,62 @@ public:
 	void reset();
 	void update();		// called every frame
 
-	void HistorySizeChanged();
+	void updateHistoryLogSize();
 
-	void save(EMUFILE *os, bool really_save = true);
+	void save(EMUFILE *os, bool reallySave = true);
 	bool load(EMUFILE *is, unsigned int offset);
 
 	void undo();
 	void redo();
 
-	int RegisterChanges(int mod_type, int start = 0, int end =-1, int size = 0, const char* comment = NULL, int consecutive_tag = 0, SelectionFrames* frameset = NULL);
-	int RegisterAdjustLag(int start, int size);
-	void RegisterMarkersChange(int mod_type, int start = 0, int end =-1, const char* comment = 0);
+	int registerChanges(int mod_type, int start = 0, int end =-1, int size = 0, const char* comment = NULL, int consecutivenessTag = 0, RowsSelection* frameset = NULL);
+	int registerAdjustLag(int start, int size);
+	void registerMarkersChange(int modificationType, int start = 0, int end =-1, const char* comment = 0);
+	void registerBookmarkSet(int slot, BOOKMARK& backup—opy, int oldCurrentBranch);
+	int registerBranching(int slot, bool markersWereChanged);
+	void registerRecording(int frameOfChange, uint32 joypadDifferenceBits);
+	int registerImport(MovieData& md, char* filename);
+	int registerLuaChanges(const char* name, int start, bool insertionOrDeletionWasDone);
 
-	void RegisterBookmarkSet(int slot, BOOKMARK& backup_copy, int old_current_branch);
-	
-	int RegisterBranching(int slot, bool markers_changed);
-	void RegisterRecording(int frame_of_change, uint32 joypad_diff_bits);
-	int RegisterImport(MovieData& md, char* filename);
-	int RegisterLuaChanges(const char* name, int start, bool InsertionDeletion_was_made);
+	int getCategoryOfOperation(int modificationType);
 
-	int GetCategoryOfOperation(int mod_type);
+	SNAPSHOT& getCurrentSnapshot();
+	SNAPSHOT& getNextToCurrentSnapshot();
+	int getUndoHint();
+	char* getItemDesc(int pos);
 
-	SNAPSHOT& GetCurrentSnapshot();
-	SNAPSHOT& GetNextToCurrentSnapshot();
-	char* GetItemDesc(int pos);
-	int GetUndoHint();
+	void getDispInfo(NMLVDISPINFO* nmlvDispInfo);
+	LONG handleCustomDraw(NMLVCUSTOMDRAW* msg);
+	void handleSingleClick(int rowIndex);
 
-	void GetDispInfo(NMLVDISPINFO* nmlvDispInfo);
-	LONG CustomDraw(NMLVCUSTOMDRAW* msg);
-	void Click(int row_index);
+	void redrawList();
+	void updateList();
 
-	void RedrawHistoryList();
-	void UpdateHistoryList();
-
-	bool CursorOverHistoryList();
+	bool isCursorOverHistoryList();
 
 	HWND hwndHistoryList;
 
 private:
-	int JumpInTime(int new_pos);
+	int jumpInTime(int newPos);
 
-	void AddItemToHistory(SNAPSHOT &snap, int cur_branch = 0);
-	void AddItemToHistory(SNAPSHOT &snap, int cur_branch, BOOKMARK &bookm);
+	void addItemToHistoryLog(SNAPSHOT &snap, int currentBranch = 0);
+	void addItemToHistoryLog(SNAPSHOT &snap, int currentBranch, BOOKMARK &bookm);
 
 	// saved variables
 	std::vector<SNAPSHOT> snapshots;
-	std::vector<BOOKMARK> backup_bookmarks;
-	std::vector<int8> backup_current_branch;
-	int history_cursor_pos;
-	int history_total_items;
+	std::vector<BOOKMARK> bookmarkBackups;
+	std::vector<int8> currentBranchNumberBackups;
+	int historyCursorPos;
+	int historyTotalItems;
 
 	// not saved variables
-	int history_start_pos;
-	int history_size;
+	int historyStartPos;
+	int historySize;
 
-	int undo_hint_pos, old_undo_hint_pos;
-	int undo_hint_time;
-	bool old_show_undo_hint, show_undo_hint;
-	int next_autocompress_time;
+	int undoHintPos, oldUndoHintPos;
+	int undoHintTimer;
+	bool showUndoHint, oldShowUndoHint;
+	int nextAutocompressTime;
 
 };
 

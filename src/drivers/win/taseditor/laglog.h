@@ -1,8 +1,11 @@
 // Specification file for LagLog class
 
-#define LAGGED_NO 0
-#define LAGGED_YES 1
-#define LAGGED_DONTKNOW 2
+enum LAG_FLAG_VALUES
+{
+	LAGGED_NO = 0,
+	LAGGED_YES = 1,
+	LAGGED_UNKNOWN = 2
+};
 
 class LAGLOG
 {
@@ -10,30 +13,30 @@ public:
 	LAGLOG();
 	void reset();
 
-	void compress_data();
-	bool Get_already_compressed();
-	void Reset_already_compressed();
+	void compressData();
+	bool isAlreadyCompressed();
+	void resetCompressedStatus();
 
 	void save(EMUFILE *os);
 	bool load(EMUFILE *is);
 	bool skipLoad(EMUFILE *is);
 
-	void InvalidateFrom(int frame);
+	void invalidateFromFrame(int frame);
 
-	void SetLagInfo(int frame, bool lagFlag);
-	void EraseFrame(int frame, int frames = 1);
-	void InsertFrame(int frame, bool lagFlag, int frames = 1);
+	void setLagInfo(int frame, bool lagFlag);
+	void eraseFrame(int frame, int numFrames = 1);
+	void insertFrame(int frame, bool lagFlag, int numFrames = 1);
 
-	int GetSize();
-	int GetLagInfoAtFrame(int frame);
+	int getSize();
+	int getLagInfoAtFrame(int frame);
 
-	int findFirstChange(LAGLOG& their_log);
+	int findFirstChange(LAGLOG& theirLog);
 
 private:
 	// saved data
-	std::vector<uint8> lag_log_compressed;
+	std::vector<uint8> compressedLagLog;
 
 	// not saved data
-	std::vector<uint8> lag_log;
-	bool already_compressed;			// to compress only once
+	std::vector<uint8> lagLog;
+	bool alreadyCompressed;			// to compress only once
 };

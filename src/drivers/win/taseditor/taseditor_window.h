@@ -1,6 +1,6 @@
 // Specification file for TASEDITOR_WINDOW class
 
-enum Window_items_enum
+enum TASEDITOR_WINDOW_ITEMS
 {
 	WINDOWITEMS_PIANO_ROLL,
 	WINDOWITEMS_PLAYBACK_MARKER,
@@ -54,7 +54,7 @@ enum Window_items_enum
 #define PATTERNS_MENU_POS 5
 #define PATTERNS_MAX_VISIBLE_NAME 50
 
-struct Window_items_struct
+struct WindowItemData
 {
 	int number;
 	int id;
@@ -62,11 +62,11 @@ struct Window_items_struct
 	int y;
 	int width;
 	int height;
-	char tooltip_text_base[TOOLTIP_TEXT_MAX_LEN];
-	char tooltip_text[TOOLTIP_TEXT_MAX_LEN];
-	bool static_rect;
-	int hotkey_emucmd;
-	HWND tooltip_hwnd;
+	char tooltipTextBase[TOOLTIP_TEXT_MAX_LEN];
+	char tooltipText[TOOLTIP_TEXT_MAX_LEN];
+	bool isStaticRect;
+	int hotkeyEmuCmd;
+	HWND tooltipHWND;
 };
 
 class TASEDITOR_WINDOW
@@ -77,40 +77,36 @@ public:
 	void exit();
 	void reset();
 	void update();
+	void redraw();
 
-	void ResizeItems();
-	void WindowMovedOrResized();
-	void ChangeBookmarksListHeight(int new_height);
+	void resizeWindowItems();
+	void handleWindowMovingOrResizing();
+	void changeBookmarksListHeight(int newHeight);
 
-	void UpdateTooltips();
+	void updateTooltips();
+	void updateCaption();
+	void updateCheckedItems();
 
-	void UpdateCaption();
-	void RedrawTaseditor();
+	void updateRecentProjectsMenu();
+	void updateRecentProjectsArray(const char* addString);
+	void removeRecentProject(unsigned int which);
+	void loadRecentProject(int slot);
 
-	void UpdateCheckedItems();
+	void updatePatternsMenu();
+	void recheckPatternsMenu();
 
-	void UpdateRecentProjectsMenu();
-	void UpdateRecentProjectsArray(const char* addString);
-	void RemoveRecentProject(unsigned int which);
-	void LoadRecentProject(int slot);
+	HWND hwndTASEditor, hwndFindNote;
+	bool TASEditorIsInFocus;
+	bool isReadyForResizing;
+	int minWidth;
+	int minHeight;
 
-	void UpdatePatternsMenu();
-	void RecheckPatternsMenu();
-
-	HWND hwndTasEditor, hwndFindNote;
-	bool TASEditor_focus;
-	bool ready_for_resizing;
-	int min_width;
-	int min_height;
-
-	bool must_update_mouse_cursor;
+	bool mustUpdateMouseCursor;
 
 private:
-	void CalculateItems();
+	void calculateItems();
 
-
-	HWND hToolTipWnd;
-	HMENU hmenu, patterns_menu;
+	HMENU hMainMenu, hPatternsMenu;
 	HICON hTaseditorIcon;
 
 };

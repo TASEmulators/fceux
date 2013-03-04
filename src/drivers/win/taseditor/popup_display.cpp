@@ -19,66 +19,66 @@ Popup display - Manager of popup windows
 #include "taseditor_project.h"
 #include "zlib.h"
 
-extern TASEDITOR_CONFIG taseditor_config;
-extern TASEDITOR_WINDOW taseditor_window;
+extern TASEDITOR_CONFIG taseditorConfig;
+extern TASEDITOR_WINDOW taseditorWindow;
 extern BOOKMARKS bookmarks;
 extern BRANCHES branches;
-extern PIANO_ROLL piano_roll;
-extern MARKERS_MANAGER markers_manager;
+extern PIANO_ROLL pianoRoll;
+extern MARKERS_MANAGER markersManager;
 extern PLAYBACK playback;
 
-LRESULT CALLBACK ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-LRESULT APIENTRY MarkerNoteDescrWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK screenshotBitmapWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY noteDescriptionWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 // resources
-char szClassName[] = "ScrBmp";
-char szClassName2[] = "MarketNoteDescr";
+char szClassName[] = "ScreenshotBitmap";
+char szClassName2[] = "NoteDescription";
 
 POPUP_DISPLAY::POPUP_DISPLAY()
 {
-	hwndScrBmp = 0;
-	hwndMarkerNoteDescr = 0;
+	hwndScreenshotBitmap = 0;
+	hwndNoteDescription = 0;
 	// create BITMAPINFO
-	scr_bmi = (LPBITMAPINFO)malloc(sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD));	// 256 color in palette
-	scr_bmi->bmiHeader.biSize = sizeof(scr_bmi->bmiHeader);
-	scr_bmi->bmiHeader.biWidth = SCREENSHOT_WIDTH;
-	scr_bmi->bmiHeader.biHeight = -SCREENSHOT_HEIGHT;		// negative value = top-down bmp
-	scr_bmi->bmiHeader.biPlanes = 1;
-	scr_bmi->bmiHeader.biBitCount = 8;
-	scr_bmi->bmiHeader.biCompression = BI_RGB;
-	scr_bmi->bmiHeader.biSizeImage = 0;
+	screenshotBmi = (LPBITMAPINFO)malloc(sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD));	// 256 color in palette
+	screenshotBmi->bmiHeader.biSize = sizeof(screenshotBmi->bmiHeader);
+	screenshotBmi->bmiHeader.biWidth = SCREENSHOT_WIDTH;
+	screenshotBmi->bmiHeader.biHeight = -SCREENSHOT_HEIGHT;		// negative value = top-down bmp
+	screenshotBmi->bmiHeader.biPlanes = 1;
+	screenshotBmi->bmiHeader.biBitCount = 8;
+	screenshotBmi->bmiHeader.biCompression = BI_RGB;
+	screenshotBmi->bmiHeader.biSizeImage = 0;
 
 	// register SCREENSHOT_DISPLAY window class
-	wincl1.hInstance = fceu_hInstance;
-	wincl1.lpszClassName = szClassName;
-	wincl1.lpfnWndProc = ScrBmpWndProc;
-	wincl1.style = CS_DBLCLKS;
-	wincl1.cbSize = sizeof(WNDCLASSEX);
-	wincl1.hIcon = 0;
-	wincl1.hIconSm = 0;
-	wincl1.hCursor = 0;
-	wincl1.lpszMenuName = 0;
-	wincl1.cbClsExtra = 0;
-	wincl1.cbWndExtra = 0;
-	wincl1.hbrBackground = 0;
-	if (!RegisterClassEx(&wincl1))
+	winCl1.hInstance = fceu_hInstance;
+	winCl1.lpszClassName = szClassName;
+	winCl1.lpfnWndProc = screenshotBitmapWndProc;
+	winCl1.style = CS_DBLCLKS;
+	winCl1.cbSize = sizeof(WNDCLASSEX);
+	winCl1.hIcon = 0;
+	winCl1.hIconSm = 0;
+	winCl1.hCursor = 0;
+	winCl1.lpszMenuName = 0;
+	winCl1.cbClsExtra = 0;
+	winCl1.cbWndExtra = 0;
+	winCl1.hbrBackground = 0;
+	if (!RegisterClassEx(&winCl1))
 		FCEU_printf("Error registering SCREENSHOT_DISPLAY window class\n");
 
-	// register MARKER_NOTE_DESCRIPTION window class
-	wincl2.hInstance = fceu_hInstance;
-	wincl2.lpszClassName = szClassName2;
-	wincl2.lpfnWndProc = MarkerNoteDescrWndProc;
-	wincl2.style = CS_DBLCLKS;
-	wincl2.cbSize = sizeof(WNDCLASSEX);
-	wincl2.hIcon = 0;
-	wincl2.hIconSm = 0;
-	wincl2.hCursor = 0;
-	wincl2.lpszMenuName = 0;
-	wincl2.cbClsExtra = 0;
-	wincl2.cbWndExtra = 0;
-	wincl2.hbrBackground = 0;
-	if (!RegisterClassEx(&wincl2))
-		FCEU_printf("Error registering MARKER_NOTE_DESCRIPTION window class\n");
+	// register NOTE_DESCRIPTION window class
+	winCl2.hInstance = fceu_hInstance;
+	winCl2.lpszClassName = szClassName2;
+	winCl2.lpfnWndProc = noteDescriptionWndProc;
+	winCl2.style = CS_DBLCLKS;
+	winCl2.cbSize = sizeof(WNDCLASSEX);
+	winCl2.hIcon = 0;
+	winCl2.hIconSm = 0;
+	winCl2.hCursor = 0;
+	winCl2.lpszMenuName = 0;
+	winCl2.cbClsExtra = 0;
+	winCl2.cbWndExtra = 0;
+	winCl2.hbrBackground = 0;
+	if (!RegisterClassEx(&winCl2))
+		FCEU_printf("Error registering NOTE_DESCRIPTION window class\n");
 
 	// create blendfunction
 	blend.BlendOp = AC_SRC_OVER;
@@ -94,210 +94,210 @@ void POPUP_DISPLAY::init()
 	extern PALETTEENTRY *color_palette;
 	for (int i = 0; i < 256; ++i)
 	{
-		scr_bmi->bmiColors[i].rgbRed = color_palette[i].peRed;
-		scr_bmi->bmiColors[i].rgbGreen = color_palette[i].peGreen;
-		scr_bmi->bmiColors[i].rgbBlue = color_palette[i].peBlue;
+		screenshotBmi->bmiColors[i].rgbRed = color_palette[i].peRed;
+		screenshotBmi->bmiColors[i].rgbGreen = color_palette[i].peGreen;
+		screenshotBmi->bmiColors[i].rgbBlue = color_palette[i].peBlue;
 	}
-	HDC win_hdc = GetWindowDC(piano_roll.hwndList);
-	scr_bmp = CreateDIBSection(win_hdc, scr_bmi, DIB_RGB_COLORS, (void**)&scr_ptr, 0, 0);
+	HDC win_hdc = GetWindowDC(pianoRoll.hwndList);
+	screenshotHBitmap = CreateDIBSection(win_hdc, screenshotBmi, DIB_RGB_COLORS, (void**)&screenshotRasterPointer, 0, 0);
 	// calculate coordinates of popup windows (relative to TAS Editor window)
-	ParentWindowMoved();
+	updateBecauseParentWindowMoved();
 }
 void POPUP_DISPLAY::free()
 {
 	reset();
-	if (scr_bmp)
+	if (screenshotHBitmap)
 	{
-		DeleteObject(scr_bmp);
-		scr_bmp = 0;
+		DeleteObject(screenshotHBitmap);
+		screenshotHBitmap = 0;
 	}
 }
 void POPUP_DISPLAY::reset()
 {
-	screenshot_currently_shown = ITEM_UNDER_MOUSE_NONE;
-	next_update_time = scr_bmp_phase = 0;
-	if (hwndScrBmp)
+	currentlyDisplayedBookmark = ITEM_UNDER_MOUSE_NONE;
+	nextUpdateTime = screenshotBitmapPhase = 0;
+	if (hwndScreenshotBitmap)
 	{
-		DestroyWindow(hwndScrBmp);
-		hwndScrBmp = 0;
+		DestroyWindow(hwndScreenshotBitmap);
+		hwndScreenshotBitmap = 0;
 	}
-	if (hwndMarkerNoteDescr)
+	if (hwndNoteDescription)
 	{
-		DestroyWindow(hwndMarkerNoteDescr);
-		hwndMarkerNoteDescr = 0;
+		DestroyWindow(hwndNoteDescription);
+		hwndNoteDescription = 0;
 	}
 }
 
 void POPUP_DISPLAY::update()
 {
 	// once per 40 milliseconds update popup windows alpha
-	if (clock() > next_update_time)
+	if (clock() > nextUpdateTime)
 	{
-		next_update_time = clock() + DISPLAY_UPDATE_TICK;
-		if (branches.IsSafeToShowBranchesData() && bookmarks.item_under_mouse >= 0 && bookmarks.item_under_mouse < TOTAL_BOOKMARKS && bookmarks.bookmarks_array[bookmarks.item_under_mouse].not_empty)
+		nextUpdateTime = clock() + DISPLAY_UPDATE_TICK;
+		if (branches.isSafeToShowBranchesData() && bookmarks.itemUnderMouse >= 0 && bookmarks.itemUnderMouse < TOTAL_BOOKMARKS && bookmarks.bookmarksArray[bookmarks.itemUnderMouse].notEmpty)
 		{
-			if (taseditor_config.show_branch_screenshots && !hwndScrBmp)
+			if (taseditorConfig.displayBranchScreenshots && !hwndScreenshotBitmap)
 			{
 				// create window
-				hwndScrBmp = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, szClassName, szClassName, WS_POPUP, taseditor_config.wndx + scr_bmp_x, taseditor_config.wndy + scr_bmp_y, SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT, taseditor_window.hwndTasEditor, NULL, fceu_hInstance, NULL);
-				RedrawScreenshotBitmap();
-				ShowWindow(hwndScrBmp, SW_SHOWNA);
+				hwndScreenshotBitmap = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, szClassName, szClassName, WS_POPUP, taseditorConfig.windowX + screenshotBitmapX, taseditorConfig.windowY + screenshotBitmapY, SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT, taseditorWindow.hwndTASEditor, NULL, fceu_hInstance, NULL);
+				redrawScreenshotBitmap();
+				ShowWindow(hwndScreenshotBitmap, SW_SHOWNA);
 			}
-			if (taseditor_config.show_branch_descr && !hwndMarkerNoteDescr)
+			if (taseditorConfig.displayBranchDescriptions && !hwndNoteDescription)
 			{
 				RECT wrect;
-				GetWindowRect(playback.hwndPlaybackMarkerEdit, &wrect);
-				descr_x = scr_bmp_x + (SCREENSHOT_WIDTH - (wrect.right - wrect.left)) / 2;
-				hwndMarkerNoteDescr = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, szClassName2, szClassName2, WS_POPUP, taseditor_config.wndx + descr_x, taseditor_config.wndy + descr_y, wrect.right - wrect.left, wrect.bottom - wrect.top, taseditor_window.hwndTasEditor, NULL, fceu_hInstance, NULL);
-				ChangeDescrText();
-				ShowWindow(hwndMarkerNoteDescr, SW_SHOWNA);
+				GetWindowRect(playback.hwndPlaybackMarkerEditField, &wrect);
+				descriptionX = screenshotBitmapX + (SCREENSHOT_WIDTH - (wrect.right - wrect.left)) / 2;
+				hwndNoteDescription = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, szClassName2, szClassName2, WS_POPUP, taseditorConfig.windowX + descriptionX, taseditorConfig.windowY + descriptionY, wrect.right - wrect.left, wrect.bottom - wrect.top, taseditorWindow.hwndTASEditor, NULL, fceu_hInstance, NULL);
+				changeDescriptionText();
+				ShowWindow(hwndNoteDescription, SW_SHOWNA);
 			}
 			// change screenshot_bitmap pic and description text if needed
-			if (screenshot_currently_shown != bookmarks.item_under_mouse)
+			if (currentlyDisplayedBookmark != bookmarks.itemUnderMouse)
 			{
-				if (taseditor_config.show_branch_screenshots)
-					ChangeScreenshotBitmap();
-				if (taseditor_config.show_branch_descr)
-					ChangeDescrText();
-				screenshot_currently_shown = bookmarks.item_under_mouse;
+				if (taseditorConfig.displayBranchScreenshots)
+					changeScreenshotBitmap();
+				if (taseditorConfig.displayBranchDescriptions)
+					changeDescriptionText();
+				currentlyDisplayedBookmark = bookmarks.itemUnderMouse;
 			}
-			if (scr_bmp_phase < SCR_BMP_PHASE_MAX)
+			if (screenshotBitmapPhase < SCREENSHOT_BITMAP_PHASE_MAX)
 			{
-				scr_bmp_phase++;
+				screenshotBitmapPhase++;
 				// update alpha
-				int phase_alpha = scr_bmp_phase;
-				if (phase_alpha > SCR_BMP_PHASE_ALPHA_MAX) phase_alpha = SCR_BMP_PHASE_ALPHA_MAX;
-				if (hwndScrBmp)
+				int phase_alpha = screenshotBitmapPhase;
+				if (phase_alpha > SCREENSHOT_BITMAP_PHASE_ALPHA_MAX) phase_alpha = SCREENSHOT_BITMAP_PHASE_ALPHA_MAX;
+				if (hwndScreenshotBitmap)
 				{
-					SetLayeredWindowAttributes(hwndScrBmp, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
-					UpdateLayeredWindow(hwndScrBmp, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
+					SetLayeredWindowAttributes(hwndScreenshotBitmap, 0, (255 * phase_alpha) / SCREENSHOT_BITMAP_PHASE_ALPHA_MAX, LWA_ALPHA);
+					UpdateLayeredWindow(hwndScreenshotBitmap, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
 				}
-				if (hwndMarkerNoteDescr)
+				if (hwndNoteDescription)
 				{
-					SetLayeredWindowAttributes(hwndMarkerNoteDescr, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
-					UpdateLayeredWindow(hwndMarkerNoteDescr, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
+					SetLayeredWindowAttributes(hwndNoteDescription, 0, (255 * phase_alpha) / SCREENSHOT_BITMAP_PHASE_ALPHA_MAX, LWA_ALPHA);
+					UpdateLayeredWindow(hwndNoteDescription, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
 				}
 			}
 		} else
 		{
 			// fade and finally hide screenshot
-			if (scr_bmp_phase > 0)
-				scr_bmp_phase--;
-			if (scr_bmp_phase > 0)
+			if (screenshotBitmapPhase > 0)
+				screenshotBitmapPhase--;
+			if (screenshotBitmapPhase > 0)
 			{
 				// update alpha
-				int phase_alpha = scr_bmp_phase;
-				if (phase_alpha > SCR_BMP_PHASE_ALPHA_MAX)
-					phase_alpha = SCR_BMP_PHASE_ALPHA_MAX;
+				int phase_alpha = screenshotBitmapPhase;
+				if (phase_alpha > SCREENSHOT_BITMAP_PHASE_ALPHA_MAX)
+					phase_alpha = SCREENSHOT_BITMAP_PHASE_ALPHA_MAX;
 				else if (phase_alpha < 0)
 					phase_alpha = 0;
-				if (hwndScrBmp)
+				if (hwndScreenshotBitmap)
 				{
-					SetLayeredWindowAttributes(hwndScrBmp, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
-					UpdateLayeredWindow(hwndScrBmp, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
+					SetLayeredWindowAttributes(hwndScreenshotBitmap, 0, (255 * phase_alpha) / SCREENSHOT_BITMAP_PHASE_ALPHA_MAX, LWA_ALPHA);
+					UpdateLayeredWindow(hwndScreenshotBitmap, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
 				}
-				if (hwndMarkerNoteDescr)
+				if (hwndNoteDescription)
 				{
-					SetLayeredWindowAttributes(hwndMarkerNoteDescr, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
-					UpdateLayeredWindow(hwndMarkerNoteDescr, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
+					SetLayeredWindowAttributes(hwndNoteDescription, 0, (255 * phase_alpha) / SCREENSHOT_BITMAP_PHASE_ALPHA_MAX, LWA_ALPHA);
+					UpdateLayeredWindow(hwndNoteDescription, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
 				}
 			} else
 			{
 				// destroy popup windows
-				scr_bmp_phase = 0;
-				if (hwndScrBmp)
+				screenshotBitmapPhase = 0;
+				if (hwndScreenshotBitmap)
 				{
-					DestroyWindow(hwndScrBmp);
-					hwndScrBmp = 0;
+					DestroyWindow(hwndScreenshotBitmap);
+					hwndScreenshotBitmap = 0;
 				}
-				if (hwndMarkerNoteDescr)
+				if (hwndNoteDescription)
 				{
-					DestroyWindow(hwndMarkerNoteDescr);
-					hwndMarkerNoteDescr = 0;
+					DestroyWindow(hwndNoteDescription);
+					hwndNoteDescription = 0;
 				}
 				// immediately redraw the window below those
-				UpdateWindow(taseditor_window.hwndTasEditor);
+				UpdateWindow(taseditorWindow.hwndTASEditor);
 			}
 		}
 	}
 }
 
-void POPUP_DISPLAY::ChangeScreenshotBitmap()
+void POPUP_DISPLAY::changeScreenshotBitmap()
 {
 	// uncompress
 	uLongf destlen = SCREENSHOT_SIZE;
-	int e = uncompress(&scr_ptr[0], &destlen, &bookmarks.bookmarks_array[bookmarks.item_under_mouse].saved_screenshot[0], bookmarks.bookmarks_array[bookmarks.item_under_mouse].saved_screenshot.size());
+	int e = uncompress(&screenshotRasterPointer[0], &destlen, &bookmarks.bookmarksArray[bookmarks.itemUnderMouse].savedScreenshot[0], bookmarks.bookmarksArray[bookmarks.itemUnderMouse].savedScreenshot.size());
 	if (e != Z_OK && e != Z_BUF_ERROR)
 	{
 		// error decompressing
-		FCEU_printf("Error decompressing screenshot %d\n", bookmarks.item_under_mouse);
+		FCEU_printf("Error decompressing screenshot %d\n", bookmarks.itemUnderMouse);
 		// at least fill bitmap with zeros
-		memset(&scr_ptr[0], 0, SCREENSHOT_SIZE);
+		memset(&screenshotRasterPointer[0], 0, SCREENSHOT_SIZE);
 	}
-	RedrawScreenshotBitmap();
+	redrawScreenshotBitmap();
 }
-void POPUP_DISPLAY::RedrawScreenshotBitmap()
+void POPUP_DISPLAY::redrawScreenshotBitmap()
 {
-	HBITMAP temp_bmp = (HBITMAP)SendMessage(scr_bmp_pic, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)scr_bmp);
-	if (temp_bmp && temp_bmp != scr_bmp)
+	HBITMAP temp_bmp = (HBITMAP)SendMessage(hwndScreenshotPicture, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)screenshotHBitmap);
+	if (temp_bmp && temp_bmp != screenshotHBitmap)
 		DeleteObject(temp_bmp);
 }
-void POPUP_DISPLAY::ChangeDescrText()
+void POPUP_DISPLAY::changeDescriptionText()
 {
 	// retrieve info from the pointed bookmark's Markers
-	int frame = bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.keyframe;
-	int marker_id = markers_manager.GetMarkerUp(bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.markers, frame);
+	int frame = bookmarks.bookmarksArray[bookmarks.itemUnderMouse].snapshot.keyFrame;
+	int markerID = markersManager.getMarkerAboveFrame(bookmarks.bookmarksArray[bookmarks.itemUnderMouse].snapshot.markers, frame);
 	char new_text[MAX_NOTE_LEN];
-	strcpy(new_text, markers_manager.GetNote(bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.markers, marker_id).c_str());
-	SetWindowText(marker_note_descr, new_text);
+	strcpy(new_text, markersManager.getNoteCopy(bookmarks.bookmarksArray[bookmarks.itemUnderMouse].snapshot.markers, markerID).c_str());
+	SetWindowText(hwndNoteText, new_text);
 }
 
-void POPUP_DISPLAY::ParentWindowMoved()
+void POPUP_DISPLAY::updateBecauseParentWindowMoved()
 {
 	// calculate new positions relative to IDC_BOOKMARKS_BOX
 	RECT temp_rect, parent_rect;
-	GetWindowRect(taseditor_window.hwndTasEditor, &parent_rect);
-	GetWindowRect(GetDlgItem(taseditor_window.hwndTasEditor, IDC_BOOKMARKS_BOX), &temp_rect);
-	scr_bmp_x = temp_rect.left - SCREENSHOT_WIDTH - SCR_BMP_DX - parent_rect.left;
-	scr_bmp_y = (temp_rect.bottom - SCREENSHOT_HEIGHT) - parent_rect.top;
+	GetWindowRect(taseditorWindow.hwndTASEditor, &parent_rect);
+	GetWindowRect(GetDlgItem(taseditorWindow.hwndTASEditor, IDC_BOOKMARKS_BOX), &temp_rect);
+	screenshotBitmapX = temp_rect.left - SCREENSHOT_WIDTH - SCREENSHOT_BITMAP_DX - parent_rect.left;
+	screenshotBitmapY = (temp_rect.bottom - SCREENSHOT_HEIGHT) - parent_rect.top;
 	RECT wrect;
-	GetWindowRect(playback.hwndPlaybackMarkerEdit, &wrect);
-	descr_x = scr_bmp_x + (SCREENSHOT_WIDTH - (wrect.right - wrect.left)) / 2;
-	descr_y = scr_bmp_y + SCREENSHOT_HEIGHT + SCR_BMP_DESCR_GAP;
+	GetWindowRect(playback.hwndPlaybackMarkerEditField, &wrect);
+	descriptionX = screenshotBitmapX + (SCREENSHOT_WIDTH - (wrect.right - wrect.left)) / 2;
+	descriptionY = screenshotBitmapY + SCREENSHOT_HEIGHT + SCREENSHOT_BITMAP_DESCRIPTION_GAP;
 	// if popup windows are currently shown, update their positions
-	if (hwndScrBmp)
-		SetWindowPos(hwndScrBmp, 0, taseditor_config.wndx + scr_bmp_x, taseditor_config.wndy + scr_bmp_y, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
-	if (hwndMarkerNoteDescr)
-		SetWindowPos(hwndMarkerNoteDescr, 0, taseditor_config.wndx + descr_x, taseditor_config.wndy + descr_y, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+	if (hwndScreenshotBitmap)
+		SetWindowPos(hwndScreenshotBitmap, 0, taseditorConfig.windowX + screenshotBitmapX, taseditorConfig.windowY + screenshotBitmapY, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+	if (hwndNoteDescription)
+		SetWindowPos(hwndNoteDescription, 0, taseditorConfig.windowX + descriptionX, taseditorConfig.windowY + descriptionY, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
 }
 // ----------------------------------------------------------------------------------------
-LRESULT APIENTRY ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT APIENTRY screenshotBitmapWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	extern POPUP_DISPLAY popup_display;
+	extern POPUP_DISPLAY popupDisplay;
 	switch(message)
 	{
 		case WM_CREATE:
 		{
 			// create static bitmap placeholder
-			popup_display.scr_bmp_pic = CreateWindow(WC_STATIC, NULL, SS_BITMAP | WS_CHILD | WS_VISIBLE, 0, 0, 255, 255, hwnd, NULL, NULL, NULL);
+			popupDisplay.hwndScreenshotPicture = CreateWindow(WC_STATIC, NULL, SS_BITMAP | WS_CHILD | WS_VISIBLE, 0, 0, 255, 255, hwnd, NULL, NULL, NULL);
 			return 0;
 		}
 		default:
 			return DefWindowProc(hwnd, message, wParam, lParam);
 	}
 }
-LRESULT APIENTRY MarkerNoteDescrWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT APIENTRY noteDescriptionWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	extern POPUP_DISPLAY popup_display;
+	extern POPUP_DISPLAY popupDisplay;
 	switch(message)
 	{
 		case WM_CREATE:
 		{
 			// create static text field
 			RECT wrect;
-			GetWindowRect(playback.hwndPlaybackMarkerEdit, &wrect);
-			popup_display.marker_note_descr = CreateWindow(WC_STATIC, NULL, WS_CHILD | WS_VISIBLE | SS_CENTER | SS_ENDELLIPSIS | SS_SUNKEN, 1, 1, wrect.right - wrect.left - 2, wrect.bottom - wrect.top - 2, hwnd, NULL, NULL, NULL);
-			SendMessage(popup_display.marker_note_descr, WM_SETFONT, (WPARAM)piano_roll.hMarkersEditFont, 0);
+			GetWindowRect(playback.hwndPlaybackMarkerEditField, &wrect);
+			popupDisplay.hwndNoteText = CreateWindow(WC_STATIC, NULL, WS_CHILD | WS_VISIBLE | SS_CENTER | SS_ENDELLIPSIS | SS_SUNKEN, 1, 1, wrect.right - wrect.left - 2, wrect.bottom - wrect.top - 2, hwnd, NULL, NULL, NULL);
+			SendMessage(popupDisplay.hwndNoteText, WM_SETFONT, (WPARAM)pianoRoll.hMarkersEditFont, 0);
 			return 0;
 		}
 		default:

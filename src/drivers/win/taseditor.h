@@ -2,36 +2,37 @@
 
 struct NewProjectParameters
 {
-	int input_type;
-	bool copy_current_input;
-	bool copy_current_markers;
-	std::wstring author_name;
+	int inputType;
+	bool copyCurrentInput;
+	bool copyCurrentMarkers;
+	std::wstring authorName;
 };
 
-bool EnterTasEditor();
-bool ExitTasEditor();
-void UpdateTasEditor();
+bool enterTASEditor();
+bool exitTASEditor();
+void updateTASEditor();
 
-void NewProject();
-void OpenProject();
-bool LoadProject(const char* fullname);
-bool SaveProject(bool save_compact = false);
-bool SaveProjectAs(bool save_compact = false);
-void SaveCompact();
-bool AskSaveProject();
+void createNewProject();
+void openProject();
+bool loadProject(const char* fullname);
+bool saveProject(bool save_compact = false);
+bool saveProjectAs(bool save_compact = false);
+void saveCompact();
+bool askToSaveProject();
 
-void Import();
-void Export();
+void importInputData();
+void exportToFM2();
 
-int GetInputType(MovieData& md);
-void SetInputType(MovieData& md, int new_input_type);
+int getInputType(MovieData& md);
+void setInputType(MovieData& md, int newInputType);
 
-void ApplyMovieInputConfig();
+void applyMovieInputConfig();
 
-bool TaseditorIsRecording();
-void Taseditor_RecordInput();
+bool isTaseditorRecording();
+void recordInputByTaseditor();
 
-void Taseditor_EMUCMD(int command);
-void SetTaseditorInput();
-void ClearTaseditorInput();
+void handleEmuCmdByTaseditor(int command);
+
+void enableGeneralKeyboardInput();
+void disableGeneralKeyboardInput();
 

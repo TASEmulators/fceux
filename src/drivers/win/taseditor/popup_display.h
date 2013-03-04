@@ -1,11 +1,9 @@
 // Specification file for POPUP_DISPLAY class
 
-#define SCR_BMP_PHASE_MAX 10
-#define SCR_BMP_PHASE_ALPHA_MAX 8
-#define SCR_BMP_DX 7
-
-#define SCR_BMP_DESCR_GAP 2
-
+#define SCREENSHOT_BITMAP_PHASE_MAX 10
+#define SCREENSHOT_BITMAP_PHASE_ALPHA_MAX 8
+#define SCREENSHOT_BITMAP_DX 7
+#define SCREENSHOT_BITMAP_DESCRIPTION_GAP 2
 #define DISPLAY_UPDATE_TICK 40		// update at 25FPS
 
 class POPUP_DISPLAY
@@ -17,28 +15,28 @@ public:
 	void reset();
 	void update();
 
-	void ChangeScreenshotBitmap();
-	void RedrawScreenshotBitmap();
-	void ChangeDescrText();
+	void changeScreenshotBitmap();
+	void redrawScreenshotBitmap();
+	void changeDescriptionText();
 
-	void ParentWindowMoved();
+	void updateBecauseParentWindowMoved();
 
-	int screenshot_currently_shown;
-	HWND hwndScrBmp, scr_bmp_pic, hwndMarkerNoteDescr, marker_note_descr;
+	int currentlyDisplayedBookmark;
+	HWND hwndScreenshotBitmap, hwndScreenshotPicture, hwndNoteDescription, hwndNoteText;
 	
 private:
-	int scr_bmp_x;
-	int scr_bmp_y;
-	int scr_bmp_phase;
-	int next_update_time;
+	int screenshotBitmapX;
+	int screenshotBitmapY;
+	int screenshotBitmapPhase;
+	int nextUpdateTime;
 
-	int descr_x;
-	int descr_y;
+	int descriptionX;
+	int descriptionY;
 	
-	WNDCLASSEX wincl1, wincl2;
+	WNDCLASSEX winCl1, winCl2;
 	BLENDFUNCTION blend;
-	LPBITMAPINFO scr_bmi;
-	HBITMAP scr_bmp;
-	uint8* scr_ptr;
+	LPBITMAPINFO screenshotBmi;
+	HBITMAP screenshotHBitmap;
+	uint8* screenshotRasterPointer;
 
 };

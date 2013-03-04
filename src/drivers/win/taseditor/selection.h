@@ -1,7 +1,7 @@
 // Specification file for SELECTION class
 
 #include <set>
-typedef std::set<int> SelectionFrames;
+typedef std::set<int> RowsSelection;
 
 #define SELECTION_ID_LEN 10
 
@@ -15,81 +15,82 @@ public:
 	void reset_vars();
 	void update();
 
-	void UpdateSelectionSize();
+	void updateSelectionSize();
 
-	void HistorySizeChanged();
+	void updateHistoryLogSize();
 
-	void RedrawMarker();
+	void redrawMarkerData();
 
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is, unsigned int offset);
-	void saveSelection(SelectionFrames& selection, EMUFILE *os);
-	bool loadSelection(SelectionFrames& selection, EMUFILE *is);
-	bool skiploadSelection(EMUFILE *is);
+	void saveSelection(RowsSelection& selection, EMUFILE *os);
+	bool loadSelection(RowsSelection& selection, EMUFILE *is);
+	bool skipLoadSelection(EMUFILE *is);
 
-	void ItemRangeChanged(NMLVODSTATECHANGE* info);
-	void ItemChanged(NMLISTVIEW* info);
+	void noteThatItemRangeChanged(NMLVODSTATECHANGE* info);
+	void noteThatItemChanged(NMLISTVIEW* info);
 
-	void AddNewSelectionToHistory();
-	void AddCurrentSelectionToHistory();
+	void addNewSelectionToHistory();
+	void addCurrentSelectionToHistory();
 
 	void undo();
 	void redo();
 
-	bool GetRowSelection(int index);
+	bool isRowSelected(int index);
 
-	void ClearSelection();
-	void ClearRowSelection(int index);
-	void ClearRegionSelection(int start, int end);
+	void clearAllRowsSelection();
+	void clearSingleRowSelection(int index);
+	void clearRegionOfRowsSelection(int start, int end);
 
-	void SelectAll();
-	void SetRowSelection(int index);
-	void SetRegionSelection(int start, int end);
+	void selectAllRows();
+	void setRowSelection(int index);
+	void setRegionOfRowsSelection(int start, int end);
 
-	void SetRegionSelectionPattern(int start, int end);
-	void SelectBetweenMarkers();
-	void ReselectClipboard();
+	void setRegionOfRowsSelectionUsingPattern(int start, int end);
+	void selectAllRowsBetweenMarkers();
 
-	void Transpose(int shift);
+	void reselectClipboard();
 
-	void JumpPrevMarker(int speed = 1);
-	void JumpNextMarker(int speed = 1);
-	void JumpToFrame(int frame);
+	void transposeVertically(int shift);
+
+	void jumpToPreviousMarker(int speed = 1);
+	void jumpToNextMarker(int speed = 1);
+
+	void jumpToFrame(int frame);
 
 	// getters
-	int GetCurrentSelectionSize();
-	int GetCurrentSelectionBeginning();
-	int GetCurrentSelectionEnd();
-	bool CheckFrameSelected(int frame);
-	SelectionFrames* MakeStrobe();
+	int getCurrentRowsSelectionSize();
+	int getCurrentRowsSelectionBeginning();
+	int getCurrentRowsSelectionEnd();
+	RowsSelection* getCopyOfCurrentRowsSelection();
 
-	bool must_find_current_marker;
-	int shown_marker;
+	bool mustFindCurrentMarker;
+	int displayedMarkerNumber;
 
-	HWND hwndPrevMarker, hwndNextMarker;
-	HWND hwndSelectionMarker, hwndSelectionMarkerEdit;
+	HWND hwndPreviousMarkerButton, hwndNextMarkerButton;
+	HWND hwndSelectionMarkerNumber, hwndSelectionMarkerEditField;
 
 private:
-	void JumpInTime(int new_pos);
 
-	void EnforceSelectionToList();
+	void jumpInTime(int new_pos);
+	void enforceRowsSelectionToList();
 
-	SelectionFrames& CurrentSelection();
+	RowsSelection& getCurrentRowsSelection();
 
-	bool track_selection_changes;
-	int last_selection_beginning;
+	bool trackSelectionChanges;
+	int lastSelectionBeginning;
 
-	bool old_prev_marker_button_state, prev_marker_button_state;
-	bool old_next_marker_button_state, next_marker_button_state;
-	int button_hold_time;
+	bool previousMarkerButtonState, previousMarkerButtonOldState;
+	bool nextMarkerButtonState, nextMarkerButtonOldState;
+	int buttonHoldTimer;
 
-	std::vector<SelectionFrames> selections_history;
+	std::vector<RowsSelection> rowsSelectionHistory;
 
-	int history_cursor_pos;
-	int history_start_pos;
-	int history_total_items;
-	int history_size;
+	int historyCursorPos;
+	int historyStartPos;
+	int historySize;
+	int historyTotalItems;
 
-	SelectionFrames temp_selection;
+	RowsSelection tempRowsSelection;
 
 };

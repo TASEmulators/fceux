@@ -6,7 +6,7 @@
 #define CURSOR_MAX_DISTANCE 256.0
 #define CURSOR_MIN_SPEED 1.0
 
-// floating "empty" branches
+// floating empty branches
 #define MAX_FLOATING_PHASE 4
 
 // branches bitmap
@@ -100,84 +100,85 @@ public:
 	void init();
 	void free();
 	void reset();
-	void reset_vars();
+	void resetVars();
 	void update();
 
 	void save(EMUFILE *os);
 	bool load(EMUFILE *is);
 
-	int GetParentOf(int child);
-	int GetCurrentBranch();
-	bool GetChangesSinceCurrentBranch();
+	int getParentOf(int child);
+	int getCurrentBranch();
+	bool areThereChangesSinceCurrentBranch();
 
-	bool IsSafeToShowBranchesData();
+	bool isSafeToShowBranchesData();
 
-	void RedrawBranchesTree();
-	void PaintBranchesBitmap(HDC hdc);
+	void redrawBranchesBitmap();
+	void paintBranchesBitmap(HDC hdc);
 
-	void HandleBookmarkSet(int slot);
-	void HandleBookmarkDeploy(int slot);
-	void HandleHistoryJump(int new_current_branch, bool new_changes_since_current_branch);
+	void handleBookmarkSet(int slot);
+	void handleBookmarkDeploy(int slot);
+	void handleHistoryJump(int newCurrentBranch, bool newChangesSinceCurrentBranch);
+	void setChangesMadeSinceBranch();
 
-	void InvalidateBranchSlot(int slot);
-	int GetFirstDifference(int first_branch, int second_branch);
-	int FindFullTimelineForBranch(int branch_num);
-	void ChangesMadeSinceBranch();
+	void invalidateRelationsOfBranchSlot(int slot);
+	int findFullTimelineForBranch(int branchNumber);
 
-	int FindItemUnderMouse(int mouse_x, int mouse_y);
+	int findItemUnderMouse(int mouseX, int mouseY);
 
 	// not saved vars
-	bool must_redraw_branches_tree;
-	bool must_recalculate_branches_tree;
-	int branch_rightclicked;
+	bool mustRedrawBranchesBitmap;
+	bool mustRecalculateBranchesTree;
+	int branchRightclicked;
 
 private:
-	void SetCurrentPosTime();
+	void setCurrentPosTimestamp();
 
-	void RecalculateParents();
-	void RecalculateBranchesTree();
-	void RecursiveAddHeight(int branch_num, int amount);
-	void RecursiveSetYPos(int parent, int parentY);
+	void recalculateParents();
+	void recalculateBranchesTree();
+	void recursiveAddHeight(int branchNumber, int amount);
+	void recursiveSetYPos(int parent, int parentY);
+
+	int getFirstDifferenceBetween(int firstBranch, int secondBranch);
 
 	// saved vars
 	std::vector<int> parents;
-	int current_branch;
-	bool changes_since_current_branch;
-	char cloud_time[TIME_DESC_LENGTH];
-	char current_pos_time[TIME_DESC_LENGTH];
-	std::vector<std::vector<int>> cached_first_difference;
-	std::vector<int8> cached_timelines;		// stores id of the last branch on the timeline of every Branch. Sometimes it's the id of the Branch itself, but sometimes it's an id of its child/grandchild that shares the same Input
+	int currentBranch;
+	bool changesSinceCurrentBranch;
+	char cloudTimestamp[TIMESTAMP_LENGTH];
+	char currentPosTimestamp[TIMESTAMP_LENGTH];
+	std::vector<std::vector<int>> cachedFirstDifferences;
+	std::vector<int8> cachedTimelines;		// stores id of the last branch on the timeline of every Branch. Sometimes it's the id of the Branch itself, but sometimes it's an id of its child/grandchild that shares the same Input
 
 	// not saved vars
-	int transition_phase;
-	int animation_frame;
-	int next_animation_time;
-	int playback_x, playback_y;
-	double cursor_x, cursor_y;
-	std::vector<int> BranchX;				// in pixels
-	std::vector<int> BranchY;
-	std::vector<int> BranchPrevX;
-	std::vector<int> BranchPrevY;
-	std::vector<int> BranchCurrX;
-	std::vector<int> BranchCurrY;
-	int CloudX, CloudPrevX, cloud_x;
-	int fireball_size;
-	int latest_drawn_item_under_mouse;
+	int transitionPhase;
+	int currentAnimationFrame;
+	int nextAnimationTime;
+	int playbackCursorX, playbackCursorY;
+	double cornersCursorX, cornersCursorY;
+	std::vector<int> branchX;				// in pixels
+	std::vector<int> branchY;
+	std::vector<int> branchPreviousX;
+	std::vector<int> branchPreviousY;
+	std::vector<int> branchCurrentX;
+	std::vector<int> branchCurrentY;
+	int cloudX, cloudPreviousX, cloudCurrentX;
+	int fireballSize;
+	int lastItemUnderMouse;
 
 	// GDI stuff
-	HBRUSH normal_brush, border_brush, selected_slot_brush;
-	RECT temp_rect;
-	HPEN normal_pen, timeline_pen, select_pen;
-	HBITMAP branches_hbitmap, hOldBitmap, buffer_hbitmap, hOldBitmap1, branchesSpritesheet, hOldBitmap2;
+	HBRUSH normalBrush, borderBrush, selectedSlotBrush;
+	RECT tempRect;
+	HPEN normalPen, timelinePen, selectPen;
+	HBITMAP hBranchesBitmap, hOldBitmap, hBufferBitmap, hOldBitmap1, hBranchesSpritesheet, hOldBitmap2;
 	HDC hBitmapDC, hBufferDC, hSpritesheetDC;
 	TRIVERTEX vertex[2];
 	GRADIENT_RECT gRect;
-	RECT branches_bitmap_rect;
+	RECT branchesBitmapRect;
 
 	// temps
-	std::vector<int> GridX;				// in grid units
-	std::vector<int> GridY;
-	std::vector<int> GridHeight;
-	std::vector<std::vector<uint8>> Children;
+	std::vector<int> gridX;				// measured in grid units, not in pixels
+	std::vector<int> gridY;
+	std::vector<int> gridHeight;
+	std::vector<std::vector<uint8>> children;
 
 };

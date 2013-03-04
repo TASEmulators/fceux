@@ -9,20 +9,20 @@ public:
 	void reset();
 	void update();
 
-	void InputToggle(int start, int end, int joy, int button, int consecutive_tag = 0);
-	void InputSetPattern(int start, int end, int joy, int button, int consecutive_tag = 0);
+	void toggleInput(int start, int end, int joy, int button, int consecutivenessTag = 0);
+	void setInputUsingPattern(int start, int end, int joy, int button, int consecutivenessTag = 0);
 
-	bool FrameColumnSet();
-	bool FrameColumnSetPattern();
-	bool InputColumnSet(int joy, int button);
-	bool InputColumnSetPattern(int joy, int button);
-	void SetMarkers();
-	void RemoveMarkers();
+	bool handleColumnSet();
+	bool handleColumnSetUsingPattern();
+	bool handleInputColumnSet(int joy, int button);
+	bool handleInputColumnSetUsingPattern(int joy, int button);
+	void setMarkers();
+	void removeMarkers();
 
-	std::vector<std::string> autofire_patterns_names;
-	std::vector<std::vector<uint8>> autofire_patterns;
+	std::vector<std::string> patternsNames;
+	std::vector<std::vector<uint8>> patterns;
 
 private:
-	bool ReadString(EMUFILE *is, std::string& dest);
+	bool readStringFromPatternsFile(EMUFILE *is, std::string& dest);
 
 };

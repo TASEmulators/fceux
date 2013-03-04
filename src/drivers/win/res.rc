@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Нейтральный resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
@@ -1476,10 +1476,10 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDCANCEL,94,55,50,14
     ICON            IDI_ICON4,IDC_STATIC,11,11,20,20
-    LTEXT           "TAS Editor",IDC_TASEDITOR_NAME,43,8,83,13
-    LTEXT           "Version 1.0",IDC_STATIC,63,25,37,8
-    LTEXT           "Created by AnS",IDC_STATIC,138,12,52,8
-    LTEXT           "Originated from TASEdit",IDC_STATIC,138,25,83,9,SS_NOPREFIX
+    LTEXT           "TAS Editor",IDC_TASEDITOR_NAME,43,8,84,13
+    LTEXT           "Version 1.01",IDC_STATIC,60,25,45,8
+    LTEXT           "Created by AnS",IDC_STATIC,138,12,58,8
+    LTEXT           "Originated from TASEdit",IDC_STATIC,138,25,85,9,SS_NOPREFIX
     LTEXT           "made by zeromus & adelikat",IDC_STATIC,138,35,96,9,SS_NOPREFIX
 END
 
@@ -2134,12 +2134,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // Нейтральный resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Russian (Russia) resources
+// Русский (Россия) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
 LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
@@ -2192,12 +2192,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Russian (Russia) resources
+#endif    // Русский (Россия) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// Английский (США) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -2431,7 +2431,7 @@ IDB_BITMAP_SELECTED17   BITMAP                  "res\\te_17_selected.bmp"
 IDB_BITMAP_SELECTED18   BITMAP                  "res\\te_18_selected.bmp"
 IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
-#endif    // English (United States) resources
+#endif    // Английский (США) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

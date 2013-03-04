@@ -21,20 +21,20 @@ Markers - Snapshot of Markers state
 
 MARKERS::MARKERS()
 {
-	already_compressed = false;
+	alreadyCompressed = false;
 }
 
 void MARKERS::save(EMUFILE *os)
 {
 	// write size
-	int size = markers_array.size();
+	int size = markersArray.size();
 	int len;
 	write32le(size, os);
 	// write array
-	if (!already_compressed)
-		compress_data();
-	write32le(markers_array_compressed.size(), os);
-	os->fwrite(&markers_array_compressed[0], markers_array_compressed.size());
+	if (!alreadyCompressed)
+		compressData();
+	write32le(compressedMarkersArray.size(), os);
+	os->fwrite(&compressedMarkersArray[0], compressedMarkersArray.size());
 	// write notes
 	size = notes.size();
 	write32le(size, os);
@@ -52,16 +52,16 @@ bool MARKERS::load(EMUFILE *is)
 	int size;
 	if (read32le(&size, is))
 	{
-		markers_array.resize(size);
+		markersArray.resize(size);
 		// read and uncompress array
-		already_compressed = true;
+		alreadyCompressed = true;
 		int comprlen, len;
 		uLongf destlen = size * sizeof(int);
 		if (!read32le(&comprlen, is)) return true;
 		if (comprlen <= 0) return true;
-		markers_array_compressed.resize(comprlen);
-		if (is->fread(&markers_array_compressed[0], comprlen) != comprlen) return true;
-		int e = uncompress((uint8*)&markers_array[0], &destlen, &markers_array_compressed[0], comprlen);
+		compressedMarkersArray.resize(comprlen);
+		if (is->fread(&compressedMarkersArray[0], comprlen) != comprlen) return true;
+		int e = uncompress((uint8*)&markersArray[0], &destlen, &compressedMarkersArray[0], comprlen);
 		if (e != Z_OK && e != Z_BUF_ERROR) return true;
 		// read notes
 		if (read32le(&size, is) && size >= 0)
@@ -103,21 +103,21 @@ bool MARKERS::skipLoad(EMUFILE *is)
 	return true;
 }
 
-void MARKERS::compress_data()
+void MARKERS::compressData()
 {
-	int len = markers_array.size() * sizeof(int);
+	int len = markersArray.size() * sizeof(int);
 	uLongf comprlen = (len>>9)+12 + len;
-	markers_array_compressed.resize(comprlen);
-	compress(&markers_array_compressed[0], &comprlen, (uint8*)&markers_array[0], len);
-	markers_array_compressed.resize(comprlen);
-	already_compressed = true;
+	compressedMarkersArray.resize(comprlen);
+	compress(&compressedMarkersArray[0], &comprlen, (uint8*)&markersArray[0], len);
+	compressedMarkersArray.resize(comprlen);
+	alreadyCompressed = true;
 }
-bool MARKERS::Get_already_compressed()
+bool MARKERS::isAalreadyCompressed()
 {
-	return already_compressed;
+	return alreadyCompressed;
 }
-void MARKERS::Reset_already_compressed()
+void MARKERS::resetCompressedStatus()
 {
-	already_compressed = false;
+	alreadyCompressed = false;
 }
 

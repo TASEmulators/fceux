@@ -402,10 +402,10 @@ static int JoedCharWidth(uint8 ch)
 
 char target[64][256];
 
-void DrawTextTransWH(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor, int max_w, int max_h, int border)
+void DrawTextTransWH(uint8 *dest, int width, uint8 *textmsg, uint8 fgcolor, int max_w, int max_h, int border)
 {
-	unsigned int beginx=2, x=beginx;
-	unsigned int y=2;
+	int beginx=2, x=beginx;
+	int y=2;
 
 	memset(target, 0, 64 * 256);
 

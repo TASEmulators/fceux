@@ -21,17 +21,17 @@ Splicer - Tool for montage
 #include "taseditor_project.h"
 #include "../Win32InputBox.h"
 
-extern TASEDITOR_WINDOW taseditor_window;
-extern TASEDITOR_CONFIG taseditor_config;
+extern TASEDITOR_WINDOW taseditorWindow;
+extern TASEDITOR_CONFIG taseditorConfig;
 extern HISTORY history;
-extern MARKERS_MANAGER markers_manager;
+extern MARKERS_MANAGER markersManager;
 extern PLAYBACK playback;
 extern GREENZONE greenzone;
-extern PIANO_ROLL piano_roll;
+extern PIANO_ROLL pianoRoll;
 extern SELECTION selection;
 
-extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
-extern int GetInputType(MovieData& md);
+extern int joysticksPerFrame[INPUT_TYPES_TOTAL];
+extern int getInputType(MovieData& md);
 
 // resources
 char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
@@ -50,24 +50,24 @@ SPLICER::SPLICER()
 
 void SPLICER::init()
 {
-	hwndTextSelection = GetDlgItem(taseditor_window.hwndTasEditor, IDC_TEXT_SELECTION);
-	hwndTextClipboard = GetDlgItem(taseditor_window.hwndTasEditor, IDC_TEXT_CLIPBOARD);
+	hwndSelectionInfo = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_TEXT_SELECTION);
+	hwndClipboardInfo = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_TEXT_CLIPBOARD);
 
 	reset();
-	if (clipboard_selection.empty())
-		CheckClipboard();
-	RedrawTextClipboard();
+	if (clipboardSelection.empty())
+		checkClipboardContents();
+	redrawInfoAboutClipboard();
 }
 void SPLICER::reset()
 {
-	must_redraw_selection_text = true;
+	mustRedrawInfoAboutSelection = true;
 }
 void SPLICER::update()
 {
 	// redraw Selection info text of needed
-	if (must_redraw_selection_text)
+	if (mustRedrawInfoAboutSelection)
 	{
-		int size = selection.GetCurrentSelectionSize();
+		int size = selection.getCurrentRowsSelectionSize();
 		if (size)
 		{
 			char new_text[100];
@@ -84,7 +84,7 @@ void SPLICER::update()
 				strcat(new_text, numTextRow);
 			}
 			// columns
-			int columns = NUM_JOYPAD_BUTTONS * joysticks_per_frame[GetInputType(currMovieData)];	// in future the number of columns will depend on selected columns
+			int columns = NUM_JOYPAD_BUTTONS * joysticksPerFrame[getInputType(currMovieData)];	// in future the number of columns will depend on selected columns
 			if (columns > 1)
 			{
 				_itoa(columns, num, 10);
@@ -94,30 +94,30 @@ void SPLICER::update()
 			{
 				strcat(new_text, numTextColumn);
 			}
-			SetWindowText(hwndTextSelection, new_text);
+			SetWindowText(hwndSelectionInfo, new_text);
 		} else
 		{
-			SetWindowText(hwndTextSelection, selectionEmptyText);
+			SetWindowText(hwndSelectionInfo, selectionEmptyText);
 		}
-		must_redraw_selection_text = false;
+		mustRedrawInfoAboutSelection = false;
 	}
 }
 // ----------------------------------------------------------------------------------------------
-void SPLICER::CloneFrames()
+void SPLICER::cloneSelectedFrames()
 {
-	SelectionFrames* current_selection = selection.MakeStrobe();
+	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
 	int frames = current_selection->size();
 	if (!frames) return;
 
-	selection.ClearSelection();			// Selection will be moved down, so that same frames are selected
+	selection.clearAllRowsSelection();			// Selection will be moved down, so that same frames are selected
 	bool markers_changed = false;
 	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
 	// insert frames before each selection, but consecutive Selection lines are accounted as single region
-	SelectionFrames::reverse_iterator next_it;
-	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
+	RowsSelection::reverse_iterator next_it;
+	RowsSelection::reverse_iterator current_selection_rend = current_selection->rend();
 	int shift = frames;
 	frames = 1;
-	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
+	for(RowsSelection::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
 	{
 		next_it = it;
 		next_it++;
@@ -125,48 +125,48 @@ void SPLICER::CloneFrames()
 		{
 			// end of current region
 			currMovieData.cloneRegion(*it, frames);
-			greenzone.laglog.InsertFrame(*it, false, frames);
-			if (taseditor_config.bind_markers)
+			greenzone.lagLog.insertFrame(*it, false, frames);
+			if (taseditorConfig.bindMarkersToInput)
 			{
 				// Markers are not cloned
-				if (markers_manager.insertEmpty(*it,frames))
+				if (markersManager.insertEmpty(*it,frames))
 					markers_changed = true;
 			}
-			selection.SetRegionSelection((*it) + shift, (*it) + shift + frames);
+			selection.setRegionOfRowsSelection((*it) + shift, (*it) + shift + frames);
 			shift -= frames;
 			// start accumulating next region
 			frames = 1;
 		} else frames++;
 	}
 	// check and register changes
-	int first_changes = history.RegisterChanges(MODTYPE_CLONE, *current_selection->begin(), -1, 0, NULL, 0, current_selection);
+	int first_changes = history.registerChanges(MODTYPE_CLONE, *current_selection->begin(), -1, 0, NULL, 0, current_selection);
 	if (first_changes >= 0)
 	{
-		greenzone.InvalidateAndCheck(first_changes);
+		greenzone.invalidateAndUpdatePlayback(first_changes);
 	} else if (markers_changed)
 	{
-		history.RegisterMarkersChange(MODTYPE_MARKER_SHIFT, *current_selection->begin());
-		piano_roll.RedrawList();
+		history.registerMarkersChange(MODTYPE_MARKER_SHIFT, *current_selection->begin());
+		pianoRoll.redraw();
 	}
 	if (markers_changed)
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
+		selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
 }
 
-void SPLICER::InsertFrames()
+void SPLICER::insertSelectedFrames()
 {
-	SelectionFrames* current_selection = selection.MakeStrobe();
+	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
 	int frames = current_selection->size();
 	if (!frames) return;
 
-	selection.ClearSelection();			// Selection will be moved down, so that same frames are selected
+	selection.clearAllRowsSelection();			// Selection will be moved down, so that same frames are selected
 	bool markers_changed = false;
 	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
 	// insert frames before each selection, but consecutive Selection lines are accounted as single region
-	SelectionFrames::reverse_iterator next_it;
-	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
+	RowsSelection::reverse_iterator next_it;
+	RowsSelection::reverse_iterator current_selection_rend = current_selection->rend();
 	int shift = frames;
 	frames = 1;
-	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
+	for(RowsSelection::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
 	{
 		next_it = it;
 		next_it++;
@@ -174,37 +174,37 @@ void SPLICER::InsertFrames()
 		{
 			// end of current region
 			currMovieData.insertEmpty(*it, frames);
-			greenzone.laglog.InsertFrame(*it, false, frames);
-			if (taseditor_config.bind_markers)
+			greenzone.lagLog.insertFrame(*it, false, frames);
+			if (taseditorConfig.bindMarkersToInput)
 			{
-				if (markers_manager.insertEmpty(*it, frames))
+				if (markersManager.insertEmpty(*it, frames))
 					markers_changed = true;
 			}
-			selection.SetRegionSelection((*it) + shift, (*it) + shift + frames);
+			selection.setRegionOfRowsSelection((*it) + shift, (*it) + shift + frames);
 			shift -= frames;
 			// start accumulating next region
 			frames = 1;
 		} else frames++;
 	}
 	// check and register changes
-	int first_changes = history.RegisterChanges(MODTYPE_INSERT, *current_selection->begin(), -1, 0, NULL, 0, current_selection);
+	int first_changes = history.registerChanges(MODTYPE_INSERT, *current_selection->begin(), -1, 0, NULL, 0, current_selection);
 	if (first_changes >= 0)
 	{
-		greenzone.InvalidateAndCheck(first_changes);
+		greenzone.invalidateAndUpdatePlayback(first_changes);
 	} else if (markers_changed)
 	{
-		history.RegisterMarkersChange(MODTYPE_MARKER_SHIFT, *current_selection->begin());
-		piano_roll.RedrawList();
+		history.registerMarkersChange(MODTYPE_MARKER_SHIFT, *current_selection->begin());
+		pianoRoll.redraw();
 	}
 	if (markers_changed)
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
+		selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
 }
 
-void SPLICER::InsertNumFrames()
+void SPLICER::insertNumberOfFrames()
 {
-	SelectionFrames* current_selection = selection.MakeStrobe();
+	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
 	int frames = current_selection->size();
-	if (CWin32InputBox::GetInteger("Insert number of Frames", "How many frames?", frames, taseditor_window.hwndTasEditor) == IDOK)
+	if (CWin32InputBox::GetInteger("Insert number of Frames", "How many frames?", frames, taseditorWindow.hwndTASEditor) == IDOK)
 	{
 		if (frames > 0)
 		{
@@ -220,103 +220,103 @@ void SPLICER::InsertNumFrames()
 				index = currFrameCounter;
 			}
 			currMovieData.insertEmpty(index, frames);
-			greenzone.laglog.InsertFrame(index, false, frames);
-			if (taseditor_config.bind_markers)
+			greenzone.lagLog.insertFrame(index, false, frames);
+			if (taseditorConfig.bindMarkersToInput)
 			{
-				if (markers_manager.insertEmpty(index, frames))
+				if (markersManager.insertEmpty(index, frames))
 					markers_changed = true;
 			}
 			if (current_selection->size())
 			{
 				// shift Selection down, so that same frames are selected
-				piano_roll.UpdateItemCount();
-				selection.ClearSelection();
-				SelectionFrames::iterator current_selection_end = current_selection->end();
-				for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
-					selection.SetRowSelection((*it) + frames);
+				pianoRoll.updateLinesCount();
+				selection.clearAllRowsSelection();
+				RowsSelection::iterator current_selection_end = current_selection->end();
+				for(RowsSelection::iterator it(current_selection->begin()); it != current_selection_end; it++)
+					selection.setRowSelection((*it) + frames);
 			}
 			// check and register changes
-			int first_changes = history.RegisterChanges(MODTYPE_INSERTNUM, index, -1, frames);
+			int first_changes = history.registerChanges(MODTYPE_INSERTNUM, index, -1, frames);
 			if (first_changes >= 0)
 			{
-				greenzone.InvalidateAndCheck(first_changes);
+				greenzone.invalidateAndUpdatePlayback(first_changes);
 			} else if (markers_changed)
 			{
-				history.RegisterMarkersChange(MODTYPE_MARKER_SHIFT, index);
-				piano_roll.RedrawList();
+				history.registerMarkersChange(MODTYPE_MARKER_SHIFT, index);
+				pianoRoll.redraw();
 			}
 			if (markers_changed)
-				selection.must_find_current_marker = playback.must_find_current_marker = true;
+				selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
 		}
 	}
 }
 
-void SPLICER::DeleteFrames()
+void SPLICER::deleteSelectedFrames()
 {
-	SelectionFrames* current_selection = selection.MakeStrobe();
+	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
 	if (current_selection->size() == 0) return;
 
 	bool markers_changed = false;
 	int start_index = *current_selection->begin();
 	int end_index = *current_selection->rbegin();
-	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
+	RowsSelection::reverse_iterator current_selection_rend = current_selection->rend();
 	// delete frames on each selection, going backwards
-	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
+	for(RowsSelection::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
 	{
 		currMovieData.eraseRecords(*it);
-		greenzone.laglog.EraseFrame(*it);
-		if (taseditor_config.bind_markers)
+		greenzone.lagLog.eraseFrame(*it);
+		if (taseditorConfig.bindMarkersToInput)
 		{
-			if (markers_manager.EraseMarker(*it))
+			if (markersManager.eraseMarker(*it))
 				markers_changed = true;
 		}
 	}
 	// check if user deleted all frames
 	if (!currMovieData.getNumRecords())
-		playback.StartFromZero();
+		playback.restartPlaybackFromZeroGround();
 	// reduce Piano Roll
-	piano_roll.UpdateItemCount();
+	pianoRoll.updateLinesCount();
 	// check and register changes
-	int result = history.RegisterChanges(MODTYPE_DELETE, start_index, -1, 0, NULL, 0, current_selection);
+	int result = history.registerChanges(MODTYPE_DELETE, start_index, -1, 0, NULL, 0, current_selection);
 	if (result >= 0)
 	{
-		greenzone.InvalidateAndCheck(result);
+		greenzone.invalidateAndUpdatePlayback(result);
 	} else
 	{
 		// check for special case: user deleted a bunch of empty frames the end of the movie
-		greenzone.InvalidateAndCheck(currMovieData.getNumRecords() - 1);
+		greenzone.invalidateAndUpdatePlayback(currMovieData.getNumRecords() - 1);
 		if (markers_changed)
-			history.RegisterMarkersChange(MODTYPE_MARKER_SHIFT, start_index);
+			history.registerMarkersChange(MODTYPE_MARKER_SHIFT, start_index);
 	}
 	if (markers_changed)
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
+		selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
 }
 
-void SPLICER::ClearFrames(SelectionFrames* current_selection)
+void SPLICER::clearSelectedFrames(RowsSelection* currentSelectionOverride)
 {
 	bool cut = true;
-	if (!current_selection)
+	if (!currentSelectionOverride)
 	{
 		cut = false;
-		current_selection = selection.MakeStrobe();
-		if (current_selection->size() == 0) return;
+		currentSelectionOverride = selection.getCopyOfCurrentRowsSelection();
+		if (currentSelectionOverride->size() == 0) return;
 	}
 
 	// clear Input on each selected frame
-	SelectionFrames::iterator current_selection_end(current_selection->end());
-	for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
+	RowsSelection::iterator current_selection_end(currentSelectionOverride->end());
+	for(RowsSelection::iterator it(currentSelectionOverride->begin()); it != current_selection_end; it++)
 	{
 		currMovieData.records[*it].clear();
 	}
 	if (cut)
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CUT, *current_selection->begin(), *current_selection->rbegin()));
+		greenzone.invalidateAndUpdatePlayback(history.registerChanges(MODTYPE_CUT, *currentSelectionOverride->begin(), *currentSelectionOverride->rbegin()));
 	else
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CLEAR, *current_selection->begin(), *current_selection->rbegin()));
+		greenzone.invalidateAndUpdatePlayback(history.registerChanges(MODTYPE_CLEAR, *currentSelectionOverride->begin(), *currentSelectionOverride->rbegin()));
 }
 
-void SPLICER::Truncate()
+void SPLICER::truncateMovie()
 {
-	int frame = selection.GetCurrentSelectionBeginning();
+	int frame = selection.getCurrentRowsSelectionBeginning();
 	if (frame < 0) frame = currFrameCounter;
 
 	if (currMovieData.getNumRecords() > frame+1)
@@ -324,49 +324,49 @@ void SPLICER::Truncate()
 		int last_frame_was = currMovieData.getNumRecords() - 1;
 		currMovieData.truncateAt(frame+1);
 		bool markers_changed = false;
-		if (taseditor_config.bind_markers)
+		if (taseditorConfig.bindMarkersToInput)
 		{
-			if (markers_manager.SetMarkersSize(frame+1))
+			if (markersManager.setMarkersArraySize(frame+1))
 			{
 				markers_changed = true;
-				selection.must_find_current_marker = playback.must_find_current_marker = true;
+				selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
 			}
 		}
-		piano_roll.UpdateItemCount();
-		int result = history.RegisterChanges(MODTYPE_TRUNCATE, frame + 1);
+		pianoRoll.updateLinesCount();
+		int result = history.registerChanges(MODTYPE_TRUNCATE, frame + 1);
 		if (result >= 0)
 		{
-			greenzone.InvalidateAndCheck(result);
+			greenzone.invalidateAndUpdatePlayback(result);
 		} else
 		{
 			// check for special case: user truncated empty frames of the movie
-			greenzone.InvalidateAndCheck(currMovieData.getNumRecords() - 1);
+			greenzone.invalidateAndUpdatePlayback(currMovieData.getNumRecords() - 1);
 			if (markers_changed)
-				history.RegisterMarkersChange(MODTYPE_MARKER_REMOVE, frame+1, last_frame_was);
+				history.registerMarkersChange(MODTYPE_MARKER_REMOVE, frame+1, last_frame_was);
 		}
 	}
 }
 
-bool SPLICER::Copy(SelectionFrames* current_selection)
+bool SPLICER::copySelectedInputToClipboard(RowsSelection* currentSelectionOverride)
 {
-	if (!current_selection)
+	if (!currentSelectionOverride)
 	{
-		current_selection = selection.MakeStrobe();
-		if (current_selection->size() == 0) return false;
+		currentSelectionOverride = selection.getCopyOfCurrentRowsSelection();
+		if (currentSelectionOverride->size() == 0) return false;
 	}
 
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
-	SelectionFrames::iterator current_selection_end(current_selection->end());
-	int num_joypads = joysticks_per_frame[GetInputType(currMovieData)];
+	RowsSelection::iterator current_selection_begin(currentSelectionOverride->begin());
+	RowsSelection::iterator current_selection_end(currentSelectionOverride->end());
+	int num_joypads = joysticksPerFrame[getInputType(currMovieData)];
 	int cframe = (*current_selection_begin) - 1;
     try 
 	{
-		int range = (*current_selection->rbegin() - *current_selection_begin) + 1;
+		int range = (*currentSelectionOverride->rbegin() - *current_selection_begin) + 1;
 
 		std::stringstream clipString;
 		clipString << "TAS " << range << std::endl;
 
-		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+		for(RowsSelection::iterator it(current_selection_begin); it != current_selection_end; it++)
 		{
 			if (*it > cframe+1)
 			{
@@ -393,7 +393,7 @@ bool SPLICER::Copy(SelectionFrames* current_selection)
 			clipString << std::endl;
 		}
 		// write data to clipboard
-		if (!OpenClipboard(taseditor_window.hwndTasEditor))
+		if (!OpenClipboard(taseditorWindow.hwndTASEditor))
 			return false;
 		EmptyClipboard();
 
@@ -416,28 +416,28 @@ bool SPLICER::Copy(SelectionFrames* current_selection)
 	}
 	// copied successfully
 	// memorize currently strobed Selection data to clipboard_selection
-	clipboard_selection = *current_selection;
-	RedrawTextClipboard();
+	clipboardSelection = *currentSelectionOverride;
+	redrawInfoAboutClipboard();
 	return true;
 }
-void SPLICER::Cut()
+void SPLICER::cutSelectedInputToClipboard()
 {
-	SelectionFrames* current_selection = selection.MakeStrobe();
+	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
 	if (current_selection->size() == 0) return;
 
-	if (Copy(current_selection))
+	if (copySelectedInputToClipboard(current_selection))
 	{
-		ClearFrames(current_selection);
+		clearSelectedFrames(current_selection);
 	}
 }
-bool SPLICER::Paste()
+bool SPLICER::pasteInputFromClipboard()
 {
-	SelectionFrames* current_selection = selection.MakeStrobe();
+	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
 	if (current_selection->size() == 0) return false;
 
-	if (!OpenClipboard(taseditor_window.hwndTasEditor)) return false;
+	if (!OpenClipboard(taseditorWindow.hwndTASEditor)) return false;
 
-	int num_joypads = joysticks_per_frame[GetInputType(currMovieData)];
+	int num_joypads = joysticksPerFrame[getInputType(currMovieData)];
 	bool result = false;
 	int pos = *(current_selection->begin());
 	HANDLE hGlobal = GetClipboardData(CF_TEXT);
@@ -454,7 +454,7 @@ bool SPLICER::Paste()
 			if (currMovieData.getNumRecords() < pos+range)
 			{
 				currMovieData.insertEmpty(currMovieData.getNumRecords(),pos+range-currMovieData.getNumRecords());
-				markers_manager.update();
+				markersManager.update();
 			}
 
 			pGlobal = strchr(pGlobal, '\n');
@@ -478,7 +478,7 @@ bool SPLICER::Paste()
 					pos++;
 				}
 				
-				if (taseditor_config.superimpose == SUPERIMPOSE_UNCHECKED)
+				if (taseditorConfig.superimpose == SUPERIMPOSE_UNCHECKED)
 				{
 					currMovieData.records[pos].joysticks[0] = 0;
 					currMovieData.records[pos].joysticks[1] = 0;
@@ -494,7 +494,7 @@ bool SPLICER::Paste()
 					{
 					case '|': // Joystick mark
 						// flush buttons to movie data
-						if (taseditor_config.superimpose == SUPERIMPOSE_CHECKED || (taseditor_config.superimpose == SUPERIMPOSE_INDETERMINATE && new_buttons == 0))
+						if (taseditorConfig.superimpose == SUPERIMPOSE_CHECKED || (taseditorConfig.superimpose == SUPERIMPOSE_INDETERMINATE && new_buttons == 0))
 						{
 							flash_joy[joy] |= (new_buttons & (~currMovieData.records[pos].joysticks[joy]));		// highlight buttons that are new
 							currMovieData.records[pos].joysticks[joy] |= new_buttons;
@@ -520,7 +520,7 @@ bool SPLICER::Paste()
 					frame++;
 				}
 				// before going to next frame, flush buttons to movie data
-				if (taseditor_config.superimpose == SUPERIMPOSE_CHECKED || (taseditor_config.superimpose == SUPERIMPOSE_INDETERMINATE && new_buttons == 0))
+				if (taseditorConfig.superimpose == SUPERIMPOSE_CHECKED || (taseditorConfig.superimpose == SUPERIMPOSE_INDETERMINATE && new_buttons == 0))
 				{
 					flash_joy[joy] |= (new_buttons & (~currMovieData.records[pos].joysticks[joy]));		// highlight buttons that are new
 					currMovieData.records[pos].joysticks[joy] |= new_buttons;
@@ -533,35 +533,35 @@ bool SPLICER::Paste()
 				pGlobal = strchr(pGlobal, '\n');
 			}
 
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PASTE, *(current_selection->begin()), pos));
+			greenzone.invalidateAndUpdatePlayback(history.registerChanges(MODTYPE_PASTE, *(current_selection->begin()), pos));
 			// flash Piano Roll header columns that were changed during paste
 			for (int joy = 0; joy < num_joypads; ++joy)
 			{
 				for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
 				{
 					if (flash_joy[joy] & (1 << btn))
-						piano_roll.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
+						pianoRoll.setLightInHeaderColumn(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
 				}
 			}
 			result = true;
 		} else
 		{
-			SetWindowText(hwndTextClipboard, clipboardEmptyText);
+			SetWindowText(hwndClipboardInfo, clipboardEmptyText);
 		}
 		GlobalUnlock(hGlobal);
 	}
 	CloseClipboard();
 	return result;
 }
-bool SPLICER::PasteInsert()
+bool SPLICER::pasteInsertInputFromClipboard()
 {
-	SelectionFrames* current_selection = selection.MakeStrobe();
+	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
 	if (current_selection->size() == 0) return false;
 
-	if (!OpenClipboard(taseditor_window.hwndTasEditor)) return false;
+	if (!OpenClipboard(taseditorWindow.hwndTASEditor)) return false;
 
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
-	int num_joypads = joysticks_per_frame[GetInputType(currMovieData)];
+	RowsSelection::iterator current_selection_begin(current_selection->begin());
+	int num_joypads = joysticksPerFrame[getInputType(currMovieData)];
 	bool result = false;
 	bool markers_changed = false;
 	int pos = *current_selection_begin;
@@ -574,9 +574,9 @@ bool SPLICER::PasteInsert()
 		if (pGlobal[0]=='T' && pGlobal[1]=='A' && pGlobal[2]=='S')
 		{
 			// make sure Markers have the same size as movie
-			markers_manager.update();
+			markersManager.update();
 			// create inserted_set (for Input history hot changes)
-			SelectionFrames inserted_set;
+			RowsSelection inserted_set;
 
 			// Extract number of frames
 			int range;
@@ -597,7 +597,7 @@ bool SPLICER::PasteInsert()
 					if (currMovieData.getNumRecords() < pos)
 					{
 						currMovieData.insertEmpty(currMovieData.getNumRecords(), pos - currMovieData.getNumRecords());
-						markers_manager.update();
+						markersManager.update();
 					}
 					while (*frame && *frame != '\n' && *frame != '|')
 						++frame;
@@ -609,10 +609,10 @@ bool SPLICER::PasteInsert()
 				
 				// insert new frame
 				currMovieData.insertEmpty(pos, 1);
-				greenzone.laglog.InsertFrame(pos, false, 1);
-				if (taseditor_config.bind_markers)
+				greenzone.lagLog.insertFrame(pos, false, 1);
+				if (taseditorConfig.bindMarkersToInput)
 				{
-					if (markers_manager.insertEmpty(pos, 1))
+					if (markersManager.insertEmpty(pos, 1))
 						markers_changed = true;
 				}
 				inserted_set.insert(pos);
@@ -643,31 +643,31 @@ bool SPLICER::PasteInsert()
 
 				pGlobal = strchr(pGlobal, '\n');
 			}
-			markers_manager.update();
-			int first_changes = history.RegisterChanges(MODTYPE_PASTEINSERT, *current_selection_begin, -1, 0, NULL, 0, &inserted_set);
+			markersManager.update();
+			int first_changes = history.registerChanges(MODTYPE_PASTEINSERT, *current_selection_begin, -1, 0, NULL, 0, &inserted_set);
 			if (first_changes >= 0)
 			{
-				greenzone.InvalidateAndCheck(first_changes);
+				greenzone.invalidateAndUpdatePlayback(first_changes);
 			} else if (markers_changed)
 			{
-				history.RegisterMarkersChange(MODTYPE_MARKER_SHIFT, *current_selection->begin());
-				piano_roll.RedrawList();
+				history.registerMarkersChange(MODTYPE_MARKER_SHIFT, *current_selection->begin());
+				pianoRoll.redraw();
 			}
 			if (markers_changed)
-				selection.must_find_current_marker = playback.must_find_current_marker = true;
+				selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
 			// flash Piano Roll header columns that were changed during paste
 			for (int joy = 0; joy < num_joypads; ++joy)
 			{
 				for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
 				{
 					if (flash_joy[joy] & (1 << btn))
-						piano_roll.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
+						pianoRoll.setLightInHeaderColumn(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
 				}
 			}
 			result = true;
 		} else
 		{
-			SetWindowText(hwndTextClipboard, clipboardEmptyText);
+			SetWindowText(hwndClipboardInfo, clipboardEmptyText);
 		}
 		GlobalUnlock(hGlobal);
 	}
@@ -676,15 +676,15 @@ bool SPLICER::PasteInsert()
 }
 // ----------------------------------------------------------------------------------------------
 // retrieves some information from clipboard to clipboard_selection
-void SPLICER::CheckClipboard()
+void SPLICER::checkClipboardContents()
 {
-	if (OpenClipboard(taseditor_window.hwndTasEditor))
+	if (OpenClipboard(taseditorWindow.hwndTASEditor))
 	{
 		// check if clipboard contains TAS Editor Input data
 		HANDLE hGlobal = GetClipboardData(CF_TEXT);
 		if (hGlobal)
 		{
-			clipboard_selection.clear();
+			clipboardSelection.clear();
 			int current_pos = -1;
 			char *pGlobal = (char*)GlobalLock((HGLOBAL)hGlobal);
 			// TAS recording info starts with "TAS "
@@ -707,7 +707,7 @@ void SPLICER::CheckClipboard()
 						if (*frame=='|') ++frame;
 					} else
 						current_pos++;
-					clipboard_selection.insert(current_pos);
+					clipboardSelection.insert(current_pos);
 					// skip Input
 					pGlobal = strchr(pGlobal, '\n');
 				}
@@ -718,17 +718,17 @@ void SPLICER::CheckClipboard()
 	}
 }
 
-void SPLICER::RedrawTextClipboard()
+void SPLICER::redrawInfoAboutClipboard()
 {
-	if (clipboard_selection.size())
+	if (clipboardSelection.size())
 	{
 		char new_text[100];
 		strcpy(new_text, clipboardText);
 		char num[11];
 		// rows
-		if (clipboard_selection.size() > 1)
+		if (clipboardSelection.size() > 1)
 		{
-			_itoa(clipboard_selection.size(), num, 10);
+			_itoa(clipboardSelection.size(), num, 10);
 			strcat(new_text, num);
 			strcat(new_text, numTextRows);
 		} else
@@ -736,7 +736,7 @@ void SPLICER::RedrawTextClipboard()
 			strcat(new_text, numTextRow);
 		}
 		// columns
-		int columns = NUM_JOYPAD_BUTTONS * joysticks_per_frame[GetInputType(currMovieData)];	// in future the number of columns will depend on selected columns
+		int columns = NUM_JOYPAD_BUTTONS * joysticksPerFrame[getInputType(currMovieData)];	// in future the number of columns will depend on selected columns
 		if (columns > 1)
 		{
 			_itoa(columns, num, 10);
@@ -746,14 +746,14 @@ void SPLICER::RedrawTextClipboard()
 		{
 			strcat(new_text, numTextColumn);
 		}
-		SetWindowText(hwndTextClipboard, new_text);
+		SetWindowText(hwndClipboardInfo, new_text);
 	} else
-		SetWindowText(hwndTextClipboard, clipboardEmptyText);
+		SetWindowText(hwndClipboardInfo, clipboardEmptyText);
 }
 
-SelectionFrames& SPLICER::GetClipboardSelection()
+RowsSelection& SPLICER::getClipboardSelection()
 {
-	return clipboard_selection;
+	return clipboardSelection;
 }
 
 

@@ -73,8 +73,8 @@
 #include "taseditor.h"
 #include "taseditor/taseditor_window.h"
 
-extern TASEDITOR_WINDOW taseditor_window;
-extern bool taseditor_accelerator_keys;
+extern TASEDITOR_WINDOW taseditorWindow;
+extern bool taseditorEnableAcceleratorKeys;
 
 //---------------------------
 //mbg merge 6/29/06 - new aboutbox
@@ -345,15 +345,15 @@ int BlockingCheck()
 				}
 			}
 
-			if(!handled && taseditor_window.hwndTasEditor && taseditor_accelerator_keys)
+			if(!handled && taseditorWindow.hwndTASEditor && taseditorEnableAcceleratorKeys)
 			{
-				if(IsChild(taseditor_window.hwndTasEditor, msg.hwnd))
-					handled = TranslateAccelerator(taseditor_window.hwndTasEditor, fceu_hAccel, &msg);
+				if(IsChild(taseditorWindow.hwndTASEditor, msg.hwnd))
+					handled = TranslateAccelerator(taseditorWindow.hwndTASEditor, fceu_hAccel, &msg);
 			}
-			if(!handled && taseditor_window.hwndFindNote)
+			if(!handled && taseditorWindow.hwndFindNote)
 			{
-				if(IsChild(taseditor_window.hwndFindNote, msg.hwnd))
-					handled = IsDialogMessage(taseditor_window.hwndFindNote, &msg);
+				if(IsChild(taseditorWindow.hwndFindNote, msg.hwnd))
+					handled = IsDialogMessage(taseditorWindow.hwndFindNote, &msg);
 			}
 			/* //adelikat - Currently no accel keys are used in the main window.  Uncomment this block to activate them.
 			if(!handled)
@@ -419,8 +419,8 @@ void DoFCEUExit()
 		return;
 
 	// If user was asked to save changes in TAS Editor and chose cancel, don't close FCEUX
-	extern bool ExitTasEditor();
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR) && !ExitTasEditor())
+	extern bool exitTASEditor();
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR) && !exitTASEditor())
 		return;
 
 	if (CloseMemoryWatch() && AskSave())		//If user was asked to save changes in the memory watch dialog or ram watch, and chose cancel, don't close FCEUX!
@@ -936,7 +936,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 	//update debugging displays
 	_updateWindow();
 	// update TAS Editor
-	UpdateTasEditor();
+	updateTASEditor();
 
 	extern bool JustFrameAdvanced;
 

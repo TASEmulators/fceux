@@ -52,7 +52,7 @@
 #include "drivers/win/window.h"
 #include "drivers/win/ntview.h"
 #include "drivers/win/taseditor.h"
-extern bool Taseditor_rewind_now;
+extern bool mustRewindNow;
 #endif // WIN32
 
 //it is easier to declare these input drivers extern here than include a bunch of files
@@ -853,7 +853,7 @@ static void CommandSelectSaveSlot(void)
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
 #ifdef WIN32
-		Taseditor_EMUCMD(execcmd);
+		handleEmuCmdByTaseditor(execcmd);
 #endif
 	} else
 	{
@@ -871,7 +871,7 @@ static void CommandStateSave(void)
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
 #ifdef WIN32
-		Taseditor_EMUCMD(execcmd);
+		handleEmuCmdByTaseditor(execcmd);
 #endif
 	} else
 	{
@@ -892,7 +892,7 @@ static void CommandStateLoad(void)
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
 #ifdef WIN32
-		Taseditor_EMUCMD(execcmd);
+		handleEmuCmdByTaseditor(execcmd);
 #endif
 	} else
 	{
@@ -955,8 +955,8 @@ void LagCounterToggle(void)
 static void LaunchTasEditor(void)
 {
 #ifdef WIN32
-	extern bool EnterTasEditor();
-	EnterTasEditor();
+	extern bool enterTASEditor();
+	enterTASEditor();
 #endif
 }
 
@@ -1131,7 +1131,7 @@ static void ReloadRom(void)
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
 		// load most recent project
-		Taseditor_EMUCMD(execcmd);
+		handleEmuCmdByTaseditor(execcmd);
 	} else
 	{
 		// load most recent ROM
@@ -1180,13 +1180,13 @@ void ToggleFullscreen()
 static void TaseditorRewindOn(void)
 {
 #ifdef WIN32
-	Taseditor_rewind_now = true;
+	mustRewindNow = true;
 #endif
 }
 static void TaseditorRewindOff(void)
 {
 #ifdef WIN32
-	Taseditor_rewind_now = false;
+	mustRewindNow = false;
 #endif
 }
 
@@ -1194,6 +1194,6 @@ static void TaseditorCommand(void)
 {
 #ifdef WIN32
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		Taseditor_EMUCMD(execcmd);
+		handleEmuCmdByTaseditor(execcmd);
 #endif
 }

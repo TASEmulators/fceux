@@ -15,7 +15,7 @@
 #define KEYWORDS_LINE_MIN_SEQUENCE 1
 #define MIN_PRIORITY_TRESHOLD 5.0
 
-enum
+enum MARKER_NOTE_EDIT_MODES
 {
 	MARKER_NOTE_EDIT_NONE, 
 	MARKER_NOTE_EDIT_UPPER, 
@@ -34,40 +34,40 @@ public:
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is, unsigned int offset);
 
-	int GetMarkersSize();
-	bool SetMarkersSize(int new_size);
+	int getMarkersArraySize();
+	bool setMarkersArraySize(int newSize);
 
-	int GetMarker(int frame);
-	int GetMarkerUp(int start_frame);
-	int GetMarkerUp(MARKERS& target_markers, int start_frame);		// special version of the function
-	int GetMarkerFrame(int marker_id);
+	int getMarkerAtFrame(int frame);
+	int getMarkerAboveFrame(int startFrame);
+	int getMarkerAboveFrame(MARKERS& targetMarkers, int startFrame);		// special version of the function
+	int getMarkerFrameNumber(int markerID);
 
-	int SetMarker(int frame);
-	void ClearMarker(int frame);
-	void ToggleMarker(int frame);
+	int setMarkerAtFrame(int frame);
+	void removeMarkerFromFrame(int frame);
+	void toggleMarkerAtFrame(int frame);
 
-	bool EraseMarker(int frame, int frames = 1);
-	bool insertEmpty(int at, int frames);
+	bool eraseMarker(int frame, int numFrames = 1);
+	bool insertEmpty(int at, int numFrames);
 
-	int GetNotesSize();
-	std::string GetNote(int index);
-	std::string GetNote(MARKERS& target_markers, int index);		// special version of the function
-	void SetNote(int index, const char* new_text);
+	int getNotesSize();
+	std::string getNoteCopy(int index);
+	std::string getNoteCopy(MARKERS& targetMarkers, int index);		// special version of the function
+	void setNote(int index, const char* newText);
 
-	void MakeCopyTo(MARKERS& destination);
-	void RestoreFromCopy(MARKERS& source);
+	void makeCopyOfCurrentMarkersTo(MARKERS& destination);
+	void restoreMarkersFromCopy(MARKERS& source);
 
-	bool checkMarkersDiff(MARKERS& their_markers);
+	bool checkMarkersDiff(MARKERS& theirMarkers);
 
-	void FindSimilar();
-	void FindNextSimilar();
+	void findSimilarNote();
+	void findNextSimilarNote();
 
-	void UpdateMarkerNote();
+	void updateEditedMarkerNote();
 
 	// not saved vars
-	int marker_note_edit;
-	char findnote_string[MAX_NOTE_LEN];
-	int search_similar_marker;
+	int markerNoteEditMode;
+	char findNoteString[MAX_NOTE_LEN];
+	int currentIterationOfFindSimilar;
 
 private:
 	// saved vars
