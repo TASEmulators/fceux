@@ -246,7 +246,7 @@ static void UNLOneBusPower(void) {
 	memset(ppu201x, 0x00, sizeof(ppu201x));
 	memset(apu40xx, 0x00, sizeof(apu40xx));
 
-	SetupCartCHRMapping(0, PRGptr[0], PRGsize[0], 1); // Actually, one bus have special flag to that, but some roms haven't using it at all, so hack applied
+	SetupCartCHRMapping(0, PRGptr[0], PRGsize[0], 0);
 
 	for (i = 0; i < 64; i++) {
 		defapuread[i] = GetReadHandler(0x4000 | i);
