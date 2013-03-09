@@ -69,7 +69,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">taseditor.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Main – главный шлюз между эмулятором и Тасэдитором (Main gate between emulator and Taseditor)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">точка запуска Тасэдитора эмулятором</span></li>
 <li class="rvps10"><span class="rvts22">точка выхода из Тасэдитора</span></li>
@@ -80,7 +80,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">taseditor_window.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Window – пользовательский интерфейс (User Interface)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">реализует все операции с окном Тасэдитора: создание, перерисовка, изменение размера, перетаскивание окна, всплывающие подсказки, щелчки</span></li>
 <li class="rvps10"><span class="rvts22">реализует обработчики для всех кнопок и чекбоксов в GUI Тасэдитора, чтобы запретить срабатывание клавиши Пробел, а также обрабатывать щелчок средней кнопкой мыши</span></li>
@@ -94,7 +94,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">bookmarks.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Bookmarks – Менеджер Закладок (Manager of Bookmarks)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">хранит 10 Закладок</span></li>
 <li class="rvps10"><span class="rvts22">реализует все операции с Закладками: ининициализация, установка Закладки, прыжок на Закладку, загрузка Ответвления Закладки</span></li>
@@ -107,7 +107,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">branches.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Branches – Менеджер Ответвлений (Manager of Branches)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">хранит информацию об Ответвлениях (родственных связах Закладок), а также номер текущего Ответвления</span></li>
 <li class="rvps10"><span class="rvts22">дополнительно хранит время последнего изменения проекта (см. файерболл), а также время начала проекта (см. тучка)</span></li>
@@ -172,7 +172,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">popup_display.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Popup display – Менеджер всплывающих окон (Manager of popup windows)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">реализует все операции с всплывающими окнами: инициализацию, перерисовку, центрирование, декомпрессию и конвертирование скриншотов</span></li>
 <li class="rvps10"><span class="rvts22">Регулярно отслеживает изменения Менеджера закладок и запускает/обновляет/закрывает всплывающие окна</span></li>
@@ -182,7 +182,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">history.cpp</span></p>
 <p class="rvps10"><span class="rvts22">History – История изменений мувика (History of movie modifications)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">хранит массив записей в Журнал Истории (снимки мувика, резервные копии Закладок, резервные копии номера текущей Закладки) и указатель на текущий снимок</span></li>
 <li class="rvps10"><span class="rvts22">сохраняет и загружает массив снимков из файла проекта, при ошибке загрузки очищает массив и начинает новую историю со снимка текущего состояния мувика</span></li>
@@ -197,7 +197,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">piano_roll.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Piano Roll – интерфейс в виде перфоленты (Piano Roll interface)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">реализует всю логику работы Списка Piano Roll: создание, перерисовка, скроллинг, наведение, щелчки, перетаскивание</span></li>
 <li class="rvps10"><span class="rvts22">регулярно обновляет размер Списка в соответствии с размером Ввода мувика</span></li>
@@ -213,7 +213,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">selection.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Selection – Менеджер выделений (Manager of selections)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">содержит определение типа данных "Набор выделенных кадров"</span></li>
 <li class="rvps10"><span class="rvts22">хранит массив наборов выделенных кадров ("история выделений")</span></li>
@@ -229,7 +229,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">editor.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Editor – Инструмент для редактирования (Tool for editing)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">реализует операции изменения Ввода: установка/снятие Ввода на заданном участке, установка по шаблону, установка в Выделении, установка по шаблону в Выделении</span></li>
 <li class="rvps10"><span class="rvts22">реализует операции изменения Маркеров: установка/снятие в Выделении, установка по шаблону в Выделении, установка всех в Выделении, снятие всех в Выделении</span></li>
@@ -239,7 +239,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">splicer.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Splicer – Инструмент для монтажа (Tool for montage)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">реализует все операции массового редактирования Ввода: копипаст, клонирование, очистка региона, вставка и удаление кадров, обрезка</span></li>
 <li class="rvps10"><span class="rvts22">хранит данные о выделении, использованном при последнем копировании в Буфер Обмена</span></li>
@@ -250,7 +250,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">taseditor_config.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Config – текущая конфигурация (Current settings)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">хранит состояние всех настроек Тасэдитора</span></li>
 <li class="rvps10"><span class="rvts22">все модули Тасэдитора могут обращаться к этому классу для получения или изменения текущих настроек</span></li>
@@ -260,7 +260,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">playback.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Playback – проигрыватель состояний эмулятора (Player of emulation states)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">реализует функции проигрывателя мувика: показ любого кадра (прыжок), запуск/отмена добегания к указанному кадру, пауза, перемотка</span></li>
 <li class="rvps10"><span class="rvts22">Регулярно следит за изменениями текущего кадра эмуляции (и управляет эмулятором), вызывает перерисовку соответствующих ячеек Списка, останавливает добегание при достижении цели, анимирует перерисовку кадра цели, обеспечивает следование Списка за курсором, определяет факт перехода курсора на другой маркер и обновляет текст в верхнем поле</span></li>
@@ -274,7 +274,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">greenzone.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Greenzone – зона доступа (Access zone)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">хранит массив сэйвов, используемых для ускорения перехода Проигрывателя на любой указанный кадр</span></li>
 <li class="rvps10"><span class="rvts22">также хранит журнал проявлений лага в кадрах</span></li>
@@ -288,7 +288,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">recorder.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Recorder – инструмент для записи Ввода (Tool for input recording)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">в момент записи кнопочных нажатий в мувик (в самом конце кадра) по сигналу эмулятора перехватывает запись и накладывает свои фильтры мультитрекинга, а затем отражает изменения Ввода в Истории и Гринзоне</span></li>
 <li class="rvps10"><span class="rvts22">Регулярно отслеживает нажатые кнопки виртуальных джойстиков и предоставляет данные для подсветки символов Заголовка Списка. Также реагирует на использование хоткея Switch Read Only и обновляет элементы интерфейса на панели Recorder и заголовок панели Закладок</span></li>
@@ -298,7 +298,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">markers_manager.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Markers_manager – Менеджер Маркеров (Manager of Markers)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">хранит один снимок состояния Маркеров, отвечающий за текущее (актуальное) состояние Маркеров в проекте</span></li>
 <li class="rvps10"><span class="rvts22">сохраняет и загружает свои данные из файла проекта, при ошибке загрузки очищает данные</span></li>
@@ -313,7 +313,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">taseditor_lua.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Lua – Менеджер возможностей Луа (Manager of Lua features)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">реализует логику всех функций Lua-библиотеки taseditor</span></li>
 <li class="rvps10"><span class="rvts22">содержит список отложенных изменений Ввода</span></li>
@@ -323,7 +323,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">taseditor_project.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Project – Менеджер рабочего проекта (Manager of working project)</span></p>
-<p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
+<p class="rvps10"><span class="rvts44">[единственный экземпляр]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts22">хранит информацию о файловом имени проекта и о наличии несохранённых изменений</span></li>
 <li class="rvps10"><span class="rvts22">реализует сохранение и загрузку проектов из файловой системы</span></li>
@@ -411,7 +411,7 @@
 	<div id="topic_footer">
 
 			<div id="topic_footer_content">
-				Copyright &copy; 2011-2012 АнС</div>
+				&copy; 2011-2013 АнС</div>
 		</div>
 	</body>
 	

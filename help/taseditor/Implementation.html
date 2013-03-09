@@ -69,7 +69,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">taseditor.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Main – Main gate between emulator and Taseditor</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">the point of launching TAS Editor from emulator</span></li>
 <li class="rvps10"><span class="rvts21">the point of quitting from TAS Editor</span></li>
@@ -80,7 +80,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">taseditor_window.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Window – User Interface</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">implements all operations with TAS Editor window: creating, redrawing, resizing, moving, tooltips, clicks</span></li>
 <li class="rvps10"><span class="rvts21">subclasses all buttons and checkboxes in TAS Editor window GUI in order to disable Spacebar key and process Middle clicks</span></li>
@@ -94,7 +94,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">bookmarks.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Bookmarks – Manager of Bookmarks</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">stores 10 Bookmarks</span></li>
 <li class="rvps10"><span class="rvts21">implements all operations with Bookmarks: initialization, setting Bookmarks, jumping to Bookmarks, deploying Branches</span></li>
@@ -107,7 +107,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">branches.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Branches – Manager of Branches</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">stores info about Branches (relations of Bookmarks) and the id of current Branch</span></li>
 <li class="rvps10"><span class="rvts21">also stores the time of the last modification (see fireball) and the time of project beginning (see cloudlet)</span></li>
@@ -172,7 +172,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">popup_display.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Popup display – Manager of popup windows</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">implements all operations with popup windows: initialization, redrawing, centering, screenshot decompression and conversion</span></li>
 <li class="rvps10"><span class="rvts21">regularly inspects changes of Bookmarks Manager and shows/updates/hides popup windows</span></li>
@@ -182,7 +182,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">history.cpp</span></p>
 <p class="rvps10"><span class="rvts21">History – History of movie modifications</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">stores array of History items (snapshots, backup_bookmarks, backup_current_branch) and pointer to current snapshot</span></li>
 <li class="rvps10"><span class="rvts21">saves and loads the data from a project file. On error: clears the array and starts new history by making snapshot of current movie data</span></li>
@@ -197,7 +197,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">piano_roll.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Piano Roll – Piano Roll interface</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">implements the working of Piano Roll List: creating, redrawing, scrolling, mouseover, clicks, drag</span></li>
 <li class="rvps10"><span class="rvts21">regularly updates the size of the List according to current movie input</span></li>
@@ -213,7 +213,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">selection.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Selection – Manager of selections</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">contains definition of the type "Set of selected frames"</span></li>
 <li class="rvps10"><span class="rvts21">stores array of Sets of selected frames (History of selections)</span></li>
@@ -229,7 +229,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">editor.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Editor – Tool for editing</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">implements operations of changing Input: toggle input in region, set input by pattern, toggle selected region, apply pattern to input selection</span></li>
 <li class="rvps10"><span class="rvts21">implements operations of changing Markers: toggle Markers in selection, apply patern to Markers in selection, mark/unmark all selected frames</span></li>
@@ -239,7 +239,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">splicer.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Splicer – Tool for montage</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">implements operations of mass-changing input: copy/paste, cloning, clearing region, insertion and deletion of frames, truncating</span></li>
 <li class="rvps10"><span class="rvts21">stores data about the selection used in last "Copy to Clipboard" operation</span></li>
@@ -250,7 +250,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">taseditor_config.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Config – Current settings</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">stores current state of all TAS Editor settings</span></li>
 <li class="rvps10"><span class="rvts21">all TAS Editor modules can get or set any data within Config</span></li>
@@ -260,7 +260,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">playback.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Playback – Player of emulation states</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">implements the working of movie player: show any frame (jump), run/cancel seekng. pause, rewinding</span></li>
 <li class="rvps10"><span class="rvts21">regularly tracks and controls emulation process, prompts redrawing of Piano Roll List rows, finishes seeking when reaching target frame, animates target frame, makes Piano Roll follow Playback cursor, detects if Playback cursor moved to another Marker and updates Note in the upper text field</span></li>
@@ -274,7 +274,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">greenzone.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Greenzone – Access zone</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">stores array of savestates, used for faster movie navigation by Playback cursor</span></li>
 <li class="rvps10"><span class="rvts21">also stores LagLog of current movie Input</span></li>
@@ -288,7 +288,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">recorder.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Recorder – Tool for input recording</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">at the moment of recording movie input (at the very end of a frame) by emulator's call the Recorder intercepts input data and applies its filters (multitracking/etc), then reflects input changes into History and Greenzone</span></li>
 <li class="rvps10"><span class="rvts21">regularly tracks virtual joypad buttonpresses and provides data for Piano Roll List Header lights. Also reacts on external changes of Recording status, and updates GUI (Recorder panel and Bookmarks/Branches caption)</span></li>
@@ -298,7 +298,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">markers_manager.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Markers_manager – Manager of Markers</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">stores one snapshot of Markers, representing current state of Markers in the project</span></li>
 <li class="rvps10"><span class="rvts21">saves and loads the data from a project file. On error: clears the data</span></li>
@@ -313,7 +313,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">taseditor_lua.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Lua – Manager of Lua features</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">implements logic of all functions of "taseditor" Lua library</span></li>
 <li class="rvps10"><span class="rvts21">stores the list of pending input changes</span></li>
@@ -323,7 +323,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts20">taseditor_project.cpp</span></p>
 <p class="rvps10"><span class="rvts21">Project – Manager of working project</span></p>
-<p class="rvps10"><span class="rvts39">[singleton]</span></p>
+<p class="rvps10"><span class="rvts39">[single instance]</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">stores the info about current project filename and about having unsaved changes</span></li>
 <li class="rvps10"><span class="rvts21">implements saving and loading project files from filesystem</span></li>
@@ -411,7 +411,7 @@
 	<div id="topic_footer">
 
 			<div id="topic_footer_content">
-				Copyright &copy; 2011-2012 AnS</div>
+				&copy; 2011-2013 AnS</div>
 		</div>
 	</body>
 	
