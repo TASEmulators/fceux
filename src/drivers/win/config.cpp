@@ -436,7 +436,7 @@ void SaveConfig(const char *filename)
 	}
 	// Hacky fix for taseditor_config.last_author and rom_name_when_closing_emulator
 	taseditorConfigLastAuthorName = taseditorConfig.lastAuthorName;
-	ResumeROM = rom_name_when_closing_emulator;
+	ResumeROM = romNameWhenClosingEmulator;
 	//-----------------------------------
 
 	SaveFCEUConfig(filename,fceuconfig);
@@ -464,15 +464,21 @@ void LoadConfig(const char *filename)
 			rw_recent_files[x][0] = 0;
 		}
 	}
+
 	// Hacky fix for taseditor_config.last_author and rom_name_when_closing_emulator
 	if (taseditorConfigLastAuthorName)
-		strncpy(taseditorConfig.lastAuthorName, taseditorConfigLastAuthorName, AUTHOR_NAME_MAX_LEN-1);
-	else
+	{
+		strncpy(taseditorConfig.lastAuthorName, taseditorConfigLastAuthorName, AUTHOR_NAME_MAX_LEN - 1);
+		taseditorConfig.lastAuthorName[AUTHOR_NAME_MAX_LEN - 1] = 0;
+	} else
+	{
 		taseditorConfig.lastAuthorName[0] = 0;
+	}
+
 	if (ResumeROM)
-		strncpy(rom_name_when_closing_emulator, ResumeROM, 128);
+		strcpy(romNameWhenClosingEmulator, ResumeROM);
 	else
-		rom_name_when_closing_emulator[0] = 0;
+		romNameWhenClosingEmulator[0] = 0;
 
 	//-----------------------------------
 }

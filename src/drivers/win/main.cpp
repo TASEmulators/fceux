@@ -457,13 +457,9 @@ void DoFCEUExit()
 		// remember the ROM name
 		extern char LoadedRomFName[2048];
 		if (GameInfo)
-		{
-			strncpy(rom_name_when_closing_emulator, LoadedRomFName, 128);
-			rom_name_when_closing_emulator[128] = 0;
-		} else
-		{
-			rom_name_when_closing_emulator[0] = 0;
-		}
+			strcpy(romNameWhenClosingEmulator, LoadedRomFName);
+		else
+			romNameWhenClosingEmulator[0] = 0;
 	}
 }
 
@@ -759,8 +755,8 @@ int main(int argc,char *argv[])
 		ALoad(t);
 	} else
 	{
-		if (AutoResumePlay && rom_name_when_closing_emulator && rom_name_when_closing_emulator[0])
-			ALoad(rom_name_when_closing_emulator, 0, true);
+		if (AutoResumePlay && romNameWhenClosingEmulator && romNameWhenClosingEmulator[0])
+			ALoad(romNameWhenClosingEmulator, 0, true);
 		if (eoptions & EO_FOAFTERSTART)
 			LoadNewGamey(hAppWnd, 0);
 	}
