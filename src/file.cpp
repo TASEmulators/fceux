@@ -36,7 +36,11 @@
 #include "utils/endian.h"
 #include "utils/memory.h"
 #include "utils/md5.h"
+#ifdef _SYSTEM_MINIZIP
+#include <minizip/unzip.h>
+#else
 #include "utils/unzip.h"
+#endif
 #include "driver.h"
 #include "types.h"
 #include "fceu.h"
