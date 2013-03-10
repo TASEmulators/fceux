@@ -40,7 +40,7 @@
 //	TODO:  Add code to put a delay in between the time a disk is inserted
 //	and the when it can be successfully read/written to.  This should
 //	prevent writes to wrong places OR add code to prevent disk ejects
-//	when the virtual motor is on(mmm...virtual motor).
+//	when the virtual motor is on (mmm...virtual motor).
 extern int disableBatteryLoading;
 
 bool isFDS = false; //flag for determining if a FDS game is loaded, movie.cpp needs this
