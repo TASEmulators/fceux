@@ -955,6 +955,9 @@
     <ClCompile Include="..\src\boards\dsoundv1.cpp">
       <Filter>boards</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\utils\ioapi.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">
@@ -1457,6 +1460,9 @@
     </ClInclude>
     <ClInclude Include="..\src\x6502abbrev.h">
       <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\utils\ioapi.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

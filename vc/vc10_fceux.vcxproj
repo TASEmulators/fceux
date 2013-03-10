@@ -625,6 +625,7 @@
     <ClCompile Include="..\src\utils\endian.cpp" />
     <ClCompile Include="..\src\utils\general.cpp" />
     <ClCompile Include="..\src\utils\guid.cpp" />
+    <ClCompile Include="..\src\utils\ioapi.cpp" />
     <ClCompile Include="..\src\utils\md5.cpp" />
     <ClCompile Include="..\src\utils\memory.cpp" />
     <ClCompile Include="..\src\utils\unzip.cpp" />
@@ -827,6 +828,7 @@
     <ClInclude Include="..\src\utils\endian.h" />
     <ClInclude Include="..\src\utils\general.h" />
     <ClInclude Include="..\src\utils\guid.h" />
+    <ClInclude Include="..\src\utils\ioapi.h" />
     <ClInclude Include="..\src\utils\md5.h" />
     <ClInclude Include="..\src\utils\memory.h" />
     <ClInclude Include="..\src\utils\unzip.h" />
