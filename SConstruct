@@ -34,8 +34,8 @@ prefix = GetOption('prefix')
 env = Environment(options = opts)
 
 #### Uncomment this for a public release ###
-#env.Append(CPPDEFINES=["PUBLIC_RELEASE"])
-#env['DEBUG'] = 0
+env.Append(CPPDEFINES=["PUBLIC_RELEASE"])
+env['DEBUG'] = 0
 ############################################
 
 # LSB_FIRST must be off for PPC to compile
