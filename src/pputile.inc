@@ -78,7 +78,7 @@ pshift[1]<<=8;
 			MMC5HackVROMMask) << 12) + (vadr & 0xfff);
 		C += (MMC50x5130&0x3)<<18; //11-jun-2009 for kuja_killer
 	#elif defined(PPUT_MMC5)
-		C=MMC5BGVRAMADR(vadr);
+		C = MMC5BGVRAMADR(vadr);
 	#else
 		C = VRAMADR(vadr);
 	#endif
@@ -88,7 +88,11 @@ pshift[1]<<=8;
 	PPU_hook(vadr);
 #endif
 
+if(ScreenON)
+	RENDER_LOG(vadr);
 pshift[0]|=C[0];
+if(ScreenON)
+	RENDER_LOG(vadr + 8);
 pshift[1]|=C[8];
 
 if((RefreshAddr&0x1f)==0x1f)

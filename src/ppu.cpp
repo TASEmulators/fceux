@@ -50,8 +50,8 @@
 
 #define SpriteON  (PPU[1]&0x10)   //Show Sprite
 #define ScreenON  (PPU[1]&0x08)   //Show screen
-#define PPUON    (PPU[1]&0x18)		//PPU should operate
-#define GRAYSCALE (PPU[1]&0x01) //Grayscale (AND palette entries with 0x30)
+#define PPUON     (PPU[1]&0x18)   //PPU should operate
+#define GRAYSCALE (PPU[1]&0x01)   //Grayscale (AND palette entries with 0x30)
 
 #define SpriteLeft8 (PPU[1]&0x04)
 #define BGLeft8 (PPU[1]&0x02)
@@ -341,7 +341,8 @@ static int deempcnt[8];
 void (*GameHBIRQHook)(void), (*GameHBIRQHook2)(void);
 void (*PPU_hook)(uint32 A);
 
-uint8 vtoggle=0;
+uint8 vtoggle5=0;
+uint8 vtoggle6=0;
 uint8 XOffset=0;
 
 uint32 TempAddr=0,RefreshAddr=0,DummyRead=0;
@@ -360,8 +361,8 @@ uint8 UPALRAM[0x03]; //for 0x4/0x8/0xC addresses in palette, the ones in
                      //0x20 are 0 to not break fceu rendering.
 
 
-#define MMC5SPRVRAMADR(V)      &MMC5SPRVPage[(V)>>10][(V)]
-#define VRAMADR(V)      &VPage[(V)>>10][(V)]
+#define MMC5SPRVRAMADR(V)	&MMC5SPRVPage[(V)>>10][(V)]
+#define VRAMADR(V)			&VPage[(V)>>10][(V)]
 
 //mbg 8/6/08 - fix a bug relating to
 //"When in 8x8 sprite mode, only one set is used for both BG and sprites."
@@ -441,14 +442,28 @@ unsigned char *cdloggervdata;
 unsigned int cdloggerVideoDataSize = 0;
 
 int GetCHRAddress(int A){
-	if(A < 0x2000) {	// Mapper 90 can map nametables from the VROM
-		if(cdloggerVideoDataSize) {
+	if(cdloggerVideoDataSize) {
 			int result = &VPage[A>>10][A] - CHRptr[0];
 			if((result >= 0) && (result < (int)cdloggerVideoDataSize))
 				return result;
-		}
 	}
 	return -1;
+}
+
+#define RENDER_LOG(tmp) { \
+	if(debug_loggingCD) \
+	{ \
+		int addr = GetCHRAddress(tmp); \
+		if(addr != -1) \
+		{ \
+			if(!(cdloggervdata[addr] & 1)) \
+			{ \
+				cdloggervdata[addr] |= 1; \
+				if(!(cdloggervdata[addr] & 2))undefinedvromcount--; \
+				rendercount++; \
+			} \
+		} \
+	} \
 }
 
 uint8 FASTCALL FFCEUX_PPURead_Default(uint32 A) {
@@ -458,19 +473,6 @@ uint8 FASTCALL FFCEUX_PPURead_Default(uint32 A) {
 
 	if(tmp<0x2000)
 	{
-		if(debug_loggingCD)
-		{
-			int addr = GetCHRAddress(tmp);
-			if(addr != -1)
-			{
-				if(!(cdloggervdata[addr] & 1))
-				{
-					cdloggervdata[addr] |= 1;
-					if(!(cdloggervdata[addr] & 2))undefinedvromcount--;
-					rendercount++;
-				}
-			}
-		}
 		return VPage[tmp>>10][tmp];
 	}
 	else if (tmp < 0x3F00)
@@ -543,9 +545,9 @@ static DECLFR(A2002)
 	if(!fceuindbg)
 #endif
 	{
-		vtoggle=0;
-		PPU_status&=0x7F;
-		PPUGenLatch=ret;
+		vtoggle5 = vtoggle6 = 0;
+		PPU_status &= 0x7F;
+		PPUGenLatch = ret;
 	}
 
 	return ret;
@@ -742,31 +744,6 @@ static DECLFR(A200x)  /* Not correct for $2004 reads. */
 	return PPUGenLatch;
 }
 
-/*
-static DECLFR(A2004)
-{
-uint8 ret;
-
-FCEUPPU_LineUpdate();
-ret = SPRAM[PPU[3]];
-
-if(PPUSPL>=8)
-{
-if(PPU[3]>=8)
-ret = SPRAM[PPU[3]];
-}
-else
-{
-//printf("$%02x:$%02x\n",PPUSPL,V);
-ret = SPRAM[PPUSPL];
-}
-PPU[3]++;
-PPUSPL++;
-PPUGenLatch = ret;
-printf("%d, %02x\n",scanline,ret);
-return(ret);
-}
-*/
 static DECLFR(A2007)
 {
 	uint8 ret;
@@ -811,7 +788,7 @@ static DECLFR(A2007)
             VRAMBuffer = CALL_PPUREAD(RefreshAddr - 0x1000);
         }
         else {
-			if(debug_loggingCD)
+			if(debug_loggingCD && (RefreshAddr < 0x2000))
 				LogAddress = GetCHRAddress(RefreshAddr);
 		    VRAMBuffer = CALL_PPUREAD(RefreshAddr);
 		}
@@ -878,15 +855,12 @@ static DECLFR(A2007)
 
 static DECLFW(B2000)
 {
-	//    FCEU_printf("%04x:%02x, (%d) %02x, %02x\n",A,V,scanline,PPU[0],PPU_status);
-
 	FCEUPPU_LineUpdate();
 	PPUGenLatch=V;
+
 	if(!(PPU[0]&0x80) && (V&0x80) && (PPU_status&0x80))
-	{
-		//     FCEU_printf("Trigger NMI, %d, %d\n",timestamp,ppudead);
 		TriggerNMI2();
-	}
+
 	PPU[0]=V;
 	TempAddr&=0xF3FF;
 	TempAddr|=(V&3)<<10;
@@ -898,14 +872,13 @@ static DECLFW(B2000)
 
 static DECLFW(B2001)
 {
-	//printf("%04x:$%02x, %d\n",A,V,scanline);
 	FCEUPPU_LineUpdate();
 	PPUGenLatch=V;
 	PPU[1]=V;
 	if(V&0xE0)
 		deemp=V>>5;
 }
-//
+
 static DECLFW(B2002)
 {
 	PPUGenLatch=V;
@@ -913,7 +886,6 @@ static DECLFW(B2002)
 
 static DECLFW(B2003)
 {
-	//printf("$%04x:$%02x, %d, %d\n",A,V,timestamp,scanline);
 	PPUGenLatch=V;
 	PPU[3]=V;
 	PPUSPL=V&0x7;
@@ -921,7 +893,6 @@ static DECLFW(B2003)
 
 static DECLFW(B2004)
 {
-	//printf("Wr: %04x:$%02x\n",A,V);
     PPUGenLatch=V;
     if (newppu)
     {
@@ -941,10 +912,7 @@ static DECLFW(B2004)
                 SPRAM[PPU[3]]=V;
         }
         else
-        {
-            //printf("$%02x:$%02x\n",PPUSPL,V);
             SPRAM[PPUSPL]=V;
-        }
         PPU[3]++;
         PPUSPL++;
     }
@@ -955,7 +923,7 @@ static DECLFW(B2005)
 	uint32 tmp=TempAddr;
 	FCEUPPU_LineUpdate();
 	PPUGenLatch=V;
-	if(!vtoggle)
+	if(!vtoggle5)
 	{
 		tmp&=0xFFE0;
 		tmp|=V>>3;
@@ -972,7 +940,7 @@ static DECLFW(B2005)
 		ppur._fv = V&7;
 	}
 	TempAddr=tmp;
-	vtoggle^=1;
+	vtoggle5^=1;
 }
 
 
@@ -981,7 +949,7 @@ static DECLFW(B2006)
 	FCEUPPU_LineUpdate();
 
 	PPUGenLatch=V;
-	if(!vtoggle)
+	if(!vtoggle6)
 	{
 		TempAddr&=0x00FF;
 		TempAddr|=(V&0x3f)<<8;
@@ -1001,7 +969,6 @@ static DECLFW(B2006)
 		DummyRead=1;
 		if(PPU_hook)
 			PPU_hook(RefreshAddr);
-		//printf("%d, %04x\n",scanline,RefreshAddr);
 
 		ppur._vt &= 0x18;
 		ppur._vt |= (V>>5);
@@ -1010,7 +977,7 @@ static DECLFW(B2006)
 		ppur.install_latches();
 	}
 
-	vtoggle^=1;
+	vtoggle6^=1;
 }
 
 static DECLFW(B2007)
@@ -1021,20 +988,20 @@ static DECLFW(B2007)
 		PPUGenLatch=V;
 		RefreshAddr = ppur.get_2007access() & 0x3FFF;
 		CALL_PPUWRITE(RefreshAddr,V);
-		//printf("%04x ",RefreshAddr);
 		ppur.increment2007(INC32!=0);
 		RefreshAddr = ppur.get_2007access();
 	}
 	else
 	{
-		//printf("%04x ",tmp);
 		PPUGenLatch=V;
 		if(tmp>=0x3F00)
 		{
 			// hmmm....
 			if(!(tmp&0xf))
 				PALRAM[0x00]=PALRAM[0x04]=PALRAM[0x08]=PALRAM[0x0C]=V&0x3F;
-			else if(tmp&3) PALRAM[(tmp&0x1f)]=V&0x3f;
+			else 
+				if(tmp&3)
+					PALRAM[(tmp&0x1f)]=V&0x3f;
 		}
 		else if(tmp<0x2000)
 		{
@@ -1046,10 +1013,12 @@ static DECLFW(B2007)
 			if(PPUNTARAM&(1<<((tmp&0xF00)>>10)))
 				vnapage[((tmp&0xF00)>>10)][tmp&0x3FF]=V;
 		}
-		//      FCEU_printf("ppu (%04x) %04x:%04x %d, %d\n",X.PC,RefreshAddr,PPUGenLatch,scanline,timestamp);
-		if(INC32) RefreshAddr+=32;
-		else RefreshAddr++;
-		if(PPU_hook) PPU_hook(RefreshAddr&0x3fff);
+		if (INC32)
+			RefreshAddr+=32;
+		else
+			RefreshAddr++;
+		if(PPU_hook)
+			PPU_hook(RefreshAddr&0x3fff);
 	}
 }
 
@@ -1115,39 +1084,6 @@ void FCEUI_GetRenderPlanes(bool& sprites, bool& bg)
 	bg = renderbg;
 }
 
-//mbg 6/21/08 - tileview is being ripped out since i dont know how long its been since it worked
-//static int tileview=1;
-//void FCEUI_ToggleTileView(void)
-//{
-//	tileview^=1;
-//}
-
-
-//mbg 6/21/08 - tileview is being ripped out since i dont know how long its been since it worked
-//static void TileView(void)
-//{
-//	uint8 *P=XBuf+16*256;
-//	int bgh;
-//	int y;
-//	int X1;
-//	for(bgh=0;bgh<2;bgh++)
-//		for(y=0;y<16*8;y++)
-//			for(P=XBuf+bgh*128+(16+y)*256,X1=16;X1;X1--,P+=8)
-//			{
-//				uint8 *C;
-//				register uint8 cc;
-//				uint32 vadr;
-//
-//				vadr=((((16-X1)|((y>>3)<<4))<<4)|(y&7))+bgh*0x1000;
-//				//C= ROM+vadr+turt*8192;
-//				C = VRAMADR(vadr);
-//				//if((vadr+turt*8192)>=524288)
-//				//printf("%d ",vadr+turt*8192);
-//				cc=0;
-//				//#include "pputile.inc"
-//			}
-//}
-
 static void CheckSpriteHit(int p);
 
 static void EndRL(void)
@@ -1175,10 +1111,6 @@ static void CheckSpriteHit(int p)
         if((sphitdata&(0x80>>(x-sphitx))) && !(Plinef[x]&64) && x < 255)
 		{
 			PPU_status|=0x40;
-			//printf("Ha:  %d, %d, Hita: %d, %d, %d, %d, %d\n",p,p&~7,scanline,GETLASTPIXEL-16,&Plinef[x],Pline,Pline-Plinef);
-			//printf("%d\n",GETLASTPIXEL-16);
-			//if(Plinef[x] == 0xFF)
-			//printf("PL: %d, %02x\n",scanline, Plinef[x]);
 			sphitx=0x100;
 			break;
 		}
@@ -1196,7 +1128,7 @@ static void RefreshLine(int lastpixel)
 	static uint32 atlatch;
 	uint32 smorkus=RefreshAddr;
 
-#define RefreshAddr smorkus
+	#define RefreshAddr smorkus
 	uint32 vofs;
 	int X1;
 
@@ -1213,10 +1145,7 @@ static void RefreshLine(int lastpixel)
 	if(sphitx != 0x100 && !(PPU_status&0x40))
 	{
 		if((sphitx < (lastpixel-16)) && !(sphitx < ((lasttile - 2)*8)))
-		{
-			//printf("OK: %d\n",scanline);
 			lasttile++;
-		}
 
 	}
 
@@ -1242,7 +1171,7 @@ static void RefreshLine(int lastpixel)
 
 		firsttile=lasttile;
 
-#define TOFIXNUM (272-0x4)
+		#define TOFIXNUM (272-0x4)
 		if(lastpixel>=TOFIXNUM && tofix)
 		{
 			Fixit1();
@@ -1376,12 +1305,9 @@ static void RefreshLine(int lastpixel)
 
 	if(lastpixel>=TOFIXNUM && tofix)
 	{
-		//puts("Fixed");
 		Fixit1();
 		tofix=0;
 	}
-
-	//CheckSpriteHit(lasttile*8); //lasttile*8); //lastpixel);
 
 	//This only works right because of a hack earlier in this function.
 	CheckSpriteHit(lastpixel);
@@ -1552,7 +1478,6 @@ static void FetchSpriteData(void)
 		for(n=63;n>=0;n--,spr++)
 		{
 			if((unsigned int)(scanline-spr->y)>=H) continue;
-			//printf("%d, %u\n",scanline,(unsigned int)(scanline-spr->y));
 			if(ns<maxsprites)
 			{
 				if(n==63) sb=1;
@@ -1584,11 +1509,17 @@ static void FetchSpriteData(void)
 					}
 
 					/* Fix this geniestage hack */
-					if(MMC5Hack && geniestage!=1) C = MMC5SPRVRAMADR(vadr);
-					else C = VRAMADR(vadr);
+					if(MMC5Hack && geniestage!=1)
+						C = MMC5SPRVRAMADR(vadr);
+					else {
+						C = VRAMADR(vadr);
+					}
 
-
+					if(SpriteON)
+						RENDER_LOG(vadr);
 					dst.ca[0]=C[0];
+					if(SpriteON)
+						RENDER_LOG(vadr + 8);
 					dst.ca[1]=C[8];
 					dst.x=spr->x;
 					dst.atr=spr->atr;
@@ -1639,14 +1570,20 @@ static void FetchSpriteData(void)
 						vadr+=t&8;
 					}
 
-					if(MMC5Hack) C = MMC5SPRVRAMADR(vadr);
-					else C = VRAMADR(vadr);
+					if(MMC5Hack) 
+						C = MMC5SPRVRAMADR(vadr);
+					else
+						C = VRAMADR(vadr);
+					if(SpriteON)
+						RENDER_LOG(vadr);
 					dst.ca[0]=C[0];
 					if(ns<8)
 					{
 						PPU_hook(0x2000);
 						PPU_hook(vadr);
 					}
+					if(SpriteON)
+						RENDER_LOG(vadr + 8);
 					dst.ca[1]=C[8];
 					dst.x=spr->x;
 					dst.atr=spr->atr;
@@ -1663,8 +1600,6 @@ static void FetchSpriteData(void)
 				break;
 			}
 		}
-		//if(ns>=7)
-		//printf("%d %d\n",scanline,ns);
 
 		//Handle case when >8 sprites per scanline option is enabled.
 		if(ns>8) PPU_status|=0x20;
@@ -1912,15 +1847,14 @@ void PPU_ResetHooks()
 
 void FCEUPPU_Reset(void)
 {
-	VRAMBuffer=PPU[0]=PPU[1]=PPU_status=PPU[3]=0;
-	PPUSPL=0;
-	PPUGenLatch=0;
-	RefreshAddr=TempAddr=0;
-	vtoggle = 0;
+	VRAMBuffer = PPU[0] = PPU[1] = PPU_status = PPU[3] = 0;
+	PPUSPL = 0;
+	PPUGenLatch = 0;
+	RefreshAddr = TempAddr = 0;
+	vtoggle5 = vtoggle6 = 0;
 	ppudead = 2;
 	kook = 0;
 	idleSynch = 1;
-	//	XOffset=0;
 
 	ppur.reset();
 	spr_read.reset();
@@ -2117,7 +2051,8 @@ SFORMAT FCEUPPU_STATEINFO[]={
 	{ &ppudead, 1, "DEAD"},
 	{ &PPUSPL, 1, "PSPL"},
 	{ &XOffset, 1, "XOFF"},
-	{ &vtoggle, 1, "VTOG"},
+	{ &vtoggle5, 1, "VTG5"},
+	{ &vtoggle6, 1, "VTG6"},
 	{ &RefreshAddrT, 2|FCEUSTATE_RLSB, "RADD"},
 	{ &TempAddrT, 2|FCEUSTATE_RLSB, "TADD"},
 	{ &VRAMBuffer, 1, "VBUF"},
@@ -2215,9 +2150,13 @@ struct BGData {
 
                 ppur.par = nt;
 				RefreshAddr = ppur.get_ptread();
+				if(ScreenON)
+					RENDER_LOG(RefreshAddr);
 				pt[0] = CALL_PPUREAD(RefreshAddr);
 				runppu(kFetchTime);
 				RefreshAddr |= 8;
+				if(ScreenON)
+					RENDER_LOG(RefreshAddr);
 				pt[1] = CALL_PPUREAD(RefreshAddr);
 				runppu(kFetchTime);
 			}
@@ -2540,10 +2479,14 @@ int FCEUX_PPU_Loop(int skip) {
 
 				//pattern table fetches
 				RefreshAddr = patternAddress;
+				if(SpriteON)
+					RENDER_LOG(RefreshAddr);
 				oam[4] = CALL_PPUREAD(RefreshAddr);
 				if(realSprite) runppu(kFetchTime);
 
 				RefreshAddr += 8;
+				if(SpriteON)
+					RENDER_LOG(RefreshAddr);
 				oam[5] = CALL_PPUREAD(RefreshAddr);
 				if(realSprite) runppu(kFetchTime);
 
