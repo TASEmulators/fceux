@@ -1,10 +1,10 @@
-FCEUX SDL 2.2.0 SDL README
+FCEUX SDL 2.2.1 SDL README
 ==========================
 By Lukas Sabota (sf: punkrockguy318)
 
 http://www.fceux.com
 
-Last Modified: November 23, 2012
+Last Modified: March 10, 2013
 
 Table of Contents
 -----------------
@@ -25,6 +25,7 @@ Table of Contents
 * libgtk2.0 (optional) - version >= 2.24 recommended
 * libgtk3.0 (optional) - this compiles as of fceux 2.2.0
 * liblua5.1 (optional)
+* minizip (optional) - you may chose to use the version of minizip on your system by enabling SYSTEM_MINIZIP in the SConstruct
 * c++ compiler -- you may use g++ from gcc or clang++ from llvm.
 
 2 - Installation
@@ -100,7 +101,7 @@ The latest version of iup (3.5 at the time of writing) is recomended.
 
 	export SDL_AUDIODRIVER=driver
 
-where driver is either: 'pulse' for pulseaudio;' alsa' for ALSA; 'dsp' for OSS; 'esd' for ESD; see SDL documentation for details.
+where driver is either: 'pulse' for pulseaudio;' alsa' for ALSA; 'dsp' for OSS; 'esd' for ESD; see SDL documentation for details (http://www.libsdl.org/docs/html/sdlenvvars.html)
 
 There are sound options that you can tweak at runtime through command line switches:
 
