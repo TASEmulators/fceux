@@ -1,6 +1,5 @@
 Features
 ========
-	* autosave/autoload for xbmc
 	* SDL.Vsync
 		* lets wait on this -- theres no simple way to use the OS default in SDL unless we just dont touch it, which might be the best thing to do here.
   
@@ -13,12 +12,11 @@ GTK
 		* scanlines
 	* GUI Cheat editor
 
-SDL 1.3
+SDL 2.0
 =======
 	* segfaults when opening a second game
 	* segfaults on fullscreen entry
-	* havent tested this in a while
-	* not a 2.2.0 target
+	* has not been tested in a while
 
 BUGS
 ====
