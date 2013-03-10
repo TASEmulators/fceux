@@ -57,7 +57,6 @@ extern void CDLoggerROMClosed();
 extern void CDLoggerROMChanged();
 extern void ResetDebugStatisticsCounters();
 extern void SetMainWindowText();
-extern void CDLoggerPPUChanged();
 extern bool isTaseditorRecording();
 
 extern int32 fps_scale;
@@ -135,7 +134,6 @@ void FCEU_TogglePPU(void) {
 	}
 #ifdef WIN32
 	SetMainWindowText();
-	CDLoggerPPUChanged();
 #endif
 }
 

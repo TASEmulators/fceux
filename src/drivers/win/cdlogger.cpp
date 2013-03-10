@@ -42,7 +42,6 @@ void SaveCDLogFile();
 void SaveStrippedROM(int invert);
 void CDLoggerROMClosed();
 void CDLoggerROMChanged();
-void CDLoggerPPUChanged();
 bool PauseCDLogging();
 void StartCDLogging();
 void FreeCDLog();
@@ -136,7 +135,6 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			CheckDlgButton(hCDLogger, IDC_AUTOSAVECDL, autosaveCDL ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hCDLogger, IDC_AUTOLOADCDL, autoloadCDL ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hCDLogger, IDC_AUTORESUMECDLOGGING, autoresumeCDLogging ? BST_CHECKED : BST_UNCHECKED);
-			CDLoggerPPUChanged();
 			break;
 		case WM_CLOSE:
 		case WM_QUIT:
@@ -522,14 +520,6 @@ void CDLoggerROMChanged()
 		if (LoadCDLog(nameo))
 			StartCDLogging();
 	}
-}
-
-void CDLoggerPPUChanged()
-{
-	if (newppu)
-		SetDlgItemText(hCDLogger, ID_CHR1, "CHR Rendered");
-	else
-		SetDlgItemText(hCDLogger, ID_CHR1, "!!! Enable NewPPU !!!");
 }
 
 bool PauseCDLogging()

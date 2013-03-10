@@ -1,5 +1,7 @@
 10-Mar-2013 - prg - SDL: added option to use system minizip
 10-Mar-2013 - prg - updated to use minizip v1.2.7
+10-Mar-2013 - CaH4e3 - CDLogger: improved CHR logging, now it also logs the data when using Old PPU
+02-Mar-2013 - AnS - Hexeditor: fixed ROM coloring when using CDLogger data
 28-Feb-2013 - AnS - PPU/PAL/Input type changing is now disabled when a movie is playing
 28-Feb-2013 - AnS - Cheats: update the window when ROM is changed
 28-Feb-2013 - AnS - show the number of active cheats when a ROM is loaded
