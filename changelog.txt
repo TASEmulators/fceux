@@ -1,3 +1,4 @@
+10-Mar-2013 - prg - updated to use minizip v1.2.7
 28-Feb-2013 - AnS - PPU/PAL/Input type changing is now disabled when a movie is playing
 28-Feb-2013 - AnS - Cheats: update the window when ROM is changed
 28-Feb-2013 - AnS - show the number of active cheats when a ROM is loaded
