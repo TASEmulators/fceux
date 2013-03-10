@@ -1,3 +1,7 @@
+
+---r2869 - FCEUX 2.2.1 Released---
+---March 10 2013---
+
 10-Mar-2013 - prg - SDL: added option to use system minizip
 10-Mar-2013 - prg - updated to use minizip v1.2.7
 10-Mar-2013 - CaH4e3 - CDLogger: improved CHR logging, now it also logs the data when using Old PPU
