@@ -240,7 +240,7 @@ InitVideo(FCEUGI *gi)
 	// enable double buffering if requested and we have hardware support
 #ifdef OPENGL
 	if(s_useOpenGL) {
-		FCEU_printf("Initializing with OpenGL (Disable with '-opengl 0').\n");
+		FCEU_printf("Initializing with OpenGL (Disable with '--opengl 0').\n");
 		if(doublebuf) {
 			 SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		}
