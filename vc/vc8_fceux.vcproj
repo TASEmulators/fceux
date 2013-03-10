@@ -4343,6 +4343,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\utils\ioapi.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\utils\ioapi.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\utils\md5.cpp"
 				>
 			</File>
