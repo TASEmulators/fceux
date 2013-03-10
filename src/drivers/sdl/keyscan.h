@@ -1,4 +1,3 @@
-#include <SDL.h>
 #define SDLK_A SDLK_a
 #define SDLK_B SDLK_b
 #define SDLK_C SDLK_c
@@ -43,7 +42,7 @@
 #define SDLK_SCROLLLOCK SDLK_SCROLLOCK		/* I guess the SDL people don't like lots of Ls... */
 #define SDLK_GRAVE	SDLK_BACKQUOTE
 #define MKK(k) SDLK_##k
-#if SDL_VERSION_ATLEAST(1, 3, 0)
+#if SDL_VERSION_ATLEAST(2, 0, 0)
 #define SDLK_LAST SDL_NUM_SCANCODES
 #endif
 #define MKK_COUNT (SDLK_LAST+1)

@@ -148,8 +148,8 @@ _keyonly (int a)
 	// check for valid key
 	if (a > SDLK_LAST + 1 || a < 0)
 		return 0;
-#if SDL_VERSION_ATLEAST(1, 3, 0)
-	if (g_keyState[SDL_GetScancodeFromKey ((SDLKey) a)])
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	if (g_keyState[SDL_GetScancodeFromKey (a)])
 #else
 	if (g_keyState[a])
 #endif
@@ -198,7 +198,16 @@ TogglePause ()
 
 	int no_cursor;
 	g_config->getOption("SDL.NoFullscreenCursor", &no_cursor);
+	int fullscreen;
+	g_config->getOption ("SDL.Fullscreen", &fullscreen);
 
+	// Don't touch grab when in windowed mode
+	if(fullscreen == 0)
+		return;
+
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	// TODO - SDL2
+#else
 	if (FCEUI_EmulationPaused () == 0)
 	{
 		SDL_WM_GrabInput (SDL_GRAB_ON);
@@ -209,7 +218,7 @@ TogglePause ()
 		SDL_WM_GrabInput (SDL_GRAB_OFF);
 		SDL_ShowCursor (1);
 	}
-
+#endif
 	return;
 }
 
@@ -420,7 +429,11 @@ void FCEUD_LoadStateFrom ()
 unsigned int *GetKeyboard(void)                                                     
 {
   int size = 256;
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+  Uint8* keystate = SDL_GetKeyboardState(&size);
+#else
   Uint8* keystate = SDL_GetKeyState(&size);
+#endif
   return (unsigned int*)(keystate);
 }
 
@@ -442,20 +455,29 @@ static void KeyboardCommands ()
 	// check if the family keyboard is enabled
 	if (CurInputType[2] == SIFC_FKB)
 	{
+#if SDL_VERSION_ATLEAST(1, 3, 0)
+		// TODO - SDL2
+		if (0)
+#else
 		if (keyonly (SCROLLLOCK))
+#endif
 			{
 				g_fkbEnabled ^= 1;
 				FCEUI_DispMessage ("Family Keyboard %sabled.", 0,
 				g_fkbEnabled ? "en" : "dis");
 			}
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		// TODO - SDL2
+#else
 		SDL_WM_GrabInput (g_fkbEnabled ? SDL_GRAB_ON : SDL_GRAB_OFF);
+#endif
 		if (g_fkbEnabled)
 		{
 			return;
 		}
 	}
 
-#if SDL_VERSION_ATLEAST(1, 3, 0)
+#if SDL_VERSION_ATLEAST(2, 0, 0)
 	if (g_keyState[SDL_GetScancodeFromKey (SDLK_LSHIFT)]
 		|| g_keyState[SDL_GetScancodeFromKey (SDLK_RSHIFT)])
 #else
@@ -464,7 +486,7 @@ static void KeyboardCommands ()
 	is_shift = 1;
   else
 	is_shift = 0;
-#if SDL_VERSION_ATLEAST(1, 3, 0)
+#if SDL_VERSION_ATLEAST(2, 0, 0)
 	if (g_keyState[SDL_GetScancodeFromKey (SDLK_LALT)]
 	|| g_keyState[SDL_GetScancodeFromKey (SDLK_RALT)])
 #else
@@ -472,7 +494,7 @@ static void KeyboardCommands ()
 #endif
 	{
 		is_alt = 1;
-#if !SDL_VERSION_ATLEAST(1, 3, 0)
+#if !SDL_VERSION_ATLEAST(2, 0, 0)
 		// workaround for GDK->SDL in GTK problems where ALT release is never getting sent
 		// i know this is sort of an ugly hack to fix this, but the bug is rather annoying
 		// prg318 10/23/11
@@ -1013,7 +1035,11 @@ ButtonConfigBegin ()
 		sprintf (SDL_windowhack, "SDL_WINDOWID=%u",
 			 (unsigned int)
 			 GDK_WINDOW_XID (gtk_widget_get_window (evbox)));
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		  // TODO - SDL2
+#else
 	      SDL_putenv (SDL_windowhack);
+#endif
 	    }
 #endif
 	  if (SDL_InitSubSystem (SDL_INIT_VIDEO) == -1)
@@ -1023,8 +1049,12 @@ ButtonConfigBegin ()
 	    }
 
 	  // set the screen and notify the user of button configuration
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	  // TODO - SDL2
+#else
 	  screen = SDL_SetVideoMode (420, 200, 8, 0);
 	  SDL_WM_SetCaption ("Button Config", 0);
+#endif
 	}
     }
 
@@ -1071,8 +1101,8 @@ DTestButton (ButtConfig * bc)
     {
       if (bc->ButtType[x] == BUTTC_KEYBOARD)
 	{
-#if SDL_VERSION_ATLEAST(1,3,0)
-	  if (g_keyState[SDL_GetScancodeFromKey ((SDLKey) bc->ButtonNum[x])])
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	  if (g_keyState[SDL_GetScancodeFromKey (bc->ButtonNum[x])])
 	    {
 #else
 	  if (g_keyState[bc->ButtonNum[x]])
@@ -1101,10 +1131,15 @@ DTestButton (ButtConfig * bc)
 #define GPZ()       {MKZ(), MKZ(), MKZ(), MKZ()}
 
 ButtConfig GamePadConfig[4][10] = {
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+  /* Gamepad 1 */
+  {MK (KP_3), MK (KP_2), MK (SLASH), MK (ENTER),
+   MK (W), MK (Z), MK (A), MK (S), MKZ (), MKZ ()},
+#else
   /* Gamepad 1 */
   {MK (KP3), MK (KP2), MK (SLASH), MK (ENTER),
-   MK (W), MK (Z), MK (A), MK (S), MKZ (), MKZ ()}
-  ,
+   MK (W), MK (Z), MK (A), MK (S), MKZ (), MKZ ()},
+#endif
 
   /* Gamepad 2 */
   GPZ (),
@@ -1589,7 +1624,11 @@ ButtonName (const ButtConfig * bc, int which)
   switch (bc->ButtType[which])
     {
     case BUTTC_KEYBOARD:
+#if SDL_VERSION_ATLEAST(2,0,0)
+      return SDL_GetKeyName (bc->ButtonNum[which]);
+#else
       return SDL_GetKeyName ((SDLKey) bc->ButtonNum[which]);
+#endif
     case BUTTC_JOYSTICK:
       int joyNum, inputNum;
       const char *inputType, *inputDirection;
@@ -1651,7 +1690,11 @@ DWaitButton (const uint8 * text, ButtConfig * bc, int wb)
     {
       std::string title = "Press a key for ";
       title += (const char *) text;
+#if SDL_VERSION_ATLEAST(2,0,0)
+	  // TODO - SDL2
+#else
       SDL_WM_SetCaption (title.c_str (), 0);
+#endif
       puts ((const char *) text);
     }
 

@@ -20,8 +20,6 @@
 #ifndef __FCEU_SDL_MAIN_H
 #define __FCEU_SDL_MAIN_H
 
-#include <SDL.h>
-
 #include "../../driver.h"
 #include "../common/config.h"
 #include "../common/args.h"

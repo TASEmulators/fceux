@@ -10,8 +10,6 @@
 #include <iostream>
 #include <cstdlib>
 
-#include <SDL/SDL.h>
-
 #include "../../types.h"
 #include "../../fceu.h"
 #include "../../driver.h"
@@ -2114,7 +2112,7 @@ gint convertKeypress(GtkWidget *grab, GdkEventKey *event, gpointer user_data)
 		// Only let the emulator handle the key event if this window has the input focus.
 		if(keystate == 0 || gtk_window_is_active(GTK_WINDOW(MainWindow)))
 		{
-			#if SDL_VERSION_ATLEAST(1, 3, 0)
+			#if SDL_VERSION_ATLEAST(2, 0, 0)
 			SDL_GetKeyboardState(NULL)[SDL_GetScancodeFromKey(sdlkey)] = keystate;
 			#else
 			SDL_GetKeyState(NULL)[sdlkey] = keystate;

@@ -26,7 +26,8 @@ opts.AddVariables(
   BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', 1),
   BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 1),
   BoolVariable('GTK3', 'Enable GTK3 GUI (SDL only)', 0),
-  BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 0)
+  BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 0),
+  BoolVariable('SDL2', 'Compile using SDL2 instead of SDL 1.2 (experimental/non-functional)', 0)
 )
 AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', metavar='DIR', help='installation prefix')
 
@@ -90,9 +91,17 @@ else:
     env.Append(CPPDEFINES=["_SYSTEM_MINIZIP"])
   else:
     assert conf.CheckLibWithHeader('z', 'zlib.h', 'c', 'inflate;', 1), "please install: zlib"
-  if not conf.CheckLib('SDL'):
-    print 'Did not find libSDL or SDL.lib, exiting!'
-    Exit(1)
+  if env['SDL2']:
+    if not conf.CheckLib('SDL2'):
+      print 'Did not find libSDL2 or SDL2.lib, exiting!'
+      Exit(1)
+    env.Append(CPPDEFINES=["_SDL2"])
+    env.ParseConfig('pkg-config sdl2 --cflags --libs')
+  else:
+    if not conf.CheckLib('SDL'):
+      print 'Did not find libSDL or SDL.lib, exiting!'
+      Exit(1)
+    env.ParseConfig('sdl-config --cflags --libs')
   if env['GTK']:
     if not conf.CheckLib('gtk-x11-2.0'):
       print 'Could not find libgtk-2.0, exiting!'
@@ -148,8 +157,6 @@ else:
   if env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c', autoadd=1):
     conf.env.Append(CCFLAGS = "-DOPENGL")
   conf.env.Append(CPPDEFINES = ['PSS_STYLE=1'])
-  # parse SDL cflags/libs
-  env.ParseConfig('sdl-config --cflags --libs')
   
   env = conf.Finish()
 
