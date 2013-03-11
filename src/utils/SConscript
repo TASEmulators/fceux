@@ -16,9 +16,7 @@ Import('env')
 
 if env['SYSTEM_MINIZIP'] == 0:
   source_list.append('unzip.cpp')
-  source_list.append('unzip.h')
   source_list.append('ioapi.cpp')
-  source_list.append('ioapi.h')
 
 for x in range(len(source_list)):
   source_list[x] = 'utils/' + source_list[x]
