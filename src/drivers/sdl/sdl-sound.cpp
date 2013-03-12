@@ -88,9 +88,12 @@ InitSound()
 		return 0;
 	}
 	char driverName[8];
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	// TODO - SDL 2
+#else
 	SDL_AudioDriverName(driverName, 8);
-    
 	fprintf(stderr, "Loading SDL sound with %s driver...\n", driverName);
+#endif
 
 	// load configuration variables
 	g_config->getOption("SDL.Sound.Rate", &soundrate);

@@ -83,6 +83,9 @@ int configHotkey(char* hotkeyString)
 	SDL_Surface *screen;
 	SDL_Event event;
 	KillVideo();
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	return 0; // TODO - SDL 2.0
+#else
 	screen = SDL_SetVideoMode(420, 200, 8, 0);
 	//SDL_WM_SetCaption("Press a key to bind...", 0);
 
@@ -103,6 +106,7 @@ int configHotkey(char* hotkeyString)
 	}	
 	
 	return 0;
+#endif
 }
 // This function configures a single button on a gamepad
 int configGamepadButton(GtkButton* button, gpointer p)
@@ -506,7 +510,12 @@ void openHotkeyConfig()
         g_config->getOption(optionName, &keycode);
         gtk_tree_store_set(hotkey_store, &iter, 
                 COMMAND_COLUMN, optionName,
-                KEY_COLUMN, SDL_GetKeyName((SDLKey)keycode),
+                KEY_COLUMN,
+#if SDL_VERSION_ATLEAST(2, 0, 0)                                                    
+				SDL_GetKeyName(keycode),
+#else
+				SDL_GetKeyName((SDLKey)keycode),
+#endif
                 -1);
         gtk_tree_store_append(hotkey_store, &iter, NULL); // acquire child     iterator
     }                      
@@ -591,8 +600,13 @@ void updateGamepadConfig(GtkWidget* w, gpointer p)
 		GtkWidget* mappedKey = buttonMappings[i];
 		if(GamePadConfig[padNo][i].ButtType[configNo] == BUTTC_KEYBOARD)
 		{
+#if SDL_VERSION_ATLEAST(2, 0, 0)                                                    
+			snprintf(strBuf, sizeof(strBuf), "<tt>%s</tt>", 
+					SDL_GetKeyName(GamePadConfig[padNo][i].ButtonNum[configNo]));
+#else
 			snprintf(strBuf, sizeof(strBuf), "<tt>%s</tt>", 
 					SDL_GetKeyName((SDLKey)GamePadConfig[padNo][i].ButtonNum[configNo]));
+#endif
 		}
 		else // FIXME: display joystick button/hat/axis names properly
 			strncpy(strBuf, "<tt>Joystick</tt>", sizeof(strBuf));
@@ -1929,8 +1943,28 @@ void changeState(GtkAction *action, GtkRadioAction *current, gpointer data)
 {
 	FCEUI_SelectState(gtk_radio_action_get_current_value(current), 0);
 }
-
-
+#if SDL_VERSION_ATLEAST(2, 0, 0)                                                    
+// SDL 1.2/2.0 compatibility macros
+#define SDLK_SCROLLOCK SDLK_SCROLLLOCK
+#define SDLK_PRINT SDLK_PRINTSCREEN
+#define SDLK_BREAK 0
+#define SDLK_COMPOSE 0
+#define SDLK_NUMLOCK SDLK_NUMLOCKCLEAR
+#define SDLK_KP0 SDLK_KP_0
+#define SDLK_KP1 SDLK_KP_1
+#define SDLK_KP2 SDLK_KP_2
+#define SDLK_KP3 SDLK_KP_3
+#define SDLK_KP4 SDLK_KP_4
+#define SDLK_KP5 SDLK_KP_5
+#define SDLK_KP6 SDLK_KP_6
+#define SDLK_KP7 SDLK_KP_7
+#define SDLK_KP8 SDLK_KP_8
+#define SDLK_KP9 SDLK_KP_9
+#define SDLK_LSUPER SDLK_LGUI
+#define SDLK_RSUPER SDLK_RGUI
+#define SDLK_LMETA 0
+#define SDLK_RMETA 0
+#endif
 // Adapted from Gens/GS.  Converts a GDK key value into an SDL key value.
 unsigned short GDKToSDLKeyval(int gdk_key)
 {
@@ -2078,9 +2112,12 @@ unsigned short GDKToSDLKeyval(int gdk_key)
 gint convertKeypress(GtkWidget *grab, GdkEventKey *event, gpointer user_data)
 {
 	SDL_Event sdlev;
-	SDLKey sdlkey;
 	int keystate;
-	
+#if SDL_VERSION_ATLEAST(2, 0, 0) 
+	SDL_Keycode sdlkey;
+#else
+	SDLKey sdlkey;
+#endif	
 	switch (event->type)
 	{
 		case GDK_KEY_PRESS:
@@ -2101,7 +2138,11 @@ gint convertKeypress(GtkWidget *grab, GdkEventKey *event, gpointer user_data)
 	}
 	
 	// Convert this keypress from GDK to SDL.
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	sdlkey = GDKToSDLKeyval(event->keyval);
+#else
 	sdlkey = (SDLKey)GDKToSDLKeyval(event->keyval);
+#endif
 	
 	// Create an SDL event from the keypress.
 	sdlev.key.keysym.sym = sdlkey;

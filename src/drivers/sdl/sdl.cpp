@@ -153,7 +153,12 @@ static void ShowUsage(char *prog)
 #endif
 	puts("");
 	printf("Compiled with SDL version %d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL );
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	SDL_version* v; 
+	SDL_GetVersion(v);
+#else
 	const SDL_version* v = SDL_Linked_Version();
+#endif
 	printf("Linked with SDL version %d.%d.%d\n", v->major, v->minor, v->patch);
 #ifdef GTK
 	printf("Compiled with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
@@ -620,6 +625,9 @@ int main(int argc, char *argv[])
 	int yres, xres;
 	g_config->getOption("SDL.XResolution", &xres);
 	g_config->getOption("SDL.YResolution", &yres);
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	// TODO _ SDL 2.0
+#else
 	const SDL_VideoInfo* vid_info = SDL_GetVideoInfo();
 	if(xres == 0) 
     {
@@ -650,7 +658,8 @@ int main(int argc, char *argv[])
 	else
 	{
 		g_config->setOption("SDL.LastYRes", yres);
-	}	
+	}
+#endif
 	
 	int autoResume;
 	g_config->getOption("SDL.AutoResume", &autoResume);
