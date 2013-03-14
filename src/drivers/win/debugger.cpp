@@ -1242,6 +1242,38 @@ void LoadGameDebuggerData(HWND hwndDlg = hDebug)
 	FillBreakList(hwndDlg);
 }
 
+// This function is for "smart" scrolling...
+// it attempts to scroll up one line by a whole instruction
+int InstructionUp(int from)
+{
+	int i = std::min(16, from), j;
+
+	while (i > 0)
+	{
+		j = i;
+		while (j > 0)
+		{
+			if (GetMem(from - j) == 0x00)
+				break;	// BRK usually signifies data
+			if (opsize[GetMem(from - j)] == 0)
+				break;	// invalid instruction!
+			if (opsize[GetMem(from - j)] > j)
+				break;	// instruction is too long!
+			if (opsize[GetMem(from - j)] == j)
+				return (from - j);	// instruction is just right! :D
+			j -= opsize[GetMem(from - j)];
+		}
+		i--;
+	}
+
+	// if we get here, no suitable instruction was found
+	if ((from >= 2) && (GetMem(from - 2) == 0x00))
+		return (from - 2);	// if a BRK instruction is possible, use that
+	if (from)
+		return (from - 1);	// else, scroll up one byte
+	return 0;	// of course, if we can't scroll up, just return 0!
+}
+
 BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
@@ -1565,7 +1597,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						case SB_ENDSCROLL:
 						case SB_TOP:
 						case SB_BOTTOM: break;
-						case SB_LINEUP: si.nPos--; break;
+						case SB_LINEUP: si.nPos = InstructionUp(si.nPos); break; // si.nPos--; break;
 						case SB_LINEDOWN:
 							if ((tmp=opsize[GetMem(si.nPos)])) si.nPos+=tmp;
 							else si.nPos++;
