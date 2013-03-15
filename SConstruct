@@ -1,9 +1,9 @@
 #
 # SConstruct - build script for the SDL port of fceux
 #
-# You can adjust the BoolVariables below to include/exclude features at compile-time
-#
-# You may need to wipe the scons cache ("scons -c") and recompile for some options to take effect.
+# You can adjust the BoolVariables below to include/exclude features 
+# at compile-time.  You may also use arguments to specify the parameters.
+#   ie: scons RELEASE=1 GTK3=1
 #
 # Use "scons" to compile and "scons install" to install.
 #
@@ -12,21 +12,22 @@ import os
 import sys
 import platform 
 
-opts = Variables()
+opts = Variables(None, ARGUMENTS)
 opts.AddVariables( 
+  BoolVariable('DEBUG',     'Build with debugging symbols', 1),
+  BoolVariable('RELEASE',   'Set to 1 to build for release', 0),
   BoolVariable('FRAMESKIP', 'Enable frameskipping', 1),
   BoolVariable('OPENGL',    'Enable OpenGL support', 1),
-  BoolVariable('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
-  BoolVariable('DEBUG',     'Build with debugging symbols', 1),
   BoolVariable('LUA',       'Enable Lua support', 1),
-  BoolVariable('SYSTEM_LUA','Use system lua instead of static lua provided with fceux', 1),
-  BoolVariable('SYSTEM_MINIZIP', 'Use system minizip instead of static minizip provided with fceux', 0),
+  BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 1),
+  BoolVariable('GTK3', 'Enable GTK3 GUI (SDL only)', 0),
   BoolVariable('NEWPPU',    'Enable new PPU core', 1),
   BoolVariable('CREATE_AVI', 'Enable avi creation support (SDL only)', 1),
   BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', 1),
-  BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 1),
-  BoolVariable('GTK3', 'Enable GTK3 GUI (SDL only)', 0),
-  BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 0),
+  BoolVariable('SYSTEM_LUA','Use system lua instead of static lua provided with fceux', 1),
+  BoolVariable('SYSTEM_MINIZIP', 'Use system minizip instead of static minizip provided with fceux', 0),
+  BoolVariable('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
+  BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 1),
   BoolVariable('SDL2', 'Compile using SDL2 instead of SDL 1.2 (experimental/non-functional)', 0)
 )
 AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', metavar='DIR', help='installation prefix')
@@ -34,10 +35,9 @@ AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', met
 prefix = GetOption('prefix')
 env = Environment(options = opts)
 
-#### Uncomment this for a public release ###
-#env.Append(CPPDEFINES=["PUBLIC_RELEASE"])
-#env['DEBUG'] = 0
-############################################
+if env['RELEASE']:
+  env.Append(CPPDEFINES=["PUBLIC_RELEASE"])
+  env['DEBUG'] = 0
 
 # LSB_FIRST must be off for PPC to compile
 if platform.system == "ppc":
@@ -182,7 +182,8 @@ else:
 Export('env')
 fceux = SConscript('src/SConscript')
 env.Program(target="fceux-net-server", source=["fceux-server/server.cpp", "fceux-server/md5.cpp", "fceux-server/throttle.cpp"])
-# Install rules
+
+# Installation rules
 if prefix == None:
   prefix = "/usr/local"
 
