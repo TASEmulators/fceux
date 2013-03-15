@@ -1,0 +1,17 @@
+my_list = Split("""
+args.cpp
+cheat.cpp
+config.cpp
+hq2x.cpp
+hq3x.cpp
+scale2x.cpp
+scale3x.cpp
+scalebit.cpp
+vidblit.cpp
+configSys.cpp
+nes_ntsc.c
+""")
+
+for x in range(len(my_list)):
+  my_list[x] = 'drivers/common/' + my_list[x]
+Return('my_list')

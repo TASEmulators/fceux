@@ -1,0 +1,112 @@
+                    SMB2j Revision "A". Mapper #50 Info
+                    -----------------------------------
+
+
+12.09.2000
+V2.00
+
+Mapper info by The Mad Dumper
+---
+
+
+This mapper has been assigned the number 50.  (that's 50 decimal)
+
+
+Wow, another SMB2j cart!  This one is alot different than the last one I
+worked on.  It has a single 128K PRG ROM and VRAM.  The other SMB2j had
+64K PRG and 8K CHR.  Not much more to say other than this has one very
+fucked up mapper circuit on it!
+
+---
+
+
+The hardware:
+
+
+It consists of 6 TTL chips (74163, 74157, 74139, 7400, 7474, and a 4020),
+1 8K RAM chip for the VRAM, and 1 128K 28 pin ROM.  There is some
+"M^2L" logic on the board (Mickey-Mouse Logic).  It is a 3 input OR gate
+made out of 3 diodes and a resistor.
+
+Also, they swapped D3 and D6, as well as A1 and A3.  Why this was done, I
+have no idea.  It sure mussed up my REing efforts!  I desoldered and read
+the ROM out through the EPROM programmer as a check and was not happy to
+find the data seemingly corrupt!  
+
+After converting the ROM image over via some QBasic, it matched up great. 
+You do not have to swap the addresses or data bytes; I have done this
+already in the released .NES ROM.
+
+---
+
+There are two registers on this cartridge.  They are located in the 4000h-
+5FFFh block.  
+
+Funny addresses are decoded for the register selection; presumably so they
+did not interfere with the FDS or NES registers.
+
+
+A15     ...      A0
+-------------------
+010x xxxQ x01x xxxx
+
+
+x = Don't Care
+0 = must be 0
+1 = must be 1
+Q = register selection bit.  0 = ROM Page; 1 = IRQ Timer Enable
+
+-
+
+ROM Page Register:
+------------------
+
+Accessed when the address lines are in the above state.  An example address
+would be 4020h.  4021h, 4022h, ... 403Fh, 40A0h, 40A1h, ... are all mirrors
+of this register.  Writing here stores the desired bank #.
+
+7  bit  0
+---------
+xxxx DCBA
+
+These 4 bits are shown below in the ROM memory map.  Note that they are
+somewhat "scrambled".  The value of this register is unknown at powerup.
+
+-
+
+IRQ Timer.
+
+7  bit  0
+---------
+xxxx xxxI
+
+The IRQ Timer register controls the state of the IRQ timer.  Writing here
+will turn it on or off.  Turning the IRQ timer off resets it to 0.  Writing
+a 1 here will turn the timer on, while writing a 0 will turn it off.
+
+The timer is composed of a binary ripple counter.  After 4096 M2 cycles,
+/IRQ is pulled low.  This is about 36 scanlines.  The idea behind the timer
+is to split the screen for the score bar at the top.  You start it at the
+beginning of the VBI routine, and then after 36 scanlines, it sends the IRQ
+which clears the timer, and resets the scroll registers.  The value of this
+register is unknown at powerup.
+
+---
+
+ROM Memory Map:
+
+
+Address Range | Bank bits: 3210 
+-------------------------------
+ 6000h-7FFFh               1111
+ 8000h-9FFFh               1000
+ A000h-BFFFh               1001
+ C000h-DFFFh               DACB -- Selectable page
+ E000h-FFFFh               1011
+
+
+The ROM is composed of 16 8K banks.  The 4 bank bits are shown above.  Bit 3
+is the MSB while bit 0 is the LSB.  6000h-7FFFh is set to 1111b, or bank 0fh.
+All banks are FIXED except the bank at C000h-DFFFh.  Only it can be changed.
+
+

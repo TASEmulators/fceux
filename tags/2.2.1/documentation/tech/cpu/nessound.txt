@@ -1,0 +1,697 @@
+The NES sound channel guide 1.8
+Written by Brad Taylor.
+btmine@hotmail.com
+
+Last updated: July 27th, 2000.
+
+All results were obtained by studying prior information available (from 
+nestech 1.00, and postings on NESDev from miscellanious people), and through 
+a series of experiments conducted by me. Results acquired by individuals 
+prior to my reverse-engineering have been double checked, and final results 
+have been confirmed. Credit is due to those individual(s) who contributed 
+any information in regards to the the miscellanious sound channels wihtin 
+the NES.
+
+A special thanks goes out to Matthew Conte, for his expertise on 
+pseudo-random number generation (amoung other things), which allowed for the 
+full reverse engineering of the NES's noise channel to take place. Without 
+his help, I would still be trying to find a needle in a haystack, as far as 
+the noise's method of pseudo-random number generation goes. Additionally, 
+his previous findings / reverse engineering work on the NES's sound hardware 
+really got the ball of NES sound emulation rolling. If it weren't for Matt's 
+original work, this document wouldn't exist.
+
+Thanks to Kentaro Ishihara, for his excellent work on finding the difference 
+in upward frequency sweep between the 2 square wave channels.
+
+****************
+* Introduction *
+****************
+
+The 2A03 (NES's integrated CPU) has 4 internal channels to it that have the 
+ability to generate semi-analog sound, for musical playback purposes. These 
+channels are 2 square wave channels, one triangle wave channel, and a noise 
+generation channel. This document will go into full detail on every aspect 
+of the operation and timing of the mentioned sound channels.
+
+
+*******************
+* Channel details *
+*******************
+
+Each channel has different characteristics to it that make up it's 
+operation.
+
+The square channel(s) have the ability to generate a square wave frequency 
+in the range of 54.6 Hz to 12.4 KHz. It's key features are frequency sweep 
+abilities, and output duty cycle adjustment.
+
+The triangle wave channel has the ability to generate an output triangle 
+wave with a resolution of 4-bits (16 steps), in the range of 27.3 Hz to 55.9 
+KHz. The key features this channel has is it's analog triangle wave output, 
+and it's linear counter, which can be set to automatically disable the 
+channel's sound after a certain period of time has gone by.
+
+The noise channel is used for producing random frequencys, which results in 
+a "noisey" sounding output. Output frequencys can range anywhere from 29.3 
+Hz to 447 KHz. It's key feature is it's pseudo- random number generator, 
+which generates the random output frequencys heard by the channel.
+
+
+*****************
+* Frame counter *
+*****************
+
+The 2A03 has an internal frame counter. It has the ability to generate 60 Hz 
+(1/1 framerate), 120 Hz (1/2 framerate), and 240 Hz (1/4 framerate) signals, 
+used by some of the sound hardware. The 1/4 framerate is calculated by 
+taking twice the CPU clock speed (3579545.454545 Hz), and dividing it by 
+14915 (i.e., the divide-by-14915 counter is decremented on the rising AND 
+falling edge of the CPU's clock signal).
+
+
+************************
+* Sound hardware delay *
+************************
+
+After resetting the 2A03, the first time any sound channel(s) length counter 
+contains a non-zero value (channel is enabled), there will be a 2048 CPU 
+clock cycle delay before any of the sound hardware is clocked. After the 2K 
+clock cycles go by, the NES sound hardware will be clocked normally. This 
+phenomenon only occurs prior to a system reset, and only occurs during the 
+first 2048 CPU clocks for any sound channel prior to a sound channel being 
+enabled.
+
+The information in regards to this delay is only provided to keep this 
+entire document persistently accurate on the 2A03's sound hardware, but may 
+not be 100% accurate in itself. I haven't done much tests on the behaviour 
+of this delay (mainly because I don't care, as I view it as a inconvenience 
+anyway), so that's why I believe there could be some inaccuracies.
+
+
+************************
+* Register Assignments *
+************************
+
+The sound hardware internal to the 2A03 has been designated these special 
+memory addresses in the CPU's memory map.
+
+$4000-$4003	Square wave 1
+$4004-$4007	Square wave 2 (identical to the first, except for upward 
+frequency sweeps (see "sweep unit" section))
+$4008-$400B	Triangle
+$400C-$400F	Noise
+$4015      	Channel enable / length counter status
+
+Note that $4015 is the only R/W register. All others are write only (attempt 
+to read them will most likely result in a returned 040H, due to heavy 
+capacitance on the NES's data bus). Reading a "write only" register, will 
+have no effect on the specific register, or channel.
+
+Every sound channel has 4 registers affiliated with it. The description of 
+the register sets are as follows:
+
++----------------+
+| Register set 1 |
++----------------+
+
+$4000(sq1)/$4004(sq2)/$400C(noise) bits
+---------------------------------------
+0-3	volume / envelope decay rate
+4	envelope decay disable
+5	length counter clock disable / envelope decay looping enable
+6-7	duty cycle type (unused on noise channel)
+
+$4008(tri) bits
+---------------
+0-6	linear counter load register
+7	length counter clock disable / linear counter start
+
+
++----------------+
+| Register set 2 |
++----------------+
+
+$4001(sq1)/$4005(sq2) bits
+--------------------------
+0-2	right shift amount
+3	decrease / increase (1/0) wavelength
+4-6	sweep update rate
+7	sweep enable
+
+$4009(tri)/$400D(noise) bits
+----------------------------
+0-7	unused
+
+
++----------------+
+| Register set 3 |
++----------------+
+
+$4002(sq1)/$4006(sq2)/$400A(Tri) bits
+-------------------------------------
+0-7	8 LSB of wavelength
+
+$400E(noise) bits
+-----------------
+0-3	playback sample rate
+4-6	unused
+7	random number type generation
+
+
++----------------+
+| Register set 4 |
++----------------+
+
+$4003(sq1)/$4007(sq2)/$400B(tri)/$400F(noise) bits
+--------------------------------------------------
+0-2	3 MS bits of wavelength (unused on noise channel)
+3-7	length counter load register
+
+
++--------------------------------+
+| length counter status register |
++--------------------------------+
+
+$4015(read)
+-----------
+0	square wave channel 1
+1	square wave channel 2
+2	triangle wave channel
+3	noise channel
+4	DMC (see "DMC.TXT" for details)
+5-6	unused
+7	IRQ status of DMC (see "DMC.TXT" for details)
+
+
++-------------------------+
+| channel enable register |
++-------------------------+
+
+$4015(write)
+------------
+0	square wave channel 1
+1	square wave channel 2
+2	triangle wave channel
+3	noise channel
+4	DMC channel (see "DMC.TXT" for details)
+5-7	unused
+
+
+************************
+* Channel architecture *
+************************
+
+This section will describe the internal components making up each individual 
+channel. Each component will then be described in full detail.
+
+Device                        Triangle Noise  Square
+------                        -------- ------ ------
+triangle step generator              X
+linear counter                       X
+programmable timer                   X      X      X
+length counter                       X      X      X
+4-bit DAC                            X      X      X
+volume/envelope decay unit                  X      X
+sweep unit                                         X
+duty cycle generator                               X
+wavelength converter                        X
+random number generator                     X
+
+
++-------------------------+
+| Triangle step generator |
++-------------------------+
+
+This is a 5-bit, single direction counter, and it is only used in the 
+triangle channel. Each of the 4 LSB outputs of the counter lead to one input 
+on a corresponding mutually exclusive XNOR gate. The 4 XNOR gates have been 
+strobed together, which results in the inverted representation of the 4 LSB 
+of the counter appearing on the outputs of the gates when the strobe is 0, 
+and a non-inverting action taking place when the strobe is 1. The strobe is 
+naturally connected to the MSB of the counter, which effectively produces on 
+the output of the XNOR gates a count sequence which reflects the scenario of 
+a near- ideal triangle step generator (D,E,F,F,E,D,...,2,1,0,0,1,2,...). At 
+this point, the outputs of the XNOR gates will be fed into the input of a 
+4-bit DAC.
+
+This 5-bit counter will be halted whenever the Triangle channel's length or 
+linear counter contains a count of 0. This results in a "latching" 
+behaviour; the counter will NOT be reset to any definite state.
+
+On system reset, this counter is loaded with 0.
+
+The counter's clock input is connected directly to the terminal count output 
+pin of the 11-bit programmable timer in the triangle channel. As a result of 
+the 5-bit triangle step generator, the output triangle wave frequency will 
+be 32 times less than the frequency of the triangle channel's programmable 
+timer is set to generate.
+
+
++----------------+
+| Linear counter |
++----------------+
+
+The linear counter is only found in the triangle channel. It is a 7-bit 
+presettable down counter, with a decoded output condition of 0 available 
+(not exactly the same as terminal count). Here's the bit assignments:
+
+$4008 bits
+----------
+0-6	bits 0-6 of the linear counter load register (NOT the linear counter 
+itself)
+7	linear counter start
+
+The counter is clocked at 240 Hz (1/4 framerate), and the calculated length 
+in frames is 0.25*N, where N is the 7-bit loaded value. The counter is 
+always being clocked, except when 0 appears on the output of the counter. At 
+this point, the linear counter & triangle step counter clocks signals are 
+disabled, which results in both counters latching their current state (the 
+linear counter will stay at 0, and the triangle step counter will stop, and 
+the channel will be silenced due to this).
+
+The linear counter has 2 modes: load, and count. When the linear counter is 
+in load mode, it essentially becomes transparent (i.e. whatever value is 
+currently in, or being written to $4008, will appear on the output of the 
+counter). Because of this, no count action can occur in load mode. When the 
+mode changes from load to count, the counter will now latch the value 
+currently in it, and start counting down from there. In the count mode, the 
+current value of $4008 is ignored by the counter (but still retained in 
+$4008). Described below is how the mode of the linear counter is set:
+
+Writes to $400B
+---------------
+cur	mode
+---	----
+1	load
+0	load (during the write cycle), count
+
+Cur is the current state of the MSB of $4008.
+
+Writes to $4008
+---------------
+old	new	mode
+---	---	----
+0	X	count
+1	0	no change (during the write cycle), count
+1	1	no change
+
+Old and new represent the state(s) of the MSB of $4008. Old is the value 
+being replaced in the MSB of $4008 on the write, and new is the value 
+replacing the old one.
+
+"no change" indicates that the mode of the linear counter will not change 
+from the last.
+
+
++--------------------+
+| Programmable timer |
++--------------------+
+
+The programmable timer is a 11-bit presettable down counter, and is found in 
+the square, triangle, and noise channel(s). The bit assignments are as 
+follows:
+
+$4002(sq1)/$4006(sq2)/$400A(Tri) bits
+-------------------------------------
+0-7	represent bits 0-7 of the 11-bit wavelength
+
+$4003(sq1)/$4007(sq2)/$400B(Tri) bits
+-------------------------------------
+0-2	represent bits 8-A of the 11-bit wavelength
+
+Note that on the noise channel, the 11 bits are not available directly. See 
+the wavelength converter section, for more details.
+
+The counter has automatic syncronous reloading upon terminal count 
+(count=0), therefore the counter will count for N+1 (N is the 11-bit loaded 
+value) clock cycles before arriving at terminal count, and reloading. This 
+counter will typically be clocked at the 2A03's internal 6502 speed (1.79 
+MHz), and produces an output frequency of 1.79 MHz/(N+1). The terminal 
+count's output spike length is typically no longer than half a CPU clock. 
+The TC signal will then be fed to the appropriate device for the particular 
+sound channel (for square, this terminal count spike will lead to the duty 
+cycle generator. For the triangle, the spike will be fed to the triangle 
+step generator. For noise, this signal will go to the random number 
+generator unit).
+
+
++----------------+
+| Length counter |
++----------------+
+
+The length counter is found in all sound channels. It is essentially a 7-bit 
+down counter, and is conditionally clocked at a frequency of 60 Hz.
+
+When the length counter arrives at a count of 0, the counter will be stopped 
+(stay on 0), and the appropriate channel will be silenced.
+
+The length counter clock disable bit, found in all the channels, can also be 
+used to halt the count sequence of the length counter for the appropriate 
+channel, by writing a 1 out to it. A 0 condition will permit counting 
+(unless of course, the counter's current count = 0). Location(s) of the 
+length counter clock disable bit:
+
+$4000(sq1)/$4004(sq2)/$400C(noise) bits
+---------------------------------------
+5	length counter clock disable
+
+$4008(tri) bits
+---------------
+7	length counter clock disable
+
+To load the length counter with a specified count, a write must be made out 
+to the length register. Location(s) of the length register:
+
+$4003(sq1)/$4007(sq2)/$400B(tri)/$400F(noise) bits
+--------------------------------------------------
+3-7	length
+
+The 5-bit length value written, determines what 7-bit value the length 
+counter will start counting from. A conversion table here will show how the 
+values are translated.
+
+	+-----------------------+
+	|	bit3=0		|
+	+-------+---------------+
+	|	|frames		|
+	|bits	+-------+-------+
+	|4-6	|bit7=0	|bit7=1	|
+	+-------+-------+-------+
+	|0	|05	|06	|
+	|1	|0A	|0C	|
+	|2	|14	|18	|
+	|3	|28	|30	|
+	|4	|50	|60	|
+	|5	|1E	|24	|
+	|6	|07	|08	|
+	|7	|0E	|10	|
+	+-------+-------+-------+
+
+	+---------------+
+	|	bit3=1	|
+	+-------+-------+
+	|bits	|	|
+	|4-7	|frames	|
+	+-------+-------+
+	|0	|7F	|
+	|1	|01	|
+	|2	|02	|
+	|3	|03	|
+	|4	|04	|
+	|5	|05	|
+	|6	|06	|
+	|7	|07	|
+	|8	|08	|
+	|9	|09	|
+	|A	|0A	|
+	|B	|0B	|
+	|C	|0C	|
+	|D	|0D	|
+	|E	|0E	|
+	|F	|0F	|
+	+-------+-------+
+
+The length counter's real-time status for each channel can be attained. A 0 
+is returned for a zero count status in the length counter (channel's sound 
+is disabled), and 1 for a non-zero status. Here's the bit description of the 
+length counter status register:
+
+$4015(read)
+-----------
+0	length counter status of square wave channel 1
+1	length counter status of square wave channel 2
+2	length counter status of triangle wave channel
+3	length counter status of noise channel
+4	length counter status of DMC (see "DMC.TXT" for details)
+5-6	unused
+7	IRQ status of DMC (see "DMC.TXT" for details)
+
+Writing a 0 to the channel enable register will force the length counters to 
+always contain a count equal to 0, which renders that specific channel 
+disabled (as if it doesn't exist). Writing a 1 to the channel enable 
+register disables the forced length counter value of 0, but will not change 
+the count itself (it will still be whatever it was prior to the writing of 
+1).
+
+Bit description of the channel enable register:
+
+$4015(write)
+------------
+0	enable square wave channel 1
+1	enable square wave channel 2
+2	enable triangle wave channel
+3	enable noise channel
+4	enable DMC channel (see "DMC.TXT" for details)
+5-7	unused
+
+Note that all 5 used bits in this register will be set to 0 upon system 
+reset.
+
+
++-----------+
+| 4-bit DAC |
++-----------+
+
+This is just a standard 4-bit DAC with 16 steps of output voltage 
+resolution, and is used by all 4 sound channels.
+
+On the 2A03, square wave 1 & 2 are mixed together, and are available via pin 
+1. Triangle & noise are available on pin 2. These analog outputs require a 
+negative current source, to attain linear symmetry on the various output 
+voltage levels generated by the channel(s) (moreover, to get the sound to be 
+audible). Since the NES just uses external 100 ohm pull-down resistors, this 
+results in the output waveforms being of very small amplitude, but with 
+minimal linearity asymmetry.
+
+
++------------------------------+
+| Volume / envelope decay unit |
++------------------------------+
+
+The volume / envelope decay hardware is found only in the square wave and 
+noise channels.
+
+$4000(sq1)/$4004(sq2)/$400C(noise)
+----------------------------------
+0-3	volume / envelope decay rate
+4	envelope decay disable
+5	envelope decay looping enable
+
+When the envelope decay disable bit (bit 4) is set (1), the current volume 
+value (bits 0-3) is sent directly to the channel's DAC. However, depending 
+on certain conditions, this 4-bit volume value will be ignored, and a value 
+of 0 will be sent to the DAC instead. This means that while the channel is 
+enabled (producing sound), the output of the channel (what you'll hear from 
+the DAC) will either be the 4-bit volume value, or 0. This also means that a 
+4-bit volume value of 0 will result in no audible sound. These conditions 
+are as follows:
+
+- When hardware in the channel wants to disable it's sound output (like the 
+length counter, or sweep unit (square channels only)).
+
+- On the negative portion of the output frequency signal coming from the 
+duty cycle / random number generator hardware (square wave channel / noise 
+channel).
+
+When the envelope decay disable bit is cleared, bits 0-3 now control the 
+envelope decay rate, and an internal 4-bit down counter (hereon the envelope 
+decay counter) now controls the channel's volume level. "Envelope decay" is 
+used to describe the action of the channel's audio output volume starting 
+from a certain value, and decreasing by 1 at a fixed (linear) rate (which 
+produces a "fade-out" sounding effect). This fixed decrement rate is 
+controlled by the envelope decay rate (bits 0-3). The calculated decrement 
+rate is 240Hz/(N+1), where N is any value between $0-$F.
+
+When the channel's envelope decay counter reaches a value of 0, depending on 
+the status of the envelope decay looping enable bit (bit 5, which is shared 
+with the length counter's clock disable bit), 2 different things will 
+happen:
+
+bit 5	action
+-----	------
+0	The envelope decay count will stay at 0 (channel silenced).
+1	The envelope decay count will wrap-around to $F (upon the next clock 
+cycle). The envelope decay counter will then continue to count down 
+normally.
+
+Only a write out to $4003/$4007/$400F will reset the current envelope decay 
+counter to a known state (to $F, the maximum volume level) for the 
+appropriate channel's envelope decay hardware. Otherwise, the envelope decay 
+counter is always counting down (by 1) at the frequency currently contained 
+in the volume / envelope decay rate bits (even when envelope decays are 
+disabled (setting bit 4)), except when the envelope decay counter contains a 
+value of 0, and envelope decay looping (bit 5) is disabled (0).
+
+
++------------+
+| Sweep unit |
++------------+
+
+The sweep unit is only found in the square wave channels. The controls for 
+the sweep unit have been mapped in at $4001 for square 1, and $4005 for 
+square 2.
+
+The controls
+------------
+Bit 7   	when this bit is set (1), sweeping is active. This results in 
+real-time increasing or decreasing of the the current wavelength value (the 
+audible frequency will decrease or increase, respectively). The wavelength 
+value in $4002/3 ($4006/7) is constantly read & updated by the sweep. 
+Modifying the contents of $4002/3 will be immediately audible, and will 
+result in the sweep now starting from this new wavelength value.
+
+Bits 6-4	These 3 bits represent the sweep refresh rate, or the frequency at 
+which $4002/3 is updated with the new calculated wavelength. The refresh 
+rate frequency is 120Hz/(N+1), where N is the value written, between 0 and 
+7.
+
+Bit 3   	This bit controls the sweep mode. When this bit is set (1), sweeps 
+will decrease the current wavelength value, as a 0 will increase the current 
+wavelength.
+
+Bits 2-0	These bits control the right shift amount of the new calculated 
+sweep update wavelength. Code that shows how the sweep unit calculates a new 
+sweep wavelength is as follows:
+
+bit 3
+-----
+0	New = Wavelength + (Wavelength >> N)
+1	New = Wavelength - (Wavelength >> N) (minus an additional 1, if using 
+square wave channel 1)
+
+where N is the the shift right value, between 0-7.
+
+Note that in decrease mode, for subtracting the 2 values:
+1's compliment (NOT) is being used for square wave channel 1
+2's compliment (NEG) is being used for square wave channel 2
+
+This information is currently the only known difference between the 2 square 
+wave channels.
+
+On each sweep refresh clock, the Wavelength register will be updated with 
+the New value, but only if all 3 of these conditions are met:
+
+- bit 7 is set (sweeping enabled)
+- the shift value (which is N in the formula) does not equal to 0
+- the channel's length counter contains a non-zero value
+
+Notes
+-----
+There are certain conditions that will cause the sweep unit to silence the 
+channel, and halt the sweep refresh clock (which effectively stops sweep 
+action, if any). Note that these conditions pertain regardless of any sweep 
+refresh rate values, or if sweeping is enabled/disabled (via bit 7).
+
+- an 11-bit wavelength value less than $008 will cause this condition
+- if the sweep unit is currently set to increase mode, the New calculated 
+wavelength value will always be tested to see if a carry (bit $B) was 
+generated or not (if sweeping is enabled, this carry will be examined before 
+the Wavelength register is updated) from the shift addition calculation. If 
+carry equals 1, the channel is silenced, and sweep action is halted.
+
+
++----------------------+
+| Duty cycle generator |
++----------------------+
+
+The duty cycle generator takes the fequency produced from the 11-bit 
+programmable timer, and uses a 4 bit counter to produce 4 types of duty 
+cycles. The output frequency is then 1/16 that of the programmable timer. 
+The duty cycle hardware is only found in the square wave channels. The bit 
+assignments are as follows:
+
+$4000(sq1)/$4004(sq2)
+---------------------
+6-7	Duty cycle type
+
+	duty (positive/negative)
+val	in clock cycles
+---	---------------
+00	 2/14
+01	 4/12
+10	 8/ 8
+11	12/ 4
+
+Where val represents bits 6-7 of $4000/$4004.
+
+The output frequency at this point will now be fed to the volume/envelope 
+decay hardware.
+
+
++----------------------+
+| Wavelength converter |
++----------------------+
+
+The wavelength converter is only used in the noise channel. It is used to 
+convert a given 4-bit value to an 11-bit wavelength, which then is sent to 
+the noise's own programmable timer. Here is the bit descriptions:
+
+$400E bits
+----------
+0-3	The 4-bit value to be converted
+
+Below is a conversion chart that shows what 4-bit value will represent the 
+11-bit wavelength to be fed to the channel's programmable timer:
+
+value	octave	scale	CPU clock cycles (11-bit wavelength+1)
+-----	------	-----	--------------------------------------
+0	15	A	002
+1	14	A	004
+2	13	A	008
+3	12	A	010
+4	11	A	020
+5	11	D	030
+6	10	A	040
+7	10	F	050
+8	10	C	065
+9	 9	A	07F
+A	 9	D	0BE
+B	 8	A	0FE
+C	 8	D	17D
+D	 7	A	1FC
+E	 6	A	3F9
+F	 5	A	7F2
+
+Octave and scale information is provided for the music enthusiast programmer 
+who is more familiar with notes than clock cycles.
+
+
++-------------------------+
+| Random number generator |
++-------------------------+
+
+The noise channel has a 1-bit pseudo-random number generator. It's based on 
+a 15-bit shift register, and an exclusive or gate. The generator can produce 
+two types of random number sequences: long, and short. The long sequence 
+generates 32,767-bit long number patterns. The short sequence generates 
+93-bit long number patterns. The 93-bit mode will generally produce higher 
+sounding playback frequencys on the channel. Here is the bit that controls 
+the mode:
+
+$400E bits
+----------
+7	mode
+
+If mode=0, then 32,767-bit long number sequences will be produced (32K 
+mode), otherwise 93-bit long number sequences will be produced (93-bit 
+mode).
+
+The following diagram shows where the XOR taps are taken off the shift 
+register to produce the 1-bit pseudo-random number sequences for each mode.
+
+mode	    <-----
+----	EDCBA9876543210
+32K	**
+93-bit	*     *
+
+The current result of the XOR will be transferred into bit position 0 of the 
+SR, upon the next shift cycle. The 1-bit random number output is taken from 
+pin E, is inverted, then is sent to the volume/envelope decay hardware for 
+the noise channel. The shift register is shifted upon recieving 2 clock 
+pulses from the programmable timer (the shift frequency will be half that of 
+the frequency from the programmable timer (one octave lower)).
+
+On system reset, this shift register is loaded with a value of 1.
+
+

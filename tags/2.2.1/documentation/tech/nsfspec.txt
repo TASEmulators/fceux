@@ -1,0 +1,336 @@
+                            NES Music Format Spec
+                            ---------------------
+
+
+By: Kevin Horton  khorton@iquest.net
+
+
+NOTE:
+-----
+
+
+Remember that I am very willing to add stuff and update this spec.  If
+you find a new sound chip or other change let me know and I will get back
+with you.  E-mail to the above address. 
+
+
+V1.61 - 06/27/2000 Updated spec a bit
+V1.60 - 06/01/2000 Updated Sunsoft, MMC5, and Namco chip information
+V1.50 - 05/28/2000 Updated FDS, added Sunsoft and Namco chips
+V1.32 - 11/27/1999 Added MMC5 register locations
+V1.30 - 11/14/1999 Added MMC5 audio bit, added some register info
+V1.20 - 09/12/1999 VRC and FDS prelim sound info added
+V1.00 - 05/11/1999 First official NSF specification file
+
+
+
+This file encompasses a way to transfer NES music data in a small, easy to
+use format.
+
+The basic idea is one rips the music/sound code from an NES game and prepends
+a small header to the data.
+
+A program of some form (6502/sound emulator) then takes the data and loads
+it into the proper place into the 6502's address space, then inits and plays
+the tune.
+
+Here's an overview of the header:
+
+offset  # of bytes   Function
+----------------------------
+
+0000    5   STRING  "NESM",01Ah  ; denotes an NES sound format file
+0005    1   BYTE    Version number (currently 01h)
+0006    1   BYTE    Total songs   (1=1 song, 2=2 songs, etc)
+0007    1   BYTE    Starting song (1= 1st song, 2=2nd song, etc)
+0008    2   WORD    (lo/hi) load address of data (8000-FFFF)
+000a    2   WORD    (lo/hi) init address of data (8000-FFFF)
+000c    2   WORD    (lo/hi) play address of data (8000-FFFF)
+000e    32  STRING  The name of the song, null terminated
+002e    32  STRING  The artist, if known, null terminated
+004e    32  STRING  The Copyright holder, null terminated
+006e    2   WORD    (lo/hi) speed, in 1/1000000th sec ticks, NTSC (see text)
+0070    8   BYTE    Bankswitch Init Values (see text, and FDS section)
+0078    2   WORD    (lo/hi) speed, in 1/1000000th sec ticks, PAL (see text)
+007a    1   BYTE    PAL/NTSC bits:
+                 bit 0: if clear, this is an NTSC tune
+                 bit 0: if set, this is a PAL tune
+                 bit 1: if set, this is a dual PAL/NTSC tune
+                 bits 2-7: not used. they *must* be 0
+007b    1   BYTE    Extra Sound Chip Support
+                 bit 0: if set, this song uses VRCVI
+                 bit 1: if set, this song uses VRCVII
+                 bit 2: if set, this song uses FDS Sound
+                 bit 3: if set, this song uses MMC5 audio
+                 bit 4: if set, this song uses Namco 106
+                 bit 5: if set, this song uses Sunsoft FME-07
+                 bits 6,7: future expansion: they *must* be 0
+007c    4   ----    4 extra bytes for expansion (must be 00h)
+0080    nnn ----    The music program/data follows
+
+This may look somewhat familiar;  if so that's because this is somewhat
+sorta of based on the PSID file format for C64 music/sound.
+
+
+Loading a tune into RAM
+-----------------------
+
+If offsets 0070h to 0077h have 00h in them, then bankswitching is *not*
+used.  If one or more bytes are something other than 00h then bankswitching
+is used.  If bankswitching is used then the load address is still used,
+but you now use (ADDRESS AND 0FFFh) to determine where on the first bank
+to load the data.
+
+
+Each bank is 4K in size, and that means there are 8 of them for the
+entire 08000h-0ffffh range in the 6502's address space.  You determine where
+in memory the data goes by setting bytes 070h thru 077h in the file.
+These determine the inital bank values that will be used, and hence where
+the data will be loaded into the address space.
+
+Here's an example:
+
+METROID.NSF will be used for the following explaination.
+
+The file is set up like so:  (starting at 070h in the file)
+
+
+0070: 05 05 05 05 05 05 05 05 - 00 00 00 00 00 00 00 00
+0080: ... music data goes here...
+
+Since 0070h-0077h are something other than 00h, then we know that this
+tune uses bankswitching.  The load address for the data is specified as
+08000h.  We take this AND 0fffh and get 0000h, so we will load data in
+at byte 0 of bank 0, since data is loaded into the banks sequentially
+starting from bank 0 up until the music data is fully loaded.
+
+Metroid has 6 4K banks in it, numbered 0 through 5.  The 6502's address
+space has 8 4K bankswitchable blocks on it, starting at 08000h-08fffh,
+09000h-09fffh, 0a000h-0afffh ... 0f000h-0ffffh.  Each one of these is 4K in
+size, and the current bank is controlled by writes to 05ff8h thru 05fffh,
+one byte per bank.  So, 05ff8h controls the 08000h-08fffh range, 05ff9h 
+controls the 09000h-09fffh range, etc. up to 05fffh which controls the 
+0f000h-0ffffh range.  When the song is loaded into RAM, it is loaded into
+the banks and not the 6502's address space.  Once this is done, then the
+bank control registers are written to set up the inital bank values.
+To do this, the value at 0070h in the file is written to 05ff8h, 0071h
+is written to 05ff9h, etc. all the way to 0077h is written to 05fffh.
+This is should be done before every call to the init routine.
+
+If the tune was not bankswitched, then it is simply loaded in at the 
+specified load address, until EOF
+
+
+Initalizing a tune
+------------------
+
+This is pretty simple.  Load the desired song # into the accumulator,
+minus 1 and set the X register to specify PAL (X=1) or NTSC (X=0).
+If this is a single standard tune (i.e. PAL *or* NTSC but not both)
+then the X register contents should not matter.  Once the song # and
+optional PAL/NTSC standard are loaded, simply call the INIT address.
+Once init is done, it should perform an RTS.
+
+
+Playing a tune
+--------------
+
+Once the tune has been initalized, it can now be played.  To do this,
+simply call the play address several times a second.  How many times
+per second is determined by offsets 006eh and 006fh in the file.
+These bytes denote the speed of playback in 1/1000000ths of a second.  
+For the "usual" 60Hz playback rate, set this to 411ah.  
+
+To generate a differing playback rate, use this formula:
+
+
+         1000000
+PBRATE= ---------
+          speed
+
+Where PBRATE is the value you stick into 006e/006fh in the file, and
+speed is the desired speed in hertz. 
+
+
+"Proper" way to load the tune
+-----------------------------
+
+1) If the tune is bankswitched, go to #3.
+
+2) Load the data into the 6502's address space starting at the specified
+   load address. Go to #4.
+
+3) Load the data into a RAM area, starting at (start_address AND 0fffh).
+
+4) Tune load is done.
+
+
+"Proper" way to init a tune
+---------------------------
+
+1) Clear all RAM at 0000h-07ffh.
+
+2) Clear all RAM at 6000h-7fffh.
+
+3) Init the sound registers by writing 00h to 04000-0400Fh, 10h to 4010h,
+   and 00h to 4011h-4013h.
+
+4) Set volume register 04015h to 00fh.
+
+5) If this is a banked tune, load the bank values from the header into
+   5ff8-5fffh.
+
+6) Set the accumulator and X registers for the desired song.
+
+7) Call the music init routine.
+
+
+"Proper" way to play a tune
+---------------------------
+
+1) Call the play address of the music at periodic intervals determined
+   by the speed words.  Which word to use is determined by which mode
+   you are in- PAL or NTSC.
+
+
+Sound Chip Support
+------------------
+
+Byte 007bh of the file stores the sound chip flags.  If a particular flag
+is set, those sound registers should be enabled.  If the flag is clear,
+then those registers should be disabled.
+
+* VRCVI Uses registers 9000-9002, A000-A002, and B000-B002, write only.
+
+Caveats: 1) The above registers are *write only* and must not disrupt music
+            code that happens to be stored there.
+
+         2) Major caveat:  The A0 and A1 lines are flipped on a few games!!
+            If you rip the music and it sounds all funny, flip around 
+            the xxx1 and xxx2 register pairs.  (i.e. 9001 and 9002)  9000
+            and 9003 can be left untouched.  I decided to do this since it 
+            would make things easier all around, and this means you only 
+            will have to change the music code in a very few places (6).
+            Esper2 and Madara will need this change, while Castlevania 3j
+            will not for instance.
+         
+         3) See my VRCVI.TXT doc for a complete register description.
+
+* VRCVII Uses registers 9010 and 9030, write only.
+
+Caveats: 1) Same caveat as #1, above.
+
+         2) See my VRCVII.TXT doc for a complete register description.
+
+* FDS Sound uses registers from 4040 through 4092.
+
+Caveats: 1) 6000-DFFF is assumed to be RAM, since 6000-DFFF is RAM on the
+            FDS.  E000-FFFF is usually not included in FDS games because
+            it is the BIOS ROM.  However, it can be used on FDS rips to help
+            the ripper (for modified play/init addresses).
+
+         2) Bankswitching operates slightly different on FDS tunes.  
+            5FF6 and 5FF7 control the banks 6000-6FFF and 7000-7FFF 
+            respectively.  NSF header offsets 76h and 77h correspond to
+            *both* 6000-7FFF *AND* E000-FFFF.  Keep this in mind!
+
+* MMC5 Sound Uses registers 5000-5015, write only as well as 5205 and 5206,
+            and 5C00-5FF5
+
+Caveats: 1) Generating a proper doc file.  Be patient.  
+
+         2) 5205 and 5206 are a hardware 8*8 multiplier.  The idea being
+            you write your two bytes to be multiplied into 5205 and 5206
+            and after doing so, you read the result back out.  Still working
+            on what exactly triggers it (I think a write to either 5205
+            or 5206 triggers the multiply).
+
+         3) 5C00-5FF5 should be RAM to emulate EXRAM while in MMC5 mode.
+
+Note: Thanks to Mamiya for the EXRAM info.
+
+
+* Namco 106 Sound Uses registers 4800 and F800.  
+
+            This works similar to VRC7.  4800 is the "data" port which is
+            readable and writable, while F800 is the "address" port and is
+            writable only.
+
+            The address is 7 bits plus a "mode" bit.  Bit 7 controls
+            address auto-incrementing.  If bit 7 is set, the address will
+            auto-increment after a byte of data is read or written from/to
+            4800.
+
+            $40 ffffffff f:frequency L
+            $42 ffffffff f:frequency M
+            $44 ---sssff f:frequency H s:tone length (8-s)*4 in 4bit-samples
+            $46 tttttttt t:tone address(4bit-address,$41 means high-4bits of $20)
+            $47 -cccvvvv v:linear volume 1+c:number of channels in use($7F only)
+            $40-47:ch1 $48-4F:ch2 ... $78-7F:ch8
+            ch2-ch8 same to ch1
+
+            $00-3F(8ch)...77(1ch) hhhhllll tone data
+            h:odd address data(signed 4bit)
+            l:even address data(signed 4bit)
+
+            real frequency = (f * NES_BASECYCLES) / (40000h * (c+1) * (8-s)*4 * 45)
+            NES_BASECYCLES 21477270(Hz)
+
+Note:  Very Special thanks to Mamiya for this information!
+
+
+* Sunsoft FME-07 Sound uses registers C000 and E000
+
+            This is similar to the common AY 3-8910 sound chip that is
+            used on tons of arcade machines, and in the Intellivision.
+
+            C000 is the address port
+            E000 is the data port
+
+            Both are write-only, and behave like the AY 3-8910.
+
+Note:  Special thanks to Mamiya for this information as well
+
+
+Caveats
+-------
+
+1) The starting song number and maximum song numbers start counting at
+   1, while the init address of the tune starts counting at 0.  To
+   "fix", simply pass the desired song number minus 1 to the init
+   routine.
+
+2) The NTSC speed word is used *only* for NTSC tunes, or dual PAL/NTSC tunes.
+   The PAL speed word is used *only* for PAL tunes, or dual PAL/NTSC tunes.
+
+3) The length of the text in the name, artist, and copyright fields must 
+   be 31 characters or less!  There has to be at least a single NULL byte
+   (00h) after the text, between fields.
+
+4) If a field is not known (name, artist, copyright) then the field must
+   contain the string "<?>" (without quotes).  
+
+5) There should be 8K of RAM present at 6000-7FFFh. MMC5 tunes need RAM at
+   5C00-5FF7 to emulate its EXRAM. 8000-FFFF Should be read-only (not 
+   writable) after a tune has loaded.  The only time this area should be 
+   writable is if an FDS tune is being played.
+
+6) Do not assume the state of *anything* on entry to the init routine
+   except A and X.  Y can be anything, as can the flags.  
+
+7) Do not assume the state of *anything* on entry to the play routine either.
+   Flags, X, A, and Y could be at any state.  I've fixed about 10 tunes
+   because of this problem and the problem, above.
+
+8) The stack sits at 1FFh and grows down.  Make sure the tune does not
+   attempt to use 1F0h-1FFh for variables. (Armed Dragon Villigust did and
+   I had to relocate its RAM usage to 2xx)
+
+9) Variables should sit in the 0000h-07FFh area *only*.  If the tune writes
+   outside this range, say 1400h this is bad and should be relocated. 
+   (Terminator 3 did this and I relocated it to 04xx).
+
+That's it!
+
+
+

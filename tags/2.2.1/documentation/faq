@@ -1,0 +1,67 @@
+FCE Ultra General User's FAQ
+ preliminary version
+ Last updated on:  Friday 13th, 2003
+------------------
+
+
+Q: Why do some games make a popping sound(Rad Racer 2, Final Fantasy 3)?
+A: These games do a very crude drum imitation by causing a large jump in
+   the output level for a short period of time via the register at $4011.
+   The analog filters on a real NES and Famicom make it sound rather decent.
+   I have not completely emulated these filters.  Enabling high-quality
+   sound emulation will also make these pseudo-drums sound better.  See
+   the next question for more information.
+
+Q: Why do some games' digitized sounds sound too loud?
+   Why do the drums in Crystalis and other games sound fuzzy?
+
+A: The NES' digital to analog converter is faulty, in that it does not output
+   sound linearly.  This effect is most noteable when a games messes with
+   register $4011, which is added with the triangle wave channel and the noise
+   channel outputs.  When $4011 is set to a large value, the volume
+   of the triangle wave channel and the noise channel drop significantly.  More
+   Importantly, when digitized sounds are being played and the digitized sample
+   stream is at a high value, less changes will be noticeable.  In other words,
+   the byte sequence "00 01 00" would be much more audible than the sequence 
+   "7e 7f 7e".  This non-linearity is only emulated when high-quality sound
+   emulation is enabled.
+
+Q: Why doesn't the NSF <insert name here> work(correctly) on FCE Ultra?
+A: Some NSF rips are bad.  Some read from addresses that are not specified
+   in the NSF specifications, expecting certain values to be returned.
+   Others execute undocumented instructions that have no affect on
+   less-accurate software NSF players, but will cause problems on NSF players 
+   that emulate these instructions.  Also, the playback rate specified
+   in the NSF header is currently ignored, though I haven't encountered
+   any problems in doing this.
+
+Q: Why doesn't the game <insert name here> work(correctly) on FCE Ultra?
+A: Many factors can make a game not work on FCE Ultra:
+
+	- If the ROM image is in the iNES format(typically files that have 
+	  the extension "nes"), its header may be incorrect.  This 
+	  incorrectness may also be because of garbage in the 
+	  header.  Certain utilities used to put text in the reserved 
+	  bytes of the iNES header, then those reserved bytes were 
+	  later assigned functions.  FCE Ultra recognizes and 
+  	  automatically removes(from the ROM image in RAM, not on the 
+	  storage medium) SOME header junk.
+
+	  If the game has graphical errors while scrolling, chances are
+	  the mirroring is set incorrectly in the header.  
+	  
+	  You can try to edit the header with a utility(in the NES 
+	  utilities section at http://zophar.net ) or a hex editor.
+
+	- The on-cart hardware the game uses may not be emulated 
+	  correctly.
+
+	- Limitations of the ROM image format may prevent a game from
+	  being emulated correctly without special code to recognize that
+	  game.  This occurs quite often with many Koei MMC5(iNES mapper 5) 
+	  and MMC1(iNES mapper 1) games in the iNES format.  FCE Ultra identifies
+	  and emulates some of these games based on the ROM CRC32 value.
+
+	- The ROM image may be encrypted.  The author of SMYNES seems to
+	  have done this intentionally to block other emulators from 
+	  playing "SMYNES only" games. 

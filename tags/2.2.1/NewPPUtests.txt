@@ -1,0 +1,69 @@
+NewPPU tests
+
+Bad
+Nightshade (U) - flickering
+
+Good
+3-D Battles of World Runner, The (U)
+8 Eyes
+10 Yard fight
+Advanced Dungeons and Dragons - Pool of Radiance
+Adventures of Bayou Billy
+Adventures of Lolo 1
+Adventures of Lolo 2
+Advenutres of Lolo 3
+Akira
+Akumajou secial - Boku Dracula-kun
+Archon
+Astyanax
+Barbie
+Bart vs the Space Mutants
+Baseball
+Batman - Return of the Joker
+Battletoads
+Battletoads & Double Dragon
+Bee 52
+Bible Adventures
+Castlevania
+Castlevania II: Simon's Quest
+Castlevania III: Dracula's Curse
+Championship Pool
+Chessmaster
+Circus Charlie
+Contra (U)
+Contra (J)
+Dragon Warrior
+Dragon Warrior III
+Dragon Warrior IV
+Double Dragon
+Double Dragon 2
+Double Dragon 3
+Donky Kong Classics
+Doki Doki panic
+Dragon's Lair - [FIXED] Black screen for level 1 (music plays)
+Duck Tales
+Duck Tales
+Earthworm Jim 2
+Excitebike
+Eggerland
+Final Fantasy
+Friday the 13th
+Gauntlet
+Gauntlet II
+Legend of Zelda
+Metroid
+Mike Tyson's Punch-out!!/Punch-out!!
+Power Blade
+RBI Baseball
+Rygar
+Super C
+Super Mario Bros 2 JPN
+Super Mario Bros 2 USA
+Super Mario Bros 3
+Tecmobowl
+Tecmo NBA Basketball (U)
+Tecmo Super Bowl (U) [!] - [FIXED] Intro screen messed up, menus out of whack, Team selection screen bad, pre game screen, field is messed up.
+TMNT
+Transformers
+Zanac
+Zelda II: The Adventure of Link

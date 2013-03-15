@@ -1,0 +1,97 @@
+This is an email posted to nesdev by Ki a while back.  I have removed one
+line at the end regarding the B flag of the cpu(the information was 
+incorrect, which Ki noted in a later email).
+
+--------------------------------------------------------------------------------
+
+ By reading Brad's NESSOUND document, we know that there is a
+"frame counter" in the NES/FC APU.  I would like to post
+some more on this.
+
+  The frame counter is reset upon any write to $4017.  It is
+reset at system power-on as well, but is NOT reset upon
+system reset.
+
+  Thanks to Samus Aran, we now know the exact period of the
+PPU's single frame.  In another words, we are now sure that
+the NMI occurs on every 29780 2/3 CPU cycles.
+
+  However, the APU's single frame is NOT 29780 2/3 CPU cycles.
+What I mean by "APU's single frame" here is that it is the
+number of CPU cycles taken between the frame IRQs.
+
+  The APU's single frame seems to be:
+
+    1789772.727... / 60 = 29829 6/11  [CPU CYCLE]
+
+  Below is a simple diagram which shows the difference
+in periods of the PPU's single frame and the APU's.
+
+
+    RESET         29780 2/3 CPU CYCLES          NMI
+PPU   |------------------------------------------|
+      |           29829 6/11 CPU CYCLES          IRQ
+APU   |----------|----------|----------|----------|
+
+
+  Note that if you write $00 to $4017 on every NMI, the frame
+IRQ would NEVER go off even if it is enabled.  This is because
+the the period of NMI is slightly shorter than the period of
+the frame IRQ.  This causes the frame counter to be reset
+before the frame IRQ goes off.
+
+When you write zero to bit 7 of $4017, the frame counter will
+be reset, and the first sound update will be done after 7457 CPU
+cycles (i.e. 29829/4).  2nd update will be done 7457 after that,
+same goes for 3rd update and 4th update, but the frame IRQ occurs
+on 4th update, resetting the frame counter as well.
+
+When you write 1 to bit 7 of $4017, the frame counter will be
+reset, but the first sound update will occur at the same time.
+2nd, 3rd, and 4th update will be done after 7457, 14914, 22371
+CPU cycles after the first update respectively, but the 5th
+update will be 14914 cycles after the 4th update.  This causes
+sound output to last 1.25 times longer than that of bit 7 = 0.
+
+
+$4017W:
+
+o when the MSB of $4017 is 0:
+
+bit7=0
+  |---------|---------|---------|---------|---------|---------|----
+            1st       2nd       3rd       4th    5th(1st)  6th(2nd)
+
+
+o when the MSB of $4017 is 1:
+
+bit7=1
+  |---------|---------|---------|-------------------|---------|----
+  1st       2nd       3rd       4th              5th(1st)  6th(2nd)
+
+
+On 1st, 3rd, 5th, ... updates, the envelope decay and the
+linear counter are updated.
+
+On 2nd, 4th, 6th, ... updates, the envelope decay, the
+linear counter, the length counter, and the frequency sweep
+are updated.
+----
+
+  The original info was provided by goroh, and verified by me.
+However, it could still be wrong.  Please tell me if you
+find anything wrong.
+----
+
+(Correction from my last posting)
+
+  I have checked once again and it turned out that the frame IRQ
+was NOT disabled upon system reset.  What actually prevented the
+frame IRQ to occur after system reset was, in fact, the I flag.
+I checked this flag shortly after system reset (right after stack
+pointer was initialized), and the flag was 1, although I never
+executed "sei" after reset.  Therefore the I flag of the PR2A03G
+is 1 on system reset.
+
+  Thanks Matthew Conte and Samus Aran for pointing out the
+inaccuracy.

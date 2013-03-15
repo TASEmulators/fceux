@@ -1,0 +1,24 @@
+# Fix compliation error about 'XKeysymToString' by linking X11 explicitly
+# Thanks Antonio Ospite!
+Import('env')
+env.ParseConfig('pkg-config --cflags --libs x11')
+Export('env')
+
+my_list =  Split("""
+input.cpp
+config.cpp
+sdl.cpp
+sdl-joystick.cpp
+sdl-sound.cpp
+sdl-throttle.cpp
+sdl-video.cpp
+unix-netplay.cpp
+""")
+
+Import('env')
+if 'GL' in env['LIBS']:
+  my_list.append('sdl-opengl.cpp')
+
+for x in range(len(my_list)):
+  my_list[x] = 'drivers/sdl/' + my_list[x]
+Return('my_list')

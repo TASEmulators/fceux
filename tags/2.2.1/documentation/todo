@@ -1,0 +1,70 @@
+The following games are broken to some extent:
+
+Crystalis:		Mostly working, but the screen jumps around during
+			dialogue.  It apparently resets the MMC3 IRQ counter
+			mid-scanline.  It'll require low-level PPU and MMC3
+			IRQ counter emulation to function properly.
+Kyoro Chan Land:	Expects a sprite hit to happen, but it has sprite 0 over
+			transparent background.
+
+*** First, things that are not on the TODO list(Don't bug me about these
+	things if you're an idiot.  I don't like listening to idiots.
+	If you are not an idiot, and you can make decent arguments for why
+	these should be on the TODO list, then you can bug me.).
+
+*** General Features:
+
+ Remappable command keys(to multiple keys on the keyboard and a joystick).
+
+ Fix possible UNIF crashes(if no PRGx or CHRx chunks exist, it may crash,
+ due to changes made in 0.92).
+
+ Windows Port:
+  Support for command-line options(so that one crazy guy will quit bugging
+  me).
+
+ SDL Port:
+   Hotkey remap GUI
+
+ Figure out a good way to add "turbo" button support and then do it.
+
+ Make default svgalib video mode a non-tweaked VGA mode.
+
+ Finish the software video blitting "library", add support for 2xsai, eagle,
+ interpolation, etc. effects.
+
+
+*** Emulation:
+
+
+ ***IMPORTANT***
+ If anyone ever cares to implement movie recording/playback, we must figure
+ out what to do with some unsaved variables, like timestamp and timestampbase.
+ These variables are abused in the sound emulation code, and modifying them
+ in certain ways elsewhere can cause crashes.
+ ***IMPORTANT***
+
+ Implement cart-based expansion devices, and interfaces for them(dip switches
+ and that Datach barcode reader, and maybe others).
+
+ Fix DPCM playback and IRQ at end of playback.
+
+ Fix some 6502 emulation bugs(undocumented opcodes might not be implemented 
+ correctly and I'm not sure if the IRQ flag latency is implemented correctly).
+
+ Implement more dummy CPU reads when in debug mode.
+
+ Fix MMC3 IRQ emulation.  
+
+ Figure out correct timing for when the PPU refresh address register is
+ updated by the PPU(for the next scanline).
+
+ Sound frame count stuff on PAL games(is it correct?).
+ 
+ Fix FDS sound emulation.
+
+ Fix NMI timing and D7 of 2002 setting timing.  Fixing this might require
+ a small hack.  Also be aware that this might break Battletoads, particularly
+ during the second level.
+
+ Fix Zapper emulation(Chiller still doesn't always work correctly).

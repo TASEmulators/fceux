@@ -1,0 +1,353 @@
+.\" t                                    Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH FCEUX 6 "June 24, 2012"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+fceux \- An emulator for the original (8-bit) Nintendo / Famicom game console.
+.SH SYNOPSIS
+.B fceux
+.RI [ options ]
+"filename"
+.SH DESCRIPTION
+.B FCEUX
+is an emulator for the original (8-bit) Nintendo Entertainment System (NES).
+It has a robust color palette rendering engine that is fully customizable,
+along with excellent sound and joystick support, and even supports movie 
+recording and playback.
+.SH OPTIONS
+.SS Misc. Options
+.TP
+.B \--no-config {0|1}
+Use default config file and do not save to it, when enabled.
+.TP
+.B \-g {0|1}, \--gamegenie {0|1}
+Enable or disable emulated Game Genie.
+.TP
+.B \--nogui {0|1}
+Enable or disable the GTK GUI.
+.TP
+.B \--loadlua FILE
+Loads lua script from filename FILE.
+.SS Emulation Options
+.TP
+.B \--pal {0|1}
+Enable or disable PAL mode.
+.SS Input Options
+.TP
+.B \-i DEV, \--inputcfg DEV
+Configures input device DEV on startup.
+Devices: gamepad powerpad hypershot quizking
+.TP
+.B \--input{1|2} DEV
+Set which input device to emulate for input 1 or 2.
+Devices: gamepad zapper powerpad.0 powerpad.1 arkanoid
+.TP
+.B \--input{3|4} DEV
+Set the famicom expansion device to emulate for input 3 or 4.
+Devices: quizking hypershot mahjong toprider ftrainer familykeyboard
+oekakids arkanoid shadow bworld 4player
+.TP
+.B \--inputdisplay {0|1}
+Enable or disable input display.
+.TP
+.B \--fourscore {0|1}
+Enable or disable fourscore emulation.
+.SS Graphics Options
+.TP
+.B \--newppu {0|1}
+Enable or disable the new PPU core. (WARNING: May break savestates)
+.TP
+.B \--frameskip NUM
+Set NUM of frames to skip per emulated frame.
+.TP
+.B \--clipsides {0|1}
+Enable or disable clipping of the leftmost and rightmost 8 columns of
+the video output.
+.TP
+.B \--slstart SCANLINE
+Set the first scanline to be rendered.
+.TP
+.B \--slend SCANLINE
+Set the last scanline to be rendered.
+.TP
+.B \--nospritelim {0|1}
+When set to 0, this disables the normal 8 sprites per scanline limitation.
+When set to 1, this enables the normal 8 sprites per scanline limitation.
+NOTE: Yes, this option is 'backwards'.
+.TP
+.B \-x XRES, \--xres XRES
+Set horizontal resolution for full screen mode.
+.TP
+.B \-y YRES, \--yres YRES
+Set vertical resolution for full screen mode.
+.TP
+.B \--doublebuf {0|1}
+Enable or disable double buffering.
+.TP
+.B \--autoscale {0|1}
+Enable or disable autoscaling in fullscreen.
+.TP
+.B \--keepratio {0|1}
+Keep native NES aspect ratio when autoscaling.
+.TP
+.B \--{x|y}scale VAL
+Multiply width/height by VAL.
+(Real numbers > 0 with OpenGL, otherwise integers > 0).
+.TP
+.B \--{x|y}stretch {0|1}
+Stretch to fill surface on x/y axis (OpenGL only).
+.TP
+.B \-b {8|16|24|32}, \--bpp {8|16|24|32}
+Set bits per pixel.
+.TP
+.B \--opengl {0|1}
+Enable or disable OpenGL support.
+.TP
+.B \--openglip {0|1}
+Enable or disable OpenGL linear interpolation.
+.TP
+.B \-f {0|1}, \--fullscreen {0|1}
+Enable or disable full-screen mode.
+.TP
+.B \--noframe {0|1}
+Hide title bar and window decorations.
+.TP
+.B \--special {1-4}
+Use special video scaling filters.
+(1 = hq2x 2 = Scale2x 3 = NTSC 2x 4 = hq3x 5 = Scale3x)
+.TP
+.B \-p FILE, \--palette FILE
+Use the custom palette in FILE.
+.TP
+.B \--ntsccolor {0|1}
+Enable or disable NTSC NES colors.
+.TP
+.B \--tint VAL
+Set the NTSC tint.
+.TP
+.B \--hue VAL
+Set the NTSC hue.
+.SS Sound Options
+.TP
+.B \-s {0|1}, \--sound {0|1}
+Enable or disable sound.
+.TP
+.B \--soundrate RATE
+Set the sound playback sample rate (0 == off?).
+.TP
+.B \--soundq {0|1|2}
+Set sound quality. (0 = Low 1 = High 2 = Very High)
+.TP
+.B \--soundbufsize MS
+Set sound buffer size to MS milliseconds.
+.TP
+.B \--volume {0-256}
+Sets the sound volume to the given value, where 256 is max volume.
+.TP
+.B \--trianglevol {0-256}
+Sets the sound volume of the triangle wave to the given value, where 256 is max volume.
+.TP
+.B \--square1vol {0-256}
+Sets the sound volume of square wave 1 to the given value, where 256 is max volume.
+.TP
+.B \--square2vol {0-256}
+Sets the sound volume of square wave 2 to the given value, where 256 is max volume.
+.TP
+.B \--noisevol {0-256}
+Sets the sound volume of the noise generator to the given value, where 256 is max volume.
+.TP
+.B \--lowpass {0|1}
+Enables or disables lowpass filtering of the sound.
+.TP
+.B \--soundrecord FILE
+Record sound to file FILE.
+.SS Movie Options
+.TP
+.B \--playmov FILE
+Play back a recorded FCM/FM2 movie from filename FILE.
+.TP
+.B \--pauseframe FRAME
+Pause movie playback at frame FRAME.
+.TP
+.B \--moviemsg {0|1}
+Enable or disable movie messages.
+.TP
+.B \--fcmconvert FILE
+Convert fcm movie file FILE to fm2.
+.TP
+.B \--ripsubs FILE
+Convert movie's subtitles to srt.
+.TP
+.B \--subtitles {0|1}
+Enable or disable subtitle display.
+.SS Networking Options
+.TP
+.B \-n SRV, \--net SRV
+Connect to server SRV for TCP/IP network play.
+.TP
+.B \--port PORT
+Use TCP/IP port PORT for network play.
+.TP
+.B \-u NICK, \--user NICK
+Set the nickname to use in network play.
+.TP
+.B \-w PASS, \--pass PASS
+Set password to use for connecting to the server.
+.TP
+.B \-k NETKEY, \--netkey NETKEY
+Use string NETKEY to create a unique session for the game loaded.
+.TP
+.B \--players NUM
+Set the number of local players.
+.TP
+.B \--rp2mic {0|1}
+If enabled, replace Port 2 Start with microphone (Famicom).
+.TP
+.B \--videolog c
+Calls mencoder to grab the video and audio streams to encode them. Check the documentation for more on this.?
+.TP
+.B \--mute {0|1}
+Mutes FCEUX while still passing the audio stream to mencoder.
+.TP
+.SH KEYBOARD COMMANDS
+.B FCEUX
+has a number of commands available within the emulator.
+It also includes default keyboard bindings when emulating game pads or power pads.
+.SS Gamepad Keyboard Bindings
+.TS
+center box;
+cb | cb, c | ci.
+NES Gamepad	Keyboard
+=
+Up  	Keypad Up
+Down	Keypad Down
+Left	Keypad Left
+Right	Keypad Right
+A	F
+B	D
+Select	S
+Start	Enter
+.TE
+.SS Other Commands
+.PP
+.TP 15
+.BI <Alt+Enter>
+Toggle full-screen mode.
+.TP 15
+.BI <F1>
+Cheat menu (command-line only).
+.TP 15
+.BI <F2>
+Toggle savestate binding to movies.
+.TP 15
+.BI <F3>
+Load LUA script.
+.TP 15
+.BI <F4>
+Toggles background rendering.
+.TP 15
+.BI <F5>
+Save game state into current slot (set using number keys).
+.TP 15
+.BI <F7>
+Restore game state from current slot (set using number keys).
+.TP 15
+.BI <F10>
+Toggle movie subtitles.
+.TP 15
+.BI <F11>
+Reset NES.
+.TP 15
+.BI <F12>
+Save screen snapshot.
+.TP 15
+.BI Shift + <F5>
+Beging recording video.
+.TP 15
+.BI Shift + <F7>
+Load recorded video.
+.TP 15
+.BI 0-9
+Select save state slot.
+.TP 15
+.BI Page Up/Page Down
+Select next/previous state.
+.TP 15
+.BI \-
+Decrease emulation speed.
+.TP 15
+.BI =
+Increase emulation speed.
+.TP 15
+.BI Tab
+Hold for turbo emulation speed.
+.TP 15
+.BI Pause
+Pause emulation.
+.TP 15
+.BI \e
+Advance a single frame.
+.TP 15
+.BI .
+Toggle movie frame counter.
+.TP 15
+.BI ,
+Toggle input display.
+.TP 15
+.BI q
+Toggle movie read-only.
+.TP 15
+.BI '
+Advance a single frame.
+.TP 15
+.BI /
+Lag counter display.
+.TP 15
+.BI Delete
+Frame advance lag skip display.
+.TP 15
+.BR <ESC>
+Quit
+.B FCEUX.
+.SS VS Unisystem Commands
+.PP
+.TP 15
+.BI <F8>
+Insert coin.
+.TP 15
+.BI <F6>
+Show/Hide dip switches.
+.TP 15
+.BI 1-8
+Toggle dip switches (when dip switches are shown).
+.SS Famicom Disk System Commands
+.PP
+.TP 15
+.BI <F6>
+Select disk and disk side.
+.TP 15
+.BI <F8>
+Eject or insert disk.
+.TP
+.I http://fceux.com/
+The
+.B FCEUX
+project homepage.
+.SH AUTHOR
+This manual page was written by Joe Nahmias <joe _at_ nahmias.net>, 
+Lukas Sabota <ltsmooth42 _at_ gmail.com> and Alexander Toresson 
+<alexander.toresson _at_ gmail.com> for the Debian GNU/Linux system 
+(but may be used by others).
