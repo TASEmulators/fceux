@@ -1,0 +1,12 @@
+BUILD SYSTEM BUGS:
+Date - Person - Details
+
+
+
+
+CLOSED * July 30, 2006 - Luke - I'm getting build errors about:
+sh: illegal option -l
+Started happening when the build system was edited to be more robust.
+I'll check it out when i get the chance, or soules if you could take a look at it, that would be grand.
+- July 31, 2006 - Luke - checked out to latest revision, all is well.
+

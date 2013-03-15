@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Fceux
+GenericName=NES/Famicom emulator
+NoDisplay=false
+Comment=Emulate NES ROMs
+Exec=/usr/bin/fceux
+Icon=/usr/share/pixmaps/fceux.png
+Terminal=false
+MimeType=application/x-nes-rom
+Categories=Game;Emulator;
+Encoding=UTF-8
+

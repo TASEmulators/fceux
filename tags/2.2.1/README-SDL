@@ -1,0 +1,116 @@
+FCEUX SDL 2.2.1 SDL README
+==========================
+By Lukas Sabota (sf: punkrockguy318)
+
+http://www.fceux.com
+
+Last Modified: March 10, 2013
+
+Table of Contents
+-----------------
+
+1.  Requirements
+2.  Installation
+3.  Compile-time options
+4.  GUI
+5.  LUA Scripting
+5.  FAQ
+6.  Contact
+
+1 - Requirements
+----------------
+* libsdl1.2 - It is strongly recommended that you upgrade to the latest
+	version of sdl (1.2.15 at the time of writing).
+* scons - Required to build fceux.
+* libgtk2.0 (optional) - version >= 2.24 recommended
+* libgtk3.0 (optional) - this compiles as of fceux 2.2.0
+* liblua5.1 (optional)
+* minizip (optional) - you may chose to use the version of minizip on your system by enabling SYSTEM_MINIZIP in the SConstruct
+* c++ compiler -- you may use g++ from gcc or clang++ from llvm.
+
+2 - Installation
+----------------
+Fceux can be compiled and built using the scons build system.  To compile, run:
+
+	scons
+	
+After a sucessful compilation, the fceux binary will be generated to 
+./src/fceux .  You can install fceux to your system with the following command:
+
+	scons install
+
+You can optionally define a prefix:
+
+	scons --prefix=/usr/local install
+
+You can choose to install the lua scripts (located in output/luaScripts) to a directory of your choosing:
+
+	cp -R output/luaScripts /usr/local/some/directory/that/i/will/find/later
+
+If you would like to clean the temporary scons files to perform a 'make clean' like function, you can do the following:
+
+	scons -c && rm -rf .scon*
+
+3 - Compile-time options
+------------------------
+You can enable and disable certain features of fceux at build time. 
+To edit these options, edit the "BoolOptions" following the "opts.AddVariables" method
+at the head of the "SConstruct" file in this source directory.  The
+default options will be fine for most users, but power users may want to
+tweak some of these options.
+
+4 - GUI
+-------
+You can enable the GTK GUI by setting GTK to 1 in the SConstruct build file. 
+GfceuX is deprecatiated in favor of the new GTK GUI.  You can disable the GTK GUI at
+run-time by passing the --nogui option, or disable it at build-time by setting
+GTK to 0 in the SConstruct file.  If you prefer GTK3 to GTK2, you can set the
+GTK3 BoolVariable to 1 in the SConstruct.
+
+5 - LUA Scripting
+-----------------
+FCEUX provides a LUA 5.1 engine that allows for in-game scripting capabilities.  LUA can be enabled or disabled at build time by adjusting the "LUA" BoolVariable in the SConstruct file.
+
+A collection of LUA scripts are provided with the source distribuition in the output directory:
+
+	$source_directory/output/luaScripts
+
+You should be able to run most of the scripts in this directory out of the box.  However, some of the the lua scripts require functionality from the "auxlib.lua" library.  This file can be copied from "./bin/auxlib.lua" or "./src/auxlib.lua".  You will need to place this file in the LUA library search path if a script bombs out looking for auxlib.lua. If the script bombs out, the console output will let you know what the search path are (/usr/local/lib/lua/5.1/ on my particular system).  You can simply copy the auxlib to a preferred location to utilize the functions in the auxiliary lua library. 
+
+In addition, some of the lua scripts require functionality from the "iup" GUI library.  You can obtain binaries and source for "iup" upstream (http://www.tecgraf.puc-rio.br/iup/), but I would recommend obtaining packages from your Linux distribution if you are able, as it can be difficult to compile or get the binaries working correctly on a given system.
+
+You will need to add the location that the libiup*.so files to the LUA_CPATH.  This can be done with the following command (please note that the location where iup is installed with vary based on how you installed iup):
+
+	export LUA_CPATH="/path/to/iup/lib/lib?51.so;"
+
+For example, if libiuplua51.so is located in '/usr/lib', you can run the following command before executing fceux to place the library in the search path:
+
+	export LUA_CPATH="/usr/lib/lib?51.so;"
+
+Finally, if any scripts complaints about "attempt to index global 'iup' (a nil value)", this means that "iup" needs to be explicitly loaded into the script.  You can add the following line to the head of script to manually load "iup":
+
+	require("iuplua")
+
+The latest version of iup (3.5 at the time of writing) is recomended.
+
+6 - FAQ
+-------
+
+* Q.  Im having issues with my sound!
+* A.  First of all, for the best sound quality be sure you are using SDL 1.2.14 or later.  Versions 1.2.13 and earlier are known to have problems with fceux!  Next, try different SDL audio drivers to see if this makes any difference.  You can do this by using this command before running fceux:
+
+	export SDL_AUDIODRIVER=driver
+
+where driver is either: 'pulse' for pulseaudio;' alsa' for ALSA; 'dsp' for OSS; 'esd' for ESD; see SDL documentation for details (http://www.libsdl.org/docs/html/sdlenvvars.html)
+
+There are sound options that you can tweak at runtime through command line switches:
+
+* -soundq x 		internal sound quality hack value (0 off)
+* -soundrate x    	sound rate (sane values: 28000 48000
+* -soundbuffersize x 	(in ms)  sane values (30, 50, 100, 120)
+
+Running fceux through esddsp is known to fix some audio issues with pulseaudio on some older Ubuntu versions.
+	
+7 - Contact
+-----------
+If you have an issue with fceux, report it in the sourceforge bug tracker (see fceux.com).  If you would like to contact the author of this readme personally, e-mail LTsmooth42 <at> gmail <dot> com.  You can also check us out at #fceu on irc.freenode.net.

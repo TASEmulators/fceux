@@ -1,0 +1,316 @@
+Library Listing of FCEUX Lua Functions
+Written by adelikat/QFox
+
+FCEU library
+
+FCEU.poweron()
+
+Executes a power cycle.
+
+FCEU.softreset()
+
+Executes a (soft) reset.
+
+FCEU.speedmode(string mode)
+
+Set the emulator to given speed. The mode argument can be one of these:
+	- "normal"
+	- "nothrottle" (same as turbo on fceux)
+	- "turbo"
+	- "maximum"
+
+FCEU.frameadvance()
+
+Advance the emulator by one frame. It's like pressing the frame advance button once.
+
+Most scripts use this function in their main game loop to advance frames. Note that you can also register functions by various methods that run "dead", returning control to the emulator and letting the emulator advance the frame.  For most people, using frame advance in an endless while loop is easier to comprehend so I suggest  starting with that.  This makes more sense when creating bots. Once you move to creating auxillary libraries, try the register() methods.
+
+FCEU.pause()
+
+Pauses the emulator. FCEUX will not unpause until you manually unpause it.
+
+FCEU.exec_count()
+
+
+
+FCEU.exec_time()
+
+
+
+FCEU.setrenderplanes(bool sprites, bool background)
+
+Toggles the drawing of the sprites and background planes.  Set to false or nil to disable a pane, anything else will draw them.
+
+FCEU.message(string message)
+
+Displays given message on screen in the standard messages position. Use gui.text() when you need to position text.
+
+int FCEU.lagcount()
+
+Return the number of lag frames encountered. Lag frames are frames where the game did not poll for input because it missed the vblank. This happens when it has to compute too much within the frame boundary. This returns the number indicated on the lag counter.
+
+bool FCEU.lagged()
+
+Returns true if currently in a lagframe, false otherwise.
+
+bool FCEU.getreadonly()
+
+Returns whether the emulator is in read-only state.  
+
+While this variable only applies to movies, it is stored as a global variable and can be modified even without a 	movie loaded.  Hence, it is in the FCEU library rather than the movie library.
+
+FCEU.setreadonly(bool state)
+
+Sets the read-only status to read-only if argument is true and read+write if false.
+Note: This might result in an error if the medium of the movie file is  not writeable (such as in an archive file).
+
+While this variable only applies to movies, it is stored as a global variable and can be modified even without a 	movie loaded.  Hence, it is in the FCEU library rather than the movie library.
+
+
+ROM Library
+
+rom.readbyte(int address)
+
+Get an unsigned byte from the actual ROM file at the given address.  
+
+This includes the header! It's the same as opening the file in a hex-editor.
+
+rom.readbytesigned(int address)
+
+Get a signed byte from the actual ROM faile at the given address. Returns a byte that is signed.
+
+This includes the header! It's the same as opening the file in a hex-editor.
+
+
+Memory Library
+
+memory.readbyte(int address)
+
+Get an unsigned byte from the RAM at the given address. Returns a byte regardless of emulator. The byte will always be positive.	
+
+memory.readbyterange(int address, int length)
+
+Get a length bytes starting at the given address and return it as a string. Convert to table to access the individual bytes.
+
+memory.readbytesigned(int address)
+
+Get a signed byte from the RAM at the given address. Returns a byte regardless of emulator. The most significant bit will serve as the sign.
+
+memory.writebyte(int address, int value)
+
+Write the value to the RAM at the given address. The value is modded with 256 before writing (so writing 257 will actually write 1). Negative values allowed.
+
+memory.register(int address, function func)
+
+Register an event listener to the given address. The function is called whenever write occurs to this address. One function per address. Can be triggered mid-frame. Set to nil to remove listener.  Given function may not call frame advance or any of the savestate functions. Joypad reading/writing is undefined (so don't).
+
+Note: this is slow!
+
+
+Joypad Library
+
+table joypad.read(int player)
+
+Returns a table containing the buttons pressed by the given player. This takes keyboard inputs, not Lua. The table keys look like this (case sensitive):
+
+up, down, left, right, A, B, start, select
+
+Where a Lua truthvalue true means that the button is set, false means the button is unset. Note that only "false" and "nil" are considered a false value by Lua.  Anything else is true, even the number 0.
+
+joypad.set(int player, table input)
+
+Set the inputs for the given player. Table keys look like this (case sensitive):
+
+up, down, left, right, A, B, start, select
+
+There are 3 possible values, true, false, and nil.  True will turn the button on, false will turn it off.  Nil will leave it unchanged (allowing the user to control it).
+
+table joypad.get()
+
+A alias of joypad.read().  Left in for backwards compatibility with older versions of FCEU/FCEUX.
+
+joypad.write()
+
+A alias of joypad.set().  Left in for backwards compatibility with older versions of FCEU/FCEUX.
+
+
+Zapper Library
+
+table zapper.read()
+
+Returns the mouse data (which is used to generate zapper input, as well as the arkanoid paddle).
+
+The return table consists of 3 values: xmouse, ymouse, and click.  xmouse and ymouse are the x,y coordinates of the cursor in terms of pixels.  click represents the mouse click.  0 = no click, 1 = left cick, 2 = right click.  
+
+Currently, zapper data is ignored while a movie is playing.
+
+Note: The right-click isn't used in zapper data
+Note: The zapper is always controller 2 on the NES so there is no player argument to this function.
+
+
+Input Library
+
+table input.get()
+
+Reads input from keyboard and mouse. Returns pressed keys and the position of mouse in pixels on game screen.  The function returns a table with at least two properties; table.xmouse and table.ymouse.  Additionally any of these keys will be set to true if they were held at the time of executing this function:
+leftclick, rightclick, middleclick, capslock, numlock, scrolllock, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, F1, F2, F3, F4, F5, F6,  F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24, backspace, tab, enter, shift, control, alt, pause, escape, space, pageup, pagedown, end, home, left, up, right, down, numpad0, numpad1, numpad2, numpad3, numpad4, numpad5, numpad6, numpad7, numpad8, numpad9, numpad*, insert, delete, numpad+, numpad-, numpad., numpad/, semicolon, plus, minus, comma, period, slash, backslash, tilde, quote, leftbracket, rightbracket.
+
+Savestate Library
+
+object savestate.create(int slot = nil)
+
+Create a new savestate object. Optionally you can save the current state to one of the predefined slots (0...9), otherwise you'll create an "anonymous" savestate.
+Note that this does not actually save the current state! You need to create this value and pass it on to the load and save functions in order to save it.
+
+Anonymous savestates are temporary, memory only states. You can make them persistent by calling memory.persistent(state). Persistent anonymous states are deleted from disk once the script exits.
+
+savestate.save(object savestate)
+
+Save the current state object to the given savestate. The argument is the result of savestate.create(). You can load this state back up by calling savestate.load(savestate) on the same object.
+
+savestate.load(object savestate)
+
+Load the the given state. The argument is the result of savestate.create() and has been passed to savestate.save() at least once.
+
+If this savestate is not persistent and not one of the predefined states, the state will be deleted after loading.
+
+savestate.persist(object savestate)
+
+Set the given savestate to be persistent. It will not be deleted when you load this state but at the exit of this script instead, unless it's one of the predefined states.  If it is one of the predefined savestates it will be saved as a file on disk.
+
+	
+Movie Library
+
+bool movie.active()
+
+Returns true if a movie is currently loaded and false otherwise.  (This should be used to guard against Lua errors when attempting to retrieve movie information).
+
+int movie.framecount()
+
+Returns the framecount value.  The frame counter runs without a movie running so this always returns a value.
+
+string movie.mode()
+
+Returns the current state of movie playback. Returns one of the following:
+
+- "record"
+- "playback"
+- nil
+
+movie.rerecordcounting(bool counting)
+
+Turn the rerecord counter on or off. Allows you to do some brute forcing without inflating the rerecord count.
+
+movie.stop()
+
+Stops movie playback.  If no movie is loaded, it throws a Lua error.
+
+int movie.length()
+
+Returns the total number of frames of the current movie.  Throws a Lua error if no movie is loaded.
+
+string movie.getname()
+
+Returns the filename of the current movie.  Throws a Lua error if no movie is loaded.
+
+movie.rerecordcount()
+
+Returns the rerecord count of the current movie.  Throws a Lua error if no movie is loaded.
+
+movie.playbeginning()
+
+Performs the Play from Beginning function.  Movie mode is switched to read-only and the movie loaded will begin playback from frame 1.
+
+If no movie is loaded, no error is thrown and no message appears on screen.
+
+
+GUI Library
+
+gui.drawpixel(int x, int y, type color)
+
+Draw one pixel of a given color at the given position on the screen.  See drawing notes and color notes at the bottom of the page.  
+
+gui.drawline(int x1, int y1, int x2, int y2, type color)
+
+Draws a line between the two points.  See also drawing notes and color notes at the bottom of the page.
+
+gui.drawbox(int x1, int y1, int x2, int y2, type color)
+
+Draw a box with the two given opposite corners.
+Also see drawing notes and color notes.
+
+gui.text(int x, int y, string str)
+
+Draws a given string at the given position.
+
+string gui.gdscreenshot()
+
+Takes a screen shot of the image and returns it in the form of a string which can be imported by the gd library using the gd.createFromGdStr() function.
+
+This function is provided so as to allow FCEUX to not carry a copy of the gd library itself. If you want raw RGB32 access, skip the first 11 bytes (header) and then read pixels as Alpha (always 0), Red, Green, Blue, left to right then top to bottom, range is 0-255 for all colors.
+
+Warning: Storing screen shots in memory is not recommended. Memory usage will blow up pretty quick. One screen shot string eats around 230 KB of RAM.
+
+gui.gdoverlay(int x = 0, int y = 0, string dgimage)
+
+Overlay the given image on the emulator.  Transparency is absolute (any pixel not 100% transparent is completely opaque).  The image must be  gd file format version 1, true color.  Image will be clipped to fit.
+
+gui.transparency(int strength)
+
+Set the transparency level for subsequent painting (including gdoverlay). Does not stack.
+Values range from 0 to 4. Where 0 means completely opaque and 4 means completely transparent.
+
+function gui.register(function func)
+
+Register a function to be called between a frame being prepared for displaying on your screen and it actually happening. Used when that 1 frame delay for rendering is not acceptable.
+
+string gui.popup(string message, string type = "ok")
+
+Shows a popup. Default type is "ok". Can be one of these:
+
+- "ok" - "yesno" - "yesnocancel"
+Returns "yes", "no" or "cancel" indicating the button clicked.
+
+Linux users might want to install xmessage to perform the work. Otherwise the dialog will appear on the shell and that's less noticeable.
+
+
+Bitwise Operations
+
+int AND(int n1, int n2, ..., int nn)
+
+Binary logical AND of all the given integers. This function compensates for Lua's lack of it.
+
+int OR(int n1, int n2, ..., int nn)
+
+Binary logical OR of all the given integers. This function compensates for Lua's lack of it.
+
+int XOR(int n1, int n2, ..., int nn)
+
+Binary logical XOR of all the given integers. This function compensates for Lua's lack of it.
+
+int BIT(int n1, int n2, ..., int nn)
+
+Returns an integer with the given bits turned on. Parameters should be smaller than 31.
+
+
+Appendix
+
+On drawing
+
+A general warning about drawing is that it is always one frame behind unless you use gui.register. This is because you tell the emulator to paint something but it will actually paint it when generating the image for the next frame. So you see your painting, except it will be on the image of the next frame. You can prevent this with gui.register because it gives you a quick chance to paint before blitting.
+
+Dimensions & color depths you can paint in:
+320x239, 8bit color (confirm?)
+
+On colors
+
+Colors can be of a few types.
+Int: use the a formula to compose the color as a number (depends on color depth)
+String: Can either be a HTML color or simple colors.
+HTML string: "#rrggbb" ("#228844") or #rrggbbaa if alpha is supported.
+Simple colors: "clear", "red", "green", "blue", "white", "black", "gray", "grey", "orange", "yellow", "green", "teal", "cyan", "purple", "magenta".
+
+For transparancy use "clear", this is actually int 1.
+
+
+

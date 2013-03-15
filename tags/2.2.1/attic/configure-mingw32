@@ -1,0 +1,1 @@
+CFLAGS="-mno-cygwin" CXXFLAGS="-mno-cygwin" LDFLAGS="-mno-cygwin" ./configure --host=mingw32
