@@ -428,13 +428,13 @@ void FCEUD_LoadStateFrom ()
 */
 unsigned int *GetKeyboard(void)                                                     
 {
-  int size = 256;
+	int size = 256;
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-  Uint8* keystate = SDL_GetKeyboardState(&size);
+	Uint8* keystate = SDL_GetKeyboardState(&size);
 #else
-  Uint8* keystate = SDL_GetKeyState(&size);
+	Uint8* keystate = SDL_GetKeyState(&size);
 #endif
-  return (unsigned int*)(keystate);
+	return (unsigned int*)(keystate);
 }
 
 /**
@@ -531,184 +531,183 @@ static void KeyboardCommands ()
 
 
 
-  // Toggle Movie auto-backup
-  if (keyonly (M) && is_shift)
-    {
-      autoMovieBackup ^= 1;
-      FCEUI_DispMessage ("Automatic movie backup %sabled.", 0,
+	// Toggle Movie auto-backup
+	if (keyonly (M) && is_shift)
+	{
+		autoMovieBackup ^= 1;
+		FCEUI_DispMessage ("Automatic movie backup %sabled.", 0,
 			 autoMovieBackup ? "en" : "dis");
-    }
-
-  // Start recording an FM2 movie on Alt+R
-  if (keyonly (R) && is_alt)
-    {
-      FCEUD_MovieRecordTo ();
-    }
-
-  // Save a state from a file
-  if (keyonly (S) && is_alt)
-    {
-      FCEUD_SaveStateAs ();
-    }
-
-  // Load a state from a file
-  if (keyonly (L) && is_alt)
-    {
-      FCEUD_LoadStateFrom ();
-    }
-
-  // Famicom disk-system games
-  if (gametype == GIT_FDS)
-    {
-      if (_keyonly (Hotkeys[HK_FDS_SELECT]))
-	{
-	  FCEUI_FDSSelect ();
-	}
-      if (_keyonly (Hotkeys[HK_FDS_EJECT]))
-	{
-	  FCEUI_FDSInsert ();
-	}
-    }
-
-  if (_keyonly (Hotkeys[HK_SCREENSHOT]))
-    {
-      FCEUI_SaveSnapshot ();
-    }
-
-  // if not NES Sound Format
-  if (gametype != GIT_NSF)
-    {
-      if (_keyonly (Hotkeys[HK_CHEAT_MENU]))
-	{
-	  DoCheatSeq ();
 	}
 
-      // f5 (default) save key, hold shift to save movie
-      if (_keyonly (Hotkeys[HK_SAVE_STATE]))
+	// Start recording an FM2 movie on Alt+R
+	if (keyonly (R) && is_alt)
 	{
-	  if (is_shift)
-	    {
-	      movie_fname =
-		const_cast <
-		char *>(FCEU_MakeFName (FCEUMKF_MOVIE, 0, 0).c_str ());
-	      FCEUI_printf ("Recording movie to %s\n", movie_fname);
-	      FCEUI_SaveMovie (movie_fname, MOVIE_FLAG_NONE, L"");
-	    }
-	  else
-	    {
-	      FCEUI_SaveState (NULL);
-	    }
+		FCEUD_MovieRecordTo ();
 	}
 
-      // f7 to load state, Shift-f7 to load movie
-      if (_keyonly (Hotkeys[HK_LOAD_STATE]))
+	// Save a state from a file
+	if (keyonly (S) && is_alt)
 	{
-	  if (is_shift)
-	    {
-	      FCEUI_StopMovie ();
-	      std::string fname;
-	      fname =
-		GetFilename ("Open FM2 movie for playback...", false,
-			     "FM2 movies|*.fm2");
-	      if (fname != "")
+		FCEUD_SaveStateAs ();
+	}
+
+	// Load a state from a file
+	if (keyonly (L) && is_alt)
+	{
+		FCEUD_LoadStateFrom ();
+	}
+
+		// Famicom disk-system games
+	if (gametype == GIT_FDS)
+	{
+		if (_keyonly (Hotkeys[HK_FDS_SELECT]))
 		{
-		  if (fname.find (".fm2") != std::string::npos
-		      || fname.find (".fm3") != std::string::npos)
-		    {
-		      FCEUI_printf ("Playing back movie located at %s\n",
-				    fname.c_str ());
-		      FCEUI_LoadMovie (fname.c_str (), false, false);
-		    }
-		  else
-		    {
-		      FCEUI_printf
-			("Only .fm2 and .fm3 movies are supported.\n");
-		    }
+			FCEUI_FDSSelect ();
 		}
-	    }
-	  else
-	    {
-	      FCEUI_LoadState (NULL);
-	    }
+		if (_keyonly (Hotkeys[HK_FDS_EJECT]))
+		{
+			FCEUI_FDSInsert ();
+		}
 	}
-    }
+
+	if (_keyonly (Hotkeys[HK_SCREENSHOT]))
+	{
+		FCEUI_SaveSnapshot ();
+	}
+
+	// if not NES Sound Format
+	if (gametype != GIT_NSF)
+	{
+		if (_keyonly (Hotkeys[HK_CHEAT_MENU]))
+		{
+			DoCheatSeq ();
+		}
+
+		// f5 (default) save key, hold shift to save movie
+		if (_keyonly (Hotkeys[HK_SAVE_STATE]))
+		{
+			if (is_shift)
+			{
+				movie_fname =
+				const_cast <char *>(FCEU_MakeFName (FCEUMKF_MOVIE, 0, 0).c_str ());
+				FCEUI_printf ("Recording movie to %s\n", movie_fname);
+				FCEUI_SaveMovie (movie_fname, MOVIE_FLAG_NONE, L"");
+			}
+			else
+			{
+				FCEUI_SaveState (NULL);
+			}
+		}
+
+		// f7 to load state, Shift-f7 to load movie
+		if (_keyonly (Hotkeys[HK_LOAD_STATE]))
+		{
+			if (is_shift)
+			{
+				FCEUI_StopMovie ();
+				std::string fname;
+				fname =
+				GetFilename ("Open FM2 movie for playback...", false,
+								"FM2 movies|*.fm2");
+				if (fname != "")
+				{
+					if (fname.find (".fm2") != std::string::npos
+					|| fname.find (".fm3") != std::string::npos)
+					{
+						FCEUI_printf ("Playing back movie located at %s\n",
+										fname.c_str ());
+						FCEUI_LoadMovie (fname.c_str (), false, false);
+					}
+					else
+					{
+						FCEUI_printf
+							("Only .fm2 and .fm3 movies are supported.\n");
+					}
+				}
+			}
+			else
+			{
+				FCEUI_LoadState (NULL);
+			}
+		}
+	}
 
 
-  if (_keyonly (Hotkeys[HK_DECREASE_SPEED]))
-    {
-      DecreaseEmulationSpeed ();
-    }
+	if (_keyonly (Hotkeys[HK_DECREASE_SPEED]))
+	{
+		DecreaseEmulationSpeed ();
+	}
 
-  if (_keyonly (Hotkeys[HK_INCREASE_SPEED]))
-    {
-      IncreaseEmulationSpeed ();
-    }
+	if (_keyonly (Hotkeys[HK_INCREASE_SPEED]))
+	{
+		IncreaseEmulationSpeed ();
+	}
 
-  if (_keyonly (Hotkeys[HK_TOGGLE_FRAME_DISPLAY]))
-    {
-      FCEUI_MovieToggleFrameDisplay ();
-    }
+	if (_keyonly (Hotkeys[HK_TOGGLE_FRAME_DISPLAY]))
+	{
+		FCEUI_MovieToggleFrameDisplay ();
+	}
 
-  if (_keyonly (Hotkeys[HK_TOGGLE_INPUT_DISPLAY]))
-    {
-      FCEUI_ToggleInputDisplay ();
-      extern int input_display;
-      g_config->setOption ("SDL.InputDisplay", input_display);
-    }
+	if (_keyonly (Hotkeys[HK_TOGGLE_INPUT_DISPLAY]))
+	{
+		FCEUI_ToggleInputDisplay ();
+		extern int input_display;
+		g_config->setOption ("SDL.InputDisplay", input_display);
+	}
 
-  if (_keyonly (Hotkeys[HK_MOVIE_TOGGLE_RW]))
-    {
-      FCEUI_SetMovieToggleReadOnly (!FCEUI_GetMovieToggleReadOnly ());
-    }
+	if (_keyonly (Hotkeys[HK_MOVIE_TOGGLE_RW]))
+	{
+		FCEUI_SetMovieToggleReadOnly (!FCEUI_GetMovieToggleReadOnly ());
+	}
 
 #ifdef CREATE_AVI
-  if (_keyonly (Hotkeys[HK_MUTE_CAPTURE]))
-    {
-      extern int mutecapture;
-      mutecapture ^= 1;
-    }
+	if (_keyonly (Hotkeys[HK_MUTE_CAPTURE]))
+	{
+		extern int mutecapture;
+		mutecapture ^= 1;
+	}
 #endif
 
-  if (_keyonly (Hotkeys[HK_PAUSE]))
-    {
-      //FCEUI_ToggleEmulationPause(); 
-      // use the wrapper function instead of the fceui function directly
-      // so we can handle cursor grabbage
-      TogglePause ();
-    }
-
-  // Toggle throttling
-  NoWaiting &= ~1;
-  if (g_keyState[Hotkeys[HK_TURBO]])
-    {
-      NoWaiting |= 1;
-    }
-
-  static bool frameAdvancing = false;
-  if (g_keyState[Hotkeys[HK_FRAME_ADVANCE]])
-    {
-      if (frameAdvancing == false)
+	if (_keyonly (Hotkeys[HK_PAUSE]))
 	{
-	  FCEUI_FrameAdvance ();
-	  frameAdvancing = true;
+		//FCEUI_ToggleEmulationPause(); 
+		// use the wrapper function instead of the fceui function directly
+		// so we can handle cursor grabbage
+		TogglePause ();
 	}
-    }
-  else
-    {
-      if (frameAdvancing)
-	{
-	  FCEUI_FrameAdvanceEnd ();
-	  frameAdvancing = false;
-	}
-    }
 
-  if (_keyonly (Hotkeys[HK_RESET]))
-    {
-      FCEUI_ResetNES ();
-    }
-  //if(_keyonly(Hotkeys[HK_POWER])) {
-  //    FCEUI_PowerNES();
-  //}
+	// Toggle throttling
+	NoWaiting &= ~1;
+	if (g_keyState[Hotkeys[HK_TURBO]])
+	{
+		NoWaiting |= 1;
+	}
+
+	static bool frameAdvancing = false;
+	if (g_keyState[Hotkeys[HK_FRAME_ADVANCE]])
+	{
+		if (frameAdvancing == false)
+		{
+			FCEUI_FrameAdvance ();
+			frameAdvancing = true;
+		}
+	}
+	else
+	{
+		if (frameAdvancing)
+		{
+			FCEUI_FrameAdvanceEnd ();
+			frameAdvancing = false;
+		}
+	}
+
+	if (_keyonly (Hotkeys[HK_RESET]))
+	{
+		FCEUI_ResetNES ();
+	}
+	//if(_keyonly(Hotkeys[HK_POWER])) {
+	//    FCEUI_PowerNES();
+	//}
 	if (_keyonly (Hotkeys[HK_QUIT]))
 	{
 		if (noGui == 1)
@@ -721,179 +720,152 @@ static void KeyboardCommands ()
 			SDL_Quit();
 			exit(0);
 		}
-    }
+	}
 	else
-
 #ifdef _S9XLUA_H
-  if (_keyonly (Hotkeys[HK_LOAD_LUA]))
-    {
-      std::string fname;
-      fname = GetFilename ("Open LUA script...", false, "Lua scripts|*.lua");
-      if (fname != "")
-	FCEU_LoadLuaCode (fname.c_str ());
-    }
+	if (_keyonly (Hotkeys[HK_LOAD_LUA]))
+	{
+		std::string fname;
+		fname = GetFilename ("Open LUA script...", false, "Lua scripts|*.lua");
+		if (fname != "")
+		FCEU_LoadLuaCode (fname.c_str ());
+	}
 #endif
 
-  for (int i = 0; i < 10; i++)
-    if (_keyonly (Hotkeys[HK_SELECT_STATE_0 + i]))
-      {
+	for (int i = 0; i < 10; i++)
+		if (_keyonly (Hotkeys[HK_SELECT_STATE_0 + i]))
+		{
 #ifdef _GTK
-	gtk_radio_action_set_current_value (stateSlot, i);
+			gtk_radio_action_set_current_value (stateSlot, i);
 #endif
-	FCEUI_SelectState (i, 1);
-      }
-
-  if (_keyonly (Hotkeys[HK_SELECT_STATE_NEXT]))
-    {
-      FCEUI_SelectStateNext (1);
-    }
-
-  if (_keyonly (Hotkeys[HK_SELECT_STATE_PREV]))
-    {
-      FCEUI_SelectStateNext (-1);
-    }
-
-  if (_keyonly (Hotkeys[HK_BIND_STATE]))
-    {
-      bindSavestate ^= 1;
-      FCEUI_DispMessage ("Savestate binding to movie %sabled.", 0,
-			 bindSavestate ? "en" : "dis");
-    }
-
-  if (_keyonly (Hotkeys[HK_FA_LAG_SKIP]))
-    {
-      frameAdvanceLagSkip ^= 1;
-      FCEUI_DispMessage ("Skipping lag in Frame Advance %sabled.", 0,
-			 frameAdvanceLagSkip ? "en" : "dis");
-    }
-
-  if (_keyonly (Hotkeys[HK_LAG_COUNTER_DISPLAY]))
-    {
-      lagCounterDisplay ^= 1;
-    }
-
-  if (_keyonly (Hotkeys[HK_TOGGLE_SUBTITLE]))
-    {
-      extern int movieSubtitles;
-      movieSubtitles ^= 1;
-      FCEUI_DispMessage ("Movie subtitles o%s.", 0,
-			 movieSubtitles ? "n" : "ff");
-    }
-
-  // VS Unisystem games
-  if (gametype == GIT_VSUNI)
-    {
-      // insert coin
-      if (_keyonly (Hotkeys[HK_VS_INSERT_COIN]))
-	FCEUI_VSUniCoin ();
-
-      // toggle dipswitch display
-      if (_keyonly (Hotkeys[HK_VS_TOGGLE_DIPSWITCH]))
-	{
-	  DIPS ^= 1;
-	  FCEUI_VSUniToggleDIPView ();
-	}
-      if (!(DIPS & 1))
-	goto DIPSless;
-
-      // toggle the various dipswitches
-      if (keyonly (1))
-	FCEUI_VSUniToggleDIP (0);
-      if (keyonly (2))
-	FCEUI_VSUniToggleDIP (1);
-      if (keyonly (3))
-	FCEUI_VSUniToggleDIP (2);
-      if (keyonly (4))
-	FCEUI_VSUniToggleDIP (3);
-      if (keyonly (5))
-	FCEUI_VSUniToggleDIP (4);
-      if (keyonly (6))
-	FCEUI_VSUniToggleDIP (5);
-      if (keyonly (7))
-	FCEUI_VSUniToggleDIP (6);
-      if (keyonly (8))
-	FCEUI_VSUniToggleDIP (7);
-    }
-  else
-    {
-      static uint8 bbuf[32];
-      static int bbuft;
-      static int barcoder = 0;
-
-      if (keyonly (H))
-	FCEUI_NTSCSELHUE ();
-      if (keyonly (T))
-	FCEUI_NTSCSELTINT ();
-
-      if (_keyonly (Hotkeys[HK_DECREASE_SPEED]))
-	FCEUI_NTSCDEC ();
-      if (_keyonly (Hotkeys[HK_INCREASE_SPEED]))
-	FCEUI_NTSCINC ();
-
-      if ((CurInputType[2] == SIFC_BWORLD) || (cspec == SIS_DATACH))
-	{
-	  if (keyonly (F8))
-	    {
-	      barcoder ^= 1;
-	      if (!barcoder)
-		{
-		  if (CurInputType[2] == SIFC_BWORLD)
-		    {
-		      strcpy ((char *) &BWorldData[1], (char *) bbuf);
-		      BWorldData[0] = 1;
-		    }
-		  else
-		    {
-		      FCEUI_DatachSet (bbuf);
-		    }
-		  FCEUI_DispMessage ("Barcode Entered", 0);
+			FCEUI_SelectState (i, 1);
 		}
-	      else
-		{
-		  bbuft = 0;
-		  FCEUI_DispMessage ("Enter Barcode", 0);
-		}
-	    }
-	}
-      else
+
+	if (_keyonly (Hotkeys[HK_SELECT_STATE_NEXT]))
 	{
-	  barcoder = 0;
+		FCEUI_SelectStateNext (1);
 	}
+
+	if (_keyonly (Hotkeys[HK_SELECT_STATE_PREV]))
+	{
+		FCEUI_SelectStateNext (-1);
+	}
+
+	if (_keyonly (Hotkeys[HK_BIND_STATE]))
+	{
+		bindSavestate ^= 1;
+		FCEUI_DispMessage ("Savestate binding to movie %sabled.", 0,
+		bindSavestate ? "en" : "dis");
+	}
+
+	if (_keyonly (Hotkeys[HK_FA_LAG_SKIP]))
+	{
+		frameAdvanceLagSkip ^= 1;
+		FCEUI_DispMessage ("Skipping lag in Frame Advance %sabled.", 0,
+		frameAdvanceLagSkip ? "en" : "dis");
+	}
+
+	if (_keyonly (Hotkeys[HK_LAG_COUNTER_DISPLAY]))
+	{
+		lagCounterDisplay ^= 1;
+	}
+
+	if (_keyonly (Hotkeys[HK_TOGGLE_SUBTITLE]))
+	{
+		extern int movieSubtitles;
+		movieSubtitles ^= 1;
+		FCEUI_DispMessage ("Movie subtitles o%s.", 0,
+		movieSubtitles ? "n" : "ff");
+	}
+
+	// VS Unisystem games
+	if (gametype == GIT_VSUNI)
+	{
+		// insert coin
+		if (_keyonly (Hotkeys[HK_VS_INSERT_COIN]))
+			FCEUI_VSUniCoin ();
+
+		// toggle dipswitch display
+		if (_keyonly (Hotkeys[HK_VS_TOGGLE_DIPSWITCH]))
+		{
+			DIPS ^= 1;
+			FCEUI_VSUniToggleDIPView ();
+		}
+		if (!(DIPS & 1))
+			goto DIPSless;
+
+		// toggle the various dipswitches
+		for(int i=1; i<=8;i++)
+		{
+			if(keyonly(i))
+				FCEUI_VSUniToggleDIP(i-1);
+		}
+	}
+	else
+	{
+		static uint8 bbuf[32];
+		static int bbuft;
+		static int barcoder = 0;
+
+		if (keyonly (H))
+			FCEUI_NTSCSELHUE ();
+		if (keyonly (T))
+			FCEUI_NTSCSELTINT ();
+
+		if (_keyonly (Hotkeys[HK_DECREASE_SPEED]))
+			FCEUI_NTSCDEC ();
+		if (_keyonly (Hotkeys[HK_INCREASE_SPEED]))
+			FCEUI_NTSCINC ();
+
+		if ((CurInputType[2] == SIFC_BWORLD) || (cspec == SIS_DATACH))
+		{
+			if (keyonly (F8))
+			{
+				barcoder ^= 1;
+				if (!barcoder)
+				{
+					if (CurInputType[2] == SIFC_BWORLD)
+					{
+						strcpy ((char *) &BWorldData[1], (char *) bbuf);
+						BWorldData[0] = 1;
+					}
+					else
+					{
+						FCEUI_DatachSet (bbuf);
+					}
+					FCEUI_DispMessage ("Barcode Entered", 0);
+				}
+				else
+				{
+					bbuft = 0;
+					FCEUI_DispMessage ("Enter Barcode", 0);
+				}
+			}
+		}
+		else
+		{
+			barcoder = 0;
+		}
 
 #define SSM(x)                                    \
 do {                                              \
-    if(barcoder) {                                \
-        if(bbuft < 13) {                          \
-            bbuf[bbuft++] = '0' + x;              \
-            bbuf[bbuft] = 0;                      \
-        }                                         \
-        FCEUI_DispMessage("Barcode: %s",0, bbuf);   \
+	if(barcoder) {                                \
+		if(bbuft < 13) {                          \
+			bbuf[bbuft++] = '0' + x;              \
+			bbuf[bbuft] = 0;                      \
+		}                                         \
+		FCEUI_DispMessage("Barcode: %s",0, bbuf); \
 	}                                             \
 } while(0)
 
-    DIPSless:
-      if (keyonly (0))
-	SSM (0);
-      if (keyonly (1))
-	SSM (1);
-      if (keyonly (2))
-	SSM (2);
-      if (keyonly (3))
-	SSM (3);
-      if (keyonly (4))
-	SSM (4);
-      if (keyonly (5))
-	SSM (5);
-      if (keyonly (6))
-	SSM (6);
-      if (keyonly (7))
-	SSM (7);
-      if (keyonly (8))
-	SSM (8);
-      if (keyonly (9))
-	SSM (9);
+		DIPSless:
+		for(int i=0; i<10;i++)
+		{
+			if (keyonly (i))
+				SSM (i);
+		}
 #undef SSM
-    }
+	}
 }
 
 /**
@@ -903,48 +875,48 @@ do {                                              \
 void				// removed static for a call in lua-engine.cpp
 GetMouseData (uint32 (&d)[3])
 {
-  int x, y;
-  uint32 t;
+	int x, y;
+	uint32 t;
 
-  // Don't get input when a movie is playing back
-  if (FCEUMOV_Mode (MOVIEMODE_PLAY))
-    return;
+	// Don't get input when a movie is playing back
+	if (FCEUMOV_Mode (MOVIEMODE_PLAY))
+		return;
 
-  // retrieve the state of the mouse from SDL
-  t = SDL_GetMouseState (&x, &y);
-  SDL_Event event;
+	// retrieve the state of the mouse from SDL
+	t = SDL_GetMouseState (&x, &y);
+	SDL_Event event;
 #ifdef _GTK
-  if (noGui == 0)
-    {
-      // don't ask for gtk mouse info when in fullscreen
-      // we can use sdl directly in fullscreen
-      int fullscreen = 0;
-      g_config->getOption ("SDL.Fullscreen", &fullscreen);
-      if (fullscreen == 0)
+	if (noGui == 0)
 	{
-	  x = GtkMouseData[0];
-	  y = GtkMouseData[1];
-	  t = GtkMouseData[2];
+		// don't ask for gtk mouse info when in fullscreen
+		// we can use sdl directly in fullscreen
+		int fullscreen = 0;
+		g_config->getOption ("SDL.Fullscreen", &fullscreen);
+		if (fullscreen == 0)
+		{
+			x = GtkMouseData[0];
+			y = GtkMouseData[1];
+			t = GtkMouseData[2];
+		}
 	}
-    }
 #endif
 
-  d[2] = 0;
-  if (t & SDL_BUTTON (1))
-    {
-      d[2] |= 0x1;
-    }
-  if (t & SDL_BUTTON (3))
-    {
-      d[2] |= 0x2;
-    }
+	d[2] = 0;
+	if (t & SDL_BUTTON (1))
+	{
+		d[2] |= 0x1;
+	}
+	if (t & SDL_BUTTON (3))
+	{
+		d[2] |= 0x2;
+	}
 
-  // get the mouse position from the SDL video driver
-  t = PtoV (x, y);
-  d[0] = t & 0xFFFF;
-  d[1] = (t >> 16) & 0xFFFF;
-  // debug print 
-  // printf("mouse %d %d %d\n", d[0], d[1], d[2]);
+	// get the mouse position from the SDL video driver
+	t = PtoV (x, y);
+	d[0] = t & 0xFFFF;
+	d[1] = (t >> 16) & 0xFFFF;
+	// debug print 
+	// printf("mouse %d %d %d\n", d[0], d[1], d[2]);
 }
 
 /**
@@ -953,33 +925,32 @@ GetMouseData (uint32 (&d)[3])
 static void
 UpdatePhysicalInput ()
 {
-  SDL_Event event;
+	SDL_Event event;
 
-  // loop, handling all pending events
-  while (SDL_PollEvent (&event))
-    {
-      switch (event.type)
+	// loop, handling all pending events
+	while (SDL_PollEvent (&event))
 	{
-	case SDL_QUIT:
-	  CloseGame ();
-	  puts ("Quit");
-	  break;
-	case SDL_FCEU_HOTKEY_EVENT:
-	  switch (event.user.code)
-	    {
-	    case HK_PAUSE:
-	      TogglePause ();
-	      break;
-	    default:
-	      FCEU_printf ("Warning: unknown hotkey event %d\n",
-			   event.user.code);
-	    }
-	default:
-	  // do nothing
-	  break;
+		switch (event.type)
+		{
+			case SDL_QUIT:
+			  CloseGame ();
+			  puts ("Quit");
+			  break;
+			case SDL_FCEU_HOTKEY_EVENT:
+				switch (event.user.code)
+				{
+					case HK_PAUSE:
+						TogglePause ();
+						break;
+					default:
+						FCEU_printf ("Warning: unknown hotkey event %d\n",
+									event.user.code);
+				}
+			default:
+				break;
+		}
 	}
-    }
-  //SDL_PumpEvents();
+	//SDL_PumpEvents();
 }
 
 
@@ -993,76 +964,75 @@ static int bcpv, bcpj;
 int
 ButtonConfigBegin ()
 {
-  SDL_Surface *screen;
+	SDL_Surface *screen;
 
-  //dont shut down video subsystem if we are using gtk to prevent the sdl window from becoming detached to GTK window
-  // prg318 - 10-2-2011
+	//dont shut down video subsystem if we are using gtk to prevent the sdl window from becoming detached to GTK window
+	// prg318 - 10-2-2011
 #ifdef _GTK
-  int noGui;
-  g_config->getOption ("SDL.NoGUI", &noGui);
-  if (noGui == 1)
-    {
-      SDL_QuitSubSystem (SDL_INIT_VIDEO);
-      bcpv = KillVideo ();
-    }
+	int noGui;
+	g_config->getOption ("SDL.NoGUI", &noGui);
+	if (noGui == 1)
+	{
+		SDL_QuitSubSystem (SDL_INIT_VIDEO);
+		bcpv = KillVideo ();
+	}
 
 #else
-  // XXX soules - why are we doing this right before KillVideo()?
-  SDL_QuitSubSystem (SDL_INIT_VIDEO);
+	// XXX soules - why are we doing this right before KillVideo()?
+	SDL_QuitSubSystem (SDL_INIT_VIDEO);
 
-  // shut down the video and joystick subsystems
-  bcpv = KillVideo ();
+	// shut down the video and joystick subsystems
+	bcpv = KillVideo ();
 #endif
-  bcpj = KillJoysticks ();
+	bcpj = KillJoysticks ();
 
-  // reactivate the video subsystem
-  if (!SDL_WasInit (SDL_INIT_VIDEO))
-    {
-      if (!bcpv)
+	// reactivate the video subsystem
+	if (!SDL_WasInit (SDL_INIT_VIDEO))
 	{
-	  InitVideo (GameInfo);
-	}
-      else
-	{
+		if (!bcpv)
+		{
+			InitVideo (GameInfo);
+		}
+		else
+		{
 #if defined(_GTK) && defined(SDL_VIDEO_DRIVER_X11)
-	  if (noGui == 0)
-	    {
-	      while (gtk_events_pending ())
-		gtk_main_iteration_do (FALSE);
+			if (noGui == 0)
+			{
+				while (gtk_events_pending ())
+					gtk_main_iteration_do (FALSE);
 
-	      char SDL_windowhack[128];
-	      if (gtk_widget_get_window (evbox))
-		sprintf (SDL_windowhack, "SDL_WINDOWID=%u",
-			 (unsigned int)
-			 GDK_WINDOW_XID (gtk_widget_get_window (evbox)));
+				char SDL_windowhack[128];
+				if (gtk_widget_get_window (evbox))
+					sprintf (SDL_windowhack, "SDL_WINDOWID=%u",
+					(unsigned int) GDK_WINDOW_XID (gtk_widget_get_window (evbox)));
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-		  // TODO - SDL2
+					// TODO - SDL2
 #else
-	      SDL_putenv (SDL_windowhack);
+					SDL_putenv (SDL_windowhack);
 #endif
-	    }
+			}
 #endif
-	  if (SDL_InitSubSystem (SDL_INIT_VIDEO) == -1)
-	    {
-	      FCEUD_Message (SDL_GetError ());
-	      return (0);
-	    }
+			if (SDL_InitSubSystem (SDL_INIT_VIDEO) == -1)
+			{
+				FCEUD_Message (SDL_GetError ());
+				return 0;
+			}
 
-	  // set the screen and notify the user of button configuration
+			// set the screen and notify the user of button configuration
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	  // TODO - SDL2
+			// TODO - SDL2
 #else
-	  screen = SDL_SetVideoMode (420, 200, 8, 0);
-	  SDL_WM_SetCaption ("Button Config", 0);
+			screen = SDL_SetVideoMode (420, 200, 8, 0);
+			SDL_WM_SetCaption ("Button Config", 0);
 #endif
+		}
 	}
-    }
 
-  // XXX soules - why did we shut this down?
-  // initialize the joystick subsystem
-  InitJoysticks ();
+	// XXX soules - why did we shut this down?
+	// initialize the joystick subsystem
+	InitJoysticks ();
 
-  return (1);
+	return 1;
 }
 
 /**
@@ -1073,20 +1043,20 @@ ButtonConfigBegin ()
 void
 ButtonConfigEnd ()
 {
-  extern FCEUGI *GameInfo;
+	extern FCEUGI *GameInfo;
 
-  // shutdown the joystick and video subsystems
-  KillJoysticks ();
-  //SDL_QuitSubSystem(SDL_INIT_VIDEO); 
+	// shutdown the joystick and video subsystems
+	KillJoysticks ();
+	//SDL_QuitSubSystem(SDL_INIT_VIDEO); 
 
-  // re-initialize joystick and video subsystems if they were active before
-  /*if(!bcpv) {
-     InitVideo(GameInfo);
-     } */
-  if (!bcpj)
-    {
-      InitJoysticks ();
-    }
+	// re-initialize joystick and video subsystems if they were active before
+	/*if(!bcpv) {
+		InitVideo(GameInfo);
+		} */
+	if (!bcpj)
+	{
+		InitJoysticks ();
+	}
 }
 
 /**
@@ -1095,34 +1065,32 @@ ButtonConfigEnd ()
 static int
 DTestButton (ButtConfig * bc)
 {
-  int x;
+	int x;
 
-  for (x = 0; x < bc->NumC; x++)
-    {
-      if (bc->ButtType[x] == BUTTC_KEYBOARD)
+	for (x = 0; x < bc->NumC; x++)
 	{
+		if (bc->ButtType[x] == BUTTC_KEYBOARD)
+		{
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	  if (g_keyState[SDL_GetScancodeFromKey (bc->ButtonNum[x])])
-	    {
+			if (g_keyState[SDL_GetScancodeFromKey (bc->ButtonNum[x])])
+			{
 #else
-	  if (g_keyState[bc->ButtonNum[x]])
-	    {
+			if (g_keyState[bc->ButtonNum[x]])
+			{
 #endif
-	      return (1);
-	    }
-	}
-      else if (bc->ButtType[x] == BUTTC_JOYSTICK)
-	{
-	  if (DTestButtonJoy (bc))
-	    {
-	      return (1);
-	    }
-	}
+				return 1;
+			}
+		}
+		else if (bc->ButtType[x] == BUTTC_JOYSTICK)
+		{
+			if (DTestButtonJoy (bc))
+			{
+				return 1;
+			}
+		}
     }
-  return (0);
+  return 0;
 }
-
-
 
 
 #define MK(x)       {{BUTTC_KEYBOARD},{0},{MKK(x)},1}
@@ -1132,23 +1100,23 @@ DTestButton (ButtConfig * bc)
 
 ButtConfig GamePadConfig[4][10] = {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-  /* Gamepad 1 */
-  {MK (KP_3), MK (KP_2), MK (SLASH), MK (ENTER),
-   MK (W), MK (Z), MK (A), MK (S), MKZ (), MKZ ()},
+/* Gamepad 1 */
+	{MK (KP_3), MK (KP_2), MK (SLASH), MK (ENTER),
+	MK (W), MK (Z), MK (A), MK (S), MKZ (), MKZ ()},
 #else
-  /* Gamepad 1 */
-  {MK (KP3), MK (KP2), MK (SLASH), MK (ENTER),
-   MK (W), MK (Z), MK (A), MK (S), MKZ (), MKZ ()},
+	/* Gamepad 1 */
+	{MK (KP3), MK (KP2), MK (SLASH), MK (ENTER),
+	MK (W), MK (Z), MK (A), MK (S), MKZ (), MKZ ()},
 #endif
 
-  /* Gamepad 2 */
-  GPZ (),
+	/* Gamepad 2 */
+	GPZ (),
 
-  /* Gamepad 3 */
-  GPZ (),
+	/* Gamepad 3 */
+	GPZ (),
 
-  /* Gamepad 4 */
-  GPZ ()
+	/* Gamepad 4 */
+	GPZ ()
 };
 
 /**
@@ -1223,16 +1191,16 @@ UpdateGamepad (void)
 }
 
 static ButtConfig powerpadsc[2][12] = {
-  {
-   MK (O), MK (P), MK (BRACKET_LEFT),
-   MK (BRACKET_RIGHT), MK (K), MK (L), MK (SEMICOLON),
-   MK (APOSTROPHE),
-   MK (M), MK (COMMA), MK (PERIOD), MK (SLASH)},
-  {
-   MK (O), MK (P), MK (BRACKET_LEFT),
-   MK (BRACKET_RIGHT), MK (K), MK (L), MK (SEMICOLON),
-   MK (APOSTROPHE),
-   MK (M), MK (COMMA), MK (PERIOD), MK (SLASH)}
+	{
+		MK (O), MK (P), MK (BRACKET_LEFT),
+		MK (BRACKET_RIGHT), MK (K), MK (L), MK (SEMICOLON),
+		MK (APOSTROPHE),
+		MK (M), MK (COMMA), MK (PERIOD), MK (SLASH)},
+	{
+		MK (O), MK (P), MK (BRACKET_LEFT),
+		MK (BRACKET_RIGHT), MK (K), MK (L), MK (SEMICOLON),
+		MK (APOSTROPHE),
+		MK (M), MK (COMMA), MK (PERIOD), MK (SLASH)}
 };
 
 static uint32 powerpadbuf[2] = { 0, 0 };
@@ -1243,26 +1211,26 @@ static uint32 powerpadbuf[2] = { 0, 0 };
 static uint32
 UpdatePPadData (int w)
 {
-  // don't update if a movie is playing
-  if (FCEUMOV_Mode (MOVIEMODE_PLAY))
-    {
-      return 0;
-    }
-
-  uint32 r = 0;
-  ButtConfig *ppadtsc = powerpadsc[w];
-  int x;
-
-  // update each of the 12 buttons
-  for (x = 0; x < 12; x++)
-    {
-      if (DTestButton (&ppadtsc[x]))
+	// don't update if a movie is playing
+	if (FCEUMOV_Mode (MOVIEMODE_PLAY))
 	{
-	  r |= 1 << x;
+		return 0;
 	}
-    }
 
-  return r;
+	uint32 r = 0;
+	ButtConfig *ppadtsc = powerpadsc[w];
+	int x;
+
+	// update each of the 12 buttons
+	for (x = 0; x < 12; x++)
+	{
+		if (DTestButton (&ppadtsc[x]))
+		{
+			r |= 1 << x;
+		}
+	}
+
+	return r;
 }
 
 static uint32 MouseData[3] = { 0, 0, 0 };
