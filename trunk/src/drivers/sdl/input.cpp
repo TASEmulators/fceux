@@ -884,7 +884,6 @@ GetMouseData (uint32 (&d)[3])
 
 	// retrieve the state of the mouse from SDL
 	t = SDL_GetMouseState (&x, &y);
-	SDL_Event event;
 #ifdef _GTK
 	if (noGui == 0)
 	{
@@ -963,10 +962,8 @@ static int bcpv, bcpj;
  */
 int ButtonConfigBegin ()
 {
-	SDL_Surface *screen;
-
-	//dont shut down video subsystem if we are using gtk to prevent the sdl window from becoming detached to GTK window
-	// prg318 - 10-2-2011
+//dont shut down video subsystem if we are using gtk to prevent the sdl window from becoming detached to GTK window
+// prg318 - 10-2-2011
 #ifdef _GTK
 	int noGui;
 	g_config->getOption ("SDL.NoGUI", &noGui);
@@ -975,7 +972,6 @@ int ButtonConfigBegin ()
 		SDL_QuitSubSystem (SDL_INIT_VIDEO);
 		bcpv = KillVideo ();
 	}
-
 #else
 	// XXX soules - why are we doing this right before KillVideo()?
 	SDL_QuitSubSystem (SDL_INIT_VIDEO);
@@ -983,6 +979,8 @@ int ButtonConfigBegin ()
 	// shut down the video and joystick subsystems
 	bcpv = KillVideo ();
 #endif
+	SDL_Surface *screen;
+
 	bcpj = KillJoysticks ();
 
 	// reactivate the video subsystem
@@ -1042,8 +1040,6 @@ int ButtonConfigBegin ()
 void
 ButtonConfigEnd ()
 {
-	extern FCEUGI *GameInfo;
-
 	// shutdown the joystick and video subsystems
 	KillJoysticks ();
 	//SDL_QuitSubSystem(SDL_INIT_VIDEO); 
