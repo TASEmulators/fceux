@@ -533,11 +533,11 @@ static BMAPPINGLocal bmap[] = {
 	{"JALECO JF-13",		 86, Mapper86_Init},
 	{"74*139/74 DISCRETE",	 87, Mapper87_Init},
 	{"NAMCO 3433",			 88, Mapper88_Init},
-	{"SUNSOFT-3",			 89, Mapper89_Init},		// SUNSOFT-2 mapper
+	{"SUNSOFT-3",			 89, Mapper89_Init},	// SUNSOFT-2 mapper
 	{"HUMMER/JY BOARD",		 90, Mapper90_Init},
 	{"EARLY HUMMER/JY BOARD",91, Mapper91_Init},
 	{"JALECO JF-19",		 92, Mapper92_Init},
-	{"SUNSOFT-3R",			 93, SUNSOFT_UNROM_Init},	// SUNSOFT-2 mapper with VRAM, different wiring
+	{"SUNSOFT-3R",			 93, SUNSOFT_UNROM_Init},// SUNSOFT-2 mapper with VRAM, different wiring
 	{"HVC-UN1ROM",			 94, Mapper94_Init},
 	{"NAMCOT 108 Rev. B",	 95, Mapper95_Init},
 	{"BANDAI OEKAKIDS",		 96, Mapper96_Init},
@@ -620,7 +620,7 @@ static BMAPPINGLocal bmap[] = {
 	{"",					173, Mapper173_Init},
 //	{"",					174, Mapper174_Init},
 	{"",					175, Mapper175_Init},
-	{"BMCFK23C",			176, BMCFK23C_Init},	//zero 26-may-2012 - well, i have some WXN junk games that use 176 for instance ????. i dont know what game uses this BMCFK23C as mapper 176. we'll have to make a note when we find it.
+	{"BMCFK23C",			176, BMCFK23C_Init},	// zero 26-may-2012 - well, i have some WXN junk games that use 176 for instance ????. i dont know what game uses this BMCFK23C as mapper 176. we'll have to make a note when we find it.
 	{"",					177, Mapper177_Init},
 	{"",					178, Mapper178_Init},
 //	{"",					179, Mapper179_Init},
@@ -756,7 +756,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 		memset(VROM, 0xFF, VROM_size << 13);
 	}
 
-	if (head.ROM_type & 4) { /* Trainer */
+	if (head.ROM_type & 4) {	/* Trainer */
 		trainerpoo = (uint8*)FCEU_gmalloc(512);
 		FCEU_fread(trainerpoo, 512, 1, fp);
 	}

@@ -753,11 +753,7 @@
 				RelativePath="..\src\boards\dream.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\src\boards\dsoundv1.cpp"
-				>
-			</File>
-			<File
+			<File
 				RelativePath="..\src\boards\edu2000.cpp"
 				>
 			</File>

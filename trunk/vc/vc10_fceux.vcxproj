@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -308,7 +308,6 @@
     <ClCompile Include="..\src\boards\bb.cpp" />
     <ClCompile Include="..\src\boards\cityfighter.cpp" />
     <ClCompile Include="..\src\boards\dance2000.cpp" />
-    <ClCompile Include="..\src\boards\dsoundv1.cpp" />
     <ClCompile Include="..\src\boards\famicombox.cpp" />
     <ClCompile Include="..\src\boards\ffe.cpp" />
     <ClCompile Include="..\src\boards\ks7012.cpp" />

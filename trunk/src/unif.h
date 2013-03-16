@@ -105,7 +105,6 @@ void TSROM_Init(CartInfo *info);
 void Transformer_Init(CartInfo *info);
 void UNL22211_Init(CartInfo *info);
 void UNL3DBlock_Init(CartInfo *info);
-void UNLDSOUNDV1_Init(CartInfo *info);
 void UNL43272_Init(CartInfo *info);
 void UNL6035052_Init(CartInfo *info);
 void UNL8157_Init(CartInfo *info);
