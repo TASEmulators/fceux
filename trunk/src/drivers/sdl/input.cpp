@@ -961,8 +961,7 @@ static int bcpv, bcpj;
  *  subsystems into a well-known state.  Button configuration really
  *  needs to be cleaned up after the new config system is in place.
  */
-int
-ButtonConfigBegin ()
+int ButtonConfigBegin ()
 {
 	SDL_Surface *screen;
 
@@ -1240,8 +1239,7 @@ static uint8 fkbkeys[0x48];
 /**
  * Update all of the input devices required for the active game.
  */
-void
-FCEUD_UpdateInput ()
+void FCEUD_UpdateInput ()
 {
 	int x;
 	int t = 0;
@@ -1315,8 +1313,7 @@ FCEUD_UpdateInput ()
 	}
 }
 
-	void
-FCEUD_SetInput (bool fourscore, bool microphone, ESI port0, ESI port1,
+void FCEUD_SetInput (bool fourscore, bool microphone, ESI port0, ESI port1,
 		ESIFC fcexp)
 {
 	eoptions &= ~EO_FOURSCORE;
@@ -1328,7 +1325,8 @@ FCEUD_SetInput (bool fourscore, bool microphone, ESI port0, ESI port1,
 		CurInputType[2] = SIFC_NONE;	// No extension
 	}
 	else
-	{				// no Four Core emulation, check the config/movie file for controller types
+	{	
+		// no Four Core emulation, check the config/movie file for controller types
 		CurInputType[0] = port0;
 		CurInputType[1] = port1;
 		CurInputType[2] = fcexp;
@@ -1446,7 +1444,7 @@ static ButtConfig fkbmap[0x48] = {
 /**
  * Update the status of the Family KeyBoard.
  */
-static void updatefkb ()
+static void UpdateFKB ()
 {
 	int x;
 
@@ -1454,7 +1452,7 @@ static void updatefkb ()
 	{
 		fkbkeys[x] = 0;
 
-		if (dtestbutton (&fkbmap[x]))
+		if (DTestButton (&fkbmap[x]))
 		{
 			fkbkeys[x] = 1;
 		}
@@ -1552,16 +1550,17 @@ UpdateTopRider ()
 }
 
 static ButtConfig FTrainerButtons[12] = {
-  MK (O), MK (P), MK (BRACKET_LEFT),
-  MK (BRACKET_RIGHT), MK (K), MK (L), MK (SEMICOLON),
-  MK (APOSTROPHE),
-  MK (M), MK (COMMA), MK (PERIOD), MK (SLASH)
+	MK (O), MK (P), MK (BRACKET_LEFT),
+	MK (BRACKET_RIGHT), MK (K), MK (L), MK (SEMICOLON),
+	MK (APOSTROPHE),
+	MK (M), MK (COMMA), MK (PERIOD), MK (SLASH)
 };
 
 /**
  * Update the status of the FTrainer input device.
  */
-static void UpdateFTrainer ()
+	static void
+UpdateFTrainer ()
 {
 	int x;
 	FTrainerData = 0;
@@ -1643,7 +1642,7 @@ const char * ButtonName (const ButtConfig * bc, int which)
  * Waits for a button input and returns the information as to which
  * button was pressed.  Used in button configuration.
  */
-	int DWaitButton (const uint8 * text, ButtConfig * bc, int wb)
+int DWaitButton (const uint8 * text, ButtConfig * bc, int wb)
 {
 	SDL_Event event;
 	static int32 LastAx[64][64];
@@ -1739,7 +1738,7 @@ const char * ButtonName (const ButtConfig * bc, int which)
 			break;
 	}
 
-	return 0;
+	return (0);
 }
 
 /**
@@ -1749,25 +1748,26 @@ const char * ButtonName (const ButtConfig * bc, int which)
  * used as input for the specified button, thus allowing up to four
  * possible settings for each input button.
  */
-void configbutton (char *text, buttconfig * bc)
+	void
+ConfigButton (char *text, ButtConfig * bc)
 {
 	uint8 buf[256];
 	int wc;
 
-	for (wc = 0; wc < maxbuttconfig; wc++)
+	for (wc = 0; wc < MAXBUTTCONFIG; wc++)
 	{
 		sprintf ((char *) buf, "%s (%d)", text, wc + 1);
-		dwaitbutton (buf, bc, wc);
+		DWaitButton (buf, bc, wc);
 
 		if (wc &&
-				bc->butttype[wc] == bc->butttype[wc - 1] &&
-				bc->devicenum[wc] == bc->devicenum[wc - 1] &&
-				bc->buttonnum[wc] == bc->buttonnum[wc - 1])
+				bc->ButtType[wc] == bc->ButtType[wc - 1] &&
+				bc->DeviceNum[wc] == bc->DeviceNum[wc - 1] &&
+				bc->ButtonNum[wc] == bc->ButtonNum[wc - 1])
 		{
 			break;
 		}
 	}
-	bc->numc = wc;
+	bc->NumC = wc;
 }
 
 /**
@@ -1962,7 +1962,8 @@ void InputCfg (const std::string & text)
  * configuration management.  Will probably want to change this in the
  * future - soules.
  */
-void UpdateInput (Config * config)
+	void
+UpdateInput (Config * config)
 {
 	char buf[64];
 	std::string device, prefix;
