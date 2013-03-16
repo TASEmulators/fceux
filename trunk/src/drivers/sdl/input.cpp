@@ -1243,314 +1243,312 @@ static uint8 fkbkeys[0x48];
 void
 FCEUD_UpdateInput ()
 {
-  int x;
-  int t = 0;
+	int x;
+	int t = 0;
 
-  UpdatePhysicalInput ();
-  KeyboardCommands ();
+	UpdatePhysicalInput ();
+	KeyboardCommands ();
 
-  for (x = 0; x < 2; x++)
-    {
-      switch (CurInputType[x])
+	for (x = 0; x < 2; x++)
 	{
-	case SI_GAMEPAD:
-	  t |= 1;
-	  break;
-	case SI_ARKANOID:
-	  t |= 2;
-	  break;
-	case SI_ZAPPER:
-	  t |= 2;
-	  break;
-	case SI_POWERPADA:
-	case SI_POWERPADB:
-	  powerpadbuf[x] = UpdatePPadData (x);
-	  break;
+		switch (CurInputType[x])
+		{
+			case SI_GAMEPAD:
+				t |= 1;
+				break;
+			case SI_ARKANOID:
+				t |= 2;
+				break;
+			case SI_ZAPPER:
+				t |= 2;
+				break;
+			case SI_POWERPADA:
+			case SI_POWERPADB:
+				powerpadbuf[x] = UpdatePPadData (x);
+				break;
+		}
 	}
-    }
 
-  switch (CurInputType[2])
-    {
-    case SIFC_ARKANOID:
-      t |= 2;
-      break;
-    case SIFC_SHADOW:
-      t |= 2;
-      break;
-    case SIFC_FKB:
-      if (g_fkbEnabled)
+	switch (CurInputType[2])
 	{
-	  UpdateFKB ();
+		case SIFC_ARKANOID:
+			t |= 2;
+			break;
+		case SIFC_SHADOW:
+			t |= 2;
+			break;
+		case SIFC_FKB:
+			if (g_fkbEnabled)
+			{
+				UpdateFKB ();
+			}
+			break;
+		case SIFC_HYPERSHOT:
+			UpdateHyperShot ();
+			break;
+		case SIFC_MAHJONG:
+			UpdateMahjong ();
+			break;
+		case SIFC_QUIZKING:
+			UpdateQuizKing ();
+			break;
+		case SIFC_FTRAINERB:
+		case SIFC_FTRAINERA:
+			UpdateFTrainer ();
+			break;
+		case SIFC_TOPRIDER:
+			UpdateTopRider ();
+			break;
+		case SIFC_OEKAKIDS:
+			t |= 2;
+			break;
 	}
-      break;
-    case SIFC_HYPERSHOT:
-      UpdateHyperShot ();
-      break;
-    case SIFC_MAHJONG:
-      UpdateMahjong ();
-      break;
-    case SIFC_QUIZKING:
-      UpdateQuizKing ();
-      break;
-    case SIFC_FTRAINERB:
-    case SIFC_FTRAINERA:
-      UpdateFTrainer ();
-      break;
-    case SIFC_TOPRIDER:
-      UpdateTopRider ();
-      break;
-    case SIFC_OEKAKIDS:
-      t |= 2;
-      break;
-    }
 
-  if (t & 1)
-    {
-      UpdateGamepad ();
-    }
+	if (t & 1)
+	{
+		UpdateGamepad ();
+	}
 
-  if (t & 2)
-    {
-      GetMouseData (MouseData);
-    }
+	if (t & 2)
+	{
+		GetMouseData (MouseData);
+	}
 }
 
-void
+	void
 FCEUD_SetInput (bool fourscore, bool microphone, ESI port0, ESI port1,
 		ESIFC fcexp)
 {
-  eoptions &= ~EO_FOURSCORE;
-  if (fourscore)
-    {				// Four Score emulation, only support gamepads, nothing else
-      eoptions |= EO_FOURSCORE;
-      CurInputType[0] = SI_GAMEPAD;	// Controllers 1 and 3
-      CurInputType[1] = SI_GAMEPAD;	// Controllers 2 and 4
-      CurInputType[2] = SIFC_NONE;	// No extension
-    }
-  else
-    {				// no Four Core emulation, check the config/movie file for controller types
-      CurInputType[0] = port0;
-      CurInputType[1] = port1;
-      CurInputType[2] = fcexp;
-    }
+	eoptions &= ~EO_FOURSCORE;
+	if (fourscore)
+	{				// Four Score emulation, only support gamepads, nothing else
+		eoptions |= EO_FOURSCORE;
+		CurInputType[0] = SI_GAMEPAD;	// Controllers 1 and 3
+		CurInputType[1] = SI_GAMEPAD;	// Controllers 2 and 4
+		CurInputType[2] = SIFC_NONE;	// No extension
+	}
+	else
+	{				// no Four Core emulation, check the config/movie file for controller types
+		CurInputType[0] = port0;
+		CurInputType[1] = port1;
+		CurInputType[2] = fcexp;
+	}
 
-  replaceP2StartWithMicrophone = microphone;
+	replaceP2StartWithMicrophone = microphone;
 
-  InitInputInterface ();
+	InitInputInterface ();
 }
 
 /**
  * Initialize the input device interface between the emulation and the driver.
  */
-void
-InitInputInterface ()
+void InitInputInterface ()
 {
-  void *InputDPtr;
+	void *InputDPtr;
 
-  int t;
-  int x;
-  int attrib;
+	int t;
+	int x;
+	int attrib;
 
-  for (t = 0, x = 0; x < 2; x++)
-    {
-      attrib = 0;
-      InputDPtr = 0;
-
-      switch (CurInputType[x])
+	for (t = 0, x = 0; x < 2; x++)
 	{
-	case SI_POWERPADA:
-	case SI_POWERPADB:
-	  InputDPtr = &powerpadbuf[x];
-	  break;
-	case SI_GAMEPAD:
-	  InputDPtr = &JSreturn;
-	  break;
-	case SI_ARKANOID:
-	  InputDPtr = MouseData;
-	  t |= 1;
-	  break;
-	case SI_ZAPPER:
-	  InputDPtr = MouseData;
-	  t |= 1;
-	  attrib = 1;
-	  break;
+		attrib = 0;
+		InputDPtr = 0;
+
+		switch (CurInputType[x])
+		{
+			case SI_POWERPADA:
+			case SI_POWERPADB:
+				InputDPtr = &powerpadbuf[x];
+				break;
+			case SI_GAMEPAD:
+				InputDPtr = &JSreturn;
+				break;
+			case SI_ARKANOID:
+				InputDPtr = MouseData;
+				t |= 1;
+				break;
+			case SI_ZAPPER:
+				InputDPtr = MouseData;
+				t |= 1;
+				attrib = 1;
+				break;
+		}
+		FCEUI_SetInput (x, (ESI) CurInputType[x], InputDPtr, attrib);
 	}
-      FCEUI_SetInput (x, (ESI) CurInputType[x], InputDPtr, attrib);
-    }
 
-  attrib = 0;
-  InputDPtr = 0;
-  switch (CurInputType[2])
-    {
-    case SIFC_SHADOW:
-      InputDPtr = MouseData;
-      t |= 1;
-      attrib = 1;
-      break;
-    case SIFC_OEKAKIDS:
-      InputDPtr = MouseData;
-      t |= 1;
-      attrib = 1;
-      break;
-    case SIFC_ARKANOID:
-      InputDPtr = MouseData;
-      t |= 1;
-      break;
-    case SIFC_FKB:
-      InputDPtr = fkbkeys;
-      break;
-    case SIFC_HYPERSHOT:
-      InputDPtr = &HyperShotData;
-      break;
-    case SIFC_MAHJONG:
-      InputDPtr = &MahjongData;
-      break;
-    case SIFC_QUIZKING:
-      InputDPtr = &QuizKingData;
-      break;
-    case SIFC_TOPRIDER:
-      InputDPtr = &TopRiderData;
-      break;
-    case SIFC_BWORLD:
-      InputDPtr = BWorldData;
-      break;
-    case SIFC_FTRAINERA:
-    case SIFC_FTRAINERB:
-      InputDPtr = &FTrainerData;
-      break;
-    }
+	attrib = 0;
+	InputDPtr = 0;
+	switch (CurInputType[2])
+	{
+		case SIFC_SHADOW:
+			InputDPtr = MouseData;
+			t |= 1;
+			attrib = 1;
+			break;
+		case SIFC_OEKAKIDS:
+			InputDPtr = MouseData;
+			t |= 1;
+			attrib = 1;
+			break;
+		case SIFC_ARKANOID:
+			InputDPtr = MouseData;
+			t |= 1;
+			break;
+		case SIFC_FKB:
+			InputDPtr = fkbkeys;
+			break;
+		case SIFC_HYPERSHOT:
+			InputDPtr = &HyperShotData;
+			break;
+		case SIFC_MAHJONG:
+			InputDPtr = &MahjongData;
+			break;
+		case SIFC_QUIZKING:
+			InputDPtr = &QuizKingData;
+			break;
+		case SIFC_TOPRIDER:
+			InputDPtr = &TopRiderData;
+			break;
+		case SIFC_BWORLD:
+			InputDPtr = BWorldData;
+			break;
+		case SIFC_FTRAINERA:
+		case SIFC_FTRAINERB:
+			InputDPtr = &FTrainerData;
+			break;
+	}
 
-  FCEUI_SetInputFC ((ESIFC) CurInputType[2], InputDPtr, attrib);
-  FCEUI_SetInputFourscore ((eoptions & EO_FOURSCORE) != 0);
+	FCEUI_SetInputFC ((ESIFC) CurInputType[2], InputDPtr, attrib);
+	FCEUI_SetInputFourscore ((eoptions & EO_FOURSCORE) != 0);
 }
 
 
 static ButtConfig fkbmap[0x48] = {
-  MK (F1), MK (F2), MK (F3), MK (F4), MK (F5), MK (F6), MK (F7), MK (F8),
-  MK (1), MK (2), MK (3), MK (4), MK (5), MK (6), MK (7), MK (8), MK (9),
-  MK (0),
-  MK (MINUS), MK (EQUAL), MK (BACKSLASH), MK (BACKSPACE),
-  MK (ESCAPE), MK (Q), MK (W), MK (E), MK (R), MK (T), MK (Y), MK (U), MK (I),
-  MK (O),
-  MK (P), MK (GRAVE), MK (BRACKET_LEFT), MK (ENTER),
-  MK (LEFTCONTROL), MK (A), MK (S), MK (D), MK (F), MK (G), MK (H), MK (J),
-  MK (K),
-  MK (L), MK (SEMICOLON), MK (APOSTROPHE), MK (BRACKET_RIGHT), MK (INSERT),
-  MK (LEFTSHIFT), MK (Z), MK (X), MK (C), MK (V), MK (B), MK (N), MK (M),
-  MK (COMMA),
-  MK (PERIOD), MK (SLASH), MK (RIGHTALT), MK (RIGHTSHIFT), MK (LEFTALT),
-  MK (SPACE),
-  MK (DELETE), MK (END), MK (PAGEDOWN),
-  MK (CURSORUP), MK (CURSORLEFT), MK (CURSORRIGHT), MK (CURSORDOWN)
+	MK (F1), MK (F2), MK (F3), MK (F4), MK (F5), MK (F6), MK (F7), MK (F8),
+	MK (1), MK (2), MK (3), MK (4), MK (5), MK (6), MK (7), MK (8), MK (9),
+	MK (0),
+	MK (MINUS), MK (EQUAL), MK (BACKSLASH), MK (BACKSPACE),
+	MK (ESCAPE), MK (Q), MK (W), MK (E), MK (R), MK (T), MK (Y), MK (U), MK (I),
+	MK (O),
+	MK (P), MK (GRAVE), MK (BRACKET_LEFT), MK (ENTER),
+	MK (LEFTCONTROL), MK (A), MK (S), MK (D), MK (F), MK (G), MK (H), MK (J),
+	MK (K),
+	MK (L), MK (SEMICOLON), MK (APOSTROPHE), MK (BRACKET_RIGHT), MK (INSERT),
+	MK (LEFTSHIFT), MK (Z), MK (X), MK (C), MK (V), MK (B), MK (N), MK (M),
+	MK (COMMA),
+	MK (PERIOD), MK (SLASH), MK (RIGHTALT), MK (RIGHTSHIFT), MK (LEFTALT),
+	MK (SPACE),
+	MK (DELETE), MK (END), MK (PAGEDOWN),
+	MK (CURSORUP), MK (CURSORLEFT), MK (CURSORRIGHT), MK (CURSORDOWN)
 };
 
 /**
  * Update the status of the Family KeyBoard.
  */
-static void
-UpdateFKB ()
+static void updatefkb ()
 {
-  int x;
+	int x;
 
-  for (x = 0; x < 0x48; x++)
-    {
-      fkbkeys[x] = 0;
-
-      if (DTestButton (&fkbmap[x]))
+	for (x = 0; x < 0x48; x++)
 	{
-	  fkbkeys[x] = 1;
+		fkbkeys[x] = 0;
+
+		if (dtestbutton (&fkbmap[x]))
+		{
+			fkbkeys[x] = 1;
+		}
 	}
-    }
 }
 
 static ButtConfig HyperShotButtons[4] = {
-  MK (Q), MK (W), MK (E), MK (R)
+	MK (Q), MK (W), MK (E), MK (R)
 };
 
 /**
  * Update the status of the HyperShot input device.
  */
-static void
+	static void
 UpdateHyperShot ()
 {
-  int x;
+	int x;
 
-  HyperShotData = 0;
-  for (x = 0; x < 0x4; x++)
-    {
-      if (DTestButton (&HyperShotButtons[x]))
+	HyperShotData = 0;
+	for (x = 0; x < 0x4; x++)
 	{
-	  HyperShotData |= 1 << x;
+		if (DTestButton (&HyperShotButtons[x]))
+		{
+			HyperShotData |= 1 << x;
+		}
 	}
-    }
 }
 
 static ButtConfig MahjongButtons[21] = {
-  MK (Q), MK (W), MK (E), MK (R), MK (T),
-  MK (A), MK (S), MK (D), MK (F), MK (G), MK (H), MK (J), MK (K), MK (L),
-  MK (Z), MK (X), MK (C), MK (V), MK (B), MK (N), MK (M)
+	MK (Q), MK (W), MK (E), MK (R), MK (T),
+	MK (A), MK (S), MK (D), MK (F), MK (G), MK (H), MK (J), MK (K), MK (L),
+	MK (Z), MK (X), MK (C), MK (V), MK (B), MK (N), MK (M)
 };
 
 /**
  * Update the status of for the Mahjong input device.
  */
-static void
+	static void
 UpdateMahjong ()
 {
-  int x;
+	int x;
 
-  MahjongData = 0;
-  for (x = 0; x < 21; x++)
-    {
-      if (DTestButton (&MahjongButtons[x]))
+	MahjongData = 0;
+	for (x = 0; x < 21; x++)
 	{
-	  MahjongData |= 1 << x;
+		if (DTestButton (&MahjongButtons[x]))
+		{
+			MahjongData |= 1 << x;
+		}
 	}
-    }
 }
 
 static ButtConfig QuizKingButtons[6] = {
-  MK (Q), MK (W), MK (E), MK (R), MK (T), MK (Y)
+	MK (Q), MK (W), MK (E), MK (R), MK (T), MK (Y)
 };
 
 /**
  * Update the status of the QuizKing input device.
  */
-static void
+	static void
 UpdateQuizKing ()
 {
-  int x;
+	int x;
 
-  QuizKingData = 0;
+	QuizKingData = 0;
 
-  for (x = 0; x < 6; x++)
-    {
-      if (DTestButton (&QuizKingButtons[x]))
+	for (x = 0; x < 6; x++)
 	{
-	  QuizKingData |= 1 << x;
+		if (DTestButton (&QuizKingButtons[x]))
+		{
+			QuizKingData |= 1 << x;
+		}
 	}
-    }
 }
 
 static ButtConfig TopRiderButtons[8] = {
-  MK (Q), MK (W), MK (E), MK (R), MK (T), MK (Y), MK (U), MK (I)
+	MK (Q), MK (W), MK (E), MK (R), MK (T), MK (Y), MK (U), MK (I)
 };
 
 /**
  * Update the status of the TopRider input device.
  */
-static void
+	static void
 UpdateTopRider ()
 {
-  int x;
-  TopRiderData = 0;
-  for (x = 0; x < 8; x++)
-    {
-      if (DTestButton (&TopRiderButtons[x]))
+	int x;
+	TopRiderData = 0;
+	for (x = 0; x < 8; x++)
 	{
-	  TopRiderData |= (1 << x);
+		if (DTestButton (&TopRiderButtons[x]))
+		{
+			TopRiderData |= (1 << x);
+		}
 	}
-    }
 }
 
 static ButtConfig FTrainerButtons[12] = {
@@ -1563,19 +1561,18 @@ static ButtConfig FTrainerButtons[12] = {
 /**
  * Update the status of the FTrainer input device.
  */
-static void
-UpdateFTrainer ()
+static void UpdateFTrainer ()
 {
-  int x;
-  FTrainerData = 0;
+	int x;
+	FTrainerData = 0;
 
-  for (x = 0; x < 12; x++)
-    {
-      if (DTestButton (&FTrainerButtons[x]))
+	for (x = 0; x < 12; x++)
 	{
-	  FTrainerData |= (1 << x);
+		if (DTestButton (&FTrainerButtons[x]))
+		{
+			FTrainerData |= (1 << x);
+		}
 	}
-    }
 }
 
 /**
@@ -1584,167 +1581,165 @@ UpdateFTrainer ()
  * @param bc the NES gamepad's button config
  * @param which the index of the button
  */
-const char *
-ButtonName (const ButtConfig * bc, int which)
+const char * ButtonName (const ButtConfig * bc, int which)
 {
-  static char name[256];
+	static char name[256];
 
-  switch (bc->ButtType[which])
-    {
-    case BUTTC_KEYBOARD:
+	switch (bc->ButtType[which])
+	{
+		case BUTTC_KEYBOARD:
 #if SDL_VERSION_ATLEAST(2,0,0)
-      return SDL_GetKeyName (bc->ButtonNum[which]);
+			return SDL_GetKeyName (bc->ButtonNum[which]);
 #else
-      return SDL_GetKeyName ((SDLKey) bc->ButtonNum[which]);
+			return SDL_GetKeyName ((SDLKey) bc->ButtonNum[which]);
 #endif
-    case BUTTC_JOYSTICK:
-      int joyNum, inputNum;
-      const char *inputType, *inputDirection;
+		case BUTTC_JOYSTICK:
+			int joyNum, inputNum;
+			const char *inputType, *inputDirection;
 
-      joyNum = bc->DeviceNum[which];
+			joyNum = bc->DeviceNum[which];
 
-      if (bc->ButtonNum[which] & 0x8000)
-	{
-	  inputType = "Axis";
-	  inputNum = bc->ButtonNum[which] & 0x3FFF;
-	  inputDirection = bc->ButtonNum[which] & 0x4000 ? "-" : "+";
+			if (bc->ButtonNum[which] & 0x8000)
+			{
+				inputType = "Axis";
+				inputNum = bc->ButtonNum[which] & 0x3FFF;
+				inputDirection = bc->ButtonNum[which] & 0x4000 ? "-" : "+";
+			}
+			else if (bc->ButtonNum[which] & 0x2000)
+			{
+				int inputValue;
+				char direction[128] = "";
+
+				inputType = "Hat";
+				inputNum = (bc->ButtonNum[which] >> 8) & 0x1F;
+				inputValue = bc->ButtonNum[which] & 0xF;
+
+				if (inputValue & SDL_HAT_UP)
+					strncat (direction, "Up ", sizeof (direction));
+				if (inputValue & SDL_HAT_DOWN)
+					strncat (direction, "Down ", sizeof (direction));
+				if (inputValue & SDL_HAT_LEFT)
+					strncat (direction, "Left ", sizeof (direction));
+				if (inputValue & SDL_HAT_RIGHT)
+					strncat (direction, "Right ", sizeof (direction));
+
+				if (direction[0])
+					inputDirection = direction;
+				else
+					inputDirection = "Center";
+			}
+			else
+			{
+				inputType = "Button";
+				inputNum = bc->ButtonNum[which];
+				inputDirection = "";
+			}
 	}
-      else if (bc->ButtonNum[which] & 0x2000)
-	{
-	  int inputValue;
-	  char direction[128] = "";
 
-	  inputType = "Hat";
-	  inputNum = (bc->ButtonNum[which] >> 8) & 0x1F;
-	  inputValue = bc->ButtonNum[which] & 0xF;
-
-	  if (inputValue & SDL_HAT_UP)
-	    strncat (direction, "Up ", sizeof (direction));
-	  if (inputValue & SDL_HAT_DOWN)
-	    strncat (direction, "Down ", sizeof (direction));
-	  if (inputValue & SDL_HAT_LEFT)
-	    strncat (direction, "Left ", sizeof (direction));
-	  if (inputValue & SDL_HAT_RIGHT)
-	    strncat (direction, "Right ", sizeof (direction));
-
-	  if (direction[0])
-	    inputDirection = direction;
-	  else
-	    inputDirection = "Center";
-	}
-      else
-	{
-	  inputType = "Button";
-	  inputNum = bc->ButtonNum[which];
-	  inputDirection = "";
-	}
-    }
-
-  return name;
+	return name;
 }
 
 /**
  * Waits for a button input and returns the information as to which
  * button was pressed.  Used in button configuration.
  */
-int
-DWaitButton (const uint8 * text, ButtConfig * bc, int wb)
+	int DWaitButton (const uint8 * text, ButtConfig * bc, int wb)
 {
-  SDL_Event event;
-  static int32 LastAx[64][64];
-  int x, y;
+	SDL_Event event;
+	static int32 LastAx[64][64];
+	int x, y;
 
-  if (text)
-    {
-      std::string title = "Press a key for ";
-      title += (const char *) text;
+	if (text)
+	{
+		std::string title = "Press a key for ";
+		title += (const char *) text;
 #if SDL_VERSION_ATLEAST(2,0,0)
-	  // TODO - SDL2
+		// TODO - SDL2
 #else
-      SDL_WM_SetCaption (title.c_str (), 0);
+		SDL_WM_SetCaption (title.c_str (), 0);
 #endif
-      puts ((const char *) text);
-    }
-
-  for (x = 0; x < 64; x++)
-    {
-      for (y = 0; y < 64; y++)
-	{
-	  LastAx[x][y] = 0x100000;
+		puts ((const char *) text);
 	}
-    }
 
-  while (1)
-    {
-      int done = 0;
+	for (x = 0; x < 64; x++)
+	{
+		for (y = 0; y < 64; y++)
+		{
+			LastAx[x][y] = 0x100000;
+		}
+	}
+
+	while (1)
+	{
+		int done = 0;
 #ifdef _GTK
-      while (gtk_events_pending ())
-	gtk_main_iteration_do (FALSE);
+		while (gtk_events_pending ())
+			gtk_main_iteration_do (FALSE);
 #endif
-      while (SDL_PollEvent (&event))
-	{
-	  done++;
-	  switch (event.type)
-	    {
-	    case SDL_KEYDOWN:
-	      bc->ButtType[wb] = BUTTC_KEYBOARD;
-	      bc->DeviceNum[wb] = 0;
-	      bc->ButtonNum[wb] = event.key.keysym.sym;
-	      return (1);
-	    case SDL_JOYBUTTONDOWN:
-	      bc->ButtType[wb] = BUTTC_JOYSTICK;
-	      bc->DeviceNum[wb] = event.jbutton.which;
-	      bc->ButtonNum[wb] = event.jbutton.button;
-	      return (1);
-	    case SDL_JOYHATMOTION:
-	      if (event.jhat.value == SDL_HAT_CENTERED)
-		done--;
-	      else
+		while (SDL_PollEvent (&event))
 		{
-		  bc->ButtType[wb] = BUTTC_JOYSTICK;
-		  bc->DeviceNum[wb] = event.jhat.which;
-		  bc->ButtonNum[wb] =
-		    (0x2000 | ((event.jhat.hat & 0x1F) << 8) | event.
-		     jhat.value);
-		  return (1);
+			done++;
+			switch (event.type)
+			{
+				case SDL_KEYDOWN:
+					bc->ButtType[wb] = BUTTC_KEYBOARD;
+					bc->DeviceNum[wb] = 0;
+					bc->ButtonNum[wb] = event.key.keysym.sym;
+					return (1);
+				case SDL_JOYBUTTONDOWN:
+					bc->ButtType[wb] = BUTTC_JOYSTICK;
+					bc->DeviceNum[wb] = event.jbutton.which;
+					bc->ButtonNum[wb] = event.jbutton.button;
+					return (1);
+				case SDL_JOYHATMOTION:
+					if (event.jhat.value == SDL_HAT_CENTERED)
+						done--;
+					else
+					{
+						bc->ButtType[wb] = BUTTC_JOYSTICK;
+						bc->DeviceNum[wb] = event.jhat.which;
+						bc->ButtonNum[wb] =
+							(0x2000 | ((event.jhat.hat & 0x1F) << 8) | event.
+							 jhat.value);
+						return (1);
+					}
+					break;
+				case SDL_JOYAXISMOTION:
+					if (LastAx[event.jaxis.which][event.jaxis.axis] == 0x100000)
+					{
+						if (abs (event.jaxis.value) < 1000)
+						{
+							LastAx[event.jaxis.which][event.jaxis.axis] =
+								event.jaxis.value;
+						}
+						done--;
+					}
+					else
+					{
+						if (abs
+								(LastAx[event.jaxis.which][event.jaxis.axis] -
+								 event.jaxis.value) >= 8192)
+						{
+							bc->ButtType[wb] = BUTTC_JOYSTICK;
+							bc->DeviceNum[wb] = event.jaxis.which;
+							bc->ButtonNum[wb] = (0x8000 | event.jaxis.axis |
+									((event.jaxis.value < 0)
+									 ? 0x4000 : 0));
+							return (1);
+						}
+						else
+							done--;
+					}
+					break;
+				default:
+					done--;
+			}
 		}
-	      break;
-	    case SDL_JOYAXISMOTION:
-	      if (LastAx[event.jaxis.which][event.jaxis.axis] == 0x100000)
-		{
-		  if (abs (event.jaxis.value) < 1000)
-		    {
-		      LastAx[event.jaxis.which][event.jaxis.axis] =
-			event.jaxis.value;
-		    }
-		  done--;
-		}
-	      else
-		{
-		  if (abs
-		      (LastAx[event.jaxis.which][event.jaxis.axis] -
-		       event.jaxis.value) >= 8192)
-		    {
-		      bc->ButtType[wb] = BUTTC_JOYSTICK;
-		      bc->DeviceNum[wb] = event.jaxis.which;
-		      bc->ButtonNum[wb] = (0x8000 | event.jaxis.axis |
-					   ((event.jaxis.value < 0)
-					    ? 0x4000 : 0));
-		      return (1);
-		    }
-		  else
-		    done--;
-		}
-	      break;
-	    default:
-	      done--;
-	    }
+		if (done)
+			break;
 	}
-      if (done)
-	break;
-    }
 
-  return (0);
+	return 0;
 }
 
 /**
@@ -1754,26 +1749,25 @@ DWaitButton (const uint8 * text, ButtConfig * bc, int wb)
  * used as input for the specified button, thus allowing up to four
  * possible settings for each input button.
  */
-void
-ConfigButton (char *text, ButtConfig * bc)
+void configbutton (char *text, buttconfig * bc)
 {
-  uint8 buf[256];
-  int wc;
+	uint8 buf[256];
+	int wc;
 
-  for (wc = 0; wc < MAXBUTTCONFIG; wc++)
-    {
-      sprintf ((char *) buf, "%s (%d)", text, wc + 1);
-      DWaitButton (buf, bc, wc);
-
-      if (wc &&
-	  bc->ButtType[wc] == bc->ButtType[wc - 1] &&
-	  bc->DeviceNum[wc] == bc->DeviceNum[wc - 1] &&
-	  bc->ButtonNum[wc] == bc->ButtonNum[wc - 1])
+	for (wc = 0; wc < maxbuttconfig; wc++)
 	{
-	  break;
+		sprintf ((char *) buf, "%s (%d)", text, wc + 1);
+		dwaitbutton (buf, bc, wc);
+
+		if (wc &&
+				bc->butttype[wc] == bc->butttype[wc - 1] &&
+				bc->devicenum[wc] == bc->devicenum[wc - 1] &&
+				bc->buttonnum[wc] == bc->buttonnum[wc - 1])
+		{
+			break;
+		}
 	}
-    }
-  bc->NumC = wc;
+	bc->numc = wc;
 }
 
 /**
@@ -1781,186 +1775,184 @@ ConfigButton (char *text, ButtConfig * bc)
  */
 extern Config *g_config;
 
-void
-ConfigDevice (int which, int arg)
+void ConfigDevice (int which, int arg)
 {
-  char buf[256];
-  int x;
-  std::string prefix;
-  char *str[10] =
-    { "A", "B", "SELECT", "START", "UP", "DOWN", "LEFT", "RIGHT", "Rapid A",
-    "Rapid B"
-  };
+	char buf[256];
+	int x;
+	std::string prefix;
+	char *str[10] =
+	{ "A", "B", "SELECT", "START", "UP", "DOWN", "LEFT", "RIGHT", "Rapid A",
+		"Rapid B"
+	};
 
-  // XXX soules - set the configuration options so that later calls
-  //              don't override these.  This is a temp hack until I
-  //              can clean up this file.
+	// XXX soules - set the configuration options so that later calls
+	//              don't override these.  This is a temp hack until I
+	//              can clean up this file.
 
-  ButtonConfigBegin ();
-  switch (which)
-    {
-    case FCFGD_QUIZKING:
-      prefix = "SDL.Input.QuizKing.";
-      for (x = 0; x < 6; x++)
+	ButtonConfigBegin ();
+	switch (which)
 	{
-	  sprintf (buf, "Quiz King Buzzer #%d", x + 1);
-	  ConfigButton (buf, &QuizKingButtons[x]);
+		case FCFGD_QUIZKING:
+			prefix = "SDL.Input.QuizKing.";
+			for (x = 0; x < 6; x++)
+			{
+				sprintf (buf, "Quiz King Buzzer #%d", x + 1);
+				ConfigButton (buf, &QuizKingButtons[x]);
 
-	  g_config->setOption (prefix + QuizKingNames[x],
-			       QuizKingButtons[x].ButtonNum[0]);
+				g_config->setOption (prefix + QuizKingNames[x],
+						QuizKingButtons[x].ButtonNum[0]);
+			}
+
+			if (QuizKingButtons[0].ButtType[0] == BUTTC_KEYBOARD)
+			{
+				g_config->setOption (prefix + "DeviceType", "Keyboard");
+			}
+			else if (QuizKingButtons[0].ButtType[0] == BUTTC_JOYSTICK)
+			{
+				g_config->setOption (prefix + "DeviceType", "Joystick");
+			}
+			else
+			{
+				g_config->setOption (prefix + "DeviceType", "Unknown");
+			}
+			g_config->setOption (prefix + "DeviceNum",
+					QuizKingButtons[0].DeviceNum[0]);
+			break;
+		case FCFGD_HYPERSHOT:
+			prefix = "SDL.Input.HyperShot.";
+			for (x = 0; x < 4; x++)
+			{
+				sprintf (buf, "Hyper Shot %d: %s",
+						((x & 2) >> 1) + 1, (x & 1) ? "JUMP" : "RUN");
+				ConfigButton (buf, &HyperShotButtons[x]);
+
+				g_config->setOption (prefix + HyperShotNames[x],
+						HyperShotButtons[x].ButtonNum[0]);
+			}
+
+			if (HyperShotButtons[0].ButtType[0] == BUTTC_KEYBOARD)
+			{
+				g_config->setOption (prefix + "DeviceType", "Keyboard");
+			}
+			else if (HyperShotButtons[0].ButtType[0] == BUTTC_JOYSTICK)
+			{
+				g_config->setOption (prefix + "DeviceType", "Joystick");
+			}
+			else
+			{
+				g_config->setOption (prefix + "DeviceType", "Unknown");
+			}
+			g_config->setOption (prefix + "DeviceNum",
+					HyperShotButtons[0].DeviceNum[0]);
+			break;
+		case FCFGD_POWERPAD:
+			snprintf (buf, 256, "SDL.Input.PowerPad.%d", (arg & 1));
+			prefix = buf;
+			for (x = 0; x < 12; x++)
+			{
+				sprintf (buf, "PowerPad %d: %d", (arg & 1) + 1, x + 11);
+				ConfigButton (buf, &powerpadsc[arg & 1][x]);
+
+				g_config->setOption (prefix + PowerPadNames[x],
+						powerpadsc[arg & 1][x].ButtonNum[0]);
+			}
+
+			if (powerpadsc[arg & 1][0].ButtType[0] == BUTTC_KEYBOARD)
+			{
+				g_config->setOption (prefix + "DeviceType", "Keyboard");
+			}
+			else if (powerpadsc[arg & 1][0].ButtType[0] == BUTTC_JOYSTICK)
+			{
+				g_config->setOption (prefix + "DeviceType", "Joystick");
+			}
+			else
+			{
+				g_config->setOption (prefix + "DeviceType", "Unknown");
+			}
+			g_config->setOption (prefix + "DeviceNum",
+					powerpadsc[arg & 1][0].DeviceNum[0]);
+			break;
+
+		case FCFGD_GAMEPAD:
+			snprintf (buf, 256, "SDL.Input.GamePad.%d", arg);
+			prefix = buf;
+			for (x = 0; x < 10; x++)
+			{
+				sprintf (buf, "GamePad #%d: %s", arg + 1, str[x]);
+				ConfigButton (buf, &GamePadConfig[arg][x]);
+
+				g_config->setOption (prefix + GamePadNames[x],
+						GamePadConfig[arg][x].ButtonNum[0]);
+			}
+
+			if (GamePadConfig[arg][0].ButtType[0] == BUTTC_KEYBOARD)
+			{
+				g_config->setOption (prefix + "DeviceType", "Keyboard");
+			}
+			else if (GamePadConfig[arg][0].ButtType[0] == BUTTC_JOYSTICK)
+			{
+				g_config->setOption (prefix + "DeviceType", "Joystick");
+			}
+			else
+			{
+				g_config->setOption (prefix + "DeviceType", "Unknown");
+			}
+			g_config->setOption (prefix + "DeviceNum",
+					GamePadConfig[arg][0].DeviceNum[0]);
+			break;
 	}
 
-      if (QuizKingButtons[0].ButtType[0] == BUTTC_KEYBOARD)
-	{
-	  g_config->setOption (prefix + "DeviceType", "Keyboard");
-	}
-      else if (QuizKingButtons[0].ButtType[0] == BUTTC_JOYSTICK)
-	{
-	  g_config->setOption (prefix + "DeviceType", "Joystick");
-	}
-      else
-	{
-	  g_config->setOption (prefix + "DeviceType", "Unknown");
-	}
-      g_config->setOption (prefix + "DeviceNum",
-			   QuizKingButtons[0].DeviceNum[0]);
-      break;
-    case FCFGD_HYPERSHOT:
-      prefix = "SDL.Input.HyperShot.";
-      for (x = 0; x < 4; x++)
-	{
-	  sprintf (buf, "Hyper Shot %d: %s",
-		   ((x & 2) >> 1) + 1, (x & 1) ? "JUMP" : "RUN");
-	  ConfigButton (buf, &HyperShotButtons[x]);
-
-	  g_config->setOption (prefix + HyperShotNames[x],
-			       HyperShotButtons[x].ButtonNum[0]);
-	}
-
-      if (HyperShotButtons[0].ButtType[0] == BUTTC_KEYBOARD)
-	{
-	  g_config->setOption (prefix + "DeviceType", "Keyboard");
-	}
-      else if (HyperShotButtons[0].ButtType[0] == BUTTC_JOYSTICK)
-	{
-	  g_config->setOption (prefix + "DeviceType", "Joystick");
-	}
-      else
-	{
-	  g_config->setOption (prefix + "DeviceType", "Unknown");
-	}
-      g_config->setOption (prefix + "DeviceNum",
-			   HyperShotButtons[0].DeviceNum[0]);
-      break;
-    case FCFGD_POWERPAD:
-      snprintf (buf, 256, "SDL.Input.PowerPad.%d", (arg & 1));
-      prefix = buf;
-      for (x = 0; x < 12; x++)
-	{
-	  sprintf (buf, "PowerPad %d: %d", (arg & 1) + 1, x + 11);
-	  ConfigButton (buf, &powerpadsc[arg & 1][x]);
-
-	  g_config->setOption (prefix + PowerPadNames[x],
-			       powerpadsc[arg & 1][x].ButtonNum[0]);
-	}
-
-      if (powerpadsc[arg & 1][0].ButtType[0] == BUTTC_KEYBOARD)
-	{
-	  g_config->setOption (prefix + "DeviceType", "Keyboard");
-	}
-      else if (powerpadsc[arg & 1][0].ButtType[0] == BUTTC_JOYSTICK)
-	{
-	  g_config->setOption (prefix + "DeviceType", "Joystick");
-	}
-      else
-	{
-	  g_config->setOption (prefix + "DeviceType", "Unknown");
-	}
-      g_config->setOption (prefix + "DeviceNum",
-			   powerpadsc[arg & 1][0].DeviceNum[0]);
-      break;
-
-    case FCFGD_GAMEPAD:
-      snprintf (buf, 256, "SDL.Input.GamePad.%d", arg);
-      prefix = buf;
-      for (x = 0; x < 10; x++)
-	{
-	  sprintf (buf, "GamePad #%d: %s", arg + 1, str[x]);
-	  ConfigButton (buf, &GamePadConfig[arg][x]);
-
-	  g_config->setOption (prefix + GamePadNames[x],
-			       GamePadConfig[arg][x].ButtonNum[0]);
-	}
-
-      if (GamePadConfig[arg][0].ButtType[0] == BUTTC_KEYBOARD)
-	{
-	  g_config->setOption (prefix + "DeviceType", "Keyboard");
-	}
-      else if (GamePadConfig[arg][0].ButtType[0] == BUTTC_JOYSTICK)
-	{
-	  g_config->setOption (prefix + "DeviceType", "Joystick");
-	}
-      else
-	{
-	  g_config->setOption (prefix + "DeviceType", "Unknown");
-	}
-      g_config->setOption (prefix + "DeviceNum",
-			   GamePadConfig[arg][0].DeviceNum[0]);
-      break;
-    }
-
-  ButtonConfigEnd ();
+	ButtonConfigEnd ();
 }
 
 
 /**
  * Update the button configuration for a device, specified by a text string.
  */
-void
-InputCfg (const std::string & text)
+void InputCfg (const std::string & text)
 {
 #ifdef _GTK
-  // enable noGui to prevent the gtk x11 hack from executing
-  noGui = 1;
-  // this is only called at the begininng of execution; make sure the video subsystem is initialized
-  InitVideo (GameInfo);
+	// enable noGui to prevent the gtk x11 hack from executing
+	noGui = 1;
+	// this is only called at the begininng of execution; make sure the video subsystem is initialized
+	InitVideo (GameInfo);
 #endif
 
-  if (noGui)
-    {
-      if (text.find ("gamepad") != std::string::npos)
+	if (noGui)
 	{
-	  int device = (text[strlen ("gamepad")] - '1');
-	  if (device < 0 || device > 3)
-	    {
-	      FCEUD_PrintError
-		("Invalid gamepad device specified; must be one of gamepad1 through gamepad4");
-	      exit (-1);
-	    }
-	  ConfigDevice (FCFGD_GAMEPAD, device);
+		if (text.find ("gamepad") != std::string::npos)
+		{
+			int device = (text[strlen ("gamepad")] - '1');
+			if (device < 0 || device > 3)
+			{
+				FCEUD_PrintError
+					("Invalid gamepad device specified; must be one of gamepad1 through gamepad4");
+				exit (-1);
+			}
+			ConfigDevice (FCFGD_GAMEPAD, device);
+		}
+		else if (text.find ("powerpad") != std::string::npos)
+		{
+			int device = (text[strlen ("powerpad")] - '1');
+			if (device < 0 || device > 1)
+			{
+				FCEUD_PrintError
+					("Invalid powerpad device specified; must be powerpad1 or powerpad2");
+				exit (-1);
+			}
+			ConfigDevice (FCFGD_POWERPAD, device);
+		}
+		else if (text.find ("hypershot") != std::string::npos)
+		{
+			ConfigDevice (FCFGD_HYPERSHOT, 0);
+		}
+		else if (text.find ("quizking") != std::string::npos)
+		{
+			ConfigDevice (FCFGD_QUIZKING, 0);
+		}
 	}
-      else if (text.find ("powerpad") != std::string::npos)
-	{
-	  int device = (text[strlen ("powerpad")] - '1');
-	  if (device < 0 || device > 1)
-	    {
-	      FCEUD_PrintError
-		("Invalid powerpad device specified; must be powerpad1 or powerpad2");
-	      exit (-1);
-	    }
-	  ConfigDevice (FCFGD_POWERPAD, device);
-	}
-      else if (text.find ("hypershot") != std::string::npos)
-	{
-	  ConfigDevice (FCFGD_HYPERSHOT, 0);
-	}
-      else if (text.find ("quizking") != std::string::npos)
-	{
-	  ConfigDevice (FCFGD_QUIZKING, 0);
-	}
-    }
-  else
-    printf ("Please run \"fceux --nogui\" before using --inputcfg\n");
+	else
+		printf ("Please run \"fceux --nogui\" before using --inputcfg\n");
 
 }
 
@@ -1970,329 +1962,328 @@ InputCfg (const std::string & text)
  * configuration management.  Will probably want to change this in the
  * future - soules.
  */
-void
-UpdateInput (Config * config)
+void UpdateInput (Config * config)
 {
-  char buf[64];
-  std::string device, prefix;
+	char buf[64];
+	std::string device, prefix;
 
-  for (unsigned int i = 0; i < 3; i++)
-    {
-      snprintf (buf, 64, "SDL.Input.%d", i);
-      config->getOption (buf, &device);
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		snprintf (buf, 64, "SDL.Input.%d", i);
+		config->getOption (buf, &device);
 
-      if (device == "None")
-	{
-	  UsrInputType[i] = SI_NONE;
-	}
-      else if (device.find ("GamePad") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_GAMEPAD : (int) SIFC_NONE;
-	}
-      else if (device.find ("PowerPad.0") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_POWERPADA : (int) SIFC_NONE;
-	}
-      else if (device.find ("PowerPad.1") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_POWERPADB : (int) SIFC_NONE;
-	}
-      else if (device.find ("QuizKing") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_QUIZKING;
-	}
-      else if (device.find ("HyperShot") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_HYPERSHOT;
-	}
-      else if (device.find ("Mahjong") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_MAHJONG;
-	}
-      else if (device.find ("TopRider") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_TOPRIDER;
-	}
-      else if (device.find ("FTrainer") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_FTRAINERA;
-	}
-      else if (device.find ("FamilyKeyBoard") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_FKB;
-	}
-      else if (device.find ("OekaKids") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_OEKAKIDS;
-	}
-      else if (device.find ("Arkanoid") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_ARKANOID : (int) SIFC_ARKANOID;
-	}
-      else if (device.find ("Shadow") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_SHADOW;
-	}
-      else if (device.find ("Zapper") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_ZAPPER : (int) SIFC_NONE;
-	}
-      else if (device.find ("BWorld") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_BWORLD;
-	}
-      else if (device.find ("4Player") != std::string::npos)
-	{
-	  UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_4PLAYER;
-	}
-      else
-	{
-	  // Unknown device
-	  UsrInputType[i] = SI_NONE;
-	}
-    }
-
-  // update each of the devices' configuration structure
-  // XXX soules - this is temporary until this file is cleaned up to
-  //              simplify the interface between configuration and
-  //              structure data.  This will likely include the
-  //              removal of multiple input buttons for a single
-  //              input device key.
-  int type, devnum, button;
-
-  // gamepad 0 - 3
-  for (unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++)
-    {
-      char buf[64];
-      snprintf (buf, 20, "SDL.Input.GamePad.%d.", i);
-      prefix = buf;
-
-      config->getOption (prefix + "DeviceType", &device);
-      if (device.find ("Keyboard") != std::string::npos)
-	{
-	  type = BUTTC_KEYBOARD;
-	}
-      else if (device.find ("Joystick") != std::string::npos)
-	{
-	  type = BUTTC_JOYSTICK;
-	}
-      else
-	{
-	  type = 0;
+		if (device == "None")
+		{
+			UsrInputType[i] = SI_NONE;
+		}
+		else if (device.find ("GamePad") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_GAMEPAD : (int) SIFC_NONE;
+		}
+		else if (device.find ("PowerPad.0") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_POWERPADA : (int) SIFC_NONE;
+		}
+		else if (device.find ("PowerPad.1") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_POWERPADB : (int) SIFC_NONE;
+		}
+		else if (device.find ("QuizKing") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_QUIZKING;
+		}
+		else if (device.find ("HyperShot") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_HYPERSHOT;
+		}
+		else if (device.find ("Mahjong") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_MAHJONG;
+		}
+		else if (device.find ("TopRider") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_TOPRIDER;
+		}
+		else if (device.find ("FTrainer") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_FTRAINERA;
+		}
+		else if (device.find ("FamilyKeyBoard") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_FKB;
+		}
+		else if (device.find ("OekaKids") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_OEKAKIDS;
+		}
+		else if (device.find ("Arkanoid") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_ARKANOID : (int) SIFC_ARKANOID;
+		}
+		else if (device.find ("Shadow") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_SHADOW;
+		}
+		else if (device.find ("Zapper") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_ZAPPER : (int) SIFC_NONE;
+		}
+		else if (device.find ("BWorld") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_BWORLD;
+		}
+		else if (device.find ("4Player") != std::string::npos)
+		{
+			UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_4PLAYER;
+		}
+		else
+		{
+			// Unknown device
+			UsrInputType[i] = SI_NONE;
+		}
 	}
 
-      config->getOption (prefix + "DeviceNum", &devnum);
-      for (unsigned int j = 0; j < GAMEPAD_NUM_BUTTONS; j++)
+	// update each of the devices' configuration structure
+	// XXX soules - this is temporary until this file is cleaned up to
+	//              simplify the interface between configuration and
+	//              structure data.  This will likely include the
+	//              removal of multiple input buttons for a single
+	//              input device key.
+	int type, devnum, button;
+
+	// gamepad 0 - 3
+	for (unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++)
 	{
-	  config->getOption (prefix + GamePadNames[j], &button);
+		char buf[64];
+		snprintf (buf, 20, "SDL.Input.GamePad.%d.", i);
+		prefix = buf;
 
-	  GamePadConfig[i][j].ButtType[0] = type;
-	  GamePadConfig[i][j].DeviceNum[0] = devnum;
-	  GamePadConfig[i][j].ButtonNum[0] = button;
-	  GamePadConfig[i][j].NumC = 1;
+		config->getOption (prefix + "DeviceType", &device);
+		if (device.find ("Keyboard") != std::string::npos)
+		{
+			type = BUTTC_KEYBOARD;
+		}
+		else if (device.find ("Joystick") != std::string::npos)
+		{
+			type = BUTTC_JOYSTICK;
+		}
+		else
+		{
+			type = 0;
+		}
+
+		config->getOption (prefix + "DeviceNum", &devnum);
+		for (unsigned int j = 0; j < GAMEPAD_NUM_BUTTONS; j++)
+		{
+			config->getOption (prefix + GamePadNames[j], &button);
+
+			GamePadConfig[i][j].ButtType[0] = type;
+			GamePadConfig[i][j].DeviceNum[0] = devnum;
+			GamePadConfig[i][j].ButtonNum[0] = button;
+			GamePadConfig[i][j].NumC = 1;
+		}
 	}
-    }
 
-  // PowerPad 0 - 1
-  for (unsigned int i = 0; i < POWERPAD_NUM_DEVICES; i++)
-    {
-      char buf[64];
-      snprintf (buf, 20, "SDL.Input.PowerPad.%d.", i);
-      prefix = buf;
-
-      config->getOption (prefix + "DeviceType", &device);
-      if (device.find ("Keyboard") != std::string::npos)
+	// PowerPad 0 - 1
+	for (unsigned int i = 0; i < POWERPAD_NUM_DEVICES; i++)
 	{
-	  type = BUTTC_KEYBOARD;
+		char buf[64];
+		snprintf (buf, 20, "SDL.Input.PowerPad.%d.", i);
+		prefix = buf;
+
+		config->getOption (prefix + "DeviceType", &device);
+		if (device.find ("Keyboard") != std::string::npos)
+		{
+			type = BUTTC_KEYBOARD;
+		}
+		else if (device.find ("Joystick") != std::string::npos)
+		{
+			type = BUTTC_JOYSTICK;
+		}
+		else
+		{
+			type = 0;
+		}
+
+		config->getOption (prefix + "DeviceNum", &devnum);
+		for (unsigned int j = 0; j < POWERPAD_NUM_BUTTONS; j++)
+		{
+			config->getOption (prefix + PowerPadNames[j], &button);
+
+			powerpadsc[i][j].ButtType[0] = type;
+			powerpadsc[i][j].DeviceNum[0] = devnum;
+			powerpadsc[i][j].ButtonNum[0] = button;
+			powerpadsc[i][j].NumC = 1;
+		}
 	}
-      else if (device.find ("Joystick") != std::string::npos)
+
+	// QuizKing
+	prefix = "SDL.Input.QuizKing.";
+	config->getOption (prefix + "DeviceType", &device);
+	if (device.find ("Keyboard") != std::string::npos)
 	{
-	  type = BUTTC_JOYSTICK;
+		type = BUTTC_KEYBOARD;
 	}
-      else
+	else if (device.find ("Joystick") != std::string::npos)
 	{
-	  type = 0;
+		type = BUTTC_JOYSTICK;
 	}
-
-      config->getOption (prefix + "DeviceNum", &devnum);
-      for (unsigned int j = 0; j < POWERPAD_NUM_BUTTONS; j++)
+	else
 	{
-	  config->getOption (prefix + PowerPadNames[j], &button);
-
-	  powerpadsc[i][j].ButtType[0] = type;
-	  powerpadsc[i][j].DeviceNum[0] = devnum;
-	  powerpadsc[i][j].ButtonNum[0] = button;
-	  powerpadsc[i][j].NumC = 1;
+		type = 0;
 	}
-    }
+	config->getOption (prefix + "DeviceNum", &devnum);
+	for (unsigned int j = 0; j < QUIZKING_NUM_BUTTONS; j++)
+	{
+		config->getOption (prefix + QuizKingNames[j], &button);
 
-  // QuizKing
-  prefix = "SDL.Input.QuizKing.";
-  config->getOption (prefix + "DeviceType", &device);
-  if (device.find ("Keyboard") != std::string::npos)
-    {
-      type = BUTTC_KEYBOARD;
-    }
-  else if (device.find ("Joystick") != std::string::npos)
-    {
-      type = BUTTC_JOYSTICK;
-    }
-  else
-    {
-      type = 0;
-    }
-  config->getOption (prefix + "DeviceNum", &devnum);
-  for (unsigned int j = 0; j < QUIZKING_NUM_BUTTONS; j++)
-    {
-      config->getOption (prefix + QuizKingNames[j], &button);
+		QuizKingButtons[j].ButtType[0] = type;
+		QuizKingButtons[j].DeviceNum[0] = devnum;
+		QuizKingButtons[j].ButtonNum[0] = button;
+		QuizKingButtons[j].NumC = 1;
+	}
 
-      QuizKingButtons[j].ButtType[0] = type;
-      QuizKingButtons[j].DeviceNum[0] = devnum;
-      QuizKingButtons[j].ButtonNum[0] = button;
-      QuizKingButtons[j].NumC = 1;
-    }
+	// HyperShot
+	prefix = "SDL.Input.HyperShot.";
+	config->getOption (prefix + "DeviceType", &device);
+	if (device.find ("Keyboard") != std::string::npos)
+	{
+		type = BUTTC_KEYBOARD;
+	}
+	else if (device.find ("Joystick") != std::string::npos)
+	{
+		type = BUTTC_JOYSTICK;
+	}
+	else
+	{
+		type = 0;
+	}
+	config->getOption (prefix + "DeviceNum", &devnum);
+	for (unsigned int j = 0; j < HYPERSHOT_NUM_BUTTONS; j++)
+	{
+		config->getOption (prefix + HyperShotNames[j], &button);
 
-  // HyperShot
-  prefix = "SDL.Input.HyperShot.";
-  config->getOption (prefix + "DeviceType", &device);
-  if (device.find ("Keyboard") != std::string::npos)
-    {
-      type = BUTTC_KEYBOARD;
-    }
-  else if (device.find ("Joystick") != std::string::npos)
-    {
-      type = BUTTC_JOYSTICK;
-    }
-  else
-    {
-      type = 0;
-    }
-  config->getOption (prefix + "DeviceNum", &devnum);
-  for (unsigned int j = 0; j < HYPERSHOT_NUM_BUTTONS; j++)
-    {
-      config->getOption (prefix + HyperShotNames[j], &button);
+		HyperShotButtons[j].ButtType[0] = type;
+		HyperShotButtons[j].DeviceNum[0] = devnum;
+		HyperShotButtons[j].ButtonNum[0] = button;
+		HyperShotButtons[j].NumC = 1;
+	}
 
-      HyperShotButtons[j].ButtType[0] = type;
-      HyperShotButtons[j].DeviceNum[0] = devnum;
-      HyperShotButtons[j].ButtonNum[0] = button;
-      HyperShotButtons[j].NumC = 1;
-    }
+	// Mahjong
+	prefix = "SDL.Input.Mahjong.";
+	config->getOption (prefix + "DeviceType", &device);
+	if (device.find ("Keyboard") != std::string::npos)
+	{
+		type = BUTTC_KEYBOARD;
+	}
+	else if (device.find ("Joystick") != std::string::npos)
+	{
+		type = BUTTC_JOYSTICK;
+	}
+	else
+	{
+		type = 0;
+	}
+	config->getOption (prefix + "DeviceNum", &devnum);
+	for (unsigned int j = 0; j < MAHJONG_NUM_BUTTONS; j++)
+	{
+		config->getOption (prefix + MahjongNames[j], &button);
 
-  // Mahjong
-  prefix = "SDL.Input.Mahjong.";
-  config->getOption (prefix + "DeviceType", &device);
-  if (device.find ("Keyboard") != std::string::npos)
-    {
-      type = BUTTC_KEYBOARD;
-    }
-  else if (device.find ("Joystick") != std::string::npos)
-    {
-      type = BUTTC_JOYSTICK;
-    }
-  else
-    {
-      type = 0;
-    }
-  config->getOption (prefix + "DeviceNum", &devnum);
-  for (unsigned int j = 0; j < MAHJONG_NUM_BUTTONS; j++)
-    {
-      config->getOption (prefix + MahjongNames[j], &button);
+		MahjongButtons[j].ButtType[0] = type;
+		MahjongButtons[j].DeviceNum[0] = devnum;
+		MahjongButtons[j].ButtonNum[0] = button;
+		MahjongButtons[j].NumC = 1;
+	}
 
-      MahjongButtons[j].ButtType[0] = type;
-      MahjongButtons[j].DeviceNum[0] = devnum;
-      MahjongButtons[j].ButtonNum[0] = button;
-      MahjongButtons[j].NumC = 1;
-    }
+	// TopRider
+	prefix = "SDL.Input.TopRider.";
+	config->getOption (prefix + "DeviceType", &device);
+	if (device.find ("Keyboard") != std::string::npos)
+	{
+		type = BUTTC_KEYBOARD;
+	}
+	else if (device.find ("Joystick") != std::string::npos)
+	{
+		type = BUTTC_JOYSTICK;
+	}
+	else
+	{
+		type = 0;
+	}
+	config->getOption (prefix + "DeviceNum", &devnum);
+	for (unsigned int j = 0; j < TOPRIDER_NUM_BUTTONS; j++)
+	{
+		config->getOption (prefix + TopRiderNames[j], &button);
 
-  // TopRider
-  prefix = "SDL.Input.TopRider.";
-  config->getOption (prefix + "DeviceType", &device);
-  if (device.find ("Keyboard") != std::string::npos)
-    {
-      type = BUTTC_KEYBOARD;
-    }
-  else if (device.find ("Joystick") != std::string::npos)
-    {
-      type = BUTTC_JOYSTICK;
-    }
-  else
-    {
-      type = 0;
-    }
-  config->getOption (prefix + "DeviceNum", &devnum);
-  for (unsigned int j = 0; j < TOPRIDER_NUM_BUTTONS; j++)
-    {
-      config->getOption (prefix + TopRiderNames[j], &button);
+		TopRiderButtons[j].ButtType[0] = type;
+		TopRiderButtons[j].DeviceNum[0] = devnum;
+		TopRiderButtons[j].ButtonNum[0] = button;
+		TopRiderButtons[j].NumC = 1;
+	}
 
-      TopRiderButtons[j].ButtType[0] = type;
-      TopRiderButtons[j].DeviceNum[0] = devnum;
-      TopRiderButtons[j].ButtonNum[0] = button;
-      TopRiderButtons[j].NumC = 1;
-    }
+	// FTrainer
+	prefix = "SDL.Input.FTrainer.";
+	config->getOption (prefix + "DeviceType", &device);
+	if (device.find ("Keyboard") != std::string::npos)
+	{
+		type = BUTTC_KEYBOARD;
+	}
+	else if (device.find ("Joystick") != std::string::npos)
+	{
+		type = BUTTC_JOYSTICK;
+	}
+	else
+	{
+		type = 0;
+	}
+	config->getOption (prefix + "DeviceNum", &devnum);
+	for (unsigned int j = 0; j < FTRAINER_NUM_BUTTONS; j++)
+	{
+		config->getOption (prefix + FTrainerNames[j], &button);
 
-  // FTrainer
-  prefix = "SDL.Input.FTrainer.";
-  config->getOption (prefix + "DeviceType", &device);
-  if (device.find ("Keyboard") != std::string::npos)
-    {
-      type = BUTTC_KEYBOARD;
-    }
-  else if (device.find ("Joystick") != std::string::npos)
-    {
-      type = BUTTC_JOYSTICK;
-    }
-  else
-    {
-      type = 0;
-    }
-  config->getOption (prefix + "DeviceNum", &devnum);
-  for (unsigned int j = 0; j < FTRAINER_NUM_BUTTONS; j++)
-    {
-      config->getOption (prefix + FTrainerNames[j], &button);
+		FTrainerButtons[j].ButtType[0] = type;
+		FTrainerButtons[j].DeviceNum[0] = devnum;
+		FTrainerButtons[j].ButtonNum[0] = button;
+		FTrainerButtons[j].NumC = 1;
+	}
 
-      FTrainerButtons[j].ButtType[0] = type;
-      FTrainerButtons[j].DeviceNum[0] = devnum;
-      FTrainerButtons[j].ButtonNum[0] = button;
-      FTrainerButtons[j].NumC = 1;
-    }
+	// FamilyKeyBoard
+	prefix = "SDL.Input.FamilyKeyBoard.";
+	config->getOption (prefix + "DeviceType", &device);
+	if (device.find ("Keyboard") != std::string::npos)
+	{
+		type = BUTTC_KEYBOARD;
+	}
+	else if (device.find ("Joystick") != std::string::npos)
+	{
+		type = BUTTC_JOYSTICK;
+	}
+	else
+	{
+		type = 0;
+	}
+	config->getOption (prefix + "DeviceNum", &devnum);
+	for (unsigned int j = 0; j < FAMILYKEYBOARD_NUM_BUTTONS; j++)
+	{
+		config->getOption (prefix + FamilyKeyBoardNames[j], &button);
 
-  // FamilyKeyBoard
-  prefix = "SDL.Input.FamilyKeyBoard.";
-  config->getOption (prefix + "DeviceType", &device);
-  if (device.find ("Keyboard") != std::string::npos)
-    {
-      type = BUTTC_KEYBOARD;
-    }
-  else if (device.find ("Joystick") != std::string::npos)
-    {
-      type = BUTTC_JOYSTICK;
-    }
-  else
-    {
-      type = 0;
-    }
-  config->getOption (prefix + "DeviceNum", &devnum);
-  for (unsigned int j = 0; j < FAMILYKEYBOARD_NUM_BUTTONS; j++)
-    {
-      config->getOption (prefix + FamilyKeyBoardNames[j], &button);
-
-      fkbmap[j].ButtType[0] = type;
-      fkbmap[j].DeviceNum[0] = devnum;
-      fkbmap[j].ButtonNum[0] = button;
-      fkbmap[j].NumC = 1;
-    }
+		fkbmap[j].ButtType[0] = type;
+		fkbmap[j].DeviceNum[0] = devnum;
+		fkbmap[j].ButtonNum[0] = button;
+		fkbmap[j].NumC = 1;
+	}
 }
 
 // Definitions from main.h:
 // GamePad defaults
 const char *GamePadNames[GAMEPAD_NUM_BUTTONS] = { "A", "B", "Select", "Start",
-  "Up", "Down", "Left", "Right", "TurboA", "TurboB"
+	"Up", "Down", "Left", "Right", "TurboA", "TurboB"
 };
 const char *DefaultGamePadDevice[GAMEPAD_NUM_DEVICES] =
-  { "Keyboard", "None", "None", "None" };
+{ "Keyboard", "None", "None", "None" };
 const int DefaultGamePad[GAMEPAD_NUM_DEVICES][GAMEPAD_NUM_BUTTONS] =
-  { {SDLK_F, SDLK_D, SDLK_S, SDLK_RETURN,
-     SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT, 0, 0},
+{ {SDLK_F, SDLK_D, SDLK_S, SDLK_RETURN,
+	SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT, 0, 0},
 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
@@ -2300,88 +2291,88 @@ const int DefaultGamePad[GAMEPAD_NUM_DEVICES][GAMEPAD_NUM_BUTTONS] =
 
 // PowerPad defaults
 const char *PowerPadNames[POWERPAD_NUM_BUTTONS] =
-  { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B" };
+{ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B" };
 const char *DefaultPowerPadDevice[POWERPAD_NUM_DEVICES] =
-  { "Keyboard", "None" };
+{ "Keyboard", "None" };
 const int DefaultPowerPad[POWERPAD_NUM_DEVICES][POWERPAD_NUM_BUTTONS] =
-  { {SDLK_o, SDLK_p, SDLK_LEFTBRACKET, SDLK_RIGHTBRACKET,
-     SDLK_k, SDLK_l, SDLK_SEMICOLON, SDLK_QUOTE,
-     SDLK_m, SDLK_COMMA, SDLK_PERIOD, SDLK_SLASH},
+{ {SDLK_o, SDLK_p, SDLK_LEFTBRACKET, SDLK_RIGHTBRACKET,
+	SDLK_k, SDLK_l, SDLK_SEMICOLON, SDLK_QUOTE,
+	SDLK_m, SDLK_COMMA, SDLK_PERIOD, SDLK_SLASH},
 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 
 // QuizKing defaults
 const char *QuizKingNames[QUIZKING_NUM_BUTTONS] =
-  { "0", "1", "2", "3", "4", "5" };
+{ "0", "1", "2", "3", "4", "5" };
 const char *DefaultQuizKingDevice = "Keyboard";
 const int DefaultQuizKing[QUIZKING_NUM_BUTTONS] =
-  { SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y };
+{ SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y };
 
 // HyperShot defaults
 const char *HyperShotNames[HYPERSHOT_NUM_BUTTONS] = { "0", "1", "2", "3" };
 
 const char *DefaultHyperShotDevice = "Keyboard";
 const int DefaultHyperShot[HYPERSHOT_NUM_BUTTONS] =
-  { SDLK_q, SDLK_w, SDLK_e, SDLK_r };
+{ SDLK_q, SDLK_w, SDLK_e, SDLK_r };
 
 // Mahjong defaults
 const char *MahjongNames[MAHJONG_NUM_BUTTONS] =
-  { "00", "01", "02", "03", "04", "05", "06", "07",
-  "08", "09", "10", "11", "12", "13", "14", "15",
-  "16", "17", "18", "19", "20"
+{ "00", "01", "02", "03", "04", "05", "06", "07",
+	"08", "09", "10", "11", "12", "13", "14", "15",
+	"16", "17", "18", "19", "20"
 };
 
 const char *DefaultMahjongDevice = "Keyboard";
 const int DefaultMahjong[MAHJONG_NUM_BUTTONS] =
-  { SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_a, SDLK_s, SDLK_d,
-  SDLK_f, SDLK_g, SDLK_h, SDLK_j, SDLK_k, SDLK_l, SDLK_z, SDLK_x,
-  SDLK_c, SDLK_v, SDLK_b, SDLK_n, SDLK_m
+{ SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_a, SDLK_s, SDLK_d,
+	SDLK_f, SDLK_g, SDLK_h, SDLK_j, SDLK_k, SDLK_l, SDLK_z, SDLK_x,
+	SDLK_c, SDLK_v, SDLK_b, SDLK_n, SDLK_m
 };
 
 // TopRider defaults
 const char *TopRiderNames[TOPRIDER_NUM_BUTTONS] =
-  { "0", "1", "2", "3", "4", "5", "6", "7" };
+{ "0", "1", "2", "3", "4", "5", "6", "7" };
 const char *DefaultTopRiderDevice = "Keyboard";
 const int DefaultTopRider[TOPRIDER_NUM_BUTTONS] =
-  { SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y, SDLK_u, SDLK_i };
+{ SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y, SDLK_u, SDLK_i };
 
 // FTrainer defaults
 const char *FTrainerNames[FTRAINER_NUM_BUTTONS] =
-  { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B" };
+{ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B" };
 const char *DefaultFTrainerDevice = "Keyboard";
 const int DefaultFTrainer[FTRAINER_NUM_BUTTONS] =
-  { SDLK_o, SDLK_p, SDLK_LEFTBRACKET, SDLK_RIGHTBRACKET,
-  SDLK_k, SDLK_l, SDLK_SEMICOLON, SDLK_QUOTE,
-  SDLK_m, SDLK_COMMA, SDLK_PERIOD, SDLK_SLASH
+{ SDLK_o, SDLK_p, SDLK_LEFTBRACKET, SDLK_RIGHTBRACKET,
+	SDLK_k, SDLK_l, SDLK_SEMICOLON, SDLK_QUOTE,
+	SDLK_m, SDLK_COMMA, SDLK_PERIOD, SDLK_SLASH
 };
 
 // FamilyKeyBoard defaults
 const char *FamilyKeyBoardNames[FAMILYKEYBOARD_NUM_BUTTONS] =
-  { "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8",
-  "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
-  "MINUS", "EQUAL", "BACKSLASH", "BACKSPACE",
-  "ESCAPE", "Q", "W", "E", "R", "T", "Y", "U", "I", "O",
-  "P", "GRAVE", "BRACKET_LEFT", "ENTER",
-  "LEFTCONTROL", "A", "S", "D", "F", "G", "H", "J", "K",
-  "L", "SEMICOLON", "APOSTROPHE", "BRACKET_RIGHT", "INSERT",
-  "LEFTSHIFT", "Z", "X", "C", "V", "B", "N", "M", "COMMA",
-  "PERIOD", "SLASH", "RIGHTALT", "RIGHTSHIFT", "LEFTALT", "SPACE",
-  "DELETE", "END", "PAGEDOWN",
-  "CURSORUP", "CURSORLEFT", "CURSORRIGHT", "CURSORDOWN"
+{ "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8",
+	"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+	"MINUS", "EQUAL", "BACKSLASH", "BACKSPACE",
+	"ESCAPE", "Q", "W", "E", "R", "T", "Y", "U", "I", "O",
+	"P", "GRAVE", "BRACKET_LEFT", "ENTER",
+	"LEFTCONTROL", "A", "S", "D", "F", "G", "H", "J", "K",
+	"L", "SEMICOLON", "APOSTROPHE", "BRACKET_RIGHT", "INSERT",
+	"LEFTSHIFT", "Z", "X", "C", "V", "B", "N", "M", "COMMA",
+	"PERIOD", "SLASH", "RIGHTALT", "RIGHTSHIFT", "LEFTALT", "SPACE",
+	"DELETE", "END", "PAGEDOWN",
+	"CURSORUP", "CURSORLEFT", "CURSORRIGHT", "CURSORDOWN"
 };
 
 const char *DefaultFamilyKeyBoardDevice = "Keyboard";
 const int DefaultFamilyKeyBoard[FAMILYKEYBOARD_NUM_BUTTONS] =
-  { SDLK_F1, SDLK_F2, SDLK_F3, SDLK_F4, SDLK_F5, SDLK_F6, SDLK_F7, SDLK_F8,
-  SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
-  SDLK_6, SDLK_7, SDLK_8, SDLK_9, SDLK_0,
-  SDLK_MINUS, SDLK_EQUALS, SDLK_BACKSLASH, SDLK_BACKSPACE,
-  SDLK_ESCAPE, SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y, SDLK_u,
-  SDLK_i, SDLK_o, SDLK_p, SDLK_BACKQUOTE, SDLK_LEFTBRACKET, SDLK_RETURN,
-  SDLK_LCTRL, SDLK_a, SDLK_s, SDLK_d, SDLK_f, SDLK_g, SDLK_h, SDLK_j,
-  SDLK_k, SDLK_l, SDLK_SEMICOLON, SDLK_QUOTE, SDLK_RIGHTBRACKET,
-  SDLK_INSERT, SDLK_LSHIFT, SDLK_z, SDLK_x, SDLK_c, SDLK_v, SDLK_b,
-  SDLK_n, SDLK_m, SDLK_COMMA, SDLK_PERIOD, SDLK_SLASH, SDLK_RALT,
-  SDLK_RSHIFT, SDLK_LALT, SDLK_SPACE, SDLK_DELETE, SDLK_END, SDLK_PAGEDOWN,
-  SDLK_UP, SDLK_LEFT, SDLK_RIGHT, SDLK_DOWN
+{ SDLK_F1, SDLK_F2, SDLK_F3, SDLK_F4, SDLK_F5, SDLK_F6, SDLK_F7, SDLK_F8,
+	SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
+	SDLK_6, SDLK_7, SDLK_8, SDLK_9, SDLK_0,
+	SDLK_MINUS, SDLK_EQUALS, SDLK_BACKSLASH, SDLK_BACKSPACE,
+	SDLK_ESCAPE, SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y, SDLK_u,
+	SDLK_i, SDLK_o, SDLK_p, SDLK_BACKQUOTE, SDLK_LEFTBRACKET, SDLK_RETURN,
+	SDLK_LCTRL, SDLK_a, SDLK_s, SDLK_d, SDLK_f, SDLK_g, SDLK_h, SDLK_j,
+	SDLK_k, SDLK_l, SDLK_SEMICOLON, SDLK_QUOTE, SDLK_RIGHTBRACKET,
+	SDLK_INSERT, SDLK_LSHIFT, SDLK_z, SDLK_x, SDLK_c, SDLK_v, SDLK_b,
+	SDLK_n, SDLK_m, SDLK_COMMA, SDLK_PERIOD, SDLK_SLASH, SDLK_RALT,
+	SDLK_RSHIFT, SDLK_LALT, SDLK_SPACE, SDLK_DELETE, SDLK_END, SDLK_PAGEDOWN,
+	SDLK_UP, SDLK_LEFT, SDLK_RIGHT, SDLK_DOWN
 };
