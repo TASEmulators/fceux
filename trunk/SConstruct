@@ -27,7 +27,7 @@ opts.AddVariables(
   BoolVariable('SYSTEM_LUA','Use system lua instead of static lua provided with fceux', 1),
   BoolVariable('SYSTEM_MINIZIP', 'Use system minizip instead of static minizip provided with fceux', 0),
   BoolVariable('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
-  BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 0),
+  BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 1),
   BoolVariable('SDL2', 'Compile using SDL2 instead of SDL 1.2 (experimental/non-functional)', 0)
 )
 AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', metavar='DIR', help='installation prefix')
@@ -87,9 +87,6 @@ else:
   if conf.CheckLib('dw'):
     conf.env.Append(CCFLAGS = "-DBACKWARD_HAS_DW=1")
     conf.env.Append(LINKFLAGS = "-ldw")
-    # workaround for upstream backward-cpp issue (https://github.com/bombela/backward-cpp/issues/2)
-    if env['CLANG']:
-      conf.env.Append(CCFLAGS = "-DBACKWARD_HAS_BACKTRACE=1")
   if conf.CheckFunc('asprintf'):
     conf.env.Append(CCFLAGS = "-DHAVE_ASPRINTF")
   if env['SYSTEM_MINIZIP']:
