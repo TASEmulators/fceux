@@ -611,8 +611,8 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		return FALSE;
 
 	case WM_COMMAND:
-		if(HIWORD(wParam) == EN_CHANGE)
-		 {
+		if (HIWORD(wParam) == EN_CHANGE)
+		{
 			if (LOWORD(wParam) == IDC_EDIT_STOPFRAME) // Check if Stop movie at value has changed
 			{
 				if (stopframeWasEditedByUser)
@@ -624,20 +624,18 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				else
 					stopframeWasEditedByUser = true;
 			}
-		 }
+		}
 
-		if(HIWORD(wParam) == CBN_SELCHANGE)
+		if (HIWORD(wParam) == CBN_SELCHANGE)
 		{
 			UpdateReplayDialog(hwndDlg);
-		}
-		else if(HIWORD(wParam) == CBN_CLOSEUP)
+		} else if(HIWORD(wParam) == CBN_CLOSEUP)
 		{
 			LONG lCount = SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_GETCOUNT, 0, 0);
 			LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_GETCURSEL, 0, 0);
 			if (lIndex != CB_ERR && lIndex == lCount-1)
 				SendMessage(hwndDlg, WM_COMMAND, (WPARAM)IDOK, 0);		// send an OK notification to open the file browser
-		}
-		else
+		} else
 		{
 			int wID = LOWORD(wParam);
 			switch(wID)
@@ -691,14 +689,15 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								{
 									// select already existing string
 									SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_SETCURSEL, lOtherIndex, 0);
-								} else {
+									UpdateReplayDialog(hwndDlg);
+								} else
+								{
 									SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_INSERTSTRING, lIndex, (LPARAM)relative);
 									SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_SETCURSEL, lIndex, 0);
+									//UpdateReplayDialog(hwndDlg);	- this call would be redundant, because the update is always triggered by CBN_SELCHANGE message anyway
 								}
-
 								// restore focus to the dialog
 								SetFocus(GetDlgItem(hwndDlg, IDC_COMBO_FILENAME));
-								UpdateReplayDialog(hwndDlg);
 							}
 						abort:
 
@@ -728,6 +727,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				return TRUE;
 			}
 		}
+		return FALSE;
 
 	case WM_CTLCOLORSTATIC:
 		if ((HWND)lParam == GetDlgItem(hwndDlg, IDC_LABEL_CURRCHECKSUM))
