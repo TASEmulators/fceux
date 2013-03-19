@@ -1816,7 +1816,7 @@ SFORMAT FCEUPPU_STATEINFO[] = {
 	{ &ppudead, 1, "DEAD" },
 	{ &PPUSPL, 1, "PSPL" },
 	{ &XOffset, 1, "XOFF" },
-	{ &vtoggle6, 1, "VTGL" },
+	{ &vtoggle, 1, "VTGL" },
 	{ &RefreshAddrT, 2 | FCEUSTATE_RLSB, "RADD" },
 	{ &TempAddrT, 2 | FCEUSTATE_RLSB, "TADD" },
 	{ &VRAMBuffer, 1, "VBUF" },
