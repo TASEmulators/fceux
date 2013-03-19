@@ -472,7 +472,7 @@ static BMAPPINGLocal bmap[] = {
 	{"Konami VRC2/VRC4 D",	 25, Mapper25_Init},
 	{"Konami VRC6 Rev. B",	 26, Mapper26_Init},
 //	{"",					 27, Mapper27_Init},	// Deprecated, dupe for VRC2/VRC4 mapper
-//	{"",					 28, Mapper28_Init},
+	{"",					 28, Mapper28_Init},
 //	{"",					 29, Mapper29_Init},
 //	{"",					 30, Mapper30_Init},
 //	{"",					 31, Mapper31_Init},
