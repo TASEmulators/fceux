@@ -238,7 +238,18 @@ struct PPUREGS {
 		return (s << 0xC) | (par << 0x4) | fv;
 	}
 
-	void increment2007(bool by32) {
+	void increment2007(bool rendering, bool by32) {
+
+		if (rendering)
+		{
+			//don't do this:
+			//if (by32) increment_vs();
+			//else increment_hsc();
+			//do this instead:
+			increment_vs();  //yes, even if we're moving by 32
+			return;
+		}
+
 		//If the VRAM address increment bit (2000.2) is clear (inc. amt. = 1), all the
 		//scroll counters are daisy-chained (in the order of HT, VT, H, V, FV) so that
 		//the carry out of each counter controls the next counter's clock rate. The
@@ -323,8 +334,7 @@ static int deempcnt[8];
 void (*GameHBIRQHook)(void), (*GameHBIRQHook2)(void);
 void (*PPU_hook)(uint32 A);
 
-uint8 vtoggle5 = 0;
-uint8 vtoggle6 = 0;
+uint8 vtoggle = 0;
 uint8 XOffset = 0;
 
 uint32 TempAddr = 0, RefreshAddr = 0, DummyRead = 0;
@@ -505,7 +515,7 @@ static DECLFR(A2002) {
 	if (!fceuindbg)
 #endif
 	{
-		vtoggle5 = vtoggle6 = 0;
+		vtoggle = 0;
 		PPU_status &= 0x7F;
 		PPUGenLatch = ret;
 	}
@@ -687,7 +697,7 @@ static DECLFR(A2007) {
 				LogAddress = GetCHRAddress(RefreshAddr);
 			VRAMBuffer = CALL_PPUREAD(RefreshAddr);
 		}
-		ppur.increment2007(INC32 != 0);
+		ppur.increment2007(ppur.status.sl >= 0 && ppur.status.sl < 241 && PPUON, INC32 != 0);
 		RefreshAddr = ppur.get_2007access();
 		return ret;
 	} else {
@@ -820,7 +830,7 @@ static DECLFW(B2005) {
 	uint32 tmp = TempAddr;
 	FCEUPPU_LineUpdate();
 	PPUGenLatch = V;
-	if (!vtoggle5) {
+	if (!vtoggle) {
 		tmp &= 0xFFE0;
 		tmp |= V >> 3;
 		XOffset = V & 7;
@@ -834,7 +844,7 @@ static DECLFW(B2005) {
 		ppur._fv = V & 7;
 	}
 	TempAddr = tmp;
-	vtoggle5 ^= 1;
+	vtoggle ^= 1;
 }
 
 
@@ -842,7 +852,7 @@ static DECLFW(B2006) {
 	FCEUPPU_LineUpdate();
 
 	PPUGenLatch = V;
-	if (!vtoggle6) {
+	if (!vtoggle) {
 		TempAddr &= 0x00FF;
 		TempAddr |= (V & 0x3f) << 8;
 
@@ -867,7 +877,7 @@ static DECLFW(B2006) {
 		ppur.install_latches();
 	}
 
-	vtoggle6 ^= 1;
+	vtoggle ^= 1;
 }
 
 static DECLFW(B2007) {
@@ -877,7 +887,7 @@ static DECLFW(B2007) {
 		PPUGenLatch = V;
 		RefreshAddr = ppur.get_2007access() & 0x3FFF;
 		CALL_PPUWRITE(RefreshAddr, V);
-		ppur.increment2007(INC32 != 0);
+		ppur.increment2007(ppur.status.sl >= 0 && ppur.status.sl < 241 && PPUON, INC32 != 0);
 		RefreshAddr = ppur.get_2007access();
 	} else {
 		PPUGenLatch = V;
@@ -1631,7 +1641,7 @@ void FCEUPPU_Reset(void) {
 	PPUSPL = 0;
 	PPUGenLatch = 0;
 	RefreshAddr = TempAddr = 0;
-	vtoggle5 = vtoggle6 = 0;
+	vtoggle = 0;
 	ppudead = 2;
 	kook = 0;
 	idleSynch = 1;
@@ -1806,8 +1816,7 @@ SFORMAT FCEUPPU_STATEINFO[] = {
 	{ &ppudead, 1, "DEAD" },
 	{ &PPUSPL, 1, "PSPL" },
 	{ &XOffset, 1, "XOFF" },
-	{ &vtoggle5, 1, "VTG5" },
-	{ &vtoggle6, 1, "VTG6" },
+	{ &vtoggle6, 1, "VTGL" },
 	{ &RefreshAddrT, 2 | FCEUSTATE_RLSB, "RADD" },
 	{ &TempAddrT, 2 | FCEUSTATE_RLSB, "TADD" },
 	{ &VRAMBuffer, 1, "VBUF" },
@@ -2131,11 +2140,6 @@ int FCEUX_PPU_Loop(int skip) {
 
 			//todo - think about clearing oams to a predefined value to force deterministic behavior
 
-			//so.. this is the end of hblank. latch horizontal scroll values
-			//do it cycle at 251
-			if (PPUON && sl != 0)
-				ppur.install_h_latches();
-
 			ppuphase = PPUPHASE_OBJ;
 
 			//fetch sprite patterns
@@ -2180,18 +2184,26 @@ int FCEUX_PPU_Loop(int skip) {
 				patternAddress += line & 7;
 
 				//garbage nametable fetches
-				//reset the scroll counter, happens at cycle 304
-				if (realSprite) {
-					if ((sl == 0) && PPUON) {
-						if (ppur.status.cycle == 304) {
-							runppu(1);
-							ppur.install_latches();
-							runppu(1);
-						} else
-							runppu(kFetchTime);
-					} else
-						runppu(kFetchTime);
+				int garbage_todo = 2;
+				if (PPUON)
+				{
+					if (sl == 0 && ppur.status.cycle == 304)
+					{
+						runppu(1);
+						if (PPUON) ppur.install_latches();
+						runppu(1);
+						garbage_todo = 0;
+					}
+					if ((sl != 0) && ppur.status.cycle == 256)
+					{
+						runppu(1);
+						//at 257: 3d world runner is ugly if we do this at 256
+						if (PPUON) ppur.install_h_latches();
+						runppu(1);
+						garbage_todo = 0;
+					}
 				}
+				if (realSprite) runppu(garbage_todo);
 
 				//Dragon's Lair (Europe version mapper 4)
 				//does not set SpriteON in the beginning but it does
