@@ -115,6 +115,7 @@
       </DataExecutionPrevention>
       <SupportUnloadOfDelayLoadedDLL>true</SupportUnloadOfDelayLoadedDLL>
       <TargetMachine>MachineX86</TargetMachine>
+      <DelayLoadDLLs>lua51.dll</DelayLoadDLLs>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)../src/drivers/win/fceu_x86.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -149,7 +150,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>Rpcrt4.lib;comctl32.lib;vfw32.lib;winmm.lib;ws2_32.lib;htmlhelp.lib;../src/drivers/win/directx/dsound.lib;../src/drivers/win/directx/dxguid.lib;../src/drivers/win/directx/ddraw.lib;../src/drivers/win/directx/dinput.lib;../src/drivers/win/lua/win32/lua51.lib;luaperks.lib;psapi.lib;mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>lua51.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -193,6 +194,7 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <TargetMachine>MachineX64</TargetMachine>
+      <DelayLoadDLLs>lua51.dll</DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -221,6 +223,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <TargetMachine>MachineX64</TargetMachine>
+      <DelayLoadDLLs>lua51.dll</DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -48,6 +48,22 @@
 extern TASEDITOR_LUA taseditor_lua;
 #endif
 
+bool DemandLua()
+{
+#ifdef WIN32
+	HMODULE mod = LoadLibrary("lua51.dll");
+	if(!mod)
+	{
+		MessageBox(NULL, "lua51.dll was not found. Please get it into your PATH or in the same directory as fceux.exe", "FCEUX", MB_OK | MB_ICONERROR);
+		return false;
+	}
+	FreeLibrary(mod);
+	return true;
+#else
+	return true;
+#endif
+}
+
 extern "C"
 {
 #include <lua.h>
@@ -5482,6 +5498,11 @@ void FCEU_LuaFrameBoundary()
  * Returns true on success, false on failure.
  */
 int FCEU_LoadLuaCode(const char *filename, const char *arg) {
+	if (!DemandLua())
+	{
+		return 0;
+	}
+
 	if (filename != luaScriptName)
 	{
 		if (luaScriptName) free(luaScriptName);
@@ -5652,6 +5673,9 @@ void FCEU_ReloadLuaCode()
  *
  */
 void FCEU_LuaStop() {
+
+	if (!DemandLua())
+		return;
 
 	//already killed
 	if (!L) return;
