@@ -69,7 +69,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Rpcrt4.lib comctl32.lib vfw32.lib winmm.lib ws2_32.lib htmlhelp.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib luaperks.lib delayimp.lib psapi.lib mpr.lib"
+				AdditionalDependencies="Rpcrt4.lib comctl32.lib vfw32.lib winmm.lib ws2_32.lib htmlhelp.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib ../src/drivers/win/lua/win32/lua51.lib luaperks.lib delayimp.lib psapi.lib mpr.lib"
 				LinkIncremental="2"
 				DelayLoadDLLs="gdi32.dll"
 				GenerateDebugInformation="true"
@@ -155,7 +155,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="dxguid.lib winmm.lib dinput.lib ws2_32.lib ddraw.lib dsound.lib"
+				AdditionalDependencies="dxguid.lib winmm.lib dinput.lib ws2_32.lib ddraw.lib dsound.lib ../src/drivers/win/lua/x64/lua51.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -239,7 +239,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Rpcrt4.lib comctl32.lib vfw32.lib winmm.lib ws2_32.lib htmlhelp.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib luaperks.lib delayimp.lib psapi.lib mpr.lib"
+				AdditionalDependencies="Rpcrt4.lib comctl32.lib vfw32.lib winmm.lib ws2_32.lib htmlhelp.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib ../src/drivers/win/lua/win32/lua51.lib luaperks.lib delayimp.lib psapi.lib mpr.lib"
 				LinkIncremental="1"
 				DelayLoadDLLs="gdi32.dll"
 				GenerateDebugInformation="true"
@@ -325,7 +325,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="dxguid.lib winmm.lib dinput.lib ws2_32.lib ddraw.lib dsound.lib"
+				AdditionalDependencies="dxguid.lib winmm.lib dinput.lib ws2_32.lib ddraw.lib dsound.lib ../src/drivers/win/lua/x64/lua51.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -414,7 +414,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Rpcrt4.lib comctl32.lib vfw32.lib winmm.lib ws2_32.lib htmlhelp.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib luaperks.lib delayimp.lib psapi.lib mpr.lib"
+				AdditionalDependencies="Rpcrt4.lib comctl32.lib vfw32.lib winmm.lib ws2_32.lib htmlhelp.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib ../src/drivers/win/lua/win32/lua51.lib luaperks.lib delayimp.lib psapi.lib mpr.lib"
 				LinkIncremental="1"
 				DelayLoadDLLs="gdi32.dll"
 				GenerateDebugInformation="true"
@@ -500,7 +500,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="dxguid.lib winmm.lib dinput.lib ws2_32.lib ddraw.lib dsound.lib"
+				AdditionalDependencies="dxguid.lib winmm.lib dinput.lib ws2_32.lib ddraw.lib dsound.lib ../src/drivers/win/lua/x64/lua51.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
