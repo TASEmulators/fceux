@@ -716,6 +716,7 @@ static void KeyboardCommands ()
 		}
 		else
 		{
+			CloseGame();
 			FCEUI_Kill();
 			SDL_Quit();
 			exit(0);
