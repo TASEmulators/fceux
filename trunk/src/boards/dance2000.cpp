@@ -16,30 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Dance 2000 12-in-1
- *
  */
 
 #include "mapinc.h"
 
-static uint8 prg, mirr, prgmode;
+static uint8 prg, mode;
 static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
+static uint32 lastnt = 0;
 
 static SFORMAT StateRegs[] =
 {
 	{ &prg, 1, "REGS" },
-	{ &mirr, 1, "MIRR" },
-	{ &prgmode, 1, "MIRR" },
+	{ &mode, 1, "MODE" },
+	{ &lastnt, 4, "LSNT" },
 	{ 0 }
 };
 
 static void Sync(void) {
-	setmirror(mirr);
+	setmirror((mode ^ 1) & 1);
 	setprg8r(0x10, 0x6000, 0);
-	setchr8(0);
-	if (prgmode)
+	setchr4(0x0000, lastnt);
+	setchr4(0x1000, 1);
+	if (mode & 4)
 		setprg32(0x8000, prg & 7);
 	else {
 		setprg16(0x8000, prg & 0x0f);
@@ -48,11 +47,9 @@ static void Sync(void) {
 }
 
 static DECLFW(UNLD2000Write) {
-//	FCEU_printf("write %04x:%04x\n",A,V);
 	switch (A) {
 	case 0x5000: prg = V; Sync(); break;
-	case 0x5200: mirr = (V & 1) ^ 1; prgmode = V & 4; Sync(); break;
-//		default: FCEU_printf("write %04x:%04x\n",A,V);
+	case 0x5200: mode = V; if (mode & 4) Sync(); break;
 	}
 }
 
@@ -64,17 +61,27 @@ static DECLFR(UNLD2000Read) {
 }
 
 static void UNLD2000Power(void) {
-	prg = prgmode = 0;
+	prg = mode = 0;
 	Sync();
 	SetReadHandler(0x6000, 0x7FFF, CartBR);
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
 	SetReadHandler(0x8000, 0xFFFF, UNLD2000Read);
-	SetWriteHandler(0x4020, 0x5FFF, UNLD2000Write);
+	SetWriteHandler(0x5000, 0x5FFF, UNLD2000Write);
 }
 
-static void UNLAX5705IRQ(void) {
-	if (scanline > 174) setchr4(0x0000, 1);
-	else setchr4(0x0000, 0);
+static void UNL2000Hook(uint32 A) {
+	if (mode & 2) {
+		if ((A & 0x3000) == 0x2000) {
+			uint32 curnt = A & 0x800;
+			if (curnt != lastnt) {
+				setchr4(0x0000, curnt >> 11);
+				lastnt = curnt;
+			}
+		}
+	} else {
+		lastnt = 0;
+		setchr4(0x0000, 0);
+	}
 }
 
 static void UNLD2000Close(void) {
@@ -83,7 +90,6 @@ static void UNLD2000Close(void) {
 	WRAM = NULL;
 }
 
-
 static void StateRestore(int version) {
 	Sync();
 }
@@ -91,7 +97,7 @@ static void StateRestore(int version) {
 void UNLD2000_Init(CartInfo *info) {
 	info->Power = UNLD2000Power;
 	info->Close = UNLD2000Close;
-	GameHBIRQHook = UNLAX5705IRQ;
+	PPU_hook = UNL2000Hook;
 	GameStateRestore = StateRestore;
 
 	WRAMSIZE = 8192;
