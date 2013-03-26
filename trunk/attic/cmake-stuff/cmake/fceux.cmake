@@ -112,7 +112,7 @@ set(SRC_CORE
   ${CMAKE_SOURCE_DIR}/src/boards/h2288.cpp
   ${CMAKE_SOURCE_DIR}/src/boards/karaoke.cpp
   ${CMAKE_SOURCE_DIR}/src/boards/kof97.cpp
-  ${CMAKE_SOURCE_DIR}/src/boards/konami-qtai.cpp
+  ${CMAKE_SOURCE_DIR}/src/boards/vrc5.cpp
   ${CMAKE_SOURCE_DIR}/src/boards/ks7032.cpp
   ${CMAKE_SOURCE_DIR}/src/boards/malee.cpp
   ${CMAKE_SOURCE_DIR}/src/boards/mmc1.cpp
@@ -330,12 +330,12 @@ set(SRC_DRIVERS_WIN
   ${CMAKE_SOURCE_DIR}/src/drivers/win/tasedit.cpp
   ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/taseditproj.cpp
   ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/greenzone.cpp
-  ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/bookmark.cpp  
+  ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/bookmark.cpp
   ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/bookmarks.cpp
   ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/inputhistory.cpp
   ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/inputsnapshot.cpp
-  ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/playback.cpp  
-  ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/markers.cpp   
+  ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/playback.cpp
+  ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/markers.cpp
   ${CMAKE_SOURCE_DIR}/src/drivers/win/texthook.cpp
   ${CMAKE_SOURCE_DIR}/src/drivers/win/throttle.cpp
   ${CMAKE_SOURCE_DIR}/src/drivers/win/timing.cpp
@@ -368,13 +368,13 @@ add_definitions( -DNETWORK )
 if(WIN32)
   set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_WIN})
   include_directories( ${CMAKE_SOURCE_DIR}/src/drivers/win/directx ${CMAKE_SOURCE_DIR}/src/drivers/win/zlib )
-  add_definitions( 
+  add_definitions(
     -DWIN32
     -DFCEUDEF_DEBUGGER
     -D_USE_SHARED_MEMORY_
     -DPSS_STYLE=2
     -DNOMINMAX
-	-D_S9XLUA_H
+        -D_S9XLUA_H
   )
   link_directories( ${CMAKE_SOURCE_DIR}/src/drivers/win/directx )
 else(WIN32)
@@ -433,8 +433,8 @@ if(WIN32)
   add_dependencies( ${FCEUX_EXE_NAME} InstallHelpFile )
   #add_dependencies( ${FCEUX_EXE_NAME} res.o)
   #add_custom_command(
-  #  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/res.o 
-  #  COMMAND windres 
+  #  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/res.o
+  #  COMMAND windres
   #  ARGS ${CMAKE_SOURCE_DIR}/src/drivers/win/res.rc ${CMAKE_CURRENT_BINARY_DIR}/res.o --use-temp-file -D_WIN_IE=0x300
   #  MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/src/drivers/win/res.rc
   #)
@@ -450,7 +450,7 @@ if(WIN32)
     DEPENDS ${OUTPUT_RES_RC_O}
   )
   set(DEFINED_BUILD_RESOURCE_FILE TRUE CACHE GLOBAL "This is a hack to get CMake to build the .rc file")
-  
+
   add_dependencies( ${FCEUX_EXE_NAME} BuildResourceFileFor${FCEUX_EXE_NAME} )
   set_property(
     TARGET ${FCEUX_EXE_NAME}
@@ -462,7 +462,7 @@ if(WIN32)
     dsound dxguid ddraw dinput
   )
   if(MINGW)
-  	include_directories(${CMAKE_SOURCE_DIR}/src/drivers/win/lua/include/)
+        include_directories(${CMAKE_SOURCE_DIR}/src/drivers/win/lua/include/)
   else(MINGW)
     target_link_libraries( ${FCEUX_EXE_NAME} htmlhelp)
   endif(MINGW)

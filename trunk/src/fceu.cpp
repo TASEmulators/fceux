@@ -275,8 +275,10 @@ readfunc GetReadHandler(int32 a) {
 	else
 		return ARead[a];
 }
+
 void SetReadHandler(int32 start, int32 end, readfunc func) {
 	int32 x;
+
 	if (!func)
 		func = ANull;
 
@@ -360,14 +362,14 @@ void ResetGameLoaded(void) {
 	if (GameInfo) FCEU_CloseGame();
 	EmulationPaused = 0; //mbg 5/8/08 - loading games while paused was bad news. maybe this fixes it
 	GameStateRestore = 0;
-	PPU_hook = 0;
-	GameHBIRQHook = 0;
-	FFCEUX_PPURead = 0;
-	FFCEUX_PPUWrite = 0;
+	PPU_hook = NULL;
+	GameHBIRQHook = NULL;
+	FFCEUX_PPURead = NULL;
+	FFCEUX_PPUWrite = NULL;
 	if (GameExpSound.Kill)
 		GameExpSound.Kill();
 	memset(&GameExpSound, 0, sizeof(GameExpSound));
-	MapIRQHook = 0;
+	MapIRQHook = NULL;
 	MMC5Hack = 0;
 	PAL &= 1;
 	pale = 0;
@@ -786,8 +788,8 @@ void PowerNES(void) {
 	SetReadHandler(0, 0x7FF, ARAML);
 	SetWriteHandler(0, 0x7FF, BRAML);
 
-	SetReadHandler(0x800, 0x1FFF, ARAMH); // Part of a little
-	SetWriteHandler(0x800, 0x1FFF, BRAMH); //hack for a small speed boost.
+	SetReadHandler(0x800, 0x1FFF, ARAMH);	// Part of a little
+	SetWriteHandler(0x800, 0x1FFF, BRAMH);	//hack for a small speed boost.
 
 	InitializeInput();
 	FCEUSND_Power();
@@ -832,6 +834,7 @@ void FCEU_ResetVidSys(void) {
 		w = FSettings.PAL;
 
 	PAL = w ? 1 : 0;
+
 	FCEUPPU_SetVideoSystem(w);
 	SetSoundVariables();
 }

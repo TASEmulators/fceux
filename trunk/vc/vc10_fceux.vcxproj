@@ -358,7 +358,7 @@
     <ClCompile Include="..\src\boards\h2288.cpp" />
     <ClCompile Include="..\src\boards\karaoke.cpp" />
     <ClCompile Include="..\src\boards\kof97.cpp" />
-    <ClCompile Include="..\src\boards\konami-qtai.cpp" />
+    <ClCompile Include="..\src\boards\vrc5.cpp" />
     <ClCompile Include="..\src\boards\ks7032.cpp" />
     <ClCompile Include="..\src\boards\malee.cpp" />
     <ClCompile Include="..\src\boards\mmc1.cpp" />

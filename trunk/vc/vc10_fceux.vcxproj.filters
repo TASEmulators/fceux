@@ -217,7 +217,7 @@
     <ClCompile Include="..\src\boards\kof97.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\boards\konami-qtai.cpp">
+    <ClCompile Include="..\src\boards\vrc5.cpp">
       <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\boards\ks7032.cpp">
