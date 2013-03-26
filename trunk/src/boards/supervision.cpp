@@ -21,45 +21,67 @@
 #include "mapinc.h"
 
 static uint8 cmd0, cmd1;
+static SFORMAT StateRegs[] =
+{
+	{ &cmd0, 1, "L1" },
+	{ &cmd1, 1, "L2" },
+	{ 0 }
+};
 
-static void DoSuper(void) {
-	setprg8r((cmd0 & 0xC) >> 2, 0x6000, ((cmd0 & 0x3) << 4) | 0xF);
+static void Sync(void) {
+	setchr8(0);
+	if (PRGptr[1])
+		setprg8r((cmd0 & 0xC) >> 2, 0x6000, ((cmd0 & 0x3) << 4) | 0xF);
+	else
+		setprg8(0x6000, (((cmd0 & 0xF) << 4) | 0xF) + 4);
 	if (cmd0 & 0x10) {
-		setprg16r((cmd0 & 0xC) >> 2, 0x8000, ((cmd0 & 0x3) << 3) | (cmd1 & 7));
-		setprg16r((cmd0 & 0xC) >> 2, 0xc000, ((cmd0 & 0x3) << 3) | 7);
+		if (PRGptr[1]) {
+			setprg16r((cmd0 & 0xC) >> 2, 0x8000, ((cmd0 & 0x3) << 3) | (cmd1 & 7));
+			setprg16r((cmd0 & 0xC) >> 2, 0xc000, ((cmd0 & 0x3) << 3) | 7);
+		} else {
+			setprg16(0x8000, (((cmd0 & 0xF) << 3) | (cmd1 & 7)) + 2);
+			setprg16(0xc000, (((cmd0 & 0xF) << 3) | 7) + 2);
+		}
 	} else
-		setprg32r(4, 0x8000, 0);
+		if (PRGptr[4])
+			setprg32r(4, 0x8000, 0);
+		else
+			setprg32(0x8000, 0);
 	setmirror(((cmd0 & 0x20) >> 5) ^ 1);
 }
 
-static DECLFW(SuperWrite) {
+static DECLFW(SuperWriteLo) {
 	if (!(cmd0 & 0x10)) {
 		cmd0 = V;
-		DoSuper();
+		Sync();
 	}
 }
 
-static DECLFW(SuperHi) {
+static DECLFW(SuperWriteHi) {
 	cmd1 = V;
-	DoSuper();
+	Sync();
+}
+
+static void SuperPower(void) {
+	SetWriteHandler(0x6000, 0x7FFF, SuperWriteLo);
+	SetWriteHandler(0x8000, 0xFFFF, SuperWriteHi);
+	SetReadHandler(0x6000, 0xFFFF, CartBR);
+	cmd0 = cmd1 = 0;
+	Sync();
 }
 
 static void SuperReset(void) {
-	SetWriteHandler(0x6000, 0x7FFF, SuperWrite);
-	SetWriteHandler(0x8000, 0xFFFF, SuperHi);
-	SetReadHandler(0x6000, 0xFFFF, CartBR);
 	cmd0 = cmd1 = 0;
-	setprg32r(4, 0x8000, 0);
-	setchr8(0);
+	Sync();
 }
 
 static void SuperRestore(int version) {
-	DoSuper();
+	Sync();
 }
 
 void Supervision16_Init(CartInfo *info) {
-	AddExState(&cmd0, 1, 0, "L1");
-	AddExState(&cmd1, 1, 0, "L2");
-	info->Power = SuperReset;
+	info->Power = SuperPower;
+	info->Reset = SuperReset;
 	GameStateRestore = SuperRestore;
+	AddExState(&StateRegs, ~0, 0, 0);
 }

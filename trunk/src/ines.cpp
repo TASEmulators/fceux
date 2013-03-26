@@ -435,7 +435,7 @@ typedef struct {
 //size
 static int not_power2[] =
 {
-	198, 228
+	53, 198, 228
 };
 typedef struct {
 	char *name;
@@ -497,7 +497,7 @@ static BMAPPINGLocal bmap[] = {
 	{"SMB2j FDS Rev. A",	 50, Mapper50_Init},
 	{"11-in-1 BALL SERIES",	 51, Mapper51_Init},	// 1993 year version
 	{"MMC3 BMC PIRATE D",	 52, Mapper52_Init},
-//	{"",					 53, Mapper53_Init},	// iNES version of complex UNIF board, can't emulate properly as iNES
+	{"SUPERVISION 16-in-1",	 53, Supervision16_Init},
 //	{"",					 54, Mapper54_Init},
 //	{"",					 55, Mapper55_Init},
 //	{"",					 56, Mapper56_Init},

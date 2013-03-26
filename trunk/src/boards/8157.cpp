@@ -16,30 +16,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * GG1 boards, similar to T-262, with no Data latch
+ *
  */
 
 #include "mapinc.h"
 
 static uint16 cmdreg;
-static uint8 invalid_data;
+static uint8 reset;
 static SFORMAT StateRegs[] =
 {
-	{ &invalid_data, 1, "INVD" },
+	{ &reset, 1, "REST" },
 	{ &cmdreg, 2, "CREG" },
 	{ 0 }
 };
 
 static void Sync(void) {
-	setprg16r((cmdreg & 0x060) >> 5, 0x8000, (cmdreg & 0x01C) >> 2);
-	setprg16r((cmdreg & 0x060) >> 5, 0xC000, (cmdreg & 0x200) ? (~0) : 0);
+	uint32 base = ((cmdreg & 0x060) | ((cmdreg & 0x100) >> 1)) >> 2;
+	uint32 bank = (cmdreg & 0x01C) >> 2;
+	uint32 lbank = (cmdreg & 0x200) ? 7 : ((cmdreg & 0x80) ? bank : 0);
+	if (PRGptr[1]) {
+		setprg16r(base >> 3, 0x8000, bank);        // for versions with split ROMs
+		setprg16r(base >> 3, 0xC000, lbank);
+	} else {
+		setprg16(0x8000, base | bank);
+		setprg16(0xC000, base | lbank);
+	}
 	setmirror(((cmdreg & 2) >> 1) ^ 1);
 }
 
 static DECLFR(UNL8157Read) {
-	if (invalid_data && cmdreg & 0x100)
-		return 0xFF;
-	else
-		return CartBR(A);
+	if ((cmdreg & 0x100) && (PRGsize[0] < (1024 * 1024))) {
+		A = (A & 0xFFF0) + reset;
+	}
+	return CartBR(A);
 }
 
 static DECLFW(UNL8157Write) {
@@ -51,14 +62,14 @@ static void UNL8157Power(void) {
 	setchr8(0);
 	SetWriteHandler(0x8000, 0xFFFF, UNL8157Write);
 	SetReadHandler(0x8000, 0xFFFF, UNL8157Read);
-	cmdreg = 0x200;
-	invalid_data = 1;
+	cmdreg = reset = 0;
 	Sync();
 }
 
 static void UNL8157Reset(void) {
-	cmdreg = 0;
-	invalid_data ^= 1;
+	cmdreg = reset = 0;
+	reset++;
+	reset &= 0x1F;
 	Sync();
 }
 
