@@ -56,6 +56,9 @@ static DECLFW(M88Write) {
 }
 
 static void M88Power(void) {
+	reg[0] = reg[1] = reg[2] = reg[3] = reg[4] = reg[5] = reg[6] = reg[7] = 0;
+	Sync();
+	MSync();
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
 	SetWriteHandler(0x8000, 0xFFFF, M88Write);
 }
