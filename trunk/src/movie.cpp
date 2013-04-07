@@ -1353,9 +1353,9 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 				// Finally, this is a savestate file for this movie
 				movieMode = MOVIEMODE_PLAY;
 			}
-		}
-		else //Read + write
+		} else
 		{
+			//Read+Write mode
 			if (currFrameCounter > (int)tempMovieData.records.size())
 			{
 				//This is a post movie savestate, handle it differently
@@ -1364,20 +1364,15 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 				openRecordingMovie(curMovieFilename);
 				currMovieData.dump(osRecordingMovie, false/*currMovieData.binaryFlag*/);
 				FinishPlayback();
-			}
-			else
+			} else
 			{
 				//truncate before we copy, just to save some time, unless the user selects a full copy option
 				if (!fullSaveStateLoads)
-					tempMovieData.truncateAt(currFrameCounter); //we can only assume this here since we have checked that the frame counter is not greater than the movie data
+					//we can only assume this here since we have checked that the frame counter is not greater than the movie data
+					tempMovieData.truncateAt(currFrameCounter);
+				
 				currMovieData = tempMovieData;
-#ifdef _S9XLUA_H
-				if(!FCEU_LuaRerecordCountSkip())
-					currRerecordCount++;
-#else
-				currRerecordCount++;
-#endif
-				currMovieData.rerecordCount = currRerecordCount;
+				FCEUMOV_IncrementRerecordCount();
 				openRecordingMovie(curMovieFilename);
 				currMovieData.dump(osRecordingMovie, false/*currMovieData.binaryFlag*/);
 				movieMode = MOVIEMODE_RECORD;
@@ -1402,6 +1397,17 @@ bool FCEUMOV_PostLoad(void)
 		return true;
 	else
 		return load_successful;
+}
+
+void FCEUMOV_IncrementRerecordCount()
+{
+#ifdef _S9XLUA_H
+	if(!FCEU_LuaRerecordCountSkip())
+		currRerecordCount++;
+#else
+	currRerecordCount++;
+#endif
+	currMovieData.rerecordCount = currRerecordCount;
 }
 
 void FCEUI_MovieToggleFrameDisplay(void)
