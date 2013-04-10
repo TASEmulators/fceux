@@ -1,17 +1,16 @@
 #include <unistd.h>
 #include <sys/types.h>
-#include <signal.h>
+#include <csignal>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <string.h>
-#include <strings.h>
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
-#include <limits.h>
-#include <math.h>
+#include <climits>
+#include <cmath>
 
 #ifdef _GTK
 #include <gtk/gtk.h>
@@ -72,53 +71,64 @@ int mutecapture;
 static int noconfig;
 
 // -Video Modes Tag- : See --special
-char *DriverUsage="\
-Option         Value   Description\n\
---pal          {0|1}   Use PAL timing.\n\
---newppu       {0|1}   Enable the new PPU core. (WARNING: May break savestates)\n\
---inputcfg     d       Configures input device d on startup.\n\
---input(1,2)   d       Set which input device to emulate for input 1 or 2.\n\
-                         Devices:  gamepad zapper powerpad.0 powerpad.1 arkanoid\n\
---input(3,4)   d       Set the famicom expansion device to emulate for input(3, 4)\n\
-                         Devices: quizking hypershot mahjong toprider ftrainer\n\
-                         familykeyboard oekakids arkanoid shadow bworld 4player\n\
---gamegenie    {0|1}   Enable emulated Game Genie.\n\
---frameskip    x       Set # of frames to skip per emulated frame.\n\
---xres         x       Set horizontal resolution for full screen mode.\n\
---yres         x       Set vertical resolution for full screen mode.\n\
---autoscale    {0|1}   Enable autoscaling in fullscreen. \n\
---keepratio    {0|1}   Keep native NES aspect ratio when autoscaling. \n\
---(x/y)scale   x       Multiply width/height by x. \n\
-                         (Real numbers >0 with OpenGL, otherwise integers >0).\n\
---(x/y)stretch {0|1}   Stretch to fill surface on x/y axis (OpenGL only).\n\
---bpp       {8|16|32}  Set bits per pixel.\n\
---opengl       {0|1}   Enable OpenGL support.\n\
---fullscreen   {0|1}   Enable full screen mode.\n\
---noframe      {0|1}   Hide title bar and window decorations.\n\
---special      {1-4}   Use special video scaling filters\n\
-                         (1 = hq2x 2 = Scale2x 3 = NTSC 2x 4 = hq3x 5 = Scale3x)\n\
---palette      f       Load custom global palette from file f.\n\
---sound        {0|1}   Enable sound.\n\
---soundrate    x       Set sound playback rate to x Hz.\n\
---soundq      {0|1|2}  Set sound quality. (0 = Low 1 = High 2 = Very High)\n\
---soundbufsize x       Set sound buffer size to x ms.\n\
---volume      {0-256}  Set volume to x.\n\
---soundrecord  f       Record sound to file f.\n\
---playmov      f       Play back a recorded FCM/FM2/FM3 movie from filename f.\n\
---pauseframe   x       Pause movie playback at frame x.\n\
---fcmconvert   f       Convert fcm movie file f to fm2.\n\
---ripsubs      f       Convert movie's subtitles to srt\n\
---subtitles    {0,1}   Enable subtitle display\n\
---fourscore    {0,1}   Enable fourscore emulation\n\
---no-config    {0,1}   Use default config file and do not save\n\
---net          s       Connect to server 's' for TCP/IP network play.\n\
---port         x       Use TCP/IP port x for network play.\n\
---user         x       Set the nickname to use in network play.\n\
---pass         x       Set password to use for connecting to the server.\n\
---netkey       s       Use string 's' to create a unique session for the game loaded.\n\
---players      x       Set the number of local players in a network play session.\n\
---rp2mic       {0,1}   Replace Port 2 Start with microphone (Famicom).\n\
---nogui                Don't load the GTK GUI";
+static const char *DriverUsage=
+"Option         Value   Description\n"
+"--pal          {0|1}   Use PAL timing.\n"
+"--newppu       {0|1}   Enable the new PPU core. (WARNING: May break savestates)\n"
+"--inputcfg     d       Configures input device d on startup.\n"
+"--input(1,2)   d       Set which input device to emulate for input 1 or 2.\n"
+"                         Devices:  gamepad zapper powerpad.0 powerpad.1\n"
+"                         arkanoid\n"
+"--input(3,4)   d       Set the famicom expansion device to emulate for\n"
+"                       input(3, 4)\n"
+"                          Devices: quizking hypershot mahjong toprider ftrainer\n"
+"                          familykeyboard oekakids arkanoid shadow bworld\n"
+"                          4player\n"
+"--gamegenie    {0|1}   Enable emulated Game Genie.\n"
+"--frameskip    x       Set # of frames to skip per emulated frame.\n"
+"--xres         x       Set horizontal resolution for full screen mode.\n"
+"--yres         x       Set vertical resolution for full screen mode.\n"
+"--autoscale    {0|1}   Enable autoscaling in fullscreen. \n"
+"--keepratio    {0|1}   Keep native NES aspect ratio when autoscaling. \n"
+"--(x/y)scale   x       Multiply width/height by x. \n"
+"                         (Real numbers >0 with OpenGL, otherwise integers >0).\n"
+"--(x/y)stretch {0|1}   Stretch to fill surface on x/y axis (OpenGL only).\n"
+"--bpp       {8|16|32}  Set bits per pixel.\n"
+"--opengl       {0|1}   Enable OpenGL support.\n"
+"--fullscreen   {0|1}   Enable full screen mode.\n"
+"--noframe      {0|1}   Hide title bar and window decorations.\n"
+"--special      {1-4}   Use special video scaling filters\n"
+"                         (1 = hq2x 2 = Scale2x 3 = NTSC 2x 4 = hq3x\n"
+"                         5 = Scale3x)\n"
+"--palette      f       Load custom global palette from file f.\n"
+"--sound        {0|1}   Enable sound.\n"
+"--soundrate    x       Set sound playback rate to x Hz.\n"
+"--soundq      {0|1|2}  Set sound quality. (0 = Low 1 = High 2 = Very High)\n"
+"--soundbufsize x       Set sound buffer size to x ms.\n"
+"--volume      {0-256}  Set volume to x.\n"
+"--soundrecord  f       Record sound to file f.\n"
+"--playmov      f       Play back a recorded FCM/FM2/FM3 movie from filename f.\n"
+"--pauseframe   x       Pause movie playback at frame x.\n"
+"--fcmconvert   f       Convert fcm movie file f to fm2.\n"
+"--ripsubs      f       Convert movie's subtitles to srt\n"
+"--subtitles    {0|1}   Enable subtitle display\n"
+"--fourscore    {0|1}   Enable fourscore emulation\n"
+"--no-config    {0|1}   Use default config file and do not save\n"
+"--net          s       Connect to server 's' for TCP/IP network play.\n"
+"--port         x       Use TCP/IP port x for network play.\n"
+"--user         x       Set the nickname to use in network play.\n"
+"--pass         x       Set password to use for connecting to the server.\n"
+"--netkey       s       Use string 's' to create a unique session for the\n"
+"                       game loaded.\n"
+"--players      x       Set the number of local players in a network play\n"
+"                       session.\n"
+"--rp2mic       {0|1}   Replace Port 2 Start with microphone (Famicom).\n"
+"--nogui                Don't load the GTK GUI\n"
+"--abstartselectexit {0|1} exit the emulator when A+B+Select+Start is pressed\n"
+"--autosavestate {0-9|>9} load from the given state when the game is loaded\n"
+"--autoloadstate {0-9|>9} save to the given state when the game is closed\n"
+"                         to not save/load automatically provide a number\n"
+"                         greater than 9\n";
 
 
 // these should be moved to the man file
@@ -175,10 +185,20 @@ static void ShowUsage(char *prog)
  */
 int LoadGame(const char *path)
 {
-	CloseGame();
+    if (isloaded){
+        CloseGame();
+    }
 	if(!FCEUI_LoadGame(path, 1)) {
 		return 0;
 	}
+
+    int state_to_load;
+    g_config->getOption("SDL.AutoLoadState", &state_to_load);
+    if (state_to_load != INVALID_STATE){
+        FCEUI_SelectState(state_to_load, 0);
+        FCEUI_LoadState(NULL);
+    }
+
 	ParseGIInput(GameInfo);
 	RefreshThrottleFPS();
 
@@ -218,7 +238,15 @@ CloseGame()
 	if(!isloaded) {
 		return(0);
 	}
+
+    int state_to_save;
+    g_config->getOption("SDL.AutoSaveState", &state_to_save);
+    if (state_to_save != INVALID_STATE){
+        FCEUI_SelectState(state_to_save, 0);
+        FCEUI_SaveState(NULL);
+    }
 	FCEUI_CloseGame();
+
 	DriverKill();
 	isloaded = 0;
 	GameInfo = 0;
@@ -499,7 +527,7 @@ int main(int argc, char *argv[])
 	{
 		if(!strcmp(argv[1], "--help") || !strcmp(argv[1],"-h"))
 		{
-	       ShowUsage(argv[0]);
+            ShowUsage(argv[0]);
 			return 0;
 		}
 	}
@@ -943,7 +971,8 @@ void FCEUD_PrintError(const char *errormsg)
 	if(gtkIsStarted == true && noGui == 0)
 	{
 		GtkWidget* d;
-		d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL,        GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, errormsg);
+		d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, 
+                GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, errormsg);
 		gtk_dialog_run(GTK_DIALOG(d));
 		gtk_widget_destroy(d);
 	}
@@ -955,7 +984,11 @@ void FCEUD_PrintError(const char *errormsg)
 
 // dummy functions
 
-#define DUMMY(__f) void __f(void) {printf("%s\n", #__f); FCEU_DispMessage("Not implemented.",0);}
+#define DUMMY(__f) \
+    void __f(void) {\
+        printf("%s\n", #__f);\
+        FCEU_DispMessage("Not implemented.",0);\
+    }
 DUMMY(FCEUD_HideMenuToggle)
 DUMMY(FCEUD_MovieReplayFrom)
 DUMMY(FCEUD_ToggleStatusIcon)

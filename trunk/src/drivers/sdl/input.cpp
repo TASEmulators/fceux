@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 
 #include "main.h"
 #include "dface.h"
@@ -320,9 +320,12 @@ std::string GetFilename (const char *title, bool save, const char *filter)
 std::string GetUserText (const char *title)
 {
 #ifdef _GTK
-/*	prg318 - 10/13/11 - this is broken in recent build and causes segfaults/very weird behavior
-	i'd rather remove it for now than it cause accidental segfaults
-	TODO fix it
+/*	prg318 - 10/13/11 - this is broken in recent build and causes 
+ *	segfaults/very weird behavior i'd rather remove it for now than it cause 
+ *	accidental segfaults
+ *	TODO fix it
+*/
+#if 0
 
 	GtkWidget* d;
 	GtkWidget* entry;
@@ -370,7 +373,7 @@ std::string GetUserText (const char *title)
 			break;
 		input += c;
 	}
-    	pclose(fpipe);*//*
+    	pclose(fpipe);
      gtk_widget_destroy(d);
 
 
@@ -379,7 +382,7 @@ std::string GetUserText (const char *title)
 
      FCEUI_ToggleEmulationPause(); // unpause emulation
      return input;
-   */
+#endif // #if 0
 #endif
   return "";
 }
@@ -495,8 +498,10 @@ static void KeyboardCommands ()
 	{
 		is_alt = 1;
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
-		// workaround for GDK->SDL in GTK problems where ALT release is never getting sent
-		// i know this is sort of an ugly hack to fix this, but the bug is rather annoying
+		// workaround for GDK->SDL in GTK problems where ALT release is never 
+        // getting sent
+        // I know this is sort of an ugly hack to fix this, but the bug is 
+        // rather annoying
 		// prg318 10/23/11
 		int fullscreen;
 		g_config->getOption ("SDL.Fullscreen", &fullscreen);
@@ -627,7 +632,7 @@ static void KeyboardCommands ()
 			}
 			else
 			{
-				FCEUI_LoadState (NULL);
+				FCEUI_LoadState(NULL);
 			}
 		}
 	}
@@ -1119,7 +1124,7 @@ ButtConfig GamePadConfig[4][10] = {
  * Update the status of the gamepad input devices.
  */
 static void
-UpdateGamepad (void)
+UpdateGamepad(void)
 {
 	// don't update during movie playback
 	if (FCEUMOV_Mode (MOVIEMODE_PLAY))
@@ -1150,18 +1155,32 @@ UpdateGamepad (void)
 				if(opposite_dirs == 0)
 				{
 					// test for left+right and up+down
-					if(x == 4)
+					if(x == 4){
 						up = true;
-					if((x == 5) && (up == true))
+                    }
+					if((x == 5) && (up == true)){
 						continue;
-					if(x == 6)
+                    }
+					if(x == 6){
 						left = true;
-					if((x == 7) && (left == true))
+                    }
+					if((x == 7) && (left == true)){
 						continue;
+                    }
 				}
 				JS |= (1 << x) << (wg << 3);
 			}
 		}
+
+        int four_button_exit;
+        g_config->getOption("SDL.ABStartSelectExit", &four_button_exit);
+        // if a+b+start+select is pressed, exit
+        if (four_button_exit && JS == 15) {
+            FCEUI_printf("all buttons pressed, exiting\n");
+            CloseGame();
+            FCEUI_Kill();
+            exit(0);
+        }
 
 		// rapid-fire a, rapid-fire b
 		if (rapid)

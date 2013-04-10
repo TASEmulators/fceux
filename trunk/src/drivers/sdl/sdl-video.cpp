@@ -21,9 +21,9 @@
 /// \file
 /// \brief Handles the graphical game display for the SDL implementation.
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 #include "sdl.h"
 #include "sdl-opengl.h"

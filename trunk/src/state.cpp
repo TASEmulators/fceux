@@ -959,7 +959,8 @@ void FCEUI_LoadState(const char *fname)
 	if(FCEUSS_Load(fname))
 	{
 		//mbg todo netplay
-		/*if(FCEUnetplay)
+#if 0 
+		if(FCEUnetplay)
 		{
 			char *fn = strdup(FCEU_MakeFName(FCEUMKF_NPTEMP, 0, 0).c_str());
 			FILE *fp;
@@ -980,7 +981,8 @@ void FCEUI_LoadState(const char *fname)
 			}
 
 			free(fn);
-		}*/
+		}
+#endif
 		freshMovie = false;		//The movie has been altered so it is no longer fresh
 	}
 	else

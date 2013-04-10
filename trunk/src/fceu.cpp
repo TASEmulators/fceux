@@ -162,7 +162,7 @@ static void FCEU_CloseGame(void)
 
 		if (GameInfo->name) {
 			free(GameInfo->name);
-			GameInfo->name = 0;
+			GameInfo->name = NULL;
 		}
 
 		if (GameInfo->type != GIT_NSF) {
@@ -263,8 +263,8 @@ void FlushGenieRW(void) {
 		}
 		free(AReadG);
 		free(BWriteG);
-		AReadG = 0;
-		BWriteG = 0;
+		AReadG = NULL;
+		BWriteG = NULL;
 		RWWrap = 0;
 	}
 }
@@ -330,6 +330,7 @@ static void AllocBuffers() {
 
 static void FreeBuffers() {
 	FCEU_free(RAM);
+    RAM = NULL;
 }
 //------
 
@@ -964,6 +965,7 @@ void UpdateAutosave(void) {
 		FCEUSS_Save(f);
 		AutoSS = true;  //Flag that an auto-savestate was made
 		free(f);
+        f = NULL;
 		AutosaveStatus[AutosaveIndex] = 1;
 	}
 }
@@ -977,6 +979,7 @@ void FCEUI_Autosave(void) {
 		f = strdup(FCEU_MakeFName(FCEUMKF_AUTOSTATE, AutosaveIndex, 0).c_str());
 		FCEUSS_Load(f);
 		free(f);
+        f = NULL;
 
 		//Set pointer to previous available slot
 		if (AutosaveStatus[(AutosaveIndex + AutosaveQty - 1) % AutosaveQty] == 1) {

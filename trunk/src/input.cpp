@@ -299,7 +299,7 @@ static void StrobeGP(int w)
 	joy_readbit[w]=0;
 }
 
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^6
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 static INPUTC GPC={ReadGP,0,StrobeGP,UpdateGP,0,0,LogGP,LoadGP};
@@ -319,8 +319,9 @@ void FCEU_UpdateInput(void)
 	//tell all drivers to poll input and set up their logical states
 	if(!FCEUMOV_Mode(MOVIEMODE_PLAY))
 	{
-		for(int port=0;port<2;port++)
+		for(int port=0;port<2;port++){
 			joyports[port].driver->Update(port,joyports[port].ptr,joyports[port].attrib);
+        }
 		portFC.driver->Update(portFC.ptr,portFC.attrib);
 	}
 
@@ -333,8 +334,9 @@ void FCEU_UpdateInput(void)
 	FCEUMOV_AddInputState();
 
 	//TODO - should this apply to the movie data? should this be displayed in the input hud?
-	if(GameInfo->type==GIT_VSUNI)
+	if(GameInfo->type==GIT_VSUNI){
 		FCEU_VSUniSwap(&joy[0],&joy[1]);
+    }
 }
 
 static DECLFR(VSUNIRead0)
@@ -371,16 +373,18 @@ void InputScanlineHook(uint8 *bg, uint8 *spr, uint32 linets, int final)
 	portFC.driver->SLHook(bg,spr,linets,final);
 }
 
+#include <iostream>
 //binds JPorts[pad] to the driver specified in JPType[pad]
 static void SetInputStuff(int port)
 {
 	switch(joyports[port].type)
 	{
 	case SI_GAMEPAD:
-		if(GameInfo->type==GIT_VSUNI)
+		if(GameInfo->type==GIT_VSUNI){
 			joyports[port].driver = &GPCVS;
-		else
+        } else {
 			joyports[port].driver= &GPC;
+        }
 		break;
 	case SI_ARKANOID:
 		joyports[port].driver=FCEU_InitArkanoid(port);
