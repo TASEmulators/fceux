@@ -14,8 +14,8 @@ import platform
 
 opts = Variables(None, ARGUMENTS)
 opts.AddVariables( 
-  BoolVariable('DEBUG',     'Build with debugging symbols', 1),
-  BoolVariable('RELEASE',   'Set to 1 to build for release', 0),
+  BoolVariable('DEBUG',     'Build with debugging symbols', 0),
+  BoolVariable('RELEASE',   'Set to 1 to build for release', 1),
   BoolVariable('FRAMESKIP', 'Enable frameskipping', 1),
   BoolVariable('OPENGL',    'Enable OpenGL support', 1),
   BoolVariable('LUA',       'Enable Lua support', 1),

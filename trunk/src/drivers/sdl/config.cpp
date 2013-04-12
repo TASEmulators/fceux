@@ -236,8 +236,8 @@ InitConfig()
     #endif
     
 
-	config->addOption("autoloadstate", "SDL.AutoLoadState", INVALID_STATE);
-	config->addOption("autosavestate", "SDL.AutoSaveState", INVALID_STATE);
+	config->addOption("loadstate", "SDL.AutoLoadState", INVALID_STATE);
+	config->addOption("savestate", "SDL.AutoSaveState", INVALID_STATE);
     
     #ifdef _GTK
 	char* home_dir = getenv("HOME");
@@ -259,7 +259,7 @@ InitConfig()
 	config->addOption("newppu", "SDL.NewPPU", 0);
 
     // quit when a+b+select+start is pressed
-    config->addOption("abstartselectexit", "SDL.ABStartSelectExit", 0);
+    config->addOption("4buttonexit", "SDL.ABStartSelectExit", 0);
 
 	// GamePad 0 - 3
 	for(unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++) {
