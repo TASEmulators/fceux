@@ -174,7 +174,7 @@ print "base CPPDEFINES:",env['CPPDEFINES']
 print "base CCFLAGS:",env['CCFLAGS']
 
 if env['DEBUG']:
-  env.Append(CPPDEFINES=["_DEBUG"], CCFLAGS = ['-g'])
+  env.Append(CPPDEFINES=["_DEBUG"], CCFLAGS = ['-g', '-O0'])
 else:
   env.Append(CCFLAGS = ['-O2'])
 
