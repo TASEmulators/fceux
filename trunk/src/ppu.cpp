@@ -19,10 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include        <string.h>
-#include        <stdio.h>
-#include        <stdlib.h>
-
 #include        "types.h"
 #include        "x6502.h"
 #include        "fceu.h"
@@ -40,6 +36,10 @@
 #include        "input.h"
 #include        "driver.h"
 #include        "debug.h"
+
+#include        <cstring>
+#include        <cstdio>
+#include        <cstdlib>
 
 #define VBlankON        (PPU[0] & 0x80)		//Generate VBlank NMI
 #define Sprite16        (PPU[0] & 0x20)		//Sprites 8x16/8x8

@@ -1,9 +1,5 @@
 /// \file
 /// \brief Implements core debugging facilities
-
-#include <stdlib.h>
-#include <string.h>
-
 #include "types.h"
 #include "x6502.h"
 #include "fceu.h"
@@ -14,6 +10,10 @@
 #include "ppu.h"
 
 #include "x6502abbrev.h"
+
+#include <cstdlib>
+#include <cstring>
+
 
 int vblankScanLines = 0;	//Used to calculate scanlines 240-261 (vblank)
 int vblankPixel = 0;		//Used to calculate the pixels in vblank

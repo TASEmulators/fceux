@@ -21,11 +21,6 @@
 /// \file
 /// \brief implements a built-in NSF player.  This is a perk--not a part of the emu core
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
 #include "types.h"
 #include "x6502.h"
 #include "fceu.h"
@@ -46,6 +41,11 @@
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
 
 static uint8 SongReload;
 static int CurrentSong;

@@ -1,16 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <zlib.h>
-#include <assert.h>
-#include <vector>
-#include <map>
-#include <string>
-#include <algorithm>
-#include <stdlib.h>
-#include <math.h>
-
 #ifdef __linux
 #include <unistd.h>
 #define SetCurrentDir chdir
@@ -47,6 +34,20 @@
 #include "drivers/win/taseditor/taseditor_lua.h"
 extern TASEDITOR_LUA taseditor_lua;
 #endif
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
+#include <cassert>
+#include <cstdlib>
+#include <cmath>
+#include <zlib.h>
+
+#include <vector>
+#include <map>
+#include <string>
+#include <algorithm>
 
 bool CheckLua()
 {
@@ -3115,7 +3116,7 @@ static int hex2int(lua_State *L, char c) {
 static const struct ColorMapping
 {
 	const char* name;
-	int value;
+	unsigned int value;
 }
 s_colorMapping [] =
 {

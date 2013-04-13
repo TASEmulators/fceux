@@ -39,15 +39,15 @@
 * PC Bank   -> 'K'
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <ctype.h>
-
 #include "conddebug.h"
 #include "types.h"
 #include "utils/memory.h"
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <cctype>
 
 // Next non-whitespace character in string
 char next;

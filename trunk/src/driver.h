@@ -1,13 +1,13 @@
 #ifndef __DRIVER_H_
 #define __DRIVER_H_
 
-#include <stdio.h>
-#include <string>
-#include <iosfwd>
-
 #include "types.h"
 #include "git.h"
 #include "file.h"
+
+#include <cstdio>
+#include <cstring>
+#include <iosfwd>
 
 FILE *FCEUD_UTF8fopen(const char *fn, const char *mode);
 inline FILE *FCEUD_UTF8fopen(const std::string &n, const char *mode) { return FCEUD_UTF8fopen(n.c_str(),mode); }

@@ -19,10 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "types.h"
 #include "x6502.h"
 #include "fceu.h"
@@ -41,6 +37,10 @@
 #include "cheat.h"
 #include "vsuni.h"
 #include "driver.h"
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 extern SFORMAT FCEUVSUNI_STATEINFO[];
 

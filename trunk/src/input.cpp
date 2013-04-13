@@ -19,10 +19,6 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <string>
-#include <ostream>
-#include <string.h>
-
 #include "types.h"
 #include "x6502.h"
 
@@ -52,6 +48,11 @@
 #include "drivers/win/window.h"
 #include "drivers/win/ntview.h"
 #include "drivers/win/taseditor.h"
+
+#include <string>
+#include <ostream>
+#include <cstring>
+
 extern bool mustRewindNow;
 #endif // WIN32
 

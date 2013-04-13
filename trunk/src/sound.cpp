@@ -18,11 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-
-#include <string.h>
-
 #include "types.h"
 #include "x6502.h"
 
@@ -32,6 +27,10 @@
 #include "state.h"
 #include "wave.h"
 #include "debug.h"
+
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 
 static uint32 wlookup1[32];
 static uint32 wlookup2[203];

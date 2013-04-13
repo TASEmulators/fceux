@@ -1,13 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <zlib.h>
-#include <iomanip>
-#include <fstream>
-#include <limits.h>
-#include <stdarg.h>
-
 #include "emufile.h"
 #include "version.h"
 #include "types.h"
@@ -39,10 +29,19 @@
 #include "./drivers/win/common.h"
 #include "./drivers/win/window.h"
 extern void AddRecentMovieFile(const char *filename);
-
 #include "./drivers/win/taseditor.h"
 extern bool mustEngageTaseditor;
 #endif
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <iomanip>
+#include <fstream>
+#include <climits>
+#include <cstdarg>
+#include <zlib.h>
 
 using namespace std;
 

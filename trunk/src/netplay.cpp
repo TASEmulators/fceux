@@ -19,15 +19,6 @@
 */
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-//#include <unistd.h> //mbg merge 7/17/06 removed
-
-#include <zlib.h>
-
 #include "types.h"
 #include "file.h"
 #include "utils/endian.h"
@@ -38,6 +29,15 @@
 #include "input.h"
 #include "driver.h"
 #include "utils/memory.h"
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <sys/types.h>
+#include <sys/stat.h>
+//#include <unistd.h> //mbg merge 7/17/06 removed
+
+#include <zlib.h>
 
 int FCEUnetplay=0;
 

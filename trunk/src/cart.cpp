@@ -21,10 +21,6 @@
 /// \file
 /// \brief This file contains all code for coordinating the mapping in of the address space external to the NES.
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <limits.h>
 #include "types.h"
 #include "fceu.h"
 #include "ppu.h"
@@ -36,6 +32,11 @@
 #include "file.h"
 #include "utils/memory.h"
 
+
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
+#include <climits>
 
 uint8 *Page[32], *VPage[8];
 uint8 **VPageR = VPage;

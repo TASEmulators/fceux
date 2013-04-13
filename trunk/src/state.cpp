@@ -20,15 +20,6 @@
 
 //  TODO: Add (better) file io error checking
 
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-//#include <unistd.h> //mbg merge 7/17/06 removed
-
-#include <vector>
-#include <fstream>
-
 #include "version.h"
 #include "types.h"
 #include "x6502.h"
@@ -57,6 +48,15 @@
 #include "drivers/win/ram_search.h"
 #include "drivers/win/ramwatch.h"
 #endif
+
+#include <string>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+//#include <unistd.h> //mbg merge 7/17/06 removed
+
+#include <vector>
+#include <fstream>
 
 using namespace std;
 

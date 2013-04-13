@@ -18,16 +18,6 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef WIN32
-#include <stdint.h>
-#endif
-
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <zlib.h>
-
 #include "types.h"
 #include "video.h"
 #include "fceu.h"
@@ -54,6 +44,16 @@
 #ifdef CREATE_AVI
 #include "drivers/videolog/nesvideos-piece.h"
 #endif
+
+#ifdef WIN32
+#include <stdint.h>
+#endif
+
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+#include <cstdarg>
+#include <zlib.h>
 
 uint8 *XBuf=NULL;
 uint8 *XBackBuf=NULL;

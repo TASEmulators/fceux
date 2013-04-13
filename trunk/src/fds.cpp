@@ -18,10 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "types.h"
 #include "x6502.h"
 #include "fceu.h"
@@ -36,6 +32,10 @@
 #include "netplay.h"
 #include "driver.h"
 #include "movie.h"
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 //	TODO:  Add code to put a delay in between the time a disk is inserted
 //	and the when it can be successfully read/written to.  This should

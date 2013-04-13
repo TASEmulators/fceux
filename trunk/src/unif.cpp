@@ -22,11 +22,6 @@
 /* **INCOMPLETE**             */
 /* Override stuff: CHR RAM instead of CHR ROM,   mirroring. */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-
 #include "types.h"
 #include "fceu.h"
 #include "cart.h"
@@ -39,6 +34,10 @@
 #include "file.h"
 #include "input.h"
 #include "driver.h"
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 typedef struct {
 	char ID[4];

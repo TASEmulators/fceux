@@ -18,12 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <string>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <time.h>
 #include "types.h"
 #include "x6502.h"
 #include "fceu.h"
@@ -49,7 +43,6 @@
 #include "file.h"
 #include "vsuni.h"
 #include "ines.h"
-
 #ifdef WIN32
 #include "drivers/win/pref.h"
 
@@ -64,9 +57,6 @@ extern int32 fps_scale_unpaused;
 extern int32 fps_scale_frameadvance;
 extern void RefreshThrottleFPS();
 #endif
-
-#include <fstream>
-#include <sstream>
 
 #ifdef _S9XLUA_H
 #include "fceulua.h"
@@ -86,6 +76,16 @@ extern void RefreshThrottleFPS();
 #include "drivers/sdl/sdl.h"
 #endif
 
+#include <fstream>
+#include <sstream>
+#include <string>
+
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+#include <cstdarg>
+#include <ctime>
+
 using namespace std;
 
 int AFon = 1, AFoff = 1, AutoFireOffset = 0; //For keeping track of autofire settings
@@ -98,14 +98,20 @@ bool AutoResumePlay = false;
 char romNameWhenClosingEmulator[2048] = {0};
 
 FCEUGI::FCEUGI()
-	: filename(0)
-	, archiveFilename(0) {
+	: filename(0),
+	  archiveFilename(0) {
 	//printf("%08x",opsize); // WTF?!
 }
 
 FCEUGI::~FCEUGI() {
-	if (filename) delete filename;
-	if (archiveFilename) delete archiveFilename;
+	if (filename) {
+        free(filename);
+        filename = NULL;
+    }
+	if (archiveFilename) {
+        delete archiveFilename;
+        archiveFilename = NULL;
+    }
 }
 
 bool CheckFileExists(const char* filename) {

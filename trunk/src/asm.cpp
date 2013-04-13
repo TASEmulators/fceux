@@ -1,15 +1,15 @@
 /// \file
 /// \brief 6502 assembler and disassembler
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include "types.h"
 #include "utils/xstring.h"
 #include "debug.h"
 #include "asm.h"
 #include "x6502.h"
 
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
 ///assembles the string to an instruction located at addr, storing opcodes in output buffer
 int Assemble(unsigned char *output, int addr, char *str) {
 	//unsigned char opcode[3] = { 0,0,0 };

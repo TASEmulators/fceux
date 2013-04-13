@@ -18,18 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <stdio.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fstream>
-
-#ifndef WIN32
-#include <zlib.h>
-#endif
 
 #include "types.h"
 #include "file.h"
@@ -48,6 +36,19 @@
 #include "movie.h"
 #include "driver.h"
 #include "utils/xstring.h"
+
+#include <cstdio>
+#include <climits>
+#include <cstdlib>
+#include <cstring>
+#include <cstdarg>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fstream>
+
+#ifndef WIN32
+#include <zlib.h>
+#endif
 
 using namespace std;
 
