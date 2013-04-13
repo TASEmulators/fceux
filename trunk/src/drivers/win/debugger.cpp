@@ -111,8 +111,8 @@ void UpdateOtherDebuggingDialogs()
 void RestoreSize(HWND hwndDlg)
 {
 	//If the dialog dimensions are changed those changes need to be reflected here.  - adelikat
-	const int DEFAULT_WIDTH = 816;	//Original width
-	const int DEFAULT_HEIGHT = 554;	//Original height
+	const int DEFAULT_WIDTH = 815;	//Original width
+	const int DEFAULT_HEIGHT = 559;	//Original height
 	
 	SetWindowPos(hwndDlg,HWND_TOP,DbgPosX,DbgPosY,DEFAULT_WIDTH,DEFAULT_HEIGHT,SWP_SHOWWINDOW);
 }
@@ -452,7 +452,8 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 		strcat(debug_str, chr);
 		disassembly_addresses.push_back(addr);
 
-		if ((size = opsize[GetMem(addr)]) == 0)
+		size = opsize[GetMem(addr)];
+		if (size == 0)
 		{
 			sprintf(chr, "%02X        UNDEFINED", GetMem(addr++));
 			strcat(debug_str, chr);
@@ -517,7 +518,9 @@ char *DisassembleLine(int addr) {
 	uint8 opcode[3];
 
 	sprintf(str, "%02X:%04X:", getBank(addr),addr);
-	if ((size = opsize[GetMem(addr)]) == 0) {
+	size = opsize[GetMem(addr)];
+	if (size == 0)
+	{
 		sprintf(chr, "%02X        UNDEFINED", GetMem(addr++));
 		strcat(str,chr);
 	}
@@ -549,22 +552,27 @@ char *DisassembleData(int addr, uint8 *opcode) {
 	int size,j;
 
 	sprintf(str, "%02X:%04X:", getBank(addr), addr);
-	if ((size = opsize[opcode[0]]) == 0) {
+	size = opsize[opcode[0]];
+	if (size == 0)
+	{
 		sprintf(chr, "%02X        UNDEFINED", opcode[0]);
 		strcat(str,chr);
-	}
-	else {
-		if ((addr+size) > 0x10000) {
+	} else
+	{
+		if ((addr+size) > 0x10000)
+		{
 			sprintf(chr, "%02X        OVERFLOW", opcode[0]);
 			strcat(str,chr);
-		}
-		else {
-			for (j = 0; j < size; j++) {
+		} else
+		{
+			for (j = 0; j < size; j++)
+			{
 				sprintf(chr, "%02X ", opcode[j]);
 				addr++;
 				strcat(str,chr);
 			}
-			while (size < 3) {
+			while (size < 3)
+			{
 				strcat(str,"   "); //pad output to align ASM
 				size++;
 			}
@@ -1035,7 +1043,10 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 						case IDC_ASSEMBLER_SAVE:
 							if (applied) {
 								count = romaddr = GetNesFileAddress(iaPC);
-								for (i = 0; i < patchlen; i++) count += opsize[patchdata[i][0]];
+								for (i = 0; i < patchlen; i++)
+								{
+									count += opsize[patchdata[i][0]];
+								}
 								if (patchlen) sprintf(str,"Write patch data to file at addresses 0x%06X - 0x%06X?",romaddr,count-1);
 								else sprintf(str,"Undo all previously applied patches?");
 								if (MessageBox(hwndDlg, str, "Save changes to file?", MB_YESNO|MB_ICONINFORMATION) == IDYES) {
@@ -1052,7 +1063,10 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 								SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_PATCH_DISASM,LB_DELETESTRING,count-1,0);
 								patchlen--;
 								count = 0;
-								for (i = 0; i < patchlen; i++) count += opsize[patchdata[i][0]];
+								for (i = 0; i < patchlen; i++)
+								{
+									count += opsize[patchdata[i][0]];
+								}
 								if (count < lastundo) {
 									ptr = GetNesPRGPointer(GetNesFileAddress(iaPC)-16);
 									j = opsize[patchdata[patchlen][0]];
@@ -1067,11 +1081,17 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 							break;
 						case IDC_ASSEMBLER_DEFPUSHBUTTON:
 							count = 0;
-							for (i = 0; i < patchlen; i++) count += opsize[patchdata[i][0]];
+							for (i = 0; i < patchlen; i++)
+							{
+								count += opsize[patchdata[i][0]];
+							}
 							GetDlgItemText(hwndDlg,IDC_ASSEMBLER_HISTORY,str,21);
 							if (!Assemble(patchdata[patchlen],(iaPC+count),str)) {
 								count = iaPC;
-								for (i = 0; i <= patchlen; i++) count += opsize[patchdata[i][0]];
+								for (i = 0; i <= patchlen; i++)
+								{
+									count += opsize[patchdata[i][0]];
+								}
 								if (count > 0x10000) { //note: don't use 0xFFFF!
 									MessageBox(hwndDlg, "Patch data cannot exceed address 0xFFFF", "Address error", MB_OK);
 									break;
@@ -1273,6 +1293,14 @@ int InstructionUp(int from)
 		return (from - 1);	// else, scroll up one byte
 	return 0;	// of course, if we can't scroll up, just return 0!
 }
+int InstructionDown(int from)
+{
+	int tmp = opsize[GetMem(si.nPos)];
+	if ((tmp))
+		return from + tmp;
+	else
+		return from + 1;		// this is data or undefined instruction
+}
 
 BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -1434,7 +1462,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			si.nMin = 0;
 			si.nMax = 0x10000;
 			si.nPos = 0;
-			si.nPage = 20;
+			si.nPage = 10;
 			SetScrollInfo(GetDlgItem(hwndDlg,IDC_DEBUGGER_DISASSEMBLY_VSCR),SB_CTL,&si,TRUE);
 
 			//setup font
@@ -1589,37 +1617,73 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				break;
 			}
 			case WM_VSCROLL:
+			{
 				//mbg merge 7/18/06 changed pausing check
-				if (FCEUI_EmulationPaused()) UpdateRegs(hwndDlg);
-				if (lParam) {
+				if (FCEUI_EmulationPaused())
+					UpdateRegs(hwndDlg);
+				if (lParam)
+				{
 					GetScrollInfo((HWND)lParam,SB_CTL,&si);
-					switch(LOWORD(wParam)) {
+					switch(LOWORD(wParam))
+					{
 						case SB_ENDSCROLL:
 						case SB_TOP:
 						case SB_BOTTOM: break;
-						case SB_LINEUP: si.nPos = InstructionUp(si.nPos); break; // si.nPos--; break;
-						case SB_LINEDOWN:
-							if ((tmp=opsize[GetMem(si.nPos)])) si.nPos+=tmp;
-							else si.nPos++;
+						case SB_LINEUP:
+						{
+							si.nPos = InstructionUp(si.nPos);
 							break;
-						case SB_PAGEUP: si.nPos-=si.nPage; break;
-						case SB_PAGEDOWN: si.nPos+=si.nPage; break;
+						}
+						case SB_LINEDOWN:
+						{
+							si.nPos = InstructionDown(si.nPos);
+							break;
+						}
+						case SB_PAGEUP:
+						{
+							for (int i = si.nPage; i > 0; i--)
+							{
+								si.nPos = InstructionUp(si.nPos);
+								if (si.nPos < si.nMin)
+								{
+									si.nPos = si.nMin;
+									break;
+								}
+							}
+							break;
+						}
+						case SB_PAGEDOWN:
+						{
+							for (int i = si.nPage; i > 0; i--)
+							{
+								si.nPos = InstructionDown(si.nPos);
+								if ((si.nPos + (int)si.nPage) > si.nMax)
+								{
+									si.nPos = si.nMax - si.nPage;
+									break;
+								}
+							}
+							break;
+						}
 						case SB_THUMBPOSITION: //break;
 						case SB_THUMBTRACK: si.nPos = si.nTrackPos; break;
 					}
-					if (si.nPos < si.nMin) si.nPos = si.nMin;
-					if ((si.nPos+(int)si.nPage) > si.nMax) si.nPos = si.nMax-si.nPage; //mbg merge 7/18/06 added cast
+					if (si.nPos < si.nMin)
+						si.nPos = si.nMin;
+					if ((si.nPos + (int)si.nPage) > si.nMax)
+						si.nPos = si.nMax - si.nPage;
 					SetScrollInfo((HWND)lParam,SB_CTL,&si,TRUE);
+
 					Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
 					// "Address Bookmark Add" follows the address
 					sprintf(str,"%04X", si.nPos);
 					SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
 				}
 				break;
-
+			}
 			case WM_CONTEXTMENU:
 			{
-				// Handle certain subborn context menus for nearly incapable controls.
+				// Handle certain stubborn context menus for nearly incapable controls.
 
 				if (wParam == (uint32)GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_LIST)) {
 					// Only open the menu if a cheat is selected
@@ -1636,24 +1700,43 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						
 					}
 				}
-			
+				break;
 			}
-			break;
-
-			case WM_MOUSEWHEEL: //just handle page up/down and mousewheel messages together
-				i = (short)HIWORD(wParam);///WHEEL_DELTA;
+			case WM_MOUSEWHEEL:
+			{
 				GetScrollInfo((HWND)lParam,SB_CTL,&si);
-				if(i < 0)si.nPos+=si.nPage;
-				if(i > 0)si.nPos-=si.nPage;
-				if (si.nPos < si.nMin) si.nPos = si.nMin;
-				if ((si.nPos+(int)si.nPage) > si.nMax) si.nPos = si.nMax-si.nPage; //mbg merge 7/18/06 added cast
+				i = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
+				if (i < 0)
+				{
+					for (int i = si.nPage; i > 0; i--)
+					{
+						si.nPos = InstructionDown(si.nPos);
+						if ((si.nPos + (int)si.nPage) > si.nMax)
+						{
+							si.nPos = si.nMax - si.nPage;
+							break;
+						}
+					}
+				} else if (i > 0)
+				{
+					for (int i = si.nPage; i > 0; i--)
+					{
+						si.nPos = InstructionUp(si.nPos);
+						if (si.nPos < si.nMin)
+						{
+							si.nPos = si.nMin;
+							break;
+						}
+					}
+				}
 				SetScrollInfo((HWND)lParam,SB_CTL,&si,TRUE);
+
 				Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
 				// "Address Bookmark Add" follows the address
 				sprintf(str,"%04X", si.nPos);
 				SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
 				break;
-
+			}
 			case WM_KEYDOWN:
 				MessageBox(hwndDlg,"Die!","I'm dead!",MB_YESNO|MB_ICONINFORMATION);
 				break;
@@ -1677,12 +1760,9 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				}
 
 				if (setString)
-				{
 					SetDlgItemText(hDebug, IDC_DEBUGGER_ADDR_LINE, "Leftclick = Inline Assembler. Midclick = Game Genie. Rightclick = Hexeditor.");
-				} else
-				{
+				else
 					SetDlgItemText(hDebug, IDC_DEBUGGER_ADDR_LINE, "");
-				}
 				break;
 			}
 			case WM_LBUTTONDOWN:
