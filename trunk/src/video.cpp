@@ -45,7 +45,8 @@
 #include "drivers/videolog/nesvideos-piece.h"
 #endif
 
-#ifdef WIN32
+//no stdint in win32 (but we could add it if we needed to)
+#ifndef WIN32
 #include <stdint.h>
 #endif
 

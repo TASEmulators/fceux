@@ -20,7 +20,6 @@
 #include "driver.h"
 #include "cheat.h"
 #include "x6502.h"
-#include "x6502abbrev.h"
 #include "utils/xstring.h"
 #include "utils/memory.h"
 #include "fceulua.h"
@@ -48,6 +47,8 @@ extern TASEDITOR_LUA taseditor_lua;
 #include <map>
 #include <string>
 #include <algorithm>
+
+#include "x6502abbrev.h"
 
 bool CheckLua()
 {
