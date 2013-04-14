@@ -1462,7 +1462,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			si.nMin = 0;
 			si.nMax = 0x10000;
 			si.nPos = 0;
-			si.nPage = 10;
+			si.nPage = 8;
 			SetScrollInfo(GetDlgItem(hwndDlg,IDC_DEBUGGER_DISASSEMBLY_VSCR),SB_CTL,&si,TRUE);
 
 			//setup font
@@ -1708,7 +1708,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				i = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
 				if (i < 0)
 				{
-					for (int i = si.nPage; i > 0; i--)
+					for (i *= -si.nPage; i > 0; i--)
 					{
 						si.nPos = InstructionDown(si.nPos);
 						if ((si.nPos + (int)si.nPage) > si.nMax)
@@ -1719,7 +1719,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					}
 				} else if (i > 0)
 				{
-					for (int i = si.nPage; i > 0; i--)
+					for (i *= si.nPage; i > 0; i--)
 					{
 						si.nPos = InstructionUp(si.nPos);
 						if (si.nPos < si.nMin)
