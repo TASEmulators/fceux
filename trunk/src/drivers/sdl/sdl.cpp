@@ -271,6 +271,10 @@ static void DoFun(int frameskip)
 	static int fskipc = 0;
 	static int opause = 0;
 
+    //TODO peroidic saves, working on it right now
+    //if (FCEUD_GetTime() % 5000 == 0){
+    //    FCEUI_SaveState(NULL);
+    //}
 #ifdef FRAMESKIP
 	fskipc = (fskipc + 1) % (frameskip + 1);
 #endif
@@ -535,7 +539,7 @@ int main(int argc, char *argv[])
 
 	int error, frameskip;
 
-	FCEUD_Message("Starting "FCEU_NAME_AND_VERSION"...\n");
+	FCEUD_Message("Starting " FCEU_NAME_AND_VERSION "...\n");
 
 #ifdef WIN32
 	/* Taken from win32 sdl_main.c */
