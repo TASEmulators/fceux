@@ -43,6 +43,9 @@ using namespace std;
 //#define LOG_SKIP_UNMAPPED 4
 //#define LOG_ADD_PERIODS 8
 
+extern uint64 total_cycles_base;
+extern uint64 total_instructions;
+
 // ################################## Start of SP CODE ###########################
 
 #include "debuggersp.h"
@@ -75,6 +78,7 @@ int tracelogbufusedsize;
 
 char str_axystate[LOG_AXYSTATE_MAX_LEN] = {0}, str_procstatus[LOG_PROCSTATUS_MAX_LEN] = {0};
 char str_tabs[LOG_TABS_MASK+1] = {0}, str_address[LOG_ADDRESS_MAX_LEN] = {0}, str_data[LOG_DATA_MAX_LEN] = {0}, str_disassembly[LOG_DISASSEMBLY_MAX_LEN] = {0};
+char str_result[LOG_LINE_MAX_LEN] = {0};
 char str_temp[LOG_LINE_MAX_LEN] = {0};
 char* tracer_decoration_name;
 char* tracer_decoration_comment;
@@ -147,7 +151,9 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_NEW_INSTRUCTIONS, (logging_options & LOG_NEW_INSTRUCTIONS) ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_NEW_DATA, (logging_options & LOG_NEW_DATA) ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_STATUSES_TO_THE_LEFT, (logging_options & LOG_TO_THE_LEFT) ? BST_CHECKED : BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_FRAME_NUMBER, (logging_options & LOG_FRAME_NUMBER) ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_FRAMES_COUNT, (logging_options & LOG_FRAMES_COUNT) ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_CYCLES_COUNT, (logging_options & LOG_CYCLES_COUNT) ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_INSTRUCTIONS_COUNT, (logging_options & LOG_INSTRUCTIONS_COUNT) ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_MESSAGES, (logging_options & LOG_MESSAGES) ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_BREAKPOINTS, (logging_options & LOG_BREAKPOINTS) ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_SYMBOLIC_TRACING, (logging_options & LOG_SYMBOLIC) ? BST_CHECKED : BST_UNCHECKED);
@@ -195,9 +201,17 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 							logging_options ^= LOG_TO_THE_LEFT;
 							CheckDlgButton(hwndDlg, IDC_CHECK_LOG_STATUSES_TO_THE_LEFT, (logging_options & LOG_TO_THE_LEFT) ? BST_CHECKED : BST_UNCHECKED);
 							break;
-						case IDC_CHECK_LOG_FRAME_NUMBER:
-							logging_options ^= LOG_FRAME_NUMBER;
-							CheckDlgButton(hwndDlg, IDC_CHECK_LOG_FRAME_NUMBER, (logging_options & LOG_FRAME_NUMBER) ? BST_CHECKED : BST_UNCHECKED);
+						case IDC_CHECK_LOG_FRAMES_COUNT:
+							logging_options ^= LOG_FRAMES_COUNT;
+							CheckDlgButton(hwndDlg, IDC_CHECK_LOG_FRAMES_COUNT, (logging_options & LOG_FRAMES_COUNT) ? BST_CHECKED : BST_UNCHECKED);
+							break;
+						case IDC_CHECK_LOG_CYCLES_COUNT:
+							logging_options ^= LOG_CYCLES_COUNT;
+							CheckDlgButton(hwndDlg, IDC_CHECK_LOG_CYCLES_COUNT, (logging_options & LOG_CYCLES_COUNT) ? BST_CHECKED : BST_UNCHECKED);
+							break;
+						case IDC_CHECK_LOG_INSTRUCTIONS_COUNT:
+							logging_options ^= LOG_INSTRUCTIONS_COUNT;
+							CheckDlgButton(hwndDlg, IDC_CHECK_LOG_INSTRUCTIONS_COUNT, (logging_options & LOG_INSTRUCTIONS_COUNT) ? BST_CHECKED : BST_UNCHECKED);
 							break;
 						case IDC_CHECK_LOG_MESSAGES:
 							logging_options ^= LOG_MESSAGES;
@@ -360,8 +374,8 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			olddatacount = datacount;
 			if(unloggedlines > 0)
 			{
-				sprintf(str_temp, "(%d lines skipped)", unloggedlines);
-				OutputLogLine(str_temp);
+				sprintf(str_result, "(%d lines skipped)", unloggedlines);
+				OutputLogLine(str_result);
 				unloggedlines = 0;
 			}
 		} else
@@ -473,15 +487,25 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
 	}
 
-	// Start filling the str_temp line: Frame number, AXYS state, Processor status, Tabs, Address, Data, Disassembly
-	if (logging_options & LOG_FRAME_NUMBER)
+	// Start filling the str_temp line: Frame count, Cycles count, Instructions count, AXYS state, Processor status, Tabs, Address, Data, Disassembly
+	if (logging_options & LOG_FRAMES_COUNT)
 	{
-		sprintf(str_temp, "%06u: ", currFrameCounter);
+		sprintf(str_result, "f%-6u ", currFrameCounter);
 	} else
 	{
-		str_temp[0] = 0;
+		str_result[0] = 0;
 	}
-
+	if (logging_options & LOG_CYCLES_COUNT)
+	{
+		sprintf(str_temp, "c%-11llu ", (timestampbase + (uint64)timestamp - total_cycles_base));
+		strcat(str_result, str_temp);
+	}
+	if (logging_options & LOG_INSTRUCTIONS_COUNT)
+	{
+		sprintf(str_temp, "i%-11llu ", total_instructions);
+		strcat(str_result, str_temp);
+	}
+	
 	if (logging_options & LOG_REGISTERS)
 	{
 		sprintf(str_axystate,"A:%02X X:%02X Y:%02X S:%02X ",(X.A),(X.X),(X.Y),(X.S));
@@ -505,9 +529,9 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 	if (logging_options & LOG_TO_THE_LEFT)
 	{
 		if (logging_options & LOG_REGISTERS)
-			strcat(str_temp, str_axystate);
+			strcat(str_result, str_axystate);
 		if (logging_options & LOG_PROCESSOR_STATUS)
-			strcat(str_temp, str_procstatus);
+			strcat(str_result, str_procstatus);
 	}
 
 	if (logging_options & LOG_CODE_TABBING)
@@ -517,26 +541,26 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		for (int i = 0; i < spaces; i++)
 			str_tabs[i] = ' ';
 		str_tabs[spaces] = 0;
-		strcat(str_temp, str_tabs);
+		strcat(str_result, str_tabs);
 	} else if (logging_options & LOG_TO_THE_LEFT)
 	{
-		strcat(str_temp, " ");
+		strcat(str_result, " ");
 	}
 
 	sprintf(str_address, "$%04X:", addr);
-	strcat(str_temp, str_address);
-	strcat(str_temp, str_data);
-	strcat(str_temp, str_disassembly);
+	strcat(str_result, str_address);
+	strcat(str_result, str_data);
+	strcat(str_result, str_disassembly);
 
 	if (!(logging_options & LOG_TO_THE_LEFT))
 	{
 		if (logging_options & LOG_REGISTERS)
-			strcat(str_temp, str_axystate);
+			strcat(str_result, str_axystate);
 		if (logging_options & LOG_PROCESSOR_STATUS)
-			strcat(str_temp, str_procstatus);
+			strcat(str_result, str_procstatus);
 	}
 
-	OutputLogLine(str_temp);
+	OutputLogLine(str_result);
 	return;
 }
 

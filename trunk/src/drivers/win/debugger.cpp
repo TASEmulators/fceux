@@ -54,14 +54,14 @@ extern int vblankScanLines;
 extern int vblankPixel;
 extern bool DebuggerWasUpdated;
 
-extern unsigned long int total_cycles_base;
-extern unsigned long int delta_cycles_base;
+extern uint64 total_cycles_base;
+extern uint64 delta_cycles_base;
 extern bool break_on_cycles;
-extern unsigned long int break_cycles_limit;
-extern unsigned long int total_instructions;
-extern unsigned long int delta_instructions;
+extern uint64 break_cycles_limit;
+extern uint64 total_instructions;
+extern uint64 delta_instructions;
 extern bool break_on_instructions;
-extern unsigned long int break_instructions_limit;
+extern uint64 break_instructions_limit;
 extern void ResetDebugStatisticsCounters();
 extern void ResetDebugStatisticsDeltaCounters();
 
@@ -111,8 +111,8 @@ void UpdateOtherDebuggingDialogs()
 void RestoreSize(HWND hwndDlg)
 {
 	//If the dialog dimensions are changed those changes need to be reflected here.  - adelikat
-	const int DEFAULT_WIDTH = 815;	//Original width
-	const int DEFAULT_HEIGHT = 559;	//Original height
+	const int DEFAULT_WIDTH = 820;	//Original width
+	const int DEFAULT_HEIGHT = 560;	//Original height
 	
 	SetWindowPos(hwndDlg,HWND_TOP,DbgPosX,DbgPosY,DEFAULT_WIDTH,DEFAULT_HEIGHT,SWP_SHOWWINDOW);
 }
@@ -783,25 +783,25 @@ void UpdateDebugger(bool jump_to_pc)
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_PPUPIXEL, str2);
 
 	// update counters
-	unsigned long int counter_value = timestampbase + timestamp - total_cycles_base;
+	uint64 counter_value = timestampbase + (uint64)timestamp - total_cycles_base;
 	if (counter_value < 0)	// sanity check
 	{
 		ResetDebugStatisticsCounters();
 		counter_value = 0;
 	}
-	sprintf(str, "%lu", counter_value);
+	sprintf(str, "%llu", counter_value);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_CYCLES_COUNT, str);
-	counter_value = timestampbase + timestamp - delta_cycles_base;
+	counter_value = timestampbase + (long)timestamp - delta_cycles_base;
 	if (counter_value < 0)	// sanity check
 	{
 		ResetDebugStatisticsCounters();
 		counter_value = 0;
 	}
-	sprintf(str, "(+%lu)", counter_value);
+	sprintf(str, "(+%llu)", counter_value);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_CYCLES_COUNT2, str);
-	sprintf(str, "%lu", total_instructions);
+	sprintf(str, "%llu", total_instructions);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_INSTRUCTIONS_COUNT, str);
-	sprintf(str, "(+%lu)", delta_instructions);
+	sprintf(str, "(+%llu)", delta_instructions);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_INSTRUCTIONS_COUNT2, str);
 
 	UpdateBreakpointsCaption();
@@ -1708,7 +1708,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				i = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
 				if (i < 0)
 				{
-					for (i *= -si.nPage; i > 0; i--)
+					for (i *= -(int)si.nPage; i > 0; i--)
 					{
 						si.nPos = InstructionDown(si.nPos);
 						if ((si.nPos + (int)si.nPage) > si.nMax)

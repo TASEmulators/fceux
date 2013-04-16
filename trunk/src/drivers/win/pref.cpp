@@ -29,9 +29,9 @@
 #include "../../debug.h"
 
 extern bool break_on_cycles;
-extern unsigned long int break_cycles_limit;
+extern uint64 break_cycles_limit;
 extern bool break_on_instructions;
-extern unsigned long int break_instructions_limit;
+extern uint64 break_instructions_limit;
 
 extern char symbDebugEnabled;
 

@@ -441,14 +441,14 @@ int skipdebug; //deleteme
 int numWPs;
 
 // for CPU cycles and Instructions counters
-unsigned long int total_cycles_base = 0;
-unsigned long int delta_cycles_base = 0;
+uint64 total_cycles_base = 0;
+uint64 delta_cycles_base = 0;
 bool break_on_cycles = false;
-unsigned long int break_cycles_limit = 0;
-unsigned long int total_instructions = 0;
-unsigned long int delta_instructions = 0;
+uint64 break_cycles_limit = 0;
+uint64 total_instructions = 0;
+uint64 delta_instructions = 0;
 bool break_on_instructions = false;
-unsigned long int break_instructions_limit = 0;
+uint64 break_instructions_limit = 0;
 
 static DebuggerState dbgstate;
 
@@ -456,12 +456,12 @@ DebuggerState &FCEUI_Debugger() { return dbgstate; }
 
 void ResetDebugStatisticsCounters()
 {
-	total_cycles_base = delta_cycles_base = timestampbase + timestamp;
+	total_cycles_base = delta_cycles_base = timestampbase + (uint64)timestamp;
 	total_instructions = delta_instructions = 0;
 }
 void ResetDebugStatisticsDeltaCounters()
 {
-	delta_cycles_base = timestampbase + timestamp;
+	delta_cycles_base = timestampbase + (uint64)timestamp;
 	delta_instructions = 0;
 }
 void IncrementInstructionsCounters()
@@ -510,7 +510,7 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 	uint8 stackop=0;
 	uint8 stackopstartaddr,stackopendaddr;
 
-	if (break_on_cycles && (timestampbase + timestamp - total_cycles_base > break_cycles_limit))
+	if (break_on_cycles && ((timestampbase + (uint64)timestamp - total_cycles_base) > break_cycles_limit))
 		BreakHit(BREAK_TYPE_CYCLES_EXCEED, true);
 	if (break_on_instructions && (total_instructions > break_instructions_limit))
 		BreakHit(BREAK_TYPE_INSTRUCTIONS_EXCEED, true);
