@@ -18,9 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <cstring>
-#include <cstdio>
-
 #include "main.h"
 #include "dface.h"
 #include "input.h"
@@ -46,6 +43,9 @@
 #endif
 #endif
 
+
+#include <cstring>
+#include <cstdio>
 
 /** GLOBALS **/
 int NoWaiting = 1;

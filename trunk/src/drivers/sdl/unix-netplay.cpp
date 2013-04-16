@@ -21,18 +21,25 @@
 //todo - ensure that #ifdef WIN32 makes sense
 //consider changing this to use sdl net stuff?
 
-#include <string.h>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <errno.h>
-#include <fcntl.h>
 #include "main.h"
 #include "dface.h"
 #include "unix-netplay.h"
+
+#include "../../fceu.h"
+#include "../../utils/md5.h"
+#include "../../utils/memory.h"
+
+#include <string>
+#include "../common/configSys.h"
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
+#include <cerrno>
+#include <fcntl.h>
 
 #ifdef WIN32
 #include <winsock.h>
@@ -44,13 +51,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #endif
-
-#include "../../fceu.h"
-#include "../../utils/md5.h"
-#include "../../utils/memory.h"
-
-#include <string>
-#include "../common/configSys.h"
 
 extern Config *g_config;
 

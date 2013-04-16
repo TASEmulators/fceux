@@ -21,14 +21,14 @@
 /// \file
 /// \brief Handles sound emulation using the SDL.
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
 #include "sdl.h"
 
 #include "../common/configSys.h"
 #include "../../utils/memory.h"
+
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 extern Config *g_config;
 

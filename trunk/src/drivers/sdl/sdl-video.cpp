@@ -21,10 +21,6 @@
 /// \file
 /// \brief Handles the graphical game display for the SDL implementation.
 
-#include <cstdio>
-#include <cstring>
-#include <cstdlib>
-
 #include "sdl.h"
 #include "sdl-opengl.h"
 #include "../common/vidblit.h"
@@ -48,6 +44,10 @@
 #include "gui.h"
 #include <gdk/gdkx.h>
 #endif
+
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 // GLOBALS
 extern Config *g_config;

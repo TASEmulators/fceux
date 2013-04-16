@@ -1,22 +1,3 @@
-#include <unistd.h>
-#include <sys/types.h>
-#include <csignal>
-#include <sys/time.h>
-#include <sys/stat.h>
-#include <cstring>
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
-#include <fstream>
-#include <climits>
-#include <cmath>
-
-#ifdef _GTK
-#include <gtk/gtk.h>
-#include "gui.cpp"
-#endif
-
 #include "main.h"
 #include "throttle.h"
 #include "config.h"
@@ -48,6 +29,25 @@
 #include <windows.h>
 #endif
 
+#ifdef _GTK
+#include <gtk/gtk.h>
+#include "gui.cpp"
+#endif
+
+#include <unistd.h>
+#include <csignal>
+#include <cstring>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <climits>
+#include <cmath>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/stat.h>
+#include <iostream>
+#include <fstream>
+
 extern double g_fpsScale;
 
 extern bool MaxSpeed;
@@ -64,6 +64,7 @@ int eoptions=0;
 
 static void DriverKill(void);
 static int DriverInitialize(FCEUGI *gi);
+uint64 FCEUD_GetTime();
 int gametype = 0;
 #ifdef CREATE_AVI
 int mutecapture;
@@ -346,7 +347,7 @@ FCEUD_Update(uint8 *XBuf,
 	{
 	  if(LoggingEnabled == 2)
 	  {
-		int16* MonoBuf = (int16*)malloc(sizeof(*MonoBuf) * Count);
+		int16* MonoBuf = new int16[Count];
 		int n;
 		for(n=0; n<Count; ++n)
 			MonoBuf[n] = Buffer[n] & 0xFFFF;
@@ -356,7 +357,7 @@ FCEUD_Update(uint8 *XBuf,
 		  FSettings.SndRate, 16, 1,
 		  Count
 		 );
-		free(MonoBuf);
+		delete [] MonoBuf;
 	  }
 	  Count /= 2;
 	  if(inited & 1)
@@ -589,8 +590,9 @@ int main(int argc, char *argv[])
 	// This is here so that a default fceux.cfg will be created on first
 	// run, even without a valid ROM to play.
 	// Unless, of course, there's actually --no-config given
-	// mbg 8/23/2008 - this is also here so that the inputcfg routines can have a chance to dump the new inputcfg to the fceux.cfg
-	// in case you didnt specify a rom filename
+	// mbg 8/23/2008 - this is also here so that the inputcfg routines can have 
+    // a chance to dump the new inputcfg to the fceux.cfg  in case you didnt 
+    // specify a rom  filename
 	g_config->getOption("SDL.NoConfig", &noconfig);
 	if (!noconfig)
 		g_config->save();
@@ -902,6 +904,7 @@ int main(int argc, char *argv[])
 				SDL_Delay(1);
 			while(gtk_events_pending())
 			gtk_main_iteration_do(FALSE);
+            printf("%d\n", FCEUD_GetTime());
 		}
 	}
 	else

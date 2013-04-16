@@ -1,15 +1,3 @@
-#include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
-#include <gdk/gdkx.h>
-
-#ifdef _GTK3
-#include <gdk/gdkkeysyms-compat.h>
-#endif
-
-#include <fstream>
-#include <iostream>
-#include <cstdlib>
-
 #include "../../types.h"
 #include "../../fceu.h"
 #include "../../driver.h"
@@ -29,6 +17,18 @@
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
 #endif
+
+#include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
+#include <gdk/gdkx.h>
+
+#ifdef _GTK3
+#include <gdk/gdkkeysyms-compat.h>
+#endif
+
+#include <fstream>
+#include <iostream>
+#include <cstdlib>
 
 // Fix compliation errors for older version of GTK (Ubuntu 10.04 LTS)
 #if GTK_MINOR_VERSION < 24 && GTK_MAJOR_VERSION == 2
@@ -517,7 +517,7 @@ void openHotkeyConfig()
 				SDL_GetKeyName((SDLKey)keycode),
 #endif
                 -1);
-        gtk_tree_store_append(hotkey_store, &iter, NULL); // acquire child     iterator
+        gtk_tree_store_append(hotkey_store, &iter, NULL); // acquire child iterator
     }                      
 
 	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(hotkey_store));

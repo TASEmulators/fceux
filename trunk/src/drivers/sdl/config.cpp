@@ -1,13 +1,3 @@
-#include <unistd.h>
-#include <sys/types.h>
-#include <csignal>
-#include <sys/time.h>
-#include <sys/stat.h>
-#include <cstring>
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-
 #include "main.h"
 #include "throttle.h"
 #include "config.h"
@@ -25,6 +15,16 @@
 #include <windows.h>
 #endif
 
+#include <unistd.h>
+
+#include <csignal>
+#include <cstring>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 /**
  * Read a custom pallete from a file and load it into the core.
