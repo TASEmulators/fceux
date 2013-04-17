@@ -33,6 +33,7 @@
 #include "fds.h"
 #include "cart.h"
 #include "input.h"
+#include "state.h"
 #include "driver.h"
 #ifdef _S9XLUA_H
 #include "fceulua.h"
@@ -47,13 +48,15 @@
 #include <cstring>
 #include <cmath>
 
+static const int FIXED_EXWRAM_SIZE = 32768+8192;
+
 static uint8 SongReload;
-static int CurrentSong;
+static int32 CurrentSong;
 
 static DECLFW(NSF_write);
 static DECLFR(NSF_read);
 
-static int vismode=1;
+static int vismode=1; //we cant consider this state, because the UI may be controlling it and wouldnt know we loadstated it
 
 //mbg 7/31/06 todo - no reason this couldnt be assembled on the fly from actual asm source code. thatd be less obscure.
 //here it is disassembled, for reference
@@ -107,18 +110,18 @@ static DECLFR(NSFROMRead)
 	return (NSFROM-0x3800)[A];
 }
 
-static int doreset=0;
-static int NSFNMIFlags;
-uint8 *NSFDATA=0;
-int NSFMaxBank;
+static uint8 doreset=0; //state
+static uint8 NSFNMIFlags; //state
+uint8 *NSFDATA=0; //configration, loaded from rom?
+int NSFMaxBank; //configuration
 
-static int NSFSize;
-static uint8 BSon;
-static uint8 BankCounter;
+static int32 NSFSize; //configuration
+static uint8 BSon; //configuration
+static uint8 BankCounter; //configuration
 
-static uint16 PlayAddr;
-static uint16 InitAddr;
-static uint16 LoadAddr;
+static uint16 PlayAddr; //configuration
+static uint16 InitAddr; //configuration
+static uint16 LoadAddr; //configuration
 
 extern char LoadedRomFName[2048];
 
@@ -275,10 +278,13 @@ int NSFLoad(const char *name, FCEUFILE *fp)
 	FCEU_printf(" %s\n",(NSFHeader.VideoSystem&1)?"PAL":"NTSC");
 	FCEU_printf(" Starting song:  %d / %d\n\n",NSFHeader.StartingSong,NSFHeader.TotalSongs);
 
+	//choose exwram size and allocate
+	int exwram_size = 8192;
 	if(NSFHeader.SoundChip&4)
-		ExWRAM=(uint8*)FCEU_gmalloc(32768+8192); //mbg merge 7/17/06 added cast
-	else
-		ExWRAM=(uint8*)FCEU_gmalloc(8192); //mbg merge 7/17/06 added cast
+		exwram_size = 32768+8192;
+	//lets just always use this size, for savestate simplicity
+	exwram_size = FIXED_EXWRAM_SIZE;
+	ExWRAM=(uint8*)FCEU_gmalloc(exwram_size);
 
 	FCEUI_SetVidSystem(NSFHeader.VideoSystem);
 
@@ -304,6 +310,15 @@ void NSFVRC7_Init(void);
 void NSFMMC5_Init(void);
 void NSFN106_Init(void);
 void NSFAY_Init(void);
+
+//zero 17-apr-2013 - added
+static SFORMAT StateRegs[] = {
+	{&SongReload, 1, "SREL"},
+	{&CurrentSong, 4 | FCEUSTATE_RLSB, "CURS"},
+	{&doreset, 1, "DORE"},
+	{&NSFNMIFlags, 1, "NMIF"},
+	{ 0 }
+};
 
 void NSF_init(void)
 {
@@ -376,6 +391,10 @@ void NSF_init(void)
 	CurrentSong=NSFHeader.StartingSong;
 	SongReload=0xFF;
 	NSFNMIFlags=0;
+
+	//zero 17-apr-2013 - added
+	AddExState(StateRegs, ~0, 0, 0);
+	AddExState(ExWRAM, FIXED_EXWRAM_SIZE, 0, "ERAM");
 }
 
 static DECLFW(NSF_write)
