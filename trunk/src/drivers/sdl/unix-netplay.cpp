@@ -22,6 +22,7 @@
 //consider changing this to use sdl net stuff?
 
 #include "main.h"
+#include "input.h"
 #include "dface.h"
 #include "unix-netplay.h"
 

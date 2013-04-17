@@ -235,9 +235,13 @@ InitConfig()
 	config->addOption("mute", "SDL.MuteCapture", 0);
     #endif
     
-
+    // auto load/save on gameload/close
 	config->addOption("loadstate", "SDL.AutoLoadState", INVALID_STATE);
 	config->addOption("savestate", "SDL.AutoSaveState", INVALID_STATE);
+
+    //TODO implement this
+    config->addOption("periodicsaves", "SDL.PeriodicSaves", 0);
+
     
     #ifdef _GTK
 	char* home_dir = getenv("HOME");

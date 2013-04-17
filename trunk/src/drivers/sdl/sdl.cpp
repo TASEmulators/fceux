@@ -31,7 +31,7 @@
 
 #ifdef _GTK
 #include <gtk/gtk.h>
-#include "gui.cpp"
+#include "gui.h"
 #endif
 
 #include <unistd.h>
@@ -126,8 +126,8 @@ static const char *DriverUsage=
 "--rp2mic       {0|1}   Replace Port 2 Start with microphone (Famicom).\n"
 "--nogui                Don't load the GTK GUI\n"
 "--4buttonexit {0|1}    exit the emulator when A+B+Select+Start is pressed\n"
-"--savestate {0-9|>9}   load from the given state when the game is loaded\n"
-"--loadstate {0-9|>9}   save to the given state when the game is closed\n"
+"--loadstate {0-9|>9}   load from the given state when the game is loaded\n"
+"--savestate {0-9|>9}   save to the given state when the game is closed\n"
 "                         to not save/load automatically provide a number\n"
 "                         greater than 9\n";
 

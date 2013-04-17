@@ -6,15 +6,19 @@
 #else
 #include <SDL.h>
 #endif
+
 #include "main.h"
 #include "dface.h"
 #include "input.h"
 
-static void DoFun(int frameskip);
-static int isloaded = 0;
+const int INVALID_STATE = 99;
+
 extern int noGui;
+extern int isloaded;
 
 int LoadGame(const char *path);
 int CloseGame(void);
+void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
+uint64 FCEUD_GetTime();
 
 #endif

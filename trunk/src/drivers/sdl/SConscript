@@ -7,21 +7,23 @@ if env['PLATFORM'] == 'darwin':
 env.ParseConfig(config_string)
 Export('env')
 
-source_list =  Split("""
-input.cpp
-config.cpp
-sdl.cpp
-sdl-joystick.cpp
-sdl-sound.cpp
-sdl-throttle.cpp
-sdl-video.cpp
-unix-netplay.cpp
-""")
+source_list = Split(
+    """
+    input.cpp
+    config.cpp
+    sdl.cpp
+    gui.cpp
+    sdl-joystick.cpp
+    sdl-sound.cpp
+    sdl-throttle.cpp
+    sdl-video.cpp
+    unix-netplay.cpp
+    game.cpp
+    """)
 
 Import('env')
 if 'GL' in env['LIBS']:
   source_list.append('sdl-opengl.cpp')
 
-for x in range(len(source_list)):
-  source_list[x] = 'drivers/sdl/' + source_list[x]
+source_list = ['drivers/sdl/' + source for source in source_list]
 Return('source_list')
