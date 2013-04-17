@@ -92,8 +92,8 @@ static uint8 *WRAM = NULL;
 static uint8 *MMC5fill = NULL;
 static uint8 *ExRAM = NULL;
 
-static uint8 MMC5WRAMsize;
-static uint8 MMC5WRAMIndex[8];
+static uint8 MMC5WRAMsize; //configuration, not state
+static uint8 MMC5WRAMIndex[8]; //configuration, not state
 
 static uint8 MMC5ROMWrProtect[4];
 static uint8 MMC5MemIn[5];
@@ -494,13 +494,19 @@ void MMC5Synco(void) {
 		MMC5CHRA();
 		MMC5CHRB();
 	}
+
+	//in case the fill register changed, we need to overwrite the fill buffer
 	FCEU_dwmemset(MMC5fill, NTFill | (NTFill << 8) | (NTFill << 16) | (NTFill << 24), 0x3c0);
 	{
 		unsigned char moop = ATFill | (ATFill << 2) | (ATFill << 4) | (ATFill << 6);
 		FCEU_dwmemset(MMC5fill + 0x3c0, moop | (moop << 8) | (moop << 16) | (moop << 24), 0x40);
 	}
-	X6502_IRQEnd(FCEU_IQEXT);
+
 	MMC5HackCHRMode = CHRMode & 3;
+
+	//zero 17-apr-2013 - why the heck should this happen here? anything in a `synco` should be depending on the state.
+	//im going to leave it commented out to see what happens
+	//X6502_IRQEnd(FCEU_IQEXT);
 }
 
 void MMC5_hb(int scanline) {
@@ -772,6 +778,15 @@ static SFORMAT MMC5_StateRegs[] = {
 	{ &NTFill, 1, "NTFL" },
 	{ &ATFill, 1, "ATFL" },
 
+	//zero 17-apr-2013 - added
+	{ &MMC5IRQR, 1, "IRQR" },
+	{ &MMC5LineCounter, 1, "LCTR" },
+	{ &mmc5psize, 1, "PSIZ" },
+	{ &mmc5vsize, 1, "VSIZ" },
+	{ mul, 2, "MUL2" },
+	{ MMC5ROMWrProtect, 4, "WRPR" },
+	{ MMC5MemIn, 5, "MEMI" },
+
 	{ &MMC5Sound.wl[0], 2 | FCEUSTATE_RLSB, "SDW0" },
 	{ &MMC5Sound.wl[1], 2 | FCEUSTATE_RLSB, "SDW1" },
 	{ MMC5Sound.env, 2, "SDEV" },
@@ -779,6 +794,15 @@ static SFORMAT MMC5_StateRegs[] = {
 	{ &MMC5Sound.running, 1, "SDRU" },
 	{ &MMC5Sound.raw, 1, "SDRW" },
 	{ &MMC5Sound.rawcontrol, 1, "SDRC" },
+
+	//zero 17-apr-2013 - added
+	{ &MMC5Sound.dcount[0], 4 | FCEUSTATE_RLSB, "DCT0" },
+	{ &MMC5Sound.dcount[1], 4 | FCEUSTATE_RLSB, "DCT1" },
+	{ &MMC5Sound.BC[0], 4 | FCEUSTATE_RLSB, "BC00" },
+	{ &MMC5Sound.BC[1], 4 | FCEUSTATE_RLSB, "BC01" },
+	{ &MMC5Sound.BC[2], 4 | FCEUSTATE_RLSB, "BC02" },
+	{ &MMC5Sound.vcount[0], 4 | FCEUSTATE_RLSB, "VCT0" },
+	{ &MMC5Sound.vcount[1], 4 | FCEUSTATE_RLSB, "VCT1" },
 	{ 0 }
 };
 
