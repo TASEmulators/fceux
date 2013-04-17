@@ -66,10 +66,10 @@ public:
     int setOption(const std::string &, double);
     int setOption(const std::string &, void (*)(const std::string &));
 
-    int getOption(const std::string &, std::string *);
-    int getOption(const std::string &, const char **);
-    int getOption(const std::string &, int *);
-    int getOption(const std::string &, double *);
+    int getOption(const std::string &, std::string *) const;
+    int getOption(const std::string &, const char **) const;
+    int getOption(const std::string &, int *) const;
+    int getOption(const std::string &, double *) const;
 
     /**
      * Parse the arguments.  Also read in the configuration file and
