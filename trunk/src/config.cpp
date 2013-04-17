@@ -13,10 +13,10 @@
 
 static char *aboutString = 0;
 
-///returns a string suitable for use in an aboutbox
+// returns a string suitable for use in an aboutbox
 char *FCEUI_GetAboutString() {
 	const char *aboutTemplate =
-		"FCEU_NAME_AND_VERSION \n\n"
+		FCEU_NAME_AND_VERSION "\n\n"
 		"Administrators:\n"
 		"zeromus, adelikat, AnS\n\n"
 		"Current Contributors:\n"
