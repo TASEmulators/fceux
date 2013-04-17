@@ -147,7 +147,7 @@ static void FCEU_CloseGame(void)
 {
 	if (GameInfo)
 	{
-		if (AutoResumePlay && (GameInfo->type != GIT_NSF))
+		if (AutoResumePlay)
 		{
 			// save "-resume" savestate
 			FCEUSS_Save(FCEU_MakeFName(FCEUMKF_RESUMESTATE, 0, 0).c_str());
@@ -494,7 +494,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	if (GameInfo->type != GIT_NSF)
 		FCEU_LoadGameCheats(0);
 
-	if (AutoResumePlay && (GameInfo->type != GIT_NSF))
+	if (AutoResumePlay)
 	{
 		// load "-resume" savestate
 		if (FCEUSS_Load(FCEU_MakeFName(FCEUMKF_RESUMESTATE, 0, 0).c_str()))
