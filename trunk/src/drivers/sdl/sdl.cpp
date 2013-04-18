@@ -920,7 +920,6 @@ int main(int argc, char *argv[])
 				SDL_Delay(1);
 			while(gtk_events_pending())
 			gtk_main_iteration_do(FALSE);
-            printf("%d\n", FCEUD_GetTime());
 		}
 	}
 	else
