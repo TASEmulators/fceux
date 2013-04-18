@@ -21,7 +21,10 @@
 #define FCEUX_GUI_H
 
 #define GTK
+
+#ifdef _GTK
 #include <gtk/gtk.h>
+#endif
 extern GtkWidget* MainWindow;
 extern GtkWidget* evbox;
 extern GtkRadioAction* stateSlot;
