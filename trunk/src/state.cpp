@@ -446,7 +446,7 @@ bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 }
 
 
-void FCEUSS_Save(const char *fname)
+void FCEUSS_Save(const char *fname, bool display_message)
 {
 	EMUFILE* st = 0;
 	char fn[2048];
@@ -480,7 +480,7 @@ void FCEUSS_Save(const char *fname)
 		st = FCEUD_UTF8_fstream(fn,"wb");
 	}
 
-	if(st == NULL || st->get_fp() == NULL)
+	if(display_message && st == NULL || st->get_fp() == NULL)
 	{
 		FCEU_DispMessage("State %d save error.",0,CurrentState);
 		return;
@@ -519,7 +519,7 @@ void FCEUSS_Save(const char *fname)
 
 	delete st;
 
-	if(!fname)
+	if(display_message && !fname)
 	{
 		SaveStateStatus[CurrentState]=1;
 		FCEU_DispMessage("State %d saved.",0,CurrentState);
@@ -701,7 +701,7 @@ bool FCEUSS_LoadFP(EMUFILE* is, ENUM_SSLOADPARAMS params)
 }
 
 
-bool FCEUSS_Load(const char *fname)
+bool FCEUSS_Load(const char *fname, bool display_message)
 {
 	EMUFILE* st;
 	char fn[2048];
@@ -730,7 +730,7 @@ bool FCEUSS_Load(const char *fname)
         strcpy(lastLoadstateMade,fn);
 	}
 
-	if(st == NULL || (st->get_fp() == NULL))
+	if(display_message && st == NULL || (st->get_fp() == NULL))
 	{
 		FCEU_DispMessage("State %d load error.",0,CurrentState);
 		//FCEU_DispMessage("State %d load error. Filename: %s",0,CurrentState, fn);
@@ -747,12 +747,16 @@ bool FCEUSS_Load(const char *fname)
 		{
 			char szFilename[260]={0};
 			splitpath(fname, 0, 0, szFilename, 0);
-			FCEU_DispMessage("State %s loaded.",0,szFilename);
+            if (display_message){
+                FCEU_DispMessage("State %s loaded.",0,szFilename);
+            }
 			//FCEU_DispMessage("State %s loaded. Filename: %s",0,szFilename, fn);
 		}
 		else
 		{
-			FCEU_DispMessage("State %d loaded.",0,CurrentState);
+            if (display_message) {
+                FCEU_DispMessage("State %d loaded.",0,CurrentState);
+            }
 			//FCEU_DispMessage("State %d loaded. Filename: %s",0,CurrentState, fn);
 			SaveStateStatus[CurrentState]=1;
 		}
@@ -913,13 +917,13 @@ int FCEUI_SelectState(int w, int show)
 	return oldstate;
 }
 
-void FCEUI_SaveState(const char *fname)
+void FCEUI_SaveState(const char *fname, bool display_message)
 {
 	if(!FCEU_IsValidUI(FCEUI_SAVESTATE)) return;
 
 	StateShow=0;
 
-	FCEUSS_Save(fname);
+	FCEUSS_Save(fname, display_message);
 }
 
 int loadStateFailed = 0; // hack, this function should return a value instead
@@ -933,7 +937,8 @@ bool file_exists(const char * filename)
     }
     return false;
 }
-void FCEUI_LoadState(const char *fname)
+void FCEUI_LoadState(const char *fname, bool display_message)
+
 {
 	if(!FCEU_IsValidUI(FCEUI_LOADSTATE)) return;
 
@@ -956,7 +961,7 @@ void FCEUI_LoadState(const char *fname)
 		loadStateFailed = 1;
 		return; // state doesn't exist; exit cleanly
 	}
-	if(FCEUSS_Load(fname))
+	if(FCEUSS_Load(fname, display_message))
 	{
 		//mbg todo netplay
 #if 0 

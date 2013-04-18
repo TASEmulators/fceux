@@ -161,8 +161,8 @@ int FCEUI_SelectState(int, int);
 extern void FCEUI_SelectStateNext(int);
 
 //"fname" overrides the default save state filename code if non-NULL.
-void FCEUI_SaveState(const char *fname);
-void FCEUI_LoadState(const char *fname);
+void FCEUI_SaveState(const char *fname, bool display_message=true);
+void FCEUI_LoadState(const char *fname, bool display_message=true);
 
 void FCEUD_SaveStateAs(void);
 void FCEUD_LoadStateFrom(void);

@@ -198,9 +198,9 @@ int LoadGame(const char *path)
 
     int state_to_load;
     g_config->getOption("SDL.AutoLoadState", &state_to_load);
-    if (state_to_load != INVALID_STATE){
+    if (state_to_load >= 0 && state_to_load < 10){
         FCEUI_SelectState(state_to_load, 0);
-        FCEUI_LoadState(NULL);
+        FCEUI_LoadState(NULL, false);
     }
 
 	ParseGIInput(GameInfo);
@@ -247,7 +247,7 @@ CloseGame()
     g_config->getOption("SDL.AutoSaveState", &state_to_save);
     if (state_to_save < 10 && state_to_save >= 0){
         FCEUI_SelectState(state_to_save, 0);
-        FCEUI_SaveState(NULL);
+        FCEUI_SaveState(NULL, false);
     }
 	FCEUI_CloseGame();
 
@@ -276,7 +276,7 @@ static void DoFun(int frameskip, int periodic_saves)
 
     //TODO peroidic saves, working on it right now
     if (periodic_saves && FCEUD_GetTime() % PERIODIC_SAVE_INTERVAL < 30){
-        FCEUI_SaveState(NULL);
+        FCEUI_SaveState(NULL, false);
     }
 #ifdef FRAMESKIP
 	fskipc = (fskipc + 1) % (frameskip + 1);
