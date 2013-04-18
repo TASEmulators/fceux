@@ -48,19 +48,20 @@
 #include <iostream>
 #include <fstream>
 
+
 extern double g_fpsScale;
 
 extern bool MaxSpeed;
+
+int isloaded;
 
 bool turbo = false;
 
 int closeFinishedMovie = 0;
 
-int CloseGame(void);
+int eoptions=0;
 
 static int inited = 0;
-
-int eoptions=0;
 
 static void DriverKill(void);
 static int DriverInitialize(FCEUGI *gi);
@@ -129,7 +130,9 @@ static const char *DriverUsage=
 "--loadstate {0-9|>9}   load from the given state when the game is loaded\n"
 "--savestate {0-9|>9}   save to the given state when the game is closed\n"
 "                         to not save/load automatically provide a number\n"
-"                         greater than 9\n";
+"                         greater than 9\n"
+"--periodicsaves {0|1}  enable automatic periodic saving.  This will save to\n"
+"                         the state passed to --savestate\n";
 
 
 // these should be moved to the man file
@@ -242,7 +245,7 @@ CloseGame()
 
     int state_to_save;
     g_config->getOption("SDL.AutoSaveState", &state_to_save);
-    if (state_to_save != INVALID_STATE){
+    if (state_to_save < 10 && state_to_save >= 0){
         FCEUI_SelectState(state_to_save, 0);
         FCEUI_SaveState(NULL);
     }
@@ -263,7 +266,7 @@ CloseGame()
 
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
 
-static void DoFun(int frameskip)
+static void DoFun(int frameskip, int periodic_saves)
 {
 	uint8 *gfx;
 	int32 *sound;
@@ -272,9 +275,9 @@ static void DoFun(int frameskip)
 	static int opause = 0;
 
     //TODO peroidic saves, working on it right now
-    //if (FCEUD_GetTime() % 5000 == 0){
-    //    FCEUI_SaveState(NULL);
-    //}
+    if (periodic_saves && FCEUD_GetTime() % PERIODIC_SAVE_INTERVAL < 30){
+        FCEUI_SaveState(NULL);
+    }
 #ifdef FRAMESKIP
 	fskipc = (fskipc + 1) % (frameskip + 1);
 #endif
@@ -877,6 +880,15 @@ int main(int argc, char *argv[])
 		}
 	}
 	
+    int periodic_saves;
+    int save_state;
+    g_config->getOption("SDL.PeriodicSaves", &periodic_saves);
+    g_config->getOption("SDL.AutoSaveState", &save_state);
+    if(periodic_saves && save_state < 10 && save_state >= 0){
+        FCEUI_SelectState(save_state, 0);
+    } else {
+        periodic_saves = 0;
+    }
 	
 #ifdef _S9XLUA_H
 	// load lua script if option passed
@@ -903,7 +915,7 @@ int main(int argc, char *argv[])
 		while(1)
 		{
 			if(GameInfo)
-				DoFun(frameskip);
+				DoFun(frameskip, periodic_saves);
 			else
 				SDL_Delay(1);
 			while(gtk_events_pending())
@@ -914,12 +926,12 @@ int main(int argc, char *argv[])
 	else
 	{
 		while(GameInfo)
-			DoFun(frameskip);
+			DoFun(frameskip, periodic_saves);
 	}
 #else
 	while(GameInfo)
 	{
-		DoFun(frameskip);
+		DoFun(frameskip, periodic_saves);
 	}
 #endif
 	CloseGame();

@@ -11,6 +11,10 @@
 #include "dface.h"
 #include "input.h"
 
+// I'm using this as a #define so the compiler can optimize the
+// modulo operation
+#define PERIODIC_SAVE_INTERVAL 5000 // milliseconds
+
 const int INVALID_STATE = 99;
 
 extern int noGui;
