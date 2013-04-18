@@ -1,6 +1,8 @@
 #ifndef _FCEUH
 #define _FCEUH
 
+#include "types.h"
+
 extern int fceuindbg;
 extern int newppu;
 void ResetGameLoaded(void);

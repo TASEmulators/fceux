@@ -119,7 +119,7 @@ struct FCEUGI
 	int mappernum;
 
 	EGIT type;
-	EGIV vidsys;     //Current emulated video system;
+	EGIV vidsys;    //Current emulated video system;
 	ESI input[2];   //Desired input for emulated input ports 1 and 2; -1 for unknown desired input.
 	ESIFC inputfc;  //Desired Famicom expansion port device. -1 for unknown desired input.
 	ESIS cspecial;  //Special cart expansion: DIP switches, barcode reader, etc.
