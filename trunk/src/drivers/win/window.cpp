@@ -2245,7 +2245,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			//Load last auto-save
 			case FCEUX_CONTEXT_REWINDTOLASTAUTO:
-				FCEUI_Autosave();
+				FCEUI_RewindToLastAutosave();
 				break;
 
 			//Create a backup movie file

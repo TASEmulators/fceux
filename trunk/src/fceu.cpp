@@ -150,7 +150,7 @@ static void FCEU_CloseGame(void)
 		if (AutoResumePlay)
 		{
 			// save "-resume" savestate
-			FCEUSS_Save(FCEU_MakeFName(FCEUMKF_RESUMESTATE, 0, 0).c_str());
+			FCEUSS_Save(FCEU_MakeFName(FCEUMKF_RESUMESTATE, 0, 0).c_str(), false);
 		}
 
 #ifdef WIN32
@@ -497,10 +497,8 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	if (AutoResumePlay)
 	{
 		// load "-resume" savestate
-		if (FCEUSS_Load(FCEU_MakeFName(FCEUMKF_RESUMESTATE, 0, 0).c_str()))
+		if (FCEUSS_Load(FCEU_MakeFName(FCEUMKF_RESUMESTATE, 0, 0).c_str(), false))
 			FCEU_DispMessage("Old play session resumed.", 0);
-		else
-			FCEU_DispMessage("", 0);
 	}
 
 	ResetScreenshotsCounter();
@@ -968,7 +966,7 @@ void UpdateAutosave(void) {
 		AutosaveCounter = 0;
 		AutosaveIndex = (AutosaveIndex + 1) % AutosaveQty;
 		f = strdup(FCEU_MakeFName(FCEUMKF_AUTOSTATE, AutosaveIndex, 0).c_str());
-		FCEUSS_Save(f);
+		FCEUSS_Save(f, false);
 		AutoSS = true;  //Flag that an auto-savestate was made
 		free(f);
         f = NULL;
@@ -976,7 +974,7 @@ void UpdateAutosave(void) {
 	}
 }
 
-void FCEUI_Autosave(void) {
+void FCEUI_RewindToLastAutosave(void) {
 	if (!EnableAutosave || !AutoSS)
 		return;
 
