@@ -203,8 +203,8 @@ static CFGSTRUCT fceuconfig[] =
 	AC(NTSCwinspecial),
 	AC(winsizemulx),
 	AC(winsizemuly),
-	NAC("saspectw987",saspectw),
-	NAC("saspecth987",saspecth),
+	AC(tvAspectX),
+	AC(tvAspectY),
 
 	AC(soundrate),
 	AC(soundbuftime),

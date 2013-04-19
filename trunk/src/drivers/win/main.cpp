@@ -122,7 +122,7 @@ void ApplyDefaultCommandMapping(void);
 // Internal variables
 int frameSkipAmt = 18;
 uint8 *xbsave = NULL;
-int eoptions = EO_BGRUN | EO_FORCEISCALE | EO_BESTFIT | EO_BGCOLOR;
+int eoptions = EO_BGRUN | EO_FORCEISCALE | EO_BESTFIT | EO_BGCOLOR | EO_SQUAREPIXELS;
 
 //global variables
 int soundoptions = SO_SECONDARY | SO_GFOCUS;
@@ -141,8 +141,8 @@ int soundPCMvol = 256;			//Sound channel PCM - volume control
 
 int KillFCEUXonFrame = 0; //TODO: clean up, this is used in fceux, move it over there?
 
-double saspectw = 1.0, saspecth = 1.0;
 double winsizemulx = 1.0, winsizemuly = 1.0;
+double tvAspectX = TV_ASPECT_DEFAULT_X, tvAspectY = TV_ASPECT_DEFAULT_Y;
 int genie = 0;
 int pal_emulation = 0;
 int pal_setting_specified = 0;

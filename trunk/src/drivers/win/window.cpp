@@ -335,17 +335,15 @@ static void ConvertFCM(HWND hwndOwner)
 
 void CalcWindowSize(RECT *al)
 {
+	double screen_width = VNSWID;
+	double screen_height = FSettings.TotalScanlines();
+	if (eoptions & EO_TVASPECT)
+		screen_width = ceil(screen_height * (screen_width / 256) * (tvAspectX / tvAspectY));
+
 	al->left = 0;
 	al->top = 0;
-
-	al->bottom = FSettings.TotalScanlines();
-	if (eoptions & EO_TVASPECT)
-		al->right = al->bottom * winsizemulx * ((double)VNSWID / 256) * ((double)4 / 3);
-	else
-		al->right = VNSWID * winsizemulx;
-	al->bottom *= winsizemuly;
-	al->bottom += menuYoffset;
-
+	al->right = ceil(screen_width * winsizemulx);
+	al->bottom = menuYoffset + ceil(screen_height * winsizemuly);
 
 	AdjustWindowRectEx(al,
 		GetWindowLong(hAppWnd, GWL_STYLE),
@@ -1123,6 +1121,9 @@ void GetMouseData(uint32 (&md)[3])
 {
 	extern RECT bestfitRect;
 
+	double screen_width = VNSWID;
+	double screen_height = FSettings.TotalScanlines();
+
 	if (eoptions & EO_BESTFIT && (bestfitRect.top || bestfitRect.left))
 	{
 		if ((int)mousex <= bestfitRect.left)
@@ -1130,20 +1131,20 @@ void GetMouseData(uint32 (&md)[3])
 			md[0] = 0;
 		} else if ((int)mousex >= bestfitRect.right)
 		{
-			md[0] = VNSWID;
+			md[0] = screen_width - 1;
 		} else
 		{
-			md[0] = VNSWID * (mousex - bestfitRect.left) / (bestfitRect.right - bestfitRect.left);
+			md[0] = screen_width * (mousex - bestfitRect.left) / (bestfitRect.right - bestfitRect.left);
 		}
 		if ((int)mousey <= bestfitRect.top)
 		{
 			md[1] = 0;
 		} else if ((int)mousey >= bestfitRect.bottom)
 		{
-			md[1] = FSettings.TotalScanlines();
+			md[1] = screen_height - 1;
 		} else
 		{
-			md[1] = FSettings.TotalScanlines() * (mousey - bestfitRect.top) / (bestfitRect.bottom - bestfitRect.top);
+			md[1] = screen_height * (mousey - bestfitRect.top) / (bestfitRect.bottom - bestfitRect.top);
 		}
 	} else
 	{
@@ -1154,20 +1155,20 @@ void GetMouseData(uint32 (&md)[3])
 			md[0] = 0;
 		} else if ((int)mousex >= client_rect.right)
 		{
-			md[0] = VNSWID;
+			md[0] = screen_width - 1;
 		} else
 		{
-			md[0] = VNSWID * (mousex - client_rect.left) / (client_rect.right - client_rect.left);
+			md[0] = screen_width * (mousex - client_rect.left) / (client_rect.right - client_rect.left);
 		}
 		if ((int)mousey <= client_rect.top)
 		{
 			md[1] = 0;
 		} else if ((int)mousey >= client_rect.bottom)
 		{
-			md[1] = FSettings.TotalScanlines();
+			md[1] = screen_height - 1;
 		} else
 		{
-			md[1] = FSettings.TotalScanlines() * (mousey - client_rect.top) / (client_rect.bottom - client_rect.top);
+			md[1] = screen_height * (mousey - client_rect.top) / (client_rect.bottom - client_rect.top);
 		}
 	}
 	md[0] += VNSCLIP;
@@ -2431,30 +2432,15 @@ void FixWXY(int pref, bool shift_held)
 {
 	if (eoptions & EO_FORCEASPECT)
 	{
-		/* First, make sure the ratio is valid, and if it's not, change
-		it so that it doesn't break everything.
-		*/
-		if(saspectw < 0.01) saspectw = 0.01;
-		if(saspecth < 0.01) saspecth = 0.01;
-		if((saspectw / saspecth) > 100) saspecth = saspectw;
-		if((saspecth / saspectw) > 100) saspectw = saspecth;
-
-		if((saspectw / saspecth) < 0.1) saspecth = saspectw;
-		if((saspecth / saspectw) > 0.1) saspectw = saspecth;
-
-		if(!pref)
-		{
-			winsizemuly = winsizemulx * (saspecth / saspectw);
-		} else
-		{
-			winsizemulx = winsizemuly * (saspectw / saspecth);
-		}
+		if (pref == 0)
+			winsizemuly = winsizemulx;
+		else
+			winsizemulx = winsizemuly;
 	}
-
-	if(winsizemulx<0.1)
-		winsizemulx=0.1;
-	if(winsizemuly<0.1)
-		winsizemuly=0.1;
+	if (winsizemulx < 0.1)
+		winsizemulx = 0.1;
+	if (winsizemuly < 0.1)
+		winsizemuly = 0.1;
 
 	// round to integer values
 	if (((eoptions & EO_FORCEISCALE) && !shift_held) || (!(eoptions & EO_FORCEISCALE) && shift_held))
@@ -2474,8 +2460,13 @@ void FixWXY(int pref, bool shift_held)
 		winsizemuly = y;    
 	}
 
-	if(winsizemulx > 100) winsizemulx = 100;
-	if(winsizemuly > 100) winsizemuly = 100;
+	/*
+	// is this really necessary?
+	if (winsizemulx > 100)
+		winsizemulx = 100;
+	if (winsizemuly > 100)
+		winsizemuly = 100;
+	*/
 }
 
 void UpdateFCEUWindow(void)

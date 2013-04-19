@@ -122,6 +122,7 @@
 #define IDC_DEBUGGER_BREAK_ON_BAD_OP    110
 #define IDC_ROMPATCHER_BTN_APPLY        110
 #define LBL_CDLOGGER_RENDERCOUNT        110
+#define IDC_VIDEOCONFIG_SQUARE_PIXELS   110
 #define MENU_LOAD_STATE                 111
 #define CB_DISABLE_SCREEN_SAVER         111
 #define BTN_FAM                         111
@@ -162,7 +163,7 @@
 #define CHEAT_CONTEXT_GOTOINHEXEDITOR   119
 #define IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS 119
 #define IDC_CHECK_LOG_FRAME_NUMBER      119
-#define IDC_CHECK_LOG_FRAMES_COUNT       119
+#define IDC_CHECK_LOG_FRAMES_COUNT      119
 #define IDC_CHECK_LOG_CYCLES_COUNT      120
 #define IDC_CHECK_LOG_FRAME_NUMBER3     121
 #define IDC_CHECK_LOG_INSTRUCTIONS_COUNT 121
@@ -430,8 +431,11 @@
 #define IDC_FORCE_ASPECT_CORRECTION     403
 #define IDC_DEBUGGER_VAL_S              403
 #define IDC_VIDEOCONFIG_ASPECT_X        404
+#define IDC_TVASPECT_X                  404
 #define IDC_VIDEOCONFIG_ASPECT_Y        405
 #define IDC_DEBUGGER_VAL_S2             405
+#define IDC_TVASPECT_HEIGHT             405
+#define IDC_TVASPECT_Y                  405
 #define IDC_VIDEOCONFIG_SCALER_WIN      406
 #define CHECK_ENABLE_MICROPHONE         407
 #define CTL_TINT_TRACKBAR               500
@@ -1179,6 +1183,7 @@
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
+#define IDC_STATIC_SLASHTEXT            65442
 #define IDC_BOOKMARK_NAME_TEXT          65535
 #define ID_CDL                          65535
 
