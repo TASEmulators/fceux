@@ -1111,12 +1111,12 @@ void FCEU_DrawMovies(uint8 *XBuf)
 		char counterbuf[32] = {0};
 		int color = 0x20;
 		if(movieMode == MOVIEMODE_PLAY)
-			sprintf(counterbuf,"%d/%d",currFrameCounter,currMovieData.records.size());
+			sprintf(counterbuf,"%d/%d",currFrameCounter,(int)currMovieData.records.size());
 		else if(movieMode == MOVIEMODE_RECORD)
 			sprintf(counterbuf,"%d",currFrameCounter);
 		else if (movieMode == MOVIEMODE_FINISHED)
 		{
-			sprintf(counterbuf,"%d/%d (finished)",currFrameCounter,currMovieData.records.size());
+			sprintf(counterbuf,"%d/%d (finished)",currFrameCounter,(int)currMovieData.records.size());
 			color = 0x17; //Show red to get attention
 		} else if(movieMode == MOVIEMODE_TASEDITOR)
 		{
