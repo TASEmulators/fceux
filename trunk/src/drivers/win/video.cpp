@@ -40,7 +40,7 @@ static int bpp;
 static int vflags;
 static int veflags;
 
-int disvaccel = 1;      // Disable video hardware acceleration. By default it's disabled in windowed, but enabled in Fullscreen mode
+int disvaccel = 0;      // Disable video hardware acceleration. By default it's enabled in both windowed and Fullscreen mode
 
 int fssync=0;
 int winsync=0;
@@ -368,11 +368,8 @@ int SetVideoMode(int fs)
 		ddsdback.dwWidth=256 * specmul;
 		ddsdback.dwHeight=FSettings.TotalScanlines() * specmul;
 
-		//If the blit hardware can't stretch, assume it's cheap(and slow)
-		//and create the buffer in system memory.
-
-		if(!(caps.dwCaps&DDCAPS_BLTSTRETCH))
-			ddsdback.ddsCaps.dwCaps|=DDSCAPS_SYSTEMMEMORY;
+		// create the buffer in system memory.
+		ddsdback.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
 
 		ddrval = IDirectDraw7_CreateSurface ( lpDD7, &ddsdback, &lpDDSBack, (IUnknown FAR*)NULL);
 		if (ddrval != DD_OK)
@@ -460,8 +457,8 @@ int SetVideoMode(int fs)
 			ddsdback.dwWidth=256 * specmul; //vmodes[vmod].srect.right;
 			ddsdback.dwHeight=FSettings.TotalScanlines() * specmul; //vmodes[vmod].srect.bottom;
 
-			if(!(caps.dwCaps&DDCAPS_BLTSTRETCH))
-				ddsdback.ddsCaps.dwCaps|=DDSCAPS_SYSTEMMEMORY; 
+			// create the buffer in system memory.
+			ddsdback.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY; 
 
 			ddrval = IDirectDraw7_CreateSurface ( lpDD7, &ddsdback, &lpDDSBack, (IUnknown FAR*)NULL);
 			if(ddrval!=DD_OK)
