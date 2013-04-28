@@ -40,7 +40,7 @@ static int bpp;
 static int vflags;
 static int veflags;
 
-int disvaccel = 0;      // Disable video hardware acceleration. By default it's enabled in both windowed and Fullscreen mode
+int disvaccel = 0;      // "Create surface in system memory". By default it's off in both windowed and Fullscreen mode
 
 int fssync=0;
 int winsync=0;
@@ -144,8 +144,7 @@ static int InitializeDDraw(int fs)
     color_palette = (PALETTEENTRY*)malloc(256 * sizeof(PALETTEENTRY));
 	}
 
-	//(disvaccel&(1<<(fs?1:0)))?(GUID FAR *)DDCREATE_EMULATIONONLY:
-	ddrval = DirectDrawCreate((disvaccel&(1<<(fs?1:0)))?(GUID FAR *)DDCREATE_EMULATIONONLY:NULL, &lpDD, NULL);
+	ddrval = DirectDrawCreate(NULL, &lpDD, NULL);
 	if (ddrval != DD_OK)
 	{
 		//ShowDDErr("Error creating DirectDraw object.");
@@ -368,8 +367,9 @@ int SetVideoMode(int fs)
 		ddsdback.dwWidth=256 * specmul;
 		ddsdback.dwHeight=FSettings.TotalScanlines() * specmul;
 
-		// create the buffer in system memory.
-		ddsdback.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
+		if (disvaccel & 1)
+			// create the buffer in system memory
+			ddsdback.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
 
 		ddrval = IDirectDraw7_CreateSurface ( lpDD7, &ddsdback, &lpDDSBack, (IUnknown FAR*)NULL);
 		if (ddrval != DD_OK)
@@ -457,8 +457,9 @@ int SetVideoMode(int fs)
 			ddsdback.dwWidth=256 * specmul; //vmodes[vmod].srect.right;
 			ddsdback.dwHeight=FSettings.TotalScanlines() * specmul; //vmodes[vmod].srect.bottom;
 
-			// create the buffer in system memory.
-			ddsdback.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY; 
+			if (disvaccel & 2)
+				// create the buffer in system memory
+				ddsdback.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY; 
 
 			ddrval = IDirectDraw7_CreateSurface ( lpDD7, &ddsdback, &lpDDSBack, (IUnknown FAR*)NULL);
 			if(ddrval!=DD_OK)

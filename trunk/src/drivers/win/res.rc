@@ -1758,7 +1758,7 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,29,154,12
     LTEXT           "Sync method:",65452,11,112,51,10
     COMBOBOX        IDC_VIDEOCONFIG_SYNC_METHOD_FS,66,110,95,50,CBS_DROPDOWNLIST | WS_TABSTOP
-    CONTROL         "Disable hardware acceleration",IDC_DISABLE_HW_ACCEL_FS,
+    CONTROL         "Create surface in system memory",IDC_DISABLE_HW_ACCEL_FS,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,127,147,12
     LTEXT           "Mode:",13,11,67,23,9
     EDITTEXT        IDC_VIDEOCONFIG_XRES,36,65,27,13,ES_RIGHT
@@ -1783,7 +1783,7 @@ BEGIN
     COMBOBOX        IDC_VIDEOCONFIG_SCALER_WIN,243,93,93,47,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Sync method:",65437,188,112,51,9
     COMBOBOX        IDC_VIDEOCONFIG_SYNC_METHOD_WIN,243,110,93,47,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Disable hardware acceleration",IDC_DISABLE_HW_ACCEL_WIN,
+    CONTROL         "Create surface in system memory",IDC_DISABLE_HW_ACCEL_WIN,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,188,127,146,12
     GROUPBOX        "Drawing Area",65494,351,50,154,65,WS_GROUP
     LTEXT           "First line:",65436,367,68,40,9
