@@ -438,6 +438,10 @@ ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 
 			if (SUCCEEDED(object->GetNumberOfItems(&numFiles)))
 			{
+				// AnS: added this check, because new 7z confuses FDS files with archives (it recognizes the first "F" as a signature of an archive)
+				if (numFiles == 0)
+					goto bomb;
+
 				ArchiveScanRecord asr(matchingFormat,(int)numFiles);
 
 				//scan the filename of each item
