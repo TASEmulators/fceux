@@ -64,7 +64,8 @@
 <p><span class="rvts12">Full Screen Settings</span></p>
 <p><br/></p>
 <p><span class="rvts40">Full Screen</span></p>
-<p>If checked, FCEUX will enter full screen mode when it is loaded.</p>
+<p>Check this checkbox to enter full screen mode.</p>
+<p>Alternatively, you can use a hotkey (Alt+Enter by default) or a double-click (if the "Switch fullscreen by double-click" option is enabled in <a class="rvts18" href="GUI.html">GUI options</a>).</p>
 <p><br/></p>
 <p><span class="rvts40">Enter full screen mode after game is loaded</span></p>
 <p>If checked, FCEUX will enter full screen mode when a game is loaded.</p>
@@ -83,8 +84,8 @@
 <p><span class="rvts40">Sync Method</span></p>
 <p>If the emulator is running poorly, trying out these sync options can help make it run smoother (fix image tearing).</p>
 <p><br/></p>
-<p><span class="rvts40">Disable Hardware Acceleration</span></p>
-<p>If full screen is causing problems, checking this might fix it.</p>
+<p><span class="rvts40">Create surface in system memory</span></p>
+<p>If full screen is causing problems (for example, the image is blurry), checking this might fix it.</p>
 <p><br/></p>
 <p><br/></p>
 <p><span class="rvts12">Windowed Settings</span></p>
@@ -105,8 +106,13 @@
 <p><span class="rvts40">Sync Method</span></p>
 <p>If the emulator is running poorly, trying out these sync options can help make it run smoother (fix image tearing).</p>
 <p><br/></p>
-<p><span class="rvts40">Disable Hardware Acceleration</span></p>
-<p>This is checked by default. Slower computers may experience slow emulation and should uncheck this option. On WIndows XP the picture may be somewhat blurred with this option checked.</p>
+<p><span class="rvts40">Create surface in system memory</span></p>
+<p>If the image is blurry, checking this might fix it.</p>
+<p><br/></p>
+<p><br/></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p><br/></p>
+<p>The following options affect both Fullscreen and windowed mode.</p>
 <p><br/></p>
 <p><br/></p>
 <p><span class="rvts27">Aspect ratio</span></p>
@@ -114,11 +120,14 @@
 <p><span class="rvts40">Best Fit</span></p>
 <p>This is checked by default, so FCEUX will automatically maintain correct aspect ratio for any size of the window. If you uncheck this, the image will be stretched to fill the whole window area.</p>
 <p><br/></p>
-<p><span class="rvts40">TV Aspect (4:3)</span></p>
-<p>Check this if you prefer TV aspect ratio (4:3).</p>
-<p><br/></p>
-<p><span class="rvts40">Use console BG color for empty areas</span></p>
+<p><span class="rvts40">BG color</span></p>
 <p>When window size is wider or taller than image size, empty areas of the window are colored black by default. Checking this option will color these areas according to current "background" color of NES palette.</p>
+<p><br/></p>
+<p><span class="rvts40">Square pixels</span></p>
+<p>This is checked by default, so FCEUX will limit the max size of the image to make all pixels share the same width/height. If you uncheck this, the image will be stretched to fill the whole width or height of the window area.</p>
+<p><br/></p>
+<p><span class="rvts40">TV Aspect</span></p>
+<p>Check this if you want to change the image aspect ratio (e.g. to 4:3). You can enter different values in adjacent text fields.</p>
 <p><br/></p>
 <p><br/></p>
 <p><span class="rvts27">Drawing Area</span></p>
@@ -130,7 +139,7 @@
 <p>Sets the last scan line for NTSC and PAL Modes. This should be left on the default of 231 for NTSC and 239 for PAL.</p>
 <p><br/></p>
 <p><span class="rvts40">Clip left and right sides</span><span class="rvts32"> (8 px on each)</span></p>
-<p>If enabled, 8 pixels from each side of the windows will be removed. Some NES games (even on real hardware) show grapical artifacts on the sides of screen when scrolling, so you may hide those artifacts by checking the option.</p>
+<p>If enabled, 8 pixels from each side of the windows will be removed. Some NES games show grapical artifacts on the sides of screen when scrolling (on real hardware too!), so you may hide those artifacts by checking the option.</p>
 <p><br/></p>
 <p><br/></p>
 <p><span class="rvts27">Emulation</span></p>

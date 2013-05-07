@@ -61,6 +61,7 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts21">At first the TAS Editor was based on the codebase of experimental tool named TASEdit, using FCEUX 2.1.5 as a kick-start.</span></p>
 <p class="rvps10"><span class="rvts21">The premise of TASEdit was to build an input editor (like TAS Movie Editor) into emulator, so that the delay between editing and checking results would greatly shrink. Since there was no research done on typical behaviors in TASing process, the concept was vague and the code wasn't scalable. Thus, soon after formulating the new vision of the editing tool the code of TAS Editor was fully rewritten to make adding new features easier.</span></p>
+<p class="rvps10"><span class="rvts21">The premise of TAS Editor is to create a tool that is more handy than traditional rerecording tools, not just for Input editing/splicing, but also for Input creation and, most importantly, polishing (optimizing).</span></p>
 <p class="rvps10"><span class="rvts21">The following architecture of TAS Editor was designed according to author's notion of a methodical TASing and of features needed for such TASing.</span></p>
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
@@ -340,22 +341,22 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts25">Main</span><span class="rvts21">/</span><span class="rvts25">Window</span><span class="rvts21">:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">call Taseditor's update() function after every emulated frame and when emulation is paused, no less than 20 times per second (necessary for adequate animations and controls in TAS Editor window)</span></li>
+<li class="rvps10"><span class="rvts21">call Taseditor's update() function after every emulated frame and when emulation is paused, no less than 20 times per second (necessary for smooth animations and controls in TAS Editor window)</span></li>
 <li class="rvps10"><span class="rvts21">dispatch OS messages to Taseditor window, including accelerator table commands</span></li>
 <li class="rvps10"><span class="rvts21">if emulator doesn't make use of mouse wheel, it should resend WM_MOUSEWHEEL to Taseditor, same with middle mouse clicks on emulator's own window</span></li>
-<li class="rvps24" style="text-indent: 30px"><span class="rvts21">on exit: emulator should ask Taseditor, so it can check unsaved changes in current project and allow user to save it before quitting. If the </span><span class="rvts20">AskSave()</span><span class="rvts21"> function returns </span><span class="rvts70">false</span><span class="rvts21">, the exit should be cancelled (means that user chose "Cancel")</span></li>
+<li class="rvps24" style="text-indent: 30px"><span class="rvts21">on exit: emulator should ask Taseditor, so it can check unsaved changes in current project and allow user to save before quitting. If the </span><span class="rvts20">askSave()</span><span class="rvts21"> function returns </span><span class="rvts70">false</span><span class="rvts21">, the exit should be cancelled (means that user chose "Cancel")</span></li>
 </ul>
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts25">Movie</span><span class="rvts21">:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">there should be an interface for full control over current movie data (creating/reading/writing/any modification). The movie should be the last layer between user's input and emulated game, which means that the game should not take input from virtual pads, only from movie data. Alternative (FCEUX example) would be to always sync changes into virtual pads every time the movie data changes. Either way, Taseditor interacts with the game by reading and modifying movie data and doesn't poll virtual pads. Piano Roll displays current movie data and edits Input of current movie data</span></li>
+<li class="rvps10"><span class="rvts21">there should be an interface for full control over the current movie data (creating/reading/writing/any modification). The movie should be the last layer between user's input and emulated game, which means that the game should not take input from virtual pads, only from movie data. An alternative (FCEUX example) would be to always sync changes into virtual pads every time the movie data changes. Either way, Taseditor interacts with the game by reading and modifying movie data and doesn't poll virtual pads. The Piano Roll displays current movie data and edits Input of current movie data only</span></li>
 <li class="rvps10"><span class="rvts21">in Recording mode: at the very beginning of a frame (right after the Input for the frame is written into current movie data) emulator should call Taseditor's Recorder function (and Recorder may change the movie data)</span></li>
 </ul>
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts25">Input</span><span class="rvts21">:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">provide an interface for reading which buttons are currently held (for Piano Roll's Header)</span></li>
-<li class="rvps10"><span class="rvts21">hardware commands (Reset/Power/etc) should not be executed immediately after user invokes them, they should work as well as buttons input from virtual pads, meaning that when Taseditor is on it may either allow or prohibit the commands. Also when Taseditor is on and is not Recording, user should not be able to even invoke hardware commands</span></li>
+<li class="rvps10"><span class="rvts21">provide an interface for knowing which buttons are currently held (it's necessary for the Piano Roll Header)</span></li>
+<li class="rvps10"><span class="rvts21">hardware commands (Reset/Power/etc) should not be executed immediately after user invokes them, they should work as well as buttons input from virtual pads, meaning that when Taseditor is engaged it may either allow or prohibit the commands. In fact, when Taseditor is engaged and is not Recording, user should not be able to even invoke hardware commands</span></li>
 </ul>
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts25">Output</span><span class="rvts21">:</span></p>
@@ -366,37 +367,37 @@
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts25">SaveStates</span><span class="rvts21">:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">have public function for making savestate in RAM and function for loading the state from RAM</span></li>
+<li class="rvps10"><span class="rvts21">have public function for making a savestate in RAM and function for loading the state from RAM array</span></li>
 <li class="rvps10"><span class="rvts21">savestates must restore the game state precisely</span></li>
-<li class="rvps10"><span class="rvts21">saving and loading should not take too much time, because the Greenzone automatically creates new savestate for every frame, which should be transparent for user</span></li>
+<li class="rvps10"><span class="rvts21">saving and loading should not take too much time, because the Greenzone automatically creates a new savestate for every frame, which should be transparent for user</span></li>
 <li class="rvps10"><span class="rvts21">savestates should be stored in compressed form, so that they don't take too much space, because for a comfortable work in Taseditor the Greenzone should have at least 1000 savestates for nearby frames</span></li>
-<li class="rvps10"><span class="rvts21">savestates should not store current movie data (that would be a waste of space)</span></li>
+<li class="rvps10"><span class="rvts21">Greenzone savestates should not store current movie data (that would be a waste of space)</span></li>
 </ul>
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts25">Config</span><span class="rvts21">:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">on emulator start: emulator should load </span><span class="rvts70">taseditor_config</span><span class="rvts21"> data from the common settings file. If the file is not found, no changes should be made to </span><span class="rvts70">taseditor_config</span><span class="rvts21"> (it will have its settings by default)</span></li>
+<li class="rvps10"><span class="rvts21">on emulator start: emulator should load </span><span class="rvts70">taseditor_config</span><span class="rvts21"> data from the common settings file. If the file is not found, no changes should be made to </span><span class="rvts70">taseditor_config</span><span class="rvts21"> (it will have its default settings)</span></li>
 <li class="rvps10"><span class="rvts21">on emulator exit: save </span><span class="rvts70">taseditor_config</span><span class="rvts21"> data to the common settings file</span></li>
 </ul>
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts25">Lua engine</span><span class="rvts21">:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">add support for </span><span class="rvts20">taseditor</span><span class="rvts21"> library. The core of each function is implemented by Taseditor, but emulator should take parameters from Lua stack and send them to respective function of Taseditor's Lua gate, then receive returned data and push it into Lua stack</span></li>
-<li class="rvps10"><span class="rvts21">add support for no more than one </span><a class="rvts27" href="LuaAPI.html#registermanual">Manual function</a><span class="rvts21"> and at least one </span><a class="rvts27" href="LuaAPI.html#registerauto">Auto function</a></li>
-<li class="rvps10"><span class="rvts21">notify Taseditor about changing Manual function status (registered/re-registered/empty) so that it can change the state of the "</span><span class="rvts29">Run function</span><span class="rvts21">" button</span></li>
+<li class="rvps10"><span class="rvts21">add support for </span><a class="rvts27" href="LuaAPI.html#registermanual">Manual function</a><span class="rvts21"> and </span><a class="rvts27" href="LuaAPI.html#registerauto">Auto function</a></li>
+<li class="rvps10"><span class="rvts21">notify Taseditor about changing the Manual function status (registered/re-registered/empty) so that it can change the appearance of the "</span><span class="rvts29">Run function</span><span class="rvts21">" button</span></li>
 </ul>
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts25">Replay</span><span class="rvts21">:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
 <li class="rvps10"><span class="rvts21">emulator should be able to replay Taseditor project files as usual movie files, ignoring the additional data at the end of the file</span></li>
 <li class="rvps10"><span class="rvts21">since Taseditor project file can be huge, emulator shouldn't load it into memory when opening</span></li>
-<li class="rvps10"><span class="rvts21">emulator must distinguish between normal movie and Taseditor project file. If it's a project file: when user tries to rerecord, emulator should refuse and suggest launching TAS Editor instead. If user agrees, emulator should send Taseditor the reference to the project file</span></li>
+<li class="rvps10"><span class="rvts21">emulator should be able to distinguish between a normal movie and a Taseditor project file. If it's a project file: when user tries to rerecord, emulator should refuse and suggest launching TAS Editor instead. If user agrees, emulator should send Taseditor the reference to the project file</span></li>
 </ul>
 <p class="rvps10"><span class="rvts21"><br/></span></p>
 <p class="rvps10"><span class="rvts25">Other</span><span class="rvts21">:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">emulator environment should be stable and deterministic. Desyncs will invalidate Playback cursor navigation and make TASing unfeasible</span></li>
-<li class="rvps10"><span class="rvts21">it's recommended to implement all the points mentioned in </span><a class="rvts27" href="MistakeProofing.html">Mistake-proofing</a><span class="rvts21"> that are related to emulator modification. In particular, Taseditor should be able to change certain settings, and user shouldn't be able to change them while Taseditor is on</span></li>
+<li class="rvps10"><span class="rvts21">emulator must be stable and deterministic. Desyncs will totally break Playback cursor navigation and make TASing unfeasible</span></li>
+<li class="rvps10"><span class="rvts21">it's recommended to implement all the points mentioned in </span><a class="rvts27" href="MistakeProofing.html">Mistake-proofing</a><span class="rvts21"> that are related to emulator modification. In particular, Taseditor should be able to change certain settings, and user shouldn't be able to change them while Taseditor is engaged</span></li>
 <li class="rvps10"><span class="rvts21">good emulation speed is necessary for adequate </span><a class="rvts27" href="NonlinearTASing.html#turbo-seeking">Turbo seeking</a><span class="rvts21"> feature. Also there should be an option to mute sound when turbo is on.</span></li>
 </ul>
 <p class="rvps10"><span class="rvts21"><br/></span></p>
