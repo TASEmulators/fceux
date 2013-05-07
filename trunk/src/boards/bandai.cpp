@@ -90,8 +90,13 @@ static DECLFW(BandaiWrite) {
 		}
 }
 
+static DECLFR(BandaiRead) {
+	return 0xef;    // TODO: EEPROM
+}
+
 static void BandaiPower(void) {
 	BandaiSync();
+	SetReadHandler(0x6000, 0x7FFF, BandaiRead);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
 	SetWriteHandler(0x6000, 0xFFFF, BandaiWrite);
 }
@@ -107,6 +112,13 @@ void Mapper16_Init(CartInfo *info) {
 	GameStateRestore = StateRestore;
 	AddExState(&StateRegs, ~0, 0, 0);
 }
+
+// Famicom jump 2:
+// 0-7: Lower bit of data selects which 256KB PRG block is in use.
+// This seems to be a hack on the developers' part, so I'll make emulation
+// of it a hack(I think the current PRG block would depend on whatever the
+// lowest bit of the CHR bank switching register that corresponds to the
+// last CHR address read).
 
 static void M153Power(void) {
 	BandaiSync();

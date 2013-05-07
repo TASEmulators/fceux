@@ -78,6 +78,7 @@
 	{0xbe939fce,	  9,		1},	/* Punchout*/
 	{0x345d3a1a,	 11,		1},	/* Castle of Deceit */
 	{0x5e66eaea,	 13,		1},	/* Videomation */
+	{0xcd373baa,	 14,	   -1}, /* Samurai Spirits (Rex Soft) */
 	{0xbfc7a2e9,	 16,		8},
 	{0x6e68e31a,	 16,		8},	/* Dragon Ball 3*/
 	{0x183859d2,	 16,	   -1},
@@ -85,6 +86,11 @@
 	{0x286fcd20,	 23,	   -1}, /* Ganbare Goemon Gaiden 2 - Tenka no Zaihou (J) [!] */
 	{0xe4a291ce,	 23,	   -1}, /* World Hero (Unl) [!] */
 	{0x51e9cd33,	 23,	   -1}, /* World Hero (Unl) [b1] */
+	{0x105dd586,	 27,	   -1}, /* Mi Hun Che variations... */
+	{0xbc9bb6c1,	 27,	   -1}, /* -- */
+	{0x43753886,	 27,	   -1}, /* -- */
+	{0x5b3de3d1,	 27,	   -1}, /* -- */
+	{0x511e73f8,	 27,	   -1}, /* -- */
 	{0x5555fca3,	 32,		8},
 	{0x283ad224,	 32,		8},	/* Ai Sensei no Oshiete */
 	{0x243a8735,	 32,   0x10|4},	/* Major League */
@@ -114,6 +120,7 @@
 	{0xbba58be5,	 70,	   -1},	/* Family Trainer - Manhattan Police */
 	{0x370ceb65,	 70,	   -1},	/* Family Trainer - Meiro Dai Sakusen */
 	{0xe62e3382,	 71,	   -1},	/* Mig-29 Soviet Fighter */
+	{0xac7b0742,	 71,	   -1},	/* Golden KTV (Ch) [!], not actually 71, but UNROM without BUS conflict */
 	{0x054bd3e9,	 74,	   -1},	/* Di 4 Ci - Ji Qi Ren Dai Zhan (As) */
 	{0x496ac8f7,	 74,	   -1},	/* Ji Jia Zhan Shi (As) */
 	{0xae854cef,	 74,	   -1},	/* Jia A Fung Yun (Chinese) */
@@ -162,12 +169,6 @@
 	{0xb1a94b82,	152,		8},	/* Pocket Zaurus */
 	{0x026c5fca,	152,		8},	/* Saint Seiya Ougon Densetsu */
 	{0x3f15d20d,	153,		8},	/* Famicom Jump 2 */
-	{0xb7f28915,	153,	   -1},	/* Magical Taruruuto-kun 2 - Mahou Daibouken (J) */
-	{0xa262a81f,	153,	   -1},	/* Rokudenashi Blues (J) */
-	{0xe170404c,	153,	   -1},	/* SD Gundam Gaiden - Knight Gundam Monogatari (J) (V1.0) [!] */
-	{0x276ac722,	153,	   -1},	/* SD Gundam Gaiden - Knight Gundam Monogatari (J) (V1.1) [!] */
-	{0xb049a8c4,	153,	   -1},	/* SD Gundam Gaiden - Knight Gundam Monogatari 2 - Hikari no Kishi (J) [!] */
-	{0xc2840372,	153,	   -1},	/* SD Gundam Gaiden - Knight Gundam Monogatari 3 - Densetsu no Kishi Dan (J) [!] */
 	{0xd1691028,	154,		8},	/* Devil Man */
 	{0xcfd4a281,	155,		8},	/* Money Game.  Yay for money! */
 	{0x2f27cdef,	155,		8},	/* Tatakae!! Rahmen Man */
@@ -179,6 +180,12 @@
 	{0x0be0a328,	157,		8},	/* Datach SD Gundam Wars */
 	{0x5b457641,	157,		8},	/* Datach Ultraman Club */
 	{0xf51a7f46,	157,		8},	/* Datach Yuu Yuu Hakusho */
+	{0xb7f28915,	159,	   -1},	/* Magical Taruruuto-kun 2 - Mahou Daibouken (J) */
+	{0xa262a81f,	159,	   -1},	/* Rokudenashi Blues (J) */
+	{0xe170404c,	159,	   -1},	/* SD Gundam Gaiden - Knight Gundam Monogatari (J) (V1.0) [!] */
+	{0x276ac722,	159,	   -1},	/* SD Gundam Gaiden - Knight Gundam Monogatari (J) (V1.1) [!] */
+	{0xb049a8c4,	159,	   -1},	/* SD Gundam Gaiden - Knight Gundam Monogatari 2 - Hikari no Kishi (J) [!] */
+	{0xc2840372,	159,	   -1},	/* SD Gundam Gaiden - Knight Gundam Monogatari 3 - Densetsu no Kishi Dan (J) [!] */
 	{0x58152b42,	160,		1},	/* Pipe 5 (Sachen) */
 	{0x1c098942,	162,	   -1}, /* Xi You Ji Hou Zhuan (Ch) */
 	{0x081caaff,	163,	   -1},	/* Commandos (Ch) */
