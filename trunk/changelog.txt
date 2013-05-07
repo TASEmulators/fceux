@@ -1,4 +1,26 @@
 
+29-Apr-2013 - AnS - added checking if archive file has any files in it, because new 7z.dll confuses FDS files with archives (it recognizes the first "F" as a signature of an archive)
+28-Apr-2013 - AnS - Video config: changed "Disable hardware acceleration" option to "Create surface in system memory"
+19-Apr-2013 - AnS - Video config: added "Square pixels" option
+19-Apr-2013 - AnS - Video config: added aspect ratio fields for customizing "TV Aspect" ratio, by default it's 4/3
+17-Apr-2013 - AnS - "Auto-resume old play session" now also works with NSFs
+17-Apr-2013 - zeromus - properly savestate NSF
+17-Apr-2013 - zeromus - add missing mmc5 savestate variables
+16-Apr-2013 - AnS - Tracer: added "Log Cycles count" and "Log Instructions count" options
+13-Apr-2013 - AnS - Debugger: scrolling up/down by whole instructions
+12-Apr-2013 - gocha - Lua: fix wrong frequency calculation in sound.get()
+07-Apr-2013 - AnS - Taseditor: comply with movie.rerecordcounting() setting
+01-Apr-2013 - CaH4e3 - mapper 154 - fixed
+26-Mar-2013 - CaH4e3 - mapper 53 - supported ines format of SUPERVISION UNIF board; UNIF 8157 - fix according to hw; UNIF T-262 - fix according to hw
+24-Mar-2013 - CaH4e3 - UNIF DANCE2000 - now emulated properly
+20-Mar-2013 - gocha - link to lua51.dll instead of static linking
+19-Mar-2013 - zeromus - bring some improvements to newppu from bizhawk, and fig vtoggle5/6 back to vtoggle
+19-Mar-2013 - zeromus - fix mapper 28
+17-Mar-2013 - AnS - Replay: removed redundant window update when using "Browse" (fixes #585)
+17-Mar-2013 - CaH4e3 - UNIF DSOUNDV1 - removed due to duplicate of 178 mapper; mapper 178 - added more features of 8/16M carts with 32K SRAM; UNIF 09-034A - added support for a new SMB2j Lite version
+14-Mar-2013 - AnS - Debugger: ported "smart scrolling" from an obscure version of FCEUXD 1.1
+14-Mar-2013 - CaH4e3 - palette ram reading fix for old ppu
+
 ---r2869 - FCEUX 2.2.1 Released---
 ---March 10 2013---
 
