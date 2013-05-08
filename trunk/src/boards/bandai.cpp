@@ -22,14 +22,9 @@
  *
  */
 
-//Famicom Jump 2 should get transformed to m153
-//All other games are not supporting EEPROM saving right now.
-//We may need to distinguish between 16 and 159 in order to know the EEPROM configuration.
-//Until then, we just return 0x00 from the EEPROM read
-
 #include "mapinc.h"
 
-static uint8 reg[16], is153;
+static uint8 reg[16], is153, x24c02;
 static uint8 IRQa;
 static int16 IRQCount, IRQLatch;
 
@@ -41,22 +36,134 @@ static SFORMAT StateRegs[] =
 	{ reg, 16, "REGS" },
 	{ &IRQa, 1, "IRQA" },
 	{ &IRQCount, 2, "IRQC" },
-	{ &IRQLatch, 2, "IRQL" }, // need for Famicom Jump II - Saikyou no 7 Nin (J) [!]
+	{ &IRQLatch, 2, "IRQL" },	// need for Famicom Jump II - Saikyou no 7 Nin (J) [!]
 	{ 0 }
 };
 
-static void BandaiIRQHook(int a) {
-	if (IRQa) {
-		IRQCount -= a;
-		if (IRQCount < 0) {
-			X6502_IRQBegin(FCEU_IQEXT);
-			IRQa = 0;
-			IRQCount = -1;
-		}
-	}
+// x24C0x interface
+
+#define X24C0X_STANDBY		0
+#define X24C0X_ADDRESS		1
+#define X24C0X_WORD			2
+#define X24C0X_READ			3
+#define X24C0X_WRITE		4
+
+static uint8 x24c0x_data[256], x24c0x_state;
+static uint8 x24c0x_addr, x24c0x_word, x24c0x_latch, x24c0x_bitcount;
+static uint8 x24c0x_sda, x24c0x_scl, x24c0x_out, x24c0x_oe;
+
+static SFORMAT x24c01StateRegs[] =
+{
+	{ x24c0x_data, 128, "DATA" },
+	{ &x24c0x_addr, 1, "ADDR" },
+	{ &x24c0x_word, 1, "WORD" },
+	{ &x24c0x_latch, 1, "LATC" },
+	{ &x24c0x_bitcount, 1, "BITC" },
+	{ &x24c0x_sda, 1, "SDA" },
+	{ &x24c0x_scl, 1, "SCL" },
+	{ &x24c0x_out, 1, "OUT" },
+	{ &x24c0x_oe, 1, "OE" },
+	{ &x24c0x_state, 1, "STAT" },
+	{ 0 }
+};
+
+static void x24c0x_init() {
+	x24c0x_addr = x24c0x_word = x24c0x_latch = x24c0x_bitcount = x24c0x_sda = x24c0x_scl = x24c0x_oe = 0;
+	x24c0x_state = X24C0X_STANDBY;
 }
 
-static void BandaiSync(void) {
+static void x24c0x_write(uint8 data) {
+	uint8 sda = (data >> 6) & 1;
+	uint8 scl = (data >> 5) & 1;
+	x24c0x_oe = (data >> 7);
+
+	if(x24c0x_scl && scl) {
+		if(x24c0x_sda && !sda) {		// START
+			x24c0x_state = X24C0X_ADDRESS;
+			x24c0x_bitcount = 0;
+			x24c0x_addr = 0;
+		} else if(!x24c0x_sda && sda) { //STOP
+			x24c0x_state = X24C0X_STANDBY;
+		}
+	} else if(!x24c0x_scl && scl) {		// RISING EDGE
+		switch(x24c0x_state) {
+		case X24C0X_ADDRESS:
+			if(x24c0x_bitcount < 7) {
+				x24c0x_addr <<= 1;
+				x24c0x_addr |= sda;
+			} else {
+				if(!x24c02)				// X24C01 mode
+					x24c0x_word = x24c0x_addr;
+				if(sda) {				// READ COMMAND
+					x24c0x_state = X24C0X_READ;
+				} else {				// WRITE COMMAND
+					if(x24c02)			// X24C02 mode
+						x24c0x_state = X24C0X_WORD;
+					else
+						x24c0x_state = X24C0X_WRITE;
+				}
+			}
+			x24c0x_bitcount++;
+			break;
+		case X24C0X_WORD:
+			if(x24c0x_bitcount == 8) {	// ACK
+				x24c0x_word = 0;
+				x24c0x_out = 0;
+			} else {					// WORD ADDRESS INPUT
+				x24c0x_word <<= 1;
+				x24c0x_word |= sda;
+				if(x24c0x_bitcount == 16) {	// END OF ADDRESS INPUT
+					x24c0x_bitcount = 7;
+					x24c0x_state = X24C0X_WRITE;
+				}
+			}
+			x24c0x_bitcount++;
+			break;
+		case X24C0X_READ:
+			if (x24c0x_bitcount == 8) {	// ACK
+				x24c0x_out = 0;
+				x24c0x_latch = x24c0x_data[x24c0x_word];
+				x24c0x_bitcount = 0;
+			} else {					// REAL OUTPUT
+				x24c0x_out = x24c0x_latch >> 7;
+				x24c0x_latch <<= 1;
+				x24c0x_bitcount++;
+				if(x24c0x_bitcount == 8) {
+					x24c0x_word++;
+					x24c0x_word &= 0xff;
+				}
+			}
+			break;
+		case X24C0X_WRITE:
+			if (x24c0x_bitcount == 8) {	// ACK
+				x24c0x_out = 0;
+				x24c0x_latch = 0;
+				x24c0x_bitcount = 0;
+			} else {					// REAL INPUT
+				x24c0x_latch <<= 1;
+				x24c0x_latch |= sda;
+				x24c0x_bitcount++;
+				if(x24c0x_bitcount == 8) {
+					x24c0x_data[x24c0x_word] = x24c0x_latch;
+					x24c0x_word++;
+					x24c0x_word &= 0xff;
+				}
+			}
+			break;
+		}
+	}
+
+	x24c0x_sda = sda;
+	x24c0x_scl = scl;
+}
+
+static uint8 x24c0x_read() {
+	return x24c0x_out << 4;
+}
+
+//
+
+static void Sync(void) {
 	if (is153) {
 		int base = (reg[0] & 1) << 4;
 		setchr8(0);
@@ -80,36 +187,71 @@ static DECLFW(BandaiWrite) {
 	A &= 0x0F;
 	if (A < 0x0A) {
 		reg[A & 0x0F] = V;
-		BandaiSync();
+		Sync();
 	} else
 		switch (A) {
 		case 0x0A: X6502_IRQEnd(FCEU_IQEXT); IRQa = V & 1; IRQCount = IRQLatch; break;
 		case 0x0B: IRQLatch &= 0xFF00; IRQLatch |= V; break;
 		case 0x0C: IRQLatch &= 0xFF; IRQLatch |= V << 8; break;
-		case 0x0D: break;	// Serial EEPROM control port
+		case 0x0D: x24c0x_write(V); break;
 		}
 }
 
 static DECLFR(BandaiRead) {
-	return 0xef;    // TODO: EEPROM
+	return (X.DB & 0xEF) | x24c0x_read();
+}
+
+static void BandaiIRQHook(int a) {
+	if (IRQa) {
+		IRQCount -= a;
+		if (IRQCount < 0) {
+			X6502_IRQBegin(FCEU_IQEXT);
+			IRQa = 0;
+			IRQCount = -1;
+		}
+	}
 }
 
 static void BandaiPower(void) {
-	BandaiSync();
+	IRQa = 0;
+	x24c0x_init();
+	Sync();
 	SetReadHandler(0x6000, 0x7FFF, BandaiRead);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
 	SetWriteHandler(0x6000, 0xFFFF, BandaiWrite);
 }
 
 static void StateRestore(int version) {
-	BandaiSync();
+	Sync();
 }
 
 void Mapper16_Init(CartInfo *info) {
+	x24c02 = 1;
 	is153 = 0;
 	info->Power = BandaiPower;
 	MapIRQHook = BandaiIRQHook;
+
+	info->battery = 1;
+	info->SaveGame[0] = x24c0x_data;
+	info->SaveGameLen[0] = 256;
+
 	GameStateRestore = StateRestore;
+	AddExState(&x24c01StateRegs, ~0, 0, 0);
+	AddExState(&StateRegs, ~0, 0, 0);
+}
+
+void Mapper159_Init(CartInfo *info) {
+	x24c02 = 0;
+	is153 = 0;
+	info->Power = BandaiPower;
+	MapIRQHook = BandaiIRQHook;
+
+	info->battery = 1;
+	info->SaveGame[0] = x24c0x_data;
+	info->SaveGameLen[0] = 128;
+
+	GameStateRestore = StateRestore;
+	AddExState(&x24c01StateRegs, ~0, 0, 0);
 	AddExState(&StateRegs, ~0, 0, 0);
 }
 
@@ -121,7 +263,7 @@ void Mapper16_Init(CartInfo *info) {
 // last CHR address read).
 
 static void M153Power(void) {
-	BandaiSync();
+	Sync();
 	setprg8r(0x10, 0x6000, 0);
 	SetReadHandler(0x6000, 0x7FFF, CartBR);
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
@@ -296,12 +438,13 @@ static DECLFR(BarcodeRead) {
 }
 
 static void M157Power(void) {
+	IRQa = 0;
 	BarcodeData[0] = 0xFF;
 	BarcodeReadPos = 0;
 	BarcodeOut = 0;
 	BarcodeCycleCount = 0;
 
-	BandaiSync();
+	Sync();
 
 	SetWriteHandler(0x6000, 0xFFFF, BandaiWrite);
 	SetReadHandler(0x6000, 0x7FFF, BarcodeRead);

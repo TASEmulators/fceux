@@ -597,13 +597,13 @@ static BMAPPINGLocal bmap[] = {
 	{"S74LS374N",			150, S74LS374N_Init},
 	{"",					151, Mapper151_Init},
 	{"",					152, Mapper152_Init},
-	{"",					153, Mapper153_Init},
+	{"BANDAI SRAM",			153, Mapper153_Init},	// Bandai board 16 with SRAM instead of EEPROM
 	{"",					154, Mapper154_Init},
 	{"",					155, Mapper155_Init},
 	{"",					156, Mapper156_Init},
-	{"",					157, Mapper157_Init},
+	{"BANDAI BARCODE",		157, Mapper157_Init},
 //	{"",					158, Mapper158_Init},
-	{"BANDAI 24C01",		159, Mapper16_Init},	// Different type of EEPROM on bandai board
+	{"BANDAI 24C01",		159, Mapper159_Init},	// Different type of EEPROM on the  bandai board
 	{"SA009",				160, SA009_Init},
 //	{"",					161, Mapper161_Init},
 	{"",					162, UNLFS304_Init},

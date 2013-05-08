@@ -5,7 +5,7 @@
 	{0x82f204ae,	 -1,		1},	/* Liang Shan Ying Xiong (NJ023) (Ch) [!] */
 	{0x684afccd,	 -1,		1},	/* Space Hunter (J) */
 	{0xad9c63e2,	 -1,		1},	/* Space Shadow (J) */
-	{0xe1526228,	 -1,		1}, /* Quest of Ki */
+	{0xe1526228,	 -1,		1},	/* Quest of Ki */
 	{0xaf5d7aa2,	 -1,		0},	/* Clu Clu Land */
 	{0xcfb224e6,	 -1,		1},	/* Dragon Ninja (J) [p1][!].nes */
 	{0x4f2f1846,	 -1,		1},	/* Famista '89 - Kaimaku Han!! (J) */
@@ -78,19 +78,19 @@
 	{0xbe939fce,	  9,		1},	/* Punchout*/
 	{0x345d3a1a,	 11,		1},	/* Castle of Deceit */
 	{0x5e66eaea,	 13,		1},	/* Videomation */
-	{0xcd373baa,	 14,	   -1}, /* Samurai Spirits (Rex Soft) */
+	{0xcd373baa,	 14,	   -1},	/* Samurai Spirits (Rex Soft) */
 	{0xbfc7a2e9,	 16,		8},
 	{0x6e68e31a,	 16,		8},	/* Dragon Ball 3*/
-	{0x183859d2,	 16,	   -1},
 	{0x33b899c9,	 16,	   -1},	/* Dragon Ball - Dai Maou Fukkatsu (J) [!] */
-	{0x286fcd20,	 23,	   -1}, /* Ganbare Goemon Gaiden 2 - Tenka no Zaihou (J) [!] */
-	{0xe4a291ce,	 23,	   -1}, /* World Hero (Unl) [!] */
-	{0x51e9cd33,	 23,	   -1}, /* World Hero (Unl) [b1] */
-	{0x105dd586,	 27,	   -1}, /* Mi Hun Che variations... */
-	{0xbc9bb6c1,	 27,	   -1}, /* -- */
-	{0x43753886,	 27,	   -1}, /* -- */
-	{0x5b3de3d1,	 27,	   -1}, /* -- */
-	{0x511e73f8,	 27,	   -1}, /* -- */
+	{0xa262a81f,	 16,	   -1},	/* Rokudenashi Blues (J) */
+	{0x286fcd20,	 23,	   -1},	/* Ganbare Goemon Gaiden 2 - Tenka no Zaihou (J) [!] */
+	{0xe4a291ce,	 23,	   -1},	/* World Hero (Unl) [!] */
+	{0x51e9cd33,	 23,	   -1},	/* World Hero (Unl) [b1] */
+	{0x105dd586,	 27,	   -1},	/* Mi Hun Che variations... */
+	{0xbc9bb6c1,	 27,	   -1},	/* -- */
+	{0x43753886,	 27,	   -1},	/* -- */
+	{0x5b3de3d1,	 27,	   -1},	/* -- */
+	{0x511e73f8,	 27,	   -1},	/* -- */
 	{0x5555fca3,	 32,		8},
 	{0x283ad224,	 32,		8},	/* Ai Sensei no Oshiete */
 	{0x243a8735,	 32,   0x10|4},	/* Major League */
@@ -101,7 +101,7 @@
 	{0xf46ef39a,	 37,	   -1},	/* Super Mario Bros. + Tetris + Nintendo World Cup (E) [!] */
 	{0x7ccb12a3,	 43,	   -1},	/* SMB2j */
 	{0x6c71feae,	 45,	   -1},	/* Kunio 8-in-1 */
-	{0xe2c94bc2,	 48,	   -1}, /* Super Bros 8 (Unl) [!] */
+	{0xe2c94bc2,	 48,	   -1},	/* Super Bros 8 (Unl) [!] */
 	{0xaebd6549,	 48,		8},	/* Bakushou!! Jinsei Gekijou 3 */
 	{0x6cdc0cd9,	 48,		8},	/* Bubble Bobble 2 */
 	{0x99c395f9,	 48,		8},	/* Captain Saver */
@@ -180,14 +180,14 @@
 	{0x0be0a328,	157,		8},	/* Datach SD Gundam Wars */
 	{0x5b457641,	157,		8},	/* Datach Ultraman Club */
 	{0xf51a7f46,	157,		8},	/* Datach Yuu Yuu Hakusho */
-	{0xb7f28915,	159,	   -1},	/* Magical Taruruuto-kun 2 - Mahou Daibouken (J) */
-	{0xa262a81f,	159,	   -1},	/* Rokudenashi Blues (J) */
 	{0xe170404c,	159,	   -1},	/* SD Gundam Gaiden - Knight Gundam Monogatari (J) (V1.0) [!] */
 	{0x276ac722,	159,	   -1},	/* SD Gundam Gaiden - Knight Gundam Monogatari (J) (V1.1) [!] */
-	{0xb049a8c4,	159,	   -1},	/* SD Gundam Gaiden - Knight Gundam Monogatari 2 - Hikari no Kishi (J) [!] */
-	{0xc2840372,	159,	   -1},	/* SD Gundam Gaiden - Knight Gundam Monogatari 3 - Densetsu no Kishi Dan (J) [!] */
+	{0x0cf42e69,	159,	   -1},	/* Magical Taruruuto-kun - Fantastic World!! (J) (V1.0) [!] */
+	{0xdcb972ce,	159,	   -1},	/* Magical Taruruuto-kun - Fantastic World!! (J) (V1.1) [!] */
+	{0xb7f28915,	159,	   -1},	/* Magical Taruruuto-kun 2 - Mahou Daibouken (J) */
+	{0x183859d2,	159,	   -1},	/* Dragon Ball Z - Kyoushuu! Saiya Jin (J) [!] */
 	{0x58152b42,	160,		1},	/* Pipe 5 (Sachen) */
-	{0x1c098942,	162,	   -1}, /* Xi You Ji Hou Zhuan (Ch) */
+	{0x1c098942,	162,	   -1},	/* Xi You Ji Hou Zhuan (Ch) */
 	{0x081caaff,	163,	   -1},	/* Commandos (Ch) */
 	{0x02c41438,	176,	   -1},	/* Xing He Zhan Shi (C) */
 	{0x558c0dc3,	178,	   -1},	/* Super 2in1 (unl)[!] {mapper unsupported} */
@@ -200,7 +200,7 @@
 	{0xa9115bc1,	192,	   -1},
 	{0x4c7bbb0e,	192,	   -1},
 	{0x98c1cd4b,	192,	   -1},	/* Ying Lie Qun Xia Zhuan (Chinese) */
-	{0xee810d55,	192,	   -1}, /* You Ling Xing Dong (Ch) */
+	{0xee810d55,	192,	   -1},	/* You Ling Xing Dong (Ch) */
 	{0x442f1a29,	192,	   -1},	/* Young chivalry */
 	{0x637134e8,	193,		1},	/* Fighting Hero */
 	{0xa925226c,	194,	   -1},	/* Dai-2-Ji - Super Robot Taisen (As) */
@@ -237,22 +237,22 @@
 	{0xd323b806,	210,		1},	/* Wagyan Land 3 */
 	{0xbd523011,	210,		0},	/* Dream Master */
 	{0x5daae69a,	211,	   -1},	/* Aladdin - Return of Jaffar, The (Unl) [!] */
-	{0x1ec1dfeb,	217,	   -1}, /* 255-in-1 (Cut version) [p1] */
-	{0x046d70cc,	217,	   -1}, /* 500-in-1 (Anim Splash, Alt Mapper)[p1][!] */
-	{0x12f86a4d,	217,	   -1}, /* 500-in-1 (Static Splash, Alt Mapper)[p1][!] */
-	{0xd09f778d,	217,	   -1}, /* 9999999-in-1 (Static Splash, Alt Mapper)[p1][!] */
+	{0x1ec1dfeb,	217,	   -1},	/* 255-in-1 (Cut version) [p1] */
+	{0x046d70cc,	217,	   -1},	/* 500-in-1 (Anim Splash, Alt Mapper)[p1][!] */
+	{0x12f86a4d,	217,	   -1},	/* 500-in-1 (Static Splash, Alt Mapper)[p1][!] */
+	{0xd09f778d,	217,	   -1},	/* 9999999-in-1 (Static Splash, Alt Mapper)[p1][!] */
 	{0x62ef6c79,	232,		8},	/* Quattro Sports -Aladdin */
 	{0x2705eaeb,	234,	   -1},	/* Maxi 15 */
 	{0x6f12afc5,	235,	   -1},	/* Golden Game 150-in-1 */
 	{0xfb2b6b10,	241,	   -1},	/* Fan Kong Jing Ying (Ch) */
 	{0xb5e83c9a,	241,	   -1},	/* Xing Ji Zheng Ba (Ch) */
-	{0x2537b3e6,	241,	   -1}, /* Dance Xtreme - Prima (Unl) */
-	{0x11611e89,	241,	   -1}, /* Darkseed (Unl) [p1] */
-	{0x81a37827,	241,	   -1}, /* Darkseed (Unl) [p1][b1] */
-	{0xc2730c30,	241,	   -1}, /* Deadly Towers (U) [!] */
-	{0x368c19a8,	241,	   -1}, /* LIKO Study Cartridge 3-in-1 (Unl) [!] */
-	{0xa21e675c,	241,	   -1}, /* Mashou (J) [!] */
-	{0x54d98b79,	241,	   -1}, /* Titanic 1912 (Unl) */
+	{0x2537b3e6,	241,	   -1},	/* Dance Xtreme - Prima (Unl) */
+	{0x11611e89,	241,	   -1},	/* Darkseed (Unl) [p1] */
+	{0x81a37827,	241,	   -1},	/* Darkseed (Unl) [p1][b1] */
+	{0xc2730c30,	241,	   -1},	/* Deadly Towers (U) [!] */
+	{0x368c19a8,	241,	   -1},	/* LIKO Study Cartridge 3-in-1 (Unl) [!] */
+	{0xa21e675c,	241,	   -1},	/* Mashou (J) [!] */
+	{0x54d98b79,	241,	   -1},	/* Titanic 1912 (Unl) */
 	{0x6bea1235,	245,	   -1},	/* MMC3 cart, but with nobanking applied to CHR-RAM, so let it be there */
 	{0x345ee51a,	245,	   -1},	/* DQ4c */
 	{0x57514c6c,	245,	   -1},	/* Yong Zhe Dou E Long - Dragon Quest VI (Ch) */
