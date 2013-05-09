@@ -40,7 +40,8 @@ static int bpp;
 static int vflags;
 static int veflags;
 
-int disvaccel = 0;      // "Create surface in system memory". By default it's off in both windowed and Fullscreen mode
+int directDrawModeWindowed = DIRECTDRAW_MODE_SOFTWARE;
+int directDrawModeFullscreen = DIRECTDRAW_MODE_FULL;
 
 int fssync=0;
 int winsync=0;
@@ -139,12 +140,17 @@ static bool firstInitialize = true;
 static int InitializeDDraw(int fs)
 {
 	//only init the palette the first time through
-	if(firstInitialize) {
+	if (firstInitialize)
+	{
 		firstInitialize = false;
-    color_palette = (PALETTEENTRY*)malloc(256 * sizeof(PALETTEENTRY));
+		color_palette = (PALETTEENTRY*)malloc(256 * sizeof(PALETTEENTRY));
 	}
 
-	ddrval = DirectDrawCreate(NULL, &lpDD, NULL);
+	if ((fs && directDrawModeFullscreen == DIRECTDRAW_MODE_SOFTWARE) || (!fs && directDrawModeWindowed == DIRECTDRAW_MODE_SOFTWARE))
+		ddrval = DirectDrawCreate((GUID FAR *)DDCREATE_EMULATIONONLY, &lpDD, NULL);
+	else
+		ddrval = DirectDrawCreate(NULL, &lpDD, NULL);
+
 	if (ddrval != DD_OK)
 	{
 		//ShowDDErr("Error creating DirectDraw object.");
@@ -367,11 +373,11 @@ int SetVideoMode(int fs)
 		ddsdback.dwWidth=256 * specmul;
 		ddsdback.dwHeight=FSettings.TotalScanlines() * specmul;
 
-		if (disvaccel & 1)
+		if (directDrawModeWindowed == DIRECTDRAW_MODE_SURFACE_IN_RAM)
 			// create the buffer in system memory
 			ddsdback.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
 
-		ddrval = IDirectDraw7_CreateSurface ( lpDD7, &ddsdback, &lpDDSBack, (IUnknown FAR*)NULL);
+		ddrval = IDirectDraw7_CreateSurface(lpDD7, &ddsdback, &lpDDSBack, (IUnknown FAR*)NULL);
 		if (ddrval != DD_OK)
 		{
 			//ShowDDErr("Error creating secondary surface.");
@@ -457,7 +463,7 @@ int SetVideoMode(int fs)
 			ddsdback.dwWidth=256 * specmul; //vmodes[vmod].srect.right;
 			ddsdback.dwHeight=FSettings.TotalScanlines() * specmul; //vmodes[vmod].srect.bottom;
 
-			if (disvaccel & 2)
+			if (directDrawModeFullscreen == DIRECTDRAW_MODE_SURFACE_IN_RAM)
 				// create the buffer in system memory
 				ddsdback.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY; 
 
@@ -1258,8 +1264,21 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
 		}
 
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_SETCURSEL,vmodes[0].special,(LPARAM)(LPSTR)0);
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_SETCURSEL,winspecial,(LPARAM)(LPSTR)0);
+		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_SCALER_FS, CB_SETCURSEL, vmodes[0].special, (LPARAM)(LPSTR)0);
+		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_SCALER_WIN, CB_SETCURSEL, winspecial, (LPARAM)(LPSTR)0);
+
+		// Direct Draw modes
+		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_WIN, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"No hardware acceleration");
+		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_WIN, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Create Surface in RAM");
+		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_WIN, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Hardware acceleration");
+
+		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_WIN, CB_SETCURSEL, directDrawModeWindowed, (LPARAM)(LPSTR)0);
+
+		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_FS, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"No hardware acceleration");
+		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_FS, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Create Surface in RAM");
+		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_FS, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Hardware acceleration");
+
+		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_FS, CB_SETCURSEL, directDrawModeFullscreen, (LPARAM)(LPSTR)0);
 
 		if(eoptions&EO_FSAFTERLOAD)
 			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_AUTO_FS,BST_CHECKED);
@@ -1281,12 +1300,6 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 		if(eoptions&EO_TVASPECT)
 			CheckDlgButton(hwndDlg, IDC_VIDEOCONFIG_TVASPECT, BST_CHECKED);
-
-		if(disvaccel&1)
-			CheckDlgButton(hwndDlg,IDC_DISABLE_HW_ACCEL_WIN,BST_CHECKED);
-
-		if(disvaccel&2)
-			CheckDlgButton(hwndDlg,IDC_DISABLE_HW_ACCEL_FS,BST_CHECKED);
 
 		if(eoptions&EO_FORCEISCALE)
 			CheckDlgButton(hwndDlg,IDC_FORCE_INT_VIDEO_SCALARS,BST_CHECKED);
@@ -1413,14 +1426,9 @@ gornk:
 				//vmodes[0].yscale=GetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YSCALE,0,0);
 				vmodes[0].special=SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
 
-				winspecial = SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
-				disvaccel = 0;
-
-				if(IsDlgButtonChecked(hwndDlg,IDC_DISABLE_HW_ACCEL_WIN)==BST_CHECKED)
-					disvaccel |= 1;
-				if(IsDlgButtonChecked(hwndDlg,IDC_DISABLE_HW_ACCEL_FS)==BST_CHECKED)
-					disvaccel |= 2;
-
+				winspecial = SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_SCALER_WIN, CB_GETCURSEL, 0, (LPARAM)(LPSTR)0);
+				directDrawModeWindowed = SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_WIN, CB_GETCURSEL, 0, (LPARAM)(LPSTR)0) % DIRECTDRAW_MODES_TOTAL;
+				directDrawModeFullscreen = SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_FS, CB_GETCURSEL, 0, (LPARAM)(LPSTR)0) % DIRECTDRAW_MODES_TOTAL;
 
 				if(IsDlgButtonChecked(hwndDlg,IDC_VIDEOCONFIG_FS)==BST_CHECKED)
 					fullscreen=1;

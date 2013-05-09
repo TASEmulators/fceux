@@ -131,9 +131,12 @@
 #define IDC_ROMPATCHER_BTN_SAVE         111
 #define IDC_CHEAT_VAL2                  111
 #define IDC_CHEAT_COM                   111
+#define IDC_VIDEOCONFIG_DIRECTDRAW_FS   111
 #define BTN_AUTO_HOLD                   112
 #define IDC_BTN_LOG_BROWSE              112
 #define IDC_DEBUGGER_BOOKMARK_ADD       112
+#define IDC_VIDEOCONFIG_SYNC_METHOD_WIN2 112
+#define IDC_VIDEOCONFIG_DIRECTDRAW_WIN  112
 #define IDC_DEBUGGER_BOOKMARK_DEL       113
 #define BTN_CLEAR_AH                    114
 #define IDC_CHECK_LOG_NEW_INSTRUCTIONS  114
@@ -434,7 +437,6 @@
 #define IDC_TVASPECT_X                  404
 #define IDC_VIDEOCONFIG_ASPECT_Y        405
 #define IDC_DEBUGGER_VAL_S2             405
-#define IDC_TVASPECT_HEIGHT             405
 #define IDC_TVASPECT_Y                  405
 #define IDC_VIDEOCONFIG_SCALER_WIN      406
 #define CHECK_ENABLE_MICROPHONE         407

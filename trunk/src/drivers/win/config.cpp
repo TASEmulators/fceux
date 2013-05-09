@@ -237,7 +237,8 @@ static CFGSTRUCT fceuconfig[] =
 	NAC("srendlinep",srendlinep),
 	NAC("erendlinep",erendlinep),
 
-	AC(disvaccel),
+	AC(directDrawModeWindowed),
+	AC(directDrawModeFullscreen),
 	AC(winsync),
 	NAC("988fssync",fssync),
 
