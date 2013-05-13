@@ -852,6 +852,10 @@
                                 >
                         </File>
                         <File
+                                RelativePath="..\src\boards\mihunche.cpp"
+                                >
+                        </File>
+                        <File
                                 RelativePath="..\src\boards\malee.cpp"
                                 >
                         </File>

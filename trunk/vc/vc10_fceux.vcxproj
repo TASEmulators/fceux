@@ -323,6 +323,7 @@
     <ClCompile Include="..\src\boards\le05.cpp" />
     <ClCompile Include="..\src\boards\lh32.cpp" />
     <ClCompile Include="..\src\boards\lh53.cpp" />
+    <ClCompile Include="..\src\boards\mihunche.cpp" />
     <ClCompile Include="..\src\boards\mmc2and4.cpp" />
     <ClCompile Include="..\src\boards\onebus.cpp" />
     <ClCompile Include="..\src\boards\pec-586.cpp" />

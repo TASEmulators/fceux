@@ -39,7 +39,7 @@ char *FCEUI_GetAboutString();
 extern uint64 timestampbase;
 extern uint32 MMC5HackVROMMask;
 extern uint8 *MMC5HackExNTARAMPtr;
-extern int MMC5Hack;
+extern int MMC5Hack, PEC586Hack;
 extern uint8 *MMC5HackVROMPTR;
 extern uint8 MMC5HackCHRMode;
 extern uint8 MMC5HackSPMode;

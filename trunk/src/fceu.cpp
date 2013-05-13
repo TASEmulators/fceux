@@ -378,6 +378,7 @@ void ResetGameLoaded(void) {
 	memset(&GameExpSound, 0, sizeof(GameExpSound));
 	MapIRQHook = NULL;
 	MMC5Hack = 0;
+	PEC586Hack = 0;
 	PAL &= 1;
 	pale = 0;
 }

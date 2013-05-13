@@ -91,7 +91,7 @@ static DECLFW(NROMWrite) {
 #endif
 
 static void NROMPower(void) {
-	setprg8r(0x10, 0x6000, 0); // Famili BASIC (v3.0) need it (uses only 4KB), FP-BASIC uses 8KB
+	setprg8r(0x10, 0x6000, 0);	// Famili BASIC (v3.0) need it (uses only 4KB), FP-BASIC uses 8KB
 	setprg16(0x8000, 0);
 	setprg16(0xC000, ~0);
 	setchr8(0);
@@ -127,7 +127,7 @@ static void UNROMSync(void) {
 		setprg16(0x8000, latche & 0x7);
 		if (latche & 8) mirror_in_use = 1;
 		if (mirror_in_use)
-			setmirror(((latche >> 3) & 1) ^ 1);  // Higway Star Hacked mapper
+			setmirror(((latche >> 3) & 1) ^ 1);	// Higway Star Hacked mapper
 	} else
 		setprg16(0x8000, latche & 0xf);
 	setprg16(0xc000, ~0);
@@ -143,7 +143,7 @@ void UNROM_Init(CartInfo *info) {
 static void CNROMSync(void) {
 	setchr8(latche);
 	setprg32(0x8000, 0);
-	setprg8r(0x10, 0x6000, 0); // Hayauchy IGO uses 2Kb or RAM
+	setprg8r(0x10, 0x6000, 0);	// Hayauchy IGO uses 2Kb or RAM
 }
 
 void CNROM_Init(CartInfo *info) {
@@ -159,7 +159,7 @@ static void ANROMSync() {
 }
 
 void ANROM_Init(CartInfo *info) {
-	Latch_Init(info, ANROMSync, 0, 0x8000, 0xFFFF, 0, 0);
+	Latch_Init(info, ANROMSync, 0, 0x4020, 0xFFFF, 0, 0);
 }
 
 //------------------ Map 8 ---------------------------
@@ -215,7 +215,6 @@ void Mapper38_Init(CartInfo *info) {
 //------------------ Map 66 ---------------------------
 
 static void MHROMSync(void) {
-
 	setprg32(0x8000, latche >> 4);
 	setchr8(latche & 0xF);
 }
@@ -373,7 +372,7 @@ static void M152Sync() {
 	setprg16(0x8000, (latche >> 4) & 7);
 	setprg16(0xc000, ~0);
 	setchr8(latche & 0xf);
-	setmirror(MI_0 + ((latche >> 7) & 1));         /* Saint Seiya...hmm. */
+	setmirror(MI_0 + ((latche >> 7) & 1));	/* Saint Seiya...hmm. */
 }
 
 void Mapper152_Init(CartInfo *info) {
@@ -435,8 +434,8 @@ void Mapper240_Init(CartInfo *info) {
 static void M241Sync(void) {
 	setchr8(0);
 	setprg8r(0x10, 0x6000, 0);
-	if(latche & 0x80)
-		setprg32(0x8000, latche | 8);   // no 241 actually, but why not afterall?
+	if (latche & 0x80)
+		setprg32(0x8000, latche | 8);	// no 241 actually, but why not afterall?
 	else
 		setprg32(0x8000, latche);
 }
@@ -455,7 +454,7 @@ void Mapper241_Init(CartInfo *info) {
 static void BMCA65ASSync(void) {
 	if (latche & 0x40)
 		setprg32(0x8000, (latche >> 1) & 0x0F);
-	else{
+	else {
 		setprg16(0x8000, ((latche & 0x30) >> 1) | (latche & 7));
 		setprg16(0xC000, ((latche & 0x30) >> 1) | 7);
 	}

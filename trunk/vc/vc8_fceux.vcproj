@@ -1083,6 +1083,10 @@
                                 >
                         </File>
                         <File
+                                RelativePath="..\src\boards\mihunche.cpp"
+                                >
+                        </File>
+                        <File
                                 RelativePath="..\src\boards\mmc1.cpp"
                                 >
                         </File>

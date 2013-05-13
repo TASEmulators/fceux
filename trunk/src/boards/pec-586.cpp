@@ -20,13 +20,15 @@
 
 #include "mapinc.h"
 
-static uint8 reg[7];
+static uint8 reg[7], debug = 1;
+static uint32 lastnt = 0;
 static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
 
 static SFORMAT StateRegs[] =
 {
 	{ reg, 2, "REG" },
+	{ &lastnt, 4, "LNT" },
 	{ 0 }
 };
 
@@ -46,9 +48,13 @@ static uint8 br_tbl[16] = {
 };
 
 static void Sync(void) {
-//	setchr4(0x0000,(reg[0]&0x80) >> 7);
-//	setchr4(0x1000,(reg[0]&0x80) >> 7);
-	setchr8(0);
+	if (reg[0]&0x80) {
+		setchr4(0x0000, (lastnt >> 9) ^ 0);
+		setchr4(0x1000, (lastnt >> 9) ^ 1);
+	} else {
+		setchr4(0x0000, 1);
+		setchr4(0x1000, 0);
+	}
 	setprg8r(0x10, 0x6000, 0);
 	setprg16(0x8000, bs_tbl[reg[0] & 0x7f] >> 4);
 	setprg16(0xc000, bs_tbl[reg[0] & 0x7f] & 0xf);
@@ -57,17 +63,18 @@ static void Sync(void) {
 
 static DECLFW(UNLPEC586Write) {
 	reg[(A & 0x700) >> 8] = V;
-	FCEU_printf("bs %04x %02x\n", A, V);
+//	FCEU_printf("bs %04x %02x\n", A, V);
 	Sync();
 }
 
 static DECLFR(UNLPEC586Read) {
-	FCEU_printf("read %04x\n", A);
+//	FCEU_printf("read %04x\n", A);
 	return (X.DB & 0xD8) | br_tbl[reg[4] >> 4];
 }
 
 static void UNLPEC586Power(void) {
 	reg[0] = 0x0E;
+	debug ^= 1;
 	Sync();
 	setchr8(0);
 	SetReadHandler(0x6000, 0x7FFF, CartBR);
@@ -77,16 +84,21 @@ static void UNLPEC586Power(void) {
 	SetReadHandler(0x5000, 0x5fff, UNLPEC586Read);
 }
 
-static void UNLPEC586IRQ(void) {
-//	if(reg[0]&0x80)
+static void UNLPEC586PPU(uint32 A) {
+	if (reg[0]&0x80)
 	{
-		if (scanline == 128) {
-			setchr4(0x0000, 1);
-			setchr4(0x1000, 0);
-		} else {
-			setchr4(0x0000, 0);
-			setchr4(0x1000, 1);
+		if (((A & 0x3FFF) > 0x2000) && ((A & 0x3FFF) < 0x23C0)) {
+			uint32 curnt = A & 0x200;
+			if (curnt != lastnt) {
+				setchr4(0x0000, (curnt >> 9) ^ 0);
+				setchr4(0x1000, (curnt >> 9) ^ 1);
+				lastnt = curnt;
+			}
 		}
+	} else {
+		lastnt = 0;
+		setchr4(0x0000, 1);
+		setchr4(0x1000, 0);
 	}
 }
 
@@ -103,8 +115,10 @@ static void StateRestore(int version) {
 void UNLPEC586Init(CartInfo *info) {
 	info->Power = UNLPEC586Power;
 	info->Close = UNLPEC586Close;
-	GameHBIRQHook = UNLPEC586IRQ;
+	PPU_hook = UNLPEC586PPU;
 	GameStateRestore = StateRestore;
+
+	PEC586Hack = 1;
 
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
