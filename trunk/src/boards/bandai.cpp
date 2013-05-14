@@ -52,9 +52,8 @@ static uint8 x24c0x_data[256], x24c0x_state;
 static uint8 x24c0x_addr, x24c0x_word, x24c0x_latch, x24c0x_bitcount;
 static uint8 x24c0x_sda, x24c0x_scl, x24c0x_out, x24c0x_oe;
 
-static SFORMAT x24c01StateRegs[] =
+static SFORMAT x24c0xStateRegs[] =
 {
-	{ x24c0x_data, 128, "DATA" },
 	{ &x24c0x_addr, 1, "ADDR" },
 	{ &x24c0x_word, 1, "WORD" },
 	{ &x24c0x_latch, 1, "LATC" },
@@ -234,9 +233,10 @@ void Mapper16_Init(CartInfo *info) {
 	info->battery = 1;
 	info->SaveGame[0] = x24c0x_data;
 	info->SaveGameLen[0] = 256;
+	AddExState(x24c0x_data, 256, 0, "DATA");
 
 	GameStateRestore = StateRestore;
-	AddExState(&x24c01StateRegs, ~0, 0, 0);
+	AddExState(&x24c0xStateRegs, ~0, 0, 0);
 	AddExState(&StateRegs, ~0, 0, 0);
 }
 
@@ -249,9 +249,10 @@ void Mapper159_Init(CartInfo *info) {
 	info->battery = 1;
 	info->SaveGame[0] = x24c0x_data;
 	info->SaveGameLen[0] = 128;
+	AddExState(x24c0x_data, 128, 0, "DATA");
 
 	GameStateRestore = StateRestore;
-	AddExState(&x24c01StateRegs, ~0, 0, 0);
+	AddExState(&x24c0xStateRegs, ~0, 0, 0);
 	AddExState(&StateRegs, ~0, 0, 0);
 }
 

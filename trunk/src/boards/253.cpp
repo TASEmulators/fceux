@@ -50,13 +50,6 @@ static void Sync(void) {
 	setprg8(0xe000, ~0);
 	for (i = 0; i < 8; i++) {
 		uint32 chr = chrlo[i] | (chrhi[i] << 8);
-		if (chrlo[i] == 0xc8) {
-			vlock = 0;
-			continue;
-		} else if (chrlo[i] == 0x88) {
-			vlock = 1;
-			continue;
-		}
 		if (((chrlo[i] == 4) || (chrlo[i] == 5)) && !vlock)
 			setchr1r(0x10, i << 10, chr & 1);
 		else
@@ -74,8 +67,15 @@ static DECLFW(M253Write) {
 	if ((A >= 0xB000) && (A <= 0xE00C)) {
 		uint8 ind = ((((A & 8) | (A >> 8)) >> 3) + 2) & 7;
 		uint8 sar = A & 4;
-		chrlo[ind] = (chrlo[ind] & (0xF0 >> sar)) | ((V & 0x0F) << sar);
-		if (A & 4)
+		uint8 clo = (chrlo[ind] & (0xF0 >> sar)) | ((V & 0x0F) << sar);
+		chrlo[ind] = clo;
+		if (ind == 0) {
+			if (clo == 0xc8)
+				vlock = 0;
+			else if (clo == 0x88)
+				vlock = 1;
+		}
+		if (sar)
 			chrhi[ind] = V >> 4;
 		Sync();
 	} else
@@ -85,11 +85,12 @@ static DECLFW(M253Write) {
 		case 0x9400: mirr = V & 3; Sync(); break;
 		case 0xF000: X6502_IRQEnd(FCEU_IQEXT); IRQLatch &= 0xF0; IRQLatch |= V & 0xF; break;
 		case 0xF004: X6502_IRQEnd(FCEU_IQEXT); IRQLatch &= 0x0F; IRQLatch |= V << 4; break;
-		case 0xF008: X6502_IRQEnd(FCEU_IQEXT); IRQClock = 0; IRQCount = IRQLatch; IRQa = V & 2;break;
+		case 0xF008: X6502_IRQEnd(FCEU_IQEXT); IRQClock = 0; IRQCount = IRQLatch; IRQa = V & 2; break;
 		}
 }
 
 static void M253Power(void) {
+	vlock = 0;
 	Sync();
 	SetReadHandler(0x6000, 0x7FFF, CartBR);
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
