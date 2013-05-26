@@ -313,7 +313,8 @@ int evaluate(Condition* c)
 	switch(c->type1)
 	{
 		case TYPE_ADDR: value1 = GetMem(value1); break;
-		case TYPE_BANK: value1 = getBank(_PC); break;
+		case TYPE_PC_BANK: value1 = getBank(_PC); break;
+		case TYPE_DATA_BANK: value1 = getBank(addressOfTheLastAccessedData); break;
 	}
 
 	f = value1;
@@ -337,7 +338,8 @@ int evaluate(Condition* c)
 	switch(c->type2)
 	{
 		case TYPE_ADDR: value2 = GetMem(value2); break;
-		case TYPE_BANK: value2 = getBank(_PC); break;
+		case TYPE_PC_BANK: value2 = getBank(_PC); break;
+		case TYPE_DATA_BANK: value2 = getBank(addressOfTheLastAccessedData); break;
 	}
 
 		switch (c->op)
@@ -732,8 +734,6 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 }
 //bbit edited: this is the end of the inserted code
 
-int debug_tracing;
-
 void DebugCycle()
 {
 	uint8 opcode[3] = {0};
@@ -783,6 +783,7 @@ void DebugCycle()
 		case 7: A = (opcode[1] | (opcode[2] << 8)) + _X; break;
 		case 8: A = opcode[1] + _Y; break;
 	}
+	addressOfTheLastAccessedData = A;
 
 	if (numWPs || dbgstate.step || dbgstate.runline || dbgstate.stepout || watchpoint[64].flags || dbgstate.badopbreak || break_on_cycles || break_on_instructions || break_asap)
 		breakpoint(opcode, A, size);

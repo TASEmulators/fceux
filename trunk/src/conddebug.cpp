@@ -37,10 +37,11 @@
 * Register  -> 'A' | 'X' | 'Y' | 'P'
 * Flag      -> 'N' | 'C' | 'Z' | 'I' | 'B' | 'V'
 * PC Bank   -> 'K'
+* Data Bank   -> 'T'
 */
 
-#include "conddebug.h"
 #include "types.h"
+#include "conddebug.h"
 #include "utils/memory.h"
 
 #include <cstdio>
@@ -49,6 +50,8 @@
 #include <cassert>
 #include <cctype>
 
+// hack: this address is used by 'T' condition
+uint16 addressOfTheLastAccessedData = 0;
 // Next non-whitespace character in string
 char next;
 
@@ -137,10 +140,16 @@ int isRegister(char c)
 	return c == 'A' || c == 'X' || c == 'Y' || c == 'P';
 }
 
-// Determines if a character is for bank
-int isBank(char c)
+// Determines if a character is for PC bank
+int isPCBank(char c)
 {
 	return c == 'K';
+}
+
+// Determines if a character is for Data bank
+int isDataBank(char c)
+{
+	return c == 'T';
 }
 
 // Reads a hexadecimal number from str
@@ -229,16 +238,33 @@ Condition* Primitive(const char** str, Condition* c)
 
 		return c;
 	}
-	else if (isBank(next)) /* PC Bank */
+	else if (isPCBank(next)) /* PC Bank */
 	{
 		if (c->type1 == TYPE_NO)
 		{
-			c->type1 = TYPE_BANK;
+			c->type1 = TYPE_PC_BANK;
 			c->value1 = next;
 		}
 		else
 		{
-			c->type2 = TYPE_BANK;
+			c->type2 = TYPE_PC_BANK;
+			c->value2 = next;
+		}
+
+		scan(str);
+
+		return c;
+	}
+	else if (isDataBank(next)) /* Data Bank */
+	{
+		if (c->type1 == TYPE_NO)
+		{
+			c->type1 = TYPE_DATA_BANK;
+			c->value1 = next;
+		}
+		else
+		{
+			c->type2 = TYPE_DATA_BANK;
 			c->value2 = next;
 		}
 
