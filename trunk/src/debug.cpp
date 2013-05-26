@@ -740,10 +740,8 @@ void DebugCycle()
 	uint16 A = 0;
 	int size;
 
-#ifdef WIN32
 	// since this function is called once for every instruction, we can use it for keeping statistics
 	IncrementInstructionsCounters();
-#endif
 
 	if (scanline == 240)
 	{

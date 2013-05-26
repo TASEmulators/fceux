@@ -142,7 +142,7 @@ function createGUI(n)
 			-- ok, file selected, if an error occurred or user canceled, the function already returned, so lets write the bot!
 
 			-- get the framework first. we need it to find the relevant tokens
-			local fh = assert(io.open("basicbot_framework.lua","r"));
+			local fh = assert(io.open("luabot_framework.lua","r"));
 			local framework = fh:read("*a");
 			fh:close();
 
