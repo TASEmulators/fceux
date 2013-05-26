@@ -54,17 +54,6 @@ extern int vblankScanLines;
 extern int vblankPixel;
 extern bool DebuggerWasUpdated;
 
-extern uint64 total_cycles_base;
-extern uint64 delta_cycles_base;
-extern bool break_on_cycles;
-extern uint64 break_cycles_limit;
-extern uint64 total_instructions;
-extern uint64 delta_instructions;
-extern bool break_on_instructions;
-extern uint64 break_instructions_limit;
-extern void ResetDebugStatisticsCounters();
-extern void ResetDebugStatisticsDeltaCounters();
-
 int childwnd;
 
 extern readfunc ARead[0x10000];

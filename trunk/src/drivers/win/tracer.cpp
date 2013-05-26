@@ -43,9 +43,6 @@ using namespace std;
 //#define LOG_SKIP_UNMAPPED 4
 //#define LOG_ADD_PERIODS 8
 
-extern uint64 total_cycles_base;
-extern uint64 total_instructions;
-
 // ################################## Start of SP CODE ###########################
 
 #include "debuggersp.h"

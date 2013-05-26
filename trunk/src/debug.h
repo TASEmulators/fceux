@@ -20,6 +20,7 @@
 #define BREAK_TYPE_BADOP -2
 #define BREAK_TYPE_CYCLES_EXCEED -3
 #define BREAK_TYPE_INSTRUCTIONS_EXCEED -4
+#define BREAK_TYPE_LUA -5
 
 //opbrktype is used to grab the breakpoint type that each instruction will cause.
 //WP_X is not used because ALL opcodes will have the execute bit set.
@@ -94,6 +95,21 @@ static INLINE int FCEUI_GetLoggingCD() { return debug_loggingCD; }
 extern int iaPC;
 extern uint32 iapoffset; //mbg merge 7/18/06 changed from int
 void DebugCycle();
+void BreakHit(int bp_num, bool force = false);
+
+extern bool break_asap;
+extern uint64 total_cycles_base;
+extern uint64 delta_cycles_base;
+extern bool break_on_cycles;
+extern uint64 break_cycles_limit;
+extern uint64 total_instructions;
+extern uint64 delta_instructions;
+extern bool break_on_instructions;
+extern uint64 break_instructions_limit;
+extern void ResetDebugStatisticsCounters();
+extern void ResetCyclesCounter();
+extern void ResetInstructionsCounter();
+extern void ResetDebugStatisticsDeltaCounters();
 //-------------
 
 //internal variables that debuggers will want access to

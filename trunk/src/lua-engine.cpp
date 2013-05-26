@@ -13,6 +13,7 @@
 #include "types.h"
 #include "fceu.h"
 #include "video.h"
+#include "debug.h"
 #include "sound.h"
 #include "drawing.h"
 #include "state.h"
@@ -4343,6 +4344,43 @@ static int sound_get(lua_State *L)
 	return 1;
 }
 
+// Debugger functions library
+
+// debugger.hitbreakpoint()
+static int debugger_hitbreakpoint(lua_State *L)
+{
+	break_asap = true;
+	return 0;
+}
+
+// debugger.getcyclescount()
+static int debugger_getcyclescount(lua_State *L)
+{
+	lua_pushinteger(L, (timestampbase + (uint64)timestamp - total_cycles_base));
+	return 1;
+}
+
+// debugger.getinstructionscount()
+static int debugger_getinstructionscount(lua_State *L)
+{
+	lua_pushinteger(L, total_instructions);
+	return 1;
+}
+
+// debugger.resetcyclescount()
+static int debugger_resetcyclescount(lua_State *L)
+{
+	ResetCyclesCounter();
+	return 0;
+}
+
+// debugger.resetinstructionscount()
+static int debugger_resetinstructionscount(lua_State *L)
+{
+	ResetInstructionsCounter();
+	return 0;
+}
+
 // TAS Editor functions library
 
 // bool taseditor.registerauto()
@@ -5406,6 +5444,16 @@ static const struct luaL_reg soundlib[] = {
 	{NULL,NULL}
 };
 
+static const struct luaL_reg debuggerlib[] = {
+
+	{"hitbreakpoint", debugger_hitbreakpoint},
+	{"getcyclescount", debugger_getcyclescount},
+	{"getinstructionscount", debugger_getinstructionscount},
+	{"resetcyclescount", debugger_resetcyclescount},
+	{"resetinstructionscount", debugger_resetinstructionscount},
+	{NULL,NULL}
+};
+
 static const struct luaL_reg taseditorlib[] = {
 
 	{"registerauto", taseditor_registerauto},
@@ -5567,6 +5615,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		luaL_register(L, "movie", movielib);
 		luaL_register(L, "gui", guilib);
 		luaL_register(L, "sound", soundlib);
+		luaL_register(L, "debugger", debuggerlib);
 		luaL_register(L, "taseditor", taseditorlib);
 		luaL_register(L, "bit", bit_funcs); // LuaBitOp library
 		lua_settop(L, 0);		// clean the stack, because each call to luaL_register leaves a table on top
@@ -5675,9 +5724,27 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 void FCEU_ReloadLuaCode()
 {
 	if (!luaScriptName)
-		FCEU_DispMessage("There's no script to reload.",0);
-	else
+	{
+#ifdef WIN32
+		// no script currently running, then try loading the most recent 
+		extern char *recent_lua[];
+		char*& fname = recent_lua[0];
+		extern void UpdateLuaConsole(const char* fname);
+		if (fname)
+		{
+			UpdateLuaConsole(fname);
+			FCEU_LoadLuaCode(fname);
+		} else
+		{
+			FCEU_DispMessage("There's no script to reload.", 0);
+		}
+#else
+		FCEU_DispMessage("There's no script to reload.", 0);
+#endif
+	} else
+	{
 		FCEU_LoadLuaCode(luaScriptName);
+	}
 }
 
 

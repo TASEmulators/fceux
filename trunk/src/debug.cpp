@@ -440,6 +440,7 @@ int u; //deleteme
 int skipdebug; //deleteme
 int numWPs;
 
+bool break_asap = false;
 // for CPU cycles and Instructions counters
 uint64 total_cycles_base = 0;
 uint64 delta_cycles_base = 0;
@@ -456,7 +457,15 @@ DebuggerState &FCEUI_Debugger() { return dbgstate; }
 
 void ResetDebugStatisticsCounters()
 {
+	ResetCyclesCounter();
+	ResetInstructionsCounter();
+}
+void ResetCyclesCounter()
+{
 	total_cycles_base = delta_cycles_base = timestampbase + (uint64)timestamp;
+}
+void ResetInstructionsCounter()
+{
 	total_instructions = delta_instructions = 0;
 }
 void ResetDebugStatisticsDeltaCounters()
@@ -470,12 +479,13 @@ void IncrementInstructionsCounters()
 	delta_instructions++;
 }
 
-void BreakHit(int bp_num, bool force = false)
+void BreakHit(int bp_num, bool force)
 {
-	if(!force) {
-
+	if(!force)
+	{
 		//check to see whether we fall in any forbid zone
-		for (int i = 0; i < numWPs; i++) {
+		for (int i = 0; i < numWPs; i++)
+		{
 			watchpointinfo& wp = watchpoint[i];
 			if(!(wp.flags & WP_F) || !(wp.flags & WP_E))
 				continue;
@@ -509,6 +519,12 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 	uint8 brk_type;
 	uint8 stackop=0;
 	uint8 stackopstartaddr,stackopendaddr;
+
+	if (break_asap)
+	{
+		break_asap = false;
+		BreakHit(BREAK_TYPE_LUA, true);
+	}
 
 	if (break_on_cycles && ((timestampbase + (uint64)timestamp - total_cycles_base) > break_cycles_limit))
 		BreakHit(BREAK_TYPE_CYCLES_EXCEED, true);
@@ -773,7 +789,7 @@ void DebugCycle()
 		case 8: A = opcode[1] + _Y; break;
 	}
 
-	if (numWPs || dbgstate.step || dbgstate.runline || dbgstate.stepout || watchpoint[64].flags || dbgstate.badopbreak || break_on_cycles || break_on_instructions)
+	if (numWPs || dbgstate.step || dbgstate.runline || dbgstate.stepout || watchpoint[64].flags || dbgstate.badopbreak || break_on_cycles || break_on_instructions || break_asap)
 		breakpoint(opcode, A, size);
 
 	if(debug_loggingCD)
