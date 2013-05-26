@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "utils/xstring.h"
 #include <assert.h>
 #include "common.h"
 #include "debugger.h"
@@ -196,7 +197,8 @@ int storePreferences(char* romname)
 	*/
 
 	filename = (char*)malloc(strlen(romname) + 5);
-	sprintf(filename, "%s.deb", romname);
+	strcpy(filename, mass_replace(romname, "|", ".").c_str());	//convert | to . for archive filenames
+	strcat(filename, ".deb");
 
 	f = fopen(filename, "wb");
 
@@ -392,7 +394,8 @@ int loadPreferences(char* romname)
 
 	// Get the name of the preferences file
 	char* filename = (char*)malloc(strlen(romname) + 5);
-	sprintf(filename, "%s.deb", romname);
+	strcpy(filename, mass_replace(romname, "|", ".").c_str());	//convert | to . for archive filenames
+	strcat(filename, ".deb");
 	
 	f = fopen(filename, "rb");
 	free(filename);
