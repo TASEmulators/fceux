@@ -22,8 +22,7 @@
 
 #include "mapinc.h"
 
-static uint8 prg[4];
-static uint8 chr[8];
+static uint8 prg[4], chr[8], mirr;
 static uint8 IRQCount;
 static uint8 IRQPre;
 static uint8 IRQa;
@@ -32,6 +31,7 @@ static SFORMAT StateRegs[] =
 {
 	{ prg, 4, "PRG" },
 	{ chr, 8, "CHR" },
+	{ &mirr, 1, "MIRR" },
 	{ &IRQCount, 1, "IRQC" },
 	{ &IRQPre, 1, "IRQP" },
 	{ &IRQa, 1, "IRQA" },
@@ -39,11 +39,20 @@ static SFORMAT StateRegs[] =
 };
 
 static void SyncPrg(void) {
-	setprg8(0x6000, 0);
+	setprg8(0x6000, prg[3]);
 	setprg8(0x8000, prg[0]);
 	setprg8(0xA000, prg[1]);
 	setprg8(0xC000, prg[2]);
 	setprg8(0xE000, ~0);
+}
+
+static void SyncMirr(void) {
+	switch (mirr) {
+	case 0: setmirror(MI_V); break;
+	case 1: setmirror(MI_H); break;
+	case 2: setmirror(MI_0); break;
+	case 3: setmirror(MI_1); break;
+	}
 }
 
 static void SyncChr(void) {
@@ -55,10 +64,14 @@ static void SyncChr(void) {
 static void StateRestore(int version) {
 	SyncPrg();
 	SyncChr();
+	SyncMirr();
 }
 
 static DECLFW(M183Write) {
-	if (((A & 0xF80C) >= 0xB000) && ((A & 0xF80C) <= 0xE00C)) {
+	if ((A & 0xF800) == 0x6800) {
+		prg[3] = A & 0x3F;
+		SyncPrg();
+	} else if (((A & 0xF80C) >= 0xB000) && ((A & 0xF80C) <= 0xE00C)) {
 		int index = (((A >> 11) - 6) | (A >> 3)) & 7;
 		chr[index] = (chr[index] & (0xF0 >> (A & 4))) | ((V & 0x0F) << (A & 4));
 		SyncChr();
@@ -66,14 +79,7 @@ static DECLFW(M183Write) {
 		case 0x8800: prg[0] = V; SyncPrg(); break;
 		case 0xA800: prg[1] = V; SyncPrg(); break;
 		case 0xA000: prg[2] = V; SyncPrg(); break;
-		case 0x9800:
-			switch (V & 3) {
-			case 0: setmirror(MI_V); break;
-			case 1: setmirror(MI_H); break;
-			case 2: setmirror(MI_0); break;
-			case 3: setmirror(MI_1); break;
-			}
-			break;
+		case 0x9800: mirr = V & 3; SyncMirr(); break;
 		case 0xF000: IRQCount = ((IRQCount & 0xF0) | (V & 0xF)); break;
 		case 0xF004: IRQCount = ((IRQCount & 0x0F) | ((V & 0xF) << 4)); break;
 		case 0xF008: IRQa = V; if (!V) IRQPre = 0; X6502_IRQEnd(FCEU_IQEXT); break;
@@ -91,9 +97,8 @@ static void M183IRQCounter(void) {
 
 static void M183Power(void) {
 	IRQPre = IRQCount = IRQa = 0;
-	SetReadHandler(0x8000, 0xFFFF, CartBR);
-	SetWriteHandler(0x8000, 0xFFFF, M183Write);
-	SetReadHandler(0x6000, 0x7FFF, CartBR);
+	SetReadHandler(0x6000, 0xFFFF, CartBR);
+	SetWriteHandler(0x6000, 0xFFFF, M183Write);
 	SyncPrg();
 	SyncChr();
 }
