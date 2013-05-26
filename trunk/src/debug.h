@@ -110,6 +110,7 @@ extern void ResetDebugStatisticsCounters();
 extern void ResetCyclesCounter();
 extern void ResetInstructionsCounter();
 extern void ResetDebugStatisticsDeltaCounters();
+extern void IncrementInstructionsCounters();
 //-------------
 
 //internal variables that debuggers will want access to

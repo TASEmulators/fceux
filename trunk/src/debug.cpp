@@ -740,9 +740,6 @@ void DebugCycle()
 	uint16 A = 0;
 	int size;
 
-	// since this function is called once for every instruction, we can use it for keeping statistics
-	IncrementInstructionsCounters();
-
 	if (scanline == 240)
 	{
 		vblankScanLines = (PAL?int((double)timestamp / ((double)341 / (double)3.2)):timestamp / 114);	//114 approximates the number of timestamps per scanline during vblank.  Approx 2508. NTSC: (341 / 3.0) PAL: (341 / 3.2). Uses (3.? * cpu_cycles) / 341.0, and assumes 1 cpu cycle.
