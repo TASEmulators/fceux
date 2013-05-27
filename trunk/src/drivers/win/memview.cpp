@@ -96,18 +96,18 @@ struct
 }
 popupmenu[] =
 {
-	{0x0000,0x2000,0,ID_ADDRESS_FRZ_SUBMENU,"Freeze/Unfreeze This Address"},
-	{0x6000,0x7FFF,0,ID_ADDRESS_FRZ_SUBMENU,"Freeze/Unfreeze This Address"},
-	{0x0000,0xFFFF,0,ID_ADDRESS_ADDBP_R,"Add Debugger Read Breakpoint"},
-	{0x0000,0x3FFF,1,ID_ADDRESS_ADDBP_R,"Add Debugger Read Breakpoint"},
-	{0x0000,0xFFFF,0,ID_ADDRESS_ADDBP_W,"Add Debugger Write Breakpoint"},
-	{0x0000,0x3FFF,1,ID_ADDRESS_ADDBP_W,"Add Debugger Write Breakpoint"},
-	{0x0000,0xFFFF,0,ID_ADDRESS_ADDBP_X,"Add Debugger Execute Breakpoint"},
-	{0x8000,0xFFFF,0,ID_ADDRESS_SEEK_IN_ROM,"Go Here In Rom File"},
-	{0x8000,0xFFFF,0,ID_ADDRESS_CREATE_GG_CODE,"Create Game Genie Code At This Address"},
-	//{0x0000,0xFFFFFF,2,7,"Create Game Genie Code At This Address"}
+	{0x0000,0x2000, MODE_NES_MEMORY,ID_ADDRESS_FRZ_SUBMENU,"Freeze/Unfreeze This Address"},
+	{0x6000,0x7FFF, MODE_NES_MEMORY,ID_ADDRESS_FRZ_SUBMENU,"Freeze/Unfreeze This Address"},
+	{0x0000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_ADDBP_R,"Add Debugger Read Breakpoint"},
+	{0x0000,0x3FFF, MODE_NES_PPU,ID_ADDRESS_ADDBP_R,"Add Debugger Read Breakpoint"},
+	{0x0000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_ADDBP_W,"Add Debugger Write Breakpoint"},
+	{0x0000,0x3FFF, MODE_NES_PPU,ID_ADDRESS_ADDBP_W,"Add Debugger Write Breakpoint"},
+	{0x0000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_ADDBP_X,"Add Debugger Execute Breakpoint"},
+	{0x8000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_SEEK_IN_ROM,"Go Here In ROM File"},
+	{0x8000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_CREATE_GG_CODE,"Create Game Genie Code At This Address"},
+	//{0x0000,0xFFFFFF,MODE_NES_FILE,7,"Create Game Genie Code At This Address"}
 	// ################################## Start of SP CODE ###########################
-	{0x0000, 0xFFFF, 0, ID_ADDRESS_BOOKMARK, "Add / Remove bookmark"},
+	{0x0000, 0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_BOOKMARK, "Add / Remove bookmark"},
 	// ################################## End of SP CODE ###########################
 } ;
 
@@ -559,7 +559,7 @@ void UpdateCaption()
 
 	if (CursorEndAddy == -1)
 	{
-		if (EditingMode == 2)
+		if (EditingMode == MODE_NES_FILE)
 		{
 			if (CursorStartAddy < 16)
 				sprintf(str, "Hex Editor - ROM Header Offset 0x%06x", CursorStartAddy);
@@ -572,7 +572,7 @@ void UpdateCaption()
 			sprintf(str, "Hex Editor - %s Offset 0x%06x", EditString[EditingMode], CursorStartAddy);
 		}
 
-		if (EditingMode == 0 && symbDebugEnabled)
+		if (EditingMode == MODE_NES_MEMORY && symbDebugEnabled)
 		{
 			// when watching RAM we may as well see symbolic names
 			sprintf(addrName, "$%04X", CursorStartAddy);
@@ -613,8 +613,8 @@ void UpdateCaption()
 }
 
 int GetMemViewData(uint32 i){
-	if(EditingMode == 0)return GetMem(i);
-	if(EditingMode == 1){
+	if(EditingMode == MODE_NES_MEMORY)return GetMem(i);
+	if(EditingMode == MODE_NES_PPU){
 		i &= 0x3FFF;
 		if(i < 0x2000)return VPage[(i)>>10][(i)];
 		//NSF PPU Viewer crash here (UGETAB) (Also disabled by 'MaxSize = 0x2000')
@@ -626,7 +626,7 @@ int GetMemViewData(uint32 i){
 			return PALRAM[i&0x1F];
 		}
 	}
-	if(EditingMode == 2){ //todo: use getfiledata() here
+	if(EditingMode == MODE_NES_FILE){ //todo: use getfiledata() here
 		if(i < 16) return *((unsigned char *)&head+i);
 		if(i < 16+PRGsize[0])return PRGptr[0][i-16];
 		if(i < 16+PRGsize[0]+CHRsize[0])return CHRptr[0][i-16-PRGsize[0]];
@@ -660,10 +660,10 @@ void UpdateColorTable(){
 	// ################################## End of SP CODE ###########################
 
 	//mbg merge 6/29/06 - added argument
-	if (EditingMode == 0)
+	if (EditingMode == MODE_NES_MEMORY)
 		FCEUI_ListCheats(UpdateCheatColorCallB, 0);
 
-	if(EditingMode == 2)
+	if(EditingMode == MODE_NES_FILE)
 	{
 		if (cdloggerdataSize)
 		{
@@ -900,11 +900,11 @@ void InputData(char *input){
 	for(i = 0;i < datasize;i++){
 		addr = CursorStartAddy+i;
 
-		if (EditingMode == 0)
+		if (EditingMode == MODE_NES_MEMORY)
 		{
 			// RAM (system bus)
 			BWrite[addr](addr,data[i]);
-		} else if (EditingMode == 1)
+		} else if (EditingMode == MODE_NES_PPU)
 		{
 			// PPU
 			addr &= 0x3FFF;
@@ -914,7 +914,7 @@ void InputData(char *input){
 				vnapage[(addr>>10)&0x3][addr&0x3FF] = data[i]; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
 			if((addr >= 0x3F00) && (addr < 0x3FFF))
 				PALRAM[addr&0x1F] = data[i];
-		} else if (EditingMode == 2)
+		} else if (EditingMode == MODE_NES_FILE)
 		{
 			// ROM
 			ApplyPatch(addr,datasize,data);
@@ -940,14 +940,14 @@ if(input > 0xF)return;
 if(TempData != -1){
 addr = CursorStartAddy;
 data = input|(TempData<<4);
-if(EditingMode == 0)BWrite[addr](addr,data);
-if(EditingMode == 1){
+if(EditingMode == MODE_NES_MEMORY)BWrite[addr](addr,data);
+if(EditingMode == MODE_NES_PPU){
 addr &= 0x3FFF;
 if(addr < 0x2000)VPage[addr>>10][addr] = data; //todo: detect if this is vrom and turn it red if so
 if((addr > 0x2000) && (addr < 0x3F00))vnapage[(addr>>10)&0x3][addr&0x3FF] = data; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
 if((addr > 0x3F00) && (addr < 0x3FFF))PALRAM[addr&0x1F] = data;
 }
-if(EditingMode == 2)ApplyPatch(addr,1,(uint8 *)&data);
+if(EditingMode == MODE_NES_FILE)ApplyPatch(addr,1,(uint8 *)&data);
 CursorStartAddy++;
 TempData = -1;
 } else {
@@ -959,8 +959,8 @@ if(i == 256)return;
 
 addr = CursorStartAddy;
 data = i;
-if(EditingMode == 0)BWrite[addr](addr,data);
-if(EditingMode == 2)ApplyPatch(addr,1,(uint8 *)&data);
+if(EditingMode == MODE_NES_MEMORY)BWrite[addr](addr,data);
+if(EditingMode == MODE_NES_FILE)ApplyPatch(addr,1,(uint8 *)&data);
 CursorStartAddy++;
 }
 */
@@ -1099,6 +1099,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	TEXTMETRIC tm;
 	SCROLLINFO si;
 	int x, y, i, j;
+	int bank = -1;
 	int tempAddy;
 	const int MemFontWidth = debugSystem->HexeditorFontWidth;
 	const int MemFontHeight = debugSystem->HexeditorFontHeight + HexRowHeightBorder;
@@ -1141,7 +1142,8 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		TextColorList = (COLORREF*)malloc(DataAmount*sizeof(COLORREF));
 		BGColorList = (COLORREF*)malloc(DataAmount*sizeof(COLORREF));
 		OldValues = (int*)malloc(DataAmount*sizeof(int));
-		EditingText = EditingMode = CurOffset = 0;
+		EditingText = CurOffset = 0;
+		EditingMode = MODE_NES_MEMORY;
 
 		//set the default table
 		UnloadTableFile();
@@ -1373,194 +1375,288 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		ReleaseCapture();
 		return 0;
 	case WM_CONTEXTMENU:
+	{
 		point.x = x = GET_X_LPARAM(lParam);
 		point.y = y = GET_Y_LPARAM(lParam);
 		ScreenToClient(hMemView,&point);
 		mousex = point.x;
 		mousey = point.y;
 		j = GetAddyFromCoord(mousex,mousey);
+		bank = getBank(j);
 		//sprintf(str,"x = %d, y = %d, j = %d",mousex,mousey,j);
 		//MessageBox(hMemView,str, "mouse wheel dance!", MB_OK);
 		hMenu = CreatePopupMenu();
-		for(i = 0;i < POPUPNUM;i++){
-			if((j >= popupmenu[i].minaddress) && (j <= popupmenu[i].maxaddress)
-				&& (EditingMode == popupmenu[i].editingmode)){
-					memset(&MenuInfo,0,sizeof(MENUITEMINFO));
-					switch(popupmenu[i].id){ //this will set the text for the menu dynamically based on the id
-						// ################################## Start of SP CODE ###########################
-	case ID_ADDRESS_FRZ_SUBMENU:
+		for(i = 0;i < POPUPNUM;i++)
 		{
-			HMENU sub = CreatePopupMenu();
-			AppendMenu(hMenu, MF_POPUP | MF_STRING, (UINT)sub, "Freeze / Unfreeze Address");
-			AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_TOGGLE_STATE, "Toggle state");
-			AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_FREEZE, "Freeze");
-			AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_UNFREEZE, "Unfreeze");
-			AppendMenu(sub, MF_SEPARATOR, ID_ADDRESS_FRZ_SEP, "-");
-			AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_UNFREEZE_ALL, "Unfreeze all");
+			if((j >= popupmenu[i].minaddress) && (j <= popupmenu[i].maxaddress) && (EditingMode == popupmenu[i].editingmode))
+			{
+				memset(&MenuInfo,0,sizeof(MENUITEMINFO));
+				switch(popupmenu[i].id)
+				{
+					//this will set the text for the menu dynamically based on the id
+					// ################################## Start of SP CODE ###########################
+					case ID_ADDRESS_FRZ_SUBMENU:
+					{
+						HMENU sub = CreatePopupMenu();
+						AppendMenu(hMenu, MF_POPUP | MF_STRING, (UINT)sub, "Freeze / Unfreeze Address");
+						AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_TOGGLE_STATE, "Toggle state");
+						AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_FREEZE, "Freeze");
+						AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_UNFREEZE, "Unfreeze");
+						AppendMenu(sub, MF_SEPARATOR, ID_ADDRESS_FRZ_SEP, "-");
+						AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_UNFREEZE_ALL, "Unfreeze all");
 			
-			if (CursorEndAddy == -1) tempAddy = CursorStartAddy;
-			else tempAddy = CursorEndAddy;								//This is necessary because CursorEnd = -1 if only 1 address is selected
-			if (tempAddy - CursorStartAddy + FrozenAddressCount > 255)	//There is a limit of 256 possible frozen addresses, therefore if the user has selected more than this limit, disable freeze menu items
-			{														
-				EnableMenuItem(sub,ID_ADDRESS_FRZ_TOGGLE_STATE,MF_GRAYED);
-				EnableMenuItem(sub,ID_ADDRESS_FRZ_FREEZE,MF_GRAYED);				
-			}
-			continue;
-		}
-		// ################################## End of SP CODE ###########################
-	case ID_ADDRESS_ADDBP_R: //We want this to give the address to add the read breakpoint for
-		if((j <= CursorEndAddy) && (j >= CursorStartAddy))
-			sprintf(str,"Add Read Breakpoint For Address 0x%04X-0x%04X",CursorStartAddy,CursorEndAddy);
-		else
-			sprintf(str,"Add Read Breakpoint For Address 0x%04X",j);
-		popupmenu[i].text = str;
-		break;
-
-	case ID_ADDRESS_ADDBP_W:
-		if((j <= CursorEndAddy) && (j >= CursorStartAddy))
-			sprintf(str,"Add Write Breakpoint For Address 0x%04X-0x%04X",CursorStartAddy,CursorEndAddy);
-		else
-			sprintf(str,"Add Write Breakpoint For Address 0x%04X",j);
-		popupmenu[i].text = str;
-		break;
-	case ID_ADDRESS_ADDBP_X:
-		if((j <= CursorEndAddy) && (j >= CursorStartAddy))
-			sprintf(str,"Add Execute Breakpoint For Address 0x%04X-0x%04X",CursorStartAddy,CursorEndAddy);
-		else
-			sprintf(str,"Add Execute Breakpoint For Address 0x%04X",j);
-		popupmenu[i].text = str;
-		break;
+						if (CursorEndAddy == -1) tempAddy = CursorStartAddy;
+						else tempAddy = CursorEndAddy;								//This is necessary because CursorEnd = -1 if only 1 address is selected
+						if (tempAddy - CursorStartAddy + FrozenAddressCount > 255)	//There is a limit of 256 possible frozen addresses, therefore if the user has selected more than this limit, disable freeze menu items
+						{														
+							EnableMenuItem(sub,ID_ADDRESS_FRZ_TOGGLE_STATE,MF_GRAYED);
+							EnableMenuItem(sub,ID_ADDRESS_FRZ_FREEZE,MF_GRAYED);				
+						}
+						continue;
 					}
-					MenuInfo.cbSize = sizeof(MENUITEMINFO);
-					MenuInfo.fMask = MIIM_TYPE | MIIM_ID | MIIM_DATA;
-					MenuInfo.fType = MF_STRING;
-					MenuInfo.dwTypeData = popupmenu[i].text;
-					MenuInfo.cch = strlen(popupmenu[i].text);
-					MenuInfo.wID = popupmenu[i].id;
-					InsertMenuItem(hMenu,i+1,1,&MenuInfo);
+					// ################################## End of SP CODE ###########################
+					case ID_ADDRESS_ADDBP_R:
+					{
+						// We want this to give the address to add the read breakpoint for
+						if ((j <= CursorEndAddy) && (j >= CursorStartAddy))
+						{
+							if (j >= 0x8000 && bank != -1)
+								sprintf(str,"Add Read Breakpoint For Address %02X:%04X-%02X:%04X", bank, CursorStartAddy, bank, CursorEndAddy);
+							else
+								sprintf(str,"Add Read Breakpoint For Address %04X-%04X", CursorStartAddy, CursorEndAddy);
+						} else
+						{
+							if (j >= 0x8000 && bank != -1)
+								sprintf(str,"Add Read Breakpoint For Address %02X:%04X", bank, j);
+							else
+								sprintf(str,"Add Read Breakpoint For Address %04X", j);
+						}
+						popupmenu[i].text = str;
+						break;
+					}
+					case ID_ADDRESS_ADDBP_W:
+					{
+						if ((j <= CursorEndAddy) && (j >= CursorStartAddy))
+						{
+							if (j >= 0x8000 && bank != -1)
+								sprintf(str,"Add Write Breakpoint For Address %02X:%04X-%02X:%04X", bank, CursorStartAddy, bank, CursorEndAddy);
+							else
+								sprintf(str,"Add Write Breakpoint For Address %04X-%04X", CursorStartAddy, CursorEndAddy);
+						} else
+						{
+							if (j >= 0x8000 && bank != -1)
+								sprintf(str,"Add Write Breakpoint For Address %02X:%04X", bank, j);
+							else
+								sprintf(str,"Add Write Breakpoint For Address %04X", j);
+						}
+						popupmenu[i].text = str;
+						break;
+					}
+					case ID_ADDRESS_ADDBP_X:
+					{
+						if ((j <= CursorEndAddy) && (j >= CursorStartAddy))
+						{
+							if (j >= 0x8000 && bank != -1)
+								sprintf(str,"Add Execute Breakpoint For Address %02X:%04X-%02X:%04X", bank, CursorStartAddy, bank, CursorEndAddy);
+							else
+								sprintf(str,"Add Execute Breakpoint For Address %04X-%04X", CursorStartAddy, CursorEndAddy);
+						} else
+						{
+							if (j >= 0x8000 && bank != -1)
+								sprintf(str,"Add Execute Breakpoint For Address %02X:%04X", bank, j);
+							else
+								sprintf(str,"Add Execute Breakpoint For Address %04X", j);
+						}
+						popupmenu[i].text = str;
+						break;
+					}
+				}
+				MenuInfo.cbSize = sizeof(MENUITEMINFO);
+				MenuInfo.fMask = MIIM_TYPE | MIIM_ID | MIIM_DATA;
+				MenuInfo.fType = MF_STRING;
+				MenuInfo.dwTypeData = popupmenu[i].text;
+				MenuInfo.cch = strlen(popupmenu[i].text);
+				MenuInfo.wID = popupmenu[i].id;
+				InsertMenuItem(hMenu,i+1,1,&MenuInfo);
 			}
 		}
-		if(i != 0)i = TrackPopupMenuEx(hMenu, TPM_RETURNCMD | TPM_RIGHTBUTTON, x, y, hMemView, NULL);
-		switch(i){
-	case ID_ADDRESS_FRZ_TOGGLE_STATE:
-		// ################################## Start of SP CODE ###########################
+		if (i != 0)
+			i = TrackPopupMenuEx(hMenu, TPM_RETURNCMD | TPM_RIGHTBUTTON, x, y, hMemView, NULL);
+		switch(i)
 		{
-			int n;
-			for (n=CursorStartAddy;(CursorEndAddy == -1 && n == CursorStartAddy) || n<=CursorEndAddy;n++)
+			case ID_ADDRESS_FRZ_TOGGLE_STATE:
+			// ################################## Start of SP CODE ###########################
 			{
-				FreezeRam(n, 0, n == CursorEndAddy);
+				int n;
+				for (n=CursorStartAddy;(CursorEndAddy == -1 && n == CursorStartAddy) || n<=CursorEndAddy;n++)
+				{
+					FreezeRam(n, 0, n == CursorEndAddy);
+				}
+				break;
 			}
-			break;
-		}
-	case ID_ADDRESS_FRZ_FREEZE:
-		{
-			int n;
-			for (n=CursorStartAddy;(CursorEndAddy == -1 && n == CursorStartAddy) || n<=CursorEndAddy;n++)
+			case ID_ADDRESS_FRZ_FREEZE:
 			{
-				FreezeRam(n, 1, n == CursorEndAddy);
+				int n;
+				for (n=CursorStartAddy;(CursorEndAddy == -1 && n == CursorStartAddy) || n<=CursorEndAddy;n++)
+				{
+					FreezeRam(n, 1, n == CursorEndAddy);
+				}
+				break;
 			}
-			break;
-		}
-	case ID_ADDRESS_FRZ_UNFREEZE:
-		{
-			int n;
-			for (n=CursorStartAddy;(CursorEndAddy == -1 && n == CursorStartAddy) || n<=CursorEndAddy;n++)
+			case ID_ADDRESS_FRZ_UNFREEZE:
 			{
-				FreezeRam(n, -1, n == CursorEndAddy);
+				int n;
+				for (n=CursorStartAddy;(CursorEndAddy == -1 && n == CursorStartAddy) || n<=CursorEndAddy;n++)
+				{
+					FreezeRam(n, -1, n == CursorEndAddy);
+				}
+				break;
 			}
+			case ID_ADDRESS_FRZ_UNFREEZE_ALL:
+			{
+				UnfreezeAllRam();
+				break;
+			}
+			// ################################## End of SP CODE ###########################
 			break;
-		}
-	case ID_ADDRESS_FRZ_UNFREEZE_ALL:
-		{
-			UnfreezeAllRam();
-			break;
-		}
-		// ################################## End of SP CODE ###########################
-		break;
 
-	case ID_ADDRESS_ADDBP_R:
-		watchpoint[numWPs].flags = WP_E | WP_R;
-		if(EditingMode == 1)watchpoint[numWPs].flags |= BT_P;
-		if((j <= CursorEndAddy) && (j >= CursorStartAddy)){
-			watchpoint[numWPs].address = CursorStartAddy;
-			watchpoint[numWPs].endaddress = CursorEndAddy;
-		}			
-		else{
-			watchpoint[numWPs].address = j;
-			watchpoint[numWPs].endaddress = 0;
-		}
-		numWPs++;
-		// ################################## Start of SP CODE ###########################
-		{ extern int myNumWPs;
-		myNumWPs++; }
-		// ################################## End of SP CODE ###########################
-		if(hDebug)AddBreakList();
-		else DoDebug(0);
-		break;
+			case ID_ADDRESS_ADDBP_R:
+			{
+				if (numWPs < MAXIMUM_NUMBER_OF_BREAKPOINTS)
+				{
+					watchpoint[numWPs].flags = WP_E | WP_R;
+					if (EditingMode == MODE_NES_PPU)
+						watchpoint[numWPs].flags |= BT_P;
+					if ((j <= CursorEndAddy) && (j >= CursorStartAddy))
+					{
+						watchpoint[numWPs].address = CursorStartAddy;
+						watchpoint[numWPs].endaddress = CursorEndAddy;
+					} else
+					{
+						watchpoint[numWPs].address = j;
+						watchpoint[numWPs].endaddress = 0;
+					}
+					char condition[10] = {0};
+					if (EditingMode == MODE_NES_MEMORY)
+					{
+						// only break at this Bank
+						if (j >= 0x8000 && bank != -1)
+							sprintf(condition, "T==#%02X", bank);
+					}
+					checkCondition(condition, numWPs);
 
-	case ID_ADDRESS_ADDBP_W:
-		watchpoint[numWPs].flags = WP_E | WP_W;
-		if(EditingMode == 1)watchpoint[numWPs].flags |= BT_P;
-		if((j <= CursorEndAddy) && (j >= CursorStartAddy)){
-			watchpoint[numWPs].address = CursorStartAddy;
-			watchpoint[numWPs].endaddress = CursorEndAddy;
-		}			
-		else{
-			watchpoint[numWPs].address = j;
-			watchpoint[numWPs].endaddress = 0;
-		}
-		numWPs++;
-		// ################################## Start of SP CODE ###########################
-		{ extern int myNumWPs;
-		myNumWPs++; }
-		// ################################## End of SP CODE ###########################
-		if(hDebug)AddBreakList();
-		else DoDebug(0);
-		break;
-	case ID_ADDRESS_ADDBP_X:
-		watchpoint[numWPs].flags = WP_E | WP_X;
-		if((j <= CursorEndAddy) && (j >= CursorStartAddy)){
-			watchpoint[numWPs].address = CursorStartAddy;
-			watchpoint[numWPs].endaddress = CursorEndAddy;
-		}			
-		else{
-			watchpoint[numWPs].address = j;
-			watchpoint[numWPs].endaddress = 0;
-		}
-		numWPs++;
-		// ################################## Start of SP CODE ###########################
-		{ extern int myNumWPs;
-		myNumWPs++; }
-		// ################################## End of SP CODE ###########################
-		if(hDebug)AddBreakList();
-		else DoDebug(0);
-		break;
-	case ID_ADDRESS_SEEK_IN_ROM:
-		ChangeMemViewFocus(2,GetNesFileAddress(j),-1);
-		break;
-	case ID_ADDRESS_CREATE_GG_CODE:
-		SetGGConvFocus(j,GetMem(j));
-		break;
-		// ################################## Start of SP CODE ###########################
-	case ID_ADDRESS_BOOKMARK:
-		{
-			if (toggleBookmark(hwnd, CursorStartAddy))
-			{
-				MessageBox(hDebug, "Can't set more than 64 breakpoints", "Error", MB_OK | MB_ICONERROR);
+					numWPs++;
+					// ################################## Start of SP CODE ###########################
+					{ extern int myNumWPs;
+					myNumWPs++; }
+					// ################################## End of SP CODE ###########################
+					if (hDebug)
+						AddBreakList();
+					else
+						DoDebug(0);
+				}
+				break;
 			}
-			else
+			case ID_ADDRESS_ADDBP_W:
 			{
-				updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), 3));
-				UpdateColorTable();
+				if (numWPs < MAXIMUM_NUMBER_OF_BREAKPOINTS)
+				{
+					watchpoint[numWPs].flags = WP_E | WP_W;
+					if (EditingMode == MODE_NES_PPU)
+						watchpoint[numWPs].flags |= BT_P;
+					if ((j <= CursorEndAddy) && (j >= CursorStartAddy))
+					{
+						watchpoint[numWPs].address = CursorStartAddy;
+						watchpoint[numWPs].endaddress = CursorEndAddy;
+					} else
+					{
+						watchpoint[numWPs].address = j;
+						watchpoint[numWPs].endaddress = 0;
+					}
+					char condition[10] = {0};
+					if (EditingMode == MODE_NES_MEMORY)
+					{
+						// only break at this Bank
+						if (j >= 0x8000 && bank != -1)
+							sprintf(condition, "T==#%02X", bank);
+					}
+					checkCondition(condition, numWPs);
+
+					numWPs++;
+					// ################################## Start of SP CODE ###########################
+					{ extern int myNumWPs;
+					myNumWPs++; }
+					// ################################## End of SP CODE ###########################
+					if (hDebug)
+						AddBreakList();
+					else
+						DoDebug(0);
+				}
+				break;
 			}
-		}
-		break;
-		// ################################## End of SP CODE ###########################
+			case ID_ADDRESS_ADDBP_X:
+			{
+				if (numWPs < MAXIMUM_NUMBER_OF_BREAKPOINTS)
+				{
+					watchpoint[numWPs].flags = WP_E | WP_X;
+					if((j <= CursorEndAddy) && (j >= CursorStartAddy))
+					{
+						watchpoint[numWPs].address = CursorStartAddy;
+						watchpoint[numWPs].endaddress = CursorEndAddy;
+					} else
+					{
+						watchpoint[numWPs].address = j;
+						watchpoint[numWPs].endaddress = 0;
+					}
+					char condition[10] = {0};
+					if (EditingMode == MODE_NES_MEMORY)
+					{
+						// only break at this Bank
+						if (j >= 0x8000 && bank != -1)
+							sprintf(condition, "T==#%02X", bank);
+					}
+					checkCondition(condition, numWPs);
+
+					numWPs++;
+					// ################################## Start of SP CODE ###########################
+					{ extern int myNumWPs;
+					myNumWPs++; }
+					// ################################## End of SP CODE ###########################
+					if (hDebug)
+						AddBreakList();
+					else
+						DoDebug(0);
+				}
+				break;
+			}
+			case ID_ADDRESS_SEEK_IN_ROM:
+				ChangeMemViewFocus(2,GetNesFileAddress(j),-1);
+				break;
+			case ID_ADDRESS_CREATE_GG_CODE:
+				SetGGConvFocus(j,GetMem(j));
+				break;
+				// ################################## Start of SP CODE ###########################
+			case ID_ADDRESS_BOOKMARK:
+			{
+				if (toggleBookmark(hwnd, CursorStartAddy))
+				{
+					MessageBox(hDebug, "Can't set more than 64 breakpoints", "Error", MB_OK | MB_ICONERROR);
+				}
+				else
+				{
+					updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), 3));
+					UpdateColorTable();
+				}
+			}
+			break;
+			// ################################## End of SP CODE ###########################
 		}
 		//6 = Create GG Code
 
 		return 0;
+	}
 	case WM_MBUTTONDOWN:
+	{
 		x = GET_X_LPARAM(lParam);
 		y = GET_Y_LPARAM(lParam);
 		i = GetAddyFromCoord(x,y);
@@ -1569,6 +1665,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		FreezeRam(i, 0, 1);
 		// ################################## End of SP CODE ###########################
 		return 0;
+	}
 	case WM_MOUSEWHEEL:
 		i = (short)HIWORD(wParam);///WHEEL_DELTA;
 		ZeroMemory(&si, sizeof(SCROLLINFO));
@@ -1730,17 +1827,23 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		case MENU_MV_VIEW_RAM:
 		case MENU_MV_VIEW_PPU:
 		case MENU_MV_VIEW_ROM:
-			EditingMode = wParam-MENU_MV_VIEW_RAM;
-			for(i = 0;i < 3;i++){
-				if(EditingMode == i)CheckMenuItem(GetMenu(hMemView),MENU_MV_VIEW_RAM+i,MF_CHECKED);
-				else CheckMenuItem(GetMenu(hMemView),MENU_MV_VIEW_RAM+i,MF_UNCHECKED);
+			EditingMode = wParam - MENU_MV_VIEW_RAM;
+			for (i = 0; i < 3; i++)
+			{
+				if (EditingMode == i)
+					CheckMenuItem(GetMenu(hMemView),MENU_MV_VIEW_RAM+i,MF_CHECKED);
+				else
+					CheckMenuItem(GetMenu(hMemView),MENU_MV_VIEW_RAM+i,MF_UNCHECKED);
 			}
-			if(EditingMode == 0)MaxSize = 0x10000;
-			if(EditingMode == 1){
+			if (EditingMode == MODE_NES_MEMORY)
+				MaxSize = 0x10000;
+			if (EditingMode == MODE_NES_PPU)
+			{
 				if (GameInfo->type==GIT_NSF) {MaxSize = 0x2000;} //Also disabled under GetMemViewData
 				else {MaxSize = 0x4000;}
 			}
-			if(EditingMode == 2)MaxSize = 16+CHRsize[0]+PRGsize[0]; //todo: add trainer size
+			if (EditingMode == MODE_NES_FILE)
+				MaxSize = 16+CHRsize[0]+PRGsize[0]; //todo: add trainer size
 			if(DataAmount+CurOffset > MaxSize)CurOffset = MaxSize-DataAmount;
 			if(CursorEndAddy > MaxSize)CursorEndAddy = -1;
 			if(CursorStartAddy > MaxSize)CursorStartAddy= MaxSize-1;
