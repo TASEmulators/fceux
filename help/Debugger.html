@@ -118,15 +118,15 @@
 </ul>
 <p><br/></p>
 <p><br/></p>
-<p>While execution is broken, the program counter (PC) can be edited, as well as the three registers A/X/Y, and the status flags. Normally they should be left as-is, but changing them at runtime can be useful for more advanced debugging.</p>
+<p>While execution is broken (emulation is paused), the program counter (PC) can be edited, as well as the three registers A/X/Y, and the status flags. Normally they should be left as-is, but changing them at runtime can be useful for more advanced debugging.</p>
 <p><br/></p>
 <p>The contents of memory starting at the stack pointer (somewhere in the range $0100-01FF) is displayed in the Stack frame below the A/X/Y registers.</p>
 <p><br/></p>
 <p>The current PPU memory address, sprite memory address, scanline, and rendering pixel are displayed below the stack and status flags.</p>
 <p><br/></p>
-<p><span class="rvts15">Examples of Scanline number:</span> -1 it means Prerender time, 240 is Idle scanline, 0-239 are visible scanlines, 241-260/310 are VBlank scanlines.</p>
+<p><span class="rvts15">Examples of Scanline number:</span> -1 means Prerender time, 240 is Idle scanline, 0-239 are visible scanlines, 241-260/310 are VBlank scanlines.</p>
 <p><br/></p>
-<p>To the right from PPU section there's Cycles counter and Instructions counter that keep counting while the game is running. You can use the information for keeping statistics, for code profiling or writing PPU-synchronized code (e.g. raster effects). You can also make the debugger break automatically based on the counters values. The "Reset counters" button resets both counters to 0.</p>
+<p>To the right from the PPU section there's Cycles counter and Instructions counter that keep counting while the game is running. You can use the information for keeping statistics, for code profiling or writing PPU-synchronized code (e.g. raster effects). You can also make the debugger break automatically based on the counters values. The "Reset counters" button resets both counters to 0.</p>
 <p><br/></p>
 <p><br/></p>
 <p><span class="rvts44">Disassembly</span></p>
@@ -169,7 +169,7 @@
 <p><br/></p>
 <p>Check one or more of the options to watch for Read, Write, or Execute at an address. Note that fetching of code from an address will not break as a Read; use the Execute box for this. Breakpoints can be given a name that will appear in the breakpoint window. The condition field can be used to break only on particular conditions; see "Conditional Breakpoints" below.</p>
 <p><br/></p>
-<p>Double click on a breakpoint in the BreakPoints list to quickly disable or enable it. So you don't have to delete breakpoints to stop them from causing the debugger to halt the game.</p>
+<p>Double click on a breakpoint in the BreakPoints list to quickly disable or enable this breakpoint. So you don't have to delete breakpoints to stop them from causing the debugger to halt the game.</p>
 <p><br/></p>
 <p>A special kind of breakpoints with the Forbid option will prevent any breakpoints from occurring within the specified memory address range. This can be enabled and disabled like other breakpoints.</p>
 <p><br/></p>
@@ -179,7 +179,7 @@
 <p><br/></p>
 <p>Finally, you can make the debugger break after certain number of instructions or CPU cycles.</p>
 <p><br/></p>
-<p>More advanced conditions and automation may be achieved through Lua script breakpoints. See the <a class="rvts18" href="LuaFunctionsList.html#LuaBreakpoints">Lua reference</a> for more information.</p>
+<p>More advanced breakpoints conditions and automation may be achieved through Lua script breakpoints. See the <a class="rvts18" href="LuaFunctionsList.html#LuaBreakpoints">Lua reference</a> for more information.</p>
 <p><br/></p>
 <p>Breakpoints are listed in the following form:</p>
 <p><br/></p>
@@ -203,17 +203,17 @@
 <p>Breakpoints may also have a conditional statement that causes them to execute only if that statement evaluates to true. The conditional breakpoint grammar has this form:</p>
 <p><br/></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li>P &nbsp; &nbsp; &nbsp; &nbsp; -&gt; Connect</li>
 <li>Connect &nbsp; -&gt; Compare { ('||' | '&amp;&amp;') Compare }</li>
 <li>Compare &nbsp; -&gt; Sum { ('==' | '!=' | '&lt;=' | '&gt;=' | '&lt;' | '&gt;') Sum }</li>
 <li>Sum &nbsp; &nbsp; &nbsp; -&gt; Product { ('+' | '-') Product }</li>
 <li>Product &nbsp; -&gt; Primitive { ('*' | '/') Primitive }</li>
-<li>Primitive -&gt; Number | Address | Register | Flag | PC Bank | '(' Connect ')'</li>
-<li>Number &nbsp; &nbsp;-&gt; '#' [1-9A-F]*</li>
-<li>Address &nbsp; -&gt; '$' [1-9A-F]* | '$' '[' Connect ']'</li>
+<li>Primitive -&gt; Number | Address | Register | Flag | PC Bank | Data Bank | '(' Connect ')'</li>
+<li>Number &nbsp; &nbsp;-&gt; '#' [0123456789ABCDEF]*</li>
+<li>Address &nbsp; -&gt; '$' [0123456789ABCDEF]* | '$' '[' Connect ']'</li>
 <li>Register &nbsp;-&gt; 'A' | 'X' | 'Y' | 'P'</li>
 <li>Flag &nbsp; &nbsp; &nbsp;-&gt; 'N' | 'C' | 'Z' | 'I' | 'B' | 'V'</li>
 <li>PC Bank &nbsp; -&gt; 'K'</li>
+<li>Data Bank &nbsp; -&gt; 'T'</li>
 </ul>
 <p><br/></p>
 <p>The parser is very strict. All numbers are hexadecimal. Always prefix a number with # for an immediate value, or $ for a memory address. If a memory address needs to be calculated use $[] with the calculation inside the brackets.</p>
@@ -226,17 +226,18 @@
 <p><br/></p>
 <p><span class="rvts15">Example conditions:</span></p>
 <p><br/></p>
-<p>Break if register A is less than value at memory address $0005:</p>
+<p>Break only if register A is less than value at memory address $0005:</p>
 <p><span class="rvts45">A &lt; $0005</span></p>
 <p><br/></p>
-<p>Break if the program counter is 8123:</p>
-<p><span class="rvts45">P == #8123</span></p>
-<p><br/></p>
-<p>Break if the value at the indirect address on zeropage $10 is not equal to FF:</p>
+<p>Break only if the value at the indirect address is not equal to FF:</p>
 <p><span class="rvts45">#FF != $[$10+($11*#100)]</span></p>
 <p><br/></p>
-<p>Break if flag N is clear or A is not equal to 00:</p>
+<p>Break only if flag N is clear or A is not equal to 00:</p>
 <p><span class="rvts45">(N==#0 || A!=#0)</span></p>
+<p><br/></p>
+<p>Break only when accessing a data from bank 2 (the condiition is relevant when using with Read/Write-type breakpoints):</p>
+<p><span class="rvts45">T==#2</span></p>
+<p><br/></p>
 <p><br/></p>
 <p><br/></p>
 <p><span class="rvts44">Bookmarks</span></p>

@@ -291,7 +291,7 @@
 <p class="rvps5"><span class="rvts37">ObjCtr = memory.getregister("y")</span></p>
 <p class="rvps5"><span class="rvts37">if ObjCtr &gt; 0x16 then</span></p>
 <p class="rvps6"><span class="rvts37">gui.text(1, 9, string.format("%02X",ObjCtr))</span></p>
-<p class="rvps6"><span class="rvts37">emu.pause()</span></p>
+<p class="rvps6"><span class="rvts37">emu.pause() -- or debugger.hitbreakpoint()</span></p>
 <p class="rvps5"><span class="rvts37">end</span></p>
 <p><span class="rvts37">end</span></p>
 <p><span class="rvts37">memory.registerexecute(0x863C, CounterBreak);</span></p>
@@ -301,7 +301,30 @@
 </div>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37"><br/></span></p>
-<p class="rvps4"><span class="rvts68">Joypad Library</span></p>
+<p><span class="rvts67">Debugger Library</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts58">debugger.hitbreakpoint()</span></p>
+<p><span class="rvts58"><br/></span></p>
+<p><span class="rvts37">Simulates a breakpoint hit, pauses emulation and brings up the Debugger window. Use this function in your handlers of custom breakpoints.</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts58">int debugger.getcyclescount()</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37">Returns an integer value representing the number of CPU cycles elapsed since the poweron or since the last reset of the cycles counter.</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts58">int debugger.getinstructionscount()</span></p>
+<p><span class="rvts58"><br/></span></p>
+<p><span class="rvts37">Returns an integer value representing the number of CPU instructions executed since the poweron or since the last reset of the instructions counter.</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts58">debugger.resetcyclescount()</span></p>
+<p><span class="rvts58"><br/></span></p>
+<p><span class="rvts37">Resets the cycles counter.</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts58">debugger.resetinstructionscount()</span></p>
+<p><span class="rvts58"><br/></span></p>
+<p><span class="rvts37">Resets the instructions counter.</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts67">Joypad Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts58">table joypad.get(int player)</span></p>
 <p><span class="rvts59">table joypad.read(</span><span class="rvts58">int player</span><span class="rvts59">)</span></p>
@@ -351,7 +374,7 @@
 <p><span class="rvts37">joypad.write left in for backwards compatibility with older versions of FCEU/FCEUX.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37"><br/></span></p>
-<p class="rvps4"><span class="rvts68">Zapper Library</span></p>
+<p><span class="rvts67">Zapper Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts59">table zapper.read()</span></p>
 <p><span class="rvts37"><br/></span></p>
@@ -366,7 +389,7 @@
 <p><span class="rvts37">Note: The zapper is always controller 2 on the NES so there is no player argument to this function.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37"><br/></span></p>
-<p class="rvps4"><span class="rvts68">Input Library</span></p>
+<p><span class="rvts67">Input Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts58">table input.get()</span></p>
 <p><span class="rvts58">table input.read()</span></p>
@@ -380,7 +403,7 @@
 <p><span class="rvts37">Requests input from the user using a multiple-option message box. See gui.popup for complete usage and returns.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37"><br/></span></p>
-<p class="rvps4"><span class="rvts68">Savestate Library</span></p>
+<p><span class="rvts67">Savestate Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts59">object savestate.object(int slot = nil)</span></p>
 <p><span class="rvts37"><br/></span></p>
@@ -427,7 +450,7 @@
 <p><span class="rvts37">Returns the data associated with the given savestate (data that was earlier returned by a registered save callback) without actually loading the rest of that savestate or calling any callbacks. location should be a save slot number.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37"><br/></span></p>
-<p class="rvps4"><span class="rvts68">Movie Library</span></p>
+<p><span class="rvts67">Movie Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts58">bool movie.active()</span></p>
 <p><span class="rvts37"><br/></span></p>
@@ -529,7 +552,7 @@
 <p><span class="rvts37">Returns the state of read-only. True if in playback mode, false if in record mode.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37"><br/></span></p>
-<p class="rvps4"><span class="rvts68">GUI Library</span></p>
+<p><span class="rvts67">GUI Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts58">gui.pixel(int x, int y, type color)</span></p>
 <p><span class="rvts58">gui.drawpixel(int x, int y, type color)</span></p>
@@ -628,7 +651,7 @@
 <p><span class="rvts37">Linux users might want to install xmessage to perform the work. Otherwise the dialog will appear on the shell and that's less noticeable.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37"><br/></span></p>
-<p class="rvps4"><span class="rvts68">Sound Library</span></p>
+<p><span class="rvts67">Sound Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts58">table sound.get()</span></p>
 <p><span class="rvts37"><br/></span></p>
@@ -699,7 +722,7 @@
 <p><span class="rvts37">}</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37"><br/></span></p>
-<p class="rvps4"><span class="rvts68">TAS Editor Library</span></p>
+<p><span class="rvts67">TAS Editor Library</span></p>
 <p><span class="rvts58"><br/></span></p>
 <p><span class="rvts58">taseditor.registerauto(function func)</span></p>
 <p><span class="rvts58">taseditor.registermanual(function func)</span></p>
