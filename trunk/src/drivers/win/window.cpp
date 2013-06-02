@@ -182,8 +182,8 @@ int EnableBackgroundInput = 0;
 int ismaximized = 0;
 
 //Help Menu subtopics
-string moviehelp = "{695C964E-B83F-4A6E-9BA2-1A975387DB55}";		 //Movie Recording
-string gettingstartedhelp = "{C76AEBD9-1E27-4045-8A37-69E5A52D0F9A}";//Getting Started
+string moviehelp = "MovieRecording";		 //Movie Recording
+string gettingstartedhelp = "Gettingstarted";//Getting Started
 
 //********************************************************************************
 void SetMainWindowText()

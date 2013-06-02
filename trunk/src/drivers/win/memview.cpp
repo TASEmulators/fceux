@@ -66,7 +66,7 @@ using namespace std;
 #define ID_ADDRESS_FRZ_SEP              52
 #define ID_ADDRESS_FRZ_UNFREEZE_ALL     53
 
-string memviewhelp = "{06F7BBD5-399E-4CA0-8E4E-75BE0ACC525A}"; //Hex Editor Help Page
+string memviewhelp = "HexEditor"; //Hex Editor Help Page
 
 int HexRowHeightBorder = 0;		//adelikat:  This will determine the number of pixels between rows in the hex editor, to alter this, the user can change it in the .cfg file, changing one will revert to the way FCEUX2.1.0 did it
 int HexCharSpacing = 1;		// pixels between chars
