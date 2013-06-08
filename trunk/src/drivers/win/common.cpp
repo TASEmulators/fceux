@@ -21,44 +21,43 @@ void WindowBoundsCheckNoResize(int &windowPosX, int &windowPosY, long windowRigh
 		if (windowRight < 59) {
 		windowPosX = 0;
 		}
+
 		if (windowPosY < -18) {
 		windowPosY = -18;
 		} 
 }
-// Check if a filename/path has an extension. Extensions can be up to 4 characters.
-// Extension strings must begin with a . or they won't work right.
-void AddExtensionIfMissing(char * name,unsigned int maxsize,const char * extension) {
-	//if user did not add an extension, add it for them
-	
+
+// Check if a filename/path has the given extension. The extension is expected to be at the very end of the filename
+void AddExtensionIfMissing(char * name, unsigned int maxsize, const char * extension)
+{
 	std::string tempName = name;
 	
-	//Non-null terminated lengths of both strings, +1 for null termination
-	if ((strlen(name) + strlen(extension) + 1) <= maxsize) {
-		unsigned int x = tempName.find_last_of(".");
+	// Non-null terminated lengths of both strings, +1 for null termination
+	if ((strlen(name) + strlen(extension) + 1) <= maxsize)
+	{
+		unsigned int x = tempName.rfind(extension);
 
-		//If the extension(".????") is longer then 5 characters, it's probably part of the filename. If x == -1, wasn't found
-		if ((x < (tempName.size() - 6)) || (x == -1)) {
-			//If everything above passed, append the extension, and update the string
+		// x == -1 means the extension string wasn't found
+		// if the extension was found in the middle of the string, this doesn't count as extension
+		if ((x == -1) || ((x + strlen(extension)) < tempName.size()))
+		{
 			tempName.append(extension);
 			strcpy(name, tempName.c_str());
 		}
 	}
 }
-
 // Overloaded operator of above, which deals with native std::string variants.
-void AddExtensionIfMissing(std::string &name,const char * extension) {
-	//if user did not add an extension, add it for them
+void AddExtensionIfMissing(std::string &name, const char * extension)
+{
+	unsigned int x = name.rfind(extension);
 
-	unsigned int x = name.find_last_of(".");
-
-	//If the extension(".????") is longer then 5 characters, it's probably part of the filename. If x == -1, wasn't found
-	if ((x < (name.size() - 6)) || (x == -1))
+	if ((x == -1) || ((x + strlen(extension)) < name.size()))
 		name.append(extension);
 }
 
 std::string GetPath(std::string filename)
 {
-	return filename.substr(0,filename.find_last_of("/\\") + 1);
+	return filename.substr(0, filename.find_last_of("/\\") + 1);
 }
 
 bool IsRelativePath(char* name)

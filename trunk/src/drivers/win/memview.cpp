@@ -38,6 +38,7 @@
 #include "string.h"
 #include "help.h"
 #include "Win32InputBox.h"
+#include "utils/xstring.h"
 
 extern Name* lastBankNames;
 extern Name* loadedBankNames;
@@ -309,7 +310,7 @@ void SaveRomAs()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Nes ROM as...";
 	ofn.lpstrFilter=filter;
-	strcpy(nameo,GetRomName());
+	strcpy(nameo, mass_replace(GetRomName(), "|", ".").c_str());
 	ofn.lpstrFile=nameo;
 	ofn.lpstrDefExt="nes";
 	ofn.nMaxFile=256;
@@ -767,7 +768,7 @@ void dumpToFile(const char* buffer, unsigned int size)
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save to file ...";
 	ofn.lpstrFilter="Binary File (*.BIN)\0*.bin\0All Files (*.*)\0*.*\0\0";
-	strcpy(name,GetRomName());
+	strcpy(name, mass_replace(GetRomName(), "|", ".").c_str());
 	ofn.lpstrFile=name;
 	ofn.lpstrDefExt="bin";
 	ofn.nMaxFile=256;

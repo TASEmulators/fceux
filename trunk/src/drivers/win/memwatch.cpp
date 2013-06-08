@@ -416,9 +416,9 @@ static void SaveMemWatch()
 	ofn.lpstrDefExt="txt";
 	char nameo[2048];
 	if (!memwLastFilename[0])
-		strcpy(nameo,GetRomName());
+		strcpy(nameo, mass_replace(GetRomName(), "|", ".").c_str());
 	else
-		strcpy(nameo,memwLastFilename);
+		strcpy(nameo, memwLastFilename);
 	ofn.lpstrFile=nameo;
 	ofn.lpstrDefExt="txt";
 	ofn.nMaxFile=256;

@@ -1187,7 +1187,7 @@ void DumpSubtitles(HWND hWnd)
 	ofn.hwndOwner = hWnd;
 	ofn.lpstrTitle="Save Subtitles as...";
 	ofn.lpstrFilter = filter;
-	strcpy(nameo,GetRomName());
+	strcpy(nameo, mass_replace(GetRomName(), "|", ".").c_str());
 	ofn.lpstrFile = nameo;
 	ofn.nMaxFile = 256;
 	ofn.Flags = OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
@@ -2671,7 +2671,7 @@ void FCEUD_AviRecordTo(void)
 	}
 	//else construct it from the ROM name.
 	else
-		tempFilename = GetRomName();
+		tempFilename = mass_replace(GetRomName(), "|", ".").c_str();
 	
 	aviFilename = aviDirectory + tempFilename;	//concate avi directory and movie filename
 				

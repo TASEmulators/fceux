@@ -33,6 +33,7 @@
 #include "tracer.h"
 #include "memview.h"
 #include "main.h" //for GetRomName()
+#include "utils/xstring.h"
 
 //Used to determine the current hotkey mapping for the pause key in order to display on the dialog
 #include "mapinput.h"
@@ -170,9 +171,12 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			EndDialog(hwndDlg,0);
 			break;
 		case WM_COMMAND:
-			switch(HIWORD(wParam)) {
+			switch(HIWORD(wParam))
+			{
 				case BN_CLICKED:
-					switch(LOWORD(wParam)) {
+				{
+					switch(LOWORD(wParam))
+					{
 						case IDC_BTN_START_STOP_LOGGING:
 							if(logging)EndLoggingSequence();
 							else BeginLoggingSequence();
@@ -259,6 +263,7 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 							break;
 					}
 					break;
+				}
 			}
 			break;
 		case WM_MOVING:
@@ -726,12 +731,13 @@ void ShowLogDirDialog(void){
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Log Trace As...";
 	ofn.lpstrFilter=filter;
-	strcpy(nameo,GetRomName());
+	strcpy(nameo, mass_replace(GetRomName(), "|", ".").c_str());
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.hwndOwner = hTracer;
-	if(GetSaveFileName(&ofn)){
+	if(GetSaveFileName(&ofn))
+	{
 		if (ofn.nFilterIndex == 1)
 			AddExtensionIfMissing(nameo, sizeof(nameo), ".log");
 		else if (ofn.nFilterIndex == 2)
