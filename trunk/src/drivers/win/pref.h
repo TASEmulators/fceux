@@ -23,6 +23,6 @@
 extern int myNumWPs;
 extern bool inDebugger;
 
-int storePreferences(char* romname);
-int loadPreferences(char* romname);
+int storePreferences(const char* romname);
+int loadPreferences(const char* romname);
 void DoDebuggerDataReload();

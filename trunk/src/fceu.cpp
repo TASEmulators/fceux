@@ -45,6 +45,7 @@
 #include "ines.h"
 #ifdef WIN32
 #include "drivers/win/pref.h"
+#include "utils/xstring.h"
 
 extern void CDLoggerROMClosed();
 extern void CDLoggerROMChanged();
@@ -155,10 +156,8 @@ static void FCEU_CloseGame(void)
 
 #ifdef WIN32
 		extern char LoadedRomFName[2048];
-		if (storePreferences(LoadedRomFName))
-		{
+		if (storePreferences(mass_replace(LoadedRomFName, "|", ".").c_str()))
 			FCEUD_PrintError("Couldn't store debugging data");
-		}
 		CDLoggerROMClosed();
 #endif
 
@@ -396,8 +395,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	//----------
 	//attempt to open the files
 	FCEUFILE *fp;
-
-	FCEU_printf("Loading %s...\n\n", name);
+	char fullname[2048];	// this name contains both archive name and ROM file name
 
 	const char* romextensions[] = { "nes", "fds", 0 };
 	fp = FCEU_fopen(name, 0, "rb", 0, -1, romextensions);
@@ -407,16 +405,21 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 		if (!silent)
 			FCEU_PrintError("Error opening \"%s\"!", name);
 		return 0;
+	} else if (fp->archiveFilename != "")
+	{
+		strcpy(fullname, fp->archiveFilename.c_str());
+		strcat(fullname, "|");
+		strcat(fullname, fp->filename.c_str());
+	} else
+	{
+		strcpy(fullname, name);
 	}
 
-	GetFileBase(fp->filename.c_str());
-	//---------
-
 	//file opened ok. start loading.
-
+	FCEU_printf("Loading %s...\n\n", fullname);
+	GetFileBase(fp->filename.c_str());
 	ResetGameLoaded();
-
-	//reset parameters so theyre cleared just in case a format's loader doesnt know to do the clearing
+	//reset parameters so they're cleared just in case a format's loader doesn't know to do the clearing
 	MasterRomInfoParams = TMasterRomInfoParams();
 
 	if (!AutosaveStatus)
@@ -429,7 +432,8 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	memset(GameInfo, 0, sizeof(FCEUGI));
 
 	GameInfo->filename = strdup(fp->filename.c_str());
-	if (fp->archiveFilename != "") GameInfo->archiveFilename = strdup(fp->archiveFilename.c_str());
+	if (fp->archiveFilename != "")
+		GameInfo->archiveFilename = strdup(fp->archiveFilename.c_str());
 	GameInfo->archiveCount = fp->archiveCount;
 
 	GameInfo->soundchan = 0;
@@ -445,13 +449,13 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	bool FCEUXLoad(const char *name, FCEUFILE * fp);
 	/*if(FCEUXLoad(name,fp))
 	    goto endlseq;*/
-	if (iNESLoad(name, fp, OverwriteVidMode))
+	if (iNESLoad(fullname, fp, OverwriteVidMode))
 		goto endlseq;
-	if (NSFLoad(name, fp))
+	if (NSFLoad(fullname, fp))
 		goto endlseq;
-	if (UNIFLoad(name, fp))
+	if (UNIFLoad(fullname, fp))
 		goto endlseq;
-	if (FDSLoad(name, fp))
+	if (FDSLoad(fullname, fp))
 		goto endlseq;
 
 	if (!silent)
@@ -472,7 +476,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	extern char LoadedRomFName[2048];
 	extern int loadDebugDataFailed;
 
-	if ((loadDebugDataFailed = loadPreferences(LoadedRomFName)))
+	if ((loadDebugDataFailed = loadPreferences(mass_replace(LoadedRomFName, "|", ".").c_str())))
 		if (!silent)
 			FCEU_printf("Couldn't load debugging data.\n");
 

@@ -1385,7 +1385,8 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 				if (i >= 0x8000)
 				{
 					dotdot[0] = 0;
-					if (!(ptr = iNesShortFName()))
+					ptr = iNesShortFName();
+					if (!ptr)
 						ptr = "...";
 					if (strlen(ptr) > 60)
 						strcpy(dotdot, "...");

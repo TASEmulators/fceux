@@ -949,8 +949,10 @@ int iNesSaveAs(char* name)
 char *iNesShortFName() {
 	char *ret;
 
-	if (!(ret = strrchr(LoadedRomFName, '\\'))) {
-		if (!(ret = strrchr(LoadedRomFName, '/'))) return 0;
+	if (!(ret = strrchr(LoadedRomFName, '\\')))
+	{
+		if (!(ret = strrchr(LoadedRomFName, '/')))
+			return 0;
 	}
 	return ret + 1;
 }

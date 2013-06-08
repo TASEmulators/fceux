@@ -19,6 +19,7 @@
  */
 
 #include "common.h"
+#include "utils/xstring.h"
 #include "debuggersp.h"
 #include "debugger.h"
 #include "../../fceu.h"
@@ -549,7 +550,7 @@ void loadNameFiles()
 		free(ramBankNames);
 		
 	// The NL file for the RAM addresses has the name nesrom.nes.ram.nl
-	strcpy(NLfilename, LoadedRomFName);
+	strcpy(NLfilename, mass_replace(LoadedRomFName, "|", ".").c_str());
 	strcat(NLfilename, ".ram.nl");
 
 	// Load the address descriptions for the RAM addresses
@@ -568,7 +569,7 @@ void loadNameFiles()
 		lastBank = cb;
 
 		// Get the name of the NL file
-		sprintf(NLfilename, "%s.%X.nl", LoadedRomFName, lastBank);
+		sprintf(NLfilename, "%s.%X.nl", mass_replace(LoadedRomFName, "|", ".").c_str(), lastBank);
 
 		if (lastBankNames)
 			freeList(lastBankNames);
@@ -591,7 +592,7 @@ void loadNameFiles()
 		loadedBank = cb;
 		
 		// Get the name of the NL file
-		sprintf(NLfilename, "%s.%X.nl", LoadedRomFName, loadedBank);
+		sprintf(NLfilename, "%s.%X.nl", mass_replace(LoadedRomFName, "|", ".").c_str(), loadedBank);
 		
 		if (loadedBankNames)
 			freeList(loadedBankNames);

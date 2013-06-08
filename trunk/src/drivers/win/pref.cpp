@@ -157,7 +157,7 @@ int storeHexPreferences(FILE* f)
 * @param romname Name of the ROM
 * @return 0 on success or an error code.
 **/
-int storePreferences(char* romname)
+int storePreferences(const char* romname)
 {
 
 	if (debuggerSaveLoadDEBFiles == false) {
@@ -197,7 +197,7 @@ int storePreferences(char* romname)
 	*/
 
 	filename = (char*)malloc(strlen(romname) + 5);
-	strcpy(filename, mass_replace(romname, "|", ".").c_str());	//convert | to . for archive filenames
+	strcpy(filename, romname);
 	strcat(filename, ".deb");
 
 	f = fopen(filename, "wb");
@@ -380,7 +380,7 @@ int loadHexPreferences(FILE* f)
 * @param romname Name of the active ROM file
 * @return 0 or an error code.
 **/
-int loadPreferences(char* romname)
+int loadPreferences(const char* romname)
 {
 	if (debuggerSaveLoadDEBFiles == false) {
 		return 0;
@@ -394,7 +394,7 @@ int loadPreferences(char* romname)
 
 	// Get the name of the preferences file
 	char* filename = (char*)malloc(strlen(romname) + 5);
-	strcpy(filename, mass_replace(romname, "|", ".").c_str());	//convert | to . for archive filenames
+	strcpy(filename, romname);
 	strcat(filename, ".deb");
 	
 	f = fopen(filename, "rb");
