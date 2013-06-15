@@ -12,6 +12,7 @@
 #include "video.h"
 #include "movie.h"
 #include "fds.h"
+#include "vsuni.h"
 #ifdef _S9XLUA_H
 #include "fceulua.h"
 #endif
@@ -345,10 +346,10 @@ void MovieRecord::dumpBinary(MovieData* md, EMUFILE* os, int index)
 
 void MovieRecord::dump(MovieData* md, EMUFILE* os, int index)
 {
-	//dump the misc commands
+	// dump the commands
 	//*os << '|' << setw(1) << (int)commands;
 	os->fputc('|');
-	putdec<uint8,1,true>(os,commands);
+	putdec<uint8,3,false>(os, commands);	// "variable length decimal integer"
 
 	//a special case: if fourscore is enabled, dump four gamepads
 	if(md->fourscore)
@@ -1003,14 +1004,16 @@ void FCEUMOV_AddInputState()
 		joyports[0].load(mr);
 		joyports[1].load(mr);
 		// replay commands
-		if(mr->command_power())
+		if (mr->command_power())
 			PowerNES();
-		if(mr->command_reset())
+		if (mr->command_reset())
 			ResetNES();
-		if(mr->command_fds_insert())
+		if (mr->command_fds_insert())
 			FCEU_FDSInsert();
-		if(mr->command_fds_select())
+		if (mr->command_fds_select())
 			FCEU_FDSSelect();
+		if (mr->command_vs_insertcoin())
+			FCEU_VSUniCoin();
 		_currCommand = 0;
 	} else
 #endif
@@ -1038,6 +1041,8 @@ void FCEUMOV_AddInputState()
 				FCEU_FDSInsert();
 			if(mr->command_fds_select())
 				FCEU_FDSSelect();
+			if (mr->command_vs_insertcoin())
+				FCEU_VSUniCoin();
 
 			joyports[0].load(mr);
 			joyports[1].load(mr);
@@ -1093,12 +1098,16 @@ void FCEUMOV_AddCommand(int cmd)
 	if(movieMode != MOVIEMODE_RECORD && movieMode != MOVIEMODE_TASEDITOR)
 		return;
 
-	//NOTE: EMOVIECMD matches FCEUNPCMD_RESET and FCEUNPCMD_POWER
-	//we are lucky (well, I planned it that way)
-
-	switch(cmd) {
+	// translate "FCEU NetPlay" command to "FCEU Movie" command
+	switch (cmd)
+	{
+		case FCEUNPCMD_RESET: cmd = MOVIECMD_RESET; break;
+		case FCEUNPCMD_POWER: cmd = MOVIECMD_POWER; break;
 		case FCEUNPCMD_FDSINSERT: cmd = MOVIECMD_FDS_INSERT; break;
 		case FCEUNPCMD_FDSSELECT: cmd = MOVIECMD_FDS_SELECT; break;
+		case FCEUNPCMD_VSUNICOIN: cmd = MOVIECMD_VS_INSERTCOIN; break;
+		// all other netplay commands (e.g. FCEUNPCMD_VSUNIDIP0) are not supported by movie recorder for now
+		default: return;
 	}
 
 	_currCommand |= cmd;

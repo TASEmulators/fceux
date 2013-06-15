@@ -100,22 +100,22 @@ inline uint64 uint64DecFromIstream(EMUFILE* is) { return templateIntegerDecFromI
 template<typename T, int DIGITS, bool PAD> void putdec(EMUFILE* os, T dec)
 {
 	char temp[DIGITS];
-	int ctr = 0;
-	for(int i=0;i<DIGITS;i++)
+	int ctr = 0;	// at least one char will always be outputted
+	for (int i = 0; i < DIGITS; ++i)
 	{
-		int quot = dec/10;
-		int rem = dec%10;
-		temp[DIGITS-1-i] = '0' + rem;
-		if(!PAD)
+		int remainder = dec % 10;
+		temp[(DIGITS - 1) - i] = '0' + remainder;
+		if (!PAD)
 		{
-			if(rem != 0) ctr = i;
+			if (remainder != 0)
+				ctr = i;
 		}
-		dec = quot;
+		dec /= 10;
 	}
-	if(!PAD)
-		os->fwrite(temp+DIGITS-ctr-1,ctr+1);
+	if (!PAD)
+		os->fwrite(temp + (DIGITS - 1) - ctr, ctr + 1);
 	else
-		os->fwrite(temp,DIGITS);
+		os->fwrite(temp, DIGITS);
 }
 
 std::string mass_replace(const std::string &source, const std::string &victim, const std::string &replacement);
