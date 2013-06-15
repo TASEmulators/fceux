@@ -1043,6 +1043,7 @@ bool FCEU_IsValidUI(EFCEUI ui) {
 	case FCEUI_POWER:
 	case FCEUI_EJECT_DISK:
 	case FCEUI_SWITCH_DISK:
+	case FCEUI_INSERT_COIN:
 		if (!GameInfo) return false;
 		if (FCEUMOV_Mode(MOVIEMODE_RECORD)) return true;
 #ifdef WIN32

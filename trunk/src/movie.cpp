@@ -1017,18 +1017,17 @@ void FCEUMOV_AddInputState()
 		_currCommand = 0;
 	} else
 #endif
-	if(movieMode == MOVIEMODE_PLAY)
+	if (movieMode == MOVIEMODE_PLAY)
 	{
 		//stop when we run out of frames
-		if(currFrameCounter >= (int)currMovieData.records.size())
+		if (currFrameCounter >= (int)currMovieData.records.size())
 		{
 			FinishPlayback();
 			//tell all drivers to poll input and set up their logical states
 			for(int port=0;port<2;port++)
 				joyports[port].driver->Update(port,joyports[port].ptr,joyports[port].attrib);
 			portFC.driver->Update(portFC.ptr,portFC.attrib);
-		}
-		else
+		} else
 		{
 			MovieRecord* mr = &currMovieData.records[currFrameCounter];
 
@@ -1049,7 +1048,7 @@ void FCEUMOV_AddInputState()
 		}
 
 		//if we are on the last frame, then pause the emulator if the player requested it
-		if(currFrameCounter == currMovieData.records.size()-1)
+		if (currFrameCounter == currMovieData.records.size()-1)
 		{
 			if(FCEUD_PauseAfterPlayback())
 			{
@@ -1058,14 +1057,13 @@ void FCEUMOV_AddInputState()
 		}
 
 		//pause the movie at a specified frame
-		if(FCEUMOV_ShouldPause() && FCEUI_EmulationPaused()==0)
+		if (FCEUMOV_ShouldPause() && FCEUI_EmulationPaused()==0)
 		{
 			FCEUI_ToggleEmulationPause();
 			FCEU_DispMessage("Paused at specified movie frame",0);
 		}
 
-	}
-	else if(movieMode == MOVIEMODE_RECORD)
+	} else if (movieMode == MOVIEMODE_RECORD)
 	{
 		MovieRecord mr;
 
@@ -1492,11 +1490,9 @@ void FCEUI_MovieToggleReadOnly()
 	if(movie_readonly)
 		strcpy(message, "Movie is now Read+Write");
 	else
-	{
 		strcpy(message, "Movie is now Read-Only");
-	}
 
-	if(movieMode == MOVIEMODE_INACTIVE)
+	if (movieMode == MOVIEMODE_INACTIVE)
 		strcat(message, " (no movie)");
 	else if (movieMode == MOVIEMODE_FINISHED)
 		strcat(message, " (finished)");
@@ -1516,10 +1512,10 @@ void FCEUI_MoviePlayFromBeginning(void)
 	{
 		if (currMovieData.savestate.empty())
 		{
-			movie_readonly=true;
+			movie_readonly = true;
 			movieMode = MOVIEMODE_PLAY;
 			poweron(true);
-			currFrameCounter=0;
+			currFrameCounter = 0;
 			FCEU_DispMessage("Movie is now Read-Only. Playing from beginning.",0);
 		}
 		else
