@@ -229,7 +229,6 @@ void FCEUI_GetIVectors(uint16 *reset, uint16 *irq, uint16 *nmi);
 
 uint32 FCEUI_CRC32(uint32 crc, uint8 *buf, uint32 len);
 
-void FCEUI_ToggleTileView(void);
 void FCEUI_SetLowPass(int q);
 
 void FCEUI_NSFSetVis(int mode);
