@@ -433,7 +433,7 @@ unsigned int *GetKeyboard(void)
 {
 	int size = 256;
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	Uint8* keystate = SDL_GetKeyboardState(&size);
+	Uint8* keystate = (Uint8*)SDL_GetKeyboardState(&size);
 #else
 	Uint8* keystate = SDL_GetKeyState(&size);
 #endif
@@ -450,7 +450,7 @@ static void KeyboardCommands ()
 	char *movie_fname = "";
 	// get the keyboard input
 #if SDL_VERSION_ATLEAST(1, 3, 0)
-	g_keyState = SDL_GetKeyboardState (NULL);
+	g_keyState = (Uint8*)SDL_GetKeyboardState (NULL);
 #else
 	g_keyState = SDL_GetKeyState (NULL);
 #endif

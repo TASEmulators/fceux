@@ -147,6 +147,15 @@ void FCEUD_VideoChanged()
 	else
 		PAL = 0;
 }
+
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+int InitVideo(FCEUGI *gi)
+{
+	// This is a big TODO.  Stubbing this off into its own function,
+	// as the SDL surface routines have changed drastically in SDL2
+	// TODO - SDL2
+}
+#else
 /**
  * Attempts to initialize the graphical video display.  Returns 0 on
  * success, -1 on failure.
@@ -494,6 +503,7 @@ InitVideo(FCEUGI *gi)
 	}
 	return 0;
 }
+#endif
 
 /**
  * Toggles the full-screen display.
@@ -580,11 +590,14 @@ static void RedoPalette()
 			SetPaletteBlitToHigh((uint8*)s_psdl);
 		} else
 		{
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+			//TODO - SDL2
+#else
 			SDL_SetPalette(s_screen, SDL_PHYSPAL, s_psdl, 0, 256);
+#endif
 		}
 	}
 }
-
 // XXX soules - console lock/unlock unimplemented?
 
 ///Currently unimplemented.
@@ -693,8 +706,12 @@ BlitScreen(uint8 *XBuf)
 	}
 
 	 // ensure that the display is updated
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	//TODO - SDL2
+#else
 	SDL_UpdateRect(s_screen, xo, yo,
 				(Uint32)(NWIDTH * s_exs), (Uint32)(s_tlines * s_eys));
+#endif
 
 #ifdef CREATE_AVI
 #if 0 /* PAL INTO NTSC HACK */
@@ -770,10 +787,14 @@ BlitScreen(uint8 *XBuf)
 #endif
 #endif
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	// TODO
+#else
     // have to flip the displayed buffer in the case of double buffering
 	if(s_screen->flags & SDL_DOUBLEBUF) {
 		SDL_Flip(s_screen);
 	}
+#endif
 }
 
 /**

@@ -2154,7 +2154,9 @@ gint convertKeypress(GtkWidget *grab, GdkEventKey *event, gpointer user_data)
 		if(keystate == 0 || gtk_window_is_active(GTK_WINDOW(MainWindow)))
 		{
 			#if SDL_VERSION_ATLEAST(2, 0, 0)
-			SDL_GetKeyboardState(NULL)[SDL_GetScancodeFromKey(sdlkey)] = keystate;
+			// Not sure how to do this yet with SDL 2.0
+			// TODO - SDL 2.0
+			//SDL_GetKeyboardState(NULL)[SDL_GetScancodeFromKey(sdlkey)] = keystate;
 			#else
 			SDL_GetKeyState(NULL)[sdlkey] = keystate;
 			#endif
