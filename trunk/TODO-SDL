@@ -1,5 +1,6 @@
 Priorities
 ==========
+	* SDL 2.0 RC is released - SDL2.0 compatibility is a goal
 	* Backwards-cpp still has an issue with clang++; look into this
 	* Users are reporting crashing issues with hotkey dialog (probably because its a mess!).  A huge chunk of the hotkey code should be rewritten (GUI and hotkey structs - or lack there-of)
 	* GTK File menu quit element has "CTRL-Q" accelerator.  This causes confusion with there being another SDL Hotkey for quit.  This should be addressed.
