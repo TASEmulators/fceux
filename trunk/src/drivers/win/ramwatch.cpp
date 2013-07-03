@@ -531,8 +531,7 @@ bool Save_Watches()
 	if(dot) *dot = 0;
 	if(Change_File_S(Str_Tmp, applicationPath, "Save Watches", "Watchlist (*.wch)\0*.wch\0All Files (*.*)\0*.*\0\0", "wch", RamWatchHWnd))
 	{
-		FILE *WatchFile = fopen(Str_Tmp,"r+b");
-		if (!WatchFile) WatchFile = fopen(Str_Tmp,"w+b");
+		FILE *WatchFile = fopen(Str_Tmp,"w+b");
 		fputc('\n',WatchFile);
 		strcpy(currentWatch,Str_Tmp);
 		RWAddRecentFile(currentWatch);
@@ -562,8 +561,7 @@ if (currentWatch[0] == NULL) //If there is no currently loaded file, run to Save
 	}
 		
 		strcpy(Str_Tmp,currentWatch);
-		FILE *WatchFile = fopen(Str_Tmp,"r+b");
-		if (!WatchFile) WatchFile = fopen(Str_Tmp,"w+b");
+		FILE *WatchFile = fopen(Str_Tmp,"w+b");
 		fputc('\n',WatchFile);
 		sprintf(Str_Tmp,"%d\n",WatchCount);
 		fputs(Str_Tmp,WatchFile);
@@ -662,13 +660,14 @@ bool ResetWatches()
 {
 	if(!AskSave())
 		return false;
-	for (;WatchCount>=0;WatchCount--)
+	for (;WatchCount >= 0; WatchCount--)
 	{
 		free(rswatches[WatchCount].comment);
 		rswatches[WatchCount].comment = NULL;
 	}
-	WatchCount++;
-	if (RamWatchHWnd) {
+	WatchCount = 0;
+	if (RamWatchHWnd)
+	{
 		ListView_SetItemCount(GetDlgItem(RamWatchHWnd,IDC_WATCHLIST),WatchCount);
 		RefreshWatchListSelectedCountControlStatus(RamWatchHWnd);
 	}
