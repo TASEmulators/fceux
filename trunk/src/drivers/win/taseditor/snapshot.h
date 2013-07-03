@@ -8,8 +8,8 @@ class SNAPSHOT
 {
 public:
 	SNAPSHOT();
-	void init(MovieData& md, bool hotChanges, int enforceInputType = -1);
-	void reinit(MovieData& md, bool hotChanges, int frameOfChanges);	// used when combining consecutive Recordings
+	void init(MovieData& md, LAGLOG& lagLog, bool hotChanges, int enforceInputType = -1);
+	void reinit(MovieData& md, LAGLOG& lagLog, bool hotChanges, int frameOfChanges);	// used when combining consecutive Recordings
 
 	bool areMarkersDifferentFromCurrentMarkers();
 	void copyToCurrentMarkers();

@@ -94,9 +94,16 @@ void GREENZONE::update()
 		} else
 		{
 			if (lagFlag && (old_lagFlag != LAGGED_YES))
+			{
 				lagLog.setLagInfo(currFrameCounter - 1, true);
-			else if (!lagFlag && old_lagFlag != LAGGED_NO)
+				// keep current snapshot laglog in touch
+				history.getCurrentSnapshot().laglog.setLagInfo(currFrameCounter - 1, true);
+			} else if (!lagFlag && old_lagFlag != LAGGED_NO)
+			{
 				lagLog.setLagInfo(currFrameCounter - 1, false);
+				// keep current snapshot laglog in touch
+				history.getCurrentSnapshot().laglog.setLagInfo(currFrameCounter - 1, false);
+			}
 		}
 	}
 }

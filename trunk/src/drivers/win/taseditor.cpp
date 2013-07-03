@@ -627,6 +627,8 @@ void importInputData()
 			{
 				greenzone.invalidateAndUpdatePlayback(result);
 				greenzone.lagLog.invalidateFromFrame(result);
+				// keep current snapshot laglog in touch
+				history.getCurrentSnapshot().laglog.invalidateFromFrame(result);
 			} else
 			{
 				MessageBox(taseditorWindow.hwndTASEditor, "Imported movie has the same Input.\nNo changes were made.", "TAS Editor", MB_OK);

@@ -146,7 +146,7 @@ void HISTORY::reset()
 	historyCursorPos = -1;
 	// create initial snapshot
 	SNAPSHOT snap;
-	snap.init(currMovieData, taseditorConfig.enableHotChanges);
+	snap.init(currMovieData, greenzone.lagLog, taseditorConfig.enableHotChanges);
 	snap.modificationType = MODTYPE_INIT;
 	strcat(snap.description, modCaptions[snap.modificationType]);
 	snap.keyFrame = -1;
@@ -404,6 +404,8 @@ int HISTORY::jumpInTime(int new_pos)
 			// truncate after the timeline starts to differ
 			first_lag_changes = first_changes;
 		greenzone.lagLog.invalidateFromFrame(first_lag_changes);
+		// keep current snapshot laglog in touch
+		snapshots[real_pos].laglog = greenzone.lagLog;
 	} else
 	{
 		greenzone.lagLog = snapshots[real_pos].laglog;
@@ -484,9 +486,9 @@ void HISTORY::addItemToHistoryLog(SNAPSHOT &snap, int cur_branch, BOOKMARK &book
 // returns frame of first actual change
 int HISTORY::registerChanges(int mod_type, int start, int end, int size, const char* comment, int consecutivenessTag, RowsSelection* frameset)
 {
-	// create new shanshot
+	// create new snapshot
 	SNAPSHOT snap;
-	snap.init(currMovieData, taseditorConfig.enableHotChanges);
+	snap.init(currMovieData, greenzone.lagLog, taseditorConfig.enableHotChanges);
 	// check if there are Input differences from latest snapshot
 	int real_pos = (historyStartPos + historyCursorPos) % historySize;
 	int first_changes = snap.inputlog.findFirstChange(snapshots[real_pos].inputlog, start, end);
@@ -641,9 +643,9 @@ int HISTORY::registerChanges(int mod_type, int start, int end, int size, const c
 }
 int HISTORY::registerAdjustLag(int start, int size)
 {
-	// create new shanshot
+	// create new snapshot
 	SNAPSHOT snap;
-	snap.init(currMovieData, taseditorConfig.enableHotChanges);
+	snap.init(currMovieData, greenzone.lagLog, taseditorConfig.enableHotChanges);
 	// check if there are Input differences from latest snapshot
 	int real_pos = (historyStartPos + historyCursorPos) % historySize;
 	SNAPSHOT& current_snap = snapshots[real_pos];
@@ -681,9 +683,9 @@ int HISTORY::registerAdjustLag(int start, int size)
 }
 void HISTORY::registerMarkersChange(int modificationType, int start, int end, const char* comment)
 {
-	// create new shanshot
+	// create new snapshot
 	SNAPSHOT snap;
-	snap.init(currMovieData, taseditorConfig.enableHotChanges);
+	snap.init(currMovieData, greenzone.lagLog, taseditorConfig.enableHotChanges);
 	// fill description:
 	snap.modificationType = modificationType;
 	strcat(snap.description, modCaptions[modificationType]);
@@ -698,9 +700,9 @@ void HISTORY::registerMarkersChange(int modificationType, int start, int end, co
 	if (snap.endFrame > snap.startFrame || modificationType == MODTYPE_MARKER_DRAG || modificationType == MODTYPE_MARKER_SWAP)
 	{
 		if (modificationType == MODTYPE_MARKER_DRAG)
-			strcat(snap.description, "=>");
+			strcat(snap.description, "->");
 		else if (modificationType == MODTYPE_MARKER_SWAP)
-			strcat(snap.description, "<=>");
+			strcat(snap.description, "<->");
 		else
 			strcat(snap.description, "-");
 		_itoa(snap.endFrame, framenum, 10);
@@ -723,7 +725,7 @@ void HISTORY::registerBookmarkSet(int slot, BOOKMARK& backupCopy, int oldCurrent
 {
 	// create new snapshot
 	SNAPSHOT snap;
-	snap.init(currMovieData, taseditorConfig.enableHotChanges);
+	snap.init(currMovieData, greenzone.lagLog, taseditorConfig.enableHotChanges);
 	// fill description: modification type + keyframe of the Bookmark
 	snap.modificationType = MODTYPE_BOOKMARK_0 + slot;
 	strcat(snap.description, modCaptions[snap.modificationType]);
@@ -741,7 +743,7 @@ int HISTORY::registerBranching(int slot, bool markers_changed)
 {
 	// create new snapshot
 	SNAPSHOT snap;
-	snap.init(currMovieData, taseditorConfig.enableHotChanges);
+	snap.init(currMovieData, greenzone.lagLog, taseditorConfig.enableHotChanges);
 	// check if there are Input differences from latest snapshot
 	int real_pos = (historyStartPos + historyCursorPos) % historySize;
 	int first_changes = snap.inputlog.findFirstChange(snapshots[real_pos].inputlog);
@@ -786,10 +788,12 @@ int HISTORY::registerBranching(int slot, bool markers_changed)
 			// truncate after the timeline starts to differ
 			first_lag_changes = first_changes;
 		greenzone.lagLog.invalidateFromFrame(first_lag_changes);
+		// keep current snapshot laglog in touch
 		snap.laglog.invalidateFromFrame(first_lag_changes);
 	} else
 	{
 		greenzone.lagLog = bookmarks.bookmarksArray[slot].snapshot.laglog;
+		// keep current snapshot laglog in touch
 		snap.laglog = greenzone.lagLog;
 	}
 	// Greenzone should be invalidated after the frame of Lag changes if this frame is less than the frame of Input changes
@@ -808,7 +812,7 @@ void HISTORY::registerRecording(int frameOfChange, uint32 joypadDifferenceBits)
 	{
 		// reinit current snapshot and set hotchanges
 		SNAPSHOT* snap = &snapshots[real_pos];
-		snap->reinit(currMovieData, taseditorConfig.enableHotChanges, frameOfChange);
+		snap->reinit(currMovieData, greenzone.lagLog, taseditorConfig.enableHotChanges, frameOfChange);
 		// refill description
 		strcat(snap->description, modCaptions[MODTYPE_RECORD]);
 		char framenum[11];
@@ -842,7 +846,7 @@ void HISTORY::registerRecording(int frameOfChange, uint32 joypadDifferenceBits)
 	{
 		// not consecutive - create new snapshot and add it to history
 		SNAPSHOT snap;
-		snap.init(currMovieData, taseditorConfig.enableHotChanges);
+		snap.init(currMovieData, greenzone.lagLog, taseditorConfig.enableHotChanges);
 		snap.recordedJoypadDifferenceBits = joypadDifferenceBits;
 		// fill description:
 		snap.modificationType = MODTYPE_RECORD;
@@ -881,7 +885,7 @@ int HISTORY::registerImport(MovieData& md, char* filename)
 {
 	// create new snapshot
 	SNAPSHOT snap;
-	snap.init(md, taseditorConfig.enableHotChanges, getInputType(currMovieData));
+	snap.init(md, greenzone.lagLog, taseditorConfig.enableHotChanges, getInputType(currMovieData));
 	// check if there are Input differences from latest snapshot
 	int real_pos = (historyStartPos + historyCursorPos) % historySize;
 	int first_changes = snap.inputlog.findFirstChange(snapshots[real_pos].inputlog);
@@ -913,9 +917,9 @@ int HISTORY::registerImport(MovieData& md, char* filename)
 }
 int HISTORY::registerLuaChanges(const char* name, int start, bool insertionOrDeletionWasDone)
 {
-	// create new shanshot
+	// create new snapshot
 	SNAPSHOT snap;
-	snap.init(currMovieData, taseditorConfig.enableHotChanges);
+	snap.init(currMovieData, greenzone.lagLog, taseditorConfig.enableHotChanges);
 	// check if there are Input differences from latest snapshot
 	int real_pos = (historyStartPos + historyCursorPos) % historySize;
 	int first_changes = snap.inputlog.findFirstChange(snapshots[real_pos].inputlog, start);

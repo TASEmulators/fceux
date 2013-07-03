@@ -29,12 +29,12 @@ SNAPSHOT::SNAPSHOT()
 {
 }
 
-void SNAPSHOT::init(MovieData& md, bool hotchanges, int enforceInputType)
+void SNAPSHOT::init(MovieData& md, LAGLOG& lagLog, bool hotchanges, int enforceInputType)
 {
 	inputlog.init(md, hotchanges, enforceInputType);
 
-	// take a copy from greenzone.laglog
-	laglog = greenzone.lagLog;
+	// make a copy of the given laglog
+	laglog = lagLog;
 	laglog.resetCompressedStatus();
 
 	// take a copy of markers_manager.markers
@@ -49,13 +49,11 @@ void SNAPSHOT::init(MovieData& md, bool hotchanges, int enforceInputType)
 	strftime(description, 10, "%H:%M:%S", timeinfo);
 }
 
-void SNAPSHOT::reinit(MovieData& md, bool hotchanges, int frameOfChanges)
+void SNAPSHOT::reinit(MovieData& md, LAGLOG& lagLog, bool hotchanges, int frameOfChanges)
 {
 	inputlog.reinit(md, hotchanges, frameOfChanges);
 
-	// take a copy from greenzone.laglog
-	laglog = greenzone.lagLog;
-	laglog.resetCompressedStatus();
+	// do not copy laglog, because it will be updated later, when Greenzone will sync its data with the current history snapshot
 
 	// Markers are supposed to be the same, because this is consecutive Recording
 

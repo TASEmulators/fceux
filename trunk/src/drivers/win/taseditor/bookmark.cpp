@@ -66,7 +66,7 @@ bool BOOKMARK::isDifferentFromCurrentMovie()
 void BOOKMARK::set()
 {
 	// copy Input and Hotchanges
-	snapshot.init(currMovieData, taseditorConfig.enableHotChanges);
+	snapshot.init(currMovieData, greenzone.lagLog, taseditorConfig.enableHotChanges);
 	snapshot.keyFrame = currFrameCounter;
 	if (taseditorConfig.enableHotChanges)
 		snapshot.inputlog.copyHotChanges(&history.getCurrentSnapshot().inputlog);
