@@ -160,10 +160,8 @@ int storeHexPreferences(FILE* f)
 int storePreferences(const char* romname)
 {
 
-	if (debuggerSaveLoadDEBFiles == false) {
+	if (debuggerSaveLoadDEBFiles == false)
 		return 0;
-	}
-
 
 	FILE* f;
 	char* filename;
@@ -174,9 +172,7 @@ int storePreferences(const char* romname)
 	// Moved debugger exit code due to complaints and the Debugger menu option being enabled
 
 	if (!debuggerWasActive)
-	{
 		return 0;
-	}
 
 	/*
 	// With some work, this could be made to prevent writing empty .deb files.

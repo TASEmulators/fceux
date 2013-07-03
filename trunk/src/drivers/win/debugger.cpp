@@ -44,6 +44,7 @@
 extern Name* lastBankNames;
 extern Name* loadedBankNames;
 extern Name* ramBankNames;
+extern bool ramBankNamesLoaded;
 extern int lastBank;
 extern int loadedBank;
 extern int myNumWPs;
@@ -1974,6 +1975,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 							case IDC_DEBUGGER_RELOAD_SYMS:
 							{
+								ramBankNamesLoaded = false;
 								lastBank = loadedBank = -1;
 								loadNameFiles();
 								UpdateDebugger(false);

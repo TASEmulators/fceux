@@ -35,6 +35,7 @@ int GetNesFileAddress(int A);
 Name* lastBankNames = 0;
 Name* loadedBankNames = 0;
 Name* ramBankNames = 0;
+bool ramBankNamesLoaded = false;
 int lastBank = -1;
 int loadedBank = -1;
 extern char LoadedRomFName[2048];
@@ -325,16 +326,16 @@ Name* parse(char* lines, const char* filename)
 		if (fail == -1)
 		{
 			continue;
-		}
-		else if (fail) // Show an error to allow the user to correct the defect line
+		} else if (fail)
 		{
-			const char* fmtString = "Error (Code: %d): Invalid line \"%s\" in NL file \"%s\"";
+			// Show an error to allow the user to correct the defect line
+			const char* fmtString = "Error (Code: %d): Invalid line \"%s\" in NL file \"%s\"\n";
 			char* msg = (char*)malloc(strlen(fmtString) + 8 + strlen(lines) + strlen(filename) + 1);
 			sprintf(msg, fmtString, fail, lines, filename);
 			MessageBox(0, msg, "Error", MB_OK | MB_ICONERROR);
 			free(msg);
 			lines = pos + 1;
-			MessageBox(0, lines, "Error", MB_OK | MB_ICONERROR);
+			//MessageBox(0, lines, "Error", MB_OK | MB_ICONERROR);
 			continue;
 		}
 		
@@ -546,16 +547,21 @@ void loadNameFiles()
 {
 	int cb;
 
-	if (ramBankNames)
-		free(ramBankNames);
+	if (!ramBankNamesLoaded)
+	{
+		ramBankNamesLoaded = true;
+		// load RAM names
+		if (ramBankNames)
+			free(ramBankNames);
 		
-	// The NL file for the RAM addresses has the name nesrom.nes.ram.nl
-	strcpy(NLfilename, mass_replace(LoadedRomFName, "|", ".").c_str());
-	strcat(NLfilename, ".ram.nl");
+		// The NL file for the RAM addresses has the name nesrom.nes.ram.nl
+		strcpy(NLfilename, mass_replace(LoadedRomFName, "|", ".").c_str());
+		strcat(NLfilename, ".ram.nl");
 
-	// Load the address descriptions for the RAM addresses
-	ramBankNames = parseNameFile(NLfilename);
-			
+		// Load the address descriptions for the RAM addresses
+		ramBankNames = parseNameFile(NLfilename);
+	}
+
 	// Find out which bank is loaded at 0xC000
 	cb = getBank(0xC000);
 	if (cb == -1) // No bank was loaded at that offset

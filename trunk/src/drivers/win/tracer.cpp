@@ -51,9 +51,6 @@ using namespace std;
 extern Name* lastBankNames;
 extern Name* loadedBankNames;
 extern Name* ramBankNames;
-extern int lastBank;
-extern int loadedBank;
-extern int myNumWPs;
 
 // ################################## End of SP CODE ###########################
 
