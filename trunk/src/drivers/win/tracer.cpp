@@ -411,9 +411,13 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 				{
 					// add the beginning address of the subroutine that we exit from
 					unsigned int caller_addr = GetMem(((X.S) + 1)|0x0100) + (GetMem(((X.S) + 2)|0x0100) << 8) - 0x2;
-					unsigned int call_addr = GetMem(caller_addr + 1) + (GetMem(caller_addr + 2) << 8);
-					sprintf(str_decoration, " (from $%04X)", call_addr);
-					strcat(a, str_decoration);
+					if (GetMem(caller_addr) == 0x20)
+					{
+						// this was a JSR instruction - take the subroutine address from it
+						unsigned int call_addr = GetMem(caller_addr + 1) + (GetMem(caller_addr + 2) << 8);
+						sprintf(str_decoration, " (from $%04X)", call_addr);
+						strcat(a, str_decoration);
+					}
 				}
 				break;
 			}
