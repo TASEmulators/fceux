@@ -76,12 +76,17 @@ bool debuggerSaveLoadDEBFiles = true;
 bool debuggerDisplayROMoffsets = false;
 
 char debug_str[35000] = {0};
+char debug_cdl_str[500] = {0};
 char* debug_decoration_name;
 char* debug_decoration_comment;
 char debug_str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 2] = {0};
 
-// this is used to keep track of addresses that lines of Disassembly window correspont to
+// this is used to keep track of addresses that lines of Disassembly window correspond to
 std::vector<unsigned int> disassembly_addresses;
+// this is used to autoscroll the Disassembly window while keeping relative position of the ">" pointer inside this window
+unsigned int PC_pointerOffset = 0;
+// this is used for dirty, but unavoidable hack, which is necessary to ensure the ">" pointer is visible when stepping/seeking to PC
+bool PC_pointerWasDrawn = false;
 
 #define INVALID_START_OFFSET 1
 #define INVALID_END_OFFSET 2
@@ -187,6 +192,46 @@ unsigned int AddBreak(HWND hwndDlg)
 	numWPs++;
 	myNumWPs++;
 	return 0;
+}
+
+// This function is for "smart" scrolling...
+// it attempts to scroll up one line by a whole instruction
+int InstructionUp(int from)
+{
+	int i = std::min(16, from), j;
+
+	while (i > 0)
+	{
+		j = i;
+		while (j > 0)
+		{
+			if (GetMem(from - j) == 0x00)
+				break;	// BRK usually signifies data
+			if (opsize[GetMem(from - j)] == 0)
+				break;	// invalid instruction!
+			if (opsize[GetMem(from - j)] > j)
+				break;	// instruction is too long!
+			if (opsize[GetMem(from - j)] == j)
+				return (from - j);	// instruction is just right! :D
+			j -= opsize[GetMem(from - j)];
+		}
+		i--;
+	}
+
+	// if we get here, no suitable instruction was found
+	if ((from >= 2) && (GetMem(from - 2) == 0x00))
+		return (from - 2);	// if a BRK instruction is possible, use that
+	if (from)
+		return (from - 1);	// else, scroll up one byte
+	return 0;	// of course, if we can't scroll up, just return 0!
+}
+int InstructionDown(int from)
+{
+	int tmp = opsize[GetMem(si.nPos)];
+	if ((tmp))
+		return from + tmp;
+	else
+		return from + 1;		// this is data or undefined instruction
 }
 
 static void UpdateDialog(HWND hwndDlg) {
@@ -370,6 +415,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 	int lines = (rect.bottom-rect.top) / debugSystem->fixedFontHeight;
 
 	debug_str[0] = 0;
+	unsigned int instructions_count = 0;
 	for (int i = 0; i < lines; i++)
 	{
 		// PC pointer
@@ -420,9 +466,14 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 // ################################## End of SP CODE ###########################
 
 		if (addr == X.PC)
+		{
+			PC_pointerOffset = instructions_count;
+			PC_pointerWasDrawn = true;
 			strcat(debug_str, ">");
-		else
+		} else
+		{
 			strcat(debug_str, " ");
+		}
 
 		if (addr >= 0x8000)
 		{
@@ -497,8 +548,37 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 			strcat(strcat(debug_str, " "), a);
 		}
 		strcat(debug_str, "\r\n");
+		instructions_count++;
 	}
 	SetDlgItemText(hWnd, id, debug_str);
+
+	// fill the left panel data
+	debug_cdl_str[0] = 0;
+	if (cdloggerdataSize)
+	{
+		uint8 cdl_data;
+		lines = disassembly_addresses.size();
+		for (int i = 0; i < lines; ++i)
+		{
+			instruction_addr = GetNesFileAddress(disassembly_addresses[i]) - 16;
+			if (instruction_addr >= 0 && instruction_addr < cdloggerdataSize)
+			{
+				cdl_data = cdloggerdata[instruction_addr] & 3;
+				if (cdl_data == 3)
+					strcat(debug_cdl_str, "cd\r\n");		// both Code and Data
+				else if (cdl_data == 2)
+					strcat(debug_cdl_str, " d\r\n");			// Data
+				else if (cdl_data == 1)
+					strcat(debug_cdl_str, "c\r\n");			// Code
+				else
+					strcat(debug_cdl_str, "\r\n");			// not logged
+			} else
+			{
+				strcat(debug_cdl_str, "\r\n");				// cannot be logged
+			}
+		}
+	}
+	SetDlgItemText(hWnd, IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL, debug_cdl_str);
 }
 
 char *DisassembleLine(int addr) {
@@ -712,16 +792,47 @@ void UpdateDebugger(bool jump_to_pc)
 	SetForegroundWindow(hDebug);
 
 	char str[512] = {0}, str2[512] = {0}, chr[8];
-	int tmp, ret, i, starting_addres;
+	int tmp, ret, i, starting_address;
 
 	if (jump_to_pc || disassembly_addresses.size() == 0)
-		starting_addres = X.PC;
-	else
-		starting_addres = disassembly_addresses[0];
-	Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_addres);
+	{
+		starting_address = X.PC;
+
+		// ensure that PC pointer will be visible even after the window was resized
+		RECT rect;
+		GetClientRect(GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY), &rect);
+		unsigned int lines = (rect.bottom-rect.top) / debugSystem->fixedFontHeight;
+		if (PC_pointerOffset >= lines)
+			PC_pointerOffset = 0;
+
+		// keep the relative position of the ">" pointer inside the Disassembly window
+		for (int i = PC_pointerOffset; i > 0; i--)
+		{
+			starting_address = InstructionUp(starting_address);
+		}
+		PC_pointerWasDrawn = false;
+		Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address);
+
+		// HACK, but I don't see any other way to ensure the ">" pointer is visible when "Symbolic debug" is enabled
+		if (!PC_pointerWasDrawn && PC_pointerOffset)
+		{
+			// we've got a problem, probably due to Symbolic info taking so much space that PC pointer couldn't be seen with (PC_pointerOffset > 0)
+			PC_pointerOffset = 0;
+			starting_address = X.PC;
+			// retry with (PC_pointerOffset = 0) now
+			Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address);
+		}
+
+		starting_address = X.PC;
+	} else
+	{
+		starting_address = disassembly_addresses[0];
+		Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address);
+	}
+	
 
 	// "Address Bookmark Add" follows the address
-	sprintf(str,"%04X", starting_addres);
+	sprintf(str,"%04X", starting_address);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
 
 	sprintf(str, "%02X", X.A);
@@ -1199,10 +1310,10 @@ BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 	int dx = (newDebuggerRect.right-newDebuggerRect.left)-(currDebuggerRect.right-currDebuggerRect.left);	//Calculate & store difference in width of old size vs new size
 	int dy = (newDebuggerRect.bottom-newDebuggerRect.top)-(currDebuggerRect.bottom-currDebuggerRect.top);	//ditto wtih height
 
-	HWND editbox = GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY);		//Get handle for Disassembly list box (large guy on the left)
-	HWND icontray = GetDlgItem(hDebug,IDC_DEBUGGER_ICONTRAY);		//Get handle for Icontray, vertical column to the left of disassembly
-	HWND addrline = GetDlgItem(hDebug,IDC_DEBUGGER_ADDR_LINE);		//Get handle of address line (text area under the disassembly
-	HWND vscr = GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY_VSCR);	//Get handle for disassembly Vertical Scrollbar
+	HWND editbox = GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY);		//Get handle for Disassembly list box (large guy on the left)
+	HWND icontray = GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL);		//Get handle for Icontray, vertical column to the left of disassembly
+	HWND addrline = GetDlgItem(hDebug, IDC_DEBUGGER_ADDR_LINE);		//Get handle of address line (text area under the disassembly
+	HWND vscr = GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY_VSCR);	//Get handle for disassembly Vertical Scrollbar
 
 	char str[8] = {0};
 
@@ -1250,46 +1361,6 @@ void LoadGameDebuggerData(HWND hwndDlg = hDebug)
 	numWPs = myNumWPs;
 	FillDebuggerBookmarkListbox(hwndDlg);
 	FillBreakList(hwndDlg);
-}
-
-// This function is for "smart" scrolling...
-// it attempts to scroll up one line by a whole instruction
-int InstructionUp(int from)
-{
-	int i = std::min(16, from), j;
-
-	while (i > 0)
-	{
-		j = i;
-		while (j > 0)
-		{
-			if (GetMem(from - j) == 0x00)
-				break;	// BRK usually signifies data
-			if (opsize[GetMem(from - j)] == 0)
-				break;	// invalid instruction!
-			if (opsize[GetMem(from - j)] > j)
-				break;	// instruction is too long!
-			if (opsize[GetMem(from - j)] == j)
-				return (from - j);	// instruction is just right! :D
-			j -= opsize[GetMem(from - j)];
-		}
-		i--;
-	}
-
-	// if we get here, no suitable instruction was found
-	if ((from >= 2) && (GetMem(from - 2) == 0x00))
-		return (from - 2);	// if a BRK instruction is possible, use that
-	if (from)
-		return (from - 1);	// else, scroll up one byte
-	return 0;	// of course, if we can't scroll up, just return 0!
-}
-int InstructionDown(int from)
-{
-	int tmp = opsize[GetMem(si.nPos)];
-	if ((tmp))
-		return from + tmp;
-	else
-		return from + 1;		// this is data or undefined instruction
 }
 
 BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -1458,6 +1529,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 			//setup font
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_A,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_X,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_Y,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
@@ -1738,7 +1810,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				mouse_y = GET_Y_LPARAM(lParam);
 
 				bool setString = false;
-				if ((mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10))
+				if ((mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
 				{
 					setString = true;
 					RECT rectDisassembly;
@@ -1765,7 +1837,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	// mouse_y < 538
 	// > 33) tmp = 33
 				//mbg merge 7/18/06 changed pausing check
-				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10))
+				if (FCEUI_EmulationPaused() && (mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
 				{
 					tmp = (mouse_y - 10) / debugSystem->fixedFontHeight;
 // ################################## End of SP CODE ###########################
@@ -1788,7 +1860,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				mouse_x = GET_X_LPARAM(lParam);
 				mouse_y = GET_Y_LPARAM(lParam);
 				//mbg merge 7/18/06 changed pausing check
-				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10))
+				if (FCEUI_EmulationPaused() && (mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
 				{
 					tmp = (mouse_y - 10) / debugSystem->fixedFontHeight;
 					if (tmp < (int)disassembly_addresses.size())
@@ -1809,7 +1881,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				mouse_x = GET_X_LPARAM(lParam);
 				mouse_y = GET_Y_LPARAM(lParam);
 				//mbg merge 7/18/06 changed pausing check
-				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10))
+				if (FCEUI_EmulationPaused() && (mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
 				{
 					tmp = (mouse_y - 10) / debugSystem->fixedFontHeight;
 					if (tmp < (int)disassembly_addresses.size())
@@ -1920,7 +1992,8 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								break;
 							case IDC_DEBUGGER_SEEK_PC:
 								//mbg merge 7/18/06 changed pausing check
-								if (FCEUI_EmulationPaused()) {
+								if (FCEUI_EmulationPaused())
+								{
 									UpdateRegs(hwndDlg);
 									UpdateDebugger(true);
 								}
@@ -1928,7 +2001,8 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							case IDC_DEBUGGER_SEEK_TO:
 							{
 								//mbg merge 7/18/06 changed pausing check
-								if (FCEUI_EmulationPaused()) UpdateRegs(hwndDlg);
+								if (FCEUI_EmulationPaused())
+									UpdateRegs(hwndDlg);
 								GetDlgItemText(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,str,5);
 								tmp = offsetStringToInt(BT_C, str);
 								if (tmp != -1)

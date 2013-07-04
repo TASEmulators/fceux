@@ -135,7 +135,6 @@
 #define BTN_AUTO_HOLD                   112
 #define IDC_BTN_LOG_BROWSE              112
 #define IDC_DEBUGGER_BOOKMARK_ADD       112
-#define IDC_VIDEOCONFIG_SYNC_METHOD_WIN2 112
 #define IDC_VIDEOCONFIG_DIRECTDRAW_WIN  112
 #define IDC_DEBUGGER_BOOKMARK_DEL       113
 #define BTN_CLEAR_AH                    114
@@ -387,6 +386,8 @@
 #define IDC_LABEL_AUTHORINFO            303
 #define IDC_BTN_CHEAT_UPD               303
 #define IDC_VIDEOCONFIG_YSCALE          303
+#define IDC_DEBUGGER_DISASSEMBLY2       303
+#define IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL 303
 #define MENU_ENABLE_AUTOSAVE            304
 #define IDC_LABEL_ROMUSED               304
 #define IDC_BTN_CHEAT_RESET             304
