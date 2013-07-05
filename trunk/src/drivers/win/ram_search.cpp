@@ -44,6 +44,7 @@
 #else
 	#include "stdint.h"
 #endif
+#include "memview.h"
 
 bool ShowROM = false;
 
@@ -1111,6 +1112,7 @@ void RefreshRamListSelectedCountControlStatus(HWND hDlg)
 		{
 			EnableWindow(GetDlgItem(hDlg, IDC_C_WATCH), (selCount >= 1 && WatchCount < MAX_WATCH_COUNT) ? TRUE : FALSE);
 			EnableWindow(GetDlgItem(hDlg, IDC_C_ADDCHEAT), (selCount >= 1) ? TRUE : FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_C_HEXEDITOR), (selCount >= 1) ? TRUE : FALSE);
 			EnableWindow(GetDlgItem(hDlg, IDC_C_ELIMINATE), (selCount >= 1) ? TRUE : FALSE);
 		}
 		prevSelCount = selCount;
@@ -1520,6 +1522,12 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			LPNMHDR lP = (LPNMHDR) lParam;
 			switch (lP->code)
 			{
+				case NM_CUSTOMDRAW:
+				{
+					SetWindowLong(hDlg, DWL_MSGRESULT, CustomDraw(lParam));
+					return TRUE;
+				}
+
 				case LVN_ITEMCHANGED: // selection changed event
 				{
 					NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)lP;
@@ -1529,7 +1537,8 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						// disable buttons that we don't have the right number of selected items for
 						RefreshRamListSelectedCountControlStatus(hDlg);
 					}
-				}	break;
+					break;
+				}
 
 				case LVN_GETDISPINFO:
 				{
@@ -1588,11 +1597,18 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					}
 				}
 
-				case NM_CUSTOMDRAW:
+				case NM_RCLICK:
 				{
-					SetWindowLong(hDlg, DWL_MSGRESULT, CustomDraw(lParam));
-					return TRUE;
-				}	break;
+					// go to the address in Hex Editor
+					LPNMITEMACTIVATE lpnmitem = (LPNMITEMACTIVATE)lParam;
+					int watchItemIndex = lpnmitem->iItem;
+					if (watchItemIndex >= 0)
+					{
+						unsigned int addr = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size, rs_t=='s', noMisalign, watchItemIndex);
+						ChangeMemViewFocus(0, addr, -1);
+					}
+					break;
+				}
 
 				//case LVN_ODCACHEHINT: //Copied this bit from the MSDN virtual listbox code sample. Eventually it should probably do something.
 				//{
@@ -1605,7 +1621,8 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				//	return 0;
 				//}
 			}
-		}	break;
+			break;
+		}
 
 		case WM_COMMAND:
 		{
@@ -1861,6 +1878,18 @@ invalid_field:
 						SendMessage(hDlg, WM_COMMAND, IDC_C_AUTOSEARCH, 0);
 					}
 					{rv = true; break;}
+				}
+				case IDC_C_HEXEDITOR:
+				{
+					HWND ramListControl = GetDlgItem(hDlg,IDC_RAMLIST);
+					int selCount = ListView_GetSelectedCount(ramListControl);
+					int watchItemIndex = ListView_GetNextItem(ramListControl, -1, LVNI_SELECTED);
+					if (watchItemIndex >= 0)
+					{
+						unsigned int addr = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size, rs_t=='s', noMisalign, watchItemIndex);
+						ChangeMemViewFocus(0, addr, -1);
+					}
+					break;
 				}
 				case IDC_C_WATCH:
 				{

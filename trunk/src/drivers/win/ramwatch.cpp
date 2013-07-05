@@ -422,32 +422,43 @@ void OpenRWRecentFile(int memwRFileNumber)
 	}
 	const char DELIM = '\t';
 	AddressWatcher Temp;
+	Temp.Address = 0;	// default values
+	Temp.Size = 'b';
+	Temp.Type = 'h';
 	char mode;
 	fgets(Str_Tmp,1024,WatchFile);
 	sscanf(Str_Tmp,"%c%*s",&mode);
-	//if ((mode == '1' && !(SegaCD_Started)) || (mode == '2' && !(_32X_Started)))
-	//{
-	//	char Device[8];
-	//	strcpy(Device,(mode > '1')?"32X":"SegaCD");
-	//	sprintf(Str_Tmp,"Warning: %s not started. \nWatches for %s addresses will be ignored.",Device,Device);
-	//	MessageBox(MESSAGEBOXPARENT,Str_Tmp,"Possible Device Mismatch",MB_OK);
-	//}
 	int WatchAdd;
 	fgets(Str_Tmp,1024,WatchFile);
 	sscanf(Str_Tmp,"%d%*s",&WatchAdd);
 	WatchAdd+=WatchCount;
 	for (int i = WatchCount; i < WatchAdd; i++)
 	{
-		while (i < 0)
-			i++;
-		do {
-			fgets(Str_Tmp,1024,WatchFile);
+		if (i < 0) i = 0;
+		memset(Str_Tmp, 0, 1024);
+		do
+		{
+			fgets(Str_Tmp, 1024, WatchFile);
 		} while (Str_Tmp[0] == '\n');
-		sscanf(Str_Tmp,"%*05X%*c%04X%*c%c%*c%c%*c%d",&(Temp.Address),&(Temp.Size),&(Temp.Type),&(Temp.WrongEndian));
-		Temp.WrongEndian = 0;
-		char *Comment = strrchr(Str_Tmp,DELIM) + 1;
-		*strrchr(Comment,'\n') = '\0';
-		InsertWatch(Temp,Comment);
+		sscanf(Str_Tmp, "%*05X%*c%04X%*c%c%*c%c%*c%*c", &(Temp.Address), &(Temp.Size), &(Temp.Type));
+		Temp.WrongEndian = false;
+		char *Comment = strrchr(Str_Tmp, DELIM);
+		if (Comment)
+		{
+			Comment++;
+			char *CommentEnd = strrchr(Comment, '\n');
+			if (CommentEnd)
+			{
+				*CommentEnd = '\0';
+				InsertWatch(Temp, Comment);
+			} else
+			{
+				// the wch file is probably corrupted
+				InsertWatch(Temp, Comment);
+				break;
+			}
+		} else
+			break;	// the wch file is probably corrupted
 	}
 
 	fclose(WatchFile);

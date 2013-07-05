@@ -679,6 +679,8 @@
 #define IDC_C_RESET_CHANGES             1236
 #define IDC_C_UNDO                      1237
 #define IDC_WATCHLIST                   1238
+#define IDC_C_ELIMINATE2                1238
+#define IDC_C_HEXEDITOR                 1238
 #define IDC_C_WATCH_EDIT                1239
 #define IDC_C_WATCH_REMOVE              1240
 #define IDC_C_WATCH_DUPLICATE           1241

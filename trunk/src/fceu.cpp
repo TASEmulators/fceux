@@ -822,7 +822,7 @@ void PowerNES(void) {
 #endif
 	FCEU_PowerCheats();
 	LagCounterReset();
-	// clear back baffer
+	// clear back buffer
 	extern uint8 *XBackBuf;
 	memset(XBackBuf, 0, 256 * 256);
 
