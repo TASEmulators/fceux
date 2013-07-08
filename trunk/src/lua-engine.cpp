@@ -85,8 +85,8 @@ extern "C"
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
-#include <lstate.h>
 #ifdef WIN32
+#include <lstate.h>
 	int iuplua_open(lua_State * L);
 	int iupcontrolslua_open(lua_State * L);
 	int luaopen_winapi(lua_State * L);
@@ -1189,6 +1189,7 @@ void CallRegisteredLuaLoadFunctions(int savestateNumber, const LuaSaveData& save
 
 		if (lua_isfunction(L, -1))
 		{
+#ifdef WIN32
 			// since the scriptdata can be very expensive to load
 			// (e.g. the registered save function returned some huge tables)
 			// check the number of parameters the registered load function expects
@@ -1200,6 +1201,13 @@ void CallRegisteredLuaLoadFunctions(int savestateNumber, const LuaSaveData& save
 
 			lua_pushinteger(L, savestateNumber);
 			saveData.LoadRecord(L, LUA_DATARECORDKEY, numParamsExpected);
+#else
+			int prevGarbage = lua_gc(L, LUA_GCCOUNT, 0);
+
+			lua_pushinteger(L, savestateNumber);
+			saveData.LoadRecord(L, LUA_DATARECORDKEY, (unsigned int) -1);
+#endif
+
 			int n = lua_gettop(L) - 1;
 
 			int ret = lua_pcall(L, n, 0, 0);
