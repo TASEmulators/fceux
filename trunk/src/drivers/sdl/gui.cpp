@@ -1521,7 +1521,9 @@ void loadLua ()
 	const char* last_file;
 	g_config->getOption("SDL.LastLoadLua", &last_file);
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), last_file);
-	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fileChooser), "/usr/share/fceux/luaScripts");
+	
+	if(strcmp(last_file, "") == 0)
+		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fileChooser), "/usr/share/fceux/luaScripts");
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
