@@ -990,7 +990,7 @@ void FCEUD_PrintError(const char *errormsg)
 	{
 		GtkWidget* d;
 		d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, 
-                GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, errormsg);
+                GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", errormsg);
 		gtk_dialog_run(GTK_DIALOG(d));
 		gtk_widget_destroy(d);
 	}
