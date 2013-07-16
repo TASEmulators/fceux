@@ -86,7 +86,9 @@ std::vector<unsigned int> disassembly_addresses;
 // this is used to autoscroll the Disassembly window while keeping relative position of the ">" pointer inside this window
 unsigned int PC_pointerOffset = 0;
 // this is used for dirty, but unavoidable hack, which is necessary to ensure the ">" pointer is visible when stepping/seeking to PC
-bool PC_pointerWasDrawn = false;
+bool PCPointerWasDrawn = false;
+// and another hack...
+int beginningOfPCPointerLine = -1;	// index of the first char within debug_str[] string, where the ">" line starts
 
 #define INVALID_START_OFFSET 1
 #define INVALID_END_OFFSET 2
@@ -398,6 +400,8 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 	unsigned int instruction_addr;
 
 	disassembly_addresses.resize(0);
+	PCPointerWasDrawn = false;
+	beginningOfPCPointerLine = -1;
 	
 // ################################## Start of SP CODE ###########################
 
@@ -468,7 +472,8 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 		if (addr == X.PC)
 		{
 			PC_pointerOffset = instructions_count;
-			PC_pointerWasDrawn = true;
+			PCPointerWasDrawn = true;
+			beginningOfPCPointerLine = strlen(debug_str);
 			strcat(debug_str, ">");
 		} else
 		{
@@ -743,6 +748,12 @@ void FCEUD_DebugBreakpoint(int bp_num)
 	DoDebug(0);
 	UpdateOtherDebuggingDialogs(); // Keeps the debugging windows updating smoothly when stepping
 
+	// highlight the ">" line
+	if (bp_num != BREAK_TYPE_STEP)
+		if (beginningOfPCPointerLine >= 0)
+			SendMessage(GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY), EM_SETSEL, beginningOfPCPointerLine + 1, beginningOfPCPointerLine + 8);
+	
+	// highlight breakpoint
 	if (bp_num >= 0)
 	{
 		// highlight bp_num item in IDC_DEBUGGER_BP_LIST
@@ -755,7 +766,7 @@ void FCEUD_DebugBreakpoint(int bp_num)
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_BP_LIST, LB_SETCURSEL, (WPARAM)(-1), 0);
 		EnableWindow(GetDlgItem(hDebug, IDC_DEBUGGER_BP_DEL), FALSE);
 		EnableWindow(GetDlgItem(hDebug, IDC_DEBUGGER_BP_EDIT), FALSE);
-		// select IDC_DEBUGGER_VAL_CYCLES_COUNT or IDC_DEBUGGER_VAL_INSTRUCTIONS_COUNT if needed
+		// highlight IDC_DEBUGGER_VAL_CYCLES_COUNT or IDC_DEBUGGER_VAL_INSTRUCTIONS_COUNT if needed
 		if (bp_num == BREAK_TYPE_CYCLES_EXCEED)
 			SendMessage(GetDlgItem(hDebug, IDC_DEBUGGER_VAL_CYCLES_COUNT), EM_SETSEL, 0, -1);
 		else if (bp_num == BREAK_TYPE_INSTRUCTIONS_EXCEED)
@@ -810,11 +821,10 @@ void UpdateDebugger(bool jump_to_pc)
 		{
 			starting_address = InstructionUp(starting_address);
 		}
-		PC_pointerWasDrawn = false;
 		Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address);
 
 		// HACK, but I don't see any other way to ensure the ">" pointer is visible when "Symbolic debug" is enabled
-		if (!PC_pointerWasDrawn && PC_pointerOffset)
+		if (!PCPointerWasDrawn && PC_pointerOffset)
 		{
 			// we've got a problem, probably due to Symbolic info taking so much space that PC pointer couldn't be seen with (PC_pointerOffset > 0)
 			PC_pointerOffset = 0;
