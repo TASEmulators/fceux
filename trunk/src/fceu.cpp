@@ -486,8 +486,18 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	FCEU_ResetVidSys();
 
 	if (GameInfo->type != GIT_NSF)
+	{
 		if (FSettings.GameGenie)
-			FCEU_OpenGenie();
+		{
+			if (FCEU_OpenGenie())
+			{
+				FCEUI_SetGameGenie(false);
+#ifdef WIN32
+				genie = 0;
+#endif
+			}
+		}
+	}
 	PowerNES();
 
 	if (GameInfo->type != GIT_NSF)

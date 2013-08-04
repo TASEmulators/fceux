@@ -89,6 +89,6 @@ extern int geniestage;
 
 void FCEU_GeniePower(void);
 
-void FCEU_OpenGenie(void);
+bool FCEU_OpenGenie(void);
 void FCEU_CloseGenie(void);
 void FCEU_KillGenie(void);
