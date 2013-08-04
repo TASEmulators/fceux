@@ -86,6 +86,7 @@ extern int DbgPosX,DbgPosY;
 extern int DbgSizeX,DbgSizeY;
 extern int MemViewSizeX,MemViewSizeY;
 extern int MemView_wndx, MemView_wndy;
+extern bool MemView_HighlightActivity;
 extern int MemFind_wndx, MemFind_wndy;
 extern int NTViewPosX,NTViewPosY;
 extern int PPUViewPosX,PPUViewPosY;
@@ -285,6 +286,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(MemViewSizeY),
 	AC(MemView_wndx),
 	AC(MemView_wndy),
+	AC(MemView_HighlightActivity),
 	AC(MemFind_wndx), 
 	AC(MemFind_wndy),
 	AC(NTViewPosX),

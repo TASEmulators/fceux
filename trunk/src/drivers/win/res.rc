@@ -340,9 +340,11 @@ BEGIN
     END
     POPUP "&View"
     BEGIN
-        MENUITEM "&NES Memory",                 MENU_MV_VIEW_RAM, CHECKED
+        MENUITEM "&NES Memory",                 MENU_MV_VIEW_RAM
         MENUITEM "&PPU Memory",                 MENU_MV_VIEW_PPU
         MENUITEM "&ROM File",                   MENU_MV_VIEW_ROM
+        MENUITEM SEPARATOR
+        MENUITEM "Highlight Activity",          ID_VIEW_HIGHLIGHT_ACTIVITY
     END
     POPUP "&Bookmarks"
     BEGIN
