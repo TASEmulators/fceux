@@ -1188,6 +1188,9 @@
 #define ID_VIEW_A                       40583
 #define ID_VIEW_HIGHLIGHT               40584
 #define ID_VIEW_HIGHLIGHT_ACTIVITY      40585
+#define ID_HIGHLIGHTING_FADEWHENPAUSED  40586
+#define ID_HIGHLIGHTING_SETFADINGPERIOD 40587
+#define ID_HIGHLIGHTING_HIGHLIGHT_ACTIVITY 40588
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1200,7 +1203,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        290
-#define _APS_NEXT_COMMAND_VALUE         40586
+#define _APS_NEXT_COMMAND_VALUE         40589
 #define _APS_NEXT_CONTROL_VALUE         1289
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

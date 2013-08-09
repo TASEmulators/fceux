@@ -87,6 +87,8 @@ extern int DbgSizeX,DbgSizeY;
 extern int MemViewSizeX,MemViewSizeY;
 extern int MemView_wndx, MemView_wndy;
 extern bool MemView_HighlightActivity;
+extern unsigned int MemView_HighlightActivity_FadingPeriod;
+extern bool MemView_HighlightActivity_FadeWhenPaused;
 extern int MemFind_wndx, MemFind_wndy;
 extern int NTViewPosX,NTViewPosY;
 extern int PPUViewPosX,PPUViewPosY;
@@ -287,6 +289,8 @@ static CFGSTRUCT fceuconfig[] =
 	AC(MemView_wndx),
 	AC(MemView_wndy),
 	AC(MemView_HighlightActivity),
+	AC(MemView_HighlightActivity_FadingPeriod),
+	AC(MemView_HighlightActivity_FadeWhenPaused),
 	AC(MemFind_wndx), 
 	AC(MemFind_wndy),
 	AC(NTViewPosX),

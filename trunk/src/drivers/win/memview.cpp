@@ -47,6 +47,8 @@ extern Name* ramBankNames;
 extern unsigned char *cdloggervdata;
 extern unsigned int cdloggerVideoDataSize;
 
+extern bool JustFrameAdvanced;
+
 using namespace std;
 
 #define MODE_NES_MEMORY   0
@@ -60,6 +62,7 @@ using namespace std;
 #define ID_ADDRESS_SEEK_IN_ROM          5
 #define ID_ADDRESS_CREATE_GG_CODE       6
 #define ID_ADDRESS_BOOKMARK             20
+#define BOOKMARKS_SUBMENU_POS			4
 
 #define ID_ADDRESS_FRZ_TOGGLE_STATE     1
 #define ID_ADDRESS_FRZ_FREEZE           50
@@ -68,10 +71,10 @@ using namespace std;
 #define ID_ADDRESS_FRZ_UNFREEZE_ALL     53
 
 #define HIGHLIGHT_ACTIVITY_MIN_VALUE 0
-#define HIGHLIGHT_ACTIVITY_MAX_VALUE 16
+#define HIGHLIGHT_ACTIVITY_NUM_COLORS 16
 #define PREVIOUS_VALUE_UNDEFINED -1
 
-COLORREF highlightActivityColors[HIGHLIGHT_ACTIVITY_MAX_VALUE] = { 0x0, 0x495249, 0x666361, 0x855a45, 0xa13620, 0xbd003f, 0xd6006f, 0xcc008b, 0xba00a1, 0x8b00ad, 0x5c00bf, 0x0003d1, 0x0059d6, 0x0077d9, 0x0096db, 0x00aede };
+COLORREF highlightActivityColors[HIGHLIGHT_ACTIVITY_NUM_COLORS] = { 0x0, 0x005252, 0x227322, 0x768046, 0x99641f, 0xbf0003, 0xe00056, 0xd90090, 0xcc00b4, 0x8500ba, 0x7100d4, 0x1c00d1, 0x003ce0, 0x0069d9, 0x008ae5, 0x4ea2de };
 
 string memviewhelp = "HexEditor"; //Hex Editor Help Page
 
@@ -157,6 +160,8 @@ int TableFileLoaded;
 int MemView_wndx, MemView_wndy;
 int MemFind_wndx, MemFind_wndy;
 bool MemView_HighlightActivity = true;
+unsigned int MemView_HighlightActivity_FadingPeriod = HIGHLIGHT_ACTIVITY_NUM_COLORS;
+bool MemView_HighlightActivity_FadeWhenPaused = false;
 int MemViewSizeX = 580, MemViewSizeY = 248;
 static RECT newMemViewRect;
 
@@ -178,7 +183,7 @@ COLORREF *BGColorList;
 COLORREF *TextColorList;
 int PreviousCurOffset;
 int *PreviousValues;	// for HighlightActivity feature and for speedhack too
-int *HighlightedBytes;
+unsigned int *HighlightedBytes;
 
 int lbuttondown, lbuttondownx, lbuttondowny;
 int mousex, mousey;
@@ -435,6 +440,7 @@ void UpdateMemoryView(int draw_all)
 
 	int i, j;
 	int byteValue;
+	int byteHighlightingValue;
 	//LPVOID lpMsgBuf;
 	//int curlength;
 	char str[100];
@@ -475,10 +481,11 @@ void UpdateMemoryView(int draw_all)
 		for(j = 0;j < 16;j++)
 		{
 			byteValue = GetMemViewData(i+j);
-			if (MemView_HighlightActivity)
-				if ((PreviousValues[i+j-CurOffset] != byteValue) && (PreviousValues[i+j-CurOffset] != PREVIOUS_VALUE_UNDEFINED))
-					HighlightedBytes[i+j-CurOffset] = HIGHLIGHT_ACTIVITY_MAX_VALUE;
-
+			if (MemView_HighlightActivity && ((PreviousValues[i+j-CurOffset] != byteValue) && (PreviousValues[i+j-CurOffset] != PREVIOUS_VALUE_UNDEFINED)))
+				byteHighlightingValue = HighlightedBytes[i+j-CurOffset] = MemView_HighlightActivity_FadingPeriod;
+			else
+				byteHighlightingValue = HighlightedBytes[i+j-CurOffset];
+			
 			if ((CursorEndAddy == -1) && (CursorStartAddy == i+j))
 			{
 				//print up single highlighted text
@@ -507,8 +514,8 @@ void UpdateMemoryView(int draw_all)
 					// 2nd nybble
 					MoveToEx(HDataDC, MemFontWidth + 8 * MemFontWidth + (j * 3 * MemFontWidth), MemFontHeight * ((i - CurOffset) / 16), NULL);
 					sprintf(str,"%X", byteValue % 16);
-					SetTextColor(HDataDC,TextColorList[i+j-CurOffset]);	//single address highlight 2nd address
-					SetBkColor(HDataDC,RGB(HexBackColorR,HexBackColorG,HexBackColorB));
+					SetTextColor(HDataDC,TextColorList[i+j-CurOffset]);
+					SetBkColor(HDataDC,BGColorList[i+j-CurOffset]);
 					TextOut(HDataDC,0,0,str,1);
 				}
 				//TextOut(HDataDC,0,0," ",1);
@@ -524,16 +531,28 @@ void UpdateMemoryView(int draw_all)
 				TextOut(HDataDC,0,0,str,1);
 
 				PreviousValues[i+j-CurOffset] = PREVIOUS_VALUE_UNDEFINED; //set it to redraw this one next time
-			} else if (draw_all || (PreviousValues[i+j-CurOffset] != byteValue) || (HighlightedBytes[i+j-CurOffset]))
+			} else if (draw_all || (PreviousValues[i+j-CurOffset] != byteValue) || byteHighlightingValue)
 			{
 				// print up normal text
-				if (HighlightedBytes[i+j-CurOffset])
+				if (byteHighlightingValue)
 				{
 					// fade out 1 step
-					if (--HighlightedBytes[i+j-CurOffset] > 0)
-						SetTextColor(HDataDC, highlightActivityColors[HighlightedBytes[i+j-CurOffset]]);//(8+j*3)*MemFontWidth
-					else
-						SetTextColor(HDataDC,TextColorList[i+j-CurOffset]);//(8+j*3)*MemFontWidth
+					if (MemView_HighlightActivity_FadeWhenPaused || !FCEUI_EmulationPaused() || JustFrameAdvanced)
+						byteHighlightingValue = (--HighlightedBytes[i+j-CurOffset]);
+
+					if (byteHighlightingValue > 0)
+					{
+						if (byteHighlightingValue == MemView_HighlightActivity_FadingPeriod - 1 || byteHighlightingValue >= HIGHLIGHT_ACTIVITY_NUM_COLORS)
+							// if the byte was changed in current frame, use brightest color, even if the "fading period" demands different color
+							// also use the last color if byteHighlightingValue points outside the array of predefined colors
+							SetTextColor(HDataDC, highlightActivityColors[HIGHLIGHT_ACTIVITY_NUM_COLORS - 1]);
+						else
+							SetTextColor(HDataDC, highlightActivityColors[byteHighlightingValue]);
+							
+					} else
+					{
+						SetTextColor(HDataDC,TextColorList[i+j-CurOffset]);
+					}
 				} else
 				{
 					SetTextColor(HDataDC,TextColorList[i+j-CurOffset]);//(8+j*3)*MemFontWidth
@@ -1197,7 +1216,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		TextColorList = (COLORREF*)malloc(DataAmount*sizeof(COLORREF));
 		BGColorList = (COLORREF*)malloc(DataAmount*sizeof(COLORREF));
 		PreviousValues = (int*)malloc(DataAmount*sizeof(int));
-		HighlightedBytes = (int*)malloc(DataAmount*sizeof(int));
+		HighlightedBytes = (unsigned int*)malloc(DataAmount*sizeof(unsigned int));
 		resetHighlightingActivityLog();
 		EditingText = CurOffset = 0;
 		EditingMode = MODE_NES_MEMORY;
@@ -1211,9 +1230,10 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		{
 			CheckMenuItem(GetMenu(hwnd), MENU_MV_VIEW_RAM + i, (EditingMode == i) ? MF_CHECKED : MF_UNCHECKED);
 		}
-		CheckMenuItem(GetMenu(hwnd), ID_VIEW_HIGHLIGHT_ACTIVITY, (MemView_HighlightActivity) ? MF_CHECKED: MF_UNCHECKED);
+		CheckMenuItem(GetMenu(hwnd), ID_HIGHLIGHTING_HIGHLIGHT_ACTIVITY, (MemView_HighlightActivity) ? MF_CHECKED: MF_UNCHECKED);
+		CheckMenuItem(GetMenu(hwnd), ID_HIGHLIGHTING_FADEWHENPAUSED, (MemView_HighlightActivity_FadeWhenPaused) ? MF_CHECKED: MF_UNCHECKED);
 
-		updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), 3));
+		updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
 		return 0;
 	case WM_PAINT:
 		hdc = BeginPaint(hwnd, &ps);
@@ -1709,7 +1729,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 				}
 				else
 				{
-					updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), 3));
+					updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
 					UpdateColorTable();
 				}
 			}
@@ -1763,7 +1783,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			TextColorList = (COLORREF*)realloc(TextColorList,DataAmount*sizeof(COLORREF));
 			BGColorList = (COLORREF*)realloc(BGColorList,DataAmount*sizeof(COLORREF));
 			PreviousValues = (int*)realloc(PreviousValues,(DataAmount)*sizeof(int));
-			HighlightedBytes = (int*)realloc(HighlightedBytes,(DataAmount)*sizeof(int));
+			HighlightedBytes = (unsigned int*)realloc(HighlightedBytes,(DataAmount)*sizeof(unsigned int));
 			resetHighlightingActivityLog();
 		}
 		//Set vertical scroll bar range and page size
@@ -1927,20 +1947,48 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			UpdateCaption();
 			return 0;
 		
-		case ID_VIEW_HIGHLIGHT_ACTIVITY:
+		case ID_HIGHLIGHTING_HIGHLIGHT_ACTIVITY:
 		{
 			MemView_HighlightActivity ^= 1;
-			CheckMenuItem(GetMenu(hMemView), ID_VIEW_HIGHLIGHT_ACTIVITY, (MemView_HighlightActivity) ? MF_CHECKED: MF_UNCHECKED);
+			CheckMenuItem(GetMenu(hMemView), ID_HIGHLIGHTING_HIGHLIGHT_ACTIVITY, (MemView_HighlightActivity) ? MF_CHECKED: MF_UNCHECKED);
+			resetHighlightingActivityLog();
+			if (!MemView_HighlightActivity)
+				UpdateMemoryView(1);
+			return 0;
+		}
+		case ID_HIGHLIGHTING_SETFADINGPERIOD:
+		{
+			int newValue = MemView_HighlightActivity_FadingPeriod - 1;
+			if (CWin32InputBox::GetInteger("Highlighting fading period", "Highlight changed bytes for how many frames?", newValue, hMemView) == IDOK)
+			{
+				if (newValue <= 0)
+					newValue = HIGHLIGHT_ACTIVITY_NUM_COLORS;
+				else
+					newValue++;
+
+				if (MemView_HighlightActivity_FadingPeriod != newValue)
+				{
+					MemView_HighlightActivity_FadingPeriod = newValue;
+					resetHighlightingActivityLog();
+				}
+			}
+			return 0;
+		}
+		case ID_HIGHLIGHTING_FADEWHENPAUSED:
+		{
+			MemView_HighlightActivity_FadeWhenPaused ^= 1;
+			CheckMenuItem(GetMenu(hMemView), ID_HIGHLIGHTING_FADEWHENPAUSED, (MemView_HighlightActivity_FadeWhenPaused) ? MF_CHECKED: MF_UNCHECKED);
 			resetHighlightingActivityLog();
 			return 0;
 		}
+
 			// ################################## Start of SP CODE ###########################
 		case MENU_MV_BOOKMARKS_RM_ALL:
 			if (nextBookmark)
 			{
 				if (MessageBox(hwnd, "Remove All Bookmarks?", "Bookmarks", MB_YESNO) == IDYES)
 				{
-					removeAllBookmarks(GetSubMenu(GetMenu(hwnd), 3));
+					removeAllBookmarks(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
 					UpdateColorTable();
 				}
 			}

@@ -343,8 +343,12 @@ BEGIN
         MENUITEM "&NES Memory",                 MENU_MV_VIEW_RAM
         MENUITEM "&PPU Memory",                 MENU_MV_VIEW_PPU
         MENUITEM "&ROM File",                   MENU_MV_VIEW_ROM
-        MENUITEM SEPARATOR
-        MENUITEM "Highlight Activity",          ID_VIEW_HIGHLIGHT_ACTIVITY
+    END
+    POPUP "Highlighting"
+    BEGIN
+        MENUITEM "Highlight Activity",          ID_HIGHLIGHTING_HIGHLIGHT_ACTIVITY
+        MENUITEM "Set fading period...",        ID_HIGHLIGHTING_SETFADINGPERIOD
+        MENUITEM "Fade when paused",            ID_HIGHLIGHTING_FADEWHENPAUSED
     END
     POPUP "&Bookmarks"
     BEGIN
