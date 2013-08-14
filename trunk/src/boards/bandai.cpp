@@ -453,7 +453,7 @@ static void M157Power(void) {
 }
 
 void Mapper157_Init(CartInfo *info) {
-	is153 = 0;
+	is153 = 1;
 	info->Power = M157Power;
 	MapIRQHook = BarcodeIRQHook;
 
