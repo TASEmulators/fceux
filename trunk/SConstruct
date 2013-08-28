@@ -223,6 +223,12 @@ man_net_dst = prefix + '/share/man/man6/fceux-net-server.6'
 share_src = 'output/'
 share_dst = prefix + '/share/fceux/'
 
+image_src = 'fceux.png'
+image_dst = prefix + '/share/pixmaps'
+
+desktop_src = 'fceux.desktop'
+desktop_dst = prefix + '/share/applications/'
+
 env.Install(prefix + "/bin/", fceux)
 env.Install(prefix + "/bin/", "fceux-net-server")
 # TODO:  Where to put auxlib on "scons install?"
@@ -230,6 +236,6 @@ env.Alias('install', env.Command(auxlib_inst_dst, auxlib_src, [Copy(auxlib_inst_
 env.Alias('install', env.Command(share_dst, share_src, [Copy(share_dst, share_src)]))
 env.Alias('install', env.Command(man_dst, man_src, [Copy(man_dst, man_src)]))
 env.Alias('install', env.Command(man_net_dst, man_net_src, [Copy(man_net_dst, man_net_src)]))
+env.Alias('install', env.Command(image_dst, image_src, [Copy(image_dst, image_src)]))
+env.Alias('install', env.Command(desktop_dst, desktop_src, [Copy(desktop_dst, desktop_src)]))
 env.Alias('install', (prefix + "/bin/"))
-
-
