@@ -1,20 +1,46 @@
 
+15-Aug-2013 - CaH4e3 - fixed bandai mapper emulation
+04-Aug-2013 - AnS - Hexeditor: added "Highlighting" submenu and "Highlight Activity" feature
+04-Aug-2013 - AnS - Taseditor: an experiment with somewhat different colors for HotChanges
+04-Aug-2013 - AnS - Auto-disable "Game Genie ROM" feature when no "gg.rom" file is found
+16-Jul-2013 - AnS - Debugger: highlight PC pointer line when a breakpoint is hit
+05-Jul-2013 - AnS - RAM Search: added "Hex Editor" button and right-click
+04-Jul-2013 - AnS - Debugger: added CDL data column in place of left panel. It helps to distinguish executed branches of code from not logged code
+04-Jul-2013 - AnS - Debugger: clever autoscrolling when stepping/seeking to PC. It maintains relative position of the ">" pointer inside the Disassembly window
+03-Jul-2013 - AnS - RAM Watch: fixed epic bug when contents of old .wch file mixed with the newly saved data because of "r+b" mode (changed it to "w+b")
+03-Jul-2013 - AnS - Taseditor: Greenzone: always keep Greenzone.lagLog in touch with history.currentSnapshot.laglog (fixes workflow with "Auto-adjust" disabled)
+03-Jul-2013 - AnS - Tracer: only output "from $XXXX" when the subroutine was called by JSR (fixes possible errors in those cases when the subroutine was called using stack magic)
+03-Jul-2013 - AnS - Debugger: do not reload ram.nl every time automatically
+21-Jun-2013 - CaH4e3 - PPU Viewer: when CDLogger is on, display unused graphics in a dim palette
+15-Jun-2013 - AnS - Movie recording: fixed bug when emulator allowed recording commands outside the range of FM2 specs
+15-Jun-2013 - AnS - Movie recording: added ability to record "Insert coin" command (for VS games)
+15-Jun-2013 - AnS - Movie recording: remember last Author name when creating a new movie
+08-Jun-2013 - AnS - A couple of fixes which deal with "multiple ROMs in a single archive" case. The loading procedure now takes into account actual ROM name when loading ROM from an archive containing multiple files. This affects PAL/NTSC detection (in case there were ROMs of different regions inside a single zip). Also, "auto-resume play" now loads actual ROM on startup (instead of prompting a list of archived files to choose). Also, NL files (symbolic debug) are named correctly when debugging a ROM from such an archive, etc.
+08-Jun-2013 - AnS - Hexeditor: fixed bugs when saving files while working with ROMs in archives
+27-May-2013 - AnS - Hexeditor: specify Data bank condition when adding a Breakpoint by context menu
+26-May-2013 - AnS - Debugger: added 'T' condition (checks the bank of the data accessed)
+26-May-2013 - AnS - Win32: fixed storing and loading .deb files when working with archived ROMs
+26-May-2013 - AnS - new Lua functions: debugger.hitbreakpoint(), debugger.getcyclescount(), debugger.getinstructionscount(), debugger.resetcyclescount(), debugger.resetinstructionscount()
+26-May-2013 - AnS - Win32: when no script is currently running, Shift+L loads the most recent Lua script
+26-May-2013 - CaH4e3 - fixed mapper 183
+14-May-2013 - CaH4e3 - fixed mapper 253
+13-May-2013 - CaH4e3 - mapper 43
+09-May-2013 - AnS - Video config: changed "Disable hardware acceleration" option to a drop-down list with 3 options: a) No hardware acceleration; b) Create surface in RAM; c) Hardware acceleration. Because it appears that some video cards still blur textures even when stored in RAM.
 29-Apr-2013 - AnS - added checking if archive file has any files in it, because new 7z.dll confuses FDS files with archives (it recognizes the first "F" as a signature of an archive)
-28-Apr-2013 - AnS - Video config: changed "Disable hardware acceleration" option to "Create surface in system memory"
 19-Apr-2013 - AnS - Video config: added "Square pixels" option
-19-Apr-2013 - AnS - Video config: added aspect ratio fields for customizing "TV Aspect" ratio, by default it's 4/3
+19-Apr-2013 - AnS - Video config: added aspect ratio fields for customizing "TV Aspect" ratio, by default it's 4:3
 17-Apr-2013 - AnS - "Auto-resume old play session" now also works with NSFs
 17-Apr-2013 - zeromus - properly savestate NSF
 17-Apr-2013 - zeromus - add missing mmc5 savestate variables
 16-Apr-2013 - AnS - Tracer: added "Log Cycles count" and "Log Instructions count" options
 13-Apr-2013 - AnS - Debugger: scrolling up/down by whole instructions
 12-Apr-2013 - gocha - Lua: fix wrong frequency calculation in sound.get()
-07-Apr-2013 - AnS - Taseditor: comply with movie.rerecordcounting() setting
+07-Apr-2013 - AnS - Taseditor: comply with Lua movie.rerecordcounting() setting
 01-Apr-2013 - CaH4e3 - mapper 154 - fixed
 26-Mar-2013 - CaH4e3 - mapper 53 - supported ines format of SUPERVISION UNIF board; UNIF 8157 - fix according to hw; UNIF T-262 - fix according to hw
 24-Mar-2013 - CaH4e3 - UNIF DANCE2000 - now emulated properly
 20-Mar-2013 - gocha - link to lua51.dll instead of static linking
-19-Mar-2013 - zeromus - bring some improvements to newppu from bizhawk, and fig vtoggle5/6 back to vtoggle
+19-Mar-2013 - zeromus - bring some improvements to newppu from bizhawk, and fix vtoggle5/6 back to vtoggle
 19-Mar-2013 - zeromus - fix mapper 28
 17-Mar-2013 - AnS - Replay: removed redundant window update when using "Browse" (fixes #585)
 17-Mar-2013 - CaH4e3 - UNIF DSOUNDV1 - removed due to duplicate of 178 mapper; mapper 178 - added more features of 8/16M carts with 32K SRAM; UNIF 09-034A - added support for a new SMB2j Lite version
