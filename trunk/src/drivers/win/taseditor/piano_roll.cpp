@@ -55,7 +55,7 @@ LRESULT APIENTRY markerDragBoxWndProc(HWND hwnd, UINT message, WPARAM wParam, LP
 char pianoRollSaveID[PIANO_ROLL_ID_LEN] = "PIANO_ROLL";
 char pianoRollSkipSaveID[PIANO_ROLL_ID_LEN] = "PIANO_ROLX";
 //COLORREF hotChangesColors[16] = { 0x0, 0x495249, 0x666361, 0x855a45, 0xa13620, 0xbd003f, 0xd6006f, 0xcc008b, 0xba00a1, 0x8b00ad, 0x5c00bf, 0x0003d1, 0x0059d6, 0x0077d9, 0x0096db, 0x00aede };
-COLORREF hotChangesColors[16] = { 0x0, 0x005252, 0x227322, 0x768046, 0x99641f, 0xbf0003, 0xe00056, 0xd90090, 0xcc00b4, 0x8500ba, 0x7100d4, 0x1c00d1, 0x003ce0, 0x0069d9, 0x008ae5, 0x4ea2de };
+COLORREF hotChangesColors[16] = { 0x0, 0x004f4f, 0x1d611d, 0x757241, 0x994d00, 0xc70003, 0xe50058, 0xd90094, 0xcc00b4, 0x9400bd, 0x7e00d9, 0x0000cf, 0x0034e0, 0x0064d6, 0x0086e5, 0x4ea2de };
 COLORREF headerLightsColors[11] = { 0x0, 0x007313, 0x009100, 0x1daf00, 0x42c700, 0x65d900, 0x91e500, 0xb0f000, 0xdaf700, 0xf0fc7c, 0xfcffba };
 
 char markerDragBoxClassName[] = "MarkerDragBox";
@@ -417,6 +417,7 @@ void PIANO_ROLL::free()
 void PIANO_ROLL::reset()
 {
 	mustRedrawList = mustCheckItemUnderMouse = true;
+	playbackCursorOffset = 0;
 	shiftHeld = ctrlHeld = altHeld = false;
 	shiftTimer = ctrlTimer = shiftActions—ount = ctrlActions—ount = 0;
 	nextHeaderUpdateTime = headerItemUnderMouse = 0;
@@ -455,32 +456,6 @@ void PIANO_ROLL::update()
 {
 	updateLinesCount();
 
-	if (mustCheckItemUnderMouse)
-	{
-		// find row and column
-		POINT p;
-		if (GetCursorPos(&p))
-		{
-			ScreenToClient(hwndList, &p);
-			// perform hit test
-			LVHITTESTINFO info;
-			info.pt.x = p.x;
-			info.pt.y = p.y;
-			ListView_SubItemHitTest(hwndList, &info);
-			rowUnderMouse = info.iItem;
-			realRowUnderMouse = rowUnderMouse;
-			if (realRowUnderMouse < 0)
-			{
-				realRowUnderMouse = ListView_GetTopIndex(hwndList) + (p.y - listTopMargin) / listRowHeight;
-				if (realRowUnderMouse < 0) realRowUnderMouse--;
-			}
-			columnUnderMouse = info.iSubItem;
-		}
-		// and don't check until mouse moves or Piano Roll scrolls
-		mustCheckItemUnderMouse = false;
-		taseditorWindow.mustUpdateMouseCursor = true;
-	}
-	
 	// update state of Shift/Ctrl/Alt holding
 	bool last_shift_held = shiftHeld, last_ctrl_held = ctrlHeld, last_alt_held = altHeld;
 	shiftHeld = (GetAsyncKeyState(VK_SHIFT) < 0);
@@ -520,6 +495,32 @@ void PIANO_ROLL::update()
 			ctrlActions—ount = 0;
 		}
 		ctrlTimer = clock();
+	}
+
+	if (mustCheckItemUnderMouse)
+	{
+		// find row and column
+		POINT p;
+		if (GetCursorPos(&p))
+		{
+			ScreenToClient(hwndList, &p);
+			// perform hit test
+			LVHITTESTINFO info;
+			info.pt.x = p.x;
+			info.pt.y = p.y;
+			ListView_SubItemHitTest(hwndList, &info);
+			rowUnderMouse = info.iItem;
+			realRowUnderMouse = rowUnderMouse;
+			if (realRowUnderMouse < 0)
+			{
+				realRowUnderMouse = ListView_GetTopIndex(hwndList) + (p.y - listTopMargin) / listRowHeight;
+				if (realRowUnderMouse < 0) realRowUnderMouse--;
+			}
+			columnUnderMouse = info.iSubItem;
+		}
+		// and don't check until mouse moves or Piano Roll scrolls
+		mustCheckItemUnderMouse = false;
+		taseditorWindow.mustUpdateMouseCursor = true;
 	}
 
 	// update dragging
@@ -912,7 +913,6 @@ void PIANO_ROLL::updateLinesCount()
 bool PIANO_ROLL::isLineVisible(int frame)
 {
 	int top = ListView_GetTopIndex(hwndList);
-	// in fourscore there's horizontal scrollbar which takes one row for itself
 	if (frame >= top && frame < top + ListView_GetCountPerPage(hwndList))
 		return true;
 	return false;
@@ -920,17 +920,39 @@ bool PIANO_ROLL::isLineVisible(int frame)
 
 void PIANO_ROLL::centerListAroundLine(int rowIndex)
 {
-	int list_items = ListView_GetCountPerPage(hwndList);
-	int lower_border = (list_items - 1) / 2;
-	int upper_border = (list_items - 1) - lower_border;
-	int index = rowIndex + lower_border;
+	int numItemsPerPage = ListView_GetCountPerPage(hwndList);
+	int lowerBorder = (numItemsPerPage - 1) / 2;
+	int upperBorder = (numItemsPerPage - 1) - lowerBorder;
+	int index = rowIndex + lowerBorder;
 	if (index >= currMovieData.getNumRecords())
 		index = currMovieData.getNumRecords()-1;
 	ListView_EnsureVisible(hwndList, index, false);
-	index = rowIndex - upper_border;
+	index = rowIndex - upperBorder;
 	if (index < 0)
 		index = 0;
 	ListView_EnsureVisible(hwndList, index, false);
+}
+void PIANO_ROLL::setListTopRow(int rowIndex)
+{
+	ListView_Scroll(hwndList, 0, listRowHeight * (rowIndex - ListView_GetTopIndex(hwndList)));
+}
+
+void PIANO_ROLL::recalculatePlaybackCursorOffset()
+{
+	int frame = playback.getPauseFrame();
+	if (frame < 0)
+		frame = currFrameCounter;
+
+	playbackCursorOffset = frame - ListView_GetTopIndex(hwndList);
+	if (playbackCursorOffset < 0)
+	{
+		playbackCursorOffset = 0;
+	} else
+	{
+		int numItemsPerPage = ListView_GetCountPerPage(hwndList);
+		if (playbackCursorOffset > numItemsPerPage - 1)
+			playbackCursorOffset = numItemsPerPage - 1;
+	}
 }
 
 void PIANO_ROLL::followPlaybackCursor()
@@ -945,6 +967,14 @@ void PIANO_ROLL::followPlaybackCursorIfNeeded(bool followPauseframe)
 			ListView_EnsureVisible(hwndList, currFrameCounter, FALSE);
 		else if (followPauseframe)
 			ListView_EnsureVisible(hwndList, playback.getPauseFrame(), FALSE);
+	}
+}
+void PIANO_ROLL::updatePlaybackCursorPositionInPianoRoll()
+{
+	if (taseditorConfig.followPlaybackCursor)
+	{
+		if (playback.getPauseFrame() < 0)
+			setListTopRow(currFrameCounter - playbackCursorOffset);
 	}
 }
 void PIANO_ROLL::followPauseframe()

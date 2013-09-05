@@ -152,7 +152,7 @@ void PLAYBACK::update()
 		bookmarks.redrawChangedBookmarks(currFrameCounter);
 		lastCursorPos = currFrameCounter;
 		// follow the Playback cursor, but in case of seeking don't follow it
-		pianoRoll.followPlaybackCursorIfNeeded(false);
+		pianoRoll.followPlaybackCursorIfNeeded(false);	//pianoRoll.updatePlaybackCursorPositionInPianoRoll();	// an unfinished experiment
 		// enforce redrawing now
 		UpdateWindow(pianoRoll.hwndList);
 		// lazy update of "Playback's Marker text"

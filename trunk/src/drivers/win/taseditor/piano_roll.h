@@ -166,8 +166,11 @@ public:
 	void updateLinesCount();
 	bool isLineVisible(int frame);
 
+	void recalculatePlaybackCursorOffset();
+
 	void followPlaybackCursor();
 	void followPlaybackCursorIfNeeded(bool followPauseframe = true);
+	void updatePlaybackCursorPositionInPianoRoll();
 	void followPauseframe();
 	void followUndoHint();
 	void followSelection();
@@ -223,6 +226,7 @@ public:
 
 private:
 	void centerListAroundLine(int rowIndex);
+	void setListTopRow(int rowIndex);
 
 	void handlePlaybackCursorDragging();
 	void finishDrag();
@@ -232,6 +236,7 @@ private:
 	int nextHeaderUpdateTime;
 
 	bool mustRedrawList;
+	int playbackCursorOffset;
 
 	HMENU hrMenu;
 

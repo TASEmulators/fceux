@@ -500,7 +500,13 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 	}
 	if (logging_options & LOG_CYCLES_COUNT)
 	{
-		sprintf(str_temp, "c%-11llu ", (timestampbase + (uint64)timestamp - total_cycles_base));
+		int64 counter_value = timestampbase + (uint64)timestamp - total_cycles_base;
+		if (counter_value < 0)	// sanity check
+		{
+			ResetDebugStatisticsCounters();
+			counter_value = 0;
+		}
+		sprintf(str_temp, "c%-11llu ", counter_value);
 		strcat(str_result, str_temp);
 	}
 	if (logging_options & LOG_INSTRUCTIONS_COUNT)

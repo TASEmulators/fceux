@@ -894,7 +894,7 @@ void UpdateDebugger(bool jump_to_pc)
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_PPUPIXEL, str2);
 
 	// update counters
-	uint64 counter_value = timestampbase + (uint64)timestamp - total_cycles_base;
+	int64 counter_value = timestampbase + (uint64)timestamp - total_cycles_base;
 	if (counter_value < 0)	// sanity check
 	{
 		ResetDebugStatisticsCounters();
@@ -902,7 +902,7 @@ void UpdateDebugger(bool jump_to_pc)
 	}
 	sprintf(str, "%llu", counter_value);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_CYCLES_COUNT, str);
-	counter_value = timestampbase + (long)timestamp - delta_cycles_base;
+	counter_value = timestampbase + (uint64)timestamp - delta_cycles_base;
 	if (counter_value < 0)	// sanity check
 	{
 		ResetDebugStatisticsCounters();

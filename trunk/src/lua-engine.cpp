@@ -4364,7 +4364,13 @@ static int debugger_hitbreakpoint(lua_State *L)
 // debugger.getcyclescount()
 static int debugger_getcyclescount(lua_State *L)
 {
-	lua_pushinteger(L, (timestampbase + (uint64)timestamp - total_cycles_base));
+	int64 counter_value = timestampbase + (uint64)timestamp - total_cycles_base;
+	if (counter_value < 0)	// sanity check
+	{
+		ResetDebugStatisticsCounters();
+		counter_value = 0;
+	}
+	lua_pushinteger(L, counter_value);
 	return 1;
 }
 

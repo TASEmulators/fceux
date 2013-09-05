@@ -841,6 +841,7 @@ BOOL CALLBACK TASEditorWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case LVN_ENDSCROLL:
 					pianoRoll.mustCheckItemUnderMouse = true;
+					//pianoRoll.recalculatePlaybackCursorOffset();	// an unfinished experiment
 					break;
 				}
 				break;
