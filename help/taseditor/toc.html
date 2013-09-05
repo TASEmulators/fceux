@@ -4,7 +4,7 @@
 <head>
 	<title>TAS Editor Manual- Table of Contents</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/silver-theme/jquery-ui-1.8.12.custom.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/dynatree/chm/ui.dynatree.css" />
@@ -176,7 +176,10 @@
 				var oUl = $("#search_results_content").append("<ul id='lr'></ul>").find("ul");
 				for (var nCnt = 0; nCnt < oSearchEngine.aResults.length; nCnt++)
 				{
-					oUl.append("<li><a href='" + aTl[oSearchEngine.aResults[nCnt]][0] + "?search=" + escape(sValue) + "' target='FrameMain'>" + unescape(aTl[oSearchEngine.aResults[nCnt]][1]) + "</a></li>");
+					if (oSearchEngine.aResults[nCnt] < aTl.length)
+					{
+						oUl.append("<li><a href='" + aTl[oSearchEngine.aResults[nCnt]][0] + "?search=" + escape(sValue) + "' target='FrameMain'>" + unescape(aTl[oSearchEngine.aResults[nCnt]][1]) + "</a></li>");
+					}
 				}
 				// Tree
 				$("#search_results_content").dynatree({
