@@ -1368,7 +1368,7 @@ void hardReset ()
 		closeGame();
 		const char* lastFile;
 		g_config->getOption("SDL.LastOpenFile", &lastFile);
-		LoadGame(lastFile) == 0;
+		LoadGame(lastFile);
 		resizeGtkWindow();
 	}
 }
