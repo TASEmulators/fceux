@@ -77,8 +77,8 @@ char str_result[LOG_LINE_MAX_LEN] = {0};
 char str_temp[LOG_LINE_MAX_LEN] = {0};
 char* tracer_decoration_name;
 char* tracer_decoration_comment;
-char str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + 2] = {0};
-char str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 2] = {0};
+char str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
+char str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
 
 bool log_old_emu_paused = true;		// thanks to this flag the window only updates once after the game is paused
 extern bool JustFrameAdvanced;
@@ -452,7 +452,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 					strcat(str_decoration_comment, "\r\n");
 					tracer_decoration_comment = str_decoration_comment;
 					// divide the str_decoration_comment into strings (Comment1, Comment2, ...)
-					char* end_pos = strstr(tracer_decoration_comment, "\r");
+					char* end_pos = strstr(tracer_decoration_comment, "\r\n");
 					while (end_pos)
 					{
 						end_pos[0] = 0;		// set \0 instead of \r
@@ -461,7 +461,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 						OutputLogLine(str_decoration, true);
 						end_pos += 2;
 						tracer_decoration_comment = end_pos;
-						end_pos = strstr(tracer_decoration_comment, "\r");
+						end_pos = strstr(end_pos, "\r\n");
 					}
 				}
 				replaceNames(ramBankNames, a);

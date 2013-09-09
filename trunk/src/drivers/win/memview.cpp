@@ -638,29 +638,13 @@ void UpdateCaption()
 			sprintf(addrName, "$%04X", CursorStartAddy);
 			strcpy(addrNameCopy, addrName);
 			// try to find the name for this address in loadedBankNames
-			replaceNames(ramBankNames, addrName);
+			replaceNames(getNamesPointerForAddress(CursorStartAddy), addrName);
+			// check if anything chenged in this string
 			if (strcmp(addrName, addrNameCopy))
 			{
+				// changes found, so the string was decorated by symbolic name - then output it
 				strcat(str, " - ");
 				strcat(str, addrName);
-			} else
-			{
-				// name was not found in ramBankNames, try loadedBankNames
-				replaceNames(loadedBankNames, addrName);
-				if (strcmp(addrName, addrNameCopy))
-				{
-					strcat(str, " - ");
-					strcat(str, addrName);
-				} else
-				{
-					// name was not found in ramBankNames, try loadedBankNames
-					replaceNames(lastBankNames, addrName);
-					if (strcmp(addrName, addrNameCopy))
-					{
-						strcat(str, " - ");
-						strcat(str, addrName);
-					}
-				}
 			}
 		}
 	} else

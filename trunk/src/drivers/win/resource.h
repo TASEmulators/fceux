@@ -361,6 +361,7 @@
 #define IDB_BITMAP_SELECTED18           287
 #define IDB_BITMAP_SELECTED19           288
 #define IDD_TASEDITOR_SAVINGOPTIONS     289
+#define IDD_SYMBOLIC_DEBUG_NAMING       290
 #define MENU_HIDE_MENU                  300
 #define COMBO_FILTER                    300
 #define IDC_EDIT_AUTHORINFO             300
@@ -573,9 +574,14 @@
 #define IDC_AUTOSAVE_PERIOD             1147
 #define IDC_BUTTON9                     1148
 #define TASEDITOR_FIND_NEXT_SIMILAR_MARKER 1148
+#define IDC_SYMBOLIC_ADDRESS            1148
 #define IDC_HISTORYLIST                 1149
+#define IDC_SYMBOLIC_NAME               1149
 #define IDC_BOOKMARKSLIST               1150
+#define IDC_SYMBOLIC_ADDRESS2           1150
+#define IDC_SYMBOLIC_FILENAME           1150
 #define TASEDITOR_NEXT_MARKER           1151
+#define IDC_SYMBOLIC_COMMENT            1151
 #define IDC_BRANCHES_BUTTON             1152
 #define IDC_JUMP_PLAYBACK_BUTTON        1153
 #define IDC_EDIT2                       1154
@@ -1202,9 +1208,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        290
+#define _APS_NEXT_RESOURCE_VALUE        291
 #define _APS_NEXT_COMMAND_VALUE         40589
-#define _APS_NEXT_CONTROL_VALUE         1289
+#define _APS_NEXT_CONTROL_VALUE         1290
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

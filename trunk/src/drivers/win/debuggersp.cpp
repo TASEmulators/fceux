@@ -43,6 +43,7 @@ char NLfilename[2048];
 char symbDebugEnabled = 0;
 int debuggerWasActive = 0;
 char temp_chr[40] = {0};
+char delimiterChar[2] = "#";
 
 extern BOOL CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 extern char bookmarkDescription[];
@@ -131,7 +132,7 @@ int parseLine(char* line, Name* n)
 	
 	// Attempt to tokenize the given line
 	
-	pos = strstr(line, "#");
+	pos = strstr(line, delimiterChar);
 
 	if (!pos)
 	{
@@ -194,7 +195,7 @@ int parseLine(char* line, Name* n)
 	
 	// Attempt to tokenize the string again to find the name of the address
 
-	pos = strstr(line, "#");
+	pos = strstr(line, delimiterChar);
 
 	if (!pos)
 	{
@@ -207,7 +208,7 @@ int parseLine(char* line, Name* n)
 	if (*line)
 	{
 		if (strlen(line) > NL_MAX_NAME_LEN)
-			line[NL_MAX_NAME_LEN] = 0;
+			line[NL_MAX_NAME_LEN + 1] = 0;
 		n->name = (char*)malloc(strlen(line) + 1);
 		strcpy(n->name, line);
 	}
@@ -225,7 +226,15 @@ int parseLine(char* line, Name* n)
 	if (*line > 0x0D)
 	{
 		if (strlen(line) > NL_MAX_MULTILINE_COMMENT_LEN)
-			line[NL_MAX_MULTILINE_COMMENT_LEN] = 0;
+			line[NL_MAX_MULTILINE_COMMENT_LEN + 1] = 0;
+		// remove all backslashes after \r\n
+		char* crlf_pos = strstr(line, "\r\n\\");
+		while (crlf_pos)
+		{
+			strcpy(crlf_pos + 2, crlf_pos + 3);
+			crlf_pos = strstr(crlf_pos + 2, "\r\n\\");
+		}
+
 		n->comment = (char*)malloc(strlen(line) + 1);
 		strcpy(n->comment, line);
 	}
@@ -302,14 +311,8 @@ Name* parse(char* lines, const char* filename)
 			{
 				pos[0] = '\r';
 				pos[1] = '\n';
-				pos += 2;
 			}
-			else
-			{
-				// Remove backslash
-				pos[1] = ' ';
-				pos += 1;
-			}
+			pos += 2;
 		}
 		
 		if (!pos)
@@ -318,7 +321,10 @@ Name* parse(char* lines, const char* filename)
 			break;
 		}
 
-		*pos = 0;
+		if (pos[-1] == '\r')
+			pos[-1] = 0;
+		else
+			*pos = 0;
 
 		// Attempt to parse the current line
 		fail = parseLine(lines, cur);
@@ -540,6 +546,46 @@ Name* searchNode(Name* node, const char* offs)
 	return 0;
 }
 
+char* generateNLFilenameForAddress(unsigned int address)
+{
+	if (address < 0x8000)
+	{
+		// The NL file for the RAM addresses has the name nesrom.nes.ram.nl
+		strcpy(NLfilename, mass_replace(LoadedRomFName, "|", ".").c_str());
+		strcat(NLfilename, ".ram.nl");
+	} else
+	{
+		sprintf(NLfilename, "%s.%X.nl", mass_replace(LoadedRomFName, "|", ".").c_str(), getBank(address));
+	}
+	return NLfilename;
+}
+Name* getNamesPointerForAddress(unsigned int address)
+{
+	if (address < 0x8000)
+	{
+		return ramBankNames;
+	} else if (address < 0xC000)
+	{
+		return loadedBankNames;
+	} else
+	{
+		return lastBankNames;
+	}
+}
+void setNamesPointerForAddress(unsigned int address, Name* newNode)
+{
+	if (address < 0x8000)
+	{
+		ramBankNames = newNode;
+	} else if (address < 0xC000)
+	{
+		loadedBankNames = newNode;
+	} else
+	{
+		lastBankNames = newNode;
+	}
+}
+
 /**
 * Loads the necessary NL files
 **/
@@ -554,12 +600,8 @@ void loadNameFiles()
 		if (ramBankNames)
 			free(ramBankNames);
 		
-		// The NL file for the RAM addresses has the name nesrom.nes.ram.nl
-		strcpy(NLfilename, mass_replace(LoadedRomFName, "|", ".").c_str());
-		strcat(NLfilename, ".ram.nl");
-
 		// Load the address descriptions for the RAM addresses
-		ramBankNames = parseNameFile(NLfilename);
+		ramBankNames = parseNameFile(generateNLFilenameForAddress(0x0000));
 	}
 
 	// Find out which bank is loaded at 0xC000
@@ -574,14 +616,11 @@ void loadNameFiles()
 		// to load the address descriptions of the new bank.
 		lastBank = cb;
 
-		// Get the name of the NL file
-		sprintf(NLfilename, "%s.%X.nl", mass_replace(LoadedRomFName, "|", ".").c_str(), lastBank);
-
 		if (lastBankNames)
 			freeList(lastBankNames);
 
 		// Load new address definitions
-		lastBankNames = parseNameFile(NLfilename);
+		lastBankNames = parseNameFile(generateNLFilenameForAddress(0xC000));
 	}
 	
 	// Find out which bank is loaded at 0x8000
@@ -597,14 +636,11 @@ void loadNameFiles()
 		
 		loadedBank = cb;
 		
-		// Get the name of the NL file
-		sprintf(NLfilename, "%s.%X.nl", mass_replace(LoadedRomFName, "|", ".").c_str(), loadedBank);
-		
 		if (loadedBankNames)
 			freeList(loadedBankNames);
 			
 		// Load new address definitions
-		loadedBankNames = parseNameFile(NLfilename);
+		loadedBankNames = parseNameFile(generateNLFilenameForAddress(0x8000));
 	}
 }
 
@@ -624,7 +660,7 @@ void decorateAddress(unsigned int addr, char** str_name, char** str_comment)
 	} else
 	{
 		// Search address definition node for a ROM address
-		n = addr >= 0xC000 ? searchNode(lastBankNames, temp_chr) : searchNode(loadedBankNames, temp_chr);
+		n = (addr >= 0xC000) ? searchNode(lastBankNames, temp_chr) : searchNode(loadedBankNames, temp_chr);
 	}
 		
 	if (n)
@@ -801,3 +837,233 @@ void GoToDebuggerBookmark(HWND hwnd)
 	unsigned int n = getBookmarkAddress(selectedItem);
 	Disassemble(hwnd, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, n);
 }
+
+BOOL CALLBACK SymbolicNamingCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch(uMsg)
+	{
+		case WM_INITDIALOG:
+		{
+			CenterWindow(hwndDlg);
+			unsigned int newAddress = lParam;
+			// filename
+			generateNLFilenameForAddress(newAddress);
+			SetDlgItemText(hwndDlg, IDC_SYMBOLIC_FILENAME, NLfilename);
+			// offset
+			sprintf(temp_chr, "$%04X", newAddress);
+			SetDlgItemText(hwndDlg, IDC_SYMBOLIC_ADDRESS, temp_chr);
+			char* oldName = 0;
+			char* oldComment = 0;
+			decorateAddress(newAddress, &oldName, &oldComment);
+			// name
+			SendDlgItemMessage(hwndDlg, IDC_SYMBOLIC_NAME, EM_SETLIMITTEXT, NL_MAX_NAME_LEN, 0);
+			if (oldName && oldName[0])
+				SetDlgItemText(hwndDlg, IDC_SYMBOLIC_NAME, oldName);
+			// comment
+			SendDlgItemMessage(hwndDlg, IDC_SYMBOLIC_COMMENT, EM_SETLIMITTEXT, NL_MAX_MULTILINE_COMMENT_LEN, 0);
+			if (oldComment && oldComment[0])
+				SetDlgItemText(hwndDlg, IDC_SYMBOLIC_COMMENT, oldComment);
+			// set focus to IDC_SYMBOLIC_NAME
+			SendMessage(hwndDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hwndDlg, IDC_SYMBOLIC_NAME), true);
+			break;
+		}
+		case WM_CLOSE:
+		case WM_QUIT:
+			break;
+		case WM_COMMAND:
+		{
+			switch(HIWORD(wParam))
+			{
+				case BN_CLICKED:
+				{
+					switch(LOWORD(wParam))
+					{
+						case IDOK:
+						{
+							unsigned int newAddress = 0;
+							char newOffset[6] = {0};
+							GetDlgItemText(hwndDlg, IDC_SYMBOLIC_ADDRESS, newOffset, 6);
+							if (sscanf(newOffset, "%*[$]%4X", &newAddress) != EOF)
+							{
+								char newName[NL_MAX_NAME_LEN + 1] = {0};
+								GetDlgItemText(hwndDlg, IDC_SYMBOLIC_NAME, newName, NL_MAX_NAME_LEN + 1);
+								char newComment[NL_MAX_MULTILINE_COMMENT_LEN + 1] = {0};
+								GetDlgItemText(hwndDlg, IDC_SYMBOLIC_COMMENT, newComment, NL_MAX_MULTILINE_COMMENT_LEN + 1);
+								
+								AddNewSymbolicName(newAddress, newOffset, newName, newComment);
+								WriteNameFileToDisk(generateNLFilenameForAddress(newAddress), getNamesPointerForAddress(newAddress));
+							}
+							EndDialog(hwndDlg, 1);
+							break;
+						}
+						case IDCANCEL:
+						{
+							EndDialog(hwndDlg, 0);
+							break;
+						}
+					}
+					break;
+				}
+			}
+        	break;
+		}
+	}
+	return FALSE;
+}
+
+void DoSymbolicDebugNaming(int offset)
+{
+	loadNameFiles();
+	childwnd = 1;
+	if (DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_SYMBOLIC_DEBUG_NAMING), hDebug, SymbolicNamingCallB, offset))
+	{
+
+		symbDebugEnabled = true;
+		CheckDlgButton(hDebug, IDC_DEBUGGER_ENABLE_SYMBOLIC, BST_CHECKED);
+		UpdateDebugger(false);
+	}
+	childwnd = 0;
+}
+
+void AddNewSymbolicName(unsigned int newAddress, char* newOffset, char* newName, char* newComment)
+{
+	Name* initialNode = getNamesPointerForAddress(newAddress);
+	Name* node = initialNode;
+	
+	// remove all delimiterChars from name and comment
+	char* pos = newName;
+	while (pos < newName + strlen(newName))
+	{
+		pos = strstr(pos, delimiterChar);
+		if (pos)
+			strcpy(pos, pos + 1);
+		else
+			break;
+	}
+	pos = newComment;
+	while (pos < newComment + strlen(newComment))
+	{
+		pos = strstr(pos, delimiterChar);
+		if (pos)
+			strcpy(pos, pos + 1);
+		else
+			break;
+	}
+
+	if (newName[0])
+	{
+		if (!initialNode)
+		{
+			// no previous data, create new list
+			node = (Name*)malloc(sizeof(Name));
+			node->offset = (char*)malloc(strlen(newOffset) + 1);
+			strcpy(node->offset, newOffset);
+			node->name = (char*)malloc(strlen(newName) + 1);
+			strcpy(node->name, newName);
+			node->comment = (char*)malloc(strlen(newComment) + 1);
+			strcpy(node->comment, newComment);
+			node->next = 0;
+			setNamesPointerForAddress(newAddress, node);
+		} else
+		{
+			// search the list
+			while (node)
+			{
+				if (!strcmp(node->offset, newOffset))
+				{
+					// found matching address - replace its name and comment
+					free(node->name);
+					node->name = (char*)malloc(strlen(newName) + 1);
+					strcpy(node->name, newName);
+					free(node->comment);
+					node->comment = (char*)malloc(strlen(newComment) + 1);
+					strcpy(node->comment, newComment);
+					break;
+				}
+				if (node->next)
+				{
+					node = node->next;
+				} else
+				{
+					// this is the last node in the list - so just append the address
+					Name* newNode = (Name*)malloc(sizeof(Name));
+					node->next = newNode;
+					newNode->offset = (char*)malloc(strlen(newOffset) + 1);
+					strcpy(newNode->offset, newOffset);
+					newNode->name = (char*)malloc(strlen(newName) + 1);
+					strcpy(newNode->name, newName);
+					newNode->comment = (char*)malloc(strlen(newComment) + 1);
+					strcpy(newNode->comment, newComment);
+					newNode->next = 0;
+					break;
+				}
+			}
+		}
+	} else
+	{
+		// name field is empty - remove the address from the list
+		Name* previousNode = 0;
+		while (node)
+		{
+			if (!strcmp(node->offset, newOffset))
+			{
+				// found matching address - delete it
+				free(node->offset);
+				free(node->name);
+				free(node->comment);
+				if (previousNode)
+					previousNode->next = node->next;
+				if (node == initialNode)
+					setNamesPointerForAddress(newAddress, node->next);
+				free(node);
+				break;
+			}
+			previousNode = node;
+			node = node->next;
+		}
+	}
+}
+
+void WriteNameFileToDisk(const char* filename, Name* node)
+{
+	FILE* f = fopen(filename, "wb");
+	char tempComment[NL_MAX_MULTILINE_COMMENT_LEN + 10];
+	if (f)
+	{
+		char tempString[10 + 1 + NL_MAX_NAME_LEN + 1 + NL_MAX_MULTILINE_COMMENT_LEN + 1];
+		while (node)
+		{
+			strcpy(tempString, node->offset);
+			strcat(tempString, delimiterChar);
+			if (node->name)
+				strcat(tempString, node->name);
+			strcat(tempString, delimiterChar);
+			if (node->comment)
+			{
+				// dump multiline comment
+				strcpy(tempComment, node->comment);
+				char* remainder_pos = tempComment;
+				char* crlf_pos = strstr(tempComment, "\r\n");
+				while (crlf_pos)
+				{
+					*crlf_pos = 0;
+					strcat(tempString, remainder_pos);
+					strcat(tempString, "\r\n\\");
+					crlf_pos = remainder_pos = crlf_pos + 2;
+					crlf_pos = strstr(crlf_pos, "\r\n");
+				}
+				strcat(tempString, remainder_pos);
+				strcat(tempString, "\r\n");
+			} else
+			{
+				strcat(tempString, "\r\n");
+			}
+			// write to the file
+			fwrite(tempString, 1, strlen(tempString), f);
+			node = node->next;
+		}
+		fclose(f);
+	}
+}
+
+

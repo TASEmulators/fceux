@@ -79,7 +79,7 @@ char debug_str[35000] = {0};
 char debug_cdl_str[500] = {0};
 char* debug_decoration_name;
 char* debug_decoration_comment;
-char debug_str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 2] = {0};
+char debug_str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
 
 // this is used to keep track of addresses that lines of Disassembly window correspond to
 std::vector<unsigned int> disassembly_addresses;
@@ -385,15 +385,6 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 {
-// ################################## Start of SP CODE ###########################
-
-// Changed size of str (TODO: Better calculation of max size)
-// Changed the buffer size of str to 35000
-
-	symbDebugEnabled = IsDlgButtonChecked(hWnd, IDC_DEBUGGER_ENABLE_SYMBOLIC);
-
-// ################################## End of SP CODE ###########################
-
 	char chr[40] = {0};
 	int size;
 	uint8 opcode[3];
@@ -450,19 +441,20 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 				strcat(debug_str_decoration_comment, "\r\n");
 				debug_decoration_comment = debug_str_decoration_comment;
 				// divide the debug_str_decoration_comment into strings (Comment1, Comment2, ...)
-				char* end_pos = strstr(debug_decoration_comment, "\r");
+				char* end_pos = strstr(debug_decoration_comment, "\r\n");
 				while (end_pos)
 				{
 					end_pos[0] = 0;		// set \0 instead of \r
 					strcat(debug_str, "; ");
 					strcat(debug_str, debug_decoration_comment);
 					strcat(debug_str, "\r\n");
-					end_pos += 2;
-					debug_decoration_comment = end_pos;
-					end_pos = strstr(debug_decoration_comment, "\r");
 					// we added one line to the disassembly window
 					disassembly_addresses.push_back(addr);
 					i++;
+
+					end_pos += 2;
+					debug_decoration_comment = end_pos;
+					end_pos = strstr(end_pos, "\r\n");
 				}
 			}
 		}
@@ -1373,81 +1365,90 @@ void LoadGameDebuggerData(HWND hwndDlg = hDebug)
 	FillBreakList(hwndDlg);
 }
 
+// returns the address, or EOF if selection cursor points to something else
+int CheckClickingOnAnAddress()
+{
+	// debug_str contains the text in the disassembly window
+	int sel_start, sel_end;
+	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
+	// find the ":" or "$" before sel_start
+	int i = sel_start - 1;
+	for (; i > sel_start - 6; i--)
+		if (i >= 0 && debug_str[i] == ':' || debug_str[i] == '$')
+			break;
+	if (i > sel_start - 6)
+	{
+		char offsetBuffer[5];
+		strncpy(offsetBuffer, debug_str + i + 1, 4);
+		offsetBuffer[4] = 0;
+		// invalidate the string if a space or \r is found
+		char* firstspace = strstr(offsetBuffer, " ");
+		if (!firstspace)
+			firstspace = strstr(offsetBuffer, "\r");
+		if (!firstspace)
+		{
+			unsigned int offset;
+			if (sscanf(offsetBuffer, "%4X", &offset) != EOF)
+			{
+				// select the text
+				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(i + 1), (LPARAM)(i + 5));
+				// send the address to "Seek To" field
+				SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_PCSEEK, offsetBuffer);
+				// send the address to "Bookmark Add" field
+				SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, offsetBuffer);
+				return (int)offset;
+			}
+		}
+	}
+	return EOF;
+}
+
 BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
 	{
 		case WM_LBUTTONDBLCLK:
 		{
-			// debug_str contains the text in the disassembly window
-			int sel_start, sel_end;
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
-			// find the ":" or "$" before sel_start
-			int i = sel_start - 1;
-			for (; i > sel_start - 6; i--)
-				if (i >= 0 && debug_str[i] == ':' || debug_str[i] == '$')
-					break;
-			if (i > sel_start - 6)
+			int offset = CheckClickingOnAnAddress();
+			if (offset != EOF)
 			{
-				char offsetBuffer[5];
-				strncpy(offsetBuffer, debug_str + i + 1, 4);
-				offsetBuffer[4] = 0;
-				// invalidate the string if a space or \r is found
-				char* firstspace = strstr(offsetBuffer, " ");
-				if (!firstspace)
-					firstspace = strstr(offsetBuffer, "\r");
-				if (!firstspace)
-				{
-					unsigned int offset;
-					if (sscanf(offsetBuffer, "%4X", &offset) != EOF)
-					{
-						// select the text
-						SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(i + 1), (LPARAM)(i + 5));
-						childwnd = 1;
-						if (DialogBoxParam(fceu_hInstance, "ADDBP", hwndDlg, AddbpCallB, offset))
-							AddBreakList();
-						childwnd = 0;
-						UpdateDebugger(false);
-					}
-				}
+				// bring "Add Breakpoint" dialog
+				childwnd = 1;
+				if (DialogBoxParam(fceu_hInstance, "ADDBP", hwndDlg, AddbpCallB, offset))
+					AddBreakList();
+				childwnd = 0;
+				UpdateDebugger(false);
 			}
 			return 0;
 		}
 		case WM_LBUTTONUP:
 		{
-			// debug_str contains the text in the disassembly window
+			CheckClickingOnAnAddress();
+			break;
+		}
+		case WM_RBUTTONDOWN:
+		{
+			// if nothing is selected, simulate Left-click
 			int sel_start, sel_end;
 			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
-			// only continue if there's no selection in the Disassembly window
 			if (sel_start == sel_end)
 			{
-				// find the ":" or "$" before sel_start
-				int i = sel_start - 1;
-				for (; i > sel_start - 6; i--)
-					if (i >= 0 && debug_str[i] == ':' || debug_str[i] == '$')
-						break;
-				if (i > sel_start - 6)
-				{
-					char offsetBuffer[5] = {0};
-					strncpy(offsetBuffer, debug_str + i + 1, 4);
-					offsetBuffer[4] = 0;
-					// truncate the string if a space or \r is found
-					char* firstspace = strstr(offsetBuffer, " ");
-					if (!firstspace)
-						firstspace = strstr(offsetBuffer, "\r");
-					if (firstspace)
-						firstspace[0] = 0;
-					unsigned int offset;
-					if (sscanf(offsetBuffer, "%4X", &offset) != EOF)
-					{
-						// select the text
-						SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(i + 1), (LPARAM)(i + 1 + strlen(offsetBuffer)));
-						// send the address to "Seek To" field
-						SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_PCSEEK, offsetBuffer);
-						// send the address to "Bookmark Add" field
-						SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, offsetBuffer);
-					}
-				}
+				CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, WM_LBUTTONDOWN, wParam, lParam);
+				CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, WM_LBUTTONUP, wParam, lParam);
+				return 0;
+			}
+			break;
+		}
+		case WM_RBUTTONUP:
+		{
+			// if nothing is selected, try bringing Symbolic Debug Naming dialog
+			int sel_start, sel_end;
+			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
+			if (sel_start == sel_end)
+			{
+				int offset = CheckClickingOnAnAddress();
+				if (offset != EOF)
+					DoSymbolicDebugNaming(offset);
 			}
 			break;
 		}
@@ -2068,7 +2069,12 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							case IDC_DEBUGGER_BOOKMARK_ADD: AddDebuggerBookmark(hwndDlg); break;
 							case IDC_DEBUGGER_BOOKMARK_DEL: DeleteDebuggerBookmark(hwndDlg); break;
 							case IDC_DEBUGGER_BOOKMARK_NAME: NameDebuggerBookmark(hwndDlg); break;
-							case IDC_DEBUGGER_ENABLE_SYMBOLIC: UpdateDebugger(false); break;
+							case IDC_DEBUGGER_ENABLE_SYMBOLIC:
+							{
+								symbDebugEnabled = IsDlgButtonChecked(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC);
+								UpdateDebugger(false);
+								break;
+							}
 							
 // ################################## End of SP CODE ###########################
 							
@@ -2132,11 +2138,13 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 extern void iNESGI(GI h);
 
-void DoPatcher(int address,HWND hParent)
+void DoPatcher(int address, HWND hParent)
 {
-	iapoffset=address;
-	if(GameInterface==iNESGI)DialogBox(fceu_hInstance,"ROMPATCHER",hParent,PatcherCallB);
-	else MessageBox(hDebug, "Sorry, The Patcher only works on INES rom images", "Error", MB_OK);
+	iapoffset = address;
+	if (GameInterface == iNESGI)
+		DialogBox(fceu_hInstance, "ROMPATCHER", hParent, PatcherCallB);
+	else
+		MessageBox(hDebug, "Sorry, The Patcher only works on INES rom images", "Error", MB_OK);
 	UpdateDebugger(false);
 }
 
