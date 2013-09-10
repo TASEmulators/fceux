@@ -62,6 +62,7 @@ using namespace std;
 #define ID_ADDRESS_SEEK_IN_ROM          5
 #define ID_ADDRESS_CREATE_GG_CODE       6
 #define ID_ADDRESS_BOOKMARK             20
+#define ID_ADDRESS_SYMBOLIC_NAME        30
 #define BOOKMARKS_SUBMENU_POS			4
 
 #define ID_ADDRESS_FRZ_TOGGLE_STATE     1
@@ -117,8 +118,9 @@ popupmenu[] =
 	{0x8000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_CREATE_GG_CODE,"Create Game Genie Code At This Address"},
 	//{0x0000,0xFFFFFF,MODE_NES_FILE,7,"Create Game Genie Code At This Address"}
 	// ################################## Start of SP CODE ###########################
-	{0x0000, 0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_BOOKMARK, "Add / Remove bookmark"},
+	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_BOOKMARK, "Add / Remove bookmark"},
 	// ################################## End of SP CODE ###########################
+	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_SYMBOLIC_NAME, "Add symbolic debug name"},
 } ;
 
 #define POPUPNUM (sizeof popupmenu / sizeof popupmenu[0])
@@ -1716,9 +1718,13 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
 					UpdateColorTable();
 				}
+				break;
 			}
-			break;
 			// ################################## End of SP CODE ###########################
+			case ID_ADDRESS_SYMBOLIC_NAME:
+				DoSymbolicDebugNaming(j);
+				break;
+			break;
 		}
 		//6 = Create GG Code
 
