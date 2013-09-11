@@ -822,8 +822,6 @@ void FillDebuggerBookmarkListbox(HWND hwnd)
 	}
 }
 
-extern void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr);
-
 /**
 * Shows the code at the bookmark address in the disassembly window
 *
@@ -911,18 +909,15 @@ BOOL CALLBACK SymbolicNamingCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 	return FALSE;
 }
 
-void DoSymbolicDebugNaming(int offset)
+// returns true if user pressed OK, false if Cancel
+bool DoSymbolicDebugNaming(int offset, HWND parentHWND)
 {
+	if (!FCEUI_EmulationPaused())
+		FCEUI_ToggleEmulationPause();
 	loadNameFiles();
-	childwnd = 1;
-	if (DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_SYMBOLIC_DEBUG_NAMING), hDebug, SymbolicNamingCallB, offset))
-	{
-
-		symbDebugEnabled = true;
-		CheckDlgButton(hDebug, IDC_DEBUGGER_ENABLE_SYMBOLIC, BST_CHECKED);
-		UpdateDebugger(false);
-	}
-	childwnd = 0;
+	if (DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_SYMBOLIC_DEBUG_NAMING), parentHWND, SymbolicNamingCallB, offset))
+		return true;
+	return false;
 }
 
 void AddNewSymbolicName(unsigned int newAddress, char* newOffset, char* newName, char* newComment)

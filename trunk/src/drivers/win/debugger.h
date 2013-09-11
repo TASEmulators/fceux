@@ -36,6 +36,8 @@ extern char* BreakToText(unsigned int num);
 void UpdateDebugger(bool jump_to_pc = true);
 void DoDebug(uint8 halt);
 void DebuggerExit();
+void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr);
+void PrintOffsetToSeekAndBookmarkFields(int offset);
 
 void LoadGameDebuggerData(HWND hwndDlg);
 void updateGameDependentMenusDebugger(unsigned int enable);

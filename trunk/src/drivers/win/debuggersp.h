@@ -54,6 +54,6 @@ void FillDebuggerBookmarkListbox(HWND hwnd);
 void GoToDebuggerBookmark(HWND hwnd);
 int isHex(char c);
 
-void DoSymbolicDebugNaming(int offset);
+bool DoSymbolicDebugNaming(int offset, HWND parentHWND);
 void AddNewSymbolicName(unsigned int newAddress, char* newOffset, char* newName, char* newComment);
 void WriteNameFileToDisk(const char* filename, Name* node);

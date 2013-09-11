@@ -577,6 +577,18 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 	}
 	SetDlgItemText(hWnd, IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL, debug_cdl_str);
 }
+void PrintOffsetToSeekAndBookmarkFields(int offset)
+{
+	if (offset >= 0 && hDebug)
+	{
+		char offsetBuffer[5];
+		sprintf(offsetBuffer, "%04X", offset);
+		// send the address to "Seek To" field
+		SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_PCSEEK, offsetBuffer);
+		// send the address to "Bookmark Add" field
+		SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, offsetBuffer);
+	}
+}
 
 char *DisassembleLine(int addr) {
 	static char str[64]={0},chr[25]={0};
@@ -834,8 +846,8 @@ void UpdateDebugger(bool jump_to_pc)
 	
 
 	// "Address Bookmark Add" follows the address
-	sprintf(str,"%04X", starting_address);
-	SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
+	//sprintf(str, "%04X", starting_address);
+	//SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
 
 	sprintf(str, "%02X", X.A);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_A, str);
@@ -1331,23 +1343,24 @@ BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 		SetWindowPos(hwnd,0,0,0,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER | SWP_NOMOVE);
 		GetScrollInfo(GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY_VSCR),SB_CTL,&si);
 		Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
-		// "Address Bookmark Add" follows the address
-		sprintf(str,"%04X", si.nPos);
-		SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
-	} else if(hwnd == icontray) {
+	} else if(hwnd == icontray)
+	{
 		crect.bottom += dy;
 		SetWindowPos(hwnd,0,0,0,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER | SWP_NOMOVE);
-	} else if(hwnd == addrline) {
+	} else if(hwnd == addrline)
+	{
 		crect.top += dy;
 		crect.bottom += dy;
 		crect.right += dx;
 		SetWindowPos(hwnd,0,crect.left,crect.top,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER);
-	} else if(hwnd == vscr) {
+	} else if(hwnd == vscr)
+	{
 		 crect.bottom += dy;
 		 crect.left += dx;
 		 crect.right += dx;
 		 SetWindowPos(hwnd,0,crect.left,crect.top,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER);
-	} else {
+	} else
+	{
 		crect.left += dx;
 		//if (crect.left < 256) crect.left = 256;		//Limit how far left the remaining child windows will move
 		SetWindowPos(hwnd,0,crect.left,crect.top,0,0,SWP_NOZORDER | SWP_NOSIZE);
@@ -1366,11 +1379,14 @@ void LoadGameDebuggerData(HWND hwndDlg = hDebug)
 }
 
 // returns the address, or EOF if selection cursor points to something else
-int CheckClickingOnAnAddress()
+int Debugger_CheckClickingOnAnAddress(bool onlyCheckWhenNothingSelected)
 {
 	// debug_str contains the text in the disassembly window
 	int sel_start, sel_end;
 	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
+	if (onlyCheckWhenNothingSelected)
+		if (sel_end > sel_start)
+			return EOF;
 	// find the ":" or "$" before sel_start
 	int i = sel_start - 1;
 	for (; i > sel_start - 6; i--)
@@ -1381,7 +1397,7 @@ int CheckClickingOnAnAddress()
 		char offsetBuffer[5];
 		strncpy(offsetBuffer, debug_str + i + 1, 4);
 		offsetBuffer[4] = 0;
-		// invalidate the string if a space or \r is found
+		// invalidate the string if a space or \r is found in it
 		char* firstspace = strstr(offsetBuffer, " ");
 		if (!firstspace)
 			firstspace = strstr(offsetBuffer, "\r");
@@ -1392,10 +1408,7 @@ int CheckClickingOnAnAddress()
 			{
 				// select the text
 				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(i + 1), (LPARAM)(i + 5));
-				// send the address to "Seek To" field
-				SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_PCSEEK, offsetBuffer);
-				// send the address to "Bookmark Add" field
-				SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, offsetBuffer);
+				PrintOffsetToSeekAndBookmarkFields(offset);
 				return (int)offset;
 			}
 		}
@@ -1409,7 +1422,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 	{
 		case WM_LBUTTONDBLCLK:
 		{
-			int offset = CheckClickingOnAnAddress();
+			int offset = Debugger_CheckClickingOnAnAddress(false);
 			if (offset != EOF)
 			{
 				// bring "Add Breakpoint" dialog
@@ -1423,7 +1436,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 		}
 		case WM_LBUTTONUP:
 		{
-			CheckClickingOnAnAddress();
+			Debugger_CheckClickingOnAnAddress(true);
 			break;
 		}
 		case WM_RBUTTONDOWN:
@@ -1442,13 +1455,19 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 		case WM_RBUTTONUP:
 		{
 			// if nothing is selected, try bringing Symbolic Debug Naming dialog
-			int sel_start, sel_end;
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
-			if (sel_start == sel_end)
+			int offset = Debugger_CheckClickingOnAnAddress(true);
+			if (offset != EOF)
 			{
-				int offset = CheckClickingOnAnAddress();
-				if (offset != EOF)
-					DoSymbolicDebugNaming(offset);
+				if (DoSymbolicDebugNaming(offset, hDebug))
+				{
+					// enable "Symbolic Debug" if not yet enabled
+					if (!symbDebugEnabled)
+					{
+						symbDebugEnabled = true;
+						CheckDlgButton(hDebug, IDC_DEBUGGER_ENABLE_SYMBOLIC, BST_CHECKED);
+					}
+					UpdateDebugger(false);
+				}
 			}
 			break;
 		}
@@ -1490,7 +1509,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 		}
 		case WM_MOUSEWHEEL:
 		{
-			SendMessage(GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY_VSCR), uMsg, wParam, lParam);
+			SendMessage(GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY_VSCR), uMsg, wParam, lParam);
 			return 0;
 		}
 	}

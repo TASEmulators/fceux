@@ -107,6 +107,7 @@ struct
 }
 popupmenu[] =
 {
+	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_SYMBOLIC_NAME, "Add symbolic debug name"},
 	{0x0000,0x2000, MODE_NES_MEMORY,ID_ADDRESS_FRZ_SUBMENU,"Freeze/Unfreeze This Address"},
 	{0x6000,0x7FFF, MODE_NES_MEMORY,ID_ADDRESS_FRZ_SUBMENU,"Freeze/Unfreeze This Address"},
 	{0x0000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_ADDBP_R,"Add Debugger Read Breakpoint"},
@@ -116,11 +117,7 @@ popupmenu[] =
 	{0x0000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_ADDBP_X,"Add Debugger Execute Breakpoint"},
 	{0x8000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_SEEK_IN_ROM,"Go Here In ROM File"},
 	{0x8000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_CREATE_GG_CODE,"Create Game Genie Code At This Address"},
-	//{0x0000,0xFFFFFF,MODE_NES_FILE,7,"Create Game Genie Code At This Address"}
-	// ################################## Start of SP CODE ###########################
 	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_BOOKMARK, "Add / Remove bookmark"},
-	// ################################## End of SP CODE ###########################
-	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_SYMBOLIC_NAME, "Add symbolic debug name"},
 } ;
 
 #define POPUPNUM (sizeof popupmenu / sizeof popupmenu[0])
@@ -129,7 +126,6 @@ int LoadTableFile();
 void UnloadTableFile();
 void InputData(char *input);
 int GetMemViewData(uint32 i);
-void UpdateCaption();
 int UpdateCheatColorCallB(char *name, uint32 a, uint8 v, int compare,int s,int type, void *data); //mbg merge 6/29/06 - added arg
 int DeleteCheatCallB(char *name, uint32 a, uint8 v, int compare,int s,int type); //mbg merge 6/29/06 - added arg
 // ################################## Start of SP CODE ###########################
@@ -280,7 +276,8 @@ void GotoAddress(HWND hwnd) {
 	}
 }
 
-void SetHexEditorAddress(int gotoaddress) {
+void SetHexEditorAddress(int gotoaddress)
+{
 
 	if (gotoaddress < 0)
 		gotoaddress = 0;
@@ -1413,6 +1410,24 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		UpdateCaption();
 		UpdateColorTable();
 		return 0;
+	case WM_RBUTTONDOWN:
+	{
+		if (!lbuttondown && CursorEndAddy == -1)
+		{
+			x = GET_X_LPARAM(lParam);
+			y = GET_Y_LPARAM(lParam);
+			i = GetAddyFromCoord(x,y);
+			if (i != -1)
+			{
+				EditingText = AddyWasText;
+				CursorStartAddy = i;
+				UpdateCaption();
+				UpdateColorTable();
+				return 0;
+			}
+		}
+		break;
+	}
 	case WM_MOUSEMOVE:
 		mousex = x = GET_X_LPARAM(lParam); 
 		mousey = y = GET_Y_LPARAM(lParam); 
@@ -1722,8 +1737,20 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			}
 			// ################################## End of SP CODE ###########################
 			case ID_ADDRESS_SYMBOLIC_NAME:
-				DoSymbolicDebugNaming(j);
+			{
+				if (DoSymbolicDebugNaming(j, hMemView))
+				{
+					// enable "Symbolic Debug" if not yet enabled
+					if (!symbDebugEnabled)
+					{
+						symbDebugEnabled = true;
+						if (hDebug)
+							CheckDlgButton(hDebug, IDC_DEBUGGER_ENABLE_SYMBOLIC, BST_CHECKED);
+					}
+					UpdateCaption();
+				}
 				break;
+			}
 			break;
 		}
 		//6 = Create GG Code

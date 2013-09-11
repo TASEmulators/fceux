@@ -88,6 +88,9 @@ FILE *LOG_FP;
 
 int Tracer_wndx=0, Tracer_wndy=0;
 
+char trace_str[35000] = {0};
+WNDPROC IDC_TRACER_LOG_oldWndProc = 0;
+
 void ShowLogDirDialog(void);
 void BeginLoggingSequence(void);
 void EndLoggingSequence(void);
@@ -95,6 +98,115 @@ void UpdateLogWindow(void);
 void UpdateLogText(void);
 void EnableTracerMenuItems(void);
 int PromptForCDLogger(void);
+
+// returns the address, or EOF if selection cursor points to something else
+int Tracer_CheckClickingOnAnAddress(bool onlyCheckWhenNothingSelected)
+{
+	// trace_str contains the text in the log window
+	int sel_start, sel_end;
+	SendDlgItemMessage(hTracer, IDC_TRACER_LOG, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
+	if (onlyCheckWhenNothingSelected)
+		if (sel_end > sel_start)
+			return EOF;
+	// find the "$" before sel_start
+	int i = sel_start - 1;
+	for (; i > sel_start - 6; i--)
+		if (i >= 0 && trace_str[i] == '$')
+			break;
+	if (i > sel_start - 6)
+	{
+		char offsetBuffer[5];
+		strncpy(offsetBuffer, trace_str + i + 1, 4);
+		offsetBuffer[4] = 0;
+		// invalidate the string if a space or \r is found in it
+		char* firstspace = strstr(offsetBuffer, " ");
+		if (!firstspace)
+			firstspace = strstr(offsetBuffer, "\r");
+		if (!firstspace)
+		{
+			unsigned int offset;
+			if (sscanf(offsetBuffer, "%4X", &offset) != EOF)
+			{
+				// select the text
+				SendDlgItemMessage(hTracer, IDC_TRACER_LOG, EM_SETSEL, (WPARAM)(i + 1), (LPARAM)(i + 5));
+				if (hDebug)
+					PrintOffsetToSeekAndBookmarkFields(offset);
+				return (int)offset;
+			}
+		}
+	}
+	return EOF;
+}
+
+BOOL CALLBACK IDC_TRACER_LOG_WndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch(uMsg)
+	{
+		case WM_LBUTTONDBLCLK:
+		{
+			int offset = Tracer_CheckClickingOnAnAddress(false);
+			if (offset != EOF)
+			{
+				// open Debugger at this address
+				DoDebug(0);
+				if (hDebug)
+				{
+					Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, offset);
+					PrintOffsetToSeekAndBookmarkFields(offset);
+				}
+			}
+			return 0;
+		}
+		case WM_LBUTTONUP:
+		{
+			Tracer_CheckClickingOnAnAddress(true);
+			break;
+		}
+		case WM_RBUTTONDOWN:
+		{
+			// if nothing is selected, simulate Left-click
+			int sel_start, sel_end;
+			SendDlgItemMessage(hTracer, IDC_TRACER_LOG, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
+			if (sel_start == sel_end)
+			{
+				CallWindowProc(IDC_TRACER_LOG_oldWndProc, hwndDlg, WM_LBUTTONDOWN, wParam, lParam);
+				CallWindowProc(IDC_TRACER_LOG_oldWndProc, hwndDlg, WM_LBUTTONUP, wParam, lParam);
+				return 0;
+			}
+			break;
+		}
+		case WM_RBUTTONUP:
+		{
+			// if nothing is selected, try bringing Symbolic Debug Naming dialog
+			int offset = Tracer_CheckClickingOnAnAddress(true);
+			if (offset != EOF)
+			{
+				if (DoSymbolicDebugNaming(offset, hTracer))
+				{
+					/*
+					// enable "Symbolic trace" if not yet enabled
+					if (!(logging_options & LOG_SYMBOLIC))
+					{
+						logging_options |= LOG_SYMBOLIC;
+						CheckDlgButton(hTracer, IDC_CHECK_SYMBOLIC_TRACING, BST_CHECKED);
+					}
+					*/
+					if (hDebug)
+						UpdateDebugger(false);
+					if (hMemView)
+						UpdateCaption();
+				}
+			}
+			break;
+		}
+		case WM_MOUSEWHEEL:
+		{
+			SendMessage(GetDlgItem(hTracer, IDC_SCRL_TRACER_LOG), uMsg, wParam, lParam);
+			return 0;
+		}
+	}
+	return CallWindowProc(IDC_TRACER_LOG_oldWndProc, hwndDlg, uMsg, wParam, lParam);
+}
 
 BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -138,7 +250,8 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				SendDlgItemMessage(hwndDlg, IDC_TRACER_LOG_SIZE, CB_INSERTSTRING, -1, (LPARAM)(LPSTR)log_optn_strlst[i]);
 			}
 			SendDlgItemMessage(hwndDlg, IDC_TRACER_LOG_SIZE, CB_SETCURSEL, (WPARAM)log_lines_option, 0);
-			SetDlgItemText(hwndDlg, IDC_TRACER_LOG, "Welcome to the Trace Logger.");
+			strcpy(trace_str, "Welcome to the Trace Logger.");
+			SetDlgItemText(hwndDlg, IDC_TRACER_LOG, trace_str);
 			logtofile = 0;
 
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_REGISTERS, (logging_options & LOG_REGISTERS) ? BST_CHECKED : BST_UNCHECKED);
@@ -158,6 +271,9 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			EnableWindow(GetDlgItem(hwndDlg, IDC_BTN_LOG_BROWSE), FALSE);
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_UPDATE_WINDOW, log_update_window ? BST_CHECKED : BST_UNCHECKED);
 			EnableTracerMenuItems();
+
+			// subclass editfield
+			IDC_TRACER_LOG_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_TRACER_LOG), GWL_WNDPROC, (LONG)IDC_TRACER_LOG_WndProc);
 			break;
 		}
 		case WM_CLOSE:
@@ -247,11 +363,10 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 							if(!FCEUI_EmulationPaused() && !log_update_window)
 							{
 								// Assemble the message to pause the game.  Uses the current hotkey mapping dynamically
-								string m1 = "Pause the game (press ";
-								string m2 = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]);
-								string m3 = " key or snap the Debugger) to update this window.\r\n";
-								string pauseMessage = m1 + m2 + m3;
-								SetDlgItemText(hTracer, IDC_TRACER_LOG, pauseMessage.c_str());
+								strcpy(trace_str, "Pause the game (press ");
+								strcat(trace_str, GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]));
+								strcat(trace_str, " key or snap the Debugger) to update this window.\r\n");
+								SetDlgItemText(hTracer, IDC_TRACER_LOG, trace_str);
 							}
 							break;
 						}
@@ -265,15 +380,16 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		case WM_MOVING:
 			break;
-	}
 
-
-	switch(uMsg) {
 		case WM_VSCROLL:
-			if (lParam) {
-				if ((!logging) || logtofile) break;
+		{
+			if (lParam)
+			{
+				if ((!logging) || logtofile)
+					break;
 
-				if(!FCEUI_EmulationPaused() && !log_update_window) break; //mbg merge 7/19/06 changd to use EmulationPaused()
+				if (!FCEUI_EmulationPaused() && !log_update_window)
+					break;
 
 				GetScrollInfo((HWND)lParam,SB_CTL,&tracesi);
 				switch(LOWORD(wParam))
@@ -296,13 +412,30 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				UpdateLogText();
 			}
 			break;
+		}
+		case WM_MOUSEWHEEL:
+		{
+			GetScrollInfo((HWND)lParam, SB_CTL, &tracesi);
+			i = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
+			if (i < -1 || i > 1)
+				i *= 2;
+			tracesi.nPos -= i;
+			if ((tracesi.nPos + (int)tracesi.nPage) > tracesi.nMax)
+				tracesi.nPos = tracesi.nMax - tracesi.nPage;
+			else if (tracesi.nPos < tracesi.nMin)
+				tracesi.nPos = tracesi.nMin;
+			SetScrollInfo((HWND)lParam, SB_CTL, &tracesi, TRUE);
+
+			UpdateLogText();
+			break;
+		}
 	}
 	return FALSE;
 }
 
 void BeginLoggingSequence(void)
 {
-	char str[2048], str2[100];
+	char str2[100];
 	int i, j;
 
 	if(!PromptForCDLogger())return; //do nothing if user selected no and CD Logger is needed
@@ -312,9 +445,10 @@ void BeginLoggingSequence(void)
 		if(logfilename == NULL) ShowLogDirDialog();
 		if (!logfilename) return;
 		LOG_FP = fopen(logfilename,"w");
-		if(LOG_FP == NULL){
-			sprintf(str,"Error Opening File %s",logfilename);
-			MessageBox(hTracer,str, "File Error", MB_OK);
+		if (LOG_FP == NULL)
+		{
+			sprintf(trace_str, "Error Opening File %s", logfilename);
+			MessageBox(hTracer, trace_str, "File Error", MB_OK);
 			return;
 		}
 		fprintf(LOG_FP,FCEU_NAME_AND_VERSION" - Trace Log File\n"); //mbg merge 7/19/06 changed string
@@ -323,8 +457,8 @@ void BeginLoggingSequence(void)
 		log_lines_option = SendDlgItemMessage(hTracer, IDC_TRACER_LOG_SIZE, CB_GETCURSEL, 0, 0);
 		if (log_lines_option == CB_ERR)
 			log_lines_option = 0;
-		strcpy(str,"Allocating Memory...\r\n");
-		SetDlgItemText(hTracer, IDC_TRACER_LOG, str);
+		strcpy(trace_str, "Allocating Memory...\r\n");
+		SetDlgItemText(hTracer, IDC_TRACER_LOG, trace_str);
 		tracelogbufsize = j = log_optn_intlst[log_lines_option];
 		tracelogbuf = (char**)malloc(j*sizeof(char *)); //mbg merge 7/19/06 added cast
 		for(i = 0;i < j;i++)
@@ -333,14 +467,12 @@ void BeginLoggingSequence(void)
 			tracelogbuf[i][0] = 0;
 		}
 		sprintf(str2, "%d Bytes Allocated...\r\n", j * LOG_LINE_MAX_LEN);
-		strcat(str,str2);
+		strcat(trace_str, str2);
 		// Assemble the message to pause the game.  Uses the current hotkey mapping dynamically
-		string m1 = "Pause the game (press ";
-		string m2 = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]);
-		string m3 = " key or snap the Debugger) to update this window.\r\n";
-		string pauseMessage = m1 + m2 + m3;
-		strcat(str, pauseMessage.c_str());
-		SetDlgItemText(hTracer, IDC_TRACER_LOG, str);
+		strcat(trace_str, "Pause the game (press ");
+		strcat(trace_str, GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]));
+		strcat(trace_str, " key or snap the Debugger) to update this window.\r\n");
+		SetDlgItemText(hTracer, IDC_TRACER_LOG, trace_str);
 		tracelogbufpos = tracelogbufusedsize = 0;
 	}
 	
@@ -653,24 +785,27 @@ void UpdateLogWindow(void)
 void UpdateLogText(void)
 {
 	int i, j;
-	char str[3000];
-	str[0] = 0;
+	trace_str[0] = 0;
+
+	if (!tracelogbufpos)
+		return;
+
 	int last_line = tracesi.nPos + tracesi.nPage;
 	if (last_line > tracesi.nMax)
 		last_line = tracesi.nMax;
 
-	for(i = tracesi.nPos; i < last_line; i++)
+	for (i = tracesi.nPos; i < last_line; i++)
 	{
 		j = i;
 		if(tracelogbufusedsize == tracelogbufsize)
 		{
-			j = (tracelogbufpos+i)%tracelogbufsize;
+			j = (tracelogbufpos + i) % tracelogbufsize;
 		}
-		strcat(str,tracelogbuf[j]);
+		strcat(trace_str, tracelogbuf[j]);
 	}
-	SetDlgItemText(hTracer, IDC_TRACER_LOG, str);
-	sprintf(str,"nPage = %d, nPos = %d, nMax = %d, nMin = %d",tracesi.nPage,tracesi.nPos,tracesi.nMax,tracesi.nMin);
-	SetDlgItemText(hTracer, IDC_TRACER_STATS, str);
+	SetDlgItemText(hTracer, IDC_TRACER_LOG, trace_str);
+	//sprintf(str,"nPage = %d, nPos = %d, nMax = %d, nMin = %d",tracesi.nPage,tracesi.nPos,tracesi.nMax,tracesi.nMin);
+	//SetDlgItemText(hTracer, IDC_TRACER_STATS, str);
 	return;
 }
 
