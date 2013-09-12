@@ -415,7 +415,7 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		case WM_MOUSEWHEEL:
 		{
-			GetScrollInfo((HWND)lParam, SB_CTL, &tracesi);
+			GetScrollInfo(GetDlgItem(hTracer, IDC_SCRL_TRACER_LOG), SB_CTL, &tracesi);
 			i = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
 			if (i < -1 || i > 1)
 				i *= 2;
@@ -424,7 +424,7 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				tracesi.nPos = tracesi.nMax - tracesi.nPage;
 			else if (tracesi.nPos < tracesi.nMin)
 				tracesi.nPos = tracesi.nMin;
-			SetScrollInfo((HWND)lParam, SB_CTL, &tracesi, TRUE);
+			SetScrollInfo(GetDlgItem(hTracer, IDC_SCRL_TRACER_LOG), SB_CTL, &tracesi, TRUE);
 
 			UpdateLogText();
 			break;
@@ -784,7 +784,7 @@ void UpdateLogWindow(void)
 
 void UpdateLogText(void)
 {
-	int i, j;
+	int j;
 	trace_str[0] = 0;
 
 	if (!tracelogbufpos)
@@ -794,7 +794,11 @@ void UpdateLogText(void)
 	if (last_line > tracesi.nMax)
 		last_line = tracesi.nMax;
 
-	for (i = tracesi.nPos; i < last_line; i++)
+	int i = tracesi.nPos;
+	if (i < tracesi.nMin)
+		i = tracesi.nMin;
+
+	for (; i < last_line; i++)
 	{
 		j = i;
 		if(tracelogbufusedsize == tracelogbufsize)
