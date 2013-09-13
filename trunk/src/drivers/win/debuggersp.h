@@ -32,7 +32,7 @@ struct Name
 	char* comment;
 };
 
-extern char symbDebugEnabled;
+extern bool symbDebugEnabled;
 extern std::vector<unsigned int> bookmarks_addr;
 extern std::vector<std::string> bookmarks_name;
 extern int debuggerWasActive;

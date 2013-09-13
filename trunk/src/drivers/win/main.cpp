@@ -627,7 +627,6 @@ int main(int argc,char *argv[])
 	}
 
 	InitCommonControls();
-	debugSystem = new DebugSystem();
 
 	if(!FCEUI_Initialize())
 	{
@@ -747,6 +746,9 @@ int main(int argc,char *argv[])
 		do_exit();
 		return 1;
 	}
+
+	debugSystem = new DebugSystem();
+	debugSystem->init();
 
 	InitSpeedThrottle();
 

@@ -422,7 +422,7 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			tracesi.nPos -= i;
 			if ((tracesi.nPos + (int)tracesi.nPage) > tracesi.nMax)
 				tracesi.nPos = tracesi.nMax - tracesi.nPage;
-			else if (tracesi.nPos < tracesi.nMin)
+			if (tracesi.nPos < tracesi.nMin)
 				tracesi.nPos = tracesi.nMin;
 			SetScrollInfo(GetDlgItem(hTracer, IDC_SCRL_TRACER_LOG), SB_CTL, &tracesi, TRUE);
 

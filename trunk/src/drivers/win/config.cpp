@@ -73,6 +73,7 @@ extern bool oldInputDisplay;
 extern bool fullSaveStateLoads;
 extern int frameSkipAmt;
 extern int32 fps_scale_frameadvance;
+extern bool symbDebugEnabled;
 
 extern TASEDITOR_CONFIG taseditorConfig;
 extern char* recentProjectsArray[];
@@ -271,8 +272,11 @@ static CFGSTRUCT fceuconfig[] =
 	AC(frameAdvanceLagSkip),
 	AC(debuggerAutoload),
 	AC(allowUDLR),
+	AC(symbDebugEnabled),
 	AC(debuggerSaveLoadDEBFiles),
 	AC(debuggerDisplayROMoffsets),
+	AC(debuggerFontSize),
+	AC(hexeditorFontSize),
 	AC(fullSaveStateLoads),
 	AC(frameSkipAmt),
 	AC(fps_scale_frameadvance),

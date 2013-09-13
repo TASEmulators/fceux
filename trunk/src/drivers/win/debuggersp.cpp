@@ -40,7 +40,7 @@ int lastBank = -1;
 int loadedBank = -1;
 extern char LoadedRomFName[2048];
 char NLfilename[2048];
-char symbDebugEnabled = 0;
+bool symbDebugEnabled = false;
 int debuggerWasActive = 0;
 char temp_chr[40] = {0};
 char delimiterChar[2] = "#";

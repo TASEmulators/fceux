@@ -34,8 +34,6 @@ extern uint64 break_cycles_limit;
 extern bool break_on_instructions;
 extern uint64 break_instructions_limit;
 
-extern char symbDebugEnabled;
-
 /**
 * Stores debugger preferences in a file
 *
@@ -47,9 +45,6 @@ int storeDebuggerPreferences(FILE* f)
 	int i;
 	unsigned int size, len;
 	uint8 tmp;
-
-	// Flag that says whether symbolic debugging should be enabled
-	if (fwrite(&symbDebugEnabled, 1, 1, f) != 1) return 1;
 
 	// Write the number of CPU bookmarks
 	size = bookmarks_addr.size();
@@ -232,9 +227,6 @@ int loadDebuggerPreferences(FILE* f)
 	unsigned int i, size, len;
 	uint8 tmp;
 
-	// Read flag that says if symbolic debugging is enabled
-	if (fread(&symbDebugEnabled, sizeof(symbDebugEnabled), 1, f) != 1) return 1;
-	
 	// Read the number of CPU bookmarks
 	if (fread(&size, sizeof(unsigned int), 1, f) != 1) return 1;
 	bookmarks_addr.resize(size);

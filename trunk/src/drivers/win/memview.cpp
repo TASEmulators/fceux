@@ -160,7 +160,7 @@ int MemFind_wndx, MemFind_wndy;
 bool MemView_HighlightActivity = true;
 unsigned int MemView_HighlightActivity_FadingPeriod = HIGHLIGHT_ACTIVITY_NUM_COLORS;
 bool MemView_HighlightActivity_FadeWhenPaused = false;
-int MemViewSizeX = 580, MemViewSizeY = 248;
+int MemViewSizeX = 630, MemViewSizeY = 300;
 static RECT newMemViewRect;
 
 static char chartable[256];
