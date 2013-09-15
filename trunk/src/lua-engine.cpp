@@ -48,6 +48,7 @@ extern TASEDITOR_LUA taseditor_lua;
 #include <map>
 #include <string>
 #include <algorithm>
+#include <bitset>
 
 #include "x6502abbrev.h"
 
@@ -2664,18 +2665,18 @@ int emu_framecount(lua_State *L) {
 	return 1;
 }
 
-//int emu.lagcount()
+// int emu.lagcount()
 //
-// Gets the current lag count
+//   Gets the current lag count
 int emu_lagcount(lua_State *L) {
 
 	lua_pushinteger(L, FCEUI_GetLagCount());
 	return 1;
 }
 
-//emu_lagged()
+// emu.lagged()
 //
-//Returns true if the game is currently on a lag frame
+//   Returns true if the game is currently on a lag frame
 int emu_lagged (lua_State *L) {
 
 	bool Lag_Frame = FCEUI_GetLagged();
@@ -2683,9 +2684,9 @@ int emu_lagged (lua_State *L) {
 	return 1;
 }
 
-//emu_setlagflag(bool value)
+// emu.setlagflag(bool value)
 //
-//Returns true if the game is currently on a lag frame
+//   Returns true if the game is currently on a lag frame
 int emu_setlagflag(lua_State *L)
 {
 	FCEUI_SetLagFlag(lua_toboolean(L, 1) == 1);
@@ -2698,9 +2699,22 @@ int emu_emulating(lua_State *L) {
 	return 1;
 }
 
+// emu.tobit(int value)
+//
+//   Converts byte to binary string
+static int emu_tobit(lua_State *L)
+{
+	std::string temp;
+	std::bitset<8> bits (luaL_checkinteger(L, 1));
+	temp = bits.to_string().insert(4, " ");
+	const char * result = temp.c_str();
+	lua_pushstring(L,result);
+	return 1;
+}
+
 // string movie.mode()
 //
-// Returns "taseditor", "record", "playback", "finished" or nil
+//   Returns "taseditor", "record", "playback", "finished" or nil
 int movie_mode(lua_State *L)
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
@@ -5302,6 +5316,7 @@ static const struct luaL_reg emulib [] = {
 	{"addgamegenie", emu_addgamegenie},
 	{"delgamegenie", emu_delgamegenie},
 	{"getscreenpixel", emu_getscreenpixel},
+	{"tobit", emu_tobit},
 	{"readonly", movie_getreadonly},
 	{"setreadonly", movie_setreadonly},
 	{"print", print}, // sure, why not
