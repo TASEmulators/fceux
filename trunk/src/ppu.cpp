@@ -1034,7 +1034,10 @@ static void RefreshLine(int lastpixel) {
 
 	vofs = 0;
 
-	vofs = ((PPU[0] & 0x10) << 8) | ((RefreshAddr >> 12) & 7);
+	if(PEC586Hack)
+		vofs = ((RefreshAddr & 0x200) << 3) | ((RefreshAddr >> 12) & 7);
+	else
+		vofs = ((PPU[0] & 0x10) << 8) | ((RefreshAddr >> 12) & 7);
 
 	if (!ScreenON && !SpriteON) {
 		uint32 tem;
@@ -1894,6 +1897,8 @@ struct BGData {
 
 		INLINE void Read() {
 			RefreshAddr = ppur.get_ntread();
+			if (PEC586Hack)
+				ppur.s = (RefreshAddr & 0x200) >> 9;
 			pecnt = (RefreshAddr & 1) << 3;
 			nt = CALL_PPUREAD(RefreshAddr);
 			runppu(kFetchTime);

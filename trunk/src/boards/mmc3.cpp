@@ -33,7 +33,7 @@ uint32 WRAMSIZE;
 uint8 *CHRRAM;
 uint32 CHRRAMSIZE;
 uint8 DRegBuf[8];
-uint8 EXPREGS[8];    /* For bootleg games, mostly. */
+uint8 EXPREGS[8];	/* For bootleg games, mostly. */
 uint8 A000B, A001B;
 uint8 mmc3opts = 0;
 
@@ -79,7 +79,7 @@ void FixMMC3PRG(int V) {
 	} else {
 		pwrap(0x8000, DRegBuf[6]);
 		pwrap(0xC000, ~1);
- }
+	}
 	pwrap(0xA000, DRegBuf[7]);
 	pwrap(0xE000, ~0);
 }
@@ -216,11 +216,11 @@ void GenMMC3Restore(int version) {
 }
 
 static void GENCWRAP(uint32 A, uint8 V) {
-	setchr1(A, V);    // Business Wars NEEDS THIS for 8K CHR-RAM
+	setchr1(A, V);			// Business Wars NEEDS THIS for 8K CHR-RAM
 }
 
 static void GENPWRAP(uint32 A, uint8 V) {
-	setprg8(A, V & 0x7F); // [NJ102] Mo Dao Jie (C) has 1024Mb MMC3 BOARD, maybe something other will be broken
+	setprg8(A, V & 0x7F);	// [NJ102] Mo Dao Jie (C) has 1024Mb MMC3 BOARD, maybe something other will be broken
 }
 
 static void GENMWRAP(uint8 V) {
@@ -305,11 +305,11 @@ void GenMMC3_Init(CartInfo *info, int prg, int chr, int wram, int battery) {
 	info->Reset = MMC3RegReset;
 	info->Close = GenMMC3Close;
 
-	if (info->CRC32 == 0x5104833e)       // Kick Master
+	if (info->CRC32 == 0x5104833e)		// Kick Master
 		GameHBIRQHook = MMC3_hb_KickMasterHack;
-	else if (info->CRC32 == 0x5a6860f1 || info->CRC32 == 0xae280e20) // Shougi Meikan '92/'93
+	else if (info->CRC32 == 0x5a6860f1 || info->CRC32 == 0xae280e20)// Shougi Meikan '92/'93
 		GameHBIRQHook = MMC3_hb_KickMasterHack;
-	else if (info->CRC32 == 0xfcd772eb)   // PAL Star Wars, similar problem as Kick Master.
+	else if (info->CRC32 == 0xfcd772eb)	// PAL Star Wars, similar problem as Kick Master.
 		GameHBIRQHook = MMC3_hb_PALStarWarsHack;
 	else
 		GameHBIRQHook = MMC3_hb;
@@ -322,7 +322,7 @@ void GenMMC3_Init(CartInfo *info, int prg, int chr, int wram, int battery) {
 
 // ---------------------------- Mapper 4 --------------------------------
 
-static int hackm4 = 0; /* For Karnov, maybe others.  BLAH.  Stupid iNES format.*/
+static int hackm4 = 0;	/* For Karnov, maybe others.  BLAH.  Stupid iNES format.*/
 
 static void M4Power(void) {
 	GenMMC3Power();
@@ -353,10 +353,22 @@ static DECLFW(M12Write) {
 	EXPREGS[1] = (V & 0x10) >> 4;
 }
 
+static DECLFR(M12Read) {
+	return EXPREGS[2];
+}
+
 static void M12Power(void) {
 	EXPREGS[0] = EXPREGS[1] = 0;
+	EXPREGS[2] = 1; // chinese is default
 	GenMMC3Power();
 	SetWriteHandler(0x4100, 0x5FFF, M12Write);
+	SetReadHandler(0x4100, 0x5FFF, M12Read);
+}
+
+static void M12Reset(void) {
+	EXPREGS[0] = EXPREGS[1] = 0;
+	EXPREGS[2] ^= 1;
+	MMC3RegReset();
 }
 
 void Mapper12_Init(CartInfo *info) {
@@ -365,6 +377,7 @@ void Mapper12_Init(CartInfo *info) {
 	isRevB = 0;
 
 	info->Power = M12Power;
+	info->Reset = M12Reset;
 	AddExState(EXPREGS, 2, 0, "EXPR");
 }
 
@@ -461,7 +474,7 @@ static void M45CW(uint32 A, uint8 V) {
 			NV &= (1 << ((EXPREGS[2] & 7) + 1)) - 1;
 		else
 		if (EXPREGS[2])
-			NV &= 0;   // hack ;( don't know exactly how it should be
+			NV &= 0;	// hack ;( don't know exactly how it should be
 		NV |= EXPREGS[0] | ((EXPREGS[2] & 0xF0) << 4);
 		setchr1(A, NV);
 	}
@@ -609,7 +622,7 @@ static void M52PW(uint32 A, uint8 V) {
 static void M52CW(uint32 A, uint8 V) {
 	uint32 mask = 0xFF ^ ((EXPREGS[0] & 0x40) << 1);
 //	uint32 bank = (((EXPREGS[0]>>3)&4)|((EXPREGS[0]>>1)&2)|((EXPREGS[0]>>6)&(EXPREGS[0]>>4)&1))<<7;
-	uint32 bank = (((EXPREGS[0] >> 4) & 2) | (EXPREGS[0] & 4) | ((EXPREGS[0] >> 6) & (EXPREGS[0] >> 4) & 1)) << 7; // actually 256K CHR banks index bits is inverted!
+	uint32 bank = (((EXPREGS[0] >> 4) & 2) | (EXPREGS[0] & 4) | ((EXPREGS[0] >> 6) & (EXPREGS[0] >> 4) & 1)) << 7;	// actually 256K CHR banks index bits is inverted!
 	setchr1(A, bank | (V & mask));
 }
 
@@ -659,7 +672,7 @@ void Mapper76_Init(CartInfo *info) {
 // ---------------------------- Mapper 74 -------------------------------
 
 static void M74CW(uint32 A, uint8 V) {
-	if ((V == 8) || (V == 9)) //Di 4 Ci - Ji Qi Ren Dai Zhan (As).nes, Ji Jia Zhan Shi (As).nes
+	if ((V == 8) || (V == 9))	//Di 4 Ci - Ji Qi Ren Dai Zhan (As).nes, Ji Jia Zhan Shi (As).nes
 		setchr1r(0x10, A, V);
 	else
 		setchr1r(0, A, V);
@@ -735,7 +748,7 @@ void Mapper114_Init(CartInfo *info) {
 static void M115PW(uint32 A, uint8 V) {
 	if (EXPREGS[0] & 0x80) {
 		if (EXPREGS[0] & 0x20)
-			setprg32(0x8000, (EXPREGS[0] & 0x0F) >> 1); // real hardware tests, info 100% now lol
+			setprg32(0x8000, (EXPREGS[0] & 0x0F) >> 1);	// real hardware tests, info 100% now lol
 		else {
 			setprg16(0x8000, (EXPREGS[0] & 0x0F));
 			setprg16(0xC000, (EXPREGS[0] & 0x0F));
@@ -750,7 +763,7 @@ static void M115CW(uint32 A, uint8 V) {
 
 static DECLFW(M115Write) {
 	if (A == 0x5080)
-		EXPREGS[2] = V; // Extra prot hardware 2-in-1 mode
+		EXPREGS[2] = V;	// Extra prot hardware 2-in-1 mode
 	else if (A == 0x6000)
 		EXPREGS[0] = V;
 	else if (A == 0x6001)
@@ -940,7 +953,7 @@ void Mapper192_Init(CartInfo *info) {
 // ---------------------------- Mapper 194 -------------------------------
 
 static void M194CW(uint32 A, uint8 V) {
-	if (V <= 1) //Dai-2-Ji - Super Robot Taisen (As).nes
+	if (V <= 1)	//Dai-2-Ji - Super Robot Taisen (As).nes
 		setchr1r(0x10, A, V);
 	else
 		setchr1r(0, A, V);
@@ -957,7 +970,7 @@ void Mapper194_Init(CartInfo *info) {
 
 // ---------------------------- Mapper 195 -------------------------------
 static void M195CW(uint32 A, uint8 V) {
-	if (V <= 3) // Crystalis (c).nes, Captain Tsubasa Vol 2 - Super Striker (C)
+	if (V <= 3)	// Crystalis (c).nes, Captain Tsubasa Vol 2 - Super Striker (C)
 		setchr1r(0x10, A, V);
 	else
 		setchr1r(0, A, V);
@@ -1028,7 +1041,7 @@ void Mapper196_Init(CartInfo *info) {
 // all data bits merged, because it's using one of them as 8000 reg...
 
 static void UNLMaliSBPW(uint32 A, uint8 V) {
-	setprg8(A, (V & 3)|((V & 8) >> 1)|((V & 4) << 1));
+	setprg8(A, (V & 3) | ((V & 8) >> 1) | ((V & 4) << 1));
 }
 
 static void UNLMaliSBCW(uint32 A, uint8 V) {
@@ -1076,7 +1089,7 @@ void Mapper197_Init(CartInfo *info) {
 // ---------------------------- Mapper 198 -------------------------------
 
 static void M198PW(uint32 A, uint8 V) {
-	if (V >= 0x50) // Tenchi o Kurau II - Shokatsu Koumei Den (J) (C).nes
+	if (V >= 0x50)	// Tenchi o Kurau II - Shokatsu Koumei Den (J) (C).nes
 		setprg8(A, V & 0x4F);
 	else
 		setprg8(A, V);
@@ -1128,7 +1141,7 @@ static void M205Reset(void) {
 static void M205Power(void) {
 	GenMMC3Power();
 	SetWriteHandler(0x6000, 0x6fff, M205Write0);
-	SetWriteHandler(0x7000, 0x7fff, M205Write1);    // OK-411 boards, the same logic, but data latched, 2-in-1 frankenstein
+	SetWriteHandler(0x7000, 0x7fff, M205Write1);	// OK-411 boards, the same logic, but data latched, 2-in-1 frankenstein
 }
 
 void Mapper205_Init(CartInfo *info) {
@@ -1143,7 +1156,7 @@ void Mapper205_Init(CartInfo *info) {
 // ---------------------------- Mapper 245 ------------------------------
 
 static void M245CW(uint32 A, uint8 V) {
-	if (!UNIFchrrama) // Yong Zhe Dou E Long - Dragon Quest VI (As).nes NEEDS THIS for RAM cart
+	if (!UNIFchrrama)	// Yong Zhe Dou E Long - Dragon Quest VI (As).nes NEEDS THIS for RAM cart
 		setchr1(A, V & 7);
 	EXPREGS[0] = V;
 	FixMMC3PRG(MMC3_cmd);
@@ -1172,7 +1185,7 @@ static void M249PW(uint32 A, uint8 V) {
 	if (EXPREGS[0] & 0x2) {
 		if (V < 0x20)
 			V = (V & 1) | ((V >> 3) & 2) | ((V >> 1) & 4) | ((V << 2) & 8) | ((V << 2) & 0x10);
-		else{
+		else {
 			V -= 0x20;
 			V = (V & 3) | ((V >> 1) & 4) | ((V >> 4) & 8) | ((V >> 2) & 0x10) | ((V << 3) & 0x20) | ((V << 2) & 0xC0);
 		}
