@@ -1241,8 +1241,16 @@ void CallRegisteredLuaLoadFunctions(int savestateNumber, const LuaSaveData& save
 }
 
 
-static int rom_readbyte(lua_State *L) {   lua_pushinteger(L, FCEU_ReadRomByte(luaL_checkinteger(L,1))); return 1; }
-static int rom_readbytesigned(lua_State *L) {   lua_pushinteger(L, (signed char)FCEU_ReadRomByte(luaL_checkinteger(L,1))); return 1; }
+static int rom_readbyte(lua_State *L) {
+	lua_pushinteger(L, FCEU_ReadRomByte(luaL_checkinteger(L,1)));
+	return 1;
+}
+
+static int rom_readbytesigned(lua_State *L) {
+	lua_pushinteger(L, (signed char)FCEU_ReadRomByte(luaL_checkinteger(L,1)));
+	return 1;
+}
+
 static int rom_gethash(lua_State *L) {
 	const char *type = luaL_checkstring(L, 1);
 	if(!type) lua_pushstring(L, "");
@@ -1250,8 +1258,41 @@ static int rom_gethash(lua_State *L) {
 	else lua_pushstring(L, "");
 	return 1;
 }
-static int memory_readbyte(lua_State *L) {   lua_pushinteger(L, FCEU_CheatGetByte(luaL_checkinteger(L,1))); return 1; }
-static int memory_writebyte(lua_State *L) {   FCEU_CheatSetByte(luaL_checkinteger(L,1), luaL_checkinteger(L,2)); return 0; }
+
+static int memory_readbyte(lua_State *L) {
+	lua_pushinteger(L, FCEU_CheatGetByte(luaL_checkinteger(L,1)));
+	return 1;
+}
+
+static int memory_readbytesigned(lua_State *L) {
+	signed char c = (signed char) FCEU_CheatGetByte(luaL_checkinteger(L,1));
+	lua_pushinteger(L, c);
+	return 1;
+}
+
+static int GetWord(lua_State *L, bool isSigned) {
+	uint16 address1 = luaL_checkinteger(L,1);
+	uint16 address2 = luaL_checkinteger(L,1)+1;
+	if (lua_type(L,2) == LUA_TNUMBER) address2 = luaL_checkinteger(L,2);
+	uint32 result = FCEU_CheatGetByte(address1) + FCEU_CheatGetByte(address2)*256; // little endian
+	return isSigned ? (int16) result : result;
+}
+
+static int memory_readword(lua_State *L) {
+	lua_pushinteger(L, GetWord(L, false));
+	return 1;
+}
+
+static int memory_readwordsigned(lua_State *L) {
+	lua_pushinteger(L, GetWord(L, true));
+	return 1;
+}
+
+static int memory_writebyte(lua_State *L) {
+	FCEU_CheatSetByte(luaL_checkinteger(L,1), luaL_checkinteger(L,2));
+	return 0;
+}
+
 static int memory_readbyterange(lua_State *L) {
 
 	int range_start = luaL_checkinteger(L,1);
@@ -1473,6 +1514,18 @@ static int tostring(lua_State *L)
 	char* str = rawToCString(L);
 	str[strlen(str)-2] = 0; // hack: trim off the \r\n (which is there to simplify the print function's task)
 	lua_pushstring(L, str);
+	return 1;
+}
+
+// tobitstring(int value)
+//
+//   Converts byte to binary string
+static int tobitstring(lua_State *L)
+{
+	std::bitset<8> bits (luaL_checkinteger(L, 1));
+	std::string temp = bits.to_string().insert(4, " ");
+	const char * result = temp.c_str();
+	lua_pushstring(L,result);
 	return 1;
 }
 
@@ -1941,13 +1994,6 @@ void TaseditorDisableManualFunctionIfNeeded()
 	} else taseditor_lua.disableRunFunction();
 }
 #endif
-
-// Not for the signed versions though
-static int memory_readbytesigned(lua_State *L) {
-	signed char c = (signed char) FCEU_CheatGetByte(luaL_checkinteger(L,1));
-	lua_pushinteger(L, c);
-	return 1;
-}
 
 static int memory_registerHook(lua_State* L, LuaMemHookType hookType, int defaultSize)
 {
@@ -2696,19 +2742,6 @@ int emu_setlagflag(lua_State *L)
 // boolean emu.emulating()
 int emu_emulating(lua_State *L) {
 	lua_pushboolean(L, GameInfo != NULL);
-	return 1;
-}
-
-// emu.tobit(int value)
-//
-//   Converts byte to binary string
-static int emu_tobit(lua_State *L)
-{
-	std::string temp;
-	std::bitset<8> bits (luaL_checkinteger(L, 1));
-	temp = bits.to_string().insert(4, " ");
-	const char * result = temp.c_str();
-	lua_pushstring(L,result);
 	return 1;
 }
 
@@ -5316,7 +5349,6 @@ static const struct luaL_reg emulib [] = {
 	{"addgamegenie", emu_addgamegenie},
 	{"delgamegenie", emu_delgamegenie},
 	{"getscreenpixel", emu_getscreenpixel},
-	{"tobit", emu_tobit},
 	{"readonly", movie_getreadonly},
 	{"setreadonly", movie_setreadonly},
 	{"print", print}, // sure, why not
@@ -5338,9 +5370,10 @@ static const struct luaL_reg memorylib [] = {
 
 	{"readbyte", memory_readbyte},
 	{"readbyterange", memory_readbyterange},
-	{"readbytesigned", memory_readbytesigned},
-	// alternate naming scheme for unsigned
-	{"readbyteunsigned", memory_readbyte},
+	{"readbytesigned", memory_readbytesigned},	
+	{"readbyteunsigned", memory_readbyte}, // alternate naming scheme for unsigned
+	{"readword", memory_readword},
+	{"readwordsigned", memory_readwordsigned},
 	{"writebyte", memory_writebyte},
 	{"getregister", memory_getregister},
 	{"setregister", memory_setregister},
@@ -5652,6 +5685,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		// register a few utility functions outside of libraries (in the global namespace)
 		lua_register(L, "print", print);
 		lua_register(L, "tostring", tostring);
+		lua_register(L, "tobitstring", tobitstring);
 		lua_register(L, "addressof", addressof);
 		lua_register(L, "copytable", copytable);
 
@@ -5660,7 +5694,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		lua_register(L, "OR", bit_bor);
 		lua_register(L, "XOR", bit_bxor);
 		lua_register(L, "SHIFT", bit_bshift_emulua);
-		lua_register(L, "BIT", bitbit);
+		lua_register(L, "BIT", bitbit);		
 
 		if (arg)
 		{
