@@ -2090,7 +2090,8 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							case IDC_DEBUGGER_BOOKMARK_NAME: NameDebuggerBookmark(hwndDlg); break;
 							case IDC_DEBUGGER_ENABLE_SYMBOLIC:
 							{
-								symbDebugEnabled = IsDlgButtonChecked(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC);
+								symbDebugEnabled ^= 1;
+								CheckDlgButton(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC, symbDebugEnabled ? BST_CHECKED : BST_UNCHECKED);
 								UpdateDebugger(false);
 								break;
 							}

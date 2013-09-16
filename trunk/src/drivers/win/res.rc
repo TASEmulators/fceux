@@ -1624,20 +1624,23 @@ BEGIN
     GROUPBOX        "Logging workflow options",65528,8,142,171,52
 END
 
-PPUVIEW DIALOGEX 44, 38, 355, 246
+PPUVIEW DIALOGEX 44, 38, 355, 260
 STYLE DS_SETFONT | DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "PPU Viewer"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "Pattern Tables",GRP_PPUVIEW_TABLES,2,-1,351,192,WS_TABSTOP
-    LTEXT           "Tile:",LBL_PPUVIEW_TILE1,6,168,50,10
-    LTEXT           "Tile:",LBL_PPUVIEW_TILE2,177,168,50,10
+    GROUPBOX        "Pattern Tables",GRP_PPUVIEW_TABLES,2,-1,351,204,WS_TABSTOP
+    LTEXT           "Tile:",LBL_PPUVIEW_TILE1,6,169,50,9
+    LTEXT           "Tile:",LBL_PPUVIEW_TILE2,177,169,50,9
     CONTROL         "",CTL_PPUVIEW_TRACKBAR,"msctls_trackbar32",WS_TABSTOP,227,178,106,11
-    LTEXT           "Refresh:   More",-1,177,178,50,10
+    LTEXT           "Refresh:   More",-1,177,178,50,9
     LTEXT           "Less",-1,334,178,18,10
-    GROUPBOX        "Palettes",LBL_PPUVIEW_PALETTES,2,192,351,53,WS_TABSTOP
-    LTEXT           "Display on scanline:",-1,6,178,65,10
+    GROUPBOX        "Palettes",LBL_PPUVIEW_PALETTES,2,204,351,53,WS_TABSTOP
+    LTEXT           "Display on scanline:",-1,6,178,65,9
     EDITTEXT        IDC_PPUVIEW_SCANLINE,72,176,27,12
+    CONTROL         "Mask unused graphics (needs Code/Data Logger)",IDC_MASK_UNUSED_GRAPHICS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,189,169,10
+    CONTROL         "Invert the mask",IDC_INVERT_THE_MASK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,177,189,61,10
 END
 
 ARCHIVECHOOSERDIALOG DIALOGEX 0, 0, 265, 159
@@ -2108,6 +2111,7 @@ BEGIN
 
     "PPUVIEW", DIALOG
     BEGIN
+        BOTTOMMARGIN, 258
     END
 
     "ARCHIVECHOOSERDIALOG", DIALOG

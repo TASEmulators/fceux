@@ -813,7 +813,8 @@ void UpdateLogText(void)
 	return;
 }
 
-void EnableTracerMenuItems(void){
+void EnableTracerMenuItems(void)
+{
 	if(logging)
 	{
 		EnableWindow(GetDlgItem(hTracer,IDC_RADIO_LOG_LAST),FALSE);

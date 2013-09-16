@@ -578,7 +578,6 @@
 #define IDC_HISTORYLIST                 1149
 #define IDC_SYMBOLIC_NAME               1149
 #define IDC_BOOKMARKSLIST               1150
-#define IDC_SYMBOLIC_ADDRESS2           1150
 #define IDC_SYMBOLIC_FILENAME           1150
 #define TASEDITOR_NEXT_MARKER           1151
 #define IDC_SYMBOLIC_COMMENT            1151
@@ -629,6 +628,7 @@
 #define IDC_MATCH_CASE                  1203
 #define IDC_COPY_INPUT                  1203
 #define IDC_AUTORESUMECDLOGGING         1203
+#define IDC_MASK_UNUSED_GRAPHICS        1203
 #define IDC_VOLUMEGROUP                 1204
 #define IDC_OMITBLANK                   1204
 #define IDC_CHECK3                      1204
@@ -637,6 +637,8 @@
 #define IDC_COPY_MARKERS                1204
 #define IDC_AUTORESUMECDLOGGING2        1204
 #define IDC_AUTOSAVECDL                 1204
+#define IDC_USE_CDLOGGER_DATA2          1204
+#define IDC_INVERT_THE_MASK             1204
 #define IDC_RAMLIST                     1205
 #define IDC_CHECK4                      1205
 #define IDC_CHECK_BOOKMARKS             1205

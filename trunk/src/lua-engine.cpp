@@ -1270,15 +1270,18 @@ static int memory_readbytesigned(lua_State *L) {
 	return 1;
 }
 
-static int GetWord(lua_State *L, bool isSigned) {
-	uint16 address1 = luaL_checkinteger(L,1);
-	uint16 address2 = luaL_checkinteger(L,1)+1;
-	if (lua_type(L,2) == LUA_TNUMBER) address2 = luaL_checkinteger(L,2);
-	uint32 result = FCEU_CheatGetByte(address1) + FCEU_CheatGetByte(address2)*256; // little endian
-	return isSigned ? (int16) result : result;
+static int GetWord(lua_State *L, bool isSigned)
+{
+	uint16 addressLow = luaL_checkinteger(L,1);
+	uint16 addressHigh = addressLow + 1;	// little endian
+	if (lua_type(L,2) == LUA_TNUMBER)
+		addressHigh = luaL_checkinteger(L,2);
+	uint32 result = FCEU_CheatGetByte(addressLow) + (FCEU_CheatGetByte(addressHigh) << 8);
+	return isSigned ? (int16)result : result;
 }
 
-static int memory_readword(lua_State *L) {
+static int memory_readword(lua_State *L)
+{
 	lua_pushinteger(L, GetWord(L, false));
 	return 1;
 }
@@ -5371,9 +5374,10 @@ static const struct luaL_reg memorylib [] = {
 	{"readbyte", memory_readbyte},
 	{"readbyterange", memory_readbyterange},
 	{"readbytesigned", memory_readbytesigned},	
-	{"readbyteunsigned", memory_readbyte}, // alternate naming scheme for unsigned
+	{"readbyteunsigned", memory_readbyte},	// alternate naming scheme for unsigned
 	{"readword", memory_readword},
 	{"readwordsigned", memory_readwordsigned},
+	{"readwordunsigned", memory_readword},	// alternate naming scheme for unsigned
 	{"writebyte", memory_writebyte},
 	{"getregister", memory_getregister},
 	{"setregister", memory_setregister},
