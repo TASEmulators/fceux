@@ -25,6 +25,7 @@
 #include "../../video.h"
 #include "input.h"
 #include "mapinput.h"
+#include <math.h>
 
 extern bool fullscreenByDoubleclick;
 

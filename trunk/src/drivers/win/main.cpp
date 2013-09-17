@@ -559,7 +559,6 @@ static BOOL CALLBACK EnumCallbackFCEUXInstantiated(HWND hWnd, LPARAM lParam)
 	//LPSTR lpClassName = '\0';
 	std::string TempString;
 	char buf[512];
-	bool PassedTest=true;
 
 	GetClassName(hWnd, buf, 511);
 	//Console.WriteLine(lpClassName.ToString());
@@ -569,26 +568,11 @@ static BOOL CALLBACK EnumCallbackFCEUXInstantiated(HWND hWnd, LPARAM lParam)
 	if (TempString != "FCEUXWindowClass")
 		return true;
 
-	//memset(buf, 0, 512 * sizeof(char));
-	GetWindowText(hWnd, buf, 512 * sizeof(char));
-
-	if (hWnd != hAppWnd) {
-		PassedTest = (PassedTest & (buf[0] == 'F'));
-		PassedTest = (PassedTest & (buf[1] == 'C'));
-		PassedTest = (PassedTest & (buf[2] == 'E'));
-		PassedTest = (PassedTest & (buf[3] == 'U'));
-		PassedTest = (PassedTest & (buf[4] == 'X'));
-		PassedTest = (PassedTest & (buf[5] == ' '));
-		PassedTest = (PassedTest & ((buf[6] >= '2') & (buf[6] <= '9')));
-		PassedTest = (PassedTest & (buf[7] == '.'));
-		PassedTest = (PassedTest & ((buf[8] >= '1') & (buf[8] <= '9')));
-		PassedTest = (PassedTest & (buf[9] == '.'));
-		PassedTest = (PassedTest & ((buf[10] >= '4') & (buf[10] <= '9')));
-
-		if (PassedTest) {
-			DoInstantiatedExit=true;
-			DoInstantiatedExitWindow = hWnd;
-		}
+	//zero 17-sep-2013 - removed window caption test which wasnt really making a lot of sense to me and was broken in any event
+	if (hWnd != hAppWnd)
+	{
+		DoInstantiatedExit = true;
+		DoInstantiatedExitWindow = hWnd;
 	}
 
 	//printf("[%03i] Found '%s'\n", ++WinCount, buf);
@@ -729,6 +713,13 @@ int main(int argc,char *argv[])
 				cData.lpData = &tData;
 
 				SendMessage(DoInstantiatedExitWindow,WM_COPYDATA,(WPARAM)(HWND)hAppWnd, (LPARAM)(LPVOID) &cData);
+				do_exit();
+				return 0;
+			}
+			else
+			{
+				//kill this one, activate the other one
+				SetActiveWindow(DoInstantiatedExitWindow);
 				do_exit();
 				return 0;
 			}
