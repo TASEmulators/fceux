@@ -100,14 +100,16 @@ extern SFORMAT FCEUSND_STATEINFO[];
 extern SFORMAT FCEUCTRL_STATEINFO[];
 extern SFORMAT FCEUMOV_STATEINFO[];
 
+//why two separate CPU structs?? who knows
 
 SFORMAT SFCPU[]={
 	{ &X.PC, 2|RLSB, "PC\0"},
 	{ &X.A, 1, "A\0\0"},
-	{ &X.P, 1, "P\0\0"},
 	{ &X.X, 1, "X\0\0"},
 	{ &X.Y, 1, "Y\0\0"},
 	{ &X.S, 1, "S\0\0"},
+	{ &X.P, 1, "P\0\0"},
+	{ &X.DB, 1, "DB"},
 	{ &RAM, 0x800 | FCEUSTATE_INDIRECT, "RAM", },
 	{ 0 }
 };
@@ -278,7 +280,10 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 					ret=false;
 			}
 			break;
-		case 0x10:if(!ReadStateChunk(is,SFMDATA,size)) ret=false; break;
+		case 0x10:
+			if(!ReadStateChunk(is,SFMDATA,size)) 
+				ret=false; 
+			break;
 
 			// now it gets hackier:
 		case 5:

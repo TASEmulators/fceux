@@ -816,13 +816,12 @@ static void GenMMC5_Init(CartInfo *info, int wsize, int battery) {
 	MMC5fill = (uint8*)FCEU_gmalloc(1024);
 	ExRAM = (uint8*)FCEU_gmalloc(1024);
 
-	AddExState(MMC5_StateRegs, ~0, 0, 0);
-	AddExState(WRAM, wsize * 1024, 0, "WRAM");
 	AddExState(ExRAM, 1024, 0, "ERAM");
 	AddExState(&MMC5HackSPMode, 1, 0, "SPLM");
 	AddExState(&MMC5HackSPScroll, 1, 0, "SPLS");
 	AddExState(&MMC5HackSPPage, 1, 0, "SPLP");
 	AddExState(&MMC50x5130, 1, 0, "5130");
+	AddExState(MMC5_StateRegs, ~0, 0, 0);
 
 	MMC5WRAMsize = wsize / 8;
 	BuildWRAMSizeTable();
