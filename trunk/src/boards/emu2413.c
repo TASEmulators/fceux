@@ -335,7 +335,7 @@ static void makeDphaseARTable(void) {
 				dphaseARTable[AR][Rks] = 0; /*EG_DP_WIDTH;*/
 				break;
 			default:
-				dphaseARTable[AR][Rks] = rate_adjust((3 * (RL + 4) << (RM + 1)));
+				dphaseARTable[AR][Rks] = rate_adjust(3 * (RL + 4) << (RM + 1));
 				break;
 			}
 		}

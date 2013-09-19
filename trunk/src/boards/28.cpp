@@ -129,7 +129,7 @@ static DECLFW(WriteEXP)
 {
 	uint32 addr = A;
 	uint8 value = V;
-	if (addr >= 05000)
+	if (addr >= 0x5000)
 		reg = value & 0x81;
 }
 

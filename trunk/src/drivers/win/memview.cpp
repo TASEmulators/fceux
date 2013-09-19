@@ -190,7 +190,7 @@ int FindAsText;
 int FindDirectionUp;
 char FindTextBox[60];
 
-uint32 temp_offset;
+int temp_offset;
 
 extern iNES_HEADER head;
 
@@ -918,7 +918,7 @@ void InputData(char *input){
 	char inputc;
 	//char str[100];
 	//mbg merge 7/18/06 added cast:
-	data = (uint8*)malloc(strlen(input)); //it can't be larger than the input string, so use that as the size
+	data = (uint8 *)malloc(strlen(input) + 1); //it can't be larger than the input string, so use that as the size
 
 	for(i = 0;input[i] != 0;i++){
 		if(!EditingText){

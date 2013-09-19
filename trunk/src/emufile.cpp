@@ -248,7 +248,7 @@ size_t EMUFILE::read8le(u8* val)
 
 u8 EMUFILE::read8le()
 {
-	u8 temp;
+	u8 temp = 0;
 	fread(&temp,1);
 	return temp;
 }

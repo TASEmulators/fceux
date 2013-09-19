@@ -170,7 +170,7 @@ void FCEU_PutImage(void)
 	{
 		char nameo[512];
 		strcpy(nameo,FCEUI_GetSnapshotAsName().c_str());
-		if (nameo)
+		if (nameo[0])
 		{
 			SaveSnapshot(nameo);
 			FCEU_DispMessage("Snapshot Saved.",0);
