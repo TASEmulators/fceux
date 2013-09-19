@@ -60,45 +60,6 @@ int isHex(char c)
 }
 
 /**
-* Replaces all occurences of a substring in a string with a new string.
-* The maximum size of the string after replacing is 1000.
-* The caller must ensure that the src buffer is large enough.
-*
-* @param src Source string
-* @param r String to replace
-* @param w New string
-**/
-void replaceString(char* src, const char* r, const char* w)
-{
-	static char buff[1001];
-	buff[0] = 0;
-	char* pos = src;
-	char* beg = src;
-
-	// Check parameters
-
-	if (!src || !r || !w)
-	{
-		MessageBox(0, "Error: Invalid parameter in function replaceString", "Error", MB_OK | MB_ICONERROR);
-		return;
-	}
-		
-	// Replace sub strings
-
-	while ((pos = strstr(src, r)))
-	{
-		*pos = 0;
-		strcat(buff, src);
-		strcat(buff, w ? w : r);
-		src = pos + strlen(r);
-	}
-
-	strcat(buff, src);
-
-	strcpy(beg, buff);
-}
-
-/**
 * Parses a line from a NL file.
 * @param line The line to parse
 * @param n The name structure to write the information to
@@ -282,6 +243,7 @@ Name* parse(char* lines, const char* filename)
 		// Allocate a name structure to hold the parsed data from the next line
 		
 		cur = (Name*)malloc(sizeof(Name));
+		cur->offsetNumeric = 0;
 		cur->offset = 0;
 		cur->next = 0;
 		cur->name = 0;
@@ -375,8 +337,9 @@ Name* parse(char* lines, const char* filename)
 					nn->comment = strdup(cur->comment);
 					
 					// The offset of the node
-					nn->offset = (char*)malloc(10);
+					nn->offset = (char*)malloc(6);
 					sprintf(nn->offset, "$%04X", offset + i);
+					nn->offsetNumeric = offset + i;
 					
 					// The name of an array address is of the form NAME[INDEX]
 					sprintf(numbuff, "[%X]", i);
@@ -390,8 +353,7 @@ Name* parse(char* lines, const char* filename)
 					{
 						prev->next = nn;
 						prev = prev->next;
-					}
-					else
+					} else
 					{
 						first = prev = nn;
 					}
@@ -411,9 +373,9 @@ Name* parse(char* lines, const char* filename)
 				// offset and array size has already been validated in parseLine
 				continue;
 			}
-		}
-		else
+		} else
 		{
+			sscanf(cur->offset, "%*[$]%4X", &(cur->offsetNumeric));
 			// Add the node to the list of address nodes
 			if (prev)
 			{
@@ -504,22 +466,34 @@ void freeList(Name* n)
 **/
 void replaceNames(Name* list, char* str)
 {
-	Name* beg = list;
+	static char buff[1001];
+	char* pos;
+	char* src;
 
-	if (!str)
+	while (list)
 	{
-		MessageBox(0, "Error: Invalid parameter \"str\" in function replaceNames", "Error", MB_OK | MB_ICONERROR);
-		return;
-	}
-	
-	while (beg)
-	{
-		if (beg->name)
+		if (list->name)
 		{
-			replaceString(str, beg->offset, beg->name);
+			// find and replace substrings
+			*buff = 0;
+			src = str;
+
+			while ((pos = strstr(src, list->offset)))
+			{
+				*pos = 0;
+				strcat(buff, src);
+				strcat(buff, list->name);
+				src = pos + 5;	// 5 = strlen(beg->offset), because all offsets are in "$XXXX" format
+			}
+			// if any offsets were changed, replace str by buff
+			if (*buff)
+			{
+				strcat(buff, src);
+				// replace whole str
+				strcpy(str, buff);
+			}
 		}
-		
-		beg = beg->next;
+		list = list->next;
 	}
 }
 
@@ -531,22 +505,31 @@ void replaceNames(Name* list, char* str)
 * @offs The offset to search
 * @return The node that has the given offset or 0.
 **/
-Name* searchNode(Name* node, const char* offs)
+Name* findNode(Name* node, const char* offset)
 {
 	while (node)
 	{
-		if (!strcmp(node->offset, offs))
-		{
+		if (!strcmp(node->offset, offset))
 			return node;
-		}
 		
 		node = node->next;
 	}
-	
+	return 0;
+}
+// same, but with offsetNumeric
+Name* findNode(Name* node, uint16 offsetNumeric)
+{
+	while (node)
+	{
+		if (node->offsetNumeric == offsetNumeric)
+			return node;
+		
+		node = node->next;
+	}
 	return 0;
 }
 
-char* generateNLFilenameForAddress(unsigned int address)
+char* generateNLFilenameForAddress(uint16 address)
 {
 	if (address < 0x8000)
 	{
@@ -559,7 +542,7 @@ char* generateNLFilenameForAddress(unsigned int address)
 	}
 	return NLfilename;
 }
-Name* getNamesPointerForAddress(unsigned int address)
+Name* getNamesPointerForAddress(uint16 address)
 {
 	if (address < 0x8000)
 	{
@@ -572,7 +555,7 @@ Name* getNamesPointerForAddress(unsigned int address)
 		return lastBankNames;
 	}
 }
-void setNamesPointerForAddress(unsigned int address, Name* newNode)
+void setNamesPointerForAddress(uint16 address, Name* newNode)
 {
 	if (address < 0x8000)
 	{
@@ -641,37 +624,6 @@ void loadNameFiles()
 			
 		// Load new address definitions
 		loadedBankNames = parseNameFile(generateNLFilenameForAddress(0x8000));
-	}
-}
-
-/**
-* Returns pointers to name and comment to an offset in the disassembly output string
-* 
-**/
-void decorateAddress(unsigned int addr, char** str_name, char** str_comment)
-{
-	Name* n;
-	sprintf(temp_chr, "$%04X", addr);
-
-	if (addr < 0x8000)
-	{
-		// Search address definition node for a RAM address
-		n = searchNode(ramBankNames, temp_chr);
-	} else
-	{
-		// Search address definition node for a ROM address
-		n = (addr >= 0xC000) ? searchNode(lastBankNames, temp_chr) : searchNode(loadedBankNames, temp_chr);
-	}
-		
-	if (n)
-	{
-		// Return pointer to name
-		if (n->name && *n->name)
-			*str_name = n->name;
-			
-		// Return pointer to comment
-		if (n->comment && *n->comment)
-			*str_comment = n->comment;
 	}
 }
 
@@ -850,17 +802,16 @@ BOOL CALLBACK SymbolicNamingCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 			// offset
 			sprintf(temp_chr, "$%04X", newAddress);
 			SetDlgItemText(hwndDlg, IDC_SYMBOLIC_ADDRESS, temp_chr);
-			char* oldName = 0;
-			char* oldComment = 0;
-			decorateAddress(newAddress, &oldName, &oldComment);
-			// name
-			SendDlgItemMessage(hwndDlg, IDC_SYMBOLIC_NAME, EM_SETLIMITTEXT, NL_MAX_NAME_LEN, 0);
-			if (oldName && oldName[0])
-				SetDlgItemText(hwndDlg, IDC_SYMBOLIC_NAME, oldName);
-			// comment
-			SendDlgItemMessage(hwndDlg, IDC_SYMBOLIC_COMMENT, EM_SETLIMITTEXT, NL_MAX_MULTILINE_COMMENT_LEN, 0);
-			if (oldComment && oldComment[0])
-				SetDlgItemText(hwndDlg, IDC_SYMBOLIC_COMMENT, oldComment);
+			Name* node = findNode(getNamesPointerForAddress(newAddress), newAddress);
+			if (node)
+			{
+				SendDlgItemMessage(hwndDlg, IDC_SYMBOLIC_NAME, EM_SETLIMITTEXT, NL_MAX_NAME_LEN, 0);
+				if (node->name && node->name[0])
+					SetDlgItemText(hwndDlg, IDC_SYMBOLIC_NAME, node->name);
+				SendDlgItemMessage(hwndDlg, IDC_SYMBOLIC_COMMENT, EM_SETLIMITTEXT, NL_MAX_MULTILINE_COMMENT_LEN, 0);
+				if (node->comment && node->comment[0])
+					SetDlgItemText(hwndDlg, IDC_SYMBOLIC_COMMENT, node->comment);
+			}
 			// set focus to IDC_SYMBOLIC_NAME
 			SendMessage(hwndDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hwndDlg, IDC_SYMBOLIC_NAME), true);
 			break;
@@ -920,7 +871,7 @@ bool DoSymbolicDebugNaming(int offset, HWND parentHWND)
 	return false;
 }
 
-void AddNewSymbolicName(unsigned int newAddress, char* newOffset, char* newName, char* newComment)
+void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char* newComment)
 {
 	Name* initialNode = getNamesPointerForAddress(newAddress);
 	Name* node = initialNode;
@@ -945,7 +896,7 @@ void AddNewSymbolicName(unsigned int newAddress, char* newOffset, char* newName,
 			break;
 	}
 
-	if (newName[0])
+	if (*newName)
 	{
 		if (!initialNode)
 		{
@@ -953,6 +904,7 @@ void AddNewSymbolicName(unsigned int newAddress, char* newOffset, char* newName,
 			node = (Name*)malloc(sizeof(Name));
 			node->offset = (char*)malloc(strlen(newOffset) + 1);
 			strcpy(node->offset, newOffset);
+			node->offsetNumeric = newAddress;
 			node->name = (char*)malloc(strlen(newName) + 1);
 			strcpy(node->name, newName);
 			node->comment = (char*)malloc(strlen(newComment) + 1);
@@ -964,7 +916,7 @@ void AddNewSymbolicName(unsigned int newAddress, char* newOffset, char* newName,
 			// search the list
 			while (node)
 			{
-				if (!strcmp(node->offset, newOffset))
+				if (node->offsetNumeric == newAddress)
 				{
 					// found matching address - replace its name and comment
 					free(node->name);
@@ -985,6 +937,7 @@ void AddNewSymbolicName(unsigned int newAddress, char* newOffset, char* newName,
 					node->next = newNode;
 					newNode->offset = (char*)malloc(strlen(newOffset) + 1);
 					strcpy(newNode->offset, newOffset);
+					newNode->offsetNumeric = newAddress;
 					newNode->name = (char*)malloc(strlen(newName) + 1);
 					strcpy(newNode->name, newName);
 					newNode->comment = (char*)malloc(strlen(newComment) + 1);
@@ -1000,7 +953,7 @@ void AddNewSymbolicName(unsigned int newAddress, char* newOffset, char* newName,
 		Name* previousNode = 0;
 		while (node)
 		{
-			if (!strcmp(node->offset, newOffset))
+			if (node->offsetNumeric == newAddress)
 			{
 				// found matching address - delete it
 				free(node->offset);

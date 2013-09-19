@@ -27,6 +27,7 @@
 struct Name 
 {
 	Name* next;
+	uint16 offsetNumeric;
 	char* offset;
 	char* name;
 	char* comment;
@@ -38,11 +39,14 @@ extern std::vector<std::string> bookmarks_name;
 extern int debuggerWasActive;
 
 int checkCondition(const char* buffer, int num);
-char* generateNLFilenameForAddress(unsigned int address);
-Name* getNamesPointerForAddress(unsigned int address);
-void setNamesPointerForAddress(unsigned int address, Name* newNode);
+
+Name* findNode(Name* node, const char* offset);
+Name* findNode(Name* node, uint16 offsetNumeric);
+
+char* generateNLFilenameForAddress(uint16 address);
+Name* getNamesPointerForAddress(uint16 address);
+void setNamesPointerForAddress(uint16 address, Name* newNode);
 void loadNameFiles();
-void decorateAddress(unsigned int addr, char** str_name, char** str_comment);
 void replaceNames(Name* list, char* str);
 void AddDebuggerBookmark(HWND hwnd);
 void AddDebuggerBookmark2(HWND hwnd, unsigned int addr);
@@ -55,5 +59,5 @@ void GoToDebuggerBookmark(HWND hwnd);
 int isHex(char c);
 
 bool DoSymbolicDebugNaming(int offset, HWND parentHWND);
-void AddNewSymbolicName(unsigned int newAddress, char* newOffset, char* newName, char* newComment);
+void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char* newComment);
 void WriteNameFileToDisk(const char* filename, Name* node);

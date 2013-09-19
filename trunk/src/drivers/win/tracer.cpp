@@ -75,10 +75,10 @@ char str_axystate[LOG_AXYSTATE_MAX_LEN] = {0}, str_procstatus[LOG_PROCSTATUS_MAX
 char str_tabs[LOG_TABS_MASK+1] = {0}, str_address[LOG_ADDRESS_MAX_LEN] = {0}, str_data[LOG_DATA_MAX_LEN] = {0}, str_disassembly[LOG_DISASSEMBLY_MAX_LEN] = {0};
 char str_result[LOG_LINE_MAX_LEN] = {0};
 char str_temp[LOG_LINE_MAX_LEN] = {0};
-char* tracer_decoration_name;
-char* tracer_decoration_comment;
 char str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
 char str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
+char* tracer_decoration_comment;
+char* tracer_decoration_comment_end_pos;
 
 bool log_old_emu_paused = true;		// thanks to this flag the window only updates once after the game is paused
 extern bool JustFrameAdvanced;
@@ -568,39 +568,41 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			if (logging_options & LOG_SYMBOLIC)
 			{
 				// Insert Name and Comment lines if needed
-				tracer_decoration_name = 0;
-				tracer_decoration_comment = 0;
-				decorateAddress(addr, &tracer_decoration_name, &tracer_decoration_comment);
-				if (tracer_decoration_name)
+				Name* node = findNode(getNamesPointerForAddress(addr), addr);
+				if (node)
 				{
-					strcpy(str_decoration, tracer_decoration_name);
-					strcat(str_decoration, ": ");
-					OutputLogLine(str_decoration, true);
-				}
-				if (tracer_decoration_comment)
-				{
-					// make a copy
-					strcpy(str_decoration_comment, tracer_decoration_comment);
-					strcat(str_decoration_comment, "\r\n");
-					tracer_decoration_comment = str_decoration_comment;
-					// divide the str_decoration_comment into strings (Comment1, Comment2, ...)
-					char* end_pos = strstr(tracer_decoration_comment, "\r\n");
-					while (end_pos)
+					if (node->name)
 					{
-						end_pos[0] = 0;		// set \0 instead of \r
-						strcpy(str_decoration, "; ");
-						strcat(str_decoration, tracer_decoration_comment);
+						strcpy(str_decoration, node->name);
+						strcat(str_decoration, ":");
 						OutputLogLine(str_decoration, true);
-						end_pos += 2;
-						tracer_decoration_comment = end_pos;
-						end_pos = strstr(end_pos, "\r\n");
+					}
+					if (node->comment)
+					{
+						// make a copy
+						strcpy(str_decoration_comment, node->comment);
+						strcat(str_decoration_comment, "\r\n");
+						tracer_decoration_comment = str_decoration_comment;
+						// divide the str_decoration_comment into strings (Comment1, Comment2, ...)
+						char* tracer_decoration_comment_end_pos = strstr(tracer_decoration_comment, "\r\n");
+						while (tracer_decoration_comment_end_pos)
+						{
+							tracer_decoration_comment_end_pos[0] = 0;		// set \0 instead of \r
+							strcpy(str_decoration, "; ");
+							strcat(str_decoration, tracer_decoration_comment);
+							OutputLogLine(str_decoration, true);
+							tracer_decoration_comment_end_pos += 2;
+							tracer_decoration_comment = tracer_decoration_comment_end_pos;
+							tracer_decoration_comment_end_pos = strstr(tracer_decoration_comment_end_pos, "\r\n");
+						}
 					}
 				}
 				replaceNames(ramBankNames, a);
 				replaceNames(loadedBankNames, a);
 				replaceNames(lastBankNames, a);
 			}
-			strcpy(str_disassembly, a);
+			strncpy(str_disassembly, a, LOG_DISASSEMBLY_MAX_LEN);
+			str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
 		}
 	}
 

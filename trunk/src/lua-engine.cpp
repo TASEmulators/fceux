@@ -1272,11 +1272,12 @@ static int memory_readbytesigned(lua_State *L) {
 
 static int GetWord(lua_State *L, bool isSigned)
 {
-	uint16 addressLow = luaL_checkinteger(L,1);
-	uint16 addressHigh = addressLow + 1;	// little endian
-	if (lua_type(L,2) == LUA_TNUMBER)
-		addressHigh = luaL_checkinteger(L,2);
-	uint32 result = FCEU_CheatGetByte(addressLow) + (FCEU_CheatGetByte(addressHigh) << 8);
+	// little endian, unless the high byte address is specified as a 2nd parameter
+	uint16 addressLow = luaL_checkinteger(L, 1);
+	uint16 addressHigh = addressLow + 1;
+	if (lua_type(L, 2) == LUA_TNUMBER)
+		addressHigh = luaL_checkinteger(L, 2);
+	uint16 result = FCEU_CheatGetByte(addressLow) | (FCEU_CheatGetByte(addressHigh) << 8);
 	return isSigned ? (int16)result : result;
 }
 

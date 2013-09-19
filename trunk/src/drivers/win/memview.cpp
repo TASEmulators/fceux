@@ -613,8 +613,6 @@ char EditString[3][20] = {"RAM","PPU","ROM"};
 void UpdateCaption()
 {
 	static char str[1000];
-	static char addrName[500];
-	static char addrNameCopy[500];
 
 	if (CursorEndAddy == -1)
 	{
@@ -633,17 +631,12 @@ void UpdateCaption()
 
 		if (EditingMode == MODE_NES_MEMORY && symbDebugEnabled)
 		{
-			// when watching RAM we may as well see symbolic names
-			sprintf(addrName, "$%04X", CursorStartAddy);
-			strcpy(addrNameCopy, addrName);
-			// try to find the name for this address in loadedBankNames
-			replaceNames(getNamesPointerForAddress(CursorStartAddy), addrName);
-			// check if anything chenged in this string
-			if (strcmp(addrName, addrNameCopy))
+			// when watching RAM we may as well see Symbolic Debug names
+			Name* node = findNode(getNamesPointerForAddress(CursorStartAddy), CursorStartAddy);
+			if (node)
 			{
-				// changes found, so the string was decorated by symbolic name - then output it
 				strcat(str, " - ");
-				strcat(str, addrName);
+				strcat(str, node->name);
 			}
 		}
 	} else
