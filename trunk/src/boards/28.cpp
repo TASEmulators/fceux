@@ -129,8 +129,7 @@ static DECLFW(WriteEXP)
 {
 	uint32 addr = A;
 	uint8 value = V;
-	if (addr >= 0x5000)
-		reg = value & 0x81;
+	reg = value & 0x81;
 }
 
 static DECLFW(WritePRG)
@@ -175,7 +174,7 @@ static void M28Power(void)
 	prg_mask_16k = PRGsize[0] - 1;
 
 	//EXP
-	SetWriteHandler(0x4020,0x5FFF,WriteEXP);
+	SetWriteHandler(0x5000,0x5FFF,WriteEXP);
   
 	//PRG
 	SetWriteHandler(0x8000,0xFFFF,WritePRG);
