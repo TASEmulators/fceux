@@ -224,7 +224,7 @@ void AddLogText(const char *text, unsigned int add_newline)
 	// also log the text into Trace Logger log if needed
 	if (logging && (logging_options & LOG_MESSAGES))
 	{
-		OutputLogLine(strdup(logtext[truncated_logcount()]), add_newline != 0);
+		OutputLogLine(strdup(logtext[truncated_logcount()]), 0, add_newline != 0);
 		log_old_emu_paused = false;		// force Trace Logger update
 	}
 

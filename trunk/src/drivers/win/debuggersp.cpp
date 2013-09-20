@@ -40,7 +40,7 @@ int lastBank = -1;
 int loadedBank = -1;
 extern char LoadedRomFName[2048];
 char NLfilename[2048];
-bool symbDebugEnabled = false;
+bool symbDebugEnabled = true;
 int debuggerWasActive = 0;
 char temp_chr[40] = {0};
 char delimiterChar[2] = "#";
@@ -463,8 +463,9 @@ void freeList(Name* n)
 * 
 * @param list NL list of address definitions
 * @param str The string where replacing takes place.
+* @param addressesLog Vector for collecting addresses that were replaced by names
 **/
-void replaceNames(Name* list, char* str)
+void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 {
 	static char buff[1001];
 	char* pos;
@@ -484,6 +485,8 @@ void replaceNames(Name* list, char* str)
 				strcat(buff, src);
 				strcat(buff, list->name);
 				src = pos + 5;	// 5 = strlen(beg->offset), because all offsets are in "$XXXX" format
+				if (addressesLog)
+					addressesLog->push_back(list->offsetNumeric);
 			}
 			// if any offsets were changed, replace str by buff
 			if (*buff)
@@ -544,15 +547,16 @@ char* generateNLFilenameForAddress(uint16 address)
 }
 Name* getNamesPointerForAddress(uint16 address)
 {
-	if (address < 0x8000)
+	// this function is called very often (when using "Symbolic trace"), so this is sorted by frequency
+	if (address >= 0xC000)
 	{
-		return ramBankNames;
-	} else if (address < 0xC000)
+		return lastBankNames;
+	} else if (address >= 0x8000)
 	{
 		return loadedBankNames;
 	} else
 	{
-		return lastBankNames;
+		return ramBankNames;
 	}
 }
 void setNamesPointerForAddress(uint16 address, Name* newNode)
@@ -907,8 +911,14 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 			node->offsetNumeric = newAddress;
 			node->name = (char*)malloc(strlen(newName) + 1);
 			strcpy(node->name, newName);
-			node->comment = (char*)malloc(strlen(newComment) + 1);
-			strcpy(node->comment, newComment);
+			if (strlen(newComment))
+			{
+				node->comment = (char*)malloc(strlen(newComment) + 1);
+				strcpy(node->comment, newComment);
+			} else
+			{
+				node->comment = 0;
+			}
 			node->next = 0;
 			setNamesPointerForAddress(newAddress, node);
 		} else
@@ -919,12 +929,20 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 				if (node->offsetNumeric == newAddress)
 				{
 					// found matching address - replace its name and comment
-					free(node->name);
+					if (node->name)
+						free(node->name);
 					node->name = (char*)malloc(strlen(newName) + 1);
 					strcpy(node->name, newName);
-					free(node->comment);
-					node->comment = (char*)malloc(strlen(newComment) + 1);
-					strcpy(node->comment, newComment);
+					if (node->comment)
+					{
+						free(node->comment);
+						node->comment = 0;
+					}
+					if (strlen(newComment))
+					{
+						node->comment = (char*)malloc(strlen(newComment) + 1);
+						strcpy(node->comment, newComment);
+					}
 					break;
 				}
 				if (node->next)
@@ -940,8 +958,14 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 					newNode->offsetNumeric = newAddress;
 					newNode->name = (char*)malloc(strlen(newName) + 1);
 					strcpy(newNode->name, newName);
-					newNode->comment = (char*)malloc(strlen(newComment) + 1);
-					strcpy(newNode->comment, newComment);
+					if (strlen(newComment))
+					{
+						newNode->comment = (char*)malloc(strlen(newComment) + 1);
+						strcpy(newNode->comment, newComment);
+					} else
+					{
+						newNode->comment = 0;
+					}
 					newNode->next = 0;
 					break;
 				}
@@ -956,9 +980,12 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 			if (node->offsetNumeric == newAddress)
 			{
 				// found matching address - delete it
-				free(node->offset);
-				free(node->name);
-				free(node->comment);
+				if (node->offset)
+					free(node->offset);
+				if (node->name)
+					free(node->name);
+				if (node->comment)
+					free(node->comment);
 				if (previousNode)
 					previousNode->next = node->next;
 				if (node == initialNode)

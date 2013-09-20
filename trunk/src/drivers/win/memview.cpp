@@ -720,7 +720,7 @@ void UpdateColorTable()
 				temp_offset = CurOffset + i - 16;	// (minus iNES header)
 				if (temp_offset >= 0)
 				{
-					if (temp_offset < cdloggerdataSize)
+					if ((unsigned int)temp_offset < cdloggerdataSize)
 					{
 						// PRG
 						if ((cdloggerdata[temp_offset] & 3) == 3)
@@ -744,7 +744,7 @@ void UpdateColorTable()
 					} else
 					{
 						temp_offset -= cdloggerdataSize;
-						if ((temp_offset < cdloggerVideoDataSize))
+						if (((unsigned int)temp_offset < cdloggerVideoDataSize))
 						{
 							// CHR
 							if ((cdloggervdata[temp_offset] & 3) == 3)

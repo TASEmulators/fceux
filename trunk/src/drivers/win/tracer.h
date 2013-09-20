@@ -43,4 +43,4 @@ void EnableTracerMenuItems(void);
 void LogInstruction(void);
 void DoTracer();
 void UpdateLogWindow(void);
-void OutputLogLine(const char *str, bool add_newline = true);
+void OutputLogLine(const char *str, std::vector<uint16>* addressesLog = 0, bool add_newline = true);

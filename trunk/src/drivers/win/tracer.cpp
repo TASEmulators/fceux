@@ -67,7 +67,9 @@ char *logfilename = 0;
 int oldcodecount, olddatacount;
 
 SCROLLINFO tracesi;
+
 char **tracelogbuf;
+std::vector<std::vector<uint16>> tracelogbufAddressesLog;
 int tracelogbufsize, tracelogbufpos;
 int tracelogbufusedsize;
 
@@ -79,6 +81,7 @@ char str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
 char str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
 char* tracer_decoration_comment;
 char* tracer_decoration_comment_end_pos;
+std::vector<uint16> tempAddressesLog;
 
 bool log_old_emu_paused = true;		// thanks to this flag the window only updates once after the game is paused
 extern bool JustFrameAdvanced;
@@ -100,7 +103,7 @@ void EnableTracerMenuItems(void);
 int PromptForCDLogger(void);
 
 // returns the address, or EOF if selection cursor points to something else
-int Tracer_CheckClickingOnAnAddress(bool onlyCheckWhenNothingSelected)
+int Tracer_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, bool onlyCheckWhenNothingSelected)
 {
 	// trace_str contains the text in the log window
 	int sel_start, sel_end;
@@ -108,6 +111,7 @@ int Tracer_CheckClickingOnAnAddress(bool onlyCheckWhenNothingSelected)
 	if (onlyCheckWhenNothingSelected)
 		if (sel_end > sel_start)
 			return EOF;
+
 	// find the "$" before sel_start
 	int i = sel_start - 1;
 	for (; i > sel_start - 6; i--)
@@ -135,6 +139,45 @@ int Tracer_CheckClickingOnAnAddress(bool onlyCheckWhenNothingSelected)
 			}
 		}
 	}
+
+	if (tracelogbufusedsize == tracelogbufsize)
+		lineNumber = (tracelogbufpos + lineNumber) % tracelogbufsize;
+
+	if (lineNumber < tracelogbufAddressesLog.size())
+	{
+		uint16 addr;
+		Name* node;
+		char* name;
+		int nameLen;
+		char* start_pos;
+		char* pos;
+	
+		for (i = tracelogbufAddressesLog[lineNumber].size() - 1; i >= 0; i--)
+		{
+			addr = tracelogbufAddressesLog[lineNumber][i];
+			node = findNode(getNamesPointerForAddress(addr), addr);
+			if (node && node->name && *(node->name))
+			{
+				name = node->name;
+				nameLen = strlen(name);
+				if (sel_start - nameLen <= 0)
+					start_pos = trace_str;
+				else
+					start_pos = trace_str + (sel_start - nameLen);
+				pos = strstr(start_pos, name);
+				if (pos && pos <= trace_str + sel_start)
+				{
+					// clicked on the operand name
+					// select the text
+					SendDlgItemMessage(hTracer, IDC_TRACER_LOG, EM_SETSEL, (WPARAM)(int)(pos - trace_str), (LPARAM)((int)(pos - trace_str) + nameLen));
+					if (hDebug)
+						PrintOffsetToSeekAndBookmarkFields(addr);
+					return (int)addr;
+				}
+			}
+		}
+	}
+	
 	return EOF;
 }
 
@@ -144,7 +187,7 @@ BOOL CALLBACK IDC_TRACER_LOG_WndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 	{
 		case WM_LBUTTONDBLCLK:
 		{
-			int offset = Tracer_CheckClickingOnAnAddress(false);
+			int offset = Tracer_CheckClickingOnAnAddressOrSymbolicName(tracesi.nPos + (GET_Y_LPARAM(lParam) / debugSystem->fixedFontHeight), false);
 			if (offset != EOF)
 			{
 				// open Debugger at this address
@@ -159,7 +202,7 @@ BOOL CALLBACK IDC_TRACER_LOG_WndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 		}
 		case WM_LBUTTONUP:
 		{
-			Tracer_CheckClickingOnAnAddress(true);
+			Tracer_CheckClickingOnAnAddressOrSymbolicName(tracesi.nPos + (GET_Y_LPARAM(lParam) / debugSystem->fixedFontHeight), true);
 			break;
 		}
 		case WM_RBUTTONDOWN:
@@ -178,19 +221,11 @@ BOOL CALLBACK IDC_TRACER_LOG_WndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 		case WM_RBUTTONUP:
 		{
 			// if nothing is selected, try bringing Symbolic Debug Naming dialog
-			int offset = Tracer_CheckClickingOnAnAddress(true);
+			int offset = Tracer_CheckClickingOnAnAddressOrSymbolicName(tracesi.nPos + (GET_Y_LPARAM(lParam) / debugSystem->fixedFontHeight), true);
 			if (offset != EOF)
 			{
 				if (DoSymbolicDebugNaming(offset, hTracer))
 				{
-					/*
-					// enable "Symbolic trace" if not yet enabled
-					if (!(logging_options & LOG_SYMBOLIC))
-					{
-						logging_options |= LOG_SYMBOLIC;
-						CheckDlgButton(hTracer, IDC_CHECK_SYMBOLIC_TRACING, BST_CHECKED);
-					}
-					*/
 					if (hDebug)
 						UpdateDebugger(false);
 					if (hMemView)
@@ -438,9 +473,10 @@ void BeginLoggingSequence(void)
 	char str2[100];
 	int i, j;
 
-	if(!PromptForCDLogger())return; //do nothing if user selected no and CD Logger is needed
+	if (!PromptForCDLogger())
+		return; //do nothing if user selected no and CD Logger is needed
 
-	if(logtofile)
+	if (logtofile)
 	{
 		if(logfilename == NULL) ShowLogDirDialog();
 		if (!logfilename) return;
@@ -460,14 +496,16 @@ void BeginLoggingSequence(void)
 		strcpy(trace_str, "Allocating Memory...\r\n");
 		SetDlgItemText(hTracer, IDC_TRACER_LOG, trace_str);
 		tracelogbufsize = j = log_optn_intlst[log_lines_option];
-		tracelogbuf = (char**)malloc(j*sizeof(char *)); //mbg merge 7/19/06 added cast
-		for(i = 0;i < j;i++)
+		tracelogbuf = (char**)malloc(j * sizeof(char *));
+		for (i = 0;i < j;i++)
 		{
-			tracelogbuf[i] = (char*)malloc(LOG_LINE_MAX_LEN); //mbg merge 7/19/06 added cast
+			tracelogbuf[i] = (char*)malloc(LOG_LINE_MAX_LEN);
 			tracelogbuf[i][0] = 0;
 		}
 		sprintf(str2, "%d Bytes Allocated...\r\n", j * LOG_LINE_MAX_LEN);
 		strcat(trace_str, str2);
+		tracelogbufAddressesLog.resize(0);
+		tracelogbufAddressesLog.resize(tracelogbufsize);
 		// Assemble the message to pause the game.  Uses the current hotkey mapping dynamically
 		strcat(trace_str, "Pause the game (press ");
 		strcat(trace_str, GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]));
@@ -567,6 +605,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		{
 			if (logging_options & LOG_SYMBOLIC)
 			{
+				tempAddressesLog.resize(0);
 				// Insert Name and Comment lines if needed
 				Name* node = findNode(getNamesPointerForAddress(addr), addr);
 				if (node)
@@ -575,7 +614,8 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 					{
 						strcpy(str_decoration, node->name);
 						strcat(str_decoration, ":");
-						OutputLogLine(str_decoration, true);
+						tempAddressesLog.push_back(addr);
+						OutputLogLine(str_decoration, &tempAddressesLog);
 					}
 					if (node->comment)
 					{
@@ -590,16 +630,17 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 							tracer_decoration_comment_end_pos[0] = 0;		// set \0 instead of \r
 							strcpy(str_decoration, "; ");
 							strcat(str_decoration, tracer_decoration_comment);
-							OutputLogLine(str_decoration, true);
+							OutputLogLine(str_decoration, &tempAddressesLog);
 							tracer_decoration_comment_end_pos += 2;
 							tracer_decoration_comment = tracer_decoration_comment_end_pos;
 							tracer_decoration_comment_end_pos = strstr(tracer_decoration_comment_end_pos, "\r\n");
 						}
 					}
 				}
-				replaceNames(ramBankNames, a);
-				replaceNames(loadedBankNames, a);
-				replaceNames(lastBankNames, a);
+				
+				replaceNames(ramBankNames, a, &tempAddressesLog);
+				replaceNames(loadedBankNames, a, &tempAddressesLog);
+				replaceNames(lastBankNames, a, &tempAddressesLog);
 			}
 			strncpy(str_disassembly, a, LOG_DISASSEMBLY_MAX_LEN);
 			str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
@@ -703,13 +744,14 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			strcat(str_result, str_procstatus);
 	}
 
-	OutputLogLine(str_result);
+	OutputLogLine(str_result, &tempAddressesLog);
+	
 	return;
 }
 
-void OutputLogLine(const char *str, bool add_newline)
+void OutputLogLine(const char *str, std::vector<uint16>* addressesLog, bool add_newline)
 {
-	if(logtofile)
+	if (logtofile)
 	{
 		fputs(str, LOG_FP);
 		if (add_newline)
@@ -727,6 +769,12 @@ void OutputLogLine(const char *str, bool add_newline)
 			strncpy(tracelogbuf[tracelogbufpos], str, LOG_LINE_MAX_LEN - 1);
 			tracelogbuf[tracelogbufpos][LOG_LINE_MAX_LEN - 1] = 0;
 		}
+
+		if (addressesLog)
+			tracelogbufAddressesLog[tracelogbufpos] = (*addressesLog);
+		else
+			tracelogbufAddressesLog[tracelogbufpos].resize(0);
+
 		tracelogbufpos++;
 		if (tracelogbufusedsize < tracelogbufsize)
 			tracelogbufusedsize++;
@@ -734,19 +782,25 @@ void OutputLogLine(const char *str, bool add_newline)
 	}
 }
 
-void EndLoggingSequence(void){
+void EndLoggingSequence(void)
+{
 	int j, i;
-	if(logtofile){
+	if (logtofile)
+	{
 		fclose(LOG_FP);
-	} else {
+	} else
+	{
 		j = tracelogbufsize;
-		for(i = 0;i < j;i++){
+		for(i = 0;i < j;i++)
+		{
 			free(tracelogbuf[i]);
 		}
 		free(tracelogbuf);
+		tracelogbufAddressesLog.resize(0);
+		
 		SetDlgItemText(hTracer, IDC_TRACER_LOG, "Welcome to the Trace Logger.");
 	}
-	logging=0;
+	logging = 0;
 	SetDlgItemText(hTracer, IDC_BTN_START_STOP_LOGGING,"Start Logging");
 
 }
@@ -803,10 +857,8 @@ void UpdateLogText(void)
 	for (; i < last_line; i++)
 	{
 		j = i;
-		if(tracelogbufusedsize == tracelogbufsize)
-		{
+		if (tracelogbufusedsize == tracelogbufsize)
 			j = (tracelogbufpos + i) % tracelogbufsize;
-		}
 		strcat(trace_str, tracelogbuf[j]);
 	}
 	SetDlgItemText(hTracer, IDC_TRACER_LOG, trace_str);

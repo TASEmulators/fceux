@@ -47,7 +47,7 @@ char* generateNLFilenameForAddress(uint16 address);
 Name* getNamesPointerForAddress(uint16 address);
 void setNamesPointerForAddress(uint16 address, Name* newNode);
 void loadNameFiles();
-void replaceNames(Name* list, char* str);
+void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog = 0);
 void AddDebuggerBookmark(HWND hwnd);
 void AddDebuggerBookmark2(HWND hwnd, unsigned int addr);
 void DeleteDebuggerBookmark(HWND hwnd);

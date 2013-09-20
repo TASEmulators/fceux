@@ -82,7 +82,9 @@ char* debug_decoration_comment;
 char* debug_decoration_comment_end_pos;
 
 // this is used to keep track of addresses that lines of Disassembly window correspond to
-std::vector<unsigned int> disassembly_addresses;
+std::vector<uint16> disassembly_addresses;
+// this is used to keep track of addresses in operands of each printed instruction
+std::vector<std::vector<uint16>> disassembly_operands;
 // this is used to autoscroll the Disassembly window while keeping relative position of the ">" pointer inside this window
 unsigned int PC_pointerOffset = 0;
 // this is used for dirty, but unavoidable hack, which is necessary to ensure the ">" pointer is visible when stepping/seeking to PC
@@ -394,12 +396,11 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 	PCPointerWasDrawn = false;
 	beginningOfPCPointerLine = -1;
 	
-// ################################## Start of SP CODE ###########################
-
 	if (symbDebugEnabled)
+	{
 		loadNameFiles();
-
-// ################################## End of SP CODE ###########################
+		disassembly_operands.resize(0);
+	}
 
 	si.nPos = addr;
 	SetScrollInfo(GetDlgItem(hWnd,scrollid),SB_CTL,&si,TRUE);
@@ -418,8 +419,6 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 
 		instruction_addr = addr;
 
-// ################################## Start of SP CODE ###########################
-
 		if (symbDebugEnabled)
 		{
 			// insert Name and Comment lines if needed
@@ -432,6 +431,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 					strcat(debug_str, ":\r\n");
 					// we added one line to the disassembly window
 					disassembly_addresses.push_back(addr);
+					disassembly_operands.resize(i + 1);
 					i++;
 				}
 				if (node->comment)
@@ -450,6 +450,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 						strcat(debug_str, "\r\n");
 						// we added one line to the disassembly window
 						disassembly_addresses.push_back(addr);
+						disassembly_operands.resize(i + 1);
 						i++;
 
 						debug_decoration_comment_end_pos += 2;
@@ -460,8 +461,6 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 			}
 		}
 		
-// ################################## End of SP CODE ###########################
-
 		if (addr == X.PC)
 		{
 			PC_pointerOffset = instructions_count;
@@ -490,6 +489,8 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 		// Add address
 		strcat(debug_str, chr);
 		disassembly_addresses.push_back(addr);
+		if (symbDebugEnabled)
+			disassembly_operands.resize(i + 1);
 
 		size = opsize[GetMem(addr)];
 		if (size == 0)
@@ -519,18 +520,14 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 				size++;
 			}
 			
-// ################################## Start of SP CODE ###########################
-
 			a = Disassemble(addr, opcode);
 			
 			if (symbDebugEnabled)
 			{
-				replaceNames(ramBankNames, a);
-				replaceNames(loadedBankNames, a);
-				replaceNames(lastBankNames, a);
+				replaceNames(ramBankNames, a, &disassembly_operands[i]);
+				replaceNames(loadedBankNames, a, &disassembly_operands[i]);
+				replaceNames(lastBankNames, a, &disassembly_operands[i]);
 			}
-			
-// ################################## End of SP CODE ###########################
 
 			// special case: an RTS opcode
 			if (GetMem(instruction_addr) == 0x60)
@@ -1380,7 +1377,7 @@ void LoadGameDebuggerData(HWND hwndDlg = hDebug)
 }
 
 // returns the address, or EOF if selection cursor points to something else
-int Debugger_CheckClickingOnAnAddress(bool onlyCheckWhenNothingSelected)
+int Debugger_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, bool onlyCheckWhenNothingSelected)
 {
 	// debug_str contains the text in the disassembly window
 	int sel_start, sel_end;
@@ -1388,6 +1385,7 @@ int Debugger_CheckClickingOnAnAddress(bool onlyCheckWhenNothingSelected)
 	if (onlyCheckWhenNothingSelected)
 		if (sel_end > sel_start)
 			return EOF;
+	
 	// find the ":" or "$" before sel_start
 	int i = sel_start - 1;
 	for (; i > sel_start - 6; i--)
@@ -1414,6 +1412,64 @@ int Debugger_CheckClickingOnAnAddress(bool onlyCheckWhenNothingSelected)
 			}
 		}
 	}
+	
+	if (symbDebugEnabled && lineNumber < disassembly_addresses.size())
+	{
+		uint16 addr;
+		Name* node;
+		char* name;
+		int nameLen;
+		char* start_pos;
+		char* pos;
+	
+		// first, try finding the name of disassembly_addresses[lineNumber]
+		addr = disassembly_addresses[lineNumber];
+		node = findNode(getNamesPointerForAddress(addr), addr);
+		if (node && node->name && *(node->name))
+		{
+			name = node->name;
+			nameLen = strlen(name);
+			if (sel_start - nameLen <= 0)
+				start_pos = debug_str;
+			else
+				start_pos = debug_str + (sel_start - nameLen);
+			pos = strstr(start_pos, name);
+			if (pos && pos <= debug_str + sel_start)
+			{
+				// clicked on the Name
+				// select the text
+				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(int)(pos - debug_str), (LPARAM)((int)(pos - debug_str) + nameLen));
+				PrintOffsetToSeekAndBookmarkFields(addr);
+				return (int)addr;
+			}
+		}
+
+		// then, try finding the name of disassembly_operands
+		for (i = disassembly_operands[lineNumber].size() - 1; i >= 0; i--)
+		{
+			addr = disassembly_operands[lineNumber][i];
+			node = findNode(getNamesPointerForAddress(addr), addr);
+			if (node && node->name && *(node->name))
+			{
+				name = node->name;
+				nameLen = strlen(name);
+				if (sel_start - nameLen <= 0)
+					start_pos = debug_str;
+				else
+					start_pos = debug_str + (sel_start - nameLen);
+				pos = strstr(start_pos, name);
+				if (pos && pos <= debug_str + sel_start)
+				{
+					// clicked on the operand name
+					// select the text
+					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(int)(pos - debug_str), (LPARAM)((int)(pos - debug_str) + nameLen));
+					PrintOffsetToSeekAndBookmarkFields(addr);
+					return (int)addr;
+				}
+			}
+		}
+	}
+	
 	return EOF;
 }
 
@@ -1423,7 +1479,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 	{
 		case WM_LBUTTONDBLCLK:
 		{
-			int offset = Debugger_CheckClickingOnAnAddress(false);
+			int offset = Debugger_CheckClickingOnAnAddressOrSymbolicName(GET_Y_LPARAM(lParam) / debugSystem->fixedFontHeight, false);
 			if (offset != EOF)
 			{
 				// bring "Add Breakpoint" dialog
@@ -1437,7 +1493,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 		}
 		case WM_LBUTTONUP:
 		{
-			Debugger_CheckClickingOnAnAddress(true);
+			Debugger_CheckClickingOnAnAddressOrSymbolicName(GET_Y_LPARAM(lParam) / debugSystem->fixedFontHeight, true);
 			break;
 		}
 		case WM_RBUTTONDOWN:
@@ -1456,7 +1512,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 		case WM_RBUTTONUP:
 		{
 			// if nothing is selected, try bringing Symbolic Debug Naming dialog
-			int offset = Debugger_CheckClickingOnAnAddress(true);
+			int offset = Debugger_CheckClickingOnAnAddressOrSymbolicName(GET_Y_LPARAM(lParam) / debugSystem->fixedFontHeight, true);
 			if (offset != EOF)
 			{
 				if (DoSymbolicDebugNaming(offset, hDebug))
