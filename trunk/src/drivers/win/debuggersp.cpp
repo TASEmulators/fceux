@@ -660,7 +660,14 @@ void AddDebuggerBookmark2(HWND hwnd, unsigned int addr)
 {
 	int index = bookmarks_addr.size();
 	bookmarks_addr.push_back(addr);
-	bookmarks_name.push_back("");
+	// try to find Symbolic name for this address
+	Name* node = findNode(getNamesPointerForAddress(addr), addr);
+	if (node && node->name)
+		bookmarks_name.push_back(node->name);
+	else
+		bookmarks_name.push_back("");
+
+	// add new item to ListBox
 	char buffer[256];
 	sprintf(buffer, "%04X %s", bookmarks_addr[index], bookmarks_name[index].c_str());
 	SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_ADDSTRING, 0, (LPARAM)buffer);
@@ -676,7 +683,7 @@ void AddDebuggerBookmark2(HWND hwnd, unsigned int addr)
 **/
 void AddDebuggerBookmark(HWND hwnd)
 {
-	unsigned int n;
+	int n;
 	char buffer[5] = {0};
 	
 	GetDlgItemText(hwnd, IDC_DEBUGGER_BOOKMARK, buffer, 5);

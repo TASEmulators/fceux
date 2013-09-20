@@ -1380,7 +1380,7 @@ void LoadGameDebuggerData(HWND hwndDlg = hDebug)
 int Debugger_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, bool onlyCheckWhenNothingSelected)
 {
 	// debug_str contains the text in the disassembly window
-	int sel_start, sel_end;
+	int sel_start = 0, sel_end = 0;
 	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
 	if (onlyCheckWhenNothingSelected)
 		if (sel_end > sel_start)
@@ -1511,8 +1511,14 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 		}
 		case WM_RBUTTONUP:
 		{
-			// if nothing is selected, try bringing Symbolic Debug Naming dialog
-			int offset = Debugger_CheckClickingOnAnAddressOrSymbolicName(GET_Y_LPARAM(lParam) / debugSystem->fixedFontHeight, true);
+			// save current selection
+			int sel_start = 0, sel_end = 0;
+			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
+			// simulate a click
+			CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, WM_LBUTTONDOWN, wParam, lParam);
+			CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, WM_LBUTTONUP, wParam, lParam);
+			// try bringing Symbolic Debug Naming dialog
+			int offset = Debugger_CheckClickingOnAnAddressOrSymbolicName(GET_Y_LPARAM(lParam) / debugSystem->fixedFontHeight, false);
 			if (offset != EOF)
 			{
 				if (DoSymbolicDebugNaming(offset, hDebug))
@@ -1524,7 +1530,16 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 						CheckDlgButton(hDebug, IDC_DEBUGGER_ENABLE_SYMBOLIC, BST_CHECKED);
 					}
 					UpdateDebugger(false);
+				} else
+				{
+					// then restore old selection
+					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)sel_start, (LPARAM)sel_end);
 				}
+				return 0;
+			} else
+			{
+				// then restore old selection
+				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)sel_start, (LPARAM)sel_end);
 			}
 			break;
 		}

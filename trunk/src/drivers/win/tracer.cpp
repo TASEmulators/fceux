@@ -220,8 +220,14 @@ BOOL CALLBACK IDC_TRACER_LOG_WndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 		}
 		case WM_RBUTTONUP:
 		{
-			// if nothing is selected, try bringing Symbolic Debug Naming dialog
-			int offset = Tracer_CheckClickingOnAnAddressOrSymbolicName(tracesi.nPos + (GET_Y_LPARAM(lParam) / debugSystem->fixedFontHeight), true);
+			// save current selection
+			int sel_start, sel_end;
+			SendDlgItemMessage(hTracer, IDC_TRACER_LOG, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
+			// simulate a click
+			CallWindowProc(IDC_TRACER_LOG_oldWndProc, hwndDlg, WM_LBUTTONDOWN, wParam, lParam);
+			CallWindowProc(IDC_TRACER_LOG_oldWndProc, hwndDlg, WM_LBUTTONUP, wParam, lParam);
+			// try bringing Symbolic Debug Naming dialog
+			int offset = Tracer_CheckClickingOnAnAddressOrSymbolicName(tracesi.nPos + (GET_Y_LPARAM(lParam) / debugSystem->fixedFontHeight), false);
 			if (offset != EOF)
 			{
 				if (DoSymbolicDebugNaming(offset, hTracer))
@@ -230,7 +236,16 @@ BOOL CALLBACK IDC_TRACER_LOG_WndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 						UpdateDebugger(false);
 					if (hMemView)
 						UpdateCaption();
+				} else
+				{
+					// then restore old selection
+					SendDlgItemMessage(hTracer, IDC_TRACER_LOG, EM_SETSEL, (WPARAM)sel_start, (LPARAM)sel_end);
 				}
+				return 0;
+			} else
+			{
+				// then restore old selection
+				SendDlgItemMessage(hTracer, IDC_TRACER_LOG, EM_SETSEL, (WPARAM)sel_start, (LPARAM)sel_end);
 			}
 			break;
 		}
