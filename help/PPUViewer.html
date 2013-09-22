@@ -63,16 +63,28 @@
 <p><br/></p>
 <p>The NES architecture includes a 6502 CPU as well as a custom video controller known as a PPU (Picture Processing Unit). &nbsp;The PPU's video memory is separated from the main CPU memory and can be read/written via special ports (see <a class="rvts18" href="PPU.html">PPU Memory</a>).</p>
 <p><br/></p>
-<p>The PPU viewer will display the contents of the current PPU memory. &nbsp;(It does not alter game data in anyway). &nbsp;</p>
+<p>The PPU viewer will only display the contents of the current PPU memory. It does not alter game data in any way.</p>
+<p><br/></p>
 <p><br/></p>
 <p><span class="rvts16">Using PPU Viewer</span></p>
 <p><br/></p>
 <p><span class="rvts10">Show on Scanline</span></p>
-<p>This options makes it show what the PPU looks like when the screen is drawing that scanline. &nbsp;It is useful for games like SMB, that swap pattern </p>
-<p>tables mid-frame (status bar stuff).</p>
+<p>This options makes it show what the PPU looks like when the screen is drawing that particular scanline. It is useful for games like SMB, that swap pattern tables mid-frame (e.g. for status bar stuff).</p>
 <p><br/></p>
-<p>Right clicking on one of the PPU panels cycles the palettes it is shown with, though pattern palettes and then sprite ones</p>
-<p>Putting the mouse cursor over a tile will display the tile address. &nbsp;Moving cursor over palette color will give palette address.</p>
+<p>Right clicking on one of the PPU panels will change the palette it is shown with, cycling though pattern palettes and then sprite ones.</p>
+<p>Putting the mouse cursor over a tile will display the tile address. Moving cursor over palette color will give palette address.</p>
+<p><br/></p>
+<p>When <a class="rvts18" href="CodeDataLogger.html">Code/Data Logger</a> is running, you can also use the "Mask unused graphics" feature. Alternatively, you can only mask tiles that were used (drawn or otherwise accessed) and emphasize the tiles that weren't used (e.g. in order to find secret sprites).</p>
+<p>Note: this feature only works with games that use CHR ROM, because Code/Data Logger only logs accesses to CHR ROM.</p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
 <p></p>
 <p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/create-epub-ebooks">Produce electronic books easily</a></p>
 </div>

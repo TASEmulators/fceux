@@ -61,35 +61,36 @@
 <p><br/></p>
 <p><span class="rvts16">Introduction</span></p>
 <p><br/></p>
-<p>The Code/Data Logger makes it much easier to reverse-engineer NES ROMs. The basic idea behind it is that a normal NES disassembler cannot distinguish between code (which is executed) and data (which is read). The Code/Data logger keeps track of what is executed and what is read while the game is played, and then you can save this information into a .cdl file, which is essentially a mask that tells which bytes in the ROM are code and which are data. The file can be used in conjunction with a suitable disassembler to disassemble only the actual game code, resulting in a much cleaner source code, with code and data properly separated.</p>
+<p>The Code/Data Logger makes it much easier to reverse-engineer NES ROMs. The basic idea behind it is that a normal NES disassembler cannot distinguish between code (which is executed) and data (which is read). The Code/Data Logger keeps track of what is executed and what is read while the game is played, and then you can save this information into a .cdl file, which is essentially a <span class="rvts32">mask</span> that tells which bytes in the ROM are code and which are data. The file can be used in conjunction with a suitable disassembler to disassemble only the actual game code, resulting in a much cleaner source code where code and data are properly separated.</p>
 <p><br/></p>
 <p><span class="rvts16">Using the Code/Data Logger</span></p>
 <p><br/></p>
-<p>The Code/Data Logger keeps track of every byte in the ROM and records whether it's code (is executed) or data (is read). You can combine this logging feature with other tools to make them much more powerful:</p>
+<p>The Code/Data Logger keeps track of every byte in the ROM and records whether it's code (is executed) or data (is read).</p>
+<p>You can combine this logging feature with other tools to make them much more powerful:</p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li>combine with Debugger to see which branches of the game code were executed and which weren't yet</li>
-<li>combine with Trace Logger to let it log the code selectively</li>
-<li>combine with Hex Editor to enable smart coloring of bytes (so you can observe which bytes are used by the game and how/when they are used)</li>
-<li>combine with (an external) Tile Viewer to see which graphics was used during the play session, and which was not</li>
+<li>combine with <a class="rvts18" href="Debugger.html">Debugger</a> to see which branches of the game code were executed and which weren't yet</li>
+<li>combine with <a class="rvts18" href="TraceLogger.html">Trace Logger</a> to let it log the code selectively</li>
+<li>combine with <a class="rvts18" href="PPUViewer.html">PPU Viewer</a> to let it only display graphics that was drawn on screen at least once</li>
+<li>combine with <a class="rvts18" href="HexEditor.html">Hex Editor</a> to enable smart coloring of bytes (so you can observe which bytes are used by the game and how/when they are used)</li>
+<li>combine with (an external) Tile Viewer to see which graphics was used during certain play session, and which was not</li>
 <li>combine with (an external) ROM Corruptor to make it only corrupt data, but not code</li>
 <li>combine with (an external) Disassembler to help it separate code from data</li>
 </ul>
 <p><br/></p>
-<p>See, it is very useful for finding specific code and data by using it with the <a class="rvts18" href="TraceLogger.html">Trace Logger</a>.</p>
-<p>It also makes debugging work more visual, since you can always see which lines of the disassembled code were executed and which weren't.</p>
+<p>See, it is very useful for finding certain types of data or code branches. It also makes debugging work more visual, since you can always see which lines of the disassembled code were executed and which weren't.</p>
 <p><br/></p>
-<p>Furthermore, while the Code/Data Logger is running, the <a class="rvts18" href="HexEditor.html">Hex Editor</a> will color-code ROM bytes depending on whether they were logged as code or data. </p>
+<p>Furthermore, while the Code/Data Logger is running, the <a class="rvts18" href="HexEditor.html">Hex Editor</a> will color-code ROM bytes depending on whether they were logged as code or data:</p>
 <p><br/></p>
 <p>For PRG ROM:</p>
-<p><span class="rvts50">Dark-yellow</span> - the byte is code</p>
-<p><span class="rvts51">Blue</span> - the byte is data</p>
-<p><span class="rvts52">Cyan</span> - the byte is PCM audio data</p>
-<p><span class="rvts49">Green</span> - the byte is both code and data</p>
+<p><span class="rvts51">Dark-yellow</span> - the byte is code</p>
+<p><span class="rvts52">Blue</span> - the byte is data</p>
+<p><span class="rvts53">Cyan</span> - the byte is PCM audio data</p>
+<p><span class="rvts50">Green</span> - the byte is both code and data</p>
 <p><br/></p>
 <p>For CHR ROM:</p>
-<p><span class="rvts53">Yellow</span> - the byte was rendered</p>
-<p><span class="rvts54">Light-blue</span> - the byte was read programmatically</p>
-<p><span class="rvts55">Light-green</span> - the byte was both rendered and read programmatically</p>
+<p><span class="rvts54">Yellow</span> - the byte was rendered</p>
+<p><span class="rvts55">Light-blue</span> - the byte was read programmatically</p>
+<p><span class="rvts56">Light-green</span> - the byte was both rendered and read programmatically</p>
 <p><br/></p>
 <p>The Code/Data Logger can also be used to generate a stripped NES ROM.</p>
 <p>"Stripped" NES ROM is a ROM in which everything that was not logged by the Code/Data Logger is removed. It can be useful in many ways, for example, you can view the ROM in an external Hex Editor or a Tile Viewer, and you'll see only the parts that were used while playing. Furthermore, you could use it to create a demo ROM by only playing through the parts you would like others to see.</p>
@@ -102,8 +103,7 @@
 <p><br/></p>
 <p>Alternatively, you can save Unused Data (a ROM which is the opposite to the Stripped ROM). For example, you can play through the game, then save Unused Data ROM and watch it in a Tile Viewer to find unused graphics (possibly stumble upon secrets and easter eggs).</p>
 <p><br/></p>
-<p>Some notes:</p>
-<p>When you "Load" another .cdl file, it does not clear the current log; instead, it combines it with the information in the file. This can be useful if you're trying to obtain a complete log of certain game, as multiple people can play through the game and keep code/data logs, and then the results can be combined. But if you would like to actually clear the code/data log, press the "Reset Log" button.</p>
+<p>Note: When you "Load" another .cdl file, it does not clear the current log; instead, it combines ("arithmetical OR") it with the information in the file. This can be useful if you're trying to obtain a complete log of certain game, as multiple people can play through the game and keep own code/data logs, and then the results can be combined into an all-encompassing log. But if you would like to actually clear the code/data log, press the "Reset Log" button.</p>
 <p><br/></p>
 <hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
 <p><br/></p>
@@ -172,12 +172,13 @@
 <p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(e.g. Argus_(J).nes checks if the bankswitching works by reading the same byte of CHR data before and after switching)</p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;x = unused.</p>
 <p><br/></p>
-<p><br/></p>
 <hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p><br/></p>
 <p><br/></p>
 <p>CDL files make possible a number of things never done before. First, a PCM data ripper could be created that scans for data that has the 'P' bit set, in order to find/rip/play every PCM sample in a ROM. Also, it is possible for someone to make a more intelligent ROM corruptor that only corrupts data (by checking the 'D' bit). In any case, the Code/Data Logger opens many new possibilities for discovering useful things in games. Another interesting possibility would be to use the Code/Data Logger on an NSF file to create a stripped NSF. Such an NSF would contain nothing but the relevant subroutines and data required by each tune played; this would be helpful to NSF rippers by removing irrelevant information. Thus, an NSF ripper could create a stripped NSF by listening to each track while the Code/Data Logger operates on it, and then saving the stripped NSF. It should be noted that this capability, though tested and working on private builds, is detrimental to the process of fixing broken NSF files. For this reason, data logging is allowed for NSF files, but stripping NSF files of unused data is disabled.</p>
 <p><br/></p>
-<p>The Code/Data Logger becomes the most useful when you need to restore a full source code of a game using e.g. IDA or another disassembler. There you can write a custom IDC script that uses a CDL file and calls MakeCode()/MakeData() functions to help the disassembler distinguish code from data. Making full and working/recompileable disassembly becomes really easy this way.</p>
+<p>The Code/Data Logger becomes the most useful when you need to restore a full source code of a game using e.g. IDA or another disassembler. There you can write a custom IDC script that uses a CDL file and calls MakeCode()/MakeData() functions to help the disassembler distinguish code from data. Making full and working/reassemblable disassembly becomes really easy this way.</p>
+<p><br/></p>
 <p><br/></p>
 <p><br/></p>
 <p><br/></p>
