@@ -1,4 +1,19 @@
 
+22-Sep-2013 - AnS - Tracer: the dialog window can be resized
+21-Sep-2013 - AnS - Debugger: newly created Bookmarks inherit existing symbolic name by default
+20-Sep-2013 - AnS - Debugger, Tracer: clicking on Symbolic names works as well as clicking on addresses
+17-Sep-2013 - zeromus - fixed "Single Instance Mode"
+16-Sep-2013 - AnS - PPU Viewer: added "Mask unused graphics" and "Invert the mask" checkboxes; fixed window layout when using big fonts
+15-Sep-2013 - feos - Lua: added tobitstring(), memory.readword(int address1 [, int address2]), memory.readwordsigned(int address1 [, int address2]) functions
+15-Sep-2013 - CaH4e3 - mapper 002 - workaround for "Top Gun" issue #621, needs testing if this broke something else; mapper 012 - added hardware dip for language select; UNIF PEC-586 - fixed render finally, added 512K cartridges suppport, TODO: PEC keyboard
+13-Sep-2013 - AnS - debuggerFontSize and hexeditorFontSize can be specified in fceux.cfg
+13-Sep-2013 - AnS - Debugger: "Symbolic Debug" state is now saved in global fceux.cfg instead of different .deb files
+12-Sep-2013 - AnS - Tracer: added mouse wheel support
+12-Sep-2013 - AnS - Tracer: clicking any address select the address; double-clicking any address brings Debugger at the address
+12-Sep-2013 - AnS - Tracer: added Symbolic Debug naming by right-clicking any address
+10-Sep-2013 - feos - Hexeditor: Symbolic Debug naming by right-clicking address
+10-Sep-2013 - AnS - Debugger: added Symbolic Debug naming by right-clicking any address
+05-Sep-2013 - AnS - Debugger: fixed Cycles counter reset when loading an earlier savestate
 15-Aug-2013 - CaH4e3 - fixed bandai mapper emulation
 04-Aug-2013 - AnS - Hexeditor: added "Highlighting" submenu and "Highlight Activity" feature
 04-Aug-2013 - AnS - Taseditor: an experiment with somewhat different colors for HotChanges
