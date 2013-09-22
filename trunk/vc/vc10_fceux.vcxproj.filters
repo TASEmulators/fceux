@@ -1803,8 +1803,5 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\auxlib.lua" />
-    <CustomBuild Include="..\src\drivers\win\help\fceux.chm">
-      <Filter>drivers\win\help</Filter>
-    </CustomBuild>
   </ItemGroup>
 </Project>

@@ -1189,13 +1189,6 @@
     <None Include="..\src\drivers\win\res\te_9.bmp" />
     <None Include="..\src\drivers\win\res\te_9_selected.bmp" />
     <None Include="..\src\drivers\win\res\te_arrow.bmp" />
-    <CustomBuild Include="..\src\drivers\win\help\fceux.chm">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">xcopy /y /d "$(ProjectDir)\..\src\drivers\win\help\fceux.chm" "$(OutDir)"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)fceux.chm;%(Outputs)</Outputs>
-    </CustomBuild>
     <CustomBuild Include="..\src\auxlib.lua">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">xcopy /y /d "$(ProjectDir)\..\src\auxlib.lua"  "$(OutDir)"
 </Command>
