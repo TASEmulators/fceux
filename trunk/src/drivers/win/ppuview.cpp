@@ -47,14 +47,14 @@ int mouse_x, mouse_y;
 #define PATTERNHEIGHT        128
 #define PATTERNBITWIDTH        PATTERNWIDTH*3
 #define PATTERNDESTX_BASE 7
-#define PATTERNDESTY_BASE 16
+#define PATTERNDESTY_BASE 18
 #define ZOOM                        2
 
 #define PALETTEWIDTH        32*4*4
 #define PALETTEHEIGHT        32*2
 #define PALETTEBITWIDTH        PALETTEWIDTH*3
 #define PALETTEDESTX_BASE 7
-#define PALETTEDESTY_BASE 16
+#define PALETTEDESTY_BASE 18
 
 #define TBM_SETPOS            (WM_USER+5)
 #define TBM_SETRANGE        (WM_USER+6)

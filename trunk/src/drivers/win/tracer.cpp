@@ -100,7 +100,6 @@ KnownWindowItemPosData tracerKnownWindowItems[] = {
 	IDC_RADIO_LOG_LAST, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
 	IDC_TRACER_LOG_SIZE, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
 	IDC_TEXT_LINES_TO_THIS_WINDOW, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
-	IDC_BTN_START_STOP_LOGGING, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
 	IDC_RADIO_LOG_TO_FILE, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
 	IDC_BTN_LOG_BROWSE, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
 };
@@ -113,10 +112,10 @@ int oldcodecount, olddatacount;
 
 SCROLLINFO tracesi;
 
-char **tracelogbuf;
+char **tracelogbuf = 0;
 std::vector<std::vector<uint16>> tracelogbufAddressesLog;
-int tracelogbufsize, tracelogbufpos;
-int tracelogbufusedsize;
+int tracelogbufsize = 0, tracelogbufpos = 0;
+int tracelogbufusedsize = 0;
 
 char str_axystate[LOG_AXYSTATE_MAX_LEN] = {0}, str_procstatus[LOG_PROCSTATUS_MAX_LEN] = {0};
 char str_tabs[LOG_TABS_MASK+1] = {0}, str_address[LOG_ADDRESS_MAX_LEN] = {0}, str_data[LOG_DATA_MAX_LEN] = {0}, str_disassembly[LOG_DISASSEMBLY_MAX_LEN] = {0};
@@ -139,8 +138,10 @@ WNDPROC IDC_TRACER_LOG_oldWndProc = 0;
 
 void ShowLogDirDialog(void);
 void BeginLoggingSequence(void);
-void EndLoggingSequence(void);
+void ClearTraceLogBuf();
+void EndLoggingSequence();
 void UpdateLogWindow(void);
+void ScrollLogWindowToLastLine();
 void UpdateLogText(void);
 void EnableTracerMenuItems(void);
 int PromptForCDLogger(void);
@@ -474,7 +475,7 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 						if (tracesi.nPos < tracesi.nMin)
 							tracesi.nPos = tracesi.nMin;
 						SetScrollInfo(GetDlgItem(hTracer, IDC_SCRL_TRACER_LOG), SB_CTL, &tracesi, TRUE);
-						if (logging && !logtofile)
+						if (!logtofile)
 							UpdateLogText();
 					}
 				}
@@ -506,8 +507,9 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		case WM_CLOSE:
 		case WM_QUIT:
-			if(logging)
+			if (logging)
 				EndLoggingSequence();
+			ClearTraceLogBuf();
 			hTracer = 0;
 			EndDialog(hwndDlg,0);
 			break;
@@ -519,8 +521,10 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					switch(LOWORD(wParam))
 					{
 						case IDC_BTN_START_STOP_LOGGING:
-							if(logging)EndLoggingSequence();
-							else BeginLoggingSequence();
+							if (logging)
+								EndLoggingSequence();
+							else
+								BeginLoggingSequence();
 							EnableTracerMenuItems();
 							break;
 						case IDC_RADIO_LOG_LAST:
@@ -613,7 +617,7 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			if (lParam)
 			{
-				if ((!logging) || logtofile)
+				if (!tracelogbuf)
 					break;
 
 				if (!FCEUI_EmulationPaused() && !log_update_window)
@@ -682,6 +686,8 @@ void BeginLoggingSequence(void)
 		fprintf(LOG_FP,FCEU_NAME_AND_VERSION" - Trace Log File\n"); //mbg merge 7/19/06 changed string
 	} else
 	{
+		ClearTraceLogBuf();
+		// create new log
 		log_lines_option = SendDlgItemMessage(hTracer, IDC_TRACER_LOG_SIZE, CB_GETCURSEL, 0, 0);
 		if (log_lines_option == CB_ERR)
 			log_lines_option = 0;
@@ -726,7 +732,8 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 
 	// if instruction executed from the RAM, skip this, log all instead
 	// TODO: loops folding mame-lyke style
-	if(GetPRGAddress(addr) != -1) {
+	if (GetPRGAddress(addr) != -1)
+	{
 		if(((logging_options & LOG_NEW_INSTRUCTIONS) && (oldcodecount != codecount)) ||
 		   ((logging_options & LOG_NEW_DATA) && (olddatacount != datacount)))
 		{
@@ -974,7 +981,22 @@ void OutputLogLine(const char *str, std::vector<uint16>* addressesLog, bool add_
 	}
 }
 
-void EndLoggingSequence(void)
+void ClearTraceLogBuf(void)
+{
+	if (tracelogbuf)
+	{
+		int j = tracelogbufsize;
+		for(int i = 0; i < j;i++)
+		{
+			free(tracelogbuf[i]);
+		}
+		free(tracelogbuf);
+		tracelogbuf = 0;
+	}
+	tracelogbufAddressesLog.resize(0);
+}
+
+void EndLoggingSequence()
 {
 	int j, i;
 	if (logtofile)
@@ -982,19 +1004,15 @@ void EndLoggingSequence(void)
 		fclose(LOG_FP);
 	} else
 	{
-		j = tracelogbufsize;
-		for(i = 0;i < j;i++)
-		{
-			free(tracelogbuf[i]);
-		}
-		free(tracelogbuf);
-		tracelogbufAddressesLog.resize(0);
-		
-		SetDlgItemText(hTracer, IDC_TRACER_LOG, "Welcome to the Trace Logger.");
+		strcpy(str_result, "Logging finished.");
+		OutputLogLine(str_result);
+		ScrollLogWindowToLastLine();
+		UpdateLogText();
+		// do not clear the log window
+		// ClearTraceLogBuf();
 	}
 	logging = 0;
 	SetDlgItemText(hTracer, IDC_BTN_START_STOP_LOGGING,"Start Logging");
-
 }
 
 void UpdateLogWindow(void)
@@ -1013,14 +1031,7 @@ void UpdateLogWindow(void)
 	}
 	log_old_emu_paused = emu_paused;
 
-	tracesi.cbSize = sizeof(SCROLLINFO);
-	tracesi.fMask = SIF_ALL;
-	tracesi.nMin = 0;
-	tracesi.nMax = tracelogbufusedsize;
-	tracesi.nPos = tracesi.nMax - tracesi.nPage;
-	if (tracesi.nPos < tracesi.nMin)
-		tracesi.nPos = tracesi.nMin;
-	SetScrollInfo(GetDlgItem(hTracer,IDC_SCRL_TRACER_LOG),SB_CTL,&tracesi,TRUE);
+	ScrollLogWindowToLastLine();
 
 	if (logging_options & LOG_SYMBOLIC)
 		loadNameFiles();
@@ -1030,12 +1041,24 @@ void UpdateLogWindow(void)
 	return;
 }
 
+void ScrollLogWindowToLastLine()
+{
+	tracesi.cbSize = sizeof(SCROLLINFO);
+	tracesi.fMask = SIF_ALL;
+	tracesi.nMin = 0;
+	tracesi.nMax = tracelogbufusedsize;
+	tracesi.nPos = tracesi.nMax - tracesi.nPage;
+	if (tracesi.nPos < tracesi.nMin)
+		tracesi.nPos = tracesi.nMin;
+	SetScrollInfo(GetDlgItem(hTracer,IDC_SCRL_TRACER_LOG),SB_CTL,&tracesi,TRUE);
+}
+
 void UpdateLogText(void)
 {
 	int j;
 	trace_str[0] = 0;
 
-	if (!tracelogbufpos)
+	if (!tracelogbuf || !tracelogbufpos || !tracelogbufsize)
 		return;
 
 	int last_line = tracesi.nPos + tracesi.nPage;
@@ -1061,7 +1084,7 @@ void UpdateLogText(void)
 
 void EnableTracerMenuItems(void)
 {
-	if(logging)
+	if (logging)
 	{
 		EnableWindow(GetDlgItem(hTracer,IDC_RADIO_LOG_LAST),FALSE);
 		EnableWindow(GetDlgItem(hTracer,IDC_RADIO_LOG_TO_FILE),FALSE);
@@ -1076,7 +1099,7 @@ void EnableTracerMenuItems(void)
 	EnableWindow(GetDlgItem(hTracer,IDC_BTN_LOG_BROWSE),TRUE);
 	EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_INSTRUCTIONS),TRUE);
 
-	if(logtofile)
+	if (logtofile)
 	{
 		EnableWindow(GetDlgItem(hTracer,IDC_TRACER_LOG_SIZE),FALSE);
 		EnableWindow(GetDlgItem(hTracer,IDC_BTN_LOG_BROWSE),TRUE);
