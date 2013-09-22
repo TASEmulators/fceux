@@ -13,7 +13,7 @@
 #define LOG_CYCLES_COUNT       1024
 #define LOG_INSTRUCTIONS_COUNT 2048
 
-#define LOG_LINE_MAX_LEN 150
+#define LOG_LINE_MAX_LEN 160
 // Frames count - 1+6+1 symbols
 // Cycles count - 1+11+1 symbols
 // Instructions count - 1+11+1 symbols
@@ -22,7 +22,7 @@
 // Tabs - 31
 // Address - 6
 // Data - 10
-// Disassembly - 35
+// Disassembly - 45
 // EOL (/0) - 1
 // ------------------------
 // 148 symbols total
@@ -31,7 +31,7 @@
 #define LOG_TABS_MASK 31
 #define LOG_ADDRESS_MAX_LEN 7
 #define LOG_DATA_MAX_LEN 11
-#define LOG_DISASSEMBLY_MAX_LEN 36
+#define LOG_DISASSEMBLY_MAX_LEN 46
 
 extern HWND hTracer;
 extern int log_update_window;

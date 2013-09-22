@@ -52,9 +52,19 @@ extern int eoptions;
 #define EO_TVASPECT      524288
 #define EO_SQUAREPIXELS 1048576
 
+enum WINDOW_ITEM_RESIZE_TYPES
+{
+	WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED,
+	WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
+	WINDOW_ITEM_RESIZE_TYPE_MULTIPLY,
+	// ---
+	WINDOW_ITEM_RESIZE_TYPES_TOTAL
+};
+
 bool directoryExists(const char* dirname);
 void WindowBoundsCheckResize(int &windowPosX, int &windowPosY, int windowSizeX, long windowRight);
 void WindowBoundsCheckNoResize(int &windowPosX, int &windowPosY, long windowRight);
+int recalculateResizedItemCoordinate(int initialValue, int initialBase, int newBase, unsigned int resizingType);
 void AddExtensionIfMissing(char * name,unsigned int maxsize,const char * extension);
 void AddExtensionIfMissing(std::string &name,const char * extension);
 std::string GetPath(std::string filename);

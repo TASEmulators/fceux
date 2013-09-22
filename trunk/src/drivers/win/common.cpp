@@ -27,6 +27,27 @@ void WindowBoundsCheckNoResize(int &windowPosX, int &windowPosY, long windowRigh
 		} 
 }
 
+int recalculateResizedItemCoordinate(int initialValue, int initialBase, int newBase, unsigned int resizingType)
+{
+	switch (resizingType)
+	{
+		default:
+		case WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED:
+		{
+			return initialValue;
+		}
+		case WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED:
+		{
+			return newBase - (initialBase - initialValue);
+		}
+		case WINDOW_ITEM_RESIZE_TYPE_MULTIPLY:
+		{
+			return (newBase * initialValue) / initialBase;
+			break;
+		}
+	}
+}
+
 // Check if a filename/path has the given extension. The extension is expected to be at the very end of the filename
 void AddExtensionIfMissing(char * name, unsigned int maxsize, const char * extension)
 {

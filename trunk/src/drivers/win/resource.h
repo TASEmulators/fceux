@@ -92,6 +92,7 @@
 #define IDC_DEBUGGER_STEP_OUT           106
 #define IDC_ADDBP_MEM_PPU               106
 #define IDC_NTVIEW_PROPERTIES_LINE_4    106
+#define IDC_TEXT_LINES_TO_THIS_WINDOW   106
 #define BTN_PORT2                       107
 #define BTN_CDLOGGER_SAVE               107
 #define IDC_CHEAT_SCRL_POSSIBILITIES    107
@@ -113,6 +114,7 @@
 #define BTN_CDLOGGER_SAVE_UNUSED        109
 #define IDC_VIDEOCONFIG_43              109
 #define IDC_VIDEOCONFIG_TVASPECT        109
+#define IDC_GROUP_LOG_OPTIONS           109
 #define IDC_CHEAT_VAL_LT_BY             110
 #define MENU_SAVE_STATE                 110
 #define CB_ASK_EXIT                     110
@@ -137,6 +139,7 @@
 #define IDC_DEBUGGER_BOOKMARK_ADD       112
 #define IDC_VIDEOCONFIG_DIRECTDRAW_WIN  112
 #define IDC_DEBUGGER_BOOKMARK_DEL       113
+#define IDC_EXTRA_LOG_OPTIONS           113
 #define BTN_CLEAR_AH                    114
 #define IDC_CHECK_LOG_NEW_INSTRUCTIONS  114
 #define IDD_DIALOG1                     114
@@ -637,7 +640,6 @@
 #define IDC_COPY_MARKERS                1204
 #define IDC_AUTORESUMECDLOGGING2        1204
 #define IDC_AUTOSAVECDL                 1204
-#define IDC_USE_CDLOGGER_DATA2          1204
 #define IDC_INVERT_THE_MASK             1204
 #define IDC_RAMLIST                     1205
 #define IDC_CHECK4                      1205

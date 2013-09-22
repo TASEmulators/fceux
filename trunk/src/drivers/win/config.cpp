@@ -101,6 +101,7 @@ extern int Monitor_wndx, Monitor_wndy;
 extern int logging_options;
 extern int log_lines_option;
 extern int Tracer_wndx, Tracer_wndy;
+extern int Tracer_wndWidth, Tracer_wndHeight;
 extern int CDLogger_wndx, CDLogger_wndy;
 extern bool autoresumeCDLogging;
 extern bool autosaveCDL;
@@ -315,6 +316,8 @@ static CFGSTRUCT fceuconfig[] =
 	AC(log_lines_option),
 	AC(Tracer_wndx),
 	AC(Tracer_wndy),
+	AC(Tracer_wndWidth),
+	AC(Tracer_wndHeight),
 	AC(CDLogger_wndx),
 	AC(CDLogger_wndy),
 	AC(autosaveCDL),

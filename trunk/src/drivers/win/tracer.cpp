@@ -59,7 +59,52 @@ int logging_options = LOG_REGISTERS | LOG_PROCESSOR_STATUS | LOG_TO_THE_LEFT | L
 int log_update_window = 0;
 //int tracer_open=0;
 volatile int logtofile = 0, logging = 0;
+
 HWND hTracer;
+bool tracerIsReadyForResizing = false;
+int tracerMinWidth = 0;
+int tracerMinHeight = 0;
+int Tracer_wndx = 0, Tracer_wndy = 0;
+int Tracer_wndWidth = 640, Tracer_wndHeight = 500;
+int tracerInitialClientWidth = 0, tracerInitialClientHeight = 0;
+int tracerCurrentClientWidth = 0, tracerCurrentClientHeight = 0;
+
+// this structure stores the data of an existing window pos and how it should be resized. The data is calculated at runtime
+struct WindowItemPosData
+{
+	HWND itemHWND;
+	int initialLeft;
+	int initialTop;
+	int initialRight;
+	int initialBottom;
+	unsigned int leftResizeType;
+	unsigned int topResizeType;
+	unsigned int rightResizeType;
+	unsigned int bottomResizeType;
+};
+std::vector<WindowItemPosData> arrayOfWindowItemPosData;	// the data is filled in WM_INITDIALOG
+
+// this structure holds the data how a known item should be resized. The data is prepared
+struct KnownWindowItemPosData
+{
+	int id;
+	unsigned int leftResizeType;
+	unsigned int topResizeType;
+	unsigned int rightResizeType;
+	unsigned int bottomResizeType;
+};
+//  not all window items have to be mentioned here, others will be resized by default method (WINDOW_ITEM_RESIZE_TYPE_MULTIPLY, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_MULTIPLY, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED)
+KnownWindowItemPosData tracerKnownWindowItems[] = {
+	IDC_TRACER_LOG, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
+	IDC_SCRL_TRACER_LOG, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
+	IDC_RADIO_LOG_LAST, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
+	IDC_TRACER_LOG_SIZE, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
+	IDC_TEXT_LINES_TO_THIS_WINDOW, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
+	IDC_BTN_START_STOP_LOGGING, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
+	IDC_RADIO_LOG_TO_FILE, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
+	IDC_BTN_LOG_BROWSE, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_LEFT_ALIGNED, WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED,
+};
+
 int log_optn_intlst[LOG_OPTION_SIZE]  = {3000000, 1000000, 300000, 100000, 30000, 10000, 3000, 1000, 300, 100};
 char *log_optn_strlst[LOG_OPTION_SIZE] = {"3 000 000", "1 000 000", "300 000", "100 000", "30 000", "10 000", "3000", "1000", "300", "100"};
 int log_lines_option = 5;	// 10000 lines by default
@@ -89,8 +134,6 @@ extern int currFrameCounter;
 
 FILE *LOG_FP;
 
-int Tracer_wndx=0, Tracer_wndy=0;
-
 char trace_str[35000] = {0};
 WNDPROC IDC_TRACER_LOG_oldWndProc = 0;
 
@@ -105,6 +148,9 @@ int PromptForCDLogger(void);
 // returns the address, or EOF if selection cursor points to something else
 int Tracer_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, bool onlyCheckWhenNothingSelected)
 {
+	if (!tracelogbufsize)
+		return EOF;
+
 	// trace_str contains the text in the log window
 	int sel_start, sel_end;
 	SendDlgItemMessage(hTracer, IDC_TRACER_LOG, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
@@ -258,43 +304,112 @@ BOOL CALLBACK IDC_TRACER_LOG_WndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 	return CallWindowProc(IDC_TRACER_LOG_oldWndProc, hwndDlg, uMsg, wParam, lParam);
 }
 
+BOOL CALLBACK TracerInitialEnumWindowsProc(HWND hwnd, LPARAM lParam)
+{
+	RECT rect;
+	POINT p;
+
+	// create new WindowItemPosData with default settings of resizing the item
+	WindowItemPosData windowItemPosData;
+	windowItemPosData.itemHWND = hwnd;
+	GetWindowRect(hwnd, &rect);
+	p.x = rect.left;
+	p.y = rect.top;
+	ScreenToClient(hTracer, &p);
+	windowItemPosData.initialLeft = p.x;
+	windowItemPosData.initialTop = p.y;
+	p.x = rect.right;
+	p.y = rect.bottom;
+	ScreenToClient(hTracer, &p);
+	windowItemPosData.initialRight = p.x;
+	windowItemPosData.initialBottom = p.y;
+	windowItemPosData.leftResizeType = WINDOW_ITEM_RESIZE_TYPE_MULTIPLY;
+	windowItemPosData.topResizeType = WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED;
+	windowItemPosData.rightResizeType = WINDOW_ITEM_RESIZE_TYPE_MULTIPLY;
+	windowItemPosData.bottomResizeType = WINDOW_ITEM_RESIZE_TYPE_RIGHT_ALIGNED;
+
+	// try to find the info in tracerKnownWindowItems
+	int controlID = GetDlgCtrlID(hwnd);
+	int sizeofKnownWindowItemPosData = sizeof(KnownWindowItemPosData);
+	int tracerKnownWindowItemsTotal = sizeof(tracerKnownWindowItems) / sizeofKnownWindowItemPosData;
+	int i;
+	for (i = 0; i < tracerKnownWindowItemsTotal; ++i)
+	{
+		if (tracerKnownWindowItems[i].id == controlID)
+			break;
+	}
+	if (i < tracerKnownWindowItemsTotal)
+	{
+		// this item is known, so its resizing method may differ from defaults
+		windowItemPosData.leftResizeType = tracerKnownWindowItems[i].leftResizeType;
+		windowItemPosData.topResizeType = tracerKnownWindowItems[i].topResizeType;
+		windowItemPosData.rightResizeType = tracerKnownWindowItems[i].rightResizeType;
+		windowItemPosData.bottomResizeType = tracerKnownWindowItems[i].bottomResizeType;
+	}
+
+	arrayOfWindowItemPosData.push_back(windowItemPosData);
+	return TRUE;
+}
+BOOL CALLBACK TracerResizingEnumWindowsProc(HWND hwnd, LPARAM lParam)
+{
+	// find the data about resizing type
+	for (int i = arrayOfWindowItemPosData.size() - 1; i >= 0; i--)
+	{
+		if (arrayOfWindowItemPosData[i].itemHWND == hwnd)
+		{
+			// recalculate the coordinates according to the resizing type of the item
+			int left = recalculateResizedItemCoordinate(arrayOfWindowItemPosData[i].initialLeft, tracerInitialClientWidth, tracerCurrentClientWidth, arrayOfWindowItemPosData[i].leftResizeType);
+			int top = recalculateResizedItemCoordinate(arrayOfWindowItemPosData[i].initialTop, tracerInitialClientHeight, tracerCurrentClientHeight, arrayOfWindowItemPosData[i].topResizeType);
+			int right = recalculateResizedItemCoordinate(arrayOfWindowItemPosData[i].initialRight, tracerInitialClientWidth, tracerCurrentClientWidth, arrayOfWindowItemPosData[i].rightResizeType);
+			int bottom = recalculateResizedItemCoordinate(arrayOfWindowItemPosData[i].initialBottom, tracerInitialClientHeight, tracerCurrentClientHeight, arrayOfWindowItemPosData[i].bottomResizeType);
+			SetWindowPos(hwnd, 0, left, top, right - left, bottom - top, SWP_NOZORDER | SWP_NOOWNERZORDER);
+			return TRUE;
+		}
+	}
+	return TRUE;
+}
+
 BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	int i;
 	switch(uMsg)
 	{
-		case WM_MOVE:
-		{
-			if (!IsIconic(hwndDlg))
-			{
-				RECT wrect;
-				GetWindowRect(hwndDlg,&wrect);
-				Tracer_wndx = wrect.left;
-				Tracer_wndy = wrect.top;
-				WindowBoundsCheckNoResize(Tracer_wndx,Tracer_wndy,wrect.right);
-			}
-			break;
-		}
 		case WM_INITDIALOG:
 		{
+			hTracer = hwndDlg;
+			// calculate initial size/positions of items
+			RECT mainRect;
+			GetClientRect(hTracer, &mainRect);
+			tracerInitialClientWidth = mainRect.right;
+			tracerInitialClientHeight = mainRect.bottom;
+			// set min size of the window to current size
+			GetWindowRect(hTracer, &mainRect);
+			tracerMinWidth = mainRect.right - mainRect.left;
+			tracerMinHeight = mainRect.bottom - mainRect.top;
+			if (Tracer_wndWidth < tracerMinWidth)
+				Tracer_wndWidth = tracerMinWidth;
+			if (Tracer_wndHeight < tracerMinHeight)
+				Tracer_wndHeight = tracerMinHeight;
+			// remember initial positions of all items
+			EnumChildWindows(hTracer, TracerInitialEnumWindowsProc, 0);
+			// restore position and size from config, also bring the window on top
 			if (Tracer_wndx==-32000) Tracer_wndx=0; //Just in case
 			if (Tracer_wndy==-32000) Tracer_wndy=0;
-			SetWindowPos(hwndDlg,0,Tracer_wndx,Tracer_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
-			hTracer = hwndDlg;
-
-			// setup font
-			SendDlgItemMessage(hwndDlg, IDC_TRACER_LOG, WM_SETFONT, (WPARAM)debugSystem->hFixedFont, FALSE);
-
+			SetWindowPos(hTracer, HWND_TOP, Tracer_wndx, Tracer_wndy, Tracer_wndWidth, Tracer_wndHeight, SWP_NOOWNERZORDER);
+			
 			// calculate tracesi.nPage
 			RECT wrect;
 			GetClientRect(GetDlgItem(hwndDlg, IDC_TRACER_LOG), &wrect);
 			tracesi.nPage = wrect.bottom / debugSystem->fixedFontHeight;
 
+			// setup font
+			SendDlgItemMessage(hwndDlg, IDC_TRACER_LOG, WM_SETFONT, (WPARAM)debugSystem->hFixedFont, FALSE);
+
 			//check the disabled radio button
 			CheckRadioButton(hwndDlg,IDC_RADIO_LOG_LAST,IDC_RADIO_LOG_TO_FILE,IDC_RADIO_LOG_LAST);
 
 			//EnableWindow(GetDlgItem(hwndDlg,IDC_SCRL_TRACER_LOG),FALSE);
-			//fill in the options for the log size
+			// fill in the options for the log size
 			for(i = 0;i < LOG_OPTION_SIZE;i++)
 			{
 				SendDlgItemMessage(hwndDlg, IDC_TRACER_LOG_SIZE, CB_INSERTSTRING, -1, (LPARAM)(LPSTR)log_optn_strlst[i]);
@@ -324,6 +439,69 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			// subclass editfield
 			IDC_TRACER_LOG_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_TRACER_LOG), GWL_WNDPROC, (LONG)IDC_TRACER_LOG_WndProc);
+			break;
+		}
+		case WM_WINDOWPOSCHANGED:
+		{
+			WINDOWPOS* windowpos = (WINDOWPOS*)lParam;
+			if (!(windowpos->flags & SWP_NOSIZE))
+			{
+				// window was resized
+				if (!IsIconic(hwndDlg))
+				{
+					if (arrayOfWindowItemPosData.size())
+					{
+						RECT mainRect;
+						GetWindowRect(hTracer, &mainRect);
+						Tracer_wndWidth = mainRect.right - mainRect.left;
+						Tracer_wndHeight = mainRect.bottom - mainRect.top;
+						// resize all items
+						GetClientRect(hTracer, &mainRect);
+						tracerCurrentClientWidth = mainRect.right;
+						tracerCurrentClientHeight = mainRect.bottom;
+						EnumChildWindows(hTracer, TracerResizingEnumWindowsProc, 0);
+						InvalidateRect(hTracer, 0, TRUE);
+					}
+					// recalculate tracesi.nPage
+					RECT wrect;
+					GetClientRect(GetDlgItem(hwndDlg, IDC_TRACER_LOG), &wrect);
+					int newPageSize = wrect.bottom / debugSystem->fixedFontHeight;
+					if (tracesi.nPage != newPageSize)
+					{
+						tracesi.nPage = newPageSize;
+						if ((tracesi.nPos + (int)tracesi.nPage) > tracesi.nMax)
+							tracesi.nPos = tracesi.nMax - (int)tracesi.nPage;
+						if (tracesi.nPos < tracesi.nMin)
+							tracesi.nPos = tracesi.nMin;
+						SetScrollInfo(GetDlgItem(hTracer, IDC_SCRL_TRACER_LOG), SB_CTL, &tracesi, TRUE);
+						if (logging && !logtofile)
+							UpdateLogText();
+					}
+				}
+			}
+			if (!(windowpos->flags & SWP_NOMOVE))
+			{
+				// window was moved
+				if (!IsIconic(hwndDlg) && arrayOfWindowItemPosData.size())
+				{
+					RECT mainRect;
+					GetWindowRect(hTracer, &mainRect);
+					Tracer_wndWidth = mainRect.right - mainRect.left;
+					Tracer_wndHeight = mainRect.bottom - mainRect.top;
+					Tracer_wndx = mainRect.left;
+					Tracer_wndy = mainRect.top;
+					WindowBoundsCheckNoResize(Tracer_wndx, Tracer_wndy, mainRect.right);
+				}
+			}
+			break;
+		}
+		case WM_GETMINMAXINFO:
+		{
+			if (tracerMinWidth)
+			{
+				((MINMAXINFO*)lParam)->ptMinTrackSize.x = tracerMinWidth;
+				((MINMAXINFO*)lParam)->ptMinTrackSize.y = tracerMinHeight;
+			}
 			break;
 		}
 		case WM_CLOSE:
@@ -475,7 +653,6 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if (tracesi.nPos < tracesi.nMin)
 				tracesi.nPos = tracesi.nMin;
 			SetScrollInfo(GetDlgItem(hTracer, IDC_SCRL_TRACER_LOG), SB_CTL, &tracesi, TRUE);
-
 			UpdateLogText();
 			break;
 		}
@@ -968,7 +1145,8 @@ void ShowLogDirDialog(void){
 
 void DoTracer()
 {
-	if (!GameInfo) {
+	if (!GameInfo)
+	{
 		FCEUD_PrintError("You must have a game loaded before you can use the Trace Logger.");
 		return;
 	}
@@ -977,8 +1155,9 @@ void DoTracer()
 	//	return;
 	//}
 
-	if(!hTracer)
+	if (!hTracer)
 	{
+		arrayOfWindowItemPosData.resize(0);
 		CreateDialog(fceu_hInstance,"TRACER",NULL,TracerCallB);
 		//hTracer gets set in WM_INITDIALOG
 	} else
