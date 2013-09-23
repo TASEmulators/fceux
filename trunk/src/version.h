@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#define PUBLIC_RELEASE		// uncomment this when making a public release, but comment back before committing
+//#define PUBLIC_RELEASE		// uncomment this when making a public release, but comment back before committing
 
 #ifndef __FCEU_VERSION
 #define __FCEU_VERSION
