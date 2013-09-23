@@ -1,0 +1,47 @@
+Priorities
+==========
+	* SDL 2.0 RC is released - SDL2.0 compatibility is a goal
+	* Backwards-cpp still has an issue with clang++; look into this
+	* Users are reporting crashing issues with hotkey dialog (probably because its a mess!).  A huge chunk of the hotkey code should be rewritten (GUI and hotkey structs - or lack there-of)
+	* GTK File menu quit element has "CTRL-Q" accelerator.  This causes confusion with there being another SDL Hotkey for quit.  This should be addressed.
+	* Quit was mapped to '0' to prevent users from accidently quitting.  Perhaps a default quit combo could be used.
+
+Features
+========
+	* SDL.Vsync
+		* lets wait on this -- theres no simple way to use the OS default in SDL unless we just dont touch it, which might be the best thing to do here.
+  
+GTK
+===
+	* Better on-the-fly video resizing with window resize / video config
+	* Smarter video config (disable widgets that are not used when openGL is enabled)
+	* Options to investigate:
+		* bpp
+		* scanlines
+	* GUI Cheat editor
+
+SDL 2.0
+=======
+	* segfaults when opening a second game
+	* segfaults on fullscreen entry
+	* has not been tested in a while
+
+BUGS
+====
+	* F1 from terminal-less gui fceux process hangs fceux (since input is required from console in cheat editor)
+
+OS X
+====
+	* Single window mode does not work (the XWINDOWID hack does not work in Apples X11 server, so this may never get fixed).
+		* It is possible to use GTK to build native OS X menus: http://developer.gnome.org/gtk3/3.4/GtkApplication.html .  It would be awesome to do this and hide the main GTK window if the top bar is available
+	* Zapper input is taken from GTK window instead of X11 window (a workaround could be implemented to resolve with with some #ifdef APPLE etc)
+	* Not an "official" target, but testing should be done before release on OS X
+	* DMG Static binary download for Intel OS X
+		* Include needful libaries
+		* Adjust scons to produce static binary/libraries with an option
+			* http://www.scons.org/wiki/StaticallyLink
+
+DOCS
+====
+	* Be sure to include details about new scons features for package maintainers so that the manpage, luascripts, and auxlib will be included in future packages
+	* Docs REALLY need a cleanup/rewrite

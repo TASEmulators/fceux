@@ -1,0 +1,321 @@
+                              VRCVII CHIP INFO
+                              ------ ---- ----
+
+                                     By:
+
+
+                                Kevin Horton
+                             khorton@iquest.net
+                             
+                             
+                             
+                             
+                             The RENES Project:
+                             Reverse-engineering
+                                 the world.
+
+
+
+V0.10 11/05/99 Document started, pinned out chip and audio thingy
+V0.20 11/10/99 Added very, very, very preliminary register findings
+v1.00 11/14/99 First release version of this doc
+
+VRCVII (VRC7)  (48 pin standard 600mil wide DIP)
+------------- 
+
+This chip is used in only one Konami game that I know of- Lagrange Point.
+I heard rumours it was used in another game, so if someone could provide
+info and/or a ROM image, that would help immensely.  It handles ROM 
+bankswitching as well as sound generation.  The sound generation is done 
+using FM synthesis, so the music sounds like "Adlib" OPL2 music.  Due to 
+extra sound, this is a Famicom-only chip like its cousin the 
+VRCVI. (See the VRCVI doc for more info) 
+
+"VII" of "VRCVII" is "7" for the roman numeral challenged.
+
+
+This chip appears to generate all of its audio internally, which is then
+fed to a small hybrid (aka "black blob") that does the audio interfacing
+to the Famicom proper.  It is physically a small ceramic substrate with
+an 8 pin SMD chip on it (probably an op-amp), and what appears to be three
+0805 sized SMD chip parts (capacitors most likely, since resistors can be
+formed on the substrate).  The whole works is then coated with a black
+dipped epoxy coating, and the smooth side (opposite the parts) is then
+marked with an identifying part number and the pin 1 dot.
+
+
+Here's the pinout for it:
+
+                        Front Side (parts facing away)
+
+                            +-----------------+  1- Audio in from Famicom
+                            |      054002     |  2- Audio out to Famicom
+                            |@                |  3,7 - Ground
+                            +-----------------+  4-6 - NC
+                             | | | | | | | | |   8- Audio from VRCVII
+                             1 2 3 4 5 6 7 8 9   9- +5V
+
+
+
+
+
+Legend:
+-------
+
+(s) means this pin connects to the System
+(r) this only connects to the ROM
+(w) this is a SRAM/WRAM connection only
+PRG : these connect to the PRG ROM and/or fami's PRG pins
+WRAM : this hooks to the WRAM
+
+Note: There is a 3.58Mhz ceramic resonator connected to the "X1" and "X2" 
+pins.  it is the three-pin style with internal caps tied to the third pin
+which is grounded.
+                                  
+Chip is physically marked: "VRV VII 053982"
+
+                                  .----\/----.
+             *1 (RAM&s) CHR /OE - |01      48| - NC
+             *1 (RAM&s) CHR /CE - |02      47| - M2 (s)
+                            GND - |03      46| - /CE WRAM (w)
+                        (s) R/W - |04      45| - PRG /A15 (s) (aka /CE)
+                       (s) /IRQ - |05      44| - PRG ROM /CE (r)
+                  (s) CIRAM A11 - |06      43| - Audio Out
+                        (s) PD0 - |07      42| - +5V
+                        (s) PD1 - |08      41| - NC
+                        (s) PD2 - |09      40| - NC
+                        (s) PD3 - |10      39| - NC
+                        (s) PD4 - |11      38| - NC
+                        (s) PD5 - |12      37| - NC
+                        (s) PD6 - |13      36| - CHR RAM A12
+                        (s) PD7 - |14      35| - CHR RAM A11
+                            +5V - |15      34| - CHR RAM A10
+                     (s) PRG A5 - |16      33| - CHR A12 (s)
+                     Crystal X2 - |17      32| - CHR A11 (s)
+                     Crystal X1 - |18      31| - CHR A10 (s)
+                     (s) PRG A4 - |19      30| - +5V
+                (r) PRG ROM A13 - |20      29| - PRG A14 (s)
+                (r) PRG ROM A14 - |21      28| - PRG A13 (s)
+                (r) PRG ROM A15 - |22      27| - PRG A12 (s)
+                (r) PRG ROM A16 - |23      26| - PRG ROM A18 (r)
+                            GND - |24      25| - PRG ROM A17 (r)
+                                  |          |
+                                  `----------'
+
+                                     VRCVII
+
+
+*1: these connect to both the CHR RAM's pins and the card edge.
+
+Note: the NC pins 37-41 most likely for CHR ROM bankswitching.  Since this
+cart uses CHR RAM these obviously weren't used ;-)
+
+Registers:  (sound related only)
+----------  
+
+All sound registers are accessed through only two physical registers.
+
+9010:
+-----
+
+This is the index register.  You write the desired register number here.
+
+9030:
+-----
+
+This is the data register.  Data written here is stored in the register
+pointed to by the above index register.
+
+There are 6 channels, each containing three registers, and 8 custom 
+instrument control registers.
+
+
+Sound Registers:
+----------------
+
+00h - 07h : Custom instrument registers.  See below for info.
+
+---
+
+10h - 15h : ffffffff
+
+f: Lower 8 bits of frequency
+
+---
+
+20h - 25h : ???tooof
+
+f: Upper bit of frequency
+o: Octave Select 
+t: Channel trigger.
+?: Dunno what these do yet (No audible effect)
+
+---
+
+30h - 35h : iiiivvvv
+
+i: Instrument number
+v: Volume 
+
+Instrument numbers 01h-0fh are fixed and cannot be changed.
+
+Instrument number 00h is the "programmable" one.
+
+To program the custom instrument, you load registers 00h-07h with the 
+desired parameters for it.  All channels set to instrument 00h will
+then use this instrument.  Note that you can only program one custom
+instrument at a time.
+
+
+
+How do the frequency registers work?  
+------------------------------------
+
+To generate a tone, you must select an octave and a frequency value.  The
+frequency values stay the same for say, the note "C", while the octave
+bits determine which octave "C" lies in.  This makes your note lookup table
+quite small.
+
+o = 000 is octave 0
+o = 001 is octave 1
+.
+.
+.
+o = 111 is octave 7
+
+
+    49722*freqval
+F = -------------
+    2^(19-octave)
+
+
+Where: 
+
+F = output frequency in Hz
+freqval = frequency register value
+octave = desired octave (starting at 0)
+
+
+Custom Instrument Registers (00-07)
+-----------------------------------
+
+Note: I will not provide too extensive documentation of the instrument
+registers since their functions are identical to those of the OPL2 chip,
+commonly found on Adlib/Soundblaster/compatible cards, and there is alot
+of information out on how to program these.  I will use terminology 
+similar to that found in said documents.  My VRC7 "emulator" test program
+I wrote simply re-arranged and tweaked the register writes to correspond
+with the OPL2 registers.
+
+Here's a link to a good document about this chip:
+
+http://www.ccms.net/~aomit/oplx/
+
+The tremolo depth is set to 4.3db and the vibrato depth is set to 14 cent
+(in reguards to OPL2 settings; to achieve this you would write 0C0h to
+OPL register 0BDh). All operator connections are fixed in FM mode. (Where
+Modulator modulates the Carrier).
+
+---
+
+
+00 (Modulator) - tvskmmmm
+01 (Carrier)
+
+t: Tremolo Enable
+v: Vibrato Enable
+s: Sustain Enable
+k: KSR
+m: Multiplier
+
+---
+
+02 - kkoooooo
+
+k: Key Scale Level
+o: Output Level
+
+---
+
+03 - ---qweee
+
+-: Not used: Write 0's
+q: Carrier Waveform
+w: Modulator Waveform
+
+Note: There are only two waveforms available.  Sine and rectified sine (only
+      the positive cycle of the sine; negative cycle "chopped off".)
+
+e: Feedback Control
+
+---
+
+04 (Modulator) - aaaadddd
+05 (Carrier)
+
+a: Attack
+d: Decay
+
+---
+
+06 (Modulator) - ssssrrrr
+07 (Carrier)
+
+s: Sustain
+r: Release
+
+
+
+Register Settings for the 15 fixed instruments.
+-----------------------------------------------
+
+*CAUTION*CAUTION*CAUTION*CAUTION*CAUTION*CAUTION*CAUTION*CAUTION*CAUTION*
+C                                                                       C
+A These instruments are not 100% correct!  There is no way to extract   A
+U the register settings from the chip short of an electron microscope.  U
+T I have "tuned" these instruments best I could, though I know a couple T
+I are not exactly right.  Use them at your own perl!  If someone wants  I
+O to waste all day tuning a new set, please let me know what you get.   O
+N                                                                       N
+*CAUTION*CAUTION*CAUTION*CAUTION*CAUTION*CAUTION*CAUTION*CAUTION*CAUTION*
+
+
+                                   Register
+                                   --------
+
+                            00 01 02 03 04 05 06 07
+                            -----------------------
+                        0 | -- -- -- -- -- -- -- --
+                        1 | 05 03 10 06 74 A1 13 F4
+                        2 | 05 01 16 00 F9 A2 15 F5
+                        3 | 01 41 11 00 A0 A0 83 95
+                        4 | 01 41 17 00 60 F0 83 95
+                        5 | 24 41 1F 00 50 B0 94 94
+                        6 | 05 01 0B 04 65 A0 54 95
+                        7 | 11 41 0E 04 70 C7 13 10
+           Instrument   8 | 02 44 16 06 E0 E0 31 35
+           ----------   9 | 48 22 22 07 50 A1 A5 F4
+                        A | 05 A1 18 00 A2 A2 F5 F5
+                        B | 07 81 2B 05 A5 A5 03 03
+                        C | 01 41 08 08 A0 A0 83 95
+                        D | 21 61 12 00 93 92 74 75
+                        E | 21 62 21 00 84 85 34 15
+                        F | 21 62 0E 00 A1 A0 34 15
+
+
+
+
+So how accurate is this info, anyways?
+--------------------------------------
+
+I believe the info to be 100% accurate.  The pinout was generated with the
+help of a multimeter and my Super-8 with both an NES cart and the Fami cart
+plugged in.  (this allows me to measure between my known "control" board
+with the unknown "experimental" board to generate the connections).  
+Register info was gleaned via writing test code and listening and capturing
+the resultant audio stream for analysis.  
+
+
+
+
+---EOF---

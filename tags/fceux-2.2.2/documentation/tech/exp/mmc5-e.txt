@@ -1,0 +1,250 @@
+========= mmc5 infomation ==========
+date 1998/05/31
+by goroh
+translated May 31, 1998 by Sgt. Bowhack
+mail goroh_kun@geocities.co.jp
+
+5000,5004 ch1,ch2 Pulse Control
+ bit CCwevvvv
+    CC Duty Cycle (Positive vs. Negative)
+      #0:87.5%  #1:75.0%  #2:50.0%  #3:25.0%
+    w Waveform Hold (e.g. Looping)
+      0: Off 1: On
+    e Envelope Select
+      0: Varied 1: Fixed
+    < e=0 >
+     vvvv Playback Rate
+         #0<-fast<--->-slow--> #15
+    < e=1 >
+     vvvv Output Volume
+
+5002,5006 ch1,ch2 frequency L
+ bit ffffffff
+5003,5007 ch1,ch2 frequency H
+ bit tttttfff
+  ttttt sound occurence time
+
+Objective is to remove the continuous changing of frequency for
+square wave setup and do the same to the main part of the square wave
+of studying the main part of the famicom. (?- Sgt. Bowhack)
+
+5010 ch3 synthetic voice business channel
+ bit -------O
+  O wave output 0:Off 1:On
+
+5011 ch4 synthetic voice business channel 2
+ bit vvvvvvvv
+  vvvvvvvv wave size
+
+5015 sound output channel
+ bit ------BA
+  A: ch1 output  1:enable 0:disable
+  B: ch2 output  1:enable 0:disable
+
+5100 PRG-page size Setting
+ bit ------SS
+    SS PRG-page size
+       0: 32k 1:16k 2,3:8k
+* Reset is misled the first times for about 8k (?- SB)
+       
+5101 CHR-page size Setting
+ bit ------SS
+    SS CHR-page size
+       0:8k 1:4k 2:2k 3:1k
+
+5102 W BBR-RAM Write Protect 1
+ bit ------AA
+5103 W BBR-RAM Write Protect 2
+ bit ------BB
+  (AA,BB) = (2,1) permitted to write to BBR-RAM only when crowded
+*Reset write around becomes prohibited when crowded
+
+5104 Grafix Mode Setting
+ $5c00-$5fff decides how it should be used
+  bit ------MM
+  #00:Enable only Split Mode
+  #01:Enable Split Mode & ExGrafix Mode
+  #02:ExRAM Mode
+  #03:ExRAM Mode & Write Protect
+
+Consideration
+ MMC5 has 2 graphic mode extensions that allow more than 256 characters
+on one standard game screen.  It uses Split Mode so it can display the
+specified CHR-page and scroll position seperate from ExGrafix Mode to
+be able to choose a palette, and the other divides it vertically.
+
+5105 W NameTable Setting
+  bit ddccbbaa
+  aa: Select VRAM at 0x2000-0x23ff
+  bb: Select VRAM at 0x2400-0x27ff
+  cc: Select VRAM at 0x2800-0x2bff
+  dd: Select VRAM at 0x2c00-0x2fff
+    #0:use VRAM 0x000-0x3ff
+    #1:use VRAM 0x400-0x7ff
+    #2:use ExVRAM 0x000-0x3ff
+    #3:use ExNameTable(Fill Mode)
+
+Consideration
+ The name table can designate 4 kinds of this resister and be a useful
+special quality for this because painting and smashing it with a
+character that there is 1 sheet for the remaining sheets can generally
+be used. (?-SB)
+
+5106 W Fill Mode Setting 1
+  bit vvvvvvvv
+  Fill chr-table
+ For whether it paints or smashes it at any non-designated character
+
+5107 W Fill Mode Setting 2
+  bit ------pp
+ Whether or not it uses any non-designated palettes
+
+5113 RAM-page for $6000-$7FFF
+  bit -----p--
+
+5114-5117 Program Bank switch
+ < page_size=32k >
+ $5117 [8]-[F] bit pppppp--
+
+ < page_size=16k >
+ $5115 [8]-[B] bit ppppppp-
+ $5117 [C]-[F] bit ppppppp-
+
+ < page_size=8k >
+ $5114 [8][9]  bit pppppppp
+ $5115 [A][B]  bit pppppppp
+ $5116 [C][D]  bit pppppppp
+ $5117* [E][F]  bit pppppppp
+
+*Reset is around early, Last Page misled
+
+5120-512b Charactor Bank switch
+ < page_size=8k >
+ $5120-$5127 switch to mode A
+ $5128-$512b switch to mode B
+ $5127 [0]-[7] modeA
+ $512b [0]-[7] modeB
+
+ < page_size=4k >
+ $5120-$5127 switch to mode A
+ $5128-$512b switch to mode B
+ $5123 [0]-[3] modeA
+ $5127 [4]-[7] modeA
+ $512b [0]-[3],[4]-[7] modeB
+
+ < page_size=2k >
+ $5120-$5127 switch to mode A
+ $5128-$512b switch to mode B
+ $5121 [0]-[1] modeA
+ $5123 [2]-[3] modeA
+ $5125 [4]-[5] modeA
+ $5127 [6]-[7] modeA
+ $5129 [0]-[1],[4]-[5] modeB
+ $512b [2]-[3],[6]-[7] modeB
+ 
+ < page_size=1k >
+ $5120-$5127 switch to mode A
+ $5128-$512b switch to mode B
+ $5120 [0] modeA
+ $5121 [1] modeA
+ $5122 [2] modeA
+ $5123 [3] modeA
+ $5124 [4] modeA
+ $5125 [5] modeA
+ $5126 [6] modeA
+ $5127 [7] modeA
+ $5128 [0],[4] modeB
+ $5129 [1],[5] modeB
+ $512a [2],[6] modeB
+ $512b [3],[7] modeB
+
+Consideration
+ MMC5 has mode A ,mode B and 2 kinds of CHR-page memory resistors.
+They can be used for refreshing it. (?-SB)
+
+5130 ???
+analyzing it...
+
+5200 W Split Mode Control 1
+ bit Ec-vvvvv
+ For the E function 0:don't use 1:use
+ c boundary's side is for using Split Mode extension of graphics
+   0: left side  1: right side
+ vvvvv left boundary is designated with the char. # to count places
+
+Sample.
+  5200 <- #00
+    (not?) used yet
+  5200 <- #82
+    Used for SplitMode GFX extension from left 1-2 character
+  5200 <- #c2
+    Used for SplitMode GFX extension from the right side 3 chars.
+  5200 <- #c0
+    Used for SplitMode GFX extension on the whole screen
+  5200 <- #d0
+    Used for SplitMode GFX extension on the right side of the screen
+  5200 <- #90
+    Used for SplitMode GFX extension on the left side of the screen
+    
+5201 W SplitMode setup for SplitMode Ext. GFX use 1
+  $2005 determines the vertical movement; it can also delay ext. gfx's
+ vert. movement if necessary.  It's written 2 times in bulk in the same
+ way as it would slip off a grade in $2005 (??-SB)
+  
+5202 W SplitMode setup for SplitMode Ext. GFX use 2
+   bit --pppppp
+  uses vertical division of ext. gfx CHR-page designation
+  index_size=4k(0x1000byte)
+In case it uses a character 0x4000-0x4fff for the ext. gfx in question
+  $5202 <- 4
+
+5203 W scanline break point
+  For scanline # that it splits and wants to make it designate it in bulk
+
+5204 WR IRQ enable/disable
+ W bit I-------
+  I 1:IRQ Enable 0:IRQ Disable
+ R bit I-------
+  I 1:Scanline Hit 0:Scanline not Hit
+   $5203 is designated as scanline when arrived.
+
+5205 WR mult input/output
+5206 WR mult input/output
+($5205in)*($5206in) = $5205,$5206out
+
+5c00-5fbf ext. gfx business VRAM
+ shows an attribute of every position character
+
+  <ExGrafix Mode>
+  bit PPpppppp
+    PP: use character palette number
+    pppppp: use background CHR-PAGE number index=4k
+      #0-#3F are designations, $0000-$3FFF is CHR-data's range
+    Use for extension gfx
+
+  <Split Mode>
+  SplitMode uses a Name Table for extension gfx use.
+  bit pppppppp
+    pppppppp: use for background char. number designation
+
+  <ExRAM Mode>
+ Used for Extension RAM
+
+5fc0-5fff
+  <ExGrafix Mode>
+  (not?) used yet
+
+  <Split Mode>
+  SplitMode uses gfx's Attribute Table extension.
+  PPU uses $23c0-$23ff in the same way as the Attribute Table
+
+  <ExRAM Mode>
+ Used for Extension RAM
+
+Consideration
+ 5c00-5fff has 3 uses.
+ Split Mode and ExGrafix Mode's VBlank is written so as to become
+  crowded, it writes a 0 and becomes crowded.
+ Every mode tries to go around ExRAM mode including reading but it
+  writes it, is effective in bulk and #5c-#5f is the output at times
+  where it is effective.

@@ -1,0 +1,140 @@
+LuaBot
+Documentation
+Written by Qfox
+
+
+LuaBot is a trial and error script that exhausts the input-search-space by simply trying to push buttons. 
+
+You can program it to limit this searchspace, as it can become exponentially large. Just do the math. You can press eight possible buttons at any frame. That makes up for 8! or 8*7*6*5*4*3*2*1 possible combinations for one single frame. There are 60 frames in one second, that's 60 to the power of (8!).
+
+Anyways, the bot has two parts. The frontend, which we'll call BeeBee, and the Lua part, which we call LuaBot.
+
+You start the bot by openening the luabot_front.lua script file. Make sure the luabot_backend.lua file is in the same directory.
+
+BeeBee
+
+BeeBee (who received it's name from BasicBot, its predecessor) just writes it's contents into the LuaBot framework and produces a big Lua script for you.
+All you need to do is enter Lua code for the specific functions and the code will generate the script.
+
+You can also save and load the contents of the front-end. That way you can easily manage your bot scripts, without actually having to look into the LuaBot code.
+
+BeeBee is only a pasting mechanism. It does not compile Lua or warn for errors.
+
+LuaBot
+
+LuaBot is a generic trial-and-error script that serves as a bot framework. It will set inputs as you program them for a number of frames (called an attempt). When the isAttemptEnd() says the attempt ends, a new attempt is started. All the attempts fall under one segment. At the end of a segment (denoted by the isSegmentEnd() function), the best attempt is kept (judged by the score and tie functions) and the next segment is started. The bot is capable of rolling back if a segment runs into a dead end. This allows you to backtrack and restart a previous segment.
+
+The bot evaluates a true or false by checking to see whether the return value of a function is bigger then a certain value. It does this for EVERY function that returns something and every function that returns something must return a number (or Lua _will_ complain). For absolute true or false you can return "yes" and "no", "maxvalue" and "minvalue" or "pressed" and "released". Read variable info for more information.
+
+The script takes a number of variables and functions into account. Some variables become important to prevent desyncing over segments.
+
+- maxvalue
+The maximum value (exclusive) of the random evaluation. If a value is higher than rand(minvalue, maxvalue), it evaluates as true, else false. By default this is set to 100.
+
+- minvalue
+The lowest value (inclusive) of the random evaluation. If a value is lower than rand(minvalue, maxvalue), it evaluates to false, else true. By default this is set to 0.
+
+- yes / no
+- pressed / released
+These map to the minvalue/maxvalue.
+
+- loopcounter
+The number of times a frameadvance has been called by the main botloop.
+
+- key1 key2 key3 key4
+The input table of players 1-4. The keys are: A B up down left right select start. Set any to 1 if you want them to be set and to nil if you don't want them set.
+Note that these get cleared right before onInputStart is called. This variable is saved in a pseudo-movie table if the attempt is better then the previous one and used for playback when moving to the next segment.
+
+- lastkey1 lastkey2 lastkey3 lastkey4
+The inputs that were given to FCEU on the PREVIOUS frame. This holds for segments as well (at the beginning of a new segment, the lastkeys of the previous segment are set). This also goes for the start. If you use key1-4 in onStart, the first segment will have those keys as lastkey.
+
+- frame
+The number of frames of the current attempt. Starts at 1.
+
+- attempt
+The number of attempts in the current segment. Starts at 1.
+
+- segment
+The segment the bot is currently running. Note that rolledback segments are deducted from this number.
+
+- okattempts
+The number of attempts that have been deemed ok. This is a statistical variable. It might tell you how well your bot is doing (combined with the number of failed attempts).
+
+- failattempts
+The number of attempts in the current segment that have been deemed bad. This is a statistical variable. It might tell you how well your bot is doing (combined with the number of approved attempts).
+
+- segments
+This is the big table that holds everything together. Don't mess with it.
+
+- maxframes
+You can set maxframes and check it in the isAttemptEnd function to simply limit a attempt by this many frames. You can also just ignore this and do something else instead.
+
+- maxattempts
+Same as maxframes, except for attempts in a segment.
+
+- maxsegments
+Same as maxframes, except for segments in a run.
+
+- playingbest
+Will be set to true when the bot is playing back it's best attempt to advance to the next segment. Not really used by other functions.
+
+- keyrecording1-4
+A simple table with the pressed keys for playback.
+
+- X Y Z P Q
+Some "static" variables. These allow you to easily set them onStart and use them in various functions to return the same number. Like a global variable. The P and Q numbers used to denote a random number between 0 and P or Q, but they don't right now.
+
+- vars
+This is your variable table. It's contents is saved at the end of an attempt and will be loaded at the beginning of a segment. On rollback, this table is also kept. Put any variable you want to keep accross segments in this table.
+
+
+Ok. That's it for the variables. Now for functions. There are basically three types of functions. The functions that determine whether a button is pressed (8 for each player), to determine whether an attempt/segment/run has ended or was ok and functions for certain events. This number is not evaluated by the random-eval function.
+
+- getScore
+This returns how "well" the current attempt is. At the end of a segment, the best scoring good attempt will be used to continue to the next segment. In case of a tie, see the tie functions. This number is not evaluated by the random-eval function!
+
+- getTie1-4
+If the score ends in a tie, that is, two attempts score equally well (have an equal number of points for instance), you can use these functions to break that tie. Like, which attempt has the most health or is the fastest or whatever. This number is not evaluated by the random-eval function!
+
+- isRunEnd
+Return whether the bot should stop running. If the returned number is bigger then the random number rand(minvalue-maxvalue), the bot will stop.
+
+- mustRollBack
+Returns whether the bot should rollback the current attempt. In such case, the previous segment is loaded and the current segment is completely discarded. If the returned number is bigger then the random number rand(minvalue-maxvalue), the segment will rollback one segment.
+
+- isSegmentEnd
+If the returned number is bigger then the random number rand(minvalue-maxvalue), the bot will stop the current segment, play back the best recorded attempt and start a new segment. Mostly done when a certain number of attempts is reached, but possibly you know when have the best possible attempt and can move on.
+
+- isAttemptEnd
+If the returned number is bigger then the random number rand(minvalue-maxvalue), the attempt will stop and a new attempt will be started. Some examples when this function should return yes is when you reached a certain goal, a number of frames or when you died (in which case the bot should try again :).
+
+- isAttemptOk
+If the returned number is bigger then the random number rand(minvalue-maxvalue), the current attempt (which has just ended) is deemed ok. Only attempts that are deemed ok are up for being saved. For instance, when the player died in the current attempt, you should return no.
+
+- pressKeyX (pressKeyA1, pressKeyStart4, etc...)
+These functions determine whether a button should be pressed in the next frame. If the returned number is bigger then the random number rand(minvalue-maxvalue), the button is pressed, otherwise it is not. To absolutely press a button, simply return yes or no. To use some odds, return a number between minvalue and maxvalue. For instance, using the default settings, if you return 50, there is a 50% chance the button will be pressed.
+
+- onStart
+Maybe a little misleading, but the onStart function is called BEFORE the main botloop starts. You can do some non-generic startup stuff here like press start at the title screen and get the game started. Returns nothing.
+
+- onFinish
+The opposite to onStart, this function is called when the main botloop exits. You can cleanup, or write stuff or whatever.
+
+- onSegmentStart
+When a new segment is started, this is called. After initializing variables and such, but before onAttemptStart is called. Returns nothing.
+
+- onSegmentEnd
+When isSegmentEnd evaluates to true, this function is called. Returns nothing.
+
+- onAttemptStart
+Called at the start of a new attempt, after onSegmentStart (in case of a new segment) but before onInputStart. Returns nothing.
+
+- onAttemptEnd(wasOk)
+Called at the end of an attempt. The only function to have a parameter (note: case sensitive). The parameter wasOk will return (boolean) whether isAttemptOk evaluated to true or false. Returns nothing.
+
+- onInputStart
+In a frame, this is the first place where the key1-4 variables are cleared. This is called before all the input (pressKeyX) functions are called. Returns nothing.
+
+- onInputEnd
+This is called immediately after the input (pressKeyX) functions have been called. Returns nothing.
+

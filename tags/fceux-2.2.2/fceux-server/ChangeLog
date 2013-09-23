@@ -1,0 +1,30 @@
+0.0.5:
+  Interface received massive overhaul.  Now takes command line
+  options.  This will allow the server to communicate with
+  other front-ends.  Integration can now occur in gfceu.
+
+0.0.4:
+  Renamed from "server" to "fceu-server".
+	Renamed standard.conf -> fceu-standard.conf
+	If no configuration file is specified, look in /etc and ./
+	Added a --help option.
+	Added GPL headers
+	
+0.0.3:
+  Error messages during server startup are more verbose(slightly).
+
+	Fixed initialization of the sockaddr_in structure, sin_family
+	member.  It's now initialized to AF_INET before calling bind().
+	While not initializing that member seemed to work ok on 
+	Linux 2.4, it won't work on Linux 2.2 and under Cygwin, 
+	and possibly other environments.
+
+0.0.2:
+  Switched to using fcntl() to set the socket to nonblocking,
+  so I don't need to use MSG_NOWAIT in send() anymore, which is
+  undefined under Cygwin.
+
+	Added a "clean" Makefile target.
+
+0.0.1:
+	First Release

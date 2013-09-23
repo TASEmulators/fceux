@@ -1,0 +1,18 @@
+Unknown:
+
+Alien Syndrome		128KiB/128KiB
+Super Sprint
+
+MIMIC 1:
+
+Fantasy Zone		64KiB/64KiB
+Toobin'			128KiB/64KiB
+Vindicators		64KiB/32KiB
+
+
+RAMBO 1(board looks like it can take 256KiB PRG/256KiB CHR max):
+
+Klax			64KiB PRG/64KiB CHR
+Road Runner		64KiB PRG/128KiB CHR
+Rolling Thunder		128KiB PRG/128KiB CHR
+Skull and Crossbones	128KiB PRG/64KiB CHR

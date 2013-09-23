@@ -1,0 +1,289 @@
+FCE Ultra Porting Guide
+ Updated:  October 4, 2003
+
+*Incomplete*
+
+
+***Driver-supplied functions:
+	These functions will only be called after the driver code calls
+	FCEUI_LoadGame() or FCEUI_Emulate().
+
+void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
+	Called by FCE Ultra on every emulated frame.  This function should 
+	perform the following three things(in any order):
+
+	1.
+	  Update the data pointed to by the pointers passed to
+	  FCEUI_SetInput() and FCEUI_SetInputFC().
+	2.
+          Copy contents of XBuf over to video memory(or whatever needs to be 
+	  done to make the contents of XBuf visible on screen).
+          Each line is 256 pixels(and bytes) in width, and there can be 240
+          lines.  The pitch for each line is 272 bytes.
+	  XBuf will be 0 if the symbol FRAMESKIP is defined and this frame
+	  was skipped.
+	3.
+          Write the contents of "Buffer" to the sound device.  "Count" is the
+          number of samples to write.  Only the lower 16-bits of each
+          sample are used, so each 32-bit sample in "Buffer" can be converted to
+          signed 16-bit by dropping the upper 16 bits.
+	  When sound was disabled for the frame, "Count" will be 0.
+
+void FCEUD_SetPalette(uint8 index, uint8 r, uint8 g, uint8 b);
+	Set palette entry "index" to specified RGB values(value: min=0, max=255).
+
+void FCEUD_GetPalette(uint8 index, uint8 *r, uint8 *g, uint8 *b);
+	Get palette entry "index" data.
+
+void FCEUD_PrintError(char *s);
+	Print/Display an error message string pointed to by "s".
+
+void FCEUD_Message(char *s);
+	Display a status message string.
+
+
+int FCEUD_NetworkConnect(void);
+	Initialize a network connection.  Return 0 if an error occurs.
+
+int FCEUD_GetDataFromClients(uint8 *data);
+
+/* Sends 5 bytes of data to all clients. */
+int FCEUD_SendDataToClients(uint8 *data);
+
+/* Sends 1 byte of data to server, and maybe a command. */
+int FCEUD_SendDataToServer(uint8 v, uint8 cmd);
+
+/* Gets 5 bytes of data from the server. This function must block. */
+int FCEUD_GetDataFromServer(uint8 *data);
+
+void FCEUD_NetworkClose(void);
+	Close the network connection.
+
+
+***FCE Ultra functions(called by the driver code):
+	The FCEUI_* functions may only be called before FCEUI_Emulate() is 
+	called or after it returns and before it is called again, or after the
+	following functions are called and before they return:
+		FCEUD_Update();
+	Calling the FCEUI_* functions at any other time may result in 
+	undefined behavior.
+	
+void FCEUI_SetInput(int port, int type, void *ptr, int attrib);
+	"port" can be either 0 or 1, and corresponds to the physical
+	ports on the front of a NES.
+
+	"type" may be:
+		SI_NONE		- No input on this port.
+		SI_GAMEPAD	- Standard NES gamepad
+		SI_ZAPPER	- "Zapper" light gun.
+		SI_POWERPAD	- Power-pad mat.
+		SI_ARKANOID	- Arkanoid controller.
+
+void FCEUI_SetInputFC(int type, void *ptr, int attrib);
+	Special Famicom devices.
+	"type" may be:
+		SIFC_NONE	- No input here.
+		SIFC_ARKANOID	- Arkanoid controller.
+		SIFC_SHADOW	- "Space Shadow" gun.
+		SIFC_4PLAYER	- Famicom 4-player adapter
+		SIFC_FKB	- Family Keyboard
+
+void FCEUI_DisableFourScore(int s);
+	Disables four-score emulation if s is nonzero.
+
+void FCEUI_SetSnapName(int a);
+	0 to order screen snapshots numerically(0.png), 1 to order them file
+	base-numerically(smb3-0.png).
+
+void FCEUI_DisableSpriteLimitation(int a);
+	Disables the 8-sprite-per-scanline limitation of the NES if "a"
+	is nonzero.  The default behavior is the limitation is enabled.
+
+void FCEUI_SaveExtraDataUnderBase(int a);
+	If "a" is nonzero, save extra non-volatile game data(battery-backed
+	RAM) under FCE Ultra's base directory.  Otherwise, the behavior is
+	to save it under the same directory the game is located in(this is
+	the default behavior).
+
+FCEUGI *FCEUI_LoadGame(char *name);
+	Loads a new file.  "name" is the full path of the file to load.
+	Returns 0 on failure, or a pointer to data type "FCEUGI":
+	See file "git.h" for more details on this structure.
+
+int FCEUI_Initialize(void);
+	Allocates and initializes memory.  Should only be called once, before
+	any calls to other FCEU functions.
+       
+void FCEUI_SetBaseDirectory(void);
+        Specifies the base FCE Ultra directory.  This should be called
+        immediately after FCEUI_Initialize() and any time afterwards.
+
+void FCEUI_SetDirOverride(int which, char *n);
+
+        FCEUIOD_CHEATS  - Cheats
+        FCEUIOD_MISC    - Miscellaneous stuff(custom game palettes)
+        FCEUIOD_NV      - Non-volatile game data(battery backed RAM)
+        FCEUIOD_SNAPS   - Screen snapshots
+        FCEUIOD_STATE   - Save states
+
+void FCEUI_Emulate(void);
+	Enters the emulation loop.  This loop will be exited when FCEUI_CloseGame()
+	is called.  This function obviously shouldn't be called if FCEUI_LoadGame()
+	wasn't called or FCEUI_CloseGame() was called after FCEUI_LoadGame().
+
+void FCEUI_CloseGame(void);
+	Closes the loaded game and frees all memory used to load it.
+	Also causes FCEUI_Emulate() to return.
+
+void FCEUI_ResetNES(void);
+void FCEUI_PowerNES(void);
+
+void FCEUI_SetRenderedLines(int ntscf, int ntscl, int palf, int pall);
+        Sets the first(minimum is 0) and last(NOT the last scanline plus one; 
+	maximum is 239) scanlines of background data to draw, for both NTSC 
+	emulation mode and PAL emulation mode.
+
+	Defaults are as if this function were called with the variables set
+	up as follows:
+		ntscf=8, ntscl=231, palf=0, pall=239
+		
+void FCEUI_SetNetworkPlay(int type);
+	Sets status of network play according to "type".  If type is 0,
+	then network play is disabled.  If type is 1, then we are server.  
+	If type is 2, then we are a client.
+
+void FCEUI_SelectState(int w);
+	Selects the state "slot" to save to and load from.
+
+void FCEUI_SaveState(void);
+	Saves the current virtual NES state from the "slot" selected by 
+	FCEUI_SelectState().
+
+void FCEUI_LoadState(void);
+        Loads the current virtual NES state from the "slot" selected by
+        FCEUI_SelectState().
+
+void FCEUI_SaveSnapshot(void);
+	Saves a screen snapshot.  
+
+void FCEUI_DispMessage(char *msg);
+	Displays a short, one-line message using FCE Ultra's built-in
+	functions and ASCII font data.
+
+int32 FCEUI_GetDesiredFPS(void);
+	Returns the desired FPS based on whether NTSC or PAL emulation is
+	enabled, shifted left by 24 bits(this is necessary because the real
+	FPS value is not a whole integer).  This function should only be 
+	necessary if sound emulation is disabled.  
+
+int FCEUI_GetCurrentVidSystem(int *slstart, int *slend);
+	Convenience function(not strictly necessary, but reduces excessive code
+	duplication); returns currently emulated video system
+	(0=NTSC, 1=PAL).  It will also set the variables pointed to by slstart
+	and slend to the first and last scanlines to be rendered, respectively,
+	if slstart and slend are not 0.
+
+void FCEUI_GetNTSCTH(int *tint, int *hue);
+void FCEUI_SetNTSCTH(int n, int tint, int hue);
+
+int FCEUI_AddCheat(char *name, uint16 addr, uint8 val);
+	Adds a RAM cheat with the specified name to patch the address "addr"
+	with the value "val".
+
+int FCEUI_DelCheat(uint32 which);
+	Deletes the specified(by number) cheat.
+
+void FCEUI_ListCheats(void (*callb)(char *name, uint16 a, uint8 v));
+	Causes FCE Ultra to go through the list of all cheats loaded for
+	the current game and call callb() for each cheat with the cheat 
+	information.
+
+int FCEUI_GetCheat(uint32 which, char **name, int32 *a, int32 *v, int *s);
+	Gets information on the cheat referenced by "which".
+
+int FCEUI_SetCheat(uint32 which, char *name, int32 a, int32 v, int s);
+	Sets information for the cheat referenced by "which".
+
+void FCEUI_CheatSearchBegin(void);
+	Begins the cheat search process.  Current RAM values are copied
+	to a buffer to later be processed by the other cheat search functions.
+
+void FCEUI_CheatSearchEnd(int type, int v1, int v2);
+	Searches the buffer using the search method specified by "type"
+	and the parameters "v1" and "v2".
+
+int32 FCEUI_CheatSearchGetCount(void);
+	Returns the number of matches from the cheat search.	
+
+void FCEUI_CheatSearchGet(void (*callb)(uint16 a, int last, int current));
+
+void FCEUI_CheatSearchGetRange(int first, int last, void (*callb)(uint16 a, int last, int current));
+	Like FCEUI_CheatSearchGet(), but you can specify the first and last
+	matches to get.
+
+void FCEUI_CheatSearchShowExcluded(void);
+	Undos any exclusions of valid addresses done by FCEUI_CheatSearchEnd().
+
+void FCEUI_CheatSearchSetCurrentAsOriginal(void);
+	Copies the current values in RAM into the cheat search buffer.
+
+void FCEUI_MemDump(uint16 a, int32 len, void (*callb)(uint16 a, uint8 v));
+	Callback to dump memory.
+
+void FCEUI_DumpMem(char *fname, uint32 start, uint32 end);
+	Dump memory to filename fname.
+
+void FCEUI_MemPoke(uint16 a, uint8 v, int hl);
+	Write a byte to specified address.  Set hl to 1 to attempt to store
+	it to ROM("high-level" write).
+
+void FCEUI_NMI(void);
+	Triggers(queues) an NMI.
+
+void FCEUI_IRQ(void);
+	Triggers(queues) an IRQ.
+
+void FCEUI_Disassemble(uint16 a, int (*callb)(uint16 a, char *s));
+	Text disassembly.
+
+void FCEUI_GetIVectors(uint16 *reset, uint16 *irq, uint16 *nmi);
+	Get current interrupt vectors.
+
+
+***Recognized defined symbols:
+
+The following defined symbols affect the way FCE Ultra is compiled:
+
+	C80x86
+	- Include 80x86 inline assembly in AT&T syntax, if available.  Also
+	use special 80x86-specific C constructs if the compiler is compatible.
+
+	FRAMESKIP
+	- Include frame skipping code.
+
+	NETWORK
+	- Include network play code.
+
+	FPS
+	- Compile code that prints out a number when FCE Ultra exits 
+	  that represents the average fps.
+	
+	ZLIB
+	- Compile support for compressed PKZIP-style files AND gzip compressed
+	  files.  "unzip.c" will need to be compiled and linked in by you if 
+	  this is defined(it's in the zlib subdirectory).
+
+	LSB_FIRST
+	- Compile code to expect that variables that are greater than 8 bits
+	  in size are stored Least Significant Byte First in memory.
+
+	PSS_STYLE x
+	- Sets the path separator style to the integer 'x'.  Valid styles are:
+	  1: Only "/" - For UNIX platforms.
+	  2: Both "/" and "\" - For Windows and MSDOS platforms.
+	  3: Only "\" - For ???.
+	  4: Only ":" - For Apple IIs ^_^.
+
+
+
+

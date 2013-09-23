@@ -1,0 +1,27 @@
+#############################################
+# getSDLKey - Lukas Sabota - October, 2011  #
+#############################################
+
+1. Dependencies:
+  gcc
+  make 
+  libsdl
+
+2. Installing
+Run "make" to compile to "getSDLKey".  Run "make install" as root if you would like to install "getSDLKey" into a user-specified PREFIX.
+
+3. Running
+Type "./getSDLKey" while in this directory to run.
+
+4. About this tool.
+This is a tool to determine what the SDL keysym for a particular key on your keyboard is.  This is especially useful when mapping hotkeys to FCEUX.  Take a look at an excerpt of ~/.fceux/fceux.cfg:
+
+ SDL.Hotkeys.SaveState = 286
+
+Apparently, F5 on my system is SDL keysym 286.  If you wanted to remap this to a different key, run ./getSDLKey and press the desired key to see what keysym you should modify your configuration with.
+
+5. Bugs
+You can report any issues with this tool in the FCEUX SourceForge bugtracker.  Alternatively, you can contact me directly at LTsmooth42 _at_ gmail _dot_ com.
+
+6. Future
+I plan to implement a GUI for remapping these keys so you dont have to do this in the future, but were all very busy people, arent we?

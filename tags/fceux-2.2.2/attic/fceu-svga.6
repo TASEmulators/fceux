@@ -1,0 +1,135 @@
+.\" t                                    Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH FCEU-SVGA 6 "March 27, 2003"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+fceu-svga \- An emulator for the original (8-bit) Nintendo game console.
+.SH SYNOPSIS
+.B fceu-svga
+.RI [ options ]
+"filename"
+.SH DESCRIPTION
+.B FCE Ultra
+is an emulator for the original (8-bit) Nintendo Entertainment System (NES).
+It has a robust color palette rendering engine that is fully customizable,
+along with excellent sound and joystick support, and even includes TCP/IP based
+network playing for head-to-head gaming with your friends!
+.PP
+The emulator is available in two versions for Linux (there are also versions
+for DOS and Windows): an SDL-based version, and one based on SVGALIB.  The two
+versions are essentially the same \-\- use the SVGALIB version for the Linux
+console, and the SDL version for playing in X.
+.SH OPTIONS
+These are some of the more frequently used options in FCE Ultra SVGALIB.  Run
+fceu-svga without any options for a larger list, or see the README for the full
+list.
+.TP
+.BI \-gg
+Enable Game Genie emulation support.
+.TP
+.BI "\-cpalette " <file>
+Use the custom palette in <file>.
+.TP
+.BI "\-soundvol " <percentage>
+Sets the sound volume to the given percentage.
+.TP
+.BI "\-sound " <rate>
+Set the sound playback sample rate (0 == off).
+.TP
+.BI "\-connect " <server>
+Connect as a client (player 2) to <server> for TCP/IP network play.
+.TP
+.BI \-server
+Be a host server (player 1) for a TCP/IP network game.
+.TP
+.BI "\-netport " <portnum>
+Use <portnum> for TCP/IP network play.
+.SH KEYBOARD COMMANDS
+.B FCE Ultra
+has a number of commands available within the emulator.
+It also includes default keyboard bindings when emulating game pads or power pads.
+.SS Gamepad Keyboard Bindings
+.TS
+center box;
+cb | cb, c | ci.
+NES Gamepad	Keyboard
+=
+Arrows	Cursor Arrows
+A	Left ALT
+B	Left CTRL
+Select	TAB
+Start	ENTER
+.TE
+.SS Other Commands
+.PP
+.TP 15
+.BI <F2>
+Activate cheat interface.
+.TP 15
+.BI <F3>
+Lock virtual console.
+.TP 15
+.BI <F4>
+Unlock virtual console.
+.TP 15
+.BI <F5>
+Save game state into current slot (set using number keys).
+.TP 15
+.BI <F7>
+Restore game state from current slot (set using number keys).
+.TP 15
+.BI <F9>
+Save screen snapshot.
+.TP 15
+.BI <F10>
+Reset NES.
+.TP 15
+.BI <F11>
+Toggle power to NES.
+.TP 15
+.BR <F12> ", " <ESC>
+Quit
+.B FCE Ultra.
+.SH NOTES
+This program needs permisison to the video hardware, this normally requires
+root access.  One way to accomplish this is by making
+.BI "fceu-svga " suid-root.
+An easy way to do this is using the
+.BR dpkg-statoverride
+command.  For example, as root on a
+.I Debian
+system run:
+.PP
+.B dpkg-statoverride --update --add root games 04755 /usr/games/fceu-svga
+.PP
+This will ensure that the setuid bit is preserved across package upgrades.
+.SH SEE ALSO
+.BR dpkg-statoverride "(8), " fceu-sdl (6)
+.TP
+.I /usr/share/doc/fceu-doc/readme-linux.txt.gz
+The 
+.B FCE Ultra README
+for linux, available from the
+.I fceu-doc
+Debian package.
+.TP
+.I http://fceultra.sourceforge.net/
+The
+.B FCE Ultra
+project homepage.
+.SH AUTHOR
+This manual page was written by Joe Nahmias <joe@nahmias.net>,
+for the Debian GNU/Linux system (but may be used by others).
