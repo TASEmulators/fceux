@@ -1,0 +1,203 @@
+Learning to use Lua Sctripting for FCEUX
+Written by QFox
+
+This is a document designed primarily to help someone use FCEUX specific commands with LUA, and tends to assume that you have some programming experience. It is best used for basic coding reference, and it is not comprehensive, in that there are a large number of things that LUA can do which aren't mentioned here. For a broad overview of the LUA language, check here:
+
+The Manual: (Good for learning LUA's basic capabilities, but you don't need to learn it all before using LUA)
+http://www.lua.org/manual/
+
+Programming in LUA: (Good for finding exact coding syntax, such as for LUA arrays, or to get coding examples)
+http://www.lua.org/pil/
+
+Other .lua files:
+Don't be afraid to copy, look through, and break existing .lua scripts in order to make your own. Taking a piece of other people's code and learning how it works, modifying it, or outright duplicating it for your own project generally isn't frowned upon, as long as you know that what you release may eventually be used by others for their projects.
+
+Windows users - see also the Lua Scripting chapter for the FCEUX sHelp manual (fceux.chm)
+
+Ok. Lua. Let's see.
+
+Lua is a scripting language. It is used in games like Farcry and World of Warcraft (and many other games and applications!). Even though you can find all kinds of tutorials online, let me help you with the basics.
+
+I will asume you are at least somewhat familiar with the basics of programming. So basic stuff like arrays, variables, strings, loops and if-then-else and branching are not explained here.
+
+A hello world EmuLua program looks like this:
+
+while (true) do
+	gui.text(50,50,"Hello world!");
+	FCEU.frameadvance();
+end;
+
+When you load the script, the emulator will sort of go into pause mode and hand controls over to Lua (you!). Hence you are responsible for frameadvancing the emulator.
+IF YOU DO NOT CALL FCEU.frameadvance AT THE CYCLE OF THE MAIN LOOP YOU WILL FREEZE THE EMULATOR! There. You have been warned. Don't worry though, you'll make this mistake at least once. Just force-quit the application and try again :)
+
+Now then. Just like any other language, Lua has a few quirks you should be aware of.
+
+First of all, if's require a then and end. After a couple of days intensive Lua coding, I still make this mistake myself, but the Lua interpreter will prompt you of such errors on load, so don't worry too much about it. So:
+
+if (something) then
+	dostuff
+end;
+
+Lua uses nil instead of null.
+
+There are only two values that evaluate to "false", these are "nil" and "false". ANYTHING else will evaluate to true, even 0 or the empty string.
+
+Comments are denoted by two consecutive dashes; --. Anything after it on the same line is a comment and ignored by Lua. There is no /* */ type of commenting in Lua.
+
+Variables have a local and global scope. You explicitly make a variable local by declaring it with the "local" keyword.
+
+somethingglobal; -- accessible by any function or flow
+local something; -- only known to the same or deeper scope as where it was declared
+
+Note that variables declared in for loops (see below) are always considered local.
+
+Arrays are called tables in Lua. To be more precise, Lua uses associative arrays.
+
+Do not rely on the table.length() when your table can contain nil values, this function stops when it encounters a nil value, thus possibly cutting your table short.
+
+One experienced programmers will have to get used to is the table offset; tables start at index 1, not 0. That's just the way it is, deal with it.
+
+There are a few ways to create a table:
+
+local tbl1 = {}; -- empty table
+local tbl2 = {"a","b","c","d"}; -- table with 5 strings
+local tbl3 = {a=1,b=2,c=3}; -- associative table with 3 numbers
+local tbl4 = {"a",b=2,c="x","d"=5}; -- associative table with mixed content
+
+Note that you can mix up the data in one table, as shown by tbl4.
+
+You can refer to table values in a few equivalent manners, using the examples above:
+
+tbl1[1] -- = nil because tbl1 is empty
+tbl2[2] -- = "b"
+tbl3["a"] -- = 1
+tbl4.b -- = 2
+tbl2.3 -- = "c"
+
+When the argument of a function is just a table, the parantheses "()" are optional. So for instance:
+
+processTable({a=2,b=3});
+
+Is equivalent to
+
+processTable{a=2,b=3};
+
+Another notation that's equivalent is
+
+filehandle.read(filehandle, 5);
+filehandle:read(5);
+
+When using the colon notation ":" Lua will call the function adding the self-reference to the front of the parameterstack.
+
+Functions behave like objects and are declared in the follow manner:
+
+function doSomething(somevalue, anothervalue)
+	dostuffhere
+end;
+
+So no curly braces "{}" !
+
+Some flow control:
+
+for i=0,15 do
+  -- do stuff here, i runs from 0 to 15 (inclusive!)
+end;
+
+for key,value in pairs(table) do
+  -- do stuff here. pairs will iterate through the table, splitting the keys and values
+end;
+
+while (somethingistrue) do
+
+end;
+
+if (somethingistrue) then
+
+end;
+
+if (somethingistrue) then
+
+else
+
+end;
+
+if (somethingistrue) then
+
+elseif (somethingelseistrue) then
+
+end;
+
+For comparison, you only have to remember that the exclamationmark is not used. Not equal "!=" is written like tilde-equals "~=" and if (!something) then ... is written with "not " in front of it; if (not something) then...
+
+For easy reference to the standard libraries look on the bottom half of this page: http://www.lua.org/manual/5.1/
+
+
+Now then, let's get to the emulator specifics!
+
+To load a Lua script in FCEU first load a rom (Lua can only do things after each frame cycle so load a rom first). Go to file, at the bottom choose Run Lua Script and select and load the file.
+
+When Lua starts, the emulator pauses and hands control over to Lua. Lua (that's you!) decides when the next frame is processed. That's why it's very common to write an endless while loop, exiting the main loop of a script will exit the script and hand control back to the emulator. This also happens when a script unexpectingly crashes.
+
+A bare script looks like this:
+
+while (true) do
+  FCEU.frameadvance();
+end;
+
+And is about equal to not running Lua at all. The frameadvance function is the same called internally, so no loss of speed there!
+
+Bitwise operators:
+
+Lua does not have bitwise operators, so we supply some for you. These are common bitwise operators, nothing fancy.
+
+AND(a,b);
+OR(a,b);
+XOR(a,b);
+BIT(n); -- returns a number with only bit n set (1)
+
+The emulator specific Lua is equal to the one of snes9x, with some platform specific changes (few buttons, for instance). 
+You can find the reference here: http://dehacked.2y.net/snes9x-lua.html
+The following is a quick reference, you can go to the snes9x reference for more details.
+
+To paint stuff on screen, use the gui table. This contains a few predefined functions to manipulate the main window. For any coordinate, 0,0 is the top-left pixel of the window. You have to prevent out-of-bound errors yourself for now. If a color can be passed on, it is a string. HTML-syntax is supported ("#34053D"), as well as a FEW colors ("red", "green", "blue" ...).
+
+gui.text(x, y, str); -- Print a line to the window, you can use \n for a return but it will only work once
+gui.drawpixel(x, y, color); -- plot a pixel at the given coordinate
+gui.drawline(x1, y1, x2, y2, color); -- plot a line from x1,y1 to x2,y2
+gui.drawbox(x1, y1, x2, y2, color); -- draw a square from x1,y1 to x2,y2
+gui.popup(str); -- pops up a messagebox informing the user of something. Real handy when debugging!
+gui.getpixel(x,y); -- return the values of the pixel at given position. Returns three numbers of the emulator image before paiting is applied.
+gui.gdscreenshot(); -- Takes a screen shot of the image and returns it in the form of a string which can be imported by the gd library using the gd.createFromGdStr() function
+(for more gd functions see DeHackED's reference: http://dehacked.2y.net/snes9x-lua.html)
+
+PAINTING IS ALWAYS ONE FRAME BEHIND! This is because the painting is done at the creation of the next frame, not while Lua is running.
+
+Emulator control:
+
+FCEU.frameadvance(); -- advances emulation ONE frame
+FCEU.pause(); -- same as pressing the pause button
+FCEU.speedmode(strMode); -- Supported are "normal","turbo","nothrottle","maximum". But know that except for "normal", all other modes will run as "turbo" for now.
+FCEU.wait(); -- skips the emulation of the next frame, in case your script needs to wait for something
+
+Memory control:
+
+memory.readbyte(adr); -- read one byte from given address and return it. Besides decimal values Lua also allows the hex notation 0x00FA. In FCEUX reading is done BEFORE the cheats are applied!
+memory.writebyte(adr, value); -- write one byte to the RAM of the NES. writing is done AFTER the hexeditor receives its values, so if you are freezing an address by Lua, it will not show in the hex editor (but it will in the game :)
+memory.readbytesigned(adr); -- same as readbyte, except this returns a signed value, rather then an unsigned value.
+memory.register(adr, function); -- binds a function to an address. The function will be called when an address changes. NOTE THAT THIS IS EXPENSIVE (eg.: slow)! Only one function allowed per address.
+
+Input control:
+
+You can read and write input by using the joypad table. A input table has the following (case sensitive) keys, where nil denotes they are not to be pressed: up down left right start select A B
+
+joypad.read(playern); -- get the input table for the player who's input you want to read (a number!)
+joypad.write(playern, inputtable); -- set the input for player n. Note that this will overwrite any input from the user, and only when this is used.
+
+Savestates:
+
+You can load and save to the predefined savestates 1 ... 9 or create new "anonymous" savestates. You must first create a savestate object, which is your handle to a savestate. Then you can pass this handle on to savestate.load or save to do so.
+
+savestate.create(n); -- n is optional. When supplied, it will create a savestate for slot n, otherwise a new (anonymous) savestate object is created. Note that this does not yet save or load anything!
+savestate.load(state); -- load the given savestate
+savestate.save(state); -- save the given savestate
+

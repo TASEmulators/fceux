@@ -1,0 +1,79 @@
+FM2 is ascii plain text.
+It consists of several key-value pairs followed by an inputlog section.
+The inputlog section can be identified by its starting with a | (pipe).
+The inputlog section terminates at eof.
+Newlines may be \r\n or \n
+
+Key-value pairs consist of a key identifier, followed by a space separator, followed by the value text.
+Value text is always terminated by a newline, which the value text will not include.
+The value text is parsed differently depending on the type of the key.
+The key-value pairs may be in any order, except that the first key must be version.
+
+Integer keys (also used for booleans, with a 1 or 0) will have a value that is a simple integer not to exceed 32bits
+ - version (required) - the version of the movie file format; for now it is always 3
+ - emuVersion (required) - the version of the emulator used to produce the movie
+ - rerecordCount (optional) - the rerecord count
+ - palFlag (bool) (optional) - true if the movie uses pal timing
+ - fourscore (bool) (*note C) - true if a fourscore was used 
+ - port0, port1 (*note C) - indicates the types of input devices. Supported values are:
+     SI_GAMEPAD = 1,
+     SI_ZAPPER = 2
+ - port2 (required) - indicates the type of the FCExp port device which was attached. Supported values are:
+     SIFC_NONE = 0
+
+String keys have values that consist of the remainder of the key-value pair line. As a consequence, string values cannot contain newlines.
+ - romFilename (required) - the name of the file used to record the movie
+ - comment (optional) - simply a memo. 
+     by convention, the first token in the comment value is the subject of the comment.
+     by convention, subsequent comments with the same subject will have their ordering preserved and may be used to approximate multiline comments.
+     by convention, the author of the movie should be stored in comment(s) with a subject of: author
+
+Hex string keys (used for binary blobs) will have a value that is like 0x0123456789ABCDEF...
+ - romChecksum (required) - the MD5 hash of the rom which was used to record the movie
+ - savestate (optional) - a fcs savestate blob, in case a movie was recorded from savestate 
+
+GUID keys have a value which is in the standard guid format: 452DE2C3-EF43-2FA9-77AC-0677FC51543B
+ - guid (required) a unique identifier for a movie, generated when the movie is created, which is used when loading a savestate to make sure it belongs to the current movie.
+
+The inputlog section consists of lines beginning and ending with a | (pipe).
+The fields are as follows, except as noted in note C.
+|c|port0|port1|port2|
+
+field c is a variable length decimal integer which is a bitfield corresponding to miscellaneous input states which are valid at the start of the frame.
+Current values for this are
+MOVIECMD_RESET = 1
+
+the format of port0, port1, port2 depends on which types of devices were attached.
+SI_GAMEPAD:
+ the field consists of eight characters which constitute a bitfield.
+ any character other than ' ' or '.' means that the button was pressed.
+ by convention, the following mnemonics will be used in a column to remind us of which button corresponds to which column:
+   RLDUTSBA (Right,Left,Down,Up,sTart,Select,B,A)
+ This seemingly arbitrary ordering is actually the reverse of the originally-desired order, which was screwed up in the first release of FCEUX. So we have preserved it for compatibility's sake.
+SI_ZAPPER:
+ XXX YYY B Q Z
+ XXX: %03d, the x position of the mouse
+ YYY: %03d, the y position of the mouse
+ B: %1d, 1 if the mouse button is pressed; 0 if not
+ Q: %1d, an internal value used by the emulator's zapper code (this is most unfortunate..)
+ Z: %d, a variable-length decimal integer; an internal value used by the emulator's zapper code (this is even more unfortunate..)
+SIFC_NONE:
+ this field must always be empty.
+
+* Notes *
+A. There is no key-value pair that indicates the length of the movie. This must be read by scanning the inputlog and counting the number of lines.
+
+B. All movies start from power-on, unless a savestate key-value is present.
+
+C. 
+If a fourscore is used, then port0 and port1 are irrelevant and ignored. 
+The input types must all be gamepads, and the inputlog will be in the following format:
+  {player1  player2  player3  player4}
+|c|RLDUTSBA|RLDUTSBA|RLDUTSBA|RLDUTSBA|port2|
+If a fourscore is not used, then port0 and port1 are required.
+
+D. The emulator uses these framerate constants
+  - NTSC: 1008307711 /256/65536 = 60.099822938442230224609375
+  - PAL : 838977920  /256/65536 = 50.00698089599609375
+
+E. The author of this format is curious about what people think of it. Please let him know!

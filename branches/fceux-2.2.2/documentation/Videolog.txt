@@ -1,0 +1,48 @@
+Since SVN revision 931, FCEUX features a new option to create avi files from a recorded movie and it is relatively easy to use if you know the bare basics of mencoder.
+Call "scons CREATE_AVI=1" to activate it. You will, however, most likely need mencoder to use it.
+
+You get the raw video data via stdin and the audio data from a fifo file. Let's say you want the video to be in the best quality available, no matter how long it takes or how big the avi file might get. In order to get the NES's original video resolution and a good sound quality, you might need to set some settings beforehand or just pass them along while calling mencoder.
+
+
+Here's an example:
+./fceux \
+  --xscale 1 --yscale 1 --special 0 \
+  --pal 0 \
+  --sound 1 --soundq 1 --soundrate 48000 --mute 1 \
+  --nospritelim 1 \
+  --no-config 1 \
+  --videolog "mencoder - -o myfirstencodedrun.avi \
+    -ovc x264 -x264encopts qp=0 \
+    -oac pcm \
+    -noskip -nocache -mc 0 -aspect 4/3
+    NESVSETTINGS" \
+  --playmov mymovie.fm2 myROM.nes
+
+Now let's see what is done and why we did it:
+First of all, we started fceux with "./fceux" and gave it some options:
+ "--xscale" and "--yscale" determine how much bigger the video in comparison to its regular size. It's no point to use anything other than 1 here because you can always see your video on fullscreen or at least scale it, can't you? As a nice addon, it saves time to create the avi file and also saves valuable space on your hard disk.
+ "--special" would usually do something fancy to your picture when you're playing a ROM, but again, it's mostly pointless to use for an avi.
+ "--pal 0" lets the game run at ~60Hz. Set this so 1 if you are using a PAL ROM.
+ "--sound 1" activates sound.
+ "--soundq 1" activates high quality sound.
+ "--soundrate 48000" sets the sound rate to 48kHz.
+ "--mute 1" mutes FCEUX while still passing the sound to mencoder. This way you can capture a movie and still listen to your music without having the NES sounds in the background.
+ "--nospritelim" deactivates the NES's 8 sprites per scanlines limit.
+ "--no-config 1" is used not to destroy your settings when creating an avi movie.
+ "--videolog" calls mencoder:
+  "-" states that we're getting the video stream from stdin.
+  "-o" determines the name of the produced avi file.
+  "-ovc x264" sets the video codec to be x264 and is highly recommended for quality reasons. However, if you using a version of x264 from Sep 28th 2008 or newer, mplayer will not be able to decode this again properly. Until this is fixed this mplayer, you might want to replace "-ovc x264 -x264encopts qp=0" with "-ovc lavc -lavcopts vcodec=ffv1:format=bgr32:coder=1:vstrict=-1". Watch out, though, as this needs *way* more space than x264 does.
+  "-x264encopts qp=0" tells the x264 codec to use a quantizer of 0, which results in lossless video quality.
+  "-oac pcm" saves the audio data uncompressed (this might turn out really big).
+  "-noskip" makes sure that no frame is dropped during capturing.
+  "-nocache" is responsible for immediate encoding and not using any cache.
+  "-mc 0" makes sure that the sound does not go out of sync.
+  "-aspect 4/3" sets the avi's aspect ratio so you can see it in fullscreen and have no borders to the left and right.
+  "NESVSETTINGS" takes care of proper recognition of the audio and video data from FCEUX.
+  "&> mencoder.log" lets mencoders log its output into a file called "mencoder.log" in your current working directory.
+ "--playmov" reads which movie file we want to load (here it's mymovie.fm2).
+ Lastly, we load our desired ROM (in this case it's "myROM.nes").
+
+To go for faster encoding and thus less quality, change "-ovc x264 -x264encopts qp=0" to "-ovc xvid -xvidencopts bitrate=200" and "-oac pcm" to "-oac mp3lame -lameopts mode=3:preset=60" to create a 200 kbps xvid video with 60 kbps of mono mp3 audio.
+Good luck! :)

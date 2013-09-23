@@ -1,0 +1,235 @@
+Delta modulation channel tutorial 1.0
+Written by Brad Taylor
+
+Last updated: August 20th, 2000.
+
+All results were obtained by studying prior information available (from 
+nestech 1.00, and postings on NESDev from miscellanious people), and through 
+a series of experiments conducted by me. Results aquired by individuals 
+prior to my reverse-engineering have been double checked, and final results 
+have been confirmed. Credit is due to those individual(s) who contributed 
+any information in regards to the DMC.
+
+Description
+-----------
+
+The delta modulation channel (DMC) is a complex digital network of counters 
+and registers used to produce analog sound. It's primary function is to play 
+"samples" from memory, and have an internal counter connected to a digital 
+to analog converter (DAC) updated accordingly. The channel is able to be 
+assigned a pointer to a chunk of memory to be played. At timed intervals, 
+the DMC will halt the 2A03 (NES's CPU) for 1 clock cycle to retrieve the 
+sample to pe played. This method of playback will be refered to here on as 
+direct memory access (DMA). Another method of playback known as pulse code 
+modulation (PCM) is available by the channel, which requires the constant 
+updating of one of the DMC's memory-mapped registers.
+
+Registers
+---------
+
+The DMC has 5 registers assigned to it. They are as follows:
+
+$4010: play mode and DMA frequency
+$4011: delta counter
+$4012: play code's starting address
+$4013: length of play code
+$4015: DMC/IRQ status
+
+Note that $4015 is the only R/W register. All others are write only (attempt 
+to read them will most likely result in a returned 040H, due to heavy 
+capacitance on the NES's data bus).
+
+$4010 - Play mode and DMA frequency
+-----------------------------------
+This register is used to control the frequency of the DMA fetches, and to 
+control the playback mode.
+
+Bits
+----
+6-7	this is the playback mode.
+
+	00 - play DMC sample until length counter reaches 0 (see $4013)
+	x1 - loop the DMC sample (x = immaterial)
+	10 - play DMC sample until length counter reaches 0, then generate a CPU 
+IRQ
+
+Looping (playback mode "x1") will have the chunk of memory played over and 
+over, until the channel is disabled (via $4015). In this case, after the 
+length counter reaches 0, it will be reloaded with the calculated length 
+value of $4013.
+
+If playback mode "10" is chosen, an interrupt will be dispached when the 
+length counter reaches 0 (after the sample is done playing). There are 2 
+ways to acknowledge the DMC's interrupt request upon recieving it. The first 
+is a write to this register ($4010), with the MSB (bit 7) cleared (0). The 
+second is any write to $4015 (see the $4015 register description for more 
+details).
+
+If playback mode "00" is chosen, the sample plays until the length counter 
+reaches 0. No interrupt is generated.
+
+5-4	appear to be unused
+
+3-0	this is the DMC frequency control. Valid values are from 0 - F. The 
+value of this register determines how many CPU clocks to wait before the DMA 
+will fetch another byte from memory. The # of clocks to wait -1 is initially 
+loaded into an internal 12-bit down counter. The down counter is then 
+decremented at the frequency of the CPU (1.79MHz). The channel fetches the 
+next DMC sample byte when the count reaches 0, and then reloads the count. 
+This process repeats until the channel is disabled by $4015, or when the 
+length counter has reached 0 (if not in the looping playback mode). The 
+exact number of CPU clock cycles is as follows:
+
+value	 CPU
+written	clocks  octave  scale
+-------	------  ------  -----
+F	1B0	8	C
+E	240	7	G
+D	2A0	7	E
+C	350	7	C
+B	400	6	A
+A	470	6	G
+9	500	6	F
+8	5F0	6	D
+7	6B0	6	C
+6	710	5	B
+5	7F0	5	A
+4	8F0	5	G
+3	A00	5	F
+2	AA0	5	E
+1	BE0	5	D
+0	D60	5	C
+
+The octave and scale values shown represent the DMC DMA clock cycle rate 
+equivelant. These values are merely shown for the music enthusiast 
+programmer, who is more familiar with notes than clock cycles.
+
+Every fetched byte is loaded into a internal 8-bit shift register. The shift 
+register is then clocked at 8x the DMA frequency (which means that the CPU 
+clock count would be 1/8th that of the DMA clock count), or shifted at +3 
+the octave of the DMA (same scale). The data shifted out of the register is 
+in serial form, and the least significant bit (LSB, or bit 0) of the fetched 
+byte is the first one to be shifted out (then bit 1, bit 2, etc.).
+
+The bits shifted out are then fed to the UP/DOWN control pin of the internal 
+delta counter, which will effectively have the counter increment it's 
+retained value by one on "1" bit samples, and decrement it's value by one on 
+"0" bit samples. This counter is clocked at the same frequency of the shift 
+register's.
+
+The counter is only 6 bits in size, and has it's 6 outputs tied to the 6 MSB 
+inputs of a 7 bit DAC. The analog output of the DAC is then what you hear 
+being played by the DMC.
+
+Wrap around counting is not allowed on this counter. Instead, a "clipping" 
+behaviour is exhibited. If the internal value of the counter has reached 0, 
+and the next bit sample is a 0 (instructing a decrement), the counter will 
+take no action. Likewise, if the counter's value is currently at -1 
+(111111B, or 03FH), and the bit sample to be played is a 1, the counter will 
+not increment.
+
+
+$4011 - Delta counter load register
+-----------------------------------
+
+bits
+----
+7	appears to be unused
+1-6	the load inputs of the internal delta counter
+0	LSB of the DAC
+
+A write to this register effectively loads the internal delta counter with a 
+6 bit value, but can be used for 7 bit PCM playback. Bit 0 is connected 
+directly to the LSB (bit 0) of the DAC, and has no effect on the internal 
+delta counter. Bit 7 appears to be unused.
+
+This register can be used to output direct 7-bit digital PCM data to the 
+DMC's audio output. To use this register for PCM playback, the programmer 
+would be responsible for making sure that this register is updated at a 
+constant rate. The rate is completely user-definable. For the regular CD 
+quality 44100 Hz playback sample rate, this register would have to be 
+written to approximately every 40 CPU cycles (assuming the 2A03 is running @ 
+1.79 MHz).
+
+
+$4012 - DMA address load register
+----------------------------
+
+This register contains the initial address where the DMC is to fetch samples 
+from memory for playback. The effective address value is $4012 shl 6 or 
+0C000H. This register is connected to the load pins of the internal DMA 
+address pointer register (counter). The counter is incremented after every 
+DMA byte fetch. The counter is 15 bits in size, and has addresses wrap 
+around from $FFFF to $8000 (not $C000, as you might have guessed). The DMA 
+address pointer register is reloaded with the initial calculated address, 
+when the DMC is activated from an inactive state, or when the length counter 
+has arrived at terminal count (count=0), if in the looping playback mode.
+
+
+$4013 - DMA length register
+---------------------------
+
+This register contains the length of the chunk of memory to be played by the 
+DMC, and it's size is measured in bytes. The value of $4013 shl 4 is loaded 
+into a 12 bit internal down counter, dubbed the length counter. The length 
+counter is decremented after every DMA fetch, and when it arrives at 0, the 
+DMC will take action(s) based on the 2 MSB of $4010. This counter will be 
+loaded with the current calculated address value of $4013 when the DMC is 
+activated from an inactive state. Because the value that is loaded by the 
+length counter is $4013 shl 4, this effectively produces a calculated byte 
+sample length of $4013 shl 4 + 1 (i.e. if $4013=0, sample length is 1 byte 
+long; if $4013=FF, sample length is $FF1 bytes long).
+
+
+$4015 - DMC status
+------------------
+
+This contains the current status of the DMC channel. There are 2 read bits, 
+and 1 write bit.
+
+bits
+----
+7(R)	DMC's IRQ status (1=CPU IRQ being caused by DMC)
+4(R)	DMC is currently enabled (playing a stream of samples)
+4(W)	enable/disable DMC (1=start/continue playing a sample;0=stop playing)
+
+When an IRQ goes off inside the 2A03, Bit 7 of $4015 can tell the interrupt 
+handler if it was caused by the DMC hardware or not. This bit will be set 
+(1) if the DMC is responsible for the IRQ. Of course, if your program has no 
+other IRQ-generating hardware going while it's using the DMC, then reading 
+this register is not neccessary upon IRQ generation. Note that reading this 
+register will NOT clear bit 7 (meaning that the DMC's IRQ will still NOT be 
+acknowledged). Also note that if the 2 MSB of $4010 were set to 10, no IRQ 
+will be generated, and bit 7 will always be 0.
+
+Upon generation of a IRQ, to let the DMC know that the software has 
+acknowledged the /IRQ (and to reset the DMC's internal IRQ flag), any write 
+out to $4015 will reset the flag, or a write out to $4010 with the MSB set 
+to 0 will do. These practices should be performed inside the IRQ handler 
+routine. To replay the same sample that just finished, all you need to do is 
+just write a 1 out to bit 4 of $4015.
+
+Bit 4 of $4015 reports the real-time status of the DMC. A returned value of 
+1 denotes that the channel is currently playing a stream of samples. A 
+returned value of 0 indicates that the channel is inactive. If the 
+programmer needed to know when a stream of samples was finished playing, but 
+didn't want to use the IRQ generation feature of the DMC, then polling this 
+bit would be a valid option.
+
+Writing a value to $4015's 4th bit has the effect of enabling the channel 
+(start, or continue playing a stream of samples), or disabling the channel 
+(stop all DMC activity). Note that writing a 1 to this bit while the channel 
+is currently enabled, will have no effect on counters or registers internal 
+to the DMC.
+
+The conditions that control the time the DMC will stay enabled are 
+determined by the 2 MSB of $4010, and register $4013 (if applicable).
+
+
+System Reset
+------------
+
+On system reset, all 7 used bits of $4011 are reset to 0, the IRQ flag is 
+cleared (disabled), and the channel is disabled. All other registers will 
+remain unmodified.
+

@@ -1,0 +1,7 @@
+To compile and install FCEUX for SDL, follow the instructions in the README-SDL.md file.
+
+Users of Microsoft Visual Studio can use the solution files within the vc directory.
+These solution files will compile FCEUX and some included libraries for full functionality.
+
+CMake has been depreciated in favor of scons.  However, if you wish to use it you can find the old cmake build files in the attic.
+

@@ -1,0 +1,32 @@
+FCE Ultra was developed with gcc and GNU make in mind.  MSVC will probably
+compile the Windows source code with a few modifications, but you'll still 
+need to make a project file.
+
+Several pre-made makefiles are provided:
+	Makefile.beos		- BeOS(with SDL and SDL_net)
+	Makefile.unixsdl	- UN*X(FreeBSD/Linux/etc, with SDL)
+	Makefile.linuxvga	- Linux(with svgalib)
+	Makefile.dos		- (MS/PC/DR) DOS
+	Makefile.win		- MS Windows 9x/Me/Xp/2000/etc.(with DirectX).
+	Makefile.macosx		- Mac OS X(with SDL)
+
+If you want to use Makefile.beos or Makefile.unixsdl for a cpu type other
+than 80x86, you will need to remove "-DC80x86" from the defines line
+and also remove "-DLSB_FIRST" if your target cpu uses MSB first ordering.
+You'll also need to remove/change "-mcpu=xxx".
+
+For the Windows port, I use MINGW32.  http://www.mingw.org
+
+To compile the DOS port, you'll need to download the DJGPP package.
+Any version of gcc >=2.95.3 should compile the code without changes, BUT
+the DJGPP versions of gcc have some problems:
+  gcc 2.95.3 sometimes breaks when compiling the code.  gcc 3.0.2 seems to 
+  produce bad code for sound.c.  So, I recommend using gcc 3.0.4 for
+  compiling the DOS version.
+
+Modifying the "-mcpu=i686" string in the makefiles, to optimize more effectively
+for your cpu type, is a good idea.
+
+Always do a "make -f Makefile.<platform> clean" before compiling for a 
+different platform or if you update via cvs and if you have stale object 
+files lying around.

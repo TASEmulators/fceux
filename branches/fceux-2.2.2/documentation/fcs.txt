@@ -1,0 +1,153 @@
+FCE Ultra Save State Format
+ Updated:  Mar 9, 2003
+---------------------------------------
+
+FCE Ultra's save state format is now designed to be as forward and backwards
+compatible as possible.  This is achieved through the (over)use of chunks.
+All multiple-byte variables are stored LSB(least significant byte)-first.
+Data types:
+
+	(u)int8 - (un)signed 8 bit variable(also referred to as "byte")
+	(u)int16 - (un)signed 16 bit variable
+	(u)int32 - (un)signed 32 bit variable
+
+-- Main File Header:
+
+The main file header is 16-bytes in length.  The first three bytes contain
+the string "FCS".  The next byte contains the version of FCE Ultra that saved
+this save state.  This document only applies to version "53"(.53) and higher.
+After the version byte, the size of the entire file in bytes(minus the 16 byte
+main file header) is stored.  The rest of the header is currently unused
+and should be nulled out.  Example of relevant parts:
+
+	FCS <uint8 version> <uint32 totalsize>
+
+-- Section Chunks:
+
+Sections chunk headers are 5-bytes in length.  The first byte defines what 
+section it  is, the next four bytes define the total size of the section
+(including the section chunk header).
+
+	<uint8 section> <uint32 size>
+
+Section definitions:
+
+	1	-	"CPU"
+	2	-	"CPUC"
+	3	-	"PPU"
+	4	-	"CTLR"
+	5	-	"SND"
+	16	-	"EXTRA"
+
+-- Subsection Chunks
+
+Subsection chunks are stored within section chunks.  They contain the actual
+state data.  Each subsection chunk is composed of an 8-byte header and the data.
+The header contains a description(a name) and the size of the data contained 
+in the chunk:
+		<uint8 description[4]> <uint32 size>
+
+The name is a four-byte string.  It does not need to be null-terminated.
+If the string is less than four bytes in length, the remaining unused bytes
+must be null.
+
+-- Subsection Chunk Description Definitions
+
+Note that not all subsection chunk description definitions listed below
+are guaranteed to be in the section chunk.  It's just a list of what CAN
+be in a section chunk.  This especially applies to the "EXTRA" subsection.
+
+---- Section "CPU"
+
+	Name:	Type:		Description:
+	
+	PC	uint16		Program Counter
+	A	uint8		Accumulator
+	P	uint8		Processor status register
+	X	uint8		X register
+	Y	uint8		Y register
+	S	uint8		Stack pointer
+	RAM	uint8[0x800]	2KB work RAM
+
+---- Section "CPUC" (emulator specific)
+
+        Name:   Type:           Description:
+
+	JAMM	uint8		Non-zero value if CPU in a "jammed" state
+	IRQL	uint8		Non-zero value if IRQs are to be generated constantly
+	ICoa	int32		Temporary cycle counter
+	ICou	int32		Cycle counter
+
+---- Section "PPU"
+
+        Name:   Type:           Description:
+
+	NTAR	uint8[0x800]	2 KB of name/attribute table RAM
+	PRAM	uint8[32]	32 bytes of palette index RAM
+	SPRA	uint8[0x100]	256 bytes of sprite RAM
+	PPU	uint8[4]	Last values written to $2000 and $2001, the PPU
+				status register, and the last value written to
+				$2003.
+	XOFF	uint8		Tile X-offset.
+	VTOG	uint8		Toggle used by $2005 and $2006.
+	RADD	uint16		PPU Address Register(address written to/read from
+				when $2007 is accessed).
+	TADD	uint16		PPU Address Register
+	VBUF	uint8		VRAM Read Buffer
+	PGEN	uint8		PPU "general" latch.  See Ki's document.
+
+---- Section "CTLR" (somewhat emulator specific)
+
+        Name:   Type:           Description:
+
+	J1RB	uint8		Bit to be returned when first joystick is read.
+	J2RB	uint8		Bit to be returned when second joystick is read.
+
+---- Section "SND" (somewhat emulator specific)
+
+	NREG	uint16		Noise LFSR.
+	P17	uint8		Last byte written to $4017.
+	PBIN	uint8		DMC bit index.
+	PAIN	uint32		DMC address index(from $8000).
+	PSIN	uint32		DMC length counter(how many bytes left 
+				to fetch).
+
+	<to be finished>
+
+---- Section "EXTRA" (varying emulator specificness)
+
+	For iNES-format games(incomplete, and doesn't apply to every game):
+
+        Name:   Type:           Description:
+
+	WRAM	uint8[0x2000]	8KB of WRAM at $6000-$7fff
+	MEXR	uint8[0x8000]	(very emulator specific)
+	CHRR	uint8[0x2000]	8KB of CHR RAM at $0000-$1fff(in PPU address space).
+	EXNR	uint8[0x800] 	Extra 2KB of name/attribute table RAM.
+	MPBY	uint8[32]	(very emulator specific)
+	MIRR	uint8		Current mirroring:
+					0 = "Horizontal"
+					1 = "Vertical"
+					$10 = Mirror from $2000
+					$11 = Mirror from $2400
+	IRQC	uint32		Generic IRQ counter
+	IQL1	uint32		Generic IRQ latch
+	IQL2	uint32		Generic IRQ latch
+	IRQA	uint8		Generic IRQ on/off register.
+	PBL	uint8[4]	List of 4 8KB ROM banks paged in at $8000-$FFFF
+	CBL	uint8[8]	List of 8 1KB VROM banks page in at $0000-$1FFF(PPU).
+
+	For FDS games(incomplete):
+
+        Name:   Type:           Description:
+
+        DDT<x>  uint8[65500]    Disk data for side x(0-3).
+	FDSR	uint8[0x8000]	32 KB of work RAM
+	CHRR	uint8[0x2000]	8 KB of CHR RAM
+        IRQC    uint32          IRQ counter
+        IQL1    uint32          IRQ latch
+        IRQA    uint8           IRQ on/off.
+
+	WAVE	uint8[64]	Carrier waveform data.
+	MWAV	uint8[32]	Modulator waveform data.
+	AMPL	uint8[2]	Amplitude data.

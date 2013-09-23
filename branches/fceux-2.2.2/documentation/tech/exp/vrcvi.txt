@@ -1,0 +1,388 @@
+                               VRCVI CHIP INFO
+                               ----- ---- ----
+
+                                     By:
+
+
+                                Kevin Horton
+                             khorton@iquest.net
+                             
+                             
+                             
+                             
+                             The RENES Project:
+                             Reverse-engineering
+                                 the world.
+
+
+
+
+V1.01 08/31/99 teeny fix 
+V1.00 08/31/99 Complete Version
+
+
+
+VRCVI (VRC6)  (48 pin standard 600mil wide DIP)
+------------ 
+This chip is used in such games as Konami's CV3j and Madara.  It's unique
+because it has some extra sound channels on it that get piped through the
+Famicom (note this is a fami-only chip and you will not find one in any
+NES game).  "VI" of "VRCVI" is "6" for the roman numeral challenged.
+
+
+This chip generates its audio via a 6 bit R2R ladder.  This is contained 
+inside a 9 pin resistor network like so:
+
+
+                  3K     3K     3K     3K     3K            2K
+        /------*-\/\/-*-\/\/-*-\/\/-*-\/\/-*-\/\/-*------*-\/\/-\
+        |      |      |      |      |      |      |      |      |
+        \      \      \      \      \      \      \      |      |
+        /      /      /      /      /      /      /      |      |
+        \ 6K   \ 6K   \ 6K   \ 6K   \ 6K   \ 6K   \ 6K   |      |
+        /      /      /      /      /      /      /      |      |
+        |      |      |      |      |      |      |      |      |
+        O      O      O      O      O      O      O      O      O
+
+       GND     D0     D1     D2     D3     D4     D5  Aud In  Aud Out
+
+
+Legend:
+-------
+
+(s) means this pin connects to the System
+(r) this only connects to the ROM
+(w) this is a SRAM/WRAM connection only
+AUD : these pass to the resistor network
+CHR : these connect to the CHR ROM and/or fami's CHR pins
+PRG : these connect to the PRG ROM and/or fami's PRG pins
+WRAM : this hooks to the WRAM
+CIRAM : the RAM chip which is on the fami board 
+
+                                  .----\/----.
+                            GND - |01      48| - +5V
+                        AUD  D1 - |02      47| - AUD  D0   
+                        AUD  D3 - |03      46| - AUD  D2
+                        AUD  D5 - |04      45| - AUD  D4
+                    (s) PRG A12 - |05      44| - PRG A16 (r)
+                    (s) PRG A14 - |06      43| - PRG A13 (s)
+                         (s) M2 - |07      42| - PRG A17 (r)
+                    (r) PRG A14 - |08      41| - PRG A15 (r)
+                *1  (s) PRG  A1 - |09      40| - PRG A13 (r)
+                *1  (s) PRG  A0 - |10      39| - PRG  D7 (s)
+                    (s) PRG  D0 - |11      38| - PRG  D6 (s)
+                    (s) PRG  D1 - |12      37| - PRG  D5 (s)
+                    (s) PRG  D2 - |13      36| - PRG  D4 (s)
+                    (r) PRG /CE - |14      35| - PRG  D3 (s)
+                        (s) R/W - |15      34| - PRG /CE (s)
+                *2 (w) WRAM /CE - |16      33| - /IRQ (s)
+                    (r) CHR /CE - |17      32| - CIRAM /CE (s)
+                    (s) CHR /RD - |18      31| - CHR A10 (s)
+                   (s) CHR /A13 - |19      30| - CHR A11 (s)
+                    (r) CHR A16 - |20      29| - CHR A12 (s)
+                    (r) CHR A15 - |21      28| - CHR A17 (r)
+                    (r) CHR A12 - |22      27| - CHR A14 (r)
+                    (r) CHR A11 - |23      26| - CHR A13 (r)
+                            GND - |24      25| - CHR A10 (r)
+                                  |          |
+                                  `----------'
+
+                                     VRCVI
+
+
+*1: On some VRCVI carts, these are reversed.  This affects some registers.
+
+*2: This passes through a small pulse shaping network consisting of a 
+    resistor, diode, and cap.
+
+
+Registers:  (sound related only)
+----------  
+
+regs 9000-9002 are for pulse channel #1
+regs a000-a002 are for pulse channel #2
+regs b000-b002 are for the phase accumulator channel (sawtooth)
+
+(bits listed 7 through 0)
+
+9000h: GDDDVVVV
+
+        D - Duty Cycle bits:
+
+          000 - 1/16th  ( 6.25%)
+          001 - 2/16ths (12.50%)
+          010 - 3/16ths (18.75%)
+          011 - 4/16ths (25.00%)
+          100 - 5/16ths (31.25%)
+          101 - 6/16ths (37.50%)
+          110 - 7/16ths (43.75%)
+          111 - 8/16ths (50.00%)
+
+        V - Volume bits. 0000b is silence, 1111b is loudest.  Volume is 
+        linear.  When in "normal" mode (see G bit), this acts as a general 
+        volume control register.  When in "digitized" mode, these act as a 
+        4 bit sample input.
+
+        G - Gate bit. 0=normal operation, 1=digitized.  In digi operation, 
+        registers 9001h and 9002h are totally disabled.  Only bits 0-3 of 
+        9000h are used.  Whatever binary word is present here is passed on 
+        as a 4 bit digitized output.
+
+
+9002h: FFFFFFFF 
+
+        F - Lower 8 bits of frequency data
+
+
+9003h: X---FFFF
+
+        X - Channel disable.  0=channel disabled, 1=channel enabled.
+
+        F - Upper 4 bits of frequency data
+
+
+A000h-A002h are identical in operation to 9000h-9002h.  One note: this chip
+will mix both digitized outputs (if the G bits are both set) into one
+added output. (see in-depth chip operation below)
+
+B000h: --PPPPPP
+
+        P - Phase accumulator input bits
+
+B001h: FFFFFFFF 
+
+        F - Lower 8 bits of frequency data
+
+B002h: X---FFFF
+
+        X - Channel disable. 0=channel disabled, 1=channel enabled.
+
+        F - Upper 4 bits of frequency data
+
+
+
+How the sounds are formed:
+--------------------------
+
+This chip is pretty cool.  It outputs a 6 bit binary word for the sound
+which is passed through a DAC and finally to the NES/Fami.  Because of this,
+the sound can be emulated *very* close to the original.
+
+
+I used my scope to figure all this out as well as my meter and logic probe
+so it should be 100% accurate.
+
+
+
+Block diagrams of the VRCVI: (as reverse engineered by me)
+----------------------------
+
+
+             |   F bits  |       | D bits|       | V bits |
+             |    (12)   |       |  (3)  |       |  (4)   |
+             \___________/       \_______/       \________/
++-----+   +----------------+   +-----------+   +------------+
+|     |   |                |   |           |   |            |--\
+| OSC |-->|Divider (12 bit)|-->| Duty Cycle|-->|  AND array |(4)> chan out
+|(M2) |   |                |   | Generator |   |            |--/
++-----+   +----------------+   +-----------+   +------------+
+                                   ^    ^
+                                   |    |
+                                   |    |
+                                   G    X
+
+                  One Pulse channel (both are identical)
+                  --------------------------------------
+
+
+How it works:  The oscillator (in the NES, the clock arrives on the M2 line 
+and is about 1.78Mhz) generates our starting frequency.  This is passed
+first into a divide by 1 to 4096 divider to generate a base frequency.
+This is then passed to the duty cycle generator. The duty cycle generator
+generates the desired duty cycle for the output waveform.  The "D" input 
+controls the duty cycle generator's duty cycle.  If the "G" bit is 
+a "1", it forces the output of the duty cycle generator to a "1" also.  If 
+the "X" bit is "0", it forces the output of the duty cycle generator to "0",
+which effectively disables the channel.  Note that this input has precidence
+over the "G" bit.
+
+The AND array is just that- an array of 4 AND gates.  If the output of
+the duty cycle generator is a "0", then the "chan out" outputs will all be
+forced to "0".  If the output of the duty cycle generator is a "1", then
+the chan out outputs will follow the V bit inputs.
+
+Note that the output of this generator is a 4 bit binary word. 
+
+
+---
+
+
+             |   F bits  |       | P bits|
+             |    (12)   |       |  (6)  |
+             \___________/       \_______/
++-----+   +----------------+   +-----------+
+|     |   |                |   |           |--\
+| OSC |-->|Divider (12 bit)|-->|   Phase   |(5)> chan out
+|(M2) |   |                |   |Accumulator|--/
++-----+   +----------------+   +-----------+
+                                        ^
+                                        |
+                                        |
+                                        X
+
+                        The Sawtooth (ramp) channel
+                        ---------------------------
+
+
+This one is pretty similar to the above when it comes to frequency selection.
+The output frequency will be the same relative to the square wave channels.
+OK, the tough part will be explaining the phase accumulator. :-)  What it is
+is just an adder tied to a latch.  Every clock it adds a constant to the
+latch.  In the case of the VRCVI, what you do is this:
+
+The ramp is generated over the course of 7 evenly spaced cycles, generated
+from the divider.  Every clock from the divider causes the phase accumulator
+to add once.  So... let's say we have 03h in the P bits.  Every 7 cycles
+the phase accumulator (which is 8 bits) is reset to 00h.  
+
+
+cycle: accumulator:  chan out: notes:
+-----------------------------------------
+0      00h           00h       On the first cycle, the acc. is reset to 0 
+1      03h           00h       We add 3 to 0 to get 3
+2      06h           00h       We add 3 to 3 to get 6
+3      09h           01h
+4      0ch           01h
+5      0fh           01h
+6      12h           02h
+7      00h           00h       Reset the acc. back to 0 and do it again
+
+
+This will look like so: (as viewed on an oscilloscope)
+
+
+
+      -      -      - 2
+   ---    ---    ---  1
+---    ---    ---     0
+                      |
+012345601234560123456-+
+
+
+
+Note: if you enter a value that is too large (i.e. 30h) the accumulator
+*WILL WRAP*. Yes, this doesn't sound very good at all and you no longer
+have a sawtooth. ;-)
+
+
+The upper 5 bits of said accumulator are run to the "chan out" outputs.  
+The lower 3 bits are not run anywhere.
+
+"X" disables the phase accumulator and forces all outputs to "0".
+Note that the output of this generator is a 5 bit word.
+
+
+---
+
+Now that the actual sound generation is out of the way, here's how the
+channels are combined into the final 6 bit binary output:
+
+
++---------+
+|  Pulse  |
+|Generator|
+|   #1    |     Final 6 Bit 
++---------+       Output
+  | (4) |        /     \
+  \     /        | (6) |
++---------+    +---------+    +---------+
+|  4 Bit  |--\ |  5 Bit  | /--|Sawtooth |
+|  Binary |(5)>|  Binary |<(5)|Generator|
+|  Adder  |--/ |  Adder  | \--|         |
++---------+    +---------+    +---------+
+  /     \
+  | (4) |
++---------+
+|  Pulse  |
+|Generator|
+|   #2    |
++---------+
+
+                        Channel Combining
+                        -----------------
+
+
+The three channels are finally added together through a series of adders
+to produce the final output word. The two pulse chans are most likely added
+first since they are 4 bit words, and that 5 bit result is most likely
+added to the sawtooth's output. (The actual adding order is not known,
+but I can make a *very* good guess.  The above illustrated way uses the least
+amount of transistors).  In the end it does not matter the order in which
+the words are added; the final word will always be the same.
+
+The final 6 bit output word is run through an "R2R" resistor ladder which
+turns the digital bits into a 64 level analog representation.  The ladder
+is binarally weighted and works like the DAC on your soundcard. :-)
+(so take heart emulator authours: just run the finished 6 bit word to
+your soundcard and it will sound right ;-).
+
+
+
+Frequency Generation:
+---------------------
+
+The chip generates all its output frequencies based on M2, which is
+colourburst divided by two (1789772.7272Hz).  This signal is passed
+directly into the programmable dividers (the 12 bit frequency regs).
+
+Squares:
+--------
+
+These take the output of the programmable divider and then run it through
+the duty cycle generator, which in the process of generating the duty cycle,
+divides the frequency by 16.  
+
+
+To calculate output frequency:
+
+         1789772.7272
+Fout = ----------------
+       (freq_in+1) * 16
+
+
+This will tell you the exact frequency in Hz. (note that the * 16 is to
+compensate for the divide by 16 duty cycle generator.)
+
+Saw:
+----
+
+This is similar to the above, however the duty cycle generator is replaced
+with a phase accumulator which divides the output frequency by 14.
+
+
+To calculate output frequency:
+
+         1789772.7272
+Fout = ----------------
+       (freq_in+1) * 14
+
+
+This will tell you the exact frequency in Hz. (note that the * 14 is to
+compensate for the phase accumulator.)
+
+
+
+So how accurate is this info, anyways?
+--------------------------------------
+
+I believe the info to be 100% accurate.  I have extensively tested the 
+output of the actual VRCVI chip to this spec and everything fits perfectly.
+I did this by using a register dump and a QBASIC program I wrote which
+takes the register dump and produces a WAV file.  All frequency and
+duty cycle measurements were taken with a Fluke 83 multimeter, and all
+waveform data was culled from my oscilloscope measuring the real chip.
+
+
+
+
+---EOF---

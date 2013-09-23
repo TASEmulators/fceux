@@ -1,0 +1,30 @@
+A list of people who have contributed code to FCE Ultra follows.
+Please note that the "Code Contributions" field may not be all inclusive;
+the coder may have done more than what is listed.
+
+Name/Alias	Code Contributions		Contact Information
+------------------------------------------------------------------------------
+Aaron Oneal	Many changes to compile		http://www.morphgear.com
+		with MSVC and first frame
+		skipping code.
+
+BERO		Base FCE code.			bero@geocities.co.jp
+
+CaH4e3 		Some mapper code.		CaH4e3 at mail dot ru
+
+\Firebug\	VGA register setting code.	??
+
+Joe Nahmias	man pages.
+
+LULU		SDL network play code.		??
+
+Paul 		Various code for the official	kuliniew@purdue.edu
+ Kuliniewicz	SDL port.
+
+Quietust	VRC7 "translation" code.	quietust@ircN.org
+
+Tatsuyuki 	OPL2 emulator.			??
+ Satoh
+
+Xodnizel        Most of the FCE Ultra code.     http://xodnizel.net/
+

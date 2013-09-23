@@ -1,0 +1,22 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Fceux
+GenericName=NES/Famicom emulator
+NoDisplay=false
+Comment=Emulate NES ROMs
+Exec=/usr/bin/fceux
+Icon=/usr/share/pixmaps/fceux.png
+Terminal=false
+MimeType=application/x-nes-rom
+Categories=Game;Emulator;
+Encoding=UTF-8
+Actions=Fullscreen;DefaultConfig;
+[Desktop Action Fullscreen]
+Name=Open in Fullscreen
+Exec=fceux -f 1
+OnlyShowIn=Unity
+[Desktop Action DefaultConfig]
+Name=Start With the Default Configuration
+Exec=fceux --no-config 1
+OnlyShowIn=Unity
