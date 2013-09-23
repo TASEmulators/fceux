@@ -116,7 +116,7 @@ void DrawPatternTable(uint8 *bitmap, uint8 *table, uint8 *log, uint8 pal)
                 chr1 = table[index + 8];
 				logs = log[index] & log[index + 8];
                 tmp = 7;
-				if (PPUView_maskUnusedGraphics && cdloggerVideoDataSize && ((bool)(logs & 3) == PPUView_invertTheMask))
+				if (PPUView_maskUnusedGraphics && cdloggerVideoDataSize && (((logs & 3) != 0) == PPUView_invertTheMask))
 				{
 					// draw pixel ~8x darker
 					for (x = 0; x < 8; x++) 

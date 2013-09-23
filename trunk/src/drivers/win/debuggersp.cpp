@@ -576,6 +576,7 @@ void setNamesPointerForAddress(uint16 address, Name* newNode)
 /**
 * Loads the necessary NL files
 **/
+// TODO: instead of loading from disk every time the "loadedBankNames" changes, it's better to cache loaded linkedlists in memory
 void loadNameFiles()
 {
 	int cb;

@@ -40,6 +40,10 @@ int recalculateResizedItemCoordinate(int initialValue, int initialBase, int newB
 		{
 			return newBase - (initialBase - initialValue);
 		}
+		case WINDOW_ITEM_RESIZE_TYPE_CENTER_ALIGNED:
+		{
+			return initialValue + (newBase - initialBase) / 2;
+		}
 		case WINDOW_ITEM_RESIZE_TYPE_MULTIPLY:
 		{
 			return (newBase * initialValue) / initialBase;
