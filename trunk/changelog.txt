@@ -1,4 +1,7 @@
 
+---r3017 - FCEUX 2.2.1 Released---
+---September 23 2013---
+
 23-Sep-2013 - AnS - Tracer: do not clear window log when stopping the logging
 22-Sep-2013 - AnS - Tracer: the dialog window can be resized
 21-Sep-2013 - AnS - Debugger: newly created Bookmarks inherit existing symbolic name by default
