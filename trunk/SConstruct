@@ -207,7 +207,7 @@ auxlib_src = 'src/auxlib.lua'
 auxlib_dst = 'bin/auxlib.lua'
 auxlib_inst_dst = prefix + '/share/fceux/auxlib.lua'
 
-fceux_h_src = 'src/drivers/win/help/fceux.chm'
+fceux_h_src = 'output/fceux.chm'
 fceux_h_dst = 'bin/fceux.chm'
 
 env.Command(fceux_h_dst, fceux_h_src, [Copy(fceux_h_dst, fceux_h_src)])
