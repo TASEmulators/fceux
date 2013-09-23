@@ -1,4 +1,5 @@
 
+23-Sep-2013 - AnS - Tracer: do not clear window log when stopping the logging
 22-Sep-2013 - AnS - Tracer: the dialog window can be resized
 21-Sep-2013 - AnS - Debugger: newly created Bookmarks inherit existing symbolic name by default
 20-Sep-2013 - AnS - Debugger, Tracer: clicking on Symbolic names works as well as clicking on addresses

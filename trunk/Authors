@@ -33,7 +33,7 @@ FCEUX >= 2.0 Contributors
 
 * zeromus - mgambrell at gmail dot com (sf:zeromus) - Core architecture refactoring and merging - Windows driver maintenance
 
-* adelikat - document thyself (sf:adelikat) - UI cleanup, project management, Win32 features & maintenence, TAS tools, documentation
+* adelikat - document thyself (sf:adelikat) - UI cleanup, project management, Win32 features & maintenance, TAS tools, documentation
 
 * CaH4e3 - CaH4e3 at mail dot ru (sf: cah4e3) - Mappers
 
@@ -47,7 +47,7 @@ FCEUX >= 2.0 Contributors
 
 * DWEdit - Debugger additions
 
-* AnS - ansstuff at yandex dot ru (sf:ansstuff) - Bugfixes and additions, TAS Editor v1.0
+* AnS - ansstuff at yandex dot ru (sf:ansstuff) - Win32 features & maintenance, TAS Editor, debugging tools, documentation
 
 FCEUX (>=2.0) Linux/SDL Developers
 ----------------------------------
