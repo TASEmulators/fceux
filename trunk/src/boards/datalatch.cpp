@@ -122,14 +122,14 @@ void NROM_Init(CartInfo *info) {
 //------------------ Map 2 ---------------------------
 
 static void UNROMSync(void) {
-	static uint32 mirror_in_use = 0;
-	if (PRGsize[0] <= 128 * 1024) {
-		setprg16(0x8000, latche & 0x7);
-		if (latche & 8) mirror_in_use = 1;
-		if (mirror_in_use)
-			setmirror(((latche >> 3) & 1) ^ 1);	// Higway Star Hacked mapper
-	} else
-		setprg16(0x8000, latche & 0xf);
+//	static uint32 mirror_in_use = 0;
+//	if (PRGsize[0] <= 128 * 1024) {
+//		setprg16(0x8000, latche & 0x7);
+//		if (latche & 8) mirror_in_use = 1;
+//		if (mirror_in_use)
+//			setmirror(((latche >> 3) & 1) ^ 1);	// Higway Star Hacked mapper, disabled till new mapper defined
+//	} else
+	setprg16(0x8000, latche);
 	setprg16(0xc000, ~0);
 	setchr8(0);
 }
