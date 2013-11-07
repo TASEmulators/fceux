@@ -1,0 +1,63 @@
+Subject: [nesdev] the skinny on nes scrolling
+Date: Tue, 13 Apr 1999 16:42:00 -0600
+From: loopy <zxcvzxcv@netzero.net>
+Reply-To: nesdev@onelist.com
+To: nesdev@onelist.com
+
+From: loopy <zxcvzxcv@netzero.net>
+
+---------
+the current information on background scrolling is sufficient for most games;
+however, there are a few that require a more complete understanding.
+
+here are the related registers:
+        (v) vram address, a.k.a. 2006 which we all know and love.  (16 bits)
+        (t) another temp vram address (16 bits)
+           (you can really call them 15 bits, the last isn't used)
+       (x) tile X offset (3 bits)
+
+the ppu uses the vram address for both reading/writing to vram thru 2007,
+and for fetching nametable data to draw the background.  as it's drawing the
+background, it updates the address to point to the nametable data currently
+being drawn.  bits 0-11 hold the nametable address (-$2000).  bits 12-14 are
+the tile Y offset.
+
+---------
+stuff that affects register contents:
+(sorry for the shorthand logic but i think it's easier to see this way)
+
+2000 write:
+        t:0000110000000000=d:00000011
+2005 first write:
+        t:0000000000011111=d:11111000
+        x=d:00000111
+2005 second write:
+        t:0000001111100000=d:11111000
+        t:0111000000000000=d:00000111
+2006 first write:
+        t:0011111100000000=d:00111111
+        t:1100000000000000=0
+2006 second write:
+        t:0000000011111111=d:11111111
+        v=t
+scanline start (if background and sprites are enabled):
+        v:0000010000011111=t:0000010000011111
+frame start (line 0) (if background and sprites are enabled):
+        v=t
+
+note!  2005 and 2006 share the toggle that selects between first/second
+writes.  reading 2002 will clear it.
+
+note!  all of this info agrees with the tests i've run on a real nes.  BUT
+if there's something you don't agree with, please let me know so i can verify
+it.
+
+________________________________________________________
+NetZero - We believe in a FREE Internet.  Shouldn't you?
+Get your FREE Internet Access and Email at
+http://www.netzero.net/download.html
+
+------------------------------------------------------------------------
+New hobbies? New curiosities? New enthusiasms?
+http://www.ONElist.com
+Sign up for a new e-mail list today!

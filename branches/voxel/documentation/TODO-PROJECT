@@ -1,0 +1,61 @@
+Items to be completed before 2.0 release
+
+FASTAPASS / FP_FASTAPASS / Are these archaic? They suck - ??
+
+Separate frameskip/pause from EmulationPaused - zeromus
+
+Make ALL Debugging code conditional - zeromus
+
+Doxygen integration - DONE
+ * website integration
+
+Linux build - soules
+ * clean-up of input device code
+
+Windows build - zeromus
+ * verify rerecording
+ * verify debugging
+ * verify avi writing
+
+Commandline parsing - lukas
+ * verify in windows - zeromus
+
+Configfile parsing - lukas
+ * verify in windows - zeromus
+
+Do we really need vc7 project? Cah4e3? - zeromus
+Source code docs cleaning - zeromus
+Homepage docs - zeromus
+
+What is the proper gnu way to do CREDITS from the homepage? e.g. Marat Fayzullin - General NES information
+
+Freenode registration - lukas
+ * homepage update
+
+Default hotkey philosophy (there are different philosophies from XD and TAS) - ALL
+
+Netplay - FUTURE STUFF
+  Move server code into tree - DONE
+  Ensure netplay compiles
+  verify netplay
+
+----done-----
+
+Investigate OSX build [ http://www.lamer0.com/ ] - zeromus [posted on blog...]
+  
+Move to scons - DONE
+  
+Merge garnet and sf repos - DONE
+ * Ensure gnome frontend is in repo - DONE
+ * Move to sourceforge SVN - DONE
+
+--strategic--
+
+Politics:
+ * aboutbox credits
+ * AUTHORS
+
+Release:
+ * Press Release - ??
+ * Homepage updates
+   - eliminate old news, add new links
