@@ -414,6 +414,11 @@ void SaveStrippedROM(int invert)
 	if(!GetSaveFileName(&ofn))return;
 
 	fp = fopen(sromfilename,"wb");
+	if(!fp) 
+	{
+		FCEUD_PrintError("Error opening target stripped rom file!");
+		return;
+	}
 
 	if(GameInfo->type==GIT_NSF)
 	{
