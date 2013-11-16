@@ -201,6 +201,20 @@ void CPROM_Init(CartInfo *info) {
 	Latch_Init(info, CPROMSync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
+//------------------ Map 29 ---------------------------	//Used by Glider, http://www.retrousb.com/product_info.php?cPath=30&products_id=58
+
+static void M29Sync() {
+	setprg16(0x8000, (latche & 0x1C) >> 2);
+	setprg16(0xc000, ~0);
+	setchr8r(0, latche & 3);
+	setprg8r(0x10, 0x6000, 0);
+}
+
+void Mapper29_Init(CartInfo *info) {
+	Latch_Init(info, M29Sync, 0, 0x8000, 0xFFFF, 1, 0);
+}
+
+
 //------------------ Map 38 ---------------------------
 
 static void M38Sync(void) {
