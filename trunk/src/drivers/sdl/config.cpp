@@ -182,6 +182,22 @@ InitConfig()
 	config->addOption("SDL.SpecialFilter", 0);
 	config->addOption("SDL.SpecialFX", 0);
 	config->addOption("SDL.Vsync", 1);
+	config->addOption("voxel", "SDL.VoxelEngine", 1);
+	
+	// Voxel engine options
+	config->addOption("voxelXscale", "SDL.VoxelXScale", 1.0);
+	config->addOption("voxelYscale", "SDL.VoxelYScale", 1.0);
+	config->addOption("voxelZscale", "SDL.VoxelZScale", 1.0);
+	config->addOption("voxelTransparency", "SDL.VoxelTransparency", 1.0);
+	config->addOption("voxelXspace", "SDL.VoxelXSpace", 0.0);
+	config->addOption("voxelYspace", "SDL.VoxelYSpace", 0.0);
+	config->addOption("voxelBGCMethod", "SDL.VoxelBGCMethod", 0);
+	config->addOption("voxelXcoord", "SDL.VoxelXCoordBGC", 0);
+	config->addOption("voxelYcoord", "SDL.VoxelYCoordBGC", 0);
+	config->addOption("voxelWaves", "SDL.VoxelWaves", 0);
+	config->addOption("voxelWaveLength", "SDL.VoxelWavelength", 1.0);
+	config->addOption("voxelWaveFrequency", "SDL.VoxelWaveFrequency", 1.0);
+	config->addOption("voxelWaveAmplitude", "SDL.VoxelWaveAmplitude", 1.0);
 
 	// network play options - netplay is broken
 	config->addOption("server", "SDL.NetworkIsServer", 0);
