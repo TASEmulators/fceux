@@ -869,15 +869,6 @@ void setDoubleBuffering(GtkWidget* w, gpointer p)
 		g_config->setOption("SDL.DoubleBuffering", 0);
 	g_config->save();
 }
-
-void setVoxel(GtkWidget* w, gpointer p)
-{
-	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
-		g_config->setOption("SDL.VoxelEngine", 1);
-	else
-		g_config->setOption("SDL.VoxelEngine", 0);
-	g_config->save();
-}
 #endif
 
 void openVideoConfig()
@@ -891,7 +882,6 @@ void openVideoConfig()
 	GtkWidget* glChk;
 	GtkWidget* linearChk;
 	GtkWidget* dbChk;
-	GtkWidget* voxelChk;
 	GtkWidget* palChk;
 	GtkWidget* ppuChk;
 	GtkWidget* spriteLimitChk;
@@ -961,7 +951,7 @@ void openVideoConfig()
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(linearChk), 0);
   	
-	// DoubleBuffering check
+    // DoubleBuffering check
 	dbChk = gtk_check_button_new_with_label("Enable double buffering");
 	g_signal_connect(dbChk, "clicked", G_CALLBACK(setDoubleBuffering), NULL);
 	
@@ -972,19 +962,6 @@ void openVideoConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dbChk), 1);
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dbChk), 0);
-		
-	// Voxel check
-	voxelChk = gtk_check_button_new_with_label("Enable voxel engine");
-	g_signal_connect(voxelChk, "clicked", G_CALLBACK(setVoxel), NULL);
-	
-	// sync with config
-	buf = 0;
-	g_config->getOption("SDL.VoxelEngine", &buf);
-	if(buf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(voxelChk), 1);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(voxelChk), 0);
-	
 #endif
 	
 	
@@ -1092,7 +1069,6 @@ void openVideoConfig()
 	gtk_box_pack_start(GTK_BOX(vbox), glChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), linearChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), dbChk, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), voxelChk, FALSE, FALSE, 5);
 #endif
 	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE,5);
 	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 5);
@@ -1112,377 +1088,6 @@ void openVideoConfig()
 	
 	return;
 }
-
-#ifdef OPENGL
-int setVoxelXscale(GtkWidget* w, gpointer p)
-{
-	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
-	g_config->setOption("SDL.VoxelXScale", v);
-	g_config->save();
-	return 0;
-}
-
-int setVoxelYscale(GtkWidget* w, gpointer p)
-{
-	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
-	g_config->setOption("SDL.VoxelYScale", v);
-	g_config->save();
-	return 0;
-}
-
-int setVoxelZscale(GtkWidget* w, gpointer p)
-{
-	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
-	g_config->setOption("SDL.VoxelZScale", v);
-	g_config->save();
-	return 0;
-}
-
-int setTransparency(GtkWidget* w, gpointer p)
-{
-	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
-	g_config->setOption("SDL.VoxelTransparency", v);
-	g_config->save();
-	return 0;
-}
-
-int setVoxelXspace(GtkWidget* w, gpointer p)
-{
-	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
-	g_config->setOption("SDL.VoxelXSpace", v);
-	g_config->save();
-	return 0;
-}
-
-int setVoxelYspace(GtkWidget* w, gpointer p)
-{
-	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
-	g_config->setOption("SDL.VoxelYSpace", v);
-	g_config->save();
-	return 0;
-}
-
-int setXcoordBGC(GtkWidget* w, gpointer p)
-{
-	int v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
-	g_config->setOption("SDL.VoxelXCoordBGC", v);
-	g_config->save();
-	return 0;
-}
-
-int setYcoordBGC(GtkWidget* w, gpointer p)
-{
-	int v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
-	g_config->setOption("SDL.VoxelYCoordBGC", v);
-	g_config->save();
-	return 0;
-}
-
-void toggleSystemBGC(GtkToggleButton *t, gpointer user_data) 
-{
-	g_config->setOption("SDL.VoxelBGCMethod", 0);
-	g_config->save();    
-}
-
-void togglePrevalentBGC(GtkToggleButton *t, gpointer user_data) 
-{
-	g_config->setOption("SDL.VoxelBGCMethod", 1);
-	g_config->save();    
-}
-
-void toggleCoordBGC(GtkToggleButton *t, gpointer user_data) 
-{
-	g_config->setOption("SDL.VoxelBGCMethod", 2);
-	g_config->save();    
-}
-
-void setVoxelWaves(GtkWidget* w, gpointer p)
-{
-	int x = gtk_combo_box_get_active(GTK_COMBO_BOX(w));
-	g_config->setOption("SDL.VoxelWaves", x);
-	g_config->save();	
-}
-
-int setWavelength(GtkWidget* w, gpointer p)
-{
-	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
-	g_config->setOption("SDL.VoxelWavelength", v);
-	g_config->save();
-	return 0;
-}
-
-int setAmplitude(GtkWidget* w, gpointer p)
-{
-	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
-	g_config->setOption("SDL.VoxelWaveAmplitude", v);
-	g_config->save();
-	return 0;
-}
-
-int setFrequency(GtkWidget* w, gpointer p)
-{
-	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
-	g_config->setOption("SDL.VoxelWaveFrequency", v);
-	g_config->save();
-	return 0;
-}
-
-void openVoxelConfig()
-{
-	GtkWidget* win;
-	GtkWidget* vbox;
-	GtkWidget* disclaimer;
-	GtkWidget* scaleLbl;
-	GtkWidget* scaleHbox;
-	GtkWidget* xscaleSpin;
-	GtkWidget* yscaleSpin;
-	GtkWidget* xscaleLbl;
-	GtkWidget* yscaleLbl;
-	GtkWidget* depthHbox;
-	GtkWidget* depthLbl;
-	GtkWidget* depthSpin;
-	GtkWidget* transHbox;
-	GtkWidget* transLbl;
-	GtkWidget* transSpin;
-	GtkWidget* spaceLbl;
-	GtkWidget* spaceHbox;
-	GtkWidget* xspaceSpin;
-	GtkWidget* yspaceSpin;
-	GtkWidget* xspaceLbl;
-	GtkWidget* yspaceLbl;
-	GSList*    groupBGC;
-	GtkWidget* systemBGC;
-	GtkWidget* prevalentBGC;
-	GtkWidget* coordBGC;
-	GtkWidget* coordHbox;
-	GtkWidget* xcoordBGC;
-	GtkWidget* ycoordBGC;
-	GtkWidget* xcoordLbl;
-	GtkWidget* ycoordLbl;	
-	GtkWidget* waveHbox;
-	GtkWidget* waveLbl;
-	GtkWidget* waveCombo;
-	GtkWidget* wavelengthHbox;
-	GtkWidget* wavelengthLbl;
-	GtkWidget* wavelengthSpin;
-	GtkWidget* amplitudeHbox;
-	GtkWidget* amplitudeLbl;
-	GtkWidget* amplitudeSpin;
-	GtkWidget* frequencyHbox;
-	GtkWidget* frequencyLbl;
-	GtkWidget* frequencySpin;
-	GtkWidget* freqNoteLbl;
-
-	double f;
-	int i;
-
-	win = gtk_dialog_new_with_buttons("Voxel Configuration",
-				GTK_WINDOW(MainWindow),
-				(GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
-				GTK_STOCK_CLOSE, GTK_RESPONSE_OK, NULL);
-	gtk_window_set_icon_name(GTK_WINDOW(win), "voxels");
-	
-	vbox = gtk_dialog_get_content_area(GTK_DIALOG(win));
-	
-	disclaimer = gtk_label_new("Voxel engine is for experimentation\npurposes only, and will not work\nwell with every game that you try.");
-	
-	// Scale of voxels
-	scaleLbl = gtk_label_new("Scale of voxels");
-	scaleHbox = gtk_hbox_new(FALSE, 5);
-	xscaleLbl = gtk_label_new("X:");
-	xscaleSpin = gtk_spin_button_new_with_range(0.1, 16.0, .1);
-	yscaleLbl = gtk_label_new("Y:");
-	yscaleSpin = gtk_spin_button_new_with_range(0.1, 16.0, .1);
-	
-	gtk_box_pack_start(GTK_BOX(scaleHbox), xscaleLbl, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(scaleHbox), xscaleSpin, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(scaleHbox), yscaleLbl, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(scaleHbox), yscaleSpin, FALSE, FALSE, 2);
-
-	g_signal_connect(xscaleSpin, "value-changed", G_CALLBACK(setVoxelXscale), NULL);
-	g_signal_connect(yscaleSpin, "value-changed", G_CALLBACK(setVoxelYscale), NULL);
-	
-	// sync with config
-	g_config->getOption("SDL.VoxelXScale", &f);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(xscaleSpin), f);
-	g_config->getOption("SDL.VoxelYScale", &f);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(yscaleSpin), f);
-
-	// Voxel depth
-	depthLbl = gtk_label_new("Voxel Thickness:");
-	depthHbox = gtk_hbox_new(FALSE, 5);
-	depthSpin = gtk_spin_button_new_with_range(0.1, 16.0, .1);
-	
-	gtk_box_pack_start(GTK_BOX(depthHbox), depthLbl, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(depthHbox), depthSpin, FALSE, FALSE, 2);
-	g_signal_connect(depthSpin, "value-changed", G_CALLBACK(setVoxelZscale), NULL);
-
-	g_config->getOption("SDL.VoxelZScale", &f);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(depthSpin), f);
-
-	// Voxel transparency
-	transLbl = gtk_label_new("Transparency:");
-	transHbox = gtk_hbox_new(FALSE, 5);
-	transSpin = gtk_spin_button_new_with_range(0.00, 1.00, .01);
-	
-	gtk_box_pack_start(GTK_BOX(transHbox), transLbl, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(transHbox), transSpin, FALSE, FALSE, 2);
-	g_signal_connect(transSpin, "value-changed", G_CALLBACK(setTransparency), NULL);
-
-	g_config->getOption("SDL.VoxelTransparency", &f);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(transSpin), f);
-
-	// Space between voxels
-	spaceLbl = gtk_label_new("Space between voxels");
-	spaceHbox = gtk_hbox_new(FALSE, 5);
-	xspaceLbl = gtk_label_new("X:");
-	xspaceSpin = gtk_spin_button_new_with_range(-10.0, 10.0, .1);
-	yspaceLbl = gtk_label_new("Y:");
-	yspaceSpin = gtk_spin_button_new_with_range(-10.0, 10.0, .1);
-	
-	gtk_box_pack_start(GTK_BOX(spaceHbox), xspaceLbl, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(spaceHbox), xspaceSpin, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(spaceHbox), yspaceLbl, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(spaceHbox), yspaceSpin, FALSE, FALSE, 2);
-
-	g_signal_connect(xspaceSpin, "value-changed", G_CALLBACK(setVoxelXspace), NULL);
-	g_signal_connect(yspaceSpin, "value-changed", G_CALLBACK(setVoxelYspace), NULL);
-	
-	// sync with config
-	g_config->getOption("SDL.VoxelXSpace", &f);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(xspaceSpin), f);
-	g_config->getOption("SDL.VoxelYSpace", &f);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(yspaceSpin), f);
-
-	// How to get the background color
-	systemBGC = gtk_radio_button_new_with_mnemonic (NULL, "Use system background color, or");
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (systemBGC), groupBGC);
-	groupBGC = g_slist_append (groupBGC, systemBGC);
-
-	prevalentBGC = gtk_radio_button_new_with_mnemonic (NULL, "Use frame's most prevalent color, or");
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (prevalentBGC), groupBGC);
-	groupBGC = g_slist_append (groupBGC, prevalentBGC);
-
-	coordBGC = gtk_radio_button_new_with_mnemonic (NULL, "Use coordinate background color:");
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (coordBGC), groupBGC);
-	groupBGC = g_slist_append (groupBGC, coordBGC);
-
-	coordHbox = gtk_hbox_new(FALSE, 5);
-	xcoordLbl = gtk_label_new("\tX:");
-	xcoordBGC = gtk_spin_button_new_with_range(0, 255, 1);
-	ycoordLbl = gtk_label_new("Y:");
-	ycoordBGC = gtk_spin_button_new_with_range(0, 255, 1);
-	
-	gtk_box_pack_start(GTK_BOX(coordHbox), xcoordLbl, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(coordHbox), xcoordBGC, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(coordHbox), ycoordLbl, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(coordHbox), ycoordBGC, FALSE, FALSE, 2);
-
-	g_signal_connect(systemBGC, "toggled", G_CALLBACK(toggleSystemBGC), NULL);
-	g_signal_connect(prevalentBGC, "toggled", G_CALLBACK(togglePrevalentBGC), NULL);
-	g_signal_connect(coordBGC, "toggled", G_CALLBACK(toggleCoordBGC), NULL);
-	g_signal_connect(xcoordBGC, "value-changed", G_CALLBACK(setXcoordBGC), NULL);
-	g_signal_connect(ycoordBGC, "value-changed", G_CALLBACK(setYcoordBGC), NULL);
-
-	// sync with config
-	g_config->getOption("SDL.VoxelBGCMethod", &i);
-	switch (i)
-	{
-	case 0:
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (systemBGC), TRUE);
-		break;
-	case 1:
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (prevalentBGC), TRUE);
-		break;
-	case 2:
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (coordBGC), TRUE);
-		break;	
-	}
-	g_config->getOption("SDL.VoxelXCoordBGC", &i);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(xcoordBGC), i);
-	g_config->getOption("SDL.VoxelYCoordBGC", &i);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(ycoordBGC), i);
-
-	// wave widgets
-	waveHbox = gtk_hbox_new(FALSE, 3);
-	waveLbl = gtk_label_new("Waves: ");
-	waveCombo = gtk_combo_box_text_new();
-	// -Wave Types Tag-
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(waveCombo), "disabled");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(waveCombo), "Horizontal");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(waveCombo), "Vertical");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(waveCombo), "Diagonal \\");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(waveCombo), "Diagonal /");
-
-	// sync with cfg
-	g_config->getOption("SDL.VoxelWaves", &i);
-	gtk_combo_box_set_active(GTK_COMBO_BOX(waveCombo), i);
-	
-	g_signal_connect(waveCombo, "changed", G_CALLBACK(setVoxelWaves), NULL);
-	gtk_box_pack_start(GTK_BOX(waveHbox), waveLbl, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(waveHbox), waveCombo, FALSE, FALSE, 5);
-
-	// Wave settings
-	wavelengthLbl = gtk_label_new("\tWavelength:");
-	wavelengthHbox = gtk_hbox_new(FALSE, 5);
-	wavelengthSpin = gtk_spin_button_new_with_range(0.1, 10.0, .1);
-	
-	gtk_box_pack_start(GTK_BOX(wavelengthHbox), wavelengthLbl, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(wavelengthHbox), wavelengthSpin, FALSE, FALSE, 2);
-
-	amplitudeLbl = gtk_label_new("\tAmplitude:");
-	amplitudeHbox = gtk_hbox_new(FALSE, 5);
-	amplitudeSpin = gtk_spin_button_new_with_range(0.1, 10.0, .1);
-	
-	gtk_box_pack_start(GTK_BOX(amplitudeHbox), amplitudeLbl, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(amplitudeHbox), amplitudeSpin, FALSE, FALSE, 2);
-
-	frequencyLbl = gtk_label_new("\tFrequency:");
-	frequencyHbox = gtk_hbox_new(FALSE, 5);
-	frequencySpin = gtk_spin_button_new_with_range(-10.0, 10.0, .1);
-	freqNoteLbl = gtk_label_new("(Negative frequency reverses\ndirection.  Zero freezes.)");
-	
-	gtk_box_pack_start(GTK_BOX(frequencyHbox), frequencyLbl, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(frequencyHbox), frequencySpin, FALSE, FALSE, 2);
-
-	g_signal_connect(wavelengthSpin, "value-changed", G_CALLBACK(setWavelength), NULL);
-	g_signal_connect(amplitudeSpin, "value-changed", G_CALLBACK(setAmplitude), NULL);
-	g_signal_connect(frequencySpin, "value-changed", G_CALLBACK(setFrequency), NULL);
-	
-	// sync with config
-	g_config->getOption("SDL.VoxelWavelength", &f);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(wavelengthSpin), f);
-	g_config->getOption("SDL.VoxelWaveAmplitude", &f);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(amplitudeSpin), f);
-	g_config->getOption("SDL.VoxelWaveFrequency", &f);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(frequencySpin), f);
-
-	gtk_box_pack_start(GTK_BOX(vbox), disclaimer, FALSE, FALSE, 5);	
-	gtk_box_pack_start(GTK_BOX(vbox), scaleLbl, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), scaleHbox, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), depthHbox, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), transHbox, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), spaceLbl, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), spaceHbox, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), systemBGC, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), prevalentBGC, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), coordBGC, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), coordHbox, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), waveHbox, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), wavelengthHbox, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), amplitudeHbox, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), frequencyHbox, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), freqNoteLbl, FALSE, FALSE, 5);
-
-	g_signal_connect(win, "delete-event", G_CALLBACK(closeVideoWin), NULL);
-	g_signal_connect(win, "response", G_CALLBACK(closeVideoWin), NULL);
-	
-	gtk_widget_show_all(win);
-	
-	return;
-}
-#endif
-
 const char* mixerStrings[6] = {"Volume", "Triangle", "Square1", "Square2", "Noise", "PCM"};
 
 int mixerChanged(GtkWidget* w, gpointer p)
@@ -2529,7 +2134,7 @@ gint convertKeypress(GtkWidget *grab, GdkEventKey *event, gpointer user_data)
 			sdlev.key.state = SDL_RELEASED;
 			keystate = 0;
 			break;
-			
+		
 		default:
 			fprintf(stderr, "Unhandled GDK event type: %d", event->type);
 			return FALSE;
@@ -2607,9 +2212,6 @@ static char* menuXml =
 	"      <menuitem action='VideoConfigAction' />"
 	"      <menuitem action='PaletteConfigAction' />"
 	"      <menuitem action='NetworkConfigAction' />"
-#ifdef OPENGL
-	"      <menuitem action='VoxelConfigAction' />"
-#endif
 	"      <menuitem action='AutoResumeAction' />"
 	"      <separator />"
 	"      <menuitem action='FullscreenAction' />"
@@ -2670,9 +2272,6 @@ static GtkActionEntry normal_entries[] = {
 	{"VideoConfigAction", "video-display", "_Video Config", NULL, NULL, G_CALLBACK(openVideoConfig)},
 	{"PaletteConfigAction", GTK_STOCK_SELECT_COLOR, "_Palette Config", NULL, NULL, G_CALLBACK(openPaletteConfig)},
 	{"NetworkConfigAction", GTK_STOCK_NETWORK, "_Network Config", NULL, NULL, G_CALLBACK(openNetworkConfig)},
-#ifdef OPENGL
-	{"VoxelConfigAction", "voxels", "_Voxel Config", NULL, NULL, G_CALLBACK(openVoxelConfig)},
-#endif
 	{"FullscreenAction", GTK_STOCK_FULLSCREEN, "_Fullscreen", "<alt>Return", NULL, G_CALLBACK(enableFullscreen)},	
 	{"EmulationMenuAction", NULL, "_Emulation"},
 	{"PowerAction", NULL, "P_ower", NULL, NULL, G_CALLBACK(FCEUI_PowerNES)},
@@ -2790,7 +2389,7 @@ gint handleMouseClick(GtkWidget* widget, GdkEvent *event, gpointer callback_data
 		if(button == 3)
 			GtkMouseData[2] |= 0x3;
 	}
-	
+
 	// this doesn't work because we poll the mouse position rather
 	// than use events
 	/*
@@ -2810,36 +2409,6 @@ gint handleMouseClick(GtkWidget* widget, GdkEvent *event, gpointer callback_data
   
 	return 0;
 }
-
-gint handleMouseMove(GtkWidget* widget, GdkEvent *event, gpointer callback_data)
-{
-	GtkMouseData[0] = ((GdkEventMotion*)event)->x;
-	GtkMouseData[1] = ((GdkEventMotion*)event)->y;
-
-	return 0;
-}
-
-extern float cameraZ;
-gint handleMouseScroll(GtkWidget* widget, GdkEvent *event, gpointer callback_data)
-{
-	switch (((GdkEventScroll *)event)->direction)
-	{
-	case GDK_SCROLL_UP:
-		cameraZ -= 10.0f;
-		if (cameraZ < 100.0f)
-			cameraZ = 100.0f;
-		break;
-
-	case GDK_SCROLL_DOWN:
-		cameraZ += 10.0f;
-		if (cameraZ > 800.0f)
-			cameraZ = 800.0f;
-		break;
-	}
-	
-	return 0;
-}
-
 // NES resolution = 256x240
 const int NES_WIDTH=256;
 const int NES_HEIGHT=240;
@@ -2926,10 +2495,6 @@ int InitGTKSubsystem(int argc, char** argv)
 	// prg - Bryan Cain, you are the man!
 	
 	evbox = gtk_event_box_new();
-	
-	// Absolutely necessary in order to poll data from mouse continuously:
-	gtk_widget_set_events(evbox, GDK_POINTER_MOTION_MASK);
-
 	gtk_box_pack_start (GTK_BOX(vbox), evbox, TRUE, TRUE, 0);
 	
 	double xscale, yscale;
@@ -2948,12 +2513,9 @@ int InitGTKSubsystem(int argc, char** argv)
 	gtk_key_snooper_install(convertKeypress, NULL);
 
 	// pass along mouse data from GTK to SDL
-	g_signal_connect(G_OBJECT(evbox), "button-press-event",   G_CALLBACK(handleMouseClick),  NULL);
-	g_signal_connect(G_OBJECT(evbox), "button-release-event", G_CALLBACK(handleMouseClick),  NULL);
+	g_signal_connect(G_OBJECT(evbox), "button-press-event", G_CALLBACK(handleMouseClick), NULL);
+	g_signal_connect(G_OBJECT(evbox), "button-release-event", G_CALLBACK(handleMouseClick), NULL);
 
-	// Collect mouse motion and wheel scrolls for voxel camera.
-	g_signal_connect(G_OBJECT(evbox), "motion-notify-event",  G_CALLBACK(handleMouseMove),   NULL);
-	g_signal_connect(G_OBJECT(evbox), "scroll-event",         G_CALLBACK(handleMouseScroll), NULL);
 	
 	// signal handlers
 	g_signal_connect(MainWindow, "delete-event", quit, NULL);

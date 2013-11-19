@@ -915,7 +915,6 @@ GetMouseData (uint32 (&d)[3])
 	{
 		d[2] |= 0x2;
 	}
-	
 
 	// get the mouse position from the SDL video driver
 	t = PtoV (x, y);
@@ -923,13 +922,8 @@ GetMouseData (uint32 (&d)[3])
 	d[1] = (t >> 16) & 0xFFFF;
 	// debug print 
 	// printf("mouse %d %d %d\n", d[0], d[1], d[2]);
-	
-	// Set these for the voxel camera.
-	GtkMouseData[0] = x;
-	GtkMouseData[1] = y;
 }
 
-extern float cameraZ;
 /**
  * Handles outstanding SDL events.
  */
@@ -956,21 +950,6 @@ UpdatePhysicalInput ()
 					default:
 						FCEU_printf ("Warning: unknown hotkey event %d\n",
 									event.user.code);
-				}
-			case SDL_MOUSEBUTTONDOWN: 
-			// Capture mouse scroll wheel for the voxel camera.
-				switch(event.button.button)
-				{ 
-				case SDL_BUTTON_WHEELUP: 
-					cameraZ -= 10.0f;
-					if (cameraZ < 100.0f)
-						cameraZ = 100.0f;
-					break; 
-				case SDL_BUTTON_WHEELDOWN: 
-					cameraZ += 10.0f;
-					if (cameraZ > 800.0f)
-						cameraZ = 800.0f;
-					break;
 				}
 			default:
 				break;

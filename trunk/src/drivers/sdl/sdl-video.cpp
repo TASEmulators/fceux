@@ -23,7 +23,6 @@
 
 #include "sdl.h"
 #include "sdl-opengl.h"
-#include "sdl-voxel.h"
 #include "../common/vidblit.h"
 #include "../../fceu.h"
 #include "../../version.h"
@@ -66,7 +65,6 @@ static int s_inited;
 
 #ifdef OPENGL
 static int s_useOpenGL;
-static int s_voxelEngine;
 #endif
 static double s_exs, s_eys;
 static int s_eefx;
@@ -177,7 +175,6 @@ InitVideo(FCEUGI *gi)
 	g_config->getOption("SDL.DoubleBuffering", &doublebuf);
 #ifdef OPENGL
 	g_config->getOption("SDL.OpenGL", &s_useOpenGL);
-	g_config->getOption("SDL.VoxelEngine", &s_voxelEngine);
 #endif
 	g_config->getOption("SDL.SpecialFilter", &s_sponge);
 	g_config->getOption("SDL.XStretch", &xstretch);
@@ -489,16 +486,10 @@ InitVideo(FCEUGI *gi)
 #ifdef OPENGL
 		if(s_useOpenGL) 
 		{
-			int openGLip, voxelEngine;
+			int openGLip;
 			g_config->getOption("SDL.OpenGLip", &openGLip);
 
-			if(s_voxelEngine)
-			{
-				initVoxelGL(NOFFSET, 256 - (s_clipSides ? 8 : 0),
-						s_srendline, s_erendline + 1,
-						s_screen, s_eefx);
-			}
-			else if(!InitOpenGL(NOFFSET, 256 - (s_clipSides ? 8 : 0),
+			if(!InitOpenGL(NOFFSET, 256 - (s_clipSides ? 8 : 0),
 						s_srendline, s_erendline + 1,
 						s_exs, s_eys, s_eefx,
 						openGLip, xstretch, ystretch, s_screen)) 
@@ -638,14 +629,7 @@ BlitScreen(uint8 *XBuf)
 #ifdef OPENGL
 	// OpenGL is handled separately
 	if(s_useOpenGL) {
-		if (s_voxelEngine)
-		{
-			drawVoxelScene(XBuf);
-		}
-		else
-		{
-			BlitOpenGL(XBuf);
-		}
+		BlitOpenGL(XBuf);
 		return;
 	}
 #endif
