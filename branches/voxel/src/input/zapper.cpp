@@ -169,25 +169,26 @@ static void UpdateZapper(int w, void *data, int arg)
 {
 	uint32 *ptr=(uint32 *)data;
 
-    bool newclicked = (ptr[2]&3)!=0;
-    bool oldclicked = (ZD[w].lastInput)!=0;
+	bool newclicked = (ptr[2]&3)!=0;
+	bool oldclicked = (ZD[w].lastInput)!=0;
 
 	if(ZD[w].bogo)
-    {
+	{
 		ZD[w].bogo--;	
-    }
+	}
 
-    ZD[w].lastInput = ptr[2]&3;
+	ZD[w].lastInput = ptr[2]&3;
 
-    //woah.. this looks like broken bit logic.
+	//woah.. this looks like broken bit logic.
 	if(newclicked && !oldclicked)
-    {
+	{
 		ZD[w].bogo=5;
-	    ZD[w].mzb=ptr[2];
-	    ZD[w].mzx=ptr[0];
-	    ZD[w].mzy=ptr[1];
-    }
+		ZD[w].mzb=ptr[2];
+	}
 
+	// Keep this outside of the above if block to keep the crosshairs updated 
+	ZD[w].mzx=ptr[0];
+	ZD[w].mzy=ptr[1];
 }
 
 static void LogZapper(int w, MovieRecord* mr)

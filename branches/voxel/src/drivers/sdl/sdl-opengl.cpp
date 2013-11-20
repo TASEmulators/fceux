@@ -25,7 +25,7 @@ static GLuint textures[2]={0,0};	// Normal image, scanline overlay.
 
 static int left,right,top,bottom; // right and bottom are not inclusive.
 static int scanlines;
-static void *HiBuffer;
+void *HiBuffer;
 
 typedef void APIENTRY (*glColorTableEXT_Func)(GLenum target,
 		GLenum internalformat,  GLsizei width, GLenum format, GLenum type,
