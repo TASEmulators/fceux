@@ -162,6 +162,8 @@ else:
    
   if env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c', autoadd=1):
     conf.env.Append(CCFLAGS = "-DOPENGL")
+    conf.CheckLibWithHeader('GLU', 'GL/glu.h', 'c', autoadd=1)
+
   conf.env.Append(CPPDEFINES = ['PSS_STYLE=1'])
   
   env = conf.Finish()
