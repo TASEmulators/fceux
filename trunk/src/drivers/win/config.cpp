@@ -185,8 +185,8 @@ static CFGSTRUCT fceuconfig[] =
 
 	NAC("palyo",pal_emulation),
 	NAC("genie",genie),
-	NAC("fs",fullscreen),
-	NAC("vgamode",vmod),
+	NAC("fs",_FIXME_getFullscreenVar()),
+	NAC("vgamode",_FIXME_getVModeIdxVar()),
 	NAC("sound",soundo),
 	NAC("sicon",status_icon),
 
@@ -206,8 +206,8 @@ static CFGSTRUCT fceuconfig[] =
 	NACS("odavi",directory_names[12]),
 	NACS("odbase",directory_names[13]),
 
-	AC(winspecial),
-	AC(NTSCwinspecial),
+	NAC("winspecial", _FIXME_getFilterModeWindowedIdxVar()),
+	NAC("NTSCwinspecial", _FIXME_getFilterOptionVar()),
 	AC(winsizemulx),
 	AC(winsizemuly),
 	AC(tvAspectX),
@@ -231,23 +231,23 @@ static CFGSTRUCT fceuconfig[] =
 
 	NACA("InputType",InputType),
 
-	NAC("vmcx",vmodes[0].x),
-	NAC("vmcy",vmodes[0].y),
-	NAC("vmcb",vmodes[0].bpp),
-	NAC("vmcf",vmodes[0].flags),
-	NAC("vmcxs",vmodes[0].xscale),
-	NAC("vmcys",vmodes[0].yscale),
-	NAC("vmspecial",vmodes[0].special),
+	NAC("vmcx",_FIXME_getCustomVideoModeVar().width),
+	NAC("vmcy",_FIXME_getCustomVideoModeVar().height),
+	NAC("vmcb",_FIXME_getCustomVideoModeVar().bpp),
+	NAC("vmcf",_FIXME_getCustomVideoModeVar().flags),
+	NAC("vmcxs",_FIXME_getCustomVideoModeVar().xscale),
+	NAC("vmcys",_FIXME_getCustomVideoModeVar().yscale),
+	NAC("vmspecial",_FIXME_getCustomVideoModeVar().filter),
 
 	NAC("srendline",srendlinen),
 	NAC("erendline",erendlinen),
 	NAC("srendlinep",srendlinep),
 	NAC("erendlinep",erendlinep),
 
-	AC(directDrawModeWindowed),
-	AC(directDrawModeFullscreen),
-	AC(winsync),
-	NAC("988fssync",fssync),
+	NAC("directDrawModeWindowed", _FIXME_getDDrawModeWindowedVar()),
+	NAC("directDrawModeFullscreen", _FIXME_getDDrawModeFullscreenVar()),
+	NAC("winsync", _FIXME_getWindowedSyncModeIdxVar()),
+	NAC("988fssync",_FIXME_getFullscreenSyncModeIdxVar()),
 
 	AC(ismaximized),
 	AC(maxconbskip),

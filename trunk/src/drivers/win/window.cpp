@@ -83,8 +83,6 @@ extern PLAYBACK playback;
 #include "Win32InputBox.h"
 extern int32 fps_scale_unpaused;
 
-//extern void ToggleFullscreen();
-
 using namespace std;
 
 //----Context Menu - Some dynamically added menu items
@@ -995,7 +993,7 @@ void HideFWindow(int h)
 //Toggles the display status of the main menu.
 void ToggleHideMenu(void)
 { 
-	if(!fullscreen && !nofocus && (GameInfo || tog))
+	if(!GetIsFullscreen() && !nofocus && (GameInfo || tog))
 	{
 		tog ^= 1;
 		HideMenu(tog);
@@ -1034,7 +1032,7 @@ bool ALoad(const char *nameo, char* innerFilename, bool silent)
 
 		UpdateCheckedMenuItems();
 
-		PushCurrentVideoSettings();
+		FCEUD_VideoChanged();
 
 		std::string recentFileName = nameo;
 		if(GameInfo->archiveFilename && GameInfo->archiveCount>1)
@@ -1053,7 +1051,10 @@ bool ALoad(const char *nameo, char* innerFilename, bool silent)
 
 		if(eoptions & EO_FSAFTERLOAD)
 		{
-			SetFSVideoMode();
+			changerecursive=1;
+			SetIsFullscreen(true);
+			FCEUD_VideoChanged();
+			changerecursive=0;
 		}
 		
 		
@@ -1119,7 +1120,7 @@ void LoadNewGamey(HWND hParent, const char *initialdir)
 
 void GetMouseData(uint32 (&md)[3])
 {
-	extern RECT bestfitRect;
+	RECT bestfitRect = GetActiveRect();
 
 	double screen_width = VNSWID;
 	double screen_height = FSettings.TotalScanlines();
@@ -1271,8 +1272,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	{
 		if (fullscreenByDoubleclick)
 		{
-			extern void ToggleFullscreen();
-			ToggleFullscreen();
+			changerecursive=1;
+			SetIsFullscreen(!GetIsFullscreen());
+			FCEUD_VideoChanged();
+			changerecursive=0;
 			return 0;
 		} else
 		{
@@ -1379,7 +1382,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		goto proco;
 
 	case WM_SIZE:
-		if (!fullscreen && !changerecursive && !windowedfailed)
+		if (!GetIsFullscreen() && !changerecursive && !windowedfailed)
 		{
 			switch(wParam)
 			{
@@ -1439,7 +1442,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		//break;
 		goto proco;
 	case WM_DISPLAYCHANGE:
-		if(!fullscreen && !changerecursive)
+		if(!GetIsFullscreen() && !changerecursive)
 			vchanged=1;
 		goto proco;
 	case WM_DROPFILES:
@@ -1970,7 +1973,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				FCEUI_SetVidSystem(pal_emulation);
 				RefreshThrottleFPS();
 				UpdateCheckedMenuItems();
-				PushCurrentVideoSettings();
+				FCEUD_VideoChanged();
 				break;
 			case MENU_DIRECTORIES:
 				ConfigDirectories();
@@ -1994,7 +1997,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				ConfigTiming();
 				break;
 			case MENU_VIDEO:
-				ConfigVideo();
+				ShowConfigVideoDialog();
 				break;
 			case MENU_HOTKEYS:
 				MapInput();
@@ -2292,14 +2295,14 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		{
 			if(GameInfo && ((InputType[2]==SIFC_FKB) || (InputType[2]==SIFC_SUBORKB)) && cidisabled)
 				break;
-			if(lParam == VK_RETURN || fullscreen || tog) break;
+			if(lParam == VK_RETURN || GetIsFullscreen() || tog) break;
 		}
 		goto proco;
 	case WM_SYSKEYDOWN:
 		if(GameInfo && ((InputType[2]==SIFC_FKB) || (InputType[2]==SIFC_SUBORKB)) && cidisabled)
 			break; // Hopefully this won't break DInput...
 
-		if(fullscreen || tog)
+		if(GetIsFullscreen() || tog)
 		{
 			if(wParam==VK_MENU)
 				break;
@@ -2472,9 +2475,10 @@ void FixWXY(int pref, bool shift_held)
 
 void UpdateFCEUWindow(void)
 {
-	if(vchanged && !fullscreen && !changerecursive && !nofocus)
+	if(vchanged && !GetIsFullscreen() && !changerecursive && !nofocus)
 	{
-		SetVideoMode(0);
+		SetIsFullscreen(false);
+		FCEUD_VideoChanged();
 		vchanged = 0;
 	}
 
@@ -2615,11 +2619,13 @@ void SetMainWindowStuff()
 		ShowWindow(hAppWnd, SW_SHOWNORMAL);
 	}
 
-	if (eoptions & EO_BESTFIT && !windowedfailed)
+	// removed check for EO_BESTFIT flag
+	// OnWindowSizeChange() now is a general purpose window resize handler on video driver side
+	if (!windowedfailed)
 	{
 		RECT client_recr;
 		GetClientRect(hAppWnd, &client_recr);
-		recalculateBestFitRect(client_recr.right - client_recr.left, client_recr.bottom - client_recr.top);
+		OnWindowSizeChange(client_recr.right - client_recr.left, client_recr.bottom - client_recr.top);
 	}
 }
 
@@ -2985,6 +2991,10 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENCDLOGGER]);
 	combined = "&Code/Data Logger...\t" + combo;
 	ChangeMenuItemText(MENU_CDLOGGER, combined);
+}
+
+bool GetIsFullscreenOnDoubleclick() {
+	return fullscreenByDoubleclick;
 }
 
 //This function is for the context menu item Save Movie As...

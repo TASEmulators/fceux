@@ -38,6 +38,7 @@
 
 #ifdef WIN32
 #include "drivers/win/main.h"
+#include "drivers/win/video.h"
 #include "drivers/win/memwatch.h"
 #include "drivers/win/cheat.h"
 #include "drivers/win/debugger.h"
@@ -1175,15 +1176,13 @@ static void FCEUI_DoExit(void)
 void ToggleFullscreen()
 {
 #ifdef WIN32
-	extern int SetVideoMode(int fs);		//adelikat: Yeah, I know, hacky
 	extern void UpdateCheckedMenuItems();
 
 	UpdateCheckedMenuItems();
-	changerecursive=1;
 
-	int oldmode = fullscreen;
-	if(!SetVideoMode(oldmode ^ 1))
-		SetVideoMode(oldmode);
+	changerecursive=1;
+	SetIsFullscreen(!GetIsFullscreen());
+	FCEUD_VideoChanged();
 	changerecursive=0;
 #endif
 }

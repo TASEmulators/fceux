@@ -25,6 +25,9 @@ void FCEU_printf(char *format, ...);
 #define FCEUI_printf FCEU_printf
 
 //Video interface
+// FIXME: these functions are declared in windows video driver header, but not in linux video driver header;
+// eventually both platform video drivers should be brought to same set of functions and single shared header,
+// which then can be included where access to video driver functions is needed instead of driver.h
 void FCEUD_SetPalette(uint8 index, uint8 r, uint8 g, uint8 b);
 void FCEUD_GetPalette(uint8 i,uint8 *r, uint8 *g, uint8 *b);
 
@@ -259,6 +262,9 @@ void FCEUI_SetEmulationPaused(int val);
 void FCEUI_ToggleEmulationPause();
 
 //indicates whether input aids should be drawn (such as crosshairs, etc; usually in fullscreen mode)
+// FIXME: this function is already declared in both platform video driver headers;
+// eventually both platform video drivers should be brought to same set of functions and single shared header,
+// which then can be included where access to video driver functions is needed instead of driver.h
 bool FCEUD_ShouldDrawInputAids();
 
 ///called when the emulator closes a game

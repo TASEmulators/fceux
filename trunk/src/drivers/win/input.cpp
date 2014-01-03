@@ -28,6 +28,7 @@
 #include <windows.h>
 #include <commctrl.h>
 
+#include "video.h"
 #include "input.h"
 #include "keyboard.h"
 #include "joystick.h"
@@ -42,9 +43,8 @@ LPDIRECTINPUT7 lpDI=0;
 
 void InitInputPorts(bool fourscore);
 
-int tempwinsync = 0;		//Temp variable used by turbo to turn of sync settings
+VSYNCMODE tempwinsync = SYNCMODE_NONE;		//Temp variable used by turbo to turn of sync settings
 int tempsoundquality = 0;	//Temp variable used by turbo to turn of sound quality settings
-extern int winsync;
 extern int soundquality;
 extern bool replaceP2StartWithMicrophone;
 //UsrInputType[] is user-specified.  InputType[] is current
@@ -1571,8 +1571,8 @@ int FCEUD_TestCommandState(int c)
 
 void FCEUD_TurboOn    (void) 
 	{ 
-		tempwinsync = winsync;	//Store winsync setting
-		winsync = 0;			//turn off winsync for turbo (so that turbo can function even with VBlank sync methods
+		tempwinsync = GetWindowedSyncModeIdx();	//Store wndSyncMode setting
+		SetWindowedSyncModeIdx(SYNCMODE_NONE);			//turn off wndSyncMode for turbo (so that turbo can function even with VBlank sync methods
 		tempsoundquality = soundquality;	//Store sound quality settings
 		FCEUI_SetSoundQuality(0);			//Turn sound quality to low
 		turbo = true; 
@@ -1580,7 +1580,7 @@ void FCEUD_TurboOn    (void)
 	}
 void FCEUD_TurboOff   (void) 
 	{
-		winsync = tempwinsync;				//Restore winsync setting
+		SetWindowedSyncModeIdx(tempwinsync);				//Restore wndSyncMode setting
 		soundquality = tempsoundquality;	//Restore sound quality settings
 		FCEUI_SetSoundQuality(soundquality);
 		turbo = false; 
@@ -1589,15 +1589,15 @@ void FCEUD_TurboOff   (void)
 void FCEUD_TurboToggle(void) 
 { 
 	if (turbo) {
-		winsync = tempwinsync;	//If turbo was on, restore winsync
+		SetWindowedSyncModeIdx(tempwinsync);	//If turbo was on, restore wndSyncMode
 		soundquality = tempsoundquality; //and restore sound quality setting
 		FCEUI_SetSoundQuality(soundquality);
 	}
 	else
 	{
-		tempwinsync = winsync;				//Store video sync settings
+		tempwinsync = GetWindowedSyncModeIdx();				//Store video sync settings
 		tempsoundquality = soundquality;	//Store sound quality settings
-		winsync = 0;				//If turbo was off, turn off winsync (so that turbo can function even with VBlank sync methods
+		SetWindowedSyncModeIdx(SYNCMODE_NONE);				//If turbo was off, turn off wndSyncMode (so that turbo can function even with VBlank sync methods
 		FCEUI_SetSoundQuality(0);	//Set sound quality to low
 	}
 
