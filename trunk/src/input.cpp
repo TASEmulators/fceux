@@ -68,6 +68,7 @@ extern INPUTCFC *FCEU_InitArkanoidFC(void);
 extern INPUTCFC *FCEU_InitSpaceShadow(void);
 extern INPUTCFC *FCEU_InitFKB(void);
 extern INPUTCFC *FCEU_InitSuborKB(void);
+extern INPUTCFC *FCEU_InitPEC586KB(void);
 extern INPUTCFC *FCEU_InitHS(void);
 extern INPUTCFC *FCEU_InitMahjong(void);
 extern INPUTCFC *FCEU_InitQuizKing(void);
@@ -431,6 +432,9 @@ static void SetInputStuffFC()
 		break;
 	case SIFC_SUBORKB:
 		portFC.driver=FCEU_InitSuborKB();
+		break;
+	case SIFC_PEC586KB:
+		portFC.driver=FCEU_InitPEC586KB();
 		break;
 	case SIFC_HYPERSHOT:
 		portFC.driver=FCEU_InitHS();

@@ -2293,13 +2293,13 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 		if(wParam==SC_KEYMENU)
 		{
-			if(GameInfo && ((InputType[2]==SIFC_FKB) || (InputType[2]==SIFC_SUBORKB)) && cidisabled)
+			if(GameInfo && ((InputType[2]==SIFC_FKB) || (InputType[2]==SIFC_SUBORKB) || (InputType[2]==SIFC_PEC586KB)) && cidisabled)
 				break;
 			if(lParam == VK_RETURN || GetIsFullscreen() || tog) break;
 		}
 		goto proco;
 	case WM_SYSKEYDOWN:
-		if(GameInfo && ((InputType[2]==SIFC_FKB) || (InputType[2]==SIFC_SUBORKB)) && cidisabled)
+		if(GameInfo && ((InputType[2]==SIFC_FKB) || (InputType[2]==SIFC_SUBORKB) || (InputType[2]==SIFC_PEC586KB)) && cidisabled)
 			break; // Hopefully this won't break DInput...
 
 		if(GetIsFullscreen() || tog)
@@ -2331,25 +2331,15 @@ adelikat: Outsourced this to a remappable hotkey
 		if(GameInfo)
 		{
 			//Only disable command keys if a game is loaded(and the other conditions are right, of course).
-			if(InputType[2]==SIFC_FKB)
+			if((InputType[2]==SIFC_FKB) || (InputType[2]==SIFC_SUBORKB) || (InputType[2]==SIFC_PEC586KB))
 			{
 				if(wParam==VK_SCROLL)
 				{
 					cidisabled^=1;
-					FCEUI_DispMessage("Family Keyboard %sabled.",0,cidisabled?"en":"dis");
+					FCEUI_DispMessage("%s Keyboard %sabled.",0,InputType[2]==SIFC_FKB?"Family":(InputType[2]==SIFC_SUBORKB?"Subor":"PEC586"),cidisabled?"en":"dis");
 				}
 				if(cidisabled)
 					break; // Hopefully this won't break DInput...
-			}
-			if(InputType[2]==SIFC_SUBORKB)
-			{
-				if(wParam==VK_SCROLL)
-				{
-					cidisabled^=1;
-					FCEUI_DispMessage("Subor Keyboard %sabled.",0,cidisabled?"en":"dis");
-				}
-				if(cidisabled)
-					break;
 			}
 		}
 		goto proco;

@@ -1,22 +1,22 @@
 /* FCE Ultra - NES/Famicom Emulator
-*
-* Copyright notice for this file:
-*  Copyright (C) 2002 Xodnizel
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ *
+ * Copyright notice for this file:
+ *  Copyright (C) 2002 Xodnizel
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 // For commctrl.h below
 #define _WIN32_IE	0x0550
@@ -376,7 +376,7 @@ static uint32 UpdatePPadData(int w)
 
 
 static uint8 fkbkeys[0x48];
-static uint8 suborkbkeys[0x60];
+static uint8 suborkbkeys[0x65];
 
 void KeyboardUpdateState(void); //mbg merge 7/17/06 yech had to add this
 
@@ -421,6 +421,7 @@ void FCEUD_UpdateInput()
 			if(cidisabled) 
 				UpdateFKB();
 			break;
+		case SIFC_PEC586KB:
 		case SIFC_SUBORKB:
 			if(cidisabled) 
 				UpdateSuborKB();
@@ -510,6 +511,7 @@ void InitInputPorts(bool fourscore)
 	case SIFC_FKB:
 		InputDPtr=fkbkeys;
 		break;
+	case SIFC_PEC586KB:
 	case SIFC_SUBORKB:
 		InputDPtr=suborkbkeys;
 		break;
@@ -554,7 +556,7 @@ ButtConfig fkbmap[0x48]=
 	MK(BL_CURSORUP),MK(BL_CURSORLEFT),MK(BL_CURSORRIGHT),MK(BL_CURSORDOWN)
 };
 
-ButtConfig suborkbmap[0x60]=
+ButtConfig suborkbmap[0x65]=
 {
 	MC(0x01),MC(0x3b),MC(0x3c),MC(0x3d),MC(0x3e),MC(0x3f),MC(0x40),MC(0x41),MC(0x42),MC(0x43),
 	MC(0x44),MC(0x57),MC(0x58),MC(0x45),MC(0x29),MC(0x02),MC(0x03),MC(0x04),MC(0x05),MC(0x06),
@@ -565,7 +567,8 @@ ButtConfig suborkbmap[0x60]=
 	MC(0x21),MC(0x22),MC(0x23),MC(0x24),MC(0x25),MC(0x26),MC(0x27),MC(0x28),MC(0x4b),MC(0x4c),
 	MC(0x4d),MC(0x2a),MC(0x2c),MC(0x2d),MC(0x2e),MC(0x2f),MC(0x30),MC(0x31),MC(0x32),MC(0x33),
 	MC(0x34),MC(0x35),MC(0x2b),MC(0xc8),MC(0x4f),MC(0x50),MC(0x51),MC(0x1d),MC(0x38),MC(0x39),
-	MC(0xcb),MC(0xd0),MC(0xcd),MC(0x52),MC(0x53)
+	MC(0xcb),MC(0xd0),MC(0xcd),MC(0x52),MC(0x53),MC(0x00),MC(0x00),MC(0x00),MC(0x00),MC(0x00),
+	MC(0x00),
 };
 
 
@@ -573,7 +576,7 @@ static void UpdateFKB(void)
 {
 	int x;
 
-	for(x=0;x<0x48;x++)
+	for(x=0;x<sizeof(fkbkeys);x++)
 	{
 		fkbkeys[x]=0;
 
@@ -586,7 +589,7 @@ static void UpdateSuborKB(void)
 {
 	int x;
 
-	for(x=0;x<0x60;x++)
+	for(x=0;x<sizeof(suborkbkeys);x++)
 	{
 		suborkbkeys[x]=0;
 
@@ -718,9 +721,9 @@ void InitInputStuff(void)
 		for(y=0; y<12; y++)    
 			JoyClearBC(&powerpadsc[x][y]);
 
-	for(x=0; x<0x48; x++)
+	for(x=0; x<sizeof(fkbkeys); x++)
 		JoyClearBC(&fkbmap[x]);
-	for(x=0; x<0x60; x++)
+	for(x=0; x<sizeof(suborkbkeys); x++)
 		JoyClearBC(&suborkbmap[x]);
 
 	for(x=0; x<6; x++)
@@ -1062,7 +1065,7 @@ const unsigned int NUMBER_OF_NES_DEVICES = SI_COUNT + 1;
 const static unsigned int NUMBER_OF_FAMICOM_DEVICES = SIFC_COUNT + 1;
 //these are unfortunate lists. they match the ESI and ESIFC enums
 static const int configurable_nes[NUMBER_OF_NES_DEVICES]= { 0, 1, 0, 1, 1, 0 };
-static const int configurable_fam[NUMBER_OF_FAMICOM_DEVICES]= { 0,0,0,0, 1,1,0,1, 1,1,1,0, 0,0 };
+static const int configurable_fam[NUMBER_OF_FAMICOM_DEVICES]= { 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0 };
 const unsigned int FAMICOM_POSITION = 2;
 
 static void UpdateComboPad(HWND hwndDlg, WORD id)
@@ -1336,10 +1339,11 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						DoTBConfig(hwndDlg, text, "POWERPADDIALOG", FTrainerButtons, 12);
 						break;
 					case SIFC_FKB:
-						DoTBConfig(hwndDlg, text, "FKBDIALOG", fkbmap, 0x48);
+						DoTBConfig(hwndDlg, text, "FKBDIALOG", fkbmap, sizeof(fkbkeys));
 						break;
+					case SIFC_PEC586KB:
 					case SIFC_SUBORKB:
-						DoTBConfig(hwndDlg, text, "SUBORKBDIALOG", suborkbmap, 0x60);
+						DoTBConfig(hwndDlg, text, "SUBORKBDIALOG", suborkbmap, sizeof(suborkbkeys));
 						break;
 					case SIFC_MAHJONG:
 						DoTBConfig(hwndDlg, text, "MAHJONGDIALOG", MahjongButtons, 21);
