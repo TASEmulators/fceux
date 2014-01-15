@@ -48,13 +48,15 @@ static uint16 matrix[13][8] =
 };
 
 static void PEC586KB_Write(uint8 v) {
-	if (((kstrobe & 7) == 1) && ((v & 7) == 2)) {
+	if (!(kstrobe & 2) && (v & 2)) {
 		kspos = 0;
+	}
+	if ((kstrobe & 1) && !(v & 1)) {
 		ksindex = 0;
-	} else if (((kstrobe & 7) == 7) && ((v & 3) == 2)) {
+	}
+	if ((kstrobe & 4) && !(v & 4)) {
 		kspos++;
 		kspos %= 13;
-		ksindex = 0;
 	}
 	kstrobe = v;
 }
@@ -65,12 +67,10 @@ static uint8 PEC586KB_Read(int w, uint8 ret) {
 #endif
 	if (w) {
 		ret &= ~2;
-		if(matrix[kspos][7-ksindex] < (88 + 16)) {
-			if(bufit[matrix[kspos][7-ksindex]])
-				ret |= 2;
-			ksindex++;
-			ksindex&=7;
-		}
+		if(bufit[matrix[kspos][7-ksindex]])
+			ret |= 2;
+		ksindex++;
+		ksindex&=7;
 	}
 #ifdef FCEUDEF_DEBUGGER
 	}
@@ -79,8 +79,8 @@ static uint8 PEC586KB_Read(int w, uint8 ret) {
 }
 
 static void PEC586KB_Strobe(void) {
-	kstrobe = 0;
-	ksindex = 0;
+//	kstrobe = 0;
+//	ksindex = 0;
 }
 
 static void PEC586KB_Update(void *data, int arg) {
