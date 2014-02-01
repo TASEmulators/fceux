@@ -22,6 +22,7 @@ extern bool debuggerAutoload;
 extern bool debuggerSaveLoadDEBFiles;
 extern bool debuggerDisplayROMoffsets;
 
+extern unsigned int debuggerPageSize;
 extern unsigned int debuggerFontSize;
 extern unsigned int hexeditorFontSize;
 

@@ -279,6 +279,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(debuggerSaveLoadDEBFiles),
 	AC(debuggerDisplayROMoffsets),
 	AC(debuggerFontSize),
+	AC(debuggerPageSize),
 	AC(hexeditorFontSize),
 	AC(fullSaveStateLoads),
 	AC(frameSkipAmt),
