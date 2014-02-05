@@ -2325,7 +2325,9 @@ void DebugSystem::init()
 		"Courier New"); /*font name*/
 
 	//if the user provided his own courier font, use that
-	AddFontResourceEx("coure.fon", FR_PRIVATE, NULL);
+	extern std::string BaseDirectory;
+	std::string courefon_path = BaseDirectory + "\\coure.fon";
+	AddFontResourceEx(courefon_path.c_str(), FR_PRIVATE, NULL);
 
 	char* hexfn = hexeditorFontName;
 	if(!hexfn) hexfn = "Courier";
@@ -2335,7 +2337,7 @@ void DebugSystem::init()
 		FW_REGULAR,FALSE,FALSE,FALSE, /*weight, italic, underline, strikeout*/
 		ANSI_CHARSET,OUT_DEVICE_PRECIS,CLIP_MASK, /*charset, precision, clipping*/
 		DEFAULT_QUALITY, DEFAULT_PITCH, /*quality, and pitch*/
-		hexeditorFontName); /*font name*/
+		hexfn); /*font name*/
 
 	HDC hdc = GetDC(GetDesktopWindow());
 	HGDIOBJ old = SelectObject(hdc,hFixedFont);
