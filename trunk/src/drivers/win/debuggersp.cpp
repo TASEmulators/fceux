@@ -32,7 +32,7 @@
 
 int GetNesFileAddress(int A);
 
-inline int PageIndexForAddress(int addr) { return addr>>(9+debuggerPageSize); }
+inline int RomPageIndexForAddress(int addr) { return (addr-0x8000)>>(debuggerPageSize); }
 
 //old
 //Name* lastBankNames = 0;
@@ -562,7 +562,7 @@ Name* getNamesPointerForAddress(uint16 address)
 {
 	if(address >= 0x8000)
 	{
-		return pageNames[PageIndexForAddress(address)];
+		return pageNames[RomPageIndexForAddress(address)];
 	}
 	else
 	{
@@ -573,7 +573,7 @@ void setNamesPointerForAddress(uint16 address, Name* newNode)
 {
 	if (address >= 0x8000)
 	{
-		pageNames[PageIndexForAddress(address)] = newNode;
+		pageNames[RomPageIndexForAddress(address)] = newNode;
 	}
 	else
 	{
