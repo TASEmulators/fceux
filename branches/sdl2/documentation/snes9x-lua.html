@@ -1,0 +1,417 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1"><title>Snes9x Lua Library</title></head><body>
+This is the API from DeHackEd's version of Lua in ZSnes. At the time of writing, FCUE's Lua was based on this API.<br /><br />
+
+<h1>Basics</h1>
+Your code will be run alongside the emulator's main loop. You code should
+probably look roughly like this:
+<hr>
+<pre>-- initialization goes here
+while condition do
+   -- Code executed once per frame
+ 
+   snes9x.frameadvance()
+
+
+end
+
+-- Cleanup goes here
+</pre><hr>
+
+When Lua execution starts, the emulator will be automatically unpaused if it
+is currently paused. If so, it will automatically be paused when the script
+exits, voluntarily or otherwise. This allows you to have a script execute
+some work on your behalf and then when it exits the emulator will be paused,
+ready for the player to continue use.
+
+<br>
+<h1>Base library</h1>
+Handy little things that are not put into a class. Mostly binary operations right now.
+<hr>
+<a name="AND">
+</a><pre><a name="AND">int AND(int arg1, int arg2, ..., int argn)</a></pre>
+<a name="AND">Since Lua lacks binary operators and since binary will come up with memory manipulation,
+I offer this function. Output is the binary AND of all its parameters together.
+Minimum 1 argument, all integers.
+</a><p>
+<a name="AND">At a binary level, the AND of two binary bits is 1 if both inputs are 1, and the output
+is 0 in any other case. Commonly used to test if a bit is set by ANDing with a number
+with only the desired position set to 1.
+</a></p><hr>
+<a name="OR">
+</a><pre><a name="OR">int OR(int arg1, int arg2, ..., int argn)</a></pre>
+<a name="OR">The OR of two bits is 1 if either of the inputs is 1, and 0 if both inputs are 0.
+Typically used to force a single bit to 1, regardless of its current state.
+</a><hr>
+<a name="XOR">
+</a><pre><a name="XOR">int XOR(int arg1, int arg2, ..., int argn)</a></pre>
+<a name="XOR">XOR flips bits. An even number of 1s yields a zero and an odd number of 1s yields a 1.
+Commonly used to toggle a bit by XORing.
+</a><hr>
+<a name="BIT">
+</a><pre><a name="BIT">int BIT(int which)</a></pre>
+<a name="BIT">Returns a number with only the given bit set. <tt>which</tt> is in the range from 0 to 15 since the
+SNES is a 16 bit system. <tt>BIT(15) == 32768</tt>
+</a><p>
+<a name="BIT">... Actually this system will accept a range of 0 to 30, but none of the memory access functions will
+accept it, so you're on your own for those. 31 is not allowed for now due to signedness risking wreaking havoc.
+</a></p><h1><a name="BIT">snes9x</a></h1>
+
+<a name="BIT">Basic master emulator control.
+</a><hr>
+<a name="snes9x.speedmode">
+</a><pre><a name="snes9x.speedmode">snes9x.speedmode(string mode)</a></pre>
+<a name="snes9x.speedmode">Selects the speed mode snes9x should run at while Lua is in control of frame advance. It must be set to one of the following:
+</a><ul>
+<li><a name="snes9x.speedmode"><b><tt>normal</tt></b> sets to normal operation. The game runs at its normal speed. Speed control (eg: 50%) apply.</a></li>
+<li><a name="snes9x.speedmode"><b><tt>nothrottle</tt></b> makes snes9x run at maximum CPU speed while still showing each frame on screen.
+</a></li><li><a name="snes9x.speedmode"><b><tt>turbo</tt></b> drops some frames. It looks like high speed fast-forwarding.</a></li>
+<li><a name="snes9x.speedmode"><b><tt>maximum</tt></b> disables screen rendering</a></li>
+</ul>
+<a name="snes9x.speedmode">In modes other than normal, pause will have no effect.
+
+</a><hr>
+<a name="snes9x.frameadvance">
+</a><pre><a name="snes9x.frameadvance">snes9x.frameadvance()</a></pre>
+<a name="snes9x.frameadvance">Snes9x executes one frame. This function pauses until the execution finishes. General system slowdown
+when running at normal speed (ie. sleeping for 1/60 seconds) also occurs here when not in high speed mode.
+</a><p>
+<a name="snes9x.frameadvance">Warning: Due to the way the code is written, the times this function may be called is restricted. Norably,
+it must not be called within a coroutine or under a [x]pcall(). You can use coroutines for
+your own purposes, but they must not call this function themselves. Furthermore, this function cannot be called from any
+"registered" callback function. An error will occur if you do.
+</a></p><p>
+</p><hr>
+<a name="snes9x.message">
+</a><pre><a name="snes9x.message">snes9x.message(string msg)</a></pre>
+<a name="snes9x.message">Displays the indicated string on the user's screen. snes9x.speedmode("normal") is probably the only way this is of any use,
+lest the message not be displayed at all
+</a><hr>
+<a name="snes9x.pause">
+</a><pre><a name="snes9x.pause">snes9x.pause()</a></pre>
+<a name="snes9x.pause"><font color="#800000">v0.05+ only</font><br>
+Pauses the emulator. This function blocks until the user unpauses.
+</a><p>
+<a name="snes9x.pause">This function is allowed to be called from outside a frame boundary (ie. when it is not allowed to call
+snes9x.frameadvance). In this case, the function does not wait for the pause because you can't pause
+midway through a frame. Your code will continue to execute and the emulator will be paused at the end
+of the current frame. If you are at a frame boundary, this function acts a lot like snes9x.frameadvance()
+plus the whole pause thing.
+</a></p><p>
+<a name="snes9x.pause">It might be smart to reset the speed mode to "normal" if it is not already so.
+</a></p><hr>
+<a name="snes9x.wait">
+</a><pre><a name="snes9x.wait">snes9x.wait()</a></pre>
+<a name="snes9x.wait"><font color="#800000">v0.06+ only</font><br>
+Skips emulation of the next frame. If your script needs to wait for something to happen before proceeding (eg.
+input from another application) then you should call this. Otherwise the GUI might jam up and your
+application will not appear to be responding and need termination. It is expected that this function
+will pause the script for 1/60 of a second without actually running the emulator itself, though it tends to be
+OS-dependent right now.
+</a><p>
+<a name="snes9x.wait">If you're not sufficiently confused yet, think of this as pausing for one frame.
+</a></p><p>
+<a name="snes9x.wait">If you need to do a large amount of calculations -- so much that you risk setting off the rampant script
+warning, just call this function every once in a while.
+</a></p><p>
+<a name="snes9x.wait">Might want to avoid using this if you don't need to. If the emulator is running at normal speed, paused
+and the user presses frame-advance, they might be confused when nothing happens.
+</a></p><p>
+</p><h1><a name="snes9x.wait">memory</a></h1>
+
+<a name="snes9x.wait">Memory access and manipulation.
+
+</a><pre><a name="snes9x.wait">int memory.readbyte(int address)
+int memory.readword(int address)</a></pre>
+<a name="snes9x.wait">Reads a number of bits (8 or 16) and returns the memory contents. The address must be a fully qualified
+memory address. The RAM range is 0x7e0000 through 0x7fffff, but you may use any memory address, including
+the ROM data itself.
+</a><hr>
+<pre><a name="snes9x.wait">int memory.readbytesigned(int address)
+int memory.readwordsigned(int address)</a></pre><a name="snes9x.wait"><font color="#800000">v0.04+ only</font><br>
+
+Same as its counterparts, except numbers will be treated as signed. Numbers larger than 127 for bytes and
+32767 for words will be translated into the correct negative numbers. For reference, an alternate formula
+is to subtract 256 for bytes and 65536 for words from any number equal to or larger than half that number.
+For example, a byte at 250 becomes <tt>250-256 = -6</tt>.
+</a><hr>
+
+<pre><a name="snes9x.wait">memory.writebyte(int address, int value)
+memory.writebyte(int address, int value)</a></pre>
+
+<a name="snes9x.wait">Writes a number of bits (8 or 16) to the indicated memory address. The address MUST be in the range of
+0x7e0000 through 0x7fffff.
+
+</a><hr>
+<pre><a name="snes9x.wait">memory.register(int address, function func)</a></pre>
+<a name="snes9x.wait">When the given memory address is written to (range must be 0x7e0000 to 0x7fffff), the given function will be
+called. The execution of the CPU will be paused mid-frame to call the given function.
+</a><p>
+<a name="snes9x.wait">Only one function can be registered with a memory address. 16 bit writes will only trigger the lower address
+listener. There is no distinction between 8 and 16 bit writes. <tt>func</tt> may be nil in order to
+delete a function from listening.
+</a></p><p>
+<a name="snes9x.wait">Code called may not call snes9x.frameadvance() or any savestate save/load functions, and any button
+manipulation results are undefined. Those actions are only meaningful at frame boundaries.
+
+
+</a></p><p>
+</p><h1><a name="snes9x.wait">joypad</a></h1>
+
+<a name="snes9x.wait">Access to the gamepads. Note that Lua makes some joysticks do strange things.
+Setting joypad inputs causes the user input for that frame to be ignored, but
+only for that one frame.
+</a><p>
+<a name="snes9x.wait">Joypads are numbered 1 to 5.
+</a></p><p>
+<a name="snes9x.wait">Joypad buttons are selected by use of a table with special keys. The table
+has keys start, select, up, down, left, right, A, B, X, Y, L, R. Note the
+case is sensetive. Buttons that are pressed are set to a non-nil value
+(use of the integer 1 is just a convention). Note that "false" is valid,
+but discouraged as testing for logical true will fail.
+</a></p><p>
+<a name="snes9x.wait">Currently reading input from a movie file is not possible, but
+a movie will record button presses from Lua.
+</a></p><pre><a name="snes9x.wait">table joypad.read(int which)</a></pre>
+<a name="snes9x.wait">Returns a table indicating which buttons are pressed <i>by the user</i>.
+This is probably the only way to get input to the script by the user.
+This is always user input, even if the joypads have been set by joypad.set.
+</a><hr>
+<pre><a name="snes9x.wait">joypad.set(int which, table buttons)</a></pre>
+<a name="snes9x.wait">Sets the buttons to be pressed. These choices will be made in place of
+what the user is pressing during the next frame advance; they are then
+discarded, so this must be called once every frame, even if you just want to
+keep the same buttons pressed for several frames.
+
+</a><p>
+</p><h1><a name="snes9x.wait">savestate</a></h1>
+<a name="snes9x.wait">Control over the savestate process. Savestate objects are opaque structures
+that represent non-player accessible states (except for the functions that
+return "official" savesates). Such an object is garbage collectable, in which
+case the savestate is no longer usable. Recycling of existing savestate objects
+is highly recommended for disk space concerns lest the garbage collector
+grow lazy.</a><p>
+<a name="snes9x.wait">Each object is basically a savestate file. Anonymous savestates are saved to
+your temp directory.
+
+</a></p><hr>
+<pre><a name="snes9x.wait">object savestate.create(int userslot=nil)</a></pre>
+<a name="snes9x.wait">Creates a savestate object for use. If the userslot argument
+is given, the state will be accessible via the associated
+F-key (F1 through F12 are 1 through 12). If not specified or
+nil, an anonymous savestate is created that only Lua can access.
+</a><p>
+<a name="snes9x.wait">Each call to <tt>savestate.create()</tt> (without parameters) returns
+a unique savestate. As such, if you discard the contents of a variable
+containing an important savestate, you've just shot yourself in the foot.
+</a></p><p>
+<a name="snes9x.wait">An object may be used freely once created, saved over and loaded whenever.
+</a></p><p>
+<a name="snes9x.wait">It is an error to load an anonymous (non-player accessbile) state that
+has not been saved yet, since it's empty.
+</a></p><p>
+<a name="snes9x.wait">Each savestate uses about 120 KB of disk space and the random filename generator
+has its limits with regards to how many filenames it can generate. Don't go too
+overboard. If you need more than 1000 savestates, maybe you should rethink
+your tehcnique. <small>(The actual windows limit is about 32768, Linux is higher).</small>
+</a></p><hr><pre><a name="snes9x.wait">savestate.save(object state)</a></pre>
+<a name="snes9x.wait">Saves the current state to the given object. Causes an error if something goes horribly
+wrong, or if called within any "registered" callback function.
+</a><hr><pre><a name="snes9x.wait">savestate.load(object state)</a></pre>
+<a name="snes9x.wait">Loads the given state. Throws an error for all the same bad things that might happen.
+
+</a><hr>
+<pre><a name="snes9x.wait">function savestate.registersave(function save)</a></pre>
+<a name="snes9x.wait"><font color="#800000">v0.06+ only</font><br>
+Registers a function to be called on a savestate event. This includes both calls to
+<tt>savestate.save()</tt> and users pressing buttons. The function will be called without
+parameters.
+</a><p>
+<a name="snes9x.wait">The function called is permitted to return any number of string and number values.
+Lua lets you do this by simply writing <tt>return 1, 2, 3, "four and five", 6.2, integerVar</tt>
+</a></p><p>
+<a name="snes9x.wait">These variables must be numeric or string. They will be saved into the savestate itself
+and returned back to the application via savestate.registerload() should the state ever be loaded
+again later.
+</a></p><p>
+<a name="snes9x.wait">Only one function can be registered. Registering a second function will cause the first function
+to be returned back by savestate.registersave() before being discarded.
+</a></p><p>
+<a name="snes9x.wait">Savestates created with this mechanism are likely to break some savestate features in other emulators.
+Don't be surprised if savestates from this version don't work on others if you enable all those
+fancy features. Compatible savestates are created if there is no registered save function, or if
+the save function returns no parameters at all.
+</a></p><hr>
+<pre><a name="snes9x.wait">function savestate.registerload(function load)</a></pre>
+<a name="snes9x.wait"><font color="#800000">v0.06+ only</font><br>
+The companion to savestate.registersave, this function registers a function to be called during
+a load. The function will be passed parameters -- exactly those returned by the function
+registered for a save. If the savestate contains no saved data for your script, the function
+will be called without parameters.
+</a><p>
+<a name="snes9x.wait">Concept code:
+<font color="#000080">
+<pre>function saveState() .... end
+function loadState(arg1, arg2, ...)  ... end
+
+savestate.registersave(saveState)
+savestate.registerload(loadState)
+
+
+-- Behind the scenes
+local saved_variables 
+
+
+
+-- User presses savestate
+saved_variables = { saveState() } -- All return values saved
+
+
+-- Time passes
+-- ...
+
+
+-- User presses loadstate
+loadState(unpack(saved_variables))
+
+</pre></font>
+</a></p><h2><a name="snes9x.wait">Recommendations for registered savestates</a></h2>
+<ul><li><a name="snes9x.wait">You may want to reserve the first parameter as a sort of key to make sure that the right
+script or the correct revision of a script is receiving its data.</a></li>
+<li><a name="snes9x.wait">The order of declarations in your script should be local variables, then functions (inclduing these),
+then any registration calls, and then your main loop. Code is executed top-to-bottom, and that includes
+variables being prepared as locals, functions created, etc.</a></li>
+<li><a name="snes9x.wait">You can build a string using string.char() from bytes and disassemble one from string.byte().
+If you need to store a table's worth of data, you'll have to do this.</a></li>
+</ul>
+<p>
+</p><h1><a name="snes9x.wait">movie</a></h1>
+<a name="snes9x.wait">Access to movie information.
+<br>
+</a><hr>
+<pre><a name="snes9x.wait">int movie.framecount()</a></pre>
+<a name="snes9x.wait">Returns the current frame count, or nil if no movie is running.
+</a><hr>
+<pre><a name="snes9x.wait">string movie.mode()</a></pre>
+<a name="snes9x.wait">Returns "record", "playback", or nil, depending on the current movie.
+</a><hr>
+<pre><a name="snes9x.wait">movie.rerecordcounting(boolean counting)</a></pre>
+<a name="snes9x.wait">Select whether rerecording should be counted. If set to false, you can do
+all the brute force work you want without inflating the rerecord count.
+</a><p>
+<a name="snes9x.wait">This will automatically be set to true after a script finishes running, so
+don't worry about messing up the rerecord count for the player.
+</a></p><hr>
+<pre><a name="snes9x.wait">movie.stop()</a></pre>
+<a name="snes9x.wait">Stops movie recording/playback. I'm not sure why you'd want to do that, but you can.
+</a><hr>
+<!--
+<pre>movie.record(string filename, boolean resetFirst = true, int players = 1)</pre>
+Starts recording a movie with the indicated filename. Will throw an error if the file
+already exists
+<hr>
+<pre>movie.playback(string filename, boolean readonly = true)</pre>
+Starts playback of the given movie file. It is an error if the file does not already exist, is invalid, etc.
+Specify readonly=true if savestates should be used for seeking during playback. If readonly=false,
+loading a savestate will switch into recording mode.
+<p>
+The selection of readonly mode might affect the ability to open a file. readonly=true would successfully
+play a file on a read-only medium (such as a CD) but readonly=false would fail.
+-->
+<h1><a name="snes9x.wait">gui</a></h1>
+<a name="snes9x.wait"><font color="#800000">0.03+ only</font><br>
+The ability to draw on the surface of the screen is a long sought feature. The surface is 256x239 pixels
+(256x224 most of the time though) with (0,0) being in the top-left corner of the screen.
+</a><p>
+<a name="snes9x.wait">The SNES uses a 16 bit colour system. Red and blue both use 5 bits (0 through 31) while green uses 
+6 bits (0 through 63), in place of the usual 0 to 255 range. If you want to construct your own exact colours,
+multiply your red value by 2048, your green value by 32 and leave your blue value untouched. Add these all
+together to get a valid colour. Bright red would be <tt>31*2048 = 63488</tt>, for example.
+</a></p><p>
+<a name="snes9x.wait">Some strings are accepted. HTML style encoding such as "#00ff00" for green is accepted. Some simple strings such
+as "red", "green", "blue", "white" and "black" are also accepted.
+</a></p><p>
+<a name="snes9x.wait">The transparent colour is 1 (a VERY dark blue, which is probably not worth using in place of black) or the string
+"clear". Remove drawn elements using this colour.
+</a></p><p>
+<a name="snes9x.wait">Output is delayed by a frame. The graphics are drawn on a separate buffer and then overlayed on the image 
+during the next refresh, which means allowing for a frame to execute. Also, the buffer is cleared after drawing,
+so if you want to keep something on screen, you must keep drawing it on each frame.
+</a></p><p>
+<a name="snes9x.wait">It is an error to draw outside the drawing area. gdoverlay is the only exception to this rule - images will
+be clipped to the visible area.
+</a></p><hr>
+<pre><a name="snes9x.wait">r,g,b = gui.getpixel(int x, int y)</a></pre>
+<a name="snes9x.wait">Returns the pixel on the indicated coordinate. (0,0) is the top-left corner and (255, 223) is the typical bottom-right corner,
+though (255,238) is allowed. The return value range is (0,0,0) to (31,63,31). You get the actual screen surface before
+any damage is done by your drawing. Well, unless you call snes9x.wait() in which case your damage is applied and the SNES
+hardware doesn't get a chance to draw a new frame. :)
+</a><hr>
+<pre><a name="snes9x.wait">gui.drawpixel(int x, int y, type colour)</a></pre>
+<a name="snes9x.wait">Draw a single pixel on the screen.
+</a><hr>
+<pre><a name="snes9x.wait">gui.drawline(int x1, int y1, int x2, int y2, type colour)</a></pre>
+<a name="snes9x.wait">Draw a line between the two indicated positions.
+</a><hr>
+<pre><a name="snes9x.wait">gui.drawbox(int x1, int y1, int x2, int y2, type colour)</a></pre>
+<a name="snes9x.wait">Draw a box going through the indicated opposite corners.
+</a><hr>
+<pre><a name="snes9x.wait">gui.text(int x, int y, string message)</a></pre>
+<a name="snes9x.wait">Write text on the screen at the indicated position.
+</a><p>
+<a name="snes9x.wait">The coordinates determine the top-left corner of the box that the text fits in.
+The font is the same one as the snes9x messages, and you can't control colours or anything. <tt>:(</tt>
+</a></p><p>
+<a name="snes9x.wait">The minimum y value is 9 for the font's height and each letter will take around 8 pixels of width.
+Text that exceeds the viewing area will be cut short, so ensuring your text will fit would be wise.
+
+</a></p><hr>
+<pre><a name="snes9x.wait">string gui.gdscreenshot()</a></pre>
+<a name="snes9x.wait"><font color="#800000">0.04+ only</font><br>
+Takes a screen shot of the image and returns it in the form of a string which can be imported by
+the </a><a href="http://lua-gd.luaforge.net/">gd library</a> using the gd.createFromGdStr() function.
+<p>
+This function is provided so as to allow snes9x to not carry a copy of the gd library itself. If you
+want raw RGB32 access, skip the first 11 bytes (header) and then read pixels as Alpha (always 0), Red,
+Green, Blue, left to right then top to bottom, range is 0-255 for all colours.
+</p><p>
+Warning: Storing screen shots in memory is not recommended. Memory usage will blow up pretty quick.
+One screen shot string eats around 230 KB of RAM.
+
+</p><hr>
+<pre>gui.gdoverlay(int x=0, int y=0, string gdimage)</pre>
+<font color="#800000">0.04+ only</font><br>
+Overlays the given image on top of the screen with the top-left corner in the given screen location. 
+Transparency is not fully supported -- a pixel must be 100% transparent to actually leave
+a hole in the overlayed image or else it will be treated as opaque.<p>
+Naturally, the format for input is the gd file format, version 1. The image MUST be truecolour.
+
+</p><p>
+The image will be clipped to fit into the screen area.
+</p><hr>
+<pre>gui.transparency(int strength)</pre>
+<font color="#800000">0.04+ only</font><br>
+Transparency mode. A value of 0 means opaque; a value of 4 means invisible (useful option that one).
+As for 1 through 3, I'll let you figure those out.<p>
+All image drawing (including gui.gdoverlay) will have the given transparency level applied from that point
+on. Note that drawing on the same point over and over will NOT build up to a higher opacity level.
+</p><hr>
+<pre>function gui.register(function func)</pre>
+<font color="#800000">0.04+ only</font><br>
+Register a function to be called between a frame being prepared for displaying on your screen and
+it actually happening. Used when that 1 frame delay for rendering is a pain in the butt.
+<p>This function is not necessarily complicated to use, but it's not recommended to users
+new to the whole scripting thing.
+</p><p>
+You may pass nil as the parameter to kill off a registered function. The old function (if any) will be
+returned.
+</p><hr>
+<pre>string function gui.popup(string message, [string type = "ok"])</pre>
+<font color="#800000">v0.05+ only</font><br>
+Pops up a dialog to the user with a message, and returns after the user acknowledges the dialog.
+<tt>type</tt> may be any of "ok", "yesno", "yesnocancel". The return value will be "yes", "no" or "cancel"
+as the case may be. "ok" is a waste of effort.
+<p>
+Linux users might want to install xmessage to perform the work. Otherwise the dialog will
+appear on the shell and that's less noticable.
+</p></body></html>

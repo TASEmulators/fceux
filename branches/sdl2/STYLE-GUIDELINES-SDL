@@ -1,0 +1,14 @@
+FceuX-SDL Style Guidelines
+=========================
+Background
+----------
+While having style guidelines specific to a directory in a sourcetree is slightly riddiculous, fceuX has a unique elaborate history of the code.  I (prg318) have ressurected the majority of the SDL port code and tried to keep some aspects of the style consistant (although not many aspects were that consistent to begin with due to the amount of different people who have contributed to this codebase). Much of the SDL code is compliant to these guidelines so please use this guidelines when going forth and making contributions in src/drivers/sdl. 
+
+Tabs
+----
+Hard tabs only!  Please!  src/drivers/sdl/* entirely consists of hard tabbed code.  Please continue to use this convention.  Consult the documentation of your text editor documentation for instructions on how to this with your editor.
+
+Return Statements
+-----------------
+Please use the "return 0;" style return statements instead of the "return(0);" style return statements.
+
