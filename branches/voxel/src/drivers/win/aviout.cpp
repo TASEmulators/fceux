@@ -4,8 +4,8 @@
 
 #include "common.h"
 #include "fceu.h"
+#include "drivers/win/video.h"
 
-extern PALETTEENTRY *color_palette;
 //extern WAVEFORMATEX wf;
 //extern int soundo;
 
@@ -292,6 +292,7 @@ static void do_video_conversion(const unsigned char* buffer)
 //	memset(avi_file->convert_buffer, 0, VIDEO_WIDTH*(avi_file->end_scanline-avi_file->start_scanline)*3);
 
 	buffer += avi_file->start_scanline * VIDEO_WIDTH;
+	PALETTEENTRY* color_palette = GetPalette();
 
 	for(int y=avi_file->start_scanline; y<avi_file->end_scanline; ++y)
 	{

@@ -32,12 +32,25 @@
 
 int GetNesFileAddress(int A);
 
-Name* lastBankNames = 0;
-Name* loadedBankNames = 0;
+inline int RomPageIndexForAddress(int addr) { return (addr-0x8000)>>(debuggerPageSize); }
+
+//old
+//Name* lastBankNames = 0;
+//Name* loadedBankNames = 0;
+
+//new
+Name* pageNames[32] = {0}; //the maximum number of pages we could have is 32, based on 1KB debuggerPageSize
+
+//old
+//int lastBank = -1;
+//int loadedBank = -1;
+
+//new
+int pageNumbersLoaded[32]; //TODO - need to initialize these to -1 somehow
+
 Name* ramBankNames = 0;
 bool ramBankNamesLoaded = false;
-int lastBank = -1;
-int loadedBank = -1;
+
 extern char LoadedRomFName[2048];
 char NLfilename[2048];
 bool symbDebugEnabled = true;
@@ -547,29 +560,24 @@ char* generateNLFilenameForAddress(uint16 address)
 }
 Name* getNamesPointerForAddress(uint16 address)
 {
-	// this function is called very often (when using "Symbolic trace"), so this is sorted by frequency
-	if (address >= 0xC000)
+	if(address >= 0x8000)
 	{
-		return lastBankNames;
-	} else if (address >= 0x8000)
-	{
-		return loadedBankNames;
-	} else
+		return pageNames[RomPageIndexForAddress(address)];
+	}
+	else
 	{
 		return ramBankNames;
 	}
 }
 void setNamesPointerForAddress(uint16 address, Name* newNode)
 {
-	if (address < 0x8000)
+	if (address >= 0x8000)
+	{
+		pageNames[RomPageIndexForAddress(address)] = newNode;
+	}
+	else
 	{
 		ramBankNames = newNode;
-	} else if (address < 0xC000)
-	{
-		loadedBankNames = newNode;
-	} else
-	{
-		lastBankNames = newNode;
 	}
 }
 
@@ -592,44 +600,32 @@ void loadNameFiles()
 		ramBankNames = parseNameFile(generateNLFilenameForAddress(0x0000));
 	}
 
-	// Find out which bank is loaded at 0xC000
-	cb = getBank(0xC000);
-	if (cb == -1) // No bank was loaded at that offset
-	{
-		free(lastBankNames);
-		lastBankNames = 0;
-	} else if (cb != lastBank)
-	{
-		// If the bank changed since loading the NL files the last time it's necessary
-		// to load the address descriptions of the new bank.
-		lastBank = cb;
+	int nPages = 1<<(15-debuggerPageSize);
 
-		if (lastBankNames)
-			freeList(lastBankNames);
+	for(int i=0;i<nPages;i++)
+	{
+		int pageIndexAddress = 0x8000 + (1<<debuggerPageSize)*i;
 
-		// Load new address definitions
-		lastBankNames = parseNameFile(generateNLFilenameForAddress(0xC000));
-	}
-	
-	// Find out which bank is loaded at 0x8000
-	cb = getBank(0x8000);
-	if (cb == -1) // No bank is loaded at that offset
-	{
-		free(loadedBankNames);
-		loadedBankNames = 0;
-	} else if (cb != loadedBank)
-	{
-		// If the bank changed since loading the NL files the last time it's necessary
-		// to load the address descriptions of the new bank.
-		
-		loadedBank = cb;
-		
-		if (loadedBankNames)
-			freeList(loadedBankNames);
-			
-		// Load new address definitions
-		loadedBankNames = parseNameFile(generateNLFilenameForAddress(0x8000));
-	}
+		// Find out which bank is loaded at the page index
+		cb = getBank(pageIndexAddress);
+		if (cb == -1) // No bank was loaded at that offset
+		{
+			free(pageNames[i]);
+			pageNames[i] = 0;
+		}
+		else if (cb != pageNumbersLoaded[i])
+		{
+			// If the bank changed since loading the NL files the last time it's necessary
+			// to load the address descriptions of the new bank.
+			pageNumbersLoaded[i] = cb;
+
+			if (pageNames[i])
+				freeList(pageNames[i]);
+
+			// Load new address definitions
+			pageNames[i] = parseNameFile(generateNLFilenameForAddress(pageIndexAddress));
+		}
+	} //loop across pages
 }
 
 // bookmarks

@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Нейтральный resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
@@ -948,6 +948,117 @@ BEGIN
     PUSHBUTTON      "Restore defaults",IDC_SOUND_RESTOREDEFAULTVOL,19,238,56,11
     LTEXT           "",ID_SOUND_TRITOP,76,135,38,8
     LTEXT           "",ID_SOUND_QUALITYNOTIFY,170,133,144,8
+END
+
+SUBORKBDIALOG DIALOGEX 13, 72, 478, 171
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Subor Keyboard Configuration"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "Close",1,405,151,56,14
+    LTEXT           "Remember to push the ""Scroll Lock"" key during emulation to enable Keyboard input.",-1,18,6,370,12
+    GROUPBOX        "",-1,9,22,461,123,WS_GROUP
+    PUSHBUTTON      "Esc",300,20,36,16,12
+    PUSHBUTTON      "F1",301,58,37,16,12
+    PUSHBUTTON      "F2",302,78,37,16,12
+    PUSHBUTTON      "F3",303,98,37,16,12
+    PUSHBUTTON      "F4",304,118,37,16,12
+    PUSHBUTTON      "F5",305,143,37,16,12
+    PUSHBUTTON      "F6",306,163,37,16,12
+    PUSHBUTTON      "F7",307,183,37,16,12
+    PUSHBUTTON      "F8",308,203,37,16,12
+    PUSHBUTTON      "F9",309,229,37,16,12
+    PUSHBUTTON      "F10",310,249,37,16,12
+    PUSHBUTTON      "F11",311,268,37,16,12
+    PUSHBUTTON      "F12",312,288,37,16,12
+    PUSHBUTTON      "Pause",313,318,36,16,12
+    PUSHBUTTON      "`",314,20,60,16,12
+    PUSHBUTTON      "1",315,39,60,16,12
+    PUSHBUTTON      "2",316,58,60,16,12
+    PUSHBUTTON      "3",317,77,60,16,12
+    PUSHBUTTON      "4",318,96,60,16,12
+    PUSHBUTTON      "5",319,115,60,16,12
+    PUSHBUTTON      "6",320,134,60,16,12
+    PUSHBUTTON      "7",321,153,60,16,12
+    PUSHBUTTON      "8",322,172,60,16,12
+    PUSHBUTTON      "9",323,191,60,16,12
+    PUSHBUTTON      "0",324,210,60,16,12
+    PUSHBUTTON      "-",325,229,60,16,12
+    PUSHBUTTON      "=",326,248,60,16,12
+    PUSHBUTTON      "BS",327,286,60,16,12
+    PUSHBUTTON      "Ins",328,318,59,16,12
+    PUSHBUTTON      "Home",329,337,59,16,12
+    PUSHBUTTON      "NL",330,385,59,16,12
+    PUSHBUTTON      "/",331,405,59,16,12
+    PUSHBUTTON      "*",332,425,59,16,12
+    PUSHBUTTON      "-",333,444,59,16,12
+    PUSHBUTTON      "PUp",334,357,59,16,12
+    PUSHBUTTON      "TAB",335,20,76,24,12
+    PUSHBUTTON      "Q",336,47,76,16,12
+    PUSHBUTTON      "W",337,66,76,16,12
+    PUSHBUTTON      "E",338,85,76,16,12
+    PUSHBUTTON      "R",339,104,76,16,12
+    PUSHBUTTON      "T",340,123,76,16,12
+    PUSHBUTTON      "Y",341,142,76,16,12
+    PUSHBUTTON      "U",342,161,76,16,12
+    PUSHBUTTON      "I",343,180,76,16,12
+    PUSHBUTTON      "O",344,199,76,16,12
+    PUSHBUTTON      "P",345,218,76,16,12
+    PUSHBUTTON      "[",346,237,76,16,12
+    PUSHBUTTON      "]",347,256,76,16,12
+    PUSHBUTTON      "Enter",348,274,76,28,29
+    PUSHBUTTON      "Del",349,318,75,16,12
+    PUSHBUTTON      "End",350,338,75,16,12
+    PUSHBUTTON      "PDn",351,357,75,16,12
+    PUSHBUTTON      "7",352,385,75,16,12
+    PUSHBUTTON      "8",353,405,75,16,12
+    PUSHBUTTON      "9",354,425,75,16,12
+    PUSHBUTTON      "+",355,444,75,16,28
+    PUSHBUTTON      "CL",356,20,92,27,12
+    PUSHBUTTON      "A",357,52,92,16,12
+    PUSHBUTTON      "S",358,71,92,16,12
+    PUSHBUTTON      "D",359,90,92,16,12
+    PUSHBUTTON      "F",360,109,92,16,12
+    PUSHBUTTON      "G",361,128,92,16,12
+    PUSHBUTTON      "H",362,147,92,16,12
+    PUSHBUTTON      "J",363,166,92,16,12
+    PUSHBUTTON      "K",364,185,92,16,12
+    PUSHBUTTON      "L",365,204,92,16,12
+    PUSHBUTTON      ";",366,223,92,16,12
+    PUSHBUTTON      "'",367,242,92,16,12
+    PUSHBUTTON      "4",368,385,91,16,12
+    PUSHBUTTON      "5",369,405,91,16,12
+    PUSHBUTTON      "6",370,425,91,16,12
+    PUSHBUTTON      "SHIFT",371,20,108,37,12
+    PUSHBUTTON      "Z",372,62,108,16,12
+    PUSHBUTTON      "X",373,81,108,16,12
+    PUSHBUTTON      "C",374,100,108,16,12
+    PUSHBUTTON      "V",375,119,108,16,12
+    PUSHBUTTON      "B",376,138,108,16,12
+    PUSHBUTTON      "N",377,157,108,16,12
+    PUSHBUTTON      "M",378,176,108,16,12
+    PUSHBUTTON      ",",379,195,108,16,12
+    PUSHBUTTON      ".",380,214,108,16,12
+    PUSHBUTTON      "/",381,233,108,16,12
+    PUSHBUTTON      "\\",382,267,60,16,12
+    PUSHBUTTON      "Up",383,337,108,16,12
+    PUSHBUTTON      "1",384,385,107,16,12
+    PUSHBUTTON      "2",385,405,107,16,12
+    PUSHBUTTON      "3",386,425,107,16,12
+    PUSHBUTTON      "CTRL",387,20,123,28,12
+    PUSHBUTTON      "ALT",388,66,123,27,12
+    PUSHBUTTON      "SPACE",389,96,123,130,12
+    PUSHBUTTON      "Left",390,318,123,16,12
+    PUSHBUTTON      "Dn",391,337,123,16,12
+    PUSHBUTTON      "Right",392,357,123,16,12
+    PUSHBUTTON      "0",393,386,123,35,12
+    PUSHBUTTON      ".",394,425,123,16,12
+    PUSHBUTTON      "SHIFT",395,254,108,48,12
+    PUSHBUTTON      "ALT",396,229,123,29,12
+    PUSHBUTTON      "CTRL",397,274,123,28,12
+    PUSHBUTTON      "Break",398,337,36,16,12
+    PUSHBUTTON      "Reset",399,357,36,16,12
+    PUSHBUTTON      "Enter",400,444,107,16,28
 END
 
 TIMINGCONFIG DIALOGEX 23, 157, 203, 60
@@ -1986,6 +2097,10 @@ BEGIN
         BOTTOMMARGIN, 274
     END
 
+    "SUBORKBDIALOG", DIALOG
+    BEGIN
+    END
+
     "TIMINGCONFIG", DIALOG
     BEGIN
         LEFTMARGIN, 10
@@ -2152,12 +2267,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Нейтральный resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Русский (Россия) resources
+// Russian (Russia) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
 LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
@@ -2232,12 +2347,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Русский (Россия) resources
+#endif    // Russian (Russia) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Английский (США) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -2283,17 +2398,17 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "resource.h\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "\r\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#include ""afxres.h""\r\0"
 END
@@ -2353,12 +2468,12 @@ BEGIN
     "O",            RAMMENU_FILE_OPEN,      VIRTKEY, CONTROL
     "S",            RAMMENU_FILE_SAVE,      VIRTKEY, CONTROL
     "S",            RAMMENU_FILE_SAVEAS,    VIRTKEY, SHIFT, CONTROL
-    "A",            IDC_C_WATCH_DUPLICATE,  VIRTKEY 
-    "E",            IDC_C_WATCH_EDIT,       VIRTKEY 
-    "D",            IDC_C_WATCH_DOWN,       VIRTKEY 
-    "U",            IDC_C_WATCH_UP,         VIRTKEY 
-    "N",            IDC_C_WATCH,            VIRTKEY 
-    "R",            IDC_C_WATCH_REMOVE,     VIRTKEY 
+    "A",            IDC_C_WATCH_DUPLICATE,  VIRTKEY
+    "E",            IDC_C_WATCH_EDIT,       VIRTKEY
+    "D",            IDC_C_WATCH_DOWN,       VIRTKEY
+    "U",            IDC_C_WATCH_UP,         VIRTKEY
+    "N",            IDC_C_WATCH,            VIRTKEY
+    "R",            IDC_C_WATCH_REMOVE,     VIRTKEY
 END
 
 
@@ -2471,7 +2586,7 @@ IDB_BITMAP_SELECTED17   BITMAP                  "res\\te_17_selected.bmp"
 IDB_BITMAP_SELECTED18   BITMAP                  "res\\te_18_selected.bmp"
 IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
-#endif    // Английский (США) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

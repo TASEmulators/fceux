@@ -34,7 +34,6 @@ extern int maxconbskip;
 extern int ffbskip;
 extern void LoadNewGamey(HWND hParent, const char *initialdir);
 extern void CloseGame();
-extern int fullscreen;	//Windows files only, keeps track of fullscreen status
 
 // Flag that indicates whether Game Genie is enabled or not.
 extern int genie;
@@ -54,8 +53,6 @@ extern int EnableBackgroundInput;
 extern int AFon;
 extern int AFoff;
 extern int AutoFireOffset;
-
-extern int vmod;
 
 extern char* directory_names[14];
 
@@ -123,13 +120,13 @@ extern int soundo;
 extern int eoptions;
 extern int soundoptions;
 extern uint8 *xbsave;
-extern HRESULT ddrval;
 extern int windowedfailed;
 extern uint32 goptions;
 
 void DoFCEUExit();
 void ShowAboutBox();
 int BlockingCheck();
+void UpdateRendBounds(void);
 void DoPriority();
 void RemoveDirs();
 void CreateDirs();

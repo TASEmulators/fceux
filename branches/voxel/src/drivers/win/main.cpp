@@ -43,6 +43,7 @@
 #include "../../movie.h"
 #include "../../fceulua.h"
 
+#include "window.h"
 #include "archive.h"
 #include "input.h"
 #include "netplay.h"
@@ -109,7 +110,6 @@ extern bool taseditorEnableAcceleratorKeys;
 // External functions
 extern std::string cfgFile;		//Contains the filename of the config file used.
 extern bool turbo;				//Is game in turbo mode?
-void ResetVideo(void);
 void ShowCursorAbs(int w);
 void HideFWindow(int h);
 void FixWXY(int pref, bool shift_held);
@@ -167,15 +167,12 @@ int ffbskip = 32;              //Blit skips per blit when FF-ing
 HINSTANCE fceu_hInstance;
 HACCEL fceu_hAccel;
 
-HRESULT ddrval;
-
 static char TempArray[2048];
 
 static int exiting = 0;
 static volatile int moocow = 0;
 
 int windowedfailed = 0;
-int fullscreen = 0;	//Windows files only, variable that keeps track of fullscreen status
 
 static volatile int _userpause = 0; //mbg merge 7/18/06 changed tasbuild was using this only in a couple of places
 
@@ -390,12 +387,12 @@ void FCEUD_PrintError(const char *errormsg)
 {
 	AddLogText(errormsg, 1);
 
-	if (fullscreen && (eoptions & EO_HIDEMOUSE))
+	if (GetIsFullscreen() && (eoptions & EO_HIDEMOUSE))
 		ShowCursorAbs(1);
 
 	MessageBox(0, errormsg, FCEU_NAME" Error", MB_ICONERROR | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
 
-	if (fullscreen && (eoptions & EO_HIDEMOUSE))
+	if (GetIsFullscreen() && (eoptions & EO_HIDEMOUSE))
 		ShowCursorAbs(0);
 }
 
@@ -491,7 +488,7 @@ int DriverInitialize()
 	if(soundo)
 		soundo = InitSound();
 
-	SetVideoMode(fullscreen);
+	InitVideoDriver();
 	InitInputStuff();             /* Initialize DInput interfaces. */
 
 	return 1;
@@ -506,7 +503,7 @@ static void DriverKill(void)
 
 	DestroyInput();
 
-	ResetVideo();
+	ShutdownVideoDriver();
 
 	if(soundo)
 	{
@@ -649,7 +646,6 @@ int main(int argc,char *argv[])
 	{
         FCEUI_SetGameGenie(genie!=0);
 
-        fullscreen = !!fullscreen;
         soundo = !!soundo;
         frame_display = !!frame_display;
         allowUDLR = !!allowUDLR;
@@ -687,7 +683,7 @@ int main(int argc,char *argv[])
 
 	if(!t)
 	{
-		fullscreen=0;
+		SetIsFullscreen(false);
 	}
 
 	CreateMainWindow();
@@ -919,8 +915,10 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 	}
 
 	//blit the framebuffer
-	if(XBuf)
+	if(XBuf) {
+		xbsave = XBuf;
 		FCEUD_BlitScreen(XBuf);
+	}
 
 	//update debugging displays
 	_updateWindow();

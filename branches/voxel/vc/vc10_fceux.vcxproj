@@ -596,6 +596,7 @@
     <ClCompile Include="..\src\input\mahjong.cpp" />
     <ClCompile Include="..\src\input\mouse.cpp" />
     <ClCompile Include="..\src\input\oekakids.cpp" />
+    <ClCompile Include="..\src\input\pec586kb.cpp" />
     <ClCompile Include="..\src\input\powerpad.cpp" />
     <ClCompile Include="..\src\input\quiz.cpp" />
     <ClCompile Include="..\src\input\shadow.cpp" />
@@ -963,6 +964,7 @@
     <ClInclude Include="..\src\ines-correct.h" />
     <ClInclude Include="..\src\ines.h" />
     <ClInclude Include="..\src\input.h" />
+    <ClInclude Include="..\src\input\fkb.h" />
     <ClInclude Include="..\src\input\share.h" />
     <ClInclude Include="..\src\input\suborkb.h" />
     <ClInclude Include="..\src\movie.h" />

@@ -41,12 +41,10 @@
 
 #include "debuggersp.h"
 
-extern Name* lastBankNames;
-extern Name* loadedBankNames;
+extern Name* pageNames[32];
 extern Name* ramBankNames;
 extern bool ramBankNamesLoaded;
-extern int lastBank;
-extern int loadedBank;
+extern int pageNumbersLoaded[32];
 extern int myNumWPs;
 
 // ################################## End of SP CODE ###########################
@@ -525,8 +523,9 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 			if (symbDebugEnabled)
 			{
 				replaceNames(ramBankNames, a, &disassembly_operands[i]);
-				replaceNames(loadedBankNames, a, &disassembly_operands[i]);
-				replaceNames(lastBankNames, a, &disassembly_operands[i]);
+				for(int p=0;p<ARRAY_SIZE(pageNames);p++)
+					if(pageNames[p] != NULL)
+						replaceNames(pageNames[p], a, &disassembly_operands[i]);
 			}
 
 			// special case: an RTS opcode
@@ -2152,7 +2151,8 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							case IDC_DEBUGGER_RELOAD_SYMS:
 							{
 								ramBankNamesLoaded = false;
-								lastBank = loadedBank = -1;
+								for(int i=0;i<ARRAYSIZE(pageNumbersLoaded);i++)
+									pageNumbersLoaded[i] = -1;
 								loadNameFiles();
 								UpdateDebugger(false);
 								break;
@@ -2307,7 +2307,9 @@ void DoDebug(uint8 halt)
 //-----------------------------------------
 DebugSystem* debugSystem;
 unsigned int debuggerFontSize = 15;
-unsigned int hexeditorFontSize = 15;
+unsigned int hexeditorFontHeight = 15;
+unsigned int hexeditorFontWidth = 7;
+char* hexeditorFontName = 0;
 
 DebugSystem::DebugSystem()
 {
@@ -2322,12 +2324,20 @@ void DebugSystem::init()
 		DEFAULT_QUALITY, DEFAULT_PITCH, /*quality, and pitch*/
 		"Courier New"); /*font name*/
 
-	hHexeditorFont = CreateFont(hexeditorFontSize, hexeditorFontSize / 2, /*Height,Width*/
+	//if the user provided his own courier font, use that
+	extern std::string BaseDirectory;
+	std::string courefon_path = BaseDirectory + "\\coure.fon";
+	AddFontResourceEx(courefon_path.c_str(), FR_PRIVATE, NULL);
+
+	char* hexfn = hexeditorFontName;
+	if(!hexfn) hexfn = "Courier";
+
+	hHexeditorFont = CreateFont(hexeditorFontHeight, hexeditorFontWidth, /*Height,Width*/
 		0,0, /*escapement,orientation*/
 		FW_REGULAR,FALSE,FALSE,FALSE, /*weight, italic, underline, strikeout*/
 		ANSI_CHARSET,OUT_DEVICE_PRECIS,CLIP_MASK, /*charset, precision, clipping*/
 		DEFAULT_QUALITY, DEFAULT_PITCH, /*quality, and pitch*/
-		"Courier"); /*font name*/
+		hexfn); /*font name*/
 
 	HDC hdc = GetDC(GetDesktopWindow());
 	HGDIOBJ old = SelectObject(hdc,hFixedFont);

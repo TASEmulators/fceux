@@ -22,8 +22,11 @@ extern bool debuggerAutoload;
 extern bool debuggerSaveLoadDEBFiles;
 extern bool debuggerDisplayROMoffsets;
 
+extern unsigned int debuggerPageSize;
 extern unsigned int debuggerFontSize;
-extern unsigned int hexeditorFontSize;
+extern unsigned int hexeditorFontWidth;
+extern unsigned int hexeditorFontHeight;
+extern char* hexeditorFontName;
 
 void CenterWindow(HWND hwndDlg);
 void DoPatcher(int address,HWND hParent);

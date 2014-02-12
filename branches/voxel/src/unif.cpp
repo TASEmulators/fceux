@@ -390,6 +390,7 @@ static BMAPPING bmap[] = {
 	{ "NovelDiamond9999999in1", Novel_Init, 0 },
 	{ "OneBus", UNLOneBus_Init, 0 },
 	{ "PEC-586", UNLPEC586Init, 0 },
+	{ "RET-CUFROM", Mapper29_Init, BMCFLAG_32KCHRR },
 	{ "RROM", NROM_Init, 0 },
 	{ "RROM-128", NROM_Init, 0 },
 	{ "SA-002", TCU02_Init, 0 },

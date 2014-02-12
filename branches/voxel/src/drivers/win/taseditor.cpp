@@ -22,6 +22,7 @@ Main - Main gate between emulator and Taseditor
 #include "main.h"			// for GetRomName
 #include "taseditor.h"
 #include "window.h"
+#include "video.h"
 #include "../../input.h"
 #include "../keyboard.h"
 #include "../joystick.h"
@@ -56,7 +57,6 @@ extern int joysticksPerFrame[INPUT_TYPES_TOTAL];
 extern bool turbo;
 extern int pal_emulation;
 extern int newppu;
-extern void PushCurrentVideoSettings();
 extern void RefreshThrottleFPS();
 extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
 // temporarily saved FCEUX config
@@ -883,7 +883,6 @@ void applyMovieInputConfig()
 	pal_emulation = currMovieData.palFlag;
 	FCEUI_SetVidSystem(pal_emulation);
 	RefreshThrottleFPS();
-	PushCurrentVideoSettings();
 	// update PPU type
 	newppu = currMovieData.PPUflag;
 	SetMainWindowText();

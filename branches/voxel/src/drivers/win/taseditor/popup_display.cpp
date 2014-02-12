@@ -19,6 +19,8 @@ Popup display - Manager of popup windows
 #include "taseditor_project.h"
 #include "zlib.h"
 
+#include "drivers/win/video.h"
+
 extern TASEDITOR_CONFIG taseditorConfig;
 extern TASEDITOR_WINDOW taseditorWindow;
 extern BOOKMARKS bookmarks;
@@ -91,7 +93,7 @@ void POPUP_DISPLAY::init()
 {
 	free();
 	// fill scr_bmp palette with current palette colors
-	extern PALETTEENTRY *color_palette;
+	PALETTEENTRY* color_palette = GetPalette();
 	for (int i = 0; i < 256; ++i)
 	{
 		screenshotBmi->bmiColors[i].rgbRed = color_palette[i].peRed;

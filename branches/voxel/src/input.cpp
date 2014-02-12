@@ -38,6 +38,7 @@
 
 #ifdef WIN32
 #include "drivers/win/main.h"
+#include "drivers/win/video.h"
 #include "drivers/win/memwatch.h"
 #include "drivers/win/cheat.h"
 #include "drivers/win/debugger.h"
@@ -67,6 +68,7 @@ extern INPUTCFC *FCEU_InitArkanoidFC(void);
 extern INPUTCFC *FCEU_InitSpaceShadow(void);
 extern INPUTCFC *FCEU_InitFKB(void);
 extern INPUTCFC *FCEU_InitSuborKB(void);
+extern INPUTCFC *FCEU_InitPEC586KB(void);
 extern INPUTCFC *FCEU_InitHS(void);
 extern INPUTCFC *FCEU_InitMahjong(void);
 extern INPUTCFC *FCEU_InitQuizKing(void);
@@ -430,6 +432,9 @@ static void SetInputStuffFC()
 		break;
 	case SIFC_SUBORKB:
 		portFC.driver=FCEU_InitSuborKB();
+		break;
+	case SIFC_PEC586KB:
+		portFC.driver=FCEU_InitPEC586KB();
 		break;
 	case SIFC_HYPERSHOT:
 		portFC.driver=FCEU_InitHS();
@@ -1175,15 +1180,13 @@ static void FCEUI_DoExit(void)
 void ToggleFullscreen()
 {
 #ifdef WIN32
-	extern int SetVideoMode(int fs);		//adelikat: Yeah, I know, hacky
 	extern void UpdateCheckedMenuItems();
 
 	UpdateCheckedMenuItems();
-	changerecursive=1;
 
-	int oldmode = fullscreen;
-	if(!SetVideoMode(oldmode ^ 1))
-		SetVideoMode(oldmode);
+	changerecursive=1;
+	SetIsFullscreen(!GetIsFullscreen());
+	FCEUD_VideoChanged();
 	changerecursive=0;
 #endif
 }

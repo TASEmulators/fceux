@@ -14,7 +14,7 @@
 #include <cstdlib>
 #include <cstring>
 
-
+unsigned int debuggerPageSize = 14;
 int vblankScanLines = 0;	//Used to calculate scanlines 240-261 (vblank)
 int vblankPixel = 0;		//Used to calculate the pixels in vblank
 
@@ -232,7 +232,7 @@ int getBank(int offs)
 
 	if (GameInfo && GameInfo->type==GIT_NSF)
 		return addr != -1 ? addr / 0x1000 : -1;
-	return addr != -1 ? addr / 0x4000 : -1;
+	return addr != -1 ? addr / (1<<debuggerPageSize) : -1; //formerly, dividing by 0x4000
 }
 
 int GetNesFileAddress(int A){

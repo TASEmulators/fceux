@@ -958,6 +958,9 @@
     <ClCompile Include="..\src\boards\mihunche.cpp">
       <Filter>boards</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\input\pec586kb.cpp">
+      <Filter>input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">
@@ -1463,6 +1466,9 @@
     </ClInclude>
     <ClInclude Include="..\src\utils\ioapi.h">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\input\fkb.h">
+      <Filter>input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
