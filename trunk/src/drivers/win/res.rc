@@ -12,11 +12,91 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// Russian resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
+#ifdef _WIN32
+LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
+#pragma code_page(1251)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_TASEDITOR_SAVINGOPTIONS DIALOGEX 0, 0, 223, 208
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Project file saving options"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,109,187,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,165,187,50,14
+    CONTROL         " Binary format of Input",IDC_CHECK_BINARY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,17,89,10
+    CONTROL         " Markers",IDC_CHECK_MARKERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,32,67,10
+    CONTROL         " Bookmarks",IDC_CHECK_BOOKMARKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,47,67,10
+    CONTROL         " History",IDC_CHECK_HISTORY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,62,67,10
+    CONTROL         " Piano Roll",IDC_CHECK_PIANO_ROLL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,77,67,10
+    CONTROL         " Selection",IDC_CHECK_SELECTION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,92,67,10
+    GROUPBOX        "File contents",IDC_STATIC,105,4,111,177
+    GROUPBOX        "Greenzone saving options",IDC_STATIC,112,106,97,69
+    CONTROL         " all frames",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,122,117,77,10
+    CONTROL         " every 16th frame",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,122,131,77,10
+    CONTROL         " marked frames",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,122,145,77,10
+    CONTROL         " don't save",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,122,159,77,10
+    CONTROL         " Autosave project",IDC_AUTOSAVE_PROJECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,17,81,10
+    CONTROL         " silently",IDC_SILENT_AUTOSAVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,47,42,10
+    LTEXT           "every",IDC_STATIC,14,32,21,8
+    EDITTEXT        IDC_AUTOSAVE_PERIOD,36,30,24,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "minutes",IDC_STATIC,64,32,28,8
+    GROUPBOX        "Settings",IDC_STATIC,6,4,91,177
+END
+
+IDD_SYMBOLIC_DEBUG_NAMING DIALOGEX 0, 0, 245, 83
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Symbolic Debug Naming"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,132,62,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,189,62,50,14
+    LTEXT           "File",IDC_STATIC,7,7,15,9
+    EDITTEXT        IDC_SYMBOLIC_ADDRESS,38,24,33,13,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
+    LTEXT           "Address",IDC_STATIC,6,26,30,10
+    EDITTEXT        IDC_SYMBOLIC_NAME,107,24,132,13,ES_AUTOHSCROLL
+    LTEXT           "Name",IDC_STATIC,83,26,22,10
+    LTEXT           "Comment",IDC_STATIC,6,45,37,10
+    EDITTEXT        IDC_SYMBOLIC_COMMENT,45,43,194,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_SYMBOLIC_FILENAME,24,6,215,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_SYMBOLIC_DEBUG_NAMING, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 82
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Russian resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(1251)
+#pragma code_page(1252)
+#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -35,7 +115,7 @@ ICON_2                  ICON                    "res/ICON_2.ico"
 // Menu
 //
 
-FCEUMENU MENU
+FCEUMENU MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -223,7 +303,7 @@ BEGIN
     END
 END
 
-TASEDITORMENU MENUEX
+TASEDITORMENU MENUEX 
 BEGIN
     POPUP "File",                           65535,MFT_STRING,MFS_ENABLED
     BEGIN
@@ -312,7 +392,7 @@ BEGIN
     END
 END
 
-MEMVIEWMENU MENU
+MEMVIEWMENU MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -324,6 +404,7 @@ BEGIN
         BEGIN
             MENUITEM "&Ram",                        MENU_MV_FILE_DUMP_RAM
             MENUITEM "&PPU Memory",                 MENU_MV_FILE_DUMP_PPU
+            MENUITEM "6502 64K",                    MENU_MV_FILE_DUMP_64K
         END
         MENUITEM "&Goto Address\tCtrl+A",       MENU_MV_FILE_GOTO_ADDRESS
         MENUITEM SEPARATOR
@@ -360,7 +441,7 @@ BEGIN
     END
 END
 
-MEMWATCHMENU MENU
+MEMWATCHMENU MENU 
 BEGIN
     POPUP "&File  "
     BEGIN
@@ -387,7 +468,7 @@ BEGIN
     END
 END
 
-TASEDITORCONTEXTMENUS MENU
+TASEDITORCONTEXTMENUS MENU 
 BEGIN
     POPUP "Selected"
     BEGIN
@@ -409,7 +490,7 @@ BEGIN
     END
 END
 
-FCEUCONTEXTMENUS MENU
+FCEUCONTEXTMENUS MENU 
 BEGIN
     POPUP "Game+Movie+readonly"
     BEGIN
@@ -470,7 +551,7 @@ BEGIN
     END
 END
 
-RAMWATCH_MENU MENU
+RAMWATCH_MENU MENU 
 BEGIN
     POPUP "File"
     BEGIN
@@ -499,7 +580,7 @@ BEGIN
     END
 END
 
-CHEATCONTEXTMENUS MENU
+CHEATCONTEXTMENUS MENU 
 BEGIN
     POPUP "CheatListPopup"
     BEGIN
@@ -510,7 +591,7 @@ BEGIN
     END
 END
 
-DEBUGCONTEXTMENUS MENU
+DEBUGCONTEXTMENUS MENU 
 BEGIN
     POPUP "DebugListPopup"
     BEGIN
@@ -518,7 +599,7 @@ BEGIN
     END
 END
 
-LUAWINDOW_MENU MENU
+LUAWINDOW_MENU MENU 
 BEGIN
     POPUP "Console"
     BEGIN
@@ -578,7 +659,7 @@ BEGIN
     LTEXT           "Avi Output",IDC_STATIC,10,208,34,8
 END
 
-DWBDIALOG DIALOG 33, 99, 250, 56
+DWBDIALOG DIALOG  33, 99, 250, 56
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "DWB!"
 FONT 8, "MS Sans Serif"
@@ -588,7 +669,7 @@ BEGIN
     PUSHBUTTON      "Close",BTN_CLOSE,188,33,50,14
 END
 
-FKBDIALOG DIALOG 13, 72, 402, 194
+FKBDIALOG DIALOG  13, 72, 402, 194
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Family Keyboard Configuration"
 FONT 8, "MS Sans Serif"
@@ -770,7 +851,7 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX,174,18,142,12
 END
 
-MAHJONGDIALOG DIALOG 65510, 106, 340, 110
+MAHJONGDIALOG DIALOG  65510, 106, 340, 110
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "mahjong"
 FONT 8, "MS Sans Serif"
@@ -873,7 +954,7 @@ BEGIN
     CONTROL         "Use Custom Palette",CHECK_PALETTE_CUSTOM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,22,85,12
 END
 
-POWERPADDIALOG DIALOG 30, 123, 131, 119
+POWERPADDIALOG DIALOG  30, 123, 131, 119
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Power Pad Configuration"
 FONT 8, "MS Sans Serif"
@@ -894,7 +975,7 @@ BEGIN
     PUSHBUTTON      "12",311,91,59,16,12
 END
 
-QUIZKINGDIALOG DIALOG 30, 123, 160, 74
+QUIZKINGDIALOG DIALOG  30, 123, 160, 74
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "quiz king"
 FONT 8, "MS Sans Serif"
@@ -1556,7 +1637,7 @@ BEGIN
     PUSHBUTTON      "||",TASEDITOR_PLAYSTOP,247,9,23,14,NOT WS_TABSTOP
     PUSHBUTTON      ">",TASEDITOR_FORWARD,270,9,23,14,NOT WS_TABSTOP
     PUSHBUTTON      ">>",TASEDITOR_FORWARD_FULL,293,9,23,14,NOT WS_TABSTOP
-    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH | WS_BORDER,201,39,115,6
+    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",WS_BORDER | 0x1,201,39,115,6
     CONTROL         " Follow cursor",CHECK_FOLLOW_CURSOR,"Button",BS_AUTOCHECKBOX,203,25,56,12
     CONTROL         " Auto-restore last position",CHECK_AUTORESTORE_PLAYBACK,
                     "Button",BS_AUTOCHECKBOX,203,48,109,12
@@ -2015,7 +2096,7 @@ BEGIN
     PUSHBUTTON      "&Cancel",IDCANCEL,120,80,50,14
 END
 
-IDD_PROMPT DIALOG 0, 0, 186, 68
+IDD_PROMPT DIALOG  0, 0, 186, 68
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Input Prompt"
 FONT 8, "Ms Shell Dlg 2"
@@ -2032,25 +2113,13 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
+GUIDELINES DESIGNINFO 
 BEGIN
     "DIRCONFIG", DIALOG
     BEGIN
         LEFTMARGIN, 10
         RIGHTMARGIN, 295
         TOPMARGIN, 8
-    END
-
-    "DWBDIALOG", DIALOG
-    BEGIN
-    END
-
-    "FKBDIALOG", DIALOG
-    BEGIN
-    END
-
-    "GUICONFIG", DIALOG
-    BEGIN
     END
 
     "INPUTCONFIG", DIALOG
@@ -2061,24 +2130,12 @@ BEGIN
         BOTTOMMARGIN, 191
     END
 
-    "MAPINPUT", DIALOG
-    BEGIN
-    END
-
-    "MESSAGELOG", DIALOG
-    BEGIN
-    END
-
     "NETMOO", DIALOG
     BEGIN
         LEFTMARGIN, 10
         RIGHTMARGIN, 357
         TOPMARGIN, 8
         BOTTOMMARGIN, 201
-    END
-
-    "NEWINPUT", DIALOG
-    BEGIN
     END
 
     "PALCONFIG", DIALOG
@@ -2097,10 +2154,6 @@ BEGIN
         BOTTOMMARGIN, 274
     END
 
-    "SUBORKBDIALOG", DIALOG
-    BEGIN
-    END
-
     "TIMINGCONFIG", DIALOG
     BEGIN
         LEFTMARGIN, 10
@@ -2117,40 +2170,16 @@ BEGIN
         BOTTOMMARGIN, 217
     END
 
-    "DWBDIALOGSIMPLE", DIALOG
-    BEGIN
-    END
-
     "MEMWATCH", DIALOG
     BEGIN
         RIGHTMARGIN, 260
         BOTTOMMARGIN, 269
     END
 
-    "DEBUGGER", DIALOG
-    BEGIN
-    END
-
-    "TRACER", DIALOG
-    BEGIN
-    END
-
     "ADDBP", DIALOG
     BEGIN
         RIGHTMARGIN, 185
         BOTTOMMARGIN, 121
-    END
-
-    "NTVIEW", DIALOG
-    BEGIN
-    END
-
-    "ROMPATCHER", DIALOG
-    BEGIN
-    END
-
-    "GGCONV", DIALOG
-    BEGIN
     END
 
     "MONITOR", DIALOG
@@ -2179,30 +2208,6 @@ BEGIN
         BOTTOMMARGIN, 198
     END
 
-    "TASEDITOR", DIALOG
-    BEGIN
-    END
-
-    IDD_TASEDITOR_ABOUT, DIALOG
-    BEGIN
-    END
-
-    IDD_TASEDITOR_NEWPROJECT, DIALOG
-    BEGIN
-    END
-
-    IDD_TASEDITOR_EXPORT, DIALOG
-    BEGIN
-    END
-
-    IDD_TASEDITOR_FINDNOTE, DIALOG
-    BEGIN
-    END
-
-    IDD_TASEDITOR_SAVECOMPACT, DIALOG
-    BEGIN
-    END
-
     "ASSEMBLER", DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -2217,10 +2222,6 @@ BEGIN
         RIGHTMARGIN, 179
         TOPMARGIN, 7
         BOTTOMMARGIN, 66
-    END
-
-    "CDLOGGER", DIALOG
-    BEGIN
     END
 
     "PPUVIEW", DIALOG
@@ -2248,22 +2249,6 @@ BEGIN
     BEGIN
         BOTTOMMARGIN, 188
     END
-
-    IDD_LUA, DIALOG
-    BEGIN
-    END
-
-    "VIDEOCONFIG", DIALOG
-    BEGIN
-    END
-
-    IDD_RAMSEARCH, DIALOG
-    BEGIN
-    END
-
-    IDD_PROMPT, DIALOG
-    BEGIN
-    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -2272,91 +2257,13 @@ END
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Russian (Russia) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
-LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
-#pragma code_page(1251)
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_TASEDITOR_SAVINGOPTIONS DIALOGEX 0, 0, 223, 208
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Project file saving options"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,109,187,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,165,187,50,14
-    CONTROL         " Binary format of Input",IDC_CHECK_BINARY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,17,89,10
-    CONTROL         " Markers",IDC_CHECK_MARKERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,32,67,10
-    CONTROL         " Bookmarks",IDC_CHECK_BOOKMARKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,47,67,10
-    CONTROL         " History",IDC_CHECK_HISTORY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,62,67,10
-    CONTROL         " Piano Roll",IDC_CHECK_PIANO_ROLL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,77,67,10
-    CONTROL         " Selection",IDC_CHECK_SELECTION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,92,67,10
-    GROUPBOX        "File contents",IDC_STATIC,105,4,111,177
-    GROUPBOX        "Greenzone saving options",IDC_STATIC,112,106,97,69
-    CONTROL         " all frames",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,122,117,77,10
-    CONTROL         " every 16th frame",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,122,131,77,10
-    CONTROL         " marked frames",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,122,145,77,10
-    CONTROL         " don't save",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,122,159,77,10
-    CONTROL         " Autosave project",IDC_AUTOSAVE_PROJECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,17,81,10
-    CONTROL         " silently",IDC_SILENT_AUTOSAVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,47,42,10
-    LTEXT           "every",IDC_STATIC,14,32,21,8
-    EDITTEXT        IDC_AUTOSAVE_PERIOD,36,30,24,14,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "minutes",IDC_STATIC,64,32,28,8
-    GROUPBOX        "Settings",IDC_STATIC,6,4,91,177
-END
-
-IDD_SYMBOLIC_DEBUG_NAMING DIALOGEX 0, 0, 245, 83
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Symbolic Debug Naming"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,132,62,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,189,62,50,14
-    LTEXT           "File",IDC_STATIC,7,7,15,9
-    EDITTEXT        IDC_SYMBOLIC_ADDRESS,38,24,33,13,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
-    LTEXT           "Address",IDC_STATIC,6,26,30,10
-    EDITTEXT        IDC_SYMBOLIC_NAME,107,24,132,13,ES_AUTOHSCROLL
-    LTEXT           "Name",IDC_STATIC,83,26,22,10
-    LTEXT           "Comment",IDC_STATIC,6,45,37,10
-    EDITTEXT        IDC_SYMBOLIC_COMMENT,45,43,194,13,ES_AUTOHSCROLL
-    EDITTEXT        IDC_SYMBOLIC_FILENAME,24,6,215,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_TASEDITOR_SAVINGOPTIONS, DIALOG
-    BEGIN
-    END
-
-    IDD_SYMBOLIC_DEBUG_NAMING, DIALOG
-    BEGIN
-        BOTTOMMARGIN, 82
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // Russian (Russia) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
+#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2379,7 +2286,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
+GUIDELINES DESIGNINFO 
 BEGIN
     "IDD_REPLAY_METADATA", DIALOG
     BEGIN
@@ -2398,17 +2305,17 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-3 TEXTINCLUDE
+3 TEXTINCLUDE 
 BEGIN
     "\r\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\0"
 END
@@ -2421,7 +2328,7 @@ END
 // Accelerator
 //
 
-IDR_TASEDITOR_ACCELERATORS ACCELERATORS
+IDR_TASEDITOR_ACCELERATORS ACCELERATORS 
 BEGIN
     "A",            ACCEL_CTRL_A,           VIRTKEY, CONTROL, NOINVERT
     "B",            ACCEL_CTRL_B,           VIRTKEY, CONTROL, NOINVERT
@@ -2462,18 +2369,18 @@ BEGIN
     VK_UP,          ACCEL_SHIFT_UP,         VIRTKEY, SHIFT, NOINVERT
 END
 
-IDR_RWACCELERATOR ACCELERATORS
+IDR_RWACCELERATOR ACCELERATORS 
 BEGIN
     "N",            RAMMENU_FILE_NEW,       VIRTKEY, CONTROL
     "O",            RAMMENU_FILE_OPEN,      VIRTKEY, CONTROL
     "S",            RAMMENU_FILE_SAVE,      VIRTKEY, CONTROL
     "S",            RAMMENU_FILE_SAVEAS,    VIRTKEY, SHIFT, CONTROL
-    "A",            IDC_C_WATCH_DUPLICATE,  VIRTKEY
-    "E",            IDC_C_WATCH_EDIT,       VIRTKEY
-    "D",            IDC_C_WATCH_DOWN,       VIRTKEY
-    "U",            IDC_C_WATCH_UP,         VIRTKEY
-    "N",            IDC_C_WATCH,            VIRTKEY
-    "R",            IDC_C_WATCH_REMOVE,     VIRTKEY
+    "A",            IDC_C_WATCH_DUPLICATE,  VIRTKEY 
+    "E",            IDC_C_WATCH_EDIT,       VIRTKEY 
+    "D",            IDC_C_WATCH_DOWN,       VIRTKEY 
+    "U",            IDC_C_WATCH_UP,         VIRTKEY 
+    "N",            IDC_C_WATCH,            VIRTKEY 
+    "R",            IDC_C_WATCH_REMOVE,     VIRTKEY 
 END
 
 
@@ -2586,7 +2493,7 @@ IDB_BITMAP_SELECTED17   BITMAP                  "res\\te_17_selected.bmp"
 IDB_BITMAP_SELECTED18   BITMAP                  "res\\te_18_selected.bmp"
 IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
-#endif    // English (United States) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

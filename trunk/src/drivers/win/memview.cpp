@@ -1844,6 +1844,15 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 				dumpToFile(bar, sizeof(bar));
 				return 0;
 			}
+		case MENU_MV_FILE_DUMP_64K:
+			{
+				char *bar = new char[65536];
+				unsigned int i;
+				for (i=0;i<65536;i++) bar[i] = GetMem(i);
+
+				dumpToFile(bar, 65536);
+				return 0;
+			}
 		case MENU_MV_FILE_DUMP_PPU:
 			{
 				char bar[0x4000];
