@@ -62,7 +62,7 @@ LoadCPalette(const std::string &file)
 static void
 CreateDirs(const std::string &dir)
 {
-	char *subs[8]={"fcs","snaps","gameinfo","sav","cheats","movies","cfg.d"};
+	char *subs[8]= {"fcs","snaps","gameinfo","sav","cheats","movies","cfg.d"};
 	std::string subdir;
 	int x;
 
@@ -139,7 +139,7 @@ InitConfig()
 	config->addOption("soundrecord", "SDL.Sound.RecordFile", "");
 	config->addOption("soundbufsize", "SDL.Sound.BufSize", 128);
 	config->addOption("lowpass", "SDL.Sound.LowPass", 0);
-    
+
 	config->addOption('g', "gamegenie", "SDL.GameGenie", 0);
 	config->addOption("pal", "SDL.PAL", 0);
 	config->addOption("frameskip", "SDL.Frameskip", 0);
@@ -191,7 +191,7 @@ InitConfig()
 	config->addOption('k', "netkey", "SDL.NetworkGameKey", "");
 	config->addOption("port", "SDL.NetworkPort", 4046);
 	config->addOption("players", "SDL.NetworkPlayers", 1);
-     
+
 	// input configuration options
 	config->addOption("input1", "SDL.Input.0", "GamePad.0");
 	config->addOption("input2", "SDL.Input.1", "GamePad.1");
@@ -200,50 +200,50 @@ InitConfig()
 
 	// allow for input configuration
 	config->addOption('i', "inputcfg", "SDL.InputCfg", InputCfg);
-    
+
 	// display input
 	config->addOption("inputdisplay", "SDL.InputDisplay", 0);
 
 	// enable / disable opposite directionals (left + right or up + down simultaneously)
 	config->addOption("opposite-directionals", "SDL.Input.EnableOppositeDirectionals", 1);
-    
+
 	// pause movie playback at frame x
 	config->addOption("pauseframe", "SDL.PauseFrame", 0);
 	config->addOption("recordhud", "SDL.RecordHUD", 1);
 	config->addOption("moviemsg", "SDL.MovieMsg", 1);
-    
+
 	// overwrite the config file?
 	config->addOption("no-config", "SDL.NoConfig", 0);
 
 	config->addOption("autoresume", "SDL.AutoResume", 0);
-    
+
 	// video playback
 	config->addOption("playmov", "SDL.Movie", "");
 	config->addOption("subtitles", "SDL.SubtitleDisplay", 1);
-	
+
 	config->addOption("fourscore", "SDL.FourScore", 0);
 
 	config->addOption("nofscursor", "SDL.NoFullscreenCursor", 1);
-    
-    #ifdef _S9XLUA_H
+
+#ifdef _S9XLUA_H
 	// load lua script
 	config->addOption("loadlua", "SDL.LuaScript", "");
-    #endif
-    
-    #ifdef CREATE_AVI
+#endif
+
+#ifdef CREATE_AVI
 	config->addOption("videolog",  "SDL.VideoLog",  "");
 	config->addOption("mute", "SDL.MuteCapture", 0);
-    #endif
-    
-    // auto load/save on gameload/close
+#endif
+
+	// auto load/save on gameload/close
 	config->addOption("loadstate", "SDL.AutoLoadState", INVALID_STATE);
 	config->addOption("savestate", "SDL.AutoSaveState", INVALID_STATE);
 
-    //TODO implement this
-    config->addOption("periodicsaves", "SDL.PeriodicSaves", 0);
+	//TODO implement this
+	config->addOption("periodicsaves", "SDL.PeriodicSaves", 0);
 
-    
-    #ifdef _GTK
+
+#ifdef _GTK
 	char* home_dir = getenv("HOME");
 	// prefixed with _ because they are internal (not cli options)
 	config->addOption("_lastopenfile", "SDL.LastOpenFile", home_dir);
@@ -251,19 +251,19 @@ InitConfig()
 	config->addOption("_lastopennsf", "SDL.LastOpenNSF", home_dir);
 	config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", home_dir);
 	config->addOption("_lastloadlua", "SDL.LastLoadLua", home_dir);
-    #endif
-    
+#endif
+
 	// fcm -> fm2 conversion
 	config->addOption("fcmconvert", "SDL.FCMConvert", "");
-    
+
 	// fm2 -> srt conversion
 	config->addOption("ripsubs", "SDL.RipSubs", "");
-	
+
 	// enable new PPU core
 	config->addOption("newppu", "SDL.NewPPU", 0);
 
-    // quit when a+b+select+start is pressed
-    config->addOption("4buttonexit", "SDL.ABStartSelectExit", 0);
+	// quit when a+b+select+start is pressed
+	config->addOption("4buttonexit", "SDL.ABStartSelectExit", 0);
 
 	// GamePad 0 - 3
 	for(unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++) {
@@ -277,7 +277,7 @@ InitConfig()
 			config->addOption(prefix + GamePadNames[j], DefaultGamePad[i][j]);
 		}
 	}
-    
+
 	// PowerPad 0 - 1
 	for(unsigned int i = 0; i < POWERPAD_NUM_DEVICES; i++) {
 		char buf[64];
@@ -337,7 +337,7 @@ InitConfig()
 	config->addOption(prefix + "DeviceNum", 0);
 	for(unsigned int j = 0; j < FAMILYKEYBOARD_NUM_BUTTONS; j++) {
 		config->addOption(prefix + FamilyKeyBoardNames[j],
-						DefaultFamilyKeyBoard[j]);
+		                  DefaultFamilyKeyBoard[j]);
 	}
 
 	// for FAMICOM microphone in pad 2 pad 1 didn't have it
@@ -377,7 +377,8 @@ InitConfig()
 		SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
 		SDLK_6, SDLK_7, SDLK_8, SDLK_9,
 		SDLK_PAGEUP, // select state next
-		SDLK_PAGEDOWN}; // select state prev
+		SDLK_PAGEDOWN
+	}; // select state prev
 
 	prefix = "SDL.Hotkeys.";
 	for(int i=0; i < HK_MAX; i++)

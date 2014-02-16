@@ -11,6 +11,7 @@ source_list = Split(
     config.cpp
     sdl.cpp
     sdl-joystick.cpp
+    sdl-gamectrl.cpp
     sdl-sound.cpp
     sdl-throttle.cpp
     sdl-video.cpp

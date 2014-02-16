@@ -66,7 +66,10 @@ if os.environ.has_key('PKG_CONFIG_PATH'):
   env['ENV']['PKG_CONFIG_PATH'] = os.environ['PKG_CONFIG_PATH']
 if os.environ.has_key('PKG_CONFIG_LIBDIR'):
   env['ENV']['PKG_CONFIG_LIBDIR'] = os.environ['PKG_CONFIG_LIBDIR']
-
+if os.environ.has_key('LIBRARY_PATH'):
+  env['ENV']['LIBRARY_PATH'] = os.environ['LIBRARY_PATH']
+if os.environ.has_key('INCLUDE_PATH'):
+  env['ENV']['INCLUDE_PATH'] = os.environ['INCLUDE_PATH']
 
 print "platform: ", env['PLATFORM']
 

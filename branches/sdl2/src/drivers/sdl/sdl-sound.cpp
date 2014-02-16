@@ -46,9 +46,12 @@ static int s_mute = 0;
  */
 static void
 fillaudio(void *udata,
-			uint8 *stream,
-			int len)
+          uint8 *stream,
+          int len)
 {
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	SDL_memset(stream, 0, len);
+#endif
 	int16 *tmps = (int16*)stream;
 	len >>= 1;
 	while(len) {
@@ -117,7 +120,7 @@ InitSound()
 
 	// For safety, set a bare minimum:
 	if (s_BufferSize < spec.samples * 2)
-	s_BufferSize = spec.samples * 2;
+		s_BufferSize = spec.samples * 2;
 
 	s_Buffer = (int *)FCEU_dmalloc(sizeof(int) * s_BufferSize);
 	if (!s_Buffer)
@@ -129,7 +132,7 @@ InitSound()
 		puts(SDL_GetError());
 		KillSound();
 		return 0;
-    }
+	}
 	SDL_PauseAudio(0);
 
 	FCEUI_SetSoundVolume(soundvolume);
@@ -173,7 +176,7 @@ WriteSound(int32 *buf,
 	if (EmulationPaused == 0)
 		while(Count)
 		{
-			while(s_BufferIn == s_BufferSize) 
+			while(s_BufferIn == s_BufferSize)
 			{
 				SDL_Delay(1);
 			}
@@ -181,11 +184,11 @@ WriteSound(int32 *buf,
 			s_Buffer[s_BufferWrite] = *buf;
 			Count--;
 			s_BufferWrite = (s_BufferWrite + 1) % s_BufferSize;
-            
+
 			SDL_LockAudio();
 			s_BufferIn++;
 			SDL_UnlockAudio();
-            
+
 			buf++;
 		}
 }
@@ -195,8 +198,8 @@ WriteSound(int32 *buf,
  */
 void
 SilenceSound(int n)
-{ 
-	SDL_PauseAudio(n);   
+{
+	SDL_PauseAudio(n);
 }
 
 /**

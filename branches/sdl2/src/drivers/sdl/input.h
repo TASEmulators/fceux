@@ -27,6 +27,7 @@ int DWaitButton(const uint8 *text, ButtConfig *bc, int wb);
 #define BUTTC_KEYBOARD          0x00
 #define BUTTC_JOYSTICK          0x01
 #define BUTTC_MOUSE             0x02
+#define BUTTC_GAMECONTROLLER    0x03
 
 #define FCFGD_GAMEPAD   1
 #define FCFGD_POWERPAD  2
@@ -48,6 +49,7 @@ void IncreaseEmulationSpeed(void);
 void DecreaseEmulationSpeed(void);
 
 int DTestButtonJoy(ButtConfig *bc);
+int DTestButtonGC(ButtConfig *bc);
 
 void FCEUD_UpdateInput(void);
 

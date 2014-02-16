@@ -18,6 +18,8 @@ void SilenceSound(int s); /* DOS and SDL */
 
 int InitJoysticks(void);
 int KillJoysticks(void);
+int InitGameControllers(void);
+int KillGameControllers(void);
 uint32 *GetJSOr(void);
 
 int InitVideo(FCEUGI *gi);
