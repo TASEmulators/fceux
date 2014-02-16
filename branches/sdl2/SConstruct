@@ -17,7 +17,7 @@ opts.AddVariables(
   BoolVariable('DEBUG',     'Build with debugging symbols', 1),
   BoolVariable('RELEASE',   'Set to 1 to build for release', 0),
   BoolVariable('FRAMESKIP', 'Enable frameskipping', 1),
-  BoolVariable('OPENGL',    'Enable OpenGL support', 1),
+  BoolVariable('OPENGL',    'Enable OpenGL support (not supported by SDL2 yet)', 0),
   BoolVariable('LUA',       'Enable Lua support', 1),
   BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 1),
   BoolVariable('GTK3', 'Enable GTK3 GUI (SDL only)', 0),
@@ -28,7 +28,7 @@ opts.AddVariables(
   BoolVariable('SYSTEM_MINIZIP', 'Use system minizip instead of static minizip provided with fceux', 0),
   BoolVariable('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
   BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 0),
-  BoolVariable('SDL2', 'Compile using SDL2 instead of SDL 1.2 (experimental/non-functional)', 0)
+  BoolVariable('SDL2', 'Compile using SDL2 instead of SDL 1.2 (experimental/non-functional)', 1)
 )
 AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', metavar='DIR', help='installation prefix')
 
@@ -66,6 +66,7 @@ if os.environ.has_key('PKG_CONFIG_PATH'):
   env['ENV']['PKG_CONFIG_PATH'] = os.environ['PKG_CONFIG_PATH']
 if os.environ.has_key('PKG_CONFIG_LIBDIR'):
   env['ENV']['PKG_CONFIG_LIBDIR'] = os.environ['PKG_CONFIG_LIBDIR']
+
 
 print "platform: ", env['PLATFORM']
 
