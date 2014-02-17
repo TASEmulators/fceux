@@ -51,11 +51,26 @@ DTestButtonGC(ButtConfig *bc)
 	for(x = 0; x < bc->NumC; x++)
 	{
 		gc = s_GameCtrls[bc->DeviceNum[x]];
-		if( SDL_GameControllerGetButton(gc, (SDL_GameControllerButton) bc->ButtonNum[x]) )
+		/*** 
+		 * ButtConfig->ButtonNum is a uint16. SDL_CONTROLLER_BUTTON_INVALID,
+		 * used to mark unused button mappings (since 0 is a valid btn too), is
+		 * defined as -1, but this turns into 0xFFFF, which doesn't cast back to
+		 * SDL_GameControllerButton type.
+		 *
+		 * Without bounds-checking, if 0xFFFF is passed into GetButton, it results
+		 * in random behavior since GetButton lacks internal bounds checking.  The
+		 * "fun" symptom that lead to discovery of this issue was that "select"
+		 * would also press the turbo A and turbo B buttons.
+		 */
+		if( bc->ButtonNum[x] < SDL_CONTROLLER_BUTTON_MAX )
 		{
-			//printf("GC %d btn '%s'=down\n", bc->DeviceNum[x],
-			//       SDL_GameControllerGetStringForButton( (SDL_GameControllerButton) bc->ButtonNum[x]));
-			return 1;
+			/** Check to see if this button is depressed */
+			if( SDL_GameControllerGetButton(gc, (SDL_GameControllerButton) bc->ButtonNum[x]) )
+			{
+				//printf("GC %d btn '%s'=down\n", bc->DeviceNum[x],
+				//		 SDL_GameControllerGetStringForButton( (SDL_GameControllerButton) bc->ButtonNum[x]));
+				return 1;
+			}
 		}
 	}
 	return 0;
