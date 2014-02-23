@@ -64,20 +64,20 @@ enum ESIFC
 {
 	SIFC_UNSET		= -1,
 	SIFC_NONE		= 0,
-	SIFC_ARKANOID	= 1,
-	SIFC_SHADOW		= 2,
-	SIFC_4PLAYER	= 3,
-	SIFC_FKB		= 4,
-	SIFC_SUBORKB	= 5,
-	SIFC_PEC586KB	= 6,
-	SIFC_HYPERSHOT	= 7,
-	SIFC_MAHJONG	= 8,
-	SIFC_QUIZKING	= 9,
-	SIFC_FTRAINERA	= 10,
-	SIFC_FTRAINERB	= 11,
-	SIFC_OEKAKIDS	= 12,
-	SIFC_BWORLD		= 13,
-	SIFC_TOPRIDER	= 14,
+	SIFC_ARKANOID,
+	SIFC_SHADOW,
+	SIFC_4PLAYER,
+	SIFC_FKB,
+	SIFC_SUBORKB,
+	SIFC_PEC586KB,
+	SIFC_HYPERSHOT,
+	SIFC_MAHJONG,
+	SIFC_PARTYTAP,
+	SIFC_FTRAINERA,
+	SIFC_FTRAINERB,
+	SIFC_OEKAKIDS,
+	SIFC_BBATTLER,
+	SIFC_TOPRIDER,
 
 	SIFC_COUNT = SIFC_TOPRIDER
 };
@@ -96,11 +96,11 @@ inline const char* ESIFC_Name(ESIFC esifc)
 		"PEC586 Keyboard",
 		"HyperShot Pads",
 		"Mahjong",
-		"Quiz King Buzzers",
+		"Party Tap Buzzers",
 		"Family Trainer A",
 		"Family Trainer B",
 		"Oeka Kids Tablet",
-		"Barcode World",
+		"Barcode Battler",
 		"Top Rider"
 	};
 

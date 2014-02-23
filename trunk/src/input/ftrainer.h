@@ -1,0 +1,1 @@
+#define NUMKEYS_FAMITRAINER (12)

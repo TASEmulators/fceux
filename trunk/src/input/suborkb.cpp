@@ -21,7 +21,7 @@
 #include <string.h>
 #include "share.h"
 #include "suborkb.h"
-#define AK(x)	FKB_ ## x
+#define AK(x)	SBRKB_ ## x
 
 static uint8 bufit[0x66];
 static uint8 ksmode;

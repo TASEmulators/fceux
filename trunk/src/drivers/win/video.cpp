@@ -26,6 +26,7 @@
 #include "gui.h"
 #include "../../fceu.h"
 #include "../../video.h"
+#include "sound.h"
 #include "input.h"
 #include "mapinput.h"
 #include <math.h>
@@ -95,6 +96,12 @@ static bool fullscreenDesired = false;	// 'Desired' fullscreen status
 static bool fullscreenActual = false; // Internal 'actual' fullscreen status
 
 static int filterScaleMultiplier[6] = {1,2,2,2,3,3}; // scale multipliers for defined filters
+
+static VSYNCMODE tempwinsync = SYNCMODE_NONE;		//Temp variable used by turbo to turn of sync settings
+static int tempsoundquality = 0;	//Temp variable used by turbo to turn of sound quality settings
+// globally exposed garbage
+bool turbo = false;
+int skipVSync = 0;
 
 
 static void RestoreLostScreenSurface()
@@ -555,7 +562,7 @@ static bool SetVideoMode()
 
 static void VerticalSync()
 {
-	if(!NoWaiting) // apparently NoWaiting is set during netplay, which means there will be no vsync
+	if(!skipVSync) // apparently skipVSync is set during netplay, which means there will be no vsync
 	{
 		int syncMode = (fullscreenActual)? idxFullscreenSyncMode:idxWindowedSyncMode;
 		switch(syncMode) {
@@ -1048,8 +1055,8 @@ static BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_NO8LIM,BST_CHECKED);
 
 		char buf[1024] = "Full Screen";
-		int c = FCEUD_CommandMapping[EMUCMD_MISC_TOGGLEFULLSCREEN];
-		if (c)
+		KeyCombo c = GetCommandKeyCombo(EMUCMD_MISC_TOGGLEFULLSCREEN);
+		if (!c.isEmpty())
 		{
 			strcat(buf, " (");
 			strcat(buf, GetKeyComboName(c));
@@ -1253,6 +1260,28 @@ void FCEUD_GetPalette(unsigned char i, unsigned char *r, unsigned char *g, unsig
 	*r=color_palette[i].peRed;
 	*g=color_palette[i].peGreen;
 	*b=color_palette[i].peBlue;
+}
+
+void FCEUD_TurboOn() { 
+	tempwinsync = GetWindowedSyncModeIdx();	//Store wndSyncMode setting
+	SetWindowedSyncModeIdx(SYNCMODE_NONE);			//turn off wndSyncMode for turbo (so that turbo can function even with VBlank sync methods
+	tempsoundquality = soundquality;	//Store sound quality settings
+	FCEUI_SetSoundQuality(0);			//Turn sound quality to low
+	turbo = true; 
+	if (muteTurbo && isSoundEnabled) TrashSound();
+}
+
+void FCEUD_TurboOff() {
+	SetWindowedSyncModeIdx(tempwinsync);				//Restore wndSyncMode setting
+	soundquality = tempsoundquality;	//Restore sound quality settings
+	FCEUI_SetSoundQuality(soundquality);
+	turbo = false; 
+	if (muteTurbo && isSoundEnabled) InitSound();
+}
+
+void FCEUD_TurboToggle() { 
+	if(turbo) FCEUD_TurboOff();
+	else FCEUD_TurboOn();
 }
 
 

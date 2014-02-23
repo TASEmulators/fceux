@@ -73,6 +73,8 @@ int mutecapture;
 static int noconfig;
 
 // -Video Modes Tag- : See --special
+// TODO proper name for 'quizking' device is 'partytap'
+// TODO proper name for 'bworld' is 'barcodebattler' ('bbattler')
 static const char *DriverUsage=
 "Option         Value   Description\n"
 "--pal          {0|1}   Use PAL timing.\n"
@@ -617,7 +619,7 @@ int main(int argc, char *argv[])
 	int t;
 	g_config->getOption("SDL.Input.FamicomPad2.EnableMic", &t);
 		if(t)
-			replaceP2StartWithMicrophone = t;
+			FCEUI_SetInputMicrophone(t);
 	}
 
     // update the input devices

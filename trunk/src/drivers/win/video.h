@@ -82,6 +82,10 @@ void FCEUD_VideoChanged(void); // this one should be declared here
 void FCEUD_SetPalette(unsigned char index, unsigned char r, unsigned char g, unsigned char b);
 void FCEUD_GetPalette(unsigned char i, unsigned char *r, unsigned char *g, unsigned char *b);
 
+void FCEUD_TurboOn(void);
+void FCEUD_TurboOff(void);
+void FCEUD_TurboToggle(void);
+
 
 // see win/config.h
 bool& _FIXME_getFullscreenVar(void);

@@ -7,7 +7,6 @@
 #include "drivers/win/video.h"
 
 //extern WAVEFORMATEX wf;
-//extern int soundo;
 
 extern int soundrate;
 

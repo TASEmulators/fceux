@@ -45,7 +45,6 @@ extern int status_icon;
 extern int frame_display;
 extern int rerecord_display;
 extern int input_display;
-extern int allowUDLR;
 extern int pauseAfterPlayback;
 extern int closeFinishedMovie;
 extern int suggestReadOnlyReplay;
@@ -116,7 +115,7 @@ static int changerecursive=0;
 /// Contains the base directory of FCE
 extern std::string BaseDirectory;
 
-extern int soundo;
+extern int isSoundEnabled;
 extern int eoptions;
 extern int soundoptions;
 extern uint8 *xbsave;

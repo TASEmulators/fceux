@@ -4,5 +4,3 @@
 // setting was changed by it, which spawns auxillary functions intended to push new values through
 void SaveConfig(const char *filename);
 void LoadConfig(const char *filename);
-
-extern int InputType[3];

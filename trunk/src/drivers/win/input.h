@@ -1,73 +1,99 @@
+/*
+	NOTE: for purposes of this header and related source files, "gamepad" is
+	an internal emulated NES/Famicom device, and actual hardware devices are
+	referred to as "joysticks"
+*/
+
 #ifndef WIN_INPUT_H
-#define WIN_INPU_H
+#define WIN_INPUT_H
 
-#include "dinput.h"
-
-#define CMD_KEY_MASK			0xff
-#define CMD_KEY_LSHIFT			(1<<16)
-#define CMD_KEY_RSHIFT			(1<<17)
-#define CMD_KEY_SHIFT			(CMD_KEY_LSHIFT|CMD_KEY_RSHIFT)
-#define CMD_KEY_LCTRL			(1<<18)
-#define CMD_KEY_RCTRL			(1<<19)
-#define CMD_KEY_CTRL			(CMD_KEY_LCTRL|CMD_KEY_RCTRL)
-#define CMD_KEY_LALT			(1<<20)
-#define CMD_KEY_RALT			(1<<21)
-#define CMD_KEY_ALT				(CMD_KEY_LALT|CMD_KEY_RALT)
-
-void ConfigInput(HWND hParent);
-int InitDInput(void);
-void CreateInputStuff(void);
-void InitInputStuff(void);
-void DestroyInput(void);
-void InputScreenChanged(int fs); // FIXME defined nowhere used nowhere
-void SetAutoFireDesynch(int DesynchOn);
-int GetAutoFireDesynch();
-uint32 GetGamepadPressedImmediate();
-void UpdateRawInputAndHotkeys();
-
-extern LPDIRECTINPUT7 lpDI;
-
-extern int InputType[3];
-//extern int UsrInputType[3];
-extern int cidisabled;
-#ifndef _aosdfjk02fmasf
-#define _aosdfjk02fmasf
-
-#include "../common/args.h"
-#include "../common/config.h"
+#include "drivers/common/input.h"
+#include "drivers/common/args.h"
+#include "drivers/common/config.h"
 #include "../../input.h"
 
-#define MAXBUTTCONFIG   4
-typedef struct {
-        uint8  ButtType[MAXBUTTCONFIG];
-        uint8  DeviceNum[MAXBUTTCONFIG];
-        uint16 ButtonNum[MAXBUTTCONFIG];
-        uint32 NumC;
-        GUID DeviceInstance[MAXBUTTCONFIG];
-        //uint64 DeviceID[MAXBUTTCONFIG];        /* TODO */
-} ButtConfig;
 
-extern CFGSTRUCT InputConfig[];
-extern ARGPSTRUCT InputArgs[];
-void ParseGIInput(FCEUGI *GameInfo);
+// Show input configuration dialog
+void ConfigInput(void);
 
-#define BUTTC_KEYBOARD          0x00
-#define BUTTC_JOYSTICK          0x01
-#define BUTTC_MOUSE             0x02
+// Init/Deinit input devices
+bool InitInputDriver(void);
+void KillInputDriver(void);
 
-#define FCFGD_GAMEPAD   1
-#define FCFGD_POWERPAD  2
-#define FCFGD_HYPERSHOT 3
-#define FCFGD_QUIZKING  4
+// Enable/disable virtual keyboard handling
+void SetInputKeyboard(bool on);
+bool GetInputKeyboard(void);
 
-void SetEmulationSpeed(int type);
-int FCEUD_TestCommandState(int c);
-void FCEUD_UpdateInput();
+// Get/set turbo A-B alternation
+void SetAutoFireDesynch(bool DesynchOn);
+bool GetAutoFireDesynch(void);
 
-extern CFGSTRUCT HotkeyConfig[];
+// U+D, L+R at the same time
+bool GetAllowUDLR(void);
+void SetAllowUDLR(bool allow);
 
-extern int FCEUD_CommandMapping[EMUCMD_MAX];
+// Get/set keys to add or remove autoholds
+int GetAutoholdsAddKey(void);
+void SetAutoholdsAddKey(int k);
 
-#endif
+int GetAutoholdsClearKey(void);
+void SetAutoholdsClearKey(int k);
 
-#endif
+// Get autohold masks for four gamepads
+// used for input visualization
+uint8 const (& GetAutoHoldMask(void))[4];
+
+// Get current key configurations for virtual input devices
+BtnConfig* GetGamePadConfig(void);
+BtnConfig* GetPowerPadConfig(void);
+BtnConfig* GetFamiTrainerConfig(void);
+BtnConfig* GetFamiKeyBoardConfig(void);
+BtnConfig* GetSuborKeyBoardConfig(void);
+BtnConfig* GetMahjongConfig(void);
+BtnConfig* GetPartyTapConfig(void);
+
+// Get 'physical' or 'mechanical' state of the gamepad
+// Returned state represents state of buttons on the gamepad, rather than
+// state of lines on input port (with no autohold/turbo/etc applied)
+// Used for recording and input visualization
+uint32 GetGamepadPressedPhysical(void);
+
+// Update input
+#define UPDATEINPUT_KEYBOARD (0x1)
+#define UPDATEINPUT_JOYSTICKS (0x2)
+#define UPDATEINPUT_COMMANDS (UPDATEINPUT_KEYBOARD|0x4) // NOTE also updates keyboard
+#define UPDATEINPUT_EVERYTHING (UPDATEINPUT_KEYBOARD|UPDATEINPUT_JOYSTICKS|UPDATEINPUT_COMMANDS|0x8)
+void FCEUD_UpdateInput(int flags);
+
+// Get input ports (types of devices currently plugged in)
+ESI GetPluggedIn(int port);
+void SetPluggedIn(int port, ESI device);
+ESIFC GetPluggedInEx(void);
+void SetPluggedInEx(ESIFC device);
+
+
+// Force set input configuration
+// FIXME really only need one generalized version
+void FCEUD_SetInput(bool fourscore, bool microphone, ESI port0, ESI port1, ESIFC fcexp);
+void FCEUD_SetInput(ESI port0, ESI port1, ESIFC fcexp);
+
+// FIXME bloature
+// Use of unified and abstract configuration facility is strongly
+// recommended for all config-related imports/exports.
+// Moving presets mechanisms off of driver layer is recommended.
+void CopyConfigToPreset(unsigned int presetIdx);
+void PresetExport(int presetNum);
+void PresetImport(int presetNum);
+void FCEUI_UseInputPreset(int preset);
+
+
+// see win/config.h
+int (&_FIXME_GetInputPortsArr(void))[3];
+int& _FIXME_GetAddAutoholdsKeyVar(void);
+int& _FIXME_GetClearAutoholdsKeyVar(void);
+int& _FIXME_GetAllowUDLRVar(void);
+int& _FIXME_GetDesynchAutoFireVar(void);
+CFGSTRUCT* _FIXME_GetCommandsConfigVar(void);
+CFGSTRUCT* _FIXME_GetInputConfigVar(void);
+
+#endif // WIN_INPUT_H

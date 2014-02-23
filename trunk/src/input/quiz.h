@@ -1,0 +1,1 @@
+#define NUMKEYS_PARTYTAP (6)

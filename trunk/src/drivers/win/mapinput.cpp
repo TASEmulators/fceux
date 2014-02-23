@@ -1,6 +1,6 @@
 #include "common.h"
 #include "mapinput.h"
-#include "input.h"
+#include "../../input.h"
 #include "keyscan.h"
 #include "keyboard.h"
 #include "gui.h"
@@ -8,7 +8,6 @@
 #include <commctrl.h>
 #include "window.h"
 
-void KeyboardUpdateState(void); //mbg merge 7/17/06 yech had to add this
 
 struct INPUTDLGTHREADARGS
 {
@@ -18,11 +17,11 @@ struct INPUTDLGTHREADARGS
 
 static struct
 {
-	int cmd;
+	EMUCMD cmd;
 	int key;
 } DefaultCommandMapping[]=
 {
-	{ EMUCMD_RESET, 					SCAN_R | CMD_KEY_CTRL, },
+	{ EMUCMD_RESET, 					SCAN_R | KeyCombo::CTRL_BIT, },
 	{ EMUCMD_PAUSE, 					SCAN_PAUSE, },
 	{ EMUCMD_FRAME_ADVANCE, 			SCAN_BACKSLASH, },
 	{ EMUCMD_SCREENSHOT,				SCAN_F12, },
@@ -46,16 +45,16 @@ static struct
 	{ EMUCMD_MOVIE_INPUT_DISPLAY_TOGGLE, 	SCAN_COMMA, },
 	{ EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE, 	SCAN_SLASH, },
 	{ EMUCMD_MOVIE_READONLY_TOGGLE, 	SCAN_Q, },
-	{ EMUCMD_SAVE_STATE_SLOT_0, 		SCAN_F10 | CMD_KEY_SHIFT, },
-	{ EMUCMD_SAVE_STATE_SLOT_1, 		SCAN_F1 | CMD_KEY_SHIFT, },
-	{ EMUCMD_SAVE_STATE_SLOT_2, 		SCAN_F2 | CMD_KEY_SHIFT, },
-	{ EMUCMD_SAVE_STATE_SLOT_3, 		SCAN_F3 | CMD_KEY_SHIFT, },
-	{ EMUCMD_SAVE_STATE_SLOT_4, 		SCAN_F4 | CMD_KEY_SHIFT, },
-	{ EMUCMD_SAVE_STATE_SLOT_5, 		SCAN_F5 | CMD_KEY_SHIFT, },
-	{ EMUCMD_SAVE_STATE_SLOT_6, 		SCAN_F6 | CMD_KEY_SHIFT, },
-	{ EMUCMD_SAVE_STATE_SLOT_7, 		SCAN_F7 | CMD_KEY_SHIFT, },
-	{ EMUCMD_SAVE_STATE_SLOT_8, 		SCAN_F8 | CMD_KEY_SHIFT, },
-	{ EMUCMD_SAVE_STATE_SLOT_9, 		SCAN_F9 | CMD_KEY_SHIFT, },
+	{ EMUCMD_SAVE_STATE_SLOT_0, 		SCAN_F10 | KeyCombo::SHIFT_BIT, },
+	{ EMUCMD_SAVE_STATE_SLOT_1, 		SCAN_F1 | KeyCombo::SHIFT_BIT, },
+	{ EMUCMD_SAVE_STATE_SLOT_2, 		SCAN_F2 | KeyCombo::SHIFT_BIT, },
+	{ EMUCMD_SAVE_STATE_SLOT_3, 		SCAN_F3 | KeyCombo::SHIFT_BIT, },
+	{ EMUCMD_SAVE_STATE_SLOT_4, 		SCAN_F4 | KeyCombo::SHIFT_BIT, },
+	{ EMUCMD_SAVE_STATE_SLOT_5, 		SCAN_F5 | KeyCombo::SHIFT_BIT, },
+	{ EMUCMD_SAVE_STATE_SLOT_6, 		SCAN_F6 | KeyCombo::SHIFT_BIT, },
+	{ EMUCMD_SAVE_STATE_SLOT_7, 		SCAN_F7 | KeyCombo::SHIFT_BIT, },
+	{ EMUCMD_SAVE_STATE_SLOT_8, 		SCAN_F8 | KeyCombo::SHIFT_BIT, },
+	{ EMUCMD_SAVE_STATE_SLOT_9, 		SCAN_F9 | KeyCombo::SHIFT_BIT, },
 	{ EMUCMD_LOAD_STATE_SLOT_0, 		SCAN_F10, },
 	{ EMUCMD_LOAD_STATE_SLOT_1, 		SCAN_F1, },
 	{ EMUCMD_LOAD_STATE_SLOT_2, 		SCAN_F2, },
@@ -66,25 +65,24 @@ static struct
 	{ EMUCMD_LOAD_STATE_SLOT_7, 		SCAN_F7, },
 	{ EMUCMD_LOAD_STATE_SLOT_8, 		SCAN_F8, },
 	{ EMUCMD_LOAD_STATE_SLOT_9, 		SCAN_F9, },
-	{ EMUCMD_MOVIE_PLAY_FROM_BEGINNING, SCAN_R | CMD_KEY_SHIFT,		},
-	{ EMUCMD_SCRIPT_RELOAD,				SCAN_L | CMD_KEY_SHIFT,		},
-	{ EMUCMD_OPENROM,					SCAN_O | CMD_KEY_CTRL,	    },
-	{ EMUCMD_CLOSEROM,					SCAN_W | CMD_KEY_CTRL,		},
-	{ EMUCMD_RELOAD,					SCAN_F1 | CMD_KEY_CTRL ,	},
-	{ EMUCMD_MISC_UNDOREDOSAVESTATE,	SCAN_Z | CMD_KEY_CTRL, },
-	{ EMUCMD_MISC_TOGGLEFULLSCREEN,		SCAN_ENTER | CMD_KEY_ALT, },
+	{ EMUCMD_MOVIE_PLAY_FROM_BEGINNING, SCAN_R | KeyCombo::SHIFT_BIT,		},
+	{ EMUCMD_SCRIPT_RELOAD,				SCAN_L | KeyCombo::SHIFT_BIT,		},
+	{ EMUCMD_OPENROM,					SCAN_O | KeyCombo::CTRL_BIT,	    },
+	{ EMUCMD_CLOSEROM,					SCAN_W | KeyCombo::CTRL_BIT,		},
+	{ EMUCMD_RELOAD,					SCAN_F1 | KeyCombo::CTRL_BIT ,	},
+	{ EMUCMD_MISC_UNDOREDOSAVESTATE,	SCAN_Z | KeyCombo::CTRL_BIT, },
+	{ EMUCMD_MISC_TOGGLEFULLSCREEN,		SCAN_ENTER | KeyCombo::ALT_BIT, },
 	{ EMUCMD_RERECORD_DISPLAY_TOGGLE,	SCAN_M,	},
 	{ EMUCMD_TASEDITOR_REWIND,			SCAN_BACKSPACE, },
 	{ EMUCMD_TASEDITOR_RESTORE_PLAYBACK,	SCAN_SPACE,	},
 	{ EMUCMD_TASEDITOR_CANCEL_SEEKING,	SCAN_ESCAPE, },
-	{ EMUCMD_TASEDITOR_SWITCH_AUTORESTORING,	SCAN_SPACE | CMD_KEY_CTRL, },
+	{ EMUCMD_TASEDITOR_SWITCH_AUTORESTORING,	SCAN_SPACE | KeyCombo::CTRL_BIT, },
 	{ EMUCMD_TASEDITOR_SWITCH_MULTITRACKING,	SCAN_W, },
 };
 
 #define NUM_DEFAULT_MAPPINGS		(sizeof(DefaultCommandMapping)/sizeof(DefaultCommandMapping[0]))
 
 static uint8 keyonce[MKK_COUNT];
-static unsigned int *keys_nr = 0;
 
 static const char* ScanNames[256]=
 {
@@ -108,6 +106,7 @@ static const char* ScanNames[256]=
 
 int _keyonly(int a)
 {
+	driver::input::keyboard::KeysState_const keys_nr = driver::input::keyboard::GetState();
 	if(keys_nr[a])
 	{
 		if(!keyonce[a]) 
@@ -129,7 +128,7 @@ int GetKeyPressed()
 	int key = 0;
 	int i;
 
-	keys_nr = GetKeyboard_nr();
+	driver::input::keyboard::KeysState_const keys_nr = driver::input::keyboard::GetState();
 
 	for(i = 0; i < 256 && !key; ++i)
 	{
@@ -146,7 +145,7 @@ int NothingPressed()
 {
 	int i;
 
-	keys_nr = GetKeyboard_nr();
+	driver::input::keyboard::KeysState_const keys_nr = driver::input::keyboard::GetState();
 
 	for(i = 0; i < 256; ++i)
 	{
@@ -159,48 +158,52 @@ int NothingPressed()
 	return 1;
 }
 
-int GetKeyMeta(int key)
+int GetKeyMeta(KeyCombo combo)
 {
-	int meta = key & (~CMD_KEY_MASK);
+	KeyCombo tmp(0);
+	tmp.setMeta(combo.getMeta());
 
-	switch(key & CMD_KEY_MASK)
+	switch(combo.getKey())
 	{
 		case SCAN_LEFTCONTROL:
-		case SCAN_RIGHTCONTROL:	
-			return CMD_KEY_CTRL | meta;
+		case SCAN_RIGHTCONTROL:
+			tmp.setModifiers(KeyCombo::CTRL_BIT);
+			break;
 		
 		case SCAN_LEFTALT:
 		case SCAN_RIGHTALT:
-			return CMD_KEY_ALT | meta;
+			tmp.setModifiers(KeyCombo::ALT_BIT);
+			break;
 		
 		case SCAN_LEFTSHIFT:
 		case SCAN_RIGHTSHIFT:
-			return CMD_KEY_SHIFT | meta;
+			tmp.setModifiers(KeyCombo::SHIFT_BIT);
+			break;
 		
 		default:
 			break;
 	}
 
-	return meta;
+	return tmp.getMeta();
 }
 
-void ClearExtraMeta(int* key)
+void ClearExtraMeta(KeyCombo& combo)
 {
-	switch((*key)&0xff)
+	switch(combo.getKey())
 	{
 		case SCAN_LEFTCONTROL:
 		case SCAN_RIGHTCONTROL:
-			*key &= ~(CMD_KEY_CTRL); 
+			combo.clearModifiers(KeyCombo::CTRL_BIT);
 			break;
 
 		case SCAN_LEFTALT:
 		case SCAN_RIGHTALT:
-			*key &= ~(CMD_KEY_ALT);  
+			combo.clearModifiers(KeyCombo::ALT_BIT);
 			break;
 
 		case SCAN_LEFTSHIFT:
 		case SCAN_RIGHTSHIFT:
-			*key &= ~(CMD_KEY_SHIFT); 
+			combo.clearModifiers(KeyCombo::SHIFT_BIT);
 			break;
 
 		default:
@@ -258,57 +261,48 @@ const char* GetKeyName(int code)
 *
 * TODO: Replace return value with parameter.
 **/
-char* GetKeyComboName(int c)
+char* GetKeyComboName(const KeyCombo& combo)
 {
 	static char text[80];
 
 	text[0] = '\0';
 	
-	if(!c)
-	{
-		return text;
-	}
+	if(!combo.isEmpty()) {
+		uint32 mods = combo.getModifiers() & KeyCombo::CTRL_BIT;
+		if (mods == KeyCombo::CTRL_BIT) {
+			strcat(text, "Ctrl + ");
+		}
+		else if (mods == KeyCombo::LCTRL_BIT) {
+			strcat(text, "Left Ctrl + ");
+		}
+		else if (mods == KeyCombo::RCTRL_BIT) {
+			strcat(text, "Right Ctrl + ");
+		}
 
-	if ((c & CMD_KEY_CTRL) == CMD_KEY_CTRL)
-	{
-		strcat(text, "Ctrl + ");
-	}
-	else if ((c & CMD_KEY_CTRL) == CMD_KEY_LCTRL)
-	{
-		strcat(text, "Left Ctrl + ");
-	}
-	else if ((c & CMD_KEY_CTRL) == CMD_KEY_RCTRL)
-	{
-		strcat(text, "Right Ctrl + ");
-	}
+		mods = combo.getModifiers() & KeyCombo::ALT_BIT;
+		if (mods == KeyCombo::ALT_BIT) {
+			strcat(text, "Alt + ");
+		}
+		else if (mods == KeyCombo::LALT_BIT) {
+			strcat(text, "Left Alt + ");
+		}
+		else if (mods == KeyCombo::RALT_BIT) {
+			strcat(text, "Right Alt + ");
+		}
 
-	if ((c & CMD_KEY_ALT) == CMD_KEY_ALT)
-	{
-		strcat(text, "Alt + ");
-	}
-	else if ((c & CMD_KEY_ALT) == CMD_KEY_LALT)
-	{
-		strcat(text, "Left Alt + ");
-	}
-	else if ((c & CMD_KEY_ALT) == CMD_KEY_RALT)
-	{
-		strcat(text, "Right Alt + ");
-	}
+		mods = combo.getModifiers() & KeyCombo::SHIFT_BIT;
+		if (mods == KeyCombo::SHIFT_BIT) {
+			strcat(text, "Shift + ");
+		}
+		else if (mods == KeyCombo::LSHIFT_BIT) {
+			strcat(text, "Left Shift + ");
+		}
+		else if (mods == KeyCombo::RSHIFT_BIT) {
+			strcat(text, "Right Shift + ");
+		}
 
-	if ((c & CMD_KEY_SHIFT) == CMD_KEY_SHIFT)
-	{
-		strcat(text, "Shift + ");
+		strcat(text, GetKeyName(combo.getKey()));
 	}
-	else if ((c & CMD_KEY_SHIFT) == CMD_KEY_LSHIFT)
-	{
-		strcat(text, "Left Shift + ");
-	}
-	else if ((c & CMD_KEY_SHIFT) == CMD_KEY_RSHIFT)
-	{
-		strcat(text, "Right Shift + ");
-	}
-
-	strcat(text, GetKeyName(c & CMD_KEY_MASK));
 
 	return text;
 }
@@ -319,7 +313,7 @@ BOOL CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 	static HANDLE hThread = NULL;
 	static DWORD dwThreadId = 0;
 	static struct INPUTDLGTHREADARGS threadargs;
-	static int key = 0;
+	static KeyCombo combo(0);
 
 	switch (uMsg)
 	{
@@ -330,10 +324,10 @@ BOOL CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 			threadargs.hwndDlg = hwndDlg;
 			hThread = CreateThread(NULL, 0, NewInputDialogThread, (LPVOID)&threadargs, 0, &dwThreadId);
 			
-			key = 0;
+			combo.assign(0);
 			memset(keyonce, 0, sizeof(keyonce));
 			
-			KeyboardSetBackgroundAccess(true);
+			driver::input::keyboard::SetBackgroundAccessBit(driver::input::keyboard::BKGINPUT_GENERAL);
 			SetFocus(GetDlgItem(hwndDlg, LBL_KEY_COMBO));
 
 			CenterWindowOnScreen(hwndDlg);
@@ -349,7 +343,7 @@ BOOL CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 					PostMessage(hwndDlg, WM_USER + 99, 0, 0);
 					break;
 				case BTN_CLEAR:
-					key = -1;
+					combo.assign(-1);
 					// Send quit message.
 					PostMessage(hwndDlg, WM_USER + 99, 0, 0);
 					break;
@@ -361,18 +355,19 @@ BOOL CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 		case WM_USER:
 			{
 				// Our thread sent us a timer signal.
-				int newkey;
-				int meta = GetKeyMeta(key);
+				int newScanCode;
+				int meta = GetKeyMeta(combo);
 
-				KeyboardUpdateState();
+				FCEUD_UpdateInput(UPDATEINPUT_KEYBOARD);
 
-				if((newkey = GetKeyPressed()) != 0)
+				if((newScanCode = GetKeyPressed()) != 0)
 				{
-					key = newkey | meta;
-					ClearExtraMeta(&key);
-					SetDlgItemText(hwndDlg, LBL_KEY_COMBO, GetKeyComboName(key));
+					combo.setKey(newScanCode);
+					combo.setMeta(meta);
+					ClearExtraMeta(combo);
+					SetDlgItemText(hwndDlg, LBL_KEY_COMBO, GetKeyComboName(combo.get()));
 				}
-				else if(NothingPressed() && key)
+				else if(NothingPressed() && !combo.isEmpty())
 				{
 					PostMessage(hwndDlg, WM_USER + 99, 0, 0);		// Send quit message.
 				}
@@ -381,10 +376,10 @@ BOOL CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 
 		case WM_CLOSE:
 			// exit without changing the key mapping
-			key = 0;
+			combo.assign(0);
 		case WM_USER + 99:
 			// Done with keyboard.
-			KeyboardSetBackgroundAccess(false);
+			driver::input::keyboard::ClearBackgroundAccessBit(driver::input::keyboard::BKGINPUT_GENERAL);
 
 			// Kill the thread.
 			SetEvent(threadargs.hThreadExit);
@@ -393,7 +388,7 @@ BOOL CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 			CloseHandle(threadargs.hThreadExit);
 
 			// End the dialog.
-			EndDialog(hwndDlg, key);
+			EndDialog(hwndDlg, combo.get());
 			return TRUE;
 
 	default:
@@ -425,11 +420,11 @@ bool ShouldDisplayMapping(int mapn, int filter, const int* conflictTable)
 	}
 	else if(filter == EMUCMDTYPE_MAX + 1) /* Assigned */
 	{
-		return FCEUD_CommandMapping[FCEUI_CommandTable[mapn].cmd] != 0;
+		return (!GetCommandKeyCombo(FCEUI_CommandTable[mapn].cmd).isEmpty());
 	}
 	else if(filter == EMUCMDTYPE_MAX + 2) /* Unassigned */
 	{
-		return FCEUD_CommandMapping[FCEUI_CommandTable[mapn].cmd] == 0;
+		return GetCommandKeyCombo(FCEUI_CommandTable[mapn].cmd).isEmpty();
 	}
 	else if(filter == EMUCMDTYPE_MAX + 3) /* Conflicts */
 	{
@@ -454,8 +449,8 @@ void PopulateConflictTable(int* conflictTable)
 	{
 		for(unsigned int j = i + 1; j < EMUCMD_MAX; ++j)
 		{
-			if(FCEUD_CommandMapping[i] &&
-				FCEUD_CommandMapping[i] == FCEUD_CommandMapping[j] &&
+			if(!GetCommandKeyCombo((EMUCMD)i).isEmpty() &&
+				GetCommandKeyCombo((EMUCMD)i).get() == GetCommandKeyCombo((EMUCMD)j).get() &&
 				 // AnS: added the condition that both commands must have the same EMUCMDFLAG_TASEDITOR, or else they are not considered conflicting
 				 (FCEUI_CommandTable[i].flags & EMUCMDFLAG_TASEDITOR) == (FCEUI_CommandTable[j].flags & EMUCMDFLAG_TASEDITOR))
 			{
@@ -533,7 +528,7 @@ void PopulateMappingDisplay(HWND hwndDlg)
 			lvi.mask = LVIF_TEXT;
 			lvi.iItem = idx;
 			lvi.iSubItem = 2;
-			lvi.pszText = GetKeyComboName(FCEUD_CommandMapping[FCEUI_CommandTable[i].cmd]);
+			lvi.pszText = GetKeyComboName(GetCommandKeyCombo(FCEUI_CommandTable[i].cmd));
 
 			SendMessage(hwndListView, LVM_SETITEM, (WPARAM)0, (LPARAM)&lvi);
 
@@ -640,20 +635,20 @@ void AskForHotkey(HWND hwndListView)
 
 		SendMessage(hwndListView, LVM_GETITEM, 0, (LPARAM)&lvi);
 
-		int nCmd = lvi.lParam;
+		EMUCMD nCmd = (EMUCMD)lvi.lParam;
 
 		int nRet = DialogBox(fceu_hInstance, "NEWINPUT", hwndListView, ChangeInputDialogProc);
 		
 		if (nRet)
 		{
-			// nRet will be -1 when the user selects "clear".
-			FCEUD_CommandMapping[nCmd] = ( nRet < 0)  ? 0 : nRet;
+			if(nRet < 0) nRet = 0; // nRet will be -1 when the user selects "clear".
+			SetCommandKeyCombo(nCmd, KeyCombo(nRet));
 
 			memset(&lvi, 0, sizeof(lvi));
 			lvi.mask = LVIF_TEXT;
 			lvi.iItem = nSel;
 			lvi.iSubItem = 2;
-			lvi.pszText = GetKeyComboName(FCEUD_CommandMapping[nCmd]);
+			lvi.pszText = GetKeyComboName(GetCommandKeyCombo(nCmd));
 			SendMessage(hwndListView, LVM_SETITEM, (WPARAM)0, (LPARAM)&lvi);
 		}
 	}
@@ -664,11 +659,13 @@ void AskForHotkey(HWND hwndListView)
 **/
 void ApplyDefaultCommandMapping()
 {
-	memset(FCEUD_CommandMapping, 0, sizeof(FCEUD_CommandMapping));
+	for(unsigned int i = 0; i < EMUCMD_MAX; ++i) {
+		SetCommandKeyCombo((EMUCMD)i, KeyCombo(0));
+	}
 
 	for(unsigned i = 0; i < NUM_DEFAULT_MAPPINGS; ++i)
 	{
-		FCEUD_CommandMapping[DefaultCommandMapping[i].cmd] = DefaultCommandMapping[i].key;
+		SetCommandKeyCombo(DefaultCommandMapping[i].cmd, KeyCombo(DefaultCommandMapping[i].key));
 	}
 }
 
@@ -772,14 +769,16 @@ BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 void MapInput(void)
 {
 	// Make a backup of the current mappings, in case the user changes their mind.
-	int* backupmapping = (int*)malloc(sizeof(FCEUD_CommandMapping));
-	memcpy(backupmapping, FCEUD_CommandMapping, sizeof(FCEUD_CommandMapping));
+	int backupmapping[EMUCMD_MAX];
+	for(unsigned int i = 0; i < EMUCMD_MAX; ++i) {
+		backupmapping[i] = GetCommandKeyCombo((EMUCMD)i).get();
+	}
 
 	if(!DialogBox(fceu_hInstance, "MAPINPUT", hAppWnd, MapInputDialogProc))
 	{
-		memcpy(FCEUD_CommandMapping, backupmapping, sizeof(FCEUD_CommandMapping));
+		for(unsigned int i = 0; i < EMUCMD_MAX; ++i) {
+			SetCommandKeyCombo((EMUCMD)i, KeyCombo(backupmapping[i]));
+		}
 	}
-
-	free(backupmapping);
 }
 

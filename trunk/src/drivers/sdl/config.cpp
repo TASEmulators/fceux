@@ -291,12 +291,12 @@ InitConfig()
 		}
 	}
 
-	// QuizKing
-	prefix = "SDL.Input.QuizKing.";
-	config->addOption(prefix + "DeviceType", DefaultQuizKingDevice);
+	// PartyTap
+	prefix = "SDL.Input.QuizKing."; // TODO correct device name is "PartyTap"
+	config->addOption(prefix + "DeviceType", DefaultPartyTapDevice);
 	config->addOption(prefix + "DeviceNum", 0);
-	for(unsigned int j = 0; j < QUIZKING_NUM_BUTTONS; j++) {
-		config->addOption(prefix + QuizKingNames[j], DefaultQuizKing[j]);
+	for(unsigned int j = 0; j < PARTYTAP_NUM_BUTTONS; j++) {
+		config->addOption(prefix + PartyTapNames[j], DefaultPartyTap[j]);
 	}
 
 	// HyperShot

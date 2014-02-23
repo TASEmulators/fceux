@@ -228,7 +228,6 @@ void FCEU_PutImage(void)
 	//Fancy input display code
 	if(input_display)
 	{
-		extern uint32 JSAutoHeld;
 		uint32 held;
 
 		int controller, c, ci, color;
@@ -253,11 +252,12 @@ void FCEU_PutImage(void)
 
 			// This doesn't work in anything except windows for now.
 			// It doesn't get set anywhere in other ports.
+			// FIXME make it work or make it go
 #ifdef WIN32
-			if (!oldInputDisplay) ci = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0:GetGamepadPressedImmediate() >> (controller * 8);
+			if (!oldInputDisplay) ci = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0:GetGamepadPressedPhysical() >> (controller * 8);
 			else ci = 0;
 
-			if (!oldInputDisplay && !FCEUMOV_Mode(MOVIEMODE_PLAY)) held = (JSAutoHeld >> (controller * 8));
+			if (!oldInputDisplay && !FCEUMOV_Mode(MOVIEMODE_PLAY)) held = (GetAutoHoldMask())[controller];
 			else held = 0;
 #else
 			// Put other port info here

@@ -579,9 +579,9 @@ void FCEUI_Kill(void) {
 	FreeBuffers();
 }
 
-int rapidAlternator = 0;
-int AutoFirePattern[8] = { 1, 0, 0, 0, 0, 0, 0, 0 };
-int AutoFirePatternLength = 2;
+static int rapidAlternator = 0;
+static int AutoFirePattern[8] = { 1, 0, 0, 0, 0, 0, 0, 0 };
+static int AutoFirePatternLength = 2;
 
 void SetAutoFirePattern(int onframes, int offframes) {
 	int i;
@@ -617,6 +617,10 @@ void AutoFire(void) {
 	} else {
 		rapidAlternator = AutoFirePattern[(AutoFireOffset + counter) % AutoFirePatternLength];
 	}
+}
+
+int GetRapidAlternatorState() {
+	return rapidAlternator;
 }
 
 void UpdateAutosave(void);

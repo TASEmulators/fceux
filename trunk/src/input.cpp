@@ -35,6 +35,7 @@
 #include "vsuni.h"
 #include "fds.h"
 #include "driver.h"
+#include "utils/bitflags.h"
 
 #ifdef WIN32
 #include "drivers/win/main.h"
@@ -71,12 +72,12 @@ extern INPUTCFC *FCEU_InitSuborKB(void);
 extern INPUTCFC *FCEU_InitPEC586KB(void);
 extern INPUTCFC *FCEU_InitHS(void);
 extern INPUTCFC *FCEU_InitMahjong(void);
-extern INPUTCFC *FCEU_InitQuizKing(void);
+extern INPUTCFC *FCEU_InitPartyTap(void);
 extern INPUTCFC *FCEU_InitFamilyTrainerA(void);
 extern INPUTCFC *FCEU_InitFamilyTrainerB(void);
 extern INPUTCFC *FCEU_InitOekaKids(void);
 extern INPUTCFC *FCEU_InitTopRider(void);
-extern INPUTCFC *FCEU_InitBarcodeWorld(void);
+extern INPUTCFC *FCEU_InitBarcodeBattler(void);
 //---------------
 
 //global lag variables
@@ -87,11 +88,13 @@ extern bool frameAdvanceLagSkip;
 extern bool movieSubtitles;
 //-------------
 
+static int CommandMapping[EMUCMD_MAX];
+
 static uint8 joy_readbit[2];
 uint8 joy[4]={0,0,0,0}; //HACK - should be static but movie needs it
 static uint8 LastStrobe;
 
-bool replaceP2StartWithMicrophone = false;
+static bool replaceP2StartWithMicrophone = false;
 
 //This function is a quick hack to get the NSF player to use emulated gamepad input.
 uint8 FCEU_GetJoyJoy(void)
@@ -442,8 +445,8 @@ static void SetInputStuffFC()
 	case SIFC_MAHJONG:
 		portFC.driver=FCEU_InitMahjong();
 		break;
-	case SIFC_QUIZKING:
-		portFC.driver=FCEU_InitQuizKing();
+	case SIFC_PARTYTAP:
+		portFC.driver=FCEU_InitPartyTap();
 		break;
 	case SIFC_FTRAINERA:
 		portFC.driver=FCEU_InitFamilyTrainerA();
@@ -451,8 +454,8 @@ static void SetInputStuffFC()
 	case SIFC_FTRAINERB:
 		portFC.driver=FCEU_InitFamilyTrainerB();
 		break;
-	case SIFC_BWORLD:
-		portFC.driver=FCEU_InitBarcodeWorld();
+	case SIFC_BBATTLER:
+		portFC.driver=FCEU_InitBarcodeBattler();
 		break;
 	case SIFC_TOPRIDER:
 		portFC.driver=FCEU_InitTopRider();
@@ -505,13 +508,20 @@ bool FCEUI_GetInputFourscore()
 {
 	return FSAttached;
 }
+void FCEUI_SetInputFourscore(bool attachFourscore)
+{
+	FSAttached = attachFourscore;
+}
 bool FCEUI_GetInputMicrophone()
 {
 	return replaceP2StartWithMicrophone;
 }
-void FCEUI_SetInputFourscore(bool attachFourscore)
+void FCEUI_SetInputMicrophone(bool set)
 {
-	FSAttached = attachFourscore;
+	replaceP2StartWithMicrophone = set;
+}
+bool& _FIXME_GetReplaceP2StartWithMicrophoneVar() {
+	return replaceP2StartWithMicrophone;
 }
 
 //mbg 6/18/08 HACK
@@ -527,6 +537,29 @@ SFORMAT FCEUCTRL_STATEINFO[]={
 	{ &currFrameCounter, 4, "FRAM"},
 	{ 0 }
 };
+
+KeyCombo GetCommandKeyCombo(EMUCMD command) {
+	return KeyCombo(CommandMapping[command]);
+}
+
+void SetCommandKeyCombo(EMUCMD command, KeyCombo combo) {
+	// there is no difference between left and right modifiers when command is triggered,
+	// reduce l/r modifiers to only left modifiers here to simplify testing
+	if(FL_TEST(combo.get(), KeyCombo::CTRL_BIT) != 0) {
+		combo.clearModifiers(KeyCombo::RCTRL_BIT);
+		combo.setModifiers(KeyCombo::LCTRL_BIT);
+	}
+	if(FL_TEST(combo.get(), KeyCombo::SHIFT_BIT) != 0) {
+		combo.clearModifiers(KeyCombo::RSHIFT_BIT);
+		combo.setModifiers(KeyCombo::LSHIFT_BIT);
+	}
+	if(FL_TEST(combo.get(), KeyCombo::ALT_BIT) != 0) {
+		combo.clearModifiers(KeyCombo::RALT_BIT);
+		combo.setModifiers(KeyCombo::LALT_BIT);
+	}
+
+	CommandMapping[command] = combo.get();
+}
 
 void FCEU_DoSimpleCommand(int cmd)
 {
@@ -811,9 +844,67 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
 
-static int execcmd, i;
+static EMUCMD execcmd;
+static int i;
 
-void FCEUI_HandleEmuCommands(TestCommandState* testfn)
+
+keyCombo_::keyCombo_(uint32 combo)
+	: mCombo(combo)
+{}
+
+uint32 KeyCombo::get() const {
+	return mCombo;
+}
+
+void KeyCombo::assign(uint32 combo) {
+	mCombo = combo;
+}
+
+uint32 KeyCombo::getKey() const {
+	return FL_TEST(mCombo, KEY_MASK);
+}
+
+void KeyCombo::setKey(int keyCode) {
+	keyCode = FL_TEST(keyCode, KEY_MASK); // make sure only code bits are affected
+	FL_CLEAR(mCombo, KEY_MASK);
+	mCombo |= keyCode;
+}
+
+uint32 KeyCombo::getMeta() const {
+	return FL_TEST(mCombo, META_MASK);
+}
+
+void KeyCombo::setMeta(int meta) {
+	meta = FL_TEST(meta, META_MASK); // make sure only meta bits are affected
+	FL_CLEAR(mCombo, META_MASK);
+	FL_SET(mCombo, meta);
+}
+
+uint32 KeyCombo::getModifiers() const {
+	return FL_TEST(mCombo, MOD_MASK);
+}
+
+void KeyCombo::setModifiers(uint32 mask) {
+	mask = FL_TEST(mask, MOD_MASK); // make sure only modifier bits are affected
+	FL_SET(mCombo, mask);
+}
+
+void KeyCombo::clearModifiers(uint32 mask) {
+	mask = FL_TEST(mask, MOD_MASK); // make sure only modifier bits are affected
+	FL_CLEAR(mCombo, mask);
+}
+
+bool KeyCombo::isEmpty() const {
+	return (mCombo == 0);
+}
+
+
+static TestCommandState* testCommandCallback = NULL;
+void FCEUI_SetTestCommandHotkeyCallback(TestCommandState* cbf) {
+	testCommandCallback = cbf;
+}
+
+void FCEUI_HandleEmuCommands()
 {
 	bool taseditor = FCEUMOV_Mode(MOVIEMODE_TASEDITOR);
 	for(i=0; i<NUM_EMU_CMDS; ++i)
@@ -821,7 +912,7 @@ void FCEUI_HandleEmuCommands(TestCommandState* testfn)
 		int new_state;
 		int old_state = FCEUI_CommandTable[i].state;
 		execcmd = FCEUI_CommandTable[i].cmd;
-		new_state = (*testfn)(execcmd);
+		new_state = (testCommandCallback != NULL)? (*testCommandCallback)(execcmd):0;
 		// in TAS Editor mode forbid commands without EMUCMDFLAG_TASEDITOR flag
 		bool allow = true;
 		if(taseditor && !(FCEUI_CommandTable[i].flags & EMUCMDFLAG_TASEDITOR))
@@ -1210,4 +1301,13 @@ static void TaseditorCommand(void)
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		handleEmuCmdByTaseditor(execcmd);
 #endif
+}
+
+
+int* _FIXME_GetCommandMappingVar() {
+	return CommandMapping;
+}
+
+int _FIXME_GetCommandMappingVarSize() {
+	return sizeof(CommandMapping);
 }

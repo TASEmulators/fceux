@@ -82,6 +82,7 @@ void FCEUI_SetInputFourscore(bool attachFourscore);
 bool FCEUI_GetInputFourscore();
 //tells whether the microphone is used
 bool FCEUI_GetInputMicrophone();
+void FCEUI_SetInputMicrophone(bool set);
 
 void FCEUI_UseInputPreset(int preset);
 
@@ -286,11 +287,6 @@ void FCEUI_SetAviDisableMovieMessages(bool disable);
 
 void FCEUD_AviRecordTo(void);
 void FCEUD_AviStop(void);
-
-///A callback that the emu core uses to poll the state of a given emulator command key
-typedef int TestCommandState(int cmd);
-///Signals the emu core to poll for emulator commands and take actions
-void FCEUI_HandleEmuCommands(TestCommandState* testfn);
 
 
 //Emulation speed

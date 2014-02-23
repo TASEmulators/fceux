@@ -1002,13 +1002,13 @@ void enableGeneralKeyboardInput()
 {
 	taseditorEnableAcceleratorKeys = true;
 	// set "Background TAS Editor input"
-	KeyboardSetBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
-	JoystickSetBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
+	driver::input::keyboard::SetBackgroundAccessBit(driver::input::keyboard::BKGINPUT_TASEDITOR);
+	driver::input::joystick::SetBackgroundAccessBit(driver::input::joystick::BKGINPUT_TASEDITOR);
 }
 void disableGeneralKeyboardInput()
 {
 	taseditorEnableAcceleratorKeys = false;
 	// clear "Background TAS Editor input"
-	KeyboardClearBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
-	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
+	driver::input::keyboard::ClearBackgroundAccessBit(driver::input::keyboard::BKGINPUT_TASEDITOR);
+	driver::input::joystick::ClearBackgroundAccessBit(driver::input::joystick::BKGINPUT_TASEDITOR);
 }

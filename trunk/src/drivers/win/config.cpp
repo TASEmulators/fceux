@@ -39,17 +39,16 @@
 #include "ramwatch.h"
 #include "debugger.h"
 #include "taseditor/taseditor_config.h"
+#include "drivers/win/input.h"
 
 #include "../../state.h"	//adelikat: For bool backupSavestates
 
 extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];
-extern CFGSTRUCT HotkeyConfig[];
-extern int autoHoldKey, autoHoldClearKey;
+extern CFGSTRUCT CommandsConfig[];
 extern int frameAdvance_Delay;
 extern int EnableAutosave, AutosaveQty, AutosaveFrequency;
 extern int AFon, AFoff, AutoFireOffset;
-extern int DesynchAutoFire;
 extern bool lagCounterDisplay;
 extern bool frameAdvanceLagSkip;
 extern int ClipSidesOffset;
@@ -66,7 +65,6 @@ extern int CurrentState;
 extern bool pauseWhileActive; //adelikat: Cheats dialog
 extern bool enableHUDrecording;
 extern bool disableMovieMessages;
-extern bool replaceP2StartWithMicrophone;
 extern bool SingleInstanceOnly;
 extern bool Show_FPS;
 extern bool oldInputDisplay;
@@ -187,7 +185,7 @@ static CFGSTRUCT fceuconfig[] =
 	NAC("genie",genie),
 	NAC("fs",_FIXME_getFullscreenVar()),
 	NAC("vgamode",_FIXME_getVModeIdxVar()),
-	NAC("sound",soundo),
+	NAC("sound",isSoundEnabled),
 	NAC("sicon",status_icon),
 
 	AC(newppu),
@@ -229,7 +227,7 @@ static CFGSTRUCT fceuconfig[] =
 	NAC("eoptions",eoptions),
 	NACA("cpalette",cpalette),
 
-	NACA("InputType",InputType),
+	NACA("InputType",_FIXME_GetInputPortsArr()),
 
 	NAC("vmcx",_FIXME_getCustomVideoModeVar().width),
 	NAC("vmcy",_FIXME_getCustomVideoModeVar().height),
@@ -254,11 +252,11 @@ static CFGSTRUCT fceuconfig[] =
 	AC(ffbskip),
 
 	ADDCFGSTRUCT(NetplayConfig),
-	ADDCFGSTRUCT(InputConfig),
-	ADDCFGSTRUCT(HotkeyConfig),
+	{0, _FIXME_GetInputConfigVar(), 0},
+	{0, _FIXME_GetCommandsConfigVar(), 0},
 
-	AC(autoHoldKey),
-	AC(autoHoldClearKey),
+	AC(_FIXME_GetAddAutoholdsKeyVar()),
+	AC(_FIXME_GetClearAutoholdsKeyVar()),
 	AC(frame_display),
 	AC(rerecord_display),
 	AC(input_display),
@@ -274,7 +272,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(AutosaveFrequency),
 	AC(frameAdvanceLagSkip),
 	AC(debuggerAutoload),
-	AC(allowUDLR),
+	NAC("allowUDLR", _FIXME_GetAllowUDLRVar()),
 	AC(symbDebugEnabled),
 	AC(debuggerSaveLoadDEBFiles),
 	AC(debuggerDisplayROMoffsets),
@@ -341,7 +339,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(AFon),
 	AC(AFoff),
 	AC(AutoFireOffset),
-	AC(DesynchAutoFire),
+	NAC("DesynchAutoFire", _FIXME_GetDesynchAutoFireVar()),
 	AC(taseditorConfig.windowX),
 	AC(taseditorConfig.windowY),
 	AC(taseditorConfig.windowWidth),
@@ -441,7 +439,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(pauseWhileActive),
 	AC(enableHUDrecording),
 	AC(disableMovieMessages),
-	AC(replaceP2StartWithMicrophone),
+	NAC("replaceP2StartWithMicrophone", _FIXME_GetReplaceP2StartWithMicrophoneVar()),
 	AC(SingleInstanceOnly),
 	AC(Show_FPS),
 

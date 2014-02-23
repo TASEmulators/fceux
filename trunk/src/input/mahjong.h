@@ -1,0 +1,1 @@
+#define NUMKEYS_MAHJONG (21)
