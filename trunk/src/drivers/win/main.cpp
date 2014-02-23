@@ -197,6 +197,8 @@ bool SingleInstanceOnly=false; // Enable/disable option
 bool DoInstantiatedExit=false;
 HWND DoInstantiatedExitWindow;
 
+int changerecursive = 0;
+
 // Internal functions
 void SetDirs()
 {
@@ -975,8 +977,6 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 
 	//make sure to update the input once per frame
 	FCEUD_UpdateInput(UPDATEINPUT_EVERYTHING);
-
-
 }
 
 static void FCEUD_MakePathDirs(const char *fname)

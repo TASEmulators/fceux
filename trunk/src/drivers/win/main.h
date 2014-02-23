@@ -110,7 +110,7 @@ extern bool force_grayscale;
 //mbg merge 7/17/06 did these have to be unsigned?
 //static int srendline, erendline;
 
-static int changerecursive=0;
+extern int changerecursive;
 
 /// Contains the base directory of FCE
 extern std::string BaseDirectory;
