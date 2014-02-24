@@ -44,7 +44,7 @@
 
 
 // main
-#define KEY_MASK_SCANCODE 0xFF0000
+#define KEY_MASK_SCANCODE 0x7F0000
 #define KEY_MASK_EXTBIT 0x1000000
 #define BTNNUM_TO_WINCODE(num) (((num << 16) & KEY_MASK_SCANCODE) | ((num << 17) & KEY_MASK_EXTBIT))
 #define WINCODE_TO_BTNNUM(cod) (((cod & KEY_MASK_SCANCODE) >> 16) | ((cod & KEY_MASK_EXTBIT) >> 17))
