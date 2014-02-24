@@ -127,24 +127,26 @@ static bool CreateDDraw()
 	HRESULT status;
 	{
 		GUID FAR *guid;
-		if ((GetIsFullscreen() && directDrawModeFullscreen == DIRECTDRAW_MODE_SOFTWARE) || (!GetIsFullscreen() && directDrawModeWindowed == DIRECTDRAW_MODE_SOFTWARE))
+		// use fullscreenDesired to determine fullscreen state - this func is called before mode is
+		// applied, value returned from GetIsFullscreen() would be outdated
+		if ((fullscreenDesired && directDrawModeFullscreen == DIRECTDRAW_MODE_SOFTWARE) || (!fullscreenDesired && directDrawModeWindowed == DIRECTDRAW_MODE_SOFTWARE))
 			guid = (GUID FAR *)DDCREATE_EMULATIONONLY;
-	else
+		else
 			guid = NULL;
 
 		LPDIRECTDRAW ddrawHandle;
 		status = DirectDrawCreate(guid, &ddrawHandle, NULL);
 		if (status != DD_OK)
-	{
-		FCEU_printf("Error creating DirectDraw object.\n");
+		{
+			FCEU_printf("Error creating DirectDraw object.\n");
 			return false;
-	}
+		}
 
 		status = IDirectDraw_QueryInterface(ddrawHandle,IID_IDirectDraw7,(LPVOID *)&ddraw7Handle);
 		IDirectDraw_Release(ddrawHandle);
 		if (status != DD_OK)
-	{
-		FCEU_printf("Error querying interface.\n");
+		{
+			FCEU_printf("Error querying interface.\n");
 			return false;
 		}
 	}
@@ -157,7 +159,7 @@ static bool CreateDDraw()
 		FCEU_printf("Error getting capabilities.\n");
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -170,11 +172,11 @@ static bool InitBPPStuff(bool fullscreen)
 	HRESULT status = IDirectDrawSurface7_GetPixelFormat(lpScreenSurface,&ddpix);
 	if (status == DD_OK) {
 		if (FL_TEST(ddpix.dwFlags, DDPF_RGB)) {
-		bpp=ddpix.dwRGBBitCount;
+			bpp=ddpix.dwRGBBitCount;
 			colorsBitMask[0]=ddpix.dwRBitMask;
 			colorsBitMask[1]=ddpix.dwGBitMask;
 			colorsBitMask[2]=ddpix.dwBBitMask;
-			
+
 			if (bpp==15) bpp=16;
 
 			if (!fullscreen || (bpp==16 || bpp==24 || bpp==32)) { // in fullscreen check for supported bitcount
@@ -207,15 +209,15 @@ static bool InitBPPStuff(bool fullscreen)
 						status = IDirectDrawSurface7_SetPalette(lpScreenSurface, ddPaletteHandle);
 						if (status == DD_OK) {
 							return true;
-	}
+						}
 						else {
 							FCEU_printf("Error setting palette object.\n");
-	}
-	}
+						}
+					}
 					else {
-			FCEU_printf("Error creating palette object.\n");
-		}
-		}
+						FCEU_printf("Error creating palette object.\n");
+					}
+				}
 			} // if(supported bpp)
 		}
 		else {
@@ -353,7 +355,7 @@ static bool RecalcVideoModeParams()
 				return false;
 			}
 		}
-		
+
 		vmode.srcRect.left = VNSCLIP;
 		vmode.srcRect.top = FSettings.FirstSLine;
 		vmode.srcRect.right = 256-VNSCLIP;
@@ -363,25 +365,25 @@ static bool RecalcVideoModeParams()
 		vmode.dstRect.bottom = vmode.dstRect.top+FSettings.TotalScanlines()*vmode.yscale;
 		vmode.dstRect.left = (vmode.width-(VNSWID*vmode.xscale)) / 2;
 		vmode.dstRect.right = vmode.dstRect.left+VNSWID*vmode.xscale;
-		}
+	}
 
 	// -Video Modes Tag-
 	if((vmode.filter == FILTER_HQ2X || vmode.filter == FILTER_HQ3X) && vmode.bpp == 8)
-		{
+	{
 		// HQ2x/HQ3x requires 16bpp or 32bpp(best)
 		vmode.bpp = 32;
-		}
+	}
 
 	if(vmode.width<VNSWID)
-		{
+	{
 		FCEUD_PrintError("Horizontal resolution is too low.");
 		return false;
-		}
+	}
 	if(vmode.height<FSettings.TotalScanlines() && !FL_TEST(vmode.flags, VIDEOMODEFLAG_STRFS))
-		{
+	{
 		FCEUD_PrintError("Vertical resolution must not be less than the total number of drawn scanlines.");
 		return false;
-		}
+	}
 
 	return true;
 }
@@ -399,7 +401,7 @@ static bool SetVideoMode()
 			if(fullscreenDesired) {
 				if(vmodeIdx == 0) {
 					specmul = filterScaleMultiplier[videoModes[0].filter];
-		}
+				}
 
 				HideFWindow(1);
 
@@ -416,17 +418,17 @@ static bool SetVideoMode()
 							surfaceDescOffscreen.dwWidth=256 * specmul; //videoModes[vmodeIdx].srcRect.right;
 							surfaceDescOffscreen.dwHeight=FSettings.TotalScanlines() * specmul; //videoModes[vmodeIdx].srcRect.bottom;
 
-			if (directDrawModeFullscreen == DIRECTDRAW_MODE_SURFACE_IN_RAM)
-				// create the buffer in system memory
+							if (directDrawModeFullscreen == DIRECTDRAW_MODE_SURFACE_IN_RAM)
+								// create the buffer in system memory
 								FL_SET(surfaceDescOffscreen.ddsCaps.dwCaps, DDSCAPS_SYSTEMMEMORY); 
 
 							status = IDirectDraw7_CreateSurface(ddraw7Handle, &surfaceDescOffscreen, &lpOffscreenSurface, (IUnknown FAR*)NULL);
-		}
+						}
 
 						if(status == DD_OK) {
 							OnWindowSizeChange(videoModes[vmodeIdx].width, videoModes[vmodeIdx].height);
 
-		// create foreground surface
+							// create foreground surface
 
 							memset(&surfaceDescScreen,0,sizeof(surfaceDescScreen));
 							surfaceDescScreen.dwSize = sizeof(surfaceDescScreen);
@@ -435,29 +437,29 @@ static bool SetVideoMode()
 							surfaceDescScreen.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
 
 							if(idxFullscreenSyncMode == SYNCMODE_DOUBLEBUF)
-		{
+							{
 								FL_SET(surfaceDescScreen.dwFlags, DDSD_BACKBUFFERCOUNT);
 								surfaceDescScreen.dwBackBufferCount = 1;
 								FL_SET(surfaceDescScreen.ddsCaps.dwCaps, DDSCAPS_COMPLEX | DDSCAPS_FLIP);
-		} 
+							} 
 
 							status = IDirectDraw7_CreateSurface ( ddraw7Handle, &surfaceDescScreen, &lpScreenSurface,(IUnknown FAR*)NULL);
 							if (status == DD_OK) {
 								if(idxFullscreenSyncMode == SYNCMODE_DOUBLEBUF)
-		{
-			DDSCAPS2 tmp;
+								{
+									DDSCAPS2 tmp;
 
-			memset(&tmp,0,sizeof(tmp));
-			tmp.dwCaps=DDSCAPS_BACKBUFFER;
+									memset(&tmp,0,sizeof(tmp));
+									tmp.dwCaps=DDSCAPS_BACKBUFFER;
 
 									status = IDirectDrawSurface7_GetAttachedSurface(lpScreenSurface,&tmp,&lpBackBuffer);
-		}
+								}
 								if(status == DD_OK) {
 									if(InitBPPStuff(fullscreenDesired!=0)) {
 										dispModeWasChanged = true;
 
 										if (FL_TEST(eoptions, EO_HIDEMOUSE))
-			ShowCursorAbs(0);
+											ShowCursorAbs(0);
 
 										fullscreenActual = true; // now in actual fullscreen mode
 										return true;
@@ -574,7 +576,7 @@ static void VerticalSync()
 			while((DD_OK == IDirectDraw7_GetVerticalBlankStatus(ddraw7Handle,&invb)) && !invb)
 				Sleep(0);
 			break;
-	}
+		}
 	}
 }
 
@@ -607,7 +609,7 @@ static void BlitScreenWindow(unsigned char *XBuf)
 			if (status == DDERR_SURFACELOST)
 				RestoreLostOffscreenSurface();
 			return;
-	}
+		}
 
 		int pitch = surfaceDescOffscreen.lPitch;
 		unsigned char *dstOffscreenBuf = (unsigned char*)surfaceDescOffscreen.lpSurface;
@@ -615,7 +617,7 @@ static void BlitScreenWindow(unsigned char *XBuf)
 		if(wipeSurface) {
 			memset(dstOffscreenBuf, 0, pitch * surfaceDescOffscreen.dwHeight);
 			wipeSurface = false;
-	}
+		}
 		Blit8ToHigh(XBuf + FSettings.FirstSLine * 256 + VNSCLIP,
 			dstOffscreenBuf,
 			VNSWID,
@@ -640,7 +642,7 @@ static void BlitScreenWindow(unsigned char *XBuf)
 		RECT rectDst;
 		bool fillBorder = false;
 		if (FL_TEST(eoptions, EO_BESTFIT) && (activeRect.top || activeRect.left))
-				{
+		{
 			// blit into activeRect
 			rectDst.top = rectWindow.top + activeRect.top;
 			rectDst.bottom = rectDst.top + activeRect.bottom - activeRect.top;
@@ -668,38 +670,38 @@ static void BlitScreenWindow(unsigned char *XBuf)
 		if (fillBorder) {
 			DDBLTFX blitfx = { sizeof(DDBLTFX) };
 			if (FL_TEST(eoptions, EO_BGCOLOR)) {
-			// fill the surface using BG color from PPU
-			unsigned char r, g, b;
-			FCEUD_GetPalette(0x80 | PALRAM[0], &r, &g, &b);
-			blitfx.dwFillColor = (r << 16) + (g << 8) + b;
+				// fill the surface using BG color from PPU
+				unsigned char r, g, b;
+				FCEUD_GetPalette(0x80 | PALRAM[0], &r, &g, &b);
+				blitfx.dwFillColor = (r << 16) + (g << 8) + b;
 			}
 			else {
-			blitfx.dwFillColor = 0;
-		}
+				blitfx.dwFillColor = 0;
+			}
 
 			if (activeRect.top) {
-			// upper border
+				// upper border
 				rectDst = rectWindow;
 				rectDst.bottom = rectWindow.top + activeRect.top;
 				IDirectDrawSurface7_Blt(lpScreenSurface, &rectDst, NULL, NULL, DDBLT_COLORFILL | DDBLT_ASYNC, &blitfx);
-			// lower border
+				// lower border
 				rectDst.top += activeRect.bottom;
 				rectDst.bottom = rectWindow.bottom;
 				IDirectDrawSurface7_Blt(lpScreenSurface, &rectDst, NULL, NULL, DDBLT_COLORFILL | DDBLT_ASYNC, &blitfx);
-		}
+			}
 
 			if (activeRect.left) {
-			// left border
+				// left border
 				rectDst = rectWindow;
 				rectDst.right = rectWindow.left + activeRect.left;
 				IDirectDrawSurface7_Blt(lpScreenSurface, &rectDst, NULL, NULL, DDBLT_COLORFILL | DDBLT_ASYNC, &blitfx);
-			// right border
+				// right border
 				rectDst.left += activeRect.right;
 				rectDst.right = rectWindow.right;
 				IDirectDrawSurface7_Blt(lpScreenSurface, &rectDst, NULL, NULL, DDBLT_COLORFILL | DDBLT_ASYNC, &blitfx);
-		}
 			}
 		}
+	}
 }
 
 // Renders XBuf into one of three buffers depending on current settings
@@ -734,7 +736,7 @@ static void BlitScreenFull(uint8 *XBuf)
 		DDSURFACEDESC2 offscreenDesc;
 		memset(&offscreenDesc,0,sizeof(offscreenDesc));
 		offscreenDesc.dwSize = sizeof(DDSURFACEDESC2);
- 		HRESULT status = IDirectDrawSurface7_Lock(lpOffscreenSurface,NULL,&offscreenDesc, 0, NULL);
+		HRESULT status = IDirectDrawSurface7_Lock(lpOffscreenSurface,NULL,&offscreenDesc, 0, NULL);
 		if(status != DD_OK) {
 			if(status==DDERR_SURFACELOST) RestoreLostOffscreenSurface();
 			return;
@@ -764,7 +766,7 @@ static void BlitScreenFull(uint8 *XBuf)
 		if(status != DD_OK) {
 			if(status == DDERR_SURFACELOST) RestoreLostScreenSurface();
 			return;
-	}
+		}
 
 		targetBuf = (char*)screenDesc.lpSurface;
 		pitch = screenDesc.lPitch;
@@ -775,13 +777,13 @@ static void BlitScreenFull(uint8 *XBuf)
 		memset(targetBuf, 0, pitch * lineCount);
 		updateDDPalette = true;
 		wipeSurface = false;
-		}
+	}
 
 	if(!FL_TEST(videoModes[vmodeIdx].flags, VIDEOMODEFLAG_DXBLT)) {  
-			// -Video Modes Tag-
+		// -Video Modes Tag-
 		if(videoModes[vmodeIdx].filter != FILTER_NONE)
 			targetBuf += (videoModes[vmodeIdx].dstRect.left * (bpp/8)) + (videoModes[vmodeIdx].dstRect.top * pitch);   
-			else
+		else
 			targetBuf += ((videoModes[vmodeIdx].width-VNSWID)/2)*(bpp/8)+(((videoModes[vmodeIdx].height-FSettings.TotalScanlines())/2))*pitch;
 	}
 
@@ -831,10 +833,10 @@ static void BlitScreenFull(uint8 *XBuf)
 				{
 					RestoreLostOffscreenSurface();
 					RestoreLostScreenSurface();
-					}
-					return;
 				}
+				return;
 			}
+		}
 
 		if(fillBorder) {
 			DDBLTFX blitfx = { sizeof(DDBLTFX) };
@@ -869,9 +871,9 @@ static void BlitScreenFull(uint8 *XBuf)
 				borderRect.left += activeRect.right;
 				borderRect.right = displayRect.right;
 				IDirectDrawSurface7_Blt(lpScreenSurface, &borderRect, NULL, NULL, DDBLT_COLORFILL | DDBLT_ASYNC, &blitfx);
-				}
 			}
 		}
+	}
 	else {
 		IDirectDrawSurface7_Unlock(targetScreenSurface, NULL);
 	}
@@ -895,24 +897,24 @@ void ShutdownVideoDriver(void)
 			IDirectDraw7_RestoreDisplayMode(ddraw7Handle);
 			dispModeWasChanged = false;
 		}
-		}
+	}
 
 	if(ddPaletteHandle) {
 		ddPaletteHandle->Release();
 		ddPaletteHandle = NULL;
-			}
+	}
 	if(lpOffscreenSurface) {
 		lpOffscreenSurface->Release();
 		lpOffscreenSurface = NULL;
-			}
+	}
 	if(lpScreenSurface) {
 		lpScreenSurface->Release();
 		lpScreenSurface = NULL;
-			}
+	}
 	if(ddClipperHandle) {
 		ddClipperHandle->Release();
 		ddClipperHandle = NULL;
-		}
+	}
 	if(ddraw7Handle) {
 		ddraw7Handle->Release();
 		ddraw7Handle = NULL;
@@ -960,117 +962,117 @@ static BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 	switch(uMsg)
 	{
 	case WM_INITDIALOG:
-	{
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_ADDSTRING,0,(LPARAM)(LPSTR)"8");
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_ADDSTRING,0,(LPARAM)(LPSTR)"16");
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_ADDSTRING,0,(LPARAM)(LPSTR)"24");
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_ADDSTRING,0,(LPARAM)(LPSTR)"32");
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_SETCURSEL,(videoModes[vmodeIdx].bpp/8)-1,(LPARAM)(LPSTR)0);
-
-		SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XRES,videoModes[vmodeIdx].width,0);
-		SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YRES,videoModes[vmodeIdx].height,0);
-
-		//SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XSCALE,videoModes[vmodeIdx].xscale,0);
-		//SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YSCALE,videoModes[vmodeIdx].yscale,0);
-		//CheckRadioButton(hwndDlg,IDC_RADIO_SCALE,IDC_RADIO_STRETCH,FL_TEST(videoModes[vmodeIdx].flags, VIDEOMODEFLAG_STRFS)?IDC_RADIO_STRETCH:IDC_RADIO_SCALE);
-
-		// -Video Modes Tag-
-		char *str[]={"<none>","hq2x","Scale2x","NTSC 2x","hq3x","Scale3x"};
-		int x;
-		for(x=0;x<6;x++)
 		{
-			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
-			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_ADDSTRING,0,(LPARAM)(LPSTR)"8");
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_ADDSTRING,0,(LPARAM)(LPSTR)"16");
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_ADDSTRING,0,(LPARAM)(LPSTR)"24");
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_ADDSTRING,0,(LPARAM)(LPSTR)"32");
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_SETCURSEL,(videoModes[vmodeIdx].bpp/8)-1,(LPARAM)(LPSTR)0);
+
+			SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XRES,videoModes[vmodeIdx].width,0);
+			SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YRES,videoModes[vmodeIdx].height,0);
+
+			//SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XSCALE,videoModes[vmodeIdx].xscale,0);
+			//SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YSCALE,videoModes[vmodeIdx].yscale,0);
+			//CheckRadioButton(hwndDlg,IDC_RADIO_SCALE,IDC_RADIO_STRETCH,FL_TEST(videoModes[vmodeIdx].flags, VIDEOMODEFLAG_STRFS)?IDC_RADIO_STRETCH:IDC_RADIO_SCALE);
+
+			// -Video Modes Tag-
+			char *str[]={"<none>","hq2x","Scale2x","NTSC 2x","hq3x","Scale3x"};
+			int x;
+			for(x=0;x<6;x++)
+			{
+				SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
+				SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
+			}
+
+			SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_SCALER_FS, CB_SETCURSEL, videoModes[vmodeIdx].filter, (LPARAM)(LPSTR)0);
+			SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_SCALER_WIN, CB_SETCURSEL, idxFilterModeWindowed, (LPARAM)(LPSTR)0);
+
+			// Direct Draw modes
+			SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_WIN, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"No hardware acceleration");
+			SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_WIN, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Create Surface in RAM");
+			SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_WIN, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Hardware acceleration");
+
+			SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_WIN, CB_SETCURSEL, directDrawModeWindowed, (LPARAM)(LPSTR)0);
+
+			SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_FS, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"No hardware acceleration");
+			SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_FS, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Create Surface in RAM");
+			SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_FS, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Hardware acceleration");
+
+			SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_FS, CB_SETCURSEL, directDrawModeFullscreen, (LPARAM)(LPSTR)0);
+
+			if(FL_TEST(eoptions, EO_FSAFTERLOAD))
+				CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_AUTO_FS,BST_CHECKED);
+
+			if(FL_TEST(eoptions, EO_HIDEMOUSE))
+				CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_HIDEMOUSE,BST_CHECKED);
+
+			if(FL_TEST(eoptions, EO_CLIPSIDES))
+				CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_CLIPSIDES,BST_CHECKED);
+
+			if(FL_TEST(eoptions, EO_BESTFIT))
+				CheckDlgButton(hwndDlg, IDC_VIDEOCONFIG_BESTFIT, BST_CHECKED);
+
+			if(FL_TEST(eoptions, EO_BGCOLOR))
+				CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_CONSOLE_BGCOLOR,BST_CHECKED);
+
+			if(FL_TEST(eoptions, EO_SQUAREPIXELS))
+				CheckDlgButton(hwndDlg, IDC_VIDEOCONFIG_SQUARE_PIXELS, BST_CHECKED);
+
+			if(FL_TEST(eoptions, EO_TVASPECT))
+				CheckDlgButton(hwndDlg, IDC_VIDEOCONFIG_TVASPECT, BST_CHECKED);
+
+			if(FL_TEST(eoptions, EO_FORCEISCALE))
+				CheckDlgButton(hwndDlg,IDC_FORCE_INT_VIDEO_SCALARS,BST_CHECKED);
+
+			if(FL_TEST(eoptions, EO_FORCEASPECT))
+				CheckDlgButton(hwndDlg,IDC_FORCE_ASPECT_CORRECTION,BST_CHECKED);
+
+			SetDlgItemInt(hwndDlg,IDC_SCANLINE_FIRST_NTSC,srendlinen,0);
+			SetDlgItemInt(hwndDlg,IDC_SCANLINE_LAST_NTSC,erendlinen,0);
+
+			SetDlgItemInt(hwndDlg,IDC_SCANLINE_FIRST_PAL,srendlinep,0);
+			SetDlgItemInt(hwndDlg,IDC_SCANLINE_LAST_PAL,erendlinep,0);
+
+
+			SetDlgItemDouble(hwndDlg, IDC_WINSIZE_MUL_X, winsizemulx);
+			SetDlgItemDouble(hwndDlg, IDC_WINSIZE_MUL_Y, winsizemuly);
+			SetDlgItemDouble(hwndDlg, IDC_TVASPECT_X, tvAspectX);
+			SetDlgItemDouble(hwndDlg, IDC_TVASPECT_Y, tvAspectY);
+
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)"<none>");
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"<none>");
+
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Wait for VBlank");
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Lazy wait for VBlank");
+
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Wait for VBlank");
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Lazy wait for VBlank");
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Double Buffering");
+
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_SETCURSEL,idxWindowedSyncMode,(LPARAM)(LPSTR)0);
+			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_SETCURSEL,idxFullscreenSyncMode,(LPARAM)(LPSTR)0);
+
+			if(FL_TEST(eoptions, EO_NOSPRLIM))
+				CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_NO8LIM,BST_CHECKED);
+
+			char buf[1024] = "Full Screen";
+			KeyCombo c = GetCommandKeyCombo(EMUCMD_MISC_TOGGLEFULLSCREEN);
+			if (!c.isEmpty())
+			{
+				strcat(buf, " (");
+				strcat(buf, GetKeyComboName(c));
+				if (GetIsFullscreenOnDoubleclick())
+					strcat(buf, " or double-click)");
+				else
+					strcat(buf, ")");
+			} else if (GetIsFullscreenOnDoubleclick())
+			{
+				strcat(buf, " (double-click anywhere)");
+			}
+			SetDlgItemText(hwndDlg, IDC_VIDEOCONFIG_FS, buf);
+			break;
 		}
-
-		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_SCALER_FS, CB_SETCURSEL, videoModes[vmodeIdx].filter, (LPARAM)(LPSTR)0);
-		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_SCALER_WIN, CB_SETCURSEL, idxFilterModeWindowed, (LPARAM)(LPSTR)0);
-
-		// Direct Draw modes
-		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_WIN, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"No hardware acceleration");
-		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_WIN, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Create Surface in RAM");
-		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_WIN, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Hardware acceleration");
-
-		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_WIN, CB_SETCURSEL, directDrawModeWindowed, (LPARAM)(LPSTR)0);
-
-		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_FS, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"No hardware acceleration");
-		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_FS, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Create Surface in RAM");
-		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_FS, CB_ADDSTRING, 0, (LPARAM)(LPSTR)"Hardware acceleration");
-
-		SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_DIRECTDRAW_FS, CB_SETCURSEL, directDrawModeFullscreen, (LPARAM)(LPSTR)0);
-
-		if(FL_TEST(eoptions, EO_FSAFTERLOAD))
-			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_AUTO_FS,BST_CHECKED);
-
-		if(FL_TEST(eoptions, EO_HIDEMOUSE))
-			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_HIDEMOUSE,BST_CHECKED);
-
-		if(FL_TEST(eoptions, EO_CLIPSIDES))
-			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_CLIPSIDES,BST_CHECKED);
-
-		if(FL_TEST(eoptions, EO_BESTFIT))
-			CheckDlgButton(hwndDlg, IDC_VIDEOCONFIG_BESTFIT, BST_CHECKED);
-
-		if(FL_TEST(eoptions, EO_BGCOLOR))
-			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_CONSOLE_BGCOLOR,BST_CHECKED);
-
-		if(FL_TEST(eoptions, EO_SQUAREPIXELS))
-			CheckDlgButton(hwndDlg, IDC_VIDEOCONFIG_SQUARE_PIXELS, BST_CHECKED);
-
-		if(FL_TEST(eoptions, EO_TVASPECT))
-			CheckDlgButton(hwndDlg, IDC_VIDEOCONFIG_TVASPECT, BST_CHECKED);
-
-		if(FL_TEST(eoptions, EO_FORCEISCALE))
-			CheckDlgButton(hwndDlg,IDC_FORCE_INT_VIDEO_SCALARS,BST_CHECKED);
-
-		if(FL_TEST(eoptions, EO_FORCEASPECT))
-			CheckDlgButton(hwndDlg,IDC_FORCE_ASPECT_CORRECTION,BST_CHECKED);
-
-		SetDlgItemInt(hwndDlg,IDC_SCANLINE_FIRST_NTSC,srendlinen,0);
-		SetDlgItemInt(hwndDlg,IDC_SCANLINE_LAST_NTSC,erendlinen,0);
-
-		SetDlgItemInt(hwndDlg,IDC_SCANLINE_FIRST_PAL,srendlinep,0);
-		SetDlgItemInt(hwndDlg,IDC_SCANLINE_LAST_PAL,erendlinep,0);
-
-
-		SetDlgItemDouble(hwndDlg, IDC_WINSIZE_MUL_X, winsizemulx);
-		SetDlgItemDouble(hwndDlg, IDC_WINSIZE_MUL_Y, winsizemuly);
-		SetDlgItemDouble(hwndDlg, IDC_TVASPECT_X, tvAspectX);
-		SetDlgItemDouble(hwndDlg, IDC_TVASPECT_Y, tvAspectY);
-
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)"<none>");
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"<none>");
-
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Wait for VBlank");
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Lazy wait for VBlank");
-
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Wait for VBlank");
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Lazy wait for VBlank");
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Double Buffering");
-
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_SETCURSEL,idxWindowedSyncMode,(LPARAM)(LPSTR)0);
-		SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_SETCURSEL,idxFullscreenSyncMode,(LPARAM)(LPSTR)0);
-
-		if(FL_TEST(eoptions, EO_NOSPRLIM))
-			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_NO8LIM,BST_CHECKED);
-
-		char buf[1024] = "Full Screen";
-		KeyCombo c = GetCommandKeyCombo(EMUCMD_MISC_TOGGLEFULLSCREEN);
-		if (!c.isEmpty())
-		{
-			strcat(buf, " (");
-			strcat(buf, GetKeyComboName(c));
-			if (GetIsFullscreenOnDoubleclick())
-				strcat(buf, " or double-click)");
-			else
-				strcat(buf, ")");
-		} else if (GetIsFullscreenOnDoubleclick())
-		{
-			strcat(buf, " (double-click anywhere)");
-		}
-		SetDlgItemText(hwndDlg, IDC_VIDEOCONFIG_FS, buf);
-		break;
-	}
 	case WM_CLOSE:
 	case WM_QUIT: goto gornk;
 	case WM_COMMAND:
@@ -1229,7 +1231,7 @@ void FCEUD_BlitScreen(uint8 *XBuf)
 
 void FCEUD_VideoChanged()
 {
-		changerecursive = 1;
+	changerecursive = 1;
 	if(!SetVideoMode()) {
 		SetIsFullscreen(false);
 		SetVideoMode();
