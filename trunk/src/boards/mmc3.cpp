@@ -254,7 +254,7 @@ void GenMMC3Power(void) {
 			SetReadHandler(0x7000, 0x7FFF, MAWRAMMMC6);
 			SetWriteHandler(0x7000, 0x7FFF, MBWRAMMMC6);
 		} else {
-			FCEU_CheatAddRAM((WRAMSIZE & 0x1fff) >> 10, 0x6000, WRAM);
+			FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 			SetWriteHandler(0x6000, 0x6000 + ((WRAMSIZE - 1) & 0x1fff), CartBW);
 			SetReadHandler(0x6000, 0x6000 + ((WRAMSIZE - 1) & 0x1fff), CartBR);
 			setprg8r(0x10, 0x6000, 0);

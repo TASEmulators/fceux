@@ -247,8 +247,8 @@ static void GenMMC1Power(void) {
 		FCEU_CheatAddRAM(8, 0x6000, WRAM);
 		if (mmc1opts & 4)
 			FCEU_dwmemset(WRAM, 0, 8192)
-			else if (!(mmc1opts & 2))
-				FCEU_dwmemset(WRAM, 0, 8192);
+		else if (!(mmc1opts & 2))
+			FCEU_dwmemset(WRAM, 0, 8192);	// wtf?
 	}
 	SetWriteHandler(0x8000, 0xFFFF, MMC1_write);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);

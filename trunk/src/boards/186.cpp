@@ -89,6 +89,7 @@ void Mapper186_Init(CartInfo *info) {
 	GameStateRestore = M186Restore;
 	WRAM = (uint8*)FCEU_gmalloc(32768);
 	SetupCartPRGMapping(0x10, WRAM, 32768, 1);
+	FCEU_CheatAddRAM(32, 0x6000, WRAM);
 	AddExState(WRAM, 32768, 0, "WRAM");
 	AddExState(StateRegs, ~0, 0, 0);
 }

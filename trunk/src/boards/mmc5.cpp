@@ -88,6 +88,7 @@ static uint8 MMC5LineCounter;
 static uint8 mmc5psize, mmc5vsize;
 static uint8 mul[2];
 
+static uint32 WRAMSIZE = 0;
 static uint8 *WRAM = NULL;
 static uint8 *MMC5fill = NULL;
 static uint8 *ExRAM = NULL;
@@ -269,6 +270,7 @@ static void MMC5WRAM(uint32 A, uint32 V) {
 	V = MMC5WRAMIndex[V & 7];
 	if (V != 255) {
 		setprg8r(0x10, A, V);
+		FCEU_CheatAddRAM(8, 0x6000, (WRAM + ((V * 8192) & (WRAMSIZE - 1))));
 		MMC5MemIn[(A - 0x6000) >> 13] = 1;
 	} else
 		MMC5MemIn[(A - 0x6000) >> 13] = 0;
@@ -727,8 +729,11 @@ void NSFMMC5_Init(void) {
 }
 
 void NSFMMC5_Close(void) {
+	if (WRAM)
+		FCEU_gfree(WRAM);
+	WRAM = NULL;
 	FCEU_gfree(ExRAM);
-	ExRAM = 0;
+	ExRAM = NULL;
 }
 
 static void GenMMC5Reset(void) {
@@ -760,7 +765,7 @@ static void GenMMC5Reset(void) {
 	SetReadHandler(0x5205, 0x5206, MMC5_read);
 
 //	GameHBIRQHook=MMC5_hb;
-	FCEU_CheatAddRAM(8, 0x6000, WRAM);
+//	FCEU_CheatAddRAM(8, 0x6000, WRAM);
 	FCEU_CheatAddRAM(1, 0x5c00, ExRAM);
 }
 
@@ -849,7 +854,8 @@ static void GenMMC5_Init(CartInfo *info, int wsize, int battery) {
 }
 
 void Mapper5_Init(CartInfo *info) {
-	GenMMC5_Init(info, DetectMMC5WRAMSize(info->CRC32), info->battery);
+	WRAMSIZE = DetectMMC5WRAMSize(info->CRC32);
+	GenMMC5_Init(info, WRAMSIZE, info->battery);
 }
 
 // ELROM seems to have 0KB of WRAM

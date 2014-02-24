@@ -75,6 +75,7 @@ static void Latch_Init(CartInfo *info, void (*proc)(void), readfunc func, uint16
 		WRAMSIZE = 8192;
 		WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 		SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
+		FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 		if (info->battery) {
 			info->SaveGame[0] = WRAM;
 			info->SaveGameLen[0] = WRAMSIZE;
