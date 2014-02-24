@@ -25,6 +25,8 @@ static uint32 WRAMSIZE;
 
 unsigned int *GetKeyboardAutorepeated(void);	// FIXME: 10/28 - now implemented in SDL as well.  should we rename this to a FCEUI_* function?
 	// Rpahut: don't. no actual game use or will ever use PC keyboard; even this transformer thing itself is quite questionable
+	// Cah4e3: nope, http://www.youtube.com/watch?v=jnOPwUJCvmQ see the small connector on the cart? this is a standart PC AT/XT keyboard connector,
+	// the program is hacked to use it and it works just like the PC with it - accepts IRQ signal from the keyboard.
 
 static unsigned int *TransformerKeys, oldkeys[256];
 static int TransformerCycleCount, TransformerChar = 0;
@@ -89,6 +91,7 @@ void Transformer_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	if (info->battery) {
 		info->SaveGame[0] = WRAM;
 		info->SaveGameLen[0] = WRAMSIZE;
