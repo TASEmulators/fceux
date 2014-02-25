@@ -62,7 +62,7 @@ public:
 	static const uint32 ISPOVBTN_MASK = 0x2000;
 	static const uint32 POVDIR_MASK = 0x3;
 	static const uint32 POVCONTROLLER_MASK = 0x10;
-	static const uint32 JOYBTN_MASK = 0xf7;
+	static const uint32 JOYBTN_MASK = 0x7f;
 
 public:
 	bool IsAxisButton(uint8 which) const;
