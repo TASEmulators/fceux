@@ -104,7 +104,6 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Rpcrt4.lib;comctl32.lib;vfw32.lib;winmm.lib;ws2_32.lib;htmlhelp.lib;../src/drivers/win/directx/dsound.lib;../src/drivers/win/directx/dxguid.lib;../src/drivers/win/directx/ddraw.lib;../src/drivers/win/directx/dinput.lib;../src/drivers/win/lua/win32/lua51.lib;LuaPerks.lib;psapi.lib;mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -148,7 +147,6 @@
       <CompileAs>Default</CompileAs>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Rpcrt4.lib;comctl32.lib;vfw32.lib;winmm.lib;ws2_32.lib;htmlhelp.lib;../src/drivers/win/directx/dsound.lib;../src/drivers/win/directx/dxguid.lib;../src/drivers/win/directx/ddraw.lib;../src/drivers/win/directx/dinput.lib;../src/drivers/win/lua/win32/lua51.lib;luaperks.lib;psapi.lib;mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -395,7 +393,16 @@
     <ClCompile Include="..\src\drivers\common\config.cpp" />
     <ClCompile Include="..\src\drivers\common\hq2x.cpp" />
     <ClCompile Include="..\src\drivers\common\hq3x.cpp" />
-    <ClCompile Include="..\src\drivers\common\input.cpp" />
+    <ClCompile Include="..\src\drivers\common\input.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)2.obj</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)2.xdc</XMLDocumentationFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)2.obj</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)2.xdc</XMLDocumentationFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename)2.obj</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename)2.xdc</XMLDocumentationFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)2.obj</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)2.xdc</XMLDocumentationFileName>
+    </ClCompile>
     <ClCompile Include="..\src\drivers\common\nes_ntsc.c" />
     <ClCompile Include="..\src\drivers\common\scale2x.cpp" />
     <ClCompile Include="..\src\drivers\common\scale3x.cpp" />
@@ -432,7 +439,16 @@
     <ClCompile Include="..\src\drivers\win\debugger.cpp" />
     <ClCompile Include="..\src\drivers\win\debuggersp.cpp" />
     <ClCompile Include="..\src\drivers\win\directinput\directInput.cpp" />
-    <ClCompile Include="..\src\drivers\win\directinput\joystick.cpp" />
+    <ClCompile Include="..\src\drivers\win\directinput\joystick.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
+    </ClCompile>
     <ClCompile Include="..\src\drivers\win\directories.cpp" />
     <ClCompile Include="..\src\drivers\win\gui.cpp" />
     <ClCompile Include="..\src\drivers\win\guiconfig.cpp" />
