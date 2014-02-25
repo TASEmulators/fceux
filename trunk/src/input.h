@@ -172,8 +172,9 @@ enum EMUCMD
 	EMUCMD_MOVIE_INPUT_DISPLAY_TOGGLE,
 	EMUCMD_MOVIE_ICON_DISPLAY_TOGGLE,
 
+#ifdef _S9XLUA_H
 	EMUCMD_SCRIPT_RELOAD,
-
+#endif
 	EMUCMD_SOUND_TOGGLE,
 	EMUCMD_SOUND_VOLUME_UP,
 	EMUCMD_SOUND_VOLUME_DOWN,
@@ -243,13 +244,13 @@ enum EMUCMD
 	//-----------------------------
 	//keep adding these in order of newness or else the hotkey binding configs will get messed up...
 	EMUCMD_FPS_DISPLAY_TOGGLE,
-
-	EMUCMD_MAX
+	//first element is NONE, so elements in this enum more than emucommands by 1, the last one isn't a count of commands
+	EMUCMD_MAX = EMUCMD_FPS_DISPLAY_TOGGLE
 };
 
 enum EMUCMDTYPE
 {
-	EMUCMDTYPE_MISC=0,
+	EMUCMDTYPE_MISC = 0,
 	EMUCMDTYPE_SPEED,
 	EMUCMDTYPE_STATE,
 	EMUCMDTYPE_MOVIE,
