@@ -268,37 +268,16 @@ char* GetKeyComboName(const KeyCombo& combo)
 	text[0] = '\0';
 	
 	if(!combo.isEmpty()) {
-		uint32 mods = combo.getModifiers() & KeyCombo::CTRL_BIT;
-		if (mods == KeyCombo::CTRL_BIT) {
+		if(combo.getModifiers() & KeyCombo::CTRL_BIT) {
 			strcat(text, "Ctrl + ");
 		}
-		else if (mods == KeyCombo::LCTRL_BIT) {
-			strcat(text, "Left Ctrl + ");
-		}
-		else if (mods == KeyCombo::RCTRL_BIT) {
-			strcat(text, "Right Ctrl + ");
-		}
 
-		mods = combo.getModifiers() & KeyCombo::ALT_BIT;
-		if (mods == KeyCombo::ALT_BIT) {
+		if(combo.getModifiers() & KeyCombo::ALT_BIT) {
 			strcat(text, "Alt + ");
 		}
-		else if (mods == KeyCombo::LALT_BIT) {
-			strcat(text, "Left Alt + ");
-		}
-		else if (mods == KeyCombo::RALT_BIT) {
-			strcat(text, "Right Alt + ");
-		}
 
-		mods = combo.getModifiers() & KeyCombo::SHIFT_BIT;
-		if (mods == KeyCombo::SHIFT_BIT) {
+		if(combo.getModifiers() & KeyCombo::SHIFT_BIT) {
 			strcat(text, "Shift + ");
-		}
-		else if (mods == KeyCombo::LSHIFT_BIT) {
-			strcat(text, "Left Shift + ");
-		}
-		else if (mods == KeyCombo::RSHIFT_BIT) {
-			strcat(text, "Right Shift + ");
 		}
 
 		strcat(text, GetKeyName(combo.getKey()));
