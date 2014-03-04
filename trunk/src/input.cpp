@@ -88,7 +88,7 @@ extern bool frameAdvanceLagSkip;
 extern bool movieSubtitles;
 //-------------
 
-static int CommandMapping[EMUCMD_MAX];
+static int CommandMapping[EMUCMD_NUM];
 
 static uint8 joy_readbit[2];
 uint8 joy[4]={0,0,0,0}; //HACK - should be static but movie needs it

@@ -424,9 +424,9 @@ void PopulateConflictTable(int* conflictTable)
 {
 	// Check whether there are conflicts between the
 	// selected hotkeys.
-	for(unsigned i = 0; i < EMUCMD_MAX - 1; ++i)
+	for(unsigned i = 0; i < EMUCMD_NUM - 1; ++i)
 	{
-		for(unsigned int j = i + 1; j < EMUCMD_MAX; ++j)
+		for(unsigned int j = i + 1; j < EMUCMD_NUM; ++j)
 		{
 			if(!GetCommandKeyCombo((EMUCMD)i).isEmpty() &&
 				GetCommandKeyCombo((EMUCMD)i).get() == GetCommandKeyCombo((EMUCMD)j).get() &&
@@ -463,8 +463,8 @@ void PopulateMappingDisplay(HWND hwndDlg)
 	if (filter == EMUCMDTYPE_MAX + 3)
 	{
 		// Set up the conflict table.
-		conflictTable = (int*)malloc(sizeof(int)*EMUCMD_MAX);
-		memset(conflictTable, 0, sizeof(int)*EMUCMD_MAX);
+		conflictTable = (int*)malloc(sizeof(int)*EMUCMD_NUM);
+		memset(conflictTable, 0, sizeof(int)*EMUCMD_NUM);
 
 		PopulateConflictTable(conflictTable);
 	}
@@ -475,7 +475,7 @@ void PopulateMappingDisplay(HWND hwndDlg)
 	int newItemCount = 0;
 
 	// Populate display.
-	for(int i = 0, idx = 0; i < EMUCMD_MAX; ++i)
+	for(int i = 0, idx = 0; i < EMUCMD_NUM; ++i)
 	{
 		// Check if the current key should be displayed
 		// according to the current filter.
@@ -638,7 +638,7 @@ void AskForHotkey(HWND hwndListView)
 **/
 void ApplyDefaultCommandMapping()
 {
-	for(unsigned int i = 0; i < EMUCMD_MAX; ++i) {
+	for(unsigned int i = 0; i < EMUCMD_NUM; ++i) {
 		SetCommandKeyCombo((EMUCMD)i, KeyCombo(0));
 	}
 
@@ -748,14 +748,14 @@ BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 void MapInput(void)
 {
 	// Make a backup of the current mappings, in case the user changes their mind.
-	int backupmapping[EMUCMD_MAX];
-	for(unsigned int i = 0; i < EMUCMD_MAX; ++i) {
+	int backupmapping[EMUCMD_NUM];
+	for(unsigned int i = 0; i < EMUCMD_NUM; ++i) {
 		backupmapping[i] = GetCommandKeyCombo((EMUCMD)i).get();
 	}
 
 	if(!DialogBox(fceu_hInstance, "MAPINPUT", hAppWnd, MapInputDialogProc))
 	{
-		for(unsigned int i = 0; i < EMUCMD_MAX; ++i) {
+		for(unsigned int i = 0; i < EMUCMD_NUM; ++i) {
 			SetCommandKeyCombo((EMUCMD)i, KeyCombo(backupmapping[i]));
 		}
 	}

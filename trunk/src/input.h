@@ -109,8 +109,8 @@ void FCEU_DoSimpleCommand(int cmd);
 
 enum EMUCMD
 {
-	EMUCMD_NONE=0,
-	EMUCMD_POWER,
+	EMUCMD_NONE=-1,
+	EMUCMD_POWER=0,
 	EMUCMD_RESET,
 	EMUCMD_PAUSE,
 	EMUCMD_FRAME_ADVANCE,
@@ -244,8 +244,7 @@ enum EMUCMD
 	//-----------------------------
 	//keep adding these in order of newness or else the hotkey binding configs will get messed up...
 	EMUCMD_FPS_DISPLAY_TOGGLE,
-	//first element is NONE, so elements in this enum more than emucommands by 1, the last one isn't a count of commands
-	EMUCMD_MAX = EMUCMD_FPS_DISPLAY_TOGGLE
+	EMUCMD_NUM,
 };
 
 enum EMUCMDTYPE
