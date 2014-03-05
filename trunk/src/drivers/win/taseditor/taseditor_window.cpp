@@ -239,7 +239,7 @@ void TASEDITOR_WINDOW::init()
 					toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
 				}
 				// add hotkey mapping if needed
-				if (windowItems[i].hotkeyEmuCmd && !GetCommandKeyCombo((EMUCMD)windowItems[i].hotkeyEmuCmd).isEmpty())
+				if (windowItems[i].hotkeyEmuCmd != EMUCMD_NONE && !GetCommandKeyCombo((EMUCMD)windowItems[i].hotkeyEmuCmd).isEmpty())
 				{
 					windowItems[i].tooltipText[0] = 0;
 					strcpy(windowItems[i].tooltipText, windowItems[i].tooltipTextBase);
