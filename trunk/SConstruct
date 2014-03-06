@@ -205,7 +205,6 @@ fceux_net_server_dst = 'bin/fceux-net-server' + exe_suffix
 
 auxlib_src = 'src/auxlib.lua'
 auxlib_dst = 'bin/auxlib.lua'
-auxlib_inst_dst = prefix + '/share/fceux/auxlib.lua'
 
 fceux_h_src = 'output/fceux.chm'
 fceux_h_dst = 'bin/fceux.chm'
@@ -217,25 +216,17 @@ env.Command(auxlib_dst, auxlib_src, [Copy(auxlib_dst, auxlib_src)])
 
 man_src = 'documentation/fceux.6'
 man_net_src = 'documentation/fceux-net-server.6'
-man_dst = prefix + '/share/man/man6/fceux.6'
-man_net_dst = prefix + '/share/man/man6/fceux-net-server.6'
 
 share_src = 'output/'
-share_dst = prefix + '/share/fceux/'
 
 image_src = 'fceux.png'
-image_dst = prefix + '/share/pixmaps'
 
 desktop_src = 'fceux.desktop'
-desktop_dst = prefix + '/share/applications/'
 
-env.Install(prefix + "/bin/", fceux)
-env.Install(prefix + "/bin/", "fceux-net-server")
-# TODO:  Where to put auxlib on "scons install?"
-env.Alias('install', env.Command(auxlib_inst_dst, auxlib_src, [Copy(auxlib_inst_dst, auxlib_src)]))
-env.Alias('install', env.Command(share_dst, share_src, [Copy(share_dst, share_src)]))
-env.Alias('install', env.Command(man_dst, man_src, [Copy(man_dst, man_src)]))
-env.Alias('install', env.Command(man_net_dst, man_net_src, [Copy(man_net_dst, man_net_src)]))
-env.Alias('install', env.Command(image_dst, image_src, [Copy(image_dst, image_src)]))
-env.Alias('install', env.Command(desktop_dst, desktop_src, [Copy(desktop_dst, desktop_src)]))
-env.Alias('install', (prefix + "/bin/"))
+env.Install(prefix + "/bin/", [fceux, fceux_net_server_src])
+env.InstallAs(prefix + '/share/fceux/', share_src)
+env.Install(prefix + '/share/fceux/', auxlib_src)
+env.Install(prefix + '/share/pixmaps/', image_src)
+env.Install(prefix + '/share/applications/', desktop_src)
+env.Install(prefix + "/share/man/man6/", [man_src, man_net_src])
+env.Alias('install', prefix)

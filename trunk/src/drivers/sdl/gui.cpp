@@ -80,14 +80,7 @@ bool checkGTKVersion(int major_required, int minor_required)
 // This function configures a single hotkey
 int configHotkey(char* hotkeyString)
 {
-	SDL_Surface *screen;
 	SDL_Event event;
-	KillVideo();
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	return 0; // TODO - SDL 2.0
-#else
-	screen = SDL_SetVideoMode(420, 200, 8, 0);
-	//SDL_WM_SetCaption("Press a key to bind...", 0);
 
 	int newkey = 0;
 	while(1)
@@ -99,14 +92,11 @@ int configHotkey(char* hotkeyString)
 			case SDL_KEYDOWN:
 				newkey = event.key.keysym.sym;
 				g_config->setOption(hotkeyString, newkey);
-				extern FCEUGI *GameInfo;
-				InitVideo(GameInfo);
 				return 0;
 		}
 	}	
 	
 	return 0;
-#endif
 }
 // This function configures a single button on a gamepad
 int configGamepadButton(GtkButton* button, gpointer p)
@@ -458,6 +448,49 @@ void openNetworkConfig()
 	g_signal_connect(win, "response", G_CALLBACK(netResponse), NULL);
 }
 
+// This function configures a single button on a gamepad
+int configHotkeyButton(GtkTreeSelection* w, gpointer p)
+{
+	char buf[256];
+	std::string prefix;
+    
+	// only configure when the "Change" button is pressed in, not when it is unpressed
+//	if(gtk_tree_selection_get_mode(w) != GTK_SELECTION_NONE)
+//		return 0;
+    
+//	ButtonConfigBegin();
+    
+	//snprintf(buf, sizeof(buf), "SDL.Input.GamePad.%d", padNo);
+	//prefix = buf;
+	ButtConfig* result;
+	//DWaitButton(NULL, &GamePadConfig[0][0], 1);
+	result = &GamePadConfig[0][0];
+
+	//g_config->setOption(prefix + GamePadNames[x], GamePadConfig[padNo][x].ButtonNum[configNo]);
+
+	if(result->ButtType[0] == BUTTC_KEYBOARD)
+	{
+		std::cout << "Keyboard event hotkey. woot\n";
+		//g_config->setOption(prefix + "DeviceType", "Keyboard");
+	} else if(result->ButtType[0] == BUTTC_JOYSTICK) {
+		//g_config->setOption(prefix + "DeviceType", "Joystick");
+	} else {
+		//g_config->setOption(prefix + "DeviceType", "Unknown");
+	}
+	//g_config->setOption(prefix + "DeviceNum", GamePadConfig[padNo][x].DeviceNum[configNo]);
+    
+	//snprintf(buf, sizeof(buf), "<tt>%s</tt>", ButtonName(&GamePadConfig[padNo][x], configNo));
+	//gtk_label_set_markup(GTK_LABEL(buttonMappings[x]), buf);
+
+	ButtonConfigEnd();
+    
+	//gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+    
+	return 0;
+}
+
+
+
 // handler prototype
 static void tree_selection_changed_cb (GtkTreeSelection *selection, gpointer data);
 
@@ -470,6 +503,23 @@ void flushGtkEvents()
 }
 
 GtkWidget* HotkeyWin;
+
+static void queryHotkey (GtkTreeSelection *selection, gpointer data)
+{
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	char* hotkey;
+
+	if (gtk_tree_selection_get_selected (selection, &model, &iter))
+	{
+		gtk_tree_model_get (model, &iter, 0, &hotkey, -1);
+
+		flushGtkEvents();
+
+		configHotkey(hotkey);
+	}
+}
+
 
 // creates and opens hotkey config window
 void openHotkeyConfig()
@@ -544,34 +594,9 @@ void openHotkeyConfig()
 
 	select = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
 	gtk_tree_selection_set_mode(select, GTK_SELECTION_SINGLE);
-	g_signal_connect ( G_OBJECT (select), "changed", G_CALLBACK (tree_selection_changed_cb),
+	g_signal_connect ( G_OBJECT (select), "changed", G_CALLBACK (queryHotkey),
 			NULL);
 	gtk_tree_selection_unselect_all (select);
-}
-
-static void tree_selection_changed_cb (GtkTreeSelection *selection, gpointer data)
-{
-	GtkTreeIter iter;
-	GtkTreeModel *model;
-	char* hotkey;
-
-	if (gtk_tree_selection_get_selected (selection, &model, &iter))
-	{
-		gtk_tree_model_get (model, &iter, 0, &hotkey, -1);
-
-		gtk_widget_hide(HotkeyWin);
-
-		flushGtkEvents();
-
-		configHotkey(hotkey);
-
-		g_signal_emit_by_name(HotkeyWin, "destroy-event");
-
-		openHotkeyConfig();
-
-		g_free (hotkey);
-
-	}
 }
 
 GtkWidget* 	typeCombo;
