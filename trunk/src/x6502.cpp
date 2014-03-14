@@ -532,7 +532,12 @@ void FCEUI_GetIVectors(uint16 *reset, uint16 *irq, uint16 *nmi)
 
 //the opsize table is used to quickly grab the instruction sizes (in bytes)
 const uint8 opsize[256] = {
-/*0x00*/	1,2,0,0,0,2,2,0,1,2,1,0,0,3,3,0,
+#ifdef BRK_3BYTE_HACK
+/*0x00*/	3, //BRK
+#else
+/*0x00*/	1, //BRK
+#endif
+/*0x01*/    2,0,0,0,2,2,0,1,2,1,0,0,3,3,0,
 /*0x10*/	2,2,0,0,0,2,2,0,1,3,0,0,0,3,3,0,
 /*0x20*/	3,2,0,0,2,2,2,0,1,2,1,0,3,3,3,0,
 /*0x30*/	2,2,0,0,0,2,2,0,1,3,0,0,0,3,3,0,

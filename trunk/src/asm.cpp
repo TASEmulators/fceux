@@ -284,8 +284,15 @@ char *Disassemble(int addr, uint8 *opcode) {
 		}
 
 
+		#ifdef BRK_3BYTE_HACK
+			case 0x00:
+			sprintf(str,"BRK %02X %02X", opcode[1], opcode[2]);
+			break;
+		#else
+			case 0x00: strcpy(str,"BRK"); break;
+		#endif
+
 		//odd, 1-byte opcodes
-		case 0x00: strcpy(str,"BRK"); break;
 		case 0x08: strcpy(str,"PHP"); break;
 		case 0x0A: strcpy(str,"ASL"); break;
 		case 0x18: strcpy(str,"CLC"); break;

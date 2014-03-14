@@ -2082,7 +2082,15 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								//mbg merge 7/18/06 changed pausing check and set
 								if (FCEUI_EmulationPaused()) {
 									UpdateRegs(hwndDlg);
-									if (GetMem(tmp=X.PC) == 0x20) {
+									uint8 opcode = GetMem(tmp=X.PC);
+									bool jsr = opcode==0x20;
+									bool call = jsr;
+									#ifdef BRK_3BYTE_HACK
+									//with this hack, treat BRK similar to JSR
+									if(opcode == 0x00)
+										call = true;
+									#endif
+									if (call) {
 										if ((watchpoint[64].flags) && (MessageBox(hwndDlg,"Step Over is currently in process. Cancel it and setup a new Step Over watch?","Step Over Already Active",MB_YESNO|MB_ICONINFORMATION) != IDYES)) break;
 										watchpoint[64].address = (tmp+3);
 										watchpoint[64].flags = WP_E|WP_X;

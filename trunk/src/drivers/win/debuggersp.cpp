@@ -554,7 +554,12 @@ char* generateNLFilenameForAddress(uint16 address)
 		strcat(NLfilename, ".ram.nl");
 	} else
 	{
-		sprintf(NLfilename, "%s.%X.nl", mass_replace(LoadedRomFName, "|", ".").c_str(), getBank(address));
+		int bank = getBank(address);
+		#ifdef DW3_NL_0F_1F_HACK
+		if(bank == 0x0F)
+			bank = 0x1F;
+		#endif
+		sprintf(NLfilename, "%s.%X.nl", mass_replace(LoadedRomFName, "|", ".").c_str(), bank);
 	}
 	return NLfilename;
 }
@@ -813,15 +818,16 @@ BOOL CALLBACK SymbolicNamingCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 			Name* node = findNode(getNamesPointerForAddress(newAddress), newAddress);
 			if (node)
 			{
-				SendDlgItemMessage(hwndDlg, IDC_SYMBOLIC_NAME, EM_SETLIMITTEXT, NL_MAX_NAME_LEN, 0);
 				if (node->name && node->name[0])
 					SetDlgItemText(hwndDlg, IDC_SYMBOLIC_NAME, node->name);
-				SendDlgItemMessage(hwndDlg, IDC_SYMBOLIC_COMMENT, EM_SETLIMITTEXT, NL_MAX_MULTILINE_COMMENT_LEN, 0);
 				if (node->comment && node->comment[0])
 					SetDlgItemText(hwndDlg, IDC_SYMBOLIC_COMMENT, node->comment);
 			}
 			// set focus to IDC_SYMBOLIC_NAME
 			SendMessage(hwndDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hwndDlg, IDC_SYMBOLIC_NAME), true);
+			//always set the limits
+			SendDlgItemMessage(hwndDlg, IDC_SYMBOLIC_NAME, EM_SETLIMITTEXT, NL_MAX_NAME_LEN, 0);
+			SendDlgItemMessage(hwndDlg, IDC_SYMBOLIC_COMMENT, EM_SETLIMITTEXT, NL_MAX_MULTILINE_COMMENT_LEN, 0);
 			break;
 		}
 		case WM_CLOSE:
