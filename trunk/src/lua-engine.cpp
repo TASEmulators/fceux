@@ -120,6 +120,7 @@ extern void AddRecentLuaFile(const char *filename);
 #endif
 
 extern bool turbo;
+extern int32 fps_scale;
 
 struct LuaSaveState {
 	std::string filename;
@@ -274,7 +275,8 @@ static void FCEU_LuaOnStop()
 	gui_used = GUI_CLEAR;
 	//if (wasPaused && !FCEUI_EmulationPaused())
 	//	FCEUI_ToggleEmulationPause();
-	FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);		//TODO: Ideally lua returns the speed to the speed the user set before running the script
+	if (fps_scale != 256)							//thanks, we already know it's on normal speed
+		FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);	//TODO: Ideally lua returns the speed to the speed the user set before running the script
 													//rather than returning it to normal, and turbo off.  Perhaps some flags and a FCEUD_GetEmulationSpeed function
 	turbo = false;
 	//FCEUD_TurboOff();
@@ -5607,7 +5609,10 @@ void FCEU_LuaFrameBoundary()
 
 	} else {
 		FCEU_LuaOnStop();
-		FCEU_DispMessage("Script died of natural causes.\n",0);
+		//FCEU_DispMessage("Script died of natural causes.\n",0);
+		// weird sequence of functions calls the above message each time the script starts or stops,
+		// then this message is overrided by "emu speed" within the same frame, which hides this bug
+		// uncomment onse solution is found
 	}
 
 	// Past here, the nes actually runs, so any Lua code is called mid-frame. We must
