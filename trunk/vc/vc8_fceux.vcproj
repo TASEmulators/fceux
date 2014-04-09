@@ -1171,6 +1171,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\unrom512.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\vrc1.cpp"
 				>
 			</File>

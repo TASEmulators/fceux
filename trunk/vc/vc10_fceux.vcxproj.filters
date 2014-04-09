@@ -904,6 +904,9 @@
     <ClCompile Include="..\src\boards\transformer.cpp">
       <Filter>boards</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\boards\unrom512.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\boards\vrc1.cpp">
       <Filter>boards</Filter>
     </ClCompile>

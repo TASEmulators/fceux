@@ -329,6 +329,7 @@
     <ClCompile Include="..\src\boards\pec-586.cpp" />
     <ClCompile Include="..\src\boards\sa-9602b.cpp" />
     <ClCompile Include="..\src\boards\transformer.cpp" />
+    <ClCompile Include="..\src\boards\unrom512.cpp" />
     <ClCompile Include="..\src\boards\vrc1.cpp" />
     <ClCompile Include="..\src\boards\vrc2and4.cpp" />
     <ClCompile Include="..\src\boards\vrc3.cpp" />

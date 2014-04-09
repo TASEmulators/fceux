@@ -448,6 +448,9 @@ static BMAPPING bmap[] = {
 	{ "TVROM", TLROM_Init, BMCFLAG_FORCE4 },
 	{ "Transformer", Transformer_Init, 0 },
 	{ "UNROM", UNROM_Init, 0 },
+	{ "UNROM-512-8", UNROM512_Init, 0 },
+	{ "UNROM-512-16", UNROM512_Init, BMCFLAG_16KCHRR },
+	{ "UNROM-512-32", UNROM512_Init, BMCFLAG_32KCHRR },
 	{ "UOROM", UNROM_Init, 0 },
 	{ "VRC7", UNLVRC7_Init, 0 },
 	{ "YOKO", UNLYOKO_Init, 0 },
@@ -513,6 +516,7 @@ static int InitializeBoard(void) {
 					CHRRAMSize = 128 * 1024;
 				else
 					CHRRAMSize = 8192;
+				UNIFCart.vram_size = CHRRAMSize;
 				if ((UNIFchrrama = (uint8*)FCEU_malloc(CHRRAMSize))) {
 					SetupCartCHRMapping(0, UNIFchrrama, CHRRAMSize, 1);
 					AddExState(UNIFchrrama, CHRRAMSize, 0, "CHRR");
