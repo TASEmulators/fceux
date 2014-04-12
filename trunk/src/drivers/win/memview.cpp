@@ -632,6 +632,7 @@ void UpdateCaption()
 		if (EditingMode == MODE_NES_MEMORY && symbDebugEnabled)
 		{
 			// when watching RAM we may as well see Symbolic Debug names
+			loadNameFiles();
 			Name* node = findNode(getNamesPointerForAddress(CursorStartAddy), CursorStartAddy);
 			if (node)
 			{
