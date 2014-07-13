@@ -46,16 +46,19 @@ static uint8 TriMode=0;
 
 static int32 tristep=0;
 
-static int32 wlcount[4]={0,0,0,0};	/* Wave length counters.	*/
+static int32 wlcount[4]={0,0,0,0};	// Wave length counters.
 
-static uint8 IRQFrameMode=0;	/* $4017 / xx000000 */
-/*static*/ uint8 PSG[0x10];
-static uint8 RawDALatch=0;	/* $4011 0xxxxxxx */
-/*static*/ uint8 InitialRawDALatch=0; // used only for lua
+// APU registers:
+uint8 PSG[0x10];			// $4000-$400F / Channels 1-4
+uint8 DMCFormat=0;			// $4010 / Play mode and frequency
+uint8 RawDALatch=0;			// $4011 / 7-bit DAC / 0xxxxxxx
+uint8 DMCAddressLatch=0;	// $4012 / Start of DMC waveform is at address $C000 + $40*$xx
+uint8 DMCSizeLatch=0;		// $4013 / Length of DMC waveform is $10*$xx + 1 bytes (128*$xx + 8 samples)
+uint8 EnabledChannels=0;	// $4015 / Sound channels enable and status
+uint8 IRQFrameMode=0;		// $4017 / Frame counter control / xx000000
 
-uint8 EnabledChannels=0;		/* Byte written to $4015 */
-
-/*static*/ ENVUNIT EnvUnits[3];
+uint8 InitialRawDALatch=0; // used only for lua
+ENVUNIT EnvUnits[3];
 
 static const int RectDuties[4]={1,2,4,6};
 
@@ -119,17 +122,9 @@ static const uint32 PALDMCTable[0x10]=
 	176, 148, 132, 118,  98,  78,  66,  50
 };
 
-// $4010        -        Frequency
-// $4011        -        Actual data outputted
-// $4012        -        Address register: $c000 + V*64
-// $4013        -        Size register:  Size in bytes = (V+1)*64
-
 /*static*/ int32 DMCacc=1;
 /*static*/ int32 DMCPeriod=0;
 /*static*/ uint8 DMCBitCount=0;
-
-/*static*/ uint8 DMCAddressLatch=0,DMCSizeLatch=0; /* writes to 4012 and 4013 */
-/*static*/ uint8 DMCFormat=0;	/* Write to $4010 */
 
 static uint32 DMCAddress=0;
 static int32 DMCSize=0;

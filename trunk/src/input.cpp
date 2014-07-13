@@ -93,6 +93,7 @@ static int CommandMapping[EMUCMD_NUM];
 static uint8 joy_readbit[2];
 uint8 joy[4]={0,0,0,0}; //HACK - should be static but movie needs it
 static uint8 LastStrobe;
+uint8 RawReg4016 = 0; // Joystick strobe (W)
 
 static bool replaceP2StartWithMicrophone = false;
 
@@ -172,6 +173,7 @@ static DECLFW(B4016)
 			portFC.driver->Strobe();
 	}
 	LastStrobe=V&0x1;
+	RawReg4016 = V;
 }
 
 //a main joystick port driver representing the case where nothing is plugged in

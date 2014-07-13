@@ -263,7 +263,7 @@ uint8 *GetNesCHRPointer(int A){
 }
 
 uint8 GetMem(uint16 A) {
-	if ((A >= 0x2000) && (A < 0x4000)) {
+	if ((A >= 0x2000) && (A < 0x4000)) // PPU regs and their mirrors
 		switch (A&7) {
 			case 0: return PPU[0];
 			case 1: return PPU[1];
@@ -274,8 +274,24 @@ uint8 GetMem(uint16 A) {
 			case 6: return RefreshAddr&0xFF;
 			case 7: return VRAMBuffer;
 		}
-	} else if ((A >= 0x4000) && (A < 0x5000)) return 0xFF;	// AnS: changed the range, so MMC5 ExRAM can be watched in the Hexeditor
-	if (GameInfo) return ARead[A](A);					 //adelikat: 11/17/09: Prevent crash if this is called with no game loaded.
+	// feos: added more registers
+	else if ((A >= 0x4000) && (A < 0x4010))
+		return PSG[A&15];
+	else if ((A >= 0x4010) && (A < 0x4018))
+		switch(A&7) {
+			case 0: return DMCFormat;
+			case 1: return RawDALatch;
+			case 2: return DMCAddressLatch;
+			case 3: return DMCSizeLatch;
+			case 4: return SpriteDMA;
+			case 5: return EnabledChannels;
+			case 6: return RawReg4016;
+			case 7: return IRQFrameMode;
+		}		
+	else if ((A >= 0x4018) && (A < 0x5000))	// AnS: changed the range, so MMC5 ExRAM can be watched in the Hexeditor
+		return 0xFF;
+	if (GameInfo)							//adelikat: 11/17/09: Prevent crash if this is called with no game loaded.
+		return ARead[A](A);
 	else return 0;
 }
 

@@ -335,6 +335,7 @@ void (*PPU_hook)(uint32 A);
 
 uint8 vtoggle = 0;
 uint8 XOffset = 0;
+uint8 SpriteDMA = 0; // $4014 / Writing $xx copies 256 bytes by reading from $xx00-$xxFF and writing to $2004 (OAM data)
 
 uint32 TempAddr = 0, RefreshAddr = 0, DummyRead = 0;
 
@@ -918,6 +919,7 @@ static DECLFW(B4014) {
 
 	for (x = 0; x < 256; x++)
 		X6502_DMW(0x2004, X6502_DMR(t + x));
+	SpriteDMA = V;
 }
 
 #define PAL(c)  ((c) + cc)

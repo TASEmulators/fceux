@@ -107,17 +107,17 @@ struct
 }
 popupmenu[] =
 {
-	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_SYMBOLIC_NAME, "Add symbolic debug name"},
-	{0x0000,0x2000, MODE_NES_MEMORY,ID_ADDRESS_FRZ_SUBMENU,"Freeze/Unfreeze This Address"},
-	{0x6000,0x7FFF, MODE_NES_MEMORY,ID_ADDRESS_FRZ_SUBMENU,"Freeze/Unfreeze This Address"},
-	{0x0000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_ADDBP_R,"Add Debugger Read Breakpoint"},
-	{0x0000,0x3FFF, MODE_NES_PPU,ID_ADDRESS_ADDBP_R,"Add Debugger Read Breakpoint"},
-	{0x0000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_ADDBP_W,"Add Debugger Write Breakpoint"},
-	{0x0000,0x3FFF, MODE_NES_PPU,ID_ADDRESS_ADDBP_W,"Add Debugger Write Breakpoint"},
-	{0x0000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_ADDBP_X,"Add Debugger Execute Breakpoint"},
-	{0x8000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_SEEK_IN_ROM,"Go Here In ROM File"},
-	{0x8000,0xFFFF, MODE_NES_MEMORY,ID_ADDRESS_CREATE_GG_CODE,"Create Game Genie Code At This Address"},
-	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_BOOKMARK, "Add / Remove bookmark"},
+	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_SYMBOLIC_NAME,  "Add symbolic debug name"},
+	{0x0000,0x2000, MODE_NES_MEMORY, ID_ADDRESS_FRZ_SUBMENU,    "Freeze/Unfreeze This Address"},
+	{0x6000,0x7FFF, MODE_NES_MEMORY, ID_ADDRESS_FRZ_SUBMENU,    "Freeze/Unfreeze This Address"},
+	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_ADDBP_R,        "Add Debugger Read Breakpoint"},
+	{0x0000,0x3FFF, MODE_NES_PPU,    ID_ADDRESS_ADDBP_R,        "Add Debugger Read Breakpoint"},
+	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_ADDBP_W,        "Add Debugger Write Breakpoint"},
+	{0x0000,0x3FFF, MODE_NES_PPU,    ID_ADDRESS_ADDBP_W,        "Add Debugger Write Breakpoint"},
+	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_ADDBP_X,        "Add Debugger Execute Breakpoint"},
+	{0x8000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_SEEK_IN_ROM,    "Go Here In ROM File"},
+	{0x8000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_CREATE_GG_CODE, "Create Game Genie Code At This Address"},
+	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_BOOKMARK,       "Add / Remove bookmark"},
 } ;
 
 #define POPUPNUM (sizeof popupmenu / sizeof popupmenu[0])
@@ -1311,20 +1311,20 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			// ################################## End of SP CODE ###########################
 
 			switch(wParam){
-	case 0x43: //Ctrl+C
-		MemViewCallB(hMemView,WM_COMMAND,MENU_MV_EDIT_COPY,0); //recursion at work
-		return 0;
-	case 0x56: //Ctrl+V
-		MemViewCallB(hMemView,WM_COMMAND,MENU_MV_EDIT_PASTE,0);
-		return 0;
-	case 0x5a: //Ctrl+Z
-		UndoLastPatch(); break;
-	case 0x41: //Ctrl+A
-		// Fall through to Ctrl+G
-	case 0x47: //Ctrl+G
-		GotoAddress(hwnd); break;
-	case 0x46: //Ctrl+F
-		OpenFindDialog(); break;
+			case 0x43: //Ctrl+C
+				MemViewCallB(hMemView,WM_COMMAND,MENU_MV_EDIT_COPY,0); //recursion at work
+				return 0;
+			case 0x56: //Ctrl+V
+				MemViewCallB(hMemView,WM_COMMAND,MENU_MV_EDIT_PASTE,0);
+				return 0;
+			case 0x5a: //Ctrl+Z
+				UndoLastPatch(); break;
+			case 0x41: //Ctrl+A
+				// Fall through to Ctrl+G
+			case 0x47: //Ctrl+G
+				GotoAddress(hwnd); break;
+			case 0x46: //Ctrl+F
+				OpenFindDialog(); break;
 			}
 		}
 
