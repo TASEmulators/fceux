@@ -43,6 +43,8 @@
 extern Name* lastBankNames;
 extern Name* loadedBankNames;
 extern Name* ramBankNames;
+extern int RegNameCount;
+extern MemoryMappedRegister RegNames[];
 
 extern unsigned char *cdloggervdata;
 extern unsigned int cdloggerVideoDataSize;
@@ -638,6 +640,14 @@ void UpdateCaption()
 			{
 				strcat(str, " - ");
 				strcat(str, node->name);
+			}
+			for (int i = 0; i < RegNameCount; i++) {
+				int test = 0;
+				sscanf(RegNames[i].offset, "$%4x", &test);
+				if (test == CursorStartAddy) {
+					strcat(str, " - ");
+					strcat(str, RegNames[i].name);
+				}
 			}
 		}
 	} else

@@ -31,6 +31,7 @@
 #include <assert.h>
 
 int GetNesFileAddress(int A);
+int RegNameCount;
 
 inline int RomPageIndexForAddress(int addr) { return (addr-0x8000)>>(debuggerPageSize); }
 
@@ -60,6 +61,41 @@ char delimiterChar[2] = "#";
 
 extern BOOL CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 extern char bookmarkDescription[];
+
+MemoryMappedRegister RegNames[] = {
+	{"$2000", "PPU_CTRL_REG1"},
+	{"$2001", "PPU_CTRL_REG2"},
+	{"$2002", "PPU_STATUS"},
+	{"$2003", "PPU_SPR_ADDR"},
+	{"$2004", "PPU_SPR_DATA"},
+	{"$2005", "PPU_SCROLL_REG"},
+	{"$2006", "PPU_ADDRESS"},
+	{"$2007", "PPU_DATA"},
+	{"$4000", "SQ1_VOL"},
+	{"$4001", "SQ1_SWEEP"},
+	{"$4002", "SQ1_LO"},
+	{"$4003", "SQ1_HI"},
+	{"$4004", "SQ2_VOL"},
+	{"$4005", "SQ2_SWEEP"},
+	{"$4006", "SQ2_LO"},
+	{"$4007", "SQ2_HI"},
+	{"$4008", "TRI_LINEAR"},
+//	{"$4009", "UNUSED"},
+	{"$400A", "TRI_LO"},
+	{"$400B", "TRI_HI"},
+	{"$400C", "NOISE_VOL"},
+//	{"$400D", "UNUSED"},
+	{"$400E", "NOISE_LO"},
+	{"$400F", "NOISE_HI"},
+	{"$4010", "DMC_FREQ"},
+	{"$4011", "DMC_RAW"},
+	{"$4012", "DMC_START"},
+	{"$4013", "DMC_LEN"},
+	{"$4014", "OAM_DMA"},
+	{"$4015", "SND_CHN"},
+	{"$4016", "JOY1"},
+	{"$4017", "JOY2"}
+};
 
 /**
 * Tests whether a char is a valid hexadecimal character.
@@ -492,7 +528,7 @@ void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 			*buff = 0;
 			src = str;
 
-			while ((pos = strstr(src, list->offset)))
+			while (pos = strstr(src, list->offset))
 			{
 				*pos = 0;
 				strcat(buff, src);
@@ -510,6 +546,23 @@ void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 			}
 		}
 		list = list->next;
+	}
+
+	for (int i = 0; i < RegNameCount; i++) {
+		// copypaste, because Name* is too complex to abstract
+		*buff = 0;
+		src = str;
+
+		while (pos = strstr(src, RegNames[i].offset)) {
+			*pos = 0;
+			strcat(buff, src);
+			strcat(buff, RegNames[i].name);
+			src = pos + 5;
+		}
+		if (*buff) {
+			strcat(buff, src);
+			strcpy(str, buff);
+		}
 	}
 }
 
@@ -593,6 +646,7 @@ void setNamesPointerForAddress(uint16 address, Name* newNode)
 void loadNameFiles()
 {
 	int cb;
+	RegNameCount = sizeof(RegNames)/sizeof(MemoryMappedRegister);
 
 	if (!ramBankNamesLoaded)
 	{
