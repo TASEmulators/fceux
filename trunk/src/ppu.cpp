@@ -1221,7 +1221,7 @@ static void DoLine(void) {
 	int x;
 	uint8 *target = XBuf + (scanline << 8);
 
-	if (MMC5Hack && (ScreenON || SpriteON)) MMC5_hb(scanline);
+	if (MMC5Hack) MMC5_hb(scanline);
 
 	X6502_Run(256);
 	EndRL();
@@ -1790,7 +1790,7 @@ int FCEUPPU_Loop(int skip) {
 				DEBUG(FCEUD_UpdatePPUView(scanline, 1));
 				DoLine();
 			}
-			if (MMC5Hack && (ScreenON || SpriteON)) MMC5_hb(scanline);
+			if (MMC5Hack) MMC5_hb(scanline);
 			for (x = 1, max = 0, maxref = 0; x < 7; x++) {
 				if (deempcnt[x] > max) {
 					max = deempcnt[x];
@@ -2033,7 +2033,7 @@ int FCEUX_PPU_Loop(int skip) {
 				DEBUG(FCEUD_UpdateNTView(scanline = yp, 1));
 			}
 
-			if (sl != 0) if (MMC5Hack && PPUON) MMC5_hb(yp);
+			if (MMC5Hack) MMC5_hb(yp);
 
 
 			//twiddle the oam buffers
@@ -2303,7 +2303,7 @@ int FCEUX_PPU_Loop(int skip) {
 				runppu(1);
 		}	//scanline loop
 
-		if (MMC5Hack && PPUON) MMC5_hb(240);
+		if (MMC5Hack) MMC5_hb(240);
 
 		//idle for one line
 		runppu(kLineTime);

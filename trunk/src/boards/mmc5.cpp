@@ -512,21 +512,40 @@ void MMC5Synco(void) {
 }
 
 void MMC5_hb(int scanline) {
-	if (scanline == 240) {
+	//zero 24-jul-2014 - revised for newer understanding, to fix metal slader glory credits. see r7371 in bizhawk
+	
+	int sl = scanline + 1;
+	int ppuon = (PPU[1] & 0x18);
+
+	if (!ppuon || sl >= 241)
+	{
+		// whenever rendering is off for any reason (vblank or forced disable
+		// the irq counter resets, as well as the inframe flag (easily verifiable from software)
+		MMC5IRQR &= ~0x40;
+		MMC5IRQR &= ~0x80;
 		MMC5LineCounter = 0;
-		MMC5IRQR = 0x40;
+		X6502_IRQEnd(FCEU_IQEXT);
 		return;
 	}
-	if (MMC5LineCounter < 240) {
-		if (MMC5LineCounter == IRQScanline) {
+
+	if (!(MMC5IRQR&0x40))
+	{
+		MMC5IRQR |= 0x40;
+		MMC5IRQR &= ~0x80;
+		MMC5LineCounter = 0;
+		X6502_IRQEnd(FCEU_IQEXT);
+	}
+	else
+	{
+		MMC5LineCounter++;
+		if (MMC5LineCounter == IRQScanline)
+		{
 			MMC5IRQR |= 0x80;
 			if (IRQEnable & 0x80)
 				X6502_IRQBegin(FCEU_IQEXT);
 		}
-		MMC5LineCounter++;
 	}
-	if (MMC5LineCounter == 240)
-		MMC5IRQR = 0;
+
 }
 
 void MMC5_StateRestore(int version) {
