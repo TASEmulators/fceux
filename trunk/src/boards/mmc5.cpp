@@ -138,7 +138,11 @@ static void mmc5_PPUWrite(uint32 A, uint8 V) {
 
 uint8 FASTCALL mmc5_PPURead(uint32 A) {
 	if (A < 0x2000) {
-		if (ppuphase == PPUPHASE_BG)
+		if (ppuphase == PPUPHASE_BG 
+			//zero 03-aug-2014 - added this to fix Uchuu Keibitai SDF. The game reads NT entries from CHR rom while PPU is disabled.
+			//obviously we have enormous numbers of bugs springing from our terrible emulation of ppu-disabled states, but this does the job for fixing this one
+			&& (PPU[1] & 0x10)
+			)
 			return *MMC5BGVRAMADR(A);
 		else return MMC5SPRVPage[(A) >> 10][(A)];
 	} else {
