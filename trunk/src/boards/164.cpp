@@ -102,6 +102,7 @@ static void Power(void) {
 	SetWriteHandler(0x5000, 0x5FFF, Write);
 	SetReadHandler(0x6000, 0xFFFF, CartBR);
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	WSync();
 }
 
@@ -119,7 +120,6 @@ void Mapper164_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	if (info->battery) {
@@ -156,6 +156,7 @@ static void Power2(void) {
 	SetWriteHandler(0x5000, 0x5FFF, Write2);
 	SetReadHandler(0x6000, 0xFFFF, CartBR);
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	WSync();
 }
 
@@ -168,7 +169,6 @@ void Mapper163_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	if (info->battery) {
@@ -208,6 +208,7 @@ static void Power3(void) {
 	SetWriteHandler(0x5000, 0x5FFF, Write3);
 	SetReadHandler(0x6000, 0xFFFF, CartBR);
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	WSync();
 }
 
@@ -219,7 +220,6 @@ void UNLFS304_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	if (info->battery) {

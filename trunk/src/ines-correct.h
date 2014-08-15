@@ -108,7 +108,7 @@
 	{0xa7b0536c,	 48,		8},	/* Don Doko Don 2 */
 	{0x40c0ad47,	 48,		8},	/* Flintstones 2 */
 	{0x1500e835,	 48,		8},	/* Jetsons (J) */
-	{0xa912b064,	 51|0x800,	8},	/* 11-in-1 Ball Games(has CHR ROM when it shouldn't) */
+	{0xa912b064,	 51|0x800,	8},	/* 11-in-1 Ball Games (has CHR ROM when it shouldn't) */
 	{0xb19a55dd,	 64,		8},	/* Road Runner */
 	{0xf92be3ec,	 64,	   -1},	/* Rolling Thunder */
 	{0xe84274c5,	 66,		1},
@@ -256,5 +256,11 @@
 	{0x6bea1235,	245,	   -1},	/* MMC3 cart, but with nobanking applied to CHR-RAM, so let it be there */
 	{0x345ee51a,	245,	   -1},	/* DQ4c */
 	{0x57514c6c,	245,	   -1},	/* Yong Zhe Dou E Long - Dragon Quest VI (Ch) */
+
+	{0x1d75fd35,	256|0x1000,-1}, /* 2-in-1 - Street Dance + Hit Mouse (Unl) [!] */
+	{0x6eef8bb7,	257|0x1000,-1}, /* PEC-586 Chinese */
+	{0xac7e98fb,	257|0x1000,-1}, /* PEC-586 Chinese No Tape Out */
+	{0x8d51a23b,	257|0x1000,-1}, /* [KeWang] Chao Ji Wu Bi Han Ka (C) V1 */
+	{0x25c76773,	257|0x1000,-1}, /* [KeWang] Chao Ji Wu Bi Han Ka (C) V2 */
 
 	{0x00000000,	  -1,	   -1}

@@ -54,6 +54,7 @@ static void M246Power(void) {
 	SetReadHandler(0x6800, 0x6FFF, CartBR);
 	SetWriteHandler(0x6800, 0x6FFF, CartBW);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 }
 
 static void M246Close(void)
@@ -75,7 +76,6 @@ void Mapper246_Init(CartInfo *info) {
 	WRAMSIZE = 2048;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	if (info->battery) {

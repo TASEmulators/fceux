@@ -133,6 +133,7 @@ static void M178Power(void) {
 	SetReadHandler(0x6000, 0x7fff, CartBR);
 	SetWriteHandler(0x6000, 0x7fff, CartBW);
 	SetReadHandler(0x8000, 0xffff, CartBR);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 }
 
 static void M178SndClk(int a) {
@@ -166,7 +167,6 @@ void Mapper178_Init(CartInfo *info) {
 	WRAMSIZE = 32768;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	if (info->battery) {
 		info->SaveGame[0] = WRAM;
 		info->SaveGameLen[0] = WRAMSIZE;

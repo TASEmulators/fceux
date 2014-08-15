@@ -237,7 +237,7 @@ int getBank(int offs)
 
 int GetNesFileAddress(int A){
 	int result;
-	if((A < 0x8000) || (A > 0xFFFF))return -1;
+	if((A < 0x6000) || (A > 0xFFFF))return -1;
 	result = &Page[A>>11][A]-PRGptr[0];
 	if((result > (int)(PRGsize[0])) || (result < 0))return -1;
 	else return result+16; //16 bytes for the header remember
@@ -421,7 +421,8 @@ void LogCDData(uint8 *opcode, uint16 A, int size) {
 		for (i = 0; i < size; i++) {
 			if(cdloggerdata[j+i] & 1)continue; //this has been logged so skip
 			cdloggerdata[j+i] |= 1;
-			cdloggerdata[j+i] |=((_PC+i)>>11)&0x0c;
+			cdloggerdata[j+i] |= ((_PC + i) >> 11) & 0x0c;
+			cdloggerdata[j+i] |= ((_PC & 0x8000) >> 8) ^ 0x80;	// 19/07/14 used last reserved bit, if bit 7 is 1, then code is running from lowe area (6000)
 			if(indirectnext)cdloggerdata[j+i] |= 0x10;
 			codecount++;
 			if(!(cdloggerdata[j+i] & 2))undefinedcount--;

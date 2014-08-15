@@ -232,6 +232,7 @@ static void M69Power(void) {
 	SetWriteHandler(0xA000, 0xBFFF, M69Write1);
 	SetWriteHandler(0xC000, 0xDFFF, M69SWrite0);
 	SetWriteHandler(0xE000, 0xFFFF, M69SWrite1);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 }
 
 static void M69Close(void) {
@@ -260,7 +261,6 @@ void Mapper69_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 	if (info->battery) {
 		info->SaveGame[0] = WRAM;

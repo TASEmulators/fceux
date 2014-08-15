@@ -86,6 +86,7 @@ static void M156Power(void) {
 	SetReadHandler(0x6000, 0xFFFF, CartBR);
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
 	SetWriteHandler(0xC000, 0xCFFF, M156Write);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 }
 
 static void M156Close(void) {
@@ -106,7 +107,6 @@ void Mapper156_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	GameStateRestore = StateRestore;

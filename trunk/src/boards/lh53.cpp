@@ -80,6 +80,7 @@ static void LH53Power(void) {
 	SetWriteHandler(0xB800, 0xD7FF, LH53RamWrite);
 	SetWriteHandler(0xE000, 0xEFFF, LH53IRQaWrite);
 	SetWriteHandler(0xF000, 0xFFFF, LH53Write);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 }
 
 static void LH53Close(void) {
@@ -101,7 +102,6 @@ void LH53_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	AddExState(&StateRegs, ~0, 0, 0);

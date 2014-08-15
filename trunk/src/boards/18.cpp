@@ -89,6 +89,7 @@ static void M18Power(void) {
 	SetWriteHandler(0x8000, 0x9FFF, M18WritePrg);
 	SetWriteHandler(0xA000, 0xDFFF, M18WriteChr);
 	SetWriteHandler(0xE000, 0xFFFF, M18WriteIRQ);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 }
 
 static void M18IRQHook(int a) {
@@ -122,7 +123,6 @@ void Mapper18_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 	if (info->battery) {
 		info->SaveGame[0] = WRAM;

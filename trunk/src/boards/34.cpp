@@ -66,6 +66,7 @@ static void M34Power(void) {
 	SetWriteHandler(0x6000, 0x7ffc, CartBW);
 	SetReadHandler(0x8000, 0xffff, CartBR);
 	SetWriteHandler(0x7ffd, 0xffff, M34Write);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 }
 
 static void M34Close(void) {
@@ -86,7 +87,6 @@ void Mapper34_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	AddExState(&StateRegs, ~0, 0, 0);

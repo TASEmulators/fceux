@@ -95,6 +95,7 @@ static void MMC2and4Power(void) {
 	if (is10) {
 		SetReadHandler(0x6000, 0x7FFF, CartBR);
 		SetWriteHandler(0x6000, 0x7FFF, CartBW);
+		FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	}
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
 	SetWriteHandler(0xA000, 0xFFFF, MMC2and4Write);
@@ -127,7 +128,6 @@ void Mapper10_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 	if (info->battery) {
 		info->SaveGame[0] = WRAM;

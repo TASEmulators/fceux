@@ -820,6 +820,7 @@ void Mapper119_Init(CartInfo *info) {
 	CHRRAMSIZE = 8192;
 	CHRRAM = (uint8*)FCEU_gmalloc(CHRRAMSIZE);
 	SetupCartCHRMapping(0x10, CHRRAM, CHRRAMSIZE, 1);
+	AddExState(CHRRAM, CHRRAMSIZE, 0, "CHRR");
 }
 
 // ---------------------------- Mapper 134 ------------------------------
@@ -1321,6 +1322,7 @@ void TQROM_Init(CartInfo *info) {
 	CHRRAMSIZE = 8192;
 	CHRRAM = (uint8*)FCEU_gmalloc(CHRRAMSIZE);
 	SetupCartCHRMapping(0x10, CHRRAM, CHRRAMSIZE, 1);
+	AddExState(CHRRAM, CHRRAMSIZE, 0, "CHRR");
 }
 
 void HKROM_Init(CartInfo *info) {

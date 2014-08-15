@@ -72,6 +72,7 @@ static void M112Power(void) {
 	SetWriteHandler(0x4020, 0x5FFF, M112Write);
 	SetReadHandler(0x6000, 0x7FFF, CartBR);
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
+	FCEU_CheatAddRAM(8, 0x6000, WRAM);
 }
 
 static void StateRestore(int version) {
@@ -84,7 +85,6 @@ void Mapper112_Init(CartInfo *info) {
 	GameStateRestore = StateRestore;
 	WRAM = (uint8*)FCEU_gmalloc(8192);
 	SetupCartPRGMapping(0x10, WRAM, 8192, 1);
-	FCEU_CheatAddRAM(8, 0x6000, WRAM);
 	AddExState(WRAM, 8192, 0, "WRAM");
 	AddExState(&StateRegs, ~0, 0, 0);
 }

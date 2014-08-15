@@ -48,6 +48,7 @@ static void UNLEDU2000Power(void) {
 	SetReadHandler(0x6000, 0xFFFF, CartBR);
 	SetWriteHandler(0x6000, 0xFFFF, CartBW);
 	SetWriteHandler(0x8000, 0xFFFF, UNLEDU2000HiWrite);
+	FCEU_CheatAddRAM(32, 0x6000, WRAM);
 	reg = 0;
 	Sync();
 }
@@ -68,7 +69,6 @@ void UNLEDU2000_Init(CartInfo *info) {
 	GameStateRestore = UNLEDU2000Restore;
 	WRAM = (uint8*)FCEU_gmalloc(32768);
 	SetupCartPRGMapping(0x10, WRAM, 32768, 1);
-	FCEU_CheatAddRAM(32, 0x6000, WRAM);
 	if (info->battery) {
 		info->SaveGame[0] = WRAM;
 		info->SaveGameLen[0] = 32768;

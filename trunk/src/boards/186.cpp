@@ -69,6 +69,7 @@ static void M186Power(void) {
 	SetWriteHandler(0x4200, 0x43FF, M186Write);
 	SetReadHandler(0x4400, 0x4FFF, ASWRAM);
 	SetWriteHandler(0x4400, 0x4FFF, BSWRAM);
+	FCEU_CheatAddRAM(32, 0x6000, WRAM);
 	regs[0] = regs[1] = regs[2] = regs[3];
 	Sync();
 }
@@ -89,7 +90,6 @@ void Mapper186_Init(CartInfo *info) {
 	GameStateRestore = M186Restore;
 	WRAM = (uint8*)FCEU_gmalloc(32768);
 	SetupCartPRGMapping(0x10, WRAM, 32768, 1);
-	FCEU_CheatAddRAM(32, 0x6000, WRAM);
 	AddExState(WRAM, 32768, 0, "WRAM");
 	AddExState(StateRegs, ~0, 0, 0);
 }

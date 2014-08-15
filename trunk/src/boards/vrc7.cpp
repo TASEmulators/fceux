@@ -151,6 +151,7 @@ static void VRC7Power(void) {
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
 	SetReadHandler(0x6000, 0xFFFF, CartBR);
 	SetWriteHandler(0x8000, 0xFFFF, VRC7Write);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 }
 
 static void VRC7Close(void)
@@ -185,7 +186,6 @@ void Mapper85_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 	if (info->battery) {
 		info->SaveGame[0] = WRAM;

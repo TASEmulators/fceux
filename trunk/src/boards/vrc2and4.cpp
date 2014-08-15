@@ -169,6 +169,7 @@ static void M23Power(void) {
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
 	SetWriteHandler(0x8000, 0xFFFF, M23Write);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 }
 
 static void M25Power(void) {
@@ -179,6 +180,7 @@ static void M25Power(void) {
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
 	SetWriteHandler(0x8000, 0xFFFF, M22Write);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 }
 
 void VRC24IRQHook(int a) {
@@ -235,7 +237,6 @@ void VRC24_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	if(info->battery) {

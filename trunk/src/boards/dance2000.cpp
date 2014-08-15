@@ -67,6 +67,7 @@ static void UNLD2000Power(void) {
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
 	SetReadHandler(0x8000, 0xFFFF, UNLD2000Read);
 	SetWriteHandler(0x5000, 0x5FFF, UNLD2000Write);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 }
 
 static void UNL2000Hook(uint32 A) {
@@ -103,7 +104,6 @@ void UNLD2000_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	AddExState(&StateRegs, ~0, 0, 0);

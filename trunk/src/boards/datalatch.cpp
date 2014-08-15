@@ -42,6 +42,7 @@ static void LatchPower(void) {
 	if (WRAM) {
 		SetReadHandler(0x6000, 0xFFFF, CartBR);
 		SetWriteHandler(0x6000, 0x7FFF, CartBW);
+		FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	} else {
 		SetReadHandler(0x8000, 0xFFFF, CartBR);
 	}
@@ -71,7 +72,6 @@ static void Latch_Init(CartInfo *info, void (*proc)(void), uint8 init, uint16 ad
 		WRAMSIZE = 8192;
 		WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 		SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-		FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 		if (info->battery) {
 			info->SaveGame[0] = WRAM;
 			info->SaveGameLen[0] = WRAMSIZE;
@@ -101,7 +101,9 @@ static void NROMPower(void) {
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
 
-	#ifdef DEBUG_MAPPER
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
+
+#ifdef DEBUG_MAPPER
 	SetWriteHandler(0x4020, 0xFFFF, NROMWrite);
 	#endif
 }
@@ -113,7 +115,6 @@ void NROM_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	if (info->battery) {
 		info->SaveGame[0] = WRAM;
 		info->SaveGameLen[0] = WRAMSIZE;

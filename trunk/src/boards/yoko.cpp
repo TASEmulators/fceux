@@ -174,6 +174,7 @@ static void M83Power(void) {
 	SetWriteHandler(0x6000, 0x7fff, CartBW); // Pirate Dragon Ball Z Party [p1] used if for saves instead of seraial EEPROM
 	SetReadHandler(0x8000, 0xffff, CartBR);
 	SetWriteHandler(0x8000, 0xffff, M83Write);
+	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 }
 
 static void UNLYOKOReset(void) {
@@ -230,7 +231,6 @@ void Mapper83_Init(CartInfo *info) {
 	WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	AddExState(&StateRegs, ~0, 0, 0);
