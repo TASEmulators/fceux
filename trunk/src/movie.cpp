@@ -103,6 +103,7 @@ SFORMAT FCEUMOV_STATEINFO[]={
 char curMovieFilename[512] = {0};
 MovieData currMovieData;
 MovieData defaultMovieData;
+int currRerecordCount; // Keep the global value
 
 char lagcounterbuf[32] = {0};
 
@@ -902,6 +903,8 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 	pauseframe = _pauseframe;
 	movie_readonly = _read_only;
 	movieMode = MOVIEMODE_PLAY;
+	if (movieMode != MOVIEMODE_TASEDITOR)
+		currRerecordCount = currMovieData.rerecordCount;
 
 	if(movie_readonly)
 		FCEU_DispMessage("Replay started Read-Only.",0);
@@ -972,6 +975,8 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 
 	movieMode = MOVIEMODE_RECORD;
 	movie_readonly = false;
+	if (movieMode != MOVIEMODE_TASEDITOR)
+		currRerecordCount = 0;
 
 	FCEU_DispMessage("Movie recording started.",0);
 }
@@ -1406,10 +1411,18 @@ void FCEUMOV_IncrementRerecordCount()
 {
 #ifdef _S9XLUA_H
 	if(!FCEU_LuaRerecordCountSkip())
-		currMovieData.rerecordCount++;
+		if (movieMode != MOVIEMODE_TASEDITOR)
+			currRerecordCount++;
+		else
+			currMovieData.rerecordCount++;
 #else
-	currMovieData.rerecordCount++;
+	if (movieMode != MOVIEMODE_TASEDITOR)currRerecordCount++;
+		currRerecordCount++;
+	else
+		currMovieData.rerecordCount++;
 #endif
+	if (movieMode != MOVIEMODE_TASEDITOR)
+		currMovieData.rerecordCount = currRerecordCount;
 }
 
 void FCEUI_MovieToggleFrameDisplay(void)
