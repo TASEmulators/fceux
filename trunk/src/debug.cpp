@@ -754,7 +754,7 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 void DebugCycle()
 {
 	uint8 opcode[3] = {0};
-	uint16 A = 0;
+	uint16 A = 0, tmp;
 	int size;
 
 	if (scanline == 240)
@@ -789,12 +789,14 @@ void DebugCycle()
 	{
 		case 0: break;
 		case 1:
-			A = (opcode[1] + _X) & 0xFF;
-			A = GetMem(A) | (GetMem(A + 1) << 8);
+			tmp = (opcode[1] + _X) & 0xFF;
+			A = GetMem(tmp);
+			tmp = (opcode[1] + _X + 1) & 0xFF;
+			A |= (GetMem(tmp) << 8);
 			break;
 		case 2: A = opcode[1]; break;
 		case 3: A = opcode[1] | (opcode[2] << 8); break;
-		case 4: A = (GetMem(opcode[1]) | (GetMem(opcode[1]+1) << 8)) + _Y; break;
+		case 4: A = (GetMem(opcode[1]) | (GetMem((opcode[1] + 1) & 0xFF) << 8)) + _Y; break;
 		case 5: A = opcode[1] + _X; break;
 		case 6: A = (opcode[1] | (opcode[2] << 8)) + _Y; break;
 		case 7: A = (opcode[1] | (opcode[2] << 8)) + _X; break;

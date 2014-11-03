@@ -276,10 +276,10 @@ char *Disassemble(int addr, uint8 *opcode) {
 		}
 		#define indirectX(a) { \
 			(a) = (opcode[1]+RX)&0xFF; \
-			(a) = GetMem((a)) | (GetMem((a)+1))<<8; \
+			(a) = GetMem((a)) | (GetMem(((a)+1)&0xff))<<8; \
 		}
 		#define indirectY(a) { \
-			(a) = GetMem(opcode[1]) | (GetMem(opcode[1]+1))<<8; \
+			(a) = GetMem(opcode[1]) | (GetMem((opcode[1]+1)&0xff))<<8; \
 			(a) += RY; \
 		}
 
