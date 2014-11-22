@@ -46,6 +46,7 @@
 char *textToTrans; // buffer to hold the text that needs translating
 char *transText; //holds the translated text
 
+extern void FCEUD_BlitScreen(uint8 *XBuf); //needed for pause, not sure where this is defined...
 //adelikat merge 7/1/08 - had to add these extern variables 
 //------------------------------
 extern uint8 PALRAM[0x20];

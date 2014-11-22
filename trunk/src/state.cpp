@@ -47,7 +47,6 @@
 #include "drivers/win/main.h"
 #include "drivers/win/ram_search.h"
 #include "drivers/win/ramwatch.h"
-#include "drivers/win/video.h"
 #endif
 
 #include <string>
@@ -244,11 +243,7 @@ static bool ReadStateChunk(EMUFILE* is, SFORMAT *sf, int size)
 
 static int read_sfcpuc=0, read_snd=0;
 
-#ifndef WIN32
-// included corresponding header on Windows, no longer needed
-// TODO do the same for SDL and remove declaration completely
 void FCEUD_BlitScreen(uint8 *XBuf); //mbg merge 7/17/06 YUCKY had to add
-#endif
 void UpdateFCEUWindow(void);  //mbg merge 7/17/06 YUCKY had to add
 static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 {

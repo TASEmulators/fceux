@@ -40,10 +40,6 @@ void GetMouseData(uint32 (&md)[3]);
 //void ChangeMenuItemText(int menuitem, string text);
 void UpdateMenuHotkeys();
 
-// Returns true if fullscreen via double click is enabled
-// TODO: replace fullscreenByDoubleclick references with a call to this
-bool GetIsFullscreenOnDoubleclick(void);
-
 template<int BUFSIZE>
 inline std::string GetDlgItemText(HWND hDlg, int nIDDlgItem) {
 	char buf[BUFSIZE];

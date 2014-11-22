@@ -19,7 +19,7 @@ int InitDInput(void);
 void CreateInputStuff(void);
 void InitInputStuff(void);
 void DestroyInput(void);
-void InputScreenChanged(int fs); // FIXME defined nowhere used nowhere
+void InputScreenChanged(int fs);
 void SetAutoFireDesynch(int DesynchOn);
 int GetAutoFireDesynch();
 uint32 GetGamepadPressedImmediate();
