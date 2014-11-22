@@ -20,268 +20,435 @@
 
 #include "common.h"
 #include "dinput.h"
-#include "window.h"
 
 #include "input.h"
-#include "directinput/directinput.h"
 #include "joystick.h"
-#include "utils/bitflags.h"
 
 
-#define FPOV_CENTER 16
-#define AXIS_DEADZONE (0x10000)
+#define MAX_JOYSTICKS   32
+static LPDIRECTINPUTDEVICE7 Joysticks[MAX_JOYSTICKS]={0};
+static GUID JoyGUID[MAX_JOYSTICKS];
 
+static int numjoysticks = 0;
+static int HavePolled[MAX_JOYSTICKS];
 
-typedef struct {
-	bool x;
-	bool y;
-} AXES_;
-static vector<AXES_> axisHelperFlag;
-	// some temporary flags to handle axes correctly during input config
+static int background = 0;
+static DIJOYSTATE2 StatusSave[MAX_JOYSTICKS];
+static DIJOYSTATE2 StatusSaveImmediate[MAX_JOYSTICKS];
 
-static int backgroundAccessBits = 0;
-
-
-int driver::input::joystick::Init()
+static int FindByGUID(GUID how)
 {
-	directinput::joystick::InitDevices();
-	return 1;
+ int x;
+
+ for(x=0; x<numjoysticks; x++)
+  if(!memcmp(&JoyGUID[x], &how, sizeof(GUID)))
+   return(x);
+
+ return(0xFF);
 }
 
-int driver::input::joystick::Kill()
+#define FPOV_CENTER     16
+
+static int POVFix(long pov, int roundpos)
 {
-	directinput::joystick::ReleaseDevices();
-	return 1;
+ long lowpov;
+
+ if(LOWORD(pov) == 65535)
+  return(FPOV_CENTER);
+
+ if(roundpos == -1)  /* Special case for button configuration */
+ {
+  pov /= 4500;
+  pov = (pov >> 1) + (pov & 1);
+  pov &= 3;
+  return(pov);
+ }
+
+ lowpov = pov % 9000;
+ if(lowpov < (4500 - 4500 / 2))
+ {
+  pov /= 9000;
+ }
+ else if(lowpov > (4500 + 4500/2))
+ {
+  pov /= 9000;
+  pov = (pov + 1) % 4;
+ }
+ else
+ {
+  if(!roundpos) pov /= 9000;
+  else { pov /= 9000; pov = (pov + 1) % 4; }
+ }
+ return(pov);
 }
 
-void driver::input::joystick::Update()
+
+typedef struct
 {
-	int count = directinput::joystick::GetDeviceCount();
-	for(int i=0; i<count; ++i) {
-		directinput::joystick::DEVICE* joy = directinput::joystick::GetDevice(i);
-		if(joy != NULL) joy->isUpdated = false;
-	}
-}
+ LONG MinX;
+ LONG MaxX;
+ LONG MinY;
+ LONG MaxY;
+ LONG MinZ;
+ LONG MaxZ;
+} POWER_RANGER;
 
-// Convert system pov value [0, 36000) to internal range [0, 4)
-static int povToRange(long pov) {
-	static const int QUARTER = 9000;
-	static const int EIGHT = QUARTER/2;
+static POWER_RANGER ranges[MAX_JOYSTICKS];
 
-	if(LOWORD(pov) == 0xFFFF) return FPOV_CENTER;
+//    r=diprg.lMax-diprg.lMin;
+//    JoyXMax[w]=diprg.lMax-(r>>2);
+//    JoyXMin[w]=diprg.lMin+(r>>2);
 
-	pov /= EIGHT;
-	pov = (pov >> 1) + (pov & 1);
-	pov &= 3;
-	return pov;
-}
-
-// Test if specified system pov value hits desired internal pov range
-// If diagonalPass is true, diagonal povs adjanced to targetpov will also pass
-// (when pov hat is used as a d-pad, diagonals will trigger both adjanced directions)
-static bool IsPovInRange(long syspov, int targetpov, bool diagonalsPass) {
-	static const int QUARTER = 9000;
-	static const int EIGHT = QUARTER/2;
-	static const int SIXTEENTH = EIGHT/2;
-
-	if(povToRange(syspov) == FPOV_CENTER) return false;
-
-	if(povToRange(syspov) == targetpov) return true; // exact hit
-
-	if(diagonalsPass && (
-		povToRange(syspov + SIXTEENTH) == targetpov ||
-		povToRange(syspov - SIXTEENTH) == targetpov)) return true;
-
-	return false;
-}
-
-bool driver::input::joystick::TestButton(const BtnConfig *btnConfig)
+static int JoyAutoRestore(HRESULT dival,LPDIRECTINPUTDEVICE7 lpJJoy)
 {
-	bool isPressed = false;
-
-	for(uint32 btnIdx=0; btnIdx<btnConfig->NumC; btnIdx++) {
-		directinput::joystick::DEVICE* device = directinput::joystick::GetDevice(btnConfig->DeviceInstance[btnIdx]);
-		if(device == NULL) continue;
-
-		if(btnConfig->ButtType[btnIdx] != BtnConfig::BT_JOYSTICK) continue;
-
-		if(!device->isUpdated) {
-			if(!directinput::GetState(device->handle, sizeof(DIJOYSTATE2), &device->state)) {
-				continue;
-			}
-			device->isUpdated = true;
-		}
-
-		if(btnConfig->IsAxisButton(btnIdx)) {
-			// Axis
-			int axisIdx = btnConfig->GetAxisIdx(btnIdx);
-			LONG rangeBase = device->ranges.base[axisIdx];
-			LONG rangeRange = device->ranges.range[axisIdx];
-			LONG srcval = (axisIdx == 0)? device->state.lX:device->state.lY;
-			long val = ((int64)srcval - rangeBase) * 0x40000 / rangeRange - 0x20000;
-			/* Now, val is of the range -131072 to 131071.  Good enough. */
-
-			if((btnConfig->IsAxisNegative(btnIdx) && val <= -AXIS_DEADZONE) ||
-				(!btnConfig->IsAxisNegative(btnIdx) && val >= AXIS_DEADZONE))
-			{
-				isPressed = true;
-				break;
-			}
-		}
-		else if(btnConfig->IsPovButton(btnIdx)) {
-			// POV Hat
-			int srcpov = device->state.rgdwPOV[btnConfig->GetPovController(btnIdx)];
-			int targetDir = btnConfig->GetPovDir(btnIdx);
-
-			if(IsPovInRange(srcpov, targetDir, true)) {
-				isPressed = true;
-				break;
-			}
-		}
-		else {
-			// Button
-			if(device->state.rgbButtons[btnConfig->GetJoyButton(btnIdx)] & 0x80) {
-				isPressed = true;
-				break;
-			}
-		}
-	}
-
-	return isPressed;
+   switch(dival)
+    {
+     case DIERR_INPUTLOST:
+     case DIERR_NOTACQUIRED:
+                           return(IDirectInputDevice7_Acquire(lpJJoy)==DI_OK);
+    }
+  return(0);
 }
+
+/* Called during normal emulator operation, not during button configuration. */
+/* Call before DTestButtonJoy */
+void UpdateJoysticks(void)
+{
+ memset(HavePolled, 0, sizeof(HavePolled));  
+}
+
+int DTestButtonJoy(ButtConfig *bc)
+{
+ uint32 x; //mbg merge 7/17/06 changed to uint
+
+ for(x=0;x<bc->NumC;x++)
+ {
+  HRESULT dival;
+  int n = bc->DeviceNum[x];
+
+  if(n == 0xFF)
+   continue;
+
+  if(bc->ButtType[x] != BUTTC_JOYSTICK) continue;
+  if(n >= numjoysticks) continue;
+
+  if(!HavePolled[n])
+  {
+   while((dival = IDirectInputDevice7_Poll(Joysticks[n])) != DI_OK)
+   {
+    if(dival == DI_NOEFFECT) break;
+
+    if(!JoyAutoRestore(dival,Joysticks[n]))
+    {
+     return(0);
+    }
+   }
+
+   IDirectInputDevice7_GetDeviceState(Joysticks[n],sizeof(DIJOYSTATE2),&StatusSave[n]);
+   HavePolled[n] = 1;
+  }
+  
+  if(bc->ButtonNum[x]&0x8000)	/* Axis "button" */
+  {
+   int sa = bc->ButtonNum[x]&3;
+   long source;
+
+   if(sa == 0) source=((int64)StatusSave[n].lX - ranges[n].MinX) * 262144 /
+                (ranges[n].MaxX - ranges[n].MinX) - 131072;
+   else if(sa == 1) source=((int64)StatusSave[n].lY - ranges[n].MinY) * 262144 /
+                (ranges[n].MaxY - ranges[n].MinY) - 131072;
+   else if(sa == 2) source=((int64)StatusSave[n].lZ - ranges[n].MinZ) * 262144 /
+                (ranges[n].MaxZ - ranges[n].MinZ) - 131072;
+
+   /* Now, source is of the range -131072 to 131071.  Good enough. */
+   if(bc->ButtonNum[x] & 0x4000)
+   {
+    if(source <= (0 - 262144/4))
+     return(1);
+   }
+   else
+   {
+    if(source >= (262144/4))
+     return(1);
+   }
+  }
+  else if(bc->ButtonNum[x]&0x2000)      /* Hat "button" */
+  {
+   int wpov = StatusSave[n].rgdwPOV[(bc->ButtonNum[x] >> 4) &3];
+   int tpov = bc->ButtonNum[x] & 3;
+
+   if(POVFix(wpov, 0) == tpov || POVFix(wpov, 1) == tpov)
+    return(1);
+  }
+  else                                  /* Normal button */
+  {
+   if(StatusSave[n].rgbButtons[bc->ButtonNum[x] & 127]&0x80)
+    return(1);
+  }
+
+ }
+
+ return(0);
+}
+
+static int canax[MAX_JOYSTICKS][3];
 
 /* Now the fun configuration test begins. */
-void driver::input::joystick::BeginWaitButton(PLATFORM_DIALOG_ARGUMENT hwnd)
+void BeginJoyWait(HWND hwnd)
 {
-	unsigned int count = directinput::joystick::GetDeviceCount();
-	axisHelperFlag.resize(count);
-	for(unsigned int n=0; n<count; ++n) {
-		axisHelperFlag[n].x = false;
-		axisHelperFlag[n].y = false;
+ int n;
 
-		directinput::SetCoopLevel(directinput::joystick::GetDevice(n)->handle, hwnd, false);
-	}
+ //StatusSave = malloc(sizeof(DIJOYSTATE2) * numjoysticks);
+ memset(canax, 0, sizeof(canax));
+
+ for(n=0; n<numjoysticks; n++)
+ {
+  IDirectInputDevice7_Unacquire(Joysticks[n]);
+  IDirectInputDevice7_SetCooperativeLevel(Joysticks[n],hwnd,DISCL_FOREGROUND|DISCL_NONEXCLUSIVE);
+  IDirectInputDevice7_Acquire(Joysticks[n]);
+  IDirectInputDevice7_Poll(Joysticks[n]);
+  IDirectInputDevice7_GetDeviceState(Joysticks[n],sizeof(DIJOYSTATE2),&StatusSave[n]);
+ }
 }
 
-int driver::input::joystick::GetButtonPressedTest(JOYINSTANCEID *guid, uint8 *devicenum, uint16 *buttonnum)
+int DoJoyWaitTest(GUID *guid, uint8 *devicenum, uint16 *buttonnum)
 {
-	unsigned int count = directinput::joystick::GetDeviceCount();
-	for(unsigned int devIdx=0; devIdx<count; ++devIdx) {
-		directinput::joystick::DEVICE* device = directinput::joystick::GetDevice(devIdx);
+ int n;
+ int x;
 
-		DIJOYSTATE2 immediateState;
-		if(!directinput::GetState(device->handle, sizeof(DIJOYSTATE2), &immediateState)) {
-			return 0;
-		}
+ for(n=0; n<numjoysticks; n++)
+ {
+  HRESULT dival;
+  DIJOYSTATE2 JoyStatus;
+  int ba;
 
-		// check normal buttons
-		for(int btnIdx = 0; btnIdx < 128; btnIdx++) {
-			if((immediateState.rgbButtons[btnIdx] & 0x80) && !(device->state.rgbButtons[btnIdx] & 0x80)) {
-				// button pressed in immediate state but not in last saved state
-				*devicenum = devIdx;
-				*buttonnum = btnIdx;
-				*guid = device->guid;
-				memcpy(device->state.rgbButtons, immediateState.rgbButtons, 128);
+  while((dival = IDirectInputDevice7_Poll(Joysticks[n])) != DI_OK)
+  {
+   if(dival == DI_NOEFFECT) break;
+   if(!JoyAutoRestore(dival,Joysticks[n])) return(0);
+  }
+  dival = IDirectInputDevice7_GetDeviceState(Joysticks[n],sizeof(DIJOYSTATE2),&JoyStatus);
 
-				return 1;
-			}
-		}
-		memcpy(device->state.rgbButtons, immediateState.rgbButtons, 128);
+  for(ba = 0; ba < 128; ba++)
+   if((JoyStatus.rgbButtons[ba]&0x80) && !(StatusSave[n].rgbButtons[ba]&0x80))
+   {
+    *devicenum = n;
+    *buttonnum = ba;
+    *guid = JoyGUID[n];
+    //memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));
+    memcpy(StatusSave[n].rgbButtons, JoyStatus.rgbButtons, 128);
+    return(1);
+   }
 
-		// check X, Y axii
-		long rangeX = device->ranges.range[0];
-		if(rangeX != 0) {
-			long value = ((int64)immediateState.lX - device->ranges.base[0]) * 0x40000 / rangeX - 0x20000;
+  memcpy(StatusSave[n].rgbButtons, JoyStatus.rgbButtons, 128);
 
-			if(axisHelperFlag[devIdx].x && abs(value) >= AXIS_DEADZONE) {
-				// activity on X axis
-				*guid = device->guid;
-				*devicenum = devIdx;
-				*buttonnum = BtnConfig::ISAXIS_MASK |
-					(0) |
-					((value < 0) ? (BtnConfig::ISAXISNEG_MASK):0);
+  // lX, lY, lZ
+  long dax, day, daz;
+  long source,psource;
 
-				memcpy(&device->state, &immediateState, sizeof(DIJOYSTATE2));   
-				axisHelperFlag[devIdx].x = false;
+  dax = ranges[n].MaxX - ranges[n].MinX;
+  day = ranges[n].MaxY - ranges[n].MinY;
+  daz = ranges[n].MaxZ - ranges[n].MinZ;
 
-				return 1;
-			}
-			else if(abs(value) <= 0x8000) {
-				axisHelperFlag[devIdx].x = true;
-			}
-		}
+  if(dax)
+  {
+   source=((int64)JoyStatus.lX - ranges[n].MinX) * 262144 / dax - 131072;
+   psource=((int64)StatusSave[n].lX - ranges[n].MinX) * 262144 / dax - 131072;
 
-		long rangeY = device->ranges.range[1];
-		if(rangeY != 0) {
-			long value = ((int64)immediateState.lY - device->ranges.base[1]) * 0x40000 / rangeY - 0x20000;
+   if(abs(source) >= 65536 && canax[n][0])
+   {
+    *guid = JoyGUID[n];
+    *devicenum = n;
+    *buttonnum = 0x8000 | (0) | ((source < 0) ? 0x4000 : 0);
+    memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));   
+    canax[n][0] = 0;
+    return(1);
+   } else if(abs(source) <= 32768) canax[n][0] = 1;
+  }
 
-			if(abs(value) >= AXIS_DEADZONE && axisHelperFlag[devIdx].y) {
-				// activity on Y axis
-				*guid = device->guid;
-				*devicenum = devIdx;
-				*buttonnum = BtnConfig::ISAXIS_MASK |
-					(1) |
-					((value < 0) ? (BtnConfig::ISAXISNEG_MASK):0);
+  if(day)
+  {
+   source=((int64)JoyStatus.lY - ranges[n].MinY) * 262144 / day - 131072;
+   psource=((int64)StatusSave[n].lY - ranges[n].MinY) * 262144 / day - 131072;
 
-				memcpy(&device->state, &immediateState, sizeof(DIJOYSTATE2));
-				axisHelperFlag[devIdx].y = false;
+   if(abs(source) >= 65536 && canax[n][1])
+   {
+    *guid = JoyGUID[n];
+    *devicenum = n;
+    *buttonnum = 0x8000 | (1) | ((source < 0) ? 0x4000 : 0);
+    memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));
+    canax[n][1] = 0;
+    return(1);
+   }  else if(abs(source) <= 32768) canax[n][1] = 1;
+  }
 
-				return 1;
-			}
-			else if(abs(value) <= 0x8000) {
-				axisHelperFlag[devIdx].y = true;
-			}
-		}
+  if(daz)
+  {
 
-		// check POV button
-		for(int x=0; x<4; x++) {   
-			if(povToRange(immediateState.rgdwPOV[x]) != FPOV_CENTER && povToRange(device->state.rgdwPOV[x]) == FPOV_CENTER) {
-				*guid = device->guid;
-				*devicenum = devIdx;
-				*buttonnum = BtnConfig::ISPOVBTN_MASK | (x<<4) | povToRange(immediateState.rgdwPOV[x]);
-				memcpy(&device->state, &immediateState, sizeof(DIJOYSTATE2));
-				return 1;
-			}
-		}
-		memcpy(&device->state, &immediateState, sizeof(DIJOYSTATE2));
-	}
 
-	return 0;
+  }
+
+  for(x=0; x<4; x++)
+  {   
+   if(POVFix(JoyStatus.rgdwPOV[x],-1) != FPOV_CENTER && POVFix(StatusSave[n].rgdwPOV[x],-1) == FPOV_CENTER)
+   {
+    *guid = JoyGUID[n];
+    *devicenum = n;
+    *buttonnum = 0x2000 | (x<<4) | POVFix(JoyStatus.rgdwPOV[x], -1);
+    memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));
+    return(1);
+   }
+  }
+  memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));
+ }
+ 
+ return(0);
 }
 
-void driver::input::joystick::EndWaitButton(PLATFORM_DIALOG_ARGUMENT hwnd)
+void EndJoyWait(HWND hwnd)
 {
-	unsigned int count = directinput::joystick::GetDeviceCount();
-	for(unsigned int n=0; n<count; ++n)
+ int n;
+
+ for(n=0; n<numjoysticks; n++)
+ {
+  IDirectInputDevice7_Unacquire(Joysticks[n]);
+  IDirectInputDevice7_SetCooperativeLevel(Joysticks[n],hwnd,DISCL_FOREGROUND|DISCL_NONEXCLUSIVE);
+ }
+}
+
+int KillJoysticks (void)
+{
+ int x;
+
+ for(x=0; x<numjoysticks; x++)
+ {
+  IDirectInputDevice7_Unacquire(Joysticks[x]);
+  IDirectInputDevice7_Release(Joysticks[x]);
+  Joysticks[x] = NULL;
+ } 
+
+ numjoysticks = 0;
+
+ return(1);
+}
+
+void JoyClearBC(ButtConfig *bc)
+{
+ uint32 x; //mbg merge 7/17/06 changed to uint
+ for(x=0; x<bc->NumC; x++)
+  if(bc->ButtType[x] == BUTTC_JOYSTICK)
+   bc->DeviceNum[x] = FindByGUID(bc->DeviceInstance[x]);
+}
+
+static int GetARange(LPDIRECTINPUTDEVICE7 dev, LONG which, LONG *min, LONG *max)
+{
+    HRESULT dival;
+    DIPROPRANGE diprg;
+    //int r; //mbg merge 7/17/06 removed
+
+    memset(&diprg,0,sizeof(DIPROPRANGE));
+    diprg.diph.dwSize=sizeof(DIPROPRANGE);
+    diprg.diph.dwHeaderSize=sizeof(DIPROPHEADER);
+    diprg.diph.dwHow=DIPH_BYOFFSET;
+    diprg.diph.dwObj=which;
+    dival=IDirectInputDevice7_GetProperty(dev,DIPROP_RANGE,&diprg.diph);
+    if(dival!=DI_OK)
+    {
+     *min = *max = 0;
+     return(1);
+    }
+    *min = diprg.lMin;
+    *max = diprg.lMax;
+    return(1);
+}
+
+static BOOL CALLBACK JoystickFound(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
+{
+ //HRESULT dival; //mbg merge 7/17/06 removed
+ int n = numjoysticks;
+
+ //mbg merge 7/17/06 changed:
+ if(DI_OK != IDirectInput7_CreateDeviceEx(lpDI,lpddi->guidInstance,IID_IDirectInputDevice7,(LPVOID *)&Joysticks[n],0))
+ //if(DI_OK != IDirectInput7_CreateDeviceEx(lpDI,&lpddi->guidInstance,&IID_IDirectInputDevice7,(LPVOID *)&Joysticks[n],0))
+ 
+ {
+  FCEU_printf("Device creation of a joystick failed during init.\n");
+  return(DIENUM_CONTINUE);
+ }
+
+ if(DI_OK != IDirectInputDevice7_SetCooperativeLevel(Joysticks[n],*(HWND *)pvRef, (background?DISCL_BACKGROUND:DISCL_FOREGROUND)|DISCL_NONEXCLUSIVE))
+ {
+  FCEU_printf("Cooperative level set of a joystick failed during init.\n");
+  IDirectInputDevice7_Release(Joysticks[n]);
+  return(DIENUM_CONTINUE);
+ }
+
+ if(DI_OK != IDirectInputDevice7_SetDataFormat(Joysticks[n], &c_dfDIJoystick2))
+ {
+  FCEU_printf("Data format set of a joystick failed during init.\n");
+  IDirectInputDevice7_Release(Joysticks[n]);
+  return(DIENUM_CONTINUE);
+ }
+
+ GetARange(Joysticks[n], DIJOFS_X, &ranges[n].MinX, &ranges[n].MaxX);
+ GetARange(Joysticks[n], DIJOFS_Y, &ranges[n].MinY, &ranges[n].MaxY);
+ GetARange(Joysticks[n], DIJOFS_Z, &ranges[n].MinZ, &ranges[n].MaxZ);
+
+ JoyGUID[numjoysticks] = lpddi->guidInstance;
+
+ if(DI_OK != IDirectInputDevice7_Acquire(Joysticks[n]))
+ {
+  //FCEU_printf("Acquire of a joystick failed during init.\n");  
+ }
+
+ numjoysticks++;
+
+ if(numjoysticks > MAX_JOYSTICKS) return(0);
+
+ return(DIENUM_CONTINUE);
+}
+
+int InitJoysticks(HWND hwnd)
+{
+ IDirectInput7_EnumDevices(lpDI, DIDEVTYPE_JOYSTICK, JoystickFound, (LPVOID *)&hwnd, DIEDFL_ATTACHEDONLY);
+ return(1);
+}
+
+static bool curr = false;
+
+
+static void UpdateBackgroundAccess(bool on)
+{
+	if(curr == on) return;
+
+	curr = on;
+
+	for(int n=0; n<numjoysticks; n++)
 	{
-		directinput::SetCoopLevel(directinput::joystick::GetDevice(n)->handle, hwnd, false);
+		IDirectInputDevice7_Unacquire(Joysticks[n]);
+		if(background)
+			IDirectInputDevice7_SetCooperativeLevel(Joysticks[n],hAppWnd,DISCL_BACKGROUND|DISCL_NONEXCLUSIVE);
+		else
+			IDirectInputDevice7_SetCooperativeLevel(Joysticks[n],hAppWnd,DISCL_FOREGROUND|DISCL_NONEXCLUSIVE);
+		IDirectInputDevice7_Acquire(Joysticks[n]);
 	}
 }
 
-
-static void UpdateBackgroundAccess(bool enable)
+void JoystickSetBackgroundAccessBit(int bit)
 {
-	static bool isEnabled = false;
-	if(isEnabled != enable) {
-		isEnabled = enable;
-
-		unsigned int count = directinput::joystick::GetDeviceCount();
-		for(unsigned int n=0; n<count; ++n) {
-			directinput::joystick::DEVICE* device = directinput::joystick::GetDevice(n);
-			directinput::SetCoopLevel(device->handle, GetMainHWND(), (backgroundAccessBits!=0));
-			directinput::Acquire(device->handle);
-		}
-	}
+	background |= (1<<bit);
+	UpdateBackgroundAccess(background != 0);
+}
+void JoystickClearBackgroundAccessBit(int bit)
+{
+	background &= ~(1<<bit);
+	UpdateBackgroundAccess(background != 0);
 }
 
-void driver::input::joystick::SetBackgroundAccessBit(driver::input::joystick::BKGINPUT bit)
+void JoystickSetBackgroundAccess(bool on)
 {
-	FL_SET(backgroundAccessBits, 1<<bit);
-	UpdateBackgroundAccess(backgroundAccessBits != 0);
-}
-
-void driver::input::joystick::ClearBackgroundAccessBit(driver::input::joystick::BKGINPUT bit)
-{
-	FL_CLEAR(backgroundAccessBits, 1<<bit);
-	UpdateBackgroundAccess(backgroundAccessBits != 0);
+	if(on)
+		JoystickSetBackgroundAccessBit(JOYBACKACCESS_OLDSTYLE);
+	else
+		JoystickClearBackgroundAccessBit(JOYBACKACCESS_OLDSTYLE);
 }

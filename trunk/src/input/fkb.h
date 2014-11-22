@@ -1,5 +1,3 @@
-#define NUMKEYS_FAMIKB (72)
-
 #define FKB_F1				0x01
 #define FKB_F2				0x02
 #define FKB_F3				0x03

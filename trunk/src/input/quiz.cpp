@@ -66,10 +66,10 @@ static void QZ_Update(void *data, int arg)
  QZVal=*(uint8 *)data;
 }
 
-static INPUTCFC PartyTap={QZ_Read,QZ_Write,QZ_Strobe,QZ_Update,0,0};
+static INPUTCFC QuizKing={QZ_Read,QZ_Write,QZ_Strobe,QZ_Update,0,0};
 
-INPUTCFC *FCEU_InitPartyTap(void)
+INPUTCFC *FCEU_InitQuizKing(void)
 {
  QZVal=QZValR=0;
- return(&PartyTap);
+ return(&QuizKing);
 }

@@ -395,16 +395,6 @@
     <ClCompile Include="..\src\drivers\common\config.cpp" />
     <ClCompile Include="..\src\drivers\common\hq2x.cpp" />
     <ClCompile Include="..\src\drivers\common\hq3x.cpp" />
-    <ClCompile Include="..\src\drivers\common\input.cpp">
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)2.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)2.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)2.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)2.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename)2.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename)2.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)2.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)2.xdc</XMLDocumentationFileName>
-    </ClCompile>
     <ClCompile Include="..\src\drivers\common\nes_ntsc.c" />
     <ClCompile Include="..\src\drivers\common\scale2x.cpp" />
     <ClCompile Include="..\src\drivers\common\scale3x.cpp" />
@@ -440,17 +430,6 @@
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\debugger.cpp" />
     <ClCompile Include="..\src\drivers\win\debuggersp.cpp" />
-    <ClCompile Include="..\src\drivers\win\directinput\directInput.cpp" />
-    <ClCompile Include="..\src\drivers\win\directinput\joystick.cpp">
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-    </ClCompile>
     <ClCompile Include="..\src\drivers\win\directories.cpp" />
     <ClCompile Include="..\src\drivers\win\gui.cpp" />
     <ClCompile Include="..\src\drivers\win\guiconfig.cpp" />
@@ -465,7 +444,6 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.obj</ObjectFileName>
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\inputConfigUI.cpp" />
     <ClCompile Include="..\src\drivers\win\joystick.cpp" />
     <ClCompile Include="..\src\drivers\win\keyboard.cpp" />
     <ClCompile Include="..\src\drivers\win\log.cpp" />
@@ -892,7 +870,6 @@
     <ClInclude Include="..\src\drivers\common\config.h" />
     <ClInclude Include="..\src\drivers\common\hq2x.h" />
     <ClInclude Include="..\src\drivers\common\hq3x.h" />
-    <ClInclude Include="..\src\drivers\common\input.h" />
     <ClInclude Include="..\src\drivers\common\nes_ntsc.h" />
     <ClInclude Include="..\src\drivers\common\nes_ntsc_config.h" />
     <ClInclude Include="..\src\drivers\common\nes_ntsc_impl.h" />
@@ -908,15 +885,11 @@
     <ClInclude Include="..\src\drivers\win\config.h" />
     <ClInclude Include="..\src\drivers\win\debugger.h" />
     <ClInclude Include="..\src\drivers\win\debuggersp.h" />
-    <ClInclude Include="..\src\drivers\win\directinput\directinput.h" />
-    <ClInclude Include="..\src\drivers\win\directinput\joystick.h" />
     <ClInclude Include="..\src\drivers\win\directories.h" />
     <ClInclude Include="..\src\drivers\win\gui.h" />
     <ClInclude Include="..\src\drivers\win\guiconfig.h" />
     <ClInclude Include="..\src\drivers\win\help.h" />
     <ClInclude Include="..\src\drivers\win\input.h" />
-    <ClInclude Include="..\src\drivers\win\inputConfigUI.h" />
-    <ClInclude Include="..\src\drivers\win\inputDevKeyMap.h" />
     <ClInclude Include="..\src\drivers\win\joystick.h" />
     <ClInclude Include="..\src\drivers\win\keyboard.h" />
     <ClInclude Include="..\src\drivers\win\keyscan.h" />
@@ -994,15 +967,8 @@
     <ClInclude Include="..\src\ines.h" />
     <ClInclude Include="..\src\input.h" />
     <ClInclude Include="..\src\input\fkb.h" />
-    <ClInclude Include="..\src\input\ftrainer.h" />
-    <ClInclude Include="..\src\input\gamepad.h" />
-    <ClInclude Include="..\src\input\hypershot.h" />
-    <ClInclude Include="..\src\input\mahjong.h" />
-    <ClInclude Include="..\src\input\powerpad.h" />
-    <ClInclude Include="..\src\input\quiz.h" />
     <ClInclude Include="..\src\input\share.h" />
     <ClInclude Include="..\src\input\suborkb.h" />
-    <ClInclude Include="..\src\input\toprider.h" />
     <ClInclude Include="..\src\movie.h" />
     <ClInclude Include="..\src\netplay.h" />
     <ClInclude Include="..\src\nsf.h" />
@@ -1014,7 +980,6 @@
     <ClInclude Include="..\src\types-des.h" />
     <ClInclude Include="..\src\types.h" />
     <ClInclude Include="..\src\unif.h" />
-    <ClInclude Include="..\src\utils\bitflags.h" />
     <ClInclude Include="..\src\utils\ConvertUTF.h" />
     <ClInclude Include="..\src\utils\crc32.h" />
     <ClInclude Include="..\src\utils\endian.h" />

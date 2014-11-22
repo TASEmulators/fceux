@@ -17,10 +17,10 @@ Recorder - Tool for Input recording
 ------------------------------------------------------------------------------------ */
 
 #include "taseditor_project.h"
-#include "drivers/win/input.h"
 
 extern int joysticksPerFrame[INPUT_TYPES_TOTAL];
 
+extern uint32 GetGamepadPressedImmediate();
 extern int getInputType(MovieData& md);
 
 extern char lagFlag;
@@ -165,7 +165,7 @@ void RECORDER::update()
 	oldJoyData[2] = currentJoypadData[2];
 	oldJoyData[3] = currentJoypadData[3];
 	// fill current_joy data for Piano Roll header lights
-	uint32 joypads = GetGamepadPressedPhysical();
+	uint32 joypads = GetGamepadPressedImmediate();
 	currentJoypadData[0] = (joypads & 0xFF);
 	currentJoypadData[1] = ((joypads >> 8) & 0xFF);
 	currentJoypadData[2] = ((joypads >> 16) & 0xFF);

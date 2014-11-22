@@ -103,16 +103,16 @@ ParseGIInput (FCEUGI * gi)
 }
 
 
-static uint8 PartyTapData = 0;
+static uint8 QuizKingData = 0;
 static uint8 HyperShotData = 0;
 static uint32 MahjongData = 0;
 static uint32 FTrainerData = 0;
 static uint8 TopRiderData = 0;
-static uint8 BBattlerData[1 + 13 + 1];
+static uint8 BWorldData[1 + 13 + 1];
 
 static void UpdateFKB (void);
 static void UpdateGamepad (void);
-static void UpdatePartyTap (void);
+static void UpdateQuizKing (void);
 static void UpdateHyperShot (void);
 static void UpdateMahjong (void);
 static void UpdateFTrainer (void);
@@ -426,13 +426,10 @@ void FCEUD_LoadStateFrom ()
 	FCEUI_LoadState (fname.c_str ());
 }
 
-#ifdef KEYBOARDTRANSFORMER_SPECIFIC
 /**
 * Hook for transformer board
-* !!!Special feature, do not use for anything besides 'Keyboard
-* Transformer' board
 */
-unsigned int *GetKeyboardAutorepeated(void)                                                     
+unsigned int *GetKeyboard(void)                                                     
 {
 	int size = 256;
 #if SDL_VERSION_ATLEAST(2, 0, 0)
@@ -442,7 +439,6 @@ unsigned int *GetKeyboardAutorepeated(void)
 #endif
 	return (unsigned int*)(keystate);
 }
-#endif // KEYBOARDTRANSFORMER_SPECIFIC
 
 /**
  * Parse keyboard commands and execute accordingly.
@@ -827,17 +823,17 @@ static void KeyboardCommands ()
 		if (_keyonly (Hotkeys[HK_INCREASE_SPEED]))
 			FCEUI_NTSCINC ();
 
-		if ((CurInputType[2] == SIFC_BBATTLER) || (cspec == SIS_DATACH))
+		if ((CurInputType[2] == SIFC_BWORLD) || (cspec == SIS_DATACH))
 		{
 			if (keyonly (F8))
 			{
 				barcoder ^= 1;
 				if (!barcoder)
 				{
-					if (CurInputType[2] == SIFC_BBATTLER)
+					if (CurInputType[2] == SIFC_BWORLD)
 					{
-						strcpy ((char *) &BBattlerData[1], (char *) bbuf);
-						BBattlerData[0] = 1;
+						strcpy ((char *) &BWorldData[1], (char *) bbuf);
+						BWorldData[0] = 1;
 					}
 					else
 					{
@@ -1068,7 +1064,7 @@ ButtonConfigEnd ()
  * Tests to see if a specified button is currently pressed.
  */
 static int
-DTestButton (BtnConfig * bc)
+DTestButton (ButtConfig * bc)
 {
 	int x;
 
@@ -1103,7 +1099,7 @@ DTestButton (BtnConfig * bc)
 #define MKZ()       {{0},{0},{0},0}
 #define GPZ()       {MKZ(), MKZ(), MKZ(), MKZ()}
 
-BtnConfig GamePadConfig[4][10] = {
+ButtConfig GamePadConfig[4][10] = {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 /* Gamepad 1 */
 	{MK (KP_3), MK (KP_2), MK (SLASH), MK (ENTER),
@@ -1209,7 +1205,7 @@ UpdateGamepad(void)
 	JSreturn = JS;
 }
 
-static BtnConfig powerpadsc[2][12] = {
+static ButtConfig powerpadsc[2][12] = {
 	{
 		MK (O), MK (P), MK (BRACKET_LEFT),
 		MK (BRACKET_RIGHT), MK (K), MK (L), MK (SEMICOLON),
@@ -1237,7 +1233,7 @@ UpdatePPadData (int w)
 	}
 
 	uint32 r = 0;
-	BtnConfig *ppadtsc = powerpadsc[w];
+	ButtConfig *ppadtsc = powerpadsc[w];
 	int x;
 
 	// update each of the 12 buttons
@@ -1307,8 +1303,8 @@ void FCEUD_UpdateInput ()
 		case SIFC_MAHJONG:
 			UpdateMahjong ();
 			break;
-		case SIFC_PARTYTAP:
-			UpdatePartyTap ();
+		case SIFC_QUIZKING:
+			UpdateQuizKing ();
 			break;
 		case SIFC_FTRAINERB:
 		case SIFC_FTRAINERA:
@@ -1352,7 +1348,7 @@ void FCEUD_SetInput (bool fourscore, bool microphone, ESI port0, ESI port1,
 		CurInputType[2] = fcexp;
 	}
 
-	FCEUI_SetInputMicrophone(microphone);
+	replaceP2StartWithMicrophone = microphone;
 
 	InitInputInterface ();
 }
@@ -1422,14 +1418,14 @@ void InitInputInterface ()
 		case SIFC_MAHJONG:
 			InputDPtr = &MahjongData;
 			break;
-		case SIFC_PARTYTAP:
-			InputDPtr = &PartyTapData;
+		case SIFC_QUIZKING:
+			InputDPtr = &QuizKingData;
 			break;
 		case SIFC_TOPRIDER:
 			InputDPtr = &TopRiderData;
 			break;
-		case SIFC_BBATTLER:
-			InputDPtr = BBattlerData;
+		case SIFC_BWORLD:
+			InputDPtr = BWorldData;
 			break;
 		case SIFC_FTRAINERA:
 		case SIFC_FTRAINERB:
@@ -1442,7 +1438,7 @@ void InitInputInterface ()
 }
 
 
-static BtnConfig fkbmap[0x48] = {
+static ButtConfig fkbmap[0x48] = {
 	MK (F1), MK (F2), MK (F3), MK (F4), MK (F5), MK (F6), MK (F7), MK (F8),
 	MK (1), MK (2), MK (3), MK (4), MK (5), MK (6), MK (7), MK (8), MK (9),
 	MK (0),
@@ -1479,7 +1475,7 @@ static void UpdateFKB ()
 	}
 }
 
-static BtnConfig HyperShotButtons[4] = {
+static ButtConfig HyperShotButtons[4] = {
 	MK (Q), MK (W), MK (E), MK (R)
 };
 
@@ -1501,7 +1497,7 @@ UpdateHyperShot ()
 	}
 }
 
-static BtnConfig MahjongButtons[21] = {
+static ButtConfig MahjongButtons[21] = {
 	MK (Q), MK (W), MK (E), MK (R), MK (T),
 	MK (A), MK (S), MK (D), MK (F), MK (G), MK (H), MK (J), MK (K), MK (L),
 	MK (Z), MK (X), MK (C), MK (V), MK (B), MK (N), MK (M)
@@ -1525,30 +1521,30 @@ UpdateMahjong ()
 	}
 }
 
-static BtnConfig PartyTapButtons[6] = {
+static ButtConfig QuizKingButtons[6] = {
 	MK (Q), MK (W), MK (E), MK (R), MK (T), MK (Y)
 };
 
 /**
- * Update the status of the PartyTap input device.
+ * Update the status of the QuizKing input device.
  */
 	static void
-UpdatePartyTap ()
+UpdateQuizKing ()
 {
 	int x;
 
-	PartyTapData = 0;
+	QuizKingData = 0;
 
 	for (x = 0; x < 6; x++)
 	{
-		if (DTestButton (&PartyTapButtons[x]))
+		if (DTestButton (&QuizKingButtons[x]))
 		{
-			PartyTapData |= 1 << x;
+			QuizKingData |= 1 << x;
 		}
 	}
 }
 
-static BtnConfig TopRiderButtons[8] = {
+static ButtConfig TopRiderButtons[8] = {
 	MK (Q), MK (W), MK (E), MK (R), MK (T), MK (Y), MK (U), MK (I)
 };
 
@@ -1569,7 +1565,7 @@ UpdateTopRider ()
 	}
 }
 
-static BtnConfig FTrainerButtons[12] = {
+static ButtConfig FTrainerButtons[12] = {
 	MK (O), MK (P), MK (BRACKET_LEFT),
 	MK (BRACKET_RIGHT), MK (K), MK (L), MK (SEMICOLON),
 	MK (APOSTROPHE),
@@ -1600,7 +1596,7 @@ UpdateFTrainer ()
  * @param bc the NES gamepad's button config
  * @param which the index of the button
  */
-const char * ButtonName (const BtnConfig * bc, int which)
+const char * ButtonName (const ButtConfig * bc, int which)
 {
 	static char name[256];
 
@@ -1662,7 +1658,7 @@ const char * ButtonName (const BtnConfig * bc, int which)
  * Waits for a button input and returns the information as to which
  * button was pressed.  Used in button configuration.
  */
-int DWaitButton (const uint8 * text, BtnConfig * bc, int wb)
+int DWaitButton (const uint8 * text, ButtConfig * bc, int wb)
 {
 	SDL_Event event;
 	static int32 LastAx[64][64];
@@ -1769,7 +1765,7 @@ int DWaitButton (const uint8 * text, BtnConfig * bc, int wb)
  * possible settings for each input button.
  */
 	void
-ConfigButton (char *text, BtnConfig * bc)
+ConfigButton (char *text, ButtConfig * bc)
 {
 	uint8 buf[256];
 	int wc;
@@ -1812,22 +1808,22 @@ void ConfigDevice (int which, int arg)
 	ButtonConfigBegin ();
 	switch (which)
 	{
-		case FCFGD_PARTYTAP:
+		case FCFGD_QUIZKING:
 			prefix = "SDL.Input.QuizKing.";
 			for (x = 0; x < 6; x++)
 			{
 				sprintf (buf, "Quiz King Buzzer #%d", x + 1);
-				ConfigButton (buf, &PartyTapButtons[x]);
+				ConfigButton (buf, &QuizKingButtons[x]);
 
-				g_config->setOption (prefix + PartyTapNames[x],
-						PartyTapButtons[x].ButtonNum[0]);
+				g_config->setOption (prefix + QuizKingNames[x],
+						QuizKingButtons[x].ButtonNum[0]);
 			}
 
-			if (PartyTapButtons[0].ButtType[0] == BUTTC_KEYBOARD)
+			if (QuizKingButtons[0].ButtType[0] == BUTTC_KEYBOARD)
 			{
 				g_config->setOption (prefix + "DeviceType", "Keyboard");
 			}
-			else if (PartyTapButtons[0].ButtType[0] == BUTTC_JOYSTICK)
+			else if (QuizKingButtons[0].ButtType[0] == BUTTC_JOYSTICK)
 			{
 				g_config->setOption (prefix + "DeviceType", "Joystick");
 			}
@@ -1836,7 +1832,7 @@ void ConfigDevice (int which, int arg)
 				g_config->setOption (prefix + "DeviceType", "Unknown");
 			}
 			g_config->setOption (prefix + "DeviceNum",
-					PartyTapButtons[0].DeviceNum[0]);
+					QuizKingButtons[0].DeviceNum[0]);
 			break;
 		case FCFGD_HYPERSHOT:
 			prefix = "SDL.Input.HyperShot.";
@@ -1968,7 +1964,7 @@ void InputCfg (const std::string & text)
 		}
 		else if (text.find ("quizking") != std::string::npos)
 		{
-			ConfigDevice (FCFGD_PARTYTAP, 0);
+			ConfigDevice (FCFGD_QUIZKING, 0);
 		}
 	}
 	else
@@ -2011,7 +2007,7 @@ UpdateInput (Config * config)
 		}
 		else if (device.find ("QuizKing") != std::string::npos)
 		{
-			UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_PARTYTAP;
+			UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_QUIZKING;
 		}
 		else if (device.find ("HyperShot") != std::string::npos)
 		{
@@ -2051,7 +2047,7 @@ UpdateInput (Config * config)
 		}
 		else if (device.find ("BWorld") != std::string::npos)
 		{
-			UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_BBATTLER;
+			UsrInputType[i] = (i < 2) ? (int) SI_NONE : (int) SIFC_BWORLD;
 		}
 		else if (device.find ("4Player") != std::string::npos)
 		{
@@ -2138,7 +2134,7 @@ UpdateInput (Config * config)
 		}
 	}
 
-	// PartyTap
+	// QuizKing
 	prefix = "SDL.Input.QuizKing.";
 	config->getOption (prefix + "DeviceType", &device);
 	if (device.find ("Keyboard") != std::string::npos)
@@ -2154,14 +2150,14 @@ UpdateInput (Config * config)
 		type = 0;
 	}
 	config->getOption (prefix + "DeviceNum", &devnum);
-	for (unsigned int j = 0; j < PARTYTAP_NUM_BUTTONS; j++)
+	for (unsigned int j = 0; j < QUIZKING_NUM_BUTTONS; j++)
 	{
-		config->getOption (prefix + PartyTapNames[j], &button);
+		config->getOption (prefix + QuizKingNames[j], &button);
 
-		PartyTapButtons[j].ButtType[0] = type;
-		PartyTapButtons[j].DeviceNum[0] = devnum;
-		PartyTapButtons[j].ButtonNum[0] = button;
-		PartyTapButtons[j].NumC = 1;
+		QuizKingButtons[j].ButtType[0] = type;
+		QuizKingButtons[j].DeviceNum[0] = devnum;
+		QuizKingButtons[j].ButtonNum[0] = button;
+		QuizKingButtons[j].NumC = 1;
 	}
 
 	// HyperShot
@@ -2322,11 +2318,11 @@ const int DefaultPowerPad[POWERPAD_NUM_DEVICES][POWERPAD_NUM_BUTTONS] =
 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 
-// PartyTap defaults
-const char *PartyTapNames[PARTYTAP_NUM_BUTTONS] =
+// QuizKing defaults
+const char *QuizKingNames[QUIZKING_NUM_BUTTONS] =
 { "0", "1", "2", "3", "4", "5" };
-const char *DefaultPartyTapDevice = "Keyboard";
-const int DefaultPartyTap[PARTYTAP_NUM_BUTTONS] =
+const char *DefaultQuizKingDevice = "Keyboard";
+const int DefaultQuizKing[QUIZKING_NUM_BUTTONS] =
 { SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y };
 
 // HyperShot defaults

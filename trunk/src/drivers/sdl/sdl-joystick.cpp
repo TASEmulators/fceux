@@ -39,7 +39,7 @@ static int s_jinited = 0;
  * Tests if the given button is active on the joystick.
  */
 int
-DTestButtonJoy(BtnConfig *bc)
+DTestButtonJoy(ButtConfig *bc)
 {
 	int x;
 

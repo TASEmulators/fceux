@@ -21,311 +21,208 @@
 #include "common.h"
 #include "dinput.h"
 
-#include "main.h"
-#include "window.h"
-#include "throttle.h"
 #include "input.h"
-#include "directinput/directinput.h"
 #include "keyboard.h"
-#include "keyscan.h"
-#include "utils/bitflags.h"
 
+static HRESULT  ddrval; //mbg merge 7/17/06 made static
+static int background = 0;
+static LPDIRECTINPUTDEVICE7 lpdid=0;
 
-static int backgroundInputBits = 0;
-static LPDIRECTINPUTDEVICE7 deviceHandle=0;
+void KeyboardClose(void)
+{
+	if(lpdid) IDirectInputDevice7_Unacquire(lpdid);
+	lpdid=0;
+}
 
-static driver::input::keyboard::KeysState keyStates = {0,}; // last registered key states
-	// zero for released keys, non-zero for pressed key
-static driver::input::keyboard::KeysState keyStatesDownEvent = {0,}; // non-zero only for keys that were pressed down on last state update
-static driver::input::keyboard::KeysState keys_jd_lock = {0,}; // set after key was pressed and held down through at least one state update
-static driver::input::keyboard::KeysState validKeyMask = {0,}; // contains 0 for key array elements that aren't mapped to anything
+static unsigned int keys[256] = {0,}; // with repeat
+static unsigned int keys_nr[256] = {0,}; // non-repeating
+static unsigned int keys_jd[256] = {0,}; // just-down
+static unsigned int keys_jd_lock[256] = {0,}; // just-down released lock
+int autoHoldKey = 0, autoHoldClearKey = 0;
+int ctr=0;
+void KeyboardUpdateState(void)
+{
+	unsigned char tk[256];
 
-#ifdef KEYBOARDTRANSFORMER_SPECIFIC
-#define KEY_REPEAT_INITIAL_DELAY ((!isSoundEnabled || fps_scale < 64) ? (16) : (64)) // must be >= 0 and <= 255
+	ddrval=IDirectInputDevice7_GetDeviceState(lpdid,256,tk);
+	if (tk[0]) tk[0] = 0;	//adelikat: HACK.  If a keyboard key is recognized as this, the effect is that all non assigned hotkeys are run.  This prevents the key from being used, but also prevent "hotkey explosion".  Also, they essentially couldn't use it anyway since FCEUX doesn't know it is a shift key, and it can't be assigned in the hotkeys
+	// HACK because DirectInput is totally wacky about recognizing the PAUSE/BREAK key
+	if(GetAsyncKeyState(VK_PAUSE)) // normally this should have & 0x8000, but apparently this key is too special for that to work
+		tk[0xC5] = 0x80;
+
+	switch(ddrval)
+	{
+	case DI_OK: //memcpy(keys,tk,256);break;
+		break;
+
+		//mbg 10/8/2008
+		//previously only these two cases were handled. this made dwedit's laptop volume keys freak out.
+		//we're trying this instead
+	default:
+	//case DIERR_INPUTLOST:
+	//case DIERR_NOTACQUIRED:
+		memset(tk,0,256);
+		IDirectInputDevice7_Acquire(lpdid);
+		break;
+	}
+
+	//process keys
+	extern int soundoptions;
+#define SO_OLDUP      32
+
+	extern int soundo;
+	extern int32 fps_scale;
+	int notAlternateThrottle = !(soundoptions&SO_OLDUP) && soundo && ((NoWaiting&1)?(256*16):fps_scale) >= 64;
+#define KEY_REPEAT_INITIAL_DELAY ((!notAlternateThrottle) ? (16) : (64)) // must be >= 0 and <= 255
 #define KEY_REPEAT_REPEATING_DELAY (6) // must be >= 1 and <= 255
+#define KEY_JUST_DOWN_DURATION (1) // must be >= 1 and <= 255	// AnS: changed to 1 to disallow unwanted hits of e.g. F1 after pressing Shift+F1 and quickly releasing Shift
 
-static unsigned int keyStatesAutorepeated[driver::input::keyboard::KEYCOUNT] = {0,}; // key states with autorepeat applied
-#endif // KEYBOARDTRANSFORMER_SPECIFIC
+	for(int i = 0 ; i < 256 ; i++)
+		if(tk[i])
+			if(keys_nr[i] < 255)
+				keys_nr[i]++; // activate key, and count up for repeat
+			else
+				keys_nr[i] = 255 - KEY_REPEAT_REPEATING_DELAY; // oscillate for repeat
+		else
+			keys_nr[i] = 0; // deactivate key
 
+	memcpy(keys,keys_nr,sizeof(keys));
 
-int driver::input::keyboard::Init() {
-	if(deviceHandle)
+	// key-down detection
+	for(int i = 0 ; i < 256 ; i++)
+		if(!keys_nr[i])
+		{
+			keys_jd[i] = 0;
+			keys_jd_lock[i] = 0;
+		}
+		else if(keys_jd_lock[i])
+		{}
+		else if(keys_jd[i]
+		/*&& (i != 0x2A && i != 0x36 && i != 0x1D && i != 0x38)*/)
+		{
+			if(++keys_jd[i] > KEY_JUST_DOWN_DURATION)
+			{
+				keys_jd[i] = 0;
+				keys_jd_lock[i] = 1;
+			}
+		}
+		else
+			keys_jd[i] = 1;
+
+		// key repeat
+		for(int i = 0 ; i < 256 ; i++)
+			if((int)keys[i] >= KEY_REPEAT_INITIAL_DELAY && !(keys[i]%KEY_REPEAT_REPEATING_DELAY))
+				keys[i] = 0;
+
+	extern uint8 autoHoldOn, autoHoldReset;
+	autoHoldOn = autoHoldKey && keys[autoHoldKey] != 0;
+	autoHoldReset = autoHoldClearKey && keys[autoHoldClearKey] != 0;
+}
+
+unsigned int *GetKeyboard(void)
+{
+	return(keys);
+}
+unsigned int *GetKeyboard_nr(void)
+{
+	return(keys_nr);
+}
+unsigned int *GetKeyboard_jd(void)
+{
+	return(keys_jd);
+}
+
+int KeyboardInitialize(void)
+{
+	if(lpdid)
 		return(1);
 
-	deviceHandle = directinput::CreateDevice(GUID_SysKeyboard);
-	if(deviceHandle == NULL)
+	//mbg merge 7/17/06 changed:
+	ddrval=IDirectInput7_CreateDeviceEx(lpDI, GUID_SysKeyboard,IID_IDirectInputDevice7, (LPVOID *)&lpdid,0);
+	//ddrval=IDirectInput7_CreateDeviceEx(lpDI, &GUID_SysKeyboard,&IID_IDirectInputDevice7, (LPVOID *)&lpdid,0);
+	if(ddrval != DI_OK)
 	{
 		FCEUD_PrintError("DirectInput: Error creating keyboard device.");
 		return 0;
 	}
 
-	if(!directinput::SetCoopLevel(deviceHandle, GetMainHWND(), (backgroundInputBits!=0)))
+	ddrval=IDirectInputDevice7_SetCooperativeLevel(lpdid, hAppWnd,(background?DISCL_BACKGROUND:DISCL_FOREGROUND)|DISCL_NONEXCLUSIVE);
+	if(ddrval != DI_OK)
 	{
 		FCEUD_PrintError("DirectInput: Error setting keyboard cooperative level.");
 		return 0;
 	}
-	
-	directinput::Acquire(deviceHandle);
 
-	// any key with scancode not in this list will be ignored
-	validKeyMask[DIK_ESCAPE] = 1;
-	validKeyMask[DIK_1] = 1;
-	validKeyMask[DIK_2] = 1;
-	validKeyMask[DIK_3] = 1;
-	validKeyMask[DIK_4] = 1;
-	validKeyMask[DIK_5] = 1;
-	validKeyMask[DIK_6] = 1;
-	validKeyMask[DIK_7] = 1;
-	validKeyMask[DIK_8] = 1;
-	validKeyMask[DIK_9] = 1;
-	validKeyMask[DIK_0] = 1;
-	validKeyMask[DIK_MINUS] = 1;
-	validKeyMask[DIK_EQUALS] = 1;
-	validKeyMask[DIK_BACK] = 1;
-	validKeyMask[DIK_TAB] = 1;
-	validKeyMask[DIK_Q] = 1;
-	validKeyMask[DIK_W] = 1;
-	validKeyMask[DIK_E] = 1;
-	validKeyMask[DIK_R] = 1;
-	validKeyMask[DIK_T] = 1;
-	validKeyMask[DIK_Y] = 1;
-	validKeyMask[DIK_U] = 1;
-	validKeyMask[DIK_I] = 1;
-	validKeyMask[DIK_O] = 1;
-	validKeyMask[DIK_P] = 1;
-	validKeyMask[DIK_LBRACKET] = 1;
-	validKeyMask[DIK_RBRACKET] = 1;
-	validKeyMask[DIK_RETURN] = 1;
-	validKeyMask[DIK_LCONTROL] = 1;
-	validKeyMask[DIK_A] = 1;
-	validKeyMask[DIK_S] = 1;
-	validKeyMask[DIK_D] = 1;
-	validKeyMask[DIK_F] = 1;
-	validKeyMask[DIK_G] = 1;
-	validKeyMask[DIK_H] = 1;
-	validKeyMask[DIK_J] = 1;
-	validKeyMask[DIK_K] = 1;
-	validKeyMask[DIK_L] = 1;
-	validKeyMask[DIK_SEMICOLON] = 1;
-	validKeyMask[DIK_APOSTROPHE] = 1;
-	validKeyMask[DIK_GRAVE] = 1;
-	validKeyMask[DIK_LSHIFT] = 1;
-	validKeyMask[DIK_BACKSLASH] = 1;
-	validKeyMask[DIK_Z] = 1;
-	validKeyMask[DIK_X] = 1;
-	validKeyMask[DIK_C] = 1;
-	validKeyMask[DIK_V] = 1;
-	validKeyMask[DIK_B] = 1;
-	validKeyMask[DIK_N] = 1;
-	validKeyMask[DIK_M] = 1;
-	validKeyMask[DIK_COMMA] = 1;
-	validKeyMask[DIK_PERIOD] = 1;
-	validKeyMask[DIK_SLASH] = 1;
-	validKeyMask[DIK_RSHIFT] = 1;
-	validKeyMask[DIK_MULTIPLY] = 1;
-	validKeyMask[DIK_LMENU] = 1;
-	validKeyMask[DIK_SPACE] = 1;
-	validKeyMask[DIK_CAPITAL] = 1;
-	validKeyMask[DIK_F1] = 1;
-	validKeyMask[DIK_F2] = 1;
-	validKeyMask[DIK_F3] = 1;
-	validKeyMask[DIK_F4] = 1;
-	validKeyMask[DIK_F5] = 1;
-	validKeyMask[DIK_F6] = 1;
-	validKeyMask[DIK_F7] = 1;
-	validKeyMask[DIK_F8] = 1;
-	validKeyMask[DIK_F9] = 1;
-	validKeyMask[DIK_F10] = 1;
-	validKeyMask[DIK_NUMLOCK] = 1;
-	validKeyMask[DIK_SCROLL] = 1;
-	validKeyMask[DIK_NUMPAD7] = 1;
-	validKeyMask[DIK_NUMPAD8] = 1;
-	validKeyMask[DIK_NUMPAD9] = 1;
-	validKeyMask[DIK_SUBTRACT] = 1;
-	validKeyMask[DIK_NUMPAD4] = 1;
-	validKeyMask[DIK_NUMPAD5] = 1;
-	validKeyMask[DIK_NUMPAD6] = 1;
-	validKeyMask[DIK_ADD] = 1;
-	validKeyMask[DIK_NUMPAD1] = 1;
-	validKeyMask[DIK_NUMPAD2] = 1;
-	validKeyMask[DIK_NUMPAD3] = 1;
-	validKeyMask[DIK_NUMPAD0] = 1;
-	validKeyMask[DIK_DECIMAL] = 1;
-	validKeyMask[DIK_OEM_102] = 1;
-	validKeyMask[DIK_F11] = 1;
-	validKeyMask[DIK_F12] = 1;
-	validKeyMask[DIK_F13] = 1;
-	validKeyMask[DIK_F14] = 1;
-	validKeyMask[DIK_F15] = 1;
-	validKeyMask[DIK_KANA] = 1;
-	validKeyMask[DIK_ABNT_C1] = 1;
-	validKeyMask[DIK_CONVERT] = 1;
-	validKeyMask[DIK_NOCONVERT] = 1;
-	validKeyMask[DIK_YEN] = 1;
-	validKeyMask[DIK_ABNT_C2] = 1;
-	validKeyMask[DIK_NUMPADEQUALS] = 1;
-	validKeyMask[DIK_PREVTRACK] = 1;
-	validKeyMask[DIK_AT] = 1;
-	validKeyMask[DIK_COLON] = 1;
-	validKeyMask[DIK_UNDERLINE] = 1;
-	validKeyMask[DIK_KANJI] = 1;
-	validKeyMask[DIK_STOP] = 1;
-	validKeyMask[DIK_AX] = 1;
-	validKeyMask[DIK_UNLABELED] = 1;
-	validKeyMask[DIK_NEXTTRACK] = 1;
-	validKeyMask[DIK_NUMPADENTER] = 1;
-	validKeyMask[DIK_RCONTROL] = 1;
-	validKeyMask[DIK_MUTE] = 1;
-	validKeyMask[DIK_CALCULATOR] = 1;
-	validKeyMask[DIK_PLAYPAUSE] = 1;
-	validKeyMask[DIK_MEDIASTOP] = 1;
-	validKeyMask[DIK_VOLUMEDOWN] = 1;
-	validKeyMask[DIK_VOLUMEUP] = 1;
-	validKeyMask[DIK_WEBHOME] = 1;
-	validKeyMask[DIK_NUMPADCOMMA] = 1;
-	validKeyMask[DIK_DIVIDE] = 1;
-	validKeyMask[DIK_SYSRQ] = 1;
-	validKeyMask[DIK_RMENU] = 1;
-	validKeyMask[DIK_PAUSE] = 1;
-	validKeyMask[DIK_HOME] = 1;
-	validKeyMask[DIK_UP] = 1;
-	validKeyMask[DIK_PRIOR] = 1;
-	validKeyMask[DIK_LEFT] = 1;
-	validKeyMask[DIK_RIGHT] = 1;
-	validKeyMask[DIK_END] = 1;
-	validKeyMask[DIK_DOWN] = 1;
-	validKeyMask[DIK_NEXT] = 1;
-	validKeyMask[DIK_INSERT] = 1;
-	validKeyMask[DIK_DELETE] = 1;
-	validKeyMask[DIK_LWIN] = 1;
-	validKeyMask[DIK_RWIN] = 1;
-	validKeyMask[DIK_APPS] = 1;
-	validKeyMask[DIK_POWER] = 1;
-	validKeyMask[DIK_SLEEP] = 1;
-	validKeyMask[DIK_WAKE] = 1;
-	validKeyMask[DIK_WEBSEARCH] = 1;
-	validKeyMask[DIK_WEBFAVORITES] = 1;
-	validKeyMask[DIK_WEBREFRESH] = 1;
-	validKeyMask[DIK_WEBSTOP] = 1;
-	validKeyMask[DIK_WEBFORWARD] = 1;
-	validKeyMask[DIK_WEBBACK] = 1;
-	validKeyMask[DIK_MYCOMPUTER] = 1;
-	validKeyMask[DIK_MAIL] = 1;
-	validKeyMask[DIK_MEDIASELECT] = 1;
+	ddrval=IDirectInputDevice7_SetDataFormat(lpdid,&c_dfDIKeyboard);
+	if(ddrval != DI_OK)
+	{
+		FCEUD_PrintError("DirectInput: Error setting keyboard data format.");
+		return 0;
+	}
 
+	////--set to buffered mode
+	//DIPROPDWORD dipdw;
+	//dipdw.diph.dwSize = sizeof(DIPROPDWORD);
+	//dipdw.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+	//dipdw.diph.dwObj = 0;
+	//dipdw.diph.dwHow = DIPH_DEVICE;
+	//dipdw.dwData = 64;
+
+	//ddrval = IDirectInputDevice7_SetProperty(lpdid,DIPROP_BUFFERSIZE, &dipdw.diph);
+	////--------
+
+	ddrval=IDirectInputDevice7_Acquire(lpdid);
+	/* Not really a fatal error. */
+	//if(ddrval != DI_OK)
+	//{
+	// FCEUD_PrintError("DirectInput: Error acquiring keyboard.");
+	// return 0;
+	//}
 	return 1;
 }
 
-void driver::input::keyboard::Kill()
+static bool curr = false;
+
+
+static void UpdateBackgroundAccess(bool on)
 {
-	if(deviceHandle) directinput::DestroyDevice(deviceHandle);
-	deviceHandle = 0;
-}
+	if(curr == on) return;
 
-void driver::input::keyboard::Update()
-{
-	unsigned char deviceState[256];
-	bool gotState = directinput::GetState(deviceHandle, sizeof(deviceState), deviceState);
-
-	for(int k = 0 ; k < KEYCOUNT ; ++k) {
-		if(k < sizeof(deviceState) && validKeyMask[k] && FL_TEST(deviceState[k], 0x80) != 0) {
-			keyStates[k] = 1;
-		}
-		else keyStates[k] = 0; // deactivate key
-
-		// key-down detection
-		if(keyStates[k] == 0) {
-			// key isn't pressed
-			keyStatesDownEvent[k] = 0;
-			keys_jd_lock[k] = 0;
-		}
-		else if(keys_jd_lock[k] != 0) {
-			// key was pressed before and already got through its 'down' event
-		}
-		else {
-			// key is entering 'down' state or still in it from before
-			if(++keyStatesDownEvent[k] > 1) {
-				keyStatesDownEvent[k] = 0;
-				keys_jd_lock[k] = 1;
-			}
-		}
-	}
-
-#ifdef KEYBOARDTRANSFORMER_SPECIFIC
-	// autorepeat keys
-	for(int k = 0 ; k < KEYCOUNT ; ++k) {
-		if(keyStatesDownEvent[k] != 0) {
-			// key just went down, set up for repeat
-			keyStatesAutorepeated[k] = KEY_REPEAT_INITIAL_DELAY;
-		}
-		else if(keys_jd_lock[k] != 0) {
-			// key remains pressed
-			if(keyStatesAutorepeated[k] > 0) {
-				--keyStatesAutorepeated[k]; // advance counter
-			}
-			else {
-				keyStatesAutorepeated[k] = KEY_REPEAT_REPEATING_DELAY; // restart counter
-			}
-		}
-		else keyStatesAutorepeated[k] = 0;
-	}
-#endif // KEYBOARDTRANSFORMER_SPECIFIC
-}
-
-
-bool driver::input::keyboard::TestButton(const BtnConfig* bc) {
-	for(uint32 x=0; x<bc->NumC; ++x) {
-		if(bc->ButtType[x] == BtnConfig::BT_KEYBOARD) {
-			if(keyStates[bc->GetScanCode(x)]) {
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-driver::input::keyboard::KeysState_const driver::input::keyboard::GetState() {
-	return keyStates;
-}
-
-driver::input::keyboard::KeysState_const driver::input::keyboard::GetStateJustPressed() {
-	return keyStatesDownEvent;
-}
-
-#ifdef KEYBOARDTRANSFORMER_SPECIFIC
-unsigned int *GetKeyboardAutorepeated() {
-	return keyStatesAutorepeated;
-}
-#endif // KEYBOARDTRANSFORMER_SPECIFIC
-
-
-static void UpdateBackgroundAccess(bool enable) {
-	if(!deviceHandle)
+	curr = on;
+	if(!lpdid)
 		return;
 
-	static bool bkgModeEnabled = false;
-	if(bkgModeEnabled != enable) {
-		bkgModeEnabled = enable;
+	ddrval=IDirectInputDevice7_Unacquire(lpdid);
 
-		if(!directinput::SetCoopLevel(deviceHandle, GetMainHWND(), bkgModeEnabled))
-		{
-			FCEUD_PrintError("DirectInput: Error setting keyboard cooperative level.");
-			return;
-		}
-
-		directinput::Acquire(deviceHandle);
+	if(on)
+		ddrval=IDirectInputDevice7_SetCooperativeLevel(lpdid, hAppWnd,DISCL_BACKGROUND|DISCL_NONEXCLUSIVE);
+	else
+		ddrval=IDirectInputDevice7_SetCooperativeLevel(lpdid, hAppWnd,DISCL_FOREGROUND|DISCL_NONEXCLUSIVE);
+	if(ddrval != DI_OK)
+	{
+		FCEUD_PrintError("DirectInput: Error setting keyboard cooperative level.");
+		return;
 	}
+
+	ddrval=IDirectInputDevice7_Acquire(lpdid);
+	return;
 }
 
-void driver::input::keyboard::SetBackgroundAccessBit(int bit)
+void KeyboardSetBackgroundAccessBit(int bit)
 {
-	FL_SET(backgroundInputBits, 1<<bit);
-	UpdateBackgroundAccess(backgroundInputBits != 0);
+	background |= (1<<bit);
+	UpdateBackgroundAccess(background != 0);
+}
+void KeyboardClearBackgroundAccessBit(int bit)
+{
+	background &= ~(1<<bit);
+	UpdateBackgroundAccess(background != 0);
 }
 
-void driver::input::keyboard::ClearBackgroundAccessBit(int bit)
+void KeyboardSetBackgroundAccess(bool on)
 {
-	FL_CLEAR(backgroundInputBits, 1<<bit);
-	UpdateBackgroundAccess(backgroundInputBits != 0);
+	if(on)
+		KeyboardSetBackgroundAccessBit(KEYBACKACCESS_OLDSTYLE);
+	else
+		KeyboardClearBackgroundAccessBit(KEYBACKACCESS_OLDSTYLE);
 }

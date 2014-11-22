@@ -176,9 +176,10 @@ int windowedfailed = 0;
 
 static volatile int _userpause = 0; //mbg merge 7/18/06 changed tasbuild was using this only in a couple of places
 
+extern int autoHoldKey, autoHoldClearKey;
 extern int frame_display, input_display;
 
-int isSoundEnabled = 1;
+int soundo = 1;
 
 int srendlinen = 8;
 int erendlinen = 231;
@@ -196,8 +197,6 @@ int BotFramesSkipped = 0;
 bool SingleInstanceOnly=false; // Enable/disable option
 bool DoInstantiatedExit=false;
 HWND DoInstantiatedExitWindow;
-
-int changerecursive = 0;
 
 // Internal functions
 void SetDirs()
@@ -288,6 +287,7 @@ void CreateDirs()
 
 
 //Fills the BaseDirectory string
+//TODO: Potential buffer overflow caused by limited size of BaseDirectory?
 void GetBaseDirectory(void)
 {
 	char temp[2048];
@@ -485,18 +485,13 @@ void DoPriority()
 
 int DriverInitialize()
 {
-	if(!isSoundEnabled || InitSound()) {
-		InitVideoDriver();
-		{
-			if(InitInputDriver()) {
-				return 1;
-			}
-			ShutdownVideoDriver();
-		}
-		if(isSoundEnabled) TrashSoundNow();
-	}
+	if(soundo)
+		soundo = InitSound();
 
-	return 0;
+	InitVideoDriver();
+	InitInputStuff();             /* Initialize DInput interfaces. */
+
+	return 1;
 }
 
 static void DriverKill(void)
@@ -506,11 +501,11 @@ static void DriverKill(void)
 	sprintf(TempArray, "%s/%s", BaseDirectory.c_str(),cfgFile.c_str());
 	SaveConfig(TempArray);
 
-	KillInputDriver();
+	DestroyInput();
 
 	ShutdownVideoDriver();
 
-	if(isSoundEnabled)
+	if(soundo)
 	{
 		TrashSoundNow();
 	}
@@ -651,20 +646,15 @@ int main(int argc,char *argv[])
 	{
         FCEUI_SetGameGenie(genie!=0);
 
-        isSoundEnabled = !!isSoundEnabled;
+        soundo = !!soundo;
         frame_display = !!frame_display;
+        allowUDLR = !!allowUDLR;
         pauseAfterPlayback = !!pauseAfterPlayback;
         closeFinishedMovie = !!closeFinishedMovie;
         EnableBackgroundInput = !!EnableBackgroundInput;
 
-		if(EnableBackgroundInput != 0) {
-			driver::input::keyboard::SetBackgroundAccessBit(driver::input::keyboard::BKGINPUT_GENERAL);
-			driver::input::joystick::SetBackgroundAccessBit(driver::input::joystick::BKGINPUT_GENERAL);
-		}
-		else {
-			driver::input::keyboard::ClearBackgroundAccessBit(driver::input::keyboard::BKGINPUT_GENERAL);
-			driver::input::joystick::ClearBackgroundAccessBit(driver::input::joystick::BKGINPUT_GENERAL);
-		}
+		KeyboardSetBackgroundAccess(EnableBackgroundInput!=0);
+		JoystickSetBackgroundAccess(EnableBackgroundInput!=0);
 
         FCEUI_SetSoundVolume(soundvolume);
 		FCEUI_SetSoundQuality(soundquality);
@@ -674,6 +664,10 @@ int main(int argc,char *argv[])
 		FCEUI_SetNoiseVolume(soundNoisevol);
 		FCEUI_SetPCMVolume(soundPCMvol);
 	}
+
+	//Since a game doesn't have to be loaded before the GUI can be used, make
+	//sure the temporary input type variables are set.
+	ParseGIInput(NULL);
 
 	// Initialize default directories
 	CreateDirs();
@@ -726,6 +720,12 @@ int main(int argc,char *argv[])
 				return 0;
 			}
 		}
+	}
+
+	if(!InitDInput())
+	{
+		do_exit();
+		return 1;
 	}
 
 	if(!DriverInitialize())
@@ -849,11 +849,8 @@ doloopy:
 		//xbsave = NULL;
 		RedrawWindow(hAppWnd,0,0,RDW_ERASE|RDW_INVALIDATE);
 	}
-	else {
-		// no game; still handle input
-		FCEUD_UpdateInput(UPDATEINPUT_KEYBOARD|UPDATEINPUT_JOYSTICKS|UPDATEINPUT_COMMANDS);
-	}
-
+  else
+    UpdateRawInputAndHotkeys();
 	Sleep(50);
 	if(!exiting)
 		goto doloopy;
@@ -891,7 +888,7 @@ void win_debuggerLoop()
 	while(FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
 	{
 		Sleep(50);
-		FCEUD_UpdateInput(UPDATEINPUT_EVERYTHING);
+		FCEUD_UpdateInput();
 		_updateWindow();
 		// HACK: break when Frame Advance is pressed
 		extern bool frameAdvanceRequested;
@@ -913,7 +910,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 	win_SoundSetScale(fps_scale); //If turboing and mute turbo is true, bypass this
 
 	//write all the sound we generated.
-	if(isSoundEnabled && Buffer && Count && !(muteTurbo && turbo)) {
+	if(soundo && Buffer && Count && !(muteTurbo && turbo)) {
 		win_SoundWriteData(Buffer,Count); //If turboing and mute turbo is true, bypass this
 	}
 
@@ -936,7 +933,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 	bool throttle = true;
 	if( (eoptions&EO_NOTHROTTLE) )
 	{
-		if(!isSoundEnabled) throttle = false;
+		if(!soundo) throttle = false;
 	}
 
 	if(throttle)  //if throttling is enabled..
@@ -946,7 +943,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 				)
 				//then throttle
 				while(SpeedThrottle()) {
-					FCEUD_UpdateInput(UPDATEINPUT_EVERYTHING);
+					FCEUD_UpdateInput();
 					_updateWindow();
 				}
 
@@ -976,7 +973,9 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 	//}
 
 	//make sure to update the input once per frame
-	FCEUD_UpdateInput(UPDATEINPUT_EVERYTHING);
+	FCEUD_UpdateInput();
+
+
 }
 
 static void FCEUD_MakePathDirs(const char *fname)

@@ -31,8 +31,6 @@ void PowerNES(void);
 void SetAutoFireOffset(int offset);
 void SetAutoFirePattern(int onframes, int offframes);
 void AutoFire(void);
-int GetRapidAlternatorState(void);
-
 void FCEUI_RewindToLastAutosave(void);
 
 //mbg 7/23/06

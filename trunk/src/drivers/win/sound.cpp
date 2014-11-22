@@ -393,7 +393,7 @@ static void UpdateSD(HWND hwndDlg)
 {
 	int t;
 
-	CheckDlgButton(hwndDlg,CHECK_SOUND_ENABLED,isSoundEnabled?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(hwndDlg,CHECK_SOUND_ENABLED,soundo?BST_CHECKED:BST_UNCHECKED);
 	CheckDlgButton(hwndDlg,CHECK_SOUND_8BIT,(soundoptions&SO_FORCE8BIT)?BST_CHECKED:BST_UNCHECKED);
 	// The option formerly flagged by SO_SECONDARY can no longer be disabled.
 	// CheckDlgButton(hwndDlg,123,(soundoptions&SO_SECONDARY)?BST_CHECKED:BST_UNCHECKED);
@@ -410,7 +410,7 @@ static void UpdateSD(HWND hwndDlg)
 	else if(soundrate==96000) t=4;
 	SendDlgItemMessage(hwndDlg,COMBO_SOUND_RATE,CB_SETCURSEL,t,(LPARAM)(LPSTR)0);
 
-	if (!isSoundEnabled) 
+	if (!soundo) 
 	{
 		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_MUTETURBO),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_MUTEFA),FALSE);
@@ -628,10 +628,10 @@ case WM_COMMAND:
 						if (!turbo) FCEUI_SetSoundQuality(0);	///If turbo is running, don't do this call, turbo will handle it instead
 						UpdateSD(hwndDlg);
 					}
-					if(isSoundEnabled)
+					if(soundo)
 					{
 						TrashSoundNow();
-						isSoundEnabled=InitSound();
+						soundo=InitSound();
 						UpdateSD(hwndDlg);
 					}
 				}
@@ -651,29 +651,29 @@ case WM_COMMAND:
 		switch(LOWORD(wParam))
 		{
 		case CHECK_SOUND_8BIT:soundoptions^=SO_FORCE8BIT;   
-			if(isSoundEnabled)
+			if(soundo)
 			{
 				TrashSoundNow();
-				isSoundEnabled=InitSound();
+				soundo=InitSound();
 				UpdateSD(hwndDlg);                                   
 			}
 			break;
 		// The option formerly flagged by SO_SECONDARY can no longer be disabled.
 #if 0
 		case 123:soundoptions^=SO_SECONDARY;
-			if(isSoundEnabled)
+			if(soundo)
 			{
 				TrashSoundNow();
-				isSoundEnabled=InitSound();
+				soundo=InitSound();
 				UpdateSD(hwndDlg);
 			}
 			break;
 #endif
 		case CHECK_SOUND_GLOBAL_FOCUS:soundoptions^=SO_GFOCUS;
-			if(isSoundEnabled)
+			if(soundo)
 			{
 				TrashSoundNow();
-				isSoundEnabled=InitSound();
+				soundo=InitSound();
 				UpdateSD(hwndDlg);
 			}
 			break;
@@ -682,10 +682,10 @@ case WM_COMMAND:
 		// The option formerly flagged by SO_OLDUP can no longer be enabled.
 #if 0
 		case 131:soundoptions^=SO_OLDUP;
-			if(isSoundEnabled)
+			if(soundo)
 			{
 				TrashSoundNow();
-				isSoundEnabled=InitSound();
+				soundo=InitSound();
 				UpdateSD(hwndDlg);
 			}
 			break;
@@ -693,9 +693,9 @@ case WM_COMMAND:
 		case CHECK_SOUND_MUTETURBO:
 			muteTurbo ^= 1;
 			break;	
-		case CHECK_SOUND_ENABLED:isSoundEnabled=!isSoundEnabled;
-			if(!isSoundEnabled) TrashSound();
-			else isSoundEnabled=InitSound();
+		case CHECK_SOUND_ENABLED:soundo=!soundo;
+			if(!soundo) TrashSound();
+			else soundo=InitSound();
 			UpdateSD(hwndDlg);
 			break;
 		case IDC_SOUND_RESTOREDEFAULTVOL:
@@ -746,7 +746,7 @@ void UpdateSoundChannelQualityMode(HWND hwndDlg)
 	if (soundquality)	//If high or highest
 	{
 		//Enable sliders & corresponding group boxes
-		if (isSoundEnabled)
+		if (soundo)
 		{
 			EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2),TRUE);
 			EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE),TRUE);

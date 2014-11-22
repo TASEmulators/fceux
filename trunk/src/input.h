@@ -6,10 +6,6 @@
 
 #include <ostream>
 
-// macro def used to isolate transformer board specific code
-#define KEYBOARDTRANSFORMER_SPECIFIC
-
-
 void LagCounterToggle(void);
 
 class MovieRecord;
@@ -109,13 +105,16 @@ void FCEU_DoSimpleCommand(int cmd);
 
 enum EMUCMD
 {
-	EMUCMD_NONE=-1,
 	EMUCMD_POWER=0,
 	EMUCMD_RESET,
 	EMUCMD_PAUSE,
 	EMUCMD_FRAME_ADVANCE,
 	EMUCMD_SCREENSHOT,
 	EMUCMD_HIDE_MENU_TOGGLE,
+	//fixed: current command key handling handle only command table record index with
+	//the same as cmd enumerarot index, or else does wrong key mapping, fixed it but placed this enum here anyway
+	//...i returned it back.
+	//adelikat, try to find true cause of problem before reversing it
 	EMUCMD_EXIT,
 
 	EMUCMD_SPEED_SLOWEST,
@@ -172,9 +171,8 @@ enum EMUCMD
 	EMUCMD_MOVIE_INPUT_DISPLAY_TOGGLE,
 	EMUCMD_MOVIE_ICON_DISPLAY_TOGGLE,
 
-#ifdef _S9XLUA_H
 	EMUCMD_SCRIPT_RELOAD,
-#endif
+
 	EMUCMD_SOUND_TOGGLE,
 	EMUCMD_SOUND_VOLUME_UP,
 	EMUCMD_SOUND_VOLUME_DOWN,
@@ -244,12 +242,13 @@ enum EMUCMD
 	//-----------------------------
 	//keep adding these in order of newness or else the hotkey binding configs will get messed up...
 	EMUCMD_FPS_DISPLAY_TOGGLE,
-	EMUCMD_NUM,
+
+	EMUCMD_MAX
 };
 
 enum EMUCMDTYPE
 {
-	EMUCMDTYPE_MISC = 0,
+	EMUCMDTYPE_MISC=0,
 	EMUCMDTYPE_SPEED,
 	EMUCMDTYPE_STATE,
 	EMUCMDTYPE_MOVIE,
@@ -275,8 +274,8 @@ enum EMUCMDFLAG
 
 struct EMUCMDTABLE
 {
-	EMUCMD cmd;
-	EMUCMDTYPE type;
+	int cmd;
+	int type;
 	EMUCMDFN* fn_on;
 	EMUCMDFN* fn_off;
 	int state;
@@ -286,64 +285,10 @@ struct EMUCMDTABLE
 
 extern struct EMUCMDTABLE FCEUI_CommandTable[];
 
-// emulator command key combo (key scan + optional modifiers)
-typedef struct keyCombo_ {
-public:
-	keyCombo_(uint32 combo);
-
-public:
-	uint32 get(void) const;
-	void assign(uint32 combo);
-
-	uint32 getKey(void) const; // get key scan code
-	void setKey(int keyCode);
-
-	uint32 getMeta() const; // get combo WITHOUT key scan code
-	void setMeta(int meta);
-
-	uint32 getModifiers(void) const; // get modifier flags
-	void setModifiers(uint32 mask);
-	void clearModifiers(uint32 mask);
-
-	bool isEmpty(void) const;
-
-public:
-	static const uint32 KEY_MASK = 0xff;
-	static const uint32 META_MASK = (~KEY_MASK);
-	static const uint32 MOD_MASK = 0xffff0000;
-	static const uint32 LSHIFT_BIT = (1<<16);
-	static const uint32 RSHIFT_BIT = (1<<17);
-	static const uint32 SHIFT_BIT = LSHIFT_BIT|RSHIFT_BIT;
-	static const uint32 LCTRL_BIT = (1<<18);
-	static const uint32 RCTRL_BIT = (1<<19);
-	static const uint32 CTRL_BIT = LCTRL_BIT|RCTRL_BIT;
-	static const uint32 LALT_BIT = (1<<20);
-	static const uint32 RALT_BIT = (1<<21);
-	static const uint32 ALT_BIT = LALT_BIT|RALT_BIT;
-
-private:
-	uint32 mCombo;
-} KeyCombo;
-
-KeyCombo GetCommandKeyCombo(EMUCMD command);
-void SetCommandKeyCombo(EMUCMD command, KeyCombo combo);
-
-///A callback that the emu core uses to poll the state of a given emulator command key
-typedef int TestCommandState(EMUCMD cmd);
-///Assign callback function to test command keycombo state
-void FCEUI_SetTestCommandHotkeyCallback(TestCommandState* cbf);
-///Signals the emu core to poll for emulator commands and take actions
-void FCEUI_HandleEmuCommands(void);
-
 extern unsigned int lagCounter;
 extern bool lagCounterDisplay;
 extern char lagFlag;
 extern bool turbo;
 void LagCounterReset();
-
-
-bool& _FIXME_GetReplaceP2StartWithMicrophoneVar(void);
-int* _FIXME_GetCommandMappingVar(void);
-int _FIXME_GetCommandMappingVarSize(void);
 
 #endif //_INPUT_H_

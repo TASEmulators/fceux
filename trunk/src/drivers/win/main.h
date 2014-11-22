@@ -45,6 +45,7 @@ extern int status_icon;
 extern int frame_display;
 extern int rerecord_display;
 extern int input_display;
+extern int allowUDLR;
 extern int pauseAfterPlayback;
 extern int closeFinishedMovie;
 extern int suggestReadOnlyReplay;
@@ -110,12 +111,12 @@ extern bool force_grayscale;
 //mbg merge 7/17/06 did these have to be unsigned?
 //static int srendline, erendline;
 
-extern int changerecursive;
+static int changerecursive=0;
 
 /// Contains the base directory of FCE
 extern std::string BaseDirectory;
 
-extern int isSoundEnabled;
+extern int soundo;
 extern int eoptions;
 extern int soundoptions;
 extern uint8 *xbsave;

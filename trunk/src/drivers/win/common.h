@@ -29,7 +29,7 @@
 extern HWND hAppWnd;
 extern HINSTANCE fceu_hInstance;
 
-extern int skipVSync;
+extern int NoWaiting;
 
 extern int eoptions;
 

@@ -22,7 +22,7 @@
 #include "share.h"
 #include "suborkb.h"
 
-#define AK(x)	SBRKB_ ## x
+#define AK(x)	FKB_ ## x
 
 static uint8 bufit[0x66];
 static uint8 kspos, kstrobe;

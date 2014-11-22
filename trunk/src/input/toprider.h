@@ -1,1 +1,0 @@
-#define NUMKEYS_TOPRIDER (8)

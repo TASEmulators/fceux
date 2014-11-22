@@ -82,7 +82,7 @@ void FCEUD_NetworkClose(void)
   wsainit=0;
  }
  /* Make sure blocking is returned to normal once network play is stopped. */
- skipVSync = 0;
+ NoWaiting&=~2;
  FCEUDnetplay = 0;
  FCEUI_NetplayStop();
 }
@@ -344,7 +344,7 @@ static int recv_tcpwrap(uint8 *buf, int len)
 
 int FCEUD_RecvData(void *data, uint32 len)
 {
-  skipVSync = 0;
+  NoWaiting&=~2;
 
   for(;;)
   {   
@@ -370,7 +370,7 @@ int FCEUD_RecvData(void *data, uint32 len)
     unsigned long beefie;
     if(!ioctlsocket(Socket,FIONREAD,&beefie))
      if(beefie)
-      skipVSync = 1;
+      NoWaiting|=2;
     return(1);
    }
    else

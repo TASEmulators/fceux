@@ -59,11 +59,11 @@ extern const char *PowerPadNames[POWERPAD_NUM_BUTTONS];
 extern const char *DefaultPowerPadDevice[POWERPAD_NUM_DEVICES];
 extern const int DefaultPowerPad[POWERPAD_NUM_DEVICES][POWERPAD_NUM_BUTTONS];
 
-// PartyTap defaults
-#define PARTYTAP_NUM_BUTTONS 6
-extern const char *PartyTapNames[PARTYTAP_NUM_BUTTONS];
-extern const char *DefaultPartyTapDevice;
-extern const int DefaultPartyTap[PARTYTAP_NUM_BUTTONS];
+// QuizKing defaults
+#define QUIZKING_NUM_BUTTONS 6
+extern const char *QuizKingNames[QUIZKING_NUM_BUTTONS];
+extern const char *DefaultQuizKingDevice;
+extern const int DefaultQuizKing[QUIZKING_NUM_BUTTONS];
 
 // HyperShot defaults
 #define HYPERSHOT_NUM_BUTTONS 4

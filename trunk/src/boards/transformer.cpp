@@ -23,10 +23,7 @@
 static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
 
-unsigned int *GetKeyboardAutorepeated(void);	// FIXME: 10/28 - now implemented in SDL as well.  should we rename this to a FCEUI_* function?
-	// Rpahut: don't. no actual game use or will ever use PC keyboard; even this transformer thing itself is quite questionable
-	// Cah4e3: nope, http://www.youtube.com/watch?v=jnOPwUJCvmQ see the small connector on the cart? this is a standart PC AT/XT keyboard connector,
-	// the program is hacked to use it and it works just like the PC with it - accepts IRQ signal from the keyboard.
+unsigned int *GetKeyboard(void);	// FIXME: 10/28 - now implemented in SDL as well.  should we rename this to a FCEUI_* function?
 
 static unsigned int *TransformerKeys, oldkeys[256];
 static int TransformerCycleCount, TransformerChar = 0;
@@ -36,7 +33,7 @@ static void TransformerIRQHook(int a) {
 	if (TransformerCycleCount >= 1000) {
 		uint32 i;
 		TransformerCycleCount -= 1000;
-		TransformerKeys = GetKeyboardAutorepeated();
+		TransformerKeys = GetKeyboard();
 
 		for (i = 0; i < 256; i++) {
 			if (oldkeys[i] != TransformerKeys[i]) {

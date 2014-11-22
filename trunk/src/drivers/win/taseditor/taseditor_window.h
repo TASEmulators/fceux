@@ -1,5 +1,4 @@
 // Specification file for TASEDITOR_WINDOW class
-#include "../../input.h"
 
 enum TASEDITOR_WINDOW_ITEMS
 {
@@ -66,7 +65,7 @@ struct WindowItemData
 	char tooltipTextBase[TOOLTIP_TEXT_MAX_LEN];
 	char tooltipText[TOOLTIP_TEXT_MAX_LEN];
 	bool isStaticRect;
-	EMUCMD hotkeyEmuCmd;
+	int hotkeyEmuCmd;
 	HWND tooltipHWND;
 };
 

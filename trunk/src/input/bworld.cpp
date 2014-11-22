@@ -65,10 +65,10 @@ static void Update(void *data, int arg)
  }
 }
 
-static INPUTCFC BarcodeBattler={Read,Write,0,Update,0,0};
+static INPUTCFC BarcodeWorld={Read,Write,0,Update,0,0};
 
-INPUTCFC *FCEU_InitBarcodeBattler(void)
+INPUTCFC *FCEU_InitBarcodeWorld(void)
 {
- return(&BarcodeBattler);
+ return(&BarcodeWorld);
 }
 

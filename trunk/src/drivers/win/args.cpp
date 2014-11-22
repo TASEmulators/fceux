@@ -21,8 +21,7 @@
 #include "main.h"
 #include "args.h"
 #include "common.h"
-#include "drivers/common/args.h"
-#include "drivers/win/input.h"
+#include "../common/args.h"
 
 char* MovieToLoad = 0;		//Loads a movie file on startup
 char* StateToLoad = 0;		//Loads a savestate on startup (after a movie is loaded, if any)
@@ -56,7 +55,7 @@ char *ParseArgies(int argc, char *argv[])
          {"-stopframe",0,&replayStopFrameSetting,0},
          {"-framedisplay",0,&frame_display,0},
          {"-inputdisplay",0,&input_display,0},
-         {"-allowUDLR",0,&_FIXME_GetAllowUDLRVar(),0},
+         {"-allowUDLR",0,&allowUDLR,0},
          {"-stopmovie",0,&pauseAfterPlayback,0},
          {"-shutmovie",0,&closeFinishedMovie,0},
          {"-bginput",0,&EnableBackgroundInput,0},

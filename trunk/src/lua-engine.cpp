@@ -27,7 +27,6 @@
 
 #ifdef WIN32
 #include "drivers/win/common.h"
-#include "drivers/win/input.h"
 #include "drivers/win/taseditor/selection.h"
 #include "drivers/win/taseditor/laglog.h"
 #include "drivers/win/taseditor/markers.h"
@@ -2397,7 +2396,8 @@ static int joypad_getimmediate(lua_State *L)
 	}
 	// Currently only supports Windows, sorry...
 #ifdef WIN32
-	uint8 buttons = GetGamepadPressedPhysical() >> ((which - 1) * 8);
+	extern uint32 GetGamepadPressedImmediate();
+	uint8 buttons = GetGamepadPressedImmediate() >> ((which - 1) * 8);
 
 	lua_newtable(L);
 	for (int i = 0; i < 8; ++i)

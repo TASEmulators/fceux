@@ -18,8 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-// TODO: replace literals with proper DirectInput DIK_* symbols
-
 #define SCAN_TILDE	0x29
 #define SCAN_1		0x02
 #define SCAN_2		0x03
@@ -127,5 +125,5 @@
 #define SCAN_F11                0x57
 #define SCAN_F12                0x58
  
-#define SCANCODE(k) SCAN_##k
+#define MKK(k) SCAN_##k
 #define MKK_COUNT (256)
