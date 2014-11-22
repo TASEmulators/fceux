@@ -24,7 +24,7 @@ opts.AddVariables(
   BoolVariable('NEWPPU',    'Enable new PPU core', 1),
   BoolVariable('CREATE_AVI', 'Enable avi creation support (SDL only)', 1),
   BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', 1),
-  BoolVariable('SYSTEM_LUA','Use system lua instead of static lua provided with fceux', 1),
+  BoolVariable('SYSTEM_LUA','Use system lua instead of static lua provided with fceux', 0),
   BoolVariable('SYSTEM_MINIZIP', 'Use system minizip instead of static minizip provided with fceux', 0),
   BoolVariable('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
   BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 0),
@@ -138,17 +138,21 @@ else:
       # Should work on any *nix
       env.Append(CCFLAGS = ["-DLUA_USE_LINUX"])
     lua_available = False
-    if conf.CheckLib('lua5.1'):
-      env.Append(LINKFLAGS = ["-ldl", "-llua5.1"])
-      env.Append(CCFLAGS = ["-I/usr/include/lua5.1"])
+    if env['SYSTEM_LUA']:
+      if conf.CheckLib('lua5.1'):
+        env.Append(LINKFLAGS = ["-ldl", "-llua5.1"])
+        env.Append(CCFLAGS = ["-I/usr/include/lua5.1"])
+        lua_available = True
+      elif conf.CheckLib('lua'):
+        env.Append(LINKFLAGS = ["-ldl", "-llua"])
+        env.Append(CCFLAGS = ["-I/usr/include/lua"])
+        lua_available = True
+      if lua_available == False:
+        print 'Could not find liblua, exiting!'
+        Exit(1)
+    else:
+      env.Append(CCFLAGS = ["-Isrc/lua/src"])
       lua_available = True
-    elif conf.CheckLib('lua'):
-      env.Append(LINKFLAGS = ["-ldl", "-llua"])
-      env.Append(CCFLAGS = ["-I/usr/include/lua"])
-      lua_available = True
-    if lua_available == False:
-      print 'Could not find liblua, exiting!'
-      Exit(1)
   # "--as-needed" no longer available on OSX (probably BSD as well? TODO: test)
   if env['PLATFORM'] != 'darwin':
     env.Append(LINKFLAGS=['-Wl,--as-needed'])
