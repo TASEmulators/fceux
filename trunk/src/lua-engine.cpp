@@ -274,9 +274,14 @@ static void FCEU_LuaOnStop()
 	gui_used = GUI_CLEAR;
 	//if (wasPaused && !FCEUI_EmulationPaused())
 	//	FCEUI_ToggleEmulationPause();
+
+	//zero 21-nov-2014 - this variable doesnt exist outside windows so it cant have this feature
+	#ifdef _MSC_VER
 	if (fps_scale != 256)							//thanks, we already know it's on normal speed
 		FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);	//TODO: Ideally lua returns the speed to the speed the user set before running the script
 													//rather than returning it to normal, and turbo off.  Perhaps some flags and a FCEUD_GetEmulationSpeed function
+	#endif
+
 	turbo = false;
 	//FCEUD_TurboOff();
 #ifdef WIN32
