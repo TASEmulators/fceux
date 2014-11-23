@@ -151,6 +151,7 @@ else:
         print 'Could not find liblua, exiting!'
         Exit(1)
     else:
+      env.Append(LINKFLAGS = ["-ldl", "-llua5.1"])
       env.Append(CCFLAGS = ["-Isrc/lua/src"])
       lua_available = True
   # "--as-needed" no longer available on OSX (probably BSD as well? TODO: test)
