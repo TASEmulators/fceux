@@ -182,6 +182,17 @@ DECLFW(MMC3_IRQWrite) {
 	}
 }
 
+// KT-008 boards hack 2-in-1, TODO assign to new ines mapper, most dump of KT-boards on the net are mapper 4, so need database or goodnes fix support
+DECLFW(KT008HackWrite) {
+//	FCEU_printf("%04x:%04x\n",A,V);
+	switch (A & 3) {
+	case 0: EXPREGS[0] = V; FixMMC3PRG(MMC3_cmd); break;
+	case 1: break;	// unk
+	case 2: break;	// unk
+	case 3: break;	// unk
+	}
+}
+
 static void ClockMMC3Counter(void) {
 	int count = IRQCount;
 	if (!count || IRQReload) {
@@ -220,7 +231,10 @@ static void GENCWRAP(uint32 A, uint8 V) {
 }
 
 static void GENPWRAP(uint32 A, uint8 V) {
-	setprg8(A, V & 0x7F);	// [NJ102] Mo Dao Jie (C) has 1024Mb MMC3 BOARD, maybe something other will be broken
+// [NJ102] Mo Dao Jie (C) has 1024Mb MMC3 BOARD, maybe something other will be broken
+// also HengGe BBC-2x boards enables this mode as default board mode at boot up
+	setprg8(A, (V & 0x7F) | ((EXPREGS[0] & 4) << 4));
+// KT-008 boards hack 2-in-1, TODO assign to new ines mapper, most dump of KT-boards on the net are mapper 4, so need database or goodnes fix support
 }
 
 static void GENMWRAP(uint8 V) {
@@ -246,6 +260,10 @@ void GenMMC3Power(void) {
 	SetWriteHandler(0x8000, 0xBFFF, MMC3_CMDWrite);
 	SetWriteHandler(0xC000, 0xFFFF, MMC3_IRQWrite);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
+
+// KT-008 boards hack 2-in-1, TODO assign to new ines mapper, most dump of KT-boards on the net are mapper 4, so need database or goodnes fix support
+	SetWriteHandler(0x5000,0x5FFF, KT008HackWrite);
+
 	A001B = A000B = 0;
 	setmirror(1);
 	if (mmc3opts & 1) {
@@ -299,6 +317,8 @@ void GenMMC3_Init(CartInfo *info, int prg, int chr, int wram, int battery) {
 		info->SaveGameLen[0] = WRAMSIZE;
 	}
 
+// KT-008 boards hack 2-in-1, TODO assign to new ines mapper, most dump of KT-boards on the net are mapper 4, so need database or goodnes fix support
+	AddExState(EXPREGS, 1, 0, "EXPR");
 	AddExState(MMC3_StateRegs, ~0, 0, 0);
 
 	info->Power = GenMMC3Power;
