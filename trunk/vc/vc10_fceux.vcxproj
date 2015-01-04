@@ -311,9 +311,11 @@
     <ClCompile Include="..\src\boards\ac-08.cpp" />
     <ClCompile Include="..\src\boards\bb.cpp" />
     <ClCompile Include="..\src\boards\cityfighter.cpp" />
+    <ClCompile Include="..\src\boards\coolboy.cpp" />
     <ClCompile Include="..\src\boards\dance2000.cpp" />
     <ClCompile Include="..\src\boards\famicombox.cpp" />
     <ClCompile Include="..\src\boards\ffe.cpp" />
+    <ClCompile Include="..\src\boards\ks7010.cpp" />
     <ClCompile Include="..\src\boards\ks7012.cpp" />
     <ClCompile Include="..\src\boards\ks7013.cpp" />
     <ClCompile Include="..\src\boards\ks7017.cpp" />
@@ -329,6 +331,7 @@
     <ClCompile Include="..\src\boards\onebus.cpp" />
     <ClCompile Include="..\src\boards\pec-586.cpp" />
     <ClCompile Include="..\src\boards\sa-9602b.cpp" />
+    <ClCompile Include="..\src\boards\sb-2000.cpp" />
     <ClCompile Include="..\src\boards\transformer.cpp" />
     <ClCompile Include="..\src\boards\unrom512.cpp" />
     <ClCompile Include="..\src\boards\vrc1.cpp" />

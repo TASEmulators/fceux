@@ -28,6 +28,7 @@
 #include "mmc3.h"
 
 uint8 MMC3_cmd;
+uint8 kt_extra;
 uint8 *WRAM;
 uint32 WRAMSIZE;
 uint8 *CHRRAM;
@@ -186,7 +187,7 @@ DECLFW(MMC3_IRQWrite) {
 DECLFW(KT008HackWrite) {
 //	FCEU_printf("%04x:%04x\n",A,V);
 	switch (A & 3) {
-	case 0: EXPREGS[0] = V; FixMMC3PRG(MMC3_cmd); break;
+	case 0: kt_extra = V; FixMMC3PRG(MMC3_cmd); break;
 	case 1: break;	// unk
 	case 2: break;	// unk
 	case 3: break;	// unk
@@ -233,7 +234,7 @@ static void GENCWRAP(uint32 A, uint8 V) {
 static void GENPWRAP(uint32 A, uint8 V) {
 // [NJ102] Mo Dao Jie (C) has 1024Mb MMC3 BOARD, maybe something other will be broken
 // also HengGe BBC-2x boards enables this mode as default board mode at boot up
-	setprg8(A, (V & 0x7F) | ((EXPREGS[0] & 4) << 4));
+	setprg8(A, (V & 0x7F) | ((kt_extra & 4) << 4));
 // KT-008 boards hack 2-in-1, TODO assign to new ines mapper, most dump of KT-boards on the net are mapper 4, so need database or goodnes fix support
 }
 
@@ -318,7 +319,7 @@ void GenMMC3_Init(CartInfo *info, int prg, int chr, int wram, int battery) {
 	}
 
 // KT-008 boards hack 2-in-1, TODO assign to new ines mapper, most dump of KT-boards on the net are mapper 4, so need database or goodnes fix support
-	AddExState(EXPREGS, 1, 0, "EXPR");
+	AddExState(&kt_extra, 1, 0, "KTEX");
 	AddExState(MMC3_StateRegs, ~0, 0, 0);
 
 	info->Power = GenMMC3Power;

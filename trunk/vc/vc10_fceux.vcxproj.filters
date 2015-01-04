@@ -1036,6 +1036,15 @@
     <ClCompile Include="..\src\input\pec586kb.cpp">
       <Filter>input</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\boards\sb-2000.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\ks7010.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\coolboy.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">
