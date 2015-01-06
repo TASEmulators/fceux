@@ -49,14 +49,14 @@ static void COOLBOYPW(uint32 A, uint8 V) {
 	case 0xC0:
 		shift = 4;
 		if(EXPREGS[3] & 0x10) {
-			mask = 0x03;
+			mask = 0x01 | (EXPREGS[1] & 2);
 		} else {
 			mask = 0x0F;
 		}
 		break;
 	}
 	if(EXPREGS[3] & 0x10)
-		setprg8(A, (base << shift) | (V & mask) | (EXPREGS[3] & 0x0C));
+		setprg8(A, (base << shift) | (V & mask) | ((EXPREGS[3] & (0x0E ^ (EXPREGS[1] & 2))) ));
 	else
 		setprg8(A, (base << shift) | (V & mask));
 }
