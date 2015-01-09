@@ -31,16 +31,18 @@ static SFORMAT StateRegs[] =
 {
 	{ reg, 8, "REGS" },
 	{ chr, 8, "CHRS" },
-	{ &IRQCount, 16, "IRQc" },
-	{ &IRQa, 16, "IRQa" },
+	{ &IRQCount, 2, "IRQc" },
+	{ &IRQa, 2, "IRQa" },
 	{ 0 }
 };
 
 static void Sync(void) {
 	int i;
+	setprg8r(0x10, 0x6000, 0);
 	setprg8(0x8000, reg[0]);
 	setprg8(0xA000, reg[1]);
 	setprg8(0xC000, reg[2]);
+	setprg8(0xE000, ~0);
 	for (i = 0; i < 8; i++)
 		setchr1(i << 10, chr[i]);
 	setmirror(reg[3] ^ 1);
@@ -68,9 +70,8 @@ static DECLFW(UNLSC127Write) {
 }
 
 static void UNLSC127Power(void) {
+	IRQCount = IRQa = 0;
 	Sync();
-	setprg8r(0x10, 0x6000, 0);
-	setprg8(0xE000, ~0);
 	SetReadHandler(0x6000, 0x7fff, CartBR);
 	SetWriteHandler(0x6000, 0x7fff, CartBW);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
@@ -80,8 +81,9 @@ static void UNLSC127Power(void) {
 
 static void UNLSC127IRQ(void) {
 	if (IRQa) {
-		IRQCount--;
-		if (IRQCount == 0) {
+		if(IRQCount > 0)
+			IRQCount--;
+		if (!IRQCount) {
 			X6502_IRQBegin(FCEU_IQEXT);
 			IRQa = 0;
 		}
@@ -89,6 +91,7 @@ static void UNLSC127IRQ(void) {
 }
 
 static void UNLSC127Reset(void) {
+	IRQCount = IRQa = 0;
 }
 
 static void UNLSC127Close(void) {
