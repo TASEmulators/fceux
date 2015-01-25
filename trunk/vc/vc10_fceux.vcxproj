@@ -362,6 +362,7 @@
     <ClCompile Include="..\src\boards\gs-2004.cpp" />
     <ClCompile Include="..\src\boards\gs-2013.cpp" />
     <ClCompile Include="..\src\boards\h2288.cpp" />
+    <ClCompile Include="..\src\boards\inlnsf.cpp" />
     <ClCompile Include="..\src\boards\karaoke.cpp" />
     <ClCompile Include="..\src\boards\kof97.cpp" />
     <ClCompile Include="..\src\boards\vrc5.cpp" />

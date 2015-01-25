@@ -211,6 +211,9 @@
     <ClCompile Include="..\src\boards\h2288.cpp">
       <Filter>boards</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\boards\inlnsf.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\boards\karaoke.cpp">
       <Filter>boards</Filter>
     </ClCompile>

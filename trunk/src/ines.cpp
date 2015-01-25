@@ -477,7 +477,7 @@ static BMAPPINGLocal bmap[] = {
 	{"",					 28, Mapper28_Init},
 	{"RET-CUFROM",			 29, Mapper29_Init},
 	{"UNROM 512",			 30, UNROM512_Init},
-//	{"",					 31, Mapper31_Init},
+	{"infiniteneslives-NSF", 31, Mapper31_Init},
 	{"IREM G-101",			 32, Mapper32_Init},
 	{"TC0190FMC/TC0350FMR",	 33, Mapper33_Init},
 	{"IREM I-IM/BNROM",		 34, Mapper34_Init},
