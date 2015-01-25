@@ -69,9 +69,14 @@ static DECLFW(UNLSC127Write) {
 	Sync();
 }
 
+static DECLFR(UNLSC127ProtRead) {
+	return 0x20;
+}
+
 static void UNLSC127Power(void) {
 	IRQCount = IRQa = 0;
 	Sync();
+	SetReadHandler(0x5800, 0x5800, UNLSC127ProtRead);
 	SetReadHandler(0x6000, 0x7fff, CartBR);
 	SetWriteHandler(0x6000, 0x7fff, CartBW);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
