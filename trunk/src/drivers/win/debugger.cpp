@@ -855,7 +855,7 @@ void UpdateDebugger(bool jump_to_pc)
 	sprintf(str, "%04X", (int)X.PC);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_PC, str);
 
-	sprintf(str, "%04X", (int)RefreshAddr);
+	sprintf(str, "%04X", (int)FCEUPPU_PeekAddress());
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_PPU, str);
 	sprintf(str, "%02X", PPU[3]);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_SPR, str);

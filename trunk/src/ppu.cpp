@@ -1880,6 +1880,15 @@ void FCEUPPU_SaveState(void) {
 	RefreshAddrT = RefreshAddr;
 }
 
+uint32 FCEUPPU_PeekAddress()
+{
+	if (newppu)
+	{
+		return ppur.get_2007access() & 0x3FFF;
+	}
+
+	return RefreshAddr & 0x3FFF;
+}
 
 //---------------------
 int pputime = 0;
@@ -2024,6 +2033,8 @@ int FCEUX_PPU_Loop(int skip) {
 
 			g_rasterpos = 0;
 			ppur.status.sl = sl;
+
+			linestartts = timestamp * 48 + X.count; // pixel timestamp for debugger
 
 			const int yp = sl - 1;
 			ppuphase = PPUPHASE_BG;

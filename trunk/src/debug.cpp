@@ -271,7 +271,7 @@ uint8 GetMem(uint16 A) {
 			case 3: return PPU[3];
 			case 4: return SPRAM[PPU[3]];
 			case 5: return XOffset;
-			case 6: return RefreshAddr&0xFF;
+			case 6: return FCEUPPU_PeekAddress() & 0xFF;
 			case 7: return VRAMBuffer;
 		}
 	// feos: added more registers
@@ -296,7 +296,7 @@ uint8 GetMem(uint16 A) {
 }
 
 uint8 GetPPUMem(uint8 A) {
-	uint16 tmp=RefreshAddr&0x3FFF;
+	uint16 tmp = FCEUPPU_PeekAddress() & 0x3FFF;
 
 	if (tmp<0x2000) return VPage[tmp>>10][tmp];
 	if (tmp>=0x3F00) return PALRAM[tmp&0x1F];
@@ -624,13 +624,14 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 				// PPU Mem breaks
 				if ((watchpoint[i].flags & brk_type) && ((A >= 0x2000) && (A < 0x4000)) && ((A&7) == 7))
 				{
+					const uint32 PPUAddr = FCEUPPU_PeekAddress();
 					if (watchpoint[i].endaddress)
 					{
-						if ((watchpoint[i].address <= RefreshAddr) && (watchpoint[i].endaddress >= RefreshAddr))
+						if ((watchpoint[i].address <= PPUAddr) && (watchpoint[i].endaddress >= PPUAddr))
 							BreakHit(i);
 					} else
 					{
-						if (watchpoint[i].address == RefreshAddr)
+						if (watchpoint[i].address == PPUAddr)
 							BreakHit(i);
 					}
 				}
