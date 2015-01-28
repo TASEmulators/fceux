@@ -47,7 +47,10 @@ Name* pageNames[32] = {0}; //the maximum number of pages we could have is 32, ba
 //int loadedBank = -1;
 
 //new
-int pageNumbersLoaded[32]; //TODO - need to initialize these to -1 somehow
+int pageNumbersLoaded[32] = {
+	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+};
 
 Name* ramBankNames = 0;
 bool ramBankNamesLoaded = false;
