@@ -157,10 +157,13 @@ void resetVideo()
 	InitVideo(GameInfo);
 }
 
-void closeVideoWin(GtkWidget* w, GdkEvent* e, gpointer p)
+void closeVideoWin(GtkWidget* w, gint response, gpointer p)
 {
 	resetVideo();
-	gtk_widget_destroy(w);
+	if(response != GTK_RESPONSE_APPLY)
+	{
+		gtk_widget_destroy(w);
+	}
 }
 
 void closeDialog(GtkWidget* w, GdkEvent* e, gpointer p)
@@ -894,11 +897,12 @@ void openVideoConfig()
 	GtkWidget* xscaleHbox;
 	GtkWidget* yscaleHbox;
 	GtkWidget* showFpsChk;
-		
+	
 	win = gtk_dialog_new_with_buttons("Video Preferences",
 				GTK_WINDOW(MainWindow),
 				(GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
-				GTK_STOCK_CLOSE, GTK_RESPONSE_OK, NULL);
+				GTK_STOCK_APPLY, GTK_RESPONSE_APPLY,
+				GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE, NULL);
 	gtk_window_set_icon_name(GTK_WINDOW(win), "video-display");
 	//gtk_widget_set_size_request(win, 250, 250);
 	

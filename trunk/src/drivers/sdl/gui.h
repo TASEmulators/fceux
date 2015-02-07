@@ -41,7 +41,7 @@ int configHotkey(char* hotkeyString);
 int configGamepadButton(GtkButton* button, gpointer p);
 
 void resetVideo();
-void closeVideoWin(GtkWidget* w, GdkEvent* e, gpointer p);
+void closeVideoWin(GtkWidget* w, gint response, gpointer p);
 void closeDialog(GtkWidget* w, GdkEvent* e, gpointer p);
 
 void toggleLowPass(GtkWidget* w, gpointer p);
