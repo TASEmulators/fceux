@@ -17,8 +17,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * CoolBoy 400-in-1 FK23C-mimic mapper 32Mb PROM + 128K CHR RAM, no wram, no CROM
+ * CoolBoy 400-in-1 FK23C-mimic mapper 16Mb/32Mb PROM + 128K/256K CHR RAM, optional SRAM, optional NTRAM
  * only MMC3 mode
+ *
+ * 6000 (õõ76x210) | 0õÑ0
+ * 6001 (õõõ354õõ)
+ * 6002 = 0
+ * 6003 = 0
  *
  */
 
@@ -28,8 +33,15 @@
 static void COOLBOYCW(uint32 A, uint8 V) {
 	if(EXPREGS[3] & 0x10)
 		setchr8(EXPREGS[2] & 0xF);
-	else
-		setchr1(A, V);
+	else {
+		uint32 mask = 0xFF;
+		switch(EXPREGS[0] & 0xC0) {
+		case 0xC0:
+			mask = 0x7F;
+			break;
+		}
+		setchr1(A, V & mask);
+	}
 }
 
 static void COOLBOYPW(uint32 A, uint8 V) {
@@ -37,17 +49,12 @@ static void COOLBOYPW(uint32 A, uint8 V) {
 	uint32 base = ((EXPREGS[0] & 0x07) >> 0) | ((EXPREGS[1] & 0x10) >> 1) | ((EXPREGS[1] & 0x0C) << 2) | ((EXPREGS[0] & 0x30) << 2);
 	switch(EXPREGS[0] & 0xC0) {
 	case 0x00:
-		base >>= 2;
 		mask = 0x3F;
-		shift = 6;
 		break;
 	case 0x80:
-		base >>= 1;
 		mask = 0x1F;
-		shift = 5;
 		break;
 	case 0xC0:
-		shift = 4;
 		if(EXPREGS[3] & 0x10) {
 			mask = 0x01 | (EXPREGS[1] & 2);
 		} else {
@@ -56,19 +63,22 @@ static void COOLBOYPW(uint32 A, uint8 V) {
 		break;
 	}
 	if(EXPREGS[3] & 0x10)
-		setprg8(A, (base << shift) | (V & mask) | ((EXPREGS[3] & (0x0E ^ (EXPREGS[1] & 2))) ));
+		setprg8(A, (base << 4) | (V & mask) | ((EXPREGS[3] & (0x0E ^ (EXPREGS[1] & 2))) ));
 	else
-		setprg8(A, (base << shift) | (V & mask));
+		setprg8(A, (base << 4) | (V & mask));
 }
 
 static DECLFW(COOLBOYWrite) {
-	if((EXPREGS[3] & 0x80) == 0) {
-		EXPREGS[A & 3] = V;
-		FixMMC3PRG(MMC3_cmd);
-		FixMMC3CHR(MMC3_cmd);
-		uint32 base = ((EXPREGS[0] & 0x07) >> 0) | ((EXPREGS[1] & 0x10) >> 1) | ((EXPREGS[1] & 0x0C) << 2) | ((EXPREGS[0] & 0x30) << 2);
-		FCEU_printf("exp %02x %02x (base %03d)\n",A,V,base);
-	}
+	if(A001B & 0x80)
+		CartBW(A,V);
+	else
+		if((EXPREGS[3] & 0x80) == 0) {
+			EXPREGS[A & 3] = V;
+			FixMMC3PRG(MMC3_cmd);
+			FixMMC3CHR(MMC3_cmd);
+			uint32 base = ((EXPREGS[0] & 0x07) >> 0) | ((EXPREGS[1] & 0x10) >> 1) | ((EXPREGS[1] & 0x0C) << 2) | ((EXPREGS[0] & 0x30) << 2);
+			FCEU_printf("exp %02x %02x (base %03d)\n",A,V,base);
+		}
 }
 
 static void COOLBOYReset(void) {
@@ -88,7 +98,7 @@ static void COOLBOYPower(void) {
 }
 
 void COOLBOY_Init(CartInfo *info) {
-	GenMMC3_Init(info, 512, 128, 0, 0);
+	GenMMC3_Init(info, 512, 128, 8, 0);
 	pwrap = COOLBOYPW;
 	cwrap = COOLBOYCW;
 	info->Power = COOLBOYPower;

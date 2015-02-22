@@ -311,11 +311,11 @@ static int LoadCHR(FCEUFILE *fp) {
 	return(1);
 }
 
-#define BMCFLAG_FORCE4 1
-#define BMCFLAG_16KCHRR  2
-#define BMCFLAG_32KCHRR  4
-#define BMCFLAG_128KCHRR  8
-#define BMCFLAG_EXPCHRR  10
+#define BMCFLAG_FORCE4    0x01
+#define BMCFLAG_16KCHRR   0x02
+#define BMCFLAG_32KCHRR   0x04
+#define BMCFLAG_128KCHRR  0x08
+#define BMCFLAG_256KCHRR  0x10
 
 static BMAPPING bmap[] = {
 	{ "11160", BMC11160_Init, 0 },
@@ -355,8 +355,8 @@ static BMAPPING bmap[] = {
 	{ "ELROM", ELROM_Init, 0 },
 	{ "ETROM", ETROM_Init, 0 },
 	{ "EWROM", EWROM_Init, 0 },
-	{ "FK23C", BMCFK23C_Init, BMCFLAG_EXPCHRR },
-	{ "FK23CA", BMCFK23CA_Init, BMCFLAG_EXPCHRR },
+	{ "FK23C", BMCFK23C_Init, BMCFLAG_256KCHRR },
+	{ "FK23CA", BMCFK23CA_Init, BMCFLAG_256KCHRR },
 	{ "FS304", UNLFS304_Init, 0 },
 	{ "G-146", BMCG146_Init, 0 },
 	{ "GK-192", BMCGK192_Init, 0 },
@@ -457,7 +457,7 @@ static BMAPPING bmap[] = {
 	{ "VRC7", UNLVRC7_Init, 0 },
 	{ "YOKO", UNLYOKO_Init, 0 },
 	{ "SB-2000", UNLSB2000_Init, 0 },
-	{ "COOLBOY", COOLBOY_Init, BMCFLAG_128KCHRR },
+	{ "COOLBOY", COOLBOY_Init, BMCFLAG_256KCHRR },
 
 	{ 0, 0, 0 }
 };
@@ -518,7 +518,7 @@ static int InitializeBoard(void) {
 					CHRRAMSize = 32;
 				else if (bmap[x].flags & BMCFLAG_128KCHRR)
 					CHRRAMSize = 128;
-				else if (bmap[x].flags & BMCFLAG_EXPCHRR)
+				else if (bmap[x].flags & BMCFLAG_256KCHRR)
 					CHRRAMSize = 256;
 				else
 					CHRRAMSize = 8;
