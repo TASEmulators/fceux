@@ -90,8 +90,8 @@ static DECLFW(M69Write1) {
 	case 0xB: preg[2] = V; Sync(); break;
 	case 0xC: mirr = V & 3; Sync();break;
 	case 0xD: IRQa = V; X6502_IRQEnd(FCEU_IQEXT); break;
-	case 0xE: IRQCount &= 0xFF00; IRQCount |= V; X6502_IRQEnd(FCEU_IQEXT); break;
-	case 0xF: IRQCount &= 0x00FF; IRQCount |= V << 8; X6502_IRQEnd(FCEU_IQEXT); break;
+	case 0xE: IRQCount &= 0xFF00; IRQCount |= V; break;
+	case 0xF: IRQCount &= 0x00FF; IRQCount |= V << 8; break;
 	}
 }
 
