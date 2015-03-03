@@ -31,7 +31,7 @@
 #include <assert.h>
 
 int GetNesFileAddress(int A);
-int RegNameCount;
+int RegNameCount = 0;
 
 inline int RomPageIndexForAddress(int addr) { return (addr-0x8000)>>(debuggerPageSize); }
 
@@ -64,6 +64,9 @@ char delimiterChar[2] = "#";
 
 extern BOOL CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 extern char bookmarkDescription[];
+
+// nonzero to use these predefined register names
+#define PREDEFINED_REGISTER_NAMES 0
 
 MemoryMappedRegister RegNames[] = {
 	{"$2000", "PPU_CTRL_REG1"},
@@ -649,7 +652,9 @@ void setNamesPointerForAddress(uint16 address, Name* newNode)
 void loadNameFiles()
 {
 	int cb;
+	#if PREDEFINED_REGISTER_NAMES
 	RegNameCount = sizeof(RegNames)/sizeof(MemoryMappedRegister);
+	#endif
 
 	if (!ramBankNamesLoaded)
 	{
