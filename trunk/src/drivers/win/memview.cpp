@@ -642,6 +642,7 @@ void UpdateCaption()
 				strcat(str, node->name);
 			}
 			for (int i = 0; i < RegNameCount; i++) {
+				if (!symbRegNames) break;
 				int test = 0;
 				sscanf(RegNames[i].offset, "$%4x", &test);
 				if (test == CursorStartAddy) {

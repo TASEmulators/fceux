@@ -74,6 +74,7 @@ extern bool fullSaveStateLoads;
 extern int frameSkipAmt;
 extern int32 fps_scale_frameadvance;
 extern bool symbDebugEnabled;
+extern bool symbRegNames;
 
 extern TASEDITOR_CONFIG taseditorConfig;
 extern char* recentProjectsArray[];
@@ -276,6 +277,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(debuggerAutoload),
 	AC(allowUDLR),
 	AC(symbDebugEnabled),
+	AC(symbRegNames),
 	AC(debuggerSaveLoadDEBFiles),
 	AC(debuggerDisplayROMoffsets),
 	AC(debuggerFontSize),
