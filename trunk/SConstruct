@@ -159,7 +159,7 @@ else:
     env.Append(LINKFLAGS=['-Wl,--as-needed'])
   
   ### Search for gd if we're not in Windows
-  if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin' and env['CREATE_AVI'] and env['LOGO']:
+  if (env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin') and (env['CREATE_AVI'] or env['LOGO']):
     gd = conf.CheckLib('gd', autoadd=1)
     if gd == 0:
       env['LOGO'] = 0
