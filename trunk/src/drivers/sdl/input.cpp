@@ -784,6 +784,16 @@ static void KeyboardCommands ()
 		movieSubtitles ? "n" : "ff");
 	}
 
+	if (_keyonly (Hotkeys[HK_VOLUME_DOWN]))
+	{
+		FCEUD_SoundVolumeAdjust(-1);
+	}
+
+	if (_keyonly (Hotkeys[HK_VOLUME_UP]))
+	{
+		FCEUD_SoundVolumeAdjust(1);
+	}
+
 	// VS Unisystem games
 	if (gametype == GIT_VSUNI)
 	{
