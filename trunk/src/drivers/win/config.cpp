@@ -183,6 +183,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(gNoBGFillColor),
 	AC(ntsccol),AC(ntsctint),AC(ntschue),
 	AC(force_grayscale),
+	AC(dendy),
 
 	NAC("palyo",pal_emulation),
 	NAC("genie",genie),

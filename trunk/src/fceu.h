@@ -74,6 +74,7 @@ extern FCEUGI *GameInfo;
 extern int GameAttributes;
 
 extern uint8 PAL;
+extern int dendy;
 
 //#include "driver.h"
 
@@ -125,6 +126,11 @@ void DrawTextTrans(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor);
 void FCEU_PutImage(void);
 #ifdef FRAMESKIP
 void FCEU_PutImageDummy(void);
+#endif
+
+#ifdef WIN32
+extern void UpdateCheckedMenuItems();
+extern void PushCurrentVideoSettings();
 #endif
 
 extern uint8 Exit;

@@ -416,7 +416,6 @@
 #define IDC_DEBUGGER_VAL_PPU            310
 #define IDC_LABEL_PALUSED2              310
 #define IDC_LABEL_NEWPPUUSED            310
-#define MENU_PAL                        311
 #define IDC_DEBUGGER_VAL_SPR            311
 #define IDC_LABEL_TWEAKCOUNT            311
 #define IDC_BTN_CHEAT_ADDFROMFILE       311
@@ -426,6 +425,9 @@
 #define MENU_DIRECTORIES                320
 #define MENU_INPUT                      321
 #define MENU_GUI_OPTIONS                327
+#define MENU_NTSC                       330
+#define MENU_PAL                        331
+#define MENU_DENDY                      332
 #define CHECK_DISABLE_FOURSCORE         400
 #define MENU_MV_BOOKMARKS_RM_ALL        400
 #define IDC_WINSIZE_MUL_X               400
@@ -1203,6 +1205,7 @@
 #define ID_HIGHLIGHTING_HIGHLIGHT_ACTIVITY 40588
 #define ID_DUMPTOFILE_CPUBUS            40589
 #define MENU_MV_FILE_DUMP_64K           40590
+#define ID_CONFIG_REGION                40591
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1215,7 +1218,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        291
-#define _APS_NEXT_COMMAND_VALUE         40591
+#define _APS_NEXT_COMMAND_VALUE         40596
 #define _APS_NEXT_CONTROL_VALUE         1290
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -400,8 +400,8 @@ void UpdateCheckedMenuItems()
 	bool spr, bg;
 	FCEUI_GetRenderPlanes(spr,bg);
 
-	static int *polo[] = { &genie, &pal_emulation, &status_icon};
-	static int polo2[]={ MENU_GAME_GENIE, MENU_PAL, MENU_SHOW_STATUS_ICON };
+	static int *polo[] = { &genie, &status_icon};
+	static int polo2[]={ MENU_GAME_GENIE, MENU_SHOW_STATUS_ICON };
 	int x;
 
 	// Check or uncheck the necessary menu items
@@ -438,6 +438,14 @@ void UpdateCheckedMenuItems()
 	CheckMenuItem(fceumenu, MENU_DISPLAY_BG, bg?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_OBJ, spr?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_INPUTDISPLAY_OLDSTYLEDISP, oldInputDisplay?MF_CHECKED:MF_UNCHECKED);
+
+	//Config - Region SubMenu
+	if (pal_emulation)
+		CheckMenuRadioItem(fceumenu, MENU_NTSC, MENU_DENDY, MENU_PAL, MF_BYCOMMAND);
+	else if (dendy)
+		CheckMenuRadioItem(fceumenu, MENU_NTSC, MENU_DENDY, MENU_DENDY, MF_BYCOMMAND);
+	else		
+		CheckMenuRadioItem(fceumenu, MENU_NTSC, MENU_DENDY, MENU_NTSC, MF_BYCOMMAND);
 
 	// Tools Menu
 	CheckMenuItem(fceumenu, MENU_ALTERNATE_AB, GetAutoFireDesynch() ? MF_CHECKED : MF_UNCHECKED);
@@ -1965,12 +1973,14 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				FCEUI_SetGameGenie(genie!=0);
 				UpdateCheckedMenuItems();
 				break;
+			case MENU_NTSC:
+				FCEUI_SetRegion(0);
+				break;
 			case MENU_PAL:
-				pal_emulation ^= 1;
-				FCEUI_SetVidSystem(pal_emulation);
-				RefreshThrottleFPS();
-				UpdateCheckedMenuItems();
-				PushCurrentVideoSettings();
+				FCEUI_SetRegion(1);
+				break;
+			case MENU_DENDY:
+				FCEUI_SetRegion(2);
 				break;
 			case MENU_DIRECTORIES:
 				ConfigDirectories();

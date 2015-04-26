@@ -1219,7 +1219,10 @@ static void Fixit1(void) {
 void MMC5_hb(int);		//Ugh ugh ugh.
 static void DoLine(void) {
 	int x;
-	uint8 *target = XBuf + (scanline << 8);
+	// scanlines after 239 are dummy for dendy, and Xbuf is capped at 0xffff bytes, don't let it overflow
+	// send all future writes to the invisible sanline. the easiest way to "skip" them altogether in old ppu
+	// todo: figure out what exactly should be skipped. it's known that there's no activity on PPU bus
+	uint8 *target = XBuf + ((scanline < 240 ? scanline : 240) << 8);
 
 	if (MMC5Hack) MMC5_hb(scanline);
 
@@ -1634,7 +1637,7 @@ static void CopySprites(uint8 *target) {
 
 void FCEUPPU_SetVideoSystem(int w) {
 	if (w) {
-		scanlines_per_frame = 312;
+		scanlines_per_frame = dendy ? 262: 312;
 		FSettings.FirstSLine = FSettings.UsrFirstSLine[1];
 		FSettings.LastSLine = FSettings.UsrLastSLine[1];
 	} else {
@@ -1785,9 +1788,10 @@ int FCEUPPU_Loop(int skip) {
 			int x, max, maxref;
 
 			deemp = PPU[1] >> 5;
-			for (scanline = 0; scanline < 240; ) {	//scanline is incremented in  DoLine.  Evil. :/
+			for (scanline = 0; scanline < (dendy ? 290 : 240); ) {	//scanline is incremented in  DoLine.  Evil. :/
 				deempcnt[deemp]++;
-				DEBUG(FCEUD_UpdatePPUView(scanline, 1));
+				if (scanline < 240)
+					DEBUG(FCEUD_UpdatePPUView(scanline, 1));
 				DoLine();
 			}
 			if (MMC5Hack) MMC5_hb(scanline);
@@ -2027,8 +2031,8 @@ int FCEUX_PPU_Loop(int skip) {
 
 		//capture the initial xscroll
 		//int xscroll = ppur.fh;
-		//render 241 scanlines (including 1 dummy at beginning)
-		for (int sl = 0; sl < 241; sl++) {
+		//render 241/291 scanlines (1 dummy at beginning, dendy's 50 at the end)
+		for (int sl = 0; sl < (dendy ? 291 : 241); sl++) {
 			spr_read.start_scanline();
 
 			g_rasterpos = 0;
@@ -2039,7 +2043,7 @@ int FCEUX_PPU_Loop(int skip) {
 			const int yp = sl - 1;
 			ppuphase = PPUPHASE_BG;
 
-			if (sl != 0) {
+			if (sl != 0 && sl < 241) { // ignore the invisible
 				DEBUG(FCEUD_UpdatePPUView(scanline = yp, 1));
 				DEBUG(FCEUD_UpdateNTView(scanline = yp, 1));
 			}
@@ -2062,7 +2066,7 @@ int FCEUX_PPU_Loop(int skip) {
 
 				//ok, we're also going to draw here.
 				//unless we're on the first dummy scanline
-				if (sl != 0) {
+				if (sl != 0 && sl < 241) { // cape at 240 for dendy, its PPU does nothing afterwards
 					int xstart = xt << 3;
 					oamcount = oamcounts[renderslot];
 					uint8 * const target = XBuf + (yp << 8) + xstart;
@@ -2233,7 +2237,7 @@ int FCEUX_PPU_Loop(int skip) {
 						runppu(1);
 						garbage_todo = 0;
 					}
-					if ((sl != 0) && ppur.status.cycle == 256)
+					if ((sl != 0 && sl < 241) && ppur.status.cycle == 256)
 					{
 						runppu(1);
 						//at 257: 3d world runner is ugly if we do this at 256

@@ -146,6 +146,7 @@ double tvAspectX = TV_ASPECT_DEFAULT_X, tvAspectY = TV_ASPECT_DEFAULT_Y;
 int genie = 0;
 int pal_emulation = 0;
 int pal_setting_specified = 0;
+int dendy = 0;
 int ntsccol = 0, ntsctint, ntschue;
 std::string BaseDirectory;
 int PauseAfterLoad;
@@ -656,6 +657,7 @@ int main(int argc,char *argv[])
         pauseAfterPlayback = !!pauseAfterPlayback;
         closeFinishedMovie = !!closeFinishedMovie;
         EnableBackgroundInput = !!EnableBackgroundInput;
+		dendy = !!dendy;
 
 		KeyboardSetBackgroundAccess(EnableBackgroundInput!=0);
 		JoystickSetBackgroundAccess(EnableBackgroundInput!=0);
@@ -754,9 +756,9 @@ int main(int argc,char *argv[])
 			LoadNewGamey(hAppWnd, 0);
 	}
 
-	if (pal_setting_specified)
+	if (pal_setting_specified && !dendy)
 	{
-		// Force the PAL setting specified in the command line
+		// Force the PAL setting specified in the command line, unless Dendy
         pal_emulation = saved_pal_setting;
         FCEUI_SetVidSystem(pal_emulation);
 	}
