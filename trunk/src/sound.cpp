@@ -226,74 +226,83 @@ static void SQReload(int x, uint8 V)
 
 static DECLFW(Write_PSG)
 {
- A&=0x1F;
- switch(A)
- {
-  case 0x0:DoSQ1();
-	   EnvUnits[0].Mode=(V&0x30)>>4;
-	   EnvUnits[0].Speed=(V&0xF);
-           break;
-  case 0x1:
-           sweepon[0]=V&0x80;
-           break;
-  case 0x2:
-           DoSQ1();
-           curfreq[0]&=0xFF00;
-           curfreq[0]|=V;
-           break;
-  case 0x3:
-           SQReload(0,V);
-           break;
-  case 0x4:
-	   DoSQ2();
-           EnvUnits[1].Mode=(V&0x30)>>4;
-           EnvUnits[1].Speed=(V&0xF);
-	   break;
-  case 0x5:
-          sweepon[1]=V&0x80;
-          break;
-  case 0x6:DoSQ2();
-          curfreq[1]&=0xFF00;
-          curfreq[1]|=V;
-          break;
-  case 0x7:
-          SQReload(1,V);
-          break;
-  case 0xa:DoTriangle();
-	   break;
-  case 0xb:
-          DoTriangle();
-	  if(EnabledChannels&0x4)
-           lengthcount[2]=lengthtable[(V>>3)&0x1f];
-	  TriMode=1;	// Load mode
-          break;
-  case 0xC:DoNoise();
-           EnvUnits[2].Mode=(V&0x30)>>4;
-           EnvUnits[2].Speed=(V&0xF);
-           break;
-  case 0xE:DoNoise();
-           break;
-  case 0xF:
-	   DoNoise();
-           if(EnabledChannels&0x8)
-	    lengthcount[3]=lengthtable[(V>>3)&0x1f];
-	   EnvUnits[2].reloaddec=1;
-           break;
- case 0x10:DoPCM();
-	   LoadDMCPeriod(V&0xF);
-
-	   if(SIRQStat&0x80)
-	   {
-	    if(!(V&0x80))
-	    {
-	     X6502_IRQEnd(FCEU_IQDPCM);
- 	     SIRQStat&=~0x80;
-	    }
-            else X6502_IRQBegin(FCEU_IQDPCM);
-	   }
-	   break;
- }
- PSG[A]=V;
+	A&=0x1F;
+	switch(A)
+	{
+	case 0x0:
+		DoSQ1();
+		EnvUnits[0].Mode=(V&0x30)>>4;
+		EnvUnits[0].Speed=(V&0xF);
+		if (swapDuty)
+			V = (V&0x3F)|((V&0x80)>>1)|((V&0x40)<<1);
+		break;
+	case 0x1:
+		sweepon[0]=V&0x80;
+		break;
+	case 0x2:
+		DoSQ1();
+		curfreq[0]&=0xFF00;
+		curfreq[0]|=V;
+		break;
+	case 0x3:
+		SQReload(0,V);
+		break;
+	case 0x4:
+		DoSQ2();
+		EnvUnits[1].Mode=(V&0x30)>>4;
+		EnvUnits[1].Speed=(V&0xF);
+		if (swapDuty)
+			V = (V&0x3F)|((V&0x80)>>1)|((V&0x40)<<1);
+		break;
+	case 0x5:
+		sweepon[1]=V&0x80;
+		break;
+	case 0x6:
+		DoSQ2();
+		curfreq[1]&=0xFF00;
+		curfreq[1]|=V;
+		break;
+	case 0x7:
+		SQReload(1,V);
+		break;
+	case 0xa:
+		DoTriangle();
+		break;
+	case 0xb:
+		DoTriangle();
+		if(EnabledChannels&0x4)
+			lengthcount[2]=lengthtable[(V>>3)&0x1f];
+		TriMode=1;	// Load mode
+		break;
+	case 0xC:
+		DoNoise();
+		EnvUnits[2].Mode=(V&0x30)>>4;
+		EnvUnits[2].Speed=(V&0xF);
+		break;
+	case 0xE:
+		DoNoise();
+		break;
+	case 0xF:
+		DoNoise();
+		if(EnabledChannels&0x8)
+			lengthcount[3]=lengthtable[(V>>3)&0x1f];
+		EnvUnits[2].reloaddec=1;
+		break;
+	case 0x10:
+		DoPCM();
+		LoadDMCPeriod(V&0xF);
+		if(SIRQStat&0x80)
+		{
+			if(!(V&0x80))
+			{
+				X6502_IRQEnd(FCEU_IQDPCM);
+				SIRQStat&=~0x80;
+			}
+			else X6502_IRQBegin(FCEU_IQDPCM);
+		}
+		break;
+	}
+	PSG[A]=V;
 }
 
 static DECLFW(Write_DMCRegs)

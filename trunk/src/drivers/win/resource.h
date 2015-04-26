@@ -634,6 +634,7 @@
 #define IDC_COPY_INPUT                  1203
 #define IDC_AUTORESUMECDLOGGING         1203
 #define IDC_MASK_UNUSED_GRAPHICS        1203
+#define CHECK_SOUND_SWAPDUTY            1203
 #define IDC_VOLUMEGROUP                 1204
 #define IDC_OMITBLANK                   1204
 #define IDC_CHECK3                      1204

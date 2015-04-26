@@ -104,6 +104,7 @@ extern int soundPCMvol;		//Sound channel PCM - volume control
 
 extern int soundquality;
 extern bool muteTurbo;
+extern bool swapDuty;
 
 extern uint8 cpalette[192];
 extern int srendlinen;
