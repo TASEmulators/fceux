@@ -222,8 +222,8 @@ static int InitBPPStuff(int fs)
 	switch (winspecial)
 	{
 	case 3:
-	specfilteropt = NTSCwinspecial;
-	break;
+		specfilteropt = NTSCwinspecial;
+		break;
 	}
 
 	if(bpp >= 16)
@@ -337,6 +337,8 @@ int SetVideoMode(int fs)
 			specmul = 2;
 		else if(winspecial >= 4 && winspecial <= 5)
 			specmul = 3;
+		else if(winspecial >= 6)
+			specmul = winspecial - 4; // magic assuming prescales are winspecial >= 6
 		else
 			specmul = 1;
 
@@ -424,7 +426,8 @@ int SetVideoMode(int fs)
 
 		windowedfailed=0;
 		SetMainWindowStuff();
-	} else
+	}
+	else
 	{
 		//Following is full-screen
 		if(vmod == 0)	// Custom mode
@@ -434,6 +437,8 @@ int SetVideoMode(int fs)
 				specmul = 2;
 			else if(vmodes[0].special >= 4 && vmodes[0].special <= 5)
 				specmul = 3;
+			 else if(vmodes[0].special >= 6)
+				specmul = vmodes[0].special - 4; // magic assuming prescales are vmodes[0].special >= 6
 			else
 				specmul = 1;
 		}
@@ -598,6 +603,8 @@ static void BlitScreenWindow(unsigned char *XBuf)
 		specialmul = 2;
 	else if(winspecial >= 4 && winspecial <= 5)
 		specialmul = 3;
+	else if(winspecial >= 6)
+		specialmul = winspecial - 4; // magic assuming prescales are winspecial >= 6
 	else specialmul = 1;
 
 	srect.top=srect.left=0;
@@ -736,6 +743,8 @@ static void BlitScreenFull(uint8 *XBuf)
 		specmul = 2;
 	else if(vmodes[0].special >= 4 && vmodes[0].special <= 5)
 		specmul = 3;
+	else if(vmodes[0].special >= 6)
+		specmul = vmodes[0].special - 4; // magic assuming prescales are vmodes[0].special >= 6
 	else
 		specmul = 1;
 
@@ -1257,9 +1266,9 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		//CheckRadioButton(hwndDlg,IDC_RADIO_SCALE,IDC_RADIO_STRETCH,(vmodes[0].flags&VMDF_STRFS)?IDC_RADIO_STRETCH:IDC_RADIO_SCALE);
 
 		// -Video Modes Tag-
-		char *str[]={"<none>","hq2x","Scale2x","NTSC 2x","hq3x","Scale3x"};
+		char *str[]={"<none>","hq2x","Scale2x","NTSC 2x","hq3x","Scale3x","Prescale2x","Prescale3x","Prescale4x"};
 		int x;
-		for(x=0;x<6;x++)
+		for(x=0;x<9;x++)
 		{
 			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
 			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
