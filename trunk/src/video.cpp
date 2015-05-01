@@ -181,6 +181,10 @@ void FCEU_PutImage(void)
 	{
 		DrawNSF(XBuf);
 
+#ifdef _S9XLUA_H
+		FCEU_LuaGui(XBuf);
+#endif
+
 		//Save snapshot after NSF screen is drawn.  Why would we want to do it before?
 		if(dosnapsave==1)
 		{

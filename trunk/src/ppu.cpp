@@ -1759,7 +1759,7 @@ int FCEUPPU_Loop(int skip) {
 			kook ^= 1;
 		}
 		if (GameInfo->type == GIT_NSF)
-			X6502_Run((256 + 85) * 240);
+			X6502_Run((256 + 85) * (dendy ? 290 : 240));
 		#ifdef FRAMESKIP
 		else if (skip) {
 			int y;
