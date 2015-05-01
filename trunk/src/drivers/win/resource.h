@@ -644,6 +644,8 @@
 #define IDC_AUTORESUMECDLOGGING2        1204
 #define IDC_AUTOSAVECDL                 1204
 #define IDC_INVERT_THE_MASK             1204
+#define IDC_DEBUGGER_PREDEFINEDREGS     1204
+#define IDC_DEBUGGER_PREDEFINED_REGS    1204
 #define IDC_RAMLIST                     1205
 #define IDC_CHECK4                      1205
 #define IDC_CHECK_BOOKMARKS             1205
@@ -1220,7 +1222,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        291
 #define _APS_NEXT_COMMAND_VALUE         40596
-#define _APS_NEXT_CONTROL_VALUE         1290
+#define _APS_NEXT_CONTROL_VALUE         1291
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

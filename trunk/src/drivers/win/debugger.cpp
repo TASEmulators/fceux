@@ -109,7 +109,7 @@ void RestoreSize(HWND hwndDlg)
 {
 	//If the dialog dimensions are changed those changes need to be reflected here.  - adelikat
 	const int DEFAULT_WIDTH = 820;	//Original width
-	const int DEFAULT_HEIGHT = 560;	//Original height
+	const int DEFAULT_HEIGHT = 570;	//Original height
 	
 	SetWindowPos(hwndDlg,HWND_TOP,DbgPosX,DbgPosY,DEFAULT_WIDTH,DEFAULT_HEIGHT,SWP_SHOWWINDOW);
 }
@@ -1613,6 +1613,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			CheckDlgButton(hwndDlg, DEBUGAUTOLOAD, debuggerAutoload ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_DEBUGGER_ROM_OFFSETS, debuggerDisplayROMoffsets ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC, symbDebugEnabled ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_DEBUGGER_PREDEFINED_REGS, symbRegNames ? BST_CHECKED : BST_UNCHECKED);
 
 			if (DbgPosX==-32000) DbgPosX=0; //Just in case
 			if (DbgPosY==-32000) DbgPosY=0;
@@ -2172,6 +2173,13 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							{
 								symbDebugEnabled ^= 1;
 								CheckDlgButton(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC, symbDebugEnabled ? BST_CHECKED : BST_UNCHECKED);
+								UpdateDebugger(false);
+								break;
+							}
+							case IDC_DEBUGGER_PREDEFINED_REGS:
+							{
+								symbRegNames ^= 1;
+								CheckDlgButton(hwndDlg, IDC_DEBUGGER_PREDEFINED_REGS, symbRegNames ? BST_CHECKED : BST_UNCHECKED);
 								UpdateDebugger(false);
 								break;
 							}

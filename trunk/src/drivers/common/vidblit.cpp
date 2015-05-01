@@ -40,7 +40,7 @@ static int backBpp, backshiftr[3], backshiftl[3];
 
 static uint8  *specbuf8bpp = NULL;		// For 2xscale, 3xscale.
 static uint8  *ntscblit    = NULL;		// For nes_ntsc
-static uint32 *prescalebuf = NULL;		// Prescale pointresizes to 2x-4x to allow less blur at fullscreen + hardware acceleration.
+static uint32 *prescalebuf = NULL;		// Prescale pointresizes to 2x-4x to allow less blur with hardware acceleration.
 
 static int silt;
 
