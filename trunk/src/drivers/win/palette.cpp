@@ -5,6 +5,10 @@
 #include "gui.h"
 
 uint8 cpalette[192] = {0};
+extern int  palhue;
+extern bool palhdtv;
+extern bool palprecision;
+extern bool palmonochrome;
 
 bool SetPalette(const char* nameo)
 {
@@ -62,6 +66,7 @@ int LoadPaletteFile()
 **/
 BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	char text[10];
 	switch(uMsg)
 	{
 		case WM_INITDIALOG:
@@ -69,13 +74,17 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			if(ntsccol)
 				CheckDlgButton(hwndDlg, CHECK_PALETTE_ENABLED, BST_CHECKED);
 
-			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR, TBM_SETRANGE, 1, MAKELONG(0, 128));
-			SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR, TBM_SETRANGE, 1, MAKELONG(0, 128));
+			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,   TBM_SETRANGE, 1, MAKELONG(0, 128));
+			SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR,    TBM_SETRANGE, 1, MAKELONG(0, 128));
+			SendDlgItemMessage(hwndDlg, CTL_PALHUE_TRACKBAR, TBM_SETRANGE, 1, MAKELONG(0, 200));
 
 			FCEUI_GetNTSCTH(&ntsctint, &ntschue);
+			sprintf(text, "Hue: %d%%", palhue);
+			SendDlgItemMessage(hwndDlg, STATIC_HUEVALUE, WM_SETTEXT, 0, (LPARAM) text);
 
-			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR, TBM_SETPOS, 1, ntsctint);
-			SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR, TBM_SETPOS, 1, ntschue);
+			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,   TBM_SETPOS, 1, ntsctint);
+			SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR,    TBM_SETPOS, 1, ntschue);
+			SendDlgItemMessage(hwndDlg, CTL_PALHUE_TRACKBAR, TBM_SETPOS, 1, palhue);
 
 			if(force_grayscale)
 				CheckDlgButton(hwndDlg, CHECK_PALETTE_GRAYSCALE, BST_CHECKED);
@@ -83,14 +92,23 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			if (eoptions & EO_CPALETTE)
 				CheckDlgButton(hwndDlg, CHECK_PALETTE_CUSTOM, BST_CHECKED);
 
+			if (palmonochrome)
+				CheckDlgButton(hwndDlg, CHECK_PALETTE_MONOCHROME, BST_CHECKED);
+
+			if (palhdtv)
+				CheckDlgButton(hwndDlg, CHECK_PALETTE_HDTV, BST_CHECKED);
+
 			CenterWindowOnScreen(hwndDlg);
 
 			break;
 
 		case WM_HSCROLL:
-			ntsctint = SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR, TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
-			ntschue = SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR, TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
+			ntsctint = SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,   TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
+			ntschue  = SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR,    TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
+			palhue   = SendDlgItemMessage(hwndDlg, CTL_PALHUE_TRACKBAR, TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
 			FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+			sprintf(text, "Hue: %d%%", palhue);
+			SendDlgItemMessage(hwndDlg, STATIC_HUEVALUE, WM_SETTEXT, 0, (LPARAM) text);
 			break;
 
 		case WM_CLOSE:
@@ -104,7 +122,7 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 				{
 					case CHECK_PALETTE_ENABLED:
 						ntsccol ^= 1;
-						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue); // it recalculates everything, use it for PAL block too!
 						break;
 
 					case CHECK_PALETTE_GRAYSCALE:
@@ -115,6 +133,24 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 					case BTN_PALETTE_LOAD:
 						if(LoadPaletteFile())
 							CheckDlgButton(hwndDlg, CHECK_PALETTE_CUSTOM, BST_CHECKED);
+						break;
+
+					case BTN_PALETTE_RESET:
+						palhue = 100;
+						SendDlgItemMessage(hwndDlg, CTL_PALHUE_TRACKBAR, TBM_SETPOS, 1, palhue);
+						sprintf(text, "Hue: %d%%", palhue);
+						SendDlgItemMessage(hwndDlg, STATIC_HUEVALUE, WM_SETTEXT, 0, (LPARAM) text);
+						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+						break;
+
+					case CHECK_PALETTE_MONOCHROME:
+						palmonochrome ^= 1;
+						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+						break;		
+					
+					case CHECK_PALETTE_HDTV:
+						palhdtv ^= 1;
+						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
 						break;
 
 					case CHECK_PALETTE_CUSTOM:

@@ -67,6 +67,7 @@ vmdef vmodes[11] =
 };
 
 extern uint8 PALRAM[0x20];
+extern bool palupdate;
 
 PALETTEENTRY *color_palette;
 
@@ -337,8 +338,10 @@ int SetVideoMode(int fs)
 			specmul = 2;
 		else if(winspecial >= 4 && winspecial <= 5)
 			specmul = 3;
-		else if(winspecial >= 6)
+		else if(winspecial >= 6 && winspecial <=8)
 			specmul = winspecial - 4; // magic assuming prescales are winspecial >= 6
+		else if(winspecial == 9)
+			specmul = 3;
 		else
 			specmul = 1;
 
@@ -374,7 +377,7 @@ int SetVideoMode(int fs)
 		ddsdback.ddsCaps.dwCaps= DDSCAPS_OFFSCREENPLAIN;
 
 		ddsdback.dwWidth=256 * specmul;
-		ddsdback.dwHeight=FSettings.TotalScanlines() * specmul;
+		ddsdback.dwHeight=FSettings.TotalScanlines() * ((winspecial == 9) ? 1 : specmul);
 
 		if (directDrawModeWindowed == DIRECTDRAW_MODE_SURFACE_IN_RAM)
 			// create the buffer in system memory
@@ -437,8 +440,10 @@ int SetVideoMode(int fs)
 				specmul = 2;
 			else if(vmodes[0].special >= 4 && vmodes[0].special <= 5)
 				specmul = 3;
-			 else if(vmodes[0].special >= 6)
+			 else if(vmodes[0].special >= 6 && vmodes[0].special <= 8)
 				specmul = vmodes[0].special - 4; // magic assuming prescales are vmodes[0].special >= 6
+			else if(vmodes[0].special == 9)
+				specmul = 3;
 			else
 				specmul = 1;
 		}
@@ -467,7 +472,7 @@ int SetVideoMode(int fs)
 			ddsdback.ddsCaps.dwCaps= DDSCAPS_OFFSCREENPLAIN;
 
 			ddsdback.dwWidth=256 * specmul; //vmodes[vmod].srect.right;
-			ddsdback.dwHeight=FSettings.TotalScanlines() * specmul; //vmodes[vmod].srect.bottom;
+			ddsdback.dwHeight=FSettings.TotalScanlines() * ((vmodes[0].special == 9) ? 1 : specmul); //vmodes[vmod].srect.bottom;
 
 			if (directDrawModeFullscreen == DIRECTDRAW_MODE_SURFACE_IN_RAM)
 				// create the buffer in system memory
@@ -603,16 +608,19 @@ static void BlitScreenWindow(unsigned char *XBuf)
 		specialmul = 2;
 	else if(winspecial >= 4 && winspecial <= 5)
 		specialmul = 3;
-	else if(winspecial >= 6)
+	else if(winspecial >= 6 && winspecial <= 8)
 		specialmul = winspecial - 4; // magic assuming prescales are winspecial >= 6
+	else if(winspecial == 9)
+		specialmul = 3;
 	else specialmul = 1;
 
 	srect.top=srect.left=0;
 	srect.right=VNSWID * specialmul;
-	srect.bottom=FSettings.TotalScanlines() * specialmul;
+	srect.bottom=FSettings.TotalScanlines() * ((winspecial == 9) ? 1 : specialmul);
 
 	if(PaletteChanged==1)
 	{
+		palupdate = 1;
 		FixPaletteHi();
 		PaletteChanged=0;
 	}
@@ -743,8 +751,10 @@ static void BlitScreenFull(uint8 *XBuf)
 		specmul = 2;
 	else if(vmodes[0].special >= 4 && vmodes[0].special <= 5)
 		specmul = 3;
-	else if(vmodes[0].special >= 6)
+	else if(vmodes[0].special >= 6 && vmodes[0].special <= 8)
 		specmul = vmodes[0].special - 4; // magic assuming prescales are vmodes[0].special >= 6
+	else if(vmodes[0].special == 9)
+		specmul = 3;
 	else
 		specmul = 1;
 
@@ -757,6 +767,7 @@ static void BlitScreenFull(uint8 *XBuf)
 
 	if(PaletteChanged==1)
 	{
+		palupdate = 1;
 		if(bpp>=16)
 			FixPaletteHi();
 		else
@@ -786,7 +797,7 @@ static void BlitScreenFull(uint8 *XBuf)
 		srect.top=0;
 		srect.left=0;
 		srect.right=VNSWID * specmul;
-		srect.bottom=FSettings.TotalScanlines() * specmul;
+		srect.bottom=FSettings.TotalScanlines() * ((vmodes[0].special == 9) ? 1 : specmul);
 
 		//if(vmodes[vmod].flags&VMDF_STRFS)
 		//{
@@ -1266,9 +1277,9 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		//CheckRadioButton(hwndDlg,IDC_RADIO_SCALE,IDC_RADIO_STRETCH,(vmodes[0].flags&VMDF_STRFS)?IDC_RADIO_STRETCH:IDC_RADIO_SCALE);
 
 		// -Video Modes Tag-
-		char *str[]={"<none>","hq2x","Scale2x","NTSC 2x","hq3x","Scale3x","Prescale2x","Prescale3x","Prescale4x"};
+		char *str[]={"<none>","hq2x","Scale2x","NTSC 2x","hq3x","Scale3x","Prescale2x","Prescale3x","Prescale4x","PAL"};
 		int x;
-		for(x=0;x<9;x++)
+		for(x=0;x<10;x++)
 		{
 			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
 			SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);

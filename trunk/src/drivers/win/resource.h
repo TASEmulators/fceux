@@ -635,6 +635,7 @@
 #define IDC_AUTORESUMECDLOGGING         1203
 #define IDC_MASK_UNUSED_GRAPHICS        1203
 #define CHECK_SOUND_SWAPDUTY            1203
+#define CHECK_PALETTE_MONOCHROME        1203
 #define IDC_VOLUMEGROUP                 1204
 #define IDC_OMITBLANK                   1204
 #define IDC_CHECK3                      1204
@@ -758,6 +759,9 @@
 #define ID_STATIC                       1286
 #define ID_CDL_OPTIONS                  1287
 #define ID_CDL_GENERATEROM              1288
+#define CTL_PALHUE_TRACKBAR             1291
+#define CHECK_PALETTE_HDTV              1292
+#define STATIC_HUEVALUE                 1293
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1222,7 +1226,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        291
 #define _APS_NEXT_COMMAND_VALUE         40596
-#define _APS_NEXT_CONTROL_VALUE         1291
+#define _APS_NEXT_CONTROL_VALUE         1294
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

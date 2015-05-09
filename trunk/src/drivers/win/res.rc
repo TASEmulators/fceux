@@ -7,7 +7,8 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -345,12 +346,12 @@ BEGIN
     PUSHBUTTON      "OK",BTN_OK,40,45,50,14
 END
 
-PALCONFIG DIALOGEX 16, 81, 228, 116
+PALCONFIG DIALOGEX 16, 81, 228, 175
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Palette Configuration"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "Close",BUTTON_CLOSE,162,94,56,14
+    DEFPUSHBUTTON   "Close",BUTTON_CLOSE,162,153,56,14
     GROUPBOX        "NES Palette",302,10,8,102,81,WS_GROUP
     DEFPUSHBUTTON   "&Load Palette...",BTN_PALETTE_LOAD,18,40,58,14
     CONTROL         "Enabled",CHECK_PALETTE_ENABLED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,22,87,12
@@ -361,6 +362,12 @@ BEGIN
     CTEXT           "Tint",65463,123,34,85,8
     CONTROL         "Force Grayscale",CHECK_PALETTE_GRAYSCALE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,67,85,12
     CONTROL         "Use Custom Palette",CHECK_PALETTE_CUSTOM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,22,85,12
+    GROUPBOX        "PAL Emulation",IDC_STATIC,10,89,208,61
+    CONTROL         "",CTL_PALHUE_TRACKBAR,"msctls_trackbar32",WS_TABSTOP,15,111,86,15
+    LTEXT           "Hue:",STATIC_HUEVALUE,41,102,46,8
+    PUSHBUTTON      "Reset",BTN_PALETTE_RESET,35,128,50,14
+    CONTROL         "Monochrome",CHECK_PALETTE_MONOCHROME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,114,101,57,10
+    CONTROL         "HDTV Colormatrix",CHECK_PALETTE_HDTV,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,114,118,72,10
 END
 
 POWERPADDIALOG DIALOG 30, 123, 131, 119
@@ -1554,7 +1561,7 @@ BEGIN
         LEFTMARGIN, 10
         RIGHTMARGIN, 218
         TOPMARGIN, 8
-        BOTTOMMARGIN, 108
+        BOTTOMMARGIN, 167
     END
 
     "SOUNDCONFIG", DIALOG
@@ -2520,7 +2527,8 @@ IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

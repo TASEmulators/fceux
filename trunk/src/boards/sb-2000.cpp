@@ -91,7 +91,7 @@ static DECLFR(UNLSB2000Read) {
 	default:
 		FCEU_printf("unk read: %04x\n",A);
 //		break;
-//		return 0xff;
+		return 0xff; // needed to prevent C4715 warning?
 	}
 }
 

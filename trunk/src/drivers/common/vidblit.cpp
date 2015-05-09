@@ -33,14 +33,20 @@ uint8 burst_phase = 0;
 static uint32 CBM[3];
 static uint32 *palettetranslate=0;
 
-static uint16 *specbuf=NULL;			// 8bpp -> 16bpp, pre hq2x/hq3x
-static uint32 *specbuf32bpp = NULL;		// Buffer to hold output of hq2x/hq3x when converting to 16bpp and 24bpp
+static uint16 *specbuf=NULL;		// 8bpp -> 16bpp, pre hq2x/hq3x
+static uint32 *specbuf32bpp = NULL;	// Buffer to hold output of hq2x/hq3x when converting to 16bpp and 24bpp
 static int backBpp, backshiftr[3], backshiftl[3];
 //static uint32 backmask[3];
 
-static uint8  *specbuf8bpp = NULL;		// For 2xscale, 3xscale.
-static uint8  *ntscblit    = NULL;		// For nes_ntsc
-static uint32 *prescalebuf = NULL;		// Prescale pointresizes to 2x-4x to allow less blur with hardware acceleration.
+static uint8  *specbuf8bpp = NULL;	// For 2xscale, 3xscale.
+static uint8  *ntscblit    = NULL;	// For nes_ntsc
+static uint32 *prescalebuf = NULL;	// Prescale pointresizes to 2x-4x to allow less blur with hardware acceleration.
+static uint32 *palrgb      = NULL;	// PAL filter buffer for lookup values of RGB with applied moir phases
+static float  *moire       = NULL;
+int    palhue              = 100;
+bool   palhdtv             = 0;
+bool   palmonochrome       = 0;
+bool   palupdate           = 1;
 
 static int silt;
 
@@ -59,6 +65,11 @@ static int highefx;
    blah.
 */
 #define FVB_BLUR	2
+
+static int Round(float value)
+{
+   return (int) floor(value + 0.5);
+}
 
 static void CalculateShift(uint32 *CBM, int *cshiftr, int *cshiftl)
 {
@@ -176,6 +187,12 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
 		int multi = specfilt - 4; // magic assuming prescales are specfilt >= 6
 		prescalebuf = (uint32 *)FCEU_dmalloc(256*240*multi*sizeof(uint32));
 	}
+	else if (specfilt == 9)
+	{
+		palrgb = (uint32 *)FCEU_dmalloc(265*16*sizeof(uint32));
+		moire  = (float  *)FCEU_dmalloc(    16*sizeof(float));
+	}
+
 	silt = specfilt;	
 	Bpp=b;	
 	highefx=efx;
@@ -246,6 +263,10 @@ void KillBlitToHigh(void)
 	if (prescalebuf) {
 		free(prescalebuf);
 		prescalebuf = NULL;
+	}
+	if (palrgb) {
+		free(palrgb);
+		palrgb = NULL;
 	}
 }
 
@@ -583,8 +604,8 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 		if (Bpp == 4) // are other modes really needed?
 		{
 			int mult = silt - 4; // magic assuming prescales are silt >= 6
-			uint32 *s = prescalebuf; // use 32-bit pointers ftw
-			uint32 *d = (uint32 *)destbackup;
+			uint32 *s = prescalebuf;
+			uint32 *d = (uint32 *)destbackup; // use 32-bit pointers ftw
 
 			for (y=0; y<yr*yscale; y++)
 			{
@@ -600,6 +621,134 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 				if (x == 256 && (y+1)%mult != 0)
 					s -= 256; // repeat scanline
 			}
+		}
+		return;
+	}
+	else if (palrgb)                 // pal moire
+	{
+		// skip usual palette translation, fill lookup array of RGB+moire values per palette update, and send directly to DX dest.
+		// hardcoded resolution is 768x240, makes moire mask cleaner, even though PAL consoles generate it at native res.
+		// source of this whole idea: http://forum.emu-russia.net/viewtopic.php?p=9410#p9410
+		if (palupdate) {
+			uint8 *source = (uint8 *)palettetranslate;
+			int16 R,G,B;
+			float Y,U,V;
+			float hue = (float) palhue/100;
+			bool hdtv = palhdtv;
+			bool monochrome = palmonochrome;
+
+			for (int i=0; i<256; i++) {
+				R = source[i*4  ];
+				G = source[i*4+1];
+				B = source[i*4+2];
+			
+				if (hdtv) { // HDTV BT.709
+					Y =  0.2126 *R + 0.7152 *G + 0.0722 *B; // Y'
+					U = -0.09991*R - 0.33609*G + 0.436  *B; // B-Y
+					V =  0.615  *R - 0.55861*G - 0.05639*B; // R-Y
+				} else { // SDTV BT.601
+					Y =  0.299  *R + 0.587  *G + 0.114  *B;
+					U = -0.14713*R - 0.28886*G + 0.436  *B;
+					V =  0.615  *R - 0.51499*G - 0.10001*B;
+				}
+
+				if (Y == 0) Y = 1;
+
+				// WARNING: phase order is magical!
+				moire[0]  = (U == 0 && V == 0) ? 1 : (Y + V)/Y;
+				moire[1]  = (U == 0 && V == 0) ? 1 : (Y + U)/Y;
+				moire[2]  = (U == 0 && V == 0) ? 1 : (Y - V)/Y;
+				moire[3]  = (U == 0 && V == 0) ? 1 : (Y - U)/Y;
+				moire[4]  = (U == 0 && V == 0) ? 1 : (Y - V)/Y;
+				moire[5]  = (U == 0 && V == 0) ? 1 : (Y + U)/Y;
+				moire[6]  = (U == 0 && V == 0) ? 1 : (Y + V)/Y;
+				moire[7]  = (U == 0 && V == 0) ? 1 : (Y - U)/Y;
+				moire[8]  = (U == 0 && V == 0) ? 1 : (Y - V)/Y;
+				moire[9]  = (U == 0 && V == 0) ? 1 : (Y - U)/Y;
+				moire[10] = (U == 0 && V == 0) ? 1 : (Y + V)/Y;
+				moire[11] = (U == 0 && V == 0) ? 1 : (Y + U)/Y;
+				moire[12] = (U == 0 && V == 0) ? 1 : (Y + V)/Y;
+				moire[13] = (U == 0 && V == 0) ? 1 : (Y - U)/Y;
+				moire[14] = (U == 0 && V == 0) ? 1 : (Y - V)/Y;
+				moire[15] = (U == 0 && V == 0) ? 1 : (Y + U)/Y;
+
+				if (monochrome)
+					hue = 0;
+				
+				for (int j=0; j<16; j++) {
+					if (hdtv) { // HDTV BT.709
+						R = Round((Y                 + 1.28033*V*hue)*moire[j]);
+						G = Round((Y - 0.21482*U*hue - 0.38059*V*hue)*moire[j]);
+						B = Round((Y + 2.12798*U*hue                )*moire[j]);
+					} else { // SDTV BT.601
+						R = Round((Y                 + 1.13983*V*hue)*moire[j]);
+						G = Round((Y - 0.39465*U*hue - 0.58060*V*hue)*moire[j]);
+						B = Round((Y + 2.03211*U*hue                )*moire[j]);
+					}
+
+					if (R > 0xff) R = 0xff; else if (R < 0) R = 0;
+					if (G > 0xff) G = 0xff; else if (G < 0) G = 0;
+					if (B > 0xff) B = 0xff; else if (B < 0) B = 0;
+
+					palrgb[i*16+j] = (B<<16)|(G<<8)|R;
+				}
+			}
+			palupdate = 0;
+		}
+
+		if (Bpp == 4) {
+			uint32 *d = (uint32 *)dest;
+			uint8 xsub  = 0;
+			uint8 xabs  = 0;
+			uint8 index = 0;
+			uint32 color;
+
+			for (y=0; y<yr; y++) {
+				for (x=0; x<xr; x++) {
+					index = *src++;
+					
+					for (int xsub = 0; xsub < 3; xsub++) {
+						xabs = x*3 + xsub;
+
+						switch (y&3) {
+						case 0:
+							switch (xabs&3) {
+								case 0: color = palrgb[index*16   ]; break;
+								case 1: color = palrgb[index*16+ 1]; break;
+								case 2: color = palrgb[index*16+ 2]; break;
+								case 3: color = palrgb[index*16+ 3]; break;
+							}
+							break;
+						case 1:
+							switch (xabs&3) {
+								case 0: color = palrgb[index*16+ 4]; break;
+								case 1: color = palrgb[index*16+ 5]; break;
+								case 2: color = palrgb[index*16+ 6]; break;
+								case 3: color = palrgb[index*16+ 7]; break;
+							}
+							break;
+						case 2:
+							switch (xabs&3) {
+								case 0: color = palrgb[index*16+ 8]; break;
+								case 1: color = palrgb[index*16+ 9]; break;
+								case 2: color = palrgb[index*16+10]; break;
+								case 3: color = palrgb[index*16+11]; break;
+							}
+							break;
+						case 3:
+							switch (xabs&3) {
+								case 0: color = palrgb[index*16+12]; break;
+								case 1: color = palrgb[index*16+13]; break;
+								case 2: color = palrgb[index*16+14]; break;
+								case 3: color = palrgb[index*16+15]; break;
+							}
+							break;
+						}
+						*d++ = color;
+					}
+				}
+			}
+
 		}
 		return;
 	}
@@ -799,7 +948,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 								int too=xscale;
 								do
 								{
-									*(uint32 *)dest=palettetranslate[*src]; 
+									*(uint32 *)dest=palettetranslate[*src];
 									dest+=4;
 								} while(--too);
 							}
