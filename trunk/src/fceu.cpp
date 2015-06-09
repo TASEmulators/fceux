@@ -56,8 +56,8 @@ extern bool isTaseditorRecording();
 extern int32 fps_scale;
 extern int32 fps_scale_unpaused;
 extern int32 fps_scale_frameadvance;
-extern void RefreshThrottleFPS();
 #endif
+extern void RefreshThrottleFPS();
 
 #ifdef _S9XLUA_H
 #include "fceulua.h"

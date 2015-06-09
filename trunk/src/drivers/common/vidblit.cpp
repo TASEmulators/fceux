@@ -19,6 +19,7 @@
  */
 
 #include <stdlib.h>
+#include <math.h>
 #include "scalebit.h"
 #include "hq2x.h"
 #include "hq3x.h"

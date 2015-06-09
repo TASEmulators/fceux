@@ -401,7 +401,7 @@ InitConfig()
 void
 UpdateEMUCore(Config *config)
 {
-	int ntsccol, ntsctint, ntschue, flag, start, end;
+	int ntsccol, ntsctint, ntschue, flag, region, start, end;
 	std::string cpalette;
 
 	config->getOption("SDL.NTSCpalette", &ntsccol);
@@ -414,8 +414,8 @@ UpdateEMUCore(Config *config)
 		LoadCPalette(cpalette);
 	}
 
-	config->getOption("SDL.PAL", &flag);
-	FCEUI_SetVidSystem(flag ? 1 : 0);
+	config->getOption("SDL.PAL", &region);
+	FCEUI_SetRegion(region);
 
 	config->getOption("SDL.GameGenie", &flag);
 	FCEUI_SetGameGenie(flag ? 1 : 0);

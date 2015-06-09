@@ -72,6 +72,11 @@ int mutecapture;
 #endif
 static int noconfig;
 
+int pal_emulation;
+int dendy;
+// TODO: actually implement swapDuty
+int swapDuty;
+
 // -Video Modes Tag- : See --special
 static const char *DriverUsage=
 "Option         Value   Description\n"
@@ -213,10 +218,23 @@ int LoadGame(const char *path)
 	// set pal/ntsc
 	int id;
 	g_config->getOption("SDL.PAL", &id);
-	if(id)
-		FCEUI_SetVidSystem(1);
-	else
-		FCEUI_SetVidSystem(0);
+	switch(id)
+	{
+		case 0:
+			FCEUI_SetVidSystem(0);
+			pal_emulation = 0;
+			dendy = 0;
+			break;
+		case 1:
+			FCEUI_SetVidSystem(1);
+			pal_emulation = 1;
+			dendy = 0;
+			break;
+		case 2:
+			FCEUI_SetVidSystem(0);
+			pal_emulation = 0;
+			dendy = 1;
+	}
 	
 	std::string filename;
 	g_config->getOption("SDL.Sound.RecordFile", &filename);
