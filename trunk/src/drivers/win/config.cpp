@@ -18,14 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/****************************************************************/
-/*			FCE Ultra				*/
-/*								*/
-/*	This file contains code to interface to the standard    */
-/*	FCE Ultra configuration file saving/loading code.	*/
-/*								*/
-/****************************************************************/
-
 #include "config.h"
 #include "common.h"
 #include "main.h"
@@ -184,6 +176,9 @@ static CFGSTRUCT fceuconfig[] =
 	AC(ntsccol),AC(ntsctint),AC(ntschue),
 	AC(force_grayscale),
 	AC(dendy),
+	AC(extrascanlines),
+	AC(overclocked),
+	AC(skip_7bit_overclocking),
 
 	NAC("palyo",pal_emulation),
 	NAC("genie",genie),

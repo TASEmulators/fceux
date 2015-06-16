@@ -135,10 +135,12 @@ void FCEU_TogglePPU(void) {
 	if (newppu) {
 		FCEU_DispMessage("New PPU loaded", 0);
 		FCEUI_printf("New PPU loaded");
+		overclocked = 0;
 	} else {
 		FCEU_DispMessage("Old PPU loaded", 0);
 		FCEUI_printf("Old PPU loaded");
 	}
+	normalscanlines = (dendy ? 290 : 240)+newppu; // use flag as number!
 #ifdef WIN32
 	SetMainWindowText();
 #endif
@@ -856,6 +858,11 @@ void FCEU_ResetVidSys(void) {
 
 	PAL = w ? 1 : 0;
 
+	if (newppu)
+		overclocked = 0;
+
+	normalscanlines = (dendy ? 290 : 240)+newppu; // use flag as number!
+	totalscanlines = normalscanlines + (overclocked ? extrascanlines : 0);
 	FCEUPPU_SetVideoSystem(w || dendy);
 	SetSoundVariables();
 }
@@ -921,18 +928,23 @@ int FCEUI_GetCurrentVidSystem(int *slstart, int *slend) {
 void FCEUI_SetRegion(int region) {
 	switch (region) {
 		case 0: // NTSC
+			normalscanlines = 240;
 			pal_emulation = 0;
 			dendy = 0;
 			break;
 		case 1: // PAL
+			normalscanlines = 240;
 			pal_emulation = 1;
 			dendy = 0;
 			break;
 		case 2: // Dendy
+			normalscanlines = 290;
 			pal_emulation = 0;
 			dendy = 1;
 			break;
 	}
+	normalscanlines += newppu;
+	totalscanlines = normalscanlines + (overclocked ? extrascanlines : 0);
 	FCEUI_SetVidSystem(pal_emulation);
 	RefreshThrottleFPS();
 #ifdef WIN32

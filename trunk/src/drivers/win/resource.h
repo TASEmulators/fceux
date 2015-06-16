@@ -577,6 +577,7 @@
 #define IDC_SELECTION_MARKER_EDIT       1147
 #define IDC_NOTE_TO_FIND                1147
 #define IDC_AUTOSAVE_PERIOD             1147
+#define IDC_EXTRA_SCANLINES             1147
 #define IDC_BUTTON9                     1148
 #define TASEDITOR_FIND_NEXT_SIMILAR_MARKER 1148
 #define IDC_SYMBOLIC_ADDRESS            1148
@@ -636,6 +637,7 @@
 #define IDC_MASK_UNUSED_GRAPHICS        1203
 #define CHECK_SOUND_SWAPDUTY            1203
 #define CHECK_PALETTE_MONOCHROME        1203
+#define CB_OVERCLOCKING                 1203
 #define IDC_VOLUMEGROUP                 1204
 #define IDC_OMITBLANK                   1204
 #define IDC_CHECK3                      1204
@@ -762,6 +764,7 @@
 #define CTL_PALHUE_TRACKBAR             1291
 #define CHECK_PALETTE_HDTV              1292
 #define STATIC_HUEVALUE                 1293
+#define CB_SKIP_7BIT                    1294
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042

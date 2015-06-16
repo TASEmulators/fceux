@@ -14,7 +14,6 @@
 #define INVALID_BREAKPOINT_CONDITION 3
 
 //extern volatile int userpause; //mbg merge 7/18/06 removed for merging
-extern int scanline; //current scanline! :D
 extern HWND hDebug;
 
 extern int childwnd,numWPs; //mbg merge 7/18/06 had to make extern

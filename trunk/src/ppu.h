@@ -34,9 +34,11 @@ extern void (*FFCEUX_PPUWrite)(uint32 A, uint8 V);
 extern uint8 FASTCALL FFCEUX_PPURead_Default(uint32 A);
 void FFCEUX_PPUWrite_Default(uint32 A, uint8 V);
 
-extern int scanline;
 extern int g_rasterpos;
 extern uint8 PPU[4];
+extern bool overclocked;
+extern bool skip_7bit_overclocking;
+extern bool DMC_7bit;
 
 enum PPUPHASE {
 	PPUPHASE_VBL, PPUPHASE_BG, PPUPHASE_OBJ

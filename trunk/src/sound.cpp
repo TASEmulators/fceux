@@ -58,6 +58,7 @@ uint8 EnabledChannels=0;	// $4015 / Sound channels enable and status
 uint8 IRQFrameMode=0;		// $4017 / Frame counter control / xx000000
 
 uint8 InitialRawDALatch=0; // used only for lua
+bool DMC_7bit = 0; // used to skip overclocking
 ENVUNIT EnvUnits[3];
 
 static const int RectDuties[4]={1,2,4,6};
@@ -307,58 +308,69 @@ static DECLFW(Write_PSG)
 
 static DECLFW(Write_DMCRegs)
 {
- A&=0xF;
-
- switch(A)
- {
-  case 0x00:DoPCM();
-            LoadDMCPeriod(V&0xF);
-
-            if(SIRQStat&0x80)
-            {
-             if(!(V&0x80))
-             {
-              X6502_IRQEnd(FCEU_IQDPCM);
-              SIRQStat&=~0x80;
-             }
-             else X6502_IRQBegin(FCEU_IQDPCM);
-            }
-	    DMCFormat=V;
-	    break;
-  case 0x01:DoPCM();
-	    InitialRawDALatch=V&0x7F;
-	    RawDALatch=InitialRawDALatch;
-	    break;
-  case 0x02:DMCAddressLatch=V;break;
-  case 0x03:DMCSizeLatch=V;break;
- }
-
-
+	A&=0xF;
+	
+	switch(A)
+	{
+	case 0x00:
+		DoPCM();
+	    LoadDMCPeriod(V&0xF);
+	
+	    if(SIRQStat&0x80)
+	    {
+			if(!(V&0x80))
+			{
+				X6502_IRQEnd(FCEU_IQDPCM);
+				SIRQStat&=~0x80;
+			}
+			else X6502_IRQBegin(FCEU_IQDPCM);
+	    }
+		DMCFormat=V;
+		break;
+	case 0x01:
+		DoPCM();
+		InitialRawDALatch=V&0x7F;
+		RawDALatch=InitialRawDALatch;
+		if (RawDALatch)
+			DMC_7bit = 1;
+		break;
+	case 0x02:
+		DMCAddressLatch=V;
+		if (V)
+			DMC_7bit = 0;
+		break;
+	case 0x03:
+		DMCSizeLatch=V;
+		if (V)
+			DMC_7bit = 0;
+		break;
+	}
 }
 
 static DECLFW(StatusWrite)
 {
 	int x;
 
-        DoSQ1();
-        DoSQ2();
-        DoTriangle();
-        DoNoise();
-        DoPCM();
-        for(x=0;x<4;x++)
-         if(!(V&(1<<x))) lengthcount[x]=0;   /* Force length counters to 0. */
+    DoSQ1();
+    DoSQ2();
+    DoTriangle();
+    DoNoise();
+    DoPCM();
 
-        if(V&0x10)
-        {
-         if(!DMCSize)
-          PrepDPCM();
-        }
+    for(x=0;x<4;x++)
+		if(!(V&(1<<x))) lengthcount[x]=0;   /* Force length counters to 0. */
+
+    if(V&0x10)
+    {
+		if(!DMCSize)
+			PrepDPCM();
+    }
 	else
 	{
-	 DMCSize=0;
+		DMCSize=0;
 	}
 	SIRQStat&=~0x80;
-        X6502_IRQEnd(FCEU_IQDPCM);
+	X6502_IRQEnd(FCEU_IQDPCM);
 	EnabledChannels=V&0x1F;
 }
 
@@ -548,7 +560,7 @@ static INLINE void DMCDMA(void)
 
 void FCEU_SoundCPUHook(int cycles)
 {
-fhcnt-=cycles*48;
+ fhcnt-=cycles*48;
  if(fhcnt<=0)
  {
   FrameSoundUpdate();

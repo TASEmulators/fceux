@@ -3,6 +3,9 @@
 #include "gui.h"
 #include "resource.h"
 
+char str[5];
+extern int newppu;
+
 /**
 * This function is called when the dialog closes.
 *
@@ -28,7 +31,27 @@ void CloseTimingDialog(HWND hwndDlg)
 		eoptions &= ~EO_NOTHROTTLE;
 	}
 
-	EndDialog(hwndDlg, 0);
+	overclocked = (IsDlgButtonChecked(hwndDlg, CB_OVERCLOCKING) == BST_CHECKED);
+	skip_7bit_overclocking = (IsDlgButtonChecked(hwndDlg, CB_SKIP_7BIT) == BST_CHECKED);
+
+	GetDlgItemText(hwndDlg, IDC_EXTRA_SCANLINES, str, 4);
+	sscanf(str,"%d",&extrascanlines);
+
+	if (extrascanlines < 0)
+	{
+		extrascanlines = 0;
+		MessageBox(hwndDlg, "Overclocking is when you speed up your CPU, not slow it down!", "Error", MB_OK);
+		sprintf(str,"%d",extrascanlines);
+		SetDlgItemText(hwndDlg,IDC_EXTRA_SCANLINES,str);
+	}
+	else if (overclocked && newppu)
+	{
+		MessageBox(hwndDlg, "Overclocking doesn't work with new PPU!", "Error", MB_OK);
+	}
+	else
+		EndDialog(hwndDlg, 0);
+
+	totalscanlines = normalscanlines + (overclocked ? extrascanlines : 0);
 }
 
 /**
@@ -51,6 +74,17 @@ BOOL CALLBACK TimingConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				CheckDlgButton(hwndDlg, CB_DISABLE_SPEED_THROTTLING, BST_CHECKED);
 			}
 
+			if(overclocked)
+				CheckDlgButton(hwndDlg, CB_OVERCLOCKING, BST_CHECKED);
+
+			if(skip_7bit_overclocking)
+				CheckDlgButton(hwndDlg, CB_SKIP_7BIT, BST_CHECKED);
+
+			SendDlgItemMessage(hwndDlg,IDC_EXTRA_SCANLINES,EM_SETLIMITTEXT,3,0);
+
+			sprintf(str,"%d",extrascanlines);
+			SetDlgItemText(hwndDlg,IDC_EXTRA_SCANLINES,str);
+			
 			CenterWindowOnScreen(hwndDlg);
 
 			break;

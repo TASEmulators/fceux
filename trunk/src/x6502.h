@@ -47,8 +47,9 @@ void X6502_RunDebug(int32 cycles);
 //------------
 
 extern uint32 timestamp;
-
-
+extern int scanline;
+extern int normalscanlines;
+extern int totalscanlines;
 
 #define N_FLAG  0x80
 #define V_FLAG  0x40

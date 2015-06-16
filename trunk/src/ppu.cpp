@@ -19,45 +19,45 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include        "types.h"
-#include        "x6502.h"
-#include        "fceu.h"
-#include        "ppu.h"
-#include        "nsf.h"
-#include        "sound.h"
-#include        "file.h"
-#include        "utils/endian.h"
-#include        "utils/memory.h"
+#include "types.h"
+#include "x6502.h"
+#include "fceu.h"
+#include "ppu.h"
+#include "nsf.h"
+#include "sound.h"
+#include "file.h"
+#include "utils/endian.h"
+#include "utils/memory.h"
+		 
+#include "cart.h"
+#include "palette.h"
+#include "state.h"
+#include "video.h"
+#include "input.h"
+#include "driver.h"
+#include "debug.h"
+		 
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
 
-#include        "cart.h"
-#include        "palette.h"
-#include        "state.h"
-#include        "video.h"
-#include        "input.h"
-#include        "driver.h"
-#include        "debug.h"
+#define VBlankON    (PPU[0] & 0x80)	//Generate VBlank NMI
+#define Sprite16    (PPU[0] & 0x20)	//Sprites 8x16/8x8
+#define BGAdrHI     (PPU[0] & 0x10)	//BG pattern adr $0000/$1000
+#define SpAdrHI     (PPU[0] & 0x08)	//Sprite pattern adr $0000/$1000
+#define INC32       (PPU[0] & 0x04)	//auto increment 1/32
 
-#include        <cstring>
-#include        <cstdio>
-#include        <cstdlib>
+#define SpriteON    (PPU[1] & 0x10)	//Show Sprite
+#define ScreenON    (PPU[1] & 0x08)	//Show screen
+#define PPUON       (PPU[1] & 0x18)	//PPU should operate
+#define GRAYSCALE   (PPU[1] & 0x01)	//Grayscale (AND palette entries with 0x30)
 
-#define VBlankON        (PPU[0] & 0x80)		//Generate VBlank NMI
-#define Sprite16        (PPU[0] & 0x20)		//Sprites 8x16/8x8
-#define BGAdrHI         (PPU[0] & 0x10)		//BG pattern adr $0000/$1000
-#define SpAdrHI         (PPU[0] & 0x08)		//Sprite pattern adr $0000/$1000
-#define INC32           (PPU[0] & 0x04)		//auto increment 1/32
+#define SpriteLeft8 (PPU[1] & 0x04)
+#define BGLeft8     (PPU[1] & 0x02)
 
-#define SpriteON        (PPU[1] & 0x10)		//Show Sprite
-#define ScreenON        (PPU[1] & 0x08)		//Show screen
-#define PPUON           (PPU[1] & 0x18)		//PPU should operate
-#define GRAYSCALE       (PPU[1] & 0x01)		//Grayscale (AND palette entries with 0x30)
+#define PPU_status  (PPU[2])
 
-#define SpriteLeft8     (PPU[1] & 0x04)
-#define BGLeft8         (PPU[1] & 0x02)
-
-#define PPU_status      (PPU[2])
-
-#define Pal             (PALRAM)
+#define Pal         (PALRAM)
 
 static void FetchSpriteData(void);
 static void RefreshLine(int lastpixel);
@@ -343,6 +343,9 @@ static int maxsprites = 8;
 
 //scanline is equal to the current visible scanline we're on.
 int scanline;
+int normalscanlines;
+int extrascanlines = 0;
+int totalscanlines;
 int g_rasterpos;
 static uint32 scanlines_per_frame;
 
@@ -1759,7 +1762,7 @@ int FCEUPPU_Loop(int skip) {
 			kook ^= 1;
 		}
 		if (GameInfo->type == GIT_NSF)
-			X6502_Run((256 + 85) * (dendy ? 290 : 240));
+			X6502_Run((256 + 85) * normalscanlines);
 		#ifdef FRAMESKIP
 		else if (skip) {
 			int y;
@@ -1786,14 +1789,22 @@ int FCEUPPU_Loop(int skip) {
 		#endif
 		else {
 			int x, max, maxref;
-
 			deemp = PPU[1] >> 5;
-			for (scanline = 0; scanline < (dendy ? 290 : 240); ) {	//scanline is incremented in  DoLine.  Evil. :/
+
+			// manual samples can't play correctly with overclocking
+			if (DMC_7bit && skip_7bit_overclocking)
+				totalscanlines = normalscanlines;
+			else
+				totalscanlines = normalscanlines + (overclocked ? extrascanlines : 0);
+
+			for (scanline = 0; scanline < totalscanlines; ) {	//scanline is incremented in  DoLine.  Evil. :/
 				deempcnt[deemp]++;
-				if (scanline < 240)
+				if (scanline < normalscanlines)
 					DEBUG(FCEUD_UpdatePPUView(scanline, 1));
 				DoLine();
 			}
+			DMC_7bit = 0;
+
 			if (MMC5Hack) MMC5_hb(scanline);
 			for (x = 1, max = 0, maxref = 0; x < 7; x++) {
 				if (deempcnt[x] > max) {
@@ -2032,7 +2043,8 @@ int FCEUX_PPU_Loop(int skip) {
 		//capture the initial xscroll
 		//int xscroll = ppur.fh;
 		//render 241/291 scanlines (1 dummy at beginning, dendy's 50 at the end)
-		for (int sl = 0; sl < (dendy ? 291 : 241); sl++) {
+		//ignore overclocking!
+		for (int sl = 0; sl < normalscanlines; sl++) {
 			spr_read.start_scanline();
 
 			g_rasterpos = 0;
@@ -2317,6 +2329,8 @@ int FCEUX_PPU_Loop(int skip) {
 			if (ppur.status.end_cycle == 341)
 				runppu(1);
 		}	//scanline loop
+
+		DMC_7bit = 0;
 
 		if (MMC5Hack) MMC5_hb(240);
 

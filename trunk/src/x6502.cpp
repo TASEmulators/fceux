@@ -35,11 +35,11 @@ uint32 timestamp;
 void (*MapIRQHook)(int a);
 
 #define ADDCYC(x) \
-{     \
+{                 \
  int __x=x;       \
  _tcount+=__x;    \
  _count-=__x*48;  \
- timestamp+=__x;  \
+ if (scanline < normalscanlines || scanline == totalscanlines) timestamp+=__x;  \
 }
 
 //normal memory read
@@ -493,7 +493,9 @@ extern int test; test++;
    temp=_tcount;
    _tcount=0;
    if(MapIRQHook) MapIRQHook(temp);
-   FCEU_SoundCPUHook(temp);
+   
+   if (scanline < normalscanlines || scanline == totalscanlines)
+    FCEU_SoundCPUHook(temp);
    #ifdef _S9XLUA_H
    CallRegisteredLuaMemHook(_PC, 1, 0, LUAMEMHOOK_EXEC);
    #endif

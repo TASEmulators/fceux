@@ -197,7 +197,7 @@ static void UNROM512LSync() {
 		}
 		else if (latche==0x10)
 		{
-			for(int i=0;i<(ROM_size*4);i++)
+			for(uint32 i=0;i<(ROM_size*4);i++)
 				inc_flash_write_count(i>>2,i<<12);
 			memset(flashdata,0xFF,ROM_size*0x4000);	//Erasing the rom chip as instructed. Crash rate calulated to be 99.9% :)
 		}
