@@ -118,7 +118,7 @@ void DecreaseEmulationSpeed(void)
 
 	RefreshThrottleFPS();
 
-	FCEU_DispMessage("Emulation speed %.1f%%",0, g_fpsScale*100.0);
+	FCEU_DispMessage("Emulation speed %.1f%%",0, fps_scale*100.0);
 }
 
 /**
@@ -152,5 +152,5 @@ FCEUD_SetEmulationSpeed(int cmd)
 
 	RefreshThrottleFPS();
 
-	FCEU_DispMessage("Emulation speed %.1f%%",0, g_fpsScale*100.0);
+	FCEU_DispMessage("Emulation speed %.1f%%",0, fps_scale*100.0);
 }
