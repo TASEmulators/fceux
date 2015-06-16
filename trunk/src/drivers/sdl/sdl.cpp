@@ -48,8 +48,9 @@
 #include <iostream>
 #include <fstream>
 
-
-extern double g_fpsScale;
+extern double fps_scale;
+extern double fps_scale_frameadvance;
+extern double fps_scale_unpaused;
 
 extern bool MaxSpeed;
 
@@ -402,14 +403,14 @@ FCEUD_Update(uint8 *XBuf,
 	
 	int ocount = Count;
 	// apply frame scaling to Count
-	Count = (int)(Count / g_fpsScale);
+	Count = (int)(Count / fps_scale);
 	if(Count) {
 		int32 can=GetWriteSound();
 		static int uflow=0;
 		int32 tmpcan;
 
 		// don't underflow when scaling fps
-		if(can >= GetMaxSound() && g_fpsScale==1.0) uflow=1;	/* Go into massive underflow mode. */
+		if(can >= GetMaxSound() && fps_scale==1.0) uflow=1;	/* Go into massive underflow mode. */
 
 		if(can > Count) can=Count;
 		else uflow=0;
@@ -422,7 +423,7 @@ FCEUD_Update(uint8 *XBuf,
 		//if(uflow) puts("Underflow");
 		tmpcan = GetWriteSound();
 		// don't underflow when scaling fps
-		if(g_fpsScale>1.0 || ((tmpcan < Count*0.90) && !uflow)) {
+		if(fps_scale>1.0 || ((tmpcan < Count*0.90) && !uflow)) {
 			if(XBuf && (inited&4) && !(NoWaiting & 2))
 				BlitScreen(XBuf);
 			Buffer+=can;
