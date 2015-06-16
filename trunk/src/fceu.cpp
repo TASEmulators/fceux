@@ -43,26 +43,20 @@
 #include "file.h"
 #include "vsuni.h"
 #include "ines.h"
-
 #ifdef WIN32
-	#include "drivers/win/pref.h"
-	#include "utils/xstring.h"
+#include "drivers/win/pref.h"
+#include "utils/xstring.h"
 
-	extern void CDLoggerROMClosed();
-	extern void CDLoggerROMChanged();
-	extern void ResetDebugStatisticsCounters();
-	extern void SetMainWindowText();
-	extern bool isTaseditorRecording();
+extern void CDLoggerROMClosed();
+extern void CDLoggerROMChanged();
+extern void ResetDebugStatisticsCounters();
+extern void SetMainWindowText();
+extern bool isTaseditorRecording();
 
-	extern int32 fps_scale;
-	extern int32 fps_scale_unpaused;
-	extern int32 fps_scale_frameadvance;
-#else
-	extern int32 fps_scale;
-	extern int32 fps_scale_unpaused;
-	extern int32 fps_scale_frameadvance;
+extern int32 fps_scale;
+extern int32 fps_scale_unpaused;
+extern int32 fps_scale_frameadvance;
 #endif
-
 extern void RefreshThrottleFPS();
 
 #ifdef _S9XLUA_H
@@ -649,20 +643,24 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 		// the user is holding Frame Advance key
 		// clear paused flag temporarily
 		EmulationPaused &= ~EMULATIONPAUSED_PAUSED;
+#ifdef WIN32
 		// different emulation speed when holding Frame Advance
 		if (fps_scale_frameadvance > 0)
 		{
 			fps_scale = fps_scale_frameadvance;
 			RefreshThrottleFPS();
 		}
+#endif
 	} else
 	{
+#ifdef WIN32
 		if (fps_scale_frameadvance > 0)
 		{
 			// restore emulation speed when Frame Advance is not held
 			fps_scale = fps_scale_unpaused;
 			RefreshThrottleFPS();
 		}
+#endif
 		if (EmulationPaused & EMULATIONPAUSED_PAUSED)
 		{
 			// emulator is paused

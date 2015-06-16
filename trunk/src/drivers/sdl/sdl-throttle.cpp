@@ -11,9 +11,7 @@ static const double Normal  = 1.0;      // 1x speed    (around 60 fps on NTSC)
 static uint64 Lasttime, Nexttime;
 static long double desired_frametime;
 static int InFrame;
-double fps_scale = Normal; // used by sdl.cpp
-double fps_scale_frameadvance = Normal;
-double fps_scale_unpaused = Normal;
+double g_fpsScale = Normal; // used by sdl.cpp
 bool MaxSpeed = false;
 
 /* LOGMUL = exp(log(2) / 3)
@@ -33,7 +31,7 @@ void
 RefreshThrottleFPS()
 {
 	uint64 fps = FCEUI_GetDesiredFPS(); // Do >> 24 to get in Hz
-	desired_frametime = 16777216.0l / (fps * fps_scale);
+	desired_frametime = 16777216.0l / (fps * g_fpsScale);
 
 	Lasttime=0;   
 	Nexttime=0;
@@ -46,7 +44,7 @@ RefreshThrottleFPS()
 int
 SpeedThrottle()
 {
-	if(fps_scale >= 32)
+	if(g_fpsScale >= 32)
 	{
 		return 0; /* Done waiting */
 	}
@@ -94,15 +92,13 @@ SpeedThrottle()
  */
 void IncreaseEmulationSpeed(void)
 {
-	fps_scale_unpaused *= LOGMUL;
+	g_fpsScale *= LOGMUL;
     
-	if(fps_scale_unpaused > Fastest) fps_scale_unpaused = Fastest;
-	
-	fps_scale = fps_scale_unpaused;
+	if(g_fpsScale > Fastest) g_fpsScale = Fastest;
 
 	RefreshThrottleFPS();
      
-	FCEU_DispMessage("Emulation speed %.1f%%",0, fps_scale*100.0);
+	FCEU_DispMessage("Emulation speed %.1f%%",0, g_fpsScale*100.0);
 }
 
 /**
@@ -110,15 +106,13 @@ void IncreaseEmulationSpeed(void)
  */
 void DecreaseEmulationSpeed(void)
 {
-	fps_scale_unpaused /= LOGMUL;
-	if(fps_scale_unpaused < Slowest)
-		fps_scale_unpaused = Slowest;
-
-	fps_scale = fps_scale_unpaused;
+	g_fpsScale /= LOGMUL;
+	if(g_fpsScale < Slowest)
+		g_fpsScale = Slowest;
 
 	RefreshThrottleFPS();
 
-	FCEU_DispMessage("Emulation speed %.1f%%",0, fps_scale*100.0);
+	FCEU_DispMessage("Emulation speed %.1f%%",0, g_fpsScale*100.0);
 }
 
 /**
@@ -131,19 +125,19 @@ FCEUD_SetEmulationSpeed(int cmd)
     
 	switch(cmd) {
 	case EMUSPEED_SLOWEST:
-		fps_scale_unpaused = Slowest;
+		g_fpsScale = Slowest;
 		break;
 	case EMUSPEED_SLOWER:
 		DecreaseEmulationSpeed();
 		break;
 	case EMUSPEED_NORMAL:
-		fps_scale_unpaused = Normal;
+		g_fpsScale = Normal;
 		break;
 	case EMUSPEED_FASTER:
 		IncreaseEmulationSpeed();
 		break;
 	case EMUSPEED_FASTEST:
-		fps_scale_unpaused = Fastest;
+		g_fpsScale = Fastest;
 		MaxSpeed = true;
 		break;
 	default:
@@ -152,5 +146,5 @@ FCEUD_SetEmulationSpeed(int cmd)
 
 	RefreshThrottleFPS();
 
-	FCEU_DispMessage("Emulation speed %.1f%%",0, fps_scale*100.0);
+	FCEU_DispMessage("Emulation speed %.1f%%",0, g_fpsScale*100.0);
 }
