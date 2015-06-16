@@ -43,20 +43,26 @@
 #include "file.h"
 #include "vsuni.h"
 #include "ines.h"
-#ifdef WIN32
-#include "drivers/win/pref.h"
-#include "utils/xstring.h"
 
-extern void CDLoggerROMClosed();
-extern void CDLoggerROMChanged();
-extern void ResetDebugStatisticsCounters();
-extern void SetMainWindowText();
-extern bool isTaseditorRecording();
+#ifdef WIN32
+	#include "drivers/win/pref.h"
+	#include "utils/xstring.h"
+
+	extern void CDLoggerROMClosed();
+	extern void CDLoggerROMChanged();
+	extern void ResetDebugStatisticsCounters();
+	extern void SetMainWindowText();
+	extern bool isTaseditorRecording();
+
+	extern int32 fps_scale;
+	extern int32 fps_scale_unpaused;
+	extern int32 fps_scale_frameadvance;
+#else
+	extern int32 fps_scale;
+	extern int32 fps_scale_unpaused;
+	extern int32 fps_scale_frameadvance;
 #endif
 
-extern int32 fps_scale;
-extern int32 fps_scale_unpaused;
-extern int32 fps_scale_frameadvance;
 extern void RefreshThrottleFPS();
 
 #ifdef _S9XLUA_H
