@@ -8,7 +8,9 @@
     <title>FCEUX Help</title>
     <script type="text/javascript">
       function escapeHtml(unsafe) {
-        return unsafe.replace(/javascript/gi, "").replace(/script/gi, "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      	//zero 18-jun-2015 - this doesnt work with documents containing the substring Script!! what!!
+        //return unsafe.replace(/javascript/gi, "").replace(/script/gi, "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        return unsafe.replace(/javascript/gi, "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
       }
       var sTopic = "";
       if (top.location.href.lastIndexOf("?") > 0)
