@@ -147,12 +147,6 @@ int genie = 0;
 int pal_emulation = 0;
 int pal_setting_specified = 0;
 int dendy = 0;
-// overclock the console by adding dummy scanlines to PPU loop
-// disables DMC DMA and WaveHi filling for these dummies
-// doesn't work with new PPU
-bool overclocked = 0;
-// 7-bit samples have priority over overclocking
-bool skip_7bit_overclocking = 1;
 bool swapDuty = 0; // some Famicom and NES clones had duty cycle bits swapped
 int ntsccol = 0, ntsctint, ntschue;
 std::string BaseDirectory;

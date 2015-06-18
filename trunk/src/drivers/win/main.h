@@ -57,11 +57,7 @@ extern int EnableBackgroundInput;
 extern int AFon;
 extern int AFoff;
 extern int AutoFireOffset;
-extern int normalscanlines;
-extern int extrascanlines;
-extern int totalscanlines;
-extern bool overclocked;
-extern bool skip_7bit_overclocking;
+
 
 extern int vmod;
 

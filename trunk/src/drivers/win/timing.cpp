@@ -2,6 +2,7 @@
 #include "main.h"
 #include "gui.h"
 #include "resource.h"
+#include "fceu.h"
 
 char str[5];
 extern int newppu;

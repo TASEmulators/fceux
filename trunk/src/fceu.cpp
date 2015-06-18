@@ -53,6 +53,19 @@ extern void ResetDebugStatisticsCounters();
 extern void SetMainWindowText();
 extern bool isTaseditorRecording();
 
+//-----------
+//overclocking-related
+// overclock the console by adding dummy scanlines to PPU loop
+// disables DMC DMA and WaveHi filling for these dummies
+// doesn't work with new PPU
+bool overclocked = 0;
+// 7-bit samples have priority over overclocking
+bool skip_7bit_overclocking = 1;
+int normalscanlines;
+int extrascanlines = 0;
+int totalscanlines;
+//------------
+
 extern int32 fps_scale;
 extern int32 fps_scale_unpaused;
 extern int32 fps_scale_frameadvance;

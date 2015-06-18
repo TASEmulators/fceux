@@ -343,9 +343,6 @@ static int maxsprites = 8;
 
 //scanline is equal to the current visible scanline we're on.
 int scanline;
-int normalscanlines;
-int extrascanlines = 0;
-int totalscanlines;
 int g_rasterpos;
 static uint32 scanlines_per_frame;
 

@@ -21,7 +21,6 @@ uint8* FCEUPPU_GetCHR(uint32 vadr, uint32 refreshaddr);
 void ppu_getScroll(int &xpos, int &ypos);
 
 
-
 #ifdef _MSC_VER
 #define FASTCALL __fastcall
 #else
@@ -36,8 +35,6 @@ void FFCEUX_PPUWrite_Default(uint32 A, uint8 V);
 
 extern int g_rasterpos;
 extern uint8 PPU[4];
-extern bool overclocked;
-extern bool skip_7bit_overclocking;
 extern bool DMC_7bit;
 
 enum PPUPHASE {
