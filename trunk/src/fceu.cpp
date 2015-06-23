@@ -1250,7 +1250,11 @@ uint8 FCEU_ReadRomByte(uint32 i) {
 
 void FCEU_WriteRomByte(uint32 i, uint8 value) {
 	if (i < 16)
+#ifdef WIN32
 		MessageBox(hMemView,"Sorry", "You can't edit the ROM header.", MB_OK);
+#else
+		printf("Sorry, you can't edit the ROM header.\n");
+#endif
 	if (i < 16 + PRGsize[0])
 		PRGptr[0][i - 16] = value;
 	if (i < 16 + PRGsize[0] + CHRsize[0])
