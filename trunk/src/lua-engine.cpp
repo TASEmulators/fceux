@@ -23,6 +23,7 @@
 #include "x6502.h"
 #include "utils/xstring.h"
 #include "utils/memory.h"
+#include "utils/crc32.h"
 #include "fceulua.h"
 
 #ifdef WIN32
@@ -1258,6 +1259,19 @@ static int rom_readbytesigned(lua_State *L) {
 	return 1;
 }
 
+// doesn't keep backups to allow maximum speed (for automatic rom corruptors and stuff)
+// keeping them might be an option though, just need to use memview's ApplyPatch()
+// that'd also highlight the edits in hex editor
+static int rom_writebyte(lua_State *L) 
+{
+	uint32 address = luaL_checkinteger(L,1);
+	if (address < 16)
+		luaL_error(L,"rom.writebyte() can't edit the ROM header.");
+	else
+		FCEU_WriteRomByte(address, luaL_checkinteger(L,2));
+	return 1;
+}
+
 static int rom_gethash(lua_State *L) {
 	const char *type = luaL_checkstring(L, 1);
 	if(!type) lua_pushstring(L, "");
@@ -1588,6 +1602,17 @@ static int print(lua_State *L)
 
 	//worry(L, 100);
 	return 0;
+}
+
+// gethash()
+//
+//  Returns the crc32 hashsum of an arbitrary buffer
+static int gethash(lua_State *L) {
+	uint8 *buffer = (uint8 *)luaL_checkstring(L, 1);
+	int size = luaL_checkinteger(L,2);
+	int hash = CalcCRC32(0, buffer, size);
+	lua_pushinteger(L, hash);
+	return 1;
 }
 
 // provides an easy way to copy a table from Lua
@@ -3586,8 +3611,8 @@ static int gui_gdscreenshot(lua_State *L) {
 	*ptr++ = (65534     ) & 0xFF;
 	*ptr++ = (width >> 8) & 0xFF;
 	*ptr++ = (width     ) & 0xFF;
-	*ptr++ = (height >> 8) & 0xFF;
-	*ptr++ = (height     ) & 0xFF;
+	*ptr++ = (height>> 8) & 0xFF;
+	*ptr++ = (height    ) & 0xFF;
 	*ptr++ = 1;
 	*ptr++ = 255;
 	*ptr++ = 255;
@@ -5371,7 +5396,7 @@ static const struct luaL_reg romlib [] = {
 	{"readbytesigned", rom_readbytesigned},
 	// alternate naming scheme for unsigned
 	{"readbyteunsigned", rom_readbyte},
-
+	{"writebyte", rom_writebyte},
 	{"gethash", rom_gethash},
 	{NULL,NULL}
 };
@@ -5699,6 +5724,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 
 		// register a few utility functions outside of libraries (in the global namespace)
 		lua_register(L, "print", print);
+		lua_register(L, "gethash", gethash),
 		lua_register(L, "tostring", tostring);
 		lua_register(L, "tobitstring", tobitstring);
 		lua_register(L, "addressof", addressof);

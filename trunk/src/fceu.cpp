@@ -1186,8 +1186,6 @@ void FCEUXGameInterface(GI command) {
 	}
 }
 
-
-
 bool FCEUXLoad(const char *name, FCEUFILE *fp) {
 	//read ines header
 	iNES_HEADER head;
@@ -1239,11 +1237,22 @@ bool FCEUXLoad(const char *name, FCEUFILE *fp) {
 	return true;
 }
 
-
 uint8 FCEU_ReadRomByte(uint32 i) {
 	extern iNES_HEADER head;
-	if (i < 16) return *((unsigned char*)&head + i);
-	if (i < 16 + PRGsize[0]) return PRGptr[0][i - 16];
-	if (i < 16 + PRGsize[0] + CHRsize[0]) return CHRptr[0][i - 16 - PRGsize[0]];
+	if (i < 16)
+		return *((unsigned char*)&head + i);
+	if (i < 16 + PRGsize[0])
+		return PRGptr[0][i - 16];
+	if (i < 16 + PRGsize[0] + CHRsize[0])
+		return CHRptr[0][i - 16 - PRGsize[0]];
 	return 0;
+}
+
+void FCEU_WriteRomByte(uint32 i, uint8 value) {
+	if (i < 16)
+		MessageBox(hMemView,"Sorry", "You can't edit the ROM header.", MB_OK);
+	if (i < 16 + PRGsize[0])
+		PRGptr[0][i - 16] = value;
+	if (i < 16 + PRGsize[0] + CHRsize[0])
+		CHRptr[0][i - 16 - PRGsize[0]] = value;
 }

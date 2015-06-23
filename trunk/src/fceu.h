@@ -61,6 +61,7 @@ extern  uint8  *RAM;            //shared memory modifications
 extern int EmulationPaused;
 
 uint8 FCEU_ReadRomByte(uint32 i);
+void FCEU_WriteRomByte(uint32 i, uint8 value);
 
 extern readfunc ARead[0x10000];
 extern writefunc BWrite[0x10000];
