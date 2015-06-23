@@ -67,5 +67,5 @@ void UNL158B_Init(CartInfo *info) {
 	GenMMC3_Init(info, 128, 128, 0, 0);
 	pwrap = UNL158BPW;
 	info->Power = UNL158BPower;
-	AddExState(EXPREGS, 6, 0, "EXPR");
+	AddExState(EXPREGS, 8, 0, "EXPR");
 }

@@ -290,9 +290,13 @@ uint8 GetMem(uint16 A) {
 		}		
 	else if ((A >= 0x4018) && (A < 0x5000))	// AnS: changed the range, so MMC5 ExRAM can be watched in the Hexeditor
 		return 0xFF;
-	if (GameInfo)							//adelikat: 11/17/09: Prevent crash if this is called with no game loaded.
-		return ARead[A](A);
-	else return 0;
+	if (GameInfo) {							//adelikat: 11/17/09: Prevent crash if this is called with no game loaded.
+		uint32 ret;
+		fceuindbg=1;
+		ret = ARead[A](A);
+		fceuindbg=0;
+		return ret;
+	} else return 0;
 }
 
 uint8 GetPPUMem(uint8 A) {

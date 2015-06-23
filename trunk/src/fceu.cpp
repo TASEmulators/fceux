@@ -892,6 +892,13 @@ void FCEU_printf(char *format, ...) {
 	vsnprintf(temp, sizeof(temp), format, ap);
 	FCEUD_Message(temp);
 
+#if 0
+	FILE *ofile;
+	ofile = fopen("stdout.txt", "ab");
+	fwrite(temp, 1, strlen(temp), ofile);
+	fclose(ofile);
+#endif
+
 	va_end(ap);
 }
 

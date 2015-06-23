@@ -323,7 +323,7 @@ static void CheckHInfo(void) {
 	{
 		#include "ines-correct.h"
 	};
-	int32 tofix = 0, x;
+	int32 tofix = 0, x, mask;
 	uint64 partialmd5 = 0;
 
 	for (x = 0; x < 8; x++)
@@ -357,9 +357,13 @@ static void CheckHInfo(void) {
 					VROM = NULL;
 					tofix |= 8;
 				}
-				if (MapperNo != (moo[x].mapper & 0xFF)) {
+				if (moo[x].mapper & 0x1000)
+					mask = 0xFFF;
+				else
+					mask = 0xFF;
+				if (MapperNo != (moo[x].mapper & mask)) {
 					tofix |= 1;
-					MapperNo = moo[x].mapper & 0xFF;
+					MapperNo = moo[x].mapper & mask;
 				}
 			}
 			if (moo[x].mirror >= 0) {
@@ -706,6 +710,14 @@ static BMAPPINGLocal bmap[] = {
 //-------- Mappers 256-511 is the Supplementary Multilingual Plane ----------
 //-------- Mappers 512-767 is the Supplementary Ideographic Plane -----------
 //-------- Mappers 3840-4095 are for rom dumps not publicly released --------
+
+//	An attempt to make working the UNIF BOARD ROMs in INES FORMAT
+//  I don't know if there a complete ines 2.0 mapper list exist, so if it does,
+//  just redefine these numbers to any others which isn't used before
+//  see the ines-correct.h files for the ROMs CHR list
+
+	{"",					256, UNLOneBus_Init},
+	{"",					257, UNLPEC586Init},
 
 	{"",					0, NULL}
 };

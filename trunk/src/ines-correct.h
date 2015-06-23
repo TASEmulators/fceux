@@ -257,6 +257,8 @@
 	{0x345ee51a,	245,	   -1},	/* DQ4c */
 	{0x57514c6c,	245,	   -1},	/* Yong Zhe Dou E Long - Dragon Quest VI (Ch) */
 
+	// added a new mask bit to define these mappers as a dupes of the UNIF format boards
+
 	{0x1d75fd35,	256|0x1000,-1}, /* 2-in-1 - Street Dance + Hit Mouse (Unl) [!] */
 	{0x6eef8bb7,	257|0x1000,-1}, /* PEC-586 Chinese */
 	{0xac7e98fb,	257|0x1000,-1}, /* PEC-586 Chinese No Tape Out */
