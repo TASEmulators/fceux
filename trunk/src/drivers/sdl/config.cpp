@@ -145,6 +145,7 @@ InitConfig()
 	config->addOption("frameskip", "SDL.Frameskip", 0);
 	config->addOption("clipsides", "SDL.ClipSides", 0);
 	config->addOption("nospritelim", "SDL.DisableSpriteLimit", 1);
+	config->addOption("swapduty", "SDL.SwapDuty", 0);
 
 	// color control
 	config->addOption('p', "palette", "SDL.Palette", "");

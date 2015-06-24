@@ -74,7 +74,6 @@ static int noconfig;
 
 int pal_emulation;
 int dendy;
-// TODO: actually implement swapDuty
 int swapDuty;
 
 // -Video Modes Tag- : See --special
@@ -249,6 +248,9 @@ int LoadGame(const char *path)
 	int id;
 	g_config->getOption("SDL.PAL", &id);
 	SetRegion(id);
+
+	g_config->getOption("SDL.SwapDuty", &id);
+	swapDuty = id;
 	
 	std::string filename;
 	g_config->getOption("SDL.Sound.RecordFile", &filename);
