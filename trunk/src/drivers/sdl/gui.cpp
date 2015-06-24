@@ -1178,7 +1178,7 @@ void openSoundConfig()
 										NULL);
 	gtk_window_set_icon_name(GTK_WINDOW(win), "audio-x-generic");
 	main_hbox = gtk_hbox_new(FALSE, 15);
-	vbox = gtk_vbox_new(False, 5);
+	vbox = gtk_vbox_new(FALSE, 5);
 
 	// sound enable check
 	soundChk = gtk_check_button_new_with_label("Enable sound");
