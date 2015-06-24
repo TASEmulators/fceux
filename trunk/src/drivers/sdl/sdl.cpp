@@ -74,7 +74,7 @@ static int noconfig;
 
 int pal_emulation;
 int dendy;
-int swapDuty;
+bool swapDuty;
 
 // -Video Modes Tag- : See --special
 static const char *DriverUsage=

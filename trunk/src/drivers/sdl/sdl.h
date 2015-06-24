@@ -22,6 +22,7 @@ extern int isloaded;
 
 extern int dendy;
 extern int pal_emulation;
+extern bool swapDuty;
 
 void SetRegion(int region);
 int LoadGame(const char *path);

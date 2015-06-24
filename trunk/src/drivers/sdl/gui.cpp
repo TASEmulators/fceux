@@ -187,6 +187,21 @@ void toggleLowPass(GtkWidget* w, gpointer p)
 	g_config->save();
 }
 
+void toggleSwapDuty(GtkWidget* w, gpointer p)
+{
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
+	{
+		g_config->setOption("SDL.SwapDuty", 1);
+		swapDuty = 1;
+	}
+	else
+	{
+		g_config->setOption("SDL.SwapDuty", 0);
+		swapDuty = 0;
+	}
+	g_config->save();
+}
+
 // Wrapper for pushing GTK options into the config file
 // p : pointer to the string that names the config option
 // w : toggle widget
@@ -1167,6 +1182,7 @@ void openSoundConfig()
 	GtkWidget* hbox3;
 	GtkWidget* bufferLbl;
 	GtkWidget* bufferHscale;
+	GtkWidget* swapDutyChk;
 	GtkWidget* mixerFrame;
 	GtkWidget* mixerHbox;
 	GtkWidget* mixers[6];
@@ -1267,6 +1283,19 @@ void openSoundConfig()
 	
 	g_signal_connect(bufferHscale, "button-release-event", G_CALLBACK(setBufSize), NULL);
 
+	// Swap duty cycles
+	swapDutyChk = gtk_check_button_new_with_label("Swap Duty Cycles");
+	
+	// sync with cfg
+	cfgBuf;
+	g_config->getOption("SDL.SwapDuty", &cfgBuf);
+	if(cfgBuf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(swapDutyChk), TRUE);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(swapDutyChk), FALSE);
+	
+	g_signal_connect(swapDutyChk, "clicked", G_CALLBACK(toggleSwapDuty), NULL);
+
 	// mixer
 	mixerFrame = gtk_frame_new("Mixer:");
 	mixerHbox = gtk_hbox_new(TRUE, 5);
@@ -1305,6 +1334,7 @@ void openSoundConfig()
 	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), bufferLbl, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), bufferHscale, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), swapDutyChk, FALSE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(main_hbox), mixerFrame, TRUE, TRUE, 5);
 	gtk_container_add(GTK_CONTAINER(mixerFrame), mixerHbox);
 	
