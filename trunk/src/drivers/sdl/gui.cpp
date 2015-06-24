@@ -48,8 +48,10 @@ GtkWidget* evbox = NULL;
 GtkWidget* padNoCombo = NULL;
 GtkWidget* configNoCombo = NULL;
 GtkWidget* buttonMappings[10];
+GtkWidget* Menubar;
 GtkRadioAction* stateSlot = NULL;
 bool gtkIsStarted = false;
+bool menuTogglingEnabled;
 
 // check to see if a particular GTK version is available
 // 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,24);
@@ -1399,6 +1401,14 @@ void enableFullscreen ()
 		ToggleFS();
 }
 
+void toggleMenuToggling (GtkToggleAction *action)
+{
+	bool toggleMenu = gtk_toggle_action_get_active(action);
+
+	g_config->setOption("SDL.ToggleMenu", (int)toggleMenu);
+	menuTogglingEnabled = toggleMenu;
+}
+
 void toggleAutoResume (GtkToggleAction *action)
 {
 	bool autoResume = gtk_toggle_action_get_active(action);
@@ -2233,6 +2243,7 @@ static char* menuXml =
 	"      <menuitem action='PaletteConfigAction' />"
 	"      <menuitem action='NetworkConfigAction' />"
 	"      <menuitem action='AutoResumeAction' />"
+	"      <menuitem action='ToggleMenuAction' />"
 	"      <separator />"
 	"      <menuitem action='FullscreenAction' />"
 	"    </menu>"
@@ -2319,6 +2330,7 @@ static GtkActionEntry normal_entries[] = {
 static GtkToggleActionEntry toggle_entries[] = {
 	{"GameGenieToggleAction", NULL, "Enable Game _Genie", NULL, NULL, G_CALLBACK(toggleGameGenie), FALSE},
 	{"AutoResumeAction", NULL, "Auto-Resume Play", NULL, NULL, G_CALLBACK(toggleAutoResume), FALSE},
+	{"ToggleMenuAction", NULL, "Toggle Menubar (alt)", NULL, NULL, G_CALLBACK(toggleMenuToggling), FALSE},
 };
 
 // Menu items for selecting a save state slot using radio buttons
@@ -2392,6 +2404,28 @@ void showGui(bool b)
 	else
 		gtk_widget_hide(MainWindow);
 }
+
+gint handleKeyRelease(GtkWidget* w, GdkEvent* event, gpointer cb_data)
+{
+	if(menuTogglingEnabled)
+	{
+		static bool menuShown = true;
+		if(((GdkEventKey*)event)->keyval == GDK_KEY_Alt_L || ((GdkEventKey*)event)->keyval == GDK_KEY_Alt_R)
+		{
+			if(menuShown)
+			{
+				gtk_widget_hide(Menubar);
+				menuShown = false;
+			}
+			else
+			{
+				gtk_widget_show(Menubar);
+				menuShown = true;
+			}
+		}
+	}
+	return 0;
+};
 
 int GtkMouseData[3] = {0,0,0};
 
@@ -2481,10 +2515,10 @@ void handle_resize(GtkWindow* win, GdkEvent* event, gpointer data)
 
 int InitGTKSubsystem(int argc, char** argv)
 {
-	GtkWidget* Menubar;
 	GtkWidget* vbox;
 	
 	MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_widget_set_events(GTK_WIDGET(MainWindow), GDK_KEY_RELEASE_MASK);
 //	gtk_window_set_policy (GTK_WINDOW (MainWindow), FALSE, FALSE, TRUE);
 	gtk_window_set_resizable(GTK_WINDOW(MainWindow), TRUE);
 	gtk_window_set_title(GTK_WINDOW(MainWindow), FCEU_NAME_AND_VERSION);
@@ -2536,6 +2570,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	g_signal_connect(G_OBJECT(evbox), "button-press-event", G_CALLBACK(handleMouseClick), NULL);
 	g_signal_connect(G_OBJECT(evbox), "button-release-event", G_CALLBACK(handleMouseClick), NULL);
 
+	g_signal_connect(G_OBJECT(MainWindow), "key-release-event", G_CALLBACK(handleKeyRelease), NULL);
 	
 	// signal handlers
 	g_signal_connect(MainWindow, "delete-event", quit, NULL);
