@@ -187,6 +187,36 @@ static void ShowUsage(char *prog)
 }
 
 /**
+ * Sets the region emulation mode.
+ * Region 0: NTSC
+ * Region 1: PAL
+ * Region 2: Dendy
+ */
+void SetRegion(int region)
+{
+	switch(region)
+	{
+		case 0:
+			pal_emulation = 0;
+			dendy = 0;
+			FCEUI_SetVidSystem(0);
+			break;
+		case 1:
+			pal_emulation = 1;
+			dendy = 0;
+			FCEUI_SetVidSystem(1);
+			break;
+		case 2:
+			pal_emulation = 0;
+			dendy = 1;
+			FCEUI_SetVidSystem(0);
+			break;
+	}
+	return;
+}
+
+
+/**
  * Loads a game, given a full path/filename.  The driver code must be
  * initialized after the game is loaded, because the emulator code
  * provides data necessary for the driver code(number of scanlines to
@@ -218,23 +248,7 @@ int LoadGame(const char *path)
 	// set pal/ntsc
 	int id;
 	g_config->getOption("SDL.PAL", &id);
-	switch(id)
-	{
-		case 0:
-			FCEUI_SetVidSystem(0);
-			pal_emulation = 0;
-			dendy = 0;
-			break;
-		case 1:
-			FCEUI_SetVidSystem(1);
-			pal_emulation = 1;
-			dendy = 0;
-			break;
-		case 2:
-			FCEUI_SetVidSystem(0);
-			pal_emulation = 0;
-			dendy = 1;
-	}
+	SetRegion(id);
 	
 	std::string filename;
 	g_config->getOption("SDL.Sound.RecordFile", &filename);

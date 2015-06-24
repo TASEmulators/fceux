@@ -835,6 +835,15 @@ void setScaler(GtkWidget* w, gpointer p)
 	
 }
 
+void setRegion(GtkWidget* w, gpointer p)
+{
+	int region = gtk_combo_box_get_active(GTK_COMBO_BOX(w));
+	g_config->setOption("SDL.PAL", region);
+	SetRegion(region);
+	
+	g_config->save();
+	
+}
 
 int setXscale(GtkWidget* w, gpointer p)
 {
@@ -885,7 +894,9 @@ void openVideoConfig()
 	GtkWidget* glChk;
 	GtkWidget* linearChk;
 	GtkWidget* dbChk;
-	GtkWidget* palChk;
+	GtkWidget* palHbox;
+	GtkWidget* palLbl;
+	GtkWidget* palCombo;
 	GtkWidget* ppuChk;
 	GtkWidget* spriteLimitChk;
 	GtkWidget* frameskipChk;
@@ -968,19 +979,24 @@ void openVideoConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dbChk), 0);
 #endif
 	
-	
-	// PAL check
-	palChk = gtk_check_button_new_with_label("Enable PAL mode");
-	g_signal_connect(palChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.PAL");
-	
-	// sync with config
+	// Region (NTSC/PAL/Dendy)
+	palHbox = gtk_hbox_new(FALSE, 3);
+	palLbl = gtk_label_new("Region: ");
+	palCombo = gtk_combo_box_text_new();
+	// -Video Modes Tag-
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(palCombo), "NTSC");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(palCombo), "PAL");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(palCombo), "Dendy");
+
+	// sync with cfg
 	buf = 0;
 	g_config->getOption("SDL.PAL", &buf);
-	if(buf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(palChk), 1);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(palChk), 0);
-		
+	gtk_combo_box_set_active(GTK_COMBO_BOX(palCombo), buf);
+	
+	g_signal_connect(palCombo, "changed", G_CALLBACK(setRegion), NULL);
+	gtk_box_pack_start(GTK_BOX(palHbox), palLbl, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(palHbox), palCombo, FALSE, FALSE, 5);
+
 	// New PPU check
 	ppuChk = gtk_check_button_new_with_label("Enable new PPU");
 	g_signal_connect(ppuChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.NewPPU");
@@ -1074,7 +1090,7 @@ void openVideoConfig()
 	gtk_box_pack_start(GTK_BOX(vbox), linearChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), dbChk, FALSE, FALSE, 5);
 #endif
-	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE,5);
+	gtk_box_pack_start(GTK_BOX(vbox), palHbox, FALSE, FALSE,5);
 	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 5);
 #ifdef FRAMESKIP
 	gtk_box_pack_start(GTK_BOX(vbox), frameskipChk, FALSE, FALSE, 5);
