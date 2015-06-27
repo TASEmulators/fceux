@@ -856,7 +856,7 @@ void setRegion(GtkWidget* w, gpointer p)
 {
 	int region = gtk_combo_box_get_active(GTK_COMBO_BOX(w));
 	g_config->setOption("SDL.PAL", region);
-	SetRegion(region);
+	FCEUI_SetRegion(region);
 	
 	g_config->save();
 	

@@ -24,7 +24,6 @@ extern int dendy;
 extern int pal_emulation;
 extern bool swapDuty;
 
-void SetRegion(int region);
 int LoadGame(const char *path);
 int CloseGame(void);
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
