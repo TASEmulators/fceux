@@ -305,18 +305,6 @@ InitVideo(FCEUGI *gi)
 			desbpp = 0;
 		}
         
-		// -Video Modes Tag-
-		if(s_sponge) {
-			if(s_sponge == 4 || s_sponge == 5) {
-				s_exs = s_eys = 3;
-			} else {
-				s_exs = s_eys = 2;
-			}
-			s_eefx = 0;
-			if(s_sponge == 1 || s_sponge == 4) {
-				desbpp = 32;
-			}
-		}
 
 		if((s_useOpenGL && !xstretch) || !s_useOpenGL)
 #endif
@@ -357,12 +345,28 @@ InitVideo(FCEUGI *gi)
         
 		// -Video Modes Tag-
 		if(s_sponge) {
-			if(s_sponge >= 4) {
-				s_exs = s_eys = 3;
-			} else {
+			if(s_sponge <= 3 && s_sponge >= 1)
+			{
 				s_exs = s_eys = 2;
+			} else if (s_sponge >=4 && s_sponge <= 5)
+			{
+				s_exs = s_eys = 3;
+			} else if (s_sponge >= 6 && s_sponge <= 8)
+			{
+				s_exs = s_eys = s_sponge - 4;
+			}
+			else if(s_sponge == 9)
+			{
+				s_exs = s_eys = 3;
+			}
+			else
+			{
+				s_exs = s_eys = 1;
 			}
 			s_eefx = 0;
+			if(s_sponge == 1 || s_sponge == 4) {
+				desbpp = 32;
+			}
 		}
 
 #ifdef OPENGL

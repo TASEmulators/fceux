@@ -832,24 +832,31 @@ void resizeGtkWindow()
 
 void setScaler(GtkWidget* w, gpointer p)
 {
-	int x = gtk_combo_box_get_active(GTK_COMBO_BOX(w));
-	g_config->setOption("SDL.SpecialFilter", x);
+	int scaler = gtk_combo_box_get_active(GTK_COMBO_BOX(w));
+	g_config->setOption("SDL.SpecialFilter", scaler);
 	
-	// 1 - hq2x 2 - Scale2x 3 - NTSC2x 4 - hq3x  5 - Scale3x
-	if (x >= 1 && x <= 3)
+	// 1=hq2x 2=Scale2x 3=NTSC2x 4=hq3x  5=Scale3x 6=Prescale2x 7=Prescale3x 8=Prescale4x 9=pal
+	switch(scaler)
 	{
-		g_config->setOption("SDL.XScale", 2.0);
-		g_config->setOption("SDL.YScale", 2.0);
-		resizeGtkWindow();
+		case 4:	// hq3x
+		case 5:	// scale3x
+		case 7:	// prescale3x
+			g_config->setOption("SDL.XScale", 3.0);
+			g_config->setOption("SDL.YScale", 3.0);
+			resizeGtkWindow();
+			break;
+		case 8: // prescale4x
+			g_config->setOption("SDL.XScale", 4.0);
+			g_config->setOption("SDL.YScale", 4.0);
+			break;
+		default:
+			g_config->setOption("SDL.XScale", 2.0);
+			g_config->setOption("SDL.YScale", 2.0);
+			resizeGtkWindow();
+			break;
 	}
-	if (x >= 4 && x < 6)
-	{
-		g_config->setOption("SDL.XScale", 3.0);
-		g_config->setOption("SDL.YScale", 3.0);
-		resizeGtkWindow();
-	}
+
 	g_config->save();
-	
 }
 
 void setRegion(GtkWidget* w, gpointer p)
@@ -949,6 +956,10 @@ void openVideoConfig()
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "NTSC 2x");
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "hq3x");
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "scale3x");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "prescale2x");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "prescale3x");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "prescale4x");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "pal");
 	
 	// sync with cfg
 	int buf;
