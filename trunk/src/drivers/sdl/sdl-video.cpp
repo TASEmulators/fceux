@@ -142,10 +142,10 @@ void FCEUD_VideoChanged()
 {
 	int buf;
 	g_config->getOption("SDL.PAL", &buf);
-	if(buf)
+	if(buf == 1)
 		PAL = 1;
 	else
-		PAL = 0;
+		PAL = 0; // NTSC and Dendy
 }
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
