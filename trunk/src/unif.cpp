@@ -344,6 +344,7 @@ static BMAPPING bmap[] = {
 	{ "BS-5", BMCBS5_Init, 0 },
 	{ "CC-21", UNLCC21_Init, 0 },
 	{ "CITYFIGHT", UNLCITYFIGHT_Init, 0 },
+	{ "10-24-C-A1", BMC1024CA1_Init, 0 },
 	{ "CNROM", CNROM_Init, 0 },
 	{ "CPROM", CPROM_Init, BMCFLAG_16KCHRR },
 	{ "D1038", BMCD1038_Init, 0 },

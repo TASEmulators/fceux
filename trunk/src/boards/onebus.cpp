@@ -113,7 +113,7 @@ static void CSync(void) {
 	setchr1(0x1800 ^ cswap, block | (bank6 & mask));
 	setchr1(0x1c00 ^ cswap, block | (bank7 & mask));
 
-	setmirror(mirror & 1);
+	setmirror((mirror ^ 1) & 1);
 }
 
 static void Sync(void) {
@@ -158,7 +158,7 @@ static DECLFW(UNLOneBusWriteMMC3) {
 		}
 		break;
 	}
-	case 0xa000: mirror = V ^ 1; CSync(); break;
+	case 0xa000: mirror = V; CSync(); break;
 	case 0xc000: IRQLatch = V & 0xfe; break;
 	case 0xc001: IRQReload = 1; break;
 	case 0xe000: X6502_IRQEnd(FCEU_IQEXT); IRQa = 0; break;

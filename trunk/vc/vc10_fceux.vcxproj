@@ -315,6 +315,7 @@
     <ClCompile Include="..\src\boards\cityfighter.cpp" />
     <ClCompile Include="..\src\boards\coolboy.cpp" />
     <ClCompile Include="..\src\boards\dance2000.cpp" />
+    <ClCompile Include="..\src\boards\et-100.cpp" />
     <ClCompile Include="..\src\boards\famicombox.cpp" />
     <ClCompile Include="..\src\boards\ffe.cpp" />
     <ClCompile Include="..\src\boards\ks7010.cpp" />

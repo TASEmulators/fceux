@@ -43,6 +43,7 @@ void BMCGhostbusters63in1_Init(CartInfo *info);
 void BMCNTD03_Init(CartInfo *info);
 void BMCT2271_Init(CartInfo *info);
 void BMCT262_Init(CartInfo *info);
+void BMC1024CA1_Init(CartInfo *info);
 void CNROM_Init(CartInfo *info);
 void CPROM_Init(CartInfo *info);
 void DreamTech01_Init(CartInfo *info);

@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2015 CaH4e3
+ *  Copyright (C) 2015 CaH4e3, ClusteR
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,67 +20,96 @@
  * CoolBoy 400-in-1 FK23C-mimic mapper 16Mb/32Mb PROM + 128K/256K CHR RAM, optional SRAM, optional NTRAM
  * only MMC3 mode
  *
- * 6000 (ıı76x210) | 0ı—0
- * 6001 (ııı354ıı)
+ * 6000 (xx76x210) | 0xC0
+ * 6001 (xxx354x)
  * 6002 = 0
  * 6003 = 0
+ * 6003 = 0
  *
+ * hardware tested logic, don't try to understand lol
  */
 
 #include "mapinc.h"
 #include "mmc3.h"
 
 static void COOLBOYCW(uint32 A, uint8 V) {
-	if(EXPREGS[3] & 0x10)
-		setchr8(EXPREGS[2] & 0xF);
-	else {
-		uint32 mask = 0xFF;
-		switch(EXPREGS[0] & 0xC0) {
-		case 0xC0:
-			mask = 0x7F;
-			break;
+	uint32 mask = 0xFF ^ (EXPREGS[0] & 0x80);
+	if (EXPREGS[3] & 0x10) {
+		if (EXPREGS[3] & 0x40) { // Weird mode
+			int cbase = (MMC3_cmd & 0x80) << 5;
+			switch (cbase ^ A) { // Don't even try do understand
+			case 0x0400:
+			case 0x0C00: V &= 0x7F; break;
+			}
 		}
-		setchr1(A, V & mask);
+		setchr8((((EXPREGS[2] & 0x0F) | ((V & 0x80) >> 3)) & (mask >> 3)) | ((((EXPREGS[0] & 0x08) << 4) & ~mask) >> 3));
+	} else {
+		if (EXPREGS[3] & 0x40) { // Weird mode, again
+			int cbase = (MMC3_cmd & 0x80) << 5;
+			switch (cbase ^ A) { // Don't even try do understand
+			case 0x0000: V = DRegBuf[0]; break;
+			case 0x0800: V = DRegBuf[1]; break;
+			case 0x0400:
+			case 0x0C00: V = 0; break;
+			}
+		}
+		setchr1(A, (V & mask) | (((EXPREGS[0] & 0x08) << 4) & (mask ^ 0xff)));
 	}
 }
 
 static void COOLBOYPW(uint32 A, uint8 V) {
-	uint32 mask = 0x3F;
+	uint32 mask = ((0x3F | (EXPREGS[1] & 0x40) | ((EXPREGS[1] & 0x20) << 2)) ^ ((EXPREGS[0] & 0x40) >> 2)) ^ ((EXPREGS[1] & 0x80) >> 2);
 	uint32 base = ((EXPREGS[0] & 0x07) >> 0) | ((EXPREGS[1] & 0x10) >> 1) | ((EXPREGS[1] & 0x0C) << 2) | ((EXPREGS[0] & 0x30) << 2);
-	switch(EXPREGS[0] & 0xC0) {
-	case 0x80:
-		mask = 0x1F;
-		break;
-	case 0xC0:
-		if(EXPREGS[3] & 0x10) {
-			mask = 0x01 | (EXPREGS[1] & 2);
-		} else {
-			mask = 0x0F;
+
+	// Very weird mode
+	// Last banks are first in this mode, ignored when MMC3_cmd&0x40
+	if ((EXPREGS[3] & 0x40) && (V >= 0xFE) && !((MMC3_cmd & 0x40) != 0)) {
+		switch (A & 0xE000) {
+		case 0xA000:
+			if ((MMC3_cmd & 0x40) != 0) V = 0;
+			break;
+		case 0xC000:
+			if ((MMC3_cmd & 0x40) == 0) V = 0;
+			break;
+		case 0xE000:
+			V = 0;
+			break;
 		}
-		break;
 	}
-	if(EXPREGS[3] & 0x10)
-		setprg8(A, (base << 4) | (V & mask) | ((EXPREGS[3] & (0x0E ^ (EXPREGS[1] & 2))) ));
-	else
-		setprg8(A, (base << 4) | (V & mask));
+
+	// Regular MMC3 mode, internal ROM size can be up to 2048kb! Minimal is 64kb
+	if (!(EXPREGS[3] & 0x10))
+		setprg8(A, (((base << 4) & ~mask)) | (V & mask));
+	else { // NROM mode
+		mask &= 0xF0;
+		uint8 emask;
+		if (!(EXPREGS[1] & 2)) // 4kb mode, 0xC000-0xFFFF is same as 0x8000-0xBFFF
+			emask = EXPREGS[3] & 0x0E;
+		else // 8kb mode, using second-last bank
+			emask = (EXPREGS[3] & 0x0C) | ((A >= 0xC000) ? 2 : 0);
+		emask |= (A >> 13) & 1; // does not depends on MMC3_cmd&0x40
+		setprg8(A, (((base << 4) & ~mask) | (V & mask) | emask));
+	}
 }
 
 static DECLFW(COOLBOYWrite) {
 	if(A001B & 0x80)
 		CartBW(A,V);
-	else
-		if((EXPREGS[3] & 0x80) == 0) {
-			EXPREGS[A & 3] = V;
-			FixMMC3PRG(MMC3_cmd);
-			FixMMC3CHR(MMC3_cmd);
-			uint32 base = ((EXPREGS[0] & 0x07) >> 0) | ((EXPREGS[1] & 0x10) >> 1) | ((EXPREGS[1] & 0x0C) << 2) | ((EXPREGS[0] & 0x30) << 2);
-			FCEU_printf("exp %02x %02x (base %03d)\n",A,V,base);
-		}
+
+	if((EXPREGS[3] & 0x80) == 0) {
+		EXPREGS[A & 3] = V;
+		FixMMC3PRG(MMC3_cmd);
+		FixMMC3CHR(MMC3_cmd);
+	}
 }
 
 static void COOLBOYReset(void) {
 	MMC3RegReset();
 	EXPREGS[0] = EXPREGS[1] = EXPREGS[2] = EXPREGS[3] = 0;
+//	EXPREGS[0] = 0;
+//	EXPREGS[1] = 0x60;
+//	EXPREGS[2] = 0;
+//	EXPREGS[3] = 0;
 	FixMMC3PRG(MMC3_cmd);
 	FixMMC3CHR(MMC3_cmd);
 }
@@ -88,6 +117,10 @@ static void COOLBOYReset(void) {
 static void COOLBOYPower(void) {
 	GenMMC3Power();
 	EXPREGS[0] = EXPREGS[1] = EXPREGS[2] = EXPREGS[3] = 0;
+//	EXPREGS[0] = 0;
+//	EXPREGS[1] = 0x60;
+//	EXPREGS[2] = 0;
+//	EXPREGS[3] = 0;
 	FixMMC3PRG(MMC3_cmd);
 	FixMMC3CHR(MMC3_cmd);
 	SetWriteHandler(0x5000, 0x5fff, CartBW);            // some games access random unmapped areas and crashes because of KT-008 PCB hack in MMC3 source lol
@@ -95,11 +128,10 @@ static void COOLBOYPower(void) {
 }
 
 void COOLBOY_Init(CartInfo *info) {
-	GenMMC3_Init(info, 512, 128, 8, 0);
+	GenMMC3_Init(info, 512, 256, 8, 0);
 	pwrap = COOLBOYPW;
 	cwrap = COOLBOYCW;
 	info->Power = COOLBOYPower;
 	info->Reset = COOLBOYReset;
 	AddExState(EXPREGS, 4, 0, "EXPR");
 }
-
