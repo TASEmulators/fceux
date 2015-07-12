@@ -24,7 +24,6 @@
  * 6001 (xxx354x)
  * 6002 = 0
  * 6003 = 0
- * 6003 = 0
  *
  * hardware tested logic, don't try to understand lol
  */
@@ -42,7 +41,12 @@ static void COOLBOYCW(uint32 A, uint8 V) {
 			case 0x0C00: V &= 0x7F; break;
 			}
 		}
-		setchr8((((EXPREGS[2] & 0x0F) | ((V & 0x80) >> 3)) & (mask >> 3)) | ((((EXPREGS[0] & 0x08) << 4) & ~mask) >> 3));
+		// Highest bit goes from MMC3 registers when EXPREGS[3]&0x80==0 or from EXPREGS[0]&0x08 otherwise
+		setchr1(A, 
+			(V & 0x80 & mask) | ((((EXPREGS[0] & 0x08) << 4) & (mask ^ 0xff))) // 7th bit
+			| ((EXPREGS[2] & 0x0F) << 3) // 6-3 bits
+			| ((A >> 10) & 7) // 2-0 bits
+		);
 	} else {
 		if (EXPREGS[3] & 0x40) { // Weird mode, again
 			int cbase = (MMC3_cmd & 0x80) << 5;
@@ -83,9 +87,9 @@ static void COOLBOYPW(uint32 A, uint8 V) {
 	else { // NROM mode
 		mask &= 0xF0;
 		uint8 emask;
-		if (!(EXPREGS[1] & 2)) // 4kb mode, 0xC000-0xFFFF is same as 0x8000-0xBFFF
+		if (!(EXPREGS[1] & 2)) // 16kb mode, 0xC000-0xFFFF is same as 0x8000-0xBFFF
 			emask = EXPREGS[3] & 0x0E;
-		else // 8kb mode, using second-last bank
+		else // 32kb mode, using second-last bank
 			emask = (EXPREGS[3] & 0x0C) | ((A >= 0xC000) ? 2 : 0);
 		emask |= (A >> 13) & 1; // does not depends on MMC3_cmd&0x40
 		setprg8(A, (((base << 4) & ~mask) | (V & mask) | emask));
