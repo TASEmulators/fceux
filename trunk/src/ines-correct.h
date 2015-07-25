@@ -62,6 +62,7 @@
 	{0x02cc3973,	  3,		1},	/* Ninja Kid */
 	{0xbc065fc3,	  3,		1},	/* Pipe Dream */
 	{0xc9ee15a7,	  3,	   -1},	/* 3 is probably best.  41 WILL NOT WORK. */
+	{0x13e09d7a,	  4,		0}, /*Dragon Wars (U) (proto) - comes with erroneous 4-screen mirroring set*/
 	{0x22d6d5bd,	  4,		1},
 	{0xd97c31b0,	  4,		1},	//Rasaaru Ishii no Childs Quest (J)
 	{0x404b2e8b,	  4,		2},	/* Rad Racer 2 */
