@@ -655,6 +655,8 @@
 #define IDC_SUPERIMPOSE2                1205
 #define IDC_RUN_AUTO                    1205
 #define IDC_AUTOLOADCDL                 1205
+#define IDC_INVERT_THE_MASK2            1205
+#define IDC_SPRITE16_MODE               1205
 #define IDC_C_SEARCH                    1206
 #define IDC_CHECK5                      1206
 #define IDC_CHECK_GREENZONE             1206

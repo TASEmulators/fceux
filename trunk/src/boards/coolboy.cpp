@@ -42,8 +42,8 @@ static void COOLBOYCW(uint32 A, uint8 V) {
 			}
 		}
 		// Highest bit goes from MMC3 registers when EXPREGS[3]&0x80==0 or from EXPREGS[0]&0x08 otherwise
-		setchr1(A, 
-			(V & 0x80 & mask) | ((((EXPREGS[0] & 0x08) << 4) & (mask ^ 0xff))) // 7th bit
+		setchr1(A,
+			(V & 0x80 & mask) | ((((EXPREGS[0] & 0x08) << 4) & ~mask)) // 7th bit
 			| ((EXPREGS[2] & 0x0F) << 3) // 6-3 bits
 			| ((A >> 10) & 7) // 2-0 bits
 		);
@@ -57,7 +57,9 @@ static void COOLBOYCW(uint32 A, uint8 V) {
 			case 0x0C00: V = 0; break;
 			}
 		}
-		setchr1(A, (V & mask) | (((EXPREGS[0] & 0x08) << 4) & (mask ^ 0xff)));
+		// Simple MMC3 mode
+		// Highest bit goes from MMC3 registers when EXPREGS[3]&0x80==0 or from EXPREGS[0]&0x08 otherwise
+		setchr1(A, (V & mask) | (((EXPREGS[0] & 0x08) << 4) & ~mask));
 	}
 }
 
@@ -70,10 +72,10 @@ static void COOLBOYPW(uint32 A, uint8 V) {
 	if ((EXPREGS[3] & 0x40) && (V >= 0xFE) && !((MMC3_cmd & 0x40) != 0)) {
 		switch (A & 0xE000) {
 		case 0xA000:
-			if ((MMC3_cmd & 0x40) != 0) V = 0;
+			if ((MMC3_cmd & 0x40)) V = 0;
 			break;
 		case 0xC000:
-			if ((MMC3_cmd & 0x40) == 0) V = 0;
+			if (!(MMC3_cmd & 0x40)) V = 0;
 			break;
 		case 0xE000:
 			V = 0;
@@ -81,18 +83,20 @@ static void COOLBOYPW(uint32 A, uint8 V) {
 		}
 	}
 
-	// Regular MMC3 mode, internal ROM size can be up to 2048kb! Minimal is 64kb
+	// Regular MMC3 mode, internal ROM size can be up to 2048kb!
 	if (!(EXPREGS[3] & 0x10))
 		setprg8(A, (((base << 4) & ~mask)) | (V & mask));
 	else { // NROM mode
 		mask &= 0xF0;
 		uint8 emask;
-		if (!(EXPREGS[1] & 2)) // 16kb mode, 0xC000-0xFFFF is same as 0x8000-0xBFFF
+		if ((((EXPREGS[1] & 2) != 0))) // 32kb mode
+			emask = (EXPREGS[3] & 0x0C) | ((A & 0x4000) >> 13);
+		else // 16kb mode
 			emask = EXPREGS[3] & 0x0E;
-		else // 32kb mode, using second-last bank
-			emask = (EXPREGS[3] & 0x0C) | ((A >= 0xC000) ? 2 : 0);
-		emask |= (A >> 13) & 1; // does not depends on MMC3_cmd&0x40
-		setprg8(A, (((base << 4) & ~mask) | (V & mask) | emask));
+		setprg8(A, ((base << 4) & ~mask) // 7-4 bits are from base (see below)
+			| (V & mask)                   // ... or from MM3 internal regs, depends on mask
+			| emask                        // 3-1 (or 3-2 when (EXPREGS[3]&0x0C is set) from EXPREGS[3]
+			| ((A & 0x2000) >> 13));       // 0th just as is
 	}
 }
 
@@ -100,7 +104,8 @@ static DECLFW(COOLBOYWrite) {
 	if(A001B & 0x80)
 		CartBW(A,V);
 
-	if((EXPREGS[3] & 0x80) == 0) {
+	// Deny any further writes when 7th bit is 1 AND 4th is 0
+	if ((EXPREGS[3] & 0x90) != 0x80) {
 		EXPREGS[A & 3] = V;
 		FixMMC3PRG(MMC3_cmd);
 		FixMMC3CHR(MMC3_cmd);
@@ -128,7 +133,7 @@ static void COOLBOYPower(void) {
 	FixMMC3PRG(MMC3_cmd);
 	FixMMC3CHR(MMC3_cmd);
 	SetWriteHandler(0x5000, 0x5fff, CartBW);            // some games access random unmapped areas and crashes because of KT-008 PCB hack in MMC3 source lol
-	SetWriteHandler(0x6000, 0x6fff, COOLBOYWrite);
+	SetWriteHandler(0x6000, 0x7fff, COOLBOYWrite);
 }
 
 void COOLBOY_Init(CartInfo *info) {

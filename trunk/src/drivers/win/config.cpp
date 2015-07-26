@@ -88,6 +88,7 @@ extern int NTViewPosX,NTViewPosY;
 extern int PPUViewPosX, PPUViewPosY;
 extern bool PPUView_maskUnusedGraphics;
 extern bool PPUView_invertTheMask;
+extern int PPUView_sprite16Mode;
 extern int MainWindow_wndx, MainWindow_wndy;
 extern int MemWatch_wndx, MemWatch_wndy;
 extern int Monitor_wndx, Monitor_wndy;
@@ -308,6 +309,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(PPUViewPosY),
 	AC(PPUView_maskUnusedGraphics),
 	AC(PPUView_invertTheMask),
+	AC(PPUView_sprite16Mode),
 	AC(MainWindow_wndx),
 	AC(MainWindow_wndy),
 	AC(MemWatch_wndx),

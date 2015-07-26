@@ -7,8 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -568,10 +567,10 @@ BEGIN
     CONTROL         "Disable speed throttling used when sound is disabled.",CB_DISABLE_SPEED_THROTTLING,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,8,183,12
     CONTROL         "Set high-priority thread.",CB_SET_HIGH_PRIORITY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,24,102,12
-	CONTROL         "Overclocking (old PPU only).",CB_OVERCLOCKING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,42,101,10
-	EDITTEXT        IDC_EXTRA_SCANLINES,122,38,61,14,ES_AUTOHSCROLL
-	LTEXT           "Extra scanlines:",IDC_STATIC,127,26,51,8
-	CONTROL         "Don't overclock 7-bit samples.",CB_SKIP_7BIT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,58,111,10
+    CONTROL         "Overclocking (old PPU only).",CB_OVERCLOCKING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,42,101,10
+    EDITTEXT        IDC_EXTRA_SCANLINES,122,38,61,14,ES_AUTOHSCROLL
+    LTEXT           "Extra scanlines:",IDC_STATIC,127,26,51,8
+    CONTROL         "Don't overclock 7-bit samples.",CB_SKIP_7BIT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,58,111,10
 END
 
 MOVIEOPTIONS DIALOGEX 65520, 76, 147, 222
@@ -1254,6 +1253,7 @@ BEGIN
     CONTROL         "Mask unused graphics (needs Code/Data Logger)",IDC_MASK_UNUSED_GRAPHICS,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,190,169,10
     CONTROL         "Invert the mask",IDC_INVERT_THE_MASK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,177,190,61,10
+    CONTROL         "Sprites 8x16 mode",IDC_SPRITE16_MODE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,279,190,75,10
 END
 
 ARCHIVECHOOSERDIALOG DIALOGEX 0, 0, 265, 159
@@ -2531,8 +2531,7 @@ IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 
