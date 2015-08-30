@@ -1057,6 +1057,12 @@
     <ClCompile Include="..\src\boards\et-100.cpp">
       <Filter>boards</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\boards\eh8813a.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\hp898f.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">

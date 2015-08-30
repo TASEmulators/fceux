@@ -315,9 +315,11 @@
     <ClCompile Include="..\src\boards\cityfighter.cpp" />
     <ClCompile Include="..\src\boards\coolboy.cpp" />
     <ClCompile Include="..\src\boards\dance2000.cpp" />
+    <ClCompile Include="..\src\boards\eh8813a.cpp" />
     <ClCompile Include="..\src\boards\et-100.cpp" />
     <ClCompile Include="..\src\boards\famicombox.cpp" />
     <ClCompile Include="..\src\boards\ffe.cpp" />
+    <ClCompile Include="..\src\boards\hp898f.cpp" />
     <ClCompile Include="..\src\boards\ks7010.cpp" />
     <ClCompile Include="..\src\boards\ks7012.cpp" />
     <ClCompile Include="..\src\boards\ks7013.cpp" />

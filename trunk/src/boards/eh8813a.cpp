@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2009 CaH4e3
+ *  Copyright (C) 2015 CaH4e3
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,59 +20,55 @@
 
 #include "mapinc.h"
 
-static uint8 reg;
-static uint8 *CHRRAM = NULL;
-static uint32 CHRRAMSIZE;
+static uint16 addrlatch;
+static uint8 datalatch;
 
 static SFORMAT StateRegs[] =
 {
-	{ &reg, 1, "REGS" },
+	{ &addrlatch, 2, "ADRL" },
+	{ &datalatch, 1, "DATL" },
 	{ 0 }
 };
 
 static void Sync(void) {
-	setchr4r(0x10, 0x0000, 0);
-	setchr4r(0x10, 0x1000, reg & 0x0f);
-	setprg16(0x8000, reg >> 6);
-	setprg16(0xc000, ~0);
+	uint8 prg = (addrlatch & 7) | ((addrlatch & 0x40) >> 3);
+	setchr8(datalatch);
+	if(addrlatch & 0x80) {
+		setprg16(0x8000,prg);
+		setprg16(0xC000,prg);
+	} else {
+		setprg32(0x8000,prg >> 1);
+	}
+	setmirror(MI_V);
 }
 
-static DECLFW(M168Write) {
-	reg = V;
+static DECLFW(EH8813AWrite) {
+	if((addrlatch & 0x100) == 0) {
+		addrlatch = A & 0x1FF;
+		datalatch = V & 0xF;
+	}
 	Sync();
 }
 
-static DECLFW(M168Dummy) {
-}
-
-static void M168Power(void) {
-	reg = 0;
+static void EH8813APower(void) {
+	addrlatch = datalatch = 0;
 	Sync();
-	SetWriteHandler(0x4020, 0x7fff, M168Dummy);
-	SetWriteHandler(0xB000, 0xB000, M168Write);
-	SetWriteHandler(0xF000, 0xF000, M168Dummy);
-	SetWriteHandler(0xF080, 0xF080, M168Dummy);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	SetWriteHandler(0x8000, 0xFFFF, EH8813AWrite);
 }
 
-static void M168Close(void) {
-	if (CHRRAM)
-		FCEU_gfree(CHRRAM);
-	CHRRAM = NULL;
+static void EH8813AReset(void) {
+	addrlatch = datalatch = 0;
+	Sync();
 }
 
 static void StateRestore(int version) {
 	Sync();
 }
 
-void Mapper168_Init(CartInfo *info) {
-	info->Power = M168Power;
-	info->Close = M168Close;
+void UNLEH8813A_Init(CartInfo *info) {
+	info->Reset = EH8813AReset;
+	info->Power = EH8813APower;
 	GameStateRestore = StateRestore;
 	AddExState(&StateRegs, ~0, 0, 0);
-
-	CHRRAMSIZE = 8192 * 8;
-	CHRRAM = (uint8*)FCEU_gmalloc(CHRRAMSIZE);
-	SetupCartCHRMapping(0x10, CHRRAM, CHRRAMSIZE, 1);
-	AddExState(CHRRAM, CHRRAMSIZE, 0, "CRAM");
 }
