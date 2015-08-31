@@ -31,7 +31,7 @@ static SFORMAT StateRegs[] =
 };
 
 static void Sync(void) {
-	uint8 prg = (addrlatch & 7) | ((addrlatch & 0x40) >> 3);
+	uint8 prg = (addrlatch & 7);
 	setchr8(datalatch);
 	if(addrlatch & 0x80) {
 		setprg16(0x8000,prg);
@@ -50,10 +50,16 @@ static DECLFW(EH8813AWrite) {
 	Sync();
 }
 
+static DECLFR(EH8813ARead) {
+	if (addrlatch & 0x40)
+		A &= 0xFFF0;
+	return CartBR(A);
+}
+	
 static void EH8813APower(void) {
 	addrlatch = datalatch = 0;
 	Sync();
-	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	SetReadHandler(0x8000, 0xFFFF, EH8813ARead);
 	SetWriteHandler(0x8000, 0xFFFF, EH8813AWrite);
 }
 
