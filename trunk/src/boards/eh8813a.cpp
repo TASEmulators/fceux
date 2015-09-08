@@ -21,12 +21,13 @@
 #include "mapinc.h"
 
 static uint16 addrlatch;
-static uint8 datalatch;
+static uint8 datalatch, hw_mode;
 
 static SFORMAT StateRegs[] =
 {
 	{ &addrlatch, 2, "ADRL" },
 	{ &datalatch, 1, "DATL" },
+	{ &hw_mode, 1, "HWMO" },
 	{ 0 }
 };
 
@@ -52,12 +53,12 @@ static DECLFW(EH8813AWrite) {
 
 static DECLFR(EH8813ARead) {
 	if (addrlatch & 0x40)
-		A &= 0xFFF0;
+		A= (A & 0xFFF0) + hw_mode;
 	return CartBR(A);
 }
 	
 static void EH8813APower(void) {
-	addrlatch = datalatch = 0;
+	addrlatch = datalatch = hw_mode = 0;
 	Sync();
 	SetReadHandler(0x8000, 0xFFFF, EH8813ARead);
 	SetWriteHandler(0x8000, 0xFFFF, EH8813AWrite);
@@ -65,6 +66,8 @@ static void EH8813APower(void) {
 
 static void EH8813AReset(void) {
 	addrlatch = datalatch = 0;
+	hw_mode = (hw_mode + 1) & 0xF;
+	FCEU_printf("Hardware Switch is %01X\n", hw_mode);
 	Sync();
 }
 
