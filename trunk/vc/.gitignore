@@ -20,3 +20,5 @@
 /vc8_fceux.suo
 /*.user
 /vc8_obj_Release
+/.vs
+/SRV

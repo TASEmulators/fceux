@@ -1,2 +1,2 @@
-SubWCRev.exe .. "defaultconfig\svnrev_template.h" "userconfig\svnrev.h"
+BizHawk.Build.Tool --wc . --template "defaultconfig\svnrev_template.h" --out "userconfig\svnrev.h"
 exit 0
