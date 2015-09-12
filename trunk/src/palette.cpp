@@ -31,8 +31,6 @@
 #include "palette.h"
 #include "palettes/palettes.h"
 
-
-
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -42,24 +40,25 @@
 #include <cmath>
 #include <cstring>
 
-static int ntsccol=0;
-static int ntsctint=46+10;
-static int ntschue=72;
-
 bool force_grayscale = false;
 
-/* These are dynamically filled/generated palettes: */
-pal palettei[64];       // Custom palette for an individual game.
-pal palettec[64];       // Custom "global" palette.
-pal paletten[64];       // Mathematically generated palette.
+pal palette_game[64*8]; //custom palette for an individual game. (formerly palettei)
+pal palette_user[64*8]; //user's overridden palette (formerly palettec)
+pal palette_ntsc[64*8]; //mathematically generated NTSC palette (formerly paletten)
 
-static void CalculatePalette(void);
-static void ChoosePalette(void);
-static void WritePalette(void);
-uint8 pale=0;
+static bool palette_game_available; //whether palette_game is available
+static bool palette_user_available; //whether palette_user is available
 
-pal *palo;
-static pal *palpoint[8]=
+//ntsc parameters:
+bool ntsccol_enable = false; //whether NTSC palette is selected
+static int ntsctint = 46+10;
+static int ntschue = 72;
+
+//the default basic palette
+int default_palette_selection = 0;
+
+//library of default palettes
+static pal *default_palette[8]=
 {
 	palette,
 	rp2c04001,
@@ -68,35 +67,99 @@ static pal *palpoint[8]=
 	rp2c05004,
 };
 
-void FCEUI_SetPaletteArray(uint8 *pal)
+static void CalculatePalette(void);
+static void ChoosePalette(void);
+static void WritePalette(void);
+
+//points to the actually selected current palette
+pal *palo;
+
+static float rtmul[] = { 1.239f, 0.794f, 1.019f, 0.905f, 1.023f, 0.741f, 0.75f };
+static float gtmul[] = { 0.915f, 1.086f, 0.98f, 1.026f, 0.908f, 0.987f, 0.75f };
+static float btmul[] = { 0.743f, 0.882f, 0.653f, 1.277f, 0.979f, 0.101f, 0.75f };
+
+static void ApplyDeemphasis(u8& r, u8& g, u8& b, int deemph_bits)
 {
-	if(!pal)
-		palpoint[0]=palette;
-	else
+	//DEEMPH BITS MAY BE ORDERED WRONG. PLEASE CHECK
+	if (deemph_bits == 0) return;
+	int d = deemph_bits - 1;
+	int nr = (int)(r * rtmul[d]);
+	int ng = (int)(g * gtmul[d]);
+	int nb = (int)(b * btmul[d]);
+	if (nr > 0xFF) nr = 0xFF;
+	if (ng > 0xFF) ng = 0xFF;
+	if (nb > 0xFF) nb = 0xFF;
+	r = (u8)nr;
+	g = (u8)ng;
+	b = (u8)nb;
+}
+
+static void ApplyDeemphasisComplete(pal* pal512)
+{
+	//for each deemph level beyond 0
+	for(int i=1,idx=64;i<8;i++)
 	{
-		int x;
-		palpoint[0]=palettec;
-		for(x=0;x<64;x++)
+		//for each palette entry
+		for(int p=0;p<64;p++,idx++)
 		{
-			palpoint[0][x].r=*((uint8 *)pal+x+x+x);
-			palpoint[0][x].g=*((uint8 *)pal+x+x+x+1);
-			palpoint[0][x].b=*((uint8 *)pal+x+x+x+2);
+			pal512[idx] = pal512[p];
+			ApplyDeemphasis(pal512[idx].r,pal512[idx].g,pal512[idx].b,i);
 		}
 	}
+}
+
+void FCEUI_SetUserPalette(uint8 *pal, int nEntries)
+{
+	if(!pal)
+	{
+		palette_user_available = false;
+		return;
+	}
+
+	palette_user_available = true;
+	memcpy(palette_user,pal,nEntries*3);
+
+	//if palette is incomplete, generate deemph entries
+	if(nEntries != 512)
+		ApplyDeemphasisComplete(palette_user);
+
 	FCEU_ResetPalette();
 }
 
+void FCEU_LoadGamePalette(void)
+{
+	palette_game_available = false;
+	std::string path = FCEU_MakeFName(FCEUMKF_PALETTE,0,0);
+	FILE* fp = FCEUD_UTF8fopen(path,"rb");
+	if(fp)
+	{
+		int readed = fread(palette_game,1,64*8*3,fp);
+		int nEntries = readed/3;
+		fclose(fp);
 
-void FCEUI_SetNTSCTH(int n, int tint, int hue)
+		//if palette is incomplete, generate deemph entries
+		if(nEntries != 512)
+			ApplyDeemphasisComplete(palette_game);
+
+		palette_game_available = true;
+	}
+
+	//not sure whether this is needed
+	FCEU_ResetPalette();
+}
+
+void FCEUI_SetNTSCTH(bool en, int tint, int hue)
 {
 	ntsctint=tint;
 	ntschue=hue;
-	ntsccol=n;
+	ntsccol_enable = en;
 	FCEU_ResetPalette();
 }
 
+//this prepares the 'deemph' palette which was a horrible idea to jam a single deemph palette into 0xC0-0xFF of the 8bpp palette.
+//its needed for GUI and lua and stuff, so we're leaving it, despite having a newer codepath for applying deemph
 static uint8 lastd=0;
-void SetNESDeemph(uint8 d, int force)
+void SetNESDeemph_OldHacky(uint8 d, int force)
 {
 	static uint16 rtmul[]={
         static_cast<uint16>(32768*1.239),
@@ -194,6 +257,10 @@ void SetNESDeemph(uint8 d, int force)
 // Converted from Kevin Horton's qbasic palette generator.
 static void CalculatePalette(void)
 {
+	//PRECONDITION: ntsc palette is enabled
+ 	if(!ntsccol_enable)
+		return;
+
 	int x,z;
 	int r,g,b;
 	double s,luma,theta;
@@ -229,39 +296,14 @@ static void CalculatePalette(void)
 			if(g<0) g=0;
 			if(b<0) b=0;
 
-			paletten[(x<<4)+z].r=r;
-			paletten[(x<<4)+z].g=g;
-			paletten[(x<<4)+z].b=b;
+			palette_ntsc[(x<<4)+z].r=r;
+			palette_ntsc[(x<<4)+z].g=g;
+			palette_ntsc[(x<<4)+z].b=b;
 		}
-		WritePalette();
-}
 
-static int ipalette=0;
-
-void FCEU_LoadGamePalette(void)
-{
-	uint8 ptmp[192];
-	FILE *fp;
-	char *fn;
-
-	ipalette=0;
-
-	fn=strdup(FCEU_MakeFName(FCEUMKF_PALETTE,0,0).c_str());
-
-	if((fp=FCEUD_UTF8fopen(fn,"rb")))
-	{
-		int x;
-		fread(ptmp,1,192,fp);
-		fclose(fp);
-		for(x=0;x<64;x++)
-		{
-			palettei[x].r=ptmp[x+x+x];
-			palettei[x].g=ptmp[x+x+x+1];
-			palettei[x].b=ptmp[x+x+x+2];
-		}
-		ipalette=1;
-	}
-	free(fn);
+	//can't call FCEU_ResetPalette(), it would be re-entrant
+	//see precondition for this function
+	WritePalette();
 }
 
 void FCEU_ResetPalette(void)
@@ -275,38 +317,51 @@ void FCEU_ResetPalette(void)
 
 static void ChoosePalette(void)
 {
+	//if it's an NSF, there's NO palette? that's right, only the 'unvarying' palette will get used
 	if(GameInfo->type==GIT_NSF)
-		palo=0;
-	else if(ipalette)
-		palo=palettei;
-	else if(ntsccol && !PAL && GameInfo->type!=GIT_VSUNI)
+		palo = NULL;
+	//user palette takes priority over others
+	else if(palette_user_available)
+		palo = palette_user;
+	//NTSC takes priority next, if it's appropriate
+	else if(ntsccol_enable && !PAL && GameInfo->type!=GIT_VSUNI)
 	{
-		palo=paletten;
+		//for NTSC games, we can actually use the NTSC palette
+		palo = palette_ntsc;
 		CalculatePalette();
 	}
+	//select the game's overridden palette if available
+	else if(palette_game_available)
+		palo = palette_game;
+	//finally, use a default built-in palette
 	else
-		palo=palpoint[pale];
+	{
+		palo = default_palette[default_palette_selection];
+		//need to calcualte a deemph on the fly.. sorry. maybe support otherwise later
+		ApplyDeemphasisComplete(palo);
+	}
 }
 
 void WritePalette(void)
 {
 	int x;
 
+	//set the 'unvarying' palettes to low < 128 palette entries
 	for(x=0;x<7;x++)
-		FCEUD_SetPalette(x,unvpalette[x].r,unvpalette[x].g,unvpalette[x].b);
+		FCEUD_SetPalette(x,palette_unvarying[x].r,palette_unvarying[x].g,palette_unvarying[x].b);
+
 	if(GameInfo->type==GIT_NSF)
 	{
 		#ifdef _S9XLUA_H
 		FCEU_LuaUpdatePalette();
 		#endif
-		//for(x=0;x<128;x++)
-		// FCEUD_SetPalette(x,x,0,x);
 	}
 	else
 	{
+		//sets palette entries >= 128 with the 64 selected main colors
 		for(x=0;x<64;x++)
 			FCEUD_SetPalette(128+x,palo[x].r,palo[x].g,palo[x].b);
-		SetNESDeemph(lastd,1);
+		SetNESDeemph_OldHacky(lastd,1);
 	}
 }
 
@@ -321,7 +376,7 @@ static int controllength=0;
 
 void FCEUI_NTSCDEC(void)
 {
-	if(ntsccol && GameInfo->type!=GIT_VSUNI &&!PAL && GameInfo->type!=GIT_NSF)
+	if(ntsccol_enable && GameInfo->type!=GIT_VSUNI &&!PAL && GameInfo->type!=GIT_NSF)
 	{
 		int which;
 		if(controlselect)
@@ -343,7 +398,7 @@ void FCEUI_NTSCDEC(void)
 
 void FCEUI_NTSCINC(void)
 {
-	if(ntsccol && GameInfo->type!=GIT_VSUNI && !PAL && GameInfo->type!=GIT_NSF)
+	if(ntsccol_enable && GameInfo->type!=GIT_VSUNI && !PAL && GameInfo->type!=GIT_NSF)
 		if(controlselect)
 		{
 			if(controllength)
@@ -366,12 +421,12 @@ void FCEUI_NTSCINC(void)
 
 void FCEUI_NTSCSELHUE(void)
 {
-	if(ntsccol && GameInfo->type!=GIT_VSUNI && !PAL && GameInfo->type!=GIT_NSF){controlselect=1;controllength=360;}
+	if(ntsccol_enable && GameInfo->type!=GIT_VSUNI && !PAL && GameInfo->type!=GIT_NSF){controlselect=1;controllength=360;}
 }
 
 void FCEUI_NTSCSELTINT(void)
 {
-	if(ntsccol && GameInfo->type!=GIT_VSUNI && !PAL && GameInfo->type!=GIT_NSF){controlselect=2;controllength=360;}
+	if(ntsccol_enable && GameInfo->type!=GIT_VSUNI && !PAL && GameInfo->type!=GIT_NSF){controlselect=2;controllength=360;}
 }
 
 void FCEU_DrawNTSCControlBars(uint8 *XBuf)

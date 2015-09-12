@@ -1223,6 +1223,7 @@ static void DoLine(void) {
 	// send all future writes to the invisible sanline. the easiest way to "skip" them altogether in old ppu
 	// todo: figure out what exactly should be skipped. it's known that there's no activity on PPU bus
 	uint8 *target = XBuf + ((scanline < 240 ? scanline : 240) << 8);
+	u8* dtarget = XDBuf + ((scanline < 240 ? scanline : 240) << 8);
 
 	if (MMC5Hack) MMC5_hb(scanline);
 
@@ -1236,19 +1237,23 @@ static void DoLine(void) {
 			col = Pal[0];
 		else col = gNoBGFillColor;
 		tem = col | (col << 8) | (col << 16) | (col << 24);
-		tem |= 0x40404040;
+		tem |= 0x40404040; 
 		FCEU_dwmemset(target, tem, 256);
 	}
 
 	if (SpriteON)
 		CopySprites(target);
 
-	if (ScreenON || SpriteON) {	// Yes, very el-cheapo.
+	//greyscale handling (mask some bits off the color) ? ? ?
+	if (ScreenON || SpriteON)
+	{
 		if (PPU[1] & 0x01) {
 			for (x = 63; x >= 0; x--)
 				*(uint32*)&target[x << 2] = (*(uint32*)&target[x << 2]) & 0x30303030;
 		}
 	}
+
+	//some pathetic attempts at deemph
 	if ((PPU[1] >> 5) == 0x7) {
 		for (x = 63; x >= 0; x--)
 			*(uint32*)&target[x << 2] = ((*(uint32*)&target[x << 2]) & 0x3f3f3f3f) | 0xc0c0c0c0;
@@ -1258,6 +1263,10 @@ static void DoLine(void) {
 	else
 		for (x = 63; x >= 0; x--)
 			*(uint32*)&target[x << 2] = ((*(uint32*)&target[x << 2]) & 0x3f3f3f3f) | 0x80808080;
+
+	//write the actual deemph
+	for (x = 63; x >= 0; x--)
+		*(uint32*)&dtarget[x << 2] = ((PPU[1]>>5)<<0)|((PPU[1]>>5)<<8)|((PPU[1]>>5)<<16)|((PPU[1]>>5)<<24);
 
 	sphitx = 0x100;
 
@@ -1785,7 +1794,6 @@ int FCEUPPU_Loop(int skip) {
 		}
 		#endif
 		else {
-			int x, max, maxref;
 			deemp = PPU[1] >> 5;
 
 			// manual samples can't play correctly with overclocking
@@ -1803,14 +1811,16 @@ int FCEUPPU_Loop(int skip) {
 			DMC_7bit = 0;
 
 			if (MMC5Hack) MMC5_hb(scanline);
-			for (x = 1, max = 0, maxref = 0; x < 7; x++) {
+
+			//deemph nonsense, kept for complicated reasons (see SetNESDeemph_OldHacky implementation)
+			for (int x = 1, max = 0, maxref = 0; x < 7; x++) {
 				if (deempcnt[x] > max) {
 					max = deempcnt[x];
 					maxref = x;
 				}
 				deempcnt[x] = 0;
 			}
-			SetNESDeemph(maxref, 0);
+			SetNESDeemph_OldHacky(maxref, 0);
 		}
 	}	//else... to if(ppudead)
 
@@ -2079,7 +2089,9 @@ int FCEUX_PPU_Loop(int skip) {
 					int xstart = xt << 3;
 					oamcount = oamcounts[renderslot];
 					uint8 * const target = XBuf + (yp << 8) + xstart;
+					uint8 * const dtarget = XDBuf + (yp << 8) + xstart;
 					uint8 *ptr = target;
+					uint8 *dptr = dtarget;
 					int rasterpos = xstart;
 
 					//check all the conditions that can cause things to render in these 8px
@@ -2147,6 +2159,7 @@ int FCEUX_PPU_Loop(int skip) {
 						}
 
 						*ptr++ = PaletteAdjustPixel(pixelcolor);
+						*dptr++= PPU[1]>>5; //grap deemph
 					}
 				}
 			}

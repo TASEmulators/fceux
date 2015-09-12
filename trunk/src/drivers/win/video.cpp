@@ -227,27 +227,8 @@ static int InitBPPStuff(int fs)
 		break;
 	}
 
-	if(bpp >= 16)
-	{
-		InitBlitToHigh(bpp >> 3, CBM[0], CBM[1], CBM[2], 0, fs?vmodes[vmod].special:winspecial,specfilteropt);
-	}
-	else if(bpp==8)
-	{
-		ddrval=IDirectDraw7_CreatePalette( lpDD7, DDPCAPS_8BIT|DDPCAPS_ALLOW256|DDPCAPS_INITIALIZE,color_palette,&lpddpal,NULL);
-		if (ddrval != DD_OK)
-		{
-			//ShowDDErr("Error creating palette object.");
-			FCEU_printf("Error creating palette object.\n");
-			return 0;
-		}
-		ddrval=IDirectDrawSurface7_SetPalette(lpDDSPrimary, lpddpal);
-		if (ddrval != DD_OK)
-		{
-			//ShowDDErr("Error setting palette object.");
-			FCEU_printf("Error setting palette object.\n");
-			return 0;
-		}
-	}
+	InitBlitToHigh(bpp >> 3, CBM[0], CBM[1], CBM[2], 0, fs?vmodes[vmod].special:winspecial,specfilteropt);
+	
 	return 1;
 }
 
@@ -394,7 +375,8 @@ int SetVideoMode(int fs)
 		if(!GetBPP())
 			return 0;
 
-		if(bpp!=16 && bpp!=24 && bpp!=32)
+		//only 24 and 32bpp are supported now
+		if(bpp!=24 && bpp!=32)
 		{
 			//ShowDDErr("Current bit depth not supported!");
 			FCEU_printf("Current bit depth not supported!\n");

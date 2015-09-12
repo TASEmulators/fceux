@@ -683,10 +683,11 @@ int main(int argc,char *argv[])
 	DoVideoConfigFix();
 	DoTimingConfigFix();
 
-	if(eoptions & EO_CPALETTE)
-	{
-		FCEUI_SetPaletteArray(cpalette);
-	}
+	//TODO - how can this do anything? we havent set a palette yet
+	//if(eoptions & EO_CPALETTE)
+	//{
+	//	FCEUI_SetUserPalette(cpalette);
+	//}
 
 	if(!t)
 	{

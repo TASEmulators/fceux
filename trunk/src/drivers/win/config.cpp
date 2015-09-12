@@ -174,7 +174,7 @@ static CFGSTRUCT fceuconfig[] =
 	ACS(ResumeROM),
 
 	AC(gNoBGFillColor),
-	AC(ntsccol),AC(ntsctint),AC(ntschue),
+	AC(ntsccol_enable),AC(ntsctint),AC(ntschue),
 	AC(force_grayscale),
 	AC(dendy),
 	AC(extrascanlines),
@@ -470,7 +470,7 @@ void LoadConfig(const char *filename)
 
 	LoadFCEUConfig(filename, fceuconfig);
 
-	FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+	FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
 
 	//adelikat:Hacky fix for Ram Watch recent menu
 	for (int x = 0; x < 5; x++)

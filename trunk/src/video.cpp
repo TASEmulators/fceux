@@ -56,10 +56,17 @@
 #include <cstdarg>
 #include <zlib.h>
 
-uint8 *XBuf=NULL;
-uint8 *XBackBuf=NULL;
+//XBuf:
+//0-63 is reserved for 7 special colours used by FCEUX (overlay, etc.)
+//64-127 is the most-used emphasis setting per frame
+//128-195 is the palette with no emphasis
+//196-255 is the palette with all emphasis bits on
+u8 *XBuf=NULL; //used for current display
+u8 *XBackBuf=NULL; //ppu output is stashed here before drawing happens
+u8 *XDBuf=NULL; //corresponding to XBuf but with deemph bits
+u8 *XDBackBuf=NULL; //corresponding to XBackBuf but with deemph bits
 int ClipSidesOffset=0;	//Used to move displayed messages when Clips left and right sides is checked
-static uint8 *xbsave=NULL;
+static u8 *xbsave=NULL;
 
 GUIMESSAGE guiMessage;
 GUIMESSAGE subtitleMessage;
@@ -105,29 +112,35 @@ void FCEU_KillVirtualVideo(void)
 **/
 int FCEU_InitVirtualVideo(void)
 {
-	if(!XBuf)		/* Some driver code may allocate XBuf externally. */
-		/* 256 bytes per scanline, * 240 scanline maximum, +16 for alignment,
-		*/
-
-		if(!(XBuf= (uint8*) (FCEU_malloc(256 * 256 + 16))) ||
-			!(XBackBuf= (uint8*) (FCEU_malloc(256 * 256 + 16))))
-		{
-			return 0;
-		}
-
-		xbsave = XBuf;
-
-		if( sizeof(uint8*) == 4 )
-		{
-			uintptr_t m = (uintptr_t)XBuf;
-			m = ( 8 - m) & 7;
-			XBuf+=m;
-		}
-
-		memset(XBuf,128,256*256); //*240);
-		memset(XBackBuf,128,256*256);
-
+	//Some driver code may allocate XBuf externally.
+	//256 bytes per scanline, * 240 scanline maximum, +16 for alignment,
+	if(XBuf)
 		return 1;
+	
+	XBuf = (u8*)FCEU_malloc(256 * 256 + 16);
+	XBackBuf = (u8*)FCEU_malloc(256 * 256 + 16);
+	XDBuf = (u8*)FCEU_malloc(256 * 256 + 16);
+	XDBackBuf = (u8*)FCEU_malloc(256 * 256 + 16);
+	if(!XBuf || !XBackBuf || !XDBuf || !XDBackBuf)
+	{
+		return 0;
+	}
+
+	xbsave = XBuf;
+
+	if( sizeof(uint8*) == 4 )
+	{
+		uintptr_t m = (uintptr_t)XBuf;
+		m = ( 8 - m) & 7;
+		XBuf+=m;
+	}
+
+	memset(XBuf,128,256*256);
+	memset(XBackBuf,128,256*256);
+	memset(XBuf,128,256*256);
+	memset(XBackBuf,128,256*256);
+
+	return 1;
 }
 
 #ifdef FRAMESKIP

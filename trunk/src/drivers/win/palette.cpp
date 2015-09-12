@@ -4,7 +4,7 @@
 #include "window.h"
 #include "gui.h"
 
-uint8 cpalette[192] = {0};
+u8 cpalette[64*8*3] = {0};
 extern int  palhue;
 extern bool palhdtv;
 extern bool palprecision;
@@ -15,9 +15,9 @@ bool SetPalette(const char* nameo)
 	FILE *fp;
 	if((fp = FCEUD_UTF8fopen(nameo, "rb")))
 	{
-		fread(cpalette, 1, 192, fp);
+		int readed = fread(cpalette, 1, sizeof(cpalette), fp);
 		fclose(fp);
-		FCEUI_SetPaletteArray(cpalette);
+		FCEUI_SetUserPalette(cpalette,readed/3);
 		eoptions |= EO_CPALETTE;
 		return true;
 	}
@@ -71,7 +71,7 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 	{
 		case WM_INITDIALOG:
 
-			if(ntsccol)
+			if(ntsccol_enable)
 				CheckDlgButton(hwndDlg, CHECK_PALETTE_ENABLED, BST_CHECKED);
 
 			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,   TBM_SETRANGE, 1, MAKELONG(0, 128));
@@ -106,7 +106,7 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			ntsctint = SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,   TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
 			ntschue  = SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR,    TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
 			palhue   = SendDlgItemMessage(hwndDlg, CTL_PALHUE_TRACKBAR, TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
-			FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+			FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
 			sprintf(text, "Hue: %d%%", palhue);
 			SendDlgItemMessage(hwndDlg, STATIC_HUEVALUE, WM_SETTEXT, 0, (LPARAM) text);
 			break;
@@ -121,13 +121,13 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 				switch(wParam&0xFFFF)
 				{
 					case CHECK_PALETTE_ENABLED:
-						ntsccol ^= 1;
-						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue); // it recalculates everything, use it for PAL block too!
+						ntsccol_enable ^= true;
+						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue); // it recalculates everything, use it for PAL block too!
 						break;
 
 					case CHECK_PALETTE_GRAYSCALE:
 						force_grayscale ^= 1;
-						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
 						break;
 
 					case BTN_PALETTE_LOAD:
@@ -140,30 +140,30 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 						SendDlgItemMessage(hwndDlg, CTL_PALHUE_TRACKBAR, TBM_SETPOS, 1, palhue);
 						sprintf(text, "Hue: %d%%", palhue);
 						SendDlgItemMessage(hwndDlg, STATIC_HUEVALUE, WM_SETTEXT, 0, (LPARAM) text);
-						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
 						break;
 
 					case CHECK_PALETTE_MONOCHROME:
 						palmonochrome ^= 1;
-						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
 						break;		
 					
 					case CHECK_PALETTE_HDTV:
 						palhdtv ^= 1;
-						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
 						break;
 
 					case CHECK_PALETTE_CUSTOM:
 					{
 						if (eoptions & EO_CPALETTE)
 						{
-							// switch back to default palette
-							FCEUI_SetPaletteArray(0);
+							//disable user palette
+							FCEUI_SetUserPalette(0,0);
 							eoptions &= ~EO_CPALETTE;
 						} else
 						{
-							// switch to custom, even if it isn't loaded yet
-							FCEUI_SetPaletteArray(cpalette);
+							//switch to user palette (even if it isn't loaded yet!?)
+							FCEUI_SetUserPalette(cpalette,64); //just have to guess the size I guess
 							eoptions |= EO_CPALETTE;
 						}
 						break;

@@ -129,7 +129,7 @@ void FCEU_DispMessage(char *format, int disppos, ...);
 void FCEU_DispMessageOnMovie(char *format, ...);
 void FCEU_TogglePPU();
 
-void SetNESDeemph(uint8 d, int force);
+void SetNESDeemph_OldHacky(uint8 d, int force);
 void DrawTextTrans(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor);
 void FCEU_PutImage(void);
 #ifdef FRAMESKIP
@@ -142,7 +142,7 @@ extern void PushCurrentVideoSettings();
 #endif
 
 extern uint8 Exit;
-extern uint8 pale;
+extern int default_palette_selection;
 extern uint8 vsdip;
 
 //#define FCEUDEF_DEBUGGER //mbg merge 7/17/06 - cleaning out conditional compiles

@@ -25,8 +25,15 @@
 #include "hq3x.h"
 
 #include "../../types.h"
+#include "../../palette.h"
 #include "../../utils/memory.h"
 #include "nes_ntsc.h"
+
+extern u8 *XBuf;
+extern u8 *XBackBuf;
+extern u8 *XDBuf;
+extern u8 *XDBackBuf;
+extern pal *palo;
 
 nes_ntsc_t* nes_ntsc;
 uint8 burst_phase = 0;
@@ -203,17 +210,17 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
 	
 	if(efx&FVB_BLUR)
 	{
-		if(Bpp==2)
-			palettetranslate=(uint32 *)FCEU_dmalloc(65536*4);
-		else if(Bpp>=3)
+		//if(Bpp==2)
+		//	palettetranslate=(uint32 *)FCEU_dmalloc(65536*4);
+		//else if(Bpp>=3)
 			palettetranslate=(uint32 *)FCEU_dmalloc(65536*4);
 	}
 	else
 	{
-		if(Bpp==2)
-			palettetranslate=(uint32*)FCEU_dmalloc(65536*4);
-		else if(Bpp>=3)
-			palettetranslate=(uint32*)FCEU_dmalloc(256*4);
+		//if(Bpp==2)
+		//	palettetranslate=(uint32*)FCEU_dmalloc(65536*4);
+		//else if(Bpp>=3)
+			palettetranslate=(uint32*)FCEU_dmalloc(256*4 + 512*4);
 	}
 	
 	if(!palettetranslate)
@@ -340,6 +347,7 @@ void SetPaletteBlitToHigh(uint8 *src)
 				palettetranslate[x]=(r<<cshiftl[0])|(g<<cshiftl[1])|(b<<cshiftl[2]);
 			}
 			else	
+			{
 				for(y=0;y<256;y++)
 				{
 					r=src[x<<2]*(100-BLUR_RED);
@@ -359,6 +367,17 @@ void SetPaletteBlitToHigh(uint8 *src)
 					
 					palettetranslate[x|(y<<8)]=(r<<cshiftl[0])|(g<<cshiftl[1])|(b<<cshiftl[2]);
 				}
+			}
+		}
+		//full size deemph palette (breaks blur shit)
+		for(x=0;x<512;x++)
+		{
+			uint32 r,g,b;
+
+			r=palo[x].r;
+			g=palo[x].g;
+			b=palo[x].b;
+			palettetranslate[256+x]=(r<<cshiftl[0])|(g<<cshiftl[1])|(b<<cshiftl[2]);
 		}
 		break;
 	}
@@ -506,6 +525,25 @@ void Blit8To8(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale, in
 }
 
 /* Todo:  Make sure 24bpp code works right with big-endian cpus */
+
+//takes a pointer to XBuf and applies fully modern deemph palettizing
+u32 ModernDeemphColorMap(u8* src)
+{
+	u8 pixel = *src;
+	
+	//look up the legacy translation
+	u32 color = palettetranslate[pixel];
+	
+	//find out which deemph bitplane value we're on
+	int ofs = src-XBuf;
+	uint8 deemph = XDBuf[ofs];
+
+	//if it was a deemph'd value, grab it from the deemph palette
+	if(deemph != 0)
+		color = palettetranslate[256+(pixel&0x3F)+deemph*64];
+
+	return color;
+}
 
 void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale, int yscale)
 {
@@ -1036,7 +1074,8 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 				{
 					for(x=xr;x;x--)
 					{
-						*(uint32 *)dest=palettetranslate[(uint32)*src];
+						//THE MAIN BLITTING CODEPATH (there may be others that are important)
+						*(uint32 *)dest = ModernDeemphColorMap(src);
 						dest+=4;
 						src++;
 					}

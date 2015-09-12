@@ -107,13 +107,14 @@ extern int soundquality;
 extern bool muteTurbo;
 extern bool swapDuty;
 
-extern uint8 cpalette[192];
+extern uint8 cpalette[64*8*3];
 extern int srendlinen;
 extern int erendlinen;
 extern int srendlinep;
 extern int erendlinep;
 
-extern int ntsccol, ntsctint, ntschue;
+extern int ntsctint, ntschue;
+extern bool ntsccol_enable;
 extern bool force_grayscale;
 
 //mbg merge 7/17/06 did these have to be unsigned?
