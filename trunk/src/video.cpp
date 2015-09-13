@@ -32,6 +32,7 @@
 #include "vsuni.h"
 #include "drawing.h"
 #include "driver.h"
+#include "drivers/common/vidblit.h"
 #ifdef _S9XLUA_H
 #include "fceulua.h"
 #endif
