@@ -1813,7 +1813,8 @@ int FCEUPPU_Loop(int skip) {
 			if (MMC5Hack) MMC5_hb(scanline);
 
 			//deemph nonsense, kept for complicated reasons (see SetNESDeemph_OldHacky implementation)
-			for (int x = 1, max = 0, maxref = 0; x < 7; x++) {
+			int maxref = 0;
+			for (int x = 1, max = 0; x < 7; x++) {
 				if (deempcnt[x] > max) {
 					max = deempcnt[x];
 					maxref = x;
