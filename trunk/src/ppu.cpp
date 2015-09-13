@@ -2107,6 +2107,18 @@ int FCEUX_PPU_Loop(int skip) {
 
 						uint8 pixel = 0, pixelcolor;
 
+						//according to qeed's doc, use palette 0 or $2006's value if it is & 0x3Fxx
+						if (!ScreenON && !SpriteON)
+						{
+							// if there's anything wrong with how we're doing this, someone please chime in
+							int addr = ppur.get_2007access();
+							if ((addr & 0x3F00) == 0x3F00)
+							{
+								pixel = addr & 0x1F;
+							}
+							pixelcolor = PALRAM[pixel];
+						}
+
 						//generate the BG data
 						if (renderbgnow) {
 							uint8* pt = bgdata.main[bgtile].pt;
@@ -2160,7 +2172,7 @@ int FCEUX_PPU_Loop(int skip) {
 						}
 
 						*ptr++ = PaletteAdjustPixel(pixelcolor);
-						*dptr++= PPU[1]>>5; //grap deemph
+						*dptr++= PPU[1]>>5; //grab deemph
 					}
 				}
 			}
