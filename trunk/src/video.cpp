@@ -627,7 +627,6 @@ int SaveSnapshot(void)
 			dest++;
 			for(x=256;x;x--)
 			{
-				extern u32 ModernDeemphColorMap(u8* src);
 				u32 color = ModernDeemphColorMap(tmp);
 				*dest++=(color>>0x10)&0xFF;
 				*dest++=(color>>0x08)&0xFF;

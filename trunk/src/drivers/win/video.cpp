@@ -375,8 +375,8 @@ int SetVideoMode(int fs)
 		if(!GetBPP())
 			return 0;
 
-		//only 24 and 32bpp are supported now
-		if(bpp!=24 && bpp!=32)
+		//only 16,24,32 bpp are supported now
+		if(bpp!=16 && bpp!=24 && bpp!=32)
 		{
 			//ShowDDErr("Current bit depth not supported!");
 			FCEU_printf("Current bit depth not supported!\n");
