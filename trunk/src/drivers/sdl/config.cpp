@@ -50,7 +50,7 @@ LoadCPalette(const std::string &file)
 		FCEUD_PrintError(errorMsg);
 		return 0;
 	}
-	FCEUI_SetPaletteArray(tmpp);
+	FCEUI_SetUserPalette(tmpp, result/3);
 	fclose(fp);
 	return 1;
 }
