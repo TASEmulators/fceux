@@ -184,7 +184,7 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
 	}
 	else if (specfilt == 9)
 	{
-		palrgb = (uint32 *)FCEU_dmalloc(265*16*sizeof(uint32));
+		palrgb = (uint32 *)FCEU_dmalloc((256+512)*16*sizeof(uint32));
 		moire  = (float  *)FCEU_dmalloc(    16*sizeof(float));
 	}
 
@@ -578,7 +578,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 			bool hdtv = palhdtv;
 			bool monochrome = palmonochrome;
 
-			for (int i=0; i<256; i++) {
+			for (int i=0; i<256+512; i++) {
 				R = source[i*4  ];
 				G = source[i*4+1];
 				B = source[i*4+2];
@@ -641,13 +641,22 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 			uint32 *d = (uint32 *)dest;
 			uint8 xsub  = 0;
 			uint8 xabs  = 0;
-			uint8 index = 0;
+			uint32 index = 0;
 			uint32 color;
 
 			for (y=0; y<yr; y++) {
 				for (x=0; x<xr; x++) {
-					index = *src++;
-					
+						
+					//find out which deemph bitplane value we're on
+					int ofs = src-XBuf;
+					uint8 deemph = XDBuf[ofs];
+
+					//get combined index from basic value and preemph bitplane
+					index = *src | (deemph<<6);
+					index += 256;
+
+					src++;
+
 					for (int xsub = 0; xsub < 3; xsub++) {
 						xabs = x*3 + xsub;
 
