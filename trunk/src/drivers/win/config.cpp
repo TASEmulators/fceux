@@ -227,6 +227,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(goptions),
 	NAC("eoptions",eoptions),
 	NACA("cpalette",cpalette),
+	NAC("cpalette_count",cpalette_count),
 
 	NACA("InputType",InputType),
 

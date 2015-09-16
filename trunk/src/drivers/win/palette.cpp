@@ -4,6 +4,7 @@
 #include "window.h"
 #include "gui.h"
 
+int cpalette_count = 0;
 u8 cpalette[64*8*3] = {0};
 extern int  palhue;
 extern bool palhdtv;
@@ -17,7 +18,8 @@ bool SetPalette(const char* nameo)
 	{
 		int readed = fread(cpalette, 1, sizeof(cpalette), fp);
 		fclose(fp);
-		FCEUI_SetUserPalette(cpalette,readed/3);
+		cpalette_count = readed/3;
+		FCEUI_SetUserPalette(cpalette,cpalette_count);
 		eoptions |= EO_CPALETTE;
 		return true;
 	}

@@ -683,11 +683,11 @@ int main(int argc,char *argv[])
 	DoVideoConfigFix();
 	DoTimingConfigFix();
 
-	//TODO - how can this do anything? we havent set a palette yet
-	//if(eoptions & EO_CPALETTE)
-	//{
-	//	FCEUI_SetUserPalette(cpalette);
-	//}
+	//restore the last user-set palette (cpalette and cpalette_count are preserved in the config file)
+	if(eoptions & EO_CPALETTE)
+	{
+		FCEUI_SetUserPalette(cpalette,cpalette_count);
+	}
 
 	if(!t)
 	{

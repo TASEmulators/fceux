@@ -107,6 +107,7 @@ extern int soundquality;
 extern bool muteTurbo;
 extern bool swapDuty;
 
+extern int cpalette_count;
 extern uint8 cpalette[64*8*3];
 extern int srendlinen;
 extern int erendlinen;
