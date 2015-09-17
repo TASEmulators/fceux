@@ -74,14 +74,106 @@ static void WritePalette(void);
 //points to the actually selected current palette
 pal *palo;
 
-static float rtmul[] = { 1.239f, 0.794f, 1.019f, 0.905f, 1.023f, 0.741f, 0.75f };
-static float gtmul[] = { 0.915f, 1.086f, 0.98f, 1.026f, 0.908f, 0.987f, 0.75f };
-static float btmul[] = { 0.743f, 0.882f, 0.653f, 1.277f, 0.979f, 0.101f, 0.75f };
+#define RGB_TO_YIQ( r, g, b, y, i ) (\
+	(y = (r) * 0.299f + (g) * 0.587f + (b) * 0.114f),\
+	(i = (r) * 0.596f - (g) * 0.275f - (b) * 0.321f),\
+	((r) * 0.212f - (g) * 0.523f + (b) * 0.311f)\
+)
 
-static void ApplyDeemphasis(u8& r, u8& g, u8& b, int deemph_bits)
+#define YIQ_TO_RGB( y, i, q, to_rgb, type, r, g ) (\
+	r = (type) (y + to_rgb [0] * i + to_rgb [1] * q),\
+	g = (type) (y + to_rgb [2] * i + to_rgb [3] * q),\
+	(type) (y + to_rgb [4] * i + to_rgb [5] * q)\
+)
+
+
+
+static void ApplyDeemphasisNTSC(int entry, u8& r, u8& g, u8& b)
+{
+				static float const to_float = 1.0f / 0xFF;
+				float fr = to_float * r;
+				float fg = to_float * g;
+				float fb = to_float * b;
+				float y, i, q = RGB_TO_YIQ( fr, fg, fb, y, i );
+
+
+	//---------------------------------
+	//it seems a bit bogus here to use this segment which is essentially part of the base palette generation,
+	//but it's needed for 'hi'
+	static float const lo_levels [4] = { -0.12f, 0.00f, 0.31f, 0.72f };
+	static float const hi_levels [4] = {  0.40f, 0.68f, 1.00f, 1.00f };
+	int level = entry >> 4 & 0x03;
+	float lo = lo_levels [level];
+	float hi = hi_levels [level];
+		
+	int color = entry & 0x0F;
+	if ( color == 0 )
+		lo = hi;
+	if ( color == 0x0D )
+		hi = lo;
+	if ( color > 0x0D )
+		hi = lo = 0.0f;
+	//---------------------------------
+
+	int tint = (entry >> 6) & 7;
+	if ( tint && color <= 0x0D )
+	{
+		static float const phases [0x10 + 3] = {
+			-1.0f, -0.866025f, -0.5f, 0.0f,  0.5f,  0.866025f,
+				1.0f,  0.866025f,  0.5f, 0.0f, -0.5f, -0.866025f,
+			-1.0f, -0.866025f, -0.5f, 0.0f,  0.5f,  0.866025f,
+				1.0f
+		};
+		#define TO_ANGLE_SIN( color )   phases [color]
+		#define TO_ANGLE_COS( color )   phases [(color) + 3]
+
+		static float const atten_mul = 0.79399f;
+		static float const atten_sub = 0.0782838f;
+					
+		if ( tint == 7 )
+		{
+			y = y * (atten_mul * 1.13f) - (atten_sub * 1.13f);
+		}
+		else
+		{
+			static unsigned char const tints [8] = { 0, 6, 10, 8, 2, 4, 0, 0 };
+			int const tint_color = tints [tint];
+			float sat = hi * (0.5f - atten_mul * 0.5f) + atten_sub * 0.5f;
+			y -= sat * 0.5f;
+			if ( tint >= 3 && tint != 4 )
+			{
+				//combined tint bits
+				sat *= 0.6f;
+				y -= sat;
+			}
+			i += TO_ANGLE_SIN( tint_color ) * sat;
+			q += TO_ANGLE_COS( tint_color ) * sat;
+		}
+	}
+
+	static float const default_decoder [6] =
+		{ 0.956f, 0.621f, -0.272f, -0.647f, -1.105f, 1.702f };
+	fb = YIQ_TO_RGB( y, i, q, default_decoder, float, fr, fg );
+
+	#define CLAMP(x) (x<0?0:(x>1.0f?1.0f:x))
+	r = (u8)(CLAMP(fr)*255);
+	g = (u8)(CLAMP(fg)*255);
+	b = (u8)(CLAMP(fb)*255);
+}
+
+//classic algorithm
+static void ApplyDeemphasisClassic(int entry, u8& r, u8& g, u8& b)
 {
 	//DEEMPH BITS MAY BE ORDERED WRONG. PLEASE CHECK
+
+	static const float rtmul[] = { 1.239f, 0.794f, 1.019f, 0.905f, 1.023f, 0.741f, 0.75f };
+	static const float gtmul[] = { 0.915f, 1.086f, 0.98f, 1.026f, 0.908f, 0.987f, 0.75f };
+	static const float btmul[] = { 0.743f, 0.882f, 0.653f, 1.277f, 0.979f, 0.101f, 0.75f };
+
+	int deemph_bits = entry >> 6;
+
 	if (deemph_bits == 0) return;
+
 	int d = deemph_bits - 1;
 	int nr = (int)(r * rtmul[d]);
 	int ng = (int)(g * gtmul[d]);
@@ -97,13 +189,13 @@ static void ApplyDeemphasis(u8& r, u8& g, u8& b, int deemph_bits)
 static void ApplyDeemphasisComplete(pal* pal512)
 {
 	//for each deemph level beyond 0
-	for(int i=1,idx=64;i<8;i++)
+	for(int i=0,idx=0;i<8;i++)
 	{
 		//for each palette entry
 		for(int p=0;p<64;p++,idx++)
 		{
 			pal512[idx] = pal512[p];
-			ApplyDeemphasis(pal512[idx].r,pal512[idx].g,pal512[idx].b,i);
+			ApplyDeemphasisNTSC(idx,pal512[idx].r,pal512[idx].g,pal512[idx].b);
 		}
 	}
 }
