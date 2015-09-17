@@ -51,7 +51,8 @@ static uint8  *ntscblit    = NULL;	// For nes_ntsc
 static uint32 *prescalebuf = NULL;	// Prescale pointresizes to 2x-4x to allow less blur with hardware acceleration.
 static uint32 *palrgb      = NULL;	// PAL filter buffer for lookup values of RGB with applied moir phases
 static float  *moire       = NULL;
-int    palhue              = 100;
+int    palsaturation       = 100;
+int    palnotch            = 0;
 bool   palhdtv             = 0;
 bool   palmonochrome       = 0;
 bool   palupdate           = 1;
@@ -574,7 +575,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 			uint8 *source = (uint8 *)palettetranslate;
 			int16 R,G,B;
 			float Y,U,V;
-			float hue = (float) palhue/100;
+			float sat = (float) palsaturation/100;
 			bool hdtv = palhdtv;
 			bool monochrome = palmonochrome;
 
@@ -614,17 +615,17 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 				moire[15] = (U == 0 && V == 0) ? 1 : (Y + U)/Y;
 
 				if (monochrome)
-					hue = 0;
+					sat = 0;
 				
 				for (int j=0; j<16; j++) {
 					if (hdtv) { // HDTV BT.709
-						R = Round((Y                 + 1.28033*V*hue)*moire[j]);
-						G = Round((Y - 0.21482*U*hue - 0.38059*V*hue)*moire[j]);
-						B = Round((Y + 2.12798*U*hue                )*moire[j]);
+						R = Round((Y                 + 1.28033*V*sat)*moire[j]);
+						G = Round((Y - 0.21482*U*sat - 0.38059*V*sat)*moire[j]);
+						B = Round((Y + 2.12798*U*sat                )*moire[j]);
 					} else { // SDTV BT.601
-						R = Round((Y                 + 1.13983*V*hue)*moire[j]);
-						G = Round((Y - 0.39465*U*hue - 0.58060*V*hue)*moire[j]);
-						B = Round((Y + 2.03211*U*hue                )*moire[j]);
+						R = Round((Y                 + 1.13983*V*sat)*moire[j]);
+						G = Round((Y - 0.39465*U*sat - 0.58060*V*sat)*moire[j]);
+						B = Round((Y + 2.03211*U*sat                )*moire[j]);
 					}
 
 					if (R > 0xff) R = 0xff; else if (R < 0) R = 0;
@@ -639,22 +640,30 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 
 		if (Bpp == 4) {
 			uint32 *d = (uint32 *)dest;
-			uint8 xsub  = 0;
-			uint8 xabs  = 0;
+			uint8  xsub  = 0;
+			uint8  xabs  = 0;
 			uint32 index = 0;
-			uint32 color;
+			uint32 lastindex = 0;
+			uint32 lastindex2 = 0;
+			uint32 color, lastcolor, lastcolor2;
+			int notch = palnotch;
+			int notch2 = notch/2;
+			int unnotch = 100 - palnotch;
+			int rmask = 0xff0000;
+			int gmask = 0x00ff00;
+			int bmask = 0x0000ff;
 
 			for (y=0; y<yr; y++) {
-				for (x=0; x<xr; x++) {
-						
+				lastcolor  = 0;
+				lastcolor2 = 0;
+				for (x=0; x<xr; x++) {						
 					//find out which deemph bitplane value we're on
 					int ofs = src-XBuf;
 					uint8 deemph = XDBuf[ofs];
 
 					//get combined index from basic value and preemph bitplane
 					index = (*src&63) | (deemph*64);
-					index += 256;
-
+					index += 256;					
 					src++;
 
 					for (int xsub = 0; xsub < 3; xsub++) {
@@ -694,7 +703,25 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 							}
 							break;
 						}
+
+						if (notch)
+						{
+							if (index == lastindex == lastindex2) {
+								int r = ((color&rmask)*unnotch + (lastcolor&rmask)*notch2 + (lastcolor2&rmask)*notch2)/100;
+								int g = ((color&gmask)*unnotch + (lastcolor&gmask)*notch2 + (lastcolor2&gmask)*notch2)/100;
+								int b = ((color&bmask)*unnotch + (lastcolor&bmask)*notch2 + (lastcolor2&bmask)*notch2)/100;
+								color = r&rmask | g&gmask | b&bmask;
+							} else {
+								int r = ((color&rmask)*unnotch + (lastcolor&rmask)*notch)/100;
+								int g = ((color&gmask)*unnotch + (lastcolor&gmask)*notch)/100;
+								int b = ((color&bmask)*unnotch + (lastcolor&bmask)*notch)/100;
+								color = r&rmask | g&gmask | b&bmask;
+							}
+						}
 						*d++ = color;
+						lastcolor2 = lastcolor;
+						lastcolor = color;
+						lastindex = index;
 					}
 				}
 			}

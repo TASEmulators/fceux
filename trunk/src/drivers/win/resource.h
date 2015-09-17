@@ -763,10 +763,12 @@
 #define ID_STATIC                       1286
 #define ID_CDL_OPTIONS                  1287
 #define ID_CDL_GENERATEROM              1288
-#define CTL_PALHUE_TRACKBAR             1291
+#define CTL_PALSAT_TRACKBAR             1291
 #define CHECK_PALETTE_HDTV              1292
-#define STATIC_HUEVALUE                 1293
-#define CB_SKIP_7BIT                    1294
+#define CB_SKIP_7BIT                    1293
+#define STATIC_SATVALUE                 1294
+#define CTL_PALNOTCH_TRACKBAR           1295
+#define STATIC_NOTCHVALUE               1296
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042

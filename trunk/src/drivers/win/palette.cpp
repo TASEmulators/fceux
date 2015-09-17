@@ -6,9 +6,9 @@
 
 int cpalette_count = 0;
 u8 cpalette[64*8*3] = {0};
-extern int  palhue;
+extern int  palsaturation;
+extern int  palnotch;
 extern bool palhdtv;
-extern bool palprecision;
 extern bool palmonochrome;
 
 bool SetPalette(const char* nameo)
@@ -68,7 +68,7 @@ int LoadPaletteFile()
 **/
 BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	char text[10];
+	char text[20];
 	switch(uMsg)
 	{
 		case WM_INITDIALOG:
@@ -76,17 +76,21 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			if(ntsccol_enable)
 				CheckDlgButton(hwndDlg, CHECK_PALETTE_ENABLED, BST_CHECKED);
 
-			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,   TBM_SETRANGE, 1, MAKELONG(0, 128));
-			SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR,    TBM_SETRANGE, 1, MAKELONG(0, 128));
-			SendDlgItemMessage(hwndDlg, CTL_PALHUE_TRACKBAR, TBM_SETRANGE, 1, MAKELONG(0, 200));
+			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,    TBM_SETRANGE, 1, MAKELONG(0, 128));
+			SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR,     TBM_SETRANGE, 1, MAKELONG(0, 128));
+			SendDlgItemMessage(hwndDlg, CTL_PALSAT_TRACKBAR,  TBM_SETRANGE, 1, MAKELONG(0, 200));
+			SendDlgItemMessage(hwndDlg, CTL_PALNOTCH_TRACKBAR,TBM_SETRANGE, 1, MAKELONG(0, 100));
 
 			FCEUI_GetNTSCTH(&ntsctint, &ntschue);
-			sprintf(text, "Hue: %d%%", palhue);
-			SendDlgItemMessage(hwndDlg, STATIC_HUEVALUE, WM_SETTEXT, 0, (LPARAM) text);
+			sprintf(text, "Saturation: %d%%", palsaturation);
+			SendDlgItemMessage(hwndDlg, STATIC_SATVALUE,   WM_SETTEXT, 0, (LPARAM) text);
+            sprintf(text, "Notch: %d%", palnotch);
+            SendDlgItemMessage(hwndDlg, STATIC_NOTCHVALUE, WM_SETTEXT, 0, (LPARAM) text);
 
-			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,   TBM_SETPOS, 1, ntsctint);
-			SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR,    TBM_SETPOS, 1, ntschue);
-			SendDlgItemMessage(hwndDlg, CTL_PALHUE_TRACKBAR, TBM_SETPOS, 1, palhue);
+			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,    TBM_SETPOS, 1, ntsctint);
+			SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR,     TBM_SETPOS, 1, ntschue);
+			SendDlgItemMessage(hwndDlg, CTL_PALSAT_TRACKBAR,  TBM_SETPOS, 1, palsaturation);
+			SendDlgItemMessage(hwndDlg, CTL_PALNOTCH_TRACKBAR,TBM_SETPOS, 1, palnotch);
 
 			if(force_grayscale)
 				CheckDlgButton(hwndDlg, CHECK_PALETTE_GRAYSCALE, BST_CHECKED);
@@ -105,12 +109,15 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			break;
 
 		case WM_HSCROLL:
-			ntsctint = SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,   TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
-			ntschue  = SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR,    TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
-			palhue   = SendDlgItemMessage(hwndDlg, CTL_PALHUE_TRACKBAR, TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
+			ntsctint      = SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,    TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
+			ntschue       = SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR,     TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
+			palsaturation = SendDlgItemMessage(hwndDlg, CTL_PALSAT_TRACKBAR,  TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
+			palnotch      = SendDlgItemMessage(hwndDlg, CTL_PALNOTCH_TRACKBAR,TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
 			FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
-			sprintf(text, "Hue: %d%%", palhue);
-			SendDlgItemMessage(hwndDlg, STATIC_HUEVALUE, WM_SETTEXT, 0, (LPARAM) text);
+			sprintf(text, "Saturation: %d%%", palsaturation);
+			SendDlgItemMessage(hwndDlg, STATIC_SATVALUE, WM_SETTEXT, 0, (LPARAM) text);
+            sprintf(text, "Notch: %d%", palnotch);
+            SendDlgItemMessage(hwndDlg, STATIC_NOTCHVALUE, WM_SETTEXT, 0, (LPARAM) text);
 			break;
 
 		case WM_CLOSE:
@@ -138,10 +145,14 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 						break;
 
 					case BTN_PALETTE_RESET:
-						palhue = 100;
-						SendDlgItemMessage(hwndDlg, CTL_PALHUE_TRACKBAR, TBM_SETPOS, 1, palhue);
-						sprintf(text, "Hue: %d%%", palhue);
-						SendDlgItemMessage(hwndDlg, STATIC_HUEVALUE, WM_SETTEXT, 0, (LPARAM) text);
+						palsaturation = 100;
+						SendDlgItemMessage(hwndDlg, CTL_PALSAT_TRACKBAR, TBM_SETPOS, 1, palsaturation);
+						sprintf(text, "Saturation: %d%%", palsaturation);
+						SendDlgItemMessage(hwndDlg, STATIC_SATVALUE, WM_SETTEXT, 0, (LPARAM) text);
+                        palnotch = 0;
+                        SendDlgItemMessage(hwndDlg, CTL_PALNOTCH_TRACKBAR, TBM_SETPOS, 1, palnotch);
+                        sprintf(text, "Notch: %d%", palnotch);
+                        SendDlgItemMessage(hwndDlg, STATIC_NOTCHVALUE, WM_SETTEXT, 0, (LPARAM) text);
 						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
 						break;
 

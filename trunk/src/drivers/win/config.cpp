@@ -67,6 +67,8 @@ extern int frameSkipAmt;
 extern int32 fps_scale_frameadvance;
 extern bool symbDebugEnabled;
 extern bool symbRegNames;
+extern int palsaturation;
+extern int palnotch;
 
 extern TASEDITOR_CONFIG taseditorConfig;
 extern char* recentProjectsArray[];
@@ -180,6 +182,8 @@ static CFGSTRUCT fceuconfig[] =
 	AC(extrascanlines),
 	AC(overclocked),
 	AC(skip_7bit_overclocking),
+	AC(palsaturation),
+	AC(palnotch),
 
 	NAC("palyo",pal_emulation),
 	NAC("genie",genie),
