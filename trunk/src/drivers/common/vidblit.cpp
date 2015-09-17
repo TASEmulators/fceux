@@ -652,8 +652,8 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 					uint8 deemph = XDBuf[ofs];
 
 					//get combined index from basic value and preemph bitplane
-					index = *src | (deemph<<6);
-					//index += 256; // feos: why?
+					index = (*src&63) | (deemph*64);
+					index += 256;
 
 					src++;
 
