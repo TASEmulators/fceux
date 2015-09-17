@@ -123,7 +123,7 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 				switch(wParam&0xFFFF)
 				{
 					case CHECK_PALETTE_ENABLED:
-						ntsccol_enable ^= true;
+						ntsccol_enable ^= 1;
 						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue); // it recalculates everything, use it for PAL block too!
 						break;
 

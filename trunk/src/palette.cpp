@@ -113,16 +113,16 @@ void FCEUI_SetUserPalette(uint8 *pal, int nEntries)
 	if(!pal)
 	{
 		palette_user_available = false;
-		return;
 	}
+	else
+	{
+		palette_user_available = true;
+		memcpy(palette_user,pal,nEntries*3);
 
-	palette_user_available = true;
-	memcpy(palette_user,pal,nEntries*3);
-
-	//if palette is incomplete, generate deemph entries
-	if(nEntries != 512)
-		ApplyDeemphasisComplete(palette_user);
-
+		//if palette is incomplete, generate deemph entries
+		if(nEntries != 512)
+			ApplyDeemphasisComplete(palette_user);
+	}
 	FCEU_ResetPalette();
 }
 
