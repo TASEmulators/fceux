@@ -145,11 +145,11 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 						break;
 
 					case BTN_PALETTE_RESET:
-						palsaturation = 100;
+						palsaturation = 200;
 						SendDlgItemMessage(hwndDlg, CTL_PALSAT_TRACKBAR, TBM_SETPOS, 1, palsaturation);
 						sprintf(text, "Saturation: %d%%", palsaturation);
 						SendDlgItemMessage(hwndDlg, STATIC_SATVALUE, WM_SETTEXT, 0, (LPARAM) text);
-                        palnotch = 0;
+                        palnotch = 64;
                         SendDlgItemMessage(hwndDlg, CTL_PALNOTCH_TRACKBAR, TBM_SETPOS, 1, palnotch);
                         sprintf(text, "Notch: %d%", palnotch);
                         SendDlgItemMessage(hwndDlg, STATIC_NOTCHVALUE, WM_SETTEXT, 0, (LPARAM) text);

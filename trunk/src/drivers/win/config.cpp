@@ -69,6 +69,8 @@ extern bool symbDebugEnabled;
 extern bool symbRegNames;
 extern int palsaturation;
 extern int palnotch;
+extern bool palmonochrome;
+extern bool palhdtv;
 
 extern TASEDITOR_CONFIG taseditorConfig;
 extern char* recentProjectsArray[];
@@ -184,6 +186,8 @@ static CFGSTRUCT fceuconfig[] =
 	AC(skip_7bit_overclocking),
 	AC(palsaturation),
 	AC(palnotch),
+	AC(palmonochrome),
+	AC(palhdtv),
 
 	NAC("palyo",pal_emulation),
 	NAC("genie",genie),
