@@ -24,7 +24,7 @@ char *FCEUI_GetAboutString() {
 		"CaH4e3, rainwarrior, feos\n"
 		"\n"
 		"Past Contributors:\n"
-		"xhainingx, gocha\n"
+		"xhainingx, gocha, AnS\n"
 		"\n"
 		"FCEUX 2.0:\n"
 		"mz, nitsujrehtona, SP, Ugly Joe,\n"
