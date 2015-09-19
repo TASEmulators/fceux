@@ -36,6 +36,7 @@ void FFCEUX_PPUWrite_Default(uint32 A, uint8 V);
 extern int g_rasterpos;
 extern uint8 PPU[4];
 extern bool DMC_7bit;
+extern bool paldeemphswap;
 
 enum PPUPHASE {
 	PPUPHASE_VBL, PPUPHASE_BG, PPUPHASE_OBJ

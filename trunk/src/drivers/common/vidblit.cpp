@@ -56,6 +56,7 @@ int    palnotch            = 64;
 bool   palhdtv             = 0;
 bool   palmonochrome       = 0;
 bool   palupdate           = 1;
+bool   paldeemphswap       = 0;
 
 static int silt;
 
@@ -88,6 +89,8 @@ static void CalculateShift(uint32 *CBM, int *cshiftr, int *cshiftl)
 
 int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int specfilt, int specfilteropt)
 {
+	paldeemphswap = 0;
+
 	// -Video Modes Tag-
 	if(specfilt == 3) // NTSC 2x
 	{
@@ -187,6 +190,7 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
 	{
 		palrgb = (uint32 *)FCEU_dmalloc((256+512)*16*sizeof(uint32));
 		moire  = (float  *)FCEU_dmalloc(          16*sizeof(float));
+		paldeemphswap = 1;
 	}
 
 	silt = specfilt;	

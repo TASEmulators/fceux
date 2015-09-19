@@ -786,6 +786,8 @@ static DECLFW(B2000) {
 
 static DECLFW(B2001) {
 	FCEUPPU_LineUpdate();
+	if (paldeemphswap)
+		V = (V&0x9F)|((V&0x40)>>1)|((V&0x20)<<1);
 	PPUGenLatch = V;
 	PPU[1] = V;
 	if (V & 0xE0)
