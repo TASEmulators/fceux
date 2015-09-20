@@ -1381,7 +1381,7 @@ const char* Authors[]= {
 	" Lukas Sabota //punkrockguy318", " Soules", " Bryan Cain", " radsaq", " Shinydoofy",
 	"FceuX 2.0 Developers:",
 	" SP", " zeromus", " adelikat", " caH4e3", " qfox",
-	" Luke Gustafson", " _mz", " UncombedCoconut", " DwEdit", " AnS",
+	" Luke Gustafson", " _mz", " UncombedCoconut", " DwEdit", " AnS", "rainwarrior", "feos",
 	"Pre 2.0 Guys:",
 	" Bero", " Xodnizel", " Aaron Oneal", " Joe Nahmias",
 	" Paul Kuliniewicz", " Quietust", " Ben Parnell", " Parasyte & bbitmaster",
