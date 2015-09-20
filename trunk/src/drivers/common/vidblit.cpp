@@ -281,15 +281,18 @@ void SetPaletteBlitToHigh(uint8 *src)
 		}
 
 		//full size deemph palette
-		for(int x=0;x<512;x++)
+		if(palo)
 		{
-			uint32 r=palo[x].r;
-			uint32 g=palo[x].g;
-			uint32 b=palo[x].b;
-			u16 color = (r>>cshiftr[0])<<cshiftl[0];
-			color |= (g>>cshiftr[1])<<cshiftl[1];
-			color |= (b>>cshiftr[2])<<cshiftl[2];
-			palettetranslate[256+x]=color;
+			for(int x=0;x<512;x++)
+			{
+				uint32 r=palo[x].r;
+				uint32 g=palo[x].g;
+				uint32 b=palo[x].b;
+				u16 color = (r>>cshiftr[0])<<cshiftl[0];
+				color |= (g>>cshiftr[1])<<cshiftl[1];
+				color |= (b>>cshiftr[2])<<cshiftl[2];
+				palettetranslate[256+x]=color;
+			}
 		}
 
 		break;
@@ -305,12 +308,15 @@ void SetPaletteBlitToHigh(uint8 *src)
 		}
 
 		//full size deemph palette
-		for(int x=0;x<512;x++)
+		if(palo)
 		{
-			uint32 r=palo[x].r;
-			uint32 g=palo[x].g;
-			uint32 b=palo[x].b;
-			palettetranslate[256+x]=(r<<cshiftl[0])|(g<<cshiftl[1])|(b<<cshiftl[2]);
+			for(int x=0;x<512;x++)
+			{
+				uint32 r=palo[x].r;
+				uint32 g=palo[x].g;
+				uint32 b=palo[x].b;
+				palettetranslate[256+x]=(r<<cshiftl[0])|(g<<cshiftl[1])|(b<<cshiftl[2]);
+			}
 		}
 
 		break;

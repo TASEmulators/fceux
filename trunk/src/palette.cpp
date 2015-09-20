@@ -527,7 +527,7 @@ void WritePalette(void)
 {
 	int x;
 
-	//set the 'unvarying' palettes to low < 128 palette entries
+	//set the 'unvarying' palettes to low < 64 palette entries
 	for(x=0;x<7;x++)
 		FCEUD_SetPalette(x,palette_unvarying[x].r,palette_unvarying[x].g,palette_unvarying[x].b);
 

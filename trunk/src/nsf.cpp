@@ -482,6 +482,7 @@ void DrawNSF(uint8 *XBuf)
 	if(vismode==0) return;
 
 	memset(XBuf,0,256*240);
+	memset(XDBuf,0,256*240);
 
 
 	{
