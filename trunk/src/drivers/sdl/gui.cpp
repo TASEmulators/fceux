@@ -1378,7 +1378,7 @@ void quit ()
 }
 const char* Authors[]= {
 	"Linux/SDL Developers:",
-	" Lukas Sabota", " Soules", " Bryan Cain", " radsaq", " Shinydoofy",
+	" Lukas Sabota //punkrockguy318", " Soules", " Bryan Cain", " radsaq", " Shinydoofy",
 	"FceuX 2.0 Developers:",
 	" SP", " zeromus", " adelikat", " caH4e3", " qfox",
 	" Luke Gustafson", " _mz", " UncombedCoconut", " DwEdit", " AnS",
@@ -1386,6 +1386,8 @@ const char* Authors[]= {
 	" Bero", " Xodnizel", " Aaron Oneal", " Joe Nahmias",
 	" Paul Kuliniewicz", " Quietust", " Ben Parnell", " Parasyte & bbitmaster",
 	" blip & nitsuja",
+	"Included components:",
+	" Mitsutaka Okazaki - YM2413 emulator", " Andrea Mazzoleni - Scale2x/Scale3x scalers", " Gilles Vollant - unzip.c PKZIP fileio",
 	NULL};
 
 void openAbout ()
@@ -1395,7 +1397,7 @@ void openAbout ()
 	gtk_show_about_dialog(GTK_WINDOW(MainWindow),
 		"program-name", "fceuX",
 		"version", FCEU_VERSION_STRING,
-		"copyright", "© 2012 FceuX development team",
+		"copyright", "© 2015 FceuX development team",
 		"license", "GPL-2; See COPYING",
 		//"license-type", GTK_LICENSE_GPL_2_0,
 		"website", "http://fceux.com",
