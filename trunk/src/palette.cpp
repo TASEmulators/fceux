@@ -531,6 +531,12 @@ void WritePalette(void)
 	for(x=0;x<7;x++)
 		FCEUD_SetPalette(x,palette_unvarying[x].r,palette_unvarying[x].g,palette_unvarying[x].b);
 
+	//clear everything else to a deterministic state.
+	//it seems likely that the text rendering on NSF has been broken since the beginning of fceux, depending on palette entries 205,205,205 everywhere
+	//this was just whatever msvc filled malloc with. on non-msvc platforms, there was no backdrop on the rendering.
+	for(x=7;x<256;x++)
+		FCEUD_SetPalette(x,205,205,205);
+
 	if(GameInfo->type==GIT_NSF)
 	{
 		#ifdef _S9XLUA_H
