@@ -127,7 +127,7 @@ else:
     env.Append(CCFLAGS = ["-D_GTK"])
 
   ### Just make every configuration use -ldl, it may be needed for some reason.
-  env.Append(LINKFLAGS = ["-ldl"])
+  env.Append(LIBS = ["-ldl"])
 
   ### Lua platform defines
   ### Applies to all files even though only lua needs it, but should be ok
