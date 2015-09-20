@@ -627,6 +627,18 @@ int main(int argc, char *argv[])
     // update the input devices
 	UpdateInput(g_config);
 
+	// check if opengl is enabled with a scaler and display an error and bail	
+	int opengl;
+	int scaler;
+	g_config->getOption("SDL.OpenGL", &opengl);
+	g_config->getOption("SDL.SpecialFilter", &scaler);
+	if(opengl && scaler)
+	{
+		printf("Scalers are not supported in OpenGL mode.  Terminating.\n");
+		exit(2);
+	}
+
+
 	// check for a .fcm file to convert to .fm2
 	g_config->getOption ("SDL.FCMConvert", &s);
 	g_config->setOption ("SDL.FCMConvert", "");

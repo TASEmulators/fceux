@@ -833,6 +833,15 @@ void resizeGtkWindow()
 void setScaler(GtkWidget* w, gpointer p)
 {
 	int scaler = gtk_combo_box_get_active(GTK_COMBO_BOX(w));
+	int opengl;
+	g_config->getOption("SDL.OpenGL", &opengl);
+	if(opengl && scaler)
+	{
+		FCEUD_PrintError("Scalers not supported in OpenGL mode.");
+		gtk_combo_box_set_active(GTK_COMBO_BOX(w), 0);
+		return;
+	}
+
 	g_config->setOption("SDL.SpecialFilter", scaler);
 	
 	// 1=hq2x 2=Scale2x 3=NTSC2x 4=hq3x  5=Scale3x 6=Prescale2x 7=Prescale3x 8=Prescale4x 9=pal
@@ -890,6 +899,15 @@ int setYscale(GtkWidget* w, gpointer p)
 #ifdef OPENGL
 void setGl(GtkWidget* w, gpointer p)
 {
+	int scaler;
+	int opengl = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w));
+	g_config->getOption("SDL.SpecialFilter", &scaler);
+	if(scaler && opengl)
+	{
+		FCEUD_PrintError("Scalers not supported in OpenGL mode.");
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), 0);
+		return;
+	}
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
 		g_config->setOption("SDL.OpenGL", 1);
 	else
