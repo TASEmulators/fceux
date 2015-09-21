@@ -69,6 +69,7 @@ extern bool symbDebugEnabled;
 extern bool symbRegNames;
 extern int palsaturation;
 extern int palnotch;
+extern int palsharpness;
 extern bool palmonochrome;
 extern bool palhdtv;
 
@@ -186,6 +187,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(skip_7bit_overclocking),
 	AC(palsaturation),
 	AC(palnotch),
+	AC(palsharpness),
 	AC(palmonochrome),
 	AC(palhdtv),
 

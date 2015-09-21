@@ -769,6 +769,9 @@
 #define STATIC_SATVALUE                 1294
 #define CTL_PALNOTCH_TRACKBAR           1295
 #define STATIC_NOTCHVALUE               1296
+#define CTL_PALSHARP_TRACKBAR           1297
+#define IDC_SLIDER1                     1297
+#define STATIC_SHARPVALUE               1298
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1233,7 +1236,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        291
 #define _APS_NEXT_COMMAND_VALUE         40596
-#define _APS_NEXT_CONTROL_VALUE         1294
+#define _APS_NEXT_CONTROL_VALUE         1298
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
