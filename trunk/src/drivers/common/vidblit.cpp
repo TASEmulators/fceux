@@ -23,6 +23,7 @@
 #include "scalebit.h"
 #include "hq2x.h"
 #include "hq3x.h"
+#include "fceu.h"
 
 #include "../../types.h"
 #include "../../palette.h"
@@ -748,6 +749,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 				{
 					ofs = src-XBuf;                  //find out which deemph bitplane value we're on
 					deemph = XDBuf[ofs];
+					int temp = *src;
 					index = (*src&63) | (deemph*64); //get combined index from basic value and preemph bitplane
 					index += 256;
 
@@ -757,7 +759,14 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 					deemph = XDBuf[ofs];
 					newindex = (*src&63) | (deemph*64);
 					newindex += 256;
-					
+
+					if(GameInfo->type==GIT_NSF)
+					{
+						*d++ = palettetranslate[temp];
+						*d++ = palettetranslate[temp];
+						*d++ = palettetranslate[temp];
+					}
+					else
 					for (int xsub = 0; xsub < 3; xsub++)
 					{
 						xabs = x*3 + xsub;
@@ -837,7 +846,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 			switch(Bpp)
 			{
 			case 4:
-				if ( nes_ntsc ) {
+				if ( nes_ntsc && GameInfo->type!=GIT_NSF) {
 					burst_phase ^= 1;
 					nes_ntsc_blit( nes_ntsc, (unsigned char*)src, xr, burst_phase, xr, yr, ntscblit, xr * Bpp * xscale );
 					
