@@ -23,8 +23,8 @@
 #include "scalebit.h"
 #include "hq2x.h"
 #include "hq3x.h"
-#include "fceu.h"
 
+#include "../../fceu.h"
 #include "../../types.h"
 #include "../../palette.h"
 #include "../../utils/memory.h"
