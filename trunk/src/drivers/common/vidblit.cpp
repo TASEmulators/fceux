@@ -41,35 +41,48 @@ uint8 burst_phase = 0;
 
 static uint32 CBM[3];
 static uint32 *palettetranslate=0;
-
-static uint16 *specbuf=NULL;		// 8bpp -> 16bpp, pre hq2x/hq3x
-static uint32 *specbuf32bpp = NULL;	// Buffer to hold output of hq2x/hq3x when converting to 16bpp and 24bpp
 static int backBpp, backshiftr[3], backshiftl[3];
+static int silt;
+static int Bpp;	// BYTES per pixel
+static int highefx;
 //static uint32 backmask[3];
 
+static uint16 *specbuf=NULL;		// 8bpp -> 16bpp, pre hq2x/hq3x
+static uint32 *specbuf32bpp= NULL;	// Buffer to hold output of hq2x/hq3x when converting to 16bpp and 24bpp
 static uint8  *specbuf8bpp = NULL;	// For 2xscale, 3xscale.
 static uint8  *ntscblit    = NULL;	// For nes_ntsc
 static uint32 *prescalebuf = NULL;	// Prescale pointresizes to 2x-4x to allow less blur with hardware acceleration.
-static uint32 *palrgb      = NULL;	// PAL filter buffer for lookup values of RGB with applied moir phases
-static uint32 *palrgb2     = NULL;	// PAL filter buffer for lookup values of blended moir phases
-static float  *moire       = NULL;
-int    palsaturation       = 100;
-int    palnotch            = 100;
-int    palsharpness        = 50;
-bool   palhdtv             = 0;
-bool   palmonochrome       = 0;
-bool   palupdate           = 1;
-bool   paldeemphswap       = 0;
 
-static int silt;
-
-static int Bpp;	// BYTES per pixel
-static int highefx;
+//////////////////////
+// PAL filter start //
+//////////////////////
+#define PAL_PHASES 108			// full vertical subcarrier cycle for 3x resolution (18) * full horizontal cycle (6)
+static uint32 *palrgb  = NULL;	// buffer for lookup values of RGB with applied moir phases
+static uint32 *palrgb2 = NULL;	// buffer for lookup values of blended moir phases
+static float  *moire   = NULL;	// modulated signal
+const  float   phasex  = (float) 5/18*2;
+const  float   phasey  = (float) 1/ 6*2;
+const  float   pi      = 3.14f;
+int    palnotch        = 90;
+int    palsaturation   = 100;
+int    palsharpness    = 50;
+int    palcontrast     = 100;
+int    palbrightness   = 50;
+bool   palupdate       = 1;
+bool   paldeemphswap   = 0;
 
 static int Round(float value)
 {
    return (int) floor(value + 0.5);
 }
+
+static int PAL_LUT(uint32 *buffer, int index, int x, int y)
+{
+	return buffer[index*PAL_PHASES + (x%18) + 18*(y%6)];
+}
+////////////////////
+// PAL filter end //
+////////////////////
 
 static void CalculateShift(uint32 *CBM, int *cshiftr, int *cshiftl)
 {
@@ -191,9 +204,9 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
 	}
 	else if (specfilt == 9)
 	{
-		palrgb     = (uint32 *)FCEU_dmalloc((256+512)*16*sizeof(uint32));
-		palrgb2    = (uint32 *)FCEU_dmalloc((256+512)*16*sizeof(uint32));
-		moire      = (float  *)FCEU_dmalloc(          16*sizeof(float));
+		palrgb     = (uint32 *)FCEU_dmalloc((256+512)*PAL_PHASES*sizeof(uint32));
+		palrgb2    = (uint32 *)FCEU_dmalloc((256+512)*PAL_PHASES*sizeof(uint32));
+		moire      = (float  *)FCEU_dmalloc(          PAL_PHASES*sizeof(float));
 		paldeemphswap = 1;
 	}
 
@@ -466,53 +479,6 @@ u32 ModernDeemphColorMap(u8* src)
 	return color;
 }
 
-int PAL_LUT(uint32 *buffer, int index, int x, int y)
-{
-	int color = 0;
-
-	switch (y&3)
-	{
-	case 0:
-		switch (x&3)
-		{
-			case 0: color = buffer[index*16   ]; break;
-			case 1: color = buffer[index*16+ 1]; break;
-			case 2: color = buffer[index*16+ 2]; break;
-			case 3: color = buffer[index*16+ 3]; break;
-		}
-		break;
-	case 1:
-		switch (x&3)
-		{
-			case 0: color = buffer[index*16+ 4]; break;
-			case 1: color = buffer[index*16+ 5]; break;
-			case 2: color = buffer[index*16+ 6]; break;
-			case 3: color = buffer[index*16+ 7]; break;
-		}
-		break;
-	case 2:
-		switch (x&3)
-		{
-			case 0: color = buffer[index*16+ 8]; break;
-			case 1: color = buffer[index*16+ 9]; break;
-			case 2: color = buffer[index*16+10]; break;
-			case 3: color = buffer[index*16+11]; break;
-		}
-		break;
-	case 3:
-		switch (x&3)
-		{
-			case 0: color = buffer[index*16+12]; break;
-			case 1: color = buffer[index*16+13]; break;
-			case 2: color = buffer[index*16+14]; break;
-			case 3: color = buffer[index*16+15]; break;
-		}
-		break;
-	}
-
-	return color;
-}
-
 void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale, int yscale)
 {
 	int x,y;
@@ -633,94 +599,74 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 	}
 	else if (palrgb)                 // pal moire
 	{
-		// skip usual palette translation, fill lookup array of RGB+moire values per palette update, and send directly to DX dest.
-		// hardcoded resolution is 768x240, makes moire mask cleaner, even though PAL consoles generate it at native res.
-		// source of this whole idea: http://forum.emu-russia.net/viewtopic.php?p=9410#p9410
+		// skip usual palette translation, fill lookup array of RGB+moire values per palette update, and send directly to DX dest
+		// written by feos in 2015, credits to HardWareMan and r57shell
 		if (palupdate)
 		{
 			uint8 *source = (uint8 *)palettetranslate;
 			int16 R,G,B;
 			float Y,U,V;
+			float alpha;
 			float sat = (float) palsaturation/100;
-			bool hdtv = palhdtv;
-			bool monochrome = palmonochrome;
+			float contrast = (float) palcontrast/100;
+			int bright = palbrightness - 50;
 			int notch = palnotch;
 			int unnotch = 100 - palnotch;
-			int mixR[16], mixG[16], mixB[16];
+			int mixR[PAL_PHASES], mixG[PAL_PHASES], mixB[PAL_PHASES];
 
 			for (int i=0; i<256+512; i++)
 			{
+				// fetch color
 				R = source[i*4  ];
 				G = source[i*4+1];
 				B = source[i*4+2];
 			
-				if (hdtv) // HDTV BT.709
-				{
-					Y =  0.2126 *R + 0.7152 *G + 0.0722 *B; // Y'
-					U = -0.09991*R - 0.33609*G + 0.436  *B; // B-Y
-					V =  0.615  *R - 0.55861*G - 0.05639*B; // R-Y
-				}
-				else // SDTV BT.601
-				{
-					Y =  0.299  *R + 0.587  *G + 0.114  *B;
-					U = -0.14713*R - 0.28886*G + 0.436  *B;
-					V =  0.615  *R - 0.51499*G - 0.10001*B;
-				}
+				// rgb -> yuv, sdtv bt.601
+				Y =  0.299  *R + 0.587  *G + 0.114  *B;
+				U = -0.14713*R - 0.28886*G + 0.436  *B;
+				V =  0.615  *R - 0.51499*G - 0.10001*B;
 
-				if (Y == 0) Y = 1;
-				if (monochrome) sat = 0;
-
-				// WARNING: phase order is magical!
-				moire[0]  = (U == 0 && V == 0) ? 1 : (Y + V)/Y;
-				moire[1]  = (U == 0 && V == 0) ? 1 : (Y + U)/Y;
-				moire[2]  = (U == 0 && V == 0) ? 1 : (Y - V)/Y;
-				moire[3]  = (U == 0 && V == 0) ? 1 : (Y - U)/Y;
-				moire[4]  = (U == 0 && V == 0) ? 1 : (Y - V)/Y;
-				moire[5]  = (U == 0 && V == 0) ? 1 : (Y + U)/Y;
-				moire[6]  = (U == 0 && V == 0) ? 1 : (Y + V)/Y;
-				moire[7]  = (U == 0 && V == 0) ? 1 : (Y - U)/Y;
-				moire[8]  = (U == 0 && V == 0) ? 1 : (Y - V)/Y;
-				moire[9]  = (U == 0 && V == 0) ? 1 : (Y - U)/Y;
-				moire[10] = (U == 0 && V == 0) ? 1 : (Y + V)/Y;
-				moire[11] = (U == 0 && V == 0) ? 1 : (Y + U)/Y;
-				moire[12] = (U == 0 && V == 0) ? 1 : (Y + V)/Y;
-				moire[13] = (U == 0 && V == 0) ? 1 : (Y - U)/Y;
-				moire[14] = (U == 0 && V == 0) ? 1 : (Y - V)/Y;
-				moire[15] = (U == 0 && V == 0) ? 1 : (Y + U)/Y;
-				
-				for (int j=0; j<16; j++)
+				// all variants of this color
+				for (int x=0; x<18; x++)
 				{
-					if (hdtv) // HDTV BT.709
+					for (y=0; y<6; y++)
 					{
-						R = Round((Y                 + 1.28033*V*sat)*moire[j]);
-						G = Round((Y - 0.21482*U*sat - 0.38059*V*sat)*moire[j]);
-						B = Round((Y + 2.12798*U*sat                )*moire[j]);
+						alpha = (x*phasex + y*phasey)*pi;                // 2*pi*freq*t
+						if (y%2 == 0) alpha = -alpha;                    // phase alternating line!
+						moire[x+y*18] = Y + U*sin(alpha) + V*cos(alpha); // modulated composite signal
 					}
-					else // SDTV BT.601
-					{
-						R = Round((Y                 + 1.13983*V*sat)*moire[j]);
-						G = Round((Y - 0.39465*U*sat - 0.58060*V*sat)*moire[j]);
-						B = Round((Y + 2.03211*U*sat                )*moire[j]);
-					}
+				}
 
+				for (int j=0; j<PAL_PHASES; j++)
+				{
+					// yuv -> rgb, sdtv bt.601
+					R = Round(moire[j]*contrast+bright                 + 1.13983*V*sat);
+					G = Round(moire[j]*contrast+bright - 0.39465*U*sat - 0.58060*V*sat);
+					B = Round(moire[j]*contrast+bright + 2.03211*U*sat                );
+
+					// clamp
 					if (R > 0xff) R = 0xff; else if (R < 0) R = 0;
 					if (G > 0xff) G = 0xff; else if (G < 0) G = 0;
 					if (B > 0xff) B = 0xff; else if (B < 0) B = 0;
 
+					// store colors to mix
 					mixR[j] = R;
 					mixG[j] = G;
 					mixB[j] = B;
 
-					palrgb[i*16+j] = (B<<16)|(G<<8)|R;
+					// moirecolor
+					palrgb[i*PAL_PHASES+j] = (B<<16)|(G<<8)|R;
 				}
 
-				for (int j=0; j<16; j++)
+				for (int j=0; j<PAL_PHASES; j++)
 				{
-					R = (mixR[j]*unnotch + (mixR[0]+mixR[1]+mixR[2]+mixR[3])/4*notch)/100;
-					G = (mixG[j]*unnotch + (mixG[0]+mixG[1]+mixG[2]+mixG[3])/4*notch)/100;
-					B = (mixB[j]*unnotch + (mixB[0]+mixB[1]+mixB[2]+mixB[3])/4*notch)/100;
+					// mix to simulate notch
+					R = (mixR[j]*unnotch + (mixR[0]+mixR[1]+mixR[2]+mixR[3]+mixR[4]+mixR[5])/6*notch)/100;
+					G = (mixG[j]*unnotch + (mixG[0]+mixG[1]+mixG[2]+mixG[3]+mixG[4]+mixG[5])/6*notch)/100;
+					B = (mixB[j]*unnotch + (mixB[0]+mixB[1]+mixB[2]+mixB[3]+mixB[4]+mixB[5])/6*notch)/100;
 
-					palrgb2[i*16+j] = (B<<16)|(G<<8)|R;
+					// notchcolor
+					palrgb2[i*PAL_PHASES+j] = (B<<16)|(G<<8)|R;
 				}
 			}
 			palupdate = 0;
@@ -730,12 +676,12 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 		{
 			uint32 *d = (uint32 *)dest;
 			uint8  xsub      = 0;
-			uint8  xabs      = 0;
+			uint16 xabs      = 0;
 			uint32 index     = 0;
 			uint32 lastindex = 0;
 			uint32 newindex  = 0;
-			int sharp = palsharpness;
-			int unsharp = 100 - palsharpness;
+			int sharp   = 50 + palsharpness;
+			int unsharp = 50 - palsharpness;
 			int rmask   = 0xff0000;
 			int gmask   = 0x00ff00;
 			int bmask   = 0x0000ff;
@@ -767,62 +713,68 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 						*d++ = palettetranslate[temp];
 					}
 					else
-					for (int xsub = 0; xsub < 3; xsub++)
 					{
-						xabs = x*3 + xsub;
-						moirecolor = PAL_LUT(palrgb,  index, xabs, y);
-						notchcolor = PAL_LUT(palrgb2, index, xabs, y);
-
-						// | | |*|*| | |
-						if (index !=  newindex && xsub == 2 ||
-							index != lastindex && xsub == 0)
+						for (xsub = 0; xsub < 3; xsub++)
 						{
-							color = moirecolor;
-						}
-						// | |*| | |*| |
-						else if (index !=  newindex && xsub == 1 ||
-							     index != lastindex && xsub == 1)
-						{
-							r = ((moirecolor&rmask)*70 + (notchcolor&rmask)*30)/100;
-							g = ((moirecolor&gmask)*70 + (notchcolor&gmask)*30)/100;
-							b = ((moirecolor&bmask)*70 + (notchcolor&bmask)*30)/100;
-							color = r&rmask | g&gmask | b&bmask;
-						}
-						// |*| | | | |*|
-						else if (index !=  newindex && xsub == 0 ||
-							     index != lastindex && xsub == 2)
-						{
-							r = ((moirecolor&rmask)*30 + (notchcolor&rmask)*70)/100;
-							g = ((moirecolor&gmask)*30 + (notchcolor&gmask)*70)/100;
-							b = ((moirecolor&bmask)*30 + (notchcolor&bmask)*70)/100;
-							color = r&rmask | g&gmask | b&bmask;
-						}
-						else
-						{
-							color = notchcolor;
-						}
+							xabs = x*3 + xsub;
+							moirecolor = PAL_LUT(palrgb,  index, xabs, y);							
+							notchcolor = PAL_LUT(palrgb2, index, xabs, y);
 
-						if (color != lastcolor && sharp < 100)
-						{
-							r = ((color&rmask)*sharp + (lastcolor&rmask)*unsharp)/100;
-							g = ((color&gmask)*sharp + (lastcolor&gmask)*unsharp)/100;
-							b = ((color&bmask)*sharp + (lastcolor&bmask)*unsharp)/100;
-							finalcolor = r&rmask | g&gmask | b&bmask;
+							// | | |*|*| | |
+							if (index !=  newindex && xsub == 2 ||
+								index != lastindex && xsub == 0)
+							{
+								r = ((moirecolor&rmask)*90 + (notchcolor&rmask)*10)/100;
+								g = ((moirecolor&gmask)*90 + (notchcolor&gmask)*10)/100;
+								b = ((moirecolor&bmask)*90 + (notchcolor&bmask)*10)/100;
+								color = r&rmask | g&gmask | b&bmask;
+							}
+							// | |*| | |*| |
+							else if (index !=  newindex && xsub == 1 ||
+									 index != lastindex && xsub == 1)
+							{
+								r = ((moirecolor&rmask)*60 + (notchcolor&rmask)*40)/100;
+								g = ((moirecolor&gmask)*60 + (notchcolor&gmask)*40)/100;
+								b = ((moirecolor&bmask)*60 + (notchcolor&bmask)*40)/100;
+								color = r&rmask | g&gmask | b&bmask;
+							}
+							// |*| | | | |*|
+							else if (index !=  newindex && xsub == 0 ||
+									 index != lastindex && xsub == 2)
+							{
+								r = ((moirecolor&rmask)*30 + (notchcolor&rmask)*70)/100;
+								g = ((moirecolor&gmask)*30 + (notchcolor&gmask)*70)/100;
+								b = ((moirecolor&bmask)*30 + (notchcolor&bmask)*70)/100;
+								color = r&rmask | g&gmask | b&bmask;
+							}
+							else
+							{
+								color = notchcolor;
+							}
+							
+							if (color != lastcolor && sharp < 100)
+							{
+								r = ((color&rmask)*sharp + (lastcolor&rmask)*unsharp)/100;
+								g = ((color&gmask)*sharp + (lastcolor&gmask)*unsharp)/100;
+								b = ((color&bmask)*sharp + (lastcolor&bmask)*unsharp)/100;
+								finalcolor = r&rmask | g&gmask | b&bmask;
 
-							r = ((lastcolor&rmask)*sharp + (color&rmask)*unsharp)/100;
-							g = ((lastcolor&gmask)*sharp + (color&gmask)*unsharp)/100;
-							b = ((lastcolor&bmask)*sharp + (color&bmask)*unsharp)/100;
-							lastcolor = r&rmask | g&gmask | b&bmask;
+								r = ((lastcolor&rmask)*sharp + (color&rmask)*unsharp)/100;
+								g = ((lastcolor&gmask)*sharp + (color&gmask)*unsharp)/100;
+								b = ((lastcolor&bmask)*sharp + (color&bmask)*unsharp)/100;
+								lastcolor = r&rmask | g&gmask | b&bmask;
 
-							*d-- = lastcolor;
-							d++;
+								*d-- = lastcolor;
+								d++;
+							}
+							else
+								finalcolor = color;
+						
+							lastcolor = color;
+							*d++ = finalcolor;
 						}
-						else
-							finalcolor = color;
-
-						lastcolor = *d++ = finalcolor;
+						lastindex = index;
 					}
-					lastindex = index;
 				}
 			}
 
