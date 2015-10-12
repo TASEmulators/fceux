@@ -498,9 +498,9 @@ void FCEU_ResetPalette(void)
 
 static void ChoosePalette(void)
 {
-	//if it's an NSF, there's NO palette? that's right, only the 'unvarying' palette will get used
+	//NSF uses a fixed palette always:
 	if(GameInfo->type==GIT_NSF)
-		palo = NULL;
+		palo = default_palette[0];
 	//user palette takes priority over others
 	else if(palette_user_available)
 		palo = palette_user;
@@ -537,19 +537,13 @@ void WritePalette(void)
 	for(x=7;x<256;x++)
 		FCEUD_SetPalette(x,205,205,205);
 
-	if(GameInfo->type==GIT_NSF)
-	{
-		#ifdef _S9XLUA_H
-		FCEU_LuaUpdatePalette();
-		#endif
-	}
-	else
-	{
-		//sets palette entries >= 128 with the 64 selected main colors
-		for(x=0;x<64;x++)
-			FCEUD_SetPalette(128+x,palo[x].r,palo[x].g,palo[x].b);
-		SetNESDeemph_OldHacky(lastd,1);
-	}
+	//sets palette entries >= 128 with the 64 selected main colors
+	for(x=0;x<64;x++)
+		FCEUD_SetPalette(128+x,palo[x].r,palo[x].g,palo[x].b);
+	SetNESDeemph_OldHacky(lastd,1);
+	#ifdef _S9XLUA_H
+	FCEU_LuaUpdatePalette();
+	#endif
 }
 
 void FCEUI_GetNTSCTH(int *tint, int *hue)
