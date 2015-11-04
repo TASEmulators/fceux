@@ -9,6 +9,9 @@ void FCEUPPU_SetVideoSystem(int w);
 extern void (*PPU_hook)(uint32 A);
 extern void (*GameHBIRQHook)(void), (*GameHBIRQHook2)(void);
 
+int newppu_get_scanline();
+int newppu_get_dot();
+
 /* For cart.c and banksw.h, mostly */
 extern uint8 NTARAM[0x800], *vnapage[4];
 extern uint8 PPUNTARAM;

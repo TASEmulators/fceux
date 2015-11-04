@@ -276,6 +276,9 @@ struct PPUREGS {
 	}
 } ppur;
 
+int newppu_get_scanline() { return ppur.status.sl; }
+int newppu_get_dot() { return ppur.status.cycle; }
+
 static void makeppulut(void) {
 	int x;
 	int y;
@@ -2024,12 +2027,20 @@ int FCEUX_PPU_Loop(int skip) {
 
 		ppur.status.sl = 241;	//for sprite reads
 
-		runppu(delay);			//X6502_Run(12);
+		//formerly: runppu(delay);
+		for(int dot=0;dot<delay;dot++)
+			runppu(1);
+
 		if (VBlankON) TriggerNMI();
-		if (PAL)
-			runppu(70 * (kLineTime) - delay);
-		else
-			runppu(20 * (kLineTime) - delay);
+		int sltodo = PAL?70:20;
+		
+		//formerly: runppu(20 * (kLineTime) - delay);
+		for(int S=0;S<sltodo;S++)
+		{
+			for(int dot=(S==0?delay:0);dot<kLineTime;dot++)
+				runppu(1);
+			ppur.status.sl++;
+		}
 
 		//this seems to run just before the dummy scanline begins
 		PPU_status = 0;

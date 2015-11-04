@@ -26,6 +26,7 @@
 #include "../../fceu.h"
 #include "../../debug.h"
 #include "../../nsf.h"
+#include "../../ppu.h"
 #include "../../cart.h"
 #include "../../ines.h"
 #include "../../asm.h"
@@ -891,6 +892,13 @@ void UpdateDebugger(bool jump_to_pc)
 		sprintf(str, "%d", scanline);
 		sprintf(str2, "%d", ppupixel);
 	}
+
+	if(newppu)
+	{
+		sprintf(str,"%d",newppu_get_scanline());
+		sprintf(str2,"%d",newppu_get_dot());
+	}
+
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_SLINE, str);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_PPUPIXEL, str2);
 
