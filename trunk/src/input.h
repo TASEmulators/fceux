@@ -242,6 +242,7 @@ enum EMUCMD
 	//-----------------------------
 	//keep adding these in order of newness or else the hotkey binding configs will get messed up...
 	EMUCMD_FPS_DISPLAY_TOGGLE,
+	EMUCMD_TOOL_DEBUGSTEPINTO,
 
 	EMUCMD_MAX
 };

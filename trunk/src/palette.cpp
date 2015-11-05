@@ -118,9 +118,9 @@ static void ApplyDeemphasisNTSC(int entry, u8& r, u8& g, u8& b)
 	{
 		static float const phases [0x10 + 3] = {
 			-1.0f, -0.866025f, -0.5f, 0.0f,  0.5f,  0.866025f,
-				1.0f,  0.866025f,  0.5f, 0.0f, -0.5f, -0.866025f,
+			 1.0f,  0.866025f,  0.5f, 0.0f, -0.5f, -0.866025f,
 			-1.0f, -0.866025f, -0.5f, 0.0f,  0.5f,  0.866025f,
-				1.0f
+			 1.0f
 		};
 		#define TO_ANGLE_SIN( color )   phases [color]
 		#define TO_ANGLE_COS( color )   phases [(color) + 3]
@@ -256,7 +256,7 @@ static void ApplyDeemphasisClassic(int entry, u8& r, u8& g, u8& b)
 	//DEEMPH BITS MAY BE ORDERED WRONG. PLEASE CHECK
 
 	static const float rtmul[] = { 1.239f, 0.794f, 1.019f, 0.905f, 1.023f, 0.741f, 0.75f };
-	static const float gtmul[] = { 0.915f, 1.086f, 0.98f, 1.026f, 0.908f, 0.987f, 0.75f };
+	static const float gtmul[] = { 0.915f, 1.086f, 0.98f,  1.026f, 0.908f, 0.987f, 0.75f };
 	static const float btmul[] = { 0.743f, 0.882f, 0.653f, 1.277f, 0.979f, 0.101f, 0.75f };
 
 	int deemph_bits = entry >> 6;

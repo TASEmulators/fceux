@@ -2254,6 +2254,13 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 extern void iNESGI(GI h);
 
+void DoDebuggerStepInto()
+{
+	if (!hDebug)
+		return;
+	DebuggerCallB(hDebug, WM_COMMAND, IDC_DEBUGGER_STEP_IN, 0);
+}
+
 void DoPatcher(int address, HWND hParent)
 {
 	iapoffset = address;
