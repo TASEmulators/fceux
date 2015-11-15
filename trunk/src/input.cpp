@@ -107,6 +107,9 @@ static bool FSAttached = false;
 JOYPORT joyports[2] = { JOYPORT(0), JOYPORT(1) };
 FCPORT portFC;
 
+FILE* DumpInputFile;
+FILE* PlayInputFile;
+
 static DECLFR(JPRead)
 {
 	lagFlag = 0;
@@ -138,6 +141,12 @@ static DECLFR(JPRead)
 			microphone = false;
 		}
 	}
+
+	if(PlayInputFile)
+		ret = fgetc(PlayInputFile);
+
+	if(DumpInputFile)
+		fputc(ret,DumpInputFile);
 
 	ret|=X.DB&0xC0;
 

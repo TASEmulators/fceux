@@ -8,6 +8,10 @@
 
 void LagCounterToggle(void);
 
+extern FILE* PlayInputFile;
+extern FILE* DumpInputFile;
+
+
 class MovieRecord;
 
 //MBG TODO - COMBINE THESE INPUTC AND INPUTCFC

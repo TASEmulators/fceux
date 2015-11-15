@@ -636,6 +636,15 @@ int main(int argc,char *argv[])
 	// Parse the commandline arguments
 	t = ParseArgies(argc, argv);
 
+	if(PlayInput)
+		PlayInputFile = fopen(PlayInput, "rb");
+	if(DumpInput)
+		DumpInputFile = fopen(DumpInput, "wb");
+
+	extern int disableBatteryLoading;
+	if(PlayInput || DumpInput)
+		disableBatteryLoading = 1;
+
 	int saved_pal_setting = !!pal_emulation;
 
 	if (ConfigToLoad)
