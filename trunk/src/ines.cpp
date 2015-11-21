@@ -716,8 +716,9 @@ static BMAPPINGLocal bmap[] = {
 //  just redefine these numbers to any others which isn't used before
 //  see the ines-correct.h files for the ROMs CHR list
 
-	{"",					256, UNLOneBus_Init},
-	{"",					257, UNLPEC586Init},
+	{"ONE-BUS Systems",		256, UNLOneBus_Init},
+	{"PEC-586 Computer",	257, UNLPEC586Init},
+	{"158B Prot Board",		258, UNL158B_Init},
 
 	{"",					0, NULL}
 };

@@ -265,5 +265,6 @@
 	{0xac7e98fb,	257|0x1000,-1}, /* PEC-586 Chinese No Tape Out */
 	{0x8d51a23b,	257|0x1000,-1}, /* [KeWang] Chao Ji Wu Bi Han Ka (C) V1 */
 	{0x25c76773,	257|0x1000,-1}, /* [KeWang] Chao Ji Wu Bi Han Ka (C) V2 */
+	{0x1ca9c322,	258|0x1000,-1}, /* Blood Of Jurassic (GD-98)(Unl) */
 
 	{0x00000000,	  -1,	   -1}
