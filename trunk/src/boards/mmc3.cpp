@@ -1039,8 +1039,8 @@ static DECLFW(Mapper196Write) {
 }
 
 static DECLFW(Mapper196WriteLo) {
-	EXPREGS[0] = 1;
-	EXPREGS[1] = (V & 0xf) | (V >> 4);
+	EXPREGS[0] = 1;						// hacky
+	EXPREGS[1] = (V & 0xf) | (V >> 4);	// this is the same as 189 mapper, but with addr permutations
 	FixMMC3PRG(MMC3_cmd);
 }
 

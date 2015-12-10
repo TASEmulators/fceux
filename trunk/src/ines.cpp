@@ -719,6 +719,7 @@ static BMAPPINGLocal bmap[] = {
 	{"ONE-BUS Systems",		256, UNLOneBus_Init},
 	{"PEC-586 Computer",	257, UNLPEC586Init},
 	{"158B Prot Board",		258, UNL158B_Init},
+	{"F-15 MMC3 Based",		259, BMCF15_Init},
 
 	{"",					0, NULL}
 };
