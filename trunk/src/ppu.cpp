@@ -445,8 +445,10 @@ int GetCHRAddress(int A) {
 				if (!(cdloggervdata[addr] & 1))	\
 				{ \
 					cdloggervdata[addr] |= 1; \
-					if (!(cdloggervdata[addr] & 2)) undefinedvromcount--; \
-					rendercount++; \
+					if(cdloggerVideoDataSize) { \
+						if (!(cdloggervdata[addr] & 2)) undefinedvromcount--; \
+						rendercount++; \
+					} \
 				} \
 			} \
 		} \
@@ -669,7 +671,7 @@ static DECLFR(A2007) {
 		if (!DummyRead && (LogAddress != -1)) {
 			if (!(cdloggervdata[LogAddress] & 2)) {
 				cdloggervdata[LogAddress] |= 2;
-				if (!(cdloggervdata[LogAddress] & 1)) undefinedvromcount--;
+				if ((!(cdloggervdata[LogAddress] & 1)) && cdloggerVideoDataSize) undefinedvromcount--;
 				vromreadcount++;
 			}
 		} else
@@ -888,10 +890,8 @@ static DECLFW(B2007) {
 	uint32 tmp = RefreshAddr & 0x3FFF;
 
 	if (debug_loggingCD) {
-		if(tmp < 0x2000) {
+		if(tmp < 0x2000)
 			cdloggervdata[tmp] = 0;
-			undefinedvromcount++;
-		}
 	}
 
 	if (newppu) {
