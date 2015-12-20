@@ -431,7 +431,8 @@ int GetCHRAddress(int A) {
 		int result = &VPage[A >> 10][A] - CHRptr[0];
 		if ((result >= 0) && (result < (int)cdloggerVideoDataSize))
 			return result;
-	}
+	} else
+		if(A < 0x2000) return A;
 	return -1;
 }
 
@@ -885,6 +886,13 @@ static DECLFW(B2006) {
 
 static DECLFW(B2007) {
 	uint32 tmp = RefreshAddr & 0x3FFF;
+
+	if (debug_loggingCD) {
+		if(tmp < 0x2000) {
+			cdloggervdata[tmp] = 0;
+			undefinedvromcount++;
+		}
+	}
 
 	if (newppu) {
 		PPUGenLatch = V;

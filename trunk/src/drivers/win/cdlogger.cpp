@@ -572,8 +572,10 @@ void InitCDLog()
 	if(!CHRram[0] || (CHRptr[0] == PRGptr[0])) {	// Some kind of workaround for my OneBus VRAM hack, will remove it if I find another solution for that
 		cdloggerVideoDataSize = CHRsize[0];
 		cdloggervdata = (unsigned char*)malloc(cdloggerVideoDataSize);
-	} else
+	} else {
 		cdloggerVideoDataSize = 0;
+		cdloggervdata = (unsigned char*)malloc(8192);
+	}
 }
 
 void ResetCDLog()
@@ -581,10 +583,12 @@ void ResetCDLog()
 	codecount = datacount = rendercount = vromreadcount = 0;
 	undefinedcount = cdloggerdataSize;
 	ZeroMemory(cdloggerdata, cdloggerdataSize);
-	if(cdloggerVideoDataSize != 0)
-	{
+	if(cdloggerVideoDataSize != 0) {
 		undefinedvromcount = cdloggerVideoDataSize;
 		ZeroMemory(cdloggervdata, cdloggerVideoDataSize);
+	} else {
+		undefinedvromcount = 8192;
+		ZeroMemory(cdloggervdata, 8192);
 	}
 }
 

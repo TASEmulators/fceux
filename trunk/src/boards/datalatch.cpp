@@ -93,7 +93,7 @@ static DECLFW(NROMWrite) {
 
 static void NROMPower(void) {
 	setprg8r(0x10, 0x6000, 0);	// Famili BASIC (v3.0) need it (uses only 4KB), FP-BASIC uses 8KB
-	setprg16(0x8000, 0);
+	setprg16(0x8000, ~1);
 	setprg16(0xC000, ~0);
 	setchr8(0);
 
