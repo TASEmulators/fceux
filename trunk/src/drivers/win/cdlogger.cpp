@@ -554,13 +554,13 @@ void FreeCDLog()
 	if (cdloggerdata)
 	{
 		free(cdloggerdata);
-		cdloggerdata = 0;
+		cdloggerdata = NULL;
 		cdloggerdataSize = 0;
 	}
 	if (cdloggervdata)
 	{
 		free(cdloggervdata);
-		cdloggervdata = 0;
+		cdloggervdata = NULL;
 		cdloggerVideoDataSize = 0;
 	}
 }

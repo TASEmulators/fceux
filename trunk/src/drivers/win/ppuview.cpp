@@ -20,6 +20,7 @@
 
 #include "common.h"
 #include "ppuview.h"
+#include "../../debug.h"
 #include "../../palette.h"
 #include "../../fceu.h"
 #include "../../cart.h"
@@ -117,7 +118,7 @@ void DrawPatternTable(uint8 *bitmap, uint8 *table, uint8 *log, uint8 pal)
 					chr1 = table[index + 8];
 					logs = log[index] & log[index + 8];
 	                tmp = 7;
-					shift=(PPUView_maskUnusedGraphics /*&& cdloggerVideoDataSize*/ && (((logs & 3) != 0) == PPUView_invertTheMask))?3:0;
+					shift=(PPUView_maskUnusedGraphics && debug_loggingCD && (((logs & 3) != 0) == PPUView_invertTheMask))?3:0;
 					for (x = 0; x < 8; x++)
 					{
 						p  =  (chr0 >> tmp) & 1;
@@ -157,19 +158,20 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 		{
             chrcache0[i] = VPage[i>>10][i];
             chrcache1[i] = VPage[x>>10][x];
-			if (cdloggerVideoDataSize)
-			{
-				int addr;
-				addr = &VPage[i >> 10][i] - CHRptr[0];
-				if ((addr >= 0) && (addr < (int)cdloggerVideoDataSize))
-					logcache0[i] = cdloggervdata[addr];
-				addr = &VPage[x >> 10][x] - CHRptr[0];
-				if ((addr >= 0) && (addr < (int)cdloggerVideoDataSize))
-					logcache1[i] = cdloggervdata[addr];
-			} else
-			{
-				logcache0[i] = cdloggervdata[i];
-				logcache1[i] = cdloggervdata[x];
+			if (debug_loggingCD) {
+				if (cdloggerVideoDataSize)
+				{
+					int addr;
+					addr = &VPage[i >> 10][i] - CHRptr[0];
+					if ((addr >= 0) && (addr < (int)cdloggerVideoDataSize))
+						logcache0[i] = cdloggervdata[addr];
+					addr = &VPage[x >> 10][x] - CHRptr[0];
+					if ((addr >= 0) && (addr < (int)cdloggerVideoDataSize))
+						logcache1[i] = cdloggervdata[addr];
+				} else {
+					logcache0[i] = cdloggervdata[i];
+					logcache1[i] = cdloggervdata[x];
+				}
 			}
         }
     }

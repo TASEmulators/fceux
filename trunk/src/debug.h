@@ -117,8 +117,6 @@ extern void IncrementInstructionsCounters();
 extern uint8 *vnapage[4],*VPage[8];
 extern uint8 PPU[4],PALRAM[0x20],SPRAM[0x100],VRAMBuffer,PPUGenLatch,XOffset;
 extern uint32 FCEUPPU_PeekAddress();
-
-extern int debug_loggingCD;
 extern int numWPs;
 
 ///encapsulates the operational state of the debugger core
