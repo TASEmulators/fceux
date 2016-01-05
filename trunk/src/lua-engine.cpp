@@ -4066,13 +4066,17 @@ void LuaDrawTextTransWH(const char *str, size_t l, int &x, int y, uint32 color, 
 					gui_drawpixel_internal(x+x2, y+y2, backcolor);
 			}
 		}
-		/*
-		// shadows :P
-		if (diffy >= 7) for(int x2 = 0; x2 < wid; x2++)
-			gui_drawpixel_internal(x+x2, y+7, LUA_BUILD_PIXEL(defaultAlpha, 0, 0, 0));
-		if (*str == '\0' || *str == '\n') for(int y2 = 0; y2 < diffy; y2++)
-			gui_drawpixel_internal(x+wid, y+y2, LUA_BUILD_PIXEL(defaultAlpha, 0, 0, 0));
-		*/
+		
+		// halo
+		if(diffy >= 7)
+			for(int x2 = -1; x2 < wid; x2++)
+			{
+				gui_drawpixel_internal(x+x2, y-1, backcolor);
+				gui_drawpixel_internal(x+x2, y+7, backcolor);
+			}
+		if(x == origX)
+			for(int y2 = 0; y2 < diffy; y2++)
+				gui_drawpixel_internal(x-1, y+y2, backcolor);
 
 		x += wid;
 		len--;
