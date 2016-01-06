@@ -526,10 +526,10 @@ void openHotkeyConfig()
     int keycode;
     for(int i=0; i<HK_MAX; i++)
     {
-        const char* optionName = (prefix + HotkeyStrings[i]).c_str();
-        g_config->getOption(optionName, &keycode);
+        std::string optionName = prefix + HotkeyStrings[i];
+        g_config->getOption(optionName.c_str(), &keycode);
         gtk_tree_store_set(hotkey_store, &iter, 
-                COMMAND_COLUMN, optionName,
+                COMMAND_COLUMN, optionName.c_str(),
                 KEY_COLUMN,
 #if SDL_VERSION_ATLEAST(2, 0, 0)                                                    
 				SDL_GetKeyName(keycode),
