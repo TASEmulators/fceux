@@ -1482,9 +1482,9 @@ void recordMovie()
 {
 	if(isloaded)
 	{
-		char* movie_fname = const_cast<char*>(FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str());
-		FCEUI_printf("Recording movie to %s\n", movie_fname);
-		FCEUI_SaveMovie(movie_fname, MOVIE_FLAG_NONE, L"");
+		std::string name = FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0);
+		FCEUI_printf("Recording movie to %s\n", name.c_str());
+		FCEUI_SaveMovie(name.c_str(), MOVIE_FLAG_NONE, L"");
 	}
     
 	return;
@@ -1523,7 +1523,6 @@ void recordMovieAs ()
 		fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		if (!fname.size())
 			return; // no filename selected, quit the whole thing
-	  char* movie_fname = const_cast<char*>(FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str());
 		
 		std::string s = GetUserText("Author name");
 		std::wstring author(s.begin(), s.end());
