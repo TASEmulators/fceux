@@ -576,23 +576,23 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 
 		if (Bpp == 4) // are other modes really needed?
 		{
-			int mult = silt - 4; // magic assuming prescales are silt >= 6
 			uint32 *s = prescalebuf;
 			uint32 *d = (uint32 *)destbackup; // use 32-bit pointers ftw
+			int subpixel;
 
 			for (y=0; y<yr*yscale; y++)
 			{
+				int back = xr*(y%yscale>0); // bool as multiplier
 				for (x=0; x<xr; x++)
 				{
-					for (int subpixel=1; subpixel<=mult; subpixel++)
+					for (subpixel=0; subpixel<xscale; subpixel++)
 					{
-						*d++ = *s++;
-						if (subpixel < mult)
-							s--; // repeat subpixel
+						*d++ = *(s-back);
 					}
+					s++;
 				}
-				if (x == 256 && (y+1)%mult != 0)
-					s -= 256; // repeat scanline
+				if (back)
+					s -= xr;
 			}
 		}
 		return;
