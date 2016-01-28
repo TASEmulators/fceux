@@ -338,6 +338,7 @@
     <ClCompile Include="..\src\boards\mmc2and4.cpp" />
     <ClCompile Include="..\src\boards\onebus.cpp" />
     <ClCompile Include="..\src\boards\pec-586.cpp" />
+    <ClCompile Include="..\src\boards\rt-01.cpp" />
     <ClCompile Include="..\src\boards\sa-9602b.cpp" />
     <ClCompile Include="..\src\boards\sb-2000.cpp" />
     <ClCompile Include="..\src\boards\transformer.cpp" />
