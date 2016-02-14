@@ -371,6 +371,7 @@ static BMAPPING bmap[] = {
 	{ "KS7010", UNLKS7010_Init, 0 },
 	{ "KS7012", UNLKS7012_Init, 0 },
 	{ "KS7013B", UNLKS7013B_Init, 0 },
+	{ "KS7016", UNLKS7016_Init, 0 },
 	{ "KS7017", UNLKS7017_Init, 0 },
 	{ "KS7030", UNLKS7030_Init, 0 },
 	{ "KS7031", UNLKS7031_Init, 0 },
@@ -465,6 +466,8 @@ static BMAPPING bmap[] = {
 	{ "HP898F", BMCHP898F_Init, 0 },
 	{ "F-15", BMCF15_Init, 0 },
 	{ "RT-01", UNLRT01_Init, 0 },
+	{ "81-01-31-C", BMC810131C_Init, 0 },
+	{ "8-IN-1", BMC8IN1_Init, 0 },
 
 	{ 0, 0, 0 }
 };

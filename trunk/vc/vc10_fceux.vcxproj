@@ -307,6 +307,7 @@
     <ClCompile Include="..\src\boards\8237.cpp" />
     <ClCompile Include="..\src\boards\830118C.cpp" />
     <ClCompile Include="..\src\boards\88.cpp" />
+    <ClCompile Include="..\src\boards\8in1.cpp" />
     <ClCompile Include="..\src\boards\90.cpp" />
     <ClCompile Include="..\src\boards\91.cpp" />
     <ClCompile Include="..\src\boards\96.cpp" />
@@ -319,6 +320,7 @@
     <ClCompile Include="..\src\boards\dance2000.cpp" />
     <ClCompile Include="..\src\boards\eh8813a.cpp" />
     <ClCompile Include="..\src\boards\et-100.cpp" />
+    <ClCompile Include="..\src\boards\et-4320.cpp" />
     <ClCompile Include="..\src\boards\F-15.cpp" />
     <ClCompile Include="..\src\boards\famicombox.cpp" />
     <ClCompile Include="..\src\boards\ffe.cpp" />
@@ -326,6 +328,7 @@
     <ClCompile Include="..\src\boards\ks7010.cpp" />
     <ClCompile Include="..\src\boards\ks7012.cpp" />
     <ClCompile Include="..\src\boards\ks7013.cpp" />
+    <ClCompile Include="..\src\boards\ks7016.cpp" />
     <ClCompile Include="..\src\boards\ks7017.cpp" />
     <ClCompile Include="..\src\boards\ks7030.cpp" />
     <ClCompile Include="..\src\boards\ks7031.cpp" />
