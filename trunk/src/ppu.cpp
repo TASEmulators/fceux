@@ -57,7 +57,8 @@
 
 #define PPU_status  (PPU[2])
 
-#define Pal         (PALRAM)
+#define READPAL(ofs)    (PALRAM[(ofs)] & (GRAYSCALE ? 0x30 : 0xFF))
+#define READUPAL(ofs)   (UPALRAM[(ofs)] & (GRAYSCALE ? 0x30 : 0xFF))
 
 static void FetchSpriteData(void);
 static void RefreshLine(int lastpixel);
@@ -467,14 +468,11 @@ uint8 FASTCALL FFCEUX_PPURead_Default(uint32 A) {
 		uint8 ret;
 		if (!(tmp & 3)) {
 			if (!(tmp & 0xC))
-				ret = PALRAM[0x00];
+				ret = READPAL(0x00);
 			else
-				ret = UPALRAM[((tmp & 0xC) >> 2) - 1];
+				ret = READUPAL(((tmp & 0xC) >> 2) - 1);
 		} else
-			ret = PALRAM[tmp & 0x1F];
-
-		if (GRAYSCALE)
-			ret &= 0x30;
+			ret = READPAL(tmp & 0x1F);
 		return ret;
 	}
 }
@@ -689,13 +687,11 @@ static DECLFR(A2007) {
 			//to get a gray color reading
 			if (!(tmp & 3)) {
 				if (!(tmp & 0xC))
-					ret = PALRAM[0x00];
+					ret = READPAL(0x00);
 				else
-					ret = UPALRAM[((tmp & 0xC) >> 2) - 1];
+					ret = READUPAL(((tmp & 0xC) >> 2) - 1);
 			} else
-				ret = PALRAM[tmp & 0x1F];
-			if (GRAYSCALE)
-				ret &= 0x30;
+				ret = READPAL(tmp & 0x1F);
 			VRAMBuffer = CALL_PPUREAD(RefreshAddr - 0x1000);
 		} else {
 			if (debug_loggingCD && (RefreshAddr < 0x2000))
@@ -711,13 +707,11 @@ static DECLFR(A2007) {
 		if (tmp >= 0x3F00) {	// Palette RAM tied directly to the output data, without VRAM buffer
 			if (!(tmp & 3)) {
 				if (!(tmp & 0xC))
-					ret = PALRAM[0x00];
+					ret = READPAL(0x00);
 				else
-					ret = UPALRAM[((tmp & 0xC) >> 2) - 1];
+					ret = READUPAL(((tmp & 0xC) >> 2) - 1);
 			} else
-				ret = PALRAM[tmp & 0x1F];
-			if (GRAYSCALE)
-				ret &= 0x30;
+				ret = READPAL(tmp & 0x1F);
 			#ifdef FCEUDEF_DEBUGGER
 			if (!fceuindbg)
 			#endif
@@ -1056,7 +1050,7 @@ static void RefreshLine(int lastpixel) {
 
 	if (!ScreenON && !SpriteON) {
 		uint32 tem;
-		tem = Pal[0] | (Pal[0] << 8) | (Pal[0] << 16) | (Pal[0] << 24);
+		tem = READPAL(0) | (READPAL(0) << 8) | (READPAL(0) << 16) | (READPAL(0) << 24);
 		tem |= 0x40404040;
 		FCEU_dwmemset(Pline, tem, numtiles * 8);
 		P += numtiles * 8;
@@ -1077,10 +1071,10 @@ static void RefreshLine(int lastpixel) {
 	}
 
 	//Priority bits, needed for sprite emulation.
-	Pal[0] |= 64;
-	Pal[4] |= 64;
-	Pal[8] |= 64;
-	Pal[0xC] |= 64;
+	PALRAM[0] |= 64;
+	PALRAM[4] |= 64;
+	PALRAM[8] |= 64;
+	PALRAM[0xC] |= 64;
 
 	//This high-level graphics MMC5 emulation code was written for MMC5 carts in "CL" mode.
 	//It's probably not totally correct for carts in "SL" mode.
@@ -1158,15 +1152,15 @@ static void RefreshLine(int lastpixel) {
 #undef RefreshAddr
 
 	//Reverse changes made before.
-	Pal[0] &= 63;
-	Pal[4] &= 63;
-	Pal[8] &= 63;
-	Pal[0xC] &= 63;
+	PALRAM[0] &= 63;
+	PALRAM[4] &= 63;
+	PALRAM[8] &= 63;
+	PALRAM[0xC] &= 63;
 
 	RefreshAddr = smorkus;
 	if (firsttile <= 2 && 2 < lasttile && !(PPU[1] & 2)) {
 		uint32 tem;
-		tem = Pal[0] | (Pal[0] << 8) | (Pal[0] << 16) | (Pal[0] << 24);
+		tem = READPAL(0) | (READPAL(0) << 8) | (READPAL(0) << 16) | (READPAL(0) << 24);
 		tem |= 0x40404040;
 		*(uint32*)Plinef = *(uint32*)(Plinef + 4) = tem;
 	}
@@ -1174,7 +1168,7 @@ static void RefreshLine(int lastpixel) {
 	if (!ScreenON) {
 		uint32 tem;
 		int tstart, tcount;
-		tem = Pal[0] | (Pal[0] << 8) | (Pal[0] << 16) | (Pal[0] << 24);
+		tem = READPAL(0) | (READPAL(0) << 8) | (READPAL(0) << 16) | (READPAL(0) << 24);
 		tem |= 0x40404040;
 
 		tcount = lasttile - firsttile;
@@ -1247,7 +1241,7 @@ static void DoLine(void) {
 		uint32 tem;
 		uint8 col;
 		if (gNoBGFillColor == 0xFF)
-			col = Pal[0];
+			col = READPAL(0);
 		else col = gNoBGFillColor;
 		tem = col | (col << 8) | (col << 16) | (col << 24);
 		tem |= 0x40404040; 
@@ -1488,7 +1482,7 @@ static void RefreshSprites(void) {
 
 		int x = spr->x;
 		uint8 *C;
-		uint8 *VB;
+		int VB;
 
 		pixdata = ppulut1[spr->ca[0]] | ppulut2[spr->ca[1]];
 		J = spr->ca[0] | spr->ca[1];
@@ -1510,75 +1504,75 @@ static void RefreshSprites(void) {
 			}
 
 			C = sprlinebuf + x;
-			VB = (PALRAM + 0x10) + ((atr & 3) << 2);
+			VB = (0x10) + ((atr & 3) << 2);
 
 			if (atr & SP_BACK) {
 				if (atr & H_FLIP) {
-					if (J & 0x80) C[7] = VB[pixdata & 3] | 0x40;
+					if (J & 0x80) C[7] = READPAL(VB | (pixdata & 3)) | 0x40;
 					pixdata >>= 4;
-					if (J & 0x40) C[6] = VB[pixdata & 3] | 0x40;
+					if (J & 0x40) C[6] = READPAL(VB | (pixdata & 3)) | 0x40;
 					pixdata >>= 4;
-					if (J & 0x20) C[5] = VB[pixdata & 3] | 0x40;
+					if (J & 0x20) C[5] = READPAL(VB | (pixdata & 3)) | 0x40;
 					pixdata >>= 4;
-					if (J & 0x10) C[4] = VB[pixdata & 3] | 0x40;
+					if (J & 0x10) C[4] = READPAL(VB | (pixdata & 3)) | 0x40;
 					pixdata >>= 4;
-					if (J & 0x08) C[3] = VB[pixdata & 3] | 0x40;
+					if (J & 0x08) C[3] = READPAL(VB | (pixdata & 3)) | 0x40;
 					pixdata >>= 4;
-					if (J & 0x04) C[2] = VB[pixdata & 3] | 0x40;
+					if (J & 0x04) C[2] = READPAL(VB | (pixdata & 3)) | 0x40;
 					pixdata >>= 4;
-					if (J & 0x02) C[1] = VB[pixdata & 3] | 0x40;
+					if (J & 0x02) C[1] = READPAL(VB | (pixdata & 3)) | 0x40;
 					pixdata >>= 4;
-					if (J & 0x01) C[0] = VB[pixdata] | 0x40;
+					if (J & 0x01) C[0] = READPAL(VB | pixdata) | 0x40;
 				} else {
-					if (J & 0x80) C[0] = VB[pixdata & 3] | 0x40;
+					if (J & 0x80) C[0] = READPAL(VB | (pixdata & 3)) | 0x40;
 					pixdata >>= 4;
-					if (J & 0x40) C[1] = VB[pixdata & 3] | 0x40;
+					if (J & 0x40) C[1] = READPAL(VB | (pixdata & 3)) | 0x40;
 					pixdata >>= 4;
-					if (J & 0x20) C[2] = VB[pixdata & 3] | 0x40;
+					if (J & 0x20) C[2] = READPAL(VB | (pixdata & 3)) | 0x40;
 					pixdata >>= 4;
-					if (J & 0x10) C[3] = VB[pixdata & 3] | 0x40;
+					if (J & 0x10) C[3] = READPAL(VB | (pixdata & 3)) | 0x40;
 					pixdata >>= 4;
-					if (J & 0x08) C[4] = VB[pixdata & 3] | 0x40;
+					if (J & 0x08) C[4] = READPAL(VB | (pixdata & 3)) | 0x40;
 					pixdata >>= 4;
-					if (J & 0x04) C[5] = VB[pixdata & 3] | 0x40;
+					if (J & 0x04) C[5] = READPAL(VB | (pixdata & 3)) | 0x40;
 					pixdata >>= 4;
-					if (J & 0x02) C[6] = VB[pixdata & 3] | 0x40;
+					if (J & 0x02) C[6] = READPAL(VB | (pixdata & 3)) | 0x40;
 					pixdata >>= 4;
-					if (J & 0x01) C[7] = VB[pixdata] | 0x40;
+					if (J & 0x01) C[7] = READPAL(VB | pixdata) | 0x40;
 				}
 			} else {
 				if (atr & H_FLIP) {
-					if (J & 0x80) C[7] = VB[pixdata & 3];
+					if (J & 0x80) C[7] = READPAL(VB | (pixdata & 3));
 					pixdata >>= 4;
-					if (J & 0x40) C[6] = VB[pixdata & 3];
+					if (J & 0x40) C[6] = READPAL(VB | (pixdata & 3));
 					pixdata >>= 4;
-					if (J & 0x20) C[5] = VB[pixdata & 3];
+					if (J & 0x20) C[5] = READPAL(VB | (pixdata & 3));
 					pixdata >>= 4;
-					if (J & 0x10) C[4] = VB[pixdata & 3];
+					if (J & 0x10) C[4] = READPAL(VB | (pixdata & 3));
 					pixdata >>= 4;
-					if (J & 0x08) C[3] = VB[pixdata & 3];
+					if (J & 0x08) C[3] = READPAL(VB | (pixdata & 3));
 					pixdata >>= 4;
-					if (J & 0x04) C[2] = VB[pixdata & 3];
+					if (J & 0x04) C[2] = READPAL(VB | (pixdata & 3));
 					pixdata >>= 4;
-					if (J & 0x02) C[1] = VB[pixdata & 3];
+					if (J & 0x02) C[1] = READPAL(VB | (pixdata & 3));
 					pixdata >>= 4;
-					if (J & 0x01) C[0] = VB[pixdata];
+					if (J & 0x01) C[0] = READPAL(VB | pixdata);
 				} else {
-					if (J & 0x80) C[0] = VB[pixdata & 3];
+					if (J & 0x80) C[0] = READPAL(VB | (pixdata & 3));
 					pixdata >>= 4;
-					if (J & 0x40) C[1] = VB[pixdata & 3];
+					if (J & 0x40) C[1] = READPAL(VB | (pixdata & 3));
 					pixdata >>= 4;
-					if (J & 0x20) C[2] = VB[pixdata & 3];
+					if (J & 0x20) C[2] = READPAL(VB | (pixdata & 3));
 					pixdata >>= 4;
-					if (J & 0x10) C[3] = VB[pixdata & 3];
+					if (J & 0x10) C[3] = READPAL(VB | (pixdata & 3));
 					pixdata >>= 4;
-					if (J & 0x08) C[4] = VB[pixdata & 3];
+					if (J & 0x08) C[4] = READPAL(VB | (pixdata & 3));
 					pixdata >>= 4;
-					if (J & 0x04) C[5] = VB[pixdata & 3];
+					if (J & 0x04) C[5] = READPAL(VB | (pixdata & 3));
 					pixdata >>= 4;
-					if (J & 0x02) C[6] = VB[pixdata & 3];
+					if (J & 0x02) C[6] = READPAL(VB | (pixdata & 3));
 					pixdata >>= 4;
-					if (J & 0x01) C[7] = VB[pixdata];
+					if (J & 0x01) C[7] = READPAL(VB | pixdata);
 				}
 			}
 		}
@@ -2145,7 +2139,7 @@ int FCEUX_PPU_Loop(int skip) {
 							uint8* pt = bgdata.main[bgtile].pt;
 							pixel = ((pt[0] >> (7 - bgpx)) & 1) | (((pt[1] >> (7 - bgpx)) & 1) << 1) | bgdata.main[bgtile].at;
 						}
-						pixelcolor = PALRAM[pixel];
+						pixelcolor = READPAL(pixel);
 
 						//look for a sprite to be drawn
 						bool havepixel = false;
@@ -2188,7 +2182,7 @@ int FCEUX_PPU_Loop(int skip) {
 
 								//bring in the palette bits and palettize
 								spixel |= (oam[2] & 3) << 2;
-								pixelcolor = PALRAM[0x10 + spixel];
+								pixelcolor = READPAL(0x10 + spixel);
 							}
 						}
 
