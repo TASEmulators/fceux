@@ -64,6 +64,8 @@ if os.environ.has_key('LDFLAGS'):
   env.Append(LINKFLAGS = os.environ['LDFLAGS'].split())
 if os.environ.has_key('PKG_CONFIG_PATH'):
   env['ENV']['PKG_CONFIG_PATH'] = os.environ['PKG_CONFIG_PATH']
+if not os.environ.has_key('PKG_CONFIG_PATH') and env['PLATFORM'] == 'darwin':
+  env['ENV']['PKG_CONFIG_PATH'] = "/usr/local/lib/pkgconfig:/opt/X11/lib/pkgconfig"
 if os.environ.has_key('PKG_CONFIG_LIBDIR'):
   env['ENV']['PKG_CONFIG_LIBDIR'] = os.environ['PKG_CONFIG_LIBDIR']
 
