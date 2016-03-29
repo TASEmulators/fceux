@@ -237,7 +237,13 @@ void recalculateBestFitRect(int width, int height)
 	if (!lpDD7)
 		return;	// DirectDraw isn't initialized yet
 
-	double screen_width = VNSWID;
+	int xres = 256;
+	if(fullscreen && vmodes[0].special==3)
+		xres=301;
+	if(!fullscreen && winspecial==3)
+		xres=301;
+
+	double screen_width = VNSWID_NU(xres);
 	double screen_height = FSettings.TotalScanlines();
 	if (eoptions & EO_TVASPECT)
 		screen_width = ceil(screen_height * (screen_width / 256) * (tvAspectX / tvAspectY));
@@ -314,6 +320,7 @@ int SetVideoMode(int fs)
 
 	if(!fs)
 	{ 
+		int xres = 256;
 		// -Video Modes Tag-
 		if(winspecial <= 3 && winspecial >= 1)
 			specmul = 2;
@@ -325,6 +332,9 @@ int SetVideoMode(int fs)
 			specmul = 3;
 		else
 			specmul = 1;
+
+		if(winspecial == 3)
+			xres = 301;
 
 		ShowCursorAbs(1);
 		windowedfailed=1;
@@ -357,7 +367,7 @@ int SetVideoMode(int fs)
 		ddsdback.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
 		ddsdback.ddsCaps.dwCaps= DDSCAPS_OFFSCREENPLAIN;
 
-		ddsdback.dwWidth=256 * specmul;
+		ddsdback.dwWidth=xres*specmul;
 		ddsdback.dwHeight=FSettings.TotalScanlines() * ((winspecial == 9) ? 1 : specmul);
 
 		if (directDrawModeWindowed == DIRECTDRAW_MODE_SURFACE_IN_RAM)
@@ -414,6 +424,8 @@ int SetVideoMode(int fs)
 	}
 	else
 	{
+		int xres = 256;
+
 		//Following is full-screen
 		if(vmod == 0)	// Custom mode
 		{
@@ -428,6 +440,9 @@ int SetVideoMode(int fs)
 				specmul = 3;
 			else
 				specmul = 1;
+
+			if(vmodes[0].special==3)
+				xres = 301;
 		}
 		HideFWindow(1);
 
@@ -453,7 +468,7 @@ int SetVideoMode(int fs)
 			ddsdback.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
 			ddsdback.ddsCaps.dwCaps= DDSCAPS_OFFSCREENPLAIN;
 
-			ddsdback.dwWidth=256 * specmul; //vmodes[vmod].srect.right;
+			ddsdback.dwWidth=xres * specmul; //vmodes[vmod].srect.right;
 			ddsdback.dwHeight=FSettings.TotalScanlines() * ((vmodes[0].special == 9) ? 1 : specmul); //vmodes[vmod].srect.bottom;
 
 			if (directDrawModeFullscreen == DIRECTDRAW_MODE_SURFACE_IN_RAM)
@@ -586,6 +601,7 @@ static void BlitScreenWindow(unsigned char *XBuf)
 	if (!lpDDSBack) return;
 
 	// -Video Modes Tag-
+	int xres = 256;
 	if(winspecial <= 3 && winspecial >= 1)
 		specialmul = 2;
 	else if(winspecial >= 4 && winspecial <= 5)
@@ -596,8 +612,11 @@ static void BlitScreenWindow(unsigned char *XBuf)
 		specialmul = 3;
 	else specialmul = 1;
 
+	if(winspecial == 3)
+		xres = 301;
+
 	srect.top=srect.left=0;
-	srect.right=VNSWID * specialmul;
+	srect.right=VNSWID_NU(xres) * specialmul;
 	srect.bottom=FSettings.TotalScanlines() * ((winspecial == 9) ? 1 : specialmul);
 
 	if(PaletteChanged==1)
@@ -625,7 +644,10 @@ static void BlitScreenWindow(unsigned char *XBuf)
 		memset(ScreenLoc,0,pitch*ddsdback.dwHeight);
 		veflags&=~1;
 	}
-	Blit8ToHigh(XBuf+FSettings.FirstSLine*256+VNSCLIP,ScreenLoc, VNSWID, FSettings.TotalScanlines(), pitch,specialmul,specialmul);
+	//NOT VNSWID_NU ON PURPOSE! this is where 256 gets turned to 301
+	//we'll actually blit a subrectangle later if we clipped the sides
+	//MOREOVER: we order this to scale the whole area no matter what; a subrectangle will come out later (right?)
+	Blit8ToHigh(XBuf+FSettings.FirstSLine*256+VNSCLIP,ScreenLoc, 256, FSettings.TotalScanlines(), pitch,specialmul,specialmul);
 
 	IDirectDrawSurface7_Unlock(lpDDSBack, NULL);
 
@@ -727,6 +749,7 @@ static void BlitScreenFull(uint8 *XBuf)
 	//uint8 y; //mbg merge 7/17/06 removed
 	RECT srect, drect;
 	LPDIRECTDRAWSURFACE7 lpDDSVPrimary;
+	int xres = 256;
 	int specmul;    // Special scaler size multiplier
 	// -Video Modes Tag-
 	if(vmodes[0].special <= 3 && vmodes[0].special >= 1)
@@ -739,6 +762,9 @@ static void BlitScreenFull(uint8 *XBuf)
 		specmul = 3;
 	else
 		specmul = 1;
+
+	if(vmodes[0].special == 3)
+		xres = 301;
 
 	if(fssync==3)
 		lpDDSVPrimary=lpDDSDBack;
@@ -778,7 +804,7 @@ static void BlitScreenFull(uint8 *XBuf)
 
 		srect.top=0;
 		srect.left=0;
-		srect.right=VNSWID * specmul;
+		srect.right=VNSWID_NU(xres) * specmul;
 		srect.bottom=FSettings.TotalScanlines() * ((vmodes[0].special == 9) ? 1 : specmul);
 
 		//if(vmodes[vmod].flags&VMDF_STRFS)
@@ -955,21 +981,21 @@ static void BlitScreenFull(uint8 *XBuf)
 			if(vmodes[vmod].special)
 				ScreenLoc += (vmodes[vmod].drect.left*(bpp>>3)) + ((vmodes[vmod].drect.top)*pitch);   
 			else
-				ScreenLoc+=((vmodes[vmod].x-VNSWID)>>1)*(bpp>>3)+(((vmodes[vmod].y-FSettings.TotalScanlines())>>1))*pitch;
+				ScreenLoc+=((vmodes[vmod].x-VNSWID_NU(xres))>>1)*(bpp>>3)+(((vmodes[vmod].y-FSettings.TotalScanlines())>>1))*pitch;
 		}
 
 		if(bpp>=16)
 		{
-			Blit8ToHigh(XBuf+FSettings.FirstSLine*256+VNSCLIP,(uint8*)ScreenLoc, VNSWID, FSettings.TotalScanlines(), pitch,specmul,specmul); //mbg merge 7/17/06 added cast
+			Blit8ToHigh(XBuf+FSettings.FirstSLine*256+VNSCLIP,(uint8*)ScreenLoc, VNSWID_NU(xres), FSettings.TotalScanlines(), pitch,specmul,specmul); //mbg merge 7/17/06 added cast
 		}
 		else
 		{
 			XBuf+=FSettings.FirstSLine*256+VNSCLIP;
 			// -Video Modes Tag-
 			if(vmodes[vmod].special)
-				Blit8To8(XBuf,(uint8*)ScreenLoc, VNSWID, FSettings.TotalScanlines(), pitch,vmodes[vmod].xscale,vmodes[vmod].yscale,0,vmodes[vmod].special); //mbg merge 7/17/06 added cast
+				Blit8To8(XBuf,(uint8*)ScreenLoc, VNSWID_NU(xres), FSettings.TotalScanlines(), pitch,vmodes[vmod].xscale,vmodes[vmod].yscale,0,vmodes[vmod].special); //mbg merge 7/17/06 added cast
 			else
-				Blit8To8(XBuf,(uint8*)ScreenLoc, VNSWID, FSettings.TotalScanlines(), pitch,1,1,0,0); //mbg merge 7/17/06 added cast
+				Blit8To8(XBuf,(uint8*)ScreenLoc, VNSWID_NU(xres), FSettings.TotalScanlines(), pitch,1,1,0,0); //mbg merge 7/17/06 added cast
 		}
 	}
 
@@ -1115,6 +1141,9 @@ static int RecalcCustom(void)
 {
 	vmdef *cmode = &vmodes[0];
 
+	//don't see how ntsc could make it through here
+	int xres = 256;
+
 	if ((cmode->x <= 0) || (cmode->y <= 0))
 		ResetCustomMode();
 
@@ -1140,7 +1169,7 @@ static int RecalcCustom(void)
 			cmode->flags|=VMDF_DXBLT;
 
 
-		if(VNSWID*cmode->xscale>cmode->x)
+		if(VNSWID_NU(xres)*cmode->xscale>cmode->x)
 		{
 			if(cmode->special)
 			{
@@ -1175,8 +1204,8 @@ static int RecalcCustom(void)
 		cmode->drect.top=(cmode->y-(FSettings.TotalScanlines()*cmode->yscale))>>1;
 		cmode->drect.bottom=cmode->drect.top+FSettings.TotalScanlines()*cmode->yscale;
 
-		cmode->drect.left=(cmode->x-(VNSWID*cmode->xscale))>>1;
-		cmode->drect.right=cmode->drect.left+VNSWID*cmode->xscale;
+		cmode->drect.left=(cmode->x-(VNSWID_NU(xres)*cmode->xscale))>>1;
+		cmode->drect.right=cmode->drect.left+VNSWID_NU(xres)*cmode->xscale;
 	}
 
 	// -Video Modes Tag-
@@ -1187,7 +1216,7 @@ static int RecalcCustom(void)
 		//return(0);
 	}
 
-	if(cmode->x<VNSWID)
+	if(cmode->x<VNSWID_NU(xres))
 	{
 		FCEUD_PrintError("Horizontal resolution is too low.");
 		return(0);

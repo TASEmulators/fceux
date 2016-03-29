@@ -11,6 +11,7 @@
 
 #define VNSCLIP  ((eoptions&EO_CLIPSIDES)?8:0)
 #define VNSWID   ((eoptions&EO_CLIPSIDES)?240:256)
+#define VNSWID_NU(XR)   (VNSWID==256?XR:((int)(XR/256.f*240)))
 
 #define SO_FORCE8BIT  1
 #define SO_SECONDARY  2

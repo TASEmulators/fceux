@@ -342,7 +342,7 @@ InitVideo(FCEUGI *gi)
 		g_config->getOption("SDL.XScale", &s_exs);
 		g_config->getOption("SDL.YScale", &s_eys);
 		g_config->getOption("SDL.SpecialFX", &s_eefx);
-        
+
 		// -Video Modes Tag-
 		if(s_sponge) {
 			if(s_sponge <= 3 && s_sponge >= 1)
@@ -363,10 +363,18 @@ InitVideo(FCEUGI *gi)
 			{
 				s_exs = s_eys = 1;
 			}
+			if(s_sponge == 3) {
+				xres = 301 * s_exs;
+			}
 			s_eefx = 0;
 			if(s_sponge == 1 || s_sponge == 4) {
 				desbpp = 32;
 			}
+		}
+
+		int scrw = NWIDTH * s_exs;
+		if(s_sponge == 3) {
+			scrw = 301 * s_exs;
 		}
 
 #ifdef OPENGL
@@ -412,8 +420,7 @@ InitVideo(FCEUGI *gi)
 		}
 #endif
         
-		s_screen = SDL_SetVideoMode((int)(NWIDTH * s_exs),
-								(int)(s_tlines * s_eys),
+		s_screen = SDL_SetVideoMode(scrw, (int)(s_tlines * s_eys),
 								desbpp, flags);
 		if(!s_screen) {
 			FCEUD_PrintError(SDL_GetError());
@@ -691,6 +698,13 @@ BlitScreen(uint8 *XBuf)
 		SDL_UnlockSurface(TmpScreen);
 	}
 
+	int scrw;
+	if(s_sponge == 3) {  // NTSC 2x
+		scrw = 301;
+	} else {
+		scrw = NWIDTH;
+	}
+
 	 // if we have a hardware video buffer, do a fast video->video copy
 	if(s_BlitBuf) {
 		SDL_Rect srect;
@@ -698,12 +712,12 @@ BlitScreen(uint8 *XBuf)
 
 		srect.x = 0;
 		srect.y = 0;
-		srect.w = NWIDTH;
+		srect.w = scrw;
 		srect.h = s_tlines;
 
 		drect.x = 0;
 		drect.y = 0;
-		drect.w = (Uint16)(s_exs * NWIDTH);
+		drect.w = (Uint16)(s_exs * scrw);
 		drect.h = (Uint16)(s_eys * s_tlines);
 
 		SDL_BlitSurface(s_BlitBuf, &srect, s_screen, &drect);
@@ -714,7 +728,7 @@ BlitScreen(uint8 *XBuf)
 	//TODO - SDL2
 #else
 	SDL_UpdateRect(s_screen, xo, yo,
-				(Uint32)(NWIDTH * s_exs), (Uint32)(s_tlines * s_eys));
+				(Uint32)(scrw * s_exs), (Uint32)(s_tlines * s_eys));
 #endif
 
 #ifdef CREATE_AVI

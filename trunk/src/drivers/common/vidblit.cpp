@@ -36,6 +36,8 @@ extern u8 *XDBuf;
 extern u8 *XDBackBuf;
 extern pal *palo;
 
+#include "../../ppu.h"  // for PPU[]
+
 nes_ntsc_t* nes_ntsc;
 uint8 burst_phase = 0;
 
@@ -110,7 +112,6 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
 	// -Video Modes Tag-
 	if(specfilt == 3) // NTSC 2x
 	{
-		int multi = (2 * 2);		
 		//nes_ntsc variables
 		nes_ntsc_setup_t ntsc_setup = nes_ntsc_composite;
 		
@@ -134,8 +135,8 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
 		
 		if ( nes_ntsc )
 		{
-			nes_ntsc_init( nes_ntsc, &ntsc_setup, b, 2 );			
-			ntscblit = (uint8*)FCEU_dmalloc(256*257*b*multi); //Need to add multiplier for larger sizes
+			nes_ntsc_init( nes_ntsc, &ntsc_setup, b );			
+			ntscblit = (uint8*)FCEU_dmalloc(602*257*b);
 		}
 		
 	} // -Video Modes Tag-
@@ -799,14 +800,19 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 			{
 			case 4:
 				if ( nes_ntsc && GameInfo->type!=GIT_NSF) {
+					int outxr = 301;
+					//if(xr == 282) outxr = 282; //hack for windows
 					burst_phase ^= 1;
-					nes_ntsc_blit( nes_ntsc, (unsigned char*)src, xr, burst_phase, xr, yr, ntscblit, xr * Bpp * xscale );
-					
-					//Multiply 4 by the multiplier on output, because it's 4 bpp
-					//Top 2 lines = line 3, due to distracting flicker
-					//memcpy(dest,ntscblit+(Bpp * xscale)+(Bpp * xr * xscale),(Bpp * xr * xscale));
-					//memcpy(dest+(Bpp * xr * xscale),ntscblit+(Bpp * xscale)+(Bpp * xr * xscale * 2),(Bpp * xr * xscale));
-					memcpy(dest+(Bpp * xr * xscale),ntscblit+(Bpp * xscale),(xr*yr*Bpp*xscale*yscale));
+					nes_ntsc_blit( nes_ntsc, (unsigned char*)src, xr, burst_phase, (PPU[1] >> 5) << 6, xr, yr, ntscblit, (2*outxr) * Bpp );
+
+					const uint8 *in = ntscblit + (Bpp * xscale);
+					uint8 *out = dest;
+					const int in_stride = Bpp * outxr * 2;
+					const int out_stride = Bpp * outxr * xscale;
+					for( int y = 0; y < yr; y++, in += in_stride, out += 2*out_stride ) {
+						memcpy(out, in, Bpp * outxr * xscale);
+						memcpy(out + out_stride, in, Bpp * outxr * xscale);
+					}
 				} else {
 					pinc=pitch-((xr*xscale)<<2);
 					for(y=yr;y;y--,src+=256-xr)

@@ -5,7 +5,7 @@
 
 /* Uncomment to enable emphasis support and use a 512 color palette instead
 of the base 64 color palette. */
-/*#define NES_NTSC_EMPHASIS 1*/
+#define NES_NTSC_EMPHASIS 1
 
 /* The following affect the built-in blitter only; a custom blitter can
 handle things however it wants. */
@@ -21,7 +21,7 @@ if you enable emphasis above. */
 // CUSTOM: (XBuf uses bit 0x80, and has palettes above 0x3f for LUA)
 /* Each raw pixel input value is passed through this. You might want to mask
 the pixel index if you use the high bits as flags, etc. */
-#define NES_NTSC_ADJ_IN( in ) in & 0x3f
+#define NES_NTSC_ADJ_IN( in ) ((in & 0x3f) | emphasis)
 
 /* For each pixel, this is the basic operation:
 output_color = color_palette [NES_NTSC_ADJ_IN( NES_NTSC_IN_T )] */

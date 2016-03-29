@@ -335,7 +335,13 @@ static void ConvertFCM(HWND hwndOwner)
 
 void CalcWindowSize(RECT *al)
 {
-	double screen_width = VNSWID;
+	int xres = 256;
+	if(fullscreen && vmodes[0].special==3)
+		xres=301;
+	if(!fullscreen && winspecial==3)
+		xres=301;
+
+	double screen_width = VNSWID_NU(xres);
 	double screen_height = FSettings.TotalScanlines();
 	if (eoptions & EO_TVASPECT)
 		screen_width = ceil(screen_height * (screen_width / 256) * (tvAspectX / tvAspectY));
@@ -1129,7 +1135,13 @@ void GetMouseData(uint32 (&md)[3])
 {
 	extern RECT bestfitRect;
 
-	double screen_width = VNSWID;
+	int xres = 256;
+	if(fullscreen && vmodes[0].special==3)
+		xres=301;
+	if(!fullscreen && winspecial==3)
+		xres=301;
+
+	double screen_width = VNSWID_NU(xres);
 	double screen_height = FSettings.TotalScanlines();
 
 	if (eoptions & EO_BESTFIT && (bestfitRect.top || bestfitRect.left))
