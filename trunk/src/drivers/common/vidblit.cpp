@@ -107,7 +107,7 @@ static void CalculateShift(uint32 *CBM, int *cshiftr, int *cshiftl)
 
 int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int specfilt, int specfilteropt)
 {
-	paldeemphswap = 0;
+	//paldeemphswap = 0; // determine this in FCEUPPU_SetVideoSystem() instead
 
 	// -Video Modes Tag-
 	if(specfilt == 3) // NTSC 2x
@@ -208,7 +208,7 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
 		palrgb     = (uint32 *)FCEU_dmalloc((256+512)*PAL_PHASES*sizeof(uint32));
 		palrgb2    = (uint32 *)FCEU_dmalloc((256+512)*PAL_PHASES*sizeof(uint32));
 		moire      = (float  *)FCEU_dmalloc(          PAL_PHASES*sizeof(float));
-		paldeemphswap = 1;
+		//paldeemphswap = 1; // determine this in FCEUPPU_SetVideoSystem() instead
 	}
 
 	silt = specfilt;	
