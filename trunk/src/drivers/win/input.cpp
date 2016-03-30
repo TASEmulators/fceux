@@ -104,6 +104,7 @@ static void UpdateMahjong(void);
 static void UpdateFTrainer(void);
 static void UpdateTopRider(void);
 
+static uint32 snespad_return[4];
 static uint32 JSreturn=0;
 int NoWaiting=0;
 bool turbo = false;
@@ -126,7 +127,7 @@ int allowUDLR=0;
 
 #define GPZ()   {MKZ(), MKZ(), MKZ(), MKZ()}
 
-ButtConfig GamePadConfig[4][10]={
+ButtConfig GamePadConfig[4][12]={
 	//Gamepad 1
 	{
 		MK(F), MK(D), MK(S), MK(ENTER), MK(BL_CURSORUP),
@@ -241,27 +242,37 @@ int DTestButton(ButtConfig *bc)
 	return(0);
 }
 
-void UpdateGamepad()
+void UpdateGamepad(bool snes)
 {
 	if(FCEUMOV_Mode(MOVIEMODE_PLAY))
 		return;
 
-	uint32 JS=0;
-	int x;
-	int wg;
+	int JS=0;
 	if(FCEUMOV_Mode(MOVIEMODE_RECORD))
 		AutoFire();
 
-	for(wg=0;wg<4;wg++)
+	for(int wg=0;wg<4;wg++)
 	{
-		for(x=0;x<8;x++)
-			if(DTestButton(&GamePadConfig[wg][x]))
-				JS|=(1<<x)<<(wg<<3);
+		int wgs = wg;
+		if(snes)
+		{
+			wgs = 0;
+			for(int x=0;x<16;x++)
+				if(DTestButton(&GamePadConfig[wg][x]))
+					JS|=(1<<x)<<(wgs<<3);
+		}
+		else
+		{
+			for(int x=0;x<8;x++)
+				if(DTestButton(&GamePadConfig[wg][x]))
+					JS|=(1<<x)<<(wgs<<3);
+		}
 
 		// Check if U+D/L+R is disabled
+		//TODO: how does this affect snes pads?
 		if(!allowUDLR)
 		{
-			for(x=0;x<32;x+=8)
+			for(int x=0;x<32;x+=8)
 			{
 				if((JS & (0xC0<<x) ) == (0xC0<<x) ) JS&=~(0xC0<<x);
 				if((JS & (0x30<<x) ) == (0x30<<x) ) JS&=~(0x30<<x);
@@ -269,9 +280,18 @@ void UpdateGamepad()
 		}
 
 		//  if(rapidAlternator)
-		for(x=0;x<2;x++)
-			if(DTestButton(&GamePadConfig[wg][8+x]))
-				JS|=((1<<x)<<(wg<<3))*(rapidAlternator^(x*DesynchAutoFire));
+		if(!snes)
+		{
+			for(int x=0;x<2;x++)
+				if(DTestButton(&GamePadConfig[wg][8+x]))
+					JS|=((1<<x)<<(wgs<<3))*(rapidAlternator^(x*DesynchAutoFire));
+		}
+
+		if(snes)
+		{
+			snespad_return[wg] = JS;
+			//printf("%d %d\n",wg,JS);
+		}
 	}
 
 	if(autoHoldOn)
@@ -283,8 +303,8 @@ void UpdateGamepad()
 				JSAutoHeldAffected = 0;
 		}
 
-		for(wg=0;wg<4;wg++)
-			for(x=0;x<8;x++)
+		for(int wg=0;wg<4;wg++)
+			for(int x=0;x<8;x++)
 				if(DTestButton(&GamePadConfig[wg][x]))
 				{
 					if(!autoHoldRefire || !(JSAutoHeldAffected&(1<<x)<<(wg<<3)))
@@ -340,7 +360,8 @@ void UpdateGamepad()
 	if(JSAutoHeld)
 		JS ^= JSAutoHeld;
 
-	JSreturn=JS;
+	if(!snes)
+		JSreturn=JS;
 }
 
 ButtConfig powerpadsc[2][12]={
@@ -405,6 +426,9 @@ void FCEUD_UpdateInput()
 			switch(InputType[x])
 		{
 			case SI_GAMEPAD: joy=true; break;
+			case SI_SNES: 
+				UpdateGamepad(true);
+				break;
 			case SI_ARKANOID: mouse=true; break;
 			case SI_ZAPPER: mouse=true; break;
 			case SI_POWERPADA:
@@ -436,7 +460,7 @@ void FCEUD_UpdateInput()
 		}
 
 		if(joy)
-			UpdateGamepad();
+			UpdateGamepad(false);
 
 		if(mouse)
 			if(FCEUMOVState != MOVIEMODE_PLAY)	//FatRatKnight: Moved this if out of the function
@@ -488,6 +512,9 @@ void InitInputPorts(bool fourscore)
 				break;
 			case SI_ZAPPER:
 				InputDPtr=MouseData;
+				break;
+			case SI_SNES:
+				InputDPtr=snespad_return;
 				break;
 			}
 			FCEUI_SetInput(i,(ESI)InputType[i],InputDPtr,attrib);
@@ -602,6 +629,18 @@ static ButtConfig HyperShotButtons[4]=
 {
 	MK(Q),MK(W),MK(E),MK(R)
 };
+
+static void UpdateSNES()
+{
+	int x;
+
+	HyperShotData=0;
+	for(x=0;x<0x4;x++)
+	{
+		if(DTestButton(&HyperShotButtons[x]))
+			HyperShotData|=1<<x;
+	}
+}
 
 static void UpdateHyperShot(void)
 {
@@ -1022,6 +1061,15 @@ static BOOL CALLBACK DoTBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		   sprintf(buf,"Virtual Gamepad %d",DoTBPort+3);
 		   SetDlgItemText(hwndDlg, GRP_GAMEPAD2, buf);
 	   }
+	   if(DoTBType == SI_SNES)
+	   {
+		   char buf[32];
+		   sprintf(buf,"Virtual SNES Pad %d",DoTBPort+1);
+		   SetDlgItemText(hwndDlg, GRP_GAMEPAD1,buf);
+
+		   sprintf(buf,"Virtual SNES Pad %d",DoTBPort+3);
+		   SetDlgItemText(hwndDlg, GRP_GAMEPAD2, buf);
+	   }
 	   SetWindowText(hwndDlg, DoTBTitle);
 	   break;
    case WM_CLOSE:
@@ -1064,7 +1112,7 @@ const unsigned int NUMBER_OF_PORTS = 2;
 const unsigned int NUMBER_OF_NES_DEVICES = SI_COUNT + 1;
 const static unsigned int NUMBER_OF_FAMICOM_DEVICES = SIFC_COUNT + 1;
 //these are unfortunate lists. they match the ESI and ESIFC enums
-static const int configurable_nes[NUMBER_OF_NES_DEVICES]= { 0, 1, 0, 1, 1, 0 };
+static const int configurable_nes[NUMBER_OF_NES_DEVICES]= { 0, 1, 0, 1, 1, 0, 0, 1 };
 static const int configurable_fam[NUMBER_OF_FAMICOM_DEVICES]= { 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0 };
 const unsigned int FAMICOM_POSITION = 2;
 
@@ -1367,18 +1415,22 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					switch(InputType[which])
 					{
 					case SI_GAMEPAD:
+					case SI_SNES:
 						{
-							ButtConfig tmp[10 + 10];
+							ButtConfig tmp[12 + 12];
 
-							memcpy(tmp, GamePadConfig[which], 10 * sizeof(ButtConfig));
-							memcpy(&tmp[10], GamePadConfig[which + 2], 10 * sizeof(ButtConfig));
+							memcpy(tmp, GamePadConfig[which], 12 * sizeof(ButtConfig));
+							memcpy(&tmp[12], GamePadConfig[which + 2], 12 * sizeof(ButtConfig));
 
-							DoTBType = SI_GAMEPAD;
+							DoTBType = InputType[which];
 							DoTBPort = which;
-							DoTBConfig(hwndDlg, text, "GAMEPADDIALOG", tmp, 10 + 10);
+							if(DoTBType == SI_GAMEPAD)
+								DoTBConfig(hwndDlg, text, "GAMEPADDIALOG", tmp, 12 + 12);
+							else 
+								DoTBConfig(hwndDlg, text, MAKEINTRESOURCE(DLG_SNESPAD), tmp, 12); //no 2nd controller since no four score
 
-							memcpy(GamePadConfig[which], tmp, 10 * sizeof(ButtConfig));
-							memcpy(GamePadConfig[which + 2], &tmp[10], 10 * sizeof(ButtConfig));
+							memcpy(GamePadConfig[which], tmp, 12 * sizeof(ButtConfig));
+							memcpy(GamePadConfig[which + 2], &tmp[12], 12 * sizeof(ButtConfig));
 						}
 						break;
 

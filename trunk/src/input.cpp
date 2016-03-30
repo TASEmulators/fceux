@@ -88,6 +88,7 @@ extern bool movieSubtitles;
 
 static uint8 joy_readbit[2];
 uint8 joy[4]={0,0,0,0}; //HACK - should be static but movie needs it
+uint16 snesjoy[4]={0,0,0,0}; //HACK - should be static but movie needs it
 static uint8 LastStrobe;
 uint8 RawReg4016 = 0; // Joystick strobe (W)
 
@@ -314,9 +315,64 @@ static void StrobeGP(int w)
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+//SNES pad
+
+static void UpdateSNES(int w, void *data, int arg)
+{
+	//LUA NOT SUPPORTED YET
+	if(w==0)
+	{
+		snesjoy[0]= ((uint32 *)joyports[0].ptr)[0];
+		snesjoy[2]= ((uint32 *)joyports[0].ptr)[2];
+	}
+	else
+	{
+		snesjoy[1] = ((uint32 *)joyports[0].ptr)[1];
+		snesjoy[3] = ((uint32 *)joyports[0].ptr)[3];
+	}
+
+}
+
+static void LogSNES(int w, MovieRecord* mr)
+{
+	//not supported for SNES pad right noe
+}
+
+static void LoadSNES(int w, MovieRecord* mr)
+{
+	//not supported for SNES pad right now
+}
+
+
+static uint8 ReadSNES(int w)
+{
+	//no fourscore support on snes (not clear how it would work)
+
+	uint8 ret;
+
+	if(joy_readbit[w]>=16)
+		ret = 1;
+	else
+	{
+		ret = ((snesjoy[w]>>(joy_readbit[w]))&1);
+	}
+	if(!fceuindbg)
+		joy_readbit[w]++;
+	return ret;
+}
+
+static void StrobeSNES(int w)
+{
+	joy_readbit[w]=0;
+}
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 
 static INPUTC GPC={ReadGP,0,StrobeGP,UpdateGP,0,0,LogGP,LoadGP};
 static INPUTC GPCVS={ReadGPVS,0,StrobeGP,UpdateGP,0,0,LogGP,LoadGP};
+static INPUTC GPSNES={ReadSNES,0,StrobeSNES,UpdateSNES,0,0,LogSNES,LoadSNES};
 
 void FCEU_DrawInput(uint8 *buf)
 {
@@ -398,6 +454,9 @@ static void SetInputStuff(int port)
         } else {
 			joyports[port].driver= &GPC;
         }
+		break;
+	case SI_SNES:
+		joyports[port].driver= &GPSNES;
 		break;
 	case SI_ARKANOID:
 		joyports[port].driver=FCEU_InitArkanoid(port);

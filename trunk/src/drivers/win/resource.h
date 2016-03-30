@@ -365,6 +365,7 @@
 #define IDB_BITMAP_SELECTED19           288
 #define IDD_TASEDITOR_SAVINGOPTIONS     289
 #define IDD_SYMBOLIC_DEBUG_NAMING       290
+#define DLG_SNESPAD                     291
 #define MENU_HIDE_MENU                  300
 #define COMBO_FILTER                    300
 #define IDC_EDIT_AUTHORINFO             300
@@ -1235,7 +1236,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        291
+#define _APS_NEXT_RESOURCE_VALUE        292
 #define _APS_NEXT_COMMAND_VALUE         40596
 #define _APS_NEXT_CONTROL_VALUE         1303
 #define _APS_NEXT_SYMED_VALUE           101

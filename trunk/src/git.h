@@ -36,8 +36,9 @@ enum ESI
 	SI_POWERPADB	= 4,
 	SI_ARKANOID		= 5,
 	SI_MOUSE		= 6,
+	SI_SNES = 7,
 
-	SI_COUNT = SI_MOUSE
+	SI_COUNT = SI_SNES
 };
 
 inline const char* ESI_Name(ESI esi)
@@ -50,7 +51,8 @@ inline const char* ESI_Name(ESI esi)
 		"Power Pad A",
 		"Power Pad B",
 		"Arkanoid Paddle",
-		"Mouse"
+		"Mouse",
+		"SNES Pad"
 	};
 
 	if(esi >= SI_NONE && esi <= SI_COUNT)
