@@ -257,9 +257,10 @@ void UpdateGamepad(bool snes)
 		if(snes)
 		{
 			wgs = 0;
-			for(int x=0;x<16;x++)
+			for(int x=0;x<12;x++)
 				if(DTestButton(&GamePadConfig[wg][x]))
 					JS|=(1<<x)<<(wgs<<3);
+			printf("%d %d\n",wg,JS);
 		}
 		else
 		{
@@ -1066,9 +1067,6 @@ static BOOL CALLBACK DoTBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		   char buf[32];
 		   sprintf(buf,"Virtual SNES Pad %d",DoTBPort+1);
 		   SetDlgItemText(hwndDlg, GRP_GAMEPAD1,buf);
-
-		   sprintf(buf,"Virtual SNES Pad %d",DoTBPort+3);
-		   SetDlgItemText(hwndDlg, GRP_GAMEPAD2, buf);
 	   }
 	   SetWindowText(hwndDlg, DoTBTitle);
 	   break;
