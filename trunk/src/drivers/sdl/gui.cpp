@@ -20,7 +20,9 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
+#ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
+#endif
 
 #ifdef _GTK3
 #include <gdk/gdkkeysyms-compat.h>

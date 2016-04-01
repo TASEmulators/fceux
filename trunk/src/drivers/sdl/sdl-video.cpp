@@ -42,6 +42,8 @@
 
 #ifdef _GTK
 #include "gui.h"
+#endif
+#ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
 #endif
 
@@ -399,7 +401,7 @@ InitVideo(FCEUGI *gi)
 		}
 #endif
 
-#if defined(_GTK) && defined(SDL_VIDEO_DRIVER_X11)
+#if defined(_GTK) && defined(SDL_VIDEO_DRIVER_X11) && defined(GDK_WINDOWING_X11)
 		if(noGui == 0)
 		{
 			while (gtk_events_pending())
