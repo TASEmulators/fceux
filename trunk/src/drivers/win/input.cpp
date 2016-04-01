@@ -256,11 +256,12 @@ void UpdateGamepad(bool snes)
 		int wgs = wg;
 		if(snes)
 		{
+			JS = 0;
 			wgs = 0;
 			for(int x=0;x<12;x++)
 				if(DTestButton(&GamePadConfig[wg][x]))
 					JS|=(1<<x)<<(wgs<<3);
-			printf("%d %d\n",wg,JS);
+			//printf("%d %d\n",wg,JS); //useful debugging
 		}
 		else
 		{
