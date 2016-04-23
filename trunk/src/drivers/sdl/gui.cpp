@@ -91,15 +91,16 @@ void setCheckbox(GtkWidget* w, const char* configName)
 // This function configures a single hotkey
 int configHotkey(char* hotkeyString)
 {
+	// This is broken right now
 	//SDL_Surface *screen;
-	SDL_Event event;
-	KillVideo();
+//	SDL_Event event;
+//	KillVideo();
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	return 0; // TODO - SDL 2.0
 #else
 	//screen = SDL_SetVideoMode(420, 200, 8, 0);
 	//SDL_WM_SetCaption("Press a key to bind...", 0);
-
+/*
 	int newkey = 0;
 	while(1)
 	{
@@ -116,7 +117,7 @@ int configHotkey(char* hotkeyString)
 		}
 	}	
 	
-	return 0;
+	return 0;*/
 #endif
 }
 // This function configures a single button on a gamepad
