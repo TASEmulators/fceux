@@ -707,21 +707,11 @@ void openGamepadConfig()
 	g_signal_connect(typeCombo, "changed", G_CALLBACK(setInputDevice), 
 		gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(typeCombo)));
 	
-	// sync with config
-	int buf = 0;
-	g_config->getOption("SDL.FourScore", &buf);
-	if(buf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fourScoreChk), 1);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fourScoreChk), 0);
-	g_config->getOption("SDL.Input.EnableOppositeDirectionals", &buf);
-	if(buf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(oppositeDirChk), 1);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(oppositeDirChk), 0);
-	
+	setCheckbox(fourScoreChk, "SDL.FourScore");
 	g_signal_connect(fourScoreChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.FourScore");
+	setCheckbox(oppositeDirChk, "SDL.Input.EnableOppositeDirectionals");
 	g_signal_connect(oppositeDirChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.Input.EnableOppositeDirectionals");
+	
 	
 	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoLabel, TRUE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoCombo, TRUE, TRUE, 5);
