@@ -81,6 +81,13 @@ bool checkGTKVersion(int major_required, int minor_required)
 	}
 }
 
+void setCheckbox(GtkWidget* w, const char* configName)
+{
+	int buf;
+	g_config->getOption(configName, &buf);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), buf);
+}
+
 // This function configures a single hotkey
 int configHotkey(char* hotkeyString)
 {
@@ -325,15 +332,8 @@ void openPaletteConfig()
 	ntscColorChk = gtk_check_button_new_with_label("Use NTSC palette");
 	
 	g_signal_connect(ntscColorChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.NTSCpalette");
+	setCheckbox(ntscColorChk, "SDL.NTSCpalette");
 	
-	int b;
-	// sync with config
-	g_config->getOption("SDL.NTSCpalette", &b);
-	if(b)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ntscColorChk), 1);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ntscColorChk), 0);
-
 	// color / tint / hue sliders
 	slidersFrame = gtk_frame_new("NTSC palette controls");
 	slidersVbox = gtk_vbox_new(FALSE, 2);
@@ -926,16 +926,6 @@ void setDoubleBuffering(GtkWidget* w, gpointer p)
 }
 #endif
 
-void setCheckboxFromConfig(GtkWidget* w, const char* configName)
-{
-	int buf;
-	g_config->getOption(configName, &buf);
-	if(buf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), 1);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), 0);
-}
-
 void openVideoConfig()
 {
 	GtkWidget* win;
@@ -1002,17 +992,17 @@ void openVideoConfig()
 	// openGL check
 	glChk = gtk_check_button_new_with_label("Enable OpenGL");
 	g_signal_connect(glChk, "clicked", G_CALLBACK(setGl), NULL);
-	loadCheckboxFromConfig(glChk, "SDL.OpenGL");
+	setCheckbox(glChk, "SDL.OpenGL");
 	
 	// openGL linear filter check
 	linearChk = gtk_check_button_new_with_label("Enable OpenGL linear filter");
 	g_signal_connect(linearChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.OpenGLip");
-	loadCheckboxFromConfig(linearChk, "SDL.OpenGLip")
+	setCheckbox(linearChk, "SDL.OpenGLip");
 	
 	// DoubleBuffering check
 	dbChk = gtk_check_button_new_with_label("Enable double buffering");
 	g_signal_connect(dbChk, "clicked", G_CALLBACK(setDoubleBuffering), NULL);
-	loadCheckboxFromConfig(dbChk, "SDL.DoubleBuffering");
+	setCheckbox(dbChk, "SDL.DoubleBuffering");
 #endif
 	
 	// Region (NTSC/PAL/Dendy)
@@ -1035,22 +1025,22 @@ void openVideoConfig()
 	// New PPU check
 	ppuChk = gtk_check_button_new_with_label("Enable new PPU");
 	g_signal_connect(ppuChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.NewPPU");
-	setCheckboxFromConfig(ppuChk, "SDL.NewPPU");
+	setCheckbox(ppuChk, "SDL.NewPPU");
 
 	// "disable 8 sprite limit" check
 	spriteLimitChk = gtk_check_button_new_with_label("Disable sprite limit");
 	g_signal_connect(spriteLimitChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.DisableSpriteLimit");
-	setCheckboxFromConfig(spriteLimitChk, "SDL.DisableSpriteLimit");
+	setCheckbox(spriteLimitChk, "SDL.DisableSpriteLimit");
 	
 	// frameskip check
 	frameskipChk = gtk_check_button_new_with_label("Enable frameskip");
 	g_signal_connect(frameskipChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.Frameskip");
-	setCheckboxFromConfig(frameskipChk, "SDL.Frameskip");
+	setCheckbox(frameskipChk, "SDL.Frameskip");
 
 	// clip sides check
 	clipSidesChk = gtk_check_button_new_with_label("Clip sides");
 	g_signal_connect(clipSidesChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.ClipSides");
-	setCheckboxFromConfig(clipSidesChk, "SDL.ClipSides");
+	setCheckbox(clipSidesChk, "SDL.ClipSides");
 	
 	// xscale / yscale
 	xscaleHbox = gtk_hbox_new(FALSE, 5);
@@ -1078,7 +1068,7 @@ void openVideoConfig()
 	// show FPS check
 	showFpsChk = gtk_check_button_new_with_label("Show FPS");
 	g_signal_connect(showFpsChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.ShowFPS");
-	setCheckboxFromConfig(showFpsChk, "SDL.ShowFPS");
+	setCheckbox(showFpsChk, "SDL.ShowFPS");
 
 	gtk_box_pack_start(GTK_BOX(vbox), lbl, FALSE, FALSE, 5);	
 	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
@@ -1179,28 +1169,13 @@ void openSoundConfig()
 
 	// sound enable check
 	soundChk = gtk_check_button_new_with_label("Enable sound");
-	
-	// sync with cfg
-	int cfgBuf;
-	g_config->getOption("SDL.Sound", &cfgBuf);
-	if(cfgBuf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundChk), TRUE);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundChk), FALSE);
-	
 	g_signal_connect(soundChk, "clicked", G_CALLBACK(toggleSound), NULL);
+	setCheckbox(soundChk,"SDL.Sound");
 
 	// low pass filter check
 	lowpassChk = gtk_check_button_new_with_label("Enable low pass filter");
-	
-	// sync with cfg
-	g_config->getOption("SDL.Sound.LowPass", &cfgBuf);
-	if(cfgBuf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lowpassChk), TRUE);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lowpassChk), FALSE);
-	
 	g_signal_connect(lowpassChk, "clicked", G_CALLBACK(toggleLowPass), NULL);
+	setCheckbox(lowpassChk, "SDL.Sound.LowPass");
 	
 	// sound quality combo box
 	hbox1 = gtk_hbox_new(FALSE, 3);
@@ -1210,13 +1185,9 @@ void openSoundConfig()
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(qualityCombo), "Very High");
 
 	// sync widget with cfg 
-	g_config->getOption("SDL.Sound.Quality", &cfgBuf);
-	if(cfgBuf == 2)
-		gtk_combo_box_set_active(GTK_COMBO_BOX(qualityCombo), 2);
-	else if(cfgBuf == 1)
-		gtk_combo_box_set_active(GTK_COMBO_BOX(qualityCombo), 1);
-	else
-		gtk_combo_box_set_active(GTK_COMBO_BOX(qualityCombo), 0);
+	int buf;
+	g_config->getOption("SDL.Sound.Quality", &buf);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(qualityCombo), buf);
 		
 	g_signal_connect(qualityCombo, "changed", G_CALLBACK(setQuality), NULL);
 	
@@ -1231,17 +1202,17 @@ void openSoundConfig()
 	
 	const int rates[5] = {11025, 22050, 44100, 48000, 96000};
 	
-	char buf[8];
+	char choices[8];
 	for(int i=0; i<5;i++)
 	{
-		sprintf(buf, "%d", rates[i]);
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(rateCombo), buf);	
+		sprintf(choices, "%d", rates[i]);
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(rateCombo), choices);	
 	}
 	
 	// sync widget with cfg 
-	g_config->getOption("SDL.Sound.Rate", &cfgBuf);
+	g_config->getOption("SDL.Sound.Rate", &buf);
 	for(int i=0; i<5; i++)
-		if(cfgBuf == rates[i])
+		if(buf == rates[i])
 			gtk_combo_box_set_active(GTK_COMBO_BOX(rateCombo), i);
 		
 	g_signal_connect(rateCombo, "changed", G_CALLBACK(setRate), NULL);
@@ -1256,22 +1227,15 @@ void openSoundConfig()
 	bufferLbl = gtk_label_new("Buffer size (in ms)");
 
 	// sync widget with cfg 
-	g_config->getOption("SDL.Sound.BufSize", &cfgBuf);
-	gtk_range_set_value(GTK_RANGE(bufferHscale), cfgBuf);
+	g_config->getOption("SDL.Sound.BufSize", &buf);
+	gtk_range_set_value(GTK_RANGE(bufferHscale), buf);
 	
 	g_signal_connect(bufferHscale, "button-release-event", G_CALLBACK(setBufSize), NULL);
 
 	// Swap duty cycles
 	swapDutyChk = gtk_check_button_new_with_label("Swap Duty Cycles");
-	
-	// sync with cfg
-	g_config->getOption("SDL.SwapDuty", &cfgBuf);
-	if(cfgBuf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(swapDutyChk), TRUE);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(swapDutyChk), FALSE);
-	
 	g_signal_connect(swapDutyChk, "clicked", G_CALLBACK(toggleSwapDuty), NULL);
+	setCheckbox(swapDutyChk, "SDL.SwapDuty");
 
 	// mixer
 	mixerFrame = gtk_frame_new("Mixer:");
