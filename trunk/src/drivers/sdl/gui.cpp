@@ -84,20 +84,20 @@ bool checkGTKVersion(int major_required, int minor_required)
 // This function configures a single hotkey
 int configHotkey(char* hotkeyString)
 {
-	SDL_Surface *screen;
+	//SDL_Surface *screen;
 	SDL_Event event;
 	KillVideo();
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	return 0; // TODO - SDL 2.0
 #else
-	screen = SDL_SetVideoMode(420, 200, 8, 0);
+	//screen = SDL_SetVideoMode(420, 200, 8, 0);
 	//SDL_WM_SetCaption("Press a key to bind...", 0);
 
 	int newkey = 0;
 	while(1)
 	{
 		SDL_WaitEvent(&event);
-	
+
 		switch (event.type)
 		{
 			case SDL_KEYDOWN:
@@ -520,8 +520,7 @@ void openHotkeyConfig()
 	GtkTreeStore *hotkey_store = gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
 
 	std::string prefix = "SDL.Hotkeys.";
-    GtkTreeIter iter; // parent
-    GtkTreeIter iter2; // child
+    GtkTreeIter iter;
     
     gtk_tree_store_append(hotkey_store, &iter, NULL); // aquire iter
      
@@ -653,7 +652,7 @@ void openGamepadConfig()
 	GtkWidget* vbox;
 	GtkWidget* hboxPadNo;
 	GtkWidget* padNoLabel;
-	GtkWidget* configNoLabel;
+	//GtkWidget* configNoLabel;
 	GtkWidget* fourScoreChk;
 	GtkWidget* oppositeDirChk;
 	GtkWidget* buttonFrame;
@@ -674,7 +673,7 @@ void openGamepadConfig()
 	
 	hboxPadNo = gtk_hbox_new(FALSE, 0);
 	padNoLabel = gtk_label_new("Port:");
-	configNoLabel = gtk_label_new("Config Number:");
+	//configNoLabel = gtk_label_new("Config Number:");
 	fourScoreChk = gtk_check_button_new_with_label("Enable Four Score");
 	oppositeDirChk = gtk_check_button_new_with_label("Allow Up+Down / Left+Right");
 	
@@ -1210,7 +1209,6 @@ void openSoundConfig()
 	GtkWidget* hbox2;
 	GtkWidget* rateCombo;
 	GtkWidget* rateLbl;
-	GtkWidget* hbox3;
 	GtkWidget* bufferLbl;
 	GtkWidget* bufferHscale;
 	GtkWidget* swapDutyChk;
@@ -1304,7 +1302,6 @@ void openSoundConfig()
 	gtk_box_pack_start(GTK_BOX(hbox2), rateLbl, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(hbox2), rateCombo, FALSE, FALSE, 5);
 	
-	hbox3 = gtk_hbox_new(FALSE, 2);
 	bufferHscale = gtk_hscale_new_with_range(15, 200, 2);
 	bufferLbl = gtk_label_new("Buffer size (in ms)");
 
@@ -1318,7 +1315,6 @@ void openSoundConfig()
 	swapDutyChk = gtk_check_button_new_with_label("Swap Duty Cycles");
 	
 	// sync with cfg
-	cfgBuf;
 	g_config->getOption("SDL.SwapDuty", &cfgBuf);
 	if(cfgBuf)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(swapDutyChk), TRUE);
@@ -2564,11 +2560,13 @@ void handle_resize(GtkWindow* win, GdkEvent* event, gpointer data)
 		InitVideo(GameInfo);
 	}
 	gtk_widget_set_size_request(evbox, (int)(NES_WIDTH*xscale), (int)(NES_HEIGHT*yscale));
-	GdkColor black;
+
+	// Currently unused; unsure why
+	/*	GdkColor black;
 	black.red = 0;
 	black.green = 0;
 	black.blue = 0;
-//	gtk_widget_modify_bg(GTK_WIDGET(win), GTK_STATE_NORMAL, &black);
+	gtk_widget_modify_bg(GTK_WIDGET(win), GTK_STATE_NORMAL, &black);*/
 
 	printf("DEBUG: new xscale: %f yscale: %f\n", xscale, yscale);
 
