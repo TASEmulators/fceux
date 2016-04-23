@@ -926,6 +926,16 @@ void setDoubleBuffering(GtkWidget* w, gpointer p)
 }
 #endif
 
+void setCheckboxFromConfig(GtkWidget* w, const char* configName)
+{
+	int buf;
+	g_config->getOption(configName, &buf);
+	if(buf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), 1);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), 0);
+}
+
 void openVideoConfig()
 {
 	GtkWidget* win;
@@ -992,38 +1002,17 @@ void openVideoConfig()
 	// openGL check
 	glChk = gtk_check_button_new_with_label("Enable OpenGL");
 	g_signal_connect(glChk, "clicked", G_CALLBACK(setGl), NULL);
-	
-	// sync with config
-	buf = 0;
-	g_config->getOption("SDL.OpenGL", &buf);
-	if(buf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glChk), 1);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glChk), 0);
+	loadCheckboxFromConfig(glChk, "SDL.OpenGL");
 	
 	// openGL linear filter check
 	linearChk = gtk_check_button_new_with_label("Enable OpenGL linear filter");
 	g_signal_connect(linearChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.OpenGLip");
+	loadCheckboxFromConfig(linearChk, "SDL.OpenGLip")
 	
-	// sync with config
-	buf = 0;
-	g_config->getOption("SDL.OpenGLip", &buf);
-	if(buf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(linearChk), 1);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(linearChk), 0);
-  	
-    // DoubleBuffering check
+	// DoubleBuffering check
 	dbChk = gtk_check_button_new_with_label("Enable double buffering");
 	g_signal_connect(dbChk, "clicked", G_CALLBACK(setDoubleBuffering), NULL);
-	
-	// sync with config
-	buf = 0;
-	g_config->getOption("SDL.DoubleBuffering", &buf);
-	if(buf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dbChk), 1);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dbChk), 0);
+	loadCheckboxFromConfig(dbChk, "SDL.DoubleBuffering");
 #endif
 	
 	// Region (NTSC/PAL/Dendy)
@@ -1036,7 +1025,6 @@ void openVideoConfig()
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(palCombo), "Dendy");
 
 	// sync with cfg
-	buf = 0;
 	g_config->getOption("SDL.PAL", &buf);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(palCombo), buf);
 	
@@ -1047,52 +1035,23 @@ void openVideoConfig()
 	// New PPU check
 	ppuChk = gtk_check_button_new_with_label("Enable new PPU");
 	g_signal_connect(ppuChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.NewPPU");
-	
-	// sync with config
-	buf = 0;
-	g_config->getOption("SDL.NewPPU", &buf);
-	if(buf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ppuChk), 1);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ppuChk), 0);
-	
-  // "disable 8 sprite limit" check
+	setCheckboxFromConfig(ppuChk, "SDL.NewPPU");
+
+	// "disable 8 sprite limit" check
 	spriteLimitChk = gtk_check_button_new_with_label("Disable sprite limit");
 	g_signal_connect(spriteLimitChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.DisableSpriteLimit");
+	setCheckboxFromConfig(spriteLimitChk, "SDL.DisableSpriteLimit");
 	
-	// sync with config
-	buf = 0;
-	g_config->getOption("SDL.DisableSpriteLimit", &buf);
-	if(buf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spriteLimitChk), 1);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spriteLimitChk), 0);
-
 	// frameskip check
 	frameskipChk = gtk_check_button_new_with_label("Enable frameskip");
 	g_signal_connect(frameskipChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.Frameskip");
-	
-	// sync with config
-	buf = 0;
-	g_config->getOption("SDL.Frameskip", &buf);
-	if(buf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(frameskipChk), 1);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(frameskipChk), 0);
-
+	setCheckboxFromConfig(frameskipChk, "SDL.Frameskip");
 
 	// clip sides check
 	clipSidesChk = gtk_check_button_new_with_label("Clip sides");
 	g_signal_connect(clipSidesChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.ClipSides");
+	setCheckboxFromConfig(clipSidesChk, "SDL.ClipSides");
 	
-	// sync with config
-	buf = 0;
-	g_config->getOption("SDL.ClipSides", &buf);
-	if(buf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(clipSidesChk), 1);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(clipSidesChk), 0);
-		
 	// xscale / yscale
 	xscaleHbox = gtk_hbox_new(FALSE, 5);
 	xscaleLbl = gtk_label_new("X scaling factor");
@@ -1119,17 +1078,8 @@ void openVideoConfig()
 	// show FPS check
 	showFpsChk = gtk_check_button_new_with_label("Show FPS");
 	g_signal_connect(showFpsChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.ShowFPS");
+	setCheckboxFromConfig(showFpsChk, "SDL.ShowFPS");
 
-	// sync with config
-	buf = 0;
-	g_config->getOption("SDL.ShowFPS", &buf);
-	if(buf)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(showFpsChk), 1);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(showFpsChk), 0);
-
-	
-	
 	gtk_box_pack_start(GTK_BOX(vbox), lbl, FALSE, FALSE, 5);	
 	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
 #ifdef OPENGL
