@@ -540,6 +540,7 @@
     <ClCompile Include="..\src\input\hypershot.cpp" />
     <ClCompile Include="..\src\input\mahjong.cpp" />
     <ClCompile Include="..\src\input\mouse.cpp" />
+    <ClCompile Include="..\src\input\snesmouse.cpp" />
     <ClCompile Include="..\src\input\oekakids.cpp" />
     <ClCompile Include="..\src\input\pec586kb.cpp" />
     <ClCompile Include="..\src\input\powerpad.cpp" />

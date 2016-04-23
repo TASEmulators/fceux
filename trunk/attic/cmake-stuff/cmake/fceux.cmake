@@ -142,6 +142,7 @@ set(SRC_CORE
   ${CMAKE_SOURCE_DIR}/src/input/hypershot.cpp
   ${CMAKE_SOURCE_DIR}/src/input/mahjong.cpp
   ${CMAKE_SOURCE_DIR}/src/input/mouse.cpp
+  ${CMAKE_SOURCE_DIR}/src/input/snesmouse.cpp
   ${CMAKE_SOURCE_DIR}/src/input/oekakids.cpp
   ${CMAKE_SOURCE_DIR}/src/input/powerpad.cpp
   ${CMAKE_SOURCE_DIR}/src/input/quiz.cpp

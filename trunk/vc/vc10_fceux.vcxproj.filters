@@ -520,6 +520,9 @@
     <ClCompile Include="..\src\input\mouse.cpp">
       <Filter>input</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\input\snesmouse.cpp">
+      <Filter>input</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\input\oekakids.cpp">
       <Filter>input</Filter>
     </ClCompile>
