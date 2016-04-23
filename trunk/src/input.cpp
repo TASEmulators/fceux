@@ -62,6 +62,7 @@ extern INPUTC *FCEU_InitZapper(int w);
 extern INPUTC *FCEU_InitPowerpadA(int w);
 extern INPUTC *FCEU_InitPowerpadB(int w);
 extern INPUTC *FCEU_InitArkanoid(int w);
+extern INPUTC *FCEU_InitMouse(int w);
 
 extern INPUTCFC *FCEU_InitArkanoidFC(void);
 extern INPUTCFC *FCEU_InitSpaceShadow(void);
@@ -390,7 +391,7 @@ void FCEU_UpdateInput(void)
 	{
 		for(int port=0;port<2;port++){
 			joyports[port].driver->Update(port,joyports[port].ptr,joyports[port].attrib);
-        }
+		}
 		portFC.driver->Update(portFC.ptr,portFC.attrib);
 	}
 
@@ -405,7 +406,7 @@ void FCEU_UpdateInput(void)
 	//TODO - should this apply to the movie data? should this be displayed in the input hud?
 	if(GameInfo->type==GIT_VSUNI){
 		FCEU_VSUniSwap(&joy[0],&joy[1]);
-    }
+	}
 }
 
 static DECLFR(VSUNIRead0)
@@ -451,9 +452,9 @@ static void SetInputStuff(int port)
 	case SI_GAMEPAD:
 		if(GameInfo->type==GIT_VSUNI){
 			joyports[port].driver = &GPCVS;
-        } else {
+		} else {
 			joyports[port].driver= &GPC;
-        }
+		}
 		break;
 	case SI_SNES:
 		joyports[port].driver= &GPSNES;
@@ -469,6 +470,9 @@ static void SetInputStuff(int port)
 		break;
 	case SI_POWERPADB:
 		joyports[port].driver=FCEU_InitPowerpadB(port);
+		break;
+	case SI_MOUSE:
+		joyports[port].driver=FCEU_InitMouse(port);
 		break;
 	case SI_NONE:
 		joyports[port].driver=&DummyJPort;
@@ -839,7 +843,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_VSUNI_TOGGLE_DIP_9,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dipswitch 9", 0 },
 
 	{ EMUCMD_MISC_AUTOSAVE,					EMUCMDTYPE_MISC,	FCEUI_RewindToLastAutosave,		0, 0, "Load Last Auto-save", 0},
-	{ EMUCMD_MISC_SHOWSTATES,				EMUCMDTYPE_MISC,	ViewSlots,						0, 0, "View save slots",    0 },
+	{ EMUCMD_MISC_SHOWSTATES,				EMUCMDTYPE_MISC,	ViewSlots,						0, 0, "View save slots", 0 },
 	{ EMUCMD_MISC_USE_INPUT_PRESET_1,		EMUCMDTYPE_MISC,	CommandUsePreset,				0, 0, "Use Input Preset 1", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_MISC_USE_INPUT_PRESET_2,		EMUCMDTYPE_MISC,	CommandUsePreset,				0, 0, "Use Input Preset 2", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_MISC_USE_INPUT_PRESET_3,		EMUCMDTYPE_MISC,	CommandUsePreset,				0, 0, "Use Input Preset 3", EMUCMDFLAG_TASEDITOR },
@@ -861,8 +865,8 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_CLOSEROM,						EMUCMDTYPE_TOOL,	CloseRom,						0, 0, "Close ROM", 0},
 	{ EMUCMD_RELOAD,						EMUCMDTYPE_TOOL,	ReloadRom,						0, 0, "Reload ROM or TAS Editor Project", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,	EMUCMDTYPE_MISC,	MovieSubtitleToggle,			0, 0, "Toggle Movie Subtitles", EMUCMDFLAG_TASEDITOR },
-	{ EMUCMD_MISC_UNDOREDOSAVESTATE,		EMUCMDTYPE_MISC,	UndoRedoSavestate,				0, 0, "Undo/Redo Savestate",    0},
-	{ EMUCMD_MISC_TOGGLEFULLSCREEN,			EMUCMDTYPE_MISC,	ToggleFullscreen,				0, 0, "Toggle Fullscreen",	  0},
+	{ EMUCMD_MISC_UNDOREDOSAVESTATE,		EMUCMDTYPE_MISC,	UndoRedoSavestate,				0, 0, "Undo/Redo Savestate", 0},
+	{ EMUCMD_MISC_TOGGLEFULLSCREEN,			EMUCMDTYPE_MISC,	ToggleFullscreen,				0, 0, "Toggle Fullscreen",	0},
 	{ EMUCMD_TOOL_OPENRAMWATCH,				EMUCMDTYPE_TOOL,	LaunchRamWatch,					0, 0, "Open Ram Watch", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_TOOL_OPENRAMSEARCH,			EMUCMDTYPE_TOOL,	LaunchRamSearch,				0, 0, "Open Ram Search", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_TOOL_RAMSEARCHLT,				EMUCMDTYPE_TOOL,	RamSearchOpLT,					0, 0, "Ram Search - Less Than", 0},

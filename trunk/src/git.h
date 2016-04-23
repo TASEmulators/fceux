@@ -36,7 +36,7 @@ enum ESI
 	SI_POWERPADB	= 4,
 	SI_ARKANOID		= 5,
 	SI_MOUSE		= 6,
-	SI_SNES = 7,
+	SI_SNES			= 7,
 
 	SI_COUNT = SI_SNES
 };

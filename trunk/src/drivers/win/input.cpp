@@ -431,6 +431,7 @@ void FCEUD_UpdateInput()
 			case SI_SNES: 
 				UpdateGamepad(true);
 				break;
+			case SI_MOUSE: mouse=true; break;
 			case SI_ARKANOID: mouse=true; break;
 			case SI_ZAPPER: mouse=true; break;
 			case SI_POWERPADA:
@@ -513,6 +514,9 @@ void InitInputPorts(bool fourscore)
 				InputDPtr=MouseData;
 				break;
 			case SI_ZAPPER:
+				InputDPtr=MouseData;
+				break;
+			case SI_MOUSE:
 				InputDPtr=MouseData;
 				break;
 			case SI_SNES:
