@@ -303,7 +303,7 @@ static void M212Sync(void) {
 }
 
 void Mapper212_Init(CartInfo *info) {
-	Latch_Init(info, M212Sync, M212Read, 0xFFFF, 0x8000, 0xFFFF, 0);
+	Latch_Init(info, M212Sync, M212Read, 0x0000, 0x8000, 0xFFFF, 0);
 }
 
 //------------------ Map 213 ---------------------------
