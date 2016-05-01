@@ -498,13 +498,18 @@ static void M45CW(uint32 A, uint8 V) {
 			NV &= 0;	// hack ;( don't know exactly how it should be
 		NV |= EXPREGS[0] | ((EXPREGS[2] & 0xF0) << 4);
 		setchr1(A, NV);
-	}
+	} else
+//		setchr8(0);		// i don't know what cart need this, but a new one need other lol
+		setchr1(A, V);
 }
 
 static void M45PW(uint32 A, uint8 V) {
-	V &= (EXPREGS[3] & 0x3F) ^ 0x3F;
-	V |= EXPREGS[1];
-	setprg8(A, V);
+	uint32 MV = V & ((EXPREGS[3] & 0x3F) ^ 0x3F);
+	MV |= EXPREGS[1];
+	if(UNIFchrrama)
+		MV |= ((EXPREGS[2] & 0x40) << 2);
+	setprg8(A, MV);
+//	FCEU_printf("1:%02x 2:%02x 3:%02x A=%04x V=%03x\n",EXPREGS[1],EXPREGS[2],EXPREGS[3],A,MV);
 }
 
 static DECLFW(M45Write) {
@@ -534,7 +539,6 @@ static void M45Reset(void) {
 }
 
 static void M45Power(void) {
-	setchr8(0);
 	GenMMC3Power();
 	EXPREGS[0] = EXPREGS[1] = EXPREGS[2] = EXPREGS[3] = EXPREGS[4] = EXPREGS[5] = 0;
 	SetWriteHandler(0x5000, 0x7FFF, M45Write);
