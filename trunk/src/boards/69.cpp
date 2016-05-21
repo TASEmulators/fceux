@@ -41,7 +41,7 @@ static SFORMAT StateRegs[] =
 static void Sync(void) {
 	uint8 i;
 	if ((preg[3] & 0xC0) == 0xC0)
-		setprg8r(0x10, 0x6000, 0);
+		setprg8r(0x10, 0x6000, preg[3] & 0x3F);
 	else
 		setprg8(0x6000, preg[3] & 0x3F);
 	setprg8(0x8000, preg[0]);
@@ -258,7 +258,10 @@ void Mapper69_Init(CartInfo *info) {
 	info->Power = M69Power;
 	info->Close = M69Close;
 	MapIRQHook = M69IRQHook;
-	WRAMSIZE = 8192;
+	if(info->ines2)
+		WRAMSIZE = info->wram_size + info->battery_wram_size;
+	else
+		WRAMSIZE = 8192;
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
