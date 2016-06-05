@@ -4304,7 +4304,8 @@ static int sound_get(lua_State *L)
 	extern uint8 PSG[0x10];
 	extern int32 lengthcount[4];
 	extern uint8 TriCount;
-	extern const uint32 *NoiseFreqTable;
+	extern const uint32 NoiseFreqTableNTSC[0x10];
+	extern const uint32 NoiseFreqTablePAL[0x10];
 	extern int32 DMCPeriod;
 	extern uint8 DMCAddressLatch, DMCSizeLatch;
 	extern uint8 DMCFormat;
@@ -4313,6 +4314,7 @@ static int sound_get(lua_State *L)
 
 	int freqReg;
 	double freq;
+	bool shortMode;
 
 	lua_newtable(L);
 
@@ -4337,7 +4339,7 @@ static int sound_get(lua_State *L)
 	else
 		lua_pushnumber(L, nesVolumes[0]);
 	lua_setfield(L, -2, "volume");
-	freq = (39375000.0/352.0) / (curfreq[0] + 1);
+	freq = ((PAL?PAL_CPU:NTSC_CPU)/16.0) / (curfreq[0] + 1);
 	lua_pushnumber(L, freq);
 	lua_setfield(L, -2, "frequency");
 	lua_pushnumber(L, (log(freq / 440.0) * 12 / log(2.0)) + 69);
@@ -4358,7 +4360,7 @@ static int sound_get(lua_State *L)
 	else
 		lua_pushnumber(L, nesVolumes[1]);
 	lua_setfield(L, -2, "volume");
-	freq = (39375000.0/352.0) / (curfreq[1] + 1);
+	freq = ((PAL?PAL_CPU:NTSC_CPU)/16.0) / (curfreq[1] + 1);
 	lua_pushnumber(L, freq);
 	lua_setfield(L, -2, "frequency");
 	lua_pushnumber(L, (log(freq / 440.0) * 12 / log(2.0)) + 69);
@@ -4378,7 +4380,7 @@ static int sound_get(lua_State *L)
 		lua_pushnumber(L, 1.0);
 	lua_setfield(L, -2, "volume");
 	freqReg = PSG[0xa] | ((PSG[0xb] & 7) << 8);
-	freq = (39375000.0/704.0) / (freqReg + 1);
+	freq = ((PAL?PAL_CPU:NTSC_CPU)/32.0) / (freqReg + 1);
 	lua_pushnumber(L, freq);
 	lua_setfield(L, -2, "frequency");
 	lua_pushnumber(L, (log(freq / 440.0) * 12 / log(2.0)) + 69);
@@ -4396,9 +4398,12 @@ static int sound_get(lua_State *L)
 		lua_pushnumber(L, nesVolumes[2]);
 	lua_setfield(L, -2, "volume");
 	freqReg = PSG[0xE] & 0xF;
-	lua_pushboolean(L, (PSG[0xE] & 0x80) != 0);
+	shortMode = ((PSG[0xE] & 0x80) != 0);
+	lua_pushboolean(L, shortMode);
 	lua_setfield(L, -2, "short");
-	freq = (39375000.0/44.0) / NoiseFreqTable[freqReg]; // probably wrong
+	freq = PAL? PAL_CPU/NoiseFreqTablePAL[freqReg] : NTSC_CPU/NoiseFreqTableNTSC[freqReg] ;  // rate
+	if(shortMode)
+		freq /= 93.0;  // pitch
 	lua_pushnumber(L, freq);
 	lua_setfield(L, -2, "frequency");
 	lua_pushnumber(L, (log(freq / 440.0) * 12 / log(2.0)) + 69);
@@ -4415,7 +4420,7 @@ static int sound_get(lua_State *L)
 	else
 		lua_pushnumber(L, 1.0);
 	lua_setfield(L, -2, "volume");
-	freq = (39375000.0/2.0) / DMCPeriod;
+	freq = (PAL?PAL_CPU:NTSC_CPU) / DMCPeriod;  // rate
 	lua_pushnumber(L, freq);
 	lua_setfield(L, -2, "frequency");
 	lua_pushnumber(L, (log(freq / 440.0) * 12 / log(2.0)) + 69);

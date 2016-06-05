@@ -91,19 +91,18 @@ static const uint8 lengthtable[0x20]=
 };
 
 
-static const uint32 NoiseFreqTableNTSC[0x10] =
+extern const uint32 NoiseFreqTableNTSC[0x10] =
 {
 	4, 8, 16, 32, 64, 96, 128, 160, 202,
 	254, 380, 508, 762, 1016, 2034, 4068
 };
 
-static const uint32 NoiseFreqTablePAL[0x10] =
+extern const uint32 NoiseFreqTablePAL[0x10] =
 {
 	4, 7, 14, 30, 60, 88, 118, 148, 188,
 	236, 354, 472, 708,  944, 1890, 3778
 };
 
-const uint32 *NoiseFreqTable = NoiseFreqTableNTSC; // for lua only
 
 static const uint32 NTSCDMCTable[0x10]=
 {
