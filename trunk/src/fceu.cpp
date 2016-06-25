@@ -95,12 +95,14 @@ using namespace std;
 // overclock the console by adding dummy scanlines to PPU loop
 // disables DMC DMA and WaveHi filling for these dummies
 // doesn't work with new PPU
-bool overclocked = 0;
+bool overclock_enabled = 0;
 // 7-bit samples have priority over overclocking
 bool skip_7bit_overclocking = 1;
 int normalscanlines;
 int extrascanlines = 0;
 int totalscanlines;
+int vblankscanlines = 0;
+bool overclocking = 0;
 //------------
 
 int AFon = 1, AFoff = 1, AutoFireOffset = 0; //For keeping track of autofire settings
@@ -149,7 +151,7 @@ void FCEU_TogglePPU(void) {
 	if (newppu) {
 		FCEU_DispMessage("New PPU loaded", 0);
 		FCEUI_printf("New PPU loaded");
-		overclocked = 0;
+		overclock_enabled = 0;
 	} else {
 		FCEU_DispMessage("Old PPU loaded", 0);
 		FCEUI_printf("Old PPU loaded");
@@ -727,6 +729,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	timestampbase += timestamp;
 	timestamp = 0;
+	soundtimestamp = 0;
 
 	*pXBuf = skip ? 0 : XBuf;
 	if (skip == 2) { //If skip = 2, then bypass sound
@@ -873,10 +876,10 @@ void FCEU_ResetVidSys(void) {
 	PAL = w ? 1 : 0;
 
 	if (newppu)
-		overclocked = 0;
+		overclock_enabled = 0;
 
 	normalscanlines = (dendy ? 290 : 240)+newppu; // use flag as number!
-	totalscanlines = normalscanlines + (overclocked ? extrascanlines : 0);
+	totalscanlines = normalscanlines + (overclock_enabled ? extrascanlines : 0);
 	FCEUPPU_SetVideoSystem(w || dendy);
 	SetSoundVariables();
 }
@@ -965,7 +968,7 @@ void FCEUI_SetRegion(int region) {
 			break;
 	}
 	normalscanlines += newppu;
-	totalscanlines = normalscanlines + (overclocked ? extrascanlines : 0);
+	totalscanlines = normalscanlines + (overclock_enabled ? extrascanlines : 0);
 	FCEUI_SetVidSystem(pal_emulation);
 	RefreshThrottleFPS();
 #ifdef WIN32

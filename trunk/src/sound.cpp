@@ -1052,7 +1052,7 @@ int FlushEmulateSound(void)
   int x;
   int32 end,left;
 
-  if(!timestamp) return(0);
+  if(!soundtimestamp) return(0);
 
   if(!FSettings.SndRate)
   {
@@ -1073,7 +1073,7 @@ int FlushEmulateSound(void)
 
    if(GameExpSound.HiFill) GameExpSound.HiFill();
 
-   for(x=timestamp;x;x--)
+   for(x=soundtimestamp;x;x--)
    {
     uint32 b=*tmpo;
     *tmpo=(b&65535)+wlookup2[(b>>16)&255]+wlookup1[b>>24];

@@ -32,6 +32,7 @@
 #include <cstring>
 X6502 X;
 uint32 timestamp;
+uint32 soundtimestamp;
 void (*MapIRQHook)(int a);
 
 #define ADDCYC(x) \
@@ -39,7 +40,8 @@ void (*MapIRQHook)(int a);
  int __x=x;       \
  _tcount+=__x;    \
  _count-=__x*48;  \
- if (scanline < normalscanlines || scanline == totalscanlines) timestamp+=__x;  \
+ timestamp+=__x;  \
+ if(!overclocking) soundtimestamp+=__x; \
 }
 
 //normal memory read
@@ -408,7 +410,7 @@ void X6502_Power(void)
 {
  _count=_tcount=_IRQlow=_PC=_A=_X=_Y=_P=_PI=_DB=_jammed=0;
  _S=0xFD;
- timestamp=0;
+ timestamp=soundtimestamp=0;
  X6502_Reset();
 }
 
@@ -494,7 +496,7 @@ extern int test; test++;
    _tcount=0;
    if(MapIRQHook) MapIRQHook(temp);
    
-   if (scanline < normalscanlines || scanline == totalscanlines)
+   if (!overclocking)
     FCEU_SoundCPUHook(temp);
    #ifdef _S9XLUA_H
    CallRegisteredLuaMemHook(_PC, 1, 0, LUAMEMHOOK_EXEC);

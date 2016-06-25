@@ -8,11 +8,13 @@ extern int newppu;
 void ResetGameLoaded(void);
 
 //overclocking-related
-extern bool overclocked;
+extern bool overclock_enabled;
 extern bool skip_7bit_overclocking;
 extern int normalscanlines;
 extern int extrascanlines;
 extern int totalscanlines;
+extern int vblankscanlines;
+extern bool overclocking;
 
 extern bool AutoResumePlay;
 extern char romNameWhenClosingEmulator[];

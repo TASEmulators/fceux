@@ -59,7 +59,7 @@ extern unsigned char *cdloggerdata;
 
 extern uint32 soundtsoffs;
 extern bool swapDuty;
-#define SOUNDTS (timestamp + soundtsoffs)
+#define SOUNDTS (soundtimestamp + soundtsoffs)
 
 void SetNESSoundMap(void);
 void FrameSoundUpdate(void);

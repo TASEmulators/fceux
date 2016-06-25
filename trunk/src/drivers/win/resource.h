@@ -582,6 +582,7 @@
 #define IDC_BUTTON9                     1148
 #define TASEDITOR_FIND_NEXT_SIMILAR_MARKER 1148
 #define IDC_SYMBOLIC_ADDRESS            1148
+#define IDC_VBLANK_SCANLINES            1148
 #define IDC_HISTORYLIST                 1149
 #define IDC_SYMBOLIC_NAME               1149
 #define IDC_BOOKMARKSLIST               1150
@@ -638,7 +639,7 @@
 #define IDC_MASK_UNUSED_GRAPHICS        1203
 #define CHECK_SOUND_SWAPDUTY            1203
 #define CB_OVERCLOCKING                 1203
-#define CHECK_DEEMPH_SWAP                 1203
+#define CHECK_DEEMPH_SWAP               1203
 #define IDC_VOLUMEGROUP                 1204
 #define IDC_OMITBLANK                   1204
 #define IDC_CHECK3                      1204
