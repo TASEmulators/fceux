@@ -638,6 +638,7 @@
 #define IDC_MASK_UNUSED_GRAPHICS        1203
 #define CHECK_SOUND_SWAPDUTY            1203
 #define CB_OVERCLOCKING                 1203
+#define CHECK_DEEMPH_SWAP                 1203
 #define IDC_VOLUMEGROUP                 1204
 #define IDC_OMITBLANK                   1204
 #define IDC_CHECK3                      1204

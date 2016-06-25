@@ -11,6 +11,7 @@ extern int palsaturation;
 extern int palsharpness;
 extern int palcontrast;
 extern int palbrightness;
+extern bool paldeemphswap;
 
 bool SetPalette(const char* nameo)
 {
@@ -77,6 +78,15 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			if(ntsccol_enable)
 				CheckDlgButton(hwndDlg, CHECK_PALETTE_ENABLED, BST_CHECKED);
 
+			if(paldeemphswap)
+				CheckDlgButton(hwndDlg, CHECK_DEEMPH_SWAP, BST_CHECKED);
+
+			if(force_grayscale)
+				CheckDlgButton(hwndDlg, CHECK_PALETTE_GRAYSCALE, BST_CHECKED);
+
+			if (eoptions & EO_CPALETTE)
+				CheckDlgButton(hwndDlg, CHECK_PALETTE_CUSTOM, BST_CHECKED);
+
 			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,       TBM_SETRANGE, 1, MAKELONG(0, 128));
 			SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR,        TBM_SETRANGE, 1, MAKELONG(0, 128));
 			SendDlgItemMessage(hwndDlg, CTL_PALNOTCH_TRACKBAR,   TBM_SETRANGE, 1, MAKELONG(0, 100));
@@ -104,12 +114,6 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			SendDlgItemMessage(hwndDlg, CTL_PALSHARP_TRACKBAR,   TBM_SETPOS, 1, palsharpness);
 			SendDlgItemMessage(hwndDlg, CTL_PALCONTRAST_TRACKBAR,TBM_SETPOS, 1, palcontrast);
 			SendDlgItemMessage(hwndDlg, CTL_PALBRIGHT_TRACKBAR,  TBM_SETPOS, 1, palbrightness);
-
-			if(force_grayscale)
-				CheckDlgButton(hwndDlg, CHECK_PALETTE_GRAYSCALE, BST_CHECKED);
-
-			if (eoptions & EO_CPALETTE)
-				CheckDlgButton(hwndDlg, CHECK_PALETTE_CUSTOM, BST_CHECKED);
 
 			CenterWindowOnScreen(hwndDlg);
 
@@ -156,6 +160,27 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
 						break;
 
+					case CHECK_DEEMPH_SWAP:
+						paldeemphswap ^= 1;
+						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
+						break;
+
+					case CHECK_PALETTE_CUSTOM:
+					{
+						if (eoptions & EO_CPALETTE)
+						{
+							//disable user palette
+							FCEUI_SetUserPalette(0,0);
+							eoptions &= ~EO_CPALETTE;
+						} else
+						{
+							//switch to user palette (even if it isn't loaded yet!?)
+							FCEUI_SetUserPalette(cpalette,64); //just have to guess the size I guess
+							eoptions |= EO_CPALETTE;
+						}
+						break;
+					}
+
 					case BTN_PALETTE_LOAD:
 						if(LoadPaletteFile())
 							CheckDlgButton(hwndDlg, CHECK_PALETTE_CUSTOM, BST_CHECKED);
@@ -187,22 +212,6 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
 						break;
-
-					case CHECK_PALETTE_CUSTOM:
-					{
-						if (eoptions & EO_CPALETTE)
-						{
-							//disable user palette
-							FCEUI_SetUserPalette(0,0);
-							eoptions &= ~EO_CPALETTE;
-						} else
-						{
-							//switch to user palette (even if it isn't loaded yet!?)
-							FCEUI_SetUserPalette(cpalette,64); //just have to guess the size I guess
-							eoptions |= EO_CPALETTE;
-						}
-						break;
-					}
 
 					case BUTTON_CLOSE:
 gornk:
