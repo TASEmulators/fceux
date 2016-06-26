@@ -1225,12 +1225,17 @@ static void Fixit1(void) {
 
 void MMC5_hb(int);		//Ugh ugh ugh.
 static void DoLine(void) {
+	if (overclocking)
+	{
+		X6502_Run(256 + 69);
+		scanline++;
+		X6502_Run(16);
+		return;
+	}
+
 	int x;
-	// scanlines after 239 are dummy for dendy, and Xbuf is capped at 0xffff bytes, don't let it overflow
-	// send all future writes to the invisible sanline. the easiest way to "skip" them altogether in old ppu
-	// todo: figure out what exactly should be skipped. it's known that there's no activity on PPU bus
-	uint8 *target = XBuf + ((scanline < 240 ? scanline : 240) << 8);
-	u8* dtarget = XDBuf + ((scanline < 240 ? scanline : 240) << 8);
+	uint8 *target = XBuf + (scanline << 8);
+	u8* dtarget = XDBuf + (scanline << 8);
 
 	if (MMC5Hack) MMC5_hb(scanline);
 
@@ -1815,7 +1820,7 @@ int FCEUPPU_Loop(int skip) {
 			if (DMC_7bit && skip_7bit_overclocking)
 				totalscanlines = normalscanlines;
 			else
-				totalscanlines = normalscanlines + (overclock_enabled ? extrascanlines : 0);
+				totalscanlines = normalscanlines + (overclock_enabled ? postrenderscanlines : 0);
 
 			for (scanline = 0; scanline < totalscanlines; ) {	//scanline is incremented in  DoLine.  Evil. :/
 				deempcnt[deemp]++;

@@ -92,17 +92,16 @@ using namespace std;
 
 //-----------
 //overclocking-related
-// overclock the console by adding dummy scanlines to PPU loop
-// disables DMC DMA and WaveHi filling for these dummies
+// overclock the console by adding dummy scanlines to PPU loop or to vblank
+// disables DMC DMA, WaveHi filling and image rendering for these dummies
 // doesn't work with new PPU
 bool overclock_enabled = 0;
-// 7-bit samples have priority over overclocking
-bool skip_7bit_overclocking = 1;
-int normalscanlines;
-int extrascanlines = 0;
-int totalscanlines;
-int vblankscanlines = 0;
 bool overclocking = 0;
+bool skip_7bit_overclocking = 1; // 7-bit samples have priority over overclocking
+int normalscanlines;
+int totalscanlines;
+int postrenderscanlines = 0;
+int vblankscanlines = 0;
 //------------
 
 int AFon = 1, AFoff = 1, AutoFireOffset = 0; //For keeping track of autofire settings
@@ -879,7 +878,7 @@ void FCEU_ResetVidSys(void) {
 		overclock_enabled = 0;
 
 	normalscanlines = (dendy ? 290 : 240)+newppu; // use flag as number!
-	totalscanlines = normalscanlines + (overclock_enabled ? extrascanlines : 0);
+	totalscanlines = normalscanlines + (overclock_enabled ? postrenderscanlines : 0);
 	FCEUPPU_SetVideoSystem(w || dendy);
 	SetSoundVariables();
 }
@@ -968,7 +967,7 @@ void FCEUI_SetRegion(int region) {
 			break;
 	}
 	normalscanlines += newppu;
-	totalscanlines = normalscanlines + (overclock_enabled ? extrascanlines : 0);
+	totalscanlines = normalscanlines + (overclock_enabled ? postrenderscanlines : 0);
 	FCEUI_SetVidSystem(pal_emulation);
 	RefreshThrottleFPS();
 #ifdef WIN32

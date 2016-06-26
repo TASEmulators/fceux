@@ -182,7 +182,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(ntsccol_enable),AC(ntsctint),AC(ntschue),
 	AC(force_grayscale),
 	AC(dendy),
-	AC(extrascanlines),
+	AC(postrenderscanlines),
 	AC(vblankscanlines),
 	AC(overclock_enabled),
 	AC(skip_7bit_overclocking),

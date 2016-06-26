@@ -36,16 +36,16 @@ void CloseTimingDialog(HWND hwndDlg)
 	skip_7bit_overclocking = (IsDlgButtonChecked(hwndDlg, CB_SKIP_7BIT) == BST_CHECKED);
 
 	GetDlgItemText(hwndDlg, IDC_EXTRA_SCANLINES, str, 4);
-	sscanf(str,"%d",&extrascanlines);
+	sscanf(str,"%d",&postrenderscanlines);
 
 	GetDlgItemText(hwndDlg, IDC_VBLANK_SCANLINES, str, 4);
 	sscanf(str,"%d",&vblankscanlines);
 
-	if (extrascanlines < 0)
+	if (postrenderscanlines < 0)
 	{
-		extrascanlines = 0;
+		postrenderscanlines = 0;
 		MessageBox(hwndDlg, "Overclocking is when you speed up your CPU, not slow it down!", "Error", MB_OK);
-		sprintf(str,"%d",extrascanlines);
+		sprintf(str,"%d",postrenderscanlines);
 		SetDlgItemText(hwndDlg,IDC_EXTRA_SCANLINES,str);
 	}
 	else if (vblankscanlines < 0)
@@ -62,7 +62,7 @@ void CloseTimingDialog(HWND hwndDlg)
 	else
 		EndDialog(hwndDlg, 0);
 
-	totalscanlines = normalscanlines + (overclock_enabled ? extrascanlines : 0);
+	totalscanlines = normalscanlines + (overclock_enabled ? postrenderscanlines : 0);
 }
 
 /**
@@ -94,7 +94,7 @@ BOOL CALLBACK TimingConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			SendDlgItemMessage(hwndDlg,IDC_EXTRA_SCANLINES, EM_SETLIMITTEXT,3,0);
 			SendDlgItemMessage(hwndDlg,IDC_VBLANK_SCANLINES,EM_SETLIMITTEXT,3,0);
 
-			sprintf(str,"%d",extrascanlines);
+			sprintf(str,"%d",postrenderscanlines);
 			SetDlgItemText(hwndDlg,IDC_EXTRA_SCANLINES,str);
 
 			sprintf(str,"%d",vblankscanlines);

@@ -9,12 +9,12 @@ void ResetGameLoaded(void);
 
 //overclocking-related
 extern bool overclock_enabled;
+extern bool overclocking;
 extern bool skip_7bit_overclocking;
 extern int normalscanlines;
-extern int extrascanlines;
 extern int totalscanlines;
+extern int postrenderscanlines;
 extern int vblankscanlines;
-extern bool overclocking;
 
 extern bool AutoResumePlay;
 extern char romNameWhenClosingEmulator[];
