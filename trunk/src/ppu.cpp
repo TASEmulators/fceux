@@ -1225,8 +1225,7 @@ static void Fixit1(void) {
 
 void MMC5_hb(int);		//Ugh ugh ugh.
 static void DoLine(void) {
-	if (overclocking)
-	{
+	if (overclocking) {
 		X6502_Run(256 + 69);
 		scanline++;
 		X6502_Run(16);
@@ -1752,8 +1751,7 @@ int FCEUPPU_Loop(int skip) {
 				TriggerNMI();
 		}
 		X6502_Run((scanlines_per_frame - 242) * (256 + 85) - 12);
-		if (vblankscanlines)
-		{
+		if (overclock_enabled && vblankscanlines) {
 			overclocking = 1;
 			X6502_Run(vblankscanlines * (256 + 85) - 12);
 			overclocking = 0;
