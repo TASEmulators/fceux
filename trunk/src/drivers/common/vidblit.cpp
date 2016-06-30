@@ -461,15 +461,21 @@ void Blit8To8(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale, in
 /* Todo:  Make sure 24bpp code works right with big-endian cpus */
 
 //takes a pointer to XBuf and applies fully modern deemph palettizing
-u32 ModernDeemphColorMap(u8* src)
+u32 ModernDeemphColorMap(u8* src, u8* srcbuf, int xscale, int yscale)
 {
 	u8 pixel = *src;
 	
 	//look up the legacy translation
 	u32 color = palettetranslate[pixel];
-	
+
+	int ofs = src-srcbuf;
+	int xofs = ofs&255;
+	int yofs = ofs>>8;
+	if(xscale!=1) xofs /= xscale; //untested optimization
+	if(yscale!=1) yofs /= yscale; //untested optimization
+	ofs = xofs+yofs*256;
+
 	//find out which deemph bitplane value we're on
-	int ofs = src-XBuf;
 	uint8 deemph = XDBuf[ofs];
 
 	//if it was a deemph'd value, grab it from the deemph palette
@@ -499,6 +505,8 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 		else mult = 3;
 		
 		Blit8To8(src, specbuf8bpp, xr, yr, 256*mult, xscale, yscale, 0, silt);
+		int mdcmxs = xscale*mult;
+		int mdcmys = yscale*mult;
 		
 		xr *= mult;
 		yr *= mult;
@@ -514,7 +522,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 			{
 				for(x=xr;x;x--)
 				{
-				 *(uint32 *)dest=palettetranslate[(uint32)*src];
+				 *(uint32 *)dest=ModernDeemphColorMap(src,specbuf8bpp,mdcmxs, mdcmys);
 				 dest+=4;
 				 src++;
 				}
@@ -527,7 +535,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 			{
 				for(x=xr;x;x--)
 				{
-					uint32 tmp=palettetranslate[(uint32)*src];
+					uint32 tmp=ModernDeemphColorMap(src,specbuf8bpp,mdcmxs, mdcmys);
 					*(uint8 *)dest=tmp;
 					*((uint8 *)dest+1)=tmp>>8;
 					*((uint8 *)dest+2)=tmp>>16;
@@ -545,7 +553,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 			{
 				for(x=xr>>1;x;x--)
 				{
-					*(uint32 *)dest=palettetranslate[*(uint16 *)src];
+					//*(uint32 *)dest=palettetranslate[*(uint16 *)src]; //16bpp is doomed
 					dest+=4;
 					src+=2;
 				}
@@ -567,7 +575,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 		{
 			for(x=xr; x; x--)
 			{
-				*(uint32 *)dest = palettetranslate[(uint32)*src];
+				*(uint32 *)dest = ModernDeemphColorMap(src,XBuf,1,1);
 				dest += 4;
 				src++;
 			}
@@ -881,7 +889,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 							int too=xscale;
 							do
 							{
-								*(uint16 *)dest=palettetranslate[*src];
+								//*(uint16 *)dest=palettetranslate[*src]; 16bpp is doomed right now
 								dest+=2;
 							} while(--too);
 						}
@@ -903,7 +911,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 					for(x=xr;x;x--)
 					{
 						//THE MAIN BLITTING CODEPATH (there may be others that are important)
-						*(uint32 *)dest = ModernDeemphColorMap(src);
+						*(uint32 *)dest = ModernDeemphColorMap(src,XBuf,1,1);
 						dest+=4;
 						src++;
 					}
@@ -916,7 +924,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 				{
 					for(x=xr;x;x--)
 					{     
-						uint32 tmp = ModernDeemphColorMap(src);
+						uint32 tmp = ModernDeemphColorMap(src,XBuf,1,1);
 						*(uint8 *)dest=tmp;
 						*((uint8 *)dest+1)=tmp>>8;
 						*((uint8 *)dest+2)=tmp>>16;
@@ -932,7 +940,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 				{
 					for(x=xr;x;x--)
 					{
-						*(uint16 *)dest = ModernDeemphColorMap(src);
+						*(uint16 *)dest = ModernDeemphColorMap(src,XBuf,1,1);
 						dest+=2;
 						src++;
 					}
