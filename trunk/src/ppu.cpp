@@ -1817,7 +1817,7 @@ int FCEUPPU_Loop(int skip) {
 			deemp = PPU[1] >> 5;
 
 			// manual samples can't play correctly with overclocking
-			if (DMC_7bit && skip_7bit_overclocking)
+			if (DMC_7bit && skip_7bit_overclocking) // 7bit sample started before 240th line
 				totalscanlines = normalscanlines;
 			else
 				totalscanlines = normalscanlines + (overclock_enabled ? postrenderscanlines : 0);
@@ -1829,8 +1829,11 @@ int FCEUPPU_Loop(int skip) {
 				DoLine();
 				if (scanline < normalscanlines || scanline == totalscanlines)
 					overclocking = 0;
-				else
+				else {
+					if (DMC_7bit && skip_7bit_overclocking) // 7bit sample started after 240th line
+						break;
 					overclocking = 1;
+				}
 			}
 			DMC_7bit = 0;
 
