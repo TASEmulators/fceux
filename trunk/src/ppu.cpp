@@ -1752,9 +1752,11 @@ int FCEUPPU_Loop(int skip) {
 		}
 		X6502_Run((scanlines_per_frame - 242) * (256 + 85) - 12);
 		if (overclock_enabled && vblankscanlines) {
-			overclocking = 1;
-			X6502_Run(vblankscanlines * (256 + 85) - 12);
-			overclocking = 0;
+			if (!DMC_7bit || !skip_7bit_overclocking) {
+				overclocking = 1;
+				X6502_Run(vblankscanlines * (256 + 85) - 12);
+				overclocking = 0;
+			}
 		}
 		PPU_status &= 0x1f;
 		X6502_Run(256);
