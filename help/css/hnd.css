@@ -373,39 +373,66 @@ span.rvts73
  font-weight: bold;
  text-decoration: underline;
 }
-a.rvts74, span.rvts74
+span.rvts74
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #00007f;
+}
+span.rvts75
+{
+ font-size: 14pt;
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts76
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts77
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #00007f;
+}
+span.rvts78
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ color: ;
+}
+a.rvts79, span.rvts79
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts74:hover { color: #0000ff; }
-a.rvts75, span.rvts75
+a.rvts79:hover { color: #0000ff; }
+a.rvts80, span.rvts80
 {
  font-size: 12pt;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts75:hover { color: #0000ff; }
-span.rvts76
+a.rvts80:hover { color: #0000ff; }
+span.rvts81
 {
  font-family: 'Lucida Console', 'Monaco', monospace;
  text-decoration: underline;
 }
-span.rvts77
+span.rvts82
 {
  font-weight: bold;
  text-decoration: underline;
 }
-span.rvts78
+span.rvts83
 {
  font-size: 11pt;
  text-decoration: underline;
 }
-span.rvts79
+span.rvts84
 {
  font-size: 5pt;
 }
-span.rvts80
+span.rvts85
 {
  font-size: 5pt;
  font-weight: bold;
@@ -447,4 +474,7 @@ p,ul,ol /* Paragraph Style */
 {
  text-indent: 48px;
  margin: 0px 0px 0px 48px;
+}
+.rvps7 /* Paragraph Style */
+{
 }

@@ -149,6 +149,16 @@
 <p><span class="rvts37">Note: This might result in an error if the medium of the movie file is not writeable (such as in an archive file).</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">While this variable only applies to movies, it is stored as a global variable and can be modified even without a movie loaded. &nbsp;Hence, it is in the emu library rather than the movie library.</span></p>
+<p><span class="rvts76"><br/></span></p>
+<p><span class="rvts77">emu.getdir()</span></p>
+<p><span class="rvts78"><br/></span></p>
+<p><span class="rvts78">Returns the path of fceux.exe as a string.</span></p>
+<p><span class="rvts77"><br/></span></p>
+<p><span class="rvts77">emu.loadrom(string filename)</span></p>
+<p><span class="rvts78"><br/></span></p>
+<p><span class="rvts78">Loads the ROM from the directory relative to the lua script or from the absolute path. Hence, the filename parameter can be absolute or relative path.</span></p>
+<p><span class="rvts78"><br/></span></p>
+<p><span class="rvts78">If the ROM can't e loaded, loads the most recent one.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts62">emu.registerbefore(function func)</span></p>
 <p><span class="rvts37"><br/></span></p>
@@ -221,7 +231,12 @@
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">This includes the header! It's the same as opening the file in a hex-editor.</span></p>
 <p><span class="rvts37"><br/></span></p>
+<p class="rvps7"><span class="rvts74">rom.writebyte()</span></p>
 <p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37">Write the value to the ROM at the given address. The value is modded with 256 before writing (so writing 257 will actually write 1). Negative values allowed.</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37">Editing the header is not available.</span></p>
+<p><span class="rvts75"><br/></span></p>
 <p><span class="rvts71">Memory Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts62">memory.readbyte(int address)</span></p>
@@ -812,7 +827,7 @@
 	<div id="topic_footer">
 
 			<div id="topic_footer_content">
-				2013</div>
+				2016</div>
 		</div>
 	</body>
 	
