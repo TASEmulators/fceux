@@ -28,6 +28,7 @@
 
 #ifdef WIN32
 #include "drivers/win/common.h"
+#include "drivers/win/main.h"
 #include "drivers/win/taseditor/selection.h"
 #include "drivers/win/taseditor/laglog.h"
 #include "drivers/win/taseditor/markers.h"
@@ -462,7 +463,44 @@ static int emu_message(lua_State *L) {
 	FCEU_DispMessage("%s",0, msg);
 
 	return 0;
+}
 
+// emu.getdir()
+//
+//  Returns the path of fceux.exe as a string.
+static int emu_getdir(lua_State *L) {
+#ifdef WIN32
+	TCHAR fullPath[2048];
+	TCHAR driveLetter[3];
+	TCHAR directory[2048];
+	TCHAR finalPath[2048];
+
+	GetModuleFileName(NULL, fullPath, 2048);
+	_splitpath(fullPath, driveLetter, directory, NULL, NULL);
+	snprintf(finalPath, sizeof(finalPath), "%s%s", driveLetter, directory);
+	lua_pushstring(L, finalPath);
+
+	return 1;
+#endif
+}
+
+// emu.loadrom(string filename)
+//
+//  Loads the rom from the directory relative to the lua script or from the absolute path.
+//  If the rom can't e loaded, loads the most recent one.
+static int emu_loadrom(lua_State *L) {
+#ifdef WIN32
+	const char *nameo2 = luaL_checkstring(L,1);
+	char nameo[2048];
+	strncpy(nameo, nameo2, sizeof(nameo));
+	if (!ALoad(nameo)) {
+		extern void LoadRecentRom(int slot);
+		LoadRecentRom(0);
+		return 0;
+	} else {
+		return 1;
+	}
+#endif
 }
 
 
@@ -5396,6 +5434,8 @@ static const struct luaL_reg emulib [] = {
 	{"getscreenpixel", emu_getscreenpixel},
 	{"readonly", movie_getreadonly},
 	{"setreadonly", movie_setreadonly},
+    {"getdir", emu_getdir},
+    {"loadrom", emu_loadrom},
 	{"print", print}, // sure, why not
 	{NULL,NULL}
 };

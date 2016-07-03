@@ -143,6 +143,8 @@ void RemoveDirs();
 void CreateDirs();
 void SetDirs();
 void FCEUX_LoadMovieExtras(const char * fname);
+bool ALoad(const char* nameo, char* innerFilename = 0, bool silent = false);
 //void initDirectories();	//adelikat 03/02/09 - commenting out reference to a directory that I commented out
+
 
 #endif

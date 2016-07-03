@@ -21,7 +21,7 @@ char *FCEUI_GetAboutString() {
 		"zeromus, punkrockguy318 (Lukas Sabota)\n"
 		"\n"
 		"Current Contributors:\n"
-		"CaH4e3, rainwarrior, feos\n"
+		"CaH4e3, feos, rainwarrior\n"
 		"\n"
 		"Past Contributors:\n"
 		"xhainingx, gocha, AnS\n"
