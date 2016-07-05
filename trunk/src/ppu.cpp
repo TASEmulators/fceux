@@ -1225,7 +1225,7 @@ static void Fixit1(void) {
 
 void MMC5_hb(int);		//Ugh ugh ugh.
 static void DoLine(void) {
-	if (overclocking) {
+	if (scanline >= 240 && scanline != totalscanlines) {
 		X6502_Run(256 + 69);
 		scanline++;
 		X6502_Run(16);
@@ -1233,8 +1233,8 @@ static void DoLine(void) {
 	}
 
 	int x;
-	uint8 *target = XBuf + (scanline << 8);
-	u8* dtarget = XDBuf + (scanline << 8);
+	uint8 *target = XBuf + ((scanline < 240 ? scanline : 240) << 8);
+	u8* dtarget = XDBuf + ((scanline < 240 ? scanline : 240) << 8);
 
 	if (MMC5Hack) MMC5_hb(scanline);
 
@@ -1824,9 +1824,10 @@ int FCEUPPU_Loop(int skip) {
 
 			for (scanline = 0; scanline < totalscanlines; ) {	//scanline is incremented in  DoLine.  Evil. :/
 				deempcnt[deemp]++;
-				if (scanline < normalscanlines)
+				if (scanline < 240)
 					DEBUG(FCEUD_UpdatePPUView(scanline, 1));
 				DoLine();
+
 				if (scanline < normalscanlines || scanline == totalscanlines)
 					overclocking = 0;
 				else {
