@@ -874,6 +874,9 @@ void FCEU_ResetVidSys(void) {
 
 	PAL = w ? 1 : 0;
 
+	if (PAL)
+		dendy = 0;
+
 	if (newppu)
 		overclock_enabled = 0;
 
