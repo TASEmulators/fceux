@@ -72,6 +72,7 @@ extern int palsaturation;
 extern int palsharpness;
 extern int palcontrast;
 extern int palbrightness;
+extern bool paldeemphswap;
 
 extern TASEDITOR_CONFIG taseditorConfig;
 extern char* recentProjectsArray[];
@@ -191,6 +192,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(palsharpness),
 	AC(palcontrast),
 	AC(palbrightness),
+	AC(paldeemphswap),
 
 	NAC("palyo",pal_emulation),
 	NAC("genie",genie),
