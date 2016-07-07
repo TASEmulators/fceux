@@ -77,9 +77,11 @@
 <p>Sets the image size during full screen mode. By default this is automatically set to match current display resolution. You can change the resolution by entering different values.</p>
 <p><br/></p>
 <p><span class="rvts40">Special Scaler</span></p>
-<p>Within this box is four options: Hq2x, Scale2x, Hq3x, and Scale3x. </p>
+<p>Within this box is eight options: hq2x, Scale2x, NTSC 2x, hq3x, Scale3x, Prescale2x, Prescale3x, and Prescale4x.</p>
 <p>- Scale2x/3x just attempts to render out the corners of the pixels to make them look a bit rounder. "2x" means two times bigger than 1x1 and "3x" means three times bigger than 1x1.</p>
 <p>- Hq2x/3x does a much better job than scale2x/3x by smearing the pixels together with a slight blur. However, Hq2x/3x requires a faster computer for decent speed (at least 1 GHz and above). "2x" means two times bigger than 1x1 and "3x" means three times bigger than 1x1.</p>
+<p>- NTSC 2x simulates visual artifacts that are produced by analog (composite) video sygnal that the real console generates.</p>
+<p>- Prescale2x/3x/4x upscales the source picture using a pixel based (nearest neighbor) algorithm, that allows to change the level of interpolation, applied when using hardware acceleration.</p>
 <p><br/></p>
 <p><span class="rvts40">Sync Method</span></p>
 <p>If the emulator is running poorly, trying out these sync options can help make it run smoother (fix image tearing).</p>
@@ -101,7 +103,7 @@
 <p>Checking this will only allow the correct aspect ratio while resizing the window.</p>
 <p><br/></p>
 <p><span class="rvts40">Special Scaler</span></p>
-<p>Within this box is four options: Hq2x, Scale2x, Hq3x, and Scale3x. </p>
+<p>Within this box is eight options: hq2x, Scale2x, NTSC 2x, hq3x, Scale3x, Prescale2x, Prescale3x, and Prescale4x.</p>
 <p><br/></p>
 <p><span class="rvts40">Sync Method</span></p>
 <p>If the emulator is running poorly, trying out these sync options can help make it run smoother (fix image tearing).</p>
