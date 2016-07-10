@@ -446,7 +446,7 @@ void UpdateCheckedMenuItems()
 	CheckMenuItem(fceumenu, ID_INPUTDISPLAY_OLDSTYLEDISP, oldInputDisplay?MF_CHECKED:MF_UNCHECKED);
 
 	//Config - Region SubMenu
-	if (pal_emulation)
+	if (PAL)
 		CheckMenuRadioItem(fceumenu, MENU_NTSC, MENU_DENDY, MENU_PAL, MF_BYCOMMAND);
 	else if (dendy)
 		CheckMenuRadioItem(fceumenu, MENU_NTSC, MENU_DENDY, MENU_DENDY, MF_BYCOMMAND);

@@ -1869,7 +1869,7 @@ BEGIN
         POPUP "PPU"
         BEGIN
             MENUITEM "Old PPU",                     ID_OLDPPU
-            MENUITEM "New PPU (slow!)",             ID_NEWPPU
+            MENUITEM "New PPU",                     ID_NEWPPU
         END
         MENUITEM SEPARATOR
         MENUITEM "&Directories...",             MENU_DIRECTORIES
