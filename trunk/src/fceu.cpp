@@ -413,6 +413,8 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	//attempt to open the files
 	FCEUFILE *fp;
 	char fullname[2048];	// this name contains both archive name and ROM file name
+	int lastpal = PAL;
+	int lastdendy = dendy;
 
 	const char* romextensions[] = { "nes", "fds", 0 };
 	fp = FCEU_fopen(name, 0, "rb", 0, -1, romextensions);
@@ -522,6 +524,18 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 
 	FCEU_ResetPalette();
 	FCEU_ResetMessages();   // Save state, status messages, etc.
+
+	if (!lastpal && PAL) {
+		FCEU_DispMessage("PAL mode set", 0);
+		FCEUI_printf("PAL mode set");
+	} else if (!lastdendy && dendy) {
+		// this won't happen, since we don't autodetect dendy, but maybe someday we will?
+		FCEU_DispMessage("Dendy mode set", 0);
+		FCEUI_printf("Dendy mode set");
+	} else if ((lastpal || lastdendy) && !(PAL || dendy)) {
+		FCEU_DispMessage("NTSC mode set", 0);
+		FCEUI_printf("NTSC mode set");
+	}
 
 	if (GameInfo->type != GIT_NSF)
 		FCEU_LoadGameCheats(0);
@@ -957,16 +971,22 @@ void FCEUI_SetRegion(int region) {
 			normalscanlines = 240;
 			pal_emulation = 0;
 			dendy = 0;
+			FCEU_DispMessage("NTSC mode set", 0);
+			FCEUI_printf("NTSC mode set");
 			break;
 		case 1: // PAL
 			normalscanlines = 240;
 			pal_emulation = 1;
 			dendy = 0;
+			FCEU_DispMessage("PAL mode set", 0);
+			FCEUI_printf("PAL mode set");
 			break;
 		case 2: // Dendy
 			normalscanlines = 290;
 			pal_emulation = 0;
 			dendy = 1;
+			FCEU_DispMessage("Dendy mode set", 0);
+			FCEUI_printf("Dendy mode set");
 			break;
 	}
 	normalscanlines += newppu;
