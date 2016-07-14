@@ -872,108 +872,6 @@ static void BlitScreenFull(uint8 *XBuf)
 	}
 
 	//mbg 6/29/06 merge
-#ifndef MSVC
-	if(vmod==5)
-	{
-		if(eoptions&EO_CLIPSIDES)
-		{
-			asm volatile(
-				"xorl %%edx, %%edx\n\t"
-				"akoop1:\n\t"
-				"movb $120,%%al     \n\t"
-				"akoop2:\n\t"
-				"movb 1(%%esi),%%dl\n\t"
-				"shl  $16,%%edx\n\t"
-				"movb (%%esi),%%dl\n\t"
-				"movl %%edx,(%%edi)\n\t"
-				"addl $2,%%esi\n\t"
-				"addl $4,%%edi\n\t"
-				"decb %%al\n\t"
-				"jne akoop2\n\t"
-				"addl $16,%%esi\n\t"
-				"addl %%ecx,%%edi\n\t"
-				"decb %%bl\n\t"
-				"jne akoop1\n\t"
-				:
-			: "S" (XBuf+FSettings.FirstSLine*256+VNSCLIP), "D" (ScreenLoc+((240-FSettings.TotalScanlines())/2)*pitch+(640-(VNSWID<<1))/2),"b" (FSettings.TotalScanlines()), "c" ((pitch-VNSWID)<<1)
-				: "%al", "%edx", "%cc" );
-		}
-		else
-		{
-			asm volatile(
-				"xorl %%edx, %%edx\n\t"
-				"koop1:\n\t"
-				"movb $128,%%al     \n\t"
-				"koop2:\n\t"
-				"movb 1(%%esi),%%dl\n\t"
-				"shl  $16,%%edx\n\t"
-				"movb (%%esi),%%dl\n\t"
-				"movl %%edx,(%%edi)\n\t"
-				"addl $2,%%esi\n\t"
-				"addl $4,%%edi\n\t"
-				"decb %%al\n\t"
-				"jne koop2\n\t"
-				"addl %%ecx,%%edi\n\t"
-				"decb %%bl\n\t"
-				"jne koop1\n\t"
-				:
-			: "S" (XBuf+FSettings.FirstSLine*256), "D" (ScreenLoc+((240-FSettings.TotalScanlines())/2)*pitch+(640-512)/2),"b" (FSettings.TotalScanlines()), "c" (pitch-512+pitch)
-				: "%al", "%edx", "%cc" );
-		}
-	}
-	else if(vmod==4)
-	{
-		if(eoptions&EO_CLIPSIDES)
-		{
-			asm volatile(
-				"ayoop1:\n\t"
-				"movb $120,%%al     \n\t"
-				"ayoop2:\n\t"
-				"movb 1(%%esi),%%dh\n\t"
-				"movb %%dh,%%dl\n\t"
-				"shl  $16,%%edx\n\t"
-				"movb (%%esi),%%dl\n\t"
-				"movb %%dl,%%dh\n\t"               // Ugh
-				"movl %%edx,(%%edi)\n\t"
-				"addl $2,%%esi\n\t"
-				"addl $4,%%edi\n\t"
-				"decb %%al\n\t"
-				"jne ayoop2\n\t"
-				"addl $16,%%esi\n\t"
-				"addl %%ecx,%%edi\n\t"
-				"decb %%bl\n\t"
-				"jne ayoop1\n\t"
-				:
-			: "S" (XBuf+FSettings.FirstSLine*256+VNSCLIP), "D" (ScreenLoc+((240-FSettings.TotalScanlines())/2)*pitch+(640-(VNSWID<<1))/2),"b" (FSettings.TotalScanlines()), "c" ((pitch-VNSWID)<<1)
-				: "%al", "%edx", "%cc" );
-		}
-		else
-		{
-			asm volatile(
-				"yoop1:\n\t"
-				"movb $128,%%al     \n\t"
-				"yoop2:\n\t"
-				"movb 1(%%esi),%%dh\n\t"
-				"movb %%dh,%%dl\n\t"
-				"shl  $16,%%edx\n\t"
-				"movb (%%esi),%%dl\n\t"
-				"movb %%dl,%%dh\n\t"               // Ugh
-				"movl %%edx,(%%edi)\n\t"
-				"addl $2,%%esi\n\t"
-				"addl $4,%%edi\n\t"
-				"decb %%al\n\t"
-				"jne yoop2\n\t"
-				"addl %%ecx,%%edi\n\t"
-				"decb %%bl\n\t"
-				"jne yoop1\n\t"
-				:
-			: "S" (XBuf+FSettings.FirstSLine*256), "D" (ScreenLoc+((240-FSettings.TotalScanlines())/2)*pitch+(640-512)/2),"b" (FSettings.TotalScanlines()), "c" (pitch-512+pitch)
-				: "%al", "%edx", "%cc" );
-		}
-	}
-	else
-#endif 
-		//mbg 6/29/06 merge
 	{
 		if(!(vmodes[vmod].flags&VMDF_DXBLT))
 		{  
@@ -986,7 +884,10 @@ static void BlitScreenFull(uint8 *XBuf)
 
 		if(bpp>=16)
 		{
-			Blit8ToHigh(XBuf+FSettings.FirstSLine*256+VNSCLIP,(uint8*)ScreenLoc, VNSWID_NU(xres), FSettings.TotalScanlines(), pitch,specmul,specmul); //mbg merge 7/17/06 added cast
+			//NOT VNSWID_NU ON PURPOSE! this is where 256 gets turned to 301
+			//we'll actually blit a subrectangle later if we clipped the sides
+			//MOREOVER: we order this to scale the whole area no matter what; a subrectangle will come out later (right?)
+			Blit8ToHigh(XBuf+FSettings.FirstSLine*256+VNSCLIP,(uint8*)ScreenLoc, 256, FSettings.TotalScanlines(), pitch,specmul,specmul); //mbg merge 7/17/06 added cast
 		}
 		else
 		{

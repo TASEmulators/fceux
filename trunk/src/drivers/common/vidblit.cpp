@@ -491,6 +491,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 	int pinc;
 	uint8 *destbackup = NULL;	/* For hq2x */
 	int pitchbackup = 0;
+
 	
 	//static int google=0;
 	//google^=1;
@@ -815,7 +816,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 					const uint8 *in = ntscblit + (Bpp * xscale);
 					uint8 *out = dest;
 					const int in_stride = Bpp * outxr * 2;
-					const int out_stride = Bpp * outxr * xscale;
+					const int out_stride = pitch;
 					for( int y = 0; y < yr; y++, in += in_stride, out += 2*out_stride ) {
 						memcpy(out, in, Bpp * outxr * xscale);
 						memcpy(out + out_stride, in, Bpp * outxr * xscale);
