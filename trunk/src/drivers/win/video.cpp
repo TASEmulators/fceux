@@ -246,7 +246,7 @@ void recalculateBestFitRect(int width, int height)
 	double screen_width = VNSWID_NU(xres);
 	double screen_height = FSettings.TotalScanlines();
 	if (eoptions & EO_TVASPECT)
-		screen_width = ceil(screen_height * (screen_width / 256) * (tvAspectX / tvAspectY));
+		screen_width = ceil(screen_height * (screen_width / xres) * (tvAspectX / tvAspectY));
 
 	int center_x = width / 2;
 	int center_y = height / 2;

@@ -344,7 +344,7 @@ void CalcWindowSize(RECT *al)
 	double screen_width = VNSWID_NU(xres);
 	double screen_height = FSettings.TotalScanlines();
 	if (eoptions & EO_TVASPECT)
-		screen_width = ceil(screen_height * (screen_width / 256) * (tvAspectX / tvAspectY));
+		screen_width = ceil(screen_height * (screen_width / xres) * (tvAspectX / tvAspectY));
 
 	al->left = 0;
 	al->top = 0;
