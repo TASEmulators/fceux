@@ -59,7 +59,7 @@
 <p><span class="rvts17">Debugger</span></p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts44">Introduction</span></p>
+<p><span class="rvts45">Introduction</span></p>
 <p><br/></p>
 <p>The debugger is a tool for inspecting and manipulating machine instructions and their execution. The debugger window has several components:</p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
@@ -72,7 +72,7 @@
 </ul>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts44">Execution and CPU State</span></p>
+<p><span class="rvts45">Execution and CPU State</span></p>
 <p><br/></p>
 <p>Execution is controlled by the set of buttons at the top-middle of the window. These allow you to break (pause) execution and inspect the current state of the NES.</p>
 <p><br/></p>
@@ -95,26 +95,26 @@
 <p><br/></p>
 <div><table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
 <tr valign="top">
-<td style="border-color: #000000; border-style: solid; width: 305px; height: 34px;"><p><span class="rvts46">HINT: When entering the address manually, these convenient strings may be used instead of the hexadecimal memory address:</span></p>
-<p><span class="rvts46">NES special addresses:</span></p>
+<td style="border-color: #000000; border-style: solid; width: 305px; height: 34px;"><p><span class="rvts47">HINT: When entering the address manually, these convenient strings may be used instead of the hexadecimal memory address:</span></p>
+<p><span class="rvts47">NES special addresses:</span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts46">NMI/VBL - non-maskable interrupt vector (at FFFA)</span></li>
-<li><span class="rvts46">RST &nbsp; &nbsp; - reset vector (at FFFC)</span></li>
-<li><span class="rvts46">IRQ &nbsp; &nbsp; - interrupt vector (at FFFE)</span></li>
+<li><span class="rvts47">NMI/VBL - non-maskable interrupt vector (at FFFA)</span></li>
+<li><span class="rvts47">RST &nbsp; &nbsp; - reset vector (at FFFC)</span></li>
+<li><span class="rvts47">IRQ &nbsp; &nbsp; - interrupt vector (at FFFE)</span></li>
 </ul>
-<p><span class="rvts46">FDS special addresses:</span></p>
+<p><span class="rvts47">FDS special addresses:</span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts46">NMI1 - non-maskable interrupt vector (at DFF6)</span></li>
-<li><span class="rvts46">NMI2 - non-maskable interrupt vector (at DFF8)</span></li>
-<li><span class="rvts46">NMI3 - non-maskable interrupt vector (at DFFA)</span></li>
-<li><span class="rvts46">RST &nbsp;- reset vector (at DFFC)</span></li>
-<li><span class="rvts46">IRQ &nbsp;- interrupt vector (at DFFE)</span></li>
+<li><span class="rvts47">NMI1 - non-maskable interrupt vector (at DFF6)</span></li>
+<li><span class="rvts47">NMI2 - non-maskable interrupt vector (at DFF8)</span></li>
+<li><span class="rvts47">NMI3 - non-maskable interrupt vector (at DFFA)</span></li>
+<li><span class="rvts47">RST &nbsp;- reset vector (at DFFC)</span></li>
+<li><span class="rvts47">IRQ &nbsp;- interrupt vector (at DFFE)</span></li>
 </ul>
-<p><span class="rvts46">NSF special addresses:</span></p>
+<p><span class="rvts47">NSF special addresses:</span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts46">LOAD - NSF LOAD address</span></li>
-<li><span class="rvts46">INIT - NSF INIT address</span></li>
-<li><span class="rvts46">PLAY - NSF PLAY address</span></li>
+<li><span class="rvts47">LOAD - NSF LOAD address</span></li>
+<li><span class="rvts47">INIT - NSF INIT address</span></li>
+<li><span class="rvts47">PLAY - NSF PLAY address</span></li>
 </ul>
 </td>
 </tr>
@@ -130,7 +130,7 @@
 <p>To the right from the PPU section there's Cycles counter and Instructions counter that keep counting while the game is running. You can use the information for keeping statistics, for code profiling or writing PPU-synchronized code (e.g. raster effects). You can also make the debugger break automatically based on the counters values. The "Reset counters" button resets both counters to 0. You can also access the counters via <a class="rvts18" href="LuaFunctionsList.html">Lua</a>.</p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts44">Disassembly</span></p>
+<p><span class="rvts45">Disassembly</span></p>
 <p><br/></p>
 <p>This large frame takes up the left side of the debugger window. It displays the current contents of memory accessible by the CPU with an automatic disassembly of that data into assembly instructions. The following memory ranges may contain useful data for inspection:</p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
@@ -142,8 +142,8 @@
 <p><br/></p>
 <p>Memory contents are displayed in this form:</p>
 <p><br/></p>
-<p><span class="rvts45">0F:C0A8:24 1F &nbsp; &nbsp; BIT $001F = #$80</span></p>
-<p><span class="rvts45">bb:mmmm:dd dd dd &nbsp;iiiiiiiiiiiii...</span></p>
+<p><span class="rvts46">0F:C0A8:24 1F &nbsp; &nbsp; BIT $001F = #$80</span></p>
+<p><span class="rvts46">bb:mmmm:dd dd dd &nbsp;iiiiiiiiiiiii...</span></p>
 <p><br/></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
 <li>bb - 16k iNES bank, designates which 16k bank from the iNES file is mapped here. Note that the number may be not the same as the actual hardware bank of the mapper.</li>
@@ -162,7 +162,7 @@
 <p>Also, when <a class="rvts18" href="CodeDataLogger.html">Code/Data Logger</a> is running, this small column displays whether the respective line of the disassembled memory was executed ("c") or it was read as Data ("d"), or it wasn't logged yet (empty space). This way you can easily distinguish which branches of the game code were executed and which weren't.</p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts44">Symbolic Debugging</span></p>
+<p><span class="rvts45">Symbolic Debugging</span></p>
 <p><br/></p>
 <p>FCEUX allows you to label any address of RAM or ROM with a human-readable symbolic name.</p>
 <p>For example, when you've figured out that at the address $C022 there's a subroutine which refills player HP, you can right-click the address and type a name like "AddHealthpoints". You can also add a comment, which will be seen while browsing the code near this address. From now on, the address will be substituted by the name everywhere - in all instructions referencing this address, in Hex Editor window, in the log produced by Trace Logger. E.g., JSR $C022 will look like JSR AddHealthpoints.</p>
@@ -175,7 +175,7 @@
 <p>You can enable and disable symbolic debugging by clicking the checkbox "Symbolic debug" in the lower right corner. In general, there's no need to disable this feature. If you need to see the actual address which got substituted by a name, you can simply left-click the name and watch its address in the "Seek To" text field. This also works when clicking a name in the Trace Logger window.</p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts44">Breakpoints</span></p>
+<p><span class="rvts45">Breakpoints</span></p>
 <p><br/></p>
 <p>Breakpoints will automatically break execution when chosen conditions are met. To create a breakpoint, click the Add button in the Breakpoints frame in the upper right corner of the debugger.</p>
 <p><br/></p>
@@ -197,9 +197,9 @@
 <p><br/></p>
 <p>Breakpoints are listed in the following form:</p>
 <p><br/></p>
-<p><span class="rvts45">aaaa EmRWXF nnnn cccc</span></p>
-<p><span class="rvts45">or</span></p>
-<p><span class="rvts45">aaaa-aaaa EmRWXF nnnn cccc</span></p>
+<p><span class="rvts46">aaaa EmRWXF nnnn cccc</span></p>
+<p><span class="rvts46">or</span></p>
+<p><span class="rvts46">aaaa-aaaa EmRWXF nnnn cccc</span></p>
 <p><br/></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
 <li>aaaa - address of breakpoint</li>
@@ -214,7 +214,7 @@
 </ul>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts44">Conditional Breakpoints</span></p>
+<p><span class="rvts45">Conditional Breakpoints</span></p>
 <p><br/></p>
 <p>Breakpoints may also have a conditional statement that causes them to execute only if that statement evaluates to true. The conditional breakpoint grammar has this form:</p>
 <p><br/></p>
@@ -242,19 +242,19 @@
 <p><span class="rvts15">Example conditions:</span></p>
 <p><br/></p>
 <p>Break only if register A is less than value at memory address $0005:</p>
-<p><span class="rvts45">A &lt; $0005</span></p>
+<p><span class="rvts46">A &lt; $0005</span></p>
 <p><br/></p>
 <p>Break only if the value at the indirect address is not equal to FF:</p>
-<p><span class="rvts45">#FF != $[$10+($11*#100)]</span></p>
+<p><span class="rvts46">#FF != $[$10+($11*#100)]</span></p>
 <p><br/></p>
 <p>Break only if flag N is clear or A is not equal to 00:</p>
-<p><span class="rvts45">(N==#0 || A!=#0)</span></p>
+<p><span class="rvts46">(N==#0 || A!=#0)</span></p>
 <p><br/></p>
 <p>Break only when accessing a data from bank 2 (the condiition is relevant when using with Read/Write-type breakpoints):</p>
-<p><span class="rvts45">T==#2</span></p>
+<p><span class="rvts46">T==#2</span></p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts44">Bookmarks</span></p>
+<p><span class="rvts45">Bookmarks</span></p>
 <p><br/></p>
 <p>A list of bookmarked addresses can be kept in the Address Bookmarks frame to make memory navigation easier. Simply type a hexadecimal address (or a convenient string, such as "NMI") and click "Add" to add it to your bookmarks. Alternatively, just left-click any address in the Disassembly window, and the address will appear in the Bookmark Add field, so you don't have to type it.</p>
 <p>Next time you wish to go to this address just double click on the bookmark.</p>
@@ -262,7 +262,7 @@
 <p>When you exit the emulator, bookmarks are saved in a .deb file named after the ROM of the debugged game. Next time you return to debugging the game, the list of bookmarks will be automatically loaded from the file.</p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts44">Inline Assembler</span></p>
+<p><span class="rvts45">Inline Assembler</span></p>
 <p><br/></p>
 <p>Open the inline assembler by left-clicking in the empty column to the left of the memory view.</p>
 <p><br/></p>
@@ -271,7 +271,7 @@
 <p>Click Apply to apply your patch to the ROM in memory. Click Undo to remove the last assembled line. After applying a patch, clicking Save will allow you to save this patch directly to the ROM file.</p>
 <p><br/></p>
 <p><br/></p>
-<p><span class="rvts44">Other</span></p>
+<p><span class="rvts45">Other</span></p>
 <p><br/></p>
 <p>If the ".DEB files" checkbox in the lower right corner of the debugger window is checked, the emulator will automatically save debug settings such as breakpoints and bookmarks in a .deb file alongside the NES ROM, and load these settings next time you open the ROM.</p>
 <p><br/></p>
