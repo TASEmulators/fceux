@@ -969,7 +969,7 @@ void openVideoConfig()
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "prescale2x");
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "prescale3x");
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "prescale4x");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "pal");
+	//gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "pal");
 	
 	// sync with cfg
 	int buf;
