@@ -36,24 +36,24 @@ a.rvts5, span.rvts5 /* Jump 2 */
 }
 span.rvts6
 {
- color: #aca899;
+ color: #808080;
 }
 span.rvts7
 {
  font-size: 15pt;
  font-family: 'Tahoma', 'Geneva', sans-serif;
  font-weight: bold;
- color: #716f64;
+ color: #404040;
 }
 span.rvts8
 {
  font-weight: bold;
- color: #aca899;
+ color: #808080;
 }
 span.rvts9
 {
  font-style: italic;
- color: #aca899;
+ color: #808080;
 }
 span.rvts10
 {
@@ -107,24 +107,24 @@ span.rvts19
  font-size: 12pt;
  text-decoration: underline;
 }
-span.rvts20 /* Font Style */
-{
-}
-span.rvts21
+span.rvts20
 {
  font-size: 18pt;
  text-decoration: underline;
 }
-span.rvts22
+span.rvts21
 {
 }
-span.rvts23
+span.rvts22
 {
  font-size: 14pt;
 }
-span.rvts24
+span.rvts23
 {
  font-size: 16pt;
+}
+span.rvts24
+{
 }
 a.rvts25, span.rvts25
 {
@@ -230,7 +230,7 @@ a.rvts44, span.rvts44
  text-decoration: underline;
 }
 a.rvts44:hover { color: #0000ff; }
-span.rvts45 /* Font Style */
+span.rvts45
 {
  font-size: 18pt;
 }
@@ -363,7 +363,7 @@ span.rvts71
  font-size: 14pt;
  font-weight: bold;
 }
-span.rvts72 /* Font Style */
+span.rvts72
 {
  font-size: 14pt;
 }
@@ -460,10 +460,10 @@ p,ul,ol /* Paragraph Style */
  padding: 2px 0px 2px 0px;
  margin: 7px 0px 7px 0px;
 }
-.rvps3 /* Paragraph Style */
+.rvps3
 {
 }
-.rvps4 /* Paragraph Style */
+.rvps4
 {
 }
 .rvps5
@@ -475,6 +475,6 @@ p,ul,ol /* Paragraph Style */
  text-indent: 48px;
  margin: 0px 0px 0px 48px;
 }
-.rvps7 /* Paragraph Style */
+.rvps7
 {
 }
