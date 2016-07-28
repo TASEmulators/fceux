@@ -144,9 +144,9 @@ ButtConfig GamePadConfig[4][12]={
 	GPZ()
 };
 
-ButtConfig GamePadPreset1[4][10]={GPZ(),GPZ(),GPZ(),GPZ()};
-ButtConfig GamePadPreset2[4][10]={GPZ(),GPZ(),GPZ(),GPZ()};
-ButtConfig GamePadPreset3[4][10]={GPZ(),GPZ(),GPZ(),GPZ()};
+ButtConfig GamePadPreset1[4][12]={GPZ(),GPZ(),GPZ(),GPZ()};
+ButtConfig GamePadPreset2[4][12]={GPZ(),GPZ(),GPZ(),GPZ()};
+ButtConfig GamePadPreset3[4][12]={GPZ(),GPZ(),GPZ(),GPZ()};
 char *InputPresetDir = 0;
 
 extern int rapidAlternator; // for auto-fire / autofire
