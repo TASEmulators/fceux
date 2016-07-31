@@ -965,7 +965,7 @@ int FCEUI_GetCurrentVidSystem(int *slstart, int *slend) {
 	return(PAL);
 }
 
-void FCEUI_SetRegion(int region, int from_menu) {
+void FCEUI_SetRegion(int region, int notify) {
 	switch (region) {
 		case 0: // NTSC
 			normalscanlines = 240;
@@ -973,7 +973,7 @@ void FCEUI_SetRegion(int region, int from_menu) {
 			dendy = 0;
 // until it's fixed on sdl. see issue #740
 #ifdef WIN32
-			if (from_menu)
+			if (notify)
 			{
 				FCEU_DispMessage("NTSC mode set", 0);
 				FCEUI_printf("NTSC mode set");
@@ -985,7 +985,7 @@ void FCEUI_SetRegion(int region, int from_menu) {
 			pal_emulation = 1;
 			dendy = 0;
 #ifdef WIN32			
-			if (from_menu)
+			if (notify)
 			{
 				FCEU_DispMessage("PAL mode set", 0);
 				FCEUI_printf("PAL mode set");
@@ -997,7 +997,7 @@ void FCEUI_SetRegion(int region, int from_menu) {
 			pal_emulation = 0;
 			dendy = 1;
 #ifdef WIN32			
-			if (from_menu)
+			if (notify)
 			{
 				FCEU_DispMessage("Dendy mode set", 0);
 				FCEUI_printf("Dendy mode set");
