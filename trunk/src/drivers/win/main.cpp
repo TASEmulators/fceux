@@ -767,12 +767,12 @@ int main(int argc,char *argv[])
 			LoadNewGamey(hAppWnd, 0);
 	}
 
-	if (pal_setting_specified && !dendy)
-	{
-		// Force the PAL setting specified in the command line, unless Dendy
-        pal_emulation = saved_pal_setting;
-        FCEUI_SetVidSystem(pal_emulation);
-	}
+	if (PAL && !dendy)
+        FCEUI_SetRegion(1, pal_setting_specified);
+	else if (dendy)
+        FCEUI_SetRegion(2, pal_setting_specified);
+	else
+        FCEUI_SetRegion(0, pal_setting_specified);
 
 	if(PaletteToLoad)
 	{

@@ -1042,7 +1042,7 @@ bool ALoad(const char *nameo, char* innerFilename, bool silent)
 
 	if (GameInfo) FCEUI_CloseGame();
 
-	if (FCEUI_LoadGameVirtual(nameo, 1, silent))
+	if (FCEUI_LoadGameVirtual(nameo, !pal_setting_specified, silent))
 	{
 		pal_emulation = FCEUI_GetCurrentVidSystem(0, 0);
 

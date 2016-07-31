@@ -19,6 +19,7 @@
  */
 
 #include "main.h"
+#include "fceu.h"
 #include "args.h"
 #include "common.h"
 #include "../common/args.h"
@@ -41,43 +42,43 @@ extern bool turbo;
 //-------------------------------------------------------------
 char *ParseArgies(int argc, char *argv[])
 {         
-        static ARGPSTRUCT FCEUArgs[]={
-         {"-pal",&pal_setting_specified,&pal_emulation,0},
-		 {"-dendy",0,&dendy,0},
-         {"-noicon",0,&status_icon,0},
-         {"-gg",0,&genie,0},
-         {"-no8lim",0,&eoptions,0x8000|EO_NOSPRLIM},
-         //{"-nofs",0,&eoptions,0},   
-         {"-clipsides",0,&eoptions,0x8000|EO_CLIPSIDES},  
-         {"-nothrottle",0,&eoptions,0x8000|EO_NOTHROTTLE},
-         {"-playmovie",0,&MovieToLoad,0x4001},
-		 {"-lua",0,&LuaToLoad,0x4001},
-		 {"-palette",0,&PaletteToLoad,0x4001},
-         {"-loadstate",0,&StateToLoad,0x4001},
-         {"-readonly",0,&replayReadOnlySetting,0},
-         {"-stopframe",0,&replayStopFrameSetting,0},
-         {"-framedisplay",0,&frame_display,0},
-         {"-inputdisplay",0,&input_display,0},
-         {"-allowUDLR",0,&allowUDLR,0},
-         {"-stopmovie",0,&pauseAfterPlayback,0},
-         {"-shutmovie",0,&closeFinishedMovie,0},
-         {"-bginput",0,&EnableBackgroundInput,0},
-         {"-turbo",0,&turbo,0},
-		 {"-pause",0,&PauseAfterLoad,0},
-		 {"-cfg",0,&ConfigToLoad,0x4001},
-		 {"-avi",0,&AviToLoad,0x4001},
-		 {"-avicapture",0,&AVICapture,0},
-				 {"-dumpinput",0,&DumpInput,0x4001},
-				 {"-playinput",0,&PlayInput,0x4001},
-         {0, 0, 0, 0},
+	static ARGPSTRUCT FCEUArgs[]={
+		{"-pal",         &pal_setting_specified,&PAL,                  0},
+	    {"-dendy",       &pal_setting_specified,&dendy,                 0},
+        {"-noicon",      0,                     &status_icon,           0},
+        {"-gg",          0,                     &genie,                 0},
+        {"-no8lim",      0,                     &eoptions,              0x8000|EO_NOSPRLIM},
+      //{"-nofs",        0,                     &eoptions,              0},   
+        {"-clipsides",   0,                     &eoptions,              0x8000|EO_CLIPSIDES},  
+        {"-nothrottle",  0,                     &eoptions,              0x8000|EO_NOTHROTTLE},
+        {"-playmovie",   0,                     &MovieToLoad,           0x4001},
+	    {"-lua",         0,                     &LuaToLoad,             0x4001},
+	    {"-palette",     0,                     &PaletteToLoad,         0x4001},
+        {"-loadstate",   0,                     &StateToLoad,           0x4001},
+        {"-readonly",    0,                     &replayReadOnlySetting, 0},
+        {"-stopframe",   0,                     &replayStopFrameSetting,0},
+        {"-framedisplay",0,                     &frame_display,         0},
+        {"-inputdisplay",0,                     &input_display,         0},
+        {"-allowUDLR",   0,                     &allowUDLR,             0},
+        {"-stopmovie",   0,                     &pauseAfterPlayback,    0},
+        {"-shutmovie",   0,                     &closeFinishedMovie,    0},
+        {"-bginput",     0,                     &EnableBackgroundInput, 0},
+        {"-turbo",       0,                     &turbo,                 0},
+	    {"-pause",       0,                     &PauseAfterLoad,        0},
+	    {"-cfg",         0,                     &ConfigToLoad,          0x4001},
+	    {"-avi",         0,                     &AviToLoad,             0x4001},
+	    {"-avicapture",  0,                     &AVICapture,            0},
+	    {"-dumpinput",   0,                     &DumpInput,             0x4001},
+	    {"-playinput",   0,                     &PlayInput,             0x4001},
+		{0,              0,                     0,                      0},
 	};
 
-       if(argc <= 1)
-	   {
-		   return(0);
-	   }
+    if(argc <= 1)
+	{
+	   return(0);
+	}
 
-       int used = ParseArguments(argc-1, &argv[1], FCEUArgs);
+    int used = ParseArguments(argc-1, &argv[1], FCEUArgs);
 
-       return(argv[used+1]);
+    return(argv[used+1]);
 }

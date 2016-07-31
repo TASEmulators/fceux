@@ -502,7 +502,8 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 // ################################## End of SP CODE ###########################
 #endif
 
-	FCEU_ResetVidSys();
+	if (OverwriteVidMode)
+		FCEU_ResetVidSys();
 
 	if (GameInfo->type != GIT_NSF)
 	{
@@ -964,7 +965,7 @@ int FCEUI_GetCurrentVidSystem(int *slstart, int *slend) {
 	return(PAL);
 }
 
-void FCEUI_SetRegion(int region) {
+void FCEUI_SetRegion(int region, int from_menu) {
 	switch (region) {
 		case 0: // NTSC
 			normalscanlines = 240;
@@ -972,26 +973,35 @@ void FCEUI_SetRegion(int region) {
 			dendy = 0;
 // until it's fixed on sdl. see issue #740
 #ifdef WIN32
-			FCEU_DispMessage("NTSC mode set", 0);
-			FCEUI_printf("NTSC mode set");
+			if (from_menu)
+			{
+				FCEU_DispMessage("NTSC mode set", 0);
+				FCEUI_printf("NTSC mode set");
+			}
 #endif
 			break;
 		case 1: // PAL
 			normalscanlines = 240;
 			pal_emulation = 1;
 			dendy = 0;
-#ifdef WIN32
-			FCEU_DispMessage("PAL mode set", 0);
-			FCEUI_printf("PAL mode set");
+#ifdef WIN32			
+			if (from_menu)
+			{
+				FCEU_DispMessage("PAL mode set", 0);
+				FCEUI_printf("PAL mode set");
+			}
 #endif
 			break;
 		case 2: // Dendy
 			normalscanlines = 290;
 			pal_emulation = 0;
 			dendy = 1;
-#ifdef WIN32
-			FCEU_DispMessage("Dendy mode set", 0);
-			FCEUI_printf("Dendy mode set");
+#ifdef WIN32			
+			if (from_menu)
+			{
+				FCEU_DispMessage("Dendy mode set", 0);
+				FCEUI_printf("Dendy mode set");
+			}
 #endif
 			break;
 	}

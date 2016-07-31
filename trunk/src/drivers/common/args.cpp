@@ -19,11 +19,11 @@
  */
 
 /****************************************************************/
-/*			FCE Ultra				*/
-/*								*/
-/*	This file contains code for parsing command-line    	*/
-/*	options.						*/
-/*								*/
+/*			FCE Ultra											*/
+/*																*/
+/*	This file contains code for parsing command-line		   	*/
+/*	options.													*/
+/*																*/
 /****************************************************************/
 
 #include <stdio.h>
