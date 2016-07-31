@@ -34,7 +34,7 @@
 * Primitive -> Number | Address | Register | Flag | PC Bank | '(' Connect ')'
 * Number    -> '#' [1-9A-F]*
 * Address   -> '$' [1-9A-F]* | '$' '[' Connect ']'
-* Register  -> 'A' | 'X' | 'Y' | 'P'
+* Register  -> 'A' | 'X' | 'Y' | 'P' | 'S'
 * Flag      -> 'N' | 'C' | 'Z' | 'I' | 'B' | 'V'
 * PC Bank   -> 'K'
 * Data Bank   -> 'T'
@@ -137,7 +137,7 @@ int isFlag(char c)
 // Determines if a character is a register
 int isRegister(char c)
 {
-	return c == 'A' || c == 'X' || c == 'Y' || c == 'P';
+	return c == 'A' || c == 'X' || c == 'Y' || c == 'P' || c == 'S';
 }
 
 // Determines if a character is for PC bank

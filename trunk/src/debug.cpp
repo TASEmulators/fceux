@@ -77,6 +77,7 @@ int getValue(int type)
 		case 'Z': return _P & Z_FLAG ? 1 : 0;
 		case 'C': return _P & C_FLAG ? 1 : 0;
 		case 'P': return _PC;
+		case 'S': return _S;
 	}
 
 	return 0;
