@@ -1,2 +1,6 @@
+@echo off
+echo Password:
+set /p ANSWER=
+@echo on
 call archive.bat
-call upload.bat %1
+call upload.bat %ANSWER%

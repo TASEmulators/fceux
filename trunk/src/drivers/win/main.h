@@ -46,6 +46,7 @@ extern int pal_setting_specified;
 // dendy and pal should have been designed alongside, using enum or alike
 // now it's not possible to do it easily, so we'll just use the flag here and there, not to touch PAL logics
 extern int dendy;
+extern int dendy_setting_specified;
 extern int status_icon;
 extern int frame_display;
 extern int rerecord_display;

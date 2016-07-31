@@ -147,6 +147,7 @@ int genie = 0;
 int pal_emulation = 0;
 int pal_setting_specified = 0;
 int dendy = 0;
+int dendy_setting_specified = 0;
 bool swapDuty = 0; // some Famicom and NES clones had duty cycle bits swapped
 int ntsccol = 0, ntsctint, ntschue;
 std::string BaseDirectory;
@@ -767,12 +768,15 @@ int main(int argc,char *argv[])
 			LoadNewGamey(hAppWnd, 0);
 	}
 
+	if (PAL && pal_setting_specified && !dendy_setting_specified)
+		dendy = 0;
+
 	if (PAL && !dendy)
         FCEUI_SetRegion(1, pal_setting_specified);
 	else if (dendy)
-        FCEUI_SetRegion(2, pal_setting_specified);
+        FCEUI_SetRegion(2, dendy_setting_specified);
 	else
-        FCEUI_SetRegion(0, pal_setting_specified);
+        FCEUI_SetRegion(0, pal_setting_specified || dendy_setting_specified);
 
 	if(PaletteToLoad)
 	{
