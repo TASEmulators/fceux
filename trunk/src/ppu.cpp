@@ -884,7 +884,7 @@ static DECLFW(B2007) {
 	uint32 tmp = RefreshAddr & 0x3FFF;
 
 	if (debug_loggingCD) {
-		if(tmp < 0x2000)
+		if(!cdloggerVideoDataSize && (tmp < 0x2000))
 			cdloggervdata[tmp] = 0;
 	}
 
