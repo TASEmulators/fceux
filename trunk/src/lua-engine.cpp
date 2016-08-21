@@ -3341,8 +3341,8 @@ static inline uint32 gui_getcolour_wrapped(lua_State *L, int offset, bool hasDef
 		}
 	case LUA_TNUMBER:
 		{
-			uint32 colour = (uint32) lua_tointeger(L,offset);
-			return colour;
+			const char *str = lua_tostring(L,offset);
+			return (uint32)strtod(str,NULL);
 		}
 	case LUA_TTABLE:
 		{
