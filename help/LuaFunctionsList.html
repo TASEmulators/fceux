@@ -292,7 +292,7 @@
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">size is the number of bytes to "watch". For example, if size is 100 and address is 0x0200, then you will register the function across all 100 bytes from 0x0200 to 0x0263. A write to any of those bytes will trigger the function. Having callbacks on a large range of memory addresses can be expensive, so try to use the smallest range that's necessary for whatever it is you're trying to do. If you don't specify any size then it defaults to 1.</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts37">The callback function will receive two arguments, (address, size) indicating what write operation triggered the callback. If you don't care about that extra information then you can ignore it and define your callback function to not take any arguments. The value that was written is NOT passed into the callback function, but you can easily use any of the memory.read functions to retrieve it.</span></p>
+<p><span class="rvts37">The callback function will receive three arguments (address, size, value) indicating what write operation triggered the callback. If you don't care about that extra information then you can ignore it and define your callback function to not take any arguments. Since 6502 writes are always single byte, the "size" argument will always be 1.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">You may use a memory.write function from inside the callback to change the value that just got written. However, keep in mind that doing so will trigger your callback again, so you must have a "base case" such as checking to make sure that the value is not already what you want it to be before writing it. Another, more drastic option is to de-register the current callback before performing the write.</span></p>
 <p><span class="rvts37"><br/></span></p>
@@ -306,7 +306,7 @@
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">Since "address" is the address in CPU address space (0x0000 - 0xFFFF), this doesn't take ROM banking into account, so the callback will be called for any bank, and in some cases you'll have to check current bank in your callback function.</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts37">The information about memory.register applies to this function as well.</span></p>
+<p><span class="rvts37">The information about memory.register applies to this function as well. The callback will receive the same three arguments, though the "value" argument will always be 0.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <div><table width="100%" border="1" cellpadding="1" cellspacing="2" style="border-color: #000000; border-style: solid;">
 <tr valign="top">
