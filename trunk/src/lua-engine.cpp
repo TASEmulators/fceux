@@ -1976,7 +1976,8 @@ static void CallRegisteredLuaMemHook_LuaMatch(unsigned int address, int size, un
 						//RefreshScriptSpeedStatus();
 						lua_pushinteger(L, address);
 						lua_pushinteger(L, size);
-						int errorcode = lua_pcall(L, 2, 0, 0);
+						lua_pushinteger(L, value);
+						int errorcode = lua_pcall(L, 3, 0, 0);
 						luaRunning /*info.running*/ = wasRunning;
 						//RefreshScriptSpeedStatus();
 						if (errorcode)
