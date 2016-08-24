@@ -1770,10 +1770,11 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	}
 	case WM_MBUTTONDOWN:
 	{
+		if (EditingMode != MODE_NES_MEMORY) return 0;
 		x = GET_X_LPARAM(lParam);
 		y = GET_Y_LPARAM(lParam);
 		i = GetAddyFromCoord(x,y);
-		if(i < 0)return 0;
+		if(i < 0) return 0;
 		FreezeRam(i, 0, 1);
 		return 0;
 	}
