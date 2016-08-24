@@ -44,7 +44,6 @@ typedef signed short int16;
 typedef signed int int32;
 #define dup _dup
 #define stat _stat
-#define fstat _fstat
 #define mkdir _mkdir
 #define alloca _alloca
 #define snprintf _snprintf
