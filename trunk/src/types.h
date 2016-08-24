@@ -47,6 +47,7 @@ typedef signed int int32;
 #define mkdir _mkdir
 #define alloca _alloca
 #define snprintf _snprintf
+#define FCEUX_fstat _fstat
 #if _MSC_VER < 1500
 #define vsnprintf _vsnprintf
 #endif
@@ -73,6 +74,8 @@ typedef int32_t int32;
 typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
+
+#define FCEUX_fstat fstat
 #endif
 
 #ifdef __GNUC__

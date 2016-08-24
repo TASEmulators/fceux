@@ -119,7 +119,7 @@ int FCEUNET_SendFile(uint8 cmd, char *fn)
 
 	if(!(fp=FCEUD_UTF8fopen(fn,"rb"))) return(0);
 
-	fstat(fileno(fp),&sb);
+	FCEUX_fstat(fileno(fp),&sb);
 	len = sb.st_size;
 	buf = (char*)FCEU_dmalloc(len); //mbg merge 7/17/06 added cast
 	fread(buf, 1, len, fp);
