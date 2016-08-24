@@ -121,6 +121,7 @@ extern int newppu;
 extern BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
 extern bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
 extern bool oldInputDisplay;
+extern int RAMInitOption;
 
 //AutoFire-----------------------------------------------
 void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
@@ -452,6 +453,9 @@ void UpdateCheckedMenuItems()
 		CheckMenuRadioItem(fceumenu, MENU_NTSC, MENU_DENDY, MENU_DENDY, MF_BYCOMMAND);
 	else		
 		CheckMenuRadioItem(fceumenu, MENU_NTSC, MENU_DENDY, MENU_NTSC, MF_BYCOMMAND);
+
+	//Config - RAM Init SubMenu
+	CheckMenuRadioItem(fceumenu, MENU_RAMINIT_DEFAULT, MENU_RAMINIT_RANDOM, MENU_RAMINIT_DEFAULT + RAMInitOption, MF_BYCOMMAND);
 
 	// Tools Menu
 	CheckMenuItem(fceumenu, MENU_ALTERNATE_AB, GetAutoFireDesynch() ? MF_CHECKED : MF_UNCHECKED);
@@ -1993,6 +1997,13 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 			case MENU_DENDY:
 				FCEUI_SetRegion(2);
+				break;
+			case MENU_RAMINIT_DEFAULT:
+			case MENU_RAMINIT_FF:
+			case MENU_RAMINIT_00:
+			case MENU_RAMINIT_RANDOM:
+				RAMInitOption = LOWORD(wParam) - MENU_RAMINIT_DEFAULT;
+				UpdateCheckedMenuItems();
 				break;
 			case MENU_DIRECTORIES:
 				ConfigDirectories();

@@ -797,17 +797,35 @@ void ResetNES(void) {
 	FCEU_DispMessage("Reset", 0);
 }
 
+
+int RAMInitOption = 0;
+// Note: this option does not currently apply to WRAM.
+// Would it be appropriate to call FCEU_MemoryRand inside FCEU_gmalloc to initialize them?
+
 void FCEU_MemoryRand(uint8 *ptr, uint32 size) {
 	int x = 0;
 	while (size) {
-		*ptr = (x & 4) ? 0xFF : 0x00;	// Huang Di DEBUG MODE enabled by default
-										// Cybernoid NO MUSIC by default
-//		*ptr = (x & 4) ? 0x7F : 0x00;	// Huang Di DEBUG MODE enabled by default
-										// Minna no Taabou no Nakayoshi Daisakusen DOESN'T BOOT
-										// Cybernoid NO MUSIC by default
-//		*ptr = (x & 1) ? 0x55 : 0xAA;	// F-15 Sity War HISCORE is screwed...
-										// 1942 SCORE/HISCORE is screwed...
-//		*ptr = 0xFF;					// Work for all cases
+		uint8 v = 0;
+		switch (RAMInitOption)
+		{
+			default:
+			case 0: v = (x & 4) ? 0xFF : 0x00; break;
+			case 1: v = 0xFF; break;
+			case 2: v = 0x00; break;
+			case 3: v = uint8(rand()); break;
+
+			// the default is this 8 byte pattern: 00 00 00 00 FF FF FF FF
+			// it has been used in FCEUX since time immemorial
+
+			// Some games to examine uninitialied RAM problems with:
+			// * Cybernoid - music option starts turned off with default pattern
+			// * Huang Di - debug mode is enabled with default pattern
+			// * Minna no Taabou no Nakayoshi Daisakusen - fails to boot with some patterns
+			// * F-15 City War - high score table
+			// * 1942 - high score table
+			// * Cheetahmen II - may start in different levels with different RAM startup
+		}
+		*ptr = v;
 		x++;
 		size--;
 		ptr++;
@@ -826,13 +844,6 @@ void PowerNES(void) {
 
 	FCEU_GeniePower();
 
-	//dont do this, it breaks some games: Cybernoid; Minna no Taabou no Nakayoshi Daisakusen; and maybe mechanized attack
-	//memset(RAM,0xFF,0x800);
-	//this fixes the above, but breaks Huang Di, which expects $100 to be non-zero or else it believes it has debug cheats enabled, giving you moon jump and other great but likely unwanted things
-	//FCEU_MemoryRand(RAM,0x800);
-	//this should work better, based on observational evidence. fixes all of the above:
-	//for(int i=0;i<0x800;i++) if(i&1) RAM[i] = 0xAA; else RAM[i] = 0x55;
-	//but we're leaving this for now until we collect some more data
 	FCEU_MemoryRand(RAM, 0x800);
 
 	SetReadHandler(0x0000, 0xFFFF, ANull);

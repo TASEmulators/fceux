@@ -73,6 +73,7 @@ extern int palsharpness;
 extern int palcontrast;
 extern int palbrightness;
 extern bool paldeemphswap;
+extern int RAMInitOption;
 
 extern TASEDITOR_CONFIG taseditorConfig;
 extern char* recentProjectsArray[];
@@ -123,6 +124,9 @@ extern int HexFreezeColorB;
 extern int RomFreezeColorR;
 extern int RomFreezeColorG;
 extern int RomFreezeColorB;
+extern int HexBoundColorR;
+extern int HexBoundColorG;
+extern int HexBoundColorB;
 
 //adelikat:  Hacky fix for Ram Watch recent menu
 char* ramWatchRecent[] = {0, 0, 0, 0, 0};
@@ -183,6 +187,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(ntsccol_enable),AC(ntsctint),AC(ntschue),
 	AC(force_grayscale),
 	AC(dendy),
+	AC(RAMInitOption),
 	AC(postrenderscanlines),
 	AC(vblankscanlines),
 	AC(overclock_enabled),
@@ -444,6 +449,9 @@ static CFGSTRUCT fceuconfig[] =
 	AC(RomFreezeColorR),
 	AC(RomFreezeColorG),
 	AC(RomFreezeColorB),
+	AC(HexBoundColorR),
+	AC(HexBoundColorG),
+	AC(HexBoundColorB),
 	//ACS(memwLastfile[2048]),
 
 	AC(AutoRWLoad),

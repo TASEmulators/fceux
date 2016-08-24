@@ -1229,6 +1229,10 @@
 #define MENU_MV_FILE_DUMP_64K           40590
 #define ID_CONFIG_REGION                40591
 #define MENU_MV_FILE_DUMP_OAM           40592
+#define MENU_RAMINIT_DEFAULT            40593
+#define MENU_RAMINIT_FF                 40594
+#define MENU_RAMINIT_00                 40595
+#define MENU_RAMINIT_RANDOM             40596
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426

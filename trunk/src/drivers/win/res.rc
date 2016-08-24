@@ -1871,6 +1871,13 @@ BEGIN
             MENUITEM "Old PPU",                     ID_OLDPPU
             MENUITEM "New PPU",                     ID_NEWPPU
         END
+        POPUP "RAM Init"
+        BEGIN
+            MENUITEM "&Default",                     MENU_RAMINIT_DEFAULT
+            MENUITEM "Fill $&FF",                    MENU_RAMINIT_FF
+            MENUITEM "Fill $&00",                    MENU_RAMINIT_00
+            MENUITEM "&Random",                      MENU_RAMINIT_RANDOM
+        END
         MENUITEM SEPARATOR
         MENUITEM "&Directories...",             MENU_DIRECTORIES
         MENUITEM "&GUI...",                     MENU_GUI_OPTIONS
