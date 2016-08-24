@@ -2045,6 +2045,7 @@ BEGIN
         BEGIN
             MENUITEM "&Ram",                        MENU_MV_FILE_DUMP_RAM
             MENUITEM "&PPU Memory",                 MENU_MV_FILE_DUMP_PPU
+            MENUITEM "&OAM Memory",                 MENU_MV_FILE_DUMP_OAM
             MENUITEM "6502 64K",                    MENU_MV_FILE_DUMP_64K
         END
         MENUITEM "&Goto Address\tCtrl+A",       MENU_MV_FILE_GOTO_ADDRESS
@@ -2064,6 +2065,7 @@ BEGIN
     BEGIN
         MENUITEM "&NES Memory",                 MENU_MV_VIEW_RAM
         MENUITEM "&PPU Memory",                 MENU_MV_VIEW_PPU
+        MENUITEM "&OAM Memory",                 MENU_MV_VIEW_OAM
         MENUITEM "&ROM File",                   MENU_MV_VIEW_ROM
     END
     POPUP "Highlighting"

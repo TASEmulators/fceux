@@ -384,9 +384,10 @@
 #define MENU_BACKGROUND_INPUT           302
 #define IDC_LABEL_UNDOCOUNT             302
 #define IDC_BTN_CHEAT_DEL               302
-#define MENU_MV_VIEW_ROM                302
 #define IDC_VIDEOCONFIG_XSCALE          302
 #define IDC_DEBUGGER_BP_LIST            302
+#define MENU_MV_VIEW_OAM                302
+#define MENU_MV_VIEW_ROM                303
 #define MENU_SHOW_STATUS_ICON           303
 #define IDC_LABEL_AUTHORINFO            303
 #define IDC_BTN_CHEAT_UPD               303
@@ -1227,6 +1228,7 @@
 #define ID_DUMPTOFILE_CPUBUS            40589
 #define MENU_MV_FILE_DUMP_64K           40590
 #define ID_CONFIG_REGION                40591
+#define MENU_MV_FILE_DUMP_OAM           40592
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
