@@ -28,6 +28,8 @@
 #define TYPE_ADDR 4
 #define TYPE_PC_BANK 5
 #define TYPE_DATA_BANK 6
+#define TYPE_VALUE_READ 7
+#define TYPE_VALUE_WRITE 8
 
 #define OP_NO 0
 #define OP_EQ 1
@@ -43,7 +45,9 @@
 #define OP_OR 11
 #define OP_AND 12
 
-extern uint16 addressOfTheLastAccessedData;
+extern uint16 debugLastAddress;
+extern uint8 debugLastOpcode;
+
 //mbg merge 7/18/06 turned into sane c++
 struct Condition
 {

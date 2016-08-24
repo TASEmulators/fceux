@@ -310,6 +310,32 @@ uint8 GetPPUMem(uint8 A) {
 
 //---------------------
 
+uint8 evaluateWrite(uint8 opcode, uint16 address)
+{
+	// predicts value written by this opcode
+	switch (opwrite[opcode])
+	{
+		default:
+		case  0: return 0; // no write
+		case  1: return _A; // STA, PHA
+		case  2: return _X; // STX
+		case  3: return _Y; // STY
+		case  4: return _P; // PHP
+		case  5: return GetMem(address) << 1; // ASL (SLO)
+		case  6: return GetMem(address) >> 1; // LSR (SRE)
+		case  7: return (GetMem(address) << 1) | (_P & 1); // ROL (RLA)
+		case  8: return (GetMem(address) >> 1) | ((_P & 1) << 7); // ROL (RRA)
+		case  9: return GetMem(address) + 1; // INC (ISC)
+		case 10: return GetMem(address) - 1; // DEC (DCP)
+		case 11: return _A & _X; // (SAX)
+		case 12: return _A&_X&(((address-_Y)>>8)+1); // (AHX)
+		case 13: return _Y&(((address-_X)>>8)+1); // (SHY)
+		case 14: return _X&(((address-_Y)>>8)+1); // (SHX)
+		case 15: return _S& (((address-_Y)>>8)+1); // (TAS)
+	}
+	return 0;
+}
+
 // Evaluates a condition
 int evaluate(Condition* c)
 {
@@ -335,7 +361,9 @@ int evaluate(Condition* c)
 	{
 		case TYPE_ADDR: value1 = GetMem(value1); break;
 		case TYPE_PC_BANK: value1 = getBank(_PC); break;
-		case TYPE_DATA_BANK: value1 = getBank(addressOfTheLastAccessedData); break;
+		case TYPE_DATA_BANK: value1 = getBank(debugLastAddress); break;
+		case TYPE_VALUE_READ: value1 = GetMem(debugLastAddress); break;
+		case TYPE_VALUE_WRITE: value1 = evaluateWrite(debugLastOpcode, debugLastAddress); break;
 	}
 
 	f = value1;
@@ -360,7 +388,9 @@ int evaluate(Condition* c)
 	{
 		case TYPE_ADDR: value2 = GetMem(value2); break;
 		case TYPE_PC_BANK: value2 = getBank(_PC); break;
-		case TYPE_DATA_BANK: value2 = getBank(addressOfTheLastAccessedData); break;
+		case TYPE_DATA_BANK: value2 = getBank(debugLastAddress); break;
+		case TYPE_VALUE_READ: value2 = GetMem(debugLastAddress); break;
+		case TYPE_VALUE_WRITE: value2 = evaluateWrite(debugLastOpcode, debugLastAddress); break;
 	}
 
 		switch (c->op)
@@ -507,6 +537,11 @@ void BreakHit(int bp_num, bool force)
 {
 	if(!force)
 	{
+		if (bp_num >= 0 && !condition(&watchpoint[bp_num]))
+		{
+			return; // condition rejected
+		}
+
 		//check to see whether we fall in any forbid zone
 		for (int i = 0; i < numWPs; i++)
 		{
@@ -543,6 +578,9 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 	uint8 brk_type;
 	uint8 stackop=0;
 	uint8 stackopstartaddr,stackopendaddr;
+
+	debugLastAddress = A;
+	debugLastOpcode = opcode[0];
 
 	if (break_asap)
 	{
@@ -606,24 +644,23 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 	switch (opcode[0]) {
 		//Push Ops
 		case 0x08: //Fall to next
-		case 0x48: stackopstartaddr=stackopendaddr=X.S-1; stackop=WP_W; StackAddrBackup = X.S; StackNextIgnorePC=_PC+1; break;
+		case 0x48: debugLastAddress=stackopstartaddr=stackopendaddr=X.S-1; stackop=WP_W; StackAddrBackup = X.S; StackNextIgnorePC=_PC+1; break;
 		//Pull Ops
 		case 0x28: //Fall to next
-		case 0x68: stackopstartaddr=stackopendaddr=X.S+1; stackop=WP_R; StackAddrBackup = X.S; StackNextIgnorePC=_PC+1; break;
+		case 0x68: debugLastAddress=stackopstartaddr=stackopendaddr=X.S+1; stackop=WP_R; StackAddrBackup = X.S; StackNextIgnorePC=_PC+1; break;
 		//JSR (Includes return address - 1)
 		case 0x20: stackopstartaddr=stackopendaddr=X.S-1; stackop=WP_W; StackAddrBackup = X.S; StackNextIgnorePC=(opcode[1]|opcode[2]<<8); break;
 		//RTI (Includes processor status, and exact return address)
 		case 0x40: stackopstartaddr=X.S+1; stackopendaddr=X.S+3; stackop=WP_R; StackAddrBackup = X.S; StackNextIgnorePC=(GetMem(X.S+2|0x0100)|GetMem(X.S+3|0x0100)<<8); break;
 		//RTS (Includes return address - 1)
 		case 0x60: stackopstartaddr=X.S+1; stackopendaddr=X.S+2; stackop=WP_R; StackAddrBackup = X.S; StackNextIgnorePC=(GetMem(stackopstartaddr|0x0100)|GetMem(stackopendaddr|0x0100)<<8)+1; break;
+		default: break;
 	}
 
 	for (i = 0; i < numWPs; i++)
 	{
-// ################################## Start of SP CODE ###########################
-		if ((watchpoint[i].flags & WP_E) && condition(&watchpoint[i]))
+		if ((watchpoint[i].flags & WP_E))
 		{
-// ################################## End of SP CODE ###########################
 			if (watchpoint[i].flags & BT_P)
 			{
 				// PPU Mem breaks
@@ -747,9 +784,7 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 
 				}
 			}
-// ################################## Start of SP CODE ###########################
 		}
-// ################################## End of SP CODE ###########################
 	}
 
 	//Update the stack address with the current one, now that changes have registered.
@@ -761,6 +796,7 @@ void DebugCycle()
 {
 	uint8 opcode[3] = {0};
 	uint16 A = 0, tmp;
+	uint8 V = 0;
 	int size;
 
 	if (scanline == 240)
@@ -782,9 +818,12 @@ void DebugCycle()
 	size = opsize[opcode[0]];
 	switch (size)
 	{
+		default:
+		case 1: break;
 		case 2:
 			opcode[1] = GetMem(_PC + 1);
 			break;
+		case 0: // illegal instructions may have operands
 		case 3:
 			opcode[1] = GetMem(_PC + 1);
 			opcode[2] = GetMem(_PC + 2);
@@ -808,7 +847,6 @@ void DebugCycle()
 		case 7: A = (opcode[1] | (opcode[2] << 8)) + _X; break;
 		case 8: A = opcode[1] + _Y; break;
 	}
-	addressOfTheLastAccessedData = A;
 
 	if (numWPs || dbgstate.step || dbgstate.runline || dbgstate.stepout || watchpoint[64].flags || dbgstate.badopbreak || break_on_cycles || break_on_instructions || break_asap)
 		breakpoint(opcode, A, size);

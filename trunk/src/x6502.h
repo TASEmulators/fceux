@@ -31,6 +31,9 @@ extern const uint8 opsize[256];
 //the optype table is a quick way to grab the addressing mode for any 6502 opcode
 extern const uint8 optype[256];
 
+// the opwrite table aids in predicting the value written for any 6502 opcode
+extern const uint8 opwrite[256];
+
 //-----------
 //mbg 6/30/06 - some of this was removed to mimic XD
 //#ifdef FCEUDEF_DEBUGGER

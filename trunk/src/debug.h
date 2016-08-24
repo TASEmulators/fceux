@@ -49,13 +49,11 @@ typedef struct {
 	uint16 address;
 	uint16 endaddress;
 	uint8 flags;
-// ################################## Start of SP CODE ###########################
 
 	Condition* cond;
 	char* condText;
 	char* desc;
 
-// ################################## End of SP CODE ###########################
 } watchpointinfo;
 
 //mbg merge 7/18/06 had to make this extern

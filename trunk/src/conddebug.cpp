@@ -35,9 +35,10 @@
 * Number    -> '#' [1-9A-F]*
 * Address   -> '$' [1-9A-F]* | '$' '[' Connect ']'
 * Register  -> 'A' | 'X' | 'Y' | 'P' | 'S'
-* Flag      -> 'N' | 'C' | 'Z' | 'I' | 'B' | 'V'
+* Flag      -> 'N' | 'C' | 'Z' | 'I' | 'B' | 'V' | 'U' | 'D'
 * PC Bank   -> 'K'
-* Data Bank   -> 'T'
+* Data Bank -> 'T'
+* Value     -> 'R' | 'W'
 */
 
 #include "types.h"
@@ -50,8 +51,9 @@
 #include <cassert>
 #include <cctype>
 
-// hack: this address is used by 'T' condition
-uint16 addressOfTheLastAccessedData = 0;
+uint16 debugLastAddress = 0; // used by 'T' and 'R' conditions
+uint8 debugLastOpcode; // used to evaluate 'W' condition
+
 // Next non-whitespace character in string
 char next;
 
@@ -150,6 +152,18 @@ int isPCBank(char c)
 int isDataBank(char c)
 {
 	return c == 'T';
+}
+
+// Determines if a character is for value read
+int isValueRead(char c)
+{
+	return c == 'R';
+}
+
+// Determines if a character is for value write
+int isValueWrite(char c)
+{
+	return c == 'W';
 }
 
 // Reads a hexadecimal number from str
@@ -265,6 +279,40 @@ Condition* Primitive(const char** str, Condition* c)
 		else
 		{
 			c->type2 = TYPE_DATA_BANK;
+			c->value2 = next;
+		}
+
+		scan(str);
+
+		return c;
+	}
+	else if (isValueRead(next))
+	{
+		if (c->type1 == TYPE_NO)
+		{
+			c->type1 = TYPE_VALUE_READ;
+			c->value1 = next;
+		}
+		else
+		{
+			c->type2 = TYPE_VALUE_READ;
+			c->value2 = next;
+		}
+
+		scan(str);
+
+		return c;
+	}
+	else if (isValueWrite(next))
+	{
+		if (c->type1 == TYPE_NO)
+		{
+			c->type1 = TYPE_VALUE_WRITE;
+			c->value1 = next;
+		}
+		else
+		{
+			c->type2 = TYPE_VALUE_WRITE;
 			c->value2 = next;
 		}
 
