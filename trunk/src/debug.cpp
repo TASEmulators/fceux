@@ -796,7 +796,6 @@ void DebugCycle()
 {
 	uint8 opcode[3] = {0};
 	uint16 A = 0, tmp;
-	uint8 V = 0;
 	int size;
 
 	if (scanline == 240)
