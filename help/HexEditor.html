@@ -75,7 +75,10 @@
 <p><span class="rvts32">2. PPU MEMORY</span></p>
 <p>This allows you to directly view and write to PPU memory (VRAM).</p>
 <p><br/></p>
-<p><span class="rvts32">3. THE ROM FILE</span></p>
+<p><span class="rvts32">3. OAM MEMORY</span></p>
+<p>This allows you to directly view and write to OAM memory (sprite RAM).</p>
+<p><br/></p>
+<p><span class="rvts32">4. THE ROM FILE</span></p>
 <p>This allows you to edit the ROM file in real time, i.e. while the game is running. If you make a mistake, press Ctrl+Z or Edit-&gt;Undo to undo your change (then load a save-state if the game crashed).</p>
 <p><br/></p>
 <p>The Hex Editor also has support for table files (*.tbl) to map bytes to text. Each line consists of four characters of the form "xx=y", where "xx" is the hex value, and "y" is the character that that value represents. I have also added an extension to represent the Return key: &nbsp;xx=ret whereby pressing the Return key will enter that value into the ROM. &nbsp;You can copy/paste data or text by selecting it and using Ctrl+C (to copy) and Ctrl+V (to paste). Plus, there is an Edit-&gt;Find feature that you can use to search for data. This feature should be fairly intuitive, so I won't bother to explain it.</p>
@@ -109,7 +112,7 @@
 <p>This feature of the Hex Editor can draw your attention to bytes that changed their value since the last frame, or since the last update of Hex Editor window (if "Fade when paused" option is enabled).</p>
 <p>If you don't need this feature, you can switch it off in the "Highlighting" submenu.</p>
 <p>You can customize this feature by changing "fading period".</p>
-<p>IMPORTANT NOTE: this feature does not track the actual changes of RAM. It works by simply comparing current values to previously displayed values of the same addresses. That's why the feature works with RAM/PPU/ROM as well.</p>
+<p>IMPORTANT NOTE: this feature does not track the actual changes of RAM. It works by simply comparing current values to previously displayed values of the same addresses. That's why the feature works with RAM/PPU/OAM/ROM as well.</p>
 <p><br/></p>
 <p><br/></p>
 <p><br/></p>
