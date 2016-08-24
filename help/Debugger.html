@@ -227,15 +227,17 @@
 <li>Number &nbsp; &nbsp;-&gt; '#' [0123456789ABCDEF]*</li>
 <li>Address &nbsp; -&gt; '$' [0123456789ABCDEF]* | '$' '[' Connect ']'</li>
 <li>Register &nbsp;-&gt; 'A' | 'X' | 'Y' | 'P'</li>
-<li>Flag &nbsp; &nbsp; &nbsp;-&gt; 'N' | 'C' | 'Z' | 'I' | 'B' | 'V'</li>
+<li>Flag &nbsp; &nbsp; &nbsp;-&gt; 'N' | 'C' | 'Z' | 'I' | 'B' | 'V' | 'D' | 'U'</li>
 <li>PC Bank &nbsp; -&gt; 'K'</li>
 <li>Data Bank &nbsp; -&gt; 'T'</li>
+<li>Read/Write Value &nbsp; -&gt; 'R' | 'W'</li>
 </ul>
 <p><br/></p>
 <p>The parser is very strict. All numbers are hexadecimal. Always prefix a number with # for an immediate value, or $ for a memory address. If a memory address needs to be calculated use $[] with the calculation inside the brackets.</p>
 <p><br/></p>
 <p>Registers A/X/Y are 8-bit unsigned values. Register P is the 16-bit program counter.</p>
-<p>Flags evaluate to 1 if set, 0 if clear.</p>
+<p>Flags evaluate to 1 if set, 0 if clear. (U is the unused bit of the status register, and D is the unused decimal flag.)</p>
+<p>For instructions that read or write a single byte (e.g. LDA, STY, PHA, ASL abs), condition R evaluates to the value that will be read by the instruction, and condition W evaluates to the value that will be written.</p>
 <p><br/></p>
 <p>Connecting operators || or &amp;&amp; combine boolean terms. Parentheses dictate order of operations.</p>
 <p><br/></p>
