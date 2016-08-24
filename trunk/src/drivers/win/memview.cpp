@@ -124,8 +124,10 @@ popupmenu[] =
 	{0x8000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_SEEK_IN_ROM,    "Go Here In ROM File"},
 	{0x8000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_CREATE_GG_CODE, "Create Game Genie Code At This Address"},
 	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_BOOKMARK,       "Add / Remove bookmark"},
-} ;
-
+	{0x0000,0xFFFF, MODE_NES_PPU,    ID_ADDRESS_BOOKMARK,       "Add / Remove bookmark"},
+	{0x0000,0xFFFF, MODE_NES_OAM,    ID_ADDRESS_BOOKMARK,       "Add / Remove bookmark"},
+	{0x0000,0xFFFF, MODE_NES_FILE,   ID_ADDRESS_BOOKMARK,       "Add / Remove bookmark"},
+};
 #define POPUPNUM (sizeof popupmenu / sizeof popupmenu[0])
 
 int LoadTableFile();
@@ -721,6 +723,7 @@ void UpdateColorTable()
 
 	for (j=0;j<nextBookmark;j++)
 	{
+		if(hexBookmarks[j].editmode != EditingMode) continue;
 		if(((int)hexBookmarks[j].address >= CurOffset) && ((int)hexBookmarks[j].address < CurOffset+DataAmount))
 			TextColorList[hexBookmarks[j].address - CurOffset] = RGB(0,0xCC,0); // Green for Bookmarks
 	}
@@ -1316,13 +1319,12 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 			if (wParam >= '0' && wParam <= '9')
 			{
-				int newValue = handleBookmarkMenu(wParam - '0');
+				int bookmark = wParam - '0';
+				int newValue = handleBookmarkMenu(bookmark);
 
 				if (newValue != -1)
 				{
-					CurOffset = newValue;
-					CursorEndAddy = -1;
-					CursorStartAddy = hexBookmarks[wParam - '0'].address;
+					ChangeMemViewFocus(hexBookmarks[bookmark].editmode,newValue,-1);
 					UpdateColorTable();
 				}
 			}
@@ -1736,9 +1738,9 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 				break;
 			case ID_ADDRESS_BOOKMARK:
 			{
-				if (toggleBookmark(hwnd, CursorStartAddy))
+				if (toggleBookmark(hwnd, CursorStartAddy, EditingMode))
 				{
-					MessageBox(hDebug, "Can't set more than 64 breakpoints", "Error", MB_OK | MB_ICONERROR);
+					MessageBox(hDebug, "Can't set more than 64 bookmarks", "Error", MB_OK | MB_ICONERROR);
 				}
 				else
 				{
@@ -2048,13 +2050,12 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		default:
 			if (wParam >= ID_FIRST_BOOKMARK && wParam < (ID_FIRST_BOOKMARK + 64))
 			{
-				int newValue = handleBookmarkMenu(wParam - ID_FIRST_BOOKMARK);
+				int bookmark = wParam - ID_FIRST_BOOKMARK;
+				int newValue = handleBookmarkMenu(bookmark);
 
 				if (newValue != -1)
 				{
-					CurOffset = newValue;
-					CursorEndAddy = -1;
-					CursorStartAddy = hexBookmarks[wParam - ID_FIRST_BOOKMARK].address;
+					ChangeMemViewFocus(hexBookmarks[bookmark].editmode,newValue,-1);
 					UpdateColorTable();
 				}
 				return 0;
@@ -2260,7 +2261,7 @@ void FindNext(){
 		return;
 	}
 	if(!FindDirectionUp){
-		for(i = CursorStartAddy+1;i+datasize < MaxSize;i++){
+		for(i = CursorStartAddy+1;i+datasize <= MaxSize;i++){
 			found = 1;
 			for(j = 0;j < datasize;j++){
 				if(GetMemViewData(i+j) != data[j])found = 0;
@@ -2281,7 +2282,7 @@ void FindNext(){
 			}
 		}
 	} else { //FindDirection is up
-		for(i = CursorStartAddy-1;i > 0;i--){
+		for(i = CursorStartAddy-1;i >= 0;i--){
 			found = 1;
 			for(j = 0;j < datasize;j++){
 				if(GetMemViewData(i+j) != data[j])found = 0;

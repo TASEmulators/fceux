@@ -26,12 +26,13 @@ typedef struct
 {
 	char description[51];
 	unsigned int address;
+	int editmode;
 } HexBookmark;
 
 extern HexBookmark hexBookmarks[64];
 extern int nextBookmark;
 
-int toggleBookmark(HWND hwnd, uint32 address);
+int toggleBookmark(HWND hwnd, uint32 address, int mode);
 void updateBookmarkMenus(HMENU menu);
 int handleBookmarkMenu(int bookmark);
 void removeAllBookmarks(HMENU menu);

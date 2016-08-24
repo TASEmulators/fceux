@@ -12,3 +12,6 @@ void SetHexEditorAddress(int gotoaddress);
 
 extern HWND hMemView, hMemFind;
 extern int EditingMode;
+
+extern char EditString[4][20];
+

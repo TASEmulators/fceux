@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "memviewsp.h"
+#include "memview.h"
 #include "common.h"
 
 HexBookmark hexBookmarks[64];
@@ -30,8 +31,9 @@ int nextBookmark = 0;
 
 /// Finds the bookmark for a given address
 /// @param address The address to find.
+/// @param editmode The editing mode of the hex editor (RAM/PPU/OAM/ROM)
 /// @return The index of the bookmark at that address or -1 if there's no bookmark at that address.
-int findBookmark(unsigned int address)
+int findBookmark(unsigned int address, int editmode)
 {
 	int i;
 
@@ -43,7 +45,7 @@ int findBookmark(unsigned int address)
 	
 	for (i=0;i<nextBookmark;i++)
 	{
-		if (hexBookmarks[i].address == address)
+		if (hexBookmarks[i].address == address && hexBookmarks[i].editmode == editmode)
 			return i;
 	}
 	
@@ -96,19 +98,21 @@ BOOL CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 /// Attempts to add a new bookmark to the bookmark list.
 /// @param hwnd HWND of the FCEU window
 /// @param address Address of the new bookmark
+/// @param editmode The editing mode of the hex editor (RAM/PPU/OAM/ROM)
 /// @return Returns 0 if everything's OK and an error flag otherwise.
-int addBookmark(HWND hwnd, unsigned int address)
+int addBookmark(HWND hwnd, unsigned int address, int editmode)
 {
 	// Enforce a maximum of 64 bookmarks
 	if (nextBookmark < 64)
 	{
-		sprintf(bookmarkDescription, "%04X", address);
+		sprintf(bookmarkDescription, "%s %04X", EditString[editmode], address);
 	
 		// Show the bookmark name dialog
 		DialogBox(fceu_hInstance, "NAMEBOOKMARKDLG", hwnd, nameBookmarkCallB);
 		
 		// Update the bookmark description
 		hexBookmarks[nextBookmark].address = address;
+		hexBookmarks[nextBookmark].editmode = editmode;
 		strcpy(hexBookmarks[nextBookmark].description, bookmarkDescription);
 		
 		nextBookmark++;
@@ -139,14 +143,15 @@ void removeBookmark(unsigned int index)
 /// Adds or removes a bookmark from a given address
 /// @param hwnd HWND of the emu window
 /// @param address Address of the bookmark
-int toggleBookmark(HWND hwnd, uint32 address)
+/// @param editmode The editing mode of the hex editor (RAM/PPU/OAM/ROM)
+int toggleBookmark(HWND hwnd, uint32 address, int editmode)
 {
-	int val = findBookmark(address);
+	int val = findBookmark(address, editmode);
 	
 	// If there's no bookmark at the given address add one.
 	if (val == -1)
 	{
-		return addBookmark(hwnd, address);
+		return addBookmark(hwnd, address, editmode);
 	}
 	else // else remove the bookmark
 	{
@@ -193,7 +198,7 @@ int handleBookmarkMenu(int bookmark)
 {
 	if (bookmark < nextBookmark)
 	{
-		return hexBookmarks[bookmark].address - (hexBookmarks[bookmark].address % 0x10);
+		return hexBookmarks[bookmark].address;
 	}
 	
 	return -1;
