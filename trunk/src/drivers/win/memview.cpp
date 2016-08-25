@@ -854,6 +854,40 @@ void dumpToFile(const char* buffer, unsigned int size)
 	}
 }
 
+bool loadFromFile(char* buffer, unsigned int size)
+{
+	char name[513] = {0};
+
+	OPENFILENAME ofn;
+	memset(&ofn, 0, sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=fceu_hInstance;
+	ofn.lpstrTitle="Save to file ...";
+	ofn.lpstrFilter="Binary File (*.BIN)\0*.bin\0All Files (*.*)\0*.*\0\0";
+	strcpy(name, mass_replace(GetRomName(), "|", ".").c_str());
+	ofn.lpstrFile=name;
+	ofn.lpstrDefExt="bin";
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER | OFN_FILEMUSTEXIST;
+
+	if (GetOpenFileName(&ofn))
+	{
+		FILE* memfile = fopen(name, "rb");
+
+		if (!memfile || fread(buffer, 1, size, memfile) != size)
+		{
+			MessageBox(0, "Load failed", "Error", 0);
+			return false;
+		}
+
+		if (memfile)
+			fclose(memfile);
+
+		return true;
+	}
+	return false;
+}
+
 void UnfreezeAllRam() {
 
 	int i=0;
@@ -1871,6 +1905,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 				for (i=0;i<65536;i++) bar[i] = GetMem(i);
 
 				dumpToFile(bar, 65536);
+				delete [] bar;
 				return 0;
 			}
 		case MENU_MV_FILE_DUMP_PPU:
@@ -1894,6 +1929,45 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 				unsigned int i;
 				for (i=0;i<0x100;i++) bar[i] = SPRAM[i];
 				dumpToFile(bar,0x100);
+				return 0;
+			}
+
+		case MENU_MV_FILE_LOAD_RAM:
+			{
+				char bar[0x800];
+				if (loadFromFile(bar, sizeof(bar)))
+				{
+					for (uint16 addr=0; addr<sizeof(bar); ++addr)
+						BWrite[addr](addr,bar[addr]);
+				}
+				return 0;
+			}
+		case MENU_MV_FILE_LOAD_PPU:
+			{
+				char bar[0x4000];
+				if (loadFromFile(bar, sizeof(bar)))
+				{
+					for (uint16 addr=0; addr<sizeof(bar); ++addr)
+					{
+						char v = bar[addr];
+						if(addr < 0x2000)
+							VPage[addr>>10][addr] = v; //todo: detect if this is vrom and turn it red if so
+						if((addr >= 0x2000) && (addr < 0x3F00))
+							vnapage[(addr>>10)&0x3][addr&0x3FF] = v; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
+						if((addr >= 0x3F00) && (addr < 0x3FFF))
+							PALRAM[addr&0x1F] = v;
+					}
+				}
+				return 0;
+			}
+		case MENU_MV_FILE_LOAD_OAM:
+			{
+				char bar[0x100];
+				if (loadFromFile(bar, sizeof(bar)))
+				{
+					for (uint16 addr=0; addr<sizeof(bar); ++addr)
+						SPRAM[addr] = bar[addr];
+				}
 				return 0;
 			}
 

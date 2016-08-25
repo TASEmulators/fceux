@@ -1233,6 +1233,9 @@
 #define MENU_RAMINIT_FF                 40594
 #define MENU_RAMINIT_00                 40595
 #define MENU_RAMINIT_RANDOM             40596
+#define MENU_MV_FILE_LOAD_RAM           40597
+#define MENU_MV_FILE_LOAD_PPU           40598
+#define MENU_MV_FILE_LOAD_OAM           40599
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426

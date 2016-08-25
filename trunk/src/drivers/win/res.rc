@@ -2055,6 +2055,12 @@ BEGIN
             MENUITEM "&OAM Memory",                 MENU_MV_FILE_DUMP_OAM
             MENUITEM "6502 64K",                    MENU_MV_FILE_DUMP_64K
         END
+        POPUP "Load from &file"
+        BEGIN
+            MENUITEM "&Ram",                        MENU_MV_FILE_LOAD_RAM
+            MENUITEM "&PPU Memory",                 MENU_MV_FILE_LOAD_PPU
+            MENUITEM "&OAM Memory",                 MENU_MV_FILE_LOAD_OAM
+        END
         MENUITEM "&Goto Address\tCtrl+A",       MENU_MV_FILE_GOTO_ADDRESS
         MENUITEM SEPARATOR
         MENUITEM "&Close\tAlt+F4",              ID_MEMWVIEW_FILE_CLOSE
