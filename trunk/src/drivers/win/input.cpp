@@ -69,6 +69,7 @@ static void PresetExport(int preset);
 static void PresetImport(int preset);
 
 static uint32 MouseData[3];
+static int32 MouseRelative[3];
 
 //force the input types suggested by the game
 void ParseGIInput(FCEUGI *gi)
@@ -418,7 +419,9 @@ void UpdateRawInputAndHotkeys()
 
 void FCEUD_UpdateInput()
 {
-	bool joy=false,mouse=false;
+	bool joy=false;
+	bool mouse=false;
+	bool mouse_relative=false;
 	EMOVIEMODE FCEUMOVState = FCEUMOV_Mode();
 
   UpdateRawInputAndHotkeys();
@@ -431,8 +434,8 @@ void FCEUD_UpdateInput()
 			case SI_SNES: 
 				UpdateGamepad(true);
 				break;
-			case SI_MOUSE: mouse=true; break;
-			case SI_SNES_MOUSE: mouse=true; break;
+			case SI_MOUSE: mouse_relative=true; break;
+			case SI_SNES_MOUSE: mouse_relative=true; break;
 			case SI_ARKANOID: mouse=true; break;
 			case SI_ZAPPER: mouse=true; break;
 			case SI_POWERPADA:
@@ -466,9 +469,11 @@ void FCEUD_UpdateInput()
 		if(joy)
 			UpdateGamepad(false);
 
-		if(mouse)
-			if(FCEUMOVState != MOVIEMODE_PLAY)	//FatRatKnight: Moved this if out of the function
-				GetMouseData(MouseData);			//A more concise fix may be desired.
+		if (FCEUMOVState != MOVIEMODE_PLAY) //FatRatKnight: Moved this if out of the function, a more concise fix may be desired.
+		{
+			if (mouse) GetMouseData(MouseData);
+			if (mouse_relative) GetMouseRelative(MouseRelative);
+		}
 	}
 }
 
@@ -518,10 +523,10 @@ void InitInputPorts(bool fourscore)
 				InputDPtr=MouseData;
 				break;
 			case SI_MOUSE:
-				InputDPtr=MouseData;
+				InputDPtr=MouseRelative;
 				break;
 			case SI_SNES_MOUSE:
-				InputDPtr=MouseData;
+				InputDPtr=MouseRelative;
 				break;
 			case SI_SNES:
 				InputDPtr=snespad_return;

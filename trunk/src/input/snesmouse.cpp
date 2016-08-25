@@ -26,9 +26,8 @@ typedef struct {
 	bool strobe;
 	uint32 latch; // latched data (read when strobe goes high to low)
 	uint32 sensitivity; // reading while strobe is high cycles sensitivity 0,1,2
-	int32 mx, my; // current screen location
-	int32 lmx, lmy; // last latched location
-	uint32 mb; // current buttons
+	int32 dx, dy; // relative position to communicate
+	int32 mb; // current buttons
 } SNES_MOUSE;
 
 static SNES_MOUSE SNESMouse;
@@ -53,11 +52,10 @@ static void WriteSNESMouse(uint8 v)
 
 	if (SNESMouse.strobe && !strobing)
 	{
-		int dx = SNESMouse.mx - SNESMouse.lmx;
-		int dy = SNESMouse.my - SNESMouse.lmy;
-
-		SNESMouse.lmx = SNESMouse.mx;
-		SNESMouse.lmy = SNESMouse.my;
+		int dx = SNESMouse.dx;
+		int dy = SNESMouse.dy;
+		SNESMouse.dx = 0;
+		SNESMouse.dy = 0;
 
 		// convert to sign and magnitude
 		bool sx = (dx < 0);
@@ -91,9 +89,10 @@ static void WriteSNESMouse(uint8 v)
 
 static void UpdateSNESMouse(int w, void *data, int arg)
 {
-	uint32 *ptr=(uint32*)data;
-	SNESMouse.mx = ptr[0]; // screen position
-	SNESMouse.my = ptr[1];
+	int32 *ptr=(int32*)data;
+
+	SNESMouse.dx += ptr[0]; ptr[0] = 0;
+	SNESMouse.dy += ptr[1]; ptr[1] = 0;
 	SNESMouse.mb = ptr[2] & 3; // bit 0 = left button, bit 1 = right button
 }
 

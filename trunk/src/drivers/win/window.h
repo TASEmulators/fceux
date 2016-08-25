@@ -36,6 +36,7 @@ void LoadNewGamey(HWND hParent, const char *initialdir);
 int BrowseForFolder(HWND hParent, const char *htext, char *buf);
 void SetMainWindowStuff();
 void GetMouseData(uint32 (&md)[3]);
+void GetMouseRelative(int32 (&md)[3]);
 //void ChangeMenuItemText(int menuitem, string text);
 void UpdateMenuHotkeys();
 

@@ -894,10 +894,6 @@ GetMouseData (uint32 (&d)[3])
 	int x, y;
 	uint32 t;
 
-	// Don't get input when a movie is playing back
-	if (FCEUMOV_Mode (MOVIEMODE_PLAY))
-		return;
-
 	// retrieve the state of the mouse from SDL
 	t = SDL_GetMouseState (&x, &y);
 #ifdef _GTK
@@ -932,6 +928,35 @@ GetMouseData (uint32 (&d)[3])
 	d[1] = (t >> 16) & 0xFFFF;
 	// debug print 
 	// printf("mouse %d %d %d\n", d[0], d[1], d[2]);
+}
+
+void GetMouseRelative (int32 (&d)[3])
+{
+	// converts absolute mouse positions to relative ones for input devices that require this
+	
+	// The windows version additionally in fullscreen will constantly return the mouse to center screen
+	// after reading it, so that the user can endlessly keep moving the mouse.
+	// The same should eventually be implemented here, but this version should minimally provide
+	// the necessary relative input, piggybacking on the already implemented GetMouseData.
+
+	static int cx = -1;
+	static int cy = -1;
+
+	uint32 md[3];
+	GetMouseData (md);
+	
+	if (cx < 0 || cy < 0)
+	{
+		cx = md[0];
+		cy = md[1];
+	}
+
+	int dx = md[0] - cx;
+	int dy = md[1] - cy;
+	
+	d[0] = dx;
+	d[1] = dy;
+	d[2] = md[2]; // buttons
 }
 
 /**
@@ -1259,6 +1284,7 @@ UpdatePPadData (int w)
 }
 
 static uint32 MouseData[3] = { 0, 0, 0 };
+static int32 MouseRelative[3] = { 0, 0, 0 };
 
 static uint8 fkbkeys[0x48];
 
@@ -1293,7 +1319,7 @@ void FCEUD_UpdateInput ()
 				break;
 			case SI_MOUSE:
 			case SI_SNES_MOUSE:
-				t |= 2;
+				t |= 4;
 				break;
 		}
 	}
@@ -1338,9 +1364,17 @@ void FCEUD_UpdateInput ()
 		UpdateGamepad ();
 	}
 
-	if (t & 2)
+	// Don't get input when a movie is playing back
+	if (!FCEUMOV_Mode (MOVIEMODE_PLAY))
 	{
-		GetMouseData (MouseData);
+		if (t & 2)
+		{
+			GetMouseData (MouseData);
+		}
+		if (t & 4)
+		{
+			GetMouseRelative (MouseRelative);
+		}
 	}
 }
 
@@ -1405,7 +1439,7 @@ void InitInputInterface ()
 				break;
 			case SI_MOUSE:
 			case SI_SNES_MOUSE:
-				InputDPtr = MouseData;
+				InputDPtr = MouseRelative;
 				t |= 1;
 				break;
 		}

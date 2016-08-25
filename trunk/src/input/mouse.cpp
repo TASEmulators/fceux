@@ -27,27 +27,28 @@
 
 typedef struct {
 	uint8 latch;
-	int32 mx,my;
-	int32 lmx,lmy;
+	int32 dx,dy;
 	uint32 mb;
 } MOUSE;
 
 static MOUSE Mouse;
 
+// since this game only picks up 1 mickey per frame,
+// allow a single delta to spread out over a few frames
+// to make it easier to move.
+const int INERTIA = 32;
+
 static void StrobeMOUSE(int w)
 {
 	Mouse.latch = Mouse.mb & 0x03;
 
-	int32 dx = Mouse.mx - Mouse.lmx;
-	int32 dy = Mouse.my - Mouse.lmy;
+	int32 dx = Mouse.dx;
+	int32 dy = Mouse.dy;
 
-	Mouse.lmx = Mouse.mx;
-	Mouse.lmy = Mouse.my;
-
-	if      (dx > 0) Mouse.latch |= (0x2 << 2);
-	else if (dx < 0) Mouse.latch |= (0x3 << 2);
-	if      (dy > 0) Mouse.latch |= (0x2 << 4);
-	else if (dy < 0) Mouse.latch |= (0x3 << 4);
+	if      (dx > 0) { Mouse.latch |= (0x2 << 2); --Mouse.dx; }
+	else if (dx < 0) { Mouse.latch |= (0x3 << 2); ++Mouse.dx; }
+	if      (dy > 0) { Mouse.latch |= (0x2 << 4); --Mouse.dy; }
+	else if (dy < 0) { Mouse.latch |= (0x3 << 4); ++Mouse.dy; }
 
 	//FCEU_printf("Subor Mouse: %02X\n",Mouse.latch);
 }
@@ -62,9 +63,15 @@ static uint8 ReadMOUSE(int w)
 static void UpdateMOUSE(int w, void *data, int arg)
 {
 	uint32 *ptr=(uint32*)data;
-	Mouse.mx = ptr[0];
-	Mouse.my = ptr[1];
+	Mouse.dx += ptr[0]; ptr[0] = 0;
+	Mouse.dy += ptr[1]; ptr[1] = 0;
 	Mouse.mb = ptr[2];
+
+	if      (Mouse.dx >  INERTIA) Mouse.dx =  INERTIA;
+	else if (Mouse.dx < -INERTIA) Mouse.dx = -INERTIA;
+
+	if      (Mouse.dy >  INERTIA) Mouse.dy =  INERTIA;
+	else if (Mouse.dy < -INERTIA) Mouse.dy = -INERTIA;
 }
 
 static INPUTC MOUSEC={ReadMOUSE,0,StrobeMOUSE,UpdateMOUSE,0,0};

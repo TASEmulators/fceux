@@ -1200,6 +1200,46 @@ void GetMouseData(uint32 (&md)[3])
 	md[2] = ((mouseb == MK_LBUTTON) ? 1 : 0) | (( mouseb == MK_RBUTTON ) ? 2 : 0);
 }
 
+void GetMouseRelative(int32 (&md)[3])
+{
+	static int cx = -1;
+	static int cy = -1;
+
+	int dx = 0;
+	int dy = 0;
+
+	bool constrain = (fullscreen != 0) && (nofocus == 0);
+
+	if (constrain || cx < 0 || cy < 0)
+	{
+		RECT window;
+		GetWindowRect(hAppWnd, &window);
+		cx = (window.left + window.right) / 2;
+		cy = (window.top + window.bottom) / 2;
+	}
+
+	POINT cursor;
+	if (GetCursorPos(&cursor))
+	{
+		dx = cursor.x - cx;
+		dy = cursor.y - cy;
+
+		if (constrain)
+		{
+			SetCursorPos(cx,cy);
+		}
+		else
+		{
+			cx = cursor.x;
+			cy = cursor.y;
+		}
+	}
+	
+	md[0] = dx;
+	md[1] = dy;
+	md[2] = ((mouseb == MK_LBUTTON) ? 1 : 0) | (( mouseb == MK_RBUTTON ) ? 2 : 0);
+}
+
 void DumpSubtitles(HWND hWnd)
 { 
 	const char filter[]="Subtitles files (*.srt)\0*.srt\0All Files (*.*)\0*.*\0\0";
@@ -2338,8 +2378,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 		}
 
-        if(wParam==VK_F10)
-            break;			// 11.12.08 CH4 Disable F10 as System Key dammit
+		if(wParam==VK_F10)
+			break;			// 11.12.08 CH4 Disable F10 as System Key dammit
 /*
 		if(wParam == VK_RETURN)
 		{
