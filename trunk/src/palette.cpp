@@ -528,13 +528,14 @@ void WritePalette(void)
 	int x;
 
 	//set the 'unvarying' palettes to low < 64 palette entries
-	for(x=0;x<7;x++)
+	const int unvaried = sizeof(palette_unvarying)/sizeof(palette_unvarying[0]);
+	for(x=0;x<unvaried;x++)
 		FCEUD_SetPalette(x,palette_unvarying[x].r,palette_unvarying[x].g,palette_unvarying[x].b);
 
 	//clear everything else to a deterministic state.
 	//it seems likely that the text rendering on NSF has been broken since the beginning of fceux, depending on palette entries 205,205,205 everywhere
 	//this was just whatever msvc filled malloc with. on non-msvc platforms, there was no backdrop on the rendering.
-	for(x=7;x<256;x++)
+	for(x=unvaried;x<256;x++)
 		FCEUD_SetPalette(x,205,205,205);
 
 	//sets palette entries >= 128 with the 64 selected main colors

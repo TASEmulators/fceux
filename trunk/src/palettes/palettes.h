@@ -23,15 +23,32 @@ pal rp2c05004[512] = {
 	EMPTY_PALETTE_DEEMPH_X_7
 };
 
-//I think these are used for 'unvarying' palette entries, for the gui
-pal palette_unvarying[7] = {
-{ 0x00<<2,0x00<<2,0x00<<2}, // Black
-{ 0x3F<<2,0x3F<<2,0x34<<2}, // White
-{ 0x00<<2,0x00<<2,0x00<<2}, // Black
-{ 0x1d<<2,0x1d<<2,0x24<<2}, // Greyish
-{ 190,0,0    }, // Redish
-{ 51,255,51}, // Bright green
-{ 49,14,200}, 
+// Fixed palette entries used by the GUI
+pal palette_unvarying[] = {
+{ 0x00<<2,0x00<<2,0x00<<2}, //  0 = Black
+{ 0x3F<<2,0x3F<<2,0x34<<2}, //  1 = White
+{ 0x00<<2,0x00<<2,0x00<<2}, //  2 = Black
+{ 0x1d<<2,0x1d<<2,0x24<<2}, //  3 = Greyish
+{ 190,  0,  0}, //  4 = Reddish
+{  51,255, 51}, //  5 = Bright green
+{  49, 14,200}, //  6 = Ultramarine Blue
+// 16 saturated colors useful for Lua scripts
+{   0,  0,  0}, //  7 = Black
+{   0,  0,128}, //  8 = Dark Blue
+{   0,128,  0}, //  9 = Dark Green
+{   0,128,128}, // 10 = Dark Cyan
+{ 128,  0,  0}, // 11 = Dark Red
+{ 128,  0,128}, // 12 = Dark Magenta
+{ 128,128,  0}, // 13 = Dark Yellow
+{ 128,128,128}, // 14 = Light Grey
+{  64, 64, 64}, // 15 = Dark Grey
+{   0,  0,255}, // 16 = Bright Blue
+{   0,255,  0}, // 17 = Bright Green
+{   0,255,255}, // 18 = Bright Cyan
+{ 255,  0,  0}, // 19 = Bright Red
+{ 255,  0,255}, // 20 = Bright Magenta
+{ 255,255,  0}, // 21 = Bright Yellow
+{ 255,255,255}, // 22 = Bright White
 };
 
 
