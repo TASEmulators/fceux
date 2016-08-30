@@ -1592,7 +1592,7 @@ static void CopySprites(uint8 *target) {
 	if (!spork) return;
 	spork = 0;
 
-	if (!rendersprites) return;	//User asked to not display sprites.
+	//if (!rendersprites) return;	//User asked to not display sprites.
 
  loopskie:
 	{
@@ -2132,8 +2132,8 @@ int FCEUX_PPU_Loop(int skip) {
 					int rasterpos = xstart;
 
 					//check all the conditions that can cause things to render in these 8px
-					const bool renderspritenow = SpriteON && rendersprites && (xt > 0 || SpriteLeft8);
-					const bool renderbgnow = ScreenON && renderbg && (xt > 0 || BGLeft8);
+					const bool renderspritenow = SpriteON && (xt > 0 || SpriteLeft8);
+					const bool renderbgnow = ScreenON && (xt > 0 || BGLeft8);
 					for (int xp = 0; xp < 8; xp++, rasterpos++, g_rasterpos++) {
 						//bg pos is different from raster pos due to its offsetability.
 						//so adjust for that here
@@ -2160,7 +2160,9 @@ int FCEUX_PPU_Loop(int skip) {
 							uint8* pt = bgdata.main[bgtile].pt;
 							pixel = ((pt[0] >> (7 - bgpx)) & 1) | (((pt[1] >> (7 - bgpx)) & 1) << 1) | bgdata.main[bgtile].at;
 						}
-						pixelcolor = READPAL(pixel);
+						if(renderbg)
+							pixelcolor = READPAL(pixel);
+						else pixelcolor = READPAL(0);
 
 						//look for a sprite to be drawn
 						bool havepixel = false;
@@ -2193,7 +2195,9 @@ int FCEUX_PPU_Loop(int skip) {
 									rasterpos < 255) {
 									PPU_status |= 0x40;
 								}
-								havepixel = true;
+								if(rendersprites) 
+									havepixel = true;
+								else continue;
 
 								//priority handling
 								if (oam[2] & 0x20) {
