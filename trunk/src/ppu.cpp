@@ -1592,7 +1592,7 @@ static void CopySprites(uint8 *target) {
 	if (!spork) return;
 	spork = 0;
 
-	//if (!rendersprites) return;	//User asked to not display sprites.
+	if (!rendersprites) return;	//User asked to not display sprites.
 
  loopskie:
 	{
@@ -2120,6 +2120,8 @@ int FCEUX_PPU_Loop(int skip) {
 			for (int xt = 0; xt < 32; xt++) {
 				bgdata.main[xt + 2].Read();
 
+				const uint8 blank = (gNoBGFillColor == 0xFF) ? READPAL(0) : gNoBGFillColor;
+
 				//ok, we're also going to draw here.
 				//unless we're on the first dummy scanline
 				if (sl != 0 && sl < 241) { // cape at 240 for dendy, its PPU does nothing afterwards
@@ -2141,7 +2143,8 @@ int FCEUX_PPU_Loop(int skip) {
 						const int bgpx = bgpos & 7;
 						const int bgtile = bgpos >> 3;
 
-						uint8 pixel = 0, pixelcolor;
+						uint8 pixel = 0;
+						uint8 pixelcolor = blank;
 
 						//according to qeed's doc, use palette 0 or $2006's value if it is & 0x3Fxx
 						if (!ScreenON && !SpriteON)
@@ -2160,9 +2163,8 @@ int FCEUX_PPU_Loop(int skip) {
 							uint8* pt = bgdata.main[bgtile].pt;
 							pixel = ((pt[0] >> (7 - bgpx)) & 1) | (((pt[1] >> (7 - bgpx)) & 1) << 1) | bgdata.main[bgtile].at;
 						}
-						if(renderbg)
+						if (renderbg)
 							pixelcolor = READPAL(pixel);
-						else pixelcolor = READPAL(0);
 
 						//look for a sprite to be drawn
 						bool havepixel = false;
@@ -2195,9 +2197,7 @@ int FCEUX_PPU_Loop(int skip) {
 									rasterpos < 255) {
 									PPU_status |= 0x40;
 								}
-								if(rendersprites) 
-									havepixel = true;
-								else continue;
+								havepixel = true;
 
 								//priority handling
 								if (oam[2] & 0x20) {
@@ -2207,7 +2207,9 @@ int FCEUX_PPU_Loop(int skip) {
 
 								//bring in the palette bits and palettize
 								spixel |= (oam[2] & 3) << 2;
-								pixelcolor = READPAL(0x10 + spixel);
+
+								if (rendersprites)
+									pixelcolor = READPAL(0x10 + spixel);
 							}
 						}
 
