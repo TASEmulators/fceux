@@ -75,12 +75,19 @@ static void M111Power(void) {
 	SetWriteHandler(0x7000, 0x7fff, M111Write);
 }
 
+static void M111Close(void) {
+	if (CHRRAM)
+		FCEU_gfree(CHRRAM);
+	CHRRAM = NULL;
+}
+
 static void StateRestore(int version) {
 	Sync();
 }
 
 void Mapper111_Init(CartInfo *info) {
 	info->Power = M111Power;
+	info->Close = M111Close;
 
 	CHRRAMSIZE = 1024 * 32;
 	CHRRAM = (uint8*)FCEU_gmalloc(CHRRAMSIZE);
