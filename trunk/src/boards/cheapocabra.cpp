@@ -39,6 +39,7 @@ const uint32 CHRRAMSIZE = 1024 * 32;
 static bool flash = false;
 static uint8 flash_mode;
 static uint8 flash_sequence;
+static uint8 flash_id;
 static uint8 *FLASHROM = NULL;
 const uint32 FLASHROMSIZE = 1024 * 512;
 
@@ -53,6 +54,7 @@ static SFORMAT FlashRegs[] =
 {
 	{ &flash_mode, 1, "FMOD" },
 	{ &flash_sequence, 1, "FSEQ" },
+	{ &flash_id, 1, "FMID" },
 	{ 0 }
 };
 
@@ -84,19 +86,23 @@ static DECLFW(M111Write) {
 
 static DECLFR(M111FlashID)
 {
-	if      (A == 0x8000) return 0xBF;
-	else if (A == 0x8001) return 0xB7;
-	else                  return CartBR(A);
+	uint32 a0 = A & 1;
+	if   (a0 == 0) return 0xBF;
+	else           return 0xB7;
 }
 
 void M111FlashIDEnter()
 {
-	SetReadHandler(0x8000,0x8001,M111FlashID);
+	if (flash_id) return;
+	flash_id = 1;
+	SetReadHandler(0x8000,0xFFFF,M111FlashID);
 }
 
 void M111FlashIDExit()
 {
-	SetReadHandler(0x8000,0x8001,CartBR);
+	if (!flash_id) return;
+	flash_id = 0;
+	SetReadHandler(0x8000,0xFFFF,CartBR);
 }
 
 static DECLFW(M111Flash) {
@@ -204,6 +210,7 @@ static void M111Power(void) {
 	{
 		flash_mode = 0;
 		flash_sequence = 0;
+		flash_id = false;
 		SetWriteHandler(0x8000, 0xFFFF, M111Flash);
 	}
 }
