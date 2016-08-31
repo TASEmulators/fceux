@@ -275,6 +275,14 @@ struct PPUREGS {
 		v &= 1;
 		fv &= 7;
 	}
+
+	void debug_log()
+	{
+		FCEU_printf("ppur: fv(%d), v(%d), h(%d), vt(%d), ht(%d)\n",fv,v,h,vt,ht);
+		FCEU_printf("      _fv(%d), _v(%d), _h(%d), _vt(%d), _ht(%d)\n",_fv,_v,_h,_vt,_ht);
+		FCEU_printf("      fh(%d), s(%d), par(%d)\n",fh,s,par);
+		FCEU_printf("      .status cycle(%d), end_cycle(%d), sl(%d)\n",status.cycle,status.end_cycle,status.sl);
+	}
 } ppur;
 
 int newppu_get_scanline() { return ppur.status.sl; }
@@ -2022,6 +2030,13 @@ int framectr = 0;
 int FCEUX_PPU_Loop(int skip) {
 	//262 scanlines
 	if (ppudead) {
+		// problem: reset triggered by debugger may be mid-frame,
+		// causing erroneous extra PPU execution after the reset to permanently misalign ppur.status.cycle and ppur.par
+		// manually realigning them here, but a more "ideal" solution might be to check ppudead after every runppu,
+		// and goto finish so there's no time to misalign?
+		ppur.status.cycle = 0;
+		ppur.par = 0;
+
 		// not quite emulating all the NES power up behavior
 		// since it is known that the NES ignores writes to some
 		// register before around a full frame, but no games
