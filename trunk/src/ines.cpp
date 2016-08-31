@@ -561,7 +561,7 @@ static BMAPPINGLocal bmap[] = {
 	{"FDS UNROM BOARD",		108, Mapper108_Init},
 //	{"",					109, Mapper109_Init},
 //	{"",					110, Mapper110_Init},
-//	{"",					111, Mapper111_Init},
+	{"Cheapocabra",			111, Mapper111_Init},
 	{"ASDER/NTDEC BOARD",	112, Mapper112_Init},
 	{"HACKER/SACHEN BOARD",	113, Mapper113_Init},
 	{"MMC3 SG PROT. A",		114, Mapper114_Init},
