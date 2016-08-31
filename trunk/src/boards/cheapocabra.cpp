@@ -21,13 +21,14 @@
 // mapper 111 - Cheapocabra board by Memblers
 // http://forums.nesdev.com/viewtopic.php?p=146039
 //
-// 512k PRG-ROM in 32k pages
+// 512k PRG-ROM in 32k pages (flashable if battery backed is specified)
 // 32k CHR-ROM used as:
 //     2 x 8k pattern pages
 //     2 x 8k nametable pages
 //
 // Notes:
 // - CHR-RAM for nametables maps to $3000-3FFF as well, but FCEUX internally mirrors to 4k?
+// - Does not implement software ID mode for flash ROM
 
 #include "mapinc.h"
 #include "../ines.h"
