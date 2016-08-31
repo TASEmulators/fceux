@@ -70,6 +70,8 @@ static uint32 ppulut1[256];
 static uint32 ppulut2[256];
 static uint32 ppulut3[128];
 
+static bool new_ppu_reset = false;
+
 int test = 0;
 
 template<typename T, int BITS>
@@ -1696,8 +1698,7 @@ void FCEUPPU_Reset(void) {
 	kook = 0;
 	idleSynch = 1;
 
-	ppur.reset();
-	spr_read.reset();
+	new_ppu_reset = true; // delay reset of ppur/spr_read until it's ready to start a new frame
 }
 
 void FCEUPPU_Power(void) {
@@ -1957,7 +1958,10 @@ const int kFetchTime = 2;
 
 void runppu(int x) {
 	ppur.status.cycle = (ppur.status.cycle + x) % ppur.status.end_cycle;
-	X6502_Run(x);
+	if (!new_ppu_reset) // if resetting, suspend CPU until the first frame
+	{
+		X6502_Run(x);
+	}
 }
 
 //todo - consider making this a 3 or 4 slot fifo to keep from touching so much memory
@@ -2028,15 +2032,16 @@ static inline int PaletteAdjustPixel(int pixel) {
 
 int framectr = 0;
 int FCEUX_PPU_Loop(int skip) {
+
+	if (new_ppu_reset) // first frame since reset, time to initialize
+	{
+		ppur.reset();
+		spr_read.reset();
+		new_ppu_reset = false;
+	}
+
 	//262 scanlines
 	if (ppudead) {
-		// problem: reset triggered by debugger may be mid-frame,
-		// causing erroneous extra PPU execution after the reset to permanently misalign ppur.status.cycle and ppur.par
-		// manually realigning them here, but a more "ideal" solution might be to check ppudead after every runppu,
-		// and goto finish so there's no time to misalign?
-		ppur.status.cycle = 0;
-		ppur.par = 0;
-
 		// not quite emulating all the NES power up behavior
 		// since it is known that the NES ignores writes to some
 		// register before around a full frame, but no games
