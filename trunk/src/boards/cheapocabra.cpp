@@ -27,14 +27,21 @@
 //     2 x 8k nametable pages
 //
 // Notes:
-// - PRG-ROM is actually flash RAM. Self-flashing should be implemented if battery backed.
-// - CHR-RAM for nametables maps to $3000-3FFF as well, but FCEUX internally limits to 4k?
+// - CHR-RAM for nametables maps to $3000-3FFF as well, but FCEUX internally mirrors to 4k?
 
 #include "mapinc.h"
+#include "../ines.h"
 
 static uint8 reg;
 static uint8 *CHRRAM = NULL;
-static uint32 CHRRAMSIZE;
+const uint32 CHRRAMSIZE = 1024 * 32;
+
+static bool flash = false;
+static uint8 flash_mode;
+static uint8 flash_sequence;
+static uint8 *FLASHROM = NULL;
+const uint32 FLASHROMSIZE = 1024 * 512;
+
 
 static SFORMAT StateRegs[] =
 {
@@ -42,8 +49,14 @@ static SFORMAT StateRegs[] =
 	{ 0 }
 };
 
-static void Sync(void) {
+static SFORMAT FlashRegs[] =
+{
+	{ &flash_mode, 1, "FMOD" },
+	{ &flash_sequence, 1, "FSEQ" },
+	{ 0 }
+};
 
+static void Sync(void) {
 	// bit 7 controls green LED
 	// bit 6 controls red LED
 	int nt  = (reg & 0x20) ? 8192 : 0; // bit 5 controls 8k nametable page
@@ -56,7 +69,9 @@ static void Sync(void) {
 		setntamem(CHRRAM + nt + (1024 * n),1,n);
 	}
 	setchr8r(0x10, chr);
-	setprg32(0x8000,prg);
+
+	uint32 prg_chip = flash ? 0x10 : 0;
+	setprg32r(prg_chip,0x8000,prg);
 }
 
 static DECLFW(M111Write) {
@@ -67,18 +82,117 @@ static DECLFW(M111Write) {
 	}
 }
 
+static DECLFW(M111Flash) {
+	if (A < 0x8000 || A > 0xFFFF) return;
+
+	uint32 flash_addr = ((reg & 0x0F) << 15) | (A & 0x7FFF);
+	uint32 command_addr = flash_addr & 0x7FFF;
+
+	enum
+	{
+		FLASH_MODE_READY = 0,
+		FLASH_MODE_COMMAND,
+		FLASH_MODE_BYTE_WRITE,
+		FLASH_MODE_ERASE,
+	};
+
+	switch (flash_mode)
+	{
+	default:
+	case FLASH_MODE_READY:
+		if (command_addr == 0x5555 && V == 0xAA)
+		{
+			flash_mode = FLASH_MODE_COMMAND;
+			flash_sequence = 0;
+		}
+		break;
+	case FLASH_MODE_COMMAND:
+		if (flash_sequence == 0)
+		{
+			if (command_addr == 0x2AAA && V == 0x55)
+				flash_sequence = 1;
+			else
+				flash_mode = FLASH_MODE_READY;
+		}
+		else if (flash_sequence == 1)
+		{
+			if (command_addr == 0x5555)
+			{
+				flash_sequence = 0;
+				switch (V)
+				{
+				default:   flash_mode = FLASH_MODE_READY; break;
+				case 0xA0: flash_mode = FLASH_MODE_BYTE_WRITE; break;
+				case 0x80: flash_mode = FLASH_MODE_ERASE; break;
+				// 0x90 = Software ID Entry (not implemented)
+				// 0xF0 = Software ID Exit (not implemented)
+				}
+			}
+			else
+				flash_mode = FLASH_MODE_READY;
+		}
+		else
+			flash_mode = FLASH_MODE_READY; // should be unreachable
+		break;
+	case FLASH_MODE_BYTE_WRITE:
+		FLASHROM[flash_addr] &= V;
+		flash_mode = FLASH_MODE_READY;
+		break;
+	case FLASH_MODE_ERASE:
+		if (flash_sequence == 0)
+		{
+			if (command_addr == 0x5555 && V == 0xAA)
+				flash_sequence = 1;
+			else
+				flash_mode = FLASH_MODE_READY;
+		}
+		else if (flash_sequence == 1)
+		{
+			if (command_addr == 0x2AAA && V == 0x55)
+				flash_sequence = 2;
+			else
+				flash_mode = FLASH_MODE_READY;
+		}
+		else if (flash_sequence == 2)
+		{
+			if (command_addr == 0x5555 && V == 0x10) // erase chip
+			{
+				memset(FLASHROM, 0xFF, FLASHROMSIZE);
+			}
+			else if (V == 0x30) // erase 4k sector
+			{
+				uint32 sector = flash_addr & 0x7F000;
+				memset(FLASHROM + sector, 0xFF, 1024 * 4);
+			}
+			flash_mode = FLASH_MODE_READY;
+		}
+		else
+			flash_mode = FLASH_MODE_READY; // should be unreachable
+		break;
+	}
+}
+
 static void M111Power(void) {
 	reg = 0xFF;
 	Sync();
 	SetReadHandler(0x8000, 0xffff, CartBR);
 	SetWriteHandler(0x5000, 0x5fff, M111Write);
 	SetWriteHandler(0x7000, 0x7fff, M111Write);
+
+	if (flash)
+	{
+		SetWriteHandler(0x8000, 0xFFFF, M111Flash);
+	}
 }
 
 static void M111Close(void) {
 	if (CHRRAM)
 		FCEU_gfree(CHRRAM);
 	CHRRAM = NULL;
+
+	if (FLASHROM)
+		FCEU_gfree(FLASHROM);
+	FLASHROM = NULL;
 }
 
 static void StateRestore(int version) {
@@ -89,11 +203,30 @@ void Mapper111_Init(CartInfo *info) {
 	info->Power = M111Power;
 	info->Close = M111Close;
 
-	CHRRAMSIZE = 1024 * 32;
 	CHRRAM = (uint8*)FCEU_gmalloc(CHRRAMSIZE);
 	SetupCartCHRMapping(0x10, CHRRAM, CHRRAMSIZE, 1);
 
 	GameStateRestore = StateRestore;
 	AddExState(&StateRegs, ~0, 0, 0);
 	AddExState(CHRRAM, CHRRAMSIZE, 0, "CRAM");
+
+	flash = (info->battery != 0);
+	if (flash)
+	{
+		FLASHROM = (uint8*)FCEU_gmalloc(FLASHROMSIZE);
+		info->SaveGame[0] = FLASHROM;
+		info->SaveGameLen[0] = FLASHROMSIZE;
+		AddExState(FLASHROM, FLASHROMSIZE, 0, "FROM");
+		AddExState(&FlashRegs, ~0, 0, 0);
+
+		// copy PRG ROM into FLASHROM, use it instead of PRG ROM
+		const uint32 PRGSIZE = ROM_size * 16 * 1024;
+		for (uint32 w=0, r=0; w<FLASHROMSIZE; ++w)
+		{
+			FLASHROM[w] = ROM[r];
+			++r;
+			if (r >= PRGSIZE) r = 0;
+		}
+		SetupCartPRGMapping(0x10, FLASHROM, FLASHROMSIZE, 0);
+	}
 }
