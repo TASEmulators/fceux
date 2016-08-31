@@ -28,7 +28,6 @@
 //
 // Notes:
 // - CHR-RAM for nametables maps to $3000-3FFF as well, but FCEUX internally mirrors to 4k?
-// - Does not implement software ID mode for flash ROM
 
 #include "mapinc.h"
 #include "../ines.h"
@@ -83,6 +82,23 @@ static DECLFW(M111Write) {
 	}
 }
 
+static DECLFR(M111FlashID)
+{
+	if      (A == 0x8000) return 0xBF;
+	else if (A == 0x8001) return 0xB7;
+	else                  return CartBR(A);
+}
+
+void M111FlashIDEnter()
+{
+	SetReadHandler(0x8000,0x8001,M111FlashID);
+}
+
+void M111FlashIDExit()
+{
+	SetReadHandler(0x8000,0x8001,CartBR);
+}
+
 static DECLFW(M111Flash) {
 	if (A < 0x8000 || A > 0xFFFF) return;
 
@@ -106,6 +122,10 @@ static DECLFW(M111Flash) {
 			flash_mode = FLASH_MODE_COMMAND;
 			flash_sequence = 0;
 		}
+		else if (V == 0xF0)
+		{
+			M111FlashIDExit();
+		}
 		break;
 	case FLASH_MODE_COMMAND:
 		if (flash_sequence == 0)
@@ -125,8 +145,8 @@ static DECLFW(M111Flash) {
 				default:   flash_mode = FLASH_MODE_READY; break;
 				case 0xA0: flash_mode = FLASH_MODE_BYTE_WRITE; break;
 				case 0x80: flash_mode = FLASH_MODE_ERASE; break;
-				// 0x90 = Software ID Entry (not implemented)
-				// 0xF0 = Software ID Exit (not implemented)
+				case 0x90: M111FlashIDEnter(); flash_mode = FLASH_MODE_READY; break;
+				case 0xF0: M111FlashIDExit(); flash_mode = FLASH_MODE_READY; break;
 				}
 			}
 			else
@@ -182,6 +202,8 @@ static void M111Power(void) {
 
 	if (flash)
 	{
+		flash_mode = 0;
+		flash_sequence = 0;
 		SetWriteHandler(0x8000, 0xFFFF, M111Flash);
 	}
 }
