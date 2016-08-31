@@ -438,10 +438,9 @@ void DoFCEUExit()
 				"E.X.I.T?",
 				"I'm sorry, you missed your exit. There is another one in 19 miles",
 				"Silly Exit Message goes here"
-
 			};
 
-			if(IDYES != MessageBox(hAppWnd, emsg[rand() & 6], "Exit FCE Ultra?", MB_ICONQUESTION | MB_YESNO) )
+			if(IDYES != MessageBox(hAppWnd, emsg[rand() % 7], "Exit FCE Ultra?", MB_ICONQUESTION | MB_YESNO) )
 			{
 				return;
 			}
