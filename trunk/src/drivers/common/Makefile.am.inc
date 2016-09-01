@@ -1,0 +1,1 @@
+fceux_SOURCES += drivers/common/args.cpp drivers/common/cheat.cpp drivers/common/config.cpp drivers/common/configSys.cpp drivers/common/hq2x.cpp drivers/common/hq3x.cpp drivers/common/nes_ntsc.c drivers/common/scale2x.cpp drivers/common/scale3x.cpp drivers/common/scalebit.cpp drivers/common/vidblit.cpp 
