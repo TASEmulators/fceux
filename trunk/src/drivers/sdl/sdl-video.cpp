@@ -194,7 +194,7 @@ InitVideo(FCEUGI *gi)
 	// check if we should auto-set x/y resolution
 
     // check for OpenGL and set the global flags
-#if OPENGL
+#ifdef OPENGL
 	if(s_useOpenGL && !s_sponge) {
 		flags = SDL_OPENGL;
 	}

@@ -1,0 +1,1 @@
+fceux_SOURCES += input/arkanoid.cpp input/bworld.cpp input/cursor.cpp input/fkb.cpp input/ftrainer.cpp input/hypershot.cpp input/mahjong.cpp input/mouse.cpp input/oekakids.cpp input/pec586kb.cpp input/powerpad.cpp input/quiz.cpp input/shadow.cpp input/snesmouse.cpp input/suborkb.cpp input/toprider.cpp input/zapper.cpp

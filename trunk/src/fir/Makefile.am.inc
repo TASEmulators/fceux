@@ -1,0 +1,1 @@
+fceux_SOURCES    +=  fir/c44100ntsc.coef fir/c44100ntsc.scm fir/c44100pal.coef fir/c44100pal.scm fir/c48000ntsc.coef fir/c48000ntsc.scm fir/c48000pal.coef fir/c48000pal.scm fir/c96000ntsc.coef fir/c96000ntsc.scm fir/c96000pal.coef fir/c96000pal.scm fir/c44100ntsc.h fir/c44100pal.h fir/c48000ntsc.h fir/c48000pal.h fir/c96000ntsc.h fir/c96000pal.h
