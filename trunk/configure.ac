@@ -87,7 +87,7 @@ if test x$use_nativewin32 = xno; then
 	AC_ARG_ENABLE([gtk2],
 		AS_HELP_STRING([--enable-gtk2], [Enable GTK2 GUI]))
 	AS_IF([test "x$enable_gtk2" = "xyes"], [
-		AM_PATH_GTK_2_0([2.10.0],AM_CONDITIONAL(GTK2, true),AC_MSG_ERROR([Gtk+ 2.10.0 or higher required.]))
+		AM_PATH_GTK_2_0([2.24.0],AM_CONDITIONAL(GTK2, true),AC_MSG_ERROR([Gtk+ 2.24.0 or higher required.]))
 		AC_DEFINE([_GTK])
 		AC_DEFINE([GTK2])
 	])
