@@ -151,7 +151,7 @@ AC_C_BIGENDIAN([], [AC_DEFINE([LSB_FIRST])])
 AC_ARG_ENABLE([frameskip],
 			      AS_HELP_STRING([--disable-frameskip], [Disable frameskip feature]))
 
-AS_IF([test "x$enable_frameskip" != "xno"], [
+AS_IF([test "x$disable_frameskip" != "xno"], [
 	AC_DEFINE([FRAMESKIP])
 ])
 
