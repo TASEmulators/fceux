@@ -133,6 +133,7 @@ AC_ARG_ENABLE([gd],
 AS_IF([test "x$enable_gd" = "xyes"], [
 	   #AX_LUA_HEADERS([], AC_MSG_ERROR([Lua 5.1 headers not found!]))
 	   AX_CHECK_GD
+	   LIBS="$LIBS $GD_LIBS"
 	   AC_DEFINE([CREATE_AVI])
 ])
 

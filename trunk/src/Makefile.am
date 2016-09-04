@@ -18,6 +18,7 @@ include lua/Makefile.am.inc
 include utils/Makefile.am.inc
 include boards/Makefile.am.inc
 include drivers/common/Makefile.am.inc
+include drivers/videolog/Makefile.am.inc
 include input/Makefile.am.inc
 include fir/Makefile.am.inc
 
