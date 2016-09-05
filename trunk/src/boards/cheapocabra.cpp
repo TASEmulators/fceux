@@ -86,9 +86,17 @@ static DECLFW(M111Write) {
 
 static DECLFR(M111FlashID)
 {
-	uint32 a0 = A & 1;
-	if   (a0 == 0) return 0xBF;
-	else           return 0xB7;
+	// Software ID mode is undefined by the datasheet for all but the lowest 2 addressable bytes,
+	// but some tests of the chip currently being used found it repeats in 512-byte patterns.
+	// http://forums.nesdev.com/viewtopic.php?p=178728#p178728
+
+	uint32 aid = A & 0x1FF;
+	switch (aid)
+	{
+	case 0:  return 0xBF;
+	case 1:  return 0xB7;
+	default: return 0xFF;
+	}
 }
 
 void M111FlashIDEnter()
