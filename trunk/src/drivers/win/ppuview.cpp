@@ -35,14 +35,14 @@ bool PPUView_maskUnusedGraphics = true;
 bool PPUView_invertTheMask = false;
 int PPUView_sprite16Mode = 0;
 
-uint8 palcache[32] = { 0xFF }; //palette cache
+static uint8 palcache[36] = { 0xFF }; //palette cache
 uint8 chrcache0[0x1000], chrcache1[0x1000], logcache0[0x1000], logcache1[0x1000]; //cache CHR, fixes a refresh problem when right-clicking
 uint8 *pattern0, *pattern1; //pattern table bitmap arrays
 uint8 *ppuv_palette;
 static int pindex0 = 0, pindex1 = 0;
 int PPUViewScanline = 0, PPUViewer = 0;
 int PPUViewSkip;
-int PPUViewRefresh = 15;
+int PPUViewRefresh = 0;
 int mouse_x, mouse_y;
 
 #define PATTERNWIDTH        128
@@ -333,6 +333,12 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			memset(logcache0,0,0x1000);
 			memset(logcache1,0,0x1000);
 
+			// forced palette (e.g. for debugging CHR when palettes are all-black)
+			palcache[(8*4)+0] = 0x0F;
+			palcache[(8*4)+1] = 0x00;
+			palcache[(8*4)+2] = 0x10;
+			palcache[(8*4)+3] = 0x20;
+
 			PPUViewer=1;
 			break;
 		}
@@ -372,13 +378,13 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			mouse_y = GET_Y_LPARAM(lParam);
 			if(((mouse_x >= patternDestX) && (mouse_x < (patternDestX + (PATTERNWIDTH * ZOOM)))) && (mouse_y >= patternDestY) && (mouse_y < (patternDestY + (PATTERNHEIGHT * ZOOM))))
 			{
-				if (pindex0 == 7)
+				if (pindex0 == 8)
 					pindex0 = 0;
 				else
 					pindex0++;
 			} else if(((mouse_x >= patternDestX + (PATTERNWIDTH * ZOOM) + 1) && (mouse_x < (patternDestX + (PATTERNWIDTH * ZOOM) * 2 + 1))) && (mouse_y >= patternDestY) && (mouse_y < (patternDestY + (PATTERNHEIGHT * ZOOM))))
 			{
-				if (pindex1 == 7)
+				if (pindex1 == 8)
 					pindex1 = 0;
 				else
 					pindex1++;

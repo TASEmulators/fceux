@@ -46,10 +46,10 @@ HWND hNTView;
 
 int NTViewPosX,NTViewPosY;
 
-static uint8 palcache[32]; //palette cache //mbg merge 7/19/06 needed to be static
+static uint8 palcache[36]; //palette cache
 int NTViewScanline=0,NTViewer=0;
 int NTViewSkip;
-int NTViewRefresh = 15;
+int NTViewRefresh = 0;
 static int mouse_x,mouse_y; //todo: is static needed here? --mbg 7/19/06 - i think so
 bool redrawtables = false;
 int chrchanged = 0;
@@ -108,6 +108,7 @@ extern uint8 XOffset;
 int xpos, ypos;
 int scrolllines = 1;
 int attview = 0;
+int hidepal = 0;
 
 // checkerboard tile for attribute view
 const uint8 ATTRIBUTE_VIEW_TILE[16] = {	0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF };
@@ -283,6 +284,7 @@ void DrawNameTable(int scanline, int ntnum, bool invalidateCache) {
 				int refreshaddr = (x)+(y)*32;
 
 				a = FCEUPPU_GetAttr(ntnum,x,y);
+				if (hidepal) a = 8;
 
 				const uint8* chrp = FCEUPPU_GetCHR(ptable+chr,refreshaddr);
 				if (attview) chrp = ATTRIBUTE_VIEW_TILE;
@@ -419,12 +421,16 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			CheckDlgButton(hwndDlg, IDC_NTVIEW_SHOW_SCROLL_LINES, BST_CHECKED);
 			CheckDlgButton(hwndDlg, IDC_NTVIEW_SHOW_ATTRIBUTES,   BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_NTVIEW_HIDE_PALETTES,     BST_UNCHECKED);
+
 			//clear cache
-			//memset(palcache,0,32);
-			//memset(ntcache0,0,0x400);
-			//memset(ntcache1,0,0x400);
-			//memset(ntcache2,0,0x400);
-			//memset(ntcache3,0,0x400);
+			memset(palcache,0,32);
+
+			// forced palette (e.g. for debugging nametables when palettes are all-black)
+			palcache[(8*4)+0] = 0x0F;
+			palcache[(8*4)+1] = 0x00;
+			palcache[(8*4)+2] = 0x10;
+			palcache[(8*4)+3] = 0x20;
 
 			NTViewer=1;
 			break;
@@ -547,6 +553,10 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 							break;
 						case IDC_NTVIEW_SHOW_ATTRIBUTES :
 							attview ^= 1;
+							chrchanged = 1;
+							break;
+						case IDC_NTVIEW_HIDE_PALETTES :
+							hidepal ^= 1;
 							chrchanged = 1;
 							break;
 					}
