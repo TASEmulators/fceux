@@ -107,6 +107,10 @@ extern uint8 XOffset;
 
 int xpos, ypos;
 int scrolllines = 1;
+int attview = 0;
+
+// checkerboard tile for attribute view
+const uint8 ATTRIBUTE_VIEW_TILE[16] = {	0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF };
 
 //if you pass this 1 then it will draw no matter what. If you pass it 0
 //then it will draw if redrawtables is true
@@ -193,7 +197,7 @@ void ChangeMirroring(){
 	return;
 }
 
-INLINE void DrawChr(uint8 *pbitmap,uint8 *chr,int pal){
+INLINE void DrawChr(uint8 *pbitmap,const uint8 *chr,int pal){
 	int y, x, tmp, index=0, p=0;
 	uint8 chr0, chr1;
 	//uint8 *table = &VPage[0][0]; //use the background table
@@ -280,8 +284,11 @@ void DrawNameTable(int scanline, int ntnum, bool invalidateCache) {
 
 				a = FCEUPPU_GetAttr(ntnum,x,y);
 
+				const uint8* chrp = FCEUPPU_GetCHR(ptable+chr,refreshaddr);
+				if (attview) chrp = ATTRIBUTE_VIEW_TILE;
+
 				//a good way to do it:
-				DrawChr(pbitmap,FCEUPPU_GetCHR(ptable+chr,refreshaddr),a);
+				DrawChr(pbitmap,chrp,a);
 
 				tablecache[ntaddr] = table[ntaddr];
 				tablecache[attraddr] = table[attraddr];
@@ -411,6 +418,7 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SelectObject (pDC, CreatePen (PS_SOLID, 2, RGB (255, 255, 255))) ;
 
 			CheckDlgButton(hwndDlg, IDC_NTVIEW_SHOW_SCROLL_LINES, BST_CHECKED);
+			CheckDlgButton(hwndDlg, IDC_NTVIEW_SHOW_ATTRIBUTES,   BST_UNCHECKED);
 			//clear cache
 			//memset(palcache,0,32);
 			//memset(ntcache0,0,0x400);
@@ -535,6 +543,10 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 							break;
 						case IDC_NTVIEW_SHOW_SCROLL_LINES : 
 							scrolllines ^= 1;
+							chrchanged = 1;
+							break;
+						case IDC_NTVIEW_SHOW_ATTRIBUTES :
+							attview ^= 1;
 							chrchanged = 1;
 							break;
 					}

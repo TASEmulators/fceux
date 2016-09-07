@@ -505,6 +505,7 @@
 #define MW_ADDR02                       1007
 #define IDC_NTVIEW_MIRROR_SS_TABLE_3    1007
 #define IDC_NTVIEW_SHOW_SCROLL_LINES    1008
+#define IDC_NTVIEW_SHOW_ATTRIBUTES      1009
 #define MW_ADDR03                       1010
 #define MW_ADDR04                       1013
 #define MW_ADDR05                       1016
