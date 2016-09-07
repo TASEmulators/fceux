@@ -138,11 +138,11 @@ void NTViewDoBlit(int autorefresh) {
 
 		//draw vertical line
 		MoveToEx(pDC,NTDESTX+xpos,NTDESTY,NULL);
-		LineTo(pDC,NTDESTX+xpos,NTDESTY+(NTHEIGHT*2));
+		LineTo(pDC,NTDESTX+xpos,NTDESTY+(NTHEIGHT*2)-1);
 	
 		//draw horizontal line
 		MoveToEx(pDC,NTDESTX,NTDESTY+ypos,NULL);
-		LineTo(pDC,NTDESTX+(NTWIDTH*2),NTDESTY+ypos);
+		LineTo(pDC,NTDESTX+(NTWIDTH*2)-1,NTDESTY+ypos);
 
 		SetROP2(pDC,R2_COPYPEN);
 	}
