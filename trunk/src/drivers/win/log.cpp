@@ -148,6 +148,10 @@ void ClearLog()
 **/
 void AddLogText(const char *text, unsigned int add_newline)
 {
+	// pass log to debugger as well
+	OutputDebugString(text);
+	if (add_newline) OutputDebugString("\n");
+
 	// Used to count the number of new line characters in text
 	int number_of_newlines;
 

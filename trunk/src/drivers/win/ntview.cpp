@@ -372,7 +372,7 @@ void KillNTView() {
 BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	RECT wrect;
 	char str[50];
-	int TileID, TileX, TileY, NameTable, PPUAddress;
+	int TileID, TileX, TileY, NameTable, PPUAddress, AttAddress, Attrib;
 
 	switch(uMsg) {
 		case WM_INITDIALOG:
@@ -471,6 +471,11 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				TileID = vnapage[(PPUAddress>>10)&0x3][PPUAddress&0x3FF];
 				sprintf(str,"Tile ID: %02X",TileID);
 				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_1,str);
+				AttAddress = 0x23C0 | (PPUAddress & 0x0C00) | ((PPUAddress >> 4) & 0x38) | ((PPUAddress >> 2) & 0x07);
+				Attrib = vnapage[(AttAddress>>10)&0x3][AttAddress&0x3FF];
+				Attrib = (Attrib >> ((PPUAddress&2) | ((PPUAddress&64)>>4))) & 0x3;
+				sprintf(str,"Attribute: %1X (%04X)",Attrib,AttAddress);
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_4,str);
 			}
 
 /*			if (((mouse_x >= PATTERNDESTX) && (mouse_x < (PATTERNDESTX+(PATTERNWIDTH*ZOOM)))) && (mouse_y >= PATTERNDESTY) && (mouse_y < (PATTERNDESTY+(PATTERNHEIGHT*ZOOM)))) {
