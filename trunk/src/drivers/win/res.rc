@@ -869,21 +869,21 @@ BEGIN
     LTEXT           "Display on scanline:",-1,173,269,65,9
     EDITTEXT        IDC_NTVIEW_SCANLINE,235,267,27,12
     CONTROL         "Show Scroll Lines",IDC_NTVIEW_SHOW_SCROLL_LINES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,254,69,10
-    CONTROL         "Show Attributes",  IDC_NTVIEW_SHOW_ATTRIBUTES,  "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,265,69,10
-    CONTROL         "Ignore Palettes",  IDC_NTVIEW_HIDE_PALETTES,    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,276,69,10
+    CONTROL         "Show Attributes",IDC_NTVIEW_SHOW_ATTRIBUTES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,265,69,10
+    CONTROL         "Ignore Palettes",IDC_NTVIEW_HIDE_PALETTES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,276,69,10
     GROUPBOX        "Current Mirroring",-1,2,289,130,59
-    CONTROL         "Horizontal", IDC_NTVIEW_MIRROR_HORIZONTAL, "Button",BS_AUTORADIOBUTTON,6,300,47,10
-    CONTROL         "Vertical",   IDC_NTVIEW_MIRROR_VERTICAL,   "Button",BS_AUTORADIOBUTTON,6,311,39,10
+    CONTROL         "Horizontal",IDC_NTVIEW_MIRROR_HORIZONTAL,"Button",BS_AUTORADIOBUTTON,6,300,47,10
+    CONTROL         "Vertical",IDC_NTVIEW_MIRROR_VERTICAL,"Button",BS_AUTORADIOBUTTON,6,311,39,10
     CONTROL         "Four Screen",IDC_NTVIEW_MIRROR_FOUR_SCREEN,"Button",BS_AUTORADIOBUTTON,6,322,55,10
     CONTROL         "Single Screen 0",IDC_NTVIEW_MIRROR_SS_TABLE_0,"Button",BS_AUTORADIOBUTTON,65,300,60,10
     CONTROL         "Single Screen 1",IDC_NTVIEW_MIRROR_SS_TABLE_1,"Button",BS_AUTORADIOBUTTON,65,311,60,10
     CONTROL         "Single Screen 2",IDC_NTVIEW_MIRROR_SS_TABLE_2,"Button",BS_AUTORADIOBUTTON,65,322,60,10
     CONTROL         "Single Screen 3",IDC_NTVIEW_MIRROR_SS_TABLE_3,"Button",BS_AUTORADIOBUTTON,65,333,60,10
     GROUPBOX        "Properties",-1,134,289,130,59
-    LTEXT           "Tile ID:",    IDC_NTVIEW_PROPERTIES_LINE_1,144,300,110,10
-    LTEXT           "X / Y:",      IDC_NTVIEW_PROPERTIES_LINE_2,144,311,110,10
+    LTEXT           "Tile ID:",IDC_NTVIEW_PROPERTIES_LINE_1,144,300,110,10
+    LTEXT           "X / Y:",IDC_NTVIEW_PROPERTIES_LINE_2,144,311,110,10
     LTEXT           "PPU Address:",IDC_NTVIEW_PROPERTIES_LINE_3,144,322,110,10
-    LTEXT           "Attribute:",  IDC_NTVIEW_PROPERTIES_LINE_4,144,333,110,10
+    LTEXT           "Attribute:",IDC_NTVIEW_PROPERTIES_LINE_4,144,333,110,10
 END
 
 ROMPATCHER DIALOGEX 84, 67, 304, 135
@@ -1251,16 +1251,18 @@ CAPTION "PPU Viewer"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     GROUPBOX        "Pattern Tables",GRP_PPUVIEW_TABLES,2,-1,263,185,WS_TABSTOP
-    LTEXT           "Tile:",LBL_PPUVIEW_TILE1,  6,138,50,9
+    LTEXT           "Tile:",LBL_PPUVIEW_TILE1,6,138,50,9
     LTEXT           "Tile:",LBL_PPUVIEW_TILE2,134,138,50,9
     LTEXT           "Refresh:   More",-1,145,151,50,9
     CONTROL         "",CTL_PPUVIEW_TRACKBAR,"msctls_trackbar32",WS_TABSTOP,195,151,50,11
     LTEXT           "Less",-1,245,151,18,10
     LTEXT           "Display on scanline:",-1,173,166,65,9
     EDITTEXT        IDC_PPUVIEW_SCANLINE,235,164,27,12
-    CONTROL         "Sprites 8x16 mode",                      IDC_SPRITE16_MODE,       "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,151, 75,10
-    CONTROL         "Mask unused graphics (Code/Data Logger)",IDC_MASK_UNUSED_GRAPHICS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,162,140,10
-    CONTROL         "Invert the mask (Code/Data Logger)",     IDC_INVERT_THE_MASK,     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,173,140,10
+    CONTROL         "Sprites 8x16 mode",IDC_SPRITE16_MODE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,151,75,10
+    CONTROL         "Mask unused graphics (Code/Data Logger)",IDC_MASK_UNUSED_GRAPHICS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,162,140,10
+    CONTROL         "Invert the mask (Code/Data Logger)",IDC_INVERT_THE_MASK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,173,140,10
     GROUPBOX        "Palettes",LBL_PPUVIEW_PALETTES,2,185,263,46,WS_TABSTOP
 END
 
@@ -1697,7 +1699,6 @@ BEGIN
 
     "PPUVIEW", DIALOG
     BEGIN
-        BOTTOMMARGIN, 258
     END
 
     "ARCHIVECHOOSERDIALOG", DIALOG
@@ -1871,10 +1872,10 @@ BEGIN
         END
         POPUP "RAM Init"
         BEGIN
-            MENUITEM "&Default",                     MENU_RAMINIT_DEFAULT
-            MENUITEM "Fill $&FF",                    MENU_RAMINIT_FF
-            MENUITEM "Fill $&00",                    MENU_RAMINIT_00
-            MENUITEM "&Random",                      MENU_RAMINIT_RANDOM
+            MENUITEM "&Default",                    MENU_RAMINIT_DEFAULT
+            MENUITEM "Fill $&FF",                   MENU_RAMINIT_FF
+            MENUITEM "Fill $&00",                   MENU_RAMINIT_00
+            MENUITEM "&Random",                     MENU_RAMINIT_RANDOM
         END
         MENUITEM SEPARATOR
         MENUITEM "&Directories...",             MENU_DIRECTORIES

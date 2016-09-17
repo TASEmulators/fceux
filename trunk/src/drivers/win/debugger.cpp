@@ -69,6 +69,8 @@ WNDPROC IDC_DEBUGGER_DISASSEMBLY_oldWndProc = 0;
 
 static HFONT hFont;
 static SCROLLINFO si;
+static HBRUSH WhiteBrush = CreateSolidBrush(RGB(255,255,255));
+static HBRUSH BlueBrush = CreateSolidBrush(RGB(208,255,255));
 
 bool debuggerAutoload = false;
 bool debuggerSaveLoadDEBFiles = true;
@@ -86,6 +88,7 @@ std::vector<uint16> disassembly_addresses;
 std::vector<std::vector<uint16>> disassembly_operands;
 // this is used to autoscroll the Disassembly window while keeping relative position of the ">" pointer inside this window
 unsigned int PC_pointerOffset = 0;
+int PCLine = -1;
 // this is used for dirty, but unavoidable hack, which is necessary to ensure the ">" pointer is visible when stepping/seeking to PC
 bool PCPointerWasDrawn = false;
 // and another hack...
@@ -410,6 +413,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 	int lines = (rect.bottom-rect.top) / debugSystem->fixedFontHeight;
 
 	debug_str[0] = 0;
+	PCLine = -1;
 	unsigned int instructions_count = 0;
 	for (int i = 0; i < lines; i++)
 	{
@@ -466,6 +470,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 			PCPointerWasDrawn = true;
 			beginningOfPCPointerLine = strlen(debug_str);
 			strcat(debug_str, ">");
+			PCLine = instructions_count;
 		} else
 		{
 			strcat(debug_str, " ");
@@ -475,14 +480,14 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 		{
 			if (debuggerDisplayROMoffsets && GetNesFileAddress(addr) != -1)
 			{
-				sprintf(chr, " %06X:", GetNesFileAddress(addr));
+				sprintf(chr, " %06X: ", GetNesFileAddress(addr));
 			} else
 			{
-				sprintf(chr, "%02X:%04X:", getBank(addr), addr);
+				sprintf(chr, "%02X:%04X: ", getBank(addr), addr);
 			}
 		} else
 		{
-			sprintf(chr, "   %04X:", addr);
+			sprintf(chr, "   %04X: ", addr);
 		}
 		
 		// Add address
@@ -562,7 +567,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 				if (cdl_data == 3)
 					strcat(debug_cdl_str, "cd\r\n");		// both Code and Data
 				else if (cdl_data == 2)
-					strcat(debug_cdl_str, " d\r\n");			// Data
+					strcat(debug_cdl_str, " d\r\n");		// Data
 				else if (cdl_data == 1)
 					strcat(debug_cdl_str, "c\r\n");			// Code
 				else
@@ -1482,8 +1487,31 @@ int Debugger_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, boo
 
 BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	PAINTSTRUCT ps;
 	switch(uMsg)
 	{
+		case WM_PAINT:
+		{
+			BeginPaint(hwndDlg, &ps);			
+			HDC hdcStatic = GetDC(hwndDlg);
+			SetBkMode(hdcStatic, TRANSPARENT);
+			SetTextColor(hdcStatic, RGB(0, 0, 0));
+			RECT rect;
+			GetClientRect(hwndDlg, &rect);
+			SelectObject(hdcStatic, (HGDIOBJ)debugSystem->hFixedFont);
+			FillRect(hdcStatic, &rect, WhiteBrush);
+			if (PCLine != -1)
+			{
+				RECT PC = {
+					rect.left, debugSystem->fixedFontHeight * PCLine + 1,
+					rect.right, debugSystem->fixedFontHeight * PCLine + debugSystem->fixedFontHeight + 1 };
+				FillRect(hdcStatic, &PC, BlueBrush);
+			}
+			OffsetRect(&rect, 1, 1);
+			DrawText(hdcStatic, debug_str, strlen(debug_str), &rect, NULL);
+			EndPaint(hwndDlg, &ps);
+			return 0;
+		}
 		case WM_LBUTTONDBLCLK:
 		{
 			int offset = Debugger_CheckClickingOnAnAddressOrSymbolicName(GET_Y_LPARAM(lParam) / debugSystem->fixedFontHeight, false);
@@ -1497,6 +1525,13 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 				UpdateDebugger(false);
 			}
 			return 0;
+		}
+		case WM_LBUTTONDOWN:
+		{
+			RECT rect;
+			GetClientRect(hwndDlg, &rect);
+			InvalidateRect(hwndDlg, &rect, 0);
+			break;
 		}
 		case WM_LBUTTONUP:
 		{
@@ -1701,7 +1736,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						newDebuggerRect.top = currDebuggerRect.top;
 						newDebuggerRect.bottom = currDebuggerRect.bottom;
 					}
-				SetWindowPos(hwndDlg,HWND_TOPMOST,newDebuggerRect.left,newDebuggerRect.top,(newDebuggerRect.right-newDebuggerRect.left),(newDebuggerRect.bottom-newDebuggerRect.top),SWP_SHOWWINDOW);
+					SetWindowPos(hwndDlg,HWND_TOPMOST,newDebuggerRect.left,newDebuggerRect.top,(newDebuggerRect.right-newDebuggerRect.left),(newDebuggerRect.bottom-newDebuggerRect.top),SWP_SHOWWINDOW);
 				}
 				//Else run normal resizing procedure-------------------------
 				else														
@@ -1734,6 +1769,14 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				#ifdef WIN32
 				WindowBoundsCheckResize(DbgPosX,DbgPosY,DbgSizeX,wrect.right);
 				#endif
+			}
+			break;
+
+		case WM_CTLCOLORSTATIC:
+			if ((HWND)lParam == GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY))
+			{
+				SetBkColor((HDC)wParam, RGB(255, 255, 255));
+				return (LRESULT) GetStockObject(DC_BRUSH);
 			}
 			break;
 
@@ -1944,8 +1987,8 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				mouse_y = GET_Y_LPARAM(lParam);
 // ################################## Start of SP CODE ###########################
 
-	// mouse_y < 538
-	// > 33) tmp = 33
+				// mouse_y < 538
+				// > 33) tmp = 33
 				//mbg merge 7/18/06 changed pausing check
 				if (FCEUI_EmulationPaused() && (mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
 				{
