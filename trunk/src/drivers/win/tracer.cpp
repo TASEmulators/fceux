@@ -433,6 +433,7 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_BREAKPOINTS, (logging_options & LOG_BREAKPOINTS) ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_SYMBOLIC_TRACING, (logging_options & LOG_SYMBOLIC) ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_CODE_TABBING, (logging_options & LOG_CODE_TABBING) ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_BANK_NUMBER, (logging_options & LOG_BANK_NUMBER) ? BST_CHECKED : BST_UNCHECKED);
 			
 			EnableWindow(GetDlgItem(hwndDlg, IDC_TRACER_LOG_SIZE), TRUE);
 			EnableWindow(GetDlgItem(hwndDlg, IDC_BTN_LOG_BROWSE), FALSE);
@@ -575,6 +576,10 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 						case IDC_CHECK_CODE_TABBING:
 							logging_options ^= LOG_CODE_TABBING;
 							CheckDlgButton(hwndDlg, IDC_CHECK_CODE_TABBING, (logging_options & LOG_CODE_TABBING) ? BST_CHECKED : BST_UNCHECKED);
+							break;
+						case IDC_CHECK_LOG_BANK_NUMBER:
+							logging_options ^= LOG_BANK_NUMBER;
+							CheckDlgButton(hwndDlg, IDC_CHECK_LOG_BANK_NUMBER, (logging_options & LOG_BANK_NUMBER) ? BST_CHECKED : BST_UNCHECKED);
 							break;
 						case IDC_CHECK_LOG_NEW_INSTRUCTIONS:
 							logging_options ^= LOG_NEW_INSTRUCTIONS;
@@ -932,7 +937,17 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		strcat(str_result, " ");
 	}
 
-	sprintf(str_address, "$%04X:", addr);
+	if (logging_options & LOG_BANK_NUMBER)
+	{
+		if (addr >= 0x8000)
+			sprintf(str_address, "$%02X:%04X: ", getBank(addr), addr);
+		else
+			sprintf(str_address, "  $%04X: ", addr);
+	} else
+	{
+		sprintf(str_address, "$%04X: ", addr);
+	}
+
 	strcat(str_result, str_address);
 	strcat(str_result, str_data);
 	strcat(str_result, str_disassembly);

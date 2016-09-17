@@ -482,7 +482,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 			}
 		} else
 		{
-			sprintf(chr, "  :%04X:", addr);
+			sprintf(chr, "   %04X:", addr);
 		}
 		
 		// Add address

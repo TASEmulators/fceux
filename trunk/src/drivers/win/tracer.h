@@ -12,6 +12,7 @@
 #define LOG_CODE_TABBING        512
 #define LOG_CYCLES_COUNT       1024
 #define LOG_INSTRUCTIONS_COUNT 2048
+#define LOG_BANK_NUMBER        4096
 
 #define LOG_LINE_MAX_LEN 160
 // Frames count - 1+6+1 symbols
@@ -29,7 +30,7 @@
 #define LOG_AXYSTATE_MAX_LEN 21
 #define LOG_PROCSTATUS_MAX_LEN 12
 #define LOG_TABS_MASK 31
-#define LOG_ADDRESS_MAX_LEN 7
+#define LOG_ADDRESS_MAX_LEN 13
 #define LOG_DATA_MAX_LEN 11
 #define LOG_DISASSEMBLY_MAX_LEN 46
 
