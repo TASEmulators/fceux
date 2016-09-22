@@ -20,6 +20,7 @@ extern int childwnd,numWPs; //mbg merge 7/18/06 had to make extern
 extern bool debuggerAutoload;
 extern bool debuggerSaveLoadDEBFiles;
 extern bool debuggerDisplayROMoffsets;
+extern bool debuggerIDAFont;
 
 extern unsigned int debuggerPageSize;
 extern unsigned int debuggerFontSize;
@@ -56,6 +57,11 @@ public:
 	HFONT hFixedFont;
 	int fixedFontWidth;
 	int fixedFontHeight;
+
+	HFONT hIDAFont;
+
+	HFONT hDisasmFont;
+	int disasmFontHeight;
 
 	HFONT hHexeditorFont;
 	int HexeditorFontWidth;

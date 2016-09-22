@@ -163,7 +163,9 @@ int Tracer_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, bool 
 	// find the "$" before sel_start
 	int i = sel_start - 1;
 	for (; i > sel_start - 6; i--)
-		if (i >= 0 && trace_str[i] == '$')
+		if (i >= 0 &&
+			(trace_str[i] == '$' && trace_str[i+3] != ':') || // allow zero page indexted, ignore bank
+			(trace_str[i] == ':' && trace_str[i+5] == ':'))
 			break;
 	if (i > sel_start - 6)
 	{

@@ -780,6 +780,10 @@
 #define STATIC_CONTRASTVALUE            1300
 #define CTL_PALBRIGHT_TRACKBAR          1301
 #define STATIC_BRIGHTVALUE              1302
+#define IDC_RICHEDIT21                  1304
+#define IDC_RICHEDIT_DISASM             1304
+#define IDC_CHECK2                      1305
+#define DEBUGIDAFONT                    1305
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1236,9 +1240,13 @@
 #define MENU_RAMINIT_FF                 40594
 #define MENU_RAMINIT_00                 40595
 #define MENU_RAMINIT_RANDOM             40596
+#define ID_COPY_SELECTALL               40596
 #define MENU_MV_FILE_LOAD_RAM           40597
+#define ID_COPY_COPY                    40597
 #define MENU_MV_FILE_LOAD_PPU           40598
+#define DISASM_CONTEXT_COPY             40598
 #define MENU_MV_FILE_LOAD_OAM           40599
+#define DISASM_CONTEXT_SELECTALL        40599
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1250,9 +1258,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        292
-#define _APS_NEXT_COMMAND_VALUE         40596
-#define _APS_NEXT_CONTROL_VALUE         1303
+#define _APS_NEXT_RESOURCE_VALUE        293
+#define _APS_NEXT_COMMAND_VALUE         40600
+#define _APS_NEXT_CONTROL_VALUE         1306
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

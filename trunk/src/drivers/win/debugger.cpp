@@ -37,6 +37,7 @@
 #include "ntview.h"
 #include "cdlogger.h"
 #include "ppuview.h"
+#include "richedit.h"
 
 // ################################## Start of SP CODE ###########################
 
@@ -65,15 +66,17 @@ uint8 debugger_open=0;
 HWND hDebug;
 static HMENU hDebugcontext;     //Handle to context menu
 static HMENU hDebugcontextsub;  //Handle to context sub menu
+static HMENU hDisasmcontext;     //Handle to context menu
+static HMENU hDisasmcontextsub;  //Handle to context sub menu
 WNDPROC IDC_DEBUGGER_DISASSEMBLY_oldWndProc = 0;
 
 static HFONT hFont;
 static SCROLLINFO si;
-static HBRUSH WhiteBrush = CreateSolidBrush(RGB(255,255,255));
-static HBRUSH BlueBrush = CreateSolidBrush(RGB(208,255,255));
 
 bool debuggerAutoload = false;
 bool debuggerSaveLoadDEBFiles = true;
+bool debuggerIDAFont = false;
+unsigned int IDAFontSize = 16;
 bool debuggerDisplayROMoffsets = false;
 
 char debug_str[35000] = {0};
@@ -113,7 +116,7 @@ void RestoreSize(HWND hwndDlg)
 {
 	//If the dialog dimensions are changed those changes need to be reflected here.  - adelikat
 	const int DEFAULT_WIDTH = 820;	//Original width
-	const int DEFAULT_HEIGHT = 570;	//Original height
+	const int DEFAULT_HEIGHT = 574;	//Original height
 	
 	SetWindowPos(hwndDlg,HWND_TOP,DbgPosX,DbgPosY,DEFAULT_WIDTH,DEFAULT_HEIGHT,SWP_SHOWWINDOW);
 }
@@ -387,6 +390,37 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return FALSE; //TRUE;
 }
 
+void HighlightPC()
+{
+	FINDTEXT ft;
+	ft.lpstrText  = ">";
+	ft.chrg.cpMin = 0;
+	ft.chrg.cpMax = -1;
+	int start = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&ft);
+	if (start >= 0)
+	{
+		int old_start, old_end;
+		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&old_start, (LPARAM)&old_end);
+		for (int end = start; end < start + 100; end++)
+		{
+			if (debug_str[end] == '\n')
+			{
+				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)start, (LPARAM)end);
+				CHARFORMAT2 cf;
+				memset(&cf, 0, sizeof cf);
+				cf.cbSize = sizeof cf;
+				cf.dwMask = CFM_COLOR;
+				cf.crTextColor = RGB(0,0,255);
+				//cf.dwMask = CFM_BACKCOLOR;
+				//cf.crBackColor = RGB(208,255,255);
+				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&cf);
+				break;
+			}
+		}
+		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)old_start, (LPARAM)old_end);
+    }
+}
+
 void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 {
 	char chr[40] = {0};
@@ -410,7 +444,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 	//figure out how many lines we can draw
 	RECT rect;
 	GetClientRect(GetDlgItem(hWnd, id), &rect);
-	int lines = (rect.bottom-rect.top) / debugSystem->fixedFontHeight;
+	int lines = (rect.bottom-rect.top) / debugSystem->disasmFontHeight;
 
 	debug_str[0] = 0;
 	PCLine = -1;
@@ -431,7 +465,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 				if (node->name)
 				{
 					strcat(debug_str, node->name);
-					strcat(debug_str, ":\r\n");
+					strcat(debug_str, ":\n");
 					// we added one line to the disassembly window
 					disassembly_addresses.push_back(addr);
 					disassembly_operands.resize(i + 1);
@@ -441,16 +475,16 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 				{
 					// make a copy
 					strcpy(debug_str_decoration_comment, node->comment);
-					strcat(debug_str_decoration_comment, "\r\n");
+					strcat(debug_str_decoration_comment, "\n");
 					// divide the debug_str_decoration_comment into strings (Comment1, Comment2, ...)
 					debug_decoration_comment = debug_str_decoration_comment;
-					debug_decoration_comment_end_pos = strstr(debug_decoration_comment, "\r\n");
+					debug_decoration_comment_end_pos = strstr(debug_decoration_comment, "\n");
 					while (debug_decoration_comment_end_pos)
 					{
 						debug_decoration_comment_end_pos[0] = 0;		// set \0 instead of \r
 						strcat(debug_str, "; ");
 						strcat(debug_str, debug_decoration_comment);
-						strcat(debug_str, "\r\n");
+						strcat(debug_str, "\n");
 						// we added one line to the disassembly window
 						disassembly_addresses.push_back(addr);
 						disassembly_operands.resize(i + 1);
@@ -458,7 +492,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 
 						debug_decoration_comment_end_pos += 2;
 						debug_decoration_comment = debug_decoration_comment_end_pos;
-						debug_decoration_comment_end_pos = strstr(debug_decoration_comment_end_pos, "\r\n");
+						debug_decoration_comment_end_pos = strstr(debug_decoration_comment_end_pos, "\n");
 					}
 				}
 			}
@@ -487,7 +521,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 			}
 		} else
 		{
-			sprintf(chr, "   %04X: ", addr);
+			sprintf(chr, "  :%04X: ", addr);
 		}
 		
 		// Add address
@@ -508,7 +542,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 			{
 				while (addr < 0xFFFF)
 				{
-					sprintf(chr, "%02X        OVERFLOW\r\n", GetMem(addr++));
+					sprintf(chr, "%02X        OVERFLOW\n", GetMem(addr++));
 					strcat(debug_str, chr);
 				}
 				break;
@@ -547,10 +581,13 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 			// append the disassembly to current line
 			strcat(strcat(debug_str, " "), a);
 		}
-		strcat(debug_str, "\r\n");
+		strcat(debug_str, "\n");
 		instructions_count++;
 	}
 	SetDlgItemText(hWnd, id, debug_str);
+
+	if (PCLine >= 0)
+		HighlightPC();
 
 	// fill the left panel data
 	debug_cdl_str[0] = 0;
@@ -819,7 +856,7 @@ void UpdateDebugger(bool jump_to_pc)
 		// ensure that PC pointer will be visible even after the window was resized
 		RECT rect;
 		GetClientRect(GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY), &rect);
-		unsigned int lines = (rect.bottom-rect.top) / debugSystem->fixedFontHeight;
+		unsigned int lines = (rect.bottom-rect.top) / debugSystem->disasmFontHeight;
 		if (PC_pointerOffset >= lines)
 			PC_pointerOffset = 0;
 
@@ -1487,34 +1524,11 @@ int Debugger_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, boo
 
 BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	PAINTSTRUCT ps;
 	switch(uMsg)
 	{
-		case WM_PAINT:
-		{
-			BeginPaint(hwndDlg, &ps);			
-			HDC hdcStatic = GetDC(hwndDlg);
-			SetBkMode(hdcStatic, TRANSPARENT);
-			SetTextColor(hdcStatic, RGB(0, 0, 0));
-			RECT rect;
-			GetClientRect(hwndDlg, &rect);
-			SelectObject(hdcStatic, (HGDIOBJ)debugSystem->hFixedFont);
-			FillRect(hdcStatic, &rect, WhiteBrush);
-			if (PCLine != -1)
-			{
-				RECT PC = {
-					rect.left, debugSystem->fixedFontHeight * PCLine + 1,
-					rect.right, debugSystem->fixedFontHeight * PCLine + debugSystem->fixedFontHeight + 1 };
-				FillRect(hdcStatic, &PC, BlueBrush);
-			}
-			OffsetRect(&rect, 1, 1);
-			DrawText(hdcStatic, debug_str, strlen(debug_str), &rect, NULL);
-			EndPaint(hwndDlg, &ps);
-			return 0;
-		}
 		case WM_LBUTTONDBLCLK:
 		{
-			int offset = Debugger_CheckClickingOnAnAddressOrSymbolicName(GET_Y_LPARAM(lParam) / debugSystem->fixedFontHeight, false);
+			int offset = Debugger_CheckClickingOnAnAddressOrSymbolicName(GET_Y_LPARAM(lParam) / debugSystem->disasmFontHeight, false);
 			if (offset != EOF)
 			{
 				// bring "Add Breakpoint" dialog
@@ -1526,16 +1540,9 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 			}
 			return 0;
 		}
-		case WM_LBUTTONDOWN:
-		{
-			RECT rect;
-			GetClientRect(hwndDlg, &rect);
-			InvalidateRect(hwndDlg, &rect, 0);
-			break;
-		}
 		case WM_LBUTTONUP:
 		{
-			Debugger_CheckClickingOnAnAddressOrSymbolicName(GET_Y_LPARAM(lParam) / debugSystem->fixedFontHeight, true);
+			Debugger_CheckClickingOnAnAddressOrSymbolicName(GET_Y_LPARAM(lParam) / debugSystem->disasmFontHeight, true);
 			break;
 		}
 		case WM_RBUTTONDOWN:
@@ -1560,7 +1567,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 			CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, WM_LBUTTONDOWN, wParam, lParam);
 			CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, WM_LBUTTONUP, wParam, lParam);
 			// try bringing Symbolic Debug Naming dialog
-			int offset = Debugger_CheckClickingOnAnAddressOrSymbolicName(GET_Y_LPARAM(lParam) / debugSystem->fixedFontHeight, false);
+			int offset = Debugger_CheckClickingOnAnAddressOrSymbolicName(GET_Y_LPARAM(lParam) / debugSystem->disasmFontHeight, false);
 			if (offset != EOF)
 			{
 				if (DoSymbolicDebugNaming(offset, hDebug))
@@ -1594,7 +1601,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 			mouse_x = GET_X_LPARAM(lParam);
 			mouse_y = GET_Y_LPARAM(lParam);
 
-			tmp = mouse_y / debugSystem->fixedFontHeight;
+			tmp = mouse_y / debugSystem->disasmFontHeight;
 			if (tmp < (int)disassembly_addresses.size())
 			{
 				i = disassembly_addresses[tmp];
@@ -1626,6 +1633,42 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 			SendMessage(GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY_VSCR), uMsg, wParam, lParam);
 			return 0;
 		}
+		case WM_CONTEXTMENU:
+		{
+			int sel_start = 0, sel_end = 0;
+			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
+			hDisasmcontextsub = GetSubMenu(hDisasmcontext, 0);
+			if (sel_end - sel_start == 0)
+				EnableMenuItem(hDisasmcontextsub, DISASM_CONTEXT_COPY, MF_GRAYED);
+			else
+				EnableMenuItem(hDisasmcontextsub, DISASM_CONTEXT_COPY, MF_ENABLED);
+			if (lParam != -1)
+				TrackPopupMenu(hDisasmcontextsub, TPM_RIGHTBUTTON, LOWORD(lParam), HIWORD(lParam), 0, hwndDlg, 0);
+			else
+			{
+				// Handle the context menu keyboard key
+				RECT wrect;
+				GetWindowRect(GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY), &wrect);
+				TrackPopupMenu(hDisasmcontextsub, TPM_RIGHTBUTTON, wrect.left + 50, wrect.top + 50, 0, hwndDlg, 0);
+			}
+			break;
+		}		
+		case WM_COMMAND:
+		{
+			switch(LOWORD(wParam))
+			{
+				case DISASM_CONTEXT_COPY:
+					SendMessage(hwndDlg, WM_COPY, 0, 0);
+					break;
+				case DISASM_CONTEXT_SELECTALL:
+					CHARRANGE charr;
+					charr.cpMin = 0;
+					charr.cpMax = -1;
+					SendMessage(hwndDlg, EM_SETSEL, 0, (LPARAM)&charr);
+					break;
+			}
+			break;
+		}
 	}
 	return CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, uMsg, wParam, lParam);
 }
@@ -1653,6 +1696,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_BAD_OP, FCEUI_Debugger().badopbreak ? BST_CHECKED : BST_UNCHECKED);
 
 			CheckDlgButton(hwndDlg, DEBUGLOADDEB, debuggerSaveLoadDEBFiles ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, DEBUGIDAFONT, debuggerIDAFont ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, DEBUGAUTOLOAD, debuggerAutoload ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_DEBUGGER_ROM_OFFSETS, debuggerDisplayROMoffsets ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC, symbDebugEnabled ? BST_CHECKED : BST_UNCHECKED);
@@ -1673,7 +1717,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			SetScrollInfo(GetDlgItem(hwndDlg,IDC_DEBUGGER_DISASSEMBLY_VSCR),SB_CTL,&si,TRUE);
 
 			//setup font
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY,WM_SETFONT,(WPARAM)debugSystem->hDisasmFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 			//SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_A,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 			//SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_X,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
@@ -1709,6 +1753,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 			// Enable Context Sub-Menus
 			hDebugcontext = LoadMenu(fceu_hInstance,"DEBUGCONTEXTMENUS");
+			hDisasmcontext = LoadMenu(fceu_hInstance,"DISASMCONTEXTMENUS");
 
 			// subclass editfield
 			IDC_DEBUGGER_DISASSEMBLY_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), GWL_WNDPROC, (LONG)IDC_DEBUGGER_DISASSEMBLY_WndProc);
@@ -1772,14 +1817,6 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			}
 			break;
 
-		case WM_CTLCOLORSTATIC:
-			if ((HWND)lParam == GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY))
-			{
-				SetBkColor((HDC)wParam, RGB(255, 255, 255));
-				return (LRESULT) GetStockObject(DC_BRUSH);
-			}
-			break;
-
 		//adelikat:  Buttons that don't need a rom loaded to do something, such as autoload
 		case WM_COMMAND:
 		{
@@ -1790,6 +1827,13 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case DEBUGLOADDEB:
 					debuggerSaveLoadDEBFiles = !debuggerSaveLoadDEBFiles;
+					break;
+				case DEBUGIDAFONT:
+					debuggerIDAFont ^= 1;
+					debugSystem->hDisasmFont = debuggerIDAFont ? debugSystem->hIDAFont : debugSystem->hFixedFont;
+					debugSystem->disasmFontHeight = debuggerIDAFont ? IDAFontSize : debugSystem->fixedFontHeight;
+					SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETFONT, (WPARAM)debugSystem->hDisasmFont, FALSE);
+					UpdateDebugger();
 					break;
 				case IDC_DEBUGGER_CYCLES_EXCEED:
 				{
@@ -1902,18 +1946,16 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				// Handle certain stubborn context menus for nearly incapable controls.
 
 				if (wParam == (uint32)GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_LIST)) {
-					// Only open the menu if a cheat is selected
+					// Only open the menu if a breakpoint is selected
 					if (SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0) >= 0) {
-						// Open IDC_LIST_CHEATS Context Menu
 						hDebugcontextsub = GetSubMenu(hDebugcontext,0);
-						SetMenuDefaultItem(hDebugcontextsub, DEBUGGER_CONTEXT_TOGGLEBREAK, false);
+						//SetMenuDefaultItem(hDebugcontextsub, DEBUGGER_CONTEXT_TOGGLEBREAK, false);
 						if (lParam != -1)
 							TrackPopupMenu(hDebugcontextsub,TPM_RIGHTBUTTON,LOWORD(lParam),HIWORD(lParam),0,hwndDlg,0);	//Create menu
 						else { // Handle the context menu keyboard key
 							GetWindowRect(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_LIST), &wrect);
 							TrackPopupMenu(hDebugcontextsub,TPM_RIGHTBUTTON,wrect.left + int((wrect.right - wrect.left) / 3),wrect.top + int((wrect.bottom - wrect.top) / 3),0,hwndDlg,0);	//Create menu
-						}
-						
+						}						
 					}
 				}
 				break;
@@ -1972,7 +2014,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					tmp = mouse_y - 10;
 					if(tmp > height)
 						setString = false;
-					tmp /= debugSystem->fixedFontHeight;
+					tmp /= debugSystem->disasmFontHeight;
 				}
 
 				if (setString)
@@ -1992,7 +2034,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				//mbg merge 7/18/06 changed pausing check
 				if (FCEUI_EmulationPaused() && (mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
 				{
-					tmp = (mouse_y - 10) / debugSystem->fixedFontHeight;
+					tmp = (mouse_y - 10) / debugSystem->disasmFontHeight;
 // ################################## End of SP CODE ###########################
 					if (tmp < (int)disassembly_addresses.size())
 					{
@@ -2015,7 +2057,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				//mbg merge 7/18/06 changed pausing check
 				if (FCEUI_EmulationPaused() && (mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
 				{
-					tmp = (mouse_y - 10) / debugSystem->fixedFontHeight;
+					tmp = (mouse_y - 10) / debugSystem->disasmFontHeight;
 					if (tmp < (int)disassembly_addresses.size())
 					{
 						i = disassembly_addresses[tmp];
@@ -2036,7 +2078,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				//mbg merge 7/18/06 changed pausing check
 				if (FCEUI_EmulationPaused() && (mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
 				{
-					tmp = (mouse_y - 10) / debugSystem->fixedFontHeight;
+					tmp = (mouse_y - 10) / debugSystem->disasmFontHeight;
 					if (tmp < (int)disassembly_addresses.size())
 					{
 						i = disassembly_addresses[tmp];
@@ -2398,6 +2440,13 @@ void DebugSystem::init()
 		DEFAULT_QUALITY, DEFAULT_PITCH, /*quality, and pitch*/
 		"Courier New"); /*font name*/
 
+	hIDAFont = CreateFont(IDAFontSize, IDAFontSize / 2, /*Height,Width*/
+		0,0, /*escapement,orientation*/
+		FW_REGULAR,FALSE,FALSE,FALSE, /*weight, italic, underline, strikeout*/
+		ANSI_CHARSET,OUT_DEVICE_PRECIS,CLIP_MASK, /*charset, precision, clipping*/
+		DEFAULT_QUALITY, DEFAULT_PITCH, /*quality, and pitch*/
+		"Fixedsys"); /*font name*/
+
 	//if the user provided his own courier font, use that
 	extern std::string BaseDirectory;
 	std::string courefon_path = BaseDirectory + "\\coure.fon";
@@ -2427,6 +2476,9 @@ void DebugSystem::init()
 	HexeditorFontWidth = tm.tmAveCharWidth;
 	SelectObject(hdc,old);
 	DeleteDC(hdc);
+	LoadLibrary(TEXT("Riched20.dll"));
+	hDisasmFont = debuggerIDAFont ? hIDAFont : hFixedFont;
+	disasmFontHeight = debuggerIDAFont ? IDAFontSize : fixedFontHeight;
 }
 
 DebugSystem::~DebugSystem()
@@ -2440,6 +2492,11 @@ DebugSystem::~DebugSystem()
 	{
 		DeleteObject(hHexeditorFont);
 		hHexeditorFont = 0;
+	}
+	if (hIDAFont)
+	{
+		DeleteObject(hIDAFont);
+		hIDAFont = 0;
 	}
 }
 
