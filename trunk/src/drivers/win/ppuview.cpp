@@ -45,21 +45,21 @@ int PPUViewSkip;
 int PPUViewRefresh = 0;
 int mouse_x, mouse_y;
 
-#define PATTERNWIDTH        128
-#define PATTERNHEIGHT        128
-#define PATTERNBITWIDTH        PATTERNWIDTH*3
-#define PATTERNDESTX_BASE 7
-#define PATTERNDESTY_BASE 18
-#define ZOOM                        2
+#define PATTERNWIDTH          128
+#define PATTERNHEIGHT         128
+#define PATTERNBITWIDTH       PATTERNWIDTH*3
+#define PATTERNDESTX_BASE     7
+#define PATTERNDESTY_BASE     18
+#define ZOOM                  2
 
-#define PALETTEWIDTH        32*4*4
-#define PALETTEHEIGHT        32*2
-#define PALETTEBITWIDTH        PALETTEWIDTH*3
-#define PALETTEDESTX_BASE 7
-#define PALETTEDESTY_BASE 18
+#define PALETTEWIDTH          32*4*4
+#define PALETTEHEIGHT         32*2
+#define PALETTEBITWIDTH       PALETTEWIDTH*3
+#define PALETTEDESTX_BASE     7
+#define PALETTEDESTY_BASE     18
 
 #define TBM_SETPOS            (WM_USER+5)
-#define TBM_SETRANGE        (WM_USER+6)
+#define TBM_SETRANGE          (WM_USER+6)
 #define TBM_GETPOS            (WM_USER)
 
 int patternDestX = PATTERNDESTX_BASE;
@@ -229,6 +229,121 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 	//PPUViewDoBlit();
 }
 
+static void CalculateBitmapPositions(HWND hwndDlg)
+{
+	// calculate bitmaps positions relative to their groupboxes
+	RECT rect;
+	POINT pt;
+	GetWindowRect(GetDlgItem(hwndDlg, GRP_PPUVIEW_TABLES), &rect);
+	pt.x = rect.left;
+	pt.y = rect.top;
+	ScreenToClient(hwndDlg, &pt);
+	patternDestX = pt.x + PATTERNDESTX_BASE;
+	patternDestY = pt.y + PATTERNDESTY_BASE;
+	GetWindowRect(GetDlgItem(hwndDlg, LBL_PPUVIEW_PALETTES), &rect);
+	pt.x = rect.left;
+	pt.y = rect.top;
+	ScreenToClient(hwndDlg, &pt);
+	paletteDestX = pt.x + PALETTEDESTX_BASE;
+	paletteDestY = pt.y + PALETTEDESTY_BASE;
+}
+
+static BOOL CALLBACK EnsurePixelSizeEnumWindowsProc(HWND hwnd, LPARAM lParam)
+{
+	const int shift = lParam;
+	HWND chrbox = GetDlgItem(hPPUView, GRP_PPUVIEW_TABLES);
+	HWND palbox = GetDlgItem(hPPUView, LBL_PPUVIEW_PALETTES);
+
+	if (hwnd != chrbox && hwnd != palbox)
+	{
+		RECT rect;
+		GetWindowRect(hwnd, &rect);
+		ScreenToClient(hPPUView,(LPPOINT)&rect);
+		ScreenToClient(hPPUView,((LPPOINT)&rect)+1);
+		SetWindowPos(hwnd,0,rect.left,rect.top+shift,0,0,SWP_NOZORDER | SWP_NOSIZE);
+	}
+	return TRUE;
+}
+
+static void EnsurePixelSize()
+{
+	// DPI varies, so the pixel size of the window may be too small to fit the viewer.
+	// This expands the window and moves its controls around if necessary.
+
+	if (!hPPUView) return;
+	HWND chrbox = GetDlgItem(hPPUView, GRP_PPUVIEW_TABLES);
+	HWND palbox = GetDlgItem(hPPUView, LBL_PPUVIEW_PALETTES);
+	HWND chrlab = GetDlgItem(hPPUView, LBL_PPUVIEW_TILE1);
+
+	RECT crect, prect, lrect;
+	GetWindowRect(chrbox,&crect);
+	GetWindowRect(palbox,&prect);
+	GetWindowRect(chrlab,&lrect);
+
+	const int MIN_CHR_W = (PATTERNWIDTH * ZOOM * 2) + 1 + (PATTERNDESTX_BASE * 2);
+	const int MIN_CHR_H = (PATTERNHEIGHT * ZOOM)        + (PATTERNDESTY_BASE + 8);
+	const int MIN_PAL_W = PALETTEWIDTH                  + (PALETTEDESTX_BASE * 2);
+	const int MIN_PAL_H = PALETTEHEIGHT                 + (PALETTEDESTY_BASE + 8);
+
+	const int chr_w = crect.right - crect.left;
+	const int chr_h = lrect.top - crect.top; // measure CHR height against "Tile:" label
+	const int pal_w = prect.right - prect.left;
+	const int pal_h = prect.bottom - prect.top;
+
+	int chr_w_add = 0;
+	int chr_h_add = 0;
+	int pal_w_add = 0;
+	int pal_h_add = 0;
+
+	if (chr_w < MIN_CHR_W) chr_w_add = MIN_CHR_W - chr_w;
+	if (chr_h < MIN_CHR_H) chr_h_add = MIN_CHR_H - chr_h;
+	if (pal_w < MIN_PAL_W) pal_w_add = MIN_PAL_W - pal_w;
+	if (pal_h < MIN_PAL_H) pal_h_add = MIN_PAL_H - pal_h;
+
+	const int all_w_add = (pal_w_add > chr_w_add) ? pal_w_add : chr_w_add;
+	const int all_h_add = chr_h_add + pal_h_add;
+
+	if (all_h_add <= 0 && all_w_add <= 0) return;
+
+	// expand parent window
+	RECT wrect;
+	GetWindowRect(hPPUView,&wrect);
+	int ww = (wrect.right - wrect.left) + all_w_add;
+	int wh = (wrect.bottom - wrect.top) + all_h_add;
+	SetWindowPos(hPPUView,0,0,0,ww,wh,SWP_NOZORDER | SWP_NOMOVE);
+
+	if (all_w_add > 0 || chr_h_add > 0)
+	{
+		// expand CHR box
+		SetWindowPos(chrbox,0,0,0,
+			chr_w + all_w_add,
+			(crect.bottom - crect.top) + chr_h_add,
+			SWP_NOZORDER | SWP_NOMOVE);
+	}
+
+	if (all_w_add > 0 || pal_h_add > 0)
+	{
+		// expand and move palette box
+		ScreenToClient(hPPUView,(LPPOINT)&prect);
+		ScreenToClient(hPPUView,(LPPOINT)&prect+1);
+		SetWindowPos(palbox,0,
+			prect.left,
+			prect.top + chr_h_add,
+			pal_w + all_w_add,
+			pal_h + pal_h_add,
+			SWP_NOZORDER);
+	}
+
+	// move children
+	if (chr_h_add > 0)
+	{
+		EnumChildWindows(hPPUView, EnsurePixelSizeEnumWindowsProc, chr_h_add);
+	}
+
+	CalculateBitmapPositions(hPPUView);
+	RedrawWindow(hPPUView,0,0,RDW_ERASE | RDW_INVALIDATE);
+}
+
 void KillPPUView()
 {
 	//GDI cleanup
@@ -262,21 +377,7 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			if (PPUViewPosY==-32000) PPUViewPosY=0;
 			SetWindowPos(hwndDlg,0,PPUViewPosX,PPUViewPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 
-			// calculate bitmaps positions relative to their groupboxes
-			RECT rect;
-			POINT pt;
-			GetWindowRect(GetDlgItem(hwndDlg, GRP_PPUVIEW_TABLES), &rect);
-			pt.x = rect.left;
-			pt.y = rect.top;
-			ScreenToClient(hwndDlg, &pt);
-			patternDestX = pt.x + PATTERNDESTX_BASE;
-			patternDestY = pt.y + PATTERNDESTY_BASE;
-			GetWindowRect(GetDlgItem(hwndDlg, LBL_PPUVIEW_PALETTES), &rect);
-			pt.x = rect.left;
-			pt.y = rect.top;
-			ScreenToClient(hwndDlg, &pt);
-			paletteDestX = pt.x + PALETTEDESTX_BASE;
-			paletteDestY = pt.y + PALETTEDESTY_BASE;
+			CalculateBitmapPositions(hwndDlg);
 
 			//prepare the bitmap attributes
 			//pattern tables
@@ -523,7 +624,11 @@ void DoPPUView()
 				return;
 		}
 
-		if(!hPPUView) hPPUView = CreateDialog(fceu_hInstance,"PPUVIEW",NULL,PPUViewCallB);
+		if(!hPPUView)
+		{
+			hPPUView = CreateDialog(fceu_hInstance,"PPUVIEW",NULL,PPUViewCallB);
+			EnsurePixelSize();
+		}
 		if(hPPUView)
 		{
 			//SetWindowPos(hPPUView,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);

@@ -83,13 +83,16 @@ NT_MirrorType ntmirroring, oldntmirroring = NT_NONE;
 
 int horzscroll, vertscroll;
 
-#define NTWIDTH			256
-#define NTHEIGHT		240
-//#define PATTERNBITWIDTH	PATTERNWIDTH*3
-#define NTDESTX		10
-#define NTDESTY		15
-#define ZOOM		1
+#define NTWIDTH             256
+#define NTHEIGHT            240
+#define NTDESTX_BASE        6
+#define NTDESTY_BASE        18
 
+int ntDestX = NTDESTX_BASE;
+int ntDestY = NTDESTY_BASE;
+
+//#define PATTERNBITWIDTH     PATTERNWIDTH*3
+//#define ZOOM                1
 //#define PALETTEWIDTH	32*4*4
 //#define PALETTEHEIGHT	32*2
 //#define PALETTEBITWIDTH	PALETTEWIDTH*3
@@ -125,10 +128,10 @@ void NTViewDoBlit(int autorefresh) {
 
 	if((redrawtables && !autorefresh) || (autorefresh) || (scrolllines)){
 
-	BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,cache[0].hdc,0,0,SRCCOPY);
-	BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,cache[1].hdc,0,0,SRCCOPY);
-	BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,cache[2].hdc,0,0,SRCCOPY);
-	BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,cache[3].hdc,0,0,SRCCOPY);
+	BitBlt(pDC,ntDestX,ntDestY,NTWIDTH,NTHEIGHT,cache[0].hdc,0,0,SRCCOPY);
+	BitBlt(pDC,ntDestX+NTWIDTH,ntDestY,NTWIDTH,NTHEIGHT,cache[1].hdc,0,0,SRCCOPY);
+	BitBlt(pDC,ntDestX,ntDestY+NTHEIGHT,NTWIDTH,NTHEIGHT,cache[2].hdc,0,0,SRCCOPY);
+	BitBlt(pDC,ntDestX+NTWIDTH,ntDestY+NTHEIGHT,NTWIDTH,NTHEIGHT,cache[3].hdc,0,0,SRCCOPY);
 
 	redrawtables = false;
 	}
@@ -137,12 +140,12 @@ void NTViewDoBlit(int autorefresh) {
 		SetROP2(pDC,R2_NOT);
 
 		//draw vertical line
-		MoveToEx(pDC,NTDESTX+xpos,NTDESTY,NULL);
-		LineTo(pDC,NTDESTX+xpos,NTDESTY+(NTHEIGHT*2)-1);
+		MoveToEx(pDC,ntDestX+xpos,ntDestY,NULL);
+		LineTo(pDC,ntDestX+xpos,ntDestY+(NTHEIGHT*2)-1);
 	
 		//draw horizontal line
-		MoveToEx(pDC,NTDESTX,NTDESTY+ypos,NULL);
-		LineTo(pDC,NTDESTX+(NTWIDTH*2)-1,NTDESTY+ypos);
+		MoveToEx(pDC,ntDestX,ntDestY+ypos,NULL);
+		LineTo(pDC,ntDestX+(NTWIDTH*2)-1,ntDestY+ypos);
 
 		SetROP2(pDC,R2_COPYPEN);
 	}
@@ -310,6 +313,18 @@ void DrawNameTable(int scanline, int ntnum, bool invalidateCache) {
 	//}
 }
 
+static void CalculateBitmapPositions(HWND hwndDlg)
+{
+	RECT rect;
+	POINT pt;
+	GetWindowRect(GetDlgItem(hwndDlg, IDC_NTVIEW_TABLE_BOX), &rect);
+	pt.x = rect.left;
+	pt.y = rect.top;
+	ScreenToClient(hwndDlg, &pt);
+	ntDestX = pt.x + NTDESTX_BASE;
+	ntDestY = pt.y + NTDESTY_BASE;
+}
+
 static BOOL CALLBACK EnsurePixelSizeEnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
 	const int shift = lParam;
@@ -334,13 +349,12 @@ static void EnsurePixelSize()
 	if (!hNTView) return;
 	HWND ntbox = GetDlgItem(hNTView, IDC_NTVIEW_TABLE_BOX);
 
-	const int MARGIN_W = 12;
-	const int MARGIN_H = 22;
-	const int MIN_W = 512 + MARGIN_W;
-	const int MIN_H = 480 + MARGIN_H;
+	const int MIN_W = (NTWIDTH  * 2) + (NTDESTX_BASE * 2);
+	const int MIN_H = (NTHEIGHT * 2) + (NTDESTY_BASE + 8);
 
-	RECT rect;
+	RECT rect, client;
 	GetWindowRect(ntbox,&rect);
+	GetClientRect(ntbox,&client);
 
 	int nt_w = rect.right - rect.left;
 	int nt_h = rect.bottom - rect.top;
@@ -348,7 +362,7 @@ static void EnsurePixelSize()
 	int nt_w_add = (nt_w < MIN_W) ? (MIN_W - nt_w) : 0;
 	int nt_h_add = (nt_h < MIN_H) ? (MIN_H - nt_h) : 0;
 
-	if (nt_w_add == 0 && nt_h_add == 0) return;
+	if (nt_w_add <= 0 && nt_h_add <= 0) return;
 
 	// expand parent window
 	RECT wrect;
@@ -360,12 +374,13 @@ static void EnsurePixelSize()
 	// expand NT box
 	SetWindowPos(ntbox,0,0,0,nt_w + nt_w_add,nt_h + nt_h_add, SWP_NOZORDER | SWP_NOMOVE);
 
-	// expand children
+	// move children
 	if (nt_h_add > 0)
 	{
 		EnumChildWindows(hNTView, EnsurePixelSizeEnumWindowsProc, nt_h_add);
 	}
 
+	CalculateBitmapPositions(hNTView);
 	RedrawWindow(hNTView,0,0,RDW_ERASE | RDW_INVALIDATE);
 }
 
@@ -447,6 +462,8 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if (NTViewPosX==-32000) NTViewPosX=0; //Just in case
 			if (NTViewPosY==-32000) NTViewPosY=0;
 			SetWindowPos(hwndDlg,0,NTViewPosX,NTViewPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
+
+			CalculateBitmapPositions(hwndDlg);
 
 			//prepare the bitmap attributes
 			//pattern tables
@@ -531,10 +548,10 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case WM_MOUSEMOVE:
 			mouse_x = GET_X_LPARAM(lParam);
 			mouse_y = GET_Y_LPARAM(lParam);
-			if((mouse_x > NTDESTX) && (mouse_x < NTDESTX+(NTWIDTH*2))
-				&& (mouse_y > NTDESTY) && (mouse_y < NTDESTY+(NTHEIGHT*2))){
-				TileX = (mouse_x-NTDESTX)/8;
-				TileY = (mouse_y-NTDESTY)/8;
+			if((mouse_x > ntDestX) && (mouse_x < ntDestX+(NTWIDTH*2))
+				&& (mouse_y > ntDestY) && (mouse_y < ntDestY+(NTHEIGHT*2))){
+				TileX = (mouse_x-ntDestX)/8;
+				TileY = (mouse_y-ntDestY)/8;
 				sprintf(str,"X / Y: %0d / %0d",TileX,TileY);
 				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_2,str);
 				NameTable = (TileX/32)+((TileY/30)*2);
@@ -645,11 +662,11 @@ void DoNTView()
 	if (!hNTView)
 	{
 		hNTView = CreateDialog(fceu_hInstance,"NTVIEW",NULL,NTViewCallB);
+		EnsurePixelSize();
 		new(cache) NTCache[4]; //reinitialize NTCache
 	}
 	if (hNTView)
 	{
-		EnsurePixelSize();
 		//SetWindowPos(hNTView,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 		ShowWindow(hNTView, SW_SHOWNORMAL);
 		SetForegroundWindow(hNTView);
