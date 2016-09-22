@@ -7,7 +7,8 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -875,10 +876,10 @@ BEGIN
     CONTROL         "Horizontal",IDC_NTVIEW_MIRROR_HORIZONTAL,"Button",BS_AUTORADIOBUTTON,6,300,47,10
     CONTROL         "Vertical",IDC_NTVIEW_MIRROR_VERTICAL,"Button",BS_AUTORADIOBUTTON,6,311,39,10
     CONTROL         "Four Screen",IDC_NTVIEW_MIRROR_FOUR_SCREEN,"Button",BS_AUTORADIOBUTTON,6,322,55,10
-    CONTROL         "Single Screen 0",IDC_NTVIEW_MIRROR_SS_TABLE_0,"Button",BS_AUTORADIOBUTTON,65,300,60,10
-    CONTROL         "Single Screen 1",IDC_NTVIEW_MIRROR_SS_TABLE_1,"Button",BS_AUTORADIOBUTTON,65,311,60,10
-    CONTROL         "Single Screen 2",IDC_NTVIEW_MIRROR_SS_TABLE_2,"Button",BS_AUTORADIOBUTTON,65,322,60,10
-    CONTROL         "Single Screen 3",IDC_NTVIEW_MIRROR_SS_TABLE_3,"Button",BS_AUTORADIOBUTTON,65,333,60,10
+    CONTROL         "Single Screen 0",IDC_NTVIEW_MIRROR_SS_TABLE_0,"Button",BS_AUTORADIOBUTTON,65,300,65,10
+    CONTROL         "Single Screen 1",IDC_NTVIEW_MIRROR_SS_TABLE_1,"Button",BS_AUTORADIOBUTTON,65,311,65,10
+    CONTROL         "Single Screen 2",IDC_NTVIEW_MIRROR_SS_TABLE_2,"Button",BS_AUTORADIOBUTTON,65,322,65,10
+    CONTROL         "Single Screen 3",IDC_NTVIEW_MIRROR_SS_TABLE_3,"Button",BS_AUTORADIOBUTTON,65,333,65,10
     GROUPBOX        "Properties",-1,134,289,130,59
     LTEXT           "Tile ID:",IDC_NTVIEW_PROPERTIES_LINE_1,144,300,110,10
     LTEXT           "X / Y:",IDC_NTVIEW_PROPERTIES_LINE_2,144,311,110,10
@@ -2597,7 +2598,8 @@ IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

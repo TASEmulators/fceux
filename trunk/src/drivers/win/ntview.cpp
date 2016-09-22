@@ -310,6 +310,65 @@ void DrawNameTable(int scanline, int ntnum, bool invalidateCache) {
 	//}
 }
 
+static BOOL CALLBACK EnsurePixelSizeEnumWindowsProc(HWND hwnd, LPARAM lParam)
+{
+	const int shift = lParam;
+	HWND ntbox = GetDlgItem(hNTView, IDC_NTVIEW_TABLE_BOX);
+
+	if (hwnd != ntbox)
+	{
+		RECT rect;
+		GetWindowRect(hwnd, &rect);
+		ScreenToClient(hNTView,(LPPOINT)&rect);
+		ScreenToClient(hNTView,((LPPOINT)&rect)+1);
+		SetWindowPos(hwnd,0,rect.left,rect.top+shift,0,0,SWP_NOZORDER | SWP_NOSIZE);
+	}
+	return TRUE;
+}
+
+static void EnsurePixelSize()
+{
+	// DPI varies, so the pixel size of the window may be too small to fit the viewer.
+	// This expands the window and moves its controls around if necessary.
+
+	if (!hNTView) return;
+	HWND ntbox = GetDlgItem(hNTView, IDC_NTVIEW_TABLE_BOX);
+
+	const int MARGIN_W = 12;
+	const int MARGIN_H = 22;
+	const int MIN_W = 512 + MARGIN_W;
+	const int MIN_H = 480 + MARGIN_H;
+
+	RECT rect;
+	GetWindowRect(ntbox,&rect);
+
+	int nt_w = rect.right - rect.left;
+	int nt_h = rect.bottom - rect.top;
+
+	int nt_w_add = (nt_w < MIN_W) ? (MIN_W - nt_w) : 0;
+	int nt_h_add = (nt_h < MIN_H) ? (MIN_H - nt_h) : 0;
+
+	if (nt_w_add == 0 && nt_h_add == 0) return;
+
+	// expand parent window
+	RECT wrect;
+	GetWindowRect(hNTView,&wrect);
+	int ww = (wrect.right - wrect.left) + nt_w_add;
+	int wh = (wrect.bottom - wrect.top) + nt_h_add;
+	SetWindowPos(hNTView,0,0,0,ww,wh,SWP_NOZORDER | SWP_NOMOVE);
+
+	// expand NT box
+	SetWindowPos(ntbox,0,0,0,nt_w + nt_w_add,nt_h + nt_h_add, SWP_NOZORDER | SWP_NOMOVE);
+
+	// expand children
+	if (nt_h_add > 0)
+	{
+		EnumChildWindows(hNTView, EnsurePixelSizeEnumWindowsProc, nt_h_add);
+	}
+
+	RedrawWindow(hNTView,0,0,RDW_ERASE | RDW_INVALIDATE);
+}
+
 void FCEUD_UpdateNTView(int scanline, bool drawall) {
 	if(!NTViewer) return;
 	if(scanline != -1 && scanline != NTViewScanline) return;
@@ -590,6 +649,7 @@ void DoNTView()
 	}
 	if (hNTView)
 	{
+		EnsurePixelSize();
 		//SetWindowPos(hNTView,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 		ShowWindow(hNTView, SW_SHOWNORMAL);
 		SetForegroundWindow(hNTView);
