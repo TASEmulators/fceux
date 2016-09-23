@@ -392,6 +392,9 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void HighlightPC()
 {
+	if (PCLine == -1)
+		return;
+
 	FINDTEXT ft;
 	ft.lpstrText  = ">";
 	ft.chrg.cpMin = 0;
@@ -411,14 +414,39 @@ void HighlightPC()
 				cf.cbSize = sizeof cf;
 				cf.dwMask = CFM_COLOR;
 				cf.crTextColor = RGB(0,0,255);
-				//cf.dwMask = CFM_BACKCOLOR;
-				//cf.crBackColor = RGB(208,255,255);
 				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&cf);
 				break;
 			}
 		}
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)old_start, (LPARAM)old_end);
     }
+}
+
+void HighlightSyntax(int lines)
+{
+	int old_start, old_end;
+	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&old_start, (LPARAM)&old_end);
+
+	CHARFORMAT2 cf;
+	memset(&cf, 0, sizeof cf);
+	cf.cbSize = sizeof cf;
+	cf.dwMask = CFM_COLOR;
+	cf.crTextColor = RGB(0,0,128);
+	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)20, (LPARAM)23);
+	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&cf);
+	
+	FINDTEXT ft;
+	ft.lpstrText  = "\r";
+	ft.chrg.cpMax = -1;
+	int start = 0;
+	for (int line = 1; line <= lines; line++)
+	{
+		ft.chrg.cpMin = start+1;
+		start = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&ft);
+		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)20+ft.chrg.cpMin, (LPARAM)23+ft.chrg.cpMin);
+		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&cf);
+	}
+	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)old_start, (LPARAM)old_end);
 }
 
 void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
@@ -584,10 +612,18 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 		strcat(debug_str, "\n");
 		instructions_count++;
 	}
-	SetDlgItemText(hWnd, id, debug_str);
 
-	if (PCLine >= 0)
-		HighlightPC();
+	// basic syntax highlighter and due richedit optimizations
+	int eventMask = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETEVENTMASK, 0, 0);
+	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, WM_SETREDRAW, false, 0);
+
+	SetDlgItemText(hWnd, id, debug_str);
+	HighlightSyntax(lines);
+	HighlightPC();
+
+	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, WM_SETREDRAW, true, 0);
+	InvalidateRect(GetDlgItem(hWnd, id), 0, true);
+	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETEVENTMASK, 0, eventMask);
 
 	// fill the left panel data
 	debug_cdl_str[0] = 0;
