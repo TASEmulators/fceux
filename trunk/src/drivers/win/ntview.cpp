@@ -50,7 +50,7 @@ static uint8 palcache[36]; //palette cache
 int NTViewScanline=0,NTViewer=0;
 int NTViewSkip;
 int NTViewRefresh = 0;
-static int mouse_x,mouse_y; //todo: is static needed here? --mbg 7/19/06 - i think so
+static int mouse_x,mouse_y;
 bool redrawtables = false;
 int chrchanged = 0;
 
@@ -91,18 +91,10 @@ int horzscroll, vertscroll;
 int ntDestX = NTDESTX_BASE;
 int ntDestY = NTDESTY_BASE;
 
-//#define PATTERNBITWIDTH     PATTERNWIDTH*3
-//#define ZOOM                1
-//#define PALETTEWIDTH	32*4*4
-//#define PALETTEHEIGHT	32*2
-//#define PALETTEBITWIDTH	PALETTEWIDTH*3
-//#define PALETTEDESTX	10
-//#define PALETTEDESTY	327
-
 void UpdateMirroringButtons();
 void ChangeMirroring();
 
-static BITMAPINFO bmInfo; //todo is static needed here so it won't interefere with the pattern table viewer?
+static BITMAPINFO bmInfo;
 static HDC pDC;
 
 extern uint32 TempAddr, RefreshAddr;
@@ -149,10 +141,6 @@ void NTViewDoBlit(int autorefresh) {
 
 		SetROP2(pDC,R2_COPYPEN);
 	}
-	//StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-	//StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-	//StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC2,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-	//StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC3,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 }
 
 void UpdateMirroringButtons(){
@@ -394,11 +382,6 @@ void FCEUD_UpdateNTView(int scanline, bool drawall) {
 	ppu_getScroll(xpos,ypos);
 
 
-	//char str[50];
-	//sprintf(str,"%d,%d,%d",horzscroll,vertscroll,ntmirroring);
-	//sprintf(str,"%08X  %08X",TempAddr, RefreshAddr);
-	//SetDlgItemText(hNTView, IDC_NTVIEW_PROPERTIES_LINE_1, str);
-
 	if (NTViewSkip < NTViewRefresh) return;
 
 	if(chrchanged) drawall = 1;
@@ -475,7 +458,7 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			bmInfo.bmiHeader.biBitCount = 24;
 
 			//create memory dcs
-			pDC = GetDC(hwndDlg); // GetDC(GetDlgItem(hwndDlg,IDC_NTVIEW_TABLE_BOX));
+			pDC = GetDC(hwndDlg);
 			for(int i=0;i<4;i++) {
 				NTCache &c = cache[i];
 				c.hdc = CreateCompatibleDC(pDC);
@@ -534,16 +517,6 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case WM_RBUTTONDOWN:
 			mouse_x = GET_X_LPARAM(lParam);
 			mouse_y = GET_Y_LPARAM(lParam);
-			/*if (((mouse_x >= PATTERNDESTX) && (mouse_x < (PATTERNDESTX+(PATTERNWIDTH*ZOOM)))) && (mouse_y >= PATTERNDESTY) && (mouse_y < (PATTERNDESTY+(PATTERNHEIGHT*ZOOM)))) {
-				if (pindex0 == 7) pindex0 = 0;
-				else pindex0++;
-			}
-			else if (((mouse_x >= PATTERNDESTX+(PATTERNWIDTH*ZOOM)+1) && (mouse_x < (PATTERNDESTX+(PATTERNWIDTH*ZOOM)*2+1))) && (mouse_y >= PATTERNDESTY) && (mouse_y < (PATTERNDESTY+(PATTERNHEIGHT*ZOOM)))) {
-				if (pindex1 == 7) pindex1 = 0;
-				else pindex1++;
-			}
-			UpdatePPUView(0);
-			PPUViewDoBlit();*/
 			break;
 		case WM_MOUSEMOVE:
 			mouse_x = GET_X_LPARAM(lParam);
@@ -567,37 +540,6 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				sprintf(str,"Attribute: %1X (%04X)",Attrib,AttAddress);
 				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_4,str);
 			}
-
-/*			if (((mouse_x >= PATTERNDESTX) && (mouse_x < (PATTERNDESTX+(PATTERNWIDTH*ZOOM)))) && (mouse_y >= PATTERNDESTY) && (mouse_y < (PATTERNDESTY+(PATTERNHEIGHT*ZOOM)))) {
-				mouse_x = (mouse_x-PATTERNDESTX)/(8*ZOOM);
-				mouse_y = (mouse_y-PATTERNDESTY)/(8*ZOOM);
-				sprintf(str,"Tile: $%X%X",mouse_y,mouse_x);
-				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_1,str);
-				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_2,"Tile:");
-				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_3,"Palettes");
-			}
-			else if (((mouse_x >= PATTERNDESTX+(PATTERNWIDTH*ZOOM)+1) && (mouse_x < (PATTERNDESTX+(PATTERNWIDTH*ZOOM)*2+1))) && (mouse_y >= PATTERNDESTY) && (mouse_y < (PATTERNDESTY+(PATTERNHEIGHT*ZOOM)))) {
-				mouse_x = (mouse_x-(PATTERNDESTX+(PATTERNWIDTH*ZOOM)+1))/(8*ZOOM);
-				mouse_y = (mouse_y-PATTERNDESTY)/(8*ZOOM);
-				sprintf(str,"Tile: $%X%X",mouse_y,mouse_x);
-				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_2,str);
-				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_1,"Tile:");
-				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_3,"Palettes");
-			}
-			else if (((mouse_x >= PALETTEDESTX) && (mouse_x < (PALETTEDESTX+PALETTEWIDTH))) && (mouse_y >= PALETTEDESTY) && (mouse_y < (PALETTEDESTY+PALETTEHEIGHT))) {
-				mouse_x = (mouse_x-PALETTEDESTX)/32;
-				mouse_y = (mouse_y-PALETTEDESTY)/32;
-				sprintf(str,"Palette: $%02X",palcache[(mouse_y<<4)|mouse_x]);
-				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_1,"Tile:");
-				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_2,"Tile:");
-				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_3,str);
-			}
-			else {
-				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_1,"Tile:");
-				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_2,"Tile:");
-				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_3,"Palettes");
-			}
-*/
 			break;
 		case WM_NCACTIVATE:
 			sprintf(str,"%d",NTViewScanline);
