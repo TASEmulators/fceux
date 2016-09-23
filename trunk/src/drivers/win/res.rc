@@ -1260,11 +1260,11 @@ BEGIN
     LTEXT           "Display on scanline:",-1,253,166,65,9
     EDITTEXT        IDC_PPUVIEW_SCANLINE,315,164,27,12
     CONTROL         "Sprites 8x16 mode",IDC_SPRITE16_MODE,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,151,75,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,151,160,10
     CONTROL         "Mask unused graphics (Code/Data Logger)",IDC_MASK_UNUSED_GRAPHICS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,162,140,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,162,160,10
     CONTROL         "Invert the mask (Code/Data Logger)",IDC_INVERT_THE_MASK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,173,140,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,173,160,10
     GROUPBOX        "Palettes",LBL_PPUVIEW_PALETTES,2,185,348,46,WS_TABSTOP
 END
 

@@ -78,7 +78,19 @@ void CloseGuiDialog(HWND hwndDlg)
 	{
 		FILE * stream = fopen( ManifestFilePath, "w" );
 		if (stream) {
-			fputs ("<\?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"\?>\n<assembly\n  xmlns=\"urn:schemas-microsoft-com:asm.v1\"\n  manifestVersion=\"1.0\">\n<assemblyIdentity\n    name=\"FCEUX\"\n    processorArchitecture=\"x86\"\n    version=\"1.0.0.0\"\n    type=\"win32\"/>\n<description>FCEUX</description>\n</assembly>\n",stream);
+			fputs (
+				"<\?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"\?>\n"
+				"<assembly\n"
+				"  xmlns=\"urn:schemas-microsoft-com:asm.v1\"\n"
+				"  manifestVersion=\"1.0\">\n"
+				"<assemblyIdentity\n"
+				"    name=\"FCEUX\"\n"
+				"    processorArchitecture=\"x86\"\n"
+				"    version=\"1.0.0.0\"\n"
+				"    type=\"win32\"/>\n"
+				"<description>FCEUX</description>\n"
+				"</assembly>\n"
+				,stream);
 			fclose(stream);
 		}
 	}
