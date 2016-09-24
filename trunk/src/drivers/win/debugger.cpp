@@ -115,7 +115,7 @@ void UpdateOtherDebuggingDialogs()
 void RestoreSize(HWND hwndDlg)
 {
 	//If the dialog dimensions are changed those changes need to be reflected here.  - adelikat
-	const int DEFAULT_WIDTH = 820;	//Original width
+	const int DEFAULT_WIDTH = 820 + (debuggerIDAFont ? 64 : 0);	//Original width
 	const int DEFAULT_HEIGHT = 574;	//Original height
 	
 	SetWindowPos(hwndDlg,HWND_TOP,DbgPosX,DbgPosY,DEFAULT_WIDTH,DEFAULT_HEIGHT,SWP_SHOWWINDOW);
@@ -404,48 +404,64 @@ void HighlightPC()
 	{
 		int old_start, old_end;
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&old_start, (LPARAM)&old_end);
-		for (int end = start; end < start + 100; end++)
-		{
-			if (debug_str[end] == '\n')
-			{
-				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)start, (LPARAM)end);
-				CHARFORMAT2 cf;
-				memset(&cf, 0, sizeof cf);
-				cf.cbSize = sizeof cf;
-				cf.dwMask = CFM_COLOR;
-				cf.crTextColor = RGB(0,0,255);
-				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&cf);
-				break;
-			}
-		}
+		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)start, (LPARAM)start+20);
+		CHARFORMAT2 cf;
+		memset(&cf, 0, sizeof cf);
+		cf.cbSize = sizeof cf;
+		cf.dwMask = CFM_COLOR;
+		cf.crTextColor = RGB(0,0,255);
+		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&cf);
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)old_start, (LPARAM)old_end);
     }
 }
 
 void HighlightSyntax(int lines)
 {
+	int wordbreak = 0;
 	int old_start, old_end;
 	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&old_start, (LPARAM)&old_end);
 
 	CHARFORMAT2 cf;
 	memset(&cf, 0, sizeof cf);
 	cf.cbSize = sizeof cf;
-	cf.dwMask = CFM_COLOR;
+	//if (!debuggerIDAFont)
+	//{
+	//	cf.dwMask = CFM_COLOR | CFM_BOLD;
+	//	cf.dwEffects = CFE_BOLD;
+	//} else
+		cf.dwMask = CFM_COLOR;
 	cf.crTextColor = RGB(0,0,128);
-	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)20, (LPARAM)23);
+	wordbreak = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDWORDBREAK, (WPARAM)WB_RIGHT, (LPARAM)21);
+	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)20, (LPARAM)wordbreak);
 	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&cf);
 	
 	FINDTEXT ft;
 	ft.lpstrText  = "\r";
 	ft.chrg.cpMax = -1;
-	int start = 0;
 	for (int line = 1; line <= lines; line++)
 	{
-		ft.chrg.cpMin = start+1;
-		start = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&ft);
-		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)20+ft.chrg.cpMin, (LPARAM)23+ft.chrg.cpMin);
+		ft.chrg.cpMin = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&ft) + 1;
+		wordbreak = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDWORDBREAK, (WPARAM)WB_RIGHT, (LPARAM)ft.chrg.cpMin+21);
+		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)ft.chrg.cpMin+20, (LPARAM)wordbreak);
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&cf);
 	}
+
+	cf.crTextColor = RGB(0,128,0);
+	ft.lpstrText  = "$";
+	ft.chrg.cpMin = 0;
+	for (;;)
+	{
+		ft.chrg.cpMin = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&ft) + 1;
+		if (ft.chrg.cpMin == 0)
+			break;
+		if (debug_str[ft.chrg.cpMin+2] == ',' || debug_str[ft.chrg.cpMin+2] == ')')
+			wordbreak = ft.chrg.cpMin+2;
+		else
+			wordbreak = ft.chrg.cpMin+4;
+		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)ft.chrg.cpMin-1, (LPARAM)wordbreak);
+		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&cf);
+	}
+
 	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)old_start, (LPARAM)old_end);
 }
 
