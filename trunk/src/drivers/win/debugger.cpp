@@ -2139,7 +2139,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						i = disassembly_addresses[tmp];
 						if (i >= 0x8000)
 							// show ROM data in Hexeditor
-							ChangeMemViewFocus(2, GetNesFileAddress(i), -1);
+							ChangeMemViewFocus(3, GetNesFileAddress(i), -1);
 						else
 							// show RAM data in Hexeditor
 							ChangeMemViewFocus(0, i, -1);

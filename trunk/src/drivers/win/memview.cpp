@@ -628,14 +628,14 @@ void UpdateCaption()
 		if (EditingMode == MODE_NES_FILE)
 		{
 			if (CursorStartAddy < 16)
-				sprintf(str, "Hex Editor - ROM Header Offset 0x%06x", CursorStartAddy);
+				sprintf(str, "Hex Editor - ROM Header: 0x%X", CursorStartAddy);
 			else if (CursorStartAddy - 16 < (int)PRGsize[0])
-				sprintf(str, "Hex Editor - (PRG) ROM Offset 0x%06x", CursorStartAddy);
+				sprintf(str, "Hex Editor - (PRG) ROM: 0x%X", CursorStartAddy);
 			else if (CursorStartAddy - 16 - PRGsize[0] < (int)CHRsize[0])
-				sprintf(str, "Hex Editor - (CHR) ROM Offset 0x%06x", CursorStartAddy);
+				sprintf(str, "Hex Editor - (CHR) ROM: 0x%X", CursorStartAddy);
 		} else
 		{
-			sprintf(str, "Hex Editor - %s Offset 0x%06x", EditString[EditingMode], CursorStartAddy);
+			sprintf(str, "Hex Editor - %s: 0x%X", EditString[EditingMode], CursorStartAddy);
 		}
 
 		if (EditingMode == MODE_NES_MEMORY && symbDebugEnabled)
@@ -660,7 +660,7 @@ void UpdateCaption()
 		}
 	} else
 	{
-		sprintf(str, "Hex Editor - %s Offset 0x%06x - 0x%06x, 0x%x bytes selected ",
+		sprintf(str, "Hex Editor - %s: 0x%X - 0x%X (0x%X)",
 			EditString[EditingMode], CursorStartAddy, CursorEndAddy, CursorEndAddy - CursorStartAddy + 1);
 	}
 	SetWindowText(hMemView,str);
