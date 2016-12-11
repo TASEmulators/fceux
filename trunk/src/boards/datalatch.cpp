@@ -68,15 +68,58 @@ static void Latch_Init(CartInfo *info, void (*proc)(void), uint8 init, uint16 ad
 	info->Power = LatchPower;
 	info->Close = LatchClose;
 	GameStateRestore = StateRestore;
-	if (wram) {
-		WRAMSIZE = 8192;
-		WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
-		SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-		if (info->battery) {
-			info->SaveGame[0] = WRAM;
-			info->SaveGameLen[0] = WRAMSIZE;
+	if(info->ines2)
+		if(info->battery_wram_size + info->wram_size > 0)
+			wram = 1;
+	if (wram)
+	{
+		if(info->ines2)
+		{
+			//I would like to do it in this way, but FCEUX is woefully inadequate
+			//for instance if WRAMSIZE is large, the cheat pointers may get overwritten. and it's just a giant mess.
+			//WRAMSIZE = info->battery_wram_size + info->wram_size;
+			//WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
+			//if(!info->wram_size && !info->battery_wram_size) {}
+			//else if(info->wram_size && !info->battery_wram_size)
+			//	SetupCartPRGMapping(0x10, WRAM, info->wram_size, 1);
+			//else if(!info->wram_size && info->battery_wram_size)
+			//{
+			//	SetupCartPRGMapping(0x10, WRAM, info->battery_wram_size, 1);
+			//	info->SaveGame[0] = WRAM;
+			//	info->SaveGameLen[0] = info->battery_wram_size;
+			//} else {
+			//	//well, this is annoying
+			//	SetupCartPRGMapping(0x10, WRAM, info->wram_size, 1);
+			//	SetupCartPRGMapping(0x11, WRAM, info->battery_wram_size, 1); //? ? ? there probably isnt even a way to select this
+			//	info->SaveGame[0] = WRAM + info->wram_size;
+			//	info->SaveGameLen[0] = info->battery_wram_size;
+			//}
+			
+			//this is more likely the only practical scenario
+			WRAMSIZE = 8192;
+			WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
+			SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
+			SetReadHandler(0x6000, 0x7FFF, CartBR);
+			SetWriteHandler(0x6000, 0x7FFF, CartBW);
+			setprg8r(0x10, 0x6000, 0);
+			if(info->battery_wram_size)
+			{
+				info->SaveGame[0] = WRAM;
+				info->SaveGameLen[0] = 8192;
+			}
 		}
-		AddExState(WRAM, WRAMSIZE, 0, "WRAM");
+		else
+		{
+			WRAMSIZE = 8192;
+			WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
+			SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
+			if (info->battery) {
+				info->SaveGame[0] = WRAM;
+				info->SaveGameLen[0] = WRAMSIZE;
+			}
+			AddExState(WRAM, WRAMSIZE, 0, "WRAM");
+		}
+		
 	}
 	AddExState(&latche, 1, 0, "LATC");
 	AddExState(&bus_conflict, 1, 0, "BUSC");
