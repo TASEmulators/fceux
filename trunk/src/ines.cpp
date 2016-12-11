@@ -855,7 +855,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 		FCEU_printf(" Total VRAM size: %d\n", iNESCart.vram_size + iNESCart.battery_vram_size);
 		if(head.ROM_type & 2)
 		{
-			FCEU_printf(" WRAM backked by battery: %d\n", iNESCart.battery_wram_size);
+			FCEU_printf(" WRAM backed by battery: %d\n", iNESCart.battery_wram_size);
 			FCEU_printf(" VRAM backed by battery: %d\n", iNESCart.battery_vram_size);
 		}
 	}
@@ -1015,8 +1015,18 @@ static int iNES_Init(int num) {
 				FCEU_MemoryRand(VROM, CHRRAMSize);
 
 				UNIFchrrama = VROM;
-				SetupCartCHRMapping(0, VROM, CHRRAMSize, 1);
-				AddExState(VROM, CHRRAMSize, 0, "CHRR");
+				if(CHRRAMSize == 0)
+				{
+					//probably a mistake. 
+					//but (for chrram): "Use of $00 with no CHR ROM implies that the game is wired to map nametable memory in CHR space. The value $00 MUST NOT be used if a mapper isn't defined to allow this. "
+					//well, i'm not going to do that now. we'll save it for when it's needed
+					//"it's only mapper 218 and no other mappers"
+				}
+				else
+				{
+					SetupCartCHRMapping(0, VROM, CHRRAMSize, 1);
+					AddExState(VROM, CHRRAMSize, 0, "CHRR");
+				}
 			}
 			if (head.ROM_type & 8)
 				AddExState(ExtraNTARAM, 2048, 0, "EXNR");
