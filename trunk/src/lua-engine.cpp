@@ -1319,12 +1319,12 @@ static int rom_gethash(lua_State *L) {
 }
 
 static int memory_readbyte(lua_State *L) {
-	lua_pushinteger(L, FCEU_CheatGetByte(luaL_checkinteger(L,1)));
+	lua_pushinteger(L, GetMem(luaL_checkinteger(L,1)));
 	return 1;
 }
 
 static int memory_readbytesigned(lua_State *L) {
-	signed char c = (signed char) FCEU_CheatGetByte(luaL_checkinteger(L,1));
+	signed char c = (signed char) GetMem(luaL_checkinteger(L,1));
 	lua_pushinteger(L, c);
 	return 1;
 }
@@ -1336,7 +1336,7 @@ static int GetWord(lua_State *L, bool isSigned)
 	uint16 addressHigh = addressLow + 1;
 	if (lua_type(L, 2) == LUA_TNUMBER)
 		addressHigh = luaL_checkinteger(L, 2);
-	uint16 result = FCEU_CheatGetByte(addressLow) | (FCEU_CheatGetByte(addressHigh) << 8);
+	uint16 result = GetMem(addressLow) | (GetMem(addressHigh) << 8);
 	return isSigned ? (int16)result : result;
 }
 
@@ -1365,7 +1365,7 @@ static int memory_readbyterange(lua_State *L) {
 
 	char* buf = (char*)alloca(range_size);
 	for(int i=0;i<range_size;i++) {
-		buf[i] = FCEU_CheatGetByte(range_start+i);
+		buf[i] = GetMem(range_start+i);
 	}
 
 	lua_pushlstring(L,buf,range_size);
