@@ -222,6 +222,7 @@ InitConfig()
 	// video playback
 	config->addOption("playmov", "SDL.Movie", "");
 	config->addOption("subtitles", "SDL.SubtitleDisplay", 1);
+	config->addOption("movielength", "SDL.MovieLength", 0);
 	
 	config->addOption("fourscore", "SDL.FourScore", 0);
 

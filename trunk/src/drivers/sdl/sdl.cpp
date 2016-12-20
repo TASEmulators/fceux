@@ -525,6 +525,7 @@ void FCEUD_TraceInstruction() {
 	int noGui = 1;
 #endif
 
+int KillFCEUXonFrame = 0;
 
 /**
  * The main loop for the SDL.
@@ -894,6 +895,8 @@ int main(int argc, char *argv[])
 		{
 		  FCEUI_printf("Sorry, I don't know how to play back %s\n", s.c_str());
 		}
+		g_config->getOption("SDL.MovieLength",&KillFCEUXonFrame);
+		printf("KillFCEUXonFrame %d\n",KillFCEUXonFrame);
 	}
 	
     int periodic_saves;
