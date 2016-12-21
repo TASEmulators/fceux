@@ -910,7 +910,9 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	// since apparently the iNES format doesn't store this information,
 	// guess if the settings should be PAL or NTSC from the ROM name
 	// TODO: MD5 check against a list of all known PAL games instead?
-	if (OverwriteVidMode) {
+	if (iNES2) {
+		FCEUI_SetVidSystem(((head.TV_system & 3) == 1) ? 1 : 0);
+	} else if (OverwriteVidMode) {
 		if (strstr(name, "(E)") || strstr(name, "(e)")
 			|| strstr(name, "(Europe)") || strstr(name, "(PAL)")
 			|| strstr(name, "(F)") || strstr(name, "(f)")
