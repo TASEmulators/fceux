@@ -21,6 +21,7 @@
 #include "driver.h"
 #include "cheat.h"
 #include "x6502.h"
+#include "ppu.h"
 #include "utils/xstring.h"
 #include "utils/memory.h"
 #include "utils/crc32.h"
@@ -1369,6 +1370,27 @@ static int memory_readbyterange(lua_State *L) {
 	}
 
 	lua_pushlstring(L,buf,range_size);
+
+	return 1;
+}
+
+static int ppu_readbyte(lua_State *L) {
+	lua_pushinteger(L, FFCEUX_PPURead(luaL_checkinteger(L, 1)));
+	return 1;
+}
+
+static int ppu_readbyterange(lua_State *L) {
+	int range_start = luaL_checkinteger(L, 1);
+	int range_size = luaL_checkinteger(L, 2);
+	if (range_size < 0)
+		return 0;
+
+	char* buf = (char*)alloca(range_size);
+	for (int i = 0;i<range_size;i++) {
+		buf[i] = FFCEUX_PPURead(range_start + i);
+	}
+
+	lua_pushlstring(L, buf, range_size);
 
 	return 1;
 }
@@ -5477,6 +5499,14 @@ static const struct luaL_reg memorylib [] = {
 	{NULL,NULL}
 };
 
+
+static const struct luaL_reg ppulib [] = {
+	{"readbyte", ppu_readbyte},
+	{"readbyterange", ppu_readbyterange},
+
+	{NULL,NULL}
+};
+
 static const struct luaL_reg joypadlib[] = {
 	{"get", joypad_get},
 	{"getdown", joypad_getdown},
@@ -5759,6 +5789,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		luaL_register(L, "emu", emulib); // added for better cross-emulator compatibility
 		luaL_register(L, "FCEU", emulib); // kept for backward compatibility
 		luaL_register(L, "memory", memorylib);
+		luaL_register(L, "ppu", ppulib);
 		luaL_register(L, "rom", romlib);
 		luaL_register(L, "joypad", joypadlib);
 		luaL_register(L, "zapper", zapperlib);
