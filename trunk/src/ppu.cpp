@@ -351,7 +351,7 @@ uint8 vtoggle = 0;
 uint8 XOffset = 0;
 uint8 SpriteDMA = 0; // $4014 / Writing $xx copies 256 bytes by reading from $xx00-$xxFF and writing to $2004 (OAM data)
 
-uint32 TempAddr = 0, RefreshAddr = 0, DummyRead = 0;
+uint32 TempAddr = 0, RefreshAddr = 0, DummyRead = 0, NTRefreshAddr = 0;
 
 static int maxsprites = 8;
 
@@ -1970,7 +1970,7 @@ struct BGData {
 		uint8 nt, pecnt, at, pt[2];
 
 		INLINE void Read() {
-			RefreshAddr = ppur.get_ntread();
+			NTRefreshAddr = RefreshAddr = ppur.get_ntread();
 			if (PEC586Hack)
 				ppur.s = (RefreshAddr & 0x200) >> 9;
 			pecnt = (RefreshAddr & 1) << 3;

@@ -136,16 +136,27 @@ static void mmc5_PPUWrite(uint32 A, uint8 V) {
 	}
 }
 
+extern uint32 NTRefreshAddr;
 uint8 FASTCALL mmc5_PPURead(uint32 A) {
-	if (A < 0x2000) {
-		if (ppuphase == PPUPHASE_BG 
+	if (A < 0x2000)
+	{
+		if (ppuphase == PPUPHASE_BG )
+		{
+			//uhhh call through to this more sophisticated function, only if it's really needed?
+			//we should probably reuse it completely, if we can
+			if (MMC5HackCHRMode == 1) {
+				return *FCEUPPU_GetCHR(A,NTRefreshAddr);
+			}
+
 			//zero 03-aug-2014 - added this to fix Uchuu Keibitai SDF. The game reads NT entries from CHR rom while PPU is disabled.
 			//obviously we have enormous numbers of bugs springing from our terrible emulation of ppu-disabled states, but this does the job for fixing this one
-			&& (PPU[1] & 0x10)
-			)
-			return *MMC5BGVRAMADR(A);
-		else return MMC5SPRVPage[(A) >> 10][(A)];
-	} else {
+			if(PPU[1] & 0x10)
+				return *MMC5BGVRAMADR(A);
+		}
+		return MMC5SPRVPage[(A) >> 10][(A)];
+	}
+	else
+	{
 		return vnapage[(A >> 10) & 0x3][A & 0x3FF];
 	}
 }
