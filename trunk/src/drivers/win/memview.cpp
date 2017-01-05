@@ -427,9 +427,8 @@ int LoadTableFile()
 }
 
 void UnloadTableFile(){
-	int i, j;
-	for(i = 0;i < 256;i++){
-		j = i;
+	for(int i = 0;i < 256;i++){
+		int j = i;
 		if(j < 0x20)j = 0x2E;
 		//if(j > 0x7e)j = 0x2E;
 		chartable[i] = j;
@@ -533,7 +532,7 @@ void UpdateMemoryView(int draw_all)
 				SetBkColor(HDataDC,RGB(0,0,0));
 				MoveToEx(HDataDC, (59 + j) * MemFontWidth, MemFontHeight * ((i - CurOffset) / 16), NULL); //todo: try moving this above the for loop
 				str[0] = chartable[byteValue];
-				if(str[0] < 0x20)str[0] = 0x2E;
+				if((u8)str[0] < 0x20)str[0] = 0x2E;
 				//if(str[0] > 0x7e)str[0] = 0x2E;
 				str[1] = 0;
 				TextOut(HDataDC,0,0,str,1);
@@ -575,7 +574,7 @@ void UpdateMemoryView(int draw_all)
 
 				MoveToEx(HDataDC,(59+j)*MemFontWidth,MemFontHeight*((i-CurOffset)/16),NULL); //todo: try moving this above the for loop
 				str[0] = chartable[byteValue];
-				if(str[0] < 0x20)str[0] = 0x2E;
+				if((u8)str[0] < 0x20)str[0] = 0x2E;
 				//if(str[0] > 0x7e)str[0] = 0x2E;
 				str[1] = 0;
 				TextOut(HDataDC,0,0,str,1);
