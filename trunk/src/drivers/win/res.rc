@@ -12,11 +12,87 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// Russian (Russia) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
+LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
+#pragma code_page(1251)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_TASEDITOR_SAVINGOPTIONS DIALOGEX 0, 0, 223, 208
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Project file saving options"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,109,187,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,165,187,50,14
+    CONTROL         " Binary format of Input",IDC_CHECK_BINARY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,17,89,10
+    CONTROL         " Markers",IDC_CHECK_MARKERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,32,67,10
+    CONTROL         " Bookmarks",IDC_CHECK_BOOKMARKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,47,67,10
+    CONTROL         " History",IDC_CHECK_HISTORY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,62,67,10
+    CONTROL         " Piano Roll",IDC_CHECK_PIANO_ROLL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,77,67,10
+    CONTROL         " Selection",IDC_CHECK_SELECTION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,92,67,10
+    GROUPBOX        "File contents",IDC_STATIC,105,4,111,177
+    GROUPBOX        "Greenzone saving options",IDC_STATIC,112,106,97,69
+    CONTROL         " all frames",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,122,117,77,10
+    CONTROL         " every 16th frame",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,122,131,77,10
+    CONTROL         " marked frames",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,122,145,77,10
+    CONTROL         " don't save",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,122,159,77,10
+    CONTROL         " Autosave project",IDC_AUTOSAVE_PROJECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,17,81,10
+    CONTROL         " silently",IDC_SILENT_AUTOSAVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,47,42,10
+    LTEXT           "every",IDC_STATIC,14,32,21,8
+    EDITTEXT        IDC_AUTOSAVE_PERIOD,36,30,24,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "minutes",IDC_STATIC,64,32,28,8
+    GROUPBOX        "Settings",IDC_STATIC,6,4,91,177
+END
+
+IDD_SYMBOLIC_DEBUG_NAMING DIALOGEX 0, 0, 245, 83
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Symbolic Debug Naming"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,132,62,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,189,62,50,14
+    LTEXT           "File",IDC_STATIC,7,7,15,9
+    EDITTEXT        IDC_SYMBOLIC_ADDRESS,38,24,33,13,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
+    LTEXT           "Address",IDC_STATIC,6,26,30,10
+    EDITTEXT        IDC_SYMBOLIC_NAME,107,24,132,13,ES_AUTOHSCROLL
+    LTEXT           "Name",IDC_STATIC,83,26,22,10
+    LTEXT           "Comment",IDC_STATIC,6,45,37,10
+    EDITTEXT        IDC_SYMBOLIC_COMMENT,45,43,194,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_SYMBOLIC_FILENAME,24,6,215,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_SYMBOLIC_DEBUG_NAMING, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 82
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Russian (Russia) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(1251)
+#pragma code_page(1252)
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -178,16 +254,16 @@ BEGIN
     PUSHBUTTON      "Turbo B",309,154,29,32,12
     PUSHBUTTON      "Turbo A",308,195,29,32,12
     GROUPBOX        "",GRP_GAMEPAD2,4,101,232,82,WS_GROUP
-    PUSHBUTTON      "Up",314,35,120,24,12
-    PUSHBUTTON      "Left",316,9,138,25,12
-    PUSHBUTTON      "Right",317,60,138,24,12
-    PUSHBUTTON      "Down",315,35,157,24,12
-    PUSHBUTTON      "Select",312,91,138,26,12
-    PUSHBUTTON      "Start",313,126,138,26,12
-    PUSHBUTTON      "B",311,169,138,16,12
-    PUSHBUTTON      "A",310,195,138,16,12
-    PUSHBUTTON      "Turbo B",319,154,122,32,12
-    PUSHBUTTON      "Turbo A",318,195,122,32,12
+    PUSHBUTTON      "Up",316,35,120,24,12
+    PUSHBUTTON      "Left",318,9,138,25,12
+    PUSHBUTTON      "Right",319,60,138,24,12
+    PUSHBUTTON      "Down",317,35,157,24,12
+    PUSHBUTTON      "Select",314,91,138,26,12
+    PUSHBUTTON      "Start",315,126,138,26,12
+    PUSHBUTTON      "B",313,169,138,16,12
+    PUSHBUTTON      "A",312,195,138,16,12
+    PUSHBUTTON      "Turbo B",321,154,122,32,12
+    PUSHBUTTON      "Turbo A",320,195,122,32,12
 END
 
 GUICONFIG DIALOGEX 16, 123, 184, 158
@@ -2274,82 +2350,6 @@ BEGIN
 END
 
 #endif    // Neutral resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Russian (Russia) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
-LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
-#pragma code_page(1251)
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_TASEDITOR_SAVINGOPTIONS DIALOGEX 0, 0, 223, 208
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Project file saving options"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,109,187,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,165,187,50,14
-    CONTROL         " Binary format of Input",IDC_CHECK_BINARY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,17,89,10
-    CONTROL         " Markers",IDC_CHECK_MARKERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,32,67,10
-    CONTROL         " Bookmarks",IDC_CHECK_BOOKMARKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,47,67,10
-    CONTROL         " History",IDC_CHECK_HISTORY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,62,67,10
-    CONTROL         " Piano Roll",IDC_CHECK_PIANO_ROLL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,77,67,10
-    CONTROL         " Selection",IDC_CHECK_SELECTION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,92,67,10
-    GROUPBOX        "File contents",IDC_STATIC,105,4,111,177
-    GROUPBOX        "Greenzone saving options",IDC_STATIC,112,106,97,69
-    CONTROL         " all frames",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,122,117,77,10
-    CONTROL         " every 16th frame",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,122,131,77,10
-    CONTROL         " marked frames",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,122,145,77,10
-    CONTROL         " don't save",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,122,159,77,10
-    CONTROL         " Autosave project",IDC_AUTOSAVE_PROJECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,17,81,10
-    CONTROL         " silently",IDC_SILENT_AUTOSAVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,47,42,10
-    LTEXT           "every",IDC_STATIC,14,32,21,8
-    EDITTEXT        IDC_AUTOSAVE_PERIOD,36,30,24,14,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "minutes",IDC_STATIC,64,32,28,8
-    GROUPBOX        "Settings",IDC_STATIC,6,4,91,177
-END
-
-IDD_SYMBOLIC_DEBUG_NAMING DIALOGEX 0, 0, 245, 83
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Symbolic Debug Naming"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,132,62,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,189,62,50,14
-    LTEXT           "File",IDC_STATIC,7,7,15,9
-    EDITTEXT        IDC_SYMBOLIC_ADDRESS,38,24,33,13,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
-    LTEXT           "Address",IDC_STATIC,6,26,30,10
-    EDITTEXT        IDC_SYMBOLIC_NAME,107,24,132,13,ES_AUTOHSCROLL
-    LTEXT           "Name",IDC_STATIC,83,26,22,10
-    LTEXT           "Comment",IDC_STATIC,6,45,37,10
-    EDITTEXT        IDC_SYMBOLIC_COMMENT,45,43,194,13,ES_AUTOHSCROLL
-    EDITTEXT        IDC_SYMBOLIC_FILENAME,24,6,215,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_SYMBOLIC_DEBUG_NAMING, DIALOG
-    BEGIN
-        BOTTOMMARGIN, 82
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // Russian (Russia) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

@@ -126,13 +126,13 @@ int allowUDLR=0;
 
 #define MKZ()   {{0},{0},{0},0}
 
-#define GPZ()   {MKZ(), MKZ(), MKZ(), MKZ()}
+#define GPZ()   {MKZ(), MKZ(), MKZ(), MKZ(), MKZ(), MKZ(), MKZ(), MKZ()}
 
 ButtConfig GamePadConfig[4][12]={
 	//Gamepad 1
 	{
-		MK(F), MK(D), MK(S), MK(ENTER), MK(BL_CURSORUP),
-			MK(BL_CURSORDOWN),MK(BL_CURSORLEFT),MK(BL_CURSORRIGHT)
+		MK(F), MK(D), MK(S), MK(ENTER),
+		MK(BL_CURSORUP), MK(BL_CURSORDOWN),MK(BL_CURSORLEFT),MK(BL_CURSORRIGHT)
 	},
 
 	//Gamepad 2
@@ -768,7 +768,7 @@ void InitInputStuff(void)
 	InitJoysticks(hAppWnd);
 
 	for(x=0; x<4; x++)
-		for(y=0; y<10; y++)
+		for(y=0; y<12; y++)
 			JoyClearBC(&GamePadConfig[x][y]);
 
 	for(x=0; x<2; x++)
