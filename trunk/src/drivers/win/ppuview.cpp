@@ -536,7 +536,9 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 				{
 					mouse_x = (mouse_x - paletteDestX) / 32;
 					mouse_y = (mouse_y - paletteDestY) / 32;
-					sprintf(str,"Palette: $%02X",palcache[(mouse_y<<4)|mouse_x]);
+					int ix = (mouse_y<<4)|mouse_x;
+					if ((ix & 0x10) && !(ix & 0x03)) ix = 0; // palcache 0x10/14/18/1C is bogus $00 values
+					sprintf(str,"Palette: $%02X",palcache[ix]);
 					SetDlgItemText(hwndDlg,LBL_PPUVIEW_TILE1,"Tile:");
 					SetDlgItemText(hwndDlg,LBL_PPUVIEW_TILE2,"Tile:");
 					SetDlgItemText(hwndDlg,LBL_PPUVIEW_PALETTES,str);
