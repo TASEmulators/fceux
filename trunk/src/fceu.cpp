@@ -1313,6 +1313,6 @@ void FCEU_WriteRomByte(uint32 i, uint8 value) {
 #endif
 	if (i < 16 + PRGsize[0])
 		PRGptr[0][i - 16] = value;
-	if (i < 16 + PRGsize[0] + CHRsize[0])
+	else if (i < 16 + PRGsize[0] + CHRsize[0])
 		CHRptr[0][i - 16 - PRGsize[0]] = value;
 }
