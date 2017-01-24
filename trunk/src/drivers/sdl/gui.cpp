@@ -1036,10 +1036,10 @@ void openVideoConfig()
 	// xscale / yscale
 	xscaleHbox = gtk_hbox_new(FALSE, 5);
 	xscaleLbl = gtk_label_new("X scaling factor");
-	xscaleSpin = gtk_spin_button_new_with_range(1.0, 10.0, .1);
+	xscaleSpin = gtk_spin_button_new_with_range(1.0, 40.0, .1);
 	yscaleHbox = gtk_hbox_new(FALSE, 5);
 	yscaleLbl = gtk_label_new("Y scaling factor");
-	yscaleSpin = gtk_spin_button_new_with_range(1.0, 10.0, .1);
+	yscaleSpin = gtk_spin_button_new_with_range(1.0, 40.0, .1);
 	
 	gtk_box_pack_start(GTK_BOX(xscaleHbox), xscaleLbl, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(xscaleHbox), xscaleSpin, FALSE, FALSE, 2);
