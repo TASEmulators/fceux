@@ -200,27 +200,3 @@ static void M190Close(void) {
 static void StateRestore(int version) {
 	Sync();
 }
-
-void Mapper190_Init(CartInfo *info) {
-	info->Power = M190Power;
-	info->Close = M190Close;
-	GameStateRestore = StateRestore;
-
-	MapIRQHook = VRC5IRQ;
-//	PPU_hook=Mapper190_PPU;
-
-	CHRRAM = (uint8*)FCEU_gmalloc(CHRSIZE);
-	SetupCartCHRMapping(0x10, CHRRAM, CHRSIZE, 1);
-	AddExState(CHRRAM, CHRSIZE, 0, "CRAM");
-
-	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
-	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
-	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
-
-	if (info->battery) {
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = WRAMSIZE - 4096;
-	}
-
-	AddExState(&StateRegs, ~0, 0, 0);
-}
