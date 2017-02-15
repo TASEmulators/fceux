@@ -370,6 +370,7 @@
     <ClCompile Include="..\src\boards\186.cpp" />
     <ClCompile Include="..\src\boards\187.cpp" />
     <ClCompile Include="..\src\boards\189.cpp" />
+    <ClCompile Include="..\src\boards\190.cpp" />
     <ClCompile Include="..\src\boards\193.cpp" />
     <ClCompile Include="..\src\boards\199.cpp" />
     <ClCompile Include="..\src\boards\206.cpp" />
