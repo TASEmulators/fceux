@@ -36,19 +36,8 @@
 
 using namespace std;
 
-bool LoadCDLog(const char* nameo);
-void LoadCDLogFile();
-void SaveCDLogFileAs();
-void SaveCDLogFile();
-void SaveStrippedROM(int invert);
 void CDLoggerROMClosed();
 void CDLoggerROMChanged();
-bool PauseCDLogging();
-void StartCDLogging();
-void FreeCDLog();
-void InitCDLog();
-void ResetCDLog();
-void RenameCDLog(const char* newName);
 
 extern iNES_HEADER head; //defined in ines.c
 extern uint8 *trainerpoo;

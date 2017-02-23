@@ -35,6 +35,7 @@
 #include "drivers/win/taseditor/markers.h"
 #include "drivers/win/taseditor/snapshot.h"
 #include "drivers/win/taseditor/taseditor_lua.h"
+#include "drivers/win/cdlogger.h"
 extern TASEDITOR_LUA taseditor_lua;
 #endif
 
@@ -1295,6 +1296,22 @@ static int rom_readbyte(lua_State *L) {
 
 static int rom_readbytesigned(lua_State *L) {
 	lua_pushinteger(L, (signed char)FCEU_ReadRomByte(luaL_checkinteger(L,1)));
+	return 1;
+}
+
+static int rom_readbyterange(lua_State *L) {
+	int range_start = luaL_checkinteger(L, 1);
+	int range_size = luaL_checkinteger(L, 2);
+	if (range_size < 0)
+		return 0;
+
+	char* buf = (char*)alloca(range_size);
+	for (int i = 0;i<range_size;i++) {
+		buf[i] = FCEU_ReadRomByte(range_start + i);
+	}
+
+	lua_pushlstring(L, buf, range_size);
+
 	return 1;
 }
 
@@ -4848,6 +4865,82 @@ static int taseditor_clearinputchanges(lua_State *L)
 	return 0;
 }
 
+// CDLog functions library
+
+static int cdl_loadcdlog(lua_State *L)
+{
+#ifdef WIN32
+	const char *nameo = luaL_checkstring(L, 1);
+	lua_pushinteger(L, LoadCDLog(nameo));
+#else
+	lua_pushinteger(L, 0);
+#endif
+	return 1;
+}
+
+static int cdl_loadfile(lua_State *L)
+{
+#ifdef WIN32
+	LoadCDLogFile();
+#endif
+	return 0;
+}
+
+static int cdl_savecdlogfile(lua_State *L)
+{
+#ifdef WIN32
+	SaveCDLogFile();
+#endif
+	return 0;
+}
+
+static int cdl_savecdlogfileas(lua_State *L)
+{
+#ifdef WIN32
+	const char *nameo = luaL_checkstring(L, 1);
+	RenameCDLog(nameo);
+	SaveCDLogFile();
+#endif
+	return 0;
+}
+
+static int cdl_docdlogger(lua_State *L)
+{
+#ifdef WIN32
+	lua_pushinteger(L, DoCDLogger());
+#else
+	lua_pushinteger(L, 0);
+#endif
+	return 1;
+}
+
+static int cdl_pausecdlogging(lua_State *L)
+{
+#ifdef WIN32
+	lua_pushinteger(L, PauseCDLogging());
+#else
+	lua_pushinteger(L, 0);
+#endif
+	return 1;
+}
+
+static int cdl_startcdlogging(lua_State *L)
+{
+#ifdef WIN32
+	StartCDLogging();
+#endif
+	return 0;
+}
+
+static int cdl_resetcdlog(lua_State *L)
+{
+#ifdef WIN32
+	ResetCDLog();
+#endif
+	return 0;
+}
+
+
 
 static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 	const char *str = luaL_checkstring(L, 1);
@@ -5468,6 +5561,7 @@ static const struct luaL_reg romlib [] = {
 	{"readbytesigned", rom_readbytesigned},
 	// alternate naming scheme for unsigned
 	{"readbyteunsigned", rom_readbyte},
+	{"readbyterange", rom_readbyterange},
 	{"writebyte", rom_writebyte},
 	{"gethash", rom_gethash},
 	{NULL,NULL}
@@ -5662,6 +5756,21 @@ static const struct luaL_reg taseditorlib[] = {
 	{NULL,NULL}
 };
 
+static const struct luaL_reg cdloglib[] = {
+
+	{ "docdlogger", cdl_docdlogger },
+	{ "savecdlogfile", cdl_savecdlogfile },
+	{ "savecdlogfileas", cdl_savecdlogfileas },
+	{ "loadfile", cdl_loadfile },
+	{ "loadcdlog", cdl_loadcdlog },
+	{ "docdlogger", cdl_docdlogger },
+	{ "docdlogger", cdl_docdlogger },
+	{ "resetcdlog", cdl_resetcdlog },
+	{ "startcdlogging", cdl_startcdlogging },
+	{ "pausecdlogging", cdl_pausecdlogging },
+	{ NULL,NULL }
+};
+
 void CallExitFunction() {
 	if (!L)
 		return;
@@ -5799,6 +5908,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		luaL_register(L, "gui", guilib);
 		luaL_register(L, "sound", soundlib);
 		luaL_register(L, "debugger", debuggerlib);
+		luaL_register(L, "cdlog", cdloglib);
 		luaL_register(L, "taseditor", taseditorlib);
 		luaL_register(L, "bit", bit_funcs); // LuaBitOp library
 		lua_settop(L, 0);		// clean the stack, because each call to luaL_register leaves a table on top
