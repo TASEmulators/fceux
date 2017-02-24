@@ -911,8 +911,6 @@ BOOL CALLBACK SymbolicNamingCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 								GetDlgItemText(hwndDlg, IDC_SYMBOLIC_NAME, newName, NL_MAX_NAME_LEN + 1);
 								char newComment[NL_MAX_MULTILINE_COMMENT_LEN + 1] = {0};
 								GetDlgItemText(hwndDlg, IDC_SYMBOLIC_COMMENT, newComment, NL_MAX_MULTILINE_COMMENT_LEN + 1);
-								strcpy(newComment,"\xa0\xa0\xa0\xa0\xa0HI\xa0\xa0\xa0\xa0");
-								strcpy(newName,"\xa0\xa0\xa0\xa0NAME\xa0\xa0\xa0\xa0");
 								
 								AddNewSymbolicName(newAddress, newOffset, newName, newComment);
 								WriteNameFileToDisk(generateNLFilenameForAddress(newAddress), getNamesPointerForAddress(newAddress));
