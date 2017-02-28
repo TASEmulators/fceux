@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2012 FCEUX team
+	Copyright (C) 2012-2017 FCEUX team
 
 	This file is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -141,6 +141,7 @@ static DECLFW(WritePRG)
 	case 0x00:
 		chr = value & 3;
 		Mirror(value);
+		Sync();
 		break;
 	case 0x01:
 		prg = value & 15;
