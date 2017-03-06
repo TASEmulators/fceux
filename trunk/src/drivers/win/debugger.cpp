@@ -1676,6 +1676,9 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 
 			mouse_x = GET_X_LPARAM(lParam);
 			mouse_y = GET_Y_LPARAM(lParam);
+			
+			if(mouse_y<0 || mouse_x<0)
+				break;
 
 			tmp = mouse_y / debugSystem->disasmFontHeight;
 			if (tmp < (int)disassembly_addresses.size())
