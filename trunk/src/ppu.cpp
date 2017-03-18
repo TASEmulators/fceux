@@ -2124,7 +2124,10 @@ int FCEUX_PPU_Loop(int skip) {
 				DEBUG(FCEUD_UpdateNTView(scanline = yp, 1));
 			}
 
-			if (MMC5Hack) MMC5_hb(yp);
+			//hack to fix SDF ship intro screen with split. is it right?
+			//well, if we didnt do this, we'd be passing in a negative scanline, so that's a sign something is fishy..
+			if(sl != 0)
+				if (MMC5Hack) MMC5_hb(yp);
 
 
 			//twiddle the oam buffers
