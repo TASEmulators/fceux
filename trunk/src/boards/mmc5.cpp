@@ -137,11 +137,35 @@ static void mmc5_PPUWrite(uint32 A, uint8 V) {
 }
 
 extern uint32 NTRefreshAddr;
-uint8 FASTCALL mmc5_PPURead(uint32 A) {
+uint8 FASTCALL mmc5_PPURead(uint32 A)
+{
+	bool split = false;
+	if(newppu)
+	{
+		if((MMC5HackSPMode&0x80) && !(MMC5HackCHRMode&2))
+		{
+			int target = MMC5HackSPMode&0x1f;
+			int side = MMC5HackSPMode&0x40;
+			int ht = NTRefreshAddr&31;
+
+			if(side==0)
+			{
+				if(ht<target) split = true;
+			}
+			else
+			{
+				if(ht>=target) split = true;
+			}
+		}
+	}
+
 	if (A < 0x2000)
 	{
 		if (ppuphase == PPUPHASE_BG )
 		{
+			if(split)
+				return MMC5HackVROMPTR[MMC5HackSPPage*0x1000 + (A&0xFFF)];
+
 			//uhhh call through to this more sophisticated function, only if it's really needed?
 			//we should probably reuse it completely, if we can
 			if (MMC5HackCHRMode == 1) {
@@ -153,10 +177,32 @@ uint8 FASTCALL mmc5_PPURead(uint32 A) {
 			if(PPU[1] & 0x10)
 				return *MMC5BGVRAMADR(A);
 		}
+
 		return MMC5SPRVPage[(A) >> 10][(A)];
 	}
 	else
 	{
+		if(split)
+		{
+			static const int kHack = -1; //dunno if theres science to this or if it just fixes SDF (cant be bothered to think about it)
+			int linetile = (newppu_get_scanline()+kHack)/8 + MMC5HackSPScroll;
+
+			//REF NT: return 0x2000 | (v << 0xB) | (h << 0xA) | (vt << 5) | ht;
+			//REF AT: return 0x2000 | (v << 0xB) | (h << 0xA) | 0x3C0 | ((vt & 0x1C) << 1) | ((ht & 0x1C) >> 2);
+
+			if((A&0x3FF)>=0x3C0)
+			{
+				A &= ~(0x1C<<1); //mask off VT
+				A |= (linetile&0x1C)<<1; //mask on adjusted VT
+				return ExRAM[A & 0x3FF];
+			}
+			else
+			{
+				A &= ~((0x1F<<5) | (1<<0xB)); //mask off VT and V
+				A |= (linetile&31)<<5; //mask on adjusted VT (V doesnt make any sense, I think)
+				return ExRAM[A & 0x3FF];
+			}
+		}
 		return vnapage[(A >> 10) & 0x3][A & 0x3FF];
 	}
 }
