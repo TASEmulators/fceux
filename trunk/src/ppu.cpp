@@ -2364,6 +2364,14 @@ int FCEUX_PPU_Loop(int skip) {
 					}
 				}
 
+				//blind attempt to replicate old ppu functionality
+				if(s == 2 && PPUON)
+				{
+					if (GameHBIRQHook2) {
+						GameHBIRQHook2();
+					}
+				}
+
 				if (realSprite) runppu(kFetchTime);
 
 
