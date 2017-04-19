@@ -486,12 +486,23 @@ static int emu_getdir(lua_State *L) {
 #endif
 }
 
+
+extern void ReloadRom(void);
+
 // emu.loadrom(string filename)
 //
 //  Loads the rom from the directory relative to the lua script or from the absolute path.
 //  If the rom can't e loaded, loads the most recent one.
 static int emu_loadrom(lua_State *L) {
 #ifdef WIN32
+	const char* str = lua_tostring(L,1);
+
+	//special case: reload rom
+	if(!str) {
+		ReloadRom();
+		return 0;
+	}
+
 	const char *nameo2 = luaL_checkstring(L,1);
 	char nameo[2048];
 	strncpy(nameo, nameo2, sizeof(nameo));

@@ -745,7 +745,7 @@ static void DebuggerStepInto(void);
 static void FA_SkipLag(void);
 static void OpenRom(void);
 static void CloseRom(void);
-static void ReloadRom(void);
+void ReloadRom(void);
 static void MovieSubtitleToggle(void);
 static void UndoRedoSavestate(void);
 static void FCEUI_DoExit(void);
@@ -1232,7 +1232,7 @@ static void CloseRom(void)
 #endif
 }
 
-static void ReloadRom(void)
+void ReloadRom(void)
 {
 #ifdef WIN32
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
