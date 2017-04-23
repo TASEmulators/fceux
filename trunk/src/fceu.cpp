@@ -360,16 +360,10 @@ uint8 PAL = 0;
 
 static DECLFW(BRAML) {
 	RAM[A] = V;
-	#ifdef _S9XLUA_H
-	CallRegisteredLuaMemHook(A, 1, V, LUAMEMHOOK_WRITE);
-	#endif
 }
 
 static DECLFW(BRAMH) {
 	RAM[A & 0x7FF] = V;
-	#ifdef _S9XLUA_H
-	CallRegisteredLuaMemHook(A & 0x7FF, 1, V, LUAMEMHOOK_WRITE);
-	#endif
 }
 
 static DECLFR(ARAML) {
