@@ -289,6 +289,11 @@ struct PPUREGS {
 
 int newppu_get_scanline() { return ppur.status.sl; }
 int newppu_get_dot() { return ppur.status.cycle; }
+void newppu_hacky_emergency_reset()
+{
+	if(ppur.status.end_cycle == 0)
+		ppur.reset();
+}
 
 static void makeppulut(void) {
 	int x;

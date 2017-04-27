@@ -11,6 +11,7 @@ extern void (*GameHBIRQHook)(void), (*GameHBIRQHook2)(void);
 
 int newppu_get_scanline();
 int newppu_get_dot();
+void newppu_hacky_emergency_reset();
 
 /* For cart.c and banksw.h, mostly */
 extern uint8 NTARAM[0x800], *vnapage[4];
