@@ -22,6 +22,11 @@
 
 #include "mapinc.h"
 
+#define ABANKS MMC5SPRVPage
+#define BBANKS MMC5BGVPage
+#define SpriteON    (PPU[1] & 0x10)	//Show Sprite
+#define ScreenON    (PPU[1] & 0x08)	//Show screen
+
 static void (*sfun)(int P);
 static void (*psfun)(void);
 
@@ -110,12 +115,18 @@ typedef struct __cartdata {
 #define Sprite16  (PPU[0]& 0x20)   //Sprites 8x16/8x8
 //#define MMC5SPRVRAMADR(V)      &MMC5SPRVPage[(V)>>10][(V)]
 static inline uint8 *  MMC5BGVRAMADR(uint32 A) {
-	if (!Sprite16) {
-		if (mmc5ABMode == 0)
-			return &MMC5SPRVPage[(A) >> 10][(A)];
-		else
-			return &MMC5BGVPage[(A) >> 10][(A)];
-	} else return &MMC5BGVPage[(A) >> 10][(A)];
+	if(Sprite16)
+	{
+		if (ppuphase == PPUPHASE_OBJ && SpriteON)
+			return &ABANKS[(A) >> 10][(A)];
+		if (ppuphase == PPUPHASE_BG && ScreenON)
+			return &BBANKS[(A) >> 10][(A)];
+		else if(mmc5ABMode == 0)
+			return &ABANKS[(A) >> 10][(A)];
+		else 
+			return &BBANKS[(A) >> 10][(A)];
+	}
+	else return &ABANKS[(A) >> 10][(A)];;
 }
 
 static void mmc5_PPUWrite(uint32 A, uint8 V) {
@@ -161,24 +172,42 @@ uint8 FASTCALL mmc5_PPURead(uint32 A)
 
 	if (A < 0x2000)
 	{
-		if (ppuphase == PPUPHASE_BG )
+		if(Sprite16)
 		{
-			if(split)
-				return MMC5HackVROMPTR[MMC5HackSPPage*0x1000 + (A&0xFFF)];
+			if (ppuphase == PPUPHASE_OBJ && SpriteON)
+				return ABANKS[(A) >> 10][(A)];
+			if (ppuphase == PPUPHASE_BG && ScreenON)
+			{
+				if(split)
+					return MMC5HackVROMPTR[MMC5HackSPPage*0x1000 + (A&0xFFF)];
 
-			//uhhh call through to this more sophisticated function, only if it's really needed?
-			//we should probably reuse it completely, if we can
-			if (MMC5HackCHRMode == 1) {
-				return *FCEUPPU_GetCHR(A,NTRefreshAddr);
+				//uhhh call through to this more sophisticated function, only if it's really needed?
+				//we should probably reuse it completely, if we can
+				if (MMC5HackCHRMode == 1)
+					return *FCEUPPU_GetCHR(A,NTRefreshAddr);
+
+				return BBANKS[(A) >> 10][(A)];
+			}
+			else if(mmc5ABMode == 0)
+				return ABANKS[(A) >> 10][(A)];
+			else 
+				return BBANKS[(A) >> 10][(A)];
+		}
+		else 
+		{
+			if (ppuphase == PPUPHASE_BG && ScreenON)
+			{
+				if(split)
+					return MMC5HackVROMPTR[MMC5HackSPPage*0x1000 + (A&0xFFF)];
+
+				//uhhh call through to this more sophisticated function, only if it's really needed?
+				//we should probably reuse it completely, if we can
+				if (MMC5HackCHRMode == 1)
+					return *FCEUPPU_GetCHR(A,NTRefreshAddr);
 			}
 
-			//zero 03-aug-2014 - added this to fix Uchuu Keibitai SDF. The game reads NT entries from CHR rom while PPU is disabled.
-			//obviously we have enormous numbers of bugs springing from our terrible emulation of ppu-disabled states, but this does the job for fixing this one
-			if(PPU[1] & 0x10)
-				return *MMC5BGVRAMADR(A);
+			return ABANKS[(A) >> 10][(A)];
 		}
-
-		return MMC5SPRVPage[(A) >> 10][(A)];
 	}
 	else
 	{
