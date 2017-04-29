@@ -26,6 +26,7 @@
 #define BBANKS MMC5BGVPage
 #define SpriteON    (PPU[1] & 0x10)	//Show Sprite
 #define ScreenON    (PPU[1] & 0x08)	//Show screen
+#define PPUON       (PPU[1] & 0x18)	//PPU should operate
 
 static void (*sfun)(int P);
 static void (*psfun)(void);
@@ -117,9 +118,10 @@ typedef struct __cartdata {
 static inline uint8 *  MMC5BGVRAMADR(uint32 A) {
 	if(Sprite16)
 	{
-		if (ppuphase == PPUPHASE_OBJ && SpriteON)
+		bool isPattern = PPUON;
+		if (ppuphase == PPUPHASE_OBJ && isPattern)
 			return &ABANKS[(A) >> 10][(A)];
-		if (ppuphase == PPUPHASE_BG && ScreenON)
+		if (ppuphase == PPUPHASE_BG && isPattern)
 			return &BBANKS[(A) >> 10][(A)];
 		else if(mmc5ABMode == 0)
 			return &ABANKS[(A) >> 10][(A)];
@@ -174,9 +176,10 @@ uint8 FASTCALL mmc5_PPURead(uint32 A)
 	{
 		if(Sprite16)
 		{
-			if (ppuphase == PPUPHASE_OBJ && SpriteON)
+			bool isPattern = PPUON;
+			if (ppuphase == PPUPHASE_OBJ && isPattern)
 				return ABANKS[(A) >> 10][(A)];
-			if (ppuphase == PPUPHASE_BG && ScreenON)
+			if (ppuphase == PPUPHASE_BG && isPattern)
 			{
 				if(split)
 					return MMC5HackVROMPTR[MMC5HackSPPage*0x1000 + (A&0xFFF)];
