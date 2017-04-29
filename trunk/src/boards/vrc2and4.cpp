@@ -133,10 +133,14 @@ static DECLFW(M21Write) {
 }
 
 static DECLFW(M22Write) {
-	if (A == 0xC007) {											// Ganbare Goemon Gaiden does strange things!!! at the end credits
-		weirdo = 8;												// quick dirty hack, seems there is no other games with such PCB, so
-																// we never know if it will not work for something else lol
-	}
+
+	//they say this is genuinely bugged in the game
+	//http://forums.nesdev.com/viewtopic.php?f=3&t=6584
+	//if (A == 0xC007) {											// Ganbare Goemon Gaiden does strange things!!! at the end credits
+	//	weirdo = 8;												// quick dirty hack, seems there is no other games with such PCB, so
+	//															// we never know if it will not work for something else lol
+	//}
+
 	A |= ((A >> 2) & 0x3);										// It's just swapped lines from 21 mapper
 																//
 	VRC24Write((A & 0xF000) | ((A >> 1) & 1) | ((A << 1) & 2), V);
