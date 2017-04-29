@@ -235,6 +235,15 @@ uint8 FASTCALL mmc5_PPURead(uint32 A)
 				return ExRAM[A & 0x3FF];
 			}
 		}
+
+		if (MMC5HackCHRMode == 1)
+		{
+			if((A&0x3FF)>=0x3C0)
+			{
+				return ExRAM[NTRefreshAddr & 0x3ff];
+			}
+		}
+			
 		return vnapage[(A >> 10) & 0x3][A & 0x3FF];
 	}
 }
