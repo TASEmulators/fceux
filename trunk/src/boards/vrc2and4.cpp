@@ -127,8 +127,7 @@ static DECLFW(VRC24Write) {
 }
 
 static DECLFW(M21Write) {
-	A = (A & 0xF000) | ((A >> 1) & 0x3);						// Ganbare Goemon Gaiden 2 - Tenka no Zaihou (J) [!] isn't mapper 21 actually,
-																// it's mapper 23 by wirings
+	A = (A & 0xF000) | ((A >> 1) & 0x3) | ((A >> 6) & 0x3);
 	VRC24Write(A, V);
 }
 
@@ -147,7 +146,7 @@ static DECLFW(M22Write) {
 }
 
 static DECLFW(M23Write) {
-	A |= ((A >> 2) & 0x3) | ((A >> 4) & 0x3) | ((A >> 6) & 0x3);// actually there is many-in-one mapper source, some pirate or
+	A |= ((A >> 2) & 0x3) | ((A >> 4) & 0x3);// actually there is many-in-one mapper source, some pirate or
 																// licensed games use various address bits for registers
 	VRC24Write(A, V);
 }
