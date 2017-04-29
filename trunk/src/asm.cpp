@@ -272,7 +272,7 @@ char *Disassemble(int addr, uint8 *opcode) {
 			(a) = opcode[1] | opcode[2]<<8; \
 		}
 		#define zpIndex(a,i) { \
-			(a) = opcode[1]+(i); \
+			(a) = (opcode[1]+(i))&0xFF; \
 		}
 		#define indirectX(a) { \
 			(a) = (opcode[1]+RX)&0xFF; \
@@ -360,8 +360,8 @@ char *Disassemble(int addr, uint8 *opcode) {
 		case 0xE6: strcpy(chr,"INC"); goto _zeropage;
 		_zeropage:
 		// ################################## Start of SP CODE ###########################
-		// Change width to %04X
-			sprintf(str,"%s $%04X = #$%02X", chr,opcode[1],GetMem(opcode[1]));
+		// Change width to %04X // don't!
+			sprintf(str,"%s $%02X = #$%02X", chr,opcode[1],GetMem(opcode[1]));
 		// ################################## End of SP CODE ###########################
 			break;
 
@@ -457,7 +457,7 @@ char *Disassemble(int addr, uint8 *opcode) {
 		_zeropagex:
 			zpIndex(tmp,RX);
 		// ################################## Start of SP CODE ###########################
-		// Change width to %04X
+		// Change width to %04X // don't!
 			sprintf(str,"%s $%02X,X @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
 		// ################################## End of SP CODE ###########################
 			break;
@@ -515,7 +515,7 @@ char *Disassemble(int addr, uint8 *opcode) {
 		_zeropagey:
 			zpIndex(tmp,RY);
 		// ################################## Start of SP CODE ###########################
-		// Change width to %04X
+		// Change width to %04X // don't!
 			sprintf(str,"%s $%02X,Y @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
 		// ################################## End of SP CODE ###########################
 			break;
