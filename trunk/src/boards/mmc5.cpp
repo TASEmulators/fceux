@@ -27,6 +27,7 @@
 #define SpriteON    (PPU[1] & 0x10)	//Show Sprite
 #define ScreenON    (PPU[1] & 0x08)	//Show screen
 #define PPUON       (PPU[1] & 0x18)	//PPU should operate
+#define Sprite16    (PPU[0] & 0x20)	//Sprites 8x16/8x8
 
 static void (*sfun)(int P);
 static void (*psfun)(void);
@@ -113,9 +114,9 @@ typedef struct __cartdata {
 	uint8 size;
 } cartdata;
 
-#define Sprite16  (PPU[0]& 0x20)   //Sprites 8x16/8x8
-//#define MMC5SPRVRAMADR(V)      &MMC5SPRVPage[(V)>>10][(V)]
-static inline uint8 *  MMC5BGVRAMADR(uint32 A) {
+
+uint8* MMC5BGVRAMADR(uint32 A)
+{
 	if(Sprite16)
 	{
 		bool isPattern = PPUON;
@@ -235,12 +236,20 @@ uint8 FASTCALL mmc5_PPURead(uint32 A)
 				return ExRAM[A & 0x3FF];
 			}
 		}
-
+		
 		if (MMC5HackCHRMode == 1)
 		{
 			if((A&0x3FF)>=0x3C0)
 			{
-				return ExRAM[NTRefreshAddr & 0x3ff];
+				uint8 byte = ExRAM[NTRefreshAddr & 0x3ff];
+				//get attribute part
+				byte >>= 6;
+				//adjust it to the right position within the byte
+				int x = NTRefreshAddr&31;
+				int y = NTRefreshAddr>>5;
+				if(y&2) byte <<= 4;
+				if(x&2) byte <<= 2;
+				return byte;
 			}
 		}
 			

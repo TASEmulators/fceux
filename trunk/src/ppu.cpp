@@ -374,18 +374,7 @@ uint8 UPALRAM[0x03];//for 0x4/0x8/0xC addresses in palette, the ones in
 #define MMC5SPRVRAMADR(V)   &MMC5SPRVPage[(V) >> 10][(V)]
 #define VRAMADR(V)          &VPage[(V) >> 10][(V)]
 
-//mbg 8/6/08 - fix a bug relating to
-//"When in 8x8 sprite mode, only one set is used for both BG and sprites."
-//in mmc5 docs
-uint8 * MMC5BGVRAMADR(uint32 V) {
-	if (!Sprite16) {
-		extern uint8 mmc5ABMode;				/* A=0, B=1 */
-		if (mmc5ABMode == 0)
-			return MMC5SPRVRAMADR(V);
-		else
-			return &MMC5BGVPage[(V) >> 10][(V)];
-	} else return &MMC5BGVPage[(V) >> 10][(V)];
-}
+extern uint8* MMC5BGVRAMADR(uint32 A);
 
 //this duplicates logic which is embedded in the ppu rendering code
 //which figures out where to get CHR data from depending on various hack modes
@@ -500,7 +489,7 @@ void (*FFCEUX_PPUWrite)(uint32 A, uint8 V) = 0;
 
 #define CALL_PPUWRITE(A, V) (FFCEUX_PPUWrite ? FFCEUX_PPUWrite(A, V) : FFCEUX_PPUWrite_Default(A, V))
 
-//whether to use the new ppu (new PPU doesn't handle MMC5 extra nametables at all
+//whether to use the new ppu
 int newppu = 0;
 
 void ppu_getScroll(int &xpos, int &ypos) {
