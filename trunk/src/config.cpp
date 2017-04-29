@@ -57,3 +57,4 @@ char *FCEUI_GetAboutString() {
     sprintf(aboutString,"%s%s",aboutTemplate,compilerString);
 	return aboutString;
 }
+
