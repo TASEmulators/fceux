@@ -458,7 +458,7 @@ char *Disassemble(int addr, uint8 *opcode) {
 			zpIndex(tmp,RX);
 		// ################################## Start of SP CODE ###########################
 		// Change width to %04X
-			sprintf(str,"%s $%02X,X @ $%02X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
+			sprintf(str,"%s $%02X,X @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
 		// ################################## End of SP CODE ###########################
 			break;
 
