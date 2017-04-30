@@ -569,7 +569,7 @@ void BreakHit(int bp_num, bool force)
 #endif
 }
 
-uint8 StackAddrBackup = X.S;
+int StackAddrBackup;
 uint16 StackNextIgnorePC = 0xFFFF;
 
 ///fires a breakpoint
@@ -744,7 +744,7 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 						StackNextIgnorePC = 0xFFFF;
 					} else
 					{
-						if ((X.S < StackAddrBackup) && (stackop==0))
+						if (StackAddrBackup != -1 && (X.S < StackAddrBackup) && (stackop==0))
 						{
 							// Unannounced stack mem breaks
 							// Pushes to stack
@@ -763,7 +763,7 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 									}
 								}
 							}
-						} else if ((StackAddrBackup < X.S) && (stackop==0))
+						} else if (StackAddrBackup != -1 && (StackAddrBackup < X.S) && (stackop==0))
 						{
 							// Pulls from stack
 							if (watchpoint[i].flags & WP_R)
@@ -790,11 +790,16 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 	} //loop across all breakpoints
 
 STOPCHECKING:
+	
+	//Update the stack address with the current one, now that changes have registered.
+	//ZEROMUS THINKS IT MAKES MORE SENSE HERE
+	StackAddrBackup = X.S;
+
 	if(breakHit != -1)
 		BreakHit(i);
 
-	//Update the stack address with the current one, now that changes have registered.
-	StackAddrBackup = X.S;
+	////Update the stack address with the current one, now that changes have registered.
+	//StackAddrBackup = X.S;
 }
 //bbit edited: this is the end of the inserted code
 

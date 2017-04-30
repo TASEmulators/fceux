@@ -406,12 +406,14 @@ void X6502_Init(void)
 	}
 }
 
+extern int StackAddrBackup;
 void X6502_Power(void)
 {
  _count=_tcount=_IRQlow=_PC=_A=_X=_Y=_P=_PI=_DB=_jammed=0;
  _S=0xFD;
  timestamp=soundtimestamp=0;
  X6502_Reset();
+ StackAddrBackup = -1;
 }
 
 void X6502_Run(int32 cycles)
