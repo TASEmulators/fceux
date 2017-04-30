@@ -657,6 +657,8 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 		default: break;
 	}
 
+	#define BREAKHIT(x) { breakHit = (x); goto STOPCHECKING; }
+	int breakHit = -1;
 	for (i = 0; i < numWPs; i++)
 	{
 		if ((watchpoint[i].flags & WP_E))
@@ -670,11 +672,11 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 					if (watchpoint[i].endaddress)
 					{
 						if ((watchpoint[i].address <= PPUAddr) && (watchpoint[i].endaddress >= PPUAddr))
-							BreakHit(i);
+							BREAKHIT(i);
 					} else
 					{
 						if (watchpoint[i].address == PPUAddr)
-							BreakHit(i);
+							BREAKHIT(i);
 					}
 				}
 			} else if (watchpoint[i].flags & BT_S)
@@ -685,16 +687,16 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 					if (watchpoint[i].endaddress)
 					{
 						if ((watchpoint[i].address <= PPU[3]) && (watchpoint[i].endaddress >= PPU[3]))
-							BreakHit(i);
+							BREAKHIT(i);
 					} else
 					{
 						if (watchpoint[i].address == PPU[3])
-						BreakHit(i);
+						BREAKHIT(i);
 					}
 				} else if ((watchpoint[i].flags & WP_W) && (A == 0x4014))
 				{
 					// Sprite DMA! :P
-					BreakHit(i);
+					BREAKHIT(i);
 				}
 			} else
 			{
@@ -705,12 +707,12 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 					{
 						if (((watchpoint[i].flags & (WP_R | WP_W)) && (watchpoint[i].address <= A) && (watchpoint[i].endaddress >= A)) ||
 							((watchpoint[i].flags & WP_X) && (watchpoint[i].address <= _PC) && (watchpoint[i].endaddress >= _PC)))
-							BreakHit(i);
+							BREAKHIT(i);
 					} else
 					{
 						if (((watchpoint[i].flags & (WP_R | WP_W)) && (watchpoint[i].address == A)) ||
 							((watchpoint[i].flags & WP_X) && (watchpoint[i].address == _PC)))
-							BreakHit(i);
+							BREAKHIT(i);
 					}
 				} else
 				{
@@ -727,11 +729,11 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 								if (watchpoint[i].endaddress)
 								{
 									if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j))
-										BreakHit(i);
+										BREAKHIT(i);
 								} else
 								{
 									if (watchpoint[i].address == j)
-										BreakHit(i);
+										BREAKHIT(i);
 								}
 							}
 						}
@@ -753,11 +755,11 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 									if (watchpoint[i].endaddress)
 									{
 										if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j))
-											BreakHit(i);
+											BREAKHIT(i);
 									} else
 									{
 										if (watchpoint[i].address == j)
-											BreakHit(i);
+											BREAKHIT(i);
 									}
 								}
 							}
@@ -771,11 +773,11 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 									if (watchpoint[i].endaddress)
 									{
 										if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j))
-											BreakHit(i);
+											BREAKHIT(i);
 									} else
 									{
 										if (watchpoint[i].address == j)
-											BreakHit(i);
+											BREAKHIT(i);
 									}
 								}
 							}
@@ -785,7 +787,11 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 				}
 			}
 		}
-	}
+	} //loop across all breakpoints
+
+STOPCHECKING:
+	if(breakHit != -1)
+		BreakHit(i);
 
 	//Update the stack address with the current one, now that changes have registered.
 	StackAddrBackup = X.S;
