@@ -706,6 +706,8 @@ static DECLFR(A2007) {
 		RefreshAddr = ppur.get_2007access();
 		return ret;
 	} else {
+
+		//OLDPPU
 		FCEUPPU_LineUpdate();
 
 		if (tmp >= 0x3F00) {	// Palette RAM tied directly to the output data, without VRAM buffer
@@ -735,9 +737,16 @@ static DECLFR(A2007) {
 				if (PPU_hook) PPU_hook(tmp);
 				PPUGenLatch = VRAMBuffer;
 				if (tmp < 0x2000) {
+
 					if (debug_loggingCD)
 						LogAddress = GetCHRAddress(tmp);
-					VRAMBuffer = VPage[tmp >> 10][tmp];
+					if(MMC5Hack)
+					{
+						//probably wrong CD logging in this case...
+						VRAMBuffer = *MMC5BGVRAMADR(tmp);
+					}
+					else VRAMBuffer = VPage[tmp >> 10][tmp];
+
 				} else if (tmp < 0x3F00)
 					VRAMBuffer = vnapage[(tmp >> 10) & 0x3][tmp & 0x3FF];
 			}

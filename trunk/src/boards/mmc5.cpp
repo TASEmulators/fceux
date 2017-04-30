@@ -119,7 +119,7 @@ uint8* MMC5BGVRAMADR(uint32 A)
 {
 	if(Sprite16)
 	{
-		bool isPattern = PPUON;
+		bool isPattern = !!PPUON;
 		if (ppuphase == PPUPHASE_OBJ && isPattern)
 			return &ABANKS[(A) >> 10][(A)];
 		if (ppuphase == PPUPHASE_BG && isPattern)
@@ -129,7 +129,7 @@ uint8* MMC5BGVRAMADR(uint32 A)
 		else 
 			return &BBANKS[(A) >> 10][(A)];
 	}
-	else return &ABANKS[(A) >> 10][(A)];;
+	else return &ABANKS[(A) >> 10][(A)];
 }
 
 static void mmc5_PPUWrite(uint32 A, uint8 V) {
@@ -177,7 +177,7 @@ uint8 FASTCALL mmc5_PPURead(uint32 A)
 	{
 		if(Sprite16)
 		{
-			bool isPattern = PPUON;
+			bool isPattern = !!PPUON;
 			if (ppuphase == PPUPHASE_OBJ && isPattern)
 				return ABANKS[(A) >> 10][(A)];
 			if (ppuphase == PPUPHASE_BG && isPattern)
@@ -242,15 +242,11 @@ uint8 FASTCALL mmc5_PPURead(uint32 A)
 			if((A&0x3FF)>=0x3C0)
 			{
 				uint8 byte = ExRAM[NTRefreshAddr & 0x3ff];
-				//get attribute part
+				//get attribute part and paste it 4x across the byte
 				byte >>= 6;
-				//adjust it to the right position within the byte
-				int x = NTRefreshAddr&31;
-				int y = NTRefreshAddr>>5;
-				if(y&2) byte <<= 4;
-				if(x&2) byte <<= 2;
+				byte *= 0x55;
 				return byte;
-			}
+			} 
 		}
 			
 		return vnapage[(A >> 10) & 0x3][A & 0x3FF];
