@@ -407,6 +407,14 @@ static int emu_debuggerloop(lua_State *L) {
 	return 0;
 }
 
+static int emu_debuggerloopstep(lua_State *L) {
+	#ifdef WIN32
+	extern void win_debuggerLoopStep();
+		win_debuggerLoopStep();
+	#endif
+	return 0;
+}
+
 // emu.softreset()
 //
 // Executes a power cycle
@@ -5547,6 +5555,7 @@ static const struct luaL_reg emulib [] = {
 
 	{"poweron", emu_poweron},
 	{"debuggerloop", emu_debuggerloop},
+	{"debuggerloopstep", emu_debuggerloopstep},
 	{"softreset", emu_softreset},
 	{"speedmode", emu_speedmode},
 	{"frameadvance", emu_frameadvance},

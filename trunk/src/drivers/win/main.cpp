@@ -903,6 +903,26 @@ void _updateWindow()
 	//UpdateTasEditor();	//AnS: moved to FCEUD_Update
 }
 
+void win_debuggerLoopStep()
+{
+	FCEUD_UpdateInput();
+	_updateWindow();
+
+	//question:
+	//should this go here, or in the loop?
+
+	// HACK: break when Frame Advance is pressed
+	extern bool frameAdvanceRequested;
+	extern int frameAdvance_Delay_count, frameAdvance_Delay;
+	if (frameAdvanceRequested)
+	{
+		if (frameAdvance_Delay_count == 0 || frameAdvance_Delay_count >= frameAdvance_Delay)
+			FCEUI_SetEmulationPaused(EMULATIONPAUSED_FA);
+		if (frameAdvance_Delay_count < frameAdvance_Delay)
+			frameAdvance_Delay_count++;
+	}
+}
+
 void win_debuggerLoop()
 {
 	//delay until something causes us to unpause.
@@ -910,20 +930,8 @@ void win_debuggerLoop()
 	while(FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
 	{
 		Sleep(50);
-		FCEUD_UpdateInput();
-		_updateWindow();
-		// HACK: break when Frame Advance is pressed
-		extern bool frameAdvanceRequested;
-		extern int frameAdvance_Delay_count, frameAdvance_Delay;
-		if (frameAdvanceRequested)
-		{
-			if (frameAdvance_Delay_count == 0 || frameAdvance_Delay_count >= frameAdvance_Delay)
-				FCEUI_SetEmulationPaused(EMULATIONPAUSED_FA);
-			if (frameAdvance_Delay_count < frameAdvance_Delay)
-				frameAdvance_Delay_count++;
-		}
+		win_debuggerLoopStep();
 	}
-	int zzz=9;
 }
 
 // Update the game and gamewindow with a new frame
