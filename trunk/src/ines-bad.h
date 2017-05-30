@@ -30,6 +30,7 @@
 { 0x9b4bad37b5498992LL, "Gradius 2", INESB_HACKED },
 { 0xb068d4ac10ef848eLL, "Highway Star", INESB_HACKED },
 { 0xbf5175271e5019c3LL, "Kaiketsu Yanchamaru 3", INESB_HACKED },
+{ 0xd113067873d975b0LL, "Nobunaga no Yabou Zenkokuban", INESB_HACKED },
 { 0xfb4b508a236bbba3LL, "Salamander", INESB_HACKED },
 { 0x1895afc6eef26c7dLL, "Super Mario Bros.", INESB_HACKED },
 { 0x3716c4bebf885344LL, "Super Mario Bros.", INESB_HACKED },
