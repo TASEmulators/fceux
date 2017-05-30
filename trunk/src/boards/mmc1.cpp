@@ -51,9 +51,9 @@ static DECLFR(MAWRAM) {
 static void MMC1CHR(void) {
 	if (WRAMSIZE > 0x2000) {
 		if (WRAMSIZE > 0x4000)
-			setprg8r(0x10, 0x6000, (DRegs[1] >> 2) & 3)
+			setprg8r(0x10, 0x6000, (DRegs[1] >> 2) & 3);
 		else
-			setprg8r(0x10, 0x6000, (DRegs[1] >> 3) & 1)
+			setprg8r(0x10, 0x6000, (DRegs[1] >> 3) & 1);
 	}
 
 	if (MMC1CHRHook4) {
