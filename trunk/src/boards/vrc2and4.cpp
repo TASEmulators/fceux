@@ -20,8 +20,8 @@
 
 #include "mapinc.h"
 
-static bool isPirate, is22;
-static uint8 reg1mask, reg2mask;
+static bool isPirate;
+static uint8 is22, reg1mask, reg2mask;
 static uint16 IRQCount;
 static uint8 IRQLatch, IRQa;
 static uint8 prgreg[2], chrreg[8];
@@ -81,7 +81,7 @@ static void Sync(void) {
 }
 
 static DECLFW(VRC24Write) {
-	A = A & 0xF000 | !!(A & reg2mask) << 1 | !!(A & regmask1);
+	A = A & 0xF000 | !!(A & reg2mask) << 1 | !!(A & reg1mask);
 	if ((A >= 0xB000) && (A <= 0xE003)) {
 		if (UNIFchrrama)
 			big_bank = (V & 8) << 2;							// my personally many-in-one feature ;) just for support pirate cart 2-in-1
@@ -167,28 +167,6 @@ static void VRC24Close(void) {
 	WRAM = NULL;
 }
 
-void Mapper21_Init(CartInfo *info) {
-	isPirate = false;
-	is22 = false;
-	reg1mask = 0x42;
-	reg2mask = 0x84;
-	VRC24_Init(info);
-}
-
-void Mapper22_Init(CartInfo *info) {
-	isPirate = false;
-	is22 = true;
-	reg1mask = 2;
-	reg2mask = 1;
-
-	// no IRQ (all mapper 22 games are VRC2)
-	// no WRAM
-	info->Power = VRC24Power;
-	GameStateRestore = StateRestore;
-
-	AddExState(&StateRegs, ~0, 0, 0);
-}
-
 static void VRC24_Init(CartInfo *info) {
 	info->Power = VRC24Power;
 	info->Close = VRC24Close;
@@ -208,9 +186,31 @@ static void VRC24_Init(CartInfo *info) {
 	AddExState(&StateRegs, ~0, 0, 0);
 }
 
+void Mapper21_Init(CartInfo *info) {
+	isPirate = false;
+	is22 = 0;
+	reg1mask = 0x42;
+	reg2mask = 0x84;
+	VRC24_Init(info);
+}
+
+void Mapper22_Init(CartInfo *info) {
+	isPirate = false;
+	is22 = 1;
+	reg1mask = 2;
+	reg2mask = 1;
+
+	// no IRQ (all mapper 22 games are VRC2)
+	// no WRAM
+	info->Power = VRC24Power;
+	GameStateRestore = StateRestore;
+
+	AddExState(&StateRegs, ~0, 0, 0);
+}
+
 void Mapper23_Init(CartInfo *info) {
 	isPirate = false;
-	is22 = false;
+	is22 = 0;
 	reg2mask = 0x15;
 	reg2mask = 0x2a;
 	VRC24_Init(info);
@@ -218,7 +218,7 @@ void Mapper23_Init(CartInfo *info) {
 
 void Mapper25_Init(CartInfo *info) {
 	isPirate = false;
-	is22 = false;
+	is22 = 0;
 	reg1mask = 0xa;
 	reg2mask = 0x5;
 	VRC24_Init(info);
@@ -226,7 +226,7 @@ void Mapper25_Init(CartInfo *info) {
 
 void UNLT230_Init(CartInfo *info) {
 	isPirate = true;
-	is22 = false;
+	is22 = 0;
 	reg1mask = 0x15;
 	reg2mask = 0x2a;
 	VRC24_Init(info);
