@@ -51,7 +51,7 @@ static DECLFR(MAWRAM) {
 static void MMC1CHR(void) {
 	if (WRAMSIZE > 0x2000) {
 		if (WRAMSIZE > 0x4000)
-			setprg8r(0x10, 0x6000, (DRegs[1] >> 2) & 3);
+			setprg8r(0x10, 0x6000, (DRegs[1] >> 2) & 3)
 		else
 			setprg8r(0x10, 0x6000, (DRegs[1] >> 3) & 1)
 	}
@@ -180,9 +180,9 @@ static void MMC1CMReset(void) {
 	MMC1PRG();
 }
 
-static int DetectMMC1WRAMSize(uint32 crc32, int *bs) {
+static int DetectMMC1WRAMSize(CartInfo *info, int *bs) {
 	int ws = 8;
-	switch (crc32) {
+	switch (info->CRC32) {
 	case 0xc6182024:	// Romance of the 3 Kingdoms
 	case 0xabbf7217:	// ""        "" (J) (PRG0)
 	case 0xccf35c02:	// ""        "" (J) (PRG1)
@@ -331,7 +331,7 @@ static void GenMMC1Init(CartInfo *info, int prg, int chr, int wram, int bram) {
 
 void Mapper1_Init(CartInfo *info) {
 	int bs = info->battery ? 8 : 0;
-	int ws = DetectMMC1WRAMSize(info->CRC32, &bs);
+	int ws = DetectMMC1WRAMSize(info, &bs);
 	GenMMC1Init(info, 512, 256, ws, bs);
 }
 
