@@ -211,7 +211,7 @@ void Mapper22_Init(CartInfo *info) {
 void Mapper23_Init(CartInfo *info) {
 	isPirate = false;
 	is22 = 0;
-	reg2mask = 0x15;
+	reg1mask = 0x15;
 	reg2mask = 0x2a;
 	VRC24_Init(info);
 }
