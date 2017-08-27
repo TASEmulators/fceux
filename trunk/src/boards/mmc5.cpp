@@ -961,8 +961,13 @@ static void GenMMC5_Init(CartInfo *info, int wsize, int battery) {
 
 	if (battery) {
 		info->SaveGame[0] = WRAM;
+
+		//this is more complex than it looks because it MUST BE, I guess. is there an assumption that only 8KB of 16KB is battery backed? That's NES mappers for you
+		//I added 64KB for the new 64KB homebrews
 		if (wsize <= 16)
 			info->SaveGameLen[0] = 8192;
+		else if(wsize == 64)
+			info->SaveGameLen[0] = 64*1024;
 		else
 			info->SaveGameLen[0] = 32768;
 	}
