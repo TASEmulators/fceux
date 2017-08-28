@@ -715,7 +715,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 					newindex = (*src&63) | (deemph*64);
 					newindex += 256;
 
-					if(GameInfo->type==GIT_NSF)
+					if(GameInfo && GameInfo->type==GIT_NSF)
 					{
 						*d++ = palettetranslate[temp];
 						*d++ = palettetranslate[temp];
@@ -807,7 +807,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 			switch(Bpp)
 			{
 			case 4:
-				if ( nes_ntsc && GameInfo->type!=GIT_NSF) {
+				if ( nes_ntsc && GameInfo && GameInfo->type!=GIT_NSF) {
 					int outxr = 301;
 					//if(xr == 282) outxr = 282; //hack for windows
 					burst_phase ^= 1;
