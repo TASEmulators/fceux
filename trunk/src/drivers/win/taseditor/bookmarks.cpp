@@ -73,6 +73,8 @@ void BOOKMARKS::init()
 	hwndBranchesBitmap = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_BRANCHES_BITMAP);
 	hwndBookmarks = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_BOOKMARKS_BOX);
 
+	// set a font which is overridden elsewhere and so really only used to calculate the row size
+	SendMessage(hwndBookmarksList, WM_SETFONT, (WPARAM)pianoRoll.hItemMeasurementFont, 0);
 	// prepare bookmarks listview
 	ListView_SetExtendedListViewStyleEx(hwndBookmarksList, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
 	// subclass the listview
