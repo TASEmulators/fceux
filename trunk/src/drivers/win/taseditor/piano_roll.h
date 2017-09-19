@@ -221,7 +221,7 @@ public:
 
 	HWND hwndMarkerDragBox, hwndMarkerDragBoxText;
 	// GDI stuff
-	HFONT hMainListFont, hMainListSelectFont, hMarkersFont, hMarkersEditFont, hTaseditorAboutFont;
+	HFONT hMainListFont, hMainListSelectFont, hMarkersFont, hMarkersEditFont, hTaseditorAboutFont, hItemMeasurementFont;
 	HBRUSH bgBrush, markerDragBoxBrushNormal, markerDragBoxBrushBind;
 
 private:

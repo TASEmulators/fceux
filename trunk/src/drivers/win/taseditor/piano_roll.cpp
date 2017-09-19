@@ -122,12 +122,22 @@ void PIANO_ROLL::init()
 		ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
 		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
 		"Arial");								/*font name*/
+	hItemMeasurementFont = CreateFont(10, 5,				/*Height,Width*/
+		0, 0,										/*escapement,orientation*/
+		FW_BOLD, FALSE, FALSE, FALSE,				/*weight, italic, underline, strikeout*/
+		ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
+		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
+		"Courier New");									/*font name*/
 
 	bgBrush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
 	markerDragBoxBrushNormal = CreateSolidBrush(MARKED_FRAMENUM_COLOR);
 	markerDragBoxBrushBind = CreateSolidBrush(BINDMARKED_FRAMENUM_COLOR);
 
 	hwndList = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_LIST1);
+	
+	// set a font which is overridden elsewhere (right?) and so really only used to calculate the row size
+	SendMessage(hwndList, WM_SETFONT, (WPARAM)hItemMeasurementFont, 0);
+
 	// prepare the main listview
 	ListView_SetExtendedListViewStyleEx(hwndList, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
 	// subclass the header
@@ -391,6 +401,11 @@ void PIANO_ROLL::free()
 	{
 		DeleteObject(hTaseditorAboutFont);
 		hTaseditorAboutFont = 0;
+	}
+	if (hItemMeasurementFont)
+	{
+		DeleteObject(hItemMeasurementFont);
+		hItemMeasurementFont = 0;
 	}
 	if (bgBrush)
 	{
