@@ -909,7 +909,7 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					switch (LOWORD(wParam)) {
 						case IDC_LIST_GGADDRESSES:
 							i = SendDlgItemMessage(hwndDlg,IDC_LIST_GGADDRESSES,LB_GETCURSEL,0,0);
-							ChangeMemViewFocus(2,GGlist[i],-1);
+							ChangeMemViewFocus(3,GGlist[i],-1);
 						break;
 					}
 					break;
