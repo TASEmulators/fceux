@@ -533,12 +533,38 @@ void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 			*buff = 0;
 			src = str;
 
-			while (pos = strstr(src, list->offset))
+			int addrlen = 5;
+
+			//zero 30-nov-2017 - handle zero page differently
+			char test[64];
+			strcpy(test, list->offset);
+			if(!strncmp(test,"$00",3))
 			{
-				*pos = 0;
-				strcat(buff, src);
+				strcpy(test,"$");
+				strcat(test,list->offset+3);
+				addrlen = 3;
+			}
+
+			while (pos = strstr(src, test))
+			{
+				//zero 30-nov-2017 - change how this works so we can display the address still
+				//*pos = 0;
+				//strcat(buff, src);
+				//strcat(buff, list->name);
+				//src = pos + 5;	// 5 = strlen(beg->offset), because all offsets are in "$XXXX" format
+				
+				//zero 30-nov-2017 - change how this works so we can display the address still
+				//append beginning part, plus addrlen for the offset
+				strncat(buff,src,pos-src+addrlen);
+				//append a space
+				strcat(buff," ");
+				//append the label
 				strcat(buff, list->name);
-				src = pos + 5;	// 5 = strlen(beg->offset), because all offsets are in "$XXXX" format
+				//begin processing after that offset
+				src = pos + addrlen;
+				//append a space.. unless what's next is an RParen, I guess
+				if(*src != ')') strcat(buff," ");
+
 				if (addressesLog)
 					addressesLog->push_back(list->offsetNumeric);
 			}

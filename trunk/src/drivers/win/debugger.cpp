@@ -470,7 +470,9 @@ void HighlightSyntax(int lines)
 		numpos = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&num);
 		if (numpos != 0)
 		{
-			if (debug_str[numpos + 3] == ',' || debug_str[numpos + 3] == ')' || debug_str[numpos + 3] == '\n')
+			if (debug_str[numpos + 3] == ',' || debug_str[numpos + 3] == ')' || debug_str[numpos + 3] == '\n'
+				|| debug_str[numpos + 3] == ' ' //zero 30-nov-2017 - in support of combined label/offset disassembly. not sure this is a good idea
+				)
 				wordbreak = numpos + 2;
 			else
 				wordbreak = numpos + 4;
