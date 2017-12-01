@@ -545,25 +545,44 @@ void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 				addrlen = 3;
 			}
 
-			while (pos = strstr(src, test))
+			for(;;)
 			{
-				//zero 30-nov-2017 - change how this works so we can display the address still
-				//*pos = 0;
-				//strcat(buff, src);
-				//strcat(buff, list->name);
-				//src = pos + 5;	// 5 = strlen(beg->offset), because all offsets are in "$XXXX" format
+				int myAddrlen = addrlen;
+
+				//first, check for the (potentially) shortened zero page address
+				pos = strstr(src, test);
+				if(!pos)
+				{
+					//if we didnt find that, check for the full $ABCD thing
+					pos = strstr(src, list->offset);
+					//if we didnt find that, bail
+					if(!pos) break;
+					
+					//otherwise we found a length-5 token to replace
+					myAddrlen = 5;
+				}
+
+				//special hack: sometimes we have #$00, and we dont want to replace that.
+				//(this isn't a problem with $0000 because on the 6502 we ... dont.. have ... #$XXXX ?
+				//honestly, I don't know anything about this CPU. don't tell anyone.
+				//I'm just inferring from the fact that the algorithm previously relied on that assumption...
+				if(pos[-1] == '#')
+				{
+					src = pos + myAddrlen;
+					continue;
+				}
 				
 				//zero 30-nov-2017 - change how this works so we can display the address still
 				//append beginning part, plus addrlen for the offset
-				strncat(buff,src,pos-src+addrlen);
+				strncat(buff,src,pos-src+myAddrlen);
 				//append a space
 				strcat(buff," ");
 				//append the label
 				strcat(buff, list->name);
 				//begin processing after that offset
-				src = pos + addrlen;
+				src = pos + myAddrlen;
 				//append a space.. unless what's next is an RParen, I guess
-				if(*src != ')') strcat(buff," ");
+				if(*src != ')' && *src != ',' && *src != 0) strcat(buff," ");
 
 				if (addressesLog)
 					addressesLog->push_back(list->offsetNumeric);
