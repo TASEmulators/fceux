@@ -642,7 +642,7 @@ void UpdateCaption()
 			// when watching RAM we may as well see Symbolic Debug names
 			loadNameFiles();
 			Name* node = findNode(getNamesPointerForAddress(CursorStartAddy), CursorStartAddy);
-			if (node)
+			if (node && node->name)
 			{
 				strcat(str, " - ");
 				strcat(str, node->name);
