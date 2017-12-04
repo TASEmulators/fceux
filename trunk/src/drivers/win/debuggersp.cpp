@@ -525,11 +525,19 @@ void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 	char* pos;
 	char* src;
 
+	Name* listRoot = list;
+
 	while (list)
 	{
 		if (list->name)
 		{
-			// find and replace substrings
+			//don't do replacements if we're not mapped appropriately
+			if(listRoot != getNamesPointerForAddress(list->offsetNumeric))
+			{
+				list = list->next;
+				continue;
+			}
+
 			*buff = 0;
 			src = str;
 
@@ -551,6 +559,12 @@ void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 
 				//first, check for the (potentially) shortened zero page address
 				pos = strstr(src, test);
+				if(pos)
+				{
+					//next character must not be another part of a longer hex value
+					if(pos[3] >= '0' && pos[3] <= '9') pos = NULL;
+					else if(pos[3] >= 'A' && pos[3] <= 'F') pos = NULL;
+				}
 				if(!pos)
 				{
 					//if we didnt find that, check for the full $ABCD thing
@@ -581,8 +595,6 @@ void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 				strcat(buff, list->name);
 				//begin processing after that offset
 				src = pos + myAddrlen;
-				//append a space.. unless what's next is an RParen, I guess
-				if(*src != ')' && *src != ',' && *src != 0) strcat(buff," ");
 
 				if (addressesLog)
 					addressesLog->push_back(list->offsetNumeric);
