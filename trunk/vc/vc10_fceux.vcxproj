@@ -412,6 +412,7 @@
     <ClCompile Include="..\src\boards\77.cpp" />
     <ClCompile Include="..\src\boards\79.cpp" />
     <ClCompile Include="..\src\boards\80.cpp" />
+    <ClCompile Include="..\src\boards\80013-B.cpp" />
     <ClCompile Include="..\src\boards\8157.cpp" />
     <ClCompile Include="..\src\boards\82.cpp" />
     <ClCompile Include="..\src\boards\8237.cpp" />
