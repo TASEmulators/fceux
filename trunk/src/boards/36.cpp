@@ -22,11 +22,12 @@
 
 #include "mapinc.h"
 
-static uint8 latche;
+static uint8 latche, mirr;
 
 static SFORMAT StateRegs[] =
 {
 	{ &latche, 1, "LATC" },
+	{ &mirr, 1, "MIRR" },
 	{ 0 }
 };
 
@@ -36,6 +37,11 @@ static void Sync(void) {
 }
 
 static DECLFW(M36Write) {
+	
+	switch((A>>12)&7) {				// need to 4-in-1 MGC-26 BMC, doesnt break other games though
+		case 0: mirr = MI_V; setmirror(mirr); break;
+		case 4: mirr = MI_H; setmirror(mirr); break;
+	}
 	latche = V;
 	Sync();
 }
