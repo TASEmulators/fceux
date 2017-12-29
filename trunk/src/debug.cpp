@@ -402,7 +402,7 @@ int evaluate(Condition* c)
 			case OP_G: f = value1 > value2; break;
 			case OP_L: f = value1 < value2; break;
 			case OP_MULT: f = value1 * value2; break;
-			case OP_DIV: f = value1 / value2; break;
+			case OP_DIV: f = (value2==0) ? 0 : (value1 / value2); break;
 			case OP_PLUS: f = value1 + value2; break;
 			case OP_MINUS: f = value1 - value2; break;
 			case OP_OR: f = value1 || value2; break;
