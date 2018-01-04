@@ -157,6 +157,7 @@ void UNLRT01_Init(CartInfo *info);
 void BMC810131C_Init(CartInfo *info);
 void BMC8IN1_Init(CartInfo *info);
 void BMC80013B_Init(CartInfo *info);
+void BMCHPxx_Init(CartInfo *info);
 
 extern uint8 *UNIFchrrama;	// Meh.  So I can stop CHR RAM
 							// bank switcherooing with certain boards...

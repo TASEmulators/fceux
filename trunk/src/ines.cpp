@@ -720,6 +720,8 @@ static BMAPPINGLocal bmap[] = {
 	{"PEC-586 Computer",	257, UNLPEC586Init},
 	{"158B Prot Board",		258, UNL158B_Init},
 	{"F-15 MMC3 Based",		259, BMCF15_Init},
+	{"HP10xx/H20xx Boards",	260, BMCHPxx_Init},
+	{"810544-CA-1",		    261, BMC810544CA1_Init},
 
 	{"",					0, NULL}
 };

@@ -436,6 +436,7 @@
     <ClCompile Include="..\src\boards\F-15.cpp" />
     <ClCompile Include="..\src\boards\famicombox.cpp" />
     <ClCompile Include="..\src\boards\ffe.cpp" />
+    <ClCompile Include="..\src\boards\hp10xx_hp20xx.cpp" />
     <ClCompile Include="..\src\boards\hp898f.cpp" />
     <ClCompile Include="..\src\boards\ks7010.cpp" />
     <ClCompile Include="..\src\boards\ks7012.cpp" />

@@ -309,8 +309,14 @@ void Mapper212_Init(CartInfo *info) {
 //------------------ Map 213 ---------------------------
 
 static void M213Sync(void) {
-	setprg32(0x8000, (latche >> 1) & 3);
+	if(latche & 0x40) {
+		setprg16(0x8000, (latche & 7));
+		setprg16(0xC000, (latche & 7));
+	} else {
+		setprg32(0x8000, (latche >> 1) & 3);
+	}
 	setchr8((latche >> 3) & 7);
+	setmirror(((latche & 1)^((latche >> 6) & 1)) ^ 1);
 }
 
 void Mapper213_Init(CartInfo *info) {
