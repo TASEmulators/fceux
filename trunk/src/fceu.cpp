@@ -845,14 +845,6 @@ u64 xoroshiro128plus_next() {
 void FCEU_MemoryRand(uint8 *ptr, uint32 size) {
 	int x = 0;
 
-	//reseed random, unless we're in a movie
-	extern int disableBatteryLoading;
-	if(FCEUMOV_Mode(MOVIEMODE_INACTIVE) && !disableBatteryLoading)
-		RAMInitSeed = rand()&0x7FFF;
-
-	//always reseed the PRNG with the current seed, for deterministic results (for that seed)
-	xoroshiro128plus_seed(RAMInitSeed);
-
 	while (size) {
 		uint8 v = 0;
 		switch (RAMInitOption)
@@ -887,6 +879,16 @@ void hand(X6502 *X, int type, uint32 A) {
 void PowerNES(void) {
 	FCEUMOV_AddCommand(FCEUNPCMD_POWER);
 	if (!GameInfo) return;
+
+	//reseed random, unless we're in a movie
+	extern int disableBatteryLoading;
+	if(FCEUMOV_Mode(MOVIEMODE_INACTIVE) && !disableBatteryLoading)
+	{
+		RAMInitSeed = (RAMInitSeed + (u32)(xoroshiro128plus_next())) | 1;
+	}
+
+	//always reseed the PRNG with the current seed, for deterministic results (for that seed)
+	xoroshiro128plus_seed(RAMInitSeed);
 
 	FCEU_CheatResetRAM();
 	FCEU_CheatAddRAM(2, 0, RAM);

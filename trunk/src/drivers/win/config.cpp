@@ -74,6 +74,7 @@ extern int palcontrast;
 extern int palbrightness;
 extern bool paldeemphswap;
 extern int RAMInitOption;
+extern int RAMInitSeed;
 
 extern TASEDITOR_CONFIG taseditorConfig;
 extern char* recentProjectsArray[];
@@ -188,6 +189,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(force_grayscale),
 	AC(dendy),
 	AC(RAMInitOption),
+	AC(RAMInitSeed),
 	AC(postrenderscanlines),
 	AC(vblankscanlines),
 	AC(overclock_enabled),
