@@ -796,12 +796,63 @@ void ResetNES(void) {
 }
 
 
+int RAMInitSeed = 0;
 int RAMInitOption = 0;
 // Note: this option does not currently apply to WRAM.
 // Would it be appropriate to call FCEU_MemoryRand inside FCEU_gmalloc to initialize them?
 
+u64 splitmix64(u32 input) {
+	u64 z = (input + 0x9e3779b97f4a7c15);
+	z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
+	z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
+	return z ^ (z >> 31);
+}
+
+static inline u64 xoroshiro128plus_rotl(const u64 x, int k) {
+	return (x << k) | (x >> (64 - k));
+}
+
+u64 xoroshiro128plus_s[2];
+void xoroshiro128plus_seed(u32 input)
+{
+//http://xoroshiro.di.unimi.it/splitmix64.c
+	u64 x = input;
+
+	u64 z = (x += 0x9e3779b97f4a7c15);
+	z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
+	z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
+	xoroshiro128plus_s[0] = z ^ (z >> 31);
+	
+	z = (x += 0x9e3779b97f4a7c15);
+	z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
+	z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
+	xoroshiro128plus_s[1] = z ^ (z >> 31);
+}
+
+//http://vigna.di.unimi.it/xorshift/xoroshiro128plus.c
+u64 xoroshiro128plus_next() {
+	const u64 s0 = xoroshiro128plus_s[0];
+	u64 s1 = xoroshiro128plus_s[1];
+	const u64 result = s0 + s1;
+
+	s1 ^= s0;
+	xoroshiro128plus_s[0] = xoroshiro128plus_rotl(s0, 55) ^ s1 ^ (s1 << 14); // a, b
+	xoroshiro128plus_s[1] = xoroshiro128plus_rotl(s1, 36); // c
+
+	return result;
+}
+
 void FCEU_MemoryRand(uint8 *ptr, uint32 size) {
 	int x = 0;
+
+	//reseed random, unless we're in a movie
+	extern int disableBatteryLoading;
+	if(FCEUMOV_Mode(MOVIEMODE_INACTIVE) && !disableBatteryLoading)
+		RAMInitSeed = rand()&0x7FFF;
+
+	//always reseed the PRNG with the current seed, for deterministic results (for that seed)
+	xoroshiro128plus_seed(RAMInitSeed);
+
 	while (size) {
 		uint8 v = 0;
 		switch (RAMInitOption)
@@ -810,7 +861,7 @@ void FCEU_MemoryRand(uint8 *ptr, uint32 size) {
 			case 0: v = (x & 4) ? 0xFF : 0x00; break;
 			case 1: v = 0xFF; break;
 			case 2: v = 0x00; break;
-			case 3: v = uint8(rand()); break;
+			case 3: v = (u8)(xoroshiro128plus_next()); break;
 
 			// the default is this 8 byte pattern: 00 00 00 00 FF FF FF FF
 			// it has been used in FCEUX since time immemorial

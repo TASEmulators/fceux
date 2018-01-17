@@ -42,7 +42,7 @@ typedef struct
 	uint32 emu_version_used;				// 9813 = 0.98.13
 	MD5DATA md5_of_rom_used;
 	std::string name_of_rom_used;
-	int RAMInitOption;
+	int RAMInitOption, RAMInitSeed;
 
 	std::vector<std::wstring> comments;
 	std::vector<std::string> subtitles;
@@ -199,7 +199,7 @@ public:
 
 	int getNumRecords() { return records.size(); }
 
-	int RAMInitOption;
+	int RAMInitOption, RAMInitSeed;
 
 	class TDictionary : public std::map<std::string,std::string>
 	{

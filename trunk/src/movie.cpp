@@ -35,6 +35,7 @@ extern bool mustEngageTaseditor;
 #endif
 
 extern int RAMInitOption;
+extern int RAMInitSeed;
 
 #include <cstdio>
 #include <cstdlib>
@@ -395,6 +396,7 @@ MovieData::MovieData()
 	, palFlag(false)
 	, PPUflag(false)
 	, RAMInitOption(0)
+	, RAMInitSeed(0)
 	, rerecordCount(0)
 	, binaryFlag(false)
 	, loadFrameCount(-1)
@@ -417,6 +419,8 @@ void MovieData::installValue(std::string& key, std::string& val)
 		installBool(val,PPUflag);
 	else if(key == "RAMInitOption")
 		installInt(val,RAMInitOption);
+	else if(key == "RAMInitSeed")
+		installInt(val,RAMInitSeed);
 	else if(key == "version")
 		installInt(val,version);
 	else if(key == "emuVersion")
@@ -481,6 +485,7 @@ int MovieData::dump(EMUFILE *os, bool binary)
 	os->fprintf("FDS %d\n" , fds?1:0 );
 	os->fprintf("NewPPU %d\n" , PPUflag?1:0 );
 	os->fprintf("RAMInitOption %d\n", RAMInitOption);
+	os->fprintf("RAMInitSeed %d\n", RAMInitSeed);
 
 	for(uint32 i=0;i<comments.size();i++)
 		os->fprintf("comment %s\n" , wcstombs(comments[i]).c_str() );
@@ -817,6 +822,7 @@ void FCEUMOV_CreateCleanMovie()
 	currMovieData.fds = isFDS;
 	currMovieData.PPUflag = (newppu != 0);
 	currMovieData.RAMInitOption = RAMInitOption;
+	currMovieData.RAMInitSeed = RAMInitSeed;
 }
 void FCEUMOV_ClearCommands()
 {
@@ -881,6 +887,9 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 	LoadSubtitles(currMovieData);
 	delete fp;
 
+	RAMInitOption = currMovieData.RAMInitOption;
+	RAMInitSeed = currMovieData.RAMInitSeed;
+
 	freshMovie = true;	//Movie has been loaded, so it must be unaltered
 	if (bindSavestate) AutoSS = false;	//If bind savestate to movie is true, then their isn't a valid auto-save to load, so flag it
 	//fully reload the game to reinitialize everything before playing any movie
@@ -903,7 +912,7 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 	else
 		FCEUI_SetVidSystem(0);
 
-	RAMInitOption = currMovieData.RAMInitOption;
+
 
 	//force the input configuration stored in the movie to apply
 	FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
@@ -1573,6 +1582,7 @@ bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount)
 	info.pal = md.palFlag;
 	info.ppuflag = md.PPUflag;
 	info.RAMInitOption = md.RAMInitOption;
+	info.RAMInitSeed = md.RAMInitSeed;
 	info.nosynchack = true;
 	info.num_frames = md.records.size();
 	info.md5_of_rom_used = md.romChecksum;
