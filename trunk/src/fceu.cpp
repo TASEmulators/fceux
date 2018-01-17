@@ -884,7 +884,7 @@ void PowerNES(void) {
 	extern int disableBatteryLoading;
 	if(FCEUMOV_Mode(MOVIEMODE_INACTIVE) && !disableBatteryLoading)
 	{
-		RAMInitSeed = (RAMInitSeed + (u32)(xoroshiro128plus_next())) | 1;
+		RAMInitSeed = rand() ^ (u32)xoroshiro128plus_next();
 	}
 
 	//always reseed the PRNG with the current seed, for deterministic results (for that seed)
