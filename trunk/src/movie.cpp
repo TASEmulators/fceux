@@ -34,6 +34,8 @@ extern void AddRecentMovieFile(const char *filename);
 extern bool mustEngageTaseditor;
 #endif
 
+extern int RAMInitOption;
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -392,6 +394,7 @@ MovieData::MovieData()
 	, fds(false)
 	, palFlag(false)
 	, PPUflag(false)
+	, RAMInitOption(0)
 	, rerecordCount(0)
 	, binaryFlag(false)
 	, loadFrameCount(-1)
@@ -412,6 +415,8 @@ void MovieData::installValue(std::string& key, std::string& val)
 		installInt(val,fds);
 	else if(key == "NewPPU")
 		installBool(val,PPUflag);
+	else if(key == "RAMInitOption")
+		installInt(val,RAMInitOption);
 	else if(key == "version")
 		installInt(val,version);
 	else if(key == "emuVersion")
@@ -475,6 +480,7 @@ int MovieData::dump(EMUFILE *os, bool binary)
 	os->fprintf("port2 %d\n" , ports[2] );
 	os->fprintf("FDS %d\n" , fds?1:0 );
 	os->fprintf("NewPPU %d\n" , PPUflag?1:0 );
+	os->fprintf("RAMInitOption %d\n", RAMInitOption);
 
 	for(uint32 i=0;i<comments.size();i++)
 		os->fprintf("comment %s\n" , wcstombs(comments[i]).c_str() );
@@ -810,6 +816,7 @@ void FCEUMOV_CreateCleanMovie()
 	currMovieData.ports[2] = portFC.type;
 	currMovieData.fds = isFDS;
 	currMovieData.PPUflag = (newppu != 0);
+	currMovieData.RAMInitOption = RAMInitOption;
 }
 void FCEUMOV_ClearCommands()
 {
@@ -895,6 +902,8 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 		FCEUI_SetVidSystem(1);
 	else
 		FCEUI_SetVidSystem(0);
+
+	RAMInitOption = currMovieData.RAMInitOption;
 
 	//force the input configuration stored in the movie to apply
 	FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
@@ -1563,6 +1572,7 @@ bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount)
 	info.reset = false; //Soft-reset isn't used from starting movies anymore, so this will be false, better for FCEUFILE to have that info (as |1| on the first frame indicates it
 	info.pal = md.palFlag;
 	info.ppuflag = md.PPUflag;
+	info.RAMInitOption = md.RAMInitOption;
 	info.nosynchack = true;
 	info.num_frames = md.records.size();
 	info.md5_of_rom_used = md.romChecksum;

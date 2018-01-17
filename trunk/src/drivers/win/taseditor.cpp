@@ -52,6 +52,7 @@ SELECTION selection;
 SPLICER splicer;
 EDITOR editor;
 
+extern int RAMInitOption;
 extern int joysticksPerFrame[INPUT_TYPES_TOTAL];
 extern bool turbo;
 extern int pal_emulation;
@@ -891,6 +892,7 @@ void applyMovieInputConfig()
 	SetMainWindowText();
 	// return focus to TAS Editor window
 	SetFocus(taseditorWindow.hwndTASEditor);
+	RAMInitOption = currMovieData.RAMInitOption;
 }
 
 // this getter contains formula to decide whether to record or replay movie

@@ -42,6 +42,7 @@ typedef struct
 	uint32 emu_version_used;				// 9813 = 0.98.13
 	MD5DATA md5_of_rom_used;
 	std::string name_of_rom_used;
+	int RAMInitOption;
 
 	std::vector<std::wstring> comments;
 	std::vector<std::string> subtitles;
@@ -197,6 +198,8 @@ public:
 	bool microphone;
 
 	int getNumRecords() { return records.size(); }
+
+	int RAMInitOption;
 
 	class TDictionary : public std::map<std::string,std::string>
 	{
