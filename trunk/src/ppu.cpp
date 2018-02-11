@@ -433,7 +433,12 @@ unsigned int cdloggerVideoDataSize = 0;
 
 int GetCHRAddress(int A) {
 	if (cdloggerVideoDataSize) {
-		int result = &VPage[A >> 10][A] - CHRptr[0];
+//		int result = &VPage[A >> 10][A] - CHRptr[0];
+		int result;
+		if(MMC5Hack)
+			result = MMC5BGVRAMADR(A) - CHRptr[0];
+		else
+			result = &VPage[A >> 10][A] - CHRptr[0];
 		if ((result >= 0) && (result < (int)cdloggerVideoDataSize))
 			return result;
 	} else
@@ -441,10 +446,40 @@ int GetCHRAddress(int A) {
 	return -1;
 }
 
+int GetCHROffset(uint8 *ptr) {
+	int result = ptr - CHRptr[0];
+	if (cdloggerVideoDataSize) {
+		if ((result >= 0) && (result < (int)cdloggerVideoDataSize))
+			return result;
+	} else {
+		if ((result >= 0) && (result < 0x2000))
+			return result;
+	}
+	return -1;
+}
+
 #define RENDER_LOG(tmp) { \
 		if (debug_loggingCD) \
 		{ \
 			int addr = GetCHRAddress(tmp); \
+			if (addr != -1)	\
+			{ \
+				if (!(cdloggervdata[addr] & 1))	\
+				{ \
+					cdloggervdata[addr] |= 1; \
+					if(cdloggerVideoDataSize) { \
+						if (!(cdloggervdata[addr] & 2)) undefinedvromcount--; \
+						rendercount++; \
+					} \
+				} \
+			} \
+		} \
+}
+
+#define RENDER_LOGP(tmp) { \
+		if (debug_loggingCD) \
+		{ \
+			int addr = GetCHROffset(tmp); \
 			if (addr != -1)	\
 			{ \
 				if (!(cdloggervdata[addr] & 1))	\
@@ -741,11 +776,9 @@ static DECLFR(A2007) {
 					if (debug_loggingCD)
 						LogAddress = GetCHRAddress(tmp);
 					if(MMC5Hack)
-					{
-						//probably wrong CD logging in this case...
 						VRAMBuffer = *MMC5BGVRAMADR(tmp);
-					}
-					else VRAMBuffer = VPage[tmp >> 10][tmp];
+					else
+						VRAMBuffer = VPage[tmp >> 10][tmp];
 
 				} else if (tmp < 0x3F00)
 					VRAMBuffer = vnapage[(tmp >> 10) & 0x3][tmp & 0x3FF];
@@ -1395,10 +1428,12 @@ static void FetchSpriteData(void) {
 						C = VRAMADR(vadr);
 
 					if (SpriteON)
-						RENDER_LOG(vadr);
+//						RENDER_LOG(vadr);
+						RENDER_LOGP(C);
 					dst.ca[0] = C[0];
 					if (SpriteON)
-						RENDER_LOG(vadr + 8);
+//						RENDER_LOG(vadr + 8);
+						RENDER_LOGP(C+8);
 					dst.ca[1] = C[8];
 					dst.x = spr->x;
 					dst.atr = spr->atr;
@@ -1447,14 +1482,16 @@ static void FetchSpriteData(void) {
 					else
 						C = VRAMADR(vadr);
 					if (SpriteON)
-						RENDER_LOG(vadr);
+//						RENDER_LOG(vadr);
+						RENDER_LOGP(C);
 					dst.ca[0] = C[0];
 					if (ns < 8) {
 						PPU_hook(0x2000);
 						PPU_hook(vadr);
 					}
 					if (SpriteON)
-						RENDER_LOG(vadr + 8);
+//						RENDER_LOG(vadr + 8);
+						RENDER_LOGP(C+8);
 					dst.ca[1] = C[8];
 					dst.x = spr->x;
 					dst.atr = spr->atr;
