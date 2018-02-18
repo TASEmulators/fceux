@@ -433,12 +433,7 @@ unsigned int cdloggerVideoDataSize = 0;
 
 int GetCHRAddress(int A) {
 	if (cdloggerVideoDataSize) {
-//		int result = &VPage[A >> 10][A] - CHRptr[0];
-		int result;
-		if(MMC5Hack)
-			result = MMC5BGVRAMADR(A) - CHRptr[0];
-		else
-			result = &VPage[A >> 10][A] - CHRptr[0];
+		int result = &VPage[A >> 10][A] - CHRptr[0];
 		if ((result >= 0) && (result < (int)cdloggerVideoDataSize))
 			return result;
 	} else
@@ -1428,12 +1423,10 @@ static void FetchSpriteData(void) {
 						C = VRAMADR(vadr);
 
 					if (SpriteON)
-//						RENDER_LOG(vadr);
 						RENDER_LOGP(C);
 					dst.ca[0] = C[0];
 					if (SpriteON)
-//						RENDER_LOG(vadr + 8);
-						RENDER_LOGP(C+8);
+						RENDER_LOGP(C + 8);
 					dst.ca[1] = C[8];
 					dst.x = spr->x;
 					dst.atr = spr->atr;
@@ -1482,7 +1475,6 @@ static void FetchSpriteData(void) {
 					else
 						C = VRAMADR(vadr);
 					if (SpriteON)
-//						RENDER_LOG(vadr);
 						RENDER_LOGP(C);
 					dst.ca[0] = C[0];
 					if (ns < 8) {
@@ -1490,8 +1482,7 @@ static void FetchSpriteData(void) {
 						PPU_hook(vadr);
 					}
 					if (SpriteON)
-//						RENDER_LOG(vadr + 8);
-						RENDER_LOGP(C+8);
+						RENDER_LOGP(C + 8);
 					dst.ca[1] = C[8];
 					dst.x = spr->x;
 					dst.atr = spr->atr;
