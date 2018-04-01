@@ -114,22 +114,33 @@ typedef struct __cartdata {
 	uint8 size;
 } cartdata;
 
+#define MMC5SPRVRAMADR(V)   &MMC5SPRVPage[(V) >> 10][(V)]
 
 uint8* MMC5BGVRAMADR(uint32 A)
 {
-	if(Sprite16)
+	if(newppu)
 	{
-		bool isPattern = !!PPUON;
-		if (ppuphase == PPUPHASE_OBJ && isPattern)
-			return &ABANKS[(A) >> 10][(A)];
-		if (ppuphase == PPUPHASE_BG && isPattern)
-			return &BBANKS[(A) >> 10][(A)];
-		else if(mmc5ABMode == 0)
-			return &ABANKS[(A) >> 10][(A)];
-		else 
-			return &BBANKS[(A) >> 10][(A)];
+		if(Sprite16)
+		{
+			bool isPattern = !!PPUON;
+			if (newppu && ppuphase == PPUPHASE_OBJ && isPattern)
+				return &ABANKS[(A) >> 10][(A)];
+			if (newppu && ppuphase == PPUPHASE_BG && isPattern)
+				return &BBANKS[(A) >> 10][(A)];
+			else if(mmc5ABMode == 0)
+				return &ABANKS[(A) >> 10][(A)];
+			else 
+				return &BBANKS[(A) >> 10][(A)];
+		}
+		else return &ABANKS[(A) >> 10][(A)];
 	}
-	else return &ABANKS[(A) >> 10][(A)];
+
+	if (!Sprite16) {
+		if (mmc5ABMode == 0)
+			return MMC5SPRVRAMADR(A);
+		else
+			return &MMC5BGVPage[(A) >> 10][(A)];
+	} else return &MMC5BGVPage[(A) >> 10][(A)];
 }
 
 static void mmc5_PPUWrite(uint32 A, uint8 V) {
@@ -241,11 +252,12 @@ uint8 FASTCALL mmc5_PPURead(uint32 A)
 		{
 			if((A&0x3FF)>=0x3C0)
 			{
-				uint8 byte = ExRAM[NTRefreshAddr & 0x3ff];
-				//get attribute part and paste it 4x across the byte
-				byte >>= 6;
-				byte *= 0x55;
-				return byte;
+				return ExRAM[NTRefreshAddr & 0x3ff];
+				//uint8 byte = ExRAM[NTRefreshAddr & 0x3ff];
+				////get attribute part and paste it 4x across the byte
+				//byte >>= 6;
+				//byte *= 0x55;
+				//return byte;
 			} 
 		}
 			
