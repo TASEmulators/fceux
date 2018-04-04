@@ -494,6 +494,23 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 
 	CheckMenuItem(context,ID_CONTEXT_FULLSAVESTATES,MF_BYCOMMAND | (fullSaveStateLoads ? MF_CHECKED : MF_UNCHECKED));
 
+	if (FCEUMOV_Mode(MOVIEMODE_PLAY | MOVIEMODE_RECORD))
+		EnableMenuItem(context, FCEUX_CONTEXT_TOGGLE_RECORDING, MF_BYCOMMAND | MF_ENABLED);
+	else
+		EnableMenuItem(context, FCEUX_CONTEXT_TOGGLE_RECORDING, MF_BYCOMMAND | MF_GRAYED);
+
+	if (FCEUMOV_Mode(MOVIEMODE_PLAY | MOVIEMODE_RECORD))
+	{
+		EnableMenuItem(context, FCEUX_CONTEXT_INSERT_1_FRAME, MF_BYCOMMAND | MF_ENABLED);
+		EnableMenuItem(context, FCEUX_CONTEXT_DELETE_1_FRAME, MF_BYCOMMAND | MF_ENABLED);
+		EnableMenuItem(context, FCEUX_CONTEXT_TRUNCATE_MOVIE, MF_BYCOMMAND | MF_ENABLED);
+	} else
+	{
+		EnableMenuItem(context, FCEUX_CONTEXT_INSERT_1_FRAME, MF_BYCOMMAND | MF_GRAYED);
+		EnableMenuItem(context, FCEUX_CONTEXT_DELETE_1_FRAME, MF_BYCOMMAND | MF_GRAYED);
+		EnableMenuItem(context, FCEUX_CONTEXT_TRUNCATE_MOVIE, MF_BYCOMMAND | MF_GRAYED);
+	}
+
 	//Undo Loadstate
 	if (CheckBackupSaveStateExist() && (undoLS || redoLS))
 		EnableMenuItem(context,FCEUX_CONTEXT_UNDOLOADSTATE,MF_BYCOMMAND | MF_ENABLED);
@@ -547,9 +564,8 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 		InsertMenu(context,0xFFFF, MF_BYCOMMAND, FCEUX_CONTEXT_UNHIDEMENU, "Unhide Menu");
 	}
 
-	if ( ( (whichContext == 0) || (whichContext == 3) ) && (currMovieData.subtitles.size()) ){
+	if (whichContext > 1 && currMovieData.subtitles.size() != 0){
 		// At position 3 is "View comments and subtitles". Insert this there:
-		
 		InsertMenu(context,0x3, MF_BYPOSITION, FCEUX_CONTEXT_TOGGLESUBTITLES, movieSubtitles ? "Subtitle Display: On" : "Subtitle Display: Off");
 		// At position 4(+1) is after View comments and subtitles. Insert this there:
 		InsertMenu(context,0x5, MF_BYPOSITION, FCEUX_CONTEXT_DUMPSUBTITLES, "Dump Subtitles to SRT file");
@@ -1374,18 +1390,25 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		{
 			if (rightClickEnabled)
 			{
-				//If There is a movie loaded in read only
-				if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD|MOVIEMODE_FINISHED) && movie_readonly)
-					whichContext = 0; // Game+Movie+readonly
-				//If there is a movie loaded in read+write
-				else if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD|MOVIEMODE_FINISHED) && !movie_readonly)
-					whichContext = 3; // Game+Movie+readwrite
+				//If There is a movie loaded
+				if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY | MOVIEMODE_RECORD | MOVIEMODE_FINISHED))
+				{
+					if (FCEUMOV_Mode(MOVIEMODE_RECORD))
+						if (movie_readonly)
+							whichContext = 4; // Game+Movie+Recording+readonly
+						else
+							whichContext = 5; // Game+Movie+Recording+readwrite
+					else //if (FCEUMOV_Mode(MOVIEMODE_PLAY | MOVIEMODE_FINISHED))
+						if (movie_readonly)
+							whichContext = 2; // Game+Movie+Playing+readonly
+						else
+							whichContext = 3; // Game+Movie+Playing+readwrite
 				//If there is a ROM loaded but no movie
-				else if (GameInfo)
+				} else if (GameInfo)
 					whichContext = 1; // Game+NoMovie
 				//Else no ROM
 				else
-					whichContext = 2; // NoGame
+					whichContext = 0; // NoGame
 
 				hfceuxcontext = LoadMenu(fceu_hInstance,"FCEUCONTEXTMENUS");
 				hfceuxcontextsub = GetSubMenu(hfceuxcontext, whichContext);
@@ -1764,6 +1787,22 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case FCEUX_CONTEXT_READONLYTOGGLE:
 			case ID_FILE_MOVIE_TOGGLEREAD:
 				FCEUI_MovieToggleReadOnly();
+				break;
+			case FCEUX_CONTEXT_TOGGLE_RECORDING:
+			case ID_FILE_TOGGLE_RECORDING_MOVIE:
+				FCEUI_MovieToggleRecording();
+				break;
+			case FCEUX_CONTEXT_INSERT_1_FRAME:
+			case ID_FILE_INSERT_1_FRAME:
+				FCEUI_MovieInsertFrame();
+				break;
+			case FCEUX_CONTEXT_DELETE_1_FRAME:
+			case ID_FILE_DELETE_1_FRAME:
+				FCEUI_MovieDeleteFrame();
+				break;
+			case FCEUX_CONTEXT_TRUNCATE_MOVIE:
+			case ID_FILE_TRUNCATE_MOVIE:
+				FCEUI_MovieTruncate();
 				break;
 
 			//Record Avi/Wav submenu
@@ -2455,6 +2494,10 @@ adelikat: Outsourced this to a remappable hotkey
 		EnableMenuItem(fceumenu,MENU_MOVIE_RECENT,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PLAYMOVIE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_STOPMOVIE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,ID_FILE_PLAYMOVIEFROMBEGINNING,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PLAYFROMBEGINNING)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu, ID_FILE_TOGGLE_RECORDING_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_TOGGLERECORDINGMOVIE)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu, ID_FILE_INSERT_1_FRAME, MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_INSERT1FRAME) ? MF_ENABLED : MF_GRAYED));
+		EnableMenuItem(fceumenu, ID_FILE_DELETE_1_FRAME, MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_DELETE1FRAME) ? MF_ENABLED : MF_GRAYED));
+		EnableMenuItem(fceumenu, ID_FILE_TRUNCATE_MOVIE, MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_TRUNCATEMOVIE) ? MF_ENABLED : MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_SAVESTATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_QUICKSAVE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_LOADSTATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_QUICKLOAD)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_SAVE_STATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_SAVESTATE)?MF_ENABLED:MF_GRAYED));
@@ -2875,6 +2918,26 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_PLAY_FROM_BEGINNING]);
 	combined = "Play from &Beginning\t" + combo;
 	ChangeMenuItemText(ID_FILE_PLAYMOVIEFROMBEGINNING, combined); 
+
+	//Toggle Movie Recording/Playing
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_TOGGLE_RECORDING]);
+	combined = "&Toggle Recording/Playing\t" + combo;
+	ChangeMenuItemText(ID_FILE_TOGGLE_RECORDING_MOVIE, combined);
+
+	//Insert 1 Frame
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_INSERT_1_FRAME]);
+	combined = "&Insert 1 Frame\t" + combo;
+	ChangeMenuItemText(ID_FILE_INSERT_1_FRAME, combined);
+
+	//Delete 1 Frame
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_DELETE_1_FRAME]);
+	combined = "&Delete 1 Frame\t" + combo;
+	ChangeMenuItemText(ID_FILE_DELETE_1_FRAME, combined);
+
+	//Truncate Movie at Current Frame
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_TRUNCATE]);
+	combined = "&Truncate at &Current Frame\t" + combo;
+	ChangeMenuItemText(ID_FILE_TRUNCATE_MOVIE, combined);
 
 	//Read only
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_READONLY_TOGGLE]);

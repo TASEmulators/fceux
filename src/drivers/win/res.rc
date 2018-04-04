@@ -7,7 +7,8 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -1854,6 +1855,14 @@ BEGIN
             MENUITEM "&Play Movie...",              MENU_REPLAY_MOVIE
             MENUITEM "&Stop Movie",                 MENU_STOP_MOVIE
             MENUITEM "Play from &Beginning",        ID_FILE_PLAYMOVIEFROMBEGINNING
+            MENUITEM "&Toggle Recording/Playing",   ID_FILE_TOGGLE_RECORDING_MOVIE
+            POPUP "&Modify"
+            BEGIN
+                MENUITEM "&Insert 1 Frame",             ID_FILE_INSERT_1_FRAME
+                MENUITEM "&Delete 1 Frame",             ID_FILE_DELETE_1_FRAME
+                MENUITEM SEPARATOR
+                MENUITEM "&Truncate at Current Frame",  ID_FILE_TRUNCATE_MOVIE
+            END
             MENUITEM SEPARATOR
             MENUITEM "&Read-only",                  ID_FILE_MOVIE_TOGGLEREAD
         END
@@ -2225,17 +2234,12 @@ END
 
 FCEUCONTEXTMENUS MENU
 BEGIN
-    POPUP "Game+Movie+readonly"
+    POPUP "NoGame"
     BEGIN
-        MENUITEM "Toggle to read+write",        FCEUX_CONTEXT_READONLYTOGGLE
-        MENUITEM "Play Movie from Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
-        MENUITEM "Stop Movie Replay",           FCEU_CONTEXT_STOPMOVIE
-        MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
+        MENUITEM "Open ROM",                    FCEU_CONTEXT_OPENROM
+        MENUITEM "Last ROM used",               FCEUX_CONTEXT_RECENTROM1
         MENUITEM SEPARATOR
-        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
-        MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
-        MENUITEM SEPARATOR
-        MENUITEM "Help....",                    FCEU_CONTEXT_MOVIEHELP
+        MENUITEM "Help...",                     FCEU_CONTEXT_FCEUHELP
         MENUITEM SEPARATOR
         MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
     END
@@ -2254,16 +2258,81 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
     END
-    POPUP "NoGame"
+    POPUP "Game+Movie+Playing+readonly"
     BEGIN
-        MENUITEM "Open ROM",                    FCEU_CONTEXT_OPENROM
-        MENUITEM "Last ROM used",               FCEUX_CONTEXT_RECENTROM1
+        MENUITEM "Toggle to read+write",        FCEUX_CONTEXT_READONLYTOGGLE
+        MENUITEM "Play Movie from Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
+        MENUITEM "Stop Movie Replay",           FCEU_CONTEXT_STOPMOVIE
+        MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
         MENUITEM SEPARATOR
-        MENUITEM "Help...",                     FCEU_CONTEXT_FCEUHELP
+        MENUITEM "Toggle to Recording",         FCEUX_CONTEXT_TOGGLE_RECORDING
+        POPUP "Modify Movie"
+        BEGIN
+            MENUITEM "Insert 1 Frame",              FCEUX_CONTEXT_INSERT_1_FRAME
+            MENUITEM "Delete 1 Frame",              FCEUX_CONTEXT_DELETE_1_FRAME
+            MENUITEM SEPARATOR
+            MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
+        MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
+        MENUITEM SEPARATOR
+        MENUITEM "Help....",                    FCEU_CONTEXT_MOVIEHELP
         MENUITEM SEPARATOR
         MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
     END
-    POPUP "Game+Movie+readwrite"
+    POPUP "Game+Movie+Playing+readwrite"
+    BEGIN
+        MENUITEM "Toggle to Read-only",         FCEUX_CONTEXT_READONLYTOGGLE
+        MENUITEM "Play Movie From Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
+        MENUITEM "Stop Movie Replay",           FCEU_CONTEXT_STOPMOVIE
+        MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
+        MENUITEM "Make backup",                 FCEUX_CONTEXT_MAKEBACKUP
+        MENUITEM "Save Movie As...",            FCEUX_CONTEXT_SAVEMOVIEAS
+        MENUITEM SEPARATOR
+        MENUITEM "Toggle to Recording",         FCEUX_CONTEXT_TOGGLE_RECORDING
+        POPUP "Modify Movie"
+        BEGIN
+            MENUITEM "Insert 1 Frame",              FCEUX_CONTEXT_INSERT_1_FRAME
+            MENUITEM "Delete 1 Frame",              FCEUX_CONTEXT_DELETE_1_FRAME
+            MENUITEM SEPARATOR
+            MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
+        MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
+        MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
+        MENUITEM SEPARATOR
+        MENUITEM "&Mode: Full state-movie loads", ID_CONTEXT_FULLSAVESTATES
+        MENUITEM SEPARATOR
+        MENUITEM "Help...",                     FCEU_CONTEXT_MOVIEHELP
+        MENUITEM SEPARATOR
+        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
+    END
+    POPUP "Game+Movie+Recording+readonly"
+    BEGIN
+        MENUITEM "Toggle to read+write",        FCEUX_CONTEXT_READONLYTOGGLE
+        MENUITEM "Play Movie from Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
+        MENUITEM "Stop Movie Recording",        FCEU_CONTEXT_STOPMOVIE
+        MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
+        MENUITEM SEPARATOR
+        MENUITEM "Toggle to Playing",           FCEUX_CONTEXT_TOGGLE_RECORDING
+        POPUP "Modify Movie"
+        BEGIN
+            MENUITEM "Insert 1 Frame",              FCEUX_CONTEXT_INSERT_1_FRAME
+            MENUITEM "Delete 1 Frame",              FCEUX_CONTEXT_DELETE_1_FRAME
+            MENUITEM SEPARATOR
+            MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
+        MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
+        MENUITEM SEPARATOR
+        MENUITEM "Help....",                    FCEU_CONTEXT_MOVIEHELP
+        MENUITEM SEPARATOR
+        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
+    END
+    POPUP "Game+Movie+Recording+readwrite"
     BEGIN
         MENUITEM "Toggle to Read-only",         FCEUX_CONTEXT_READONLYTOGGLE
         MENUITEM "Play Movie From Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
@@ -2271,6 +2340,15 @@ BEGIN
         MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
         MENUITEM "Make backup",                 FCEUX_CONTEXT_MAKEBACKUP
         MENUITEM "Save Movie As...",            FCEUX_CONTEXT_SAVEMOVIEAS
+        MENUITEM SEPARATOR
+        MENUITEM "Toggle to Playing",           FCEUX_CONTEXT_TOGGLE_RECORDING
+        POPUP "Modify Movie"
+        BEGIN
+            MENUITEM "Insert 1 Frame",              FCEUX_CONTEXT_INSERT_1_FRAME
+            MENUITEM "Delete 1 Frame",              FCEUX_CONTEXT_DELETE_1_FRAME
+            MENUITEM SEPARATOR
+            MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
+        END
         MENUITEM SEPARATOR
         MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
         MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
@@ -2599,7 +2677,8 @@ IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

@@ -746,6 +746,22 @@ bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
 	return true;
 }
 
+static const char *GetMovieModeStr()
+{
+	if (movieMode == MOVIEMODE_INACTIVE)
+		return " (no movie)";
+	else if (movieMode == MOVIEMODE_PLAY)
+		return " (playing)";
+	else if (movieMode == MOVIEMODE_RECORD)
+		return " (recording)";
+	else if (movieMode == MOVIEMODE_FINISHED)
+		return " (finished)";
+	else if (movieMode == MOVIEMODE_TASEDITOR)
+		return " (taseditor)";
+	else
+		return ".";
+}
+
 static EMUFILE *openRecordingMovie(const char* fname)
 {
 	if (osRecordingMovie)
@@ -1641,22 +1657,162 @@ void FCEUI_SetMovieToggleReadOnly(bool which)
 			FCEU_DispMessage("Movie is Read+Write.",0);
 	}
 }
+
+//auqnull: What's the point to toggle Read-Only without a movie loaded?
 void FCEUI_MovieToggleReadOnly()
 {
 	char message[260];
 
-	if(movie_readonly)
-		strcpy(message, "Movie is now Read+Write");
-	else
+	movie_readonly = !movie_readonly;
+	if (movie_readonly)
 		strcpy(message, "Movie is now Read-Only");
+	else
+		strcpy(message, "Movie is now Read+Write");
+
+	strcat(message, GetMovieModeStr());
+	FCEU_DispMessage(message, 0);
+}
+
+void FCEUI_MovieToggleRecording()
+{
+	char message[260] = "";
 
 	if (movieMode == MOVIEMODE_INACTIVE)
-		strcat(message, " (no movie)");
-	else if (movieMode == MOVIEMODE_FINISHED)
-		strcat(message, " (finished)");
+		strcpy(message, "Cannot toggle Recording");
+	else if (currFrameCounter > (int)currMovieData.records.size())
+		strcpy(message, "Cannot toggle Recording in a future state");
+	else if (movieMode == MOVIEMODE_PLAY || (movieMode == MOVIEMODE_FINISHED && currFrameCounter == (int)currMovieData.records.size()))
+	{
+		strcpy(message, "Movie is now Read+Write");
+		movie_readonly = false;
+		FCEUMOV_IncrementRerecordCount();
+		movieMode = MOVIEMODE_RECORD;
+		RedumpWholeMovieFile(true);
+	} else if (movieMode == MOVIEMODE_RECORD)
+	{
+		strcpy(message, "Movie is now Read-Only");
+		movie_readonly = true;
+		movieMode = MOVIEMODE_PLAY;
+		RedumpWholeMovieFile(true);
+		if (currFrameCounter >= (int)currMovieData.records.size())
+		{
+			extern int closeFinishedMovie;
+			if (closeFinishedMovie)
+			{
+				movieMode = MOVIEMODE_INACTIVE;
+				OnMovieClosed();
+			} else
+				movieMode = MOVIEMODE_FINISHED;
+		}
+	} else
+		strcpy(message, "Nothing to do in this mode");
 
-	FCEU_DispMessage(message,0);
-	movie_readonly = !movie_readonly;
+	strcat(message, GetMovieModeStr());
+
+	FCEU_DispMessage(message, 0);
+}
+
+void FCEUI_MovieInsertFrame()
+{
+	char message[260] = "";
+
+	if (movieMode == MOVIEMODE_INACTIVE)
+		strcpy(message, "No movie to insert a frame.");
+	else if (movie_readonly)
+		strcpy(message, "Cannot modify movie in Read-Only mode.");
+	else if (currFrameCounter > (int)currMovieData.records.size())
+		strcpy(message, "Cannot insert a frame here.");
+	else if (movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_FINISHED)
+	{
+		strcpy(message, "1 frame inserted");
+		strcat(message, GetMovieModeStr());
+		std::vector<MovieRecord>::iterator iter = currMovieData.records.begin();
+		currMovieData.records.insert(iter + currFrameCounter, MovieRecord());
+		FCEUMOV_IncrementRerecordCount();
+		RedumpWholeMovieFile();
+	} else
+	{
+		strcpy(message, "Nothing to do in this mode");
+		strcat(message, GetMovieModeStr());
+	}
+
+	FCEU_DispMessage(message, 0);
+}
+
+void FCEUI_MovieDeleteFrame()
+{
+	char message[260] = "";
+
+	if (movieMode == MOVIEMODE_INACTIVE)
+		strcpy(message, "No movie to delete a frame.");
+	else if (movie_readonly)
+		strcpy(message, "Cannot modify movie in Read-Only mode.");
+	else if (currFrameCounter >= (int)currMovieData.records.size())
+		strcpy(message, "Nothing to delete past movie end.");
+	else if (movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY)
+	{
+		strcpy(message, "1 frame deleted");
+		std::vector<MovieRecord>::iterator iter = currMovieData.records.begin();
+		currMovieData.records.erase(iter + currFrameCounter);
+		FCEUMOV_IncrementRerecordCount();
+		RedumpWholeMovieFile();
+
+		if (movieMode != MOVIEMODE_RECORD && currFrameCounter >= (int)currMovieData.records.size())
+		{
+			extern int closeFinishedMovie;
+			if (closeFinishedMovie)
+			{
+				movieMode = MOVIEMODE_INACTIVE;
+				OnMovieClosed();
+			} else
+				movieMode = MOVIEMODE_FINISHED;
+		}
+		strcat(message, GetMovieModeStr());
+	} else
+	{
+		strcpy(message, "Nothing to do in this mode");
+		strcat(message, GetMovieModeStr());
+	}
+
+	FCEU_DispMessage(message, 0);
+}
+
+void FCEUI_MovieTruncate()
+{
+	char message[260] = "";
+
+	if (movieMode == MOVIEMODE_INACTIVE)
+		strcpy(message, "No movie to truncate.");
+	else if (movie_readonly)
+		strcpy(message, "Cannot modify movie in Read-Only mode.");
+	else if (currFrameCounter >= (int)currMovieData.records.size())
+		strcpy(message, "Nothing to truncate past movie end.");
+	else if (movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY)
+	{
+		strcpy(message, "Movie truncated");
+		currMovieData.truncateAt(currFrameCounter);
+		FCEUMOV_IncrementRerecordCount();
+		RedumpWholeMovieFile();
+
+		if (movieMode != MOVIEMODE_RECORD)
+		{
+			extern int closeFinishedMovie;
+			if (closeFinishedMovie)
+			{
+				movieMode = MOVIEMODE_INACTIVE;
+				OnMovieClosed();
+			}
+			else
+				movieMode = MOVIEMODE_FINISHED;
+		}
+		strcat(message, GetMovieModeStr());
+	} else
+	{
+		strcpy(message, "Nothing to do in this mode");
+		strcat(message, GetMovieModeStr());
+	}
+
+	FCEU_DispMessage(message, 0);
 }
 
 void FCEUI_MoviePlayFromBeginning(void)
