@@ -1689,9 +1689,12 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			// A menu item for the recent movie files menu was clicked.
 			if(wParam >= MOVIE_FIRST_RECENT_FILE && wParam < MOVIE_FIRST_RECENT_FILE + MAX_NUMBER_OF_MOVIE_RECENT_FILES)
 			{
+				// aquanull: FCEUI_LoadMovie() calls AddRecentMovieFile(), which may change the orders of recent movies.
+				// For FCEUX_LoadMovieExtras() to receive the correct filename, fname has to be unaffected.
 				char*& fname = recent_movie[wParam - MOVIE_FIRST_RECENT_FILE];
 				if(fname)
 				{
+					string movie_fname = fname;
 					if (!FCEUI_LoadMovie(fname, 1, false))
 					{
 						int result = MessageBox(hWnd,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
@@ -1701,7 +1704,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 							UpdateMovieRMenu(recentmoviemenu, recent_movie, MENU_MOVIE_RECENT, MOVIE_FIRST_RECENT_FILE);
 						}
 					} else {
-						FCEUX_LoadMovieExtras(fname);
+						FCEUX_LoadMovieExtras(movie_fname.c_str());
 					}
 				}
 			}
