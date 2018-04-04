@@ -478,7 +478,7 @@ void MovieData::installValue(std::string& key, std::string& val)
 	}
 }
 
-int MovieData::dump(EMUFILE *os, bool binary)
+int MovieData::dump(EMUFILE *os, bool binary, bool seekToCurrFramePos)
 {
 	int start = os->ftell();
 	os->fprintf("version %d\n", version);
@@ -516,19 +516,30 @@ int MovieData::dump(EMUFILE *os, bool binary)
 	if (this->loadFrameCount >= 0)
 		os->fprintf("length %d\n" , this->loadFrameCount);
 
+	int currFramePos = -1;
 	if(binary)
 	{
 		//put one | to start the binary dump
 		os->fputc('|');
-		for(int i=0;i<(int)records.size();i++)
+		for (int i = 0; i < (int)records.size(); i++)
+		{
+			if (seekToCurrFramePos && currFrameCounter == i)
+				currFramePos = os->ftell();
 			records[i].dumpBinary(this, os, i);
+		}
 	} else
 	{
-		for(int i=0;i<(int)records.size();i++)
+		for (int i = 0; i < (int)records.size(); i++)
+		{
+			if (seekToCurrFramePos && currFrameCounter == i)
+				currFramePos = os->ftell();
 			records[i].dump(this, os, i);
+		}
 	}
 
 	int end = os->ftell();
+	if (currFramePos >= 0)
+		os->fseek(currFramePos, SEEK_SET);
 	return end-start;
 }
 
@@ -735,53 +746,83 @@ bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
 	return true;
 }
 
-/// Stop movie playback.
-static void StopPlayback()
+static EMUFILE *openRecordingMovie(const char* fname)
 {
-	FCEU_DispMessageOnMovie("Movie playback stopped.");
-	movieMode = MOVIEMODE_INACTIVE;
-}
+	if (osRecordingMovie)
+		delete osRecordingMovie;
 
-// Stop movie playback without closing the movie.
-static void FinishPlayback()
-{
-	extern int closeFinishedMovie;
-	if (closeFinishedMovie)
-		StopPlayback();
-	else
-	{
-		FCEU_DispMessage("Movie finished playing.",0);
-		movieMode = MOVIEMODE_FINISHED;
+	osRecordingMovie = FCEUD_UTF8_fstream(fname, "wb");
+	if (!osRecordingMovie || osRecordingMovie->fail()) {
+		FCEU_PrintError("Error opening movie output file: %s", fname);
+		return NULL;
 	}
+	strcpy(curMovieFilename, fname);
+
+	return osRecordingMovie;
 }
 
 static void closeRecordingMovie()
 {
-	if(osRecordingMovie)
+	if (osRecordingMovie)
 	{
 		delete osRecordingMovie;
 		osRecordingMovie = 0;
 	}
 }
 
+// Callers shall set the approriate movieMode before calling this
+static void RedumpWholeMovieFile(bool justToggledRecording = false)
+{
+	bool recording = (movieMode == MOVIEMODE_RECORD);
+	assert((NULL != osRecordingMovie) == (recording != justToggledRecording) && "osRecordingMovie should be consistent with movie mode!");
+
+	if (NULL == openRecordingMovie(curMovieFilename))
+		return;
+
+	currMovieData.dump(osRecordingMovie, false/*currMovieData.binaryFlag*/, recording);
+	if (recording)
+		osRecordingMovie->fflush();
+	else
+		closeRecordingMovie();
+}
+
+/// Stop movie playback.
+static void StopPlayback()
+{
+	assert(movieMode != MOVIEMODE_RECORD && NULL == osRecordingMovie);
+
+	movieMode = MOVIEMODE_INACTIVE;
+	FCEU_DispMessageOnMovie("Movie playback stopped.");
+}
+
+// Stop movie playback without closing the movie.
+static void FinishPlayback()
+{
+	assert(movieMode != MOVIEMODE_RECORD);
+
+	extern int closeFinishedMovie;
+	if (closeFinishedMovie)
+		StopPlayback();
+	else
+	{
+		movieMode = MOVIEMODE_FINISHED;
+		FCEU_DispMessage("Movie finished playing.",0);
+	}
+}
+
 /// Stop movie recording
 static void StopRecording()
 {
-	FCEU_DispMessage("Movie recording stopped.",0);
-	movieMode = MOVIEMODE_INACTIVE;
+	assert(movieMode == MOVIEMODE_RECORD);
 
-	closeRecordingMovie();
+	movieMode = MOVIEMODE_INACTIVE;
+	RedumpWholeMovieFile(true);
+	FCEU_DispMessage("Movie recording stopped.",0);
 }
 
-void FCEUI_StopMovie()
+static void OnMovieClosed()
 {
-	if(suppressMovieStop)
-		return;
-
-	if(movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_FINISHED)
-		StopPlayback();
-	else if(movieMode == MOVIEMODE_RECORD)
-		StopRecording();
+	assert(movieMode == MOVIEMODE_INACTIVE);
 
 	curMovieFilename[0] = 0;			//No longer a current movie filename
 	freshMovie = false;					//No longer a fresh movie loaded
@@ -793,6 +834,19 @@ void FCEUI_StopMovie()
 }
 
 bool bogorf;
+
+void FCEUI_StopMovie()
+{
+	if (suppressMovieStop)
+		return;
+
+	if (movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_FINISHED)
+		StopPlayback();
+	else if (movieMode == MOVIEMODE_RECORD)
+		StopRecording();
+
+	OnMovieClosed();
+}
 
 void poweron(bool shouldDisableBatteryLoading)
 {
@@ -1021,21 +1075,6 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 	return true;
 }
 
-static void openRecordingMovie(const char* fname)
-{
-	osRecordingMovie = FCEUD_UTF8_fstream(fname, "wb");
-	if(!osRecordingMovie || osRecordingMovie->fail()) {
-		FCEU_PrintError("Error opening movie output file: %s",fname);
-		return;
-	}
-	strcpy(curMovieFilename, fname);
-
-#ifdef WIN32
-	//Add to the recent movie menu
-	AddRecentMovieFile(fname);
-#endif
-}
-
 
 //begin recording a new movie
 //TODO - BUG - the record-from-another-savestate doesnt work.
@@ -1048,10 +1087,13 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 
 	FCEUI_StopMovie();
 
-	openRecordingMovie(fname);
-
-	if(!osRecordingMovie || osRecordingMovie->fail())
+	if (NULL == openRecordingMovie(fname))
 		return;
+
+#ifdef WIN32
+	//Add to the recent movie menu
+	AddRecentMovieFile(fname);
+#endif
 
 	currFrameCounter = 0;
 	LagCounterReset();
@@ -1224,6 +1266,9 @@ void FCEUMOV_AddCommand(int cmd)
 
 void FCEU_DrawMovies(uint8 *XBuf)
 {
+	// not the best place, but just working
+	assert((NULL != osRecordingMovie) == (movieMode == MOVIEMODE_RECORD));
+
 	if(frame_display)
 	{
 		char counterbuf[32] = {0};
@@ -1420,9 +1465,15 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 			#endif
 		}
 
-		closeRecordingMovie();
 		if (movie_readonly)
 		{
+			if (movieMode == MOVIEMODE_RECORD)
+			{
+				movieMode = MOVIEMODE_PLAY;
+				RedumpWholeMovieFile(true);
+				closeRecordingMovie();
+			}
+
 			// currFrameCounter at this point represents the savestate framecount
 			int frame_of_mismatch = CheckTimelines(tempMovieData, currMovieData);
 			if (frame_of_mismatch >= 0)
@@ -1461,13 +1512,16 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 		} else
 		{
 			//Read+Write mode
+			closeRecordingMovie();
+
 			if (currFrameCounter > (int)tempMovieData.records.size())
 			{
 				//This is a post movie savestate, handle it differently
 				//Replace movie contents but then switch to movie finished mode
 				currMovieData = tempMovieData;
-				openRecordingMovie(curMovieFilename);
-				currMovieData.dump(osRecordingMovie, false/*currMovieData.binaryFlag*/);
+				movieMode = MOVIEMODE_PLAY;
+				FCEUMOV_IncrementRerecordCount();
+				RedumpWholeMovieFile();
 				FinishPlayback();
 			} else
 			{
@@ -1477,11 +1531,9 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 					tempMovieData.truncateAt(currFrameCounter);
 				
 				currMovieData = tempMovieData;
-				FCEUMOV_IncrementRerecordCount();
-				openRecordingMovie(curMovieFilename);
-				currMovieData.dump(osRecordingMovie, false/*currMovieData.binaryFlag*/);
 				movieMode = MOVIEMODE_RECORD;
-
+				FCEUMOV_IncrementRerecordCount();
+				RedumpWholeMovieFile(true);
 			}
 		}
 	}
@@ -1616,6 +1668,11 @@ void FCEUI_MoviePlayFromBeginning(void)
 #endif
 	} else if (movieMode != MOVIEMODE_INACTIVE)
 	{
+		if (movieMode == MOVIEMODE_RECORD)
+		{
+			movieMode = MOVIEMODE_PLAY;
+			RedumpWholeMovieFile(true);
+		}
 		if (currMovieData.savestate.empty())
 		{
 			movie_readonly = true;

@@ -234,7 +234,7 @@ public:
 
 	void truncateAt(int frame);
 	void installValue(std::string& key, std::string& val);
-	int dump(EMUFILE* os, bool binary);
+	int dump(EMUFILE* os, bool binary, bool seekToCurrFramePos = false);
 
 	void clearRecordRange(int start, int len);
 	void eraseRecords(int at, int frames = 1);
