@@ -1680,8 +1680,13 @@ void FCEUI_MovieToggleRecording()
 	if (movieMode == MOVIEMODE_INACTIVE)
 		strcpy(message, "Cannot toggle Recording");
 	else if (currFrameCounter > (int)currMovieData.records.size())
-		strcpy(message, "Cannot toggle Recording in a future state");
-	else if (movieMode == MOVIEMODE_PLAY || (movieMode == MOVIEMODE_FINISHED && currFrameCounter == (int)currMovieData.records.size()))
+	{
+		movie_readonly = !movie_readonly;
+		if (movie_readonly)
+			strcpy(message, "Movie is now Read-Only (finished)");
+		else
+			strcpy(message, "Movie is now Read+Write (finished)");
+	} else if (movieMode == MOVIEMODE_PLAY || (movieMode == MOVIEMODE_FINISHED && currFrameCounter == (int)currMovieData.records.size()))
 	{
 		strcpy(message, "Movie is now Read+Write");
 		movie_readonly = false;
