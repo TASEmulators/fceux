@@ -1421,7 +1421,6 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 		}
 
 		closeRecordingMovie();
-
 		if (movie_readonly)
 		{
 			// currFrameCounter at this point represents the savestate framecount
@@ -1436,40 +1435,29 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 				} else
 					FCEU_PrintError("Error: Savestate not in the same timeline as movie!\nFrame %d branches from current timeline", frame_of_mismatch);
 				return false;
-			} else if (movieMode == MOVIEMODE_FINISHED
-				&& currFrameCounter > (int)currMovieData.records.size()
-				&& currMovieData.records.size() == tempMovieData.records.size())
+			} else if ((int)tempMovieData.records.size() < currFrameCounter)
 			{
-				// special case (in MOVIEMODE_FINISHED mode)
-				// allow loading post-movie savestates that were made after finishing current movie
-
-			} else if (currFrameCounter > (int)currMovieData.records.size())
-			{
-				// this is future event state, don't allow it
-				//TODO: turn frame counter to red to get attention
-				if (!backupSavestates)	//If backups are disabled we can just resume normally since we can't restore so stop movie and inform user
+				// this is post-movie savestate and must be checked further
+				if (tempMovieData.records.size() < currMovieData.records.size())
 				{
-					FCEU_PrintError("Error: Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.\nUnable to restore backup, movie playback stopped.", currFrameCounter, currMovieData.records.size()-1);
-					FCEUI_StopMovie();
-				} else
-					FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", currFrameCounter, currMovieData.records.size()-1);
-				return false;
-			} else if (currFrameCounter > (int)tempMovieData.records.size())
-			{
-				// this is post-movie savestate, don't allow it
-				//TODO: turn frame counter to red to get attention
-				if (!backupSavestates)	//If backups are disabled we can just resume normally since we can't restore so stop movie and inform user
-				{
-					FCEU_PrintError("Error: Savestate is from a frame (%d) after the final frame in the savestated movie (%d). This is not permitted.\nUnable to restore backup, movie playback stopped.", currFrameCounter, tempMovieData.records.size()-1);
-					FCEUI_StopMovie();
-				} else
-					FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the savestated movie (%d). This is not permitted.", currFrameCounter, tempMovieData.records.size()-1);
-				return false;
-			} else
-			{
-				// Finally, this is a savestate file for this movie
-				movieMode = MOVIEMODE_PLAY;
+					// this savestate doesn't contain enough input to be checked
+					//TODO: turn frame counter to red to get attention
+					if (!backupSavestates)	//If backups are disabled we can just resume normally since we can't restore so stop movie and inform user
+					{
+						FCEU_PrintError("Error: Savestate taken from a frame (%d) after the final frame in the savestated movie (%d) cannot be verified against current movie (%d). This is not permitted.\nUnable to restore backup, movie playback stopped.", currFrameCounter, tempMovieData.records.size() - 1, currMovieData.records.size() - 1);
+						FCEUI_StopMovie();
+					} else
+						FCEU_PrintError("Savestate taken from a frame (%d) after the final frame in the savestated movie (%d) cannot be verified against current movie (%d). This is not permitted.", currFrameCounter, tempMovieData.records.size() - 1, currMovieData.records.size() - 1);
+					return false;
+				}
 			}
+
+			// Finally, this is a savestate file for this movie
+			// We'll allow loading post-movie savestates that were made after finishing current movie
+			if (currFrameCounter < (int)currMovieData.records.size())
+				movieMode = MOVIEMODE_PLAY;
+			else
+				FinishPlayback();
 		} else
 		{
 			//Read+Write mode
