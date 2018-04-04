@@ -86,6 +86,7 @@ void EMUFILE_FILE::truncate(s32 length)
 	#else
 		ftruncate(fileno(fp),length);
 	#endif
+	// this is probably wrong if mode is "wb"
 	fclose(fp);
 	fp = NULL;
 	open(fname.c_str(),mode);
