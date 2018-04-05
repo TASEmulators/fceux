@@ -1856,7 +1856,7 @@ BEGIN
             MENUITEM "&Stop Movie",                 MENU_STOP_MOVIE
             MENUITEM "Play from &Beginning",        ID_FILE_PLAYMOVIEFROMBEGINNING
             MENUITEM "&Toggle Recording/Playing",   ID_FILE_TOGGLE_RECORDING_MOVIE
-            POPUP "&Modify"
+            POPUP "&Quickly Modify"
             BEGIN
                 MENUITEM "&Insert 1 Frame",             ID_FILE_INSERT_1_FRAME
                 MENUITEM "&Delete 1 Frame",             ID_FILE_DELETE_1_FRAME
@@ -1864,6 +1864,14 @@ BEGIN
                 MENUITEM "&Truncate at Current Frame",  ID_FILE_TRUNCATE_MOVIE
             END
             MENUITEM SEPARATOR
+            POPUP "Record &Mode"
+            BEGIN
+                MENUITEM "&Next Record Mode",           ID_FILE_NEXTRECORDMODE
+                MENUITEM SEPARATOR
+                MENUITEM "&Truncate",                   ID_FILE_RECORDMODE_TRUNCATE
+                MENUITEM "&Overwrite[W]",               ID_FILE_RECORDMODE_OVERWRITE
+                MENUITEM "&Insert[I]",                  ID_FILE_RECORDMODE_INSERT
+            END
             MENUITEM "&Read-only",                  ID_FILE_MOVIE_TOGGLEREAD
         END
         POPUP "&AVI/Wav"
@@ -2273,6 +2281,12 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
         END
+        POPUP "Record Mode"
+        BEGIN
+            MENUITEM "&Truncate",                   FCEUX_CONTEXT_RECORDMODE_TRUNCATE
+            MENUITEM "&Overwrite[W]",               FCEUX_CONTEXT_RECORDMODE_OVERWRITE
+            MENUITEM "&Insert[I]",                  FCEUX_CONTEXT_RECORDMODE_INSERT
+        END
         MENUITEM SEPARATOR
         MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
         MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
@@ -2297,6 +2311,12 @@ BEGIN
             MENUITEM "Delete 1 Frame",              FCEUX_CONTEXT_DELETE_1_FRAME
             MENUITEM SEPARATOR
             MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
+        END
+        POPUP "Record Mode"
+        BEGIN
+            MENUITEM "&Truncate",                   FCEUX_CONTEXT_RECORDMODE_TRUNCATE
+            MENUITEM "&Overwrite[W]",               FCEUX_CONTEXT_RECORDMODE_OVERWRITE
+            MENUITEM "&Insert[I]",                  FCEUX_CONTEXT_RECORDMODE_INSERT
         END
         MENUITEM SEPARATOR
         MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
@@ -2324,6 +2344,12 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
         END
+        POPUP "Record Mode"
+        BEGIN
+            MENUITEM "&Truncate",                   FCEUX_CONTEXT_RECORDMODE_TRUNCATE
+            MENUITEM "&Overwrite[W]",               FCEUX_CONTEXT_RECORDMODE_OVERWRITE
+            MENUITEM "&Insert[I]",                  FCEUX_CONTEXT_RECORDMODE_INSERT
+        END
         MENUITEM SEPARATOR
         MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
         MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
@@ -2348,6 +2374,12 @@ BEGIN
             MENUITEM "Delete 1 Frame",              FCEUX_CONTEXT_DELETE_1_FRAME
             MENUITEM SEPARATOR
             MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
+        END
+        POPUP "Record Mode"
+        BEGIN
+            MENUITEM "&Truncate",                   FCEUX_CONTEXT_RECORDMODE_TRUNCATE
+            MENUITEM "&Overwrite[W]",               FCEUX_CONTEXT_RECORDMODE_OVERWRITE
+            MENUITEM "&Insert[I]",                  FCEUX_CONTEXT_RECORDMODE_INSERT
         END
         MENUITEM SEPARATOR
         MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE

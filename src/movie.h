@@ -65,6 +65,16 @@ enum EMOVIEMODE
 	MOVIEMODE_FINISHED = 16
 };
 
+enum EMOVIERECORDMODE
+{
+	MOVIE_RECORD_MODE_TRUNCATE = 0,
+	MOVIE_RECORD_MODE_OVERWRITE = 1,
+	MOVIE_RECORD_MODE_INSERT = 2,
+	//MOVIE_RECORD_MODE_XOR = 3,
+
+	MOVIE_RECORD_MODE_MAX
+};
+
 enum EMOVIECMD
 {
 	MOVIECMD_RESET = 1,
@@ -267,6 +277,8 @@ extern bool freshMovie;
 extern bool movie_readonly;
 extern bool autoMovieBackup;
 extern bool fullSaveStateLoads;
+extern int movieRecordMode;
+
 //--------------------------------------------------
 void FCEUI_MakeBackupMovie(bool dispMessage);
 void FCEUI_CreateMovieFile(std::string fn);
@@ -281,6 +293,11 @@ void FCEUI_MovieToggleRecording();
 void FCEUI_MovieInsertFrame();
 void FCEUI_MovieDeleteFrame();
 void FCEUI_MovieTruncate();
+void FCEUI_MovieNextRecordMode();
+void FCEUI_MoviePrevRecordMode();
+void FCEUI_MovieRecordModeTruncate();
+void FCEUI_MovieRecordModeOverwrite();
+void FCEUI_MovieRecordModeInsert();
 bool FCEUI_GetMovieToggleReadOnly();
 void FCEUI_SetMovieToggleReadOnly(bool which);
 int FCEUI_GetMovieLength();

@@ -819,7 +819,12 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MOVIE_TRUNCATE,				EMUCMDTYPE_MOVIE,	FCEUI_MovieTruncate,			0, 0, "Truncate Movie At Current Frame", 0 },
 	{ EMUCMD_MOVIE_STOP,					EMUCMDTYPE_MOVIE,	FCEUI_StopMovie,				0, 0, "Stop Movie", 0 },
 	{ EMUCMD_MOVIE_READONLY_TOGGLE,			EMUCMDTYPE_MOVIE,	FCEUI_MovieToggleReadOnly,		0, 0, "Toggle Read-Only", EMUCMDFLAG_TASEDITOR },
-	{ EMUCMD_MOVIE_FRAME_DISPLAY_TOGGLE,	EMUCMDTYPE_MOVIE,	FCEUI_MovieToggleFrameDisplay,	0, 0, "Toggle Frame Display", EMUCMDFLAG_TASEDITOR },										 
+	{ EMUCMD_MOVIE_NEXT_RECORD_MODE,		EMUCMDTYPE_MOVIE,	FCEUI_MovieNextRecordMode,		0, 0, "Next Record Mode", 0 },
+	{ EMUCMD_MOVIE_PREV_RECORD_MODE,		EMUCMDTYPE_MOVIE,	FCEUI_MoviePrevRecordMode,		0, 0, "Prev Record Mode", 0 },
+	{ EMUCMD_MOVIE_RECORD_MODE_TRUNCATE,	EMUCMDTYPE_MOVIE,	FCEUI_MovieRecordModeTruncate,	0, 0, "Record Mode Truncate", 0 },
+	{ EMUCMD_MOVIE_RECORD_MODE_OVERWRITE,	EMUCMDTYPE_MOVIE,	FCEUI_MovieRecordModeOverwrite,	0, 0, "Record Mode Overwrite", 0 },
+	{ EMUCMD_MOVIE_RECORD_MODE_INSERT,		EMUCMDTYPE_MOVIE,	FCEUI_MovieRecordModeInsert,	0, 0, "Record Mode Insert", 0 },
+	{ EMUCMD_MOVIE_FRAME_DISPLAY_TOGGLE,	EMUCMDTYPE_MOVIE,	FCEUI_MovieToggleFrameDisplay,	0, 0, "Toggle Frame Display", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_MOVIE_INPUT_DISPLAY_TOGGLE,	EMUCMDTYPE_MISC,	FCEUI_ToggleInputDisplay,		0, 0, "Toggle Input Display", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_MOVIE_ICON_DISPLAY_TOGGLE,		EMUCMDTYPE_MISC,	FCEUD_ToggleStatusIcon,			0, 0, "Toggle Status Icon", EMUCMDFLAG_TASEDITOR },
 

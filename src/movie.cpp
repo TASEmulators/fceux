@@ -98,6 +98,7 @@ int input_display = 0;
 int frame_display = 0;
 int rerecord_display = 0;
 bool fullSaveStateLoads = false;	//Option for loading a savestates full contents in read+write mode instead of up to the frame count in the savestate (useful as a recovery option)
+int movieRecordMode = 0;			//Option for various movie recording modes such as TRUNCATE (normal), OVERWRITE etc.
 
 SFORMAT FCEUMOV_STATEINFO[]={
 	{ &currFrameCounter, 4|FCEUSTATE_RLSB, "FCNT"},
@@ -762,6 +763,27 @@ static const char *GetMovieModeStr()
 		return ".";
 }
 
+static const char *GetMovieReadOnlyStr()
+{
+	if (movieMode == MOVIEMODE_RECORD)
+		return movie_readonly ? " R-O" : "";
+	else
+		return movie_readonly ? "" : " R+W";
+}
+
+static const char *GetMovieRecordModeStr()
+{
+	switch (movieRecordMode)
+	{
+	case MOVIE_RECORD_MODE_OVERWRITE:
+		return " [W]";
+	case MOVIE_RECORD_MODE_INSERT:
+		return " [I]";
+	default:
+		return "";
+	}
+}
+
 static EMUFILE *openRecordingMovie(const char* fname)
 {
 	if (osRecordingMovie)
@@ -1241,14 +1263,29 @@ void FCEUMOV_AddInputState()
 		mr.commands = _currCommand;
 		_currCommand = 0;
 
-		//Adelikat: in normal mode, this is done at the time of loading a savestate in read+write mode
+		//aquanull: now it supports other recording modes that don't necessarily truncate further frame data
 		//If the user chooses it can be delayed to here
-		if (fullSaveStateLoads && (currFrameCounter < (int)currMovieData.records.size()))
-			currMovieData.truncateAt(currFrameCounter);
+		if (currFrameCounter < (int)currMovieData.records.size())
+			switch (movieRecordMode)
+			{
+			case MOVIE_RECORD_MODE_OVERWRITE:
+				currMovieData.records[currFrameCounter].Clone(mr);
+				break;
+			case MOVIE_RECORD_MODE_INSERT:
+				//FIXME: this could be very insufficient
+				currMovieData.records.insert(currMovieData.records.begin() + currFrameCounter, mr);
+				break;
+			//case MOVIE_RECORD_MODE_TRUNCATE:
+			default:
+				//Adelikat: in normal mode, this is done at the time of loading a savestate in read+write mode
+				currMovieData.truncateAt(currFrameCounter);
+				currMovieData.records.push_back(mr);
+				break;
+			}
+		else
+			currMovieData.records.push_back(mr);
 
-		mr.dump(&currMovieData, osRecordingMovie,currMovieData.records.size());	// to disk
-
-		currMovieData.records.push_back(mr);
+		mr.dump(&currMovieData, osRecordingMovie, currFrameCounter);	// to disk
 	}
 
 	currFrameCounter++;
@@ -1285,33 +1322,39 @@ void FCEU_DrawMovies(uint8 *XBuf)
 	// not the best place, but just working
 	assert((NULL != osRecordingMovie) == (movieMode == MOVIEMODE_RECORD));
 
-	if(frame_display)
+	if (frame_display)
 	{
 		char counterbuf[32] = {0};
 		int color = 0x20;
-		if(movieMode == MOVIEMODE_PLAY)
-			sprintf(counterbuf,"%d/%d",currFrameCounter,(int)currMovieData.records.size());
-		else if(movieMode == MOVIEMODE_RECORD)
-			sprintf(counterbuf,"%d",currFrameCounter);
-		else if (movieMode == MOVIEMODE_FINISHED)
+		
+		if (movieMode == MOVIEMODE_PLAY)
 		{
-			sprintf(counterbuf,"%d/%d (finished)",currFrameCounter,(int)currMovieData.records.size());
+			sprintf(counterbuf, "%d/%d%s%s", currFrameCounter, (int)currMovieData.records.size(), GetMovieRecordModeStr(), GetMovieReadOnlyStr());
+		} else if (movieMode == MOVIEMODE_RECORD)
+		{
+			if (movieRecordMode == MOVIE_RECORD_MODE_TRUNCATE)
+				sprintf(counterbuf, "%d%s%s (record)", currFrameCounter, GetMovieRecordModeStr(), GetMovieReadOnlyStr()); // nearly classic
+			else
+				sprintf(counterbuf, "%d/%d%s%s (record)", currFrameCounter, (int)currMovieData.records.size(), GetMovieRecordModeStr(), GetMovieReadOnlyStr());
+		} else if (movieMode == MOVIEMODE_FINISHED)
+		{
+			sprintf(counterbuf,"%d/%d%s%s (finished)",currFrameCounter,(int)currMovieData.records.size(), GetMovieRecordModeStr(), GetMovieReadOnlyStr());
 			color = 0x17; //Show red to get attention
-		} else if(movieMode == MOVIEMODE_TASEDITOR)
+		} else if (movieMode == MOVIEMODE_TASEDITOR)
 		{
 			sprintf(counterbuf,"%d",currFrameCounter);
 		} else
 			sprintf(counterbuf,"%d (no movie)",currFrameCounter);
 
-		if(counterbuf[0])
+		if (counterbuf[0])
 			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(30)+1, 256, (uint8*)counterbuf, color+0x80);
 	}
-	if(rerecord_display && movieMode != MOVIEMODE_INACTIVE)
+	if (rerecord_display && movieMode != MOVIEMODE_INACTIVE)
 	{
 		char counterbuf[32] = {0};
-		sprintf(counterbuf,"%d",currMovieData.rerecordCount);
+		sprintf(counterbuf, "%d", currMovieData.rerecordCount);
 
-		if(counterbuf[0])
+		if (counterbuf[0])
 			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(50)+1, 256, (uint8*)counterbuf, 0x28+0x80);
 	}
 }
@@ -1668,9 +1711,9 @@ void FCEUI_MovieToggleReadOnly()
 		strcpy(message, "Movie is now Read-Only");
 	else
 		strcpy(message, "Movie is now Read+Write");
-
+	
 	strcat(message, GetMovieModeStr());
-	FCEU_DispMessage(message, 0);
+	FCEU_DispMessage(message,0);
 }
 
 void FCEUI_MovieToggleRecording()
@@ -1818,6 +1861,31 @@ void FCEUI_MovieTruncate()
 	}
 
 	FCEU_DispMessage(message, 0);
+}
+
+void FCEUI_MovieNextRecordMode()
+{
+	movieRecordMode = (movieRecordMode + 1) % MOVIE_RECORD_MODE_MAX;
+}
+
+void FCEUI_MoviePrevRecordMode()
+{
+	movieRecordMode = (movieRecordMode + MOVIE_RECORD_MODE_MAX - 1) % MOVIE_RECORD_MODE_MAX;
+}
+
+void FCEUI_MovieRecordModeTruncate()
+{
+	movieRecordMode = MOVIE_RECORD_MODE_TRUNCATE;
+}
+
+void FCEUI_MovieRecordModeOverwrite()
+{
+	movieRecordMode = MOVIE_RECORD_MODE_OVERWRITE;
+}
+
+void FCEUI_MovieRecordModeInsert()
+{
+	movieRecordMode = MOVIE_RECORD_MODE_INSERT;
 }
 
 void FCEUI_MoviePlayFromBeginning(void)

@@ -122,6 +122,7 @@ extern BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wP
 extern bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
 extern bool oldInputDisplay;
 extern int RAMInitOption;
+extern int movieRecordMode;
 
 //AutoFire-----------------------------------------------
 void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
@@ -417,6 +418,9 @@ void UpdateCheckedMenuItems()
 		CheckMenuItem(fceumenu, polo2[x], *polo[x] ? MF_CHECKED : MF_UNCHECKED);
 	}
 	//File Menu
+	CheckMenuItem(fceumenu, ID_FILE_RECORDMODE_TRUNCATE, movieRecordMode == MOVIE_RECORD_MODE_TRUNCATE ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, ID_FILE_RECORDMODE_OVERWRITE, movieRecordMode == MOVIE_RECORD_MODE_OVERWRITE ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, ID_FILE_RECORDMODE_INSERT, movieRecordMode == MOVIE_RECORD_MODE_INSERT ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_FILE_MOVIE_TOGGLEREAD, movie_readonly ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_FILE_OPENLUAWINDOW, LuaConsoleHWnd ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_AVI_ENABLEHUDRECORDING, FCEUI_AviEnableHUDrecording() ? MF_CHECKED : MF_UNCHECKED);
@@ -510,6 +514,9 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 		EnableMenuItem(context, FCEUX_CONTEXT_DELETE_1_FRAME, MF_BYCOMMAND | MF_GRAYED);
 		EnableMenuItem(context, FCEUX_CONTEXT_TRUNCATE_MOVIE, MF_BYCOMMAND | MF_GRAYED);
 	}
+	CheckMenuItem(context, FCEUX_CONTEXT_RECORDMODE_TRUNCATE, movieRecordMode == MOVIE_RECORD_MODE_TRUNCATE ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(context, FCEUX_CONTEXT_RECORDMODE_OVERWRITE, movieRecordMode == MOVIE_RECORD_MODE_OVERWRITE ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(context, FCEUX_CONTEXT_RECORDMODE_INSERT, movieRecordMode == MOVIE_RECORD_MODE_INSERT ? MF_CHECKED : MF_UNCHECKED);
 
 	//Undo Loadstate
 	if (CheckBackupSaveStateExist() && (undoLS || redoLS))
@@ -1804,6 +1811,24 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case ID_FILE_TRUNCATE_MOVIE:
 				FCEUI_MovieTruncate();
 				break;
+			case ID_FILE_NEXTRECORDMODE:
+				FCEUI_MovieNextRecordMode();
+				break;
+			case ID_FILE_PREVRECORDMODE:
+				FCEUI_MoviePrevRecordMode();
+				break;
+			case FCEUX_CONTEXT_RECORDMODE_TRUNCATE:
+			case ID_FILE_RECORDMODE_TRUNCATE:
+				FCEUI_MovieRecordModeTruncate();
+				break;
+			case FCEUX_CONTEXT_RECORDMODE_OVERWRITE:
+			case ID_FILE_RECORDMODE_OVERWRITE:
+				FCEUI_MovieRecordModeOverwrite();
+				break;
+			case FCEUX_CONTEXT_RECORDMODE_INSERT:
+			case ID_FILE_RECORDMODE_INSERT:
+				FCEUI_MovieRecordModeInsert();
+				break;
 
 			//Record Avi/Wav submenu
 			case MENU_RECORD_AVI:
@@ -2943,6 +2968,31 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_READONLY_TOGGLE]);
 	combined = "&Read only\t" + combo;
 	ChangeMenuItemText(ID_FILE_MOVIE_TOGGLEREAD, combined); 
+
+	//Next Record Mode
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_NEXT_RECORD_MODE]);
+	combined = "&Next Record Mode\t" + combo;
+	ChangeMenuItemText(ID_FILE_NEXTRECORDMODE, combined);
+
+	//Prev Record Mode
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_PREV_RECORD_MODE]);
+	combined = "&Prev Record Mode\t" + combo;
+	ChangeMenuItemText(ID_FILE_PREVRECORDMODE, combined);
+
+	//Record Mode Truncate
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_RECORD_MODE_TRUNCATE]);
+	combined = "&Truncate\t" + combo;
+	ChangeMenuItemText(ID_FILE_RECORDMODE_TRUNCATE, combined);
+
+	//Record Mode Overwrite
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_RECORD_MODE_OVERWRITE]);
+	combined = "&Overwrite[W]\t" + combo;
+	ChangeMenuItemText(ID_FILE_RECORDMODE_OVERWRITE, combined);
+
+	//Record Mode Insert
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_RECORD_MODE_INSERT]);
+	combined = "&Insert[I]\t" + combo;
+	ChangeMenuItemText(ID_FILE_RECORDMODE_INSERT, combined);
 
 	//Screenshot
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SCREENSHOT]);
