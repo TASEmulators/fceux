@@ -1053,6 +1053,7 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 
 	freshMovie = true;	//Movie has been loaded, so it must be unaltered
 	if (bindSavestate) AutoSS = false;	//If bind savestate to movie is true, then their isn't a valid auto-save to load, so flag it
+	cur_input_display = 0; //clear previous input display
 	//fully reload the game to reinitialize everything before playing any movie
 	poweron(true);
 
@@ -1906,6 +1907,7 @@ void FCEUI_MoviePlayFromBeginning(void)
 		{
 			movie_readonly = true;
 			movieMode = MOVIEMODE_PLAY;
+			cur_input_display = 0; //clear previous input display
 			poweron(true);
 			currFrameCounter = 0;
 			FCEU_DispMessage("Movie is now Read-Only. Playing from beginning.",0);
