@@ -1443,7 +1443,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		goto proco;
 
 	case WM_SIZE:
-		if (!fullscreen && !changerecursive && !windowedfailed)
+		if (wParam == SIZE_MINIMIZED)
+			nofocus = 1;
+		else if (!fullscreen && !changerecursive && !windowedfailed)
 		{
 			switch(wParam)
 			{
@@ -2420,6 +2422,7 @@ adelikat: Outsourced this to a remappable hotkey
 		DoFCEUExit();
 		break;
 	case WM_SETFOCUS:
+		nofocus = 0;
 		if (wasPausedByCheats)
 		{
 			EmulationPaused = 0;
