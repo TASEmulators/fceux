@@ -1,0 +1,12 @@
+You can install gfceu with setup.py:
+
+$ sudo ./setup.py install
+
+Requirements:
+Python (tested with 2.5) (Ubuntu package name:  python)
+PyGTK, GTK, and PyGlade (tested with 2.8) (Ubuntu package name: (python-gtk2 libgtk2.0-0 python-glade)
+FCE Ultra 1.x (Ubuntu package name: fceu)
+
+Optional:
+GnomeVFS 2 (tested with 2.14.1) (Ubuntu package name libgnomevfs2-0 python-gtk2)
+alsa-oss (tested with 1.0.11)

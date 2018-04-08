@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=GFCE Ultra NES Emulator
+Comment=Play Nintendo ROM files
+Exec=gfceu
+Terminal=false
+Type=Application
+StartupNotify=true
+Icon=gfceu
+Categories=GNOME;GTK;Game;
