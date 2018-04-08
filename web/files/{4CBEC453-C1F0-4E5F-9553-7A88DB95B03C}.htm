@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>NES Scrolling 1</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts11 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts12 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts13, span.rvts13 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{4CBEC453-C1F0-4E5F-9553-7A88DB95B03C}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts10>NES Scrolling 1</span></p>
+<p>Subject: [nesdev] the skinny on nes scrolling</p>
+<p>Date: Tue, 13 Apr 1999 16:42:00 -0600</p>
+<p>From: loopy &lt;zxcvzxcv@netzero.net&gt;</p>
+<p>Reply-To: nesdev@onelist.com</p>
+<p>To: nesdev@onelist.com</p>
+<p><br></p>
+<p>From: loopy &lt;zxcvzxcv@netzero.net&gt;</p>
+<p><br></p>
+<p>---------</p>
+<p>the current information on background scrolling is sufficient for most games;</p>
+<p>however, there are a few that require a more complete understanding.</p>
+<p><br></p>
+<p>here are the related registers:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (v) vram address, a.k.a. 2006 which we all know and love.&nbsp; (16 bits)</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (t) another temp vram address (16 bits)</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (you can really call them 15 bits, the last isn't used)</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (x) tile X offset (3 bits)</p>
+<p><br></p>
+<p>the ppu uses the vram address for both reading/writing to vram thru 2007,</p>
+<p>and for fetching nametable data to draw the background.&nbsp; as it's drawing the</p>
+<p>background, it updates the address to point to the nametable data currently</p>
+<p>being drawn.&nbsp; bits 0-11 hold the nametable address (-$2000).&nbsp; bits 12-14 are</p>
+<p>the tile Y offset.</p>
+<p><br></p>
+<p>---------</p>
+<p>stuff that affects register contents:</p>
+<p>(sorry for the shorthand logic but i think it's easier to see this way)</p>
+<p><br></p>
+<p>2000 write:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t:0000110000000000=d:00000011</p>
+<p>2005 first write:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t:0000000000011111=d:11111000</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x=d:00000111</p>
+<p>2005 second write:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t:0000001111100000=d:11111000</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t:0111000000000000=d:00000111</p>
+<p>2006 first write:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t:0011111100000000=d:00111111</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t:1100000000000000=0</p>
+<p>2006 second write:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t:0000000011111111=d:11111111</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; v=t</p>
+<p>scanline start (if background and sprites are enabled):</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; v:0000010000011111=t:0000010000011111</p>
+<p>frame start (line 0) (if background and sprites are enabled):</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; v=t</p>
+<p><br></p>
+<p>note!&nbsp; 2005 and 2006 share the toggle that selects between first/second</p>
+<p>writes.&nbsp; reading 2002 will clear it.</p>
+<p><br></p>
+<p>note!&nbsp; all of this info agrees with the tests i've run on a real nes.&nbsp; BUT</p>
+<p>if there's something you don't agree with, please let me know so i can verify</p>
+<p>it.</p>
+<p><br></p>
+<p><br></p>
+<p class=rvps3><span class=rvts11>2008</span></p>
+<p class=rvps4><span class=rvts12>This help file has been generated by the freeware version of </span><a class=rvts13 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

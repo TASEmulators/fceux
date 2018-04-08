@@ -1,0 +1,743 @@
+----------------------------------------
+2000-11-12
+xodnizel
+<p>
+FCE Ultra .40 for Windows and Linux SVGAlib is out.  The source code has also been released.  I had wanted to clean up the code much more, but I also wanted to get the code released.  The next source code release should be much cleaner.  Anyway, here's what's new:
+</p>
+
+<ul>
+<li>Rewrote MMC1 emulation code.</li>
+<li>Added support for mappers 95, 113, and 118 (thanks to M. Knibbs for the information).</li>
+<li>Adjusted PPU/CPU timing.</li>
+<li>Added partial support for the Famicom Disk System</li>
+<li>Added support for 4(up from 2) joysticks.</li>
+<li>Added support for sound frame IRQ's.</li>
+<li>Rewrote sound envelope decay/length counter/sweep code to use sound frame emulation code.</li>
+<li>Rewrote large portions of code to be more efficient and more correct.</li>
+<li>Added support for mappers 42,43,44,45,46,47, and 182. (thanks to K. Horton for the information)</li>
+<li>Improved support for mapper 15.</li>
+
+<p>
+I've also rewritten large parts of the Windows DirectX code to be more stable, and added several more video modes(for the Windows version).
+</p>
+----------------------------------------
+2000-11-13
+xodnizel
+<p>
+FCE Ultra .40 for DOS is out. This is the last build for DOS.
+</p>
+----------------------------------------
+2000-12-17
+xodnizel
+<p>
+FCE Ultra .41 for Windows is out. It's quite different from previous versions for Windows. Source code and other ports will be released in a few weeks when I have the time to rewrite the driver code for other platforms.
+</p>
+----------------------------------------
+2000-12-17
+xodnizel
+<p>
+There was a problem with the Windows binary that will cause the corruption of the FDS BIOS if you use an FDS disk image. It resulted from a very stupid programming error on a large scale. I've fixed the bug, and uploaded a new package. Get it on the downloads page as "FCE Ultra .41r2". Thanks to "Nick" for posting on the message board about this bug.
+</p>
+----------------------------------------
+2000-12-27
+xodnizel
+<p>
+FCE Ultra .42 for Windows DX and Linux SVGAlib is out. I've updated the source code to .42 as well. I've also added a small "Features" page to the site, and added a link to NesCE on the links page.
+</p>
+----------------------------------------
+2000-12-29
+xodnizel
+<p>
+FCE Ultra .42r2 for Windows DX is out, get it here or on the downloads page. This is only a "driver update version". I fixed some problems with my DirectSound code that would cause FCE Ultra to lock up/not work right on certain machines if sound is enabled. This bug affected all Windows 2000 machines, and some Windows 98/ME machines, and possibly a few Windows 95 machines. If you continue to have problems, please email me.
+</p>
+----------------------------------------
+2001-01-21
+xodnizel
+<p>
+*UPDATED* The .50 release had a small bug in the MMC5 code. It would cause the emulator to crash under Linux, and just mess up MMC5 games under Windows. The fixed version is called .50r2 and is on downloads page.
+</p>
+
+<p>
+FCE Ultra .50 for Windows DX and Linux SVGAlib is out. Many changes have been made, but first: If you link to this site, make sure the link is correct. The correct URL for this site is "http://fceultra.sourceforge.net", not "http://fceultra.sourceforge.net/fce/", not "http://fceultra.sourceforge.net/fceu/", not "http://www.kc.net/~zaik/", etc. Some sites(Zophar's Domain) should also update their descriptions of FCE Ultra and many of the other NES/Famicom emulators listed on their sites. Multiple-year-old descriptions aren't very useful. None of the preceding is meant to be offensive or insultive.
+</p>
+
+<p>
+Anyway, here's what's new:
+</p>
+
+<ul>
+<li>Many bug fixes.</li>
+<li>Sound code partially rewritten to improve quality (near-perfect raw PCM now) and eliminate the need for a separate thread.  This created a small problem with network play, though, so read the network play notes section.  Also, synchronizing to vertical blank has been removed.</li>
+<li>Rewrote other pieces of sound code.  No more "buzzing" in MegaMan 2, Codemasters games' intros, etc.</li>
+<li>Added support for the NES Zapper and the VS Unisystem's light gun.  Be sure to read "Light Gun Notes".</li>
+<li>Changed save state format.  Save states should now be much smaller for most games.  Most (not all) save states created with an older version should work.</li>
+<li>Added support for VS Duck Hunt and VS Hogan's Alley.</li>
+</ul>
+----------------------------------------
+2001-02-04
+xodnizel
+<p>
+FCE Ultra .51 for Windows DX and Linux SVGAlib is out. The following changes apply to both ports:
+</p>
+
+<ul>
+<li>Added support for iNES mappers 86 and 89.</li>
+<li>Reduced byte size of the NSF player's background.</li>
+<li>Adjusted CPU/PPU timing.</li>
+<li>Fixed sound channel frequency calculations for when PAL emulation is enabled.</li>
+<li>Rewrote large pieces of the sound code and got rid of the sound queue.  Sound quality should be slightly better now.</li>
+<li>Various minor bug fixes.</li>
+</ul>
+
+<p>
+The following changes apply only to the Windows DX port:
+</p>
+
+<ul>
+<li>Fixed an FDS side reset bug when a new game is loaded.</li>
+<li>Screen width/depth/height changes while FCE Ultra is in windowed mode are handled now.</li>
+<li>Changed the configuration file format.</li>
+<li>Added a palette configuration dialog.</li>
+<li>Added the ability to load a custom NES palette.</li>
+<li>Added an option to double 16-bit sound volume.</li>
+<li>Added an option to force 8-bit sound.</li>
+<li>Added an option to use a secondary sound buffer(versus the primary).</li>
+<li>Added an option to wait for vertical blank if sound is disabled.</li>
+<li>Added an option to run while focus is lost.</li>
+</ul>
+----------------------------------------
+2001-02-05
+xodnizel
+<p>
+I updated the Windows DX version of FCE Ultra .51r2 earlier today. It fixed a bug that would cause some(very few) games to not work(requiring you to restart the emulator or load another game which might fix it) when a new game is loaded, or you reset/power cycle the virtual NES. Since loading new games with the Linux SVGAlib version isn't possible, this bug only affects resetting/power cycling, which is not as much of a problem. I'll update the Linux build and the source code tomorrow if I have time. I am starting to neglect the Linux port a little...but the next version for Linux should have most of the new options that were put in the Windows version.
+</p>
+----------------------------------------
+2001-02-15
+xodnizel
+<p>
+Anyone who is working on or has done a port of FCE Ultra, *please* email me at xodnizel@home.com( cc to xodnizel@starmen.net if you can, @home's servers are a bit unreliable). Include what platform your port is for, whether or not you want it distributed in the main source distribution, and whether or not you're still (planning on) updating the port. I'd also like the URLs of any web page(s) you have set up for your port. I need this information to keep track of different ports and coordinate people who are working on different ports for the same platform. The preceding applies to anyone who has contacted me about/submitted ported code to me before.
+</p>
+----------------------------------------
+2001-02-19
+xodnizel
+<p>
+FCE Ultra .52 for Linux SVGAlib and Windows DX is out. Here's what's new:
+</p>
+
+<ul>
+<li>Fixed a PCM emulation bug(digitized voices in "Ikari Warriors 2" and "The Immortal", among others, work now).</li>
+<li>Fixed noise channel's LFSR update frequencies(hopefully).</li>
+<li>Various minor bug fixes.</li>
+</ul>
+----------------------------------------
+2001-04-14
+xodnizel
+<p>
+FCE Ultra .53 for Windows DX is out. The Linux SVGAlib port should be released within the next two days. The features page and the source code will also be updated at that time. Here's what's new:
+</p>
+
+<ul>
+<li>Fixed a bug with joysticks that occured on systems with multiple joysticks.</li>
+<li>Added support for iNES mappers 77 and 92(thanks to LULU for the code for both).</li>
+<li>Added partial(timer is non-configurable) support for iNES mapper 105.</li>
+<li>Changed save state format again.  Save states made with previous versions should still be compatible, though this may change in future versions.</li>
+<li>Small optimization to sprite emulation code.</li>
+<li>Rewrote color-deemphasis code to use integer math instead of floating-point math.</li>
+<li>Rewrote and restructured input code.  Among other new features, keyboard keys are now somewhat configurable.</li>
+<li>Writes to $4003/$4007 will now reset the emulated square wave duty cycle generator.</li>
+<li>Added emulation of the Power Pad.</li>
+</ul>
+----------------------------------------
+2001-04-16
+xodnizel
+<p>
+FCE Ultra .53 for Linux SVGAlib is out. I've also updated the source code on the "Development" page. Here's what's new:
+</p>
+
+<ul>
+        *  Added support for iNES mappers 77 and 92(thanks to LULU for the
+           code for both).
+        *  Added partial(timer is non-configurable) support for iNES mapper 105.
+	*  Changed save state format again.  Save states made with previous
+           versions should still be compatible, though this may change in
+           future versions.
+        *  Changed the format of the configuration file.
+        *  Small optimization to sprite emulation code.
+        *  Rewrote color-deemphasis code to use integer math instead of
+           floating-point math.
+        *  Rewrote and restructured input code.
+        *  Writes to $4003/$4007 will now reset the emulated square wave
+           duty cycle generator.
+        *  Added emulation of the Power Pad.
+        *  Added command line option "-f8bit" to force 8-bit sound.
+        *  Rewrote joystick device reading code to use the event-driven
+           interface.  This should fix various problems regarding support
+           for joysticks with many buttons.
+</ul>
+----------------------------------------
+2001-05-05
+xodnizel
+<p>
+FCE Ultra .54 for Windows DX and Linux SVGAlib is out. The source code has been updated as well. Here's what's new for the Windows DX port(what follows is new for the Linux SVGAlib port as well, except for the last two items):
+</p>
+
+<ul>
+	* Fixed a bug that would cause a wrong battery-backed WRAM file
+	  name to be produced if FCE Ultra was passed a file name without
+          any directory component(such as "fceu SuperBlah.nes").
+	* Fixed an iNES mapper 118 emulation bug that got into the code
+	  in a recent code cleanup.  "Armadillo" is playable again.
+	* Fixed a typo(and bug) in the MMC5 emulation code.
+	* Data returned from emulated reads to "unmapped" areas or 
+	  memory locations where bits are undefined should now be correct.
+	* Fixed emulation of the sprite memory transfer register $4014.
+	  It now takes into account the last value written to $2003 and
+	  starts the transfer to that location in sprite memory(like on
+	  a real NES).
+        * Added a video configuration dialog box.
+        * Added the ability to configure a custom video mode.  Aspects
+          that are configurable include width, height, bits per pixel,
+          and size transforming(stretching and scaling).
+</ul>
+----------------------------------------
+2001-05-06
+xodnizel
+<p>
+I've just released a minor update(.54r2) for the .54 version for Windows DX. It fixes a small bug(forgot brackets in a piece of code) that would cause no image to be displayed in windowed mode. If you don't have this problem, you don't need to download the fix.
+</p>
+----------------------------------------
+2001-05-28
+xodnizel
+<p>
+FCE Ultra .55 for Windows and Linux is out. Here's what's new for the Windows port:
+</p>
+
+<ul>
+        *  Rewrote window resizing code.  The window will now resize itself
+           to a multiple of the NES' screen dimensions nearest to the user
+           selected dimensions.
+        *  Added an option to use buttons instead of axes on physical joysticks
+           for the emulated D-Pad.  This is useful for some digital joysticks.
+        *  Fixed a bug that would cause FCE Ultra to crash if sound were
+           disabled during emulation.
+        *  Added the ability to "fast forward" emulation(use the tilde/grave key).
+        *  Added an option to allow more than 8 sprites per scanline to be
+           displayed.
+        *  Added an option to save all extra non-volatile game data
+           (such as battery-backed RAM) in a directory under FCE Ultra's
+           base directory(as opposed to the directory the game is located in).
+        *  Added an option to allow the emulator to change to a full screen
+           video mode once a new game is loaded.
+        *  Rewrote pieces of DirectInput joystick handling code.  Hopefully
+           it should increase compatibility.
+        *  Added the ability to automatically obtain button numbers when
+           configuring joysticks, by pressing buttons on the joystick.
+        *  Added the ability to close the current game(decreases CPU usage).
+        *  Increased the speed of various function calls by passing
+           arguments to functions through registers instead of through the
+           stack.
+        *  Added emulation of the MMC5's raw PCM register.
+        *  Added the ability to save/load save states while network play
+           is occuring.
+        *  Having PAL emulation enabled will no longer override the
+           NTSC/PAL settings in NSF headers.
+        *  Fixed a bug that got into the .54 release.  Extraneous data was
+           being returned on reads from $2002, which caused problems
+           with some games(such as "Choujin Sentai Jetman").
+</ul>
+
+<p>
+Here's what's new for the Linux port:
+</p>
+
+<ul>
+        *  Added the ability to "fast forward" emulation(use the tilde/grave key).
+        *  Added command line options "-no8lim" and "-subase".
+        *  Increased the speed of various function calls by passing
+           arguments to functions through registers instead of through the
+           stack.
+        *  Added emulation of the MMC5's raw PCM register.
+        *  Added the ability to save/load save states while network play
+           is occuring.
+        *  Having PAL emulation enabled will no longer override the
+           NTSC/PAL settings in NSF headers.
+        *  Fixed a bug that got into the .54 release.  Extraneous data was
+           being returned on reads from $2002, which caused problems
+           with some games(such as "Choujin Sentai Jetman").
+</ul>
+----------------------------------------
+2001-07-04
+xodnizel
+<p>
+FCE Ultra .60 for Windows and Linux is out. Here's what's new for both ports:
+</p>
+
+<ul>
+        *  Various speed optimizations.
+        *  Sound is no longer messed up when a JAM/KIL opcode is emulated.
+        *  Fixed an overflow bug that occured when $4014 was written to
+           during certain(rare) conditions.
+        *  Fixed a few save state bugs.
+        *  Fixed a MMC1 CHR bank switching bug.
+        *  Added emulation of the MMC5's WRAM write-enable/disable registers.
+        *  Fixed a sound frame IRQ emulation bug.  "Qix" works now.
+        *  Added UNIF support.  Some of the board emulation is still a bit
+           buggy, though.  Look at the documentation for a list of supported
+           boards.
+        *  Updated the "Palette Notes" section of the documentation.  Also
+           fixed a few other problems with the documentation.
+        *  Added support for loading files in the PKZIP and gzip
+           compressed file formats via zlib.
+        *  Added the ability to configure the first scanline and the last
+           scanline to draw to the screen.  Enabling PAL emulation no longer
+           will cause all 239 scanlines to be displayed, though an option
+           to override these settings for when PAL emulation is enabled may
+           be in the next version.
+</ul>
+
+<p>
+The following is also new for the Windows port:
+</p>
+
+<ul>
+        *  Fixed a bug that would cause the emulated D-pad of virtual gamepads
+           emulated through the keyboard to be duplicated through "higher"
+           virtual gamepads(gamepad 1 would affect 2,3,4; gamepad 2 would
+           affect 3,4; etc.).
+</ul>
+----------------------------------------
+2001-07-07
+xodnizel
+<p>
+FCE Ultra .61 for Windows and Linux is out. Here's what's new for the Windows port:
+</p>
+
+<ul>
+        *  Speed optimizations in sprite rendering code.
+        *  Screen snapshots are now saved in the PNG format instead of the PCX
+           format.
+        *  Fixed Game Genie emulation(it wasn't working in the last release).
+           Also added support for Game Genie emulation to the UNIF code.
+        *  Fixed a problem(if FCE Ultra was configured to connect to a remote
+           host and the remote host was given as an IP address, and the IP
+           address couldn't be reverse resolved, which is commonly the case
+           on home LANs, the connection attempt would fail) in the network
+           play code.  I had misinterpreted the Winsock API documentation
+           when I wrote the code.
+</ul>
+
+<p>
+Here's what's new for the Linux port:
+</p>
+
+<ul>
+        *  Speed optimizations in sprite rendering code.
+        *  Screen snapshots are now saved in the PNG format instead of the PCX
+           format.
+        *  Fixed Game Genie emulation(it wasn't working in the last release).
+           Also added support for Game Genie emulation to the UNIF code.
+        *  Rewrote command line option parsing code.
+
+</p>
+----------------------------------------
+2001-07-07
+xodnizel
+<p>
+Due to a rather major bug(sprite transparencies were messed up a bit) with .61, I've released .61r2 for both Linux and Windows. Another bug has also been fixed, which fixes "Gremlins 2", at least.
+</p>
+----------------------------------------
+2001-08-06
+xodnizel
+<p>
+FCE Ultra .62 for Windows and Linux is out. Here's what's new:
+</p>
+
+<ul>
+	*  Added support for the Famicom Disk System's extra sound channel.
+	*  Updated the version of Tatsuyuki Satoh's OPL2 emulator used in 
+	   FCE Ultra from .36f to .37a.  The sound quality in "Lagrange Point"
+	   seems to have improved.
+	*  Added support for iNES mapper 242(used by "Wai Xing Zhan Shi").
+	*  Fixed a network play bug that could cause desynchronizations
+	   if more than one network play session occured since FCE Ultra
+	   was started.  This bug only showed up on the Windows port, though.
+	*  Increased the volume of the noise and triangle sound channels.
+	*  Fixed a save state loading bug.
+	*  Fixed a small memory leak that was being caused by the VRC7
+	   state loading code.
+	*  Fixed a bug that could cause FCE Ultra to crash if a virtual disk
+	   was being read and the user ejected the virtual disk.
+	*  Various minor bug fixes/code cleanups.
+</ul>
+----------------------------------------
+2001-08-07
+xodnizel
+<p>
+I've released FCE Ultra .62r2 for Windows and Linux. It fixes a bug in the last version that causes incorrect Game Genie emulation.
+</p>
+----------------------------------------
+2001-09-05
+xodnizel
+<p>
+FCE Ultra .70 for Linux and Windows is out. Read the documentation to find out what's new, I'm busy. :)
+</p>
+<p>
+Thanks to Richard Hoelscher for his document on the Famicom four-player adapter.
+</p>
+----------------------------------------
+2001-10-28
+xodnizel
+<p>
+FCE Ultra .71 for Windows and Linux is out. Get it in the "Downloads" section. Many things were changed in this release that might cause game incompatibilities, so feel free to email me if any games have been broken between this release and the last release.
+</p>
+
+<p>
+Also, the email address "xodnizel@home.com" will stop functioning in November. Please use xodnizel@users.sourceforge.net instead. 
+</p>
+----------------------------------------
+2001-11-15
+xodnizel
+<p>
+FCE Ultra .71 has a bug in it that causes the Game Genie emulation to not work with certain games that it should work with. This is fixed in the development version(to be .72). .72 will be released later this month, or in December, when I have enough free time when I'm not tired.
+</p>
+----------------------------------------
+2001-12-02
+xodnizel
+<p>
+FCE Ultra .72 for Linux, Windows, and DOS is out. I've gone back to using gcc 2.95.3 instead of gcc 3.0 to compile the Linux binary release, due to shared library problems. Check out the documentation on the Downloads page to see what's new.
+</p>
+----------------------------------------
+2001-12-06
+xodnizel
+<p>
+FCE Ultra .73 will be released this weekend(hopefully). I've decided to do a new release so soon to the last release due to several bugs in .72(bugs that were also in .71 that I didn't catch). 
+</p>
+----------------------------------------
+2001-12-08
+xodnizel
+<p>
+FCE Ultra .73 for DOS, Linux, and Windows is out. Here's what's new:
+</p>
+
+<ul>
+*  Fixed several bugs with sprite emulation.  Several games(such
+   as "Trojan" and "VS Duck Hunt") that were broken in .71 and .72 now
+   work ok.
+*  Added support for iNES mapper 82.  Thanks to those who work on
+   "unofficial nester".
+*  Added support for iNES mapper 250(used by "Time Diver Avenger").
+*  Fixed the documentation to show that iNES mappers 48, 83, and 232
+   are supported.
+*  Removed various pieces of stale code and fixed a few minor bugs.
+*  Fixed a triangle wave channel bug(the channel was sometimes enabled
+   when it shouldn't have been).
+*  Writing to $4010 with the upper bit clear now acknowledges the DPCM
+   IRQ.  This appears to fix "Stunt Buggies".
+*  Rewrote pieces of the Zapper emulation code to be cleaner and more
+   accurate.
+*  Rewrote the VS Unisystem dip switch drawing code.
+*  Simplified the setting of VS Unisystem dip switches.  The "V" key
+   now toggles viewing AND editing of dip switches.
+</ul>
+----------------------------------------
+2002-01-20
+xodnizel
+<p>
+FCE Ultra .74 for DOS, Linux, and Windows is out.
+</p>
+----------------------------------------
+2002-07-01
+xodnizel
+<p>
+FCE Ultra 0.80 for DOS, Linux, and Windows is out. FCE Ultra is now distributed under the terms of the GNU GPL. See the documentation for a list of the many changes that concern most users. This release *might* be buggier than past releases due to the large amount of code that has been modified. If something is broken, report it on the forum, or to me via email. Also, this will probably be the last release that I provide precompiled Linux binaries for.
+</p>
+----------------------------------------
+2002-08-18
+xodnizel
+<p>
+FCE Ultra 0.81 is out. This is a major release, despite the small increment in the version number; besides the changes listed in the end-user documentation, many internal changes have been made, so some things may have been broken.
+</p>
+
+<p>
+I have decided not to distribute the source code in the same archive as the executables, so if you provide a binary release of FCE Ultra, you must also provide the source code at the same location. 
+</p>
+----------------------------------------
+2002-11-13
+xodnizel
+<p>
+I have been working on an NSF player based on the sound code that is to be in the next release of FCE Ultra. The source code for the preliminary release can be downloaded here. It is currently distributed under the GPL, but I'll release the "real" version under the LGPL. Currently there are only a console interface and an xmms plugin(which isn't complete). It will currently build and run on Linux and FreeBSD systems running on an IA32 platform.
+</p>
+
+<p>
+I'm posting this information now in the hopes that someone will write Winamp 2/3 plugins, fix the xmms plugin, and do whatever else. If you need assistance, you can post on the forum or email me, if you can find my email address. ;) 
+</p>
+----------------------------------------
+2002-11-28
+xodnizel
+<p>
+First official release of <a href="http://festalon.sourceforge.net/">Festalon</a> is out. It still has a few bugs, but should work well.
+</p>
+----------------------------------------
+2002-12-14
+xodnizel
+<p>
+A few days ago, Festalon 0.1.2 was released. It's an NSF player based on the sound code that is (or was) to be in FCE Ultra 0.90, with a few improvements.
+</p>
+
+<p>
+I will no longer offer any email support for FCE Ultra end users. If you have a problem, post on the forum. 
+</p>
+----------------------------------------
+2002-12-22
+xodnizel
+<p>
+Festalon 0.1.3 is out.
+</p>
+
+<p>
+deraj and others are working on a fork of FCE Ultra called <a href="http://phamicom.sourceforge.net/">phamicom</a>.
+</p>
+----------------------------------------
+2002-12-26
+xodnizel
+<p>
+A new source release of FCE Ultra 0.81 is available. It fixes compilation problems that existed with newer versions of gcc.
+</p>
+----------------------------------------
+2003-02-22
+xodnizel
+<p>
+Anyone who has any of the following Famicom games, a real Famicom (no clones) and can record digital audio files, email me at xod2 at starmen.net:
+</p>
+
+<ul>
+Digital Devil Story II
+Erika to Satoru no Yumebouken
+Esper Dream II
+Final Lap
+Gimmick!
+Just Breed
+King of Kings(Namco)
+Lagrange Point
+Madara
+Mappy Kids
+Sangokushi II(Namco)
+Zelda no Densetsu(FDS version)
+</ul>
+----------------------------------------
+2003-03-09
+xodnizel
+<p>
+FCE Ultra 0.92 is out. This is a major release, fixing many bugs present in 0.81, and adding a new sound core. The new sound emulation core is disabled by default, however, since it uses a considerable amount of CPU time, so if you want to use it, you'll have to enable it. See the documentation for a more complete list of what is new.
+</p>
+
+<p>
+Binaries are only available for Windows users. DOS/Linux/MacOS X users will need to download the source tarball from the development section and compile their own binaries. I may provide binaries for DOS later, though. 
+</p>
+----------------------------------------
+2003-03-10
+xodnizel
+<p>
+FCE Ultra 0.92r2 is out. This fixes a small bug in the sound code that caused "Cobra Triangle" to freeze. The source code package for 0.92 also was incomplete(it was missing some of the new Windows code).
+</p>
+----------------------------------------
+2003-03-11
+xodnizel
+<p>
+FCE Ultra 0.93 is out. This is a minor release, fixing some FDS IRQ emulation bugs(and thus fixing the game "Lutter"), reducing the volume of the FDS sound channel, and fixing two obscure null-pointer dereferencing bugs.
+</p>
+----------------------------------------
+2003-03-19
+xodnizel
+<p>
+I've been working on putting together a PSF player, which will probably be called sexyPSF. It is based on Pcsx and the PEOPS SPU plugin, with heavy modifications and a few improvements. A preliminary release can be downloaded. It'll only run in Linux console, on IA32 platforms, with OSS. It currently supports psfs and minipsfs, but most of the loading code is prone to failure(when loading minipsfs, you have to have a slash in the filename), which will be fixed before its official release.
+</p>
+----------------------------------------
+2003-03-23
+xodnizel
+<p>
+<a href="http://xod.starmen.net/sexypsf/">sexypsf</a> has been released...sort of.
+</p>
+----------------------------------------
+2003-03-29
+xodnizel
+<p>
+FCE Ultra 0.94 has been released. This is a source-only release. This release is officially the final release.
+</p>
+----------------------------------------
+2003-03-29
+xodnizel
+<p>
+The Windows executable has been updated to 0.94. I decided to go ahead with the executable release since there were a few important bug fixes and changes. The Linux svgalib executable will not be updated. Grab the source code and compile it from there, or compile the SDL code, which works well now. I don't want to mess with incompatible library versions. :/ The DOS executable wasn't updated because it's in low demand, most people using DOS today are probably knowledgable enough to compile it, and I didn't feel like it. The source code package has also been updated...the previous copy had the wrong files in it. D'oh.
+</p>
+
+<p>
+Taking into consideration I already messed up this release...  If any bugs were introduced in 0.94, I might release a quick followup (0.94r2), depending on the severity of the bug(s).
+</p>
+----------------------------------------
+2003-06-18
+xodnizel
+<p>
+0.95 pre release #2 (Windows executable) - Source code(do a make clean first). There will be an FCE Ultra 0.95. 0.94 had a few BLECK bugs in it, particularly with the NSF player... Report any game compatibility issues on the forum.
+</p>
+----------------------------------------
+2003-06-21
+xodnizel
+<p>
+FCE Ultra 0.95 is out. Now you can have even more Mother fun. What is new:
+</p>
+
+<ul>
+    * Fixed some save state loading bugs, particularly when "high-quality" sound emulation is enabled.
+    * Tweaked Konami mappers' IRQ counter emulation.
+    * Altered NMI, IRQ, and BRK emulation. Fixed games include "Dynamite Bowl" and "Bases Loaded 2".
+    * Added support for mid-scanline background effects, such as those used in "Mother", "Marble Madness", "Pirates!", and "Business Wars".
+    * Low/Normal-quality sound emulation now uses 32-bit integers instead of 64-bit integers, resulting in a significant speed boost.
+    * Decreased the PCM/DMC volume in low/normal-quality sound emulation.
+    * Low-G-Man(NTSC and PAL versions) are now recognized by CRC32 value, and WRAM will be disabled if they are loaded. A warning/status message will also be printed regarding this issue if one of these games is loaded.
+    * Cleaned up a bit of code.
+    * Fixed some NSF player bugs that were causing some rips not to play. 
+</ul>
+----------------------------------------
+2003-06-21
+xodnizel
+<p>
+FCE Ultra 0.96.
+<p>
+
+<ul>
+    * Improved support for the RAMBO-1(mapper 64). "Skull and Crossbones" is now playable. 
+</ul>
+----------------------------------------
+2003-06-21 to 2003-07-17
+xodnizel
+<p>
+No more support will be provided for FCE Ultra from me. If you care about FCE Ultra so much, support others. Support files for building on Windows will no longer be provided. "Binary" releases for Windows will no longer be made. The source code will be updated whenever I feel like it, and may contain bugs. If you're packaging a release, you should read the ChangeLog and take note of anything that might be buggy, and test it before releasing. Get files.
+</p>
+----------------------------------------
+2003-07-17 to 2003-08-03
+xodnizel
+<p>
+FCE Ultra: The Terms
+No more support will be provided for FCE Ultra from me. If you care about FCE Ultra so much, support others. Support files for building on Windows will no longer be provided. "Binary" releases for Windows will no longer be made. The source code will be updated whenever I feel like it, and may contain bugs. If you're packaging a release, you should read the ChangeLog and take note of anything that might be buggy, and test it before releasing.
+Get files.
+</p>
+
+<p>
+I've documented the network play protocol in case anyone wants to write a standalone network play server. It may contain mistakes, so you might want to also look at the actual source code(fceu/drivers/cli/unix-netplay.c should be more readable than the Winsock code).
+</p>
+
+    * Developer's Forum. (not archived)
+    * Network play protocol. (not archived)
+----------------------------------------
+2004-03-10
+xodnizel
+<p>
+I've uploaded the FCE Ultra 0.98.2, available on the downloads page. A precompiled Windows executable is not provided, but it should be relatively simple to compile, provided you have the correct tools (msys, mingw, sdl header/import libraries, directx header/import libraries).
+</p>
+----------------------------------------
+2004-04-19
+xodnizel
+<p>
+FCE Ultra 0.98.6 is out, along with an updated version for Windows, using the old Win32 codebase, with some improvements.
+</p>
+
+<p>
+Please note that this Windows release is somewhat of an experimental release, and may contain bugs. Of course, bugs won't be fixed unless I find out about them. Also note that not all of the new Famicom input devices FCE Ultra has support for are usable in this build.
+</p>
+----------------------------------------
+2004-04-21
+xodnizel
+<p>
+FCE Ultra 0.98.7 is out.
+</p>
+----------------------------------------
+2004-04-21
+xodnizel
+<p>
+FCE Ultra 0.98.8 is out.
+</p>
+
+<ul>
+        Fixed a typo in sound.c that caused only part of the sound registers
+        to be saved in save states.
+
+        Win32: Switched over to the DirectDraw7 interface, from DirectDraw4's.
+        The surface Flip() method will now block, which results in somewhat
+        smoother animation/scrolling with double buffering, especially when combined with the
+        auto blit-skip implemented in 0.98.6 when sound is enabled.
+
+        Win32: Undid a change made in the last release that limited the
+        speed of fast-forwarding when using the tilde key.  I really do
+        need to implement some sort of unified timing/blit skip system...
+
+        Win32: Added an option, disabled by default, to ask for confirmation
+        before exiting FCE Ultra.
+
+        Win32:  Added an option, enabled by default, to disable the system
+        screen saver while a game is loaded.
+
+        Win32:  Added a new video synchronization mode, a "lazy" wait for
+        vblank/vertical retrace.  It calls Sleep(0) in its wait loop.  This
+        still uses all available cpu cycles, but it is much more friendly
+        to other processes than the old-style wait for vblank.
+
+        Win32:  Added support for joystick POV hats.
+</ul>
+----------------------------------------
+2004-05-06
+xodnizel
+<p>
+FCE Ultra 0.98.9 is out.
+</p>
+
+<li>
+        Win32-native:  Fixed the speed throttling used when sound is disabled.  In previous
+        0.98.x Win32-native releases, emulation was running at 1/2 the speed it should
+        have been when sound was disabled.
+
+        Win32-native:  Moved settings in the "Miscellaneous" configuration window
+        to where they should have been in the first place, and added "GUI" and "Timing"
+        configuration windows to accommodate some.
+
+        Win32-native:  Fixed the handling of the "Scroll Lock" key used to disable and
+        enable Family BASIC Keyboard input.
+
+        Updated documentation to handle some slight differences in the Win32-native
+        port("Win32-native" is what the Win32 port using native APIs, as opposed to something
+        like GTK+ and SDL, will be referred to in documentation now).  I also made
+        some other minor wording adjustments to the documentation.
+
+        Added an iNES header correction for Dragonball.
+</li>
+----------------------------------------
+2004-05-07
+xodnizel
+<p>
+I've released a "fixed" version of 0.98.9 for Windows. The previous release had a small issue with radio buttons in the "Image Size Transform" box in the "Video" coniguration window.
+</p>
+
+<p>
+A fix for this was the only change.
+</p>
+----------------------------------------
+2004-10-29
+xodnizel
+<p>
+No new *official* releases of FCE Ultra will be made. I mean it this time. :b
+</p>
+
+<p>
+The forum has been closed, as I will not be available to moderate it any longer, but the old posts will be viewable indefinitely.
+</p>
+
+<p>
+Crazy people may download http://fceultra.sourceforge.net/fceu-0.98.13-pre.src.tar.bz2 which was intended to be 0.98.13.  It should be stable, and fixed several major bugs present in 0.98.12, but I have neither the time nor desire to do thorough tests for regressions, and thus it will not be an official release.
+</p>
+----------------------------------------
+2006-03-18
+Mark Doliner
+<p>
+The FCE Ultra project has been taken over.  Our current goal is only to post the previous release and documentation, but we'd love to get development going again, too. We'll post more information soon.
+</p>
+----------------------------------------

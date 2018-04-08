@@ -1,0 +1,286 @@
+﻿<html>
+	
+<head>
+	<title>Glossary</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "index.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("Glossary");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Glossary</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Reference.html">Reference</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Reference.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Reference.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="Controls.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts19">Glossary</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps10"><span class="rvts21">Here you can find definitions for many terms that are used throughout this Manual. Most of them were used in the context of TASing before TAS Editor was created. Some of those terms are described more thoroughly in the </span><a class="rvts27" href="BeginnersGuide.html">Beginner's Guide</a><span class="rvts21">.</span></p>
+<p class="rvps10"><span class="rvts21">It's recommended to read the Glossary at once, because many terms are interconnected.</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps10"><a name="Input"></a>
+<span class="rvts21"><br/></span></p>
+<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/game-player-taser.png"/></p>
+<p class="rvps10"><span class="rvts25">Input</span></p>
+<p class="rvps10"><span class="rvts21">Data about player's actions, that can be received by a game.</span></p>
+<p class="rvps10"><span class="rvts21">TASing became feasible because of general assumption that behavior of a game is always determined by its initial state and player's input, and nothing else (see Determinism).</span></p>
+<p class="rvps10"><span class="rvts21">Examples of Input: pressing a button on a gamepad, pushing analog stick, touching by stylus, shouting into a microphone, etc.</span></p>
+<p class="rvps10"><span class="rvts21">Taseditor works with Input in the form of "sequence of buttons states".</span></p>
+<p class="rvps10"><span class="rvts21">Note: the fact of player not pressing any button is also considered an Input.</span></p>
+<p class="rvps10"><a name="Output"></a>
+<span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Output</span></p>
+<p class="rvps10"><span class="rvts21">Data sent from a game as a result of processing player's Input.</span></p>
+<p class="rvps10"><span class="rvts21">The process of playing a game can be depicted as a loop of interaction between a subject (player) and an object (game).</span></p>
+<p class="rvps10"><span class="rvts21">Examples of Output: displaying an image, producing a sound, vibrating gamepad, changing the value of an observed RAM address, providing an information about lag, etc.</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Playthrough / Walkthrough </span><span class="rvts21">(Solution)</span></p>
+<p class="rvps10"><span class="rvts21">A sequence of player's actions needed for successful completion of the game.</span></p>
+<p class="rvps10"><span class="rvts21">This sequence is inputted into the game using an input device (e.g. gamepad). The sequence can be either performed live (created in real-time) or constructed in advance in a form of reproducible recording (e.g. log of button presses). The latter form allows editing of the sequence.</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Speedrun</span></p>
+<p class="rvps10"><span class="rvts21">A walkthrough aimed on fastest completion of the game.</span></p>
+<p class="rvps10"><span class="rvts21">Some games have &nbsp;build-in "Speedrun" or "Time Attack" mode, where the game counts the time spent while playing. For other games it's possible to use external timer, measuring time in seconds or TV frames.</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">TAS</span><span class="rvts21"> (Tool-Assisted Superplay / Tool-Assisted Speedrun)</span></p>
+<p class="rvps10"><span class="rvts21">A walkthrough made with use of tools for editing the sequence of player's actions.</span></p>
+<p class="rvps10"><span class="rvts21">The process of creating TASes is called "TASing", authors are usually called "TASers".</span></p>
+<p class="rvps10"><span class="rvts21">The Input editing exempts TASers from certain human limitations (e.g. slow reflexes), allowing to spend full energy on making extraordinary walkthroughs. It can be either speedruns or entertainment videos (playarounds).</span></p>
+<p class="rvps10"><span class="rvts21">TASes can be distributed:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps14"><span class="rvts21">in the form of finished videos containing Output (youtube, AVI files and so on) – easy to watch</span></li>
+<li class="rvps14"><span class="rvts21">in the form of source files containing Input (FM2 movies and so on) – easy to edit</span></li>
+</ul>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Movie</span><span class="rvts21"> (replay)</span></p>
+<p class="rvps10"><span class="rvts21">Container for storing Input and associated data.</span></p>
+<p class="rvps10"><span class="rvts21">Unlike video containers, the TAS movies don't contain Output (game footage). The Output appears only when user applies the movie Input to an appropriate game file.</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Lag</span></p>
+<p class="rvps10"><span class="rvts21">The term used when the delay between Input and Output is greater than normally.</span></p>
+<p class="rvps10"><span class="rvts21">The loop of interaction between player and game usually establishes some fixed amount of time between polling Input and updating Output, for example 60 times per second.</span></p>
+<p class="rvps10"><span class="rvts21">A computer processor can only make fixed amount of operations in this fixed amount of time. But videogames try to mimic the unboundedness of real life, so the quantity of in-game objects may vary greatly. Thus it's possible that processing all objects will take more time than allotted. In such cases the Output update will be delayed, and next Input polling will be delayed too.</span></p>
+<p class="rvps10"><span class="rvts21">Speedrunners try to avoid excessive delays, and the lag is often considered as a factor when TASing. Usually TASers try to minimize the number of "frames containing lag".</span></p>
+<p class="rvps10"><span class="rvts21">Emulators can detect lag in a frame right after finishing the frame emulation. The criterion is simple: if the game didn't poll Input during the frame then it's the lag frame. If it did poll Input then this is normal frame. Taseditor highlights lag frames with red color, and it's useless to draw any Input on these frames.</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Desync</span></p>
+<p class="rvps10"><span class="rvts21">Discrepancy between expected and received Output, which results in player's Input not syncing with the logic of the game.</span></p>
+<p class="rvps10"><span class="rvts21">Desync may appear when the Input made for one game is applied to another game, or using different emulator version or different settings. Also, desyncs appear when emulator doesn't support deterministic emulation.</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Segment</span></p>
+<p class="rvps10"><span class="rvts21">A part of the movie, representing the period of time between two in-game events.</span></p>
+<p class="rvps10"><span class="rvts21">Breaking the movie into segments is used to decompose big tasks to smaller subtasks.</span></p>
+<p class="rvps10"><span class="rvts21">The size of a segment can be measured in frames, but the limits of a segment are usually defined by in-game events. The beginning event cuts all previous tasks and concentrates TASer's attention on the nearest set of conditions. The ending event serves as an optimality criterion for all possible approaches to the current task solution.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="TASingProcess.html">TASing Process</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Optimization</span></p>
+<p class="rvps10"><span class="rvts21">The process of searching for the optimal (the best) solution of the task in current segment.</span></p>
+<p class="rvps10"><span class="rvts21">Almost any task in videogames can be solved in a variety of ways. Every way has its own pros and cons. When starting a project, TASer chooses his goal (e.g. pacifist speedrun), thus assigning priorities to those pros and cons, therefore all the ways of solving a task can be evaluated and compared to each other to determine which one is better.</span></p>
+<p class="rvps10"><span class="rvts21">Actual process of TAS optimization consists of editing Input and evaluating resulting Output. When TASer gets better result, he marks current Input as the best, until he finds an even more optimal Input. The final product (TAS movie) contains the best solution for every subtask.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="TASingMethodology.html">TASing Methodology</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Improvement</span></p>
+<p class="rvps10"><span class="rvts21">A way to solve the task better (closer to optimum).</span></p>
+<p class="rvps10"><span class="rvts21">Examples of improvements in speedruns: removing inaccuracy, applying unused timesaver, increasing the usefulness of an old timesaver, adding entertainment without losing speed.</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Timesaver</span></p>
+<p class="rvps10"><span class="rvts21">Any in-game trick that can save time.</span></p>
+<p class="rvps10"><span class="rvts21">When making a speedrun, TASer is supposed to use every unprohibited opportunity to make the walkthrough become as fast as possible. One thing is polishing the Input to find the best outcome from current knowledge about the game. Another important activity is expanding this knowledge base – finding and applying tricks. True TASer strives to gather the maximum information about the game and use all known tricks to full extent, so that his record wouldn't be easily beaten.</span></p>
+<p class="rvps10"><span class="rvts21">Examples of timesavers: features of the game, bugs of the game, luck manipulation.</span></p>
+<p class="rvps10"><span class="rvts21">Note: sometimes TASers deliberately refuse certain timesavers, in this case the TAS aims for extra category. Examples: Super Mario Bros TAS without using </span><span class="rvts29">B</span><span class="rvts21"> button (denying certain feature of the game), Sonic the Hedgehog TAS without zipping (denying certain bug of the game).</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Feature</span></p>
+<p class="rvps10"><span class="rvts21">An intended aspect of the game. </span></p>
+<p class="rvps10"><span class="rvts21">Some features are unimportant (or even unnoticeable) for an ordinary player, but substantial for a TASer. So, before optimizing Input it's recommended to research the game engine.</span></p>
+<p class="rvps10"><span class="rvts21">Examples of such features: damage boost, forced waiting for score countdown, coordinate subpixels, AI peculiarities, etc...</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Bug / Glitch</span></p>
+<p class="rvps10"><span class="rvts21">An unintended aspect of the game. </span></p>
+<p class="rvps10"><span class="rvts21">Bugs abused by TASer should be reproducible on real console (at least theoretically). Bugs caused by emulation are not permitted.</span></p>
+<p class="rvps10"><span class="rvts21">Many bugs are discovered during real-time play. Some of them require thorough research and disassembly of the game code.</span></p>
+<p class="rvps10"><span class="rvts21">Examples of bugs: simplistic collision detection system, not checking save data corruption, race conditions, mistake in the order of checks, etc...</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Luck Manipulation</span></p>
+<p class="rvps10"><span class="rvts21">Unrestricted exploiting of certain game features, which are normally limited by the shortage of player's knowledge.</span></p>
+<p class="rvps10"><span class="rvts21">Although any experiments with Input modification are manipulations of game features, but some aspects of games appear especially unpredictable for an ordinary player. Developers intentionally entangle algorithms of those features, so that for a naked eye they seem completely random and uncontrollable.</span></p>
+<p class="rvps10"><span class="rvts21">However, in deterministic world all aspects of videogames are predictable (defined by Input). Using tools and careful analysis you can reveal those hidden laws and dependencies, and then use the knowledge when creating the Input. And sometimes you don't even have to dissect algorithms, when you can use trial-and-error method.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="NonlinearTASing.html#turbo-seeking">Nonlinear TASing</a><span class="rvts21"> (example of luck manipulation)</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Subpixels</span></p>
+<p class="rvps10"><span class="rvts21">The term used when in-game objects have coordinates with fractional parts.</span></p>
+<p class="rvps10"><span class="rvts21">Generally, there's difference between on-screen coordinates of a sprite and in-game coordinates of the object this sprite represents. In some games those coordinates have the same scale and their values coincide, but usually on-screen images represent a rough outline of the real state of things. So, to get max precision TASers observe the memory of emulated console, using Memory Watch tool or custom Lua HUD. This way also allows to see hidden variables of the game, those that aren't displayed on screen normally.</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Recording</span></p>
+<p class="rvps10"><span class="rvts21">One of possible ways to create Input for a movie.</span></p>
+<p class="rvps10"><span class="rvts21">It consists of appending new Input sequentially to the end of current movie, while watching interim results of the Input.</span></p>
+<p class="rvps10"><span class="rvts21">Another way would be drawing Input directly in the movie.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="Toolbox.html#recorder">Toolbox</a><span class="rvts21">, </span><a class="rvts27" href="TASingMethodology.html#linear-tasing">TASing Methodology</a><span class="rvts21">, </span><a class="rvts27" href="TraditionalTASing.html">Traditional TASing</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Rerecording</span></p>
+<p class="rvps10"><span class="rvts21">One of possible ways to edit Input in a movie.</span></p>
+<p class="rvps10"><span class="rvts21">It consists of rewriting old Input sequentially from starting frame to ending frame, while watching interim results of the Input changes.</span></p>
+<p class="rvps10"><span class="rvts21">Another way would be direct modification of existing Input in the movie.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="TASingMethodology.html#linear-tasing">TASing Methodology</a><span class="rvts21">, </span><a class="rvts27" href="TraditionalTASing.html">Traditional TASing</a><span class="rvts21">, </span><a class="rvts27" href="Ideas.html#RerecordsCounter">Rerecords counter</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Multitracking</span><span class="rvts21"> (multi-track recording)</span></p>
+<p class="rvps10"><span class="rvts21">One of ways to record Input for a walkthrough of the game in multi-player mode.</span></p>
+<p class="rvps10"><span class="rvts21">It consists of recording Input for a segment of the movie by taking turns for every player separately.</span></p>
+<p class="rvps10"><span class="rvts21">Another way would be recording Input for all players simultaneously.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="Toolbox.html#multitracking">Toolbox</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Frame Advance</span></p>
+<p class="rvps10"><span class="rvts21">Step-by-step emulation of a game using the minimum units of measuring time – frames.</span></p>
+<p class="rvps10"><span class="rvts21">Used for manual control of progression of time. Considered to be more effective replacement to "slow motion".</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Turbo</span><span class="rvts21"> (turbo speed)</span></p>
+<p class="rvps10"><span class="rvts21">The feature of speeding up emulation to the maximum possible speed.</span></p>
+<p class="rvps10"><span class="rvts21">Used for skipping meaningless in-game events and reducing waiting time when the emulator is seeking.</span></p>
+<p class="rvps10"><span class="rvts21">Most emulators allow to customize emulation speed, slowing it down or speeding up when needed. Turbo speed means the fastest speed possible, which is only limited by your computer speed.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="Toolbox.html#turbo-seek">Toolbox</a><span class="rvts21">, </span><a class="rvts27" href="NonlinearTASing.html#turbo-seeking">Nonlinear TASing</a><span class="rvts21">, </span><a class="rvts27" href="SemiautomaticTASing.html#turbo-seeking">Semiautomatic TASing</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Savestate</span></p>
+<p class="rvps10"><span class="rvts21">A snapshot of the emulated system's state at that current moment.</span></p>
+<p class="rvps10"><span class="rvts21">Unlike in-game saves, a savestate contains all the comprehensive data on the state of emulated hardware.</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Piano Roll</span></p>
+<p class="rvps10"><span class="rvts21">A medium for visual representation of data, similar to table or grid view.</span></p>
+<p class="rvps10"><span class="rvts21">The interface is used in many music editing programs (MIDI sequencers and MOD trackers). Its name and basic concept was derived from existing storage medium used to operate a mechanic piano (paper rolls).</span></p>
+<p class="rvps10"><span class="rvts21">Taseditor's Piano Roll displays current movie data (Input and Markers) and allows to edit the data by mouse clicks. It also displays auxiliary information like pointers, Bookmarks, Lag log, etc.</span></p>
+<p class="rvps10"><span class="rvts21">Every row of the Piano Roll corresponds to one frame of the movie.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="PianoRoll.html">Piano Roll</a><span class="rvts21">, </span><a class="rvts27" href="Ideas.html#PianoRoll">Piano Roll specs</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Playback cursor</span></p>
+<p class="rvps10"><span class="rvts21">Pointer to currently played frame of the movie.</span></p>
+<p class="rvps10"><span class="rvts21">Events of this frame are displayed in emulator's main window as current screenshot. Piano Roll marks respective row with light-blue color and the "Play" symbol (light-blue arrow).</span></p>
+<p class="rvps10"><span class="rvts21">Only one frame of the movie can be seen at any given moment. To see the screenshot of upcoming events you'll have to move the Playback cursor forward (down in the Piano Roll). To see the screenshot of previous events you'll have to move the Playback cursor backward (up in the Piano Roll).</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="PianoRoll.html">Piano Roll</a><span class="rvts21">, </span><a class="rvts27" href="Navigation.html#playback-cursor">Playback cursor Navigation</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Greenzone </span><span class="rvts21">(access zone)</span></p>
+<p class="rvps10"><span class="rvts21">The storage designed for speeding up Playback cursor navigation.</span></p>
+<p class="rvps10"><span class="rvts21">This storage automatically collects savestates for all emulated frames of the movie, and when it's necessary to rewind or jump forward to a frame, Taseditor loads respective savestate from Greenzone.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="Toolbox.html#progressbar">Toolbox</a><span class="rvts21">, </span><a class="rvts27" href="ProgramCustomization.html#SetGreenzonecapacity">Program Customization</a><span class="rvts21">, </span><a class="rvts27" href="Ideas.html#Greenzone">Greenzone specs</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Selection</span></p>
+<p class="rvps10"><span class="rvts21">Set of rows in the Piano Roll that are highlighted by special color (usually dark-blue).</span></p>
+<p class="rvps10"><span class="rvts21">Any row of the Piano Roll (and thus any frame of the movie) can be either selected or not selected.</span></p>
+<p class="rvps10"><span class="rvts21">Selection allows to operate with many frames at once, for example, delete a whole section of the movie at once instead of deleting every single frame in it.</span></p>
+<p class="rvps10"><span class="rvts21">The upper row of the Selection is called "Selection cursor".</span></p>
+<p class="rvps10"><span class="rvts21">The Selection cursor automatically follows the process of Input editing.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="PianoRoll.html">Piano Roll</a><span class="rvts21">, </span><a class="rvts27" href="Navigation.html#selection-cursor">Selection cursor Navigation</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Marker</span></p>
+<p class="rvps10"><span class="rvts21">Yellow mark for a row in Piano Roll that emphasizes the frame among its neighbors.</span></p>
+<p class="rvps10"><span class="rvts21">Any row in the Piano Roll can be marked. Markers allow to improve the distinctness of movie data.</span></p>
+<p class="rvps10"><span class="rvts21">Markers can be used to:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts21">organize the Input</span></li>
+<li class="rvps10"><span class="rvts21">formalize knowledge (using text Notes)</span></li>
+<li class="rvps10"><span class="rvts21">speed up navigation</span></li>
+<li class="rvps10"><span class="rvts21">speed up selection of segments (</span><span class="rvts30">Ctrl + A</span><span class="rvts21">)</span></li>
+</ul>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="PianoRoll.html#markers">Piano Roll</a><span class="rvts21">, </span><a class="rvts27" href="Ideas.html#Markers">Markers specs</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Note</span></p>
+<p class="rvps10"><span class="rvts21">A single line of text accompanying every Marker.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="PianoRoll.html#markers">Piano Roll</a><span class="rvts21">, </span><a class="rvts27" href="Controls.html#notes">Controls</a><span class="rvts21">, </span><a class="rvts27" href="AdvancedFeatures.html#UsingMarkers">Advanced Features</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Bookmark</span></p>
+<p class="rvps10"><span class="rvts21">A numbered mark for a frame of the movie.</span></p>
+<p class="rvps10"><span class="rvts21">Taseditor has 10 slots for Bookmarks.</span></p>
+<p class="rvps10"><span class="rvts21">A Bookmark stores all necessary data about the frame it was placed on. Including the movie branch that contains an Input that definitely leads the game to the events of this frame.</span></p>
+<p class="rvps10"><span class="rvts21">Bookmarks can be used for Playback cursor navigation, but their main purpose is to store branches.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="Toolbox.html#bookmarks">Toolbox</a><span class="rvts21">, </span><a class="rvts27" href="Ideas.html#BookmarksBranches">Bookmarks specs</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Branch</span></p>
+<p class="rvps10"><span class="rvts21">A full copy of the movie, storing its state at the moment of creating the Bookmark.</span></p>
+<p class="rvps10"><span class="rvts21">The current movie can be replaced by the branch when necessary, thus restoring saved state of the movie.</span></p>
+<p class="rvps10"><span class="rvts21">With branches you can have many different movies in one project, and you can instantly switch among them:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts21">to compare alternative strategies of walkthrough</span></li>
+<li class="rvps10"><span class="rvts21">to store current best approach when testing different solutions in a segment</span></li>
+<li class="rvps10"><span class="rvts21">to store examples of unused tricks that could be useful in future</span></li>
+<li class="rvps10"><span class="rvts21">to compare your own movie with somebody else's movie (e.g. when making an improvement)</span></li>
+</ul>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="Toolbox.html#bookmarks">Toolbox</a><span class="rvts21">, </span><a class="rvts27" href="ProgramCustomization.html#BranchesrestoreentireMovie">Program Customization</a><span class="rvts21">, </span><a class="rvts27" href="Ideas.html#BookmarksBranches">Branches specs</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Project</span></p>
+<p class="rvps10"><span class="rvts21">Container for storing working data in Taseditor.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="AdvancedFeatures.html#ProjectsSharing">Advanced Features</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Lua</span></p>
+<p class="rvps10"><span class="rvts21">Programming language used in many TAS-friendly emulators.</span></p>
+<p class="rvps10"><span class="rvts21">Useful for making custom tools and for data visualization.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="AdvancedFeatures.html#UsingLua">Advanced Features</a><span class="rvts21">, </span><span class="rvts27">Lua</span><span class="rvts21">, </span><a class="rvts27" href="LuaAPI.html">Lua API</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Bot </span><span class="rvts21">(robot)</span></p>
+<p class="rvps10"><span class="rvts21">A program made for automation of a specific task.</span></p>
+<p class="rvps10"><span class="rvts21">Bots are created to free humans from tedious work that doesn't require high intelligence. Unlike humans, bots don't invent the solution, they just methodically test all possible approaches within given limits, following an algorithm made by the programmer.</span></p>
+<p class="rvps10"><span class="rvts21">Nowadays bots are only practical for running exhaustive search within a very small segment of the movie. Most of time it's faster to search for best solution manually, using human intuition to eliminate dead ends without unnecessary tests.</span></p>
+<p class="rvps10"><span class="rvts21">Making bots requires programming skills. TASing bots are either written in Lua or built-in into emulators by modifying an open source code.</span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts25">Pattern</span></p>
+<p class="rvps10"><span class="rvts21">A predefined sequence of Input values for a button.</span></p>
+<p class="rvps10"><span class="rvts21">More: </span><a class="rvts27" href="AdvancedFeatures.html#UsingPatterns">Advanced Features</a><span class="rvts21">, </span><a class="rvts27" href="Ideas.html#Patterns">Patterns specs</a></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p></p>
+<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com">Free EBook and documentation generator</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				&copy; 2011-2013 AnS</div>
+		</div>
+	</body>
+	
+</html>
+

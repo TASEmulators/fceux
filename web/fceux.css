@@ -1,0 +1,106 @@
+﻿  /* CSS layout */
+body {
+	margin: 0;
+	padding: 0;
+}
+
+#masthead {
+	
+	background-repeat: no-repeat;
+	background-position: left;
+	background-color: #999999;
+	padding: 0px;
+	margin: auto;
+	border-style: solid;
+	text-align:center;
+	font-weight:bold;                                                                                                                   
+	font-size:medium;
+	padding-top:0px;
+	padding-bottom:1px;
+
+}
+
+#top_nav {
+	text-align: center;
+	border-style: solid;
+	border-width: thin;
+	margin-left: 200px;
+	margin-right: 200px;
+	margin-top: 0px;
+	padding-top: 8px;
+	padding-bottom: 4px;
+	margin-bottom: 32px;
+	background-color:#B7B7B7;
+}
+
+#container {
+	min-width: 600px;
+}
+
+#left_col {
+	width: 192px;
+	float: left;
+	padding-right: 8px
+}
+
+#page_content {
+	margin-left: 200px;
+}
+
+.Font {
+	font-family: Arial, Helvetica, sans-serif;
+}
+body {
+	background-color: #E9E9E9;
+}
+
+#footer {
+	font-size: small;
+	text-align: center;
+	border-style: inset;
+	border-width: thick;
+	margin-left: 200px;
+	margin-right: 200px;
+	margin-top: 24px;
+	margin-bottom: 8px;
+	border-color: #E2E2E2;
+}
+
+h1 {
+	background-image:url('assets/ICON_1.ico'); 
+	background-repeat: no-repeat;
+	background-position: left;
+	background-color: #999999;
+	padding: 0px;
+	margin: auto;
+	border-style:solid;
+	border-width: thin;
+	text-indent:40px;
+}
+h2 {
+	background-color: #B4B4B4;
+	padding: 0px;
+	border-top-width:4px;
+	border-style: solid;
+	border-width: thin;
+	padding-top: 4px;
+	margin-top: 20px;
+	margin-left: 0px;
+	margin-right: 80px;
+}
+h3 {
+	border-style: solid;
+	border-color: #999999;
+	border-width: thin;
+	text-align: left;
+	background-color: #E1E1E1;
+	margin-right: 80px;
+}
+li {
+	background-color: #E9E9E9;
+	padding-left: 1px; 
+}
+.largerfont {
+	font-weight:bold;
+	font-size:xx-large;
+}

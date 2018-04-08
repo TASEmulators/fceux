@@ -1,0 +1,179 @@
+﻿<html>
+	
+<head>
+	<title>What's New? 2.1.4 (changelog)</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("WhatsNew214");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>What's New? 2.1.4 (changelog)</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="WhatsNew215.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="WhatsNew213.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">What's New? </span><span class="rvts20">2.1.4a</span></p>
+<p>Released 01 June 2010</p>
+<p>2.1.4 is a maintenance release that fixes these bugs in 2.1.4:</p>
+<p>fix crash bug on .fcm convert</p>
+<p>fix erroneous reporting of savestate past the end of movie error during read-only loadstates</p>
+<p><br/></p>
+<p>Released 31 May 2010</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts21">The 2.1.4 release fixes many bugs and adds new features compared to 2.1.3. In addition it also fixes up the movie code significantly; fixing implementation problems, loading speed, adding new features, and fixing bugs. </span></p>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts22">Common </span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Added microphone support option. When enabled, Port 2 Start activates the Microphone</span></li>
+<li><span class="rvts21">Prevent .zip files containing no recognized files from causing crash</span></li>
+<li><span class="rvts21">Autohold - Added player 3 and 4 to autohold notification window, labeled controller input</span></li>
+<li><span class="rvts21">mapper 19 savestate fix mirroring for "Dream Master (J)" corrected to "four-screen" by CRC check</span></li>
+<li><span class="rvts21">Disable auto-savestates during turbo </span></li>
+<li><span class="rvts21">Fixed so Gotcha! auto-enables the zapper</span></li>
+<li><span class="rvts21">Autohold - Added player 3 and 4 to autohold notification window, labeled controller input</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23">Movies</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Fully implemented "bulletproof" read-only</span></li>
+<li><span class="rvts21">Movie code now fully conforms to the Savestate section of the Laws of TAS</span></li>
+<li><span class="rvts21">Fixed a potential desync that plays out an extra frame without an update to the frame count involving heavy lua use, joypad.get, and a loadstate</span></li>
+<li><span class="rvts21">Movie support for microphone</span></li>
+<li><span class="rvts21">Movies now have a "finished" mode. &nbsp;If a playback stops the movie isn't cleared from memory, and can be replayed or a state loaded Similar functionality as DeSmuME and GENS rerecording</span></li>
+<li><span class="rvts21">New PPU flag in movie headers (doesn't change an emulators PPU state when loading a movie)</span></li>
+<li><span class="rvts21">Much faster movie loading and movie-savestate loading</span></li>
+<li><span class="rvts21">Made gamepad 2 off by default (so less movies should have unused player 2 data)</span></li>
+<li><span class="rvts21">Implemented a "full savestate-movie load" mode similar to the implementation in VBA-rr and SNES9x-rr. &nbsp;In this mode loading a savestate in read+write doesn't truncate the movie to its frame count immediately. &nbsp;Instead it waits until input is recording into the movie (next frame). &nbsp;For win32 this feature is togglable in movie options and the context menu. &nbsp;For SDL this is off by default and a toggle will need to be added</span></li>
+<li><span class="rvts21">Movie + loadstate errors are handled more gracefully now, with more informative error messages and the movie doesn't have to stop if backups are enabled</span></li>
+<li><span class="rvts21">Fix PlayMovieFromBeginning when using a movie that starts from savestate</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts23">Lua</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">fix bug that caused zapper.read() to crash when movie playback ends</span></li>
+<li><span class="rvts21">Win32 - Added option for palette selection as color for LUA colors. Included is a LUA script to display all choices with the value used to pick displayed color</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21">New Lua functions</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">movie.ispoweron()</span></li>
+<li><span class="rvts21">movie.isfromsavestate()</span></li>
+<li><span class="rvts21">emu.addgamegenie()</span></li>
+<li><span class="rvts21">emu.delgamegenie()</span></li>
+<li><span class="rvts21">savestate.object() which is savestate.create() with intuitive numbering under windows</span></li>
+<li><span class="rvts21">gui.getpixel() which gets any gui.pixel() set pixel colors, and possibly other functions</span></li>
+<li><span class="rvts21">emu.getscreenpixel() which gets the RGB and Palette of any pixel on the screen</span></li>
+<li><span class="rvts21">lua function movie.getfilename() which returns the current movie filename without the path included</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts23">Input Display</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Input display updates on loadstate</span></li>
+<li><span class="rvts21">Input display overhaul that uses different colors for different input contexts</span></li>
+<li><span class="rvts21">Input display now shows both currently pressed buttons and buttons held the previous frame</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts23">Win32</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Added NTSC 2x scalar option with some CFG config options of it's own Added Ram Search hotkeys for the first 6 search types in the list</span></li>
+<li><span class="rvts21">Add Cheat buttons for Ram Search and Ram Watch</span></li>
+<li><span class="rvts21">With special scaler in window mode, it's possible to resize to anything above the minimum.</span></li>
+<li><span class="rvts21">Recording a new movie adds it to recent movies list</span></li>
+<li><span class="rvts21">Replay dialog, when selecting a movie in a relative path (.\movies for example), the recent movies list stores an absolute path instead</span></li>
+<li><span class="rvts21">Replay dialog shows PAL flag and New PPU flags</span></li>
+<li><span class="rvts21">CDLogger - fixed bug preventing correct interrupt vectors from logging</span></li>
+<li><span class="rvts21">Memwatch - ignore spaces at the beginnign of an address in the address boxes</span></li>
+<li><span class="rvts21">Replay dialog - fix bug that was causing it to always report savestate movies as soft-reset</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts22">Debugger</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Added conditional debugging option 'K', for bank PC is on</span></li>
+<li><span class="rvts21">Fixed bug involving pausing emulation outside of the debugger, then trying to use the debugger commands, and having the CPU registers become corrupted</span></li>
+<li><span class="rvts21">Made debugger able to break on and distinguish Stack reads/writes</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts23">Hex Editor</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Added "Goto" command</span></li>
+<li><span class="rvts21">Made the Hex Editor display the Frozen, Bookmarked, etc. status of the selected address, and made the Frozen color override the Bookmarked color.</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts23">Cheat Search</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Made enabling/disabling cheats no longer deselect the selected cheat</span></li>
+<li><span class="rvts21">Added context menu to Cheat Dialog Cheat Listbox, populated list with Toggle Cheat, Poke Cheat Value, and Goto In Hex Editor</span></li>
+<li><span class="rvts21">Enabled multi-select for Cheat menu to allow multiple toggles and deletes</span></li>
+<li><span class="rvts21">Made cheat menu's Pause When Active effect immediate</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts23">GUI</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Added Tools - GUI option to partially disable visual themes, so the emulator can be made to look like it did in 2.1.1 and earlier releases. Drag &amp; Drop - if dropping a .fcm with no ROM loaded, prompt for one (same functionality that was added to .fm2 files)</span></li>
+<li><span class="rvts21">Added single-instance mode, which makes starting a second copy of FCEUX load the file into the first, then exit.Mode off by default, togglable under Config - GUI</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/help-authoring-tool">Single source CHM, PDF, DOC and HTML Help creation</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

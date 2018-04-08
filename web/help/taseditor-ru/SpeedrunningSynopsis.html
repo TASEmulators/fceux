@@ -1,0 +1,167 @@
+﻿<html>
+	
+<head>
+	<title>Конспект спидраннера</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "index.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("SpeedrunningSynopsis");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Конспект спидраннера</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Reference.html">Справочник</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Reference.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="FAQ.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="TASEditorInside.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts20">Конспект спидраннера</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Благодаря наличию однозначной цели, создание спидранов является наиболее простым видом ТАСинга, и соответствующие приёмы хорошо изучены. Здесь приводится классификация типовых задач спидраннера, возникающих во время шлифовки Ввода. Перед чтением этого раздела рекомендуется усвоить материалы </span><a class="rvts28" href="TASingProcess.html">Процесс ТАСинга</a><span class="rvts22"> и </span><a class="rvts28" href="TASingMethodology.html">Методология ТАСинга</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">При создании спидрана необходимо находить кратчайший способ прохождения каждого участка игры. Процесс поиска заключается в тестировании множества подходов к прохождению участка и выборе самого лучшего подхода. Здесь мы обсудим только проблему выбора.</span></p>
+<p class="rvps10"><span class="rvts22">Для упрощения задачи ТАСеры обычно сравнивают между собой только два подхода: </span><span class="rvts26">новый рабочий</span><span class="rvts22"> подход и </span><span class="rvts26">наилучший старый</span><span class="rvts22"> подход, а все остальные старые подходы сразу забывают (впрочем, некоторые любопытные подходы всегда можно сохранить в Закладки).</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Самый лучший из всех старых (ранее протестированных) подходов может храниться:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">в Закладках – рекомендуется</span></li>
+<li class="rvps10"><span class="rvts22">в Журнале Истории – автоматически, но временно</span></li>
+<li class="rvps10"><span class="rvts22">в памяти ТАСера – не рекомендуется</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Когда новый рабочий подход оказывается лучше (оптимальнее) наилучшего старого, автоматически подразумевается, что он лучше всех остальных старых подходов, поэтому этот рабочий подход сразу становится наилучшим. В случае использования Закладок следует пересохранить новый подход в тот же слот, где хранился наилучший старый подход. По окончании поиска содержимое этого слота загружается в финальный мувик.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Критерии оптимальности в спидранах:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">наличие/отсутствие определённого события в новом и старом подходе </span><span class="rvts72">(bool)</span></li>
+<li class="rvps10"><span class="rvts22">время наступления целевого события в новом и старом подходе </span><span class="rvts72">(int)</span></li>
+<li class="rvps10"><span class="rvts22">состояние игры на одном и том же кадре нового и старого мувика </span><span class="rvts72">(string)</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Соответственно, при сравнении любой пары подходов вы делаете одно из трёх возможных действий:</span></p>
+<p class="rvps10"><a class="rvts28" href="SpeedrunningSynopsis.html#CompareEvent">1. &nbsp;Сравнение наличия/отсутствия события.</a></p>
+<p class="rvps33"><a class="rvts63" href="SpeedrunningSynopsis.html#CompareEvent-A">А. По памяти</a></p>
+<p class="rvps33"><a class="rvts63" href="SpeedrunningSynopsis.html#CompareEvent-B">B. С помощью Закладок</a></p>
+<p class="rvps10"><a class="rvts28" href="SpeedrunningSynopsis.html#CompareTime">2. Сравнение времени наступления события.</a></p>
+<p class="rvps33"><a class="rvts63" href="SpeedrunningSynopsis.html#CompareTime-A">A. По памяти</a></p>
+<p class="rvps33"><a class="rvts63" href="SpeedrunningSynopsis.html#CompareTime-B">B. С помощью зелёной стрелки</a></p>
+<p class="rvps33"><a class="rvts63" href="SpeedrunningSynopsis.html#CompareTime-C">C. С помощью Маркера</a></p>
+<p class="rvps33"><a class="rvts63" href="SpeedrunningSynopsis.html#CompareTime-D">D. С помощью Закладок</a></p>
+<p class="rvps10"><a class="rvts28" href="SpeedrunningSynopsis.html#CompareState">3. Сравнение состояния игры на одном и том же кадре.</a></p>
+<p class="rvps33"><a class="rvts63" href="SpeedrunningSynopsis.html#CompareState-A">А. По памяти</a></p>
+<p class="rvps33"><a class="rvts63" href="SpeedrunningSynopsis.html#CompareState-B">B. С помощью Закладок</a></p>
+<p class="rvps32"><span class="rvts48"><br/></span></p>
+<p class="rvps10"><a name="CompareEvent"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">1. Сравнение наличия/отсутствия события.</span></p>
+<p class="rvps10"><span class="rvts22">Выигрывает подход, где требуемое событие происходит в рамках текущего участка (а вредное событие, соответственно, не происходит). Появление требуемого события – это всего лишь первый (и зачастую лёгкий) этап при создании Ввода, а следующим этапом будут попытки ускорить момент появления этого события.</span></p>
+<p class="rvps10"><span class="rvts31">Перебор подходов продолжается до первого успешного подхода, либо пока не надоест (тогда событие признаётся недостижимым).</span></p>
+<p class="rvps10"><span class="rvts72">Аналогия с программированием: сравнение двух Boolean (переменная логического типа), сравнение двух массивов Boolean.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a name="CompareEvent-A"></a>
+<span class="rvts22">A. В большинстве случаев достаточно просто помнить тот факт, что требуемого события не удалось добиться в прошлых подходах. Пример: </span><a class="rvts28" href="SemiautomaticTASing.html#FindStartButtonPress">нажатие кнопки </a><a class="rvts73" href="SemiautomaticTASing.html#FindStartButtonPress">Start</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a name="CompareEvent-B"></a>
+<span class="rvts22">B. Если целевое событие является комплексным (например, планируется одновременно подстрелить трёх врагов), рекомендуется в процессе перебора подходов сохранять в Закладки те варианты, где требуемое событие выполнилось хотя бы частично (например, подстрелили двух врагов одновременно, а третьего позже). Если в конце концов целевое события окажется недостижимым, может сгодиться и такой частичный успех.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a name="CompareTime"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">2. Сравнение времени наступления события.</span></p>
+<p class="rvps10"><span class="rvts22">Выигрывает подход, где целевое событие наступает раньше. Время наступления целевого события определяется кадром, перед которым целевого события в игре ещё не было, а на этом кадре оно уже есть. Номер этого кадра определяется при наведении на него Курсора Проигрывателя и просмотре экрана FCEUX (или Memory Watch) для подтверждения.</span></p>
+<p class="rvps10"><span class="rvts31">Перебор подходов продолжается до тех пор, пока не надоест, либо пока не исчерпаются все возможные типы подходов (тогда текущий лучший подход признаётся идеальным (frame perfect), пока не обнаружены новые факторы).</span></p>
+<p class="rvps10"><span class="rvts72">Аналогия с программированием: сравнение двух целых чисел.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a name="CompareTime-A"></a>
+<span class="rvts22">A. Для простейших участков и маленьких подучастков бывает достаточно запомнить лучший номер кадра в уме и сравнивать результаты всех новых подходов с этим числом. Но в целом полагаться на человеческую память не рекомендуется. Подробнее: </span><a class="rvts28" href="TASingProcess.html#EndOfSegment">Процесс ТАСинга</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a name="CompareTime-B"></a>
+<span class="rvts22">B. На несложных участках можно сверяться с зелёной стрелкой Тасэдитора. При её использовании подразумевается, что вы каждый раз оставляете Курсор Проигрывателя на кадре целевого события (это естественное поведение). Поэтому, если новый кадр целевого события находится выше зелёной стрелки, то новый подход быстрее предыдущего. Подробнее: </span><a class="rvts28" href="NonlinearTASing.html#GreenArrow">Методология ТАСинга</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a name="CompareTime-C"></a>
+<span class="rvts22">C. На сложных участках используйте отвязанный Маркер, который будет всегда указывать на текущий лучший номер кадра в Piano Roll. При каждом улучшении старого результата этот Маркер вручную перетаскивается повыше. Поэтому, если новый кадр целевого события находится выше Маркера, то новый подход быстрее наилучшего старого.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a name="CompareTime-D"></a>
+<span class="rvts22">D. На участках любой степени сложности рекомендуется использовать Закладки, отображаемые в столбце иконок Piano Roll. При каждом улучшении старого результата текущий подход вручную сохраняется в ту же Закладку, замещая собой наилучший старый подход. Поэтому, если новый кадр целевого события находится выше иконки Закладки, то новый подход быстрее наилучшего старого.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a name="CompareState"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">3. Сравнение состояния игры на одном и том же кадре.</span></p>
+<p class="rvps10"><span class="rvts22">Выигрывает подход, в котором у игры в целом более выгодные характеристики. Этот тип сравнений актуально использовать для оценки сложных и многогранных игровых ситуаций. Например, в гонках Формула-1 приходится заботиться одновременно и о скорости, и о минимальной изношенности шин, поэтому на каждом участке трассы нужно искать оптимальный баланс, а не просто торопиться.</span></p>
+<p class="rvps10"><span class="rvts22">Здесь у участка есть чётко определённый кадр окончания, и каждый новый тест должен проиграть участок до этого кадра. Тасэдитор запоминает номер этого кадра в виде зелёной стрелки, которая автоматически останавливает эмуляцию при просмотре новых вариантов. Так что от ТАСера требуется только изменять Ввод (создавая новые подходы), запускать просмотр, дожидаться остановки и оценивать результат (по экрану FCEUX или Memory Watch).</span></p>
+<p class="rvps10"><span class="rvts31">Перебор подходов продолжается до тех пор, пока не надоест, либо пока не исчерпаются все возможные типы подходов (тогда текущий лучший подход признаётся идеальным, пока не обнаружены новые факторы).</span></p>
+<p class="rvps10"><span class="rvts72">Аналогия с программированием: сравнение двух строк, сравнение двух массивов целых чисел.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a name="CompareState-A"></a>
+<span class="rvts22">A. Для простых участков бывает достаточно запомнить значение главной характеристики состояния игры, достигнутого в наилучшем подходе. Это значение сравнивается с характеристиками нового состояния игры, достигнутого в конце просмотра нового подхода. Если решено, что новое значение лучше, необходимо запомнить его вместо старого. Пример: </span><a class="rvts28" href="NonlinearTASing.html#LuckManipulation">манипуляция удачей</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Когда важных характеристик больше, чем одна, рекомендуется не полагаться на человеческую память.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a name="CompareState-B"></a>
+<span class="rvts22">B. На участках средней и высокой сложности, а особенно на гигантских участках (размером с целый уровень игры) используйте Закладки, хранящие альтернативные ответвления мувика. Наилучший подход к прохождению участка сохраняется в один слот, а новый тестируемый подход сохраняется в другой слот. После этого можно легко переключаться между этими слотами и сравнивать значения каждой характеристики состояния игры. Кроме того, можно наводить курсор мыши на соответствующие Закладки, чтобы видеть скриншоты состояний игры и визуально сравнивать их характеристики с текущим изображением на экране FCEUX.</span></p>
+<p class="rvps10"><span class="rvts22">Для отображения ячеек памяти на скриншотах рекомендуется использовать Lua-вывод на экран, тогда окно Memory Watch не понадобится, и об оптимальности можно будет успешно судить по одним скриншотам. Подробнее: </span><a class="rvts28" href="ProgramCustomization.html#DisplayBranchScreenshots">Настройка программы</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">В ситуации, когда некоторые характеристики в новом подходе оказались лучше, а некоторые хуже, требуется хорошенько взвесить их все (в уме, или используя обобщающую Lua-формулу) и решить, какое состояние игры лучше.</span></p>
+<p class="rvps10"><span class="rvts22">При каждом улучшении старого результата новый подход вручную сохраняется в ту же Закладку, замещая собой наилучший старый подход.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">После нахождения самого быстрого подхода к прохождению участка ТАСер может дополнительно улучшить его, добавив немного развлекательности в игровые события. Критерии оптимальности при этом могут быть самыми разными, но при этом время прохождения участка должно оставаться без изменений.</span></p>
+<p class="rvps10"><span class="rvts22">А можно отложить процесс облагораживания участка на будущее и сразу перейти к следующему участку.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p></p>
+<p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com/help-authoring-tool">Single source CHM, PDF, DOC and HTML Help creation</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				&copy; 2011-2013 АнС</div>
+		</div>
+	</body>
+	
+</html>
+

@@ -1,0 +1,2 @@
+Fix up press releases
+Page about long term fceux plans (core development, movie, debugging, lua etc)

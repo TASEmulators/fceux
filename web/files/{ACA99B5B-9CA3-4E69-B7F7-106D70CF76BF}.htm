@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Game Genie Encoder/Decoder</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+span.rvts11
+{
+ font-size: 14pt;
+}
+a.rvts12, span.rvts12
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts12:hover { color: #0000ff; }
+span.rvts13 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts14 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts15 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts16, span.rvts16 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{ACA99B5B-9CA3-4E69-B7F7-106D70CF76BF}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts13>Game Genie Encoder/Decoder</span></p>
+<p><span class=rvts10>Game Genie Decoder/Encoder</span></p>
+<p><br></p>
+<p>This will take an NES address space PRG address ($8000-$FFFF), a comparison value (for 8-letter GG codes; refer to a Game Genie code FAQ for an explanation of what this does), and a Value that replaces the addressed byte.</p>
+<p><br></p>
+<p>Filling in the Address and Value fields will produce a 6-letter code; if you also fill out the Compare field, it will produce an 8-letter code.&nbsp; The code so produced will appear in the Game Genie Code box immediately; you can then click "Add to Cheat List" to activate it.</p>
+<p><br></p>
+<p>To decrypt a Game Genie code, enter it into the Game Genie Code box, and the Address and Value fields will be automatically filled in, as will the Compare field if it was an 8-letter code.</p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Adding Game Genie codes</span></p>
+<p><br></p>
+<p>In the Game Genie Code Decoder/Encoder window, type the code into the Game Genie Code box and click "Add to Cheat List", which will add it to the <a class=rvts12 href="{B37E7A47-E65F-4544-BDDF-39BE708BA68F}.htm">Cheat Search</a> cheat list. You can then enable/disable them by double-clicking the code in the box (a * means the code is active).</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts11>Making Game Genie codes permanent</span></p>
+<p><br></p>
+<p>Using the Game Genie Code Decoder/Encoder, enter in your code in the "Game Genie Code" box, and under "Possible Affected ROM File Addresses", a list of possible matches (usually from 1 to 5) is displayed. Using the built-in Hex Editor, go to the first listed address in the ROM, and change its value to the value given in the "Value" box (of the GG code Decoder/Encoder window). If the desired effect isn't achieved, undo the change (Ctrl+Z) and try the next address. Repeat until the desired effect is achieved, and then save the ROM.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts11>How do I make my own Game Genie codes?</span></p>
+<p><br></p>
+<p>First of all, you must:</p>
+<p><br></p>
+<p>* have a decent amount of ASM knowledge;</p>
+<p>* know how to use the debugger;</p>
+<p>* understand NES PRG-ROM bank switching.</p>
+<p><br></p>
+<p>Once you've found a part of PRG-ROM you want to change to create a code effect, snap the <a class=rvts12 href="{8A78E5FE-C7EB-418D-A921-F9A6782663F0}.htm">Debugger</a> (if it's not so already) and find the code's location in the PRG-ROM's address space ($8000-$FFFF) (you'll want the debugger snapped so the game won't swap banks out from under you). Then, using the built-in <a class=rvts12 href="{06F7BBD5-399E-4CA0-8E4E-75BE0ACC525A}.htm">Hex Editor</a>, view the NES memory and go to the PRG-ROM address you wish to modify, then right-click the byte and choose "Create Game Genie Code at this Address". The Game Genie Code Decoder/Encoder will appear, with the Address and Compare boxes filled in (the Compare box represents the address's original value). Enter the new value into the "Value" box. </p>
+<p><br></p>
+<p>An alternative way to enter the code is to locate the desired address in the debugger, and then middle-click on it, which will summon the GG Code Decoder/Encoder. Then enter the code as described above</p>
+<p class=rvps3><span class=rvts14>2008</span></p>
+<p class=rvps4><span class=rvts15>This help file has been generated by the freeware version of </span><a class=rvts16 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

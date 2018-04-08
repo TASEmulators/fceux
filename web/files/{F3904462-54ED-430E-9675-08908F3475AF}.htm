@@ -1,0 +1,261 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>What's New? 2.0.2 (changelog)</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+span.rvts11
+{
+ font-size: 18pt;
+ text-decoration: underline;
+}
+span.rvts12
+{
+ font-size: 14pt;
+}
+span.rvts13 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts14 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts15 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts16, span.rvts16 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{F3904462-54ED-430E-9675-08908F3475AF}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts13>What's New? 2.0.2 (changelog)</span></p>
+<p><span class=rvts10>What's New? </span><span class=rvts11>2.0.2</span></p>
+<p>Released August 14, 2008</p>
+<p><br></p>
+<p>This release includes a large number of bug fixes, feature enhancements, and new features.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts12>Fixed Crashing Bugs</span></p>
+<p><br></p>
+<p>* restore savestate error recovery functionality.&nbsp; Will prevent crashes after savestate error messages</p>
+<p>* Fixed - Low speeds (1%) crash FCEUX</p>
+<p>* fixes bug where palflag 1 in .fm2 files crashes fceux</p>
+<p>* FCEUX no longer crashes when attempting to open a non movie file</p>
+<p>* Buffer overflow (change vsprintf to vsnprintf)</p>
+<p><br></p>
+<p><span class=rvts12>Minor Bug fixes</span></p>
+<p><br></p>
+<p>* SRAM not wiped on power cycle (during movies)</p>
+<p>* Moviefilenames without extension now automatically get fm2</p>
+<p>* auto-fill .fcs extension in save state as dialog</p>
+<p>* FCM&gt;FM2 converter releases file handle</p>
+<p>* fix a new bug in windows build which caused fourscore emulation to fail in some cases</p>
+<p>* Player 3 no longer inputs when not used</p>
+<p>* prints a special message when trying to open an FCM reminding user to convert.</p>
+<p>* fixes bug where Avi recording with no sound messes up the format</p>
+<p>* Fixed bug where Convert .fcm didn't do special characters</p>
+<p>* fixed the (null) in the default lua directory listing</p>
+<p>* Ctrl+X now works in the memory watch dialog</p>
+<p>* Dialog window positions won't "disappear" (-32000 protection on all dialogs that remember x,y)</p>
+<p>* fixed View Slots bug - will now always show the used slots</p>
+<p><br></p>
+<p>* added shift+L as default hotkey for reload lua script</p>
+<p>* added input display to the FCEUX main menu</p>
+<p>* change config filename from fceu98.cfg to fceux.cfg</p>
+<p><br></p>
+<p><span class=rvts12>New Features</span></p>
+<p><br></p>
+<p>* restore IPS patching capability which was lost when archive support was added</p>
+<p>* restore ungzipping (and unzipping in sdl) capability which was lost when archive support was added</p>
+<p>* re-enable an "author" text field in the record movie dialog</p>
+<p>* re-enable support for old-format savestates. (Note: can not be loaded into a movie!)</p>
+<p><br></p>
+<p>* Added new toggle - frame adv. - lag skip (menu item + hotkey mapping + saved in config), will cause frame adv. to skip frames where input is not read</p>
+<p>* Added support for loading movies from archives (just like ROM files).&nbsp; Note: Movies loaded from an archive file will be read-only.</p>
+<p>* movie replay dialog displays fractions of a second on movie length</p>
+<p><br></p>
+<p>* Savestates now save the Lagcounter information.</p>
+<p>* added a mute turbo option in sound config</p>
+<p><br></p>
+<p>* add an option to pick a constant color to draw in place of BG when BG rendering is disabled (look for gNoBGFillColor in config).</p>
+<p><br></p>
+<p><span class=rvts12>Mappers</span></p>
+<p><br></p>
+<p>* remove cnrom chr rom size limit for homebrew roms</p>
+<p>* mmc5 - 64KB WRAM games now work correctly</p>
+<p>* mmc5 - use of chr A regs for BG in sprite 8x8 mode is fixed</p>
+<p>* upgrade to cah4e3's latest mapper 163&amp;164 code to fix a crash in a game</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts12>Debugging Tools</span></p>
+<p><br></p>
+<p>* Debugger - restore snap functionality</p>
+<p>* Debugger - add FORBID breakpoints - regions which block breakpoints from happening if they contain the PC</p>
+<p>* Debugger - debugger window is now resizeable</p>
+<p>* nametable viewer&nbsp; will display correct NT,CHR,ATTR data in more cases (specifically, including some exotic mmc5 cases).</p>
+<p><br></p>
+<p><span class=rvts12>Lua</span></p>
+<p><br></p>
+<p>* Savestates remember Lua painting</p>
+<p>* add memory.readbyterange to emulua</p>
+<p><br></p>
+<p><span class=rvts12>SDL only</span></p>
+<p><br></p>
+<p>* SDL: fixed --input(1-4) options.&nbsp; input1 and 2 are regular inputs, input3 and 4 are famicom expansion inputs</p>
+<p>* SDL fix configfile woes. configfile now goes to ~/.fceux/fceux.cfg</p>
+<p>* SDL: fixed segfault when opening .fcm files</p>
+<p>* SDL: Saner sound defaults for less choppy sound</p>
+<p>* SDL: "--special" option fixed for special video scaling filters</p>
+<p>* SDL: cleaned up the SConsruct</p>
+<p>* SDL: fixed issue where fceu would lock up when file dialogs were opened during fullscreen</p>
+<p>* SDL: fixed bug where fceux would close when file dialogs were closed</p>
+<p>* SDL: File open dialog is now used to movie playback</p>
+<p>* SDL: File open wrapper now takes a titlebar argument</p>
+<p>* SDL: Cleanup of usage</p>
+<p>* SDL: rename options --no8lim -&gt; --nospritelim and --color -&gt; --ntsccolor</p>
+<p>* SDL: Screenshots now always prepend the game name.</p>
+<p>* SDL: Changed default A/B from numpad 2 and 3 to j and k.</p>
+<p>* SDL: Enable frameskip by default</p>
+<p>* SDL: Fixed a bug that would crash fceux if the emulation speed was overincreased</p>
+<p>* SDL: New default hotkeys to more closely match win32 defaults</p>
+<p>* SDL: Added lua script loading hotkey (f3).&nbsp; Non win32 SDL requires zenity for this to function.</p>
+<p>* SDL: Build script cleanup; also added option for DEBUG builds.</p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p class=rvps3><span class=rvts14>2008</span></p>
+<p class=rvps4><span class=rvts15>This help file has been generated by the freeware version of </span><a class=rvts16 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

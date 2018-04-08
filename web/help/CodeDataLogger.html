@@ -1,0 +1,198 @@
+﻿<html>
+	
+<head>
+	<title>Code/Data Logger</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("CodeDataLogger");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Code/Data Logger</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Debug.html">Debug</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Debug.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="TraceLogger.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="GameGenieEncoderDecoder.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">Code/Data Logger</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Introduction</span></p>
+<p><br/></p>
+<p>The Code/Data Logger makes it much easier to reverse-engineer NES ROMs. The basic idea behind it is that a normal NES disassembler cannot distinguish between code (which is executed) and data (which is read). The Code/Data Logger keeps track of what is executed and what is read while the game is played, and then you can save this information into a .cdl file, which is essentially a <span class="rvts32">mask</span> that tells which bytes in the ROM are code and which are data. The file can be used in conjunction with a suitable disassembler to disassemble only the actual game code, resulting in a much cleaner source code where code and data are properly separated.</p>
+<p><br/></p>
+<p><span class="rvts16">Using the Code/Data Logger</span></p>
+<p><br/></p>
+<p>The Code/Data Logger keeps track of every byte in the ROM and records whether it's code (is executed) or data (is read).</p>
+<p>You can combine this logging feature with other tools to make them much more powerful:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>combine with <a class="rvts18" href="Debugger.html">Debugger</a> to see which branches of the game code were executed and which weren't yet</li>
+<li>combine with <a class="rvts18" href="TraceLogger.html">Trace Logger</a> to let it log the code selectively</li>
+<li>combine with <a class="rvts18" href="PPUViewer.html">PPU Viewer</a> to let it only display graphics that was drawn on screen at least once</li>
+<li>combine with <a class="rvts18" href="HexEditor.html">Hex Editor</a> to enable smart coloring of bytes (so you can observe which bytes are used by the game and how/when they are used)</li>
+<li>combine with (an external) Tile Viewer to see which graphics was used during certain play session, and which was not</li>
+<li>combine with (an external) ROM Corruptor to make it only corrupt data, but not code</li>
+<li>combine with (an external) Disassembler to help it separate code from data</li>
+</ul>
+<p><br/></p>
+<p>See, it is very useful for finding certain types of data or code branches. It also makes debugging work more visual, since you can always see which lines of the disassembled code were executed and which weren't.</p>
+<p><br/></p>
+<p>Furthermore, while the Code/Data Logger is running, the <a class="rvts18" href="HexEditor.html">Hex Editor</a> will color-code ROM bytes depending on whether they were logged as code or data:</p>
+<p><br/></p>
+<p>For PRG ROM:</p>
+<p><span class="rvts52">Dark-yellow</span> - the byte is code</p>
+<p><span class="rvts53">Blue</span> - the byte is data</p>
+<p><span class="rvts54">Cyan</span> - the byte is PCM audio data</p>
+<p><span class="rvts51">Green</span> - the byte is both code and data</p>
+<p><br/></p>
+<p>For CHR ROM:</p>
+<p><span class="rvts55">Yellow</span> - the byte was rendered</p>
+<p><span class="rvts56">Light-blue</span> - the byte was read programmatically</p>
+<p><span class="rvts57">Light-green</span> - the byte was both rendered and read programmatically</p>
+<p><br/></p>
+<p>The Code/Data Logger can also be used to generate a stripped NES ROM.</p>
+<p>"Stripped" NES ROM is a ROM in which everything that was not logged by the Code/Data Logger is removed. It can be useful in many ways, for example, you can view the ROM in an external Hex Editor or a Tile Viewer, and you'll see only the parts that were used while playing. Furthermore, you could use it to create a demo ROM by only playing through the parts you would like others to see.</p>
+<p><span class="rvts32">Example of such usage:</span></p>
+<p>1. Open the Code/Data Logger, and press Start to begin logging.</p>
+<p>2. Perform a soft and a hard reset while logging, in order to capture the ROM's startup sequence. If you don't do so, you can distribute a save-state file so they will start from within the game.</p>
+<p>3. If the game has Save-RAM (e.g. Zelda), you will need to capture the game's Save-RAM initialization routines; you can try to do so by deleting the game's *.sav file and then perform a soft and hard reset again while logging.</p>
+<p>4. Play through whatever levels you want present in the demo ROM. Be sure to perform every move, get every item, etc., so that the code and data necessary for those things are logged. If, for example, you fail to perform some special move, and then someone plays the stripped ROM and attempts to perform that move, the game may very well crash or glitch up, because there are zeros in the stripped ROM instead of the code responsible for handling this special move.</p>
+<p>5. Save the stripped NES ROM.</p>
+<p><br/></p>
+<p>Alternatively, you can save Unused Data (a ROM which is the opposite to the Stripped ROM). For example, you can play through the game, then save Unused Data ROM and watch it in a Tile Viewer to find unused graphics (possibly stumble upon secrets and easter eggs).</p>
+<p><br/></p>
+<p>Note: When you "Load" another .cdl file, it does not clear the current log; instead, it combines ("arithmetical OR") it with the information in the file. This can be useful if you're trying to obtain a complete log of certain game, as multiple people can play through the game and keep own code/data logs, and then the results can be combined into an all-encompassing log. But if you would like to actually clear the code/data log, press the "Reset Log" button.</p>
+<p><br/></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p><br/></p>
+<p>CDL files are just a mask of the ROM; that is, they are of the same size as the ROM, and each byte represents the corresponding byte of the ROM. The format of each byte is like so (in binary):</p>
+<p><br/></p>
+<p>For PRG ROM:</p>
+<div><table width="256" border="1" cellpadding="1" cellspacing="1" style="border-color: #000000; border-style: solid;">
+<tr valign="middle">
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">x</p>
+</td>
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">P</p>
+</td>
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">d</p>
+</td>
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">c</p>
+</td>
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">A</p>
+</td>
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">A</p>
+</td>
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">D</p>
+</td>
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">C</p>
+</td>
+</tr>
+</table>
+</div>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;C = Whether it was accessed as code.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;D = Whether it was accessed as data.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;AA = Into which ROM bank it was mapped when last accessed:</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;00 = $8000-$9FFF &nbsp; &nbsp; &nbsp; &nbsp;01 = $A000-$BFFF</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;10 = $C000-$DFFF &nbsp; &nbsp; &nbsp; &nbsp;11 = $E000-$FFFF</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;c = Whether indirectly accessed as code.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(e.g. as the destination of a JMP ($nnnn) instruction)</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;d = Whether indirectly accessed as data.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(e.g. as the destination of an LDA ($nn),Y instruction)</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;P = If logged as PCM audio data.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;x = unused.</p>
+<p><br/></p>
+<p>For CHR ROM:</p>
+<div><table width="256" border="1" cellpadding="1" cellspacing="1" style="border-color: #000000; border-style: solid;">
+<tr valign="middle">
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">x</p>
+</td>
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">x</p>
+</td>
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">x</p>
+</td>
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">x</p>
+</td>
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">x</p>
+</td>
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">x</p>
+</td>
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">R</p>
+</td>
+<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">D</p>
+</td>
+</tr>
+</table>
+</div>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;D = Whether it was drawn on screen (rendered by PPU at runtime)</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;R = Whether it was read programmatically using port $2007</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(e.g. Argus_(J).nes checks if the bankswitching works by reading the same byte of CHR data before and after switching)</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;x = unused.</p>
+<p><br/></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p><br/></p>
+<p><br/></p>
+<p>CDL files make possible a number of things never done before. First, a PCM data ripper could be created that scans for data that has the 'P' bit set, in order to find/rip/play every PCM sample in a ROM. Also, it is possible for someone to make a more intelligent ROM corruptor that only corrupts data (by checking the 'D' bit). In any case, the Code/Data Logger opens many new possibilities for discovering useful things in games. Another interesting possibility would be to use the Code/Data Logger on an NSF file to create a stripped NSF. Such an NSF would contain nothing but the relevant subroutines and data required by each tune played; this would be helpful to NSF rippers by removing irrelevant information. Thus, an NSF ripper could create a stripped NSF by listening to each track while the Code/Data Logger operates on it, and then saving the stripped NSF. It should be noted that this capability, though tested and working on private builds, is detrimental to the process of fixing broken NSF files. For this reason, data logging is allowed for NSF files, but stripping NSF files of unused data is disabled.</p>
+<p><br/></p>
+<p>The Code/Data Logger becomes the most useful when you need to restore a full source code of a game using e.g. IDA or another disassembler. There you can write a custom IDC script that uses a CDL file and calls MakeCode()/MakeData() functions to help the disassembler distinguish code from data. Making full and working/reassemblable disassembly becomes really easy this way.</p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com">Free HTML Help documentation generator</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

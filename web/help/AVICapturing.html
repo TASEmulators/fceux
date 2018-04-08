@@ -1,0 +1,94 @@
+﻿<html>
+	
+<head>
+	<title>AVI Capturing</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("AVICapturing");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>AVI Capturing</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="General.html">General</a> &rsaquo;&rsaquo; <a href="FamicomDiskSytem.html">Famicom Disk Sytem</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="FamicomDiskSytem.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="FamicomDiskSytem.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="MovieRecording.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">Video &amp; Audio Capturing</span></p>
+<p><span class="rvts16"><br/></span></p>
+<p><span class="rvts16">Introduction</span></p>
+<p><br/></p>
+<p>FCEU allows for outputting Video/Audio into .avi files or capturing audio only into .wav files. &nbsp;This can be used to capture one's playing or for dumping movie files (.fm2) to .avi files.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Capturing a Movie File (.fm2) to Video/Audio (AVI)</span></p>
+<p><br/></p>
+<p>-Pause the emulator by navigating to NES &gt; Emulation Speed &gt; pause or pressing the pause hotkey (the pause key by default). &nbsp;</p>
+<p>-For a faster capture increase emulation speed (you can capture at any emulation speed and FCEUX will still output a 60 (or 50) fps video file).</p>
+<p>-Select "Replay Movie" from the File &gt; Movie Menu and select the movie file</p>
+<p>-If you intend to capture beyond the final frame of the movie file, make sure "Pause after Playback" (Config Menu) is not checked.</p>
+<p>-Select "Record AVI" in the File &gt; AVI/Wav menu.</p>
+<p>-Select a file location and the video codec you wish to use.</p>
+<p>-Unpause the emulator.</p>
+<p>-When capturing is complete, pause the emulator and select "Stop AVI" in the File Menu.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Capture Audio only</span></p>
+<p><br/></p>
+<p>To capture audio only, navigate to File &gt; AVI/Wav &gt; Record WAV. &nbsp;Pick a filename and destination for FCEUX to begin capturing the audio to a .wav file (raw .pcm). &nbsp;To stop WAV recording, select File &gt; AVI/Wav &gt; Stop WAV.</p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/help-authoring-tool">Create HTML Help, DOC, PDF and print manuals from 1 single source</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

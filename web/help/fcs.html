@@ -1,0 +1,227 @@
+﻿<html>
+	
+<head>
+	<title>Savestate (.fcs)</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("fcs");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Savestate (.fcs)</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Technicalinformation.html">Technical Information</a> &rsaquo;&rsaquo; <a href="Movieformats.html">Movie &amp; Savestate formats</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Movieformats.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="fcm.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="Sound.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p>FCE Ultra Save State Format</p>
+<p> Updated: &nbsp;Mar 9, 2003</p>
+<p>---------------------------------------</p>
+<p><br/></p>
+<p>FCE Ultra's save state format is now designed to be as forward and backwards</p>
+<p>compatible as possible. &nbsp;This is achieved through the (over)use of chunks.</p>
+<p>All multiple-byte variables are stored LSB(least significant byte)-first.</p>
+<p>Data types:</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;(u)int8 - (un)signed 8 bit variable(also referred to as "byte")</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;(u)int16 - (un)signed 16 bit variable</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;(u)int32 - (un)signed 32 bit variable</p>
+<p><br/></p>
+<p>-- Main File Header:</p>
+<p><br/></p>
+<p>The main file header is 16-bytes in length. &nbsp;The first three bytes contain</p>
+<p>the string "FCS". &nbsp;The next byte contains the version of FCE Ultra that saved</p>
+<p>this save state. &nbsp;This document only applies to version "53"(.53) and higher.</p>
+<p>After the version byte, the size of the entire file in bytes(minus the 16 byte</p>
+<p>main file header) is stored. &nbsp;If oldversion is set to 255, the 32-bit version</p>
+<p>field will be used. &nbsp;In this field, a version such as 0.98.10 is stored as "9810"(decimal).</p>
+<p>The rest of the header is currently unused and should be nulled out. &nbsp;</p>
+<p>Example of relevant parts:</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;FCS &lt;uint8 oldversion&gt; &lt;uint32 totalsize&gt; &lt;uint32 version&gt;</p>
+<p><br/></p>
+<p>-- Section Chunks:</p>
+<p><br/></p>
+<p>Sections chunk headers are 5-bytes in length. &nbsp;The first byte defines what </p>
+<p>section it &nbsp;is, the next four bytes define the total size of the section</p>
+<p>(including the section chunk header).</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;&lt;uint8 section&gt; &lt;uint32 size&gt;</p>
+<p><br/></p>
+<p>Section definitions:</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;1 &nbsp; &nbsp; &nbsp; &nbsp;- &nbsp; &nbsp; &nbsp; &nbsp;"CPU"</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;2 &nbsp; &nbsp; &nbsp; &nbsp;- &nbsp; &nbsp; &nbsp; &nbsp;"CPUC"</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;3 &nbsp; &nbsp; &nbsp; &nbsp;- &nbsp; &nbsp; &nbsp; &nbsp;"PPU"</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;4 &nbsp; &nbsp; &nbsp; &nbsp;- &nbsp; &nbsp; &nbsp; &nbsp;"CTLR"</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;5 &nbsp; &nbsp; &nbsp; &nbsp;- &nbsp; &nbsp; &nbsp; &nbsp;"SND"</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;16 &nbsp; &nbsp; &nbsp; &nbsp;- &nbsp; &nbsp; &nbsp; &nbsp;"EXTRA"</p>
+<p><br/></p>
+<p>-- Subsection Chunks</p>
+<p><br/></p>
+<p>Subsection chunks are stored within section chunks. &nbsp;They contain the actual</p>
+<p>state data. &nbsp;Each subsection chunk is composed of an 8-byte header and the data.</p>
+<p>The header contains a description(a name) and the size of the data contained </p>
+<p>in the chunk:</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;uint8 description[4]&gt; &lt;uint32 size&gt;</p>
+<p><br/></p>
+<p>The name is a four-byte string. &nbsp;It does not need to be null-terminated.</p>
+<p>If the string is less than four bytes in length, the remaining unused bytes</p>
+<p>must be null.</p>
+<p><br/></p>
+<p>-- Subsection Chunk Description Definitions</p>
+<p><br/></p>
+<p>Note that not all subsection chunk description definitions listed below</p>
+<p>are guaranteed to be in the section chunk. &nbsp;It's just a list of what CAN</p>
+<p>be in a section chunk. &nbsp;This especially applies to the "EXTRA" subsection.</p>
+<p><br/></p>
+<p>---- Section "CPU"</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Name: &nbsp; &nbsp; &nbsp; &nbsp;Type: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Description:</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;PC &nbsp; &nbsp; &nbsp; &nbsp;uint16 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Program Counter</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;A &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Accumulator</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;P &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Processor status register</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;X &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;X register</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Y &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Y register</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;S &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Stack pointer</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;RAM &nbsp; &nbsp; &nbsp; &nbsp;uint8[0x800] &nbsp; &nbsp; &nbsp; &nbsp;2KB work RAM</p>
+<p><br/></p>
+<p>---- Section "CPUC" (emulator specific)</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Name: &nbsp; &nbsp; &nbsp; &nbsp;Type: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Description:</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;JAMM &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Non-zero value if CPU in a "jammed" state</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;IRQL &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Non-zero value if IRQs are to be generated constantly</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;ICoa &nbsp; &nbsp; &nbsp; &nbsp;int32 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Temporary cycle counter</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;ICou &nbsp; &nbsp; &nbsp; &nbsp;int32 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Cycle counter</p>
+<p><br/></p>
+<p>---- Section "PPU"</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Name: &nbsp; &nbsp; &nbsp; &nbsp;Type: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Description:</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;NTAR &nbsp; &nbsp; &nbsp; &nbsp;uint8[0x800] &nbsp; &nbsp; &nbsp; &nbsp;2 KB of name/attribute table RAM</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;PRAM &nbsp; &nbsp; &nbsp; &nbsp;uint8[32] &nbsp; &nbsp; &nbsp; &nbsp;32 bytes of palette index RAM</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;SPRA &nbsp; &nbsp; &nbsp; &nbsp;uint8[0x100] &nbsp; &nbsp; &nbsp; &nbsp;256 bytes of sprite RAM</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;PPU &nbsp; &nbsp; &nbsp; &nbsp;uint8[4] &nbsp; &nbsp; &nbsp; &nbsp;Last values written to $2000 and $2001, the PPU</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;status register, and the last value written to</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$2003.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;XOFF &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Tile X-offset.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;VTOG &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Toggle used by $2005 and $2006.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;RADD &nbsp; &nbsp; &nbsp; &nbsp;uint16 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;PPU Address Register(address written to/read from</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;when $2007 is accessed).</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;TADD &nbsp; &nbsp; &nbsp; &nbsp;uint16 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;PPU Address Register</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;VBUF &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;VRAM Read Buffer</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;PGEN &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;PPU "general" latch. &nbsp;See Ki's document.</p>
+<p><br/></p>
+<p>---- Section "CTLR" (somewhat emulator specific)</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Name: &nbsp; &nbsp; &nbsp; &nbsp;Type: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Description:</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;J1RB &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Bit to be returned when first joystick is read.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;J2RB &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Bit to be returned when second joystick is read.</p>
+<p><br/></p>
+<p>---- Section "SND" (somewhat emulator specific)</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;NREG &nbsp; &nbsp; &nbsp; &nbsp;uint16 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Noise LFSR.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;P17 &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Last byte written to $4017.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;PBIN &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;DMC bit index.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;PAIN &nbsp; &nbsp; &nbsp; &nbsp;uint32 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;DMC address index(from $8000).</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;PSIN &nbsp; &nbsp; &nbsp; &nbsp;uint32 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;DMC length counter(how many bytes left </p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;to fetch).</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;&lt;to be finished&gt;</p>
+<p><br/></p>
+<p>---- Section "EXTRA" (varying emulator specificness)</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;For iNES-format games(incomplete, and doesn't apply to every game):</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Name: &nbsp; &nbsp; &nbsp; &nbsp;Type: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Description:</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;WRAM &nbsp; &nbsp; &nbsp; &nbsp;uint8[0x2000] &nbsp; &nbsp; &nbsp; &nbsp;8KB of WRAM at $6000-$7fff</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;MEXR &nbsp; &nbsp; &nbsp; &nbsp;uint8[0x8000] &nbsp; &nbsp; &nbsp; &nbsp;(very emulator specific)</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;CHRR &nbsp; &nbsp; &nbsp; &nbsp;uint8[0x2000] &nbsp; &nbsp; &nbsp; &nbsp;8KB of CHR RAM at $0000-$1fff(in PPU address space).</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;EXNR &nbsp; &nbsp; &nbsp; &nbsp;uint8[0x800]  &nbsp; &nbsp; &nbsp; &nbsp;Extra 2KB of name/attribute table RAM.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;MPBY &nbsp; &nbsp; &nbsp; &nbsp;uint8[32] &nbsp; &nbsp; &nbsp; &nbsp;(very emulator specific)</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;MIRR &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Current mirroring:</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;0 = "Horizontal"</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;1 = "Vertical"</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$10 = Mirror from $2000</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$11 = Mirror from $2400</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;IRQC &nbsp; &nbsp; &nbsp; &nbsp;uint32 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Generic IRQ counter</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;IQL1 &nbsp; &nbsp; &nbsp; &nbsp;uint32 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Generic IRQ latch</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;IQL2 &nbsp; &nbsp; &nbsp; &nbsp;uint32 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Generic IRQ latch</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;IRQA &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Generic IRQ on/off register.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;PBL &nbsp; &nbsp; &nbsp; &nbsp;uint8[4] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;List of 4 8KB ROM banks paged in at $8000-$FFFF</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;CBL &nbsp; &nbsp; &nbsp; &nbsp;uint8[8] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;List of 8 1KB VROM banks page in at $0000-$1FFF(PPU).</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;For FDS games(incomplete):</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Name: &nbsp; &nbsp; &nbsp; &nbsp;Type: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Description:</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;DDT&lt;x&gt; &nbsp;uint8[65500] &nbsp; &nbsp;Disk data for side x(0-3).</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;FDSR &nbsp; &nbsp; &nbsp; &nbsp;uint8[0x8000] &nbsp; &nbsp; &nbsp; &nbsp;32 KB of work RAM</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;CHRR &nbsp; &nbsp; &nbsp; &nbsp;uint8[0x2000] &nbsp; &nbsp; &nbsp; &nbsp;8 KB of CHR RAM</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;IRQC &nbsp; &nbsp; &nbsp; &nbsp;uint32 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;IRQ counter</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;IQL1 &nbsp; &nbsp; &nbsp; &nbsp;uint32 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;IRQ latch</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;IRQA &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;IRQ on/off.</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;WAVE &nbsp; &nbsp; &nbsp; &nbsp;uint8[64] &nbsp; &nbsp; &nbsp; &nbsp;Carrier waveform data.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;MWAV &nbsp; &nbsp; &nbsp; &nbsp;uint8[32] &nbsp; &nbsp; &nbsp; &nbsp;Modulator waveform data.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;AMPL &nbsp; &nbsp; &nbsp; &nbsp;uint8[2] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Amplitude data.</p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/help-authoring-tool">Create HTML Help, DOC, PDF and print manuals from 1 single source</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

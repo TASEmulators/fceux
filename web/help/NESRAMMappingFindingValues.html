@@ -1,0 +1,279 @@
+﻿<html>
+	
+<head>
+	<title>NES RAM (Mapping/Finding Values)</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("NESRAMMappingFindingValues");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>NES RAM (Mapping/Finding Values)</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="FAQGuides.html">FAQ / Guides</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="FAQGuides.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="ROMHacking.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="Technicalinformation.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">NES Mapping</span></p>
+<p><br/></p>
+<p>This guide gives a map of the addresses in the NES cpu and explains each portion in detail. &nbsp;</p>
+<p><br/></p>
+<p>It also provides information for the basic layout of ram values in typical NES games. &nbsp;This info can be used to quickly map and find useful values in the game's ram.</p>
+<p><br/></p>
+<p><span class="rvts12">Contents</span></p>
+<p><br/></p>
+<p><span class="rvts41">Memory Map</span></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Gives a diagram of the 2A03 CPU memory map .</p>
+<p><br/></p>
+<p><span class="rvts41">2C02 PPU memory map</span></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Gives more detailed info about each section of the Memory map diagram</p>
+<p><br/></p>
+<p><span class="rvts41">Game Ram Details</span></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;On board RAM Map ($000-$07FF) Map (gives specific info on the how NES games typically layout their ram values)</p>
+<p><br/></p>
+<p><span class="rvts41">Online Resources</span></p>
+<p><a class="rvts18" href="http://en.wikibooks.org/wiki/NES_Programming">NES Programming - Wikipedia</a></p>
+<p><a class="rvts18" href="http://everything2.com/e2node/NES%2520memory%2520map">NES Memory Map</a></p>
+<p><br/></p>
+<p><span class="rvts12"><br/></span></p>
+<p><span class="rvts12">Memory Map </span><span class="rvts10">(NES RAM/ROM)</span></p>
+<p><br/></p>
+<p>2A03 CPU memory map</p>
+<p>2A03 CPU is a 6502-compatible CPU without the decimal mode (CLD and SED do nothing). It has an on-die sound generator, very limited DMA capability, and an input device controller that can be accessed through the 2A03 registers.</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</p>
+<p><span class="rvts36">6502 CPU Memory Map &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p>Address Range  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Size in bytes &nbsp; &nbsp; &nbsp; &nbsp;Notes (Page size = 256bytes)</p>
+<p><span class="rvts15">(Hexadecimal)</span><span class="rvts15"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts15"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts15"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts15"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts15"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p><br/></p>
+<p>$0000 - $07FF &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;2048 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Game Ram</p>
+<p><br/></p>
+<p>($0000 - $00FF) &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;256  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zero Page - Special Zero Page addressing modes give faster memory read/write access</p>
+<p>($0100 - $01FF) &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;256  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Stack memory</p>
+<p>($0200 - $07FF) &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;1536  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;RAM</p>
+<p><span class="rvts15"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p><br/></p>
+<p>$0800 - $0FFF  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;2048  &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;Mirror of $0000-$07FF  &nbsp; &nbsp; &nbsp; &nbsp;</p>
+<p><br/></p>
+<p>($0800 - $08FF) &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;256  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Zero Page</p>
+<p>($0900 - $09FF)  &nbsp; &nbsp; &nbsp; &nbsp;256  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Stack</p>
+<p>($0A00 - $0FFF) &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;1024 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Ram</p>
+<p><span class="rvts15"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p><br/></p>
+<p>$1000 - $17FF &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;2048 bytes &nbsp; &nbsp; &nbsp; &nbsp;Mirror of $0000-$07FF</p>
+<p><br/></p>
+<p>($1000 - $10FF) &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;256 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zero Page</p>
+<p>$1100 - $11FF &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;256 &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;Stack</p>
+<p>$1200 - $17FF  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;1024 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;RAM</p>
+<p><span class="rvts15"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p><br/></p>
+<p>$1800 - $1FFF  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;2048 bytes  &nbsp; &nbsp; &nbsp; &nbsp;Mirror of $0000-$07FF  &nbsp; &nbsp; &nbsp; &nbsp;</p>
+<p><br/></p>
+<p>($1800 - $18FF) &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;256 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zero Page</p>
+<p>($1900 - $19FF) &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;256 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Stack</p>
+<p>($1A00 - $1FFF)  &nbsp; &nbsp; &nbsp; &nbsp;1024 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;RAM</p>
+<p><span class="rvts15"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p><br/></p>
+<p>$2000 - $2007  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;8 bytes  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Input / Output registers</p>
+<p>$2008 - $3FFF  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;8184 bytes  &nbsp; &nbsp; &nbsp; &nbsp;Mirror of $2000-$2007 (mulitple times)</p>
+<p><span class="rvts15"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p><br/></p>
+<p>$4000 - $401F  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;32 bytes  &nbsp; &nbsp; &nbsp; &nbsp;Input / Output registers</p>
+<p>$4020 - $5FFF  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;8160 bytes  &nbsp; &nbsp; &nbsp; &nbsp;Expansion ROM - Used with Nintendo's MMC5 to expand the capabilities of VRAM.</p>
+<p><span class="rvts15"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p><br/></p>
+<p>$6000 - $7FFF  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;8192 bytes  &nbsp; &nbsp; &nbsp; &nbsp;SRAM - Save Ram used to save data between game plays.</p>
+<p><span class="rvts15"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p><br/></p>
+<p>$8000 - $BFFF  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;16384 bytes  &nbsp; &nbsp; &nbsp; &nbsp;PRG-ROM lower bank - executable code</p>
+<p>$C000 - $FFFF  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;16384 bytes  &nbsp; &nbsp; &nbsp; &nbsp;PRG-ROM upper bank - executable code</p>
+<p>$FFFA - $FFFB  &nbsp; &nbsp; &nbsp; &nbsp;2 bytes  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Address of Non Maskable Interrupt (NMI) handler routine</p>
+<p>$FFFC - $FFFD  &nbsp; &nbsp; &nbsp; &nbsp;2 bytes  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Address of Power on reset handler routine</p>
+<p>$FFFE - $FFFF  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;2 bytes  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Address of Break (BRK instruction) handler routine</p>
+<p><span class="rvts15"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts12">2C02 PPU memory map</span></p>
+<p><br/></p>
+<p>2C02 PPU is a character generator with sprites, designed by Nintendo specifically for the NES.</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; __________________________________________</p>
+<p>0000| Pattern table 0 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|</p>
+<p> &nbsp; &nbsp;|__________________________________________|</p>
+<p>1000| Pattern table 1 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|</p>
+<p> &nbsp; &nbsp;|__________________________________________| &nbsp; _____ _____</p>
+<p>2000| Nametable 0 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;| &nbsp;| &nbsp; &nbsp; | &nbsp; &nbsp; |</p>
+<p> &nbsp; &nbsp;|__________________________________________| &nbsp;| &nbsp;0 &nbsp;| &nbsp;1 &nbsp;|</p>
+<p>2400| Nametable 1 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;| &nbsp;|_____|_____|</p>
+<p> &nbsp; &nbsp;|__________________________________________| &nbsp;| &nbsp; &nbsp; | &nbsp; &nbsp; |</p>
+<p>2800| Nametable 2 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;| &nbsp;| &nbsp;2 &nbsp;| &nbsp;3 &nbsp;|</p>
+<p> &nbsp; &nbsp;|__________________________________________| &nbsp;|_____|_____|</p>
+<p>2c00| Nametable 3 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|</p>
+<p> &nbsp; &nbsp;|__________________________________________|</p>
+<p>3000| Mirror of $2000-$2eff &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|</p>
+<p> &nbsp; &nbsp;|__________________________________________|</p>
+<p>3f00| Palette &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|</p>
+<p> &nbsp; &nbsp;|__________________________________________|</p>
+<p>3f20| Mirrors of $3f00-$3f1f &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; |</p>
+<p> &nbsp; &nbsp;|__________________________________________|</p>
+<p><br/></p>
+<p>The NES PPU has enough RAM for two nametables (0 and 3); it brings some PPU nametable address lines to the cart edge so that the cart can decide whether to map 0 onto 2 and 1 onto 3 (vertical mirroring as in Super Mario Brothers and Contra) or 0 onto 1 and 2 onto 3 (horizontal mirroring as in Kid Icarus and Ikari), all screens to either 0 or 3 (as in many Rare games such as Battletoads and Jeopardy!), or all screens to RAM on the cartridge (as in Gauntlet). Split-screen games that scroll in all four directions (such as Super Mario Brothers 3 and Kirby's Adventure) often use vertical or one-screen mirroring (with a small amount of screen corruption at the sides due to tiles wrapping around the sides) and stick the status bar in some random unused area of the screen. </p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts12">Game RAM Details</span></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Mapping RAM/Finding Ram</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Written by: adelikat</p>
+<p><br/></p>
+<p>This guide is written specifically for finding useful values for TAS <a class="rvts18" href="MovieRecording.html">movie making</a>. &nbsp;</p>
+<p>It does not tell you how to use specific tools to find values. &nbsp;For that refer to <a class="rvts18" href="HexEditor.html">Hex editor</a>, <a class="rvts18" href="CheatSearch.html">Cheat Search</a>, and <span class="rvts18">RAM filter</span>.</p>
+<p><br/></p>
+<p>Most games use the basic on board ram. &nbsp;The address range of this ram is $0000-$07FF. &nbsp;This translates to 2048 possible ram values.</p>
+<p><br/></p>
+<p><span class="rvts41">Pages</span></p>
+<p><br/></p>
+<p>This ram is broken down into 8 pages. &nbsp;A "page" is a block of 256 ram values.</p>
+<p><br/></p>
+<p>I will refer to these values as such:</p>
+<p>Block 0 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$00xx &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;($0000-$00FF)</p>
+<p>Block 1 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$01xx &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;($0100-$01FF)</p>
+<p>Block 2 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$02xx &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;($0200-$02FF)</p>
+<p>Block 3 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$03xx &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;($0300-$03FF)</p>
+<p>Block 4 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$04xx &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;($0400-$04FF)</p>
+<p>Block 5 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$05xx &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;($0500-$05FF)</p>
+<p>Block 6 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$06xx &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;($0600-$06FF)</p>
+<p>Block 7 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$07xx &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;($0700-$07FF)</p>
+<p><br/></p>
+<p>Each block will be organized will similar data. &nbsp;For instance, all sprite data will be in the same block. &nbsp;Enemy/Player statistics (energy, coordinates, speed, etc.) will be in another. &nbsp;For instance, if you find the main character's HP and it is located in block 3, you know that the remaining stats for the character are also in that block. &nbsp;This can significantly cut down time when trying to find related values.</p>
+<p><br/></p>
+<p>There are always the following blocks:</p>
+<p><br/></p>
+<p><span class="rvts32">Sprite Data</span><span class="rvts32"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts32"> &nbsp; &nbsp; &nbsp; &nbsp;</span>Block 2</p>
+<p><br/></p>
+<p>I've yet to see map a game that does not use this block solely for sprite data. &nbsp;It will contain the "ID" numbers for all the items currently on the screen. &nbsp;Simply put, this data is precisely the data you see on the screen. &nbsp;For making TAS movies this is not useful data. &nbsp;If you are using cheat search and have narrowed it down your search to a few values, you can immediately discard any $02xx values.</p>
+<p><br/></p>
+<p>In games with a lot of sprite data, I've seen blocks 1 &amp; 3 also reserved for sprite data.</p>
+<p><br/></p>
+<p><span class="rvts32">Music &amp; Sound FX</span><span class="rvts32"> &nbsp; &nbsp; &nbsp; &nbsp;</span>Block 1 or 7, generally</p>
+<p><br/></p>
+<p>This one has more deviation, but almost all games reserve an entire block for memory allocated to the game's Music and Sound FX. &nbsp;Again, for TAS purposes these values are not *useful. By finding even 1 of these values, you can eliminate that block from your search possibilities. &nbsp; Finding which block is reserved for music is often quite simple with the <a class="rvts18" href="HexEditor.html">Hex editor</a>. &nbsp;Watching the ram values with the game playing, you can see which addresses "move to the beat". &nbsp;</p>
+<p><br/></p>
+<p>*Actually they can come in handy for "dancing to the beat"</p>
+<p><br/></p>
+<p><span class="rvts32">Player &amp; Enemy Stats</span> &nbsp; &nbsp; &nbsp; &nbsp;Blocks 1,3,4,5 generally (any or all of these)</p>
+<p><br/></p>
+<p>This is your "sweet spot" for movie making, as often you will be wanting to track the players speed or coordinates, enemy energy, or enemy coordinates.</p>
+<p><br/></p>
+<p>These values rarely (if at all) reside outside blocks 1, 3, 4, or 5. &nbsp;This knowledge already reduces your search possibilities in half!</p>
+<p><br/></p>
+<p><span class="rvts41">Rows </span></p>
+<p><span class="rvts41"><br/></span></p>
+<p>Each block is broken down into 16 "rows" of addresses. &nbsp;For example, in block 3, the first row is $030x ($0300-$030F).</p>
+<p><br/></p>
+<p>Each row of 16* will contain similar data. &nbsp;For instance all x coordinates will generally be in the same row. &nbsp;So xxx0 might be the main characters x position. &nbsp;xxxx1 would be "enemy 1" (1st enemy loaded onto the screen), and so on.</p>
+<p><br/></p>
+<p>The y coordinates would be in another row, x subpixel values in yet another row, etc.</p>
+<p><br/></p>
+<p>*Super Mario Bros. 2 (U) is a rare example that uses rows of 10</p>
+<p><br/></p>
+<p><span class="rvts41">Columns</span></p>
+<p><br/></p>
+<p>A column would be all the values of a block that share the same last digit. &nbsp;So a column would be 16 addresses such as $0300, $0310, $0320, etc.</p>
+<p><br/></p>
+<p>For enemy/player stats, columns usually refer to the same player or enemy.</p>
+<p><br/></p>
+<p>So for example, if a player's energy was stored in $0300. &nbsp;The remaining row will be other player/enemy's energy. &nbsp;</p>
+<p><br/></p>
+<p>If the next row ($031x) is x positions. &nbsp;$0310 would be the player's x position. &nbsp;The remaining positions of that row would correspond to the other player/enemy x positions in line with the hp values of the previous row.</p>
+<p><br/></p>
+<p><span class="rvts41">Example</span></p>
+<p><br/></p>
+<p>These distinctions are easier to see in a visual example. &nbsp;This is the enemy/player stats as they are mapped in the game <span class="rvts29">Teenage Mutant Ninja Turtles</span>.</p>
+<p><br/></p>
+<p><span class="rvts32">Block 4</span></p>
+<p><span class="rvts81"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts81"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts81"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;P &nbsp;W1 W2 W3 E1 E2 E3 E4 E5 E6 E7 E8 X &nbsp;X &nbsp;X &nbsp;X &nbsp;</span></p>
+<p><span class="rvts28">Sprite ID: &nbsp; &nbsp; &nbsp; &nbsp;040x: 09 00 00 00 00 9E 9E 9E 9E 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">ID counter: &nbsp; &nbsp; &nbsp; 041x: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">Timer/sp change: &nbsp;042x: 02 00 00 00 00 03 03 03 03 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">hit animation: &nbsp; &nbsp;043x: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">characteristics: &nbsp;044x: 00 00 00 00 00 8D 8D 8D 8D 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">characteristics: &nbsp;045x: C2 00 00 00 00 C2 C2 C3 C3 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">Y position: &nbsp; &nbsp; &nbsp; 046x: 4C 00 00 00 00 B4 B4 64 B4 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">Y subpixel: &nbsp; &nbsp; &nbsp; 047x: 34 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">X position: &nbsp; &nbsp; &nbsp; 048x: 50 00 00 00 00 79 B9 CC CC 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">X subpixel: &nbsp; &nbsp; &nbsp; 049x: 80 00 00 00 00 C0 C0 C0 00 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">Not used: &nbsp; &nbsp; &nbsp; &nbsp; 04ax: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">Y pix speed: &nbsp; &nbsp; &nbsp;04bx: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">Y subpix speed: &nbsp; 04cx: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">Not used: &nbsp; &nbsp; &nbsp; &nbsp; 04dx: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">X pix speed: &nbsp; &nbsp; &nbsp;04ex: 00 00 00 00 00 01 01 FE FE 00 00 00 00 00 00 00</span></p>
+<p><span class="rvts28">X subpix speed: &nbsp; 04fx: 00 00 00 00 00 60 60 A0 A0 00 00 00 00 00 00 00</span></p>
+<p><br/></p>
+<p>P = current turtle (player)</p>
+<p>W = weapon (up to 3 on the screen at one time)</p>
+<p>E = enemy (up to 8 on the screen at one time)</p>
+<p>X = no use</p>
+<p><br/></p>
+<p>E1 = "Enemy slot 1" which will be the first enemy on the screen loaded into memory. &nbsp;The 2nd will be placed in "Enemy slot 2". &nbsp;When enemy 1 is removed from memory (killed or goes off screen), the next enemy will be loaded into that slot. &nbsp;Enemy's always take the lowest available slot when loaded. &nbsp;Note: usually enemy slots are in reverse order. &nbsp;So the first addresses is usually the last enemy slot loaded into memory. &nbsp;TMNT is an exception.</p>
+<p><br/></p>
+<p>All object (player, weapon, enemy) characteristics reside in block 4.</p>
+<p>Each row is a different characteristic of each object on the screen (040x refers to a sprite ID of an object)</p>
+<p>Each column corresponds to a specific object on the screen. &nbsp;(All 04x0 's refer to the player).</p>
+<p><br/></p>
+<p>See also, <a class="rvts18" href="MemoryWatch.html">Memory Watch</a>, <a class="rvts18" href="HexEditor.html">Hex Editor</a>,<a class="rvts18" href="CheatSearch.html"> Cheat Search</a>, <span class="rvts18">Ram Filter</span>, <a class="rvts18" href="MovieRecording.html">Movie Making</a>, <a class="rvts18" href="ToolAssistedSpeedruns.html">Tool Assisted Speedruns</a></p>
+<p><br/></p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com">Free CHM Help documentation generator</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

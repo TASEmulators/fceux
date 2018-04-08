@@ -1,0 +1,136 @@
+﻿<html>
+	
+<head>
+	<title>What's New? 2.1.2 (changelog)</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("WhatsNew212");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>What's New? 2.1.2 (changelog)</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="WhatsNew213.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="WhatsNew211.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">What's New? </span><span class="rvts20">2.1.2</span></p>
+<p>Released November 3, 2009</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts21">The 2.1.2 release fixes some bugs of 2.1.0a, increases game compatibility, launches a new PPU core, and adds usability enhancements to the windows port.</span></p>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts22">Common </span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">New PPU is now functional! &nbsp;You can access it by changing the newPPU flag in the config file. &nbsp;Windows users can access it from Config &gt; PPU &gt; New PPU</span></li>
+<li><span class="rvts21">Dragon Ball Z 3 now playable again</span></li>
+<li><span class="rvts21">Fixed action 52 game that was broken in post-FCEUX 2.0.3 versions</span></li>
+<li><span class="rvts21">Mapper 253 mostly implemented</span></li>
+<li><span class="rvts21">Mapper 43 fixed bug</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23">Win32</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Imported NSF features from FCEUXDSP-NSF. &nbsp;Debugging tools are now compatible with NSF files.</span></li>
+<li><span class="rvts21">Movies now record FDS disk swapping commands</span></li>
+<li><span class="rvts21">Movie play dialog displays movie time based on ~60.1 (~50.1 PAL) instead of 60 &amp; 50</span></li>
+<li><span class="rvts21">Ram Watch and Ram Search dialogs imported from GENS rerecording</span></li>
+<li><span class="rvts21">Ram Filter dialog removed (now redundant compared to both cheat search and ram search)</span></li>
+<li><span class="rvts21">Lua script window ported from GENS</span></li>
+<li><span class="rvts21">Fix for the directory overrides bug that caused overrides to reset</span></li>
+<li><span class="rvts21">Debugger: &nbsp;.deb file saving/loading restored</span></li>
+<li><span class="rvts21">"Save config file" menu item</span></li>
+<li><span class="rvts21">"New PPU" menu item</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts22">Minor Bug fixes</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Minor fixes to recent menus</span></li>
+<li><span class="rvts21">Fixed a bug that prevented the Map Hotkeys dialog's X button from closing the dialog</span></li>
+<li><span class="rvts21">Restored DPCM Logging when Code/Data Logger is active</span></li>
+<li><span class="rvts21">Memory watch - Save Changes Prompt - clicking save will default to quicksave first and save as 2nd (instead of always defaulting to save as)</span></li>
+<li><span class="rvts21">Made Trace Logger refresh adequately when using stepping options in the debugger.</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts23">Lua</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">joypad.set() fixed. &nbsp;True,False, and Nil now work properly for all buttons. &nbsp;In addition there is a new "invert" option.</span></li>
+<li><span class="rvts21">Lua5.1.dll no longer required to use lua.</span></li>
+<li><span class="rvts21">fceu.unpause()</span></li>
+<li><span class="rvts21">Added savestate.registerload(), savestate.registersave(), savestate.loadscriptdata()</span></li>
+<li><span class="rvts21">emu. library, has all the same functions as fceu. library for better compatibility between lua emulators</span></li>
+<li><span class="rvts21">Many additional function names to increase consistency with other lua emulators</span></li>
+<li><span class="rvts21">Added movie.recording() and movie.playing()</span></li>
+<li><span class="rvts21">Added memory.getregister() and memory.setregister()</span></li>
+<li><span class="rvts21">Added gui.popup and input.popup</span></li>
+<li><span class="rvts21">Added savestate.registerload(), savestate.registersave(), and savestate.loadscriptdata()</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts23">New Lua Scripts</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">A multi-track movie recording tools written by FatRatKnight. &nbsp;Allows input for different players to be recorded separately.</span></li>
+<li><span class="rvts21">A rewinding tool by Antony Lavelle</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour">Easily create Help documents</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

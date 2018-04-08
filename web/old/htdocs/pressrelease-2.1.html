@@ -1,0 +1,173 @@
+<pre>
+29 March 2009
+
+FCEUX 2.1 release
+
+The 2.1 is a major new release that incorporates new mappers and mapper fixes from FCEU-mm.  In addition it offers a multitude of bug fixes, and 
+feature enhancements to both the Win32 and SDL ports.
+
+Major Bug / Crash Bug Fixes
+
+*Fixed throttling problems that resulted on AMD Dualcore processors. (Caused FCEUX to appear to be in turbo mode).
+*Fix major crash issue where NROM game (such as SMB) savestates were writing erroneous information if a non NROM game was loaded prior.
+*Fixed a bug that caused a new sav file to not get created when loading a 2nd battery backed game.
+*Fix Directory Overrides so to allow users to have no override.  Also fixes directory override reset bug.
+
+Minor Bug fixes
+
+*Hotkeys - prevent "Hotkey explosion" where some laptop keys set off all unassigned hotkeys
+*Timing - "disable throttling when sound is off" now only affects FCEUX when sound is off
+*Clip Left and Right sides taken into account when drawing on screen (record/play/pause, lag & frame counters, messages, etc)
+*Fixed bug where having sound off and Mute turbo caused chirps when toggling
+*Video settings - fixed bug when both aspect ratio correction and special scaling 3x are set, video was getting resized incorrectly
+*Auto-save cleanup -prevent loading an auto-save from previous session.  Added flags for enabling auto-save menu item.
+*Fixed issues related to big endian compiling.
+*Fix bug so that Escape can now be assigned as a hotkey
+*Fixed bug in screenshot numbering that caused numbering to not reset when changing games.
+
+SDL
+*SDL Movie subtitle support and subtitle toggle hotkey added.
+*SDL Added fcm to fm2 converter tool to SDL version.
+*SDL Improved the SDL sound code; drastically improves quality of sound.
+*SDL Savestate slots are now mappable.
+*SDL Major updates to SDL documentation
+*SDL Added Shift+M for toggling automatic movie backups.
+*SDL Added option to mute FCEUX for avi capturing, check the documentation for more details.
+*SDL Added --noconfig command line option
+*SDL Frame Advance Skip Lag frames toggle implemented
+
+New Features Win32
+
+*The latest mappers and mapper fixes from FCEU-mm.  Adds support for many new games such as Warioland II (Unl), Shu Qi Yu,  and Street Dance
+*Full screen mode fixed!  Also, Alt+Enter properly toggles full screen.
+*Individual control for sound channels! (See sound config for details).
+*Undo/Redo Savestate/Loadstate features installed!  No more loss of data to unintentional presses.  (See getting started for details).
+*Movie subtitles can now be included in .fm2 files.  See .fm2 documentation for details and Movie options for details on customizing.
+*Auto-backup for movie files.  (See movie options for details).
+*A Ram change monitor for the Memory watch dialog. (see memwatch for details).
+*Frame counter works even without a movie loaded.
+*AVI Directory Override option.
+
+GUI / Menu Enhancements
+
+*A right-click context menu added!  Includes many commonly used items for a variety of situations.
+*Menu items that are hotkey mappable now show their current hotkey mapping
+*Major overhaul to the Menu organization.
+*All FCEUX features are now accessible in the menu
+*Alt Menu Shortcuts properly configured
+*Menu items are properly grayed when not useable
+*All movie related menu items moved to a Movie options dialog
+*Removed hard-coded Accel keys and replaced with re-mappable hotkeys (Open & Close ROM)
+*Drag & Drop for .fm2 and .lua files
+*Many new functions added to the context menu (See context menu for details)
+*New Mappable Hotkeys: Open Cheats, Open ROM, Close ROM, Undo/Redo savestate, Toggle Movie Subtitles
+
+Lua
+
+*Added input.get() !  Returns the mouse info and all keyboard buttons pressed by the user.
+*Fixed joypad.set().  False now sets a button to off.  Nil does not affect the button at all (allowing the user to still control it).
+*gui.text() Increased height (to approx. 7 lines).
+*speedmode("turbo") now turns on turbo (which employs frame-skipping) rather than max speed.
+*memory.readbyte will recognize frozen addresses (cheats).
+*movie.framecount() always return a number, even when no movie is playing (since the frame counter is implemented without a movie loaded).
+*Added FCEU.poweron()
+*Added FCEU.softreset()
+*Added FCEU.lagged()
+*Added FCEU.lagcount()
+*Added FCEU.getreadonly()
+*Added FCEU.setreadonly()
+*Added FCEU.fceu_setrenderplanes(sprites, background)
+*Added movie.active()
+*Added movie.rerecordcount()
+*Added movie.length()
+*Added movie.getname()
+*Added movie.playbeginning()
+*Added -lua command line argment, loads a Lua script on startup
+*Added zapper.read() - returns the zapper (mouse) data.  (Currently does return zapper data in movie playback).
+*Added joypad.write and joypad.get for naming consistency.
+*Added rom.readbyte()
+*Added rom.readbytesigned()
+
+Sound Config
+
+*Turning sound off disabled sound config controls
+*Re-enabled sound buffer time slider control
+
+Hex Editor
+
+*Freezing ram addresses automatically updates the Cheats dialog if it is open.
+* Added prevention from freezing more than 256 addresses at once (doing so caused crash bugs).
+*Dialog remembers window size.
+*Dump Rom & Dump PPU to file Dialogs use ROM to build default filename
+*Maximize and minimize buttons added.
+*Help menu item added
+
+Memory Watch
+
+*Dialog now includes Ram change monitoring. (see memwatch for details).
+*Dialog is now collapsible to 1 column.
+*No longer crashes when attempting to load an invalid file from the recent file menu.
+*Cancel option added to the save changes dialog.
+*Memory address values that are frozen by the debugger or hex editor are displayed in blue.
+*Fixed bug that caused dialog to "disappear" due to saving -32000 as its window position.
+*Save as dialog uses ROM name to build a default memory watch filename if there was no last used memory watch filename
+*Drag and drop for .txt (memory watch) files.
+*Minor menu and hotkey fixes.
+*Watch values now compatible with custom windows dialog colors.
+
+Debugger
+
+*Shows scanlines and PPU pixel values
+*Shows scanlines even while in VBlank
+*Added a Run Line button (runs 1 scanline per click)
+*Run 128 Lines button (runs 128 scanlines per click)
+*Number of active cheats listed.
+*Cheats list automatically updated if ram addresses are frozen in the hex editor.
+*Fixed bug that caused dialog to "disappear" due to saving -32000 as its window position.
+*Debugger now has a minimum valid size
+*Added "Restore original window size" button
+
+PPU Viewer
+
+*Default refresh value set to 15
+*Refresh value stored in the .cfg file
+
+Nametable Viewer
+
+*Default refresh value set to 15
+*Refresh value stored in the .cfg file
+
+Trace Logger
+
+*Fixed bug where user can't scroll the log window while it is auto-updating.
+*Changed message about F2 pause (left over from FCEUXDSP) to display the current hotkey mapping.
+
+Text Hooker
+
+*Saving a .tht file no longer crashes
+*Dialog updates every frame
+*Initialization error checking reinstalled,
+*Dialog remembers window position
+*Fixed bug where canceling save as produces an error message.
+*Save As produces default filename based on the current ROM
+
+Message Log
+
+*Remembers X,Y position
+*Resized width and height
+*Allowed more lines of text to appear on the screen at once.
+
+Metadata
+
+*Remembers window position
+*Can be called from the context menu if a movie is loaded (see context menu for details).
+
+TASEdit
+
+*added help menu item
+*disabled menu items that are not currently implemented.
+
+Turbo
+*Turbo now employs frame skip, greatly increasing its speed
+*The mute turbo option completely bypasses sound processing (another big speed boost)
+*Turbo now works with the Lazy wait for VBlank sync setting

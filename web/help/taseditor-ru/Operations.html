@@ -1,0 +1,716 @@
+﻿<html>
+	
+<head>
+	<title>Операции</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "index.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("Operations");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Операции</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Reference.html">Справочник</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Reference.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Navigation.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="LuaAPI.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts20">Операции</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps10"><span class="rvts22">При внесении любых изменений в мувик Тасэдитор регистрирует эти изменения в Журнале Истории. В текст каждой записи Журнала добавляется время внесения изменений, а также номер ключевого кадра (или начало и конец региона кадров), где произошли изменения.</span></p>
+<p class="rvps10"><span class="rvts22">Здесь перечислены все возможные типы записей в Журнал Истории, а также дана примерная оценка частоты использования соответствующих операций.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<div class="rvps21"><table width="420" border="1" cellpadding="0" cellspacing="0" style="border-color: #000000 #d3c4af #d3c4af #000000; border-style: solid;">
+<tr valign="middle">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #0000ff; width: 132px; height: 10px;"><p class="rvps5"><span class="rvts69">Изменение Ввода</span></p>
+</td>
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #0000ff; width: 150px; height: 10px;"><p class="rvps5"><span class="rvts69">Изменение Маркеров</span></p>
+</td>
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #0000ff; width: 124px; height: 10px;"><p class="rvps5"><span class="rvts69">Прочее</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Set">Set</a></p>
+</td>
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#MarkerSet">Marker Set</a></p>
+</td>
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ede4e4; width: 124px; height: 10px;"><p class="rvps5"><span class="rvts68">Initialization</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Unset">Unset</a></p>
+</td>
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#MarkerRemove">Marker Remove</a></p>
+</td>
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ede4e4; width: 124px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Undefined">Undefined</a></p>
+</td>
+</tr>
+<tr valign="middle">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Pattern">Pattern</a></p>
+</td>
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#MarkerPattern">Marker Pattern</a></p>
+</td>
+<td rowspan="12" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; width: 124px;"><p class="rvps5"><span class="rvts67"><br/></span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Clear">Clear</a></p>
+</td>
+<td rowspan="3" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ffffff; width: 150px;"><br/>
+</td>
+</tr>
+<tr valign="middle">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Cut">Cut</a></p>
+</td>
+</tr>
+<tr valign="middle">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Paste">Paste</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#PasteInsert">PasteInsert</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Clone">Clone</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Insert">Insert</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#InsertNum">Insert#</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Delete">Delete</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Truncate">Truncate</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Record">Record</a></p>
+</td>
+<td rowspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; width: 150px; height: 10px;"><p class="rvps5"><span class="rvts67"><br/></span></p>
+</td>
+</tr>
+<tr valign="top">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Import">Import</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Branch">Branch</a></p>
+</td>
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ede4e4; width: 124px;"><p class="rvps5"><a class="rvts68" href="Operations.html#Bookmark">Bookmark</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td rowspan="8" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; width: 132px; height: 10px;"><p class="rvps5"><span class="rvts67"><br/></span></p>
+</td>
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#MarkerBranch">Marker Branch</a></p>
+</td>
+<td rowspan="9" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; width: 124px;"><p class="rvps5"><span class="rvts6"><br/></span></p>
+</td>
+</tr>
+<tr valign="top">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#MarkerRename">Marker Rename</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#MarkerDrag">Marker Drag</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#MarkerSwap">Marker Swap</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#MarkerShift">Marker Shift</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#LUAMarkerSet">LUA Marker Set</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#LUAMarkerRemove">LUA Marker Remove</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#LUAMarkerRename">LUA Marker Rename</a></p>
+</td>
+</tr>
+<tr valign="top">
+<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts68" href="Operations.html#LUAChange">LUA Change</a></p>
+</td>
+</tr>
+</table>
+</div>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps10"><a name="Initialization"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Initialization</span></p>
+<p class="rvps10"><span class="rvts48">Категория: прочее</span></p>
+<p class="rvps10"><span class="rvts22">Эта запись создаётся автоматически при создании Журнала Истории.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">при создании нового проекта</span></li>
+<li class="rvps10"><span class="rvts22">при открытии компактно сохранённого проекта, в котором нет Журнала Истории</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:24:53 Initialization</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">очень редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после нулевого кадра.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a name="Undefined"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Undefined</span></p>
+<p class="rvps10"><span class="rvts48">Категория: прочее</span></p>
+<p class="rvps10"><span class="rvts22">Неопределённое изменение. В Тасэдиторе 1.0 эта запись не используется.</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">никогда</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a name="Set"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Set</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Ввода</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при установке одного или нескольких кнопочных нажатий в один или несколько кадров.</span></p>
+<p class="rvps10"><span class="rvts22">The record is created when one or more buttonpresses appear in the movie.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps29" style="text-indent: 30px"><span class="rvts22">щелчок по пустой клетке Ввода в Piano Roll</span></li>
+<li class="rvps29" style="text-indent: 30px"><span class="rvts22">рисование Ввода при помощи щелчка по пустой клетке и дальнейшего перемещения курсора мыши без отпускания левой кнопки</span></li>
+<li class="rvps29" style="text-indent: 30px"><span class="rvts34">Shift</span><span class="rvts22"> + щелчок по пустой клетке </span><span class="rvts22">Ввод</span><span class="rvts22">а</span></li>
+<li class="rvps29" style="text-indent: 30px"><span class="rvts22">щелчок по символу в Заголовке Piano Roll (когда есть Выделение)</span></li>
+<li class="rvps29" style="text-indent: 30px"><span class="rvts22">нажатие кнопки виртуального джойстика </span><span class="rvts22">(когда есть Выделение)</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:25:18 Set 15-21</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">очень часто</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после первого же кадра, где изменился </span><span class="rvts22">Ввод</span><span class="rvts43">.</span></p>
+<p class="rvps11"><span class="rvts23"><br/></span></p>
+<p class="rvps11"><a name="Unset"></a>
+<span class="rvts23"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Unset</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Ввода</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при снятии </span><span class="rvts22">одного или нескольких кнопочных нажатий</span><span class="rvts22"> с одного или нескольких кадров.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">щелчок по заполненной клетке </span><span class="rvts22">Ввод</span><span class="rvts22">а в Piano Roll</span></li>
+<li class="rvps29" style="text-indent: 30px"><span class="rvts22">стирание Ввода при помощи щелчка по заполненной клетке и дальнейшего перемещения курсора мыши без отпускания левой кнопки</span></li>
+<li class="rvps10"><span class="rvts34">Shift</span><span class="rvts22"> + щелчок по заполненной клетке </span><span class="rvts22">Ввод</span><span class="rvts22">а в Piano Roll</span></li>
+<li class="rvps10"><span class="rvts22">щелчок по символу в Заголовке Piano Roll </span><span class="rvts22">(когда есть Выделение)</span></li>
+<li class="rvps10"><span class="rvts22">нажатие кнопки виртуального джойстика </span><span class="rvts22">(когда есть Выделение)</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:25:22 Unset 21</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">очень часто</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после первого же кадра, где изменился </span><span class="rvts22">Ввод</span><span class="rvts43">.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="Pattern"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Pattern</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Ввода</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при установке нажатий/отпусканий одной кнопки по шаблону.</span></p>
+<p class="rvps10"><span class="rvts22">В текст записи добавляется название использованного шаблона.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps24" style="text-indent: 30px"><span class="rvts34">Alt</span><span class="rvts22"> + щелчок по любой клетке </span><span class="rvts22">Ввод</span><span class="rvts22">а в Piano Roll</span></li>
+<li class="rvps24" style="text-indent: 30px"><span class="rvts34">Alt</span><span class="rvts22"> + </span><span class="rvts22">рисование Ввода перемещением курсора мыши с зажатой левой кнопкой</span></li>
+<li class="rvps10"><span class="rvts34">Alt</span><span class="rvts22"> + щелчок по символу в Заголовке Piano Roll </span><span class="rvts22">(когда есть Выделение)</span></li>
+<li class="rvps10"><span class="rvts34">Alt</span><span class="rvts22"> + нажатие кнопки виртуального джойстика </span><span class="rvts22">(когда есть Выделение)</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:25:40 Pattern 21-30 Alternating (1010...)</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после первого же кадра, где изменился </span><span class="rvts22">Ввод</span><span class="rvts43">.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="Clear"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Clear</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Ввода</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при снятии нажатий всех кнопок с одного или нескольких кадров.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">нажатие клавиши </span><span class="rvts34">Delete</span><span class="rvts22"> </span><span class="rvts22">(когда есть Выделение)</span></li>
+<li class="rvps10"><span class="rvts22">выбор в меню Тасэдитора пункта </span><span class="rvts26">Edit -&gt; Clear</span><span class="rvts22"> </span><span class="rvts22">(когда есть Выделение)</span></li>
+<li class="rvps10"><span class="rvts22">щелчок правой кнопкой </span><span class="rvts22">по выделенному номеру кадра </span><span class="rvts22">и выбор контекстном меню пункта </span><span class="rvts26">Clear</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:26:51 Clear 15-20</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">средне</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после первого же кадра, где изменился Ввод.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="Cut"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Cut</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Ввода</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при снятии нажатий всех кнопок с одного или нескольких кадров при помощи операции </span><span class="rvts22">Cut ("Вырезать" – копирование данных в Буфер Обмена).</span></p>
+<p class="rvps10"><span class="rvts22">Эта операция идентична операции </span><a class="rvts28" href="Operations.html#Clear">Clear</a><span class="rvts22">, за исключением того, что Ввод перед очисткой попадают в Буфер Обмена.</span></p>
+<p class="rvps10"><span class="rvts37">Замечание:</span><span class="rvts22"> хотя последствия операции Cut можно откатывать, данные в Буфере Обмена при этом не восстановятся.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">нажатие клавиатурного акселератора </span><span class="rvts34">Ctrl + X</span><span class="rvts22"> (когда есть Выделение)</span></li>
+<li class="rvps10"><span class="rvts22">выбор в меню Тасэдитора пункта </span><span class="rvts26">Edit -&gt; Cut</span><span class="rvts22"> (когда есть Выделение)</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:27:05 Cut 21-23</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после первого же кадра, где изменился Ввод.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="Paste"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Paste</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Ввода</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при вставке данных из Буфера Обмена в мувик (поверх старых данных).</span></p>
+<p class="rvps10"><span class="rvts22">В зависимости от состояния галочки "Superimpose" старый Ввод на этих кадрах либо очищается, либо объединяется с новым. В Заголовке Piano Roll вспыхивают символы кнопок, для которых было установлено хотя бы одно нажатие в выделенных кадрах.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">нажатие клавиатурного акселератора </span><span class="rvts34">Ctrl + V</span><span class="rvts22"> (когда есть Выделение)</span></li>
+<li class="rvps10"><span class="rvts22">выбор в меню Тасэдитора пункта </span><span class="rvts26">Edit -&gt; Paste</span><span class="rvts22"> (когда есть Выделение)</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:27:11 Paste 21</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">средне/редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после первого же кадра, где изменился Ввод.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="PasteInsert"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">PasteInsert</span></p>
+<p class="rvps10"><span class="rvts48">Категории: изменение Ввода, изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при вставке данных из Буфера Обмена в мувик (с раздвиганием старых данных). Также смещаются вниз Маркеры, если они привязаны.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">нажатие клавиатурного акселератора </span><span class="rvts34">Ctrl + Shift + V</span><span class="rvts22"> (когда есть Выделение)</span></li>
+<li class="rvps10"><span class="rvts22">выбор в меню Тасэдитора пункта </span><span class="rvts26">Edit -&gt; PasteInsert</span><span class="rvts22"> (когда есть Выделение)</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:27:16 PasteInsert 21</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после первого же кадра, где изменился Ввод или Лаг.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="Clone"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Clone</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Ввода, изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при вставке копий одного или нескольких кадров посреди мувика, что приводит к сдвиганию Ввода (и Маркеров, если они привязаны к Вводу) вниз.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">нажатие клавиатурного акселератора </span><span class="rvts34">Ctrl + Insert</span><span class="rvts22"> </span><span class="rvts22">(когда есть Выделение)</span></li>
+<li class="rvps10"><span class="rvts22">выбор в меню Тасэдитора пункта </span><span class="rvts26">Edit -&gt; Clone</span><span class="rvts22"> </span><span class="rvts22">(когда есть Выделение)</span></li>
+<li class="rvps10"><span class="rvts22">щелчок правой кнопкой </span><span class="rvts22">по выделенному номеру кадра</span><span class="rvts22"> и выбор в контекстном меню пункта </span><span class="rvts26">Clone</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:27:34 Clone 23</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">часто</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после первого же кадра, где изменился Ввод или Лаг.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="Insert"></a>
+<span class="rvts66"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Insert</span></p>
+<p class="rvps10"><span class="rvts48">Категории: изменение Ввода, изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при вставке одного или нескольких пустых кадров посреди мувика, что приводит к сдвиганию </span><span class="rvts22">Ввод</span><span class="rvts22">а (и Маркеров, если они привязаны к </span><span class="rvts22">Ввод</span><span class="rvts22">у) вниз.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">нажатие клавиатурного акселератора </span><span class="rvts34">Ctrl + Shift + Insert</span><span class="rvts22"> </span><span class="rvts22">(когда есть Выделение)</span></li>
+<li class="rvps10"><span class="rvts22">выбор в меню Тасэдитора пункта </span><span class="rvts26">Edit -&gt; Insert</span><span class="rvts22"> </span><span class="rvts22">(когда есть Выделение)</span></li>
+<li class="rvps10"><span class="rvts22">щелчок правой кнопкой по выделенному номеру кадра и выбор в контекстном меню пункта </span><span class="rvts26">Insert</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:25:58 Insert 21</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">средне</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после первого же кадра, где изменился </span><span class="rvts22">Ввод</span><span class="rvts22"> или Лаг</span><span class="rvts43">.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="InsertNum"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Insert#</span></p>
+<p class="rvps10"><span class="rvts48">Категории: изменение Ввода, изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при вставке заданного количества пустых кадров посреди мувика, что приводит к сдвиганию </span><span class="rvts22">Ввод</span><span class="rvts22">а (и Маркеров, если они привязаны к </span><span class="rvts22">Ввод</span><span class="rvts22">у) вниз.</span></p>
+<p class="rvps10"><span class="rvts22">Если в Piano Roll есть Выделение, </span><span class="rvts22">то требуемое количество пустых строк появляется перед Курсором Выделения</span><span class="rvts22">. </span><span class="rvts22">Если Выделения нет, то требуемое количество пустых строк появляется перед Курсором Проигрывателя.</span></p>
+<p class="rvps10"><span class="rvts22">В текст записи добавляется количество вставленных кадров.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">нажатие клавиши </span><span class="rvts34">Insert</span><span class="rvts22"> и введение требуемого числа кадров</span></li>
+<li class="rvps10"><span class="rvts22">выбор в меню Тасэдитора пункта </span><span class="rvts26">Edit -&gt; Insert # of Frames</span></li>
+<li class="rvps10"><span class="rvts22">щелчок правой кнопкой </span><span class="rvts22">по выделенному номеру кадра </span><span class="rvts22">и выбор в контекстном меню пункта </span><span class="rvts26">Insert # of Frames</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:26:09 Insert#4 29</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после первого же кадра, где изменился </span><span class="rvts22">Ввод</span><span class="rvts22"> или Лаг</span><span class="rvts43">.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="Delete"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Delete</span></p>
+<p class="rvps10"><span class="rvts48">Категории: изменение Ввода, изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при удалении одного или нескольких кадров посреди мувика, что приводит к сдвиганию </span><span class="rvts22">Ввод</span><span class="rvts22">а (и Маркеров, если они привязаны к </span><span class="rvts22">Ввод</span><span class="rvts22">у) вверх.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">нажатие клавиатурного акселератора </span><span class="rvts34">Ctrl + Delete</span><span class="rvts22"> </span><span class="rvts22">(когда есть Выделение)</span></li>
+<li class="rvps10"><span class="rvts22">выбор в меню Тасэдитора пункта </span><span class="rvts26">Edit -&gt; Delete</span><span class="rvts22"> </span><span class="rvts22">(когда есть Выделение)</span></li>
+<li class="rvps10"><span class="rvts22">щелчок правой кнопкой </span><span class="rvts22">по выделенному номеру кадра </span><span class="rvts22">и выбор в контекстном меню пункта </span><span class="rvts26">Delete</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:26:12 Delete 33</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">часто</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после первого же кадра, где изменился Ввод</span><span class="rvts22"> или Лаг</span><span class="rvts43">.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="Truncate"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Truncate</span></p>
+<p class="rvps10"><span class="rvts48">Категории: изменение Ввода, изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при усечении хвоста мувика, что приводит удалению Ввода (и Маркеров, если они привязаны к Вводу), начиная с указанной строки. Е</span><span class="rvts22">сли в Piano Roll есть Выделение, мувик усекается сразу после первого выделенного кадра. Если выделения нет, то мувик усекается сразу после Курсора Проигрывателя.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">выбор в меню Тасэдитора пункта </span><span class="rvts26">Edit -&gt; Truncate movie</span></li>
+<li class="rvps10"><span class="rvts22">щелчок правой кнопкой </span><span class="rvts22">по выделенному номеру кадра </span><span class="rvts22">и выбор в контекстном меню пункта </span><span class="rvts26">Truncate movie</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:26:28 Truncate 42</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">очень редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после кадра усечения мувика.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="Record"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Record</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Ввода</span></p>
+<p class="rvps10"><span class="rvts22">Эта запись в Журнал Истории создаётся при Записывании Ввода в мувик с помощью виртуальных джойстиков в режиме Recording.</span></p>
+<p class="rvps10"><span class="rvts22">Новый Ввод появляется на кадре, где находится Курсор Проигрывателя. В зависимости от состояния галочки "Superimpose" старый Ввод на этом кадре либо очищается, либо объединяется с новым. </span><span class="rvts22">В Заголовке Piano Roll вспыхивают символы кнопок, для которых было установлено нажатие.</span></p>
+<p class="rvps10"><span class="rvts22">В текст записи добавляются номера виртуальных джойстиков, Ввод которых был изменён.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">нажатие кнопок виртуального джойстика (когда отжата пауза эмулятора, и включен режим Recording)</span></li>
+<li class="rvps10"><span class="rvts22">отсутствие нажатий кнопок виртуального джойстика (когда отжата пауза эмулятора, и включен режим Recording)</span></li>
+<li class="rvps10"><span class="rvts22">нажатие кнопок виртуального джойстика одновременно с нажатием хоткея </span><span class="rvts27">Frame Advance</span><span class="rvts22"> (когда эмулятор стоит на паузе, и включен режим Recording)</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:28:01 Record(1P) 18-24</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">средне</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после Курсора Проигрывателя.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="Import"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Import</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Ввода</span></p>
+<p class="rvps10"><span class="rvts22">Эта запись создаётся при импорте Ввода из любого другого FM2/FM3-файла.</span></p>
+<p class="rvps10"><span class="rvts22">Текущий Ввод мувика полностью заменяется на Ввод из выбранного файла. Маркеры остаются без изменений</span></p>
+<p class="rvps10"><span class="rvts22">В текст записи добавляется имя файла, из которого был взят Ввод. Номер кадра в этих записях отсутствует, так как заменяется весь Ввод, начиная с нулевого кадра.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">выбор пункта меню </span><span class="rvts26">File -&gt; Import Input</span><span class="rvts22"> и открытие файла-источника</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:28:53 Import Battletoads-WIP1.fm2</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">очень редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после первого же кадра, где изменился Ввод.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="Bookmark"></a>
+<span class="rvts43"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Bookmark0</span></p>
+<p class="rvps11"><span class="rvts23">Bookmark1</span></p>
+<p class="rvps11"><span class="rvts23">Bookmark2</span></p>
+<p class="rvps11"><span class="rvts23">Bookmark3</span></p>
+<p class="rvps11"><span class="rvts23">Bookmark4</span></p>
+<p class="rvps11"><span class="rvts23">Bookmark5</span></p>
+<p class="rvps11"><span class="rvts23">Bookmark6</span></p>
+<p class="rvps11"><span class="rvts23">Bookmark7</span></p>
+<p class="rvps11"><span class="rvts23">Bookmark8</span></p>
+<p class="rvps11"><span class="rvts23">Bookmark9</span></p>
+<p class="rvps10"><span class="rvts48">Категория: прочее</span></p>
+<p class="rvps10"><span class="rvts22">Эта запись создаётся при изменении данных одного слота Закладок.</span></p>
+<p class="rvps10"><span class="rvts22">Пересохранение Закладки в уже заполненный слот срабатывает, только если новые данные отличаются от имеющихся в данном слоте. Например, если отличается кадр Закладки или мувик её ответвления.</span></p>
+<p class="rvps10"><span class="rvts22">При успешном сохранении Закладки её ответвление становится текущим, а в окне эмулятора появляется сообщение "Branch # saved."</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">нажатие хоткея "сохранить состояние": </span><span class="rvts26">Shift +</span><span class="rvts22"> клавиша в ряду от </span><span class="rvts27">F1</span><span class="rvts22"> до </span><span class="rvts27">F10</span></li>
+<li class="rvps10"><span class="rvts22">щелчок правой кнопкой мыши по любой строке Списка Закладок</span></li>
+<li class="rvps10"><span class="rvts22">щелчок правой кнопкой мыши по любой иконке Закладок в Дереве ответвлений</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:28:53 Bookmark1 10</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">часто</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона не усекается.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="Branch"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Branch0 to</span></p>
+<p class="rvps11"><span class="rvts23">Branch1 to</span></p>
+<p class="rvps11"><span class="rvts23">Branch2 to</span></p>
+<p class="rvps11"><span class="rvts23">Branch3 to</span></p>
+<p class="rvps11"><span class="rvts23">Branch4 to</span></p>
+<p class="rvps11"><span class="rvts23">Branch5 to</span></p>
+<p class="rvps11"><span class="rvts23">Branch6 to</span></p>
+<p class="rvps11"><span class="rvts23">Branch7 to</span></p>
+<p class="rvps11"><span class="rvts23">Branch8 to</span></p>
+<p class="rvps11"><span class="rvts23">Branch9 to</span></p>
+<p class="rvps10"><span class="rvts48">Категории: изменение Ввода, изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при замене текущего мувика на данные из ответвления Закладки. Заменяется и Ввод, и Маркеры.</span></p>
+<p class="rvps10"><span class="rvts22">В текст записи добавляется время создания этой Закладки, так как фактически содержимое мувика возвращается во времени на этот момент.</span></p>
+<p class="rvps10"><span class="rvts22">При успешной загрузке Закладки её ответвление становится текущим, а в окне эмулятора появляется сообщение "Branch # loaded."</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">нажатие хоткея "загрузить состояние": клавиша в ряду от </span><span class="rvts27">F1</span><span class="rvts22"> до </span><span class="rvts27">F10</span></li>
+<li class="rvps10"><span class="rvts22">щелчок левой кнопкой мыши по правой половине Списка Закладок</span></li>
+<li class="rvps10"><span class="rvts22">двойной щелчок по любой иконке Закладок в Дереве ответвлений</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:29:02 Branch1 to 20:28:15</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">средне</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после первого же кадра, где изменился Ввод или Лаг.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="MarkerBranch"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Marker Branch0 to</span></p>
+<p class="rvps11"><span class="rvts23">Marker Branch1 to</span></p>
+<p class="rvps11"><span class="rvts23">Marker Branch2 to</span></p>
+<p class="rvps11"><span class="rvts23">Marker Branch3 to</span></p>
+<p class="rvps11"><span class="rvts23">Marker Branch4 to</span></p>
+<p class="rvps11"><span class="rvts23">Marker Branch5 to</span></p>
+<p class="rvps11"><span class="rvts23">Marker Branch6 to</span></p>
+<p class="rvps11"><span class="rvts23">Marker Branch7 to</span></p>
+<p class="rvps11"><span class="rvts23">Marker Branch8 to</span></p>
+<p class="rvps11"><span class="rvts23">Marker Branch9 to</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при замене текущего мувика на данные из ответвления Закладки, когда Ввод Закладки совпадал с Вводом мувика, а отличались только Маркеры.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">нажатие хоткея "загрузить состояние": клавиша в ряду от </span><span class="rvts27">F1</span><span class="rvts22"> до </span><span class="rvts27">F10</span></li>
+<li class="rvps10"><span class="rvts22">щелчок левой кнопкой мыши по правой половине Списка Закладок</span></li>
+<li class="rvps10"><span class="rvts22">двойной щелчок по любой иконке Закладок в Дереве ответвлений</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:29:33 Marker Branch1 to 20:28:15</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">очень редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона не усекается.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="MarkerSet"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Marker Set</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при установке Маркера на один или несколько кадров.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">двойной щелчок по номеру кадра в Piano Roll (при условии, что на этом кадре ещё нет Маркера)</span></li>
+<li class="rvps10"><span class="rvts22">щелчок по "Frame#" в Заголовке Piano Roll (когда есть Выделение, и среди выделенных кадров есть кадры без Маркеров)</span></li>
+<li class="rvps10"><span class="rvts22">щелчок правой кнопкой </span><span class="rvts22">по выделенному номеру кадра </span><span class="rvts22">и выбор в контекстном меню пункта </span><span class="rvts26">Set Markers</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:29:47 Marker Set 15-18</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">часто</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона не усекается.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="MarkerRemove"></a>
+<span class="rvts43"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Marker Remove</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при снятии Маркера с одного или нескольких кадров.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">двойной щелчок по номеру кадра в Piano Roll (при условии, что на этом кадре есть Маркер), перетаскивание Маркера за пределы Piano Roll и отпускание</span></li>
+<li class="rvps10"><span class="rvts22">щелчок по "Frame#" в Заголовке Piano Roll (когда есть Выделение, и на всех выделенных кадрах есть Маркеры)</span></li>
+<li class="rvps10"><span class="rvts22">щелчок правой кнопкой </span><span class="rvts22">по выделенному номеру кадра </span><span class="rvts22">и выбор в контекстном меню пункта </span><span class="rvts26">Remove Markers</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:29:52 Marker Remove 16-18</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">средне</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона не усекается.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="MarkerPattern"></a>
+<span class="rvts43"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Marker Pattern</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при установке Маркеров по шаблону.</span></p>
+<p class="rvps10"><span class="rvts22">В текст записи добавляется название использованного шаблона.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts34">Alt</span><span class="rvts22"> + щелчок по "Frame#" в Заголовке Piano Roll (когда есть Выделение)</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:30:11 Marker Pattern 20-30 One Quarter (10001000...)</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">очень редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона не усекается.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="MarkerRename"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Marker Rename</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при изменении текста Заметки одного Маркера.</span></p>
+<p class="rvps10"><span class="rvts22">В текст записи добавляется новый текст Заметки.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">ввести текст Заметки сразу же после создания нового Маркера двойным щелчком</span></li>
+<li class="rvps10"><span class="rvts22">щёлкнуть мышью по верхнему текстовому полю, стереть старый текст и ввести новый текст, затем нажать </span><span class="rvts26">Enter</span><span class="rvts22"> или </span><span class="rvts22">щёлкнуть по любому месту окна TAS Editor</span></li>
+<li class="rvps10"><span class="rvts22">щёлкнуть мышью по нижнему текстовому полю, ввести новый текст, затем нажать </span><span class="rvts26">Enter</span><span class="rvts22"> или щёлкнуть по любому месту окна TAS Editor</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:31:01 Marker Rename 20 Testing...</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">часто</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона не усекается.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="MarkerDrag"></a>
+<span class="rvts43"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Marker Drag</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при перемещении Маркера с одного кадра на другой.</span></p>
+<p class="rvps10"><span class="rvts22">В текст записи помещается старый и новый номер кадра данного Маркера, а также текст его Заметки.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">сделать двойной щелчок по </span><span class="rvts22">Маркеру и зажать левую кнопку, затем перетащить Маркер на кадр, где нет Маркера, и отпустить</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:31:08 Marker Drag 20=&gt;15 Testing...</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">средне</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона не усекается.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="MarkerSwap"></a>
+<span class="rvts43"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Marker Swap</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся, когда два Маркера меняются местами.</span></p>
+<p class="rvps10"><span class="rvts22">В текст записи помещается старый и новый номер кадра перетаскиваемого Маркера, а также текст его Заметки.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">сделать двойной щелчок по </span><span class="rvts22">Маркеру и зажать левую кнопку, затем перетащить Маркер на кадр с другим Маркером и отпустить</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:31:14 Marker Swap 24&lt;=&gt;28</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона не усекается.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="MarkerShift"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">Marker Shift</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при изменении мувика, которое не изменило Ввод, но привело к смещению Маркеров вверх или вниз.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">вставить пустой кадр перед самым концом мувика, за которым нет нажатий, но есть Маркер</span></li>
+<li class="rvps10"><span class="rvts22">склонировать пустой кадр перед самым концом мувика, за которым нет нажатий, но есть Маркер</span></li>
+<li class="rvps10"><span class="rvts22">скопировать в Буфер Обмена пустой кадр, затем сделать </span><a class="rvts28" href="Operations.html#PasteInsert">PasteInsert</a><span class="rvts22"> перед самым концом мувика, за которым нет нажатий, но есть Маркер</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:31:44 Marker Shift 21</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">очень редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона не усекается.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="LUAMarkerSet"></a>
+<span class="rvts43"><br/></span></p>
+<p class="rvps11"><span class="rvts23">LUA Marker Set</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при установке Маркера на один кадр с помощью вызова функции </span><span class="rvts21">taseditor.setmarker()</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">исполнить Луа-скрипт со строкой </span><span class="rvts21">taseditor.setmarker(framenum)</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:35:14 LUA Marker Set 0</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона не усекается.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="LUAMarkerRemove"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">LUA Marker Remove</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при снятии Маркера с одного кадра с помощью вызова функции </span><span class="rvts21">taseditor.removemarker()</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">исполнить Луа-скрипт со строкой </span><span class="rvts21">taseditor.removemarker(framenum)</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:36:12 LUA Marker Remove 0</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона не усекается.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="LUAMarkerRename"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">LUA Marker Rename</span></p>
+<p class="rvps10"><span class="rvts48">Категория: изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при изменении текста Заметки одного Маркера с помощью вызова функции </span><span class="rvts21">taseditor.setnote()</span><span class="rvts22"> из Луа-скрипта.</span></p>
+<p class="rvps10"><span class="rvts22">В текст записи добавляется новый текст Заметки.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">исполнить Луа-скрипт со строкой </span><span class="rvts21">taseditor.setnote(markernum, newtext)</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:37:03 LUA Marker Rename 0 Hello from Lua!</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона не усекается.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><a name="LUAChange"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps11"><span class="rvts23">LUA Change</span></p>
+<p class="rvps10"><span class="rvts48">Категории: изменение Ввода, изменение Маркеров</span></p>
+<p class="rvps10"><span class="rvts22">Запись создаётся при изменении Ввода/Маркеров одного или нескольких кадров с помощью вызова функции </span><span class="rvts21">taseditor.applyinputchanges()</span><span class="rvts22"> из Луа-скрипта.</span></p>
+<p class="rvps10"><span class="rvts22">Вместо слова "Change" в тексте записи может фигурировать любое другое слово или словосочетание, которое указывается в качестве параметра функции </span><span class="rvts21">taseditor.applyinputchanges()</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Варианты:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">исполнить Луа-скрипт со строками </span><span class="rvts21">taseditor.submitinputchange(frame, joypad, input)</span><span class="rvts22"> и </span><span class="rvts21">taseditor.applyinputchanges(name)</span></li>
+<li class="rvps10"><span class="rvts22">исполнить Луа-скрипт со строками </span><span class="rvts21">taseditor.submitinsertframes(frame, number)</span><span class="rvts22"> либо </span><span class="rvts21">taseditor.submitdeleteframes(frame, number)</span><span class="rvts22"> и </span><span class="rvts21">taseditor.applyinputchanges(name)</span></li>
+</ul>
+<p class="rvps22"><span class="rvts44">Пример:</span></p>
+<p class="rvps22"><span class="rvts44">20:39:56 LUA Corruptor 10</span></p>
+<p class="rvps10"><span class="rvts22">Частота использования: </span><span class="rvts31">редко</span></p>
+<p class="rvps10"><span class="rvts43">Гринзона усекается: после первого же кадра, где изменился Ввод или Лаг.</span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p class="rvps10"><span class="rvts43"><br/></span></p>
+<p></p>
+<p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Free Kindle producer</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				&copy; 2011-2013 АнС</div>
+		</div>
+	</body>
+	
+</html>
+

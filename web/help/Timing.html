@@ -1,0 +1,93 @@
+﻿<html>
+	
+<head>
+	<title>Timing</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("Timing");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Timing</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Config.html">Config</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Config.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="SoundOptions.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="Video.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">Timings</span></p>
+<p><br/></p>
+<p>Settings related to emulation timing.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Disable Speed Throttling Used When Sound is Disabled</span></p>
+<p><br/></p>
+<p>If checked, speed throttling will not be used while sound is disabled. &nbsp;(Speed throttling gives a performance boost while sound is off).</p>
+<p><span class="rvts16"><br/></span></p>
+<p><span class="rvts16">Set High Priority Thread</span></p>
+<p><br/></p>
+<p>Sets processing priority. &nbsp;Enabling can help slower computers keep a steady 60fps (or 50fps) framerate.</p>
+<p><span class="rvts16"><br/></span></p>
+<p><span class="rvts16">Overclocking (old PPU only)</span></p>
+<p><br/></p>
+<p>Overclocks the console by adding dummy scanlines to the usual PPU loop, causing CPU to run more cycles per frame. Can be done in two different ways: by adding <span class="rvts32">Post-render scanlines</span> and by adding <span class="rvts32">Vblank scanlines</span>. The method to be used depends on the game. Maximum value is 999.</p>
+<p><span class="rvts16"><br/></span></p>
+<p><span class="rvts16">Don't overclock 7-bit samples</span></p>
+<p><br/></p>
+<p>Such samples are played by the game at the rate it wants, so by running extra cycles, it will generate extra samples. To prevent those from being sped up, this option allows to cancel all the dummy scanlines once a 7-bit sample starts. This hardly affects gameplay, since such samples cause heavy lag, preventing the game from actually operating, so disabling overclocking during them won't slow the game down.</p>
+<p><br/></p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/create-epub-ebooks">Full-featured EBook editor</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

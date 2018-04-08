@@ -1,0 +1,878 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Lua Functions List</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+span.rvts11
+{
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts12
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts13
+{
+ font-size: 14pt;
+ font-weight: bold;
+}
+span.rvts14
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000080;
+}
+span.rvts15
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #333399;
+}
+span.rvts16
+{
+ font-size: 14pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts17
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000080;
+}
+span.rvts18
+{
+ font-size: 16pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts19
+{
+ font-size: 11pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts20
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts21
+{
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts22
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000080;
+}
+a.rvts23, span.rvts23
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts23:hover { color: #0000ff; }
+span.rvts24 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts25 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts26 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts27, span.rvts27 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{D3F1816D-0770-4257-98D2-A21456B07D28}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts24>Lua Functions List</span></p>
+<p><span class=rvts10>Lua Functions</span></p>
+<p><br></p>
+<p>The following functions are available in FCEUX, in addition to standard LUA capabilities:</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts13>Emu library</span></p>
+<p><br></p>
+<p><span class=rvts22>emu.poweron()</span></p>
+<p><span class=rvts21><br></span></p>
+<p><span class=rvts21>Executes a power cycle.</span></p>
+<p><span class=rvts21><br></span></p>
+<p><span class=rvts22>emu.softreset()</span></p>
+<p><span class=rvts21><br></span></p>
+<p><span class=rvts21>Executes a (soft) reset.</span></p>
+<p><br></p>
+<p><span class=rvts14>emu.speedmode(string mode)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Set the emulator to given speed. The mode argument can be one of these:</span></p>
+<p><span class=rvts11> &nbsp; &nbsp; &nbsp; &nbsp;- "normal"</span></p>
+<p><span class=rvts11> &nbsp; &nbsp; &nbsp; &nbsp;- "nothrottle" (same as turbo on fceux)</span></p>
+<p><span class=rvts11> &nbsp; &nbsp; &nbsp; &nbsp;- "turbo"</span></p>
+<p><span class=rvts11> &nbsp; &nbsp; &nbsp; &nbsp;- "maximum"</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>emu.frameadvance()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Advance the emulator by one frame. It's like pressing the frame advance button once.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Most scripts use this function in their main game loop to advance frames. Note that you can also register functions by various methods that run "dead", returning control to the emulator and letting the emulator advance the frame.&nbsp; For most people, using frame advance in an endless while loop is easier to comprehend so I suggest&nbsp; starting with that.&nbsp; This makes more sense when creating bots. Once you move to creating auxillary libraries, try the register() methods.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>emu.pause()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Pauses the emulator. FCEUX will not unpause until you manually unpause it.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>emu.unpause()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Unpauses the emulator.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>int emu.exec_count(int count)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts15>int emu.exec_time(int count)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>emu.setrenderplanes(bool sprites, bool background)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Toggles the drawing of the sprites and background planes. Set to false or nil to disable a pane, anything else will draw them.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts15>emu.message(string message)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Displays given message on screen in the standard messages position. Use gui.text() when you need to position text.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>int emu.framecount()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns the framecount value. The frame counter runs without a movie running so this always returns a value.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>int emu.lagcount()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns the number of lag frames encountered. Lag frames are frames where the game did not poll for input because it missed the vblank. This happens when it has to compute too much within the frame boundary. This returns the number indicated on the lag counter.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>bool emu.lagged()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns true if currently in a lagframe, false otherwise.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>bool emu.emulating()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns true if emulation has started, or false otherwise. Certain operations such as using savestates are invalid to attempt before emulation has started. You probably won't need to use this function unless you want to make your script extra-robust to being started too early.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>bool emu.paused()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns true if emulator is paused, false otherwise.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>bool emu.readonly()</span></p>
+<p><span class=rvts11>Alias: movie.readonly</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns whether the emulator is in read-only state.&nbsp; </span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>While this variable only applies to movies, it is stored as a global variable and can be modified even without a movie loaded.&nbsp; Hence, it is in the emu library rather than the movie library.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>emu.setreadonly(bool state)</span></p>
+<p><span class=rvts11>Alias: movie.setreadonly</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Sets the read-only status to read-only if argument is true and read+write if false.</span></p>
+<p><span class=rvts11>Note: This might result in an error if the medium of the movie file is not writeable (such as in an archive file).</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>While this variable only applies to movies, it is stored as a global variable and can be modified even without a movie loaded.&nbsp; Hence, it is in the emu library rather than the movie library.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>emu.registerbefore(function func)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Registers a callback function to run immediately before each frame gets emulated. This runs after the next frame's input is known but before it's used, so this is your only chance to set the next frame's input using the next frame's would-be input. For example, if you want to make a script that filters or modifies ongoing user input, such as making the game think "left" is pressed whenever you press "right", you can do it easily with this.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Note that this is not quite the same as code that's placed before a call to emu.frameadvance. This callback runs a little later than that. Also, you cannot safely assume that this will only be called once per frame. Depending on the emulator's options, every frame may be simulated multiple times and your callback will be called once per simulation. If for some reason you need to use this callback to keep track of a stateful linear progression of things across frames then you may need to key your calculations to the results of emu.framecount.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Like other callback-registering functions provided by FCEUX, there is only one registered callback at a time per registering function per script. If you register two callbacks, the second one will replace the first, and the call to emu.registerbefore will return the old callback. You may register nil instead of a function to clear a previously-registered callback. If a script returns while it still has registered callbacks, FCEUX will keep it alive to call those callbacks when appropriate, until either the script is stopped by the user or all of the callbacks are de-registered.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>emu.registerafter(function func)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Registers a callback function to run immediately after each frame gets emulated. It runs at a similar time as (and slightly before) gui.register callbacks, except unlike with gui.register it doesn't also get called again whenever the screen gets redrawn. Similar caveats as those mentioned in emu.registerbefore apply.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>emu.registerexit(function func)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Registers a callback function that runs when the script stops. Whether the script stops on its own or the user tells it to stop, or even if the script crashes or the user tries to close the emulator, FCEUX will try to run whatever Lua code you put in here first. So if you want to make sure some code runs that cleans up some external resources or saves your progress to a file or just says some last words, you could put it here. (Of course, a forceful termination of the application or a crash from inside the registered exit function will still prevent the code from running.)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Suppose you write a script that registers an exit function and then enters an infinite loop. If the user clicks "Stop" your script will be forcefully stopped, but then it will start running its exit function. If your exit function enters an infinite loop too, then the user will have to click "Stop" a second time to really stop your script. That would be annoying. So try to avoid doing too much inside the exit function.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Note that restarting a script counts as stopping it and then starting it again, so doing so (either by clicking "Restart" or by editing the script while it is running) will trigger the callback. Note also that returning from a script generally does NOT count as stopping (because your script is still running or waiting to run its callback functions and thus does not stop... see here for more information), even if the exit callback is the only one you have registered. </span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>bool emu.addgamegenie(string str)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Adds a Game Genie code to the Cheats menu. Returns false and an error message if the code can't be decoded. Returns false if the code couldn't be added. Returns true if the code already existed, or if it was added.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Usage: emu.addgamegenie("NUTANT")</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Note that the Cheats Dialog Box won't show the code unless you close and reopen it.</span></p>
+<p><span class=rvts14><br></span></p>
+<p><span class=rvts14>bool emu.delgamegenie(string str)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Removes a Game Genie code from the Cheats menu. Returns false and an error message if the code can't be decoded. Returns false if the code couldn't be deleted. Returns true if the code didn't exist, or if it was deleted.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Usage: emu.delgamegenie("NUTANT")</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Note that the Cheats Dialog Box won't show the code unless you close and reopen it.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>emu.print(string str)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Puts a message into the Output Console area of the Lua Script control window. Useful for displaying usage instructions to the user when a script gets run.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>emu.getscreenpixel(int x, int y, bool getemuscreen)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns the separate RGB components of the given screen pixel, and the palette. Can be 0-255 by 0-239, but NTSC only displays 0-255 x 8-231 of it. If getemuscreen is false, this gets background colors from either the screen pixel or the LUA pixels set, but LUA data may not match the information used to put the data to the screen. If getemuscreen is true, this gets background colors from anything behind an LUA screen element.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Usage is local r,g,b,palette = emu.getscreenpixel(5, 5, false) to retrieve the current red/green/blue colors and palette value of the pixel at 5x5.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Palette value can be 0-63, or 254 if there was an error.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>You can avoid getting LUA data by putting the data into a function, and feeding the function name to emu.registerbefore.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts13>FCEU library</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>The FCEU library is the same as the emu library. It is left in for backwards compatibility. However, the emu library is preferred.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts16>ROM Library</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>rom.readbyte(int address)</span></p>
+<p><span class=rvts14>rom.readbyteunsigned(int address)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Get an unsigned byte from the actual ROM file at the given address.&nbsp; </span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>This includes the header! It's the same as opening the file in a hex-editor.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>rom.readbytesigned(int address)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Get a signed byte from the actual ROM file at the given address. Returns a byte that is signed.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>This includes the header! It's the same as opening the file in a hex-editor.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts16>Memory Library</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>memory.readbyte(int address)</span></p>
+<p><span class=rvts14>memory.readbyteunsigned(int address)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Get an unsigned byte from the RAM at the given address. Returns a byte regardless of emulator. The byte will always be positive.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>memory.readbyterange(int address, int length)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Get a length bytes starting at the given address and return it as a string. Convert to table to access the individual bytes.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>memory.readbytesigned(int address)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Get a signed byte from the RAM at the given address. Returns a byte regardless of emulator. The most significant bit will serve as the sign.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>memory.writebyte(int address, int value)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Write the value to the RAM at the given address. The value is modded with 256 before writing (so writing 257 will actually write 1). Negative values allowed.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>int memory.getregister(cpuregistername)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns the current value of the given hardware register.</span></p>
+<p><span class=rvts11>For example, memory.getregister("pc") will return the main CPU's current Program Counter.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Valid registers are: "a", "x", "y", "s", "p", and "pc".</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>memory.setregister(string cpuregistername, int value)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Sets the current value of the given hardware register.</span></p>
+<p><span class=rvts11>For example, memory.setregister("pc",0x200) will change the main CPU's current Program Counter to 0x200.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Valid registers are: "a", "x", "y", "s", "p", and "pc".</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>You had better know exactly what you're doing or you're probably just going to crash the game if you try to use this function. That applies to the other memory.write functions as well, but to a lesser extent. </span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>memory.register(int address, [int size,] function func)</span></p>
+<p><span class=rvts14>memory.registerwrite(int address, [int size,] function func)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Registers a function to be called immediately whenever the given memory address range is written to.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>size is the number of bytes to "watch". For example, if size is 100 and address is 0x0200, then you will register the function across all 100 bytes from 0x0200 to 0x0263. A write to any of those bytes will trigger the function. Having callbacks on a large range of memory addresses can be expensive, so try to use the smallest range that's necessary for whatever it is you're trying to do. If you don't specify any size then it defaults to 1.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>The callback function will receive two arguments, (address, size) indicating what write operation triggered the callback. If you don't care about that extra information then you can ignore it and define your callback function to not take any arguments. The value that was written is NOT passed into the callback function, but you can easily use any of the memory.read functions to retrieve it.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>You may use a memory.write function from inside the callback to change the value that just got written. However, keep in mind that doing so will trigger your callback again, so you must have a "base case" such as checking to make sure that the value is not already what you want it to be before writing it. Another, more drastic option is to de-register the current callback before performing the write.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>If func is nil that means to de-register any memory write callbacks that the current script has already registered on the given range of bytes.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>memory.registerexec(int address, [int size,] function func)</span></p>
+<p><span class=rvts14>memory.registerrun(int address, [int size,] function func)</span></p>
+<p><span class=rvts14>memory.registerexecute(int address, [int size,] function func)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Registers a function to be called immediately whenever the emulated system runs code located in the given memory address range.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Besides that, most of the information about memory.register applies to this function as well.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts16>Joypad Library</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>table joypad.get(int player)</span></p>
+<p><span class=rvts15>table joypad.read(</span><span class=rvts14>int player</span><span class=rvts15>)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns a table of every game button, where each entry is true if that button is currently held (as of the last time the emulation checked), or false if it is not held. This takes keyboard inputs, not Lua. The table keys look like this (case sensitive):</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>up, down, left, right, A, B, start, select</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Where a Lua truthvalue true means that the button is set, false means the button is unset. Note that only "false" and "nil" are considered a false value by Lua.&nbsp; Anything else is true, even the number 0.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>joypad.read left in for backwards compatibility with older versions of FCEU/FCEUX.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>table joypad.getimmediate(int player)</span></p>
+<p><span class=rvts15>table joypad.readimmediate(</span><span class=rvts14>int player</span><span class=rvts15>)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns a table of every game button, where each entry is true if that button is held at the moment of calling the function, or false if it is not held. This function polls keyboard input immediately, allowing Lua to interact with user even when emulator is paused.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>As of FCEUX 2.1.6, the function only works in Windows. In Linux this function will return nil.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>table joypad.getdown(int player)</span></p>
+<p><span class=rvts14>table joypad.readdown(int player)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns a table of only the game buttons that are currently held. Each entry is true if that button is currently held (as of the last time the emulation checked), or nil if it is not held.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>table joypad.getup(int player)</span></p>
+<p><span class=rvts14>table joypad.readup(int player)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns a table of only the game buttons that are not currently held. Each entry is nil if that button is currently held (as of the last time the emulation checked), or false if it is not held.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>joypad.set(int player, table input)</span></p>
+<p><span class=rvts15>joypad.write(</span><span class=rvts14>int player, table input</span><span class=rvts15>)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Set the inputs for the given player. Table keys look like this (case sensitive):</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>up, down, left, right, A, B, start, select</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>There are 4 possible values: true, false, nil, and "invert".</span></p>
+<p><span class=rvts11>true&nbsp;&nbsp;&nbsp; - Forces the button on</span></p>
+<p><span class=rvts11>false&nbsp;&nbsp; - Forces the button off</span></p>
+<p><span class=rvts11>nil&nbsp;&nbsp;&nbsp;&nbsp; - User's button press goes through unchanged</span></p>
+<p><span class=rvts11>"invert"- Reverses the user's button press</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Any string works in place of "invert".&nbsp; It is suggested as a convention to use "invert" for readability, but strings like "inv", "Weird switchy mechanism", "", or "true or false" works as well as "invert".</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>nil and "invert" exists so the script can control individual buttons of the controller without entirely blocking the user from having any control. Perhaps there is a process which can be automated by the script, like an optimal firing pattern, but the user still needs some manual control, such as moving the character around.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>joypad.write left in for backwards compatibility with older versions of FCEU/FCEUX.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts12>Zapper Library</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts15>table zapper.read()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns the zapper data</span></p>
+<p><span class=rvts11>When no movie is loaded this input is the same as the internal mouse input (which is used to generate zapper input, as well as the arkanoid paddle).</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>When a movie is playing, it returns the zapper data in the movie code.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>The return table consists of 3 values: x, y, and fire.&nbsp; x and y are the x,y coordinates of the zapper target in terms of pixels.&nbsp; fire represents the zapper firing.&nbsp; 0 = not firing, 1 = firing</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Note: The zapper is always controller 2 on the NES so there is no player argument to this function.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts12>Input Library</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>table input.get()</span></p>
+<p><span class=rvts14>table input.read()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Reads input from keyboard and mouse. Returns pressed keys and the position of mouse in pixels on game screen.&nbsp; The function returns a table with at least two properties; table.xmouse and table.ymouse.&nbsp; Additionally any of these keys will be set to true if they were held at the time of executing this function:</span></p>
+<p><span class=rvts11>leftclick, rightclick, middleclick, capslock, numlock, scrolllock, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, F1, F2, F3, F4, F5, F6,&nbsp; F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24, backspace, tab, enter, shift, control, alt, pause, escape, space, pageup, pagedown, end, home, left, up, right, down, numpad0, numpad1, numpad2, numpad3, numpad4, numpad5, numpad6, numpad7, numpad8, numpad9, numpad*, insert, delete, numpad+, numpad-, numpad., numpad/, semicolon, plus, minus, comma, period, slash, backslash, tilde, quote, leftbracket, rightbracket.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>string input.popup</span></p>
+<p><span class=rvts11>Alias: gui.popup</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Requests input from the user using a multiple-option message box. See gui.popup for complete usage and returns.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts12>Savestate Library</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts15>object savestate.object(int slot = nil)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Create a new savestate object. Optionally you can save the current state to one of the predefined slots(1-10) using the range 1-9 for slots 1-9, and 10 for 0, QWERTY style. Using no number will create an "anonymous" savestate.</span></p>
+<p><span class=rvts11>Note that this does not actually save the current state! You need to create this value and pass it on to the load and save functions in order to save it.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Anonymous savestates are temporary, memory only states. You can make them persistent by calling memory.persistent(state). Persistent anonymous states are deleted from disk once the script exits.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts15>object savestate.create(int slot = nil)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>savestate.create is identical to savestate.object, except for the numbering for predefined slots(1-10, 1 refers to slot 0, 2-10 refer to 1-9). It's being left in for compatibility with older scripts, and potentially for platforms with different internal predefined slot numbering.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts15>savestate.save(object savestate)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Save the current state object to the given savestate. The argument is the result of savestate.create(). You can load this state back up by calling savestate.load(savestate) on the same object.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts15>savestate.load(object savestate)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Load the the given state. The argument is the result of savestate.create() and has been passed to savestate.save() at least once.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>If this savestate is not persistent and not one of the predefined states, the state will be deleted after loading.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>savestate.persist(object savestate)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Set the given savestate to be persistent. It will not be deleted when you load this state but at the exit of this script instead, unless it's one of the predefined states.&nbsp; If it is one of the predefined savestates it will be saved as a file on disk.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>savestate.registersave(function func)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Registers a callback function that runs whenever the user saves a state. This won't actually be called when the script itself makes a savestate, so none of those endless loops due to a misplaced savestate.save.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>As with other callback-registering functions provided by FCEUX, there is only one registered callback at a time per registering function per script. Upon registering a second callback, the first is kicked out to make room for the second. In this case, it will return the first function instead of nil, letting you know what was kicked out. Registering nil will clear the previously-registered callback.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>savestate.registerload(function func)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Registers a callback function that runs whenever the user loads a previously saved state. It's not called when the script itself loads a previous state, so don't worry about your script interrupting itself just because it's loading something.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>The state's data is loaded before this function runs, so you can read the RAM immediately after the user loads a state, or check the new framecount. Particularly useful if you want to update lua's display right away instead of showing junk from before the loadstate.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>savestate.loadscriptdata(int location)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Accuracy not yet confirmed.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Intended Function, according to snes9x LUA documentation:</span></p>
+<p><span class=rvts11>Returns the data associated with the given savestate (data that was earlier returned by a registered save callback) without actually loading the rest of that savestate or calling any callbacks. location should be a save slot number.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts16>Movie Library</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>bool movie.active()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns true if a movie is currently loaded and false otherwise.&nbsp; (This should be used to guard against Lua errors when attempting to retrieve movie information).</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>int movie.framecount()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns the current frame count. (Has the same affect as emu.framecount)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>string movie.mode()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns the current state of movie playback. Returns one of the following:</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>- "record"</span></p>
+<p><span class=rvts11>- "playback"</span></p>
+<p><span class=rvts11>- "finished"</span></p>
+<p><span class=rvts11>- nil</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>movie.rerecordcounting(bool counting)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Turn the rerecord counter on or off. Allows you to do some brute forcing without inflating the rerecord count.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>movie.stop()</span></p>
+<p><span class=rvts14>movie.close()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Stops movie playback. If no movie is loaded, it throws a Lua error.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>int movie.length()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns the total number of frames of the current movie. Throws a Lua error if no movie is loaded.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>string movie.name()</span></p>
+<p><span class=rvts14>string movie.getname()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns the filename of the current movie with path. Throws a Lua error if no movie is loaded.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>movie.getfilename()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns the filename of the current movie with no path. Throws a Lua error if no movie is loaded.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>movie.rerecordcount()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns the rerecord count of the current movie. Throws a Lua error if no movie is loaded.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>movie.replay()</span></p>
+<p><span class=rvts14>movie.playbeginning()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Performs the Play from Beginning function. Movie mode is switched to read-only and the movie loaded will begin playback from frame 1.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>If no movie is loaded, no error is thrown and no message appears on screen.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>bool movie.readonly()</span></p>
+<p><span class=rvts14>bool movie.getreadonly()</span></p>
+<p><span class=rvts11>Alias: emu.getreadonly</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>FCEUX keeps the read-only status even without a movie loaded.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns whether the emulator is in read-only state.&nbsp; </span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>While this variable only applies to movies, it is stored as a global variable and can be modified even without a movie loaded.&nbsp; Hence, it is in the emu library rather than the movie library.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>movie.setreadonly(bool state)</span></p>
+<p><span class=rvts11>Alias: emu.setreadonly</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>FCEUX keeps the read-only status even without a movie loaded.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Sets the read-only status to read-only if argument is true and read+write if false.</span></p>
+<p><span class=rvts11>Note: This might result in an error if the medium of the movie file is&nbsp; not writeable (such as in an archive file).</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>While this variable only applies to movies, it is stored as a global variable and can be modified even without a movie loaded.&nbsp; Hence, it is in the emu library rather than the movie library.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>bool movie.recording()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns true if there is a movie loaded and in record mode.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>bool movie.playing()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns true if there is a movie loaded and in play mode.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>bool movie.ispoweron()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns true if the movie recording or loaded started from 'Start'.</span></p>
+<p><span class=rvts11>Returns false if the movie uses a save state.</span></p>
+<p><span class=rvts11>Opposite of movie.isfromsavestate()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>bool movie.isfromsavestate()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns true if the movie recording or loaded started from 'Now'.</span></p>
+<p><span class=rvts11>Returns false if the movie was recorded from a reset.</span></p>
+<p><span class=rvts11>Opposite of movie.ispoweron()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>string movie.name()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>If a movie is loaded it returns the name of the movie, else it throws an error.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>bool movie.readonly()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns the state of read-only. True if in playback mode, false if in record mode.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts12>GUI Library</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>gui.pixel(int x, int y, type color)</span></p>
+<p><span class=rvts14>gui.drawpixel(int x, int y, type color)</span></p>
+<p><span class=rvts14>gui.setpixel(int x, int y, type color)</span></p>
+<p><span class=rvts14>gui.writepixel(int x, int y, type color)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Draw one pixel of a given color at the given position on the screen. See drawing notes and color notes at the bottom of the page.&nbsp; </span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>gui.getpixel(int x, int y)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns the separate RGBA components of the given pixel set by gui.pixel. This only gets LUA pixels set, not background colors.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Usage is local r,g,b,a = gui.getpixel(5, 5) to retrieve the current red/green/blue/alpha values of the LUA pixel at 5x5.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>See emu.getscreenpixel() for an emulator screen variant.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>gui.line(int x1, int y1, int x2, int y2 [, color [, skipfirst]])</span></p>
+<p><span class=rvts14>gui.drawline(int x1, int y1, int x2, int y2 [, color [, skipfirst]])</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Draws a line between the two points. The x1,y1 coordinate specifies one end of the line segment, and the x2,y2 coordinate specifies the other end. If skipfirst is true then this function will not draw anything at the pixel x1,y1, otherwise it will. skipfirst is optional and defaults to false. The default color for the line is solid white, but you may optionally override that using a color of your choice. See also drawing notes and color notes at the bottom of the page.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>gui.box(int x1, int y1, int x2, int y2 [, fillcolor [, outlinecolor]]))</span></p>
+<p><span class=rvts14>gui.drawbox(int x1, int y1, int x2, int y2 [, fillcolor [, outlinecolor]]))</span></p>
+<p><span class=rvts14>gui.rect(int x1, int y1, int x2, int y2 [, fillcolor [, outlinecolor]]))</span></p>
+<p><span class=rvts14>gui.drawrect(int x1, int y1, int x2, int y2 [, fillcolor [, outlinecolor]]))</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Draws a rectangle between the given coordinates of the emulator screen for one frame. The x1,y1 coordinate specifies any corner of the rectangle (preferably the top-left corner), and the x2,y2 coordinate specifies the opposite corner.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>The default color for the box is transparent white with a solid white outline, but you may optionally override those using colors of your choice. Also see drawing notes and color notes.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>gui.text(int x, int y, string str [, textcolor [, backcolor]])</span></p>
+<p><span class=rvts14>gui.drawtext(int x, int y, string str [, textcolor [, backcolor]])</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Draws a given string at the given position. textcolor and backcolor are optional. See 'on colors' at the end of this page for information. Using nil as the input or not including an optional field will make it use the default.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>gui.parsecolor(color)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns the separate RGBA components of the given color.</span></p>
+<p><span class=rvts11>For example, you can say local r,g,b,a = gui.parsecolor('orange') to retrieve the red/green/blue values of the preset color orange. (You could also omit the a in cases like this.) This uses the same conversion method that FCEUX uses internally to support the different representations of colors that the GUI library uses. Overriding this function will not change how FCEUX interprets color values, however.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>gui.savescreenshot()</span></p>
+<p><span class=rvts11>Makes a screenshot of the FCEUX emulated screen, and saves it to the appropriate folder. Performs identically to pressing the Screenshot hotkey.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>string gui.gdscreenshot()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Takes a screen shot of the image and returns it in the form of a string which can be imported by the gd library using the gd.createFromGdStr() function.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>This function is provided so as to allow FCEUX to not carry a copy of the gd library itself. If you want raw RGB32 access, skip the first 11 bytes (header) and then read pixels as Alpha (always 0), Red, Green, Blue, left to right then top to bottom, range is 0-255 for all colors.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts20>Warning:</span><span class=rvts11> Storing screen shots in memory is not recommended. Memory usage will blow up pretty quick. One screen shot string eats around 230 KB of RAM.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>gui.gdoverlay([int dx=0, int dy=0,] string str [, sx=0, sy=0, sw, sh] [, float alphamul=1.0])</span></p>
+<p><span class=rvts14>gui.image([int dx=0, int dy=0,] string str [, sx=0, sy=0, sw, sh] [, float alphamul=1.0])</span></p>
+<p><span class=rvts14>gui.drawimage([int dx=0, int dy=0,] string str [, sx=0, sy=0, sw, sh] [, float alphamul=1.0])</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Draws an image on the screen. gdimage must be in truecolor gd string format.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Transparency is fully supported. Also, if alphamul is specified then it will modulate the transparency of the image even if it's originally fully opaque. (alphamul=1.0 is normal, alphamul=0.5 is doubly transparent, alphamul=3.0 is triply opaque, etc.)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>dx,dy determines the top-left corner of where the image should draw. If they are omitted, the image will draw starting at the top-left corner of the screen.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>gui.gdoverlay is an actual drawing function (like gui.box and friends) and thus must be called every frame, preferably inside a gui.register'd function, if you want it to appear as a persistent image onscreen.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Here is an example that loads a PNG from file, converts it to gd string format, and draws it once on the screen:</span></p>
+<p><span class=rvts11>local gdstr = gd.createFromPng("myimage.png"):gdStr()</span></p>
+<p><span class=rvts11>gui.gdoverlay(gdstr) </span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>gui.opacity(int alpha)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Scales the transparency of subsequent draw calls. An alpha of 0.0 means completely transparent, and an alpha of 1.0 means completely unchanged (opaque). Non-integer values are supported and meaningful, as are values greater than 1.0. It is not necessary to use this function (or the less-recommended gui.transparency) to perform drawing with transparency, because you can provide an alpha value in the color argument of each draw call. However, it can sometimes be convenient to be able to globally modify the drawing transparency. </span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>gui.transparency(int trans)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Scales the transparency of subsequent draw calls. Exactly the same as gui.opacity, except the range is different: A trans of 4.0 means completely transparent, and a trans of 0.0 means completely unchanged (opaque). </span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>function gui.register(function func)</span></p>
+<p><span class=rvts14><br></span></p>
+<p><span class=rvts11>Register a function to be called between a frame being prepared for displaying on your screen and it actually happening. Used when that 1 frame delay for rendering is not acceptable.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>string gui.popup(string message [, string type = "ok" [, string icon = "message"]])</span></p>
+<p><span class=rvts14>string input.popup(string message [, string type = "yesno" [, string icon = "question"]])</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Brings up a modal popup dialog box (everything stops until the user dismisses it). The box displays the message tostring(msg). This function returns the name of the button the user clicked on (as a string).</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>type determines which buttons are on the dialog box, and it can be one of the following: 'ok', 'yesno', 'yesnocancel', 'okcancel', 'abortretryignore'.</span></p>
+<p><span class=rvts11>type defaults to 'ok' for gui.popup, or to 'yesno' for input.popup.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>icon indicates the purpose of the dialog box (or more specifically it dictates which title and icon is displayed in the box), and it can be one of the following: 'message', 'question', 'warning', 'error'.</span></p>
+<p><span class=rvts11>icon defaults to 'message' for gui.popup, or to 'question' for input.popup.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Try to avoid using this function much if at all, because modal dialog boxes can be irritating. </span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Linux users might want to install xmessage to perform the work. Otherwise the dialog will appear on the shell and that's less noticeable.</span></p>
+<p><span class=rvts11><br></span></p>
+
+<p><span class=rvts12>Sound Library</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>table sound.get()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns current state of PSG channels in a big array.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>table:<br>
+{<br>
+&nbsp;&nbsp;rp2a03:<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;square1:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;volume,      -- 0.0-1.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency,   -- in hertz<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;midikey,     -- 0-127<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;duty,        -- 0:12.5% 1:25% 2:50% 3:75%<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;regs:        -- raw register values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency  -- raw freq register value<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;square2:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;volume,      -- 0.0-1.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency,   -- in hertz<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;midikey,     -- 0-127<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;duty,        -- 0:12.5% 1:25% 2:50% 3:75%<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;regs:        -- raw register values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency  -- raw freq register value<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;triangle:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;volume,      -- 0.0-1.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency,   -- in hertz (correct?)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;midikey,     -- 0-127 (correct?)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;regs:        -- raw register values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency  -- raw freq register value<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dpcm:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;volume,      -- 0.0-1.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency,   -- in hertz (correct?)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;midikey,     -- 0-127 (correct?)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dmcaddress,  -- start position of the sample<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dmcsize,     -- size of the sample, in bytes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dmcloop,     -- true:looped sample, false:oneshot<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dmcseed,     -- InitialRawDALatch<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;regs:        -- raw register values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency  -- raw freq register value<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;}<br>
+}<br></span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts12>TAS Editor Library</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>taseditor.registerauto(function func)</span></p>
+<p><span class=rvts14>taseditor.registermanual(function func)</span></p>
+<p><span class=rvts14>bool taseditor.engaged()</span></p>
+<p><span class=rvts14>bool taseditor.markedframe(int frame)</span></p>
+<p><span class=rvts14>int taseditor.getmarker(int frame)</span></p>
+<p><span class=rvts14>int taseditor.setmarker(int frame)</span></p>
+<p><span class=rvts14>taseditor.clearmarker(int frame)</span></p>
+<p><span class=rvts14>string taseditor.getnote(int index)</span></p>
+<p><span class=rvts14>taseditor.setnote(int index, string newtext)</span></p>
+<p><span class=rvts14>int taseditor.getcurrentbranch()</span></p>
+<p><span class=rvts14>string taseditor.getrecordermode()</span></p>
+<p><span class=rvts14>int taseditor.getsuperimpose()</span></p>
+<p><span class=rvts14>int taseditor.getlostplayback()</span></p>
+<p><span class=rvts14>int taseditor.getplaybacktarget()</span></p>
+<p><span class=rvts14>taseditor.setplayback(int frame)</span></p>
+<p><span class=rvts14>taseditor.stopseeking()</span></p>
+<p><span class=rvts14>taseditor.getselection()</span></p>
+<p><span class=rvts14>taseditor.setselection()</span></p>
+<p><span class=rvts14>int taseditor.getinput(int frame, int joypad)</span></p>
+<p><span class=rvts14>taseditor.submitinputchange(int frame, int joypad, int input)</span></p>
+<p><span class=rvts14>taseditor.submitinsertframes(int frame, int number)</span></p>
+<p><span class=rvts14>taseditor.submitdeleteframes(int frame, int number)</span></p>
+<p><span class=rvts14>int taseditor.applyinputchanges([string name])</span></p>
+<p><span class=rvts14>taseditor.clearinputchanges()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>For full description of these functions refer to TAS Editor Manual.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts12>Bitwise Operations</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>All the following functions are left for backward compatibility, since </span><a class=rvts23 href="http://bitop.luajit.org/">LuaBitOp</a><span class=rvts11> is embedded in FCEUX.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts17>int AND(int n1, int n2, ..., int nn)</span></p>
+<p><span class=rvts17><br></span></p>
+<p><span class=rvts11>Binary logical AND of all the given integers. This function compensates for Lua's lack of it.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts17>int OR(int n1, int n2, ..., int nn)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Binary logical OR of all the given integers. This function compensates for Lua's lack of it.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts17>int XOR(int n1, int n2, ..., int nn)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Binary logical XOR of all the given integers. This function compensates for Lua's lack of it.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts17>int BIT(int n1, int n2, ..., int nn)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns an integer with the given bits turned on. Parameters should be smaller than 31.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts18>Appendix</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts19>On drawing</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>A general warning about drawing is that it is always one frame behind unless you use gui.register. This is because you tell the emulator to paint something but it will actually paint it when generating the image for the next frame. So you see your painting, except it will be on the image of the next frame. You can prevent this with gui.register because it gives you a quick chance to paint before blitting.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Dimensions &amp; color depths you can paint in:</span></p>
+<p><span class=rvts11>--320x239, 8bit color (confirm?)</span></p>
+<p><span class=rvts11>256x224, 8bit color (confirm?)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts19>On colors</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Colors can be of a few types.</span></p>
+<p><span class=rvts11>Int: use the a formula to compose the color as a number (depends on color depth)</span></p>
+<p><span class=rvts11>String: Can either be a HTML colors, simple colors, or internal palette colors.</span></p>
+<p><span class=rvts11>HTML string: "#rrggbb" ("#228844") or #rrggbbaa if alpha is supported.</span></p>
+<p><span class=rvts11>Simple colors: "clear", "red", "green", "blue", "white", "black", "gray", "grey", "orange", "yellow", "green", "teal", "cyan", "purple", "magenta".</span></p>
+<p><span class=rvts11>Array: Example: {255,112,48,96} means {red=255, green=112, blue=48, alpha=96} </span></p>
+<p><span class=rvts11>Table: Example: {r=255,g=112,b=48,a=96} means {red=255, green=112, blue=48, alpha=96} </span></p>
+<p><span class=rvts11>Palette: Example: "P00" for Palette 00. "P3F" for palette 3F. P40-P7F are for LUA.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>For transparancy use "clear".</span></p>
+<p><span class=rvts11><br></span></p>
+<p class=rvps3><span class=rvts25>2012</span></p>
+<p class=rvps4><span class=rvts26>This help file has been generated by the freeware version of </span><a class=rvts27 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

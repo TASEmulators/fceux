@@ -1,0 +1,117 @@
+﻿<html>
+	
+<head>
+	<title>.nl files format</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("NLFilesFormat");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>.nl files format</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Technicalinformation.html">Technical Information</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Technicalinformation.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="NESScrolling2.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts12">.nl files format</span></p>
+<p><br/></p>
+<p><br/></p>
+<p>FCEUX implements Symbolic Debugger which uses "NameList" files to store the data about labels and comments. The needed files are created automatically when user right-clicks an address in Disassembly and enters a symbolic name or a comment for it. The files are stored in the same folder as the debugged ROM, and they inherit the name of the ROM.</p>
+<p>These files are simple ASCII text files. You can edit them in any text editor like Notepad.</p>
+<p><br/></p>
+<p>When reverse-engineering a game for which you don't have a source, you can reconstruct the logic incrementally, by adding labels/comments while debugging (right-clicking addresses).</p>
+<p><br/></p>
+<p>But if you want to debug your own homebrew game, you can setup your workflow to automatically export all names and comments when building the game using your favourite assembler (e.g. ca65 or ASM6). This way you can use FCEUX as a Source-Level Debugger.</p>
+<p><br/></p>
+<p><span class="rvts15">Example:</span> for the ROM called "NES Test Cart (PD).nes" the NL files will be named "NES Test Cart (PD).nes.0.nl", "NES Test Cart (PD).nes.ram.nl", etc. </p>
+<p><br/></p>
+<p><span class="rvts15">Example of contents of a NL file:</span></p>
+<p><br/></p>
+<p>$C000#NewName1#Comment1</p>
+<p>$C002##Comment2</p>
+<p>$C004#NewName2#</p>
+<p>$C006#NewName3#MultilineComment-Part1</p>
+<p>\MultilineComment-Part2</p>
+<p>\MultilineComment-Part3</p>
+<p>$C008/10#NewName4#</p>
+<p><br/></p>
+<p>Every line contains two # characters which separate the three parts of one line:</p>
+<p>* The first part (starting with a $ character) is the address to be renamed. Optionally you can add a "/number" part which marks the offsets as a beginning of an array of the given size (the size must be specified in hex form).</p>
+<p>* The second (optional) part is the new name of that address. Whenever the line of that address is shown in the disassembly window, an extra line saying "NewName1: " is shown above it. &nbsp;Instructions referencing this address, for example JSR $C000 are also changed to JSR NewName1 (in that example).</p>
+<p>* The third (optional) part is the comment that's also added above the disassembly line the comment refers to. It works exactly like the additional name line, only the prefix of that line is different. Comment lines start with "; ". &nbsp;Multi-lines comments are possible. Lines in an NL file starting with the \ character are just appended to the comment of the preceding line. Multi-line comments are also shown in multiple lines in the disassembly window.</p>
+<p><br/></p>
+<p>In the example above, the first line contains all three parts. Using this NL file, all references to the address $C000 are replaced with NewName1, and whenever line $C000 is shown in the disassembly window (or Trace Logger window) an additional comment is also visible right above the actual disassembled line. The second example line defines only a comment while the third line defines only a name. Following that, there's a multi-line comment definition for address $C006. The last line defines an array called NewName4 of size 0x10 (= 16) bytes starting at offset $C008. FCEUX will regard the line like there are 16 lines describing 16 adjacent addresses with names like NewName4[0], NewName4[1], ... NewName4[F].</p>
+<p><br/></p>
+<p>NL files must follow a specific naming convention to account for bank swapping. Each bank needs its own NL file with a hexadecimal number of the bank.</p>
+<p>For instance, an NES file named "mygame.nes" that has 4 banks (i.e. ROM size = 64k) would have these NL files:</p>
+<p><br/></p>
+<p>mygame.nes.ram.nl</p>
+<p>mygame.nes.0.nl</p>
+<p>mygame.nes.1.nl</p>
+<p>mygame.nes.2.nl</p>
+<p>mygame.nes.3.nl</p>
+<p><br/></p>
+<p>All NL files must be in the same directory as the ROM file itself.</p>
+<p><br/></p>
+<p>RAM can also be given its own NL file. In the *.ram.nl file you can name and comment RAM addresses (system bus range of 0x0000 - 0x7FFF) instead of ROM addresses. In this case, you might use a line such as:</p>
+<p><br/></p>
+<p>$00A5#Mic Test OK#00=Not Passed, 01=Passed</p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Full-featured Kindle eBooks generator</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

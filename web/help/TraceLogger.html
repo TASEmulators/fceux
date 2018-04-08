@@ -1,0 +1,104 @@
+﻿<html>
+	
+<head>
+	<title>Trace Logger</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("TraceLogger");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Trace Logger</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Debug.html">Debug</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Debug.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="HexEditor.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="CodeDataLogger.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts58">Trace Logger</span></p>
+<p><br/></p>
+<p><span class="rvts16">Introduction</span></p>
+<p><br/></p>
+<p>The Trace Logger logs every executed instruction and every byte of ROM accessed to the window, or a file if you prefer. &nbsp;Logging to a file is useful if you just want to dump everything that was executed and then search through it later. Logging to the window is useful when you wish to see the instructions that were executed prior to a breakpoint being hit. Both options produce the same data, but the desire to keep that data for a short amount of time or a long amount of time will determine which is best for you.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Using the Trace Logger</span></p>
+<p><br/></p>
+<p>The Trace Logger is a very nice feature which logs each instruction as it is being executed. If you choose to log to the window, you can set how many lines it will retain before discarding old lines. The higher this setting, the more RAM it will consume, but the more lines you'll have available to work with.</p>
+<p><br/></p>
+<p>Normally, when logging to window, the Tracer only shows the log if you pause emulator by Pause or Frame Advance hotkey, or by snapping the Debugger. But there is the option to automatically update the log window while the game runs - this is normally useless, unless it is working with the Code/Data Logger to only show newly-executed instructions.</p>
+<p><br/></p>
+<p class="rvps3"><span class="rvts24">When the code is logged to window, you can browse it using mouse wheel or vertical scrollbar. Double-clicking any address in this window will bring the </span><a class="rvts18" href="Debugger.html">Debugger</a><span class="rvts24"> window at this address. Right-clicking any address allows you to label the address (see Symbolic Debug).</span></p>
+<p><br/></p>
+<p>You can customize the format of text output in the log:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>whether to log registers state for every instruction, and where to put the data in every text line (to the left or to the right from the code disassembly)</li>
+<li>whether to log current frame number, cycles counter, instructions counter</li>
+<li>whether to log emulator messages (such as "State 1 loaded")</li>
+<li>whether to log Breakpoint Hits (when you use debugger while tracing)</li>
+<li>whether to apply Symbolic Debug names when logging. See <a class="rvts18" href="Debugger.html">Debugger</a> section for details</li>
+</ul>
+<p><br/></p>
+<p>For nice visualization of JSRs nesting you can use Stack Pointer for lines tabbing. Since NES games mostly use stack for subroutine calls (and rarely store variables in the stack), this option will likely produce a more readable disassembly. With this option you may also want to put registers data to the left from disassembly text, so they won't be tabbed.</p>
+<p><br/></p>
+<p>The Trace Logger has extra options which work with the Code/Data Logger so that Tracer only shows instructions executed for the first time, or those which access data for the first time. This can be quite useful for finding certain key routines or finding otherwise impossible-to-find data in almost any game. &nbsp;The best way to use this feature is in conjunction with the option to automatically update the window while logging. Then, as you play the game, you can watch new results appear at once. If you're searching for something specific, first try to get everything (EXCEPT what you're looking for) to execute, then watch closely as what you're looking for executes for the first time.</p>
+<p><br/></p>
+<p>There are two ways to filter what the Code/Data Logger shows. The first filter lets you log only newly-executed code (so that an instruction is not logged again if it has already been logged). The second logs only instructions when they access data which hadn't been accessed before. Note that both filters can be used at once (which shows bytes that pass either filter).</p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Write eBooks for the Kindle</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

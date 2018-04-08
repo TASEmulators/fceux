@@ -1,0 +1,304 @@
+﻿<html>
+	
+<head>
+	<title>Debugger</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("Debugger");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Debugger</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Debug.html">Debug</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Debug.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Debug.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="PPUViewer.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">Debugger</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts45">Introduction</span></p>
+<p><br/></p>
+<p>The debugger is a tool for inspecting and manipulating machine instructions and their execution. The debugger window has several components:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>Execution - a small set of controls for controlling the execution of code.</li>
+<li>CPU State - display of registers, flags, the stack, cycles and instructions counters, and also the PPU state.</li>
+<li>Memory disassembly - displays a disassembly of the bytes currently accessible by the CPU data bus.</li>
+<li>Breakpoints - a list of breakpoints for debugging.</li>
+<li>Bookmarks - a list of bookmarked addresses for quick navigation.</li>
+<li>Other - buttons for controlling symbolic debugging, rom patching, etc.</li>
+</ul>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts45">Execution and CPU State</span></p>
+<p><br/></p>
+<p>Execution is controlled by the set of buttons at the top-middle of the window. These allow you to break (pause) execution and inspect the current state of the NES.</p>
+<p><br/></p>
+<p>When an NES ROM is opened, it will be normally be running right away (unless you manually pause the emulator before loading). Most of the debugger window does not update while the game is running. To begin debugging you may click one of the buttons that will break (pause) execution, such as "Step Into".</p>
+<p><br/></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>Run - runs the program continuously until the next breakpoint is hit, or the emulator is paused manually. The same effect can be achieved by pressing the Pause hotkey which will unpause emulator when it's paused.</li>
+<li>Step Into - runs one instruction and then breaks.</li>
+<li>Step Out - attempt to run until the current subroutine ends with an RTS; in some cases will behave the same as Run.</li>
+<li>Step Over - runs one instruction, unless it is a JSR instruction, which will run until its RTS.</li>
+<li>Run Line - runs one scanline before breaking.</li>
+<li>128 Lines - runs 128 scanlines before breaking.</li>
+</ul>
+<p><br/></p>
+<p>The Pause hotkey will break execution or resume it. The Frame Advance hotkey will run the emulator for one frame and then break.</p>
+<p><br/></p>
+<p>When execution is paused, the disassembly view will begin with the memory near the current program counter location (PC). The "&gt;" mark shows the line which will be executed next. You can scroll the disassembly up or down (using scrollbar or mouse wheel) to observe the code. Then you can click "Seek PC" to return to the program counter at any time.</p>
+<p><br/></p>
+<p>You can also use "Seek To" button that will navigate to the specified address. Either type a hexadecimal address to the text field or simply left-click on any address in the Disassembly window.</p>
+<p><br/></p>
+<div><table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
+<tr valign="top">
+<td style="border-color: #000000; border-style: solid; width: 305px; height: 34px;"><p><span class="rvts47">HINT: When entering the address manually, these convenient strings may be used instead of the hexadecimal memory address:</span></p>
+<p><span class="rvts47">NES special addresses:</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts47">NMI/VBL - non-maskable interrupt vector (at FFFA)</span></li>
+<li><span class="rvts47">RST &nbsp; &nbsp; - reset vector (at FFFC)</span></li>
+<li><span class="rvts47">IRQ &nbsp; &nbsp; - interrupt vector (at FFFE)</span></li>
+</ul>
+<p><span class="rvts47">FDS special addresses:</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts47">NMI1 - non-maskable interrupt vector (at DFF6)</span></li>
+<li><span class="rvts47">NMI2 - non-maskable interrupt vector (at DFF8)</span></li>
+<li><span class="rvts47">NMI3 - non-maskable interrupt vector (at DFFA)</span></li>
+<li><span class="rvts47">RST &nbsp;- reset vector (at DFFC)</span></li>
+<li><span class="rvts47">IRQ &nbsp;- interrupt vector (at DFFE)</span></li>
+</ul>
+<p><span class="rvts47">NSF special addresses:</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts47">LOAD - NSF LOAD address</span></li>
+<li><span class="rvts47">INIT - NSF INIT address</span></li>
+<li><span class="rvts47">PLAY - NSF PLAY address</span></li>
+</ul>
+</td>
+</tr>
+</table>
+</div>
+<p><span class="rvts38"><br/></span></p>
+<p>While execution is broken (emulation is paused), the program counter (PC) can be edited, as well as the three registers A/X/Y, and the status flags. Normally they should be left as-is, but changing them at runtime can be useful for more advanced debugging.</p>
+<p><br/></p>
+<p>The contents of memory starting at the stack pointer (somewhere in the range $0100-01FF) is displayed in the Stack frame below the A/X/Y registers.</p>
+<p><br/></p>
+<p>The current PPU memory address, sprite memory address, scanline, and rendering pixel are displayed below the stack and status flags. <span class="rvts15">Examples of Scanline number:</span> -1 means Prerender time, 240 is Idle scanline, 0-239 are visible scanlines, 241-260/310 are VBlank scanlines.</p>
+<p><br/></p>
+<p>To the right from the PPU section there's Cycles counter and Instructions counter that keep counting while the game is running. You can use the information for keeping statistics, for code profiling or writing PPU-synchronized code (e.g. raster effects). You can also make the debugger break automatically based on the counters values. The "Reset counters" button resets both counters to 0. You can also access the counters via <a class="rvts18" href="LuaFunctionsList.html">Lua</a>.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts45">Disassembly</span></p>
+<p><br/></p>
+<p>This large frame takes up the left side of the debugger window. It displays the current contents of memory accessible by the CPU with an automatic disassembly of that data into assembly instructions. The following memory ranges may contain useful data for inspection:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>0000-00FF - zero page (RAM)</li>
+<li>0100-01FF - stack (RAM)</li>
+<li>0200-07FF - RAM</li>
+<li>4018-FFFF - mapper controlled (ROM or RAM, may be bankswitched)</li>
+</ul>
+<p><br/></p>
+<p>Memory contents are displayed in this form:</p>
+<p><br/></p>
+<p><span class="rvts46">0F:C0A8:24 1F &nbsp; &nbsp; BIT $001F = #$80</span></p>
+<p><span class="rvts46">bb:mmmm:dd dd dd &nbsp;iiiiiiiiiiiii...</span></p>
+<p><br/></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>bb - 16k iNES bank, designates which 16k bank from the iNES file is mapped here. Note that the number may be not the same as the actual hardware bank of the mapper.</li>
+<li>mmmm - physical address on the NES CPU data bus.</li>
+<li>dd - data bytes belonging to the instruction beginning at this address.</li>
+<li>iiii - assembly description of the instruction, possibly with symbolic decoration.</li>
+</ul>
+<p><br/></p>
+<p>When debugging an NSF program, the bank designation will be a 4k NSF bank instead of the 16k iNES bank.</p>
+<p><br/></p>
+<p>A single instruction may be one to three bytes, and will all appear on the line before the assembly code description of that instruction. An instruction with "= #$xx" at the end conveniently indicates the value currently in memory at the address referenced by the instruction.</p>
+<p><br/></p>
+<p>Hovering the mouse over the disassembly will display at the bottom of the window more detailed information about the location of this code in the iNES file.</p>
+<p><br/></p>
+<p>There is narrow column to the left of the Disassembly window. Left clicking on this column will open the <span class="rvts32">Inline Assembler</span>, which allows you to patch the ROM at runtime. Right clicking on this column will open the <a class="rvts18" href="HexEditor.html">Hex Editor</a>, which allows you to directly edit the ROM. Middle-clicking on this column will bring up the <a class="rvts18" href="GameGenieEncoderDecoder.html">Game Genie Encoder</a> at that address, so you can easily make Game Genie codes.</p>
+<p>Also, when <a class="rvts18" href="CodeDataLogger.html">Code/Data Logger</a> is running, this small column displays whether the respective line of the disassembled memory was executed ("c") or it was read as Data ("d"), or it wasn't logged yet (empty space). This way you can easily distinguish which branches of the game code were executed and which weren't.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts45">Symbolic Debugging</span></p>
+<p><br/></p>
+<p>FCEUX allows you to label any address of RAM or ROM with a human-readable symbolic name.</p>
+<p>For example, when you've figured out that at the address $C022 there's a subroutine which refills player HP, you can right-click the address and type a name like "AddHealthpoints". You can also add a comment, which will be seen while browsing the code near this address. From now on, the address will be substituted by the name everywhere - in all instructions referencing this address, in Hex Editor window, in the log produced by Trace Logger. E.g., JSR $C022 will look like JSR AddHealthpoints.</p>
+<p><br/></p>
+<p>When entering the name, you can use any symbols except #. It's also recommended to avoid whitespaces in names.</p>
+<p>To rename an address, just right-click the name.</p>
+<p><br/></p>
+<p>The data for Symbolic Debugging is stored in <a class="rvts18" href="NLFilesFormat.html">NL files</a> in the same folder as the ROM. You can edit the files in any text editor (to reload all NL files of the currently active ROM file press the "Reload Symbols" button), but it's more convenient to use right-clicks.</p>
+<p><br/></p>
+<p>You can enable and disable symbolic debugging by clicking the checkbox "Symbolic debug" in the lower right corner. In general, there's no need to disable this feature. If you need to see the actual address which got substituted by a name, you can simply left-click the name and watch its address in the "Seek To" text field. This also works when clicking a name in the Trace Logger window.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts45">Breakpoints</span></p>
+<p><br/></p>
+<p>Breakpoints will automatically break execution when chosen conditions are met. To create a breakpoint, click the Add button in the Breakpoints frame in the upper right corner of the debugger.</p>
+<p><br/></p>
+<p>Each breakpoint has an address range to watch. Use only the left address field if you wish to watch a single byte address. When entering the address of a breakpoint, you can also use the aforementioned convenient strings (such as IRQ) instead of hexadecimal memory addresses.</p>
+<p><br/></p>
+<p>Check one or more of the options to watch for Read, Write, or Execute at the given address. Note that fetching of code from an address will not break as a Read; so use the Execute box for this case. Breakpoints can be given a name that will appear in the breakpoints list. The condition field can be used to break only on particular conditions; see "Conditional Breakpoints" below.</p>
+<p><br/></p>
+<p>Double click on a breakpoint in the Breakpoints list to quickly disable or enable this breakpoint. So you don't have to delete breakpoints to stop them from causing the debugger to halt the game.</p>
+<p><br/></p>
+<p>A special kind of breakpoints with the "Forbid" option will prevent any breakpoints from occurring within the specified memory address range. This can be enabled and disabled like other breakpoints.</p>
+<p><br/></p>
+<p>A quicker way to add PC breakpoints is to double click on any address in the Disassembly when you want to set the breakpoint to that address. <span class="rvts15">Example:</span> when you need to quickly advance emulation to a given line of code, double-click on the address part of the line, and the "Add Execute breakpoint here" dialog will appear, just click "OK" and then hit "Run", Debugger will break at this line of code.</p>
+<p><br/></p>
+<p>There is also an option to Break on Bad Opcodes, which will halt execution if a bad instruction opcode is reached.</p>
+<p><br/></p>
+<p>Finally, you can make the debugger break after executing a certain number of instructions or CPU cycles.</p>
+<p><br/></p>
+<p>More advanced breakpoints conditions and full automation may be achieved through Lua script breakpoints. See the <a class="rvts18" href="LuaFunctionsList.html#LuaBreakpoints">Lua reference</a> for more information.</p>
+<p><br/></p>
+<p>Breakpoints are listed in the following form:</p>
+<p><br/></p>
+<p><span class="rvts46">aaaa EmRWXF nnnn cccc</span></p>
+<p><span class="rvts46">or</span></p>
+<p><span class="rvts46">aaaa-aaaa EmRWXF nnnn cccc</span></p>
+<p><br/></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>aaaa - address of breakpoint</li>
+<li>E &nbsp; &nbsp;- enabled</li>
+<li>m &nbsp; &nbsp;- memory area: C = CPU, P = PPU, S = sprite</li>
+<li>R &nbsp; &nbsp;- read</li>
+<li>W &nbsp; &nbsp;- write</li>
+<li>X &nbsp; &nbsp;- execute</li>
+<li>F &nbsp; &nbsp;- Forbid</li>
+<li>nnnn - (optional) name of breakpoint</li>
+<li>nnnn - (optional) condition of breakpoint</li>
+</ul>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts45">Conditional Breakpoints</span></p>
+<p><br/></p>
+<p>Breakpoints may also have a conditional statement that causes them to execute only if that statement evaluates to true. The conditional breakpoint grammar has this form:</p>
+<p><br/></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>Connect &nbsp; -&gt; Compare { ('||' | '&amp;&amp;') Compare }</li>
+<li>Compare &nbsp; -&gt; Sum { ('==' | '!=' | '&lt;=' | '&gt;=' | '&lt;' | '&gt;') Sum }</li>
+<li>Sum &nbsp; &nbsp; &nbsp; -&gt; Product { ('+' | '-') Product }</li>
+<li>Product &nbsp; -&gt; Primitive { ('*' | '/') Primitive }</li>
+<li>Primitive -&gt; Number | Address | Register | Flag | PC Bank | Data Bank | '(' Connect ')'</li>
+<li>Number &nbsp; &nbsp;-&gt; '#' [0123456789ABCDEF]*</li>
+<li>Address &nbsp; -&gt; '$' [0123456789ABCDEF]* | '$' '[' Connect ']'</li>
+<li>Register &nbsp;-&gt; 'A' | 'X' | 'Y' | 'P'</li>
+<li>Flag &nbsp; &nbsp; &nbsp;-&gt; 'N' | 'C' | 'Z' | 'I' | 'B' | 'V' | 'D' | 'U'</li>
+<li>PC Bank &nbsp; -&gt; 'K'</li>
+<li>Data Bank &nbsp; -&gt; 'T'</li>
+<li>Read/Write Value &nbsp; -&gt; 'R' | 'W'</li>
+</ul>
+<p><br/></p>
+<p>The parser is very strict. All numbers are hexadecimal. Always prefix a number with # for an immediate value, or $ for a memory address. If a memory address needs to be calculated use $[] with the calculation inside the brackets.</p>
+<p><br/></p>
+<p>Registers A/X/Y are 8-bit unsigned values. Register P is the 16-bit program counter.</p>
+<p>Flags evaluate to 1 if set, 0 if clear. (U is the unused bit of the status register, and D is the unused decimal flag.)</p>
+<p>For instructions that read or write a single byte (e.g. LDA, STY, PHA, ASL abs), condition R evaluates to the value that will be read by the instruction, and condition W evaluates to the value that will be written.</p>
+<p><br/></p>
+<p>Connecting operators || or &amp;&amp; combine boolean terms. Parentheses dictate order of operations.</p>
+<p><br/></p>
+<p><span class="rvts15">Example conditions:</span></p>
+<p><br/></p>
+<p>Break only if register A is less than value at memory address $0005:</p>
+<p><span class="rvts46">A &lt; $0005</span></p>
+<p><br/></p>
+<p>Break only if the value at the indirect address is not equal to FF:</p>
+<p><span class="rvts46">#FF != $[$10+($11*#100)]</span></p>
+<p><br/></p>
+<p>Break only if flag N is clear or A is not equal to 00:</p>
+<p><span class="rvts46">(N==#0 || A!=#0)</span></p>
+<p><br/></p>
+<p>Break only when accessing a data from bank 2 (the condiition is relevant when using with Read/Write-type breakpoints):</p>
+<p><span class="rvts46">T==#2</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts45">Bookmarks</span></p>
+<p><br/></p>
+<p>A list of bookmarked addresses can be kept in the Address Bookmarks frame to make memory navigation easier. Simply type a hexadecimal address (or a convenient string, such as "NMI") and click "Add" to add it to your bookmarks. Alternatively, just left-click any address in the Disassembly window, and the address will appear in the Bookmark Add field, so you don't have to type it.</p>
+<p>Next time you wish to go to this address just double click on the bookmark.</p>
+<p>You can also name bookmarks.</p>
+<p>When you exit the emulator, bookmarks are saved in a .deb file named after the ROM of the debugged game. Next time you return to debugging the game, the list of bookmarks will be automatically loaded from the file.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts45">Inline Assembler</span></p>
+<p><br/></p>
+<p>Open the inline assembler by left-clicking in the empty column to the left of the memory view.</p>
+<p><br/></p>
+<p>The starting memory address is displayed in the PC field at the top of the inline assembler window. Type a line of assembly to add in the empty field just below this, and hit enter. The assembled code of your patch will appear below as you enter each line.</p>
+<p><br/></p>
+<p>Click Apply to apply your patch to the ROM in memory. Click Undo to remove the last assembled line. After applying a patch, clicking Save will allow you to save this patch directly to the ROM file.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts45">Other</span></p>
+<p><br/></p>
+<p>If the ".DEB files" checkbox in the lower right corner of the debugger window is checked, the emulator will automatically save debug settings such as breakpoints and bookmarks in a .deb file alongside the NES ROM, and load these settings next time you open the ROM.</p>
+<p><br/></p>
+<p>There is a "Rom Patcher" button that may be used to apply a small patch to a ROM, although <a class="rvts18" href="HexEditor.html">Hex Editor</a> is more convenient in general.</p>
+<p><br/></p>
+<p>The "ROM offsets" option will display ROM offsets instead of CPU addresses in the Disassembly window.</p>
+<p><br/></p>
+<p>The "Restore Original Window Size" button will restore the original size of the debugger window if you resized it manually.</p>
+<p><br/></p>
+<p>The "Auto-open" checkbox causes the debugger window to open automatically whenever an NES ROM is opened.</p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/create-epub-ebooks">Full-featured EBook editor</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

@@ -1,0 +1,408 @@
+﻿<html>
+	
+<head>
+	<title>NSF Format</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("NSFFormat");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>NSF Format</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Technicalinformation.html">Technical Information</a> &rsaquo;&rsaquo; <a href="Sound.html">Sound</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Sound.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Sound.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="NESSound.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts27">NES Music Format Spec</span></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;---------------------</p>
+<p><br/></p>
+<p><br/></p>
+<p>By: Kevin Horton &nbsp;khorton@iquest.net</p>
+<p><br/></p>
+<p><br/></p>
+<p>NOTE:</p>
+<p>-----</p>
+<p><br/></p>
+<p><br/></p>
+<p>Remember that I am very willing to add stuff and update this spec. &nbsp;If</p>
+<p>you find a new sound chip or other change let me know and I will get back</p>
+<p>with you. &nbsp;E-mail to the above address. </p>
+<p><br/></p>
+<p><br/></p>
+<p>V1.61 - 06/27/2000 Updated spec a bit</p>
+<p>V1.60 - 06/01/2000 Updated Sunsoft, MMC5, and Namco chip information</p>
+<p>V1.50 - 05/28/2000 Updated FDS, added Sunsoft and Namco chips</p>
+<p>V1.32 - 11/27/1999 Added MMC5 register locations</p>
+<p>V1.30 - 11/14/1999 Added MMC5 audio bit, added some register info</p>
+<p>V1.20 - 09/12/1999 VRC and FDS prelim sound info added</p>
+<p>V1.00 - 05/11/1999 First official NSF specification file</p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p>This file encompasses a way to transfer NES music data in a small, easy to</p>
+<p>use format.</p>
+<p><br/></p>
+<p>The basic idea is one rips the music/sound code from an NES game and prepends</p>
+<p>a small header to the data.</p>
+<p><br/></p>
+<p>A program of some form (6502/sound emulator) then takes the data and loads</p>
+<p>it into the proper place into the 6502's address space, then inits and plays</p>
+<p>the tune.</p>
+<p><br/></p>
+<p>Here's an overview of the header:</p>
+<p><br/></p>
+<p>offset &nbsp;# of bytes &nbsp; Function</p>
+<p>----------------------------</p>
+<p><br/></p>
+<p>0000 &nbsp; &nbsp;5 &nbsp; STRING &nbsp;"NESM",01Ah &nbsp;; denotes an NES sound format file</p>
+<p>0005 &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;Version number (currently 01h)</p>
+<p>0006 &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;Total songs &nbsp; (1=1 song, 2=2 songs, etc)</p>
+<p>0007 &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;Starting song (1= 1st song, 2=2nd song, etc)</p>
+<p>0008 &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) load address of data (8000-FFFF)</p>
+<p>000a &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) init address of data (8000-FFFF)</p>
+<p>000c &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) play address of data (8000-FFFF)</p>
+<p>000e &nbsp; &nbsp;32 &nbsp;STRING &nbsp;The name of the song, null terminated</p>
+<p>002e &nbsp; &nbsp;32 &nbsp;STRING &nbsp;The artist, if known, null terminated</p>
+<p>004e &nbsp; &nbsp;32 &nbsp;STRING &nbsp;The Copyright holder, null terminated</p>
+<p>006e &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) speed, in 1/1000000th sec ticks, NTSC (see text)</p>
+<p>0070 &nbsp; &nbsp;8 &nbsp; BYTE &nbsp; &nbsp;Bankswitch Init Values (see text, and FDS section)</p>
+<p>0078 &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) speed, in 1/1000000th sec ticks, PAL (see text)</p>
+<p>007a &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;PAL/NTSC bits:</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 0: if clear, this is an NTSC tune</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 0: if set, this is a PAL tune</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 1: if set, this is a dual PAL/NTSC tune</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bits 2-7: not used. they *must* be 0</p>
+<p>007b &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;Extra Sound Chip Support</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 0: if set, this song uses VRCVI</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 1: if set, this song uses VRCVII</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 2: if set, this song uses FDS Sound</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 3: if set, this song uses MMC5 audio</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 4: if set, this song uses Namco 106</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 5: if set, this song uses Sunsoft FME-07</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bits 6,7: future expansion: they *must* be 0</p>
+<p>007c &nbsp; &nbsp;4 &nbsp; ---- &nbsp; &nbsp;4 extra bytes for expansion (must be 00h)</p>
+<p>0080 &nbsp; &nbsp;nnn ---- &nbsp; &nbsp;The music program/data follows</p>
+<p><br/></p>
+<p>This may look somewhat familiar; &nbsp;if so that's because this is somewhat</p>
+<p>sorta of based on the PSID file format for C64 music/sound.</p>
+<p><br/></p>
+<p><br/></p>
+<p>Loading a tune into RAM</p>
+<p>-----------------------</p>
+<p><br/></p>
+<p>If offsets 0070h to 0077h have 00h in them, then bankswitching is *not*</p>
+<p>used. &nbsp;If one or more bytes are something other than 00h then bankswitching</p>
+<p>is used. &nbsp;If bankswitching is used then the load address is still used,</p>
+<p>but you now use (ADDRESS AND 0FFFh) to determine where on the first bank</p>
+<p>to load the data.</p>
+<p><br/></p>
+<p><br/></p>
+<p>Each bank is 4K in size, and that means there are 8 of them for the</p>
+<p>entire 08000h-0ffffh range in the 6502's address space. &nbsp;You determine where</p>
+<p>in memory the data goes by setting bytes 070h thru 077h in the file.</p>
+<p>These determine the inital bank values that will be used, and hence where</p>
+<p>the data will be loaded into the address space.</p>
+<p><br/></p>
+<p>Here's an example:</p>
+<p><br/></p>
+<p>METROID.NSF will be used for the following explaination.</p>
+<p><br/></p>
+<p>The file is set up like so: &nbsp;(starting at 070h in the file)</p>
+<p><br/></p>
+<p><br/></p>
+<p>0070: 05 05 05 05 05 05 05 05 - 00 00 00 00 00 00 00 00</p>
+<p>0080: ... music data goes here...</p>
+<p><br/></p>
+<p>Since 0070h-0077h are something other than 00h, then we know that this</p>
+<p>tune uses bankswitching. &nbsp;The load address for the data is specified as</p>
+<p>08000h. &nbsp;We take this AND 0fffh and get 0000h, so we will load data in</p>
+<p>at byte 0 of bank 0, since data is loaded into the banks sequentially</p>
+<p>starting from bank 0 up until the music data is fully loaded.</p>
+<p><br/></p>
+<p>Metroid has 6 4K banks in it, numbered 0 through 5. &nbsp;The 6502's address</p>
+<p>space has 8 4K bankswitchable blocks on it, starting at 08000h-08fffh,</p>
+<p>09000h-09fffh, 0a000h-0afffh ... 0f000h-0ffffh. &nbsp;Each one of these is 4K in</p>
+<p>size, and the current bank is controlled by writes to 05ff8h thru 05fffh,</p>
+<p>one byte per bank. &nbsp;So, 05ff8h controls the 08000h-08fffh range, 05ff9h </p>
+<p>controls the 09000h-09fffh range, etc. up to 05fffh which controls the </p>
+<p>0f000h-0ffffh range. &nbsp;When the song is loaded into RAM, it is loaded into</p>
+<p>the banks and not the 6502's address space. &nbsp;Once this is done, then the</p>
+<p>bank control registers are written to set up the inital bank values.</p>
+<p>To do this, the value at 0070h in the file is written to 05ff8h, 0071h</p>
+<p>is written to 05ff9h, etc. all the way to 0077h is written to 05fffh.</p>
+<p>This is should be done before every call to the init routine.</p>
+<p><br/></p>
+<p>If the tune was not bankswitched, then it is simply loaded in at the </p>
+<p>specified load address, until EOF</p>
+<p><br/></p>
+<p><br/></p>
+<p>Initalizing a tune</p>
+<p>------------------</p>
+<p><br/></p>
+<p>This is pretty simple. &nbsp;Load the desired song # into the accumulator,</p>
+<p>minus 1 and set the X register to specify PAL (X=1) or NTSC (X=0).</p>
+<p>If this is a single standard tune (i.e. PAL *or* NTSC but not both)</p>
+<p>then the X register contents should not matter. &nbsp;Once the song # and</p>
+<p>optional PAL/NTSC standard are loaded, simply call the INIT address.</p>
+<p>Once init is done, it should perform an RTS.</p>
+<p><br/></p>
+<p><br/></p>
+<p>Playing a tune</p>
+<p>--------------</p>
+<p><br/></p>
+<p>Once the tune has been initalized, it can now be played. &nbsp;To do this,</p>
+<p>simply call the play address several times a second. &nbsp;How many times</p>
+<p>per second is determined by offsets 006eh and 006fh in the file.</p>
+<p>These bytes denote the speed of playback in 1/1000000ths of a second. &nbsp;</p>
+<p>For the "usual" 60Hz playback rate, set this to 411ah. &nbsp;</p>
+<p><br/></p>
+<p>To generate a differing playback rate, use this formula:</p>
+<p><br/></p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; 1000000</p>
+<p>PBRATE= ---------</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;speed</p>
+<p><br/></p>
+<p>Where PBRATE is the value you stick into 006e/006fh in the file, and</p>
+<p>speed is the desired speed in hertz. </p>
+<p><br/></p>
+<p><br/></p>
+<p>"Proper" way to load the tune</p>
+<p>-----------------------------</p>
+<p><br/></p>
+<p>1) If the tune is bankswitched, go to #3.</p>
+<p><br/></p>
+<p>2) Load the data into the 6502's address space starting at the specified</p>
+<p> &nbsp; load address. Go to #4.</p>
+<p><br/></p>
+<p>3) Load the data into a RAM area, starting at (start_address AND 0fffh).</p>
+<p><br/></p>
+<p>4) Tune load is done.</p>
+<p><br/></p>
+<p><br/></p>
+<p>"Proper" way to init a tune</p>
+<p>---------------------------</p>
+<p><br/></p>
+<p>1) Clear all RAM at 0000h-07ffh.</p>
+<p><br/></p>
+<p>2) Clear all RAM at 6000h-7fffh.</p>
+<p><br/></p>
+<p>3) Init the sound registers by writing 00h to 04000-0400Fh, 10h to 4010h,</p>
+<p> &nbsp; and 00h to 4011h-4013h.</p>
+<p><br/></p>
+<p>4) Set volume register 04015h to 00fh.</p>
+<p><br/></p>
+<p>5) If this is a banked tune, load the bank values from the header into</p>
+<p> &nbsp; 5ff8-5fffh.</p>
+<p><br/></p>
+<p>6) Set the accumulator and X registers for the desired song.</p>
+<p><br/></p>
+<p>7) Call the music init routine.</p>
+<p><br/></p>
+<p><br/></p>
+<p>"Proper" way to play a tune</p>
+<p>---------------------------</p>
+<p><br/></p>
+<p>1) Call the play address of the music at periodic intervals determined</p>
+<p> &nbsp; by the speed words. &nbsp;Which word to use is determined by which mode</p>
+<p> &nbsp; you are in- PAL or NTSC.</p>
+<p><br/></p>
+<p><br/></p>
+<p>Sound Chip Support</p>
+<p>------------------</p>
+<p><br/></p>
+<p>Byte 007bh of the file stores the sound chip flags. &nbsp;If a particular flag</p>
+<p>is set, those sound registers should be enabled. &nbsp;If the flag is clear,</p>
+<p>then those registers should be disabled.</p>
+<p><br/></p>
+<p>* VRCVI Uses registers 9000-9002, A000-A002, and B000-B002, write only.</p>
+<p><br/></p>
+<p>Caveats: 1) The above registers are *write only* and must not disrupt music</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;code that happens to be stored there.</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; 2) Major caveat: &nbsp;The A0 and A1 lines are flipped on a few games!!</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;If you rip the music and it sounds all funny, flip around </p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;the xxx1 and xxx2 register pairs. &nbsp;(i.e. 9001 and 9002) &nbsp;9000</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;and 9003 can be left untouched. &nbsp;I decided to do this since it </p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;would make things easier all around, and this means you only </p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;will have to change the music code in a very few places (6).</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Esper2 and Madara will need this change, while Castlevania 3j</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;will not for instance.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; </p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; 3) See my VRCVI.TXT doc for a complete register description.</p>
+<p><br/></p>
+<p>* VRCVII Uses registers 9010 and 9030, write only.</p>
+<p><br/></p>
+<p>Caveats: 1) Same caveat as #1, above.</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; 2) See my VRCVII.TXT doc for a complete register description.</p>
+<p><br/></p>
+<p>* FDS Sound uses registers from 4040 through 4092.</p>
+<p><br/></p>
+<p>Caveats: 1) 6000-DFFF is assumed to be RAM, since 6000-DFFF is RAM on the</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;FDS. &nbsp;E000-FFFF is usually not included in FDS games because</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;it is the BIOS ROM. &nbsp;However, it can be used on FDS rips to help</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;the ripper (for modified play/init addresses).</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; 2) Bankswitching operates slightly different on FDS tunes. &nbsp;</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;5FF6 and 5FF7 control the banks 6000-6FFF and 7000-7FFF </p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;respectively. &nbsp;NSF header offsets 76h and 77h correspond to</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;*both* 6000-7FFF *AND* E000-FFFF. &nbsp;Keep this in mind!</p>
+<p><br/></p>
+<p>* MMC5 Sound Uses registers 5000-5015, write only as well as 5205 and 5206,</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;and 5C00-5FF5</p>
+<p><br/></p>
+<p>Caveats: 1) Generating a proper doc file. &nbsp;Be patient. &nbsp;</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; 2) 5205 and 5206 are a hardware 8*8 multiplier. &nbsp;The idea being</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;you write your two bytes to be multiplied into 5205 and 5206</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;and after doing so, you read the result back out. &nbsp;Still working</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;on what exactly triggers it (I think a write to either 5205</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;or 5206 triggers the multiply).</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; 3) 5C00-5FF5 should be RAM to emulate EXRAM while in MMC5 mode.</p>
+<p><br/></p>
+<p>Note: Thanks to Mamiya for the EXRAM info.</p>
+<p><br/></p>
+<p><br/></p>
+<p>* Namco 106 Sound Uses registers 4800 and F800. &nbsp;</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;This works similar to VRC7. &nbsp;4800 is the "data" port which is</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;readable and writable, while F800 is the "address" port and is</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;writable only.</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;The address is 7 bits plus a "mode" bit. &nbsp;Bit 7 controls</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;address auto-incrementing. &nbsp;If bit 7 is set, the address will</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;auto-increment after a byte of data is read or written from/to</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;4800.</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$40 ffffffff f:frequency L</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$42 ffffffff f:frequency M</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$44 ---sssff f:frequency H s:tone length (8-s)*4 in 4bit-samples</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$46 tttttttt t:tone address(4bit-address,$41 means high-4bits of $20)</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$47 -cccvvvv v:linear volume 1+c:number of channels in use($7F only)</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$40-47:ch1 $48-4F:ch2 ... $78-7F:ch8</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;ch2-ch8 same to ch1</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$00-3F(8ch)...77(1ch) hhhhllll tone data</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;h:odd address data(signed 4bit)</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;l:even address data(signed 4bit)</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;real frequency = (f * NES_BASECYCLES) / (40000h * (c+1) * (8-s)*4 * 45)</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;NES_BASECYCLES 21477270(Hz)</p>
+<p><br/></p>
+<p>Note: &nbsp;Very Special thanks to Mamiya for this information!</p>
+<p><br/></p>
+<p><br/></p>
+<p>* Sunsoft FME-07 Sound uses registers C000 and E000</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;This is similar to the common AY 3-8910 sound chip that is</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;used on tons of arcade machines, and in the Intellivision.</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;C000 is the address port</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;E000 is the data port</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Both are write-only, and behave like the AY 3-8910.</p>
+<p><br/></p>
+<p>Note: &nbsp;Special thanks to Mamiya for this information as well</p>
+<p><br/></p>
+<p><br/></p>
+<p>Caveats</p>
+<p>-------</p>
+<p><br/></p>
+<p>1) The starting song number and maximum song numbers start counting at</p>
+<p> &nbsp; 1, while the init address of the tune starts counting at 0. &nbsp;To</p>
+<p> &nbsp; "fix", simply pass the desired song number minus 1 to the init</p>
+<p> &nbsp; routine.</p>
+<p><br/></p>
+<p>2) The NTSC speed word is used *only* for NTSC tunes, or dual PAL/NTSC tunes.</p>
+<p> &nbsp; The PAL speed word is used *only* for PAL tunes, or dual PAL/NTSC tunes.</p>
+<p><br/></p>
+<p>3) The length of the text in the name, artist, and copyright fields must </p>
+<p> &nbsp; be 31 characters or less! &nbsp;There has to be at least a single NULL byte</p>
+<p> &nbsp; (00h) after the text, between fields.</p>
+<p><br/></p>
+<p>4) If a field is not known (name, artist, copyright) then the field must</p>
+<p> &nbsp; contain the string "&lt;?&gt;" (without quotes). &nbsp;</p>
+<p><br/></p>
+<p>5) There should be 8K of RAM present at 6000-7FFFh. MMC5 tunes need RAM at</p>
+<p> &nbsp; 5C00-5FF7 to emulate its EXRAM. 8000-FFFF Should be read-only (not </p>
+<p> &nbsp; writable) after a tune has loaded. &nbsp;The only time this area should be </p>
+<p> &nbsp; writable is if an FDS tune is being played.</p>
+<p><br/></p>
+<p>6) Do not assume the state of *anything* on entry to the init routine</p>
+<p> &nbsp; except A and X. &nbsp;Y can be anything, as can the flags. &nbsp;</p>
+<p><br/></p>
+<p>7) Do not assume the state of *anything* on entry to the play routine either.</p>
+<p> &nbsp; Flags, X, A, and Y could be at any state. &nbsp;I've fixed about 10 tunes</p>
+<p> &nbsp; because of this problem and the problem, above.</p>
+<p><br/></p>
+<p>8) The stack sits at 1FFh and grows down. &nbsp;Make sure the tune does not</p>
+<p> &nbsp; attempt to use 1F0h-1FFh for variables. (Armed Dragon Villigust did and</p>
+<p> &nbsp; I had to relocate its RAM usage to 2xx)</p>
+<p><br/></p>
+<p>9) Variables should sit in the 0000h-07FFh area *only*. &nbsp;If the tune writes</p>
+<p> &nbsp; outside this range, say 1400h this is bad and should be relocated. </p>
+<p> &nbsp; (Terminator 3 did this and I relocated it to 04xx).</p>
+<p><br/></p>
+<p>That's it!</p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/iphone-website-generation">Free iPhone documentation generator</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

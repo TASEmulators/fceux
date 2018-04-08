@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Hex Editor</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+span.rvts11
+{
+ font-size: 14pt;
+}
+span.rvts12
+{
+ font-size: 12pt;
+}
+span.rvts13
+{
+ font-weight: bold;
+}
+span.rvts14 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts15 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts16 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts17, span.rvts17 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{06F7BBD5-399E-4CA0-8E4E-75BE0ACC525A}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts14>Hex Editor</span></p>
+<p><span class=rvts10>Hex Editor</span></p>
+<p><br></p>
+<p><span class=rvts11>Introduction</span></p>
+<p><br></p>
+<p>The Hex editor is a very powerful memory viewing/editing tool and obsoletes the Memory Viewer tool from the FCE Ultra and FCEU Rerecording branches.</p>
+<p><br></p>
+<p>It can do a wide range of things.&nbsp; It allows you to view the entire RAM &amp; ROM contents in an expandable dialog Window.&nbsp; It makes it easy to edit the game's RAM, PPU memory, and even its currently-loaded ROM data by simply typing in values in the editor. You can also "freeze" parts of RAM (to prevent the game from modifying the data there), search for data, and even copy and paste data to/from the clipboard.&nbsp; Furthermore, table files are supported, so you can edit a game's text in real-time and see the result immediately.</p>
+<p><br></p>
+<p>Basically, it lets you tinker with any part of a game's RAM or ROM while it is running.</p>
+<p><br></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Using the Hex Editor</span></p>
+<p><br></p>
+<p>The Hex Editor lets you edit three major areas:</p>
+<p><br></p>
+<p><span class=rvts13>1. NES MEMORY</span></p>
+<p>This allows you to directly edit all of the NES address space ($0000-$FFFF). While you can easily modify RAM, or write directly to registers by typing in data, you cannot modify ROM data ($8000-$FFFF) itself.&nbsp; This is because most mappers have registers which are located in this space; so writing there can trigger mapper operations that may cause the game to crash or glitch if you don't know what you're doing.&nbsp; If you want to edit the ROM itself, right-click on the offset and select&nbsp; "Go here in ROM file"; that will take you directly to where you need to be so you can start editing.&nbsp; You can also freeze RAM by clicking on it with the middle mouse button, or by using the right-click menu. This works by adding it directly to the Cheat List, which you can see from the Cheat Console.&nbsp; Finally, the right-click menu can be used to quickly add a read or write breakpoint to the debugger.</p>
+<p><br></p>
+<p><span class=rvts13>2. PPU MEMORY</span></p>
+<p>This allows you to directly view and write to PPU memory (VRAM).</p>
+<p><br></p>
+<p><span class=rvts13>3. THE ROM FILE</span></p>
+<p>This is possibly the coolest part of FCEUXD:&nbsp; It allows you to edit the ROM file in real-time, i.e. while the game is running. If you make a mistake, press Ctrl+Z or Edit-&gt;Undo to undo your change (then load a save-state if the game crashed).&nbsp; If you have the Code/Data Logger running, then bytes that were logged as code will be colored yellow, while bytes logged as data will be colored blue. Bytes that have been logged as code *and* data will be colored green.</p>
+<p><br></p>
+<p>The Hex Editor also has support for table files (*.tbl) to map bytes to text. Each line consists of four characters of the form "xx=y", where "xx" is the hex value, and "y" is the character that that value represents.&nbsp; I have also added an extension to represent the Return key:&nbsp; xx=ret whereby pressing the Return key will enter that value into the ROM.&nbsp; You can copy/paste data or text by selecting it and using Ctrl+Z (to copy) and Ctrl+V (to paste). Plus, there is an Edit-&gt;Find feature that you can use to search for data. This feature should be fairly intuitive, so I won't bother to explain it.</p>
+<p><br></p>
+<p>When you're done editing, remember to save the ROM file (File-&gt;Save) or your changes will be lost when you close the ROM.</p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts11>Why can't I edit NES memory beyond $8000?</span></p>
+<p><span class=rvts12><br></span></p>
+<p>NES memory from $8000-$FFFF is where the game's PRG-ROM code is mapped.&nbsp; Whenever you type in a value in the NES memory editor, it effectively writes that value to that address. Many games use mappers, which are usually accessed by writing to $8000-$FFFF (which is read-only)... and if *you* were to do so, it may trigger a bankswitch, which could easily make the game crash. In any event, doing so will not modify the ROM itself.&nbsp; What you *can* do, though, is edit the PRG-ROM itself by right-clicking on the offset you wish to edit, and selecting "Go here in the ROM file", which should take you to that spot in the ROM instead, where you can change the data at instead.</p>
+<p><br></p>
+<p>.</p>
+<p><br></p>
+<p class=rvps3><span class=rvts15>2008</span></p>
+<p class=rvps4><span class=rvts16>This help file has been generated by the freeware version of </span><a class=rvts17 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

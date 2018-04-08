@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>.fm2</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 18pt;
+}
+span.rvts11
+{
+ font-size: 14pt;
+}
+span.rvts12
+{
+ font-size: 12pt;
+}
+a.rvts13, span.rvts13
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts13:hover { color: #0000ff; }
+span.rvts14 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts15 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts16 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts17, span.rvts17 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{35A71F02-6927-4476-B205-A524630184CC}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts14>.fm2</span></p>
+<p><span class=rvts10>FCEUX Movie File format</span></p>
+<p>designed by: Zeromus</p>
+<p><br></p>
+<p>FCEUX uses a new movie file format - .fm2.</p>
+<p><br></p>
+<p>This differs from the previous FCE Ultra movie format (.fcm) in the following ways:</p>
+<p><br></p>
+<p>-It is completely text based; allowing easy movie editing/splicing</p>
+<p>-An imbedded GUID so FCEUX can tell if a savestate belongs to a movie file</p>
+<p>-Movies recorded from Start (Power-on) no longer have a redundant savestate</p>
+<p>-Can no longer record from soft reset</p>
+<p>-Contains mouse input for recording the Zapper &amp; Arkanoid Paddle</p>
+<p><br></p>
+<p><span class=rvts11>Format</span></p>
+<p><br></p>
+<p>FM2 is ASCII plain text.&nbsp; It consists of several key-value pairs followed by an input log section.</p>
+<p><br></p>
+<p>The input log section can be identified by its starting with a | (pipe).</p>
+<p>The input log section terminates at eof.</p>
+<p>Newlines may be \r\n or \n</p>
+<p><br></p>
+<p>Key-value pairs consist of a key identifier, followed by a space separator, followed by the value text.</p>
+<p>Value text is always terminated by a newline, which the value text will not include.</p>
+<p>The value text is parsed differently depending on the type of the key.</p>
+<p>The key-value pairs may be in any order, except that the first key must be version.</p>
+<p><br></p>
+<p>Integer keys (also used for booleans, with a 1 or 0) will have a value that is a simple integer not to exceed 32bits</p>
+<p> - version (required) - the version of the movie file format; for now it is always 3</p>
+<p> - emuVersion (required) - the version of the emulator used to produce the movie</p>
+<p> - rerecordCount (optional) - the rerecord count</p>
+<p> - palFlag (bool) (optional) - true if the movie uses pal timing</p>
+<p> - fourscore (bool) (*note C) - true if a fourscore was used</p>
+<p> - FDS (bool) (optional) - true if movie was recorded on a Famicom Disk System (FDS) game</p>
+<p> - port0, port1 (*note C) - indicates the types of input devices. Supported values are:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp; SI_GAMEPAD = 1,</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp; SI_ZAPPER = 2</p>
+<p> - port2 (required) - indicates the type of the FCExp port device which was attached. Supported values are:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp; SIFC_NONE = 0</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts11>Header</span></p>
+<p><br></p>
+<p>String keys have values that consist of the remainder of the key-value pair line. As a consequence, string values cannot contain newlines.</p>
+<p> - romFilename (required) - the name of the file used to record the movie</p>
+<p> </p>
+<p><br></p>
+<p>Hex string keys (used for binary blobs) will have a value that is like 0x0123456789ABCDEF...</p>
+<p> - romChecksum (required) - the MD5 hash of the ROM which was used to record the movie</p>
+<p> - savestate (optional) - a fcs savestate blob, in case a movie was recorded from savestate </p>
+<p><br></p>
+<p>GUID keys have a value which is in the standard guide format: 452DE2C3-EF43-2FA9-77AC-0677FC51543B</p>
+<p> - guide (required) a unique identifier for a movie, generated when the movie is created, which is used when loading a savestate to make sure it belongs to the current movie.</p>
+<p><br></p>
+<p><span class=rvts12>Comments</span></p>
+<p><br></p>
+<p>- comment (optional) - simply a memo. </p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp; by convention, the first token in the comment value is the subject of the comment.</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp; by convention, subsequent comments with the same subject will have their ordering preserved and may be used to approximate multi-line comments.</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp; by convention, the author of the movie should be stored in comment(s) with a subject of: author</p>
+<p><br></p>
+<p>example:</p>
+<p>comment author adelikat</p>
+<p><br></p>
+<p><span class=rvts12>Subtitles</span></p>
+<p><br></p>
+<p>- subtitle (optional) - a message that will be displayed on screen when movie is played back (unless Subtitles are turned off, see <a class=rvts13 href="{75E1BB96-B43D-4D24-B1C3-120890F15B94}.htm">Movie options</a>).</p>
+<p>&nbsp;&nbsp;&nbsp; by convention, subtitles will begin with the word subtitle</p>
+<p>&nbsp;&nbsp;&nbsp; by convention, an integer value will proceed which will indicate the frame that the subtitle will be displayed</p>
+<p>&nbsp;&nbsp;&nbsp; by convention, a string of text will follow which will be the string displayed</p>
+<p><br></p>
+<p>example:</p>
+<p>subtitle 1000 Level Two</p>
+<p><br></p>
+<p>At frame 1000 the words "Level Two" will be displayed on the screen</p>
+<p><br></p>
+<p><span class=rvts11>Input log</span></p>
+<p><br></p>
+<p>The input log section consists of lines beginning and ending with a | (pipe).</p>
+<p>The fields are as follows, except as noted in note C.</p>
+<p>|c|port0|port1|port2|</p>
+<p><br></p>
+<p>field c is a variable length decimal integer which is a bit field corresponding to miscellaneous input states which are valid at the start of the frame.</p>
+<p>Current values for this are</p>
+<p>MOVIECMD_RESET = 1</p>
+<p><br></p>
+<p>the format of port0, port1, port2 depends on which types of devices were attached.</p>
+<p>SI_GAMEPAD:</p>
+<p> the field consists of eight characters which constitute a bit field.</p>
+<p> any character other than ' ' or '.' means that the button was pressed.</p>
+<p> by convention, the following mnemonics will be used in a column to remind us of which button corresponds to which column:</p>
+<p>&nbsp;&nbsp; RLDUTSBA (Right,Left,Down,Up,sTart,Select,B,A)</p>
+<p>SI_ZAPPER:</p>
+<p> XXX YYY B Q Z</p>
+<p> XXX: %03d, the x position of the mouse</p>
+<p> YYY: %03d, the y position of the mouse</p>
+<p> B: %1d, 1 if the mouse button is pressed; 0 if not</p>
+<p> Q: %1d, an internal value used by the emulator's zapper code (this is most unfortunate..)</p>
+<p> Z: %d, a variable-length decimal integer; an internal value used by the emulator's zapper code (this is even more unfortunate..)</p>
+<p>SIFC_NONE:</p>
+<p> this field must always be empty.</p>
+<p><br></p>
+<p>* Notes *</p>
+<p>A. There is no key-value pair that indicates the length of the movie. This must be read by scanning the input log and counting the number of lines.</p>
+<p><br></p>
+<p>B. All movies start from power-on, unless a savestate key-value is present.</p>
+<p><br></p>
+<p>C. </p>
+<p>If a fourscore is used, then port0 and port1 are irrelevant and ignored. </p>
+<p>The input types must all be gamepads, and the input log will be in the following format:</p>
+<p>&nbsp; {player1&nbsp; player2&nbsp; player3&nbsp; player4}</p>
+<p>|c|ABSTUDLR|ABSTUDLR|ABSTUDLR|ABSTUDLR|port2|</p>
+<p>If a fourscore is not used, then port0 and port1 are required.</p>
+<p><br></p>
+<p>D. The emulator uses these framerate constants</p>
+<p>&nbsp; - NTSC: 1008307711 /256/65536 = 60.099822938442230224609375</p>
+<p>&nbsp; - PAL : 838977920&nbsp; /256/65536 = 50.00698089599609375</p>
+<p><br></p>
+<p>E. The author of this format is curious about what people think of it. Please let him know!</p>
+<p class=rvps3><span class=rvts15>2008</span></p>
+<p class=rvps4><span class=rvts16>This help file has been generated by the freeware version of </span><a class=rvts17 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

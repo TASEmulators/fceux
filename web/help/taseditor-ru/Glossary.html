@@ -1,0 +1,293 @@
+﻿<html>
+	
+<head>
+	<title>Глоссарий</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "index.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("Glossary");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Глоссарий</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Reference.html">Справочник</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Reference.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Reference.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="Controls.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts20">Глоссарий</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Здесь перечислено большинство используемых в данном Руководстве терминов, и приведена их краткая характеристика. Более подробное описание некоторых терминов дано в </span><a class="rvts28" href="BeginnersGuide.html">Курсе новичка</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Рекомендуется сразу прочитать весь глоссарий целиком, так как многие термины тесно связаны друг с другом.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Почти все термины имеют англоязычный первоисточник, так как ТАСерские традиции вырабатывались в среде англоговорящих игроков.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps10"><a name="Input"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/game-player-taser.png"/></p>
+<p class="rvps10"><span class="rvts26">Input – Ввод</span></p>
+<p class="rvps10"><span class="rvts22">Данные о действиях игрока, воспринимаемые игрой и влияющие на её поведение.</span></p>
+<p class="rvps10"><span class="rvts22">Из-за многозначности слова "Ввод" среди русскоязычных ТАСеров чаще используется англицизм "Инпут", который можно перевести как "Вводимые данные".</span></p>
+<p class="rvps10"><span class="rvts22">ТАСинг базируется на допущении, что поведение игры однозначно зависит от Ввода игрока и начального состояния игры, и ни от чего более (т.н. детерминизм).</span></p>
+<p class="rvps10"><span class="rvts22">Примеры существующих типов Ввода: нажатие кнопки джойстика, наклон аналогового стика, прикосновение стилуса, крик в микрофон и т.д.</span></p>
+<p class="rvps10"><span class="rvts22">В Тасэдиторе используется представление Ввода в формате "последовательность кнопочных состояний".</span></p>
+<p class="rvps10"><span class="rvts22">Замечание: когда игрок не нажимает ни одной кнопки, этот факт так же является Вводом.</span></p>
+<p class="rvps10"><a name="Output"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Output – Вывод</span></p>
+<p class="rvps10"><span class="rvts22">Данные, выдаваемые игрой в ответ на Ввод игрока.</span></p>
+<p class="rvps10"><span class="rvts22">Из-за многозначности слова "Вывод" в данном Руководстве используются слова "результат", "реакция игры" и т.п.</span></p>
+<p class="rvps10"><span class="rvts22">Процесс игры в любую видеоигру можно представить в виде зацикленного взаимодействия между субъектом (игроком) и объектом (игрой).</span></p>
+<p class="rvps10"><span class="rvts22">Примеры существующих типов Вывода: изображение, звук, вибрация джойстика, изменение просматриваемой ячейки памяти, информация о лаге и т.д.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Walkthrough – Прохождение</span><span class="rvts22"> (прохождение видеоигры)</span></p>
+<p class="rvps10"><span class="rvts22">Последовательность действий для успешного завершения игры.</span></p>
+<p class="rvps10"><span class="rvts22">Эта последовательность вводится в игру с помощью устройства ввода (например, джойстика). Последовательность может быть либо исполнена вживую (real-time – в реальном времени), либо приготовлена в виде воспроизводимых данных (например, журнал нажатых кнопок). Во втором случае эту последовательность можно редактировать.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Speedrun – Пробег</span></p>
+<p class="rvps10"><span class="rvts22">Прохождение с целью самого быстрого завершения игры.</span></p>
+<p class="rvps10"><span class="rvts22">Часто используется англицизм "cпидран".</span></p>
+<p class="rvps10"><span class="rvts22">В некоторых играх присутствует встроенный режим под названием "Speedrun" или "Time Attack", при котором игра ведёт учёт затраченного времени на прохождение. Для других игр можно использовать внешний таймер, измеряя время в секундах или TV-кадрах (обычно подразумевается 60 кадров в секунду).</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">TAS </span><span class="rvts22">(Tool-Assisted Superplay / Tool-Assisted Speedrun)</span><span class="rvts26"> – ТАС</span></p>
+<p class="rvps10"><span class="rvts22">Прохождение, при создании которого были использованы инструменты для редактирования совершаемых действий игрока.</span></p>
+<p class="rvps10"><span class="rvts22">Процесс создания ТАСа называется ТАСингом, а авторы зовутся ТАСерами.</span></p>
+<p class="rvps10"><span class="rvts22">Благодаря редактированию Ввода ТАСер освобождается от некоторых человеческих ограничений (например, слабой реакции) и может направить все усилия на создание крайне неординарных прохождений видеоигр. Это может быть не только спидран, но и развлекательный видеоролик (playaround).</span></p>
+<p class="rvps10"><span class="rvts22">ТАСы распространяются:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">в виде готовых видеороликов с Выводом (youtube, AVI-файлы &nbsp;и т.д.) – удобно смотреть</span></li>
+<li class="rvps10"><span class="rvts22">в виде исходных мувиков с Вводом (fm2 и т.д.) – удобно редактировать</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Movie – Мувик</span><span class="rvts22"> (фильм)</span></p>
+<p class="rvps10"><span class="rvts22">Контейнер для хранения Ввода и сопутствующих данных.</span></p>
+<p class="rvps10"><span class="rvts22">В отличие от видеороликов, игровой Вывод (изображение и звук) в мувике не хранится, он появляется на экране только в результате применения Ввода мувика к соответствующей игре.</span></p>
+<p class="rvps10"><span class="rvts22">Также мувиком называется файл (movie file), в котором хранится Ввод и сопутствующие данные.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Lag – Лаг</span><span class="rvts22"> (задержка)</span></p>
+<p class="rvps10"><span class="rvts22">Превышение нормы при задержке между Вводом и Выводом.</span></p>
+<p class="rvps10"><span class="rvts22">При зацикленном взаимодействии между игроком и игрой обычно устанавливается режим Ввода и Вывода через равные промежутки времени, например, ровно 60 раз в секунду.</span></p>
+<p class="rvps10"><span class="rvts22">Процессор может производить строго фиксированное количество операций в единицу времени. Но игра пытается имитировать безграничность реальной жизни, поэтому количество игровых объектов может сильно варьироваться. Как следствие, возможны ситуации, когда обработка объектов занимает больше времени, чем отведено. В таких ситуациях задерживается генерация Вывода и опрашивание следующего Ввода.</span></p>
+<p class="rvps10"><span class="rvts22">Лишние задержки не выгодны при создании спидрана. Поэтому лаг зачастую выступает в качестве одного из факторов, который нужно учитывать во время создания Ввода. Обычно требуется минимизировать количество кадров с лагом.</span></p>
+<p class="rvps10"><span class="rvts22">Наличие лага в кадре определяется эмулятором сразу после окончания обработки данного кадра. Если во время эмуляции кадра игра опросила Ввод, считается, что лага в кадре нет. Если игра не опросила Ввод – лаг в кадре есть. В Тасэдиторе кадры с лагом отмечаются красными строками. Рисовать Ввод на этих кадрах бесполезно.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Desync – Рассинхронизация</span><span class="rvts22"> (расхождение)</span></p>
+<p class="rvps10"><span class="rvts22">Отличие Вывода от ожидаемого образца, в результате чего действия игрока расходятся с логикой игры.</span></p>
+<p class="rvps10"><span class="rvts22">Может произойти в случае, если Ввод проигрывается на другой игре, другом эмуляторе или с другими настройками синхронизирования. Также может произойти, если эмулятор не обеспечивает детерминизм должным образом.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Segment – Участок</span></p>
+<p class="rvps10"><span class="rvts22">Часть мувика, соответствующая промежутку времени между двумя игровыми событиями.</span></p>
+<p class="rvps10"><span class="rvts22">Разбиение мувика на участки – это разложение большой задачи на мелкие подзадачи.</span></p>
+<p class="rvps10"><span class="rvts22">Размер участка измеряется в кадрах, а границы участка обычно определяются игровыми событиями. Начальное событие отсекает все предыдущие задачи и концентрирует внимание ТАСера на ближайшем наборе условий. Конечное событие служит для оценки оптимальности всех вариантов решения текущей задачи.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="TASingProcess.html">Процесс ТАСинга</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Optimization – Оптимизация</span></p>
+<p class="rvps10"><span class="rvts22">Процесс поиска оптимального (наилучшего) решения задачи на текущем участке.</span></p>
+<p class="rvps10"><span class="rvts22">Почти любую задачу в видеоиграх можно решить множеством разнообразных способов. У каждого способа есть свои плюсы и минусы. ТАСер перед началом работы выбирает свои цели (например, сделать пацифистский спидран), тем самым расставляя приоритеты среди вышеупомянутых плюсов и минусов. Поэтому любые способы решения можно оценить и сравнить между собой, чтобы определить лучший и худший.</span></p>
+<p class="rvps10"><span class="rvts22">Процесс оптимизация ТАСа заключается в редактировании Ввода и оценке получающегося Вывода. Когда ТАСер получает от игры более предпочтительный результат, он отмечает текущий Ввод в качестве основного, пока не найдёт ещё более оптимальный Ввод. В финальном ТАСе для каждой подзадачи оставлен наилучший вариант решения.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="TASingMethodology.html">Методология ТАСинга</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Improvement – Улучшение</span></p>
+<p class="rvps10"><span class="rvts22">Возможность решить задачу более оптимально.</span></p>
+<p class="rvps10"><span class="rvts22">Примеры улучшений в спидранах: устранение неточностей, использование неиспользованного таймсэйвера, повышение эффективности использования таймсэйвера, повышение развлекательности мувика без потери скорости.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Timesaver – Таймсэйвер</span></p>
+<p class="rvps10"><span class="rvts22">Любой внутриигровой трюк, который позволяет сэкономить время.</span></p>
+<p class="rvps10"><span class="rvts22">При создании спидрана ТАСеру необходимо использовать все незапрещённые возможности для максимально быстрого прохождения игры. В первую очередь это шлифовка Ввода с целью найти наилучшее решение, исходя из имеющихся знаний об игре. Во вторую очередь это расширение базы знаний – поиск и применение трюков. Настоящий ТАСер пытается собрать максимум информации об игре и использовать все известные трюки максимально эффективно, чтобы его рекорд скорости нельзя было легко побить.</span></p>
+<p class="rvps10"><span class="rvts22">Примеры таймсэйверов: фичи игры, баги игры, манипуляция удачей.</span></p>
+<p class="rvps10"><span class="rvts22">Замечание: иногда ТАСер сознательно отказывается от использования некоторых таймсэйверов, в этом случае для его ТАСа отводится отдельная категория на сайте. Например: спидран Super Mario Bros без использования кнопки </span><span class="rvts32">B</span><span class="rvts22"> (отказ от фичи), спидран Sonic the Hedgehog без прохождения сквозь стены (отказ от бага).</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Feature – Фича</span><span class="rvts22"> (особенность)</span></p>
+<p class="rvps10"><span class="rvts22">Запланированный аспект игры.</span></p>
+<p class="rvps10"><span class="rvts22">Некоторые фичи не существенны (а иногда и незаметны) для простого игрока, но существенны для ТАСера. Поэтому перед оптимизацией Ввода рекомендуется провести исследования игрового движка.</span></p>
+<p class="rvps10"><span class="rvts22">Примеры существеных для ТАСера фич: ускорение при ранении (damage boost), вынужденное ожидание при подсчёте очков, наличие субпикселей у координат персонажа, особенности искусственного интеллекта врагов и т.д.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Bug / Glitch – Баг / Глюк</span><span class="rvts22"> (ошибка)</span></p>
+<p class="rvps10"><span class="rvts22">Незапланированный аспект игры.</span></p>
+<p class="rvps10"><span class="rvts22">Используемые ТАСером баги должны быть воспроизводимыми (хотя бы теоретически) на настоящей приставке. Использование багов, специфичных для эмулятора, не разрешается.</span></p>
+<p class="rvps10"><span class="rvts22">Многие баги обнаруживаются даже при обычной игре без использования инструментов. Некоторые требуют тщательного исследования поведения игры и изучения её исполняемого кода.</span></p>
+<p class="rvps10"><span class="rvts22">Примеры багов: упрощённая проверка коллизий, отсутствие проверки испорченных данных в сохранении, непредусмотренное изменение ячеек оперативной памяти, ошибка в порядке очерёдности проверок и т.д.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Luck Manipulation – Манипуляция удачей</span></p>
+<p class="rvps10"><span class="rvts22">Неограниченная эксплуатация фич, использование которых при нормальной игре сдерживается нехваткой знаний у игрока.</span></p>
+<p class="rvps10"><span class="rvts22">По сути любые эксперименты с изменением Ввода являются манипуляцией с игровыми фичами. Но некоторые аспекты игр кажутся обычным игрокам особенно непредсказуемыми. Алгоритмы их функционирования нарочно скрыты разработчиками от невооружённого глаза, игроку они показаны как случайные и неконтролируемые.</span></p>
+<p class="rvps10"><span class="rvts22">Однако на самом деле все аспекты видеоигр являются детерминированными (однозначно зависящими от Ввода). Использование инструментов и вдумчивого анализа позволяет выявить скрытые закономерности и использовать их при создании Ввода мувика. А в некоторых случаях вместо исследования алгоритмов достаточно воспользоваться методом перебора, натыкаясь на удачный исход событий методом проб и ошибок, а затем оставляя в мувике именно тот Ввод, который приводит игру к удачному результату.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="NonlinearTASing.html#turbo-seeking">Нелинейный ТАСинг</a><span class="rvts22"> (пример манипуляции)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Subpixels – Субпиксели</span><span class="rvts22"> (дробная часть пикселя)</span></p>
+<p class="rvps10"><span class="rvts22">Наличие не только целых, но и дробных значений у координат персонажа в игре.</span></p>
+<p class="rvps10"><span class="rvts22">В общем случае ТАСеру следует понимать отличие между экранными координатами спрайта и реальными координатами физического объекта в игре. Только в простейших играх эти координаты совпадают, обычно же на экран выводится приблизительное положение вещей, где проекции всех объектов выравнены по сетке пикселей. Чтобы узнать реальные координаты (и другие скрытые от глаз игрока данные), нужно просматривать ячейки оперативной памяти эмулируемой платформы. Это делается с помощью просмотрщика памяти (Memory Watch) или Lua.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Recording – Запись</span></p>
+<p class="rvps10"><span class="rvts22">Один из способов создания Ввода в мувике.</span></p>
+<p class="rvps10"><span class="rvts22">Заключается в последовательном добавлении Ввода в конец мувика, одновременно с просмотром промежуточных результатов.</span></p>
+<p class="rvps10"><span class="rvts22">Другим способом является рисование Ввода непосредственно в мувике.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="Toolbox.html#recorder">Панель инструментов</a><span class="rvts22">, </span><a class="rvts28" href="TASingMethodology.html#linear-tasing">Методология ТАСинга</a><span class="rvts22">, </span><a class="rvts28" href="TraditionalTASing.html">Традиционный метод ТАСинга</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Rerecording – Перезапись</span><span class="rvts22"> (повторная запись)</span></p>
+<p class="rvps10"><span class="rvts22">Один из способов редактирования Ввода в мувике.</span></p>
+<p class="rvps10"><span class="rvts22">Заключается в последовательном изменении Ввода, начиная с определённого кадра, одновременно с просмотром промежуточных результатов.</span></p>
+<p class="rvps10"><span class="rvts22">Другим способом является непосредственная модификация Ввода в мувике.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="TASingMethodology.html#linear-tasing">Методология ТАСинга</a><span class="rvts22">, </span><a class="rvts28" href="TraditionalTASing.html">Традиционный метод ТАСинга</a><span class="rvts22">, </span><a class="rvts28" href="Ideas.html#RerecordsCounter">Счётчик перезаписей</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Multitracking – Мультитрекинг</span><span class="rvts22"> (многодорожечная запись)</span></p>
+<p class="rvps10"><span class="rvts22">Один из способов записи Ввода при прохождении игр в режиме нескольких игроков.</span></p>
+<p class="rvps10"><span class="rvts22">Заключается в поочерёдной записи Ввода на одном участке для каждого игрока отдельно.</span></p>
+<p class="rvps10"><span class="rvts22">Другим способом является запись Ввода для всех игроков сразу.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="Toolbox.html#multitracking">Панель инструментов</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Frame Advance – Frame Advance </span><span class="rvts22">(покадровая эмуляция)</span></p>
+<p class="rvps10"><span class="rvts22">Пошаговая эмуляция игры минимальными порциями (единицами измерения времени) – кадрами.</span></p>
+<p class="rvps10"><span class="rvts22">Используется для ручного управления ходом времени, является более эффективной заменой простому замедлению эмуляции.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Turbo – Турбо</span><span class="rvts22"> (повышенная скорость)</span></p>
+<p class="rvps10"><span class="rvts22">Ускорение эмуляции игры до максимально возможной скорости.</span></p>
+<p class="rvps10"><span class="rvts22">Используется для пропуска несущественных игровых событий и уменьшения времени ожидания при добегании к дальнему кадру мувика.</span></p>
+<p class="rvps10"><span class="rvts22">С помощью настроек эмулятора можно гибко варьировать скорость эмуляции, замедляя или ускоряя её при необходимости. Под Турбо понимается максимально возможная скорость эмуляции. Этот предел зависит от производительности вашего компьютера.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="Toolbox.html#turbo-seek">Панель инструментов</a><span class="rvts22">, </span><a class="rvts28" href="NonlinearTASing.html#turbo-seeking">Нелинейный ТАСинг</a><span class="rvts22">, </span><a class="rvts28" href="SemiautomaticTASing.html#turbo-seeking">Полуавтоматический ТАСинг</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Savestate – Сэйв</span><span class="rvts22"> (сохранение)</span></p>
+<p class="rvps10"><span class="rvts22">Снимок состояния эмулируемой платформы.</span></p>
+<p class="rvps10"><span class="rvts22">В отличие от встроенных игровых сохранений, здесь сохраняется и восстанавливается исчерпывающая информация о состоянии эмулируемой системы.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Piano Roll – Piano Roll</span><span class="rvts22"> (перфолента)</span></p>
+<p class="rvps10"><span class="rvts22">Тип визуального представления данных, похожий на представление в виде таблицы.</span></p>
+<p class="rvps10"><span class="rvts22">Этот интерфейс используется в редакторах музыки (MIDI-секвенсорах и MOD-трекерах). Его имя и принцип действия унаследован из физического аналога (давно существовавшие свёртки перфорированной бумаги для механических клавесинов).</span></p>
+<p class="rvps10"><span class="rvts22">В Piano Roll Тасэдитора отображаются и редактируются данные мувика (Ввод и Маркеры), а также отображаются некоторые данные эмулируемой игры (текущий кадр, Журнал лага, Закладки и т.д.).</span></p>
+<p class="rvps10"><span class="rvts22">Каждая строка Piano Roll соотносится с одним кадром мувика.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="PianoRoll.html">Интерфейс Piano Roll</a><span class="rvts22">, </span><a class="rvts28" href="Ideas.html#PianoRoll">Спецификации Piano Roll</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Playback cursor – Курсор Проигрывателя</span></p>
+<p class="rvps10"><span class="rvts22">Указатель на текущий проигрываемый кадр мувика.</span></p>
+<p class="rvps10"><span class="rvts22">События этого кадра отображаются в окне эмулятора в виде скриншота, а в Piano Roll соответствующая строка обозначается голубым цветом и значком "Play" (голубая стрелка).</span></p>
+<p class="rvps10"><span class="rvts22">Одновременно можно видеть только события одного кадра мувика. Чтобы увидеть скриншот последующих событий мувика, нужно переместить голубой Курсор Проигрывателя вперёд (вниз по Piano Roll), чтобы увидеть скриншот предыдущих событий, нужно переместить курсор назад (вверх по Piano Roll).</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="PianoRoll.html">Интерфейс Piano Roll</a><span class="rvts22">, </span><a class="rvts28" href="Navigation.html#playback-cursor">Навигация Курсором Проигрывателя</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Greenzone – Гринзона</span><span class="rvts22"> (зона мгновенного доступа)</span></p>
+<p class="rvps10"><span class="rvts22">Хранилище данных, специально разработанное для ускорения навигации Курсором Проигрывателя по мувику.</span></p>
+<p class="rvps10"><span class="rvts22">Это хранилище автоматически собирает сэйвы для каждого кадра мувика во время эмуляции, а при необходимости использует эти сэйвы для мгновенного прыжка Курсором Проигрывателя на любой кадр.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="Toolbox.html#progressbar">Панель инструментов</a><span class="rvts22">, </span><a class="rvts28" href="ProgramCustomization.html#SetGreenzonecapacity">Настройка программы</a><span class="rvts22">, </span><a class="rvts28" href="Ideas.html#Greenzone">Спецификации Гринзоны</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Selection – Выделение</span></p>
+<p class="rvps10"><span class="rvts22">Набор строк Piano Roll, отмеченных специальным цветом (обычно синим).</span></p>
+<p class="rvps10"><span class="rvts22">Любая строка (и, соответственно, любой кадр мувика) является либо выделенной, либо не выделенной.</span></p>
+<p class="rvps10"><span class="rvts22">Выделение позволяет оперировать одновременно с несколькими кадрами, например, удалить целый регион кадров вместо удаления каждого кадра поодиночке.</span></p>
+<p class="rvps10"><span class="rvts22">Самый верхний выделенный кадр называется Курсором Выделения.</span></p>
+<p class="rvps10"><span class="rvts22">Курсор Выделения автоматически следует за процессом редактирования Ввода.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="PianoRoll.html">Интерфейс Piano Roll</a><span class="rvts22">, </span><a class="rvts28" href="Navigation.html#selection-cursor">Навигация Курсором Выделения</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Marker – Маркер</span></p>
+<p class="rvps10"><span class="rvts22">Жёлтая отметка для строки в Piano Roll, акцентирующая внимание на этом кадре.</span></p>
+<p class="rvps10"><span class="rvts22">Маркером можно отметить любой кадр в Piano Roll. С помощью установки и удаления Маркеров можно повысить наглядность и удобство работы.</span></p>
+<p class="rvps10"><span class="rvts22">Цели использования Маркеров:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">структуризация Ввода</span></li>
+<li class="rvps10"><span class="rvts22">формализация знаний (с помощью Заметок)</span></li>
+<li class="rvps10"><span class="rvts22">ускорение навигации</span></li>
+<li class="rvps10"><span class="rvts22">быстрое выделение участков (</span><span class="rvts34">Ctrl + A</span><span class="rvts22">)</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="PianoRoll.html#markers">Интерфейс Piano Roll</a><span class="rvts22">, </span><a class="rvts28" href="Ideas.html#Markers">Спецификации Маркеров</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Note – Заметка</span></p>
+<p class="rvps10"><span class="rvts22">Однострочная текстовая запись, прилагаемая к каждому Маркеру.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="PianoRoll.html#markers">Интерфейс Piano Roll</a><span class="rvts22">, </span><a class="rvts28" href="Controls.html#notes">Управление</a><span class="rvts22">, </span><a class="rvts28" href="AdvancedFeatures.html#UsingMarkers">Продвинутые возможности</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Bookmark – Закладка</span></p>
+<p class="rvps10"><span class="rvts22">Номерная отметка для кадра мувика.</span></p>
+<p class="rvps10"><span class="rvts22">В Тасэдиторе есть 10 слотов для Закладок.</span></p>
+<p class="rvps10"><span class="rvts22">Закладка сохраняет всю необходимую информацию о кадре, на который она установлена. В том числе то ответвление мувика, которое однозначно приводит игру к событиям данного кадра.</span></p>
+<p class="rvps10"><span class="rvts22">Закладки могут использоваться для навигации Курсором Проигрывателя, но в основном они используются для хранения ответвлений.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="Toolbox.html#bookmarks">Панель инструментов</a><span class="rvts22">, </span><a class="rvts28" href="Ideas.html#BookmarksBranches">Спецификации Закладок</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Branch – Ответвление</span></p>
+<p class="rvps10"><span class="rvts22">Полная копия мувика, хранящая его состояние на момент создания Закладки.</span></p>
+<p class="rvps10"><span class="rvts22">При желании текущий мувик может быть заменён на это ответвление, тем самым восстанавливается состояние мувика из копии.</span></p>
+<p class="rvps10"><span class="rvts22">С помощью ответвлений можно одновременно хранить в проекте несколько разных мувиков и мгновенно переключаться между ними:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">для сравнения альтернативных стратегий прохождения</span></li>
+<li class="rvps10"><span class="rvts22">для хранения текущего лучшего варианта при тестировании других вариантов на участке</span></li>
+<li class="rvps10"><span class="rvts22">для запоминания ещё неиспользованных трюков, которые могут пригодиться в будущем</span></li>
+<li class="rvps10"><span class="rvts22">для сравнения своего мувика с чужим (при создании обгона)</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="Toolbox.html#bookmarks">Панель инструментов</a><span class="rvts22">, </span><a class="rvts28" href="ProgramCustomization.html#BranchesrestoreentireMovie">Настройка программы</a><span class="rvts22">, </span><a class="rvts28" href="Ideas.html#BookmarksBranches">Спецификации ответвлений</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Project – Проект</span></p>
+<p class="rvps10"><span class="rvts22">Контейнер для хранения рабочих данных при использовании в Тасэдиторе.</span></p>
+<p class="rvps10"><span class="rvts22">Также проектом называется файл (project file), в котором хранятся рабочие данные пользователя.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="AdvancedFeatures.html#ProjectsSharing">Продвинутые возможности</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Lua – Lua</span></p>
+<p class="rvps10"><span class="rvts22">Интерпретируемый язык программирования, использующийся во многих ТАСерских эмуляторах.</span></p>
+<p class="rvps10"><span class="rvts22">Полезен для создания индивидуальных инструментов и визуализации данных.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="AdvancedFeatures.html#UsingLua">Продвинутые возможности</a><span class="rvts22">, </span><a class="rvts28" href="Ideas.html#Lua">Луа-автоматизация</a><span class="rvts22">, </span><a class="rvts28" href="LuaAPI.html">Lua-функции</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Bot – Бот</span><span class="rvts22"> (робот)</span></p>
+<p class="rvps10"><span class="rvts22">Средство для автоматизации определённых действий.</span></p>
+<p class="rvps10"><span class="rvts22">Обычно программы-боты используются для избавления человека от рутинных действий, не требующих высокой гибкости ума. В отличие от человека, боты не изобретают путь решения задачи, а методично перебирают варианты решения, следуя алгоритму, заложенному программистом.</span></p>
+<p class="rvps10"><span class="rvts22">В наши дни практично использовать ботов только для исчерпывающего перебора вариантов на очень коротком участке мувика. И в большинстве случаев ТАСеру проще перебрать варианты вручную, интуитивно отсеивая тупиковые варианты в уме, чем заниматься написанием бота и долгим ожиданием результатов полного перебора.</span></p>
+<p class="rvps10"><span class="rvts22">Для создания ботов требуется умение программировать. Обычно боты либо пишутся на Lua, либо встраиваются в эмуляторы с помощью модификации исходного кода.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">Pattern – Шаблон</span></p>
+<p class="rvps10"><span class="rvts22">Заданная последовательность значений Ввода для одной (любой) кнопки.</span></p>
+<p class="rvps10"><span class="rvts22">Подробнее: </span><a class="rvts28" href="AdvancedFeatures.html#UsingPatterns">Продвинутые возможности</a><span class="rvts22">, </span><a class="rvts28" href="Ideas.html#Patterns">Спецификации шаблонов</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p></p>
+<p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com">Free EBook and documentation generator</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				&copy; 2011-2013 АнС</div>
+		</div>
+	</body>
+	
+</html>
+

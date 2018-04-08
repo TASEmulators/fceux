@@ -1,0 +1,264 @@
+﻿<html>
+	
+<head>
+	<title>Using Lua</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("Commands");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Using Lua</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="LuaScripting.html">Lua Scripting</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="LuaScripting.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="LuaGettingStarted.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="LuaFunctionsList.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p>(written by qFox)</p>
+<p><br/></p>
+<p><span class="rvts27">Introduction</span></p>
+<p><br/></p>
+<p>Lua is a scripting language. It is used in games like Farcry and World of Warcraft (and many other games and applications!). Even though you can find all kinds of tutorials online, let me help you with the basics.</p>
+<p><br/></p>
+<p>I will assume you are at least somewhat familiar with the basics of programming. So basic stuff like arrays, variables, strings, loops and if-then-else and branching are not explained here.</p>
+<p><br/></p>
+<p>A hello world EmuLua program looks like this:</p>
+<p><br/></p>
+<p>while (true) do</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;gui.text(50,50,"Hello world!");</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;emu.frameadvance();</p>
+<p>end;</p>
+<p><br/></p>
+<p>When you load the script, the emulator will sort of go into pause mode and hand controls over to Lua (you!). Hence you are responsible for frameadvancing the emulator.</p>
+<p>IF YOU DO NOT CALL emu.frameadvance AT THE CYCLE OF THE MAIN LOOP YOU WILL FREEZE THE EMULATOR! There. You have been warned. Don't worry though, you'll make this mistake at least once. Just force-quit the application and try again :)</p>
+<p><br/></p>
+<p><span class="rvts27">Syntax</span></p>
+<p><br/></p>
+<p>Now then. Just like any other language, Lua has a few quirks you should be aware of.</p>
+<p><br/></p>
+<p>First of all, if's require a then and end. After a couple of days intensive Lua coding, I still make this mistake myself, but the Lua interpreter will prompt you of such errors on load, so don't worry too much about it. So:</p>
+<p><br/></p>
+<p>if (something) then</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;dostuff</p>
+<p>end;</p>
+<p><br/></p>
+<p>Lua uses nil instead of null.</p>
+<p><br/></p>
+<p>There are only two values that evaluate to "false", these are "nil" and "false". ANYTHING else will evaluate to true, even 0 or the empty string.</p>
+<p><br/></p>
+<p>Comments are denoted by two consecutive dashes; --. Anything after it on the same line is a comment and ignored by Lua. There is no /* */ type of commenting in Lua.</p>
+<p><br/></p>
+<p>Variables have a local and global scope. You explicitly make a variable local by declaring it with the "local" keyword.</p>
+<p><br/></p>
+<p>somethingglobal; -- accessible by any function or flow</p>
+<p>local something; -- only known to the same or deeper scope as where it was declared</p>
+<p><br/></p>
+<p>Note that variables declared in for loops (see below) are always considered local.</p>
+<p><br/></p>
+<p>Arrays are called tables in Lua. To be more precise, Lua uses associative arrays.</p>
+<p><br/></p>
+<p>Do not rely on the table.length() when your table can contain nil values, this function stops when it encounters a nil value, thus possibly cutting your table short.</p>
+<p><br/></p>
+<p>One experienced programmers will have to get used to is the table offset; tables start at index 1, not 0. That's just the way it is, deal with it.</p>
+<p><br/></p>
+<p>There are a few ways to create a table:</p>
+<p><br/></p>
+<p>local tbl1 = {}; -- empty table</p>
+<p>local tbl2 = {"a","b","c","d"}; -- table with 5 strings</p>
+<p>local tbl3 = {a=1,b=2,c=3}; -- associative table with 3 numbers</p>
+<p>local tbl4 = {"a",b=2,c="x","d"=5}; -- associative table with mixed content</p>
+<p><br/></p>
+<p>Note that you can mix up the data in one table, as shown by tbl4.</p>
+<p><br/></p>
+<p>You can refer to table values in a few equivalent manners, using the examples above:</p>
+<p><br/></p>
+<p>tbl1[1] -- = nil because tbl1 is empty</p>
+<p>tbl2[2] -- = "b"</p>
+<p>tbl3["a"] -- = 1</p>
+<p>tbl4.b -- = 2</p>
+<p>tbl2.3 -- = "c"</p>
+<p><br/></p>
+<p>When the argument of a function is just a table, the parantheses "()" are optional. So for instance:</p>
+<p><br/></p>
+<p>processTable({a=2,b=3});</p>
+<p><br/></p>
+<p>Is equivalent to</p>
+<p><br/></p>
+<p>processTable{a=2,b=3};</p>
+<p><br/></p>
+<p>Another notation that's equivalent is</p>
+<p><br/></p>
+<p>filehandle.read(filehandle, 5);</p>
+<p>filehandle:read(5);</p>
+<p><br/></p>
+<p>When using the colon notation ":" Lua will call the function adding the self-reference to the front of the parameterstack.</p>
+<p><br/></p>
+<p>Functions behave like objects and are declared in the follow manner:</p>
+<p><br/></p>
+<p>function doSomething(somevalue, anothervalue)</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;dostuffhere</p>
+<p>end;</p>
+<p><br/></p>
+<p>So no curly braces "{}" !</p>
+<p><br/></p>
+<p>Some flow control:</p>
+<p><br/></p>
+<p>for i=0,15 do</p>
+<p> &nbsp;-- do stuff here, i runs from 0 to 15 (inclusive!)</p>
+<p>end;</p>
+<p><br/></p>
+<p>for key,value in pairs(table) do</p>
+<p> &nbsp;-- do stuff here. pairs will iterate through the table, splitting the keys and values</p>
+<p>end;</p>
+<p><br/></p>
+<p>while (somethingistrue) do</p>
+<p><br/></p>
+<p>end;</p>
+<p><br/></p>
+<p>if (somethingistrue) then</p>
+<p><br/></p>
+<p>end;</p>
+<p><br/></p>
+<p>if (somethingistrue) then</p>
+<p><br/></p>
+<p>else</p>
+<p><br/></p>
+<p>end;</p>
+<p><br/></p>
+<p>if (somethingistrue) then</p>
+<p><br/></p>
+<p>elseif (somethingelseistrue) then</p>
+<p><br/></p>
+<p>end;</p>
+<p><br/></p>
+<p>For comparison, you only have to remember that the exclamationmark is not used. Not equal "!=" is written like tilde-equals "~=" and if (!something) then ... is written with "not " in front of it; if (not something) then...</p>
+<p><br/></p>
+<p>For easy reference to the standard libraries look on the bottom half of this page: http://www.lua.org/manual/5.1/</p>
+<p><br/></p>
+<p><span class="rvts27">Lua in FCEUX</span></p>
+<p><br/></p>
+<p>Now then, let's get to the emulator specifics!</p>
+<p><br/></p>
+<p>To load a Lua script in FCEU first load a rom (Lua can only do things after each frame cycle so load a rom first). Go to file, at the bottom choose Run Lua Script and select and load the file.</p>
+<p><br/></p>
+<p>When Lua starts, the emulator pauses and hands control over to Lua. Lua (that's you!) decides when the next frame is processed. That's why it's very common to write an endless while loop, exiting the main loop of a script will exit the script and hand control back to the emulator. This also happens when a script unexpectingly crashes.</p>
+<p><br/></p>
+<p>A bare script looks like this:</p>
+<p><br/></p>
+<p>while (true) do</p>
+<p> &nbsp;emu.frameadvance();</p>
+<p>end;</p>
+<p><br/></p>
+<p>And is about equal to not running Lua at all. The frameadvance function is the same called internally, so no loss of speed there!</p>
+<p><br/></p>
+<p>Bitwise operators:</p>
+<p><br/></p>
+<p>Lua does not have bitwise operators, so we supply some for you. These are common bitwise operators, nothing fancy.</p>
+<p><br/></p>
+<p>AND(a,b);</p>
+<p>OR(a,b);</p>
+<p>XOR(a,b);</p>
+<p>BIT(n); -- returns a number with only bit n set (1)</p>
+<p><br/></p>
+<p>The emulator specific Lua is equal to the one of snes9x, with some platform specific changes (few buttons, for instance). </p>
+<p>You can find the reference here: <a class="rvts18" href="http://dehacked.2y.net/snes9x-lua.html" target="_blank">http://dehacked.2y.net/snes9x-lua.html</a></p>
+<p>The following is a quick reference, you can go to the snes9x reference for more details.</p>
+<p><br/></p>
+<p>To paint stuff on screen, use the gui table. This contains a few predefined functions to manipulate the main window. For any coordinate, 0,0 is the top-left pixel of the window. You have to prevent out-of-bound errors yourself for now. If a color can be passed on, it is a string. HTML-syntax is supported ("#34053D"), as well as a FEW colors ("red", "green", "blue" ...).</p>
+<p><br/></p>
+<p>gui.text(x, y, str); -- Print a line to the window, you can use \n for a return but it will only work once</p>
+<p>gui.pixel(x, y, color); -- plot a pixel at the given coordinate</p>
+<p>gui.line(x1, y1, x2, y2, color); -- plot a line from x1,y1 to x2,y2</p>
+<p>gui.box(x1, y1, x2, y2, color); -- draw a square from x1,y1 to x2,y2</p>
+<p>gui.popup(str); -- pops up a messagebox informing the user of something. Real handy when debugging!</p>
+<p>gui.getpixel(x,y); -- return the values of the pixel at given position. Returns three numbers of the emulator image before paiting is applied.</p>
+<p>gui.gdscreenshot(); -- Takes a screen shot of the image and returns it in the form of a string which can be imported by the gd library using the gd.createFromGdStr() function</p>
+<p>(for more gd functions see DeHackED's reference: http://dehacked.2y.net/snes9x-lua.html)</p>
+<p><br/></p>
+<p>PAINTING IS ALWAYS ONE FRAME BEHIND! This is because the painting is done at the creation of the next frame, not while Lua is running.</p>
+<p><br/></p>
+<p>Emulator control:</p>
+<p><br/></p>
+<p>emu.frameadvance(); -- advances emulation ONE frame</p>
+<p>emu.pause(); -- same as pressing the pause button</p>
+<p>emu.speedmode(strMode); -- Supported are "normal","turbo","nothrottle","maximum". But know that except for "normal", all other modes will run as "turbo" for now.</p>
+<p>emu.wait(); -- skips the emulation of the next frame, in case your script needs to wait for something</p>
+<p><br/></p>
+<p>Memory control:</p>
+<p><br/></p>
+<p>memory.readbyte(adr); -- read one byte from given address and return it. Besides decimal values Lua also allows the hex notation 0x00FA. In FCEUX reading is done BEFORE the cheats are applied!</p>
+<p>memory.writebyte(adr, value); -- write one byte to the RAM of the NES. writing is done AFTER the hexeditor receives its values, so if you are freezing an address by Lua, it will not show in the hex editor (but it will in the game :)</p>
+<p>memory.readbytesigned(adr); -- same as readbyte, except this returns a signed value, rather then an unsigned value.</p>
+<p>memory.register(adr, function); -- binds a function to an address. The function will be called when an address changes. NOTE THAT THIS IS EXPENSIVE (eg.: slow)! Only one function allowed per address.</p>
+<p><br/></p>
+<p>Input control:</p>
+<p><br/></p>
+<p>You can read and write input by using the joypad table. A input table has the following (case sensitive) keys, where nil denotes they are not to be pressed: up down left right start select A B</p>
+<p><br/></p>
+<p>joypad.read(playern); -- get the input table for the player who's input you want to read (a number!)</p>
+<p>joypad.write(playern, inputtable); -- set the input for player n. Note that this will overwrite any input from the user, and only when this is used.</p>
+<p><br/></p>
+<p>Savestates:</p>
+<p><br/></p>
+<p>You can load and save to the predefined savestates 1 ... 9 or create new "anonymous" savestates. You must first create a savestate object, which is your handle to a savestate. Then you can pass this handle on to savestate.load or save to do so.</p>
+<p><br/></p>
+<p>savestate.create(n); -- n is optional. When supplied, it will create a savestate for slot n, otherwise a new (anonymous) savestate object is created. Note that this does not yet save or load anything!</p>
+<p>savestate.load(state); -- load the given savestate</p>
+<p>savestate.save(state); -- save the given savestate</p>
+<p><br/></p>
+<p>For an up-to-date list of functions, see the <a class="rvts18" href="LuaFunctionsList.html">Lua Functions List</a>.</p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour">Easily create Web Help sites</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

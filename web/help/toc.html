@@ -1,0 +1,1505 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+	<title>FCEUX Help- Table of Contents</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/silver-theme/jquery-ui-1.8.12.custom.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/dynatree/chm/ui.dynatree.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+    <link type="text/css" rel="stylesheet" media="all" href="css/toc.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#tabs .ui-widget-header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/jquery-ui-1.8.17.custom.min.js"></script>
+    <script type="text/javascript" src="js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="js/jquery.dynatree.min.js"></script>
+	<script type="text/javascript" src="js/hndjsse.js"></script>
+	<script type="text/javascript">
+	
+		var bSearchDataLoaded = false;
+		var sHelpIdToActivate = '';
+	
+		$(document).ready(function()
+		{
+			var sAnchorName = '';
+			try { sAnchorName = top.location.href.substring(top.location.href.lastIndexOf("#") + 1, top.location.href.length); }
+			catch(err) { sAnchorName = ''; }
+			var nSelectedTab = 0;
+			if (sAnchorName == '_index') nSelectedTab = 1
+			else if (sAnchorName == '_search') nSelectedTab = 2;			
+			$("#tabs").tabs({
+				selected: nSelectedTab,
+				select: function(event, ui) { HideKwPopup(); }
+			});
+			
+			// Toc
+			if ($("#tab-toc").length) {
+				$("#tab-toc").dynatree({
+					clickFolderMode: 1,
+					debugLevel: 0,
+					imagePath: 'css/dynatree/chm/',
+					onActivate: function(node){
+						if ($("#tab-keywords").length && $("#tab-keywords").dynatree && $("#tab-keywords").dynatree("getTree") && $("#tab-keywords").dynatree("getTree").activateKey)
+							$("#tab-keywords").dynatree("getTree").activateKey(null);
+						if(node.data.href && node.data.href != '#'){
+							window.open(node.data.href, node.data.target);
+						}
+					}
+				});
+				// Expand all nodes if required
+				$("#tab-toc").dynatree("getRoot").visit(function(node){
+						node.expand(true);
+					});
+				// Select the active help id
+				if (sHelpIdToActivate != '') $("#tab-toc").dynatree("getTree").activateKey(sHelpIdToActivate);
+			}
+			
+			// Keywords
+			
+			if ($("#tab-keywords").length) {
+				$("#tab-keywords").dynatree({
+					clickFolderMode: 1,
+					debugLevel: 0,
+					imagePath: 'css/dynatree/chm/',
+					onClick: function(node, event){
+						HideKwPopup();
+						if (node.data && node.data.click)
+						{
+							var aRefList = null;
+							eval('aRefList=' + node.data.click);
+							if (ShowKwPopup(node.li, aRefList))
+							{
+								if ($("#tab-toc") && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").activateKey)
+									$("#tab-toc").dynatree("getTree").activateKey(null);
+								if(node.data.href && node.data.href != '#'){
+									window.open(node.data.href, node.data.target);
+								}
+							}
+						}
+					}
+				});
+				// Expand all nodes if required
+				$("#tab-keywords").dynatree("getRoot").visit(function(node){
+						node.expand(true);
+					});
+				}
+			
+			// Load search data
+			$.getScript("js/searchdata.js",	function() {
+				bSearchDataLoaded = true;
+			});
+		});
+		
+		$('body').click(function() {
+			HideKwPopup();
+		});
+		
+		function SelectTocItem(sHelpId)
+		{
+			if ($("#tab-toc").length && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").getNodeByKey) {
+				$("#tab-toc").dynatree("getTree").getNodeByKey(sHelpId).activateSilently();
+			}
+			else {
+				sHelpIdToActivate = sHelpId;
+			}
+		}
+		
+		function HideKwPopup()
+		{
+			if($("#popupMenu")) $("#popupMenu").remove();
+		}
+		
+		function ShowKwPopup(oSender, aLinks)
+		{
+			HideKwPopup();
+			if (!aLinks || !aLinks.length || aLinks.length == 0) return false
+			else if (aLinks.length == 1) return true
+			else
+			{
+				var oParentDiv = document.createElement("DIV");
+				oParentDiv.id = "popupMenu";
+				var oLink = null;
+				// Close button
+				oLink = document.createElement("SPAN");
+				oLink.className = "close-button";
+				oLink.innerHTML = "X";
+				oLink.href = "#";
+				oLink.onclick = HideKwPopup;
+				oParentDiv.appendChild(oLink);
+				// Items
+				for (var nCnt=0; nCnt<aLinks.length; nCnt++)
+				{
+					oLink = document.createElement("A");
+					oLink.innerHTML = aLinks[nCnt][0];
+					oLink.href = aLinks[nCnt][1];
+					oLink.target = "FrameMain";
+					oLink.onclick = HideKwPopup;
+					oParentDiv.appendChild(oLink);
+				}
+				document.body.appendChild(oParentDiv);
+				var pos = $(oSender).offset(); 
+				var height = $(oSender).height();
+				$(oParentDiv).css({
+					"left": (pos.left+20) + "px",
+					"top": (pos.top + height + 5) + "px"
+				});
+				$(oParentDiv).show();
+				return false;
+			}
+		}
+		
+		function PerformSearch()
+		{
+			sValue = $("#search_value").val();
+			$("#search_results").html('Searching...');
+			var oSearchEngine = new HndJsSe;
+			oSearchEngine.ParseInput(sValue);			
+			oSearchEngine.PerformSearch();
+			if (!oSearchEngine.aResults || !oSearchEngine.aResults.length)
+			{
+				$("#search_results").html('No results found.');
+			}
+			else
+			{
+				$("#search_results").html('<div id="search_results_content"></div>');
+				var oUl = $("#search_results_content").append("<ul id='lr'></ul>").find("ul");
+				for (var nCnt = 0; nCnt < oSearchEngine.aResults.length; nCnt++)
+				{
+					oUl.append("<li><a href='" + aTl[oSearchEngine.aResults[nCnt]][0] + "?search=" + escape(sValue) + "' target='FrameMain'>" + unescape(aTl[oSearchEngine.aResults[nCnt]][1]) + "</a></li>");
+				}
+				// Tree
+				$("#search_results_content").dynatree({
+					clickFolderMode: 1,
+					debugLevel: 0,
+					imagePath: 'css/dynatree/chm/',
+					onActivate: function(node){
+						if ($("#search_results_content") && $("#search_results_content").dynatree && $("#search_results_content").dynatree("getTree") && $("#search_results_content").dynatree("getTree").activateKey)
+							$("#search_results_content").dynatree("getTree").activateKey(null);
+						if(node.data.href && node.data.href != '#'){
+							window.open(node.data.href, node.data.target);
+						}
+					}
+				});
+			}
+		}
+	</script>
+</head>
+
+<body>
+
+	<div id="tabs">
+		<ul>
+			<li><a href="#tab-toc">Contents</a></li>
+			<li><a href="#tab-keywords">Index</a></li>
+			<li><a href="#tab-search">Search</a></li>
+			</ul>
+		<div id="tab-toc">
+			<ul id="toc" class="">
+
+				<li class="folder" id="Intro" data="">
+							<a
+							href="Intro.html"
+							target="FrameMain">
+								Introduction</a>
+
+				<ul><li class="" id="Introduction" data="">
+							<a
+							href="Introduction.html"
+							target="FrameMain">
+								Introduction</a>
+
+				</li><li class="" id="Overview" data="">
+							<a
+							href="Overview.html"
+							target="FrameMain">
+								Overview</a>
+
+				</li><li class="" id="FCEUltraVersionHistory" data="">
+							<a
+							href="FCEUltraVersionHistory.html"
+							target="FrameMain">
+								FCE Ultra Version History</a>
+
+				</li><li class="" id="WhatsNew223" data="">
+							<a
+							href="WhatsNew223.html"
+							target="FrameMain">
+								What's New? 2.2.3 (changelog)</a>
+
+				</li><li class="" id="WhatsNew222" data="">
+							<a
+							href="WhatsNew222.html"
+							target="FrameMain">
+								What's New? 2.2.2 (changelog)</a>
+
+				</li><li class="" id="WhatsNew221" data="">
+							<a
+							href="WhatsNew221.html"
+							target="FrameMain">
+								What's New? 2.2.1 (changelog)</a>
+
+				</li><li class="" id="WhatsNew220" data="">
+							<a
+							href="WhatsNew220.html"
+							target="FrameMain">
+								What's New? 2.2.0 (changelog)</a>
+
+				</li><li class="" id="WhatsNew215" data="">
+							<a
+							href="WhatsNew215.html"
+							target="FrameMain">
+								What's New? 2.1.5 (changelog)</a>
+
+				</li><li class="" id="WhatsNew214" data="">
+							<a
+							href="WhatsNew214.html"
+							target="FrameMain">
+								What's New? 2.1.4 (changelog)</a>
+
+				</li><li class="" id="WhatsNew213" data="">
+							<a
+							href="WhatsNew213.html"
+							target="FrameMain">
+								What's New? 2.1.3 (changelog)</a>
+
+				</li><li class="" id="WhatsNew212" data="">
+							<a
+							href="WhatsNew212.html"
+							target="FrameMain">
+								What's New? 2.1.2 (changelog)</a>
+
+				</li><li class="" id="WhatsNew211" data="">
+							<a
+							href="WhatsNew211.html"
+							target="FrameMain">
+								What's New? 2.1.1 (changelog)</a>
+
+				</li><li class="" id="WhatsNew210" data="">
+							<a
+							href="WhatsNew210.html"
+							target="FrameMain">
+								What's New? 2.1 (changelog)</a>
+
+				</li><li class="" id="WhatsNew203" data="">
+							<a
+							href="WhatsNew203.html"
+							target="FrameMain">
+								What's New? 2.0.3 (changelog)</a>
+
+				</li><li class="" id="WhatsNew202" data="">
+							<a
+							href="WhatsNew202.html"
+							target="FrameMain">
+								What's New? 2.0.2 (changelog)</a>
+
+				</li><li class="" id="WhatsNew201" data="">
+							<a
+							href="WhatsNew201.html"
+							target="FrameMain">
+								What's New? 2.0.1 (changelog)</a>
+
+				</li><li class="" id="WhatsNew200" data="">
+							<a
+							href="WhatsNew200.html"
+							target="FrameMain">
+								What's New? 2.0.0</a>
+
+				</li></ul></li><li class="folder" id="General" data="">
+							<a
+							href="General.html"
+							target="FrameMain">
+								General</a>
+
+				<ul><li class="" id="Gettingstarted" data="">
+							<a
+							href="Gettingstarted.html"
+							target="FrameMain">
+								Getting Started</a>
+
+				</li><li class="" id="Gamefilecompatibility" data="">
+							<a
+							href="Gamefilecompatibility.html"
+							target="FrameMain">
+								Game file compatibility</a>
+
+				</li><li class="" id="CommandLineOptions" data="">
+							<a
+							href="CommandLineOptions.html"
+							target="FrameMain">
+								Command Line Options</a>
+
+				</li><li class="" id="CustomizingthroughtheConfigFil" data="">
+							<a
+							href="CustomizingthroughtheConfigFil.html"
+							target="FrameMain">
+								Customizing through the Config File</a>
+
+				</li><li class="folder" id="FamicomDiskSytem" data="">
+							<a
+							href="FamicomDiskSytem.html"
+							target="FrameMain">
+								Famicom Disk Sytem</a>
+
+				<ul><li class="" id="AVICapturing" data="">
+							<a
+							href="AVICapturing.html"
+							target="FrameMain">
+								AVI Capturing</a>
+
+				</li></ul></li><li class="" id="MovieRecording" data="">
+							<a
+							href="MovieRecording.html"
+							target="FrameMain">
+								Movie Recording</a>
+
+				</li><li class="" id="NES" data="">
+							<a
+							href="NES.html"
+							target="FrameMain">
+								NES Menu</a>
+
+				</li><li class="" id="PaletteOptions" data="">
+							<a
+							href="PaletteOptions.html"
+							target="FrameMain">
+								Palette Options</a>
+
+				</li></ul></li><li class="folder" id="Config" data="">
+							<a
+							href="Config.html"
+							target="FrameMain">
+								Config</a>
+
+				<ul><li class="" id="ToggleSwitchesHideMenuetc" data="">
+							<a
+							href="ToggleSwitchesHideMenuetc.html"
+							target="FrameMain">
+								Menu Items &amp; Submenus</a>
+
+				</li><li class="" id="Directories" data="">
+							<a
+							href="Directories.html"
+							target="FrameMain">
+								Directories</a>
+
+				</li><li class="" id="GUI" data="">
+							<a
+							href="GUI.html"
+							target="FrameMain">
+								GUI</a>
+
+				</li><li class="" id="Input" data="">
+							<a
+							href="Input.html"
+							target="FrameMain">
+								Input</a>
+
+				</li><li class="" id="NetworkPlay" data="">
+							<a
+							href="NetworkPlay.html"
+							target="FrameMain">
+								Network Play</a>
+
+				</li><li class="" id="Palette" data="">
+							<a
+							href="Palette.html"
+							target="FrameMain">
+								Palette</a>
+
+				</li><li class="" id="SoundOptions" data="">
+							<a
+							href="SoundOptions.html"
+							target="FrameMain">
+								Sound</a>
+
+				</li><li class="" id="Timing" data="">
+							<a
+							href="Timing.html"
+							target="FrameMain">
+								Timing</a>
+
+				</li><li class="" id="Video" data="">
+							<a
+							href="Video.html"
+							target="FrameMain">
+								Video</a>
+
+				</li><li class="" id="MovieOptions" data="">
+							<a
+							href="MovieOptions.html"
+							target="FrameMain">
+								Movie Options</a>
+
+				</li><li class="" id="MapHotkeys" data="">
+							<a
+							href="MapHotkeys.html"
+							target="FrameMain">
+								Map Hotkeys</a>
+
+				</li><li class="" id="ContextMenuItems" data="">
+							<a
+							href="ContextMenuItems.html"
+							target="FrameMain">
+								Context Menu Items</a>
+
+				</li></ul></li><li class="folder" id="Tools2" data="">
+							<a
+							href="Tools2.html"
+							target="FrameMain">
+								Tools</a>
+
+				<ul><li class="" id="CheatSearch" data="">
+							<a
+							href="CheatSearch.html"
+							target="FrameMain">
+								Cheat Search</a>
+
+				</li><li class="" id="RAMSearch" data="">
+							<a
+							href="RAMSearch.html"
+							target="FrameMain">
+								RAM Search</a>
+
+				</li><li class="" id="RAMWatch" data="">
+							<a
+							href="RAMWatch.html"
+							target="FrameMain">
+								RAM Watch</a>
+
+				</li><li class="" id="MemoryWatch" data="">
+							<a
+							href="MemoryWatch.html"
+							target="FrameMain">
+								Memory Watch</a>
+
+				</li><li class="" id="TASEditor" data="">
+							<a
+							href="TASEditor.html"
+							target="FrameMain">
+								TAS Editor</a>
+
+				</li><li class="" id="Covertfcm" data="">
+							<a
+							href="Covertfcm.html"
+							target="FrameMain">
+								Convert fcm</a>
+
+				</li><li class="" id="AutoFireConfigurations" data="">
+							<a
+							href="AutoFireConfigurations.html"
+							target="FrameMain">
+								Auto Fire Settings</a>
+
+				</li><li class="" id="TextHooker" data="">
+							<a
+							href="TextHooker.html"
+							target="FrameMain">
+								Text Hooker</a>
+
+				</li></ul></li><li class="folder" id="Debug" data="">
+							<a
+							href="Debug.html"
+							target="FrameMain">
+								Debug</a>
+
+				<ul><li class="" id="Debugger" data="">
+							<a
+							href="Debugger.html"
+							target="FrameMain">
+								Debugger</a>
+
+				</li><li class="" id="PPUViewer" data="">
+							<a
+							href="PPUViewer.html"
+							target="FrameMain">
+								PPU Viewer</a>
+
+				</li><li class="" id="NameTableViewer" data="">
+							<a
+							href="NameTableViewer.html"
+							target="FrameMain">
+								Name Table Viewer</a>
+
+				</li><li class="" id="HexEditor" data="">
+							<a
+							href="HexEditor.html"
+							target="FrameMain">
+								Hex Editor</a>
+
+				</li><li class="" id="TraceLogger" data="">
+							<a
+							href="TraceLogger.html"
+							target="FrameMain">
+								Trace Logger</a>
+
+				</li><li class="" id="CodeDataLogger" data="">
+							<a
+							href="CodeDataLogger.html"
+							target="FrameMain">
+								Code/Data Logger</a>
+
+				</li><li class="" id="GameGenieEncoderDecoder" data="">
+							<a
+							href="GameGenieEncoderDecoder.html"
+							target="FrameMain">
+								Game Genie Encoder/Decoder</a>
+
+				</li></ul></li><li class="folder" id="LuaScripting" data="">
+							<a
+							href="LuaScripting.html"
+							target="FrameMain">
+								Lua Scripting</a>
+
+				<ul><li class="" id="LuaGettingStarted" data="">
+							<a
+							href="LuaGettingStarted.html"
+							target="FrameMain">
+								Getting Started</a>
+
+				</li><li class="" id="Commands" data="">
+							<a
+							href="Commands.html"
+							target="FrameMain">
+								Using Lua</a>
+
+				</li><li class="" id="LuaFunctionsList" data="">
+							<a
+							href="LuaFunctionsList.html"
+							target="FrameMain">
+								Lua Functions List</a>
+
+				</li><li class="" id="LuaPerks" data="">
+							<a
+							href="LuaPerks.html"
+							target="FrameMain">
+								LuaPerks</a>
+
+				</li><li class="" id="LuaBot" data="">
+							<a
+							href="LuaBot.html"
+							target="FrameMain">
+								Lua Bot</a>
+
+				</li><li class="" id="OverviewofIncludedScripts" data="">
+							<a
+							href="OverviewofIncludedScripts.html"
+							target="FrameMain">
+								Overview of Included Scripts</a>
+
+				</li></ul></li><li class="folder" id="FAQGuides" data="">
+							<a
+							href="FAQGuides.html"
+							target="FrameMain">
+								FAQ / Guides</a>
+
+				<ul><li class="" id="Troubleshooting" data="">
+							<a
+							href="Troubleshooting.html"
+							target="FrameMain">
+								Troubleshooting</a>
+
+				</li><li class="" id="ToolAssistedSpeedruns" data="">
+							<a
+							href="ToolAssistedSpeedruns.html"
+							target="FrameMain">
+								Tool Assisted Speedruns</a>
+
+				</li><li class="" id="ROMHacking" data="">
+							<a
+							href="ROMHacking.html"
+							target="FrameMain">
+								ROM Hacking</a>
+
+				</li><li class="" id="NESRAMMappingFindingValues" data="">
+							<a
+							href="NESRAMMappingFindingValues.html"
+							target="FrameMain">
+								NES RAM (Mapping/Finding Values)</a>
+
+				</li></ul></li><li class="folder" id="Technicalinformation" data="">
+							<a
+							href="Technicalinformation.html"
+							target="FrameMain">
+								Technical Information</a>
+
+				<ul><li class="folder" id="Movieformats" data="">
+							<a
+							href="Movieformats.html"
+							target="FrameMain">
+								Movie &amp; Savestate formats</a>
+
+				<ul><li class="" id="fm2" data="">
+							<a
+							href="fm2.html"
+							target="FrameMain">
+								.fm2</a>
+
+				</li><li class="" id="fcm" data="">
+							<a
+							href="fcm.html"
+							target="FrameMain">
+								.fcm</a>
+
+				</li><li class="" id="fcs" data="">
+							<a
+							href="fcs.html"
+							target="FrameMain">
+								Savestate (.fcs)</a>
+
+				</li></ul></li><li class="folder" id="Sound" data="">
+							<a
+							href="Sound.html"
+							target="FrameMain">
+								Sound</a>
+
+				<ul><li class="" id="NSFFormat" data="">
+							<a
+							href="NSFFormat.html"
+							target="FrameMain">
+								NSF Format</a>
+
+				</li><li class="" id="NESSound" data="">
+							<a
+							href="NESSound.html"
+							target="FrameMain">
+								NES Sound</a>
+
+				</li></ul></li><li class="folder" id="NESProcessor" data="">
+							<a
+							href="NESProcessor.html"
+							target="FrameMain">
+								NES Processing</a>
+
+				<ul><li class="" id="6502CPU" data="">
+							<a
+							href="6502CPU.html"
+							target="FrameMain">
+								CPU - 6502</a>
+
+				</li><li class="" id="PPU" data="">
+							<a
+							href="PPU.html"
+							target="FrameMain">
+								PPU - 2C02</a>
+
+				</li><li class="" id="NESScrolling1" data="">
+							<a
+							href="NESScrolling1.html"
+							target="FrameMain">
+								NES Scrolling 1</a>
+
+				</li><li class="" id="NESScrolling2" data="">
+							<a
+							href="NESScrolling2.html"
+							target="FrameMain">
+								NES Scrolling 2</a>
+
+				</li></ul></li><li class="" id="NLFilesFormat" data="">
+							<a
+							href="NLFilesFormat.html"
+							target="FrameMain">
+								.nl files format</a>
+
+				</li></ul></li></ul>
+		</div>
+		
+		<div id="tab-keywords">
+			<ul id="keywords">
+
+				<li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								"Can't find FDS Bios image when I attempt to load a .fds game!"</a>
+
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								"Directdraw: Error creating secondary surface"</a>
+
+				</li><li class="file" data="click:'[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
+							<a
+								href="NESRAMMappingFindingValues.html"
+								target="FrameMain"
+								onClick="[['NES RAM (Mapping/Finding Values)','NESRAMMappingFindingValues.html']]"
+								>
+								2C02 PPU memory map</a>
+
+				</li><li class="file" data="click:'[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]'">
+							<a
+								href="AutoFireConfigurations.html"
+								target="FrameMain"
+								onClick="[['Auto Fire Settings','AutoFireConfigurations.html']]"
+								>
+								Alternate A and B</a>
+
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
+							<a
+								href="Input.html"
+								target="FrameMain"
+								onClick="[['Input','Input.html']]"
+								>
+								Arkanoid Paddle</a>
+
+				</li><li class="file" data="click:'[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]'">
+							<a
+								href="AutoFireConfigurations.html"
+								target="FrameMain"
+								onClick="[['Auto Fire Settings','AutoFireConfigurations.html']]"
+								>
+								Autofire Offset</a>
+
+				</li><li class="file" data="click:'[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]'">
+							<a
+								href="AutoFireConfigurations.html"
+								target="FrameMain"
+								onClick="[['Auto Fire Settings','AutoFireConfigurations.html']]"
+								>
+								Autofire Pattern</a>
+
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
+							<a
+								href="Input.html"
+								target="FrameMain"
+								onClick="[['Input','Input.html']]"
+								>
+								Auto-Hold</a>
+
+				</li><li class="file" data="click:'[]'">
+							<a
+								href="#"
+								target="FrameMain"
+								onClick="[]"
+								>
+								Basic Bot</a>
+
+				</li><li class="file" data="click:'[[\'AVI Capturing\',\'AVICapturing.html\']]'">
+							<a
+								href="AVICapturing.html"
+								target="FrameMain"
+								onClick="[['AVI Capturing','AVICapturing.html']]"
+								>
+								Capturing a Movie File</a>
+
+				</li><li class="file" data="click:'[[\'Cheat Search\',\'CheatSearch.html\']]'">
+							<a
+								href="CheatSearch.html"
+								target="FrameMain"
+								onClick="[['Cheat Search','CheatSearch.html']]"
+								>
+								Cheat Guide</a>
+
+				</li><li class="file" data="click:'[[\'Code/Data Logger\',\'CodeDataLogger.html\']]'">
+							<a
+								href="CodeDataLogger.html"
+								target="FrameMain"
+								onClick="[['Code/Data Logger','CodeDataLogger.html']]"
+								>
+								Code/Data Logger</a>
+
+				</li><li class="file" data="click:'[[\'Command Line Options\',\'CommandLineOptions.html\']]'">
+							<a
+								href="CommandLineOptions.html"
+								target="FrameMain"
+								onClick="[['Command Line Options','CommandLineOptions.html']]"
+								>
+								Command Line Options</a>
+
+				</li><li class="file" data="click:'[[\'GUI\',\'GUI.html\'],[\'Context Menu Items\',\'ContextMenuItems.html\']]'">
+							<a
+								href="GUI.html"
+								target="FrameMain"
+								onClick="[['GUI','GUI.html'],['Context Menu Items','ContextMenuItems.html']]"
+								>
+								context menu</a>
+
+				</li><li class="file" data="click:'[[\'Convert fcm\',\'Covertfcm.html\']]'">
+							<a
+								href="Covertfcm.html"
+								target="FrameMain"
+								onClick="[['Convert fcm','Covertfcm.html']]"
+								>
+								Converting .fcm</a>
+
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								crash</a>
+
+				</li><li class="file" data="click:'[[\'Debugger\',\'Debugger.html\']]'">
+							<a
+								href="Debugger.html"
+								target="FrameMain"
+								onClick="[['Debugger','Debugger.html']]"
+								>
+								Debugger</a>
+
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								desyncs</a>
+
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								Directdraw</a>
+
+				</li><li class="file" data="click:'[[\'Directories\',\'Directories.html\']]'">
+							<a
+								href="Directories.html"
+								target="FrameMain"
+								onClick="[['Directories','Directories.html']]"
+								>
+								Directory Overrides</a>
+
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
+							<a
+								href="Input.html"
+								target="FrameMain"
+								onClick="[['Input','Input.html']]"
+								>
+								Disable left+right/up+down</a>
+
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								disksys.rom</a>
+
+				</li><li class="file" data="click:'[[\'NES Menu\',\'NES.html\']]'">
+							<a
+								href="NES.html"
+								target="FrameMain"
+								onClick="[['NES Menu','NES.html']]"
+								>
+								Eject/Insert Disk</a>
+
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+							<a
+								href="ToggleSwitchesHideMenuetc.html"
+								target="FrameMain"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
+								>
+								Enable Background Input</a>
+
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+							<a
+								href="ToggleSwitchesHideMenuetc.html"
+								target="FrameMain"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
+								>
+								Enable Rewind</a>
+
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+							<a
+								href="ToggleSwitchesHideMenuetc.html"
+								target="FrameMain"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
+								>
+								Enable Run in Background</a>
+
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								error</a>
+
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
+							<a
+								href="Input.html"
+								target="FrameMain"
+								onClick="[['Input','Input.html']]"
+								>
+								Famicom Controllers</a>
+
+				</li><li class="file" data="click:'[[\'Famicom Disk Sytem\',\'FamicomDiskSytem.html\']]'">
+							<a
+								href="FamicomDiskSytem.html"
+								target="FrameMain"
+								onClick="[['Famicom Disk Sytem','FamicomDiskSytem.html']]"
+								>
+								Famicom Disk System</a>
+
+				</li><li class="file" data="click:'[[\'Palette Options\',\'PaletteOptions.html\']]'">
+							<a
+								href="PaletteOptions.html"
+								target="FrameMain"
+								onClick="[['Palette Options','PaletteOptions.html']]"
+								>
+								FCEU-13-default_nitsuja.pal</a>
+
+				</li><li class="file" data="click:'[[\'Palette Options\',\'PaletteOptions.html\']]'">
+							<a
+								href="PaletteOptions.html"
+								target="FrameMain"
+								onClick="[['Palette Options','PaletteOptions.html']]"
+								>
+								FCEU-15-nitsuja-new.pal</a>
+
+				</li><li class="file" data="click:'[[\'.fm2\',\'fm2.html\']]'">
+							<a
+								href="fm2.html"
+								target="FrameMain"
+								onClick="[['.fm2','fm2.html']]"
+								>
+								FCEUX Movie File format</a>
+
+				</li><li class="file" data="click:'[[\'Palette Options\',\'PaletteOptions.html\']]'">
+							<a
+								href="PaletteOptions.html"
+								target="FrameMain"
+								onClick="[['Palette Options','PaletteOptions.html']]"
+								>
+								FCEUX.pal</a>
+
+				</li><li class="file" data="click:'[[\'.fcm\',\'fcm.html\']]'">
+							<a
+								href="fcm.html"
+								target="FrameMain"
+								onClick="[['.fcm','fcm.html']]"
+								>
+								FCM</a>
+
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								fds</a>
+
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								FDS Bios</a>
+
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								fm2</a>
+
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								Full screen</a>
+
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+							<a
+								href="ToggleSwitchesHideMenuetc.html"
+								target="FrameMain"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
+								>
+								Game Genie</a>
+
+				</li><li class="file" data="click:'[[\'Game Genie Encoder/Decoder\',\'GameGenieEncoderDecoder.html\']]'">
+							<a
+								href="GameGenieEncoderDecoder.html"
+								target="FrameMain"
+								onClick="[['Game Genie Encoder/Decoder','GameGenieEncoderDecoder.html']]"
+								>
+								Game Genie Decoder/Encoder</a>
+
+				</li><li class="file" data="click:'[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
+							<a
+								href="NESRAMMappingFindingValues.html"
+								target="FrameMain"
+								onClick="[['NES RAM (Mapping/Finding Values)','NESRAMMappingFindingValues.html']]"
+								>
+								Game RAM Details</a>
+
+				</li><li class="file" data="click:'[[\'Getting Started\',\'Gettingstarted.html\']]'">
+							<a
+								href="Gettingstarted.html"
+								target="FrameMain"
+								onClick="[['Getting Started','Gettingstarted.html']]"
+								>
+								Getting Started</a>
+
+				</li><li class="file" data="click:'[[\'GUI\',\'GUI.html\']]'">
+							<a
+								href="GUI.html"
+								target="FrameMain"
+								onClick="[['GUI','GUI.html']]"
+								>
+								GUI</a>
+
+				</li><li class="file" data="click:'[[\'Game file compatibility\',\'Gamefilecompatibility.html\']]'">
+							<a
+								href="Gamefilecompatibility.html"
+								target="FrameMain"
+								onClick="[['Game file compatibility','Gamefilecompatibility.html']]"
+								>
+								Hacked Games</a>
+
+				</li><li class="file" data="click:'[[\'Hex Editor\',\'HexEditor.html\']]'">
+							<a
+								href="HexEditor.html"
+								target="FrameMain"
+								onClick="[['Hex Editor','HexEditor.html']]"
+								>
+								Hex Editor</a>
+
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+							<a
+								href="ToggleSwitchesHideMenuetc.html"
+								target="FrameMain"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
+								>
+								Hide Menu</a>
+
+				</li><li class="file" data="click:'[[\'FCE Ultra Version History\',\'FCEUltraVersionHistory.html\']]'">
+							<a
+								href="FCEUltraVersionHistory.html"
+								target="FrameMain"
+								onClick="[['FCE Ultra Version History','FCEUltraVersionHistory.html']]"
+								>
+								History of FCEUX / FCE Ultra</a>
+
+				</li><li class="file" data="click:'[[\'Debugger\',\'Debugger.html\']]'">
+							<a
+								href="Debugger.html"
+								target="FrameMain"
+								onClick="[['Debugger','Debugger.html']]"
+								>
+								Inline Assembler</a>
+
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
+							<a
+								href="Input.html"
+								target="FrameMain"
+								onClick="[['Input','Input.html']]"
+								>
+								Input Configuration</a>
+
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
+							<a
+								href="Input.html"
+								target="FrameMain"
+								onClick="[['Input','Input.html']]"
+								>
+								Input Presets</a>
+
+				</li><li class="file" data="click:'[[\'NES Menu\',\'NES.html\']]'">
+							<a
+								href="NES.html"
+								target="FrameMain"
+								onClick="[['NES Menu','NES.html']]"
+								>
+								Insert Coin</a>
+
+				</li><li class="file" data="click:'[[\'Getting Started\',\'Gettingstarted.html\']]'">
+							<a
+								href="Gettingstarted.html"
+								target="FrameMain"
+								onClick="[['Getting Started','Gettingstarted.html']]"
+								>
+								Loadstate</a>
+
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								Lua</a>
+
+				</li><li class="file" data="click:'[[\'Lua Functions List\',\'LuaFunctionsList.html\']]'">
+							<a
+								href="LuaFunctionsList.html"
+								target="FrameMain"
+								onClick="[['Lua Functions List','LuaFunctionsList.html']]"
+								>
+								Lua Functions</a>
+
+				</li><li class="file" data="click:'[]'">
+							<a
+								href="#"
+								target="FrameMain"
+								onClick="[]"
+								>
+								Lua Scripting</a>
+
+				</li><li class="file" data="click:'[[\'Game Genie Encoder/Decoder\',\'GameGenieEncoderDecoder.html\']]'">
+							<a
+								href="GameGenieEncoderDecoder.html"
+								target="FrameMain"
+								onClick="[['Game Genie Encoder/Decoder','GameGenieEncoderDecoder.html']]"
+								>
+								Making Game Genie codes</a>
+
+				</li><li class="file" data="click:'[[\'Map Hotkeys\',\'MapHotkeys.html\']]'">
+							<a
+								href="MapHotkeys.html"
+								target="FrameMain"
+								onClick="[['Map Hotkeys','MapHotkeys.html']]"
+								>
+								Map Hotkeys</a>
+
+				</li><li class="file" data="click:'[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
+							<a
+								href="NESRAMMappingFindingValues.html"
+								target="FrameMain"
+								onClick="[['NES RAM (Mapping/Finding Values)','NESRAMMappingFindingValues.html']]"
+								>
+								Memory Map</a>
+
+				</li><li class="file" data="click:'[[\'Memory Watch\',\'MemoryWatch.html\']]'">
+							<a
+								href="MemoryWatch.html"
+								target="FrameMain"
+								onClick="[['Memory Watch','MemoryWatch.html']]"
+								>
+								Memory Watch</a>
+
+				</li><li class="file" data="click:'[[\'Movie Recording\',\'MovieRecording.html\']]'">
+							<a
+								href="MovieRecording.html"
+								target="FrameMain"
+								onClick="[['Movie Recording','MovieRecording.html']]"
+								>
+								Movie Recording</a>
+
+				</li><li class="file" data="click:'[[\'Sound\',\'SoundOptions.html\']]'">
+							<a
+								href="SoundOptions.html"
+								target="FrameMain"
+								onClick="[['Sound','SoundOptions.html']]"
+								>
+								Mute frame advance</a>
+
+				</li><li class="file" data="click:'[[\'Name Table Viewer\',\'NameTableViewer.html\']]'">
+							<a
+								href="NameTableViewer.html"
+								target="FrameMain"
+								onClick="[['Name Table Viewer','NameTableViewer.html']]"
+								>
+								Name Table Viewer</a>
+
+				</li><li class="file" data="click:'[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
+							<a
+								href="NESRAMMappingFindingValues.html"
+								target="FrameMain"
+								onClick="[['NES RAM (Mapping/Finding Values)','NESRAMMappingFindingValues.html']]"
+								>
+								NES Mapping</a>
+
+				</li><li class="file" data="click:'[[\'Palette Options\',\'PaletteOptions.html\']]'">
+							<a
+								href="PaletteOptions.html"
+								target="FrameMain"
+								onClick="[['Palette Options','PaletteOptions.html']]"
+								>
+								Nestopia</a>
+
+				</li><li class="file" data="click:'[[\'Network Play\',\'NetworkPlay.html\']]'">
+							<a
+								href="NetworkPlay.html"
+								target="FrameMain"
+								onClick="[['Network Play','NetworkPlay.html']]"
+								>
+								Network Play</a>
+
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+							<a
+								href="ToggleSwitchesHideMenuetc.html"
+								target="FrameMain"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
+								>
+								PAL Emulation</a>
+
+				</li><li class="file" data="click:'[[\'Palette\',\'Palette.html\'],[\'Palette Options\',\'PaletteOptions.html\'],[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Palette.html"
+								target="FrameMain"
+								onClick="[['Palette','Palette.html'],['Palette Options','PaletteOptions.html'],['Troubleshooting','Troubleshooting.html']]"
+								>
+								Palette</a>
+
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+							<a
+								href="ToggleSwitchesHideMenuetc.html"
+								target="FrameMain"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
+								>
+								Pause After Movie Playback</a>
+
+				</li><li class="file" data="click:'[[\'NES Menu\',\'NES.html\']]'">
+							<a
+								href="NES.html"
+								target="FrameMain"
+								onClick="[['NES Menu','NES.html']]"
+								>
+								Power</a>
+
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
+							<a
+								href="Input.html"
+								target="FrameMain"
+								onClick="[['Input','Input.html']]"
+								>
+								Power Pad</a>
+
+				</li><li class="file" data="click:'[[\'PPU Viewer\',\'PPUViewer.html\']]'">
+							<a
+								href="PPUViewer.html"
+								target="FrameMain"
+								onClick="[['PPU Viewer','PPUViewer.html']]"
+								>
+								PPU Viewer</a>
+
+				</li><li class="file" data="click:'[]'">
+							<a
+								href="#"
+								target="FrameMain"
+								onClick="[]"
+								>
+								RAM Filter</a>
+
+				</li><li class="file" data="click:'[[\'NES Menu\',\'NES.html\']]'">
+							<a
+								href="NES.html"
+								target="FrameMain"
+								onClick="[['NES Menu','NES.html']]"
+								>
+								Reset</a>
+
+				</li><li class="file" data="click:'[[\'GUI\',\'GUI.html\']]'">
+							<a
+								href="GUI.html"
+								target="FrameMain"
+								onClick="[['GUI','GUI.html']]"
+								>
+								right-click</a>
+
+				</li><li class="file" data="click:'[[\'ROM Hacking\',\'ROMHacking.html\']]'">
+							<a
+								href="ROMHacking.html"
+								target="FrameMain"
+								onClick="[['ROM Hacking','ROMHacking.html']]"
+								>
+								ROM Hacking</a>
+
+				</li><li class="file" data="click:'[[\'Getting Started\',\'Gettingstarted.html\']]'">
+							<a
+								href="Gettingstarted.html"
+								target="FrameMain"
+								onClick="[['Getting Started','Gettingstarted.html']]"
+								>
+								Savestates</a>
+
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
+							<a
+								href="Input.html"
+								target="FrameMain"
+								onClick="[['Input','Input.html']]"
+								>
+								Setting up controllers</a>
+
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+							<a
+								href="ToggleSwitchesHideMenuetc.html"
+								target="FrameMain"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
+								>
+								Show Movie Status Icon</a>
+
+				</li><li class="file" data="click:'[[\'Video\',\'Video.html\'],[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Video.html"
+								target="FrameMain"
+								onClick="[['Video','Video.html'],['Troubleshooting','Troubleshooting.html']]"
+								>
+								slow emulation</a>
+
+				</li><li class="file" data="click:'[[\'Sound\',\'SoundOptions.html\']]'">
+							<a
+								href="SoundOptions.html"
+								target="FrameMain"
+								onClick="[['Sound','SoundOptions.html']]"
+								>
+								Sound Configuration</a>
+
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								Sound crackle</a>
+
+				</li><li class="file" data="click:'[[\'NES Menu\',\'NES.html\']]'">
+							<a
+								href="NES.html"
+								target="FrameMain"
+								onClick="[['NES Menu','NES.html']]"
+								>
+								Switch Disk Side</a>
+
+				</li><li class="file" data="click:'[[\'Debugger\',\'Debugger.html\']]'">
+							<a
+								href="Debugger.html"
+								target="FrameMain"
+								onClick="[['Debugger','Debugger.html']]"
+								>
+								Symbolic Debugging</a>
+
+				</li><li class="file" data="click:'[[\'TAS Editor\',\'TASEditor.html\']]'">
+							<a
+								href="TASEditor.html"
+								target="FrameMain"
+								onClick="[['TAS Editor','TASEditor.html']]"
+								>
+								TAS Edit</a>
+
+				</li><li class="file" data="click:'[[\'Timing\',\'Timing.html\']]'">
+							<a
+								href="Timing.html"
+								target="FrameMain"
+								onClick="[['Timing','Timing.html']]"
+								>
+								Timings</a>
+
+				</li><li class="file" data="click:'[[\'Tool Assisted Speedruns\',\'ToolAssistedSpeedruns.html\']]'">
+							<a
+								href="ToolAssistedSpeedruns.html"
+								target="FrameMain"
+								onClick="[['Tool Assisted Speedruns','ToolAssistedSpeedruns.html']]"
+								>
+								Tool Assisted Speedruns</a>
+
+				</li><li class="file" data="click:'[[\'Trace Logger\',\'TraceLogger.html\']]'">
+							<a
+								href="TraceLogger.html"
+								target="FrameMain"
+								onClick="[['Trace Logger','TraceLogger.html']]"
+								>
+								Trace Logger</a>
+
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								Troubleshooting</a>
+
+				</li><li class="file" data="click:'[[\'Getting Started\',\'Gettingstarted.html\']]'">
+							<a
+								href="Gettingstarted.html"
+								target="FrameMain"
+								onClick="[['Getting Started','Gettingstarted.html']]"
+								>
+								Undo</a>
+
+				</li><li class="file" data="click:'[[\'\',\'.html\']]'">
+							<a
+								href=".html"
+								target="FrameMain"
+								onClick="[['','.html']]"
+								>
+								Use External Input</a>
+
+				</li><li class="file" data="click:'[[\'Game file compatibility\',\'Gamefilecompatibility.html\']]'">
+							<a
+								href="Gamefilecompatibility.html"
+								target="FrameMain"
+								onClick="[['Game file compatibility','Gamefilecompatibility.html']]"
+								>
+								Valid Game Types</a>
+
+				</li><li class="file" data="click:'[[\'Video\',\'Video.html\']]'">
+							<a
+								href="Video.html"
+								target="FrameMain"
+								onClick="[['Video','Video.html']]"
+								>
+								Video Configuration</a>
+
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+							<a
+								href="Troubleshooting.html"
+								target="FrameMain"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
+								>
+								Vista</a>
+
+				</li><li class="file" data="click:'[[\'Sound\',\'SoundOptions.html\']]'">
+							<a
+								href="SoundOptions.html"
+								target="FrameMain"
+								onClick="[['Sound','SoundOptions.html']]"
+								>
+								Volume</a>
+
+				</li><li class="file" data="click:'[[\'What\\\'s New? 2.0.0\',\'WhatsNew200.html\']]'">
+							<a
+								href="WhatsNew200.html"
+								target="FrameMain"
+								onClick="[['What\'s New? 2.0.0','WhatsNew200.html']]"
+								>
+								What's New?</a>
+
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
+							<a
+								href="Input.html"
+								target="FrameMain"
+								onClick="[['Input','Input.html']]"
+								>
+								Zapper</a>
+
+				</li></ul>
+		</div>
+		
+		<div id="tab-search">
+			<form onsubmit="PerformSearch(); return false;">
+				<label for="search_value">Search:</label>
+				<input id="search_value" name="search_value"></input>
+				<input type="submit" value="Search"/>
+			</form>
+			<div id="search_results"></div>
+		</div>
+		
+		</div>
+    
+</body>
+
+</html>
+

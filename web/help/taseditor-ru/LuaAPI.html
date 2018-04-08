@@ -1,0 +1,331 @@
+﻿<html>
+	
+<head>
+	<title>Lua-функции</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "index.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("LuaAPI");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Lua-функции</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Reference.html">Справочник</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Reference.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Operations.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="FAQ.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts20">Lua-функции</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">TAS Editor 1.0 предоставляет библиотеку из 24 функций, доступных для использования в Lua-скриптах, запускаемых в эмуляторе FCEUX. С помощью Lua-скриптов вы можете автоматизировать некоторые аспекты работы в Тасэдиторе и даже создать свои инструменты для обработки мувика.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">В папке FCEUX есть папка </span><span class="rvts21">/luaScripts</span><span class="rvts22">, в которой находится подпапка </span><span class="rvts21">/taseditor</span><span class="rvts22">. Там можно найти несколько скриптов с примерами использования функций этой библиотеки.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Если вы не знаете, как создавать и запускать Lua-скрипты в эмуляторах, прочитайте раздел </span><a class="rvts28" href="AdvancedFeatures.html#UsingLua">Продвинутые возможности</a><span class="rvts22">, а также соответствующий раздел в </span><a class="rvts28" href="http://www.fceux.com/web/help/fceux.html?Commands.html" target="_blank">документации</a><a class="rvts28" href="http://www.fceux.com/web/help/fceux.html?Commands.html" target="_blank"> FCEUX</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps3"><span class="rvts7">Полный список функций:</span></p>
+<p class="rvps2"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#registerauto">taseditor.registerauto(function func)</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#registermanual">taseditor.registermanual(function func, [string name])</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#engaged">bool taseditor.engaged()</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#markedframe">bool taseditor.markedframe(int frame)</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#getmarker">int taseditor.getmarker(int frame)</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#setmarker">int taseditor.setmarker(int frame)</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#removemarker">taseditor.removemarker(int frame)</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#getnote">string taseditor.getnote(int index)</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#setnote">taseditor.setnote(int index, string newtext)</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#getcurrentbranch">int taseditor.getcurrentbranch()</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#getrecordermode">string taseditor.getrecordermode()</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#getsuperimpose">int taseditor.getsuperimpose()</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#getlostplayback">int taseditor.getlostplayback()</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#getplaybacktarget">int taseditor.getplaybacktarget()</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#setplayback">taseditor.setplayback(int frame)</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#stopseeking">taseditor.stopseeking()</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#getselection">table taseditor.getselection()</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#setselection">taseditor.setselection(table new_set)</a></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#getinput">int taseditor.getinput(int frame, int joypad)</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#submitinputchange">taseditor.submitinputchange(int frame, int joypad, int input)</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#submitinsertframes">taseditor.submitinsertframes(int frame, int number)</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#submitdeleteframes">taseditor.submitdeleteframes(int frame, int number)</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#applyinputchanges">int taseditor.applyinputchanges([string name])</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#clearinputchanges">taseditor.clearinputchanges()</a></p>
+<p class="rvps10"><a class="rvts28" href="LuaAPI.html#clearinputchanges"><br/></a></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps10"><a name="registerauto"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">taseditor.registerauto(function func)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Регистрирует функцию ("Auto Function", Автофункция), которая будет периодически вызываться эмулятором. Можно зарегистрировать и исполнять Автофункцию, даже когда Тасэдитор не запущен.</span></p>
+<p class="rvps10"><span class="rvts22">Когда FCEUX эмулирует игру, Автофункция запускается по окончании каждого кадра (то есть 60 раз в секунду в NTSC-играх и 50 раз в PAL).</span></p>
+<p class="rvps10"><span class="rvts22">Когда FCEUX стоит на паузе, Автофункция запускается 20 раз в секунду.</span></p>
+<p class="rvps10"><span class="rvts22">Пользователь может включать и отключать вызовы Автофункции с помощью галочки "Auto function" в интерфейсе Тасэдитора.</span></p>
+<p class="rvps10"><span class="rvts22">Как и в случае с остальными регистрируемыми Луа-функциями в FCEUX, одновременно может быть зарегистрирована только одна Автофункция. Если вы зарегистрируете две Автофункции, вторая заменит первую, причём второй вызов </span><span class="rvts21">taseditor.registerauto()</span><span class="rvts22"> возвратит ссылку на код старой Автофункции. Вы можете удалить зарегистрированную Автофункцию, вызвав </span><span class="rvts21">taseditor.registerauto(</span><span class="rvts72">nil</span><span class="rvts21">)</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Если скрипт заканчивает свою работу, а зарегистрированные функции остались, FCEUX не удаляет скрипт из памяти, чтобы была возможность вызывать эти функции. Скрипт завершается, если пользователь останавливает его вручную, или же если все зарегистрированные функции оказываются удалены.</span></p>
+<p class="rvps10"><a name="registermanual"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">taseditor.registermanual(function func, [string name])</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Регистрирует функцию ("Manual Function", Ручная функция), которая может быть вызвана пользователем Тасэдитора вручную. Можно зарегистрировать Ручную функцию даже когда Тасэдитор не запущен.</span></p>
+<p class="rvps10"><span class="rvts22">Ручная функция не зависит от состояния паузы эмуляции. Она будет вызвана в конце кадра, в течение которого пользователь нажал кнопку </span><span class="rvts32">Run function</span><span class="rvts22"> в интерфейсе Тасэдитора.</span></p>
+<p class="rvps10"><span class="rvts22">Вы можете указать название, которое будет отображаться на кнопке вместо текста "Run function".</span></p>
+<p class="rvps10"><span class="rvts22">Ручную функцию невозможно вызвать чаще, чем частота обновления окна Тасэдитора (60/50 FPS или 20FPS во время паузы).</span></p>
+<p class="rvps10"><span class="rvts22">Выполнение Ручной функции расположено в коде FCEUX сразу после выполнения Автофункции.</span></p>
+<p class="rvps10"><span class="rvts22">С помощью регистрации Луа-функций вы можете создавать новые инструменты для Тасэдитора. Например, можно написать скрипт, который инвертирует выделенный Ввод, так что пользователь сможет в любой момент выделить регион мувика и нажать кнопку </span><span class="rvts32">Run function</span><span class="rvts22"> для инвертирования Ввода в этом регионе.</span></p>
+<p class="rvps10"><span class="rvts22">Как и в случае с остальными регистрируемыми Луа-функциями в FCEUX, одновременно может быть зарегистрирована только одна Ручная функция. Если вы зарегистрируете две Ручные функции, вторая заменит первую, причём второй вызов </span><span class="rvts21">taseditor.registermanual()</span><span class="rvts22"> возвратит ссылку на старую Ручную функцию. Вы можете удалить зарегистрированную Ручную функцию, вызвав </span><span class="rvts21">taseditor.registermanual(</span><span class="rvts72">nil</span><span class="rvts21">)</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Если скрипт заканчивает свою работу, а зарегистрированные функции остались, FCEUX не удаляет скрипт из памяти, чтобы была возможность вызывать эти функции. Скрипт завершается, если пользователь останавливает его вручную, или же если все зарегистрированные функции оказываются удалены.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a name="engaged"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">bool taseditor.engaged()</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Возвращает </span><span class="rvts72">true</span><span class="rvts22">, если Тасэдитор в данный момент запущен, иначе возвращает </span><span class="rvts72">false</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Кроме того, когда Тасэдитор запущен, вызов функции </span><span class="rvts21">movie.mode()</span><span class="rvts22"> возвращает строку "taseditor".</span></p>
+<p class="rvps10"><a name="markedframe"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">bool taseditor.markedframe(int frame)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Возвращает </span><span class="rvts72">true</span><span class="rvts22">, если в текущем мувике на указанном кадре установлен Маркер, иначе возвращает </span><span class="rvts72">false</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, возвращает </span><span class="rvts72">false</span><span class="rvts22">.</span></p>
+<p class="rvps10"><a name="getmarker"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">int taseditor.getmarker(int frame)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Возвращает порядковый номер Маркера, под которым находится указанный кадр.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, возвращает -1.</span></p>
+<p class="rvps10"><a name="setmarker"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">int taseditor.setmarker(int frame)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Устанавливает Маркер на указанный кадр. Возвращает порядковый номер установленного Маркера.</span></p>
+<p class="rvps10"><span class="rvts22">Если на этом кадре уже есть Маркер, никаких изменений не производится, будет возвращён номер существующего Маркера на указанном кадре.</span></p>
+<p class="rvps10"><span class="rvts22">Можно устанавливать Маркеры даже за пределами Ввода.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, возвращает -1.</span></p>
+<p class="rvps10"><a name="removemarker"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">taseditor.removemarker(int frame)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Удаляет Маркер с указанного кадра. Если на этом кадре не было Маркера, никаких изменений не производится.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, никаких изменений не производится.</span></p>
+<p class="rvps10"><a name="getnote"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">string taseditor.getnote(int index)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Возвращает строку с текстом Заметки указанного Маркера.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, возвращает </span><span class="rvts72">nil</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Если указанный Маркер не существует, возвращает текст Заметки нулевого Маркера.</span></p>
+<p class="rvps10"><a name="setnote"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">taseditor.setnote(int index, string newtext)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Изменяет текст Заметки указанного Маркера.</span></p>
+<p class="rvps10"><span class="rvts22">Если указанный Маркер не существует, никаких изменений не производится.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, никаких изменений не производится.</span></p>
+<p class="rvps10"><a name="getcurrentbranch"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">int taseditor.getcurrentbranch()</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Возвращает число от 0 до 9, представляющее собой номер текущего ответвления.</span></p>
+<p class="rvps10"><span class="rvts22">Если в проекте отсутствуют ответвления, возвращает -1.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, возвращает -1.</span></p>
+<p class="rvps10"><a name="getrecordermode"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">string taseditor.getrecordermode()</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Возвращает строку, соответствующую текущему режиму Рекордера:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">"All"</span></li>
+<li class="rvps10"><span class="rvts22">"1P"</span></li>
+<li class="rvps10"><span class="rvts22">"2P"</span></li>
+<li class="rvps10"><span class="rvts22">"3P"</span></li>
+<li class="rvps10"><span class="rvts22">"4P"</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, возвращает </span><span class="rvts72">nil</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Когда вам требуется узнать состояние Записи (Read-only или Read+Write), воспользуйтесь функцией </span><span class="rvts21">emu.readonly()</span><span class="rvts22">.</span></p>
+<p class="rvps10"><a name="getsuperimpose"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">int taseditor.getsuperimpose()</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Возвращает текущее состояние галочки "Superimpose" в интерфейсе Тасэдитора.</span></p>
+<p class="rvps10"><span class="rvts22">0 – галочка не установлена (пустой чекбокс)</span></p>
+<p class="rvps10"><span class="rvts22">1 – галочка установлена</span></p>
+<p class="rvps10"><span class="rvts22">2 – неопределённое состояние (можно трактовать это как "галочка наполовину установлена")</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, возвращает -1.</span></p>
+<p class="rvps10"><a name="getlostplayback"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">int taseditor.getlostplayback()</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Возвращает номер кадра, на котором находился Курсор Проигрывателя до изменения Ввода.</span></p>
+<p class="rvps10"><span class="rvts22">Если Курсор Проигрывателя не терял позицию при усечении Гринзоны, возвращает -1.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, возвращает -1.</span></p>
+<p class="rvps10"><a name="getplaybacktarget"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">int taseditor.getplaybacktarget()</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Если Проигрыватель Тасэдитора в данный момент добегает (seek) к целевому кадру, эта функция возвращает номер целевого кадра.</span></p>
+<p class="rvps10"><span class="rvts22">Если же Проигрыватель не занят добеганием, возвращает -1.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, возвращает -1.</span></p>
+<p class="rvps10"><a name="setplayback"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">taseditor.setplayback(int frame)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Посылает Курсор Проигрывателя на указанный кадр.</span></p>
+<p class="rvps10"><span class="rvts22">Если указанный кадр не находится в Гринзоне, Проигрыватель Тасэдитора начинает добегание к этому кадру.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, ничего не производится.</span></p>
+<p class="rvps10"><a name="stopseeking"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">taseditor.stopseeking()</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Прекращает добегание и ставит эмулятор на паузу.</span></p>
+<p class="rvps10"><span class="rvts22">Если Проигрыватель не занят добеганием, просто ставит эмулятор на паузу.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, ничего не производится.</span></p>
+<p class="rvps10"><a name="getselection"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">table taseditor.getselection()</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Возвращает таблицу (массив), содержащую номера выделенных в данынй момент кадров. Эти номера отсортированы по возрастанию.</span></p>
+<p class="rvps10"><span class="rvts22">Если выделенных кадров в данный момент нет, возвращает </span><span class="rvts72">nil</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, возвращает </span><span class="rvts72">nil</span><span class="rvts22">.</span></p>
+<p class="rvps10"><a name="setselection"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">taseditor.setselection(table new_set)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Изменяет текущее Выделение на указанный набор кадров. Номера кадров в вашей таблице не обязательно отсортировывать.</span></p>
+<p class="rvps10"><span class="rvts22">Если нужно очистить Выделение, используйте </span><span class="rvts21">taseditor.setselection(</span><span class="rvts72">nil</span><span class="rvts21">)</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, ничего не производится.</span></p>
+<p class="rvps10"><a name="getinput"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">int taseditor.getinput(int frame, int joypad)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Возвращает число, представляющее собой Ввод указанного джойстика на указанном кадре.</span></p>
+<p class="rvps10"><span class="rvts22">Если указан отрицательный номер кадра, возвращает -1.</span></p>
+<p class="rvps10"><span class="rvts22">Если указан номер кадра за пределами текущего Ввода мувика, возвращает 0, что может трактоваться как отсутствие нажатий на этом кадре.</span></p>
+<p class="rvps10"><span class="rvts22">Указываемое вами значение джойстика (joypad) должно быть одним из следующих чисел:</span></p>
+<p class="rvps10"><span class="rvts22">0 – если нужно получить приставочные команды (бит 0 = сброс, бит 1 = включение консоли, бит 2 = вставка диска FDS, бит 3 = смена стороны диска FDS)</span></p>
+<p class="rvps10"><span class="rvts22">1 – чтобы получить кнопки 1 пада (бит 0 = A, бит 1 = B, бит 2 = Select, бит 3 = Start, бит 4 = Вверх, бит 5 = Вниз, бит 6 = Влево, бит 7 = Вправо)</span></p>
+<p class="rvps10"><span class="rvts22">2 – чтобы получить кнопки 2 пада</span></p>
+<p class="rvps10"><span class="rvts22">3 – чтобы получить кнопки 3 пада</span></p>
+<p class="rvps10"><span class="rvts22">4 – чтобы получить кнопки 4 пада</span></p>
+<p class="rvps10"><span class="rvts22">Возвратившееся число (если оно не равно -1) следует рассматривать как байт, каждый бит которого отвечает за одну кнопку (например, если младший бит установлен, это означает, что кнопка A нажата). Используйте битовые операции, чтобы получить состояние нужных кнопок.</span></p>
+<p class="rvps10"><span class="rvts22">Если указанный джойстик не является числом в пределах [0-4], возвращает -1.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, возвращает -1.</span></p>
+<p class="rvps10"><a name="submitinputchange"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">taseditor.submitinputchange(int frame, int joypad, int input)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Отправляет запрос Тасэдитору, требуя изменить Ввод указанного джойстика на указанном кадре.</span></p>
+<p class="rvps10"><span class="rvts22">Сам Ввод мувика будет изменён только после вызова </span><span class="rvts21">taseditor.applyinputchanges()</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Таким образом вы можете изменить сразу несколько кадров мувика, сделав несколько последовательных вызовов </span><span class="rvts21">taseditor.submitinputchange()</span><span class="rvts22">, а затем применив все накопившиеся запросы к мувику одним вызовом </span><span class="rvts21">taseditor.applyinputchanges()</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">В момент применения списка запросов Тасэдитор исполняет их в порядке поступления.</span></p>
+<p class="rvps10"><span class="rvts22">Если указан отрицательный номер кадра, Тасэдитор проигнорирует этот запрос.</span></p>
+<p class="rvps10"><span class="rvts22">Если указан номер кадра за пределами Ввода мувика, Тасэдитор расширит границы мувика во время </span><span class="rvts21">applyinputchanges()</span><span class="rvts22"> до указанного кадра.</span></p>
+<p class="rvps10"><span class="rvts22">Если указанный джойстик не является числом в пределах [0-4], Тасэдитор проигнорирует этот запрос.</span></p>
+<p class="rvps10"><span class="rvts22">Указанный Ввод должен быть числом, которое Тасэдитор сможет представить в виде последовательности битов, отражающих состояние соответствующих кнопок указанного джойстика </span><span class="rvts22">(бит 0 = A, бит 1 = B, бит 2 = Select, бит 3 = Start, бит 4 = Вверх, бит 5 = Вниз, бит 6 = Влево, бит 7 = Вправо)</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, ничего не производится.</span></p>
+<p class="rvps10"><a name="submitinsertframes"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">taseditor.submitinsertframes(int frame, int number)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Отправляет запрос Тасэдитору, требуя вставить указанное количество пустых кадров перед указанным номером кадра мувика.</span></p>
+<p class="rvps10"><span class="rvts22">Сам Ввод мувика будет изменён только после вызова </span><span class="rvts21">taseditor.applyinputchanges()</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Вставка пустых кадров сдвигает вниз часть старого Ввода, а также сдвигает вниз часть Маркеров (если установлена галочка "</span><a class="rvts28" href="ProgramCustomization.html#BindMarkerstoInput">Bind Markers to Input</a><span class="rvts22">").</span></p>
+<p class="rvps10"><span class="rvts22">Если указанное количество кадров для вставки меньше или равно нулю, Тасэдитор проигнорирует этот запрос.</span></p>
+<p class="rvps10"><span class="rvts22">Если указан отрицательный номер кадра, Тасэдитор проигнорирует этот запрос.</span></p>
+<p class="rvps10"><span class="rvts22">Если указан номер кадра за пределами Ввода мувика, Тасэдитор расширит границы мувика во время </span><span class="rvts21">applyinputchanges()</span><span class="rvts22"> до указанного кадра.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, ничего не производится.</span></p>
+<p class="rvps10"><a name="submitdeleteframes"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">taseditor.submitdeleteframes(int frame, int number)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Отправляет запрос Тасэдитору, требуя удалить из мувика указанное количество кадров, начиная с указанного кадра.</span></p>
+<p class="rvps10"><span class="rvts22">Сам Ввод мувика будет изменён только после вызова </span><span class="rvts21">taseditor.applyinputchanges()</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Удаление кадров сдвигает вверх часть старого Ввода, а также сдвигает вверх часть Маркеров (если установлена галочка "</span><a class="rvts28" href="ProgramCustomization.html#BindMarkerstoInput">Bind Markers to Input</a><span class="rvts22">").</span></p>
+<p class="rvps10"><span class="rvts22">Если указанное количество кадров для удаления меньше или равно нулю, Тасэдитор проигнорирует этот запрос.</span></p>
+<p class="rvps10"><span class="rvts22">Если указан отрицательный номер кадра, Тасэдитор проигнорирует этот запрос.</span></p>
+<p class="rvps10"><span class="rvts22">Если указан номер кадра за пределами Ввода мувика, Тасэдитор расширит границы мувика во время </span><span class="rvts21">applyinputchanges()</span><span class="rvts22"> до указанного кадра.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, ничего не производится.</span></p>
+<p class="rvps10"><a name="applyinputchanges"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">int taseditor.applyinputchanges([string name])</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Моментально применяет список накопившихся запросов к текущему мувику. Если эти запросы действительно внесли какие-то изменения во Ввод мувика, в Журнале Истории появится новый пункт (чтобы пользователь мог откатить эти изменения), как следствие, Гринзона может быть усечена, Курсор Проигрывателя может отступить назад и запустить автоматическое добегание.</span></p>
+<p class="rvps10"><span class="rvts22">Возвращает номер кадра, на котором были обнаружен первый факт изменения Ввода.</span></p>
+<p class="rvps10"><span class="rvts22">Если изменений не обнаружено (например, вы запросили Тасэдитор установить нажатия для кнопок, которые и так уже нажаты), возвращает -1.</span></p>
+<p class="rvps10"><span class="rvts22">Если список запросов был пуст, возвращает -1.</span></p>
+<p class="rvps10"><span class="rvts22">Вы можете указать имя, которое будет присвоено найденным изменениям Ввода. Это имя отразится в Журнале Истории. Если вы не указываете имя, Тасэдитор использует имя по умолчанию ("Change").</span></p>
+<p class="rvps10"><span class="rvts22">После применения всех запросов Тасэдитор очищает список запросов.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, ничего не производится.</span></p>
+<p class="rvps10"><a name="clearinputchanges"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps9"><span class="rvts70">taseditor.clearinputchanges()</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Очищает список накопившихся запросов, позволяя отменить их до вызова </span><span class="rvts21">applyinputchanges()</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Рекомендуется вызывать эту функцию перед формированием нового списка запросов, чтобы быть уверенным, что в список не попадут какие-нибудь старые запросы.</span></p>
+<p class="rvps10"><span class="rvts22">Если Тасэдитор не запущен, ничего не производится.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p></p>
+<p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com">Full-featured Documentation generator</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				&copy; 2011-2013 АнС</div>
+		</div>
+	</body>
+	
+</html>
+

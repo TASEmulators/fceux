@@ -1,0 +1,87 @@
+﻿<html>
+	
+<head>
+	<title>Auto Fire Settings</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("AutoFireConfigurations");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Auto Fire Settings</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Tools2.html">Tools</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Tools2.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Covertfcm.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="TextHooker.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts35">Auto Fire Settings</span></p>
+<p><br/></p>
+<p><span class="rvts12">Autofire Pattern</span></p>
+<p><br/></p>
+<p>The default configuration for an auto fire key is the alteration of on/off/on/off every frame. &nbsp;For most games this works nicely, but there are situations where this doesn't work properly. &nbsp;For example, Double Dragon 2 and Teenage Mutant Ninja Turtles run at 30fps (screen updates every other frame). &nbsp;To use autofire in these types of games, you would want to set the autofire pattern to 2 on / 2 off. &nbsp; In a situation where a players weapon on fires every 4th frame, you can set the autofire pattern to 1 on / 3 off.</p>
+<p><br/></p>
+<p><span class="rvts12">Autofire Offset</span></p>
+<p><br/></p>
+<p>The default is for certain frames to have the on setting and others to have the off setting. &nbsp;For instance, "on" might be lined up with a movie file's even numbers. &nbsp;But a situation may need the autofire pattern to have "on" on the odd numbers instead. &nbsp;In this case the autofire offset should be set to 1. &nbsp;This will delay the normal "on" fire by 1 frame. &nbsp;If an autofire pattern is set to 2 on / 2 off, an autofire offset of 2 might be necessary.</p>
+<p><span class="rvts12"><br/></span></p>
+<p><span class="rvts12">Alternate A and B</span></p>
+<p><br/></p>
+<p>Alternate A and B is for a specific case where both the A and B autofire buttons are pressed simultaneously. &nbsp;With alternate A and B, the fire pattern will be A,B,A,B rather than A+B, off, A+B, off.</p>
+<p><br/></p>
+<p><br/></p>
+<p>Note: All autofire patterns read the Lag Counter (see <span class="rvts18">display</span>) and skip over any frames where input is not polled. &nbsp;This means that in a laggy area, the autofire pattern will not be affected.</p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Produce Kindle eBooks easily</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

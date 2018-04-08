@@ -1,0 +1,126 @@
+﻿<html>
+	
+<head>
+	<title>Directories</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("Directories");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Directories</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Config.html">Config</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Config.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="ToggleSwitchesHideMenuetc.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="GUI.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">Directory Overrides</span></p>
+<p><br/></p>
+<p><br/></p>
+<p>This menu sets a default directory override for various files relating to FCEU.</p>
+<p><br/></p>
+<p><span class="rvts16">Base Directory</span></p>
+<p>sets the default directory FCEU will use. &nbsp;It will be the folder that FCEU creates all the sub folders (unless they are also overridden).</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">ROMS</span></p>
+<p>where FCEU will look for ROMS by default. &nbsp;(What folder will appear when selecting the Files &gt; Open...)</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Battery Saves</span></p>
+<p>where .sav files will stored and opened from. &nbsp;These files contain the battery backed SRAM used in some games (such as Dragon Warrior).</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Save States</span></p>
+<p>where .fcs (savestate) files will be stored. </p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">FDS BIOS ROM</span></p>
+<p>where FCEU can find disksys.rom. &nbsp;disksys.rom is a required file in order to load FDS (Famicom Disk System) games. &nbsp;If not specified, FCEUX will default to the base directory.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Screenshots</span></p>
+<p>where screen captures (.png) files will be saved.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Save Screenshots as "&lt;filebase&gt;-&lt;x&gt;.png"</span></p>
+<p>sets how the .png files will be named. &nbsp;Left unchecked, the file names will simply be 0.png, 1.png etc. &nbsp;Checked adds the ROM name into the file as well (such as Double Dragon 2 (U)-0.png)</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Cheats</span></p>
+<p>where .cht files will be stored. &nbsp;.cht files store the active cheats set up in <a class="rvts18" href="CheatSearch.html">Cheat Search</a>.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Movies</span></p>
+<p>where &nbsp;.fm2 files will be saved/loaded. &nbsp;These files are the input files used in <a class="rvts18" href="MovieRecording.html">movie recording</a>.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Memory Watch</span></p>
+<p>where memory watch files are saved/loaded. &nbsp;These are used by <a class="rvts18" href="MemoryWatch.html">memory watch</a>.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Input Presets</span></p>
+<p>where input presets will be saved/loaded. &nbsp;These are used in the presets section on the <a class="rvts18" href="Input.html">input config</a> window.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Lua Scripts</span></p>
+<p>where Lua scripts will be saved/loaded. &nbsp;These are used when using the <span class="rvts18">Lua Scripting</span> tool.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">AVI Output</span></p>
+<p>overrides which directory FCEUX will default to when saving a <a class="rvts18" href="AVICapturing.html">.avi file</a>.</p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/create-epub-ebooks">Free EPub producer</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

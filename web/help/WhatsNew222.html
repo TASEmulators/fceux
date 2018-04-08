@@ -1,0 +1,195 @@
+﻿<html>
+	
+<head>
+	<title>What's New? 2.2.2 (changelog)</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("WhatsNew222");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>What's New? 2.2.2 (changelog)</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="WhatsNew223.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="WhatsNew221.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">What's New? </span><span class="rvts20">2.2.2</span></p>
+<p>Released -- 23 September 2013</p>
+<p><br/></p>
+<p><br/></p>
+<p>The 2.2.2 release fixes a number of emulation bugs and adds many new features, most of which are related to debugging and reverse engineering.</p>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts22">Common </span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts24">Properly savestate NSF files</span></li>
+<li class="rvps3"><span class="rvts24">"Auto-resume old play session" now also works with NSFs</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23">Emulation</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Fixed mappers 178, 28, 53, 154, 43, 253, 19, 2</span></li>
+<li class="rvps3"><span class="rvts24">Mapper 012 - added hardware dip for language select</span></li>
+<li class="rvps3"><span class="rvts24">UNIF PEC-586 - fixed render, added 512K cartridges suppport</span></li>
+<li><span class="rvts24">Fixed UNIF 8157, UNIF T-262, UNIF DANCE2000</span></li>
+<li class="rvps3"><span class="rvts24">Palette RAM reading fix for Old PPU</span></li>
+<li class="rvps3"><span class="rvts24">Bring some improvements to New PPU from BizHawk, fix vtoggle5/6 back to vtoggle</span></li>
+<li class="rvps3"><span class="rvts24">Fixed mmc5 savestates</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23">Lua</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts24">Fix wrong frequency calculation in sound.get() function</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21">New Lua functions:</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">tobitstring()</span></li>
+<li><span class="rvts21">memory.readword()</span></li>
+<li><span class="rvts21">memory.readwordsigned()</span></li>
+<li><span class="rvts21">debugger.hitbreakpoint()</span></li>
+<li><span class="rvts21">debugger.getcyclescount()</span></li>
+<li><span class="rvts21">debugger.getinstructionscount()</span></li>
+<li><span class="rvts21">debugger.resetcyclescount()</span></li>
+<li><span class="rvts21">debugger.resetinstructionscount()</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23">Win32</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts24">Added "Square pixels" option to Video Config</span></li>
+<li class="rvps3"><span class="rvts24">"TV Aspect" ratio can be customized, by default it's 4:3</span></li>
+<li class="rvps3"><span class="rvts24">Changed "Disable hardware acceleration" checkbox to a drop-down list with 3 options</span></li>
+<li class="rvps3"><span class="rvts24">Movie recording: remember last Author name when creating a new movie</span></li>
+<li class="rvps3"><span class="rvts24">Movie recording: added ability to record "Insert coin" command (for VS games)</span></li>
+<li class="rvps3"><span class="rvts24">When no script is currently running, Shift+L loads the most recent Lua script</span></li>
+<li class="rvps3"><span class="rvts24">Dynamic link to lua51.dll instead of static linking, because some external libraries might crash without lua51.dll</span></li>
+<li class="rvps3"><span class="rvts24">Updated 7z.dll to v9.22</span></li>
+<li class="rvps3"><span class="rvts24">A couple of fixes which deal with "multiple ROMs in a single archive" case</span></li>
+<li class="rvps3"><span class="rvts24">Auto-disable "Game Genie ROM" feature when no "gg.rom" file is found</span></li>
+<li class="rvps3"><span class="rvts24">Fixed "Single Instance Mode"</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts22">TAS Editor</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts24">Comply with Lua movie.rerecordcounting() setting</span></li>
+<li class="rvps3"><span class="rvts24">Fixed workflow with "Auto-adjust Input according to Lag" disabled</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts22">Debugger</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts24">Smart scrolling up/down by whole instructions - ported from an obscure version of FCEUXD 1.1</span></li>
+<li class="rvps3"><span class="rvts24">Scrolling maintains relative position of the "&gt;" pointer inside the Disassembly window</span></li>
+<li class="rvps3"><span class="rvts24">Highlight PC pointer line when a breakpoint is hit</span></li>
+<li class="rvps3"><span class="rvts24">debuggerFontSize can be specified in fceux.cfg</span></li>
+<li class="rvps3"><span class="rvts24">Fixed storing and loading .deb files when working with archived ROMs</span></li>
+<li class="rvps3"><span class="rvts24">Fixed Cycles counter reset when loading an earlier savestate</span></li>
+<li class="rvps3"><span class="rvts24">Added Symbolic Debug naming by right-clicking any address or name</span></li>
+<li class="rvps3"><span class="rvts24">Symbolic names behave the same way as usual addresses</span></li>
+<li class="rvps3"><span class="rvts24">Newly created Bookmarks inherit existing symbolic name by default</span></li>
+<li class="rvps3"><span class="rvts24">Added CDL data column to the left from Disassembly, to distinguish executed branches of code from not executed</span></li>
+<li class="rvps3"><span class="rvts24">Added 'T' condition for breakpoints (it checks the bank of the accessed data, see docs)</span></li>
+</ul>
+<p><span class="rvts22"><br/></span></p>
+<p><span class="rvts22">Trace Logger</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts24">The dialog window can be resized</span></li>
+<li class="rvps3"><span class="rvts24">Do not clear window log when stopping the logging</span></li>
+<li class="rvps3"><span class="rvts24">Added "Log Cycles count" and "Log Instructions count" options</span></li>
+<li class="rvps3"><span class="rvts24">Added Symbolic Debug naming by right-clicking any address or name</span></li>
+<li class="rvps3"><span class="rvts24">Clicking any address select the address</span></li>
+<li class="rvps3"><span class="rvts24">Double-clicking any address brings Debugger at the address</span></li>
+<li class="rvps3"><span class="rvts24">Added mouse wheel support</span></li>
+<li><span class="rvts21">Only output "from $XXXX" when the subroutine was called by JSR</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts22">PPU Viewer</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Added "Mask unused graphics" feature (needs Code/Data Logger running)</span></li>
+<li><span class="rvts21">Fixed window layout when using big fonts</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts22">Hex Editor</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts24">Added "Highlighting" submenu and "Highlight Activity" feature</span></li>
+<li class="rvps3"><span class="rvts24">Added Symbolic Debug naming by right-clicking any address</span></li>
+<li class="rvps3"><span class="rvts24">Specify Data bank condition when adding a Breakpoint by context menu</span></li>
+<li class="rvps3"><span class="rvts24">Fixed bugs when saving files while working with ROMs in archives</span></li>
+<li class="rvps3"><span class="rvts24">hexeditorFontSize can be specified in fceux.cfg</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts22">RAM Search/RAM Watch</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Added "Hex Editor" button to RAM Search (right-clicking an address works as well)</span></li>
+<li><span class="rvts21">Fixed RAM Watch bug when contents of old .wch file were mixed with the newly saved data</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23">SDL</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts24">"--periodicsaves" command line option</span></li>
+<li class="rvps3"><span class="rvts24">"--4buttonexit" command line option</span></li>
+<li class="rvps3"><span class="rvts24">"--loadstate X" and "--savestate X" command line options</span></li>
+<li class="rvps3"><span class="rvts24">Added Unity desktop support</span></li>
+<li class="rvps3"><span class="rvts24">Added otion to use system-provided LUA library instead of statically linked LUA</span></li>
+<li class="rvps3"><span class="rvts24">Fix issue where battery backup save was not being saved when using "Quit" hotkey</span></li>
+<li class="rvps3"><span class="rvts24">Fixed bug where FCEUX would take exclusive grab of input in windowed mode when resuming from pause</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23"><br/></span></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/create-epub-ebooks">Generate EPub eBooks with ease</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

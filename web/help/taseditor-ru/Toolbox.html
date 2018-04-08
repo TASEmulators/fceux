@@ -1,0 +1,277 @@
+﻿<html>
+	
+<head>
+	<title>2.2. Панель инструментов</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "index.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("Toolbox");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>2.2. Панель инструментов</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="BeginnersGuide.html">Курс для новичка</a> &rsaquo;&rsaquo; <a href="ProgramInterface.html">2. Интерфейс программы</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="ProgramInterface.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="PianoRoll.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="TASingProcess.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts20">Панель инструментов</span></p>
+<p class="rvps5"><span class="rvts39"><br/></span></p>
+<p class="rvps5"><img alt="" style="padding : 1px;" src="lib/taseditor-smb.png"/></p>
+<p class="rvps21"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Панель инструментов содержит 7 разделов:</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps14"><a class="rvts40" href="Toolbox.html#playback">Playback – Проигрыватель</a></li>
+<li class="rvps14"><a class="rvts40" href="Toolbox.html#recorder">Recorder – Рекордер</a></li>
+<li class="rvps14"><a class="rvts40" href="Toolbox.html#splicer">Splicer – Монтажный инструмент</a></li>
+<li class="rvps14"><a class="rvts40" href="Toolbox.html#lua">Lua – Луа-автоматизация</a></li>
+<li class="rvps14"><a class="rvts40" href="Toolbox.html#bookmarks">Bookmarks – Закладки</a></li>
+<li class="rvps14"><a class="rvts40" href="Toolbox.html#history">History – Журнал Истории</a></li>
+<li class="rvps14"><a class="rvts40" href="Toolbox.html#selection">кнопки навигации Курсором Выделения</a></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps2"><a name="playback"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-playback.png"/></p>
+<p class="rvps10"><span class="rvts22">В самом верху находится раздел </span><span class="rvts22">Проигрывателя</span><span class="rvts22"> (Playback). </span><span class="rvts26">Проигрыватель</span><span class="rvts22"> – это тот компонент Тасэдитора, который управляет процессом эмуляции игры: держит на паузе, проигрывает в любом направлении, перематывает на желаемый кадр и так далее. Он</span><span class="rvts22"> позволяет обращаться с видеоиграми так же прямолинейно, как с обычной видеозаписью, невзирая на их интерактивность.</span></p>
+<p class="rvps10"><span class="rvts22">Вверху находятся 5 кнопок.</span></p>
+<p class="rvps10"><span class="rvts22">Кнопка "</span><span class="rvts32">||</span><span class="rvts22">" (пауза/продолжить) является простым аналогом клавиатурного хоткея </span><span class="rvts27">Pause Emulation</span><span class="rvts22">. При её нажатии эмуляция игры либо приостанавливается, либо продолжается. Впрочем, если на вашей мышке есть средняя кнопка, проще нажимать её вместо щелчка по кнопке "</span><span class="rvts32">||</span><span class="rvts22">", в этом случае даже не нужно будет подводить курсор мыши к разделу Проигрывателя.</span></p>
+<p class="rvps10"><span class="rvts22">Кнопка "</span><span class="rvts32">&gt;</span><span class="rvts22">" (шаг вперёд, Advance 1 frame) перемещает голубой курсор на один кадр ниже, при необходимости заставляя FCEUX эмулировать 1 кадр игры. По этой кнопке можно не только щёлкать, но и зажимать её на некоторое время, чтобы сделать несколько шагов подряд. </span><span class="rvts22">У этой кнопки есть аналог на клавиатуре: </span><span class="rvts34">Shift + Вниз</span><span class="rvts22">. Если у вашей мышки есть колесо, проще зажимать правую кнопку и прокручивать колесо на одно деление вниз вместо использования кнопки </span><span class="rvts22">"</span><span class="rvts32">&gt;</span><span class="rvts22">".</span></p>
+<p class="rvps10"><span class="rvts22">Кнопка "</span><span class="rvts32">&lt;</span><span class="rvts22">" (шаг назад, Rewind 1 frame) перемещает голубой курсор на один кадр выше, а на экране FCEUX отражаются события предыдущего кадра игры. Эту кнопку тоже можно зажимать, чтобы сделать подряд несколько шагов назад. Для этой кнопки есть свой хоткей </span><span class="rvts27">Frame Rewind</span><span class="rvts22"> (по умолчанию клавиша </span><span class="rvts27">Backspace</span><span class="rvts22">), а также</span><span class="rvts22"> аналог на клавиатуре: </span><span class="rvts34">Shift + Вверх</span><span class="rvts22">. Если у вашей мышки есть колесо, проще зажимать правую кнопку и прокручивать колесо на одно деление вверх вместо использования кнопки </span><span class="rvts22">"</span><span class="rvts32">&lt;</span><span class="rvts22">".</span></p>
+<p class="rvps10"><span class="rvts22">Кнопка "</span><span class="rvts32">&lt;&lt;</span><span class="rvts22">" (быстрая перемотка назад) тоже перемещает Курсор Проигрывателя назад, но не на один кадр, а сразу на множество кадров. Эта кнопка перемещает голубой курсор прямо на кадр, на котором установлен вышестоящий Маркер. В примере с верхней картинкой при нажатии "</span><span class="rvts32">&lt;&lt;</span><span class="rvts22">" голубой курсор прыгнет на 12-й кадр (где располагается Маркер 1). Благодаря этой кнопке можно очень быстро возвращаться к началу редактируемого участка и вообще к любому ранее пройденному моменту мувика. У этой кнопки есть аналог на клавиатуре: </span><span class="rvts34">Shift + Page Up</span><span class="rvts22">. Эту кнопку также можно зажимать – голубой курсор будет очень быстро прыгать по Маркерам всё выше и выше по Piano Roll, и, глядя на меняющееся изображение на экране FCEUX, вы сможете быстро найти нужный фрагмент.</span></p>
+<p class="rvps10"><span class="rvts22">Кнопка "</span><span class="rvts32">&gt;&gt;</span><span class="rvts22">" (быстрая перемотка вперёд) прыгает Курсором Проигрывателя по Маркерам вперёд. В примере с верхней картинкой при нажатии "</span><span class="rvts32">&gt;&gt;</span><span class="rvts22">" голубой курсор прыгнет на 22-й кадр (где </span><span class="rvts22">располагается</span><span class="rvts22"> Маркер 2). Благодаря этой кнопке можно быстро проматывать события мувика вперёд. Однако в случае, если следующий Маркер находится за пределами Гринзоны, эмулятору потребуется некоторое время для обработки неизведанных кадров, поэтому прыжок голубого курсора может быть не мгновенным, придётся чуть-чуть подождать. У этой кнопки есть аналог на клавиатуре: </span><span class="rvts34">Shift + Page Down</span><span class="rvts22">. Эту кнопку также можно зажимать.</span></p>
+<p class="rvps10"><span class="rvts22">В качестве эксперимента попробуйте сделать мувик из тысячи кадров и поставить пару десятков Маркеров, по одному через каждые 30-50 кадров. Затем зажмите </span><span class="rvts34">Shift</span><span class="rvts22"> и, нажимая клавиши </span><span class="rvts26">Page Up</span><span class="rvts22"> или </span><span class="rvts26">Page Down</span><span class="rvts22">, почувствуйте все удобства быстрой перемотки. </span><span class="rvts22">Помимо клавиш </span><span class="rvts26">Page Up</span><span class="rvts22"> и </span><span class="rvts26">Page Down </span><span class="rvts22">можно также вращать колесо мыши, зажав клавишу </span><span class="rvts34">Shift</span><span class="rvts22">.</span></p>
+<p class="rvps10"><a name="progressbar"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Под 5 кнопками находится индикатор выполнения (</span><span class="rvts42">Progress bar</span><span class="rvts22">) и три переключателя (Checkbox).</span></p>
+<p class="rvps10"><span class="rvts22">Прогрессбар служит для оценки оставшегося времени при добегании к указанному кадру. М</span><span class="rvts22">гновенные прыжки на затребованный кадр становятся возможными только после того, как эмулятор хотя бы однажды проэмулировал игру до этого кадра, применив ваш мувик в качестве игрового </span><span class="rvts22">Ввод</span><span class="rvts22">а, чтобы получить актуальное состояние игры на этом кадре. После того, как состояние игры однажды просчитано, оно сохраняется в Гринзону, и в следующий раз эмулятор может мгновенно прыгнуть на этот кадр, пока не изменился </span><span class="rvts22">Ввод</span><span class="rvts22">, предшествующий этому кадру. Если Ввод изменился, потребуется новый пересчёт игровых событий, так как даже малейшее изменение нажатых кнопок может повлечь серьёзные изменения в хронологии игрового процесса. Поэтому при любом изменении Ввода Гринзона автоматически усекается, выбрасывая из памяти все кадры, на которые оказывает влияние изменившийся Ввод. И эти кадры эмулятору нужно просчитывать заново, что занимает некоторое время.</span></p>
+<p class="rvps10"><span class="rvts22">Таким образом, когда вы отправляете Курсор Проигрывателя на кадр, который находится далеко от Гринзоны, вместо мгновенного перемещения голубой курсор начинает </span><span class="rvts31">добегание</span><span class="rvts22"> (</span><span class="rvts31">Seeking</span><span class="rvts22">) к этому кадру. На месте целевой строки Piano Roll начинает мигать тень голубого курсора, а на экране FCEUX будут быстро сменяться кадры игры по мере того, как Курсор Проигрывателя бежит к цели.</span></p>
+<p class="rvps10"><span class="rvts22">В этом случае вам придётся подождать. Время добегания зависит от расстояния между ближайшим краем Гринзоны и целевым кадром, а также от мощности вашего компьютера и ещё от ряда факторов. </span><span class="rvts41">Прогрессбар</span><span class="rvts43"> </span><span class="rvts22">поможет оценить оставшееся время ожидания. А если вы передумали ждать, достаточно щёлкнуть по прогрессбару левой кнопкой мыши (помимо индикатора он ещё является кнопкой) или использовать клавиатурный хоткей </span><span class="rvts27">Cancel Seeking </span><span class="rvts22">(по умолчанию клавиша </span><span class="rvts27">Esc</span><span class="rvts22">). Тогда целевой кадр перестанет мигать, голубой курсор остановится, а эмуляция будет поставлена на паузу.</span></p>
+<p class="rvps10"><span class="rvts22">Во время добегания можно изменить конечную цель, сделав щелчок в колонке иконок перед номером желаемого кадра. Если во время добегания поставить эмулятор на паузу, голубой курсор приостановится, мигание целевого кадра замедлится, но добегание не будет отменено – при отпускании паузы Курсор Проигрывателя продолжит бег к цели и автоматически остановится при её достижении.</span></p>
+<p class="rvps10"><span class="rvts22">Прогрессбар также используется во время загрузки и сохранения проектов Тасэдитора на диск.</span></p>
+<p class="rvps10"><a name="turbo-seek"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Галочка "</span><span class="rvts26">Turbo seek</span><span class="rvts22">" позволяет влиять на скорость добегания. С помощью функции </span><span class="rvts45">Turbo</span><span class="rvts22"> эмулятор может эмулировать игру с максимально достижимой скоростью, сокращая конечное время добегания в десятки раз. Поэтому при добегании к дальнему кадру рекомендуется установить эту галочку. Однако во время работы над ТАСом часто требуется увидеть не только конечный кадр определённого участка, но и внимательно рассмотреть все промежуточные кадры. В таких случаях следует снять эту галочку и даже уменьшить скорость эмуляции с помощью хоткеев </span><span class="rvts27">- </span><span class="rvts22">и </span><span class="rvts27">=</span><span class="rvts22">, чтобы не упустить важные детали геймплея.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Галочка "</span><span class="rvts26">Follow cursor</span><span class="rvts22">" заставляет Piano Roll следить за перемещениями Курсора Проигрывателя и автоматически скроллировать видимую область Piano Roll таким образом, чтобы голубой курсор всегда был виден пользователю. Это позволяет отслеживать глазами проигрываемый </span><span class="rvts22">Ввод, когда отпущена пауза эмуляции</span><span class="rvts22">. Обычно во время редактирования мувика эту галочку нужно отключать, чтобы Piano Roll не убегал от места редактирования </span><span class="rvts22">Ввод</span><span class="rvts22">а.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Галочка "</span><span class="rvts26">Auto-restore last position"</span><span class="rvts22"> заставляет Проигрыватель автоматически запускать добегание, когда голубой курсор отступает назад при усечении Гринзоны. Каждый раз, когда вы меняете </span><span class="rvts22">Ввод</span><span class="rvts22">, Гринзона усекается после первого кадра изменения, забывая о событиях, ставших не актуальными после изменения Ввода. Курсор Проигрывателя всегда должен находиться внутри Гринзоны, поэтому он отступает назад вместе с ней. С помощью галочки автовосстановления позиции вы сможете сразу увидеть </span><span class="rvts22">новые</span><span class="rvts22"> события на этих кадрах. Когда галочка установлена, после каждой модификации </span><span class="rvts22">Ввод</span><span class="rvts22">а Проигрыватель будет заново эмулировать изменившийся участок, помогая ТАСеру оперативно сравнивать различные сценарии развития игровых событий.</span></p>
+<p class="rvps10"><span class="rvts22">Благодаря автоматическому восстановлению позиции ТАСер может сконцентрировать внимание на редактировании </span><span class="rvts22">Ввод</span><span class="rvts22">а и в кратчайшие сроки перебрать множество подходов к прохождению текущего участка мувика. Подробнее об этом методе ТАСинга будет рассказано позже.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps2"><a name="recorder"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-recorder.png"/><span class="rvts22">Под Проигрывателем находится раздел </span><span class="rvts22">Рекордера</span><span class="rvts22"> (Recorder). </span><span class="rvts26">Рекордер</span><span class="rvts22"> служит для записи кнопочного </span><span class="rvts22">Ввод</span><span class="rvts22">а с клавиатуры (или геймпада) в мувик, прямо как при обычной игре в любом эмуляторе.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Галочка "</span><span class="rvts26">Recording</span><span class="rvts22">" включает и выключает режим Записи. Перед тем как начать запись кнопочных нажатий, убедитесь, что Курсор Проигрывателя находится на нужном кадре, с которого вы хотите начать запись. Затем либо нажмите хоткей "</span><span class="rvts27">Toggle Read-only</span><span class="rvts22">" (по умолчанию клавиша </span><span class="rvts27">Q</span><span class="rvts22">), либо установите галочку Recording щелчком по ней. При этом в заголовке окна Тасэдитора появится слово "Recording", а в окне FCEUX появится сообщение "Movie is now Read+Write". Теперь вы можете либо отпустить паузу и проходить игру в обычном или замедленном состоянии, либо впечатывать кнопки покадрово с помощью хоткея </span><span class="rvts27">Frame Advance</span><span class="rvts22">. По мере продвижения голубого курсора мувик будет заполняться информацией о нажатых вами кнопках.</span></p>
+<p class="rvps10"><span class="rvts22">Можно неоднократно перезаписывать один и тот же участок мувика, затирая старые данные новой информацией о нажатиях/отпусканиях. Если вам не понравилось, как был пройден только что записанный участок (например, персонаж упал в яму), переставьте Курсор Проигрывателя повыше, а именно на кадр, после которого были совершены неправильные нажатия кнопок (например, слишком поздно была нажата кнопка </span><span class="rvts32">A</span><span class="rvts22">), затем продолжите Запись, нажимая уже правильные кнопки в правильное время.</span></p>
+<p class="rvps10"><span class="rvts22">Когда участок готов, следует отключить режим Записи, чтобы случайно не затереть </span><span class="rvts22">Ввод</span><span class="rvts22"> при проигрывании мувика. Уберите галочку "Recording" щелчком или нажатием хоткея. Обычно при работе в Тасэдиторе галочка Записи почти всё время отключена, так как вместо Записи используется прямое редактирование мувика мышью.</span></p>
+<p class="rvps10"><span class="rvts22">Рекомендуется рационально комбинировать возможности Рекордера с возможностями Piano Roll. Для длинных и лёгких участков игры может быть проще записать нажатия с клавиатуры или удобного USB-геймпада, а вот для мелких разбросанных правок лучше использовать мышку.</span></p>
+<p class="rvps10"><a name="superimpose"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Галочка "</span><span class="rvts26">Superimpose</span><span class="rvts22">" (Наложение) в разделе Рекордера позволяет объединять новый </span><span class="rvts22">Ввод</span><span class="rvts22"> с уже имеющимся </span><span class="rvts22">Вводом</span><span class="rvts22"> на том же участке мувика. Например, сначала с помощью мыши вы можете нарисовать зажатие кнопки </span><span class="rvts32">R</span><span class="rvts22"> на длинном участке, чтобы персонаж всё время бежал вправо. Затем можно поставить галочку "Superimpose", включить Запись и нажимать только кнопки прыжка и стрельбы, без необходимости вручную нажимать кнопку </span><span class="rvts32">Вправо</span><span class="rvts22">. В игре в это время персонаж будет бежать вправо и прыгать/стрелять по команде.</span></p>
+<p class="rvps10"><span class="rvts22">В отличие от обычных галочек, у "Superimpose" помимо состояний "включена" и "отключена" есть дополнительное третье состояние – промежуточное между "включена" и "отключена". Принцип работы таков: когда игрок нажимает какие-либо кнопки геймпада во время Записи, эти кнопки записываются в мувик вместо старого Ввода. Если же игрок не нажимает ни одной кнопки во время Записи, старый Ввод на текущих кадрах не удаляется.</span></p>
+<p class="rvps10"><a name="UsePattern"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Галочка "</span><span class="rvts26">Use pattern</span><span class="rvts22">" (Использовать шаблон) применяет текущий шаблон во время Записи кнопок. Название текущего шаблона можно увидеть в верхнем правом углу окна TAS Editor (самый последний пункт меню). При щелчке по этому пункту появляется ниспадающее меню, где можно выбрать другой шаблон из списка заготовленных.</span></p>
+<p class="rvps10"><span class="rvts22">Шаблоны используются для ускорения ввода однообразных нажатий и отпусканий. Например, если в игре требуется стрелять с максимально возможной частотой (то есть чередовать один кадр нажатия кнопки </span><span class="rvts32">B</span><span class="rvts22"> и один кадр отпускания кнопки </span><span class="rvts32">B</span><span class="rvts22">), можно просто выбрать шаблон "</span><span class="rvts31">Alternating (1010...)</span><span class="rvts22">" и зажать кнопку </span><span class="rvts32">B </span><span class="rvts22">не заботясь о её периодическом отпускании. Благодаря применению шаблона нажатие кнопки </span><span class="rvts32">B</span><span class="rvts22"> будет записываться через кадр.</span></p>
+<p class="rvps10"><a name="multitracking"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Кроме галочек в Рекордере ещё есть круглые радиокнопки (Radio buttons), реализующие функцию </span><span class="rvts26">мультитрекинга</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts26">Многодорожечная Запись</span><span class="rvts22"> серьёзно облегчает работу при традиционном ТАСинге игры на двоих и более игроков. Вместо того, чтобы нажимать руками кнопки одновременно на двух геймпадах, можно сначала записать прохождение короткого участка игры первым игроком, а затем записать рядом кнопки второго.</span></p>
+<p class="rvps10"><span class="rvts22">По умолчанию настроена Запись всех игроков одновременно (установлена радиокнопка "All"). Вы можете выбрать отдельный джойстик, щёлкнув по соответствующей радиокнопке (1P, 2P и т.д. – количество доступных геймпадов зависит от типа вашего проекта). Также для переключения радиокнопок можно использовать хоткей "</span><span class="rvts27">Switch current Multitracking mode</span><span class="rvts22">"</span><span class="rvts22"> (по умолчанию клавиша </span><span class="rvts27">W</span><span class="rvts22">). </span><span class="rvts22">Теперь во время Записи эмулятор будет воспринимать только нажатия кнопок для выбранного игрока, а колонки </span><span class="rvts22">Ввод</span><span class="rvts22">а для остальных игроков не будут изменяться, даже если вы случайно нажмёте какую-нибудь кнопку на их джойстике.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps2"><a name="splicer"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-splicer.png"/></p>
+<p class="rvps10"><span class="rvts22">Под Рекордером находится раздел </span><span class="rvts26">Монтажа</span><span class="rvts22"> (Splicer).</span></p>
+<p class="rvps10"><span class="rvts22">Несмотря на схожее звучание, редактирование ТАСов совсем не похоже на работу в программах для нелинейного монтажа видео, ведь в Тасэдиторе можно редактировать только Ввод, а не готовый видеоматериал (Вывод). Финальный видеоряд определяется самой игрой.</span></p>
+<p class="rvps10"><span class="rvts22">В этом разделе выводится информация о размере текущего Выделения: сколько строк (rows) выделено в высоту, и сколько колонок (columns) занимает </span><span class="rvts22">Ввод</span><span class="rvts22"> в ширину. Благодаря этой информации вы можете использовать Выделение в качестве </span><span class="rvts26">линейки</span><span class="rvts22"> для измерений. Например, чтобы быстро узнать временную дистанцию между двумя игровыми событиями, нужно щёлкнуть мышкой по одному и растянуть Выделение до другого – выделятся все кадры между этими двумя строчками, а в разделе Splicer появится сообщение "Selection: </span><span class="rvts31">N</span><span class="rvts22"> rows, </span><span class="rvts31">M</span><span class="rvts22"> columns", где </span><span class="rvts31">N</span><span class="rvts22"> – искомое количество кадров.</span></p>
+<p class="rvps10"><span class="rvts22">Также здесь находится информация о данных в Буфере Обмена: содержится ли там Ввод, который можно вставить в любое место мувика. Если содержится, то указывается количество скопированных в Буфер кадров. Данные в Буфере Обмена хранятся независимо от Тасэдитора, они сохраняются там даже после закрытия FCEUX, пока какая-нибудь другая программа не скопирует в Буфер Обмена что-нибудь своё.</span></p>
+<p class="rvps10"><span class="rvts22">В разделе "Splicer" нет никаких управляющих элементов, так как все команды для монтажа Ввода вынесены в раздел меню </span><span class="rvts26">Edit</span><span class="rvts22">, а также назначены на быстрые клавиши клавиатуры. </span><span class="rvts22">Рекомендуется использовать в процессе монтажа именно клавиатурные комбинации, т.к. их легко запомнить, а скорость работы повышается во много раз.</span></p>
+<p class="rvps10"><a name="splicing-operations"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts23">Перечень всех функций Монтажного инструмента</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">По сути это стандартные возможности любого текстового редактора, но в Тасэдиторе их можно применять к </span><span class="rvts22">Ввод</span><span class="rvts22">у прямо во время эмуляции игры, что позволяет на лету анализировать результаты их применения и гибко перестраивать свои планы.</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts23">Copy </span><span class="rvts22">(</span><span class="rvts34">Ctrl + C</span><span class="rvts22">) – копирует весь выделенный </span><span class="rvts22">Ввод</span><span class="rvts22"> в Буфер Обмена.</span></li>
+<li class="rvps10"><span class="rvts23">Paste </span><span class="rvts22">(</span><span class="rvts34">Ctrl + V</span><span class="rvts22">) – вставляет </span><span class="rvts22">Ввод</span><span class="rvts22"> из Буфера Обмена в мувик, начиная с кадра, где стоит Курсор Выделения. Старые данные мувика на этом месте затираются новыми, либо объединяются, если у Рекордера установлена галочка "Superimpose".</span></li>
+<li class="rvps10"><span class="rvts23">Paste Insert </span><span class="rvts22">(</span><span class="rvts34">Ctrl + </span><span class="rvts34">Shift</span><span class="rvts34"> + </span><span class="rvts34">V</span><span class="rvts22">) – раздвигает мувик и вставляет данные из Буфера Обмена, начиная с кадра, где стоит Курсор Выделения. Старые данные мувика отодвигаются вниз.</span></li>
+<li class="rvps10"><span class="rvts23">Clear </span><span class="rvts22">(</span><span class="rvts34">Delete</span><span class="rvts22">) – очищает выделенные кадры, удаляя с них нажатия всех кнопок.</span></li>
+<li class="rvps10"><span class="rvts23">Cut </span><span class="rvts22">(</span><span class="rvts34">Ctrl + X</span><span class="rvts22">) = </span><span class="rvts23">Copy</span><span class="rvts22"> + </span><span class="rvts23">Clear</span><span class="rvts22"> – копирует </span><span class="rvts22">Ввод</span><span class="rvts22"> из выделенного участка мувика и очищает этот участок.</span></li>
+<li class="rvps10"><span class="rvts23">Delete </span><span class="rvts22">(</span><span class="rvts34">Ctrl + Delete</span><span class="rvts22">) – удаляет выделенные кадры из мувика, сдвигая последующие кадры на их место. Очень удобно таким образом перемещать </span><span class="rvts22">Ввод</span><span class="rvts22"> вверх.</span></li>
+<li class="rvps10"><span class="rvts23">Insert </span><span class="rvts22">(</span><span class="rvts34">Ctrl + Shift + Insert</span><span class="rvts22">) – вставляет в мувик пустой кадр перед каждым выделенным кадром, сдвигая существующий Ввод вперёд. Удобно таким образом перемещать </span><span class="rvts22">Ввод</span><span class="rvts22"> вниз.</span></li>
+<li class="rvps10"><span class="rvts23">Clone </span><span class="rvts22">(</span><span class="rvts34">Ctrl + Insert</span><span class="rvts22">) – аналог </span><span class="rvts23">Insert</span><span class="rvts22">, но вместо пустоты в мувик вставляются копии выделенных кадров. Зачастую этот способ предпочтительнее.</span></li>
+<li class="rvps10"><span class="rvts23">Insert number of frames </span><span class="rvts22">(</span><span class="rvts34">Insert</span><span class="rvts22">) – позволяет вставить на место Курсора Выделения любое желаемое количество пустых кадров. При нажатии клавиши </span><span class="rvts34">Insert</span><span class="rvts22"> появляется окошко для ввода требуемого количества кадров, нужно напечатать число и нажать OK. Если передумали, можно нажать Cancel (Esc) для убирания окошка.</span></li>
+<li class="rvps10"><span class="rvts23">Truncate</span><span class="rvts22"> – удаляет все кадры мувика, начиная со следующего за Курсором Выделения. Редко используемая функция, поэтому у неё нет хоткея, она доступна только через меню программы или меню по правой кнопке мыши.</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Наиболее часто во время ТАСинга в Тасэдиторе вы будете использовать </span><span class="rvts34">Ctrl + Delete</span><span class="rvts22"> (</span><span class="rvts23">Delete Frames</span><span class="rvts22">) и </span><span class="rvts34">Ctrl + Insert</span><span class="rvts22"> (</span><span class="rvts23">Clone Frames</span><span class="rvts22">) для быстрого перемещения редактируемых участков вверх/вниз по &nbsp;списку кадров, тем самым совершая в игре определённые действия раньше или позже по времени.</span></p>
+<p class="rvps10"><span class="rvts22">В отличие от хоткеев FCEUX эти клавиатурные комбинации нельзя переназначить, поэтому, если у вас на </span><span class="rvts34">Ctrl</span><span class="rvts22">, </span><span class="rvts34">Insert</span><span class="rvts22"> или </span><span class="rvts34">Delete</span><span class="rvts22"> назначены какие-то другие функции эмулятора, необходимо изменить настройки эмулятора.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps2"><a name="lua"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-lua.png"/></p>
+<p class="rvps10"><span class="rvts22">Под Монтажным инструментом находится маленький раздел </span><span class="rvts26">Lua</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Здесь находится одна неактивная кнопка и одна галочка, назначение которых будет описано позже. Пока вы не знакомы с Lua-скриптингом, этот раздел вам не понадобится.</span></p>
+<p class="rvps10"><span class="rvts22">Использование скриптового языка Lua позволяет автоматизировать некоторую часть работы ТАСера и создавать собственные плагины для Тасэдитора.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps10"><a name="bookmarks"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-bookmarks.png"/></p>
+<p class="rvps10"><span class="rvts22">Далее располагается раздел </span><span class="rvts22">Закладок</span><span class="rvts22"> (Bookmarks/Branches). О Закладках следует рассказать подробнее.</span></p>
+<p class="rvps10"><span class="rvts26">Закладки</span><span class="rvts22"> являются развитием принципа эмуляторных сэйвов. До Тасэдитора сэйвы были главным способом навигации по мувику, с их помощью ТАСер возвращался к месту ошибки и исправлял её. В Тасэдиторе есть более совершенные способы навигации, однако и этот способ был оставлен.</span></p>
+<p class="rvps10"><span class="rvts22">В вашем распоряжении 10 слотов для Закладок, которые нумеруются цифрами от 0 до 9. Вы можете поставить любую из 10 Закладок на любой кадр мувика, предварительно указав на этот кадр Курсором Проигрывателя.</span></p>
+<p class="rvps10"><span class="rvts26">1 способ. </span><span class="rvts22">Поставьте голубой курсор на кадр, где должна появиться Закладка и сделайте эмуляторный сэйв (по умочанию это </span><span class="rvts34">Shift</span><span class="rvts22"> + любая из клавиш в ряду </span><span class="rvts27">F1</span><span class="rvts22">-</span><span class="rvts27">F10</span><span class="rvts22">). Например, нажмите </span><span class="rvts27">Shift + F1</span><span class="rvts22"> для установки первой Закладки. Она тут же отобразится в Списке Закладок, сверкнув красным светом.</span></p>
+<p class="rvps10"><span class="rvts26">2 способ. </span><span class="rvts22">Поставьте голубой курсор на нужный кадр и сделайте щелчок</span><span class="rvts22"> правой кнопкой мыши по любой&nbsp;</span><span class="rvts22"> строке Списка Закладок. Например, щёлкните правой кнопкой по второй строке Списка, чтобы установить вторую Закладку.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Нечаянно совершённую установку Закладок можно отменять </span><span class="rvts22">с помощью </span><span class="rvts34">Ctrl + Z</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">В Списке Закладок для каждой Закладки отображается номер кадра, на котором она установлена, и реальное время её установки. </span><span class="rvts22">При наведении курсора мыши на время Закладки (правый столбец в Списке) вы увидите скриншот из игры.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">В момент установки Закладки Тасэдитор сохраняет в указанный слот не только текущее место положения Курсора Проигрывателя, но и всё содержимое мувика на текущий момент времени. Теперь вы в любой момент можете либо "</span><span class="rvts31">прыгнуть на Закладку в пространстве</span><span class="rvts22">" (просто вернув Курсор Проигрывателя на заложенное Закладкой место), либо "</span><span class="rvts31">прыгнуть на Закладку во времени</span><span class="rvts22">", вернув весь мувик в запомненное Закладкой состояние.</span></p>
+<p class="rvps10"><span class="rvts22">Чтобы вернуться на Закладку в пространстве, щёлкните левой кнопкой мыши по </span><span class="rvts26">левой половине</span><span class="rvts22"> нужной Закладки (более светлая половина Списка Закладок, где написан номер кадра, на котором установлена Закладка). Или же воспользуйтесь клавиатурой – нажмите соответствующую цифру (цифровые клавиши </span><span class="rvts27">0</span><span class="rvts22">-</span><span class="rvts27">9</span><span class="rvts22"> расположены под клавишами </span><span class="rvts27">F1</span><span class="rvts22">-</span><span class="rvts27">F10</span><span class="rvts22">). О совершении прыжка вы сможете догадаться не только по перемещению голубого курсора в Piano Roll, но и по зелёной вспышке использованной Закладки.</span></p>
+<p class="rvps10"><span class="rvts22">Чтобы вернуться на Закладку во времени, щёлкните левой кнопкой мыши по </span><span class="rvts26">правой половине</span><span class="rvts22"> нужной Закладки (более яркая половина Списка Закладок, где написано время создания Закладки). Или же загрузите соответствующий эмуляторный сэйв (по умолчанию это клавиши </span><span class="rvts27">F1</span><span class="rvts22">-</span><span class="rvts27">F10</span><span class="rvts22">). Если при прыжке во времени изменяется </span><span class="rvts22">Ввод</span><span class="rvts22"> мувика (ведь восстанавливается его состояние на момент создания Закладки), то использованная Закладка вспыхивает синим светом, иначе вспыхивает зелёным, как при простом прыжке Курсора Проигрывателя. Как обычно, при изменении </span><span class="rvts22">Ввод</span><span class="rvts22">а будет автоматическое усечение Гринзоны. И, конечно же, вы всегда можете отменить это изменение с помощью </span><span class="rvts34">Ctrl + Z</span><span class="rvts22">, вернув мувик к состоянию, которое у него было перед прыжком на Закладку во времени.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Таким образом, часть Закладок можно использовать для ускорения навигации. Например, поставьте Закладку на начало текущего уровня игры, чтобы периодически возвращать Курсор Проигрывателя на кадр этой Закладки и пересматривать события уровня. Для этой же цели можно воспользоваться Маркерами, но преимущество Закладок в том, что на Закладку можно будет мгновенно прыгнуть из любого сколь угодно отдалённого места мувика, а к Маркеру издалека нужно добираться прыжками через соседние Маркеры.</span></p>
+<p class="rvps10"><span class="rvts22">Другую часть Закладок можно использовать для хранения альтернативных подходов к прохождению одного и того же участка игры. При ТАСинге сложных игр мы не всегда можем сразу оценить степень оптимальности той или иной стратегии прохождения. Порой ТАСеру требуется записать несколько разных способов прохождения одного и того же участка игры, а затем тщательно сравнить готовые мувики и выбрать наиболее подходящий, чтобы оставить его в конечном ТАСе.</span></p>
+<p class="rvps10"><span class="rvts22">В традиционном ТАСинге каждый такой мувик хранится в отдельном файле, так что для переключения между альтернативными мувиками (а точнее, между альтернативными ответвлениями главного мувика) нужно загружать соответствующие сэйвы, созданные во время записи этих прохождений.</span></p>
+<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-branches.png"/></p>
+<p class="rvps10"><span class="rvts22">В Тасэдиторе все сохранённые варианты прохождения хранятся вместе, образуя между собой иерархию под названием &nbsp;</span><span class="rvts26">Дерево ответвлений</span><span class="rvts22"> (Branches Tree). Для переключения между альтернативными ответвлениями нужно загрузить соответствующую Закладку, вернув рабочий мувик на один из заготовленных вариантов. По сути всё так же, как раньше. </span><span class="rvts22">Но теперь можно наглядно визуализировать все альтернативные прохождения в виде схемы, чтобы облегчить ориентацию ТАСера среди множества вариантов.</span></p>
+<p class="rvps10"><span class="rvts22">Когда вы тестируете парочку подходов к прохождению второго уровня игры, первый уровень в обоих ответвлениях проходится одинаково, так что расхождение </span><span class="rvts22">Ввод</span><span class="rvts22">а идёт не с самого начала мувика, а только с начала второго уровня. Так что, если перед началом второго уровня вы когда-то оставили Закладку 1, на схеме будет видно расхождение двух линий, начиная с цифры 1.</span></p>
+<p class="rvps10"><span class="rvts22">В качестве эксперимента начните новый проект и создайте очень короткий мувик. Установите Курсор Проигрывателя на конец мувика и сохраните Закладку в первый слот (</span><span class="rvts27">Shift + F1</span><span class="rvts22">). Затем добавьте после кадра Закладки несколько кадров и нарисуйте на них несколько кнопочных нажатий, затем проиграйте этот новый Ввод и сохраните Закладку во второй слот (</span><span class="rvts27">Shift + F2</span><span class="rvts22">). Теперь верните мувик на состояние первой Закладки (нажав </span><span class="rvts27">F1</span><span class="rvts22">), опять добавьте в мувик несколько кадров после первой Закладки и нарисуйте на них несколько кнопочных нажатий, отличающихся от тех, что сохранены во второй слот. Затем проиграйте эти альтернативные нажатия до конца и сохраните Закладку в третий (</span><span class="rvts27">Shift + F3</span><span class="rvts22">) или какой-либо другой слот.</span></p>
+<p class="rvps10"><span class="rvts22">Теперь щёлкните левой кнопкой мыши по заголовку раздела Закладок (по надписи "Bookmarks/Branches"). При этом Список Закладок сменится на изображение схемы ответвлений (Branches). Если мувик третьей сохранённой Закладки отличается от мувика второй Закладки, но это различие начинается после кадра, где установлена первая Закладка, то вы должны увидеть картину наподобие показанной выше. Тучка символизирует начало мувика (корень иерархии). Закладки представлены карточками с соответствующими номерами. Синим номером отмечена текущая Закладка, соответствующая рабочему мувику (отображаемому в Piano Roll). Если после сохранения или загрузки этой Закладки в рабочий мувик уже вносились изменения, на схеме появляется фаербол.</span></p>
+<p class="rvps10"><span class="rvts22">Красными линиями объединены Закладки, совместимые с хронологией текущего рабочего мувика. Например, если ставить по одной Закладке в конец каждого уровня, то все эти Закладки будут объединены между собой красной линией, так как мувик каждой следующей Закладки фактически состоит из мувика предыдущей Закладки, плюс дописанного прохождения ещё одного уровня.</span></p>
+<p class="rvps10"><span class="rvts22">На Дереве ответвлений также отображается текущая позиция Курсора Проигрывателя. Попробуйте перетаскивать голубой курсор мышкой вверх и вниз по Piano Roll, либо просто проиграть весь мувик от начала до конца (нажмите </span><span class="rvts34">Shift + Home</span><span class="rvts22"> и отпустите паузу эмулятора). Вы увидите перемещение маленькой голубой стрелки по красным линиям, соединяющим все Закладки в текущей хронологии. Например, если текущей Закладкой является вторая, значок Курсора Проигрывателя будет перемещаться по маршруту "тучка -&gt; Закладка 1 -&gt; Закладка 2". А остальные Закладки останутся в стороне, так как они представляют альтернативную хронологию, не совпадающую с проигрываемым в данный момент мувиком.</span></p>
+<p class="rvps10"><span class="rvts22">Дерево ответвлений автоматически перестраивается каждый раз, когда вы создаёте новую Закладку или изменяете содержимое существующей. </span><span class="rvts22">В зависимости от сложности вашего проекта схема ответвлений может быть очень разной.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<div class="rvps21"><table width="10%" border="0" cellpadding="1" cellspacing="2" style="border-width: 0px;">
+<tr valign="top">
+<td><p class="rvps5"><img alt="" style="padding : 1px;" src="lib/branches-example1.png"/></p>
+</td>
+<td><p class="rvps5"><img alt="" style="padding : 1px;" src="lib/branches-example2.png"/></p>
+</td>
+<td><p class="rvps5"><img alt="" style="padding : 1px;" src="lib/branches-example3.png"/></p>
+</td>
+</tr>
+<tr valign="top">
+<td><p class="rvps5"><img alt="" style="padding : 1px;" src="lib/branches-example4.png"/></p>
+</td>
+<td><p class="rvps5"><img alt="" style="padding : 1px;" src="lib/branches-example5.png"/></p>
+</td>
+<td><p class="rvps5"><img alt="" style="padding : 1px;" src="lib/branches-example6.png"/></p>
+</td>
+</tr>
+</table>
+</div>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Вы можете наводить курсор мыши на номер любой Закладки, чтобы увидеть информацию о ней.</span></p>
+<p class="rvps10"><span class="rvts22">Также вы можете сделать </span><span class="rvts26">одинарный щелчок левой</span><span class="rvts22"> кнопкой мыши по любой Закладке, чтобы послать Курсор Проигрывателя на кадр этой Закладки (прыжок в пространстве). Щелчком по тучке вы посылаете Курсор Проигрывателя в начало мувика (аналогично нажатию </span><span class="rvts34">Shift + Home</span><span class="rvts22">), а щелчком по фаерболу вы посылаете Курсор Проигрывателя в конец мувика (аналогично нажатию </span><span class="rvts34">Shift + End</span><span class="rvts22">).</span></p>
+<p class="rvps10"><span class="rvts22">Кроме того, вы можете сделать </span><span class="rvts26">двойной щелчок левой</span><span class="rvts22"> кнопкой мыши, чтобы прыгнуть на указанную Закладку во времени. При этом из указанной Закладки восстанавливается состояние мувика, Закладка становится текущей, а Курсор Проигрывателя перемещается на кадр Закладки.</span></p>
+<p class="rvps10"><span class="rvts22">Наконец, вы можете сделать </span><span class="rvts26">щелчок правой кнопкой</span><span class="rvts22"> мыши по любой карточке, чтобы сохранить текущий мувик и текущее положение Курсора Проигрывателя в указанную Закладку.</span></p>
+<p class="rvps10"><span class="rvts22">Как видите, в режиме просмотра Дерева ответвлений можно совершать все те же действия, что и в режиме просмотра Списка Закладок. Поэтому для опытных пользователей рекомендуется использовать в работе только вид Дерева ответвлений, так как он даёт больше информации для ТАСера. Когда нужно переключиться обратно на просмотр Списка Закладок, щёлкните по заголовку раздела (по надписи "Branches").</span></p>
+<p class="rvps10"><span class="rvts22">Сейчас попробуйте использовать все 10 доступных слотов. Каждый раз немного меняйте </span><span class="rvts22">Ввод</span><span class="rvts22"> текущего мувика и просматривайте отредактированные изменения на экране FCEUX перед сохранением их в Закладку. Позиция каждой карточки на Дереве ответвлений определяется, исходя из </span><span class="rvts22">Ввод</span><span class="rvts22">а, предшествующего кадру этой Закладки. Подразумевается, что ТАСер всегда сначала просматривает нарисованный </span><span class="rvts22">Ввод</span><span class="rvts22"> в эмуляторе, а только потом сохраняет протестированную работу в Закладку.</span></p>
+<p class="rvps10"><span class="rvts22">В руках опытного ТАСера Закладки являются мощным инструментом, позволяющим многократно облегчить процесс ТАСинга и реализовать даже то, что кажется невозможным. Обычно "невозможным" всё представляется только лишь из-за чудовищной, необъятной сложности. Но стоит лишь снизить сложность хотя бы в сотню раз (благодаря инструментам и умной организации процесса), и достижение из ранга невозможных переходит в разряд просто трудных.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps2"><a name="history"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-history.png"/></p>
+<p class="rvps10"><span class="rvts22">Ниже Закладок располагается раздел </span><span class="rvts26">Истории</span><span class="rvts22"> (History).</span></p>
+<p class="rvps10"><span class="rvts22">Тасэдитор ведёт строгий учёт всех проделанных операций в текущем проекте. Каждое действие пользователя по изменению </span><span class="rvts22">Ввод</span><span class="rvts22">а, Маркеров или Закладок заносится в журнал, отображаемый в этом разделе.</span></p>
+<p class="rvps10"><span class="rvts22">Текущий пункт Журнала Истории выделяется синим цветом. Другие пункты выделяются белым цветом, если они не имеют никакого отношения к текущему пункту, или фиолетовым цветом, если они представляют собой изменения мувика, произведённые на том же месте, где и изменения, совершённые текущим пунктом. Например, если текущий пункт Журнала Истории был создан в результате изменения Ввода на кадре 27, то фиолетовым цветом будут отмечены все пункты, которые затрагивают этот кадр.</span></p>
+<p class="rvps10"><span class="rvts22">Для отката зарегистрированных в Журнале операций вы можете </span><span class="rvts22">либо воспользоваться клавишами </span><span class="rvts34">Ctrl + Z</span><span class="rvts22"> и </span><span class="rvts34">Ctrl + Y</span><span class="rvts22">, либо </span><span class="rvts22">щёлкать по любой строке Журнала Истории левой кнопкой мыши, чтобы вернуть мувик на время создания соответствующей записи в Журнале.</span></p>
+<p class="rvps10"><span class="rvts22">При этом в Piano Roll на долю секунды появляется курсор-указка фиолетового цвета, акцентирующий внимание на месте произведённых при откате изменений.</span></p>
+<p class="rvps10"><span class="rvts22">Максимальное количество уровней отката настраивается в меню </span><a class="rvts40" href="ProgramCustomization.html#Setmaxundolevels">Config</a><span class="rvts22">, от этого количества зависит максимальный объём Журнала Истории и, как следствие, объём занимаемой памяти.</span></p>
+<p class="rvps10"><span class="rvts22">Полный перечень всех возможных типов записей в Журнал Истории вы можете прочитать в </span><a class="rvts28" href="Operations.html">Справочнике</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps2"><a name="selection"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-selection.png"/></p>
+<p class="rvps10"><span class="rvts22">В самом низу Панели инструментов находятся 4 кнопки для управления Курсором Выделения.</span></p>
+<p class="rvps10"><span class="rvts22">О назначении кнопок "</span><span class="rvts32">&lt;&lt;</span><span class="rvts22">" и "</span><span class="rvts32">&gt;&gt;</span><span class="rvts22">" легко догадаться по аналогии с верхники кнопками "</span><span class="rvts32">&lt;&lt;</span><span class="rvts22">" и "</span><span class="rvts32">&gt;&gt;</span><span class="rvts22">" в разделе Playback. Верхняя часть окна Тасэдитора содержит элементы, относящиеся к Курсору Проигрывателя, а нижняя часть окна – к Курсору Выделения.</span></p>
+<p class="rvps10"><span class="rvts22">Кнопка "</span><span class="rvts32">&lt;&lt;</span><span class="rvts22">" (прыжок назад) перемещает Курсор Выделения на кадр, на котором установлен вышестоящий Маркер. В примере с верхней картинкой при нажатии "</span><span class="rvts32">&lt;&lt;</span><span class="rvts22">" синий курсор прыгнет с 27-го на 22-й кадр, где установлен Маркер 2. Благодаря этой кнопке можно очень быстро возвращать Выделение к началу редактируемого участка и вообще к началу любого отмеченного участка. У этой кнопки есть аналог на клавиатуре: </span><span class="rvts34">Ctrl + Page Up</span><span class="rvts22">. Эту кнопку можно зажимать – синий курсор будет очень быстро прыгать по Маркерам вверх по Piano Roll.</span></p>
+<p class="rvps10"><span class="rvts22">Кнопка "</span><span class="rvts32">&gt;&gt;</span><span class="rvts22">" (прыжок вперёд) прыгает Курсором Выделения по Маркерам вперёд. В примере с верхней картинкой при нажатии "</span><span class="rvts32">&gt;&gt;</span><span class="rvts22">" синий курсор прыгнет с 27-го на кадр за пределами видимости (где установлен следующий Маркер), при этом Piano Roll автоматически проскроллируется вслед за Курсором Выделения. Благодаря этой кнопке можно очень быстро перемещаться по мувику вниз. У этой кнопки есть аналог на клавиатуре: </span><span class="rvts34">Ctrl + Page Down</span><span class="rvts22">. Эту кнопку также можно зажимать.</span></p>
+<p class="rvps10"><span class="rvts22">Так как Курсор Выделения не привязан к эмуляции игры, его прыжки по Маркерам всегда совершаются мгновенно, не завися от наличия Гринзоны у целевого кадра. Поэтому удобно читать таким образом Заметки Маркеров одну за другой в нижнем текстовом поле, нажимая </span><span class="rvts34">Ctrl + Page Down</span><span class="rvts22"> для мгновенного перехода к следующей Заметке. </span><span class="rvts22">Помимо клавиш </span><span class="rvts26">Page Up</span><span class="rvts22"> и </span><span class="rvts26">Page Down </span><span class="rvts22">можно также вращать колесо мыши, зажав клавишу </span><span class="rvts34">Ctrl</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Кнопки "</span><span class="rvts32">Similar</span><span class="rvts22">" и "</span><span class="rvts32">More</span><span class="rvts22">" нужны для поиска похожих Заметок. Это ещё одна экспериментальная фича Тасэдитора, о которой будет рассказано позже.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps2"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Теперь вы ознакомлены с основными принципами использования программы.</span></p>
+<p class="rvps10"><span class="rvts22">В следующей главе: </span><a class="rvts40" href="TASingProcess.html">системный подход к ТАСингу</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<div class="rvps10"><table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
+<tr valign="top">
+<td style="border-color: #000000; border-style: solid;"><p class="rvps10"><span class="rvts26">ПРАКТИЧЕСКОЕ ЗАДАНИЕ: </span><span class="rvts22">Пройдите World 1-1 в игре Super Mario Bros (или любой другой игре) с помощью одной только мышки, без использования режима Записи.</span></p>
+<p class="rvps10"><span class="rvts22">Делать спидран не нужно, просто освойтесь с процедурой рисования и стирания </span><span class="rvts22">Ввод</span><span class="rvts22">а, а также с просмотром результатов колесом мыши / средней кнопкой.</span></p>
+<p class="rvps10"><span class="rvts26">Примерное время выполнения: </span><span class="rvts22">20-30 минут.</span></p>
+</td>
+</tr>
+</table>
+</div>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p></p>
+<p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com/feature-tour">Easily create Help documents</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				&copy; 2011-2013 АнС</div>
+		</div>
+	</body>
+	
+</html>
+

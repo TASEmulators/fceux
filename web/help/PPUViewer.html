@@ -1,0 +1,101 @@
+﻿<html>
+	
+<head>
+	<title>PPU Viewer</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("PPUViewer");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>PPU Viewer</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Debug.html">Debug</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Debug.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Debugger.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="NameTableViewer.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">PPU Viewer</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts12">Introduction</span></p>
+<p><br/></p>
+<p>The NES architecture includes a 6502 CPU as well as a custom video controller known as a PPU (Picture Processing Unit). &nbsp;The PPU's video memory is separated from the main CPU memory and can be read/written via special ports (see <a class="rvts18" href="PPU.html">PPU Memory</a>).</p>
+<p><br/></p>
+<p>The PPU viewer will only display the contents of the current PPU memory. It does not alter game data in any way.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Using PPU Viewer</span></p>
+<p><br/></p>
+<p><span class="rvts10">Show on Scanline</span></p>
+<p>This options makes it show what the PPU looks like when the screen is drawing that particular scanline. It is useful for games like SMB, that swap pattern tables mid-frame (e.g. for status bar stuff).</p>
+<p><br/></p>
+<p>Right clicking on one of the PPU panels will change the palette it is shown with, cycling though pattern palettes, then sprite ones, then a ninth fixed grey palette (useful for inspecting CHR if all the palettes are currently black).</p>
+<p><br/></p>
+<p>Putting the mouse cursor over a tile will display the tile address. Moving cursor over palette color will give palette address.</p>
+<p><br/></p>
+<p>When <a class="rvts18" href="CodeDataLogger.html">Code/Data Logger</a> is running, you can also use the "Mask unused graphics" feature. Alternatively, you can only mask tiles that were used (drawn or otherwise accessed) and emphasize the tiles that weren't used (e.g. in order to find secret sprites).</p>
+<p>Note: this feature only works with games that use CHR ROM, because Code/Data Logger only logs accesses to CHR ROM.</p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/create-epub-ebooks">Produce electronic books easily</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

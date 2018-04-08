@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Troubleshooting</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+a.rvts11, span.rvts11
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts11:hover { color: #0000ff; }
+span.rvts12
+{
+ font-size: 12pt;
+ font-weight: bold;
+}
+span.rvts13 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts14 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts15 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts16, span.rvts16 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{BA48F691-421D-453C-A04B-F73440BE0263}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts13>Troubleshooting</span></p>
+<p><span class=rvts10>Troubleshooting</span></p>
+<p><br></p>
+<p>This section describes potential problems/question that could arise when using FCEUX.</p>
+<p><br></p>
+<p><span class=rvts12>Slow emulation / Sound crackle</span></p>
+<p><br></p>
+<p>FCEUX may not run well on slower CPU's.&nbsp; You can improve performance by setting sound to low quality in the<a class=rvts11 href="{57C3F33F-6EEB-4881-8968-B3E0DC60FADD}.htm"> Sound Dialog</a>.&nbsp; In addition, for windowed mode try enabling hardware acceleration in the <a class=rvts11 href="{849BF734-E954-4544-8892-20606DFCF779}.htm">Video config</a> dialog may also help.</p>
+<p><br></p>
+<p><span class=rvts12>Slow savestates when recording movies</span></p>
+<p><br></p>
+<p>On slower computers, savestates can be slow with long movies.&nbsp; A small speedup can be done by disabling config &gt; enable &gt; Backup savestates.</p>
+<p><br></p>
+<p><span class=rvts12>"The colors in game X do not look right"</span></p>
+<p><br></p>
+<p>FCEUX uses the color palette of the old FCEU / FCEUXD branches.&nbsp; However, FCEUX comes pre-packaged with several additional color palettes.&nbsp; For more information see <a class=rvts11 href="{607BB21A-0839-47E9-AF33-9F631D541D9D}.htm">Palette config</a> and <a class=rvts11 href="{98E9F36B-2822-40C4-B917-B8E0E976C753}.htm">Palette options</a>.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts12>"FCEUX won't open my ROM/File.&nbsp; It let's me select it in the Open File dialog then ignores my selection"</span></p>
+<p><br></p>
+<p>It maybe be that the filename or pathname includes one or more on ASCII characters.&nbsp; Currently FCEUX does not support Unicode characters.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts12>"I converted a .fcm file to .fm2 but the .fm2 desyncs"</span></p>
+<p><br></p>
+<p>Depending on what version of FCEU / Game your .fcm was made, there maybe a number of sync issues.&nbsp; These are listed in detail at <a class=rvts11 href="http://tasvideos.org/ConvertFCMtoFM2.html" target="_blank">http://tasvideos.org/ConvertFCMtoFM2.html</a>.</p>
+<p><br></p>
+<p>In addition, the .fm2 conversion tool has had some issues on certain operating systems including Vista and Mac.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts12>"When I attempt to load a Lua script I get an error / crash"</span></p>
+<p><br></p>
+<p>Double check you have the Lua .dll files that came packaged with FCEUX 2.1.&nbsp; They must be in the /dll folder from the root directory (where fceux.exe is stored).</p>
+<p><br></p>
+<p> </p>
+<p><span class=rvts12>"Directdraw: Error creating secondary surface"</span></p>
+<p><br></p>
+<p>Currently this error will happen when attempting to do Full screen mode on Windows Vista.&nbsp; In addition, there has been one reported case of this happening on the 32-bit version of Windows XP.&nbsp; This is a known issue with FCEUX that has not yet been resolved.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts12>"Can't find FDS Bios image when I attempt to load a .fds game!"</span></p>
+<p><br></p>
+<p>FCEUX requires the FDS Bios to be named disksys.rom.&nbsp; It must be located in the root directory (where fceux.exe is stored) or in the folder of the FDS Directory override (see <a class=rvts11 href="{D6DDB3DB-500D-4DCE-8D48-10A67F896057}.htm">Directory overrides</a>).</p>
+<p><br></p>
+<p>In addition, there are some bad versions of disksys.rom.&nbsp; The one FDS requires is 8192 bytes.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts12>"How can I use Netplay / Where can I get FCEU Server?"</span></p>
+<p><br></p>
+<p>Currently FCEUX is not compatible with the FCEU-server code.&nbsp; This is a known issue and will be resolved in a future release.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts12>"I have a Game Genie rom, how can I use it with FCEUX?" </span></p>
+<p><br></p>
+<p>While FCEUX has a <a class=rvts11 href="{ACA99B5B-9CA3-4E69-B7F7-106D70CF76BF}.htm">Game Genie code converter</a>, you can also use game genie codes with the game genie rom.&nbsp; It must be named gg.rom and be placed in the root directory (where fceux.exe is stored).&nbsp; You must also check NES &gt; Game Genie in the main menu.</p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p class=rvps3><span class=rvts14>2008</span></p>
+<p class=rvps4><span class=rvts15>This help file has been generated by the freeware version of </span><a class=rvts16 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

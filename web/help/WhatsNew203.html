@@ -1,0 +1,126 @@
+﻿<html>
+	
+<head>
+	<title>What's New? 2.0.3 (changelog)</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("WhatsNew203");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>What's New? 2.0.3 (changelog)</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="WhatsNew210.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="WhatsNew202.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">What's New? </span><span class="rvts20">2.0.2</span></p>
+<p>Released November 02, 2008</p>
+<p><br/></p>
+<p>This release includes some key bug fixes and feature enhancements.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Major Bug / Crash Bug Fixes</span></p>
+<p><br/></p>
+<p>* Reset/Power-on recording for .fm2 files!</p>
+<p>* fix ..fcm conversion, recording, and playback of reset and power commands</p>
+<p>* Win32 - auto-load the only useful ROM or movie from an archive, in cases where there is only one</p>
+<p>* Win32 - permit user optionally to proceed through the movie savestate mismatch error condition, in case he knows what he is doing.</p>
+<p>* Win32 - fix a bug in the savestate recovery code which prevent aborted savestate loads from recovering emulator state correctly.</p>
+<p>* gracefully handle non-convertible broken UTF-8 text without crashing</p>
+<p>* Win32 - don't read every archive file when scanning for replay dialog. scan them, and only look for *.fm2</p>
+<p><br/></p>
+<p><span class="rvts16">New Features Win32</span></p>
+<p><br/></p>
+<p>* Win32 - added a toggle for binding savestates to movies</p>
+<p>* Win32 - added -cfg (config file) command line argument</p>
+<p><br/></p>
+<p><span class="rvts16">Minor Bug fixes</span></p>
+<p><br/></p>
+<p>* Win32 - Sound config dialog will now look to see if Mute Turbo should be checked</p>
+<p>* Win32 - Debugger - Fix Child windows inside debugging window get invalid sizes</p>
+<p>* Win32 - bind a menu option for display frame counter</p>
+<p>* Win32 - fix problem where replay dialog couldn't work when the process current directory had changed to something other than emulator base directory</p>
+<p>* Lua ignores second joypad.set()</p>
+<p>* Load state as... does not use the savestate override dir (fixed; now, it does)</p>
+<p>*Win32 - debugger - fix issue where keyboard keys get stuck when switching between debugger window and main window</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">SDL </span></p>
+<p><br/></p>
+<p>* SDL - added support for AVI creation for SDL, see documentation/Videolog.txt for more</p>
+<p>* SDL - --inputcfg can now be used without a filename</p>
+<p>* SDL - should fix issues with missing author field crashing FCEUX</p>
+<p>* SDL - toggle lag frame counter for SDL, default hotkey F8</p>
+<p>* SDL - toggle skipping of lag frames for SDL, default hotkey F6</p>
+<p>* SDL - user ability to toggle "bind savestates to movie" added for SDL, default hotkey F2</p>
+<p>* SDL - Lua is now optional, thanks Shinydoofy for a patch. &nbsp;also fixed some build issues.</p>
+<p>* SDL - fixed an issue where flawed movie would crash FCEUX on every startup</p>
+<p>* SDL - fixed issue where windowed mode would always be set to 32 bpp</p>
+<p>* SDL - fixed ppc build errors and added LSB_FIRST option to build scripts</p>
+<p>* SDL - --newppu option added to SDL, disabled by default</p>
+<p><br/></p>
+<p><span class="rvts16">GFCEUX (SDL)</span></p>
+<p><br/></p>
+<p>* GFCEUX - made the input config window more usable</p>
+<p>* GFCEUX - added uninstall script for GFCEUX</p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour">Easily create PDF Help documents</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

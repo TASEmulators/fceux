@@ -1,0 +1,132 @@
+﻿<html>
+	
+<head>
+	<title>What's New? 2.1.3 (changelog)</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("WhatsNew213");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>What's New? 2.1.3 (changelog)</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="WhatsNew214.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="WhatsNew212.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">What's New? </span><span class="rvts20">2.1.3</span></p>
+<p>Released April 8, 2010</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts21">The 2.1.3 release fixes some bugs of 2.1.2, increases game compatibility, and adds usability enhancements to the windows port and adds a GUI to the SDL port.</span></p>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts22">Common </span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Fixed mappers 82, 25, 21, and 18. &nbsp;Games such as SD Kiji Blader, Ganbare Goemon Gaiden, and Ganbare Goemon Gaiden 2, Jajamaru Gekimadden are now playable</span></li>
+<li><span class="rvts21">Fixes for mappers 253 &amp; 226 - fixes games such as Fire Emblem (J) and Fire Emblem Gaiden (J)</span></li>
+<li><span class="rvts21">Fix crashing on game loading for any battery backed ROMs with mappers from MapInitTab (fixes Esper Dream 2 - Aratanaru Tatakai (J)</span></li>
+<li><span class="rvts21">FDS - show name of missing bios file in error message</span></li>
+<li><span class="rvts21">NewPPU - fixed sprite hit before 255 and for non transparent hits only, thanks to dwedit for providing the fix</span></li>
+<li><span class="rvts21">.fm2 file format header now has an FDS flag</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23">SDL</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">A GUI! &nbsp;A graphic user interface (using GTK) with many basic menu options</span></li>
+<li><span class="rvts21">ported to SDL 1.3; compatibility maintained with 1.2</span></li>
+<li><span class="rvts21">unix netplay is now functional; gtk network gui created</span></li>
+<li><span class="rvts21">now prints the name of the mapper on ROM load</span></li>
+<li><span class="rvts21">fixed dpad/joyhat support</span></li>
+<li><span class="rvts21">VS unisystem keys now configable</span></li>
+<li><span class="rvts21">changed default hotkeys and keys to match Win32</span></li>
+<li><span class="rvts21">disallow --inputcfg gamepad0 and gamepad5</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts23">Win32</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Made savestate backups optional (config - enable - backup savestates)</span></li>
+<li><span class="rvts21">Made savestate compression togglable (config - enable - compress savestates)</span></li>
+<li><span class="rvts21">Cheats dialog - Pause while active checkbox</span></li>
+<li><span class="rvts21">Cheats dialog - Toggling a cheat in the cheats list now updates the active cheats count</span></li>
+<li><span class="rvts21">Debugger - added an auto-load feature</span></li>
+<li><span class="rvts21">Debugger - Fix so it doesn't crash if unminimized with no game loaded </span></li>
+<li><span class="rvts21">Closing minimized windows no longer moves them the next time they get opened</span></li>
+<li><span class="rvts21">Lua console - added a menu</span></li>
+<li><span class="rvts21">Lua console - filename updates when lua scripts are dragged to emulator or recent filenames invoked</span></li>
+<li><span class="rvts21">Name Table Viewer - Fix for use with New PPU</span></li>
+<li><span class="rvts21">Trace Logger - Trace logger now logs the values of the stack pointer register</span></li>
+<li><span class="rvts21">If a .fm2 file is drag and dropped with no ROM load, the open ROM dialog will appear</span></li>
+<li><span class="rvts21">disable movie messages menu item</span></li>
+<li><span class="rvts21">Added more window positions bounds checks. Accounts for -32000 positions and less out-of-range too</span></li>
+<li><span class="rvts21">TASEdit - Added interface functionality (save/load, running TASEdit mid-movie, etc.)</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts23">Lua</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">New lua functions: gui.parsecolor(), joypad.getup(), joypad.getdown(), emu.emulating()</span></li>
+<li><span class="rvts21">Change gui.line, gui.box, joypad.get to function consistently with other lua emulators such as GENS rerecording</span></li>
+<li><span class="rvts21">fixed zapper.read() to read movie data if a movie is playing. &nbsp;Also changed the struct values to x,y,fire. This breaks lua scripts that used it previous, sorry</span></li>
+<li><span class="rvts21">gui.text() now has out of bounds checking</span></li>
+<li><span class="rvts21">Lua no longer unpauses the emulator when a script is loaded</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/create-epub-ebooks">Full-featured EBook editor</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Getting Started</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 18pt;
+ font-weight: bold;
+}
+span.rvts11
+{
+ font-weight: bold;
+}
+a.rvts12, span.rvts12
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts12:hover { color: #0000ff; }
+span.rvts13 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts14 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts15 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts16, span.rvts16 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{26F9812A-A0FB-4F3F-8514-5E6A7984F327}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts13>Getting Started</span></p>
+<p><span class=rvts10>Using Lua scripting</span></p>
+<p><span class=rvts11><br></span></p>
+<p>Lua is built into FCEUX as of 2.1.2, and luapack DLL files are no longer needed in this and later versions.</p>
+<p><br></p>
+<p>To run lua scripts in older versions of FCEUX, you will need the lua pack which can be found <a class=rvts12 href="http://fceux.com/luapack">here</a>. The .dll files must be unzipped in the same folder as fceux.exe.</p>
+<p><span class=rvts10><br></span></p>
+<p><span class=rvts10>Core Lua Documentation</span></p>
+<p><span class=rvts11><br></span></p>
+<p>If you have never programmed, you will probably want to start by learning the basic of Lua, which is too broad for the scope of this help file.&nbsp; Try searching on the Internet for "Lua tutorial".&nbsp; As of this writing, it's official homepage is <a class=rvts12 href="http://www.lua.org/">http://www.lua.org/</a></p>
+<p><br></p>
+<p>If you are familiar with any programming language you will probably not have too much difficulty adjusting to the syntax and structure of Lua.&nbsp; You will probably also find useful information on the Internet.</p>
+<p><span class=rvts10><br></span></p>
+<p><span class=rvts10>GUI Frontend</span></p>
+<p><br></p>
+<p>To use a Lua script, you need to create one in a text editor.&nbsp; The name of the file created should end in .lua to indicate that it is a Lua script.</p>
+<p><br></p>
+<p>To run a Lua script, choose "Run Lua Script" ***from where***&nbsp; In the dialog that pops up, click "Browse" and find the file you wish to run.&nbsp; This will insert the path of this file into the dialog.&nbsp; You can then click on "Run" to run the script or "Cancel" to return to FCEUX without running the script.</p>
+<p><br></p>
+<p>To end a Lua script, choose "Stop Lua Script" ***from where***.</p>
+<p><br></p>
+<p><span class=rvts10>FCEUX Lua Basics</span></p>
+<p><br></p>
+<p>Your script will be constructed according to the rules of Lua, but you will use FCEUX-specific functions to interact with the emulator.&nbsp; For example, one of the most often-used functions is emu.frameadvance() which will tell the emulator to advance exactly one frame, which is the basic unit of time on an NES.</p>
+<p><br></p>
+<p>In general, your script will probably want to be run until you tell it to stop, so it will look something like this:</p>
+<p><br></p>
+<p>emu.speedmode("normal") -- Set the speed of the emulator</p>
+<p><br></p>
+<p>-- Declare and set variables or functions if needed</p>
+<p><br></p>
+<p>while true do</p>
+<p>&nbsp;&nbsp; -- Execute instructions for FCEUX</p>
+<p>&nbsp;&nbsp; emu.frameadvance() -- This essentially tells FCEUX to keep running</p>
+<p>end</p>
+<p><br></p>
+<p>The way instructions are sent to FCEUX is through a set of specially defined functions (and variables) which are called an API, the specification of which follows.</p>
+<p class=rvps3><span class=rvts14>2008</span></p>
+<p class=rvps4><span class=rvts15>This help file has been generated by the freeware version of </span><a class=rvts16 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

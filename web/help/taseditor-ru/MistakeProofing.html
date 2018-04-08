@@ -1,0 +1,203 @@
+﻿<html>
+	
+<head>
+	<title>Защита от ошибок</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "index.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("MistakeProofing");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Защита от ошибок</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="TASEditorInside.html">TAS Editor изнутри</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="TASEditorInside.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Implementation.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="FM3format.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts20">Защита от ошибок</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Здесь приведён список всевозможных мелочей, призванных улучшить взаимодействие пользователя с программой. Все эти детали следует учесть при портировании Тасэдитора на другие платформы.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">Когда пользователь выходит из эмулятора, тот сначала подаёт запрос Тасэдитору, чтобы Тасэдитор мог сохранить текущий проект. Если в проекте имеются несохранённые данные, Тасэдитор выводит диалог Yes/No/Cancel. Пользователь может либо сохранить изменения, либо не сохранять их, либо отменить выход из эмулятора.</span></li>
+<li class="rvps10"><span class="rvts22">При проигрывании fm3-проектов вне Тасэдитора (в виде обычных мувиков) пользователь может переключить эмулятор в режим Записи и попытаться осуществить перезапись. В этом случае эмулятор сообщает пользователю, что текущий мувик является проектом Тасэдитора, и предлагает начать его редактирование. В случае отказа эмулятор отключает режим Записи и продолжает проигрывание Ввода из файла проекта. В случае согласия эмулятор подаёт сигнал Тасэдитору, и в конце текущего кадра тот запустится и загрузит текущий проигрываемый проект.</span></li>
+<li class="rvps10"><span class="rvts22">Когда в эмулятор загружен РОМ, запустить Тасэдитор можно в любой момент. Если открыть окно Тасэдитора во время записи или проигрывания мувика, Тасэдитор автоматически создаст безымянный проект, содержащий Ввод из этого мувика. При этом, если мувик начинается с сэйва, Тасэдитор выдаст предупреждение об отсутствии поддержки таких мувиков и создаст чистый мувик.</span></li>
+<li class="rvps10"><span class="rvts22">Пока проекту не присвоено имя, функция автоматического сохранения не работает.</span></li>
+<li class="rvps10"><span class="rvts22">При первом сохранении безымянного проекта Тасэдитор предлагает в качестве имени fm3-файла имя текущего РОМа с расширением, изменённым на fm3.</span></li>
+<li class="rvps10"><span class="rvts22">Так как формат fm3 является надстройкой над форматом fm2, пользователь может открывать fm2-файлы как обычные проекты – через диалог "Open TAS Editor Project", выбрав фильтр "All Files (*.*)". При открытии fm2-файлов Тасэдитор дополнительно информирует об этом с помощью диалога Yes/No. Пользователь может либо загрузить fm2-файл в качестве нового проекта, либо отменить загрузку.</span></li>
+<li class="rvps10"><span class="rvts22">После открытия fm2-файла или запорченного fm3-файла этот проект считается безымянным, хотя в заголовке окна Тасэдитора отображается имя загруженного файла. При первом сохранении (</span><span class="rvts34">Ctrl + S</span><span class="rvts22">) появится диалог SaveAs, где в качестве имени будет предложено имя загруженного fm2/fm3-файла с расширением, изменённым на fm3. Пользователь может либо сохранить проект под этим именем, либо изменить имя. Таким образом Тасэдитор акцентирует внимание пользователя на том, что сохраняемый проект значительно отличается от имеющегося на диске файла под тем же именем.</span></li>
+<li class="rvps10"><span class="rvts22">В fm3-проектах хранится номер версии используемого fm3-формата. Разные версии могут быть полностью или частично не совместимы между собой. Если при загрузке проекта его версия не совпадает с текущей поддерживаемой версией, проект считается запорченным. Тасэдитор выводит диалог Yes/No/Cancel. Пользователь может либо продолжить попытку загрузки всего проекта (не рекомендуется), либо загрузить из проекта только fm2-данные о Вводе (рекомендуется), либо отменить загрузку.</span></li>
+<li class="rvps10"><span class="rvts22">Формат fm2 (а значит, и fm3) хранит MD5-чексумму РОМа, использованного при создании мувика/проекта. При загрузке проектов Тасэдитор сверяет чексумму текущего РОМа с чексуммой из проекта, и если они не совпадают, выводит диалог Yes/No, отображающий оригинальное и текущее имя РОМа. Пользователь может либо продолжить загрузку, либо отменить её. Далее, при сохранении этого проекта Тасэдитор вновь обнаружит несовпадение чексумм и предложит заменить в сохраняемом файле имя РОМа и его MD5-чексумму. Пользователь может либо подтвердить замену, либо сохранить проект со старым именем и чексуммой, либо отменить сохранение.</span></li>
+<li class="rvps10"><span class="rvts22">При загрузке запорченных файлов проектов Тасэдитор в меру сил пытается не допустить зависание эмулятора. При обнаружении ошибки во время загрузки дальнейшая загрузка прекращается, и незагруженные данные заменяются данными по умолчанию. В частности, если ошибка произошла во время загрузки Гринзоны, в проекте останутся только кадры Гринзоны, успешно вытащенные из файла, остальные кадры будут бледными. Сообщения об ошибках, произошедших при загрузке проекта, помещаются в Message Log эмулятора FCEUX.</span></li>
+<li class="rvps10"><span class="rvts22">Во время загрузки проекта Тасэдитор принимает во внимание текущие настройки "Greenzone capacity" и "Undo levels". Например, если при сохранении проекта </span><span class="rvts37">Greenzone capacity = 5000</span><span class="rvts22">, а при загрузке </span><span class="rvts37">Greenzone capacity = 3000</span><span class="rvts22">, часть кадров во время загрузки будет пропущена. Это необходимо для того, чтобы проекты, сохранённые на более мощном компьютере, можно было загрузить и на слабом компьютере, у которого недостаточно памяти.</span></li>
+<li class="rvps10"><span class="rvts22">При запуске Тасэдитор загружает данные о шаблонах из файла </span><span class="rvts21">taseditor_patterns.txt</span><span class="rvts22">. Если этот файл невозможно открыть (например, он удалён), Тасэдитор создаёт небольшой набор шаблонов по умолчанию, чтобы меню Patterns никогда не пустовало.</span></li>
+<li class="rvps10"><span class="rvts22">Сохранения, используемые Гринзоной, немного отличаются от обычных сохранений. Они не содержат данные мувика, так как для Гринзоны это лишняя информация. Кроме того, они всегда сжаты, ради экономии памяти.</span></li>
+<li class="rvps10"><span class="rvts22">Если в результате операции </span><a class="rvts28" href="Operations.html#Delete">Delete</a><span class="rvts22"> или </span><a class="rvts28" href="Operations.html#LUAChange">Lua Change</a><span class="rvts22"> пользователь удалит весь Ввод из мувика, Тасэдитор в тот же момент создаст один пустой кадр в начале мувика.</span></li>
+<li class="rvps10"><span class="rvts22">Во время выделения региона кадров с помощью растягивания мышкой пользователь может второй рукой нажимать акселераторы и хоткеи. Чтобы не было конфликта, во время DRAG_MODE_SELECTION и DRAG_MODE_DESELECTION не срабатывают функции, свзанные с изменением выделения:</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 40px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts21">clearSelection()</span></li>
+<li class="rvps10"><span class="rvts21">selectAll()</span></li>
+<li class="rvps10"><span class="rvts21">selectBetweenMarkers()</span><span class="rvts22"> – </span><span class="rvts34">Ctrl + A</span></li>
+<li class="rvps10"><span class="rvts21">selection.undo()</span><span class="rvts22"> – </span><span class="rvts34">Ctrl + Q</span></li>
+<li class="rvps10"><span class="rvts21">selection.redo()</span><span class="rvts22"> – </span><span class="rvts34">Ctrl + W</span></li>
+<li class="rvps10"><span class="rvts21">reselectClipboard()</span><span class="rvts22"> – </span><span class="rvts34">Ctrl + B</span></li>
+<li class="rvps10"><span class="rvts21">selection.Transpose()</span><span class="rvts22"> – </span><span class="rvts34">Ctrl + Вверх</span><span class="rvts22">, </span><span class="rvts34">Ctrl + Вниз</span><span class="rvts22">, </span><span class="rvts34">Ctrl + Home</span><span class="rvts22">, </span><span class="rvts34">Ctrl + End</span></li>
+<li class="rvps10"><span class="rvts21">selection.JumpPrevMarker()</span><span class="rvts22"> – </span><span class="rvts34">Ctrl + Page Up</span></li>
+<li class="rvps10"><span class="rvts21">selection.JumpNextMarker()</span><span class="rvts22"> – </span><span class="rvts34">Ctrl + Page Down</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">Так как столбец иконок в Piano Roll довольно узкий, пользователь может случайно промахнуться во время щелчка по этому столбцу. Поэтому при щелчке по левой границе Piano Roll, а также &nbsp;по пространству слева Piano Roll &nbsp;Тасэдитор считает, что был осуществлён щелчок по колонке иконок. В результате пользователю не нужно точно прицеливаться, когда требуется передвинуть Курсор Проигрывателя или начать его перетаскивание.</span></li>
+<li class="rvps10"><span class="rvts22">Когда эмулятор стоит на паузе, средняя кнопка мыши работает только при условии, что правая кнопка мыши отпущена. Так как средняя кнопка обычно является колесом, пользователь может случайно надавить её при вращении колеса с зажатой правой кнопкой (перемещение Курсора Проигрывателя). Вращение колеса с зажатыми клавишами-модификаторами используется гораздо реже, поэтому для них защита не требуется.</span></li>
+<li class="rvps10"><span class="rvts22">Щелчок средней кнопкой по окну FCEUX передаётся окну Тасэдитора. Точно так же передаётся сообщение в вращении колеса, когда фокус у окна FCEUX. А щелчок правой кнопкой по окну FCEUX никак не действует. Благодаря этому пользователь может использовать среднюю кнопку (колесо мыши), даже когда курсор мыши находится над окном FCEUX.</span></li>
+<li class="rvps10"><span class="rvts22">Даже если включен режим Записи, во время добегания Тасэдитор не будет перезаписывать Ввод. Благодаря этой особенности можно свободно перетаскивать Курсор Проигрывателя без выключения режима Записи, не опасаясь затереть Ввод.</span></li>
+<li class="rvps10"><span class="rvts22">Когда запущен Тасэдитор, следующие команды в меню FCEUX доступны только в режиме Записи и при отсутствии добегания:</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 40px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">NES -&gt; Reset</span></li>
+<li class="rvps10"><span class="rvts22">NES -&gt; Power</span></li>
+<li class="rvps10"><span class="rvts22">NES -&gt; Eject/insert Disk</span></li>
+<li class="rvps10"><span class="rvts22">NES -&gt; Switch Disk Side</span></li>
+<li class="rvps10"><span class="rvts22">NES -&gt; Insert Coin</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">Когда запущен Тасэдитор, следующие команды в меню FCEUX не доступны:</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 40px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">File -&gt; Open ROM</span></li>
+<li class="rvps10"><span class="rvts22">File -&gt; Close</span></li>
+<li class="rvps10"><span class="rvts22">File -&gt; Recent</span></li>
+<li class="rvps10"><span class="rvts22">File -&gt; Savestate -&gt; Load State</span></li>
+<li class="rvps10"><span class="rvts22">File -&gt; Savestate -&gt; Save State</span></li>
+<li class="rvps10"><span class="rvts22">File -&gt; Savestate -&gt; Load State From</span></li>
+<li class="rvps10"><span class="rvts22">File -&gt; Savestate -&gt; Save State As</span></li>
+<li class="rvps10"><span class="rvts22">File -&gt; Savestate -&gt; Next save slot</span></li>
+<li class="rvps10"><span class="rvts22">File -&gt; Savestate -&gt; Previous save slot</span></li>
+<li class="rvps10"><span class="rvts22">File -&gt; Savestate -&gt; View save slots</span></li>
+<li class="rvps10"><span class="rvts22">File -&gt; Movie -&gt; Recent</span></li>
+<li class="rvps10"><span class="rvts22">File -&gt; Movie -&gt; Record Movie</span></li>
+<li class="rvps10"><span class="rvts22">File -&gt; Movie -&gt; Play Movie</span></li>
+<li class="rvps10"><span class="rvts22">File -&gt; Movie -&gt; Stop Movie</span></li>
+<li class="rvps10"><span class="rvts22">Config -&gt; Enable -&gt; Auto-savestates (всегда отключено во время работы Тасэдитора)</span></li>
+<li class="rvps10"><span class="rvts22">Config -&gt; Enable -&gt; Backup Savestates (всегда отключено во время работы Тасэдитора)</span></li>
+<li class="rvps10"><span class="rvts22">Config -&gt; Enable -&gt; Compress Savestates (всегда включено во время работы Тасэдитора)</span></li>
+<li class="rvps10"><span class="rvts22">Config -&gt; PAL Emulation (следует настроить это до запуска Тасэдитора)</span></li>
+<li class="rvps10"><span class="rvts22">Config -&gt; PPU -&gt; New PPU / Old PPU (следует настроить это до запуска Тасэдитора)</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">Также необходимо, чтобы пользователь не изменял настройки синхронизации мувика во время редактирования проекта. Когда запущен Тасэдитор, следующие элементы GUI в окне "Input Configuration" заблокированы:</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 40px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">галочка "Attach four-score"</span></li>
+<li class="rvps10"><span class="rvts22">галочка "Replace port 2 Start With &nbsp;Microphone"</span></li>
+<li class="rvps10"><span class="rvts22">ListBox с выбором port0</span></li>
+<li class="rvps10"><span class="rvts22">ListBox с выбором port1</span></li>
+<li class="rvps10"><span class="rvts22">ListBox с выбором port2</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><a name="DisabledHotkeys"></a>
+<span class="rvts22">Когда запущен Тасэдитор, следующие хоткеи не работают:</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 40px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">Hide Menu Toggle</span></li>
+<li class="rvps10"><span class="rvts22">Fastest Speed</span></li>
+<li class="rvps10"><span class="rvts22">Save State As...</span></li>
+<li class="rvps10"><span class="rvts22">Load State From...</span></li>
+<li class="rvps10"><span class="rvts22">Record Movie To...</span></li>
+<li class="rvps10"><span class="rvts22">Play Movie From...</span></li>
+<li class="rvps10"><span class="rvts22">Stop Movie</span></li>
+<li class="rvps10"><span class="rvts22">Toggle Dipswitch – т.к. эти команды пока не поддерживаются форматом FM2</span></li>
+<li class="rvps10"><span class="rvts22">Load Last Auto-save</span></li>
+<li class="rvps10"><span class="rvts22">View save slots</span></li>
+<li class="rvps10"><span class="rvts22">Open ROM</span></li>
+<li class="rvps10"><span class="rvts22">Close ROM</span></li>
+<li class="rvps10"><span class="rvts22">Undo/Redo Savestate</span></li>
+<li class="rvps10"><span class="rvts22">Toggle Fullscreen</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">Хоткеи, поведение которых меняется при запущенном Тасэдиторе:</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 40px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">Power</span></li>
+<li class="rvps10"><span class="rvts27">Reset</span></li>
+<li class="rvps10"><span class="rvts22">Eject or Insert FDS Disk</span></li>
+<li class="rvps10"><span class="rvts22">Switch FDS Disk Side</span></li>
+<li class="rvps10"><span class="rvts22">Insert Coin</span></li>
+<li class="rvps10"><span class="rvts27">Savestate Slot 0</span><span class="rvts22"> – </span><span class="rvts27">Savestate Slot 9</span></li>
+<li class="rvps10"><span class="rvts27">Save State</span></li>
+<li class="rvps10"><span class="rvts27">Save State to Slot 0</span><span class="rvts22"> – </span><span class="rvts27">Save State to Slot 9</span></li>
+<li class="rvps10"><span class="rvts27">Load State</span></li>
+<li class="rvps10"><span class="rvts27">Load State from Slot 0</span><span class="rvts22"> – </span><span class="rvts27">Load State from Slot 9</span></li>
+<li class="rvps10"><span class="rvts27">Play Movie From Beginning</span></li>
+<li class="rvps10"><span class="rvts27">Reload ROM or TAS Editor Project</span></li>
+<li class="rvps10"><span class="rvts22">Open TAS Editor</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">Так как клавиши </span><span class="rvts34">Alt</span><span class="rvts22"> и </span><span class="rvts27">F10</span><span class="rvts22"> активно используются при работе в Тасэдиторе, их стандартное поведение (открытие меню программы) отключено.</span></li>
+<li class="rvps10"><span class="rvts22">Так как клавиша </span><span class="rvts27">Пробел</span><span class="rvts22"> по умолчанию используется в качестве хоткея, её стандартное действие (симуляция щелчка по элементу GUI, на котором находится фокус клавиатуры) отключена. Также каждый элемент GUI в окне Тасэдитора реализует обработку щелчка средней кнопкой мыши, отсылая это сообщение Проигрывателю, чтобы этот щелчок срабатывал независимо от положения курсора мыши.</span></li>
+<li class="rvps10"><span class="rvts22">Так как контекстное меню при щелчке правой кнопкой по Piano Roll используется редко, оно появляется только когда пользователь щёлкает по выделенной строке в столбце номеров кадров (Frame#). В остальных случаях контекстное меню не появляется, зато при щелчке правой кнопкой по Piano Roll начинается удобное перетаскивание содержимого Piano Roll во все стороны.</span></li>
+<li class="rvps10"><span class="rvts22">Так как правая кнопка часто используется для перемещения Курсора Проигрывателя колесом, программа поощряет щелчки этой кнопкой без оглядки на текущее положение курсора мыши. Теоретически пользователь может случайно щёлкнуть по Закладке. Чтобы не допустить случайных команд, Список Закладок и Дерево ответвлений требуют от пользователя нажать и отпустить правую кнопку на одной и той же Закладке. При этом, если между нажатием и отпусканием правой кнопки пользователь совершил вращение колесом, Закладка изменяться не будет.</span></li>
+<li class="rvps10"><span class="rvts22">Пользователь может осуществлять прыжки на Закладки одинарным щелчком по желаемой иконке в Дереве ответвлений. При этом он ожидает, что голубой треугольник (иконка Курсора Проигрывателя) после щелчка окажется на этом месте в Дереве ответвлений. Это справедливо для Закладок, которые не противоречат текущей хронологии, но это не так для Закладок, представляющих альтернативные стратегии прохождения. При прыжках на кадры этих Закладок Курсор Проигрывателя будет находиться в другом ответвлении (хотя и на том же самом кадре). Чтобы заранее уведомить пользователя о возможном недопонимании с его стороны, при наведении на иконки таких Закладок курсор мыши превращается в стрелку с вопросительным знаком.</span></li>
+<li class="rvps10"><span class="rvts22">Во время трансформации Дерева ответвлений наведение курсора мыши на его элементы не работает, потому что активная область элементов постоянно перемещается и убегает от курсора мыши.</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p></p>
+<p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com">Full-featured Documentation generator</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				&copy; 2011-2013 АнС</div>
+		</div>
+	</body>
+	
+</html>
+

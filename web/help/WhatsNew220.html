@@ -1,0 +1,252 @@
+﻿<html>
+	
+<head>
+	<title>What's New? 2.2.0 (changelog)</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("WhatsNew220");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>What's New? 2.2.0 (changelog)</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="WhatsNew221.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="WhatsNew215.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">What's New? </span><span class="rvts20">2.2.0</span></p>
+<p>Released -- 27 November 2012</p>
+<p><br/></p>
+<p><br/></p>
+<p>The 2.2.0 release fixes a lot of bugs and adds many new features to prior releases, <span class="rvts21">increasing game compatibility and enhancing usability of both Windows and SDL ports</span>. The Windows version also includes major improvement of debugging tools and introduces the new powerful toolset – TAS Editor v1.0 – created to boost efficiency and ease of Tool-Assisted Speedrunning.</p>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts22">Common </span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Fixed crash when using machine with no sound card</span></li>
+<li><span class="rvts21">Fixed long savestate messages containing path</span></li>
+<li><span class="rvts21">Soft reset and power switch messages</span></li>
+<li><span class="rvts21">All onscreen messages are now logged to Message Log</span></li>
+<li><span class="rvts21">Fixed wrong default palette entry</span></li>
+<li><span class="rvts21">Fixed bug when loading UNIF games</span></li>
+<li><span class="rvts21">Improved HUD text rendering wrapping</span></li>
+<li><span class="rvts21">"Display FPS" option</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23">Emulation</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">PAL/NTSC noise channel bug fixed</span></li>
+<li><span class="rvts21">All latest mapper changes from fceu-mm</span></li>
+<li><span class="rvts21">Also added mappers 176, 116, 156, 252, 28</span></li>
+<li><span class="rvts21">Fixed mappers 242, 227, 115, 248, 12, 164, 15, 253, 23, 178, 90, 73 and many others</span></li>
+<li><span class="rvts21">Straighten out bandai m159/m016 handling and add valid null-EEPROM emulation to get those games booting.</span></li>
+<li><span class="rvts21">Add ability for CNROM games to choose whether they have bus conflicts (fixes Colorful Dragon (Unl) (Sachen), since it flakes out if bus conflicts are emulated)</span></li>
+<li><span class="rvts21">Fixed bus conflict emulation, no kage no densetsu bug anymore</span></li>
+<li><span class="rvts21">Fixed newppu bug which prevented metroid from booting, CHR RAM was not getting initialized to anything</span></li>
+<li><span class="rvts21">Newppu - fix bug in scroll reg logic causing mis-scrolls in p'radikus conflict</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23">Movies</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Fixed old bug in "Play Movie From Beginning"</span></li>
+<li><span class="rvts21">Fixed replay engine bug that doubles the last input of the movie</span></li>
+<li><span class="rvts21">Fixed movie savestates logic, loading post-movie savestates from different timeline is not allowed in read-only</span></li>
+<li><span class="rvts21">Fixed savestates filenaming bug when working with a movie</span></li>
+<li><span class="rvts21">Added support for HUD recording in AVI dumping</span></li>
+<li><span class="rvts21">Rerecords counter display</span></li>
+<li><span class="rvts21">Config-&gt;Movie options-&gt;Always suggest Read-Only replay (for Replay dialog). No more accidental rewrites!</span></li>
+<li><span class="rvts21">Removed "Lag Counter Reset" hotkey, as it was obsolete since FCEUX 2.0.2</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23">Lua</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Fixed lua drawing alpha blending</span></li>
+<li><span class="rvts21">Auto-clearing previous frame drawings (same behaviour as other emulators)</span></li>
+<li><span class="rvts21">New library: taseditor (Windows-only) - contains 24 functions, see taseditor.chm</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21">New Lua functions:</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">emu.paused()</span></li>
+<li><span class="rvts21">emu.setlagflag()</span></li>
+<li><span class="rvts21">joypad.getimmediate()</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21">New scripts:</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">BoulderDash_AmoebaAI.lua</span></li>
+<li><span class="rvts21">ButtonCount.lua</span></li>
+<li><span class="rvts21">CustomLagIndicator_RvT.lua</span></li>
+<li><span class="rvts21">RBIBaseball.lua</span></li>
+<li><span class="rvts21">SoundDisplay.lua</span></li>
+<li><span class="rvts21">SoundDisplay2.lua</span></li>
+<li><span class="rvts21">taseditor\InputDisplay_for_Selection.lua</span></li>
+<li><span class="rvts21">taseditor\InvertSelection.lua</span></li>
+<li><span class="rvts21">taseditor\RecordBackwards.lua</span></li>
+<li><span class="rvts21">taseditor\ShowNotes.lua</span></li>
+<li><span class="rvts21">taseditor\Swap1P2P.lua</span></li>
+<li><span class="rvts21">taseditor\TrackNoise.lua</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23">Win32</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Total revamp of fulscreen support</span></li>
+<li><span class="rvts21">Fixed graphic tearing with vertical sync enabled</span></li>
+<li><span class="rvts21">Added "Maintain aspect ratio" option to Video config</span></li>
+<li><span class="rvts21">Added "Hide mouse cursor" and "Use console BG color for empty areas" options to Video config</span></li>
+<li><span class="rvts21">Added "Switch fullscreen by double-click" option to GUI config</span></li>
+<li><span class="rvts21">Added "Force Grayscale" option to Palette config</span></li>
+<li><span class="rvts21">Fixed crashes and bugs caused by 2.1.5 allowing hotkeys without ROM loaded</span></li>
+<li><span class="rvts21">Lua console now gets proper file path when selecting a file from the recent menu</span></li>
+<li><span class="rvts21">Fixed context menus to use rightclicks in context menus correctly</span></li>
+<li><span class="rvts21">Reload hotkey now also supports removing invalid filenames in Recent ROMs</span></li>
+<li><span class="rvts21">Replay dialog speedup, it doesn't search for movies in fceux root folder anymore</span></li>
+<li><span class="rvts21">Support multibyte languages for opening files through drag&amp;drop (except for Lua files)</span></li>
+<li><span class="rvts21">Loading TAS Editor projects (*.fm3) by drag&amp;drop</span></li>
+<li><span class="rvts21">Fixed bug with Input Config not displaying some key names</span></li>
+<li><span class="rvts21">Launch tools hotkeys shown in menu; general cleanup of menu/settings, changed some checkboxes to radiobuttons</span></li>
+<li><span class="rvts21">Added "Clear" button to Message Log</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts22">TAS Editor</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Completely rewritten tool with brand new architecture and design. Too many changes to enlist, see taseditor.chm</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts22">Debugger</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">General window layout cleanup; different font; ".DEB files" can be switched off; etc</span></li>
+<li><span class="rvts21">Deleting a breakpoint/bookmark leaves selection in the list</span></li>
+<li><span class="rvts21">Fixed mysterious out of bounds condition while editing breakpoints</span></li>
+<li><span class="rvts21">Fixed RAM peek by a rightclick on left pane</span></li>
+<li><span class="rvts21">Allow Frame Advancing when Debugger is in breakpoint state</span></li>
+<li><span class="rvts21">Disabled breakpoints now don't impose slowdown</span></li>
+<li><span class="rvts21">When a breakpoint is hit, it becomes highlighed (selected) in the breakpoints list</span></li>
+<li><span class="rvts21">Show the number of breakpoints (enabled and total) above the breakpoints list</span></li>
+<li><span class="rvts21">"&gt;" points at current line in disassembly</span></li>
+<li><span class="rvts21">Improved stack display</span></li>
+<li><span class="rvts21">Added "CPU cycles" and "Instructions" counters (cumulative and delta)</span></li>
+<li><span class="rvts21">Added "Cycles counter exceeds N" and "Instructions counter exceeds N" type of breakpoints</span></li>
+<li><span class="rvts21">Single click on any address copies this address to the "Seek To" field and "Bookmark Add" field</span></li>
+<li><span class="rvts21">Double-click on any address prompts "Add Breakpoint here" dialog</span></li>
+<li><span class="rvts21">"ROM offsets" option displays real ROM addresses in the Disassembly window</span></li>
+<li><span class="rvts21">Fixed conditional breakpoints bug: the error message didn't appear when editing a breakpoint</span></li>
+<li><span class="rvts21">Fixed and improved Symbolic debug (Names and Comments display)</span></li>
+<li><span class="rvts21">Added Bookmarks naming</span></li>
+<li><span class="rvts21">Cleaned up and vastly improved debugging documentation</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts22">Trace Logger</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Added "Symbolic trace" option</span></li>
+<li><span class="rvts21">"RTS" instructions now output the subroutine address/name</span></li>
+<li><span class="rvts21">Added "Use Stack Pointer for code tabbing (nesting visualization)" option</span></li>
+<li><span class="rvts21">Added "To the left from disassembly text" option for log format customization</span></li>
+<li><span class="rvts21">Added "Log current Frame number" option</span></li>
+<li><span class="rvts21">Added "Log emulator messages" option</span></li>
+<li><span class="rvts21">Added "Log breakpoint hits" option</span></li>
+<li><span class="rvts21">Fixed bug with trying to log to file without choosing a filename</span></li>
+<li><span class="rvts21">Tracer now also updates its window when user pauses the game, not just when Debugger snaps</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts22">Code/Data Logger</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Now can log data access from RAM code</span></li>
+<li><span class="rvts21">"Save Unused Data" button complements "Save Stripped iNes Rom" feature</span></li>
+<li><span class="rvts21">Now can log VROM access (CHR banks of the ROM) when NewPPU is enabled</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts22">Hex Editor</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Display 0x5000-0x5FFF contents</span></li>
+<li><span class="rvts21">Ctrl+F opens Find dialog</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts22">RAM Watch / RAM Search</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Updating list when emulator is paused (on Power or when resetting search)</span></li>
+<li><span class="rvts21">Fixed loading Data Size and Data Type from a .wch, now corrupted .wch won't crash</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts22">Cheats</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Added Compare box to the Cheats window</span></li>
+<li><span class="rvts21">Don't lose cheat compare value when toggle cheat enables through UI</span></li>
+<li><span class="rvts21">Parse cheat files with non-ASCII characters properly</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23">SDL</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">gtk 2.24 now recommended</span></li>
+<li><span class="rvts21">added gtk hotkey configuration dialog</span></li>
+<li><span class="rvts21">updated/added various gui elements for options</span></li>
+<li><span class="rvts21">new option: SDL.ShowFPS</span></li>
+<li><span class="rvts21">new option: SDL.Input..EnableOppositeDirectional - allow/disallow simultaneous right+left/up+down input</span></li>
+<li><span class="rvts21">fixed various build issues</span></li>
+<li><span class="rvts21">fixed segfault occuring during particular sequences in the cheat menu</span></li>
+<li><span class="rvts21">fixed potential segfault with gui</span></li>
+<li><span class="rvts21">fixed segfault issue on debian/ubuntu with proprietary nvidia drivers</span></li>
+<li><span class="rvts21">now compatible with llvm/clang++ </span></li>
+<li><span class="rvts21">added build option to dynamically link lua</span></li>
+<li><span class="rvts21">updated default server configuration file to "fceux-server.conf" (from "fceu-server.conf")</span></li>
+<li><span class="rvts21">updated manpage and documentation</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com">Free Web Help generator</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

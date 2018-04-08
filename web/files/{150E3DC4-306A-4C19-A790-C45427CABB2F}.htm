@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Debug</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+span.rvts11
+{
+ font-size: 12pt;
+}
+a.rvts12, span.rvts12
+{
+ font-size: 12pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts12:hover { color: #0000ff; }
+a.rvts13, span.rvts13
+{
+ font-size: 12pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts13:hover { color: #0000ff; }
+span.rvts14 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts15 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts16 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts17, span.rvts17 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{150E3DC4-306A-4C19-A790-C45427CABB2F}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts14>Debug</span></p>
+<p><span class=rvts10>Debug</span></p>
+<p><br></p>
+<p>Guides for the specific tools and settings under FCEUX's Debug menu.</p>
+<p><br></p>
+<p><a class=rvts12 href="{8A78E5FE-C7EB-418D-A921-F9A6782663F0}.htm">Debugger</a></p>
+<p><br></p>
+<p>A tool for looking at game instructions in assembly language. With experience,</p>
+<p>one can use it to fix game patching errors, or find RAM and Game Genie codes.</p>
+<p><br></p>
+<p><a class=rvts12 href="{D0C2EE8C-8862-4CC2-BFF6-BFAC535BA3FB}.htm">PPU Viewer</a></p>
+<p><br></p>
+<p>A tool that displays the current PPU contents and related information. The PPU</p>
+<p>viewer allows you to view the graphic squares that make up what's displayed.</p>
+<p><br></p>
+<p><a class=rvts12 href="{88A0A828-FEF6-4230-AECD-9A5315C384D2}.htm">Name Table Viewer</a></p>
+<p><br></p>
+<p>A tool for displaying the current Name Table contents. Helps to isolate PPU</p>
+<p>and tile information, which allows the debugger to be used to check PPU coding.</p>
+<p><br></p>
+<p><a class=rvts12 href="{06F7BBD5-399E-4CA0-8E4E-75BE0ACC525A}.htm">Hex Editor</a></p>
+<p><br></p>
+<p>A tool for displaying a game's RAM contents and for memory poking. Also allows</p>
+<p>for reading in the raw PPU data, copy/paste-ing RAM, and visually debugging RAM.</p>
+<p><br></p>
+<p><a class=rvts12 href="{414E8900-7ECB-4E7A-96FE-13F095EDF1DE}.htm">Trace Logger</a></p>
+<p><br></p>
+<p>Captures assembly code instructions and outputs them to a file or the window. Very</p>
+<p>useful for modifying code, finding crash addresses, fixing transferred routines, and</p>
+<p>for comparing routine function between a game and a persistently buggy NSF.</p>
+<p><br></p>
+<p><a class=rvts12 href="{05FC9F4A-AB26-4164-A5F8-6824A3353760}.htm">Code/Data Logger</a></p>
+<p><br></p>
+<p>Allows you to extract the data used by a game. Make patch demos, find data</p>
+<p>loaded by a game around a certain point, or just map out a single routine run.</p>
+<p><br></p>
+<p><a class=rvts13 href="{ACA99B5B-9CA3-4E69-B7F7-106D70CF76BF}.htm">Game Genie Encoder/Decoder</a></p>
+<p><br></p>
+<p>Allows you to add Game Genie codes to the Cheats menu, decode existing</p>
+<p>ones to their component information, and (re)create a code with desired values.</p>
+<p><br></p>
+<p class=rvps3><span class=rvts15>2008</span></p>
+<p class=rvps4><span class=rvts16>This help file has been generated by the freeware version of </span><a class=rvts17 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

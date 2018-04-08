@@ -1,0 +1,148 @@
+﻿<html>
+	
+<head>
+	<title>What's New? 2.1.5 (changelog)</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("WhatsNew215");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>What's New? 2.1.5 (changelog)</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="WhatsNew220.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="WhatsNew214.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">What's New? </span><span class="rvts20">2.1.5</span></p>
+<p>Released 04 June 2011</p>
+<p><br/></p>
+<p><br/></p>
+<p>The 2.1.5 release fixes a lot of bugs and brings various improvements to the prior 2.1.4a release. In addition, the SDL port has improved signficantly; completely overhauling the GTK2 GUI, fixing many sound issues, and fixing a variety of bugs.</p>
+<p><br/></p>
+<p><span class="rvts22">Common </span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Fixed compatibility issue with Young Indiana Jones Chronicles</span></li>
+<li><span class="rvts21">Fixed bug in new PPU that made some intensify bits not get applied to output (fixed flashing siren screen in Werefolf)</span></li>
+<li><span class="rvts21">Fix many segmentation faults related to file handling</span></li>
+</ul>
+<p><span class="rvts23"><br/></span></p>
+<p><span class="rvts23">Movies</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Slight performance increase when loading movies</span></li>
+<li><span class="rvts21">Fixed read-only loadstate error messages and logic</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts23">Lua</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Lua socket added to built-in lua library</span></li>
+<li><span class="rvts21">Fixed speed.mode() function so that normal turns off turbo</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21">New Lua functions</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">gui.savescreenshotas()</span></li>
+<li><span class="rvts21">sound.get()</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts23">Win32</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Fixed bug where PPU toggling toggled the Game Genie as well</span></li>
+<li><span class="rvts21">Fixed some minor GUI issues</span></li>
+<li><span class="rvts21">Added avi capture commandline argument and related parameters</span></li>
+<li><span class="rvts21">Fix input selection for Famicom Expansion port</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts22">Debugger</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Fixed Ram Search to only display valid RAM addresses (0000-07FF and 6000-7FFF)</span></li>
+<li><span class="rvts21">Fixed crash when re-opening debugging window</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts22">Hex Editor</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Added a confirmation prompt before removing all bookmarks</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts22">Ram Watch / Ram Search</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Fixed the multiple selection of watches</span></li>
+<li><span class="rvts21">Added support for Multiple selection of addresses in RamWatch Fixed issue with restoration of the selection range in RamWatch</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts22">TasEdit</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">General cleanup</span></li>
+<li><span class="rvts21">Fixed crash when truncating while turbo was enabled</span></li>
+<li><span class="rvts21">Invalidate greenzone when re-recording earlier portions of a movie</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts22">GUI</span></p>
+<p><span class="rvts21"><br/></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts21">Added "SaveStateAs" menu item</span></li>
+<li><span class="rvts21">Display movie name at the top of the main window</span></li>
+</ul>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p><span class="rvts21"><br/></span></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/help-authoring-tool">Free help authoring tool</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

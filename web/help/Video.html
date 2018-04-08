@@ -1,0 +1,168 @@
+﻿<html>
+	
+<head>
+	<title>Video</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("Video");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Video</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Config.html">Config</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Config.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Timing.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="MovieOptions.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">Video Configuration</span></p>
+<p><br/></p>
+<p>This window sets various graphics emulation options.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts12">Full Screen Settings</span></p>
+<p><br/></p>
+<p><span class="rvts41">Full Screen</span></p>
+<p>Check this checkbox to enter full screen mode.</p>
+<p>Alternatively, you can use a hotkey (Alt+Enter by default) or a double-click (if the "Switch fullscreen by double-click" option is enabled in <a class="rvts18" href="GUI.html">GUI options</a>).</p>
+<p><br/></p>
+<p><span class="rvts41">Enter full screen mode after game is loaded</span></p>
+<p>If checked, FCEUX will enter full screen mode when a game is loaded.</p>
+<p><br/></p>
+<p><span class="rvts41">Hide mouse cursor</span></p>
+<p>If checked, FCEUX will hide mouse cursor when in full screen mode.</p>
+<p><br/></p>
+<p><span class="rvts41">Mode</span></p>
+<p>Sets the image size during full screen mode. By default this is automatically set to match current display resolution. You can change the resolution by entering different values.</p>
+<p><br/></p>
+<p><span class="rvts41">Special Scaler</span></p>
+<p>Within this box is eight options: hq2x, Scale2x, NTSC 2x, hq3x, Scale3x, Prescale2x, Prescale3x, and Prescale4x.</p>
+<p>- Scale2x/3x just attempts to render out the corners of the pixels to make them look a bit rounder. "2x" means two times bigger than 1x1 and "3x" means three times bigger than 1x1.</p>
+<p>- Hq2x/3x does a much better job than scale2x/3x by smearing the pixels together with a slight blur. However, Hq2x/3x requires a faster computer for decent speed (at least 1 GHz and above). "2x" means two times bigger than 1x1 and "3x" means three times bigger than 1x1.</p>
+<p>- NTSC 2x simulates visual artifacts that are produced by analog (composite) video sygnal that the real console generates.</p>
+<p>- Prescale2x/3x/4x upscales the source picture using a pixel based (nearest neighbor) algorithm, that allows to change the level of interpolation, applied when using hardware acceleration.</p>
+<p><br/></p>
+<p><span class="rvts41">Sync Method</span></p>
+<p>If the emulator is running poorly, trying out these sync options can help make it run smoother (fix image tearing).</p>
+<p><br/></p>
+<p><span class="rvts41">DirectDraw</span></p>
+<p>If the image is blurry, here you can disable hardware acceleration.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts12">Windowed Settings</span></p>
+<p><br/></p>
+<p><span class="rvts41">Size Multiplier</span></p>
+<p>Takes the image size and multiples the X and Y by a specific amount. You can also change these by clicking and dragging the border of the FCEUX window.</p>
+<p><br/></p>
+<p><span class="rvts41">Force Integral Scaling Factors</span></p>
+<p>If checked, FCEUX window can only be stretched by even amounts (1x, 2x, 3x, etc.). &nbsp;If unchecked, it can be stretched by any amount.</p>
+<p>When you are resizing FCEUX window by dragging its borders, you can hold Shift to temporarily invert this option.</p>
+<p><br/></p>
+<p><span class="rvts41">Force Aspect Ratio Correction</span></p>
+<p>Checking this will only allow the correct aspect ratio while resizing the window.</p>
+<p><br/></p>
+<p><span class="rvts41">Special Scaler</span></p>
+<p>Within this box is eight options: hq2x, Scale2x, NTSC 2x, hq3x, Scale3x, Prescale2x, Prescale3x, and Prescale4x.</p>
+<p><br/></p>
+<p><span class="rvts41">Sync Method</span></p>
+<p>If the emulator is running poorly, trying out these sync options can help make it run smoother (fix image tearing).</p>
+<p><br/></p>
+<p><span class="rvts41">DirectDraw</span></p>
+<p>If Vsync doesn't work, here you can enable hardware acceleration.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; </p>
+<p><br/></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p><br/></p>
+<p>The following options affect both Fullscreen and windowed mode.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts27">Aspect ratio</span></p>
+<p><br/></p>
+<p><span class="rvts41">Best Fit</span></p>
+<p>This is checked by default, so FCEUX will automatically maintain correct aspect ratio for any size of the window. If you uncheck this, the image will be stretched to fill the whole window area.</p>
+<p><br/></p>
+<p><span class="rvts41">BG color</span></p>
+<p>When window size is wider or taller than image size, empty areas of the window are colored black by default. Checking this option will color these areas according to current "background" color of NES palette.</p>
+<p><br/></p>
+<p><span class="rvts41">Square pixels</span></p>
+<p>This is checked by default, so FCEUX will limit the max size of the image to make all pixels share the same width/height. If you uncheck this, the image will be stretched to fill the whole width or height of the window area.</p>
+<p><br/></p>
+<p><span class="rvts41">TV Aspect</span></p>
+<p>Check this if you want to change the image aspect ratio (e.g. to 4:3). You can enter different values in adjacent text fields.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts27">Drawing Area</span></p>
+<p><br/></p>
+<p><span class="rvts41">First Line</span></p>
+<p>Sets the first scan line for NTSC and PAL Modes. This should be left on the default of 8 for NTSC and 0 for PAL.</p>
+<p><br/></p>
+<p><span class="rvts41">Last Line</span></p>
+<p>Sets the last scan line for NTSC and PAL Modes. This should be left on the default of 231 for NTSC and 239 for PAL.</p>
+<p><br/></p>
+<p><span class="rvts41">Clip left and right sides</span><span class="rvts32"> (8 px on each)</span></p>
+<p>If enabled, 8 pixels from each side of the windows will be removed. Some NES games show grapical artifacts on the sides of screen when scrolling (on real hardware too!), so you may hide those artifacts by checking the option.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts27">Emulation</span></p>
+<p><br/></p>
+<p><span class="rvts41">Allow more than 8 sprites per scanline</span></p>
+<p>On real NES hardware, more than 8 sprites on the screen causes flickering. Enabling this option can reduce flickering by allowing more sprites to be visible at once. But if you prefer to stay "true" to NES hardware, this should not be checked, because some games rely on the limitation.</p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/iphone-website-generation">Create iPhone web-based documentation</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

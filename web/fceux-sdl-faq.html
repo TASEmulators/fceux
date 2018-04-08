@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+ <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+  <title>FCEUX SDL FAQ</title>
+  <link href="fceux.css" rel="stylesheet" type="text/css" />
+  <script type="text/javascript" src="Javascript/buttons.js"></script>
+ </head>
+ <body onload="FP_preloadImgs(/*url*/'assets/button67.jpg',/*url*/'assets/button68.jpg',/*url*/'assets/button80.jpg',/*url*/'assets/button81.jpg',/*url*/'assets/button87.jpg',/*url*/'assets/button88.jpg',/*url*/'assets/button92.jpg',/*url*/'assets/button93.jpg',/*url*/'assets/button98.jpg',/*url*/'assets/button99.jpg',/*url*/'assets/button4.jpg',/*url*/'assets/button5.jpg')">
+<div id="masthead">
+	<span class="largerfont">FCEUX<br/></span>The all in one NES/Famicom/Dendy Emulator
+</div>
+<div id="top_nav">
+	<a href="home.html"><img id="img1" alt="Home" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img1',/*url*/'assets/button68.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img1',/*url*/'assets/button66.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img1',/*url*/'assets/button67.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img1',/*url*/'assets/button67.jpg')" src="assets/button66.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Home" --></a>
+	<a href="download.html"><img id="img2" alt="Download" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img2',/*url*/'assets/button81.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img2',/*url*/'assets/button7F.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img2',/*url*/'assets/button80.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img2',/*url*/'assets/button80.jpg')" src="assets/button7F.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Download" --></a>
+	<a href="documentation.html"><img id="img6" alt="Documentation" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img6',/*url*/'assets/button5.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img6',/*url*/'assets/button3.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img6',/*url*/'assets/button4.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img6',/*url*/'assets/button4.jpg')" src="assets/button3.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Documentation" --></a>
+	<a href="version.html"><img id="img3" alt="Versions" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img3',/*url*/'assets/button88.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img3',/*url*/'assets/button86.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img3',/*url*/'assets/button87.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img3',/*url*/'assets/button87.jpg')" src="assets/button86.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Versions" --></a>
+	<a href="contact.html"><img id="img4" alt="Contact" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img4',/*url*/'assets/button93.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img4',/*url*/'assets/button91.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img4',/*url*/'assets/button92.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img4',/*url*/'assets/button92.jpg')" src="assets/button91.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Contact" --></a>
+	<a href="links.html"><img id="img5" alt="Links" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img5',/*url*/'assets/button99.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img5',/*url*/'assets/button97.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img5',/*url*/'assets/button98.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img5',/*url*/'assets/button98.jpg')" src="assets/button97.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Links" --></a></div>
+ <div id="container">
+	<div id="left_col">
+	</div>
+	<div id="page_content">
+
+  <center><h1>FCEUX SDL FAQ</h1></center>
+  <center><i>Last updated February 10, 2012<br /></i> by punkrockguy318<br />
+  </center>
+ <p><b>Table of Contents:</b></p>
+ <ul>
+  <li><a href="#svn">What is the subversion build and how can I get it?</a></li>
+  <li><a href="#config">How do I configure a gamepad?</a></li>
+  <li><a href="#sound">My sound is stuttery/laggy.  How can I fix this?</a></li>
+  <li><a href="#hotkeys1">How can I change my hotkey bindings?</a></li>
+  <li><a href="#hotkeys2">Can I map hotkeys to my gamepad?</a></li>
+ </ul>
+ <a name="subversion"><h3>What is the subversion build and how can I get it?</h3></a>
+ <p>The most recent changes to fceuX are reflected immediately in the fceux
+ sourceforge subversion server.  You can checkout the source code to build
+ fceuX with the most recent sources by running the following command:</p>
+ <p><b>svn co https://fceultra.svn.sourceforge.net/svnroot/fceultra/fceu fceux</b></p>
+ <p>Instructions for compiling and installing fceuX can be found in the "README-SDL" file.</p>
+ <a name="config"><h3>How do I configure a gamepad?</h3></a>
+ <p>
+ <p>If you have the GTK GUI compiled into fceuX, you can configure the gamepad by
+ selecting "Options...Gamepad" in the menubar.</p>
+ <p>You can allso configure the first gamepad by running <b>fceux --inputcfg gamepad1</b> </p>
+  <p>When you configure a button you will be presented with a black window with a titlebar
+  indicating what button to map.  FceuX will look for two
+  of the same keypress/joystick event in a row.  If it doesn't find two of the same 
+  keypresses in a row, it will allow you to map the button to two separate keys.</p>
+ </p>
+ <a name="sound"><h3>My sound is stuttery/laggy.  How can I fix this?</h3></a>
+ <p>Try using different SDL audio drivers.  You can set the SDL audio driver with
+ the following command:</p>
+ <p><b>export SDL_AUDIODRIVER=driver</b></p>
+ <p>where driver is: esd,oss,alsa,pulse,nas,arts.</p>
+ <p>There have been a lot of sound related bug fixes for the SDL port in recent releases, so 
+ you may want to try the latest version of fceuX to see if you are still having issues.  FceuX 
+ 2.1.4 fixed the majority of the reported sound issues.
+ </p>
+ <a name="hotkeys1"><h3>How can I change my emulator hotkey bindings?</h3></a>
+ <p>You need to edit your ~/.fceux/fceux.cfg file.  The SDL.Hotkeys.* values
+ are SDL keysyms, which can be found in SDL_keysym.h (probably
+ /usr/include/SDL/SDL_keysym.h on your system).  At the time of writing,
+ hotkeys are not mappable from the GUI in sdl (although it is planned for the future).
+ </p>
+ <a name="hotkeys2"><h3>Can I map emulator hotkeys to my gamepad?</h3></a>
+ <p>If you want to map particular hotkeys (pause, save state, load state, etc) to buttons on 
+ your gamepad, you can use software that allows you to map joystick events to key presses. 
+ <a href="http://qjoypad.sourceforge.net/">qjoypad</a> is the recomended solution for this.  You
+  can also use <a href="http://code.google.com/p/jkeys/">Jkeys</a> to do this. 
+
+        
+ <a name="credits"><h2>Credits</h2></a>
+ <p>
+ <table border width="100%">
+  <tr><th>Name:</th><th>Contribution(s):</th></tr>
+  <tr><td><a href="mailto:ltsmooth42 _at_ gmail _dot_ com">Lukas Sabota</a></td>
+  <td>Author of this document</td></tr>
+ </table>
+ </p>
+ </div>
+ </div>
+ <div id="footer">
+	<a href="home.html">Home</a> | <a href="download.html">Download</a> |
+	<a href="documentation.html">Documentation</a> | <a href="version.html">
+	Version History</a> | <a href="contact.html">Contact</a> | <a href="links.html">Links</a>
+		<br/>We are in no way affiliated or endorsed by Nintendo or Nintendo of America. "Nintendo" is a registered trademark of Nintendo of America Inc.
+		<br/>©2009 adelikat
+</div>
+</body>
+</html>

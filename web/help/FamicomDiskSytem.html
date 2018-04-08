@@ -1,0 +1,111 @@
+﻿<html>
+	
+<head>
+	<title>Famicom Disk Sytem</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("FamicomDiskSytem");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Famicom Disk Sytem</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="General.html">General</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="General.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="CustomizingthroughtheConfigFil.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="AVICapturing.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">Famicom Disk System</span></p>
+<p><br/></p>
+<p>The Family Computer Disk System (FDS) was released in 1986 by Nintendo as a peripheral for the Family Computer ("Famicom") console in Japan. It was a unit that used proprietary floppy disks for data storage. It was announced, but never released, for the North American Nintendo Entertainment System.</p>
+<p><br/></p>
+<p>The device was connected to the Famicom deck by plugging a modified cartridge known as the RAM Adapter into the system's cartridge port, which attached via a supplied cable to the disk drive. </p>
+<p><br/></p>
+<p>The floppy disks used were double-sided, with a capacity of 64 kilobytes per side. Many games spanned both sides of a disk, requiring the user to switch sides at some point during gameplay. A few games used two full disks (four sides). The Famicom Disk System was capable of running on six C-cell batteries or the supplied AC adapter. The battery option was included due to the likelihood of a standard set of AC sockets already being occupied by a Famicom and a television.</p>
+<p><br/></p>
+<p><span class="rvts16">FDS BIOS ROM</span></p>
+<p><br/></p>
+<p>In order to play any Famicom (.fds) game, you will need the FDS BIOS ROM image and it must be named disksys.rom.</p>
+<p>It must be in the base FCEU directory unless you specified a path to disksys.rom in the <a class="rvts18" href="Directories.html">Directory Overrides List</a>. FCEUX will not load FDS games without this file.</p>
+<p><br/></p>
+<p><span class="rvts16">File types</span></p>
+<p><br/></p>
+<p>Two types of FDS disk images are supported: disk images with the FWNES-style header, and disk images with no header. The number of sides on headerless disk images is calculated by the total file size, so don't put extraneous data at the end of the file.</p>
+<p><br/></p>
+<p><span class="rvts16">Writing to disk image</span></p>
+<p><br/></p>
+<p>If a loaded disk image is written to during emulation, FCEUX will store the modified disk image in the save games directory, which is "sav" under the base directory by default (unless changed under the <a class="rvts18" href="Directories.html">Directory Overrides List</a>).</p>
+<p><br/></p>
+<p><span class="rvts16">Eject/Insert Disk</span></p>
+<p><br/></p>
+<p>Emulates the ejecting of the current disk or the inserting of a new disk. &nbsp;If a disk image is loaded, this command will eject it. &nbsp;If a disk is ejected, this will insert a new disk.</p>
+<p>This command can be mapped to a keyboard/joypad button in the <a class="rvts18" href="MapHotkeys.html">Map Hotkeys Menu</a>.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Switch Disk Side</span></p>
+<p><br/></p>
+<p>When prompted by the game, you can emulate the Switching sides of the FDS disk with the NES -&gt; Switch Disk Side command.</p>
+<p>This command can be mapped to a keyboard/joypad button in the <a class="rvts18" href="MapHotkeys.html">Map Hotkeys Menu</a>.</p>
+<p><br/></p>
+<p>To switch disk side you first have to eject the disk, and after switching sides you have to insert the disk back.</p>
+<p>Many FDS games ask you to switch disk side before you can proceed from the title screen. So you have to do the following:</p>
+<p>1) choose <span class="rvts32">NES -&gt; Eject/Insert Disk</span>, the message "Disk 0 Side A Ejected" will appear</p>
+<p>2) choose <span class="rvts32">NES -&gt; Switch Disk Side</span>, the message "Disk 0 Side B Selected" will appear</p>
+<p>3) choose <span class="rvts32">NES -&gt; Eject/Insert Disk</span> again, the message "Disk 0 Side B Inserted" will appear, and the game will change from title screen to player select screen.</p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com">Free CHM Help documentation generator</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

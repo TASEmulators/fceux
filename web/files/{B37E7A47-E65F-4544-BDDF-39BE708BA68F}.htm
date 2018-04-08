@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Cheat Search</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 18pt;
+}
+a.rvts11, span.rvts11
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts11:hover { color: #0000ff; }
+span.rvts12
+{
+ font-size: 16pt;
+}
+span.rvts13
+{
+ font-size: 12pt;
+}
+span.rvts14
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+span.rvts15
+{
+ font-weight: bold;
+}
+span.rvts16 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts17 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts18 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts19, span.rvts19 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{B37E7A47-E65F-4544-BDDF-39BE708BA68F}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts16>Cheat Search</span></p>
+<p><span class=rvts14>FCE Ultra Cheat Guide</span></p>
+<p><span class=rvts10><br></span></p>
+<p><span class=rvts10>Introduction</span></p>
+<p><br></p>
+<p>FCE Ultra allows cheating by the periodic "patching" of arbitrary addresses in the 6502's memory space with arbitrary values, as well as read substitution. "Read substitution" is the method that would be used on a real NES/Famicom, such as done by the Game Genie and Pro Action Replay. It is required to support GG and PAR codes, but since it is relatively slow when done in emulation, it is not the preferred method when a RAM patch will suffice. Also, in FCE Ultra, read substitution will not work properly with zero-page addressing modes(instructions that operate on RAM at $0000 through $00FF).</p>
+<p><br></p>
+<p>The RAM patches are all applied a short time before the emulated vertical blanking period. This detail shouldn't concern most people, though. However, this does mean that cheating with games that use bank-switched RAM may be problematic. Fortunately, such games are not very common (in relation to the total number of NES and Famicom games).</p>
+<p><br></p>
+<p>The cheat search comes with its own set of tools for finding addresses in memory to use for making cheats (or for monitoring the addresses in the <a class=rvts11 href="{01ABA5FD-D54A-44EF-961A-42C7AA586D95}.htm">memory watch window</a>)</p>
+<p><br></p>
+<p><span class=rvts10>Cheat Files</span></p>
+<p><br></p>
+<p>By default cheat files (.cht) are stored in the "cheats" subdirectory under the base FCEUX. The files are in a simple plain-text format. Each line represents a one-byte memory patch. The format is as follows(text in brackets [] represents optional parameters):</p>
+<p><br></p>
+<p>&nbsp;&nbsp;&nbsp; [S][C][:]Address(hex):Value(hex):[Compare value:]Description </p>
+<p><br></p>
+<p>Example:</p>
+<p><br></p>
+<p>&nbsp;&nbsp;&nbsp; 040e:05:Infinite super power.</p>
+<p><br></p>
+<p>A colon(:) near the beginning of the line is used to disable the cheat. "S" denotes a cheat that is a read-substitute-style cheat(such as with Game Genie cheats), and a "C" denotes that the cheat has a compare value.</p>
+<p><br></p>
+<p>Note:&nbsp; When a game is loaded, FCEUX will load any accompanying saved .cht file automatically.</p>
+<p><br></p>
+<p>The default .cht file folder can be changed with the <a class=rvts11 href="{D6DDB3DB-500D-4DCE-8D48-10A67F896057}.htm">Directory Override menu</a>.</p>
+<p><br></p>
+<p><span class=rvts10>The Cheat Search Menu</span></p>
+<p><br></p>
+<p>The cheat search interface consists of several components: a list of addresses and associated data for a search, several command buttons, and the search parameters.</p>
+<p><br></p>
+<p>All addresses listed in the cheat search windows are in unsigned 16-bit hexadecimal format and all values in these windows are in an unsigned 8-bit decimal format(the range for values is 0 through 255).</p>
+<p><br></p>
+<p><span class=rvts12>Active Cheats</span></p>
+<p><br></p>
+<p>The Active cheats window on the left contains the list of cheats for the currently loaded game. Existing cheats can be selected, edited, and updated using the "Update" button.</p>
+<p><br></p>
+<p>Each entry in the list is in the format of:&nbsp; * Address = Value</p>
+<p><br></p>
+<p>The address is the location in the 6502's address space.&nbsp; The * denotes that the current cheat is active (double clicking will toggle on/off).&nbsp; Value is the value (in hex) that the addresses has been locked into.</p>
+<p><br></p>
+<p>You can add, delete, and update cheats in the active cheats window with the boxes below.</p>
+<p>To find an address use the cheat search portion of the window.</p>
+<p><br></p>
+<p>There is also a right-click menu with the options Toggle Cheat, Poke Cheat Value, and Goto In Hex Editor.</p>
+<p><br></p>
+<p>Toggle Cheat is like Double Clicking. It enables or disables the cheat code.</p>
+<p>Poke Cheat Value is like turning the cheat on, but in this case there's no off switch. If the code is on when you use this, then when the code is turned off, it will revert to the value last used. Good for one time life refills, if you want that sort of thing.</p>
+<p>Goto in Hex Editor opens the Hex Editor window, and puts the cursor on the address shown. It's somewhat similar to how Bookmarks work in the Hex Editor.</p>
+<p><br></p>
+<p><span class=rvts12>Cheat Search</span></p>
+<p><br></p>
+<p>The cheat search is used to find a specific value in the games RAM by process of elimination.</p>
+<p><br></p>
+<p>The possibilities window is in the format of&nbsp; Address:Original Value:Current Value</p>
+<p>The address is the location in the 6502's address space, the original value is the value that was stored at this address when the search was reset, and the current value is the value that is currently stored at that address. Selecting an item in this list will automatically cause the "Address" field in the cheat information box on the right side of the window to be updated with the selected address.</p>
+<p><br></p>
+<p>The "Reset" button resets the search process; all valid addresses are displayed in the possibilities window and the data values at those addresses noted in both the left and right columns.&nbsp; The number of possibilities is displayed at the top.&nbsp; Resetting will set it to 2048 or 10240 depending on if the game uses "On cartridge ram" ($6000-$7FFF).&nbsp; (See <a class=rvts11 href="{C652C305-E5FC-4C80-BCCD-721D9B6235EF}.htm">NES RAM</a>)</p>
+<p><br></p>
+<p>The left column is the "previous value" and the right column is the "current value"</p>
+<p><br></p>
+<p>The "Known Value", "Equal", "Not Equal", Greater than" and Less than" buttons perform a search based on the search parameter and removes any non-matching addresses from the address list.&nbsp;&nbsp; It then sets the "previous value" column to the contents of the "current value"</p>
+<p><br></p>
+<p>"Known Value" will search for all addresses that match the value in the box to the right (the value is in hex).</p>
+<p><br></p>
+<p>"Equal" will search for all addresses that have the same value now as the last search (or since reset was pressed, if there has not yet been a search).</p>
+<p><br></p>
+<p>"Not equal" will search for all addresses that have changed sine the last search (or since reset was pressed, if there has not yet been a search).</p>
+<p>If the checkbox next to it is checked it will looks for values that have changed by the value in the number box to the right.&nbsp; For instance, if it is checked and the number is 5, it will search for all values that are +- 5 from the previous value.</p>
+<p><br></p>
+<p>"Greater than" functions like "Not equal" except it only searches for values that have increased since the last search.</p>
+<p><br></p>
+<p>"Less than" functions like "Not equal" except it only searches for values that have decreased since the last search.</p>
+<p><span class=rvts13><br></span></p>
+<p><span class=rvts13>Using the Results</span></p>
+<p><br></p>
+<p>Any value in the possibilities list can be sent to memory watch by double clicking it.&nbsp; </p>
+<p>Highlighting it and hitting the "Add" button under the Active cheats window will automatically activate it as a cheat with the value set to its current value.</p>
+<p><br></p>
+<p><span class=rvts12>Example</span></p>
+<p><br></p>
+<p>Here is an example of cheat search in action.</p>
+<p><br></p>
+<p>Let's say I am playing Mega man 3 and I want to find Mega man's energy level in the game's ram.&nbsp; I will start by opening the ROM and selecting a level.&nbsp; At this point, I know Mega man's energy address is active.&nbsp; So I will pause the game and open the cheat search and hit the reset button.&nbsp; The game uses SRAM so the possibilities window will say 10240 "possibilities".&nbsp; </p>
+<p>Next I will frame advance (or briefly unpause) the game.&nbsp; At this point I know Mega man's energy level is still the same as it was.&nbsp; So I click the "equal" button.&nbsp;&nbsp; Next I want to take damage.&nbsp; I know for sure now that the energy level has decreased so after the "ouch" animation, I click the "Less than button".&nbsp; This will cut the possibilities down significantly.&nbsp; Next I will advance some more and click the "Equal" button since I know the value is still the previous value.&nbsp; I will repeat this cycle until I am down to 1 or just a few values.&nbsp; From there I can double click the values to send them to memory watch to monitor them more closely to weed them out.&nbsp; (Note:&nbsp; Mega man's energy is located in $00A2).</p>
+<p><br></p>
+<p><span class=rvts12>Context Menu</span></p>
+<p><br></p>
+<p>Right-clicking in the active cheats list brings up the context menu.</p>
+<p><br></p>
+<p><span class=rvts15>Toggle Cheat</span> - does the same thing as double clicking</p>
+<p><br></p>
+<p><span class=rvts15>Poke cheat value</span> - has a different affect that normal freezing, this makes a one time write of that value as opposed to freezing it temporarily to that value and having it restored later.&nbsp; It has the same affect as typing in values in the <a class=rvts11 href="{06F7BBD5-399E-4CA0-8E4E-75BE0ACC525A}.htm">Hex Editor</a>.</p>
+<p><br></p>
+<p><span class=rvts15>Goto In Hex Editor</span> - Opens the <a class=rvts11 href="{06F7BBD5-399E-4CA0-8E4E-75BE0ACC525A}.htm">Hex editor</a> dialog to the position of the selected RAM value.</p>
+<p><br></p>
+<p class=rvps3><span class=rvts17>2008</span></p>
+<p class=rvps4><span class=rvts18>This help file has been generated by the freeware version of </span><a class=rvts19 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>What's New? 2.0.3 (changelog)</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+span.rvts11
+{
+ font-size: 18pt;
+ text-decoration: underline;
+}
+span.rvts12
+{
+ font-size: 14pt;
+}
+span.rvts13 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts14 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts15 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts16, span.rvts16 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{F6ADADC6-1EFA-4F9B-9DB4-2A8A9BA3DF38}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts13>What's New? 2.0.3 (changelog)</span></p>
+<p><span class=rvts10>What's New? </span><span class=rvts11>2.0.2</span></p>
+<p>Released November 02, 2008</p>
+<p><br></p>
+<p>This release includes some key bug fixes and feature enhancements.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts12>Major Bug / Crash Bug Fixes</span></p>
+<p><br></p>
+<p>* Reset/Power-on recording for .fm2 files!</p>
+<p>* fix ..fcm conversion, recording, and playback of reset and power commands</p>
+<p>* Win32 - auto-load the only useful ROM or movie from an archive, in cases where there is only one</p>
+<p>* Win32 - permit user optionally to proceed through the movie savestate mismatch error condition, in case he knows what he is doing.</p>
+<p>* Win32 - fix a bug in the savestate recovery code which prevent aborted savestate loads from recovering emulator state correctly.</p>
+<p>* gracefully handle non-convertible broken UTF-8 text without crashing</p>
+<p>* Win32 - don't read every archive file when scanning for replay dialog. scan them, and only look for *.fm2</p>
+<p><br></p>
+<p><span class=rvts12>New Features Win32</span></p>
+<p><br></p>
+<p>* Win32 - added a toggle for binding savestates to movies</p>
+<p>* Win32 - added -cfg (config file) command line argument</p>
+<p><br></p>
+<p><span class=rvts12>Minor Bug fixes</span></p>
+<p><br></p>
+<p>* Win32 - Sound config dialog will now look to see if Mute Turbo should be checked</p>
+<p>* Win32 - Debugger - Fix Child windows inside debugging window get invalid sizes</p>
+<p>* Win32 - bind a menu option for display frame counter</p>
+<p>* Win32 - fix problem where replay dialog couldn't work when the process current directory had changed to something other than emulator base directory</p>
+<p>* Lua ignores second joypad.set()</p>
+<p>* Load state as... does not use the savestate override dir (fixed; now, it does)</p>
+<p>*Win32 - debugger - fix issue where keyboard keys get stuck when switching between debugger window and main window</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts12>SDL </span></p>
+<p><br></p>
+<p>* SDL - added support for AVI creation for SDL, see documentation/Videolog.txt for more</p>
+<p>* SDL - --inputcfg can now be used without a filename</p>
+<p>* SDL - should fix issues with missing author field crashing FCEUX</p>
+<p>* SDL - toggle lag frame counter for SDL, default hotkey F8</p>
+<p>* SDL - toggle skipping of lag frames for SDL, default hotkey F6</p>
+<p>* SDL - user ability to toggle "bind savestates to movie" added for SDL, default hotkey F2</p>
+<p>* SDL - Lua is now optional, thanks Shinydoofy for a patch.&nbsp; also fixed some build issues.</p>
+<p>* SDL - fixed an issue where flawed movie would crash FCEUX on every startup</p>
+<p>* SDL - fixed issue where windowed mode would always be set to 32 bpp</p>
+<p>* SDL - fixed ppc build errors and added LSB_FIRST option to build scripts</p>
+<p>* SDL - --newppu option added to SDL, disabled by default</p>
+<p><br></p>
+<p><span class=rvts12>GFCEUX (SDL)</span></p>
+<p><br></p>
+<p>* GFCEUX - made the input config window more usable</p>
+<p>* GFCEUX - added uninstall script for GFCEUX</p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p class=rvps3><span class=rvts14>2008</span></p>
+<p class=rvps4><span class=rvts15>This help file has been generated by the freeware version of </span><a class=rvts16 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

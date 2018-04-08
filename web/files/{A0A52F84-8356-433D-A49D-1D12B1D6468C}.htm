@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Famicom Disk Sytem</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+span.rvts11
+{
+ font-size: 14pt;
+}
+a.rvts12, span.rvts12
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts12:hover { color: #0000ff; }
+span.rvts13 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts14 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts15 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts16, span.rvts16 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{A0A52F84-8356-433D-A49D-1D12B1D6468C}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts13>Famicom Disk Sytem</span></p>
+<p><span class=rvts10>Famicom Disk System</span></p>
+<p><br></p>
+<p>The Family Computer Disk System (FDS) was released in 1986 by Nintendo as a peripheral for the Family Computer ("Famicom") console in Japan. It was a unit that used proprietary floppy disks for data storage. It was announced, but never released, for the North American Nintendo Entertainment System.</p>
+<p><br></p>
+<p>The device was connected to the Famicom deck by plugging a modified cartridge known as the RAM Adapter into the system's cartridge port, which attached via a supplied cable to the disk drive. </p>
+<p><br></p>
+<p>The floppy disks used were double-sided, with a capacity of 64 kilobytes per side. Many games spanned both sides of a disk, requiring the user to switch sides at some point during gameplay. A few games used two full disks (four sides). The Famicom Disk System was capable of running on six C-cell batteries or the supplied AC adapter. The battery option was included due to the likelihood of a standard set of AC sockets already being occupied by a Famicom and a television.</p>
+<p><br></p>
+<p><span class=rvts11>FDS BIOS ROM</span></p>
+<p><br></p>
+<p>In order to play any Famicom (.fds) game, you will need the FDS BIOS ROM image and it must be named disksys.rom.</p>
+<p>It must be in the base FCEU directory unless you specified a path to disksys.rom in the <a class=rvts12 href="{D6DDB3DB-500D-4DCE-8D48-10A67F896057}.htm">Directory Overrides List</a>. FCEUX will not load FDS games without this file.</p>
+<p><br></p>
+<p><span class=rvts11>File types</span></p>
+<p><br></p>
+<p>Two types of FDS disk images are supported: disk images with the FWNES-style header, and disk images with no header. The number of sides on headerless disk images is calculated by the total file size, so don't put extraneous data at the end of the file.</p>
+<p><br></p>
+<p><span class=rvts11>Writing to disk image</span></p>
+<p><br></p>
+<p>If a loaded disk image is written to during emulation, FCEUX will store the modified disk image in the save games directory, which is "sav" under the base directory by default (unless changed under the <a class=rvts12 href="{D6DDB3DB-500D-4DCE-8D48-10A67F896057}.htm">Directory Overrides List</a>).</p>
+<p><br></p>
+<p><span class=rvts11>Eject/Insert Disk</span></p>
+<p><br></p>
+<p>Emulates the ejecting of the current disk or the inserting of a new disk.&nbsp; If a disk image is loaded, this command will eject it.&nbsp; If a disk is ejected, this will insert a new disk.</p>
+<p>This command can be mapped to a keyboard/joypad button in the <a class=rvts12 href="{EA4D684B-BEDB-4395-AF94-C9ACAF0B6561}.htm">Map Hotkeys Menu</a>.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts11>Switch Disk Side</span></p>
+<p><br></p>
+<p>If/when prompted by the game, you can emulate the Switching sides of the FDS disk with the NES &gt; Switch Disk Side command.</p>
+<p>This command can be mapped to a keyboard/joypad button in the <a class=rvts12 href="{EA4D684B-BEDB-4395-AF94-C9ACAF0B6561}.htm">Map Hotkeys Menu</a>.</p>
+<p><br></p>
+<p> </p>
+<p class=rvps3><span class=rvts14>2008</span></p>
+<p class=rvps4><span class=rvts15>This help file has been generated by the freeware version of </span><a class=rvts16 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

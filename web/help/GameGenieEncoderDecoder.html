@@ -1,0 +1,104 @@
+﻿<html>
+	
+<head>
+	<title>Game Genie Encoder/Decoder</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("GameGenieEncoderDecoder");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Game Genie Encoder/Decoder</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Debug.html">Debug</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Debug.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="CodeDataLogger.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="LuaScripting.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">Game Genie Decoder/Encoder</span></p>
+<p><br/></p>
+<p>This will take an NES address space PRG address ($8000-$FFFF), a comparison value (for 8-letter GG codes; refer to a Game Genie code FAQ for an explanation of what this does), and a Value that replaces the addressed byte.</p>
+<p><br/></p>
+<p>Filling in the Address and Value fields will produce a 6-letter code; if you also fill out the Compare field, it will produce an 8-letter code. &nbsp;The code so produced will appear in the Game Genie Code box immediately; you can then click "Add to Cheat List" to activate it.</p>
+<p><br/></p>
+<p>To decrypt a Game Genie code, enter it into the Game Genie Code box, and the Address and Value fields will be automatically filled in, as will the Compare field if it was an 8-letter code.</p>
+<p><span class="rvts16"><br/></span></p>
+<p><span class="rvts16">Adding Game Genie codes</span></p>
+<p><br/></p>
+<p>In the Game Genie Code Decoder/Encoder window, type the code into the Game Genie Code box and click "Add to Cheat List", which will add it to the <a class="rvts18" href="CheatSearch.html">Cheat Search</a> cheat list. You can then enable/disable them by double-clicking the code in the box (a * means the code is active).</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Making Game Genie codes permanent</span></p>
+<p><br/></p>
+<p>Using the Game Genie Code Decoder/Encoder, enter in your code in the "Game Genie Code" box, and under "Possible Affected ROM File Addresses", a list of possible matches (usually from 1 to 5) is displayed. Using the built-in Hex Editor, go to the first listed address in the ROM, and change its value to the value given in the "Value" box (of the GG code Decoder/Encoder window). If the desired effect isn't achieved, undo the change (Ctrl+Z) and try the next address. Repeat until the desired effect is achieved, and then save the ROM.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">How do I make my own Game Genie codes?</span></p>
+<p><br/></p>
+<p>First of all, you must:</p>
+<p><br/></p>
+<p>* have a decent amount of ASM knowledge;</p>
+<p>* know how to use the debugger;</p>
+<p>* understand NES PRG-ROM bank switching.</p>
+<p><br/></p>
+<p>Once you've found a part of PRG-ROM you want to change to create a code effect, snap the <a class="rvts18" href="Debugger.html">Debugger</a> (if it's not so already) and find the code's location in the PRG-ROM's address space ($8000-$FFFF) (you'll want the debugger snapped so the game won't swap banks out from under you). Then, using the built-in <a class="rvts18" href="HexEditor.html">Hex Editor</a>, view the NES memory and go to the PRG-ROM address you wish to modify, then right-click the byte and choose "Create Game Genie Code at this Address". The Game Genie Code Decoder/Encoder will appear, with the Address and Compare boxes filled in (the Compare box represents the address's original value). Enter the new value into the "Value" box. </p>
+<p><br/></p>
+<p>An alternative way to enter the code is to locate the desired address in the debugger, and then middle-click on it, which will summon the GG Code Decoder/Encoder. Then enter the code as described above.</p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com">Free EPub and documentation generator</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

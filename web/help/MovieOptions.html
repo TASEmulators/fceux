@@ -1,0 +1,118 @@
+﻿<html>
+	
+<head>
+	<title>Movie Options</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("MovieOptions");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Movie Options</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Config.html">Config</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Config.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Video.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="MapHotkeys.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">Movie Options</span></p>
+<p><span class="rvts15"><br/></span></p>
+<p><span class="rvts15"><br/></span></p>
+<p>The movie option dialog has various settings related to movie making.</p>
+<p><br/></p>
+<p><span class="rvts16">Always suggest Read-Only replay</span></p>
+<p><br/></p>
+<p>If checked, FCEUX will automatically check "Open Read-Only" checkbox when showing "Play Movie" dialog. If unchecked, the "Open Read-Only" checkbox state will depend on current movie status.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Pause After Movie Playback</span></p>
+<p><br/></p>
+<p>If checked, FCEUX will automatically pause emulation when reaching the last frame of a movie file.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Close After Movie Playback</span></p>
+<p><br/></p>
+<p>If checked, FCEUX will close the movie after replaying its last frame. If unchecked, when reaching the last frame the movie will switch to "MOVIE_FINISHED" state, still allowing you to load its savestates.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Bind savestates to movies</span></p>
+<p><br/></p>
+<p>Affects the savestate naming system when a movie is loaded. &nbsp;If checked, the movie name will be appended to a savestate filename.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Display movie subtitles</span></p>
+<p><br/></p>
+<p>Toggles whether or not movie subtitles (imbedded into the .fm2 file, see <a class="rvts18" href="fm2.html">.fm2</a> documentation) will be displayed on screen.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Put movie subtitles in AVI</span></p>
+<p><br/></p>
+<p>Toggles whether or not movie subtitles will be recorded into a .avi file.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Automatically backup movies</span></p>
+<p><br/></p>
+<p>If checked, the auto-movie backup is toggled on. &nbsp;Whenever a movie is loaded then set into record mode (by loading a savestate while in read-write mode), a backup copy of the .fm2 is saved before changing the file. &nbsp;</p>
+<p><br/></p>
+<p>Movie backups will be created only once each time a movie is loaded into FCEUX. &nbsp;Movie backups are appended with a backup number and the .bak file extension.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Load full savestate-movies</span></p>
+<p><br/></p>
+<p>If checked, FCEUX will not truncate movie immediately when you load its savestate in Recording mode (thus behaving similar to VBA-rr and Snes9x emulators). If unchecked, the movie will always shrink to the frame of the savestate you loaded.</p>
+<p><br/></p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/help-authoring-tool">Single source CHM, PDF, DOC and HTML Help creation</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

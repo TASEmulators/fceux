@@ -1,0 +1,250 @@
+﻿<html>
+	
+<head>
+	<title>Command Line Options</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("CommandLineOptions");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Command Line Options</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="General.html">General</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="General.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Gamefilecompatibility.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="CustomizingthroughtheConfigFil.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">Command Line Options</span></p>
+<p><br/></p>
+<p><br/></p>
+<p>FCEUX offers numerous command line options.</p>
+<p>All commands are case sensitive.</p>
+<p><br/></p>
+<p><span class="rvts16">ROM name</span></p>
+<p>Plays specified ROM (ROM name must always be put last in command line arguments)</p>
+<p><br/></p>
+<p><span class="rvts29">fceux path\rom.nes</span> (or <span class="rvts29">rom.zip</span>)</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;<span class="rvts28">fceux smb.nes</span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux c:\fceux\roms\smb.zip</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Play Movie File</span></p>
+<p>Plays a specified movie (.fm2) file. &nbsp;A valid ROM must be specified or movie will not be played.</p>
+<p><br/></p>
+<p><span class="rvts29">fcuex -playmovie path\movie.fm2 romname</span></p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;<span class="rvts28">fceux -playmovie smb.fm2 smb.nes</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Read-only Status</span></p>
+<p>Specifies whether a movie will be in "read-only" or "read &amp; write" mode. &nbsp;(Note: a specified movie is not required to be used in conjunction with this command). 1 specifies read only status, 0 specifies read &amp; write.</p>
+<p><br/></p>
+<p><span class="rvts29">fceux -readonly flag</span></p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;<span class="rvts28">fceux -readonly 1</span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -readonly 0 -playmovie smb.fm2 smb.nes</span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -readonly 1 -playmovie c:\fceux\movies\smb.fm2 c:\fceux\roms\smb.nes</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Stop Movie at frame x</span></p>
+<p>Specifies that the movie will automatically stop at the specified frame. &nbsp;(A movie must be specified with -playmovie for this command to work)</p>
+<p><br/></p>
+<p><span class="rvts29">fceux -playmovie path\movie.fm2 -stopframe framenumber romname</span></p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;<span class="rvts28">fceux -playmovie smb.fm2 -stopframe 10000 smb.nes</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Load State</span></p>
+<p>Specifies FCEUX to automatically load a specified savestate file. &nbsp;(Must have a specified ROM for this to work).</p>
+<p><br/></p>
+<p><span class="rvts29">fceux -loadstate path\savestatefile romname</span></p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;<span class="rvts28">fceux -loadstate smb0.fc0 smb.nes</span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -playmovie smb.fm2 -readonly 0 -loadstate smb0.fc0 smb.nes</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Pause Movie After Playback</span></p>
+<p>Sets the "<a class="rvts18" href="ToggleSwitchesHideMenuetc.html">Pause Movie After Playback</a>" switch on/off. &nbsp;1 sets it to enabled, 0 sets it to disabled.</p>
+<p><br/></p>
+<p><span class="rvts29">fceux -stopmovie flag</span></p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;<span class="rvts28">fceux -stopmovie 1</span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -playmovie smb.fm2 -readonly 0 - stopmovie 1 smb0.nes</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Frame Display Toggle</span></p>
+<p>Toggles whether or not the frame count will be displayed. &nbsp;1 sets it to on, 0 sets it to off.</p>
+<p><br/></p>
+<p><span class="rvts29">fceux -framedisplay flag</span></p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;<span class="rvts28">fceux -framedisplay 1</span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -playmovie smb2.fm2 -framedisplay 1 smb0.nes</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Input Display Toggle</span></p>
+<p>Toggles whether the movie input will be displayed. &nbsp;1 sets it to on, 0 sets it to off.</p>
+<p><br/></p>
+<p><span class="rvts29">fceux -inputdisplay flag</span></p>
+<p><br/></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -inputdisplay 1</span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -playmovie smb2.fm2 -inputdisplay 1 smb0.nes</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Allow L+R/U+D</span></p>
+<p>Sets whether or not the game will allow L+R/U+D input (see <a class="rvts18" href="Input.html">Input config</a>). &nbsp;1 enables L+R, 0 disables it.</p>
+<p><br/></p>
+<p><span class="rvts29">fceux -allowUDLR flag</span></p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;<span class="rvts28">fceux -allowUDLR 1</span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -allowUDLR 0 smb0.nes</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Enable Background Input</span></p>
+<p>Sets the "<a class="rvts18" href="ToggleSwitchesHideMenuetc.html">Enable Background Input</a>" switch on/off. &nbsp;1 sets it to enabled, 0 sets it to disabled.</p>
+<p><br/></p>
+<p><span class="rvts29">fceux -bginput flag</span></p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;<span class="rvts28">fceux -bginput 0</span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -playmovie smb.fm2 -readonly 0 -bginput 1 smb0.nes</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Use Game Genie</span></p>
+<p>Sets the Game Genie Flag (see <a class="rvts18" href="ToggleSwitchesHideMenuetc.html">Toggle Switches</a>). &nbsp;1 sets it to enabled, 0 sets it to disabled.</p>
+<p><br/></p>
+<p><span class="rvts29">fceux -gg flag</span></p>
+<p><span class="rvts28"><br/></span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -gg 1</span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -gg 1 smb0.nes</span></p>
+<p><br/></p>
+<p><span class="rvts16">PAL Emulation</span></p>
+<p>Sets the PAL region. 1 sets it to enabled, 0 sets it to disabled.</p>
+<p>(note: FCEUX will assign PAL emulation automatically if a PAL ROM is loaded) </p>
+<p><br/></p>
+<p><span class="rvts29">fceux -pal flag</span></p>
+<p><span class="rvts28"><br/></span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -pal 1</span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -pal 1 smb0.nes</span></p>
+<p><br/></p>
+<p><span class="rvts16">Dendy Emulation</span></p>
+<p>Sets the Dendy region. 1 sets it to enabled, 0 sets it to disabled.</p>
+<p>(note: If set to 1, it will override <span class="rvts28">-pal</span> argument) </p>
+<p><br/></p>
+<p><span class="rvts29">fceux -dendy flag</span></p>
+<p><span class="rvts28"><br/></span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -dendy 1</span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -dendy 1 smb0.nes</span></p>
+<p><br/></p>
+<p><span class="rvts16">Movie Status Icon Toggle</span></p>
+<p>Sets the Status Icon Toggle (see <a class="rvts18" href="ToggleSwitchesHideMenuetc.html">Toggle Switches</a>). &nbsp;1 turns off the status icon, 0 turns it on.</p>
+<p><br/></p>
+<p><span class="rvts29">fceux -noicon flag</span></p>
+<p><span class="rvts28"><br/></span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -noicon 1</span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -noicon 0 smb0.nes</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Clip Left and Right Sides</span></p>
+<p>Sets the Clip Left and Right Sides Toggle (see <a class="rvts18" href="Video.html">Video Config</a>). &nbsp;1 turns on clipping, 0 turns it off.</p>
+<p><br/></p>
+<p><span class="rvts29">fceux -clipsides flag</span></p>
+<p><span class="rvts28"><br/></span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -clipsides 0 smb0.nes</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Allow More than 8 Sprites per Scanline</span></p>
+<p>Sets the 8 Sprites per scanline flag (see <a class="rvts18" href="Video.html">Video Config</a>). &nbsp;1 turns on extra sprites, 0 turns it off.</p>
+<p><br/></p>
+<p><span class="rvts29">fceux -no8lim flag</span></p>
+<p><span class="rvts28"><br/></span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -no8lim 0 smb0.nes</span></p>
+<p><span class="rvts28"><br/></span></p>
+<p><span class="rvts28"><br/></span></p>
+<p><span class="rvts16">Disable Speed Throttling</span></p>
+<p>Sets the Disable Speed Throttling When Sound is Disabled flag (see <a class="rvts18" href="Timing.html">Timing Config</a>). &nbsp;1 disables throttling, 0 leaves it on.</p>
+<p><br/></p>
+<p><span class="rvts29">fceux -nothrottle flag</span></p>
+<p><span class="rvts28"><br/></span></p>
+<p><span class="rvts28"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts28">fceux -nothrottle 0 smb0.nes</span></p>
+<p><span class="rvts30"><br/></span></p>
+<p><span class="rvts30"><br/></span></p>
+<p><span class="rvts16">Turbo Toggle</span></p>
+<p>Sets the Turbo Toggle. &nbsp;1 Sets Turbo on, 0 leaves it off.</p>
+<p><br/></p>
+<p><span class="rvts29">fceux &nbsp;-turbo flag</span></p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;<span class="rvts28">fceux -turbo 1 smb0.nes</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Load Config File</span></p>
+<p>Loads a specified config file rather than the default fceux.cfg</p>
+<p><br/></p>
+<p>Warning: &nbsp;the config file must be in the base directory. &nbsp;A pathname can NOT be specified in the filename</p>
+<p><br/></p>
+<p>fceux -cfg filename</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;<span class="rvts28">fceux -cfg fceux-smbconfig.cfg smb.nes</span></p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Load Lua Script</span></p>
+<p>Loads a Lua script on startup.</p>
+<p><br/></p>
+<p>fceux -lua filename</p>
+<p><br/></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;<span class="rvts28">fceux -lua memwatch.lua</span></p>
+<p><br/></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour">Easily create Help documents</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

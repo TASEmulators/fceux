@@ -1,0 +1,480 @@
+﻿/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table, span.rvts0 /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6
+{
+ color: #aca899;
+}
+span.rvts7
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #716f64;
+}
+span.rvts8
+{
+ font-weight: bold;
+ color: #aca899;
+}
+span.rvts9
+{
+ font-style: italic;
+ color: #aca899;
+}
+span.rvts10
+{
+ font-size: 12pt;
+}
+a.rvts11, span.rvts11
+{
+ font-size: 12pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts11:hover { color: #0000ff; }
+span.rvts12
+{
+ font-size: 18pt;
+}
+span.rvts13 /* Font Style */
+{
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts14, span.rvts14 /* Font Style */
+{
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+span.rvts15
+{
+ text-decoration: underline;
+}
+span.rvts16
+{
+ font-size: 14pt;
+}
+span.rvts17
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+a.rvts18, span.rvts18
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts18:hover { color: #0000ff; }
+span.rvts19
+{
+ font-size: 12pt;
+ text-decoration: underline;
+}
+span.rvts20
+{
+ font-size: 18pt;
+ text-decoration: underline;
+}
+span.rvts21
+{
+}
+span.rvts22
+{
+ font-size: 14pt;
+}
+span.rvts23
+{
+ font-size: 16pt;
+}
+span.rvts24
+{
+}
+a.rvts25, span.rvts25
+{
+ font-size: 12pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts25:hover { color: #0000ff; }
+a.rvts26, span.rvts26
+{
+ font-size: 12pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts26:hover { color: #0000ff; }
+span.rvts27
+{
+ font-size: 16pt;
+}
+span.rvts28
+{
+ font-family: 'Lucida Console', 'Monaco', monospace;
+}
+span.rvts29
+{
+ font-style: italic;
+}
+span.rvts30
+{
+ font-family: 'Times New Roman', 'Times', serif;
+}
+span.rvts31
+{
+ font-size: 11pt;
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts32
+{
+ font-weight: bold;
+}
+span.rvts33
+{
+ font-size: 16pt;
+ text-decoration: underline;
+}
+a.rvts34, span.rvts34
+{
+ font-size: 12pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts34:hover { color: #0000ff; }
+span.rvts35
+{
+ font-size: 24pt;
+}
+span.rvts36
+{
+ font-size: 14pt;
+ text-decoration: underline;
+}
+span.rvts37
+{
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts38
+{
+ font-size: 9pt;
+}
+a.rvts39, span.rvts39
+{
+ font-size: 9pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts39:hover { color: #0000ff; }
+span.rvts40
+{
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts41
+{
+ font-size: 12pt;
+ font-weight: bold;
+}
+a.rvts42, span.rvts42
+{
+ font-size: 12pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts42:hover { color: #0000ff; }
+span.rvts43
+{
+ font-size: 12pt;
+ font-weight: bold;
+ text-decoration: underline;
+}
+a.rvts44, span.rvts44
+{
+ font-size: 12pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts44:hover { color: #0000ff; }
+span.rvts45
+{
+ font-size: 18pt;
+}
+span.rvts46
+{
+ font-size: 11pt;
+ font-weight: bold;
+}
+span.rvts47
+{
+ font-size: 8pt;
+}
+span.rvts48
+{
+ color: #0000ff;
+}
+span.rvts49
+{
+ color: #00cc00;
+}
+span.rvts50
+{
+ color: #ff0000;
+}
+span.rvts51
+{
+ color: #00be00;
+}
+span.rvts52
+{
+ color: #a08c00;
+}
+span.rvts53
+{
+ color: #0000c3;
+}
+span.rvts54
+{
+ color: #0082a0;
+}
+span.rvts55
+{
+ color: #d2be00;
+}
+span.rvts56
+{
+ color: #0a0aff;
+}
+span.rvts57
+{
+ color: #05ff05;
+}
+span.rvts58
+{
+ font-size: 22pt;
+ text-decoration: underline;
+}
+a.rvts59, span.rvts59
+{
+ font-size: 12pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts59:hover { color: #0000ff; }
+span.rvts60
+{
+ font-size: 18pt;
+ font-weight: bold;
+}
+span.rvts61
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts62
+{
+ font-size: 14pt;
+ font-weight: bold;
+}
+span.rvts63
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000080;
+}
+span.rvts64
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #333399;
+}
+span.rvts65
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000080;
+}
+span.rvts66
+{
+ font-size: 16pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts67
+{
+ font-size: 11pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts68
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts69
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000080;
+}
+a.rvts70, span.rvts70
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts70:hover { color: #0000ff; }
+span.rvts71
+{
+ font-size: 14pt;
+ font-weight: bold;
+}
+span.rvts72
+{
+ font-size: 14pt;
+}
+span.rvts73
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+ text-decoration: underline;
+}
+span.rvts74
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #00007f;
+}
+span.rvts75
+{
+ font-size: 14pt;
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts76
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts77
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #00007f;
+}
+span.rvts78
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ color: ;
+}
+a.rvts79, span.rvts79
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts79:hover { color: #0000ff; }
+a.rvts80, span.rvts80
+{
+ font-size: 12pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts80:hover { color: #0000ff; }
+span.rvts81
+{
+ font-family: 'Lucida Console', 'Monaco', monospace;
+ text-decoration: underline;
+}
+span.rvts82
+{
+ font-weight: bold;
+ text-decoration: underline;
+}
+span.rvts83
+{
+ font-size: 11pt;
+ text-decoration: underline;
+}
+span.rvts84
+{
+ font-size: 5pt;
+}
+span.rvts85
+{
+ font-size: 5pt;
+ font-weight: bold;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ text-align: center;
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-left: none;
+ padding: 2px 0px 2px 0px;
+ margin: 7px 0px 7px 0px;
+}
+.rvps3
+{
+}
+.rvps4
+{
+}
+.rvps5
+{
+ text-indent: 48px;
+}
+.rvps6
+{
+ text-indent: 48px;
+ margin: 0px 0px 0px 48px;
+}
+.rvps7
+{
+}

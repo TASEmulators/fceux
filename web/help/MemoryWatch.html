@@ -1,0 +1,133 @@
+﻿<html>
+	
+<head>
+	<title>Memory Watch</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("MemoryWatch");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Memory Watch</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Tools2.html">Tools</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Tools2.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="RAMWatch.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="TASEditor.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts17">Memory Watch</span></p>
+<p><span class="rvts12"><br/></span></p>
+<p><span class="rvts12">Overview</span></p>
+<p><span class="rvts12"><br/></span></p>
+<p>Memory watch is a tool designed to values of specific known memory values in the game's <a class="rvts18" href="NESRAMMappingFindingValues.html">RAM</a>. Memory watch does not find values. &nbsp;To find useful values to monitor, see <a class="rvts18" href="CheatSearch.html">Cheats</a>, <span class="rvts18">Ram filter</span>, <a class="rvts18" href="HexEditor.html">Hex Editor</a>, and <a class="rvts18" href="Debugger.html">Debugger</a>.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts16">Inserting Values</span></p>
+<p><br/></p>
+<p>To display a ram value, simply type its address into one of the address fields. &nbsp;The name field allows you to put a brief description of the value. &nbsp; </p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts27">Prefixes</span></p>
+<p><br/></p>
+<p>You must put in the hexi-decimal value of the address, &nbsp;but the value will be displayed will be decimal by default.</p>
+<p><br/></p>
+<p>To display the value in hex, use a prefix of "x" (such as x00FD). &nbsp;</p>
+<p><br/></p>
+<p>Use the prefix "!" to display a 2 byte value. </p>
+<p><br/></p>
+<p>Use a prefix of "X" to watch a 2 byte value in hex.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts27">Saving/Loading Watch files</span></p>
+<p><br/></p>
+<p>You can save your addresses into watch files, as well as loading previous files using the standard save,load,new options in the File menu.</p>
+<p><br/></p>
+<p>FCEUX uses the /memw folder by default but you can specify a new default folder in the <a class="rvts18" href="Directories.html">Directory Override</a> menu.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts27">Options Menu</span></p>
+<p><br/></p>
+<p>If you select <span class="rvts32">Load on Start up</span>, Memory watch will load up automatically when FCEU is started. </p>
+<p><br/></p>
+<p>If you select <span class="rvts32">Load Last File on Start up</span>, the most recent file in the Recent folder will be loaded when memory watch is loaded.</p>
+<p><br/></p>
+<p>If you select <span class="rvts32">Collapse to 1 Column </span>(or press the right arrow button on the bottom left of the dialog), the memory watch dialog is reduced to just 1 column.</p>
+<p><br/></p>
+<p><span class="rvts16">Frozen Memory Addresses</span></p>
+<p><br/></p>
+<p>If one of the watched addresses is frozen by the <a class="rvts18" href="CheatSearch.html">cheats dialog</a> or the <a class="rvts18" href="HexEditor.html">hex editor</a>, it will display blue in the memory watch dialog.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts12">Memory Change Monitor</span></p>
+<p><br/></p>
+<p>The bottom of the memory watch dialog displays a memory change monitoring section. &nbsp;This monitors the 1st two values of each memory watch column. &nbsp;Rather than monitoring the value itself, this monitors the value's behavior. &nbsp;</p>
+<p><br/></p>
+<p>The address being monitored is under the address column.</p>
+<p><br/></p>
+<p>The Formula drop down box shows which criteria the change monitoring is using.</p>
+<p><br/></p>
+<p>The count value displays how many times the value has changed based on the criteria.</p>
+<p><br/></p>
+<p>Reset will reset the count to 0.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts43">Usage Example:</span></p>
+<p><br/></p>
+<p>As an example of the memory change monitoring, Let's say we are recording a movie of the game Super C and want to keep track of when the game lags.</p>
+<p>The ram address 001C functions as a "lag flag". &nbsp;It will remain 0, then change to a positive value on a frame that the game lags.</p>
+<p><br/></p>
+<p>We could put 001C in one of the 1st two memory watch edit boxes. &nbsp;Then set the corresponding formula in the memory change monitoring to "&gt; then" (greater than). &nbsp;Now the count will show us how many lag frames occur in the movie.</p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour">Easily create HTML Help documents</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

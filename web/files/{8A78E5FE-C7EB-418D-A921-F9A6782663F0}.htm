@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Debugger</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+span.rvts11
+{
+ font-size: 18pt;
+}
+span.rvts12
+{
+ font-size: 14pt;
+}
+a.rvts13, span.rvts13
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts13:hover { color: #0000ff; }
+span.rvts14 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts15 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts16 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts17, span.rvts17 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{8A78E5FE-C7EB-418D-A921-F9A6782663F0}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts14>Debugger</span></p>
+<p><span class=rvts10>Debugger</span></p>
+<p><br></p>
+<p>Taken from the FCEUXDSP 1.07 documentation.</p>
+<p><br></p>
+<p><span class=rvts11>Introduction</span></p>
+<p><br></p>
+<p>The debugger is a powerful tool that reads, displays, and manipulates assembly language instructions in a game.</p>
+<p><br></p>
+<p><span class=rvts12>Debugger Features</span></p>
+<p><br></p>
+<p>-When you hold the mouse over the left pane in the debugger, you can now see the ROM file address of the data loaded there.</p>
+<p>-Right-click in that pane, it will bring up the Hex Editor at that address so you can immediately begin editing. </p>
+<p>-Left-clicking in that pane brings up the inline assembler. </p>
+<p>-"Break on bad opcode" feature; this can help you figure out where your game is crashing. Middle-clicking on a byte will bring up the <a class=rvts13 href="{ACA99B5B-9CA3-4E69-B7F7-106D70CF76BF}.htm">Game Genie Encoder</a> at that address, so you can easily make Game Genie codes.</p>
+<p>-Debugging data like breakpoints or bookmarks are automatically saved and restored when games are closed / opened.</p>
+<p>-Ability to give breakpoints a brief description/name. </p>
+<p>-All debugging information for addresses &lt; $8000 into the name list file romname.nes.ram.nl.</p>
+<p>-Added a feature to NL files to support arrays.</p>
+<p>-Range options for freezing / unfreezing addresses</p>
+<p>-Dump RAM to file option</p>
+<p>-Dump PPU memory to file option</p>
+<p>-Automatically generated .deb debug files created if the debugger is used.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts11>Using Debugger</span></p>
+<p><br></p>
+<p><span class=rvts12>Symbolic Debugging</span></p>
+<p><br></p>
+<p>The most important feature (at least for me) that was introduced in FCEUXD SP is symbolic debugging.&nbsp; With this new feature it's possible to rename addresses in the disassembly window (like $C022) to easily understandable names (like AddHealthpoints). It's also possible to add comments to lines in the disassembly window.</p>
+<p><br></p>
+<p>To be able to use this feature it's necessary to create so called name list files (*.(bank).nl/*.ram.nl, Ex: NES Test Cart (PD).nes.0.nl, NES Test Cart (PD).nes.ram.nl) which contain all names and comments you wish to display in the disassembly window. These files are plain ASCII files of the following format (example follows):</p>
+<p><br></p>
+<p>$C000#NewName1#Comment1</p>
+<p>$C002##Comment2</p>
+<p>$C004#NewName2#</p>
+<p>$C006#NewName3#MultilineComment-Part1</p>
+<p>\MultilineComment-Part2</p>
+<p>\MultilineComment-Part3</p>
+<p>$C008/10#NewName4#</p>
+<p><br></p>
+<p>Every line contains two # characters which separate the three parts of one line: The first part (starting with a $ character) is the address to be renamed. Optionally you can add a "/number" part which marks the offsets as a beginning of an array of the given size (the size must be specified in hex form).&nbsp; The second (optional) part is the new name of that address. Whenever the line of that address is shown in the disassembly window an extra line saying "Name: NewName" is shown above it.&nbsp; Instructions referencing this address, for example JSR $C000 are also changed to JSR NewName1 (in that example).&nbsp; The third (optional) part is the comment that's also added above the disassembly line the comment refers to. It works exactly like the additional name line, only the prefix of that line is different. Comment lines start with "Comment: " rather than with "Name: ".&nbsp; Multi-lines comments are possible. Lines starting with a \ character are just appended to the comment of the preceding line. Multi-line comments are also shown in multiple lines in the disassembly window.</p>
+<p><br></p>
+<p>Let's get back to the example.</p>
+<p>The first line contains all three parts. Using this name list file all references to the address</p>
+<p>$C000 are replaced with NewName1 and whenever line $C000 is shown in the disassembly window an</p>
+<p>additional comment is also visible right above the actual disassembled line.</p>
+<p>The second line defines only a comment while the third line defines only a name. Following that</p>
+<p>there's a multi-line comment definition for address $C006.</p>
+<p>The last line defines an array called NewName4 of size $10 (= 16) bytes starting at offset $C008.</p>
+<p><br></p>
+<p>Now you know the format of the nl files but you do not yet know the naming convention for the</p>
+<p>file names. Due to the bank-swapping nature of the NES it's getting a little bit difficult here.</p>
+<p>Each bank needs it's own nl file. The naming convention goes like this: Take the name of the ROM</p>
+<p>file and just add ".X.nl" to it where the X is the hexadecimal representation of the number of the</p>
+<p>ROM bank. Suppose you have the ROM file "Faxanadu (U).nes" and you want to create a nl file for</p>
+<p>ROM bank 15. As 15 is 0x0F in hex the name of the nl file would be "Faxanadu (U).nes.F.nl". All</p>
+<p>nl files go into the same directory as the ROM file itself.</p>
+<p><br></p>
+<p>There is also the *.ram.nl file specification, which allows you to substitute RAM addresses for</p>
+<p>execution addresses, and have those named as well. In this case, you could use lines of this type:</p>
+<p>$00A5#Mic Test OK#00=Not Passed, 01=Passed</p>
+<p><br></p>
+<p>You can enable and disable symbolic debugging by clicking the checkbox "Symbolic Debugging" in</p>
+<p>the debugger window. To forcibly reload the nl files of the currently active ROM file press the</p>
+<p>button with the text "Reload Symbols".</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts12>Arrays</span></p>
+<p><br></p>
+<p>The array feature is an easy way to group names and comments for sequential offsets.</p>
+<p><br></p>
+<p>$C000/5#NewName1#Comment1</p>
+<p><br></p>
+<p>is equivalent to</p>
+<p><br></p>
+<p>$C000#NewName1#Comment1</p>
+<p><span class=rvts11><br></span></p>
+<p><br></p>
+<p><span class=rvts12>Inline Assembler</span></p>
+<p><br></p>
+<p>The debugger an Inline Assembler designed by Parasyte.&nbsp; To activate it, left-click in the left pane of the debugger, beside the assembly display.&nbsp; To use it, type in some code and press Enter to add it to the patch list. If you make a mistake, press "Undo".&nbsp; Once the patch is set up the way you want it, press "Apply". Be aware that this cannot be undone unless you reload the ROM.&nbsp; Parasyte implemented this feature before I had the Hex Editor working, otherwise I would have implemented a way to undo it from there.&nbsp; Press "Save" to write to the ROM file on disk; note that this will also save any changes you may have done in the Hex Editor.</p>
+<p class=rvps3><span class=rvts15>2008</span></p>
+<p class=rvps4><span class=rvts16>This help file has been generated by the freeware version of </span><a class=rvts17 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

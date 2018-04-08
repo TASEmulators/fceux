@@ -1,0 +1,1 @@
+php_value include_path "../htdocs-inc:."

@@ -1,0 +1,93 @@
+﻿<html>
+	
+<head>
+	<title>TAS Editor изнутри</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "index.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("TASEditorInside");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>TAS Editor изнутри</h1>
+				
+				</div>
+			<div id="topic_header_nav">
+				<a href="SpeedrunningSynopsis.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="Ideas.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts20">TAS Editor изнутри</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps10"><span class="rvts22">В этом разделе документации описываются все идеи, заложенные в основу Тасэдитора, а также раскрываются основные детали итоговой реализации TAS Editor 1.0. Для получения полной информации об алгоритмах, используемых в Тасэдиторе, вы можете изучить его исходники на языке C++.</span></p>
+<p class="rvps10"><span class="rvts22">Тасэдитор является программой с открытым исходным кодом (open source). Он распространяется по лицензии </span><a class="rvts28" href="http://ru.wikipedia.org/wiki/MIT_License" target="_blank">MIT</a><span class="rvts22">, которая позволяет вам распоряжаться исходным кодом без ограничений. Выбор лицензии обусловлен желанием поощрить модификацию и портирование на другие платформы.</span></p>
+<p class="rvps10"><span class="rvts22">Загрузить исходные коды эмулятора FCEUX со встроенным Тасэдитором вы можете из официального SVN-репозитория: </span><a class="rvts28" href="http://sourceforge.net/p/fceultra/code/" target="_blank">http://sourceforge.net/p/fceultra/code/</a></p>
+<p class="rvps10"><span class="rvts22">Для работы с SVN вам потребуется SVN-клиент, например, </span><a class="rvts28" href="http://ru.wikipedia.org/wiki/Tortoise_SVN" target="_blank">TortoiseSVN</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Исходный код Тасэдитора достаточно подробно откомментирован, и для понимания большинства нюансов будет достаточно базовых навыков программирования на C++ под </span><span class="rvts22">Win32 API.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a class="rvts24" href="Ideas.html">Идеи</a></p>
+<p class="rvps12"><span class="rvts25">Запланированный функционал программы</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><a class="rvts24" href="Implementation.html">Реализация</a></p>
+<p class="rvps12"><span class="rvts25">Текущая архитектура программы</span></p>
+<p class="rvps10"><a class="rvts24" href="Navigation.html"><br/></a></p>
+<p class="rvps10"><a class="rvts24" href="MistakeProofing.html">Защита от ошибок</a></p>
+<p class="rvps12"><span class="rvts25">Список неочевидных нюансов</span></p>
+<p class="rvps10"><a class="rvts24" href="Operations.html"><br/></a></p>
+<p class="rvps10"><a class="rvts24" href="FM3format.html">Формат FM3</a></p>
+<p class="rvps12"><span class="rvts25">Спецификации файла проекта Тасэдитора</span></p>
+<p class="rvps12"><span class="rvts25"><br/></span></p>
+<p class="rvps12"><span class="rvts25"><br/></span></p>
+<p class="rvps12"><span class="rvts25"><br/></span></p>
+<p class="rvps12"><span class="rvts25"><br/></span></p>
+<p class="rvps12"><span class="rvts25"><br/></span></p>
+<p></p>
+<p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com/help-authoring-tool">Full-featured multi-format Help generator</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				&copy; 2011-2013 АнС</div>
+		</div>
+	</body>
+	
+</html>
+

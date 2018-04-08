@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Code/Data Logger</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+span.rvts11
+{
+ font-size: 14pt;
+}
+span.rvts12 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts13 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts14 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts15, span.rvts15 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{05FC9F4A-AB26-4164-A5F8-6824A3353760}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts12>Code/Data Logger</span></p>
+<p><span class=rvts10>Code/Data Logger</span></p>
+<p><br></p>
+<p>(Taken from the FCEUXD readme.txt)</p>
+<p><br></p>
+<p><span class=rvts11>Introduction</span></p>
+<p><br></p>
+<p>The Code/Data Logger makes it *much* easier to reverse-engineer NES ROMs.&nbsp; The idea behind it is that a normal NES disassembler cannot distinguish between code (which is executed) and data (which is read). The Code/Data logger keeps track of what is executed and what is read while the game is played, and stores this information in a .cdl file, which is essentially a mask that tells which bytes in the ROM are code and which are data. The file can then be used in conjunction with a suitable disassembler (which I plan to make) to disassemble only the actual game code, resulting in a much cleaner source code, with code and data properly separated.</p>
+<p><br></p>
+<p><span class=rvts11>Using the Code/Data Logger</span></p>
+<p><br></p>
+<p>The Code/Data Logger keeps track of every byte in the ROM and records whether it's code (is executed) or data (is read). In the future, I hope to combine this with a suitable disassembler that will disassemble only bytes marked as "code", in order to generate near-perfect source code (provided you play through the game several times, very thoroughly, to ensure everything gets logged). In order to get that feature to work, I need to get the Address Label Logger working, in order to create all the labels.</p>
+<p><br></p>
+<p>But right now, it is very useful for finding specific code and data by using it with the Trace Logger (see above for instructions on doing this).&nbsp; Furthermore, while it is running, the Hex Editor will color-code bytes depending on whether they were logged as code or data. And it can also be used to create a stripped NES ROM (see below).</p>
+<p><br></p>
+<p>Some notes: when you open another .cdl file, it does not clear the current log; instead, it combines it with the information in the file.&nbsp; This can be useful if you're trying to obtain a complete log, as multiple people can play through the game and keep code/data logs, and then the results can be combined.&nbsp; But if you would like to actually clear the code/data log, press the "Reset Log" button.</p>
+<p><br></p>
+<p>A "stripped" NES ROM is one in which everything that was not logged by the code/data logger is removed. This may be just a novelty feature, however it can be useful because you can view the ROM in a Hex Editor, and you'll see only the parts that were used while playing. Furthermore, you could use it to create a demo ROM by only playing through the parts you would like others to see.</p>
+<p><br></p>
+<p>To do so, follow these steps:</p>
+<p><br></p>
+<p>1. Open the Code/Data Logger, and press Start to begin logging.</p>
+<p><br></p>
+<p>2. Perform a soft and a hard reset while logging, in order to capture the ROM's startup sequence. If you don't do so, you can distribute a save-state file so they will start from within the game.</p>
+<p><br></p>
+<p>3. If the game has Save-RAM (e.g. Zelda), you will need to capture the game's Save-RAM initialization routines; you can try to do so by deleting the game's *.sav file and then perform a soft and hard reset (F10, F11) again while logging.</p>
+<p><br></p>
+<p>4. Play through whatever levels you want present in the demo. Be sure to perform every move, get every item, etc., so that the code and data necessary for those things are logged. If, for example, you fail to perform some special move, then if someone plays the stripped ROM and attempts to perform that move, the game may very well crash or glitch up.</p>
+<p><br></p>
+<p>5. Save the stripped NES ROM.</p>
+<p><br></p>
+<p>6. Rejoice, for it is done.</p>
+<p><br></p>
+<p>CDL log files are just a mask of the PRG-ROM; that is, they are the same size as the PRG-ROM, and each byte represents the corresponding byte of the PRG-ROM.&nbsp; The format of each byte is like so (in binary):</p>
+<p><br></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;xPdcAADC</p>
+<p><br></p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;C&nbsp; = Whether it was accessed as code.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;D&nbsp; = Whether it was accessed as data.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;AA = Into which ROM bank it was mapped when last accessed:</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;00 = $8000-$9FFF &nbsp; &nbsp; &nbsp; &nbsp;01 = $A000-$BFFF</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;10 = $C000-$DFFF &nbsp; &nbsp; &nbsp; &nbsp;11 = $E000-$FFFF</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;c&nbsp; = Whether indirectly accessed as code.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(e.g. as the destination of a JMP ($nnnn) instruction)</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;d&nbsp; = Whether indirectly accessed as data.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(e.g. as the destination of an LDA ($nn),Y instruction)</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;P&nbsp; = If logged as PCM audio data.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;x&nbsp; = unused.</p>
+<p><br></p>
+<p>CDL files make possible a number of things never before done.&nbsp; First, a PCM data ripper could be created that scans for data that has the 'P' bit set, in order to find/rip/play every PCM sample in a ROM.&nbsp; Also, it is possible for someone to make a more intelligent ROM corruptor that only corrupts data (by checking the 'D' bit).&nbsp; In any case, the Code/Data Logger opens many new possibilities for discovering useful things in games.&nbsp; Another interesting possibility (which is now partially supported) would be to use the Code/Data Logger on an NSF file to create a stripped NSF. Such an NSF would contain nothing but the relevant subroutines and data required by each tune played; this would be helpful to NSF rippers by removing irrelevant information. Thus, an NSF ripper could create a stripped NSF by listening to each track while the Code/Data Logger operates on it, and then saving the stripped NSF.&nbsp; It should be noted that this capability, though tested and working on private builds, is detrimental to the process of fixing broken NSF files. For this reason, data logging is allowed for NSF files, but stripping NSF files of unused data is disabled.</p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p class=rvps3><span class=rvts13>2008</span></p>
+<p class=rvps4><span class=rvts14>This help file has been generated by the freeware version of </span><a class=rvts15 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

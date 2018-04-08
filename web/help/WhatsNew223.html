@@ -1,0 +1,208 @@
+﻿<html>
+	
+<head>
+	<title>What's New? 2.2.3 (changelog)</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("WhatsNew223");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>What's New? 2.2.3 (changelog)</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="FCEUltraVersionHistory.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="WhatsNew222.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p class="rvps3"><span class="rvts17">What's New? </span><span class="rvts20">2.2.3</span></p>
+<p class="rvps3">Released -- 28 July 2016</p>
+<p class="rvps3"><br/></p>
+<p class="rvps3"><br/></p>
+<p class="rvps3">The 2.2.3 release fixes a number of emulation bugs, features overclocking (for lag reduction) and Dendy mode, and adds support for a bunch of new ROM dumps (mostly unlicensed). Reverse engineering tools and Lua scripting have got some updates, new input devices are supported, new palette files have beed added. The SDL port has been fixed and updated as well.</p>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts22">Common</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3">Customizable overclocking</li>
+<li class="rvps3">Dendy mode</li>
+<li class="rvps3"><span class="rvts21">Fixed rerecord counting broken outside taseditor</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23">Emulation</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Added mappers: 29, 30, </span></li>
+<li class="rvps3"><span class="rvts21">Fixed mappers: 225, 119, 4, 35, 31, 69, 212, 45, </span></li>
+<li class="rvps3"><span class="rvts21">Fixed mmc5 IRQ handling</span></li>
+<li class="rvps3"><span class="rvts21">Fixed mmc1 reg#3 masking</span></li>
+<li class="rvps3"><span class="rvts21">Fixed vrc7 sound savestates</span></li>
+<li class="rvps3"><span class="rvts21">Added CoolBoy, KS7010, SB200, UNIF 158B, UNIF DRAGONFIGHTER, UNIF BMC-10-24-C-A1, UNIF EH8813A, UNIF HP898F, UNIF F-15, UNIF RT-01, UNIF UNL-KS7017, UNIF BMC-81-01-31-C, UNIF UNL-8-IN-1</span></li>
+<li class="rvps3"><span class="rvts21">NES 2.0 support</span></li>
+<li class="rvps3"><span class="rvts21">Fixed UNIF BMC 12 IN 1, UNIF OneBus</span></li>
+</ul>
+<p class="rvps3"><span class="rvts21"><br/></span></p>
+<p class="rvps3"><span class="rvts23">Movies</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Fixed a bug with FDS flag being always set when converting a FCM</span></li>
+</ul>
+<p class="rvps3"><span class="rvts21"><br/></span></p>
+<p class="rvps3"><span class="rvts23">Video</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Prescale filter for 2x, 3x and 4x resolutions</span></li>
+<li class="rvps3"><span class="rvts21">Made NTSC filter internal resolution closer to 4:3</span></li>
+</ul>
+<p class="rvps3"><span class="rvts21"><br/></span></p>
+<p class="rvps3"><span class="rvts23">Palette</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Support 512 color palettes</span></li>
+<li class="rvps3">Added external palettes: SONY_CXA2025AS_US.pal, RP2C03.pal (and its versions), Unsaturated-V6.pal</li>
+<li class="rvps3"><span class="rvts21">Option to swap deemphasis bits</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23">Sound</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3">Option to swap duty cycles</li>
+<li class="rvps3"><span class="rvts21">NSF can be set to Dendy mode</span></li>
+</ul>
+<p class="rvps3"><span class="rvts21"><br/></span></p>
+<p class="rvps3"><span class="rvts23">Input</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Fix Mouse input implementation</span></li>
+<li class="rvps3"><span class="rvts21">Support for SNES mouse</span></li>
+<li class="rvps3"><span class="rvts21">PEC-586 russian keyboard support</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23">Lua</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Removed speed notification per script reload, if it remained 100%</span></li>
+<li class="rvps3"><span class="rvts21">Fixed lua drawings in NSF</span></li>
+<li class="rvps3"><span class="rvts21">Proper halo for lua font</span></li>
+<li class="rvps3"><span class="rvts21">Fixes to sound.get() region consistency and frequency/midikey detection for Noise and DPCM channels</span></li>
+</ul>
+<p class="rvps3"><span class="rvts21"><br/></span></p>
+<p class="rvps3"><span class="rvts21">New Lua functions:</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">emu.getpath()</span></li>
+<li class="rvps3"><span class="rvts21">emu.loadrom()</span></li>
+<li class="rvps3"><span class="rvts21">rom.writebyte()</span></li>
+<li class="rvps3"><span class="rvts21">gethash()</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23">Win32</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Added -dumpinput and -playinput functions</span></li>
+<li class="rvps3"><span class="rvts21">Support for SNES pad</span></li>
+<li class="rvps3"><span class="rvts21">Added onscreen messages when region changes</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts22">Debugger</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Added debuggerPageSize config variable which lets you pick whether 8KB physical PRG pages are used, or 16KB (the original). It defaults to 14 (1&lt;&lt;14 == 16KB).</span></li>
+<li class="rvps3"><span class="rvts21">Set symbolic debugger name entry dialog text limits when creating a new label</span></li>
+<li class="rvps3"><span class="rvts21">Fixed new-PPU debug information (address and pixel)</span></li>
+<li class="rvps3"><span class="rvts21">Step Into hotkey</span></li>
+<li class="rvps3"><span class="rvts21">More granular accounting of scanline and dot</span></li>
+</ul>
+<p class="rvps3"><span class="rvts22"><br/></span></p>
+<p class="rvps3"><span class="rvts22">Trace Logger</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Fixed incorrect display of resolved address for (FF,x)</span></li>
+</ul>
+<p class="rvps3"><span class="rvts22"><br/></span></p>
+<p class="rvps3"><span class="rvts22">Symbolic debugging</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Optionally display register names</span></li>
+</ul>
+<p class="rvps3"><span class="rvts22"><br/></span></p>
+<p class="rvps3"><span class="rvts22">CDLogger</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3">Fix <span class="rvts21">crash when attempting to open file picked as target for Save Stripped ROM operation</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts22">PPU Viewer</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">8x16 sprite display mode</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts22">Hex Editor</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Added option to dump entire 64k memory space</span></li>
+<li class="rvps3"><span class="rvts21">Don't forget to load the symbols, when hex editor is first launched before debugger</span></li>
+<li class="rvps3"><span class="rvts21">Show values for registers $4000-$4017</span></li>
+</ul>
+<p class="rvps3"><span class="rvts22"><br/></span></p>
+<p class="rvps3"><span class="rvts22">Cheats</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">mmc5 Akumajou Dracula crash fix</span></li>
+<li class="rvps3"><span class="rvts21">More RAM available in search</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23">SDL</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Added apply button to video config dialog</span></li>
+<li class="rvps3"><span class="rvts21">Added link to libgd project download page in readme</span></li>
+<li class="rvps3"><span class="rvts21">Noted optional libgd dependency in readme</span></li>
+<li class="rvps3"><span class="rvts21">SCons: Fixed logic for LOGO and CREATE_AVI options</span></li>
+<li class="rvps3"><span class="rvts21">Manpage updates</span></li>
+<li class="rvps3"><span class="rvts21">Added hotkeys for volume up/down</span></li>
+<li class="rvps3"><span class="rvts21">Menu toggling with the Alt key</span></li>
+<li class="rvps3"><span class="rvts21">Print error when opengl/scalers are both enabled</span></li>
+<li class="rvps3"><span class="rvts21">Fixed bug where lua open file gui would default to home directory</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour">Easily create Web Help sites</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2016</div>
+		</div>
+	</body>
+	
+</html>
+

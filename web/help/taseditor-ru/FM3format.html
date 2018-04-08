@@ -1,0 +1,394 @@
+﻿<html>
+	
+<head>
+	<title>Формат FM3</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "index.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("FM3format");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Формат FM3</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="TASEditorInside.html">TAS Editor изнутри</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="TASEditorInside.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="MistakeProofing.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p><span class="rvts20">Формат FM3</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Формат FM3 является расширенной версией старого формата FM2. В FM2 хранятся данные, необходимые для воспроизведения мувика, а FM3 добавляет к ним данные о состоянии рабочего процесса в Тасэдиторе.</span></p>
+<p class="rvps10"><span class="rvts22">Спецификации формата FM2 можно прочитать в Справке FCEUX, а также </span><a class="rvts28" href="http://www.fceux.com/web/FM2.html" target="_blank">на официальном сайте эмулятора</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Любой FM3-файл состоит из трёх частей:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><a class="rvts28" href="FM3format.html#Header">Заголовок</a><span class="rvts22"> (как в fm2)</span></li>
+<li class="rvps10"><a class="rvts28" href="FM3format.html#InputLog">Журнал Ввода</a><span class="rvts22"> (как в fm2)</span></li>
+<li class="rvps10"><a class="rvts28" href="FM3format.html#TaseditorData">Данные Тасэдитора</a></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps10"><a name="Header"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts23">Заголовок</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Заголовок хранится в текстовом формате, в кодировке ASCII.</span></p>
+<p class="rvps10"><span class="rvts22">Он состоит из нескольких строк вида "ключевое слово + значение".</span></p>
+<p class="rvps10"><span class="rvts22">Символом перевода строки может быть как </span><span class="rvts72">\r\n</span><span class="rvts22">, так и </span><span class="rvts72">\n</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Если в начале очередной строки идёт символ "|" (вертикальная черта), это значит, что Заголовок закончился, и начался Журнал Ввода.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">В начале каждой строки Заголовка находится ключевое слово, после которого стоит пробел, а затем идёт текстовое представление значения.</span></p>
+<p class="rvps10"><span class="rvts22">В первой строке Заголовка должно идти ключевое слово </span><span class="rvts26">version</span><span class="rvts22">, остальные ключевые слова могут располагаться в какой угодно последовательности.</span></p>
+<p class="rvps10"><span class="rvts22">Значение заканчивается переводом строки.</span></p>
+<p class="rvps10"><span class="rvts22">Значение следует разбирать в зависимости от ключевого слова – либо как целочисленное значение, либо как строку текста.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts37">Список ключевых слов с целочисленным значением:</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">(включая значения для переменных типа Boolean, где 1 = </span><span class="rvts72">true</span><span class="rvts22">, 0 = </span><span class="rvts72">false</span><span class="rvts22">)</span></p>
+<p class="rvps10"><span class="rvts22">(числовое значение должно умещаться в переменную типа </span><span class="rvts72">int32</span><span class="rvts22">)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts26">version</span><span class="rvts22"> (наличие обязательно) – номер версии формата мувика; на данный момент это </span><span class="rvts26">3</span></li>
+<li class="rvps10"><span class="rvts26">emuVersion</span><span class="rvts22"> (обязательно) – версия эмулятора, в котором был создан этот файл (например, </span><span class="rvts26">21060</span><span class="rvts22">)</span></li>
+<li class="rvps10"><span class="rvts26">rerecordCount</span><span class="rvts22"> (наличие не обязательно) – счётчик перезаписей</span></li>
+<li class="rvps10"><span class="rvts26">palFlag</span><span class="rvts22"> (</span><span class="rvts72">bool</span><span class="rvts22">) (не обязательно) – </span><span class="rvts72">true</span><span class="rvts22">, если мувик использует тайминг PAL, а по умолчанию используется NTSC</span></li>
+<li class="rvps10"><span class="rvts26">NewPPU</span><span class="rvts22"> (</span><span class="rvts72">bool</span><span class="rvts22">) (не обязательно) – </span><span class="rvts72">true</span><span class="rvts22">, если мувик использует New PPU</span></li>
+<li class="rvps10"><span class="rvts26">FDS</span><span class="rvts22"> (</span><span class="rvts72">bool</span><span class="rvts22">) (не обязательно) – </span><span class="rvts72">true</span><span class="rvts22">, если мувик создан для игры с Famicom Disk System</span></li>
+<li class="rvps10"><span class="rvts26">fourscore</span><span class="rvts22"> (</span><span class="rvts72">bool</span><span class="rvts22">) – </span><span class="rvts72">true</span><span class="rvts22">, если мувик создан с использованием устройства fourscore. Если fourscore не использовалось, то в Заголовке обязательно наличие значений для ключевых слов </span><span class="rvts26">port0</span><span class="rvts22"> и </span><span class="rvts26">port1</span><span class="rvts22">.</span></li>
+<li class="rvps10"><span class="rvts26">port0</span><span class="rvts22"> – тип устройства ввода, настроенного на порт 0 приставки. Возможны следующие значения:</span></li>
+</ul>
+<ul style="text-indent: 60px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10" style="text-indent: 60px"><span class="rvts22">SI_NONE = 0 (ничего не подключено)</span></li>
+<li class="rvps10" style="text-indent: 60px"><span class="rvts22">SI_GAMEPAD = 1 (подключен стандартный геймпад NES)</span></li>
+<li class="rvps10" style="text-indent: 60px"><span class="rvts22">SI_ZAPPER = 2 (подключен пистолет)</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts26">port1</span><span class="rvts22"> – тип устройства ввода, настроенного на порт 1 приставки. Возможны следующие значения:</span></li>
+</ul>
+<ul style="text-indent: 60px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10" style="text-indent: 60px"><span class="rvts22">SI_NONE = 0 (ничего не подключено)</span></li>
+<li class="rvps10" style="text-indent: 60px"><span class="rvts22">SI_GAMEPAD = 1 (подключен стандартный геймпад NES)</span></li>
+<li class="rvps10" style="text-indent: 60px"><span class="rvts22">SI_ZAPPER = 2 (подключен пистолет)</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts26">port2</span><span class="rvts22"> (обязательно) – тип устройства ввода, настроенного на порт FCExp приставки. Возможны следующие значения:</span></li>
+</ul>
+<ul style="text-indent: 60px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10" style="text-indent: 60px"><span class="rvts22">SIFC_NONE = 0 (ничего не подключено)</span></li>
+</ul>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts26">binary</span><span class="rvts22"> (</span><span class="rvts72">bool</span><span class="rvts22">) (не обязательно) – </span><span class="rvts72">true</span><span class="rvts22">, если Журнал Ввода сохранён в двоичном формате. FM2-файлы обычно хранят Ввод в текстовом формате, чтобы его было удобно редактировать в текстовых редакторах. FM3-файлы обычно хранят Ввод в двоичном формате, чтобы сэкономить место на диске</span></li>
+<li class="rvps10"><span class="rvts26">length</span><span class="rvts22"> (обязательно для fm3) – размер мувика (количество кадров в сохранённом Журнале Ввода). Если в Заголовке есть это ключевое слово, и его значение &gt;= 0, то Журнал Ввода оканчивается после означенного количества записей, а затем следуют данные Тасэдитора. Именно наличие этого ключевого слова в Заголовке отличает FM3-файлы от FM2-файлов.</span></li>
+</ul>
+<p class="rvps14"><span class="rvts22"><br/></span></p>
+<p class="rvps14"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts37">Список ключевых слов со строковым значением:</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">(эти строки не могут содержать символ перевода строки, так как он служит индикатором окончания значения)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts26">romFilename</span><span class="rvts22"> (обязательно) – имя файла, использованного при создании проекта</span></p>
+<p class="rvps10"><span class="rvts26">romChecksum</span><span class="rvts22"> (обязательно) – MD5-чексумма РОМа, использованного при создании мувика</span></p>
+<p class="rvps10"><span class="rvts26">comment</span><span class="rvts22"> (не обязательно) – комментарий. По традиции автор мувика обозначается комментарием вида "author имя". Пример: "comment author AnS"</span></p>
+<p class="rvps10"><span class="rvts26">subtitle</span><span class="rvts22"> (не обязательно) – сообщение, которое будет выводиться на экран эмулятора во время проигрывания этого мувика. Сразу после слова subtitle через пробел должно следовать целочисленное значение, определяющее номер кадра, на котором должно появиться сообщение. После этого числа через пробел следует текст выводимого сообщения. Пример: "subtitle 100 Level Two" – на сотом кадре мувика появится сообщение "Level Two"</span></p>
+<p class="rvps10"><span class="rvts26">guid</span><span class="rvts22"> (обязательно) – уникальный идентификатор мувика, сгенерированный при его создании</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps10"><a name="InputLog"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts23">Журнал Ввода</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Журнал Ввода состоит из последовательности записей о состоянии Ввода на каждом кадре мувика. Эти записи могут храниться в виде текстовых строк или в виде двоичных данных.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts37">Текстовый формат:</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Каждый кадр мувика представлен текстовой строкой, в начале и конце которой находится символ "|".</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Если не используется fourscore, строка имеет следующий вид:</span></p>
+<p class="rvps10"><span class="rvts26">|команды|port0|port1|port2|</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">В поле </span><span class="rvts26">команды</span><span class="rvts22"> должно находиться десятичное целое число, интерпретируемое как битовая карта состояний команд приставки:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">бит 0 (значение числа = 1) – Сброс</span></li>
+<li class="rvps10"><span class="rvts22">бит 1 (значение числа = 2) – Power</span></li>
+<li class="rvps10"><span class="rvts22">бит 2 (значение числа = 4) – Eject/Insert Disk</span></li>
+<li class="rvps10"><span class="rvts22">бит 3 (значение числа = 8) – Switch Disk Side</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Формат полей </span><span class="rvts26">port0</span><span class="rvts22">, </span><span class="rvts26">port1 </span><span class="rvts22">и </span><span class="rvts26">port2 </span><span class="rvts22">зависит от типа устройства ввода, настроенного на данный порт.</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">SI_NONE: поле должно быть пустым</span></li>
+<li class="rvps10"><span class="rvts22">SI_GAMEPAD: Поле состоит из восьми текстовых символов, соответствующих восьми кнопкам джойстика. Если символ равен " " (пробел) или "." (точка), это означает, что соответствующая кнопка на данном кадре отпущена. Любой другой символ означает, что соответствующая кнопка на данном кадре нажата. Для простоты запоминания, какой столбец какой кнопке соответствует, рекомендуется использовать символы в следующей последовательности: RLDUTSBA (</span><span class="rvts32">Вправо</span><span class="rvts22">, </span><span class="rvts32">Влево</span><span class="rvts22">, </span><span class="rvts32">Вниз</span><span class="rvts22">, </span><span class="rvts32">Вверх</span><span class="rvts22">, </span><span class="rvts32">Start</span><span class="rvts22">, </span><span class="rvts32">Select</span><span class="rvts22">, </span><span class="rvts32">B</span><span class="rvts22">, </span><span class="rvts32">A</span><span class="rvts22">).</span></li>
+<li class="rvps10"><span class="rvts22">SI_ZAPPER: Поле состоит из последовательности текстовых символов вида </span><span class="rvts26">XXX YYY B Q Z</span></li>
+</ul>
+<ul style="text-indent: 60px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10" style="text-indent: 60px"><span class="rvts26">XXX</span><span class="rvts22">: %03d – координата X мыши</span></li>
+<li class="rvps10" style="text-indent: 60px"><span class="rvts26">YYY</span><span class="rvts22">: %03d – координата Y мыши</span></li>
+<li class="rvps10" style="text-indent: 60px"><span class="rvts26">B</span><span class="rvts22">: %1d – 1 = кнопка мыши нажата, 0 = не нажата</span></li>
+<li class="rvps10" style="text-indent: 60px"><span class="rvts26">Q</span><span class="rvts22">: %1d – значение, необходимое для эмуляции пистолета</span></li>
+<li class="rvps10" style="text-indent: 60px"><span class="rvts26">Z</span><span class="rvts22">: %d – значение, необходимое для эмуляции пистолета, количество разрядов у этого числа может варьироваться</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Если используется fourscore, все устройства ввода считаются геймпадами, и каждая запись представлена строкой вида:</span></p>
+<p class="rvps10"><span class="rvts26">|команды|RLDUTSBA|RLDUTSBA|RLDUTSBA|RLDUTSBA|port2|</span></p>
+<p class="rvps10"><span class="rvts22">(команды, игрок 1, игрок 2, игрок 3, игрок 4, пустота)</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts37">Двоичный формат:</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Перед началом Журнала Ввода располагается символ "|".</span></p>
+<p class="rvps10"><span class="rvts22">Каждый кадр мувика представлен записью в виде последовательности байтов. Размер каждой записи одинаков и зависит от устройств ввода, настроенных на порты приставки.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">В первом байте каждой записи хранится битовая карта состояний команд приставки:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">бит 0 – Сброс</span></li>
+<li class="rvps10"><span class="rvts22">бит 1 – Power</span></li>
+<li class="rvps10"><span class="rvts22">бит 2 – Eject/Insert Disk</span></li>
+<li class="rvps10"><span class="rvts22">бит 3 – Switch Disk Side</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Если не используется fourscore, остальное содержание записи зависит от устройств ввода, настреонных на порт 0 и порт 1:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">SI_NONE: 0 байтов добавляется к размеру записи</span></li>
+<li class="rvps10"><span class="rvts22">SI_GAMEPAD: 1 байт добавляется к размеру записи. Каждый бит этого байта отражает состояние сооветствующей кнопки джойстика (бит 0 = </span><span class="rvts32">A</span><span class="rvts22">, бит 1 = </span><span class="rvts32">B</span><span class="rvts22">, бит 2 = </span><span class="rvts32">Select</span><span class="rvts22">, бит 3 = </span><span class="rvts32">Start</span><span class="rvts22">, бит 4 = </span><span class="rvts32">Вверх</span><span class="rvts22">, бит 5 = </span><span class="rvts32">Вниз</span><span class="rvts22">, бит 6 = </span><span class="rvts32">Влево</span><span class="rvts22">, бит 7 = </span><span class="rvts32">Вправо</span><span class="rvts22">). Если бит установлен, кнопка считается нажатой на данном кадре, иначе она считается отпущенной</span></li>
+<li class="rvps10"><span class="rvts22">SI_ZAPPER: 12 байтов добавляется к размеру записи.</span></li>
+</ul>
+<ul style="text-indent: 60px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10" style="text-indent: 60px"><span class="rvts22">первый байт –</span><span class="rvts26"> </span><span class="rvts22">координата X мыши</span></li>
+<li class="rvps10" style="text-indent: 60px"><span class="rvts22">второй байт – координата Y мыши</span></li>
+<li class="rvps10" style="text-indent: 60px"><span class="rvts22">третий байт – 1 = кнопка мышки нажата, 0 = не нажата</span></li>
+<li class="rvps10" style="text-indent: 60px"><span class="rvts22">четвёртый байт – значение, необходимое для эмуляции пистолета</span></li>
+<li class="rvps10" style="text-indent: 60px"><span class="rvts22">байты с 5-го по 12-й (</span><span class="rvts72">uint64</span><span class="rvts22">) – значение, необходимое для эмуляции пистолета</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Если используется fourscore, все устройства ввода считаются геймпадами, и к размеру записи добавляется 4 байта. Биты первого байта отражают состояние сооветствующей кнопки первого джойстика (бит 0 = </span><span class="rvts32">A</span><span class="rvts22">, бит 1 = </span><span class="rvts32">B</span><span class="rvts22">, бит 2 = </span><span class="rvts32">Select</span><span class="rvts22">, бит 3 = </span><span class="rvts32">Start</span><span class="rvts22">, бит 4 = </span><span class="rvts32">Вверх</span><span class="rvts22">, бит 5 = </span><span class="rvts32">Вниз</span><span class="rvts22">, бит 6 = </span><span class="rvts32">Влево</span><span class="rvts22">, бит 7 = </span><span class="rvts32">Вправо</span><span class="rvts22">). Биты второго байта отражают состояние сооветствующей кнопки второго джойстика, и т.д.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps10"><a name="TaseditorData"></a>
+<span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts23">Данные Тасэдитора</span></p>
+<p class="rvps21"><span class="rvts22"><br/></span></p>
+<div class="rvps21"><table width="450" border="1" cellpadding="0" cellspacing="0" style="border-color: #d3c4af #000000 #000000 #d3c4af; border-style: solid;">
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">4 байта</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts80">unsigned int32</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">Версия FM3</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">4 байта</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts80">unsigned int32</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">Какие модули сохранены</span></p>
+</td>
+</tr>
+<tr valign="top">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">4 байта</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts80">unsigned int32</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">Количество смещений (N)</span></p>
+</td>
+</tr>
+<tr valign="top">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">4 * N байтов</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">указатели</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">Смещения</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">???</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">stream</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">MARKERS DATA</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">???</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">stream</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">BOOKMARKS DATA</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">???</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">stream</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">GREENZONE DATA</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">???</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">stream</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">HISTORY DATA</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">???</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">stream</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">PIANO ROLL DATA</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">???</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">stream</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">SELECTION DATA</span></p>
+</td>
+</tr>
+</table>
+</div>
+<p class="rvps21"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Данные Тасэдитора начинаются сразу после окончания последней записи в Журнале Ввода. Если сразу после окончания последней записи обнаруживается конец файла, Тасэдитор воспримет этот файл как fm2-файл.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Первые 4 байта данных содержат номер версии формата проекта. Релизная версия TAS Editor 1.0 имеет версию формата под номером 3.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Следующие 4 байта содержат битовую карту, которая может использоваться для определения, какие модули Тасэдитора сохранили свои данные в этот файл:</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">бит 0 – в файле сохранены Маркеры</span></li>
+<li class="rvps10"><span class="rvts22">бит 1 – в файле сохранены Закладки</span></li>
+<li class="rvps10"><span class="rvts22">бит 2 – в файле сохранена вся Гринзона</span></li>
+<li class="rvps10"><span class="rvts22">бит 3 – в файле сохранен Журнал Истории</span></li>
+<li class="rvps10"><span class="rvts22">бит 4 – в файле сохранены данные Piano Roll</span></li>
+<li class="rvps10"><span class="rvts22">бит 5 – в файле сохранена История Выделений</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">Следующие 4 байта содержат общее число сохраняемых модулей, в версии 3 это число всегда должно быть равно 6.</span></p>
+<p class="rvps10"><span class="rvts22">Затем располагаются шесть четырёхбайтных смещений на данные каждого модуля. Смещения отсчитываются от начала файла.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22">При сохранении проекта Тасэдитор поочерёдно вызывает все модули, требующие сохранения данных. Каждый модуль сначала сохраняет текущую позицию записи в файл (смещение), а затем в зависимости от настроек компактного сохранения осуществляет выборочную сериализацию своих данных в файловый поток. Порядок сохранения модулей всегда одинаков (Маркеры, Закладки, Гринзона, История, Piano Roll, Выделение). При загрузке проекта Тасэдитор вызывает модули в той же очерёдности, и они переходят по нужному смещению и загружают свои данные из файлового потока.</span></p>
+<p class="rvps10"><span class="rvts22">Чтобы оценить целостность загружаемых данных, каждый модуль при сохранении записывает в файл строку-идентификатор своих данных. И если перед началом загрузки своих данных модуль не обнаружит эту строку на текущей позиции в файловом потоке, он откажется от загрузки и создаст данные по умолчанию, передав Тасэдитору сообщение об ошибке загрузки. Кроме того, если вместо строки-идентификатора сохранения он обнаружит строку-идентификатор отсутствия данных, он откажется от загрузки и создаст данные по умолчанию, без генерации сообщения об ошибке.</span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<div class="rvps21"><table width="450" border="1" cellpadding="0" cellspacing="0" style="border-color: #d3c4af #000000 #000000 #d3c4af; border-style: solid;">
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; background-color: #0000ff; width: 106px;"><p class="rvps5"><span class="rvts79">Модуль</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; background-color: #0000ff; width: 174px;"><p class="rvps5"><span class="rvts79">Идентификатор</span></p>
+<p class="rvps5"><span class="rvts79">сохранённых данных</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; background-color: #0000ff; width: 162px;"><p class="rvps5"><span class="rvts79">Идентификатор</span></p>
+<p class="rvps5"><span class="rvts79">отсутствия данных</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 106px;"><p class="rvps5"><span class="rvts6">Маркеры</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 174px;"><p class="rvps5"><span class="rvts6">MARKERS</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 162px;"><p class="rvps5"><span class="rvts6">MARKERX</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 106px;"><p class="rvps5"><span class="rvts6">Закладки</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 174px;"><p class="rvps5"><span class="rvts6">BOOKMARKS</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 162px;"><p class="rvps5"><span class="rvts6">BOOKMARKX</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 106px;"><p class="rvps5"><span class="rvts6">Гринзона</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 174px;"><p class="rvps5"><span class="rvts6">GREENZONE</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 162px;"><p class="rvps5"><span class="rvts6">GREENZONX</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 106px;"><p class="rvps5"><span class="rvts6">История</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 174px;"><p class="rvps5"><span class="rvts6">HISTORY</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 162px;"><p class="rvps5"><span class="rvts6">HISTORX</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 106px;"><p class="rvps5"><span class="rvts6">Piano Roll</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 174px;"><p class="rvps5"><span class="rvts6">PIANO_ROLL</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 162px;"><p class="rvps5"><span class="rvts6">PIANO_ROLX</span></p>
+</td>
+</tr>
+<tr valign="middle">
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 106px;"><p class="rvps5"><span class="rvts6">Выделение</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 174px;"><p class="rvps5"><span class="rvts6">SELECTION</span></p>
+</td>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 162px;"><p class="rvps5"><span class="rvts6">SELECTIOX</span></p>
+</td>
+</tr>
+</table>
+</div>
+<p class="rvps21"><span class="rvts22"><br/></span></p>
+<p class="rvps21"><span class="rvts22"><br/></span></p>
+<p class="rvps21"><span class="rvts22"><br/></span></p>
+<p class="rvps21"><span class="rvts22"><br/></span></p>
+<p class="rvps21"><span class="rvts22"><br/></span></p>
+<p></p>
+<p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com/help-authoring-tool">Single source CHM, PDF, DOC and HTML Help creation</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				&copy; 2011-2013 АнС</div>
+		</div>
+	</body>
+	
+</html>
+
