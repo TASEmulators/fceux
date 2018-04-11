@@ -122,25 +122,25 @@ uint8* MMC5BGVRAMADR(uint32 A)
 	{
 		if(Sprite16)
 		{
-			bool isPattern = !!PPUON;
-			if (newppu && ppuphase == PPUPHASE_OBJ && isPattern)
+			bool isPattern = PPUON;
+			if (ppuphase == PPUPHASE_OBJ && isPattern)
 				return &ABANKS[(A) >> 10][(A)];
-			if (newppu && ppuphase == PPUPHASE_BG && isPattern)
+			if (ppuphase == PPUPHASE_BG && isPattern)
 				return &BBANKS[(A) >> 10][(A)];
 			else if(mmc5ABMode == 0)
 				return &ABANKS[(A) >> 10][(A)];
 			else 
 				return &BBANKS[(A) >> 10][(A)];
 		}
-		else return &ABANKS[(A) >> 10][(A)];
+		else return &ABANKS[(A) >> 10][(A)];;
 	}
 
 	if (!Sprite16) {
 		if (mmc5ABMode == 0)
-			return MMC5SPRVRAMADR(A);
+			return &ABANKS[(A) >> 10][(A)];
 		else
-			return &MMC5BGVPage[(A) >> 10][(A)];
-	} else return &MMC5BGVPage[(A) >> 10][(A)];
+			return &BBANKS[(A) >> 10][(A)];
+	} else return &BBANKS[(A) >> 10][(A)];
 }
 
 static void mmc5_PPUWrite(uint32 A, uint8 V) {

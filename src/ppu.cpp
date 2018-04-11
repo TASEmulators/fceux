@@ -374,7 +374,7 @@ uint8 UPALRAM[0x03];//for 0x4/0x8/0xC addresses in palette, the ones in
 #define MMC5SPRVRAMADR(V)   &MMC5SPRVPage[(V) >> 10][(V)]
 #define VRAMADR(V)          &VPage[(V) >> 10][(V)]
 
-extern uint8* MMC5BGVRAMADR(uint32 A);
+uint8* MMC5BGVRAMADR(uint32 A);
 
 //this duplicates logic which is embedded in the ppu rendering code
 //which figures out where to get CHR data from depending on various hack modes
@@ -770,7 +770,7 @@ static DECLFR(A2007) {
 
 					if (debug_loggingCD)
 						LogAddress = GetCHRAddress(tmp);
-					if(MMC5Hack)
+					if(MMC5Hack && newppu)
 						VRAMBuffer = *MMC5BGVRAMADR(tmp);
 					else
 						VRAMBuffer = VPage[tmp >> 10][tmp];
