@@ -3,3 +3,11 @@
 /vc/vc14_bin_Debug
 /vc/vc14_obj_Debug
 /vc/*.user
+/output/auxlib.lua
+/vc/vc14_obj_Release
+/output/fceux.pdb
+/output/7z.dll
+/output/fceux.exe
+/output/fceux.exp
+/output/fceux.lib
+/vc/vc14_obj_PublicRelease
