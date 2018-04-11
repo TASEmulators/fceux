@@ -29,9 +29,9 @@
 #include "scmrev.h"
 #else
 #ifdef SVN_REV
-#define SVN_REV_STR SVN_REV
+#define SCM_REV_STR SCM_REV
 #else
-#define SVN_REV_STR ""
+#define SCM_REV_STR ""
 #endif
 #endif
 
@@ -44,7 +44,7 @@
 #elif defined(PUBLIC_RELEASE)
 #define FCEU_SUBVERSION_STRING ""
 #else
-#define FCEU_SUBVERSION_STRING "-interim svn" SVN_REV_STR
+#define FCEU_SUBVERSION_STRING "-interim git" SCM_REV_STR
 #endif
 
 #if defined(_MSC_VER)
