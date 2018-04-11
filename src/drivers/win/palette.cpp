@@ -201,7 +201,7 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 						SendDlgItemMessage(hwndDlg, STATIC_SHARPVALUE, WM_SETTEXT, 0, (LPARAM) text);
 						sprintf(text, "Contrast: %d%", palcontrast);
 						SendDlgItemMessage(hwndDlg, STATIC_CONTRASTVALUE,WM_SETTEXT, 0, (LPARAM) text);
-						sprintf(text, "Brightness: %d%", palbrightness);
+						sprintf(text, "Brightness: %d%%", palbrightness);
 						SendDlgItemMessage(hwndDlg, STATIC_BRIGHTVALUE,  WM_SETTEXT, 0, (LPARAM) text);
 
 						SendDlgItemMessage(hwndDlg, CTL_PALNOTCH_TRACKBAR,   TBM_SETPOS, 1, palnotch);
