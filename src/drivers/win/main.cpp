@@ -21,7 +21,11 @@
 
 #include "common.h"
 
+//little build hack for vs2015 (due to static libs linked in by lua/luaperks)
+//could probably rebuild those libs, but this is easier
+#if _MSC_VER >= 1900
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
+#endif
 
 // I like hacks.
 #define uint8 __UNO492032
