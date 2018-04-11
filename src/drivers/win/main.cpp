@@ -21,6 +21,8 @@
 
 #include "common.h"
 
+extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
+
 // I like hacks.
 #define uint8 __UNO492032
 #include <winsock.h>

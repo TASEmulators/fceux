@@ -1494,9 +1494,6 @@
     <ClInclude Include="..\src\conddebug.h">
       <Filter>include files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\config.h">
-      <Filter>include files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\debug.h">
       <Filter>include files</Filter>
     </ClInclude>

@@ -46,7 +46,6 @@ typedef signed int int32;
 #define stat _stat
 #define mkdir _mkdir
 #define alloca _alloca
-#define snprintf _snprintf
 #define FCEUX_fstat _fstat
 #if _MSC_VER < 1500
 #define vsnprintf _vsnprintf
