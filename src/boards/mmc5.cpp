@@ -252,12 +252,11 @@ uint8 FASTCALL mmc5_PPURead(uint32 A)
 		{
 			if((A&0x3FF)>=0x3C0)
 			{
-				return ExRAM[NTRefreshAddr & 0x3ff];
-				//uint8 byte = ExRAM[NTRefreshAddr & 0x3ff];
-				////get attribute part and paste it 4x across the byte
-				//byte >>= 6;
-				//byte *= 0x55;
-				//return byte;
+				uint8 byte = ExRAM[NTRefreshAddr & 0x3ff];
+				//get attribute part and paste it 4x across the byte
+				byte >>= 6;
+				byte *= 0x55;
+				return byte;
 			} 
 		}
 			
