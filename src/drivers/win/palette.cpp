@@ -96,15 +96,15 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			SendDlgItemMessage(hwndDlg, CTL_PALBRIGHT_TRACKBAR,  TBM_SETRANGE, 1, MAKELONG(0, 100));
 
 			FCEUI_GetNTSCTH(&ntsctint, &ntschue);
-			sprintf(text, "Notch: %d%", palnotch);
+			sprintf(text, "Notch: %d%%", palnotch);
 			SendDlgItemMessage(hwndDlg, STATIC_NOTCHVALUE,   WM_SETTEXT, 0, (LPARAM) text);
 			sprintf(text, "Saturation: %d%%", palsaturation);
 			SendDlgItemMessage(hwndDlg, STATIC_SATVALUE,     WM_SETTEXT, 0, (LPARAM) text);
-			sprintf(text, "Sharpness: %d%", palsharpness);
+			sprintf(text, "Sharpness: %d%%", palsharpness);
 			SendDlgItemMessage(hwndDlg, STATIC_SHARPVALUE,   WM_SETTEXT, 0, (LPARAM) text);
-			sprintf(text, "Contrast: %d%", palcontrast);
+			sprintf(text, "Contrast: %d%%", palcontrast);
 			SendDlgItemMessage(hwndDlg, STATIC_CONTRASTVALUE,WM_SETTEXT, 0, (LPARAM) text);
-			sprintf(text, "Brightness: %d%", palbrightness);
+			sprintf(text, "Brightness: %d%%", palbrightness);
 			SendDlgItemMessage(hwndDlg, STATIC_BRIGHTVALUE,  WM_SETTEXT, 0, (LPARAM) text);
 
 			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,       TBM_SETPOS, 1, ntsctint);
@@ -129,13 +129,13 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			palbrightness = SendDlgItemMessage(hwndDlg, CTL_PALBRIGHT_TRACKBAR,  TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
 			FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
 
-			sprintf(text, "Notch: %d%", palnotch);
+			sprintf(text, "Notch: %d%%", palnotch);
 			SendDlgItemMessage(hwndDlg, STATIC_NOTCHVALUE,   WM_SETTEXT, 0, (LPARAM) text);
 			sprintf(text, "Saturation: %d%%", palsaturation);
 			SendDlgItemMessage(hwndDlg, STATIC_SATVALUE,     WM_SETTEXT, 0, (LPARAM) text);
-			sprintf(text, "Sharpness: %d%", palsharpness);
+			sprintf(text, "Sharpness: %d%%", palsharpness);
 			SendDlgItemMessage(hwndDlg, STATIC_SHARPVALUE,   WM_SETTEXT, 0, (LPARAM) text);
-			sprintf(text, "Contrast: %d%", palcontrast);
+			sprintf(text, "Contrast: %d%%", palcontrast);
 			SendDlgItemMessage(hwndDlg, STATIC_CONTRASTVALUE,WM_SETTEXT, 0, (LPARAM) text);
 			sprintf(text, "Brightness: %d%%", palbrightness);
 			SendDlgItemMessage(hwndDlg, STATIC_BRIGHTVALUE,  WM_SETTEXT, 0, (LPARAM) text);
@@ -193,13 +193,13 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 						palcontrast   = 100;
 						palbrightness = 50;
 
-						sprintf(text, "Notch: %d%", palnotch);
+						sprintf(text, "Notch: %d%%", palnotch);
 						SendDlgItemMessage(hwndDlg, STATIC_NOTCHVALUE, WM_SETTEXT, 0, (LPARAM) text);
 						sprintf(text, "Saturation: %d%%", palsaturation);
 						SendDlgItemMessage(hwndDlg, STATIC_SATVALUE, WM_SETTEXT, 0, (LPARAM) text);
-						sprintf(text, "Sharpness: %d%", palsharpness);
+						sprintf(text, "Sharpness: %d%%", palsharpness);
 						SendDlgItemMessage(hwndDlg, STATIC_SHARPVALUE, WM_SETTEXT, 0, (LPARAM) text);
-						sprintf(text, "Contrast: %d%", palcontrast);
+						sprintf(text, "Contrast: %d%%", palcontrast);
 						SendDlgItemMessage(hwndDlg, STATIC_CONTRASTVALUE,WM_SETTEXT, 0, (LPARAM) text);
 						sprintf(text, "Brightness: %d%%", palbrightness);
 						SendDlgItemMessage(hwndDlg, STATIC_BRIGHTVALUE,  WM_SETTEXT, 0, (LPARAM) text);
