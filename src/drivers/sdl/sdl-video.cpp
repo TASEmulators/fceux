@@ -319,7 +319,7 @@ InitVideo(FCEUGI *gi)
 #ifdef OPENGL
 		if((s_useOpenGL && !ystretch) || !s_useOpenGL)
 #endif
-			if(yres < s_tlines * s_eys || s_eys <= 0.01) {
+			if(yres < int(s_tlines * s_eys) || s_eys <= 0.01) {
 				FCEUD_PrintError("yscale out of bounds.");
 				KillVideo();
 				return -1;
