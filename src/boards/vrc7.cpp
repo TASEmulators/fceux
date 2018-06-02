@@ -86,7 +86,7 @@ static void VRC7SKill(void) {
 static void VRC7_ESI(void) {
 	GameExpSound.RChange = VRC7SC;
 	GameExpSound.Kill = VRC7SKill;
-	VRC7Sound = OPLL_new(3579545, FSettings.SndRate ? FSettings.SndRate : 44100);
+	VRC7Sound = OPLL_new(3579545, FSettings.SndRate ? FSettings.SndRate : 48000);
 	OPLL_reset(VRC7Sound);
 	OPLL_reset(VRC7Sound);
 }

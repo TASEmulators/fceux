@@ -394,7 +394,6 @@ static void UpdateSD(HWND hwndDlg)
 	int t;
 
 	CheckDlgButton(hwndDlg,CHECK_SOUND_ENABLED,soundo?BST_CHECKED:BST_UNCHECKED);
-	CheckDlgButton(hwndDlg,CHECK_SOUND_8BIT,(soundoptions&SO_FORCE8BIT)?BST_CHECKED:BST_UNCHECKED);
 	// The option formerly flagged by SO_SECONDARY can no longer be disabled.
 	// CheckDlgButton(hwndDlg,123,(soundoptions&SO_SECONDARY)?BST_CHECKED:BST_UNCHECKED);
 	CheckDlgButton(hwndDlg,CHECK_SOUND_GLOBAL_FOCUS,(soundoptions&SO_GFOCUS)?BST_CHECKED:BST_UNCHECKED);
@@ -410,15 +409,18 @@ static void UpdateSD(HWND hwndDlg)
 	else if(soundrate==48000) t=3;
 	else if(soundrate==96000) t=4;
 	SendDlgItemMessage(hwndDlg,COMBO_SOUND_RATE,CB_SETCURSEL,t,(LPARAM)(LPSTR)0);
+	t=0;
+	if (soundoptions&SO_FORCE8BIT) t=1;
+	SendDlgItemMessage(hwndDlg,COMBO_SOUND_8BIT,CB_SETCURSEL,t,(LPARAM)(LPSTR)0);
 
 	if (!soundo) 
 	{
 		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_SWAPDUTY),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_MUTETURBO),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_MUTEFA),FALSE);
-		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_8BIT),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,COMBO_SOUND_QUALITY),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,COMBO_SOUND_RATE),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,COMBO_SOUND_8BIT),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,CTL_LATENCY_TRACKBAR),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1),FALSE);
@@ -456,9 +458,9 @@ static void UpdateSD(HWND hwndDlg)
 	{
 		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_MUTETURBO),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_MUTEFA),TRUE);
-		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_8BIT),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,COMBO_SOUND_QUALITY),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,COMBO_SOUND_RATE),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,COMBO_SOUND_8BIT),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,CTL_LATENCY_TRACKBAR),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1),TRUE);
@@ -555,6 +557,9 @@ case WM_INITDIALOG:
 	SendDlgItemMessage(hwndDlg,COMBO_SOUND_RATE,CB_ADDSTRING,0,(LPARAM)(LPSTR)"48000");
 	SendDlgItemMessage(hwndDlg,COMBO_SOUND_RATE,CB_ADDSTRING,0,(LPARAM)(LPSTR)"96000");
 
+	SendDlgItemMessage(hwndDlg,COMBO_SOUND_8BIT,CB_ADDSTRING,0,(LPARAM)(LPSTR)"16-Bit");
+	SendDlgItemMessage(hwndDlg,COMBO_SOUND_8BIT,CB_ADDSTRING,0,(LPARAM)(LPSTR)"8-Bit");
+
 	UpdateSD(hwndDlg);
 	break;
 case WM_VSCROLL:
@@ -646,20 +651,26 @@ case WM_COMMAND:
 			if (!turbo) FCEUI_SetSoundQuality(soundquality); //If turbo is running, don't do this call, turbo will handle it instead
 			UpdateSD(hwndDlg);
 			break;
+
+		case COMBO_SOUND_8BIT:
+			{
+				int tmp = SendDlgItemMessage(hwndDlg,COMBO_SOUND_8BIT,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
+				soundoptions &= ~SO_FORCE8BIT;
+				if (tmp == 1) soundoptions |= SO_FORCE8BIT;
+				if(soundo)
+				{
+					TrashSoundNow();
+					soundo=InitSound();
+					UpdateSD(hwndDlg);
+				}
+			}
+			break;
 		}
 		break;
 
 	case BN_CLICKED:
 		switch(LOWORD(wParam))
 		{
-		case CHECK_SOUND_8BIT:soundoptions^=SO_FORCE8BIT;   
-			if(soundo)
-			{
-				TrashSoundNow();
-				soundo=InitSound();
-				UpdateSD(hwndDlg);                                   
-			}
-			break;
 		// The option formerly flagged by SO_SECONDARY can no longer be disabled.
 #if 0
 		case 123:soundoptions^=SO_SECONDARY;
