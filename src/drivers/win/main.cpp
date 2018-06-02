@@ -132,7 +132,7 @@ int eoptions = EO_BGRUN | EO_FORCEISCALE | EO_BESTFIT | EO_BGCOLOR | EO_SQUAREPI
 
 //global variables
 int soundoptions = SO_SECONDARY | SO_GFOCUS;
-int soundrate = 44100;
+int soundrate = 48000;
 int soundbuftime = 50;
 int soundquality = 1;
 

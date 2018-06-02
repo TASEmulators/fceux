@@ -51,7 +51,7 @@ static struct AVIFile
 	
 	long				tBytes, ByteBuffer;
 
-	u8					audio_buffer[44100*2*2]; // ~ 1 second buffer
+	u8					audio_buffer[96000*2*2]; // ~ 1 second buffer * stereo * 16-bit
 	int					audio_buffer_pos;
 } *avi_file = NULL;
 

@@ -172,7 +172,7 @@
 #define IDC_CHECK_LOG_CYCLES_COUNT      120
 #define IDC_CHECK_LOG_FRAME_NUMBER3     121
 #define IDC_CHECK_LOG_INSTRUCTIONS_COUNT 121
-#define CHECK_SOUND_8BIT                122
+#define COMBO_SOUND_8BIT                122
 #define IDD_DIALOG3                     123
 #define IDC_CHECK_SYMBOLIC_TRACING      123
 #define CHECK_SOUND_GLOBAL_FOCUS        124
