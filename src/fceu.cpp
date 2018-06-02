@@ -850,7 +850,10 @@ void FCEU_MemoryRand(uint8 *ptr, uint32 size) {
 		switch (RAMInitOption)
 		{
 			default:
-			case 0: v = (x & 4) ? 0xFF : 0x00; break;
+			case 0:
+				if (!wram) v = (x & 4) ? 0xFF : 0x00;
+				else       v = 0x00;
+				break;
 			case 1: v = 0xFF; break;
 			case 2: v = 0x00; break;
 			case 3: v = (u8)(xoroshiro128plus_next()); break;
