@@ -122,7 +122,7 @@ uint8* MMC5BGVRAMADR(uint32 A)
 	{
 		if(Sprite16)
 		{
-			bool isPattern = PPUON;
+			bool isPattern = PPUON != 0;
 			if (ppuphase == PPUPHASE_OBJ && isPattern)
 				return &ABANKS[(A) >> 10][(A)];
 			if (ppuphase == PPUPHASE_BG && isPattern)
