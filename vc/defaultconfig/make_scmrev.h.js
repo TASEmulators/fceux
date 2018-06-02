@@ -41,7 +41,7 @@ function GetGitExe()
 
 	WScript.Echo("Cannot find git or git.cmd, check your PATH:\n" +
 		wshShell.ExpandEnvironmentStrings("%PATH%"));
-	WScript.Quit(1);
+	WScript.Quit(0);
 }
 
 function GetFirstStdOutLine(cmd)
@@ -54,7 +54,7 @@ function GetFirstStdOutLine(cmd)
 	{
 		// catch "the system cannot find the file specified" error
 		WScript.Echo("Failed to exec " + cmd + " this should never happen");
-		WScript.Quit(1);
+		WScript.Quit(0);
 	}
 }
 

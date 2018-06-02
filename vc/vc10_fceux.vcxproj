@@ -124,7 +124,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>SubWCRev.bat</Command>
+      <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -165,7 +165,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>SubWCRev.bat</Command>
+      <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
       <Message>write current revision number to placeholders</Message>
     </PreBuildEvent>
     <ClCompile>
@@ -208,7 +208,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='PublicRelease|Win32'">
     <PreBuildEvent>
-      <Command>SubWCRev.bat</Command>
+      <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
       <Message>write current revision number to placeholders</Message>
     </PreBuildEvent>
     <ClCompile>
@@ -277,6 +277,9 @@
       <TargetMachine>MachineX64</TargetMachine>
       <DelayLoadDLLs>lua51.dll</DelayLoadDLLs>
     </Link>
+    <PreBuildEvent>
+      <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -306,6 +309,9 @@
       <TargetMachine>MachineX64</TargetMachine>
       <DelayLoadDLLs>lua51.dll</DelayLoadDLLs>
     </Link>
+    <PreBuildEvent>
+      <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='PublicRelease|x64'">
     <Midl>
@@ -335,6 +341,9 @@
       <TargetMachine>MachineX64</TargetMachine>
       <DelayLoadDLLs>lua51.dll</DelayLoadDLLs>
     </Link>
+    <PreBuildEvent>
+      <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\boards\01-222.cpp">
