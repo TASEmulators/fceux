@@ -114,7 +114,7 @@ int LoadConfigFile(char *fn)
 	if(fp=fopen(fn,"rb"))
 	{
 		char buf[256];
-		while(fgets(buf, 256, fp) > (void *)0)
+		while(fgets(buf, 256, fp) != NULL)
 		{
 			if(!strncasecmp(buf,"maxclients",strlen("maxclients")))
 				sscanf(buf,"%*s %d",&ServerConfig.MaxClients);
