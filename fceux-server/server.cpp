@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <netdb.h>
-#include <errno.h>  
+#include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
 
@@ -114,7 +114,7 @@ int LoadConfigFile(char *fn)
  if(fp=fopen(fn,"rb"))
  {
   char buf[256];
-  while(fgets(buf, 256, fp) > 0)
+  while(fgets(buf, 256, fp) > (void *)0)
   {
    if(!strncasecmp(buf,"maxclients",strlen("maxclients")))
     sscanf(buf,"%*s %d",&ServerConfig.MaxClients);
@@ -140,7 +140,7 @@ int LoadConfigFile(char *fn)
    }
   }
  }
- 
+
  else
  {
   printf("Cannot load configuration file %s.\n", fn);
@@ -167,7 +167,7 @@ static void en32(uint8 *buf, uint32 morp)
  buf[2]=morp>>16;
  buf[3]=morp>>24;
 }
-    
+
 static uint32 de32(uint8 *morp)
 {
  return(morp[0]|(morp[1]<<8)|(morp[2]<<16)|(morp[3]<<24));
@@ -239,7 +239,7 @@ static int CheckNBTCPReceive(ClientEntry *client) throw(int)
  if(!client->nbtcplen)
   throw(1);			/* Should not happen. */
  int l;
-       
+
  while(l = recv(client->TCPSocket, client->nbtcp + client->nbtcphas, client->nbtcplen  - client->nbtcphas, MSG_NOSIGNAL))
  {
   if(l == -1)
@@ -300,12 +300,12 @@ static int CheckNBTCPReceive(ClientEntry *client) throw(int)
 			 if(len)
 			  StartNBTCPReceive(client,NBTCP_COMMAND | cmd,len);
 			 else	/* Woops.  Client probably tried to send a text message of 0 length. Or maybe a 0-length cheat file?  Better be safe! */
-			  StartNBTCPReceive(client,NBTCP_UPDATEDATA,client->localplayers);					
+			  StartNBTCPReceive(client,NBTCP_UPDATEDATA,client->localplayers);
 			}
 			else throw(1);
 			return(1);
 			}
-    case NBTCP_COMMAND: 
+    case NBTCP_COMMAND:
 			{
 			len = client->nbtcplen;
 			uint32 tocmd = client->nbtcptype & 0xFF;
@@ -313,9 +313,9 @@ static int CheckNBTCPReceive(ClientEntry *client) throw(int)
 			if(tocmd == 0x90)       /* Text */
 			{
 			 char *ma, *ma2;
-   
+
 			 ma = (char *) malloc(len + 1);
-			 memcpy(ma, client->nbtcp, len); 
+			 memcpy(ma, client->nbtcp, len);
 			 ma[len] = 0;
 			 asprintf(&ma2, "<%s> %s",client->nickname,ma);
 		         free(ma);
@@ -345,12 +345,12 @@ static int CheckNBTCPReceive(ClientEntry *client) throw(int)
 
 			 len = client->nbtcplen;
 			 sexybuf = client->nbtcp;
-     
+
 			 /* Game ID(MD5'd game MD5 and password on client side). */
 			 memcpy(gameid, sexybuf, 16);
 			 sexybuf += 16;
 			 len -= 16;
-     
+
 			 if(ServerConfig.Password)
 			  if(memcmp(ServerConfig.Password,sexybuf,16))
 			  {
@@ -400,7 +400,7 @@ static int CheckNBTCPReceive(ClientEntry *client) throw(int)
 			 for(x=0; x<tg->MaxPlayers; x++)
 			  if(tg->Players[x] && tg->IsUnique[x])
 			  {
-			   if(tg->Players[x] != client)		  
+			   if(tg->Players[x] != client)
 			   {
 			    try
 			    {
@@ -414,7 +414,7 @@ static int CheckNBTCPReceive(ClientEntry *client) throw(int)
 			   else
 			    TextToClient(client, "* You(Player %s) have just connected as: %s",MakeMPS(client),client->nickname);
 			  }
-			} 
+			}
 			EndNBTCPReceive(client);
 			StartNBTCPReceive(client,NBTCP_UPDATEDATA,client->localplayers);
 			return(1);
@@ -471,24 +471,24 @@ static void SendToAll(GameEntry *game, int cmd, uint8 *data, uint32 len) throw(i
  for(x=0;x<game->MaxPlayers;x++)
  {
   if(!game->Players[x] || !game->IsUnique[x]) continue;
-   
+
   try
   {
    if(cmd & 0x80)
     en32(poo, len);
    MakeSendTCP(game->Players[x],poo,5);
-   
+
    if(cmd & 0x80)
    {
     MakeSendTCP(game->Players[x], data, len);
-   }   
-  } 
+   }
+  }
   catch(int i)
   {
    KillClient(game->Players[x]);
   }
 
- } 
+ }
 }
 
 static void TextToClient(ClientEntry *client, const char *fmt, ...) throw(int)
@@ -499,11 +499,11 @@ static void TextToClient(ClientEntry *client, const char *fmt, ...) throw(int)
  va_start(ap,fmt);
  vasprintf(&moo, fmt, ap);
  va_end(ap);
- 
+
 
  uint8 poo[5];
  uint32 len;
- 
+
  poo[4] = 0x90;
  len = strlen(moo);
  en32(poo, len);
@@ -547,7 +547,7 @@ static void KillClient(ClientEntry *client)
      game->Players[w] = NULL;
 
   time_t curtime = time(0);
-  printf("Player <%s> disconnected from game %d on %s",client->nickname,game-Games,ctime(&curtime)); 
+  printf("Player <%s> disconnected from game %d on %s",client->nickname,game-Games,ctime(&curtime));
   asprintf(&bmsg, "* Player %s <%s> left.",MakeMPS(client),client->nickname);
   if(tc == client->localplayers)	/* If total players for this game = total local
 					   players for this client, destroy the game.
@@ -565,8 +565,8 @@ static void KillClient(ClientEntry *client)
  }
  if(client->nbtcp)
   free(client->nbtcp);
- 
- if(client->nickname) 
+
+ if(client->nickname)
   free(client->nickname);
 
  if(client->TCPSocket != -1)
@@ -618,16 +618,16 @@ static void AddClientToGame(ClientEntry *client, uint8 id[16], uint8 extra[64]) 
   {
    try
    {
-    uint8 b[5]; 
+    uint8 b[5];
     b[4] = 0x81;
-    MakeSendTCP(game->Players[n], b, 5);   
+    MakeSendTCP(game->Players[n], b, 5);
     break;
    }
    catch(int i)
    {
     KillClient(game->Players[n]);
     /* All right, now the client we sent the request to is killed.  I HOPE YOU'RE HAPPY! */
-    /* Since killing a client can destroy a game, we'll need to see if the game was trashed.  
+    /* Since killing a client can destroy a game, we'll need to see if the game was trashed.
        If it was, then "goto retry", and try again.  Ugly, yes.  I LIKE UGLY.
     */
     if(!game->MaxPlayers)
@@ -668,7 +668,7 @@ static void AddClientToGame(ClientEntry *client, uint8 id[16], uint8 extra[64]) 
 
 int main(int argc, char *argv[])
 {
-  
+
   struct sockaddr_in sockin;
   socklen_t sockin_len;
   int i;
@@ -681,16 +681,16 @@ int main(int argc, char *argv[])
     ServerConfig.FrameDivisor = DEFAULT_FRAMEDIVISOR;
   }
   char* configfile = 0;
-   
-  
+
+
   for(i=1; i<argc ;i++)
   {
     if(!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h"))  {
       printf("Usage: %s [OPTION]...\n" ,argv[0]);
       printf("Begins the FCE Ultra game server with given options.\n");
       printf("This server will first look in %s for options.  If that \nfile does not exist, it will use the defaults given here.  Any argument given \ndirectly will override any default values.\n\n", DEFAULT_CONFIG);
-      
-      printf("-h\t--help\t\tDisplays this help message.\n");  
+
+      printf("-h\t--help\t\tDisplays this help message.\n");
       printf("-v\t--version\t\tDisplays the version number and quits.\n");
       printf("-p\t--port\t\tStarts server on given port. (default=%d)\n", DEFAULT_PORT);
       printf("-w\t--password\tSpecifies a password for entry.\n");
@@ -773,8 +773,8 @@ int main(int argc, char *argv[])
   printf("Invalid parameter: %s\n", argv[i]);
   return -1;
   }
- 
- 
+
+
  Games = (GameEntry *)malloc(sizeof(GameEntry) * ServerConfig.MaxClients);
  Clients = (ClientEntry *)malloc(sizeof(ClientEntry) * ServerConfig.MaxClients);
 
@@ -848,13 +848,13 @@ int main(int argc, char *argv[])
     printf("Client %d connecting from %s on %s",n,inet_ntoa(sockin.sin_addr),ctime(&Clients[n].timeconnect));
     {
      uint8 buf[1];
-  
+
      buf[0] = ServerConfig.FrameDivisor;
      send(Clients[n].TCPSocket,buf,1,MSG_NOSIGNAL);
     }
     StartNBTCPReceive(&Clients[n], NBTCP_LOGINLEN, 4);
    }
-  }  
+  }
 
   /* Check for users still in the login process(not yet assigned a game). BOING */
   time_t curtime = time(0);
@@ -871,7 +871,7 @@ int main(int argc, char *argv[])
       while(CheckNBTCPReceive(&Clients[n])) {};
     }
    }
-   catch(int i) 
+   catch(int i)
    {
     KillClient(&Clients[n]);
    }
