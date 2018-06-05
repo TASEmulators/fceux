@@ -842,7 +842,7 @@ u64 xoroshiro128plus_next() {
 	return result;
 }
 
-void FCEU_MemoryRand(uint8 *ptr, uint32 size, bool wram) {
+void FCEU_MemoryRand(uint8 *ptr, uint32 size, bool default_zero) {
 	int x = 0;
 
 	while (size) {
@@ -851,8 +851,8 @@ void FCEU_MemoryRand(uint8 *ptr, uint32 size, bool wram) {
 		{
 			default:
 			case 0:
-				if (!wram) v = (x & 4) ? 0xFF : 0x00;
-				else       v = 0x00;
+				if (!default_zero) v = (x & 4) ? 0xFF : 0x00;
+				else               v = 0x00;
 				break;
 			case 1: v = 0xFF; break;
 			case 2: v = 0x00; break;
