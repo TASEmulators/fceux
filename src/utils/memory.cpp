@@ -39,7 +39,7 @@ void *FCEU_gmalloc(uint32 size)
   FCEU_PrintError("Error allocating memory!  Doing a hard exit.");
   exit(1);
  }
- FCEU_MemoryRand((uint8*)ret,size,true); // initialize according to RAMInitOption
+ FCEU_MemoryRand((uint8*)ret,size,true); // initialize according to RAMInitOption, default zero
  return ret;
 }
 
