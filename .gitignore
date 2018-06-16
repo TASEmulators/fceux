@@ -20,3 +20,13 @@
 /output/fceux.exp
 /output/fceux.lib
 /output/fceux.cfg
+
+# build output
+bin
+src/fceux
+fceux-net-server
+*.o
+.sconf_temp/
+.sconsign.dblite
+.deps
+.dirstamp
