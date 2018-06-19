@@ -76,6 +76,8 @@ uint8 geniech[3];
 
 uint32 genieaddr[3];
 
+CartInfo *currCartInfo;
+
 static INLINE void setpageptr(int s, uint32 A, uint8 *p, int ram) {
 	uint32 AB = A >> 11;
 	int x;

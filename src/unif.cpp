@@ -618,6 +618,7 @@ int UNIFLoad(const char *name, FCEUFILE *fp) {
 
 	strcpy(LoadedRomFName, name); //For the debugger list
 	GameInterface = UNIFGI;
+	currCartInfo = &UNIFCart;
 	return 1;
 
  aborto:
