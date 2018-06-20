@@ -20,4 +20,6 @@
 /output/fceux.exp
 /output/fceux.lib
 /output/fceux.cfg
+/output/sav/*.sav
+/output/fcs/*.fc*
 /vc/userconfig/scmrev.h
