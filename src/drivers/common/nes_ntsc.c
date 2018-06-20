@@ -242,15 +242,16 @@ void nes_ntsc_init( nes_ntsc_t* ntsc, nes_ntsc_setup_t const* setup, int bpp )
 
 #ifndef NES_NTSC_NO_BLITTERS
 
-void nes_ntsc_blit( nes_ntsc_t const* ntsc, NES_NTSC_IN_T const* input, long in_row_width,
-		int burst_phase, int emphasis, int in_width, int in_height, void* rgb_out, long out_pitch )
+void nes_ntsc_blit( nes_ntsc_t const* ntsc, NES_NTSC_IN_T const* input, NES_NTSC_IN_T const* inputD, long in_row_width,
+		int burst_phase, int in_width, int in_height, void* rgb_out, long out_pitch )
 {
 	int chunk_count = (in_width - 1) / nes_ntsc_in_chunk;
 
 	for ( ; in_height; --in_height )
 	{
 		NES_NTSC_IN_T const* line_in = input;
-		NES_NTSC_BEGIN_ROW( ntsc, burst_phase, nes_ntsc_black, nes_ntsc_black, NES_NTSC_ADJ_IN( *line_in ) );
+		NES_NTSC_IN_T const* line_inD = inputD;
+		NES_NTSC_BEGIN_ROW( ntsc, burst_phase, nes_ntsc_black, nes_ntsc_black, NES_NTSC_ADJ_IN( *line_in, *line_inD ) );
 		nes_ntsc_out_t* restrict line_out = (nes_ntsc_out_t*) rgb_out;
 		int n;
 		++line_in;
@@ -259,20 +260,21 @@ void nes_ntsc_blit( nes_ntsc_t const* ntsc, NES_NTSC_IN_T const* input, long in_
 		{
 
 			/* order of input and output pixels must not be altered */
-			NES_NTSC_COLOR_IN( 0, NES_NTSC_ADJ_IN( line_in [0] ) );
+			NES_NTSC_COLOR_IN( 0, NES_NTSC_ADJ_IN( line_in [0], line_inD [0] ) );
 			NES_NTSC_RGB_OUT( 0, line_out [0], OutputDepth );
 			NES_NTSC_RGB_OUT( 1, line_out [1], OutputDepth );
 			
-			NES_NTSC_COLOR_IN( 1, NES_NTSC_ADJ_IN( line_in [1] ) );
+			NES_NTSC_COLOR_IN( 1, NES_NTSC_ADJ_IN( line_in [1], line_inD [1] ) );
 			NES_NTSC_RGB_OUT( 2, line_out [2], OutputDepth );
 			NES_NTSC_RGB_OUT( 3, line_out [3], OutputDepth );
 			
-			NES_NTSC_COLOR_IN( 2, NES_NTSC_ADJ_IN( line_in [2] ) );
+			NES_NTSC_COLOR_IN( 2, NES_NTSC_ADJ_IN( line_in [2], line_inD [2] ) );
 			NES_NTSC_RGB_OUT( 4, line_out [4], OutputDepth );
 			NES_NTSC_RGB_OUT( 5, line_out [5], OutputDepth );
 			NES_NTSC_RGB_OUT( 6, line_out [6], OutputDepth );
 			
 			line_in  += 3;
+			line_inD += 3;
 			line_out += rescale_out;
 		}
 		
@@ -293,6 +295,7 @@ void nes_ntsc_blit( nes_ntsc_t const* ntsc, NES_NTSC_IN_T const* input, long in_
 		
 		burst_phase = (burst_phase + 1) % nes_ntsc_burst_count;
 		input += in_row_width;
+		inputD += in_row_width;
 	}
 }
 

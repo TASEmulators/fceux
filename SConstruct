@@ -45,6 +45,7 @@ if platform.system == "ppc":
 
 # Default compiler flags:
 env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare'])
+env.Append(CXXFLAGS = ['-std=c++0x'])
 
 if os.environ.has_key('PLATFORM'):
   env.Replace(PLATFORM = os.environ['PLATFORM'])

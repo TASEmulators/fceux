@@ -907,6 +907,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	}
 
 	GameInterface = iNESGI;
+	currCartInfo = &iNESCart;
 	FCEU_printf("\n");
 
 	// since apparently the iNES format doesn't store this information,

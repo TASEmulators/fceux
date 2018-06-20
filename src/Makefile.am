@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
-fceux_CPPFLAGS =
+fceux_CPPFLAGS = -std=c++0x
 fceux_LDADD =
 
 bin_PROGRAMS	=	fceux
