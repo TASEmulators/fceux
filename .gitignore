@@ -23,3 +23,13 @@
 /output/sav/*.sav
 /output/fcs/*.fc*
 /vc/userconfig/scmrev.h
+
+# linux build output
+bin
+src/fceux
+fceux-net-server
+*.o
+.sconf_temp/
+.sconsign.dblite
+.deps
+.dirstamp
