@@ -11,6 +11,7 @@
 #include "file.h"
 #include "video.h"
 #include "movie.h"
+#include "cart.h"
 #include "fds.h"
 #include "vsuni.h"
 #ifdef _S9XLUA_H
@@ -461,6 +462,16 @@ void MovieData::installValue(std::string& key, std::string& val)
 			StringToBytes(val,&savestate[0],len); // decodes either base64 or hex
 		}
 	}
+	else if(key == "saveram")
+	{
+		int len = Base64StringToBytesLength(val);
+		if(len == -1) len = HexStringToBytesLength(val); // wasn't base64, try hex
+		if(len >= 1)
+		{
+			saveram.resize(len);
+			StringToBytes(val,&saveram[0],len); // decodes either base64 or hex
+		}
+	}
 	else if (key == "length")
 	{
 		installInt(val, loadFrameCount);
@@ -498,6 +509,9 @@ int MovieData::dump(EMUFILE *os, bool binary)
 
 	if(savestate.size())
 		os->fprintf("savestate %s\n" , BytesToString(&savestate[0],savestate.size()).c_str() );
+
+	if(saveram.size())
+		os->fprintf("saveram %s\n" , BytesToString(&saveram[0],saveram.size()).c_str() );
 
 	if (this->loadFrameCount >= 0)
 		os->fprintf("length %d\n" , this->loadFrameCount);
@@ -778,6 +792,8 @@ void FCEUI_StopMovie()
 #endif
 }
 
+bool bogorf;
+
 void poweron(bool shouldDisableBatteryLoading)
 {
 	//// make a for-movie-recording power-on clear the game's save data, too
@@ -802,9 +818,9 @@ void poweron(bool shouldDisableBatteryLoading)
 	//suppressAddPowerCommand=0;
 
 	extern int disableBatteryLoading;
-	disableBatteryLoading = 1;
+	if(!bogorf) disableBatteryLoading = 1;
 	PowerNES();
-	disableBatteryLoading = 0;
+	if(!bogorf) disableBatteryLoading = 0;
 }
 
 void FCEUMOV_CreateCleanMovie()
@@ -845,6 +861,59 @@ void MovieData::dumpSavestateTo(std::vector<uint8>* buf, int compressionLevel)
 	FCEUSS_SaveMS(&ms,compressionLevel);
 	ms.trim();
 }
+
+bool MovieData::loadSaveramFrom(std::vector<uint8>* buf)
+{
+	EMUFILE_MEMORY ms(buf);
+
+	bool hasBattery = !!ms.read32le();
+	if(hasBattery != !!currCartInfo->battery)
+	{
+		FCEU_PrintError("movie battery load mismatch 1");
+		return false;
+	}
+
+	for(int i=0;i<4;i++)
+	{
+		int len = ms.read32le();
+
+		if(!currCartInfo->SaveGame[i] && len!=0)
+		{
+			FCEU_PrintError("movie battery load mismatch 2");
+			return false;
+		}
+
+		if(currCartInfo->SaveGameLen[i] != len)
+		{
+			FCEU_PrintError("movie battery load mismatch 3");
+			return false;
+		}
+
+		ms.fread(currCartInfo->SaveGame[i], len);
+	}
+
+	return true;
+}
+
+void MovieData::dumpSaveramTo(std::vector<uint8>* buf, int compressionLevel)
+{
+	EMUFILE_MEMORY ms(buf);
+
+	ms.write32le(currCartInfo->battery?1:0);
+	for(int i=0;i<4;i++)
+	{
+		if(!currCartInfo->SaveGame[i])
+		{
+			ms.write32le((u32)0);
+			continue;
+		}
+
+		ms.write32le(currCartInfo->SaveGameLen[i]);
+		ms.fwrite(currCartInfo->SaveGame[i], currCartInfo->SaveGameLen[i]);
+	}
+
+}
+
 
 //begin playing an existing movie
 bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
@@ -901,7 +970,14 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 		movieFromPoweron = false;
 		bool success = MovieData::loadSavestateFrom(&currMovieData.savestate);
 		if(!success) return true;	//adelikat: I guess return true here?  False is only for a bad movie filename, if it got this far the file was good?
-	} else {
+	}
+	else if(currMovieData.saveram.size())
+	{
+		movieFromPoweron = true;
+		bool success = MovieData::loadSaveramFrom(&currMovieData.saveram);
+		if(!success) return true;	//adelikat: I guess return true here?  False is only for a bad movie filename, if it got this far the file was good?
+	}
+	else {
 		movieFromPoweron = true;
 	}
 
@@ -981,7 +1057,15 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 		movieFromPoweron = true;
 		poweron(true);
 	}
-	else
+	else if(flags & MOVIE_FLAG_FROM_SAVERAM)
+	{
+		movieFromPoweron = true;
+		MovieData::dumpSaveramTo(&currMovieData.saveram,Z_NO_COMPRESSION); //i guess with this there's a chance someone could hack the file, at least, so maybe it's helpfu
+		bogorf = true;
+		poweron(false);
+		bogorf = false;
+	}
+	else //from savestate
 	{
 		movieFromPoweron = false;
 		MovieData::dumpSavestateTo(&currMovieData.savestate,Z_BEST_COMPRESSION);

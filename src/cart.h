@@ -25,6 +25,8 @@ typedef struct {
 					// other code in the future.
 } CartInfo;
 
+extern CartInfo *currCartInfo;
+
 void FCEU_SaveGameSave(CartInfo *LocalHWInfo);
 void FCEU_LoadGameSave(CartInfo *LocalHWInfo);
 void FCEU_ClearGameSave(CartInfo *LocalHWInfo);

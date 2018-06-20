@@ -851,6 +851,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 
 			SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_INSERTSTRING, i++, (LPARAM)"Start");
 			SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_INSERTSTRING, i++, (LPARAM)"Now");
+			SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_INSERTSTRING, i++, (LPARAM)"SaveRam");
 
 			memset(&wfd, 0, sizeof(wfd));
 			hFind = FindFirstFile(findGlob, &wfd);
@@ -941,7 +942,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 						// convert Unicode wstring to UTF8 char* string
 						WideCharToMultiByte(CP_UTF8, 0, (p->authorName).c_str(), -1, taseditorConfig.lastAuthorName, AUTHOR_NAME_MAX_LEN, 0, 0);
 
-					if (lIndex >= 2)
+					if (lIndex >= 3)
 						p->szSavestateFilename = GetSavePath(hwndDlg);
 					EndDialog(hwndDlg, 1);
 				}
@@ -983,11 +984,11 @@ void FCEUD_MovieRecordTo()
 	if (!GameInfo) return;
 	static struct CreateMovieParameters p;
 	p.szFilename = strdup(FCEU_MakeFName(FCEUMKF_MOVIE,0,0).c_str());
-	if(p.recordFrom >= 2) p.recordFrom=1;
+	if(p.recordFrom >= 3) p.recordFrom=1;
 
 	if(DialogBoxParam(fceu_hInstance, "IDD_RECORDINP", hAppWnd, RecordDialogProc, (LPARAM)&p))
 	{
-		if(p.recordFrom >= 2)
+		if(p.recordFrom >= 3)
 		{
 			// attempt to load the savestate
 			// FIXME:  pop open a messagebox if this fails
@@ -1006,6 +1007,7 @@ void FCEUD_MovieRecordTo()
 
 		EMOVIE_FLAG flags = MOVIE_FLAG_NONE;
 		if(p.recordFrom == 0) flags = MOVIE_FLAG_FROM_POWERON;
+		if(p.recordFrom == 2) flags = MOVIE_FLAG_FROM_SAVERAM;
 		FCEUI_SaveMovie(p.szFilename.c_str(), flags, p.authorName);
 	}
 }
