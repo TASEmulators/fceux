@@ -70,7 +70,7 @@ static void SSSNROMPower(void) {
 	regs[0] = regs[1] = regs[2] = regs[3] = regs[4] = regs[5] = regs[6] = 0;
 	regs[7] = 0xff;
 	Sync();
-	memset(WRAM, 0x00, WRAMSIZE);
+	FCEU_MemoryRand(WRAM, WRAMSIZE, true);
 //	SetWriteHandler(0x0000,0x1FFF,SSSNROMRamWrite);
 	SetReadHandler(0x0800, 0x1FFF, CartBR);
 	SetWriteHandler(0x0800, 0x1FFF, CartBW);

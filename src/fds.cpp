@@ -752,13 +752,11 @@ int FDSLoad(const char *name, FCEUFILE *fp) {
 
 	CHRRAMSize = 8192;
 	CHRRAM = (uint8*)FCEU_gmalloc(CHRRAMSize);
-	memset(CHRRAM, 0, CHRRAMSize);
 	SetupCartCHRMapping(0, CHRRAM, CHRRAMSize, 1);
 	AddExState(CHRRAM, CHRRAMSize, 0, "CHRR");
 
 	FDSRAMSize = 32768;
 	FDSRAM = (uint8*)FCEU_gmalloc(FDSRAMSize);
-	memset(FDSRAM, 0, FDSRAMSize);
 	SetupCartPRGMapping(1, FDSRAM, FDSRAMSize, 1);
 	AddExState(FDSRAM, FDSRAMSize, 0, "FDSR");
 

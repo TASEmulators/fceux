@@ -272,7 +272,7 @@ static void GenMMC1Power(void) {
 
 		// clear non-battery-backed portion of WRAM
 		if (NONBRAMSIZE)
-			FCEU_dwmemset(WRAM, 0, NONBRAMSIZE)
+			FCEU_MemoryRand(WRAM, NONBRAMSIZE, true);
 
 		SetReadHandler(0x6000, 0x7FFF, MAWRAM);
 		SetWriteHandler(0x6000, 0x7FFF, MBWRAM);
@@ -303,11 +303,6 @@ static void GenMMC1Init(CartInfo *info, int prg, int chr, int wram, int bram) {
 
 	if (WRAMSIZE) {
 		WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
-		//mbg 17-jun-08 - this shouldve been cleared to re-initialize save ram
-		//ch4 10-dec-08 - nope, this souldn't
-		//mbg 29-mar-09 - no time to debate this, we need to keep from breaking some old stuff.
-		//we really need to make up a policy for how compatibility and accuracy can be resolved.
-		memset(WRAM, 0, WRAMSIZE);
 		SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 		AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 		if (bram) {
