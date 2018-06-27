@@ -798,8 +798,6 @@ void ResetNES(void) {
 
 int RAMInitSeed = 0;
 int RAMInitOption = 0;
-// Note: this option does not currently apply to WRAM.
-// Would it be appropriate to call FCEU_MemoryRand inside FCEU_gmalloc to initialize them?
 
 u64 splitmix64(u32 input) {
 	u64 z = (input + 0x9e3779b97f4a7c15);
@@ -842,7 +840,7 @@ u64 xoroshiro128plus_next() {
 	return result;
 }
 
-void FCEU_MemoryRand(uint8 *ptr, uint32 size) {
+void FCEU_MemoryRand(uint8 *ptr, uint32 size, bool default_zero) {
 	int x = 0;
 
 	while (size) {
@@ -850,7 +848,10 @@ void FCEU_MemoryRand(uint8 *ptr, uint32 size) {
 		switch (RAMInitOption)
 		{
 			default:
-			case 0: v = (x & 4) ? 0xFF : 0x00; break;
+			case 0:
+				if (!default_zero) v = (x & 4) ? 0xFF : 0x00;
+				else               v = 0x00;
+				break;
 			case 1: v = 0xFF; break;
 			case 2: v = 0x00; break;
 			case 3: v = (u8)(xoroshiro128plus_next()); break;

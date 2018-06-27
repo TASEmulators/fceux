@@ -39,11 +39,7 @@ void *FCEU_gmalloc(uint32 size)
   FCEU_PrintError("Error allocating memory!  Doing a hard exit.");
   exit(1);
  }
- //mbg 6/17/08 - sometimes this memory is used as RAM or somesuch without clearing first.
- //this yields different behavior in debug and release modes.
- //specifically, saveram wasnt getting cleared so the games thought their savefiles were initialized
- //so we are going to clear it here.
- memset(ret,0,size);
+ FCEU_MemoryRand((uint8*)ret,size,true); // initialize according to RAMInitOption, default zero
  return ret;
 }
 
@@ -57,11 +53,7 @@ void *FCEU_malloc(uint32 size)
   FCEU_PrintError("Error allocating memory!");
   return(0);
  }
- //mbg 6/17/08 - sometimes this memory is used as RAM or somesuch without clearing first.
- //this yields different behavior in debug and release modes.
- //specifically, saveram wasnt getting cleared so the games thought their savefiles were initialized
- //so we are going to clear it here.
- memset(ret,0,size);
+ memset(ret,0,size); // initialize to 0
  return ret;
 }
 

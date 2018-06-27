@@ -114,6 +114,7 @@ static void MooMirroring(void) {
 	if (mirrortodo < 0x4)
 		SetupCartMirroring(mirrortodo, 1, 0);
 	else if (mirrortodo == 0x4) {
+		FCEU_MemoryRand(exntar, sizeof(exntar), true);
 		SetupCartMirroring(4, 1, exntar);
 		AddExState(exntar, 2048, 0, "EXNR");
 	} else
@@ -534,7 +535,7 @@ static int InitializeBoard(void) {
 					CHRRAMSize = 256;
 				else
 					CHRRAMSize = 8;
-                CHRRAMSize <<= 10;
+					CHRRAMSize <<= 10;
 				if ((UNIFchrrama = (uint8*)FCEU_malloc(CHRRAMSize))) {
 					SetupCartCHRMapping(0, UNIFchrrama, CHRRAMSize, 1);
 					AddExState(UNIFchrrama, CHRRAMSize, 0, "CHRR");

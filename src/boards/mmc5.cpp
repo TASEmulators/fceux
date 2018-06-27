@@ -958,6 +958,12 @@ static void GenMMC5_Init(CartInfo *info, int wsize, int battery) {
 	MMC5fill = (uint8*)FCEU_gmalloc(1024);
 	ExRAM = (uint8*)FCEU_gmalloc(1024);
 
+	// MMC5fill is and 8-bit tile index, and a 2-bit attribute implented as a mirrored nametable
+	u8 nval = MMC5fill[0x000];
+	u8 aval = MMC5fill[0x3C0] & 3; aval = aval | (aval << 2) | (aval << 4) | (aval << 6);
+	FCEU_dwmemset(MMC5fill + 0x000, nval | (nval<<8) | (nval<<16) | (nval<<24), 0x3C0);
+	FCEU_dwmemset(MMC5fill + 0x3C0, aval | (aval<<8) | (aval<<16) | (aval<<24), 0x040);
+
 	AddExState(ExRAM, 1024, 0, "ERAM");
 	AddExState(&MMC5HackSPMode, 1, 0, "SPLM");
 	AddExState(&MMC5HackSPScroll, 1, 0, "SPLS");
