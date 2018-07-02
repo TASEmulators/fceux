@@ -2640,18 +2640,25 @@ static int savestate_gc(lua_State *L) {
 }
 
 //  Referenced by:
-//  savestate.create(int which = nil)
+//  savestate.create(var which = nil)
 //  savestate.object(int which = nil)
 //
 //  Creates an object used for savestates.
 //  The object can be associated with a player-accessible savestate
 //  ("which" between 1 and 10) or not (which == nil).
+//  If "which" is a string it's interpreted as a filesystem path
 static int savestate_create_aliased(lua_State *L, bool newnumbering) {
 	int which = -1;
+	const char* path = NULL;
+	bool hasArg = false;
 	if (lua_gettop(L) >= 1) {
-		which = luaL_checkinteger(L, 1);
-		if (which < 1 || which > 10) {
-			luaL_error(L, "invalid player's savestate %d", which);
+		hasArg = true;
+		path = luaL_checkstring(L, 1);
+		if(path == NULL) {
+			which = luaL_checkinteger(L, 1);
+			if (which < 1 || which > 10) {
+				luaL_error(L, "invalid player's savestate %d", which);
+			}
 		}
 	}
 
@@ -2678,9 +2685,22 @@ static int savestate_create_aliased(lua_State *L, bool newnumbering) {
 		//filename = mktemp(tempbuf);
 		//doesnt work -^
 
-		//mbg 8/13/08 - this needs to be this way. we'll make a better system later:
-		ss->filename = tempnam(NULL, "snlua");
-		ss->anonymous = true;
+		if(hasArg)
+		{
+			ss->filename = path;
+			
+			EMUFILE_FILE inf(path,"rb");
+			if(!inf.fail())
+				ss->data = (EMUFILE_MEMORY*)inf.memwrap();
+		}
+		else 
+		{
+			char* tmp = tempnam(NULL, "snlua");
+			ss->filename = tmp;
+			free(tmp);
+			ss->anonymous = true;
+		}
+
 	}
 
 
@@ -2721,12 +2741,13 @@ static int savestate_object(lua_State *L) {
 	return savestate_create_aliased(L,true);
 }
 
-// object savestate.create(int which = nil)
+// object savestate.create(var which = nil)
 //
 //  Creates an object used for savestates.
 //  The object can be associated with a player-accessible savestate
 //  ("which" between 1 and 10) or not (which == nil).
 //  Uses original slot numbering
+//  If "which" is a string it's interpreted as a string filesystem path
 static int savestate_create(lua_State *L) {
 	// Original Save Slot Numbers:
 	// 1-10, 1 refers to slot 0, 2-10 refer to 1-9
