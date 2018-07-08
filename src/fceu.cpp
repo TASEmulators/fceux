@@ -254,11 +254,6 @@ int AutosaveFrequency = 256; // Number of frames between autosaves
 // Flag that indicates whether the Auto-save option is enabled or not
 int EnableAutosave = 0;
 
-///a wrapper for unzip.c
-extern "C" FILE *FCEUI_UTF8fopen_C(const char *n, const char *m) {
-	return ::FCEUD_UTF8fopen(n, m);
-}
-
 static DECLFW(BNull) {
 }
 

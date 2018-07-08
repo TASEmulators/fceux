@@ -200,7 +200,7 @@ public:
 	InFileStream(std::string fname)
 	: inf(0)
 	{
-		inf = FCEUD_UTF8_fstream(fname,"rb");
+		inf = FCEUD_fstream(fname,"rb");
 		if(inf)
 		{
 			size = inf->size();
@@ -399,7 +399,7 @@ ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 	}
 
 	//check the file against the signatures
-	EMUFILE* inf = FCEUD_UTF8_fstream(fname,"rb");
+	EMUFILE* inf = FCEUD_fstream(fname,"rb");
 	if(!inf) return ArchiveScanRecord();
 
 	int matchingFormat = -1;

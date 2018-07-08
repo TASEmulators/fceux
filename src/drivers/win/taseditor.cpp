@@ -805,7 +805,7 @@ void exportToFM2()
 		ofn.lpstrInitialDir = initdir.c_str();
 		if (GetSaveFileName(&ofn))
 		{
-			EMUFILE* osRecordingMovie = FCEUD_UTF8_fstream(fname, "wb");
+			EMUFILE* osRecordingMovie = FCEUD_fstream(fname, "wb");
 			// create copy of current movie data
 			MovieData temp_md = currMovieData;
 			// modify the copy according to selected type of export

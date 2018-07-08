@@ -16,7 +16,7 @@ extern bool paldeemphswap;
 bool SetPalette(const char* nameo)
 {
 	FILE *fp;
-	if((fp = FCEUD_UTF8fopen(nameo, "rb")))
+	if((fp = FCEUD_fopen(nameo, "rb")))
 	{
 		int readed = fread(cpalette, 1, sizeof(cpalette), fp);
 		fclose(fp);

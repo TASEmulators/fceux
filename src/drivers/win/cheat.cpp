@@ -573,7 +573,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 							if (GetOpenFileName(&ofn))
 							{
-								FILE* file = FCEUD_UTF8fopen(nameo, "rb");
+								FILE* file = FCEUD_fopen(nameo, "rb");
 								if (file)
 								{
 									FCEU_LoadGameCheats(file);

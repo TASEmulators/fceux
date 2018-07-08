@@ -465,7 +465,7 @@ void FCEUSS_Save(const char *fname, bool display_message)
 
 	if(fname)	//If filename is given use it.
 	{
-		st = FCEUD_UTF8_fstream(fname, "wb");
+		st = FCEUD_fstream(fname, "wb");
 		strcpy(fn, fname);
 	}
 	else		//Else, generate one
@@ -483,7 +483,7 @@ void FCEUSS_Save(const char *fname, bool display_message)
 		else
 			undoSS = false;					//so backup made so lastSavestateMade does have a backup file, so no undo
 
-		st = FCEUD_UTF8_fstream(fn,"wb");
+		st = FCEUD_fstream(fn,"wb");
 	}
 
 	if (st == NULL || st->get_fp() == NULL)
@@ -729,12 +729,12 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 	}
 	if (fname)
 	{
-		st = FCEUD_UTF8_fstream(fname, "rb");
+		st = FCEUD_fstream(fname, "rb");
 		strcpy(fn, fname);
 	} else
 	{
 		strcpy(fn, FCEU_MakeFName(FCEUMKF_STATE,CurrentState,fname).c_str());
-		st=FCEUD_UTF8_fstream(fn,"rb");
+		st=FCEUD_fstream(fn,"rb");
         strcpy(lastLoadstateMade,fn);
 	}
 
@@ -827,7 +827,7 @@ void FCEUSS_CheckStates(void)
 
 	for(ssel=0;ssel<10;ssel++)
 	{
-		st=FCEUD_UTF8fopen(FCEU_MakeFName(FCEUMKF_STATE,ssel,0),"rb");
+		st=FCEUD_fopen(FCEU_MakeFName(FCEUMKF_STATE,ssel,0),"rb");
 		if(st)
 		{
 			SaveStateStatus[ssel]=1;

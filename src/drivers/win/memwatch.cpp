@@ -441,7 +441,7 @@ static void SaveMemWatch()
 		strcpy(memwLastFilename,nameo);
 
 		SaveStrings();
-		FILE *fp=FCEUD_UTF8fopen(memwLastFilename,"w");
+		FILE *fp=FCEUD_fopen(memwLastFilename,"w");
 		for(i=0;i<NUMWATCHES;i++)
 		{
 			//Use dummy strings to fill empty slots
@@ -472,7 +472,7 @@ static void QuickSaveMemWatch() //Save rather than Save as
 	if (memwLastFilename[0]!=NULL) // Check if there is there something to save else default to save as
 	{
 		SaveStrings();
-		FILE *fp=FCEUD_UTF8fopen(memwLastFilename,"w");
+		FILE *fp=FCEUD_fopen(memwLastFilename,"w");
 		for(int i=0;i<NUMWATCHES;i++)
 		{
 			//Use dummy strings to fill empty slots
@@ -538,7 +538,7 @@ static void LoadMemWatch()
 			MemWatchDir[ofn.nFileOffset]=0;
 		}
 			
-		FILE *fp=FCEUD_UTF8fopen(memwLastFilename,"r");
+		FILE *fp=FCEUD_fopen(memwLastFilename,"r");
 			MemwAddRecentFile(memwLastFilename);
 
 		for(i=0;i<NUMWATCHES;i++)
@@ -584,7 +584,7 @@ void OpenMemwatchRecentFile(int memwRFileNumber)
 	if (x == NULL) return; //If no recent files exist just return.  Useful for Load last file on startup (or if something goes screwy)
 	char watchfcontents[2048];
 
-	FILE *fp=FCEUD_UTF8fopen(x,"r");	//Open the recent file
+	FILE *fp=FCEUD_fopen(x,"r");	//Open the recent file
 	if (fp)		//Check if file opening was successful, if not, abort
 	{
 		strcpy(memwLastFilename,x);

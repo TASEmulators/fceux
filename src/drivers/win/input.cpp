@@ -1716,7 +1716,7 @@ static void PresetExport(int preset)
 			InputPresetDir[ofn.nFileOffset]=0;
 		}
 
-		FILE *fp=FCEUD_UTF8fopen(nameo,"w");
+		FILE *fp=FCEUD_fopen(nameo,"w");
 		switch(preset)
 		{
 		case 1: fwrite(GamePadPreset1,1,sizeof(GamePadPreset1),fp); break;
@@ -1755,7 +1755,7 @@ static void PresetImport(int preset)
 			InputPresetDir[ofn.nFileOffset]=0;
 		}
 
-		FILE *fp=FCEUD_UTF8fopen(nameo,"r");
+		FILE *fp=FCEUD_fopen(nameo,"r");
 		switch(preset)
 		{
 		case 1: fread(GamePadPreset1,1,sizeof(GamePadPreset1),fp); break;

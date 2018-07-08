@@ -318,7 +318,7 @@ static void ConvertFCM(HWND hwndOwner)
 			if(result==FCM_CONVERTRESULT_SUCCESS)
 			{
 				okcount++;
-				EMUFILE_FILE* outf = FCEUD_UTF8_fstream(outname, "wb");
+				EMUFILE_FILE* outf = FCEUD_fstream(outname, "wb");
 				md.dump(outf,false);
 				delete outf;
 			} else {
@@ -1105,7 +1105,11 @@ bool ALoad(const char *nameo, char* innerFilename, bool silent)
 /// @param initialdir Directory that's pre-selected in the Open File dialog.
 void LoadNewGamey(HWND hParent, const char *initialdir)
 {
-	const char filter[] = "All usable files (*.nes,*.nsf,*.fds,*.unf,*.zip,*.rar,*.7z,*.gz)\0*.nes;*.nsf;*.fds;*.unf;*.zip;*.rar;*.7z;*.gz\0All non-compressed usable files (*.nes,*.nsf,*.fds,*.unf)\0*.nes;*.nsf;*.fds;*.unf\0All Files (*.*)\0*.*\0\0";
+	const char filter[] =
+		"All usable files (*.nes,*.nsf,*.fds,*.unf,*.zip,*.rar,*.7z,*.gz)\0*.nes;*.nsf;*.fds;*.unf;*.zip;*.rar;*.7z;*.gz\0"
+		"All non-compressed usable files (*.nes,*.nsf,*.fds,*.unf)\0*.nes;*.nsf;*.fds;*.unf\0"
+		"All Files (*.*)\0*.*\0"
+		"\0";
 	char nameo[2048];
 
 	// Create the Open File dialog
@@ -1523,7 +1527,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				//-------------------------------------------------------
 				if (!(fileDropped.find(".cht") == string::npos) && (fileDropped.find(".cht") == fileDropped.length()-4))
 				{
-					FILE* file = FCEUD_UTF8fopen(fileDropped.c_str(),"rb");
+					FILE* file = FCEUD_fopen(fileDropped.c_str(),"rb");
 					FCEU_LoadGameCheats(file);
 				}
 				
@@ -1544,7 +1548,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					EFCM_CONVERTRESULT result = convert_fcm(md, fileDropped.c_str());
 					if(result==FCM_CONVERTRESULT_SUCCESS)
 					{
-						EMUFILE* outf = FCEUD_UTF8_fstream(outname, "wb");
+						EMUFILE* outf = FCEUD_fstream(outname, "wb");
 						md.dump(outf,false);
 						delete outf;
 						if (!GameInfo)				//If no game is loaded, load the Open Game dialog

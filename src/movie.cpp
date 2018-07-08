@@ -1023,7 +1023,7 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 
 static void openRecordingMovie(const char* fname)
 {
-	osRecordingMovie = FCEUD_UTF8_fstream(fname, "wb");
+	osRecordingMovie = FCEUD_fstream(fname, "wb");
 	if(!osRecordingMovie)
 		FCEU_PrintError("Error opening movie output file: %s",fname);
 	strcpy(curMovieFilename, fname);
@@ -1735,7 +1735,7 @@ void FCEU_DisplaySubtitles(char *format, ...)
 void FCEUI_CreateMovieFile(std::string fn)
 {
 	MovieData md = currMovieData;							//Get current movie data
-	EMUFILE* outf = FCEUD_UTF8_fstream(fn, "wb");		//open/create file
+	EMUFILE* outf = FCEUD_fstream(fn, "wb");		//open/create file
 	md.dump(outf,false);									//dump movie data
 	delete outf;											//clean up, delete file object
 }

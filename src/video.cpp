@@ -576,13 +576,13 @@ int SaveSnapshot(void)
 
 	for (u = lastu; u < 99999; ++u)
 	{
-		pp=FCEUD_UTF8fopen(FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str(),"rb");
+		pp=FCEUD_fopen(FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str(),"rb");
 		if(pp==NULL) break;
 		fclose(pp);
 	}
 	lastu = u;
 
-	if(!(pp=FCEUD_UTF8fopen(FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str(),"wb")))
+	if(!(pp=FCEUD_fopen(FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str(),"wb")))
 	{
 		free(compmem);
 		return 0;
@@ -674,7 +674,7 @@ int SaveSnapshot(char fileName[512])
 	if(!(compmem=(uint8 *)FCEU_malloc(compmemsize)))
 		return 0;
 
-	if(!(pp=FCEUD_UTF8fopen(fileName,"wb")))
+	if(!(pp=FCEUD_fopen(fileName,"wb")))
 	{
 		free(compmem);
 		return 0;
