@@ -77,7 +77,7 @@ static bool use_sound=false;
 static int truncate_existing(const char* filename)
 {
 	// this is only here because AVIFileOpen doesn't seem to do it for us
-	FILE* fd = FCEUD_UTF8fopen(filename, "wb");
+	FILE* fd = FCEUD_fopen(filename, "wb");
 	if(fd)
 	{
 		fclose(fd);

@@ -311,7 +311,7 @@ void FCEU_LoadGamePalette(void)
 {
 	palette_game_available = false;
 	std::string path = FCEU_MakeFName(FCEUMKF_PALETTE,0,0);
-	FILE* fp = FCEUD_UTF8fopen(path,"rb");
+	FILE* fp = FCEUD_fopen(path,"rb");
 	if(fp)
 	{
 		int readed = fread(palette_game,1,64*8*3,fp);

@@ -1046,7 +1046,7 @@ static void FCEUD_MakePathDirs(const char *fname)
 	} while(1);
 }
 
-EMUFILE_FILE* FCEUD_UTF8_fstream(const char *n, const char *m)
+EMUFILE_FILE* FCEUD_fstream(const char *n, const char *m)
 {
 	if(strchr(m, 'w') || strchr(m, '+'))
 	{
@@ -1060,7 +1060,7 @@ EMUFILE_FILE* FCEUD_UTF8_fstream(const char *n, const char *m)
 	} else return fs;
 }
 
-FILE *FCEUD_UTF8fopen(const char *n, const char *m)
+FILE *FCEUD_fopen(const char *n, const char *m)
 {
 	if(strchr(m, 'w') || strchr(m, '+'))
 	{

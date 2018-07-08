@@ -117,9 +117,9 @@ bool TASEDITOR_PROJECT::save(const char* differentName, bool inputInBinary, bool
 	// open file for write
 	EMUFILE_FILE* ofs = 0;
 	if (differentName)
-		ofs = FCEUD_UTF8_fstream(differentName, "wb");
+		ofs = FCEUD_fstream(differentName, "wb");
 	else
-		ofs = FCEUD_UTF8_fstream(getProjectFile().c_str(), "wb");
+		ofs = FCEUD_fstream(getProjectFile().c_str(), "wb");
 	if (ofs)
 	{
 		// change cursor to hourglass

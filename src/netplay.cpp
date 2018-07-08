@@ -117,7 +117,7 @@ int FCEUNET_SendFile(uint8 cmd, char *fn)
 	FILE *fp;
 	struct stat sb;
 
-	if(!(fp=FCEUD_UTF8fopen(fn,"rb"))) return(0);
+	if(!(fp=FCEUD_fopen(fn,"rb"))) return(0);
 
 	FCEUX_fstat(fileno(fp),&sb);
 	len = sb.st_size;

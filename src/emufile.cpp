@@ -66,6 +66,9 @@ void EMUFILE_FILE::open(const char* fname, const char* mode)
 	if(!fp)
 	{
 #ifdef _MSC_VER
+		// fname can be either UTF-8(Linux/macOS) or Extended-ASCII(Windows) like Chinese.
+		// BUT, mbstowcs does conversion from UTF-8 to UNICODE-16 only.
+		// It really works?
 		std::wstring wfname = mbstowcs((std::string)fname);
 		std::wstring wfmode = mbstowcs((std::string)mode);
 		fp = _wfopen(wfname.c_str(),wfmode.c_str());

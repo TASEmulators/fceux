@@ -356,7 +356,7 @@ bool FCEU_OpenGenie(void)
 			return true;
 
 		fn = strdup(FCEU_MakeFName(FCEUMKF_GGROM, 0, 0).c_str());
-		fp = FCEUD_UTF8fopen(fn, "rb");
+		fp = FCEUD_fopen(fn, "rb");
 		if (!fp)
 		{
 			FCEU_PrintError("Error opening Game Genie ROM image!\nIt should be named \"gg.rom\"!");
@@ -536,7 +536,7 @@ void FCEU_SaveGameSave(CartInfo *LocalHWInfo) {
 		FILE *sp;
 
 		std::string soot = FCEU_MakeFName(FCEUMKF_SAV, 0, "sav");
-		if ((sp = FCEUD_UTF8fopen(soot, "wb")) == NULL) {
+		if ((sp = FCEUD_fopen(soot, "wb")) == NULL) {
 			FCEU_PrintError("WRAM file \"%s\" cannot be written to.\n", soot.c_str());
 		} else {
 			for (int x = 0; x < 4; x++)
@@ -556,7 +556,7 @@ void FCEU_LoadGameSave(CartInfo *LocalHWInfo) {
 		FILE *sp;
 
 		std::string soot = FCEU_MakeFName(FCEUMKF_SAV, 0, "sav");
-		sp = FCEUD_UTF8fopen(soot, "rb");
+		sp = FCEUD_fopen(soot, "rb");
 		if (sp != NULL) {
 			for (int x = 0; x < 4; x++)
 				if (LocalHWInfo->SaveGame[x])

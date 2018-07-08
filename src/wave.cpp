@@ -83,7 +83,7 @@ bool FCEUI_BeginWaveRecord(const char *fn)
 {
  int r;
 
- if(!(soundlog=FCEUD_UTF8fopen(fn,"wb")))
+ if(!(soundlog=FCEUD_fopen(fn,"wb")))
   return false;
  wsize=0;
 

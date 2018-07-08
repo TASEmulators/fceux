@@ -275,7 +275,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 
 	//try to setup the ips file
 	if(ipsfn && read)
-		ipsfile=FCEUD_UTF8fopen(ipsfn,"rb");
+		ipsfile=FCEUD_fopen(ipsfn,"rb");
 	if(read)
 	{
 		ArchiveScanRecord asr = FCEUD_ScanArchive(fileToOpen);
@@ -283,7 +283,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 		if(!asr.isArchive())
 		{
 			//if the archive contained no files, try to open it the old fashioned way
-			EMUFILE_FILE* fp = FCEUD_UTF8_fstream(fileToOpen,mode);
+			EMUFILE_FILE* fp = FCEUD_fstream(fileToOpen,mode);
 			if(!fp || (fp->get_fp() == NULL))
 			{
 				return 0;
@@ -371,7 +371,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 	applyips:
 		//try to open the ips file
 		if(!ipsfile && !ipsfn)
-			ipsfile=FCEUD_UTF8fopen(FCEU_MakeIpsFilename(DetermineFileBase(fceufp->logicalPath.c_str())),"rb");
+			ipsfile=FCEUD_fopen(FCEU_MakeIpsFilename(DetermineFileBase(fceufp->logicalPath.c_str())),"rb");
 		ApplyIPS(ipsfile,fceufp);
 		return fceufp;
 	}

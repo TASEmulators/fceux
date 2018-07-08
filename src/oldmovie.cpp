@@ -107,7 +107,7 @@ static void FCEUI_LoadMovie_v1(char *fname, int _read_only);
 //		uint32 version;
 //		uint8 _flags[4];
 //
-//		FILE* fp = FCEUD_UTF8fopen(fname, "rb");
+//		FILE* fp = FCEUD_fopen(fname, "rb");
 //		if(!fp)
 //			return 0;
 //
@@ -267,7 +267,7 @@ uint16 metadata_ucs2[];     // ucs-2, ick!  sizeof(metadata) = offset_to_savesta
 //	if(access(fname, W_OK))
 //		movie_readonly = 2;
 //
-//	fp = FCEUD_UTF8fopen(fname, (movie_readonly>=2) ? "rb" : "r+b");
+//	fp = FCEUD_fopen(fname, (movie_readonly>=2) ? "rb" : "r+b");
 //
 //	if(fn)
 //	{
@@ -362,7 +362,7 @@ uint16 metadata_ucs2[];     // ucs-2, ick!  sizeof(metadata) = offset_to_savesta
 //	uint8 tmp[MOVIE_MAX_METADATA<<1];
 //	int metadata_length;
 //
-//	FILE* fp = FCEUD_UTF8fopen(fname, "rb");
+//	FILE* fp = FCEUD_fopen(fname, "rb");
 //	if(!fp)
 //		return 0;
 //
@@ -542,7 +542,7 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	int movieConvertOffset1=0, movieConvertOffset2=0,movieSyncHackOn=0;
 
 
-	EMUFILE* fp = FCEUD_UTF8_fstream(fname, "rb");
+	EMUFILE* fp = FCEUD_fstream(fname, "rb");
 	if(!fp) return FCM_CONVERTRESULT_FAILOPEN;
 
 	// read header
