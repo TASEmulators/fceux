@@ -21,6 +21,11 @@
 #define APIENTRY
 #endif
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+#define SDL_FULLSCREEN SDL_WINDOW_FULLSCREEN
+#define SDL_GL_SwapBuffers() SDL_GL_SwapWindow(NULL)
+#endif
+
 static GLuint textures[2]={0,0};	// Normal image, scanline overlay.
 
 static int left,right,top,bottom; // right and bottom are not inclusive.

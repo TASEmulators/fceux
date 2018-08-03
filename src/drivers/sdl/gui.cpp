@@ -1988,7 +1988,7 @@ unsigned short GDKToSDLKeyval(int gdk_key)
 	}
 	
 	// Non-ASCII symbol.
-	static const uint16_t gdk_to_sdl_table[0x100] =
+	static const unsigned int gdk_to_sdl_table[0x100] =
 	{
 		// 0x00 - 0x0F
 		0x0000, 0x0000, 0x0000, 0x0000,
