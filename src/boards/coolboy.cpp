@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2015 CaH4e3, ClusteR
+ *  Copyright (C) 2018 CaH4e3, Cluster
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +17,61 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * CoolBoy 400-in-1 FK23C-mimic mapper 16Mb/32Mb PROM + 128K/256K CHR RAM, optional SRAM, optional NTRAM
+ * CoolBoy 400-in-1 FK23C-mimic mapper 16Mb/32Mb PROM + 128K/256K CHR RAM, optional SRAM, optional battery
  * only MMC3 mode
  *
- * 6000 (xx76x210) | 0xC0
- * 6001 (xxx354x)
- * 6002 = 0
- * 6003 = 0
+ * $6000
+ * 7  bit  0
+ * ---- ----
+ * ABCC DEEE
+ * |||| ||||
+ * |||| |+++-- PRG offset (PRG A19, A18, A17)
+ * |||| +----- Alternate CHR A17
+ * ||++------- PRG offset (PRG A24, A23)
+ * |+--------- PRG mask (PRG A17 from 0: MMC3; 1: offset)
+ * +---------- CHR mask (CHR A17 from 0: MMC3; 1: alternate)
  *
- * hardware tested logic, don't try to understand lol
+ * $6001
+ *
+ * 7  bit  0
+ * ---- ----
+ * GHIJ KKLx
+ * |||| |||
+ * |||| ||+--- GNROM mode bank PRG size (1: 32 KiB bank, PRG A14=CPU A14; 0: 16 KiB bank, PRG A14=offset A14)
+ * |||+-++---- PRG offset (in order: PRG A20, A22, A21)
+ * ||+-------- PRG mask (PRG A20 from 0: offset; 1: MMC3)
+ * |+--------- PRG mask (PRG A19 from 0: offset; 1: MMC3)
+ * +---------- PRG mask (PRG A18 from 0: MMC3; 1: offset)
+ *
+ * $6002
+ * 7  bit  0
+ * ---- ----
+ * xxxx MMMM
+ *      ||||
+ *      ++++-- CHR offset for GNROM mode (CHR A16, A15, A14, A13)
+ *
+ * $6003
+ * 7  bit  0
+ * ---- ----
+ * NPxP QQRx
+ * || | |||
+ * || | +++--- PRG offset for GNROM mode (PRG A16, A15, A14)
+ * || +------- 1: GNROM mode; 0: MMC3 mode
+ * || |         (1: PRG A16...13 from QQ, L, R, CPU A14, A13 + CHR A16...10 from MMMM, PPU A12...10;
+ * || |          0: PRG A16...13 from MMC3 + CHR A16...A10 from MMC3 )
+ * |+-+------- Banking mode
+ * |+--------- "Weird MMC3 mode"
+ * +---------- Lockout (prevent further writes to these four registers, only works in MMC3 mode)
+ *
+ * There is also alternative version from MINDKIDS,
+ * the only difference is register addresses - 500x instead of 600x
+ *
+ * Also some new cartridges from MINDKIDS have /WE and /OE pins connected to mapper,
+ * which allows you to rewrite flash memory without soldering.
+ * This also allows console to write data to the cartridge.
+ * This behavior is not emulated.
+ * No cart has been discovered so far that makes use of this feature, but this can be used for homebrew.
+ *
  */
 
 #include "mapinc.h"
@@ -71,12 +117,7 @@ static void COOLBOYPW(uint32 A, uint8 V) {
 	// Last banks are first in this mode, ignored when MMC3_cmd&0x40
 	if ((EXPREGS[3] & 0x40) && (V >= 0xFE) && !((MMC3_cmd & 0x40) != 0)) {
 		switch (A & 0xE000) {
-		case 0xA000:
-			if ((MMC3_cmd & 0x40)) V = 0;
-			break;
 		case 0xC000:
-			if (!(MMC3_cmd & 0x40)) V = 0;
-			break;
 		case 0xE000:
 			V = 0;
 			break;
@@ -115,10 +156,6 @@ static DECLFW(COOLBOYWrite) {
 static void COOLBOYReset(void) {
 	MMC3RegReset();
 	EXPREGS[0] = EXPREGS[1] = EXPREGS[2] = EXPREGS[3] = 0;
-//	EXPREGS[0] = 0;
-//	EXPREGS[1] = 0x60;
-//	EXPREGS[2] = 0;
-//	EXPREGS[3] = 0;
 	FixMMC3PRG(MMC3_cmd);
 	FixMMC3CHR(MMC3_cmd);
 }
@@ -126,21 +163,34 @@ static void COOLBOYReset(void) {
 static void COOLBOYPower(void) {
 	GenMMC3Power();
 	EXPREGS[0] = EXPREGS[1] = EXPREGS[2] = EXPREGS[3] = 0;
-//	EXPREGS[0] = 0;
-//	EXPREGS[1] = 0x60;
-//	EXPREGS[2] = 0;
-//	EXPREGS[3] = 0;
 	FixMMC3PRG(MMC3_cmd);
 	FixMMC3CHR(MMC3_cmd);
 	SetWriteHandler(0x5000, 0x5fff, CartBW);            // some games access random unmapped areas and crashes because of KT-008 PCB hack in MMC3 source lol
-	SetWriteHandler(0x6000, 0x7fff, COOLBOYWrite);
+	SetWriteHandler(0x6000, 0x6fff, COOLBOYWrite);
+}
+
+static void MINDKIDSPower(void) {
+	GenMMC3Power();
+	EXPREGS[0] = EXPREGS[1] = EXPREGS[2] = EXPREGS[3] = 0;
+	FixMMC3PRG(MMC3_cmd);
+	FixMMC3CHR(MMC3_cmd);
+	SetWriteHandler(0x5000, 0x5fff, COOLBOYWrite);
 }
 
 void COOLBOY_Init(CartInfo *info) {
-	GenMMC3_Init(info, 512, 256, 8, 0);
+	GenMMC3_Init(info, 2048, 256, 8, 1);
 	pwrap = COOLBOYPW;
 	cwrap = COOLBOYCW;
 	info->Power = COOLBOYPower;
+	info->Reset = COOLBOYReset;
+	AddExState(EXPREGS, 4, 0, "EXPR");
+}
+
+void MINDKIDS_Init(CartInfo *info) {
+	GenMMC3_Init(info, 2048, 256, 8, 1);
+	pwrap = COOLBOYPW;
+	cwrap = COOLBOYCW;
+	info->Power = MINDKIDSPower;
 	info->Reset = COOLBOYReset;
 	AddExState(EXPREGS, 4, 0, "EXPR");
 }

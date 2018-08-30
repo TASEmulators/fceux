@@ -471,6 +471,7 @@ static BMAPPING bmap[] = {
 	{ "8-IN-1", BMC8IN1_Init, 0 },
 	{ "80013-B", BMC80013B_Init, 0 },
 	{ "HPxx", BMCHPxx_Init, 0 },
+	{ "MINDKIDS", MINDKIDS_Init, BMCFLAG_256KCHRR },
 
 	{ 0, 0, 0 }
 };
