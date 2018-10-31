@@ -22,7 +22,7 @@
 // http://forums.nesdev.com/viewtopic.php?p=146039
 //
 // 512k PRG-ROM in 32k pages (flashable if battery backed is specified)
-// 32k CHR-ROM used as:
+// 32k CHR-RAM used as:
 //     2 x 8k pattern pages
 //     2 x 8k nametable pages
 //
