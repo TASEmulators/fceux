@@ -679,11 +679,12 @@ int GetMemViewData(uint32 i)
 		if (GameInfo->type==GIT_NSF)
 		{
 			return (0);
-		} else
+		}
+		else
 		{
 			if(i < 0x3F00)
-				return vnapage[(i>>10)&0x3][i&0x3FF];
-			return PALRAM[i&0x1F];
+				return vnapage[(i >> 10) & 0x3][i & 0x3FF];
+			return READPAL_MOTHEROFALL(i & 0x1F);
 		}
 	}
 

@@ -376,6 +376,18 @@ uint8 UPALRAM[0x03];//for 0x4/0x8/0xC addresses in palette, the ones in
 
 uint8* MMC5BGVRAMADR(uint32 A);
 
+uint8 READPAL_MOTHEROFALL(uint32 A)
+{
+	if(!(A & 3)) {
+		if(!(A & 0xC))
+			return READPAL(0x00);
+		else
+			return READUPAL(((A & 0xC) >> 2) - 1);
+	}
+	else
+		return READPAL(A & 0x1F);
+}
+
 //this duplicates logic which is embedded in the ppu rendering code
 //which figures out where to get CHR data from depending on various hack modes
 //mostly involving mmc5.
@@ -1627,7 +1639,6 @@ static void RefreshSprites(void) {
 }
 
 static void CopySprites(uint8 *target) {
-	uint8 n = ((PPU[1] & 4) ^ 4) << 1;
 	uint8 *P = target;
 
 	if (!spork) return;
@@ -1635,65 +1646,14 @@ static void CopySprites(uint8 *target) {
 
 	if (!rendersprites) return;	//User asked to not display sprites.
 
- loopskie:
+	if(!SpriteON) return;
+	for(int i=0;i<256;i++)
 	{
-		uint32 t = *(uint32*)(sprlinebuf + n);
-
-		if (t != 0x80808080) {
-			#ifdef LSB_FIRST
-			if (!(t & 0x80)) {
-				if (!(t & 0x40) || (P[n] & 0x40))		// Normal sprite || behind bg sprite
-					P[n] = sprlinebuf[n];
-			}
-
-			if (!(t & 0x8000)) {
-				if (!(t & 0x4000) || (P[n + 1] & 0x40))		// Normal sprite || behind bg sprite
-					P[n + 1] = (sprlinebuf + 1)[n];
-			}
-
-			if (!(t & 0x800000)) {
-				if (!(t & 0x400000) || (P[n + 2] & 0x40))	// Normal sprite || behind bg sprite
-					P[n + 2] = (sprlinebuf + 2)[n];
-			}
-
-			if (!(t & 0x80000000)) {
-				if (!(t & 0x40000000) || (P[n + 3] & 0x40))	// Normal sprite || behind bg sprite
-					P[n + 3] = (sprlinebuf + 3)[n];
-			}
-			#else
-			/* TODO:  Simplify */
-			if (!(t & 0x80000000)) {
-				if (!(t & 0x40000000))	// Normal sprite
-					P[n] = sprlinebuf[n];
-				else if (P[n] & 64)		// behind bg sprite
-					P[n] = sprlinebuf[n];
-			}
-
-			if (!(t & 0x800000)) {
-				if (!(t & 0x400000))	// Normal sprite
-					P[n + 1] = (sprlinebuf + 1)[n];
-				else if (P[n + 1] & 64)	// behind bg sprite
-					P[n + 1] = (sprlinebuf + 1)[n];
-			}
-
-			if (!(t & 0x8000)) {
-				if (!(t & 0x4000))		// Normal sprite
-					P[n + 2] = (sprlinebuf + 2)[n];
-				else if (P[n + 2] & 64)	// behind bg sprite
-					P[n + 2] = (sprlinebuf + 2)[n];
-			}
-
-			if (!(t & 0x80)) {
-				if (!(t & 0x40))		// Normal sprite
-					P[n + 3] = (sprlinebuf + 3)[n];
-				else if (P[n + 3] & 64)	// behind bg sprite
-					P[n + 3] = (sprlinebuf + 3)[n];
-			}
-			#endif
-		}
+		uint8 t = sprlinebuf[i];
+		if(!(t&0x80))
+			if (!(t & 0x40) || (P[i] & 0x40))		// Normal sprite || behind bg sprite
+				P[i] = t;
 	}
-	n += 4;
-	if (n) goto loopskie;
 }
 
 void FCEUPPU_SetVideoSystem(int w) {
