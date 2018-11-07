@@ -146,12 +146,18 @@ uint8* MMC5BGVRAMADR(uint32 A)
 static void mmc5_PPUWrite(uint32 A, uint8 V) {
 	uint32 tmp = A;
 	extern uint8 PALRAM[0x20];
+	extern uint8 UPALRAM[0x03];
 
 	if (tmp >= 0x3F00) {
-		// hmmm....
-		if (!(tmp & 0xf))
-			PALRAM[0x00] = PALRAM[0x04] = PALRAM[0x08] = PALRAM[0x0C] = V & 0x3F;
-		else if (tmp & 3) PALRAM[(tmp & 0x1f)] = V & 0x3f;
+		if (!(tmp & 3)) {
+			if (!(tmp & 0xC)) {
+				PALRAM[0x00] = PALRAM[0x04] = PALRAM[0x08] = PALRAM[0x0C] = V & 0x3F;
+				PALRAM[0x10] = PALRAM[0x14] = PALRAM[0x18] = PALRAM[0x1C] = V & 0x3F;
+			}
+			else
+				UPALRAM[((tmp & 0xC) >> 2) - 1] = V & 0x3F;
+		} else
+			PALRAM[tmp & 0x1F] = V & 0x3F;
 	} else if (tmp < 0x2000) {
 		if (PPUCHRRAM & (1 << (tmp >> 10)))
 			VPage[tmp >> 10][tmp] = V;

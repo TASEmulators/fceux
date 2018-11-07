@@ -430,8 +430,10 @@ inline void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
 			vnapage[((tmp & 0xF00) >> 10)][tmp & 0x3FF] = V;
 	} else {
 		if (!(tmp & 3)) {
-			if (!(tmp & 0xC))
+			if (!(tmp & 0xC)) {
 				PALRAM[0x00] = PALRAM[0x04] = PALRAM[0x08] = PALRAM[0x0C] = V & 0x3F;
+				PALRAM[0x10] = PALRAM[0x14] = PALRAM[0x18] = PALRAM[0x1C] = V & 0x3F;
+			}
 			else
 				UPALRAM[((tmp & 0xC) >> 2) - 1] = V & 0x3F;
 		} else
