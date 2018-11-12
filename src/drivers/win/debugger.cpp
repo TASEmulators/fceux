@@ -447,6 +447,7 @@ void HighlightSyntax(int lines)
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)newline.chrg.cpMin + 20, (LPARAM)opbreak);
 		int oldline = newline.chrg.cpMin;
 		newline.chrg.cpMin = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&newline) + 1;
+		if(newline.chrg.cpMin == 0) break;
 		// symbolic address
 		if (debug_str[newline.chrg.cpMin - 2] == ':')
 		{
