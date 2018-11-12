@@ -6015,7 +6015,8 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 #endif
 
 		// Wipe the stack. Our thread
-		lua_settop(L,0);
+		if (L)
+			lua_settop(L,0);
 		return 0; // Oh shit.
 	}
 #ifdef WIN32
