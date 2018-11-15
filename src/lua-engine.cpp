@@ -1345,7 +1345,7 @@ static int rom_readbyterange(lua_State *L) {
 // doesn't keep backups to allow maximum speed (for automatic rom corruptors and stuff)
 // keeping them might be an option though, just need to use memview's ApplyPatch()
 // that'd also highlight the edits in hex editor
-static int rom_writebyte(lua_State *L) 
+static int rom_writebyte(lua_State *L)
 {
 	uint32 address = luaL_checkinteger(L,1);
 	if (address < 16)
@@ -1869,6 +1869,26 @@ static int memory_setregister(lua_State *L)
 	return 0;
 }
 
+// Forces a stack trace and returns the string
+static const char *CallLuaTraceback(lua_State *L) {
+	lua_getfield(L, LUA_GLOBALSINDEX, "debug");
+	if (!lua_istable(L, -1)) {
+		lua_pop(L, 1);
+		return "";
+	}
+
+	lua_getfield(L, -1, "traceback");
+	if (!lua_isfunction(L, -1)) {
+		lua_pop(L, 2);
+		return "";
+	}
+
+	lua_pushvalue(L, 1);
+	lua_call(L, 1, 1);
+
+	return lua_tostring(L, -1);
+}
+
 
 void HandleCallbackError(lua_State* L)
 {
@@ -1876,14 +1896,19 @@ void HandleCallbackError(lua_State* L)
 	//	luaL_error(L, "%s", lua_tostring(L,-1));
 	//else
 	{
+		const char *trace = CallLuaTraceback(L);
+
 		lua_pushnil(L);
 		lua_setfield(L, LUA_REGISTRYINDEX, guiCallbackTable);
 
+		char errmsg [2048];
+		sprintf(errmsg, "%s\n%s", lua_tostring(L,-1), trace);
+
 		// Error?
 #ifdef WIN32
-		MessageBox( hAppWnd, lua_tostring(L,-1), "Lua run error", MB_OK | MB_ICONSTOP);
+		MessageBox( hAppWnd, errmsg, "Lua run error", MB_OK | MB_ICONSTOP);
 #else
-		fprintf(stderr, "Lua thread bombed out: %s\n", lua_tostring(L,-1));
+		fprintf(stderr, "Lua thread bombed out: %s\n", errmsg);
 #endif
 
 		FCEU_LuaStop();
@@ -2688,12 +2713,12 @@ static int savestate_create_aliased(lua_State *L, bool newnumbering) {
 		if(hasArg)
 		{
 			ss->filename = path;
-			
+
 			EMUFILE_FILE inf(path,"rb");
 			if(!inf.fail())
 				ss->data = (EMUFILE_MEMORY*)inf.memwrap();
 		}
-		else 
+		else
 		{
 			char* tmp = tempnam(NULL, "snlua");
 			ss->filename = tmp;
@@ -4192,7 +4217,7 @@ void LuaDrawTextTransWH(const char *str, size_t l, int &x, int y, uint32 color, 
 					gui_drawpixel_internal(x+x2, y+y2, backcolor);
 			}
 		}
-		
+
 		// halo
 		if(diffy >= 7)
 			for(int x2 = -1; x2 < wid; x2++)
@@ -5622,7 +5647,7 @@ static const struct luaL_reg memorylib [] = {
 
 	{"readbyte", memory_readbyte},
 	{"readbyterange", memory_readbyterange},
-	{"readbytesigned", memory_readbytesigned},	
+	{"readbytesigned", memory_readbytesigned},
 	{"readbyteunsigned", memory_readbyte},	// alternate naming scheme for unsigned
 	{"readword", memory_readword},
 	{"readwordsigned", memory_readwordsigned},
@@ -5865,17 +5890,21 @@ void FCEU_LuaFrameBoundary()
 	} else if (result != 0) {
 		// Done execution by bad causes
 		FCEU_LuaOnStop();
+		const char *trace = CallLuaTraceback(L);
+
 		lua_pushnil(L);
-		lua_setfield(L, LUA_REGISTRYINDEX, frameAdvanceThread);
+		lua_setfield(L, LUA_REGISTRYINDEX, guiCallbackTable);
+
+		char errmsg [1024];
+		sprintf(errmsg, "%s\n%s", lua_tostring(thread,-1), trace);
 
 		// Error?
 #ifdef WIN32
-                //StopSound();//StopSound(); //mbg merge 7/23/08
-		MessageBox( hAppWnd, lua_tostring(thread,-1), "Lua run error", MB_OK | MB_ICONSTOP);
+				//StopSound();//StopSound(); //mbg merge 7/23/08
+		MessageBox( hAppWnd, errmsg, "Lua run error", MB_OK | MB_ICONSTOP);
 #else
-		fprintf(stderr, "Lua thread bombed out: %s\n", lua_tostring(thread,-1));
+		fprintf(stderr, "Lua thread bombed out: %s\n", errmsg);
 #endif
-
 	} else {
 		FCEU_LuaOnStop();
 		//FCEU_DispMessage("Script died of natural causes.\n",0);
@@ -5976,7 +6005,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		lua_register(L, "OR", bit_bor);
 		lua_register(L, "XOR", bit_bxor);
 		lua_register(L, "SHIFT", bit_bshift_emulua);
-		lua_register(L, "BIT", bitbit);		
+		lua_register(L, "BIT", bitbit);
 
 		if (arg)
 		{
@@ -6072,7 +6101,7 @@ void FCEU_ReloadLuaCode()
 	if (!luaScriptName)
 	{
 #ifdef WIN32
-		// no script currently running, then try loading the most recent 
+		// no script currently running, then try loading the most recent
 		extern char *recent_lua[];
 		char*& fname = recent_lua[0];
 		extern void UpdateLuaConsole(const char* fname);
