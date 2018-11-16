@@ -624,11 +624,13 @@
 <p><span class="rvts63">gui.savescreenshotas(string name)</span></p>
 <p><span class="rvts37">Makes a screenshot of the FCEUX emulated screen, and saves it to the appropriate folder. However, this one receives a file name for the screenshot.</span></p>
 <p><span class="rvts37"> </span></p>
-<p><span class="rvts63">string gui.gdscreenshot()</span></p>
+<p><span class="rvts63">string gui.gdscreenshot(bool getemuscreen)</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">Takes a screen shot of the image and returns it in the form of a string which can be imported by the gd library using the gd.createFromGdStr() function.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">This function is provided so as to allow FCEUX to not carry a copy of the gd library itself. If you want raw RGB32 access, skip the first 11 bytes (header) and then read pixels as Alpha (always 0), Red, Green, Blue, left to right then top to bottom, range is 0-255 for all colors.</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37">If getemuscreen is false, this gets background colors from either the screen pixel or the LUA pixels set, but LUA data may not match the information used to put the data to the screen. If getemuscreen is true, this gets background colors from anything behind an LUA screen element.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts68">Warning:</span><span class="rvts37"> Storing screen shots in memory is not recommended. Memory usage will blow up pretty quick. One screen shot string eats around 230 KB of RAM.</span></p>
 <p><span class="rvts37"><br/></span></p>

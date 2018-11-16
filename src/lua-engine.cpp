@@ -3737,7 +3737,7 @@ static int gui_savescreenshot(lua_State *L) {
 	return 1;
 }
 
-// gui.gdscreenshot()
+// gui.gdscreenshot(getemuscreen)
 //
 //  Returns a screen shot as a string in gd's v1 file format.
 //  This allows us to make screen shots available without gd installed locally.
@@ -3748,6 +3748,7 @@ static int gui_savescreenshot(lua_State *L) {
 //  It really is easier that way.
 // example: gd.createFromGdStr(gui.gdscreenshot()):png("outputimage.png")
 static int gui_gdscreenshot(lua_State *L) {
+	bool getemuscreen = (lua_toboolean(L,1) == 1);
 
 	int width = LUA_SCREEN_WIDTH;
 	int height = LUA_SCREEN_HEIGHT;
@@ -3770,9 +3771,11 @@ static int gui_gdscreenshot(lua_State *L) {
 	*ptr++ = 255;
 	*ptr++ = 255;
 
+	uint8* scrBuf = getemuscreen ? XBackBuf : XBuf;
+
 	for (int y=0; y < height; y++) {
 		for (int x=0; x < width; x++) {
-			uint8 index = XBuf[(y)*256 + x];
+			uint8 index = scrBuf[(y)*256 + x];
 
 			// Write A,R,G,B (alpha=0 for us):
 			*ptr = 0;
