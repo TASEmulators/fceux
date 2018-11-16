@@ -376,12 +376,12 @@ static int emu_speedmode(lua_State *L) {
 		luaL_error(L, "Invalid mode %s to emu.speedmode",mode);
 
 	//printf("new speed mode:  %d\n", speedmode);
-        if (speedmode == SPEED_NORMAL)
+		if (speedmode == SPEED_NORMAL)
 		{
 			FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);
 			FCEUD_TurboOff();
 		}
-        else if (speedmode == SPEED_TURBO)				//adelikat: Making turbo actually use turbo.
+		else if (speedmode == SPEED_TURBO)				//adelikat: Making turbo actually use turbo.
 			FCEUD_TurboOn();							//Turbo and max speed are two different results. Turbo employs frame skipping and sound bypassing if mute turbo option is enabled.
 												//This makes it faster but with frame skipping. Therefore, maximum is still a useful feature, in case the user is recording an avi or making screenshots (or something else that needs all frames)
 		else
@@ -1962,11 +1962,11 @@ struct TieredRegion
 		}
 		bool Contains(unsigned int address, int size) const
 		{
-            for (size_t i = 0; i != islands.size(); ++i)
-            {
-                if (islands[i].Contains(address, size))
-                    return true;
-            }
+			for (size_t i = 0; i != islands.size(); ++i)
+			{
+				if (islands[i].Contains(address, size))
+					return true;
+			}
 			return false;
 		}
 	};
@@ -1986,7 +1986,7 @@ struct TieredRegion
 
 	TieredRegion()
 	{
-        std::vector <unsigned int> temp;
+		std::vector <unsigned int> temp;
 		Calculate(temp);
 	}
 
@@ -4268,7 +4268,7 @@ static int gui_text(lua_State *L) {
 
 	LuaDrawTextTransWH(msg, l, x, y, color, bgcolor);
 
-    lua_pushinteger(L, x);
+	lua_pushinteger(L, x);
 #endif
 	return 1;
 
@@ -5346,19 +5346,19 @@ static UBits barg(lua_State *L, int idx)
   b = (UBits)bn.b;
 #endif
 #elif defined(LUA_NUMBER_INT) || defined(LUA_NUMBER_LONG) || \
-      defined(LUA_NUMBER_LONGLONG) || defined(LUA_NUMBER_LONG_LONG) || \
-      defined(LUA_NUMBER_LLONG)
+	  defined(LUA_NUMBER_LONGLONG) || defined(LUA_NUMBER_LONG_LONG) || \
+	  defined(LUA_NUMBER_LLONG)
   if (sizeof(UBits) == sizeof(lua_Number))
-    b = bn.b;
+	b = bn.b;
   else
-    b = (UBits)(SBits)bn.n;
+	b = (UBits)(SBits)bn.n;
 #elif defined(LUA_NUMBER_FLOAT)
 #error "A 'float' lua_Number type is incompatible with this library"
 #else
 #error "Unknown number type, check LUA_NUMBER_* in luaconf.h"
 #endif
   if (b == 0 && !lua_isnumber(L, idx))
-    luaL_typerror(L, idx, "number");
+	luaL_typerror(L, idx, "number");
   return b;
 }
 
@@ -5370,7 +5370,7 @@ static int bit_bnot(lua_State *L) { BRET(~barg(L, 1)) }
 
 #define BIT_OP(func, opr) \
   static int func(lua_State *L) { int i; UBits b = barg(L, 1); \
-    for (i = lua_gettop(L); i > 1; i--) b opr barg(L, i); BRET(b) }
+	for (i = lua_gettop(L); i > 1; i--) b opr barg(L, i); BRET(b) }
 BIT_OP(bit_band, &=)
 BIT_OP(bit_bor, |=)
 BIT_OP(bit_bxor, ^=)
@@ -5382,7 +5382,7 @@ BIT_OP(bit_bxor, ^=)
 #define bror(b, n)  ((b << (32-n)) | (b >> n))
 #define BIT_SH(func, fn) \
   static int func(lua_State *L) { \
-    UBits b = barg(L, 1); UBits n = barg(L, 2) & 31; BRET(fn(b, n)) }
+	UBits b = barg(L, 1); UBits n = barg(L, 2) & 31; BRET(fn(b, n)) }
 BIT_SH(bit_lshift, bshl)
 BIT_SH(bit_rshift, bshr)
 BIT_SH(bit_arshift, bsar)
@@ -5438,19 +5438,19 @@ bool luabitop_validate(lua_State *L) // originally named as luaopen_bit
   lua_pushnumber(L, (lua_Number)1437217655L);
   b = barg(L, -1);
   if (b != (UBits)1437217655L || BAD_SAR) {  /* Perform a simple self-test. */
-    const char *msg = "compiled with incompatible luaconf.h";
+	const char *msg = "compiled with incompatible luaconf.h";
 #ifdef LUA_NUMBER_DOUBLE
 #ifdef WIN32
-    if (b == (UBits)1610612736L)
-      msg = "use D3DCREATE_FPU_PRESERVE with DirectX";
+	if (b == (UBits)1610612736L)
+	  msg = "use D3DCREATE_FPU_PRESERVE with DirectX";
 #endif
-    if (b == (UBits)1127743488L)
-      msg = "not compiled with SWAPPED_DOUBLE";
+	if (b == (UBits)1127743488L)
+	  msg = "not compiled with SWAPPED_DOUBLE";
 #endif
-    if (BAD_SAR)
-      msg = "arithmetic right-shift broken";
-    luaL_error(L, "bit library self-test failed (%s)", msg);
-    return false;
+	if (BAD_SAR)
+	  msg = "arithmetic right-shift broken";
+	luaL_error(L, "bit library self-test failed (%s)", msg);
+	return false;
   }
   return true;
 }
@@ -5491,7 +5491,7 @@ static void FCEU_LuaHookFunction(lua_State *L, lua_Debug *dbg) {
 
 #ifdef WIN32
 		// Uh oh
-                //StopSound(); //mbg merge 7/23/08
+				//StopSound(); //mbg merge 7/23/08
 		int ret = MessageBox(hAppWnd, "The Lua script running has been running a long time. It may have gone crazy. Kill it?\n\n(No = don't check anymore either)", "Lua Script Gone Nuts?", MB_YESNO);
 
 		if (ret == IDYES) {
@@ -5625,8 +5625,8 @@ static const struct luaL_reg emulib [] = {
 	{"getscreenpixel", emu_getscreenpixel},
 	{"readonly", movie_getreadonly},
 	{"setreadonly", movie_setreadonly},
-    {"getdir", emu_getdir},
-    {"loadrom", emu_loadrom},
+	{"getdir", emu_getdir},
+	{"loadrom", emu_loadrom},
 	{"print", print}, // sure, why not
 	{NULL,NULL}
 };
@@ -6037,7 +6037,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 	if (result) {
 #ifdef WIN32
 		// Doing this here caused nasty problems; reverting to MessageBox-from-dialog behavior.
-                //StopSound();//StopSound(); //mbg merge 7/23/08
+				//StopSound();//StopSound(); //mbg merge 7/23/08
 		MessageBox(NULL, lua_tostring(L,-1), "Lua load error", MB_OK | MB_ICONSTOP);
 #else
 		fprintf(stderr, "Failed to compile file: %s\n", lua_tostring(L,-1));
