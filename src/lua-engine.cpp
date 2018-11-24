@@ -1694,15 +1694,20 @@ static const char* toCString(lua_State* L, int idx)
 // replacement for luaB_print() that goes to the appropriate textbox instead of stdout
 static int print(lua_State *L)
 {
-	const char* str = toCString(L);
+	if (info_print) {
+		const char* str = toCString(L);
 
-	int uid = info_uid;//luaStateToUIDMap[L->l_G->mainthread];
-	//LuaContextInfo& info = GetCurrentInfo();
+		int uid = info_uid;//luaStateToUIDMap[L->l_G->mainthread];
+		//LuaContextInfo& info = GetCurrentInfo();
 
-	if(info_print)
 		info_print(uid, str);
-	else
+	}
+	else {
+		char* str = rawToCString(L);
+		str[strlen(str)-2] = 0; // *NIX need no extra \r\n BS
+
 		puts(str);
+	}
 
 	//worry(L, 100);
 	return 0;
