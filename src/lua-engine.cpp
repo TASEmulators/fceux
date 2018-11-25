@@ -12,6 +12,7 @@
 
 #include "types.h"
 #include "fceu.h"
+#include "file.h"
 #include "video.h"
 #include "debug.h"
 #include "sound.h"
@@ -26,6 +27,8 @@
 #include "utils/memory.h"
 #include "utils/crc32.h"
 #include "fceulua.h"
+
+extern char FileBase[];
 
 #ifdef WIN32
 #include "drivers/win/common.h"
@@ -1316,6 +1319,23 @@ void CallRegisteredLuaLoadFunctions(int savestateNumber, const LuaSaveData& save
 }
 
 
+// rom.getfilename()
+//
+// Base filename of the currently loaded ROM, or nil if none is loaded
+static int rom_getfilename(lua_State *L) {
+    if (GameInfo) lua_pushstring(L, FileBase);
+	else          lua_pushnil(L);
+	return 1;
+}
+
+static int rom_gethash(lua_State *L) {
+	const char *type = luaL_checkstring(L, 1);
+	if(!type) lua_pushstring(L, "");
+	else if(!stricmp(type,"md5")) lua_pushstring(L, md5_asciistr(GameInfo->MD5));
+	else lua_pushstring(L, "");
+	return 1;
+}
+
 static int rom_readbyte(lua_State *L) {
 	lua_pushinteger(L, FCEU_ReadRomByte(luaL_checkinteger(L,1)));
 	return 1;
@@ -1352,14 +1372,6 @@ static int rom_writebyte(lua_State *L)
 		luaL_error(L,"rom.writebyte() can't edit the ROM header.");
 	else
 		FCEU_WriteRomByte(address, luaL_checkinteger(L,2));
-	return 1;
-}
-
-static int rom_gethash(lua_State *L) {
-	const char *type = luaL_checkstring(L, 1);
-	if(!type) lua_pushstring(L, "");
-	else if(!stricmp(type,"md5")) lua_pushstring(L, md5_asciistr(GameInfo->MD5));
-	else lua_pushstring(L, "");
 	return 1;
 }
 
@@ -5606,7 +5618,6 @@ static int emu_exec_time(lua_State *L) { return 0; }
 #endif
 
 static const struct luaL_reg emulib [] = {
-
 	{"poweron", emu_poweron},
 	{"debuggerloop", emu_debuggerloop},
 	{"debuggerloopstep", emu_debuggerloopstep},
@@ -5640,13 +5651,14 @@ static const struct luaL_reg emulib [] = {
 };
 
 static const struct luaL_reg romlib [] = {
+	{"getfilename", rom_getfilename},
+	{"gethash", rom_gethash},
 	{"readbyte", rom_readbyte},
 	{"readbytesigned", rom_readbytesigned},
 	// alternate naming scheme for unsigned
 	{"readbyteunsigned", rom_readbyte},
 	{"readbyterange", rom_readbyterange},
 	{"writebyte", rom_writebyte},
-	{"gethash", rom_gethash},
 	{NULL,NULL}
 };
 
