@@ -3098,6 +3098,72 @@ static int movie_replay (lua_State *L) {
 	return 0;
 }
 
+// bool movie.play(string filename, [bool read_only, [int pauseframe]])
+//
+//   Loads and plays a movie.
+int movie_playback(lua_State *L) {
+	int arg_count = lua_gettop(L);
+
+	if (arg_count == 0) {
+		luaL_error(L, "no parameters specified");
+		return 0;
+	}
+
+	const char *filename = luaL_checkstring(L,1);
+	if (filename == NULL) {
+		luaL_error(L, "Filename required");
+		return 0;
+	}
+
+	bool read_only  = arg_count >= 2 ? (lua_toboolean(L,2) == 1) : 0;
+	int  pauseframe = arg_count >= 3 ? lua_tointeger(L,3) : 0;
+
+	if (pauseframe < 0) pauseframe = 0;
+
+	// Load it!
+	bool loaded = FCEUI_LoadMovie(filename, read_only, pauseframe);
+
+	lua_pushboolean(L, loaded);
+	return 1;
+}
+
+// bool movie.record(string filename, [int save_type, [string author]])
+//
+//   Saves and records a movie.
+int movie_record(lua_State *L) {
+	int arg_count = lua_gettop(L);
+
+	if (arg_count == 0) {
+		luaL_error(L, "no parameters specified");
+		return 0;
+	}
+
+	const char *filename = luaL_checkstring(L,1);
+	if (filename == NULL) {
+		luaL_error(L, "Filename required");
+		return 0;
+	}
+
+	// No need to use the full functionality of the enum
+	int save_type = arg_count >= 2 ? lua_tointeger(L, 2) : 0;
+	EMOVIE_FLAG flags;
+	if      (save_type == 1) flags = MOVIE_FLAG_NONE;  // from savestate
+	else if (save_type == 2) flags = MOVIE_FLAG_FROM_SAVERAM;
+	else                     flags = MOVIE_FLAG_FROM_POWERON;
+
+	// XXX: Assuming UTF-8 strings in Lua
+	std::wstring author =
+		arg_count >= 3 ?
+		mbstowcs( (std::string)luaL_checkstring(L, 3) ) : L""
+	;
+
+	// Save it!
+	FCEUI_SaveMovie(filename, flags, author);
+
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
 //movie.ispoweron
 //
 //If movie is recorded from power-on
@@ -5759,13 +5825,15 @@ static const struct luaL_reg movielib[] = {
 	{"readonly", movie_getreadonly},
 	{"setreadonly", movie_setreadonly},
 	{"replay", movie_replay},
-//	{"record", movie_record},
-//	{"play", movie_playback},
+	{"record", movie_record},
+	{"play", movie_playback},
 
 	// alternative names
 	{"close", movie_stop},
 	{"getname", movie_getname},
-//	{"playback", movie_playback},
+	{"load", movie_playback},
+	{"save", movie_record},
+	{"playback", movie_playback},
 	{"playbeginning", movie_replay},
 	{"getreadonly", movie_getreadonly},
 	{"ispoweron", movie_ispoweron},					//If movie recorded from power-on
