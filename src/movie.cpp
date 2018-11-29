@@ -1024,9 +1024,12 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 static void openRecordingMovie(const char* fname)
 {
 	osRecordingMovie = FCEUD_UTF8_fstream(fname, "wb");
-	if(!osRecordingMovie)
+	if(!osRecordingMovie || osRecordingMovie->fail()) {
 		FCEU_PrintError("Error opening movie output file: %s",fname);
+		return;
+	}
 	strcpy(curMovieFilename, fname);
+
 #ifdef WIN32
 	//Add to the recent movie menu
 	AddRecentMovieFile(fname);
@@ -1046,6 +1049,9 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 	FCEUI_StopMovie();
 
 	openRecordingMovie(fname);
+
+	if(!osRecordingMovie || osRecordingMovie->fail())
+		return;
 
 	currFrameCounter = 0;
 	LagCounterReset();
