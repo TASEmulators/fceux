@@ -1330,9 +1330,12 @@ static int rom_getfilename(lua_State *L) {
 
 static int rom_gethash(lua_State *L) {
 	const char *type = luaL_checkstring(L, 1);
-	if(!type) lua_pushstring(L, "");
-	else if(!stricmp(type,"md5")) lua_pushstring(L, md5_asciistr(GameInfo->MD5));
-	else lua_pushstring(L, "");
+	MD5DATA md5hash = GameInfo->MD5;
+
+	if      (!type)                    lua_pushstring(L, "");
+	else if (!stricmp(type, "md5"))    lua_pushstring(L, md5_asciistr(md5hash));
+	else if (!stricmp(type, "base64")) lua_pushstring(L, BytesToString(md5hash.data, MD5DATA::size).c_str());
+	else                               lua_pushstring(L, "");
 	return 1;
 }
 
