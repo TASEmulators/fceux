@@ -930,7 +930,8 @@ void EncodeGG(char *str, int a, int v, int c)
 	uint8 num[8];
 	static char lets[16]={'A','P','Z','L','G','I','T','Y','E','O','X','U','K','S','V','N'};
 	int i;
-	if(a > 0x8000)a-=0x8000;
+	
+	a&=0x7fff;
 
 	num[0]=(v&7)+((v>>4)&8);
 	num[1]=((v>>4)&7)+((a>>4)&8);
