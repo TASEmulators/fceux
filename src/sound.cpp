@@ -443,7 +443,7 @@ static void FrameSoundStuff(int V)
       if((mod+curfreq[P])&0x800)
       {
        sweepon[P]=0;
-       curfreq[P]=0;
+//       curfreq[P]=0;		// fixes R.C.Pro Am II title music
       }
       else
       {
