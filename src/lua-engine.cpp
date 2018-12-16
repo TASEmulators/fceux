@@ -99,6 +99,10 @@ extern "C"
 	int iupcontrolslua_open(lua_State * L);
 	int luaopen_winapi(lua_State * L);
 
+	int imlua_open (lua_State *L);
+	int cdlua_open (lua_State *L);
+	int cdluaim_open(lua_State *L);
+
 	//luasocket
 	int luaopen_socket_core(lua_State *L);
 	int luaopen_mime_core(lua_State *L);
@@ -6055,6 +6059,9 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		iuplua_open(L);
 		iupcontrolslua_open(L);
 		luaopen_winapi(L);
+		imlua_open(L);
+		cdlua_open(L);
+		cdluaim_open(L);
 
 		//luasocket - yeah, have to open this in a weird way
 		lua_pushcfunction(L,luaopen_socket_core);
