@@ -2421,6 +2421,11 @@ static int input_get(lua_State *L) {
 					int mask = (i == VK_CAPITAL || i == VK_NUMLOCK || i == VK_SCROLL) ? 0x01 : 0x80;
 					if(keys[i] & mask)
 					{
+						//ignore mouse buttons if the main window isn't focused
+						if(i==1 || i==2)
+							if(GetForegroundWindow()!=hAppWnd)
+								continue;
+
 						const char* name = s_keyToName[i];
 						if(name)
 						{
@@ -2439,6 +2444,12 @@ static int input_get(lua_State *L) {
 				if(name)
 				{
 					int active;
+
+					//ignore mouse buttons if the main window isn't focused
+					if(i==1 || i==2)
+						if(GetForegroundWindow()!=hAppWnd)
+							continue;
+
 					if(i == VK_CAPITAL || i == VK_NUMLOCK || i == VK_SCROLL)
 						active = GetKeyState(i) & 0x01;
 					else
