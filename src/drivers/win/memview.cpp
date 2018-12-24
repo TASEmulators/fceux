@@ -2242,7 +2242,7 @@ BOOL CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 		break;
 	case WM_CLOSE:
 	case WM_QUIT:
-		GetDlgItemText(hwndDlg,IDC_MEMVIEWFIND_WHAT,FindTextBox,59);
+		GetDlgItemText(hwndDlg,IDC_MEMVIEWFIND_WHAT,FindTextBox,60);
 		DestroyWindow(hwndDlg);
 		hMemFind = 0;
 		hwndDlg = 0;
@@ -2302,7 +2302,7 @@ void FindNext(){
 	unsigned char data[60];
 	int datasize = 0, i, j, inputc = -1, found;
 
-	if(hMemFind) GetDlgItemText(hMemFind,IDC_MEMVIEWFIND_WHAT,str,59);
+	if(hMemFind) GetDlgItemText(hMemFind,IDC_MEMVIEWFIND_WHAT,str,60);
 	else strcpy(str,FindTextBox);
 
 	for(i = 0;str[i] != 0;i++){
