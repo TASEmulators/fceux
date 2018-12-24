@@ -72,12 +72,12 @@ extern void RemoveRecentItem(unsigned int which, char**bufferArray, const unsign
 //Ram change monitor globals-----------------------------------
 bool RamChangeInitialize = false;		//Set true during memw WM_INIT
 const int MAX_RAMMONITOR = 4;			//Maximum number of Ram values that can be monitored
-char editboxnow[MAX_RAMMONITOR][5];		//current address put into editbox 00
-char editboxlast[MAX_RAMMONITOR][5];	//last address put into editbox (1 frame ago)
+char editboxnow[MAX_RAMMONITOR][8];		//current address put into editbox 00
+char editboxlast[MAX_RAMMONITOR][8];	//last address put into editbox (1 frame ago)
 int editlast[MAX_RAMMONITOR];			//last address value (1 frame ago)
 int editnow[MAX_RAMMONITOR];			//current address value
 unsigned int editcount[MAX_RAMMONITOR];	//Current counter value
-char editchangem[MAX_RAMMONITOR][5];	//counter converted to string
+char editchangem[MAX_RAMMONITOR][12];	//counter converted to string
 
 //-------------------------------------------------
 
@@ -286,14 +286,14 @@ void UpdateMemWatch()
 			//Display blue if address is frozen
 			if (FrozenAddressCount && FrozenAddresses.size())
 			{
-			for (unsigned int x = 0; x < FrozenAddressCount; x++)
-			{
-				if (mwrec.addr == FrozenAddresses[x])
+				for (unsigned int x = 0; x < FrozenAddressCount; x++)
 				{
-					//SetTextColor(hdc,RGB(0,0,255));
-					SetTextColor(hdc,GetSysColor(COLOR_HIGHLIGHT));
+					if (mwrec.addr == FrozenAddresses[x])
+					{
+						//SetTextColor(hdc,RGB(0,0,255));
+						SetTextColor(hdc,GetSysColor(COLOR_HIGHLIGHT));
+					}
 				}
-			}
 			}
 
 			char* text;
@@ -336,7 +336,6 @@ void UpdateMemWatch()
 			TextOut(hdc,0,0,text,strlen(text));
 			SetTextColor(hdc,RGB(0,0,0));
 		}
-		
 	}
 }
 
@@ -388,14 +387,14 @@ bool iftextchanged()
 	int i,j;
 	for(i=0;i<NUMWATCHES;i++)
 	{
-		for(j=0;j<LABELLENGTH;j++)
+		for(j=0;j<ADDRESSLENGTH;j++)
 		{
-			if(addresses[i][j] != NULL || labels [i][j] != NULL)
+			if(addresses[i][j] != '\0' || labels [i][j] != '\0')
 				return true;
 		}
 		for(;j<LABELLENGTH;j++)
 		{
-			if(labels[i][j] != NULL)
+			if(labels[i][j] != '\0')
 				return true;
 		}
 	}
@@ -445,15 +444,15 @@ static void SaveMemWatch()
 		for(i=0;i<NUMWATCHES;i++)
 		{
 			//Use dummy strings to fill empty slots
-			if(labels[i][0] == 0)
-			{
-				labels[i][0] = '|';
-				labels[i][1] = 0;
-			}
 			if(addresses[i][0] == 0)
 			{
 				addresses[i][0] = '|';
 				addresses[i][1] = 0;
+			}
+			if(labels[i][0] == 0)
+			{
+				labels[i][0] = '|';
+				labels[i][1] = 0;
 			}
 			//spaces can be a problem for scanf so get rid of them
 			TakeOutSpaces(i);
@@ -476,15 +475,15 @@ static void QuickSaveMemWatch() //Save rather than Save as
 		for(int i=0;i<NUMWATCHES;i++)
 		{
 			//Use dummy strings to fill empty slots
-			if(labels[i][0] == 0)
-			{
-				labels[i][0] = '|';
-				labels[i][1] = 0;
-			}
 			if(addresses[i][0] == 0)
 			{
 				addresses[i][0] = '|';
 				addresses[i][1] = 0;
+			}
+			if(labels[i][0] == 0)
+			{
+				labels[i][0] = '|';
+				labels[i][1] = 0;
 			}
 			//spaces can be a problem for scanf so get rid of them
 			TakeOutSpaces(i);
@@ -572,7 +571,7 @@ static void LoadMemWatch()
 		}
 		fclose(fp);
 	}
-fileChanged = false;
+	fileChanged = false;
 }
 
 //Loads a recent file given the recent files array number(0-4) 
@@ -592,33 +591,33 @@ void OpenMemwatchRecentFile(int memwRFileNumber)
 			MemwAddRecentFile(x);
 		int i,j;
 		for(i=0;i<NUMWATCHES;i++)
+		{
+			fscanf(fp, "%s ", watchfcontents); //Reads contents of newly opened file
+			for(j = 0; j < ADDRESSLENGTH; j++)
+				addresses[i][j] = watchfcontents[j];
+			fscanf(fp, "%s\n", watchfcontents);
+			for(j = 0; j < LABELLENGTH; j++)
+				labels[i][j] = watchfcontents[j];
+
+			//Replace dummy strings with empty strings
+			if(addresses[i][0] == '|')
 			{
-				fscanf(fp, "%s ", watchfcontents); //Reads contents of newly opened file
-				for(j = 0; j < ADDRESSLENGTH; j++)
-					addresses[i][j] = watchfcontents[j];
-				fscanf(fp, "%s\n", watchfcontents);
-				for(j = 0; j < LABELLENGTH; j++)
-					labels[i][j] = watchfcontents[j];
+				addresses[i][0] = 0;
+			}
+			if(labels[i][0] == '|')
+			{
+				labels[i][0] = 0;
+			}
+			PutInSpaces(i);
 
-				//Replace dummy strings with empty strings
-				if(addresses[i][0] == '|')
-				{
-					addresses[i][0] = 0;
-				}
-				if(labels[i][0] == '|')
-				{
-					labels[i][0] = 0;
-				}
-				PutInSpaces(i);
+			int templl = LABELLENGTH - 1;
+			int tempal = ADDRESSLENGTH - 1;
+			addresses[i][tempal] = 0;
+			labels[i][templl] = 0; //just in case
 
-				int templl = LABELLENGTH - 1;
-				int tempal = ADDRESSLENGTH - 1;
-				addresses[i][tempal] = 0;
-				labels[i][templl] = 0; //just in case
-
-				SetDlgItemText(hwndMemWatch,MW_VAL (i),(LPTSTR) "---");
-				SetDlgItemText(hwndMemWatch,MW_ADDR(i),(LPTSTR) addresses[i]);
-				SetDlgItemText(hwndMemWatch,MW_NAME(i),(LPTSTR) labels[i]);
+			SetDlgItemText(hwndMemWatch,MW_VAL (i),(LPTSTR) "---");
+			SetDlgItemText(hwndMemWatch,MW_ADDR(i),(LPTSTR) addresses[i]);
+			SetDlgItemText(hwndMemWatch,MW_NAME(i),(LPTSTR) labels[i]);
 		}
 		fclose(fp);				//Close the file
 		fileChanged = false;	//Flag that the memwatch file has not been changed since last save
@@ -958,9 +957,13 @@ void CreateMemWatch()
 		int i,j;
 		for(i=0;i<NUMWATCHES;i++)
 		{
-			for(j=0;j<LABELLENGTH;j++)
+			for(j=0;j<ADDRESSLENGTH;j++)
 			{
 				addresses[i][j] = 0;
+				labels[i][j] = 0;
+			}
+			for (;j<LABELLENGTH;j++)
+			{
 				labels[i][j] = 0;
 			}
 		}

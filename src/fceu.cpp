@@ -112,6 +112,7 @@ bool movieSubtitles = true; //Toggle for displaying movie subtitles
 bool DebuggerWasUpdated = false; //To prevent the debugger from updating things without being updated.
 bool AutoResumePlay = false;
 char romNameWhenClosingEmulator[2048] = {0};
+bool togglePausedRequested = false; //Flaged true to pause at frame boundary
 
 FCEUGI::FCEUGI()
 	: filename(0),
@@ -656,6 +657,14 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	JustFrameAdvanced = false;
 
+	//do pausing at frame boundary to avoid inconsistency
+	if (togglePausedRequested)
+	{
+		togglePausedRequested = false;
+		if (!frameAdvanceRequested)
+			EmulationPaused ^= EMULATIONPAUSED_PAUSED;
+	}
+
 	if (frameAdvanceRequested)
 	{
 		if (frameAdvance_Delay_count == 0 || frameAdvance_Delay_count >= frameAdvance_Delay)
@@ -721,6 +730,8 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 #ifdef _S9XLUA_H
 	CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
 #endif
+
+	FCEU_PutImage();
 
 #ifdef WIN32
 	//These Windows only dialogs need to be updated only once per frame so they are included here
@@ -1119,7 +1130,7 @@ void FCEUI_SetEmulationPaused(int val) {
 
 void FCEUI_ToggleEmulationPause(void)
 {
-	EmulationPaused = (EmulationPaused & EMULATIONPAUSED_PAUSED) ^ EMULATIONPAUSED_PAUSED;
+	togglePausedRequested = true;;
 	DebuggerWasUpdated = false;
 }
 
@@ -1199,10 +1210,14 @@ bool FCEU_IsValidUI(EFCEUI ui) {
 		break;
 
 	case FCEUI_STOPMOVIE:
+	case FCEUI_TOGGLERECORDINGMOVIE:
 		return(FCEUMOV_Mode(MOVIEMODE_PLAY | MOVIEMODE_RECORD | MOVIEMODE_FINISHED));
 
 	case FCEUI_PLAYFROMBEGINNING:
 		return(FCEUMOV_Mode(MOVIEMODE_PLAY | MOVIEMODE_RECORD | MOVIEMODE_TASEDITOR | MOVIEMODE_FINISHED));
+
+	case FCEUI_TRUNCATEMOVIE:
+		return(FCEUMOV_Mode(MOVIEMODE_PLAY | MOVIEMODE_RECORD));
 
 	case FCEUI_STOPAVI:
 		return FCEUI_AviIsRecording();

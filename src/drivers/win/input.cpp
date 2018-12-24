@@ -245,9 +245,6 @@ int DTestButton(ButtConfig *bc)
 
 void UpdateGamepad(bool snes)
 {
-	if(FCEUMOV_Mode(MOVIEMODE_PLAY))
-		return;
-
 	int JS=0;
 	if(FCEUMOV_Mode(MOVIEMODE_RECORD))
 		AutoFire();
@@ -422,10 +419,13 @@ void FCEUD_UpdateInput()
 	bool joy=false;
 	bool mouse=false;
 	bool mouse_relative=false;
-	EMOVIEMODE FCEUMOVState = FCEUMOV_Mode();
 
-  UpdateRawInputAndHotkeys();
+	//aquanull: if we are ok with getting real input even when emulation is paused, why should we bother skipping it when playing a movie?
+	bool skipRealInput = (FCEUMOV_Mode() == MOVIEMODE_PLAY && currFrameCounter < (int)currMovieData.records.size());
 
+	UpdateRawInputAndHotkeys();
+
+	if (!skipRealInput) //FatRatKnight: Moved this if out of the function, a more concise fix may be desired.
 	{
 		for(int x=0;x<2;x++)
 			switch(InputType[x])
@@ -469,11 +469,8 @@ void FCEUD_UpdateInput()
 		if(joy)
 			UpdateGamepad(false);
 
-		if (FCEUMOVState != MOVIEMODE_PLAY) //FatRatKnight: Moved this if out of the function, a more concise fix may be desired.
-		{
-			if (mouse) GetMouseData(MouseData);
-			if (mouse_relative) GetMouseRelative(MouseRelative);
-		}
+		if (mouse) GetMouseData(MouseData);
+		if (mouse_relative) GetMouseRelative(MouseRelative);
 	}
 }
 

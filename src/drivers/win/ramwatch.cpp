@@ -470,7 +470,7 @@ void OpenRWRecentFile(int memwRFileNumber)
 	return;
 }
 
-int Change_File_L(char *Dest, char *Dir, char *Titre, char *Filter, char *Ext, HWND hwnd)
+int Change_File_L(char *Dest, const char *Dir, const char *Titre, const char *Filter, const char *Ext, HWND hwnd)
 {
 	OPENFILENAME ofn;
 
@@ -501,7 +501,7 @@ int Change_File_L(char *Dest, char *Dir, char *Titre, char *Filter, char *Ext, H
 	return 0;
 }
 
-int Change_File_S(char *Dest, char *Dir, char *Titre, char *Filter, char *Ext, HWND hwnd)
+int Change_File_S(char *Dest, const char *Dir, const char *Titre, const char *Filter, const char *Ext, HWND hwnd)
 {
 	OPENFILENAME ofn;
 
@@ -536,11 +536,12 @@ int Change_File_S(char *Dest, char *Dir, char *Titre, char *Filter, char *Ext, H
 
 bool Save_Watches()
 {
+	string initdir = FCEU_GetPath(FCEUMKF_MEMW);
 	const char* slash = max(strrchr(gamefilename, '|'), max(strrchr(gamefilename, '\\'), strrchr(gamefilename, '/')));
 	strcpy(Str_Tmp,slash ? slash+1 : gamefilename);
 	char* dot = strrchr(Str_Tmp, '.');
 	if(dot) *dot = 0;
-	if(Change_File_S(Str_Tmp, applicationPath, "Save Watches", "Watchlist (*.wch)\0*.wch\0All Files (*.*)\0*.*\0\0", "wch", RamWatchHWnd))
+	if(Change_File_S(Str_Tmp, initdir.c_str(), "Save Watches", "Watchlist (*.wch)\0*.wch\0All Files (*.*)\0*.*\0\0", "wch", RamWatchHWnd))
 	{
 		FILE *WatchFile = fopen(Str_Tmp,"w+b");
 		fputc('\n',WatchFile);
@@ -655,12 +656,13 @@ bool Load_Watches(bool clear, const char* filename)
 
 bool Load_Watches(bool clear)
 {
+	string initdir = FCEU_GetPath(FCEUMKF_MEMW);
 	const char* slash = max(strrchr(gamefilename, '|'), max(strrchr(gamefilename, '\\'), strrchr(gamefilename, '/')));
 	strcpy(Str_Tmp,slash ? slash+1 : gamefilename);
 	char* dot = strrchr(Str_Tmp, '.');
 	if(dot) *dot = 0;
 	strcat(Str_Tmp,".wch");
-	if(Change_File_L(Str_Tmp, applicationPath, "Load Watches", "Watchlist (*.wch)\0*.wch\0All Files (*.*)\0*.*\0\0", "wch", RamWatchHWnd))
+	if(Change_File_L(Str_Tmp, initdir.c_str(), "Load Watches", "Watchlist (*.wch)\0*.wch\0All Files (*.*)\0*.*\0\0", "wch", RamWatchHWnd))
 	{
 		return Load_Watches(clear, Str_Tmp);
 	}

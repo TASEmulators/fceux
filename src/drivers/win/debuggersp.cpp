@@ -429,7 +429,9 @@ Name* parse(char* lines, const char* filename)
 			}
 		} else
 		{
-			sscanf(cur->offset, "%*[$]%4X", &(cur->offsetNumeric));
+			unsigned int tempOffset;
+			sscanf(cur->offset, "%*[$]%4X", &(tempOffset));
+			cur->offsetNumeric = (uint16)tempOffset;
 			// Add the node to the list of address nodes
 			if (prev)
 			{

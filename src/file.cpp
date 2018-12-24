@@ -284,10 +284,15 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 		{
 			//if the archive contained no files, try to open it the old fashioned way
 			EMUFILE_FILE* fp = FCEUD_UTF8_fstream(fileToOpen,mode);
-			if(!fp || (fp->get_fp() == NULL))
+			if(!fp)
+				return 0;
+			if (fp->get_fp() == NULL)
 			{
+				//fp is new'ed so it has to be deleted
+				delete fp;
 				return 0;
 			}
+
 
 			//try to read a zip file
 			{

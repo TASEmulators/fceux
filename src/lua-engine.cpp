@@ -6178,7 +6178,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 	//if (wasPaused) FCEUI_ToggleEmulationPause();
 
 	// And run it right now. :)
-	//FCEU_LuaFrameBoundary();
+	FCEU_LuaFrameBoundary();
 
 	// Set up our protection hook to be executed once every 10,000 bytecode instructions.
 	//lua_sethook(thread, FCEU_LuaHookFunction, LUA_MASKCOUNT, 10000);
