@@ -146,23 +146,23 @@ void ResetMemoryRegions()
 	{
 		MemoryRegion& region = *iter;
 		region.virtualIndex = nextVirtualIndex;
-		nextVirtualIndex = region.virtualIndex + region.size;
+		nextVirtualIndex = region.virtualIndex + region.size + 4;
 	}
 	//assert(nextVirtualIndex <= MAX_RAM_SIZE);
 
 	if(nextVirtualIndex > MAX_RAM_SIZE)
 	{
-		s_prevValues = (unsigned char*)realloc(s_prevValues, sizeof(char)*(nextVirtualIndex+4));
-		memset(s_prevValues, 0, sizeof(char)*(nextVirtualIndex+4));
+		s_prevValues = (unsigned char*)realloc(s_prevValues, sizeof(unsigned char)*nextVirtualIndex);
+		memset(s_prevValues, 0, sizeof(unsigned char)*nextVirtualIndex);
 
-		s_curValues = (unsigned char*)realloc(s_curValues, sizeof(char)*(nextVirtualIndex+4));
-		memset(s_curValues, 0, sizeof(char)*(nextVirtualIndex+4));
+		s_curValues = (unsigned char*)realloc(s_curValues, sizeof(unsigned char)*nextVirtualIndex);
+		memset(s_curValues, 0, sizeof(unsigned char)*nextVirtualIndex);
 
-		s_numChanges = (unsigned short*)realloc(s_numChanges, sizeof(short)*(nextVirtualIndex+4));
-		memset(s_numChanges, 0, sizeof(short)*(nextVirtualIndex+4));
+		s_numChanges = (unsigned short*)realloc(s_numChanges, sizeof(unsigned short)*nextVirtualIndex);
+		memset(s_numChanges, 0, sizeof(unsigned short)*nextVirtualIndex);
 
-		s_itemIndexToRegionPointer = (MemoryRegion**)realloc(s_itemIndexToRegionPointer, sizeof(MemoryRegion*)*(nextVirtualIndex+4));
-		memset(s_itemIndexToRegionPointer, 0, sizeof(MemoryRegion*)*(nextVirtualIndex+4));
+		s_itemIndexToRegionPointer = (MemoryRegion**)realloc(s_itemIndexToRegionPointer, sizeof(MemoryRegion*)*nextVirtualIndex);
+		memset(s_itemIndexToRegionPointer, 0, sizeof(MemoryRegion*)*nextVirtualIndex);
 
 		MAX_RAM_SIZE = nextVirtualIndex;
 	}
