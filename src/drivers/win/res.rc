@@ -7,93 +7,16 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Russian (Russia) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
-LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
-#pragma code_page(1251)
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_TASEDITOR_SAVINGOPTIONS DIALOGEX 0, 0, 223, 208
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Project file saving options"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,109,187,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,165,187,50,14
-    CONTROL         " Binary format of Input",IDC_CHECK_BINARY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,17,89,10
-    CONTROL         " Markers",IDC_CHECK_MARKERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,32,67,10
-    CONTROL         " Bookmarks",IDC_CHECK_BOOKMARKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,47,67,10
-    CONTROL         " History",IDC_CHECK_HISTORY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,62,67,10
-    CONTROL         " Piano Roll",IDC_CHECK_PIANO_ROLL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,77,67,10
-    CONTROL         " Selection",IDC_CHECK_SELECTION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,92,67,10
-    GROUPBOX        "File contents",IDC_STATIC,105,4,111,177
-    GROUPBOX        "Greenzone saving options",IDC_STATIC,112,106,97,69
-    CONTROL         " all frames",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,122,117,77,10
-    CONTROL         " every 16th frame",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,122,131,77,10
-    CONTROL         " marked frames",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,122,145,77,10
-    CONTROL         " don't save",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,122,159,77,10
-    CONTROL         " Autosave project",IDC_AUTOSAVE_PROJECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,17,81,10
-    CONTROL         " silently",IDC_SILENT_AUTOSAVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,47,42,10
-    LTEXT           "every",IDC_STATIC,14,32,21,8
-    EDITTEXT        IDC_AUTOSAVE_PERIOD,36,30,24,14,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "minutes",IDC_STATIC,64,32,28,8
-    GROUPBOX        "Settings",IDC_STATIC,6,4,91,177
-END
-
-IDD_SYMBOLIC_DEBUG_NAMING DIALOGEX 0, 0, 245, 83
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Symbolic Debug Naming"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,132,62,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,189,62,50,14
-    LTEXT           "File",IDC_STATIC,7,7,15,9
-    EDITTEXT        IDC_SYMBOLIC_ADDRESS,38,24,33,13,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
-    LTEXT           "Address",IDC_STATIC,6,26,30,10
-    EDITTEXT        IDC_SYMBOLIC_NAME,107,24,132,13,ES_AUTOHSCROLL
-    LTEXT           "Name",IDC_STATIC,83,26,22,10
-    LTEXT           "Comment",IDC_STATIC,6,45,37,10
-    EDITTEXT        IDC_SYMBOLIC_COMMENT,45,43,194,13,ES_AUTOHSCROLL
-    EDITTEXT        IDC_SYMBOLIC_FILENAME,24,6,215,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_SYMBOLIC_DEBUG_NAMING, DIALOG
-    BEGIN
-        BOTTOMMARGIN, 82
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // Russian (Russia) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// 非特定语言 resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(1252)
+#pragma code_page(936)
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -431,11 +354,11 @@ BEGIN
     GROUPBOX        "NES Palette",302,10,8,102,81,WS_GROUP
     DEFPUSHBUTTON   "&Load Palette...",BTN_PALETTE_LOAD,18,39,58,14
     CONTROL         "Enabled",CHECK_PALETTE_ENABLED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,22,87,12
-    CONTROL         "Tint",CTL_TINT_TRACKBAR,"msctls_trackbar32",WS_TABSTOP,121,44,91,11
+    CONTROL         "Tint",CTL_TINT_TRACKBAR,"msctls_trackbar32",WS_DISABLED | WS_TABSTOP,121,44,91,11
     GROUPBOX        "NTSC Color Emulation",101,115,8,103,81,WS_GROUP
-    CONTROL         "Hue",CTL_HUE_TRACKBAR,"msctls_trackbar32",WS_TABSTOP,121,69,91,11
-    CTEXT           "Hue",64395,124,59,85,8
-    CTEXT           "Tint",65463,123,34,85,8
+    CONTROL         "Hue",CTL_HUE_TRACKBAR,"msctls_trackbar32",WS_DISABLED | WS_TABSTOP,121,69,91,11
+    CTEXT           "Hue",64395,124,59,85,8,WS_DISABLED
+    CTEXT           "Tint",65463,123,34,85,8,WS_DISABLED
     CONTROL         "Force Grayscale",CHECK_PALETTE_GRAYSCALE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,57,85,12
     CONTROL         "Use Custom Palette",CHECK_PALETTE_CUSTOM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,22,85,12
     GROUPBOX        "PAL Emulation",IDC_STATIC,10,89,208,66,WS_DISABLED
@@ -513,7 +436,7 @@ BEGIN
     COMBOBOX        COMBO_SOUND_RATE,50,61,53,46,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Hz",65460,108,64,15,9
     LTEXT           "Depth:",65462,17,85,27,10
-	COMBOBOX        COMBO_SOUND_8BIT,50,82,67,45,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        COMBO_SOUND_8BIT,50,82,67,45,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Mute frame advance",CHECK_SOUND_MUTEFA,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,110,87,11
     CONTROL         "Mute Turbo",CHECK_SOUND_MUTETURBO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,138,111,53,10
     GROUPBOX        "Triangle",131,70,142,44,93,WS_GROUP
@@ -654,11 +577,11 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,8,183,12
     CONTROL         "Set high-priority thread.",CB_SET_HIGH_PRIORITY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,24,102,12
     CONTROL         "Overclocking (old PPU only).",CB_OVERCLOCKING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,41,101,10
-    EDITTEXT        IDC_EXTRA_SCANLINES,104,55,84,14,ES_AUTOHSCROLL
-    LTEXT           "Post-render scanlines:",IDC_STATIC,21,57,74,8
-    CONTROL         "Don't overclock 7-bit samples.",CB_SKIP_7BIT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,87,111,10
-    EDITTEXT        IDC_VBLANK_SCANLINES,104,68,84,14,ES_AUTOHSCROLL
-    LTEXT           "VBlank scanlines:",IDC_STATIC,21,71,76,8
+    EDITTEXT        IDC_EXTRA_SCANLINES,104,55,84,14,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "Post-render scanlines:",IDC_EXTRA_SCANLINES_TEXT,21,57,74,8, WS_DISABLED
+    CONTROL         "Don't overclock 7-bit samples.",CB_SKIP_7BIT,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,10,87,111,10
+    EDITTEXT        IDC_VBLANK_SCANLINES,104,68,84,14,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "VBlank scanlines:",IDC_VBLANK_SCANLINES_TEXT,21,71,76,8, WS_DISABLED
 END
 
 MOVIEOPTIONS DIALOGEX 65520, 76, 147, 222
@@ -944,7 +867,7 @@ BEGIN
     LTEXT           "Refresh:   More",-1,225,254,50,9
     CONTROL         "",IDC_NTVIEW_REFRESH_TRACKBAR,"msctls_trackbar32",WS_TABSTOP,275,254,50,11
     LTEXT           "Less",-1,325,254,18,10
-    LTEXT           "Display on scanline:",-1,253,269,65,9
+    LTEXT           "Display on scanline:",IDC_NTVIEW_SCANLINE_TEXT,253,269,65,9
     EDITTEXT        IDC_NTVIEW_SCANLINE,315,267,27,12
     CONTROL         "Show Scroll Lines",IDC_NTVIEW_SHOW_SCROLL_LINES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,254,69,10
     CONTROL         "Show Attributes",IDC_NTVIEW_SHOW_ATTRIBUTES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,265,69,10
@@ -1512,9 +1435,9 @@ BEGIN
     CONTROL         "TV Aspect",IDC_VIDEOCONFIG_TVASPECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,357,29,48,12
     GROUPBOX        "When resizing the window",65431,188,38,152,43,WS_GROUP
     CONTROL         "Square pixels",IDC_VIDEOCONFIG_SQUARE_PIXELS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,448,14,55,12
-    EDITTEXT        IDC_TVASPECT_X,407,28,41,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_TVASPECT_Y,458,28,41,12,ES_AUTOHSCROLL
-    CTEXT           "/",IDC_STATIC_SLASHTEXT,449,31,8,8
+    EDITTEXT        IDC_TVASPECT_X,407,28,41,12,ES_AUTOHSCROLL | WS_DISABLED
+    EDITTEXT        IDC_TVASPECT_Y,458,28,41,12,ES_AUTOHSCROLL | WS_DISABLED
+    CTEXT           "/",IDC_STATIC_SLASHTEXT,449,31,8,8,WS_DISABLED
     LTEXT           "DirectDraw:",65454,11,126,46,10
     LTEXT           "DirectDraw:",65455,188,125,46,10
     COMBOBOX        IDC_VIDEOCONFIG_DIRECTDRAW_FS,59,123,105,50,CBS_DROPDOWNLIST | WS_TABSTOP
@@ -1730,6 +1653,10 @@ BEGIN
         BOTTOMMARGIN, 121
     END
 
+    "NTVIEW", DIALOG
+    BEGIN
+    END
+
     "MONITOR", DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -1754,6 +1681,10 @@ BEGIN
     "IDD_REPLAYINP", DIALOG
     BEGIN
         BOTTOMMARGIN, 198
+    END
+
+    "TASEDITOR", DIALOG
+    BEGIN
     END
 
     "ASSEMBLER", DIALOG
@@ -2460,12 +2391,119 @@ BEGIN
     END
 END
 
-#endif    // Neutral resources
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+NTVIEW AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+TIMINGCONFIG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // 非特定语言 resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// 俄语(俄罗斯) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
+LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
+#pragma code_page(1251)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_TASEDITOR_SAVINGOPTIONS DIALOGEX 0, 0, 223, 208
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Project file saving options"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,109,187,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,165,187,50,14
+    CONTROL         " Binary format of Input",IDC_CHECK_BINARY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,17,89,10
+    CONTROL         " Markers",IDC_CHECK_MARKERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,32,67,10
+    CONTROL         " Bookmarks",IDC_CHECK_BOOKMARKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,47,67,10
+    CONTROL         " History",IDC_CHECK_HISTORY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,62,67,10
+    CONTROL         " Piano Roll",IDC_CHECK_PIANO_ROLL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,77,67,10
+    CONTROL         " Selection",IDC_CHECK_SELECTION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,92,67,10
+    GROUPBOX        "File contents",IDC_STATIC,105,4,111,177
+    GROUPBOX        "Greenzone saving options",IDC_STATIC,112,106,97,69
+    CONTROL         " all frames",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,122,117,77,10
+    CONTROL         " every 16th frame",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,122,131,77,10
+    CONTROL         " marked frames",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,122,145,77,10
+    CONTROL         " don't save",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,122,159,77,10
+    CONTROL         " Autosave project",IDC_AUTOSAVE_PROJECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,17,81,10
+    CONTROL         " silently",IDC_SILENT_AUTOSAVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,47,42,10
+    LTEXT           "every",IDC_AUTOSAVE_PERIOD_EVERY_TEXT,14,32,21,8
+    EDITTEXT        IDC_AUTOSAVE_PERIOD,36,30,24,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "minutes",IDC_AUTOSAVE_PERIOD_MINUTES_TEXT,64,32,28,8
+    GROUPBOX        "Settings",IDC_STATIC,6,4,91,177
+END
+
+IDD_SYMBOLIC_DEBUG_NAMING DIALOGEX 0, 0, 245, 83
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Symbolic Debug Naming"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,132,62,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,189,62,50,14
+    LTEXT           "File",IDC_STATIC,7,7,15,9
+    EDITTEXT        IDC_SYMBOLIC_ADDRESS,38,24,33,13,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
+    LTEXT           "Address",IDC_STATIC,6,26,30,10
+    EDITTEXT        IDC_SYMBOLIC_NAME,107,24,132,13,ES_AUTOHSCROLL
+    LTEXT           "Name",IDC_STATIC,83,26,22,10
+    LTEXT           "Comment",IDC_STATIC,6,45,37,10
+    EDITTEXT        IDC_SYMBOLIC_COMMENT,45,43,194,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_SYMBOLIC_FILENAME,24,6,215,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_TASEDITOR_SAVINGOPTIONS, DIALOG
+    BEGIN
+    END
+
+    IDD_SYMBOLIC_DEBUG_NAMING, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 82
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_TASEDITOR_SAVINGOPTIONS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // 俄语(俄罗斯) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// 英语(美国) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -2699,7 +2737,7 @@ IDB_BITMAP_SELECTED17   BITMAP                  "res\\te_17_selected.bmp"
 IDB_BITMAP_SELECTED18   BITMAP                  "res\\te_18_selected.bmp"
 IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
-#endif    // English (United States) resources
+#endif    // 英语(美国) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -2709,8 +2747,7 @@ IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

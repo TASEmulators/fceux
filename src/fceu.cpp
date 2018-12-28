@@ -416,10 +416,13 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 
 	if (!fp)
 	{
-		if (!silent)
-			FCEU_PrintError("Error opening \"%s\"!", name);
+		extern bool archiveManuallyCanceled;
+		// Although !fp, if the operation was canceled from archive select dialog box, don't show the error message;
+		if (!silent && !archiveManuallyCanceled)
+			FCEU_PrintError("´ò¿ª \"%s\" ´íÎó£¡", name);
 		return 0;
-	} else if (fp->archiveFilename != "")
+	}
+	else if (fp->archiveFilename != "")
 	{
 		strcpy(fullname, fp->archiveFilename.c_str());
 		strcat(fullname, "|");
