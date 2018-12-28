@@ -217,7 +217,7 @@ public:
 
 	bool shiftHeld, ctrlHeld, altHeld;
 	int shiftTimer, ctrlTimer;
-	int shiftActions—ount, ctrlActions—ount;
+	int shiftActionsCount, ctrlActionsCount;
 
 	HWND hwndMarkerDragBox, hwndMarkerDragBoxText;
 	// GDI stuff

@@ -14,3 +14,5 @@ void UpdateCheatsAdded();
 extern unsigned int FrozenAddressCount;
 extern std::vector<uint16> FrozenAddresses;
 //void ConfigAddCheat(HWND wnd); //bbit edited:commented out this line
+
+void DisableAllCheats();

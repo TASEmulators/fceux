@@ -354,16 +354,51 @@ int BlockingCheck()
 				}
 			}
 
-			if(!handled && taseditorWindow.hwndTASEditor && taseditorEnableAcceleratorKeys)
+			if(!handled && taseditorWindow.hwndTASEditor)
 			{
-				if(IsChild(taseditorWindow.hwndTASEditor, msg.hwnd))
-					handled = TranslateAccelerator(taseditorWindow.hwndTASEditor, fceu_hAccel, &msg);
+				if(taseditorEnableAcceleratorKeys)
+					if(IsChild(taseditorWindow.hwndTASEditor, msg.hwnd))
+						handled = TranslateAccelerator(taseditorWindow.hwndTASEditor, fceu_hAccel, &msg);
+				if(!handled && taseditorWindow.hwndTASEditor){
+					handled = IsDialogMessage(taseditorWindow.hwndTASEditor, &msg);
+				}
 			}
 			if(!handled && taseditorWindow.hwndFindNote)
 			{
 				if(IsChild(taseditorWindow.hwndFindNote, msg.hwnd))
 					handled = IsDialogMessage(taseditorWindow.hwndFindNote, &msg);
 			}
+
+			extern HWND uug;
+			if(!handled && uug && IsChild(uug, msg.hwnd))
+				handled = IsDialogMessage(uug, &msg);
+			if(!handled && pwindow && IsChild(pwindow, msg.hwnd))
+				handled = IsDialogMessage(pwindow, &msg);
+			if(!handled && hCDLogger && IsChild(hCDLogger, msg.hwnd))
+				handled = IsDialogMessage(hCDLogger, &msg);
+			if(!handled && hTracer && IsChild(hTracer, msg.hwnd))
+				handled = IsDialogMessage(hTracer, &msg);
+			extern HWND hGGConv;
+			if(!handled && hGGConv && IsChild(hGGConv, msg.hwnd))
+				handled = IsDialogMessage(hGGConv, &msg);
+			if(!handled && hDebug && IsChild(hDebug, msg.hwnd))
+				handled = IsDialogMessage(hDebug, &msg);
+			extern HWND hPPUView;
+			if(!handled && hPPUView && IsChild(hPPUView, msg.hwnd))
+				handled = IsDialogMessage(hPPUView, &msg);
+			extern HWND hNTView;
+			if(!handled && hNTView && IsChild(hNTView, msg.hwnd))
+				handled = IsDialogMessage(hNTView, &msg);
+			extern HWND hTextHooker;
+			if(!handled && hTextHooker && IsChild(hTextHooker, msg.hwnd))
+				handled = IsDialogMessage(hTextHooker, &msg);
+			extern HWND LuaConsoleHWnd;
+			if(!handled && LuaConsoleHWnd && IsChild(LuaConsoleHWnd, msg.hwnd))
+				handled = IsDialogMessage(LuaConsoleHWnd, &msg);
+			extern HWND logwin;
+			if(!handled && logwin && IsChild(logwin, msg.hwnd))
+				handled = IsDialogMessage(logwin, &msg);
+
 			/* //adelikat - Currently no accel keys are used in the main window.  Uncomment this block to activate them.
 			if(!handled)
 				if(msg.hwnd == hAppWnd)
@@ -711,8 +746,6 @@ int main(int argc,char *argv[])
 		fullscreen=0;
 	}
 
-	CreateMainWindow();
-
 	// Do single instance coding, since we now know if the user wants it,
 	// and we have a source window to send from
 	// http://wiki.github.com/ffi/ffi/windows-examples
@@ -741,11 +774,16 @@ int main(int argc,char *argv[])
 			{
 				//kill this one, activate the other one
 				SetActiveWindow(DoInstantiatedExitWindow);
+				if(IsIconic(DoInstantiatedExitWindow))
+					ShowWindow(DoInstantiatedExitWindow, SW_RESTORE); 
+				SetForegroundWindow(DoInstantiatedExitWindow);
 				do_exit();
 				return 0;
 			}
 		}
 	}
+
+	CreateMainWindow();
 
 	if(!InitDInput())
 	{

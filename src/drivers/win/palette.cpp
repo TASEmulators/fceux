@@ -117,6 +117,11 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 			CenterWindowOnScreen(hwndDlg);
 
+			EnableWindow(GetDlgItem(hwndDlg, 65463), ntsccol_enable);
+			EnableWindow(GetDlgItem(hwndDlg, 64395), ntsccol_enable);
+			EnableWindow(GetDlgItem(hwndDlg, CTL_HUE_TRACKBAR), ntsccol_enable);
+			EnableWindow(GetDlgItem(hwndDlg, CTL_TINT_TRACKBAR), ntsccol_enable);
+
 			break;
 
 		case WM_HSCROLL:
@@ -153,6 +158,11 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 					case CHECK_PALETTE_ENABLED:
 						ntsccol_enable ^= 1;
 						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue); // it recalculates everything, use it for PAL block too!
+						EnableWindow(GetDlgItem(hwndDlg, 65463), ntsccol_enable);
+						EnableWindow(GetDlgItem(hwndDlg, 64395), ntsccol_enable);
+						EnableWindow(GetDlgItem(hwndDlg, CTL_HUE_TRACKBAR), ntsccol_enable);
+						EnableWindow(GetDlgItem(hwndDlg, CTL_TINT_TRACKBAR), ntsccol_enable);
+
 						break;
 
 					case CHECK_PALETTE_GRAYSCALE:
