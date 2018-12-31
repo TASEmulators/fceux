@@ -3398,11 +3398,13 @@ static void gui_drawbox_internal(int x1, int y1, int x2, int y2, uint32 colour) 
 
 	if(w < 2 || h < 2) 
 		gui_fillbox_internal(x1,y1,x2,y2,colour);
-
-	gui_drawline_internal(x1, y1, x2, y1, true, colour); //top
-	gui_drawline_internal(x1, y2, x2, y2, true, colour); //bottom
-	gui_drawline_internal(x1, y1+1, x1, y2-1, true, colour); //left
-	gui_drawline_internal(x2, y1+1, x2, y2-1, true, colour); //right
+	else
+	{
+		gui_drawline_internal(x1, y1, x2, y1, true, colour); //top
+		gui_drawline_internal(x1, y2, x2, y2, true, colour); //bottom
+		gui_drawline_internal(x1, y1+1, x1, y2-1, true, colour); //left
+		gui_drawline_internal(x2, y1+1, x2, y2-1, true, colour); //right
+	}
 }
 
 enum
