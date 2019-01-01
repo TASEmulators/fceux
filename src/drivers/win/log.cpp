@@ -2,7 +2,7 @@
 #include "common.h"
 #include "tracer.h"
 
-HWND logwin = 0;
+static HWND logwin = 0;
 
 static char *logtext[MAXIMUM_NUMBER_OF_LOGS];
 static int logcount=0;

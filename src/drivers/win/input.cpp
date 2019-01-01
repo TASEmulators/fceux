@@ -1202,9 +1202,6 @@ static void UpdateFourscoreState(HWND dlg)
 		SetDlgItemText(dlg,TXT_PAD1,ESI_Name(SI_GAMEPAD));
 		SetDlgItemText(dlg,TXT_PAD2,ESI_Name(SI_GAMEPAD));
 	}
-
-	EnableWindow(GetDlgItem(dlg,102), enable);
-	EnableWindow(GetDlgItem(dlg,103), enable);
 }
 
 //Callback function of the input configuration dialog.
@@ -1305,7 +1302,7 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		char btext[128];
 		if (autoHoldKey)
 		{
-			if (!GetKeyNameText((autoHoldKey & 0x7F) << 16 | (autoHoldKey & 0x80) << 17, btext, 128))
+			if (!GetKeyNameText(autoHoldKey << 16, btext, 128))
 				sprintf(btext, "KB: %d", autoHoldKey);
 		} else
 		{
@@ -1486,7 +1483,7 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 					if(button)
 					{
-						if(!GetKeyNameText((button & 0x7F) << 16 | (button & 0x80) << 17, btext, 128))
+						if(!GetKeyNameText(button << 16, btext, 128))
 						{
 							sprintf(btext, "KB: %d", button);
 						}
@@ -1512,7 +1509,7 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 					if(button)
 					{
-						if( !GetKeyNameText((button & 0x7F) << 16 | (button & 0x80 << 17), btext, sizeof(btext)))
+						if( !GetKeyNameText(button << 16, btext, sizeof(btext)))
 						{
 							sprintf(btext, "KB: %d", button);
 						}
