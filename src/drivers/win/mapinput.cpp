@@ -7,6 +7,7 @@
 #include "../../input.h"
 #include <commctrl.h>
 #include "window.h"
+#include "taseditor/taseditor_window.h"
 
 void KeyboardUpdateState(void); //mbg merge 7/17/06 yech had to add this
 
@@ -689,7 +690,11 @@ BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			PopulateMappingDisplay(hwndDlg);
 
 			// Autosize last column.
-			SendMessage(hwndListView, LVM_SETCOLUMNWIDTH, (WPARAM)2, MAKELPARAM(LVSCW_AUTOSIZE_USEHEADER, 0));
+			SendMessage(hwndListView, LVM_SETCOLUMNWIDTH, (WPARAM)2, MAKELPARAM(LVSCW_AUTOSIZE, 0));
+			SendMessage(hwndListView, LVM_SETCOLUMNWIDTH, (WPARAM)1, MAKELPARAM(LVSCW_AUTOSIZE, 0));
+			RECT rect;
+			GetClientRect(hwndListView, &rect);
+			SendMessage(hwndListView, LVM_SETCOLUMNWIDTH, (WPARAM)2, MAKELPARAM(rect.right - rect.left - SendMessage(hwndListView, LVM_GETCOLUMNWIDTH, 0, 0) - SendMessage(hwndListView, LVM_GETCOLUMNWIDTH, 1, 0), 0));
 
 			CenterWindowOnScreen(hwndDlg);
 		}
@@ -708,6 +713,10 @@ BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 		{
 			case IDOK:
 				UpdateMenuHotkeys();
+				// Update TAS Editor's tooltips if it's opening.
+				extern TASEDITOR_WINDOW taseditorWindow;
+				if (taseditorWindow.hwndTASEditor)
+					taseditorWindow.updateTooltips();
 				EndDialog(hwndDlg, 1);
 				return TRUE;
 

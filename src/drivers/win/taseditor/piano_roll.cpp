@@ -433,7 +433,7 @@ void PIANO_ROLL::reset()
 	mustRedrawList = mustCheckItemUnderMouse = true;
 	playbackCursorOffset = 0;
 	shiftHeld = ctrlHeld = altHeld = false;
-	shiftTimer = ctrlTimer = shiftActions—ount = ctrlActions—ount = 0;
+	shiftTimer = ctrlTimer = shiftActionsCount = ctrlActionsCount = 0;
 	nextHeaderUpdateTime = headerItemUnderMouse = 0;
 	// delete all columns except 0th
 	while (ListView_DeleteColumn(hwndList, 1)) {}
@@ -480,16 +480,16 @@ void PIANO_ROLL::update()
 	{
 		if ((int)(shiftTimer + GetDoubleClickTime()) > clock())
 		{
-			shiftActions—ount++;
-			if (shiftActions—ount >= DOUBLETAP_COUNT)
+			shiftActionsCount++;
+			if (shiftActionsCount >= DOUBLETAP_COUNT)
 			{
 				if (taseditorWindow.TASEditorIsInFocus)
 					followPlaybackCursor();
-				shiftActions—ount = ctrlActions—ount = 0;
+				shiftActionsCount = ctrlActionsCount = 0;
 			}
 		} else
 		{
-			shiftActions—ount = 0;
+			shiftActionsCount = 0;
 		}
 		shiftTimer = clock();
 	}
@@ -497,16 +497,16 @@ void PIANO_ROLL::update()
 	{
 		if ((int)(ctrlTimer + GetDoubleClickTime()) > clock())
 		{
-			ctrlActions—ount++;
-			if (ctrlActions—ount >= DOUBLETAP_COUNT)
+			ctrlActionsCount++;
+			if (ctrlActionsCount >= DOUBLETAP_COUNT)
 			{
 				if (taseditorWindow.TASEditorIsInFocus)
 					followSelection();
-				ctrlActions—ount = shiftActions—ount = 0;
+				ctrlActionsCount = shiftActionsCount = 0;
 			}
 		} else
 		{
-			ctrlActions—ount = 0;
+			ctrlActionsCount = 0;
 		}
 		ctrlTimer = clock();
 	}
