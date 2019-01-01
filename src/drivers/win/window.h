@@ -54,4 +54,31 @@ inline std::wstring GetDlgItemTextW(HWND hDlg, int nIDDlgItem) {
 	return buf;
 }
 
+enum FCEUMENU_HWND {
+	FCEUMENU_CONTEXT_OFF, // NoGame
+	FCEUMENU_CONTEXT_GAME, // Game+NoMovie
+	FCEUMENU_CONTEXT_PLAYING_READONLY, //Game+Movie+Playing+ReadOnly
+	FCEUMENU_CONTEXT_PLAYING_READWRITE, //Game+Movie+Playing+ReadWrite
+	FCEUMENU_CONTEXT_RECORDING_READONLY, //Game+Movie+Recording+ReadOnly
+	FCEUMENU_CONTEXT_RECORDING_READWRITE, //Game+Movie+Recording+Readwrite
+	FCEUMENU_CONTEXT, // parent menu of all context menus,
+	                  // not recommended to use it since there's duplicate ids in context menus,
+	                  // unless you're quite sure the id is unique in all submenus.
+	FCEUMENU_MAIN, // main fceux menu
+	FCEUMENU_LIMIT
+};
+
+struct HOTKEYMENUINDEX {
+	int menu_id; // menu ID
+	int cmd_id;  // hotkey ID
+	int hmenu_index = FCEUMENU_MAIN; // whitch menu it belongs to, refers to FCEUMENU_HWND
+	int flags = MF_BYCOMMAND; // flags when searching and modifying menu item, usually MF_BYCOMMAND
+	// returns an std::string contains original menu text followed with shortcut keys.
+	std::string getQualifiedMenuText();
+	// this is used when you only want to create a qualified menu text String
+	static std::string getQualifiedMenuText(char* text, int cmdid);
+	int updateMenuText();
+	HOTKEYMENUINDEX(int id, int cmd, int menu = FCEUMENU_MAIN, int _flags = MF_BYCOMMAND) : menu_id(id), cmd_id(cmd), hmenu_index(menu), flags(_flags) {}
+};
+
 #endif

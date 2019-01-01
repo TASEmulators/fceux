@@ -682,12 +682,23 @@ BOOL CALLBACK savingOptionsWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LP
 			CheckDlgButton(hwndDlg, IDC_CHECK_PIANO_ROLL, taseditorConfig.projectSavingOptions_SavePianoRoll?BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, taseditorConfig.projectSavingOptions_SaveSelection?BST_CHECKED : BST_UNCHECKED);
 			CheckRadioButton(hwndDlg, IDC_RADIO1, IDC_RADIO4, IDC_RADIO1 + (taseditorConfig.projectSavingOptions_GreenzoneSavingMode % GREENZONE_SAVING_MODES_TOTAL));
+			EnableWindow(GetDlgItem(hwndDlg, IDC_AUTOSAVE_PERIOD), taseditorConfig.autosaveEnabled);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_AUTOSAVE_PERIOD_EVERY_TEXT), taseditorConfig.autosaveEnabled);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_AUTOSAVE_PERIOD_MINUTES_TEXT), taseditorConfig.autosaveEnabled);
 			return TRUE;
 		}
 		case WM_COMMAND:
 		{
 			switch (LOWORD(wParam))
 			{
+				case IDC_AUTOSAVE_PROJECT:
+				{
+					bool chk = BST_CHECKED == SendDlgItemMessage(hwndDlg, IDC_AUTOSAVE_PROJECT, BM_GETCHECK, 0, 0);
+					EnableWindow(GetDlgItem(hwndDlg, IDC_AUTOSAVE_PERIOD), chk);
+					EnableWindow(GetDlgItem(hwndDlg, IDC_AUTOSAVE_PERIOD_EVERY_TEXT), chk);
+					EnableWindow(GetDlgItem(hwndDlg, IDC_AUTOSAVE_PERIOD_MINUTES_TEXT), chk);
+				}
+					break;
 				case IDOK:
 				{
 					taseditorConfig.autosaveEnabled = (SendDlgItemMessage(hwndDlg, IDC_AUTOSAVE_PROJECT, BM_GETCHECK, 0, 0) == BST_CHECKED);

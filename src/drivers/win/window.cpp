@@ -94,7 +94,6 @@ using namespace std;
 #define FCEUX_CONTEXT_TOGGLESUBTITLES   60003
 #define FCEUX_CONTEXT_DUMPSUBTITLES     60004
 
-
 //********************************************************************************
 //Globals
 //********************************************************************************
@@ -108,6 +107,9 @@ HMENU recentmoviemenu;			//Recent Movie Files Menu
 HMENU hfceuxcontext;		  //Handle to context menu
 HMENU hfceuxcontextsub;		  //Handle to context sub menu
 HWND MainhWnd;				  //Main FCEUX(Parent) window Handle.  Dialogs should use GetMainHWND() to get this
+
+// HWND list for menu update, refers to FCEU_MENU_HWND
+HMENU hmenuList[FCEUMENU_LIMIT];
 
 //Extern variables-------------------------------------
 extern bool movieSubtitles;
@@ -418,9 +420,9 @@ void UpdateCheckedMenuItems()
 		CheckMenuItem(fceumenu, polo2[x], *polo[x] ? MF_CHECKED : MF_UNCHECKED);
 	}
 	//File Menu
-	CheckMenuItem(fceumenu, ID_FILE_RECORDMODE_TRUNCATE, movieRecordMode == MOVIE_RECORD_MODE_TRUNCATE ? MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(fceumenu, ID_FILE_RECORDMODE_OVERWRITE, movieRecordMode == MOVIE_RECORD_MODE_OVERWRITE ? MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(fceumenu, ID_FILE_RECORDMODE_INSERT, movieRecordMode == MOVIE_RECORD_MODE_INSERT ? MF_CHECKED : MF_UNCHECKED);
+	if (movieRecordMode == MOVIE_RECORD_MODE_TRUNCATE) CheckMenuRadioItem(fceumenu, ID_FILE_RECORDMODE_TRUNCATE, ID_FILE_RECORDMODE_INSERT, ID_FILE_RECORDMODE_TRUNCATE, MF_BYCOMMAND);
+	if (movieRecordMode == MOVIE_RECORD_MODE_OVERWRITE) CheckMenuRadioItem(fceumenu, ID_FILE_RECORDMODE_TRUNCATE, ID_FILE_RECORDMODE_INSERT, ID_FILE_RECORDMODE_OVERWRITE, MF_BYCOMMAND);
+	if (movieRecordMode == MOVIE_RECORD_MODE_INSERT) CheckMenuRadioItem(fceumenu, ID_FILE_RECORDMODE_TRUNCATE, ID_FILE_RECORDMODE_INSERT, ID_FILE_RECORDMODE_INSERT, MF_BYCOMMAND);
 	CheckMenuItem(fceumenu, ID_FILE_MOVIE_TOGGLEREAD, movie_readonly ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_FILE_OPENLUAWINDOW, LuaConsoleHWnd ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_AVI_ENABLEHUDRECORDING, FCEUI_AviEnableHUDrecording() ? MF_CHECKED : MF_UNCHECKED);
@@ -514,9 +516,9 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 		EnableMenuItem(context, FCEUX_CONTEXT_DELETE_1_FRAME, MF_BYCOMMAND | MF_GRAYED);
 		EnableMenuItem(context, FCEUX_CONTEXT_TRUNCATE_MOVIE, MF_BYCOMMAND | MF_GRAYED);
 	}
-	CheckMenuItem(context, FCEUX_CONTEXT_RECORDMODE_TRUNCATE, movieRecordMode == MOVIE_RECORD_MODE_TRUNCATE ? MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(context, FCEUX_CONTEXT_RECORDMODE_OVERWRITE, movieRecordMode == MOVIE_RECORD_MODE_OVERWRITE ? MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(context, FCEUX_CONTEXT_RECORDMODE_INSERT, movieRecordMode == MOVIE_RECORD_MODE_INSERT ? MF_CHECKED : MF_UNCHECKED);
+	if (movieRecordMode == MOVIE_RECORD_MODE_TRUNCATE) CheckMenuRadioItem(context, FCEUX_CONTEXT_RECORDMODE_TRUNCATE, FCEUX_CONTEXT_RECORDMODE_INSERT, FCEUX_CONTEXT_RECORDMODE_TRUNCATE, MF_BYCOMMAND);
+	if (movieRecordMode == MOVIE_RECORD_MODE_OVERWRITE) CheckMenuRadioItem(context, FCEUX_CONTEXT_RECORDMODE_TRUNCATE, FCEUX_CONTEXT_RECORDMODE_INSERT, FCEUX_CONTEXT_RECORDMODE_OVERWRITE, MF_BYCOMMAND);
+	if (movieRecordMode == MOVIE_RECORD_MODE_INSERT) CheckMenuRadioItem(context, FCEUX_CONTEXT_RECORDMODE_TRUNCATE, FCEUX_CONTEXT_RECORDMODE_INSERT, FCEUX_CONTEXT_RECORDMODE_INSERT, MF_BYCOMMAND);
 
 	//Undo Loadstate
 	if (CheckBackupSaveStateExist() && (undoLS || redoLS))
@@ -568,12 +570,12 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 	if (tog)
 	{
 		InsertMenu(context, 0xFFFF, MF_SEPARATOR, 0, "");
-		InsertMenu(context,0xFFFF, MF_BYCOMMAND, FCEUX_CONTEXT_UNHIDEMENU, "Unhide Menu");
+		InsertMenu(context,0xFFFF, MF_BYCOMMAND, FCEUX_CONTEXT_UNHIDEMENU, HOTKEYMENUINDEX::getQualifiedMenuText("Unhide Menu", EMUCMD_HIDE_MENU_TOGGLE).c_str());
 	}
 
 	if (whichContext > 1 && currMovieData.subtitles.size() != 0){
 		// At position 3 is "View comments and subtitles". Insert this there:
-		InsertMenu(context,0x3, MF_BYPOSITION, FCEUX_CONTEXT_TOGGLESUBTITLES, movieSubtitles ? "Subtitle Display: On" : "Subtitle Display: Off");
+		InsertMenu(context,0x3, MF_BYPOSITION, FCEUX_CONTEXT_TOGGLESUBTITLES, HOTKEYMENUINDEX::getQualifiedMenuText(movieSubtitles ? "Subtitle Display: On" : "Subtitle Display: Off", EMUCMD_MISC_DISPLAY_MOVIESUBTITLES).c_str());
 		// At position 4(+1) is after View comments and subtitles. Insert this there:
 		InsertMenu(context,0x5, MF_BYPOSITION, FCEUX_CONTEXT_DUMPSUBTITLES, "Dump Subtitles to SRT file");
 	}
@@ -1067,7 +1069,9 @@ bool ALoad(const char *nameo, char* innerFilename, bool silent)
 {
 	int oldPaused = EmulationPaused;
 
-	if (GameInfo) FCEUI_CloseGame();
+	// loading is not started yet, so the game can continue;
+	// FCEUI_LoadGameVirtual() already had an FCEUI_CloseGame() call after loading success;
+	// if (GameInfo) FCEUI_CloseGame();
 
 	if (FCEUI_LoadGameVirtual(nameo, !(pal_setting_specified || dendy_setting_specified), silent))
 	{
@@ -1418,7 +1422,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					whichContext = 0; // NoGame
 
 				hfceuxcontext = LoadMenu(fceu_hInstance,"FCEUCONTEXTMENUS");
+				hmenuList[FCEUMENU_HWND::FCEUMENU_CONTEXT] = hfceuxcontext;
 				hfceuxcontextsub = GetSubMenu(hfceuxcontext, whichContext);
+				hmenuList[whichContext] = hfceuxcontextsub;
 				UpdateContextMenuItems(hfceuxcontextsub, whichContext);
 				pt.x = LOWORD(lParam);		//Get mouse x in terms of client area
 				pt.y = HIWORD(lParam);		//Get mouse y in terms of client area
@@ -1542,12 +1548,25 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		{
 			UINT len;
 
-			len=DragQueryFileW((HDROP)wParam,0,0,0)+1; 
-			wchar_t* wftmp = new wchar_t[len];
+			/*
+			 Using DragQueryFileW() and wcstombs() is not a proper way to convert Unicode string
+			 to a multibyte one, the system has its own codepage but wcstombs seems ignores it and only
+			 convert it to UTF-8. Similarly, functions such named FCEUD_UTF8fopen() acturally perform ANSI
+			 behaviour which follows the codepage of the system rather than UTF-8. I knew Windows with some
+			 languages has a very narrow codepage like 1252 and may have a problem to load a filename
+			 which contains extra characters without its convert, but the wcstombs() may corrupt the string
+			 to garbage text to the title and menu in some multibyte language Windows systems, it's due to
+			 the limitation of ANSI application and system itself, not the fault of the emulator, so there's
+			 no responsibility for the emulator to use a different API to solve it, just leave it as the
+			 default definition.
+			*/
+			len = DragQueryFile((HDROP)wParam, 0, 0, 0) + 1;
+			char* ftmp = new char[len];
 			{
-				DragQueryFileW((HDROP)wParam,0,wftmp,len); 
-				std::string fileDropped = wcstombs(wftmp);
-				delete[] wftmp;
+				DragQueryFile((HDROP)wParam,0,ftmp,len); 
+				// std::string fileDropped = wcstombs(wftmp);
+				std::string fileDropped = ftmp;
+				delete[] ftmp;
 				//adelikat:  Drag and Drop only checks file extension, the internal functions are responsible for file error checking
 				
 				//-------------------------------------------------------
@@ -2090,6 +2109,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 
 			case ID_NEWPPU:
+				if(overclock_enabled &&
+					MessageBox(hWnd, "The new PPU doesn't support overclocking, it will be disabled. Do you want to continue?", "Overclocking", MB_ICONQUESTION | MB_YESNO) == IDNO)
+					break;
 			case ID_OLDPPU:
 				FCEU_TogglePPU();
 				break;
@@ -2667,6 +2689,7 @@ int CreateMainWindow()
 	AdjustWindowRectEx(&tmp, WS_OVERLAPPEDWINDOW, 1, 0);
 
 	fceumenu = LoadMenu(fceu_hInstance,"FCEUMENU");
+	hmenuList[FCEUMENU_MAIN] = fceumenu;
 
 	recentmenu = CreateMenu();
 	recentluamenu = CreateMenu();
@@ -2873,300 +2896,274 @@ void ChangeMenuItemText(int menuitem, string text)
 	SetMenuItemInfo(fceumenu, menuitem, FALSE, &moo);
 }
 
+string HOTKEYMENUINDEX::getQualifiedMenuText() {
+	int length = GetMenuString(hmenuList[hmenu_index], menu_id, 0, 0, flags) + 1;
+	char* buffer = new char[length];
+	GetMenuString(hmenuList[hmenu_index], menu_id, buffer, length, flags);
+	if (char* pTab = strrchr(buffer, '\t'))
+		*pTab = '\0';
+	std::string menustr = HOTKEYMENUINDEX::getQualifiedMenuText(buffer, cmd_id);
+	delete[] buffer;
+	return menustr;
+}
+
+string HOTKEYMENUINDEX::getQualifiedMenuText(char* text, int emu_cmd_id) {
+	char* combo = GetKeyComboName(FCEUD_CommandMapping[emu_cmd_id]);
+	char* str = new char[strlen(text) + strlen(combo) + strlen("\t") + 1];
+	strcpy(str, text);
+	if (strcmp("", combo))
+	{
+		strcat(str, "\t");
+		strcat(str, combo);
+	}
+	string menustr = str;
+	delete[] str;
+	return menustr;
+}
+
+struct HOTKEYMENUINDEX HOTKEYMENUINDEXs[] = {
+	// "&Open..."
+	{ MENU_OPEN_FILE,EMUCMD_OPENROM },
+	// "Open ROM"
+	{ FCEU_CONTEXT_OPENROM,EMUCMD_OPENROM,FCEUMENU_CONTEXT_OFF },
+	// "&Close"
+	{ MENU_CLOSE_FILE,EMUCMD_CLOSEROM },
+	// "Close ROM"
+	{ FCEU_CONTEXT_CLOSEROM,EMUCMD_CLOSEROM,FCEUMENU_CONTEXT_GAME },
+	// "&Load State"
+	{ MENU_LOADSTATE,EMUCMD_LOAD_STATE,FCEUMENU_CONTEXT_GAME },
+	// "&Save State"
+	{ MENU_SAVESTATE,EMUCMD_SAVE_STATE },
+	// "Load State &From..."
+	{ MENU_LOAD_STATE,EMUCMD_LOAD_STATE_FROM },
+	// "Save State &As..."
+	{ MENU_SAVE_STATE,EMUCMD_SAVE_STATE_AS },
+	// "&Next save slot"
+	{ MENU_NEXTSAVESTATE,EMUCMD_SAVE_SLOT_NEXT },
+	// "&Previous save slot"
+	{ MENU_PREVIOUSSAVESTATE,EMUCMD_SAVE_SLOT_PREV },
+	// "&View save slots"
+	{ MENU_VIEWSAVESLOTS,EMUCMD_MISC_SHOWSTATES },
+	// "Record Movie..."
+	{ FCEUX_CONTEXT_RECORDMOVIE,EMUCMD_MOVIE_RECORD_TO,FCEUMENU_CONTEXT_GAME },
+	// "&Record Movie..."
+	{ MENU_RECORD_MOVIE,EMUCMD_MOVIE_RECORD_TO },
+	// "Play Movie..."
+	{ FCEUX_CONTEXT_REPLAYMOVIE,EMUCMD_MOVIE_REPLAY_FROM,FCEUMENU_CONTEXT_GAME },
+	// "&Play Movie..."
+	{ MENU_REPLAY_MOVIE,EMUCMD_MOVIE_REPLAY_FROM },
+	// "&Stop Movie"
+	{ MENU_STOP_MOVIE,EMUCMD_MOVIE_STOP },
+	// "Stop Movie Replay"
+	{ FCEU_CONTEXT_STOPMOVIE,EMUCMD_MOVIE_STOP,FCEUMENU_CONTEXT_PLAYING_READONLY },
+	// "Stop Movie Replay"
+	{ FCEU_CONTEXT_STOPMOVIE,EMUCMD_MOVIE_STOP,FCEUMENU_CONTEXT_PLAYING_READWRITE },
+	// "Stop Movie Recording"
+	{ FCEU_CONTEXT_STOPMOVIE,EMUCMD_MOVIE_STOP,FCEUMENU_CONTEXT_RECORDING_READONLY },
+	// "Stop Movie Recording"
+	{ FCEU_CONTEXT_STOPMOVIE,EMUCMD_MOVIE_STOP,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	// "Play Movie from Beginning"
+	{ FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING,EMUCMD_MOVIE_PLAY_FROM_BEGINNING,FCEUMENU_CONTEXT_PLAYING_READONLY },
+	// "Play Movie from Beginning"
+	{ FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING,EMUCMD_MOVIE_PLAY_FROM_BEGINNING,FCEUMENU_CONTEXT_PLAYING_READWRITE },
+	// "Play Movie from Beginning"
+	{ FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING,EMUCMD_MOVIE_PLAY_FROM_BEGINNING,FCEUMENU_CONTEXT_RECORDING_READONLY },
+	// "Play Movie from Beginning"
+	{ FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING,EMUCMD_MOVIE_PLAY_FROM_BEGINNING,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	// "Play from &Beginning"
+	{ ID_FILE_PLAYMOVIEFROMBEGINNING,EMUCMD_MOVIE_PLAY_FROM_BEGINNING },
+	// "&Read-only"
+	{ ID_FILE_MOVIE_TOGGLEREAD,EMUCMD_MOVIE_READONLY_TOGGLE },
+	// "Toggle to read+write"
+	{ FCEUX_CONTEXT_READONLYTOGGLE,EMUCMD_MOVIE_READONLY_TOGGLE,FCEUMENU_CONTEXT_PLAYING_READONLY },
+	// "Toggle to Read-only"
+	{ FCEUX_CONTEXT_READONLYTOGGLE,EMUCMD_MOVIE_READONLY_TOGGLE,FCEUMENU_CONTEXT_PLAYING_READWRITE },
+	// "Toggle to read+write"
+	{ FCEUX_CONTEXT_READONLYTOGGLE,EMUCMD_MOVIE_READONLY_TOGGLE,FCEUMENU_CONTEXT_RECORDING_READONLY },
+	// "Toggle to Read-only"
+	{ FCEUX_CONTEXT_READONLYTOGGLE,EMUCMD_MOVIE_READONLY_TOGGLE,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	// "&Screenshot"
+	{ ID_FILE_SCREENSHOT,EMUCMD_SCREENSHOT },
+	// "Screenshot"
+	{ FCEUX_CONTEXT_SCREENSHOT,EMUCMD_SCREENSHOT, FCEUMENU_CONTEXT_GAME },
+	// "&Record AVI..."
+	{ MENU_RECORD_AVI,EMUCMD_AVI_RECORD_AS },
+	//"&Stop AVI"
+	{ MENU_STOP_AVI,EMUCMD_AVI_STOP },
+	// "&Reset"
+	{ MENU_RESET,EMUCMD_RESET },
+	// "&Power"
+	{ MENU_POWER,EMUCMD_POWER },
+	// "&Eject/Insert Disk"
+	{ MENU_EJECT_DISK,EMUCMD_FDS_EJECT_INSERT },
+	// "&Switch Disk Side"
+	{ MENU_SWITCH_DISK,EMUCMD_FDS_SIDE_SELECT },
+	// "&Insert Coin"
+	{ MENU_INSERT_COIN,EMUCMD_VSUNI_COIN },
+	// "Speed &Up"
+	{ ID_NES_SPEEDUP,EMUCMD_SPEED_FASTER },
+	// "Slow &Down"
+	{ ID_NES_SLOWDOWN,EMUCMD_SPEED_SLOWER },
+	// "&Slowest Speed"
+	{ ID_NES_SLOWESTSPEED,EMUCMD_SPEED_SLOWEST },
+	// "&Normal Speed"
+	{ ID_NES_NORMALSPEED,EMUCMD_SPEED_NORMAL },
+	// "&Turbo"
+	{ ID_NES_TURBO,EMUCMD_SPEED_TURBO_TOGGLE },
+	// "&Pause"
+	{ ID_NES_PAUSE,EMUCMD_PAUSE },
+	// "&Hide Menu"
+	{ MENU_HIDE_MENU,EMUCMD_HIDE_MENU_TOGGLE },
+	// "Unhide Menu"
+	{ FCEUX_CONTEXT_UNHIDEMENU,EMUCMD_HIDE_MENU_TOGGLE,FCEUMENU_CONTEXT_GAME },
+	// "Unhide Menu"
+	{ FCEUX_CONTEXT_UNHIDEMENU,EMUCMD_HIDE_MENU_TOGGLE,FCEUMENU_CONTEXT_PLAYING_READONLY },
+	// "Unhide Menu"
+	{ FCEUX_CONTEXT_UNHIDEMENU,EMUCMD_HIDE_MENU_TOGGLE,FCEUMENU_CONTEXT_PLAYING_READWRITE },
+	// "Unhide Menu"
+	{ FCEUX_CONTEXT_UNHIDEMENU,EMUCMD_HIDE_MENU_TOGGLE,FCEUMENU_CONTEXT_RECORDING_READONLY },
+	// "Unhide Menu"
+	{ FCEUX_CONTEXT_UNHIDEMENU,EMUCMD_HIDE_MENU_TOGGLE,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	// "&Frame Adv. - Skip Lag"
+	{ MENU_DISPLAY_FA_LAGSKIP,EMUCMD_FRAMEADV_SKIPLAG },
+	// "&Lag Counter"
+	{ MENU_DISPLAY_LAGCOUNTER,EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE },
+	// "&Frame Counter"
+	{ ID_DISPLAY_FRAMECOUNTER,EMUCMD_MOVIE_FRAME_DISPLAY_TOGGLE },
+	// "&Rerecord Counter
+	{ ID_DISPLAY_RERECORDCOUNTER,EMUCMD_RERECORD_DISPLAY_TOGGLE },
+	// "&Movie status icon"
+	{ ID_DISPLAY_MOVIESTATUSICON,EMUCMD_MOVIE_ICON_DISPLAY_TOGGLE },
+	// "FPS"
+	{ ID_DISPLAY_FPS,EMUCMD_FPS_DISPLAY_TOGGLE },
+	// "Graphics: &BG"
+	{ MENU_DISPLAY_BG,EMUCMD_MISC_DISPLAY_BG_TOGGLE },
+	// "Graphics: &OBJ"
+	{ MENU_DISPLAY_OBJ,EMUCMD_MISC_DISPLAY_OBJ_TOGGLE },
+	// "&Cheats..."
+	{ MENU_CHEATS,EMUCMD_TOOL_OPENCHEATS },
+	// "RAM Search..."
+	{ ID_RAM_SEARCH,EMUCMD_TOOL_OPENRAMSEARCH },
+	// "RAM Watch..."
+	{ ID_RAM_WATCH,EMUCMD_TOOL_OPENRAMWATCH },
+	// "&Memory Watch..."
+	{ MENU_MEMORY_WATCH,EMUCMD_TOOL_OPENMEMORYWATCH },
+	// "&TAS Editor..."
+	{ MENU_TASEDITOR,EMUCMD_MISC_OPENTASEDITOR },
+	// "&Debugger..."
+	{ MENU_DEBUGGER,EMUCMD_TOOL_OPENDEBUGGER },
+	// "&PPU Viewer..."
+	{ MENU_PPUVIEWER,EMUCMD_TOOL_OPENPPU },
+	// "&Name Table Viewer..."
+	{ MENU_NAMETABLEVIEWER,EMUCMD_TOOL_OPENNTVIEW },
+	// "&Hex Editor..."
+	{ MENU_HEXEDITOR,EMUCMD_TOOL_OPENHEX },
+	// "&Trace Logger..."
+	{ MENU_TRACELOGGER,EMUCMD_TOOL_OPENTRACELOGGER },
+	// "&Code/Data Logger..."
+	{ MENU_CDLOGGER,EMUCMD_TOOL_OPENCDLOGGER },
+	// "Undo savestate"
+	{ FCEUX_CONTEXT_UNDOSAVESTATE,EMUCMD_MISC_UNDOREDOSAVESTATE,FCEUMENU_CONTEXT_GAME },
+	// "Undo savestate"
+	{ FCEUX_CONTEXT_UNDOSAVESTATE,EMUCMD_MISC_UNDOREDOSAVESTATE,FCEUMENU_CONTEXT_PLAYING_READONLY },
+	// "Undo savestate"
+	{ FCEUX_CONTEXT_UNDOSAVESTATE,EMUCMD_MISC_UNDOREDOSAVESTATE,FCEUMENU_CONTEXT_PLAYING_READWRITE },
+	// "Undo savestate"
+	{ FCEUX_CONTEXT_UNDOSAVESTATE,EMUCMD_MISC_UNDOREDOSAVESTATE,FCEUMENU_CONTEXT_RECORDING_READONLY },
+	// "Undo savestate"
+	{ FCEUX_CONTEXT_UNDOSAVESTATE,EMUCMD_MISC_UNDOREDOSAVESTATE,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	// "Rewind to last auto-save"
+	{ FCEUX_CONTEXT_REWINDTOLASTAUTO,EMUCMD_MISC_AUTOSAVE,FCEUMENU_CONTEXT_GAME },
+	// "Rewind to last auto-save"
+	{ FCEUX_CONTEXT_REWINDTOLASTAUTO,EMUCMD_MISC_AUTOSAVE,FCEUMENU_CONTEXT_PLAYING_READONLY },
+	// "Rewind to last auto-save"
+	{ FCEUX_CONTEXT_REWINDTOLASTAUTO,EMUCMD_MISC_AUTOSAVE,FCEUMENU_CONTEXT_PLAYING_READWRITE },
+	// "Rewind to last auto-save"
+	{ FCEUX_CONTEXT_REWINDTOLASTAUTO,EMUCMD_MISC_AUTOSAVE,FCEUMENU_CONTEXT_RECORDING_READONLY },
+	// "Rewind to last auto-save"
+	{ FCEUX_CONTEXT_REWINDTOLASTAUTO,EMUCMD_MISC_AUTOSAVE,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	// "Toggle to Recording"
+	{ FCEUX_CONTEXT_TOGGLE_RECORDING,EMUCMD_MOVIE_TOGGLE_RECORDING,FCEUMENU_CONTEXT_PLAYING_READONLY },
+	// "Toggle to Recording"
+	{ FCEUX_CONTEXT_TOGGLE_RECORDING,EMUCMD_MOVIE_TOGGLE_RECORDING,FCEUMENU_CONTEXT_PLAYING_READWRITE },
+	// "Toggle to Playing"
+	{ FCEUX_CONTEXT_TOGGLE_RECORDING,EMUCMD_MOVIE_TOGGLE_RECORDING,FCEUMENU_CONTEXT_RECORDING_READONLY },
+	// "Toggle to Playing"
+	{ FCEUX_CONTEXT_TOGGLE_RECORDING,EMUCMD_MOVIE_TOGGLE_RECORDING,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	// "&Toggle Recording/Playing"
+	{ ID_FILE_TOGGLE_RECORDING_MOVIE,EMUCMD_MOVIE_TOGGLE_RECORDING },
+	// "&Truncate at Current Frame"
+	{ ID_FILE_TRUNCATE_MOVIE,EMUCMD_MOVIE_TRUNCATE },
+	// "Truncate at Current Frame"
+	{ FCEUX_CONTEXT_TRUNCATE_MOVIE,EMUCMD_MOVIE_TRUNCATE,FCEUMENU_CONTEXT_PLAYING_READONLY },
+	// "Truncate at Current Frame"
+	{ FCEUX_CONTEXT_TRUNCATE_MOVIE,EMUCMD_MOVIE_TRUNCATE,FCEUMENU_CONTEXT_PLAYING_READWRITE },
+	// "Truncate at Current Frame"
+	{ FCEUX_CONTEXT_TRUNCATE_MOVIE,EMUCMD_MOVIE_TRUNCATE,FCEUMENU_CONTEXT_RECORDING_READONLY },
+	// "Truncate at Current Frame"
+	{ FCEUX_CONTEXT_TRUNCATE_MOVIE,EMUCMD_MOVIE_TRUNCATE,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	// "&Insert 1 Frame"
+	{ ID_FILE_INSERT_1_FRAME,EMUCMD_MOVIE_INSERT_1_FRAME },
+	// "Insert 1 Frame"
+	{ FCEUX_CONTEXT_INSERT_1_FRAME,EMUCMD_MOVIE_INSERT_1_FRAME,FCEUMENU_CONTEXT_PLAYING_READONLY },
+	// "Insert 1 Frame"
+	{ FCEUX_CONTEXT_INSERT_1_FRAME,EMUCMD_MOVIE_INSERT_1_FRAME,FCEUMENU_CONTEXT_PLAYING_READWRITE },
+	// "Insert 1 Frame"
+	{ FCEUX_CONTEXT_INSERT_1_FRAME,EMUCMD_MOVIE_INSERT_1_FRAME,FCEUMENU_CONTEXT_RECORDING_READONLY },
+	// "Insert 1 Frame"
+	{ FCEUX_CONTEXT_INSERT_1_FRAME,EMUCMD_MOVIE_INSERT_1_FRAME,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	// "&Delete 1 Frame"
+	{ ID_FILE_DELETE_1_FRAME,EMUCMD_MOVIE_DELETE_1_FRAME },
+	// "Delete 1 Frame"
+	{ FCEUX_CONTEXT_DELETE_1_FRAME,EMUCMD_MOVIE_DELETE_1_FRAME,FCEUMENU_CONTEXT_PLAYING_READONLY },
+	// "Delete 1 Frame"
+	{ FCEUX_CONTEXT_DELETE_1_FRAME,EMUCMD_MOVIE_DELETE_1_FRAME,FCEUMENU_CONTEXT_PLAYING_READWRITE },
+	// "Delete 1 Frame"
+	{ FCEUX_CONTEXT_DELETE_1_FRAME,EMUCMD_MOVIE_DELETE_1_FRAME,FCEUMENU_CONTEXT_RECORDING_READONLY },
+	// "Delete 1 Frame"
+	{ FCEUX_CONTEXT_DELETE_1_FRAME,EMUCMD_MOVIE_DELETE_1_FRAME,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	// "&Next Record Mode"
+	{ ID_FILE_NEXTRECORDMODE,EMUCMD_MOVIE_NEXT_RECORD_MODE },
+	// "&Truncate
+	{ ID_FILE_RECORDMODE_TRUNCATE,EMUCMD_MOVIE_RECORD_MODE_TRUNCATE },
+	// "&Truncate"
+	{ FCEUX_CONTEXT_RECORDMODE_TRUNCATE,EMUCMD_MOVIE_RECORD_MODE_TRUNCATE,FCEUMENU_CONTEXT_PLAYING_READONLY },
+	// "&Truncate"
+	{ FCEUX_CONTEXT_RECORDMODE_TRUNCATE,EMUCMD_MOVIE_RECORD_MODE_TRUNCATE,FCEUMENU_CONTEXT_PLAYING_READWRITE },
+	// "&Truncate"
+	{ FCEUX_CONTEXT_RECORDMODE_TRUNCATE,EMUCMD_MOVIE_RECORD_MODE_TRUNCATE,FCEUMENU_CONTEXT_RECORDING_READONLY },
+	// "&Truncate"
+	{ FCEUX_CONTEXT_RECORDMODE_TRUNCATE,EMUCMD_MOVIE_RECORD_MODE_TRUNCATE,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	// "&Overwrite[W]"
+	{ ID_FILE_RECORDMODE_OVERWRITE,EMUCMD_MOVIE_RECORD_MODE_OVERWRITE },
+	// "&Overwrite[W]"
+	{ FCEUX_CONTEXT_RECORDMODE_OVERWRITE,EMUCMD_MOVIE_RECORD_MODE_OVERWRITE,FCEUMENU_CONTEXT_PLAYING_READONLY },
+	// "&Overwrite[W]"
+	{ FCEUX_CONTEXT_RECORDMODE_OVERWRITE,EMUCMD_MOVIE_RECORD_MODE_OVERWRITE,FCEUMENU_CONTEXT_PLAYING_READWRITE },
+	// "&Overwrite[W]"
+	{ FCEUX_CONTEXT_RECORDMODE_OVERWRITE,EMUCMD_MOVIE_RECORD_MODE_OVERWRITE,FCEUMENU_CONTEXT_RECORDING_READONLY },
+	// "&Overwrite[W]"
+	{ FCEUX_CONTEXT_RECORDMODE_OVERWRITE,EMUCMD_MOVIE_RECORD_MODE_OVERWRITE,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	// "&Insert[I]"
+	{ ID_FILE_RECORDMODE_INSERT,EMUCMD_MOVIE_RECORD_MODE_INSERT },
+	// "&Insert[I]"
+	{ FCEUX_CONTEXT_RECORDMODE_INSERT,EMUCMD_MOVIE_RECORD_MODE_INSERT,FCEUMENU_CONTEXT_PLAYING_READONLY },
+	// "&Insert[I]"
+	{ FCEUX_CONTEXT_RECORDMODE_INSERT,EMUCMD_MOVIE_RECORD_MODE_INSERT,FCEUMENU_CONTEXT_PLAYING_READWRITE },
+	// "&Insert[I]"
+	{ FCEUX_CONTEXT_RECORDMODE_INSERT,EMUCMD_MOVIE_RECORD_MODE_INSERT,FCEUMENU_CONTEXT_RECORDING_READONLY },
+	// "&Insert[I]"
+	{ FCEUX_CONTEXT_RECORDMODE_INSERT,EMUCMD_MOVIE_RECORD_MODE_INSERT,FCEUMENU_CONTEXT_RECORDING_READWRITE }
+};
+
+int HOTKEYMENUINDEX::updateMenuText() {
+	return ModifyMenu(hmenuList[hmenu_index], menu_id, GetMenuState(hmenuList[hmenu_index], menu_id, flags) | flags, menu_id, getQualifiedMenuText().c_str());
+}
+
 void UpdateMenuHotkeys()
 {
-	//Update all menu items that can be called from a hotkey to include the current hotkey assignment
-	string combo, combined;
-
-	//-------------------------------FILE---------------------------------------
-	//Open ROM
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_OPENROM]);
-	combined = "&Open ROM...\t" + combo;
-	ChangeMenuItemText(MENU_OPEN_FILE, combined);
-
-	//Close ROM
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_CLOSEROM]);
-	combined = "&Close\t" + combo;
-	ChangeMenuItemText(MENU_CLOSE_FILE, combined);
-
-	//Load State
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_LOAD_STATE]);
-	combined = "&Load State\t" + combo;
-	ChangeMenuItemText(MENU_LOADSTATE, combined);
-
-	//Save State
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SAVE_STATE]);
-	combined = "&Save State\t" + combo;
-	ChangeMenuItemText(MENU_SAVESTATE, combined);
-
-	//Loadstate from
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_LOAD_STATE_FROM]);
-	combined = "Load State &From...\t" + combo;
-	ChangeMenuItemText(MENU_LOAD_STATE, combined);
-
-	//Savestate as
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SAVE_STATE_AS]);
-	combined = "Save State &As...\t" + combo;
-	ChangeMenuItemText(MENU_SAVE_STATE, combined);
-
-	//Next Save Slot
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SAVE_SLOT_NEXT]);
-	combined = "&Next save slot\t" + combo;
-	ChangeMenuItemText(MENU_NEXTSAVESTATE, combined);
-
-	//Previous Save Slot
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SAVE_SLOT_PREV]);
-	combined = "&Previous save slot\t" + combo;
-	ChangeMenuItemText(MENU_PREVIOUSSAVESTATE, combined);
-
-	//View Save Slots
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_SHOWSTATES]);
-	combined = "&View save slots\t" + combo;
-	ChangeMenuItemText(MENU_VIEWSAVESLOTS, combined);
-
-	//Record Movie
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_RECORD_TO]);
-	combined = "&Record Movie...\t" + combo;
-	ChangeMenuItemText(MENU_RECORD_MOVIE, combined);
-
-	//Play movie
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_REPLAY_FROM]);
-	combined = "&Play Movie...\t" + combo;
-	ChangeMenuItemText(MENU_REPLAY_MOVIE, combined); 
-
-	//Stop movie
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_STOP]);
-	combined = "&Stop Movie\t" + combo;
-	ChangeMenuItemText(MENU_STOP_MOVIE, combined); 
-
-	//Play Movie from Beginning
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_PLAY_FROM_BEGINNING]);
-	combined = "Play from &Beginning\t" + combo;
-	ChangeMenuItemText(ID_FILE_PLAYMOVIEFROMBEGINNING, combined); 
-
-	//Toggle Movie Recording/Playing
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_TOGGLE_RECORDING]);
-	combined = "&Toggle Recording/Playing\t" + combo;
-	ChangeMenuItemText(ID_FILE_TOGGLE_RECORDING_MOVIE, combined);
-
-	//Insert 1 Frame
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_INSERT_1_FRAME]);
-	combined = "&Insert 1 Frame\t" + combo;
-	ChangeMenuItemText(ID_FILE_INSERT_1_FRAME, combined);
-
-	//Delete 1 Frame
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_DELETE_1_FRAME]);
-	combined = "&Delete 1 Frame\t" + combo;
-	ChangeMenuItemText(ID_FILE_DELETE_1_FRAME, combined);
-
-	//Truncate Movie at Current Frame
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_TRUNCATE]);
-	combined = "&Truncate at &Current Frame\t" + combo;
-	ChangeMenuItemText(ID_FILE_TRUNCATE_MOVIE, combined);
-
-	//Read only
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_READONLY_TOGGLE]);
-	combined = "&Read only\t" + combo;
-	ChangeMenuItemText(ID_FILE_MOVIE_TOGGLEREAD, combined); 
-
-	//Next Record Mode
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_NEXT_RECORD_MODE]);
-	combined = "&Next Record Mode\t" + combo;
-	ChangeMenuItemText(ID_FILE_NEXTRECORDMODE, combined);
-
-	//Prev Record Mode
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_PREV_RECORD_MODE]);
-	combined = "&Prev Record Mode\t" + combo;
-	ChangeMenuItemText(ID_FILE_PREVRECORDMODE, combined);
-
-	//Record Mode Truncate
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_RECORD_MODE_TRUNCATE]);
-	combined = "&Truncate\t" + combo;
-	ChangeMenuItemText(ID_FILE_RECORDMODE_TRUNCATE, combined);
-
-	//Record Mode Overwrite
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_RECORD_MODE_OVERWRITE]);
-	combined = "&Overwrite[W]\t" + combo;
-	ChangeMenuItemText(ID_FILE_RECORDMODE_OVERWRITE, combined);
-
-	//Record Mode Insert
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_RECORD_MODE_INSERT]);
-	combined = "&Insert[I]\t" + combo;
-	ChangeMenuItemText(ID_FILE_RECORDMODE_INSERT, combined);
-
-	//Screenshot
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SCREENSHOT]);
-	combined = "&Screenshot\t" + combo;
-	ChangeMenuItemText(ID_FILE_SCREENSHOT, combined); 
-
-	//Record AVI
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_AVI_RECORD_AS]);
-	combined = "&Record AVI...\t" + combo;
-	ChangeMenuItemText(MENU_RECORD_AVI, combined); 
-
-	//Stop AVI
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_AVI_STOP]);
-	combined = "&Stop AVI\t" + combo;
-	ChangeMenuItemText(MENU_STOP_AVI, combined); 
-	
-	//-------------------------------NES----------------------------------------
-	//Reset
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_RESET]);
-	combined = "&Reset\t" + combo;
-	ChangeMenuItemText(MENU_RESET, combined); 
-
-	//Power
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_POWER]);
-	combined = "&Power\t" + combo;
-	ChangeMenuItemText(MENU_POWER, combined);
-
-	//Eject/Insert Disk
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_FDS_EJECT_INSERT]);
-	combined = "&Eject/Insert Disk\t" + combo;
-	ChangeMenuItemText(MENU_EJECT_DISK, combined);
-
-	//Switch Disk Side
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_FDS_SIDE_SELECT]);
-	combined = "&Switch Disk Side\t" + combo;
-	ChangeMenuItemText(MENU_SWITCH_DISK, combined);
-	
-	//Insert Coin
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_VSUNI_COIN]);
-	combined = "&Insert Coin\t" + combo;
-	ChangeMenuItemText(MENU_INSERT_COIN, combined);
-		
-	//Speed Up
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_FASTER]);
-	combined = "Speed &Up\t" + combo;
-	ChangeMenuItemText(ID_NES_SPEEDUP, combined);
-
-	//Slow Down
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_SLOWER]);
-	combined = "Slow &Down\t" + combo;
-	ChangeMenuItemText(ID_NES_SLOWDOWN, combined);
-
-	//Pause
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]);
-	combined = "&Pause\t" + combo;
-	ChangeMenuItemText(ID_NES_PAUSE, combined);
-	
-	//Slowest Speed
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_SLOWEST]);
-	combined = "&Slowest Speed\t" + combo;
-	ChangeMenuItemText(ID_NES_SLOWESTSPEED, combined);
-
-	//Normal Speed
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_NORMAL]);
-	combined = "&Normal Speed\t" + combo;
-	ChangeMenuItemText(ID_NES_NORMALSPEED, combined);
-
-	//Turbo
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_TURBO_TOGGLE]);
-	combined = "&Turbo\t" + combo;
-	ChangeMenuItemText(ID_NES_TURBO, combined);
-
-	//-------------------------------Config-------------------------------------
-	//Hide Menu
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_HIDE_MENU_TOGGLE]);
-	combined = "&Hide Menu\t" + combo;
-	ChangeMenuItemText(MENU_HIDE_MENU, combined);
-
-	//Frame Adv. skip lag
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_FRAMEADV_SKIPLAG]);
-	combined = "&Frame Adv. - Skip Lag\t" + combo;
-	ChangeMenuItemText(MENU_DISPLAY_FA_LAGSKIP, combined);
-
-	//Lag Counter
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE]);
-	combined = "&Lag Counter\t" + combo;
-	ChangeMenuItemText(MENU_DISPLAY_LAGCOUNTER, combined);
-
-	//Frame Counter
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_FRAME_DISPLAY_TOGGLE]);
-	combined = "&Frame Counter\t" + combo;
-	ChangeMenuItemText(ID_DISPLAY_FRAMECOUNTER, combined);
-
-	//Rerecord Counter
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_RERECORD_DISPLAY_TOGGLE]);
-	combined = "&Rerecord Counter\t" + combo;
-	ChangeMenuItemText(ID_DISPLAY_RERECORDCOUNTER, combined);
-
-	//Movie status icon
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_ICON_DISPLAY_TOGGLE]);
-	combined = "&Movie status icon\t" + combo;
-	ChangeMenuItemText(ID_DISPLAY_MOVIESTATUSICON, combined);
-
-	//FPS counter
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_FPS_DISPLAY_TOGGLE]);
-	combined = "FPS\t" + combo;
-	ChangeMenuItemText(ID_DISPLAY_FPS, combined);
-
-	//Graphics: BG
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_DISPLAY_BG_TOGGLE]);
-	combined = "Graphics: &BG\t" + combo;
-	ChangeMenuItemText(MENU_DISPLAY_BG, combined);
-
-	//Graphics: OBJ
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_DISPLAY_OBJ_TOGGLE]);
-	combined = "Graphics: &OBJ\t" + combo;
-	ChangeMenuItemText(MENU_DISPLAY_OBJ, combined);
-
-	//-------------------------------Tools--------------------------------------
-	//Open Cheats
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENCHEATS]);
-	combined = "&Cheats...\t" + combo;
-	ChangeMenuItemText(MENU_CHEATS, combined);
-
-	//Open RAM Search
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENRAMSEARCH]);
-	combined = "&RAM Search...\t" + combo;
-	ChangeMenuItemText(ID_RAM_SEARCH, combined);
-
-	//Open RAM Watch
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENRAMWATCH]);
-	combined = "&RAM Watch...\t" + combo;
-	ChangeMenuItemText(ID_RAM_WATCH, combined);
-
-	//Open Memory Watch
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENMEMORYWATCH]);
-	combined = "&Memory Watch...\t" + combo;
-	ChangeMenuItemText(MENU_MEMORY_WATCH, combined);
-
-	//Open TAS Editor
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_OPENTASEDITOR]);
-	combined = "&TAS Editor...\t" + combo;
-	ChangeMenuItemText(MENU_TASEDITOR, combined);
-
-	//-------------------------------Debug--------------------------------------
-	//Open Debugger
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENDEBUGGER]);
-	combined = "&Debugger...\t" + combo;
-	ChangeMenuItemText(MENU_DEBUGGER, combined);
-
-	//Open PPU Viewer
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENPPU]);
-	combined = "&PPU Viewer...\t" + combo;
-	ChangeMenuItemText(MENU_PPUVIEWER, combined);
-
-	//Open Nametable Viewer 
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENNTVIEW]);
-	combined = "&Name table Viewer...\t" + combo;
-	ChangeMenuItemText(MENU_NAMETABLEVIEWER, combined);
-
-	//Open Hex editor
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENHEX]);
-	combined = "&Hex Editor...\t" + combo;
-	ChangeMenuItemText(MENU_HEXEDITOR, combined);
-
-	//Open Trace Logger
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENTRACELOGGER]);
-	combined = "&Trace Logger...\t" + combo;
-	ChangeMenuItemText(MENU_TRACELOGGER, combined);
-	
-	//Open Code/Data Logger
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENCDLOGGER]);
-	combined = "&Code/Data Logger...\t" + combo;
-	ChangeMenuItemText(MENU_CDLOGGER, combined);
+	for (int i = 0; i < sizeof(HOTKEYMENUINDEXs) / sizeof(HOTKEYMENUINDEX); ++i)
+		HOTKEYMENUINDEXs[i].updateMenuText();
 }
 
 //This function is for the context menu item Save Movie As...

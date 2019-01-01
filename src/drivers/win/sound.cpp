@@ -387,7 +387,7 @@ void win_SoundWriteData(int32 *buffer, int count) {
 //--------
 //GUI and control APIs
 
-static HWND uug=0;
+HWND uug=0;
 
 static void UpdateSD(HWND hwndDlg)
 {
@@ -450,6 +450,7 @@ static void UpdateSD(HWND hwndDlg)
 		EnableWindow(GetDlgItem(hwndDlg,65457),FALSE);
 		//Misc. Output Format group
 		EnableWindow(GetDlgItem(hwndDlg,65455),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,65462),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,65461),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,65460),FALSE);
 		
@@ -490,6 +491,7 @@ static void UpdateSD(HWND hwndDlg)
 		EnableWindow(GetDlgItem(hwndDlg,65457),TRUE);
 		//Misc. Output Format group
 		EnableWindow(GetDlgItem(hwndDlg,65455),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,65462),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,65461),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,65460),TRUE);
 		

@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by res.rc
+// Microsoft Visual C++ 生成的包含文件。
+// 供 res.rc 使用
 //
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
@@ -784,6 +784,10 @@
 #define IDC_RICHEDIT_DISASM             1304
 #define IDC_CHECK2                      1305
 #define DEBUGIDAFONT                    1305
+#define IDC_AUTOSAVE_PERIOD_EVERY_TEXT  1306
+#define IDC_AUTOSAVE_PERIOD_MINUTES_TEXT 1307
+#define IDC_VBLANK_SCANLINES_TEXT       1308
+#define IDC_EXTRA_SCANLINES_TEXT        1309
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1271,14 +1275,15 @@
 #define IDC_STATIC_SLASHTEXT            65442
 #define IDC_BOOKMARK_NAME_TEXT          65535
 #define ID_CDL                          65535
+#define IDC_NTVIEW_SCANLINE_TEXT        65535
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        293
+#define _APS_NEXT_RESOURCE_VALUE        296
 #define _APS_NEXT_COMMAND_VALUE         40600
-#define _APS_NEXT_CONTROL_VALUE         1306
+#define _APS_NEXT_CONTROL_VALUE         1310
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

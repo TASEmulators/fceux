@@ -567,6 +567,8 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 							break;
 						case IDC_NTVIEW_SHOW_SCROLL_LINES : 
 							scrolllines ^= 1;
+							EnableWindow(GetDlgItem(hwndDlg, IDC_NTVIEW_SCANLINE_TEXT), scrolllines);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_NTVIEW_SCANLINE), scrolllines);
 							chrchanged = 1;
 							break;
 						case IDC_NTVIEW_SHOW_ATTRIBUTES :

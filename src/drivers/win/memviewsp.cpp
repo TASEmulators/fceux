@@ -181,7 +181,7 @@ void updateBookmarkMenus(HMENU menu)
 	{
 		// Get the text of the menu
 		char buffer[0x100];
-		sprintf(buffer, i < 10 ? "$%04X - %s\tCTRL-%d" : "$%04X - %s", hexBookmarks[i].address, hexBookmarks[i].description, i);
+		sprintf(buffer, i < 10 ? "&%d. $%04X - %s\tCtrl+%d" : "%d. $%04X - %s",i, hexBookmarks[i].address, hexBookmarks[i].description, i);
 		
 		mi.dwTypeData = buffer;
 		mi.cch = strlen(buffer);
