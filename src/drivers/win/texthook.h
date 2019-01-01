@@ -14,5 +14,3 @@ void UpdateTextHooker();
 void KillTextHooker();
 void DoTextHooker();
 void TextHookerCheck();
-
-extern HWND hTextHooker;

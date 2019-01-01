@@ -143,11 +143,9 @@ static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 						"Base Directory",
 					};
 
-					char name[MAX_PATH]; 
-					char path[MAX_PATH];
-					GetDlgItemText(hwndDlg, EDIT_ROMS + ((wParam & 0xFFFF) - BUTTON_ROMS), path, MAX_PATH);
+					char name[MAX_PATH];
 
-					if(BrowseForFolder(hwndDlg, helpert[ ( (wParam & 0xFFFF) - BUTTON_ROMS)], name, path))
+					if(BrowseForFolder(hwndDlg, helpert[ ( (wParam & 0xFFFF) - BUTTON_ROMS)], name))
 					{
 						SetDlgItemText(hwndDlg, EDIT_ROMS + ((wParam & 0xFFFF) - BUTTON_ROMS), name);
 					}

@@ -44,23 +44,20 @@ void CloseTimingDialog(HWND hwndDlg)
 	if (postrenderscanlines < 0)
 	{
 		postrenderscanlines = 0;
-		MessageBox(hwndDlg, "Overclocking is when you speed up your CPU, not slow it down!", "Error", MB_OK | MB_ICONERROR);
+		MessageBox(hwndDlg, "Overclocking is when you speed up your CPU, not slow it down!", "Error", MB_OK);
 		sprintf(str,"%d",postrenderscanlines);
 		SetDlgItemText(hwndDlg,IDC_EXTRA_SCANLINES,str);
-		SetFocus(GetDlgItem(hwndDlg, IDC_EXTRA_SCANLINES));
 	}
 	else if (vblankscanlines < 0)
 	{
 		vblankscanlines = 0;
-		MessageBox(hwndDlg, "Overclocking is when you speed up your CPU, not slow it down!", "Error", MB_OK | MB_ICONERROR);
+		MessageBox(hwndDlg, "Overclocking is when you speed up your CPU, not slow it down!", "Error", MB_OK);
 		sprintf(str,"%d",vblankscanlines);
 		SetDlgItemText(hwndDlg,IDC_VBLANK_SCANLINES,str);
-		SetFocus(GetDlgItem(hwndDlg, IDC_VBLANK_SCANLINES));
 	}
 	else if (overclock_enabled && newppu)
 	{
-		MessageBox(hwndDlg, "Overclocking doesn't work with new PPU!", "Error", MB_OK | MB_ICONERROR);
-		SetFocus(GetDlgItem(hwndDlg, CB_OVERCLOCKING));
+		MessageBox(hwndDlg, "Overclocking doesn't work with new PPU!", "Error", MB_OK);
 	}
 	else
 		EndDialog(hwndDlg, 0);
@@ -88,20 +85,9 @@ BOOL CALLBACK TimingConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				CheckDlgButton(hwndDlg, CB_DISABLE_SPEED_THROTTLING, BST_CHECKED);
 			}
 
-			if(newppu)
-			{
-				EnableWindow(GetDlgItem(hwndDlg, CB_OVERCLOCKING), false);
-			}
-
 			if(overclock_enabled)
-			{
 				CheckDlgButton(hwndDlg, CB_OVERCLOCKING, BST_CHECKED);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_EXTRA_SCANLINES), true);
-				EnableWindow(GetDlgItem(hwndDlg, CB_SKIP_7BIT), true);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_VBLANK_SCANLINES), true);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_VBLANK_SCANLINES_TEXT), true);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_EXTRA_SCANLINES_TEXT), true);
-			}
+
 			if(skip_7bit_overclocking)
 				CheckDlgButton(hwndDlg, CB_SKIP_7BIT, BST_CHECKED);
 
@@ -131,16 +117,6 @@ BOOL CALLBACK TimingConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				{
 					case 1:
 						CloseTimingDialog(hwndDlg);
-						break;
-					case CB_OVERCLOCKING:
-						bool chk = IsDlgButtonChecked(hwndDlg, CB_OVERCLOCKING) == BST_CHECKED;
-						
-						EnableWindow(GetDlgItem(hwndDlg, IDC_EXTRA_SCANLINES), chk);
-						EnableWindow(GetDlgItem(hwndDlg, CB_SKIP_7BIT), chk);
-						EnableWindow(GetDlgItem(hwndDlg, IDC_VBLANK_SCANLINES), chk);
-						EnableWindow(GetDlgItem(hwndDlg, IDC_VBLANK_SCANLINES_TEXT), chk);
-						EnableWindow(GetDlgItem(hwndDlg, IDC_EXTRA_SCANLINES_TEXT), chk);
-						
 						break;
 				}
 			}

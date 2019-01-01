@@ -275,9 +275,6 @@ public:
 	}
 };
 
-// indicator for the open in archive dialog that if the load was canceled by the user.
-// TODO: Since I can't think of a better way to indicate it, hope someone could imporve it.
-bool archiveManuallyCanceled;
 
 static BOOL CALLBACK ArchiveFileSelectorCallback(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -285,8 +282,6 @@ static BOOL CALLBACK ArchiveFileSelectorCallback(HWND hwndDlg, UINT uMsg, WPARAM
 	{
 	case WM_INITDIALOG:
 		{
-			// TODO: find a better way to do this.
-			archiveManuallyCanceled = false;
 			HWND hwndListbox = GetDlgItem(hwndDlg,IDC_LIST1);
 			for(uint32 i=0;i<currFileSelectorContext->size();i++)
 			{
@@ -312,9 +307,6 @@ static BOOL CALLBACK ArchiveFileSelectorCallback(HWND hwndDlg, UINT uMsg, WPARAM
 
 			case IDCANCEL:
 				EndDialog(hwndDlg, LB_ERR);
-				// Tell the parent window that the operation was canceled rather than loading error
-				// TODO: find a better way to do this.
-				archiveManuallyCanceled = true;
 				return TRUE;
 		}
 		break;
