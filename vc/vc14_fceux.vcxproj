@@ -68,6 +68,15 @@
     <CharacterSet>NotSet</CharacterSet>
     <PlatformToolset>v140_xp</PlatformToolset>
   </PropertyGroup>
+  <!-- change toolset if it doesnt exist, so people can use 2017 for now -->
+  <!-- I can't figure out how to detect if v140_xp is installed in 2017. I would like to use it if possible, but I guess not today -->
+  <PropertyGroup Label="Globals" Condition="!Exists('$(VCTargetsPath)\Platforms\$(Platform)\PlatformToolsets\v140_xp\Toolset.props')">
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Globals" Condition="'$(v141_xp_Installed)'=='true'">
+    <PlatformToolset>v141_xp</PlatformToolset>
+  </PropertyGroup>  
+  <Import Project="$(VCTargetsPath)\Platforms\$(Platform)\PlatformToolsets\v140_xp\Microsoft.Cpp.$(Platform).v140_xp.props" Condition="Exists('$(VCTargetsPath)\Platforms\$(Platform)\PlatformToolsets\v140_xp\Microsoft.Cpp.$(Platform).v140_xp.props')"/>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>

@@ -3348,30 +3348,6 @@ static void gui_drawline_internal(int x1, int y1, int x2, int y2, bool lastPixel
 	}
 }
 
-// draw a rect on gui_data
-static void gui_drawbox_internal(int x1, int y1, int x2, int y2, uint32 colour) {
-
-	if (x1 > x2)
-		swap<int>(x1, x2);
-	if (y1 > y2)
-		swap<int>(y1, y2);
-	if (x1 < 0)
-		x1 = -1;
-	if (y1 < 0)
-		y1 = -1;
-	if (x2 >= LUA_SCREEN_WIDTH)
-		x2 = LUA_SCREEN_WIDTH;
-	if (y2 >= LUA_SCREEN_HEIGHT)
-		y2 = LUA_SCREEN_HEIGHT;
-
-	//gui_prepare();
-
-	gui_drawline_internal(x1, y1, x2, y1, true, colour);
-	gui_drawline_internal(x1, y2, x2, y2, true, colour);
-	gui_drawline_internal(x1, y1, x1, y2, true, colour);
-	gui_drawline_internal(x2, y1, x2, y2, true, colour);
-}
-
 // draw fill rect on gui_data
 static void gui_fillbox_internal(int x1, int y1, int x2, int y2, uint32 colour)
 {
@@ -3396,6 +3372,38 @@ static void gui_fillbox_internal(int x1, int y1, int x2, int y2, uint32 colour)
 		{
 			gui_drawpixel_fast(ix, iy, colour);
 		}
+	}
+}
+
+// draw a rect on gui_data
+static void gui_drawbox_internal(int x1, int y1, int x2, int y2, uint32 colour) {
+
+	if (x1 > x2)
+		swap<int>(x1, x2);
+	if (y1 > y2)
+		swap<int>(y1, y2);
+	if (x1 < 0)
+		x1 = -1;
+	if (y1 < 0)
+		y1 = -1;
+	if (x2 >= LUA_SCREEN_WIDTH)
+		x2 = LUA_SCREEN_WIDTH;
+	if (y2 >= LUA_SCREEN_HEIGHT)
+		y2 = LUA_SCREEN_HEIGHT;
+
+	//gui_prepare();
+
+	int h = y2 - y1 + 1;
+	int w = x2 - x1 + 1;
+
+	if(w < 2 || h < 2) 
+		gui_fillbox_internal(x1,y1,x2,y2,colour);
+	else
+	{
+		gui_drawline_internal(x1, y1, x2, y1, true, colour); //top
+		gui_drawline_internal(x1, y2, x2, y2, true, colour); //bottom
+		gui_drawline_internal(x1, y1+1, x1, y2-1, true, colour); //left
+		gui_drawline_internal(x2, y1+1, x2, y2-1, true, colour); //right
 	}
 }
 
