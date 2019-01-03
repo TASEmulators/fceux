@@ -285,8 +285,6 @@ static BOOL CALLBACK ArchiveFileSelectorCallback(HWND hwndDlg, UINT uMsg, WPARAM
 	{
 	case WM_INITDIALOG:
 		{
-			// TODO: find a better way to do this.
-			archiveManuallyCanceled = false;
 			HWND hwndListbox = GetDlgItem(hwndDlg,IDC_LIST1);
 			for(uint32 i=0;i<currFileSelectorContext->size();i++)
 			{

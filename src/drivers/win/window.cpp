@@ -108,9 +108,6 @@ HMENU hfceuxcontext;		  //Handle to context menu
 HMENU hfceuxcontextsub;		  //Handle to context sub menu
 HWND MainhWnd;				  //Main FCEUX(Parent) window Handle.  Dialogs should use GetMainHWND() to get this
 
-// HWND list for menu update, refers to FCEU_MENU_HWND
-HMENU hmenuList[FCEUMENU_LIMIT];
-
 //Extern variables-------------------------------------
 extern bool movieSubtitles;
 extern FCEUGI *GameInfo;
@@ -489,6 +486,7 @@ void UpdateCheckedMenuItems()
 		default:
 			break;
 	}
+	UpdateMenuHotkeys(FCEUMENU_MAIN_INPUTDISPLAY);
 }
 
 void UpdateContextMenuItems(HMENU context, int whichContext)
@@ -579,6 +577,7 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 		// At position 4(+1) is after View comments and subtitles. Insert this there:
 		InsertMenu(context,0x5, MF_BYPOSITION, FCEUX_CONTEXT_DUMPSUBTITLES, "Dump Subtitles to SRT file");
 	}
+
 }
 
 
@@ -1402,30 +1401,12 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			if (rightClickEnabled)
 			{
 				//If There is a movie loaded
-				if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY | MOVIEMODE_RECORD | MOVIEMODE_FINISHED))
-				{
-					if (FCEUMOV_Mode(MOVIEMODE_RECORD))
-						if (movie_readonly)
-							whichContext = 4; // Game+Movie+Recording+readonly
-						else
-							whichContext = 5; // Game+Movie+Recording+readwrite
-					else //if (FCEUMOV_Mode(MOVIEMODE_PLAY | MOVIEMODE_FINISHED))
-						if (movie_readonly)
-							whichContext = 2; // Game+Movie+Playing+readonly
-						else
-							whichContext = 3; // Game+Movie+Playing+readwrite
-				//If there is a ROM loaded but no movie
-				} else if (GameInfo)
-					whichContext = 1; // Game+NoMovie
-				//Else no ROM
-				else
-					whichContext = 0; // NoGame
+				int whichContext = GetCurrentContextIndex();
 
 				hfceuxcontext = LoadMenu(fceu_hInstance,"FCEUCONTEXTMENUS");
-				hmenuList[FCEUMENU_HWND::FCEUMENU_CONTEXT] = hfceuxcontext;
 				hfceuxcontextsub = GetSubMenu(hfceuxcontext, whichContext);
-				hmenuList[whichContext] = hfceuxcontextsub;
 				UpdateContextMenuItems(hfceuxcontextsub, whichContext);
+				UpdateMenuHotkeys(whichContext);
 				pt.x = LOWORD(lParam);		//Get mouse x in terms of client area
 				pt.y = HIWORD(lParam);		//Get mouse y in terms of client area
 				ClientToScreen(hAppWnd, (LPPOINT) &pt);	//Convert client area x,y to screen x,y
@@ -2526,7 +2507,6 @@ adelikat: Outsourced this to a remappable hotkey
 		goto proco;
 	case WM_ENTERMENULOOP:
 		UpdateCheckedMenuItems();
-		UpdateMenuHotkeys();
 		EnableMenuItem(fceumenu,MENU_RESET,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_RESET)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_POWER,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_POWER)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_EJECT_DISK,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_EJECT_DISK)?MF_ENABLED:MF_GRAYED));
@@ -2689,8 +2669,7 @@ int CreateMainWindow()
 	AdjustWindowRectEx(&tmp, WS_OVERLAPPEDWINDOW, 1, 0);
 
 	fceumenu = LoadMenu(fceu_hInstance,"FCEUMENU");
-	hmenuList[FCEUMENU_MAIN] = fceumenu;
-
+	UpdateMenuHotkeys(FCEUMENU_MAIN);
 	recentmenu = CreateMenu();
 	recentluamenu = CreateMenu();
 	recentmoviemenu = CreateMenu();
@@ -2896,10 +2875,12 @@ void ChangeMenuItemText(int menuitem, string text)
 	SetMenuItemInfo(fceumenu, menuitem, FALSE, &moo);
 }
 
-string HOTKEYMENUINDEX::getQualifiedMenuText() {
-	int length = GetMenuString(hmenuList[hmenu_index], menu_id, 0, 0, flags) + 1;
+string HOTKEYMENUINDEX::getQualifiedMenuText(FCEUMENU_INDEX menu_index) {
+	HMENU menu;
+	GetHMENU(menu_index, menu);
+	int length = GetMenuString(menu, menu_id, 0, 0, flags) + 1;
 	char* buffer = new char[length];
-	GetMenuString(hmenuList[hmenu_index], menu_id, buffer, length, flags);
+	GetMenuString(menu, menu_id, buffer, length, flags);
 	if (char* pTab = strrchr(buffer, '\t'))
 		*pTab = '\0';
 	std::string menustr = HOTKEYMENUINDEX::getQualifiedMenuText(buffer, cmd_id);
@@ -2921,17 +2902,17 @@ string HOTKEYMENUINDEX::getQualifiedMenuText(char* text, int emu_cmd_id) {
 	return menustr;
 }
 
-struct HOTKEYMENUINDEX HOTKEYMENUINDEXs[] = {
+struct HOTKEYMENUINDEX hotkeyMenuIndexes[] = {
 	// "&Open..."
 	{ MENU_OPEN_FILE,EMUCMD_OPENROM },
 	// "Open ROM"
-	{ FCEU_CONTEXT_OPENROM,EMUCMD_OPENROM,FCEUMENU_CONTEXT_OFF },
+	{ FCEU_CONTEXT_OPENROM,EMUCMD_OPENROM,MENU_BELONG(CONTEXT_OFF) },
 	// "&Close"
 	{ MENU_CLOSE_FILE,EMUCMD_CLOSEROM },
 	// "Close ROM"
-	{ FCEU_CONTEXT_CLOSEROM,EMUCMD_CLOSEROM,FCEUMENU_CONTEXT_GAME },
+	{ FCEU_CONTEXT_CLOSEROM,EMUCMD_CLOSEROM,MENU_BELONG(CONTEXT_GAME) },
 	// "&Load State"
-	{ MENU_LOADSTATE,EMUCMD_LOAD_STATE,FCEUMENU_CONTEXT_GAME },
+	{ MENU_LOADSTATE,EMUCMD_LOAD_STATE,MENU_BELONG(CONTEXT_GAME) },
 	// "&Save State"
 	{ MENU_SAVESTATE,EMUCMD_SAVE_STATE },
 	// "Load State &From..."
@@ -2945,47 +2926,31 @@ struct HOTKEYMENUINDEX HOTKEYMENUINDEXs[] = {
 	// "&View save slots"
 	{ MENU_VIEWSAVESLOTS,EMUCMD_MISC_SHOWSTATES },
 	// "Record Movie..."
-	{ FCEUX_CONTEXT_RECORDMOVIE,EMUCMD_MOVIE_RECORD_TO,FCEUMENU_CONTEXT_GAME },
+	{ FCEUX_CONTEXT_RECORDMOVIE,EMUCMD_MOVIE_RECORD_TO, MENU_BELONG(CONTEXT_GAME) },
 	// "&Record Movie..."
 	{ MENU_RECORD_MOVIE,EMUCMD_MOVIE_RECORD_TO },
 	// "Play Movie..."
-	{ FCEUX_CONTEXT_REPLAYMOVIE,EMUCMD_MOVIE_REPLAY_FROM,FCEUMENU_CONTEXT_GAME },
+	{ FCEUX_CONTEXT_REPLAYMOVIE,EMUCMD_MOVIE_REPLAY_FROM,MENU_BELONG(CONTEXT_GAME) },
 	// "&Play Movie..."
 	{ MENU_REPLAY_MOVIE,EMUCMD_MOVIE_REPLAY_FROM },
 	// "&Stop Movie"
-	{ MENU_STOP_MOVIE,EMUCMD_MOVIE_STOP },
-	// "Stop Movie Replay"
-	{ FCEU_CONTEXT_STOPMOVIE,EMUCMD_MOVIE_STOP,FCEUMENU_CONTEXT_PLAYING_READONLY },
-	// "Stop Movie Replay"
-	{ FCEU_CONTEXT_STOPMOVIE,EMUCMD_MOVIE_STOP,FCEUMENU_CONTEXT_PLAYING_READWRITE },
-	// "Stop Movie Recording"
-	{ FCEU_CONTEXT_STOPMOVIE,EMUCMD_MOVIE_STOP,FCEUMENU_CONTEXT_RECORDING_READONLY },
-	// "Stop Movie Recording"
-	{ FCEU_CONTEXT_STOPMOVIE,EMUCMD_MOVIE_STOP,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	{ MENU_STOP_MOVIE, EMUCMD_MOVIE_STOP },
+	// "Stop Movie Replay" (Playing)
+	// "Stop Movie Recording" (Recording)
+	{ FCEU_CONTEXT_STOPMOVIE,EMUCMD_MOVIE_STOP,BELONG_CONTEXT_MOVIE_ALL },
 	// "Play Movie from Beginning"
-	{ FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING,EMUCMD_MOVIE_PLAY_FROM_BEGINNING,FCEUMENU_CONTEXT_PLAYING_READONLY },
-	// "Play Movie from Beginning"
-	{ FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING,EMUCMD_MOVIE_PLAY_FROM_BEGINNING,FCEUMENU_CONTEXT_PLAYING_READWRITE },
-	// "Play Movie from Beginning"
-	{ FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING,EMUCMD_MOVIE_PLAY_FROM_BEGINNING,FCEUMENU_CONTEXT_RECORDING_READONLY },
-	// "Play Movie from Beginning"
-	{ FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING,EMUCMD_MOVIE_PLAY_FROM_BEGINNING,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	{ FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING,EMUCMD_MOVIE_PLAY_FROM_BEGINNING,BELONG_CONTEXT_MOVIE_ALL },
 	// "Play from &Beginning"
 	{ ID_FILE_PLAYMOVIEFROMBEGINNING,EMUCMD_MOVIE_PLAY_FROM_BEGINNING },
 	// "&Read-only"
 	{ ID_FILE_MOVIE_TOGGLEREAD,EMUCMD_MOVIE_READONLY_TOGGLE },
-	// "Toggle to read+write"
-	{ FCEUX_CONTEXT_READONLYTOGGLE,EMUCMD_MOVIE_READONLY_TOGGLE,FCEUMENU_CONTEXT_PLAYING_READONLY },
-	// "Toggle to Read-only"
-	{ FCEUX_CONTEXT_READONLYTOGGLE,EMUCMD_MOVIE_READONLY_TOGGLE,FCEUMENU_CONTEXT_PLAYING_READWRITE },
-	// "Toggle to read+write"
-	{ FCEUX_CONTEXT_READONLYTOGGLE,EMUCMD_MOVIE_READONLY_TOGGLE,FCEUMENU_CONTEXT_RECORDING_READONLY },
-	// "Toggle to Read-only"
-	{ FCEUX_CONTEXT_READONLYTOGGLE,EMUCMD_MOVIE_READONLY_TOGGLE,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	// "Toggle to read+write" (Readonly)
+	// "Toggle to Read-only" (Readwrite)
+	{ FCEUX_CONTEXT_READONLYTOGGLE,EMUCMD_MOVIE_READONLY_TOGGLE,BELONG_CONTEXT_MOVIE_ALL },
 	// "&Screenshot"
 	{ ID_FILE_SCREENSHOT,EMUCMD_SCREENSHOT },
 	// "Screenshot"
-	{ FCEUX_CONTEXT_SCREENSHOT,EMUCMD_SCREENSHOT, FCEUMENU_CONTEXT_GAME },
+	{ FCEUX_CONTEXT_SCREENSHOT,EMUCMD_SCREENSHOT, MENU_BELONG(CONTEXT_GAME) },
 	// "&Record AVI..."
 	{ MENU_RECORD_AVI,EMUCMD_AVI_RECORD_AS },
 	//"&Stop AVI"
@@ -3015,15 +2980,7 @@ struct HOTKEYMENUINDEX HOTKEYMENUINDEXs[] = {
 	// "&Hide Menu"
 	{ MENU_HIDE_MENU,EMUCMD_HIDE_MENU_TOGGLE },
 	// "Unhide Menu"
-	{ FCEUX_CONTEXT_UNHIDEMENU,EMUCMD_HIDE_MENU_TOGGLE,FCEUMENU_CONTEXT_GAME },
-	// "Unhide Menu"
-	{ FCEUX_CONTEXT_UNHIDEMENU,EMUCMD_HIDE_MENU_TOGGLE,FCEUMENU_CONTEXT_PLAYING_READONLY },
-	// "Unhide Menu"
-	{ FCEUX_CONTEXT_UNHIDEMENU,EMUCMD_HIDE_MENU_TOGGLE,FCEUMENU_CONTEXT_PLAYING_READWRITE },
-	// "Unhide Menu"
-	{ FCEUX_CONTEXT_UNHIDEMENU,EMUCMD_HIDE_MENU_TOGGLE,FCEUMENU_CONTEXT_RECORDING_READONLY },
-	// "Unhide Menu"
-	{ FCEUX_CONTEXT_UNHIDEMENU,EMUCMD_HIDE_MENU_TOGGLE,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	{ FCEUX_CONTEXT_UNHIDEMENU,EMUCMD_HIDE_MENU_TOGGLE,BELONG_CONTEXT_RUNNING },
 	// "&Frame Adv. - Skip Lag"
 	{ MENU_DISPLAY_FA_LAGSKIP,EMUCMD_FRAMEADV_SKIPLAG },
 	// "&Lag Counter"
@@ -3063,107 +3020,110 @@ struct HOTKEYMENUINDEX HOTKEYMENUINDEXs[] = {
 	// "&Code/Data Logger..."
 	{ MENU_CDLOGGER,EMUCMD_TOOL_OPENCDLOGGER },
 	// "Undo savestate"
-	{ FCEUX_CONTEXT_UNDOSAVESTATE,EMUCMD_MISC_UNDOREDOSAVESTATE,FCEUMENU_CONTEXT_GAME },
-	// "Undo savestate"
-	{ FCEUX_CONTEXT_UNDOSAVESTATE,EMUCMD_MISC_UNDOREDOSAVESTATE,FCEUMENU_CONTEXT_PLAYING_READONLY },
-	// "Undo savestate"
-	{ FCEUX_CONTEXT_UNDOSAVESTATE,EMUCMD_MISC_UNDOREDOSAVESTATE,FCEUMENU_CONTEXT_PLAYING_READWRITE },
-	// "Undo savestate"
-	{ FCEUX_CONTEXT_UNDOSAVESTATE,EMUCMD_MISC_UNDOREDOSAVESTATE,FCEUMENU_CONTEXT_RECORDING_READONLY },
-	// "Undo savestate"
-	{ FCEUX_CONTEXT_UNDOSAVESTATE,EMUCMD_MISC_UNDOREDOSAVESTATE,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	{ FCEUX_CONTEXT_UNDOSAVESTATE,EMUCMD_MISC_UNDOREDOSAVESTATE,BELONG_CONTEXT_RUNNING },
 	// "Rewind to last auto-save"
-	{ FCEUX_CONTEXT_REWINDTOLASTAUTO,EMUCMD_MISC_AUTOSAVE,FCEUMENU_CONTEXT_GAME },
-	// "Rewind to last auto-save"
-	{ FCEUX_CONTEXT_REWINDTOLASTAUTO,EMUCMD_MISC_AUTOSAVE,FCEUMENU_CONTEXT_PLAYING_READONLY },
-	// "Rewind to last auto-save"
-	{ FCEUX_CONTEXT_REWINDTOLASTAUTO,EMUCMD_MISC_AUTOSAVE,FCEUMENU_CONTEXT_PLAYING_READWRITE },
-	// "Rewind to last auto-save"
-	{ FCEUX_CONTEXT_REWINDTOLASTAUTO,EMUCMD_MISC_AUTOSAVE,FCEUMENU_CONTEXT_RECORDING_READONLY },
-	// "Rewind to last auto-save"
-	{ FCEUX_CONTEXT_REWINDTOLASTAUTO,EMUCMD_MISC_AUTOSAVE,FCEUMENU_CONTEXT_RECORDING_READWRITE },
-	// "Toggle to Recording"
-	{ FCEUX_CONTEXT_TOGGLE_RECORDING,EMUCMD_MOVIE_TOGGLE_RECORDING,FCEUMENU_CONTEXT_PLAYING_READONLY },
-	// "Toggle to Recording"
-	{ FCEUX_CONTEXT_TOGGLE_RECORDING,EMUCMD_MOVIE_TOGGLE_RECORDING,FCEUMENU_CONTEXT_PLAYING_READWRITE },
-	// "Toggle to Playing"
-	{ FCEUX_CONTEXT_TOGGLE_RECORDING,EMUCMD_MOVIE_TOGGLE_RECORDING,FCEUMENU_CONTEXT_RECORDING_READONLY },
-	// "Toggle to Playing"
-	{ FCEUX_CONTEXT_TOGGLE_RECORDING,EMUCMD_MOVIE_TOGGLE_RECORDING,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	{ FCEUX_CONTEXT_REWINDTOLASTAUTO,EMUCMD_MISC_AUTOSAVE,BELONG_CONTEXT_RUNNING },
+	// "Toggle to Recording" (Playing)
+	// "Toggle to Playing" (Recording)
+	{ FCEUX_CONTEXT_TOGGLE_RECORDING,EMUCMD_MOVIE_TOGGLE_RECORDING,BELONG_CONTEXT_MOVIE_ALL },
 	// "&Toggle Recording/Playing"
 	{ ID_FILE_TOGGLE_RECORDING_MOVIE,EMUCMD_MOVIE_TOGGLE_RECORDING },
 	// "&Truncate at Current Frame"
 	{ ID_FILE_TRUNCATE_MOVIE,EMUCMD_MOVIE_TRUNCATE },
 	// "Truncate at Current Frame"
-	{ FCEUX_CONTEXT_TRUNCATE_MOVIE,EMUCMD_MOVIE_TRUNCATE,FCEUMENU_CONTEXT_PLAYING_READONLY },
-	// "Truncate at Current Frame"
-	{ FCEUX_CONTEXT_TRUNCATE_MOVIE,EMUCMD_MOVIE_TRUNCATE,FCEUMENU_CONTEXT_PLAYING_READWRITE },
-	// "Truncate at Current Frame"
-	{ FCEUX_CONTEXT_TRUNCATE_MOVIE,EMUCMD_MOVIE_TRUNCATE,FCEUMENU_CONTEXT_RECORDING_READONLY },
-	// "Truncate at Current Frame"
-	{ FCEUX_CONTEXT_TRUNCATE_MOVIE,EMUCMD_MOVIE_TRUNCATE,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	{ FCEUX_CONTEXT_TRUNCATE_MOVIE,EMUCMD_MOVIE_TRUNCATE,BELONG_CONTEXT_MOVIE_ALL },
 	// "&Insert 1 Frame"
 	{ ID_FILE_INSERT_1_FRAME,EMUCMD_MOVIE_INSERT_1_FRAME },
 	// "Insert 1 Frame"
-	{ FCEUX_CONTEXT_INSERT_1_FRAME,EMUCMD_MOVIE_INSERT_1_FRAME,FCEUMENU_CONTEXT_PLAYING_READONLY },
-	// "Insert 1 Frame"
-	{ FCEUX_CONTEXT_INSERT_1_FRAME,EMUCMD_MOVIE_INSERT_1_FRAME,FCEUMENU_CONTEXT_PLAYING_READWRITE },
-	// "Insert 1 Frame"
-	{ FCEUX_CONTEXT_INSERT_1_FRAME,EMUCMD_MOVIE_INSERT_1_FRAME,FCEUMENU_CONTEXT_RECORDING_READONLY },
-	// "Insert 1 Frame"
-	{ FCEUX_CONTEXT_INSERT_1_FRAME,EMUCMD_MOVIE_INSERT_1_FRAME,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	{ FCEUX_CONTEXT_INSERT_1_FRAME,EMUCMD_MOVIE_INSERT_1_FRAME,BELONG_CONTEXT_MOVIE_ALL },
 	// "&Delete 1 Frame"
 	{ ID_FILE_DELETE_1_FRAME,EMUCMD_MOVIE_DELETE_1_FRAME },
 	// "Delete 1 Frame"
-	{ FCEUX_CONTEXT_DELETE_1_FRAME,EMUCMD_MOVIE_DELETE_1_FRAME,FCEUMENU_CONTEXT_PLAYING_READONLY },
-	// "Delete 1 Frame"
-	{ FCEUX_CONTEXT_DELETE_1_FRAME,EMUCMD_MOVIE_DELETE_1_FRAME,FCEUMENU_CONTEXT_PLAYING_READWRITE },
-	// "Delete 1 Frame"
-	{ FCEUX_CONTEXT_DELETE_1_FRAME,EMUCMD_MOVIE_DELETE_1_FRAME,FCEUMENU_CONTEXT_RECORDING_READONLY },
-	// "Delete 1 Frame"
-	{ FCEUX_CONTEXT_DELETE_1_FRAME,EMUCMD_MOVIE_DELETE_1_FRAME,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	{ FCEUX_CONTEXT_DELETE_1_FRAME,EMUCMD_MOVIE_DELETE_1_FRAME,BELONG_CONTEXT_MOVIE_ALL },
 	// "&Next Record Mode"
 	{ ID_FILE_NEXTRECORDMODE,EMUCMD_MOVIE_NEXT_RECORD_MODE },
 	// "&Truncate
 	{ ID_FILE_RECORDMODE_TRUNCATE,EMUCMD_MOVIE_RECORD_MODE_TRUNCATE },
 	// "&Truncate"
-	{ FCEUX_CONTEXT_RECORDMODE_TRUNCATE,EMUCMD_MOVIE_RECORD_MODE_TRUNCATE,FCEUMENU_CONTEXT_PLAYING_READONLY },
-	// "&Truncate"
-	{ FCEUX_CONTEXT_RECORDMODE_TRUNCATE,EMUCMD_MOVIE_RECORD_MODE_TRUNCATE,FCEUMENU_CONTEXT_PLAYING_READWRITE },
-	// "&Truncate"
-	{ FCEUX_CONTEXT_RECORDMODE_TRUNCATE,EMUCMD_MOVIE_RECORD_MODE_TRUNCATE,FCEUMENU_CONTEXT_RECORDING_READONLY },
-	// "&Truncate"
-	{ FCEUX_CONTEXT_RECORDMODE_TRUNCATE,EMUCMD_MOVIE_RECORD_MODE_TRUNCATE,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	{ FCEUX_CONTEXT_RECORDMODE_TRUNCATE,EMUCMD_MOVIE_RECORD_MODE_TRUNCATE,BELONG_CONTEXT_MOVIE_ALL },
 	// "&Overwrite[W]"
 	{ ID_FILE_RECORDMODE_OVERWRITE,EMUCMD_MOVIE_RECORD_MODE_OVERWRITE },
 	// "&Overwrite[W]"
-	{ FCEUX_CONTEXT_RECORDMODE_OVERWRITE,EMUCMD_MOVIE_RECORD_MODE_OVERWRITE,FCEUMENU_CONTEXT_PLAYING_READONLY },
-	// "&Overwrite[W]"
-	{ FCEUX_CONTEXT_RECORDMODE_OVERWRITE,EMUCMD_MOVIE_RECORD_MODE_OVERWRITE,FCEUMENU_CONTEXT_PLAYING_READWRITE },
-	// "&Overwrite[W]"
-	{ FCEUX_CONTEXT_RECORDMODE_OVERWRITE,EMUCMD_MOVIE_RECORD_MODE_OVERWRITE,FCEUMENU_CONTEXT_RECORDING_READONLY },
-	// "&Overwrite[W]"
-	{ FCEUX_CONTEXT_RECORDMODE_OVERWRITE,EMUCMD_MOVIE_RECORD_MODE_OVERWRITE,FCEUMENU_CONTEXT_RECORDING_READWRITE },
+	{ FCEUX_CONTEXT_RECORDMODE_OVERWRITE,EMUCMD_MOVIE_RECORD_MODE_OVERWRITE,BELONG_CONTEXT_MOVIE_ALL },
 	// "&Insert[I]"
 	{ ID_FILE_RECORDMODE_INSERT,EMUCMD_MOVIE_RECORD_MODE_INSERT },
 	// "&Insert[I]"
-	{ FCEUX_CONTEXT_RECORDMODE_INSERT,EMUCMD_MOVIE_RECORD_MODE_INSERT,FCEUMENU_CONTEXT_PLAYING_READONLY },
-	// "&Insert[I]"
-	{ FCEUX_CONTEXT_RECORDMODE_INSERT,EMUCMD_MOVIE_RECORD_MODE_INSERT,FCEUMENU_CONTEXT_PLAYING_READWRITE },
-	// "&Insert[I]"
-	{ FCEUX_CONTEXT_RECORDMODE_INSERT,EMUCMD_MOVIE_RECORD_MODE_INSERT,FCEUMENU_CONTEXT_RECORDING_READONLY },
-	// "&Insert[I]"
-	{ FCEUX_CONTEXT_RECORDMODE_INSERT,EMUCMD_MOVIE_RECORD_MODE_INSERT,FCEUMENU_CONTEXT_RECORDING_READWRITE }
+	{ FCEUX_CONTEXT_RECORDMODE_INSERT,EMUCMD_MOVIE_RECORD_MODE_INSERT,BELONG_CONTEXT_MOVIE_ALL },
+	// This is a special one for submenus of "Display Input", its matching hotkey is variable on the fly to the next mode
+	{ 0, EMUCMD_MOVIE_INPUT_DISPLAY_TOGGLE, MENU_BELONG(MAIN_INPUTDISPLAY) | MENU_BELONG(MAIN)}
 };
 
-int HOTKEYMENUINDEX::updateMenuText() {
-	return ModifyMenu(hmenuList[hmenu_index], menu_id, GetMenuState(hmenuList[hmenu_index], menu_id, flags) | flags, menu_id, getQualifiedMenuText().c_str());
+void HOTKEYMENUINDEX::updateMenuText(FCEUMENU_INDEX index) {
+	if (IsMenuBelongsTo(index, hmenu_ident))
+	{
+		HMENU hmenu;
+		GetHMENU(index, hmenu);
+		ModifyMenu(hmenu, menu_id, flags | GetMenuState(hmenu, menu_id, flags), menu_id, getQualifiedMenuText(index).c_str());
+	}
 }
 
-void UpdateMenuHotkeys()
+void UpdateMenuHotkeys(FCEUMENU_INDEX index)
 {
-	for (int i = 0; i < sizeof(HOTKEYMENUINDEXs) / sizeof(HOTKEYMENUINDEX); ++i)
-		HOTKEYMENUINDEXs[i].updateMenuText();
+	for (int i = 0; i < sizeof(hotkeyMenuIndexes) / sizeof(HOTKEYMENUINDEX); ++i)
+	{
+		if (IsMenuBelongsTo(index, hotkeyMenuIndexes[i].hmenu_ident))
+		{
+			switch (hotkeyMenuIndexes[i].cmd_id)
+			{
+			case EMUCMD_MOVIE_INPUT_DISPLAY_TOGGLE:
+				// "input display" need a special proccess
+				if (input_display == 0 && hotkeyMenuIndexes[i].menu_id != MENU_INPUTDISPLAY_1 ||
+					input_display == 1 && hotkeyMenuIndexes[i].menu_id != MENU_INPUTDISPLAY_2 ||
+					input_display == 2 && hotkeyMenuIndexes[i].menu_id != MENU_INPUTDISPLAY_4 ||
+					input_display == 4 && hotkeyMenuIndexes[i].menu_id != MENU_INPUTDISPLAY_0)
+				{
+					// if the current "input display" hotkey is not on the menu item of the next mode, change it back to normal first.
+					hotkeyMenuIndexes[i].cmd_id = -1;
+					hotkeyMenuIndexes[i].updateMenuText(index);
+					// make the update menu to the next mode
+					hotkeyMenuIndexes[i].cmd_id = EMUCMD_MOVIE_INPUT_DISPLAY_TOGGLE;
+					switch (input_display)
+					{
+					case 0: hotkeyMenuIndexes[i].menu_id = MENU_INPUTDISPLAY_1; break;
+					case 1: hotkeyMenuIndexes[i].menu_id = MENU_INPUTDISPLAY_2; break;
+					case 2: hotkeyMenuIndexes[i].menu_id = MENU_INPUTDISPLAY_4; break;
+					case 4: hotkeyMenuIndexes[i].menu_id = MENU_INPUTDISPLAY_0; break;
+					}
+				}
+				// there's no break here, since the hotkey should re-add to the correct menu;
+			default:
+				hotkeyMenuIndexes[i].updateMenuText(index);
+			}
+		}
+	}
+}
+
+int GetCurrentContextIndex()
+{
+	if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY | MOVIEMODE_RECORD | MOVIEMODE_FINISHED))
+	{
+		if (FCEUMOV_Mode(MOVIEMODE_RECORD))
+			if (movie_readonly)
+				return FCEUMENU_CONTEXT_RECORDING_READONLY; // Game+Movie+Recording+readonly
+			else
+				return FCEUMENU_CONTEXT_RECORDING_READWRITE; // Game+Movie+Recording+readwrite
+		else //if (FCEUMOV_Mode(MOVIEMODE_PLAY | MOVIEMODE_FINISHED))
+			if (movie_readonly)
+				return FCEUMENU_CONTEXT_PLAYING_READONLY; // Game+Movie+Playing+readonly
+			else
+				return FCEUMENU_CONTEXT_PLAYING_READWRITE; // Game+Movie+Playing+readwrite
+															   //If there is a ROM loaded but no movie
+	}
+	else if (GameInfo)
+		return FCEUMENU_CONTEXT_GAME; // Game+NoMovie
+	//Else no ROM
+	else
+		return FCEUMENU_CONTEXT_OFF; // NoGame
 }
 
 //This function is for the context menu item Save Movie As...
