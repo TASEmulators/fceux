@@ -114,6 +114,11 @@ bool AutoResumePlay = false;
 char romNameWhenClosingEmulator[2048] = {0};
 bool togglePausedRequested = false; //Flaged true to pause at frame boundary
 
+
+// indicator for the open in archive dialog that if the load was canceled by the user.
+// TODO: Since I can't think of a better way to indicate it, hope someone could imporve it.
+bool archiveManuallyCanceled = false;
+
 FCEUGI::FCEUGI()
 	: filename(0),
 	  archiveFilename(0) {

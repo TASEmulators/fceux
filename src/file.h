@@ -15,6 +15,7 @@ extern bool bindSavestate;
 // TODO: Since I can't think of a better way to indicate it, hope someone could imporve it.
 extern bool archiveManuallyCanceled;
 
+
 struct FCEUFILE {
 	//the stream you can use to access the data
 	//std::iostream *stream;

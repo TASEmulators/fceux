@@ -1939,4 +1939,15 @@
   <ItemGroup>
     <CustomBuild Include="..\src\auxlib.lua" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\arrow-up.png" />
+    <Image Include="..\src\drivers\win\res\arrow-up.png" />
+    <Image Include="res\arrow-down.png" />
+    <Image Include="..\src\drivers\win\res\arrow-down.png" />
+    <Image Include="..\src\drivers\win\res\bitmap21.bmp" />
+    <Image Include="res\arrow-down.bmp" />
+    <Image Include="res\arrow-up.bmp" />
+    <Image Include="..\src\drivers\win\res\arrow-down.bmp" />
+    <Image Include="..\src\drivers\win\res\arrow-up.bmp" />
+  </ItemGroup>
 </Project>

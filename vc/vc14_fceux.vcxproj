@@ -75,8 +75,8 @@
   </PropertyGroup>
   <PropertyGroup Label="Globals" Condition="'$(v141_xp_Installed)'=='true'">
     <PlatformToolset>v141_xp</PlatformToolset>
-  </PropertyGroup>  
-  <Import Project="$(VCTargetsPath)\Platforms\$(Platform)\PlatformToolsets\v140_xp\Microsoft.Cpp.$(Platform).v140_xp.props" Condition="Exists('$(VCTargetsPath)\Platforms\$(Platform)\PlatformToolsets\v140_xp\Microsoft.Cpp.$(Platform).v140_xp.props')"/>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Platforms\$(Platform)\PlatformToolsets\v140_xp\Microsoft.Cpp.$(Platform).v140_xp.props" Condition="Exists('$(VCTargetsPath)\Platforms\$(Platform)\PlatformToolsets\v140_xp\Microsoft.Cpp.$(Platform).v140_xp.props')" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -1438,6 +1438,17 @@
     <None Include="..\src\drivers\win\res\te_piano_9_playback.bmp" />
     <None Include="..\src\ops.inc" />
     <None Include="..\src\pputile.inc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\src\drivers\win\res\arrow-down.bmp" />
+    <Image Include="..\src\drivers\win\res\arrow-down.png" />
+    <Image Include="..\src\drivers\win\res\arrow-up.bmp" />
+    <Image Include="..\src\drivers\win\res\arrow-up.png" />
+    <Image Include="..\src\drivers\win\res\bitmap21.bmp" />
+    <Image Include="res\arrow-down.bmp" />
+    <Image Include="res\arrow-down.png" />
+    <Image Include="res\arrow-up.bmp" />
+    <Image Include="res\arrow-up.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

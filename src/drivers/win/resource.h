@@ -366,6 +366,7 @@
 #define IDD_TASEDITOR_SAVINGOPTIONS     289
 #define IDD_SYMBOLIC_DEBUG_NAMING       290
 #define DLG_SNESPAD                     291
+#define IDB_PNG2                        298
 #define MENU_HIDE_MENU                  300
 #define COMBO_FILTER                    300
 #define IDC_EDIT_AUTHORINFO             300
@@ -1273,15 +1274,15 @@
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define IDC_STATIC_SLASHTEXT            65442
-#define IDC_BOOKMARK_NAME_TEXT          65535
-#define ID_CDL                          65535
-#define IDC_NTVIEW_SCANLINE_TEXT        65535
+#define IDC_BOOKMARK_NAME_TEXT          65532
+#define ID_CDL                          65533
+#define IDC_NTVIEW_SCANLINE_TEXT        65534
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        296
+#define _APS_NEXT_RESOURCE_VALUE        302
 #define _APS_NEXT_COMMAND_VALUE         40600
 #define _APS_NEXT_CONTROL_VALUE         1310
 #define _APS_NEXT_SYMED_VALUE           101

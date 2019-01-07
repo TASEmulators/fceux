@@ -297,7 +297,7 @@ FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,261,274,50,14
     PUSHBUTTON      "Cancel",BTN_CANCEL,205,274,50,14
-    CONTROL         "List2",LV_MAPPING,"SysListView32",LVS_REPORT | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,7,304,243
+    CONTROL         "List2",LV_MAPPING,"SysListView32",LVS_REPORT | WS_BORDER | WS_TABSTOP,7,7,304,243
     PUSHBUTTON      "Restore Defaults",BTN_RESTORE_DEFAULTS,7,274,75,14
     COMBOBOX        COMBO_FILTER,32,255,279,193,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     RTEXT           "Filter:",65484,6,255,21,12,SS_CENTERIMAGE | NOT WS_GROUP
@@ -578,10 +578,10 @@ BEGIN
     CONTROL         "Set high-priority thread.",CB_SET_HIGH_PRIORITY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,24,102,12
     CONTROL         "Overclocking (old PPU only).",CB_OVERCLOCKING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,41,101,10
     EDITTEXT        IDC_EXTRA_SCANLINES,104,55,84,14,ES_AUTOHSCROLL | WS_DISABLED
-    LTEXT           "Post-render scanlines:",IDC_EXTRA_SCANLINES_TEXT,21,57,74,8, WS_DISABLED
+    LTEXT           "Post-render scanlines:",IDC_EXTRA_SCANLINES_TEXT,21,57,74,8,WS_DISABLED
     CONTROL         "Don't overclock 7-bit samples.",CB_SKIP_7BIT,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,10,87,111,10
     EDITTEXT        IDC_VBLANK_SCANLINES,104,68,84,14,ES_AUTOHSCROLL | WS_DISABLED
-    LTEXT           "VBlank scanlines:",IDC_VBLANK_SCANLINES_TEXT,21,71,76,8, WS_DISABLED
+    LTEXT           "VBlank scanlines:",IDC_VBLANK_SCANLINES_TEXT,21,71,76,8,WS_DISABLED
 END
 
 MOVIEOPTIONS DIALOGEX 65520, 76, 147, 222
@@ -864,15 +864,15 @@ CAPTION "Name Table Viewer"
 FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
     GROUPBOX        "Name Tables",IDC_NTVIEW_TABLE_BOX,2,0,347,251,WS_TABSTOP
-    LTEXT           "Refresh:   More",-1,225,254,50,9
+    LTEXT           "Refresh:   More",IDC_STATIC,225,254,50,9
     CONTROL         "",IDC_NTVIEW_REFRESH_TRACKBAR,"msctls_trackbar32",WS_TABSTOP,275,254,50,11
-    LTEXT           "Less",-1,325,254,18,10
+    LTEXT           "Less",IDC_STATIC,325,254,18,10
     LTEXT           "Display on scanline:",IDC_NTVIEW_SCANLINE_TEXT,253,269,65,9
     EDITTEXT        IDC_NTVIEW_SCANLINE,315,267,27,12
     CONTROL         "Show Scroll Lines",IDC_NTVIEW_SHOW_SCROLL_LINES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,254,69,10
     CONTROL         "Show Attributes",IDC_NTVIEW_SHOW_ATTRIBUTES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,265,69,10
     CONTROL         "Ignore Palettes",IDC_NTVIEW_HIDE_PALETTES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,276,69,10
-    GROUPBOX        "Current Mirroring",-1,2,289,170,59
+    GROUPBOX        "Current Mirroring",IDC_STATIC,2,289,170,59
     CONTROL         "Horizontal",IDC_NTVIEW_MIRROR_HORIZONTAL,"Button",BS_AUTORADIOBUTTON,6,300,47,10
     CONTROL         "Vertical",IDC_NTVIEW_MIRROR_VERTICAL,"Button",BS_AUTORADIOBUTTON,6,311,39,10
     CONTROL         "Four Screen",IDC_NTVIEW_MIRROR_FOUR_SCREEN,"Button",BS_AUTORADIOBUTTON,6,322,55,10
@@ -880,7 +880,7 @@ BEGIN
     CONTROL         "Single Screen 1",IDC_NTVIEW_MIRROR_SS_TABLE_1,"Button",BS_AUTORADIOBUTTON,85,311,75,10
     CONTROL         "Single Screen 2",IDC_NTVIEW_MIRROR_SS_TABLE_2,"Button",BS_AUTORADIOBUTTON,85,322,75,10
     CONTROL         "Single Screen 3",IDC_NTVIEW_MIRROR_SS_TABLE_3,"Button",BS_AUTORADIOBUTTON,85,333,75,10
-    GROUPBOX        "Properties",-1,174,289,175,59
+    GROUPBOX        "Properties",IDC_STATIC,174,289,175,59
     LTEXT           "Tile ID:",IDC_NTVIEW_PROPERTIES_LINE_1,184,300,150,10
     LTEXT           "X / Y:",IDC_NTVIEW_PROPERTIES_LINE_2,184,311,150,10
     LTEXT           "PPU Address:",IDC_NTVIEW_PROPERTIES_LINE_3,184,322,150,10
@@ -1838,12 +1838,12 @@ BEGIN
         POPUP "E&mulation Speed"
         BEGIN
             MENUITEM "&Pause",                      ID_NES_PAUSE
-            MENUITEM "&Turbo",                      ID_NES_TURBO  
+            MENUITEM "&Turbo",                      ID_NES_TURBO
             MENUITEM SEPARATOR
             MENUITEM "Speed &Up",                   ID_NES_SPEEDUP
             MENUITEM "Slow &Down",                  ID_NES_SLOWDOWN
             MENUITEM "&Slowest Speed",              ID_NES_SLOWESTSPEED
-            MENUITEM "&Normal Speed",               ID_NES_NORMALSPEED  
+            MENUITEM "&Normal Speed",               ID_NES_NORMALSPEED
             MENUITEM "Set &Custom Speed",           ID_EMULATIONSPEED_CUSTOMSPEED
             MENUITEM SEPARATOR
             MENUITEM "Set FrameAdvance Delay",      ID_EMULATIONSPEED_SETFRAMEADVANCEDELAY
