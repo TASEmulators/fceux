@@ -578,8 +578,8 @@ void PopulateMappingDisplay(HWND hwndDlg)
 		else
 			listView.iSubItem = mapInputSortCol;
 
-		SendMessage(hwndListView, LVM_SORTITEMS, (WPARAM)&listView, (LPARAM)ItemSortFunc);
-		UpdateSortColumnIcon(hwndListView);
+		int ret = SendMessage(hwndListView, LVM_SORTITEMS, (WPARAM)&listView, (LPARAM)MapInputItemSortFunc);
+		UpdateSortColumnIcon(hwndListView, mapInputSortCol, mapInputSortAsc);
 	}
 }
 
@@ -811,8 +811,8 @@ BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 							else
 								lpListView->iSubItem = mapInputSortCol;
 
-							SendMessage(hwndListView, LVM_SORTITEMS, (WPARAM)lpListView, (LPARAM)ItemSortFunc);
-							UpdateSortColumnIcon(hwndListView);
+							int ret = SendMessage(hwndListView, LVM_SORTITEMS, (WPARAM)lpListView, (LPARAM)MapInputItemSortFunc);
+							UpdateSortColumnIcon(hwndListView, mapInputSortCol, mapInputSortAsc);
 					}
 					return TRUE;
 				}
@@ -846,7 +846,7 @@ void MapInput(void)
 	free(backupmapping);
 }
 
-int CALLBACK ItemSortFunc(LPARAM lp1, LPARAM lp2, LPARAM lpSort)
+static int CALLBACK MapInputItemSortFunc(LPARAM lp1, LPARAM lp2, LPARAM lpSort)
 {
 	NMLISTVIEW* lpListView = (NMLISTVIEW*)lpSort;
 	HWND hwndListView = lpListView->hdr.hwndFrom;
@@ -893,22 +893,4 @@ int CALLBACK ItemSortFunc(LPARAM lp1, LPARAM lp2, LPARAM lpSort)
 	delete[] item2.pszText;
 
 	return ret;
-}
-
-int UpdateSortColumnIcon(HWND hwndListView)
-{
-	HWND header = (HWND)SendMessage(hwndListView, LVM_GETHEADER, 0, 0);
-	for (int i = SendMessage(header, HDM_GETITEMCOUNT, 0, 0) - 1; i >= 0; --i)
-	{
-		HDITEM hdItem = { 0 };
-		hdItem.mask = HDI_FORMAT;
-		if (SendMessage(header, HDM_GETITEM, i, (LPARAM)&hdItem))
-		{
-			hdItem.fmt &= ~(HDF_SORTUP | HDF_SORTDOWN);
-			if (i == mapInputSortCol)
-				hdItem.fmt |= mapInputSortAsc ? HDF_SORTUP : HDF_SORTDOWN;
-			SendMessage(header, HDM_SETITEM, i, (LPARAM)&hdItem);
-		}
-	}
-	return 0;
 }

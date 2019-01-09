@@ -126,5 +126,4 @@ struct HOTKEYMENUINDEX {
 
 void UpdateMenuHotkeys(FCEUMENU_INDEX index);
 int GetCurrentContextIndex();
-
 #endif

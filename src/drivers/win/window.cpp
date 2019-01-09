@@ -3159,7 +3159,7 @@ void OpenRamSearch()
 	if (GameInfo)
 	{
 		reset_address_info();
-		RamSearchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), MainhWnd, (DLGPROC) RamSearchProc);
+		RamSearchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), MainhWnd, (DLGPROC)RamSearchProc);
 	}
 }
 
@@ -3194,4 +3194,22 @@ void SaveSnapshotAs()
 	if(GetSaveFileName(&ofn))
 		FCEUI_SetSnapshotAsName(nameo);
 	FCEUI_SaveSnapshotAs();
+}
+
+
+void UpdateSortColumnIcon(HWND hwndListView, int sortColumn, bool sortAsc)
+{
+	HWND header = (HWND)SendMessage(hwndListView, LVM_GETHEADER, 0, 0);
+	for (int i = SendMessage(header, HDM_GETITEMCOUNT, 0, 0) - 1; i >= 0; --i)
+	{
+		HDITEM hdItem = { 0 };
+		hdItem.mask = HDI_FORMAT;
+		if (SendMessage(header, HDM_GETITEM, i, (LPARAM)&hdItem))
+		{
+			hdItem.fmt &= ~(HDF_SORTUP | HDF_SORTDOWN);
+			if (i == sortColumn)
+				hdItem.fmt |= sortAsc ? HDF_SORTUP : HDF_SORTDOWN;
+			SendMessage(header, HDM_SETITEM, i, (LPARAM)&hdItem);
+		}
+	}
 }

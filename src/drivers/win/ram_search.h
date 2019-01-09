@@ -32,4 +32,9 @@ void DoRamSearchOperation(); //Perform a search
 extern HWND RamSearchHWnd;
 extern LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+// Too much work to do for resorting the values, and finding the biggest number 
+// by sorting in ram list doesn't help too much in usually use, so I gave it up. 
+// static int CALLBACK RamSearchItemSortFunc(LPARAM lp1, LPARAM lp2, LPARAM lpSort);
+// extern void UpdateSortColumnIcon(HWND hwndListView, int sortColumn, bool sortAsc);
+
 #endif
