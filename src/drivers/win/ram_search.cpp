@@ -412,8 +412,8 @@ void ItemIndexToVirtualRegion(unsigned int itemIndex, MemoryRegion& virtualRegio
 		return;
 	}
 
-	const MemoryRegion* regionPtr = s_itemIndexToRegionPointer[itemIndex];
-	const MemoryRegion& region = *regionPtr;
+	MemoryRegion* regionPtr = s_itemIndexToRegionPointer[itemIndex];
+	MemoryRegion& region = *regionPtr;
 
 	int bytesWithinRegion = (itemIndex - region.itemIndex) * sizeof(stepType);
 	int startSkipSize = ((unsigned int)(sizeof(stepType) - region.hardwareAddress)) % sizeof(stepType);
