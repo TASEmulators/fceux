@@ -1862,7 +1862,6 @@ int FCEUPPU_Loop(int skip) {
 	} else
 	#endif
 	{
-		FCEU_PutImage();
 		return(1);
 	}
 }
@@ -2429,7 +2428,5 @@ int FCEUX_PPU_Loop(int skip) {
 	}
 
 finish:
-	FCEU_PutImage();
-
 	return 0;
 }

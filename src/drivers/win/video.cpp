@@ -1283,6 +1283,11 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			strcat(buf, " (double-click anywhere)");
 		}
 		SetDlgItemText(hwndDlg, IDC_VIDEOCONFIG_FS, buf);
+
+		EnableWindow(GetDlgItem(hwndDlg, IDC_TVASPECT_X), eoptions&EO_TVASPECT);
+		EnableWindow(GetDlgItem(hwndDlg, IDC_TVASPECT_Y), eoptions&EO_TVASPECT);
+		EnableWindow(GetDlgItem(hwndDlg, IDC_STATIC_SLASHTEXT), eoptions&EO_TVASPECT);
+
 		break;
 	}
 	case WM_CLOSE:
@@ -1398,6 +1403,11 @@ gornk:
 				fssync=SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
 				EndDialog(hwndDlg,0);
 				break;
+				case IDC_VIDEOCONFIG_TVASPECT:
+					bool enable = SendDlgItemMessage(hwndDlg, IDC_VIDEOCONFIG_TVASPECT, BM_GETCHECK, 0, 0) == BST_CHECKED;
+					EnableWindow(GetDlgItem(hwndDlg, IDC_TVASPECT_X), enable);
+					EnableWindow(GetDlgItem(hwndDlg, IDC_TVASPECT_Y), enable);
+					EnableWindow(GetDlgItem(hwndDlg, IDC_STATIC_SLASHTEXT), enable);
 		}
 	}
 	return 0;

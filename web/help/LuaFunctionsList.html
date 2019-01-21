@@ -1,5 +1,5 @@
 ﻿<html>
-	
+
 <head>
 	<title>Lua Functions List</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -217,6 +217,14 @@
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts71">ROM Library</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts63">rom.getfilename()</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37">Get the base filename of the ROM loaded.</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts63">rom.gethash(string type)</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37">Get a hash of the ROM loaded, for verification. If type is "md5", returns a hex string of the MD5 hash. If type is "base64", returns a base64 string of the MD5 hash, just like the movie romChecksum value.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts63">rom.readbyte(int address)</span></p>
 <p><span class="rvts63">rom.readbyteunsigned(int address)</span></p>
@@ -477,6 +485,23 @@
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts71">Movie Library</span></p>
 <p><span class="rvts37"><br/></span></p>
+<p><span class="rvts63">bool movie.play(string filename, [bool read_only, [int pauseframe]])</span></p>
+<p><span class="rvts63">bool movie.playback(...)</span></p>
+<p><span class="rvts63">bool movie.load(...)</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37">Loads and plays a movie from the directory relative to the Lua script or from the absolute path. If read_only is true, the movie will be loaded in read-only mode. The default is read+write.</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37">A pauseframe can be specified, which controls which frame will auto-pause the movie. By default, this is off. A true value is returned if the movie loaded correctly.</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts63">bool movie.record(string filename, [int save_type, [string author]])</span></p>
+<p><span class="rvts63">bool movie.save(...)</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37">Starts recording a movie, using the filename, relative to the Lua script.</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37">An optional save_type can be specified. If set to 0 (default), it will record from a power on state, and automatically do so. This is the recommended setting for creating movies. This can also be set to 1 for savestate or 2 for saveram movies.</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37">A third parameter specifies an author string. If included, it will be recorded into the movie file.</span></p>
+<p><span class="rvts37"><br/></span></p>
 <p><span class="rvts63">bool movie.active()</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">Returns true if a movie is currently loaded and false otherwise. &nbsp;(This should be used to guard against Lua errors when attempting to retrieve movie information).</span></p>
@@ -624,11 +649,13 @@
 <p><span class="rvts63">gui.savescreenshotas(string name)</span></p>
 <p><span class="rvts37">Makes a screenshot of the FCEUX emulated screen, and saves it to the appropriate folder. However, this one receives a file name for the screenshot.</span></p>
 <p><span class="rvts37"> </span></p>
-<p><span class="rvts63">string gui.gdscreenshot()</span></p>
+<p><span class="rvts63">string gui.gdscreenshot(bool getemuscreen)</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">Takes a screen shot of the image and returns it in the form of a string which can be imported by the gd library using the gd.createFromGdStr() function.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">This function is provided so as to allow FCEUX to not carry a copy of the gd library itself. If you want raw RGB32 access, skip the first 11 bytes (header) and then read pixels as Alpha (always 0), Red, Green, Blue, left to right then top to bottom, range is 0-255 for all colors.</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37">If getemuscreen is false, this gets background colors from either the screen pixel or the LUA pixels set, but LUA data may not match the information used to put the data to the screen. If getemuscreen is true, this gets background colors from anything behind an LUA screen element.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts68">Warning:</span><span class="rvts37"> Storing screen shots in memory is not recommended. Memory usage will blow up pretty quick. One screen shot string eats around 230 KB of RAM.</span></p>
 <p><span class="rvts37"><br/></span></p>

@@ -901,6 +901,7 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 									EnableWindow(GetDlgItem(hCheat,IDC_BTN_CHEAT_DEL),TRUE);
 									EnableWindow(GetDlgItem(hCheat,IDC_BTN_CHEAT_UPD),TRUE);
+									UpdateCheatsAdded();
 								}
 						}
 					break;
@@ -930,7 +931,8 @@ void EncodeGG(char *str, int a, int v, int c)
 	uint8 num[8];
 	static char lets[16]={'A','P','Z','L','G','I','T','Y','E','O','X','U','K','S','V','N'};
 	int i;
-	if(a > 0x8000)a-=0x8000;
+	
+	a&=0x7fff;
 
 	num[0]=(v&7)+((v>>4)&8);
 	num[1]=((v>>4)&7)+((a>>4)&8);
@@ -1026,3 +1028,30 @@ void ListBox::OnRButtonDown(UINT nFlags, CPoint point)
 {
 CPoint test = point;
 } */
+
+void DisableAllCheats()
+{
+	if(!FCEU_DisableAllCheats() || !hCheat){
+		return;
+	}
+	int selcheattemp = SendDlgItemMessage(hCheat, IDC_LIST_CHEATS, LB_GETCOUNT, 0, 0) - 1;
+	LRESULT sel; char str[259];
+	while(selcheattemp >= 0)
+	{
+		SendDlgItemMessage(hCheat,IDC_LIST_CHEATS,LB_GETTEXT,selcheattemp, (LPARAM)(LPCTSTR)str);
+		if(str[0] == '*')
+		{
+			sel = SendDlgItemMessage(hCheat,IDC_LIST_CHEATS,LB_GETSEL,selcheattemp,0);
+			str[0] = ' ';
+			SendDlgItemMessage(hCheat,IDC_LIST_CHEATS,LB_DELETESTRING,selcheattemp,0);
+			SendDlgItemMessage(hCheat,IDC_LIST_CHEATS,LB_INSERTSTRING,selcheattemp, (LPARAM)(LPSTR)str);
+			if(sel)
+			{
+				SendDlgItemMessage(hCheat,IDC_LIST_CHEATS,LB_SETSEL,1,selcheattemp);
+			}
+		}
+		selcheattemp--;
+	}
+	sprintf(str, "Active Cheats %d", 0);
+	SetDlgItemText(hCheat, 201, str);
+}

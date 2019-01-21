@@ -3,6 +3,8 @@
 #include <commctrl.h>
 #include <shlobj.h>     // For directories configuration dialog.
 
+int CALLBACK SHBrowseForFolderCallbackProc(HWND, UINT, LPARAM, LPARAM);
+
 /**
 * Centers a window relative to its parent window.
 *
@@ -96,18 +98,26 @@ void ShowCursorAbs(int set_visible)
 *
 * @return 0 or 1 to indicate failure or success.
 **/
-int BrowseForFolder(HWND hParent, const char *htext, char *buf)
+int BrowseForFolder(HWND hParent, const char *htext, char *buf, char* defPath = NULL)
 {
 	BROWSEINFO bi;
 	LPCITEMIDLIST pidl;
 
-	buf[0] = 0;
-
 	memset(&bi, 0, sizeof(bi));
-
 	bi.hwndOwner = hParent;
 	bi.lpszTitle = htext;
-	bi.ulFlags = BIF_RETURNONLYFSDIRS; 
+	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_EDITBOX;
+
+	if(defPath == NULL || defPath[0] == '\0')
+	{
+		char currentDir[MAX_PATH];
+		GetCurrentDirectory(MAX_PATH, currentDir);
+		bi.lParam = (LPARAM)currentDir;
+	} else {
+		bi.lParam = (LPARAM)defPath;
+	}
+
+	bi.lpfn = SHBrowseForFolderCallbackProc;
 
 	if(FAILED(CoInitialize(0)))
 	{
@@ -134,4 +144,9 @@ int BrowseForFolder(HWND hParent, const char *htext, char *buf)
 
 	return 1;
 }
-
+// Automatically expand to the configured folder.
+int CALLBACK SHBrowseForFolderCallbackProc(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
+	if(uMsg == BFFM_INITIALIZED)
+		SendMessage(hwnd, BFFM_SETSELECTION, TRUE, (LPARAM)(const char*)lpData);
+	return 0;
+}

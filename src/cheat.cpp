@@ -964,3 +964,20 @@ void UpdateFrozenList(void)
 	}
 	//FCEUI_DispMessage("FrozenCount: %d",0,FrozenAddressCount);//Debug
 }
+
+// disable all cheats
+int FCEU_DisableAllCheats(){
+	int count = 0;
+	struct CHEATF *next=cheats;
+	while(next)
+	{
+		if(next->status){
+			count++;
+		}
+		next->status = 0;
+		next = next->next;
+	}
+	savecheats=1;
+	RebuildSubCheats();
+	return count;
+}

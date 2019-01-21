@@ -1770,9 +1770,9 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		{
 			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_CYCLES, break_on_cycles ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS, break_on_instructions ? BST_CHECKED : BST_UNCHECKED);
-			sprintf(str, "%d", break_cycles_limit);
+			sprintf(str, "%u", (unsigned)break_cycles_limit);
 			SetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str);
-			sprintf(str, "%d", break_instructions_limit);
+			sprintf(str, "%u", (unsigned)break_instructions_limit);
 			SetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str);
 
 			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_BAD_OP, FCEUI_Debugger().badopbreak ? BST_CHECKED : BST_UNCHECKED);
@@ -2200,7 +2200,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								//mbg merge 7/18/06 changed pausing check and set
 								if (FCEUI_EmulationPaused()) {
 									UpdateRegs(hwndDlg);
-									FCEUI_ToggleEmulationPause();
+									FCEUI_SetEmulationPaused(0);
 									//DebuggerWasUpdated = false done in above function;
 								}
 								break;

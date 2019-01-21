@@ -148,26 +148,26 @@ function doexspriteai(s)
 		end
 	elseif(s.ai=="AimOnce") then
 		if(s.timer==0) then
-			s.vx,s.vy = get_vdir(s,vic)
+			s.vx,s.vy = getvdir(s.x,s.y, vic.x,vic.y)
 			s.vx = s.vx * 2
 			s.vy = s.vy * 2
 			--s.vy = AND(timer,0x0F) / 8 - 1
 		end
 	elseif(s.ai=="AimDelayed") then
 		if(s.timer>=30 and s.timer<=33) then
-			local x,y = get_vdir(s,vic)
+			local x,y = getvdir(s.x,s.y, vic.x,vic.y)
 			s.vx = (x+s.vx)
 			s.vy = (y+s.vy)
 		end
 	elseif(s.ai=="AimRight") then
 		if(s.timer==0) then
-			s.vx,s.vy = get_vdir(s,vic)
+			s.vx,s.vy = getvdir(s.x,s.y, vic.x,vic.y)
 			s.vx = s.vx * 2.5
 			s.vy = s.vy * 1.5
 		end
 	elseif(s.ai=="AimLeft") then
 		if(s.timer==0) then
-			s.vx,s.vy = get_vdir(s,vic)
+			s.vx,s.vy = getvdir(s.x,s.y, vic.x,vic.y)
 			s.vx = s.vx * 1.5
 			s.vy = s.vy * 2.5
 		end
@@ -179,7 +179,7 @@ function doexspriteai(s)
 			s.vx=s.vx/1.1
 			s.vy=s.vy/1.1
 		elseif(s.timer==70) then
-			local x,y = get_vdir(s,vic)
+			local x,y = getvdir(s.x,s.y, vic.x,vic.y)
 			s.vx = x*3
 			s.vy = y*3
 		end

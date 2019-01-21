@@ -126,7 +126,10 @@ void UpdateReplayCommentsSubs(const char * fname) {
 	MOVIE_INFO info;
 	
 	FCEUFILE *fp = FCEU_fopen(fname,0,"rb",0);
-	fp->stream = fp->stream->memwrap();
+	EMUFILE *tmp = fp->stream->memwrap();
+	if (tmp != fp->stream)
+		delete fp->stream;
+	fp->stream = tmp;
 	bool scanok = FCEUI_MovieGetInfo(fp, info, true);
 	delete fp;
 
@@ -151,8 +154,11 @@ void UpdateReplayDialog(HWND hwndDlg)
 	{
 		MOVIE_INFO info;
 
-		FCEUFILE* fp = FCEU_fopen(fn,0,"rb",0);
-		fp->stream = fp->stream->memwrap();
+		FCEUFILE *fp = FCEU_fopen(fn,0,"rb",0);
+		EMUFILE *tmp = fp->stream->memwrap();
+		if (tmp != fp->stream)
+			delete fp->stream;
+		fp->stream = tmp;
 		bool isarchive = FCEU_isFileInArchive(fn);
 		bool ismovie = FCEUI_MovieGetInfo(fp, info, false);
 		delete fp;
@@ -283,6 +289,8 @@ void UpdateReplayDialog(HWND hwndDlg)
 		EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,IDOK),FALSE);
 	}
+	EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_STOPMOVIE), !doClear);
+	EnableWindow(GetDlgItem(hwndDlg,IDC_EDIT_STOPFRAME), !doClear && SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE, BM_GETCHECK, 0, 0) == BST_CHECKED);
 }
 
 // C:\fceu\movies\bla.fcm  +  C:\fceu\fceu\  ->  C:\fceu\movies\bla.fcm
@@ -643,6 +651,9 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			int wID = LOWORD(wParam);
 			switch(wID)
 			{
+			case IDC_CHECK_STOPMOVIE:
+				EnableWindow(GetDlgItem(hwndDlg, IDC_EDIT_STOPFRAME), SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE, BM_GETCHECK, 0, 0) == BST_CHECKED);
+				break;
 			case IDC_BUTTON_METADATA:
 				DialogBoxParam(fceu_hInstance, "IDD_REPLAY_METADATA", hwndDlg, ReplayMetadataDialogProc, (LPARAM)0);
 				break;
@@ -708,6 +719,21 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						}
 						else
 						{
+							extern unsigned int FrozenAddressCount;
+							if(FrozenAddressCount)
+							{
+								char ch[512];
+								sprintf(ch, "You have %d activated cheats. If this is not your intentional, it can cause playback prblems! Do you want to disable all of them and continue?", FrozenAddressCount);
+								switch(MessageBox(hwndDlg, ch, "Movie playing problem", MB_YESNOCANCEL|MB_ICONEXCLAMATION))
+								{
+									case IDCANCEL:
+										return TRUE;
+									case IDYES:
+										extern void DisableAllCheats();
+										DisableAllCheats();
+								}
+
+							}
 							// user had made their choice
 							// TODO: warn the user when they open a movie made with a different ROM
 							char* fn=GetReplayPath(hwndDlg);

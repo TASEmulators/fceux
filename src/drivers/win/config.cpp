@@ -61,6 +61,7 @@ extern bool disableMovieMessages;
 extern bool replaceP2StartWithMicrophone;
 extern bool SingleInstanceOnly;
 extern bool Show_FPS;
+extern int movieRecordMode;
 extern bool oldInputDisplay;
 extern bool fullSaveStateLoads;
 extern int frameSkipAmt;
@@ -470,6 +471,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(replaceP2StartWithMicrophone),
 	AC(SingleInstanceOnly),
 	AC(Show_FPS),
+	AC(movieRecordMode),
 
 	ENDCFGSTRUCT
 };

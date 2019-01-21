@@ -143,22 +143,33 @@ else:
       # If we're POSIX, we use LUA_USE_LINUX since that combines usual lua posix defines with dlfcn calls for dynamic library loading.
       # Should work on any *nix
       env.Append(CCFLAGS = ["-DLUA_USE_LINUX"])
-    lua_available = False
     if env['SYSTEM_LUA']:
-      if conf.CheckLib('lua5.1'):
-        env.Append(LINKFLAGS = ["-llua5.1"])
-        env.Append(CCFLAGS = ["-I/usr/include/lua5.1"])
-        lua_available = True
+      lua_link_flags  = ''
+      lua_include_dir = ''
+
+      if conf.CheckLib('luajit-5.1'):
+        lua_link_flags  = "-lluajit-5.1"
+        lua_include_dir = "/usr/include/luajit-2.0"
+      elif conf.CheckLib('lua5.1'):
+        lua_link_flags  = "-llua5.1"
+        lua_include_dir = "/usr/include/lua5.1"
       elif conf.CheckLib('lua'):
-        env.Append(LINKFLAGS = ["-llua"])
-        env.Append(CCFLAGS = ["-I/usr/include/lua"])
-        lua_available = True
-      if lua_available == False:
+        lua_link_flags  = "-llua"
+        lua_include_dir = "/usr/include/lua"
+
+      if os.environ.has_key('LUA_LINKFLAGS'):
+        lua_link_flags  = os.environ['LUA_LINKFLAGS']
+      if os.environ.has_key('LUA_INCDIR'):
+        lua_include_dir = os.environ['LUA_INCDIR']
+
+      if not lua_link_flags or not lua_include_dir:
         print 'Could not find liblua, exiting!'
         Exit(1)
+
+      env.Append(LINKFLAGS = lua_link_flags.split())
+      env.Append(CCFLAGS = ["-I" + lua_include_dir])
     else:
       env.Append(CCFLAGS = ["-Isrc/lua/src"])
-      lua_available = True
   # "--as-needed" no longer available on OSX (probably BSD as well? TODO: test)
   if env['PLATFORM'] != 'darwin':
     env.Append(LINKFLAGS=['-Wl,--as-needed'])

@@ -1262,9 +1262,10 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 		// update menus
 		for (i = MODE_NES_MEMORY; i <= MODE_NES_FILE; i++)
-		{
-			CheckMenuItem(GetMenu(hwnd), MENU_MV_VIEW_RAM + i, (EditingMode == i) ? MF_CHECKED : MF_UNCHECKED);
-		}
+			if(EditingMode == i) {
+				CheckMenuRadioItem(GetMenu(hMemView), MENU_MV_VIEW_RAM, MENU_MV_VIEW_ROM, MENU_MV_VIEW_RAM + i, MF_BYCOMMAND);
+				break;
+			}
 		CheckMenuItem(GetMenu(hwnd), ID_HIGHLIGHTING_HIGHLIGHT_ACTIVITY, (MemView_HighlightActivity) ? MF_CHECKED: MF_UNCHECKED);
 		CheckMenuItem(GetMenu(hwnd), ID_HIGHLIGHTING_FADEWHENPAUSED, (MemView_HighlightActivity_FadeWhenPaused) ? MF_CHECKED: MF_UNCHECKED);
 
@@ -2038,9 +2039,11 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		case MENU_MV_VIEW_ROM:
 			EditingMode = wParam - MENU_MV_VIEW_RAM;
 			for (i = MODE_NES_MEMORY; i <= MODE_NES_FILE; i++)
-			{
-				CheckMenuItem(GetMenu(hMemView), MENU_MV_VIEW_RAM + i, (EditingMode == i) ? MF_CHECKED : MF_UNCHECKED);
-			}
+				if(EditingMode == i)
+				{
+					CheckMenuRadioItem(GetMenu(hMemView), MENU_MV_VIEW_RAM, MENU_MV_VIEW_ROM, MENU_MV_VIEW_RAM + i, MF_BYCOMMAND);
+					break;
+				}
 			if (EditingMode == MODE_NES_MEMORY)
 				MaxSize = 0x10000;
 			if (EditingMode == MODE_NES_PPU)
@@ -2242,7 +2245,7 @@ BOOL CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 		break;
 	case WM_CLOSE:
 	case WM_QUIT:
-		GetDlgItemText(hwndDlg,IDC_MEMVIEWFIND_WHAT,FindTextBox,59);
+		GetDlgItemText(hwndDlg,IDC_MEMVIEWFIND_WHAT,FindTextBox,60);
 		DestroyWindow(hwndDlg);
 		hMemFind = 0;
 		hwndDlg = 0;
@@ -2302,7 +2305,7 @@ void FindNext(){
 	unsigned char data[60];
 	int datasize = 0, i, j, inputc = -1, found;
 
-	if(hMemFind) GetDlgItemText(hMemFind,IDC_MEMVIEWFIND_WHAT,str,59);
+	if(hMemFind) GetDlgItemText(hMemFind,IDC_MEMVIEWFIND_WHAT,str,60);
 	else strcpy(str,FindTextBox);
 
 	for(i = 0;str[i] != 0;i++){

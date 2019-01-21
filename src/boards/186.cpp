@@ -18,6 +18,33 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Family Study Box by Fukutake Shoten
+ *
+ * REG[0] R dddddddd / W ww---sss
+ *  ddd - TAPE DATA BYTE (ready when IRQ occurs)
+ *  sss - BRAM hi-bank
+ *  ww  - PRAM bank
+ * REG[1] R 0123---- / W ----PPPP
+ *  0   - ?
+ *  1   - ?
+ *  2   - ?
+ *  3   - ?
+ *  PPPP- PROM bank
+ * REG[2] R -?--R--- / W A-BC-DEF
+ *  4   - ?
+ *  R   - sb4x power supply status (active low)
+ *  A   - ?
+ *  B   - ?
+ *  C   - ?
+ *  D   - ?
+ *  E   - ?
+ *  F   - ?
+ *
+ * BRAM0	4400-4FFF, 3K bank  0   (32K SWRAM)	 [hardwired]
+ * BRAMB	5000-5FFF, 4K banks 1-7 (32K SWRAM)	 [REG[0] W -----sss]
+ * PRAMB	6000-7FFF, 8K banks 1-3 (32K PRAM) 	 [REG[0] W ww------]
+ * PROMB    8000-BFFF, 16K banks 1-15 (256K PROM)[REG[1] W ----PPPP]
+ * PROM0	C000-FFFF, 16K bank 0   (256K PROM)  [hardwired]
+ *
  */
 
 #include "mapinc.h"

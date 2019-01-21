@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by res.rc
+// Microsoft Visual C++ 生成的包含文件。
+// 供 res.rc 使用
 //
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
@@ -784,6 +784,10 @@
 #define IDC_RICHEDIT_DISASM             1304
 #define IDC_CHECK2                      1305
 #define DEBUGIDAFONT                    1305
+#define IDC_AUTOSAVE_PERIOD_EVERY_TEXT  1306
+#define IDC_AUTOSAVE_PERIOD_MINUTES_TEXT 1307
+#define IDC_VBLANK_SCANLINES_TEXT       1308
+#define IDC_EXTRA_SCANLINES_TEXT        1309
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -833,6 +837,9 @@
 #define MENU_DEBUGGER                   40080
 #define MENU_MEMORY_WATCH               40081
 #define MENU_RAMFILTER                  40082
+#define ID_FILE_RECENT                  40100
+#define MEMW_HELP_WCOMMANDS             40101
+#define MEMW_OPTIONS_LOADLASTFILE       40102
 #define MEMW_FILE_NEW                   40103
 #define MEMW_FILE_OPEN                  40104
 #define MEMW_FILE_SAVE                  40105
@@ -840,13 +847,20 @@
 #define MEMW_FILE_RECENT                40107
 #define MEMW_FILE_CLOSE                 40108
 #define MEMW_OPTIONS_LOADSTART          40109
-#define MEMW_HELP_WCOMMANDS             40113
-#define MEMW_OPTIONS_LOADLASTFILE       40114
-#define ID_FILE_RECENT                  40117
+#define ID_FILE_RECORDMODE_TRUNCATE     40110
+#define ID_FILE_RECORDMODE_OVERWRITE    40111
+#define ID_FILE_RECORDMODE_INSERT       40112
+#define ID_FILE_RECORDMODE_XOR          40113
+#define FCEUX_CONTEXT_RECORDMODE_TRUNCATE 40115
+#define FCEUX_CONTEXT_RECORDMODE_OVERWRITE 40116
+#define FCEUX_CONTEXT_RECORDMODE_INSERT 40117
+#define FCEUX_CONTEXT_RECORDMODE_XOR    40118
 #define MENU_RECORD_WAV                 40120
 #define MENU_STOP_WAV                   40121
 #define MENU_TASEDIT                    40124
 #define MENU_PAUSEAFTERPLAYBACK         40126
+#define ID_FILE_NEXTRECORDMODE          40127
+#define ID_FILE_PREVRECORDMODE          40128
 #define ACCEL_CTRL_O                    40130
 #define ACCEL_CTRL_E                    40131
 #define ACCEL_CTRL_W                    40132
@@ -923,6 +937,12 @@
 #define ID_FILE_CLOSE40218              40218
 #define MENU_MV_FILE_GOTO_ADDRESS       40219
 #define MENU_BASIC_BOT2                 40220
+#define ID_FILE_TRUNCATE_MOVIE          40221
+#define FCEUX_CONTEXT_TRUNCATE_MOVIE    40222
+#define ID_FILE_INSERT_1_FRAME          40223
+#define FCEUX_CONTEXT_INSERT_1_FRAME    40224
+#define ID_FILE_DELETE_1_FRAME          40225
+#define FCEUX_CONTEXT_DELETE_1_FRAME    40226
 #define ID_FILE_OPENLUAWINDOW           40229
 #define ID_FILE_CLOSELUAWINDOWS         40230
 #define ID_CONFIG_DISPLAY               40231
@@ -1053,6 +1073,8 @@
 #define FCEUX_CONTEXT_LOADLASTMOVIE     40356
 #define ID_GAME_SAVEMOVIEAS             40357
 #define FCEUX_CONTEXT_SAVEMOVIEAS       40358
+#define ID_FILE_TOGGLE_RECORDING_MOVIE  40359
+#define FCEUX_CONTEXT_TOGGLE_RECORDING  40360
 #define ID_OPTIONS_BINDTOMAINWINDOW     40361
 #define ID_CONFIG_PPU                   40362
 #define ID_PPU_NEWPPU                   40363
@@ -1253,14 +1275,15 @@
 #define IDC_STATIC_SLASHTEXT            65442
 #define IDC_BOOKMARK_NAME_TEXT          65535
 #define ID_CDL                          65535
+#define IDC_NTVIEW_SCANLINE_TEXT        65535
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        293
+#define _APS_NEXT_RESOURCE_VALUE        296
 #define _APS_NEXT_COMMAND_VALUE         40600
-#define _APS_NEXT_CONTROL_VALUE         1306
+#define _APS_NEXT_CONTROL_VALUE         1310
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

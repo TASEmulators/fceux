@@ -62,8 +62,8 @@ struct WindowItemData
 	int y;
 	int width;
 	int height;
-	char tooltipTextBase[TOOLTIP_TEXT_MAX_LEN];
-	char tooltipText[TOOLTIP_TEXT_MAX_LEN];
+//	char* tooltipTextBase;
+	char* tooltipText;
 	bool isStaticRect;
 	int hotkeyEmuCmd;
 	HWND tooltipHWND;
@@ -83,6 +83,7 @@ public:
 	void handleWindowMovingOrResizing();
 	void changeBookmarksListHeight(int newHeight);
 
+	void toggleTooltips();
 	void updateTooltips();
 	void updateCaption();
 	void updateCheckedItems();
