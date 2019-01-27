@@ -1264,7 +1264,7 @@ void GetMouseRelative(int32 (&md)[3])
 	
 	md[0] = dx;
 	md[1] = dy;
-	md[2] = ((mouseb == MK_LBUTTON) ? 1 : 0) | (( mouseb == MK_RBUTTON ) ? 2 : 0);
+	md[2] = ((mouseb & MK_LBUTTON) ? 1 : 0) | (( mouseb & MK_RBUTTON ) ? 2 : 0);
 }
 
 void DumpSubtitles(HWND hWnd)
