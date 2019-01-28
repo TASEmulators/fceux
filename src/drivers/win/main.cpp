@@ -901,6 +901,9 @@ doloopy:
 			}
 			else skippy = 0;
 
+			if(FCEU_LuaFrameskip())
+				skippy = true;
+
 			FCEUI_Emulate(&gfx, &sound, &ssize, skippy); //emulate a single frame
 			FCEUD_Update(gfx, sound, ssize); //update displays and debug tools
 

@@ -327,7 +327,7 @@ int FCEU_LuaSpeed() {
  * Asks Lua if it wants control whether this frame is skipped.
  * Returns 0 if no, 1 if frame should be skipped, -1 if it should not be.
  */
-int FCEU_LuaFrameSkip() {
+int FCEU_LuaFrameskip() {
 	if (!L || !luaRunning)
 		return 0;
 
