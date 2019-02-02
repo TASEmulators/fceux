@@ -859,11 +859,8 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 	{
 		// special case: an RTS opcode
 		// add "----------" to emphasize the end of subroutine
-		strcat(str_disassembly, " ");
-		int i = strlen(str_disassembly);
-		for (; i < (LOG_DISASSEMBLY_MAX_LEN - 2); ++i)
-			str_disassembly[i] = '-';
-		str_disassembly[i] = 0;
+		static const char* emphasize = " -------------------------------------------------------------------------------------------------------------------------";
+		strncat(str_disassembly, emphasize, LOG_DISASSEMBLY_MAX_LEN - strlen(str_disassembly) - 1);
 	}
 	// stretch the disassembly string out if we have to output other stuff.
 	if ((logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)) && !(logging_options & LOG_TO_THE_LEFT))
