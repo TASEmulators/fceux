@@ -1223,7 +1223,7 @@ void GetMouseData(uint32 (&md)[3])
 	}
 	md[0] += VNSCLIP;
 	md[1] += FSettings.FirstSLine;
-	md[2] = ((mouseb == MK_LBUTTON) ? 1 : 0) | (( mouseb == MK_RBUTTON ) ? 2 : 0);
+	md[2] = ((mouseb & MK_LBUTTON) ? 1 : 0) | (( mouseb & MK_RBUTTON ) ? 2 : 0);
 }
 
 void GetMouseRelative(int32 (&md)[3])
@@ -1263,7 +1263,7 @@ void GetMouseRelative(int32 (&md)[3])
 	
 	md[0] = dx;
 	md[1] = dy;
-	md[2] = ((mouseb == MK_LBUTTON) ? 1 : 0) | (( mouseb == MK_RBUTTON ) ? 2 : 0);
+	md[2] = ((mouseb & MK_LBUTTON) ? 1 : 0) | (( mouseb & MK_RBUTTON ) ? 2 : 0);
 }
 
 void DumpSubtitles(HWND hWnd)
@@ -3195,7 +3195,6 @@ void SaveSnapshotAs()
 		FCEUI_SetSnapshotAsName(nameo);
 	FCEUI_SaveSnapshotAs();
 }
-
 
 void UpdateSortColumnIcon(HWND hwndListView, int sortColumn, bool sortAsc)
 {

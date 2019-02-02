@@ -1,4 +1,4 @@
--- feos, 2012
+-- feos, r57shell, 2012-2018
 -- gui.box frame simulates transparency
 
 print("Hi-hat and keys may glitch if you produce sound effects.")
@@ -23,12 +23,18 @@ function Draw()
 	snd = sound.get()
 	keys = input.get()
 	
+	if iterator == 1 then
+		kb.y = 30
+	else
+		kb.y = 154
+	end
+	
 	-- do only at the first frame
 	if #volumes.S1V == 1 then
 		channels = {
-			Square1  = {x=1,      y=9, vol=volumes.S1V, color=volumes.S1C, duty=0, midi=0, semitone=0, octave=0, prev_semitone=0, float = {}},
-			Square2  = {x=1+45*1, y=9, vol=volumes.S2V, color=volumes.S2C, duty=0, midi=0, semitone=0, octave=0, prev_semitone=0, float = {}},
-			Triangle = {x=1+45*2, y=9, vol=volumes.TV, midi=0, semitone=0, octave=0, prev_semitone=0, float = {}},
+			Square1  = {x=1,      y=9, vol=volumes.S1V, color=volumes.S1C, duty=0, midi=0, semitone=0, octave=0, prev_semitone=0, float = {}, floaty = {}, floatz = {}},
+			Square2  = {x=1+45*1, y=9, vol=volumes.S2V, color=volumes.S2C, duty=0, midi=0, semitone=0, octave=0, prev_semitone=0, float = {}, floaty = {}, floatz = {}},
+			Triangle = {x=1+45*2, y=9, vol=volumes.TV, midi=0, semitone=0, octave=0, prev_semitone=0, float = {}, floaty = {}, floatz = {}},
 			Noise    = {x=1+45*3, y=9, vol=volumes.NV, midi=0, semitone=0, octave=0},
 			DPCM     = {x=1+45*4, y=9, vol=volumes.DPCMV}
 		}
@@ -120,7 +126,7 @@ function Draw()
 
 	if (kb.on) then
 		-- capture leftclicks
-		if keys.xmouse <= 256 and keys.xmouse >= 205 and keys.ymouse >= 154 and keys.ymouse <= 181 then
+		if keys.xmouse <= 256 and keys.xmouse >= 205 and keys.ymouse >= kb.y and keys.ymouse <= kb.y+27 then
 			if keys["leftclick"] and not prev_keys["leftclick"] then kb.on = false end
 		end		
 		-- draw the kayboard
@@ -185,7 +191,7 @@ function Draw()
 		gui.line(kb.x+200, kb.y,    kb.x+200, kb.y+16, "#00000088")
 	else
 		-- capture leftclicks
-		if keys.xmouse <= 256 and keys.xmouse >= 205 and keys.ymouse >= 154 and keys.ymouse <= 181 then
+		if keys.xmouse <= 256 and keys.xmouse >= 205 and keys.ymouse >= kb.y and keys.ymouse <= kb.y+27 then
 			if keys["leftclick"] and not prev_keys["leftclick"] then kb.on = true end
 		end
 	end
@@ -199,6 +205,7 @@ function Draw()
 			if name == "Square1" or name == "Square2" or name == "Triangle" then
 			
 				if chan.prev_semitone ~= chan.semitone then
+					local len_prev = #chan.float
 					if     chan.semitone == "C"  then table.insert(chan.float, 1, kb.x+1 +28*(chan.octave-1))
 					elseif chan.semitone == "D"  then table.insert(chan.float, 1, kb.x+5 +28*(chan.octave-1))
 					elseif chan.semitone == "E"  then table.insert(chan.float, 1, kb.x+9 +28*(chan.octave-1))
@@ -212,6 +219,9 @@ function Draw()
 					elseif chan.semitone == "G#" then table.insert(chan.float, 1, kb.x+19+28*(chan.octave-1))
 					elseif chan.semitone == "A#" then table.insert(chan.float, 1, kb.x+23+28*(chan.octave-1))
 					end
+					if len_prev ~= #chan.float then table.insert(chan.floaty, 1, 0) table.insert(chan.floatz, 1, 0) end
+				elseif chan.semitone ~= '--' then
+					chan.floaty[1] = 0
 				end
 				
 				if name == "Triangle" then color = "#00aaffff"
@@ -219,17 +229,20 @@ function Draw()
 				else color = "#aa00ccff"
 				end
 			
-				if #chan.float < 13 then
-					for i = 2, #chan.float do
-						if movie.framecount()%2 == 0 then gui.box(chan.float[i]-1, 161+i*5, chan.float[i]+3, 165+i*5, "#eedd2200") end
-						gui.box(chan.float[i], 162+i*5, chan.float[i]+2, 164+i*5, color)
+				for i = 1, #chan.float do
+					local y = kb.y+chan.floaty[i]
+					local z = kb.y+chan.floatz[i]
+					chan.floaty[i] = chan.floaty[i] + 1
+					chan.floatz[i] = chan.floatz[i] + 1
+					if y+17<=z+15 then
+						if movie.framecount()%2 == 0 then gui.box(chan.float[i]-1, y+16, chan.float[i]+3, z+16, "#eedd2200") end
+						gui.box(chan.float[i], y+17, chan.float[i]+2, z+15, color)
 					end
-				else
-					for i = 2, 13 do
-						if movie.framecount()%2 == 0 then gui.box(chan.float[i]-1, 161+i*5, chan.float[i]+3, 165+i*5, "#eedd2200") end
-						gui.box(chan.float[i], 162+i*5, chan.float[i]+2, 164+i*5, color)
-					end
-					table.remove(chan.float, 14)
+				end
+				while #chan.float ~= 0 and chan.floaty[#chan.float] > 224 do
+					table.remove(chan.float,  #chan.float)
+					table.remove(chan.floaty, #chan.floaty)
+					table.remove(chan.floatz, #chan.floatz)
 				end
 			end
 		end
