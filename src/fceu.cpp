@@ -400,6 +400,7 @@ int FDSLoad(const char *name, FCEUFILE *fp);
 int NSFLoad(const char *name, FCEUFILE *fp);
 
 //char lastLoadedGameName [2048] = {0,}; // hack for movie WRAM clearing on record from poweron
+bool archiveManuallyCanceled;
 
 //name should be UTF-8, hopefully, or else there may be trouble
 FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silent)
@@ -416,7 +417,6 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 
 	if (!fp)
 	{
-		extern bool archiveManuallyCanceled;
 		// Although !fp, if the operation was canceled from archive select dialog box, don't show the error message;
 		if (!silent && !archiveManuallyCanceled)
 			FCEU_PrintError("´ò¿ª \"%s\" ´íÎó£¡", name);

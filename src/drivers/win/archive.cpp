@@ -277,7 +277,7 @@ public:
 
 // indicator for the open in archive dialog that if the load was canceled by the user.
 // TODO: Since I can't think of a better way to indicate it, hope someone could imporve it.
-bool archiveManuallyCanceled;
+extern bool archiveManuallyCanceled;
 
 static BOOL CALLBACK ArchiveFileSelectorCallback(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
