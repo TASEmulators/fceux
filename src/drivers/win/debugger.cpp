@@ -2200,7 +2200,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								//mbg merge 7/18/06 changed pausing check and set
 								if (FCEUI_EmulationPaused()) {
 									UpdateRegs(hwndDlg);
-									FCEUI_SetEmulationPaused(0);
+									FCEUI_ToggleEmulationPause();
 									//DebuggerWasUpdated = false done in above function;
 								}
 								break;
