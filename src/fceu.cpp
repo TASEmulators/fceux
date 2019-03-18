@@ -112,7 +112,6 @@ bool movieSubtitles = true; //Toggle for displaying movie subtitles
 bool DebuggerWasUpdated = false; //To prevent the debugger from updating things without being updated.
 bool AutoResumePlay = false;
 char romNameWhenClosingEmulator[2048] = {0};
-bool togglePausedRequested = false; //Flaged true to pause at frame boundary
 
 
 // indicator for the open in archive dialog that if the load was canceled by the user.
@@ -405,6 +404,7 @@ int FDSLoad(const char *name, FCEUFILE *fp);
 int NSFLoad(const char *name, FCEUFILE *fp);
 
 //char lastLoadedGameName [2048] = {0,}; // hack for movie WRAM clearing on record from poweron
+bool archiveManuallyCanceled;
 
 //name should be UTF-8, hopefully, or else there may be trouble
 FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silent)
@@ -667,14 +667,6 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	int r, ssize;
 
 	JustFrameAdvanced = false;
-
-	//do pausing at frame boundary to avoid inconsistency
-	if (togglePausedRequested)
-	{
-		togglePausedRequested = false;
-		if (!frameAdvanceRequested)
-			EmulationPaused ^= EMULATIONPAUSED_PAUSED;
-	}
 
 	if (frameAdvanceRequested)
 	{
@@ -1141,7 +1133,7 @@ void FCEUI_SetEmulationPaused(int val) {
 
 void FCEUI_ToggleEmulationPause(void)
 {
-	togglePausedRequested = true;;
+	EmulationPaused = (EmulationPaused & EMULATIONPAUSED_PAUSED) ^ EMULATIONPAUSED_PAUSED;
 	DebuggerWasUpdated = false;
 }
 
