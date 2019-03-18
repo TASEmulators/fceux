@@ -404,7 +404,7 @@ int FDSLoad(const char *name, FCEUFILE *fp);
 int NSFLoad(const char *name, FCEUFILE *fp);
 
 //char lastLoadedGameName [2048] = {0,}; // hack for movie WRAM clearing on record from poweron
-bool archiveManuallyCanceled;
+extern bool archiveManuallyCanceled;
 
 //name should be UTF-8, hopefully, or else there may be trouble
 FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silent)
