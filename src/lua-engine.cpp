@@ -2711,14 +2711,21 @@ static int savestate_create_aliased(lua_State *L, bool newnumbering) {
 	int which = -1;
 	const char* path = NULL;
 	bool hasArg = false;
-	if (lua_gettop(L) >= 1) {
+
+	if (lua_gettop(L) >= 1)
+	{
 		hasArg = true;
-		path = luaL_checkstring(L, 1);
-		if(path == NULL) {
-			which = luaL_checkinteger(L, 1);
+
+		if(lua_isnumber(L,1))
+		{
+			which = luaL_checkinteger(L,1);
 			if (which < 1 || which > 10) {
 				luaL_error(L, "invalid player's savestate %d", which);
 			}
+		}
+		else 
+		{
+			path = luaL_checkstring(L, 1);
 		}
 	}
 
@@ -2730,9 +2737,9 @@ static int savestate_create_aliased(lua_State *L, bool newnumbering) {
 		// So I turned the filename selection code into my bitch. :)
 		// Numbers are 0 through 9.
 		if (newnumbering) //1-9, 10 = 0. QWERTY style.
-		ss->filename = FCEU_MakeFName(FCEUMKF_STATE, (which % 10), 0);
+			ss->filename = FCEU_MakeFName(FCEUMKF_STATE, (which % 10), 0);
 		else // Note: Windows Slots 1-10 = Which 2-10, 1
-		ss->filename = FCEU_MakeFName(FCEUMKF_STATE, which - 1, 0);
+			ss->filename = FCEU_MakeFName(FCEUMKF_STATE, which - 1, 0);
 
 		// Only ensure load if the file exists
 		// Also makes it persistent, but files are like that
