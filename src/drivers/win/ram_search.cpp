@@ -29,6 +29,7 @@
 #include "common.h"
 #include "fceu.h"
 #include "../../debug.h"
+#include "../../cheat.h"
 
 #include "resource.h"
 #include "ram_search.h"
@@ -47,6 +48,17 @@
 #include "memview.h"
 
 bool ShowROM = false;
+
+// Too much work to do for resorting the values, and finding the biggest number 
+// by sorting in ram list doesn't help too much in usually use, so I gave it up. 
+// whitch column does the sort based on, the default status is 0 which means sorted by address
+// static int ramSearchSortCol = 0;
+// whether it's asc or desc sorting
+// static bool ramSearchSortAsc = true;
+
+// used for changing colors of cheated address.
+extern int numsubcheats;
+extern CHEATF_SUBFAST SubCheats[256];
 
 bool IsHardwareAddressValid(HWAddressType address)
 {
@@ -73,6 +85,7 @@ struct MemoryRegion
 
 	unsigned int virtualIndex; // index into s_prevValues, s_curValues, and s_numChanges, valid after being initialized in ResetMemoryRegions()
 	unsigned int itemIndex; // index into listbox items, valid when s_itemIndicesInvalid is false
+	unsigned int cheatAffect; // how many bytes affected by the cheats. 0 indicates for free, max value is the size.
 };
 
 int MAX_RAM_SIZE = 0;
@@ -169,6 +182,19 @@ void ResetMemoryRegions()
 	LeaveCriticalSection(&s_activeMemoryRegionsCS);
 }
 
+/* currently not used, only virtual region is to show the cheat status
+void UpdateMemoryCheatStatus()
+{
+	EnterCriticalSection(&s_activeMemoryRegionsCS);
+
+	for (MemoryList::iterator iter = s_activeMemoryRegions.begin(); iter != s_activeMemoryRegions.end(); ++iter)
+	{
+		MemoryRegion& region = *iter;
+		UpdateRegionCheatStatus(region);
+	}
+	LeaveCriticalSection(&s_activeMemoryRegionsCS);
+}
+*/
 // eliminates a range of hardware addresses from the search results
 // returns 2 if it changed the region and moved the iterator to another region
 // returns 1 if it changed the region but didn't move the iterator
@@ -249,7 +275,7 @@ void CalculateItemIndices(int itemSize)
 		int startSkipSize = ((unsigned int)(itemSize - (unsigned int)region.hardwareAddress)) % itemSize; // FIXME: is this still ok?
 		unsigned int start = startSkipSize;
 		unsigned int end = region.size;
-		for(unsigned int i = start; i < end; i += itemSize)
+		for (unsigned int i = start; i < end; i += itemSize)
 			s_itemIndexToRegionPointer[itemIndex++] = &region;
 	}
 	s_maxItemIndex = itemIndex;
@@ -386,8 +412,8 @@ void ItemIndexToVirtualRegion(unsigned int itemIndex, MemoryRegion& virtualRegio
 		return;
 	}
 
-	const MemoryRegion* regionPtr = s_itemIndexToRegionPointer[itemIndex];
-	const MemoryRegion& region = *regionPtr;
+	MemoryRegion* regionPtr = s_itemIndexToRegionPointer[itemIndex];
+	MemoryRegion& region = *regionPtr;
 
 	int bytesWithinRegion = (itemIndex - region.itemIndex) * sizeof(stepType);
 	int startSkipSize = ((unsigned int)(sizeof(stepType) - region.hardwareAddress)) % sizeof(stepType);
@@ -397,7 +423,11 @@ void ItemIndexToVirtualRegion(unsigned int itemIndex, MemoryRegion& virtualRegio
 	virtualRegion.hardwareAddress = region.hardwareAddress + bytesWithinRegion;
 	virtualRegion.virtualIndex = region.virtualIndex + bytesWithinRegion;
 	virtualRegion.itemIndex = itemIndex;
-	return;
+
+	region.cheatAffect = 0;
+	for (int i = 0; i < numsubcheats; i++)
+		if (SubCheats[i].addr >= region.hardwareAddress && SubCheats[i].addr < region.hardwareAddress + region.size)
+			++region.cheatAffect;
 }
 
 template<typename stepType, typename compareType>
@@ -463,6 +493,13 @@ unsigned int GetHardwareAddressFromItemIndex(unsigned int itemIndex)
 	MemoryRegion virtualRegion;
 	ItemIndexToVirtualRegion<stepType,compareType>(itemIndex, virtualRegion);
 	return virtualRegion.hardwareAddress;
+}
+template<typename stepType, typename compareType>
+unsigned int GetCheatStatusFromItemIndex(unsigned int itemIndex)
+{
+	MemoryRegion virtualRegion;
+	ItemIndexToVirtualRegion<stepType, compareType>(itemIndex, virtualRegion);
+	return virtualRegion.cheatAffect;
 }
 
 // this one might be unreliable, haven't used it much
@@ -987,6 +1024,7 @@ void soft_reset_address_info ()
 	}*/
 	s_prevValuesNeedUpdate = false;
 	ResetMemoryRegions();
+//	UpdateMemoryCheatStatus();
 	if(!RamSearchHWnd)
 	{
 		EnterCriticalSection(&s_activeMemoryRegionsCS);
@@ -1015,6 +1053,7 @@ void reset_address_info ()
 		memcpy(s_prevValues, s_curValues, (sizeof(*s_prevValues)*(MAX_RAM_SIZE)));
 	s_prevValuesNeedUpdate = false;
 	ResetMemoryRegions();
+//	UpdateMemoryCheatStatus();
 	if(!RamSearchHWnd)
 	{
 		EnterCriticalSection(&s_activeMemoryRegionsCS);
@@ -1374,7 +1413,6 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	RECT r2;
 	int dx1, dy1, dx2, dy2;
 	static int watchIndex=0;
-
 	switch(uMsg)
 	{
 		case WM_INITDIALOG: {
@@ -1481,8 +1519,8 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			SendDlgItemMessage(hDlg,IDC_C_SEARCHROM,BM_SETCHECK,ShowROM?BST_CHECKED:BST_UNCHECKED,0);
 			//const char* names[5] = {"Address","Value","Previous","Changes","Notes"};
 			//int widths[5] = {62,64,64,55,55};
-			const char* names[] = {"Address","Value","Previous","Changes"};
-			int widths[4] = {68,76,76,68};
+			const char* names[5] = {"Addr.","Value","Previous","Changes","Cheats"};
+			int widths[5] = {48,80,80,66,52};
 			if (!ResultCount)
 				reset_address_info();
 			else
@@ -1491,7 +1529,7 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				CompactAddrs();
 			}
 			void init_list_box(HWND Box, const char* Strs[], int numColumns, int *columnWidths);
-			init_list_box(GetDlgItem(hDlg,IDC_RAMLIST),names,4,widths);
+			init_list_box(GetDlgItem(hDlg,IDC_RAMLIST),names,5,widths);
 			//ListView_SetItemCount(GetDlgItem(hDlg,IDC_RAMLIST),ResultCount);
 			if (!noMisalign) SendDlgItemMessage(hDlg, IDC_MISALIGN, BM_SETCHECK, BST_CHECKED, 0);
 			//if (littleEndian) SendDlgItemMessage(hDlg, IDC_ENDIAN, BM_SETCHECK, BST_CHECKED, 0);
@@ -1516,7 +1554,6 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 			return true;
 		}	break;
-
 		case WM_NOTIFY:
 		{
 			LPNMHDR lP = (LPNMHDR) lParam;
@@ -1589,6 +1626,12 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 							Item->item.pszText = num;
 						}	return true;
+						case 4:
+						{
+							int cheat = CALL_WITH_T_SIZE_TYPES_1(GetCheatStatusFromItemIndex, rs_type_size, rs_t=='s', noMisalign, iNum);
+							sprintf(num, "%d", cheat);
+							Item->item.pszText = num;
+						}
 						//case 4:
 						//	Item->item.pszText = rsaddrs[rsresults[iNum].Index].comment ? rsaddrs[rsresults[iNum].Index].comment : "";
 						//	return true;
@@ -1596,7 +1639,23 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							return false;
 					}
 				}
+				/*
+				Too much work to do for resorting the values, and finding the biggest number 
+				by sorting in ram list doesn't help too much in usually use, so I gave it up. 
+				case LVN_COLUMNCLICK:
+				{
+					NMLISTVIEW* pNMListView = (NMLISTVIEW*)lParam;
+					if (ramSearchSortCol != pNMListView->iSubItem) {
+						ramSearchSortCol = pNMListView->iSubItem;
+						ramSearchSortAsc = true;
+					}
+					else
+						ramSearchSortAsc = !ramSearchSortAsc;
 
+					UpdateSortColumnIcon(pNMListView->hdr.hwndFrom, ramSearchSortCol, ramSearchSortAsc);
+					break;
+				}
+				*/
 				case NM_RCLICK:
 				{
 					// go to the address in Hex Editor
@@ -1609,6 +1668,7 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					}
 					break;
 				}
+
 
 				//case LVN_ODCACHEHINT: //Copied this bit from the MSDN virtual listbox code sample. Eventually it should probably do something.
 				//{
@@ -2116,7 +2176,7 @@ void init_list_box(HWND Box, const char* Strs[], int numColumns, int *columnWidt
 {
 	LVCOLUMN Col;
 	Col.mask = LVCF_FMT | LVCF_ORDER | LVCF_SUBITEM | LVCF_TEXT | LVCF_WIDTH;
-	Col.fmt = LVCFMT_CENTER;
+	Col.fmt = LVCFMT_RIGHT;
 	for (int i = 0; i < numColumns; i++)
 	{
 		Col.iOrder = i;

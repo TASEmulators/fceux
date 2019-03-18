@@ -478,9 +478,11 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			SelectObject (pDC, CreatePen (PS_SOLID, 2, RGB (255, 255, 255))) ;
 
-			CheckDlgButton(hwndDlg, IDC_NTVIEW_SHOW_SCROLL_LINES, BST_CHECKED);
-			CheckDlgButton(hwndDlg, IDC_NTVIEW_SHOW_ATTRIBUTES,   BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_NTVIEW_HIDE_PALETTES,     BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_NTVIEW_SHOW_SCROLL_LINES, scrolllines ? BST_CHECKED : BST_UNCHECKED);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_NTVIEW_SCANLINE_TEXT), scrolllines);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_NTVIEW_SCANLINE), scrolllines);
+			CheckDlgButton(hwndDlg, IDC_NTVIEW_SHOW_ATTRIBUTES,   attview ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_NTVIEW_HIDE_PALETTES,     hidepal ? BST_CHECKED : BST_UNCHECKED);
 
 			//clear cache
 			memset(palcache,0,32);

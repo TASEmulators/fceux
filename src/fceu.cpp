@@ -113,6 +113,11 @@ bool DebuggerWasUpdated = false; //To prevent the debugger from updating things 
 bool AutoResumePlay = false;
 char romNameWhenClosingEmulator[2048] = {0};
 
+
+// indicator for the open in archive dialog that if the load was canceled by the user.
+// TODO: Since I can't think of a better way to indicate it, hope someone could imporve it.
+bool archiveManuallyCanceled = false;
+
 FCEUGI::FCEUGI()
 	: filename(0),
 	  archiveFilename(0) {
@@ -418,7 +423,11 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	{
 		// Although !fp, if the operation was canceled from archive select dialog box, don't show the error message;
 		if (!silent && !archiveManuallyCanceled)
-			FCEU_PrintError("´ò¿ª \"%s\" ´íÎó£¡", name);
+			FCEU_PrintError("Error opening \"%s\"!", name);
+		// Set it back to false, since user might not load ROM from dialog the next time.
+		// TODO: find a better way to do this.
+		archiveManuallyCanceled = false;
+
 		return 0;
 	}
 	else if (fp->archiveFilename != "")

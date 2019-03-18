@@ -9,6 +9,11 @@
 #include "window.h"
 #include "taseditor/taseditor_window.h"
 
+// whitch column does the sort based on, the default status -1 is natrually not sorted (or sort by FCEUI_CommandTable)
+static int mapInputSortCol = -1;
+// whether it's asc or desc sorting, when sortCol is -1, this value has no effect
+static bool mapInputSortAsc = true;
+
 void KeyboardUpdateState(void); //mbg merge 7/17/06 yech had to add this
 
 struct INPUTDLGTHREADARGS
@@ -552,6 +557,30 @@ void PopulateMappingDisplay(HWND hwndDlg)
 	{
 		free(conflictTable);
 	}
+
+	if (mapInputSortCol != -1)
+	{
+		NMHDR hdr;
+		hdr.hwndFrom = hwndListView;
+		hdr.code = LVN_COLUMNCLICK;
+
+		NMLISTVIEW listView;
+		listView.hdr = hdr;
+
+		// when showing the conflict table, always sorted by "Input" column first,
+		// So the user can easily find out which are conflicting.
+		if (filter == EMUCMDTYPE_MAX + 3)
+			listView.iSubItem = 2;
+		// only one type is in the list, just sort with "Command" column
+		// "Unassigned" has no text in "Input", just sort with "Command" column
+		else if (filter > EMUCMDTYPE_MISC && filter < EMUCMDTYPE_MAX || filter == EMUCMDTYPE_MAX + 2)
+			listView.iSubItem = 1;
+		else
+			listView.iSubItem = mapInputSortCol;
+
+		int ret = SendMessage(hwndListView, LVM_SORTITEMS, (WPARAM)&listView, (LPARAM)MapInputItemSortFunc);
+		UpdateSortColumnIcon(hwndListView, mapInputSortCol, mapInputSortAsc);
+	}
 }
 
 /**
@@ -712,12 +741,14 @@ BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 		switch(LOWORD(wParam))
 		{
 			case IDOK:
-				UpdateMenuHotkeys();
+				EndDialog(hwndDlg, 1);
 				// Update TAS Editor's tooltips if it's opening.
 				extern TASEDITOR_WINDOW taseditorWindow;
 				if (taseditorWindow.hwndTASEditor)
 					taseditorWindow.updateTooltips();
-				EndDialog(hwndDlg, 1);
+				// main menu is always shown, so we only need to update it,
+				// the context menus are updated only when they are created
+				UpdateMenuHotkeys(FCEUMENU_MAIN);
 				return TRUE;
 
 			case BTN_CANCEL:  // here true cause of ESC button handling as EXIT ;)
@@ -746,23 +777,46 @@ BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			case LV_MAPPING:
 				if (lParam)
 				{
-					NMHDR* pnm = (NMHDR*)lParam;
-
-					if (pnm->code == LVN_ITEMACTIVATE)
+					NMLISTVIEW* lpListView = (NMLISTVIEW*)lParam;
+					UINT code = lpListView->hdr.code;
+					HWND hwndListView = lpListView->hdr.hwndFrom;
+					switch (code)
 					{
-						HWND hwndListView = GetDlgItem(hwndDlg, LV_MAPPING);
+						case LVN_ITEMACTIVATE:
+							AskForHotkey(hwndListView);
 
-						AskForHotkey(hwndListView);
+							// TODO: Only redraw if Conflicts filter
+							// is active.
+							PopulateMappingDisplay(hwndDlg);
+							break;
+						case LVN_COLUMNCLICK:
+							// Sort the items
+							if (mapInputSortCol != lpListView->iSubItem) {
+								mapInputSortCol= lpListView->iSubItem;
+								mapInputSortAsc = true;
+							}
+							else
+								mapInputSortAsc = !mapInputSortAsc;
 
-						// TODO: Only redraw if Conflicts filter
-						// is active.
-						PopulateMappingDisplay(hwndDlg);
+							int filter = (int)SendDlgItemMessage(hwndDlg, COMBO_FILTER, CB_GETCURSEL, 0, 0);
+
+							// when showing the conflict table, always sorted by "Input" column first,
+							// So the user can easily find out which are conflicting.
+							if (filter == EMUCMDTYPE_MAX + 3)
+								lpListView->iSubItem = 2;
+							// only one type is in the list, just sort with "Command" column
+							// "Unassigned" has no text in "Input", just sort with "Command" column
+							else if (filter > EMUCMDTYPE_MISC && filter < EMUCMDTYPE_MAX || filter == EMUCMDTYPE_MAX + 2)
+								lpListView->iSubItem = 1;
+							else
+								lpListView->iSubItem = mapInputSortCol;
+
+							int ret = SendMessage(hwndListView, LVM_SORTITEMS, (WPARAM)lpListView, (LPARAM)MapInputItemSortFunc);
+							UpdateSortColumnIcon(hwndListView, mapInputSortCol, mapInputSortAsc);
 					}
-
 					return TRUE;
 				}
 				break;
-
 			default:
 				break;
 		}
@@ -792,3 +846,51 @@ void MapInput(void)
 	free(backupmapping);
 }
 
+static int CALLBACK MapInputItemSortFunc(LPARAM lp1, LPARAM lp2, LPARAM lpSort)
+{
+	NMLISTVIEW* lpListView = (NMLISTVIEW*)lpSort;
+	HWND hwndListView = lpListView->hdr.hwndFrom;
+	
+	LVFINDINFO info1, info2;
+	LVITEM item1, item2;
+	memset(&info1, 0, sizeof(LVFINDINFO));
+	memset(&info2, 0, sizeof(LVFINDINFO));
+	memset(&item1, 0, sizeof(LVITEM));
+	memset(&item2, 0, sizeof(LVITEM));
+
+	info1.flags = LVFI_PARAM;
+	info2.flags = LVFI_PARAM;
+	info1.lParam = lp1;
+	info2.lParam = lp2;
+
+	int index1 = SendMessage(hwndListView, LVM_FINDITEM, -1, (LPARAM)&info1);
+	int index2 = SendMessage(hwndListView, LVM_FINDITEM, -1, (LPARAM)&info2);
+
+	item1.pszText = new char[64];
+	item2.pszText = new char[64];
+	item1.cchTextMax = 64;
+	item2.cchTextMax = 64;
+	item1.iSubItem = lpListView->iSubItem;
+	item2.iSubItem = lpListView->iSubItem;
+
+	SendMessage(hwndListView, LVM_GETITEMTEXT, index1, (LPARAM)&item1);
+	SendMessage(hwndListView, LVM_GETITEMTEXT, index2, (LPARAM)&item2);
+
+	int ret = strcmp(item1.pszText, item2.pszText);
+	// "Type" and "Input" column can have repeated items, uses "Command" line for another sorting  
+	if (ret == 0 && (lpListView->iSubItem == 0 || lpListView->iSubItem == 2))
+	{
+		item1.iSubItem = 1;
+		item2.iSubItem = 1;
+		SendMessage(hwndListView, LVM_GETITEMTEXT, index1, (LPARAM)&item1);
+		SendMessage(hwndListView, LVM_GETITEMTEXT, index2, (LPARAM)&item2);
+		ret = strcmp(item1.pszText, item2.pszText);
+	}
+
+	if (!mapInputSortAsc)
+		ret = -ret;
+	delete[] item1.pszText;
+	delete[] item2.pszText;
+
+	return ret;
+}

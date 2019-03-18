@@ -1939,4 +1939,7 @@
   <ItemGroup>
     <CustomBuild Include="..\src\auxlib.lua" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\src\drivers\win\res\bitmap21.bmp" />
+  </ItemGroup>
 </Project>
