@@ -412,22 +412,21 @@ void ItemIndexToVirtualRegion(unsigned int itemIndex, MemoryRegion& virtualRegio
 		return;
 	}
 
-	MemoryRegion* regionPtr = s_itemIndexToRegionPointer[itemIndex];
-	MemoryRegion& region = *regionPtr;
+	MemoryRegion* region = s_itemIndexToRegionPointer[itemIndex];
 
-	int bytesWithinRegion = (itemIndex - region.itemIndex) * sizeof(stepType);
-	int startSkipSize = ((unsigned int)(sizeof(stepType) - region.hardwareAddress)) % sizeof(stepType);
+	int bytesWithinRegion = (itemIndex - region->itemIndex) * sizeof(stepType);
+	int startSkipSize = ((unsigned int)(sizeof(stepType) - region->hardwareAddress)) % sizeof(stepType);
 	bytesWithinRegion += startSkipSize;
 	
 	virtualRegion.size = sizeof(compareType);
-	virtualRegion.hardwareAddress = region.hardwareAddress + bytesWithinRegion;
-	virtualRegion.virtualIndex = region.virtualIndex + bytesWithinRegion;
+	virtualRegion.hardwareAddress = region->hardwareAddress + bytesWithinRegion;
+	virtualRegion.virtualIndex = region->virtualIndex + bytesWithinRegion;
 	virtualRegion.itemIndex = itemIndex;
 
-	region.cheatAffect = 0;
-	for (int i = 0; i < numsubcheats; i++)
-		if (SubCheats[i].addr >= region.hardwareAddress && SubCheats[i].addr < region.hardwareAddress + region.size)
-			++region.cheatAffect;
+	virtualRegion.cheatAffect = 0;
+	for (int i = 0; i < numsubcheats; ++i)
+		if (SubCheats[i].addr >= virtualRegion.hardwareAddress && SubCheats[i].addr < virtualRegion.hardwareAddress + virtualRegion.size)
+			++virtualRegion.cheatAffect;
 }
 
 template<typename stepType, typename compareType>
@@ -541,10 +540,10 @@ unsigned int HardwareAddressToItemIndex(HWAddressType hardwareAddress)
 	: sizeTypeID == 'd' \
 		? (isSigned \
 			? (requiresAligned \
-				? functionName<short, signed long>() \
+				? functionName<long, signed long>() \
 				: functionName<char, signed long>()) \
 			: (requiresAligned \
-				? functionName<short, unsigned long>() \
+				? functionName<long, unsigned long>() \
 				: functionName<char, unsigned long>())) \
 	: functionName<char, signed char>())
 
@@ -564,10 +563,10 @@ unsigned int HardwareAddressToItemIndex(HWAddressType hardwareAddress)
 	: sizeTypeID == 'd' \
 		? (isSigned \
 			? (requiresAligned \
-				? functionName<short, signed long>(p0) \
+				? functionName<long, signed long>(p0) \
 				: functionName<char, signed long>(p0)) \
 			: (requiresAligned \
-				? functionName<short, unsigned long>(p0) \
+				? functionName<long, unsigned long>(p0) \
 				: functionName<char, unsigned long>(p0))) \
 	: functionName<char, signed char>(p0))
 
@@ -587,10 +586,10 @@ unsigned int HardwareAddressToItemIndex(HWAddressType hardwareAddress)
 	: sizeTypeID == 'd' \
 		? (isSigned \
 			? (requiresAligned \
-				? functionName<short, signed long>(p0, p1, p2) \
+				? functionName<long, signed long>(p0, p1, p2) \
 				: functionName<char, signed long>(p0, p1, p2)) \
 			: (requiresAligned \
-				? functionName<short, unsigned long>(p0, p1, p2) \
+				? functionName<long, unsigned long>(p0, p1, p2) \
 				: functionName<char, unsigned long>(p0, p1, p2))) \
 	: functionName<char, signed char>(p0, p1, p2))
 
@@ -610,10 +609,10 @@ unsigned int HardwareAddressToItemIndex(HWAddressType hardwareAddress)
 	: sizeTypeID == 'd' \
 		? (isSigned \
 			? (requiresAligned \
-				? functionName<short, signed long>(p0, p1, p2, p3) \
+				? functionName<long, signed long>(p0, p1, p2, p3) \
 				: functionName<char, signed long>(p0, p1, p2, p3)) \
 			: (requiresAligned \
-				? functionName<short, unsigned long>(p0, p1, p2, p3) \
+				? functionName<long, unsigned long>(p0, p1, p2, p3) \
 				: functionName<char, unsigned long>(p0, p1, p2, p3))) \
 	: functionName<char, signed char>(p0, p1, p2, p3))
 
@@ -627,7 +626,7 @@ unsigned int HardwareAddressToItemIndex(HWAddressType hardwareAddress)
 			: functionName<char, type>(p0, p1, p2)) \
 	: sizeTypeID == 'd' \
 		? (requiresAligned \
-			? functionName<short, type>(p0, p1, p2) \
+			? functionName<long, type>(p0, p1, p2) \
 			: functionName<char, type>(p0, p1, p2)) \
 	: functionName<char, type>(p0, p1, p2))
 
@@ -641,7 +640,7 @@ unsigned int HardwareAddressToItemIndex(HWAddressType hardwareAddress)
 			: functionName<char, type>(p0, p1, p2, p3)) \
 	: sizeTypeID == 'd' \
 		? (requiresAligned \
-			? functionName<short, type>(p0, p1, p2, p3) \
+			? functionName<long, type>(p0, p1, p2, p3) \
 			: functionName<char, type>(p0, p1, p2, p3)) \
 	: functionName<char, type>(p0, p1, p2, p3))
 
