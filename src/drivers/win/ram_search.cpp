@@ -85,7 +85,7 @@ struct MemoryRegion
 
 	unsigned int virtualIndex; // index into s_prevValues, s_curValues, and s_numChanges, valid after being initialized in ResetMemoryRegions()
 	unsigned int itemIndex; // index into listbox items, valid when s_itemIndicesInvalid is false
-	unsigned int cheatAffect; // how many bytes affected by the cheats. 0 indicates for free, max value is the size.
+	unsigned int cheatCount; // how many bytes affected by the cheats. 0 indicates for free, max value is the size.
 };
 
 int MAX_RAM_SIZE = 0;
@@ -423,10 +423,10 @@ void ItemIndexToVirtualRegion(unsigned int itemIndex, MemoryRegion& virtualRegio
 	virtualRegion.virtualIndex = region->virtualIndex + bytesWithinRegion;
 	virtualRegion.itemIndex = itemIndex;
 
-	virtualRegion.cheatAffect = 0;
-	for (int i = 0; i < numsubcheats; ++i)
+	virtualRegion.cheatCount = 0;
+	for (int i = 0; i < numsubcheats && virtualRegion.cheatCount <= virtualRegion.size; ++i)
 		if (SubCheats[i].addr >= virtualRegion.hardwareAddress && SubCheats[i].addr < virtualRegion.hardwareAddress + virtualRegion.size)
-			++virtualRegion.cheatAffect;
+			++virtualRegion.cheatCount;
 }
 
 template<typename stepType, typename compareType>
@@ -494,11 +494,11 @@ unsigned int GetHardwareAddressFromItemIndex(unsigned int itemIndex)
 	return virtualRegion.hardwareAddress;
 }
 template<typename stepType, typename compareType>
-unsigned int GetCheatStatusFromItemIndex(unsigned int itemIndex)
+unsigned int GetNumCheatsFromIndex(unsigned int itemIndex)
 {
 	MemoryRegion virtualRegion;
 	ItemIndexToVirtualRegion<stepType, compareType>(itemIndex, virtualRegion);
-	return virtualRegion.cheatAffect;
+	return virtualRegion.cheatCount;
 }
 
 // this one might be unreliable, haven't used it much
@@ -1270,7 +1270,17 @@ LRESULT CustomDraw (LPARAM lParam)
 		{
 			int rv = CDRF_DODEFAULT;
 
-			if(lplvcd->nmcd.dwItemSpec % 2)
+			if (int cheat = CALL_WITH_T_SIZE_TYPES_1(GetNumCheatsFromIndex, rs_type_size, rs_t == 's', noMisalign, lplvcd->nmcd.dwItemSpec))
+			{
+				switch (cheat) {
+					case 1: lplvcd->clrTextBk = RGB(216, 203, 253); break;
+					case 2: lplvcd->clrTextBk = RGB(195, 186, 253); break;
+					case 3: lplvcd->clrTextBk = RGB(176, 139, 252); break;
+					case 4: lplvcd->clrTextBk = RGB(175, 94, 253); break;
+				}
+				rv = CDRF_NEWFONT;
+			}
+			else if(lplvcd->nmcd.dwItemSpec % 2)
 			{
 				// alternate the background color slightly
 				lplvcd->clrTextBk = RGB(248,248,255);
@@ -1518,8 +1528,8 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			SendDlgItemMessage(hDlg,IDC_C_SEARCHROM,BM_SETCHECK,ShowROM?BST_CHECKED:BST_UNCHECKED,0);
 			//const char* names[5] = {"Address","Value","Previous","Changes","Notes"};
 			//int widths[5] = {62,64,64,55,55};
-			const char* names[5] = {"Addr.","Value","Previous","Changes","Cheats"};
-			int widths[5] = {48,80,80,66,52};
+			const char* names[5] = {"Addr.","Value","Previous","Changes"};
+			int widths[5] = {68,76,76,68};
 			if (!ResultCount)
 				reset_address_info();
 			else
@@ -1627,7 +1637,7 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						}	return true;
 						case 4:
 						{
-							int cheat = CALL_WITH_T_SIZE_TYPES_1(GetCheatStatusFromItemIndex, rs_type_size, rs_t=='s', noMisalign, iNum);
+							int cheat = CALL_WITH_T_SIZE_TYPES_1(GetNumCheatsFromIndex, rs_type_size, rs_t=='s', noMisalign, iNum);
 							sprintf(num, "%d", cheat);
 							Item->item.pszText = num;
 						}
