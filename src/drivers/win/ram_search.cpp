@@ -1269,30 +1269,30 @@ LRESULT CustomDraw (LPARAM lParam)
 		case CDDS_ITEMPREPAINT:
 		{
 			int rv = CDRF_DODEFAULT;
-
-			if (int cheat = CALL_WITH_T_SIZE_TYPES_1(GetNumCheatsFromIndex, rs_type_size, rs_t == 's', noMisalign, lplvcd->nmcd.dwItemSpec))
-			{
-				switch (cheat) {
-					case 1: lplvcd->clrTextBk = RGB(216, 203, 253); break;
-					case 2: lplvcd->clrTextBk = RGB(195, 186, 253); break;
-					case 3: lplvcd->clrTextBk = RGB(176, 139, 252); break;
-					case 4: lplvcd->clrTextBk = RGB(175, 94, 253); break;
-				}
-				rv = CDRF_NEWFONT;
-			}
-			else if(lplvcd->nmcd.dwItemSpec % 2)
-			{
-				// alternate the background color slightly
-				lplvcd->clrTextBk = RGB(248,248,255);
-				rv = CDRF_NEWFONT;
+			int cheat = CALL_WITH_T_SIZE_TYPES_1(GetNumCheatsFromIndex, rs_type_size, rs_t == 's', noMisalign, lplvcd->nmcd.dwItemSpec);
+			switch (cheat) {
+			default: 
+			case 0: 
+				if (lplvcd->nmcd.dwItemSpec % 2)
+					lplvcd->clrTextBk = RGB(248, 248, 255);
+				break;
+			case 1:
+				lplvcd->clrTextBk = RGB(216, 203, 253); break;
+			case 2:
+				lplvcd->clrTextBk = RGB(195, 186, 253); break;
+			case 3:
+				lplvcd->clrTextBk = RGB(176, 139, 252); break;
+			case 4:
+				lplvcd->clrTextBk = RGB(175, 94, 253);
+				lplvcd->clrText = RGB(255, 255, 255); break; // use a more visual color in dark background
 			}
 
 			if(!IsSatisfied(lplvcd->nmcd.dwItemSpec))
-			{
 				// tint red any items that would be eliminated if a search were to run now
-				lplvcd->clrText = RGB(192,64,64);
-				rv = CDRF_NEWFONT;
-			}
+				// changed to a more visual color in dark background
+				lplvcd->clrText = cheat == 4 ? RGB(255,192,0) : RGB(192,64,64);
+
+			rv = CDRF_NEWFONT;
 
 			return rv;
 		}	break;

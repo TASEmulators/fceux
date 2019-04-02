@@ -731,11 +731,8 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 									case IDYES:
 										extern void DisableAllCheats();
 										DisableAllCheats();
-										extern HWND hMemView;
-										if (hMemView) {
-											extern void UpdateColorTable();
-											UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
-										}
+										extern void UpdateCheatWindowRelatedWindow();
+										UpdateCheatWindowRelatedWindow();
 								}
 
 							}
