@@ -1534,7 +1534,7 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				CompactAddrs();
 			}
 			void init_list_box(HWND Box, const char* Strs[], int numColumns, int *columnWidths);
-			init_list_box(GetDlgItem(hDlg,IDC_RAMLIST),names,5,widths);
+			init_list_box(GetDlgItem(hDlg,IDC_RAMLIST),names,4,widths);
 			//ListView_SetItemCount(GetDlgItem(hDlg,IDC_RAMLIST),ResultCount);
 			if (!noMisalign) SendDlgItemMessage(hDlg, IDC_MISALIGN, BM_SETCHECK, BST_CHECKED, 0);
 			//if (littleEndian) SendDlgItemMessage(hDlg, IDC_ENDIAN, BM_SETCHECK, BST_CHECKED, 0);
@@ -2183,10 +2183,7 @@ void init_list_box(HWND Box, const char* Strs[], int numColumns, int *columnWidt
 	Col.mask = LVCF_FMT | LVCF_ORDER | LVCF_SUBITEM | LVCF_TEXT | LVCF_WIDTH;
 	for (int i = 0; i < numColumns; i++)
 	{
-		if (i == 1)
-			Col.fmt = LVCFMT_RIGHT;
-		else
-			Col.fmt = LVCFMT_LEFT;
+		Col.fmt = !strcmp(Strs[i], "Value") || !strcmp(Strs[i], "Previous") || !strcmp(Strs[i], "Changes") ? LVCFMT_RIGHT : LVCFMT_LEFT;
 		Col.iOrder = i;
 		Col.iSubItem = i;
 		Col.pszText = (LPSTR)(Strs[i]);
