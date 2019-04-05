@@ -195,7 +195,6 @@
 #define IDD_RAMSEARCH                   154
 #define IDD_RAMWATCH                    155
 #define IDD_EDITWATCH                   156
-#define IDD_PROMPT                      157
 #define IDR_RWACCELERATOR               158
 #define IDD_LUA                         159
 #define IDB_BITMAP0                     163
@@ -789,6 +788,8 @@
 #define IDC_AUTOSAVE_PERIOD_MINUTES_TEXT 1307
 #define IDC_VBLANK_SCANLINES_TEXT       1308
 #define IDC_EXTRA_SCANLINES_TEXT        1309
+#define IDC_DATASIZE_GROUPBOX           1310
+#define IDC_DATATYPE_GROUPBOX           1311
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1282,9 +1283,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        302
+#define _APS_NEXT_RESOURCE_VALUE        303
 #define _APS_NEXT_COMMAND_VALUE         40600
-#define _APS_NEXT_CONTROL_VALUE         1310
+#define _APS_NEXT_CONTROL_VALUE         1312
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

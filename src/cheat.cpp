@@ -136,6 +136,14 @@ void FCEU_PowerCheats()
 	RebuildSubCheats();
 }
 
+int FCEU_CalcCheatAffectedBytes(uint32 address, uint32 size) {
+	int count = 0;
+	for (int i = 0; i < numsubcheats && count < size; ++i)
+		if (SubCheats[i].addr >= address && SubCheats[i].addr < address + size)
+			++count;
+	return count;
+}
+
 static int AddCheatEntry(char *name, uint32 addr, uint8 val, int compare, int status, int type);
 static void CheatMemErr(void)
 {

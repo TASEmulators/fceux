@@ -471,7 +471,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 								SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)"");
 								SetDlgItemText(hwndDlg,IDC_CHEAT_NAME,(LPTSTR)"");
 							}
-							if (hMemView) UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
+							UpdateCheatWindowRelatedWindow();
 							UpdateCheatsAdded();
 							break;
 						case ID_CHEATLISTPOPUP_DELETESELECTEDCHEATS:
@@ -490,7 +490,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 									SetDlgItemText(hwndDlg,IDC_CHEAT_VAL,(LPTSTR)"");
 									SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)"");
 									SetDlgItemText(hwndDlg,IDC_CHEAT_NAME,(LPTSTR)"");
-									if (hMemView) UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
+									UpdateCheatWindowRelatedWindow();
 									UpdateCheatsAdded();
 								}
 							} else {
@@ -503,7 +503,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 									SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)"");
 									SetDlgItemText(hwndDlg,IDC_CHEAT_NAME,(LPTSTR)"");
 								}
-								if (hMemView) UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
+								UpdateCheatWindowRelatedWindow();
 								UpdateCheatsAdded();
 							}
 							break;
@@ -551,7 +551,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							SetDlgItemText(hwndDlg,IDC_CHEAT_VAL,(LPTSTR)U8ToStr(v));
 							if(c == -1)	SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)"");
 							else SetDlgItemText(hwndDlg,IDC_CHEAT_COM,(LPTSTR)U8ToStr(c));
-							if(hMemView)UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
+							UpdateCheatWindowRelatedWindow();
 							break;
 						case IDC_BTN_CHEAT_ADDFROMFILE:
 						{
@@ -577,7 +577,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 								if (file)
 								{
 									FCEU_LoadGameCheats(file);
-									if (hMemView) UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
+									UpdateCheatWindowRelatedWindow();
 									UpdateCheatsAdded();
 									savecheats = 1;
 								}
@@ -670,7 +670,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 								}
 							}
 							UpdateCheatsAdded();
-							UpdateColorTable();
+							UpdateCheatWindowRelatedWindow();
 							SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_SETCURSEL,selcheat,0);
 							SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_SETSEL,(WPARAM)1,selcheat);
 							break;
@@ -1031,27 +1031,43 @@ CPoint test = point;
 
 void DisableAllCheats()
 {
-	if(!FCEU_DisableAllCheats() || !hCheat){
-		return;
-	}
-	int selcheattemp = SendDlgItemMessage(hCheat, IDC_LIST_CHEATS, LB_GETCOUNT, 0, 0) - 1;
-	LRESULT sel; char str[259];
-	while(selcheattemp >= 0)
-	{
-		SendDlgItemMessage(hCheat,IDC_LIST_CHEATS,LB_GETTEXT,selcheattemp, (LPARAM)(LPCTSTR)str);
-		if(str[0] == '*')
+	if(FCEU_DisableAllCheats() && hCheat){
+		LRESULT sel; char str[259];
+		for (int tempSelCheat = SendDlgItemMessage(hCheat, IDC_LIST_CHEATS, LB_GETCOUNT, 0, 0) - 1; tempSelCheat >= 0; --tempSelCheat)
 		{
-			sel = SendDlgItemMessage(hCheat,IDC_LIST_CHEATS,LB_GETSEL,selcheattemp,0);
-			str[0] = ' ';
-			SendDlgItemMessage(hCheat,IDC_LIST_CHEATS,LB_DELETESTRING,selcheattemp,0);
-			SendDlgItemMessage(hCheat,IDC_LIST_CHEATS,LB_INSERTSTRING,selcheattemp, (LPARAM)(LPSTR)str);
-			if(sel)
+			SendDlgItemMessage(hCheat, IDC_LIST_CHEATS, LB_GETTEXT, tempSelCheat, (LPARAM)(LPCTSTR)str);
+			if (str[0] == '*')
 			{
-				SendDlgItemMessage(hCheat,IDC_LIST_CHEATS,LB_SETSEL,1,selcheattemp);
+				str[0] = ' ';
+				sel = SendDlgItemMessage(hCheat, IDC_LIST_CHEATS, LB_GETSEL, tempSelCheat, 0);
+				SendDlgItemMessage(hCheat, IDC_LIST_CHEATS, LB_DELETESTRING, tempSelCheat, 0);
+				SendDlgItemMessage(hCheat, IDC_LIST_CHEATS, LB_INSERTSTRING, tempSelCheat, (LPARAM)(LPSTR)str);
+				if (sel)
+					SendDlgItemMessage(hCheat, IDC_LIST_CHEATS, LB_SETSEL, 1, tempSelCheat);
 			}
 		}
-		selcheattemp--;
-	}
-	sprintf(str, "Active Cheats %d", 0);
-	SetDlgItemText(hCheat, 201, str);
+		sprintf(str, "Active Cheats %d", 0);
+		SetDlgItemText(hCheat, 201, str);
+	}	
+}
+
+void UpdateCheatWindowRelatedWindow()
+{
+	// hex editor
+	if (hMemView)
+		UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
+	extern HWND RamSearchHWnd;
+
+	// ram search
+	if (RamSearchHWnd)
+		RedrawWindow(GetDlgItem(RamSearchHWnd, IDC_RAMLIST), NULL, NULL, RDW_INVALIDATE); // if ram search is open then update the ram list.
+
+	// ram watch
+	extern void UpdateWatchCheats();
+	UpdateWatchCheats();
+	extern HWND RamWatchHWnd;
+	if (RamWatchHWnd)
+		RedrawWindow(GetDlgItem(RamWatchHWnd, IDC_WATCHLIST), NULL, NULL, RDW_INVALIDATE); // update the data in watch list to the newest.
+
+
 }

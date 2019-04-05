@@ -731,6 +731,8 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 									case IDYES:
 										extern void DisableAllCheats();
 										DisableAllCheats();
+										extern void UpdateCheatWindowRelatedWindow();
+										UpdateCheatWindowRelatedWindow();
 								}
 
 							}
