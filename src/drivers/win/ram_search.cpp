@@ -423,10 +423,7 @@ void ItemIndexToVirtualRegion(unsigned int itemIndex, MemoryRegion& virtualRegio
 	virtualRegion.virtualIndex = region->virtualIndex + bytesWithinRegion;
 	virtualRegion.itemIndex = itemIndex;
 
-	virtualRegion.cheatCount = 0;
-	for (int i = 0; i < numsubcheats && virtualRegion.cheatCount <= virtualRegion.size; ++i)
-		if (SubCheats[i].addr >= virtualRegion.hardwareAddress && SubCheats[i].addr < virtualRegion.hardwareAddress + virtualRegion.size)
-			++virtualRegion.cheatCount;
+	virtualRegion.cheatCount = FCEU_CalcCheatAffectedBytes(virtualRegion.hardwareAddress, virtualRegion.size);
 }
 
 template<typename stepType, typename compareType>
@@ -995,7 +992,6 @@ bool WriteValueAtHardwareAddress(HWAddressType address, unsigned int value, unsi
 int ResultCount=0;
 bool AutoSearch=false;
 bool AutoSearchAutoRetry=false;
-LRESULT CALLBACK PromptWatchNameProc(HWND, UINT, WPARAM, LPARAM);
 void UpdatePossibilities(int rs_possible, int regions);
 
 
@@ -2185,9 +2181,12 @@ void init_list_box(HWND Box, const char* Strs[], int numColumns, int *columnWidt
 {
 	LVCOLUMN Col;
 	Col.mask = LVCF_FMT | LVCF_ORDER | LVCF_SUBITEM | LVCF_TEXT | LVCF_WIDTH;
-	Col.fmt = LVCFMT_RIGHT;
 	for (int i = 0; i < numColumns; i++)
 	{
+		if (i == 1)
+			Col.fmt = LVCFMT_RIGHT;
+		else
+			Col.fmt = LVCFMT_LEFT;
 		Col.iOrder = i;
 		Col.iSubItem = i;
 		Col.pszText = (LPSTR)(Strs[i]);

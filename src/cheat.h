@@ -5,6 +5,8 @@ void FCEU_LoadGameCheats(FILE *override);
 void FCEU_FlushGameCheats(FILE *override, int nosave);
 void FCEU_ApplyPeriodicCheats(void);
 void FCEU_PowerCheats(void);
+int FCEU_CalcCheatAffectedBytes(uint32 address, uint32 size);
+
 
 int FCEU_CheatGetByte(uint32 A);
 void FCEU_CheatSetByte(uint32 A, uint8 V);
@@ -29,3 +31,10 @@ struct CHEATF {
 	int type;	/* 0 for replace, 1 for substitute(GG). */
 	int status;
 };
+
+
+#define CalcAddressRangeCheatCount(count, address, size) \
+	count = 0; \
+	for (int i = 0; i < numsubcheats && count < size; ++i) \
+		if (SubCheats[i].addr >= address && SubCheats[i].addr < address + size) \
+			++count;

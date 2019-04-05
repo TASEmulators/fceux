@@ -1053,9 +1053,21 @@ void DisableAllCheats()
 
 void UpdateCheatWindowRelatedWindow()
 {
+	// hex editor
 	if (hMemView)
 		UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
 	extern HWND RamSearchHWnd;
+
+	// ram search
 	if (RamSearchHWnd)
 		RedrawWindow(GetDlgItem(RamSearchHWnd, IDC_RAMLIST), NULL, NULL, RDW_INVALIDATE); // if ram search is open then update the ram list.
+
+	// ram watch
+	extern void UpdateWatchCheats();
+	UpdateWatchCheats();
+	extern HWND RamWatchHWnd;
+	if (RamWatchHWnd)
+		RedrawWindow(GetDlgItem(RamWatchHWnd, IDC_WATCHLIST), NULL, NULL, RDW_INVALIDATE); // update the data in watch list to the newest.
+
+
 }

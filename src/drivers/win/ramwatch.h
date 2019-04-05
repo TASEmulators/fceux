@@ -26,6 +26,7 @@ struct AddressWatcher
 	bool WrongEndian;
 	char Size; //'d' = 4 bytes, 'w' = 2 bytes, 'b' = 1 byte, and 'S' means it's a separator.
 	char Type;//'s' = signed integer, 'u' = unsigned, 'h' = hex, 'S' = separator
+	short Cheats; // how many bytes are affected by cheat
 };
 #define MAX_WATCH_COUNT 256
 extern AddressWatcher rswatches[MAX_WATCH_COUNT];
@@ -41,8 +42,13 @@ bool InsertWatch(const AddressWatcher& Watch, HWND parent=NULL); // asks user fo
 void Update_RAM_Watch();
 bool Load_Watches(bool clear, const char* filename);
 void RWAddRecentFile(const char *filename);
+void UpdateWatchCheats();
 
 LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 extern HWND RamWatchHWnd;
+
+#define WatchSizeConv(watch) (watch.Type == 'S' ? 0 : watch.Size == 'd' ? 4 : watch.Size == 'w' ? 2 : watch.Size == 'b' ? 1 : 0)
+#define SizeConvWatch(size) (size == 4 ? 'd' : size == 2 ? 'w' : size == 1 : 'b' : 0)
 
 #endif
