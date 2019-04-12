@@ -122,7 +122,6 @@ static void Latch_Init(CartInfo *info, void (*proc)(void), uint8 init, uint16 ad
 		
 	}
 	AddExState(&latche, 1, 0, "LATC");
-	AddExState(&bus_conflict, 1, 0, "BUSC");
 }
 
 //------------------ Map 0 ---------------------------
