@@ -205,12 +205,15 @@ void Update_RAM_Watch()
 
 		for(int i = 0; i < WatchCount; i++)
 		{
-			unsigned int prevCurValue = rswatches[i].CurValue;
-			unsigned int newCurValue = GetCurrentValue(rswatches[i]);
-			if(prevCurValue != newCurValue)
+			if (rswatches[i].Type != 'S')
 			{
-				rswatches[i].CurValue = newCurValue;
-				watchChanged[i] = TRUE;
+				unsigned int prevCurValue = rswatches[i].CurValue;
+				unsigned int newCurValue = GetCurrentValue(rswatches[i]);
+				if (prevCurValue != newCurValue)
+				{
+					rswatches[i].CurValue = newCurValue;
+					watchChanged[i] = TRUE;
+				}
 			}
 		}
 	}
@@ -735,7 +738,7 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				RECT r;
 				GetWindowRect(hWnd, &r);
 				SetWindowPos(hDlg, NULL, r.left, r.top, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-			
+
 				index = (int)lParam;
 				AddressWatcher* watcher = &rswatches[index];
 				if (watcher->Type != 'S') {
@@ -918,10 +921,9 @@ void RefreshWatchListSelectedCountControlStatus(HWND hDlg)
 
 LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	RECT r;
-	RECT r2;
-	int dx1, dy1, dx2, dy2;
-	static int watchIndex=0;
+	static int watchIndex = 0; // current watch index
+	static HPEN sepPen, sepPenSel; // separator line colors
+	static HFONT sepFon; // separator fonts
 
 	switch(uMsg)
 	{
@@ -941,6 +943,9 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 		}	break;
 
 		case WM_INITDIALOG: {
+			RECT r, r2;
+			int dx1, dy1, dx2, dy2;
+
 			GetWindowRect(hWnd, &r);  //Ramwatch window
 			dx1 = (r.right - r.left) / 2;
 			dy1 = (r.bottom - r.top) / 2;
@@ -984,7 +989,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			UpdateRW_RMenu(rwrecentmenu, RAMMENU_FILE_RECENT, RW_MENU_FIRST_RECENT_FILE);
 			
 			const char* names[3] = {"Address","Value","Notes"};
-			int widths[3] = {62,64,64+51+53};
+			int widths[3] = {68,64,64+51+53};
 			init_list_box(GetDlgItem(hDlg,IDC_WATCHLIST),names,3,widths);
 			if (!ResultCount)
 				reset_address_info();
@@ -1004,6 +1009,14 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			DragAcceptFiles(hDlg, TRUE);
 
 			RefreshWatchListSelectedCountControlStatus(hDlg);
+
+			sepPen = CreatePen(PS_SOLID, 1, RGB(160, 160, 160));
+			sepPenSel = CreatePen(PS_SOLID, 1, RGB(224, 224, 224));
+			LOGFONT logFont;
+			GetObject((HANDLE)SendDlgItemMessage(hDlg, IDC_WATCHLIST, WM_GETFONT, NULL, NULL), sizeof(logFont), &logFont);
+			logFont.lfWeight = FW_SEMIBOLD;
+			sepFon = (HFONT)CreateFontIndirect(&logFont);
+
 			return false;
 		}	break;
 		
@@ -1032,7 +1045,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					}
 				} break;
 
-				default:
+				case IDC_WATCHLIST:
 				{
 					LPNMHDR lP = (LPNMHDR) lParam;
 					switch (lP->code)
@@ -1051,44 +1064,44 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 						case LVN_GETDISPINFO:
 						{
 							LV_DISPINFO *Item = (LV_DISPINFO *)lParam;
-							Item->item.mask = LVIF_TEXT;
-							Item->item.state = 0;
-							Item->item.iImage = 0;
 							const unsigned int iNum = Item->item.iItem;
-							static char num[11];
-							switch (Item->item.iSubItem)
+							if (rswatches[iNum].Type != 'S')
 							{
-								case 0:
+								Item->item.mask = LVIF_TEXT;
+								static char num[11];
+								switch (Item->item.iSubItem)
 								{
-									int size = WatchSizeConv(rswatches[iNum]);
-									int addr = rswatches[iNum].Address;
-									sprintf(num, rswatches[iNum].Type == 'S' ?  "------" : size > 1 ? "%04X-%04X" : "%04X", addr, addr + size - 1);
-									Item->item.pszText = num;
-									return true;
-								}
-								case 1: {
-									int i = rswatches[iNum].CurValue;
-									int t = rswatches[iNum].Type;
-									int size = rswatches[iNum].Size;
-									const char* formatString = ((t=='s') ? "%d" : (t=='u') ? "%u" : (size=='d' ? "%08X" : size=='w' ? "%04X" : "%02X"));
-									switch (size)
-									{
-										case 'b':
-										default: sprintf(num, formatString, t=='s' ? (char)(i&0xff) : (unsigned char)(i&0xff)); break;
-										case 'w': sprintf(num, formatString, t=='s' ? (short)(i&0xffff) : (unsigned short)(i&0xffff)); break;
-										case 'd': sprintf(num, formatString, t=='s' ? (long)(i&0xffffffff) : (unsigned long)(i&0xffffffff)); break;
-										case 'S': sprintf(num, "---------"); break;
+									case 0: {
+										int size = WatchSizeConv(rswatches[iNum]);
+										int addr = rswatches[iNum].Address;
+										sprintf(num, size > 1 ? "%04X-%04X" : "%04X", addr, addr + size - 1);
+										Item->item.pszText = num;
+										break;
 									}
+									case 1: {
+										int i = rswatches[iNum].CurValue;
+										int t = rswatches[iNum].Type;
+										int size = rswatches[iNum].Size;
+										const char* formatString = ((t == 's') ? "%d" : (t == 'u') ? "%u" : (size == 'd' ? "%08X" : size == 'w' ? "%04X" : "%02X"));
+										switch (size)
+										{
+										case 'b':
+										default: sprintf(num, formatString, t == 's' ? (char)(i & 0xff) : (unsigned char)(i & 0xff)); break;
+										case 'w': sprintf(num, formatString, t == 's' ? (short)(i & 0xffff) : (unsigned short)(i & 0xffff)); break;
+										case 'd': sprintf(num, formatString, t == 's' ? (long)(i & 0xffffffff) : (unsigned long)(i & 0xffffffff)); break;
+										}
 
-									Item->item.pszText = num;
-								}	return true;
-								case 2:
-									Item->item.pszText = rswatches[iNum].comment ? rswatches[iNum].comment : (char*)"";
-									return true;
-
-								default:
-									return false;
+										Item->item.pszText = num;
+									}
+									break;
+									case 2:
+										Item->item.pszText = rswatches[iNum].comment ? rswatches[iNum].comment : (char*)"";
+										break;
+									default:
+										break;
+								}
 							}
+							return true;
 						}
 						case LVN_ODFINDITEM:
 						{	
@@ -1100,15 +1113,57 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 						}
 						case NM_CUSTOMDRAW:
 						{
-							LPNMCUSTOMDRAW nmcd = (LPNMCUSTOMDRAW)lParam;
+							NMCUSTOMDRAW* nmcd = (NMCUSTOMDRAW*)lParam;
 							switch (nmcd->dwDrawStage)
 							{
-								case CDDS_ITEMPREPAINT:
-								{
-									LPNMLVCUSTOMDRAW lplvcd = (LPNMLVCUSTOMDRAW)lParam;
+								case CDDS_ITEMPOSTPAINT:
+									// Here is the separator actually drawn
 									if (rswatches[nmcd->dwItemSpec].Type == 'S')
-										lplvcd->clrTextBk = RGB(247, 187, 67);
+									{
+										char* comment = rswatches[nmcd->dwItemSpec].comment;
+										RECT rect;
+										rect.left = LVIR_BOUNDS;
+										SendDlgItemMessage(hDlg, IDC_WATCHLIST, LVM_GETITEMRECT, nmcd->dwItemSpec, (LPARAM)&rect);
+										HDC hdc = nmcd->hdc;
+
+										// This value is required, when you click outside any items in the list there's nothing selected, but the frame is still on the separator, it would draw with the wrong color. I don't know if there's a better way to check this state, since nmcd->uItemState doesn't seem tohave a value for it.
+										// int selCount = SendDlgItemMessage(hDlg, IDC_WATCHLIST, LVM_GETSELECTEDCOUNT, 0, 0);
+										int state = SendDlgItemMessage(hDlg, IDC_WATCHLIST, LVM_GETITEMSTATE, nmcd->dwItemSpec, LVIS_SELECTED);
+
+										// draw the comment as the separator title
+										if (comment != NULL && strcmp(comment, ""))
+										{
+											SIZE size;
+											SelectObject(hdc, sepFon);
+											GetTextExtentPoint(hdc, comment, strlen(comment), &size);
+											int adjust = (rect.bottom - rect.top - size.cy) / 2;
+											rect.bottom -= adjust;
+											rect.top += adjust;
+											int right = rect.right;
+											rect.right = (rect.left += 6) + size.cx;
+											// draw it with a different color when hilighted for eyes easy
+											SetTextColor(hdc, state ? RGB(229, 224, 236) : RGB(43, 145, 175));
+											DrawText(hdc, comment, strlen(comment), &rect, DT_VCENTER);
+											rect.left = rect.right;
+											rect.right = right;
+										}
+
+										// draw the separator
+										// draw it with a different color when hilighted for eyes easy
+										SelectObject(hdc, state ? sepPenSel : sepPen);
+										int posy = (rect.bottom - rect.top) / 2 + rect.top;
+										// Is there a way to find real ident of the highlight mark in the first cloumn?
+										MoveToEx(hdc, rect.left += 4, posy, NULL);
+										LineTo(hdc, rect.right, posy);
+									}
+									break;
+								case CDDS_ITEMPREPAINT:
+									if (rswatches[nmcd->dwItemSpec].Type == 'S')
+										// A separator looks very different from normal watches, it should be drawn in another space while I want to use the highlight bar and the focus frame from the system.
+										SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NOTIFYPOSTPAINT);
 									else
+									{
+										NMLVCUSTOMDRAW* lplvcd = (NMLVCUSTOMDRAW*)lParam;
 										switch (rswatches[nmcd->dwItemSpec].Cheats)
 										{
 											default:
@@ -1125,20 +1180,19 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 												lplvcd->clrTextBk = RGB(175, 94, 253);
 												lplvcd->clrText = RGB(255, 255, 255); break; // use a more visual color in dark background
 										}
-									SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NEWFONT);
-								}
+										SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NEWFONT);
+									}
 								break;
 								case CDDS_PREPAINT:
 									SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NOTIFYITEMDRAW);
 							}
 							return TRUE;
 						}
-						
 					}
 				}
 			}
-		}	break;
-
+		}
+		break;
 		case WM_COMMAND:
 			switch(LOWORD(wParam))
 			{
@@ -1349,6 +1403,11 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			RamWatchHWnd = NULL;
 			DragAcceptFiles(hDlg, FALSE);
 			WriteRecentRWFiles();	// write recent menu to ini
+
+			DeleteObject(sepFon);
+			DeleteObject(sepPen);
+			DeleteObject(sepPenSel); // delete drawing objects;
+
 			break;
 
 		case WM_DROPFILES:

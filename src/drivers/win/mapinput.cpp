@@ -14,6 +14,18 @@ static int mapInputSortCol = -1;
 // whether it's asc or desc sorting, when sortCol is -1, this value has no effect
 static bool mapInputSortAsc = true;
 
+// an ugly macro function
+#define UpdateListViewSort(hwndListView, lpListView, filter) \
+if (filter == EMUCMDTYPE_MAX + 3) \
+	lpListView->iSubItem = 2; \
+else if (filter > EMUCMDTYPE_MISC && filter < EMUCMDTYPE_MAX || filter == EMUCMDTYPE_MAX + 2) \
+	lpListView->iSubItem = 1; \
+else \
+	lpListView->iSubItem = mapInputSortCol; \
+if (SendMessage(hwndListView, LVM_SORTITEMS, (WPARAM)lpListView, (LPARAM)MapInputItemSortFunc)) \
+	UpdateSortColumnIcon(hwndListView, mapInputSortCol, mapInputSortAsc); 
+
+
 void KeyboardUpdateState(void); //mbg merge 7/17/06 yech had to add this
 
 struct INPUTDLGTHREADARGS
@@ -564,22 +576,12 @@ void PopulateMappingDisplay(HWND hwndDlg)
 		hdr.hwndFrom = hwndListView;
 		hdr.code = LVN_COLUMNCLICK;
 
-		NMLISTVIEW listView;
-		listView.hdr = hdr;
+		NMLISTVIEW* lpListView = new NMLISTVIEW;
+		lpListView->hdr = hdr;
 
-		// when showing the conflict table, always sorted by "Input" column first,
-		// So the user can easily find out which are conflicting.
-		if (filter == EMUCMDTYPE_MAX + 3)
-			listView.iSubItem = 2;
-		// only one type is in the list, just sort with "Command" column
-		// "Unassigned" has no text in "Input", just sort with "Command" column
-		else if (filter > EMUCMDTYPE_MISC && filter < EMUCMDTYPE_MAX || filter == EMUCMDTYPE_MAX + 2)
-			listView.iSubItem = 1;
-		else
-			listView.iSubItem = mapInputSortCol;
+		UpdateListViewSort(hwndListView, lpListView, filter);
 
-		int ret = SendMessage(hwndListView, LVM_SORTITEMS, (WPARAM)&listView, (LPARAM)MapInputItemSortFunc);
-		UpdateSortColumnIcon(hwndListView, mapInputSortCol, mapInputSortAsc);
+		delete lpListView;
 	}
 }
 
@@ -792,27 +794,14 @@ BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 						case LVN_COLUMNCLICK:
 							// Sort the items
 							if (mapInputSortCol != lpListView->iSubItem) {
-								mapInputSortCol= lpListView->iSubItem;
+								mapInputSortCol = lpListView->iSubItem;
 								mapInputSortAsc = true;
 							}
 							else
 								mapInputSortAsc = !mapInputSortAsc;
 
 							int filter = (int)SendDlgItemMessage(hwndDlg, COMBO_FILTER, CB_GETCURSEL, 0, 0);
-
-							// when showing the conflict table, always sorted by "Input" column first,
-							// So the user can easily find out which are conflicting.
-							if (filter == EMUCMDTYPE_MAX + 3)
-								lpListView->iSubItem = 2;
-							// only one type is in the list, just sort with "Command" column
-							// "Unassigned" has no text in "Input", just sort with "Command" column
-							else if (filter > EMUCMDTYPE_MISC && filter < EMUCMDTYPE_MAX || filter == EMUCMDTYPE_MAX + 2)
-								lpListView->iSubItem = 1;
-							else
-								lpListView->iSubItem = mapInputSortCol;
-
-							int ret = SendMessage(hwndListView, LVM_SORTITEMS, (WPARAM)lpListView, (LPARAM)MapInputItemSortFunc);
-							UpdateSortColumnIcon(hwndListView, mapInputSortCol, mapInputSortAsc);
+							UpdateListViewSort(hwndListView, lpListView, filter);
 					}
 					return TRUE;
 				}
