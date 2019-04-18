@@ -623,6 +623,7 @@ bool Load_Watches(bool clear, const char* filename)
 	Temp.Address = 0;	// default values
 	Temp.Size = 'b';
 	Temp.Type = 'h';
+	Temp.comment = NULL;
 	char mode;
 	char Str_Tmp[1024];
 	fgets(Str_Tmp,1024,WatchFile);
