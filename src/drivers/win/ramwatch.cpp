@@ -12,6 +12,7 @@ using namespace std;
 #include <windows.h>
 #include <commctrl.h>
 #include <string>
+#include <map>
 
 /*
 #include <commctrl.h>
@@ -32,7 +33,7 @@ bool AutoRWLoad = false;    //Keeps track of whether Auto-load is checked
 bool RWSaveWindowPos = false; //Keeps track of whether Save Window position is checked
 char currentWatch[1024];
 int ramw_x, ramw_y;			//Used to store ramwatch dialog window positions
-AddressWatcher rswatches[MAX_WATCH_COUNT];
+std::map<int, AddressWatcher> rswatches;
 int WatchCount=0;
 
 char applicationPath[2048];
@@ -43,6 +44,14 @@ struct InitRamWatch
 		GetModuleFileName(NULL, applicationPath, 2048);
 	}
 } initRamWatch;
+
+HPEN SeparatorCache::sepPen = NULL;
+HPEN SeparatorCache::sepPenSel = NULL;
+HFONT SeparatorCache::sepFon = NULL;
+int SeparatorCache::iHeight = 0;
+int SeparatorCache::sepOffY = 0;
+
+std::map<int, SeparatorCache> separatorCache;
 
 HWND RamWatchHWnd;
 #define gamefilename GetRomName()
@@ -114,8 +123,12 @@ bool InsertWatch(const AddressWatcher& Watch, char *Comment)
 	NewWatch.CurValue = GetCurrentValue(NewWatch);
 	extern int FCEU_CalcCheatAffectedBytes(uint32, uint32);
 	NewWatch.Cheats = FCEU_CalcCheatAffectedBytes(NewWatch.Address, WatchSizeConv(NewWatch));
+
+	if (NewWatch.Type == 'S')
+		separatorCache[i] = SeparatorCache(RamWatchHWnd, Comment);
+
 	ListView_SetItemCount(GetDlgItem(RamWatchHWnd,IDC_WATCHLIST),WatchCount);
-	RWfileChanged=true;
+	RWfileChanged = true;
 
 	return true;
 }
@@ -190,7 +203,7 @@ bool InsertWatch(const AddressWatcher& Watch, HWND parent)
 
 	rswatches[WatchCount] = Watch;
 	rswatches[WatchCount].CurValue = GetCurrentValue(rswatches[WatchCount]);
-	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), parent, (DLGPROC) EditWatchProc, (LPARAM)WatchCount);
+	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), parent, (DLGPROC)EditWatchProc, (LPARAM)WatchCount);
 
 	return WatchCount > prevWatchCount;
 }
@@ -420,7 +433,7 @@ void OpenRWRecentFile(int memwRFileNumber)
 	FILE *WatchFile = fopen(Str_Tmp,"rb");
 	if (!WatchFile)
 	{
-		int answer = MessageBox(MESSAGEBOXPARENT,"Error opening file.","ERROR",MB_OKCANCEL | MB_ICONERROR);
+		int answer = MessageBox(MESSAGEBOXPARENT,"Error opening file.","Ram Watch",MB_OKCANCEL | MB_ICONERROR);
 		if (answer == IDOK)
 		{
 			rw_recent_files[rnum][0] = '\0';	//Clear file from list 
@@ -606,7 +619,7 @@ bool Load_Watches(bool clear, const char* filename)
 	FILE* WatchFile = fopen(filename,"rb");
 	if (!WatchFile)
 	{
-		MessageBox(MESSAGEBOXPARENT,"Error opening file.","ERROR",MB_OK | MB_ICONERROR);
+		MessageBox(MESSAGEBOXPARENT,"Error opening file.","Ram Watch",MB_OK | MB_ICONERROR);
 		return false;
 	}
 	if(clear)
@@ -693,6 +706,7 @@ bool ResetWatches()
 		free(rswatches[WatchCount].comment);
 		rswatches[WatchCount].comment = NULL;
 	}
+	rswatches.clear();
 	WatchCount = 0;
 	if (RamWatchHWnd)
 	{
@@ -701,6 +715,8 @@ bool ResetWatches()
 	}
 	RWfileChanged = false;
 	currentWatch[0] = NULL;
+
+	separatorCache.clear();
 	return true;
 }
 
@@ -708,9 +724,20 @@ void RemoveWatch(int watchIndex)
 {
 	free(rswatches[watchIndex].comment);
 	rswatches[watchIndex].comment = NULL;
+	if (rswatches[watchIndex].Type == 'S')
+		RemoveSeparatorBuf(watchIndex);
+	rswatches.erase(watchIndex);
 	for (int i = watchIndex; i <= WatchCount; i++)
-		rswatches[i] = rswatches[i+1];
+	{
+		rswatches[i] = rswatches[i + 1];
+		separatorCache[i] = separatorCache[i + 1];
+	}
 	WatchCount--;
+}
+
+void RemoveSeparatorBuf(int watchIndex)
+{
+	separatorCache.erase(watchIndex);
 }
 
 void RefreshWatchListSelectedItemControlStatus(HWND hDlg)
@@ -776,7 +803,8 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				if (watcher->comment != NULL)
 					SetDlgItemText(hDlg, IDC_PROMPT_EDIT, watcher->comment);
 
-				if (watcher->Type == 'S' || GetParent(hDlg) == RamSearchHWnd)
+				HWND parent = GetParent(hDlg);
+				if (watcher->Type == 'S' || parent == RamSearchHWnd)
 				{
 					EnableWindow(GetDlgItem(hDlg, IDC_SPECIFICADDRESS), FALSE);
 					EnableWindow(GetDlgItem(hDlg, IDC_DATATYPE_GROUPBOX), FALSE);
@@ -806,6 +834,8 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						watcher.comment = strcpy((char*)malloc(strlen(watcher.comment) + 2), watcher.comment);
 
 					// It's from ram watch window, not a separator
+					// When it's from ram search window, all the information required is already set,
+					// so this is also unecessary
 					if (RamWatchHWnd && RamWatchHWnd == GetParent(hDlg) && watcher.Type != 'S')
 					{
 						GetDlgItemText(hDlg, IDC_PROMPT_EDIT, Str_Tmp, 1024);
@@ -923,8 +953,7 @@ void RefreshWatchListSelectedCountControlStatus(HWND hDlg)
 LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	static int watchIndex = 0; // current watch index
-	static HPEN sepPen, sepPenSel; // separator line colors
-	static HFONT sepFon; // separator fonts
+	static bool listFocus;
 
 	switch(uMsg)
 	{
@@ -990,8 +1019,11 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			UpdateRW_RMenu(rwrecentmenu, RAMMENU_FILE_RECENT, RW_MENU_FIRST_RECENT_FILE);
 			
 			const char* names[3] = {"Address","Value","Notes"};
-			int widths[3] = {68,64,64+51+53};
+			int widths[3] = {78,64,160};
 			init_list_box(GetDlgItem(hDlg,IDC_WATCHLIST),names,3,widths);
+
+			SeparatorCache::Init(GetDlgItem(hDlg, IDC_WATCHLIST));
+
 			if (!ResultCount)
 				reset_address_info();
 			else
@@ -1011,13 +1043,6 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 			RefreshWatchListSelectedCountControlStatus(hDlg);
 
-			sepPen = CreatePen(PS_SOLID, 1, RGB(160, 160, 160));
-			sepPenSel = CreatePen(PS_SOLID, 1, RGB(224, 224, 224));
-			LOGFONT logFont;
-			GetObject((HANDLE)SendDlgItemMessage(hDlg, IDC_WATCHLIST, WM_GETFONT, NULL, NULL), sizeof(logFont), &logFont);
-			logFont.lfWeight = FW_SEMIBOLD;
-			sepFon = (HFONT)CreateFontIndirect(&logFont);
-
 			return false;
 		}	break;
 		
@@ -1030,7 +1055,6 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
  		case WM_ENTERSIZEMOVE:
 			//Clear_Sound_Buffer();
 			break;
-
 		case WM_NOTIFY:
 		{
 			switch(wParam)
@@ -1112,52 +1136,16 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 							SetWindowLong(hDlg, DWL_MSGRESULT, ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST)));
 							return 1;
 						}
+						case NM_SETFOCUS: listFocus = true; break;
+						case NM_KILLFOCUS: listFocus = false; break;
 						case NM_CUSTOMDRAW:
 						{
 							NMCUSTOMDRAW* nmcd = (NMCUSTOMDRAW*)lParam;
 							switch (nmcd->dwDrawStage)
 							{
-								case CDDS_ITEMPOSTPAINT:
-									// Here is the separator actually drawn
-									if (rswatches[nmcd->dwItemSpec].Type == 'S')
-									{
-										char* comment = rswatches[nmcd->dwItemSpec].comment;
-										RECT rect;
-										rect.left = LVIR_BOUNDS;
-										SendDlgItemMessage(hDlg, IDC_WATCHLIST, LVM_GETITEMRECT, nmcd->dwItemSpec, (LPARAM)&rect);
-										HDC hdc = nmcd->hdc;
-
-										// This value is required, when you click outside any items in the list there's nothing selected, but the frame is still on the separator, it would draw with the wrong color. I don't know if there's a better way to check this state, since nmcd->uItemState doesn't seem tohave a value for it.
-										// int selCount = SendDlgItemMessage(hDlg, IDC_WATCHLIST, LVM_GETSELECTEDCOUNT, 0, 0);
-										int state = SendDlgItemMessage(hDlg, IDC_WATCHLIST, LVM_GETITEMSTATE, nmcd->dwItemSpec, LVIS_SELECTED);
-
-										// draw the comment as the separator title
-										if (comment != NULL && strcmp(comment, ""))
-										{
-											SIZE size;
-											SelectObject(hdc, sepFon);
-											GetTextExtentPoint(hdc, comment, strlen(comment), &size);
-											int adjust = (rect.bottom - rect.top - size.cy) / 2;
-											rect.bottom -= adjust;
-											rect.top += adjust;
-											int right = rect.right;
-											rect.right = (rect.left += 6) + size.cx;
-											// draw it with a different color when hilighted for eyes easy
-											SetTextColor(hdc, state ? RGB(229, 224, 236) : RGB(43, 145, 175));
-											DrawText(hdc, comment, strlen(comment), &rect, DT_VCENTER);
-											rect.left = rect.right;
-											rect.right = right;
-										}
-
-										// draw the separator
-										// draw it with a different color when hilighted for eyes easy
-										SelectObject(hdc, state ? sepPenSel : sepPen);
-										int posy = (rect.bottom - rect.top) / 2 + rect.top;
-										// Is there a way to find real ident of the highlight mark in the first cloumn?
-										MoveToEx(hdc, rect.left += 4, posy, NULL);
-										LineTo(hdc, rect.right, posy);
-									}
-									break;
+							case CDDS_PREPAINT:
+								SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NOTIFYITEMDRAW);
+								break;
 								case CDDS_ITEMPREPAINT:
 									if (rswatches[nmcd->dwItemSpec].Type == 'S')
 										// A separator looks very different from normal watches, it should be drawn in another space while I want to use the highlight bar and the focus frame from the system.
@@ -1184,8 +1172,41 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 										SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NEWFONT);
 									}
 								break;
-								case CDDS_PREPAINT:
-									SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NOTIFYITEMDRAW);
+								case CDDS_ITEMPOSTPAINT:
+									// Here is the separator actually drawn
+									if (rswatches[nmcd->dwItemSpec].Type == 'S')
+									{
+										char* comment = rswatches[nmcd->dwItemSpec].comment;
+										RECT rect;
+										rect.left = LVIR_BOUNDS;
+										SendDlgItemMessage(hDlg, IDC_WATCHLIST, LVM_GETITEMRECT, nmcd->dwItemSpec, (LPARAM)&rect);
+
+										HDC hdc = nmcd->hdc;
+
+										// This value is required, when you click outside any items in the list there's nothing selected, but the frame is still on the separator, it would draw with the wrong color. I don't know if there's a better way to check this state, since nmcd->uItemState doesn't seem to have a value for it.
+										bool state = SendDlgItemMessage(hDlg, IDC_WATCHLIST, LVM_GETITEMSTATE, nmcd->dwItemSpec, LVIS_SELECTED) && listFocus;
+
+										SeparatorCache& sepCache = separatorCache[nmcd->dwItemSpec];
+
+										// draw the separator
+										// draw it with a different color when hilighted for eyes easy
+										SelectObject(hdc, state ? SeparatorCache::sepPenSel : SeparatorCache::sepPen);
+										MoveToEx(hdc, rect.left + sepCache.sepOffX, rect.top + SeparatorCache::sepOffY, NULL);
+										LineTo(hdc, rect.right, rect.top + SeparatorCache::sepOffY);
+
+										// draw the comment as the separator title
+										if (comment && comment[0])
+										{
+											rect.top += sepCache.labelOffY;
+											rect.left += 6;
+											// draw it with a different color when hilighted for eyes easy
+											SetTextColor(hdc, state ? RGB(229, 224, 236) : RGB(43, 145, 175));
+											SelectObject(hdc, SeparatorCache::sepFon);
+											DrawText(hdc, comment, strlen(comment), &rect, DT_LEFT);
+										}
+									}
+									break;
+
 							}
 							return TRUE;
 						}
@@ -1275,10 +1296,17 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					if (watchIndex == 0 || watchIndex == -1)
 						return true;
 					void *tmp = malloc(sizeof(AddressWatcher));
-					memcpy(tmp,&(rswatches[watchIndex]),sizeof(AddressWatcher));
-					memcpy(&(rswatches[watchIndex]),&(rswatches[watchIndex - 1]),sizeof(AddressWatcher));
-					memcpy(&(rswatches[watchIndex - 1]),tmp,sizeof(AddressWatcher));
+					memcpy(tmp, &rswatches[watchIndex], sizeof(AddressWatcher));
+					memcpy(&rswatches[watchIndex], &rswatches[watchIndex - 1], sizeof(AddressWatcher));
+					memcpy(&rswatches[watchIndex - 1], tmp, sizeof(AddressWatcher));
 					free(tmp);
+
+					tmp = malloc(sizeof(SeparatorCache));
+					memcpy(tmp, &separatorCache[watchIndex], sizeof(SeparatorCache));
+					memcpy(&separatorCache[watchIndex], &separatorCache[watchIndex - 1], sizeof(SeparatorCache));
+					memcpy(&separatorCache[watchIndex - 1], tmp, sizeof(SeparatorCache));
+					free(tmp);
+
 					ListView_SetItemState(GetDlgItem(hDlg,IDC_WATCHLIST),watchIndex,0,LVIS_FOCUSED|LVIS_SELECTED);
 					ListView_SetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST),watchIndex-1);
 					ListView_SetItemState(GetDlgItem(hDlg,IDC_WATCHLIST),watchIndex-1,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
@@ -1291,11 +1319,19 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					watchIndex = ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST));
 					if (watchIndex >= WatchCount - 1 || watchIndex == -1)
 						return true;
-					void *tmp = malloc(sizeof(AddressWatcher));
-					memcpy(tmp,&(rswatches[watchIndex]),sizeof(AddressWatcher));
-					memcpy(&(rswatches[watchIndex]),&(rswatches[watchIndex + 1]),sizeof(AddressWatcher));
-					memcpy(&(rswatches[watchIndex + 1]),tmp,sizeof(AddressWatcher));
+
+					void *tmp = calloc(1, sizeof(AddressWatcher));
+					memcpy(tmp, &rswatches[watchIndex], sizeof(AddressWatcher));
+					memcpy(&rswatches[watchIndex], &rswatches[watchIndex + 1], sizeof(AddressWatcher));
+					memcpy(&rswatches[watchIndex + 1], tmp, sizeof(AddressWatcher));
 					free(tmp);
+
+					tmp = calloc(1, sizeof(SeparatorCache));
+					memcpy(tmp, &separatorCache[watchIndex], sizeof(SeparatorCache));
+					memcpy(&separatorCache[watchIndex], &separatorCache[watchIndex + 1], sizeof(SeparatorCache));
+					memcpy(&separatorCache[watchIndex + 1], tmp, sizeof(SeparatorCache));
+					free(tmp);
+
 					ListView_SetItemState(GetDlgItem(hDlg,IDC_WATCHLIST),watchIndex,0,LVIS_FOCUSED|LVIS_SELECTED);
 					ListView_SetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST),watchIndex+1);
 					ListView_SetItemState(GetDlgItem(hDlg,IDC_WATCHLIST),watchIndex+1,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
@@ -1327,46 +1363,48 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 				{
 					watchIndex = ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST));
 					if(watchIndex >= 0)
-					{
-						unsigned int address = rswatches[watchIndex].Address;
+						if (rswatches[watchIndex].Type != 'S')
+						{
+							unsigned int address = rswatches[watchIndex].Address;
 
-						int sizeType = -1;
-						if(rswatches[watchIndex].Size == 'b')
-							sizeType = 0;
-						else if(rswatches[watchIndex].Size == 'w')
-							sizeType = 1;
-						else if(rswatches[watchIndex].Size == 'd')
-							sizeType = 2;
+							int sizeType = -1;
+							if(rswatches[watchIndex].Size == 'b')
+								sizeType = 0;
+							else if(rswatches[watchIndex].Size == 'w')
+								sizeType = 1;
+							else if(rswatches[watchIndex].Size == 'd')
+								sizeType = 2;
 
-						int numberType = -1;
-						if(rswatches[watchIndex].Type == 's')
-							numberType = 0;
-						else if(rswatches[watchIndex].Type == 'u')
-							numberType = 1;
-						else if(rswatches[watchIndex].Type == 'h')
-							numberType = 2;
+							int numberType = -1;
+							if(rswatches[watchIndex].Type == 's')
+								numberType = 0;
+							else if(rswatches[watchIndex].Type == 'u')
+								numberType = 1;
+							else if(rswatches[watchIndex].Type == 'h')
+								numberType = 2;
 
-						// Don't open cheat dialog
+							// Don't open cheat dialog
 
-						switch (sizeType) {
-						case 0: {
-								FCEUI_AddCheat("",address,rswatches[watchIndex].CurValue,-1,1);
-								break; }
-						case 1: {
-								FCEUI_AddCheat("",address,rswatches[watchIndex].CurValue & 0xFF,-1,1);
-								FCEUI_AddCheat("",address + 1,(rswatches[watchIndex].CurValue & 0xFF00) / 0x100,-1,1);
-								break; }
-						case 2: {
-								FCEUI_AddCheat("",address,rswatches[watchIndex].CurValue & 0xFF,-1,1);
-								FCEUI_AddCheat("",address + 1,(rswatches[watchIndex].CurValue & 0xFF00) / 0x100,-1,1);
-								FCEUI_AddCheat("",address + 2,(rswatches[watchIndex].CurValue & 0xFF0000) / 0x10000,-1,1);
-								FCEUI_AddCheat("",address + 3,(rswatches[watchIndex].CurValue & 0xFF000000) / 0x1000000,-1,1);
-								break; }
+							switch (sizeType) {
+								case 0:
+									FCEUI_AddCheat("", address, rswatches[watchIndex].CurValue, -1, 1);
+									break;
+								case 1:
+									FCEUI_AddCheat("", address, rswatches[watchIndex].CurValue & 0xFF, -1, 1);
+									FCEUI_AddCheat("", address + 1, (rswatches[watchIndex].CurValue & 0xFF00) / 0x100, -1, 1);
+									break;
+								case 2:
+									FCEUI_AddCheat("", address, rswatches[watchIndex].CurValue & 0xFF, -1, 1);
+									FCEUI_AddCheat("", address + 1, (rswatches[watchIndex].CurValue & 0xFF00) / 0x100, -1, 1);
+									FCEUI_AddCheat("", address + 2, (rswatches[watchIndex].CurValue & 0xFF0000) / 0x10000, -1, 1);
+									FCEUI_AddCheat("", address + 3, (rswatches[watchIndex].CurValue & 0xFF000000) / 0x1000000, -1, 1);
+									break;
+							}
+							UpdateCheatsAdded();
+							UpdateCheatWindowRelatedWindow();
 						}
-
-						UpdateCheatsAdded();
-						UpdateCheatWindowRelatedWindow();
-					}
+						else
+							MessageBox(hDlg, "Sorry, you can't add cheat to a separator.", "Error", MB_ICONERROR | MB_OK);
 				}
 				break;
 				case IDOK:
@@ -1405,9 +1443,8 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			DragAcceptFiles(hDlg, FALSE);
 			WriteRecentRWFiles();	// write recent menu to ini
 
-			DeleteObject(sepFon);
-			DeleteObject(sepPen);
-			DeleteObject(sepPenSel); // delete drawing objects;
+			// release the hdc related objects
+			SeparatorCache::DeInit();
 
 			break;
 
@@ -1429,4 +1466,51 @@ void UpdateWatchCheats() {
 	extern int FCEU_CalcCheatAffectedBytes(uint32, uint32);
 	for (int i = 0; i < WatchCount; ++i)
 		rswatches[i].Cheats = FCEU_CalcCheatAffectedBytes(rswatches[i].Address, WatchSizeConv(rswatches[i]));
+
+void SeparatorCache::Init(HWND hBox)
+{
+	RECT ir;
+	ir.left = LVIR_BOUNDS;
+
+	int count = SendMessage(hBox, LVM_GETITEMCOUNT, 0, 0);
+	SendMessage(hBox, LVM_SETITEMCOUNT, 1, 0);
+	SendMessage(hBox, LVM_GETITEMRECT, 0, (LPARAM)&ir);
+	SendMessage(hBox, LVM_SETITEMCOUNT, count, 0);
+
+	sepOffY = (iHeight = ir.bottom - ir.top) / 2;
+
+	sepPen = CreatePen(PS_SOLID, 1, RGB(160, 160, 160));
+	sepPenSel = CreatePen(PS_SOLID, 1, RGB(224, 224, 224));
+
+	LOGFONT logFont;
+	GetObject((HANDLE)SendMessage(hBox, WM_GETFONT, NULL, NULL), sizeof(logFont), &logFont);
+	sepFon = (HFONT)CreateFontIndirect((logFont.lfWeight = FW_SEMIBOLD, &logFont));
+}
+
+void SeparatorCache::DeInit()
+{
+	DeleteObject(sepPen);
+	DeleteObject(sepPenSel);
+	DeleteObject(sepFon);
+}
+
+
+SeparatorCache::SeparatorCache(HWND hwnd, char* text) {
+	if (text && text[0])
+	{
+		SIZE size;
+
+		HDC hdc = GetDC(hwnd);
+		SelectFont(hdc, sepFon);
+		GetTextExtentPoint(hdc, text, strlen(text), &size);
+		ReleaseDC(hwnd, hdc);
+
+		sepOffX = size.cx + 8;
+		labelOffY = (iHeight - size.cy) / 2;
+	}
+	else {
+		// Is there a way to find real ident of the highlight mark in the first cloumn?
+		sepOffX = 4;
+		labelOffY = 0;
+	}
 }
