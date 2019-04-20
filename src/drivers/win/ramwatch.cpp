@@ -66,7 +66,7 @@ void init_list_box(HWND Box, const char* Strs[], int numColumns, int *columnWidt
 bool QuickSaveWatches();
 bool ResetWatches();
 
-void RefreshWatchListSelectedCountControlStatus(HWND hDlg);
+void RefreshWatchListSelectedCountControlStatus(HWND hDlg, int newComer = -1);
 
 unsigned int GetCurrentValue(AddressWatcher& watch)
 {
@@ -921,21 +921,23 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 void RamWatchEnableCommand(HWND hDlg, HMENU hMenu, UINT uIDEnableItem, bool enable)
 {
-	EnableWindow(GetDlgItem(hDlg, uIDEnableItem), (enable?TRUE:FALSE));
+	EnableWindow(GetDlgItem(hDlg, uIDEnableItem), enable ? TRUE : FALSE);
 	if (hMenu != NULL) {
 		if (uIDEnableItem == ID_WATCHES_UPDOWN) {
-			EnableMenuItem(hMenu, IDC_C_WATCH_UP, MF_BYCOMMAND | (enable?MF_ENABLED:MF_GRAYED));
-			EnableMenuItem(hMenu, IDC_C_WATCH_DOWN, MF_BYCOMMAND | (enable?MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(hMenu, IDC_C_WATCH_UP, MF_BYCOMMAND | enable ? MF_ENABLED : MF_GRAYED | MF_DISABLED);
+			EnableMenuItem(hMenu, IDC_C_WATCH_DOWN, MF_BYCOMMAND | enable ? MF_ENABLED : MF_GRAYED | MF_DISABLED);
 		}
 		else
-			EnableMenuItem(hMenu, uIDEnableItem, MF_BYCOMMAND | (enable?MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(hMenu, uIDEnableItem, MF_BYCOMMAND | enable ? MF_ENABLED : MF_GRAYED | MF_DISABLED);
 	}
 }
 
-void RefreshWatchListSelectedCountControlStatus(HWND hDlg)
+void RefreshWatchListSelectedCountControlStatus(HWND hDlg, int newComer)
 {
 	static int prevSelCount=-1;
 	int selCount = ListView_GetSelectedCount(GetDlgItem(hDlg,IDC_WATCHLIST));
+
+	// int sel = SendDlgItemMessage(hDlg, IDC_WATCHLIST, LVM_GETSELECTIONMARK, 0, 0);
 	if(selCount != prevSelCount)
 	{
 		if(selCount < 2 || prevSelCount < 2)
@@ -943,8 +945,8 @@ void RefreshWatchListSelectedCountControlStatus(HWND hDlg)
 			RamWatchEnableCommand(hDlg, ramwatchmenu, IDC_C_WATCH_EDIT, selCount == 1);
 			RamWatchEnableCommand(hDlg, ramwatchmenu, IDC_C_WATCH_REMOVE, selCount >= 1);
 			RamWatchEnableCommand(hDlg, ramwatchmenu, IDC_C_WATCH_DUPLICATE, selCount == 1);
-			RamWatchEnableCommand(hDlg, ramwatchmenu, IDC_C_ADDCHEAT, selCount == 1);
 			RamWatchEnableCommand(hDlg, ramwatchmenu, ID_WATCHES_UPDOWN, selCount == 1);
+			RamWatchEnableCommand(hDlg, ramwatchmenu, IDC_C_ADDCHEAT, selCount == 1 && newComer != -1 && rswatches[newComer].Type != 'S');
 		}
 		prevSelCount = selCount;
 	}
@@ -1078,12 +1080,14 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 						case LVN_ITEMCHANGED: // selection changed event
 						{
 							NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)lP;
+
 							if(pNMListView->uNewState & LVIS_FOCUSED ||
 								(pNMListView->uNewState ^ pNMListView->uOldState) & LVIS_SELECTED)
 							{
 								// disable buttons that we don't have the right number of selected items for
-								RefreshWatchListSelectedCountControlStatus(hDlg);
+								RefreshWatchListSelectedCountControlStatus(hDlg, pNMListView->iItem);
 							}
+
 						}	break;
 
 						case LVN_GETDISPINFO:
@@ -1410,7 +1414,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 							UpdateCheatWindowRelatedWindow();
 						}
 						else
-							MessageBox(hDlg, "You can't add cheat to a separator.", "Error", MB_ICONERROR | MB_OK);
+							MessageBox(hDlg, "Sorry, you can't add cheat to a separator.", "Ram Watch", MB_ICONERROR | MB_OK);
 				}
 				break;
 				case IDOK:
