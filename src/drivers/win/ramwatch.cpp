@@ -636,7 +636,6 @@ bool Load_Watches(bool clear, const char* filename)
 	Temp.Address = 0;	// default values
 	Temp.Size = 'b';
 	Temp.Type = 'h';
-	Temp.comment = NULL;
 	char mode;
 	char Str_Tmp[1024];
 	fgets(Str_Tmp,1024,WatchFile);
@@ -819,6 +818,7 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					SetFocus(GetDlgItem(hDlg, IDC_PROMPT_EDIT));
 				}
 			}
+
 			return true;
 			break;
 		
@@ -1136,8 +1136,14 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 							SetWindowLong(hDlg, DWL_MSGRESULT, ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST)));
 							return 1;
 						}
-						case NM_SETFOCUS: listFocus = true; break;
-						case NM_KILLFOCUS: listFocus = false; break;
+						case NM_SETFOCUS:
+							listFocus = true;
+							InvalidateRect(GetDlgItem(RamWatchHWnd, IDC_WATCHLIST), 0, 0);
+							break;
+						case NM_KILLFOCUS:
+							listFocus = false;
+							InvalidateRect(GetDlgItem(RamWatchHWnd, IDC_WATCHLIST), 0, 0);
+							break;
 						case NM_CUSTOMDRAW:
 						{
 							NMCUSTOMDRAW* nmcd = (NMCUSTOMDRAW*)lParam;
@@ -1404,7 +1410,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 							UpdateCheatWindowRelatedWindow();
 						}
 						else
-							MessageBox(hDlg, "Sorry, you can't add cheat to a separator.", "Error", MB_ICONERROR | MB_OK);
+							MessageBox(hDlg, "You can't add cheat to a separator.", "Error", MB_ICONERROR | MB_OK);
 				}
 				break;
 				case IDOK:
@@ -1466,6 +1472,7 @@ void UpdateWatchCheats() {
 	extern int FCEU_CalcCheatAffectedBytes(uint32, uint32);
 	for (int i = 0; i < WatchCount; ++i)
 		rswatches[i].Cheats = FCEU_CalcCheatAffectedBytes(rswatches[i].Address, WatchSizeConv(rswatches[i]));
+}
 
 void SeparatorCache::Init(HWND hBox)
 {
