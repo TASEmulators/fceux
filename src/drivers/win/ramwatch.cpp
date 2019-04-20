@@ -1138,11 +1138,11 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 						}
 						case NM_SETFOCUS:
 							listFocus = true;
-							InvalidateRect(GetDlgItem(RamWatchHWnd, IDC_WATCHLIST), 0, 0);
+							InvalidateRect(GetDlgItem(hDlg, IDC_WATCHLIST), 0, 0);
 							break;
 						case NM_KILLFOCUS:
 							listFocus = false;
-							InvalidateRect(GetDlgItem(RamWatchHWnd, IDC_WATCHLIST), 0, 0);
+							InvalidateRect(GetDlgItem(hDlg, IDC_WATCHLIST), 0, 0);
 							break;
 						case NM_CUSTOMDRAW:
 						{
