@@ -102,7 +102,7 @@ bool VerifyWatchNotAlreadyAdded(const AddressWatcher& watch)
 }
 
 
-bool InsertWatch(const AddressWatcher& Watch, char *Comment)
+bool InsertWatch(const AddressWatcher& Watch)
 {
 	if(!VerifyWatchNotAlreadyAdded(Watch))
 		return false;
@@ -113,25 +113,22 @@ bool InsertWatch(const AddressWatcher& Watch, char *Comment)
 	int i = WatchCount++;
 	AddressWatcher& NewWatch = rswatches[i];
 	NewWatch = Watch;
-	//if (NewWatch.comment) free(NewWatch.comment);
-	if (NewWatch.comment == NULL)
-		NewWatch.comment = (char *)malloc(strlen(Comment) + 2);
-	else
-		NewWatch.comment = (char *)realloc(NewWatch.comment, strlen(Comment) + 2);
-	strcpy(NewWatch.comment, Comment);
 
 	NewWatch.CurValue = GetCurrentValue(NewWatch);
 	extern int FCEU_CalcCheatAffectedBytes(uint32, uint32);
 	NewWatch.Cheats = FCEU_CalcCheatAffectedBytes(NewWatch.Address, WatchSizeConv(NewWatch));
+	NewWatch.comment = strcpy((char*)malloc(strlen(Watch.comment) + 2), Watch.comment);
 
 	if (NewWatch.Type == 'S')
-		separatorCache[i] = SeparatorCache(RamWatchHWnd, Comment);
+		separatorCache[i] = SeparatorCache(RamWatchHWnd, NewWatch.comment);
 
 	ListView_SetItemCount(GetDlgItem(RamWatchHWnd,IDC_WATCHLIST),WatchCount);
 	RWfileChanged = true;
 
 	return true;
 }
+
+
 
 /*
 LRESULT CALLBACK PromptWatchNameProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) //Gets the description of a watched address
@@ -475,11 +472,13 @@ void OpenRWRecentFile(int memwRFileNumber)
 			if (CommentEnd)
 			{
 				*CommentEnd = '\0';
-				InsertWatch(Temp, Comment);
+				Temp.comment = Comment;
+				InsertWatch(Temp);
 			} else
 			{
 				// the wch file is probably corrupted
-				InsertWatch(Temp, Comment);
+				Temp.comment = Comment;
+				InsertWatch(Temp);
 				break;
 			}
 		} else
@@ -662,11 +661,13 @@ bool Load_Watches(bool clear, const char* filename)
 			if (CommentEnd)
 			{
 				*CommentEnd = '\0';
-				InsertWatch(Temp, Comment);
+				Temp.comment = Comment;
+				InsertWatch(Temp);
 			} else
 			{
 				// the wch file is probably corrupted
-				InsertWatch(Temp, Comment);
+				Temp.comment = Comment;
+				InsertWatch(Temp);
 				break;
 			}
 		} else
@@ -719,12 +720,18 @@ bool ResetWatches()
 	return true;
 }
 
-void RemoveWatch(int watchIndex)
+bool RemoveWatch(int watchIndex)
 {
-	free(rswatches[watchIndex].comment);
-	rswatches[watchIndex].comment = NULL;
-	if (rswatches[watchIndex].Type == 'S')
-		RemoveSeparatorBuf(watchIndex);
+	AddressWatcher& target = rswatches[watchIndex];
+	if (watchIndex >= WatchCount)
+		return false;
+	if (target.comment)
+	{
+		free(target.comment);
+		target.comment = NULL;
+	}
+	if (target.Type == 'S')
+		separatorCache.erase(watchIndex);
 	rswatches.erase(watchIndex);
 	for (int i = watchIndex; i <= WatchCount; i++)
 	{
@@ -732,11 +739,48 @@ void RemoveWatch(int watchIndex)
 		separatorCache[i] = separatorCache[i + 1];
 	}
 	WatchCount--;
+	return true;
 }
 
-void RemoveSeparatorBuf(int watchIndex)
+bool EditWatch(int watchIndex, AddressWatcher& watcher)
 {
-	separatorCache.erase(watchIndex);
+	if (watchIndex >= WatchCount)
+		return InsertWatch(watcher);
+
+	AddressWatcher& original = rswatches[watchIndex];
+
+	if (watcher.Type != 'S' && VerifyWatchNotAlreadyAdded(watcher))
+	{
+
+		if (original.Address != watcher.Address || original.Size != watcher.Size)
+		{
+			extern int FCEU_CalcCheatAffectedBytes(uint32, uint32);
+			original.Cheats = FCEU_CalcCheatAffectedBytes(watcher.Address, WatchSizeConv(watcher));
+			original.CurValue = GetCurrentValue(watcher);
+		}
+
+		original.Address = watcher.Address;
+		original.Type = watcher.Type;
+		original.Size = watcher.Size;
+		original.WrongEndian = watcher.WrongEndian;
+
+		RWfileChanged = true;
+	}
+
+	if (strcmp(original.comment, watcher.comment))
+	{
+		if (original.comment)
+			original.comment = strcpy((char*)realloc(original.comment, strlen(watcher.comment) + 2), watcher.comment);
+		else
+			original.comment = strcpy((char*)malloc(strlen(watcher.comment) + 2), watcher.comment);
+
+		if (original.Type == 'S')
+			separatorCache[watchIndex] = SeparatorCache(RamWatchHWnd, watcher.comment);
+
+		return true;
+	}
+
+	return false;
 }
 
 void RefreshWatchListSelectedItemControlStatus(HWND hDlg)
@@ -767,12 +811,12 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				SetWindowPos(hDlg, NULL, r.left, r.top, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
 
 				index = (int)lParam;
-				AddressWatcher* watcher = &rswatches[index];
-				if (watcher->Type != 'S') {
+				AddressWatcher& watcher = rswatches[index];
+				if (watcher.Type != 'S') {
 					char Str_Tmp[1024];
-					sprintf(Str_Tmp, "%04X", watcher->Address);
+					sprintf(Str_Tmp, "%04X", watcher.Address);
 					SetDlgItemText(hDlg, IDC_EDIT_COMPAREADDRESS, Str_Tmp);
-					switch (watcher->Size)
+					switch (watcher.Size)
 					{
 						case 'b':
 							SendDlgItemMessage(hDlg, IDC_1_BYTE, BM_SETCHECK, BST_CHECKED, 0);
@@ -784,7 +828,7 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							SendDlgItemMessage(hDlg, IDC_4_BYTES, BM_SETCHECK, BST_CHECKED, 0);
 							break;
 					}
-					switch (watcher->Type)
+					switch (watcher.Type)
 					{
 						case 's':
 							SendDlgItemMessage(hDlg, IDC_SIGNED, BM_SETCHECK, BST_CHECKED, 0);
@@ -799,11 +843,11 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				} else
 					SetDlgItemText(hDlg, IDC_EDIT_COMPAREADDRESS, "---------");
 
-				if (watcher->comment != NULL)
-					SetDlgItemText(hDlg, IDC_PROMPT_EDIT, watcher->comment);
+				if (watcher.comment != NULL)
+					SetDlgItemText(hDlg, IDC_PROMPT_EDIT, watcher.comment);
 
 				HWND parent = GetParent(hDlg);
-				if (watcher->Type == 'S' || parent == RamSearchHWnd)
+				if (watcher.Type == 'S' || parent == RamSearchHWnd)
 				{
 					EnableWindow(GetDlgItem(hDlg, IDC_SPECIFICADDRESS), FALSE);
 					EnableWindow(GetDlgItem(hDlg, IDC_DATATYPE_GROUPBOX), FALSE);
@@ -886,12 +930,15 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 					// comment
 					GetDlgItemText(hDlg, IDC_PROMPT_EDIT, Str_Tmp, 80);
+					watcher.comment = Str_Tmp;
 
 					// finallly update the watch list
 					if (index < WatchCount)
-						// it's a watch editing operation, and the dialog is from Ram Watch Window, remove then insert;
-						RemoveWatch(index);
-					InsertWatch(watcher, Str_Tmp);
+						// it's a watch editing operation.
+						// Only ram watch window can edit a watch, the ram search window only add watch.
+						EditWatch(index, watcher);
+					else
+						InsertWatch(watcher);
 					if (RamWatchHWnd)
 						ListView_SetItemCount(GetDlgItem(RamWatchHWnd, IDC_WATCHLIST), WatchCount);
 					EndDialog(hDlg, true);
@@ -1153,8 +1200,8 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 							NMCUSTOMDRAW* nmcd = (NMCUSTOMDRAW*)lParam;
 							switch (nmcd->dwDrawStage)
 							{
-							case CDDS_PREPAINT:
-								SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NOTIFYITEMDRAW);
+								case CDDS_PREPAINT:
+									SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NOTIFYITEMDRAW);
 								break;
 								case CDDS_ITEMPREPAINT:
 									if (rswatches[nmcd->dwItemSpec].Type == 'S')
@@ -1267,39 +1314,45 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					}
 					return true;
 				case IDC_C_WATCH:
-					rswatches[WatchCount].Address = 0;
-					rswatches[WatchCount].WrongEndian = 0;
-					rswatches[WatchCount].Size = 'b';
-					rswatches[WatchCount].Type = 's';
-					DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, (DLGPROC) EditWatchProc,(LPARAM)WatchCount);
-					SetFocus(GetDlgItem(hDlg,IDC_WATCHLIST));
+				{
+					AddressWatcher& target = rswatches[WatchCount];
+					target.Address = 0;
+					target.WrongEndian = 0;
+					target.Size = 'b';
+					target.Type = 's';
+					DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, (DLGPROC)EditWatchProc, (LPARAM)WatchCount);
+					SetFocus(GetDlgItem(hDlg, IDC_WATCHLIST));
 					return true;
+				}
 				case IDC_C_WATCH_DUPLICATE:
-					watchIndex = ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST));
-					if(watchIndex != -1)
+				{
+					watchIndex = ListView_GetSelectionMark(GetDlgItem(hDlg, IDC_WATCHLIST));
+					if (watchIndex != -1)
 					{
-						rswatches[WatchCount].Address = rswatches[watchIndex].Address;
-						rswatches[WatchCount].WrongEndian = rswatches[watchIndex].WrongEndian;
-						rswatches[WatchCount].Size = rswatches[watchIndex].Size;
-						rswatches[WatchCount].Type = rswatches[watchIndex].Type;
-						rswatches[WatchCount].comment = strcpy((char*)malloc(strlen(rswatches[watchIndex].comment) + 2), rswatches[watchIndex].comment);
-						DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, (DLGPROC) EditWatchProc,WatchCount);
-						SetFocus(GetDlgItem(hDlg,IDC_WATCHLIST));
+						char str_tmp[1024];
+						AddressWatcher* target = &rswatches[WatchCount];
+						AddressWatcher* source = &rswatches[watchIndex];
+						memcpy(target, source, sizeof(AddressWatcher));
+						target->comment = strcpy(str_tmp, source->comment);
+						DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, (DLGPROC)EditWatchProc, WatchCount);
+						SetFocus(GetDlgItem(hDlg, IDC_WATCHLIST));
 					}
 					return true;
-
+				}
 				case IDC_C_WATCH_SEPARATE:
-					rswatches[WatchCount].Address = 0;
-					rswatches[WatchCount].WrongEndian = false;
-					rswatches[WatchCount].Size = 'S';
-					rswatches[WatchCount].Type = 'S';
-					
+				{
+					AddressWatcher* target = &rswatches[WatchCount];
+					target->Address = 0;
+					target->WrongEndian = false;
+					target->Size = 'S';
+					target->Type = 'S';
+
 					DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, (DLGPROC)EditWatchProc, (LPARAM)WatchCount);
 
-//					InsertWatch(separator, "----------------------------");
-					SetFocus(GetDlgItem(hDlg,IDC_WATCHLIST));
+					// InsertWatch(separator, "----------------------------");
+					SetFocus(GetDlgItem(hDlg, IDC_WATCHLIST));
 					return true;
-					
+				}
 				case IDC_C_WATCH_UP:
 				{
 					watchIndex = ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST));
@@ -1317,16 +1370,16 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					memcpy(&separatorCache[watchIndex - 1], tmp, sizeof(SeparatorCache));
 					free(tmp);
 
-					ListView_SetItemState(GetDlgItem(hDlg,IDC_WATCHLIST),watchIndex,0,LVIS_FOCUSED|LVIS_SELECTED);
-					ListView_SetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST),watchIndex-1);
-					ListView_SetItemState(GetDlgItem(hDlg,IDC_WATCHLIST),watchIndex-1,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
-					ListView_SetItemCount(GetDlgItem(hDlg,IDC_WATCHLIST),WatchCount);
+					ListView_SetItemState(GetDlgItem(hDlg, IDC_WATCHLIST), watchIndex, 0, LVIS_FOCUSED | LVIS_SELECTED);
+					ListView_SetSelectionMark(GetDlgItem(hDlg, IDC_WATCHLIST), watchIndex - 1);
+					ListView_SetItemState(GetDlgItem(hDlg, IDC_WATCHLIST), watchIndex - 1, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);
+					ListView_SetItemCount(GetDlgItem(hDlg, IDC_WATCHLIST), WatchCount);
 					RWfileChanged=true;
 					return true;
 				}
 				case IDC_C_WATCH_DOWN:
 				{
-					watchIndex = ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST));
+					watchIndex = ListView_GetSelectionMark(GetDlgItem(hDlg, IDC_WATCHLIST));
 					if (watchIndex >= WatchCount - 1 || watchIndex == -1)
 						return true;
 
@@ -1342,17 +1395,16 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					memcpy(&separatorCache[watchIndex + 1], tmp, sizeof(SeparatorCache));
 					free(tmp);
 
-					ListView_SetItemState(GetDlgItem(hDlg,IDC_WATCHLIST),watchIndex,0,LVIS_FOCUSED|LVIS_SELECTED);
-					ListView_SetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST),watchIndex+1);
-					ListView_SetItemState(GetDlgItem(hDlg,IDC_WATCHLIST),watchIndex+1,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
-					ListView_SetItemCount(GetDlgItem(hDlg,IDC_WATCHLIST),WatchCount);
-					RWfileChanged=true;
+					ListView_SetItemState(GetDlgItem(hDlg, IDC_WATCHLIST), watchIndex, 0, LVIS_FOCUSED | LVIS_SELECTED);
+					ListView_SetSelectionMark(GetDlgItem(hDlg, IDC_WATCHLIST),watchIndex + 1);
+					ListView_SetItemState(GetDlgItem(hDlg, IDC_WATCHLIST), watchIndex + 1, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);
+					ListView_SetItemCount(GetDlgItem(hDlg, IDC_WATCHLIST), WatchCount);
+					RWfileChanged = true;
 					return true;
 				}
 				case ID_WATCHES_UPDOWN:
 				{
-					int delta = ((LPNMUPDOWN)lParam)->iDelta;
-					SendMessage(hDlg, WM_COMMAND, delta<0 ? IDC_C_WATCH_UP : IDC_C_WATCH_DOWN,0);
+					SendMessage(hDlg, WM_COMMAND, ((LPNMUPDOWN)lParam)->iDelta < 0 ? IDC_C_WATCH_UP : IDC_C_WATCH_DOWN,0);
 					break;
 				}
 				case RAMMENU_FILE_AUTOLOAD:
@@ -1364,7 +1416,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 				}
 				case RAMMENU_FILE_SAVEWINDOW:
 				{
-					RWSaveWindowPos ^=1;
+					RWSaveWindowPos ^= 1;
 					CheckMenuItem(ramwatchmenu, RAMMENU_FILE_SAVEWINDOW, RWSaveWindowPos ? MF_CHECKED : MF_UNCHECKED);
 					//regSetDwordValue(RWSAVEPOS, RWSaveWindowPos); TODO
 					break;

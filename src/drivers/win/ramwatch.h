@@ -58,11 +58,10 @@ extern char Watch_Dir[1024];
 extern HWND RamWatchHWnd;
 extern HACCEL RamWatchAccels;
 
-bool InsertWatch(const AddressWatcher& Watch, char *Comment);
-bool InsertWatch(const AddressWatcher& Watch, HWND parent=NULL); // asks user for comment
-void EditWatch(int watchIndex, AddressWatcher& watcher);
-void RemoveWatch(int watchIndex);
-void RemoveSeparatorBuf(int index);
+bool InsertWatch(const AddressWatcher& Watch);
+bool InsertWatch(const AddressWatcher& Watch, HWND parent); // asks user for comment)
+bool EditWatch(int watchIndex, AddressWatcher& watcher);
+bool RemoveWatch(int watchIndex);
 
 void Update_RAM_Watch();
 bool Load_Watches(bool clear, const char* filename);

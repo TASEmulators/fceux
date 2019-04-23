@@ -1975,7 +1975,7 @@ invalid_field:
 						if (selCount == 1)
 							inserted |= InsertWatch(tempWatch, hDlg);
 						else
-							inserted |= InsertWatch(tempWatch, "");
+							inserted |= InsertWatch(tempWatch);
 
 						watchItemIndex = ListView_GetNextItem(ramListControl, watchItemIndex, LVNI_SELECTED);
 					}

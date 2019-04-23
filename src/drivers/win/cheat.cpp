@@ -1056,18 +1056,27 @@ void UpdateCheatWindowRelatedWindow()
 	// hex editor
 	if (hMemView)
 		UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
-	extern HWND RamSearchHWnd;
 
 	// ram search
+	extern HWND RamSearchHWnd;
 	if (RamSearchHWnd)
-		RedrawWindow(GetDlgItem(RamSearchHWnd, IDC_RAMLIST), NULL, NULL, RDW_INVALIDATE); // if ram search is open then update the ram list.
+	{
+		// if ram search is open then update the ram list.
+		SendDlgItemMessage(RamSearchHWnd, IDC_RAMLIST, LVM_REDRAWITEMS, 
+			SendDlgItemMessage(RamSearchHWnd, IDC_RAMLIST, LVM_GETTOPINDEX, 0, 0),
+			SendDlgItemMessage(RamSearchHWnd, IDC_RAMLIST, LVM_GETCOUNTPERPAGE, 0, 0) + 1);
+	}
 
 	// ram watch
 	extern void UpdateWatchCheats();
 	UpdateWatchCheats();
 	extern HWND RamWatchHWnd;
 	if (RamWatchHWnd)
-		RedrawWindow(GetDlgItem(RamWatchHWnd, IDC_WATCHLIST), NULL, NULL, RDW_INVALIDATE); // update the data in watch list to the newest.
-
+	{
+		// if ram watch is open then update the ram list.
+		SendDlgItemMessage(RamWatchHWnd, IDC_WATCHLIST, LVM_REDRAWITEMS,
+			SendDlgItemMessage(RamWatchHWnd, IDC_WATCHLIST, LVM_GETTOPINDEX, 0, 0),
+			SendDlgItemMessage(RamWatchHWnd, IDC_WATCHLIST, LVM_GETCOUNTPERPAGE, 0, 0) + 1);
+	}
 
 }
