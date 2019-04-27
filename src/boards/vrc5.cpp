@@ -147,13 +147,17 @@ static DECLFW(QTAiWrite) {
 	case 0xd600: {
 		IRQLatch &= 0xFF00;
 		IRQLatch |= V;
+#ifdef CAI_DEBUG
 		FCEU_printf("irq latch lo=%02x\n", V);
+#endif
 		break;
 	}
 	case 0xd700: {
 		IRQLatch &= 0x00FF;
 		IRQLatch |= V << 8;
+#ifdef CAI_DEBUG
 		FCEU_printf("irq latch hi=%02x\n", V);
+#endif
 		break;
 	}
 	case 0xd900: {
@@ -161,17 +165,23 @@ static DECLFW(QTAiWrite) {
 		IRQa = V & 2;
 		K4IRQ = V & 1;
 		X6502_IRQEnd(FCEU_IQEXT);
+#ifdef CAI_DEBUG
 		FCEU_printf("irq reload\n", V);
+#endif
 		break;
 	}
 	case 0xd800: {
 		IRQa = K4IRQ;
 		X6502_IRQEnd(FCEU_IQEXT);
+#ifdef CAI_DEBUG
 		FCEU_printf("irq stop\n", V);
+#endif
 		break;
 	}
 	default:
+#ifdef CAI_DEBUG
 		FCEU_printf("write %04x:%04x %d, %d\n", A, V, scanline, timestamp);
+#endif
 	}
 	Sync();
 }
