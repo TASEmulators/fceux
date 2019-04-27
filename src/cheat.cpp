@@ -61,7 +61,7 @@ void FCEU_CheatAddRAM(int s, uint32 A, uint8 *p)
 
 
 CHEATF_SUBFAST SubCheats[256];
-int numsubcheats=0;
+uint32 numsubcheats=0;
 struct CHEATF *cheats=0,*cheatsl=0;
 
 
@@ -98,7 +98,7 @@ static DECLFR(SubCheatsRead)
 
 void RebuildSubCheats(void)
 {
-	int x;
+	uint32 x;
 	struct CHEATF *c=cheats;
 	for(x=0;x<numsubcheats;x++)
 		SetReadHandler(SubCheats[x].addr,SubCheats[x].addr,SubCheats[x].PrevRead);
@@ -137,8 +137,8 @@ void FCEU_PowerCheats()
 }
 
 int FCEU_CalcCheatAffectedBytes(uint32 address, uint32 size) {
-	int count = 0;
-	for (int i = 0; i < numsubcheats && count < size; ++i)
+	uint32 count = 0;
+	for (uint32 i = 0; i < numsubcheats && count < size; ++i)
 		if (SubCheats[i].addr >= address && SubCheats[i].addr < address + size)
 			++count;
 	return count;
@@ -945,7 +945,7 @@ void UpdateFrozenList(void)
 	//and make these accessible to other dialogs that deal with memory addresses such as
 	//memwatch, hex editor, ramfilter, etc.
 
-	int x;
+	uint32 x;
 	FrozenAddresses.clear();		//Clear vector and repopulate
 	for(x=0;x<numsubcheats;x++)
 	{

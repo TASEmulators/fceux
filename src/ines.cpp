@@ -670,7 +670,7 @@ static BMAPPINGLocal bmap[] = {
 	{"",					217, Mapper217_Init},	// Redefined to a new Discrete BMC mapper
 //	{"",					218, Mapper218_Init},
 	{"UNLA9746",			219, UNLA9746_Init},
-	{"Debug Mapper",		220, UNLKS7057_Init},
+	{"Debug Mapper",		220, QTAi_Init},
 	{"UNLN625092",			221, UNLN625092_Init},
 	{"",					222, Mapper222_Init},
 //	{"",					223, Mapper223_Init},
