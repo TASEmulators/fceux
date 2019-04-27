@@ -22,14 +22,35 @@ struct AddressWatcher
 {
 	unsigned int Address; // hardware address
 	unsigned int CurValue;
-	char* comment; // NULL means no comment, non-NULL means allocated comment
+	char* comment = NULL; // NULL means no comment, non-NULL means allocated comment
 	bool WrongEndian;
 	char Size; //'d' = 4 bytes, 'w' = 2 bytes, 'b' = 1 byte, and 'S' means it's a separator.
 	char Type;//'s' = signed integer, 'u' = unsigned, 'h' = hex, 'S' = separator
 	short Cheats; // how many bytes are affected by cheat
 };
+
+// Cache all the things required for drawing separator
+// to prevent creating and destroying them repeatedly when painting
+struct SeparatorCache
+{
+	// these things are static, every items are currently all the same.
+	static HPEN sepPen; // color for separator in normal state
+	static HPEN sepPenSel; // color for separator in selected state
+	static HFONT sepFon; // caption font
+	static int iHeight; // item height
+	static int sepOffY; // y coordinate offset of the separator
+	static void Init(HWND hBox); // prepare all the static stuff
+	static void DeInit(); // destroy all the static stuff
+
+	// there are only 2 thing that identical
+	int labelOffY; // y coordinate offset of the label
+	int sepOffX; // x coordinate offset of the separator
+
+	SeparatorCache() {};
+	SeparatorCache(HWND hWnd, char* text);
+};
+
 #define MAX_WATCH_COUNT 256
-extern AddressWatcher rswatches[MAX_WATCH_COUNT];
 extern int WatchCount; // number of valid items in rswatches
 
 extern char Watch_Dir[1024];
@@ -37,8 +58,11 @@ extern char Watch_Dir[1024];
 extern HWND RamWatchHWnd;
 extern HACCEL RamWatchAccels;
 
-bool InsertWatch(const AddressWatcher& Watch, char *Comment);
-bool InsertWatch(const AddressWatcher& Watch, HWND parent=NULL); // asks user for comment
+bool InsertWatch(const AddressWatcher& Watch);
+bool InsertWatch(const AddressWatcher& Watch, HWND parent); // asks user for comment)
+bool EditWatch(int watchIndex, AddressWatcher& watcher);
+bool RemoveWatch(int watchIndex);
+
 void Update_RAM_Watch();
 bool Load_Watches(bool clear, const char* filename);
 void RWAddRecentFile(const char *filename);
@@ -46,6 +70,7 @@ void UpdateWatchCheats();
 
 LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
 extern HWND RamWatchHWnd;
 
 #define WatchSizeConv(watch) (watch.Type == 'S' ? 0 : watch.Size == 'd' ? 4 : watch.Size == 'w' ? 2 : watch.Size == 'b' ? 1 : 0)
