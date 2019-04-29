@@ -59,7 +59,7 @@ void LH32_Init(CartInfo *info);
 void LH53_Init(CartInfo *info);
 void MALEE_Init(CartInfo *info);
 void MHROM_Init(CartInfo *info);
-void Mapper190_Init(CartInfo *info);
+void QTAi_Init(CartInfo *info);
 void NROM_Init(CartInfo *info);
 void Novel_Init(CartInfo *info);
 void S74LS374NA_Init(CartInfo *info);

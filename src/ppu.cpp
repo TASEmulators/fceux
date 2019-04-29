@@ -330,7 +330,7 @@ int fceuindbg = 0;
 //0xFF shall indicate to use palette[0]
 uint8 gNoBGFillColor = 0xFF;
 
-int MMC5Hack = 0, PEC586Hack = 0;;
+int MMC5Hack = 0, PEC586Hack = 0, QTAIHack = 0;
 uint32 MMC5HackVROMMask = 0;
 uint8 *MMC5HackExNTARAMPtr = 0;
 uint8 *MMC5HackVROMPTR = 0;
