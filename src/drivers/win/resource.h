@@ -1,7 +1,3 @@
-//{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ 生成的包含文件。
-// 供 res.rc 使用
-//
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
 #define BTN_CLOSE                       1
