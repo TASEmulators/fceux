@@ -59,8 +59,9 @@ extern HWND RamWatchHWnd;
 extern HACCEL RamWatchAccels;
 
 bool InsertWatch(const AddressWatcher& Watch);
-bool InsertWatch(const AddressWatcher& Watch, HWND parent); // asks user for comment)
-bool EditWatch(int watchIndex, AddressWatcher& watcher);
+bool InsertWatch(const AddressWatcher& Watch, HWND parent); // asks user for comment
+bool InsertWatch(int watchIndex, const AddressWatcher& watcher);
+bool EditWatch(int watchIndex, const AddressWatcher& watcher);
 bool RemoveWatch(int watchIndex);
 
 void Update_RAM_Watch();

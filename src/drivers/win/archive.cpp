@@ -275,10 +275,6 @@ public:
 	}
 };
 
-// indicator for the open in archive dialog that if the load was canceled by the user.
-// TODO: Since I can't think of a better way to indicate it, hope someone could imporve it.
-extern bool archiveManuallyCanceled;
-
 static BOOL CALLBACK ArchiveFileSelectorCallback(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
@@ -289,7 +285,7 @@ static BOOL CALLBACK ArchiveFileSelectorCallback(HWND hwndDlg, UINT uMsg, WPARAM
 			for(uint32 i=0;i<currFileSelectorContext->size();i++)
 			{
 				std::string& name = (*currFileSelectorContext)[i].name;
-				SendMessage(hwndListbox,LB_ADDSTRING,0,(LPARAM)name.c_str());
+				SendMessage(hwndListbox, LB_ADDSTRING, 0, (LPARAM)name.c_str());
 			}
 		}
 		break;
@@ -310,9 +306,6 @@ static BOOL CALLBACK ArchiveFileSelectorCallback(HWND hwndDlg, UINT uMsg, WPARAM
 
 			case IDCANCEL:
 				EndDialog(hwndDlg, LB_ERR);
-				// Tell the parent window that the operation was canceled rather than loading error
-				// TODO: find a better way to do this.
-				archiveManuallyCanceled = true;
 				return TRUE;
 		}
 		break;
@@ -493,7 +486,7 @@ extern HWND hAppWnd;
 
 //TODO - factor out the filesize and name extraction code from below (it is already done once above)
 
-static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int innerIndex)
+static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int innerIndex, bool* userCancel)
 {
 	FCEUFILE* fp = 0;
 	
@@ -565,7 +558,11 @@ static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, s
 					delete ms;
 				}
 
-			} //if returned a file from the fileselector
+			}
+			else {
+				if(userCancel)
+					*userCancel = true;
+			}//if returned a file from the fileselector
 			
 		} //if we opened the 7z correctly
 		object->Release();
@@ -574,9 +571,24 @@ static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, s
 	return fp;
 }
 
+static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int innerIndex)
+{
+	return FCEUD_OpenArchive(asr, fname, innerFilename, innerIndex, NULL);
+}
+
+FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string& fname, int innerIndex, bool* userCancel)
+{
+	return FCEUD_OpenArchive(asr, fname, 0, innerIndex, userCancel);
+}
+
 FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string& fname, int innerIndex)
 {
 	return FCEUD_OpenArchive(asr, fname, 0, innerIndex);
+}
+
+FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, bool* userCancel)
+{
+	return FCEUD_OpenArchive(asr, fname, innerFilename, -1, userCancel);
 }
 
 FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename)

@@ -34,7 +34,7 @@ bool RWSaveWindowPos = false; //Keeps track of whether Save Window position is c
 char currentWatch[1024];
 int ramw_x, ramw_y;			//Used to store ramwatch dialog window positions
 std::map<int, AddressWatcher> rswatches;
-int WatchCount=0;
+int WatchCount = 0;
 
 char applicationPath[2048];
 struct InitRamWatch
@@ -127,7 +127,6 @@ bool InsertWatch(const AddressWatcher& Watch)
 
 	return true;
 }
-
 
 
 /*
@@ -1021,7 +1020,8 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			//regSetDwordValue(RAMWY, ramw_y); TODO
 		}	break;
 
-		case WM_INITDIALOG: {
+		case WM_INITDIALOG: 
+		{
 			RECT r, r2;
 			int dx1, dy1, dx2, dy2;
 
@@ -1126,7 +1126,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					{
 						case LVN_ITEMCHANGED: // selection changed event
 						{
-							NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)lP;
+							NMLISTVIEW* pNMListView = (NMLISTVIEW*)lP;
 
 							if(pNMListView->uNewState & LVIS_FOCUSED ||
 								(pNMListView->uNewState ^ pNMListView->uOldState) & LVIS_SELECTED)
@@ -1493,12 +1493,9 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 				return true;
 		}	break;
 
-//		case WM_CLOSE:
-//			RamWatchHWnd = NULL;
-//			DragAcceptFiles(hDlg, FALSE);
-//			DestroyWindow(hDlg);
-//			return false;
-
+		case WM_CLOSE:
+			DestroyWindow(hDlg);
+			break;
 		case WM_DESTROY:
 			// this is the correct place
 			RamWatchHWnd = NULL;
@@ -1507,7 +1504,6 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 			// release the hdc related objects
 			SeparatorCache::DeInit();
-
 			break;
 
 		case WM_DROPFILES:
@@ -1532,22 +1528,33 @@ void UpdateWatchCheats() {
 
 void SeparatorCache::Init(HWND hBox)
 {
-	RECT ir;
-	ir.left = LVIR_BOUNDS;
+	if (!iHeight)
+	{
+		RECT ir;
+		ir.left = LVIR_BOUNDS;
 
-	int count = SendMessage(hBox, LVM_GETITEMCOUNT, 0, 0);
-	SendMessage(hBox, LVM_SETITEMCOUNT, 1, 0);
-	SendMessage(hBox, LVM_GETITEMRECT, 0, (LPARAM)&ir);
-	SendMessage(hBox, LVM_SETITEMCOUNT, count, 0);
+		int count = SendMessage(hBox, LVM_GETITEMCOUNT, 0, 0);
+		SendMessage(hBox, LVM_SETITEMCOUNT, 1, 0);
+		SendMessage(hBox, LVM_GETITEMRECT, 0, (LPARAM)&ir);
+		SendMessage(hBox, LVM_SETITEMCOUNT, count, 0);
 
-	sepOffY = (iHeight = ir.bottom - ir.top) / 2;
+		iHeight = ir.bottom - ir.top;
+	}
 
-	sepPen = CreatePen(PS_SOLID, 1, RGB(160, 160, 160));
-	sepPenSel = CreatePen(PS_SOLID, 1, RGB(224, 224, 224));
+	if (!sepOffY)
+		sepOffY = iHeight / 2;
 
-	LOGFONT logFont;
-	GetObject((HANDLE)SendMessage(hBox, WM_GETFONT, NULL, NULL), sizeof(logFont), &logFont);
-	sepFon = (HFONT)CreateFontIndirect((logFont.lfWeight = FW_SEMIBOLD, &logFont));
+	if (!sepPen)
+		sepPen = CreatePen(PS_SOLID, 1, RGB(160, 160, 160));
+	if (!sepPenSel)
+		sepPenSel = CreatePen(PS_SOLID, 1, RGB(224, 224, 224));
+
+	if (!sepFon)
+	{
+		LOGFONT logFont;
+		GetObject((HANDLE)SendMessage(hBox, WM_GETFONT, NULL, NULL), sizeof(logFont), &logFont);
+		sepFon = (HFONT)CreateFontIndirect((logFont.lfWeight = FW_SEMIBOLD, &logFont));
+	}
 }
 
 void SeparatorCache::DeInit()
@@ -1555,6 +1562,10 @@ void SeparatorCache::DeInit()
 	DeleteObject(sepPen);
 	DeleteObject(sepPenSel);
 	DeleteObject(sepFon);
+
+	sepPen = NULL;
+	sepPenSel = NULL;
+	sepFon = NULL;
 }
 
 

@@ -238,6 +238,7 @@
 #define IDC_DEBUGGER_FLAG_N             200
 #define IDC_ADDBP_ADDR_START            200
 #define MENU_POWER                      201
+#define IDC_GROUPBOX_CHEATLIST          201
 #define TXT_PAD2                        201
 #define IDC_BUTTON_BROWSEFILE           201
 #define IDC_CHECK_READONLY              201
@@ -260,6 +261,7 @@
 #define IDC_ADDBP_CONDITION             202
 #define IDC_ASSEMBLER_SAVE              202
 #define IDD_TASEDITOR_NEWPROJECT        202
+#define IDC_GROUPBOX_CHEATSEARCH        202
 #define MENU_SWITCH_DISK                203
 #define IDC_NETMOO_NICK                 203
 #define IDC_CHEAT_BOX_POSSIBILITIES     203

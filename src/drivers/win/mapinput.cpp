@@ -23,7 +23,7 @@ else if (filter > EMUCMDTYPE_MISC && filter < EMUCMDTYPE_MAX || filter == EMUCMD
 else \
 	lpListView->iSubItem = mapInputSortCol; \
 if (SendMessage(hwndListView, LVM_SORTITEMS, (WPARAM)lpListView, (LPARAM)MapInputItemSortFunc)) \
-	UpdateSortColumnIcon(hwndListView, mapInputSortCol, mapInputSortAsc); 
+	UpdateSortColumnIcon(hwndListView, mapInputSortCol, mapInputSortAsc)
 
 
 void KeyboardUpdateState(void); //mbg merge 7/17/06 yech had to add this
@@ -768,9 +768,10 @@ BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 		break;
 		
 	case WM_CLOSE:
+		EndDialog(hwndDlg, 0);
+		break;
 	case WM_DESTROY:
 	case WM_QUIT:
-			EndDialog(hwndDlg, 0);
 			break;
 	case WM_NOTIFY:
 

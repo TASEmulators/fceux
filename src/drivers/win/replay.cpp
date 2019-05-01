@@ -957,6 +957,23 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 			{
 			case IDOK:
 				{
+					extern unsigned int FrozenAddressCount;
+					if (FrozenAddressCount)
+					{
+						char ch[512];
+						sprintf(ch, "You have %d activated cheats. If this is not your intentional, it can cause playback prblems! Do you want to disable all of them and continue?", FrozenAddressCount);
+						switch (MessageBox(hwndDlg, ch, "Movie recording problem", MB_YESNOCANCEL | MB_ICONEXCLAMATION))
+						{
+							case IDCANCEL:
+								return TRUE;
+							case IDYES:
+								extern void DisableAllCheats();
+								DisableAllCheats();
+								extern void UpdateCheatWindowRelatedWindow();
+								UpdateCheatWindowRelatedWindow();
+						}
+					}
+
 					LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETCURSEL, 0, 0);
 					p->szFilename = GetRecordPath(hwndDlg);
 					p->recordFrom = (int)lIndex;

@@ -1078,9 +1078,6 @@ void signal_new_frame ()
 
 
 
-bool RamSearchClosed = false;
-bool RamWatchClosed = false;
-
 void ResetResults()
 {
 	reset_address_info();
@@ -1093,39 +1090,26 @@ void CloseRamWindows() //Close the Ram Search & Watch windows when rom closes
 	ResetWatches();
 	ResetResults();
 	if (RamSearchHWnd)
-	{
 		SendMessage(RamSearchHWnd,WM_CLOSE,NULL,NULL);
-		RamSearchClosed = true;
-	}
 	if (RamWatchHWnd)
-	{
 		SendMessage(RamWatchHWnd,WM_CLOSE,NULL,NULL);
-		RamWatchClosed = true;
-	}
 }
 void ReopenRamWindows() //Reopen them when a new Rom is loaded
 {
 	HWND hwnd = GetActiveWindow();
 
-	if (RamSearchClosed)
+	if(!RamSearchHWnd)
 	{
-		RamSearchClosed = false;
-		if(!RamSearchHWnd)
-		{
-			reset_address_info();
-			LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-			RamSearchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMSEARCH), hWnd, (DLGPROC) RamSearchProc);
-		}
+		reset_address_info();
+		LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+		RamSearchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMSEARCH), hWnd, (DLGPROC) RamSearchProc);
 	}
-	if (RamWatchClosed || AutoRWLoad)
-	{
-		RamWatchClosed = false;
-		if(!RamWatchHWnd)
-		{
-			if (AutoRWLoad) OpenRWRecentFile(0);
-			RamWatchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, (DLGPROC) RamWatchProc);
-		}
-	}
+
+	if (AutoRWLoad)
+		OpenRWRecentFile(0);
+
+	if (!RamWatchHWnd)
+		RamWatchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, (DLGPROC) RamWatchProc);
 
 	if (hwnd == hWnd && hwnd != GetActiveWindow())
 		SetActiveWindow(hWnd); // restore focus to the main window if it had it before
@@ -2045,15 +2029,6 @@ invalid_field:
 					signal_new_size();
 					{rv = true; break;}
 				}
-				//case IDOK:
-				case IDCANCEL:
-					RamSearchHWnd = NULL;
-/*					if (theApp.pauseDuringCheatSearch)
-						EndDialog(hDlg, true);	// this should never be called on a modeless dialog
-					else
-*/
-						DestroyWindow(hDlg);
-					{rv = true; break;}
 			}
 
 			// check refresh for comparison preview color update
@@ -2097,12 +2072,12 @@ invalid_field:
 
 			return rv;
 		}	break;
-
-//		case WM_CLOSE:
+		case WM_CLOSE:
+			DestroyWindow(hDlg);
+			break;
 		case WM_DESTROY:
 			RamSearchHWnd = NULL;
 //			theApp.modelessCheatDialogIsOpen = false;
-//			return true;
 			break;
 	}
 

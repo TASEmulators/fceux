@@ -3,12 +3,14 @@
 extern int CheatWindow,CheatStyle; //bbit edited: this line added
 extern HWND hCheat;
 
+HWND InitializeCheatList(HWND hwndDlg);
 void RedoCheatsLB(HWND hwndDlg);
 
 void ConfigCheats(HWND hParent);
 void DoGGConv();
 void SetGGConvFocus(int address,int compare);
 void UpdateCheatList();
+void UpdateCheatListGroupBoxUI();
 void UpdateCheatsAdded();
 
 extern unsigned int FrozenAddressCount;

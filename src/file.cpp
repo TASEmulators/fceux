@@ -256,7 +256,7 @@ zpfail:
 	return 0;
 }
 
-FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index, const char** extensions)
+FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index, const char** extensions, bool* userCancel)
 {
 	FILE *ipsfile=0;
 	FCEUFILE *fceufp=0;
@@ -360,11 +360,11 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 			//open an archive file
 			if(archive == "")
 				if(index != -1)
-					fceufp = FCEUD_OpenArchiveIndex(asr, fileToOpen, index);
+					fceufp = FCEUD_OpenArchiveIndex(asr, fileToOpen, index, userCancel);
 				else
-					fceufp = FCEUD_OpenArchive(asr, fileToOpen, 0);
+					fceufp = FCEUD_OpenArchive(asr, fileToOpen, 0, userCancel);
 			else
-				fceufp = FCEUD_OpenArchive(asr, archive, &fname);
+				fceufp = FCEUD_OpenArchive(asr, archive, &fname, userCancel);
 
 			if(!fceufp) return 0;
 

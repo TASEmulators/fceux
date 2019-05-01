@@ -1,7 +1,7 @@
 void FCEU_CheatResetRAM(void);
 void FCEU_CheatAddRAM(int s, uint32 A, uint8 *p);
 
-void FCEU_LoadGameCheats(FILE *override);
+void FCEU_LoadGameCheats(FILE *override, int override_existing = 1);
 void FCEU_FlushGameCheats(FILE *override, int nosave);
 void FCEU_ApplyPeriodicCheats(void);
 void FCEU_PowerCheats(void);
@@ -24,7 +24,7 @@ typedef struct {
 
 struct CHEATF {
 	struct CHEATF *next;
-	char *name;
+	char *name = "";
 	uint16 addr;
 	uint8 val;
 	int compare;	/* -1 for no compare. */
@@ -32,9 +32,19 @@ struct CHEATF {
 	int status;
 };
 
+#define FCEU_SEARCH_SPECIFIC_CHANGE         0
+#define FCEU_SEARCH_RELATIVE_CHANGE         1
+#define FCEU_SEARCH_PUERLY_RELATIVE_CHANGE  2
+#define FCEU_SEARCH_ANY_CHANGE              3
+#define FCEU_SEARCH_NEWVAL_KNOWN            4
+#define FCEU_SEARCH_NEWVAL_GT               5
+#define FCEU_SEARCH_NEWVAL_LT               6
+#define FCEU_SEARCH_NEWVAL_GT_KNOWN         7
+#define FCEU_SEARCH_NEWVAL_LT_KNOWN         8
+
 
 #define CalcAddressRangeCheatCount(count, address, size) \
 	count = 0; \
 	for (int i = 0; i < numsubcheats && count < size; ++i) \
 		if (SubCheats[i].addr >= address && SubCheats[i].addr < address + size) \
-			++count;
+			++count
