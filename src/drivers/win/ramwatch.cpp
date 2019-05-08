@@ -1442,8 +1442,10 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 									FCEUI_AddCheat("", address + 3, (rswatches[watchIndex].CurValue & 0xFF000000) / 0x1000000, -1, 1);
 									break;
 							}
+
 							UpdateCheatsAdded();
 							UpdateCheatWindowRelatedWindow();
+
 						}
 						else
 							MessageBox(hDlg, "Sorry, you can't add cheat to a separator.", "Ram Watch", MB_ICONERROR | MB_OK);

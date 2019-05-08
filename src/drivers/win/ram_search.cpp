@@ -1819,22 +1819,23 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						// Don't open cheat dialog
 
 						switch (sizeType) {
-						case 0: {
-								FCEUI_AddCheat("",address,curvalue,-1,1);
-								break; }
-						case 1: {
+							case 0:
+								FCEUI_AddCheat("",address,curvalue, -1, 1);
+								break;
+							case 1: 
+								FCEUI_AddCheat("",address,curvalue & 0xFF, -1, 1);
+								FCEUI_AddCheat("",address + 1,(curvalue & 0xFF00) / 0x100, -1, 1);
+								break;
+							case 2:
 								FCEUI_AddCheat("",address,curvalue & 0xFF,-1,1);
-								FCEUI_AddCheat("",address + 1,(curvalue & 0xFF00) / 0x100,-1,1);
-								break; }
-						case 2: {
-								FCEUI_AddCheat("",address,curvalue & 0xFF,-1,1);
-								FCEUI_AddCheat("",address + 1,(curvalue & 0xFF00) / 0x100,-1,1);
-								FCEUI_AddCheat("",address + 2,(curvalue & 0xFF0000) / 0x10000,-1,1);
-								FCEUI_AddCheat("",address + 3,(curvalue & 0xFF000000) / 0x1000000,-1,1);
-								break; }
+								FCEUI_AddCheat("",address + 1,(curvalue & 0xFF00) / 0x100, -1, 1);
+								FCEUI_AddCheat("",address + 2,(curvalue & 0xFF0000) / 0x10000, -1, 1);
+								FCEUI_AddCheat("",address + 3,(curvalue & 0xFF000000) / 0x1000000, -1, 1);
+								break;
 						}
 
 						UpdateCheatsAdded();
+						UpdateCheatRelatedWindow();
 
 						watchItemIndex = ListView_GetNextItem(ramListControl, watchItemIndex, LVNI_SELECTED);
 

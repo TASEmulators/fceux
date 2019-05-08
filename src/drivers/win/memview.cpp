@@ -951,6 +951,7 @@ void FreezeRam(int address, int mode, int final){
 		//}
 		
 		UpdateCheatsAdded();
+		UpdateCheatRelatedWindow();
 	}
 }
 

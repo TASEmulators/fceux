@@ -459,7 +459,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 								tmpsel = SendDlgItemMessage(hwndDlg, IDC_LIST_CHEATS, LVM_GETNEXTITEM, tmpsel, LVNI_ALL | LVNI_SELECTED);
 							}
-							UpdateCheatWindowRelatedWindow();
+							UpdateCheatRelatedWindow();
 							UpdateCheatListGroupBoxUI();
 						}
 						break;
@@ -496,7 +496,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 									selcheat = newselcheat;
 								}
 
-								UpdateCheatWindowRelatedWindow();
+								UpdateCheatRelatedWindow();
 								UpdateCheatListGroupBoxUI();
 							}
 						}
@@ -581,7 +581,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 								ClearCheatListText(hwndDlg);
 							}
-							UpdateCheatWindowRelatedWindow();
+							UpdateCheatRelatedWindow();
 							UpdateCheatListGroupBoxUI();
 							break;
 						}
@@ -606,7 +606,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 									ClearCheatListText(hwndDlg);
 
-									UpdateCheatWindowRelatedWindow();
+									UpdateCheatRelatedWindow();
 									UpdateCheatListGroupBoxUI();
 								}
 							} else {
@@ -616,7 +616,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 									selcheat = -1;
 									ClearCheatListText(hwndDlg);
 								}
-								UpdateCheatWindowRelatedWindow();
+								UpdateCheatRelatedWindow();
 								UpdateCheatListGroupBoxUI();
 							}
 							break;
@@ -661,7 +661,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 								SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPTSTR)"");
 							else
 								SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPTSTR)U8ToStr(c));
-							UpdateCheatWindowRelatedWindow();
+							UpdateCheatRelatedWindow();
 							UpdateCheatListGroupBoxUI();
 							// UpdateCheatAdded();
 							break;
@@ -690,8 +690,8 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 								if (file)
 								{
 									FCEU_LoadGameCheats(file, 0);
-									UpdateCheatWindowRelatedWindow();
 									UpdateCheatsAdded();
+									UpdateCheatRelatedWindow();
 									savecheats = 1;
 								}
 							}
@@ -801,7 +801,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 										{
 											FCEUI_SetCheat(tmpsel, name, -1, -1, -2, s ^= 1, 1);
 
-											UpdateCheatWindowRelatedWindow();
+											UpdateCheatRelatedWindow();
 											UpdateCheatListGroupBoxUI();
 										}
 									}
@@ -816,7 +816,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 										{
 											FCEUI_SetCheat(tmpsel, name, -1, -1, -2, s ^= 1, 1);
 
-											UpdateCheatWindowRelatedWindow();
+											UpdateCheatRelatedWindow();
 											UpdateCheatListGroupBoxUI();
 										}
 									}
@@ -907,6 +907,7 @@ void ConfigCheats(HWND hParent)
 		else
 			DialogBox(fceu_hInstance, "CHEATCONSOLE", hParent, CheatConsoleCallB);
 		UpdateCheatsAdded();
+		UpdateCheatRelatedWindow();
 	} else
 	{
 		ShowWindow(hCheat, SW_SHOWNORMAL);
@@ -1063,7 +1064,7 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 									EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_DEL), TRUE);
 									EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_UPD), TRUE);
 
-									UpdateCheatWindowRelatedWindow();
+									UpdateCheatRelatedWindow();
 									UpdateCheatListGroupBoxUI();
 								}
 						}
@@ -1205,7 +1206,7 @@ void DisableAllCheats()
 	}	
 }
 
-void UpdateCheatWindowRelatedWindow()
+void UpdateCheatRelatedWindow()
 {
 	// hex editor
 	if (hMemView)

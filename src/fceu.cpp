@@ -556,7 +556,11 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	DoDebuggerDataReload(); // Reloads data without reopening window
 	CDLoggerROMChanged();
 	if (hMemView) UpdateColorTable();
-	if (hCheat) UpdateCheatsAdded();
+	if (hCheat)
+	{
+		UpdateCheatsAdded();
+		UpdateCheatRelatedWindow();
+	}
 	if (FrozenAddressCount)
 		FCEU_DispMessage("%d cheats active", 0, FrozenAddressCount);
 #endif

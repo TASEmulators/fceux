@@ -731,8 +731,8 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 									case IDYES:
 										extern void DisableAllCheats();
 										DisableAllCheats();
-										extern void UpdateCheatWindowRelatedWindow();
-										UpdateCheatWindowRelatedWindow();
+										extern void UpdateCheatRelatedWindow();
+										UpdateCheatRelatedWindow();
 								}
 
 							}
@@ -969,8 +969,8 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 							case IDYES:
 								extern void DisableAllCheats();
 								DisableAllCheats();
-								extern void UpdateCheatWindowRelatedWindow();
-								UpdateCheatWindowRelatedWindow();
+								extern void UpdateCheatRelatedWindow();
+								UpdateCheatRelatedWindow();
 						}
 					}
 

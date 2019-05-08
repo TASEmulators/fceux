@@ -22,7 +22,7 @@ extern std::vector<uint16> FrozenAddresses;
 
 void DisableAllCheats();
 
-void UpdateCheatWindowRelatedWindow();
+void UpdateCheatRelatedWindow();
 
 // deselect the old one and select the new one
 #define ListView_MoveSelectionMark(hwnd, prevIndex, newIndex) \
