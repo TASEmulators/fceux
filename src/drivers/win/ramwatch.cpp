@@ -1444,7 +1444,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 							}
 
 							UpdateCheatsAdded();
-							UpdateCheatWindowRelatedWindow();
+							UpdateCheatRelatedWindow();
 
 						}
 						else

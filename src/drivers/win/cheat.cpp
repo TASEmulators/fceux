@@ -447,10 +447,11 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							lvi.mask = LVIF_STATE;
 							lvi.stateMask = LVIS_STATEIMAGEMASK;
 							int tmpsel = SendDlgItemMessage(hCheat, IDC_LIST_CHEATS, LVM_GETNEXTITEM, -1, LVNI_ALL | LVNI_SELECTED);
+
+							char* name = ""; int s;
 							while (tmpsel != -1)
 							{
-								char* name = ""; uint32 a = 0; uint8 v = 0; int s = 0; int c = 0;
-								FCEUI_GetCheat(tmpsel, &name, &a, &v, &c, &s, NULL);
+								FCEUI_GetCheat(tmpsel, &name, NULL, NULL, NULL, &s, NULL);
 								FCEUI_SetCheat(tmpsel, name, -1, -1, -2, s ^= 1, 1);
 
 								lvi.iItem = tmpsel;
@@ -459,22 +460,23 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 								tmpsel = SendDlgItemMessage(hwndDlg, IDC_LIST_CHEATS, LVM_GETNEXTITEM, tmpsel, LVNI_ALL | LVNI_SELECTED);
 							}
+
 							UpdateCheatRelatedWindow();
 							UpdateCheatListGroupBoxUI();
 						}
 						break;
 						case CHEAT_CONTEXT_LIST_POKECHEATVALUE:
 						{
-							char* name = ""; uint32 a; uint8 v; int s;
-							FCEUI_GetCheat(selcheat, &name, &a, &v, NULL, &s, NULL);
+							uint32 a; uint8 v;
+							FCEUI_GetCheat(selcheat, NULL, &a, &v, NULL, NULL, NULL);
 							BWrite[a](a, v);
 						}
 						break;
 						case CHEAT_CONTEXT_LIST_GOTOINHEXEDITOR:
 						{
+							uint32 a;
+							FCEUI_GetCheat(selcheat, NULL, &a, NULL, NULL, NULL, NULL);
 							DoMemView();
-							char* name = ""; uint32 a; uint8 v; int s;
-							FCEUI_GetCheat(selcheat, &name, &a, &v, NULL, &s, NULL);
 							SetHexEditorAddress(a);
 						}
 						break;
@@ -532,7 +534,10 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 						{
 							int sel = SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LVM_GETSELECTIONMARK, 0, 0);
 							if (sel != -1)
+							{
+								DoMemView();
 								SetHexEditorAddress(possiList[sel].addr);
+							}
 						}
 						break;
 						case IDC_CHEAT_PAUSEWHENACTIVE:
@@ -795,8 +800,8 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 										pNMListView->uNewState & INDEXTOSTATEIMAGEMASK(2))
 									{
 										int tmpsel = pNMListView->iItem;
-										char* name = ""; uint32 a; uint8 v; int s; int c;
-										FCEUI_GetCheat(tmpsel, &name, &a, &v, &c, &s, NULL);
+										char* name = ""; int s;
+										FCEUI_GetCheat(tmpsel, &name, NULL, NULL, NULL, &s, NULL);
 										if (!s)
 										{
 											FCEUI_SetCheat(tmpsel, name, -1, -1, -2, s ^= 1, 1);
@@ -810,8 +815,8 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 										pNMListView->uNewState & INDEXTOSTATEIMAGEMASK(1))
 									{
 										int tmpsel = pNMListView->iItem;
-										char* name = ""; uint32 a; uint8 v; int s; int c;
-										FCEUI_GetCheat(tmpsel, &name, &a, &v, &c, &s, NULL);
+										char* name = ""; int s;
+										FCEUI_GetCheat(tmpsel, &name, NULL, NULL, NULL, &s, NULL);
 										if (s)
 										{
 											FCEUI_SetCheat(tmpsel, name, -1, -1, -2, s ^= 1, 1);

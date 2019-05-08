@@ -944,12 +944,6 @@ void FreezeRam(int address, int mode, int final){
 			FCEUI_AddCheat("", address, GetMem(address), -1, 1);
 		}
 
-		//if (final)
-		//{
-		//if(hCheat)RedoCheatsLB(hCheat);
-		UpdateColorTable();
-		//}
-		
 		UpdateCheatsAdded();
 		UpdateCheatRelatedWindow();
 	}
