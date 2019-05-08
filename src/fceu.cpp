@@ -734,7 +734,10 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 #ifdef WIN32
 	//These Windows only dialogs need to be updated only once per frame so they are included here
-	UpdateCheatList(); // CaH4e3: can't see why, this is only cause problems with selection - adelikat: selection is only a problem when not paused, it shoudl be paused to select, we want to see the values update
+	// CaH4e3: can't see why, this is only cause problems with selection
+	// adelikat: selection is only a problem when not paused, it should be paused to select, we want to see the values update
+	// owomomo: use an OWNERDATA CListCtrl to partially solve the problem
+	UpdateCheatList();
 	UpdateTextHooker();
 	Update_RAM_Search(); // Update_RAM_Watch() is also called.
 	RamChange();

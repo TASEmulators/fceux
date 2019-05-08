@@ -17,18 +17,6 @@ extern bool RWfileChanged;
 #define RAMWX "RamwX"
 #define RAMWY "RamwY"
 
-// AddressWatcher is self-contained now
-struct AddressWatcher
-{
-	unsigned int Address; // hardware address
-	unsigned int CurValue;
-	char* comment = NULL; // NULL means no comment, non-NULL means allocated comment
-	bool WrongEndian;
-	char Size; //'d' = 4 bytes, 'w' = 2 bytes, 'b' = 1 byte, and 'S' means it's a separator.
-	char Type;//'s' = signed integer, 'u' = unsigned, 'h' = hex, 'S' = separator
-	short Cheats; // how many bytes are affected by cheat
-};
-
 // Cache all the things required for drawing separator
 // to prevent creating and destroying them repeatedly when painting
 struct SeparatorCache
@@ -58,8 +46,21 @@ extern char Watch_Dir[1024];
 extern HWND RamWatchHWnd;
 extern HACCEL RamWatchAccels;
 
+// AddressWatcher is self-contained now
+struct AddressWatcher
+{
+	unsigned int Address; // hardware address
+	unsigned int CurValue;
+	char* comment = NULL; // NULL means no comment, non-NULL means allocated comment
+	bool WrongEndian;
+	char Size; //'d' = 4 bytes, 'w' = 2 bytes, 'b' = 1 byte, and 'S' means it's a separator.
+	char Type;//'s' = signed integer, 'u' = unsigned, 'h' = hex, 'S' = separator
+	short Cheats; // how many bytes are affected by cheat
+};
+
 bool InsertWatch(const AddressWatcher& Watch);
 bool InsertWatch(const AddressWatcher& Watch, HWND parent); // asks user for comment
+bool InsertWatches(const AddressWatcher* watches, HWND parent, const int count);
 bool InsertWatch(int watchIndex, const AddressWatcher& watcher);
 bool EditWatch(int watchIndex, const AddressWatcher& watcher);
 bool RemoveWatch(int watchIndex);

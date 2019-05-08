@@ -602,23 +602,18 @@ HWND InitializeListView(HWND hwndDlg)
 
 	// Init ListView columns.
 	memset(&lv, 0, sizeof(lv));
-	lv.mask = LVCF_FMT | LVCF_TEXT | LVCF_WIDTH;
-	lv.fmt = LVCFMT_LEFT;
+	lv.mask = LVCF_TEXT | LVCF_WIDTH;
 	lv.pszText = "Type";
 	lv.cx = 80;
 
 	SendMessage(hwndListView, LVM_INSERTCOLUMN, (WPARAM)0, (LPARAM)&lv);
 
-	memset(&lv, 0, sizeof(lv));
-	lv.mask = LVCF_FMT | LVCF_TEXT | LVCF_WIDTH;
-	lv.fmt = LVCFMT_LEFT;
 	lv.pszText = "Command";
 	lv.cx = 240;
 
 	SendMessage(hwndListView, LVM_INSERTCOLUMN, (WPARAM)1, (LPARAM)&lv);
 
-	memset(&lv, 0, sizeof(lv));
-	lv.mask = LVCF_FMT | LVCF_TEXT;
+	lv.mask ^= LVCF_WIDTH;
 	lv.fmt = LVCFMT_LEFT;
 	lv.pszText = "Input";
 

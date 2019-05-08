@@ -4,7 +4,6 @@
 
 extern char rs_type_size;
 extern int ResultCount;
-typedef unsigned int HWAddressType;
 
 unsigned int sizeConv(unsigned int index,char size, char *prevSize = &rs_type_size, bool usePrev = false);
 unsigned int GetRamValue(unsigned int Addr,char Size);

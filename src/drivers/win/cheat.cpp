@@ -23,14 +23,15 @@
 #include "memview.h"
 #include "memwatch.h"
 #include "debugger.h"
+#include "ramwatch.h"
 #include "../../fceu.h"
 #include "../../cart.h"
 #include "../../cheat.h" // For FCEU_LoadGameCheats()
+#include <map>
 
 static HWND pwindow = 0;	    //Handle to Cheats dialog
 HWND hCheat = 0;			    //mbg merge 7/19/06 had to add
-static HMENU hCheatcontext;     //Handle to context menu
-static HMENU hCheatcontextsub;  //Handle to context sub menu
+static HMENU hCheatcontext;     //Handle to cheat context menu
 
 bool pauseWhileActive = false;	//For checkbox "Pause while active"
 extern bool wasPausedByCheats;
@@ -40,19 +41,6 @@ int CheatStyle = 1;
 
 #define GGLISTSIZE 128 //hopefully this is enough for all cases
 
-// deselect the old one and select the new one
-#define ListView_MoveSelectionMark(hwnd, prevIndex, newIndex) \
-LVITEM lvi; \
-SendMessage(hwnd, LVM_SETITEMSTATE, prevIndex, (LPARAM)&(lvi.mask = LVIF_STATE, lvi.stateMask = LVIS_SELECTED, lvi.state = 0, lvi)), \
-SendMessage(hwnd, LVM_SETITEMSTATE, newIndex, (LPARAM)&(lvi.state = LVIS_SELECTED, lvi)), \
-SendMessage(hwnd, LVM_SETSELECTIONMARK, 0, newIndex)
-
-#define ClearCheatListText(hwnd) \
-(SetDlgItemText(hwnd, IDC_CHEAT_ADDR, (LPTSTR)"") & \
-SetDlgItemText(hwnd, IDC_CHEAT_VAL, (LPTSTR)"") & \
-SetDlgItemText(hwnd, IDC_CHEAT_COM, (LPTSTR)"") & \
-SetDlgItemText(hwnd, IDC_CHEAT_NAME, (LPTSTR)""))
-
 
 int selcheat;
 int selcheatcount;
@@ -60,13 +48,19 @@ int ChtPosX,ChtPosY;
 int GGConv_wndx=0, GGConv_wndy=0;
 static HFONT hFont,hNewFont;
 
-static int scrollindex;
-static int scrollnum;
-static int scrollmax;
+// static int scrollindex;
+// static int scrollnum;
+// static int scrollmax;
+std::map<int, SEARCHPOSSIBLE> possiList;
 
-int lbfocus=0;
+int possiStart = 0;
+int possiItemCount = 0;
+int possiTotalCount = 0;
+bool possibleUpdate = false;
+
+int lbfocus = 0;
 int searchdone;
-static int knownvalue=0;
+static int knownvalue = 0;
 
 int GGaddr, GGcomp, GGval;
 char GGcode[10];
@@ -140,6 +134,7 @@ int RedoCheatsCallB(char *name, uint32 a, uint8 v, int c, int s, int type, void*
 	lvi.state = INDEXTOSTATEIMAGEMASK(s ? 2 : 1);
 	SendDlgItemMessage(hCheat, IDC_LIST_CHEATS, LVM_SETITEMSTATE, lvi.iItem, (LPARAM)&lvi);
 
+
 	return 1;
 }
 
@@ -159,35 +154,103 @@ void RedoCheatsLB(HWND hwndDlg)
 	}
 }
 
+HWND InitializeResultsList(HWND hwnd)
+{
+	HWND hwndResults = GetDlgItem(hwnd, IDC_CHEAT_LIST_POSSIBILITIES);
+
+	// prepare columns
+	LVCOLUMN lv = { 0 };
+	lv.mask = LVCF_TEXT | LVCF_WIDTH;
+
+	lv.pszText = "Addr";
+	lv.cx = 50;
+	SendMessage(hwndResults, LVM_INSERTCOLUMN, 0, (LPARAM)&lv);
+
+	lv.pszText = "Pre";
+	lv.mask |= LVCF_FMT;
+	lv.fmt = LVCFMT_RIGHT;
+	lv.cx = 36;
+	SendMessage(hwndResults, LVM_INSERTCOLUMN, 1, (LPARAM)&lv);
+
+	lv.pszText = "Cur";
+	SendMessage(hwndResults, LVM_INSERTCOLUMN, 2, (LPARAM)&lv);
+
+
+	// set style to full row select
+	SendMessage(hwndResults, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
+	
+
+	return hwndResults;
+}
+
 int ShowResultsCallB(uint32 a, uint8 last, uint8 current)
 {
-	char temp[16];
+	if (hCheat)
+	{
+		if (possiList[possiItemCount].update =
+			(possiList[possiItemCount].addr != a ||
+				possiList[possiItemCount].previous != last ||
+				possiList[possiItemCount].current != current))
+		{
+			possiList[possiItemCount].addr = a;
+			possiList[possiItemCount].previous = last;
+			possiList[possiItemCount].current = current;
+			possibleUpdate |= possiList[possiItemCount].update;
+		}
+		++possiItemCount;
+	}
 
-	sprintf(temp,"$%04X:  %02X | %02X",(unsigned int)a,last,current);
-	SendDlgItemMessage(hCheat, IDC_CHEAT_LIST_POSSIBILITIES, LB_ADDSTRING, 0, (LPARAM)(LPSTR)temp);
 	return 1;
 }
 
-void ShowResults(HWND hwndDlg)
+int ShowResults(HWND hwndDlg, bool supressUpdate = false)
 {
-	int n=FCEUI_CheatSearchGetCount();
-	int t;
-	char str[20];
 
-	scrollnum=n;
-	scrollindex=-32768;
+	if (possiList.size() > 64)
+		possiList.clear();
 
-	SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST_POSSIBILITIES,LB_RESETCONTENT,0,0);
-	FCEUI_CheatSearchGetRange(0,16,ShowResultsCallB);
+	int count = FCEUI_CheatSearchGetCount();
 
-	t=-32768+n-17;
-	if (t<-32768) t=-32768;
-	scrollmax=t;
-	SendDlgItemMessage(hwndDlg,IDC_CHEAT_SCRL_POSSIBILITIES,SBM_SETRANGE,-32768,t);
-	SendDlgItemMessage(hwndDlg,IDC_CHEAT_SCRL_POSSIBILITIES,SBM_SETPOS,-32768,1);
+	if (count != possiTotalCount)
+	{
+		char str[20];
+		sprintf(str, "%d Possibilit%s", count, count == 1 ? "y" : "ies");
+		SetDlgItemText(hwndDlg, IDC_CHEAT_BOX_POSSIBILITIES, str);
+		SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LVM_SETITEMCOUNT, count, 0);
+		possiTotalCount = count;
+	}
 
-	sprintf(str,"%d Possibilities",n);
-	SetDlgItemText(hwndDlg,IDC_CHEAT_BOX_POSSIBILITIES,str);
+	if (count)
+	{
+		int first = SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LVM_GETTOPINDEX, 0, 0);
+		if (first < 0)
+			first = 0;
+		int last = first + possiItemCount + 1;
+		if (last > count)
+			last = count;
+
+		int tmpPossiItemCount = possiItemCount;
+		possiItemCount = first;
+		FCEUI_CheatSearchGetRange(first, last, ShowResultsCallB);
+		possiItemCount = tmpPossiItemCount;
+		if (possibleUpdate && !supressUpdate)
+		{
+			int start = -1, end = -1;
+			for (int i = first; i < last; ++i)
+				if (possiList[i - first].update)
+				{
+					if (start == -1)
+						start = i;
+					end = i;
+				}
+
+			SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LVM_REDRAWITEMS, start, end);
+		}
+		possibleUpdate = false;
+		possiStart = first;
+	}
+
+	return 1;
 }
 
 void EnableCheatButtons(HWND hwndDlg, int enable)
@@ -213,7 +276,7 @@ HWND InitializeCheatList(HWND hwnd)
 	SendMessage(hwndChtList, LVM_INSERTCOLUMN, 0, (LPARAM)&lv);
 
 	lv.pszText = "Name";
-	lv.cx = 140;
+	lv.cx = 132;
 	SendMessage(hwndChtList, LVM_INSERTCOLUMN, 1, (LPARAM)&lv);
 
 	// Add a checkbox to indicate if the cheat is activated
@@ -224,16 +287,6 @@ HWND InitializeCheatList(HWND hwnd)
 
 BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	LOGFONT lf;
-	RECT wrect;
-
-//	char str[256] = { 0 }, str2[256] = { 0 };
-
-//	char *name = "";
-//	uint32 a;
-//	uint8 v;
-//	int c;
-//	int s;
 
 	switch (uMsg)
 	{
@@ -247,6 +300,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 			//setup font
 			hFont = (HFONT)SendMessage(hwndDlg, WM_GETFONT, 0, 0);
+			LOGFONT lf;
 			GetObject(hFont, sizeof(LOGFONT), &lf);
 			strcpy(lf.lfFaceName, "Courier New");
 			hNewFont = CreateFontIndirect(&lf);
@@ -272,18 +326,16 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 			//disable or enable buttons
 			EnableWindow(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_KNOWN), FALSE);
-			if (scrollnum)
-			{
-				char str[256] = { 0 };
-				EnableCheatButtons(hwndDlg, TRUE);
-				ShowResults(hwndDlg);
-				sprintf(str, "%d Possibilities", (int)FCEUI_CheatSearchGetCount());
-				SetDlgItemText(hwndDlg, IDC_CHEAT_BOX_POSSIBILITIES, str);
-			}
-			else EnableCheatButtons(hwndDlg, FALSE);
 
-			//add header for cheat list
+			possiTotalCount = 0;
+			possiItemCount = SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LVM_GETCOUNTPERPAGE, 0, 0);
+
+			EnableCheatButtons(hwndDlg, possiTotalCount != 0);
+			ShowResults(hwndDlg);
+
+			//add header for cheat list and possibilities
 			InitializeCheatList(hwndDlg);
+			InitializeResultsList(hwndDlg);
 
 			//misc setup
 			searchdone = 0;
@@ -307,9 +359,9 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 				}
 			
 			}
-			if ((CheatStyle) && (scrollnum)) {
-				if ((!wParam) && (searchdone)) {
-					searchdone=0;
+			if (CheatStyle && possiTotalCount) {
+				if ((!wParam) && searchdone) {
+					searchdone = 0;
 					FCEUI_CheatSearchSetCurrentAsOriginal();
 				}
 				ShowResults(hwndDlg);   
@@ -328,139 +380,68 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			DeleteObject(hNewFont);
 			if (searchdone)
 				FCEUI_CheatSearchSetCurrentAsOriginal();
+			possiList.clear();
 			break;
 		case WM_MOVE:
 			if (!IsIconic(hwndDlg)) {
-				GetWindowRect(hwndDlg,&wrect);
+				RECT wrect;
+				GetWindowRect(hwndDlg, &wrect);
 				ChtPosX = wrect.left;
 				ChtPosY = wrect.top;
 
 				#ifdef WIN32
-				WindowBoundsCheckNoResize(ChtPosX,ChtPosY,wrect.right);
+				WindowBoundsCheckNoResize(ChtPosX, ChtPosY, wrect.right);
 				#endif
 			}
 			break;
-
-		case WM_VSCROLL:
-			if (scrollnum > 16) {
- 				switch (LOWORD(wParam)) {
-					case SB_TOP:
-						scrollindex=-32768;
-						SendDlgItemMessage(hwndDlg,IDC_CHEAT_SCRL_POSSIBILITIES,SBM_SETPOS,scrollindex,1);
-						SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST_POSSIBILITIES,LB_RESETCONTENT,16,0);
-						FCEUI_CheatSearchGetRange(scrollindex+32768,scrollindex+32768+16,ShowResultsCallB);
-						break;
-					case SB_BOTTOM:
-						scrollindex=scrollmax;
-						SendDlgItemMessage(hwndDlg,IDC_CHEAT_SCRL_POSSIBILITIES,SBM_SETPOS,scrollindex,1);
-						SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST_POSSIBILITIES,LB_RESETCONTENT,16,0);
-						FCEUI_CheatSearchGetRange(scrollindex+32768,scrollindex+32768+16,ShowResultsCallB);
-						break;
-					case SB_LINEUP:
-						if (scrollindex > -32768) {
-							scrollindex--;
-							SendDlgItemMessage(hwndDlg,IDC_CHEAT_SCRL_POSSIBILITIES,SBM_SETPOS,scrollindex,1);
-							SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST_POSSIBILITIES,LB_RESETCONTENT,16,0);
-							FCEUI_CheatSearchGetRange(scrollindex+32768,scrollindex+32768+16,ShowResultsCallB);
-						}
-						break;
-					case SB_PAGEUP:
-						scrollindex-=17;
-						if(scrollindex<-32768) scrollindex=-32768;
-						SendDlgItemMessage(hwndDlg,IDC_CHEAT_SCRL_POSSIBILITIES,SBM_SETPOS,scrollindex,1);
-						SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST_POSSIBILITIES,LB_RESETCONTENT,16,0);
-						FCEUI_CheatSearchGetRange(scrollindex+32768,scrollindex+32768+16,ShowResultsCallB);
-						break;
-
-					case SB_LINEDOWN:
-						if (scrollindex<scrollmax) {
-							scrollindex++;
-							SendDlgItemMessage(hwndDlg,IDC_CHEAT_SCRL_POSSIBILITIES,SBM_SETPOS,scrollindex,1);
-							SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST_POSSIBILITIES,LB_RESETCONTENT,0,0);
-							FCEUI_CheatSearchGetRange(scrollindex+32768,scrollindex+32768+16,ShowResultsCallB);
-						}
-						break;
-					case SB_PAGEDOWN:
-						scrollindex+=17;
-						if (scrollindex>scrollmax) scrollindex=scrollmax;
-						SendDlgItemMessage(hwndDlg,IDC_CHEAT_SCRL_POSSIBILITIES,SBM_SETPOS,scrollindex,1);
-						SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST_POSSIBILITIES,LB_RESETCONTENT,0,0);
-						FCEUI_CheatSearchGetRange(scrollindex+32768,scrollindex+32768+16,ShowResultsCallB);
-						break;
-					case SB_THUMBPOSITION:
-					case SB_THUMBTRACK:
-						scrollindex=(short int)HIWORD(wParam);
-						SendDlgItemMessage(hwndDlg,IDC_CHEAT_SCRL_POSSIBILITIES,SBM_SETPOS,scrollindex,1);
-						SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST_POSSIBILITIES,LB_RESETCONTENT,0,0);
-						FCEUI_CheatSearchGetRange(32768+scrollindex,32768+scrollindex+16,ShowResultsCallB);
-						break;
-				}
-
-			}
-			break;
-
-		case WM_VKEYTOITEM:
-			if (lbfocus) {
-				int real;
-
-				real=SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST_POSSIBILITIES,LB_GETCURSEL,0,0);
-				switch (LOWORD(wParam)) {
-					case VK_UP:
-						// mmmm....recursive goodness
-						if (real == 0) SendMessage(hwndDlg,WM_VSCROLL,SB_LINEUP,0);
-						return -1;
-						break;
-					case VK_DOWN:
-						if (real == 16) {
-							SendMessage(hwndDlg,WM_VSCROLL,SB_LINEDOWN,0);
-							SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST_POSSIBILITIES,LB_SETCURSEL,real,0);
-						}
-						return -1;
-						break;
-					case VK_PRIOR:
-						SendMessage(hwndDlg,WM_VSCROLL,SB_PAGEUP,0);
-						break;
-					case VK_NEXT:
-						SendMessage(hwndDlg,WM_VSCROLL,SB_PAGEDOWN,0);
-						break;
-					case VK_HOME:
-						SendMessage(hwndDlg,WM_VSCROLL,SB_TOP,0);
-						break;
-					case VK_END:
-						SendMessage(hwndDlg,WM_VSCROLL,SB_BOTTOM,0);
-						break;
-				}
-				return -2;
-			}
-			break;
-
 		case WM_CONTEXTMENU:
 		{
 			// Handle certain subborn context menus for nearly incapable controls.
-			if (GetDlgCtrlID((HWND)wParam) == IDC_LIST_CHEATS) {
-				// Only open the menu if a cheat is selected
-				if (selcheat >= 0) {
-					// Open IDC_LIST_CHEATS Context Menu
-					hCheatcontextsub = GetSubMenu(hCheatcontext, 0);
-					// SetMenuDefaultItem(hCheatcontextsub, CHEAT_CONTEXT_TOGGLECHEAT, false);
-					if (lParam != -1)
-						TrackPopupMenu(hCheatcontextsub, TPM_RIGHTBUTTON, LOWORD(lParam), HIWORD(lParam), 0, hwndDlg, 0);	//Create menu
-					else { // Handle the context menu keyboard key
-						GetWindowRect(GetDlgItem(hwndDlg, IDC_LIST_CHEATS), &wrect);
-						TrackPopupMenu(hCheatcontextsub, TPM_RIGHTBUTTON, wrect.left + int((wrect.right - wrect.left) / 3), wrect.top + int((wrect.bottom - wrect.top) / 3), 0, hwndDlg, 0);	//Create menu
+			HWND itemHwnd = (HWND)wParam;
+			int dlgId = GetDlgCtrlID(itemHwnd);
+			int sel = SendMessage(itemHwnd, LVM_GETSELECTIONMARK, 0, 0);
+			HMENU hCheatcontextsub = NULL;
+			switch (dlgId) {
+				case IDC_LIST_CHEATS:
+					// Only open the menu if a cheat is selected
+					if (selcheat >= 0)
+						// Open IDC_LIST_CHEATS Context Menu
+						hCheatcontextsub = GetSubMenu(hCheatcontext, 0);
+				break;
+				case IDC_CHEAT_LIST_POSSIBILITIES:
+					if (sel != -1) {
+						hCheatcontextsub = GetSubMenu(hCheatcontext, 1);
+						SetMenuDefaultItem(hCheatcontextsub, CHEAT_CONTEXT_POSSI_ADDTOMEMORYWATCH, false);
 					}
-
-				}
 			}
-		
+
+			if (hCheatcontextsub)
+			{
+				POINT point;
+				if (lParam != -1)
+				{
+					point.x = LOWORD(lParam);
+					point.y = HIWORD(lParam);
+				} else {
+					// Handle the context menu keyboard key
+					RECT wrect;
+					wrect.left = LVIR_BOUNDS;
+					SendMessage(itemHwnd, LVM_GETITEMRECT, sel, (LPARAM)&wrect);
+					POINT point;
+					point.x = wrect.left + (wrect.right - wrect.left) / 2;
+					point.y = wrect.top + (wrect.bottom - wrect.top) / 2;
+					ClientToScreen(itemHwnd, &point);
+				}
+				TrackPopupMenu(hCheatcontextsub, TPM_RIGHTBUTTON, point.x, point.y, 0, hwndDlg, 0);	//Create menu
+
+			}
 		}
 		break;
-
 		case WM_COMMAND:
 			switch (HIWORD(wParam)) {
 				case BN_CLICKED:
 					switch (LOWORD(wParam)) {
-						case CHEAT_CONTEXT_TOGGLECHEAT:
+						case CHEAT_CONTEXT_LIST_TOGGLECHEAT:
 						{
 							LVITEM lvi;
 							lvi.mask = LVIF_STATE;
@@ -482,19 +463,76 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							UpdateCheatListGroupBoxUI();
 						}
 						break;
-						case CHEAT_CONTEXT_POKECHEATVALUE:
+						case CHEAT_CONTEXT_LIST_POKECHEATVALUE:
 						{
 							char* name = ""; uint32 a; uint8 v; int s;
 							FCEUI_GetCheat(selcheat, &name, &a, &v, NULL, &s, NULL);
 							BWrite[a](a, v);
 						}
 						break;
-						case CHEAT_CONTEXT_GOTOINHEXEDITOR:
+						case CHEAT_CONTEXT_LIST_GOTOINHEXEDITOR:
 						{
 							DoMemView();
 							char* name = ""; uint32 a; uint8 v; int s;
 							FCEUI_GetCheat(selcheat, &name, &a, &v, NULL, &s, NULL);
 							SetHexEditorAddress(a);
+						}
+						break;
+						case CHEAT_CONTEXT_POSSI_ADDCHEAT:
+						{
+							char str[256] = { 0 };
+							int sel = SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LVM_GETSELECTIONMARK, 0, 0);
+							if (sel != -1)
+							{
+								char str[256] = { 0 };
+								GetDlgItemText(hwndDlg, IDC_CHEAT_NAME, str, 256);
+								SEARCHPOSSIBLE& possible = possiList[sel];
+								if (FCEUI_AddCheat(str, possible.addr, possible.current, -1, 1))
+								{
+									RedoCheatsCallB(str, possible.addr, possible.current, -1, 1, 1, NULL);
+
+									int newselcheat = SendDlgItemMessage(hwndDlg, IDC_LIST_CHEATS, LVM_GETITEMCOUNT, 0, 0) - 1;
+									ListView_MoveSelectionMark(GetDlgItem(hwndDlg, IDC_LIST_CHEATS), selcheat, newselcheat);
+									selcheat = newselcheat;
+								}
+
+								UpdateCheatWindowRelatedWindow();
+								UpdateCheatListGroupBoxUI();
+							}
+						}
+						break;
+						case CHEAT_CONTEXT_POSSI_ADDTOMEMORYWATCH:
+						{
+							char addr[16] = { 0 };
+							int sel = SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LVM_GETSELECTIONMARK, 0, 0);
+							if (sel != -1)
+							{
+								sprintf(addr, "%04X", possiList[sel].addr);
+								AddMemWatch(addr);
+							}
+						}
+						break;
+						case CHEAT_CONTEXT_POSSI_ADDTORAMWATCH:
+						{
+							int sel = SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LVM_GETSELECTIONMARK, 0, 0);
+							if (sel != -1)
+							{
+								AddressWatcher tempWatch;
+								tempWatch.Size = 'b';
+								tempWatch.Type = 'h';
+								tempWatch.Address = possiList[sel].addr;
+								tempWatch.WrongEndian = false;
+								if(InsertWatch(tempWatch, hwndDlg) && !RamWatchHWnd)
+									SendMessage(hAppWnd, WM_COMMAND, ID_RAM_WATCH, 0);
+								SetForegroundWindow(RamWatchHWnd);
+							}
+						}
+						break;
+						case CHEAT_CONTEXT_POSSI_GOTOINHEXEDITOR:
+						{
+							int sel = SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LVM_GETSELECTIONMARK, 0, 0);
+							if (sel != -1)
+								SetHexEditorAddress(possiList[sel].addr);
 						}
 						break;
 						case IDC_CHEAT_PAUSEWHENACTIVE:
@@ -547,7 +585,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							UpdateCheatListGroupBoxUI();
 							break;
 						}
-						case ID_CHEATLISTPOPUP_DELETESELECTEDCHEATS:
+						case CHEAT_CONTEXT_LIST_DELETESELECTEDCHEATS:
 						case IDC_BTN_CHEAT_DEL:
 							if (selcheatcount > 1)
 							{
@@ -717,49 +755,6 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 						}
 					}
 					break;
-				case LBN_DBLCLK:
-					switch (LOWORD(wParam)) { //disable/enable cheat
-						case IDC_CHEAT_LIST_POSSIBILITIES:
-							if (EmulationPaused == 1)	//We only want to send info to memwatch if paused
-							{							//otherwise we will be sending info while it is updating causing unpredictable behavior
-								lbfocus = 1;
-								char str[256] = { 0 }, str2[256] = { 0 };
-								SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LB_GETTEXT, 
-									SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LB_GETCURSEL, 0, 0), (LPARAM)(LPCTSTR)str);
-								strcpy(str2, str+1);
-								str2[4] = 0;
-								AddMemWatch(str2);
-							}
-							break;
-					}
-					break;
-				case LBN_SELCHANGE:
-					switch (LOWORD(wParam)) {
-						case IDC_CHEAT_LIST_POSSIBILITIES:
-						{
-							char str[256] = { 0 }, str2[256] = { 0 };
-							lbfocus = 1;
-							SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LB_GETTEXT,
-								SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LB_GETCURSEL, 0, 0),
-								(LPARAM)(LPCTSTR)str);
-							strcpy(str2, str + 1);
-							str2[4] = 0;
-							SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPTSTR)str2);
-							strcpy(str2, str + 13);
-							SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPTSTR)str2);
-							SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPTSTR)"");
-							break;
-						}
-					}
-					break;
-				case LBN_SELCANCEL:
-					switch(LOWORD(wParam)) {
-						case IDC_CHEAT_LIST_POSSIBILITIES:
-							lbfocus=0;
-							break;
-					}
-					break;
-
 			}
 			break;
 			case WM_NOTIFY:
@@ -825,9 +820,62 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 											UpdateCheatListGroupBoxUI();
 										}
 									}
-
-								break;
 							}
+						}
+					}
+					break;
+					case IDC_CHEAT_LIST_POSSIBILITIES:
+					{
+						LPNMHDR lP = (LPNMHDR)lParam;
+						switch (lP->code)
+						{
+							case LVN_ITEMCHANGED:
+							{
+								NMLISTVIEW* pNMListView = (NMLISTVIEW*)lP;
+								if (pNMListView->uNewState & LVIS_FOCUSED ||
+									!(pNMListView->uOldState & LVIS_SELECTED) && pNMListView->uNewState & LVIS_SELECTED)
+								{
+
+									SEARCHPOSSIBLE& possible = possiList[pNMListView->iItem];
+									char str[16];
+									sprintf(str, "%04X", possible.addr);
+									SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPCTSTR)str);
+									sprintf(str, "%02X", possible.current);
+									SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPCTSTR)str);
+									SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPTSTR)"");
+								}
+							}
+							break;
+							case LVN_GETDISPINFO:
+							{
+								NMLVDISPINFO* info = (NMLVDISPINFO*)lParam;
+								
+								if (!possiList.count(info->item.iItem))
+									ShowResults(hwndDlg, true);
+
+								static char num[32];
+								switch (info->item.iSubItem)
+								{
+									case 0:
+										sprintf(num, "$%04X", possiList[info->item.iItem].addr);
+									break;
+									case 1:
+										sprintf(num, "%02X", possiList[info->item.iItem].previous);
+									break;
+									case 2:
+										sprintf(num, "%02X", possiList[info->item.iItem].current);
+									break;
+								}
+								info->item.pszText = num;
+							}
+							break;
+							case NM_DBLCLK:
+							{
+								char addr[16];
+								sprintf(addr, "%04X", possiList[((NMITEMACTIVATE*)lParam)->iItem].addr);
+								AddMemWatch(addr);
+							}
+							break;
 						}
 					}
 					break;
@@ -868,7 +916,7 @@ void ConfigCheats(HWND hParent)
 
 void UpdateCheatList()
 {
-	if(!pwindow)
+	if (!pwindow)
 		return;
 	else
 		ShowResults(pwindow);
@@ -1014,7 +1062,9 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 									EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_DEL), TRUE);
 									EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_UPD), TRUE);
-									UpdateCheatsAdded();
+
+									UpdateCheatWindowRelatedWindow();
+									UpdateCheatListGroupBoxUI();
 								}
 						}
 					break;

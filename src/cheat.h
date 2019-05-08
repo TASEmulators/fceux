@@ -32,6 +32,13 @@ struct CHEATF {
 	int status;
 };
 
+struct SEARCHPOSSIBLE {
+	uint16 addr;
+	uint8 previous;
+	uint8 current;
+	bool update;
+};
+
 #define FCEU_SEARCH_SPECIFIC_CHANGE         0
 #define FCEU_SEARCH_RELATIVE_CHANGE         1
 #define FCEU_SEARCH_PUERLY_RELATIVE_CHANGE  2

@@ -39,12 +39,12 @@
 #include "input.h"
 #include "fceu.h"
 
+#include "cheat.h"
 #include "ram_search.h"
 #include "ramwatch.h"
 #include "memwatch.h"
 #include "ppuview.h"
 #include "debugger.h"
-#include "cheat.h"
 #include "debug.h"
 #include "ntview.h"
 #include "memview.h"

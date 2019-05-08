@@ -45,6 +45,7 @@
 //TODO - we really need some kind of global platform-specific options api
 #ifdef WIN32
 #include "drivers/win/main.h"
+#include "drivers/win/cheat.h"
 #include "drivers/win/ram_search.h"
 #include "drivers/win/ramwatch.h"
 #endif

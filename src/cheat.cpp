@@ -139,14 +139,13 @@ int FCEU_CalcCheatAffectedBytes(uint32 address, uint32 size) {
 	return count;
 }
 
-static int AddCheatEntry(char *name, uint32 addr, uint8 val, int compare, int status, int type);
+static int AddCheatEntry(const char *name, uint32 addr, uint8 val, int compare, int status, int type);
 static void CheatMemErr(void)
 {
 	FCEUD_PrintError("Error allocating memory for cheat data.");
 }
 
-/* This function doesn't allocate any memory for "name" */
-static int AddCheatEntry(char *name, uint32 addr, uint8 val, int compare, int status, int type)
+static int AddCheatEntry(const char *name, uint32 addr, uint8 val, int compare, int status, int type)
 {
 	struct CHEATF *temp;
 	if(!(temp = (struct CHEATF *)FCEU_dmalloc(sizeof(struct CHEATF))))
@@ -191,7 +190,7 @@ void FCEU_LoadGameCheats(FILE *override, int override_existing)
 	int x;
 
 	char linebuf[2048];
-	char *namebuf = NULL;
+	char namebuf[128];
 	int tc = 0;
 	char *fn;
 
@@ -244,8 +243,7 @@ void FCEU_LoadGameCheats(FILE *override, int override_existing)
 			char *neo = &tbuf[4+2+2+1+1+1];
 			if(sscanf(tbuf, "%04x%*[:]%02x%*[:]%02x", &addr, &val, &compare) != 3)
 				continue;
-			if (!(namebuf = (char *)FCEU_dmalloc(strlen(neo) + 1)))
-                return;
+			char namebuf[128];
 			strcpy(namebuf, neo);
 		}
 		else
@@ -253,8 +251,6 @@ void FCEU_LoadGameCheats(FILE *override, int override_existing)
 			char *neo = &tbuf[4+2+1+1];
 			if(sscanf(tbuf, "%04x%*[:]%02x", &addr, &val) != 2)
 				continue;
-			if (!(namebuf = (char *)FCEU_dmalloc(strlen(neo) + 1)))
-                return;
 			strcpy(namebuf, neo);
 		}
 
@@ -272,9 +268,6 @@ void FCEU_LoadGameCheats(FILE *override, int override_existing)
 		AddCheatEntry(namebuf, addr, val, doc ? compare : -1, status, type);
 		tc++;
 	}
-
-	if (namebuf)
-		free(namebuf);
 
 	RebuildSubCheats();
 
@@ -368,24 +361,11 @@ void FCEU_FlushGameCheats(FILE *override, int nosave)
 
 int FCEUI_AddCheat(const char *name, uint32 addr, uint8 val, int compare, int type)
 {
-	char *t = NULL;
 
-	if(!(t = (char *)FCEU_dmalloc(strlen(name) + 1)))
-	{
-		CheatMemErr();
-		return(0);
-	}
-	strcpy(t,name);
-	if(!AddCheatEntry(t, addr, val, compare, 1, type))
-	{
-		free(t);
-		return(0);
-	}
+	if(!AddCheatEntry(name, addr, val, compare, 1, type))
+		return 0;
 	savecheats = 1;
 	RebuildSubCheats();
-
-	if (t)
-		free(t);
 
 	return 1;
 }
@@ -744,7 +724,7 @@ void FCEUI_CheatSearchGet(int (*callb)(uint32 a, uint8 last, uint8 current, void
 void FCEUI_CheatSearchGetRange(uint32 first, uint32 last, int (*callb)(uint32 a, uint8 last, uint8 current))
 {
 	uint32 x;
-	uint32 in=0;
+	uint32 in = 0;
 
 	if(!CheatComp)
 	{
@@ -753,14 +733,15 @@ void FCEUI_CheatSearchGetRange(uint32 first, uint32 last, int (*callb)(uint32 a,
 		return;
 	}
 
-	for(x=0;x<0x10000;x++)
-		if(!(CheatComp[x]&CHEATC_NOSHOW) && CheatRPtrs[x>>10])
+	for(x = 0; x < 0x10000; x++)
+		if(!(CheatComp[x] & CHEATC_NOSHOW) && CheatRPtrs[x >> 10])
 		{
-			if(in>=first)
-				if(!callb(x,CheatComp[x],CheatRPtrs[x>>10][x]))
+			if(in >= first)
+				if(!callb(x, CheatComp[x], CheatRPtrs[x >> 10][x]))
 					break;
 			in++;
-			if(in>last) return;
+			if(in > last)
+				return;
 		}
 }
 
@@ -814,7 +795,7 @@ void FCEUI_CheatSearchEnd(int type, uint8 v1, uint8 v2)
 				if (!(CheatComp[x] & CHEATC_NOSHOW) && (CheatComp[x] != v1 || CheatRPtrs[x >> 10][x] != v2))
 					CheatComp[x] |= CHEATC_EXCLUDED;
 			break;
-		case FCEU_SEARCH_RELATIVE_CHANGE: // Search for relative change(between values).
+		case FCEU_SEARCH_RELATIVE_CHANGE: // Search for relative change (between values).
 			for (x = 0; x < 0x10000; x++)
 				if (!(CheatComp[x] & CHEATC_NOSHOW) && (CheatComp[x] != v1 || CAbs(CheatComp[x] - CheatRPtrs[x >> 10][x]) != v2))
 					CheatComp[x] |= CHEATC_EXCLUDED;
@@ -886,7 +867,7 @@ void UpdateFrozenList(void)
 
 	uint32 x;
 	FrozenAddresses.clear();		//Clear vector and repopulate
-	for(x=0;x<numsubcheats;x++)
+	for(x = 0; x < numsubcheats; x++)
 	{
 		FrozenAddresses.push_back(SubCheats[x].addr);
 		//FCEU_printf("Address %d: %d \n",x,FrozenAddresses[x]); //Debug

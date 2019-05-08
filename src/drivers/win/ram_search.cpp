@@ -32,9 +32,9 @@
 #include "../../cheat.h"
 
 #include "resource.h"
+#include "cheat.h"
 #include "ram_search.h"
 #include "ramwatch.h"
-#include "cheat.h"
 #include <assert.h>
 #include <commctrl.h>
 #include <list>
@@ -1943,30 +1943,36 @@ invalid_field:
 				case IDC_C_WATCH:
 				{
 					HWND ramListControl = GetDlgItem(hDlg,IDC_RAMLIST);
-					int selCount = ListView_GetSelectedCount(ramListControl);
-
-					bool inserted = false;
-					int watchItemIndex = ListView_GetNextItem(ramListControl, -1, LVNI_SELECTED);
-					while (watchItemIndex >= 0)
+					int selCount = SendMessage(ramListControl, LVM_GETSELECTEDCOUNT, 0, 0);
+					if (selCount > 0)
 					{
 						AddressWatcher tempWatch;
-						tempWatch.Address = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size,rs_t=='s',noMisalign, watchItemIndex);
 						tempWatch.Size = rs_type_size;
 						tempWatch.Type = rs_t;
 						tempWatch.WrongEndian = 0; //Replace when I get little endian working
 						tempWatch.comment = NULL;
 
-						if (selCount == 1)
-							inserted |= InsertWatch(tempWatch, hDlg);
-						else
-							inserted |= InsertWatch(tempWatch);
+						bool inserted = false;
 
-						watchItemIndex = ListView_GetNextItem(ramListControl, watchItemIndex, LVNI_SELECTED);
+						AddressWatcher* watches = (AddressWatcher*)malloc(selCount * sizeof(AddressWatcher));
+						int i = 0;
+						int watchItemIndex = -1;
+						while ((watchItemIndex = SendMessage(ramListControl, LVM_GETNEXTITEM, watchItemIndex, LVNI_SELECTED)) >= 0)
+						{
+							tempWatch.Address = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size, rs_t == 's', noMisalign, watchItemIndex);
+							watches[i] = tempWatch;
+							++i;
+						}
+
+						// bring up the ram watch window if it's not already showing so the user knows where the watch went
+						if ((selCount == 1 ?
+							InsertWatch(watches[0], hDlg) : InsertWatches(watches, hDlg, selCount)) 
+							&& !RamWatchHWnd)
+							SendMessage(hWnd, WM_COMMAND, ID_RAM_WATCH, 0);
+						SetForegroundWindow(RamSearchHWnd);
+
+						free(watches);
 					}
-					// bring up the ram watch window if it's not already showing so the user knows where the watch went
-					if(inserted && !RamWatchHWnd)
-						SendMessage(hWnd, WM_COMMAND, ID_RAM_WATCH, 0);
-					SetForegroundWindow(RamSearchHWnd);
 					{rv = true; break;}
 				}
 
