@@ -189,8 +189,8 @@ void FCEU_LoadGameCheats(FILE *override, int override_existing)
 	unsigned int compare;
 	int x;
 
-	char linebuf[2048];
-	char namebuf[128];
+	char linebuf[2048] = { 0 };
+	char namebuf[128] = { 0 };
 	int tc = 0;
 	char *fn;
 

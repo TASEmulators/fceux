@@ -15,6 +15,9 @@ void SetGGConvFocus(int address,int compare);
 void UpdateCheatList();
 void UpdateCheatListGroupBoxUI();
 void UpdateCheatsAdded();
+void ToggleCheatInputMode(HWND hwndDlg, int modeId);
+void GetUICheatInfo(HWND hwndDlg, char* name, uint32* a, uint8* v, int* c);
+inline void GetCheatStr(char* buf, int a, int v, int c);
 
 extern unsigned int FrozenAddressCount;
 extern std::vector<uint16> FrozenAddresses;
@@ -35,5 +38,6 @@ SendMessage(hwnd, LVM_SETSELECTIONMARK, 0, newIndex)
 (SetDlgItemText(hwnd, IDC_CHEAT_ADDR, (LPTSTR)"") & \
 SetDlgItemText(hwnd, IDC_CHEAT_VAL, (LPTSTR)"") & \
 SetDlgItemText(hwnd, IDC_CHEAT_COM, (LPTSTR)"") & \
-SetDlgItemText(hwnd, IDC_CHEAT_NAME, (LPTSTR)""))
+SetDlgItemText(hwnd, IDC_CHEAT_NAME, (LPTSTR)"") & \
+SetDlgItemText(hwnd, IDC_CHEAT_TEXT, (LPTSTR)""))
 

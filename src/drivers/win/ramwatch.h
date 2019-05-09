@@ -78,4 +78,9 @@ extern HWND RamWatchHWnd;
 #define WatchSizeConv(watch) (watch.Type == 'S' ? 0 : watch.Size == 'd' ? 4 : watch.Size == 'w' ? 2 : watch.Size == 'b' ? 1 : 0)
 #define SizeConvWatch(size) (size == 4 ? 'd' : size == 2 ? 'w' : size == 1 : 'b' : 0)
 
+#define GetDlgStoreIndex(parent) \
+	(parent == RamWatchHWnd ? 0 : \
+	parent == RamSearchHWnd ? 1 : \
+	parent == hCheat ? 2 : 3)
+
 #endif

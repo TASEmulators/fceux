@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ 生成的包含文件。
-// 供 res.rc 使用
+// Microsoft Visual C++ generated file
+// for res.rc
 //
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
@@ -273,6 +273,7 @@
 #define COMBO_NETMOO_LOCAL_PLAYERS      204
 #define MENU_MV_EDIT_FIND_NEXT          204
 #define IDC_DEBUGGER_FLAG_D             204
+#define IDC_GROUP_PREV_COM              204
 #define IDC_NETMOO_KEY                  205
 #define IDC_DEBUGGER_FLAG_I             205
 #define IDB_BITMAP20                    205
@@ -584,6 +585,7 @@
 #define IDC_NOTE_TO_FIND                1147
 #define IDC_AUTOSAVE_PERIOD             1147
 #define IDC_EXTRA_SCANLINES             1147
+#define IDC_CHEAT_TEXT                  1147
 #define IDC_BUTTON9                     1148
 #define TASEDITOR_FIND_NEXT_SIMILAR_MARKER 1148
 #define IDC_SYMBOLIC_ADDRESS            1148
@@ -792,6 +794,12 @@
 #define IDC_EXTRA_SCANLINES_TEXT        1309
 #define IDC_DATASIZE_GROUPBOX           1310
 #define IDC_DATATYPE_GROUPBOX           1311
+#define IDC_RADIO_ADDRESS               1312
+#define IDC_RADIO_TEXT_CODE             1313
+#define IDC_CHEAT_VAL_LABEL             1314
+#define IDC_CHEAT_COM_LABEL             1315
+#define IDC_CHEAT_KNOWN_LABEL           1316
+#define IDC_CHEAT_LABEL_KNOWN           1316
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1273,7 +1281,7 @@
 #define MENU_MV_FILE_LOAD_OAM           40599
 #define DISASM_CONTEXT_SELECTALL        40599
 #define CHEAT_CONTEXT_POSSI_ADDTOMEMORYWATCH 40600
-#define CHEAT_CONTEXT_POSSI_ADDCHEAT 40601
+#define CHEAT_CONTEXT_POSSI_ADDCHEAT    40601
 #define CHEAT_CONTEXT_POSSI_GOTOINHEXEDITOR 40602
 #define CHEAT_CONTEXT_POSSI_ADDTORAMWATCH 40603
 #define IDC_DEBUGGER_ICONTRAY           55535
@@ -1290,7 +1298,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        304
 #define _APS_NEXT_COMMAND_VALUE         40611
-#define _APS_NEXT_CONTROL_VALUE         1312
+#define _APS_NEXT_CONTROL_VALUE         1317
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

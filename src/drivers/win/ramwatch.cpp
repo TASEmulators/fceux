@@ -131,7 +131,6 @@ bool InsertWatch(const AddressWatcher& Watch)
 	return true;
 }
 
-
 bool InsertWatch(const AddressWatcher& Watch, HWND parent)
 {
 	if(!VerifyWatchNotAlreadyAdded(Watch))
@@ -144,9 +143,20 @@ bool InsertWatch(const AddressWatcher& Watch, HWND parent)
 
 	int prevWatchCount = WatchCount;
 
-	rswatches[WatchCount] = Watch;
-	rswatches[WatchCount].CurValue = GetCurrentValue(rswatches[WatchCount]);
-	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), parent, (DLGPROC)EditWatchProc, (LPARAM)WatchCount);
+	int tmpWatchIndex;
+	if (parent == RamWatchHWnd)
+		tmpWatchIndex = WatchCount;
+	else if (parent == RamSearchHWnd)
+		tmpWatchIndex = -2;
+	else if (parent == hCheat)
+		tmpWatchIndex = -3;
+	else
+		tmpWatchIndex = -4;
+
+	rswatches[tmpWatchIndex] = Watch;
+	rswatches[tmpWatchIndex].CurValue = GetCurrentValue(rswatches[tmpWatchIndex]);
+	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), parent, (DLGPROC)EditWatchProc, tmpWatchIndex);
+	rswatches.erase(tmpWatchIndex);
 
 	return WatchCount > prevWatchCount;
 }
@@ -158,7 +168,9 @@ bool InsertWatches(const AddressWatcher* watches, HWND parent, const int count)
 	else
 	{
 		bool success = false;
+		char comment[256];
 		rswatches[-1] = watches[0];
+		rswatches[-1].comment = comment;
 		if(DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), parent, (DLGPROC)EditWatchProc, (LPARAM)-1))
 			for (int i = 0; i < count; ++i)
 			{
@@ -166,7 +178,6 @@ bool InsertWatches(const AddressWatcher* watches, HWND parent, const int count)
 				watcher.comment = rswatches[-1].comment;
 				success |= InsertWatch(watcher);
 			}
-		free(rswatches[-1].comment);
 		rswatches.erase(-1);
 		return success;
 	}
@@ -768,7 +779,9 @@ void RefreshWatchListSelectedItemControlStatus(HWND hDlg)
 LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) //Gets info for a RAM Watch, and then inserts it into the Watch List
 {
 
-	static int index;
+	// since there are 3 windows can pops up the add watch dialog, we should store them separately.
+	// 0 for ram watch, 1 for ram search, 2 for cheat dialog.
+	static int indexes[4];
 
 	switch(uMsg)
 	{
@@ -777,12 +790,12 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				RECT r;
 				GetWindowRect(hWnd, &r);
 				SetWindowPos(hDlg, NULL, r.left, r.top, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-
-				index = (int)lParam;
-				AddressWatcher& watcher = rswatches[index];
+				
+				AddressWatcher& watcher = rswatches[lParam];
 				if (watcher.Type != 'S') {
 					char Str_Tmp[1024];
-					if (index != -1)
+					// -1 means batch add
+					if (lParam != -1)
 					{
 						sprintf(Str_Tmp, "%04X", watcher.Address);
 						SetDlgItemText(hDlg, IDC_EDIT_COMPAREADDRESS, Str_Tmp);
@@ -821,6 +834,8 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					SetDlgItemText(hDlg, IDC_PROMPT_EDIT, watcher.comment);
 
 				HWND parent = GetParent(hDlg);
+				indexes[GetDlgStoreIndex(parent)] = lParam;
+
 				if (watcher.Type == 'S' || parent == RamSearchHWnd || parent == hCheat)
 				{
 					EnableWindow(GetDlgItem(hDlg, IDC_SPECIFICADDRESS), FALSE);
@@ -845,21 +860,25 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			{
 				case IDOK:
 				{
-					char Str_Tmp[1024];
+					char Str_Tmp[256];
+					
+					HWND parent = GetParent(hDlg);
+					int index = indexes[GetDlgStoreIndex(parent)];
+
 					// not a single watch editing operation
 					if (index != -1)
 					{
 						// a normal watch, copy it to a temporary one
 						AddressWatcher watcher = rswatches[index];
-						if (watcher.comment != NULL)
-							watcher.comment = strcpy((char*)malloc(strlen(watcher.comment) + 2), watcher.comment);
+						// if (watcher.comment != NULL)
+						//	 watcher.comment = strcpy((char*)malloc(strlen(watcher.comment) + 2), watcher.comment);
 
 						// It's from ram watch window, not a separator
-						// When it's from ram search window, all the information required is already set,
+						// When it's from ram search or cheat window, all the information required is already set,
 						// so this is also unecessary
 						if (RamWatchHWnd && RamWatchHWnd == GetParent(hDlg) && watcher.Type != 'S')
 						{
-							GetDlgItemText(hDlg, IDC_PROMPT_EDIT, Str_Tmp, 1024);
+							GetDlgItemText(hDlg, IDC_PROMPT_EDIT, Str_Tmp, 256);
 
 							// type
 							if (SendDlgItemMessage(hDlg, IDC_SIGNED, BM_GETCHECK, 0, 0) == BST_CHECKED)
@@ -910,9 +929,9 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						watcher.comment = Str_Tmp;
 
 						// finallly update the watch list
-						if (index < WatchCount)
+						if (index >= 0 && index < WatchCount)
 							// it's a watch editing operation.
-							// Only ram watch window can edit a watch, the ram search window only add watch.
+							// Only ram watch window can edit a watch, the ram search window and cheat window only add watch.
 							EditWatch(index, watcher);
 						else
 							InsertWatch(watcher);
@@ -924,7 +943,7 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						AddressWatcher& watcher = rswatches[index];
 						// comment
 						GetDlgItemText(hDlg, IDC_PROMPT_EDIT, Str_Tmp, 80);
-						watcher.comment = strcpy((char*) malloc(strlen(Str_Tmp) + 2), Str_Tmp);
+						strcpy(watcher.comment, Str_Tmp);
 					}
 					EndDialog(hDlg, true);
 
@@ -1289,7 +1308,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					watchIndex = ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST));
 					if(watchIndex != -1)
 					{
-						DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, (DLGPROC) EditWatchProc,(LPARAM)watchIndex);
+						DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, (DLGPROC)EditWatchProc, watchIndex);
 						SetFocus(GetDlgItem(hDlg,IDC_WATCHLIST));
 					}
 					return true;
@@ -1300,7 +1319,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					target.WrongEndian = 0;
 					target.Size = 'b';
 					target.Type = 's';
-					DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, (DLGPROC)EditWatchProc, (LPARAM)WatchCount);
+					DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, (DLGPROC)EditWatchProc, WatchCount);
 					SetFocus(GetDlgItem(hDlg, IDC_WATCHLIST));
 					return true;
 				}
