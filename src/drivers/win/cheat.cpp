@@ -723,51 +723,51 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 					case EN_SETFOCUS:
 						switch (LOWORD(wParam))
 						{
-						case IDC_CHEAT_ADDR:
-						case IDC_CHEAT_VAL:
-						case IDC_CHEAT_COM: editMode = 0; break;
-						case IDC_CHEAT_TEXT: editMode = 1; break;
+							case IDC_CHEAT_ADDR:
+							case IDC_CHEAT_VAL:
+							case IDC_CHEAT_COM: editMode = 0; break;
+							case IDC_CHEAT_TEXT: editMode = 1; break;
 						}
 						break;
 					case EN_UPDATE:
 						switch (LOWORD(wParam))
 						{
-						case IDC_CHEAT_ADDR:
-						case IDC_CHEAT_VAL:
-						case IDC_CHEAT_COM:
-						{
-							if (editMode == 0)
+							case IDC_CHEAT_ADDR:
+							case IDC_CHEAT_VAL:
+							case IDC_CHEAT_COM:
 							{
-								char buf[16]; uint32 a; uint8 v; int c;
-								GetUICheatInfo(hwndDlg, NULL, &a, &v, &c);
-								GetCheatStr(buf, a, v, c);
-								SetDlgItemText(hwndDlg, IDC_CHEAT_TEXT, buf);
-							}
-						}
-						break;
-						case IDC_CHEAT_TEXT:
-						{
-							if (editMode == 1)
-							{
-								char buf[16];
-								GetDlgItemText(hwndDlg, IDC_CHEAT_TEXT, buf, 16);
-								int a = -1, v = -1; int c = -1;
-								if (strchr(buf, ':'))
+								if (editMode == 0)
 								{
-									if (strchr(buf, '?'))
-										sscanf(buf, "%X:%X?%X", &a, &c, &v);
-									else
-										sscanf(buf, "%X:%X", &a, &v);
+									char buf[16]; uint32 a; uint8 v; int c;
+									GetUICheatInfo(hwndDlg, NULL, &a, &v, &c);
+									GetCheatStr(buf, a, v, c);
+									SetDlgItemText(hwndDlg, IDC_CHEAT_TEXT, buf);
 								}
-								else if (strlen(buf) == 6 || strlen(buf) == 8)
-									FCEUI_DecodeGG(buf, &a, &v, &c);
+							}
+							break;
+							case IDC_CHEAT_TEXT:
+							{
+								if (editMode == 1)
+								{
+									char buf[16];
+									GetDlgItemText(hwndDlg, IDC_CHEAT_TEXT, buf, 16);
+									int a = -1, v = -1; int c = -1;
+									if (strchr(buf, ':'))
+									{
+										if (strchr(buf, '?'))
+											sscanf(buf, "%X:%X?%X", &a, &c, &v);
+										else
+											sscanf(buf, "%X:%X", &a, &v);
+									}
+									else if (strlen(buf) == 6 || strlen(buf) == 8)
+										FCEUI_DecodeGG(buf, &a, &v, &c);
 
-								SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPTSTR)(a == -1 ? "" : U16ToStr(a)));
-								SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPTSTR)(v == -1 ? "" : U8ToStr(v)));
-								SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPTSTR)(c == -1 ? "" : U8ToStr(c)));
+									SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPTSTR)(a == -1 ? "" : U16ToStr(a)));
+									SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPTSTR)(v == -1 ? "" : U8ToStr(v)));
+									SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPTSTR)(c == -1 ? "" : U8ToStr(c)));
+								}
 							}
 						}
-					}
 				}
 			}
 			break;
