@@ -436,10 +436,11 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 		strcpy(fullname, name);
 	}
 
+	// reset loaded game BEFORE it's loading.
+	ResetGameLoaded();
 	//file opened ok. start loading.
 	FCEU_printf("Loading %s...\n\n", fullname);
 	GetFileBase(fp->filename.c_str());
-	ResetGameLoaded();
 	//reset parameters so they're cleared just in case a format's loader doesn't know to do the clearing
 	MasterRomInfoParams = TMasterRomInfoParams();
 
