@@ -408,7 +408,7 @@ void UpdateCheckedMenuItems()
 	FCEUI_GetRenderPlanes(spr,bg);
 
 	static int *polo[] = { &genie, &status_icon};
-	static int polo2[]={ MENU_GAME_GENIE, MENU_SHOW_STATUS_ICON };
+	static int polo2[]={ MENU_GAME_GENIE, ID_DISPLAY_MOVIESTATUSICON };
 	int x;
 
 	// Check or uncheck the necessary menu items

@@ -269,11 +269,6 @@ void UpdateReplayDialog(HWND hwndDlg)
 
 		free(fn);
 	}
-	else
-	{
-		EnableWindow(GetDlgItem(hwndDlg,IDC_EDIT_OFFSET),FALSE);
-		EnableWindow(GetDlgItem(hwndDlg,IDC_EDIT_FROM),FALSE);
-	}
 
 	if(doClear)
 	{

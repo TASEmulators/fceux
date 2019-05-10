@@ -1138,19 +1138,19 @@ BOOL CALLBACK TASEditorWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					FCEUI_MovieToggleReadOnly();
 					CheckDlgButton(taseditorWindow.hwndTASEditor, IDC_RECORDING, movie_readonly?BST_UNCHECKED : BST_CHECKED);
 					break;
-				case IDC_RADIO2:
+				case IDC_RADIO_ALL:
 					recorder.multitrackRecordingJoypadNumber = MULTITRACK_RECORDING_ALL;
 					break;
-				case IDC_RADIO3:
+				case IDC_RADIO_1P:
 					recorder.multitrackRecordingJoypadNumber = MULTITRACK_RECORDING_1P;
 					break;
-				case IDC_RADIO4:
+				case IDC_RADIO_2P:
 					recorder.multitrackRecordingJoypadNumber = MULTITRACK_RECORDING_2P;
 					break;
-				case IDC_RADIO5:
+				case IDC_RADIO_3P:
 					recorder.multitrackRecordingJoypadNumber = MULTITRACK_RECORDING_3P;
 					break;
-				case IDC_RADIO6:
+				case IDC_RADIO_4P:
 					recorder.multitrackRecordingJoypadNumber = MULTITRACK_RECORDING_4P;
 					break;
 				case IDC_SUPERIMPOSE:

@@ -326,9 +326,6 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			SendDlgItemMessage(hwndDlg, IDC_CHEAT_VAL_LT_BY, EM_SETLIMITTEXT, 2, 0);
 			SendDlgItemMessage(hwndDlg, IDC_CHEAT_TEXT, EM_SETLIMITTEXT, 10, 0);
 
-			//disable or enable buttons
-			CheckDlgButton(hwndDlg, IDC_RADIO_ADDRESS, MF_CHECKED);
-
 			possiTotalCount = 0;
 			possiItemCount = SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LVM_GETCOUNTPERPAGE, 0, 0);
 
@@ -438,9 +435,14 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 		}
 		break;
 		case WM_COMMAND:
-			switch (HIWORD(wParam)) {
+		{
+			static int editMode = 0;
+
+			switch (HIWORD(wParam))
+			{
 				case BN_CLICKED:
-					switch (LOWORD(wParam)) {
+					switch (LOWORD(wParam))
+					{
 						case CHEAT_CONTEXT_LIST_TOGGLECHEAT:
 						{
 							LVITEM lvi;
@@ -524,7 +526,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 								tempWatch.Type = 'h';
 								tempWatch.Address = possiList[sel].addr;
 								tempWatch.WrongEndian = false;
-								if(InsertWatch(tempWatch, hwndDlg) && !RamWatchHWnd)
+								if (InsertWatch(tempWatch, hwndDlg) && !RamWatchHWnd)
 									SendMessage(hAppWnd, WM_COMMAND, ID_RAM_WATCH, 0);
 								SetForegroundWindow(RamWatchHWnd);
 							}
@@ -542,19 +544,19 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 						break;
 						case IDC_CHEAT_PAUSEWHENACTIVE:
 							pauseWhileActive ^= 1;
-							if ((EmulationPaused == 1 ? true : false) != pauseWhileActive) 
+							if ((EmulationPaused == 1 ? true : false) != pauseWhileActive)
 							{
 								EmulationPaused = (pauseWhileActive ? 1 : 0);
 								wasPausedByCheats = pauseWhileActive;
 								if (EmulationPaused)
 									FCEU_printf("Emulation paused: %d\n", EmulationPaused);
 							}
-						break;
+							break;
 						case IDC_BTN_CHEAT_ADD:
 						{
 							char name[256] = { 0 }; uint32 a; uint8 v = 0; int c = 0;
 							GetUICheatInfo(hwndDlg, name, &a, &v, &c);
-							
+
 							if (FCEUI_AddCheat(name, a, v, c, 1)) {
 								RedoCheatsCallB(name, a, v, c, 1, 1, NULL);
 
@@ -592,7 +594,8 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 									UpdateCheatRelatedWindow();
 									UpdateCheatListGroupBoxUI();
 								}
-							} else {
+							}
+							else {
 								if (selcheat >= 0) {
 									FCEUI_DelCheat(selcheat);
 									SendDlgItemMessage(hwndDlg, IDC_LIST_CHEATS, LVM_DELETEITEM, selcheat, 0);
@@ -639,10 +642,10 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							const char filter[] = "Cheat files (*.cht)\0*.cht\0All Files (*.*)\0*.*\0\0";
 							ofn.lpstrFilter = filter;
 
-							char nameo[2048] = {0};
-							ofn.lpstrFile = nameo;							
+							char nameo[2048] = { 0 };
+							ofn.lpstrFile = nameo;
 							ofn.nMaxFile = 2048;
-							ofn.Flags = OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_FILEMUSTEXIST;
+							ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST;
 							std::string initdir = FCEU_GetPath(FCEUMKF_CHEAT);
 							ofn.lpstrInitialDir = initdir.c_str();
 
@@ -662,7 +665,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 						case IDC_BTN_CHEAT_RESET:
 							FCEUI_CheatSearchBegin();
 							ShowResults(hwndDlg);
-							EnableCheatButtons(hwndDlg,TRUE);
+							EnableCheatButtons(hwndDlg, TRUE);
 							break;
 						case IDC_BTN_CHEAT_KNOWN:
 						{
@@ -676,7 +679,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 						break;
 						case IDC_BTN_CHEAT_EQ:
 							searchdone = 1;
-							FCEUI_CheatSearchEnd(FCEU_SEARCH_PUERLY_RELATIVE_CHANGE,0,0);
+							FCEUI_CheatSearchEnd(FCEU_SEARCH_PUERLY_RELATIVE_CHANGE, 0, 0);
 							ShowResults(hwndDlg);
 							break;
 						case IDC_BTN_CHEAT_NE:
@@ -715,41 +718,36 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							ShowResults(hwndDlg);
 						}
 						break;
-						case IDC_RADIO_ADDRESS:
-						case IDC_RADIO_TEXT_CODE:
-							ToggleCheatInputMode(hwndDlg, LOWORD(wParam));
-						break;
 					}
-				break;
-				case EN_UPDATE:
-					switch (LOWORD(wParam))
-					{
+					break;
+					case EN_SETFOCUS:
+						switch (LOWORD(wParam))
+						{
+						case IDC_CHEAT_ADDR:
+						case IDC_CHEAT_VAL:
+						case IDC_CHEAT_COM: editMode = 0; break;
+						case IDC_CHEAT_TEXT: editMode = 1; break;
+						}
+						break;
+					case EN_UPDATE:
+						switch (LOWORD(wParam))
+						{
 						case IDC_CHEAT_ADDR:
 						case IDC_CHEAT_VAL:
 						case IDC_CHEAT_COM:
 						{
-							if (IsDlgButtonChecked(hwndDlg, IDC_RADIO_ADDRESS))
+							if (editMode == 0)
 							{
 								char buf[16]; uint32 a; uint8 v; int c;
 								GetUICheatInfo(hwndDlg, NULL, &a, &v, &c);
 								GetCheatStr(buf, a, v, c);
 								SetDlgItemText(hwndDlg, IDC_CHEAT_TEXT, buf);
 							}
-
-							// it was saparated to the text/game genie position
-							/*
-							if (dodecode && (strlen(buf) == 6 || strlen(buf) == 8))
-							if (FCEUI_DecodeGG(buf, &GGaddr, &GGval, &GGcomp)) {
-							a = GGaddr;
-							v = GGval;
-							c = GGcomp;
-							}
-							*/
 						}
 						break;
 						case IDC_CHEAT_TEXT:
 						{
-							if (IsDlgButtonChecked(hwndDlg, IDC_RADIO_TEXT_CODE))
+							if (editMode == 1)
 							{
 								char buf[16];
 								GetDlgItemText(hwndDlg, IDC_CHEAT_TEXT, buf, 16);
@@ -765,11 +763,12 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 									FCEUI_DecodeGG(buf, &a, &v, &c);
 
 								SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPTSTR)(a == -1 ? "" : U16ToStr(a)));
-								SetDlgItemText(hwndDlg, IDC_CHEAT_VAL,  (LPTSTR)(v == -1 ? "" : U8ToStr(v)));
-								SetDlgItemText(hwndDlg, IDC_CHEAT_COM,  (LPTSTR)(c == -1 ? "" : U8ToStr(c)));
-							}							
+								SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPTSTR)(v == -1 ? "" : U8ToStr(v)));
+								SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPTSTR)(c == -1 ? "" : U8ToStr(c)));
+							}
 						}
 					}
+				}
 			}
 			break;
 			case WM_NOTIFY:
@@ -973,16 +972,6 @@ void UpdateCheatsAdded()
 {
 	RedoCheatsLB(hCheat);
 	UpdateCheatListGroupBoxUI();
-}
-
-void ToggleCheatInputMode(HWND hwndDlg, int modeId)
-{
-	EnableWindow(GetDlgItem(hwndDlg, IDC_CHEAT_ADDR), modeId == IDC_RADIO_ADDRESS);
-	EnableWindow(GetDlgItem(hwndDlg, IDC_CHEAT_VAL), modeId == IDC_RADIO_ADDRESS);
-	EnableWindow(GetDlgItem(hwndDlg, IDC_CHEAT_COM), modeId == IDC_RADIO_ADDRESS);
-	EnableWindow(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_LABEL), modeId == IDC_RADIO_ADDRESS);
-	EnableWindow(GetDlgItem(hwndDlg, IDC_CHEAT_COM_LABEL), modeId == IDC_RADIO_ADDRESS);
-	EnableWindow(GetDlgItem(hwndDlg, IDC_CHEAT_TEXT), modeId == IDC_RADIO_TEXT_CODE);
 }
 
 BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
