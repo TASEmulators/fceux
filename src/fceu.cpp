@@ -114,10 +114,6 @@ bool AutoResumePlay = false;
 char romNameWhenClosingEmulator[2048] = {0};
 
 
-// indicator for the open in archive dialog that if the load was canceled by the user.
-// TODO: Since I can't think of a better way to indicate it, hope someone could imporve it.
-bool archiveManuallyCanceled = false;
-
 FCEUGI::FCEUGI()
 	: filename(0),
 	  archiveFilename(0) {
@@ -404,9 +400,6 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode);
 int FDSLoad(const char *name, FCEUFILE *fp);
 int NSFLoad(const char *name, FCEUFILE *fp);
 
-//char lastLoadedGameName [2048] = {0,}; // hack for movie WRAM clearing on record from poweron
-extern bool archiveManuallyCanceled;
-
 //name should be UTF-8, hopefully, or else there may be trouble
 FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silent)
 {
@@ -418,16 +411,18 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	int lastdendy = dendy;
 
 	const char* romextensions[] = { "nes", "fds", 0 };
-	fp = FCEU_fopen(name, 0, "rb", 0, -1, romextensions);
+
+	// indicator for if the operaton was canceled by user
+	// currently there's only one situation:
+	// the user clicked cancel form the open from archive dialog
+	bool userCancel = false;
+	fp = FCEU_fopen(name, 0, "rb", 0, -1, romextensions, &userCancel);
 
 	if (!fp)
 	{
 		// Although !fp, if the operation was canceled from archive select dialog box, don't show the error message;
-		if (!silent && !archiveManuallyCanceled)
+		if (!silent && !userCancel)
 			FCEU_PrintError("Error opening \"%s\"!", name);
-		// Set it back to false, since user might not load ROM from dialog the next time.
-		// TODO: find a better way to do this.
-		archiveManuallyCanceled = false;
 
 		return 0;
 	}
@@ -441,10 +436,11 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 		strcpy(fullname, name);
 	}
 
+	// reset loaded game BEFORE it's loading.
+	ResetGameLoaded();
 	//file opened ok. start loading.
 	FCEU_printf("Loading %s...\n\n", fullname);
 	GetFileBase(fp->filename.c_str());
-	ResetGameLoaded();
 	//reset parameters so they're cleared just in case a format's loader doesn't know to do the clearing
 	MasterRomInfoParams = TMasterRomInfoParams();
 
@@ -561,7 +557,11 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	DoDebuggerDataReload(); // Reloads data without reopening window
 	CDLoggerROMChanged();
 	if (hMemView) UpdateColorTable();
-	if (hCheat) UpdateCheatsAdded();
+	if (hCheat)
+	{
+		UpdateCheatsAdded();
+		UpdateCheatRelatedWindow();
+	}
 	if (FrozenAddressCount)
 		FCEU_DispMessage("%d cheats active", 0, FrozenAddressCount);
 #endif
@@ -739,7 +739,10 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 #ifdef WIN32
 	//These Windows only dialogs need to be updated only once per frame so they are included here
-	UpdateCheatList(); // CaH4e3: can't see why, this is only cause problems with selection - adelikat: selection is only a problem when not paused, it shoudl be paused to select, we want to see the values update
+	// CaH4e3: can't see why, this is only cause problems with selection
+	// adelikat: selection is only a problem when not paused, it should be paused to select, we want to see the values update
+	// owomomo: use an OWNERDATA CListCtrl to partially solve the problem
+	UpdateCheatList();
 	UpdateTextHooker();
 	Update_RAM_Search(); // Update_RAM_Watch() is also called.
 	RamChange();

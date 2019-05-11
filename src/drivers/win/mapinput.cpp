@@ -23,7 +23,7 @@ else if (filter > EMUCMDTYPE_MISC && filter < EMUCMDTYPE_MAX || filter == EMUCMD
 else \
 	lpListView->iSubItem = mapInputSortCol; \
 if (SendMessage(hwndListView, LVM_SORTITEMS, (WPARAM)lpListView, (LPARAM)MapInputItemSortFunc)) \
-	UpdateSortColumnIcon(hwndListView, mapInputSortCol, mapInputSortAsc); 
+	UpdateSortColumnIcon(hwndListView, mapInputSortCol, mapInputSortAsc)
 
 
 void KeyboardUpdateState(void); //mbg merge 7/17/06 yech had to add this
@@ -602,23 +602,18 @@ HWND InitializeListView(HWND hwndDlg)
 
 	// Init ListView columns.
 	memset(&lv, 0, sizeof(lv));
-	lv.mask = LVCF_FMT | LVCF_TEXT | LVCF_WIDTH;
-	lv.fmt = LVCFMT_LEFT;
+	lv.mask = LVCF_TEXT | LVCF_WIDTH;
 	lv.pszText = "Type";
 	lv.cx = 80;
 
 	SendMessage(hwndListView, LVM_INSERTCOLUMN, (WPARAM)0, (LPARAM)&lv);
 
-	memset(&lv, 0, sizeof(lv));
-	lv.mask = LVCF_FMT | LVCF_TEXT | LVCF_WIDTH;
-	lv.fmt = LVCFMT_LEFT;
 	lv.pszText = "Command";
 	lv.cx = 240;
 
 	SendMessage(hwndListView, LVM_INSERTCOLUMN, (WPARAM)1, (LPARAM)&lv);
 
-	memset(&lv, 0, sizeof(lv));
-	lv.mask = LVCF_FMT | LVCF_TEXT;
+	lv.mask ^= LVCF_WIDTH;
 	lv.fmt = LVCFMT_LEFT;
 	lv.pszText = "Input";
 
@@ -768,9 +763,10 @@ BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 		break;
 		
 	case WM_CLOSE:
+		EndDialog(hwndDlg, 0);
+		break;
 	case WM_DESTROY:
 	case WM_QUIT:
-			EndDialog(hwndDlg, 0);
 			break;
 	case WM_NOTIFY:
 

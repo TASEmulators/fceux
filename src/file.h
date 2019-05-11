@@ -11,11 +11,6 @@
 
 extern bool bindSavestate;
 
-// indicator for the open in archive dialog that if the load was canceled by the user.
-// TODO: Since I can't think of a better way to indicate it, hope someone could imporve it.
-extern bool archiveManuallyCanceled;
-
-
 struct FCEUFILE {
 	//the stream you can use to access the data
 	//std::iostream *stream;
@@ -127,7 +122,7 @@ struct ArchiveScanRecord
 };
 
 
-FCEUFILE *FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index=-1, const char** extensions = 0);
+FCEUFILE *FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index=-1, const char** extensions = 0, bool* userCancel = NULL);
 bool FCEU_isFileInArchive(const char *path);
 int FCEU_fclose(FCEUFILE*);
 uint64 FCEU_fread(void *ptr, size_t size, size_t nmemb, FCEUFILE*);

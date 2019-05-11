@@ -933,23 +933,19 @@ void FreezeRam(int address, int mode, int final){
 		if (mode == 0 || mode == -1)
 		{
 			//mbg merge 6/29/06 - added argument
-			FCEUI_ListCheats(DeleteCheatCallB,0);
-			if(mode == 0 && cheatwasdeleted != -1)FCEUI_AddCheat("",address,GetMem(address),-1,1);
+			FCEUI_ListCheats(DeleteCheatCallB, 0);
+			if(mode == 0 && cheatwasdeleted != -1)
+				FCEUI_AddCheat("", address, GetMem(address), -1, 1);
 		}
 		else
 		{
 			//mbg merge 6/29/06 - added argument
-			FCEUI_ListCheats(DeleteCheatCallB,0);
-			FCEUI_AddCheat("",address,GetMem(address),-1,1);
+			FCEUI_ListCheats(DeleteCheatCallB, 0);
+			FCEUI_AddCheat("", address, GetMem(address), -1, 1);
 		}
 
-		//if (final)
-		//{
-		//if(hCheat)RedoCheatsLB(hCheat);
-		UpdateColorTable();
-		//}
-		
 		UpdateCheatsAdded();
+		UpdateCheatRelatedWindow();
 	}
 }
 

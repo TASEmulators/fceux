@@ -485,7 +485,21 @@ void SaveCompact_SetDialogItems(HWND hwndDlg)
 	CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, taseditorConfig.saveCompact_SaveHistory?BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(hwndDlg, IDC_CHECK_PIANO_ROLL, taseditorConfig.saveCompact_SavePianoRoll?BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, taseditorConfig.saveCompact_SaveSelection?BST_CHECKED : BST_UNCHECKED);
-	CheckRadioButton(hwndDlg, IDC_RADIO1, IDC_RADIO4, IDC_RADIO1 + (taseditorConfig.saveCompact_GreenzoneSavingMode % GREENZONE_SAVING_MODES_TOTAL));
+	switch (taseditorConfig.saveCompact_GreenzoneSavingMode % GREENZONE_SAVING_MODES_TOTAL)
+	{
+		case GREENZONE_SAVING_MODE_ALL:
+			CheckRadioButton(hwndDlg, IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES, IDC_RADIO_GREENZONE_SAVINGMODE_DONTSAVE, IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES);
+			break;
+		case GREENZONE_SAVING_MODE_16TH:
+			CheckRadioButton(hwndDlg, IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES, IDC_RADIO_GREENZONE_SAVINGMODE_DONTSAVE, IDC_RADIO_GREENZONE_SAVINGMODE_EVERY16FRAME);
+			break;
+		case GREENZONE_SAVING_MODE_MARKED:
+			CheckRadioButton(hwndDlg, IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES, IDC_RADIO_GREENZONE_SAVINGMODE_DONTSAVE, IDC_RADIO_GREENZONE_SAVINGMODE_MARKEDFRAMES);
+			break;
+		case GREENZONE_SAVING_MODE_NO:
+		default:
+			CheckRadioButton(hwndDlg, IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES, IDC_RADIO_GREENZONE_SAVINGMODE_DONTSAVE, IDC_RADIO_GREENZONE_SAVINGMODE_DONTSAVE);
+	}
 }
 void SaveCompact_GetDialogItems(HWND hwndDlg)
 {
@@ -495,11 +509,11 @@ void SaveCompact_GetDialogItems(HWND hwndDlg)
 	taseditorConfig.saveCompact_SaveHistory = (SendDlgItemMessage(hwndDlg, IDC_CHECK_HISTORY, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	taseditorConfig.saveCompact_SavePianoRoll = (SendDlgItemMessage(hwndDlg, IDC_CHECK_PIANO_ROLL, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	taseditorConfig.saveCompact_SaveSelection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
-	if (SendDlgItemMessage(hwndDlg, IDC_RADIO1, BM_GETCHECK, 0, 0) == BST_CHECKED)
+	if (SendDlgItemMessage(hwndDlg, IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES, BM_GETCHECK, 0, 0) == BST_CHECKED)
 		taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_ALL;
-	else if (SendDlgItemMessage(hwndDlg, IDC_RADIO2, BM_GETCHECK, 0, 0) == BST_CHECKED)
+	else if (SendDlgItemMessage(hwndDlg, IDC_RADIO_GREENZONE_SAVINGMODE_EVERY16FRAME, BM_GETCHECK, 0, 0) == BST_CHECKED)
 		taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_16TH;
-	else if (SendDlgItemMessage(hwndDlg, IDC_RADIO3, BM_GETCHECK, 0, 0) == BST_CHECKED)
+	else if (SendDlgItemMessage(hwndDlg, IDC_RADIO_GREENZONE_SAVINGMODE_MARKEDFRAMES, BM_GETCHECK, 0, 0) == BST_CHECKED)
 		taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_MARKED;
 	else
 		taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_NO;
@@ -681,7 +695,21 @@ BOOL CALLBACK savingOptionsWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LP
 			CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, taseditorConfig.projectSavingOptions_SaveHistory?BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_PIANO_ROLL, taseditorConfig.projectSavingOptions_SavePianoRoll?BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, taseditorConfig.projectSavingOptions_SaveSelection?BST_CHECKED : BST_UNCHECKED);
-			CheckRadioButton(hwndDlg, IDC_RADIO1, IDC_RADIO4, IDC_RADIO1 + (taseditorConfig.projectSavingOptions_GreenzoneSavingMode % GREENZONE_SAVING_MODES_TOTAL));
+			switch (taseditorConfig.saveCompact_GreenzoneSavingMode % GREENZONE_SAVING_MODES_TOTAL)
+			{
+			case GREENZONE_SAVING_MODE_ALL:
+				CheckRadioButton(hwndDlg, IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES, IDC_RADIO_GREENZONE_SAVINGMODE_DONTSAVE, IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES);
+				break;
+			case GREENZONE_SAVING_MODE_16TH:
+				CheckRadioButton(hwndDlg, IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES, IDC_RADIO_GREENZONE_SAVINGMODE_DONTSAVE, IDC_RADIO_GREENZONE_SAVINGMODE_EVERY16FRAME);
+				break;
+			case GREENZONE_SAVING_MODE_MARKED:
+				CheckRadioButton(hwndDlg, IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES, IDC_RADIO_GREENZONE_SAVINGMODE_DONTSAVE, IDC_RADIO_GREENZONE_SAVINGMODE_MARKEDFRAMES);
+				break;
+			case GREENZONE_SAVING_MODE_NO:
+			default:
+				CheckRadioButton(hwndDlg, IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES, IDC_RADIO_GREENZONE_SAVINGMODE_DONTSAVE, IDC_RADIO_GREENZONE_SAVINGMODE_DONTSAVE);
+			}
 			EnableWindow(GetDlgItem(hwndDlg, IDC_AUTOSAVE_PERIOD), taseditorConfig.autosaveEnabled);
 			EnableWindow(GetDlgItem(hwndDlg, IDC_AUTOSAVE_PERIOD_EVERY_TEXT), taseditorConfig.autosaveEnabled);
 			EnableWindow(GetDlgItem(hwndDlg, IDC_AUTOSAVE_PERIOD_MINUTES_TEXT), taseditorConfig.autosaveEnabled);
@@ -719,11 +747,11 @@ BOOL CALLBACK savingOptionsWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LP
 					taseditorConfig.projectSavingOptions_SaveHistory = (SendDlgItemMessage(hwndDlg, IDC_CHECK_HISTORY, BM_GETCHECK, 0, 0) == BST_CHECKED);
 					taseditorConfig.projectSavingOptions_SavePianoRoll = (SendDlgItemMessage(hwndDlg, IDC_CHECK_PIANO_ROLL, BM_GETCHECK, 0, 0) == BST_CHECKED);
 					taseditorConfig.projectSavingOptions_SaveSelection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
-					if (SendDlgItemMessage(hwndDlg, IDC_RADIO1, BM_GETCHECK, 0, 0) == BST_CHECKED)
+					if (SendDlgItemMessage(hwndDlg, IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES, BM_GETCHECK, 0, 0) == BST_CHECKED)
 						taseditorConfig.projectSavingOptions_GreenzoneSavingMode = GREENZONE_SAVING_MODE_ALL;
-					else if (SendDlgItemMessage(hwndDlg, IDC_RADIO2, BM_GETCHECK, 0, 0) == BST_CHECKED)
+					else if (SendDlgItemMessage(hwndDlg, IDC_RADIO_GREENZONE_SAVINGMODE_EVERY16FRAME, BM_GETCHECK, 0, 0) == BST_CHECKED)
 						taseditorConfig.projectSavingOptions_GreenzoneSavingMode = GREENZONE_SAVING_MODE_16TH;
-					else if (SendDlgItemMessage(hwndDlg, IDC_RADIO3, BM_GETCHECK, 0, 0) == BST_CHECKED)
+					else if (SendDlgItemMessage(hwndDlg, IDC_RADIO_GREENZONE_SAVINGMODE_MARKEDFRAMES, BM_GETCHECK, 0, 0) == BST_CHECKED)
 						taseditorConfig.projectSavingOptions_GreenzoneSavingMode = GREENZONE_SAVING_MODE_MARKED;
 					else
 						taseditorConfig.projectSavingOptions_GreenzoneSavingMode = GREENZONE_SAVING_MODE_NO;

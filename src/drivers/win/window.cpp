@@ -39,12 +39,12 @@
 #include "input.h"
 #include "fceu.h"
 
+#include "cheat.h"
 #include "ram_search.h"
 #include "ramwatch.h"
 #include "memwatch.h"
 #include "ppuview.h"
 #include "debugger.h"
-#include "cheat.h"
 #include "debug.h"
 #include "ntview.h"
 #include "memview.h"
@@ -408,7 +408,7 @@ void UpdateCheckedMenuItems()
 	FCEUI_GetRenderPlanes(spr,bg);
 
 	static int *polo[] = { &genie, &status_icon};
-	static int polo2[]={ MENU_GAME_GENIE, MENU_SHOW_STATUS_ICON };
+	static int polo2[]={ MENU_GAME_GENIE, ID_DISPLAY_MOVIESTATUSICON };
 	int x;
 
 	// Check or uncheck the necessary menu items

@@ -32,9 +32,9 @@
 #include "../../cheat.h"
 
 #include "resource.h"
+#include "cheat.h"
 #include "ram_search.h"
 #include "ramwatch.h"
-#include "cheat.h"
 #include <assert.h>
 #include <commctrl.h>
 #include <list>
@@ -1078,9 +1078,6 @@ void signal_new_frame ()
 
 
 
-bool RamSearchClosed = false;
-bool RamWatchClosed = false;
-
 void ResetResults()
 {
 	reset_address_info();
@@ -1093,39 +1090,26 @@ void CloseRamWindows() //Close the Ram Search & Watch windows when rom closes
 	ResetWatches();
 	ResetResults();
 	if (RamSearchHWnd)
-	{
 		SendMessage(RamSearchHWnd,WM_CLOSE,NULL,NULL);
-		RamSearchClosed = true;
-	}
 	if (RamWatchHWnd)
-	{
 		SendMessage(RamWatchHWnd,WM_CLOSE,NULL,NULL);
-		RamWatchClosed = true;
-	}
 }
 void ReopenRamWindows() //Reopen them when a new Rom is loaded
 {
 	HWND hwnd = GetActiveWindow();
 
-	if (RamSearchClosed)
+	if(!RamSearchHWnd)
 	{
-		RamSearchClosed = false;
-		if(!RamSearchHWnd)
-		{
-			reset_address_info();
-			LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-			RamSearchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMSEARCH), hWnd, (DLGPROC) RamSearchProc);
-		}
+		reset_address_info();
+		LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+		RamSearchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMSEARCH), hWnd, (DLGPROC) RamSearchProc);
 	}
-	if (RamWatchClosed || AutoRWLoad)
-	{
-		RamWatchClosed = false;
-		if(!RamWatchHWnd)
-		{
-			if (AutoRWLoad) OpenRWRecentFile(0);
-			RamWatchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, (DLGPROC) RamWatchProc);
-		}
-	}
+
+	if (AutoRWLoad)
+		OpenRWRecentFile(0);
+
+	if (!RamWatchHWnd)
+		RamWatchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, (DLGPROC) RamWatchProc);
 
 	if (hwnd == hWnd && hwnd != GetActiveWindow())
 		SetActiveWindow(hWnd); // restore focus to the main window if it had it before
@@ -1835,22 +1819,23 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						// Don't open cheat dialog
 
 						switch (sizeType) {
-						case 0: {
-								FCEUI_AddCheat("",address,curvalue,-1,1);
-								break; }
-						case 1: {
+							case 0:
+								FCEUI_AddCheat("",address,curvalue, -1, 1);
+								break;
+							case 1: 
+								FCEUI_AddCheat("",address,curvalue & 0xFF, -1, 1);
+								FCEUI_AddCheat("",address + 1,(curvalue & 0xFF00) / 0x100, -1, 1);
+								break;
+							case 2:
 								FCEUI_AddCheat("",address,curvalue & 0xFF,-1,1);
-								FCEUI_AddCheat("",address + 1,(curvalue & 0xFF00) / 0x100,-1,1);
-								break; }
-						case 2: {
-								FCEUI_AddCheat("",address,curvalue & 0xFF,-1,1);
-								FCEUI_AddCheat("",address + 1,(curvalue & 0xFF00) / 0x100,-1,1);
-								FCEUI_AddCheat("",address + 2,(curvalue & 0xFF0000) / 0x10000,-1,1);
-								FCEUI_AddCheat("",address + 3,(curvalue & 0xFF000000) / 0x1000000,-1,1);
-								break; }
+								FCEUI_AddCheat("",address + 1,(curvalue & 0xFF00) / 0x100, -1, 1);
+								FCEUI_AddCheat("",address + 2,(curvalue & 0xFF0000) / 0x10000, -1, 1);
+								FCEUI_AddCheat("",address + 3,(curvalue & 0xFF000000) / 0x1000000, -1, 1);
+								break;
 						}
 
 						UpdateCheatsAdded();
+						UpdateCheatRelatedWindow();
 
 						watchItemIndex = ListView_GetNextItem(ramListControl, watchItemIndex, LVNI_SELECTED);
 
@@ -1959,30 +1944,36 @@ invalid_field:
 				case IDC_C_WATCH:
 				{
 					HWND ramListControl = GetDlgItem(hDlg,IDC_RAMLIST);
-					int selCount = ListView_GetSelectedCount(ramListControl);
-
-					bool inserted = false;
-					int watchItemIndex = ListView_GetNextItem(ramListControl, -1, LVNI_SELECTED);
-					while (watchItemIndex >= 0)
+					int selCount = SendMessage(ramListControl, LVM_GETSELECTEDCOUNT, 0, 0);
+					if (selCount > 0)
 					{
 						AddressWatcher tempWatch;
-						tempWatch.Address = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size,rs_t=='s',noMisalign, watchItemIndex);
 						tempWatch.Size = rs_type_size;
 						tempWatch.Type = rs_t;
 						tempWatch.WrongEndian = 0; //Replace when I get little endian working
 						tempWatch.comment = NULL;
 
-						if (selCount == 1)
-							inserted |= InsertWatch(tempWatch, hDlg);
-						else
-							inserted |= InsertWatch(tempWatch);
+						bool inserted = false;
 
-						watchItemIndex = ListView_GetNextItem(ramListControl, watchItemIndex, LVNI_SELECTED);
+						AddressWatcher* watches = (AddressWatcher*)malloc(selCount * sizeof(AddressWatcher));
+						int i = 0;
+						int watchItemIndex = -1;
+						while ((watchItemIndex = SendMessage(ramListControl, LVM_GETNEXTITEM, watchItemIndex, LVNI_SELECTED)) >= 0)
+						{
+							tempWatch.Address = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size, rs_t == 's', noMisalign, watchItemIndex);
+							watches[i] = tempWatch;
+							++i;
+						}
+
+						// bring up the ram watch window if it's not already showing so the user knows where the watch went
+						if ((selCount == 1 ?
+							InsertWatch(watches[0], hDlg) : InsertWatches(watches, hDlg, selCount)) 
+							&& !RamWatchHWnd)
+							SendMessage(hWnd, WM_COMMAND, ID_RAM_WATCH, 0);
+						SetForegroundWindow(RamSearchHWnd);
+
+						free(watches);
 					}
-					// bring up the ram watch window if it's not already showing so the user knows where the watch went
-					if(inserted && !RamWatchHWnd)
-						SendMessage(hWnd, WM_COMMAND, ID_RAM_WATCH, 0);
-					SetForegroundWindow(RamSearchHWnd);
 					{rv = true; break;}
 				}
 
@@ -2045,15 +2036,6 @@ invalid_field:
 					signal_new_size();
 					{rv = true; break;}
 				}
-				//case IDOK:
-				case IDCANCEL:
-					RamSearchHWnd = NULL;
-/*					if (theApp.pauseDuringCheatSearch)
-						EndDialog(hDlg, true);	// this should never be called on a modeless dialog
-					else
-*/
-						DestroyWindow(hDlg);
-					{rv = true; break;}
 			}
 
 			// check refresh for comparison preview color update
@@ -2097,12 +2079,12 @@ invalid_field:
 
 			return rv;
 		}	break;
-
-//		case WM_CLOSE:
+		case WM_CLOSE:
+			DestroyWindow(hDlg);
+			break;
 		case WM_DESTROY:
 			RamSearchHWnd = NULL;
 //			theApp.modelessCheatDialogIsOpen = false;
-//			return true;
 			break;
 	}
 

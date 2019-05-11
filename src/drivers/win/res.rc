@@ -12,8 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 
-
+// Neutral resources
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 #pragma code_page(1252)
@@ -25,8 +24,8 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON3               ICON                    "res\\taseditor-icon.ico"
-IDI_ICON4               ICON                    "res\\taseditor-icon32.ico"
+IDI_ICON3               ICON                    "res/taseditor-icon.ico"
+IDI_ICON4               ICON                    "res/taseditor-icon32.ico"
 ICON_1                  ICON                    "res/ICON_1.ico"
 ICON_2                  ICON                    "res/ICON_2.ico"
 
@@ -206,14 +205,14 @@ BEGIN
             MENUITEM "1 on, 1 off",                 MENU_AUTOFIRE_PATTERN_1
             MENUITEM "1 on, 2 off",                 MENU_AUTOFIRE_PATTERN_2
             MENUITEM "1 on, 3 off",                 MENU_AUTOFIRE_PATTERN_3
-            MENUITEM "1 on, 4 off",                 ID_DEBUG_DEBUGGER
-            MENUITEM "1 on, 5 off",                 ID_DEBUG_PPUVIEWER
-            MENUITEM "2 on, 1 off",                 ID_DEBUG_NAMETABLEVIEWER
-            MENUITEM "2 on, 2 off",                 ID_DEBUG_HEXEDITOR
-            MENUITEM "2 on, 3 off",                 ID_DEBUG_TRACELOGGER
+            MENUITEM "1 on, 4 off",                 MENU_AUTOFIRE_PATTERN_4
+            MENUITEM "1 on, 5 off",                 MENU_AUTOFIRE_PATTERN_5
+            MENUITEM "2 on, 1 off",                 MENU_AUTOFIRE_PATTERN_6
+            MENUITEM "2 on, 2 off",                 MENU_AUTOFIRE_PATTERN_7
+            MENUITEM "2 on, 3 off",                 MENU_AUTOFIRE_PATTERN_8
             MENUITEM "2 on, 4 off",                 MENU_AUTOFIRE_PATTERN_9
-            MENUITEM "3 on, 1 off",                 ID_DEBUG_GAMEGENIEDECODER
-            MENUITEM "3 on, 2 off",                 ID_DEBUG_CDLOGGER
+            MENUITEM "3 on, 1 off",                 MENU_AUTOFIRE_PATTERN_10
+            MENUITEM "3 on, 2 off",                 MENU_AUTOFIRE_PATTERN_11
             MENUITEM "3 on, 3 off",                 MENU_AUTOFIRE_PATTERN_12
             MENUITEM "4 on, 1 off",                 MENU_AUTOFIRE_PATTERN_13
             MENUITEM "4 on, 2 off",                 MENU_AUTOFIRE_PATTERN_14
@@ -633,10 +632,17 @@ CHEATCONTEXTMENUS MENU
 BEGIN
     POPUP "CheatListPopup"
     BEGIN
-        MENUITEM "Toggle selected Cheats\tDbl-Clk", CHEAT_CONTEXT_TOGGLECHEAT
-        MENUITEM "Poke Cheat Value",            CHEAT_CONTEXT_POKECHEATVALUE
-        MENUITEM "Goto in Hex Editor",          CHEAT_CONTEXT_GOTOINHEXEDITOR
-        MENUITEM "Delete selected Cheats",      ID_CHEATLISTPOPUP_DELETESELECTEDCHEATS
+        MENUITEM "Toggle selected Cheats",      CHEAT_CONTEXT_LIST_TOGGLECHEAT
+        MENUITEM "Poke Cheat Value",            CHEAT_CONTEXT_LIST_POKECHEATVALUE
+        MENUITEM "Goto in Hex Editor",          CHEAT_CONTEXT_LIST_GOTOINHEXEDITOR
+        MENUITEM "Delete selected Cheats",      CHEAT_CONTEXT_LIST_DELETESELECTEDCHEATS
+    END
+    POPUP "CheatPossiPopup"
+    BEGIN
+        MENUITEM "Add to Memory Watch",         CHEAT_CONTEXT_POSSI_ADDTOMEMORYWATCH
+        MENUITEM "Add cheat",                   CHEAT_CONTEXT_POSSI_ADDCHEAT
+        MENUITEM "Add to RAM Watch",            CHEAT_CONTEXT_POSSI_ADDTORAMWATCH
+        MENUITEM "Go to in Hex Editor",         CHEAT_CONTEXT_POSSI_GOTOINHEXEDITOR
     END
 END
 
@@ -1071,7 +1077,7 @@ BEGIN
     GROUPBOX        "Output/Output Format:",302,10,9,131,93,WS_GROUP
     CONTROL         "Sound enabled.",CHECK_SOUND_ENABLED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,22,117,12
     GROUPBOX        "Buffering:",127,150,9,131,93,WS_GROUP
-    CONTROL         "Use Global Focus",124,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,157,22,100,12
+    CONTROL         "Use Global Focus",CHECK_SOUND_GLOBAL_FOCUS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,157,22,100,12
     CTEXT           "Sound Latency",65459,162,50,107,8
     CONTROL         "",CTL_LATENCY_TRACKBAR,"msctls_trackbar32",WS_TABSTOP,162,70,107,13
     GROUPBOX        "Master",125,19,142,44,93,WS_GROUP
@@ -1327,10 +1333,10 @@ BEGIN
     EDITTEXT        1069,171,182,55,14,ES_AUTOHSCROLL
     LTEXT           "Name",65428,41,7,20,8
     LTEXT           "Address",65427,6,7,26,8
-    LTEXT           "Value",MW_ValueLabel1,101,7,19,8
+    LTEXT           "Value",MW_VALUELABEL1,101,7,19,8
     LTEXT           "Name",65425,171,7,20,8
     LTEXT           "Address",65424,135,7,26,8
-    LTEXT           "Value",MW_ValueLabel2,231,7,19,8
+    LTEXT           "Value",MW_VALUELABEL2,231,7,19,8
     LTEXT           " ",EDIT00_RESULTS,89,225,26,8
     GROUPBOX        "Memory Change Monitoring",IDC_STATIC,0,202,129,57,BS_CENTER
     LTEXT           "Address",IDC_STATIC,6,213,26,8
@@ -1560,7 +1566,7 @@ STYLE DS_SYSMODAL | DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_MINIMIZEBOX | WS
 CAPTION "Game Genie Encoder/Decoder Tool"
 FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
-    EDITTEXT        IDC_GAME_GENIE_CODE,115,22,53,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_GAME_GENIE_CODE,115,22,53,14,ES_UPPERCASE | ES_AUTOHSCROLL
     GROUPBOX        "Game Genie Code",-1,107,5,69,42
     GROUPBOX        "Address/Compare/Value",65534,9,5,91,75
     LTEXT           "Address:",65533,18,24,35,8
@@ -1820,10 +1826,10 @@ BEGIN
     CONTROL         " Piano Roll",IDC_CHECK_PIANO_ROLL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,23,68,67,10
     CONTROL         " Selection",IDC_CHECK_SELECTION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,23,83,67,10
     GROUPBOX        "Greenzone saving options",IDC_STATIC,13,98,97,72
-    CONTROL         " all frames",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,23,109,77,10
-    CONTROL         " every 16th frame",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,23,124,77,10
-    CONTROL         " marked frames",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,23,139,77,10
-    CONTROL         " don't save",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,23,154,77,10
+    CONTROL         " all frames",IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES,"Button",BS_AUTORADIOBUTTON,23,109,77,10
+    CONTROL         " every 16th frame",IDC_RADIO_GREENZONE_SAVINGMODE_EVERY16FRAME,"Button",BS_AUTORADIOBUTTON,23,124,77,10
+    CONTROL         " marked frames",IDC_RADIO_GREENZONE_SAVINGMODE_MARKEDFRAMES,"Button",BS_AUTORADIOBUTTON,23,139,77,10
+    CONTROL         " don't save",IDC_RADIO_GREENZONE_SAVINGMODE_DONTSAVE,"Button",BS_AUTORADIOBUTTON,23,154,77,10
 END
 
 ASSEMBLER DIALOGEX 0, 0, 202, 135
@@ -1966,46 +1972,47 @@ BEGIN
     LTEXT           "New Selection Name:",-1,5,240,68,8
 END
 
-CHEATCONSOLE DIALOGEX 0, 0, 379, 189
+CHEATCONSOLE DIALOGEX 0, 0, 386, 217
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Cheat Search"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    GROUPBOX        "Active Cheats",201,5,2,129,182,WS_TABSTOP
-    GROUPBOX        "Cheat Search",202,140,2,233,182,WS_TABSTOP
-    LISTBOX         IDC_LIST_CHEATS,11,11,118,98,LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL
-    LTEXT           "Name:",IDC_STATIC,12,114,22,10
-    LTEXT           "Addr:",IDC_STATIC,12,130,18,10
-    LTEXT           "Val:",IDC_STATIC,61,130,12,10
-    LTEXT           "Cmp:",IDC_STATIC,95,130,16,10
-    EDITTEXT        IDC_CHEAT_NAME,35,112,94,12,ES_AUTOHSCROLL | ES_WANTRETURN
-    EDITTEXT        IDC_CHEAT_ADDR,31,128,25,12,ES_UPPERCASE | ES_WANTRETURN
-    EDITTEXT        IDC_CHEAT_VAL,74,128,16,12,ES_UPPERCASE | ES_WANTRETURN
-    EDITTEXT        IDC_CHEAT_COM,113,128,16,12,ES_UPPERCASE | ES_WANTRETURN
-    DEFPUSHBUTTON   "Add",IDC_BTN_CHEAT_ADD,11,144,36,16
-    PUSHBUTTON      "Delete",IDC_BTN_CHEAT_DEL,52,144,36,16
-    PUSHBUTTON      "Update",IDC_BTN_CHEAT_UPD,93,144,36,16
-    PUSHBUTTON      "Reset",IDC_BTN_CHEAT_RESET,146,12,55,15
-    PUSHBUTTON      "Known Value:",IDC_BTN_CHEAT_KNOWN,146,31,55,15
-    LTEXT           "0x",IDC_STATIC,205,34,9,8
-    EDITTEXT        IDC_CHEAT_VAL_KNOWN,215,32,18,12,ES_UPPERCASE
-    GROUPBOX        "Previous Compare",204,145,49,113,115
-    PUSHBUTTON      "Equal",IDC_BTN_CHEAT_EQ,151,62,55,15,WS_GROUP
-    PUSHBUTTON      "Not Equal",IDC_BTN_CHEAT_NE,151,87,55,15
-    CONTROL         "By:",IDC_CHEAT_CHECK_NE_BY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,210,90,22,10
-    EDITTEXT        IDC_CHEAT_VAL_NE_BY,234,89,18,12,ES_UPPERCASE | ES_WANTRETURN
-    PUSHBUTTON      "Greater Than",IDC_BTN_CHEAT_GT,151,114,55,15
-    CONTROL         "By:",IDC_CHEAT_CHECK_GT_BY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,210,117,22,10
-    EDITTEXT        IDC_CHEAT_VAL_GT_BY,234,116,18,12,ES_UPPERCASE | ES_WANTRETURN
-    PUSHBUTTON      "Less Than",IDC_BTN_CHEAT_LT,151,141,55,15
-    CONTROL         "By:",IDC_CHEAT_CHECK_LT_BY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,210,144,22,10
-    EDITTEXT        IDC_CHEAT_VAL_LT_BY,234,143,18,12,ES_UPPERCASE | ES_WANTRETURN
-    GROUPBOX        "Possibilities",IDC_CHEAT_BOX_POSSIBILITIES,263,8,105,156,WS_TABSTOP
-    LISTBOX         IDC_CHEAT_LIST_POSSIBILITIES,268,18,85,142,LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_WANTKEYBOARDINPUT | WS_TABSTOP
-    SCROLLBAR       IDC_CHEAT_SCRL_POSSIBILITIES,354,18,10,142,SBS_VERT
+    GROUPBOX        "Active Cheats",IDC_GROUPBOX_CHEATLIST,5,2,169,209,WS_TABSTOP
+    GROUPBOX        "Cheat Search",IDC_GROUPBOX_CHEATSEARCH,179,2,201,209,WS_TABSTOP
+    CONTROL         "",IDC_LIST_CHEATS,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,11,11,157,133
+    LTEXT           "Name:",IDC_STATIC,12,149,22,10
+    LTEXT           "Value:",IDC_CHEAT_VAL_LABEL,73,163,22,8
+    LTEXT           "Compare:",IDC_CHEAT_COM_LABEL,117,163,34,8
+    EDITTEXT        IDC_CHEAT_NAME,37,147,131,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    EDITTEXT        IDC_CHEAT_ADDR,44,161,25,12,ES_UPPERCASE | ES_WANTRETURN
+    EDITTEXT        IDC_CHEAT_VAL,97,161,16,12,ES_UPPERCASE | ES_WANTRETURN
+    EDITTEXT        IDC_CHEAT_COM,152,161,16,12,ES_UPPERCASE | ES_WANTRETURN
+    DEFPUSHBUTTON   "Add",IDC_BTN_CHEAT_ADD,9,192,36,16
+    PUSHBUTTON      "Delete",IDC_BTN_CHEAT_DEL,45,192,36,16
+    PUSHBUTTON      "Update",IDC_BTN_CHEAT_UPD,81,192,36,16
+    PUSHBUTTON      "Reset",IDC_BTN_CHEAT_RESET,191,12,55,15
+    PUSHBUTTON      "Known Value:",IDC_BTN_CHEAT_KNOWN,191,32,55,15
+    LTEXT           "0x",IDC_CHEAT_LABEL_KNOWN,216,51,9,8
+    EDITTEXT        IDC_CHEAT_VAL_KNOWN,227,49,18,12,ES_UPPERCASE
+    GROUPBOX        "Previous Compare",IDC_GROUP_PREV_COM,184,63,69,132
+    PUSHBUTTON      "Equal",IDC_BTN_CHEAT_EQ,191,75,55,15,WS_GROUP
+    PUSHBUTTON      "Not Equal",IDC_BTN_CHEAT_NE,191,96,55,15
+    CONTROL         "By:",IDC_CHEAT_CHECK_NE_BY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,203,114,22,10
+    EDITTEXT        IDC_CHEAT_VAL_NE_BY,227,113,18,12,ES_UPPERCASE | ES_WANTRETURN
+    PUSHBUTTON      "Greater Than",IDC_BTN_CHEAT_GT,191,129,55,15
+    CONTROL         "By:",IDC_CHEAT_CHECK_GT_BY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,203,147,22,10
+    EDITTEXT        IDC_CHEAT_VAL_GT_BY,227,146,18,12,ES_UPPERCASE | ES_WANTRETURN
+    PUSHBUTTON      "Less Than",IDC_BTN_CHEAT_LT,191,162,55,15
+    CONTROL         "By:",IDC_CHEAT_CHECK_LT_BY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,203,180,22,10
+    EDITTEXT        IDC_CHEAT_VAL_LT_BY,227,179,18,12,ES_UPPERCASE | ES_WANTRETURN
+    GROUPBOX        "Possibilities",IDC_CHEAT_BOX_POSSIBILITIES,257,8,117,187,WS_TABSTOP
+    CONTROL         "",IDC_CHEAT_LIST_POSSIBILITIES,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,263,18,106,172
     CONTROL         " Pause emulation when this window is active",IDC_CHEAT_PAUSEWHENACTIVE,
-                    "Button",BS_AUTOCHECKBOX,147,169,157,10
-    PUSHBUTTON      "Add from CHT file...",IDC_BTN_CHEAT_ADDFROMFILE,23,163,93,16
+                    "Button",BS_AUTOCHECKBOX,185,198,157,10
+    PUSHBUTTON      "Import...",IDC_BTN_CHEAT_ADDFROMFILE,126,192,43,16
+    EDITTEXT        IDC_CHEAT_TEXT,105,175,63,12,ES_UPPERCASE | ES_AUTOHSCROLL
+    LTEXT           "Address:",IDC_CHEAT_ADDRESS_LABEL,12,163,30,8
+    LTEXT           "Cheat code / Game Genie:",IDC_CHEAT_CODE_GG_LABEL,12,177,87,8
 END
 
 IDD_LUA DIALOGEX 0, 0, 270, 150
@@ -2142,7 +2149,7 @@ END
 
 IDD_RAMWATCH DIALOGEX 0, 0, 269, 298
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION " RAM Watch"
+CAPTION "RAM Watch"
 MENU RAMWATCH_MENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
@@ -2214,10 +2221,10 @@ BEGIN
     CONTROL         " Selection",IDC_CHECK_SELECTION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,92,67,10
     GROUPBOX        "File contents",IDC_STATIC,105,4,111,177
     GROUPBOX        "Greenzone saving options",IDC_STATIC,112,106,97,69
-    CONTROL         " all frames",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,122,117,77,10
-    CONTROL         " every 16th frame",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,122,131,77,10
-    CONTROL         " marked frames",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,122,145,77,10
-    CONTROL         " don't save",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,122,159,77,10
+    CONTROL         " all frames",IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES,"Button",BS_AUTORADIOBUTTON,122,117,77,10
+    CONTROL         " every 16th frame", IDC_RADIO_GREENZONE_SAVINGMODE_EVERY16FRAME,"Button",BS_AUTORADIOBUTTON,122,131,77,10
+    CONTROL         " marked frames", IDC_RADIO_GREENZONE_SAVINGMODE_MARKEDFRAMES,"Button",BS_AUTORADIOBUTTON,122,145,77,10
+    CONTROL         " don't save", IDC_RADIO_GREENZONE_SAVINGMODE_DONTSAVE,"Button",BS_AUTORADIOBUTTON,122,159,77,10
     CONTROL         " Autosave project",IDC_AUTOSAVE_PROJECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,17,81,10
     CONTROL         " silently",IDC_SILENT_AUTOSAVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,47,42,10
     LTEXT           "every",IDC_AUTOSAVE_PERIOD_EVERY_TEXT,14,32,21,8
@@ -2425,7 +2432,8 @@ BEGIN
 
     "CHEATCONSOLE", DIALOG
     BEGIN
-        BOTTOMMARGIN, 188
+        RIGHTMARGIN, 385
+        BOTTOMMARGIN, 216
     END
 
     "VIDEOCONFIG", DIALOG
@@ -2495,6 +2503,11 @@ BEGIN
 END
 
 GGCONV AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+CHEATCONSOLE AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
@@ -2670,12 +2683,12 @@ IDB_BITMAP_SELECTED17   BITMAP                  "res\\te_17_selected.bmp"
 IDB_BITMAP_SELECTED18   BITMAP                  "res\\te_18_selected.bmp"
 IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
-#endif
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English(U.S.) resources
+// English (U.S) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -2704,7 +2717,7 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English(U.S.) resources
+#endif    // English (U.S) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

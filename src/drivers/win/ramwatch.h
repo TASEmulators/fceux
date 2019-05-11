@@ -17,18 +17,6 @@ extern bool RWfileChanged;
 #define RAMWX "RamwX"
 #define RAMWY "RamwY"
 
-// AddressWatcher is self-contained now
-struct AddressWatcher
-{
-	unsigned int Address; // hardware address
-	unsigned int CurValue;
-	char* comment = NULL; // NULL means no comment, non-NULL means allocated comment
-	bool WrongEndian;
-	char Size; //'d' = 4 bytes, 'w' = 2 bytes, 'b' = 1 byte, and 'S' means it's a separator.
-	char Type;//'s' = signed integer, 'u' = unsigned, 'h' = hex, 'S' = separator
-	short Cheats; // how many bytes are affected by cheat
-};
-
 // Cache all the things required for drawing separator
 // to prevent creating and destroying them repeatedly when painting
 struct SeparatorCache
@@ -58,9 +46,23 @@ extern char Watch_Dir[1024];
 extern HWND RamWatchHWnd;
 extern HACCEL RamWatchAccels;
 
+// AddressWatcher is self-contained now
+struct AddressWatcher
+{
+	unsigned int Address; // hardware address
+	unsigned int CurValue;
+	char* comment = NULL; // NULL means no comment, non-NULL means allocated comment
+	bool WrongEndian;
+	char Size; //'d' = 4 bytes, 'w' = 2 bytes, 'b' = 1 byte, and 'S' means it's a separator.
+	char Type;//'s' = signed integer, 'u' = unsigned, 'h' = hex, 'S' = separator
+	short Cheats; // how many bytes are affected by cheat
+};
+
 bool InsertWatch(const AddressWatcher& Watch);
-bool InsertWatch(const AddressWatcher& Watch, HWND parent); // asks user for comment)
-bool EditWatch(int watchIndex, AddressWatcher& watcher);
+bool InsertWatch(const AddressWatcher& Watch, HWND parent); // asks user for comment
+bool InsertWatches(const AddressWatcher* watches, HWND parent, const int count);
+bool InsertWatch(int watchIndex, const AddressWatcher& watcher);
+bool EditWatch(int watchIndex, const AddressWatcher& watcher);
 bool RemoveWatch(int watchIndex);
 
 void Update_RAM_Watch();
@@ -75,5 +77,10 @@ extern HWND RamWatchHWnd;
 
 #define WatchSizeConv(watch) (watch.Type == 'S' ? 0 : watch.Size == 'd' ? 4 : watch.Size == 'w' ? 2 : watch.Size == 'b' ? 1 : 0)
 #define SizeConvWatch(size) (size == 4 ? 'd' : size == 2 ? 'w' : size == 1 : 'b' : 0)
+
+#define GetDlgStoreIndex(parent) \
+	(parent == RamWatchHWnd ? 0 : \
+	parent == RamSearchHWnd ? 1 : \
+	parent == hCheat ? 2 : 3)
 
 #endif

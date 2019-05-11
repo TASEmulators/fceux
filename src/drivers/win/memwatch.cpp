@@ -702,7 +702,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 	const int FMAX = 6;
 	string formula[FMAX] = {"> than", "> by 1", "< than", "< by 1", "equal", "!equal"};
 	
-	const int kLabelControls[] = {MW_ValueLabel1,MW_ValueLabel2};
+	const int kLabelControls[] = {MW_VALUELABEL1,MW_VALUELABEL2};
 
 	switch(uMsg)
 	{
@@ -846,10 +846,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			ClearAllText();
 			RamChange();
 			break;
-		
-		case MEMW_FILE_RECENT:
-			break;
-
+	
 		case MEMW_OPTIONS_LOADSTART:	//Load on Start up
 			MemWatchLoadOnStart ^= 1;
 			CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADSTART, MemWatchLoadOnStart ? MF_CHECKED : MF_UNCHECKED);
