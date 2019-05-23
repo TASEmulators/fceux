@@ -486,7 +486,7 @@ extern HWND hAppWnd;
 
 //TODO - factor out the filesize and name extraction code from below (it is already done once above)
 
-static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int innerIndex, bool* userCancel)
+static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int innerIndex, int* userCancel)
 {
 	FCEUFILE* fp = 0;
 	
@@ -561,7 +561,7 @@ static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, s
 			}
 			else {
 				if(userCancel)
-					*userCancel = true;
+					*userCancel = 1;
 			}//if returned a file from the fileselector
 			
 		} //if we opened the 7z correctly
@@ -576,7 +576,7 @@ static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, s
 	return FCEUD_OpenArchive(asr, fname, innerFilename, innerIndex, NULL);
 }
 
-FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string& fname, int innerIndex, bool* userCancel)
+FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string& fname, int innerIndex, int* userCancel)
 {
 	return FCEUD_OpenArchive(asr, fname, 0, innerIndex, userCancel);
 }
@@ -586,7 +586,7 @@ FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string& fname, int
 	return FCEUD_OpenArchive(asr, fname, 0, innerIndex);
 }
 
-FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, bool* userCancel)
+FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int* userCancel)
 {
 	return FCEUD_OpenArchive(asr, fname, innerFilename, -1, userCancel);
 }

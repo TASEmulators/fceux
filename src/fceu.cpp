@@ -415,7 +415,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	// indicator for if the operaton was canceled by user
 	// currently there's only one situation:
 	// the user clicked cancel form the open from archive dialog
-	bool userCancel = false;
+	int userCancel = 0;
 	fp = FCEU_fopen(name, 0, "rb", 0, -1, romextensions, &userCancel);
 
 	if (!fp)
