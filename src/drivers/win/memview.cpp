@@ -316,7 +316,7 @@ static int GetFileData(uint32 offset){
 }
 
 static int WriteFileData(uint32 addr,int data){
-	if (addr < 16)MessageBox(hMemView,"Sorry", "Go bug bbit if you really want to edit the header.", MB_OK);
+	if (addr < 16) MessageBox(hMemView, "Use iNES Header Editor to edit the header.", "Sorry", MB_OK | MB_ICONASTERISK);
 	if((addr >= 16) && (addr < PRGsize[0]+16)) *(uint8 *)(GetNesPRGPointer(addr-16)) = data;
 	if((addr >= PRGsize[0]+16) && (addr < CHRsize[0]+PRGsize[0]+16)) *(uint8 *)(GetNesCHRPointer(addr-16-PRGsize[0])) = data;
 

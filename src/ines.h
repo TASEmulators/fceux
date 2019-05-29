@@ -51,40 +51,40 @@ extern TMasterRomInfoParams MasterRomInfoParams;
 
 //mbg merge 7/19/06 changed to c++ decl format
 struct iNES_HEADER {
-	char ID[4]; /*NES^Z*/
-	uint8 ROM_size;
-	uint8 VROM_size;
-	uint8 ROM_type;
-	uint8 ROM_type2;
-	uint8 ROM_type3;
-	uint8 Upper_ROM_VROM_size;
-	uint8 RAM_size;
-	uint8 VRAM_size;
-	uint8 TV_system;
-	uint8 VS_hardware;
-	uint8 reserved[2];
+	char ID[4]; /*NES^Z*/        // 0-3
+	uint8 ROM_size;              // 4
+	uint8 VROM_size;             // 5
+	uint8 ROM_type;              // 6
+	uint8 ROM_type2;             // 7
+	uint8 ROM_type3;             // 8
+	uint8 Upper_ROM_VROM_size;   // 9
+	uint8 RAM_size;              // 10
+	uint8 VRAM_size;             // 11
+	uint8 TV_system;             // 12
+	uint8 VS_hardware;           // 13
+	uint8 reserved[2];           // 14, 15
 
 	void cleanup()
 	{
-		if(!memcmp((char *)(this)+0x7,"DiskDude",8))
-		{
-			memset((char *)(this)+0x7,0,0x9);
-		}
+		if(!memcmp((char*)(this) + 0x7, "DiskDude", 8) || !memcmp((char*)(this) + 0x7, "demiforce", 9))
+			memset((char*)(this) + 0x7, 0, 0x9);
 
-		if(!memcmp((char *)(this)+0x7,"demiforce",9))
+		if(!memcmp((char*)(this) + 0xA, "Ni03", 4))
 		{
-			memset((char *)(this)+0x7,0,0x9);
-		}
-
-		if(!memcmp((char *)(this)+0xA,"Ni03",4))
-		{
-			if(!memcmp((char *)(this)+0x7,"Dis",3))
-				memset((char *)(this)+0x7,0,0x9);
+			if(!memcmp((char*)(this) + 0x7, "Dis", 3))
+				memset((char*)(this) + 0x7, 0, 0x9);
 			else
-				memset((char *)(this)+0xA,0,0x6);
+				memset((char*)(this) + 0xA, 0, 0x6);
 		}
 	}
 };
+
+typedef struct {
+	char *name;
+	int32 number;
+	void(*init)(CartInfo *);
+} BMAPPINGLocal;
+
 extern struct iNES_HEADER head; //for mappers usage
 
 void NSFVRC6_Init(void);

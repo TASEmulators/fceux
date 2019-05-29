@@ -398,6 +398,9 @@ int BlockingCheck()
 			extern HWND logwin;
 			if(!handled && logwin && IsChild(logwin, msg.hwnd))
 				handled = IsDialogMessage(logwin, &msg);
+			extern HWND hHeadEditor;
+			if (!handled && hHeadEditor && IsChild(hHeadEditor, msg.hwnd))
+				handled = IsDialogMessage(hHeadEditor, &msg);
 
 			/* //adelikat - Currently no accel keys are used in the main window.  Uncomment this block to activate them.
 			if(!handled)

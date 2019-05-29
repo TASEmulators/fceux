@@ -1196,10 +1196,7 @@ void DoGGConv()
 		ShowWindow(hGGConv, SW_SHOWNORMAL);
 		SetForegroundWindow(hGGConv);
 	} else
-	{
 		hGGConv = CreateDialog(fceu_hInstance,"GGCONV",NULL,GGConvCallB);
-	}
-	return;
 }
 
 inline void GetCheatStr(char* buf, int a, int v, int c)
