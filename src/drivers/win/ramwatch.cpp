@@ -1,4 +1,3 @@
-
 #include <windows.h>
 #include "common.h"
 #include "main.h"
