@@ -603,7 +603,6 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 			strcat(debug_str, chr);
 		} else
 		{
-			char* a;
 			if ((addr + size) > 0xFFFF)
 			{
 				while (addr < 0xFFFF)
@@ -624,28 +623,30 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 				size++;
 			}
 			
-			a = Disassemble(addr, opcode);
+			static char bufferForDisassemblyWithPlentyOfStuff[64+NL_MAX_NAME_LEN*10]; //"plenty"
+			char* _a = Disassemble(addr, opcode);
+			strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
 			
 			if (symbDebugEnabled)
 			{
-				replaceNames(ramBankNames, a, &disassembly_operands[i]);
+				replaceNames(ramBankNames, bufferForDisassemblyWithPlentyOfStuff, &disassembly_operands[i]);
 				for(int p=0;p<ARRAY_SIZE(pageNames);p++)
 					if(pageNames[p] != NULL)
-						replaceNames(pageNames[p], a, &disassembly_operands[i]);
+						replaceNames(pageNames[p], bufferForDisassemblyWithPlentyOfStuff, &disassembly_operands[i]);
 			}
 
 			// special case: an RTS opcode
 			if (GetMem(instruction_addr) == 0x60)
 			{
 				// add "----------" to emphasize the end of subroutine
-				strcat(a, " ");
-				for (int j = strlen(a); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
-					a[j] = '-';
-				a[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+				strcat(bufferForDisassemblyWithPlentyOfStuff, " ");
+				for (int j = strlen(bufferForDisassemblyWithPlentyOfStuff); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
+					bufferForDisassemblyWithPlentyOfStuff[j] = '-';
+				bufferForDisassemblyWithPlentyOfStuff[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
 			}
 
 			// append the disassembly to current line
-			strcat(strcat(debug_str, " "), a);
+			strcat(strcat(debug_str, " "), bufferForDisassemblyWithPlentyOfStuff);
 		}
 		strcat(debug_str, "\n");
 		instructions_count++;
