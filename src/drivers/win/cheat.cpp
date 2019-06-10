@@ -1001,6 +1001,10 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				GGConv_wndy = 0;
 			SetWindowPos(hwndDlg, 0, GGConv_wndx, GGConv_wndy, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_CODE, EM_SETLIMITTEXT, 8, 0);
+			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_ADDR, EM_SETLIMITTEXT, 5, 0);
+			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_COMP, EM_SETLIMITTEXT, 2, 0);
+			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_VAL, EM_SETLIMITTEXT, 2, 0);
+
 			break;
 		case WM_CLOSE:
 		case WM_QUIT:
