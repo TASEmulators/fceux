@@ -794,7 +794,7 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 	int input = header->reserved[1] & 0x1F;
 	if (SendDlgItemMessage(hwnd, IDC_INPUT_DEVICE_COMBO, CB_SETCURSEL, input, 0) == CB_ERR)
 	{
-		sprintf(buf, "$%X", input);
+		sprintf(buf, "$%02X", input);
 		SetDlgItemText(hwnd, IDC_INPUT_DEVICE_COMBO, buf);
 	}
 
