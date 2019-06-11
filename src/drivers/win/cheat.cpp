@@ -634,19 +634,32 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 						case IDC_BTN_CHEAT_ADDFROMFILE:
 						{
 							OPENFILENAME ofn;
-							memset(&ofn, 0, sizeof(ofn));
-							ofn.lStructSize = sizeof(ofn);
+							memset(&ofn, 0, sizeof(OPENFILENAME));
+							ofn.lStructSize = sizeof(OPENFILENAME);
 							ofn.hwndOwner = hwndDlg;
 							ofn.hInstance = fceu_hInstance;
-							ofn.lpstrTitle = "Open Cheats file";
+							ofn.lpstrTitle = "Open cheats file";
 							const char filter[] = "Cheat files (*.cht)\0*.cht\0All Files (*.*)\0*.*\0\0";
 							ofn.lpstrFilter = filter;
 
 							char nameo[2048] = { 0 };
+							/*
+							I gave up setting the default filename for import cheat dialog, since the filename display contains a bug.
+							if (GameInfo)
+							{
+								char* filename;
+								if ((filename = strrchr(GameInfo->filename, '\\')) || (filename = strrchr(GameInfo->filename, '/')))
+									strcpy(nameo, filename + 1);
+								else
+									strcpy(nameo, GameInfo->filename);
+								strcpy(strrchr(nameo, '.'), ".cht");
+							}
+							*/
 							ofn.lpstrFile = nameo;
 							ofn.nMaxFile = 2048;
+							ofn.lpstrDefExt = "cht";
 							ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST;
-							std::string initdir = FCEU_GetPath(FCEUMKF_CHEAT);
+							std::string initdir = FCEU_GetPath(FCEUMKF_CHEAT) + PSS;
 							ofn.lpstrInitialDir = initdir.c_str();
 
 							if (GetOpenFileName(&ofn))
@@ -658,6 +671,45 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 									UpdateCheatsAdded();
 									UpdateCheatRelatedWindow();
 									savecheats = 1;
+								}
+							}
+						}
+						break;
+						case IDC_BTN_CHEAT_EXPORTTOFILE:
+						{
+							OPENFILENAME ofn;
+							memset(&ofn, 0, sizeof(OPENFILENAME));
+							ofn.lStructSize = sizeof(OPENFILENAME);
+							ofn.hInstance = fceu_hInstance;
+							ofn.lpstrTitle = "Save cheats file";
+							const char filter[] = "Cheat files (*.cht)\0*.cht\0All Files (*.*)\0*.*\0\0";
+							ofn.lpstrFilter = filter;
+
+							char nameo[2048] = { 0 };
+							if (GameInfo)
+							{
+								char* filename;
+								if ((filename = strrchr(GameInfo->filename, '\\')) || (filename = strrchr(GameInfo->filename, '/')))
+									strcpy(nameo, filename + 1);
+								else
+									strcpy(nameo, GameInfo->filename);
+								strcpy(strrchr(nameo, '.'), ".cht");
+							}
+							ofn.lpstrFile = nameo;
+							ofn.nMaxFile = 2048;
+							ofn.lpstrDefExt = "cht";
+							ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST;
+							std::string initdir = FCEU_GetPath(FCEUMKF_CHEAT) + PSS;
+							ofn.lpstrInitialDir = initdir.c_str();
+
+							if (GetSaveFileName(&ofn))
+							{
+								FILE* file = FCEUD_UTF8fopen(nameo, "wb");
+								if (file)
+								{
+									savecheats = 1;
+									FCEU_FlushGameCheats(file, 0);
+									fclose(file);
 								}
 							}
 						}
@@ -1001,7 +1053,7 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				GGConv_wndy = 0;
 			SetWindowPos(hwndDlg, 0, GGConv_wndx, GGConv_wndy, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_CODE, EM_SETLIMITTEXT, 8, 0);
-			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_ADDR, EM_SETLIMITTEXT, 5, 0);
+			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_ADDR, EM_SETLIMITTEXT, 4, 0);
 			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_COMP, EM_SETLIMITTEXT, 2, 0);
 			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_VAL, EM_SETLIMITTEXT, 2, 0);
 

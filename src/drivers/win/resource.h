@@ -468,6 +468,7 @@
 #define IDC_NTVIEW_SHOW_ATTRIBUTES      1009
 #define IDC_NTVIEW_HIDE_PALETTES        1010
 #define MW_ADDR03                       1010
+#define IDC_BTN_CHEAT_EXPORTTOFILE      1011
 #define MW_ADDR04                       1013
 #define MW_ADDR05                       1016
 #define MW_ADDR06                       1019
@@ -999,7 +1000,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        303
 #define _APS_NEXT_COMMAND_VALUE         40000
-#define _APS_NEXT_CONTROL_VALUE         1011
+#define _APS_NEXT_CONTROL_VALUE         1012
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
