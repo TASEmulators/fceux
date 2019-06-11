@@ -79,12 +79,6 @@ struct iNES_HEADER {
 	}
 };
 
-typedef struct {
-	char *name;
-	int32 number;
-	void(*init)(CartInfo *);
-} BMAPPINGLocal;
-
 extern struct iNES_HEADER head; //for mappers usage
 
 void NSFVRC6_Init(void);

@@ -131,7 +131,7 @@ int dropDownIdList[] = {
 
 HWND hHeadEditor = NULL;
 
-bool LoadHeader(HWND parent, char* name, iNES_HEADER* header)
+bool LoadHeader(HWND parent, iNES_HEADER* header)
 {
 	int error = 0;
 	enum errors {
@@ -142,7 +142,10 @@ bool LoadHeader(HWND parent, char* name, iNES_HEADER* header)
 		UNIF_HEADER
 	};
 
-	FCEUFILE* fp = FCEU_fopen(name, NULL, "rb", NULL);
+	FCEUFILE* fp = FCEU_fopen(LoadedRomFName, NULL, "rb", NULL);
+	if (!GameInfo)
+		strcpy(LoadedRomFName, fp->fullFilename.c_str());
+
 	if (fp)
 	{
 		if (FCEU_fread(header, 1, sizeof(iNES_HEADER), fp) == sizeof(iNES_HEADER) && !memcmp(header, "NES\x1A", 4))
@@ -165,7 +168,7 @@ bool LoadHeader(HWND parent, char* name, iNES_HEADER* header)
 			case errors::OPEN_FAILED:
 			{
 				char buf[1024];
-				sprintf(buf, "Error opening %s!", name);
+				sprintf(buf, "Error opening %s!", LoadedRomFName);
 				MessageBox(parent, buf, "iNES Header Editor", MB_ICONERROR | MB_OK);
 				break;
 			}
@@ -262,7 +265,7 @@ HWND InitHeaderEditDialog(HWND hwnd, iNES_HEADER* header)
 	for (int i = 0; dropDownIdList[i]; ++i)
 		for (int j = 0; dropDownList[i][j]; ++j)
 		{
-			sprintf(buf, "$%X %s", j, dropDownList[i][j]);
+			sprintf(buf, dropDownList[i] == inputDevList ? "$%02X %s" : "$%X %s", j, dropDownList[i][j]);
 			SendDlgItemMessage(hwnd, IDC_MAPPER_COMBO, CB_SETITEMDATA, SendDlgItemMessage(hwnd, dropDownIdList[i], CB_ADDSTRING, 0, (LPARAM)buf), j);
 		}
 
@@ -501,10 +504,9 @@ LRESULT CALLBACK HeaderEditorProc(HWND hDlg, UINT uMsg, WPARAM wP, LPARAM lP)
 							iNES_HEADER newHeader;
 							if (WriteHeaderData(hDlg, &newHeader))
 							{
-								char name[2048];
-								strcpy(name, LoadedRomFName);
-								if (ShowINESFileBox(hDlg, name, true))
-									SaveINESFile(hDlg, name, &newHeader);
+								char path[4096] = { 0 };
+								if (ShowINESFileBox(hDlg, true, path))
+									SaveINESFile(hDlg, path, &newHeader);
 							}
 						}
 						break;
@@ -545,7 +547,7 @@ void DoHeadEdit()
 		iNES_HEADER* header = (iNES_HEADER*)calloc(1, sizeof(iNES_HEADER));
 		if (GameInfo)
 		{
-			if (LoadHeader(hAppWnd, LoadedRomFName, header))
+			if (LoadHeader(hAppWnd, header))
 				CreateDialogParam(fceu_hInstance, MAKEINTRESOURCE(IDD_EDIT_HEADER), hAppWnd, (DLGPROC)HeaderEditorProc, (LPARAM)header);
 			else
 				free(header);
@@ -553,7 +555,7 @@ void DoHeadEdit()
 		else {
 			// temporarily borrow LoadedRomFName, when no game is loaded, it is unused.
 			LoadedRomFName[0] = 0;
-			if (ShowINESFileBox(hAppWnd, LoadedRomFName, false) && LoadHeader(hAppWnd, LoadedRomFName, header))
+			if (ShowINESFileBox(hAppWnd) && LoadHeader(hAppWnd, header))
 				DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_EDIT_HEADER), hAppWnd, (DLGPROC)HeaderEditorProc, (LPARAM)header);
 			else
 				free(header);
@@ -788,7 +790,7 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 		SetDlgItemText(hwnd, IDC_VS_SYSTEM_COMBO, buf);
 	}
 
-// Input Device:
+	// Input Device:
 	int input = header->reserved[1] & 0x1F;
 	if (SendDlgItemMessage(hwnd, IDC_INPUT_DEVICE_COMBO, CB_SETCURSEL, input, 0) == CB_ERR)
 	{
@@ -831,12 +833,9 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 	int mapper;
 	if (!GetComboBoxListItemData(hwnd, IDC_MAPPER_COMBO, &mapper, buf))
 	{
-		if (sscanf(buf, "%d", &mapper) < 1)
-		{
-			MessageBox(hwnd, "The mapper# you have entered is invalid. Please enter a decimal number or select an item from the dropdown list.", "Error", MB_OK | MB_ICONERROR);
-			SetFocus(GetDlgItem(hwnd, IDC_MAPPER_COMBO));
-			return false;
-		}
+		MessageBox(hwnd, "The mapper# you have entered is invalid. Please enter a decimal number or select an item from the dropdown list.", "Error", MB_OK | MB_ICONERROR);
+		SetFocus(GetDlgItem(hwnd, IDC_MAPPER_COMBO));
+		return false;
 	}
 	printf("mapper: %d\n", mapper);
 
@@ -1235,13 +1234,25 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 		_header.ROM_type2 |= 1;
 		if (ines20) {
 			// VS System type
-			int system = SendDlgItemMessage(hwnd, IDC_VS_SYSTEM_COMBO, CB_GETCURSEL, 0, 0);
-			if (system != CB_ERR)
+			int system;
+			if (GetComboBoxListItemData(hwnd, IDC_VS_SYSTEM_COMBO, &system, buf) && system <= 0xF)
 				_header.VS_hardware |= (system & 0xF) << 4;
+			else
+			{
+				MessageBox(hwnd, "Invalid VS System hardware type.", "Error", MB_OK | MB_ICONERROR);
+				SetFocus(GetDlgItem(hwnd, IDC_VS_SYSTEM_COMBO));
+				return false;
+			}
 			// VS PPU type
-			int ppu = SendDlgItemMessage(hwnd, IDC_VS_PPU_COMBO, CB_GETCURSEL, 0, 0);
-			if (ppu != CB_ERR)
+			int ppu;
+			if (GetComboBoxListItemData(hwnd, IDC_VS_PPU_COMBO, &ppu, buf) && system <= 0xF)
 				_header.VS_hardware |= ppu & 0xF;
+			else
+			{
+				MessageBox(hwnd, "Invalid VS System PPU type.", "Error", MB_OK | MB_ICONERROR);
+				SetFocus(GetDlgItem(hwnd, IDC_VS_PPU_COMBO));
+				return false;
+			}
 		}
 	}
 	else if (IsDlgButtonChecked(hwnd, IDC_RADIO_SYSTEM_PLAYCHOICE10) == BST_CHECKED)
@@ -1250,17 +1261,29 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 	{
 		// Extend System
 		_header.ROM_type2 |= 3;
-		int extend = SendDlgItemMessage(hwnd, IDC_SYSTEM_EXTEND_COMBO, CB_GETCURSEL, 0, 0);
-		if (extend != CB_ERR)
+		int extend;
+		if (GetComboBoxListItemData(hwnd, IDC_SYSTEM_EXTEND_COMBO, &extend, buf) && extend <= 0x3F)
 			_header.VS_hardware |= extend & 0x3F;
+		else
+		{
+			MessageBox(hwnd, "Invalid extend system type", "Error", MB_OK | MB_ICONERROR);
+			SetFocus(GetDlgItem(hwnd, IDC_SYSTEM_EXTEND_COMBO));
+			return false;
+		}			
 	}
 
 	// Input device
 	if (ines20)
 	{
-		int input = SendDlgItemMessage(hwnd, IDC_INPUT_DEVICE_COMBO, CB_GETCURSEL, 0, 0);
-		if (input != CB_ERR)
+		int input;
+		if (GetComboBoxListItemData(hwnd, IDC_INPUT_DEVICE_COMBO, &input, buf, true) && input <= 0x3F)
 			_header.reserved[1] |= input & 0x3F;
+		else
+		{
+			MessageBox(hwnd, "Invalid input device.", "Error", MB_OK | MB_ICONERROR);
+			SetFocus(GetDlgItem(hwnd, IDC_INPUT_DEVICE_COMBO));
+			return false;
+		}
 	}
 
 	// Miscellanous ROM(s)
@@ -1335,16 +1358,16 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 	printf("%02X ", _header.ROM_type);
 	printf("%02X ", _header.ROM_type2);
 	printf("%02X ", _header.ROM_type3);
-	printf("%02X ", _header.Upper_ROM_VROM_size);
-	printf("%02X ", _header.RAM_size);
-	printf("%02X ", _header.VRAM_size);
-	printf("%02X ", _header.TV_system);
-	printf("%02X ", _header.VS_hardware);
-	printf("%02X ", _header.reserved[0]);
-	printf("%02X\n", _header.reserved[1]);
+printf("%02X ", _header.Upper_ROM_VROM_size);
+printf("%02X ", _header.RAM_size);
+printf("%02X ", _header.VRAM_size);
+printf("%02X ", _header.TV_system);
+printf("%02X ", _header.VS_hardware);
+printf("%02X ", _header.reserved[0]);
+printf("%02X\n", _header.reserved[1]);
 #endif
 
-	return true;
+return true;
 }
 
 int GetComboBoxByteSize(HWND hwnd, UINT id, int* value)
@@ -1363,12 +1386,12 @@ int GetComboBoxByteSize(HWND hwnd, UINT id, int* value)
 
 	switch (id)
 	{
-		case IDC_PRGROM_COMBO: name = "PRG ROM"; break;
-		case IDC_PRGRAM_COMBO: name = "PRG RAM"; break;
-		case IDC_PRGNVRAM_COMBO: name = "PRG NVRAM"; break;
-		case IDC_CHRROM_COMBO: name = "CHR ROM"; break;
-		case IDC_CHRRAM_COMBO: name = "CHR RAM"; break;
-		case IDC_CHRNVRAM_COMBO: name = "CHR NVRAM"; break;
+	case IDC_PRGROM_COMBO: name = "PRG ROM"; break;
+	case IDC_PRGRAM_COMBO: name = "PRG RAM"; break;
+	case IDC_PRGNVRAM_COMBO: name = "PRG NVRAM"; break;
+	case IDC_CHRROM_COMBO: name = "CHR ROM"; break;
+	case IDC_CHRRAM_COMBO: name = "CHR RAM"; break;
+	case IDC_CHRNVRAM_COMBO: name = "CHR NVRAM"; break;
 	}
 
 	if (!GetComboBoxListItemData(hwnd, id, value, buf, true))
@@ -1391,15 +1414,15 @@ int GetComboBoxByteSize(HWND hwnd, UINT id, int* value)
 
 	switch (err)
 	{
-		case errors::FORMAT_ERR:
-			sprintf(buf, "%s size you entered is invalid, it should be positive decimal integer followed with unit, e.g. 1024B, 128KB, 4MB", name);
-			break;
-		case errors::UNIT_ERR:
-			sprintf(buf, "The unit of %s size you entered is invalid, it must be B, KB or MB", name);
-			break;
-		case errors::MINUS_ERR:
-			sprintf(buf, "Negative value of %s is not supported by iNES header.", name);
-			break;
+	case errors::FORMAT_ERR:
+		sprintf(buf, "%s size you entered is invalid, it should be positive decimal integer followed with unit, e.g. 1024B, 128KB, 4MB", name);
+		break;
+	case errors::UNIT_ERR:
+		sprintf(buf, "The unit of %s size you entered is invalid, it must be B, KB or MB", name);
+		break;
+	case errors::MINUS_ERR:
+		sprintf(buf, "Negative value of %s is not supported by iNES header.", name);
+		break;
 	}
 
 	if (err)
@@ -1413,22 +1436,56 @@ int GetComboBoxByteSize(HWND hwnd, UINT id, int* value)
 
 bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, bool exact)
 {
+
 	bool success = true;
 	*value = SendDlgItemMessage(hwnd, id, CB_GETCURSEL, 0, 0);
 	if (*value != CB_ERR)
 		*value = SendDlgItemMessage(hwnd, id, CB_GETITEMDATA, *value, 0);
 	else {
 		GetDlgItemText(hwnd, id, buf, 256);
+
 		if (exact)
 			*value = SendDlgItemMessage(hwnd, id, CB_FINDSTRINGEXACT, 0, (LPARAM)buf);
 		else
 			*value = SendDlgItemMessage(hwnd, id, CB_SELECTSTRING, 0, (LPARAM)buf);
+
 		if (*value != CB_ERR)
 			*value = SendDlgItemMessage(hwnd, id, CB_GETITEMDATA, *value, 0);
 		else
 		{
-			SetDlgItemText(hwnd, id, buf);
-			success = false;
+			switch (id)
+			{
+				default:
+					success = false;
+				break;
+				case IDC_MAPPER_COMBO:
+					if (!(success = sscanf(buf, "%d", value) > 0))
+						success = SearchByString(hwnd, id, value, buf);
+					else
+						SetDlgItemText(hwnd, id, buf);
+				break;
+				case IDC_VS_SYSTEM_COMBO:
+				case IDC_VS_PPU_COMBO:
+				case IDC_SYSTEM_EXTEND_COMBO:
+					if (!(success = sscanf(buf, "$%X", value) > 0))
+						success = SearchByString(hwnd, id, value, buf);
+					else
+						SetDlgItemText(hwnd, id, buf);
+					break;
+				case IDC_INPUT_DEVICE_COMBO:
+					if (success = sscanf(buf, "$%X", value) > 0)
+					{
+						char buf2[3];
+						sprintf(buf2, "$%02X", *value);
+						if (SendDlgItemMessage(hwnd, id, CB_SELECTSTRING, 0, (LPARAM)buf2) == CB_ERR)
+							SetDlgItemText(hwnd, id, buf);
+					} else
+						success = SearchByString(hwnd, id, value, buf);
+				break;
+			}
+
+			if (!success)
+				SetDlgItemText(hwnd, id, buf);
 		}
 	}
 
@@ -1436,37 +1493,67 @@ bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, bool exa
 }
 
 // Warning: when in save mode, the content of buf might be overwritten by the save filename which user changed.
-bool ShowINESFileBox(HWND parent, char* buf, bool save)
+bool ShowINESFileBox(HWND parent, bool save, char* buf)
 {
-	char name[2048] = { 0 };
+	char *filename = NULL, *path = NULL;
+	bool success = true;
+
 	if (save)
-		strncpy(name, buf, strcspn(buf, "|"));
-
-	OPENFILENAME ofDlg;
-	memset(&ofDlg, 0, sizeof(OPENFILENAME));
-	ofDlg.lStructSize = sizeof(OPENFILENAME);
-	ofDlg.lpstrTitle = save ? "Save NES file" : "Open NES file";
-	ofDlg.lpstrFilter = "NES ROM file(*.nes)\0*.nes\0All files(*.*)\0*.*\0\0";
-	ofDlg.hInstance = fceu_hInstance;
-	ofDlg.hwndOwner = parent;
-	ofDlg.nMaxFile = sizeof(name);
-	ofDlg.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
-	ofDlg.lpstrInitialDir = save ? name : FCEU_GetPath(FCEUMKF_ROMS).c_str();
-
-	char* sub_name = strrchr(buf, '|');
-	if (sub_name)
-		ofDlg.lpstrFile = sub_name + 1;
-	else
-		ofDlg.lpstrFile = name;
-
-
-	if (save ? GetSaveFileName(&ofDlg) : GetOpenFileName(&ofDlg))
 	{
-		strcpy(buf, name);
-		return true;
+		// When open this dialog for saving prpose, the buf must be a separate buf.
+		if (buf && buf != LoadedRomFName)
+		{
+			extern char* GetRomName(bool force = false);
+			extern char* GetRomPath(bool force = false);
+			filename = GetRomName(true);
+			char* second = strchr(filename, '|');
+			if (second)
+			{
+				char* _filename = (char*)calloc(1, 2048);
+				strcpy(_filename, second + 1);
+				char* third = strrchr(filename, '\\');
+				if (third)
+					strcpy(_filename, third + 1);
+				free(filename);
+				filename = _filename;
+			}
+			strcat(filename, " [header modified].nes");
+			path = GetRomPath(true);
+		}
+		else
+			success = false;
+	}
+	else {
+		if (!buf)
+			buf = LoadedRomFName;
+		filename = (char*)calloc(1, 2048);
+		path = (char*)calloc(1, 2048);
 	}
 
-	return false;
+	if (success)
+	{
+		OPENFILENAME ofDlg;
+		memset(&ofDlg, 0, sizeof(OPENFILENAME));
+		ofDlg.lStructSize = sizeof(OPENFILENAME);
+		ofDlg.lpstrTitle = save ? "Save NES file" : "Open NES file";
+		ofDlg.lpstrFilter = "NES ROM file(*.nes)\0*.nes\0All files(*.*)\0*.*\0\0";
+		ofDlg.hInstance = fceu_hInstance;
+		ofDlg.hwndOwner = parent;
+		ofDlg.lpstrFile = filename;
+		ofDlg.nMaxFile = 2048;
+		ofDlg.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
+		ofDlg.lpstrInitialDir = path;
+
+		if (save ? GetSaveFileName(&ofDlg) : GetOpenFileName(&ofDlg))
+			strcpy(buf, filename);
+		else
+			success = false;
+	}
+
+	if (filename) free(filename);
+	if (path) free(path);
+
+	return success;
 }
 
 bool SaveINESFile(HWND hwnd, char* path, iNES_HEADER* header)
@@ -1507,4 +1594,46 @@ bool SaveINESFile(HWND hwnd, char* path, iNES_HEADER* header)
 
 	return true;
 
+}
+
+bool SearchByString(HWND hwnd, UINT id, int* value, char* buf)
+{
+	if (buf[0] != ' ' && buf[0] != 0)
+	{
+		if (id == IDC_MAPPER_COMBO)
+		{
+			extern BMAPPINGLocal bmap[];
+			for (int i = 0; bmap[i].init; ++i)
+			{
+				if (!stricmp(buf, bmap[i].name))
+				{
+					SendDlgItemMessage(hwnd, id, CB_SETCURSEL, i, 0);
+					*value = SendDlgItemMessage(hwnd, id, CB_GETITEMDATA, i, 0);
+					return true;
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; dropDownIdList[i]; ++i)
+			{
+				if (dropDownIdList[i] == id)
+				{
+					char** checkList = dropDownList[i];
+					for (int j = 0; checkList[j]; ++j)
+					{
+						if (!stricmp(buf, checkList[j]))
+						{
+							SendDlgItemMessage(hwnd, id, CB_SETCURSEL, j, 0);
+							*value = SendDlgItemMessage(hwnd, id, CB_GETITEMDATA, j, 0);
+							return true;
+						}
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	return false;
 }
