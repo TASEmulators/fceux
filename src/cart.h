@@ -103,4 +103,5 @@ void FCEU_GeniePower(void);
 bool FCEU_OpenGenie(void);
 void FCEU_CloseGenie(void);
 void FCEU_KillGenie(void);
-#endif
+
+#endif#endif

@@ -50,6 +50,7 @@
 #include "memview.h"
 #include "tracer.h"
 #include "cdlogger.h"
+#include "header_editor.h"
 #include "throttle.h"
 #include "monitor.h"
 #include "keyboard.h"
@@ -2312,7 +2313,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_GAMEGENIEDECODER:
 				DoGGConv();
 				break;
-
+			case MENU_INESHEADEREDITOR:
+				DoHeadEdit();
+				break;
 			//Help Menu--------------------------------------------------------------
 			case MENU_HELP:
 				OpenHelpWindow();

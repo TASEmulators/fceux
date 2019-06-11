@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated file
-// for res.rc
+// Microsoft Visual C++ generated include file.
+// Used by res.rc
 //
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
@@ -365,6 +365,7 @@
 #define MENU_MV_VIEW_ROM                303
 #define IDC_BTN_CHEAT_UPD               303
 #define IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL 303
+#define IDD_EDIT_HEADER                 303
 #define MENU_ENABLE_AUTOSAVE            304
 #define IDC_LABEL_ROMUSED               304
 #define IDC_BTN_CHEAT_RESET             304
@@ -469,26 +470,86 @@
 #define IDC_NTVIEW_HIDE_PALETTES        1010
 #define MW_ADDR03                       1010
 #define IDC_BTN_CHEAT_EXPORTTOFILE      1011
+#define IDSAVE                          1012
 #define MW_ADDR04                       1013
+#define IDC_CHECK1                      1013
+#define IDC_RESTORE_BUTTON              1014
 #define MW_ADDR05                       1016
+#define IDC_PRGROM_COMBO                1018
 #define MW_ADDR06                       1019
+#define IDC_CHRROM_COMBO                1019
+#define IDC_RADIO_MIRR_HORIZONTAL       1020
+#define IDC_RADIO_MIRR_VERTICAL         1021
 #define MW_ADDR07                       1022
+#define IDC_RADIO_MIRR_4SCREEN          1022
+#define IDC_CHECK_TRAINER               1024
 #define MW_ADDR08                       1025
+#define IDC_PRGRAM_COMBO                1025
+#define IDC_MAPPER_COMBO                1026
+#define IDC_SUBMAPPER_EDIT              1027
 #define MW_ADDR09                       1028
+#define IDC_CHRRAM_COMBO                1028
+#define IDC_PRGNVRAM_COMBO              1029
+#define IDC_CHRNVRAM_COMBO              1030
 #define MW_ADDR10                       1031
+#define IDC_RADIO_REGION_NTSC           1031
+#define IDC_RADIO_REGION_PAL            1032
+#define IDC_RADIO_REGION_DUAL           1033
 #define MW_ADDR11                       1034
+#define IDC_INPUT_DEVICE_COMBO          1036
 #define MW_ADDR12                       1037
+#define IDC_RADIO_REGION_DENDY          1037
+#define IDC_RADIO_SYSTEM_NORMAL         1038
+#define IDC_RADIO_SYSTEM_VS             1039
 #define MW_ADDR13                       1040
+#define IDC_RADIO_SYSTEM_PLAYCHOICE10   1040
+#define IDC_RADIO_SYSTEM_EXTEND         1041
 #define MW_ADDR14                       1043
+#define IDC_SYSTEM_EXTEND_COMBO         1043
 #define MW_ADDR15                       1046
+#define IDC_VS_SYSTEM_COMBO             1046
+#define IDC_VS_PPU_COMBO                1047
 #define MW_ADDR16                       1049
+#define IDC_MAPPER_TEXT                 1049
+#define IDC_SUBMAPPER_TEXT              1050
+#define IDC_PRGROM_TEXT                 1051
 #define MW_ADDR17                       1052
+#define IDC_CHRROM_TEXT                 1053
 #define MW_ADDR18                       1055
+#define IDC_PRGRAM_TEXT                 1055
+#define IDC_CHRRAM_TEXT                 1057
 #define MW_ADDR19                       1058
+#define IDC_PRGNVRAM_TEXT               1059
+#define IDC_CHRNVRAM_TEXT               1060
 #define MW_ADDR20                       1061
+#define IDC_INESHEADER_GROUP            1063
 #define MW_ADDR21                       1064
+#define IDC_MIRRORING_GROUP             1064
+#define IDC_REGION_GROUP                1065
+#define IDC_SYSTEM_GROUP                1066
 #define MW_ADDR22                       1067
+#define IDC_VS_SYSTEM_GROUP             1067
+#define IDC_VS_SYSTEM_TEXT              1068
+#define IDC_VS_PPU_TEXT                 1069
 #define MW_ADDR23                       1070
+#define IDC_RADIO_VERSION_STANDARD      1071
+#define IDC_RADIO_VERSION_INES20        1073
+#define IDC_VERSION_GROUP               1074
+#define IDC_MAPPER_GROUP                1075
+#define IDC_CHECK_BATTERYNVRAM              1076
+#define IDC_INPUT_DEVICE_TEXT           1077
+#define IDC_PRG_GROUP                   1078
+#define IDC_CHR_GROUP                   1079
+#define IDC_UNOFFICIAL_GROUP            1081
+#define IDC_CHECK_UNOFFICIAL_PRGRAM     1082
+#define IDC_CHECK_UNOFFICIAL_EXTRA_REGION 1083
+#define IDC_CHECK_UNOFFICIAL_BUS_CONFLICT 1084
+#define IDC_CHECK_UNOFFICIAL            1085
+#define IDC_MISCELLANEOUS_ROMS_TEXT 1086
+#define IDC_MISCELLANEOUS_ROMS_EDIT              1087
+#define IDC_EXTEND_SYSTEM_GROUP         1089
+#define IDC_EXTEND_SYSTEM_TEXT          1090
+#define IDC_BUTTON1                     1094
 #define BTN_ALLOW_LRUD                  1117
 #define BTN_PRESET_SET1                 1119
 #define BTN_PRESET_SET2                 1120
@@ -705,6 +766,7 @@
 #define IDC_CHEAT_VAL_LABEL             1314
 #define IDC_CHEAT_COM_LABEL             1315
 #define IDC_CHEAT_LABEL_KNOWN           1316
+#define MENU_INESHEADEREDITOR             40001
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -998,9 +1060,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        303
-#define _APS_NEXT_COMMAND_VALUE         40000
-#define _APS_NEXT_CONTROL_VALUE         1012
+#define _APS_NEXT_RESOURCE_VALUE        305
+#define _APS_NEXT_COMMAND_VALUE         40002
+#define _APS_NEXT_CONTROL_VALUE         1095
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
