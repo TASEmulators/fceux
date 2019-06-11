@@ -659,8 +659,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							ofn.nMaxFile = 2048;
 							ofn.lpstrDefExt = "cht";
 							ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST;
-							std::string initdir = FCEU_GetPath(FCEUMKF_CHEAT) + PSS;
-							ofn.lpstrInitialDir = initdir.c_str();
+							ofn.lpstrInitialDir = FCEU_GetPath(FCEUMKF_CHEAT).c_str();
 
 							if (GetOpenFileName(&ofn))
 							{
@@ -699,8 +698,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							ofn.nMaxFile = 2048;
 							ofn.lpstrDefExt = "cht";
 							ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST;
-							std::string initdir = FCEU_GetPath(FCEUMKF_CHEAT) + PSS;
-							ofn.lpstrInitialDir = initdir.c_str();
+							ofn.lpstrInitialDir = FCEU_GetPath(FCEUMKF_CHEAT).c_str();
 
 							if (GetSaveFileName(&ofn))
 							{
