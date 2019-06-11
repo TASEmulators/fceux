@@ -274,4 +274,9 @@ void Mapper252_Init(CartInfo *);
 void Mapper253_Init(CartInfo *);
 void Mapper254_Init(CartInfo *);
 
+typedef struct {
+	char *name;
+	int32 number;
+	void (*init)(CartInfo *);
+} BMAPPINGLocal;
 #endif

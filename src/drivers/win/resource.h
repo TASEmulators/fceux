@@ -469,6 +469,7 @@
 #define IDC_NTVIEW_SHOW_ATTRIBUTES      1009
 #define IDC_NTVIEW_HIDE_PALETTES        1010
 #define MW_ADDR03                       1010
+#define IDC_BTN_CHEAT_EXPORTTOFILE      1011
 #define IDSAVE                          1012
 #define MW_ADDR04                       1013
 #define IDC_CHECK1                      1013
