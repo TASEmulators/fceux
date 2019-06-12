@@ -975,8 +975,9 @@ void UpdateCheatListGroupBoxUI()
 		EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_ADD), FALSE);
 		EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_ADDFROMFILE), FALSE);
 	}
-
 	SetDlgItemText(hCheat, IDC_GROUPBOX_CHEATLIST, temp);
+
+	EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_EXPORTTOFILE), cheats != 0);
 }
 
 //Used by cheats and external dialogs such as hex editor to update items in the cheat search dialog

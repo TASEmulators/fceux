@@ -1,5 +1,7 @@
 //--
 //mbg merge 7/18/06 had to make these extern
+#ifndef WIN_CHEAT_H
+#define WIN_CHEAT_H
 extern int CheatWindow,CheatStyle; //bbit edited: this line added
 extern HWND hCheat;
 
@@ -44,4 +46,4 @@ SetDlgItemText(hwnd, IDC_CHEAT_VAL, (LPTSTR)"") & \
 SetDlgItemText(hwnd, IDC_CHEAT_COM, (LPTSTR)"") & \
 SetDlgItemText(hwnd, IDC_CHEAT_NAME, (LPTSTR)"") & \
 SetDlgItemText(hwnd, IDC_CHEAT_TEXT, (LPTSTR)""))
-
+#endif

@@ -1,3 +1,5 @@
+#ifndef CHEAT_H
+#define CHEAT_H
 void FCEU_CheatResetRAM(void);
 void FCEU_CheatAddRAM(int s, uint32 A, uint8 *p);
 
@@ -59,3 +61,4 @@ struct SEARCHPOSSIBLE {
 	for (int i = 0; i < numsubcheats && count < size; ++i) \
 		if (SubCheats[i].addr >= address && SubCheats[i].addr < address + size) \
 			++count
+#endif

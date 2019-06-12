@@ -192,7 +192,6 @@ int FCEUI_AddCheat(const char *name, uint32 addr, uint8 val, int compare, int ty
 int FCEUI_DelCheat(uint32 which);
 int FCEUI_ToggleCheat(uint32 which);
 int FCEUI_GlobalToggleCheat(int global_enable);
-void FCEU_SaveGameCheats(FILE *fp, int release = 0);
 
 int32 FCEUI_CheatSearchGetCount(void);
 void FCEUI_CheatSearchGetRange(uint32 first, uint32 last, int (*callb)(uint32 a, uint8 last, uint8 current));
