@@ -234,7 +234,7 @@ void Update_RAM_Watch()
 	}
 }
 
-bool AskSave()
+bool AskSaveRamWatch()
 {
 	//This function asks to save changes if the watch file contents have changed
 	//returns false only if a save was attempted but failed or was cancelled
@@ -677,7 +677,7 @@ bool Load_Watches(bool clear)
 
 bool ResetWatches()
 {
-	if(!AskSave())
+	if(!AskSaveRamWatch())
 		return false;
 	for (;WatchCount >= 0; WatchCount--)
 	{

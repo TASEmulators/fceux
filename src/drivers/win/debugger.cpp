@@ -2475,11 +2475,11 @@ void UpdatePatcher(HWND hwndDlg){
 
 /// Updates debugger controls that should be enabled/disabled if a game is loaded.
 /// @param enable Flag that indicates whether the menus should be enabled (1) or disabled (0). 
-void updateGameDependentMenusDebugger(unsigned int enable) {
+void updateGameDependentMenusDebugger() {
 	if (!hDebug)
 		return;
 
-	//EnableWindow(GetDlgItem(hDebug,DEBUGLOADDEB),(enable ? 0 : 1));
+	// EnableWindow(GetDlgItem(hDebug,DEBUGLOADDEB), GameInfo != 0 ? FALSE : TRUE);
 }
 
 void DoDebug(uint8 halt)
@@ -2496,7 +2496,7 @@ void DoDebug(uint8 halt)
 		ShowWindow(hDebug, SW_SHOWNORMAL);
 		SetForegroundWindow(hDebug);
 		
-		updateGameDependentMenusDebugger(GameInfo != 0);
+		updateGameDependentMenusDebugger();
 
 		if (GameInfo)
 			UpdateDebugger(true);

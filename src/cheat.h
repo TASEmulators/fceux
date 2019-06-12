@@ -3,6 +3,8 @@ void FCEU_CheatAddRAM(int s, uint32 A, uint8 *p);
 
 void FCEU_LoadGameCheats(FILE *override, int override_existing = 1);
 void FCEU_FlushGameCheats(FILE *override, int nosave);
+void FCEU_SaveGameCheats(FILE *fp, int release = 0);
+int FCEUI_GlobalToggleCheat(int global_enabled);
 void FCEU_ApplyPeriodicCheats(void);
 void FCEU_PowerCheats(void);
 int FCEU_CalcCheatAffectedBytes(uint32 address, uint32 size);
@@ -12,6 +14,8 @@ int FCEU_CheatGetByte(uint32 A);
 void FCEU_CheatSetByte(uint32 A, uint8 V);
 
 extern int savecheats;
+extern int globalCheatDisabled;
+extern int disableAutoLSCheats;
 
 int FCEU_DisableAllCheats();
 

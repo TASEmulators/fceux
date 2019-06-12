@@ -473,6 +473,7 @@
 #define IDSAVE                          1012
 #define MW_ADDR04                       1013
 #define IDC_CHECK1                      1013
+#define IDC_CHEAT_AUTOLOADSAVE          1013
 #define IDC_RESTORE_BUTTON              1014
 #define MW_ADDR05                       1016
 #define IDC_PRGROM_COMBO                1018
@@ -536,7 +537,7 @@
 #define IDC_RADIO_VERSION_INES20        1073
 #define IDC_VERSION_GROUP               1074
 #define IDC_MAPPER_GROUP                1075
-#define IDC_CHECK_BATTERYNVRAM              1076
+#define IDC_CHECK_BATTERYNVRAM          1076
 #define IDC_INPUT_DEVICE_TEXT           1077
 #define IDC_PRG_GROUP                   1078
 #define IDC_CHR_GROUP                   1079
@@ -545,11 +546,13 @@
 #define IDC_CHECK_UNOFFICIAL_EXTRA_REGION 1083
 #define IDC_CHECK_UNOFFICIAL_BUS_CONFLICT 1084
 #define IDC_CHECK_UNOFFICIAL            1085
-#define IDC_MISCELLANEOUS_ROMS_TEXT 1086
-#define IDC_MISCELLANEOUS_ROMS_EDIT              1087
+#define IDC_MISCELLANEOUS_ROMS_TEXT     1086
+#define IDC_MISCELLANEOUS_ROMS_EDIT     1087
 #define IDC_EXTEND_SYSTEM_GROUP         1089
 #define IDC_EXTEND_SYSTEM_TEXT          1090
 #define IDC_BUTTON1                     1094
+#define IDC_CHEAT_SWITCH                1096
+#define IDC_CHEAT_GLOBAL_SWITCH         1096
 #define BTN_ALLOW_LRUD                  1117
 #define BTN_PRESET_SET1                 1119
 #define BTN_PRESET_SET2                 1120
@@ -766,7 +769,7 @@
 #define IDC_CHEAT_VAL_LABEL             1314
 #define IDC_CHEAT_COM_LABEL             1315
 #define IDC_CHEAT_LABEL_KNOWN           1316
-#define MENU_INESHEADEREDITOR             40001
+#define MENU_INESHEADEREDITOR           40001
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1062,7 +1065,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        305
 #define _APS_NEXT_COMMAND_VALUE         40002
-#define _APS_NEXT_CONTROL_VALUE         1095
+#define _APS_NEXT_CONTROL_VALUE         1097
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -470,7 +470,7 @@ void DoFCEUExit()
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR) && !exitTASEditor())
 		return;
 
-	if (CloseMemoryWatch() && AskSave())		//If user was asked to save changes in the memory watch dialog or ram watch, and chose cancel, don't close FCEUX!
+	if (CloseMemoryWatch() && AskSaveRamWatch())		//If user was asked to save changes in the memory watch dialog or ram watch, and chose cancel, don't close FCEUX!
 	{
 		if(goptions & GOO_CONFIRMEXIT)
 		{

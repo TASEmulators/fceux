@@ -367,8 +367,9 @@ void CalcWindowSize(RECT *al)
 
 /// Updates the menu items that should only be enabled if a game is loaded.
 /// @param enable Flag that indicates whether the menus should be enabled (1) or disabled (0). 
-void updateGameDependentMenus(unsigned int enable)
+void updateGameDependentMenus()
 {
+	// they are quite simple, enabled only when game is loaded
 	const int menu_ids[]= {
 		MENU_CLOSE_FILE,
 		ID_FILE_SCREENSHOT,
@@ -396,10 +397,14 @@ void updateGameDependentMenus(unsigned int enable)
 		ID_TOOLS_TEXTHOOKER
 	};
 
+	bool enable = GameInfo != 0;
 	for (unsigned int i = 0; i < sizeof(menu_ids) / sizeof(*menu_ids); i++)
-	{
-			EnableMenuItem(fceumenu, menu_ids[i], MF_BYCOMMAND | (enable ? MF_ENABLED : MF_GRAYED));
-	}
+		EnableMenuItem(fceumenu, menu_ids[i], MF_BYCOMMAND | enable ? MF_ENABLED : MF_GRAYED | MF_DISABLED);
+
+	// Special treatment for the iNES head editor, only when no game is loaded or an NES game is loaded
+	extern iNES_HEADER head;
+	enable = GameInfo == 0 || !strncmp((const char*)&head, "NES\x1A", 4);
+	EnableMenuItem(fceumenu, MENU_INESHEADEREDITOR, MF_BYCOMMAND | enable ? MF_ENABLED : MF_GRAYED | MF_DISABLED);
 }
 
 //Updates menu items which need to be checked or unchecked.
@@ -1059,8 +1064,8 @@ void CloseGame()
 	{
 		FCEUI_CloseGame();
 		KillMemView();
-		updateGameDependentMenus(GameInfo != 0);
-		updateGameDependentMenusDebugger(GameInfo != 0);
+		updateGameDependentMenus();
+		updateGameDependentMenusDebugger();
 		SetMainWindowText();
 	}
 }
@@ -1121,8 +1126,8 @@ bool ALoad(const char *nameo, char* innerFilename, bool silent)
 	SetMainWindowText();
 	ParseGIInput(GameInfo);
 
-	updateGameDependentMenus(GameInfo != 0);
-	updateGameDependentMenusDebugger(GameInfo != 0);
+	updateGameDependentMenus();
+	updateGameDependentMenusDebugger();
 	EmulationPaused = oldPaused;
 	return true;
 }
@@ -2682,8 +2687,8 @@ int CreateMainWindow()
 	UpdateLuaRMenu(recentluamenu, recent_lua, MENU_LUA_RECENT, LUA_FIRST_RECENT_FILE);
 	UpdateMovieRMenu(recentmoviemenu, recent_movie, MENU_MOVIE_RECENT, MOVIE_FIRST_RECENT_FILE);
 
-	updateGameDependentMenus(0);
-	updateGameDependentMenusDebugger(0);
+	updateGameDependentMenus();
+	updateGameDependentMenusDebugger();
 	if (MainWindow_wndx==-32000) MainWindow_wndx=0; //Just in case
 	if (MainWindow_wndy==-32000) MainWindow_wndy=0;
 	hAppWnd = CreateWindowEx(

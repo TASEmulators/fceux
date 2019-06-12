@@ -139,7 +139,10 @@ bool LoadHeader(HWND parent, iNES_HEADER* header)
 		OPEN_FAILED,
 		INVALID_HEADER,
 		FDS_HEADER,
-		UNIF_HEADER
+		UNIF_HEADER,
+		NSF_HEADER//,
+//		NSFE_HEADER,
+//		NSF2_HEADER
 	};
 
 	FCEUFILE* fp = FCEU_fopen(LoadedRomFName, NULL, "rb", NULL);
@@ -154,7 +157,13 @@ bool LoadHeader(HWND parent, iNES_HEADER* header)
 			error = errors::FDS_HEADER;
 		else if (!memcmp(header, "UNIF", 4))
 			error = errors::UNIF_HEADER;
-		else
+		else if (!memcmp(header, "NESM", 4))
+			error = errors::NSF_HEADER;
+/*		else if (!memcmp(header, "NSFE", 4))
+			error = errors::NSFE_HEADER;
+		else if (!memcmp(header, "NESM\2", 4))
+			error = errors::NSF2_HEADER;
+*/		else
 			error = errors::INVALID_HEADER;
 		FCEU_fclose(fp);
 	}
@@ -169,17 +178,23 @@ bool LoadHeader(HWND parent, iNES_HEADER* header)
 			{
 				char buf[1024];
 				sprintf(buf, "Error opening %s!", LoadedRomFName);
-				MessageBox(parent, buf, "iNES Header Editor", MB_ICONERROR | MB_OK);
+				MessageBox(parent, buf, "iNES Header Editor", MB_OK | MB_ICONERROR);
 				break;
 			}
 			case errors::INVALID_HEADER:
-				MessageBox(parent, "Invalid iNES header.", "iNES Header Editor", MB_ICONERROR | MB_OK);
+				MessageBox(parent, "Invalid iNES header.", "iNES Header Editor", MB_OK | MB_ICONERROR);
 				break;
 			case errors::FDS_HEADER:
-				MessageBox(parent, "Editing header of an FDS file is not supported.", "iNES Header Editor", MB_ICONERROR | MB_OK);
+				MessageBox(parent, "Editing header of an FDS file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
 				break;
 			case errors::UNIF_HEADER:
-				MessageBox(parent, "Editing header of a UNIF file is not supported.", "iNES Header Editor", MB_ICONERROR | MB_OK);
+				MessageBox(parent, "Editing header of a UNIF file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
+				break;
+			case errors::NSF_HEADER:
+//			case errors::NSF2_HEADER:
+//			case errors::NSFE_HEADER:
+				MessageBox(parent, "Editing header of an NSF file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
+				break;
 		}
 		return false;
 	}
@@ -505,7 +520,7 @@ LRESULT CALLBACK HeaderEditorProc(HWND hDlg, UINT uMsg, WPARAM wP, LPARAM lP)
 							if (WriteHeaderData(hDlg, &newHeader))
 							{
 								char path[4096] = { 0 };
-								if (ShowINESFileBox(hDlg, true, path))
+								if (ShowINESFileBox(hDlg, path, true))
 									SaveINESFile(hDlg, path, &newHeader);
 							}
 						}
@@ -1493,7 +1508,7 @@ bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, bool exa
 }
 
 // Warning: when in save mode, the content of buf might be overwritten by the save filename which user changed.
-bool ShowINESFileBox(HWND parent, bool save, char* buf)
+bool ShowINESFileBox(HWND parent, char* buf, bool save)
 {
 	char *filename = NULL, *path = NULL;
 	bool success = true;
@@ -1532,19 +1547,20 @@ bool ShowINESFileBox(HWND parent, bool save, char* buf)
 
 	if (success)
 	{
-		OPENFILENAME ofDlg;
-		memset(&ofDlg, 0, sizeof(OPENFILENAME));
-		ofDlg.lStructSize = sizeof(OPENFILENAME);
-		ofDlg.lpstrTitle = save ? "Save NES file" : "Open NES file";
-		ofDlg.lpstrFilter = "NES ROM file(*.nes)\0*.nes\0All files(*.*)\0*.*\0\0";
-		ofDlg.hInstance = fceu_hInstance;
-		ofDlg.hwndOwner = parent;
-		ofDlg.lpstrFile = filename;
-		ofDlg.nMaxFile = 2048;
-		ofDlg.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
-		ofDlg.lpstrInitialDir = path;
+		OPENFILENAME ofn;
+		memset(&ofn, 0, sizeof(OPENFILENAME));
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.lpstrTitle = save ? "Save NES file" : "Open NES file";
+		ofn.lpstrFilter = "NES ROM file (*.nes)\0*.nes\0All files (*.*)\0*.*\0\0";
+		ofn.hInstance = fceu_hInstance;
+		ofn.hwndOwner = parent;
+		ofn.lpstrFile = filename;
+		ofn.nMaxFile = 2048;
+		ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
+		ofn.lpstrInitialDir = path;
+		ofn.lpstrDefExt = "nes";
 
-		if (save ? GetSaveFileName(&ofDlg) : GetOpenFileName(&ofDlg))
+		if (save ? GetSaveFileName(&ofn) : GetOpenFileName(&ofn))
 			strcpy(buf, filename);
 		else
 			success = false;

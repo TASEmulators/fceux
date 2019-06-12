@@ -189,7 +189,12 @@ static void FCEU_CloseGame(void)
 		}
 
 		if (GameInfo->type != GIT_NSF) {
-			FCEU_FlushGameCheats(0, 0);
+			if (disableAutoLSCheats == 2)
+				FCEU_FlushGameCheats(0, 1);
+			else if (disableAutoLSCheats == 1)
+				AskSaveCheat();
+			else if (disableAutoLSCheats == 0)
+				FCEU_FlushGameCheats(0, 0);
 		}
 
 		GameInterface(GI_CLOSE);
@@ -521,7 +526,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 			FCEUI_printf("NTSC mode set");
 		}
 
-		if (GameInfo->type != GIT_NSF)
+		if (GameInfo->type != GIT_NSF && !disableAutoLSCheats)
 			FCEU_LoadGameCheats(0);
 
 		if (AutoResumePlay)

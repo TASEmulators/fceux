@@ -22,8 +22,12 @@ inline void GetCheatStr(char* buf, int a, int v, int c);
 extern unsigned int FrozenAddressCount;
 extern std::vector<uint16> FrozenAddresses;
 //void ConfigAddCheat(HWND wnd); //bbit edited:commented out this line
+extern struct CHEATF* cheats;
 
 void DisableAllCheats();
+bool ShowCheatFileBox(HWND hwnd, char* buf, bool save = false);
+void AskSaveCheat();
+void SaveCheatAs(HWND hwnd, bool flush = false);
 
 void UpdateCheatRelatedWindow();
 

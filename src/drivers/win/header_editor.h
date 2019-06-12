@@ -5,7 +5,7 @@ extern HWND hHeadEditor;
 
 struct iNES_HEADER;
 HWND InitHeaderEditDialog(HWND hwnd, iNES_HEADER* header);
-bool ShowINESFileBox(HWND parent, bool save = false, char* buf = NULL);
+bool ShowINESFileBox(HWND parent, char* buf = NULL, bool save = false);
 void ToggleINES20(HWND hwnd, bool ines20);
 void ToggleExtendSystemList(HWND hwnd, bool enable);
 void ToggleVSSystemGroup(HWND hwnd, bool enable);

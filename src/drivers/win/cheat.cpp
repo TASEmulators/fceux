@@ -34,6 +34,8 @@ HWND hCheat = 0;			    //mbg merge 7/19/06 had to add
 HMENU hCheatcontext = 0;     //Handle to cheat context menu
 
 bool pauseWhileActive = false;	//For checkbox "Pause while active"
+extern int globalCheatDisabled;
+extern int disableAutoLSCheats;
 extern bool wasPausedByCheats;
 
 int CheatWindow;
@@ -296,7 +298,9 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			if (ChtPosY == -32000) ChtPosY = 0;
 			SetWindowPos(hwndDlg, 0, ChtPosX, ChtPosY, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
-			CheckDlgButton(hwndDlg, IDC_CHEAT_PAUSEWHENACTIVE, pauseWhileActive ? MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHEAT_PAUSEWHENACTIVE, pauseWhileActive ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHEAT_GLOBAL_SWITCH, globalCheatDisabled ? BST_UNCHECKED : BST_CHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHEAT_AUTOLOADSAVE, disableAutoLSCheats == 2 ? BST_UNCHECKED : disableAutoLSCheats == 1 ? BST_INDETERMINATE : BST_CHECKED);
 
 			//setup font
 			hFont = (HFONT)SendMessage(hwndDlg, WM_GETFONT, 0, 0);
@@ -633,37 +637,10 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 						}
 						case IDC_BTN_CHEAT_ADDFROMFILE:
 						{
-							OPENFILENAME ofn;
-							memset(&ofn, 0, sizeof(OPENFILENAME));
-							ofn.lStructSize = sizeof(OPENFILENAME);
-							ofn.hwndOwner = hwndDlg;
-							ofn.hInstance = fceu_hInstance;
-							ofn.lpstrTitle = "Open cheats file";
-							const char filter[] = "Cheat files (*.cht)\0*.cht\0All Files (*.*)\0*.*\0\0";
-							ofn.lpstrFilter = filter;
-
-							char nameo[2048] = { 0 };
-							/*
-							I gave up setting the default filename for import cheat dialog, since the filename display contains a bug.
-							if (GameInfo)
+							char filename[2048];
+							if (ShowCheatFileBox(hwndDlg, filename, false))
 							{
-								char* filename;
-								if ((filename = strrchr(GameInfo->filename, '\\')) || (filename = strrchr(GameInfo->filename, '/')))
-									strcpy(nameo, filename + 1);
-								else
-									strcpy(nameo, GameInfo->filename);
-								strcpy(strrchr(nameo, '.'), ".cht");
-							}
-							*/
-							ofn.lpstrFile = nameo;
-							ofn.nMaxFile = 2048;
-							ofn.lpstrDefExt = "cht";
-							ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST;
-							ofn.lpstrInitialDir = FCEU_GetPath(FCEUMKF_CHEAT).c_str();
-
-							if (GetOpenFileName(&ofn))
-							{
-								FILE* file = FCEUD_UTF8fopen(nameo, "rb");
+								FILE* file = FCEUD_UTF8fopen(filename, "rb");
 								if (file)
 								{
 									FCEU_LoadGameCheats(file, 0);
@@ -675,42 +652,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 						}
 						break;
 						case IDC_BTN_CHEAT_EXPORTTOFILE:
-						{
-							OPENFILENAME ofn;
-							memset(&ofn, 0, sizeof(OPENFILENAME));
-							ofn.lStructSize = sizeof(OPENFILENAME);
-							ofn.hInstance = fceu_hInstance;
-							ofn.lpstrTitle = "Save cheats file";
-							const char filter[] = "Cheat files (*.cht)\0*.cht\0All Files (*.*)\0*.*\0\0";
-							ofn.lpstrFilter = filter;
-
-							char nameo[2048] = { 0 };
-							if (GameInfo)
-							{
-								char* filename;
-								if ((filename = strrchr(GameInfo->filename, '\\')) || (filename = strrchr(GameInfo->filename, '/')))
-									strcpy(nameo, filename + 1);
-								else
-									strcpy(nameo, GameInfo->filename);
-								strcpy(strrchr(nameo, '.'), ".cht");
-							}
-							ofn.lpstrFile = nameo;
-							ofn.nMaxFile = 2048;
-							ofn.lpstrDefExt = "cht";
-							ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST;
-							ofn.lpstrInitialDir = FCEU_GetPath(FCEUMKF_CHEAT).c_str();
-
-							if (GetSaveFileName(&ofn))
-							{
-								FILE* file = FCEUD_UTF8fopen(nameo, "wb");
-								if (file)
-								{
-									savecheats = 1;
-									FCEU_FlushGameCheats(file, 0);
-									fclose(file);
-								}
-							}
-						}
+							SaveCheatAs(hwndDlg);
 						break;
 						case IDC_BTN_CHEAT_RESET:
 							FCEUI_CheatSearchBegin();
@@ -768,6 +710,27 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							ShowResults(hwndDlg);
 						}
 						break;
+						case IDC_CHEAT_GLOBAL_SWITCH:
+							if (FCEUI_GlobalToggleCheat(IsDlgButtonChecked(hwndDlg, IDC_CHEAT_GLOBAL_SWITCH)))
+							{
+								UpdateCheatRelatedWindow();
+								UpdateCheatListGroupBoxUI();
+							}
+						break;
+						case IDC_CHEAT_AUTOLOADSAVE:
+							switch (IsDlgButtonChecked(hwndDlg, IDC_CHEAT_AUTOLOADSAVE))
+							{
+								case BST_CHECKED: disableAutoLSCheats = 0; break;
+								case BST_INDETERMINATE: disableAutoLSCheats = 1; break;
+								case BST_UNCHECKED: 
+									if(MessageBox(hwndDlg, "If this option is unchecked, you must manually save the cheats by yourself, or all the changed you made to the cheat list would be discarded silently without any asking once you close the game!\nDo you really want to do it in this way?", "Cheat warning", MB_YESNO | MB_ICONWARNING) == IDYES)
+										disableAutoLSCheats = 2;
+									else
+									{
+										disableAutoLSCheats = 0;
+										CheckDlgButton(hwndDlg, IDC_CHEAT_AUTOLOADSAVE, BST_INDETERMINATE);
+									}
+							}
 					}
 					break;
 					case EN_SETFOCUS:
@@ -869,7 +832,6 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 										if (!s)
 										{
 											FCEUI_SetCheat(tmpsel, name, -1, -1, -2, s ^= 1, 1);
-
 											UpdateCheatRelatedWindow();
 											UpdateCheatListGroupBoxUI();
 										}
@@ -1320,4 +1282,89 @@ void UpdateCheatRelatedWindow()
 			SendDlgItemMessage(RamWatchHWnd, IDC_WATCHLIST, LVM_GETCOUNTPERPAGE, 0, 0) + 1);
 	}
 
+}
+
+bool ShowCheatFileBox(HWND hwnd, char* buf, bool save)
+{
+	if (!buf)
+		return false;
+
+	char filename[2048] = { 0 };
+
+	OPENFILENAME ofn;
+	memset(&ofn, 0, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hInstance = fceu_hInstance;
+	ofn.hwndOwner = hwnd;
+	ofn.lpstrTitle = save ? "Save cheats file" : "Open cheats file";
+	ofn.lpstrFilter = "Cheat files (*.cht)\0*.cht\0All Files (*.*)\0*.*\0\0";
+
+	// I gave up setting the default filename for import cheat dialog, since the filename display contains a bug.
+	if (save)
+	{
+		if (GameInfo)
+		{
+			char* _filename;
+			if ((_filename = strrchr(GameInfo->filename, '\\')) || (_filename = strrchr(GameInfo->filename, '/')))
+				strcpy(filename, _filename + 1);
+			else
+				strcpy(filename, GameInfo->filename);
+
+			_filename = strrchr(filename, '.');
+			if (_filename)
+				strcpy(_filename, ".cht");
+			else
+				strcat(filename, ".cht");
+		}
+	}
+
+	ofn.lpstrFile = filename;
+	ofn.nMaxFile = sizeof(filename);
+	ofn.lpstrDefExt = "cht";
+	ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST;
+	ofn.lpstrInitialDir = FCEU_GetPath(FCEUMKF_CHEAT).c_str();
+
+	if (save ? GetSaveFileName(&ofn) : GetOpenFileName(&ofn))
+	{
+		strcpy(buf, filename);
+		return true;
+	}
+
+	return false;
+}
+
+void AskSaveCheat()
+{
+	if (cheats)
+	{
+		HWND hwnd = hCheat ? hCheat : hAppWnd;
+		if (MessageBox(hwnd, "Save cheats?", "Cheat Console", MB_YESNO | MB_ICONASTERISK) == IDYES)
+			SaveCheatAs(hwnd, true);
+	}
+}
+
+
+void SaveCheatAs(HWND hwnd, bool flush)
+{
+	if (cheats)
+	{
+		char filename[2048];
+		if (ShowCheatFileBox(hwnd, filename, true))
+		{
+			FILE* file = FCEUD_UTF8fopen(filename, "wb");
+			if (file)
+			{
+				if (flush)
+				{
+					savecheats = 1;
+					FCEU_FlushGameCheats(file, 0);
+				}
+				else
+					FCEU_SaveGameCheats(file);
+				fclose(file);
+			}
+			else
+				MessageBox(hwnd, "Error saving cheats!", "Cheat Console", MB_OK | MB_ICONERROR);
+		}
+	}
 }
