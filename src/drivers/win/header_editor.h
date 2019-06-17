@@ -21,5 +21,5 @@ bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, bool exa
 bool SaveINESFile(HWND hwnd, char* path, iNES_HEADER* header);
 LRESULT CALLBACK HeaderEditorProc(HWND hDlg, UINT uMsg, WPARAM wP, LPARAM lP);
 void DoHeadEdit();
-
+extern POINT CalcSubWindowPos(HWND hDlg, POINT* conf);
 #endif

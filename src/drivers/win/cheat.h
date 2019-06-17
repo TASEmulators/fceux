@@ -32,6 +32,7 @@ void AskSaveCheat();
 void SaveCheatAs(HWND hwnd, bool flush = false);
 
 void UpdateCheatRelatedWindow();
+extern POINT CalcSubWindowPos(HWND hDlg, POINT* conf);
 
 // deselect the old one and select the new one
 #define ListView_MoveSelectionMark(hwnd, prevIndex, newIndex) \

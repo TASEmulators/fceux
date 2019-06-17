@@ -3220,3 +3220,43 @@ void UpdateSortColumnIcon(HWND hwndListView, int sortColumn, bool sortAsc)
 		}
 	}
 }
+
+// Push the window away from the main FCEUX window
+POINT CalcSubWindowPos(HWND hDlg, POINT* conf)
+{
+	POINT pt; // dialog position
+	RECT wR, dR; // Window rect, dialog rect
+
+
+	// Try to calc the default position, it doesn't overlap the main window and ensure it's in the screen;
+	GetWindowRect(hAppWnd, &wR);
+	GetWindowRect(hDlg, &dR);
+
+	pt.x = wR.left;
+	pt.y = wR.top;
+
+	LONG wW = wR.right - wR.left; // window width
+	LONG dW = dR.right - dR.left; // dialog width
+
+	if (pt.x + wW + dW < GetSystemMetrics(SM_CXSCREEN))
+		pt.x += wW; // if there is enough place for the dialog on the right, put the dialog there
+	else if (pt.x - dW > 0)
+		pt.x -= dW; // otherwise, we check if we can put it on the left
+
+	// If the dialog has a configured window position, override the default position
+	if (conf)
+	{
+		LONG wH = wR.bottom - wR.top;
+		// It is overrided only when the configured position is not completely off screen
+		if (conf->x > -wW * 2 || conf->x < wW * 2 + GetSystemMetrics(SM_CXSCREEN))
+			pt.x = conf->x;
+		if (conf->y > -wH * 2 || conf->y < wH * 2 + GetSystemMetrics(SM_CYSCREEN))
+			pt.y = conf->y;
+	}
+
+	// finally set the window position
+	SetWindowPos(hDlg, NULL, pt.x, pt.y, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+
+	// return the calculated point, maybe the caller can use it for further.
+	return pt;
+}

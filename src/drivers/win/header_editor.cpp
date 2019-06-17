@@ -471,13 +471,14 @@ LRESULT CALLBACK HeaderEditorProc(HWND hDlg, UINT uMsg, WPARAM wP, LPARAM lP)
 		{
 			header = (iNES_HEADER*)lP;
 			if (!header)
-			{
-				if (GameInfo)
-					DestroyWindow(hDlg);
-				else
-					EndDialog(hDlg, 0);
-			} else
+				goto wm_close;
+			else
 				InitHeaderEditDialog(hDlg, header);
+
+			// Put the window aside the main window when in game.
+			if (GameInfo)
+				CalcSubWindowPos(hDlg, NULL);
+
 		}
 		break;
 		case WM_COMMAND:

@@ -38,6 +38,7 @@ void SetMainWindowStuff();
 void GetMouseData(uint32 (&md)[3]);
 void GetMouseRelative(int32 (&md)[3]);
 //void ChangeMenuItemText(int menuitem, string text);
+POINT CalcSubWindowPos(HWND hDlg, POINT* conf);
 
 template<int BUFSIZE>
 inline std::string GetDlgItemText(HWND hDlg, int nIDDlgItem) {

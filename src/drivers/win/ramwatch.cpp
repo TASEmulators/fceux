@@ -1026,47 +1026,16 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 		case WM_INITDIALOG: 
 		{
-			RECT r, r2;
-			int dx1, dy1, dx2, dy2;
-
-			GetWindowRect(hWnd, &r);  //Ramwatch window
-			dx1 = (r.right - r.left) / 2;
-			dy1 = (r.bottom - r.top) / 2;
-
-			GetWindowRect(hDlg, &r2); // TASer window
-			dx2 = (r2.right - r2.left) / 2;
-			dy2 = (r2.bottom - r2.top) / 2;
-
-			
-			// push it away from the main window if we can
-			const int width = (r.right-r.left);
-			const int height = (r.bottom - r.top);
-			const int width2 = (r2.right-r2.left); 
-			if(r.left+width2 + width < GetSystemMetrics(SM_CXSCREEN))
+			if (RWSaveWindowPos)
 			{
-				r.right += width;
-				r.left += width;
+				POINT pt = { ramw_x, ramw_y };
+				pt = CalcSubWindowPos(hDlg, &pt);
+				ramw_x = pt.x;
+				ramw_y = pt.y;
 			}
-			else if((int)r.left - (int)width2 > 0)
-			{
-				r.right -= width2;
-				r.left -= width2;
-			}
-			
-			//-----------------------------------------------------------------------------------
-			//If user has Save Window Pos selected, override default positioning
-			if (RWSaveWindowPos)	
-			{
-				//If ramwindow is for some reason completely off screen, use default instead 
-				if (ramw_x > (-width*2) || ramw_x < (width*2 + GetSystemMetrics(SM_CYSCREEN))   ) 
-					r.left = ramw_x;	  //This also ignores cases of windows -32000 error codes
-				//If ramwindow is for some reason completely off screen, use default instead 
-				if (ramw_y > (0-height*2) ||ramw_y < (height*2 + GetSystemMetrics(SM_CYSCREEN))	)
-					r.top = ramw_y;		  //This also ignores cases of windows -32000 error codes
-			}
-			//-------------------------------------------------------------------------------------
-			SetWindowPos(hDlg, NULL, r.left, r.top, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-			
+			else
+				CalcSubWindowPos(hDlg, NULL);
+
 			ramwatchmenu=GetMenu(hDlg);
 			rwrecentmenu=CreateMenu();
 			UpdateRW_RMenu(rwrecentmenu, RAMMENU_FILE_RECENT, RW_MENU_FIRST_RECENT_FILE);

@@ -294,9 +294,21 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 	{
 		case WM_INITDIALOG:
 		{
-			if (ChtPosX == -32000) ChtPosX = 0; //Just in case
-			if (ChtPosY == -32000) ChtPosY = 0;
-			SetWindowPos(hwndDlg, 0, ChtPosX, ChtPosY, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+			POINT pt;
+			if (ChtPosX != 0 && ChtPosY != 0)
+			{
+				pt.x = ChtPosX;
+				pt.y = ChtPosY;
+				pt = CalcSubWindowPos(hwndDlg, &pt);
+			}
+			else
+				pt = CalcSubWindowPos(hwndDlg, NULL);
+
+			ChtPosX = pt.x;
+			ChtPosY = pt.y;
+
+
+			// SetWindowPos(hwndDlg, 0, ChtPosX, ChtPosY, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
 			CheckDlgButton(hwndDlg, IDC_CHEAT_PAUSEWHENACTIVE, pauseWhileActive ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHEAT_GLOBAL_SWITCH, globalCheatDisabled ? BST_UNCHECKED : BST_CHECKED);
@@ -1112,10 +1124,6 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					break;
 				}
 			break;
-		case WM_MOUSEMOVE:
-			break;
-		case WM_HSCROLL:
-			break;
 	}
 	return FALSE;
 }
@@ -1213,7 +1221,7 @@ void DoGGConv()
 		ShowWindow(hGGConv, SW_SHOWNORMAL);
 		SetForegroundWindow(hGGConv);
 	} else
-		hGGConv = CreateDialog(fceu_hInstance,"GGCONV",NULL,GGConvCallB);
+		hGGConv = CreateDialog(fceu_hInstance,"GGCONV", hAppWnd, GGConvCallB);
 }
 
 inline void GetCheatStr(char* buf, int a, int v, int c)
