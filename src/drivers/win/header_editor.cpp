@@ -271,10 +271,49 @@ HWND InitHeaderEditDialog(HWND hwnd, iNES_HEADER* header)
 	// Playchoice-10 will be finally determined in ToggleUnofficialPropertiesEnabled()
 	// EnableWindow(GetDlgItem(hwnd, IDC_RADIO_SYSTEM_PLAYCHOICE10), TRUE);
 
-	ToggleINES20(hwnd, IsDlgButtonChecked(hwnd, IDC_RADIO_VERSION_INES20) == BST_CHECKED);
 
+
+	// Limit text
+	// Sub Mapper#
 	SendDlgItemMessage(hwnd, IDC_SUBMAPPER_EDIT, EM_SETLIMITTEXT, 2, 0);
+	// Misc. ROM(s)
 	SendDlgItemMessage(hwnd, IDC_MISCELLANEOUS_ROMS_EDIT, EM_SETLIMITTEXT, 1, 0);
+
+	// Assign ID to the sub edit control in these comboboxes
+	// PRG ROM
+	SetWindowLong(GetWindow(GetDlgItem(hwnd, IDC_PRGROM_COMBO), GW_CHILD), GWL_ID, IDC_PRGROM_EDIT);
+	// PRG RAM
+	SetWindowLong(GetWindow(GetDlgItem(hwnd, IDC_PRGRAM_COMBO), GW_CHILD), GWL_ID, IDC_PRGRAM_EDIT);
+	// PRG NVRAM
+	SetWindowLong(GetWindow(GetDlgItem(hwnd, IDC_PRGNVRAM_COMBO), GW_CHILD), GWL_ID, IDC_PRGNVRAM_EDIT);
+	// CHR ROM
+	SetWindowLong(GetWindow(GetDlgItem(hwnd, IDC_CHRROM_COMBO), GW_CHILD), GWL_ID, IDC_CHRROM_EDIT);
+	// CHR RAM
+	SetWindowLong(GetWindow(GetDlgItem(hwnd, IDC_CHRRAM_COMBO), GW_CHILD), GWL_ID, IDC_CHRRAM_EDIT);
+	// CHR NVRAM
+	SetWindowLong(GetWindow(GetDlgItem(hwnd, IDC_CHRNVRAM_COMBO), GW_CHILD), GWL_ID, IDC_CHRNVRAM_EDIT);
+
+
+	// Change the default wndproc of these control to limit their text
+	// PRG ROM
+	DefaultEditCtrlProc = (WNDPROC)SetWindowLong(GetDlgItem(GetDlgItem(hwnd, IDC_PRGROM_COMBO), IDC_PRGROM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	// PRG RAM
+	SetWindowLong(GetDlgItem(GetDlgItem(hwnd, IDC_PRGRAM_COMBO), IDC_PRGRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	// PRG NVRAM
+	SetWindowLong(GetDlgItem(GetDlgItem(hwnd, IDC_PRGNVRAM_COMBO), IDC_PRGNVRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	// CHR ROM
+	SetWindowLong(GetDlgItem(GetDlgItem(hwnd, IDC_CHRROM_COMBO), IDC_CHRROM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	// CHR RAM
+	SetWindowLong(GetDlgItem(GetDlgItem(hwnd, IDC_CHRRAM_COMBO), IDC_CHRRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	// CHR NVRAM
+	SetWindowLong(GetDlgItem(GetDlgItem(hwnd, IDC_CHRNVRAM_COMBO), IDC_CHRNVRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	// Sub Mapper#
+	SetWindowLong(GetDlgItem(hwnd, IDC_SUBMAPPER_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	// Misc. ROM(s)
+	SetWindowLong(GetDlgItem(hwnd, IDC_MISCELLANEOUS_ROMS_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+
+
+	ToggleINES20(hwnd, IsDlgButtonChecked(hwnd, IDC_RADIO_VERSION_INES20) == BST_CHECKED);
 
 	char buf[256];
 	for (int i = 0; dropDownIdList[i]; ++i)
@@ -293,7 +332,7 @@ HWND InitHeaderEditDialog(HWND hwnd, iNES_HEADER* header)
 	}
 
 	// add usually used size strings
-	strcpy(buf, "N/A");
+	strcpy(buf, "0B");
 	SendDlgItemMessage(hwnd, IDC_PRGROM_COMBO, CB_SETITEMDATA, SendDlgItemMessage(hwnd, IDC_PRGROM_COMBO, CB_ADDSTRING, 0, (LPARAM)buf), 0);
 	SendDlgItemMessage(hwnd, IDC_CHRROM_COMBO, CB_SETITEMDATA, SendDlgItemMessage(hwnd, IDC_CHRROM_COMBO, CB_ADDSTRING, 0, (LPARAM)buf), 0);
 	SendDlgItemMessage(hwnd, IDC_PRGRAM_COMBO, CB_SETITEMDATA, SendDlgItemMessage(hwnd, IDC_PRGRAM_COMBO, CB_ADDSTRING, 0, (LPARAM)buf), 0);
@@ -603,7 +642,7 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 	SetDlgItemText(hwnd, IDC_SUBMAPPER_EDIT, buf);
 
 	// PRG ROM
-	strcpy(buf, "N/A");
+	strcpy(buf, "0B");
 	int prg_rom = header->ROM_size;
 	if (ines20) {
 		if ((header->Upper_ROM_VROM_size & 0xF) == 0xF)
@@ -625,7 +664,7 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 		SetDlgItemText(hwnd, IDC_PRGROM_COMBO, buf);
 
 	// PRG RAM
-	strcpy(buf, "N/A");
+	strcpy(buf, "0B");
 	if (ines20)
 	{
 		int shift = header->RAM_size & 0xF;
@@ -646,7 +685,7 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 		SetDlgItemText(hwnd, IDC_PRGRAM_COMBO, buf);
 
 	// PRG NVRAM
-	strcpy(buf, "N/A");
+	strcpy(buf, "0B");
 	if (ines20)
 	{
 		int shift = header->RAM_size >> 4;
@@ -666,7 +705,7 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 
 
 	// CHR ROM
-	strcpy(buf, "N/A");
+	strcpy(buf, "0B");
 	int chr_rom = header->VROM_size;
 	if (ines20)
 	{
@@ -689,7 +728,7 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 		SetDlgItemText(hwnd, IDC_CHRROM_COMBO, buf);
 
 	// CHR RAM
-	sprintf(buf, "N/A");
+	sprintf(buf, "0B");
 	if (ines20)
 	{
 		int shift = header->VRAM_size & 0xF;
@@ -705,7 +744,7 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 		SetDlgItemText(hwnd, IDC_CHRRAM_COMBO, buf);
 
 	// CHR NVRAM
-	sprintf(buf, "N/A");
+	sprintf(buf, "0B");
 	if (ines20)
 	{
 		int shift = header->VRAM_size >> 4;
@@ -1374,13 +1413,13 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 	printf("%02X ", _header.ROM_type);
 	printf("%02X ", _header.ROM_type2);
 	printf("%02X ", _header.ROM_type3);
-printf("%02X ", _header.Upper_ROM_VROM_size);
-printf("%02X ", _header.RAM_size);
-printf("%02X ", _header.VRAM_size);
-printf("%02X ", _header.TV_system);
-printf("%02X ", _header.VS_hardware);
-printf("%02X ", _header.reserved[0]);
-printf("%02X\n", _header.reserved[1]);
+	printf("%02X ", _header.Upper_ROM_VROM_size);
+	printf("%02X ", _header.RAM_size);
+	printf("%02X ", _header.VRAM_size);
+	printf("%02X ", _header.TV_system);
+	printf("%02X ", _header.VS_hardware);
+	printf("%02X ", _header.reserved[0]);
+	printf("%02X\n", _header.reserved[1]);
 #endif
 
 return true;

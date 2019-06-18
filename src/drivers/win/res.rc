@@ -12,11 +12,35 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 非特定语言 resources
+// English(U.S) resources
 
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
-LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(936)
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1489,30 +1513,30 @@ BEGIN
     CONTROL         "Log Bank number",IDC_CHECK_LOG_BANK_NUMBER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,211,121,100,10
 END
 
-ADDBP DIALOGEX 66, 83, 196, 130
+ADDBP DIALOGEX 66, 83, 197, 125
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Add Breakpoint..."
 FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
-    LTEXT           "Address:",-1,14,5,30,10
-    CTEXT           "-",65534,78,5,8,8
+    LTEXT           "&Address:",-1,14,6,30,10
     EDITTEXT        IDC_ADDBP_ADDR_START,48,4,30,12,ES_UPPERCASE | ES_WANTRETURN
-    EDITTEXT        IDC_ADDBP_ADDR_END,83,4,30,12,ES_UPPERCASE | ES_WANTRETURN
-    CONTROL         "Read",IDC_ADDBP_MODE_R,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,25,35,12
-    CONTROL         "Write",IDC_ADDBP_MODE_W,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,49,25,35,12
-    CONTROL         "Execute",IDC_ADDBP_MODE_X,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,86,25,40,12
-    DEFPUSHBUTTON   "&OK",IDOK,99,113,42,13
-    PUSHBUTTON      "&Cancel",IDCANCEL,147,114,42,13
-    GROUPBOX        "Memory",108,9,39,174,24,WS_TABSTOP
-    CONTROL         "CPU Mem",IDC_ADDBP_MEM_CPU,"Button",BS_AUTORADIOBUTTON | WS_GROUP,13,49,50,10
-    CONTROL         "PPU Mem",IDC_ADDBP_MEM_PPU,"Button",BS_AUTORADIOBUTTON,68,49,50,10
-    CONTROL         "Sprite Mem",IDC_ADDBP_MEM_SPR,"Button",BS_AUTORADIOBUTTON,124,49,50,10
-    EDITTEXT        IDC_ADDBP_CONDITION,43,72,136,14,ES_AUTOHSCROLL
-    LTEXT           "Condition",65533,7,74,30,8
-    LTEXT           "Name",65532,8,92,20,8
-    EDITTEXT        IDC_ADDBP_NAME,43,89,136,14,ES_AUTOHSCROLL
-    CONTROL         "Forbid",IDC_ADDBP_MODE_F,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,6,40,12
+    CTEXT           "-",65534,78,6,8,8
+    EDITTEXT        IDC_ADDBP_ADDR_END,87,4,30,12,ES_UPPERCASE | ES_WANTRETURN
+    CONTROL         "&Forbid",IDC_ADDBP_MODE_F,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,154,6,33,12
     GROUPBOX        "",112,3,18,185,50,WS_TABSTOP
+    CONTROL         "&Read",IDC_ADDBP_MODE_R,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,25,35,12
+    CONTROL         "&Write",IDC_ADDBP_MODE_W,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,49,25,35,12
+    CONTROL         "&Execute",IDC_ADDBP_MODE_X,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,86,25,40,12
+    GROUPBOX        "Memory",108,9,39,174,24,WS_TABSTOP
+    CONTROL         "&CPU Mem",IDC_ADDBP_MEM_CPU,"Button",BS_AUTORADIOBUTTON | WS_GROUP,13,49,50,10
+    CONTROL         "&PPU Mem",IDC_ADDBP_MEM_PPU,"Button",BS_AUTORADIOBUTTON,68,49,50,10
+    CONTROL         "&Sprite Mem",IDC_ADDBP_MEM_SPR,"Button",BS_AUTORADIOBUTTON,124,49,50,10
+    LTEXT           "C&ondition:",65533,7,74,34,8
+    EDITTEXT        IDC_ADDBP_CONDITION,43,72,136,14,ES_AUTOHSCROLL
+    LTEXT           "&Name:",65532,8,92,20,8
+    EDITTEXT        IDC_ADDBP_NAME,43,89,136,14,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,99,110,42,13
+    PUSHBUTTON      "Cancel",IDCANCEL,147,110,42,13
 END
 
 NTVIEW DIALOGEX 44, 38, 352, 350
@@ -1568,18 +1592,18 @@ STYLE DS_SYSMODAL | DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_MINIMIZEBOX | WS
 CAPTION "Game Genie Encoder/Decoder Tool"
 FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
-    EDITTEXT        IDC_GAME_GENIE_CODE,115,22,53,14,ES_UPPERCASE | ES_AUTOHSCROLL
     GROUPBOX        "Game Genie Code",-1,107,5,69,42
+    EDITTEXT        IDC_GAME_GENIE_CODE,115,22,53,14,ES_UPPERCASE | ES_AUTOHSCROLL
+    PUSHBUTTON      "Add To Cheat List",IDC_BTN_ADD_TO_CHEATS,108,58,68,14,WS_DISABLED
     GROUPBOX        "Address/Compare/Value",65534,9,5,91,75
     LTEXT           "Address:",65533,18,24,35,8
-    EDITTEXT        IDC_GAME_GENIE_ADDR,50,21,36,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_GAME_GENIE_COMP,64,38,22,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_GAME_GENIE_VAL,64,56,22,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_GAME_GENIE_ADDR,50,21,36,14,ES_UPPERCASE | ES_AUTOHSCROLL
     LTEXT           "Compare:",65532,17,41,37,8
+    EDITTEXT        IDC_GAME_GENIE_COMP,64,38,22,14,ES_UPPERCASE | ES_AUTOHSCROLL
     LTEXT           "Value:",65531,18,58,32,8
+    EDITTEXT        IDC_GAME_GENIE_VAL,64,56,22,14,ES_UPPERCASE | ES_AUTOHSCROLL
     GROUPBOX        "Possible Affected Rom File Addresses",65530,8,83,169,58
     LISTBOX         IDC_LIST_GGADDRESSES,67,95,54,40,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Add To Cheat List",IDC_BTN_ADD_TO_CHEATS,108,58,68,14,WS_DISABLED
 END
 
 MONITOR DIALOGEX 0, 0, 316, 343
@@ -1996,8 +2020,10 @@ BEGIN
     EDITTEXT        IDC_CHEAT_VAL,97,174,16,12,ES_UPPERCASE | ES_WANTRETURN
     LTEXT           "Compare:",IDC_CHEAT_COM_LABEL,117,176,34,8
     EDITTEXT        IDC_CHEAT_COM,152,174,16,12,ES_UPPERCASE | ES_WANTRETURN
-    LTEXT           "Cheat code / Game Genie:",IDC_CHEAT_CODE_GG_LABEL,11,190,87,8
-    EDITTEXT        IDC_CHEAT_TEXT,105,188,63,12,ES_UPPERCASE | ES_AUTOHSCROLL
+    LTEXT           "Cheat Code:",IDC_CHEAT_CODE_LABEL,12,190,42,8
+    EDITTEXT        IDC_CHEAT_TEXT,55,188,47,12,ES_UPPERCASE | ES_AUTOHSCROLL
+    LTEXT           "GG:",IDC_GAME_GENIE_LABEL,106,191,13,8
+    EDITTEXT        IDC_CHEAT_GAME_GENIE_TEXT,120,188,47,12,ES_UPPERCASE | ES_AUTOHSCROLL
     DEFPUSHBUTTON   "Add",IDC_BTN_CHEAT_ADD,7,202,30,16
     PUSHBUTTON      "Delete",IDC_BTN_CHEAT_DEL,37,202,30,16
     PUSHBUTTON      "Update",IDC_BTN_CHEAT_UPD,67,202,30,16
@@ -2429,8 +2455,8 @@ BEGIN
 
     "ADDBP", DIALOG
     BEGIN
-        RIGHTMARGIN, 185
-        BOTTOMMARGIN, 121
+        RIGHTMARGIN, 195
+        BOTTOMMARGIN, 123
     END
 
     "NTVIEW", DIALOG
@@ -2606,6 +2632,11 @@ BEGIN
     0
 END
 
+ADDBP AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2777,31 +2808,7 @@ IDB_BITMAP_SELECTED17   BITMAP                  "res\\te_17_selected.bmp"
 IDB_BITMAP_SELECTED18   BITMAP                  "res\\te_18_selected.bmp"
 IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
-
-#ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// TEXTINCLUDE
-//
-
-1 TEXTINCLUDE 
-BEGIN
-    "resource.h\0"
-END
-
-3 TEXTINCLUDE 
-BEGIN
-    "\r\0"
-END
-
-2 TEXTINCLUDE 
-BEGIN
-    "#include ""afxres.h""\r\0"
-END
-
-#endif    // APSTUDIO_INVOKED
-
-#endif    // 非特定语言 resources
+#endif    // English(U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

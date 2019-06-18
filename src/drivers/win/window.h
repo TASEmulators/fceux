@@ -127,4 +127,17 @@ struct HOTKEYMENUINDEX {
 
 void UpdateMenuHotkeys(FCEUMENU_INDEX index);
 int GetCurrentContextIndex();
+
+bool inline (*GetIsLetterLegal(UINT id))(char letter);
+bool inline IsInputLegal(UINT id, char letter);
+bool inline IsLetterLegalGG(char letter);
+bool inline IsLetterLegalHex(char letter);
+bool inline IsLetterLegalCheat(char letter);
+bool inline IsLetterLegalDec(char letter);
+bool inline IsLetterLegalPosDec(char letter);
+bool inline IsLetterLegalSize(char letter);
+
+extern WNDPROC DefaultEditCtrlProc;
+extern LRESULT APIENTRY FilterEditCtrlProc(HWND hDlg, UINT msg, WPARAM wP, LPARAM lP);
+
 #endif

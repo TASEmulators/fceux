@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by res.rc
+// Microsoft Visual C++ generated include file
+// for res.rc
 //
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
@@ -553,16 +553,26 @@
 #define IDC_BUTTON1                     1094
 #define IDC_CHEAT_SWITCH                1096
 #define IDC_CHEAT_GLOBAL_SWITCH         1096
+#define IDC_GAME_GENIE_LABEL            1097
+#define IDC_CHEAT_GAME_GENIE_TEXT       1098
+#define IDC_CHECK2                      1099
+#define IDC_SHOW_GG                     1099
 #define BTN_ALLOW_LRUD                  1117
+#define IDC_PRGROM_EDIT                 1118
+#define IDC_CHRROM_EDIT                 1119
 #define BTN_PRESET_SET1                 1119
 #define BTN_PRESET_SET2                 1120
 #define BTN_PRESET_SET3                 1121
 #define BTN_PRESET_IMPORT1              1122
 #define BTN_PRESET_IMPORT2              1123
 #define BTN_PRESET_IMPORT3              1124
+#define IDC_PRGRAM_EDIT                 1125
 #define BTN_PRESET_EXPORT1              1125
 #define BTN_PRESET_EXPORT2              1126
 #define BTN_PRESET_EXPORT3              1127
+#define IDC_CHRRAM_EDIT                 1128
+#define IDC_PRGNVRAM_EDIT               1129
+#define IDC_CHRNVRAM_EDIT               1130
 #define IDC_LIST1                       1130
 #define IDC_BUTTON_METADATA             1132
 #define MEMW_EXPANDCOLLAPSE             1133
@@ -764,7 +774,7 @@
 #define IDC_EXTRA_SCANLINES_TEXT        1309
 #define IDC_DATASIZE_GROUPBOX           1310
 #define IDC_DATATYPE_GROUPBOX           1311
-#define IDC_CHEAT_CODE_GG_LABEL         1312
+#define IDC_CHEAT_CODE_LABEL            1312
 #define IDC_CHEAT_ADDRESS_LABEL         1313
 #define IDC_CHEAT_VAL_LABEL             1314
 #define IDC_CHEAT_COM_LABEL             1315
@@ -1065,7 +1075,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        305
 #define _APS_NEXT_COMMAND_VALUE         40002
-#define _APS_NEXT_CONTROL_VALUE         1097
+#define _APS_NEXT_CONTROL_VALUE         1100
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

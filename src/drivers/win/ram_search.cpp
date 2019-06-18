@@ -1245,7 +1245,6 @@ LRESULT CustomDraw (LPARAM lParam)
 	{
 		case CDDS_PREPAINT :
 			return CDRF_NOTIFYITEMDRAW;
-
 		case CDDS_ITEMPREPAINT:
 		{
 			int rv = CDRF_DODEFAULT;

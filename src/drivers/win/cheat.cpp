@@ -64,19 +64,18 @@ int lbfocus = 0;
 int searchdone;
 static int knownvalue = 0;
 
-int GGaddr, GGcomp, GGval;
-char GGcode[10];
+// int GGaddr, GGcomp, GGval;
+// char GGcode[10];
 int GGlist[GGLISTSIZE];
 static int dontupdateGG; //this eliminates recursive crashing
-static char* ggLets = "APZLGITYEOXUKSVN";
+char* GameGenieLetters = "APZLGITYEOXUKSVN";
 
 // bool dodecode;
 
 HWND hGGConv;
-WNDPROC DefaultGGConvWndProc;
 
 void EncodeGG(char *str, int a, int v, int c);
-void ListGGAddresses();
+void ListGGAddresses(HWND hwndDlg);
 
 uint16 StrToU16(char *s)
 {
@@ -317,11 +316,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			CheckDlgButton(hwndDlg, IDC_CHEAT_AUTOLOADSAVE, disableAutoLSCheats == 2 ? BST_UNCHECKED : disableAutoLSCheats == 1 ? BST_INDETERMINATE : BST_CHECKED);
 
 			//setup font
-			hFont = (HFONT)SendMessage(hwndDlg, WM_GETFONT, 0, 0);
-			LOGFONT lf;
-			GetObject(hFont, sizeof(LOGFONT), &lf);
-			strcpy(lf.lfFaceName, "Courier New");
-			hNewFont = CreateFontIndirect(&lf);
+			SetupCheatFont(hwndDlg);
 
 			SendDlgItemMessage(hwndDlg, IDC_CHEAT_ADDR, WM_SETFONT, (WPARAM)hNewFont, FALSE);
 			SendDlgItemMessage(hwndDlg, IDC_CHEAT_VAL, WM_SETFONT, (WPARAM)hNewFont, FALSE);
@@ -343,6 +338,22 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			SendDlgItemMessage(hwndDlg, IDC_CHEAT_VAL_GT_BY, EM_SETLIMITTEXT, 2, 0);
 			SendDlgItemMessage(hwndDlg, IDC_CHEAT_VAL_LT_BY, EM_SETLIMITTEXT, 2, 0);
 			SendDlgItemMessage(hwndDlg, IDC_CHEAT_TEXT, EM_SETLIMITTEXT, 10, 0);
+			SendDlgItemMessage(hwndDlg, IDC_CHEAT_GAME_GENIE_TEXT, EM_SETLIMITTEXT, 8, 0);
+
+			// limit their characters
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_ADDR), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_ADDR), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_VAL), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_COM), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_NAME), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_KNOWN), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_NE_BY), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_GT_BY), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_LT_BY), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_TEXT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_GAME_GENIE_TEXT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+
+
 
 			possiTotalCount = 0;
 			possiItemCount = SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LVM_GETCOUNTPERPAGE, 0, 0);
@@ -356,7 +367,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 			//misc setup
 			searchdone = 0;
-			SetDlgItemText(hwndDlg, IDC_CHEAT_VAL_KNOWN, (LPTSTR)U8ToStr(knownvalue));
+			SetDlgItemText(hwndDlg, IDC_CHEAT_VAL_KNOWN, (LPCSTR)U8ToStr(knownvalue));
 
 			// Enable Context Sub-Menus
 			hCheatcontext = LoadMenu(fceu_hInstance, "CHEATCONTEXTMENUS");
@@ -374,7 +385,6 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 					wasPausedByCheats = true;
 					FCEU_printf("Emulation paused: %d\n", EmulationPaused);
 				}
-			
 			}
 			if (CheatStyle && possiTotalCount) {
 				if ((!wParam) && searchdone) {
@@ -384,6 +394,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 				ShowResults(hwndDlg);   
 			}
 			break;
+		case WM_QUIT:
 		case WM_CLOSE:
 			if (CheatStyle)
 				DestroyWindow(hwndDlg);
@@ -393,8 +404,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 		case WM_DESTROY:
 			CheatWindow = 0;
 			hCheat = NULL;
-			DeleteObject(hFont);
-			DeleteObject(hNewFont);
+			DeleteCheatFont();
 			if (searchdone)
 				FCEUI_CheatSearchSetCurrentAsOriginal();
 			possiList.clear();
@@ -638,12 +648,12 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							RedoCheatsCallB(name, a, v, c, s, 1, &selcheat);
 							SendDlgItemMessage(hwndDlg, IDC_LIST_CHEATS, LVM_SETSELECTIONMARK, 0, selcheat);
 
-							SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPTSTR)U16ToStr(a));
-							SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPTSTR)U8ToStr(v));
+							SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPCSTR)U16ToStr(a));
+							SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPCSTR)U8ToStr(v));
 							if (c == -1)
-								SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPTSTR)"");
+								SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPCSTR)"");
 							else
-								SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPTSTR)U8ToStr(c));
+								SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPCSTR)U8ToStr(c));
 							UpdateCheatRelatedWindow();
 							UpdateCheatListGroupBoxUI();
 							// UpdateCheatAdded();
@@ -742,7 +752,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 									else
 									{
 										disableAutoLSCheats = 0;
-										CheckDlgButton(hwndDlg, IDC_CHEAT_AUTOLOADSAVE, BST_INDETERMINATE);
+										CheckDlgButton(hwndDlg, IDC_CHEAT_AUTOLOADSAVE, BST_CHECKED);
 									}
 							}
 					}
@@ -754,6 +764,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							case IDC_CHEAT_VAL:
 							case IDC_CHEAT_COM: editMode = 0; break;
 							case IDC_CHEAT_TEXT: editMode = 1; break;
+							case IDC_CHEAT_GAME_GENIE_TEXT: editMode = 2; break;
 						}
 						break;
 					case EN_UPDATE:
@@ -767,8 +778,13 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 								{
 									char buf[16]; uint32 a; uint8 v; int c;
 									GetUICheatInfo(hwndDlg, NULL, &a, &v, &c);
-									GetCheatStr(buf, a, v, c);
+									buf[0] = 0;
+									GetCheatCodeStr(buf, a, v, c);
 									SetDlgItemText(hwndDlg, IDC_CHEAT_TEXT, buf);
+									buf[0] = 0;
+									if (a > 0x7FFF && v != -1)
+										EncodeGG(buf, a, v, c);
+									SetDlgItemText(hwndDlg, IDC_CHEAT_GAME_GENIE_TEXT, buf);
 								}
 							}
 							break;
@@ -778,7 +794,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 								{
 									char buf[16];
 									GetDlgItemText(hwndDlg, IDC_CHEAT_TEXT, buf, 16);
-									int a = -1, v = -1; int c = -1;
+									int a = -1, v = -1, c = -1;
 									if (strchr(buf, ':'))
 									{
 										if (strchr(buf, '?'))
@@ -786,12 +802,35 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 										else
 											sscanf(buf, "%X:%X", &a, &v);
 									}
-									else if (strlen(buf) == 6 || strlen(buf) == 8)
+
+									SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPCSTR)(a == -1 ? "" : U16ToStr(a)));
+									SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPCSTR)(v == -1 ? "" : U8ToStr(v)));
+									SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPCSTR)(c == -1 ? "" : U8ToStr(c)));
+									buf[0] = 0;
+									if (a > 0x7FFF && v != -1)
+										EncodeGG(buf, a, v, c);
+									SetDlgItemText(hwndDlg, IDC_CHEAT_GAME_GENIE_TEXT, buf);
+								}
+							}
+							break;
+							case IDC_CHEAT_GAME_GENIE_TEXT:
+							{
+								if (editMode == 2)
+								{
+									char buf[16];
+									GetDlgItemText(hwndDlg, IDC_CHEAT_GAME_GENIE_TEXT, buf, 16);
+									int a = -1, v = -1, c = -1;
+									if (strlen(buf) == 6 || strlen(buf) == 8)
 										FCEUI_DecodeGG(buf, &a, &v, &c);
 
-									SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPTSTR)(a == -1 ? "" : U16ToStr(a)));
-									SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPTSTR)(v == -1 ? "" : U8ToStr(v)));
-									SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPTSTR)(c == -1 ? "" : U8ToStr(c)));
+									SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPCSTR)(a == -1 ? "" : U16ToStr(a)));
+									SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPCSTR)(v == -1 ? "" : U8ToStr(v)));
+									SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPCSTR)(c == -1 ? "" : U8ToStr(c)));
+
+									buf[0] = 0;
+									if (a != -1 && v != -1)
+										GetCheatCodeStr(buf, a, v, c);
+									SetDlgItemText(hwndDlg, IDC_CHEAT_TEXT, buf);
 								}
 							}
 						}
@@ -820,15 +859,20 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 									{
 										char* name = ""; uint32 a; uint8 v; int s; int c;
 										FCEUI_GetCheat(selcheat, &name, &a, &v, &c, &s, NULL);
-										SetDlgItemText(hwndDlg, IDC_CHEAT_NAME, (LPTSTR)name);
-										SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPTSTR)U16ToStr(a));
-										SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPTSTR)U8ToStr(v));
-										SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPTSTR)(c == -1 ? "" : U8ToStr(c)));
+										SetDlgItemText(hwndDlg, IDC_CHEAT_NAME, (LPCSTR)name);
+										SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPCSTR)U16ToStr(a));
+										SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPCSTR)U8ToStr(v));
+										SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPCSTR)(c == -1 ? "" : U8ToStr(c)));
 										
 										char code[32];
-										GetCheatStr(code, a, v, c);
-
+										code[0] = 0;
+										GetCheatCodeStr(code, a, v, c);
 										SetDlgItemText(hwndDlg, IDC_CHEAT_TEXT, code);
+										code[0] = 0;
+										if (a > 0x7FFF && v != -1)
+											EncodeGG(code, a, v, c);
+										SetDlgItemText(hwndDlg, IDC_CHEAT_GAME_GENIE_TEXT, code);
+
 									}
 
 									EnableWindow(GetDlgItem(hwndDlg, IDC_BTN_CHEAT_DEL), selcheatcount > 0);
@@ -884,10 +928,10 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 									SEARCHPOSSIBLE& possible = possiList[pNMListView->iItem];
 									char str[16];
 									sprintf(str, "%04X", possible.addr);
-									SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPCTSTR)str);
+									SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPCSTR)str);
 									sprintf(str, "%02X", possible.current);
-									SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPCTSTR)str);
-									SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPTSTR)"");
+									SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPCSTR)str);
+									SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPCSTR)"");
 								}
 							}
 							break;
@@ -1003,8 +1047,8 @@ void UpdateCheatsAdded()
 
 BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	char str[100];
-	int i;
+//	int i;
+	extern void GetUIGGInfo(HWND hwndDlg, uint32* a, uint8* v, int* c);
 
 	switch(uMsg) {
 		case WM_MOVE: {
@@ -1021,73 +1065,85 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		};
 		case WM_INITDIALOG:
-			//todo: set text limits
-			if (GGConv_wndx == -32000)
-				GGConv_wndx = 0; //Just in case
-			if (GGConv_wndy == -32000)
-				GGConv_wndy = 0;
-			SetWindowPos(hwndDlg, 0, GGConv_wndx, GGConv_wndy, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+		{
+			POINT pt;
+			if (GGConv_wndx != 0 && GGConv_wndy != 0)
+			{
+				pt.x = GGConv_wndx;
+				pt.y = GGConv_wndy;
+				pt = CalcSubWindowPos(hwndDlg, &pt);
+			}
+			else
+				pt = CalcSubWindowPos(hwndDlg, NULL);
+
+			GGConv_wndx = pt.x;
+			GGConv_wndy = pt.y;
+
+			// text limits;
 			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_CODE, EM_SETLIMITTEXT, 8, 0);
 			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_ADDR, EM_SETLIMITTEXT, 4, 0);
 			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_COMP, EM_SETLIMITTEXT, 2, 0);
 			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_VAL, EM_SETLIMITTEXT, 2, 0);
 
-			DefaultGGConvWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_GAME_GENIE_CODE), GWL_WNDPROC, (LONG)GGConvCustomWndProc);
+			// setup font
+			SetupCheatFont(hwndDlg);
 
-			break;
+			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_ADDR, WM_SETFONT, (WPARAM)hNewFont, FALSE);
+			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_COMP, WM_SETFONT, (WPARAM)hNewFont, FALSE);
+			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_VAL, WM_SETFONT, (WPARAM)hNewFont, FALSE);
+
+			// limit their characters
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_GAME_GENIE_CODE), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_GAME_GENIE_ADDR), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_GAME_GENIE_COMP), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_GAME_GENIE_VAL), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+		}
+		break;
 		case WM_CLOSE:
 		case WM_QUIT:
 			DestroyWindow(hGGConv);
-			hGGConv = 0;
 			break;
+		case WM_DESTROY:
+			hGGConv = NULL;
+			DeleteCheatFont();
 		case WM_COMMAND:
 			switch(HIWORD(wParam)) {
 				case EN_UPDATE:
 					if(dontupdateGG)break;
 					dontupdateGG = 1;
-					switch(LOWORD(wParam)){ //lets find out what edit control got changed
+					switch(LOWORD(wParam))
+					{
+						//lets find out what edit control got changed
 						case IDC_GAME_GENIE_CODE: //The Game Genie Code - in this case decode it.
-							GetDlgItemText(hGGConv,IDC_GAME_GENIE_CODE,GGcode,9);
-							if((strlen(GGcode) != 8) && (strlen(GGcode) != 6))break;
+						{
+							char buf[9];
+							GetDlgItemText(hGGConv, IDC_GAME_GENIE_CODE, buf, 9);
 
-							FCEUI_DecodeGG(GGcode, &GGaddr, &GGval, &GGcomp);
+							int a = -1, v = -1, c = -1;
+							if (strlen(buf) == 6 || strlen(buf) == 8)
+								FCEUI_DecodeGG(buf, &a, &v, &c);
 
-							sprintf(str,"%04X",GGaddr);
-							SetDlgItemText(hGGConv,IDC_GAME_GENIE_ADDR,str);
-
-							if(GGcomp != -1)
-								sprintf(str,"%02X",GGcomp);
-							else str[0] = 0;
-								SetDlgItemText(hGGConv,IDC_GAME_GENIE_COMP,str);
-
-							sprintf(str,"%02X",GGval);
-							SetDlgItemText(hGGConv,IDC_GAME_GENIE_VAL,str);
-								//ListGGAddresses();
+							SetDlgItemText(hwndDlg, IDC_GAME_GENIE_ADDR, a == -1 ? "" : U16ToStr(a));
+							SetDlgItemText(hwndDlg, IDC_GAME_GENIE_COMP, c == -1 ? "" : U8ToStr(c));
+							SetDlgItemText(hwndDlg, IDC_GAME_GENIE_VAL, v == -1 ? "" : U8ToStr(v));
+						}
 						break;
 
 						case IDC_GAME_GENIE_ADDR:
 						case IDC_GAME_GENIE_COMP:
 						case IDC_GAME_GENIE_VAL:
 
-							GetDlgItemText(hGGConv,IDC_GAME_GENIE_ADDR,str,5);
-							if(strlen(str) != 4) break;
-
-							GetDlgItemText(hGGConv,IDC_GAME_GENIE_VAL,str,5);
-							if(strlen(str) != 2) {GGval = -1; break;}
-
-							GGaddr = GetEditHex(hGGConv,IDC_GAME_GENIE_ADDR);
-							GGval = GetEditHex(hGGConv,IDC_GAME_GENIE_VAL);
-
-							GetDlgItemText(hGGConv,IDC_GAME_GENIE_COMP,str,5);
-							if(strlen(str) != 2) GGcomp = -1;
-							else GGcomp = GetEditHex(hGGConv,IDC_GAME_GENIE_COMP);
-
-							EncodeGG(GGcode, GGaddr, GGval, GGcomp);
-							SetDlgItemText(hGGConv,IDC_GAME_GENIE_CODE,GGcode);
+							uint32 a = -1; uint8 v = -1; int c = -1;
+							GetUIGGInfo(hwndDlg, &a, &v, &c);
+							
+							char buf[9] = { 0 };
+							if (a > 0x7FFF && v != -1)
+								EncodeGG(buf, a, v, c);
+							SetDlgItemText(hwndDlg, IDC_GAME_GENIE_CODE, buf);
 							//ListGGAddresses();
 							break;
 						}
-						ListGGAddresses();
+						ListGGAddresses(hwndDlg);
 						dontupdateGG = 0;
 					break;
 					case BN_CLICKED:
@@ -1095,20 +1151,22 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 							case IDC_BTN_ADD_TO_CHEATS:
 								//ConfigCheats(fceu_hInstance);
 
-								if(GGaddr < 0x8000)GGaddr += 0x8000;
+								char buf[9];
+								uint32 a = -1; uint8 v = -1; int c = -1;
+								GetUIGGInfo(hwndDlg, &a, &v, &c);
+								GetDlgItemText(hwndDlg, IDC_GAME_GENIE_CODE, buf, 9);
 
-								if (FCEUI_AddCheat(GGcode, GGaddr, GGval, GGcomp, 1) && hCheat) {
-									RedoCheatsCallB(GGcode, GGaddr, GGval, GGcomp, 1, 1, NULL);
+								if(a < 0x8000) a += 0x8000;
+
+								if (FCEUI_AddCheat(buf, a, v, c, 1) && hCheat) {
+									RedoCheatsCallB(buf, a, v, c, 1, 1, NULL);
 									int newselcheat = SendDlgItemMessage(hCheat, IDC_LIST_CHEATS, LVM_GETITEMCOUNT, 0, 0) - 1;
 									ListView_MoveSelectionMark(GetDlgItem(hCheat, IDC_LIST_CHEATS), selcheat, newselcheat);
 									selcheat = newselcheat;
 
-									SetDlgItemText(hCheat, IDC_CHEAT_ADDR, (LPTSTR)U16ToStr(GGaddr));
-									SetDlgItemText(hCheat, IDC_CHEAT_VAL, (LPTSTR)U8ToStr(GGval));
-									if(GGcomp == -1)
-										SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPTSTR)"");
-									else
-										SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPTSTR)U8ToStr(GGcomp));
+									SetDlgItemText(hCheat, IDC_CHEAT_ADDR, (LPCSTR)U16ToStr(a));
+									SetDlgItemText(hCheat, IDC_CHEAT_VAL, (LPCSTR)U8ToStr(v));
+									SetDlgItemText(hCheat, IDC_CHEAT_COM, (LPCSTR)(c == -1 ? "" : U8ToStr(c)));
 
 									EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_DEL), TRUE);
 									EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_UPD), TRUE);
@@ -1121,8 +1179,7 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					case LBN_DBLCLK:
 					switch (LOWORD(wParam)) {
 						case IDC_LIST_GGADDRESSES:
-							i = SendDlgItemMessage(hwndDlg,IDC_LIST_GGADDRESSES,LB_GETCURSEL,0,0);
-							ChangeMemViewFocus(3,GGlist[i],-1);
+							ChangeMemViewFocus(3,GGlist[SendDlgItemMessage(hwndDlg, IDC_LIST_GGADDRESSES, LB_GETCURSEL, 0, 0)],-1);
 						break;
 					}
 					break;
@@ -1132,105 +1189,6 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
-LRESULT APIENTRY GGConvCustomWndProc(HWND hDlg, UINT msg, WPARAM wP, LPARAM lP)
-{
-	bool through = true;
-	LRESULT result = 0;
-
-	switch (msg)
-	{
-		case WM_PASTE:
-		{
-			switch (GetDlgCtrlID(GetFocus()))
-			{
-				case IDC_GAME_GENIE_CODE:
-					printf("PASTE\n");
-					if (OpenClipboard(hDlg))
-					{
-						HANDLE handle = GetClipboardData(CF_TEXT);
-						if (handle)
-						{
-
-							// copy the original clipboard string
-							char* clipStr = (char*)GlobalLock(handle);
-							char* original = (char*)calloc(1, strlen(clipStr) + 1);
-							strcpy(original, clipStr);
-							GlobalUnlock(handle);
-
-							// filter it out
-							char filtered[9] = { 0 };
-							int filteredIndex = 0, origIndex = 0;
-							while (clipStr[origIndex] && filteredIndex < 9)
-							{
-								for (int i = 0; ggLets[i]; ++i)
-								{
-									if (toupper(clipStr[origIndex]) == ggLets[i])
-									{
-										filtered[filteredIndex] = clipStr[origIndex];
-										++filteredIndex;
-									}
-								}
-								++origIndex;
-							}
-
-							// copy filtered str to clipboard
-							EmptyClipboard();
-							HANDLE hNewStr = GlobalAlloc(GMEM_MOVEABLE, 9);
-							char* newStr = (char*)GlobalLock(hNewStr);
-							strcpy(newStr, filtered);
-							GlobalUnlock(hNewStr);
-							SetClipboardData(CF_TEXT, hNewStr);
-
-							// end
-							CloseClipboard();
-							result = CallWindowProc(DefaultGGConvWndProc, hDlg, msg, wP, lP);
-							through = false;
-
-							// set it back to normal
-							if (OpenClipboard(hDlg))
-							{
-								handle = GetClipboardData(CF_TEXT);
-								if (handle)
-								{
-									EmptyClipboard();
-									HANDLE hOldStr = GlobalAlloc(GMEM_MOVEABLE, strlen(original) + 1);
-									char* oldStr = (char*)GlobalLock(hOldStr);
-									strcpy(oldStr, original);
-									GlobalUnlock(hOldStr);
-									SetClipboardData(CF_TEXT, hOldStr);
-								}
-								CloseClipboard();
-							}
-
-							// end
-							free(original);
-						}
-					}
-			}
-		}
-		break;
-		case WM_CHAR:
-		{
-			switch (GetDlgCtrlID(GetFocus()))
-			{
-				case IDC_GAME_GENIE_CODE:
-				{
-					through = wP == VK_BACK || GetKeyState(VK_CONTROL) & 0x8000;
-					if (!through)
-						for (int i = 0; ggLets[i]; ++i)
-							if (toupper(wP) == ggLets[i])
-							{
-								through = true;
-								break;
-							}
-				}
-
-			}
-		}
-	}
-
-	return through ? CallWindowProc(DefaultGGConvWndProc, hDlg, msg, wP, lP) : result;
-}
 
 //The code in this function is a modified version
 //of Chris Covell's work - I'd just like to point that out
@@ -1250,69 +1208,78 @@ void EncodeGG(char *str, int a, int v, int c)
 
 	if (c == -1){
 		num[5]+=v&8;
-		for(i = 0;i < 6;i++)str[i] = ggLets[num[i]];
+		for(i = 0;i < 6;i++)str[i] = GameGenieLetters[num[i]];
 		str[6] = 0;
 	} else {
 		num[2]+=8;
 		num[5]+=c&8;
 		num[6]=(c&7)+((c>>4)&8);
 		num[7]=((c>>4)&7)+(v&8);
-		for(i = 0;i < 8;i++)str[i] = ggLets[num[i]];
+		for(i = 0;i < 8;i++)str[i] = GameGenieLetters[num[i]];
 		str[8] = 0;
 	}
 	return;
 }
 
-void ListGGAddresses()
+void ListGGAddresses(HWND hwndDlg)
 {
 	uint32 i, j = 0; //mbg merge 7/18/06 changed from int
-	char str[20];
-	SendDlgItemMessage(hGGConv,IDC_LIST_GGADDRESSES,LB_RESETCONTENT,0,0);
+	char str[20], code[9];
+	SendDlgItemMessage(hwndDlg, IDC_LIST_GGADDRESSES, LB_RESETCONTENT,0,0);
 
-	//also enable/disable the add GG button here
-	GetDlgItemText(hGGConv,IDC_GAME_GENIE_CODE,GGcode,9);
+	uint32 a = -1; uint8 v = -1; int c = -1;
+	extern void GetUIGGInfo(HWND hwnd, uint32* a, uint8* v, int* c);
+	GetUIGGInfo(hwndDlg, &a, &v, &c);
 
-	if((GGaddr < 0) || ((strlen(GGcode) != 8) && (strlen(GGcode) != 6)))EnableWindow(GetDlgItem(hGGConv,IDC_BTN_ADD_TO_CHEATS),FALSE);
-	else EnableWindow(GetDlgItem(hGGConv,IDC_BTN_ADD_TO_CHEATS),TRUE);
+	// also enable/disable the add GG button here
+	GetDlgItemText(hwndDlg, IDC_GAME_GENIE_CODE, code, 9);
+	EnableWindow(GetDlgItem(hwndDlg, IDC_BTN_ADD_TO_CHEATS), a >= 0 && (strlen(code) == 6 || strlen(code) == 8));
 
-	for(i = 0;i < PRGsize[0];i+=0x2000){
-		if((PRGptr[0][i+(GGaddr&0x1FFF)] == GGcomp) || (GGcomp == -1)){
-			GGlist[j] = i+(GGaddr&0x1FFF)+0x10;
-			if(++j > GGLISTSIZE)return;
-			sprintf(str,"%06X",i+(GGaddr&0x1FFF)+0x10);
-			SendDlgItemMessage(hGGConv,IDC_LIST_GGADDRESSES,LB_ADDSTRING,0,(LPARAM)(LPSTR)str);
-		}
-	}
+	if (a != -1 && v != -1)
+		for(i = 0; i < PRGsize[0]; i += 0x2000)
+			if(c == -1 || PRGptr[0][i + (a & 0x1FFF)] == c){
+				GGlist[j] = i + (a & 0x1FFF) + 0x10;
+				if(++j > GGLISTSIZE)
+					return;
+				sprintf(str, "%06X", i + (a & 0x1FFF) + 0x10);
+				SendDlgItemMessage(hwndDlg, IDC_LIST_GGADDRESSES, LB_ADDSTRING, 0, (LPARAM)str);
+			}
 }
 
 //A different model for this could be to have everything
 //set in the INITDIALOG message based on the internal
 //variables, and have this simply call that.
-void SetGGConvFocus(int address,int compare)
+void SetGGConvFocus(int address, int compare)
 {
 	char str[10];
-	if(!hGGConv)DoGGConv();
-	GGaddr = address;
-	GGcomp = compare;
+	if(!hGGConv)
+		DoGGConv();
+	// GGaddr = address;
+	// GGcomp = compare;
 
 	dontupdateGG = 1; //little hack to fix a nasty bug
 
-	sprintf(str,"%04X",address);
-	SetDlgItemText(hGGConv,IDC_GAME_GENIE_ADDR,str);
+	sprintf(str, "%04X", address);
+	SetDlgItemText(hGGConv, IDC_GAME_GENIE_ADDR, str);
 
 	dontupdateGG = 0;
 
-	sprintf(str,"%02X",GGcomp);
-	SetDlgItemText(hGGConv,IDC_GAME_GENIE_COMP,str);
+	sprintf(str, "%02X", compare);
+	SetDlgItemText(hGGConv, IDC_GAME_GENIE_COMP, str);
 
+	GetDlgItemText(hGGConv, IDC_GAME_GENIE_VAL, str, 3);
+	uint8 val = StrToU8(str);
 
-	if(GGval < 0)SetDlgItemText(hGGConv,IDC_GAME_GENIE_CODE,"");
+	if(val < 0)
+		SetDlgItemText(hGGConv, IDC_GAME_GENIE_CODE, "");
 	else {
-		EncodeGG(GGcode, GGaddr, GGval, GGcomp);
-		SetDlgItemText(hGGConv,IDC_GAME_GENIE_CODE,GGcode);
+		str[0] = 0;
+		if (val > 0x7FFF)
+			EncodeGG(str, address, val, compare);
+		SetDlgItemText(hGGConv, IDC_GAME_GENIE_CODE, str);
 	}
 
-	SetFocus(GetDlgItem(hGGConv,IDC_GAME_GENIE_VAL));
+	SetFocus(GetDlgItem(hGGConv, IDC_GAME_GENIE_VAL));
 
 	return;
 }
@@ -1329,15 +1296,19 @@ void DoGGConv()
 
 inline void GetCheatStr(char* buf, int a, int v, int c)
 {
-	if (a >= 0x8000)
+	if (a > 0x7FFF)
 		EncodeGG(buf, a, v, c);
 	else {
-		if (c == -1)
-			sprintf(buf, "%04X:%02X", (int)a, (int)v);
-		else
-			sprintf(buf, "%04X?%02X:%02X", (int)a, (int)c, (int)v);
+		GetCheatCodeStr(buf, a, v, c);
 	}
+}
 
+inline void GetCheatCodeStr(char* buf, int a, int v, int c)
+{
+	if (c == -1)
+		sprintf(buf, "%04X:%02X", a, v);
+	else
+		sprintf(buf, "%04X?%02X:%02X", a, c, v);
 }
 
 void GetUICheatInfo(HWND hwndDlg, char* name, uint32* a, uint8* v, int* c)
@@ -1351,6 +1322,17 @@ void GetUICheatInfo(HWND hwndDlg, char* name, uint32* a, uint8* v, int* c)
 	*c = (buf[0] == 0) ? -1 : StrToU8(buf);
 	if (name)
 		GetDlgItemText(hwndDlg, IDC_CHEAT_NAME, name, 256);
+}
+
+void GetUIGGInfo(HWND hwndDlg, uint32* a, uint8* v, int* c)
+{
+	char buf[16];
+	GetDlgItemText(hwndDlg, IDC_GAME_GENIE_ADDR, buf, 5);
+	*a = StrToU16(buf);
+	GetDlgItemText(hwndDlg, IDC_GAME_GENIE_VAL, buf, 3);
+	*v = StrToU8(buf);
+	GetDlgItemText(hwndDlg, IDC_GAME_GENIE_COMP, buf, 3);
+	*c = (buf[0] == 0 ? -1 : StrToU8(buf));
 }
 
 void DisableAllCheats()
@@ -1478,5 +1460,28 @@ void SaveCheatAs(HWND hwnd, bool flush)
 			else
 				MessageBox(hwnd, "Error saving cheats!", "Cheat Console", MB_OK | MB_ICONERROR);
 		}
+	}
+}
+
+void SetupCheatFont(HWND hwnd)
+{
+	if (!hCheat && !hGGConv)
+	{
+		hFont = (HFONT)SendMessage(hwnd, WM_GETFONT, 0, 0);
+		LOGFONT lf;
+		GetObject(hFont, sizeof(LOGFONT), &lf);
+		strcpy(lf.lfFaceName, "Courier New");
+		hNewFont = CreateFontIndirect(&lf);
+	}
+}
+
+void DeleteCheatFont()
+{
+	if (!hCheat && !hGGConv)
+	{
+		DeleteObject(hFont);
+		DeleteObject(hNewFont);
+		hFont = NULL;
+		hNewFont = NULL;
 	}
 }

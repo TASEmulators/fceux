@@ -182,6 +182,7 @@ const unsigned int MAX_NUMBER_OF_MOVIE_RECENT_FILES = sizeof(recent_movie)/sizeo
 
 int EnableBackgroundInput = 0;
 int ismaximized = 0;
+WNDPROC DefaultEditCtrlProc;
 
 //Help Menu subtopics
 string moviehelp = "MovieRecording";		 //Movie Recording
@@ -3259,4 +3260,162 @@ POINT CalcSubWindowPos(HWND hDlg, POINT* conf)
 
 	// return the calculated point, maybe the caller can use it for further.
 	return pt;
+}
+
+LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
+{
+	bool through = true;
+	LRESULT result = 0;
+
+	switch (msg)
+	{
+	case WM_PASTE:
+	{
+		bool(*IsLetterLegal)(char) = GetIsLetterLegal(GetDlgCtrlID(hwnd));
+
+		if (IsLetterLegal)
+		{
+			if (OpenClipboard(hwnd))
+			{
+				HANDLE handle = GetClipboardData(CF_TEXT);
+				if (handle)
+				{
+
+					// copy the original clipboard string
+					char* clipStr = (char*)GlobalLock(handle);
+					char* original = (char*)calloc(1, strlen(clipStr) + 1);
+					strcpy(original, clipStr);
+					GlobalUnlock(handle);
+
+					// filter it out
+					int lmt = SendMessage(hwnd, EM_GETLIMITTEXT, 0, 0);
+					char* filtered = (char*)calloc(1, lmt + 1);
+					int filteredIndex = 0, origIndex = 0;
+					while (clipStr[origIndex] && filteredIndex < lmt + 1)
+					{
+						if (IsLetterLegal(clipStr[origIndex]))
+						{
+							filtered[filteredIndex] = clipStr[origIndex];
+							++filteredIndex;
+						}
+						++origIndex;
+					}
+
+					// copy filtered str to clipboard
+					EmptyClipboard();
+					HANDLE hNewStr = GlobalAlloc(GMEM_MOVEABLE, lmt);
+					char* newStr = (char*)GlobalLock(hNewStr);
+					strcpy(newStr, filtered);
+					GlobalUnlock(hNewStr);
+					SetClipboardData(CF_TEXT, hNewStr);
+
+					// end
+					CloseClipboard();
+					result = CallWindowProc(DefaultEditCtrlProc, hwnd, msg, wP, lP);
+					through = false;
+					free(filtered);
+
+					// set it back to normal
+					if (OpenClipboard(hwnd))
+					{
+						handle = GetClipboardData(CF_TEXT);
+						if (handle)
+						{
+							EmptyClipboard();
+							HANDLE hOldStr = GlobalAlloc(GMEM_MOVEABLE, strlen(original) + 1);
+							char* oldStr = (char*)GlobalLock(hOldStr);
+							strcpy(oldStr, original);
+							GlobalUnlock(hOldStr);
+							SetClipboardData(CF_TEXT, hOldStr);
+						}
+						CloseClipboard();
+					}
+
+					// end
+					free(original);
+				}
+			}
+		}
+	}
+	break;
+	case WM_CHAR:
+		through = IsInputLegal(GetDlgCtrlID(GetFocus()), wP);
+	}
+
+	return through ? CallWindowProc(DefaultEditCtrlProc, hwnd, msg, wP, lP) : result;
+}
+
+bool inline (*GetIsLetterLegal(UINT id))(char letter)
+{
+	switch (id)
+	{
+		case IDC_CHEAT_GAME_GENIE_TEXT:
+		case IDC_GAME_GENIE_CODE:
+			return IsLetterLegalGG;
+		case IDC_CHEAT_ADDR:
+		case IDC_CHEAT_VAL:
+		case IDC_CHEAT_COM:
+		case IDC_CHEAT_NAME:
+		case IDC_CHEAT_VAL_KNOWN:
+		case IDC_CHEAT_VAL_NE_BY:
+		case IDC_CHEAT_VAL_GT_BY:
+		case IDC_CHEAT_VAL_LT_BY:
+		case IDC_GAME_GENIE_ADDR:
+		case IDC_GAME_GENIE_COMP:
+		case IDC_GAME_GENIE_VAL:
+			return IsLetterLegalHex;
+		case IDC_CHEAT_TEXT:
+			return IsLetterLegalCheat;
+		case IDC_PRGROM_EDIT:
+		case IDC_PRGRAM_EDIT:
+		case IDC_PRGNVRAM_EDIT:
+		case IDC_CHRROM_EDIT:
+		case IDC_CHRRAM_EDIT:
+		case IDC_CHRNVRAM_EDIT:
+			return IsLetterLegalSize;
+		case IDC_SUBMAPPER_EDIT:
+		case IDC_MISCELLANEOUS_ROMS_EDIT:
+			return IsLetterLegalPosDec;
+	}
+	return NULL;
+}
+
+bool inline IsInputLegal(UINT id, char letter)
+{
+	bool(*IsLetterLegal)(char) = GetIsLetterLegal(id);
+	return !IsLetterLegal || letter == VK_BACK || GetKeyState(VK_CONTROL) & 0x8000 || IsLetterLegal(letter);
+}
+
+bool inline IsLetterLegalGG(char letter)
+{
+	char ch = toupper(letter);
+	for (int i = 0; GameGenieLetters[i]; ++i)
+		if (GameGenieLetters[i] == ch)
+			return true;
+	return false;
+}
+
+bool inline IsLetterLegalHex(char letter)
+{
+	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f';
+}
+
+bool inline IsLetterLegalCheat(char letter)
+{
+	return letter >= '0' && letter <= ':' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '?';
+}
+
+bool inline IsLetterLegalSize(char letter)
+{
+	return letter >= '0' && letter <= '9' || letter == 'm' || letter == 'M' || letter == 'k' || letter == 'K' || letter == 'b' || letter == 'B';
+}
+
+bool inline IsLetterLegalPosDec(char letter)
+{
+	return letter >= '0' && letter <= '9';
+}
+
+bool inline IsLetterLegalDec(char letter)
+{
+	return letter >= '0' && letter <= '9' || letter == '-';
 }
