@@ -19,7 +19,7 @@ struct CreateMovieParameters
 extern char *recent_files[];
 extern char *recent_lua[];
 extern char *recent_movie[];
-extern HWND pwindow;
+// extern HWND pwindow;
 
 HWND GetMainHWND();
 

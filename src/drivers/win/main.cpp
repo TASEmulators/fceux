@@ -321,41 +321,37 @@ int BlockingCheck()
 		if(GetMessage(&msg, 0, 0, 0) > 0)
 		{
 			//other accelerator capable dialogs could be added here
-			extern HWND hwndMemWatch;
-
 			int handled = 0;
 
-			extern HWND hGGConv;
-			bool debug = IsChild(hGGConv, msg.hwnd) && msg.message == WM_KEYDOWN;
-
+			// Cheat console
 			if(hCheat && IsChild(hCheat, msg.hwnd))
 				handled = IsDialogMessage(hCheat, &msg);
 
+			// Hex Editor -> Find
 			if(!handled && hMemFind && IsChild(hMemFind, msg.hwnd))
 				handled = IsDialogMessage(hMemFind, &msg);
 
+			// Memory Watch
+			extern HWND hwndMemWatch;
 			if(!handled && hwndMemWatch)
 			{
-				if(IsChild(hwndMemWatch,msg.hwnd))
-					handled = TranslateAccelerator(hwndMemWatch,fceu_hAccel,&msg);
+				if(IsChild(hwndMemWatch, msg.hwnd))
+					handled = TranslateAccelerator(hwndMemWatch, fceu_hAccel, &msg);
 				if(!handled)
 					handled = IsDialogMessage(hwndMemWatch,&msg);
 			}
 
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 3);
-
+			// RAM Search
 			if(!handled && RamSearchHWnd && IsChild(RamSearchHWnd, msg.hwnd))
 				handled = IsDialogMessage(RamSearchHWnd, &msg);
 
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 4);
-
+			// RAM_Watch
 			if(!handled && RamWatchHWnd)
 				if(handled = IsDialogMessage(RamWatchHWnd, &msg))
 					if(msg.message == WM_KEYDOWN) // send keydown messages to the dialog (for accelerators, and also needed for the Alt key to work)
 						SendMessage(RamWatchHWnd, msg.message, msg.wParam, msg.lParam);
 
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 5);
-
+			// TAS Editor
 			if(!handled && taseditorWindow.hwndTASEditor)
 			{
 				if(taseditorEnableAcceleratorKeys)
@@ -366,84 +362,71 @@ int BlockingCheck()
 				}
 			}
 
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 6);
-
+			// TAS Editor -> Find Node
 			if(!handled && taseditorWindow.hwndFindNote && IsChild(taseditorWindow.hwndFindNote, msg.hwnd))
 				handled = IsDialogMessage(taseditorWindow.hwndFindNote, &msg);
 
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 7);
-
+			// Sound Config
 			extern HWND uug;
 			if(!handled && uug && IsChild(uug, msg.hwnd))
 				handled = IsDialogMessage(uug, &msg);
 
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 8);
+			// Palette Config
+			extern HWND hWndPal;
+			if(!handled && hWndPal && IsChild(hWndPal, msg.hwnd))
+				handled = IsDialogMessage(hWndPal, &msg);
 
-			if(!handled && pwindow && IsChild(pwindow, msg.hwnd))
-				handled = IsDialogMessage(pwindow, &msg);
-
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 9);
-
+			// Code/Data Logger
 			if(!handled && hCDLogger && IsChild(hCDLogger, msg.hwnd))
 				handled = IsDialogMessage(hCDLogger, &msg);
 
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 10);
-
+			// Trace Logger
 			if(!handled && hTracer && IsChild(hTracer, msg.hwnd))
 				handled = IsDialogMessage(hTracer, &msg);
 
-			if (debug && !handled)
-				printf("GGConv unhandled WM_KEYDOWN: %d\n", 11);
-
+			// Game Genie Encoder/Decoder
+			extern HWND hGGConv;
 			if(!handled && hGGConv && IsChild(hGGConv, msg.hwnd))
 				handled = IsDialogMessage(hGGConv, &msg);
 
-			if (debug)
-				if(!handled)
-					printf("GGConv unhandled WM_KEYDOWN: %d\n", 12);
-				else
-					printf("GGConv handled\n");
-
+			// Debugger
 			if(!handled && hDebug && IsChild(hDebug, msg.hwnd))
 				handled = IsDialogMessage(hDebug, &msg);
 
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 13);
-
+			// PPU Viewer
 			extern HWND hPPUView;
 			if(!handled && hPPUView && IsChild(hPPUView, msg.hwnd))
 				handled = IsDialogMessage(hPPUView, &msg);
 
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 14);
-
+			// Nametable Viewer
 			extern HWND hNTView;
 			if(!handled && hNTView && IsChild(hNTView, msg.hwnd))
 				handled = IsDialogMessage(hNTView, &msg);
 
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 15);
-
+			// Text Hooker
 			extern HWND hTextHooker;
 			if(!handled && hTextHooker && IsChild(hTextHooker, msg.hwnd))
 				handled = IsDialogMessage(hTextHooker, &msg);
 
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 16);
-
+			// Lua Scripts
 			extern HWND LuaConsoleHWnd;
 			if(!handled && LuaConsoleHWnd && IsChild(LuaConsoleHWnd, msg.hwnd))
 				handled = IsDialogMessage(LuaConsoleHWnd, &msg);
 
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 17);
-
+			// Logs
 			extern HWND logwin;
 			if(!handled && logwin && IsChild(logwin, msg.hwnd))
 				handled = IsDialogMessage(logwin, &msg);
 
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 18);
-
+			// Header Editor
 			extern HWND hHeadEditor;
 			if (!handled && hHeadEditor && IsChild(hHeadEditor, msg.hwnd))
 				handled = IsDialogMessage(hHeadEditor, &msg);
 
-			if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 19);
+			// Netplay (Though it's quite dummy and nearly forgotten)
+			extern HWND netwin;
+			if (!handled && netwin && IsChild(netwin, msg.hwnd))
+				handled = IsDialogMessage(netwin, &msg);
 
 			/* //adelikat - Currently no accel keys are used in the main window.  Uncomment this block to activate them.
 			if(!handled)
@@ -456,10 +439,9 @@ int BlockingCheck()
 					}
 				}
 			*/
+
 			if(!handled)
 			{
-				if (debug && !handled) printf("GGConv unhandled WM_KEYDOWN: %d\n", 20);
-
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}

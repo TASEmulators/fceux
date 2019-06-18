@@ -25,7 +25,7 @@
 static int recv_tcpwrap(uint8 *buf, int len);
 static void NetStatAdd(char *text);
 
-static HWND netwin=0;
+HWND netwin=0;
 
 static char *netstatt[64];
 static int netstattcount=0;

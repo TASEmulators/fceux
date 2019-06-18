@@ -101,7 +101,7 @@ using namespace std;
 
 //Handles----------------------------------------------
 static HMENU fceumenu = 0;	  //Main menu.
-HWND pwindow;				  //Client Area
+// HWND pwindow;				  //Client Area
 HMENU recentmenu;				//Recent Menu
 HMENU recentluamenu;			//Recent Lua Files Menu
 HMENU recentmoviemenu;			//Recent Movie Files Menu

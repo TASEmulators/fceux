@@ -29,8 +29,8 @@
 #include "../../cheat.h" // For FCEU_LoadGameCheats()
 #include <map>
 
-static HWND pwindow = 0;	    //Handle to Cheats dialog
-HWND hCheat = 0;			    //mbg merge 7/19/06 had to add
+// static HWND pwindow = 0;	    // owomomo: removed pwindow because ambiguous, perhaps it is some obseleted early future plan from half developed old FCEUX? 
+HWND hCheat = 0;			    //Handle to Cheats dialog
 HMENU hCheatcontext = 0;     //Handle to cheat context menu
 
 bool pauseWhileActive = false;	//For checkbox "Pause while active"
@@ -68,10 +68,12 @@ int GGaddr, GGcomp, GGval;
 char GGcode[10];
 int GGlist[GGLISTSIZE];
 static int dontupdateGG; //this eliminates recursive crashing
+static char* ggLets = "APZLGITYEOXUKSVN";
 
 // bool dodecode;
 
 HWND hGGConv;
+WNDPROC DefaultGGConvWndProc;
 
 void EncodeGG(char *str, int a, int v, int c);
 void ListGGAddresses();
@@ -946,7 +948,7 @@ void ConfigCheats(HWND hParent)
 		selcheat = -1;
 		CheatWindow = 1;
 		if (CheatStyle)
-			pwindow = hCheat = CreateDialog(fceu_hInstance, "CHEATCONSOLE", hParent, CheatConsoleCallB);
+			hCheat = CreateDialog(fceu_hInstance, "CHEATCONSOLE", hParent, CheatConsoleCallB);
 		else
 			DialogBox(fceu_hInstance, "CHEATCONSOLE", hParent, CheatConsoleCallB);
 		UpdateCheatsAdded();
@@ -960,10 +962,10 @@ void ConfigCheats(HWND hParent)
 
 void UpdateCheatList()
 {
-	if (!pwindow)
+	if (!hCheat)
 		return;
 	else
-		ShowResults(pwindow);
+		ShowResults(hCheat);
 }
 
 void UpdateCheatListGroupBoxUI()
@@ -1030,7 +1032,7 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_COMP, EM_SETLIMITTEXT, 2, 0);
 			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_VAL, EM_SETLIMITTEXT, 2, 0);
 
-
+			DefaultGGConvWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_GAME_GENIE_CODE), GWL_WNDPROC, (LONG)GGConvCustomWndProc);
 
 			break;
 		case WM_CLOSE:
@@ -1130,12 +1132,111 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
+LRESULT APIENTRY GGConvCustomWndProc(HWND hDlg, UINT msg, WPARAM wP, LPARAM lP)
+{
+	bool through = true;
+	LRESULT result = 0;
+
+	switch (msg)
+	{
+		case WM_PASTE:
+		{
+			switch (GetDlgCtrlID(GetFocus()))
+			{
+				case IDC_GAME_GENIE_CODE:
+					printf("PASTE\n");
+					if (OpenClipboard(hDlg))
+					{
+						HANDLE handle = GetClipboardData(CF_TEXT);
+						if (handle)
+						{
+
+							// copy the original clipboard string
+							char* clipStr = (char*)GlobalLock(handle);
+							char* original = (char*)calloc(1, strlen(clipStr) + 1);
+							strcpy(original, clipStr);
+							GlobalUnlock(handle);
+
+							// filter it out
+							char filtered[9] = { 0 };
+							int filteredIndex = 0, origIndex = 0;
+							while (clipStr[origIndex] && filteredIndex < 9)
+							{
+								for (int i = 0; ggLets[i]; ++i)
+								{
+									if (toupper(clipStr[origIndex]) == ggLets[i])
+									{
+										filtered[filteredIndex] = clipStr[origIndex];
+										++filteredIndex;
+									}
+								}
+								++origIndex;
+							}
+
+							// copy filtered str to clipboard
+							EmptyClipboard();
+							HANDLE hNewStr = GlobalAlloc(GMEM_MOVEABLE, 9);
+							char* newStr = (char*)GlobalLock(hNewStr);
+							strcpy(newStr, filtered);
+							GlobalUnlock(hNewStr);
+							SetClipboardData(CF_TEXT, hNewStr);
+
+							// end
+							CloseClipboard();
+							result = CallWindowProc(DefaultGGConvWndProc, hDlg, msg, wP, lP);
+							through = false;
+
+							// set it back to normal
+							if (OpenClipboard(hDlg))
+							{
+								handle = GetClipboardData(CF_TEXT);
+								if (handle)
+								{
+									EmptyClipboard();
+									HANDLE hOldStr = GlobalAlloc(GMEM_MOVEABLE, strlen(original) + 1);
+									char* oldStr = (char*)GlobalLock(hOldStr);
+									strcpy(oldStr, original);
+									GlobalUnlock(hOldStr);
+									SetClipboardData(CF_TEXT, hOldStr);
+								}
+								CloseClipboard();
+							}
+
+							// end
+							free(original);
+						}
+					}
+			}
+		}
+		break;
+		case WM_CHAR:
+		{
+			switch (GetDlgCtrlID(GetFocus()))
+			{
+				case IDC_GAME_GENIE_CODE:
+				{
+					through = wP == VK_BACK || GetKeyState(VK_CONTROL) & 0x8000;
+					if (!through)
+						for (int i = 0; ggLets[i]; ++i)
+							if (toupper(wP) == ggLets[i])
+							{
+								through = true;
+								break;
+							}
+				}
+
+			}
+		}
+	}
+
+	return through ? CallWindowProc(DefaultGGConvWndProc, hDlg, msg, wP, lP) : result;
+}
+
 //The code in this function is a modified version
 //of Chris Covell's work - I'd just like to point that out
 void EncodeGG(char *str, int a, int v, int c)
 {
 	uint8 num[8];
-	static char lets[16]={'A','P','Z','L','G','I','T','Y','E','O','X','U','K','S','V','N'};
 	int i;
 	
 	a&=0x7fff;
@@ -1149,14 +1250,14 @@ void EncodeGG(char *str, int a, int v, int c)
 
 	if (c == -1){
 		num[5]+=v&8;
-		for(i = 0;i < 6;i++)str[i] = lets[num[i]];
+		for(i = 0;i < 6;i++)str[i] = ggLets[num[i]];
 		str[6] = 0;
 	} else {
 		num[2]+=8;
 		num[5]+=c&8;
 		num[6]=(c&7)+((c>>4)&8);
 		num[7]=((c>>4)&7)+(v&8);
-		for(i = 0;i < 8;i++)str[i] = lets[num[i]];
+		for(i = 0;i < 8;i++)str[i] = ggLets[num[i]];
 		str[8] = 0;
 	}
 	return;
