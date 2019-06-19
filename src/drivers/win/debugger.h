@@ -69,5 +69,7 @@ public:
 
 } *debugSystem;
 
+// extern WNDPROC DefaultEditCtrlProc;
+// extern LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP);
 
 #endif

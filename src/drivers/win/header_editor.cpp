@@ -307,10 +307,6 @@ HWND InitHeaderEditDialog(HWND hwnd, iNES_HEADER* header)
 	SetWindowLong(GetDlgItem(GetDlgItem(hwnd, IDC_CHRRAM_COMBO), IDC_CHRRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 	// CHR NVRAM
 	SetWindowLong(GetDlgItem(GetDlgItem(hwnd, IDC_CHRNVRAM_COMBO), IDC_CHRNVRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-	// Sub Mapper#
-	SetWindowLong(GetDlgItem(hwnd, IDC_SUBMAPPER_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-	// Misc. ROM(s)
-	SetWindowLong(GetDlgItem(hwnd, IDC_MISCELLANEOUS_ROMS_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 
 
 	ToggleINES20(hwnd, IsDlgButtonChecked(hwnd, IDC_RADIO_VERSION_INES20) == BST_CHECKED);
