@@ -345,7 +345,6 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_ADDR), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_VAL), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_COM), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_NAME), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_KNOWN), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_NE_BY), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_GT_BY), GWL_WNDPROC, (LONG)FilterEditCtrlProc);

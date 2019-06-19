@@ -3352,27 +3352,31 @@ bool inline (*GetIsLetterLegal(UINT id))(char letter)
 		case IDC_CHEAT_GAME_GENIE_TEXT:
 		case IDC_GAME_GENIE_CODE:
 			return IsLetterLegalGG;
-		case IDC_CHEAT_ADDR:
-		case IDC_CHEAT_VAL:
-		case IDC_CHEAT_COM:
-		case IDC_CHEAT_NAME:
-		case IDC_CHEAT_VAL_KNOWN:
-		case IDC_CHEAT_VAL_NE_BY:
-		case IDC_CHEAT_VAL_GT_BY:
-		case IDC_CHEAT_VAL_LT_BY:
-		case IDC_GAME_GENIE_ADDR:
-		case IDC_GAME_GENIE_COMP:
-		case IDC_GAME_GENIE_VAL:
+		
+		case IDC_CHEAT_ADDR: case IDC_CHEAT_VAL: case IDC_CHEAT_COM:
+		case IDC_CHEAT_VAL_KNOWN: case IDC_CHEAT_VAL_NE_BY:
+		case IDC_CHEAT_VAL_GT_BY: case IDC_CHEAT_VAL_LT_BY:
+
+		case IDC_GAME_GENIE_ADDR: case IDC_GAME_GENIE_VAL: case IDC_GAME_GENIE_COMP:
+
+		case MW_ADDR00: case MW_ADDR01: case MW_ADDR02: case MW_ADDR03:
+		case MW_ADDR04: case MW_ADDR05: case MW_ADDR06: case MW_ADDR07:
+		case MW_ADDR08: case MW_ADDR09: case MW_ADDR10: case MW_ADDR11:
+		case MW_ADDR12: case MW_ADDR13: case MW_ADDR14: case MW_ADDR15:
+		case MW_ADDR16: case MW_ADDR17: case MW_ADDR18: case MW_ADDR19:
+		case MW_ADDR20: case MW_ADDR21: case MW_ADDR22: case MW_ADDR23:
 			return IsLetterLegalHex;
+
+
 		case IDC_CHEAT_TEXT:
 			return IsLetterLegalCheat;
-		case IDC_PRGROM_EDIT:
-		case IDC_PRGRAM_EDIT:
-		case IDC_PRGNVRAM_EDIT:
-		case IDC_CHRROM_EDIT:
-		case IDC_CHRRAM_EDIT:
-		case IDC_CHRNVRAM_EDIT:
+
+
+		case IDC_PRGROM_EDIT: case IDC_PRGRAM_EDIT: case IDC_PRGNVRAM_EDIT:
+		case IDC_CHRROM_EDIT: case IDC_CHRRAM_EDIT: case IDC_CHRNVRAM_EDIT:
 			return IsLetterLegalSize;
+
+
 		case IDC_SUBMAPPER_EDIT:
 		case IDC_MISCELLANEOUS_ROMS_EDIT:
 			return IsLetterLegalPosDec;
