@@ -7,13 +7,12 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English(U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -51,9 +50,13 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_ICON3               ICON                    "res/taseditor-icon.ico"
+
 IDI_ICON4               ICON                    "res/taseditor-icon32.ico"
+
 ICON_1                  ICON                    "res/ICON_1.ico"
+
 ICON_2                  ICON                    "res/ICON_2.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2214,13 +2217,13 @@ BEGIN
     CONTROL         "&Signed",IDC_SIGNED,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,18,47,67,9
     CONTROL         "&Unsigned",IDC_UNSIGNED,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,18,57,67,9
     CONTROL         "&Hexadecimal",IDC_HEX,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,18,67,67,9
-	CONTROL         "&Binary", IDC_BINARY, "Button", BS_AUTORADIOBUTTON | WS_TABSTOP, 18, 77, 67, 9
+    CONTROL         "&Binary",IDC_BINARY,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,18,77,67,9
     GROUPBOX        "Data Size",IDC_DATASIZE_GROUPBOX,94,37,73,42,0,WS_EX_TRANSPARENT
     CONTROL         "&1 byte",IDC_1_BYTE,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,98,47,61,11
     CONTROL         "&2 bytes",IDC_2_BYTES,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,98,57,61,11
     CONTROL         "&4 bytes",IDC_4_BYTES,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,98,67,61,11
-    DEFPUSHBUTTON   "&OK",IDOK,66,90,50,14
-    PUSHBUTTON      "&Cancel",IDCANCEL,120,90,50,147
+    DEFPUSHBUTTON   "&OK",IDOK,66,97,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,117,97,50,15
 END
 
 DLG_SNESPAD DIALOGEX 4, 109, 243, 121
@@ -2763,110 +2766,214 @@ END
 //
 
 IDB_BITMAP0             BITMAP                  "res\\te_0.bmp"
+
 IDB_BITMAP1             BITMAP                  "res\\te_1.bmp"
+
 IDB_BITMAP2             BITMAP                  "res\\te_2.bmp"
+
 IDB_BITMAP3             BITMAP                  "res\\te_3.bmp"
+
 IDB_BITMAP4             BITMAP                  "res\\te_4.bmp"
+
 IDB_BITMAP5             BITMAP                  "res\\te_5.bmp"
+
 IDB_BITMAP6             BITMAP                  "res\\te_6.bmp"
+
 IDB_BITMAP7             BITMAP                  "res\\te_7.bmp"
+
 IDB_BITMAP8             BITMAP                  "res\\te_8.bmp"
+
 IDB_BITMAP9             BITMAP                  "res\\te_9.bmp"
+
 IDB_BITMAP10            BITMAP                  "res\\te_10.bmp"
+
 IDB_BITMAP11            BITMAP                  "res\\te_11.bmp"
+
 IDB_BITMAP12            BITMAP                  "res\\te_12.bmp"
+
 IDB_BITMAP13            BITMAP                  "res\\te_13.bmp"
+
 IDB_BITMAP14            BITMAP                  "res\\te_14.bmp"
+
 IDB_BITMAP15            BITMAP                  "res\\te_15.bmp"
+
 IDB_BITMAP16            BITMAP                  "res\\te_16.bmp"
+
 IDB_BITMAP17            BITMAP                  "res\\te_17.bmp"
+
 IDB_BITMAP18            BITMAP                  "res\\te_18.bmp"
+
 IDB_BITMAP19            BITMAP                  "res\\te_19.bmp"
+
 IDB_TE_ARROW            BITMAP                  "res\\te_arrow.bmp"
+
 IDB_TE_GREEN_ARROW      BITMAP                  "res\\te_green_arrow.bmp"
+
 IDB_TE_GREEN_BLUE_ARROW BITMAP                  "res\\te_green_blue_arrow.bmp"
+
 IDB_PIANO_0             BITMAP                  "res\\te_piano_0.bmp"
+
 IDB_PIANO_1             BITMAP                  "res\\te_piano_1.bmp"
+
 IDB_PIANO_2             BITMAP                  "res\\te_piano_2.bmp"
+
 IDB_PIANO_3             BITMAP                  "res\\te_piano_3.bmp"
+
 IDB_PIANO_4             BITMAP                  "res\\te_piano_4.bmp"
+
 IDB_PIANO_5             BITMAP                  "res\\te_piano_5.bmp"
+
 IDB_PIANO_6             BITMAP                  "res\\te_piano_6.bmp"
+
 IDB_PIANO_7             BITMAP                  "res\\te_piano_7.bmp"
+
 IDB_PIANO_8             BITMAP                  "res\\te_piano_8.bmp"
+
 IDB_PIANO_9             BITMAP                  "res\\te_piano_9.bmp"
+
 IDB_PIANO_10            BITMAP                  "res\\te_piano_10.bmp"
+
 IDB_PIANO_11            BITMAP                  "res\\te_piano_11.bmp"
+
 IDB_PIANO_12            BITMAP                  "res\\te_piano_12.bmp"
+
 IDB_PIANO_13            BITMAP                  "res\\te_piano_13.bmp"
+
 IDB_PIANO_14            BITMAP                  "res\\te_piano_14.bmp"
+
 IDB_PIANO_15            BITMAP                  "res\\te_piano_15.bmp"
+
 IDB_PIANO_16            BITMAP                  "res\\te_piano_16.bmp"
+
 IDB_PIANO_17            BITMAP                  "res\\te_piano_17.bmp"
+
 IDB_PIANO_18            BITMAP                  "res\\te_piano_18.bmp"
+
 IDB_PIANO_19            BITMAP                  "res\\te_piano_19.bmp"
+
 IDB_PIANO_PLAYBACK_0    BITMAP                  "res\\te_piano_0_playback.bmp"
+
 IDB_PIANO_PLAYBACK_1    BITMAP                  "res\\te_piano_1_playback.bmp"
+
 IDB_PIANO_PLAYBACK_2    BITMAP                  "res\\te_piano_2_playback.bmp"
+
 IDB_PIANO_PLAYBACK_3    BITMAP                  "res\\te_piano_3_playback.bmp"
+
 IDB_PIANO_PLAYBACK_4    BITMAP                  "res\\te_piano_4_playback.bmp"
+
 IDB_PIANO_PLAYBACK_5    BITMAP                  "res\\te_piano_5_playback.bmp"
+
 IDB_PIANO_PLAYBACK_6    BITMAP                  "res\\te_piano_6_playback.bmp"
+
 IDB_PIANO_PLAYBACK_7    BITMAP                  "res\\te_piano_7_playback.bmp"
+
 IDB_PIANO_PLAYBACK_8    BITMAP                  "res\\te_piano_8_playback.bmp"
+
 IDB_PIANO_PLAYBACK_9    BITMAP                  "res\\te_piano_9_playback.bmp"
+
 IDB_PIANO_PLAYBACK_10   BITMAP                  "res\\te_piano_10_playback.bmp"
+
 IDB_PIANO_PLAYBACK_11   BITMAP                  "res\\te_piano_11_playback.bmp"
+
 IDB_PIANO_PLAYBACK_12   BITMAP                  "res\\te_piano_12_playback.bmp"
+
 IDB_PIANO_PLAYBACK_13   BITMAP                  "res\\te_piano_13_playback.bmp"
+
 IDB_PIANO_PLAYBACK_14   BITMAP                  "res\\te_piano_14_playback.bmp"
+
 IDB_PIANO_PLAYBACK_15   BITMAP                  "res\\te_piano_15_playback.bmp"
+
 IDB_PIANO_PLAYBACK_16   BITMAP                  "res\\te_piano_16_playback.bmp"
+
 IDB_PIANO_PLAYBACK_17   BITMAP                  "res\\te_piano_17_playback.bmp"
+
 IDB_PIANO_PLAYBACK_18   BITMAP                  "res\\te_piano_18_playback.bmp"
+
 IDB_PIANO_PLAYBACK_19   BITMAP                  "res\\te_piano_19_playback.bmp"
+
 IDB_PIANO_LOSTPOS_0     BITMAP                  "res\\te_piano_0_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_1     BITMAP                  "res\\te_piano_1_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_2     BITMAP                  "res\\te_piano_2_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_3     BITMAP                  "res\\te_piano_3_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_4     BITMAP                  "res\\te_piano_4_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_5     BITMAP                  "res\\te_piano_5_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_6     BITMAP                  "res\\te_piano_6_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_7     BITMAP                  "res\\te_piano_7_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_8     BITMAP                  "res\\te_piano_8_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_9     BITMAP                  "res\\te_piano_9_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_10    BITMAP                  "res\\te_piano_10_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_11    BITMAP                  "res\\te_piano_11_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_12    BITMAP                  "res\\te_piano_12_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_13    BITMAP                  "res\\te_piano_13_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_14    BITMAP                  "res\\te_piano_14_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_15    BITMAP                  "res\\te_piano_15_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_16    BITMAP                  "res\\te_piano_16_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_17    BITMAP                  "res\\te_piano_17_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_18    BITMAP                  "res\\te_piano_18_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_19    BITMAP                  "res\\te_piano_19_lostpos.bmp"
+
 IDB_BITMAP_SELECTED0    BITMAP                  "res\\te_0_selected.bmp"
+
 IDB_BITMAP_SELECTED1    BITMAP                  "res\\te_1_selected.bmp"
+
 IDB_BITMAP_SELECTED2    BITMAP                  "res\\te_2_selected.bmp"
+
 IDB_BITMAP_SELECTED3    BITMAP                  "res\\te_3_selected.bmp"
+
 IDB_BITMAP_SELECTED4    BITMAP                  "res\\te_4_selected.bmp"
+
 IDB_BITMAP_SELECTED5    BITMAP                  "res\\te_5_selected.bmp"
+
 IDB_BITMAP_SELECTED6    BITMAP                  "res\\te_6_selected.bmp"
+
 IDB_BITMAP_SELECTED7    BITMAP                  "res\\te_7_selected.bmp"
+
 IDB_BITMAP_SELECTED8    BITMAP                  "res\\te_8_selected.bmp"
+
 IDB_BITMAP_SELECTED9    BITMAP                  "res\\te_9_selected.bmp"
+
 IDB_BITMAP_SELECTED10   BITMAP                  "res\\te_10_selected.bmp"
+
 IDB_BITMAP_SELECTED11   BITMAP                  "res\\te_11_selected.bmp"
+
 IDB_BITMAP_SELECTED12   BITMAP                  "res\\te_12_selected.bmp"
+
 IDB_BITMAP_SELECTED13   BITMAP                  "res\\te_13_selected.bmp"
+
 IDB_BITMAP_SELECTED14   BITMAP                  "res\\te_14_selected.bmp"
+
 IDB_BITMAP_SELECTED15   BITMAP                  "res\\te_15_selected.bmp"
+
 IDB_BITMAP_SELECTED16   BITMAP                  "res\\te_16_selected.bmp"
+
 IDB_BITMAP_SELECTED17   BITMAP                  "res\\te_17_selected.bmp"
+
 IDB_BITMAP_SELECTED18   BITMAP                  "res\\te_18_selected.bmp"
+
 IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
+
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
-#endif    // English(U.S.) resources
+
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -2876,8 +2983,7 @@ IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 
