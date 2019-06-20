@@ -630,7 +630,7 @@ BOOL CALLBACK findNoteWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM 
 			if (taseditorConfig.findnoteWindowY == -32000) taseditorConfig.findnoteWindowY = 0;
 			SetWindowPos(hwndDlg, 0, taseditorConfig.findnoteWindowX, taseditorConfig.findnoteWindowY, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
-			CheckDlgButton(hwndDlg, IDC_MATCH_CASE, taseditorConfig.findnoteMatchCase?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_MATCH_CASE, taseditorConfig.findnoteMatchCase ? BST_CHECKED : BST_UNCHECKED);
 			if (taseditorConfig.findnoteSearchUp)
 				Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_UP), BST_CHECKED);
 			else
@@ -680,7 +680,7 @@ BOOL CALLBACK findNoteWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM 
 					break;
 				case IDC_MATCH_CASE:
 					taseditorConfig.findnoteMatchCase ^= 1;
-					CheckDlgButton(hwndDlg, IDC_MATCH_CASE, taseditorConfig.findnoteMatchCase?MF_CHECKED : MF_UNCHECKED);
+					CheckDlgButton(hwndDlg, IDC_MATCH_CASE, taseditorConfig.findnoteMatchCase? BST_CHECKED : BST_UNCHECKED);
 					break;
 				case IDOK:
 				{

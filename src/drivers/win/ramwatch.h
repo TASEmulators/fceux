@@ -6,7 +6,7 @@ extern bool AutoRWLoad;
 extern bool RWSaveWindowPos;
 #define MAX_RECENT_WATCHES 5
 extern char rw_recent_files[MAX_RECENT_WATCHES][1024];
-extern bool AskSave();
+extern bool AskSaveRamWatch();
 extern int ramw_x;
 extern int ramw_y;
 extern bool RWfileChanged;

@@ -135,7 +135,7 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				FreeCDLog();
 				RenameCDLog("");
 				hCDLogger = 0;
-				EndDialog(hwndDlg, 0);
+				DestroyWindow(hwndDlg);
 			}
 			break;
 		case WM_COMMAND:

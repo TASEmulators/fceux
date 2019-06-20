@@ -299,11 +299,11 @@ BOOL CALLBACK newProjectProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 					break;
 				case IDC_COPY_INPUT:
 					p->copyCurrentInput ^= 1;
-					CheckDlgButton(hwndDlg, IDC_COPY_INPUT, p->copyCurrentInput?MF_CHECKED : MF_UNCHECKED);
+					CheckDlgButton(hwndDlg, IDC_COPY_INPUT, p->copyCurrentInput? BST_CHECKED : BST_UNCHECKED);
 					break;
 				case IDC_COPY_MARKERS:
 					p->copyCurrentMarkers ^= 1;
-					CheckDlgButton(hwndDlg, IDC_COPY_MARKERS, p->copyCurrentMarkers?MF_CHECKED : MF_UNCHECKED);
+					CheckDlgButton(hwndDlg, IDC_COPY_MARKERS, p->copyCurrentMarkers? BST_CHECKED : BST_UNCHECKED);
 					break;
 				case IDOK:
 				{
@@ -792,7 +792,7 @@ BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 					break;
 				}
 			}
-			CheckDlgButton(hwndDlg, IDC_NOTES_TO_SUBTITLES, taseditorConfig.lastExportedSubtitlesStatus?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_NOTES_TO_SUBTITLES, taseditorConfig.lastExportedSubtitlesStatus ? BST_CHECKED : BST_UNCHECKED);
 			return TRUE;
 		case WM_COMMAND:
 			switch (LOWORD(wParam))
@@ -808,7 +808,7 @@ BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 					break;
 				case IDC_NOTES_TO_SUBTITLES:
 					taseditorConfig.lastExportedSubtitlesStatus ^= 1;
-					CheckDlgButton(hwndDlg, IDC_NOTES_TO_SUBTITLES, taseditorConfig.lastExportedSubtitlesStatus?MF_CHECKED : MF_UNCHECKED);
+					CheckDlgButton(hwndDlg, IDC_NOTES_TO_SUBTITLES, taseditorConfig.lastExportedSubtitlesStatus ? BST_CHECKED : BST_UNCHECKED);
 					break;
 				case IDOK:
 					EndDialog(hwndDlg, 1);

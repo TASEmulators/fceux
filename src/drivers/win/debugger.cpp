@@ -70,7 +70,7 @@ static HMENU hDisasmcontext;     //Handle to context menu
 static HMENU hDisasmcontextsub;  //Handle to context sub menu
 WNDPROC IDC_DEBUGGER_DISASSEMBLY_oldWndProc = 0;
 
-static HFONT hFont;
+// static HFONT hFont;
 static SCROLLINFO si;
 
 bool debuggerAutoload = false;
@@ -276,8 +276,12 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		case WM_INITDIALOG:
 			CenterWindow(hwndDlg);
-			SendDlgItemMessage(hwndDlg,IDC_ADDBP_ADDR_START,EM_SETLIMITTEXT,4,0);
-			SendDlgItemMessage(hwndDlg,IDC_ADDBP_ADDR_END,EM_SETLIMITTEXT,4,0);
+			SendDlgItemMessage(hwndDlg, IDC_ADDBP_ADDR_START, EM_SETLIMITTEXT, 4, 0);
+			SendDlgItemMessage(hwndDlg, IDC_ADDBP_ADDR_END, EM_SETLIMITTEXT, 4, 0);
+
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_ADDBP_ADDR_START), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_ADDBP_ADDR_END), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+
 			if (WP_edit >= 0)
 			{
 				SetWindowText(hwndDlg,"Edit Breakpoint...");
@@ -359,7 +363,7 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 								int tmp = NewBreakWindows(hwndDlg,WP_edit,(BOOL)(watchpoint[WP_edit].flags&WP_E));
 								if (tmp == 2 || tmp == INVALID_BREAKPOINT_CONDITION)
 								{
-									MessageBox(hwndDlg, "Invalid breakpoint condition", "Error", MB_OK);
+									MessageBox(hwndDlg, "Invalid breakpoint condition", "Error", MB_OK | MB_ICONERROR);
 									break;
 								}
 								EndDialog(hwndDlg,1);
@@ -1820,6 +1824,14 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,EM_SETLIMITTEXT,4,0);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,EM_SETLIMITTEXT,2,0);
 
+			// limit input
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PCSEEK), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PC), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_A), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_X), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_Y), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_BOOKMARK), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+
 			//I'm lazy, disable the controls which I can't mess with right now
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,EM_SETREADONLY,TRUE,0);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,EM_SETREADONLY,TRUE,0);
@@ -2475,11 +2487,11 @@ void UpdatePatcher(HWND hwndDlg){
 
 /// Updates debugger controls that should be enabled/disabled if a game is loaded.
 /// @param enable Flag that indicates whether the menus should be enabled (1) or disabled (0). 
-void updateGameDependentMenusDebugger(unsigned int enable) {
+void updateGameDependentMenusDebugger() {
 	if (!hDebug)
 		return;
 
-	//EnableWindow(GetDlgItem(hDebug,DEBUGLOADDEB),(enable ? 0 : 1));
+	// EnableWindow(GetDlgItem(hDebug,DEBUGLOADDEB), GameInfo != 0 ? FALSE : TRUE);
 }
 
 void DoDebug(uint8 halt)
@@ -2496,7 +2508,7 @@ void DoDebug(uint8 halt)
 		ShowWindow(hDebug, SW_SHOWNORMAL);
 		SetForegroundWindow(hDebug);
 		
-		updateGameDependentMenusDebugger(GameInfo != 0);
+		updateGameDependentMenusDebugger();
 
 		if (GameInfo)
 			UpdateDebugger(true);
