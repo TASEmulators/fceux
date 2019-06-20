@@ -825,6 +825,7 @@
 #define IDC_CHEAT_VAL_LABEL             1314
 #define IDC_CHEAT_COM_LABEL             1315
 #define IDC_CHEAT_LABEL_KNOWN           1316
+#define IDC_BINARY                      1317
 #define IDC_GAME_GENIE_ADDR             1501
 #define MENU_INESHEADEREDITOR           40001
 #define MENU_NETWORK                    40040

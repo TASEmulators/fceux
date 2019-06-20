@@ -54,7 +54,7 @@ struct AddressWatcher
 	char* comment = NULL; // NULL means no comment, non-NULL means allocated comment
 	bool WrongEndian;
 	char Size; //'d' = 4 bytes, 'w' = 2 bytes, 'b' = 1 byte, and 'S' means it's a separator.
-	char Type;//'s' = signed integer, 'u' = unsigned, 'h' = hex, 'S' = separator
+	char Type;//'s' = signed integer, 'u' = unsigned, 'h' = hex, 'b' = binary, 'S' = separator
 	short Cheats; // how many bytes are affected by cheat
 };
 
