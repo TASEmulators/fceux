@@ -12,6 +12,7 @@ using namespace std;
 #include <commctrl.h>
 #include <string>
 #include <map>
+#include <bitset>
 
 /*
 #include <commctrl.h>
@@ -825,6 +826,9 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						case 'h':
 							SendDlgItemMessage(hDlg, IDC_HEX, BM_SETCHECK, BST_CHECKED, 0);
 							break;
+						case 'b':
+							SendDlgItemMessage(hDlg, IDC_BINARY, BM_SETCHECK, BST_CHECKED, 0);
+							break;
 					}
 				} else
 					SetDlgItemText(hDlg, IDC_EDIT_COMPAREADDRESS, "---------");
@@ -844,6 +848,7 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					EnableWindow(GetDlgItem(hDlg, IDC_SIGNED), FALSE);
 					EnableWindow(GetDlgItem(hDlg, IDC_UNSIGNED), FALSE);
 					EnableWindow(GetDlgItem(hDlg, IDC_HEX), FALSE);
+					EnableWindow(GetDlgItem(hDlg, IDC_BINARY), FALSE);
 					EnableWindow(GetDlgItem(hDlg, IDC_1_BYTE), FALSE);
 					EnableWindow(GetDlgItem(hDlg, IDC_2_BYTES), FALSE);
 					EnableWindow(GetDlgItem(hDlg, IDC_4_BYTES), FALSE);
@@ -886,6 +891,8 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								watcher.Type = 'u';
 							else if (SendDlgItemMessage(hDlg, IDC_HEX, BM_GETCHECK, 0, 0) == BST_CHECKED)
 								watcher.Type = 'h';
+							else if (SendDlgItemMessage(hDlg, IDC_BINARY, BM_GETCHECK, 0, 0) == BST_CHECKED)
+								watcher.Type = 'b';
 							else {
 								MessageBox(hDlg, "Type must be specified.", "Error", MB_OK | MB_ICONERROR);
 								return true;
@@ -900,6 +907,12 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								watcher.Size = 'd';
 							else {
 								MessageBox(hDlg, "Size must be specified.", "Error", MB_OK | MB_ICONERROR);
+								return true;
+							}
+
+							if (watcher.Type == 'b' && (watcher.Size == 'd' || watcher.Size == 'w'))
+							{
+								MessageBox(hDlg, "Only 1 byte is supported on binary format.", "Error", MB_OK | MB_ICONERROR);
 								return true;
 							}
 
@@ -1160,6 +1173,18 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 										int i = rswatches[iNum].CurValue;
 										int t = rswatches[iNum].Type;
 										int size = rswatches[iNum].Size;
+										if (rswatches[iNum].Type == 'b')
+										{
+											auto bits = bitset<8>(i); // Currently work with 1 byte size only
+											int j = 0, k = 7;
+											while (k >= 0)
+											{		
+												if (k == 3) num[j++] = ' ';
+												num[j++] = bits[k--] ? '1' : '0';
+											}
+											Item->item.pszText = num;
+											break;
+										}
 										const char* formatString = ((t == 's') ? "%d" : (t == 'u') ? "%u" : (size == 'd' ? "%08X" : size == 'w' ? "%04X" : "%02X"));
 										switch (size)
 										{
@@ -1442,6 +1467,8 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 								numberType = 1;
 							else if(rswatches[watchIndex].Type == 'h')
 								numberType = 2;
+							else if (rswatches[watchIndex].Type == 'b')
+								numberType = 3;
 
 							// Don't open cheat dialog
 

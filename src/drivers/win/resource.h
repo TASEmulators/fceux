@@ -704,6 +704,7 @@
 #define IDC_CHEAT_VAL_LABEL             1314
 #define IDC_CHEAT_COM_LABEL             1315
 #define IDC_CHEAT_LABEL_KNOWN           1316
+#define IDC_BINARY                      1317
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
