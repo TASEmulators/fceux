@@ -1117,8 +1117,8 @@ static void LaunchCodeDataLogger(void)
 static void LaunchCheats(void)
 {
 #ifdef WIN32
-	extern HWND pwindow;
-	ConfigCheats(pwindow);
+	extern HWND hCheat;
+	ConfigCheats(hCheat);
 #endif
 }
 

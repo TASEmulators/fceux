@@ -63,7 +63,7 @@ static int iNES_Init(int num);
 
 static int MapperNo = 0;
 
-static int iNES2 = 0;
+int iNES2 = 0;
 
 static DECLFR(TrainerRead) {
 	return(trainerpoo[A & 0x1FF]);
@@ -443,13 +443,8 @@ static int not_power2[] =
 {
 	53, 198, 228
 };
-typedef struct {
-	char *name;
-	int32 number;
-	void (*init)(CartInfo *);
-} BMAPPINGLocal;
 
-static BMAPPINGLocal bmap[] = {
+BMAPPINGLocal bmap[] = {
 	{"NROM",				  0, NROM_Init},
 	{"MMC1",				  1, Mapper1_Init},
 	{"UNROM",				  2, UNROM_Init},
@@ -729,12 +724,9 @@ static BMAPPINGLocal bmap[] = {
 int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	struct md5_context md5;
 
-	if (FCEU_fread(&head, 1, 16, fp) != 16)
+	if (FCEU_fread(&head, 1, 16, fp) != 16 || memcmp(&head, "NES\x1A", 4))
 		return 0;
-
-	if (memcmp(&head, "NES\x1a", 4))
-		return 0;
-
+	
 	head.cleanup();
 
 	memset(&iNESCart, 0, sizeof(iNESCart));

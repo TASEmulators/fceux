@@ -1500,8 +1500,7 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 			//mbg 8/18/08 - this code  can be used to turn the error message into an OK/CANCEL
 			#ifdef WIN32
 				std::string msg = "There is a mismatch between savestate's movie and current movie.\ncurrent: " + currMovieData.guid.toString() + "\nsavestate: " + tempMovieData.guid.toString() + "\n\nThis means that you have loaded a savestate belonging to a different movie than the one you are playing now.\n\nContinue loading this savestate anyway?";
-				extern HWND pwindow;
-				int result = MessageBox(pwindow,msg.c_str(),"Error loading savestate",MB_OKCANCEL);
+				int result = MessageBox(hAppWnd, msg.c_str(), "Error loading savestate", MB_OKCANCEL);
 				if(result == IDCANCEL)
 				{
 					if (!backupSavestates) //If backups are disabled we can just resume normally since we can't restore so stop movie and inform user
