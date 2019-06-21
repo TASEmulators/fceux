@@ -70,8 +70,8 @@ bool Load_Watches(bool clear, const char* filename);
 void RWAddRecentFile(const char *filename);
 void UpdateWatchCheats();
 
-LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 extern HWND RamWatchHWnd;
 

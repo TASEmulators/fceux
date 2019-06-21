@@ -619,7 +619,7 @@ void MARKERS_MANAGER::updateEditedMarkerNote()
 	}
 }
 // ------------------------------------------------------------------------------------
-BOOL CALLBACK findNoteWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK findNoteWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	extern MARKERS_MANAGER markersManager;
 	switch (message)

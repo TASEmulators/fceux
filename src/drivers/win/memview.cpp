@@ -142,7 +142,7 @@ int GetHexScreenCoordy(int offset);
 int GetAddyFromCoord(int x,int y);
 void AutoScrollFromCoord(int x,int y);
 LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 void FindNext();
 void OpenFindDialog();
 static int GetFileData(uint32 offset);
@@ -2218,7 +2218,7 @@ void DoMemView()
 	}
 }
 
-BOOL CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+INT_PTR CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	switch(uMsg) {
 	case WM_INITDIALOG:

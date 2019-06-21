@@ -842,7 +842,7 @@ static const uint8 *DWBText;
 
 static HWND die;
 
-static BOOL CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 
 	switch(uMsg) {
@@ -1060,7 +1060,7 @@ static const char *DoTBTitle=0;
 static int DoTBMax=0;
 static int DoTBType=0,DoTBPort=0;
 
-static BOOL CALLBACK DoTBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK DoTBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg) {
    case WM_INITDIALOG:
@@ -1208,7 +1208,7 @@ static void UpdateFourscoreState(HWND dlg)
 }
 
 //Callback function of the input configuration dialog.
-BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
 	{

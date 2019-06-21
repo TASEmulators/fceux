@@ -1101,15 +1101,15 @@ void ReopenRamWindows() //Reopen them when a new Rom is loaded
 	if(!RamSearchHWnd)
 	{
 		reset_address_info();
-		LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-		RamSearchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMSEARCH), hWnd, (DLGPROC) RamSearchProc);
+		INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+		RamSearchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMSEARCH), hWnd, RamSearchProc);
 	}
 
 	if (AutoRWLoad)
 		OpenRWRecentFile(0);
 
 	if (!RamWatchHWnd)
-		RamWatchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, (DLGPROC) RamWatchProc);
+		RamWatchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, RamWatchProc);
 
 	if (hwnd == hWnd && hwnd != GetActiveWindow())
 		SetActiveWindow(hWnd); // restore focus to the main window if it had it before
@@ -1396,7 +1396,7 @@ static BOOL SelectingByKeyboard()
 	return (a | b | c | d) & 0x80;
 }
 
-LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	RECT r;
 	RECT r2;

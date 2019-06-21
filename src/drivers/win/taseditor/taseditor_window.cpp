@@ -53,12 +53,12 @@ extern bool mustCallManualLuaFunction;
 
 extern char* GetKeyComboName(int c);
 
-extern BOOL CALLBACK findNoteWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-extern BOOL CALLBACK aboutWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-extern BOOL CALLBACK savingOptionsWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
+extern INT_PTR CALLBACK findNoteWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+extern INT_PTR CALLBACK aboutWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+extern INT_PTR CALLBACK savingOptionsWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 // main window wndproc
-BOOL CALLBACK TASEditorWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK TASEditorWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 // wndprocs for "Marker X" text fields
 LRESULT APIENTRY IDC_PLAYBACK_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY IDC_SELECTION_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -780,7 +780,7 @@ void TASEDITOR_WINDOW::recheckPatternsMenu()
 }
 
 // ====================================================================================================
-BOOL CALLBACK TASEditorWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK TASEditorWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	extern TASEDITOR_WINDOW taseditorWindow;
 	switch(uMsg)

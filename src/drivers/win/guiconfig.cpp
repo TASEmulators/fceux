@@ -107,7 +107,7 @@ void CloseGuiDialog(HWND hwndDlg)
 /**
 * Message loop of the GUI configuration dialog.
 **/
-BOOL CALLBACK GUIConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK GUIConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
 	{

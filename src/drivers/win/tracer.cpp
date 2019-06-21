@@ -373,7 +373,7 @@ BOOL CALLBACK TracerResizingEnumWindowsProc(HWND hwnd, LPARAM lParam)
 	return TRUE;
 }
 
-BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	int i;
 	switch(uMsg)

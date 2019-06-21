@@ -68,7 +68,7 @@ int LoadPaletteFile()
 /**
 * Callback function for the palette configuration dialog.
 **/
-BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	char text[40];
 	switch(uMsg)

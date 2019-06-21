@@ -777,7 +777,7 @@ int TextHookerSaveTableFile(){
  * Looking for comments?  Inqure within!
  *
  */
-BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+INT_PTR CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	RECT wrect;
 	char str[2048];
 	char bufferstr[10240]; //holds the entire buffer, so it needs to be big...

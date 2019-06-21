@@ -697,7 +697,7 @@ void ClearAllText()
 	fileChanged = false;				
 }
 
-static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	const int FMAX = 6;
 	string formula[FMAX] = {"> than", "> by 1", "< than", "< by 1", "equal", "!equal"};

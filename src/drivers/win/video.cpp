@@ -1148,7 +1148,7 @@ double GetDlgItemDouble(HWND hDlg, int item)
 	return(ret);
 }
 
-BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	static char *vmstr[11]={
 		"Custom",

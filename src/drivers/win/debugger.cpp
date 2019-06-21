@@ -267,7 +267,7 @@ static void UpdateDialog(HWND hwndDlg) {
 	//CheckDlgButton(hwndDlg,IDC_ADDBP_MEM_SPR,BST_UNCHECKED);
 }
 
-BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	char str[8] = {0};
 	int tmp;
@@ -1224,7 +1224,7 @@ int AddAsmHistory(HWND hwndDlg, int id, char *str) {
 	return 1;
 }
 
-BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+INT_PTR CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	int romaddr,count,i,j;
 	char str[128],*dasm;
 	static int patchlen,applied,saved,lastundo;
@@ -1358,7 +1358,7 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return FALSE;
 }
 
-BOOL CALLBACK PatcherCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+INT_PTR CALLBACK PatcherCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	char str[64]; //mbg merge 7/18/06 changed from unsigned char
 	uint8 *c;
 	int i;
@@ -1756,7 +1756,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 	return CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, uMsg, wParam, lParam);
 }
 
-BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	RECT wrect;
 	char str[256] = {0};

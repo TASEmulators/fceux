@@ -364,7 +364,7 @@ void KillPPUView()
 	PPUViewSkip=0;
 }
 
-BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	RECT wrect;
 	char str[20];

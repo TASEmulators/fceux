@@ -245,7 +245,7 @@ void updateTASEditor()
 	}
 }
 
-BOOL CALLBACK newProjectProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK newProjectProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static struct NewProjectParameters* p = NULL;
 	switch (message)
@@ -518,7 +518,7 @@ void SaveCompact_GetDialogItems(HWND hwndDlg)
 	else
 		taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_NO;
 }
-BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
@@ -655,7 +655,7 @@ void importInputData()
 	}
 }
 
-BOOL CALLBACK aboutWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK aboutWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
@@ -678,7 +678,7 @@ BOOL CALLBACK aboutWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	return FALSE; 
 }
 
-BOOL CALLBACK savingOptionsWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK savingOptionsWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
@@ -768,7 +768,7 @@ BOOL CALLBACK savingOptionsWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LP
 	return FALSE; 
 }
 
-BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{

@@ -60,7 +60,7 @@ bool autoloadCDL = true;
 bool autoresumeCDLogging = false;
 char loadedcdfile[2048] = {0};
 
-BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
 	{

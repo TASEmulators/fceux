@@ -500,7 +500,7 @@ static void UpdateSD(HWND hwndDlg)
 	UpdateSoundChannelQualityMode(hwndDlg);
 }
 
-BOOL CALLBACK SoundConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK SoundConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 
 	switch(uMsg) {
