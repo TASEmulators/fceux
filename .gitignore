@@ -8,6 +8,7 @@
 /vc/vc10_obj_Debug
 /vc/vc10_obj_Release
 /vc/vc10_obj_PublicRelease
+/vc/x64
 /vc/*.user
 /vc/*.sdf
 /vc/*.opensdf
