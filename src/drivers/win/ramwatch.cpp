@@ -12,6 +12,7 @@ using namespace std;
 #include <commctrl.h>
 #include <string>
 #include <map>
+#include <bitset>
 
 /*
 #include <commctrl.h>
@@ -234,7 +235,7 @@ void Update_RAM_Watch()
 	}
 }
 
-bool AskSave()
+bool AskSaveRamWatch()
 {
 	//This function asks to save changes if the watch file contents have changed
 	//returns false only if a save was attempted but failed or was cancelled
@@ -677,7 +678,7 @@ bool Load_Watches(bool clear)
 
 bool ResetWatches()
 {
-	if(!AskSave())
+	if(!AskSaveRamWatch())
 		return false;
 	for (;WatchCount >= 0; WatchCount--)
 	{
@@ -825,6 +826,9 @@ INT_PTR CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						case 'h':
 							SendDlgItemMessage(hDlg, IDC_HEX, BM_SETCHECK, BST_CHECKED, 0);
 							break;
+						case 'b':
+							SendDlgItemMessage(hDlg, IDC_BINARY, BM_SETCHECK, BST_CHECKED, 0);
+							break;
 					}
 				} else
 					SetDlgItemText(hDlg, IDC_EDIT_COMPAREADDRESS, "---------");
@@ -844,6 +848,7 @@ INT_PTR CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					EnableWindow(GetDlgItem(hDlg, IDC_SIGNED), FALSE);
 					EnableWindow(GetDlgItem(hDlg, IDC_UNSIGNED), FALSE);
 					EnableWindow(GetDlgItem(hDlg, IDC_HEX), FALSE);
+					EnableWindow(GetDlgItem(hDlg, IDC_BINARY), FALSE);
 					EnableWindow(GetDlgItem(hDlg, IDC_1_BYTE), FALSE);
 					EnableWindow(GetDlgItem(hDlg, IDC_2_BYTES), FALSE);
 					EnableWindow(GetDlgItem(hDlg, IDC_4_BYTES), FALSE);
@@ -886,6 +891,8 @@ INT_PTR CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								watcher.Type = 'u';
 							else if (SendDlgItemMessage(hDlg, IDC_HEX, BM_GETCHECK, 0, 0) == BST_CHECKED)
 								watcher.Type = 'h';
+							else if (SendDlgItemMessage(hDlg, IDC_BINARY, BM_GETCHECK, 0, 0) == BST_CHECKED)
+								watcher.Type = 'b';
 							else {
 								MessageBox(hDlg, "Type must be specified.", "Error", MB_OK | MB_ICONERROR);
 								return true;
@@ -900,6 +907,12 @@ INT_PTR CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								watcher.Size = 'd';
 							else {
 								MessageBox(hDlg, "Size must be specified.", "Error", MB_OK | MB_ICONERROR);
+								return true;
+							}
+
+							if (watcher.Type == 'b' && (watcher.Size == 'd' || watcher.Size == 'w'))
+							{
+								MessageBox(hDlg, "Only 1 byte is supported on binary format.", "Error", MB_OK | MB_ICONERROR);
 								return true;
 							}
 
@@ -1026,47 +1039,16 @@ INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 		case WM_INITDIALOG: 
 		{
-			RECT r, r2;
-			int dx1, dy1, dx2, dy2;
-
-			GetWindowRect(hWnd, &r);  //Ramwatch window
-			dx1 = (r.right - r.left) / 2;
-			dy1 = (r.bottom - r.top) / 2;
-
-			GetWindowRect(hDlg, &r2); // TASer window
-			dx2 = (r2.right - r2.left) / 2;
-			dy2 = (r2.bottom - r2.top) / 2;
-
-			
-			// push it away from the main window if we can
-			const int width = (r.right-r.left);
-			const int height = (r.bottom - r.top);
-			const int width2 = (r2.right-r2.left); 
-			if(r.left+width2 + width < GetSystemMetrics(SM_CXSCREEN))
+			if (RWSaveWindowPos)
 			{
-				r.right += width;
-				r.left += width;
+				POINT pt = { ramw_x, ramw_y };
+				pt = CalcSubWindowPos(hDlg, &pt);
+				ramw_x = pt.x;
+				ramw_y = pt.y;
 			}
-			else if((int)r.left - (int)width2 > 0)
-			{
-				r.right -= width2;
-				r.left -= width2;
-			}
-			
-			//-----------------------------------------------------------------------------------
-			//If user has Save Window Pos selected, override default positioning
-			if (RWSaveWindowPos)	
-			{
-				//If ramwindow is for some reason completely off screen, use default instead 
-				if (ramw_x > (-width*2) || ramw_x < (width*2 + GetSystemMetrics(SM_CYSCREEN))   ) 
-					r.left = ramw_x;	  //This also ignores cases of windows -32000 error codes
-				//If ramwindow is for some reason completely off screen, use default instead 
-				if (ramw_y > (0-height*2) ||ramw_y < (height*2 + GetSystemMetrics(SM_CYSCREEN))	)
-					r.top = ramw_y;		  //This also ignores cases of windows -32000 error codes
-			}
-			//-------------------------------------------------------------------------------------
-			SetWindowPos(hDlg, NULL, r.left, r.top, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-			
+			else
+				CalcSubWindowPos(hDlg, NULL);
+
 			ramwatchmenu=GetMenu(hDlg);
 			rwrecentmenu=CreateMenu();
 			UpdateRW_RMenu(rwrecentmenu, RAMMENU_FILE_RECENT, RW_MENU_FIRST_RECENT_FILE);
@@ -1160,6 +1142,18 @@ INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 										int i = rswatches[iNum].CurValue;
 										int t = rswatches[iNum].Type;
 										int size = rswatches[iNum].Size;
+										if (rswatches[iNum].Type == 'b')
+										{
+											auto bits = bitset<8>(i); // Currently work with 1 byte size only
+											int j = 0, k = 7;
+											while (k >= 0)
+											{		
+												if (k == 3) num[j++] = ' ';
+												num[j++] = bits[k--] ? '1' : '0';
+											}
+											Item->item.pszText = num;
+											break;
+										}
 										const char* formatString = ((t == 's') ? "%d" : (t == 'u') ? "%u" : (size == 'd' ? "%08X" : size == 'w' ? "%04X" : "%02X"));
 										switch (size)
 										{
@@ -1442,6 +1436,8 @@ INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 								numberType = 1;
 							else if(rswatches[watchIndex].Type == 'h')
 								numberType = 2;
+							else if (rswatches[watchIndex].Type == 'b')
+								numberType = 3;
 
 							// Don't open cheat dialog
 

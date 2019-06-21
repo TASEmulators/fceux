@@ -56,6 +56,8 @@ extern bool rightClickEnabled;
 extern bool fullscreenByDoubleclick;
 extern int CurrentState;
 extern bool pauseWhileActive; //adelikat: Cheats dialog
+extern int globalCheatDisabled;
+extern int disableAutoLSCheats;
 extern bool enableHUDrecording;
 extern bool disableMovieMessages;
 extern bool replaceP2StartWithMicrophone;
@@ -466,6 +468,8 @@ static CFGSTRUCT fceuconfig[] =
 	AC(backupSavestates),
 	AC(compressSavestates),
 	AC(pauseWhileActive),
+	AC(disableAutoLSCheats),
+	AC(globalCheatDisabled),
 	AC(enableHUDrecording),
 	AC(disableMovieMessages),
 	AC(replaceP2StartWithMicrophone),

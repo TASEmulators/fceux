@@ -189,7 +189,12 @@ static void FCEU_CloseGame(void)
 		}
 
 		if (GameInfo->type != GIT_NSF) {
-			FCEU_FlushGameCheats(0, 0);
+			if (disableAutoLSCheats == 2)
+				FCEU_FlushGameCheats(0, 1);
+			else if (disableAutoLSCheats == 1)
+				AskSaveCheat();
+			else if (disableAutoLSCheats == 0)
+				FCEU_FlushGameCheats(0, 0);
 		}
 
 		GameInterface(GI_CLOSE);
@@ -432,9 +437,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 		strcat(fullname, "|");
 		strcat(fullname, fp->filename.c_str());
 	} else
-	{
 		strcpy(fullname, name);
-	}
 
 	// reset loaded game BEFORE it's loading.
 	ResetGameLoaded();
@@ -469,103 +472,94 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 
 	//try to load each different format
 	bool FCEUXLoad(const char *name, FCEUFILE * fp);
-	/*if(FCEUXLoad(name,fp))
-	    goto endlseq;*/
-	if (iNESLoad(fullname, fp, OverwriteVidMode))
-		goto endlseq;
-	if (NSFLoad(fullname, fp))
-		goto endlseq;
-	if (UNIFLoad(fullname, fp))
-		goto endlseq;
-	if (FDSLoad(fullname, fp))
-		goto endlseq;
 
-	if (!silent)
-		FCEU_PrintError("An error occurred while loading the file.");
-	FCEU_fclose(fp);
-
-	delete GameInfo;
-	GameInfo = 0;
-
-	return 0;
-
- endlseq:
-
-	FCEU_fclose(fp);
+	if (iNESLoad(fullname, fp, OverwriteVidMode) ||
+		NSFLoad(fullname, fp) ||
+		UNIFLoad(fullname, fp) ||
+		FDSLoad(fullname, fp))
+	{
 
 #ifdef WIN32
-// ################################## Start of SP CODE ###########################
-	extern char LoadedRomFName[2048];
-	extern int loadDebugDataFailed;
+		// ################################## Start of SP CODE ###########################
+		extern char LoadedRomFName[2048];
+		extern int loadDebugDataFailed;
 
-	if ((loadDebugDataFailed = loadPreferences(mass_replace(LoadedRomFName, "|", ".").c_str())))
-		if (!silent)
-			FCEU_printf("Couldn't load debugging data.\n");
+		if ((loadDebugDataFailed = loadPreferences(mass_replace(LoadedRomFName, "|", ".").c_str())))
+			if (!silent)
+				FCEU_printf("Couldn't load debugging data.\n");
 
-// ################################## End of SP CODE ###########################
+		// ################################## End of SP CODE ###########################
 #endif
 
-	if (OverwriteVidMode)
-		FCEU_ResetVidSys();
+		if (OverwriteVidMode)
+			FCEU_ResetVidSys();
 
-	if (GameInfo->type != GIT_NSF)
-	{
-		if (FSettings.GameGenie)
+		if (GameInfo->type != GIT_NSF && 
+			FSettings.GameGenie && 
+			FCEU_OpenGenie())
 		{
-			if (FCEU_OpenGenie())
-			{
-				FCEUI_SetGameGenie(false);
+			FCEUI_SetGameGenie(false);
 #ifdef WIN32
-				genie = 0;
+			genie = 0;
 #endif
-			}
 		}
-	}
-	PowerNES();
 
-	if (GameInfo->type != GIT_NSF)
-		FCEU_LoadGamePalette();
+		PowerNES();
 
-	FCEU_ResetPalette();
-	FCEU_ResetMessages();   // Save state, status messages, etc.
+		if (GameInfo->type != GIT_NSF)
+			FCEU_LoadGamePalette();
 
-	if (!lastpal && PAL) {
-		FCEU_DispMessage("PAL mode set", 0);
-		FCEUI_printf("PAL mode set");
-	} else if (!lastdendy && dendy) {
-		// this won't happen, since we don't autodetect dendy, but maybe someday we will?
-		FCEU_DispMessage("Dendy mode set", 0);
-		FCEUI_printf("Dendy mode set");
-	} else if ((lastpal || lastdendy) && !(PAL || dendy)) {
-		FCEU_DispMessage("NTSC mode set", 0);
-		FCEUI_printf("NTSC mode set");
-	}
+		FCEU_ResetPalette();
+		FCEU_ResetMessages();   // Save state, status messages, etc.
 
-	if (GameInfo->type != GIT_NSF)
-		FCEU_LoadGameCheats(0);
+		if (!lastpal && PAL) {
+			FCEU_DispMessage("PAL mode set", 0);
+			FCEUI_printf("PAL mode set");
+		}
+		else if (!lastdendy && dendy) {
+			// this won't happen, since we don't autodetect dendy, but maybe someday we will?
+			FCEU_DispMessage("Dendy mode set", 0);
+			FCEUI_printf("Dendy mode set");
+		}
+		else if ((lastpal || lastdendy) && !(PAL || dendy)) {
+			FCEU_DispMessage("NTSC mode set", 0);
+			FCEUI_printf("NTSC mode set");
+		}
 
-	if (AutoResumePlay)
-	{
-		// load "-resume" savestate
-		if (FCEUSS_Load(FCEU_MakeFName(FCEUMKF_RESUMESTATE, 0, 0).c_str(), false))
-			FCEU_DispMessage("Old play session resumed.", 0);
-	}
+		if (GameInfo->type != GIT_NSF && !disableAutoLSCheats)
+			FCEU_LoadGameCheats(0);
 
-	ResetScreenshotsCounter();
+		if (AutoResumePlay)
+		{
+			// load "-resume" savestate
+			if (FCEUSS_Load(FCEU_MakeFName(FCEUMKF_RESUMESTATE, 0, 0).c_str(), false))
+				FCEU_DispMessage("Old play session resumed.", 0);
+		}
+
+		ResetScreenshotsCounter();
 
 #if defined (WIN32) || defined (WIN64)
-	DoDebuggerDataReload(); // Reloads data without reopening window
-	CDLoggerROMChanged();
-	if (hMemView) UpdateColorTable();
-	if (hCheat)
-	{
-		UpdateCheatsAdded();
-		UpdateCheatRelatedWindow();
-	}
-	if (FrozenAddressCount)
-		FCEU_DispMessage("%d cheats active", 0, FrozenAddressCount);
+		DoDebuggerDataReload(); // Reloads data without reopening window
+		CDLoggerROMChanged();
+		if (hMemView) UpdateColorTable();
+		if (hCheat)
+		{
+			UpdateCheatsAdded();
+			UpdateCheatRelatedWindow();
+		}
+		if (FrozenAddressCount)
+			FCEU_DispMessage("%d cheats active", 0, FrozenAddressCount);
 #endif
+	}
+	else {
+		if (!silent)
+			FCEU_PrintError("An error occurred while loading the file.");
 
+		delete GameInfo;
+		GameInfo = 0;
+	}
+
+	FCEU_fclose(fp);
 	return GameInfo;
 }
 
@@ -1377,7 +1371,7 @@ uint8 FCEU_ReadRomByte(uint32 i) {
 void FCEU_WriteRomByte(uint32 i, uint8 value) {
 	if (i < 16)
 #ifdef WIN32
-		MessageBox(hMemView,"Sorry", "You can't edit the ROM header.", MB_OK);
+		MessageBox(hMemView, "Sorry", "You can't edit the ROM header.", MB_OK);
 #else
 		printf("Sorry, you can't edit the ROM header.\n");
 #endif

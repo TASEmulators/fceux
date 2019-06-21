@@ -17,5 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+#ifndef COMMON_CHEAT_H
+#define COMMON_CHEAT_H
 void DoConsoleCheatConfig(void);
+#endif

@@ -261,9 +261,9 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 	FILE *ipsfile=0;
 	FCEUFILE *fceufp=0;
 
-	bool read = (std::string)mode == "rb";
-	bool write = (std::string)mode == "wb";
-	if((read&&write) || (!read&&!write))
+	bool read = !strcmp(mode, "rb");
+	bool write = !strcmp(mode, "wb");
+	if(read && write || !read && !write)
 	{
 		FCEU_PrintError("invalid file open mode specified (only wb and rb are supported)");
 		return 0;

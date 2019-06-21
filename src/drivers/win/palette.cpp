@@ -12,6 +12,7 @@ extern int palsharpness;
 extern int palcontrast;
 extern int palbrightness;
 extern bool paldeemphswap;
+HWND hWndPal = NULL;
 
 bool SetPalette(const char* nameo)
 {
@@ -226,7 +227,7 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 					case BUTTON_CLOSE:
 gornk:
 						DestroyWindow(hwndDlg);
-						pwindow = 0; // Yay for user race conditions.
+						hWndPal = 0; // Yay for user race conditions.
 						break;
 				}
 			}
@@ -240,13 +241,9 @@ gornk:
 **/
 void ConfigPalette()
 {
-	if(!pwindow)
-	{
-		pwindow=CreateDialog(fceu_hInstance, "PALCONFIG" ,0 , PaletteConCallB);
-	}
+	if(!hWndPal)
+		hWndPal = CreateDialog(fceu_hInstance, "PALCONFIG", hAppWnd, PaletteConCallB);
 	else
-	{
-		SetFocus(pwindow);
-	}
+		SetFocus(hWndPal);
 }
 

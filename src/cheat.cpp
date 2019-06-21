@@ -62,6 +62,8 @@ void FCEU_CheatAddRAM(int s, uint32 A, uint8 *p)
 
 CHEATF_SUBFAST SubCheats[256] = { 0 };
 uint32 numsubcheats = 0;
+int globalCheatDisabled = 0;
+int disableAutoLSCheats = 0;
 struct CHEATF *cheats = 0, *cheatsl = 0;
 
 
@@ -104,11 +106,10 @@ void RebuildSubCheats(void)
 		SetReadHandler(SubCheats[x].addr, SubCheats[x].addr, SubCheats[x].PrevRead);
 
 	numsubcheats = 0;
-	while(c)
-	{
-		if(c->type == 1 && c->status)
+	if (!globalCheatDisabled)
+		while(c)
 		{
-			if(GetReadHandler(c->addr) != SubCheatsRead)
+			if(c->type == 1 && c->status && GetReadHandler(c->addr) != SubCheatsRead)
 			{
 				SubCheats[numsubcheats].PrevRead = GetReadHandler(c->addr);
 				SubCheats[numsubcheats].addr = c->addr;
@@ -117,9 +118,9 @@ void RebuildSubCheats(void)
 				SetReadHandler(c->addr, c->addr, SubCheatsRead);
 				numsubcheats++;
 			}
+			c = c->next;
 		}
-		c = c->next;
-	}
+
 	FrozenAddressCount = numsubcheats;		//Update the frozen address list
 	UpdateFrozenList();
 
@@ -243,7 +244,6 @@ void FCEU_LoadGameCheats(FILE *override, int override_existing)
 			char *neo = &tbuf[4+2+2+1+1+1];
 			if(sscanf(tbuf, "%04x%*[:]%02x%*[:]%02x", &addr, &val, &compare) != 3)
 				continue;
-			char namebuf[128];
 			strcpy(namebuf, neo);
 		}
 		else
@@ -275,6 +275,31 @@ void FCEU_LoadGameCheats(FILE *override, int override_existing)
 
 	if(!override)
 		fclose(fp);
+}
+
+void FCEU_SaveGameCheats(FILE* fp, int release)
+{
+	struct CHEATF *next = cheats;
+	while (next)
+	{
+		if (next->type)
+			fputc('S', fp);
+		if (next->compare >= 0)
+			fputc('C', fp);
+
+		if (!next->status)
+			fputc(':', fp);
+
+		if (next->compare >= 0)
+			fprintf(fp, "%04x:%02x:%02x:%s\n", next->addr, next->val, next->compare, next->name);
+		else
+			fprintf(fp, "%04x:%02x:%s\n", next->addr, next->val, next->name);
+
+		if (release) free(next->name);
+		struct CHEATF *t = next;
+		next = next->next;
+		if (release) free(t);
+	}
 }
 
 void FCEU_FlushGameCheats(FILE *override, int nosave)
@@ -309,7 +334,6 @@ void FCEU_FlushGameCheats(FILE *override, int nosave)
 
 		if(cheats)
 		{
-			struct CHEATF *next=cheats;
 			FILE *fp;
 
 			if(override)
@@ -319,28 +343,7 @@ void FCEU_FlushGameCheats(FILE *override, int nosave)
 
 			if(fp)
 			{
-				for(;;)
-				{
-					struct CHEATF *t;
-					if(next->type)
-						fputc('S',fp);
-					if(next->compare>=0)
-						fputc('C',fp);
-
-					if(!next->status)
-						fputc(':',fp);
-
-					if(next->compare>=0)
-						fprintf(fp,"%04x:%02x:%02x:%s\n",next->addr,next->val,next->compare,next->name);
-					else
-						fprintf(fp,"%04x:%02x:%s\n",next->addr,next->val,next->name);
-
-					free(next->name);
-					t=next;
-					next=next->next;
-					free(t);
-					if(!next) break;
-				}
+				FCEU_SaveGameCheats(fp, 1);
 				if(!override)
 					fclose(fp);
 			}
@@ -640,6 +643,14 @@ int FCEUI_ToggleCheat(uint32 which)
 	}
 
 	return(-1);
+}
+
+int FCEUI_GlobalToggleCheat(int global_enabled)
+{
+	int _numsubcheats = numsubcheats;
+	globalCheatDisabled = !global_enabled;
+	RebuildSubCheats();
+	return _numsubcheats != numsubcheats;
 }
 
 static int InitCheatComp(void)

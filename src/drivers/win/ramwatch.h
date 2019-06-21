@@ -6,7 +6,7 @@ extern bool AutoRWLoad;
 extern bool RWSaveWindowPos;
 #define MAX_RECENT_WATCHES 5
 extern char rw_recent_files[MAX_RECENT_WATCHES][1024];
-extern bool AskSave();
+extern bool AskSaveRamWatch();
 extern int ramw_x;
 extern int ramw_y;
 extern bool RWfileChanged;
@@ -54,7 +54,7 @@ struct AddressWatcher
 	char* comment = NULL; // NULL means no comment, non-NULL means allocated comment
 	bool WrongEndian;
 	char Size; //'d' = 4 bytes, 'w' = 2 bytes, 'b' = 1 byte, and 'S' means it's a separator.
-	char Type;//'s' = signed integer, 'u' = unsigned, 'h' = hex, 'S' = separator
+	char Type;//'s' = signed integer, 'u' = unsigned, 'h' = hex, 'b' = binary, 'S' = separator
 	short Cheats; // how many bytes are affected by cheat
 };
 
