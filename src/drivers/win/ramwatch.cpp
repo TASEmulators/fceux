@@ -1180,7 +1180,7 @@ INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 							// disable search by keyboard typing,
 							// because it interferes with some of the accelerators
 							// and it isn't very useful here anyway
-							SetWindowLong(hDlg, DWL_MSGRESULT, ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST)));
+							SetWindowLongPtr(hDlg, DWL_MSGRESULT, ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST)));
 							return 1;
 						}
 						case NM_SETFOCUS:
@@ -1197,12 +1197,12 @@ INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 							switch (nmcd->dwDrawStage)
 							{
 								case CDDS_PREPAINT:
-									SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NOTIFYITEMDRAW);
+									SetWindowLongPtr(hDlg, DWL_MSGRESULT, CDRF_NOTIFYITEMDRAW);
 								break;
 								case CDDS_ITEMPREPAINT:
 									if (rswatches[nmcd->dwItemSpec].Type == 'S')
 										// A separator looks very different from normal watches, it should be drawn in another space while I want to use the highlight bar and the focus frame from the system.
-										SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NOTIFYPOSTPAINT);
+										SetWindowLongPtr(hDlg, DWL_MSGRESULT, CDRF_NOTIFYPOSTPAINT);
 									else
 									{
 										NMLVCUSTOMDRAW* lplvcd = (NMLVCUSTOMDRAW*)lParam;
@@ -1210,7 +1210,7 @@ INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 										{
 											default:
 											case 0:
-												SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_DODEFAULT);
+												SetWindowLongPtr(hDlg, DWL_MSGRESULT, CDRF_DODEFAULT);
 												return TRUE;
 											case 1:
 												lplvcd->clrTextBk = RGB(216, 203, 253); break;
@@ -1222,7 +1222,7 @@ INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 												lplvcd->clrTextBk = RGB(175, 94, 253);
 												lplvcd->clrText = RGB(255, 255, 255); break; // use a more visual color in dark background
 										}
-										SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NEWFONT);
+										SetWindowLongPtr(hDlg, DWL_MSGRESULT, CDRF_NEWFONT);
 									}
 								break;
 								case CDDS_ITEMPOSTPAINT:

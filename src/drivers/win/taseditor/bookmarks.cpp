@@ -78,7 +78,7 @@ void BOOKMARKS::init()
 	// prepare bookmarks listview
 	ListView_SetExtendedListViewStyleEx(hwndBookmarksList, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
 	// subclass the listview
-	hwndBookmarksList_oldWndProc = (WNDPROC)SetWindowLong(hwndBookmarksList, GWL_WNDPROC, (LONG)BookmarksListWndProc);
+	hwndBookmarksList_oldWndProc = (WNDPROC)SetWindowLongPtr(hwndBookmarksList, GWLP_WNDPROC, (LONG_PTR)BookmarksListWndProc);
 	// setup images for the listview
 	hImgList = ImageList_Create(11, 13, ILC_COLOR8 | ILC_MASK, 1, 1);
 	HBITMAP bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP0));

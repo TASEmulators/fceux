@@ -1037,7 +1037,7 @@ void HideFWindow(int h)
 		SetWindowPos(hAppWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOREPOSITION | SWP_NOSIZE);
 	}
 
-	SetWindowLong(hAppWnd, GWL_STYLE, desa | ( GetWindowLong(hAppWnd, GWL_STYLE) & WS_VISIBLE ));
+	SetWindowLongPtr(hAppWnd, GWL_STYLE, desa | ( GetWindowLong(hAppWnd, GWL_STYLE) & WS_VISIBLE ));
 	SetWindowPos(hAppWnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOREPOSITION | SWP_NOSIZE | SWP_NOZORDER);
 }
 
@@ -3265,7 +3265,7 @@ POINT CalcSubWindowPos(HWND hDlg, POINT* conf)
 LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 {
 	bool through = true;
-	LRESULT result = 0;
+	INT_PTR result = 0;
 
 	switch (msg)
 	{

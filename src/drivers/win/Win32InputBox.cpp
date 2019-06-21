@@ -319,7 +319,7 @@ INT_PTR CALLBACK CWin32InputBox::DlgProc(HWND hDlg, UINT message, WPARAM wParam,
   {
     case WM_INITDIALOG:
     {
-      ::SetWindowLong(hDlg, GWL_USERDATA, (LONG) lParam);
+      ::SetWindowLongPtr(hDlg, GWL_USERDATA, lParam);
       
       _this = (CWin32InputBox *)  lParam;
       _this->_param->hDlg = hDlg;

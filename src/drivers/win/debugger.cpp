@@ -279,8 +279,8 @@ INT_PTR CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			SendDlgItemMessage(hwndDlg, IDC_ADDBP_ADDR_START, EM_SETLIMITTEXT, 4, 0);
 			SendDlgItemMessage(hwndDlg, IDC_ADDBP_ADDR_END, EM_SETLIMITTEXT, 4, 0);
 
-			DefaultEditCtrlProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_ADDBP_ADDR_START), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_ADDBP_ADDR_END), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_ADDBP_ADDR_START), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_ADDBP_ADDR_END), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 
 			if (WP_edit >= 0)
 			{
@@ -1825,12 +1825,12 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,EM_SETLIMITTEXT,2,0);
 
 			// limit input
-			DefaultEditCtrlProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PCSEEK), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PC), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_A), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_X), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_Y), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_BOOKMARK), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PCSEEK), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PC), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_A), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_X), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_Y), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_BOOKMARK), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 
 			//I'm lazy, disable the controls which I can't mess with right now
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,EM_SETREADONLY,TRUE,0);
@@ -1851,7 +1851,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			hDisasmcontext = LoadMenu(fceu_hInstance,"DISASMCONTEXTMENUS");
 
 			// subclass editfield
-			IDC_DEBUGGER_DISASSEMBLY_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), GWL_WNDPROC, (LONG)IDC_DEBUGGER_DISASSEMBLY_WndProc);
+			IDC_DEBUGGER_DISASSEMBLY_oldWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), GWLP_WNDPROC, (LONG_PTR)IDC_DEBUGGER_DISASSEMBLY_WndProc);
 
 			debugger_open = 1;
 			inDebugger = true;
