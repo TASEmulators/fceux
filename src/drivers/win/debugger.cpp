@@ -370,13 +370,13 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 								break;
 							}
 							if ((tmp=AddBreak(hwndDlg)) == TOO_MANY_BREAKPOINTS) {
-								MessageBox(hwndDlg, "Too many breakpoints, please delete one and try again", "Breakpoint Error", MB_OK);
+								MessageBox(hwndDlg, "Too many breakpoints, please delete one and try again", "Breakpoint Error", MB_OK | MB_ICONERROR);
 								goto endaddbrk;
 							}
 							if (tmp == 2) goto endaddbrk;
 							else if (tmp == INVALID_BREAKPOINT_CONDITION)
 							{
-								MessageBox(hwndDlg, "Invalid breakpoint condition", "Error", MB_OK);
+								MessageBox(hwndDlg, "Invalid breakpoint condition", "Error", MB_OK | MB_ICONERROR);
 								break;
 							}
 							EndDialog(hwndDlg,1);
@@ -1295,7 +1295,7 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 										saved = 1;
 										applied = 0;
 									}
-									else MessageBox(hwndDlg, "Unable to save changes to file", "Error saving to file", MB_OK);
+									else MessageBox(hwndDlg, "Unable to save changes to file", "Error saving to file", MB_OK | MB_ICONERROR);
 								}
 							}
 							break;
@@ -1334,7 +1334,7 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 									count += opsize[patchdata[i][0]];
 								}
 								if (count > 0x10000) { //note: don't use 0xFFFF!
-									MessageBox(hwndDlg, "Patch data cannot exceed address 0xFFFF", "Address error", MB_OK);
+									MessageBox(hwndDlg, "Patch data cannot exceed address 0xFFFF", "Address error", MB_OK | MB_ICONERROR);
 									break;
 								}
 								SetDlgItemText(hwndDlg,IDC_ASSEMBLER_HISTORY,"");
@@ -1399,11 +1399,11 @@ BOOL CALLBACK PatcherCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 							else
 								iapoffset = GetNesFileAddress(GetEditHex(hwndDlg,IDC_ROMPATCHER_OFFSET));
 							if((iapoffset < 16) && (iapoffset != -1)){
-								MessageBox(hDebug, "Sorry, iNes Header editing isn't supported", "Error", MB_OK);
+								MessageBox(hDebug, "Sorry, iNES Header editing isn't supported by this tool. If you want to edit the header, please use iNES Header Editor", "Error", MB_OK | MB_ICONASTERISK);
 								iapoffset = -1;
 							}
 							if((iapoffset > PRGsize[0]) && (iapoffset != -1)){
-								MessageBox(hDebug, "Error: .Nes offset outside of PRG rom", "Error", MB_OK);
+								MessageBox(hDebug, "Error: .Nes offset outside of PRG rom", "Error", MB_OK | MB_ICONERROR);
 								iapoffset = -1;
 							}
 							UpdatePatcher(hwndDlg);
@@ -1420,7 +1420,7 @@ BOOL CALLBACK PatcherCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 							break;
 						case IDC_ROMPATCHER_BTN_SAVE:
 							if (!iNesSave())
-								MessageBox(NULL, "Error Saving", "Error", MB_OK);
+								MessageBox(NULL, "Error Saving", "Error", MB_OK | MB_ICONERROR);
 							break;
 					}
 					break;
@@ -2447,7 +2447,7 @@ void DoPatcher(int address, HWND hParent)
 	if (GameInterface == iNESGI)
 		DialogBox(fceu_hInstance, "ROMPATCHER", hParent, PatcherCallB);
 	else
-		MessageBox(hDebug, "Sorry, The Patcher only works on INES rom images", "Error", MB_OK);
+		MessageBox(hDebug, "Sorry, The Patcher only works on INES rom images", "Error", MB_OK | MB_ICONASTERISK);
 	UpdateDebugger(false);
 }
 

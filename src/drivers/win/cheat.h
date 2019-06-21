@@ -19,8 +19,11 @@ void UpdateCheatListGroupBoxUI();
 void UpdateCheatsAdded();
 void ToggleCheatInputMode(HWND hwndDlg, int modeId);
 void GetUICheatInfo(HWND hwndDlg, char* name, uint32* a, uint8* v, int* c);
+void GetUIGGInfo(HWND hwndDlg, uint32* a, uint8* v, int* c);
 inline void GetCheatStr(char* buf, int a, int v, int c);
 inline void GetCheatCodeStr(char* buf, int a, int v, int c);
+static void SetCheatToolTip(HWND hwndDlg, UINT id);
+char* GetCheatToolTipStr(HWND hwndDlg, UINT id);
 
 extern unsigned int FrozenAddressCount;
 extern std::vector<uint16> FrozenAddresses;

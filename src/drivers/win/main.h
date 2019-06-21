@@ -64,6 +64,8 @@ extern int AutoFireOffset;
 extern int vmod;
 
 extern char* directory_names[14];
+extern int edit_id[14];
+extern int browse_btn_id[14];
 
 char *GetRomName(bool force = false);	//Checks if rom is loaded, if so, outputs the Rom name with no directory path or file extension
 char *GetRomPath(bool force = false);	//Checks if rom is loaded, if so, outputs the Rom path only
