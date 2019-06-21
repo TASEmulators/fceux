@@ -833,7 +833,7 @@ INT_PTR CALLBACK TASEditorWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 				switch(((LPNMHDR)lParam)->code)
 				{
 				case NM_CUSTOMDRAW:
-					SetWindowLongPtr(hWnd, DWL_MSGRESULT, pianoRoll.handleCustomDraw((NMLVCUSTOMDRAW*)lParam));
+					SetWindowLongPtr(hWnd, DWLP_MSGRESULT, pianoRoll.handleCustomDraw((NMLVCUSTOMDRAW*)lParam));
 					return TRUE;
 				case LVN_GETDISPINFO:
 					pianoRoll.getDispInfo((NMLVDISPINFO*)lParam);
@@ -854,7 +854,7 @@ INT_PTR CALLBACK TASEditorWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 				switch(((LPNMHDR)lParam)->code)
 				{
 				case NM_CUSTOMDRAW:
-					SetWindowLongPtr(hWnd, DWL_MSGRESULT, bookmarks.handleCustomDraw((NMLVCUSTOMDRAW*)lParam));
+					SetWindowLongPtr(hWnd, DWLP_MSGRESULT, bookmarks.handleCustomDraw((NMLVCUSTOMDRAW*)lParam));
 					return TRUE;
 				case LVN_GETDISPINFO:
 					bookmarks.getDispInfo((NMLVDISPINFO*)lParam);
@@ -865,7 +865,7 @@ INT_PTR CALLBACK TASEditorWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 				switch(((LPNMHDR)lParam)->code)
 				{
 				case NM_CUSTOMDRAW:
-					SetWindowLongPtr(hWnd, DWL_MSGRESULT, history.handleCustomDraw((NMLVCUSTOMDRAW*)lParam));
+					SetWindowLongPtr(hWnd, DWLP_MSGRESULT, history.handleCustomDraw((NMLVCUSTOMDRAW*)lParam));
 					return TRUE;
 				case LVN_GETDISPINFO:
 					history.getDispInfo((NMLVDISPINFO*)lParam);
