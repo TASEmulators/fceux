@@ -43,7 +43,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr);
 void PrintOffsetToSeekAndBookmarkFields(int offset);
 
 void LoadGameDebuggerData(HWND hwndDlg);
-void updateGameDependentMenusDebugger(unsigned int enable);
+void updateGameDependentMenusDebugger();
 
 extern bool inDebugger;
 
@@ -69,5 +69,7 @@ public:
 
 } *debugSystem;
 
+// extern WNDPROC DefaultEditCtrlProc;
+// extern INT_PTR APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP);
 
 #endif

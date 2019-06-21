@@ -70,7 +70,7 @@ static HMENU hDisasmcontext;     //Handle to context menu
 static HMENU hDisasmcontextsub;  //Handle to context sub menu
 WNDPROC IDC_DEBUGGER_DISASSEMBLY_oldWndProc = 0;
 
-static HFONT hFont;
+// static HFONT hFont;
 static SCROLLINFO si;
 
 bool debuggerAutoload = false;
@@ -276,8 +276,12 @@ INT_PTR CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	{
 		case WM_INITDIALOG:
 			CenterWindow(hwndDlg);
-			SendDlgItemMessage(hwndDlg,IDC_ADDBP_ADDR_START,EM_SETLIMITTEXT,4,0);
-			SendDlgItemMessage(hwndDlg,IDC_ADDBP_ADDR_END,EM_SETLIMITTEXT,4,0);
+			SendDlgItemMessage(hwndDlg, IDC_ADDBP_ADDR_START, EM_SETLIMITTEXT, 4, 0);
+			SendDlgItemMessage(hwndDlg, IDC_ADDBP_ADDR_END, EM_SETLIMITTEXT, 4, 0);
+
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_ADDBP_ADDR_START), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_ADDBP_ADDR_END), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+
 			if (WP_edit >= 0)
 			{
 				SetWindowText(hwndDlg,"Edit Breakpoint...");
@@ -359,7 +363,7 @@ INT_PTR CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								int tmp = NewBreakWindows(hwndDlg,WP_edit,(BOOL)(watchpoint[WP_edit].flags&WP_E));
 								if (tmp == 2 || tmp == INVALID_BREAKPOINT_CONDITION)
 								{
-									MessageBox(hwndDlg, "Invalid breakpoint condition", "Error", MB_OK);
+									MessageBox(hwndDlg, "Invalid breakpoint condition", "Error", MB_OK | MB_ICONERROR);
 									break;
 								}
 								EndDialog(hwndDlg,1);
@@ -1820,6 +1824,14 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,EM_SETLIMITTEXT,4,0);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,EM_SETLIMITTEXT,2,0);
 
+			// limit input
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PCSEEK), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PC), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_A), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_X), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_Y), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_BOOKMARK), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+
 			//I'm lazy, disable the controls which I can't mess with right now
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,EM_SETREADONLY,TRUE,0);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,EM_SETREADONLY,TRUE,0);
@@ -1839,7 +1851,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			hDisasmcontext = LoadMenu(fceu_hInstance,"DISASMCONTEXTMENUS");
 
 			// subclass editfield
-			IDC_DEBUGGER_DISASSEMBLY_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), GWL_WNDPROC, (LONG)IDC_DEBUGGER_DISASSEMBLY_WndProc);
+			IDC_DEBUGGER_DISASSEMBLY_oldWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), GWLP_WNDPROC, (LONG_PTR)IDC_DEBUGGER_DISASSEMBLY_WndProc);
 
 			debugger_open = 1;
 			inDebugger = true;
@@ -2475,11 +2487,11 @@ void UpdatePatcher(HWND hwndDlg){
 
 /// Updates debugger controls that should be enabled/disabled if a game is loaded.
 /// @param enable Flag that indicates whether the menus should be enabled (1) or disabled (0). 
-void updateGameDependentMenusDebugger(unsigned int enable) {
+void updateGameDependentMenusDebugger() {
 	if (!hDebug)
 		return;
 
-	//EnableWindow(GetDlgItem(hDebug,DEBUGLOADDEB),(enable ? 0 : 1));
+	// EnableWindow(GetDlgItem(hDebug,DEBUGLOADDEB), GameInfo != 0 ? FALSE : TRUE);
 }
 
 void DoDebug(uint8 halt)
@@ -2496,7 +2508,7 @@ void DoDebug(uint8 halt)
 		ShowWindow(hDebug, SW_SHOWNORMAL);
 		SetForegroundWindow(hDebug);
 		
-		updateGameDependentMenusDebugger(GameInfo != 0);
+		updateGameDependentMenusDebugger();
 
 		if (GameInfo)
 			UpdateDebugger(true);

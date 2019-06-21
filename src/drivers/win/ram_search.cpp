@@ -1245,7 +1245,6 @@ LRESULT CustomDraw (LPARAM lParam)
 	{
 		case CDDS_PREPAINT :
 			return CDRF_NOTIFYITEMDRAW;
-
 		case CDDS_ITEMPREPAINT:
 		{
 			int rv = CDRF_DODEFAULT;
@@ -1398,38 +1397,15 @@ static BOOL SelectingByKeyboard()
 
 INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	RECT r;
-	RECT r2;
-	int dx1, dy1, dx2, dy2;
+
 	static int watchIndex=0;
 	switch(uMsg)
 	{
 		case WM_INITDIALOG: {
 			RamSearchHWnd = hDlg;
 
-			GetWindowRect(hWnd, &r);
-			dx1 = (r.right - r.left) / 2;
-			dy1 = (r.bottom - r.top) / 2;
+			CalcSubWindowPos(hDlg, NULL);
 
-			GetWindowRect(hDlg, &r2);
-			dx2 = (r2.right - r2.left) / 2;
-			dy2 = (r2.bottom - r2.top) / 2;
-
-			// push it away from the main window if we can
-			const int width = (r.right-r.left); 
-			const int width2 = (r2.right-r2.left); 
-			if(r.left+width2 + width < GetSystemMetrics(SM_CXSCREEN))
-			{
-				r.right += width;
-				r.left += width;
-			}
-			else if((int)r.left - (int)width2 > 0)
-			{
-				r.right -= width2;
-				r.left -= width2;
-			}
-
-			SetWindowPos(hDlg, NULL, r.left, r.top, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
 			switch(rs_o)
 			{
 				case '<':
@@ -1550,7 +1526,7 @@ INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			{
 				case NM_CUSTOMDRAW:
 				{
-					SetWindowLong(hDlg, DWL_MSGRESULT, CustomDraw(lParam));
+					SetWindowLongPtr(hDlg, DWL_MSGRESULT, CustomDraw(lParam));
 					return TRUE;
 				}
 

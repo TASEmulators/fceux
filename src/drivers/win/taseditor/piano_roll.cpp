@@ -141,9 +141,9 @@ void PIANO_ROLL::init()
 	ListView_SetExtendedListViewStyleEx(hwndList, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
 	// subclass the header
 	hwndHeader = ListView_GetHeader(hwndList);
-	hwndHeaderOldWndproc = (WNDPROC)SetWindowLong(hwndHeader, GWL_WNDPROC, (LONG)headerWndProc);
+	hwndHeaderOldWndproc = (WNDPROC)SetWindowLongPtr(hwndHeader, GWLP_WNDPROC, (LONG_PTR)headerWndProc);
 	// subclass the whole listview
-	hwndListOldWndProc = (WNDPROC)SetWindowLong(hwndList, GWL_WNDPROC, (LONG)listWndProc);
+	hwndListOldWndProc = (WNDPROC)SetWindowLongPtr(hwndList, GWLP_WNDPROC, (LONG_PTR)listWndProc);
 	// disable Visual Themes for header
 	SetWindowTheme(hwndHeader, L"", L"");
 	// setup images for the listview

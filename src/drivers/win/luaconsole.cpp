@@ -102,9 +102,9 @@ void WinLuaOnStop(int hDlgAsInt)
 
 INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	RECT r;
-	RECT r2;
-	int dx1, dy1, dx2, dy2;
+//	RECT r;
+//	RECT r2;
+//	int dx1, dy1, dx2, dy2;
 
 	switch (msg) {
 
@@ -113,43 +113,10 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 		// remove the 30000 character limit from the console control
 		SendMessage(GetDlgItem(hDlg, IDC_LUACONSOLE),EM_LIMITTEXT,0,0);
 
-		GetWindowRect(hAppWnd, &r);
-		dx1 = (r.right - r.left) / 2;
-		dy1 = (r.bottom - r.top) / 2;
+		extern POINT CalcSubWindowPos(HWND hDlg, POINT* conf);
+		CalcSubWindowPos(hDlg, NULL);
 
-		GetWindowRect(hDlg, &r2);
-		dx2 = (r2.right - r2.left) / 2;
-		dy2 = (r2.bottom - r2.top) / 2;
-
-		//int windowIndex = 0;//std::find(LuaScriptHWnds.begin(), LuaScriptHWnds.end(), hDlg) - LuaScriptHWnds.begin();
-		//int staggerOffset = windowIndex * 24;
-		//r.left += staggerOffset;
-		//r.right += staggerOffset;
-		//r.top += staggerOffset;
-		//r.bottom += staggerOffset;
-
-		// push it away from the main window if we can
-		const int width = (r.right-r.left); 
-		const int width2 = (r2.right-r2.left); 
-		const int rspace = GetSystemMetrics(SM_CXSCREEN)- (r.left+width2+width);
-		if(rspace > r.left && r.left+width2 + width < GetSystemMetrics(SM_CXSCREEN))
-		{
-			r.right += width;
-			r.left += width;
-		}
-		else if((int)r.left - (int)width2 > 0)
-		{
-			r.right -= width2;
-			r.left -= width2;
-		}
-		else if(r.left+width2 + width < GetSystemMetrics(SM_CXSCREEN))
-		{
-			r.right += width;
-			r.left += width;
-		}
-
-		SetWindowPos(hDlg, NULL, r.left, r.top, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-
+		
 		RECT r3;
 		GetClientRect(hDlg, &r3);
 		windowInfo.width = r3.right - r3.left;

@@ -19,7 +19,7 @@ struct CreateMovieParameters
 extern char *recent_files[];
 extern char *recent_lua[];
 extern char *recent_movie[];
-extern HWND pwindow;
+// extern HWND pwindow;
 
 HWND GetMainHWND();
 
@@ -38,6 +38,7 @@ void SetMainWindowStuff();
 void GetMouseData(uint32 (&md)[3]);
 void GetMouseRelative(int32 (&md)[3]);
 //void ChangeMenuItemText(int menuitem, string text);
+POINT CalcSubWindowPos(HWND hDlg, POINT* conf);
 
 template<int BUFSIZE>
 inline std::string GetDlgItemText(HWND hDlg, int nIDDlgItem) {
@@ -126,4 +127,21 @@ struct HOTKEYMENUINDEX {
 
 void UpdateMenuHotkeys(FCEUMENU_INDEX index);
 int GetCurrentContextIndex();
+
+inline bool (*GetIsLetterLegal(UINT id))(char letter);
+inline char* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter));
+inline void ShowLetterIllegalError(HWND hwnd, bool(*IsLetterLegal)(char letter), bool balloon = true);
+void ShowLetterIllegalBalloonTip(HWND hwnd, bool(*IsLetterLegal)(char letter));
+inline void ShowLetterIllegalMessageBox(HWND hwnd, bool(*IsLetterLegal)(char letter));
+inline bool IsInputLegal(bool(*IsLetterLegal)(char letter), char letter);
+inline bool IsLetterLegalGG(char letter);
+inline bool IsLetterLegalHex(char letter);
+inline bool IsLetterLegalCheat(char letter);
+inline bool IsLetterLegalDec(char letter);
+inline bool IsLetterLegalSize(char letter);
+inline bool IsLetterLegalFloat(char letter);
+
+extern WNDPROC DefaultEditCtrlProc;
+extern LRESULT APIENTRY FilterEditCtrlProc(HWND hDlg, UINT msg, WPARAM wP, LPARAM lP);
+
 #endif

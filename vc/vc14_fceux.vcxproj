@@ -557,6 +557,7 @@
     <ClCompile Include="..\src\drivers\win\directories.cpp" />
     <ClCompile Include="..\src\drivers\win\gui.cpp" />
     <ClCompile Include="..\src\drivers\win\guiconfig.cpp" />
+    <ClCompile Include="..\src\drivers\win\header_editor.cpp" />
     <ClCompile Include="..\src\drivers\win\help.cpp" />
     <ClCompile Include="..\src\drivers\win\input.cpp" />
     <ClCompile Include="..\src\drivers\win\joystick.cpp" />
@@ -1012,6 +1013,7 @@
     <ClInclude Include="..\src\drivers\win\directories.h" />
     <ClInclude Include="..\src\drivers\win\gui.h" />
     <ClInclude Include="..\src\drivers\win\guiconfig.h" />
+    <ClInclude Include="..\src\drivers\win\header_editor.h" />
     <ClInclude Include="..\src\drivers\win\help.h" />
     <ClInclude Include="..\src\drivers\win\input.h" />
     <ClInclude Include="..\src\drivers\win\joystick.h" />
