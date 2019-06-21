@@ -189,11 +189,13 @@ static void FCEU_CloseGame(void)
 		}
 
 		if (GameInfo->type != GIT_NSF) {
+#ifdef WIN32
 			if (disableAutoLSCheats == 2)
 				FCEU_FlushGameCheats(0, 1);
 			else if (disableAutoLSCheats == 1)
 				AskSaveCheat();
 			else if (disableAutoLSCheats == 0)
+#endif
 				FCEU_FlushGameCheats(0, 0);
 		}
 
