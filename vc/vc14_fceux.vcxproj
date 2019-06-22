@@ -276,16 +276,14 @@
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <ForceConformanceInForLoopScope>false</ForceConformanceInForLoopScope>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;vfw32.lib;winmm.lib;htmlhelp.lib;../src/drivers/win/directx/x64/dsound.lib;../src/drivers/win/directx/x64/dxguid.lib;../src/drivers/win/directx/x64/ddraw.lib;../src/drivers/win/directx/x64/dinput.lib;../src/drivers/win/lua/x64/lua51.lib;../src/drivers/win/lua/x64/luaperks.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comctl32.lib;ws2_32.lib;vfw32.lib;winmm.lib;htmlhelp.lib;../src/drivers/win/directx/x64/dsound.lib;../src/drivers/win/directx/x64/dxguid.lib;../src/drivers/win/directx/x64/ddraw.lib;../src/drivers/win/directx/x64/dinput.lib;../src/drivers/win/lua/x64/lua51.lib;../src/drivers/win/lua/x64/luaperks.lib;psapi.lib;mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
@@ -315,7 +313,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;vfw32.lib;winmm.lib;htmlhelp.lib;../src/drivers/win/directx/x64/dsound.lib;../src/drivers/win/directx/x64/dxguid.lib;../src/drivers/win/directx/x64/ddraw.lib;../src/drivers/win/directx/x64/dinput.lib;../src/drivers/win/lua/x64/lua51.lib;../src/drivers/win/lua/x64/luaperks.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comctl32.lib;ws2_32.lib;vfw32.lib;winmm.lib;htmlhelp.lib;../src/drivers/win/directx/x64/dsound.lib;../src/drivers/win/directx/x64/dxguid.lib;../src/drivers/win/directx/x64/ddraw.lib;../src/drivers/win/directx/x64/dinput.lib;../src/drivers/win/lua/x64/lua51.lib;../src/drivers/win/lua/x64/luaperks.lib;psapi.lib;mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -347,7 +345,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;vfw32.lib;winmm.lib;htmlhelp.lib;../src/drivers/win/directx/x64/dsound.lib;../src/drivers/win/directx/x64/dxguid.lib;../src/drivers/win/directx/x64/ddraw.lib;../src/drivers/win/directx/x64/dinput.lib;../src/drivers/win/lua/x64/lua51.lib;../src/drivers/win/lua/x64/luaperks.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comctl32.lib;ws2_32.lib;vfw32.lib;winmm.lib;htmlhelp.lib;../src/drivers/win/directx/x64/dsound.lib;../src/drivers/win/directx/x64/dxguid.lib;../src/drivers/win/directx/x64/ddraw.lib;../src/drivers/win/directx/x64/dinput.lib;../src/drivers/win/lua/x64/lua51.lib;../src/drivers/win/lua/x64/luaperks.lib;psapi.lib;mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
