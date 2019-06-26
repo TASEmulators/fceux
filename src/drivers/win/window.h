@@ -140,6 +140,8 @@ inline bool IsLetterLegalCheat(char letter);
 inline bool IsLetterLegalDec(char letter);
 inline bool IsLetterLegalSize(char letter);
 inline bool IsLetterLegalFloat(char letter);
+inline bool IsLetterLegalDecHexMixed(char letter);
+inline bool IsLetterLegalUnsignedDecHexMixed(char letter);
 
 extern WNDPROC DefaultEditCtrlProc;
 extern LRESULT APIENTRY FilterEditCtrlProc(HWND hDlg, UINT msg, WPARAM wP, LPARAM lP);

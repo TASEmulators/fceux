@@ -1288,10 +1288,10 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		EnableWindow(GetDlgItem(hwndDlg, IDC_TVASPECT_Y), eoptions&EO_TVASPECT);
 		EnableWindow(GetDlgItem(hwndDlg, IDC_STATIC_SLASHTEXT), eoptions&EO_TVASPECT);
 
-		DefaultEditCtrlProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_WINSIZE_MUL_X), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-		SetWindowLong(GetDlgItem(hwndDlg, IDC_WINSIZE_MUL_Y), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-		SetWindowLong(GetDlgItem(hwndDlg, IDC_TVASPECT_X), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-		SetWindowLong(GetDlgItem(hwndDlg, IDC_TVASPECT_Y), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+		DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_WINSIZE_MUL_X), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+		SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_WINSIZE_MUL_Y), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+		SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_TVASPECT_X), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+		SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_TVASPECT_Y), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 
 		break;
 	}

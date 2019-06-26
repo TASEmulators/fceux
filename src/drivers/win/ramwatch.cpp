@@ -854,6 +854,11 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					EnableWindow(GetDlgItem(hDlg, IDC_4_BYTES), FALSE);
 					SetFocus(GetDlgItem(hDlg, IDC_PROMPT_EDIT));
 				}
+				else {
+					SetFocus(GetDlgItem(hDlg, IDC_EDIT_COMPAREADDRESS));
+					SendDlgItemMessage(hDlg, IDC_EDIT_COMPAREADDRESS, EM_SETLIMITTEXT, 4, 0);
+					DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_COMPAREADDRESS), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+				}
 			}
 
 			return true;

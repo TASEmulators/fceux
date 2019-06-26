@@ -296,17 +296,17 @@ HWND InitHeaderEditDialog(HWND hwnd, iNES_HEADER* header)
 
 	// Change the default wndproc of these control to limit their text
 	// PRG ROM
-	DefaultEditCtrlProc = (WNDPROC)SetWindowLong(GetDlgItem(GetDlgItem(hwnd, IDC_PRGROM_COMBO), IDC_PRGROM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_PRGROM_COMBO), IDC_PRGROM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 	// PRG RAM
-	SetWindowLong(GetDlgItem(GetDlgItem(hwnd, IDC_PRGRAM_COMBO), IDC_PRGRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_PRGRAM_COMBO), IDC_PRGRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 	// PRG NVRAM
-	SetWindowLong(GetDlgItem(GetDlgItem(hwnd, IDC_PRGNVRAM_COMBO), IDC_PRGNVRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_PRGNVRAM_COMBO), IDC_PRGNVRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 	// CHR ROM
-	SetWindowLong(GetDlgItem(GetDlgItem(hwnd, IDC_CHRROM_COMBO), IDC_CHRROM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_CHRROM_COMBO), IDC_CHRROM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 	// CHR RAM
-	SetWindowLong(GetDlgItem(GetDlgItem(hwnd, IDC_CHRRAM_COMBO), IDC_CHRRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_CHRRAM_COMBO), IDC_CHRRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 	// CHR NVRAM
-	SetWindowLong(GetDlgItem(GetDlgItem(hwnd, IDC_CHRNVRAM_COMBO), IDC_CHRNVRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_CHRNVRAM_COMBO), IDC_CHRNVRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 
 
 	ToggleINES20(hwnd, IsDlgButtonChecked(hwnd, IDC_RADIO_VERSION_INES20) == BST_CHECKED);

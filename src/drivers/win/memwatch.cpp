@@ -795,7 +795,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 
 			// experimental: limit the text length and input to hex values
 			SendDlgItemMessage(hwndDlg, MW_ADDR[i], EM_SETLIMITTEXT, 4, 0);
-			DefaultEditCtrlProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, MW_ADDR[i]), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, MW_ADDR[i]), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
 		}
 
 		//Populate Formula pulldown menus

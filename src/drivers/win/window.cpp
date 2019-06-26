@@ -3342,10 +3342,6 @@ bool inline (*GetIsLetterLegal(UINT id))(char letter)
 		// Debugger -> Add breakpoint
 		case IDC_ADDBP_ADDR_START: case IDC_ADDBP_ADDR_END:
 
-		// RAM Watch / RAM Search / Cheat -> Add watch
-		// TODO: Some other features
-		// case IDC_EDIT_COMPAREADDRESS:
-
 		// Address, Value, Compare, Known Value, Note equal, Greater than and Less than in Cheat
 		case IDC_CHEAT_ADDR: case IDC_CHEAT_VAL: case IDC_CHEAT_COM:
 		case IDC_CHEAT_VAL_KNOWN: case IDC_CHEAT_VAL_NE_BY:
@@ -3361,6 +3357,10 @@ bool inline (*GetIsLetterLegal(UINT id))(char letter)
 		case MW_ADDR12: case MW_ADDR13: case MW_ADDR14: case MW_ADDR15:
 		case MW_ADDR16: case MW_ADDR17: case MW_ADDR18: case MW_ADDR19:
 		case MW_ADDR20: case MW_ADDR21: case MW_ADDR22: case MW_ADDR23:
+
+		// Specific Address in RAM Search
+		// RAM Watch / RAM Search / Cheat -> Add watch
+		case IDC_EDIT_COMPAREADDRESS:
 			return IsLetterLegalHex;
 
 		// Size multiplier and TV Aspect in Video Config
@@ -3372,10 +3372,24 @@ bool inline (*GetIsLetterLegal(UINT id))(char letter)
 		case IDC_CHEAT_TEXT:
 			return IsLetterLegalCheat;
 
-		// PRG ROM, PRG RAM, PRG NVRAM, CHR ROM, CHR RAM, CHR NVRAM in iNES Header Editor
+		// PRG ROM, PRG RAM, PRG NVRAM, CHR ROM, CHR RAM and CHR NVRAM in iNES Header Editor
 		case IDC_PRGROM_EDIT: case IDC_PRGRAM_EDIT: case IDC_PRGNVRAM_EDIT:
 		case IDC_CHRROM_EDIT: case IDC_CHRRAM_EDIT: case IDC_CHRNVRAM_EDIT:
 			return IsLetterLegalSize;
+
+		// Specific value, Different by and Modulo in RAM search
+		case IDC_EDIT_COMPAREVALUE:
+		case IDC_EDIT_DIFFBY:
+		case IDC_EDIT_MODBY:
+		{
+			extern char rs_t;
+			switch (rs_t)
+            {
+				case 's': return IsLetterLegalDecHexMixed;
+				case 'u': return IsLetterLegalUnsignedDecHexMixed;
+				case 'h': return IsLetterLegalHex;
+			}
+		}
 	}
 	return NULL;
 }
@@ -3430,7 +3444,28 @@ inline char* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter))
 	if (IsLetterLegal == IsLetterLegalSize)
 		return "You can only type decimal number followed with B, KB or MB.";
 	if (IsLetterLegal == IsLetterLegalDec)
-		return "You can only type decimal number (minus is acceptable).";
+		return "You can only type decimal number (sign character is acceptable).";
+	if (IsLetterLegal == IsLetterLegalDecHexMixed)
+		return
+		"You can only type decimal or hexademical number\n"
+		"(sign character is acceptable).\n\n"
+		"When your number contains letter A-F,\n"
+		"it is regarded as hexademical number,\n"
+		"however, if you want to express a heademical number\n"
+		"but all the digits are in 0-9,\n"
+		"you must add a $ prefix to prevent ambiguous.\n"
+		"eg. 10 is a decimal number,\n"
+		"$10 means a hexademical number that is 16 in decimal.";
+	if (IsLetterLegal == IsLetterLegalUnsignedDecHexMixed)
+		return
+		"You can only type decimal or hexademical number.\n\n"
+		"When your number contains letter A-F,\n"
+		"it is regarded as hexademical number,\n"
+		"however, if you want to express a heademical number\n"
+		"but all the digits are in 0-9,\n"
+		"you must add a $ prefix to prevent ambiguous.\n"
+		"eg. 10 is a decimal number,\n"
+		"$10 means a hexademical number that is 16 in decimal.";
 
 	return "Your input contains invalid characters.";
 }
@@ -3466,10 +3501,20 @@ inline bool IsLetterLegalSize(char letter)
 
 inline bool IsLetterLegalDec(char letter)
 {
-	return letter >= '0' && letter <= '9' || letter == '-';
+	return letter >= '0' && letter <= '9' || letter == '-' || letter == '+';
 }
 
 inline bool IsLetterLegalFloat(char letter)
 {
-	return letter >= '0' && letter <= '9' || letter == '.';
+	return letter >= '0' && letter <= '9' || letter == '.' || letter == '-' || letter == '+';
+}
+
+inline bool IsLetterLegalDecHexMixed(char letter)
+{
+	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '$' || letter == '-' || letter == '+';
+}
+
+inline bool IsLetterLegalUnsignedDecHexMixed(char letter)
+{
+	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '$';
 }
