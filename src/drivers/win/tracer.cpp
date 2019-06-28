@@ -373,7 +373,7 @@ BOOL CALLBACK TracerResizingEnumWindowsProc(HWND hwnd, LPARAM lParam)
 	return TRUE;
 }
 
-BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	int i;
 	switch(uMsg)
@@ -443,7 +443,7 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			EnableTracerMenuItems();
 
 			// subclass editfield
-			IDC_TRACER_LOG_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_TRACER_LOG), GWL_WNDPROC, (LONG)IDC_TRACER_LOG_WndProc);
+			IDC_TRACER_LOG_oldWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_TRACER_LOG), GWLP_WNDPROC, (LONG_PTR)IDC_TRACER_LOG_WndProc);
 			break;
 		}
 		case WM_WINDOWPOSCHANGED:

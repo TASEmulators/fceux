@@ -6194,7 +6194,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 	info_onstart = WinLuaOnStart;
 	info_onstop = WinLuaOnStop;
 	if(!LuaConsoleHWnd)
-		LuaConsoleHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_LUA), hAppWnd, (DLGPROC) DlgLuaScriptDialog);
+		LuaConsoleHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_LUA), hAppWnd, DlgLuaScriptDialog);
 	info_uid = (int)LuaConsoleHWnd;
 #else
 	info_print = NULL;

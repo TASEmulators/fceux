@@ -332,7 +332,7 @@ char* GetKeyComboName(int c)
 }
 
 //Callback function for the dialog where the user can change hotkeys.
-BOOL CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	static HANDLE hThread = NULL;
 	static DWORD dwThreadId = 0;
@@ -702,7 +702,7 @@ void ApplyDefaultCommandMapping()
 /**
 * Callback function of the Map Input dialog
 **/
-BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
 	{

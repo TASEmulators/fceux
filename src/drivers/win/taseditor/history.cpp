@@ -116,7 +116,7 @@ void HISTORY::init()
 	hwndHistoryList = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_HISTORYLIST);
 	ListView_SetExtendedListViewStyleEx(hwndHistoryList, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
 	// subclass the listview
-	hwndHistoryList_oldWndProc = (WNDPROC)SetWindowLong(hwndHistoryList, GWL_WNDPROC, (LONG)historyListWndProc);
+	hwndHistoryList_oldWndProc = (WNDPROC)SetWindowLongPtr(hwndHistoryList, GWLP_WNDPROC, (LONG_PTR)historyListWndProc);
 	LVCOLUMN lvc;
 	lvc.mask = LVCF_WIDTH | LVCF_FMT;
 	lvc.cx = HISTORY_LIST_WIDTH;

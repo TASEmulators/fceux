@@ -71,7 +71,7 @@ void CloseTimingDialog(HWND hwndDlg)
 /**
 * Callback function of the Timing configuration dialog.
 **/
-BOOL CALLBACK TimingConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK TimingConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
 	{

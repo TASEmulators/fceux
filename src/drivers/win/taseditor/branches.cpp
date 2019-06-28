@@ -56,7 +56,7 @@ void BRANCHES::init()
 	free();
 
 	// subclass BranchesBitmap
-	hwndBranchesBitmap_oldWndProc = (WNDPROC)SetWindowLong(bookmarks.hwndBranchesBitmap, GWL_WNDPROC, (LONG)BranchesBitmapWndProc);
+	hwndBranchesBitmap_oldWndProc = (WNDPROC)SetWindowLongPtr(bookmarks.hwndBranchesBitmap, GWLP_WNDPROC, (LONG_PTR)BranchesBitmapWndProc);
 
 	// init arrays
 	branchX.resize(TOTAL_BOOKMARKS+1);

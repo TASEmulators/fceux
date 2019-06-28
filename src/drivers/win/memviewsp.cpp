@@ -57,7 +57,7 @@ char bookmarkDescription[51] = {0};
 BOOL CenterWindow(HWND hwndDlg);
 
 /// Callback function for the name bookmark dialog
-BOOL CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{

@@ -57,7 +57,7 @@ void SELECTION::init()
 	SendMessage(hwndSelectionMarkerEditField, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
 	SendMessage(hwndSelectionMarkerEditField, WM_SETFONT, (WPARAM)pianoRoll.hMarkersEditFont, 0);
 	// subclass the edit control
-	selectionMarkerEdit_oldWndproc = (WNDPROC)SetWindowLong(hwndSelectionMarkerEditField, GWL_WNDPROC, (LONG)LowerMarkerEditWndProc);
+	selectionMarkerEdit_oldWndproc = (WNDPROC)SetWindowLongPtr(hwndSelectionMarkerEditField, GWLP_WNDPROC, (LONG_PTR)LowerMarkerEditWndProc);
 
 	reset();
 }

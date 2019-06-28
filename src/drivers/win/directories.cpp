@@ -89,7 +89,7 @@ void CloseDirectoriesDialog(HWND hwndDlg)
 }
 
 ///Callback function for the directories configuration dialog.
-static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
 	{

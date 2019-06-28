@@ -219,7 +219,7 @@ unsigned int ruleBox_to_ruleInput(unsigned int ruleBox)
 	return ruleBox - RULE_BOX_1 + RULE_INPUT_1;
 }
 
-BOOL CALLBACK MonitorCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK MonitorCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg) {
 		case WM_MOVE: {

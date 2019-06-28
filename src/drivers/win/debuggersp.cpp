@@ -62,7 +62,7 @@ int debuggerWasActive = 0;
 char temp_chr[40] = {0};
 char delimiterChar[2] = "#";
 
-extern BOOL CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+extern INT_PTR CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 extern char bookmarkDescription[];
 
 MemoryMappedRegister RegNames[] = {
@@ -919,7 +919,7 @@ void GoToDebuggerBookmark(HWND hwnd)
 	Disassemble(hwnd, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, n);
 }
 
-BOOL CALLBACK SymbolicNamingCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK SymbolicNamingCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
 	{
