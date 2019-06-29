@@ -47,7 +47,7 @@ struct {
 	ControlLayoutState layoutState [numControlLayoutInfos];
 } windowInfo;
 
-void PrintToWindowConsole(int hDlgAsInt, const char* str)
+void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str)
 {
 	HWND hDlg = (HWND)hDlgAsInt;
 	HWND hConsole = GetDlgItem(hDlg, IDC_LUACONSOLE);
@@ -69,7 +69,7 @@ void PrintToWindowConsole(int hDlgAsInt, const char* str)
 	}
 }
 
-void WinLuaOnStart(int hDlgAsInt)
+void WinLuaOnStart(intptr_t hDlgAsInt)
 {
 	HWND hDlg = (HWND)hDlgAsInt;
 	//LuaPerWindowInfo& info = LuaWindowInfo[hDlg];
@@ -81,7 +81,7 @@ void WinLuaOnStart(int hDlgAsInt)
 //	Show_Genesis_Screen(HWnd); // otherwise we might never show the first thing the script draws
 }
 
-void WinLuaOnStop(int hDlgAsInt)
+void WinLuaOnStop(intptr_t hDlgAsInt)
 {
 	HWND hDlg = (HWND)hDlgAsInt;
 	//LuaPerWindowInfo& info = LuaWindowInfo[hDlg];
@@ -229,8 +229,8 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 				SendDlgItemMessage(hDlg,IDC_EDIT_LUAPATH,WM_GETTEXT,(WPARAM)512,(LPARAM)Str_Tmp);
 				// tell the OS to open the file with its associated editor,
 				// without blocking on it or leaving a command window open.
-				if((int)ShellExecute(NULL, "edit", Str_Tmp, NULL, NULL, SW_SHOWNORMAL) == SE_ERR_NOASSOC)
-					if((int)ShellExecute(NULL, "open", Str_Tmp, NULL, NULL, SW_SHOWNORMAL) == SE_ERR_NOASSOC)
+				if((intptr_t)ShellExecute(NULL, "edit", Str_Tmp, NULL, NULL, SW_SHOWNORMAL) == SE_ERR_NOASSOC)
+					if((intptr_t)ShellExecute(NULL, "open", Str_Tmp, NULL, NULL, SW_SHOWNORMAL) == SE_ERR_NOASSOC)
 						ShellExecute(NULL, NULL, "notepad", Str_Tmp, NULL, SW_SHOWNORMAL);
 			}	break;
 
