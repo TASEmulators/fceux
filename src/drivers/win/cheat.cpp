@@ -343,16 +343,16 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			SendDlgItemMessage(hwndDlg, IDC_CHEAT_GAME_GENIE_TEXT, EM_SETLIMITTEXT, 8, 0);
 
 			// limit their characters
-			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_ADDR), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_ADDR), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_VAL), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_COM), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_KNOWN), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_NE_BY), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_GT_BY), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_LT_BY), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_TEXT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_GAME_GENIE_TEXT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_ADDR), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_ADDR), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_VAL), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_COM), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_KNOWN), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_NE_BY), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_GT_BY), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_VAL_LT_BY), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_TEXT), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_GAME_GENIE_TEXT), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 
 			// Create popup to "Auto load / save with game", since it has 3 states and the text need some explanation
 			SetCheatToolTip(hwndDlg, IDC_CHEAT_AUTOLOADSAVE);
@@ -1109,10 +1109,10 @@ INT_PTR CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			SendDlgItemMessage(hwndDlg, IDC_GAME_GENIE_VAL, WM_SETFONT, (WPARAM)hNewFont, FALSE);
 
 			// limit their characters
-			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_GAME_GENIE_CODE), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_GAME_GENIE_ADDR), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_GAME_GENIE_COMP), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_GAME_GENIE_VAL), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_GAME_GENIE_CODE), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_GAME_GENIE_ADDR), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_GAME_GENIE_COMP), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_GAME_GENIE_VAL), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 		}
 		break;
 		case WM_CLOSE:
