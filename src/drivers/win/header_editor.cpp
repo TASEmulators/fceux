@@ -281,32 +281,32 @@ HWND InitHeaderEditDialog(HWND hwnd, iNES_HEADER* header)
 
 	// Assign ID to the sub edit control in these comboboxes
 	// PRG ROM
-	SetWindowLong(GetWindow(GetDlgItem(hwnd, IDC_PRGROM_COMBO), GW_CHILD), GWL_ID, IDC_PRGROM_EDIT);
+	SetWindowLongPtr(GetWindow(GetDlgItem(hwnd, IDC_PRGROM_COMBO), GW_CHILD), GWL_ID, IDC_PRGROM_EDIT);
 	// PRG RAM
-	SetWindowLong(GetWindow(GetDlgItem(hwnd, IDC_PRGRAM_COMBO), GW_CHILD), GWL_ID, IDC_PRGRAM_EDIT);
+	SetWindowLongPtr(GetWindow(GetDlgItem(hwnd, IDC_PRGRAM_COMBO), GW_CHILD), GWL_ID, IDC_PRGRAM_EDIT);
 	// PRG NVRAM
-	SetWindowLong(GetWindow(GetDlgItem(hwnd, IDC_PRGNVRAM_COMBO), GW_CHILD), GWL_ID, IDC_PRGNVRAM_EDIT);
+	SetWindowLongPtr(GetWindow(GetDlgItem(hwnd, IDC_PRGNVRAM_COMBO), GW_CHILD), GWL_ID, IDC_PRGNVRAM_EDIT);
 	// CHR ROM
-	SetWindowLong(GetWindow(GetDlgItem(hwnd, IDC_CHRROM_COMBO), GW_CHILD), GWL_ID, IDC_CHRROM_EDIT);
+	SetWindowLongPtr(GetWindow(GetDlgItem(hwnd, IDC_CHRROM_COMBO), GW_CHILD), GWL_ID, IDC_CHRROM_EDIT);
 	// CHR RAM
-	SetWindowLong(GetWindow(GetDlgItem(hwnd, IDC_CHRRAM_COMBO), GW_CHILD), GWL_ID, IDC_CHRRAM_EDIT);
+	SetWindowLongPtr(GetWindow(GetDlgItem(hwnd, IDC_CHRRAM_COMBO), GW_CHILD), GWL_ID, IDC_CHRRAM_EDIT);
 	// CHR NVRAM
-	SetWindowLong(GetWindow(GetDlgItem(hwnd, IDC_CHRNVRAM_COMBO), GW_CHILD), GWL_ID, IDC_CHRNVRAM_EDIT);
+	SetWindowLongPtr(GetWindow(GetDlgItem(hwnd, IDC_CHRNVRAM_COMBO), GW_CHILD), GWL_ID, IDC_CHRNVRAM_EDIT);
 
 
 	// Change the default wndproc of these control to limit their text
 	// PRG ROM
-	DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_PRGROM_COMBO), IDC_PRGROM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_PRGROM_COMBO), IDC_PRGROM_EDIT), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 	// PRG RAM
-	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_PRGRAM_COMBO), IDC_PRGRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_PRGRAM_COMBO), IDC_PRGRAM_EDIT), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 	// PRG NVRAM
-	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_PRGNVRAM_COMBO), IDC_PRGNVRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_PRGNVRAM_COMBO), IDC_PRGNVRAM_EDIT), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 	// CHR ROM
-	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_CHRROM_COMBO), IDC_CHRROM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_CHRROM_COMBO), IDC_CHRROM_EDIT), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 	// CHR RAM
-	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_CHRRAM_COMBO), IDC_CHRRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_CHRRAM_COMBO), IDC_CHRRAM_EDIT), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 	// CHR NVRAM
-	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_CHRNVRAM_COMBO), IDC_CHRNVRAM_EDIT), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+	SetWindowLongPtr(GetDlgItem(GetDlgItem(hwnd, IDC_CHRNVRAM_COMBO), IDC_CHRNVRAM_EDIT), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 
 
 	ToggleINES20(hwnd, IsDlgButtonChecked(hwnd, IDC_RADIO_VERSION_INES20) == BST_CHECKED);
@@ -496,7 +496,7 @@ void ToggleUnofficialPrgRamPresent(HWND hwnd, bool ines20, bool unofficial_check
 	EnableWindow(GetDlgItem(hwnd, IDC_PRGRAM_COMBO), enable);
 }
 
-LRESULT CALLBACK HeaderEditorProc(HWND hDlg, UINT uMsg, WPARAM wP, LPARAM lP)
+INT_PTR CALLBACK HeaderEditorProc(HWND hDlg, UINT uMsg, WPARAM wP, LPARAM lP)
 {
 
 	static iNES_HEADER* header;
@@ -599,7 +599,7 @@ void DoHeadEdit()
 		if (GameInfo)
 		{
 			if (LoadHeader(hAppWnd, header))
-				CreateDialogParam(fceu_hInstance, MAKEINTRESOURCE(IDD_EDIT_HEADER), hAppWnd, (DLGPROC)HeaderEditorProc, (LPARAM)header);
+				CreateDialogParam(fceu_hInstance, MAKEINTRESOURCE(IDD_EDIT_HEADER), hAppWnd, HeaderEditorProc, (LPARAM)header);
 			else
 				free(header);
 		}
@@ -607,7 +607,7 @@ void DoHeadEdit()
 			// temporarily borrow LoadedRomFName, when no game is loaded, it is unused.
 			LoadedRomFName[0] = 0;
 			if (ShowINESFileBox(hAppWnd) && LoadHeader(hAppWnd, header))
-				DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_EDIT_HEADER), hAppWnd, (DLGPROC)HeaderEditorProc, (LPARAM)header);
+				DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_EDIT_HEADER), hAppWnd, HeaderEditorProc, (LPARAM)header);
 			else
 				free(header);
 		}

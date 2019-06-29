@@ -728,7 +728,7 @@ void ClearAllText()
 	fileChanged = false;				
 }
 
-static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	const int FMAX = 6;
 	string formula[FMAX] = {"> than", "> by 1", "< than", "< by 1", "equal", "!equal"};
@@ -795,7 +795,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 
 			// experimental: limit the text length and input to hex values
 			SendDlgItemMessage(hwndDlg, MW_ADDR[i], EM_SETLIMITTEXT, 4, 0);
-			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, MW_ADDR[i]), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, MW_ADDR[i]), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 		}
 
 		//Populate Formula pulldown menus

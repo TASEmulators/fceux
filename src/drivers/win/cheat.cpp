@@ -289,7 +289,7 @@ HWND InitializeCheatList(HWND hwnd)
 	return hwndChtList;
 }
 
-BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 
 	switch (uMsg)
@@ -1063,7 +1063,7 @@ void UpdateCheatsAdded()
 	UpdateCheatListGroupBoxUI();
 }
 
-BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 
 	switch(uMsg) {
