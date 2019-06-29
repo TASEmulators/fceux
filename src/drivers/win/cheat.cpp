@@ -30,8 +30,7 @@
 #include <map>
 
 // static HWND pwindow = 0;	    // owomomo: removed pwindow because ambiguous, perhaps it is some obseleted early future plan from half developed old FCEUX? 
-HWND hCheat = 0;			 //Handle to Cheats dialog
-HWND hCheatTip = 0;          //Handle to tooltip
+HWND hCheat = 0;			    //Handle to Cheats dialog
 HMENU hCheatcontext = 0;     //Handle to cheat context menu
 
 bool pauseWhileActive = false;	//For checkbox "Pause while active"
@@ -73,7 +72,7 @@ char* GameGenieLetters = "APZLGITYEOXUKSVN";
 
 // bool dodecode;
 
-HWND hGGConv = 0;
+HWND hGGConv;
 
 void EncodeGG(char *str, int a, int v, int c);
 void ListGGAddresses(HWND hwndDlg);
@@ -296,7 +295,6 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 	{
 		case WM_INITDIALOG:
 		{
-
 			POINT pt;
 			if (ChtPosX != 0 && ChtPosY != 0)
 			{
@@ -354,8 +352,7 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_TEXT), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_CHEAT_GAME_GENIE_TEXT), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 
-			// Create popup to "Auto load / save with game", since it has 3 states and the text need some explanation
-			SetCheatToolTip(hwndDlg, IDC_CHEAT_AUTOLOADSAVE);
+
 
 			possiTotalCount = 0;
 			possiItemCount = SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LVM_GETCOUNTPERPAGE, 0, 0);
@@ -398,7 +395,6 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			break;
 		case WM_QUIT:
 		case WM_CLOSE:
-			DestroyWindow(hCheatTip);
 			if (CheatStyle)
 				DestroyWindow(hwndDlg);
 			else
@@ -467,7 +463,7 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		break;
 		case WM_COMMAND:
 		{
-			static int editMode = -1;
+			static int editMode = 0;
 
 			switch (HIWORD(wParam))
 			{
@@ -745,13 +741,12 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 							}
 						break;
 						case IDC_CHEAT_AUTOLOADSAVE:
-						{
 							switch (IsDlgButtonChecked(hwndDlg, IDC_CHEAT_AUTOLOADSAVE))
 							{
 								case BST_CHECKED: disableAutoLSCheats = 0; break;
 								case BST_INDETERMINATE: disableAutoLSCheats = 1; break;
 								case BST_UNCHECKED: 
-									if(MessageBox(hwndDlg, "If this option is unchecked, you must manually save the cheats by yourself, or all the changes you made to the cheat list would be discarded silently without any asking once you close the game!\nDo you really want to do it in this way?", "Cheat warning", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES)
+									if(MessageBox(hwndDlg, "If this option is unchecked, you must manually save the cheats by yourself, or all the changed you made to the cheat list would be discarded silently without any asking once you close the game!\nDo you really want to do it in this way?", "Cheat warning", MB_YESNO | MB_ICONWARNING) == IDYES)
 										disableAutoLSCheats = 2;
 									else
 									{
@@ -759,8 +754,6 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 										CheckDlgButton(hwndDlg, IDC_CHEAT_AUTOLOADSAVE, BST_CHECKED);
 									}
 							}
-							SetCheatToolTip(hwndDlg, IDC_CHEAT_AUTOLOADSAVE);
-						}
 					}
 					break;
 					case EN_SETFOCUS:
@@ -771,18 +764,6 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 							case IDC_CHEAT_COM: editMode = 0; break;
 							case IDC_CHEAT_TEXT: editMode = 1; break;
 							case IDC_CHEAT_GAME_GENIE_TEXT: editMode = 2; break;
-							default: editMode = -1;
-						}
-						break;
-					case EN_KILLFOCUS:
-						switch (LOWORD(wParam))
-						{
-							case IDC_CHEAT_ADDR:
-							case IDC_CHEAT_VAL:
-							case IDC_CHEAT_COM:
-							case IDC_CHEAT_TEXT:
-							case IDC_CHEAT_GAME_GENIE_TEXT:
-							default: editMode = -1; break;
 						}
 						break;
 					case EN_UPDATE:
@@ -1065,6 +1046,8 @@ void UpdateCheatsAdded()
 
 INT_PTR CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+//	int i;
+	extern void GetUIGGInfo(HWND hwndDlg, uint32* a, uint8* v, int* c);
 
 	switch(uMsg) {
 		case WM_MOVE: {
@@ -1244,6 +1227,7 @@ void ListGGAddresses(HWND hwndDlg)
 	SendDlgItemMessage(hwndDlg, IDC_LIST_GGADDRESSES, LB_RESETCONTENT,0,0);
 
 	uint32 a = -1; uint8 v = -1; int c = -1;
+	extern void GetUIGGInfo(HWND hwnd, uint32* a, uint8* v, int* c);
 	GetUIGGInfo(hwndDlg, &a, &v, &c);
 
 	// also enable/disable the add GG button here
@@ -1324,50 +1308,6 @@ inline void GetCheatCodeStr(char* buf, int a, int v, int c)
 		sprintf(buf, "%04X:%02X", a, v);
 	else
 		sprintf(buf, "%04X?%02X:%02X", a, c, v);
-}
-
-static void SetCheatToolTip(HWND hwndDlg, UINT id)
-{
-	TOOLINFO info;
-	memset(&info, 0, sizeof(TOOLINFO));
-	info.cbSize = sizeof(TOOLINFO);
-	info.uFlags = TTF_SUBCLASS | TTF_IDISHWND;
-	info.hwnd = hwndDlg;
-	info.lpszText = GetCheatToolTipStr(hwndDlg, id);
-	info.uId = (UINT_PTR)GetDlgItem(hwndDlg, id);
-
-	if (hCheatTip)
-		SendMessage(hCheatTip, TTM_UPDATETIPTEXT, 0, (LPARAM)&info);
-	else
-	{
-		if (hCheatTip = CreateWindow(TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_ALWAYSTIP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hwndDlg, NULL, fceu_hInstance, NULL)) {
-			SendMessage(hCheatTip, TTM_ADDTOOL, 0, (LPARAM)&info);
-			SendMessage(hCheatTip, TTM_SETDELAYTIME, TTDT_AUTOPOP, 30000);
-			SendMessage(hCheatTip, TTM_SETMAXTIPWIDTH, 0, 8000);
-		}
-	}
-}
-
-char* GetCheatToolTipStr(HWND hwndDlg, UINT id)
-{
-	switch (id)
-	{
-		case IDC_CHEAT_AUTOLOADSAVE:
-			switch (disableAutoLSCheats)
-			{
-				case 0: return "Automatically load/save cheat file along with the game.";
-				case 1: return
-					"Don't add cheat on game load, but prompt for saving on game closes.\r\n"
-					"You must manually import cht file when it's needed.";
-				case 2: return
-					"Don't add cheat on game load, and don't save cheat on game closes.\r\n"
-					"You must manually import/export cht file by yourself,\nor all your changes to cheat will be lost!";
-				default:
-					return "Mysterious undocumented state.";
-			}
-	}
-
-	return NULL;
 }
 
 void GetUICheatInfo(HWND hwndDlg, char* name, uint32* a, uint8* v, int* c)
