@@ -73,7 +73,7 @@ void RedoText(void)
 /**
 * Callback function for the log window.
 **/
-BOOL CALLBACK LogCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK LogCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	RECT wrect;	//For remembering window position
 	switch(uMsg)

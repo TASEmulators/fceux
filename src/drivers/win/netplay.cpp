@@ -393,7 +393,7 @@ CFGSTRUCT NetplayConfig[]={
 };
 
 
-static BOOL CALLBACK NetCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK NetCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   switch(uMsg)
   {

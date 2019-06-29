@@ -435,7 +435,7 @@ void KillNTView() {
 	NTViewSkip=0;
 }
 
-BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+INT_PTR CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	RECT wrect;
 	char str[50];
 	int TileID, TileX, TileY, NameTable, PPUAddress, AttAddress, Attrib;

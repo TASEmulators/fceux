@@ -198,7 +198,7 @@ INT_PTR CWin32InputBox::InputBoxEx(WIN32INPUTBOX_PARAM *param)
   CWin32InputBox inputbox(param);
 
   // Resize dialog and SHOW or HIDE multiline
-  INT_PTR r = ::DialogBoxIndirectParam(param->hInstance, dlgTemplate, param->hwndOwner, (DLGPROC)DlgProc, (LPARAM)&inputbox);
+  INT_PTR r = ::DialogBoxIndirectParam(param->hInstance, dlgTemplate, param->hwndOwner, DlgProc, (LPARAM)&inputbox);
 
   return r;
 }
@@ -310,16 +310,16 @@ void CWin32InputBox::InitDialog()
 }
 
 // Message handler for about box.
-LRESULT CALLBACK CWin32InputBox::DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK CWin32InputBox::DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-  CWin32InputBox *_this = (CWin32InputBox *) ::GetWindowLong(hDlg, GWL_USERDATA);
+  CWin32InputBox *_this = (CWin32InputBox *) ::GetWindowLongPtr(hDlg, GWLP_USERDATA);
   WIN32INPUTBOX_PARAM *param = _this ? _this->GetParam() : 0;
 
   switch (message)
   {
     case WM_INITDIALOG:
     {
-      ::SetWindowLong(hDlg, GWL_USERDATA, (LONG) lParam);
+      ::SetWindowLongPtr(hDlg, GWLP_USERDATA, lParam);
       
       _this = (CWin32InputBox *)  lParam;
       _this->_param->hDlg = hDlg;

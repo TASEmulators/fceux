@@ -155,7 +155,7 @@ bool InsertWatch(const AddressWatcher& Watch, HWND parent)
 
 	rswatches[tmpWatchIndex] = Watch;
 	rswatches[tmpWatchIndex].CurValue = GetCurrentValue(rswatches[tmpWatchIndex]);
-	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), parent, (DLGPROC)EditWatchProc, tmpWatchIndex);
+	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), parent, EditWatchProc, tmpWatchIndex);
 	rswatches.erase(tmpWatchIndex);
 
 	return WatchCount > prevWatchCount;
@@ -171,7 +171,7 @@ bool InsertWatches(const AddressWatcher* watches, HWND parent, const int count)
 		char comment[256];
 		rswatches[-1] = watches[0];
 		rswatches[-1].comment = comment;
-		if(DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), parent, (DLGPROC)EditWatchProc, (LPARAM)-1))
+		if(DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), parent, EditWatchProc, (LPARAM)-1))
 			for (int i = 0; i < count; ++i)
 			{
 				AddressWatcher watcher = watches[i];
@@ -776,7 +776,7 @@ void RefreshWatchListSelectedItemControlStatus(HWND hDlg)
 	}
 }
 
-LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) //Gets info for a RAM Watch, and then inserts it into the Watch List
+INT_PTR CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) //Gets info for a RAM Watch, and then inserts it into the Watch List
 {
 
 	// since there are 3 windows can pops up the add watch dialog, we should store them separately.
@@ -1020,7 +1020,7 @@ void RefreshWatchListSelectedCountControlStatus(HWND hDlg, int newComer)
 	}
 }
 
-LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	static int watchIndex = 0; // current watch index
 	static bool listFocus;
@@ -1185,7 +1185,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 							// disable search by keyboard typing,
 							// because it interferes with some of the accelerators
 							// and it isn't very useful here anyway
-							SetWindowLong(hDlg, DWL_MSGRESULT, ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST)));
+							SetWindowLongPtr(hDlg, DWLP_MSGRESULT, ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST)));
 							return 1;
 						}
 						case NM_SETFOCUS:
@@ -1202,12 +1202,12 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 							switch (nmcd->dwDrawStage)
 							{
 								case CDDS_PREPAINT:
-									SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NOTIFYITEMDRAW);
+									SetWindowLongPtr(hDlg, DWLP_MSGRESULT, CDRF_NOTIFYITEMDRAW);
 								break;
 								case CDDS_ITEMPREPAINT:
 									if (rswatches[nmcd->dwItemSpec].Type == 'S')
 										// A separator looks very different from normal watches, it should be drawn in another space while I want to use the highlight bar and the focus frame from the system.
-										SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NOTIFYPOSTPAINT);
+										SetWindowLongPtr(hDlg, DWLP_MSGRESULT, CDRF_NOTIFYPOSTPAINT);
 									else
 									{
 										NMLVCUSTOMDRAW* lplvcd = (NMLVCUSTOMDRAW*)lParam;
@@ -1215,7 +1215,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 										{
 											default:
 											case 0:
-												SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_DODEFAULT);
+												SetWindowLongPtr(hDlg, DWLP_MSGRESULT, CDRF_DODEFAULT);
 												return TRUE;
 											case 1:
 												lplvcd->clrTextBk = RGB(216, 203, 253); break;
@@ -1227,7 +1227,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 												lplvcd->clrTextBk = RGB(175, 94, 253);
 												lplvcd->clrText = RGB(255, 255, 255); break; // use a more visual color in dark background
 										}
-										SetWindowLong(hDlg, DWL_MSGRESULT, CDRF_NEWFONT);
+										SetWindowLongPtr(hDlg, DWLP_MSGRESULT, CDRF_NEWFONT);
 									}
 								break;
 								case CDDS_ITEMPOSTPAINT:
@@ -1306,7 +1306,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					watchIndex = ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST));
 					if(watchIndex != -1)
 					{
-						DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, (DLGPROC)EditWatchProc, watchIndex);
+						DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, EditWatchProc, watchIndex);
 						SetFocus(GetDlgItem(hDlg,IDC_WATCHLIST));
 					}
 					return true;
@@ -1317,7 +1317,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					target.WrongEndian = 0;
 					target.Size = 'b';
 					target.Type = 's';
-					DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, (DLGPROC)EditWatchProc, WatchCount);
+					DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, EditWatchProc, WatchCount);
 					SetFocus(GetDlgItem(hDlg, IDC_WATCHLIST));
 					return true;
 				}
@@ -1331,7 +1331,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 						AddressWatcher* source = &rswatches[watchIndex];
 						memcpy(target, source, sizeof(AddressWatcher));
 						target->comment = strcpy(str_tmp, source->comment);
-						DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, (DLGPROC)EditWatchProc, WatchCount);
+						DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, EditWatchProc, WatchCount);
 						SetFocus(GetDlgItem(hDlg, IDC_WATCHLIST));
 					}
 					return true;
@@ -1344,7 +1344,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					target->Size = 'S';
 					target->Type = 'S';
 
-					DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, (DLGPROC)EditWatchProc, (LPARAM)WatchCount);
+					DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, EditWatchProc, (LPARAM)WatchCount);
 
 					// InsertWatch(separator, "----------------------------");
 					SetFocus(GetDlgItem(hDlg, IDC_WATCHLIST));

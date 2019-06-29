@@ -6098,6 +6098,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		luaL_register(L, "joypad", joypadlib);
 		luaL_register(L, "zapper", zapperlib);
 		luaL_register(L, "input", inputlib);
+		lua_settop(L, 0); // clean the stack, because each call to luaL_register leaves a table on top (eventually overflows)
 		luaL_register(L, "savestate", savestatelib);
 		luaL_register(L, "movie", movielib);
 		luaL_register(L, "gui", guilib);
@@ -6106,7 +6107,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		luaL_register(L, "cdlog", cdloglib);
 		luaL_register(L, "taseditor", taseditorlib);
 		luaL_register(L, "bit", bit_funcs); // LuaBitOp library
-		lua_settop(L, 0);		// clean the stack, because each call to luaL_register leaves a table on top
+		lua_settop(L, 0);
 
 		// register a few utility functions outside of libraries (in the global namespace)
 		lua_register(L, "print", print);
@@ -6193,7 +6194,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 	info_onstart = WinLuaOnStart;
 	info_onstop = WinLuaOnStop;
 	if(!LuaConsoleHWnd)
-		LuaConsoleHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_LUA), hAppWnd, (DLGPROC) DlgLuaScriptDialog);
+		LuaConsoleHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_LUA), hAppWnd, DlgLuaScriptDialog);
 	info_uid = (int)LuaConsoleHWnd;
 #else
 	info_print = NULL;

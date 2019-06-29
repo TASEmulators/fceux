@@ -65,7 +65,7 @@ void PLAYBACK::init()
 	SendMessage(hwndPlaybackMarkerEditField, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
 	SendMessage(hwndPlaybackMarkerEditField, WM_SETFONT, (WPARAM)pianoRoll.hMarkersEditFont, 0);
 	// subclass the edit control
-	playbackMarkerEdit_oldWndproc = (WNDPROC)SetWindowLong(hwndPlaybackMarkerEditField, GWL_WNDPROC, (LONG)UpperMarkerEditWndProc);
+	playbackMarkerEdit_oldWndproc = (WNDPROC)SetWindowLongPtr(hwndPlaybackMarkerEditField, GWLP_WNDPROC, (LONG_PTR)UpperMarkerEditWndProc);
 
 	reset();
 }

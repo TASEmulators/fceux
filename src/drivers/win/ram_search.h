@@ -29,7 +29,7 @@ void SetSearchType(int SearchType); //Set the search type
 void DoRamSearchOperation(); //Perform a search
 
 extern HWND RamSearchHWnd;
-extern LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+extern INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 extern POINT CalcSubWindowPos(HWND hDlg, POINT* conf);
 
 // Too much work to do for resorting the values, and finding the biggest number 

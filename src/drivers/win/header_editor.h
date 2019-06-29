@@ -23,7 +23,7 @@ bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, bool exa
 bool SaveINESFile(HWND hwnd, char* path, iNES_HEADER* header);
 
 
-LRESULT CALLBACK HeaderEditorProc(HWND hDlg, UINT uMsg, WPARAM wP, LPARAM lP);
+INT_PTR CALLBACK HeaderEditorProc(HWND hDlg, UINT uMsg, WPARAM wP, LPARAM lP);
 extern WNDPROC DefaultEditCtrlProc;
 extern LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP);
 
