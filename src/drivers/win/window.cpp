@@ -118,7 +118,7 @@ extern bool turbo;
 extern bool movie_readonly;
 extern bool AutoSS;			//flag for whether an auto-save has been made
 extern int newppu;
-extern BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
+extern INT_PTR CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
 extern bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
 extern bool oldInputDisplay;
 extern int RAMInitOption;
@@ -1037,7 +1037,7 @@ void HideFWindow(int h)
 		SetWindowPos(hAppWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOREPOSITION | SWP_NOSIZE);
 	}
 
-	SetWindowLong(hAppWnd, GWL_STYLE, desa | ( GetWindowLong(hAppWnd, GWL_STYLE) & WS_VISIBLE ));
+	SetWindowLongPtr(hAppWnd, GWL_STYLE, desa | ( GetWindowLong(hAppWnd, GWL_STYLE) & WS_VISIBLE ));
 	SetWindowPos(hAppWnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOREPOSITION | SWP_NOSIZE | SWP_NOZORDER);
 }
 
@@ -1877,7 +1877,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case ID_FILE_OPENLUAWINDOW:
 				if (!LuaConsoleHWnd)
 				{
-					LuaConsoleHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_LUA), hWnd, (DLGPROC) DlgLuaScriptDialog);
+					LuaConsoleHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_LUA), hWnd, DlgLuaScriptDialog);
 				} else
 				{
 					ShowWindow(LuaConsoleHWnd, SW_SHOWNORMAL);
@@ -3168,14 +3168,14 @@ void OpenRamSearch()
 	if (GameInfo)
 	{
 		reset_address_info();
-		RamSearchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), MainhWnd, (DLGPROC)RamSearchProc);
+		RamSearchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), MainhWnd, RamSearchProc);
 	}
 }
 
 void OpenRamWatch()
 {
 	if (GameInfo)
-		RamWatchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), MainhWnd, (DLGPROC) RamWatchProc);
+		RamWatchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), MainhWnd, RamWatchProc);
 }
 
 void SaveSnapshotAs()
@@ -3265,7 +3265,7 @@ POINT CalcSubWindowPos(HWND hDlg, POINT* conf)
 LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 {
 	bool through = true;
-	LRESULT result = 0;
+	INT_PTR result = 0;
 
 	switch (msg)
 	{
