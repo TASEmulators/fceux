@@ -895,12 +895,12 @@ INT_PTR CALLBACK TASEditorWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 			{
 				SetTextColor((HDC)wParam, PLAYBACK_MARKER_COLOR);
 				SetBkMode((HDC)wParam, TRANSPARENT);
-				return (BOOL)(pianoRoll.bgBrush);
+				return (INT_PTR)(pianoRoll.bgBrush);
 			} else if ((HWND)lParam == selection.hwndSelectionMarkerNumber)
 			{
 				SetTextColor((HDC)wParam, GetSysColor(COLOR_HIGHLIGHT));
 				SetBkMode((HDC)wParam, TRANSPARENT);
-				return (BOOL)pianoRoll.bgBrush;
+				return (INT_PTR)pianoRoll.bgBrush;
 			}
 			break;
 		case WM_COMMAND:

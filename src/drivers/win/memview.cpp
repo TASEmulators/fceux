@@ -1539,7 +1539,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					case ID_ADDRESS_FRZ_SUBMENU:
 					{
 						HMENU sub = CreatePopupMenu();
-						AppendMenu(hMenu, MF_POPUP | MF_STRING, (UINT)sub, "Freeze / Unfreeze Address");
+						AppendMenu(hMenu, MF_POPUP | MF_STRING, (UINT_PTR)sub, "Freeze / Unfreeze Address");
 						AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_TOGGLE_STATE, "Toggle state");
 						AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_FREEZE, "Freeze");
 						AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_UNFREEZE, "Unfreeze");
