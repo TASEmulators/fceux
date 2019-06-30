@@ -23,7 +23,7 @@
 
 #include "mapinc.h"
 
-#define CAI_DEBUG
+//#define CAI_DEBUG
 
 // main tiles RAM is 8K in size, but unless other non-CHR ROM type carts,
 // this one accesses the $0000 and $1000 pages based on extra NT RAM on board
