@@ -42,7 +42,7 @@ static uint8 *WRAM = NULL;
 static uint8 IRQa, K4IRQ;
 static uint32 IRQLatch, IRQCount;
 
-// some kind of 16-bit text  encoding (actually 15-bit) used in game resources
+// some kind of 16-bit text  encoding (actually 14-bit) used in game resources
 // may be converted by the hardware into the tile indexes for internal CHR ROM
 // not sure whey they made it hardware, because most of calculations are just
 // bit shifting. the main purpose of this table is to calculate actual CHR ROM
@@ -51,7 +51,16 @@ static uint32 IRQLatch, IRQCount;
 
 // table read out from hardware registers as is
 
-static uint8 conv_tbl[128][4] = {
+///*
+static uint8 conv_tbl[4][8] = {
+	{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
+	{ 0x00, 0x00, 0x40, 0x10, 0x28, 0x00, 0x18, 0x30 },
+	{ 0x00, 0x00, 0x48, 0x18, 0x30, 0x08, 0x20, 0x38 },
+	{ 0x00, 0x00, 0x80, 0x20, 0x38, 0x10, 0x28, 0xB0 }
+};
+//*/
+/*
+static uint8 conv_tbl[64][4] = {
 	{ 0x40, 0x40, 0x40, 0x40 }, // 00  | A  - 40 41 42 43 44 45 46 47  
 	{ 0x41, 0x41, 0x41, 0x41 }, // 02  | B  - 48 49 4A 4B 4C 4D 4E 4F  
 	{ 0x42, 0x42, 0x42, 0x42 }, // 04  | C  - 50 51 52 53 54 55 56 57
@@ -117,6 +126,7 @@ static uint8 conv_tbl[128][4] = {
 	{ 0x46, 0x76, 0x7E, 0x76 }, // 7C
 	{ 0x47, 0x77, 0x7F, 0x77 }, // 7E
 };
+*/
 
 static uint8 regs[16];
 static SFORMAT StateRegs[] =
@@ -169,8 +179,19 @@ static DECLFW(QTAiWrite) {
 }
 
 static DECLFR(QTAiRead) {
-	uint8 res1 = conv_tbl[regs[0xD] >> 1][(regs[0xC] >> 5) & 3];
+
+//	uint8 res1 = conv_tbl[(regs[0xD] & 0x7F) >> 1][(regs[0xC] >> 5) & 3];
+//	uint8 res2 = ((regs[0xD] & 1) << 7) | ((regs[0xC] & 0x1F) << 2) | (regs[0xB] & 3);
+
+	uint8 tabl = conv_tbl[(regs[0xC] >> 5) & 3][(regs[0xD] & 0x7F) >> 4];
+	uint8 res1 = 0x40 | (tabl & 0x3F) | ((regs[0xD] >> 1) & 7);
 	uint8 res2 = ((regs[0xD] & 1) << 7) | ((regs[0xC] & 0x1F) << 2) | (regs[0xB] & 3);
+	
+	if (tabl & 0x40)
+		res1 &= 0xFB;
+	else if (tabl & 0x80)
+		res1 |= 0x04;
+
 	if (A == 0xDD00) {
 		return res1;
 	} else if (A == 0xDC00) {
