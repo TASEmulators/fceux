@@ -330,7 +330,7 @@ int fceuindbg = 0;
 //0xFF shall indicate to use palette[0]
 uint8 gNoBGFillColor = 0xFF;
 
-int MMC5Hack = 0, PEC586Hack = 0, QTAIHack = 0;
+int MMC5Hack = 0;
 uint32 MMC5HackVROMMask = 0;
 uint8 *MMC5HackExNTARAMPtr = 0;
 uint8 *MMC5HackVROMPTR = 0;
@@ -339,6 +339,12 @@ uint8 MMC5HackSPMode = 0;
 uint8 MMC50x5130 = 0;
 uint8 MMC5HackSPScroll = 0;
 uint8 MMC5HackSPPage = 0;
+
+int PEC586Hack = 0;
+
+int QTAIHack = 0;
+uint8 QTAINTRAM[2048];
+uint8 qtaintramreg;
 
 uint8 VRAMBuffer = 0, PPUGenLatch = 0;
 uint8 *vnapage[4];
@@ -426,8 +432,12 @@ inline void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
 		if (PPUCHRRAM & (1 << (tmp >> 10)))
 			VPage[tmp >> 10][tmp] = V;
 	} else if (tmp < 0x3F00) {
-		if (PPUNTARAM & (1 << ((tmp & 0xF00) >> 10)))
-			vnapage[((tmp & 0xF00) >> 10)][tmp & 0x3FF] = V;
+		if (QTAIHack && (qtaintramreg & 1)) {
+			QTAINTRAM[((((tmp & 0xF00) >> 10) >> ((qtaintramreg >> 1)) & 1) << 10) | (tmp & 0x3FF)] = V;
+		} else {
+			if (PPUNTARAM & (1 << ((tmp & 0xF00) >> 10)))
+				vnapage[((tmp & 0xF00) >> 10)][tmp & 0x3FF] = V;
+		}
 	} else {
 		if (!(tmp & 3)) {
 			if (!(tmp & 0xC)) {
@@ -955,8 +965,12 @@ static DECLFW(B2007) {
 			if (PPUCHRRAM & (1 << (tmp >> 10)))
 				VPage[tmp >> 10][tmp] = V;
 		} else if (tmp < 0x3F00) {
-			if (PPUNTARAM & (1 << ((tmp & 0xF00) >> 10)))
-				vnapage[((tmp & 0xF00) >> 10)][tmp & 0x3FF] = V;
+			if (QTAIHack && (qtaintramreg & 1)) {
+				QTAINTRAM[((((tmp & 0xF00) >> 10) >> ((qtaintramreg >> 1)) & 1) << 10) | (tmp & 0x3FF)] = V;
+			} else {
+				if (PPUNTARAM & (1 << ((tmp & 0xF00) >> 10)))
+					vnapage[((tmp & 0xF00) >> 10)][tmp & 0x3FF] = V;
+			}
 		} else {
 			if (!(tmp & 3)) {
 				if (!(tmp & 0xC))
@@ -1196,6 +1210,12 @@ static void RefreshLine(int lastpixel) {
 				#include "pputile.inc"
 			}
 			#undef PPU_BGFETCH
+		} if (QTAIHack) {
+			#define PPU_VRC5FETCH
+			for (X1 = firsttile; X1 < lasttile; X1++) {
+				#include "pputile.inc"
+			}
+			#undef PPU_VRC5FETCH
 		} else {
 			for (X1 = firsttile; X1 < lasttile; X1++) {
 				#include "pputile.inc"
@@ -1959,12 +1979,16 @@ void runppu(int x) {
 //todo - consider making this a 3 or 4 slot fifo to keep from touching so much memory
 struct BGData {
 	struct Record {
-		uint8 nt, pecnt, at, pt[2];
+		uint8 nt, pecnt, at, pt[2], qtnt;
 
 		INLINE void Read() {
 			NTRefreshAddr = RefreshAddr = ppur.get_ntread();
 			if (PEC586Hack)
 				ppur.s = (RefreshAddr & 0x200) >> 9;
+			else if (QTAIHack) {
+				qtnt = QTAINTRAM[((((RefreshAddr >> 10) & 3) >> ((qtaintramreg >> 1)) & 1) << 10) | (RefreshAddr & 0x3FF)];
+				ppur.s = qtnt & 0x3F;
+			}
 			pecnt = (RefreshAddr & 1) << 3;
 			nt = CALL_PPUREAD(RefreshAddr);
 			runppu(kFetchTime);
@@ -1990,11 +2014,15 @@ struct BGData {
 			ppur.par = nt;
 			RefreshAddr = ppur.get_ptread();
 			if (PEC586Hack) {
-				if (ScreenON)
-					RENDER_LOG(RefreshAddr | pecnt);
 				pt[0] = CALL_PPUREAD(RefreshAddr | pecnt);
 				runppu(kFetchTime);
 				pt[1] = CALL_PPUREAD(RefreshAddr | pecnt);
+				runppu(kFetchTime);
+			} else if (QTAIHack && (qtnt & 0x40)) {
+				pt[0] = *(CHRptr[0] + RefreshAddr);
+				runppu(kFetchTime);
+				RefreshAddr |= 8;
+				pt[1] = *(CHRptr[0] + RefreshAddr);
 				runppu(kFetchTime);
 			} else {
 				if (ScreenON)
