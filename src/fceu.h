@@ -46,9 +46,11 @@ void FCEUI_RewindToLastAutosave(void);
 char *FCEUI_GetAboutString();
 
 extern uint64 timestampbase;
+
+// MMC5 external shared buffers/vars
+extern int MMC5Hack;
 extern uint32 MMC5HackVROMMask;
 extern uint8 *MMC5HackExNTARAMPtr;
-extern int MMC5Hack, PEC586Hack, QTAIHack;
 extern uint8 *MMC5HackVROMPTR;
 extern uint8 MMC5HackCHRMode;
 extern uint8 MMC5HackSPMode;
@@ -56,6 +58,12 @@ extern uint8 MMC50x5130;
 extern uint8 MMC5HackSPScroll;
 extern uint8 MMC5HackSPPage;
 
+extern int PEC586Hack;
+
+// VRCV extarnal shared buffers/vars
+extern int QTAIHack;
+extern uint8 QTAINTRAM[2048];
+extern uint8 qtaintramreg;
 
 #define GAME_MEM_BLOCK_SIZE 131072
 

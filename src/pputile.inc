@@ -1,6 +1,9 @@
 uint8 *C;
 register uint8 cc;
 uint32 vadr;
+#ifdef PPU_VRC5FETCH
+uint8 tmpd;
+#endif
 
 #ifndef PPUT_MMC5SP
 	register uint8 zz;
@@ -42,7 +45,11 @@ if (X1 >= 2) {
 #else
 	zz = RefreshAddr & 0x1F;
 	C = vnapage[(RefreshAddr >> 10) & 3];
-	vadr = (C[RefreshAddr & 0x3ff] << 4) + vofs;	// Fetch name table byte.
+#ifdef PPU_VRC5FETCH
+	tmpd = QTAINTRAM[((((RefreshAddr >> 10) & 3) >> ((qtaintramreg >> 1)) & 1) << 10) | (RefreshAddr & 0x3FF)];
+	vofs = ((tmpd & 0x3F) << 12) | ((RefreshAddr >> 12) & 7);	// recalculate VROM offset 
+#endif
+	vadr = (C[RefreshAddr & 0x3ff] << 4) + vofs;				// Fetch name table byte.
 #endif
 
 #ifdef PPUT_HOOK
@@ -78,7 +85,16 @@ pshift[1] <<= 8;
 	#elif defined(PPUT_MMC5)
 		C = MMC5BGVRAMADR(vadr);
 	#else
+
+	#ifdef PPU_VRC5FETCH
+	if(tmpd & 0x40)
+		C = CHRptr[0] + vadr;
+	else
 		C = VRAMADR(vadr);
+	#else
+		C = VRAMADR(vadr);
+#endif
+
 	#endif
 #endif
 
