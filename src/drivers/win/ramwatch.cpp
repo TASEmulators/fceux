@@ -787,8 +787,12 @@ INT_PTR CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	{
 		case WM_INITDIALOG:
 			{
+				
+				HWND parent = GetParent(hDlg);
+				indexes[GetDlgStoreIndex(parent)] = lParam;
+
 				RECT r;
-				GetWindowRect(hWnd, &r);
+				GetWindowRect(hDlg, &r);
 				SetWindowPos(hDlg, NULL, r.left, r.top, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
 				
 				AddressWatcher& watcher = rswatches[lParam];
@@ -835,9 +839,6 @@ INT_PTR CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 				if (watcher.comment != NULL)
 					SetDlgItemText(hDlg, IDC_PROMPT_EDIT, watcher.comment);
-
-				HWND parent = GetParent(hDlg);
-				indexes[GetDlgStoreIndex(parent)] = lParam;
 
 				if (watcher.Type == 'S' || parent == RamSearchHWnd || parent == hCheat)
 				{

@@ -3272,7 +3272,7 @@ LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 		case WM_PASTE:
 		{
 
-			bool(*IsLetterLegal)(char) = GetIsLetterLegal(GetDlgCtrlID(hwnd));
+			bool (*IsLetterLegal)(char) = GetIsLetterLegal(GetDlgCtrlID(hwnd));
 
 			if (IsLetterLegal)
 			{
@@ -3299,7 +3299,6 @@ LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 						}
 						GlobalUnlock(handle);
 						CloseClipboard();
-
 					}
 				}
 			}
@@ -3308,7 +3307,7 @@ LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 		case WM_CHAR:
 		{
 			bool(*IsLetterLegal)(char) = GetIsLetterLegal(GetDlgCtrlID(hwnd));
-			through = IsInputLegal(GetIsLetterLegal(GetDlgCtrlID(hwnd)), wP);
+			through = IsInputLegal(IsLetterLegal, wP);
 			if (!through)
 				ShowLetterIllegalError(hwnd, IsLetterLegal);
 		}
@@ -3322,9 +3321,6 @@ bool inline (*GetIsLetterLegal(UINT id))(char letter)
 {
 	switch (id)
 	{
-		// owomomo TODO: RAM Search is a bit complicated,
-		// I'll handle it in later development
-		
 
 		// Game genie text in Cheat and Game Genie Encoder/Decoder
 		case IDC_CHEAT_GAME_GENIE_TEXT:
@@ -3418,16 +3414,19 @@ void ShowLetterIllegalBalloonTip(HWND hwnd, bool(*IsLetterLegal)(char letter))
 	tip.ttiIcon = TTI_ERROR;
 	SendMessage(hwnd, EM_SHOWBALLOONTIP, 0, (LPARAM)&tip);
 
+	// make a sound
+	MessageBeep(0xFFFFFFFF);
+
 	free(titleW);
 	free(msgW);
 }
 
 inline void ShowLetterIllegalMessageBox(HWND hwnd, bool(*IsLetterLegal)(char letter))
 {
-	MessageBox(hwnd, GetLetterIllegalErrMsg(IsLetterLegal), "Unacceptable Character", MB_OK | MB_ICONERROR);
+	MessageBox(hwnd, GetLetterIllegalErrMsg(IsLetterLegal), _T("Unacceptable Character"), MB_OK | MB_ICONERROR);
 }
 
-inline char* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter))
+inline TCHAR* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter))
 {
 	if (IsLetterLegal == IsLetterLegalGG)
 		return "You can only type Game Genie characters:\nA P Z L G I T Y E O X U K S V N";
