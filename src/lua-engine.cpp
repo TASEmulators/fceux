@@ -1416,6 +1416,16 @@ static int memory_readwordsigned(lua_State *L) {
 }
 
 static int memory_writebyte(lua_State *L) {
+	uint32 A = luaL_checkinteger(L, 1);
+	uint8  V = luaL_checkinteger(L, 2);
+
+	if(A < 0x10000)
+		BWrite[A](A, V);
+
+	return 0;
+}
+
+static int legacymemory_writebyte(lua_State *L) {
 	FCEU_CheatSetByte(luaL_checkinteger(L,1), luaL_checkinteger(L,2));
 	return 0;
 }
@@ -5764,6 +5774,7 @@ static const struct luaL_reg memorylib [] = {
 	{"readwordsigned", memory_readwordsigned},
 	{"readwordunsigned", memory_readword},	// alternate naming scheme for unsigned
 	{"writebyte", memory_writebyte},
+	{"legacywritebyte", legacymemory_writebyte},
 	{"getregister", memory_getregister},
 	{"setregister", memory_setregister},
 
