@@ -354,6 +354,7 @@ static void M227Sync(void) {
 	uint32 L = (latche >> 9) & 1;
 
 	if ((latche >> 7) & 1) {
+		SetupCartCHRMapping(0, CHRptr[0], 0x2000, 0);	// hacky hacky write protection for CHR
 		if (S) {
 			setprg32(0x8000, p >> 1);
 		} else {
@@ -361,6 +362,7 @@ static void M227Sync(void) {
 			setprg16(0xC000, p);
 		}
 	} else {
+		SetupCartCHRMapping(0, CHRptr[0], 0x2000, 1);	// hacky hacky write protection for CHR
 		if (S) {
 			if (L) {
 				setprg16(0x8000, p & 0x3E);
