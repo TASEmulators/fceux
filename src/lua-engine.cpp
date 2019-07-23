@@ -163,16 +163,16 @@ struct LuaSaveState {
 	}
 };
 
-static void(*info_print)(int uid, const char* str);
-static void(*info_onstart)(int uid);
-static void(*info_onstop)(int uid);
-static int info_uid;
+static void(*info_print)(intptr_t uid, const char* str);
+static void(*info_onstart)(intptr_t uid);
+static void(*info_onstop)(intptr_t uid);
+static intptr_t info_uid;
 #ifdef WIN32
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-extern void PrintToWindowConsole(int hDlgAsInt, const char* str);
-extern void WinLuaOnStart(int hDlgAsInt);
-extern void WinLuaOnStop(int hDlgAsInt);
+extern void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str);
+extern void WinLuaOnStart(intptr_t hDlgAsInt);
+extern void WinLuaOnStop(intptr_t hDlgAsInt);
 void TaseditorDisableManualFunctionIfNeeded();
 #endif
 
@@ -6195,7 +6195,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 	info_onstop = WinLuaOnStop;
 	if(!LuaConsoleHWnd)
 		LuaConsoleHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_LUA), hAppWnd, DlgLuaScriptDialog);
-	info_uid = (int)LuaConsoleHWnd;
+	info_uid = (intptr_t)LuaConsoleHWnd;
 #else
 	info_print = NULL;
 	info_onstart = NULL;
