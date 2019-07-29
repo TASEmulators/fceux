@@ -767,7 +767,7 @@ INT_PTR CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 			else
 				SetTextColor(hdcStatic, RGB(255,0,0));		// use red for a mismatch
 			SetBkMode((HDC)wParam,TRANSPARENT);
-			return (BOOL)GetSysColorBrush(COLOR_BTNFACE);
+			return (INT_PTR)GetSysColorBrush(COLOR_BTNFACE);
 		} else if ((HWND)lParam == GetDlgItem(hwndDlg, IDC_LABEL_NEWPPUUSED))
 		{
 			HDC hdcStatic = (HDC)wParam;
@@ -780,7 +780,7 @@ INT_PTR CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 			else
 				SetTextColor(hdcStatic, RGB(255,0,0));		// use red for a mismatch
 			SetBkMode((HDC)wParam,TRANSPARENT);
-			return (BOOL)GetSysColorBrush(COLOR_BTNFACE);
+			return (INT_PTR)GetSysColorBrush(COLOR_BTNFACE);
 		} else
 		{
 			return FALSE;

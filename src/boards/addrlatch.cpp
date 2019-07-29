@@ -353,6 +353,17 @@ static void M227Sync(void) {
 	uint32 p = ((latche >> 2) & 0x1F) + ((latche & 0x100) >> 3);
 	uint32 L = (latche >> 9) & 1;
 
+// ok, according to nesdev wiki (refrenced to the nesdev dumping thread) there is a CHR write protection bit7.
+// however, this bit clearly determined a specific PRG layout for some game but does not meant to have additional
+// functionality. as I see from the menu code, it disables the chr writing before run an actual game.
+// this fix here makes happy both waixing rpgs and multigame menus at once. can't veryfy it on a hardware
+// but if I find some i'll definitly do this.
+
+	if ((latche & 0xF000) == 0xF000)
+		SetupCartCHRMapping(0, CHRptr[0], 0x2000, 0);	
+	else
+		SetupCartCHRMapping(0, CHRptr[0], 0x2000, 1);
+
 	if ((latche >> 7) & 1) {
 		if (S) {
 			setprg32(0x8000, p >> 1);

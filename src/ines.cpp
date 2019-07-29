@@ -261,15 +261,15 @@ struct CHINF {
 };
 
 static const TMasterRomInfo sMasterRomInfo[] = {
-	{ 0x62b51b108a01d2beLL, "bonus=0" }, //4-in-1 (FK23C8021)[p1][!].nes
-	{ 0x8bb48490d8d22711LL, "bonus=0" }, //4-in-1 (FK23C8033)[p1][!].nes
-	{ 0xc75888d7b48cd378LL, "bonus=0" }, //4-in-1 (FK23C8043)[p1][!].nes
-	{ 0xf81a376fa54fdd69LL, "bonus=0" }, //4-in-1 (FK23Cxxxx, S-0210A PCB)[p1][!].nes
-	{ 0xa37eb9163e001a46LL, "bonus=0" }, //4-in-1 (FK23C8026) [p1][!].nes
-	{ 0xde5ce25860233f7eLL, "bonus=0" }, //4-in-1 (FK23C8045) [p1][!].nes
-	{ 0x5b3aa4cdc484a088LL, "bonus=0" }, //4-in-1 (FK23C8056) [p1][!].nes
-	{ 0x9342bf9bae1c798aLL, "bonus=0" }, //4-in-1 (FK23C8079) [p1][!].nes
-	{ 0x164eea6097a1e313LL, "busc=1" }, //Cybernoid - The Fighting Machine (U)[!].nes -- needs bus conflict emulation
+	{ 0x62b51b108a01d2beULL, "bonus=0" }, //4-in-1 (FK23C8021)[p1][!].nes
+	{ 0x8bb48490d8d22711ULL, "bonus=0" }, //4-in-1 (FK23C8033)[p1][!].nes
+	{ 0xc75888d7b48cd378ULL, "bonus=0" }, //4-in-1 (FK23C8043)[p1][!].nes
+	{ 0xf81a376fa54fdd69ULL, "bonus=0" }, //4-in-1 (FK23Cxxxx, S-0210A PCB)[p1][!].nes
+	{ 0xa37eb9163e001a46ULL, "bonus=0" }, //4-in-1 (FK23C8026) [p1][!].nes
+	{ 0xde5ce25860233f7eULL, "bonus=0" }, //4-in-1 (FK23C8045) [p1][!].nes
+	{ 0x5b3aa4cdc484a088ULL, "bonus=0" }, //4-in-1 (FK23C8056) [p1][!].nes
+	{ 0x9342bf9bae1c798aULL, "bonus=0" }, //4-in-1 (FK23C8079) [p1][!].nes
+	{ 0x164eea6097a1e313ULL, "busc=1" }, //Cybernoid - The Fighting Machine (U)[!].nes -- needs bus conflict emulation
 };
 const TMasterRomInfo* MasterRomInfo;
 TMasterRomInfoParams MasterRomInfoParams;
@@ -284,38 +284,38 @@ static void CheckHInfo(void) {
 
 	static uint64 savie[] =
 	{
-		0xc04361e499748382LL,	/* AD&D Heroes of the Lance */
-		0xb72ee2337ced5792LL,	/* AD&D Hillsfar */
-		0x2b7103b7a27bd72fLL,	/* AD&D Pool of Radiance */
-		0x498c10dc463cfe95LL,	/* Battle Fleet */
-		0x854d7947a3177f57LL,	/* Crystalis */
-		0x4a1f5336b86851b6LL,	/* DW */
-		0xb0bcc02c843c1b79LL,	/* DW */
-		0x2dcf3a98c7937c22LL,	/* DW 2 */
-		0x98e55e09dfcc7533LL,	/* DW 4*/
-		0x733026b6b72f2470LL,	/* Dw 3 */
-		0x6917ffcaca2d8466LL,	/* Famista '90 */
-		0x8da46db592a1fcf4LL,	/* Faria */
-		0xedba17a2c4608d20LL,	/* Final Fantasy */
-		0x91a6846d3202e3d6LL,	/* Final Fantasy */
-		0x012df596e2b31174LL,	/* Final Fantasy 1+2 */
-		0xf6b359a720549ecdLL,	/* Final Fantasy 2 */
-		0x5a30da1d9b4af35dLL,	/* Final Fantasy 3 */
-		0xd63dcc68c2b20adcLL,	/* Final Fantasy J */
-		0x2ee3417ba8b69706LL,	/* Hydlide 3*/
-		0xebbce5a54cf3ecc0LL,	/* Justbreed */
-		0x6a858da551ba239eLL,	/* Kaijuu Monogatari */
-		0x2db8f5d16c10b925LL,	/* Kyonshiizu 2 */
-		0x04a31647de80fdabLL,	/* Legend of Zelda */
-		0x94b9484862a26cbaLL,	/* Legend of Zelda */
-		0xa40666740b7d22feLL,	/* Mindseeker */
-		0x82000965f04a71bbLL,	/* Mirai Shinwa Jarvas */
-		0x77b811b2760104b9LL,	/* Mouryou Senki Madara */
-		0x11b69122efe86e8cLL,	/* RPG Jinsei Game */
-		0x9aa1dc16c05e7de5LL,	/* Startropics */
-		0x1b084107d0878bd0LL,	/* Startropics 2*/
-		0xa70b495314f4d075LL,	/* Ys 3 */
-		0x836c0ff4f3e06e45LL,	/* Zelda 2 */
+		0xc04361e499748382ULL,	/* AD&D Heroes of the Lance */
+		0xb72ee2337ced5792ULL,	/* AD&D Hillsfar */
+		0x2b7103b7a27bd72fULL,	/* AD&D Pool of Radiance */
+		0x498c10dc463cfe95ULL,	/* Battle Fleet */
+		0x854d7947a3177f57ULL,	/* Crystalis */
+		0x4a1f5336b86851b6ULL,	/* DW */
+		0xb0bcc02c843c1b79ULL,	/* DW */
+		0x2dcf3a98c7937c22ULL,	/* DW 2 */
+		0x98e55e09dfcc7533ULL,	/* DW 4*/
+		0x733026b6b72f2470ULL,	/* Dw 3 */
+		0x6917ffcaca2d8466ULL,	/* Famista '90 */
+		0x8da46db592a1fcf4ULL,	/* Faria */
+		0xedba17a2c4608d20ULL,	/* Final Fantasy */
+		0x91a6846d3202e3d6ULL,	/* Final Fantasy */
+		0x012df596e2b31174ULL,	/* Final Fantasy 1+2 */
+		0xf6b359a720549ecdULL,	/* Final Fantasy 2 */
+		0x5a30da1d9b4af35dULL,	/* Final Fantasy 3 */
+		0xd63dcc68c2b20adcULL,	/* Final Fantasy J */
+		0x2ee3417ba8b69706ULL,	/* Hydlide 3*/
+		0xebbce5a54cf3ecc0ULL,	/* Justbreed */
+		0x6a858da551ba239eULL,	/* Kaijuu Monogatari */
+		0x2db8f5d16c10b925ULL,	/* Kyonshiizu 2 */
+		0x04a31647de80fdabULL,	/* Legend of Zelda */
+		0x94b9484862a26cbaULL,	/* Legend of Zelda */
+		0xa40666740b7d22feULL,	/* Mindseeker */
+		0x82000965f04a71bbULL,	/* Mirai Shinwa Jarvas */
+		0x77b811b2760104b9ULL,	/* Mouryou Senki Madara */
+		0x11b69122efe86e8cULL,	/* RPG Jinsei Game */
+		0x9aa1dc16c05e7de5ULL,	/* Startropics */
+		0x1b084107d0878bd0ULL,	/* Startropics 2*/
+		0xa70b495314f4d075ULL,	/* Ys 3 */
+		0x836c0ff4f3e06e45ULL,	/* Zelda 2 */
 		0						/* Abandon all hope if the game has 0 in the lower 64-bits of its MD5 hash */
 	};
 

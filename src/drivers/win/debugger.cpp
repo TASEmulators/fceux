@@ -338,7 +338,7 @@ INT_PTR CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				if (lParam)
 				{
 					CheckDlgButton(hwndDlg, IDC_ADDBP_MODE_X, BST_CHECKED);
-					sprintf(str, "%04X", lParam);
+					sprintf(str, "%04X", (unsigned int)lParam);
 					SetDlgItemText(hwndDlg,IDC_ADDBP_ADDR_START,str);
 					// also set the condition to only break at this Bank
 					sprintf(str, "K==#%02X", getBank(lParam));
@@ -2040,7 +2040,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			{
 				// Handle certain stubborn context menus for nearly incapable controls.
 
-				if (wParam == (uint32)GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_LIST)) {
+				if (wParam == (INT_PTR)GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_LIST)) {
 					// Only open the menu if a breakpoint is selected
 					if (SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0) >= 0) {
 						hDebugcontextsub = GetSubMenu(hDebugcontext,0);
