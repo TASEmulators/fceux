@@ -115,12 +115,20 @@ pshift[1] <<= 8;
 		pshift[1] |= C[0];
 	}
 #else
+	#ifdef PPU_VRC5FETCH
+	pshift[0] |= C[0];
+	if(tmpd & 0x40)
+		pshift[1] |= (tmpd & 0x80) ? 0xFF : 0x00;
+	else
+		pshift[1] |= C[8];
+	#else
 	if(ScreenON)
 		RENDER_LOGP(C);
 	pshift[0] |= C[0];
 	if(ScreenON)
 		RENDER_LOGP(C + 8);
 	pshift[1] |= C[8];
+	#endif
 #endif
 
 if ((RefreshAddr & 0x1f) == 0x1f)
