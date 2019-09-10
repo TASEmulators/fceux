@@ -47,30 +47,30 @@ if platform.system == "ppc":
 env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare'])
 env.Append(CXXFLAGS = ['-std=c++0x'])
 
-if os.environ.has_key('PLATFORM'):
+if 'PLATFORM' in os.environ:
   env.Replace(PLATFORM = os.environ['PLATFORM'])
-if os.environ.has_key('CC'):
+if 'CC' in os.environ:
   env.Replace(CC = os.environ['CC'])
-if os.environ.has_key('CXX'):
+if 'CXX' in os.environ:
   env.Replace(CXX = os.environ['CXX'])
-if os.environ.has_key('WINDRES'):
+if 'WINDRES' in os.environ:
   env.Replace(WINDRES = os.environ['WINDRES'])
-if os.environ.has_key('CFLAGS'):
+if 'CFLAGS' in os.environ:
   env.Append(CCFLAGS = os.environ['CFLAGS'].split())
-if os.environ.has_key('CXXFLAGS'):
+if 'CXXFLAGS' in os.environ:
   env.Append(CXXFLAGS = os.environ['CXXFLAGS'].split())
-if os.environ.has_key('CPPFLAGS'):
+if 'CPPFLAGS' in os.environ:
   env.Append(CPPFLAGS = os.environ['CPPFLAGS'].split())
-if os.environ.has_key('LDFLAGS'):
+if 'LDFLAGS' in os.environ:
   env.Append(LINKFLAGS = os.environ['LDFLAGS'].split())
-if os.environ.has_key('PKG_CONFIG_PATH'):
+if 'PKG_CONFIG_PATH' in os.environ:
   env['ENV']['PKG_CONFIG_PATH'] = os.environ['PKG_CONFIG_PATH']
-if not os.environ.has_key('PKG_CONFIG_PATH') and env['PLATFORM'] == 'darwin':
+if 'PKG_CONFIG_PATH' not in os.environ and env['PLATFORM'] == 'darwin':
   env['ENV']['PKG_CONFIG_PATH'] = "/usr/local/lib/pkgconfig:/opt/X11/lib/pkgconfig"
-if os.environ.has_key('PKG_CONFIG_LIBDIR'):
+if 'PKG_CONFIG_LIBDIR' in os.environ:
   env['ENV']['PKG_CONFIG_LIBDIR'] = os.environ['PKG_CONFIG_LIBDIR']
 
-print "platform: ", env['PLATFORM']
+print("platform: ", env['PLATFORM'])
 
 # compile with clang
 if env['CLANG']:
@@ -104,18 +104,18 @@ else:
     assert conf.CheckLibWithHeader('z', 'zlib.h', 'c', 'inflate;', 1), "please install: zlib"
   if env['SDL2']:
     if not conf.CheckLib('SDL2'):
-      print 'Did not find libSDL2 or SDL2.lib, exiting!'
+      print('Did not find libSDL2 or SDL2.lib, exiting!')
       Exit(1)
     env.Append(CPPDEFINES=["_SDL2"])
     env.ParseConfig('pkg-config sdl2 --cflags --libs')
   else:
     if not conf.CheckLib('SDL'):
-      print 'Did not find libSDL or SDL.lib, exiting!'
+      print('Did not find libSDL or SDL.lib, exiting!')
       Exit(1)
     env.ParseConfig('sdl-config --cflags --libs')
   if env['GTK']:
     if not conf.CheckLib('gtk-x11-2.0'):
-      print 'Could not find libgtk-2.0, exiting!'
+      print('Could not find libgtk-2.0, exiting!')
       Exit(1)
     # Add compiler and linker flags from pkg-config
     config_string = 'pkg-config --cflags --libs gtk+-2.0'
@@ -157,13 +157,13 @@ else:
         lua_link_flags  = "-llua"
         lua_include_dir = "/usr/include/lua"
 
-      if os.environ.has_key('LUA_LINKFLAGS'):
+      if 'LUA_LINKFLAGS' in os.environ:
         lua_link_flags  = os.environ['LUA_LINKFLAGS']
-      if os.environ.has_key('LUA_INCDIR'):
+      if 'LUA_INCDIR' in os.environ:
         lua_include_dir = os.environ['LUA_INCDIR']
 
       if not lua_link_flags or not lua_include_dir:
-        print 'Could not find liblua, exiting!'
+        print('Could not find liblua, exiting!')
         Exit(1)
 
       env.Append(LINKFLAGS = lua_link_flags.split())
@@ -179,7 +179,7 @@ else:
     gd = conf.CheckLib('gd', autoadd=1)
     if gd == 0:
       env['LOGO'] = 0
-      print 'Did not find libgd, you won\'t be able to create a logo screen for your avis.'
+      print('Did not find libgd, you won\'t be able to create a logo screen for your avis.')
    
   if env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c', autoadd=1):
     conf.env.Append(CCFLAGS = "-DOPENGL")
@@ -193,8 +193,8 @@ if sys.byteorder == 'little' or env['PLATFORM'] == 'win32':
 if env['FRAMESKIP']:
   env.Append(CPPDEFINES = ['FRAMESKIP'])
 
-print "base CPPDEFINES:",env['CPPDEFINES']
-print "base CCFLAGS:",env['CCFLAGS']
+print("base CPPDEFINES:",env['CPPDEFINES'])
+print("base CCFLAGS:",env['CCFLAGS'])
 
 if env['DEBUG']:
   env.Append(CPPDEFINES=["_DEBUG"], CCFLAGS = ['-g', '-O0'])
