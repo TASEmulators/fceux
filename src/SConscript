@@ -33,7 +33,7 @@ else:
   platform_files = SConscript('drivers/sdl/SConscript')
 file_list.append(platform_files)
 
-print env['LINKFLAGS']
+print(env['LINKFLAGS'])
 
 if env['PLATFORM'] == 'win32':
   fceux = env.Program('fceux.exe', file_list)

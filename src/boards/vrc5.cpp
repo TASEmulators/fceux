@@ -184,7 +184,7 @@ static DECLFR(QTAiRead) {
 //	uint8 res2 = ((regs[0xD] & 1) << 7) | ((regs[0xC] & 0x1F) << 2) | (regs[0xB] & 3);
 
 	uint8 tabl = conv_tbl[(regs[0xC] >> 5) & 3][(regs[0xD] & 0x7F) >> 4];
-	uint8 res1 = 0x40 | (tabl & 0x3F) | ((regs[0xD] >> 1) & 7);
+	uint8 res1 = 0x40 | (tabl & 0x3F) | ((regs[0xD] >> 1) & 7) | ((regs[0xB] & 4) << 5);
 	uint8 res2 = ((regs[0xD] & 1) << 7) | ((regs[0xC] & 0x1F) << 2) | (regs[0xB] & 3);
 	
 	if (tabl & 0x40)
