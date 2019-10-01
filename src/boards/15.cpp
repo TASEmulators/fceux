@@ -35,17 +35,17 @@ static SFORMAT StateRegs[] =
 static void Sync(void) {
 	int i;
 	setmirror(((latched >> 6) & 1) ^ 1);
-	switch (latchea) {
-	case 0x8000:
+	switch (latchea & 3) {
+	case 0:
 		for (i = 0; i < 4; i++)
 			setprg8(0x8000 + (i << 13), (((latched & 0x7F) << 1) + i) ^ (latched >> 7));
 		break;
-	case 0x8002:
+	case 2:
 		for (i = 0; i < 4; i++)
 			setprg8(0x8000 + (i << 13), ((latched & 0x7F) << 1) + (latched >> 7));
 		break;
-	case 0x8001:
-	case 0x8003:
+	case 1:
+	case 3:
 		for (i = 0; i < 4; i++) {
 			unsigned int b;
 			b = latched & 0x7F;
@@ -60,6 +60,18 @@ static void Sync(void) {
 static DECLFW(M15Write) {
 	latchea = A;
 	latched = V;
+	switch (latchea & 3) {
+	case 0:
+	case 3:
+		SetupCartCHRMapping(0, CHRptr[0], 0x2000, 0);
+		setchr8(0);
+		break;
+	case 1:
+	case 2:
+		SetupCartCHRMapping(0, CHRptr[0], 0x2000, 1);
+		setchr8(0);
+		break;
+	}
 	Sync();
 }
 
@@ -70,7 +82,6 @@ static void StateRestore(int version) {
 static void M15Power(void) {
 	latchea = 0x8000;
 	latched = 0;
-	setchr8(0);
 	setprg8r(0x10, 0x6000, 0);
 	SetReadHandler(0x6000, 0x7FFF, CartBR);
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
