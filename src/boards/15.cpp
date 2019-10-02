@@ -38,20 +38,20 @@ static void Sync(void) {
 	switch (latchea & 3) {
 	case 0:
 		for (i = 0; i < 4; i++)
-			setprg8(0x8000 + (i << 13), (((latched & 0x7F) << 1) + i) ^ (latched >> 7));
+			setprg8(0x8000 + (i << 13), ((latched & 0x3F) << 1) + i);
 		break;
 	case 2:
 		for (i = 0; i < 4; i++)
-			setprg8(0x8000 + (i << 13), ((latched & 0x7F) << 1) + (latched >> 7));
+			setprg8(0x8000 + (i << 13), ((latched & 0x3F) << 1) + (latched >> 7));
 		break;
 	case 1:
 	case 3:
 		for (i = 0; i < 4; i++) {
 			unsigned int b;
-			b = latched & 0x7F;
+			b = latched & 0x3F;
 			if (i >= 2 && !(latchea & 0x2))
-				b = 0x7F;
-			setprg8(0x8000 + (i << 13), (i & 1) + ((b << 1) ^ (latched >> 7)));
+				b = b | 0x07;
+			setprg8(0x8000 + (i << 13), (i & 1) + (b << 1));
 		}
 		break;
 	}
