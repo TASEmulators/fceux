@@ -35,31 +35,39 @@ static SFORMAT StateRegs[] =
 static void Sync(void) {
 	int i;
 	setmirror(((latched >> 6) & 1) ^ 1);
-	switch (latchea) {
-	case 0x8000:
+	switch (latchea & 3) {
+	case 0:
 		for (i = 0; i < 4; i++)
-			setprg8(0x8000 + (i << 13), (((latched & 0x7F) << 1) + i) ^ (latched >> 7));
+			setprg8(0x8000 + (i << 13), ((latched & 0x3F) << 1) + i);
 		break;
-	case 0x8002:
+	case 2:
 		for (i = 0; i < 4; i++)
-			setprg8(0x8000 + (i << 13), ((latched & 0x7F) << 1) + (latched >> 7));
+			setprg8(0x8000 + (i << 13), ((latched & 0x3F) << 1) + (latched >> 7));
 		break;
-	case 0x8001:
-	case 0x8003:
+	case 1:
+	case 3:
 		for (i = 0; i < 4; i++) {
 			unsigned int b;
-			b = latched & 0x7F;
+			b = latched & 0x3F;
 			if (i >= 2 && !(latchea & 0x2))
-				b = 0x7F;
-			setprg8(0x8000 + (i << 13), (i & 1) + ((b << 1) ^ (latched >> 7)));
+				b = b | 0x07;
+			setprg8(0x8000 + (i << 13), (i & 1) + (b << 1));
 		}
 		break;
 	}
+	setchr8(0);
 }
 
 static DECLFW(M15Write) {
 	latchea = A;
 	latched = V;
+	// cah4e3 02.10.19 once again, there may be either two similar mapper 15 exist. the one for 110in1 or 168in1 carts with complex multi game features.
+	// and another implified version for subor/waixing chinese originals and hacks with no different modes, working only in mode 0 and which does not
+	// expect there is any CHR write protection. protecting CHR writes only for mode 3 fixes the problem, all roms may be run on the same source again.
+	if((latchea & 3) == 3)
+		SetupCartCHRMapping(0, CHRptr[0], 0x2000, 0);
+	else
+		SetupCartCHRMapping(0, CHRptr[0], 0x2000, 1);
 	Sync();
 }
 
@@ -70,7 +78,6 @@ static void StateRestore(int version) {
 static void M15Power(void) {
 	latchea = 0x8000;
 	latched = 0;
-	setchr8(0);
 	setprg8r(0x10, 0x6000, 0);
 	SetReadHandler(0x6000, 0x7FFF, CartBR);
 	SetWriteHandler(0x6000, 0x7FFF, CartBW);
