@@ -152,11 +152,11 @@ static void Sync(void) {
 	chrSync();
 	setprg4r(0x10, 0x6000, (regs[0] & 1) | (regs[0] >> 2));	// two 4K banks are identical, either internal or excernal
 	setprg4r(0x10, 0x7000, (regs[1] & 1) | (regs[1] >> 2)); // SRAMs may be mapped in any bank independently
-	if (PRGsize[0] == 1024 * 1024) {// hacky hacky way to run it as iNES rom for debugging purposes
-		setprg8(0x8000, regs[2]);
-		setprg8(0xA000, regs[3]);
-		setprg8(0xC000, regs[4]);
-		setprg8(0xE000, ~0);
+	if (PRGptr[1] == NULL) {	// for iNES 2.0 version it even more hacky lol
+		setprg8(0x8000, (regs[2] & 0x3F) + ((regs[2] & 0x40) >> 2));
+		setprg8(0xA000, (regs[3] & 0x3F) + ((regs[3] & 0x40) >> 2));
+		setprg8(0xC000, (regs[4] & 0x3F) + ((regs[4] & 0x40) >> 2));
+		setprg8(0xE000, 0x10 + 0x3F);
 	} else {
 		setprg8r((regs[2] >> 6) & 1, 0x8000, (regs[2] & 0x3F));
 		setprg8r((regs[3] >> 6) & 1, 0xA000, (regs[3] & 0x3F));
