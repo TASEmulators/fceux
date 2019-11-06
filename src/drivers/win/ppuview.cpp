@@ -29,13 +29,15 @@ HWND hPPUView;
 
 extern uint8 *VPage[8];
 extern uint8 PALRAM[0x20];
+extern uint8 UPALRAM[3];
 
 int PPUViewPosX, PPUViewPosY;
 bool PPUView_maskUnusedGraphics = true;
 bool PPUView_invertTheMask = false;
 int PPUView_sprite16Mode = 0;
 
-static uint8 palcache[36] = { 0xFF }; //palette cache
+static uint8 pallast[32+3] = { 0 }; // palette cache for change comparison
+static uint8 palcache[36] = { 0 }; //palette cache for drawing
 uint8 chrcache0[0x1000], chrcache1[0x1000], logcache0[0x1000], logcache1[0x1000]; //cache CHR, fixes a refresh problem when right-clicking
 uint8 *pattern0, *pattern1; //pattern table bitmap arrays
 uint8 *ppuv_palette;
@@ -177,18 +179,17 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 	}
 
 	// update palette only if required
-	if (memcmp(palcache, PALRAM, 32) != 0)
+	if ((memcmp(pallast, PALRAM, 32) != 0) || (memcmp(pallast+32, UPALRAM, 3) != 0))
 	{
-		// bbit note: let para know that this if is useless and
-		// will not work because of the lines below that change
-		// palcache which will make it not equal next time
+		memcpy(pallast, PALRAM, 32);
+		memcpy(pallast+32, UPALRAM, 3);
 
 		// cache palette content
 		memcpy(palcache,PALRAM,32);
 		palcache[0x10] = palcache[0x00];
-		palcache[0x14] = palcache[0x00];
-		palcache[0x18] = palcache[0x00];
-		palcache[0x1C] = palcache[0x00];
+		palcache[0x04] = palcache[0x14] = UPALRAM[0];
+		palcache[0x08] = palcache[0x18] = UPALRAM[1];
+		palcache[0x0C] = palcache[0x1C] = UPALRAM[2];
 
 		//draw palettes
 		for (y = 0; y < PALETTEHEIGHT; y++)
@@ -220,7 +221,6 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 			}
 			pbitmap += ((32*4*3)-6);
 		}
-		memcpy(palcache,PALRAM,32);        //palcache which will make it not equal next time
 	}
 
 	DrawPatternTable(pattern0,chrcache0,logcache0,pindex0);
@@ -428,7 +428,8 @@ INT_PTR CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			PPUViewSkip=100;
 
 			//clear cache
-			memset(palcache,0,32);
+			memset(pallast,0,32+3);
+			memset(palcache,0,36);
 			memset(chrcache0,0,0x1000);
 			memset(chrcache1,0,0x1000);
 			memset(logcache0,0,0x1000);
@@ -537,7 +538,6 @@ INT_PTR CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 					mouse_x = (mouse_x - paletteDestX) / 32;
 					mouse_y = (mouse_y - paletteDestY) / 32;
 					int ix = (mouse_y<<4)|mouse_x;
-					if ((ix & 0x10) && !(ix & 0x03)) ix = 0; // palcache 0x10/14/18/1C is bogus $00 values
 					sprintf(str,"Palette: $%02X",palcache[ix]);
 					SetDlgItemText(hwndDlg,LBL_PPUVIEW_TILE1,"Tile:");
 					SetDlgItemText(hwndDlg,LBL_PPUVIEW_TILE2,"Tile:");
