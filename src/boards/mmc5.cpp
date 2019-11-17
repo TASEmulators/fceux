@@ -315,7 +315,8 @@ int DetectMMC5WRAMSize(uint32 crc32) {
 }
 
 static void BuildWRAMSizeTable(void) {
-	bool other = false;
+	bool other = false; // non-standard configuration
+	// fill first 8 entries
 	int x;
 	for (x = 0; x < 8; x++) {
 		switch (MMC5WRAMsize) {
@@ -327,14 +328,17 @@ static void BuildWRAMSizeTable(void) {
 		default: MMC5WRAMIndex[x] = x; other = true; break;         //0,1,2...
 		}
 	}
+	// extend to fill complete table
 	if (other)
 	{
 		for (x = 0; x < MMC5WRAMMAX && x < MMC5WRAMsize; ++x) MMC5WRAMIndex[x] = x; // linear mapping
-		for (x = MMC5WRAMsize; x < MMC5WRAMMAX; ++x) MMC5WRAMIndex[x] = MMC5WRAMIndex[x-MMC5WRAMsize]; // fill table
+		for (x = MMC5WRAMsize; x < MMC5WRAMMAX; ++x) MMC5WRAMIndex[x] = MMC5WRAMIndex[x-MMC5WRAMsize]; // repeat to fill table
+		// theoretically the table fill should decompose into powers of two for possible mismatched SRAM combos,
+		// but I don't want to complicate the code with unnecessary hypotheticals
 	}
 	else
 	{
-		for (x = 8; x < MMC5WRAMMAX; ++x) MMC5WRAMIndex[x] = MMC5WRAMIndex[x & 7]; // fill table
+		for (x = 8; x < MMC5WRAMMAX; ++x) MMC5WRAMIndex[x] = MMC5WRAMIndex[x & 7]; // fill table, repeating groups of 8
 	}
 }
 
