@@ -100,7 +100,7 @@ static uint8 *WRAM = NULL;
 static uint8 *MMC5fill = NULL;
 static uint8 *ExRAM = NULL;
 
-const int MMC5WRAMMAX = 128; // 7 bits in register interface (real MMC5 has only 4 pins, however)
+const int MMC5WRAMMAX = 1<<7; // 7 bits in register interface (real MMC5 has only 4 pins, however)
 static uint8 MMC5WRAMsize; //configuration, not state
 static uint8 MMC5WRAMIndex[MMC5WRAMMAX]; //configuration, not state
 
