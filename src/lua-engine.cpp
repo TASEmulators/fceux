@@ -208,6 +208,11 @@ static int wasPaused = FALSE;
 // Transparency strength. 255=opaque, 0=so transparent it's invisible
 static int transparencyModifier = 255;
 
+// Our zapper.
+static int luazapperx = -1;
+static int luazappery = -1;
+static int luazapperfire = -1;
+
 // Our joypads.
 static uint8 luajoypads1[4]= { 0xFF, 0xFF, 0xFF, 0xFF }; //x1
 static uint8 luajoypads2[4]= { 0x00, 0x00, 0x00, 0x00 }; //0x
@@ -278,6 +283,9 @@ static const char* toCString(lua_State* L, int idx=0);
 static void FCEU_LuaOnStop()
 {
 	luaRunning = FALSE;
+	luazapperx = -1;
+	luazappery = -1;
+	luazapperfire = -1;
 	for (int i = 0 ; i < 4 ; i++ ){
 		luajoypads1[i]= 0xFF;	// Set these back to pass-through
 		luajoypads2[i]= 0x00;
@@ -2536,7 +2544,37 @@ static int zapper_read(lua_State *L){
 	return 1;
 }
 
+// zapper.set(table state)
+//
+//   Sets the zapper state for the next frame advance.
+static int zapper_set(lua_State* L) {
 
+	luaL_checktype(L, 1, LUA_TTABLE);
+
+	luazapperx = -1;
+	luazappery = -1;
+	luazapperfire = -1;
+
+	lua_getfield(L, 1, "x");
+	if (!lua_isnil(L, -1)) luazapperx = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+
+	lua_getfield(L, 1, "y");
+	if (!lua_isnil(L, -1)) luazappery = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+
+	lua_getfield(L, 1, "fire");
+	if (!lua_isnil(L, -1))
+	{
+		if (lua_toboolean(L, -1)) // True or string
+			luazapperfire = 1;
+		if (lua_toboolean(L, -1) == 0 || lua_isstring(L, -1)) // False or string
+			luazapperfire = 0;
+	}
+	lua_pop(L, 1);
+
+	return 0;
+}
 
 // table joypad.read(int which = 1)
 //
@@ -5815,6 +5853,7 @@ static const struct luaL_reg joypadlib[] = {
 
 static const struct luaL_reg zapperlib[] = {
 	{"read", zapper_read},
+	{"set", zapper_set},
 	{NULL,NULL}
 };
 
@@ -6309,6 +6348,15 @@ int FCEU_LuaRunning() {
 	return (int) (L != NULL); // should return true if callback functions are active.
 }
 
+/**
+ * Applies zapper.set overrides to zapper input.
+ */
+void FCEU_LuaReadZapper(const uint32* mouse_in, uint32* mouse_out)
+{
+	mouse_out[0] = luazapperx >= 0 ? luazapperx : mouse_in[0];
+	mouse_out[1] = luazappery >= 0 ? luazappery : mouse_in[1];
+	mouse_out[2] = luazapperfire >= 0 ? (luazapperfire | (mouse_in[2] & ~1)) : mouse_in[2];
+}
 
 /**
  * Returns true if Lua would like to steal the given joypad control.
