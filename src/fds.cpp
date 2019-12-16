@@ -86,6 +86,20 @@ static int32 DiskPtr;
 static int32 DiskSeekIRQ;
 static uint8 SelectDisk, InDisk;
 
+/* 4024(w), 4025(w), 4031(r) by dink(fbneo) */
+#define USE_DINK // remove this and old code after testing phase
+enum FDS_DiskBlockIDs { DSK_INIT = 0, DSK_VOLUME, DSK_FILECNT, DSK_FILEHDR, DSK_FILEDATA };
+static uint8  mapperFDS_control;    // 4025(w) control register
+static uint16 mapperFDS_filesize;	// size of file being read/written
+static uint8  mapperFDS_block;		// block-id of current block
+static uint16 mapperFDS_blockstart;	// start-address of current block
+static uint16 mapperFDS_blocklen;	// length of current block
+static uint16 mapperFDS_diskaddr;   // current address relative to blockstart
+static uint8  mapperFDS_diskaccess;	// disk needs to be accessed at least once before writing
+#define fds_disk() (diskdata[InDisk][mapperFDS_blockstart + mapperFDS_diskaddr])
+#define mapperFDS_diskinsert (InDisk != 255)
+
+
 #define DC_INC    1
 
 void FDSGI(GI h) {
@@ -141,6 +155,16 @@ static void FDSInit(void) {
 	FDSSoundReset();
 	InDisk = 0;
 	SelectDisk = 0;
+
+#ifdef USE_DINK
+	mapperFDS_control = 0;
+	mapperFDS_filesize = 0;
+	mapperFDS_block = 0;
+	mapperFDS_blockstart = 0;
+	mapperFDS_blocklen = 0;
+	mapperFDS_diskaddr = 0;
+	mapperFDS_diskaccess = 0;
+#endif
 }
 
 void FCEU_FDSInsert(void)
@@ -232,6 +256,7 @@ static DECLFR(FDSRead4030) {
 	return ret;
 }
 
+#ifndef USE_DINK
 static DECLFR(FDSRead4031) {
 	static uint8 z = 0;
 	if (InDisk != 255) {
@@ -244,6 +269,51 @@ static DECLFR(FDSRead4031) {
 	}
 	return z;
 }
+
+#else
+
+static DECLFR(FDSRead4031) {
+	static uint8 ret = 0;
+
+	ret = 0xff;
+	if (mapperFDS_diskinsert && mapperFDS_control & 0x04) {
+		mapperFDS_diskaccess = 1;
+
+		ret = 0;
+
+		switch (mapperFDS_block) {
+			case DSK_FILEHDR:
+				if (mapperFDS_diskaddr < mapperFDS_blocklen) {
+					ret = fds_disk();
+					switch (mapperFDS_diskaddr) {
+						case 13: mapperFDS_filesize = ret; break;
+						case 14:
+							mapperFDS_filesize |= ret << 8;
+							//char fdsfile[10];
+							//strncpy(fdsfile, (char*)&diskdata[InDisk][mapperFDS_blockstart + 3], 8);
+							//printf("Read file: %s (size: %d)\n"), fdsfile, mapperFDS_filesize);
+							break;
+					}
+					mapperFDS_diskaddr++;
+				}
+				break;
+			default:
+				if (mapperFDS_diskaddr < mapperFDS_blocklen) {
+					ret = fds_disk();
+					mapperFDS_diskaddr++;
+				}
+				break;
+		}
+
+		DiskSeekIRQ = 150;
+		X6502_IRQEnd(FCEU_IQEXT2);
+	}
+
+	return ret;
+}
+
+#endif
+
 static DECLFR(FDSRead4032) {
 	uint8 ret;
 
@@ -533,6 +603,7 @@ static DECLFW(FDSWrite) {
 		break;
 	case 0x4023: break;
 	case 0x4024:
+#ifndef USE_DINK
 		if ((InDisk != 255) && !(FDSRegs[5] & 0x4) && (FDSRegs[3] & 0x1)) {
 			if (DiskPtr >= 0 && DiskPtr < 65500) {
 				if (writeskip)
@@ -543,8 +614,43 @@ static DECLFW(FDSWrite) {
 				}
 			}
 		}
+#else
+		if (mapperFDS_diskinsert && ~mapperFDS_control & 0x04) {
+
+			if (mapperFDS_diskaccess == 0) {
+				mapperFDS_diskaccess = 1;
+				break;
+			}
+
+			switch (mapperFDS_block) {
+				case DSK_FILEHDR:
+					if (mapperFDS_diskaddr < mapperFDS_blocklen) {
+						fds_disk() = V;
+						switch (mapperFDS_diskaddr) {
+							case 13: mapperFDS_filesize = V; break;
+							case 14:
+								mapperFDS_filesize |= V << 8;
+								//char fdsfile[10];
+								//strncpy(fdsfile, (char*)&diskdata[InDisk][mapperFDS_blockstart + 3], 8);
+								//printf("Write file: %s (size: %d)\n"), fdsfile, mapperFDS_filesize);
+								break;
+						}
+						mapperFDS_diskaddr++;
+					}
+					break;
+				default:
+					if (mapperFDS_diskaddr < mapperFDS_blocklen) {
+						fds_disk() = V;
+						mapperFDS_diskaddr++;
+					}
+					break;
+			}
+
+		}
+#endif
 		break;
 	case 0x4025:
+#ifndef USE_DINK
 		X6502_IRQEnd(FCEU_IQEXT2);
 		if (InDisk != 255) {
 			if (!(V & 0x40)) {
@@ -561,6 +667,54 @@ static DECLFW(FDSWrite) {
 			if (V & 0x40) DiskSeekIRQ = 200;
 		}
 		setmirror(((V >> 3) & 1) ^ 1);
+#else
+		X6502_IRQEnd(FCEU_IQEXT2);
+		if (mapperFDS_diskinsert) {
+			if (V & 0x40 && ~mapperFDS_control & 0x40) {
+				mapperFDS_diskaccess = 0;
+
+				DiskSeekIRQ = 150;
+
+				// blockstart  - address of block on disk
+				// diskaddr    - address relative to blockstart
+				// _block -> _blockID ?
+				mapperFDS_blockstart += mapperFDS_diskaddr;
+				mapperFDS_diskaddr = 0;
+
+				mapperFDS_block++;
+				if (mapperFDS_block > DSK_FILEDATA)
+					mapperFDS_block = DSK_FILEHDR;
+
+				switch (mapperFDS_block) {
+					case DSK_VOLUME:
+						mapperFDS_blocklen = 0x38;
+						break;
+					case DSK_FILECNT:
+						mapperFDS_blocklen = 0x02;
+						break;
+					case DSK_FILEHDR:
+						mapperFDS_blocklen = 0x10;
+						break;
+					case DSK_FILEDATA:		 // <blockid><filedata>
+						mapperFDS_blocklen = 0x01 + mapperFDS_filesize;
+						break;
+				}
+			}
+
+			if (V & 0x02) { // transfer reset
+				mapperFDS_block = DSK_INIT;
+				mapperFDS_blockstart = 0;
+				mapperFDS_blocklen = 0;
+				mapperFDS_diskaddr = 0;
+				DiskSeekIRQ = 150;
+			}
+			if (V & 0x40) { // turn on motor
+				DiskSeekIRQ = 150;
+			}
+		}
+		mapperFDS_control = V;
+		setmirror(((V >> 3) & 1) ^ 1);
+#endif
 		break;
 	}
 	FDSRegs[A & 7] = V;
@@ -749,6 +903,15 @@ int FDSLoad(const char *name, FCEUFILE *fp) {
 	AddExState(&SelectDisk, 1, 0, "SELD");
 	AddExState(&InDisk, 1, 0, "INDI");
 	AddExState(&DiskWritten, 1, 0, "DSKW");
+#ifdef USE_DINK
+	AddExState(&mapperFDS_control, 1, 0, "CTRG");
+	AddExState(&mapperFDS_filesize, 2, 1, "FLSZ");
+	AddExState(&mapperFDS_block, 1, 0, "BLCK");
+	AddExState(&mapperFDS_blockstart, 2, 1, "BLKS");
+	AddExState(&mapperFDS_blocklen, 2, 1, "BLKL");
+	AddExState(&mapperFDS_diskaddr, 2, 1, "DADR");
+	AddExState(&mapperFDS_diskaccess, 1, 0, "DACC");
+#endif
 
 	CHRRAMSize = 8192;
 	CHRRAM = (uint8*)FCEU_gmalloc(CHRRAMSize);
