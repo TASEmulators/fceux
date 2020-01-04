@@ -34,3 +34,7 @@ fceux-net-server
 .sconsign.dblite
 .deps
 .dirstamp
+/output/movies
+/output/cheats
+/output/snaps
+/output/sav
