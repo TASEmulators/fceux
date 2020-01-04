@@ -688,6 +688,7 @@
     </ClCompile>
     <ClCompile Include="..\src\input\cursor.cpp" />
     <ClCompile Include="..\src\input\fkb.cpp" />
+    <ClCompile Include="..\src\input\fns.cpp" />
     <ClCompile Include="..\src\input\ftrainer.cpp" />
     <ClCompile Include="..\src\input\hypershot.cpp" />
     <ClCompile Include="..\src\input\mahjong.cpp" />

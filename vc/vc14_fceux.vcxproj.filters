@@ -1096,6 +1096,9 @@
     <ClCompile Include="..\src\drivers\win\header_editor.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\input\fns.cpp">
+      <Filter>input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">

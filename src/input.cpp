@@ -77,6 +77,7 @@ extern INPUTCFC *FCEU_InitFamilyTrainerA(void);
 extern INPUTCFC *FCEU_InitFamilyTrainerB(void);
 extern INPUTCFC *FCEU_InitOekaKids(void);
 extern INPUTCFC *FCEU_InitTopRider(void);
+extern INPUTCFC *FCEU_InitFamiNetSys(void);
 extern INPUTCFC *FCEU_InitBarcodeWorld(void);
 //---------------
 
@@ -533,6 +534,9 @@ static void SetInputStuffFC()
 		break;
 	case SIFC_TOPRIDER:
 		portFC.driver=FCEU_InitTopRider();
+		break;
+	case SIFC_FAMINETSYS:
+		portFC.driver = FCEU_InitFamiNetSys();
 		break;
 	}
 }
