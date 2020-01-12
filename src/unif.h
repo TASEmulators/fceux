@@ -51,7 +51,7 @@ void EKROM_Init(CartInfo *info);
 void ELROM_Init(CartInfo *info);
 void ETROM_Init(CartInfo *info);
 void EWROM_Init(CartInfo *info);
-void GNROM_Init(CartInfo *info);
+//void GNROM_Init(CartInfo *info);
 void HKROM_Init(CartInfo *info);
 void LE05_Init(CartInfo *info);
 void LH10_Init(CartInfo *info);

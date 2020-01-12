@@ -93,7 +93,7 @@ static INLINE int FCEUI_GetLoggingCD() { return debug_loggingCD; }
 extern int iaPC;
 extern uint32 iapoffset; //mbg merge 7/18/06 changed from int
 void DebugCycle();
-void BreakHit(int bp_num, bool force = false);
+void BreakHit(int bp_num);
 
 extern bool break_asap;
 extern uint64 total_cycles_base;
