@@ -536,7 +536,7 @@ void IncrementInstructionsCounters()
 bool CondForbidTest(int bp_num) {
 	if (bp_num >= 0 && !condition(&watchpoint[bp_num]))
 	{
-		return false; // condition rejected
+		return false;	// condition rejected
 	}
 
 	//check to see whether we fall in any forbid zone
@@ -550,11 +550,11 @@ bool CondForbidTest(int bp_num) {
 		{
 			if (wp.endaddress) {
 				if ((wp.address <= _PC) && (wp.endaddress >= _PC))
-					return false;	//forbid
+					return false;	// forbid
 			}
 			else {
 				if (wp.address == _PC)
-					return false; //forbid
+					return false;	// forbid
 			}
 		}
 	}
