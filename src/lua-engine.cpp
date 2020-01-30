@@ -515,7 +515,7 @@ extern void ReloadRom(void);
 // emu.loadrom(string filename)
 //
 //  Loads the rom from the directory relative to the lua script or from the absolute path.
-//  If the rom can't e loaded, loads the most recent one.
+//  If the rom can't be loaded, loads the most recent one.
 static int emu_loadrom(lua_State *L) {
 #ifdef WIN32
 	const char* str = lua_tostring(L,1);
