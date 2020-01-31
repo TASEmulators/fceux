@@ -11,7 +11,6 @@ void FCEU_ApplyPeriodicCheats(void);
 void FCEU_PowerCheats(void);
 int FCEU_CalcCheatAffectedBytes(uint32 address, uint32 size);
 
-
 int FCEU_CheatGetByte(uint32 A);
 void FCEU_CheatSetByte(uint32 A, uint8 V);
 
@@ -45,6 +44,11 @@ struct SEARCHPOSSIBLE {
 	bool update;
 };
 
+// Trying to find a more efficient way for determining if an address has a cheat
+// 1 byte represents to 8 bytes in NES, 
+int IsByteCheat(uint8 address);
+void SetByteCheat(uint8 address, bool cheat);
+
 #define FCEU_SEARCH_SPECIFIC_CHANGE         0
 #define FCEU_SEARCH_RELATIVE_CHANGE         1
 #define FCEU_SEARCH_PUERLY_RELATIVE_CHANGE  2
@@ -55,10 +59,4 @@ struct SEARCHPOSSIBLE {
 #define FCEU_SEARCH_NEWVAL_GT_KNOWN         7
 #define FCEU_SEARCH_NEWVAL_LT_KNOWN         8
 
-
-#define CalcAddressRangeCheatCount(count, address, size) \
-	count = 0; \
-	for (int i = 0; i < numsubcheats && count < size; ++i) \
-		if (SubCheats[i].addr >= address && SubCheats[i].addr < address + size) \
-			++count
 #endif

@@ -1415,24 +1415,22 @@ void UpdateCheatRelatedWindow()
 	// ram search
 	extern HWND RamSearchHWnd;
 	if (RamSearchHWnd)
-	{
 		// if ram search is open then update the ram list.
 		SendDlgItemMessage(RamSearchHWnd, IDC_RAMLIST, LVM_REDRAWITEMS, 
 			SendDlgItemMessage(RamSearchHWnd, IDC_RAMLIST, LVM_GETTOPINDEX, 0, 0),
+			SendDlgItemMessage(RamSearchHWnd, IDC_RAMLIST, LVM_GETTOPINDEX, 0, 0) + 
 			SendDlgItemMessage(RamSearchHWnd, IDC_RAMLIST, LVM_GETCOUNTPERPAGE, 0, 0) + 1);
-	}
 
 	// ram watch
 	extern void UpdateWatchCheats();
 	UpdateWatchCheats();
 	extern HWND RamWatchHWnd;
 	if (RamWatchHWnd)
-	{
 		// if ram watch is open then update the ram list.
 		SendDlgItemMessage(RamWatchHWnd, IDC_WATCHLIST, LVM_REDRAWITEMS,
 			SendDlgItemMessage(RamWatchHWnd, IDC_WATCHLIST, LVM_GETTOPINDEX, 0, 0),
+			SendDlgItemMessage(RamSearchHWnd, IDC_RAMLIST, LVM_GETTOPINDEX, 0, 0) + 
 			SendDlgItemMessage(RamWatchHWnd, IDC_WATCHLIST, LVM_GETCOUNTPERPAGE, 0, 0) + 1);
-	}
 
 }
 

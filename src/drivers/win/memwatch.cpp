@@ -315,17 +315,13 @@ void UpdateMemWatch()
 			MWRec& mwrec = mwrecs[i];
 
 			//Display blue if address is frozen
-			if (FrozenAddressCount && FrozenAddresses.size())
-			{
+			if (FrozenAddressCount)
 				for (unsigned int x = 0; x < FrozenAddressCount; x++)
 				{
-					if (mwrec.addr == FrozenAddresses[x])
-					{
-						//SetTextColor(hdc,RGB(0,0,255));
+					extern int IsByteCheat(uint8);
+					if (IsByteCheat(mwrec.addr))
 						SetTextColor(hdc,GetSysColor(COLOR_HIGHLIGHT));
-					}
 				}
-			}
 
 			char* text;
 			if(mwrec.valid && GameInfo)

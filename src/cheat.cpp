@@ -39,7 +39,6 @@ using namespace std;
 static uint8 *CheatRPtrs[64];
 
 vector<uint16> FrozenAddresses;			//List of addresses that are currently frozen
-void UpdateFrozenList(void);			//Function that populates the list of frozen addresses
 unsigned int FrozenAddressCount = 0;		//Keeps up with the Frozen address count, necessary for using in other dialogs (such as hex editor)
 
 void FCEU_CheatResetRAM(void)
@@ -64,6 +63,7 @@ CHEATF_SUBFAST SubCheats[256] = { 0 };
 uint32 numsubcheats = 0;
 int globalCheatDisabled = 0;
 int disableAutoLSCheats = 0;
+static unsigned char cheatMap[0x10000 / 8] = { 0 };
 struct CHEATF *cheats = 0, *cheatsl = 0;
 
 
@@ -102,11 +102,16 @@ void RebuildSubCheats(void)
 {
 	uint32 x;
 	struct CHEATF *c = cheats;
-	for(x = 0; x < numsubcheats; x++)
+	for (x = 0; x < numsubcheats; x++)
+	{
 		SetReadHandler(SubCheats[x].addr, SubCheats[x].addr, SubCheats[x].PrevRead);
+		SetByteCheat(SubCheats[x].addr, false);
+	}
 
 	numsubcheats = 0;
+
 	if (!globalCheatDisabled)
+	{
 		while(c)
 		{
 			if(c->type == 1 && c->status && GetReadHandler(c->addr) != SubCheatsRead)
@@ -116,26 +121,28 @@ void RebuildSubCheats(void)
 				SubCheats[numsubcheats].val = c->val;
 				SubCheats[numsubcheats].compare = c->compare;
 				SetReadHandler(c->addr, c->addr, SubCheatsRead);
+				SetByteCheat(SubCheats[numsubcheats].addr, true);
 				numsubcheats++;
 			}
 			c = c->next;
 		}
-
+	}
 	FrozenAddressCount = numsubcheats;		//Update the frozen address list
-	UpdateFrozenList();
 
 }
 
 void FCEU_PowerCheats()
 {
 	numsubcheats = 0;	/* Quick hack to prevent setting of ancient read addresses. */
+	memset(cheatMap, 0, sizeof(cheatMap));
 	RebuildSubCheats();
 }
 
 int FCEU_CalcCheatAffectedBytes(uint32 address, uint32 size) {
+
 	uint32 count = 0;
-	for (uint32 i = 0; i < numsubcheats && count < size; ++i)
-		if (SubCheats[i].addr >= address && SubCheats[i].addr < address + size)
+	for (uint32 i = 0; i < size; ++i)
+		if (IsByteCheat(address + i))
 			++count;
 	return count;
 }
@@ -195,9 +202,11 @@ void FCEU_LoadGameCheats(FILE *override, int override_existing)
 	int tc = 0;
 	char *fn;
 
-	savecheats = 0;
 	if (override_existing)
+	{
 		numsubcheats = 0;
+		memset(cheatMap, 0, sizeof(cheatMap));
+	}
 
 	if(override)
 		fp = override;
@@ -870,22 +879,6 @@ void FCEU_CheatSetByte(uint32 A, uint8 V)
     BWrite[A](A, V);
 }
 
-void UpdateFrozenList(void)
-{
-	//The purpose of this function is to keep an up to date list of addresses that are currently frozen
-	//and make these accessible to other dialogs that deal with memory addresses such as
-	//memwatch, hex editor, ramfilter, etc.
-
-	uint32 x;
-	FrozenAddresses.clear();		//Clear vector and repopulate
-	for(x = 0; x < numsubcheats; x++)
-	{
-		FrozenAddresses.push_back(SubCheats[x].addr);
-		//FCEU_printf("Address %d: %d \n",x,FrozenAddresses[x]); //Debug
-	}
-	//FCEUI_DispMessage("FrozenCount: %d",0,FrozenAddressCount);//Debug
-}
-
 // disable all cheats
 int FCEU_DisableAllCheats(){
 	int count = 0;
@@ -902,3 +895,14 @@ int FCEU_DisableAllCheats(){
 	RebuildSubCheats();
 	return count;
 }
+
+int IsByteCheat(uint8 address)
+{
+	return cheatMap[address / 8] >> (address % 8) & 1;
+}
+
+void SetByteCheat(uint8 address, bool cheat)
+{
+	cheat ? cheatMap[address / 8] |= (1 << address % 8) : cheatMap[address / 8] ^= (1 << address % 8);
+}
+

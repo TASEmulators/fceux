@@ -26,7 +26,6 @@ static void SetCheatToolTip(HWND hwndDlg, UINT id);
 char* GetCheatToolTipStr(HWND hwndDlg, UINT id);
 
 extern unsigned int FrozenAddressCount;
-extern std::vector<uint16> FrozenAddresses;
 //void ConfigAddCheat(HWND wnd); //bbit edited:commented out this line
 extern struct CHEATF* cheats;
 extern char* GameGenieLetters;

@@ -39,6 +39,7 @@
 #include <commctrl.h>
 #include <list>
 #include <vector>
+
 #ifdef WIN32
 	#include "BaseTsd.h"
 	typedef INT_PTR intptr_t;
@@ -1262,20 +1263,20 @@ LRESULT CustomDraw (LPARAM lParam)
 			int rv = CDRF_DODEFAULT;
 			int cheat = CALL_WITH_T_SIZE_TYPES_1(GetNumCheatsFromIndex, rs_type_size, rs_t == 's', noMisalign, lplvcd->nmcd.dwItemSpec);
 			switch (cheat) {
-			default: 
-			case 0: 
-				if (lplvcd->nmcd.dwItemSpec % 2)
-					lplvcd->clrTextBk = RGB(248, 248, 255);
-				break;
-			case 1:
-				lplvcd->clrTextBk = CHEAT_1BYTE_BG; break;
-			case 2:
-				lplvcd->clrTextBk = CHEAT_2BYTE_BG; break;
-			case 3:
-				lplvcd->clrTextBk = CHEAT_3BYTE_BG; break;
-			case 4:
-				lplvcd->clrTextBk = CHEAT_4BYTE_BG;
-				lplvcd->clrText = CHEAT_4BYTE_TEXT; break; // use a more visual color in dark background
+				default: 
+				case 0: 
+					if (lplvcd->nmcd.dwItemSpec % 2)
+						lplvcd->clrTextBk = RGB(248, 248, 255);
+					break;
+				case 1:
+					lplvcd->clrTextBk = CHEAT_1BYTE_BG; break;
+				case 2:
+					lplvcd->clrTextBk = CHEAT_2BYTE_BG; break;
+				case 3:
+					lplvcd->clrTextBk = CHEAT_3BYTE_BG; break;
+				case 4:
+					lplvcd->clrTextBk = CHEAT_4BYTE_BG;
+					lplvcd->clrText = CHEAT_4BYTE_TEXT; break; // use a more visual color in dark background
 			}
 
 			if(!IsSatisfied(lplvcd->nmcd.dwItemSpec))
