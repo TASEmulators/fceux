@@ -2198,7 +2198,7 @@ int FCEUX_PPU_Loop(int skip) {
 							{
 								pixel = addr & 0x1F;
 							}
-							pixelcolor = PALRAM[pixel];
+							pixelcolor = READPAL_MOTHEROFALL(pixel);
 						}
 
 						//generate the BG data

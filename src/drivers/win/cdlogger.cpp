@@ -562,8 +562,10 @@ void InitCDLog()
 		cdloggerVideoDataSize = CHRsize[0];
 		cdloggervdata = (unsigned char*)malloc(cdloggerVideoDataSize);
 	} else {
-		cdloggerVideoDataSize = 0;
-		cdloggervdata = (unsigned char*)malloc(8192);
+		if (GameInfo->type != GIT_NSF) {
+			cdloggerVideoDataSize = 0;
+			cdloggervdata = (unsigned char*)malloc(8192);
+		}
 	}
 }
 
@@ -576,8 +578,10 @@ void ResetCDLog()
 		undefinedvromcount = cdloggerVideoDataSize;
 		ZeroMemory(cdloggervdata, cdloggerVideoDataSize);
 	} else {
-		undefinedvromcount = 8192;
-		ZeroMemory(cdloggervdata, 8192);
+		if (GameInfo->type != GIT_NSF) {
+			undefinedvromcount = 8192;
+			ZeroMemory(cdloggervdata, 8192);
+		}
 	}
 }
 

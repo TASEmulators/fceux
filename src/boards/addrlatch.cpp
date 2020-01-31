@@ -237,13 +237,8 @@ void Mapper200_Init(CartInfo *info) {
 //------------------ Map 201 ---------------------------
 
 static void M201Sync(void) {
-	if (latche & 8) {
-		setprg32(0x8000, latche & 3);
-		setchr8(latche & 3);
-	} else {
-		setprg32(0x8000, 0);
-		setchr8(0);
-	}
+	setprg32(0x8000, latche & 3);
+	setchr8(latche & 3);
 }
 
 void Mapper201_Init(CartInfo *info) {

@@ -51,7 +51,7 @@ void EKROM_Init(CartInfo *info);
 void ELROM_Init(CartInfo *info);
 void ETROM_Init(CartInfo *info);
 void EWROM_Init(CartInfo *info);
-void GNROM_Init(CartInfo *info);
+//void GNROM_Init(CartInfo *info);
 void HKROM_Init(CartInfo *info);
 void LE05_Init(CartInfo *info);
 void LH10_Init(CartInfo *info);
@@ -159,6 +159,7 @@ void BMC8IN1_Init(CartInfo *info);
 void BMC80013B_Init(CartInfo *info);
 void BMCHPxx_Init(CartInfo *info);
 void MINDKIDS_Init(CartInfo *info);
+void FNS_Init(CartInfo *info);
 
 extern uint8 *UNIFchrrama;	// Meh.  So I can stop CHR RAM
 							// bank switcherooing with certain boards...

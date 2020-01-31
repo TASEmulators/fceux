@@ -147,6 +147,7 @@ void FindNext();
 void OpenFindDialog();
 static int GetFileData(uint32 offset);
 static int WriteFileData(uint32 offset,int data);
+static void PalettePoke(uint32 addr, uint8 data);
 
 
 HWND hMemView, hMemFind;
@@ -1013,7 +1014,7 @@ void InputData(char *input){
 			if((addr >= 0x2000) && (addr < 0x3F00))
 				vnapage[(addr>>10)&0x3][addr&0x3FF] = data[i]; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
 			if((addr >= 0x3F00) && (addr < 0x3FFF))
-				PALRAM[addr&0x1F] = data[i];
+				PalettePoke(addr,data[i]);
 		} else if (EditingMode == MODE_NES_OAM)
 		{
 			addr &= 0xFF;
@@ -1049,7 +1050,7 @@ if(EditingMode == MODE_NES_PPU){
 addr &= 0x3FFF;
 if(addr < 0x2000)VPage[addr>>10][addr] = data; //todo: detect if this is vrom and turn it red if so
 if((addr > 0x2000) && (addr < 0x3F00))vnapage[(addr>>10)&0x3][addr&0x3FF] = data; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
-if((addr > 0x3F00) && (addr < 0x3FFF))PALRAM[addr&0x1F] = data;
+if((addr > 0x3F00) && (addr < 0x3FFF)) PalettePoke(addr,data);
 }
 if(EditingMode == MODE_NES_FILE)ApplyPatch(addr,1,(uint8 *)&data);
 CursorStartAddy++;
@@ -1915,7 +1916,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					i &= 0x3FFF;
 					if(i < 0x2000) bar[i] = VPage[(i)>>10][(i)];
 					else if(i < 0x3F00) bar[i] = vnapage[(i>>10)&0x3][i&0x3FF];
-					else bar[i] = PALRAM[i&0x1F];
+					else bar[i] = READPAL_MOTHEROFALL(i & 0x1F);
 				}
 				dumpToFile(bar, sizeof(bar));
 				return 0;
@@ -1952,7 +1953,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 						if((addr >= 0x2000) && (addr < 0x3F00))
 							vnapage[(addr>>10)&0x3][addr&0x3FF] = v; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
 						if((addr >= 0x3F00) && (addr < 0x3FFF))
-							PALRAM[addr&0x1F] = v;
+							PalettePoke(addr,v);
 					}
 				}
 				return 0;
@@ -2393,4 +2394,26 @@ void OpenFindDialog()
 	else
 		hMemFind = CreateDialog(fceu_hInstance,"MEMVIEWFIND",hMemView,MemFindCallB);
 	return;
+}
+
+void PalettePoke(uint32 addr, uint8 data)
+{
+	data = data & 0x3F;
+	addr = addr & 0x1F;
+	if ((addr & 3) == 0)
+	{
+		addr = (addr & 0xC) >> 2;
+		if (addr == 0)
+		{
+			PALRAM[0x00] = PALRAM[0x04] = PALRAM[0x08] = PALRAM[0x0C] = data;
+		}
+		else
+		{
+			UPALRAM[addr-1] = UPALRAM[0x10|(addr-1)] = data;
+		}
+	}
+	else
+	{
+		PALRAM[addr] = data;
+	}
 }

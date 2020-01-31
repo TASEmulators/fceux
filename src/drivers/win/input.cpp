@@ -93,6 +93,7 @@ static uint8 HyperShotData=0;
 static uint32 MahjongData=0;
 static uint32 FTrainerData=0;
 static uint8 TopRiderData=0;
+static uint32 FamiNetSysData = 0;
 
 static uint8 BWorldData[1+13+1];
 
@@ -104,6 +105,7 @@ static void UpdateHyperShot(void);
 static void UpdateMahjong(void);
 static void UpdateFTrainer(void);
 static void UpdateTopRider(void);
+static void UpdateFamiNetSys(void);
 
 static uint32 snespad_return[4];
 static uint32 JSreturn=0;
@@ -463,6 +465,7 @@ void FCEUD_UpdateInput()
 		case SIFC_FTRAINERB:
 		case SIFC_FTRAINERA: UpdateFTrainer();break;
 		case SIFC_TOPRIDER: UpdateTopRider();break;
+		case SIFC_FAMINETSYS: UpdateFamiNetSys(); break;
 		case SIFC_OEKAKIDS: mouse=true; break;
 		}
 
@@ -565,6 +568,9 @@ void InitInputPorts(bool fourscore)
 		break;
 	case SIFC_TOPRIDER:
 		InputDPtr=&TopRiderData;
+		break;
+	case SIFC_FAMINETSYS:
+		InputDPtr = &FamiNetSysData;
 		break;
 	case SIFC_BWORLD:
 		InputDPtr=BWorldData;
@@ -716,6 +722,27 @@ static void UpdateTopRider(void)
 	for(x=0;x<8;x++)
 		if(DTestButton(&TopRiderButtons[x]))
 			TopRiderData|=1<<x;
+}
+
+ButtConfig FamiNetSysButtons[24] =
+{
+	MK(V),MK(C),MK(X),MK(Z),MK(BL_CURSORUP),MK(BL_CURSORDOWN),MK(BL_CURSORLEFT),MK(BL_CURSORRIGHT),
+	MK(0),MK(1),MK(2),MK(3),MK(4),MK(5),MK(6),MK(7),
+	MK(8),MK(9),MK(ASTERISK),MK(KP_PLUS),MK(KP_DELETE),MK(KP_MINUS),MK(ESCAPE),MK(BACKSPACE)
+};
+
+// A B SEL ST * # .	  C x EndComm
+// V C X   Z  * + DEL - x BS
+
+static void UpdateFamiNetSys(void)
+{
+	int x;
+	FamiNetSysData = 0;
+	for (x = 0; x<24; x++) {
+		if (DTestButton(&FamiNetSysButtons[x]))
+			FamiNetSysData |= 1 << x;
+	}
+	FamiNetSysData &= 0x00BFFFFF;	// bit22 must be zero
 }
 
 ButtConfig FTrainerButtons[12]=

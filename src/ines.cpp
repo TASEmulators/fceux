@@ -211,6 +211,7 @@ static void SetInput(void) {
 		{0xb8b9aca3,	SI_UNSET,		SI_ZAPPER,		SIFC_NONE		},	// Wild Gunman
 		{0x5112dc21,	SI_UNSET,		SI_ZAPPER,		SIFC_NONE		},	// Wild Gunman
 		{0xaf4010ea,	SI_GAMEPAD,		SI_POWERPADB,	SIFC_UNSET		},	// World Class Track Meet
+		{0x67b126b9,	SI_GAMEPAD,		SI_GAMEPAD,		SIFC_FAMINETSYS },	// Famicom Network System
 		{0x00000000,	SI_UNSET,		SI_UNSET,		SIFC_UNSET		}
 	};
 	int x = 0;
@@ -439,9 +440,16 @@ typedef struct {
 //that are not in the power of 2 tends to come
 //in obscure mappers themselves which supports such
 //size
+//Cah4e3 25.10.19: iNES 2.0 attempts to cover all
+// boards including UNIF boards with non power 2 
+// total rom size (a lot of them with a couple of 
+// roms different sizes (may vary a lot)
+// so we need either add here ALL ines 2.0 mappers 
+// with not power2 roms or change logic here
+// to something more unified for ines 2.0 specific
 static int not_power2[] =
 {
-	53, 198, 228
+	53, 198, 228, 547
 };
 
 BMAPPINGLocal bmap[] = {
@@ -716,7 +724,8 @@ BMAPPINGLocal bmap[] = {
 	{"158B Prot Board",		258, UNL158B_Init},
 	{"F-15 MMC3 Based",		259, BMCF15_Init},
 	{"HP10xx/H20xx Boards",	260, BMCHPxx_Init},
-	{"810544-CA-1",		    261, BMC810544CA1_Init},
+	{"810544-CA-1",			261, BMC810544CA1_Init},
+	{"KONAMI QTAi Board",	547, QTAi_Init },
 
 	{"",					0, NULL}
 };
