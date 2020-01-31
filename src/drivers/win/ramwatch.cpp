@@ -1219,14 +1219,14 @@ INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 												SetWindowLongPtr(hDlg, DWLP_MSGRESULT, CDRF_DODEFAULT);
 												return TRUE;
 											case 1:
-												lplvcd->clrTextBk = RGB(216, 203, 253); break;
+												lplvcd->clrTextBk = CHEAT_1BYTE_BG; break;
 											case 2:
-												lplvcd->clrTextBk = RGB(195, 186, 253); break;
+												lplvcd->clrTextBk = CHEAT_2BYTE_BG; break;
 											case 3:
-												lplvcd->clrTextBk = RGB(176, 139, 252); break;
+												lplvcd->clrTextBk = CHEAT_3BYTE_BG; break;
 											case 4:
-												lplvcd->clrTextBk = RGB(175, 94, 253);
-												lplvcd->clrText = RGB(255, 255, 255); break; // use a more visual color in dark background
+												lplvcd->clrTextBk = CHEAT_4BYTE_BG;
+												lplvcd->clrText = CHEAT_4BYTE_TEXT; break; // use a more visual color in dark background
 										}
 										SetWindowLongPtr(hDlg, DWLP_MSGRESULT, CDRF_NEWFONT);
 									}
