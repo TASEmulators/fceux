@@ -63,7 +63,7 @@ CHEATF_SUBFAST SubCheats[256] = { 0 };
 uint32 numsubcheats = 0;
 int globalCheatDisabled = 0;
 int disableAutoLSCheats = 0;
-static unsigned char cheatMap[0x10000 / 8] = { 0 };
+static _8BYTECHEATMAP* cheatMap = NULL;
 struct CHEATF *cheats = 0, *cheatsl = 0;
 
 
@@ -105,7 +105,8 @@ void RebuildSubCheats(void)
 	for (x = 0; x < numsubcheats; x++)
 	{
 		SetReadHandler(SubCheats[x].addr, SubCheats[x].addr, SubCheats[x].PrevRead);
-		SetByteCheat(SubCheats[x].addr, false);
+		if (cheatMap)
+			FCEUI_SetCheatMapByte(SubCheats[x].addr, false);
 	}
 
 	numsubcheats = 0;
@@ -121,7 +122,8 @@ void RebuildSubCheats(void)
 				SubCheats[numsubcheats].val = c->val;
 				SubCheats[numsubcheats].compare = c->compare;
 				SetReadHandler(c->addr, c->addr, SubCheatsRead);
-				SetByteCheat(SubCheats[numsubcheats].addr, true);
+				if (cheatMap)
+					FCEUI_SetCheatMapByte(SubCheats[numsubcheats].addr, true);
 				numsubcheats++;
 			}
 			c = c->next;
@@ -134,16 +136,18 @@ void RebuildSubCheats(void)
 void FCEU_PowerCheats()
 {
 	numsubcheats = 0;	/* Quick hack to prevent setting of ancient read addresses. */
-	memset(cheatMap, 0, sizeof(cheatMap));
+	if (cheatMap)
+		FCEUI_RefreshCheatMap();
 	RebuildSubCheats();
 }
 
 int FCEU_CalcCheatAffectedBytes(uint32 address, uint32 size) {
 
 	uint32 count = 0;
-	for (uint32 i = 0; i < size; ++i)
-		if (IsByteCheat(address + i))
-			++count;
+	if (cheatMap)
+		for (uint32 i = 0; i < size; ++i)
+			if (FCEUI_FindCheatMapByte(address + i))
+				++count;
 	return count;
 }
 
@@ -205,7 +209,8 @@ void FCEU_LoadGameCheats(FILE *override, int override_existing)
 	if (override_existing)
 	{
 		numsubcheats = 0;
-		memset(cheatMap, 0, sizeof(cheatMap));
+		if (cheatMap)
+			FCEUI_RefreshCheatMap();
 	}
 
 	if(override)
@@ -896,13 +901,35 @@ int FCEU_DisableAllCheats(){
 	return count;
 }
 
-int IsByteCheat(uint8 address)
+inline int FCEUI_FindCheatMapByte(uint16 address)
 {
 	return cheatMap[address / 8] >> (address % 8) & 1;
 }
 
-void SetByteCheat(uint8 address, bool cheat)
+inline void FCEUI_SetCheatMapByte(uint16 address, bool cheat)
 {
 	cheat ? cheatMap[address / 8] |= (1 << address % 8) : cheatMap[address / 8] ^= (1 << address % 8);
 }
 
+inline void FCEUI_CreateCheatMap()
+{
+	if (!cheatMap)
+		cheatMap = (unsigned char*)malloc(CHEATMAP_SIZE);
+	FCEUI_RefreshCheatMap();
+}
+
+inline void FCEUI_RefreshCheatMap()
+{
+	memset(cheatMap, 0, CHEATMAP_SIZE);
+	for (int i = 0; i < numsubcheats; ++i)
+		FCEUI_SetCheatMapByte(SubCheats[i].addr, true);
+}
+
+inline void FCEUI_ReleaseCheatMap()
+{
+	if (cheatMap)
+	{
+		free(cheatMap);
+		cheatMap = NULL;
+	}
+}

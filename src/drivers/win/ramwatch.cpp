@@ -1059,6 +1059,7 @@ INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			rwrecentmenu=CreateMenu();
 			UpdateRW_RMenu(rwrecentmenu, RAMMENU_FILE_RECENT, RW_MENU_FIRST_RECENT_FILE);
 			
+			CreateCheatMap();
 			const char* names[3] = {"Address","Value","Notes"};
 			int widths[3] = {78,64,160};
 			init_list_box(GetDlgItem(hDlg,IDC_WATCHLIST),names,3,widths);
@@ -1506,6 +1507,8 @@ INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 			// release the hdc related objects
 			SeparatorCache::DeInit();
+			// release cheatmap
+			ReleaseCheatMap();
 			break;
 
 		case WM_DROPFILES:

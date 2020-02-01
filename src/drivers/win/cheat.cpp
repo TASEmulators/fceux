@@ -41,6 +41,7 @@ extern bool wasPausedByCheats;
 
 int CheatWindow;
 int CheatStyle = 1;
+int CheatMapUsers = 0; // how many windows using cheatmap
 
 #define GGLISTSIZE 128 //hopefully this is enough for all cases
 
@@ -1541,3 +1542,19 @@ void DeleteCheatFont()
 		hNewFont = NULL;
 	}
 }
+
+void CreateCheatMap()
+{
+	if (!CheatMapUsers)
+		FCEUI_CreateCheatMap();
+	++CheatMapUsers;
+}
+
+void ReleaseCheatMap()
+{
+	--CheatMapUsers;
+	printf("CheatMapUsers: %d\n", CheatMapUsers);
+	if (!CheatMapUsers)
+		FCEUI_ReleaseCheatMap();
+}
+

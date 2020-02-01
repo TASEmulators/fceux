@@ -318,8 +318,8 @@ void UpdateMemWatch()
 			if (FrozenAddressCount)
 				for (unsigned int x = 0; x < FrozenAddressCount; x++)
 				{
-					extern int IsByteCheat(uint8);
-					if (IsByteCheat(mwrec.addr))
+					extern int FCEUI_FindCheatMapByte(uint16);
+					if (FCEUI_FindCheatMapByte(mwrec.addr))
 						SetTextColor(hdc,GetSysColor(COLOR_HIGHLIGHT));
 				}
 
@@ -812,6 +812,8 @@ static INT_PTR CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 			editlast[x]= 0;
 		}
 
+		CreateCheatMap();
+
 		RamChangeInitialize = true;
 		break;
 
@@ -830,7 +832,9 @@ static INT_PTR CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 	case WM_QUIT:
 		CloseMemoryWatch();
 		break;
-
+	case WM_DESTROY:
+		ReleaseCheatMap();
+		break;
 	case WM_DROPFILES:
 	{
 		unsigned int len;

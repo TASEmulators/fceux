@@ -1420,6 +1420,8 @@ INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 			CalcSubWindowPos(hDlg, NULL);
 
+			CreateCheatMap();
+
 			switch(rs_o)
 			{
 				case '<':
@@ -2105,6 +2107,7 @@ INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			break;
 		case WM_DESTROY:
 			RamSearchHWnd = NULL;
+			ReleaseCheatMap();
 //			theApp.modelessCheatDialogIsOpen = false;
 			break;
 	}

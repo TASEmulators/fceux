@@ -11,6 +11,17 @@ void FCEU_ApplyPeriodicCheats(void);
 void FCEU_PowerCheats(void);
 int FCEU_CalcCheatAffectedBytes(uint32 address, uint32 size);
 
+// Trying to find a more efficient way for determining if an address has a cheat
+// each bit of 1 byte represents to 8 bytes in NES
+typedef unsigned char _8BYTECHEATMAP;
+#define CHEATMAP_SIZE 0x10000 / 8
+
+extern int FCEUI_FindCheatMapByte(uint16 address);
+extern void FCEUI_SetCheatMapByte(uint16 address, bool cheat);
+extern void FCEUI_CreateCheatMap();
+extern void FCEUI_RefreshCheatMap();
+extern void FCEUI_ReleaseCheatMap();
+
 int FCEU_CheatGetByte(uint32 A);
 void FCEU_CheatSetByte(uint32 A, uint8 V);
 
@@ -43,11 +54,6 @@ struct SEARCHPOSSIBLE {
 	uint8 current;
 	bool update;
 };
-
-// Trying to find a more efficient way for determining if an address has a cheat
-// 1 byte represents to 8 bytes in NES, 
-int IsByteCheat(uint8 address);
-void SetByteCheat(uint8 address, bool cheat);
 
 #define FCEU_SEARCH_SPECIFIC_CHANGE         0
 #define FCEU_SEARCH_RELATIVE_CHANGE         1

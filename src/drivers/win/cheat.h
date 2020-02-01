@@ -40,6 +40,10 @@ void SetupCheatFont(HWND hDlg);
 void DeleteCheatFont();
 extern POINT CalcSubWindowPos(HWND hDlg, POINT* conf);
 
+void CreateCheatMap();
+void ReleaseCheatMap();
+extern int CheatMapUsers;
+
 extern INT_PTR CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 extern LRESULT APIENTRY FilterEditCtrlProc(HWND hDlg, UINT msg, WPARAM wP, LPARAM lP);
 extern WNDPROC DefaultEditCtrlProc;
