@@ -1553,7 +1553,7 @@ void CreateCheatMap()
 void ReleaseCheatMap()
 {
 	--CheatMapUsers;
-	printf("CheatMapUsers: %d\n", CheatMapUsers);
+	// printf("CheatMapUsers: %d\n", CheatMapUsers);
 	if (!CheatMapUsers)
 		FCEUI_ReleaseCheatMap();
 }

@@ -3293,7 +3293,7 @@ LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 							{
 								through = false;
 								// Show Edit control tip, just like the control with ES_NUMBER do
-								ShowLetterIllegalError(hwnd, IsLetterLegal);
+								ShowLetterIllegalBalloonTip(hwnd, IsLetterLegal);
 								break;
 							}
 						}
@@ -3309,7 +3309,7 @@ LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 			bool(*IsLetterLegal)(char) = GetIsLetterLegal(GetDlgCtrlID(hwnd));
 			through = IsInputLegal(IsLetterLegal, wP);
 			if (!through)
-				ShowLetterIllegalError(hwnd, IsLetterLegal);
+				ShowLetterIllegalBalloonTip(hwnd, IsLetterLegal);
 		}
 	}
 
@@ -3353,11 +3353,14 @@ bool inline (*GetIsLetterLegal(UINT id))(char letter)
 		case MW_ADDR12: case MW_ADDR13: case MW_ADDR14: case MW_ADDR15:
 		case MW_ADDR16: case MW_ADDR17: case MW_ADDR18: case MW_ADDR19:
 		case MW_ADDR20: case MW_ADDR21: case MW_ADDR22: case MW_ADDR23:
+		case IDC_EDIT_COMPAREADDRESS:
+
+			return IsLetterLegalHex;
 
 		// Specific Address in RAM Search
-		// RAM Watch / RAM Search / Cheat -> Add watch
-		case IDC_EDIT_COMPAREADDRESS:
-			return IsLetterLegalHex;
+		// RAM Watch / RAM Search / Cheat -> Add watch (current only in adding watch operation)
+		case IDC_EDIT_COMPAREADDRESSES:
+			return IsLetterLegalHexList;
 
 		// Size multiplier and TV Aspect in Video Config
 		case IDC_WINSIZE_MUL_X: case IDC_WINSIZE_MUL_Y:
@@ -3390,63 +3393,45 @@ bool inline (*GetIsLetterLegal(UINT id))(char letter)
 	return NULL;
 }
 
-inline void ShowLetterIllegalError(HWND hwnd, bool(*IsLetterLegal)(char letter), bool balloon)
-{
-	(balloon ? ShowLetterIllegalBalloonTip : ShowLetterIllegalMessageBox)(hwnd, IsLetterLegal);
-}
-
 void ShowLetterIllegalBalloonTip(HWND hwnd, bool(*IsLetterLegal)(char letter))
 {
-	char* title = "Unacceptable Character";
-	int uLen = MultiByteToWideChar(CP_ACP, NULL, title, -1, NULL, 0);
-	wchar_t* titleW = (wchar_t*)malloc(sizeof(wchar_t) * uLen);
-	MultiByteToWideChar(CP_ACP, 0, title, -1, (LPWSTR)titleW, uLen);
-
-	char* msg = GetLetterIllegalErrMsg(IsLetterLegal);
-	uLen = MultiByteToWideChar(CP_ACP, NULL, msg, -1, NULL, 0);
-	wchar_t* msgW = (wchar_t*)malloc(sizeof(wchar_t) * uLen);
-	MultiByteToWideChar(CP_ACP, 0, msg, -1, (LPWSTR)msgW, uLen);
+	wchar_t* title = L"Unacceptable Character";
+	wchar_t* msg = GetLetterIllegalErrMsg(IsLetterLegal);
 
 	EDITBALLOONTIP tip;
 	tip.cbStruct = sizeof(EDITBALLOONTIP);
-	tip.pszText = msgW;
-	tip.pszTitle = titleW;
+	tip.pszText = msg;
+	tip.pszTitle = title;
 	tip.ttiIcon = TTI_ERROR;
 	SendMessage(hwnd, EM_SHOWBALLOONTIP, 0, (LPARAM)&tip);
 
 	// make a sound
 	MessageBeep(0xFFFFFFFF);
-
-	free(titleW);
-	free(msgW);
 }
 
-inline void ShowLetterIllegalMessageBox(HWND hwnd, bool(*IsLetterLegal)(char letter))
-{
-	MessageBox(hwnd, GetLetterIllegalErrMsg(IsLetterLegal), _T("Unacceptable Character"), MB_OK | MB_ICONERROR);
-}
-
-inline TCHAR* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter))
+inline wchar_t* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter))
 {
 	if (IsLetterLegal == IsLetterLegalGG)
-		return "You can only type Game Genie characters:\nA P Z L G I T Y E O X U K S V N";
+		return L"You can only type Game Genie characters:\nA P Z L G I T Y E O X U K S V N";
 	if (IsLetterLegal == IsLetterLegalHex)
-		return "You can only type characters for hexadecimal number (0-9,A-F).";
+		return L"You can only type characters for hexadecimal number (0-9,A-F).";
+	if (IsLetterLegal == IsLetterLegalHexList)
+		return L"You can only type characters for hexademical number (0-9,A-F), each number is separated by a comma (,)";
 	if (IsLetterLegal == IsLetterLegalCheat)
 		return
-		"The cheat code comes into the following 2 formats:\n"
+		L"The cheat code comes into the following 2 formats:\n"
 		"AAAA:VV freezes the value in Address $AAAA to $VV.\n"
 		"AAAA?CC:VV changes the value in Address $AAAA to $VV only when it's $CC.\n"
 		"All the characters are hexadecimal number (0-9,A-F).\n";
 	if (IsLetterLegal == IsLetterLegalFloat)
-		return "You can only type decimal number (decimal point is acceptable).";
+		return L"You can only type decimal number (decimal point is acceptable).";
 	if (IsLetterLegal == IsLetterLegalSize)
-		return "You can only type decimal number followed with B, KB or MB.";
+		return L"You can only type decimal number followed with B, KB or MB.";
 	if (IsLetterLegal == IsLetterLegalDec)
-		return "You can only type decimal number (sign character is acceptable).";
+		return L"You can only type decimal number (sign character is acceptable).";
 	if (IsLetterLegal == IsLetterLegalDecHexMixed)
 		return
-		"You can only type decimal or hexademical number\n"
+		L"You can only type decimal or hexademical number\n"
 		"(sign character is acceptable).\n\n"
 		"When your number contains letter A-F,\n"
 		"it is regarded as hexademical number,\n"
@@ -3457,7 +3442,7 @@ inline TCHAR* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter))
 		"$10 means a hexademical number that is 16 in decimal.";
 	if (IsLetterLegal == IsLetterLegalUnsignedDecHexMixed)
 		return
-		"You can only type decimal or hexademical number.\n\n"
+		L"You can only type decimal or hexademical number.\n\n"
 		"When your number contains letter A-F,\n"
 		"it is regarded as hexademical number,\n"
 		"however, if you want to express a heademical number\n"
@@ -3466,7 +3451,7 @@ inline TCHAR* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter))
 		"eg. 10 is a decimal number,\n"
 		"$10 means a hexademical number that is 16 in decimal.";
 
-	return "Your input contains invalid characters.";
+	return L"Your input contains invalid characters.";
 }
 
 inline bool IsInputLegal(bool (*IsLetterLegal)(char letter), char letter)
@@ -3486,6 +3471,11 @@ inline bool IsLetterLegalGG(char letter)
 inline bool IsLetterLegalHex(char letter)
 {
 	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f';
+}
+
+inline bool IsLetterLegalHexList(char letter)
+{
+	return IsLetterLegalHex(letter) || letter == ',' || letter == ' ';
 }
 
 inline bool IsLetterLegalCheat(char letter)

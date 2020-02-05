@@ -1,12 +1,12 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file
-// for res.rc
+// Microsoft Visual C++ 生成的包含文件。
+// 供 res.rc 使用
 //
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
 #define BTN_CLOSE                       1
 #define MENU_OPEN_FILE                  100
-#define EDIT_ROM                       100
+#define EDIT_ROM                        100
 #define LBL_LOG_TEXT                    100
 #define LBL_KEY_COMBO                   100
 #define LBL_CDLOGGER_CODECOUNT          100
@@ -216,7 +216,7 @@
 #define IDD_TASEDITOR_FINDNOTE          198
 #define IDD_TASEDITOR_ABOUT             199
 #define MENU_RESET                      200
-#define BUTTON_ROM                     200
+#define BUTTON_ROM                      200
 #define TXT_PAD1                        200
 #define BTN_RESTORE_DEFAULTS            200
 #define BTN_CLEAR                       200
@@ -765,6 +765,7 @@
 #define IDC_EDIT_COMPAREVALUE           1225
 #define IDC_EDIT_COMPAREADDRESS         1226
 #define IDC_EDIT_COMPARECHANGES         1227
+#define IDC_EDIT_COMPAREADDRESSES       1227
 #define IDC_SIGNED                      1228
 #define IDC_UNSIGNED                    1229
 #define IDC_HEX                         1230

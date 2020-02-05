@@ -1982,32 +1982,30 @@ INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							int selCount = SendMessage(ramListControl, LVM_GETSELECTEDCOUNT, 0, 0);
 							if (selCount > 0)
 							{
-								AddressWatcher tempWatch;
-								tempWatch.Size = rs_type_size;
-								tempWatch.Type = rs_t;
-								tempWatch.WrongEndian = 0; //Replace when I get little endian working
-								tempWatch.comment = NULL;
+								WatcherMsg msg;
+								msg.Size = rs_type_size;
+								msg.Type = rs_t;
+								msg.WrongEndian = 0; //Replace when I get little endian working
+								msg.comment = NULL;
 
 								bool inserted = false;
 
-								AddressWatcher* watches = (AddressWatcher*)malloc(selCount * sizeof(AddressWatcher));
+								msg.Addresses = (unsigned int*)malloc(selCount * sizeof(unsigned int));
 								int i = 0;
 								int watchItemIndex = -1;
 								while ((watchItemIndex = SendMessage(ramListControl, LVM_GETNEXTITEM, watchItemIndex, LVNI_SELECTED)) >= 0)
 								{
-									tempWatch.Address = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size, rs_t == 's', noMisalign, watchItemIndex);
-									watches[i] = tempWatch;
+									msg.Addresses[i] = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size, rs_t == 's', noMisalign, watchItemIndex);
 									++i;
 								}
-
+								msg.count = i;
 								// bring up the ram watch window if it's not already showing so the user knows where the watch went
-								if ((selCount == 1 ?
-									InsertWatch(watches[0], hDlg) : InsertWatches(watches, hDlg, selCount))
+								if (InsertWatches(&msg, hDlg, selCount)
 									&& !RamWatchHWnd)
 									SendMessage(hWnd, WM_COMMAND, ID_RAM_WATCH, 0);
 								SetForegroundWindow(RamSearchHWnd);
-
-								free(watches);
+								if (msg.Addresses) free(msg.Addresses);
+								if (msg.comment) free(msg.comment);
 							}
 							break;
 						}

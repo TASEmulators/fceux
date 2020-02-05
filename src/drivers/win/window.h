@@ -129,13 +129,12 @@ void UpdateMenuHotkeys(FCEUMENU_INDEX index);
 int GetCurrentContextIndex();
 
 inline bool (*GetIsLetterLegal(UINT id))(char letter);
-inline char* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter));
-inline void ShowLetterIllegalError(HWND hwnd, bool(*IsLetterLegal)(char letter), bool balloon = true);
+inline wchar_t* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter));
 void ShowLetterIllegalBalloonTip(HWND hwnd, bool(*IsLetterLegal)(char letter));
-inline void ShowLetterIllegalMessageBox(HWND hwnd, bool(*IsLetterLegal)(char letter));
 inline bool IsInputLegal(bool(*IsLetterLegal)(char letter), char letter);
 inline bool IsLetterLegalGG(char letter);
 inline bool IsLetterLegalHex(char letter);
+inline bool IsLetterLegalHexList(char letter);
 inline bool IsLetterLegalCheat(char letter);
 inline bool IsLetterLegalDec(char letter);
 inline bool IsLetterLegalSize(char letter);
