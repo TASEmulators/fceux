@@ -702,6 +702,7 @@
     <ClCompile Include="..\src\input\shadow.cpp" />
     <ClCompile Include="..\src\input\suborkb.cpp" />
     <ClCompile Include="..\src\input\toprider.cpp" />
+    <ClCompile Include="..\src\input\virtualboy.cpp" />
     <ClCompile Include="..\src\input\zapper.cpp" />
     <ClCompile Include="..\src\boards\emu2413.c" />
     <ClCompile Include="..\src\utils\ConvertUTF.c" />

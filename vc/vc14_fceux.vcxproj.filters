@@ -1102,6 +1102,9 @@
     <ClCompile Include="..\src\boards\fns.cpp">
       <Filter>boards</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\input\virtualboy.cpp">
+      <Filter>input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">
