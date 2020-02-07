@@ -46,6 +46,7 @@ void UpdateVB(int w, void *data, int arg)
 	{
 		vbrdata[w]|=(((*(uint32 *)data)>>x)&1)<<x;
 	}
+	vbrdata[w]|=(1<<14); // fixed signature bit
 }
 
 static INPUTC VirtualBoyCtrl={ReadVB,0,StrobeVB,UpdateVB,0,0};
