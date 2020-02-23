@@ -64,6 +64,7 @@ extern INPUTC *FCEU_InitPowerpadB(int w);
 extern INPUTC *FCEU_InitArkanoid(int w);
 extern INPUTC *FCEU_InitMouse(int w);
 extern INPUTC *FCEU_InitSNESMouse(int w);
+extern INPUTC *FCEU_InitVirtualBoy(int w);
 
 extern INPUTCFC *FCEU_InitArkanoidFC(void);
 extern INPUTCFC *FCEU_InitSpaceShadow(void);
@@ -478,6 +479,9 @@ static void SetInputStuff(int port)
 		break;
 	case SI_SNES_MOUSE:
 		joyports[port].driver=FCEU_InitSNESMouse(port);
+		break;
+	case SI_VIRTUALBOY:
+		joyports[port].driver=FCEU_InitVirtualBoy(port);
 		break;
 	case SI_NONE:
 		joyports[port].driver=&DummyJPort;

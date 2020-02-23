@@ -38,8 +38,9 @@ enum ESI
 	SI_MOUSE		= 6,
 	SI_SNES			= 7,
 	SI_SNES_MOUSE	= 8,
+	SI_VIRTUALBOY	= 9,
 
-	SI_COUNT = SI_SNES_MOUSE
+	SI_COUNT = SI_VIRTUALBOY
 };
 
 inline const char* ESI_Name(ESI esi)
@@ -54,7 +55,8 @@ inline const char* ESI_Name(ESI esi)
 		"Arkanoid Paddle",
 		"Subor Mouse",
 		"SNES Pad",
-		"SNES Mouse"
+		"SNES Mouse",
+		"Virtual Boy"
 	};
 
 	if(esi >= SI_NONE && esi <= SI_COUNT)
