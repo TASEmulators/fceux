@@ -725,6 +725,9 @@ BMAPPINGLocal bmap[] = {
 	{"F-15 MMC3 Based",		259, BMCF15_Init},
 	{"HP10xx/H20xx Boards",	260, BMCHPxx_Init},
 	{"810544-CA-1",			261, BMC810544CA1_Init},
+
+	{"Impact Soft MMC3 Flash Board",	406, Mapper406_Init },
+
 	{"KONAMI QTAi Board",	547, QTAi_Init },
 
 	{"",					0, NULL}
