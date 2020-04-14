@@ -1670,9 +1670,9 @@ static void CopySprites(uint8 *target) {
 
 	if(!SpriteON) return;
 	
-	int start=0;
+	int start=8;
 	if(PPU[1] & 0x04)
-		start = 8;
+		start = 0;
 
 	for(int i=start;i<256;i++)
 	{
