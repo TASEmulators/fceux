@@ -1669,7 +1669,12 @@ static void CopySprites(uint8 *target) {
 	if (!rendersprites) return;	//User asked to not display sprites.
 
 	if(!SpriteON) return;
-	for(int i=0;i<256;i++)
+	
+	int start=0;
+	if(PPU[1] & 0x04)
+		start = 8;
+
+	for(int i=start;i<256;i++)
 	{
 		uint8 t = sprlinebuf[i];
 		if(!(t&0x80))
