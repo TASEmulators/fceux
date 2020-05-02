@@ -2350,7 +2350,21 @@ static GtkWidget* CreateMenubar( GtkWidget* window)
 	/* Set the autoResume checkbox */
 	GtkCheckMenuItem* auto_resume_chk = (GtkCheckMenuItem*) gtk_ui_manager_get_widget ( ui_manager, "/Menubar/OptionsMenuAction/AutoResumeAction");
 	gtk_check_menu_item_set_active (auto_resume_chk, (bool)AutoResumePlay);
-    
+
+	// Sync State of GameGenie Toggle Action to Startup Configuration
+	int gameGenieEnabled=0;
+	g_config->getOption("SDL.GameGenie", &gameGenieEnabled);
+
+	if ( gameGenieEnabled )
+	{
+		state = gtk_action_group_get_action (action_group, "GameGenieToggleAction");
+
+		if ( state ){
+		   gtk_action_activate( state );
+		}
+	}
+	enableGameGenie(gameGenieEnabled);
+
 	/* Finally, return the actual menu bar created by the UIManager. */
 	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
 }
@@ -2499,8 +2513,6 @@ int InitGTKSubsystem(int argc, char** argv)
 	gtk_container_add(GTK_CONTAINER(MainWindow), vbox);
 	
 	Menubar = CreateMenubar(MainWindow);
-	// turn of game genie by default, since its off by default in the menu
-	enableGameGenie(0); 
 
 	gtk_box_pack_start (GTK_BOX(vbox), Menubar, FALSE, TRUE, 0);
 		
