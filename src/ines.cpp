@@ -1017,6 +1017,7 @@ static int iNES_Init(int num) {
 				{
 					CHRRAMSize = iNESCart.battery_vram_size + iNESCart.vram_size;
 				}
+				if (CHRRAMSize < 1024) return 0; // unsupported size, VPage only goes down to 1k banks, NES program can corrupt memory if used
 				if ((VROM = (uint8*)FCEU_dmalloc(CHRRAMSize)) == NULL) return 0;
 				FCEU_MemoryRand(VROM, CHRRAMSize);
 
