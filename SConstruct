@@ -97,7 +97,7 @@ else:
   if conf.CheckFunc('asprintf'):
     conf.env.Append(CCFLAGS = "-DHAVE_ASPRINTF")
   if env['SYSTEM_MINIZIP']:
-    assert conf.CheckLibWithHeader('minizip', 'minizip/unzip.h', 'C', 'unzOpen;', 1), "please install: libminizip"
+    assert env.ParseConfig('pkg-config minizip --cflags --libs'), "please install: libminizip"
     assert conf.CheckLibWithHeader('z', 'zlib.h', 'c', 'inflate;', 1), "please install: zlib"
     env.Append(CPPDEFINES=["_SYSTEM_MINIZIP"])
   else:
@@ -153,6 +153,9 @@ else:
       elif conf.CheckLib('lua5.1'):
         lua_link_flags  = "-llua5.1"
         lua_include_dir = "/usr/include/lua5.1"
+      elif conf.CheckLib('lua-5.1'):
+        lua_link_flags  = "-llua-5.1"
+        lua_include_dir = "/usr/include/lua-5.1"
       elif conf.CheckLib('lua'):
         lua_link_flags  = "-llua"
         lua_include_dir = "/usr/include/lua"
