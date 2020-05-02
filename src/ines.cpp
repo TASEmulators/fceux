@@ -892,8 +892,31 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	iNESCart.battery = (head.ROM_type & 2) ? 1 : 0;
 	iNESCart.mirror = Mirroring;
 
-	if (!iNES_Init(MapperNo))
+	int result = iNES_Init(MapperNo);
+	switch(result)
+	{
+	case 0:
+		goto init_ok;
+	case 1:
 		FCEU_PrintError("iNES mapper #%d is not supported at all.", MapperNo);
+		goto init_ok; // this error is still allowed to run as NROM?
+	case 2:
+		FCEU_PrintError("Unable to allocate CHR-RAM.");
+		break;
+	case 3:
+		FCEU_PrintError("CHR-RAM size < 1k is not supported.");
+		break;
+	}
+	if (ROM) free(ROM);
+	if (VROM) free(VROM);
+	if (trainerpoo) free(trainerpoo);
+	if (ExtraNTARAM) free(ExtraNTARAM);
+	ROM = NULL;
+	VROM = NULL;
+	trainerpoo = NULL;
+	ExtraNTARAM = NULL;
+	return 0;
+init_ok:
 
 	GameInfo->mappernum = MapperNo;
 	FCEU_LoadGameSave(&iNESCart);
@@ -1017,8 +1040,8 @@ static int iNES_Init(int num) {
 				{
 					CHRRAMSize = iNESCart.battery_vram_size + iNESCart.vram_size;
 				}
-				if (CHRRAMSize < 1024) return 0; // unsupported size, VPage only goes down to 1k banks, NES program can corrupt memory if used
-				if ((VROM = (uint8*)FCEU_dmalloc(CHRRAMSize)) == NULL) return 0;
+				if (CHRRAMSize < 1024) return 3; // unsupported size, VPage only goes down to 1k banks, NES program can corrupt memory if used
+				if ((VROM = (uint8*)FCEU_dmalloc(CHRRAMSize)) == NULL) return 2;
 				FCEU_MemoryRand(VROM, CHRRAMSize);
 
 				UNIFchrrama = VROM;
@@ -1038,9 +1061,9 @@ static int iNES_Init(int num) {
 			if (head.ROM_type & 8)
 				AddExState(ExtraNTARAM, 2048, 0, "EXNR");
 			tmp->init(&iNESCart);
-			return 1;
+			return 0;
 		}
 		tmp++;
 	}
-	return 0;
+	return 1;
 }
