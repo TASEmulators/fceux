@@ -1383,6 +1383,234 @@ void toggleAutoResume (GtkToggleAction *action)
 	AutoResumePlay = autoResume;
 }
 
+// creates and opens cheats window
+static void openCheatsWindow(void)
+{
+	GtkWidget* win;
+	GtkWidget* main_hbox;
+	GtkWidget* hbox;
+	GtkWidget* vbox, *prev_cmp_vbox;
+	GtkWidget* frame;
+	GtkWidget* label, *txt_entry;
+	GtkWidget* button;
+	GtkWidget *tree;
+	GtkWidget *scroll;
+
+	win = gtk_dialog_new_with_buttons("Cheats",
+			GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
+			GTK_STOCK_CLOSE,
+			GTK_RESPONSE_OK,
+			NULL);
+	gtk_window_set_default_size(GTK_WINDOW(win), 600, 600);
+
+	main_hbox = gtk_hbox_new(FALSE, 2);
+	vbox = gtk_vbox_new(FALSE, 5);
+	frame = gtk_frame_new("Active Cheats");
+	
+	GtkTreeStore *actv_cheats_store = gtk_tree_store_new( 1, G_TYPE_STRING);
+
+   GtkTreeIter iter;
+    
+   gtk_tree_store_append(actv_cheats_store, &iter, NULL); // aquire iter
+
+	for(int i=0; i<15; i++)
+   {
+        std::string cheatName = "Test";
+
+        gtk_tree_store_set(actv_cheats_store, &iter, 
+                0, cheatName.c_str(),
+                -1);
+
+        gtk_tree_store_append(actv_cheats_store, &iter, NULL); // acquire child iterator
+   }
+
+	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(actv_cheats_store));
+
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn* column;
+	
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes("Active Cheats", renderer, "text", 0, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	
+	scroll = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_NEVER,
+			GTK_POLICY_AUTOMATIC);
+	gtk_container_add(GTK_CONTAINER(scroll), tree);
+	gtk_box_pack_start(GTK_BOX(vbox), scroll, TRUE, TRUE, 1);
+
+	hbox = gtk_hbox_new(FALSE, 2);
+	label = gtk_label_new("Name:");
+	txt_entry = gtk_entry_new();
+
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 1);
+	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, TRUE, TRUE, 1);
+
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 1);
+
+	hbox = gtk_hbox_new(FALSE, 6);
+	label = gtk_label_new("Addr:");
+	txt_entry = gtk_entry_new();
+	gtk_entry_set_max_length( GTK_ENTRY(txt_entry), 8 );
+	gtk_entry_set_width_chars( GTK_ENTRY(txt_entry), 8 );
+
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 1);
+	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, TRUE, TRUE, 1);
+
+	label = gtk_label_new("Val:");
+	txt_entry = gtk_entry_new();
+	gtk_entry_set_max_length( GTK_ENTRY(txt_entry), 4 );
+	gtk_entry_set_width_chars( GTK_ENTRY(txt_entry), 4 );
+
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 1);
+	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, TRUE, TRUE, 1);
+
+	label = gtk_label_new("Cmp:");
+	txt_entry = gtk_entry_new();
+	gtk_entry_set_max_length( GTK_ENTRY(txt_entry), 4 );
+	gtk_entry_set_width_chars( GTK_ENTRY(txt_entry), 4 );
+
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 1);
+	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, TRUE, TRUE, 1);
+
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 1);
+
+	hbox = gtk_hbox_new(FALSE, 3);
+	button = gtk_button_new_with_label("Add");
+	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, FALSE, 1);
+	button = gtk_button_new_with_label("Delete");
+	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, FALSE, 1);
+	button = gtk_button_new_with_label("Update");
+	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, FALSE, 1);
+
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 1);
+
+	hbox = gtk_hbox_new(FALSE, 1);
+	button = gtk_button_new_with_label("Add from CHT file...");
+	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, FALSE, 1);
+
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 1);
+
+	gtk_container_add(GTK_CONTAINER(frame), vbox);
+	//
+	gtk_box_pack_start(GTK_BOX(main_hbox), frame, TRUE, TRUE, 1);
+
+	vbox = gtk_vbox_new(FALSE, 5);
+	hbox = gtk_hbox_new(FALSE, 1);
+	button = gtk_button_new_with_label("Reset");
+	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
+
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 5);
+
+	hbox = gtk_hbox_new(FALSE, 3);
+	button = gtk_button_new_with_label("Known Value:");
+	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
+	label = gtk_label_new("0x");
+	txt_entry = gtk_entry_new();
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, FALSE, FALSE, 5);
+
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 5);
+
+	frame = gtk_frame_new("Previous Compare");
+	gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 5);
+	button = gtk_check_button_new_with_label("Pause emulation when this window is active");
+	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 5);
+
+	prev_cmp_vbox = gtk_vbox_new(FALSE, 4);
+	gtk_container_add(GTK_CONTAINER(frame), prev_cmp_vbox);
+
+	hbox = gtk_hbox_new(FALSE, 1);
+	button = gtk_button_new_with_label("Equal");
+	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(prev_cmp_vbox), hbox, FALSE, FALSE, 5);
+
+	hbox = gtk_hbox_new(FALSE, 4);
+	button = gtk_button_new_with_label("Not Equal");
+	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
+	button = gtk_check_button_new();
+	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
+	label = gtk_label_new("By:");
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
+	txt_entry = gtk_entry_new();
+	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, FALSE, FALSE, 5);
+
+	gtk_box_pack_start(GTK_BOX(prev_cmp_vbox), hbox, FALSE, FALSE, 5);
+
+	hbox = gtk_hbox_new(FALSE, 4);
+	button = gtk_button_new_with_label("Greater Than");
+	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
+	button = gtk_check_button_new();
+	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
+	label = gtk_label_new("By:");
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
+	txt_entry = gtk_entry_new();
+	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, FALSE, FALSE, 5);
+
+	gtk_box_pack_start(GTK_BOX(prev_cmp_vbox), hbox, FALSE, FALSE, 5);
+
+	hbox = gtk_hbox_new(FALSE, 4);
+	button = gtk_button_new_with_label("Less Than");
+	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
+	button = gtk_check_button_new();
+	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
+	label = gtk_label_new("By:");
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
+	txt_entry = gtk_entry_new();
+	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, FALSE, FALSE, 1);
+
+	gtk_box_pack_start(GTK_BOX(prev_cmp_vbox), hbox, FALSE, FALSE, 1);
+
+	hbox = gtk_hbox_new(FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox), vbox, FALSE, FALSE, 1);
+
+	frame = gtk_frame_new("Cheat Search");
+	gtk_container_add(GTK_CONTAINER(frame), hbox);
+	gtk_box_pack_start(GTK_BOX(main_hbox), frame, TRUE, TRUE, 5);
+
+	vbox = gtk_vbox_new(FALSE, 5);
+	//hbox = gtk_hbox_new(FALSE, 1);
+
+	GtkTreeStore *ram_match_store = gtk_tree_store_new( 1, G_TYPE_STRING);
+
+   gtk_tree_store_append( ram_match_store, &iter, NULL); // aquire iter
+
+	for(int i=0; i<15; i++)
+   {
+        std::string ramText = "Test";
+
+        gtk_tree_store_set(ram_match_store, &iter, 
+                0, ramText.c_str(),
+                -1);
+
+        gtk_tree_store_append(ram_match_store, &iter, NULL); // acquire child iterator
+   }
+
+	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(ram_match_store));
+
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes("0 Possibilities", renderer, "text", 0, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	
+	scroll = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_NEVER,
+			GTK_POLICY_AUTOMATIC);
+	gtk_container_add(GTK_CONTAINER(scroll), tree);
+	gtk_box_pack_start(GTK_BOX(vbox), scroll, TRUE, TRUE, 5);
+
+	frame = gtk_frame_new("");
+	gtk_container_add(GTK_CONTAINER(frame), vbox);
+
+	gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 5);
+
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(win))), main_hbox, TRUE, TRUE, 0);
+
+	g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
+	
+	gtk_widget_show_all(win);
+}
+
 void recordMovie()
 {
 	if(isloaded)
@@ -2229,6 +2457,9 @@ static char* menuXml =
 	"        <menuitem action='LoadBiosAction' />"
 	"      </menu>"
 	"    </menu>"
+	"    <menu action='ToolsMenuAction'>"
+	"      <menuitem action='CheatsAction' />"
+	"    </menu>"
 	"    <menu action='MovieMenuAction'>"
 	"      <menuitem action='OpenMovieAction' />"
 	"      <menuitem action='StopMovieAction' />"
@@ -2281,6 +2512,9 @@ static GtkActionEntry normal_entries[] = {
 	{"LoadGameGenieAction", GTK_STOCK_OPEN, "_Load Game Genie ROM", "", NULL, G_CALLBACK(loadGameGenie)},
 	{"InsertCoinAction", NULL, "_Insert Coin", NULL, NULL, G_CALLBACK(FCEUI_VSUniCoin)},
 	
+	{"ToolsMenuAction", NULL, "_Tools"},
+	{"CheatsAction", "cheats-win", "_Cheats...", NULL, NULL, G_CALLBACK(openCheatsWindow)},
+
 	{"MovieMenuAction", NULL, "_Movie"},
 	{"OpenMovieAction", GTK_STOCK_OPEN, "_Open", "<shift>F7", NULL, G_CALLBACK(loadMovie)},
 	{"StopMovieAction", GTK_STOCK_MEDIA_STOP, "S_top", NULL, NULL, G_CALLBACK(FCEUI_StopMovie)},
