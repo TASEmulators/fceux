@@ -39,6 +39,7 @@
 #include <commctrl.h>
 #include <list>
 #include <vector>
+
 #ifdef WIN32
 	#include "BaseTsd.h"
 	typedef INT_PTR intptr_t;
@@ -641,6 +642,18 @@ unsigned int HardwareAddressToItemIndex(HWAddressType hardwareAddress)
 			: functionName<char, type>(p0, p1, p2, p3)) \
 	: functionName<char, type>(p0, p1, p2, p3))
 
+#define CONV_VAL_TO_STR(sizeTypeID, type, val, buf) (sprintf(buf, type == 's' ? "%d" : type == 'u' ? "%u" : type == 'd' ? "%08X" : type == 'w' ? "%04X" : "%02X", sizeTypeID == 'd' ?  (type == 's' ? (long)(val & 0xFFFFFFFF) : (unsigned long)(val & 0xFFFFFFFF)) : sizeTypeID == 'w' ? (type == 's' ? (short)(val & 0xFFFF) : (unsigned short)(val & 0xFFFF)) : (type == 's' ? (char)(val & 0xFF) : (unsigned char)(val & 0xFF))), buf)
+
+#define ConvEditTextNum(hDlg, id, sizeTypeID, type) \
+{ \
+	BOOL success = FALSE; \
+	int val = ReadControlInt(id, type == 'h', success); \
+	if (success) \
+	{ \
+		char num[11]; \
+		SetDlgItemText(hDlg, id, CONV_VAL_TO_STR(sizeTypeID, type, val, num)); \
+	} else SetDlgItemText(hDlg, id, ""); \
+}
 // basic comparison functions:
 template <typename T> inline bool LessCmp (T x, T y, T i)        { return x < y; }
 template <typename T> inline bool MoreCmp (T x, T y, T i)        { return x > y; }
@@ -1250,20 +1263,20 @@ LRESULT CustomDraw (LPARAM lParam)
 			int rv = CDRF_DODEFAULT;
 			int cheat = CALL_WITH_T_SIZE_TYPES_1(GetNumCheatsFromIndex, rs_type_size, rs_t == 's', noMisalign, lplvcd->nmcd.dwItemSpec);
 			switch (cheat) {
-			default: 
-			case 0: 
-				if (lplvcd->nmcd.dwItemSpec % 2)
-					lplvcd->clrTextBk = RGB(248, 248, 255);
-				break;
-			case 1:
-				lplvcd->clrTextBk = RGB(216, 203, 253); break;
-			case 2:
-				lplvcd->clrTextBk = RGB(195, 186, 253); break;
-			case 3:
-				lplvcd->clrTextBk = RGB(176, 139, 252); break;
-			case 4:
-				lplvcd->clrTextBk = RGB(175, 94, 253);
-				lplvcd->clrText = RGB(255, 255, 255); break; // use a more visual color in dark background
+				default: 
+				case 0: 
+					if (lplvcd->nmcd.dwItemSpec % 2)
+						lplvcd->clrTextBk = RGB(248, 248, 255);
+					break;
+				case 1:
+					lplvcd->clrTextBk = CHEAT_1BYTE_BG; break;
+				case 2:
+					lplvcd->clrTextBk = CHEAT_2BYTE_BG; break;
+				case 3:
+					lplvcd->clrTextBk = CHEAT_3BYTE_BG; break;
+				case 4:
+					lplvcd->clrTextBk = CHEAT_4BYTE_BG;
+					lplvcd->clrText = CHEAT_4BYTE_TEXT; break; // use a more visual color in dark background
 			}
 
 			if(!IsSatisfied(lplvcd->nmcd.dwItemSpec))
@@ -1401,10 +1414,13 @@ INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	static int watchIndex=0;
 	switch(uMsg)
 	{
-		case WM_INITDIALOG: {
+		case WM_INITDIALOG:
+		{
 			RamSearchHWnd = hDlg;
 
 			CalcSubWindowPos(hDlg, NULL);
+
+			CreateCheatMap();
 
 			switch(rs_o)
 			{
@@ -1435,6 +1451,7 @@ INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_MODBY),true);
 					break;
 			}
+
 			switch (rs_c)
 			{
 				case 'r':
@@ -1453,6 +1470,7 @@ INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_COMPARECHANGES),true);
 					break;
 			}
+
 			switch (rs_t)
 			{
 				case 's':
@@ -1465,6 +1483,7 @@ INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					SendDlgItemMessage(hDlg, IDC_HEX, BM_SETCHECK, BST_CHECKED, 0);
 					break;
 			}
+
 			switch (rs_type_size)
 			{
 				case 'b':
@@ -1517,8 +1536,16 @@ INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 			ListView_SetCallbackMask(GetDlgItem(hDlg,IDC_RAMLIST), LVIS_FOCUSED|LVIS_SELECTED);
 
+			SendDlgItemMessage(hDlg, IDC_EDIT_COMPAREADDRESS, EM_SETLIMITTEXT, 4, 0);
+
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_DIFFBY), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_MODBY), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_COMPAREVALUE), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_COMPAREADDRESS), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+
 			return true;
-		}	break;
+		}
+		break;
 		case WM_NOTIFY:
 		{
 			LPNMHDR lP = (LPNMHDR) lParam;
@@ -1561,28 +1588,12 @@ INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						case 1:
 						{
 							int i = CALL_WITH_T_SIZE_TYPES_1(GetCurValueFromItemIndex, rs_type_size,rs_t=='s',noMisalign, iNum);
-							const char* formatString = ((rs_t=='s') ? "%d" : (rs_t=='u') ? "%u" : (rs_type_size=='d' ? "%08X" : rs_type_size=='w' ? "%04X" : "%02X"));
-							switch (rs_type_size)
-							{
-								case 'b':
-								default: sprintf(num, formatString, rs_t=='s' ? (char)(i&0xff) : (unsigned char)(i&0xff)); break;
-								case 'w': sprintf(num, formatString, rs_t=='s' ? (short)(i&0xffff) : (unsigned short)(i&0xffff)); break;
-								case 'd': sprintf(num, formatString, rs_t=='s' ? (long)(i&0xffffffff) : (unsigned long)(i&0xffffffff)); break;
-							}
-							Item->item.pszText = num;
+							Item->item.pszText = CONV_VAL_TO_STR(rs_type_size, rs_t, i, num);
 						}	return true;
 						case 2:
 						{
 							int i = CALL_WITH_T_SIZE_TYPES_1(GetPrevValueFromItemIndex, rs_type_size,rs_t=='s',noMisalign, iNum);
-							const char* formatString = ((rs_t=='s') ? "%d" : (rs_t=='u') ? "%u" : (rs_type_size=='d' ? "%08X" : rs_type_size=='w' ? "%04X" : "%02X"));
-							switch (rs_type_size)
-							{
-								case 'b':
-								default: sprintf(num, formatString, rs_t=='s' ? (char)(i&0xff) : (unsigned char)(i&0xff)); break;
-								case 'w': sprintf(num, formatString, rs_t=='s' ? (short)(i&0xffff) : (unsigned short)(i&0xffff)); break;
-								case 'd': sprintf(num, formatString, rs_t=='s' ? (long)(i&0xffffffff) : (unsigned long)(i&0xffffffff)); break;
-							}
-							Item->item.pszText = num;
+							Item->item.pszText = CONV_VAL_TO_STR(rs_type_size, rs_t, i, num);
 						}	return true;
 						case 3:
 						{
@@ -1646,426 +1657,462 @@ INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				//	return 0;
 				//}
 			}
-			break;
 		}
-
+		break;
 		case WM_COMMAND:
 		{
-			int rv = false;
-			switch(LOWORD(wParam))
+			switch (HIWORD(wParam))
 			{
-				case IDC_SIGNED:
-					rs_t='s';
-					signal_new_size();
-					{rv = true; break;}
-				case IDC_UNSIGNED:
-					rs_t='u';
-					signal_new_size();
-					{rv = true; break;}
-				case IDC_HEX:
-					rs_t='h';
-					signal_new_size();
-					{rv = true; break;}
-				case IDC_1_BYTE:
-					rs_type_size = 'b';
-					signal_new_size();
-					{rv = true; break;}
-				case IDC_2_BYTES:
-					rs_type_size = 'w';
-					signal_new_size();
-					{rv = true; break;}
-				case IDC_4_BYTES:
-					rs_type_size = 'd';
-					signal_new_size();
-					{rv = true; break;}
-				case IDC_MISALIGN:
-					noMisalign = !noMisalign;
-					//CompactAddrs();
-					signal_new_size();
-					{rv = true; break;}
-//				case IDC_ENDIAN:
-////					littleEndian = !littleEndian;
-////					signal_new_size();
-//					{rv = true; break;}				
-				case IDC_LESSTHAN:
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_DIFFBY),false);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_MODBY),false);
-					rs_o = '<';
-					{rv = true; break;}
-				case IDC_MORETHAN:
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_DIFFBY),false);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_MODBY),false);
-					rs_o = '>';
-					{rv = true; break;}
-				case IDC_NOMORETHAN:
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_DIFFBY),false);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_MODBY),false);
-					rs_o = 'l';
-					{rv = true; break;}
-				case IDC_NOLESSTHAN:
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_DIFFBY),false);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_MODBY),false);
-					rs_o = 'm';
-					{rv = true; break;}
-				case IDC_EQUALTO:
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_DIFFBY),false);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_MODBY),false);
-					rs_o = '=';
-					{rv = true; break;}
-				case IDC_DIFFERENTFROM:
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_DIFFBY),false);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_MODBY),false);
-					rs_o = '!';
-					{rv = true; break;}
-				case IDC_DIFFERENTBY:
+				case BN_CLICKED:
 				{
-					rs_o = 'd';
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_DIFFBY),true);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_MODBY),false);
-					if(!SelectingByKeyboard())
-						SelectEditControl(IDC_EDIT_DIFFBY);
-				}	{rv = true; break;}
-				case IDC_MODULO:
-				{
-					rs_o = '%';
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_DIFFBY),false);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_MODBY),true);
-					if(!SelectingByKeyboard())
-						SelectEditControl(IDC_EDIT_MODBY);
-				}	{rv = true; break;}
-				case IDC_PREVIOUSVALUE:
-					rs_c='r';
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_COMPAREVALUE),false);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_COMPAREADDRESS),false);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_COMPARECHANGES),false);
-					{rv = true; break;}
-				case IDC_SPECIFICVALUE:
-				{
-					rs_c = 's';
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_COMPAREVALUE),true);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_COMPAREADDRESS),false);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_COMPARECHANGES),false);
-					if(!SelectingByKeyboard())
-						SelectEditControl(IDC_EDIT_COMPAREVALUE);
-					{rv = true; break;}
-				}
-				case IDC_SPECIFICADDRESS:
-				{
-					rs_c = 'a';
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_COMPAREADDRESS),true);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_COMPAREVALUE),false);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_COMPARECHANGES),false);
-					if(!SelectingByKeyboard())
-						SelectEditControl(IDC_EDIT_COMPAREADDRESS);
-				}	{rv = true; break;}
-				case IDC_NUMBEROFCHANGES:
-				{
-					rs_c = 'n';
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_COMPARECHANGES),true);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_COMPAREVALUE),false);
-					EnableWindow(GetDlgItem(hDlg,IDC_EDIT_COMPAREADDRESS),false);
-					if(!SelectingByKeyboard())
-						SelectEditControl(IDC_EDIT_COMPARECHANGES);
-				}	{rv = true; break;}
-				case IDC_C_ADDCHEAT:
-				{
-					HWND ramListControl = GetDlgItem(hDlg,IDC_RAMLIST);
-					int watchItemIndex = ListView_GetNextItem(ramListControl, -1, LVNI_SELECTED);
-					while (watchItemIndex >= 0)
+					int rv = true;
+					bool needRefresh = true;
+					switch (LOWORD(wParam))
 					{
-						unsigned long address = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size,rs_t=='s',noMisalign, watchItemIndex);
-						unsigned long curvalue = CALL_WITH_T_SIZE_TYPES_1(GetCurValueFromItemIndex, rs_type_size,rs_t=='s',noMisalign, watchItemIndex);
-
-						int sizeType = -1;
-						if(rs_type_size == 'b')
-							sizeType = 0;
-						else if(rs_type_size == 'w')
-							sizeType = 1;
-						else if(rs_type_size == 'd')
-							sizeType = 2;
-
-						int numberType = -1;
-						if(rs_t == 's')
-							numberType = 0;
-						else if(rs_t == 'u')
-							numberType = 1;
-						else if(rs_t == 'h')
-							numberType = 2;
-
-						// Don't open cheat dialog
-
-						switch (sizeType) {
-							case 0:
-								FCEUI_AddCheat("",address,curvalue, -1, 1);
-								break;
-							case 1: 
-								FCEUI_AddCheat("",address,curvalue & 0xFF, -1, 1);
-								FCEUI_AddCheat("",address + 1,(curvalue & 0xFF00) / 0x100, -1, 1);
-								break;
-							case 2:
-								FCEUI_AddCheat("",address,curvalue & 0xFF,-1,1);
-								FCEUI_AddCheat("",address + 1,(curvalue & 0xFF00) / 0x100, -1, 1);
-								FCEUI_AddCheat("",address + 2,(curvalue & 0xFF0000) / 0x10000, -1, 1);
-								FCEUI_AddCheat("",address + 3,(curvalue & 0xFF000000) / 0x1000000, -1, 1);
-								break;
-						}
-
-						UpdateCheatsAdded();
-						UpdateCheatRelatedWindow();
-
-						watchItemIndex = ListView_GetNextItem(ramListControl, watchItemIndex, LVNI_SELECTED);
-
-					}
-				}	{rv = true; break;}
-				case IDC_C_SEARCHROM:
-					ShowROM = SendDlgItemMessage(hDlg, IDC_C_SEARCHROM, BM_GETCHECK, 0, 0) != 0;
-				case IDC_C_RESET:
-				{
-					RamSearchSaveUndoStateIfNotTooBig(RamSearchHWnd);
-					int prevNumItems = last_rs_possible;
-
-					soft_reset_address_info();
-
-					if(prevNumItems == last_rs_possible)
-						SetRamSearchUndoType(RamSearchHWnd, 0); // nothing to undo
-
-					ListView_SetItemState(GetDlgItem(hDlg,IDC_RAMLIST), -1, 0, LVIS_SELECTED); // deselect all
-					//ListView_SetItemCount(GetDlgItem(hDlg,IDC_RAMLIST),ResultCount);
-					ListView_SetSelectionMark(GetDlgItem(hDlg,IDC_RAMLIST), 0);
-					RefreshRamListSelectedCountControlStatus(hDlg);
-					Update_RAM_Search();
-					{rv = true; break;}
-				}
-				case IDC_C_RESET_CHANGES:
-					memset(s_numChanges, 0, (sizeof(*s_numChanges)*(MAX_RAM_SIZE)));
-					ListView_Update(GetDlgItem(hDlg,IDC_RAMLIST), -1);
-					Update_RAM_Search();
-					//SetRamSearchUndoType(hDlg, 0);
-					{rv = true; break;}
-				case IDC_C_UNDO:
-					if(s_undoType>0)
-					{
-//						Clear_Sound_Buffer();
-						EnterCriticalSection(&s_activeMemoryRegionsCS);
-						if(s_activeMemoryRegions.size() < tooManyRegionsForUndo)
+						case IDC_SIGNED:
 						{
-							MemoryList tempMemoryList = s_activeMemoryRegions;
-							s_activeMemoryRegions = s_activeMemoryRegionsBackup;
-							s_activeMemoryRegionsBackup = tempMemoryList;
-							LeaveCriticalSection(&s_activeMemoryRegionsCS);
-							SetRamSearchUndoType(hDlg, 3 - s_undoType);
+							rs_t = 's';
+							signal_new_size();
+							ConvEditTextNum(hDlg, IDC_EDIT_COMPAREVALUE, rs_type_size, rs_t);
+							ConvEditTextNum(hDlg, IDC_EDIT_DIFFBY, rs_type_size, rs_t);
+							ConvEditTextNum(hDlg, IDC_EDIT_MODBY, rs_type_size, rs_t);
 						}
-						else
+						break;
+						case IDC_UNSIGNED:
 						{
-							s_activeMemoryRegions = s_activeMemoryRegionsBackup;
-							LeaveCriticalSection(&s_activeMemoryRegionsCS);
-							SetRamSearchUndoType(hDlg, -1);
+							rs_t = 'u';
+							signal_new_size();
+							ConvEditTextNum(hDlg, IDC_EDIT_COMPAREVALUE, rs_type_size, rs_t);
+							ConvEditTextNum(hDlg, IDC_EDIT_DIFFBY, rs_type_size, rs_t);
+							ConvEditTextNum(hDlg, IDC_EDIT_MODBY, rs_type_size, rs_t);
 						}
-						CompactAddrs();
-						ListView_SetItemState(GetDlgItem(hDlg,IDC_RAMLIST), -1, 0, LVIS_SELECTED); // deselect all
-						ListView_SetSelectionMark(GetDlgItem(hDlg,IDC_RAMLIST), 0);
-						RefreshRamListSelectedCountControlStatus(hDlg);
-					}
-					{rv = true; break;}
-				case IDC_C_AUTOSEARCH:
-					AutoSearch = SendDlgItemMessage(hDlg, IDC_C_AUTOSEARCH, BM_GETCHECK, 0, 0) != 0;
-					AutoSearchAutoRetry = false;
-					if (!AutoSearch) {rv = true; break;}
-				case IDC_C_SEARCH:
-				{
-//					Clear_Sound_Buffer();
-
-					if(!rs_val_valid && !(rs_val_valid = Set_RS_Val()))
-						goto invalid_field;
-
-					if(ResultCount)
-					{
-						RamSearchSaveUndoStateIfNotTooBig(hDlg);
-
-						prune(rs_c,rs_o,rs_t=='s',rs_val,rs_param);
-
-						RefreshRamListSelectedCountControlStatus(hDlg);
-					}
-
-					if(!ResultCount)
-					{
-
-						MessageBox(RamSearchHWnd,"Resetting search.","Out of results.",MB_OK|MB_ICONINFORMATION);
-						soft_reset_address_info();
-					}
-
-					{rv = true; break;}
-
-invalid_field:
-					MessageBox(RamSearchHWnd,"Invalid or out-of-bound entered value.","Error",MB_OK|MB_ICONSTOP);
-					if(AutoSearch) // stop autosearch if it just started
-					{
-						SendDlgItemMessage(hDlg, IDC_C_AUTOSEARCH, BM_SETCHECK, BST_UNCHECKED, 0);
-						SendMessage(hDlg, WM_COMMAND, IDC_C_AUTOSEARCH, 0);
-					}
-					{rv = true; break;}
-				}
-				case IDC_C_HEXEDITOR:
-				{
-					HWND ramListControl = GetDlgItem(hDlg,IDC_RAMLIST);
-					int selCount = ListView_GetSelectedCount(ramListControl);
-					int watchItemIndex = ListView_GetNextItem(ramListControl, -1, LVNI_SELECTED);
-					if (watchItemIndex >= 0)
-					{
-						unsigned int addr = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size, rs_t=='s', noMisalign, watchItemIndex);
-						ChangeMemViewFocus(0, addr, -1);
-					}
-					break;
-				}
-				case IDC_C_WATCH:
-				{
-					HWND ramListControl = GetDlgItem(hDlg,IDC_RAMLIST);
-					int selCount = SendMessage(ramListControl, LVM_GETSELECTEDCOUNT, 0, 0);
-					if (selCount > 0)
-					{
-						AddressWatcher tempWatch;
-						tempWatch.Size = rs_type_size;
-						tempWatch.Type = rs_t;
-						tempWatch.WrongEndian = 0; //Replace when I get little endian working
-						tempWatch.comment = NULL;
-
-						bool inserted = false;
-
-						AddressWatcher* watches = (AddressWatcher*)malloc(selCount * sizeof(AddressWatcher));
-						int i = 0;
-						int watchItemIndex = -1;
-						while ((watchItemIndex = SendMessage(ramListControl, LVM_GETNEXTITEM, watchItemIndex, LVNI_SELECTED)) >= 0)
+						break;
+						case IDC_HEX:
 						{
-							tempWatch.Address = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size, rs_t == 's', noMisalign, watchItemIndex);
-							watches[i] = tempWatch;
-							++i;
+							rs_t = 'h';
+							signal_new_size();
+							ConvEditTextNum(hDlg, IDC_EDIT_COMPAREVALUE, rs_type_size, rs_t);
+							ConvEditTextNum(hDlg, IDC_EDIT_DIFFBY, rs_type_size, rs_t);
+							ConvEditTextNum(hDlg, IDC_EDIT_MODBY, rs_type_size, rs_t);
 						}
-
-						// bring up the ram watch window if it's not already showing so the user knows where the watch went
-						if ((selCount == 1 ?
-							InsertWatch(watches[0], hDlg) : InsertWatches(watches, hDlg, selCount)) 
-							&& !RamWatchHWnd)
-							SendMessage(hWnd, WM_COMMAND, ID_RAM_WATCH, 0);
-						SetForegroundWindow(RamSearchHWnd);
-
-						free(watches);
-					}
-					{rv = true; break;}
-				}
-
-				// eliminate all selected items
-				case IDC_C_ELIMINATE:
-				{
-					RamSearchSaveUndoStateIfNotTooBig(hDlg);
-
-					HWND ramListControl = GetDlgItem(hDlg,IDC_RAMLIST);
-					int size = (rs_type_size=='b' || !noMisalign) ? 1 : 2;
-					int selCount = ListView_GetSelectedCount(ramListControl);
-					int watchIndex = -1;
-
-					// time-saving trick #1:
-					// condense the selected items into an array of address ranges
-					std::vector<AddrRange> selHardwareAddrs;
-					for(int i = 0, j = 1024; i < selCount; ++i, --j)
-					{
-						watchIndex = ListView_GetNextItem(ramListControl, watchIndex, LVNI_SELECTED);
-						int addr = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size,rs_t=='s',noMisalign, watchIndex);
-						if(!selHardwareAddrs.empty() && addr == selHardwareAddrs.back().End())
-							selHardwareAddrs.back().size += size;
-						else
-							selHardwareAddrs.push_back(AddrRange(addr,size));
-
-						if(!j) UpdateRamSearchProgressBar(i * 50 / selCount), j = 1024;
-					}
-
-					// now deactivate the ranges
-
-					// time-saving trick #2:
-					// take advantage of the fact that the listbox items must be in the same order as the regions
-					MemoryList::iterator iter = s_activeMemoryRegions.begin();
-					int numHardwareAddrRanges = selHardwareAddrs.size();
-					for(int i = 0, j = 16; i < numHardwareAddrRanges; ++i, --j)
-					{
-						int addr = selHardwareAddrs[i].addr;
-						int size = selHardwareAddrs[i].size;
-						bool affected = false;
-						while(iter != s_activeMemoryRegions.end())
+						break;
+						case IDC_1_BYTE:
 						{
-							MemoryRegion& region = *iter;
-							int affNow = DeactivateRegion(region, iter, addr, size);
-							if(affNow)
-								affected = true;
-							else if(affected)
+							needRefresh = false;
+							rs_type_size = 'b';
+							signal_new_size();
+							BOOL success = FALSE;
+							int val = ReadControlInt(IDC_EDIT_COMPAREVALUE, false, success);
+							if (success)
+							{
+								char num[11];
+								SetDlgItemText(hDlg, IDC_EDIT_COMPAREVALUE, CONV_VAL_TO_STR(rs_type_size, rs_t, val, num));
+							}
+						}
+						break;
+						case IDC_2_BYTES:
+							needRefresh = false;
+							rs_type_size = 'w';
+							signal_new_size();
+							break;
+						case IDC_4_BYTES:
+							needRefresh = false;
+							rs_type_size = 'd';
+							signal_new_size();
+							break;
+						case IDC_MISALIGN:
+							needRefresh = false;
+							noMisalign = !noMisalign;
+							//CompactAddrs();
+							signal_new_size();
+							break;
+//						case IDC_ENDIAN:
+//							littleEndian = !littleEndian;
+//							signal_new_size();
+//							break;
+						case IDC_LESSTHAN:
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_DIFFBY), false);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_MODBY), false);
+							rs_o = '<';
+							break;
+						case IDC_MORETHAN:
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_DIFFBY), false);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_MODBY), false);
+							rs_o = '>';
+							break;
+						case IDC_NOMORETHAN:
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_DIFFBY), false);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_MODBY), false);
+							rs_o = 'l';
+							break;
+						case IDC_NOLESSTHAN:
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_DIFFBY), false);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_MODBY), false);
+							rs_o = 'm';
+							break;
+						case IDC_EQUALTO:
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_DIFFBY), false);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_MODBY), false);
+							rs_o = '=';
+							break;
+						case IDC_DIFFERENTFROM:
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_DIFFBY), false);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_MODBY), false);
+							rs_o = '!';
+							break;
+						case IDC_DIFFERENTBY:
+						{
+							rs_o = 'd';
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_DIFFBY), true);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_MODBY), false);
+							if (!SelectingByKeyboard())
+								SelectEditControl(IDC_EDIT_DIFFBY);
+							break;
+						}
+						case IDC_MODULO:
+						{
+							rs_o = '%';
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_DIFFBY), false);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_MODBY), true);
+							if (!SelectingByKeyboard())
+								SelectEditControl(IDC_EDIT_MODBY);
+							break;
+						}
+						case IDC_PREVIOUSVALUE:
+							rs_c = 'r';
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_COMPAREVALUE), false);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_COMPAREADDRESS), false);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_COMPARECHANGES), false);
+							break;
+						case IDC_SPECIFICVALUE:
+						{
+							rs_c = 's';
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_COMPAREVALUE), true);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_COMPAREADDRESS), false);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_COMPARECHANGES), false);
+							if (!SelectingByKeyboard())
+								SelectEditControl(IDC_EDIT_COMPAREVALUE);
+							break;
+						}
+						case IDC_SPECIFICADDRESS:
+						{
+							rs_c = 'a';
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_COMPAREADDRESS), true);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_COMPAREVALUE), false);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_COMPARECHANGES), false);
+							if (!SelectingByKeyboard())
+								SelectEditControl(IDC_EDIT_COMPAREADDRESS);
+							break;
+						}
+						case IDC_NUMBEROFCHANGES:
+						{
+							rs_c = 'n';
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_COMPARECHANGES), true);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_COMPAREVALUE), false);
+							EnableWindow(GetDlgItem(hDlg, IDC_EDIT_COMPAREADDRESS), false);
+							if (!SelectingByKeyboard())
+								SelectEditControl(IDC_EDIT_COMPARECHANGES);
+							break;
+						}
+						case IDC_C_ADDCHEAT:
+						{
+							needRefresh = false;
+							HWND ramListControl = GetDlgItem(hDlg, IDC_RAMLIST);
+							int watchItemIndex = ListView_GetNextItem(ramListControl, -1, LVNI_SELECTED);
+							while (watchItemIndex >= 0)
+							{
+								unsigned long address = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size, rs_t == 's', noMisalign, watchItemIndex);
+								unsigned long curvalue = CALL_WITH_T_SIZE_TYPES_1(GetCurValueFromItemIndex, rs_type_size, rs_t == 's', noMisalign, watchItemIndex);
+
+								int sizeType = -1;
+								if (rs_type_size == 'b')
+									sizeType = 0;
+								else if (rs_type_size == 'w')
+									sizeType = 1;
+								else if (rs_type_size == 'd')
+									sizeType = 2;
+
+								int numberType = -1;
+								if (rs_t == 's')
+									numberType = 0;
+								else if (rs_t == 'u')
+									numberType = 1;
+								else if (rs_t == 'h')
+									numberType = 2;
+
+								// Don't open cheat dialog
+
+								switch (sizeType) {
+								case 0:
+									FCEUI_AddCheat("", address, curvalue, -1, 1);
+									break;
+								case 1:
+									FCEUI_AddCheat("", address, curvalue & 0xFF, -1, 1);
+									FCEUI_AddCheat("", address + 1, (curvalue & 0xFF00) / 0x100, -1, 1);
+									break;
+								case 2:
+									FCEUI_AddCheat("", address, curvalue & 0xFF, -1, 1);
+									FCEUI_AddCheat("", address + 1, (curvalue & 0xFF00) / 0x100, -1, 1);
+									FCEUI_AddCheat("", address + 2, (curvalue & 0xFF0000) / 0x10000, -1, 1);
+									FCEUI_AddCheat("", address + 3, (curvalue & 0xFF000000) / 0x1000000, -1, 1);
+									break;
+								}
+
+								UpdateCheatsAdded();
+								UpdateCheatRelatedWindow();
+
+								watchItemIndex = ListView_GetNextItem(ramListControl, watchItemIndex, LVNI_SELECTED);
+
+							}
+							break;
+						}
+						case IDC_C_SEARCHROM:
+							ShowROM = SendDlgItemMessage(hDlg, IDC_C_SEARCHROM, BM_GETCHECK, 0, 0) != 0;
+						case IDC_C_RESET:
+						{
+							needRefresh = false;
+							RamSearchSaveUndoStateIfNotTooBig(RamSearchHWnd);
+							int prevNumItems = last_rs_possible;
+
+							soft_reset_address_info();
+
+							if (prevNumItems == last_rs_possible)
+								SetRamSearchUndoType(RamSearchHWnd, 0); // nothing to undo
+
+							ListView_SetItemState(GetDlgItem(hDlg, IDC_RAMLIST), -1, 0, LVIS_SELECTED); // deselect all
+																										//ListView_SetItemCount(GetDlgItem(hDlg,IDC_RAMLIST),ResultCount);
+							ListView_SetSelectionMark(GetDlgItem(hDlg, IDC_RAMLIST), 0);
+							RefreshRamListSelectedCountControlStatus(hDlg);
+							Update_RAM_Search();
+							break;
+						}
+						case IDC_C_RESET_CHANGES:
+							needRefresh = false;
+							memset(s_numChanges, 0, (sizeof(*s_numChanges)*(MAX_RAM_SIZE)));
+							ListView_Update(GetDlgItem(hDlg, IDC_RAMLIST), -1);
+							Update_RAM_Search();
+							//SetRamSearchUndoType(hDlg, 0);
+							break;
+						case IDC_C_UNDO:
+							needRefresh = false;
+							if (s_undoType > 0)
+							{
+								//						Clear_Sound_Buffer();
+								EnterCriticalSection(&s_activeMemoryRegionsCS);
+								if (s_activeMemoryRegions.size() < tooManyRegionsForUndo)
+								{
+									MemoryList tempMemoryList = s_activeMemoryRegions;
+									s_activeMemoryRegions = s_activeMemoryRegionsBackup;
+									s_activeMemoryRegionsBackup = tempMemoryList;
+									LeaveCriticalSection(&s_activeMemoryRegionsCS);
+									SetRamSearchUndoType(hDlg, 3 - s_undoType);
+								}
+								else
+								{
+									s_activeMemoryRegions = s_activeMemoryRegionsBackup;
+									LeaveCriticalSection(&s_activeMemoryRegionsCS);
+									SetRamSearchUndoType(hDlg, -1);
+								}
+								CompactAddrs();
+								ListView_SetItemState(GetDlgItem(hDlg, IDC_RAMLIST), -1, 0, LVIS_SELECTED); // deselect all
+								ListView_SetSelectionMark(GetDlgItem(hDlg, IDC_RAMLIST), 0);
+								RefreshRamListSelectedCountControlStatus(hDlg);
+							}
+							break;
+						case IDC_C_AUTOSEARCH:
+							needRefresh = false;
+							AutoSearch = SendDlgItemMessage(hDlg, IDC_C_AUTOSEARCH, BM_GETCHECK, 0, 0) != 0;
+							AutoSearchAutoRetry = false;
+							if (!AutoSearch)
 								break;
-							if(affNow != 2)
-								++iter;
+							else
+								rv = false;
+						case IDC_C_SEARCH:
+						{
+							needRefresh = false;
+							//					Clear_Sound_Buffer();
+
+							if (!rs_val_valid && !(rs_val_valid = Set_RS_Val()))
+							{
+								MessageBox(RamSearchHWnd, "Invalid or out-of-bound entered value.", "Error", MB_OK | MB_ICONSTOP);
+								if (AutoSearch) // stop autosearch if it just started
+								{
+									SendDlgItemMessage(hDlg, IDC_C_AUTOSEARCH, BM_SETCHECK, BST_UNCHECKED, 0);
+									SendMessage(hDlg, WM_COMMAND, IDC_C_AUTOSEARCH, 0);
+								}
+							}
+							else {
+								if (ResultCount)
+								{
+									RamSearchSaveUndoStateIfNotTooBig(hDlg);
+
+									prune(rs_c, rs_o, rs_t == 's', rs_val, rs_param);
+
+									RefreshRamListSelectedCountControlStatus(hDlg);
+								}
+
+								if (!ResultCount)
+								{
+
+									MessageBox(RamSearchHWnd, "Resetting search.", "Out of results.", MB_OK | MB_ICONINFORMATION);
+									soft_reset_address_info();
+								}
+
+							}
+							break;
+						}
+						case IDC_C_HEXEDITOR:
+						{
+							needRefresh = false;
+							HWND ramListControl = GetDlgItem(hDlg, IDC_RAMLIST);
+							int selCount = ListView_GetSelectedCount(ramListControl);
+							int watchItemIndex = ListView_GetNextItem(ramListControl, -1, LVNI_SELECTED);
+							if (watchItemIndex >= 0)
+							{
+								unsigned int addr = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size, rs_t == 's', noMisalign, watchItemIndex);
+								ChangeMemViewFocus(0, addr, -1);
+							}
+							rv = false;
+							break;
+						}
+						case IDC_C_WATCH:
+						{
+							needRefresh = false;
+							HWND ramListControl = GetDlgItem(hDlg, IDC_RAMLIST);
+							int selCount = SendMessage(ramListControl, LVM_GETSELECTEDCOUNT, 0, 0);
+							if (selCount > 0)
+							{
+								WatcherMsg msg;
+								msg.Size = rs_type_size;
+								msg.Type = rs_t;
+								msg.WrongEndian = 0; //Replace when I get little endian working
+								msg.comment = NULL;
+
+								bool inserted = false;
+
+								msg.Addresses = (unsigned int*)malloc(selCount * sizeof(unsigned int));
+								int i = 0;
+								int watchItemIndex = -1;
+								while ((watchItemIndex = SendMessage(ramListControl, LVM_GETNEXTITEM, watchItemIndex, LVNI_SELECTED)) >= 0)
+								{
+									msg.Addresses[i] = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size, rs_t == 's', noMisalign, watchItemIndex);
+									++i;
+								}
+								msg.count = i;
+								// bring up the ram watch window if it's not already showing so the user knows where the watch went
+								if (InsertWatches(&msg, hDlg, selCount)
+									&& !RamWatchHWnd)
+									SendMessage(hWnd, WM_COMMAND, ID_RAM_WATCH, 0);
+								SetForegroundWindow(RamSearchHWnd);
+								if (msg.Addresses) free(msg.Addresses);
+								if (msg.comment) free(msg.comment);
+							}
+							break;
 						}
 
-						if(!j) UpdateRamSearchProgressBar(50 + (i * 50 / selCount)), j = 16;
+						// eliminate all selected items
+						case IDC_C_ELIMINATE:
+						{
+							needRefresh = false;
+							RamSearchSaveUndoStateIfNotTooBig(hDlg);
+
+							HWND ramListControl = GetDlgItem(hDlg, IDC_RAMLIST);
+							int size = (rs_type_size == 'b' || !noMisalign) ? 1 : 2;
+							int selCount = ListView_GetSelectedCount(ramListControl);
+							int watchIndex = -1;
+
+							// time-saving trick #1:
+							// condense the selected items into an array of address ranges
+							std::vector<AddrRange> selHardwareAddrs;
+							for (int i = 0, j = 1024; i < selCount; ++i, --j)
+							{
+								watchIndex = ListView_GetNextItem(ramListControl, watchIndex, LVNI_SELECTED);
+								int addr = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size, rs_t == 's', noMisalign, watchIndex);
+								if (!selHardwareAddrs.empty() && addr == selHardwareAddrs.back().End())
+									selHardwareAddrs.back().size += size;
+								else
+									selHardwareAddrs.push_back(AddrRange(addr, size));
+
+								if (!j) UpdateRamSearchProgressBar(i * 50 / selCount), j = 1024;
+							}
+
+							// now deactivate the ranges
+
+							// time-saving trick #2:
+							// take advantage of the fact that the listbox items must be in the same order as the regions
+							MemoryList::iterator iter = s_activeMemoryRegions.begin();
+							int numHardwareAddrRanges = selHardwareAddrs.size();
+							for (int i = 0, j = 16; i < numHardwareAddrRanges; ++i, --j)
+							{
+								int addr = selHardwareAddrs[i].addr;
+								int size = selHardwareAddrs[i].size;
+								bool affected = false;
+								while (iter != s_activeMemoryRegions.end())
+								{
+									MemoryRegion& region = *iter;
+									int affNow = DeactivateRegion(region, iter, addr, size);
+									if (affNow)
+										affected = true;
+									else if (affected)
+										break;
+									if (affNow != 2)
+										++iter;
+								}
+
+								if (!j) UpdateRamSearchProgressBar(50 + (i * 50 / selCount)), j = 16;
+							}
+							UpdateRamSearchTitleBar();
+
+							// careful -- if the above two time-saving tricks aren't working,
+							// the runtime can absolutely explode (seconds -> hours) when there are lots of regions
+
+							ListView_SetItemState(ramListControl, -1, 0, LVIS_SELECTED); // deselect all
+							signal_new_size();
+							break;
+						}
+						default:
+							rv = false;
+							needRefresh = false;
+							break;
 					}
-					UpdateRamSearchTitleBar();
 
-					// careful -- if the above two time-saving tricks aren't working,
-					// the runtime can absolutely explode (seconds -> hours) when there are lots of regions
-
-					ListView_SetItemState(ramListControl, -1, 0, LVIS_SELECTED); // deselect all
-					signal_new_size();
-					{rv = true; break;}
-				}
-			}
-
-			// check refresh for comparison preview color update
-			// also, update rs_val if needed
-			bool needRefresh = false;
-			switch(LOWORD(wParam))
-			{
-				case IDC_LESSTHAN:
-				case IDC_MORETHAN:
-				case IDC_NOMORETHAN:
-				case IDC_NOLESSTHAN:
-				case IDC_EQUALTO:
-				case IDC_DIFFERENTFROM:
-				case IDC_DIFFERENTBY:
-				case IDC_MODULO:
-				case IDC_PREVIOUSVALUE:
-				case IDC_SPECIFICVALUE:
-				case IDC_SPECIFICADDRESS:
-				case IDC_NUMBEROFCHANGES:
-				case IDC_SIGNED:
-				case IDC_UNSIGNED:
-				case IDC_HEX:
-					rs_val_valid = Set_RS_Val();
-					needRefresh = true;
-					break;
-				case IDC_EDIT_COMPAREVALUE:
-				case IDC_EDIT_COMPAREADDRESS:
-				case IDC_EDIT_COMPARECHANGES:
-				case IDC_EDIT_DIFFBY:
-				case IDC_EDIT_MODBY:
-					if(HIWORD(wParam) == EN_CHANGE)
+					if (needRefresh)
 					{
 						rs_val_valid = Set_RS_Val();
-						needRefresh = true;
+						ListView_Update(GetDlgItem(hDlg, IDC_RAMLIST), -1);
 					}
-					break;
+
+					return rv;
+				}
+				case EN_CHANGE:
+				{
+					switch (LOWORD(wParam))
+					{
+						case IDC_EDIT_COMPAREVALUE:
+						case IDC_EDIT_COMPAREADDRESS:
+						case IDC_EDIT_COMPARECHANGES:
+						case IDC_EDIT_DIFFBY:
+						case IDC_EDIT_MODBY:
+							rs_val_valid = Set_RS_Val();
+							ListView_Update(GetDlgItem(hDlg, IDC_RAMLIST), -1);
+					}
+				}
 			}
-			if(needRefresh)
-				ListView_Update(GetDlgItem(hDlg,IDC_RAMLIST), -1);
-
-
-			return rv;
-		}	break;
+		}
+		break;
 		case WM_CLOSE:
 			DestroyWindow(hDlg);
 			break;
 		case WM_DESTROY:
 			RamSearchHWnd = NULL;
+			ReleaseCheatMap();
 //			theApp.modelessCheatDialogIsOpen = false;
 			break;
 	}
 
 	return false;
 }
+
 
 void UpdateRamSearchTitleBar(int percent)
 {

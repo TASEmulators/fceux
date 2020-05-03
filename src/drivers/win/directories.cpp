@@ -27,7 +27,7 @@ void CloseDirectoriesDialog(HWND hwndDlg)
 	for(unsigned int curr_dir = 0; curr_dir < NUMBER_OF_DIRECTORIES; curr_dir++)
 	{
 		LONG len;
-		len = SendDlgItemMessage(hwndDlg, EDIT_ROMS + curr_dir, WM_GETTEXTLENGTH, 0, 0);
+		len = SendDlgItemMessage(hwndDlg, edit_id[curr_dir], WM_GETTEXTLENGTH, 0, 0);
 
 		if(len <= 0)
 		{
@@ -47,7 +47,7 @@ void CloseDirectoriesDialog(HWND hwndDlg)
 			continue;
 		}
 
-		if(!GetDlgItemText(hwndDlg, EDIT_ROMS + curr_dir, directory_names[curr_dir], len))
+		if(!GetDlgItemText(hwndDlg, edit_id[curr_dir], directory_names[curr_dir], len))
 		{
 			free(directory_names[curr_dir]);
 			directory_names[curr_dir] = 0;
@@ -98,7 +98,7 @@ static INT_PTR CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 			// Initialize the directories textboxes
 			for(unsigned int curr_dir = 0; curr_dir < NUMBER_OF_DIRECTORIES; curr_dir++)
 			{
-				SetDlgItemText(hwndDlg, EDIT_ROMS + curr_dir, directory_names[curr_dir]);
+				SetDlgItemText(hwndDlg, edit_id[curr_dir], directory_names[curr_dir]);
 			}
 
 			// Check the screenshot naming checkbox if necessary
@@ -119,48 +119,54 @@ static INT_PTR CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 			break;
 
 		case WM_COMMAND:
-			if( !(wParam >> 16) )
+			switch (HIWORD(wParam))
 			{
-				if( (wParam & 0xFFFF) >= BUTTON_ROMS && (wParam & 0xFFFF) <= BUTTON_ROMS + NUMBER_OF_DIRECTORIES)
-				{
-					// If a directory selection button was pressed, ask the
-					// user for a directory.
-
-					static char *helpert[14] = {
-						"Roms",
-						"Battery Saves",
-						"Save States",
-						"FDS Bios Rom",
-						"Screenshots",
-						"Cheats",
-						"Movies",
-						"Memory Watch",
-						"Basic Bot",
-						"Macro files",
-						"Input Presets",
-						"Lua Scripts",
-						"Avi Directory",
-						"Base Directory",
-					};
-
-					char name[MAX_PATH]; 
-					char path[MAX_PATH];
-					GetDlgItemText(hwndDlg, EDIT_ROMS + ((wParam & 0xFFFF) - BUTTON_ROMS), path, MAX_PATH);
-
-					if(BrowseForFolder(hwndDlg, helpert[ ( (wParam & 0xFFFF) - BUTTON_ROMS)], name, path))
+				case BN_CLICKED:
+					switch(LOWORD(wParam))
 					{
-						SetDlgItemText(hwndDlg, EDIT_ROMS + ((wParam & 0xFFFF) - BUTTON_ROMS), name);
+						case CLOSE_BUTTON:
+							CloseDirectoriesDialog(hwndDlg);
+							break;
+						case BTN_CANCEL:
+							EndDialog(hwndDlg, 0);
+							break;
+						default:
+							static char *helpert[14] = {
+								"Roms",
+								"Battery Saves",
+								"Save States",
+								"FDS Bios Rom",
+								"Screenshots",
+								"Cheats",
+								"Movies",
+								"Memory Watch",
+								"Basic Bot",
+								"Macro files",
+								"Input Presets",
+								"Lua Scripts",
+								"Avi output",
+								"Base",
+							};
+
+							for (int i = 0; i < NUMBER_OF_DIRECTORIES; ++i)
+							{
+								if (browse_btn_id[i] == LOWORD(wParam))
+								{
+									// If a directory selection button was pressed, ask the
+									// user for a directory.
+
+									char name[MAX_PATH];
+									char path[MAX_PATH];
+									char caption[256];
+
+									GetDlgItemText(hwndDlg, edit_id[i], path, MAX_PATH);
+									sprintf(caption, "Select a directory for %s.", helpert[i]);
+									if (BrowseForFolder(hwndDlg, caption, name, path))
+										SetDlgItemText(hwndDlg, edit_id[i], name);
+									break;
+								}
+							}
 					}
-				}
-				else switch(wParam & 0xFFFF)
-				{
-					case CLOSE_BUTTON:
-						CloseDirectoriesDialog(hwndDlg);
-						break;
-					case BTN_CANCEL:
-						EndDialog(hwndDlg, 0);
-						break;
-				}
 			}
 
 	}

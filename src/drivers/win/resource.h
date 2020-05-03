@@ -1,12 +1,12 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file
-// for res.rc
+// Microsoft Visual C++ 生成的包含文件。
+// 供 res.rc 使用
 //
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
 #define BTN_CLOSE                       1
 #define MENU_OPEN_FILE                  100
-#define EDIT_ROMS                       100
+#define EDIT_ROM                        100
 #define LBL_LOG_TEXT                    100
 #define LBL_KEY_COMBO                   100
 #define LBL_CDLOGGER_CODECOUNT          100
@@ -31,6 +31,7 @@
 #define IDC_ROMPATCHER_DOTNES_OFFSET    101
 #define IDC_NTVIEW_TABLE_BOX            101
 #define IDC_ASSEMBLER_DISASSEMBLY       101
+#define EDIT_BATTERY                    101
 #define MENU_RECENT_FILES               102
 #define CB_LOAD_FILE_OPEN               102
 #define LBL_CDLOGGER_UNDEFCOUNT         102
@@ -46,6 +47,7 @@
 #define IDC_NTVIEW_SCANLINE             102
 #define IDC_ASSEMBLER_PATCH_DISASM      102
 #define CHECK_PALETTE_GRAYSCALE         102
+#define EDIT_STATE                      102
 #define BTN_CDLOGGER_RESET              103
 #define LBL_PPUVIEW_TILE1               103
 #define IDC_CHEAT_VAL                   103
@@ -56,6 +58,7 @@
 #define IDC_ROMPATCHER_BTN_EDIT         103
 #define IDC_NTVIEW_PROPERTIES_LINE_1    103
 #define IDC_VIDEOCONFIG_HIDEMOUSE       103
+#define EDIT_FDSBIOS                    103
 #define CB_AUTO_HIDE_MENU               104
 #define COMBO_PAD1                      104
 #define BTN_CDLOGGER_LOAD               104
@@ -69,6 +72,7 @@
 #define IDC_ROMPATCHER_CURRENT_DATA_BOX 104
 #define IDC_NTVIEW_PROPERTIES_LINE_2    104
 #define CHECK_PALETTE_CUSTOM            104
+#define EDIT_SCREENSHOT                 104
 #define COMBO_PAD2                      105
 #define CB_SET_HIGH_PRIORITY            105
 #define BTN_CDLOGGER_START_PAUSE        105
@@ -81,6 +85,7 @@
 #define IDC_ADDBP_MEM_CPU               105
 #define IDC_ROMPATCHER_CURRENT_DATA     105
 #define IDC_NTVIEW_PROPERTIES_LINE_3    105
+#define EDIT_CHEAT                      105
 #define BTN_PORT1                       106
 #define BTN_CDLOGGER_SAVE_AS            106
 #define IDC_CHEAT_LIST_POSSIBILITIES    106
@@ -89,18 +94,21 @@
 #define IDC_ADDBP_MEM_PPU               106
 #define IDC_NTVIEW_PROPERTIES_LINE_4    106
 #define IDC_TEXT_LINES_TO_THIS_WINDOW   106
+#define EDIT_MOVIE                      106
 #define BTN_PORT2                       107
 #define BTN_CDLOGGER_SAVE               107
 #define IDC_DEBUGGER_STEP_OVER          107
 #define IDC_ADDBP_MEM_SPR               107
 #define IDC_ROMPATCHER_DISASSEMBLY      107
 #define IDC_VIDEOCONFIG_BESTFIT         107
+#define EDIT_MEMWATCH                   107
 #define IDR_ACCELERATOR1                108
 #define BTN_CDLOGGER_SAVE_STRIPPED      108
 #define IDC_CHEAT_VAL_NE_BY             108
 #define IDC_DEBUGGER_SEEK_PC            108
 #define IDR_TASEDITOR_ACCELERATORS      108
 #define IDC_VIDEOCONFIG_CONSOLE_BGCOLOR 108
+#define EDIT_BOT                        108
 #define IDC_CHEAT_VAL_GT_BY             109
 #define IDC_DEBUGGER_SEEK_TO            109
 #define IDC_ROMPATCHER_PATCH_DATA       109
@@ -108,6 +116,7 @@
 #define BTN_CDLOGGER_SAVE_UNUSED        109
 #define IDC_VIDEOCONFIG_TVASPECT        109
 #define IDC_GROUP_LOG_OPTIONS           109
+#define EDIT_MACRO                      109
 #define IDC_CHEAT_VAL_LT_BY             110
 #define MENU_SAVE_STATE                 110
 #define CB_ASK_EXIT                     110
@@ -118,6 +127,7 @@
 #define IDC_ROMPATCHER_BTN_APPLY        110
 #define LBL_CDLOGGER_RENDERCOUNT        110
 #define IDC_VIDEOCONFIG_SQUARE_PIXELS   110
+#define EDIT_PRESET                     110
 #define MENU_LOAD_STATE                 111
 #define CB_DISABLE_SCREEN_SAVER         111
 #define BTN_FAM                         111
@@ -126,12 +136,15 @@
 #define IDC_ROMPATCHER_BTN_SAVE         111
 #define IDC_CHEAT_COM                   111
 #define IDC_VIDEOCONFIG_DIRECTDRAW_FS   111
+#define EDIT_LUA                        111
 #define BTN_AUTO_HOLD                   112
 #define IDC_BTN_LOG_BROWSE              112
 #define IDC_DEBUGGER_BOOKMARK_ADD       112
 #define IDC_VIDEOCONFIG_DIRECTDRAW_WIN  112
+#define EDIT_AVI                        112
 #define IDC_DEBUGGER_BOOKMARK_DEL       113
 #define IDC_EXTRA_LOG_OPTIONS           113
+#define EDIT_ROOT                       113
 #define BTN_CLEAR_AH                    114
 #define IDC_CHECK_LOG_NEW_INSTRUCTIONS  114
 #define IDC_DEBUGGER_RUN_LINE           114
@@ -203,7 +216,7 @@
 #define IDD_TASEDITOR_FINDNOTE          198
 #define IDD_TASEDITOR_ABOUT             199
 #define MENU_RESET                      200
-#define BUTTON_ROMS                     200
+#define BUTTON_ROM                      200
 #define TXT_PAD1                        200
 #define BTN_RESTORE_DEFAULTS            200
 #define BTN_CLEAR                       200
@@ -232,6 +245,7 @@
 #define IDC_ASSEMBLER_APPLY             201
 #define IDI_ICON4                       201
 #define BTN_OK                          201
+#define BUTTON_BATTERY                  201
 #define MENU_EJECT_DISK                 202
 #define TXT_FAM                         202
 #define MENU_MV_EDIT_PASTE              202
@@ -241,6 +255,7 @@
 #define IDC_ASSEMBLER_SAVE              202
 #define IDD_TASEDITOR_NEWPROJECT        202
 #define IDC_GROUPBOX_CHEATSEARCH        202
+#define BUTTON_STATE                    202
 #define MENU_SWITCH_DISK                203
 #define IDC_NETMOO_NICK                 203
 #define IDC_CHEAT_BOX_POSSIBILITIES     203
@@ -248,24 +263,35 @@
 #define IDC_DEBUGGER_FLAG_B             203
 #define IDC_ADDBP_NAME                  203
 #define IDC_ASSEMBLER_UNDO              203
+#define BUTTON_FDSBIOS                  203
 #define MENU_INSERT_COIN                204
 #define COMBO_NETMOO_LOCAL_PLAYERS      204
 #define IDC_DEBUGGER_FLAG_D             204
 #define IDC_GROUP_PREV_COM              204
+#define BUTTON_SCREENSHOT               204
 #define IDC_NETMOO_KEY                  205
 #define IDC_DEBUGGER_FLAG_I             205
 #define IDB_TE_GREEN_ARROW              205
+#define BUTTON_CHEAT                    205
 #define IDC_NETMOO_PASS                 206
 #define IDC_DEBUGGER_FLAG_Z             206
+#define BUTTON_MOVIE                    206
 #define IDC_DEBUGGER_FLAG_C             207
+#define BUTTON_MEMWATCH                 207
 #define IDC_DEBUGGER_ENABLE_SYMBOLIC    208
 #define IDB_TE_GREEN_BLUE_ARROW         208
+#define BUTTON_BOT                      208
 #define IDB_PIANO_0                     209
 #define IDC_DEBUGGER_ROM_OFFSETS        209
+#define BUTTON_MACRO                    209
 #define IDB_PIANO_1                     210
+#define BUTTON_PRESET                   210
 #define IDB_PIANO_2                     211
+#define BUTTON_LUA                      211
 #define IDB_PIANO_3                     212
+#define BUTTON_AVI                      212
 #define IDB_PIANO_4                     213
+#define BUTTON_ROOT                     213
 #define IDB_PIANO_5                     214
 #define IDB_PIANO_6                     215
 #define IDB_PIANO_7                     216
@@ -739,6 +765,7 @@
 #define IDC_EDIT_COMPAREVALUE           1225
 #define IDC_EDIT_COMPAREADDRESS         1226
 #define IDC_EDIT_COMPARECHANGES         1227
+#define IDC_EDIT_COMPAREADDRESSES       1227
 #define IDC_SIGNED                      1228
 #define IDC_UNSIGNED                    1229
 #define IDC_HEX                         1230

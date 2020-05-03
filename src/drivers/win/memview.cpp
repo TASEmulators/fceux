@@ -669,37 +669,30 @@ void UpdateCaption()
 
 int GetMemViewData(uint32 i)
 {
-	if (EditingMode == MODE_NES_MEMORY)
-		return GetMem(i);
-
-	if (EditingMode == MODE_NES_PPU)
+	switch (EditingMode)
 	{
-		i &= 0x3FFF;
-		if(i < 0x2000)return VPage[(i)>>10][(i)];
-		//NSF PPU Viewer crash here (UGETAB) (Also disabled by 'MaxSize = 0x2000')
-		if (GameInfo->type==GIT_NSF)
-		{
-			return (0);
-		}
-		else
-		{
-			if(i < 0x3F00)
-				return vnapage[(i >> 10) & 0x3][i & 0x3FF];
-			return READPAL_MOTHEROFALL(i & 0x1F);
-		}
-	}
-
-	if (EditingMode == MODE_NES_OAM)
-	{
-		return SPRAM[i & 0xFF];
-	}
-
-	if (EditingMode == MODE_NES_FILE)
-	{
-		//todo: use getfiledata() here
-		if(i < 16) return *((unsigned char *)&head+i);
-		if(i < 16+PRGsize[0])return PRGptr[0][i-16];
-		if(i < 16+PRGsize[0]+CHRsize[0])return CHRptr[0][i-16-PRGsize[0]];
+		case MODE_NES_MEMORY:
+			return GetMem(i);
+		case MODE_NES_PPU:
+			i &= 0x3FFF;
+			if (i < 0x2000)return VPage[(i) >> 10][(i)];
+			//NSF PPU Viewer crash here (UGETAB) (Also disabled by 'MaxSize = 0x2000')
+			if (GameInfo->type == GIT_NSF)
+				return (0);
+			else
+			{
+				if (i < 0x3F00)
+					return vnapage[(i >> 10) & 0x3][i & 0x3FF];
+				return READPAL_MOTHEROFALL(i & 0x1F);
+			}
+			break;
+		case MODE_NES_OAM:
+			return SPRAM[i & 0xFF];
+		case MODE_NES_FILE:
+			//todo: use getfiledata() here
+			if (i < 16) return *((unsigned char *)&head + i);
+			if (i < 16 + PRGsize[0])return PRGptr[0][i - 16];
+			if (i < 16 + PRGsize[0] + CHRsize[0])return CHRptr[0][i - 16 - PRGsize[0]];
 	}
 	return 0;
 }
@@ -729,87 +722,86 @@ void UpdateColorTable()
 			TextColorList[hexBookmarks[j].address - CurOffset] = RGB(0,0xCC,0); // Green for Bookmarks
 	}
 
-	//mbg merge 6/29/06 - added argument
-	if (EditingMode == MODE_NES_MEMORY)
-		FCEUI_ListCheats(UpdateCheatColorCallB, 0);
-
-	if(EditingMode == MODE_NES_FILE)
+	switch (EditingMode)
 	{
-		if (cdloggerdataSize)
-		{
-			for (i = 0; i < DataAmount; i++)
+		case MODE_NES_MEMORY:
+			for (uint32 a = CurOffset; a < CurOffset + DataAmount; ++a)
+				if (FCEUI_FindCheatMapByte(a))
+					TextColorList[a - CurOffset] = RGB(HexFreezeColorR, HexFreezeColorG, HexFreezeColorB);
+			break;
+		case MODE_NES_FILE:
+			if (cdloggerdataSize)
 			{
-				temp_offset = CurOffset + i - 16;	// (minus iNES header)
-				if (temp_offset >= 0)
+				for (i = 0; i < DataAmount; i++)
 				{
-					if ((unsigned int)temp_offset < cdloggerdataSize)
+					temp_offset = CurOffset + i - 16;	// (minus iNES header)
+					if (temp_offset >= 0)
 					{
-						// PRG
-						if ((cdloggerdata[temp_offset] & 3) == 3)
+						if ((unsigned int)temp_offset < cdloggerdataSize)
 						{
-							// the byte is both Code and Data - green
-							TextColorList[i]=RGB(0,190,0);
-						} else if((cdloggerdata[temp_offset] & 3) == 1)
-						{
-							// the byte is Code - dark-yellow
-							TextColorList[i]=RGB(160,140,0);
-						} else if((cdloggerdata[temp_offset] & 3) == 2)
-						{
-							// the byte is Data - blue/cyan
-							if (cdloggerdata[temp_offset] & 0x40)
-								// PCM data - cyan
-								TextColorList[i]=RGB(0,130,160);
-							else
-								// non-PCM data - blue
-								TextColorList[i]=RGB(0,0,210);
+							// PRG
+							if ((cdloggerdata[temp_offset] & 3) == 3)
+							{
+								// the byte is both Code and Data - green
+								TextColorList[i] = RGB(0, 190, 0);
+							}
+							else if ((cdloggerdata[temp_offset] & 3) == 1)
+							{
+								// the byte is Code - dark-yellow
+								TextColorList[i] = RGB(160, 140, 0);
+							}
+							else if ((cdloggerdata[temp_offset] & 3) == 2)
+							{
+								// the byte is Data - blue/cyan
+								if (cdloggerdata[temp_offset] & 0x40)
+									// PCM data - cyan
+									TextColorList[i] = RGB(0, 130, 160);
+								else
+									// non-PCM data - blue
+									TextColorList[i] = RGB(0, 0, 210);
+							}
 						}
-					} else
-					{
-						temp_offset -= cdloggerdataSize;
-						if (((unsigned int)temp_offset < cdloggerVideoDataSize))
+						else
 						{
-							// CHR
-							if ((cdloggervdata[temp_offset] & 3) == 3)
+							temp_offset -= cdloggerdataSize;
+							if (((unsigned int)temp_offset < cdloggerVideoDataSize))
 							{
-								// the byte was both rendered and read programmatically - light-green
-								TextColorList[i]=RGB(5,255,5);
-							} else if ((cdloggervdata[temp_offset] & 3) == 1)
-							{
-								// the byte was rendered - yellow
-								TextColorList[i]=RGB(210,190,0);
-							} else if ((cdloggervdata[temp_offset] & 3) == 2)
-							{
-								// the byte was read programmatically - light-blue
-								TextColorList[i]=RGB(15,15,255);
+								// CHR
+								if ((cdloggervdata[temp_offset] & 3) == 3)
+								{
+									// the byte was both rendered and read programmatically - light-green
+									TextColorList[i] = RGB(5, 255, 5);
+								}
+								else if ((cdloggervdata[temp_offset] & 3) == 1)
+								{
+									// the byte was rendered - yellow
+									TextColorList[i] = RGB(210, 190, 0);
+								}
+								else if ((cdloggervdata[temp_offset] & 3) == 2)
+								{
+									// the byte was read programmatically - light-blue
+									TextColorList[i] = RGB(15, 15, 255);
+								}
 							}
 						}
 					}
 				}
 			}
-		}
 
-		tmp = undo_list;
-		while(tmp!= 0)
-		{
-			//if((tmp->addr < CurOffset+DataAmount) && (tmp->addr+tmp->size > CurOffset))
-			for(i = tmp->addr;i < tmp->addr+tmp->size;i++){
-				if((i > CurOffset) && (i < CurOffset+DataAmount))
-					TextColorList[i-CurOffset] = RGB(RomFreezeColorR,RomFreezeColorG,RomFreezeColorB);
+			tmp = undo_list;
+			while (tmp != 0)
+			{
+				//if((tmp->addr < CurOffset+DataAmount) && (tmp->addr+tmp->size > CurOffset))
+				for (i = tmp->addr; i < tmp->addr + tmp->size; i++) {
+					if ((i > CurOffset) && (i < CurOffset + DataAmount))
+						TextColorList[i - CurOffset] = RGB(RomFreezeColorR, RomFreezeColorG, RomFreezeColorB);
+				}
+				tmp = tmp->last;
 			}
-			tmp=tmp->last;
-		}
+			break;
 	}
 
 	UpdateMemoryView(1); //anytime the colors change, the memory viewer needs to be completely redrawn
-}
-
-//mbg merge 6/29/06 - added argument
-int UpdateCheatColorCallB(char *name, uint32 a, uint8 v, int compare,int s,int type, void *data) {
-
-	if((a >= (uint32)CurOffset) && (a < (uint32)CurOffset+DataAmount)){
-		if(s)TextColorList[a-CurOffset] = RGB(HexFreezeColorR,HexFreezeColorG,HexFreezeColorB);
-	}
-	return 1;
 }
 
 int addrtodelete;    // This is a very ugly hackish method of doing this
@@ -1001,29 +993,30 @@ void InputData(char *input){
 
 		if (addr >= MaxSize) continue;
 
-		if (EditingMode == MODE_NES_MEMORY)
+		switch(EditingMode)
 		{
-			// RAM (system bus)
-			BWrite[addr](addr,data[i]);
-		} else if (EditingMode == MODE_NES_PPU)
-		{
-			// PPU
-			addr &= 0x3FFF;
-			if(addr < 0x2000)
-				VPage[addr>>10][addr] = data[i]; //todo: detect if this is vrom and turn it red if so
-			if((addr >= 0x2000) && (addr < 0x3F00))
-				vnapage[(addr>>10)&0x3][addr&0x3FF] = data[i]; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
-			if((addr >= 0x3F00) && (addr < 0x3FFF))
-				PalettePoke(addr,data[i]);
-		} else if (EditingMode == MODE_NES_OAM)
-		{
-			addr &= 0xFF;
-			SPRAM[addr] = data[i];
-		} else if (EditingMode == MODE_NES_FILE)
-		{
-			// ROM
-			ApplyPatch(addr,datasize,data);
-			break;
+			case MODE_NES_MEMORY:
+				// RAM (system bus)
+				BWrite[addr](addr, data[i]);
+				break;
+			case MODE_NES_PPU:
+				// PPU
+				addr &= 0x3FFF;
+				if (addr < 0x2000)
+					VPage[addr >> 10][addr] = data[i]; //todo: detect if this is vrom and turn it red if so
+				if ((addr >= 0x2000) && (addr < 0x3F00))
+					vnapage[(addr >> 10) & 0x3][addr & 0x3FF] = data[i]; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
+				if ((addr >= 0x3F00) && (addr < 0x3FFF))
+					PalettePoke(addr, data[i]);
+				break;
+			case MODE_NES_OAM:
+				addr &= 0xFF;
+				SPRAM[addr] = data[i];
+				break;
+			case MODE_NES_FILE:
+				// ROM
+				ApplyPatch(addr, datasize, data);
+				break;
 		}
 	}
 	CursorStartAddy+=datasize;
@@ -1194,6 +1187,8 @@ void KillMemView()
 	UnregisterClass("MEMVIEW",fceu_hInstance);
 	hMemView = 0;
 	hMemFind = 0;
+	if (EditingMode == MODE_NES_MEMORY)
+		ReleaseCheatMap();
 	return;
 }
 
@@ -1232,7 +1227,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 	case WM_CREATE:
 		SetWindowPos(hwnd,0,MemView_wndx,MemView_wndy,MemViewSizeX,MemViewSizeY,SWP_NOZORDER|SWP_NOOWNERZORDER);
-		
+
 		debuggerWasActive = 1;
 		mDC = GetDC(hwnd);
 		HDataDC = mDC;//deleteme
@@ -1252,6 +1247,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		resetHighlightingActivityLog();
 		EditingText = CurOffset = 0;
 		EditingMode = MODE_NES_MEMORY;
+		CreateCheatMap();
 
 		//set the default table
 		UnloadTableFile();
@@ -1685,8 +1681,10 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					checkCondition(condition, numWPs);
 
 					numWPs++;
-					{ extern int myNumWPs;
-					myNumWPs++; }
+					{
+						extern int myNumWPs;
+						myNumWPs++;
+					}
 					if (hDebug)
 						AddBreakList();
 					else
@@ -2034,24 +2032,34 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		case MENU_MV_VIEW_PPU:
 		case MENU_MV_VIEW_OAM:
 		case MENU_MV_VIEW_ROM:
-			EditingMode = wParam - MENU_MV_VIEW_RAM;
+		{
+			int _EditingMode = wParam - MENU_MV_VIEW_RAM;
+			// Leave NES Memory
+			if (_EditingMode == MODE_NES_MEMORY && EditingMode != MODE_NES_MEMORY)
+				CreateCheatMap();
+			// Enter NES Memory
+			if (_EditingMode != MODE_NES_MEMORY && EditingMode == MODE_NES_MEMORY)
+				ReleaseCheatMap();
+			EditingMode = _EditingMode;
 			for (i = MODE_NES_MEMORY; i <= MODE_NES_FILE; i++)
 				if(EditingMode == i)
 				{
 					CheckMenuRadioItem(GetMenu(hMemView), MENU_MV_VIEW_RAM, MENU_MV_VIEW_ROM, MENU_MV_VIEW_RAM + i, MF_BYCOMMAND);
 					break;
 				}
-			if (EditingMode == MODE_NES_MEMORY)
-				MaxSize = 0x10000;
-			if (EditingMode == MODE_NES_PPU)
+
+			switch (EditingMode)
 			{
-				if (GameInfo->type==GIT_NSF) {MaxSize = 0x2000;} //Also disabled under GetMemViewData
-				else {MaxSize = 0x4000;}
+				case MODE_NES_MEMORY:
+					MaxSize = 0x10000; break;
+				case MODE_NES_PPU:
+					MaxSize = (GameInfo->type == GIT_NSF ? 0x2000 : 0x4000); break;
+				case MODE_NES_OAM:
+					MaxSize = 0x100; break;
+				case MODE_NES_FILE: //todo: add trainer size
+					MaxSize = 16 + CHRsize[0] + PRGsize[0]; break;
 			}
-			if (EditingMode == MODE_NES_OAM)
-				MaxSize = 0x100;
-			if (EditingMode == MODE_NES_FILE)
-				MaxSize = 16+CHRsize[0]+PRGsize[0]; //todo: add trainer size
+
 			if (CurOffset >= MaxSize - DataAmount) CurOffset = MaxSize - DataAmount;
 			if (CurOffset < 0) CurOffset = 0;
 			if(CursorEndAddy >= MaxSize) CursorEndAddy = -1;
@@ -2070,7 +2078,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			UpdateColorTable();
 			UpdateCaption();
 			return 0;
-		
+		}
 		case ID_HIGHLIGHTING_HIGHLIGHT_ACTIVITY:
 		{
 			MemView_HighlightActivity ^= 1;

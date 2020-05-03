@@ -50,13 +50,9 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_ICON3               ICON                    "res/taseditor-icon.ico"
-
 IDI_ICON4               ICON                    "res/taseditor-icon32.ico"
-
 ICON_1                  ICON                    "res/ICON_1.ico"
-
 ICON_2                  ICON                    "res/ICON_2.ico"
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -713,44 +709,44 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTIO
 CAPTION "Directories Configuration"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
+    LTEXT           "Base &Directory",IDC_STATIC,10,10,47,8
+    EDITTEXT        EDIT_ROOT,71,9,158,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",BUTTON_ROOT,239,8,56,14
+    LTEXT           "&Roms",IDC_STATIC,10,28,19,8
+    EDITTEXT        EDIT_ROM,71,27,158,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",BUTTON_ROM,239,26,56,14
+    LTEXT           "&Battery Saves",IDC_STATIC,10,46,45,8
+    EDITTEXT        EDIT_BATTERY,71,45,158,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",BUTTON_BATTERY,239,44,56,14
+    LTEXT           "&Save States",IDC_STATIC,10,64,41,9
+    EDITTEXT        EDIT_STATE,71,63,158,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",BUTTON_STATE,239,62,56,14
+    LTEXT           "&FDS Bios Rom",IDC_STATIC,10,82,47,8
+    EDITTEXT        EDIT_FDSBIOS,71,81,158,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",BUTTON_FDSBIOS,239,80,56,14
+    LTEXT           "Screens&hots",IDC_STATIC,10,100,40,8
+    EDITTEXT        EDIT_SCREENSHOT,71,99,158,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",BUTTON_SCREENSHOT,239,98,56,14
+    LTEXT           "Chea&ts",IDC_STATIC,10,118,23,8
+    EDITTEXT        EDIT_CHEAT,71,117,158,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",BUTTON_CHEAT,239,116,56,14
+    LTEXT           "&Movies",IDC_STATIC,10,136,24,8
+    EDITTEXT        EDIT_MOVIE,71,135,158,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",BUTTON_MOVIE,239,134,56,14
+    LTEXT           "Memory &Watch",IDC_STATIC,10,154,52,9
+    EDITTEXT        EDIT_MEMWATCH,71,153,158,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",BUTTON_MEMWATCH,239,152,56,14
+    LTEXT           "&Input Presets",IDC_STATIC,10,172,42,8
+    EDITTEXT        EDIT_PRESET,71,171,158,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",210,239,170,56,14
+    LTEXT           "&Lua Scripts",IDC_STATIC,10,190,36,8
+    EDITTEXT        EDIT_LUA,71,189,158,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",211,239,188,56,14
+    LTEXT           "A&vi Output",IDC_STATIC,10,208,34,8
+    EDITTEXT        EDIT_AVI,71,207,158,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",BUTTON_AVI,239,206,56,14
     DEFPUSHBUTTON   "OK",CLOSE_BUTTON,175,230,56,14
     PUSHBUTTON      "Cancel",BTN_CANCEL,239,230,56,14
-    EDITTEXT        113,71,9,158,12,ES_AUTOHSCROLL
-    EDITTEXT        EDIT_ROMS,71,27,158,12,ES_AUTOHSCROLL
-    EDITTEXT        101,71,45,158,12,ES_AUTOHSCROLL
-    EDITTEXT        102,71,63,158,12,ES_AUTOHSCROLL
-    EDITTEXT        103,71,81,158,12,ES_AUTOHSCROLL
-    EDITTEXT        104,71,99,158,12,ES_AUTOHSCROLL
-    EDITTEXT        105,71,117,158,12,ES_AUTOHSCROLL
-    EDITTEXT        106,71,135,158,12,ES_AUTOHSCROLL
-    EDITTEXT        107,71,153,158,12,ES_AUTOHSCROLL
-    EDITTEXT        110,71,171,158,12,ES_AUTOHSCROLL
-    EDITTEXT        111,71,189,158,12,ES_AUTOHSCROLL
-    EDITTEXT        112,71,207,158,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse...",213,239,8,56,14
-    PUSHBUTTON      "Browse...",BUTTON_ROMS,239,26,56,14
-    PUSHBUTTON      "Browse...",201,239,44,56,14
-    PUSHBUTTON      "Browse...",202,239,62,56,14
-    PUSHBUTTON      "Browse...",203,239,80,56,14
-    PUSHBUTTON      "Browse...",204,239,98,56,14
-    PUSHBUTTON      "Browse...",205,239,116,56,14
-    PUSHBUTTON      "Browse...",206,239,134,56,14
-    PUSHBUTTON      "Browse...",207,239,152,56,14
-    PUSHBUTTON      "Browse...",210,239,170,56,14
-    PUSHBUTTON      "Browse...",211,239,188,56,14
-    PUSHBUTTON      "Browse...",212,239,206,56,14
-    LTEXT           "Base Directory",IDC_STATIC,10,10,47,8
-    LTEXT           "Roms",IDC_STATIC,10,28,19,8
-    LTEXT           "Battery Saves",IDC_STATIC,10,46,45,8
-    LTEXT           "Save States",IDC_STATIC,10,64,41,9
-    LTEXT           "FDS Bios Rom",IDC_STATIC,10,82,47,8
-    LTEXT           "Screenshots",IDC_STATIC,10,100,40,8
-    LTEXT           "Cheats",IDC_STATIC,10,118,23,8
-    LTEXT           "Movies",IDC_STATIC,10,136,24,8
-    LTEXT           "Memory Watch",IDC_STATIC,10,154,52,9
-    LTEXT           "Input Presets",IDC_STATIC,10,172,42,8
-    LTEXT           "Lua Scripts",IDC_STATIC,10,190,36,8
-    LTEXT           "Avi Output",IDC_STATIC,10,208,34,8
 END
 
 DWBDIALOG DIALOG 33, 99, 250, 56
@@ -880,7 +876,6 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTIO
 CAPTION "GUI Configuration"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "Close",BTN_CLOSE,65,136,56,14
     CONTROL         "Load ""File Open"" dialog when FCEUX starts.",CB_LOAD_FILE_OPEN,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,8,168,12
     CONTROL         "Automatically hide menu on game load.",CB_AUTO_HIDE_MENU,
@@ -895,6 +890,7 @@ BEGIN
     CONTROL         "Partially disable Visual Themes (Requires restart)",CB_PARTIALVISUALTHEME,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,100,168,12
     CONTROL         "Single Instance Mode",IDC_SINGLEINSTANCE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,117,167,10
+    DEFPUSHBUTTON   "Close",BTN_CLOSE,65,136,56,14
 END
 
 INPUTCONFIG DIALOGEX 122, 105, 349, 199
@@ -950,7 +946,6 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTIO
 CAPTION "mahjong"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    DEFPUSHBUTTON   "Close",BTN_CLOSE,277,91,56,14
     GROUPBOX        "",321,8,8,324,73,WS_GROUP
     PUSHBUTTON      "A",300,14,42,16,12
     PUSHBUTTON      "B",301,36,42,16,12
@@ -973,6 +968,7 @@ BEGIN
     PUSHBUTTON      " ",318,212,58,16,12
     PUSHBUTTON      " ",319,234,58,16,12
     PUSHBUTTON      " ",320,256,58,16,12
+    DEFPUSHBUTTON   "Close",BTN_CLOSE,277,91,56,14
 END
 
 MAPINPUT DIALOGEX 0, 0, 318, 294
@@ -984,8 +980,8 @@ BEGIN
     PUSHBUTTON      "Cancel",BTN_CANCEL,205,274,50,14
     CONTROL         "List2",LV_MAPPING,"SysListView32",LVS_REPORT | WS_BORDER | WS_TABSTOP,7,7,304,243
     PUSHBUTTON      "Restore Defaults",BTN_RESTORE_DEFAULTS,7,274,75,14
-    COMBOBOX        COMBO_FILTER,32,255,279,193,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     RTEXT           "Filter:",65484,6,255,21,12,SS_CENTERIMAGE | NOT WS_GROUP
+    COMBOBOX        COMBO_FILTER,32,255,279,193,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
 MESSAGELOG DIALOGEX 33, 38, 197, 229
@@ -1035,31 +1031,31 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTIO
 CAPTION "Palette Configuration"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "Close",BUTTON_CLOSE,162,195,56,14
     GROUPBOX        "NES Palette",302,10,8,102,81,WS_GROUP
     DEFPUSHBUTTON   "&Load Palette...",BTN_PALETTE_LOAD,18,39,58,14
     CONTROL         "Enabled",CHECK_PALETTE_ENABLED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,22,87,12
+    CTEXT           "Tint",65463,123,34,85,8,WS_DISABLED
     CONTROL         "Tint",CTL_TINT_TRACKBAR,"msctls_trackbar32",WS_DISABLED | WS_TABSTOP,121,44,91,11
     GROUPBOX        "NTSC Color Emulation",101,115,8,103,81,WS_GROUP
-    CONTROL         "Hue",CTL_HUE_TRACKBAR,"msctls_trackbar32",WS_DISABLED | WS_TABSTOP,121,69,91,11
     CTEXT           "Hue",64395,124,59,85,8,WS_DISABLED
-    CTEXT           "Tint",65463,123,34,85,8,WS_DISABLED
+    CONTROL         "Hue",CTL_HUE_TRACKBAR,"msctls_trackbar32",WS_DISABLED | WS_TABSTOP,121,69,91,11
     CONTROL         "Force Grayscale",CHECK_PALETTE_GRAYSCALE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,57,85,12
     CONTROL         "Use Custom Palette",CHECK_PALETTE_CUSTOM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,22,85,12
     GROUPBOX        "PAL Emulation",IDC_STATIC,10,89,208,66,WS_DISABLED
-    CONTROL         "",CTL_PALSAT_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,78,110,70,15
     LTEXT           "Saturation:",STATIC_SATVALUE,83,100,58,8,WS_DISABLED
+    CONTROL         "",CTL_PALSAT_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,78,110,70,15
     PUSHBUTTON      "Reset",BTN_PALETTE_RESET,161,132,50,14,WS_DISABLED
-    CONTROL         "",CTL_PALNOTCH_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,11,110,68,15
     LTEXT           "Notch:",STATIC_NOTCHVALUE,16,100,46,8,WS_DISABLED
-    CONTROL         "",CTL_PALSHARP_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,156,109,61,15
+    CONTROL         "",CTL_PALNOTCH_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,11,110,68,15
     LTEXT           "Sharpness:",STATIC_SHARPVALUE,161,99,50,8,WS_DISABLED
+    CONTROL         "",CTL_PALSHARP_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,156,109,61,15
     LTEXT           "NTSC Color Emulation overrides Internal default Palette.\nIndividual Game Palette overrides Internal+NTSC Palettes.\nCustom Palette overrides all of the above.\nPAL Emulation overrides other choices when PAL filter is selected",IDC_STATIC,10,159,208,33
-    CONTROL         "",CTL_PALCONTRAST_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,11,134,67,15
     LTEXT           "Contrast: ",STATIC_CONTRASTVALUE,16,126,55,8,WS_DISABLED
-    CONTROL         "",CTL_PALBRIGHT_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,78,133,70,15
+    CONTROL         "",CTL_PALCONTRAST_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,11,134,67,15
     LTEXT           "Brightness: ",STATIC_BRIGHTVALUE,83,125,61,8,WS_DISABLED
+    CONTROL         "",CTL_PALBRIGHT_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,78,133,70,15
     CONTROL         "De-emphasis bit swap",CHECK_DEEMPH_SWAP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,73,83,10
+    DEFPUSHBUTTON   "Close",BUTTON_CLOSE,162,195,56,14
 END
 
 POWERPADDIALOG DIALOG 30, 123, 131, 119
@@ -1280,16 +1276,16 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | WS_POPUP | WS_VISIB
 CAPTION "Timing Configuration"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "Close",1,137,87,56,14
     CONTROL         "Disable speed throttling used when sound is disabled.",CB_DISABLE_SPEED_THROTTLING,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,8,183,12
     CONTROL         "Set high-priority thread.",CB_SET_HIGH_PRIORITY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,24,102,12
     CONTROL         "Overclocking (old PPU only).",CB_OVERCLOCKING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,41,101,10
-    EDITTEXT        IDC_EXTRA_SCANLINES,104,55,84,14,ES_AUTOHSCROLL | ES_NUMBER | WS_DISABLED
     LTEXT           "Post-render scanlines:",IDC_EXTRA_SCANLINES_TEXT,21,57,74,8,WS_DISABLED
+    EDITTEXT        IDC_EXTRA_SCANLINES,104,55,84,14,ES_AUTOHSCROLL | ES_NUMBER | WS_DISABLED
     CONTROL         "Don't overclock 7-bit samples.",CB_SKIP_7BIT,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,10,87,111,10
-    EDITTEXT        IDC_VBLANK_SCANLINES,104,68,84,14,ES_AUTOHSCROLL | ES_NUMBER | WS_DISABLED
     LTEXT           "VBlank scanlines:",IDC_VBLANK_SCANLINES_TEXT,21,71,76,8,WS_DISABLED
+    EDITTEXT        IDC_VBLANK_SCANLINES,104,68,84,14,ES_AUTOHSCROLL | ES_NUMBER | WS_DISABLED
+    DEFPUSHBUTTON   "Close",1,137,87,56,14
 END
 
 MOVIEOPTIONS DIALOGEX 65520, 76, 147, 222
@@ -1297,7 +1293,6 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTIO
 CAPTION "Movie Options"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "Close",IDC_MOVIE_CLOSE,48,200,49,14,BS_CENTER
     CONTROL         "Pause after playback",IDC_MOVIE_PAUSEAFTERPLAYBACK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,26,110,10
     CONTROL         "Bind savestates to movies",IDC_MOVIE_BINDSAVESTATES,
@@ -1317,6 +1312,7 @@ BEGIN
     CONTROL         "Always suggest Read-Only replay",IDC_MOVIE_SUGGEST_READONLY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,8,125,10
     LTEXT           "(VBA-rr and SNES9x style)",IDC_STATIC,25,184,93,8
+    DEFPUSHBUTTON   "Close",IDC_MOVIE_CLOSE,48,200,49,14,BS_CENTER
 END
 
 DWBDIALOGSIMPLE DIALOGEX 33, 99, 250, 39
@@ -1546,8 +1542,8 @@ CAPTION "Add Breakpoint..."
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     LTEXT           "&Address:",-1,14,6,30,10
-    EDITTEXT        IDC_ADDBP_ADDR_START,48,4,30,12,ES_UPPERCASE | ES_WANTRETURN
     CTEXT           "-",65534,78,6,8,8
+    EDITTEXT        IDC_ADDBP_ADDR_START,48,4,30,12,ES_UPPERCASE | ES_WANTRETURN
     EDITTEXT        IDC_ADDBP_ADDR_END,87,4,30,12,ES_UPPERCASE | ES_WANTRETURN
     CONTROL         "&Forbid",IDC_ADDBP_MODE_F,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,154,6,33,12
     GROUPBOX        "",112,3,18,185,50,WS_TABSTOP
@@ -1596,7 +1592,7 @@ BEGIN
 END
 
 ROMPATCHER DIALOGEX 84, 67, 304, 135
-STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Rom Data Editor"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
@@ -1690,16 +1686,16 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPT
 CAPTION "Find"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
+    LTEXT           "Find &What:",-1,7,9,38,8
     EDITTEXT        IDC_MEMVIEWFIND_WHAT,47,7,171,14,ES_AUTOHSCROLL
-    LTEXT           "Find What:",-1,7,9,38,8
     GROUPBOX        "Type",-1,83,29,187,45
-    CONTROL         "Hex",IDC_MEMVIEWFIND_TYPE_HEX,"Button",BS_AUTORADIOBUTTON | WS_GROUP,93,43,29,10
-    CONTROL         "Text (Uses Currently Loaded Table as Reference)",IDC_MEMVIEWFIND_TYPE_TEXT,
+    CONTROL         "&Hex",IDC_MEMVIEWFIND_TYPE_HEX,"Button",BS_AUTORADIOBUTTON | WS_GROUP,93,43,29,10
+    CONTROL         "&Text (Uses Currently Loaded Table as Reference)",IDC_MEMVIEWFIND_TYPE_TEXT,
                     "Button",BS_AUTORADIOBUTTON,93,56,172,10
     GROUPBOX        "Direction",-1,9,29,65,44
-    CONTROL         "Up",IDC_MEMVIEWFIND_DIR_UP,"Button",BS_AUTORADIOBUTTON | WS_GROUP,18,43,25,10
-    CONTROL         "Down",IDC_MEMVIEWFIND_DIR_DOWN,"Button",BS_AUTORADIOBUTTON,18,56,35,10
-    DEFPUSHBUTTON   "Find Next",IDC_MEMVIEWFIND_NEXT,225,7,50,14
+    CONTROL         "&Up",IDC_MEMVIEWFIND_DIR_UP,"Button",BS_AUTORADIOBUTTON | WS_GROUP,18,43,25,10
+    CONTROL         "&Down",IDC_MEMVIEWFIND_DIR_DOWN,"Button",BS_AUTORADIOBUTTON,18,56,35,10
+    DEFPUSHBUTTON   "&Find Next",IDC_MEMVIEWFIND_NEXT,225,7,50,14
 END
 
 IDD_RECORDINP DIALOGEX 0, 0, 276, 86
@@ -1707,16 +1703,16 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTI
 CAPTION "Record input"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "OK",1,167,66,50,14
     GROUPBOX        "",65501,3,0,269,60
-    RTEXT           "File:",65500,28,11,24,10,SS_CENTERIMAGE | NOT WS_GROUP,WS_EX_RIGHT
-    PUSHBUTTON      "Cancel",2,221,66,50,14
+    RTEXT           "&File:",65500,28,11,24,10,SS_CENTERIMAGE | NOT WS_GROUP,WS_EX_RIGHT
     EDITTEXT        IDC_EDIT_FILENAME,55,10,189,12,ES_AUTOHSCROLL
     PUSHBUTTON      "...",IDC_BUTTON_BROWSEFILE,249,10,18,14
+    RTEXT           "&Record From:",65498,9,27,43,8,0,WS_EX_RIGHT
     COMBOBOX        IDC_COMBO_RECORDFROM,55,25,189,154,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    RTEXT           "Record From:",65498,9,27,43,8,0,WS_EX_RIGHT
+    RTEXT           "&Author:",65502,18,43,34,10,SS_CENTERIMAGE | NOT WS_GROUP,WS_EX_RIGHT
     EDITTEXT        IDC_EDIT_AUTHOR,55,41,189,14,ES_AUTOHSCROLL
-    RTEXT           "Author:",65502,18,43,34,10,SS_CENTERIMAGE | NOT WS_GROUP,WS_EX_RIGHT
+    DEFPUSHBUTTON   "OK",1,167,66,50,14
+    PUSHBUTTON      "Cancel",2,221,66,50,14
 END
 
 IDD_REPLAYINP DIALOGEX 0, 0, 300, 202
@@ -1724,36 +1720,36 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTI
 CAPTION "Play Movie"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "OK",1,189,183,50,14
     GROUPBOX        "",65497,3,0,293,180
     RTEXT           "File:",65498,8,11,24,10,SS_CENTERIMAGE | NOT WS_GROUP
     COMBOBOX        IDC_COMBO_FILENAME,35,10,257,128,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Cancel",2,243,183,50,14
     RTEXT           "Length:",64397,10,67,59,8
+    EDITTEXT        IDC_LABEL_LENGTH,76,67,59,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
     RTEXT           "Frames:",65496,10,78,59,8
+    EDITTEXT        IDC_LABEL_FRAMES,76,78,59,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
     RTEXT           "Record Count:",65495,10,89,59,8
+    EDITTEXT        IDC_LABEL_UNDOCOUNT,76,89,59,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
     RTEXT           "ROM Used:",65493,10,111,59,8
+    EDITTEXT        IDC_LABEL_ROMUSED,76,111,187,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
     RTEXT           "ROM Checksum:",65492,10,122,59,8
+    EDITTEXT        IDC_LABEL_ROMCHECKSUM,76,122,155,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
     RTEXT           "Recorded From:",65491,10,100,59,8
+    EDITTEXT        IDC_LABEL_RECORDEDFROM,76,100,123,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
     RTEXT           "Emulator Used:",65490,10,144,59,8
+    EDITTEXT        IDC_LABEL_EMULATORUSED,76,144,155,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
     RTEXT           "Current ROM Sum:",65489,8,133,61,8
+    EDITTEXT        IDC_LABEL_CURRCHECKSUM,76,133,155,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
     CONTROL         "Pause movie at frame",IDC_CHECK_STOPMOVIE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,49,83,10
     EDITTEXT        IDC_EDIT_STOPFRAME,103,47,39,12,ES_AUTOHSCROLL | ES_NUMBER
     GROUPBOX        "Parameters",IDC_STATIC,13,25,278,40
     PUSHBUTTON      "Metadata...",IDC_BUTTON_METADATA,239,71,50,14
-    EDITTEXT        IDC_LABEL_EMULATORUSED,76,144,155,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
-    EDITTEXT        IDC_LABEL_CURRCHECKSUM,76,133,155,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
-    EDITTEXT        IDC_LABEL_ROMCHECKSUM,76,122,155,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
-    EDITTEXT        IDC_LABEL_ROMUSED,76,111,187,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
-    EDITTEXT        IDC_LABEL_RECORDEDFROM,76,100,123,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
     CONTROL         "Open &Read-Only",IDC_CHECK_READONLY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,36,69,10
-    EDITTEXT        IDC_LABEL_UNDOCOUNT,76,89,59,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
-    EDITTEXT        IDC_LABEL_FRAMES,76,78,59,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
-    EDITTEXT        IDC_LABEL_LENGTH,76,67,59,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
     RTEXT           "Pal:",65494,10,155,59,8
     EDITTEXT        IDC_LABEL_PALUSED,76,155,155,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
     RTEXT           "New PPU:",65499,10,166,59,8
     EDITTEXT        IDC_LABEL_NEWPPUUSED,76,166,155,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
+    DEFPUSHBUTTON   "OK",1,189,183,50,14
+    PUSHBUTTON      "Cancel",2,243,183,50,14
 END
 
 TASEDITOR DIALOGEX 0, 0, 326, 348
@@ -1825,16 +1821,16 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTI
 CAPTION "Create New Project"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,7,80,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,114,80,50,14
     CONTROL         " Copy current Input",IDC_COPY_INPUT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,80,14,75,10
     CONTROL         " 1 player",IDC_RADIO_1PLAYER,"Button",BS_AUTORADIOBUTTON,16,14,45,10
     CONTROL         " 2 players",IDC_RADIO_2PLAYERS,"Button",BS_AUTORADIOBUTTON,16,27,45,10
     CONTROL         " Fourscore",IDC_RADIO_FOURSCORE,"Button",BS_AUTORADIOBUTTON,16,40,45,10
     CONTROL         " Copy current Markers",IDC_COPY_MARKERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,80,27,83,10
     GROUPBOX        "Input type",IDC_STATIC,5,3,67,52,BS_CENTER
-    EDITTEXT        IDC_EDIT_AUTHOR,36,61,127,13,ES_AUTOHSCROLL
     LTEXT           "Author:",IDC_STATIC,8,63,26,9
+    EDITTEXT        IDC_EDIT_AUTHOR,36,61,127,13,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,7,80,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,114,80,50,14
 END
 
 IDD_TASEDITOR_EXPORT DIALOGEX 0, 0, 158, 86
@@ -1842,13 +1838,13 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIB
 CAPTION "Export to FM2"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "Export",IDOK,7,66,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,100,66,50,14
     CONTROL         " 1 player",IDC_RADIO_1PLAYER,"Button",BS_AUTORADIOBUTTON | WS_GROUP,8,8,47,10
     CONTROL         " 2 players",IDC_RADIO_2PLAYERS,"Button",BS_AUTORADIOBUTTON,8,21,47,10
     CONTROL         " Fourscore",IDC_RADIO_FOURSCORE,"Button",BS_AUTORADIOBUTTON,8,35,47,10
     CONTROL         " Convert Marker Notes to Movie Subtitles",IDC_NOTES_TO_SUBTITLES,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,50,146,10
+    DEFPUSHBUTTON   "Export",IDOK,7,66,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,100,66,50,14
 END
 
 IDD_TASEDITOR_FINDNOTE DIALOGEX 0, 0, 228, 49
@@ -2085,16 +2081,16 @@ CAPTION "Lua Script"
 MENU LUAWINDOW_MENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    PUSHBUTTON      "&Browse...",IDC_BUTTON_LUABROWSE,7,31,48,16
-    PUSHBUTTON      "&Run",IDC_BUTTON_LUARUN,213,31,50,16
-    PUSHBUTTON      "&Stop",IDC_BUTTON_LUASTOP,160,31,50,16
-    EDITTEXT        IDC_EDIT_LUAPATH,7,16,256,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_EDIT_LUAARGS,47,50,216,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_LUACONSOLE,7,80,256,60,ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
-    LTEXT           "Output Console:",IDC_STATIC,7,70,56,8
     LTEXT           "Script File:",IDC_STATIC,7,7,36,8
-    LTEXT           "Arguments:",IDC_STATIC,7,52,40,8
+    EDITTEXT        IDC_EDIT_LUAPATH,7,16,256,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Browse...",IDC_BUTTON_LUABROWSE,7,31,48,16
     PUSHBUTTON      "Edit",IDC_BUTTON_LUAEDIT,58,31,46,16
+    PUSHBUTTON      "&Stop",IDC_BUTTON_LUASTOP,160,31,50,16
+    PUSHBUTTON      "&Run",IDC_BUTTON_LUARUN,213,31,50,16
+    LTEXT           "Output Console:",IDC_STATIC,7,70,56,8
+    EDITTEXT        IDC_LUACONSOLE,7,80,256,60,ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
+    LTEXT           "Arguments:",IDC_STATIC,7,52,40,8
+    EDITTEXT        IDC_EDIT_LUAARGS,47,50,216,14,ES_AUTOHSCROLL
 END
 
 VIDEOCONFIG DIALOGEX 65520, 76, 511, 170
@@ -2134,12 +2130,12 @@ BEGIN
     COMBOBOX        IDC_VIDEOCONFIG_SYNC_METHOD_WIN,236,106,103,47,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "Drawing Area",65494,351,50,154,65,WS_GROUP
     LTEXT           "First line:",65436,367,68,40,9
-    LTEXT           "Last line:",65435,367,84,40,9
     CTEXT           "NTSC",65434,413,57,27,8
-    CTEXT           "PAL/Dendy",65433,455,57,48,8
     EDITTEXT        IDC_SCANLINE_FIRST_NTSC,414,66,27,12,ES_RIGHT | ES_NUMBER
-    EDITTEXT        IDC_SCANLINE_LAST_NTSC,414,83,27,12,ES_RIGHT | ES_NUMBER
+    CTEXT           "PAL/Dendy",65433,455,57,48,8
     EDITTEXT        IDC_SCANLINE_FIRST_PAL,465,66,27,12,ES_RIGHT | ES_NUMBER
+    LTEXT           "Last line:",65435,367,84,40,9
+    EDITTEXT        IDC_SCANLINE_LAST_NTSC,414,83,27,12,ES_RIGHT | ES_NUMBER
     EDITTEXT        IDC_SCANLINE_LAST_PAL,465,83,27,12,ES_RIGHT | ES_NUMBER
     CONTROL         "Clip left and right sides (8 px on each)",IDC_VIDEOCONFIG_CLIPSIDES,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,357,98,140,12
@@ -2158,8 +2154,8 @@ BEGIN
     EDITTEXT        IDC_TVASPECT_Y,458,28,41,12,ES_AUTOHSCROLL | WS_DISABLED
     CTEXT           "/",IDC_STATIC_SLASHTEXT,449,31,8,8,WS_DISABLED
     LTEXT           "DirectDraw:",65454,11,126,46,10
-    LTEXT           "DirectDraw:",65455,188,125,46,10
     COMBOBOX        IDC_VIDEOCONFIG_DIRECTDRAW_FS,59,123,105,50,CBS_DROPDOWNLIST | WS_TABSTOP
+    LTEXT           "DirectDraw:",65455,188,125,46,10
     COMBOBOX        IDC_VIDEOCONFIG_DIRECTDRAW_WIN,236,123,103,47,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
@@ -2192,7 +2188,7 @@ BEGIN
     CONTROL         "Number of Changes:",IDC_NUMBEROFCHANGES,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,121,212,76,10
     EDITTEXT        IDC_EDIT_COMPAREVALUE,203,187,63,12,ES_UPPERCASE | ES_AUTOHSCROLL | WS_DISABLED
     EDITTEXT        IDC_EDIT_COMPAREADDRESS,203,199,63,12,ES_UPPERCASE | ES_AUTOHSCROLL | WS_DISABLED
-    EDITTEXT        IDC_EDIT_COMPARECHANGES,203,211,63,12,ES_UPPERCASE | ES_AUTOHSCROLL | WS_DISABLED
+    EDITTEXT        IDC_EDIT_COMPARECHANGES,203,211,63,12,ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER | WS_DISABLED
     GROUPBOX        "Data Type / Display",IDC_STATIC,196,228,75,45,0,WS_EX_TRANSPARENT
     CONTROL         "Signed",IDC_SIGNED,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,200,238,67,9
     CONTROL         "Unsigned",IDC_UNSIGNED,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,200,249,67,9
@@ -2232,8 +2228,9 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION " Edit Watch"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CTEXT           "&Address:",IDC_SPECIFICADDRESS,15,12,30,8
-    EDITTEXT        IDC_EDIT_COMPAREADDRESS,48,10,65,12,ES_UPPERCASE | ES_AUTOHSCROLL
+    CTEXT           "&Address:",IDC_SPECIFICADDRESS,15,12,30,8,NOT WS_VISIBLE | WS_DISABLED
+    EDITTEXT        IDC_EDIT_COMPAREADDRESS,48,10,65,12,ES_UPPERCASE | ES_AUTOHSCROLL | NOT WS_VISIBLE | WS_DISABLED
+    EDITTEXT        IDC_EDIT_COMPAREADDRESSES,48,10,65,12,ES_UPPERCASE | ES_AUTOHSCROLL | NOT WS_VISIBLE | WS_DISABLED
     CTEXT           "&Notes:",IDC_PROMPT_TEXT,23,24,22,8
     EDITTEXT        IDC_PROMPT_EDIT,48,22,119,12,ES_AUTOHSCROLL
     GROUPBOX        "Data Type",IDC_DATATYPE_GROUPBOX,14,37,75,53,0,WS_EX_TRANSPARENT
@@ -2245,8 +2242,8 @@ BEGIN
     CONTROL         "&1 byte",IDC_1_BYTE,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,98,47,61,11
     CONTROL         "&2 bytes",IDC_2_BYTES,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,98,57,61,11
     CONTROL         "&4 bytes",IDC_4_BYTES,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,98,67,61,11
-    DEFPUSHBUTTON   "&OK",IDOK,66,93,50,14
-    PUSHBUTTON      "&Cancel",IDCANCEL,118,93,50,14
+    DEFPUSHBUTTON   "OK",IDOK,66,93,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,118,93,50,14
 END
 
 DLG_SNESPAD DIALOGEX 4, 109, 243, 121
@@ -2306,16 +2303,16 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "Symbolic Debug Naming"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,132,62,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,189,62,50,14
     LTEXT           "File",IDC_STATIC,7,7,15,9
-    EDITTEXT        IDC_SYMBOLIC_ADDRESS,38,24,33,13,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
+    EDITTEXT        IDC_SYMBOLIC_FILENAME,24,6,215,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
     LTEXT           "Address",IDC_STATIC,6,26,30,10
-    EDITTEXT        IDC_SYMBOLIC_NAME,107,24,132,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_SYMBOLIC_ADDRESS,38,24,33,13,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
     LTEXT           "Name",IDC_STATIC,83,26,22,10
+    EDITTEXT        IDC_SYMBOLIC_NAME,107,24,132,13,ES_AUTOHSCROLL
     LTEXT           "Comment",IDC_STATIC,6,45,37,10
     EDITTEXT        IDC_SYMBOLIC_COMMENT,45,43,194,13,ES_AUTOHSCROLL
-    EDITTEXT        IDC_SYMBOLIC_FILENAME,24,6,215,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,132,62,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,189,62,50,14
 END
 
 IDD_REPLAY_METADATA DIALOGEX 0, 0, 325, 250
@@ -2324,7 +2321,7 @@ CAPTION "Movie Metadata"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Close",IDCANCEL,268,229,50,14
-    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,7,311,214
+    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,7,311,214
 END
 
 IDD_EDIT_HEADER DIALOGEX 0, 0, 321, 258
@@ -2775,6 +2772,11 @@ BEGIN
     0
 END
 
+IDD_RAMSEARCH AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2843,214 +2845,110 @@ END
 //
 
 IDB_BITMAP0             BITMAP                  "res\\te_0.bmp"
-
 IDB_BITMAP1             BITMAP                  "res\\te_1.bmp"
-
 IDB_BITMAP2             BITMAP                  "res\\te_2.bmp"
-
 IDB_BITMAP3             BITMAP                  "res\\te_3.bmp"
-
 IDB_BITMAP4             BITMAP                  "res\\te_4.bmp"
-
 IDB_BITMAP5             BITMAP                  "res\\te_5.bmp"
-
 IDB_BITMAP6             BITMAP                  "res\\te_6.bmp"
-
 IDB_BITMAP7             BITMAP                  "res\\te_7.bmp"
-
 IDB_BITMAP8             BITMAP                  "res\\te_8.bmp"
-
 IDB_BITMAP9             BITMAP                  "res\\te_9.bmp"
-
 IDB_BITMAP10            BITMAP                  "res\\te_10.bmp"
-
 IDB_BITMAP11            BITMAP                  "res\\te_11.bmp"
-
 IDB_BITMAP12            BITMAP                  "res\\te_12.bmp"
-
 IDB_BITMAP13            BITMAP                  "res\\te_13.bmp"
-
 IDB_BITMAP14            BITMAP                  "res\\te_14.bmp"
-
 IDB_BITMAP15            BITMAP                  "res\\te_15.bmp"
-
 IDB_BITMAP16            BITMAP                  "res\\te_16.bmp"
-
 IDB_BITMAP17            BITMAP                  "res\\te_17.bmp"
-
 IDB_BITMAP18            BITMAP                  "res\\te_18.bmp"
-
 IDB_BITMAP19            BITMAP                  "res\\te_19.bmp"
-
 IDB_TE_ARROW            BITMAP                  "res\\te_arrow.bmp"
-
 IDB_TE_GREEN_ARROW      BITMAP                  "res\\te_green_arrow.bmp"
-
 IDB_TE_GREEN_BLUE_ARROW BITMAP                  "res\\te_green_blue_arrow.bmp"
-
 IDB_PIANO_0             BITMAP                  "res\\te_piano_0.bmp"
-
 IDB_PIANO_1             BITMAP                  "res\\te_piano_1.bmp"
-
 IDB_PIANO_2             BITMAP                  "res\\te_piano_2.bmp"
-
 IDB_PIANO_3             BITMAP                  "res\\te_piano_3.bmp"
-
 IDB_PIANO_4             BITMAP                  "res\\te_piano_4.bmp"
-
 IDB_PIANO_5             BITMAP                  "res\\te_piano_5.bmp"
-
 IDB_PIANO_6             BITMAP                  "res\\te_piano_6.bmp"
-
 IDB_PIANO_7             BITMAP                  "res\\te_piano_7.bmp"
-
 IDB_PIANO_8             BITMAP                  "res\\te_piano_8.bmp"
-
 IDB_PIANO_9             BITMAP                  "res\\te_piano_9.bmp"
-
 IDB_PIANO_10            BITMAP                  "res\\te_piano_10.bmp"
-
 IDB_PIANO_11            BITMAP                  "res\\te_piano_11.bmp"
-
 IDB_PIANO_12            BITMAP                  "res\\te_piano_12.bmp"
-
 IDB_PIANO_13            BITMAP                  "res\\te_piano_13.bmp"
-
 IDB_PIANO_14            BITMAP                  "res\\te_piano_14.bmp"
-
 IDB_PIANO_15            BITMAP                  "res\\te_piano_15.bmp"
-
 IDB_PIANO_16            BITMAP                  "res\\te_piano_16.bmp"
-
 IDB_PIANO_17            BITMAP                  "res\\te_piano_17.bmp"
-
 IDB_PIANO_18            BITMAP                  "res\\te_piano_18.bmp"
-
 IDB_PIANO_19            BITMAP                  "res\\te_piano_19.bmp"
-
 IDB_PIANO_PLAYBACK_0    BITMAP                  "res\\te_piano_0_playback.bmp"
-
 IDB_PIANO_PLAYBACK_1    BITMAP                  "res\\te_piano_1_playback.bmp"
-
 IDB_PIANO_PLAYBACK_2    BITMAP                  "res\\te_piano_2_playback.bmp"
-
 IDB_PIANO_PLAYBACK_3    BITMAP                  "res\\te_piano_3_playback.bmp"
-
 IDB_PIANO_PLAYBACK_4    BITMAP                  "res\\te_piano_4_playback.bmp"
-
 IDB_PIANO_PLAYBACK_5    BITMAP                  "res\\te_piano_5_playback.bmp"
-
 IDB_PIANO_PLAYBACK_6    BITMAP                  "res\\te_piano_6_playback.bmp"
-
 IDB_PIANO_PLAYBACK_7    BITMAP                  "res\\te_piano_7_playback.bmp"
-
 IDB_PIANO_PLAYBACK_8    BITMAP                  "res\\te_piano_8_playback.bmp"
-
 IDB_PIANO_PLAYBACK_9    BITMAP                  "res\\te_piano_9_playback.bmp"
-
 IDB_PIANO_PLAYBACK_10   BITMAP                  "res\\te_piano_10_playback.bmp"
-
 IDB_PIANO_PLAYBACK_11   BITMAP                  "res\\te_piano_11_playback.bmp"
-
 IDB_PIANO_PLAYBACK_12   BITMAP                  "res\\te_piano_12_playback.bmp"
-
 IDB_PIANO_PLAYBACK_13   BITMAP                  "res\\te_piano_13_playback.bmp"
-
 IDB_PIANO_PLAYBACK_14   BITMAP                  "res\\te_piano_14_playback.bmp"
-
 IDB_PIANO_PLAYBACK_15   BITMAP                  "res\\te_piano_15_playback.bmp"
-
 IDB_PIANO_PLAYBACK_16   BITMAP                  "res\\te_piano_16_playback.bmp"
-
 IDB_PIANO_PLAYBACK_17   BITMAP                  "res\\te_piano_17_playback.bmp"
-
 IDB_PIANO_PLAYBACK_18   BITMAP                  "res\\te_piano_18_playback.bmp"
-
 IDB_PIANO_PLAYBACK_19   BITMAP                  "res\\te_piano_19_playback.bmp"
-
 IDB_PIANO_LOSTPOS_0     BITMAP                  "res\\te_piano_0_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_1     BITMAP                  "res\\te_piano_1_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_2     BITMAP                  "res\\te_piano_2_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_3     BITMAP                  "res\\te_piano_3_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_4     BITMAP                  "res\\te_piano_4_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_5     BITMAP                  "res\\te_piano_5_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_6     BITMAP                  "res\\te_piano_6_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_7     BITMAP                  "res\\te_piano_7_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_8     BITMAP                  "res\\te_piano_8_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_9     BITMAP                  "res\\te_piano_9_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_10    BITMAP                  "res\\te_piano_10_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_11    BITMAP                  "res\\te_piano_11_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_12    BITMAP                  "res\\te_piano_12_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_13    BITMAP                  "res\\te_piano_13_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_14    BITMAP                  "res\\te_piano_14_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_15    BITMAP                  "res\\te_piano_15_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_16    BITMAP                  "res\\te_piano_16_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_17    BITMAP                  "res\\te_piano_17_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_18    BITMAP                  "res\\te_piano_18_lostpos.bmp"
-
 IDB_PIANO_LOSTPOS_19    BITMAP                  "res\\te_piano_19_lostpos.bmp"
-
 IDB_BITMAP_SELECTED0    BITMAP                  "res\\te_0_selected.bmp"
-
 IDB_BITMAP_SELECTED1    BITMAP                  "res\\te_1_selected.bmp"
-
 IDB_BITMAP_SELECTED2    BITMAP                  "res\\te_2_selected.bmp"
-
 IDB_BITMAP_SELECTED3    BITMAP                  "res\\te_3_selected.bmp"
-
 IDB_BITMAP_SELECTED4    BITMAP                  "res\\te_4_selected.bmp"
-
 IDB_BITMAP_SELECTED5    BITMAP                  "res\\te_5_selected.bmp"
-
 IDB_BITMAP_SELECTED6    BITMAP                  "res\\te_6_selected.bmp"
-
 IDB_BITMAP_SELECTED7    BITMAP                  "res\\te_7_selected.bmp"
-
 IDB_BITMAP_SELECTED8    BITMAP                  "res\\te_8_selected.bmp"
-
 IDB_BITMAP_SELECTED9    BITMAP                  "res\\te_9_selected.bmp"
-
 IDB_BITMAP_SELECTED10   BITMAP                  "res\\te_10_selected.bmp"
-
 IDB_BITMAP_SELECTED11   BITMAP                  "res\\te_11_selected.bmp"
-
 IDB_BITMAP_SELECTED12   BITMAP                  "res\\te_12_selected.bmp"
-
 IDB_BITMAP_SELECTED13   BITMAP                  "res\\te_13_selected.bmp"
-
 IDB_BITMAP_SELECTED14   BITMAP                  "res\\te_14_selected.bmp"
-
 IDB_BITMAP_SELECTED15   BITMAP                  "res\\te_15_selected.bmp"
-
 IDB_BITMAP_SELECTED16   BITMAP                  "res\\te_16_selected.bmp"
-
 IDB_BITMAP_SELECTED17   BITMAP                  "res\\te_17_selected.bmp"
-
 IDB_BITMAP_SELECTED18   BITMAP                  "res\\te_18_selected.bmp"
-
 IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
-
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
-
-#endif    // English (United States) resources
+#endif    // English(United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

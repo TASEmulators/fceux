@@ -315,17 +315,13 @@ void UpdateMemWatch()
 			MWRec& mwrec = mwrecs[i];
 
 			//Display blue if address is frozen
-			if (FrozenAddressCount && FrozenAddresses.size())
-			{
+			if (FrozenAddressCount)
 				for (unsigned int x = 0; x < FrozenAddressCount; x++)
 				{
-					if (mwrec.addr == FrozenAddresses[x])
-					{
-						//SetTextColor(hdc,RGB(0,0,255));
+					extern int FCEUI_FindCheatMapByte(uint16);
+					if (FCEUI_FindCheatMapByte(mwrec.addr))
 						SetTextColor(hdc,GetSysColor(COLOR_HIGHLIGHT));
-					}
 				}
-			}
 
 			char* text;
 			if(mwrec.valid && GameInfo)
@@ -816,6 +812,8 @@ static INT_PTR CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 			editlast[x]= 0;
 		}
 
+		CreateCheatMap();
+
 		RamChangeInitialize = true;
 		break;
 
@@ -834,7 +832,9 @@ static INT_PTR CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 	case WM_QUIT:
 		CloseMemoryWatch();
 		break;
-
+	case WM_DESTROY:
+		ReleaseCheatMap();
+		break;
 	case WM_DROPFILES:
 	{
 		unsigned int len;
