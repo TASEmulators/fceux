@@ -70,6 +70,8 @@ static int  new_cheat_addr =  0;
 static int  new_cheat_val  =  0;
 static int  new_cheat_cmp  = -1;
 static std::string new_cheat_name;
+static bool wasPausedByCheats = false;
+static bool pauseWhileCheatsActv = false;
 
 // check to see if a particular GTK version is available
 // 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,24);
@@ -135,6 +137,7 @@ int configHotkey(char* hotkeyString)
 	
 	return 0;*/
 #endif
+	return 0;
 }
 // This function configures a single button on a gamepad
 int configGamepadButton(GtkButton* button, gpointer p)
@@ -1247,7 +1250,7 @@ void openSoundConfig()
 	// mixer
 	mixerFrame = gtk_frame_new("Mixer:");
 	mixerHbox = gtk_hbox_new(TRUE, 5);
-	for(int i=0; i<6; i++)
+	for(long int i=0; i<6; i++)
 	{
 		mixers[i] = gtk_vscale_new_with_range(0, 256, 1);
 		gtk_range_set_inverted(GTK_RANGE(mixers[i]), TRUE);
@@ -1509,6 +1512,30 @@ static void cheatSearchLessThan( GtkButton *button,
 	showCheatSearchResults();
 }
 
+static void pauseDuringCheatWinActvCB( GtkToggleButton *button,
+                                       void *userData )
+{
+   pauseWhileCheatsActv = gtk_toggle_button_get_active(button);
+
+   if ( pauseWhileCheatsActv )
+   {
+      if ( EmulationPaused == 0 )
+      {
+         EmulationPaused = 1;
+         wasPausedByCheats = true;
+      }
+   }
+   else
+   {
+      if ( EmulationPaused && wasPausedByCheats )
+      {
+         EmulationPaused = 0;
+      }
+      wasPausedByCheats = false;
+   }
+   FCEU_printf("Emulation paused: %d\n", EmulationPaused);
+}
+
 static void cheatSearchValueEntryCB( GtkWidget *widget,
                                      void *userData )
 {
@@ -1575,12 +1602,9 @@ static void cheatListEnableToggle( GtkCellRendererToggle *renderer,
 		                             gchar *pathStr,
                                    GtkTreeView *tree )
 {
-	GtkTreeModel *model=NULL;
 	GtkTreePath  *path;
 	int depth;
 	int *indexArray;
-
-	model = gtk_tree_view_get_model( tree );
 
 	path = gtk_tree_path_new_from_string( pathStr );
 
@@ -1714,6 +1738,10 @@ static void removeCheatFromActive( GtkWidget *widget,
 
 	numListRows = gtk_tree_selection_count_selected_rows( treeSel );
 
+   if ( numListRows == 0 )
+   {
+      return;
+   }
 	//printf("Number of Rows Selected: %i\n", numListRows );
 
 	selListRows = gtk_tree_selection_get_selected_rows( treeSel, &model );
@@ -1757,6 +1785,10 @@ static void updateCheatList( GtkWidget *widget,
 
 	numListRows = gtk_tree_selection_count_selected_rows( treeSel );
 
+   if ( numListRows == 0 )
+   {
+      return;
+   }
 	//printf("Number of Rows Selected: %i\n", numListRows );
 
 	selListRows = gtk_tree_selection_get_selected_rows( treeSel, &model );
@@ -1793,6 +1825,18 @@ static void updateCheatList( GtkWidget *widget,
    g_list_free_full(selListRows, (GDestroyNotify) gtk_tree_path_free);
 
 	showActiveCheatList();
+}
+
+void closeCheatDialog(GtkWidget* w, GdkEvent* e, gpointer p)
+{
+   if ( EmulationPaused && wasPausedByCheats )
+   {
+      EmulationPaused = 0;
+   }
+   wasPausedByCheats = false;
+   pauseWhileCheatsActv = false;
+
+	gtk_widget_destroy(w);
 }
 
 // creates and opens cheats window
@@ -1975,6 +2019,8 @@ static void openCheatsWindow(void)
 	gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 5);
 	button = gtk_check_button_new_with_label("Pause emulation when this window is active");
 	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 5);
+	g_signal_connect( button, "clicked",
+		      G_CALLBACK (pauseDuringCheatWinActvCB), (gpointer) NULL );
 
 	prev_cmp_vbox = gtk_vbox_new(FALSE, 4);
 	gtk_container_add(GTK_CONTAINER(frame), prev_cmp_vbox);
@@ -2102,8 +2148,8 @@ static void openCheatsWindow(void)
 
 	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(win))), main_hbox, TRUE, TRUE, 0);
 
-	g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
-	g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(win, "delete-event", G_CALLBACK(closeCheatDialog), NULL);
+	g_signal_connect(win, "response", G_CALLBACK(closeCheatDialog), NULL);
 	
 	gtk_widget_show_all(win);
 }
