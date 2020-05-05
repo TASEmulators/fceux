@@ -1536,6 +1536,51 @@ static void cheatSearchValueEntryCB( GtkWidget *widget,
    //printf("Cheat Value Entry contents: '%s' Value: 0x%02lx\n", entry_text, value);
 }
 
+static void openCheatFile( GtkWidget *widget,
+                           void *userData )
+{
+	GtkWidget* fileChooser;
+	GtkFileFilter* filterCht;
+	GtkFileFilter* filterAll;
+
+   filterCht = gtk_file_filter_new();
+   filterAll = gtk_file_filter_new();
+
+	gtk_file_filter_add_pattern(filterCht, "*.cht");
+	gtk_file_filter_add_pattern(filterAll, "*");
+
+	gtk_file_filter_set_name(filterCht, "*.cht");
+	gtk_file_filter_set_name(filterAll, "All Files");
+
+	fileChooser = gtk_file_chooser_dialog_new ("Open Cheat", GTK_WINDOW(MainWindow),
+			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	const char* last_dir;
+	g_config->getOption("SDL.LastOpenFile", &last_dir);
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), last_dir);
+
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterCht);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
+
+	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
+	{
+		char* filename;
+		
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+		gtk_widget_destroy (fileChooser);
+		//g_config->setOption("SDL.LastOpenFile", filename);
+		// Error dialog no longer required with GTK implementation of FCEUD_PrintError()
+		
+		resizeGtkWindow();
+		g_free( filename);
+	}
+	else
+	{
+		gtk_widget_destroy (fileChooser);
+	}
+
+}
+
 
 // creates and opens cheats window
 static void openCheatsWindow(void)
@@ -1643,6 +1688,8 @@ static void openCheatsWindow(void)
 	hbox = gtk_hbox_new(FALSE, 1);
 	button = gtk_button_new_with_label("Add from CHT file...");
 	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, FALSE, 1);
+	g_signal_connect( button, "clicked",
+		      G_CALLBACK (openCheatFile), (gpointer) NULL );
 
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 1);
 
