@@ -1546,6 +1546,8 @@ static int activeCheatListCB(char *name, uint32 a, uint8 v, int c, int s, int ty
 	char addrStr[32], valStr[16], cmpStr[16];
 	//printf("Cheat Name:'%s'   Addr:0x%04x   Val:0x%02x \n", name, a, v );
 
+	gtk_tree_store_append( actv_cheats_store, &actv_cheats_iter, NULL); // aquire iter
+
 	sprintf( addrStr, "0x%04x", a );
 	sprintf( valStr,	"0x%02x", v );
 
@@ -1556,10 +1558,8 @@ static int activeCheatListCB(char *name, uint32 a, uint8 v, int c, int s, int ty
 	}
 
    gtk_tree_store_set(actv_cheats_store, &actv_cheats_iter, 
-           0, addrStr, 1, valStr, 2, cmpStr, 3, name,
+           0, s, 1, addrStr, 2, valStr, 3, cmpStr, 4, name,
            -1);
-
-	gtk_tree_store_append( actv_cheats_store, &actv_cheats_iter, NULL); // aquire iter
 
    return 1;
 }
@@ -1568,9 +1568,40 @@ static void showActiveCheatList(void)
 {
    gtk_tree_store_clear(actv_cheats_store);
 
-	gtk_tree_store_append( actv_cheats_store, &actv_cheats_iter, NULL); // aquire iter
-
    FCEUI_ListCheats( activeCheatListCB, 0 );
+}
+
+static void cheatListEnableToggle( GtkCellRendererToggle *renderer,
+		                             gchar *pathStr,
+                                   GtkTreeView *tree )
+{
+	GtkTreeModel *model=NULL;
+	GtkTreePath  *path;
+	int depth;
+	int *indexArray;
+
+	model = gtk_tree_view_get_model( tree );
+
+	path = gtk_tree_path_new_from_string( pathStr );
+
+	if ( path == NULL ){
+      printf("Error: gtk_tree_path_new_from_string failed\n");
+		return;
+	}
+
+	depth = gtk_tree_path_get_depth(path);
+	indexArray = gtk_tree_path_get_indices(path);
+
+	if ( depth > 0 )
+	{
+      //printf("Toggle: %i\n", indexArray[0] );
+      FCEUI_ToggleCheat( indexArray[0] );
+	}
+
+	gtk_tree_path_free( path );
+
+	showActiveCheatList();
+
 }
 
 static void openCheatFile( GtkWidget *widget,
@@ -1748,38 +1779,34 @@ static void openCheatsWindow(void)
 	vbox = gtk_vbox_new(FALSE, 5);
 	frame = gtk_frame_new("Active Cheats");
 	
-	actv_cheats_store = gtk_tree_store_new( 4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING );
-
-   GtkTreeIter iter;
-    
-   gtk_tree_store_append(actv_cheats_store, &iter, NULL); // aquire iter
-
-	//for(int i=0; i<15; i++)
-   //{
-   //     std::string cheatName = "Test";
-
-   //     gtk_tree_store_set(actv_cheats_store, &iter, 
-   //             0, cheatName.c_str(),
-   //             -1);
-
-   //     gtk_tree_store_append(actv_cheats_store, &iter, NULL); // acquire child iterator
-   //}
+	actv_cheats_store = gtk_tree_store_new( 5, G_TYPE_BOOLEAN, 
+			G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING );
 
 	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(actv_cheats_store));
 
 	GtkCellRenderer *renderer;
+	GtkCellRenderer *chkbox_renderer;
 	GtkTreeViewColumn* column;
 	
 	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes("Addr", renderer, "text", 0, NULL);
+	chkbox_renderer = gtk_cell_renderer_toggle_new();
+	gtk_cell_renderer_toggle_set_activatable( (GtkCellRendererToggle*)chkbox_renderer, TRUE );
+	column = gtk_tree_view_column_new_with_attributes("Ena", chkbox_renderer, "active", 0, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("Val", renderer, "text", 1, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Addr", renderer, "text", 1, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("Cmp", renderer, "text", 2, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Val", renderer, "text", 2, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("Desc", renderer, "text", 3, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Cmp", renderer, "text", 3, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	column = gtk_tree_view_column_new_with_attributes("Desc", renderer, "text", 4, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 	
+   g_signal_connect( chkbox_renderer, "toggled",
+		      G_CALLBACK(cheatListEnableToggle), (void*)tree );
+
+	showActiveCheatList();
+
 	scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_NEVER,
 			GTK_POLICY_AUTOMATIC);
