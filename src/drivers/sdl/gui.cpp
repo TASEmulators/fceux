@@ -66,9 +66,9 @@ static int  cheat_search_known_value = 0;
 static int  cheat_search_neq_value = 0;
 static int  cheat_search_gt_value = 0;
 static int  cheat_search_lt_value = 0;
-static int  new_cheat_addr = 0;
-static int  new_cheat_val  = 0;
-static int  new_cheat_cmp  = 0;
+static int  new_cheat_addr =  0;
+static int  new_cheat_val  =  0;
+static int  new_cheat_cmp  = -1;
 static std::string new_cheat_name;
 
 // check to see if a particular GTK version is available
@@ -1544,11 +1544,16 @@ static void cheatSearchValueEntryCB( GtkWidget *widget,
 static int activeCheatListCB(char *name, uint32 a, uint8 v, int c, int s, int type, void* data)
 {
 	char addrStr[32], valStr[16], cmpStr[16];
-	printf("Cheat Name:'%s'   Addr:0x%04x   Val:0x%02x \n", name, a, v );
+	//printf("Cheat Name:'%s'   Addr:0x%04x   Val:0x%02x \n", name, a, v );
 
 	sprintf( addrStr, "0x%04x", a );
 	sprintf( valStr,	"0x%02x", v );
-	sprintf( cmpStr,	"0x%02x", c );
+
+	if ( c >= 0 ){
+	   sprintf( cmpStr,	"0x%02x", c );
+	} else {
+		strcpy( cmpStr, "0xff");
+	}
 
    gtk_tree_store_set(actv_cheats_store, &actv_cheats_iter, 
            0, addrStr, 1, valStr, 2, cmpStr, 3, name,
@@ -1596,10 +1601,19 @@ static void openCheatFile( GtkWidget *widget,
 
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
+		FILE *fp;
 		char* filename;
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		gtk_widget_destroy (fileChooser);
+
+		fp = fopen( filename, "r");
+
+		if ( fp != NULL )
+		{
+         FCEU_LoadGameCheats( fp, 0 );
+			fclose(fp);
+		}
 		//g_config->setOption("SDL.LastOpenFile", filename);
 		// Error dialog no longer required with GTK implementation of FCEUD_PrintError()
 		
@@ -1630,7 +1644,16 @@ static void newCheatEntryCB( GtkWidget *widget,
         new_cheat_val = strtol( entry_text, NULL, 16 );
 		break;
       case 2:
-        new_cheat_cmp = strtol( entry_text, NULL, 16 );
+		{
+		  if ( entry_text[0] == 0 )
+		  {
+			  new_cheat_cmp = -1;
+		  }
+		  else
+		  {
+           new_cheat_cmp = strtol( entry_text, NULL, 16 );
+		  }
+		}
 		break;
       case 3:
         new_cheat_name.assign( entry_text );
