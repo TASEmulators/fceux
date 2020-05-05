@@ -1748,8 +1748,49 @@ static void removeCheatFromActive( GtkWidget *widget,
 }
 
 static void updateCheatList( GtkWidget *widget,
-                             void *userData )
+                             GtkTreeView *tree )
 {
+	int numListRows;
+	GList *selListRows, *tmpList;
+	GtkTreeModel *model = NULL;
+	GtkTreeSelection *treeSel = gtk_tree_view_get_selection(tree);
+
+	numListRows = gtk_tree_selection_count_selected_rows( treeSel );
+
+	//printf("Number of Rows Selected: %i\n", numListRows );
+
+	selListRows = gtk_tree_selection_get_selected_rows( treeSel, &model );
+
+	tmpList = selListRows;
+
+	while ( tmpList )
+	{
+		int depth;
+		int *indexArray;
+		GtkTreePath *path = (GtkTreePath*)tmpList->data;
+
+		depth = gtk_tree_path_get_depth(path);
+		indexArray = gtk_tree_path_get_indices(path);
+
+		if ( depth > 0 )
+		{
+			uint32 a; uint8 v;
+			int c, s, type;
+			if ( FCEUI_GetCheat( indexArray[0], NULL, &a, &v, &c, &s, &type) )
+			{
+            FCEUI_SetCheat( indexArray[0], new_cheat_name.c_str(), new_cheat_addr, new_cheat_val, new_cheat_cmp, s, type );
+			}
+		}
+		//printf("Depth: %i \n", depth );
+
+		//for (int i=0; i<depth; i++)
+		//{
+      //   printf("%i: %i\n", i, indexArray[i] );
+		//}
+      tmpList = tmpList->next;
+	}
+
+   g_list_free_full(selListRows, (GDestroyNotify) gtk_tree_path_free);
 
 	showActiveCheatList();
 }
@@ -1886,7 +1927,7 @@ static void openCheatsWindow(void)
 	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, FALSE, 1);
 
 	g_signal_connect( button, "clicked",
-		      G_CALLBACK (updateCheatList), (gpointer) NULL );
+		      G_CALLBACK (updateCheatList), (gpointer) tree );
 
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 1);
 
