@@ -1,5 +1,6 @@
 #include "../../types.h"
 #include "../../fceu.h"
+#include "../../cheat.h"
 #include "../../driver.h"
 #include "../../version.h"
 #include "../../movie.h"
@@ -54,6 +55,16 @@ GtkWidget* Menubar;
 GtkRadioAction* stateSlot = NULL;
 bool gtkIsStarted = false;
 bool menuTogglingEnabled;
+
+//-----------------------------------------
+// Cheat static variables 
+static GtkTreeStore *actv_cheats_store = NULL;
+static GtkTreeStore *ram_match_store = NULL;
+static GtkTreeIter ram_match_iter;
+static int  cheat_search_known_value = 0;
+static int  cheat_search_neq_value = 0;
+static int  cheat_search_gt_value = 0;
+static int  cheat_search_lt_value = 0;
 
 // check to see if a particular GTK version is available
 // 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,24);
@@ -1383,6 +1394,149 @@ void toggleAutoResume (GtkToggleAction *action)
 	AutoResumePlay = autoResume;
 }
 
+static int ShowCheatSearchResultsCallB(uint32 a, uint8 last, uint8 current)
+{
+	char addrStr[32], lastStr[32], curStr[32];
+
+	sprintf( addrStr, "0x%04x", a );
+	sprintf( lastStr,	"0x%02x", last );
+	sprintf( curStr,	"| 0x%02x", current );
+
+   gtk_tree_store_set(ram_match_store, &ram_match_iter, 
+           0, addrStr, 1, lastStr, 2, curStr,
+           -1);
+
+	gtk_tree_store_append( ram_match_store, &ram_match_iter, NULL); // aquire iter
+
+	return 1;
+}
+
+static void showCheatSearchResults(void)
+{
+	int total_matches = 0;
+
+   gtk_tree_store_clear(ram_match_store);
+
+	gtk_tree_store_append( ram_match_store, &ram_match_iter, NULL); // aquire iter
+
+	total_matches = FCEUI_CheatSearchGetCount();
+
+	printf("Cheat Search Matches: %i \n", total_matches );
+
+   FCEUI_CheatSearchGetRange( 0, total_matches, ShowCheatSearchResultsCallB );
+}
+
+static void cheatSearchReset( GtkButton *button,
+                              gpointer   user_data)
+{
+	printf("Cheat Search Reset!\n");
+
+   cheat_search_known_value = 0;
+   cheat_search_neq_value = 0;
+   cheat_search_gt_value = 0;
+   cheat_search_lt_value = 0;
+
+	FCEUI_CheatSearchBegin();
+	showCheatSearchResults();
+	// Enable Cheat Search Buttons - Change Sensitivity
+}
+
+static void cheatSearchKnown( GtkButton *button,
+                              gpointer   user_data)
+{
+	//printf("Cheat Search Known!\n");
+
+	FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_KNOWN, cheat_search_known_value, 0);
+	showCheatSearchResults();
+}
+
+static void cheatSearchEqual( GtkButton *button,
+                              gpointer   user_data)
+{
+	//printf("Cheat Search Equal !\n");
+
+	FCEUI_CheatSearchEnd(FCEU_SEARCH_PUERLY_RELATIVE_CHANGE, 0, cheat_search_neq_value);
+	showCheatSearchResults();
+}
+
+static void cheatSearchNotEqual( GtkButton *button,
+                                 GtkToggleButton *chkbox )
+{
+	int checked = gtk_toggle_button_get_active(chkbox);
+
+	//printf("Cheat Search NotEqual %i!\n", checked);
+
+	if ( checked ){
+	   FCEUI_CheatSearchEnd(FCEU_SEARCH_PUERLY_RELATIVE_CHANGE, 0, cheat_search_neq_value);
+	} else {
+	   FCEUI_CheatSearchEnd(FCEU_SEARCH_ANY_CHANGE, 0, 0);
+	}
+	showCheatSearchResults();
+}
+
+static void cheatSearchGreaterThan( GtkButton *button,
+                                    GtkToggleButton *chkbox )
+{
+	int checked = gtk_toggle_button_get_active(chkbox);
+
+	//printf("Cheat Search GreaterThan %i!\n", checked);
+
+	if ( checked ){
+	   FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_GT_KNOWN, 0, cheat_search_gt_value);
+	} else {
+	   FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_GT, 0, 0);
+	}
+	showCheatSearchResults();
+}
+
+static void cheatSearchLessThan( GtkButton *button,
+                                 GtkToggleButton *chkbox )
+{
+	int checked = gtk_toggle_button_get_active(chkbox);
+
+	//printf("Cheat Search LessThan %i!\n", checked);
+
+	if ( checked ){
+	   FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_LT_KNOWN, 0, cheat_search_gt_value);
+	} else {
+	   FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_LT, 0, 0);
+	}
+	showCheatSearchResults();
+}
+
+static void cheatSearchValueEntryCB( GtkWidget *widget,
+                                     void *userData )
+{
+	long value;
+	const gchar *entry_text;
+   entry_text = gtk_entry_get_text (GTK_ENTRY (widget));
+
+   value = strtol( entry_text, NULL, 16 );
+
+	switch ( (long)userData )
+	{
+		default:
+		case 0:
+
+		break;
+      case 1:
+        cheat_search_known_value = value;
+		break;
+      case 2:
+        cheat_search_neq_value = value;
+		break;
+      case 3:
+        cheat_search_gt_value = value;
+		break;
+      case 4:
+        cheat_search_lt_value = value;
+		break;
+	}
+
+   //printf("Cheat Value Entry contents: '%s' Value: 0x%02lx\n", entry_text, value);
+}
+
+
 // creates and opens cheats window
 static void openCheatsWindow(void)
 {
@@ -1392,9 +1546,10 @@ static void openCheatsWindow(void)
 	GtkWidget* vbox, *prev_cmp_vbox;
 	GtkWidget* frame;
 	GtkWidget* label, *txt_entry;
-	GtkWidget* button;
+	GtkWidget* button, *chkbutton;
 	GtkWidget *tree;
 	GtkWidget *scroll;
+	GtkWidget *align;
 
 	win = gtk_dialog_new_with_buttons("Cheats",
 			GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
@@ -1407,7 +1562,7 @@ static void openCheatsWindow(void)
 	vbox = gtk_vbox_new(FALSE, 5);
 	frame = gtk_frame_new("Active Cheats");
 	
-	GtkTreeStore *actv_cheats_store = gtk_tree_store_new( 1, G_TYPE_STRING);
+	actv_cheats_store = gtk_tree_store_new( 1, G_TYPE_STRING);
 
    GtkTreeIter iter;
     
@@ -1498,15 +1653,26 @@ static void openCheatsWindow(void)
 	vbox = gtk_vbox_new(FALSE, 5);
 	hbox = gtk_hbox_new(FALSE, 1);
 	button = gtk_button_new_with_label("Reset");
+	g_signal_connect( button, "clicked",
+		      G_CALLBACK (cheatSearchReset), (gpointer) NULL );
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
 
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 5);
 
 	hbox = gtk_hbox_new(FALSE, 3);
 	button = gtk_button_new_with_label("Known Value:");
+	g_signal_connect( button, "clicked",
+		      G_CALLBACK (cheatSearchKnown), (gpointer) NULL );
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
 	label = gtk_label_new("0x");
 	txt_entry = gtk_entry_new();
+	gtk_entry_set_max_length( GTK_ENTRY(txt_entry), 2 );
+	gtk_entry_set_width_chars( GTK_ENTRY(txt_entry), 2 );
+
+   g_signal_connect( txt_entry, "activate",
+		      G_CALLBACK(cheatSearchValueEntryCB), (void*)1L );
+   g_signal_connect( txt_entry, "changed",
+		      G_CALLBACK(cheatSearchValueEntryCB), (void*)1L );
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, FALSE, FALSE, 5);
 
@@ -1521,43 +1687,77 @@ static void openCheatsWindow(void)
 	gtk_container_add(GTK_CONTAINER(frame), prev_cmp_vbox);
 
 	hbox = gtk_hbox_new(FALSE, 1);
+	align = gtk_alignment_new( 0, 0, 0.5, 0 );
 	button = gtk_button_new_with_label("Equal");
-	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
+	gtk_container_add( GTK_CONTAINER(align), button );
+	gtk_box_pack_start(GTK_BOX(hbox), align, TRUE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(prev_cmp_vbox), hbox, FALSE, FALSE, 5);
+	g_signal_connect( button, "clicked",
+		      G_CALLBACK (cheatSearchEqual), (gpointer) NULL );
 
 	hbox = gtk_hbox_new(FALSE, 4);
+	align = gtk_alignment_new( 0, 0, 1, 0 );
 	button = gtk_button_new_with_label("Not Equal");
-	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
-	button = gtk_check_button_new();
-	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
-	label = gtk_label_new("By:");
+	gtk_container_add( GTK_CONTAINER(align), button );
+	gtk_box_pack_start(GTK_BOX(hbox), align, TRUE, TRUE, 5);
+	chkbutton = gtk_check_button_new();
+	gtk_box_pack_start(GTK_BOX(hbox), chkbutton, FALSE, FALSE, 5);
+	g_signal_connect( button, "clicked",
+		      G_CALLBACK (cheatSearchNotEqual), (gpointer) chkbutton );
+	label = gtk_label_new("By: 0x");
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
 	txt_entry = gtk_entry_new();
+	gtk_entry_set_max_length( GTK_ENTRY(txt_entry), 2 );
+	gtk_entry_set_width_chars( GTK_ENTRY(txt_entry), 2 );
+   g_signal_connect( txt_entry, "activate",
+		      G_CALLBACK(cheatSearchValueEntryCB), (void*)2L );
+   g_signal_connect( txt_entry, "changed",
+		      G_CALLBACK(cheatSearchValueEntryCB), (void*)2L );
 	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, FALSE, FALSE, 5);
 
 	gtk_box_pack_start(GTK_BOX(prev_cmp_vbox), hbox, FALSE, FALSE, 5);
 
 	hbox = gtk_hbox_new(FALSE, 4);
+	align = gtk_alignment_new( 0, 0, 1, 0 );
 	button = gtk_button_new_with_label("Greater Than");
-	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
-	button = gtk_check_button_new();
-	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
-	label = gtk_label_new("By:");
+	gtk_container_add( GTK_CONTAINER(align), button );
+	gtk_box_pack_start(GTK_BOX(hbox), align, TRUE, TRUE, 5);
+	chkbutton = gtk_check_button_new();
+	g_signal_connect( button, "clicked",
+		      G_CALLBACK (cheatSearchGreaterThan), (gpointer) chkbutton );
+	gtk_box_pack_start(GTK_BOX(hbox), chkbutton, FALSE, FALSE, 5);
+	label = gtk_label_new("By: 0x");
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
 	txt_entry = gtk_entry_new();
+	gtk_entry_set_max_length( GTK_ENTRY(txt_entry), 2 );
+	gtk_entry_set_width_chars( GTK_ENTRY(txt_entry), 2 );
+   g_signal_connect( txt_entry, "activate",
+		      G_CALLBACK(cheatSearchValueEntryCB), (void*)3L );
+   g_signal_connect( txt_entry, "changed",
+		      G_CALLBACK(cheatSearchValueEntryCB), (void*)3L );
 	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, FALSE, FALSE, 5);
 
 	gtk_box_pack_start(GTK_BOX(prev_cmp_vbox), hbox, FALSE, FALSE, 5);
 
 	hbox = gtk_hbox_new(FALSE, 4);
+	align = gtk_alignment_new( 0, 0, 1, 0 );
 	button = gtk_button_new_with_label("Less Than");
-	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
-	button = gtk_check_button_new();
-	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
-	label = gtk_label_new("By:");
+	gtk_container_add( GTK_CONTAINER(align), button );
+	gtk_box_pack_start(GTK_BOX(hbox), align, TRUE, TRUE, 5);
+	chkbutton = gtk_check_button_new();
+	g_signal_connect( button, "clicked",
+		      G_CALLBACK (cheatSearchLessThan), (gpointer) chkbutton );
+	gtk_box_pack_start(GTK_BOX(hbox), chkbutton, FALSE, FALSE, 5);
+	label = gtk_label_new("By: 0x");
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
 	txt_entry = gtk_entry_new();
-	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, FALSE, FALSE, 1);
+	gtk_entry_set_max_length( GTK_ENTRY(txt_entry), 2 );
+	gtk_entry_set_width_chars( GTK_ENTRY(txt_entry), 2 );
+   g_signal_connect( txt_entry, "activate",
+		      G_CALLBACK(cheatSearchValueEntryCB), (void*)4L );
+   g_signal_connect( txt_entry, "changed",
+		      G_CALLBACK(cheatSearchValueEntryCB), (void*)4L );
+	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, FALSE, FALSE, 5);
 
 	gtk_box_pack_start(GTK_BOX(prev_cmp_vbox), hbox, FALSE, FALSE, 1);
 
@@ -1571,25 +1771,29 @@ static void openCheatsWindow(void)
 	vbox = gtk_vbox_new(FALSE, 5);
 	//hbox = gtk_hbox_new(FALSE, 1);
 
-	GtkTreeStore *ram_match_store = gtk_tree_store_new( 1, G_TYPE_STRING);
+	ram_match_store = gtk_tree_store_new( 3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
-   gtk_tree_store_append( ram_match_store, &iter, NULL); // aquire iter
+   gtk_tree_store_append( ram_match_store, &ram_match_iter, NULL); // aquire iter
 
-	for(int i=0; i<15; i++)
-   {
-        std::string ramText = "Test";
+	//for(int i=0; i<15; i++)
+   //{
+   //     std::string ramText = "Test";
 
-        gtk_tree_store_set(ram_match_store, &iter, 
-                0, ramText.c_str(),
-                -1);
+   //     gtk_tree_store_set(ram_match_store, &ram_match_iter, 
+   //             0, ramText.c_str(),
+   //             -1);
 
-        gtk_tree_store_append(ram_match_store, &iter, NULL); // acquire child iterator
-   }
+   //     gtk_tree_store_append(ram_match_store, &ram_match_iter, NULL); // acquire child iterator
+   //}
 
 	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(ram_match_store));
 
 	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes("0 Possibilities", renderer, "text", 0, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Addr", renderer, "text", 0, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	column = gtk_tree_view_column_new_with_attributes("Last", renderer, "text", 1, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	column = gtk_tree_view_column_new_with_attributes("Curr", renderer, "text", 2, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 	
 	scroll = gtk_scrolled_window_new(NULL, NULL);
