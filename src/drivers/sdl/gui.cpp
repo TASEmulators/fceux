@@ -60,11 +60,16 @@ bool menuTogglingEnabled;
 // Cheat static variables 
 static GtkTreeStore *actv_cheats_store = NULL;
 static GtkTreeStore *ram_match_store = NULL;
+static GtkTreeIter actv_cheats_iter;
 static GtkTreeIter ram_match_iter;
 static int  cheat_search_known_value = 0;
 static int  cheat_search_neq_value = 0;
 static int  cheat_search_gt_value = 0;
 static int  cheat_search_lt_value = 0;
+static int  new_cheat_addr = 0;
+static int  new_cheat_val  = 0;
+static int  new_cheat_cmp  = 0;
+static std::string new_cheat_name;
 
 // check to see if a particular GTK version is available
 // 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,24);
@@ -1536,6 +1541,33 @@ static void cheatSearchValueEntryCB( GtkWidget *widget,
    //printf("Cheat Value Entry contents: '%s' Value: 0x%02lx\n", entry_text, value);
 }
 
+static int activeCheatListCB(char *name, uint32 a, uint8 v, int c, int s, int type, void* data)
+{
+	char addrStr[32], valStr[16], cmpStr[16];
+	printf("Cheat Name:'%s'   Addr:0x%04x   Val:0x%02x \n", name, a, v );
+
+	sprintf( addrStr, "0x%04x", a );
+	sprintf( valStr,	"0x%02x", v );
+	sprintf( cmpStr,	"0x%02x", c );
+
+   gtk_tree_store_set(actv_cheats_store, &actv_cheats_iter, 
+           0, addrStr, 1, valStr, 2, cmpStr, 3, name,
+           -1);
+
+	gtk_tree_store_append( actv_cheats_store, &actv_cheats_iter, NULL); // aquire iter
+
+   return 1;
+}
+
+static void showActiveCheatList(void)
+{
+   gtk_tree_store_clear(actv_cheats_store);
+
+	gtk_tree_store_append( actv_cheats_store, &actv_cheats_iter, NULL); // aquire iter
+
+   FCEUI_ListCheats( activeCheatListCB, 0 );
+}
+
 static void openCheatFile( GtkWidget *widget,
                            void *userData )
 {
@@ -1579,8 +1611,94 @@ static void openCheatFile( GtkWidget *widget,
 		gtk_widget_destroy (fileChooser);
 	}
 
+	showActiveCheatList();
 }
 
+static void newCheatEntryCB( GtkWidget *widget,
+                             void *userData )
+{
+	const gchar *entry_text;
+   entry_text = gtk_entry_get_text (GTK_ENTRY (widget));
+
+	switch ( (long)userData )
+	{
+		default:
+      case 0:
+        new_cheat_addr = strtol( entry_text, NULL, 16 );
+		break;
+      case 1:
+        new_cheat_val = strtol( entry_text, NULL, 16 );
+		break;
+      case 2:
+        new_cheat_cmp = strtol( entry_text, NULL, 16 );
+		break;
+      case 3:
+        new_cheat_name.assign( entry_text );
+		break;
+	}
+
+   //printf("Cheat Value Entry contents: '%s' Value: 0x%02lx\n", entry_text, value);
+}
+
+static void addCheat2Active( GtkWidget *widget,
+                             void *userData )
+{
+
+	if ( FCEUI_AddCheat( new_cheat_name.c_str(), new_cheat_addr, new_cheat_val, new_cheat_cmp, 1) )
+	{
+	   showActiveCheatList();
+	}
+}
+
+static void removeCheatFromActive( GtkWidget *widget,
+                             GtkTreeView *tree )
+{
+	int numListRows;
+	GList *selListRows, *tmpList;
+	GtkTreeModel *model = NULL;
+	GtkTreeSelection *treeSel = gtk_tree_view_get_selection(tree);
+
+	numListRows = gtk_tree_selection_count_selected_rows( treeSel );
+
+	//printf("Number of Rows Selected: %i\n", numListRows );
+
+	selListRows = gtk_tree_selection_get_selected_rows( treeSel, &model );
+
+	tmpList = selListRows;
+
+	while ( tmpList )
+	{
+		int depth;
+		int *indexArray;
+		GtkTreePath *path = (GtkTreePath*)tmpList->data;
+
+		depth = gtk_tree_path_get_depth(path);
+		indexArray = gtk_tree_path_get_indices(path);
+
+		if ( depth > 0 )
+		{
+         FCEUI_DelCheat( indexArray[0] );
+		}
+		//printf("Depth: %i \n", depth );
+
+		//for (int i=0; i<depth; i++)
+		//{
+      //   printf("%i: %i\n", i, indexArray[i] );
+		//}
+      tmpList = tmpList->next;
+	}
+
+   g_list_free_full(selListRows, (GDestroyNotify) gtk_tree_path_free);
+
+	showActiveCheatList();
+}
+
+static void updateCheatList( GtkWidget *widget,
+                             void *userData )
+{
+
+	showActiveCheatList();
+}
 
 // creates and opens cheats window
 static void openCheatsWindow(void)
@@ -1607,22 +1725,22 @@ static void openCheatsWindow(void)
 	vbox = gtk_vbox_new(FALSE, 5);
 	frame = gtk_frame_new("Active Cheats");
 	
-	actv_cheats_store = gtk_tree_store_new( 1, G_TYPE_STRING);
+	actv_cheats_store = gtk_tree_store_new( 4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING );
 
    GtkTreeIter iter;
     
    gtk_tree_store_append(actv_cheats_store, &iter, NULL); // aquire iter
 
-	for(int i=0; i<15; i++)
-   {
-        std::string cheatName = "Test";
+	//for(int i=0; i<15; i++)
+   //{
+   //     std::string cheatName = "Test";
 
-        gtk_tree_store_set(actv_cheats_store, &iter, 
-                0, cheatName.c_str(),
-                -1);
+   //     gtk_tree_store_set(actv_cheats_store, &iter, 
+   //             0, cheatName.c_str(),
+   //             -1);
 
-        gtk_tree_store_append(actv_cheats_store, &iter, NULL); // acquire child iterator
-   }
+   //     gtk_tree_store_append(actv_cheats_store, &iter, NULL); // acquire child iterator
+   //}
 
 	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(actv_cheats_store));
 
@@ -1630,7 +1748,13 @@ static void openCheatsWindow(void)
 	GtkTreeViewColumn* column;
 	
 	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes("Active Cheats", renderer, "text", 0, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Addr", renderer, "text", 0, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	column = gtk_tree_view_column_new_with_attributes("Val", renderer, "text", 1, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	column = gtk_tree_view_column_new_with_attributes("Cmp", renderer, "text", 2, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	column = gtk_tree_view_column_new_with_attributes("Desc", renderer, "text", 3, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 	
 	scroll = gtk_scrolled_window_new(NULL, NULL);
@@ -1643,6 +1767,11 @@ static void openCheatsWindow(void)
 	label = gtk_label_new("Name:");
 	txt_entry = gtk_entry_new();
 
+   g_signal_connect( txt_entry, "activate",
+		      G_CALLBACK(newCheatEntryCB), (void*)3L );
+   g_signal_connect( txt_entry, "changed",
+		      G_CALLBACK(newCheatEntryCB), (void*)3L );
+
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 1);
 	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, TRUE, TRUE, 1);
 
@@ -1651,24 +1780,39 @@ static void openCheatsWindow(void)
 	hbox = gtk_hbox_new(FALSE, 6);
 	label = gtk_label_new("Addr:");
 	txt_entry = gtk_entry_new();
-	gtk_entry_set_max_length( GTK_ENTRY(txt_entry), 8 );
-	gtk_entry_set_width_chars( GTK_ENTRY(txt_entry), 8 );
+	gtk_entry_set_max_length( GTK_ENTRY(txt_entry), 4 );
+	gtk_entry_set_width_chars( GTK_ENTRY(txt_entry), 4 );
+
+   g_signal_connect( txt_entry, "activate",
+		      G_CALLBACK(newCheatEntryCB), (void*)0L );
+   g_signal_connect( txt_entry, "changed",
+		      G_CALLBACK(newCheatEntryCB), (void*)0L );
 
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 1);
 	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, TRUE, TRUE, 1);
 
 	label = gtk_label_new("Val:");
 	txt_entry = gtk_entry_new();
-	gtk_entry_set_max_length( GTK_ENTRY(txt_entry), 4 );
-	gtk_entry_set_width_chars( GTK_ENTRY(txt_entry), 4 );
+	gtk_entry_set_max_length( GTK_ENTRY(txt_entry), 2 );
+	gtk_entry_set_width_chars( GTK_ENTRY(txt_entry), 2 );
+
+   g_signal_connect( txt_entry, "activate",
+		      G_CALLBACK(newCheatEntryCB), (void*)1L );
+   g_signal_connect( txt_entry, "changed",
+		      G_CALLBACK(newCheatEntryCB), (void*)1L );
 
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 1);
 	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, TRUE, TRUE, 1);
 
 	label = gtk_label_new("Cmp:");
 	txt_entry = gtk_entry_new();
-	gtk_entry_set_max_length( GTK_ENTRY(txt_entry), 4 );
-	gtk_entry_set_width_chars( GTK_ENTRY(txt_entry), 4 );
+	gtk_entry_set_max_length( GTK_ENTRY(txt_entry), 2 );
+	gtk_entry_set_width_chars( GTK_ENTRY(txt_entry), 2 );
+
+   g_signal_connect( txt_entry, "activate",
+		      G_CALLBACK(newCheatEntryCB), (void*)2L );
+   g_signal_connect( txt_entry, "changed",
+		      G_CALLBACK(newCheatEntryCB), (void*)2L );
 
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 1);
 	gtk_box_pack_start(GTK_BOX(hbox), txt_entry, TRUE, TRUE, 1);
@@ -1678,10 +1822,21 @@ static void openCheatsWindow(void)
 	hbox = gtk_hbox_new(FALSE, 3);
 	button = gtk_button_new_with_label("Add");
 	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, FALSE, 1);
+
+	g_signal_connect( button, "clicked",
+		      G_CALLBACK (addCheat2Active), (gpointer) NULL );
+
 	button = gtk_button_new_with_label("Delete");
 	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, FALSE, 1);
+
+	g_signal_connect( button, "clicked",
+		      G_CALLBACK (removeCheatFromActive), (gpointer) tree );
+
 	button = gtk_button_new_with_label("Update");
 	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, FALSE, 1);
+
+	g_signal_connect( button, "clicked",
+		      G_CALLBACK (updateCheatList), (gpointer) NULL );
 
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 1);
 
