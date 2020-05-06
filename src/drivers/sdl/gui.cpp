@@ -74,6 +74,10 @@ static bool wasPausedByCheats = false;
 static bool pauseWhileCheatsActv = false;
 static bool cheatWindowOpen = false;
 
+//-----------------------------------------
+// Ram Watch static variables 
+static GtkTreeStore *ram_watch_store = NULL;
+
 // check to see if a particular GTK version is available
 // 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,24);
 bool checkGTKVersion(int major_required, int minor_required)
@@ -2186,6 +2190,289 @@ static void openCheatsWindow(void)
    cheatWindowOpen = true;
 }
 
+//*******************************************************************************************************
+// Ram Watch Window
+//*******************************************************************************************************
+
+static void openWatchFile()
+{
+	GtkWidget* fileChooser;
+	GtkFileFilter* filterWch;
+	GtkFileFilter* filterAll;
+	
+	filterWch = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterWch, "*.wch");
+	gtk_file_filter_add_pattern(filterWch, "*.WCH");
+	gtk_file_filter_set_name(filterWch, "Watch files");
+	
+	filterAll = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterAll, "*");
+	gtk_file_filter_set_name(filterAll, "All Files");
+	
+	const char* last_dir;
+	g_config->getOption("SDL.LastSaveStateAs", &last_dir);
+	
+	fileChooser = gtk_file_chooser_dialog_new ("Open Watch File", GTK_WINDOW(MainWindow),
+			GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
+			
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fileChooser), last_dir);
+	
+	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(fileChooser), ".wch");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterWch);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
+	
+	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
+	{
+		char* filename;
+		
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+		//FCEUI_SaveState(filename);
+		//g_config->setOption("SDL.LastSaveStateAs", filename);
+		g_free(filename);
+	}
+	gtk_widget_destroy (fileChooser);
+	
+	
+}
+
+// Our menu, in the XML markup format used by GtkUIManager
+static char* menuRamWatchXml = 
+	"<ui>"
+	"  <menubar name='Menubar'>"
+	"    <menu action='FileMenuAction'>"
+	"      <menuitem action='OpenWatchFile' />"
+	"      <menuitem action='SaveWatchFile' />"
+	"    </menu>"
+	"  </menubar>"
+	"</ui>";
+
+static GtkActionEntry ramWatch_entries[] = {
+   {"FileMenuAction", NULL, "_File"},
+   {"OpenWatchFile", GTK_STOCK_OPEN, "_Open Watch", NULL, NULL, G_CALLBACK(openWatchFile)},
+   {"SaveWatchFile", GTK_STOCK_SAVE_AS, "_Save Watch", NULL, NULL, G_CALLBACK(openWatchFile)},
+};
+
+
+static GtkWidget* CreateRamWatchMenubar( GtkWidget* window)
+{
+	GtkUIManager *ui_manager;
+	GtkActionGroup *action_group;
+	GtkAccelGroup* accel_group;
+	GError *error = NULL;
+	//GtkAction* state;
+
+	/* Make an UIManager (which makes a menubar). */
+	ui_manager = gtk_ui_manager_new ();
+	
+	/* Add the menu items to the UIManager as a GtkActionGroup. */
+	action_group = gtk_action_group_new ("MenubarActions");
+	gtk_action_group_add_actions (action_group, ramWatch_entries, G_N_ELEMENTS (ramWatch_entries), NULL);
+	//gtk_action_group_add_toggle_actions (action_group, toggle_entries, G_N_ELEMENTS (toggle_entries), NULL);
+	//gtk_action_group_add_radio_actions (action_group, radio_entries, G_N_ELEMENTS (radio_entries), 0, G_CALLBACK(changeState), NULL);
+	gtk_ui_manager_insert_action_group (ui_manager, action_group, 0);
+    
+	/* Read the menu layout from the XML markup. */
+	gtk_ui_manager_add_ui_from_string (ui_manager, menuRamWatchXml, -1, &error);
+	if (error)
+	{
+		fprintf (stderr, "Unable to create menu bar: %s\n", error->message);
+		g_error_free (error);
+	}
+    
+	/* Attach the new accelerator group to the window. */
+	accel_group = gtk_ui_manager_get_accel_group (ui_manager);
+	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
+    
+	/* Get an action that can be used to change the active state slot selection. */
+	//state = gtk_action_group_get_action (action_group, "State0Action");
+	//if (state && GTK_IS_RADIO_ACTION (state))
+	//	stateSlot = GTK_RADIO_ACTION (state);
+
+	/* Finally, return the actual menu bar created by the UIManager. */
+	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
+}
+
+static int openRamWatchEntryDialog( char *name, int *addr, int *type )
+{
+   int retval;
+	GtkWidget* win;
+	GtkWidget* vbox;
+	GtkWidget* hbox;
+	GtkWidget* label;
+	GtkWidget* chkbox;
+	GtkWidget* txt_entry_name;
+	GtkWidget* txt_entry_addr;
+   char stmp[32];
+
+   win = gtk_dialog_new_with_buttons("RAM Watch Entry",
+			GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
+			GTK_STOCK_CLOSE,
+			GTK_RESPONSE_OK,
+			NULL);
+	gtk_window_set_default_size(GTK_WINDOW(win), 400, 200);
+
+	vbox = gtk_vbox_new(FALSE, 4);
+
+   label = gtk_label_new("Name:");
+	txt_entry_name = gtk_entry_new();
+
+   if ( name[0] != 0 ){
+      gtk_entry_set_text( GTK_ENTRY(txt_entry_name), name );
+   }
+
+	gtk_box_pack_start (GTK_BOX(vbox), label, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX(vbox), txt_entry_name, FALSE, TRUE, 0);
+
+	hbox = gtk_hbox_new(FALSE, 2);
+   label = gtk_label_new("Hex Address:");
+	txt_entry_addr = gtk_entry_new();
+
+	gtk_box_pack_start (GTK_BOX(vbox), label, FALSE, FALSE, 0);
+
+   label = gtk_label_new("0x");
+   sprintf( stmp, "%04x", *addr );
+	gtk_entry_set_max_length( GTK_ENTRY(txt_entry_addr), 4 );
+	gtk_entry_set_width_chars( GTK_ENTRY(txt_entry_addr), 4 );
+   gtk_entry_set_text( GTK_ENTRY(txt_entry_addr), stmp );
+
+	gtk_box_pack_start (GTK_BOX(hbox), label, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX(hbox), txt_entry_addr, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
+
+   chkbox = gtk_check_button_new_with_label("Value is Unsigned");
+	gtk_box_pack_start (GTK_BOX(vbox), chkbox, FALSE, FALSE, 0);
+
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(win))), vbox, TRUE, TRUE, 0);
+
+	gtk_widget_show_all(win);
+
+   retval = gtk_dialog_run(GTK_DIALOG(win));
+
+   if ( retval )
+   {
+      // FIXME - what error checking should be done here
+   }
+
+   strcpy( name, gtk_entry_get_text ( GTK_ENTRY(txt_entry_name) ) );
+
+  *addr = strtol( gtk_entry_get_text ( GTK_ENTRY(txt_entry_addr) ), NULL, 16 );
+
+  *type = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(chkbox) );
+
+   //printf("retval %i\n", retval );
+
+   gtk_widget_destroy(win);
+
+   return 0;
+}
+
+static void editRamWatch( GtkButton *button,
+                          void *userData )
+{
+   char name[256];
+   int addr = 0, type = 0;
+   name[0] = 0;
+   openRamWatchEntryDialog( name, &addr, &type );
+	printf("Edit RamWatch '%s'  0x%04x   %i\n", name, addr, type);
+}
+
+static void removeRamWatch( GtkButton *button,
+                          void *userData )
+{
+	printf("Remove RamWatch\n");
+}
+
+static void newRamWatch( GtkButton *button,
+                         void *userData )
+{
+   char name[256];
+   int addr = 0, type = 0;
+   name[0] = 0;
+   openRamWatchEntryDialog( name, &addr, &type );
+	printf("New RamWatch '%s'  0x%04x   %i\n", name, addr, type);
+}
+
+// creates and opens cheats window
+static void openMemoryWatchWindow(void)
+{
+	GtkWidget* win;
+	GtkWidget* main_vbox;
+	GtkWidget* hbox;
+	GtkWidget* vbox;
+	GtkWidget* button;
+	GtkWidget *tree;
+	GtkWidget *scroll;
+   GtkWidget* menubar;
+
+	win = gtk_dialog_new_with_buttons("RAM Watch",
+			GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
+			GTK_STOCK_CLOSE,
+			GTK_RESPONSE_OK,
+			NULL);
+	gtk_window_set_default_size(GTK_WINDOW(win), 600, 600);
+
+	main_vbox = gtk_vbox_new(FALSE, 1);
+
+   menubar = CreateRamWatchMenubar(win);
+
+	gtk_box_pack_start (GTK_BOX(main_vbox), menubar, FALSE, TRUE, 0);
+	
+   hbox = gtk_hbox_new(FALSE,2);
+
+   ram_watch_store = gtk_tree_store_new( 4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+
+	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(ram_watch_store));
+
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn* column;
+
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes("Addr", renderer, "text", 0, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	column = gtk_tree_view_column_new_with_attributes("Value Dec", renderer, "text", 1, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	column = gtk_tree_view_column_new_with_attributes("Value Hex", renderer, "text", 2, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	column = gtk_tree_view_column_new_with_attributes("Notes", renderer, "text", 3, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+
+   scroll = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_NEVER,
+			GTK_POLICY_AUTOMATIC);
+	gtk_container_add(GTK_CONTAINER(scroll), tree);
+	gtk_box_pack_start(GTK_BOX(hbox), scroll, TRUE, TRUE, 5);
+
+	gtk_box_pack_start(GTK_BOX(main_vbox), hbox, TRUE, TRUE, 5);
+
+	vbox = gtk_vbox_new(FALSE, 3);
+
+   button = gtk_button_new_with_label("Edit");
+	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 5);
+	g_signal_connect( button, "clicked",
+		      G_CALLBACK (editRamWatch), (gpointer) NULL );
+
+   button = gtk_button_new_with_label("Remove");
+	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 5);
+	g_signal_connect( button, "clicked",
+		      G_CALLBACK (removeRamWatch), (gpointer) NULL );
+
+   button = gtk_button_new_with_label("New");
+	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 5);
+	g_signal_connect( button, "clicked",
+		      G_CALLBACK (newRamWatch), (gpointer) NULL );
+
+	gtk_box_pack_start(GTK_BOX(hbox), vbox, TRUE, TRUE, 5);
+
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(win))), main_vbox, TRUE, TRUE, 0);
+
+   g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
+	
+	gtk_widget_show_all(win);
+}
+
+
 void recordMovie()
 {
 	if(isloaded)
@@ -3034,6 +3321,7 @@ static char* menuXml =
 	"    </menu>"
 	"    <menu action='ToolsMenuAction'>"
 	"      <menuitem action='CheatsAction' />"
+	"      <menuitem action='RamWatchAction' />"
 	"    </menu>"
 	"    <menu action='MovieMenuAction'>"
 	"      <menuitem action='OpenMovieAction' />"
@@ -3089,6 +3377,7 @@ static GtkActionEntry normal_entries[] = {
 	
 	{"ToolsMenuAction", NULL, "_Tools"},
 	{"CheatsAction", "cheats-win", "_Cheats...", NULL, NULL, G_CALLBACK(openCheatsWindow)},
+	{"RamWatchAction", "ram-watch", "_RAM Watch...", NULL, NULL, G_CALLBACK(openMemoryWatchWindow)},
 
 	{"MovieMenuAction", NULL, "_Movie"},
 	{"OpenMovieAction", GTK_STOCK_OPEN, "_Open", "<shift>F7", NULL, G_CALLBACK(loadMovie)},
