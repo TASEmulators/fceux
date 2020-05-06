@@ -1,6 +1,7 @@
 #include "../../types.h"
 #include "../../fceu.h"
 #include "../../cheat.h"
+#include "../../debug.h"
 #include "../../driver.h"
 #include "../../version.h"
 #include "../../movie.h"
@@ -32,6 +33,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
+#include <list>
 
 // Fix compliation errors for older version of GTK (Ubuntu 10.04 LTS)
 #if GTK_MINOR_VERSION < 24 && GTK_MAJOR_VERSION == 2
@@ -77,6 +79,72 @@ static bool cheatWindowOpen = false;
 //-----------------------------------------
 // Ram Watch static variables 
 static GtkTreeStore *ram_watch_store = NULL;
+static gint ramWatchEvntSrcID = 0;
+
+struct ramWatch_t
+{
+   std::string  name;
+   int  addr;
+   int  type;
+
+   union {
+       int8_t  i;
+      uint8_t  u;
+   } val;
+
+   ramWatch_t(void)
+   {
+      addr = 0; type = 0; val.u = 0;
+   };
+};
+
+struct ramWatchList_t
+{
+
+   std::list <ramWatch_t*> ls;
+
+   ramWatchList_t(void)
+   {
+
+   } 
+
+  ~ramWatchList_t(void)
+   {
+      ramWatch_t *rw;
+
+      while ( !ls.empty() )
+      {
+         rw = ls.front();
+
+         delete rw;
+
+         ls.pop_front();
+      }
+   } 
+
+   size_t  size(void){ return ls.size(); };
+
+   void  add_entry( const char *name, int addr, int type )
+   {
+      ramWatch_t *rw = new ramWatch_t;
+
+      rw->name.assign(name);
+      rw->addr = addr;
+      rw->type = type;
+      ls.push_back(rw);
+   }
+
+   void updateMemoryValues(void)
+   {
+      std::list <ramWatch_t*>::iterator it;
+
+      for (it=ls.begin(); it!=ls.end(); it++)
+      {
+         (*it)->val.u = GetMem( (*it)->addr );
+      }
+   }
+};
+static ramWatchList_t ramWatchList;
 
 // check to see if a particular GTK version is available
 // 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,24);
@@ -2193,6 +2261,39 @@ static void openCheatsWindow(void)
 //*******************************************************************************************************
 // Ram Watch Window
 //*******************************************************************************************************
+//
+static void showRamWatchResults(void)
+{
+   std::list <ramWatch_t*>::iterator it;
+   GtkTreeIter iter;
+   char addrStr[32], valStr1[16], valStr2[16];
+   ramWatch_t *rw;
+
+   gtk_tree_store_clear(ram_watch_store);
+
+   gtk_tree_store_append( ram_watch_store, &iter, NULL); // aquire iter
+
+   for (it=ramWatchList.ls.begin(); it!=ramWatchList.ls.end(); it++)
+   {
+      rw = *it;
+		sprintf( addrStr, "0x%04x", rw->addr );
+
+      rw->val.u = GetMem(rw->addr);
+
+      if ( rw->type ){
+		   sprintf( valStr1,	"%4u", rw->val.u);
+      } else {
+		   sprintf( valStr1,	"%4i", rw->val.i);
+      }
+		sprintf( valStr2,	"0x%02x", rw->val.u);
+   
+      gtk_tree_store_set(ram_watch_store, &iter, 
+              0, addrStr, 1, valStr1, 2, valStr2, 3, rw->name.c_str(),
+              -1);
+
+      gtk_tree_store_append( ram_watch_store, &iter, NULL); // aquire iter
+   }
+}
 
 static void openWatchFile()
 {
@@ -2391,6 +2492,18 @@ static void newRamWatch( GtkButton *button,
    name[0] = 0;
    openRamWatchEntryDialog( name, &addr, &type );
 	printf("New RamWatch '%s'  0x%04x   %i\n", name, addr, type);
+
+   ramWatchList.add_entry( name, addr, type );
+
+   showRamWatchResults();
+}
+
+static gint updateRamWatchTree( void *userData )
+{
+   static uint32_t c = 0;
+   //printf("RamWatch: %u\n", c++ );
+   showRamWatchResults();
+   return 1;
 }
 
 // creates and opens cheats window
@@ -2444,6 +2557,11 @@ static void openMemoryWatchWindow(void)
 	gtk_box_pack_start(GTK_BOX(hbox), scroll, TRUE, TRUE, 5);
 
 	gtk_box_pack_start(GTK_BOX(main_vbox), hbox, TRUE, TRUE, 5);
+
+   if ( ramWatchEvntSrcID == 0 )
+   {
+      ramWatchEvntSrcID = g_timeout_add( 100, updateRamWatchTree, NULL );
+   }
 
 	vbox = gtk_vbox_new(FALSE, 3);
 
