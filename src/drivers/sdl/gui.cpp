@@ -86,16 +86,35 @@ struct ramWatch_t
    std::string  name;
    int  addr;
    int  type;
+   int  size;
 
    union {
-       int8_t  i;
-      uint8_t  u;
+       int8_t   i8;
+      uint8_t   u8;
+       int16_t  i16;
+      uint16_t  u16;
    } val;
 
    ramWatch_t(void)
    {
-      addr = 0; type = 0; val.u = 0;
+      addr = 0; type = 0; size = 0; val.u16 = 0;
    };
+
+   void updateMem(void)
+   {
+      if ( size == 1)
+      {
+         val.u8 = GetMem( addr );
+      } 
+      else if ( size == 2)
+      {
+         val.u16 = GetMem( addr ) | (GetMem( addr+1 ) << 8);
+      } 
+      else 
+      {
+         val.u8 = GetMem( addr );
+      }
+   }
 };
 
 struct ramWatchList_t
@@ -124,23 +143,27 @@ struct ramWatchList_t
 
    size_t  size(void){ return ls.size(); };
 
-   void  add_entry( const char *name, int addr, int type )
+   void  add_entry( const char *name, int addr, int type, int size )
    {
       ramWatch_t *rw = new ramWatch_t;
 
       rw->name.assign(name);
       rw->addr = addr;
       rw->type = type;
+      rw->size = size;
       ls.push_back(rw);
    }
 
    void updateMemoryValues(void)
    {
+      ramWatch_t *rw;
       std::list <ramWatch_t*>::iterator it;
 
       for (it=ls.begin(); it!=ls.end(); it++)
       {
-         (*it)->val.u = GetMem( (*it)->addr );
+         rw = *it;
+
+         rw->updateMem();
       }
    }
 };
@@ -1474,6 +1497,9 @@ void toggleAutoResume (GtkToggleAction *action)
 	g_config->setOption("SDL.AutoResume", (int)autoResume);
 	AutoResumePlay = autoResume;
 }
+//*******************************************************************************************************
+// Cheat Window
+//*******************************************************************************************************
 
 static int ShowCheatSearchResultsCallB(uint32 a, uint8 last, uint8 current)
 {
@@ -2278,14 +2304,26 @@ static void showRamWatchResults(void)
       rw = *it;
 		sprintf( addrStr, "0x%04x", rw->addr );
 
-      rw->val.u = GetMem(rw->addr);
+      rw->updateMem();
 
-      if ( rw->type ){
-		   sprintf( valStr1,	"%4u", rw->val.u);
-      } else {
-		   sprintf( valStr1,	"%4i", rw->val.i);
+      if ( rw->size == 2 )
+      {
+         if ( rw->type ){
+			   sprintf( valStr1,	"%6u", rw->val.u16);
+         } else {
+			   sprintf( valStr1,	"%6i", rw->val.i16);
+         }
+		   sprintf( valStr2,	"0x%04x", rw->val.u16);
       }
-		sprintf( valStr2,	"0x%02x", rw->val.u);
+      else
+      {
+         if ( rw->type ){
+			   sprintf( valStr1,	"%6u", rw->val.u8);
+         } else {
+			   sprintf( valStr1,	"%6i", rw->val.i8);
+         }
+		   sprintf( valStr2,	"0x%02x", rw->val.u8);
+      }
    
       gtk_tree_store_set(ram_watch_store, &iter, 
               0, addrStr, 1, valStr1, 2, valStr2, 3, rw->name.c_str(),
@@ -2394,7 +2432,7 @@ static GtkWidget* CreateRamWatchMenubar( GtkWidget* window)
 	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
 }
 
-static int openRamWatchEntryDialog( char *name, int *addr, int *type )
+static int openRamWatchEntryDialog( char *name, int *addr, int *type, int *size )
 {
    int retval;
 	GtkWidget* win;
@@ -2402,6 +2440,7 @@ static int openRamWatchEntryDialog( char *name, int *addr, int *type )
 	GtkWidget* hbox;
 	GtkWidget* label;
 	GtkWidget* chkbox;
+	GtkWidget* button1, *button2, *button4;
 	GtkWidget* txt_entry_name;
 	GtkWidget* txt_entry_addr;
    char stmp[32];
@@ -2413,7 +2452,7 @@ static int openRamWatchEntryDialog( char *name, int *addr, int *type )
 			NULL);
 	gtk_window_set_default_size(GTK_WINDOW(win), 400, 200);
 
-	vbox = gtk_vbox_new(FALSE, 4);
+	vbox = gtk_vbox_new(FALSE, 6);
 
    label = gtk_label_new("Name:");
 	txt_entry_name = gtk_entry_new();
@@ -2444,7 +2483,27 @@ static int openRamWatchEntryDialog( char *name, int *addr, int *type )
    chkbox = gtk_check_button_new_with_label("Value is Unsigned");
 	gtk_box_pack_start (GTK_BOX(vbox), chkbox, FALSE, FALSE, 0);
 
-	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(win))), vbox, TRUE, TRUE, 0);
+	hbox = gtk_hbox_new(FALSE, 4);
+   label = gtk_label_new("Size in Bytes:");
+   button1 = gtk_radio_button_new_with_label (NULL, "1");
+   //gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
+
+	gtk_box_pack_start (GTK_BOX(hbox), label, FALSE, FALSE, 1);
+	gtk_box_pack_start (GTK_BOX(hbox), button1, TRUE, FALSE, 1);
+
+   button2 = gtk_radio_button_new_with_label_from_widget ( GTK_RADIO_BUTTON (button1), "2");
+	gtk_box_pack_start (GTK_BOX(hbox), button2, TRUE, FALSE, 1);
+
+   button4 = gtk_radio_button_new_with_label_from_widget ( GTK_RADIO_BUTTON (button1), "4");
+	gtk_box_pack_start (GTK_BOX(hbox), button4, TRUE, FALSE, 1);
+
+   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button1), TRUE);
+   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button2), FALSE);
+   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button4), FALSE);
+
+	gtk_box_pack_start (GTK_BOX(vbox), hbox, FALSE, TRUE, 1);
+
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(win))), vbox, TRUE, TRUE, 1);
 
 	gtk_widget_show_all(win);
 
@@ -2461,8 +2520,24 @@ static int openRamWatchEntryDialog( char *name, int *addr, int *type )
 
   *type = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(chkbox) );
 
+   if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(button4) ) )
+   {
+     *size = 4;
+   }
+   else if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(button2) ) )
+   {
+     *size = 2;
+   }
+   else
+   {
+     *size = 1;
+   }
+
    //printf("retval %i\n", retval );
 
+   g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
+	
    gtk_widget_destroy(win);
 
    return 0;
@@ -2472,10 +2547,10 @@ static void editRamWatch( GtkButton *button,
                           void *userData )
 {
    char name[256];
-   int addr = 0, type = 0;
+   int addr = 0, type = 0, size = 0;
    name[0] = 0;
-   openRamWatchEntryDialog( name, &addr, &type );
-	printf("Edit RamWatch '%s'  0x%04x   %i\n", name, addr, type);
+   openRamWatchEntryDialog( name, &addr, &type, &size );
+	printf("Edit RamWatch '%s'  0x%04x   %i   %i\n", name, addr, type, size);
 }
 
 static void removeRamWatch( GtkButton *button,
@@ -2488,19 +2563,19 @@ static void newRamWatch( GtkButton *button,
                          void *userData )
 {
    char name[256];
-   int addr = 0, type = 0;
+   int addr = 0, type = 0, size = 0;
    name[0] = 0;
-   openRamWatchEntryDialog( name, &addr, &type );
-	printf("New RamWatch '%s'  0x%04x   %i\n", name, addr, type);
+   openRamWatchEntryDialog( name, &addr, &type, &size );
+	printf("New RamWatch '%s'  0x%04x   %i   %i\n", name, addr, type, size);
 
-   ramWatchList.add_entry( name, addr, type );
+   ramWatchList.add_entry( name, addr, type, size );
 
    showRamWatchResults();
 }
 
 static gint updateRamWatchTree( void *userData )
 {
-   static uint32_t c = 0;
+   //static uint32_t c = 0;
    //printf("RamWatch: %u\n", c++ );
    showRamWatchResults();
    return 1;
