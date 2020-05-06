@@ -66,12 +66,13 @@ static int  cheat_search_known_value = 0;
 static int  cheat_search_neq_value = 0;
 static int  cheat_search_gt_value = 0;
 static int  cheat_search_lt_value = 0;
-static int  new_cheat_addr =  0;
-static int  new_cheat_val  =  0;
+static int  new_cheat_addr = -1;
+static int  new_cheat_val  = -1;
 static int  new_cheat_cmp  = -1;
 static std::string new_cheat_name;
 static bool wasPausedByCheats = false;
 static bool pauseWhileCheatsActv = false;
+static bool cheatWindowOpen = false;
 
 // check to see if a particular GTK version is available
 // 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,24);
@@ -1425,8 +1426,6 @@ static void showCheatSearchResults(void)
 
    gtk_tree_store_clear(ram_match_store);
 
-	gtk_tree_store_append( ram_match_store, &ram_match_iter, NULL); // aquire iter
-
 	total_matches = FCEUI_CheatSearchGetCount();
 
 	printf("Cheat Search Matches: %i \n", total_matches );
@@ -1439,10 +1438,10 @@ static void cheatSearchReset( GtkButton *button,
 {
 	printf("Cheat Search Reset!\n");
 
-   cheat_search_known_value = 0;
-   cheat_search_neq_value = 0;
-   cheat_search_gt_value = 0;
-   cheat_search_lt_value = 0;
+   //cheat_search_known_value = 0;
+   //cheat_search_neq_value = 0;
+   //cheat_search_gt_value = 0;
+   //cheat_search_lt_value = 0;
 
 	FCEUI_CheatSearchBegin();
 	showCheatSearchResults();
@@ -1463,7 +1462,7 @@ static void cheatSearchEqual( GtkButton *button,
 {
 	//printf("Cheat Search Equal !\n");
 
-	FCEUI_CheatSearchEnd(FCEU_SEARCH_PUERLY_RELATIVE_CHANGE, 0, cheat_search_neq_value);
+	FCEUI_CheatSearchEnd(FCEU_SEARCH_PUERLY_RELATIVE_CHANGE, 0, 0);
 	showCheatSearchResults();
 }
 
@@ -1505,7 +1504,7 @@ static void cheatSearchLessThan( GtkButton *button,
 	//printf("Cheat Search LessThan %i!\n", checked);
 
 	if ( checked ){
-	   FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_LT_KNOWN, 0, cheat_search_gt_value);
+	   FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_LT_KNOWN, 0, cheat_search_lt_value);
 	} else {
 	   FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_LT, 0, 0);
 	}
@@ -1693,10 +1692,24 @@ static void newCheatEntryCB( GtkWidget *widget,
 	{
 		default:
       case 0:
-        new_cheat_addr = strtol( entry_text, NULL, 16 );
+		  if ( entry_text[0] == 0 )
+		  {
+			  new_cheat_addr = -1;
+		  }
+		  else
+        {
+           new_cheat_addr = strtol( entry_text, NULL, 16 );
+        }
 		break;
       case 1:
-        new_cheat_val = strtol( entry_text, NULL, 16 );
+		  if ( entry_text[0] == 0 )
+		  {
+			  new_cheat_val = -1;
+		  }
+		  else
+        {
+           new_cheat_val = strtol( entry_text, NULL, 16 );
+        }
 		break;
       case 2:
 		{
@@ -1722,9 +1735,12 @@ static void addCheat2Active( GtkWidget *widget,
                              void *userData )
 {
 
-	if ( FCEUI_AddCheat( new_cheat_name.c_str(), new_cheat_addr, new_cheat_val, new_cheat_cmp, 1) )
-	{
-	   showActiveCheatList();
+   if ( (new_cheat_addr >= 0) && (new_cheat_val >= 0) )
+   {
+		if ( FCEUI_AddCheat( new_cheat_name.c_str(), new_cheat_addr, new_cheat_val, new_cheat_cmp, 1) )
+		{
+		   showActiveCheatList();
+		}
 	}
 }
 
@@ -1808,9 +1824,23 @@ static void updateCheatList( GtkWidget *widget,
 		{
 			uint32 a; uint8 v;
 			int c, s, type;
+         const char *name = NULL;
 			if ( FCEUI_GetCheat( indexArray[0], NULL, &a, &v, &c, &s, &type) )
 			{
-            FCEUI_SetCheat( indexArray[0], new_cheat_name.c_str(), new_cheat_addr, new_cheat_val, new_cheat_cmp, s, type );
+            if ( new_cheat_addr >= 0 ){
+               a = new_cheat_addr;
+            }
+            if ( new_cheat_val >= 0 ){
+               v = new_cheat_val;
+            }
+            if ( new_cheat_cmp >= 0 ){
+               c = new_cheat_cmp;
+            }
+            if ( new_cheat_name.size() )
+            {
+               name = new_cheat_name.c_str();
+            }
+            FCEUI_SetCheat( indexArray[0], name, a, v, c, s, type );
 			}
 		}
 		//printf("Depth: %i \n", depth );
@@ -1835,6 +1865,15 @@ void closeCheatDialog(GtkWidget* w, GdkEvent* e, gpointer p)
    }
    wasPausedByCheats = false;
    pauseWhileCheatsActv = false;
+   cheatWindowOpen = false;
+
+   cheat_search_known_value = 0;
+   cheat_search_neq_value = 0;
+   cheat_search_gt_value = 0;
+   cheat_search_lt_value = 0;
+   new_cheat_addr = -1;
+   new_cheat_val  = -1;
+   new_cheat_cmp  = -1;
 
 	gtk_widget_destroy(w);
 }
@@ -1852,6 +1891,10 @@ static void openCheatsWindow(void)
 	GtkWidget *tree;
 	GtkWidget *scroll;
 	GtkWidget *align;
+
+   if ( cheatWindowOpen ){
+      return; // Only allow one cheat window to be open per gui.
+   }
 
 	win = gtk_dialog_new_with_buttons("Cheats",
 			GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
@@ -2112,19 +2155,6 @@ static void openCheatsWindow(void)
 
 	ram_match_store = gtk_tree_store_new( 3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
-   gtk_tree_store_append( ram_match_store, &ram_match_iter, NULL); // aquire iter
-
-	//for(int i=0; i<15; i++)
-   //{
-   //     std::string ramText = "Test";
-
-   //     gtk_tree_store_set(ram_match_store, &ram_match_iter, 
-   //             0, ramText.c_str(),
-   //             -1);
-
-   //     gtk_tree_store_append(ram_match_store, &ram_match_iter, NULL); // acquire child iterator
-   //}
-
 	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(ram_match_store));
 
 	renderer = gtk_cell_renderer_text_new();
@@ -2152,6 +2182,8 @@ static void openCheatsWindow(void)
 	g_signal_connect(win, "response", G_CALLBACK(closeCheatDialog), NULL);
 	
 	gtk_widget_show_all(win);
+
+   cheatWindowOpen = true;
 }
 
 void recordMovie()
