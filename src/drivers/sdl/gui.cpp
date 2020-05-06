@@ -2288,16 +2288,25 @@ static void openCheatsWindow(void)
 // Ram Watch Window
 //*******************************************************************************************************
 //
-static void showRamWatchResults(void)
+static void showRamWatchResults(int reset)
 {
    std::list <ramWatch_t*>::iterator it;
    GtkTreeIter iter;
    char addrStr[32], valStr1[16], valStr2[16];
    ramWatch_t *rw;
 
-   gtk_tree_store_clear(ram_watch_store);
 
-   gtk_tree_store_append( ram_watch_store, &iter, NULL); // aquire iter
+
+   if ( reset )
+   {
+      gtk_tree_store_clear(ram_watch_store);
+
+      gtk_tree_store_append( ram_watch_store, &iter, NULL); // aquire iter
+   }
+   else
+   {
+      gtk_tree_model_get_iter_first( GTK_TREE_MODEL(ram_watch_store), &iter );
+   }
 
    for (it=ramWatchList.ls.begin(); it!=ramWatchList.ls.end(); it++)
    {
@@ -2329,7 +2338,14 @@ static void showRamWatchResults(void)
               0, addrStr, 1, valStr1, 2, valStr2, 3, rw->name.c_str(),
               -1);
 
-      gtk_tree_store_append( ram_watch_store, &iter, NULL); // aquire iter
+      if ( reset )
+      {
+         gtk_tree_store_append( ram_watch_store, &iter, NULL); // aquire iter
+      }
+      else
+      {
+         gtk_tree_model_iter_next( GTK_TREE_MODEL(ram_watch_store), &iter );
+      }
    }
 }
 
@@ -2570,14 +2586,14 @@ static void newRamWatch( GtkButton *button,
 
    ramWatchList.add_entry( name, addr, type, size );
 
-   showRamWatchResults();
+   showRamWatchResults(1);
 }
 
 static gint updateRamWatchTree( void *userData )
 {
    //static uint32_t c = 0;
    //printf("RamWatch: %u\n", c++ );
-   showRamWatchResults();
+   showRamWatchResults(0);
    return 1;
 }
 
