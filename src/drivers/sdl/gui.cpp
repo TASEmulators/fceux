@@ -80,6 +80,7 @@ static bool cheatWindowOpen = false;
 // Ram Watch static variables 
 static GtkTreeStore *ram_watch_store = NULL;
 static gint ramWatchEvntSrcID = 0;
+static bool ramWatchWinOpen = false;
 
 struct ramWatch_t
 {
@@ -1667,10 +1668,16 @@ static void cheatSearchValueEntryCB( GtkWidget *widget,
 
 static int activeCheatListCB(char *name, uint32 a, uint8 v, int c, int s, int type, void* data)
 {
+   long int reset;
 	char addrStr[32], valStr[16], cmpStr[16];
 	//printf("Cheat Name:'%s'   Addr:0x%04x   Val:0x%02x \n", name, a, v );
+   //
+   reset = (long)data;
 
-	gtk_tree_store_append( actv_cheats_store, &actv_cheats_iter, NULL); // aquire iter
+   if ( reset )
+   {
+	   gtk_tree_store_append( actv_cheats_store, &actv_cheats_iter, NULL); // aquire iter
+   }
 
 	sprintf( addrStr, "0x%04x", a );
 	sprintf( valStr,	"0x%02x", v );
@@ -1685,14 +1692,33 @@ static int activeCheatListCB(char *name, uint32 a, uint8 v, int c, int s, int ty
            0, s, 1, addrStr, 2, valStr, 3, cmpStr, 4, name,
            -1);
 
+   if ( !reset )
+   {
+      if ( !gtk_tree_model_iter_next( GTK_TREE_MODEL(actv_cheats_store), &actv_cheats_iter ) )
+      {
+	      gtk_tree_store_append( actv_cheats_store, &actv_cheats_iter, NULL); // aquire iter
+      }
+   }
+
    return 1;
 }
 
-static void showActiveCheatList(void)
+static void showActiveCheatList( long int reset )
 {
-   gtk_tree_store_clear(actv_cheats_store);
+   if ( reset )
+   {
+      gtk_tree_store_clear(actv_cheats_store);
+   }
+   else 
+   {
+      if ( !gtk_tree_model_get_iter_first( GTK_TREE_MODEL(actv_cheats_store), &actv_cheats_iter ) )
+      {
+         printf("No Tree Entries Loaded.\n");
+         reset = 1;
+      }
+   }
 
-   FCEUI_ListCheats( activeCheatListCB, 0 );
+   FCEUI_ListCheats( activeCheatListCB, (void*)reset );
 }
 
 static void cheatListEnableToggle( GtkCellRendererToggle *renderer,
@@ -1721,7 +1747,7 @@ static void cheatListEnableToggle( GtkCellRendererToggle *renderer,
 
 	gtk_tree_path_free( path );
 
-	showActiveCheatList();
+	showActiveCheatList(0);
 
 }
 
@@ -1777,7 +1803,7 @@ static void openCheatFile( GtkWidget *widget,
 		gtk_widget_destroy (fileChooser);
 	}
 
-	showActiveCheatList();
+	showActiveCheatList(1);
 }
 
 static void newCheatEntryCB( GtkWidget *widget,
@@ -1826,7 +1852,6 @@ static void newCheatEntryCB( GtkWidget *widget,
 		break;
 	}
 
-   //printf("Cheat Value Entry contents: '%s' Value: 0x%02lx\n", entry_text, value);
 }
 
 static void addCheat2Active( GtkWidget *widget,
@@ -1837,7 +1862,7 @@ static void addCheat2Active( GtkWidget *widget,
    {
 		if ( FCEUI_AddCheat( new_cheat_name.c_str(), new_cheat_addr, new_cheat_val, new_cheat_cmp, 1) )
 		{
-		   showActiveCheatList();
+		   showActiveCheatList(1);
 		}
 	}
 }
@@ -1873,20 +1898,21 @@ static void removeCheatFromActive( GtkWidget *widget,
 
 		if ( depth > 0 )
 		{
+         //GtkTreeIter iter;
          FCEUI_DelCheat( indexArray[0] );
-		}
-		//printf("Depth: %i \n", depth );
 
-		//for (int i=0; i<depth; i++)
-		//{
-      //   printf("%i: %i\n", i, indexArray[i] );
-		//}
+         //if ( gtk_tree_model_get_iter ( model, &iter, path ) )
+         //{
+         //   gtk_tree_store_remove( actv_cheats_store, &iter );
+         //}
+		}
+
       tmpList = tmpList->next;
 	}
 
    g_list_free_full(selListRows, (GDestroyNotify) gtk_tree_path_free);
 
-	showActiveCheatList();
+	showActiveCheatList(1);
 }
 
 static void updateCheatList( GtkWidget *widget,
@@ -1952,8 +1978,59 @@ static void updateCheatList( GtkWidget *widget,
 
    g_list_free_full(selListRows, (GDestroyNotify) gtk_tree_path_free);
 
-	showActiveCheatList();
+	showActiveCheatList(0);
 }
+
+static void  cheat_cell_edited_cb (GtkCellRendererText *cell,
+                                   gchar               *path_string,
+                                   gchar               *new_text,
+                                   gpointer             user_data)
+{
+   long int row_idx = -1, column_idx;
+
+   //printf("'%s'\n", path_string );
+   //printf("'%s'\n", new_text    );
+   //printf("%p\n", user_data   );
+
+   column_idx = (long)user_data;
+
+   if ( isdigit(path_string[0]) )
+   {
+      row_idx = atoi(path_string);
+   }
+
+	if ( row_idx >= 0 )
+	{
+      uint32 a; uint8 v;
+		int c, s, type;
+      const char *name = NULL;
+		if ( FCEUI_GetCheat( row_idx, NULL, &a, &v, &c, &s, &type) )
+		{
+         switch ( column_idx )
+         {
+            default:
+            case 0:
+
+            break;
+            case 1:
+               a = strtol( new_text, NULL, 0 );
+            break;
+            case 2:
+               v = strtol( new_text, NULL, 0 );
+            break;
+            case 3:
+               c = strtol( new_text, NULL, 0 );
+            break;
+            case 4:
+               name = new_text;
+            break;
+         }
+         FCEUI_SetCheat( row_idx, name, a, v, c, s, type );
+	      showActiveCheatList(0);
+		}
+   }
+}
+
 
 void closeCheatDialog(GtkWidget* w, GdkEvent* e, gpointer p)
 {
@@ -2015,23 +2092,42 @@ static void openCheatsWindow(void)
 	GtkTreeViewColumn* column;
 	
 	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "editable", TRUE, NULL);
+   g_signal_connect(renderer, "edited", (GCallback) cheat_cell_edited_cb, NULL);
+
 	chkbox_renderer = gtk_cell_renderer_toggle_new();
 	gtk_cell_renderer_toggle_set_activatable( (GtkCellRendererToggle*)chkbox_renderer, TRUE );
 	column = gtk_tree_view_column_new_with_attributes("Ena", chkbox_renderer, "active", 0, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+
+	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "editable", TRUE, NULL);
+   g_signal_connect(renderer, "edited", (GCallback) cheat_cell_edited_cb, (gpointer)1);
 	column = gtk_tree_view_column_new_with_attributes("Addr", renderer, "text", 1, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+
+	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "editable", TRUE, NULL);
+   g_signal_connect(renderer, "edited", (GCallback) cheat_cell_edited_cb, (gpointer)2);
 	column = gtk_tree_view_column_new_with_attributes("Val", renderer, "text", 2, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+
+	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "editable", TRUE, NULL);
+   g_signal_connect(renderer, "edited", (GCallback) cheat_cell_edited_cb, (gpointer)3);
 	column = gtk_tree_view_column_new_with_attributes("Cmp", renderer, "text", 3, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+
+	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "editable", TRUE, NULL);
+   g_signal_connect(renderer, "edited", (GCallback) cheat_cell_edited_cb, (gpointer)4);
 	column = gtk_tree_view_column_new_with_attributes("Desc", renderer, "text", 4, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 	
    g_signal_connect( chkbox_renderer, "toggled",
 		      G_CALLBACK(cheatListEnableToggle), (void*)tree );
 
-	showActiveCheatList();
+	showActiveCheatList(1);
 
 	scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_NEVER,
@@ -2295,13 +2391,24 @@ static void showRamWatchResults(int reset)
    char addrStr[32], valStr1[16], valStr2[16];
    ramWatch_t *rw;
 
+   if ( gtk_tree_model_get_iter_first( GTK_TREE_MODEL(ram_watch_store), &iter ) )
+   {
+      size_t treeSize = 1;
 
+      while ( gtk_tree_model_iter_next( GTK_TREE_MODEL(ram_watch_store), &iter ) )
+      {
+         treeSize++;
+      }
+      if ( treeSize != ramWatchList.size() )
+      {
+         reset = 1;
+      }
+      //printf("  TreeSize:  %zi   RamWatchList.size: %zi \n", treeSize, ramWatchList.size() );
+   }
 
    if ( reset )
    {
       gtk_tree_store_clear(ram_watch_store);
-
-      gtk_tree_store_append( ram_watch_store, &iter, NULL); // aquire iter
    }
    else
    {
@@ -2312,6 +2419,10 @@ static void showRamWatchResults(int reset)
    {
       rw = *it;
 		sprintf( addrStr, "0x%04x", rw->addr );
+
+      if ( reset ){
+         gtk_tree_store_append( ram_watch_store, &iter, NULL); // aquire iter
+      }
 
       rw->updateMem();
 
@@ -2338,11 +2449,7 @@ static void showRamWatchResults(int reset)
               0, addrStr, 1, valStr1, 2, valStr2, 3, rw->name.c_str(),
               -1);
 
-      if ( reset )
-      {
-         gtk_tree_store_append( ram_watch_store, &iter, NULL); // aquire iter
-      }
-      else
+      if ( !reset )
       {
          gtk_tree_model_iter_next( GTK_TREE_MODEL(ram_watch_store), &iter );
       }
@@ -2597,6 +2704,13 @@ static gint updateRamWatchTree( void *userData )
    return 1;
 }
 
+void closeMemoryWatchWindow(GtkWidget* w, GdkEvent* e, gpointer p)
+{
+   ramWatchWinOpen = false;
+
+	gtk_widget_destroy(w);
+}
+
 // creates and opens cheats window
 static void openMemoryWatchWindow(void)
 {
@@ -2608,6 +2722,11 @@ static void openMemoryWatchWindow(void)
 	GtkWidget *tree;
 	GtkWidget *scroll;
    GtkWidget* menubar;
+
+   if ( ramWatchWinOpen )
+   {
+      return; // Only allow 1 RAM watch window to be open.
+   }
 
 	win = gtk_dialog_new_with_buttons("RAM Watch",
 			GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
@@ -2632,6 +2751,7 @@ static void openMemoryWatchWindow(void)
 	GtkTreeViewColumn* column;
 
 	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "editable", TRUE, NULL);
 	column = gtk_tree_view_column_new_with_attributes("Addr", renderer, "text", 0, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 	column = gtk_tree_view_column_new_with_attributes("Value Dec", renderer, "text", 1, NULL);
@@ -2648,6 +2768,8 @@ static void openMemoryWatchWindow(void)
 	gtk_box_pack_start(GTK_BOX(hbox), scroll, TRUE, TRUE, 5);
 
 	gtk_box_pack_start(GTK_BOX(main_vbox), hbox, TRUE, TRUE, 5);
+
+   showRamWatchResults(1);
 
    if ( ramWatchEvntSrcID == 0 )
    {
@@ -2675,10 +2797,12 @@ static void openMemoryWatchWindow(void)
 
 	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(win))), main_vbox, TRUE, TRUE, 0);
 
-   g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
-	g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
+   g_signal_connect(win, "delete-event", G_CALLBACK(closeMemoryWatchWindow), NULL);
+	g_signal_connect(win, "response", G_CALLBACK(closeMemoryWatchWindow), NULL);
 	
 	gtk_widget_show_all(win);
+
+   ramWatchWinOpen = true;
 }
 
 
