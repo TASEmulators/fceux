@@ -1510,11 +1510,12 @@ static int ShowCheatSearchResultsCallB(uint32 a, uint8 last, uint8 current)
 	sprintf( lastStr,	"0x%02x", last );
 	sprintf( curStr,	"| 0x%02x", current );
 
-   gtk_tree_store_set(ram_match_store, &ram_match_iter, 
+	gtk_tree_store_append( ram_match_store, &ram_match_iter, NULL); // aquire iter
+
+	gtk_tree_store_set(ram_match_store, &ram_match_iter, 
            0, addrStr, 1, lastStr, 2, curStr,
            -1);
 
-	gtk_tree_store_append( ram_match_store, &ram_match_iter, NULL); // aquire iter
 
 	return 1;
 }
@@ -2391,19 +2392,22 @@ static void showRamWatchResults(int reset)
    char addrStr[32], valStr1[16], valStr2[16];
    ramWatch_t *rw;
 
-   if ( gtk_tree_model_get_iter_first( GTK_TREE_MODEL(ram_watch_store), &iter ) )
+   if ( !reset )
    {
-      size_t treeSize = 1;
+    	if ( gtk_tree_model_get_iter_first( GTK_TREE_MODEL(ram_watch_store), &iter ) )
+    	{
+    	   size_t treeSize = 1;
 
-      while ( gtk_tree_model_iter_next( GTK_TREE_MODEL(ram_watch_store), &iter ) )
-      {
-         treeSize++;
-      }
-      if ( treeSize != ramWatchList.size() )
-      {
-         reset = 1;
-      }
-      //printf("  TreeSize:  %zi   RamWatchList.size: %zi \n", treeSize, ramWatchList.size() );
+    	   while ( gtk_tree_model_iter_next( GTK_TREE_MODEL(ram_watch_store), &iter ) )
+    	   {
+    	      treeSize++;
+    	   }
+    	   if ( treeSize != ramWatchList.size() )
+    	   {
+    	      reset = 1;
+    	   }
+    	   //printf("  TreeSize:  %zi   RamWatchList.size: %zi \n", treeSize, ramWatchList.size() );
+    	}
    }
 
    if ( reset )
@@ -2451,12 +2455,193 @@ static void showRamWatchResults(int reset)
 
       if ( !reset )
       {
-         gtk_tree_model_iter_next( GTK_TREE_MODEL(ram_watch_store), &iter );
+         if ( !gtk_tree_model_iter_next( GTK_TREE_MODEL(ram_watch_store), &iter ) )
+		 {
+         	gtk_tree_store_append( ram_watch_store, &iter, NULL); // aquire iter
+		 }
       }
    }
 }
 
-static void openWatchFile()
+static void saveWatchFile( const char *filename )
+{
+	int i;
+	FILE *fp;
+	const char *c;
+	std::list <ramWatch_t*>::iterator it;
+	ramWatch_t *rw;
+
+	fp = fopen( filename, "w");
+
+	if ( fp == NULL )
+	{
+		printf("Error: Failed to open file: %s\n", filename);
+		return;
+	}
+
+	for (it=ramWatchList.ls.begin(); it!=ramWatchList.ls.end(); it++)
+	{
+		rw = *it;
+
+		c = rw->name.c_str();
+
+		fprintf( fp, "0x%04x   %c%i   ", rw->addr, rw->type ? 'U' : 'S', rw->size);
+
+		i=0;
+		fprintf( fp, "\"");
+		while ( c[i] )
+		{
+			if ( c[i] == '"')
+			{
+			   fprintf( fp, "\\%c", c[i]);
+			}
+			else
+			{
+			   fprintf( fp, "%c", c[i]);
+			}
+			i++;
+		}
+		fprintf( fp, "\"\n");
+	}
+	fclose(fp);
+
+}
+
+static void loadWatchFile( const char *filename )
+{
+	FILE *fp;
+	int i, j, a, t, s, literal;
+	char line[512], stmp[512];
+	ramWatch_t *rw;
+
+	fp = fopen( filename, "r");
+
+	if ( fp == NULL )
+	{
+		printf("Error: Failed to open file: %s\n", filename);
+		return;
+	}
+
+	while ( fgets( line, sizeof(line)-1, fp ) > 0)
+	{
+		a = -1; t = -1; s = -1;
+	   // Check for Comments
+       i=0;
+	   while ( line[i] != 0 )
+	   {
+		   if ( literal )
+		   {
+			   literal = 0;
+		   }
+		   else
+		   {
+		   		if ( line[i] == '#')
+		   		{
+			  		 line[i] = 0; break;
+		   		}
+		   		else if ( line[i] == '\\' )
+		   		{
+					literal = 1;
+				}
+		   }
+		   i++;
+	   }
+
+       i=0; j=0;
+	   while ( isspace(line[i]) ) i++;
+
+	   if ( (line[i] == '0') && ( tolower(line[i+1]) == 'x') )
+	   {
+          stmp[j] = '0'; j++; i++;
+          stmp[j] = 'x'; j++; i++;
+
+		  while ( isxdigit(line[i]) )
+		  {
+			  stmp[j] = line[i]; i++; j++;
+		  }
+	   }
+	   else
+	   {
+		  while ( isxdigit(line[i]) )
+		  {
+			  stmp[j] = line[i]; i++; j++;
+		  }
+	   }
+	   stmp[j] = 0;
+
+	   if ( j == 0 ) continue;
+
+	   a = strtol( stmp, NULL, 0);
+
+	   while ( isspace(line[i]) ) i++;
+
+	   t = line[i]; i++;
+	   s = line[i]; i++;
+
+	   if ( (t != 'U') && (t != 'S') )
+	   {
+		   printf("Error: Invalid RAM Watch Byte Type: %c", t);
+		   continue;
+	   }
+	   if ( !isdigit(s) )
+	   {
+		   printf("Error: Invalid RAM Watch Byte Size: %c", s);
+		   continue;
+	   }
+	   s = s - '0';
+
+	   if ( (s != 1) && (s != 2) && (s != 4) )
+	   {
+		   printf("Error: Invalid RAM Watch Byte Size: %i", s);
+		   continue;
+	   }
+
+	   while ( isspace(line[i]) ) i++;
+
+	   if ( line[i] == '"')
+	   {
+		   i++; j=0;
+		   literal = 0;
+		   while ( (line[i] != 0) )
+		   {
+				if ( literal )
+				{
+				   literal = 0;
+				}
+				else
+				{
+					if ( line[i] == '"')
+					{
+						break;
+					}
+					else if ( line[i] == '\\' )
+		 	 		{
+						literal = 1;
+					}
+				}
+				if ( !literal ){
+			      stmp[j] = line[i]; j++;
+				}
+			    i++; 
+		   }
+		   stmp[j] = 0; 
+	   }
+	   rw = new ramWatch_t;
+
+	   rw->addr =  a;
+	   rw->type = (t == 'U') ? 1 : 0;
+	   rw->size =  s;
+	   rw->name.assign( stmp );
+
+	   ramWatchList.ls.push_back(rw);
+	}
+
+	fclose(fp);
+
+    showRamWatchResults(1);
+}
+
+static void openWatchFile( int mode )
 {
 	GtkWidget* fileChooser;
 	GtkFileFilter* filterWch;
@@ -2471,16 +2656,26 @@ static void openWatchFile()
 	gtk_file_filter_add_pattern(filterAll, "*");
 	gtk_file_filter_set_name(filterAll, "All Files");
 	
-	const char* last_dir;
-	g_config->getOption("SDL.LastSaveStateAs", &last_dir);
-	
-	fileChooser = gtk_file_chooser_dialog_new ("Open Watch File", GTK_WINDOW(MainWindow),
-			GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
+	//const char* last_dir;
+	//g_config->getOption("SDL.LastSaveStateAs", &last_dir);
+
+
+   if ( mode )
+   {
+	   fileChooser = gtk_file_chooser_dialog_new ("Save Watch File", GTK_WINDOW(MainWindow),
+	   		GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+	   		GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
+   }
+   else
+   {
+	   fileChooser = gtk_file_chooser_dialog_new ("Load Watch File", GTK_WINDOW(MainWindow),
+	   		GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+	   		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+   }
 			
-	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fileChooser), last_dir);
+	//gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fileChooser), last_dir);
 	
-	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(fileChooser), ".wch");
+	//gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(fileChooser), ".wch");
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterWch);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
 	
@@ -2491,11 +2686,29 @@ static void openWatchFile()
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		//FCEUI_SaveState(filename);
 		//g_config->setOption("SDL.LastSaveStateAs", filename);
-		g_free(filename);
+		if ( filename )
+		{
+			if ( mode )
+			{
+				saveWatchFile( filename );
+			}
+			else
+			{
+				loadWatchFile( filename );
+			}
+			g_free(filename);
+		}
 	}
 	gtk_widget_destroy (fileChooser);
-	
-	
+}
+
+static void loadRamWatchCB(void)
+{
+   openWatchFile(0);
+}
+static void saveRamWatchCB(void)
+{
+   openWatchFile(1);
 }
 
 // Our menu, in the XML markup format used by GtkUIManager
@@ -2511,8 +2724,8 @@ static char* menuRamWatchXml =
 
 static GtkActionEntry ramWatch_entries[] = {
    {"FileMenuAction", NULL, "_File"},
-   {"OpenWatchFile", GTK_STOCK_OPEN, "_Open Watch", NULL, NULL, G_CALLBACK(openWatchFile)},
-   {"SaveWatchFile", GTK_STOCK_SAVE_AS, "_Save Watch", NULL, NULL, G_CALLBACK(openWatchFile)},
+   {"OpenWatchFile", GTK_STOCK_OPEN, "_Load Watch", NULL, NULL, G_CALLBACK(loadRamWatchCB)},
+   {"SaveWatchFile", GTK_STOCK_SAVE_AS, "_Save Watch", NULL, NULL, G_CALLBACK(saveRamWatchCB)},
 };
 
 
