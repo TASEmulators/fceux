@@ -5,11 +5,12 @@
 
 trigger:
 - master
+- linux-cheats
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
 - script: |
-    make
-  displayName: 'make'
+    which scons-3
+  displayName: 'Build'
