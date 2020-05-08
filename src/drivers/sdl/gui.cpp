@@ -81,6 +81,8 @@ static bool cheatWindowOpen = false;
 static GtkTreeStore *ram_watch_store = NULL;
 static gint ramWatchEvntSrcID = 0;
 static bool ramWatchWinOpen = false;
+static int  ramWatchEditRowIdx = -1;
+static int  ramWatchEditColIdx = -1;
 
 struct ramWatch_t
 {
@@ -166,6 +168,22 @@ struct ramWatchList_t
 
          rw->updateMem();
       }
+   }
+
+   ramWatch_t *getIndex(size_t idx)
+   {
+      size_t i=0;
+      std::list <ramWatch_t*>::iterator it;
+
+      for (it=ls.begin(); it!=ls.end(); it++)
+      {
+         if ( i == idx )
+         {
+            return *it;
+         }
+         i++;
+      }
+      return NULL;
    }
 };
 static ramWatchList_t ramWatchList;
@@ -2387,28 +2405,29 @@ static void openCheatsWindow(void)
 //
 static void showRamWatchResults(int reset)
 {
+   int row=0;
    std::list <ramWatch_t*>::iterator it;
    GtkTreeIter iter;
    char addrStr[32], valStr1[16], valStr2[16];
    ramWatch_t *rw;
 
-   if ( !reset )
-   {
-    	if ( gtk_tree_model_get_iter_first( GTK_TREE_MODEL(ram_watch_store), &iter ) )
-    	{
-    	   size_t treeSize = 1;
+   //if ( !reset )
+   //{
+   // 	if ( gtk_tree_model_get_iter_first( GTK_TREE_MODEL(ram_watch_store), &iter ) )
+   // 	{
+   // 	   size_t treeSize = 1;
 
-    	   while ( gtk_tree_model_iter_next( GTK_TREE_MODEL(ram_watch_store), &iter ) )
-    	   {
-    	      treeSize++;
-    	   }
-    	   if ( treeSize != ramWatchList.size() )
-    	   {
-    	      reset = 1;
-    	   }
-    	   //printf("  TreeSize:  %zi   RamWatchList.size: %zi \n", treeSize, ramWatchList.size() );
-    	}
-   }
+   // 	   while ( gtk_tree_model_iter_next( GTK_TREE_MODEL(ram_watch_store), &iter ) )
+   // 	   {
+   // 	      treeSize++;
+   // 	   }
+   // 	   if ( treeSize != ramWatchList.size() )
+   // 	   {
+   // 	      reset = 1;
+   // 	   }
+   // 	   //printf("  TreeSize:  %zi   RamWatchList.size: %zi \n", treeSize, ramWatchList.size() );
+   // 	}
+   //}
 
    if ( reset )
    {
@@ -2416,7 +2435,10 @@ static void showRamWatchResults(int reset)
    }
    else
    {
-      gtk_tree_model_get_iter_first( GTK_TREE_MODEL(ram_watch_store), &iter );
+      if ( !gtk_tree_model_get_iter_first( GTK_TREE_MODEL(ram_watch_store), &iter ) )
+      {
+         gtk_tree_store_append( ram_watch_store, &iter, NULL); // aquire iter
+      }
    }
 
    for (it=ramWatchList.ls.begin(); it!=ramWatchList.ls.end(); it++)
@@ -2449,9 +2471,34 @@ static void showRamWatchResults(int reset)
 		   sprintf( valStr2,	"0x%02x", rw->val.u8);
       }
    
-      gtk_tree_store_set(ram_watch_store, &iter, 
-              0, addrStr, 1, valStr1, 2, valStr2, 3, rw->name.c_str(),
-              -1);
+      if ( row != ramWatchEditRowIdx )
+      {
+         gtk_tree_store_set(ram_watch_store, &iter, 
+                 0, addrStr, 1, valStr1, 2, valStr2, 3, rw->name.c_str(),
+                 -1);
+      }
+      else 
+      {
+          //if ( ramWatchEditColIdx != 0 )
+          //{
+          //   gtk_tree_store_set(ram_watch_store, &iter, 0, addrStr, -1 );
+          //}
+
+          //if ( ramWatchEditColIdx != 1 )
+          //{
+          //   gtk_tree_store_set(ram_watch_store, &iter, 1, valStr1, -1 );
+          //}
+
+          //if ( ramWatchEditColIdx != 2 )
+          //{
+          //   gtk_tree_store_set(ram_watch_store, &iter, 2, valStr2, -1 );
+          //}
+
+          //if ( ramWatchEditColIdx != 3 )
+          //{
+          //   gtk_tree_store_set(ram_watch_store, &iter, 3, rw->name.c_str(), -1 );
+          //}
+      }
 
       if ( !reset )
       {
@@ -2460,6 +2507,7 @@ static void showRamWatchResults(int reset)
          	gtk_tree_store_append( ram_watch_store, &iter, NULL); // aquire iter
 		 }
       }
+      row++;
    }
 }
 
@@ -2917,6 +2965,102 @@ static gint updateRamWatchTree( void *userData )
    return 1;
 }
 
+static void  ramWatch_cell_edited_cb (
+      GtkCellRendererText *cell,
+      gchar               *path_string,
+      gchar               *new_text,
+      gpointer             user_data)
+{
+	ramWatch_t *rw;
+   //printf("Ram Watch Edited: %i:%i\n", ramWatchEditRowIdx, ramWatchEditColIdx);
+
+   rw = ramWatchList.getIndex( ramWatchEditRowIdx );
+
+   switch ( (long)user_data )
+   {
+      case 0:
+         rw->addr = strtol( new_text, NULL, 0 );
+      break;
+      case 1:
+      case 2:
+      {
+         writefunc wfunc;
+
+         if ( rw->size == 2 )
+         {
+            if ( rw->type )
+            {
+               rw->val.u16 = strtol( new_text, NULL, 0 );
+            }
+            else
+            {
+               rw->val.i16 = strtol( new_text, NULL, 0 );
+            }
+            wfunc = GetWriteHandler( rw->addr );
+
+            if ( wfunc )
+            {
+               wfunc( (uint32)rw->addr, (uint8)(rw->val.u16 & 0x00ff) );
+            }
+
+            wfunc = GetWriteHandler( rw->addr+1 );
+
+            if ( wfunc )
+            {
+               wfunc( (uint32)rw->addr+1, (uint8)( (rw->val.u16 & 0xff00) >> 8) );
+            }
+         }
+         else
+         {
+            if ( rw->type )
+            {
+               rw->val.u8 = strtol( new_text, NULL, 0 );
+            }
+            else
+            {
+               rw->val.i8 = strtol( new_text, NULL, 0 );
+            }
+            wfunc = GetWriteHandler( rw->addr );
+
+            if ( wfunc )
+            {
+               wfunc( (uint32)rw->addr, (uint8)rw->val.u8 );
+            }
+         }
+      }
+      break;
+      case 3:
+         rw->name.assign( new_text );
+      break;
+      default:
+
+      break;
+   }
+
+   ramWatchEditRowIdx = -1;
+   ramWatchEditColIdx = -1;
+}
+
+static void  ramWatch_cell_edited_start_cb(
+      GtkCellRenderer *renderer,
+      GtkCellEditable *editable,
+      gchar           *path,
+      gpointer         user_data)
+{
+   //printf("Ram Watch Edit Start: '%s':%li\n", path,  (long)user_data);
+   ramWatchEditRowIdx = atoi( path );
+   ramWatchEditColIdx = (long)user_data;
+}
+
+static void  ramWatch_cell_edited_cancel_cb(
+      GtkCellRenderer *renderer,
+      gpointer         user_data)
+{
+   //printf("Ram Watch Edit Cancel:%li\n", (long)user_data);
+   ramWatchEditRowIdx = -1;
+   ramWatchEditColIdx = -1;
+}
+
 void closeMemoryWatchWindow(GtkWidget* w, GdkEvent* e, gpointer p)
 {
    ramWatchWinOpen = false;
@@ -2965,12 +3109,33 @@ static void openMemoryWatchWindow(void)
 
 	renderer = gtk_cell_renderer_text_new();
    g_object_set(renderer, "editable", TRUE, NULL);
+   g_signal_connect(renderer, "edited", (GCallback) ramWatch_cell_edited_cb, (gpointer)0);
+   g_signal_connect(renderer, "editing-started", (GCallback) ramWatch_cell_edited_start_cb, (gpointer)0);
+   g_signal_connect(renderer, "editing-canceled", (GCallback) ramWatch_cell_edited_cancel_cb, (gpointer)0);
 	column = gtk_tree_view_column_new_with_attributes("Addr", renderer, "text", 0, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+
+	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "editable", TRUE, NULL);
+   g_signal_connect(renderer, "edited", (GCallback) ramWatch_cell_edited_cb, (gpointer)1);
+   g_signal_connect(renderer, "editing-started", (GCallback) ramWatch_cell_edited_start_cb, (gpointer)1);
+   g_signal_connect(renderer, "editing-canceled", (GCallback) ramWatch_cell_edited_cancel_cb, (gpointer)1);
 	column = gtk_tree_view_column_new_with_attributes("Value Dec", renderer, "text", 1, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+
+	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "editable", TRUE, NULL);
+   g_signal_connect(renderer, "edited", (GCallback) ramWatch_cell_edited_cb, (gpointer)2);
+   g_signal_connect(renderer, "editing-started", (GCallback) ramWatch_cell_edited_start_cb, (gpointer)2);
+   g_signal_connect(renderer, "editing-canceled", (GCallback) ramWatch_cell_edited_cancel_cb, (gpointer)2);
 	column = gtk_tree_view_column_new_with_attributes("Value Hex", renderer, "text", 2, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+
+	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "editable", TRUE, NULL);
+   g_signal_connect(renderer, "edited", (GCallback) ramWatch_cell_edited_cb, (gpointer)3);
+   g_signal_connect(renderer, "editing-started", (GCallback) ramWatch_cell_edited_start_cb, (gpointer)3);
+   g_signal_connect(renderer, "editing-canceled", (GCallback) ramWatch_cell_edited_cancel_cb, (gpointer)3);
 	column = gtk_tree_view_column_new_with_attributes("Notes", renderer, "text", 3, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 
