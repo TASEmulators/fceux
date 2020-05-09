@@ -441,7 +441,7 @@ void openPaletteConfig()
 	vbox = gtk_dialog_get_content_area(GTK_DIALOG(win));
 	
 	paletteFrame = gtk_frame_new("Custom palette: ");
-	paletteHbox = gtk_hbox_new(FALSE, 5);
+	paletteHbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	gtk_container_set_border_width(GTK_CONTAINER(paletteHbox), 5);
 	gtk_container_add(GTK_CONTAINER(paletteFrame), paletteHbox);
 	paletteButton = gtk_button_new_from_stock(GTK_STOCK_OPEN);
@@ -471,7 +471,7 @@ void openPaletteConfig()
 	
 	// color / tint / hue sliders
 	slidersFrame = gtk_frame_new("NTSC palette controls");
-	slidersVbox = gtk_vbox_new(FALSE, 2);
+	slidersVbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	tintFrame = gtk_frame_new("Tint");
 	tintHscale = gtk_hscale_new_with_range(0, 128, 1);
 	gtk_container_add(GTK_CONTAINER(tintFrame), tintHscale);
@@ -563,7 +563,7 @@ void openNetworkConfig()
 	gtk_window_set_icon_name(GTK_WINDOW(win), GTK_STOCK_NETWORK);
 	box = gtk_dialog_get_content_area(GTK_DIALOG(win));
 	
-	userBox = gtk_hbox_new(FALSE, 3);
+	userBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
 	userLbl = gtk_label_new("Username:");
 	userEntry = gtk_entry_new();
 	std::string s;
@@ -573,15 +573,15 @@ void openNetworkConfig()
 	g_signal_connect(userEntry, "changed", G_CALLBACK(setUsername), NULL);
 
 	frame = gtk_frame_new("Network options");
-	vbox = gtk_vbox_new(FALSE, 5);
-	ipBox = gtk_hbox_new(FALSE, 5);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+	ipBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	ipLbl = gtk_label_new("Server IP:");
 	ipEntry = gtk_entry_new();
-	portBox = gtk_hbox_new(FALSE, 5);
+	portBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	portLbl = gtk_label_new("Server port:");
 	portSpin = gtk_spin_button_new_with_range(0, 999999, 1);
 	//localPlayersCbo = gtk_combo_box_new_text();
-	pwBox = gtk_hbox_new(FALSE, 3);
+	pwBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
 	pwLbl = gtk_label_new("Server password:");
 	pwEntry = gtk_entry_new();
 	
@@ -806,7 +806,7 @@ void openGamepadConfig()
 	vbox = gtk_dialog_get_content_area(GTK_DIALOG(win));
 	gtk_box_set_homogeneous(GTK_BOX(vbox), FALSE);
 	
-	hboxPadNo = gtk_hbox_new(FALSE, 0);
+	hboxPadNo = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	padNoLabel = gtk_label_new("Port:");
 	//configNoLabel = gtk_label_new("Config Number:");
 	fourScoreChk = gtk_check_button_new_with_label("Enable Four Score");
@@ -1090,7 +1090,7 @@ void openVideoConfig()
 	lbl = gtk_label_new("Video options will not take\neffect until the emulator is restarted.");
 	
 	// scalar widgets
-	hbox1 = gtk_hbox_new(FALSE, 3);
+	hbox1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
 	scalerLbl = gtk_label_new("Special Scaler: ");
 	scalerCombo = gtk_combo_box_text_new();
 	// -Video Modes Tag-
@@ -1131,7 +1131,7 @@ void openVideoConfig()
 #endif
 	
 	// Region (NTSC/PAL/Dendy)
-	palHbox = gtk_hbox_new(FALSE, 3);
+	palHbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
 	palLbl = gtk_label_new("Region: ");
 	palCombo = gtk_combo_box_text_new();
 	// -Video Modes Tag-
@@ -1168,10 +1168,10 @@ void openVideoConfig()
 	setCheckbox(clipSidesChk, "SDL.ClipSides");
 	
 	// xscale / yscale
-	xscaleHbox = gtk_hbox_new(FALSE, 5);
+	xscaleHbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	xscaleLbl = gtk_label_new("X scaling factor");
 	xscaleSpin = gtk_spin_button_new_with_range(1.0, 40.0, .1);
-	yscaleHbox = gtk_hbox_new(FALSE, 5);
+	yscaleHbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	yscaleLbl = gtk_label_new("Y scaling factor");
 	yscaleSpin = gtk_spin_button_new_with_range(1.0, 40.0, .1);
 	
@@ -1289,8 +1289,8 @@ void openSoundConfig()
 										GTK_RESPONSE_OK,
 										NULL);
 	gtk_window_set_icon_name(GTK_WINDOW(win), "audio-x-generic");
-	main_hbox = gtk_hbox_new(FALSE, 15);
-	vbox = gtk_vbox_new(FALSE, 5);
+	main_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 15);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 
 	// sound enable check
 	soundChk = gtk_check_button_new_with_label("Enable sound");
@@ -1303,7 +1303,7 @@ void openSoundConfig()
 	setCheckbox(lowpassChk, "SDL.Sound.LowPass");
 	
 	// sound quality combo box
-	hbox1 = gtk_hbox_new(FALSE, 3);
+	hbox1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
 	qualityCombo = gtk_combo_box_text_new();
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(qualityCombo), "Low");
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(qualityCombo), "High");
@@ -1322,7 +1322,7 @@ void openSoundConfig()
 	gtk_box_pack_start(GTK_BOX(hbox1), qualityCombo, FALSE, FALSE, 5);
 	
 	// sound rate widgets
-	hbox2 = gtk_hbox_new(FALSE, 3);
+	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
 	rateCombo = gtk_combo_box_text_new();
 	
 	const int rates[5] = {11025, 22050, 44100, 48000, 96000};
@@ -1364,7 +1364,7 @@ void openSoundConfig()
 
 	// mixer
 	mixerFrame = gtk_frame_new("Mixer:");
-	mixerHbox = gtk_hbox_new(TRUE, 5);
+	mixerHbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	for(long int i=0; i<6; i++)
 	{
 		mixers[i] = gtk_vscale_new_with_range(0, 256, 1);
@@ -2097,8 +2097,8 @@ static void openCheatsWindow(void)
 			NULL);
 	gtk_window_set_default_size(GTK_WINDOW(win), 600, 600);
 
-	main_hbox = gtk_hbox_new(FALSE, 2);
-	vbox = gtk_vbox_new(FALSE, 5);
+	main_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 	frame = gtk_frame_new("Active Cheats");
 	
 	actv_cheats_store = gtk_tree_store_new( 5, G_TYPE_BOOLEAN, 
@@ -2159,7 +2159,7 @@ static void openCheatsWindow(void)
 	gtk_container_add(GTK_CONTAINER(scroll), tree);
 	gtk_box_pack_start(GTK_BOX(vbox), scroll, TRUE, TRUE, 1);
 
-	hbox = gtk_hbox_new(FALSE, 2);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new("Name:");
 	txt_entry = gtk_entry_new();
 
@@ -2173,7 +2173,7 @@ static void openCheatsWindow(void)
 
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 1);
 
-	hbox = gtk_hbox_new(FALSE, 6);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
 	label = gtk_label_new("Addr:");
 	txt_entry = gtk_entry_new();
 	gtk_entry_set_max_length( GTK_ENTRY(txt_entry), 4 );
@@ -2215,7 +2215,7 @@ static void openCheatsWindow(void)
 
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 1);
 
-	hbox = gtk_hbox_new(FALSE, 3);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
 	button = gtk_button_new_with_label("Add");
 	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, FALSE, 1);
 
@@ -2236,7 +2236,7 @@ static void openCheatsWindow(void)
 
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 1);
 
-	hbox = gtk_hbox_new(FALSE, 1);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 1);
 	button = gtk_button_new_with_label("Add from CHT file...");
 	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, FALSE, 1);
 	g_signal_connect( button, "clicked",
@@ -2248,8 +2248,8 @@ static void openCheatsWindow(void)
 	//
 	gtk_box_pack_start(GTK_BOX(main_hbox), frame, TRUE, TRUE, 1);
 
-	vbox = gtk_vbox_new(FALSE, 5);
-	hbox = gtk_hbox_new(FALSE, 1);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 1);
 	button = gtk_button_new_with_label("Reset");
 	g_signal_connect( button, "clicked",
 		      G_CALLBACK (cheatSearchReset), (gpointer) NULL );
@@ -2257,7 +2257,7 @@ static void openCheatsWindow(void)
 
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 5);
 
-	hbox = gtk_hbox_new(FALSE, 3);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
 	button = gtk_button_new_with_label("Known Value:");
 	g_signal_connect( button, "clicked",
 		      G_CALLBACK (cheatSearchKnown), (gpointer) NULL );
@@ -2283,10 +2283,10 @@ static void openCheatsWindow(void)
 	g_signal_connect( button, "clicked",
 		      G_CALLBACK (pauseDuringCheatWinActvCB), (gpointer) NULL );
 
-	prev_cmp_vbox = gtk_vbox_new(FALSE, 4);
+	prev_cmp_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
 	gtk_container_add(GTK_CONTAINER(frame), prev_cmp_vbox);
 
-	hbox = gtk_hbox_new(FALSE, 1);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 1);
 	align = gtk_alignment_new( 0, 0, 0.5, 0 );
 	button = gtk_button_new_with_label("Equal");
 	gtk_container_add( GTK_CONTAINER(align), button );
@@ -2295,7 +2295,7 @@ static void openCheatsWindow(void)
 	g_signal_connect( button, "clicked",
 		      G_CALLBACK (cheatSearchEqual), (gpointer) NULL );
 
-	hbox = gtk_hbox_new(FALSE, 4);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
 	align = gtk_alignment_new( 0, 0, 1, 0 );
 	button = gtk_button_new_with_label("Not Equal");
 	gtk_container_add( GTK_CONTAINER(align), button );
@@ -2317,7 +2317,7 @@ static void openCheatsWindow(void)
 
 	gtk_box_pack_start(GTK_BOX(prev_cmp_vbox), hbox, FALSE, FALSE, 5);
 
-	hbox = gtk_hbox_new(FALSE, 4);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
 	align = gtk_alignment_new( 0, 0, 1, 0 );
 	button = gtk_button_new_with_label("Greater Than");
 	gtk_container_add( GTK_CONTAINER(align), button );
@@ -2339,7 +2339,7 @@ static void openCheatsWindow(void)
 
 	gtk_box_pack_start(GTK_BOX(prev_cmp_vbox), hbox, FALSE, FALSE, 5);
 
-	hbox = gtk_hbox_new(FALSE, 4);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
 	align = gtk_alignment_new( 0, 0, 1, 0 );
 	button = gtk_button_new_with_label("Less Than");
 	gtk_container_add( GTK_CONTAINER(align), button );
@@ -2361,15 +2361,15 @@ static void openCheatsWindow(void)
 
 	gtk_box_pack_start(GTK_BOX(prev_cmp_vbox), hbox, FALSE, FALSE, 1);
 
-	hbox = gtk_hbox_new(FALSE, 2);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	gtk_box_pack_start(GTK_BOX(hbox), vbox, FALSE, FALSE, 1);
 
 	frame = gtk_frame_new("Cheat Search");
 	gtk_container_add(GTK_CONTAINER(frame), hbox);
 	gtk_box_pack_start(GTK_BOX(main_hbox), frame, TRUE, TRUE, 5);
 
-	vbox = gtk_vbox_new(FALSE, 5);
-	//hbox = gtk_hbox_new(FALSE, 1);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+	//hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 1);
 
 	ram_match_store = gtk_tree_store_new( 3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
@@ -2844,7 +2844,7 @@ static int openRamWatchEntryDialog( char *name, int *addr, int *type, int *size 
 			NULL);
 	gtk_window_set_default_size(GTK_WINDOW(win), 400, 200);
 
-	vbox = gtk_vbox_new(FALSE, 6);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
 
    label = gtk_label_new("Name:");
 	txt_entry_name = gtk_entry_new();
@@ -2856,7 +2856,7 @@ static int openRamWatchEntryDialog( char *name, int *addr, int *type, int *size 
 	gtk_box_pack_start (GTK_BOX(vbox), label, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox), txt_entry_name, FALSE, TRUE, 0);
 
-	hbox = gtk_hbox_new(FALSE, 2);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
    label = gtk_label_new("Hex Address:");
 	txt_entry_addr = gtk_entry_new();
 
@@ -2875,7 +2875,7 @@ static int openRamWatchEntryDialog( char *name, int *addr, int *type, int *size 
    chkbox = gtk_check_button_new_with_label("Value is Unsigned");
 	gtk_box_pack_start (GTK_BOX(vbox), chkbox, FALSE, FALSE, 0);
 
-	hbox = gtk_hbox_new(FALSE, 4);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
    label = gtk_label_new("Size in Bytes:");
    button1 = gtk_radio_button_new_with_label (NULL, "1");
    //gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
@@ -3100,13 +3100,13 @@ static void openMemoryWatchWindow(void)
 			NULL);
 	gtk_window_set_default_size(GTK_WINDOW(win), 600, 600);
 
-	main_vbox = gtk_vbox_new(FALSE, 1);
+	main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 1);
 
    menubar = CreateRamWatchMenubar(win);
 
 	gtk_box_pack_start (GTK_BOX(main_vbox), menubar, FALSE, TRUE, 0);
 	
-   hbox = gtk_hbox_new(FALSE,2);
+   hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,2);
 
    ram_watch_store = gtk_tree_store_new( 4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
@@ -3167,7 +3167,7 @@ static void openMemoryWatchWindow(void)
       ramWatchEvntSrcID = g_timeout_add( 100, updateRamWatchTree, NULL );
    }
 
-	vbox = gtk_vbox_new(FALSE, 3);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 3);
 
    button = gtk_button_new_with_label("Edit");
 	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 5);
@@ -4331,7 +4331,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	gtk_window_set_default_icon(icon);
 	gtk_window_set_icon(GTK_WINDOW(MainWindow), icon);
 	
-	vbox = gtk_vbox_new(FALSE, 0);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(MainWindow), vbox);
 	
 	Menubar = CreateMenubar(MainWindow);
