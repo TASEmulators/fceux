@@ -985,8 +985,11 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 						sprintf(buf, "PRG ROM size you entered is invalid in iNES 2.0, do you want to set to its nearest value %s?", buf2);
 						if (MessageBox(hwnd, buf, "Error", MB_YESNO | MB_ICONERROR) == IDYES)
 							SetDlgItemText(hwnd, IDC_PRGROM_COMBO, buf2);
-						SetFocus(GetDlgItem(hwnd, IDC_PRGROM_COMBO));
-						return false;
+						else
+						{
+							SetFocus(GetDlgItem(hwnd, IDC_PRGROM_COMBO));
+							return false;
+						}
 					}
 				}
 				else {
@@ -1154,8 +1157,11 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 						sprintf(buf, "CHR ROM size you entered is invalid in iNES 2.0, do you want to set to its nearest value %s?", buf2);
 						if (MessageBox(hwnd, buf, "Error", MB_YESNO | MB_ICONERROR) == IDYES)
 							SetDlgItemText(hwnd, IDC_CHRROM_COMBO, buf2);
-						SetFocus(GetDlgItem(hwnd, IDC_CHRROM_COMBO));
-						return false;
+						else
+						{
+							SetFocus(GetDlgItem(hwnd, IDC_CHRROM_COMBO));
+							return false;
+						}
 					}
 				}
 				else {
@@ -1344,14 +1350,14 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 		int misc_roms = 0;
 		if (sscanf(buf, "%d", &misc_roms) < 1)
 		{
-			MessageBox(hwnd, "Invalid miscellanous ROM(s) count. If you don't know what value should be, we recommend to set it to 0.", "ERROR", MB_OK | MB_ICONERROR);
-			SetFocus(GetDlgItem(hwnd, IDC_MISCELLANEOUS_ROMS_TEXT));
+			MessageBox(hwnd, "Invalid miscellanous ROM(s) count. If you don't know what value should be, we recommend to set it to 0.", "Error", MB_OK | MB_ICONERROR);
+			SetFocus(GetDlgItem(hwnd, IDC_MISCELLANEOUS_ROMS_EDIT));
 			return false;
 		}
 		if (misc_roms > 3)
 		{
 			MessageBox(hwnd, "Miscellanous ROM(s) count has exceeded the limit of iNES 2.0 (3)", "Error", MB_OK | MB_ICONERROR);
-			SetFocus(GetDlgItem(hwnd, IDC_MISCELLANEOUS_ROMS_TEXT));
+			SetFocus(GetDlgItem(hwnd, IDC_MISCELLANEOUS_ROMS_EDIT));
 			return false;
 		}
 		_header.reserved[0] |= misc_roms & 3;
