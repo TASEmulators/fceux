@@ -39,6 +39,7 @@ struct SeparatorCache
 };
 
 #define MAX_WATCH_COUNT 256
+
 extern int WatchCount; // number of valid items in rswatches
 
 extern char Watch_Dir[1024];
@@ -58,9 +59,28 @@ struct AddressWatcher
 	short Cheats; // how many bytes are affected by cheat
 };
 
+// the struct for communicating with add watch window
+#define WATCHER_MSG_ADD 0
+#define WATCHER_MSG_EDIT 1
+#define WATCHER_MSG_DUP 2
+struct WatcherMsg {
+	int msg = WATCHER_MSG_ADD;
+	int count = 0; // how many addresses are there
+	unsigned int* Addresses = NULL; // Address list
+	char* comment = NULL;
+	bool WrongEndian;
+	char Size;
+	char Type;
+
+	AddressWatcher* ToAddressWatches(int* _count = NULL);
+	static WatcherMsg FromAddressWatches(const AddressWatcher* watches, int count = 1);
+};
+
+
+
 bool InsertWatch(const AddressWatcher& Watch);
 bool InsertWatch(const AddressWatcher& Watch, HWND parent); // asks user for comment
-bool InsertWatches(const AddressWatcher* watches, HWND parent, const int count);
+bool InsertWatches(WatcherMsg* msg, HWND parent, int count);
 bool InsertWatch(int watchIndex, const AddressWatcher& watcher);
 bool EditWatch(int watchIndex, const AddressWatcher& watcher);
 bool RemoveWatch(int watchIndex);
