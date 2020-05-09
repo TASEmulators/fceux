@@ -5,12 +5,12 @@
 
 trigger:
 - master
-- linux-cheats
+- development
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
 - script: |
-    which scons-3
-  displayName: 'Build'
+    ./azure/linux_build.sh
+  displayName: 'make'
