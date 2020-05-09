@@ -28,10 +28,10 @@ uint32 uppow2(uint32 n)
  int x;
 
  for(x=31;x>=0;x--)
-  if(n&(1<<x))
+  if(n&(1u<<x))
   {
-   if((1<<x)!=n)
-    return(1<<(x+1));
+   if((1u<<x)!=n)
+    return(1u<<(x+1));
    break;
   }
  return n;
