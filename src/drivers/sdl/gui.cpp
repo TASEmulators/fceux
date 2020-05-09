@@ -1524,9 +1524,9 @@ static int ShowCheatSearchResultsCallB(uint32 a, uint8 last, uint8 current)
 {
 	char addrStr[32], lastStr[32], curStr[32];
 
-	sprintf( addrStr, "0x%04x", a );
-	sprintf( lastStr,	"0x%02x", last );
-	sprintf( curStr,	"| 0x%02x", current );
+	sprintf( addrStr, "0x%04X ", a );
+	sprintf( lastStr,	" 0x%02X ", last );
+	sprintf( curStr,	" 0x%02X ", current );
 
 	gtk_tree_store_append( ram_match_store, &ram_match_iter, NULL); // aquire iter
 
@@ -1698,13 +1698,13 @@ static int activeCheatListCB(char *name, uint32 a, uint8 v, int c, int s, int ty
 	   gtk_tree_store_append( actv_cheats_store, &actv_cheats_iter, NULL); // aquire iter
    }
 
-	sprintf( addrStr, "0x%04x", a );
-	sprintf( valStr,	"0x%02x", v );
+	sprintf( addrStr, "0x%04X ", a );
+	sprintf( valStr,	" 0x%02X ", v );
 
 	if ( c >= 0 ){
-	   sprintf( cmpStr,	"0x%02x", c );
+	   sprintf( cmpStr,	" 0x%02X ", c );
 	} else {
-		strcpy( cmpStr, "0xff");
+		strcpy( cmpStr, " 0xFF ");
 	}
 
    gtk_tree_store_set(actv_cheats_store, &actv_cheats_iter, 
@@ -2110,6 +2110,8 @@ static void openCheatsWindow(void)
 	GtkCellRenderer *chkbox_renderer;
 	GtkTreeViewColumn* column;
 	
+   gtk_tree_view_set_grid_lines( GTK_TREE_VIEW(tree), GTK_TREE_VIEW_GRID_LINES_VERTICAL );
+
 	renderer = gtk_cell_renderer_text_new();
    g_object_set(renderer, "editable", TRUE, NULL);
    g_signal_connect(renderer, "edited", (GCallback) cheat_cell_edited_cb, NULL);
@@ -2120,18 +2122,21 @@ static void openCheatsWindow(void)
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 
 	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "family", "MonoSpace", NULL);
    g_object_set(renderer, "editable", TRUE, NULL);
    g_signal_connect(renderer, "edited", (GCallback) cheat_cell_edited_cb, (gpointer)1);
 	column = gtk_tree_view_column_new_with_attributes("Addr", renderer, "text", 1, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 
 	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "family", "MonoSpace", NULL);
    g_object_set(renderer, "editable", TRUE, NULL);
    g_signal_connect(renderer, "edited", (GCallback) cheat_cell_edited_cb, (gpointer)2);
 	column = gtk_tree_view_column_new_with_attributes("Val", renderer, "text", 2, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 
 	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "family", "MonoSpace", NULL);
    g_object_set(renderer, "editable", TRUE, NULL);
    g_signal_connect(renderer, "edited", (GCallback) cheat_cell_edited_cb, (gpointer)3);
 	column = gtk_tree_view_column_new_with_attributes("Cmp", renderer, "text", 3, NULL);
@@ -2370,7 +2375,10 @@ static void openCheatsWindow(void)
 
 	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(ram_match_store));
 
+   gtk_tree_view_set_grid_lines( GTK_TREE_VIEW(tree), GTK_TREE_VIEW_GRID_LINES_VERTICAL );
+
 	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "family", "MonoSpace", NULL);
 	column = gtk_tree_view_column_new_with_attributes("Addr", renderer, "text", 0, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 	column = gtk_tree_view_column_new_with_attributes("Last", renderer, "text", 1, NULL);
@@ -2444,7 +2452,7 @@ static void showRamWatchResults(int reset)
    for (it=ramWatchList.ls.begin(); it!=ramWatchList.ls.end(); it++)
    {
       rw = *it;
-		sprintf( addrStr, "0x%04x", rw->addr );
+		sprintf( addrStr, "0x%04X", rw->addr );
 
       if ( reset ){
          gtk_tree_store_append( ram_watch_store, &iter, NULL); // aquire iter
@@ -2459,7 +2467,7 @@ static void showRamWatchResults(int reset)
          } else {
 			   sprintf( valStr1,	"%6i", rw->val.i16);
          }
-		   sprintf( valStr2,	"0x%04x", rw->val.u16);
+		   sprintf( valStr2,	"0x%04X", rw->val.u16);
       }
       else
       {
@@ -2468,7 +2476,7 @@ static void showRamWatchResults(int reset)
          } else {
 			   sprintf( valStr1,	"%6i", rw->val.i8);
          }
-		   sprintf( valStr2,	"0x%02x", rw->val.u8);
+		   sprintf( valStr2,	"0x%02X", rw->val.u8);
       }
    
       if ( row != ramWatchEditRowIdx )
@@ -3104,10 +3112,13 @@ static void openMemoryWatchWindow(void)
 
 	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(ram_watch_store));
 
+   gtk_tree_view_set_grid_lines( GTK_TREE_VIEW(tree), GTK_TREE_VIEW_GRID_LINES_VERTICAL );
+
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn* column;
 
 	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "family", "MonoSpace", NULL);
    g_object_set(renderer, "editable", TRUE, NULL);
    g_signal_connect(renderer, "edited", (GCallback) ramWatch_cell_edited_cb, (gpointer)0);
    g_signal_connect(renderer, "editing-started", (GCallback) ramWatch_cell_edited_start_cb, (gpointer)0);
@@ -3116,6 +3127,7 @@ static void openMemoryWatchWindow(void)
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 
 	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "family", "MonoSpace", NULL);
    g_object_set(renderer, "editable", TRUE, NULL);
    g_signal_connect(renderer, "edited", (GCallback) ramWatch_cell_edited_cb, (gpointer)1);
    g_signal_connect(renderer, "editing-started", (GCallback) ramWatch_cell_edited_start_cb, (gpointer)1);
@@ -3124,6 +3136,7 @@ static void openMemoryWatchWindow(void)
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 
 	renderer = gtk_cell_renderer_text_new();
+   g_object_set(renderer, "family", "MonoSpace", NULL);
    g_object_set(renderer, "editable", TRUE, NULL);
    g_signal_connect(renderer, "edited", (GCallback) ramWatch_cell_edited_cb, (gpointer)2);
    g_signal_connect(renderer, "editing-started", (GCallback) ramWatch_cell_edited_start_cb, (gpointer)2);
