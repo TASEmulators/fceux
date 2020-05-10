@@ -1449,7 +1449,7 @@ const char* Authors[]= {
 	" Mitsutaka Okazaki - YM2413 emulator", " Andrea Mazzoleni - Scale2x/Scale3x scalers", " Gilles Vollant - unzip.c PKZIP fileio",
 	NULL};
 
-void openAbout ()
+void openAbout (void)
 {
 	GdkPixbuf* logo = gdk_pixbuf_new_from_xpm_data(icon_xpm);
 	
@@ -3229,7 +3229,7 @@ void recordMovieAs ()
 	gtk_widget_destroy (fileChooser);
 }
 
-void loadMovie ()
+void loadMovie (void)
 {
 	GtkWidget* fileChooser;
 	
@@ -4565,6 +4565,113 @@ static GtkWidget* CreateMenubar2( GtkWidget* window)
    //                           GDK_KEY_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 
    gtk_menu_shell_append( GTK_MENU_SHELL(submenu), item );
+
+	//---------------------------------------
+	// Create Tools Menu
+   item = gtk_menu_item_new_with_label("Tools");
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menubar), item );
+
+   menu = gtk_menu_new();
+
+   gtk_menu_item_set_submenu( GTK_MENU_ITEM(item), menu );
+
+	// Load Tools Menu Items
+	//-Tools --> Cheats ---------------------
+   item = gtk_menu_item_new_with_label("Cheats...");
+
+   g_signal_connect( item, "activate", G_CALLBACK(openCheatsWindow), NULL);
+
+	//gtk_widget_add_accelerator( item, "activate", accel_group,
+   //                           GDK_KEY_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-Tools --> Ram Watch ---------------------
+   item = gtk_menu_item_new_with_label("Ram Watch...");
+
+   g_signal_connect( item, "activate", G_CALLBACK(openMemoryWatchWindow), NULL);
+
+	//gtk_widget_add_accelerator( item, "activate", accel_group,
+   //                           GDK_KEY_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//---------------------------------------
+	// Create Movie Menu
+   item = gtk_menu_item_new_with_label("Movie");
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menubar), item );
+
+   menu = gtk_menu_new();
+
+   gtk_menu_item_set_submenu( GTK_MENU_ITEM(item), menu );
+
+	// Load Movie Menu Items
+	//-Movie --> Open ---------------------
+   item = gtk_menu_item_new_with_label("Open");
+
+   g_signal_connect( item, "activate", G_CALLBACK(loadMovie), NULL);
+
+	gtk_widget_add_accelerator( item, "activate", accel_group,
+                              GDK_KEY_F7, GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-Movie --> Stop ---------------------
+   item = gtk_menu_item_new_with_label("Stop");
+
+   g_signal_connect( item, "activate", G_CALLBACK(FCEUI_StopMovie), NULL);
+
+	//gtk_widget_add_accelerator( item, "activate", accel_group,
+   //                           GDK_KEY_F7, GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	// Add Separator
+	item = gtk_separator_menu_item_new();
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-Movie --> Record ---------------------
+   item = gtk_menu_item_new_with_label("Record");
+
+   g_signal_connect( item, "activate", G_CALLBACK(recordMovie), NULL);
+
+	gtk_widget_add_accelerator( item, "activate", accel_group,
+                              GDK_KEY_F5, GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-Movie --> Record As ---------------------
+   item = gtk_menu_item_new_with_label("Record As");
+
+   g_signal_connect( item, "activate", G_CALLBACK(recordMovieAs), NULL);
+
+	//gtk_widget_add_accelerator( item, "activate", accel_group,
+   //                           GDK_KEY_F5, GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//---------------------------------------
+	// Create Help Menu
+   item = gtk_menu_item_new_with_label("Help");
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menubar), item );
+
+   menu = gtk_menu_new();
+
+   gtk_menu_item_set_submenu( GTK_MENU_ITEM(item), menu );
+
+	// Load Help Menu Items
+	//-Help --> About ---------------------
+   item = gtk_menu_item_new_with_label("About");
+
+   g_signal_connect( item, "activate", G_CALLBACK(openAbout), NULL);
+
+	//gtk_widget_add_accelerator( item, "activate", accel_group,
+   //                           GDK_KEY_F7, GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
 
 	// Finally, return the actual menu bar created
 	return menubar;
