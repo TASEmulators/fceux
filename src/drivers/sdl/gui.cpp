@@ -861,30 +861,46 @@ void openGamepadConfig()
 	// create gamepad buttons
 	buttonFrame = gtk_frame_new("<b><i>Buttons</i></b>");
 	gtk_label_set_use_markup(GTK_LABEL(gtk_frame_get_label_widget(GTK_FRAME(buttonFrame))), TRUE);
-	buttonTable = gtk_table_new(10, 3, FALSE);
-	gtk_table_set_col_spacings(GTK_TABLE(buttonTable), 5);
+	//buttonTable = gtk_table_new(10, 3, FALSE);
+	buttonTable = gtk_grid_new();
+	//gtk_table_set_col_spacings(GTK_TABLE(buttonTable), 5);
 	gtk_container_add(GTK_CONTAINER(buttonFrame), buttonTable);
+
+	for (int i=0; i<3; i++)
+	{
+	   gtk_grid_insert_column( GTK_GRID(buttonTable), i );
+	}
+	gtk_grid_set_column_spacing( GTK_GRID(buttonTable), 5 );
+	gtk_grid_set_column_homogeneous( GTK_GRID(buttonTable), TRUE );
+	gtk_grid_set_row_spacing( GTK_GRID(buttonTable), 3 );
+
 	for(int i=0; i<10; i++)
 	{
 		GtkWidget* buttonName = gtk_label_new(GamePadNames[i]);
 		GtkWidget* mappedKey = gtk_label_new(NULL);
 		GtkWidget* changeButton = gtk_toggle_button_new();
 		char strBuf[128];
-		
+
+		gtk_grid_insert_row( GTK_GRID(buttonTable), i );
+
 		sprintf(strBuf, "%s:", GamePadNames[i]);
 		gtk_label_set_text(GTK_LABEL(buttonName), strBuf);
-		gtk_misc_set_alignment(GTK_MISC(buttonName), 1.0, 0.5);
+		//gtk_misc_set_alignment(GTK_MISC(buttonName), 1.0, 0.5);
 		
-		gtk_misc_set_alignment(GTK_MISC(mappedKey), 0.0, 0.5);
+		//gtk_misc_set_alignment(GTK_MISC(mappedKey), 0.0, 0.5);
 		
 		gtk_button_set_label(GTK_BUTTON(changeButton), "Change");
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(changeButton), FALSE);
 		
-		gtk_table_attach(GTK_TABLE(buttonTable), buttonName, 0, 1, i, i+1, GTK_FILL, GTK_FILL, 0, 0);
-		gtk_table_attach(GTK_TABLE(buttonTable), mappedKey, 1, 2, i, i+1, 
-				(GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-		gtk_table_attach(GTK_TABLE(buttonTable), changeButton, 2, 3, i, i+1,
-				(GtkAttachOptions)0, (GtkAttachOptions)0, 0, 0);
+		gtk_grid_attach(GTK_GRID(buttonTable), buttonName, 0, i, 1, 1);
+		gtk_grid_attach(GTK_GRID(buttonTable), mappedKey, 1, i, 1, 1);
+		gtk_grid_attach(GTK_GRID(buttonTable), changeButton, 2, i, 1, 1);
+
+		//gtk_table_attach(GTK_TABLE(buttonTable), buttonName, 0, 1, i, i+1, GTK_FILL, GTK_FILL, 0, 0);
+		//gtk_table_attach(GTK_TABLE(buttonTable), mappedKey, 1, 2, i, i+1, 
+		//		(GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
+		//gtk_table_attach(GTK_TABLE(buttonTable), changeButton, 2, 3, i, i+1,
+		//		(GtkAttachOptions)0, (GtkAttachOptions)0, 0, 0);
 		
 		g_signal_connect(changeButton, "clicked", G_CALLBACK(configGamepadButton), GINT_TO_POINTER(i));
 		buttonMappings[i] = mappedKey;
