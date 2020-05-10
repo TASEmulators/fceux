@@ -473,10 +473,10 @@ void openPaletteConfig()
 	slidersFrame = gtk_frame_new("NTSC palette controls");
 	slidersVbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	tintFrame = gtk_frame_new("Tint");
-	tintHscale = gtk_hscale_new_with_range(0, 128, 1);
+	tintHscale = gtk_scale_new_with_range( GTK_ORIENTATION_HORIZONTAL, 0, 128, 1);
 	gtk_container_add(GTK_CONTAINER(tintFrame), tintHscale);
 	hueFrame = gtk_frame_new("Hue");
-	hueHscale = gtk_hscale_new_with_range(0, 128, 1);
+	hueHscale = gtk_scale_new_with_range( GTK_ORIENTATION_HORIZONTAL, 0, 128, 1);
 	gtk_container_add(GTK_CONTAINER(hueFrame), hueHscale);
 	
 	g_signal_connect(tintHscale, "button-release-event", G_CALLBACK(setTint), NULL);
@@ -950,7 +950,7 @@ void resizeGtkWindow()
 		g_config->getOption("SDL.YScale", &yscale);
 		gtk_widget_set_size_request(evbox, 256*xscale, 224*yscale);
 		GtkRequisition req;
-		gtk_widget_size_request(GTK_WIDGET(MainWindow), &req);
+		gtk_widget_get_preferred_size(GTK_WIDGET(MainWindow), NULL, &req);
 		gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
 	}
 	return;
@@ -1348,7 +1348,7 @@ void openSoundConfig()
 	gtk_box_pack_start(GTK_BOX(hbox2), rateLbl, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(hbox2), rateCombo, FALSE, FALSE, 5);
 	
-	bufferHscale = gtk_hscale_new_with_range(15, 200, 2);
+	bufferHscale = gtk_scale_new_with_range( GTK_ORIENTATION_HORIZONTAL, 15, 200, 2);
 	bufferLbl = gtk_label_new("Buffer size (in ms)");
 
 	// sync widget with cfg 
@@ -1367,7 +1367,7 @@ void openSoundConfig()
 	mixerHbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	for(long int i=0; i<6; i++)
 	{
-		mixers[i] = gtk_vscale_new_with_range(0, 256, 1);
+		mixers[i] = gtk_scale_new_with_range( GTK_ORIENTATION_VERTICAL, 0, 256, 1);
 		gtk_range_set_inverted(GTK_RANGE(mixers[i]), TRUE);
 		mixerFrames[i] = gtk_frame_new(mixerStrings[i]);
 		gtk_container_add(GTK_CONTAINER(mixerFrames[i]), mixers[i]);
@@ -4357,7 +4357,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	gtk_widget_show_all(MainWindow);
 	
 	GtkRequisition req;
-	gtk_widget_size_request(GTK_WIDGET(MainWindow), &req);
+	gtk_widget_get_preferred_size(GTK_WIDGET(MainWindow), NULL, &req);
 	gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
 	gtkIsStarted = true;
 	 
