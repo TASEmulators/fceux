@@ -1443,8 +1443,8 @@ const char* Authors[]= {
 	" Luke Gustafson", " _mz", " UncombedCoconut", " DwEdit", " AnS", "rainwarrior", "feos",
 	"Pre 2.0 Guys:",
 	" Bero", " Xodnizel", " Aaron Oneal", " Joe Nahmias",
-	" Paul Kuliniewicz", " Quietust", " Ben Parnell", " Parasyte & bbitmaster",
-	" blip & nitsuja",
+	" Paul Kuliniewicz", " Quietust", " Ben Parnell", " Parasyte &amp; bbitmaster",
+	" blip &amp; nitsuja",
 	"Included components:",
 	" Mitsutaka Okazaki - YM2413 emulator", " Andrea Mazzoleni - Scale2x/Scale3x scalers", " Gilles Vollant - unzip.c PKZIP fileio",
 	NULL};
