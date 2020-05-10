@@ -2758,70 +2758,45 @@ static void openWatchFile( int mode )
 	gtk_widget_destroy (fileChooser);
 }
 
-static void loadRamWatchCB(void)
+static void loadRamWatchCB( GtkMenuItem *menuitem,
+                            gpointer     user_data)
 {
    openWatchFile(0);
 }
-static void saveRamWatchCB(void)
+static void saveRamWatchCB( GtkMenuItem *menuitem,
+                            gpointer     user_data)
 {
    openWatchFile(1);
 }
 
-// Our menu, in the XML markup format used by GtkUIManager
-static char* menuRamWatchXml = 
-	"<ui>"
-	"  <menubar name='Menubar'>"
-	"    <menu action='FileMenuAction'>"
-	"      <menuitem action='OpenWatchFile' />"
-	"      <menuitem action='SaveWatchFile' />"
-	"    </menu>"
-	"  </menubar>"
-	"</ui>";
-
-static GtkActionEntry ramWatch_entries[] = {
-   {"FileMenuAction", NULL, "_File"},
-   {"OpenWatchFile", GTK_STOCK_OPEN, "_Load Watch", NULL, NULL, G_CALLBACK(loadRamWatchCB)},
-   {"SaveWatchFile", GTK_STOCK_SAVE_AS, "_Save Watch", NULL, NULL, G_CALLBACK(saveRamWatchCB)},
-};
-
-
 static GtkWidget* CreateRamWatchMenubar( GtkWidget* window)
 {
-	GtkUIManager *ui_manager;
-	GtkActionGroup *action_group;
-	GtkAccelGroup* accel_group;
-	GError *error = NULL;
-	//GtkAction* state;
+   GtkWidget *menubar, *menu, *item;
 
-	/* Make an UIManager (which makes a menubar). */
-	ui_manager = gtk_ui_manager_new ();
-	
-	/* Add the menu items to the UIManager as a GtkActionGroup. */
-	action_group = gtk_action_group_new ("MenubarActions");
-	gtk_action_group_add_actions (action_group, ramWatch_entries, G_N_ELEMENTS (ramWatch_entries), NULL);
-	//gtk_action_group_add_toggle_actions (action_group, toggle_entries, G_N_ELEMENTS (toggle_entries), NULL);
-	//gtk_action_group_add_radio_actions (action_group, radio_entries, G_N_ELEMENTS (radio_entries), 0, G_CALLBACK(changeState), NULL);
-	gtk_ui_manager_insert_action_group (ui_manager, action_group, 0);
-    
-	/* Read the menu layout from the XML markup. */
-	gtk_ui_manager_add_ui_from_string (ui_manager, menuRamWatchXml, -1, &error);
-	if (error)
-	{
-		fprintf (stderr, "Unable to create menu bar: %s\n", error->message);
-		g_error_free (error);
-	}
-    
-	/* Attach the new accelerator group to the window. */
-	accel_group = gtk_ui_manager_get_accel_group (ui_manager);
-	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
-    
-	/* Get an action that can be used to change the active state slot selection. */
-	//state = gtk_action_group_get_action (action_group, "State0Action");
-	//if (state && GTK_IS_RADIO_ACTION (state))
-	//	stateSlot = GTK_RADIO_ACTION (state);
+   menubar = gtk_menu_bar_new();
 
-	/* Finally, return the actual menu bar created by the UIManager. */
-	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
+   item = gtk_menu_item_new_with_label("File");
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menubar), item );
+
+   menu = gtk_menu_new();
+
+   gtk_menu_item_set_submenu( GTK_MENU_ITEM(item), menu );
+
+   item = gtk_menu_item_new_with_label("Load Watch");
+
+   g_signal_connect( item, "activate", G_CALLBACK(loadRamWatchCB), NULL);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+   item = gtk_menu_item_new_with_label("Save Watch");
+
+   g_signal_connect( item, "activate", G_CALLBACK(saveRamWatchCB), NULL);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	// Finally, return the actual menu bar created
+	return menubar;
 }
 
 static int openRamWatchEntryDialog( char *name, int *addr, int *type, int *size )
