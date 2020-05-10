@@ -3730,7 +3730,7 @@ void quickSave(void)
 void	changeState(GtkRadioMenuItem *radiomenuitem,
                    gpointer          user_data)
 {
-	printf("Changing State: %li\n", (long)user_data);
+	//printf("Changing State: %li\n", (long)user_data);
 	FCEUI_SelectState( (long)user_data, 0);
 }
 #if SDL_VERSION_ATLEAST(2, 0, 0)                                                    
@@ -4174,9 +4174,15 @@ static GtkWidget* CreateMenubar2( GtkWidget* window)
 {
    GtkWidget *menubar, *menu, *submenu, *item;
 	GSList *radioGroup;
+	GtkAccelGroup *accel_group;
 
 	// Create Menu Bar
    menubar = gtk_menu_bar_new();
+
+	// Create a GtkAccelGroup and add it to the window.
+   accel_group = gtk_accel_group_new ();
+
+   gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
 
 	// Create File Menu
    item = gtk_menu_item_new_with_label("File");
@@ -4193,12 +4199,18 @@ static GtkWidget* CreateMenubar2( GtkWidget* window)
 
    g_signal_connect( item, "activate", G_CALLBACK(loadGame), NULL);
 
+	gtk_widget_add_accelerator( item, "activate", accel_group,
+                              GDK_KEY_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
    gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
 
 	//-File --> Close ROM ------------------
    item = gtk_menu_item_new_with_label("Close ROM");
 
    g_signal_connect( item, "activate", G_CALLBACK(closeGame), NULL);
+
+	gtk_widget_add_accelerator( item, "activate", accel_group,
+                              GDK_KEY_c, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 
    gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
 
@@ -4210,6 +4222,9 @@ static GtkWidget* CreateMenubar2( GtkWidget* window)
 	item = gtk_menu_item_new_with_label("Play NSF");
 
    g_signal_connect( item, "activate", G_CALLBACK(loadNSF), NULL);
+
+	gtk_widget_add_accelerator( item, "activate", accel_group,
+                              GDK_KEY_n, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 
    gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
 
@@ -4236,12 +4251,18 @@ static GtkWidget* CreateMenubar2( GtkWidget* window)
 
    g_signal_connect( item, "activate", G_CALLBACK(quickLoad), NULL);
 
+	gtk_widget_add_accelerator( item, "activate", accel_group,
+                              GDK_KEY_F7, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
+
    gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
 
 	//-File --> Quick Save ------------------
 	item = gtk_menu_item_new_with_label("Quick Save");
 
    g_signal_connect( item, "activate", G_CALLBACK(quickSave), NULL);
+
+	gtk_widget_add_accelerator( item, "activate", accel_group,
+                              GDK_KEY_F5, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
    gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
 
@@ -4293,6 +4314,16 @@ static GtkWidget* CreateMenubar2( GtkWidget* window)
    gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
 	
    g_signal_connect( item, "activate", G_CALLBACK(FCEUI_SaveSnapshot), NULL);
+
+	//-File --> Quit ------------------
+	item = gtk_menu_item_new_with_label("Quit");
+
+   g_signal_connect( item, "activate", G_CALLBACK(quit), NULL);
+
+	gtk_widget_add_accelerator( item, "activate", accel_group,
+                              GDK_KEY_q, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
 
 	// Finally, return the actual menu bar created
 	return menubar;
