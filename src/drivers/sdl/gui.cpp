@@ -389,8 +389,8 @@ void loadPalette (GtkWidget* w, gpointer p)
 	GtkWidget* fileChooser;
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Open NES Palette", GTK_WINDOW(MainWindow),
-			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL,
+			"_Open", GTK_RESPONSE_ACCEPT, NULL);
 	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fileChooser), "/usr/share/fceux/palettes");
 
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
@@ -434,10 +434,10 @@ void openPaletteConfig(void)
 	win = gtk_dialog_new_with_buttons("Palette Options",
 									  GTK_WINDOW(MainWindow),
 									  (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
-									  GTK_STOCK_CLOSE,
+									  "_Close",
 									  GTK_RESPONSE_OK,
 									  NULL);
-	gtk_window_set_icon_name(GTK_WINDOW(win), GTK_STOCK_SELECT_COLOR);
+	gtk_window_set_icon_name(GTK_WINDOW(win), "Color");
 	vbox = gtk_dialog_get_content_area(GTK_DIALOG(win));
 	
 	paletteFrame = gtk_frame_new("Custom palette: ");
@@ -558,8 +558,8 @@ void openNetworkConfig(void)
 	GtkWidget* pwBox;
 	GtkWidget* pwLbl;
 	
-	win = gtk_dialog_new_with_buttons("Network Options",GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),GTK_STOCK_CLOSE,  GTK_RESPONSE_CLOSE,  GTK_STOCK_CONNECT, GTK_RESPONSE_OK, NULL);
-	gtk_window_set_icon_name(GTK_WINDOW(win), GTK_STOCK_NETWORK);
+	win = gtk_dialog_new_with_buttons("Network Options",GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),"_Close",  GTK_RESPONSE_CLOSE,  "_Connect", GTK_RESPONSE_OK, NULL);
+	gtk_window_set_icon_name(GTK_WINDOW(win), "network-workgroup");
 	box = gtk_dialog_get_content_area(GTK_DIALOG(win));
 	
 	userBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
@@ -638,7 +638,7 @@ void openHotkeyConfig()
 	};
 	GtkWidget* win = gtk_dialog_new_with_buttons("Hotkey Configuration",
 			GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
-			GTK_STOCK_CLOSE,
+			"_Close",
 			GTK_RESPONSE_OK,
 			NULL);
 	gtk_window_set_default_size(GTK_WINDOW(win), 400, 800);
@@ -795,7 +795,7 @@ void openGamepadConfig(void)
 	win = gtk_dialog_new_with_buttons("Controller Configuration",
 									  GTK_WINDOW(MainWindow),
 									  (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
-									  GTK_STOCK_CLOSE,
+									  "_Close",
 									  GTK_RESPONSE_OK,
 									  NULL);
 	gtk_window_set_title(GTK_WINDOW(win), "Controller Configuration");
@@ -1084,8 +1084,8 @@ void openVideoConfig(void)
 	win = gtk_dialog_new_with_buttons("Video Preferences",
 				GTK_WINDOW(MainWindow),
 				(GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
-				GTK_STOCK_APPLY, GTK_RESPONSE_APPLY,
-				GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE, NULL);
+				"_Apply", GTK_RESPONSE_APPLY,
+				"_Close", GTK_RESPONSE_CLOSE, NULL);
 	gtk_window_set_icon_name(GTK_WINDOW(win), "video-display");
 	//gtk_widget_set_size_request(win, 250, 250);
 	
@@ -1289,7 +1289,7 @@ void openSoundConfig(void)
 	win = gtk_dialog_new_with_buttons("Sound Preferences",
 										GTK_WINDOW(MainWindow),
 										(GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
-										GTK_STOCK_CLOSE,
+										"_Close",
 										GTK_RESPONSE_OK,
 										NULL);
 	gtk_window_set_icon_name(GTK_WINDOW(win), "audio-x-generic");
@@ -1793,8 +1793,8 @@ static void openCheatFile( GtkWidget *widget,
 	gtk_file_filter_set_name(filterAll, "All Files");
 
 	fileChooser = gtk_file_chooser_dialog_new ("Open Cheat", GTK_WINDOW(MainWindow),
-			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL,
+			"_Open", GTK_RESPONSE_ACCEPT, NULL);
 	const char* last_dir;
 	g_config->getOption("SDL.LastOpenFile", &last_dir);
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), last_dir);
@@ -2097,7 +2097,7 @@ static void openCheatsWindow(void)
 
 	win = gtk_dialog_new_with_buttons("Cheats",
 			GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
-			GTK_STOCK_CLOSE,
+			"_Close",
 			GTK_RESPONSE_OK,
 			NULL);
 	gtk_window_set_default_size(GTK_WINDOW(win), 600, 600);
@@ -2721,14 +2721,14 @@ static void openWatchFile( int mode )
    if ( mode )
    {
 	   fileChooser = gtk_file_chooser_dialog_new ("Save Watch File", GTK_WINDOW(MainWindow),
-	   		GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-	   		GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
+	   		GTK_FILE_CHOOSER_ACTION_SAVE, "_Cancel", GTK_RESPONSE_CANCEL,
+	   		"_Save", GTK_RESPONSE_ACCEPT, NULL);
    }
    else
    {
 	   fileChooser = gtk_file_chooser_dialog_new ("Load Watch File", GTK_WINDOW(MainWindow),
-	   		GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-	   		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	   		GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL,
+	   		"_Open", GTK_RESPONSE_ACCEPT, NULL);
    }
 			
 	//gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fileChooser), last_dir);
@@ -2816,7 +2816,7 @@ static int openRamWatchEntryDialog( char *name, int *addr, int *type, int *size 
 
    win = gtk_dialog_new_with_buttons("RAM Watch Entry",
 			GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
-			GTK_STOCK_CLOSE,
+			"_Close",
 			GTK_RESPONSE_OK,
 			NULL);
 	gtk_window_set_default_size(GTK_WINDOW(win), 400, 200);
@@ -3072,7 +3072,7 @@ static void openMemoryWatchWindow(void)
 
 	win = gtk_dialog_new_with_buttons("RAM Watch",
 			GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
-			GTK_STOCK_CLOSE,
+			"_Close",
 			GTK_RESPONSE_OK,
 			NULL);
 	gtk_window_set_default_size(GTK_WINDOW(win), 600, 600);
@@ -3205,8 +3205,8 @@ void recordMovieAs ()
 	gtk_file_filter_set_name(filterAll, "All Files");
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Save FM2 movie for recording", GTK_WINDOW(MainWindow),
-			GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
+			GTK_FILE_CHOOSER_ACTION_SAVE, "_Cancel", GTK_RESPONSE_CANCEL,
+			"_Save", GTK_RESPONSE_ACCEPT, NULL);
 	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(fileChooser), ".fm2");
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFm2);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
@@ -3253,8 +3253,8 @@ void loadMovie (void)
 	gtk_file_filter_set_name(filterAll, "All Files");
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Open FM2 Movie", GTK_WINDOW(MainWindow),
-			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL,
+			"_Open", GTK_RESPONSE_ACCEPT, NULL);
 			
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterMovies);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFm2);
@@ -3299,8 +3299,8 @@ void loadLua (void)
 	gtk_file_filter_set_name(filterAll, "All Files");
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Open LUA Script", GTK_WINDOW(MainWindow),
-			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL,
+			"_Open", GTK_RESPONSE_ACCEPT, NULL);
 	
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterLua);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
@@ -3357,8 +3357,8 @@ void loadFdsBios (void)
 	
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Load FDS BIOS (disksys.rom)", GTK_WINDOW(MainWindow),
-			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL,
+			"_Open", GTK_RESPONSE_ACCEPT, NULL);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterDiskSys);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterRom);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
@@ -3450,8 +3450,8 @@ void loadGameGenie ()
 	
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Load Game Genie ROM", GTK_WINDOW(MainWindow),
-			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL,
+			"_Open", GTK_RESPONSE_ACCEPT, NULL);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterGG);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterRom);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterNes);
@@ -3503,8 +3503,8 @@ void loadNSF (void)
 	gtk_file_filter_set_name(filterAll, "All Files");
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Open NSF File", GTK_WINDOW(MainWindow),
-			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL,
+			"_Open", GTK_RESPONSE_ACCEPT, NULL);
 	
 	const char* last_dir;
 	g_config->getOption("SDL.LastOpenNSF", &last_dir);
@@ -3592,8 +3592,8 @@ void loadGame (void)
 	
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Open ROM", GTK_WINDOW(MainWindow),
-			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL,
+			"_Open", GTK_RESPONSE_ACCEPT, NULL);
 	const char* last_dir;
 	g_config->getOption("SDL.LastOpenFile", &last_dir);
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), last_dir);
@@ -3650,8 +3650,8 @@ void saveStateAs(void)
 	g_config->getOption("SDL.LastSaveStateAs", &last_dir);
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Save State As", GTK_WINDOW(MainWindow),
-			GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
+			GTK_FILE_CHOOSER_ACTION_SAVE, "_Cancel", GTK_RESPONSE_CANCEL,
+			"_Save", GTK_RESPONSE_ACCEPT, NULL);
 			
 	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fileChooser), last_dir);
 	
@@ -3695,8 +3695,8 @@ void loadStateFrom(void)
 	gtk_file_filter_set_name(filterAll, "All Files");
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Load State From", GTK_WINDOW(MainWindow),
-			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL,
+			"_Open", GTK_RESPONSE_ACCEPT, NULL);
 			
 	const char* last_dir;
 	g_config->getOption("SDL.LastLoadStateFrom", &last_dir);
