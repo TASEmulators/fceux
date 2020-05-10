@@ -433,7 +433,7 @@ InitVideo(FCEUGI *gi)
 		if(noGui == 0)
 		{
 			GtkRequisition req;
-			gtk_widget_size_request(GTK_WIDGET(MainWindow), &req);
+			gtk_widget_get_preferred_size(GTK_WIDGET(MainWindow), NULL, &req);
 			gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
 		 }
 #endif

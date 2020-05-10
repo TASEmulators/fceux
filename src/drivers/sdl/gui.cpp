@@ -444,12 +444,11 @@ void openPaletteConfig()
 	paletteHbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	gtk_container_set_border_width(GTK_CONTAINER(paletteHbox), 5);
 	gtk_container_add(GTK_CONTAINER(paletteFrame), paletteHbox);
-	paletteButton = gtk_button_new_from_stock(GTK_STOCK_OPEN);
-	gtk_button_set_label(GTK_BUTTON(paletteButton), "Open palette");
+	paletteButton = gtk_button_new_with_label("Open palette");
 	paletteEntry = gtk_entry_new();
 	gtk_editable_set_editable(GTK_EDITABLE(paletteEntry), FALSE);
 	
-	clearButton = gtk_button_new_from_stock(GTK_STOCK_CLEAR);
+	clearButton = gtk_button_new_with_label("Clear");
 	
 	gtk_box_pack_start(GTK_BOX(paletteHbox), paletteButton, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(paletteHbox), paletteEntry, TRUE, TRUE, 5);
