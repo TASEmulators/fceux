@@ -3540,8 +3540,8 @@ void loadNSF (void)
 
 void closeGame(void)
 {
-	GdkColor bg = {0, 0, 0, 0};
-	gtk_widget_modify_bg(evbox, GTK_STATE_NORMAL, &bg);
+	//GdkColor bg = {0, 0, 0, 0};
+	//gtk_widget_modify_bg(evbox, GTK_STATE_NORMAL, &bg);
 	CloseGame(); 
 }
 
@@ -4836,6 +4836,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	// prg - Bryan Cain, you are the man!
 	
 	evbox = gtk_event_box_new();
+	//evbox = gtk_drawing_area_new();
 	gtk_box_pack_start (GTK_BOX(vbox), evbox, TRUE, TRUE, 0);
 	
 	double xscale, yscale;
@@ -4847,8 +4848,8 @@ int InitGTKSubsystem(int argc, char** argv)
 	gtk_widget_show(evbox);
 	gtk_widget_show_all(vbox);
 	
-	GdkColor bg = {0, 0, 0, 0};
-	gtk_widget_modify_bg(evbox, GTK_STATE_NORMAL, &bg);
+	//GdkColor bg = {0, 0, 0, 0};
+	//gtk_widget_modify_bg(evbox, GTK_STATE_NORMAL, &bg);
 	
 	// set up keypress "snooper" to convert GDK keypress events into SDL keypresses
 	gtk_key_snooper_install(convertKeypress, NULL);
