@@ -861,9 +861,7 @@ void openGamepadConfig()
 	// create gamepad buttons
 	buttonFrame = gtk_frame_new("<b><i>Buttons</i></b>");
 	gtk_label_set_use_markup(GTK_LABEL(gtk_frame_get_label_widget(GTK_FRAME(buttonFrame))), TRUE);
-	//buttonTable = gtk_table_new(10, 3, FALSE);
 	buttonTable = gtk_grid_new();
-	//gtk_table_set_col_spacings(GTK_TABLE(buttonTable), 5);
 	gtk_container_add(GTK_CONTAINER(buttonFrame), buttonTable);
 
 	for (int i=0; i<3; i++)
@@ -885,9 +883,6 @@ void openGamepadConfig()
 
 		sprintf(strBuf, "%s:", GamePadNames[i]);
 		gtk_label_set_text(GTK_LABEL(buttonName), strBuf);
-		//gtk_misc_set_alignment(GTK_MISC(buttonName), 1.0, 0.5);
-		
-		//gtk_misc_set_alignment(GTK_MISC(mappedKey), 0.0, 0.5);
 		
 		gtk_button_set_label(GTK_BUTTON(changeButton), "Change");
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(changeButton), FALSE);
@@ -896,12 +891,6 @@ void openGamepadConfig()
 		gtk_grid_attach(GTK_GRID(buttonTable), mappedKey, 1, i, 1, 1);
 		gtk_grid_attach(GTK_GRID(buttonTable), changeButton, 2, i, 1, 1);
 
-		//gtk_table_attach(GTK_TABLE(buttonTable), buttonName, 0, 1, i, i+1, GTK_FILL, GTK_FILL, 0, 0);
-		//gtk_table_attach(GTK_TABLE(buttonTable), mappedKey, 1, 2, i, i+1, 
-		//		(GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-		//gtk_table_attach(GTK_TABLE(buttonTable), changeButton, 2, 3, i, i+1,
-		//		(GtkAttachOptions)0, (GtkAttachOptions)0, 0, 0);
-		
 		g_signal_connect(changeButton, "clicked", G_CALLBACK(configGamepadButton), GINT_TO_POINTER(i));
 		buttonMappings[i] = mappedKey;
 	}
@@ -2099,7 +2088,6 @@ static void openCheatsWindow(void)
 	GtkWidget* button, *chkbutton;
 	GtkWidget *tree;
 	GtkWidget *scroll;
-	GtkWidget *align;
 
    if ( cheatWindowOpen ){
       return; // Only allow one cheat window to be open per gui.
@@ -2302,19 +2290,18 @@ static void openCheatsWindow(void)
 	gtk_container_add(GTK_CONTAINER(frame), prev_cmp_vbox);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 1);
-	align = gtk_alignment_new( 0, 0, 0.5, 0 );
 	button = gtk_button_new_with_label("Equal");
-	gtk_container_add( GTK_CONTAINER(align), button );
-	gtk_box_pack_start(GTK_BOX(hbox), align, TRUE, TRUE, 5);
+	//gtk_widget_set_halign( button, GTK_ALIGN_BASELINE);
+	
+	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(prev_cmp_vbox), hbox, FALSE, FALSE, 5);
 	g_signal_connect( button, "clicked",
 		      G_CALLBACK (cheatSearchEqual), (gpointer) NULL );
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-	align = gtk_alignment_new( 0, 0, 1, 0 );
 	button = gtk_button_new_with_label("Not Equal");
-	gtk_container_add( GTK_CONTAINER(align), button );
-	gtk_box_pack_start(GTK_BOX(hbox), align, TRUE, TRUE, 5);
+	//gtk_widget_set_halign( button, GTK_ALIGN_BASELINE);
+	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 5);
 	chkbutton = gtk_check_button_new();
 	gtk_box_pack_start(GTK_BOX(hbox), chkbutton, FALSE, FALSE, 5);
 	g_signal_connect( button, "clicked",
@@ -2333,10 +2320,9 @@ static void openCheatsWindow(void)
 	gtk_box_pack_start(GTK_BOX(prev_cmp_vbox), hbox, FALSE, FALSE, 5);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-	align = gtk_alignment_new( 0, 0, 1, 0 );
 	button = gtk_button_new_with_label("Greater Than");
-	gtk_container_add( GTK_CONTAINER(align), button );
-	gtk_box_pack_start(GTK_BOX(hbox), align, TRUE, TRUE, 5);
+	//gtk_widget_set_halign( button, GTK_ALIGN_BASELINE);
+	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 5);
 	chkbutton = gtk_check_button_new();
 	g_signal_connect( button, "clicked",
 		      G_CALLBACK (cheatSearchGreaterThan), (gpointer) chkbutton );
@@ -2355,10 +2341,9 @@ static void openCheatsWindow(void)
 	gtk_box_pack_start(GTK_BOX(prev_cmp_vbox), hbox, FALSE, FALSE, 5);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-	align = gtk_alignment_new( 0, 0, 1, 0 );
 	button = gtk_button_new_with_label("Less Than");
-	gtk_container_add( GTK_CONTAINER(align), button );
-	gtk_box_pack_start(GTK_BOX(hbox), align, TRUE, TRUE, 5);
+	//gtk_widget_set_halign( button, GTK_ALIGN_BASELINE);
+	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 5);
 	chkbutton = gtk_check_button_new();
 	g_signal_connect( button, "clicked",
 		      G_CALLBACK (cheatSearchLessThan), (gpointer) chkbutton );
