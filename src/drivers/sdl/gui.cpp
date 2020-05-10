@@ -56,7 +56,7 @@ GtkWidget* buttonMappings[10];
 GtkWidget* Menubar;
 GtkRadioAction* stateSlot = NULL;
 bool gtkIsStarted = false;
-bool menuTogglingEnabled;
+bool menuTogglingEnabled = false;
 
 //-----------------------------------------
 // Cheat static variables 
@@ -414,7 +414,7 @@ void clearPalette(GtkWidget* w, gpointer p)
 	gtk_entry_set_text(GTK_ENTRY(p), "");
 }
 
-void openPaletteConfig()
+void openPaletteConfig(void)
 {
 	GtkWidget* win;
 	GtkWidget* vbox;
@@ -539,7 +539,7 @@ void netResponse(GtkWidget* w, gint response_id, gpointer p)
 		gtk_widget_destroy(w);
 }
 
-void openNetworkConfig()
+void openNetworkConfig(void)
 {
 	GtkWidget* win;
 	GtkWidget* box;
@@ -772,7 +772,7 @@ void updateGamepadConfig(GtkWidget* w, gpointer p)
 }
 
 // creates and opens the gamepad config window (requires GTK 2.24)
-void openGamepadConfig()
+void openGamepadConfig(void)
 {
 	// GTK 2.24 required for this dialog
 	if (checkGTKVersion(2, 24) == false)
@@ -1055,7 +1055,7 @@ void setDoubleBuffering(GtkWidget* w, gpointer p)
 }
 #endif
 
-void openVideoConfig()
+void openVideoConfig(void)
 {
 	GtkWidget* win;
 	GtkWidget* vbox;
@@ -1265,7 +1265,7 @@ int mixerChanged(GtkWidget* w, gpointer p)
 	return 0;
 }
 
-void openSoundConfig()
+void openSoundConfig(void)
 {
 	GtkWidget* win;
 	GtkWidget* main_hbox;
@@ -1499,24 +1499,26 @@ void hardReset ()
 	}
 }
 
-void enableFullscreen ()
+void enableFullscreen (void)
 {
 	if(isloaded)
 		ToggleFS();
 }
 
-void toggleMenuToggling (GtkToggleAction *action)
+void toggleMenuToggling(GtkCheckMenuItem *item,  gpointer  user_data)
 {
-	bool toggleMenu = gtk_toggle_action_get_active(action);
+	bool toggleMenu = gtk_check_menu_item_get_active(item);
 
+	//printf("ToggleMenu: %i\n", (int)toggleMenu);
 	g_config->setOption("SDL.ToggleMenu", (int)toggleMenu);
 	menuTogglingEnabled = toggleMenu;
 }
 
-void toggleAutoResume (GtkToggleAction *action)
+void toggleAutoResume(GtkCheckMenuItem *item,  gpointer  user_data)
 {
-	bool autoResume = gtk_toggle_action_get_active(action);
+	bool autoResume = gtk_check_menu_item_get_active(item);
 
+	//printf("AutoResume: %i\n", (int)autoResume);
 	g_config->setOption("SDL.AutoResume", (int)autoResume);
 	AutoResumePlay = autoResume;
 }
@@ -4184,6 +4186,7 @@ static GtkWidget* CreateMenubar2( GtkWidget* window)
 
    gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
 
+	//---------------------------------------
 	// Create File Menu
    item = gtk_menu_item_new_with_label("File");
 
@@ -4315,6 +4318,9 @@ static GtkWidget* CreateMenubar2( GtkWidget* window)
 	
    g_signal_connect( item, "activate", G_CALLBACK(FCEUI_SaveSnapshot), NULL);
 
+	gtk_widget_add_accelerator( item, "activate", accel_group,
+                              GDK_KEY_F12, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
+
 	//-File --> Quit ------------------
 	item = gtk_menu_item_new_with_label("Quit");
 
@@ -4322,6 +4328,106 @@ static GtkWidget* CreateMenubar2( GtkWidget* window)
 
 	gtk_widget_add_accelerator( item, "activate", accel_group,
                               GDK_KEY_q, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//---------------------------------------
+	// Create Options Menu
+   item = gtk_menu_item_new_with_label("Options");
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menubar), item );
+
+   menu = gtk_menu_new();
+
+   gtk_menu_item_set_submenu( GTK_MENU_ITEM(item), menu );
+
+	// Load Options Menu Items
+	//-Options --> Gamepad Config ---------------------
+   item = gtk_menu_item_new_with_label("Gamepad Config");
+
+   g_signal_connect( item, "activate", G_CALLBACK(openGamepadConfig), NULL);
+
+	//gtk_widget_add_accelerator( item, "activate", accel_group,
+   //                           GDK_KEY_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-Options --> Hotkey Config ---------------------
+   item = gtk_menu_item_new_with_label("Hotkey Config");
+
+   g_signal_connect( item, "activate", G_CALLBACK(openHotkeyConfig), NULL);
+
+	//gtk_widget_add_accelerator( item, "activate", accel_group,
+   //                           GDK_KEY_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-Options --> Sound Config ---------------------
+   item = gtk_menu_item_new_with_label("Sound Config");
+
+   g_signal_connect( item, "activate", G_CALLBACK(openSoundConfig), NULL);
+
+	//gtk_widget_add_accelerator( item, "activate", accel_group,
+   //                           GDK_KEY_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-Options --> Video Config ---------------------
+   item = gtk_menu_item_new_with_label("Video Config");
+
+   g_signal_connect( item, "activate", G_CALLBACK(openVideoConfig), NULL);
+
+	//gtk_widget_add_accelerator( item, "activate", accel_group,
+   //                           GDK_KEY_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-Options --> Palette Config ---------------------
+   item = gtk_menu_item_new_with_label("Palette Config");
+
+   g_signal_connect( item, "activate", G_CALLBACK(openPaletteConfig), NULL);
+
+	//gtk_widget_add_accelerator( item, "activate", accel_group,
+   //                           GDK_KEY_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-Options --> Network Config ---------------------
+   item = gtk_menu_item_new_with_label("Network Config");
+
+   g_signal_connect( item, "activate", G_CALLBACK(openNetworkConfig), NULL);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-Options --> Auto-Resume Play ---------------------
+   item = gtk_check_menu_item_new_with_label("Auto-Resume Play");
+
+	gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(item), AutoResumePlay);
+
+   g_signal_connect( item, "toggled", G_CALLBACK(toggleAutoResume), NULL);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-Options --> Toggle Menubar ---------------------
+   item = gtk_check_menu_item_new_with_label("Toggle Menubar (alt)");
+
+	//gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(item), FALSE);
+
+   g_signal_connect( item, "toggled", G_CALLBACK(toggleMenuToggling), NULL);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	// Add Separator
+	item = gtk_separator_menu_item_new();
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-Options --> Fullscreen ---------------------
+   item = gtk_menu_item_new_with_label("Fullscreen");
+
+   g_signal_connect( item, "activate", G_CALLBACK(enableFullscreen), NULL);
+
+	gtk_widget_add_accelerator( item, "activate", accel_group,
+                              GDK_KEY_Return, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
 
    gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
 
