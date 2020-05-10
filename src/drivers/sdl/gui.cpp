@@ -44,8 +44,8 @@
 #endif
 
 void toggleSound(GtkWidget* check, gpointer data);
-void loadGame ();
-void closeGame();
+void loadGame (void);
+void closeGame(void);
 extern Config *g_config;
 
 GtkWidget* MainWindow = NULL;
@@ -3281,7 +3281,7 @@ void loadMovie ()
 }
 
 #ifdef _S9XLUA_H
-void loadLua ()
+void loadLua (void)
 {
 	GtkWidget* fileChooser;
 	GtkFileFilter* filterLua;
@@ -3480,7 +3480,7 @@ void loadGameGenie ()
 
 }
 
-void loadNSF ()
+void loadNSF (void)
 {
 	GtkWidget* fileChooser;
 	GtkFileFilter* filterNSF;
@@ -3536,14 +3536,14 @@ void loadNSF ()
 		gtk_widget_destroy (fileChooser);
 }
 
-void closeGame()
+void closeGame(void)
 {
 	GdkColor bg = {0, 0, 0, 0};
 	gtk_widget_modify_bg(evbox, GTK_STATE_NORMAL, &bg);
 	CloseGame(); 
 }
 
-void loadGame ()
+void loadGame (void)
 {
 	GtkWidget* fileChooser;
 	GtkFileFilter* filterFCEU;
@@ -3629,7 +3629,7 @@ void loadGame ()
 		gtk_widget_destroy (fileChooser);
 }
 
-void saveStateAs()
+void saveStateAs(void)
 {
 	GtkWidget* fileChooser;
 	GtkFileFilter* filterSav;
@@ -3671,7 +3671,7 @@ void saveStateAs()
 	
 }
 
-void loadStateFrom()
+void loadStateFrom(void)
 {
 	GtkWidget* fileChooser;
 	GtkFileFilter* filterFcs;
@@ -3716,19 +3716,22 @@ void loadStateFrom()
 	gtk_widget_destroy (fileChooser);
 }
 
-void quickLoad()
+void quickLoad(void)
 {
 	FCEUI_LoadState(NULL);
 }
 
-void quickSave()
+void quickSave(void)
 {
 	FCEUI_SaveState(NULL);
 }
 
-void changeState(GtkAction *action, GtkRadioAction *current, gpointer data)
+//void changeState(GtkAction *action, GtkRadioAction *current, gpointer data)
+void	changeState(GtkRadioMenuItem *radiomenuitem,
+                   gpointer          user_data)
 {
-	FCEUI_SelectState(gtk_radio_action_get_current_value(current), 0);
+	printf("Changing State: %li\n", (long)user_data);
+	FCEUI_SelectState( (long)user_data, 0);
 }
 #if SDL_VERSION_ATLEAST(2, 0, 0)                                                    
 // SDL 1.2/2.0 compatibility macros
@@ -4167,6 +4170,134 @@ static GtkWidget* CreateMenubar( GtkWidget* window)
 }
 
 
+static GtkWidget* CreateMenubar2( GtkWidget* window)
+{
+   GtkWidget *menubar, *menu, *submenu, *item;
+	GSList *radioGroup;
+
+	// Create Menu Bar
+   menubar = gtk_menu_bar_new();
+
+	// Create File Menu
+   item = gtk_menu_item_new_with_label("File");
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menubar), item );
+
+   menu = gtk_menu_new();
+
+   gtk_menu_item_set_submenu( GTK_MENU_ITEM(item), menu );
+
+	// Load File Menu Items
+	//-File --> Open ROM ---------------------
+   item = gtk_menu_item_new_with_label("Open ROM");
+
+   g_signal_connect( item, "activate", G_CALLBACK(loadGame), NULL);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-File --> Close ROM ------------------
+   item = gtk_menu_item_new_with_label("Close ROM");
+
+   g_signal_connect( item, "activate", G_CALLBACK(closeGame), NULL);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	// Add Separator
+	item = gtk_separator_menu_item_new();
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-File --> Play NSF ------------------
+	item = gtk_menu_item_new_with_label("Play NSF");
+
+   g_signal_connect( item, "activate", G_CALLBACK(loadNSF), NULL);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	// Add Separator
+	item = gtk_separator_menu_item_new();
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-File --> Load State From ------------------
+	item = gtk_menu_item_new_with_label("Load State From");
+
+   g_signal_connect( item, "activate", G_CALLBACK(loadStateFrom), NULL);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-File --> Save State As ------------------
+	item = gtk_menu_item_new_with_label("Save State As");
+
+   g_signal_connect( item, "activate", G_CALLBACK(saveStateAs), NULL);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-File --> Quick Load ------------------
+	item = gtk_menu_item_new_with_label("Quick Load");
+
+   g_signal_connect( item, "activate", G_CALLBACK(quickLoad), NULL);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-File --> Quick Save ------------------
+	item = gtk_menu_item_new_with_label("Quick Save");
+
+   g_signal_connect( item, "activate", G_CALLBACK(quickSave), NULL);
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-File --> Change State ------------------
+	item = gtk_menu_item_new_with_label("Change State");
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+	
+   submenu = gtk_menu_new();
+
+   gtk_menu_item_set_submenu( GTK_MENU_ITEM(item), submenu );
+
+	//-File --> Change State --> State 0:9 ------------------
+	radioGroup = NULL;
+
+	for (int i=0; i<10; i++)
+	{
+		char stmp[32];
+
+		sprintf( stmp, "%i", i );
+
+		item = gtk_radio_menu_item_new_with_label( radioGroup, stmp);
+	
+		radioGroup = gtk_radio_menu_item_get_group( GTK_RADIO_MENU_ITEM(item) );
+	
+	   gtk_menu_shell_append( GTK_MENU_SHELL(submenu), item );
+
+      g_signal_connect( item, "activate", G_CALLBACK(changeState), (gpointer)i);
+	}
+
+	// Add Separator
+	item = gtk_separator_menu_item_new();
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-File --> Load Lua Script ------------------
+	item = gtk_menu_item_new_with_label("Load Lua Script");
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+	
+   g_signal_connect( item, "activate", G_CALLBACK(loadLua), NULL);
+
+	// Add Separator
+	item = gtk_separator_menu_item_new();
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+
+	//-File --> ScreenShot ------------------
+	item = gtk_menu_item_new_with_label("Screenshot");
+
+   gtk_menu_shell_append( GTK_MENU_SHELL(menu), item );
+	
+   g_signal_connect( item, "activate", G_CALLBACK(FCEUI_SaveSnapshot), NULL);
+
+	// Finally, return the actual menu bar created
+	return menubar;
+}
+
 void pushOutputToGTK(const char* str)
 {
 	// we don't really do anything with the output right now
@@ -4309,7 +4440,8 @@ int InitGTKSubsystem(int argc, char** argv)
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(MainWindow), vbox);
 	
-	Menubar = CreateMenubar(MainWindow);
+	//Menubar = CreateMenubar(MainWindow);
+	Menubar = CreateMenubar2(MainWindow);
 
 	gtk_box_pack_start (GTK_BOX(vbox), Menubar, FALSE, TRUE, 0);
 		
