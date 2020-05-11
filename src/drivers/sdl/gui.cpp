@@ -43,6 +43,10 @@
   #define gtk_combo_box_text_append_text gtk_combo_box_append_text
 #endif
 
+// NES resolution = 256x240
+const int NES_WIDTH=256;
+const int NES_HEIGHT=240;
+
 void toggleSound(GtkWidget* check, gpointer data);
 void loadGame (void);
 void closeGame(void);
@@ -297,8 +301,9 @@ int configGamepadButton(GtkButton* button, gpointer p)
 	return 0;
 }
 
-void resetVideo()
+void resetVideo(void)
 {
+	resizeGtkWindow();
 	KillVideo();
 	InitVideo(GameInfo);
 }
@@ -945,18 +950,20 @@ void setQuality(GtkWidget* w, gpointer p)
 	return;
 }
 
-void resizeGtkWindow()
+void resizeGtkWindow(void)
 {
-	if(GameInfo == 0)
-	{
+	//if(GameInfo == 0)
+	//{
 		double xscale, yscale;
 		g_config->getOption("SDL.XScale", &xscale);
 		g_config->getOption("SDL.YScale", &yscale);
-		gtk_widget_set_size_request(evbox, 256*xscale, 224*yscale);
+	   gtk_widget_set_size_request(evbox, NES_WIDTH*xscale, NES_HEIGHT*yscale);
 		GtkRequisition req;
 		gtk_widget_get_preferred_size(GTK_WIDGET(MainWindow), NULL, &req);
+		//printf("GTK Resizing: w:%i  h:%i \n", req.width, req.height );
 		gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
-	}
+	   gtk_widget_set_size_request(evbox, NES_WIDTH, NES_HEIGHT);
+	//}
 	return;
 }
 
@@ -4749,11 +4756,8 @@ gint handleMouseClick(GtkWidget* widget, GdkEvent *event, gpointer callback_data
   
 	return 0;
 }
-// NES resolution = 256x240
-const int NES_WIDTH=256;
-const int NES_HEIGHT=240;
 
-void handle_resize(GtkWindow* win, GdkEvent* event, gpointer data)
+gboolean handle_resize(GtkWindow* win, GdkEvent* event, gpointer data)
 {
 	// TODO this is a stub atm
 	// this should handle resizing so the emulation takes up as much
@@ -4764,7 +4768,7 @@ void handle_resize(GtkWindow* win, GdkEvent* event, gpointer data)
 	int width, height;
 	width = event->configure.width;
 	height = event->configure.height;
-	printf("DEBUG: new window size: %dx%d\n", width, height);
+	printf("DEBUG: Configure new window size: %dx%d\n", width, height);
 
 	// get width/height multipliers
 	double xscale = width / (double)NES_WIDTH;
@@ -4787,7 +4791,7 @@ void handle_resize(GtkWindow* win, GdkEvent* event, gpointer data)
 		KillVideo();
 		InitVideo(GameInfo);
 	}
-	gtk_widget_set_size_request(evbox, (int)(NES_WIDTH*xscale), (int)(NES_HEIGHT*yscale));
+	//gtk_widget_set_size_request(evbox, (int)(NES_WIDTH*xscale), (int)(NES_HEIGHT*yscale));
 
 	// Currently unused; unsure why
 	/*	GdkColor black;
@@ -4798,7 +4802,7 @@ void handle_resize(GtkWindow* win, GdkEvent* event, gpointer data)
 
 	printf("DEBUG: new xscale: %f yscale: %f\n", xscale, yscale);
 
-	return;
+	return FALSE;
 }
 
 int InitGTKSubsystem(int argc, char** argv)
@@ -4864,13 +4868,17 @@ int InitGTKSubsystem(int argc, char** argv)
 	g_signal_connect(MainWindow, "delete-event", quit, NULL);
 	g_signal_connect(MainWindow, "destroy-event", quit, NULL);
 	// resize handler
-//	g_signal_connect(MainWindow, "configure-event", G_CALLBACK(handle_resize), NULL);
+	g_signal_connect(MainWindow, "configure-event", G_CALLBACK(handle_resize), NULL);
 	
 	gtk_widget_show_all(MainWindow);
 	
 	GtkRequisition req;
 	gtk_widget_get_preferred_size(GTK_WIDGET(MainWindow), NULL, &req);
-	gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
+	//printf("Init Resize: w:%i  h:%i \n", req.width, req.height );
+	gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height );
+
+   // Once the window has been resized, return draw area size request to minimum values
+	gtk_widget_set_size_request(evbox, NES_WIDTH, NES_HEIGHT);
 	gtkIsStarted = true;
 	 
 	return 0;

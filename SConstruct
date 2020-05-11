@@ -44,7 +44,7 @@ if platform.system == "ppc":
   env['LSB_FIRST'] = 0
 
 # Default compiler flags:
-env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare'])
+env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare', '-Wno-parentheses', '-Wno-unused-local-typedefs'])
 env.Append(CXXFLAGS = ['-std=c++0x'])
 
 if 'PLATFORM' in os.environ:

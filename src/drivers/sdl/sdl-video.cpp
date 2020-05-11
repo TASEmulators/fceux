@@ -429,14 +429,15 @@ InitVideo(FCEUGI *gi)
 			return -1;
 		}
 
-#ifdef _GTK
-		if(noGui == 0)
-		{
-			GtkRequisition req;
-			gtk_widget_get_preferred_size(GTK_WIDGET(MainWindow), NULL, &req);
-			gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
-		 }
-#endif
+      // This code is not needed, gui.cpp handles all window sizing.
+//#ifdef _GTK
+//		if(noGui == 0)
+//		{
+//			GtkRequisition req;
+//			gtk_widget_get_preferred_size(GTK_WIDGET(MainWindow), NULL, &req);
+//			gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
+//		 }
+//#endif
 		 }
 	s_curbpp = s_screen->format->BitsPerPixel;
 	if(!s_screen) {
