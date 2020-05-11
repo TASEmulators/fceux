@@ -62,6 +62,7 @@ GtkRadioAction* stateSlot = NULL;
 bool gtkIsStarted = false;
 bool menuTogglingEnabled = false;
 
+static GtkTreeStore *hotkey_store = NULL;
 //-----------------------------------------
 // Cheat static variables 
 static GtkTreeStore *actv_cheats_store = NULL;
@@ -225,39 +226,6 @@ void setCheckbox(GtkWidget* w, const char* configName)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), buf);
 }
 
-// This function configures a single hotkey
-int configHotkey(char* hotkeyString)
-{
-	// This is broken right now
-	//SDL_Surface *screen;
-//	SDL_Event event;
-//	KillVideo();
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	return 0; // TODO - SDL 2.0
-#else
-	//screen = SDL_SetVideoMode(420, 200, 8, 0);
-	//SDL_WM_SetCaption("Press a key to bind...", 0);
-/*
-	int newkey = 0;
-	while(1)
-	{
-		SDL_WaitEvent(&event);
-
-		switch (event.type)
-		{
-			case SDL_KEYDOWN:
-				newkey = event.key.keysym.sym;
-				g_config->setOption(hotkeyString, newkey);
-				extern FCEUGI *GameInfo;
-				InitVideo(GameInfo);
-				return 0;
-		}
-	}	
-	
-	return 0;*/
-#endif
-	return 0;
-}
 // This function configures a single button on a gamepad
 int configGamepadButton(GtkButton* button, gpointer p)
 {
@@ -620,9 +588,8 @@ void openNetworkConfig(void)
 }
 
 // handler prototype
-static void tree_selection_changed_cb (GtkTreeSelection *selection, gpointer data);
 
-void flushGtkEvents()
+void flushGtkEvents(void)
 {
 	while (gtk_events_pending ())
 		gtk_main_iteration_do (FALSE);
@@ -632,15 +599,99 @@ void flushGtkEvents()
 
 GtkWidget* HotkeyWin;
 
-// creates and opens hotkey config window
-void openHotkeyConfig()
+static void hotKeyWindowRefresh(void)
 {
-	enum
+    GtkTreeIter iter;
+    std::string prefix = "SDL.Hotkeys.";
+
+    if ( hotkey_store == NULL ) return;
+
+    gtk_tree_store_clear(hotkey_store);
+    
+    gtk_tree_store_append(hotkey_store, &iter, NULL); // aquire iter
+     
+    int keycode;
+    for(int i=0; i<HK_MAX; i++)
+    {
+        std::string optionName = prefix + HotkeyStrings[i];
+        g_config->getOption(optionName.c_str(), &keycode);
+        gtk_tree_store_set(hotkey_store, &iter, 
+                0, optionName.c_str(),
+                1,
+#if SDL_VERSION_ATLEAST(2, 0, 0)                                                    
+				SDL_GetKeyName(keycode),
+#else
+				SDL_GetKeyName((SDLKey)keycode),
+#endif
+                -1);
+        gtk_tree_store_append(hotkey_store, &iter, NULL); // acquire child iterator
+    }
+
+}
+
+static gint hotKeyPressCB(GtkTreeView* tree, GdkEventKey* event, gpointer cb_data)
+{
+	int numListRows;
+	GList *selListRows, *tmpList;
+	GtkTreeModel *model = NULL;
+   GtkTreeSelection *treeSel = gtk_tree_view_get_selection(tree);
+
+   printf("Hot Key Press: %i \n", event->keyval );
+
+	numListRows = gtk_tree_selection_count_selected_rows( treeSel );
+
+   if ( numListRows == 0 )
+   {
+      return FALSE;
+   }
+	//printf("Number of Rows Selected: %i\n", numListRows );
+
+	selListRows = gtk_tree_selection_get_selected_rows( treeSel, &model );
+
+	tmpList = selListRows;
+
+	while ( tmpList )
 	{
-		COMMAND_COLUMN,
-		KEY_COLUMN,
-		N_COLUMNS
-	};
+		int depth;
+		int *indexArray;
+		GtkTreePath *path = (GtkTreePath*)tmpList->data;
+
+		depth = gtk_tree_path_get_depth(path);
+		indexArray = gtk_tree_path_get_indices(path);
+
+		if ( depth > 0 )
+		{
+         int sdlkey = 0;
+         std::string hotKeyName = "SDL.Hotkeys.";
+         hotKeyName.append( HotkeyStrings[indexArray[0]] );
+
+       	// Convert this keypress from GDK to SDL.
+         #if SDL_VERSION_ATLEAST(2, 0, 0)
+         	sdlkey = GDKToSDLKeyval(event->keyval);
+         #else
+         	sdlkey = (SDLKey)GDKToSDLKeyval(event->keyval);
+         #endif
+         printf("HotKey Index: %i   '%s'  %i   %i \n", 
+               indexArray[0], hotKeyName.c_str(), event->keyval, sdlkey );
+
+	      g_config->setOption( hotKeyName, sdlkey );
+
+         setHotKeys(); // Update Hot Keys in Input Model
+
+         hotKeyWindowRefresh();
+		}
+
+      tmpList = tmpList->next;
+	}
+
+   g_list_free_full(selListRows, (GDestroyNotify) gtk_tree_path_free);
+
+   return TRUE;
+}
+
+// creates and opens hotkey config window
+void openHotkeyConfig(void)
+{
 	GtkWidget* win = gtk_dialog_new_with_buttons("Hotkey Configuration",
 			GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
 			"_Close",
@@ -652,43 +703,22 @@ void openHotkeyConfig()
 	GtkWidget *vbox;
 	GtkWidget *scroll;
 
-
-
 	vbox = gtk_dialog_get_content_area(GTK_DIALOG(win));
 	
-	GtkTreeStore *hotkey_store = gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
+	hotkey_store = gtk_tree_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
 
-	std::string prefix = "SDL.Hotkeys.";
-    GtkTreeIter iter;
-    
-    gtk_tree_store_append(hotkey_store, &iter, NULL); // aquire iter
-     
-    int keycode;
-    for(int i=0; i<HK_MAX; i++)
-    {
-        std::string optionName = prefix + HotkeyStrings[i];
-        g_config->getOption(optionName.c_str(), &keycode);
-        gtk_tree_store_set(hotkey_store, &iter, 
-                COMMAND_COLUMN, optionName.c_str(),
-                KEY_COLUMN,
-#if SDL_VERSION_ATLEAST(2, 0, 0)                                                    
-				SDL_GetKeyName(keycode),
-#else
-				SDL_GetKeyName((SDLKey)keycode),
-#endif
-                -1);
-        gtk_tree_store_append(hotkey_store, &iter, NULL); // acquire child iterator
-    }                      
+   hotKeyWindowRefresh();
 
 	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(hotkey_store));
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn* column;
 
+	g_signal_connect(G_OBJECT(tree), "key-press-event", G_CALLBACK(hotKeyPressCB), NULL);
 	
 	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes("Command", renderer, "text", COMMAND_COLUMN, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Command", renderer, "text", 0, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("Key", renderer, "text", KEY_COLUMN, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Key", renderer, "text", 1, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 	scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_NEVER,
@@ -698,40 +728,8 @@ void openHotkeyConfig()
 	gtk_widget_show_all(win);
 
 	g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
-    g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
+   g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
 
-	GtkTreeSelection *select;
-
-	select = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
-	gtk_tree_selection_set_mode(select, GTK_SELECTION_SINGLE);
-	g_signal_connect ( G_OBJECT (select), "changed", G_CALLBACK (tree_selection_changed_cb),
-			NULL);
-	gtk_tree_selection_unselect_all (select);
-}
-
-static void tree_selection_changed_cb (GtkTreeSelection *selection, gpointer data)
-{
-	GtkTreeIter iter;
-	GtkTreeModel *model;
-	char* hotkey;
-
-	if (gtk_tree_selection_get_selected (selection, &model, &iter))
-	{
-		gtk_tree_model_get (model, &iter, 0, &hotkey, -1);
-
-		gtk_widget_hide(HotkeyWin);
-
-		flushGtkEvents();
-
-		configHotkey(hotkey);
-
-		g_signal_emit_by_name(HotkeyWin, "destroy-event");
-
-		openHotkeyConfig();
-
-		g_free (hotkey);
-
-	}
 }
 
 GtkWidget* 	typeCombo;

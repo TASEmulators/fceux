@@ -177,7 +177,7 @@ int Hotkeys[HK_MAX] = { 0 };
 
 // on every cycle of keyboardinput()
 void
-setHotKeys ()
+setHotKeys (void)
 {
 	std::string prefix = "SDL.Hotkeys.";
 	for (int i = 0; i < HK_MAX; i++)
