@@ -157,7 +157,10 @@ static void FixCache(int a, int V) {
 	case 0x02: FreqCache[w] &= ~0x0000FF00; FreqCache[w] |= V << 8; break;
 	case 0x04:
 		FreqCache[w] &= ~0x00030000; FreqCache[w] |= (V & 3) << 16;
-		LengthCache[w] = (8 - ((V >> 2) & 7)) << 2;
+// something wrong here http://www.romhacking.net/forum/index.php?topic=21907.msg306903#msg306903
+//		LengthCache[w] = (8 - ((V >> 2) & 7)) << 2;
+// fix be like in https://github.com/SourMesen/Mesen/blob/cda0a0bdcb5525480784f4b8c71de6fc7273b570/Core/Namco163Audio.h#L61
+		LengthCache[w] = 256 - (V & 0xFC);
 		break;
 	case 0x07: EnvCache[w] = (double)(V & 0xF) * 576716; break;
 	}

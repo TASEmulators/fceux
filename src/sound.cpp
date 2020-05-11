@@ -181,6 +181,7 @@ void LogDPCM(int romaddress, int dpcmsize){
 	for (int dpcmstart = i; dpcmstart < (i + dpcmsize); dpcmstart++) {
 		if(!(cdloggerdata[dpcmstart] & 0x40)) {
 			cdloggerdata[dpcmstart] |= 0x40;
+			cdloggerdata[dpcmstart] |= (romaddress >> 11) & 0x0c;
 
 			if(!(cdloggerdata[dpcmstart] & 2)){
 				datacount++;

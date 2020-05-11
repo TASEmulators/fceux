@@ -1363,3 +1363,30 @@ void TQROM_Init(CartInfo *info) {
 void HKROM_Init(CartInfo *info) {
 	GenMMC3_Init(info, 512, 512, 1, info->battery);
 }
+
+// -------------------------------- iNES 2.0 ----------------------------
+
+// ---------------------------- Mapper 406 ------------------------------
+
+static DECLFW(M406CMDWrite) {
+	MMC3_CMDWrite((A & 0xFFFE) | ((A & 2) >> 1), V);
+}
+
+static DECLFW(M406IRQWrite) {
+	MMC3_IRQWrite((A & 0xFFFE) | ((A & 2) >> 1), V);
+}
+
+static DECLFW(M406Write) {
+}
+
+static void M406_Power(void) {
+	GenMMC3Power();
+	// TODO : FLASH
+	SetWriteHandler(0x8000, 0xBFFF, M406CMDWrite);
+	SetWriteHandler(0xC000, 0xFFFF, M406IRQWrite);
+}
+
+void Mapper406_Init(CartInfo *info) {
+	GenMMC3_Init(info, 512, 256, 0, 0);
+	info->Power = M406_Power;
+}
