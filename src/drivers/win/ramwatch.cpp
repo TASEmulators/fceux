@@ -797,18 +797,20 @@ INT_PTR CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				addrCtrlID = IDC_EDIT_COMPAREADDRESS;
 				// limit the length to 4 since currently doesn't support batch editing
 				SendDlgItemMessage(hDlg, addrCtrlID, EM_SETLIMITTEXT, 4, 0);
-				strcpy(title, "Edit ");
+				strcpy(title, "Edit");
 				break;
 			case WATCHER_MSG_ADD:
-				strcpy(title, "Add ");
+				strcpy(title, "Add");
 				addrCtrlID = IDC_EDIT_COMPAREADDRESSES;
 				break;
 			case WATCHER_MSG_DUP:
 			default:
-				strcpy(title, "Duplicate ");
+				strcpy(title, "Duplicate");
 				addrCtrlID = IDC_EDIT_COMPAREADDRESSES;
 				break;
 			}
+
+			strcat(title, " ");
 
 			// The information is needed to fill to the UI, and separetor doesn't have them
 			if (msg->Type != 'S')

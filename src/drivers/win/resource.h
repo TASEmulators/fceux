@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ 生成的包含文件。
-// 供 res.rc 使用
+// Microsoft Visual C++ generated include file.
+// Used for res.rc
 //
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1

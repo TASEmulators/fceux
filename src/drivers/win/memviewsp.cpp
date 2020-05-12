@@ -52,13 +52,13 @@ int findBookmark(unsigned int address, int editmode)
 	return -1;
 }
 
-char bookmarkDescription[51] = {0};
-
 BOOL CenterWindow(HWND hwndDlg);
 
 /// Callback function for the name bookmark dialog
 INT_PTR CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	static char* description;
+
 	switch (uMsg)
 	{
 		case WM_INITDIALOG:
@@ -67,7 +67,9 @@ INT_PTR CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			
 			// Put the current bookmark description into the edit field
 			// and set focus to that edit field.
-			SetDlgItemText(hwndDlg, IDC_BOOKMARK_DESCRIPTION, bookmarkDescription);
+			
+			description = (char*)lParam;
+			SetDlgItemText(hwndDlg, IDC_BOOKMARK_DESCRIPTION, description);
 			SetFocus(GetDlgItem(hwndDlg, IDC_BOOKMARK_DESCRIPTION));
 			break;
 		case WM_CLOSE:
@@ -83,7 +85,7 @@ INT_PTR CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 						case IDOK:
 						{
 							// Update the bookmark description
-							GetDlgItemText(hwndDlg, IDC_BOOKMARK_DESCRIPTION, bookmarkDescription, 50);
+							GetDlgItemText(hwndDlg, IDC_BOOKMARK_DESCRIPTION, description, 50);
 							EndDialog(hwndDlg, 1);
 							break;
 						}
@@ -99,38 +101,63 @@ INT_PTR CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 /// @param hwnd HWND of the FCEU window
 /// @param address Address of the new bookmark
 /// @param editmode The editing mode of the hex editor (RAM/PPU/OAM/ROM)
-/// @return Returns 0 if everything's OK and an error flag otherwise.
+/// @return Returns 0 if everything's OK, 1 if user canceled and an error flag otherwise.
 int addBookmark(HWND hwnd, unsigned int address, int editmode)
 {
 	// Enforce a maximum of 64 bookmarks
 	if (nextBookmark < 64)
 	{
-		sprintf(bookmarkDescription, "%s %04X", EditString[editmode], address);
+		char description[51] = { 0 };
+		sprintf(description, "%s %04X", EditString[editmode], address);
 	
 		// Show the bookmark name dialog
-		DialogBox(fceu_hInstance, "NAMEBOOKMARKDLG", hwnd, nameBookmarkCallB);
-		
-		// Update the bookmark description
-		hexBookmarks[nextBookmark].address = address;
-		hexBookmarks[nextBookmark].editmode = editmode;
-		strcpy(hexBookmarks[nextBookmark].description, bookmarkDescription);
-		
-		nextBookmark++;
-		
+		if (DialogBoxParam(fceu_hInstance, "NAMEBOOKMARKDLG", hwnd, nameBookmarkCallB, (LPARAM)description))
+		{
+			// Add the bookmark
+			hexBookmarks[nextBookmark].address = address;
+			hexBookmarks[nextBookmark].editmode = editmode;
+			strcpy(hexBookmarks[nextBookmark].description, description);
+			nextBookmark++;
+			return 0;
+		}
+		else
+			return 1;
+	}
+	else
+		return -1;
+}
+
+/// Edit a bookmark in the bookmark list
+/// @param hwnd HWND of the FCEU window
+/// @param index Index of the bookmark to edit
+/// @return Returns 0 if everything's OK, 1 if user canceled and an error flag otherwise.
+int editBookmark(HWND hwnd, unsigned int index)
+{
+	if (index >= 64) return -1;
+
+	char description[51] = { 0 };
+	strcpy(description, hexBookmarks[index].description);
+
+	// Show the bookmark name dialog
+	if (DialogBoxParam(fceu_hInstance, "NAMEBOOKMARKDLG", hwnd, nameBookmarkCallB, (LPARAM)description))
+	{
+		// Update the bookmark information
+		strcpy(hexBookmarks[index].description, description);
 		return 0;
 	}
 	else
-	{
 		return 1;
-	}
+
+	return -1;
 }
 
 /// Removes a bookmark from the bookmark list
 /// @param index Index of the bookmark to remove
-void removeBookmark(unsigned int index)
+/// @return Returns 0 if everything's OK, 1 if user canceled and an error flag otherwise.
+int removeBookmark(unsigned int index)
 {
-	// TODO: Range checking
-	
+	if (index >= 64) return -1;
+
 	// At this point it's necessary to move the content of the bookmark list
 	for (int i=index;i<nextBookmark - 1;i++)
 	{
@@ -138,8 +165,10 @@ void removeBookmark(unsigned int index)
 	}
 	
 	--nextBookmark;
-}
 
+	return 0;
+}
+/*
 /// Adds or removes a bookmark from a given address
 /// @param hwnd HWND of the emu window
 /// @param address Address of the bookmark
@@ -159,35 +188,28 @@ int toggleBookmark(HWND hwnd, uint32 address, int editmode)
 		return 0;
 	}
 }
-
+*/
 /// Updates the bookmark menu in the hex window
 /// @param menu Handle of the bookmark menu
 void updateBookmarkMenus(HMENU menu)
 {
-	int i;
-	MENUITEMINFO mi;
-	mi.cbSize = sizeof(MENUITEMINFO);
-	mi.fMask = MIIM_TYPE | MIIM_ID | MIIM_DATA;
-	mi.fType = MF_STRING;
-	
 	// Remove all bookmark menus
-	for (i = 0;i<nextBookmark + 1;i++)
-	{
+	for (int i = 0; i<nextBookmark + 1; i++)
 		RemoveMenu(menu, ID_FIRST_BOOKMARK + i, MF_BYCOMMAND);
-	}
-	
-	// Add the menus again
-	for (i = 0;i<nextBookmark;i++)
+	RemoveMenu(menu, ID_BOOKMARKLIST_SEP, MF_BYCOMMAND);
+
+	if (nextBookmark != 0)
 	{
-		// Get the text of the menu
-		char buffer[0x100];
-		sprintf(buffer, i < 10 ? "&%d. $%04X - %s\tCtrl+%d" : "%d. $%04X - %s",i, hexBookmarks[i].address, hexBookmarks[i].description, i);
+		// Add the menus again
+		AppendMenu(menu, MF_SEPARATOR, ID_BOOKMARKLIST_SEP, NULL);
+		for (int i = 0;i<nextBookmark;i++)
+		{
+			// Get the text of the menu
+			char buffer[0x100];
+			sprintf(buffer, i < 10 ? "&%d. $%04X - %s\tCtrl+%d" : "%d. $%04X - %s",i, hexBookmarks[i].address, hexBookmarks[i].description, i);
 		
-		mi.dwTypeData = buffer;
-		mi.cch = strlen(buffer);
-		mi.wID = ID_FIRST_BOOKMARK + i;
-		
-		InsertMenuItem(menu, 2 + i , TRUE, &mi);
+			AppendMenu(menu, MF_STRING, ID_FIRST_BOOKMARK + i, buffer);
+		}
 	}
 }
 
@@ -212,6 +234,7 @@ void removeAllBookmarks(HMENU menu)
 	{
 		RemoveMenu(menu, ID_FIRST_BOOKMARK + i, MF_BYCOMMAND);
 	}
+	RemoveMenu(menu, ID_BOOKMARKLIST_SEP, MF_BYCOMMAND);
 	
 	nextBookmark = 0;
 }

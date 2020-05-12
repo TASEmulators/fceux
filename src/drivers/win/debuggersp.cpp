@@ -63,7 +63,6 @@ char temp_chr[40] = {0};
 char delimiterChar[2] = "#";
 
 extern INT_PTR CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-extern char bookmarkDescription[];
 
 MemoryMappedRegister RegNames[] = {
 	{"$2000", "PPU_CTRL"},
@@ -857,10 +856,10 @@ void NameDebuggerBookmark(HWND hwnd)
 		return;
 	} else
 	{
+		char bookmarkDescription[51] = { 0 };
 		if (bookmarks_name[selectedItem].size())
-		{
 			strcpy(bookmarkDescription, bookmarks_name[selectedItem].c_str());
-		} else
+		else
 		{
 			bookmarkDescription[0] = 0;
 			// try to find the same address in bookmarks
@@ -874,7 +873,7 @@ void NameDebuggerBookmark(HWND hwnd)
 			}
 		}
 		// Show the bookmark name dialog
-		if (DialogBox(fceu_hInstance, "NAMEBOOKMARKDLG", hwnd, nameBookmarkCallB))
+		if (DialogBoxParam(fceu_hInstance, "NAMEBOOKMARKDLG", hwnd, nameBookmarkCallB, (LPARAM)bookmarkDescription))
 		{
 			// Rename the selected bookmark
 			bookmarks_name[selectedItem] = bookmarkDescription;
