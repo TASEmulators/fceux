@@ -8,6 +8,7 @@ Export('env')
 source_list = Split(
     """
     input.cpp
+    cheat.cpp
     config.cpp
     sdl.cpp
     sdl-joystick.cpp
