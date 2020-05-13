@@ -470,7 +470,6 @@ void flushGtkEvents(void)
 	return;
 }
 
-GtkWidget* HotkeyWin;
 
 static void hotKeyWindowRefresh(void)
 {
@@ -571,7 +570,6 @@ void openHotkeyConfig(void)
 			GTK_RESPONSE_OK,
 			NULL);
 	gtk_window_set_default_size(GTK_WINDOW(win), 400, 800);
-	HotkeyWin = win;
 	GtkWidget *tree;
 	GtkWidget *vbox;
 	GtkWidget *scroll;
