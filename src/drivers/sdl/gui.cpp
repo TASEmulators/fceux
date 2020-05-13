@@ -66,6 +66,9 @@ bool menuTogglingEnabled = false;
 
 static GtkTreeStore *hotkey_store = NULL;
 
+/* Surface to store black screen */
+static cairo_surface_t *surface = NULL;
+
 // check to see if a particular GTK version is available
 // 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,24);
 bool checkGTKVersion(int major_required, int minor_required)
@@ -1294,11 +1297,17 @@ void openSoundConfig(void)
 	return;
 }
 
-void quit ()
+void quit (void)
 {
 	// manually flush GTK event queue
 	while(gtk_events_pending())
 		gtk_main_iteration_do(FALSE);
+
+   if (surface)
+   {
+      cairo_surface_destroy (surface);
+      surface = NULL;
+   }
 	// this is not neccesary to be explicitly called
 	// it raises a GTK-Critical when its called
 	//gtk_main_quit();
@@ -2764,8 +2773,8 @@ gint handleMouseClick(GtkWidget* widget, GdkEvent *event, gpointer callback_data
 
 gboolean handle_resize(GtkWindow* win, GdkEvent* event, gpointer data)
 {
-	// TODO this is a stub atm
-	// this should handle resizing so the emulation takes up as much
+   cairo_t *cr = NULL;
+	// This should handle resizing so the emulation takes up as much
 	// of the GTK window as possible
 
 
@@ -2795,7 +2804,32 @@ gboolean handle_resize(GtkWindow* win, GdkEvent* event, gpointer data)
 	{
 		KillVideo();
 		InitVideo(GameInfo);
-	}
+   }
+
+
+   if (surface)
+   {
+      cairo_surface_destroy (surface);
+   }
+   surface = gdk_window_create_similar_surface (gtk_widget_get_window (evbox),
+                                                CAIRO_CONTENT_COLOR,
+                                                gtk_widget_get_allocated_width (evbox),
+                                                gtk_widget_get_allocated_height (evbox));
+
+
+   if ( surface != NULL )
+   {
+      cr = cairo_create (surface);
+      
+      if ( cr != NULL )
+      {
+         cairo_set_source_rgb (cr, 0, 0, 0);
+         cairo_paint (cr);
+         
+         cairo_destroy (cr);
+      }
+   }
+
 	//gtk_widget_set_size_request(evbox, (int)(NES_WIDTH*xscale), (int)(NES_HEIGHT*yscale));
 
 	// Currently unused; unsure why
@@ -2809,6 +2843,26 @@ gboolean handle_resize(GtkWindow* win, GdkEvent* event, gpointer data)
 
 	return FALSE;
 }
+
+/* Redraw the screen from the surface. Note that the ::draw
+ * signal receives a ready-to-be-used cairo_t that is already
+ * clipped to only draw the exposed areas of the widget
+ */
+static gboolean
+draw_cb (GtkWidget *widget,
+         cairo_t   *cr,
+         gpointer   data)
+{
+   // Only clear the screen if a game is not loaded
+   if (GameInfo == 0)
+   {
+      cairo_set_source_surface (cr, surface, 0, 0);
+      cairo_paint (cr);
+   }
+
+  return FALSE;
+}
+
 
 int InitGTKSubsystem(int argc, char** argv)
 {
@@ -2843,8 +2897,8 @@ int InitGTKSubsystem(int argc, char** argv)
 	//
 	// prg - Bryan Cain, you are the man!
 	
-	evbox = gtk_event_box_new();
-	//evbox = gtk_drawing_area_new();
+	//evbox = gtk_event_box_new();
+	evbox = gtk_drawing_area_new();
 	gtk_box_pack_start (GTK_BOX(vbox), evbox, TRUE, TRUE, 0);
 	
 	double xscale, yscale;
@@ -2873,6 +2927,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	g_signal_connect(MainWindow, "destroy-event", quit, NULL);
 	// resize handler
 	g_signal_connect(MainWindow, "configure-event", G_CALLBACK(handle_resize), NULL);
+	g_signal_connect( evbox, "draw", G_CALLBACK(draw_cb), NULL);
 	
 	gtk_widget_show_all(MainWindow);
 	
