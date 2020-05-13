@@ -10,6 +10,7 @@ source_list = Split(
     input.cpp
     cheat.cpp
     config.cpp
+    ramwatch.cpp
     sdl.cpp
     sdl-joystick.cpp
     sdl-sound.cpp
