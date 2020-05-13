@@ -610,32 +610,32 @@ static GtkWidget* CreateRamWatchMenubar( GtkWidget* window)
 	return menubar;
 }
 
-void closeMemoryWatchEntryWindow(GtkWidget* w, GdkEvent* e, ramWatchEntryWin_t *ew)
-{
-
-// strcpy( name, gtk_entry_get_text ( GTK_ENTRY(ew->txt_entry_name) ) );
-
-//*addr = strtol( gtk_entry_get_text ( GTK_ENTRY(ew->txt_entry_addr) ), NULL, 16 );
-
-//*type = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(ew->chkbox) );
-
-// if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(ew->button4) ) )
-// {
-//   *size = 4;
-// }
-// else if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(ew->button2) ) )
-// {
-//   *size = 2;
-// }
-// else
-// {
-//   *size = 1;
-// }
-
-   delete ew;
-
-	gtk_widget_destroy(w);
-}
+//void closeMemoryWatchEntryWindow(GtkWidget* w, GdkEvent* e, ramWatchEntryWin_t *ew)
+//{
+//
+//// strcpy( name, gtk_entry_get_text ( GTK_ENTRY(ew->txt_entry_name) ) );
+//
+////*addr = strtol( gtk_entry_get_text ( GTK_ENTRY(ew->txt_entry_addr) ), NULL, 16 );
+//
+////*type = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(ew->chkbox) );
+//
+//// if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(ew->button4) ) )
+//// {
+////   *size = 4;
+//// }
+//// else if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(ew->button2) ) )
+//// {
+////   *size = 2;
+//// }
+//// else
+//// {
+////   *size = 1;
+//// }
+//
+//   delete ew;
+//
+//	gtk_widget_destroy(w);
+//}
 
 static int openRamWatchEntryDialog( ramWatchWin_t *rww, std::string *name, int *addr, int *type, int *size, int idx )
 {
@@ -717,38 +717,40 @@ static int openRamWatchEntryDialog( ramWatchWin_t *rww, std::string *name, int *
 
    retval = gtk_dialog_run(GTK_DIALOG(ew->win));
 
-   if ( retval )
+   printf("retval %i\n", retval );
+   //
+   if ( retval == GTK_RESPONSE_OK )
    {
       // FIXME - what error checking should be done here
+
+      name->assign( gtk_entry_get_text ( GTK_ENTRY(ew->txt_entry_name) ) );
+   
+     *addr = strtol( gtk_entry_get_text ( GTK_ENTRY(ew->txt_entry_addr) ), NULL, 16 );
+   
+     *type = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(ew->chkbox) );
+   
+      if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(ew->button4) ) )
+      {
+        *size = 4;
+      }
+      else if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(ew->button2) ) )
+      {
+        *size = 2;
+      }
+      else
+      {
+        *size = 1;
+      }
    }
 
-   name->assign( gtk_entry_get_text ( GTK_ENTRY(ew->txt_entry_name) ) );
+   //g_signal_connect(ew->win, "delete-event", G_CALLBACK(closeMemoryWatchEntryWindow), ew);
+	//g_signal_connect(ew->win, "response", G_CALLBACK(closeMemoryWatchEntryWindow), ew);
 
-  *addr = strtol( gtk_entry_get_text ( GTK_ENTRY(ew->txt_entry_addr) ), NULL, 16 );
+   gtk_widget_destroy(ew->win);
 
-  *type = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(ew->chkbox) );
+   delete ew;
 
-   if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(ew->button4) ) )
-   {
-     *size = 4;
-   }
-   else if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(ew->button2) ) )
-   {
-     *size = 2;
-   }
-   else
-   {
-     *size = 1;
-   }
-
-   //printf("retval %i\n", retval );
-
-   g_signal_connect(ew->win, "delete-event", G_CALLBACK(closeMemoryWatchEntryWindow), ew);
-	g_signal_connect(ew->win, "response", G_CALLBACK(closeMemoryWatchEntryWindow), ew);
-	
-   //gtk_widget_destroy(win);
-
-   return 0;
+   return ( retval == GTK_RESPONSE_OK );
 }
 
 static void editRamWatch( GtkButton *button,
@@ -788,7 +790,7 @@ static void editRamWatch( GtkButton *button,
          if ( rw != NULL )
          {
             openRamWatchEntryDialog( rww, &rw->name, &rw->addr, &rw->type, &rw->size, indexArray[0] );
-            showAllRamWatchResults(1);
+            showAllRamWatchResults(0);
          }
 		}
       tmpList = tmpList->next;
@@ -845,9 +847,10 @@ static void newRamWatch( GtkButton *button,
    std::string name;
    int addr = 0, type = 0, size = 0;
 
-   openRamWatchEntryDialog( rww, &name, &addr, &type, &size, -1 );
-
-   ramWatchList.add_entry( name.c_str(), addr, type, size );
+   if ( openRamWatchEntryDialog( rww, &name, &addr, &type, &size, -1 ) )
+   {
+      ramWatchList.add_entry( name.c_str(), addr, type, size );
+   }
 
    showAllRamWatchResults(1);
 }
