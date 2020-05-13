@@ -2135,7 +2135,7 @@ unsigned short GDKToSDLKeyval(int gdk_key)
 
 
 // Function adapted from Gens/GS (source/gens/input/input_sdl.c)
-gint convertKeypress(GtkWidget *grab, GdkEventKey *event, gpointer user_data)
+static gint convertKeypress(GtkWidget *grab, GdkEventKey *event, gpointer user_data)
 {
 	SDL_Event sdlev;
 	int keystate;
@@ -2914,13 +2914,15 @@ int InitGTKSubsystem(int argc, char** argv)
 	//gtk_widget_modify_bg(evbox, GTK_STATE_NORMAL, &bg);
 	
 	// set up keypress "snooper" to convert GDK keypress events into SDL keypresses
-	gtk_key_snooper_install(convertKeypress, NULL);
+	//gtk_key_snooper_install(convertKeypress, NULL);
+	g_signal_connect(G_OBJECT(MainWindow), "key-press-event", G_CALLBACK(convertKeypress), NULL);
+	g_signal_connect(G_OBJECT(MainWindow), "key-release-event", G_CALLBACK(convertKeypress), NULL);
 
 	// pass along mouse data from GTK to SDL
 	g_signal_connect(G_OBJECT(evbox), "button-press-event", G_CALLBACK(handleMouseClick), NULL);
 	g_signal_connect(G_OBJECT(evbox), "button-release-event", G_CALLBACK(handleMouseClick), NULL);
 
-	g_signal_connect(G_OBJECT(MainWindow), "key-release-event", G_CALLBACK(handleKeyRelease), NULL);
+	//g_signal_connect(G_OBJECT(MainWindow), "key-release-event", G_CALLBACK(handleKeyRelease), NULL);
 	
 	// signal handlers
 	g_signal_connect(MainWindow, "delete-event", quit, NULL);
