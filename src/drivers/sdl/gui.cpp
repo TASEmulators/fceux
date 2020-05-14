@@ -3025,6 +3025,9 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	gtk_draw_area_width = gtk_widget_get_allocated_width (evbox);
 	gtk_draw_area_height = gtk_widget_get_allocated_height (evbox);
 
+	if ( gtk_draw_area_width  < NES_WIDTH  ) gtk_draw_area_width  = NES_WIDTH;
+	if ( gtk_draw_area_height < NES_HEIGHT ) gtk_draw_area_height = NES_HEIGHT;
+
 	// TODO check KeepRatio (where is this)
 	// do this to keep aspect ratio
 	if (xscale > yscale)
@@ -3061,6 +3064,9 @@ static gboolean draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 
 	gtk_draw_area_width = gtk_widget_get_allocated_width (widget);
 	gtk_draw_area_height = gtk_widget_get_allocated_height (widget);
+
+	if ( gtk_draw_area_width  < NES_WIDTH  ) gtk_draw_area_width  = NES_WIDTH;
+	if ( gtk_draw_area_height < NES_HEIGHT ) gtk_draw_area_height = NES_HEIGHT;
 
 	// Clear the screen on a window redraw
 	//if (GameInfo == 0)
