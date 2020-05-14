@@ -66,9 +66,6 @@ bool menuTogglingEnabled = false;
 
 static GtkTreeStore *hotkey_store = NULL;
 
-/* Surface to store black screen */
-static cairo_surface_t *surface = NULL;
-
 // check to see if a particular GTK version is available
 // 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,24);
 bool checkGTKVersion (int major_required, int minor_required)
@@ -1419,11 +1416,6 @@ void quit (void)
 	while (gtk_events_pending ())
 		gtk_main_iteration_do (FALSE);
 
-	if (surface)
-	{
-		cairo_surface_destroy (surface);
-		surface = NULL;
-	}
 	// this is not neccesary to be explicitly called
 	// it raises a GTK-Critical when its called
 	//gtk_main_quit();
@@ -3015,10 +3007,8 @@ gint handleMouseClick (GtkWidget * widget, GdkEvent * event,
 
 gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 {
-	cairo_t *cr = NULL;
 	// This should handle resizing so the emulation takes up as much
 	// of the GTK window as possible
-
 
 	// get new window width/height
 	int width, height;
@@ -3048,41 +3038,7 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 		InitVideo (GameInfo);
 	}
 
-
-	if (surface)
-	{
-		cairo_surface_destroy (surface);
-	}
-	surface =
-		gdk_window_create_similar_surface (gtk_widget_get_window
-						   (evbox), CAIRO_CONTENT_COLOR,
-						   gtk_widget_get_allocated_width
-						   (evbox),
-						   gtk_widget_get_allocated_height
-						   (evbox));
-
-
-	if (surface != NULL)
-	{
-		cr = cairo_create (surface);
-
-		if (cr != NULL)
-		{
-			cairo_set_source_rgb (cr, 0, 0, 0);
-			cairo_paint (cr);
-
-			cairo_destroy (cr);
-		}
-	}
-
 	//gtk_widget_set_size_request(evbox, (int)(NES_WIDTH*xscale), (int)(NES_HEIGHT*yscale));
-
-	// Currently unused; unsure why
-	/*      GdkColor black;
-	   black.red = 0;
-	   black.green = 0;
-	   black.blue = 0;
-	   gtk_widget_modify_bg(GTK_WIDGET(win), GTK_STATE_NORMAL, &black); */
 
 	//printf ("DEBUG: new xscale: %f yscale: %f\n", xscale, yscale);
 
@@ -3095,10 +3051,24 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
  */
 static gboolean draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 {
+	guint width, height;
+	GdkRGBA color;
+	GtkStyleContext *context;
+
 	// Only clear the screen if a game is not loaded
 	if (GameInfo == 0)
 	{
-		cairo_set_source_surface (cr, surface, 0, 0);
+		context = gtk_widget_get_style_context (widget);
+
+		width = gtk_widget_get_allocated_width (widget);
+		height = gtk_widget_get_allocated_height (widget);
+
+		color.red = 0, color.blue = 0; color.green = 0; color.alpha = 1.0;
+
+		gtk_render_background( context, cr, 0, 0, width, height );
+		gdk_cairo_set_source_rgba (cr, &color);
+
+		cairo_fill (cr);
 		cairo_paint (cr);
 	}
 
