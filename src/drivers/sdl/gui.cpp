@@ -3024,7 +3024,7 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	int width, height;
 	width = event->configure.width;
 	height = event->configure.height;
-	printf ("DEBUG: Configure new window size: %dx%d\n", width, height);
+	//printf ("DEBUG: Configure new window size: %dx%d\n", width, height);
 
 	// get width/height multipliers
 	double xscale = width / (double) NES_WIDTH;
@@ -3084,7 +3084,7 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	   black.blue = 0;
 	   gtk_widget_modify_bg(GTK_WIDGET(win), GTK_STATE_NORMAL, &black); */
 
-	printf ("DEBUG: new xscale: %f yscale: %f\n", xscale, yscale);
+	//printf ("DEBUG: new xscale: %f yscale: %f\n", xscale, yscale);
 
 	return FALSE;
 }
