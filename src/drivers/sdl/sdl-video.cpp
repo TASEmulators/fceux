@@ -83,6 +83,8 @@ static int s_paletterefresh;
 
 extern bool MaxSpeed;
 
+extern unsigned int gtk_draw_area_width;
+extern unsigned int gtk_draw_area_height;
 /**
  * Attempts to destroy the graphical video display.  Returns 0 on
  * success, -1 on failure.
@@ -181,13 +183,16 @@ InitVideo(FCEUGI *gi)
 	g_config->getOption("SDL.SpecialFilter", &s_sponge);
 	g_config->getOption("SDL.XStretch", &xstretch);
 	g_config->getOption("SDL.YStretch", &ystretch);
-	g_config->getOption("SDL.LastXRes", &xres);
-	g_config->getOption("SDL.LastYRes", &yres);
+	//g_config->getOption("SDL.LastXRes", &xres);
+	//g_config->getOption("SDL.LastYRes", &yres);
 	g_config->getOption("SDL.ClipSides", &s_clipSides);
 	g_config->getOption("SDL.NoFrame", &noframe);
 	g_config->getOption("SDL.ShowFPS", &show_fps);
 
+	xres = gtk_draw_area_width;
+	yres = gtk_draw_area_height;
 	// check the starting, ending, and total scan lines
+
 	FCEUI_GetCurrentVidSystem(&s_srendline, &s_erendline);
 	s_tlines = s_erendline - s_srendline + 1;
 
@@ -374,10 +379,10 @@ InitVideo(FCEUGI *gi)
 			}
 		}
 
-		int scrw = NWIDTH * s_exs;
-		if(s_sponge == 3) {
-			scrw = 301 * s_exs;
-		}
+		//int scrw = NWIDTH * s_exs;
+		//if(s_sponge == 3) {
+		//	scrw = 301 * s_exs;
+		//}
 
 #ifdef OPENGL
 		if(!s_useOpenGL) {
@@ -422,7 +427,8 @@ InitVideo(FCEUGI *gi)
 		}
 #endif
         
-		s_screen = SDL_SetVideoMode(scrw, (int)(s_tlines * s_eys),
+		//s_screen = SDL_SetVideoMode(scrw, (int)(s_tlines * s_eys),
+		s_screen = SDL_SetVideoMode( xres, yres,
 								desbpp, flags);
 		if(!s_screen) {
 			FCEUD_PrintError(SDL_GetError());
@@ -540,7 +546,7 @@ void ToggleFS()
 	if(noGui == 0)
 	{
 		if(!fullscreen)
-		showGui(0);
+			showGui(0);
 		else
 			showGui(1);
 	}
@@ -666,14 +672,14 @@ BlitScreen(uint8 *XBuf)
 
 	dest = (uint8*)TmpScreen->pixels;
 
-	if(s_fullscreen) {
+	//if(s_fullscreen) { // Always do this calculation now. Screen resolution is always provided.
 		xo = (int)(((TmpScreen->w - NWIDTH * s_exs)) / 2);
 		dest += xo * (s_curbpp >> 3);
 		if(TmpScreen->h > (s_tlines * s_eys)) {
 			yo = (int)((TmpScreen->h - s_tlines * s_eys) / 2);
 			dest += yo * TmpScreen->pitch;
 		}
-	}
+	//}
 
 	// XXX soules - again, I'm surprised SDL can't handle this
 	// perform the blit, converting bpp if necessary

@@ -64,6 +64,8 @@ GtkRadioAction *stateSlot = NULL;
 bool gtkIsStarted = false;
 bool menuTogglingEnabled = false;
 
+unsigned int gtk_draw_area_width = NES_WIDTH;
+unsigned int gtk_draw_area_height = NES_HEIGHT;
 static GtkTreeStore *hotkey_store = NULL;
 
 // check to see if a particular GTK version is available
@@ -3020,6 +3022,9 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	double xscale = width / (double) NES_WIDTH;
 	double yscale = height / (double) NES_HEIGHT;
 
+	gtk_draw_area_width = gtk_widget_get_allocated_width (evbox);
+	gtk_draw_area_height = gtk_widget_get_allocated_height (evbox);
+
 	// TODO check KeepRatio (where is this)
 	// do this to keep aspect ratio
 	if (xscale > yscale)
@@ -3051,26 +3056,25 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
  */
 static gboolean draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 {
-	guint width, height;
 	GdkRGBA color;
 	GtkStyleContext *context;
 
-	// Only clear the screen if a game is not loaded
-	if (GameInfo == 0)
-	{
-		context = gtk_widget_get_style_context (widget);
+	gtk_draw_area_width = gtk_widget_get_allocated_width (widget);
+	gtk_draw_area_height = gtk_widget_get_allocated_height (widget);
 
-		width = gtk_widget_get_allocated_width (widget);
-		height = gtk_widget_get_allocated_height (widget);
+	// Clear the screen on a window redraw
+	//if (GameInfo == 0)
+	//{
+		context = gtk_widget_get_style_context (widget);
 
 		color.red = 0, color.blue = 0; color.green = 0; color.alpha = 1.0;
 
-		gtk_render_background( context, cr, 0, 0, width, height );
+		gtk_render_background( context, cr, 0, 0, gtk_draw_area_width, gtk_draw_area_height );
 		gdk_cairo_set_source_rgba (cr, &color);
 
 		cairo_fill (cr);
 		cairo_paint (cr);
-	}
+	//}
 
 	return FALSE;
 }
