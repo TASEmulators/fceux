@@ -10,9 +10,9 @@ python3 --version
 
 sudo apt-get install lua5.1-dev
 pkg-config --cflags --libs  lua5.1
-sudo apt-get install libsdl1.2-dev
+sudo apt-get install libsdl1.2-dev  --fix-missing
 sdl-config --cflags --libs
-sudo apt-get install libsdl2-dev
+sudo apt-get install libsdl2-dev  --fix-missing
 sdl2-config --cflags --libs
 sudo apt-get install libminizip-dev
 pkg-config --cflags --libs  minizip
