@@ -12,5 +12,5 @@ pool:
 
 steps:
 - script: |
-    ./azure/linux_build.sh
+    ./pipelines/linux_build.sh
   displayName: 'make'
