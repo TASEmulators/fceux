@@ -8,22 +8,94 @@ gcc --version
 python2 --version
 python3 --version
 
-sudo apt-get install lua5.1-dev
+INSTALL_PREFIX=/tmp/fceux
+
+echo '****************************************'
+echo "APPVEYOR_SSH_KEY=$APPVEYOR_SSH_KEY";
+echo "APPVEYOR_SSH_BLOCK=$APPVEYOR_SSH_BLOCK";
+echo '****************************************'
+
+echo '****************************************'
+echo '****************************************'
+echo '***  Installing Package Dependencies ***'
+echo '****************************************'
+echo '****************************************'
+# Install Lua-5.1 development package
+echo '****************************************'
+echo 'Install Dependency lua5.1-dev'
+echo '****************************************'
+sudo apt-get --assume-yes  install lua5.1-dev
 pkg-config --cflags --libs  lua5.1
-sudo apt-get install libsdl1.2-dev  
+
+# Install libSDL-1.2 and libSDL-2
+echo '****************************************'
+echo 'Install Dependency libsdl1.2-dev'
+echo '****************************************'
+sudo apt-get --assume-yes  install libsdl1.2-dev  
 sdl-config --cflags --libs
-sudo apt-get install libsdl2-dev  
+echo '****************************************'
+echo 'Install Dependency libsdl2-dev'
+echo '****************************************'
+sudo apt-get --assume-yes  install libsdl2-dev  
 sdl2-config --cflags --libs
-sudo apt-get install libminizip-dev
+
+# Install libminizip-dev
+echo '****************************************'
+echo 'Install Dependency libminizip-dev'
+echo '****************************************'
+sudo apt-get --assume-yes  install libminizip-dev
 pkg-config --cflags --libs  minizip
+
+# GTK+-2 is no longer needed
 #sudo apt-get install libgtk2.0-dev
-sudo apt-get install libgtk-3-dev
+
+# Install GTK+-3 
+echo '****************************************'
+echo 'Install Dependency libgtk-3-dev'
+echo '****************************************'
+sudo apt-get --assume-yes  install libgtk-3-dev
 pkg-config --cflags --libs  gtk+-3.0
-sudo apt-get install libgtksourceview-3.0-dev
+
+# Install GTK+-3 Sourceview
+sudo apt-get --assume-yes  install libgtksourceview-3.0-dev
 pkg-config --cflags --libs  gtksourceview-3.0
-sudo apt-get install scons
 
+# Install scons
+echo '****************************************'
+echo 'Install Build Dependency scons'
+echo '****************************************'
+sudo apt-get --assume-yes  install scons
+
+# Install cppcheck
+echo '****************************************'
+echo 'Install Check Dependency cppcheck'
+echo '****************************************'
+sudo apt-get --assume-yes  install cppcheck
+
+echo '**************************'
+echo '***  Building Project  ***'
+echo '**************************'
+mkdir -p $INSTALL_PREFIX/usr;
 scons   --clean
-scons   GTK3=1   SYSTEM_LUA=1   SYSTEM_MINIZIP=1   CREATE_AVI=1
+scons   GTK3=1   SYSTEM_LUA=1   SYSTEM_MINIZIP=1   CREATE_AVI=1  install  --prefix=$INSTALL_PREFIX/usr
 
-ls -ltr ./bin/*
+# Debug via ssh if necessary
+if [ ! -z $APPVEYOR_SSH_BLOCK ]; then
+   curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
+fi
+
+if [ -e $INSTALL_PREFIX/usr/bin/fceux ]; then
+   echo '**************************************************************'
+   echo 'Printing Shared Object Dependencies for ./bin/fceux Executable'
+   echo '**************************************************************'
+   ldd  $INSTALL_PREFIX/usr/bin/fceux
+else
+   echo "Error: Executable Failed to build: $INSTALL_PREFIX/usr/bin/fceux";
+   exit 1;
+fi
+
+echo '**************************************************************'
+echo 'Printing Packaged Files '
+echo '**************************************************************'
+find $INSTALL_PREFIX
+
