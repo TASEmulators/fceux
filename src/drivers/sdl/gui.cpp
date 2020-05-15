@@ -64,10 +64,10 @@ GtkRadioAction *stateSlot = NULL;
 bool gtkIsStarted = false;
 bool menuTogglingEnabled = false;
 
-unsigned int gtk_win_width = NES_WIDTH;
-unsigned int gtk_win_height = NES_HEIGHT;
 unsigned int gtk_draw_area_width = NES_WIDTH;
 unsigned int gtk_draw_area_height = NES_HEIGHT;
+static unsigned int gtk_win_width = NES_WIDTH;
+static unsigned int gtk_win_height = NES_HEIGHT;
 static GtkTreeStore *hotkey_store = NULL;
 
 // check to see if a particular GTK version is available
