@@ -64,6 +64,8 @@ GtkRadioAction *stateSlot = NULL;
 bool gtkIsStarted = false;
 bool menuTogglingEnabled = false;
 
+unsigned int gtk_win_width = NES_WIDTH;
+unsigned int gtk_win_height = NES_HEIGHT;
 unsigned int gtk_draw_area_width = NES_WIDTH;
 unsigned int gtk_draw_area_height = NES_HEIGHT;
 static GtkTreeStore *hotkey_store = NULL;
@@ -3013,10 +3015,15 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	// of the GTK window as possible
 
 	// get new window width/height
-	int width, height;
+	int width, height, winsize_changed;
 	width = event->configure.width;
 	height = event->configure.height;
 	//printf ("DEBUG: Configure new window size: %dx%d\n", width, height);
+
+	winsize_changed = (width != gtk_win_width) || (height != gtk_win_height);
+
+	gtk_win_width  = width;
+	gtk_win_height = height;
 
 	// get width/height multipliers
 	double xscale = width / (double) NES_WIDTH;
@@ -3039,8 +3046,9 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	g_config->setOption ("SDL.XScale", xscale);
 	g_config->setOption ("SDL.YScale", yscale);
 	//gtk_widget_realize(evbox);
+	
 	flushGtkEvents ();
-	if (GameInfo != 0)
+	if ( winsize_changed && (GameInfo != 0) )
 	{
 		KillVideo ();
 		InitVideo (GameInfo);
