@@ -915,6 +915,15 @@ int main(int argc, char *argv[])
 	g_config->setOption("SDL.LuaScript", "");
 	if (s != "")
 	{
+#ifdef __linux
+		// Resolve absolute path to file
+		char fullpath[2048];
+		if ( realpath( s.c_str(), fullpath ) != NULL )
+		{
+			//printf("Fullpath: '%s'\n", fullpath );
+			s.assign( fullpath );
+		}
+#endif
 		FCEU_LoadLuaCode(s.c_str());
 	}
 #endif
