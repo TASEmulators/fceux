@@ -31,6 +31,7 @@
 #include "../../movie.h"
 #include "../../fceu.h"
 #include "../../driver.h"
+#include "../../state.h"
 #include "../../utils/xstring.h"
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
@@ -281,16 +282,16 @@ std::string GetFilename (const char *title, bool save, const char *filter)
 	if (save)
 		fileChooser = gtk_file_chooser_dialog_new ("Save as", NULL,
 							GTK_FILE_CHOOSER_ACTION_SAVE,
-							GTK_STOCK_CANCEL,
+							"_Cancel",
 							GTK_RESPONSE_CANCEL,
-							GTK_STOCK_SAVE_AS,
+							"_Save",
 							GTK_RESPONSE_ACCEPT, NULL);
 	else
 		fileChooser = gtk_file_chooser_dialog_new ("Open", NULL,
 							GTK_FILE_CHOOSER_ACTION_OPEN,
-							GTK_STOCK_CANCEL,
+							"_Cancel",
 							GTK_RESPONSE_CANCEL,
-							GTK_STOCK_OPEN,
+							"_Open",
 							GTK_RESPONSE_ACCEPT, NULL);
 
 	// TODO: make file filters case insensitive     
@@ -739,22 +740,30 @@ static void KeyboardCommands ()
 #endif
 
 	for (int i = 0; i < 10; i++)
+	{
 		if (_keyonly (Hotkeys[HK_SELECT_STATE_0 + i]))
 		{
 #ifdef _GTK
-			gtk_radio_action_set_current_value (stateSlot, i);
+			setStateMenuItem(i);
 #endif
 			FCEUI_SelectState (i, 1);
 		}
+	}
 
 	if (_keyonly (Hotkeys[HK_SELECT_STATE_NEXT]))
 	{
 		FCEUI_SelectStateNext (1);
+#ifdef _GTK
+		setStateMenuItem( CurrentState );
+#endif
 	}
 
 	if (_keyonly (Hotkeys[HK_SELECT_STATE_PREV]))
 	{
 		FCEUI_SelectStateNext (-1);
+#ifdef _GTK
+		setStateMenuItem( CurrentState );
+#endif
 	}
 
 	if (_keyonly (Hotkeys[HK_BIND_STATE]))
@@ -1685,13 +1694,13 @@ const char * ButtonName (const ButtConfig * bc, int which)
 				inputValue = bc->ButtonNum[which] & 0xF;
 
 				if (inputValue & SDL_HAT_UP)
-					strncat (direction, "Up ", sizeof (direction));
+					strncat (direction, "Up ", sizeof (direction)-1);
 				if (inputValue & SDL_HAT_DOWN)
-					strncat (direction, "Down ", sizeof (direction));
+					strncat (direction, "Down ", sizeof (direction)-1);
 				if (inputValue & SDL_HAT_LEFT)
-					strncat (direction, "Left ", sizeof (direction));
+					strncat (direction, "Left ", sizeof (direction)-1);
 				if (inputValue & SDL_HAT_RIGHT)
-					strncat (direction, "Right ", sizeof (direction));
+					strncat (direction, "Right ", sizeof (direction)-1);
 
 				if (direction[0])
 					inputDirection = direction;
@@ -2127,7 +2136,7 @@ UpdateInput (Config * config)
 	for (unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++)
 	{
 		char buf[64];
-		snprintf (buf, 20, "SDL.Input.GamePad.%d.", i);
+		snprintf (buf, 32, "SDL.Input.GamePad.%d.", i);
 		prefix = buf;
 
 		config->getOption (prefix + "DeviceType", &device);
@@ -2160,7 +2169,7 @@ UpdateInput (Config * config)
 	for (unsigned int i = 0; i < POWERPAD_NUM_DEVICES; i++)
 	{
 		char buf[64];
-		snprintf (buf, 20, "SDL.Input.PowerPad.%d.", i);
+		snprintf (buf, 32, "SDL.Input.PowerPad.%d.", i);
 		prefix = buf;
 
 		config->getOption (prefix + "DeviceType", &device);

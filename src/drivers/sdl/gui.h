@@ -27,7 +27,6 @@
 #endif
 extern GtkWidget* MainWindow;
 extern GtkWidget* evbox;
-extern GtkRadioAction* stateSlot;
 extern int GtkMouseData[3];
 extern bool gtkIsStarted;
 
@@ -54,6 +53,8 @@ void resizeGtkWindow();
 void setGl(GtkWidget* w, gpointer p);
 void setDoubleBuffering(GtkWidget* w, gpointer p);
 #endif
+
+void setStateMenuItem( int i );
 
 void openVideoConfig();
 void openSoundConfig();

@@ -59,15 +59,15 @@ GtkWidget *evbox = NULL;
 GtkWidget *padNoCombo = NULL;
 GtkWidget *configNoCombo = NULL;
 GtkWidget *buttonMappings[10];
-GtkWidget *Menubar;
-GtkRadioAction *stateSlot = NULL;
+static GtkWidget *Menubar = NULL;
+static GtkRadioMenuItem *stateSlot[10] = { NULL };
 bool gtkIsStarted = false;
 bool menuTogglingEnabled = false;
 
 unsigned int gtk_draw_area_width = NES_WIDTH;
 unsigned int gtk_draw_area_height = NES_HEIGHT;
-static unsigned int gtk_win_width = NES_WIDTH;
-static unsigned int gtk_win_height = NES_HEIGHT;
+static unsigned int gtk_win_width = 0;
+static unsigned int gtk_win_height = 0;
 static GtkTreeStore *hotkey_store = NULL;
 
 // check to see if a particular GTK version is available
@@ -2168,11 +2168,18 @@ void quickSave (void)
 	FCEUI_SaveState (NULL);
 }
 
-//void changeState(GtkAction *action, GtkRadioAction *current, gpointer data)
-void changeState (GtkRadioMenuItem * radiomenuitem, gpointer user_data)
+void setStateMenuItem( int i )
 {
-	//printf("Changing State: %li\n", (long)user_data);
-	FCEUI_SelectState ((long) user_data, 0);
+	if ( (i >= 0) && (i < 10) )
+	{
+		gtk_menu_item_activate( GTK_MENU_ITEM(stateSlot[i]) );
+	}
+}
+
+static void changeState (GtkRadioMenuItem * radiomenuitem, gpointer user_data)
+{
+	printf("GTK Changing State: %li\n", (long)user_data);
+	FCEUI_SelectState ((long) user_data, 1);
 }
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
@@ -2525,6 +2532,8 @@ static GtkWidget *CreateMenubar (GtkWidget * window)
 		sprintf (stmp, "%li", i);
 
 		item = gtk_radio_menu_item_new_with_label (radioGroup, stmp);
+
+		stateSlot[i] = GTK_RADIO_MENU_ITEM(item);
 
 		radioGroup =
 			gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM
@@ -3015,7 +3024,7 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	// of the GTK window as possible
 
 	// get new window width/height
-	int width, height, winsize_changed;
+	int width, height, draw_width, draw_height, winsize_changed = 0;
 	width = event->configure.width;
 	height = event->configure.height;
 	//printf ("DEBUG: Configure new window size: %dx%d\n", width, height);
@@ -3029,8 +3038,15 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	double xscale = width / (double) NES_WIDTH;
 	double yscale = height / (double) NES_HEIGHT;
 
-	gtk_draw_area_width = gtk_widget_get_allocated_width (evbox);
-	gtk_draw_area_height = gtk_widget_get_allocated_height (evbox);
+	draw_width = gtk_widget_get_allocated_width (evbox);
+	draw_height = gtk_widget_get_allocated_height (evbox);
+
+	if ( (draw_width != gtk_draw_area_width) || (draw_height != gtk_draw_area_height) )
+	{
+		winsize_changed = 1;
+	}
+	gtk_draw_area_width = draw_width;
+	gtk_draw_area_height = draw_height;
 
 	if ( gtk_draw_area_width  < NES_WIDTH  ) gtk_draw_area_width  = NES_WIDTH;
 	if ( gtk_draw_area_height < NES_HEIGHT ) gtk_draw_area_height = NES_HEIGHT;
