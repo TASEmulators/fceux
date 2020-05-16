@@ -652,21 +652,21 @@ void openHotkeyConfig (void)
 
 }
 
-GtkWidget *typeCombo;
+//GtkWidget *typeCombo;
 
 // TODO: finish this
-int setInputDevice (GtkWidget * w, gpointer p)
-{
-	std::string s = "SDL.Input.";
-	s = s + (char *) p;
-	printf ("%s", s.c_str ());
-	g_config->setOption (s,
-			     gtk_combo_box_text_get_active_text
-			     (GTK_COMBO_BOX_TEXT (typeCombo)));
-	g_config->save ();
-
-	return 1;
-}
+//int setInputDevice (GtkWidget * w, gpointer p)
+//{
+//	std::string s = "SDL.Input.";
+//	s = s + (char *) p;
+//	printf ("setInputDevice: %s", s.c_str ());
+//	g_config->setOption (s,
+//			     gtk_combo_box_text_get_active_text
+//			     (GTK_COMBO_BOX_TEXT (typeCombo)));
+//	g_config->save ();
+//
+//	return 1;
+//}
 
 void updateGamepadConfig (GtkWidget * w, gpointer p)
 {
@@ -696,8 +696,8 @@ void updateGamepadConfig (GtkWidget * w, gpointer p)
 						  ButtonNum[configNo]));
 #endif
 		}
-		else		// FIXME: display joystick button/hat/axis names properly
-			strncpy (strBuf, "<tt>Joystick</tt>", sizeof (strBuf));
+		else		
+			sprintf (strBuf, "<tt>%s</tt>", ButtonName( &GamePadConfig[padNo][i], configNo ) );
 
 		gtk_label_set_text (GTK_LABEL (mappedKey), strBuf);
 		gtk_label_set_use_markup (GTK_LABEL (mappedKey), TRUE);
@@ -744,19 +744,19 @@ void openGamepadConfig (void)
 	oppositeDirChk =
 		gtk_check_button_new_with_label ("Allow Up+Down / Left+Right");
 
-	typeCombo = gtk_combo_box_text_new ();
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
-					"gamepad");
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
-					"zapper");
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
-					"powerpad.0");
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
-					"powerpad.1");
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
-					"arkanoid");
+	//typeCombo = gtk_combo_box_text_new ();
+	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
+	//				"gamepad");
+	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
+	//				"zapper");
+	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
+	//				"powerpad.0");
+	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
+	//				"powerpad.1");
+	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
+	//				"arkanoid");
 
-	gtk_combo_box_set_active (GTK_COMBO_BOX (typeCombo), 0);
+	//gtk_combo_box_set_active (GTK_COMBO_BOX (typeCombo), 0);
 
 
 	padNoCombo = gtk_combo_box_text_new ();
@@ -782,9 +782,9 @@ void openGamepadConfig (void)
 			  G_CALLBACK (updateGamepadConfig), NULL);
 
 
-	g_signal_connect (typeCombo, "changed", G_CALLBACK (setInputDevice),
-			  gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT
-							      (typeCombo)));
+	//g_signal_connect (typeCombo, "changed", G_CALLBACK (setInputDevice),
+	//		  gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT
+	//						      (typeCombo)));
 
 	setCheckbox (fourScoreChk, "SDL.FourScore");
 	g_signal_connect (fourScoreChk, "clicked", G_CALLBACK (toggleOption),
