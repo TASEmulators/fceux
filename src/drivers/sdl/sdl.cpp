@@ -614,8 +614,8 @@ int main(int argc, char *argv[])
 	g_config->getOption("SDL.InputCfg", &s);
 	if(s.size() != 0)
 	{
-	InitVideo(GameInfo);
-	InputCfg(s);
+		InitVideo(GameInfo);
+		InputCfg(s);
 	}
 	// set the FAMICOM PAD 2 Mic thing 
 	{
