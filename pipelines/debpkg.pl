@@ -5,12 +5,14 @@ use strict;
 my $VERSION="2.2.4";
 my $INSTALL_PREFIX="/tmp/fceux";
 my $CTL_FILENAME="$INSTALL_PREFIX/DEBIAN/control";
+my $ARCH="amd64";
+my $PKG_OUTPUT_FILE="fceux-$VERSION-$ARCH.deb";
 
 my $SO_LIST=`objdump -x  $INSTALL_PREFIX/usr/bin/fceux`;
 
 #print "$SO_LIST";
 
-my $i; my $j; my $k; my $PKG;
+my $i; my $j; my $k; my $pkg;
 my @fd = split /\n/, $SO_LIST;
 my @libls;
 
@@ -27,67 +29,84 @@ for ($i=0; $i<=$#fd; $i++)
       $libls[$#libls] = $1; $#libls++;
    }
 
-   #$PKG=`dpkg-query -S  $fd[$i] | cut -d ':' -f1`;
 }
 
-my @rpm;
-my @rpmfile;
-my @rpmfilelist;
-my $rpmlist = `rpm -qa`;
-@rpm = split /\n/, $rpmlist;
+my %pkghash; my $pkgsearch;
+my @pkglist; my @pkgdeps;
+my $pkg; my $filepath;
 
-$#rpmfilelist = 0;
-
-for ($i=0; $i<=$#rpm; $i++)
-{
-   #print "$fd[$i]\n";
-   #$pkg = `rpm -qf   --queryformat '%{NAME}'`;
-   #
-   $rpmfilelist[ $#rpmfilelist ] = `rpm -ql $rpm[$i]`;
-   $#rpmfilelist++;
-}
+$#pkgdeps=0;
 
 for ($i=0; $i<$#libls; $i++)
 {
-   for ($j=0; $j<$#rpmfilelist; $j++)
-   {
-      @rpmfile = split /\n/, $rpmfilelist[$j];
+   $pkgsearch=`dpkg-query -S  $libls[$i]`;
 
-      for ($k=0; $k<=$#rpmfile; $k++)
+   @pkglist = split /\n/, $pkgsearch;
+
+   for ($j=0; $j<=$#pkglist; $j++)
+   {
+      #$pkghash{$pkg} = 1;
+      #print "  $libls[$i]    '$pkglist[$j]'  \n";
+
+      if ( $pkglist[$j] =~ m/(.*):$ARCH:\s+(.*)/ )
       {
-         if ( $rpmfile[$k] =~ m/$libls[$i]/ )
-         {
-            print "FOUND: $rpmfile[$k] in $rpm[$j]\n";
+	 $pkg = $1;
+         $filepath = $2;
+
+	 $filepath =~ s/^.*\///;
+
+	 if ( $libls[$i] eq $filepath )
+	 {
+            #print "PKG:   '$pkg'   '$libls[$i]' ==  '$filepath' \n";
+	    $pkgdeps[ $#pkgdeps ] = $pkg; $#pkgdeps++;
          }
       }
    }
 }
-#for LIB in $LDD_LIST
-#do
-#   PKG+=`dpkg-query -S  $LIB | cut -d ':' -f1`;
-#done
 #
 #
 system("mkdir -p $INSTALL_PREFIX/DEBIAN");
 
 open CTL, ">$CTL_FILENAME" or die "Error: Could not open file '$CTL_FILENAME'\n";
 #
-print CTL "Package: fceux";
-print CTL "Version: $VERSION";
-print CTL "Section: games";
-print CTL "Priority: extra";
-print CTL "Architecture: amd64";
-print CTL "Homepage: http://fceux.com/";
-print CTL "Essential: no";
-print CTL "Installed-Size: 1024";
-print CTL "Maintainer: mjbudd77";
-print CTL "Description: fceux is an emulator of the original (8-bit) Nintendo Entertainment System (NES)";
-print CTL "Depends: liblua5.1-0, libsdl1.2debian, libsdl2-2.0-0, libminizip1, libgtk-3-0 ";
+print CTL "Package: fceux\n";
+print CTL "Version: $VERSION\n";
+print CTL "Section: games\n";
+print CTL "Priority: extra\n";
+print CTL "Architecture: $ARCH\n";
+print CTL "Homepage: http://fceux.com/\n";
+print CTL "Essential: no\n";
+#print CTL "Installed-Size: 1024\n";
+print CTL "Maintainer: mjbudd77\n";
+print CTL "Description: fceux is an emulator of the original (8-bit) Nintendo Entertainment System (NES)\n";
+print CTL "Depends: $pkgdeps[0]";
+
+for ($i=1; $i<$#pkgdeps; $i++)
+{
+   print CTL ", $pkgdeps[$i]";
+}
+print CTL "\n";
 
 close CTL;
+
+#system("cat $CTL_FILENAME");
 #
-#cd /tmp;
-#dpkg-deb  --build  fceux 
-#mv  fceux.deb  fceux-$VERSION.deb
-#dpkg-deb  -I   fceux-$VERSION.deb
+chdir "/tmp";
+system("dpkg-deb  --build  fceux ");
+if ( !(-e "/tmp/fceux.deb") )
+{ 
+   die "Error: Failed to create package $PKG_OUTPUT_FILE\n";
+}
+system("mv  fceux.deb  $PKG_OUTPUT_FILE");
+system("dpkg-deb  -I   $PKG_OUTPUT_FILE");
 #
+if ( -e "/tmp/$PKG_OUTPUT_FILE" )
+{ 
+   print "**********************************************\n";
+   print "Created deb package: /tmp/$PKG_OUTPUT_FILE\n";
+   print "**********************************************\n";
+}
+else
+{
+   die "Error: Failed to create package $PKG_OUTPUT_FILE\n";
+}

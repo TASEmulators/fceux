@@ -4,6 +4,10 @@ id
 pwd
 cat /etc/os-release
 
+SCRIPT_DIR=$( cd $(dirname $BASH_SOURCE[0]); pwd );
+
+#echo $SCRIPT_DIR;
+
 gcc --version
 python2 --version
 python3 --version
@@ -95,7 +99,16 @@ else
 fi
 
 echo '**************************************************************'
-echo 'Printing Packaged Files '
+echo 'Printing To Be Packaged Files '
 echo '**************************************************************'
 find $INSTALL_PREFIX
 
+echo '**************************************************************'
+echo 'Creating Debian Package'
+echo '**************************************************************'
+$SCRIPT_DIR/debpkg.pl;
+
+echo '**************************************************************'
+echo 'Testing Install of Package'
+echo '**************************************************************'
+dpkg -i /tmp/fceux*.deb
