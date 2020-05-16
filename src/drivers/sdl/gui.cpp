@@ -71,6 +71,8 @@ static unsigned int gtk_win_height = 0;
 static int gtk_win_menu_ysize = 30;
 static GtkTreeStore *hotkey_store = NULL;
 
+static gint convertKeypress (GtkWidget * grab, GdkEventKey * event, gpointer user_data);
+
 // check to see if a particular GTK version is available
 // 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,24);
 bool checkGTKVersion (int major_required, int minor_required)
@@ -859,6 +861,11 @@ void openGamepadConfig (void)
 	g_signal_connect (win, "response", G_CALLBACK (closeDialog), NULL);
 
 	gtk_widget_show_all (win);
+
+	g_signal_connect (G_OBJECT (win), "key-press-event",
+			  G_CALLBACK (convertKeypress), NULL);
+	g_signal_connect (G_OBJECT (win), "key-release-event",
+			  G_CALLBACK (convertKeypress), NULL);
 
 	return;
 }
@@ -2395,9 +2402,9 @@ static gint convertKeypress (GtkWidget * grab, GdkEventKey * event,
 		SDL_PushEvent (&sdlev);
 
 		// Only let the emulator handle the key event if this window has the input focus.
-		if (keystate == 0
-		    || gtk_window_is_active (GTK_WINDOW (MainWindow)))
-		{
+		//if (keystate == 0
+		//    || gtk_window_is_active (GTK_WINDOW (MainWindow)))
+		//{
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 			// Not sure how to do this yet with SDL 2.0
 			// TODO - SDL 2.0
@@ -2405,7 +2412,7 @@ static gint convertKeypress (GtkWidget * grab, GdkEventKey * event,
 #else
 			SDL_GetKeyState (NULL)[sdlkey] = keystate;
 #endif
-		}
+		//}
 	}
 
 	// Allow GTK+ to process this key.
