@@ -52,16 +52,21 @@ for ($i=0; $i<$#libls; $i++)
 
       if ( $pkglist[$j] =~ m/(.*):$ARCH:\s+(.*)/ )
       {
-	 $pkg = $1;
-         $filepath = $2;
-
-	 $filepath =~ s/^.*\///;
-
-	 if ( $libls[$i] eq $filepath )
-	 {
-            #print "PKG:   '$pkg'   '$libls[$i]' ==  '$filepath' \n";
-	    $pkgdeps[ $#pkgdeps ] = $pkg; $#pkgdeps++;
-         }
+	       $pkg = $1;
+          $filepath = $2;
+          
+          $filepath =~ s/^.*\///;
+          
+	       if ( $libls[$i] eq $filepath )
+	       {
+             #print "PKG:   '$pkg'   '$libls[$i]' ==  '$filepath' \n";
+             # Don't put duplicate entries into the pkg depend list.
+             if ( !defined( $pkghash{$pkg} ) )
+             {
+                $pkgdeps[ $#pkgdeps ] = $pkg; $#pkgdeps++;
+                $pkghash{$pkg} = 1;
+             }
+          }
       }
    }
 }
