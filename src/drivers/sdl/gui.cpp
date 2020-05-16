@@ -68,6 +68,7 @@ unsigned int gtk_draw_area_width = NES_WIDTH;
 unsigned int gtk_draw_area_height = NES_HEIGHT;
 static unsigned int gtk_win_width = 0;
 static unsigned int gtk_win_height = 0;
+static int gtk_win_menu_ysize = 30;
 static GtkTreeStore *hotkey_store = NULL;
 
 // check to see if a particular GTK version is available
@@ -3038,14 +3039,16 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	double xscale = width / (double) NES_WIDTH;
 	double yscale = height / (double) NES_HEIGHT;
 
-	draw_width = gtk_widget_get_allocated_width (evbox);
-	draw_height = gtk_widget_get_allocated_height (evbox);
+	draw_width  = gtk_win_width;
+	draw_height = gtk_win_height - gtk_win_menu_ysize;
+
+	//printf("DRAW: %ix%i   MenuY: %i \n", draw_width, draw_height, gtk_win_menu_ysize );
 
 	if ( (draw_width != gtk_draw_area_width) || (draw_height != gtk_draw_area_height) )
 	{
 		winsize_changed = 1;
 	}
-	gtk_draw_area_width = draw_width;
+	gtk_draw_area_width  = draw_width;
 	gtk_draw_area_height = draw_height;
 
 	if ( gtk_draw_area_width  < NES_WIDTH  ) gtk_draw_area_width  = NES_WIDTH;
@@ -3063,12 +3066,14 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	g_config->setOption ("SDL.YScale", yscale);
 	//gtk_widget_realize(evbox);
 	
-	flushGtkEvents ();
+	//flushGtkEvents ();
 	if ( winsize_changed && (GameInfo != 0) )
 	{
 		KillVideo ();
 		InitVideo (GameInfo);
 	}
+
+	gtk_widget_queue_draw( evbox );
 
 	//gtk_widget_set_size_request(evbox, (int)(NES_WIDTH*xscale), (int)(NES_HEIGHT*yscale));
 
@@ -3091,6 +3096,8 @@ static gboolean draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 
 	if ( gtk_draw_area_width  < NES_WIDTH  ) gtk_draw_area_width  = NES_WIDTH;
 	if ( gtk_draw_area_height < NES_HEIGHT ) gtk_draw_area_height = NES_HEIGHT;
+
+	gtk_win_menu_ysize = gtk_win_height - gtk_draw_area_height;
 
 	// Clear the screen on a window redraw
 	//if (GameInfo == 0)
@@ -3152,15 +3159,6 @@ int InitGTKSubsystem (int argc, char **argv)
 	g_config->getOption ("SDL.XScale", &xscale);
 	g_config->getOption ("SDL.YScale", &yscale);
 
-	gtk_widget_set_size_request (evbox, NES_WIDTH * xscale,
-				     NES_HEIGHT * yscale);
-	gtk_widget_realize (evbox);
-	gtk_widget_show (evbox);
-	gtk_widget_show_all (vbox);
-
-	//GdkColor bg = {0, 0, 0, 0};
-	//gtk_widget_modify_bg(evbox, GTK_STATE_NORMAL, &bg);
-
 	// set up keypress "snooper" to convert GDK keypress events into SDL keypresses
 	//gtk_key_snooper_install(convertKeypress, NULL);
 	g_signal_connect (G_OBJECT (MainWindow), "key-press-event",
@@ -3183,6 +3181,13 @@ int InitGTKSubsystem (int argc, char **argv)
 	g_signal_connect (MainWindow, "configure-event",
 			  G_CALLBACK (handle_resize), NULL);
 	g_signal_connect (evbox, "draw", G_CALLBACK (draw_cb), NULL);
+
+	gtk_widget_set_size_request (evbox, NES_WIDTH * xscale,
+				     NES_HEIGHT * yscale);
+
+	gtk_widget_realize (evbox);
+	gtk_widget_show (evbox);
+	gtk_widget_show_all (vbox);
 
 	gtk_widget_show_all (MainWindow);
 

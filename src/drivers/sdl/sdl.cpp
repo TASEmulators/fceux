@@ -193,9 +193,9 @@ static void ShowUsage(char *prog)
  */
 int LoadGame(const char *path)
 {
-    if (isloaded){
-        CloseGame();
-    }
+	if (isloaded){
+		CloseGame();
+	}
 	if(!FCEUI_LoadGame(path, 1)) {
 		return 0;
 	}
@@ -864,7 +864,7 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-  if(romIndex >= 0)
+	if(romIndex >= 0)
 	{
 		// load the specified game
 		error = LoadGame(argv[romIndex]);
