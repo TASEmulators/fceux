@@ -126,7 +126,7 @@ int configGamepadButton (GtkButton * button, gpointer p)
 
 	ButtonConfigBegin ();
 
-	snprintf (buf, sizeof (buf), "SDL.Input.GamePad.%d", padNo);
+	snprintf (buf, sizeof(buf)-1, "SDL.Input.GamePad.%d.", padNo);
 	prefix = buf;
 	DWaitButton (NULL, &GamePadConfig[padNo][x], configNo);
 

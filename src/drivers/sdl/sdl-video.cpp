@@ -55,7 +55,7 @@
 extern Config *g_config;
 
 // STATIC GLOBALS
-extern SDL_Surface *s_screen;
+static SDL_Surface *s_screen = NULL;
 
 static SDL_Surface *s_BlitBuf; // Buffer when using hardware-accelerated blits.
 static SDL_Surface *s_IconSurface = NULL;
