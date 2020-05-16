@@ -1070,6 +1070,10 @@ int ButtonConfigBegin ()
 			// TODO - SDL2
 #else
 			screen = SDL_SetVideoMode (420, 200, 8, 0);
+         if ( screen == NULL )
+         {
+            printf("Error: SDL_SetVideoMode Failed\n");
+         }
 			SDL_WM_SetCaption ("Button Config", 0);
 #endif
 		}
@@ -1672,7 +1676,9 @@ const char * ButtonName (const ButtConfig * bc, int which)
 #else
 			return SDL_GetKeyName ((SDLKey) bc->ButtonNum[which]);
 #endif
+		break;
 		case BUTTC_JOYSTICK:
+		{
 			int joyNum, inputNum;
 			const char *inputType, *inputDirection;
 
@@ -1713,6 +1719,9 @@ const char * ButtonName (const ButtConfig * bc, int which)
 				inputNum = bc->ButtonNum[which];
 				inputDirection = "";
 			}
+			sprintf( name, "js%i:%s%i%s", joyNum, inputType, inputNum, inputDirection );
+		}
+		break;
 	}
 
 	return name;
