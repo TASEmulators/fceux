@@ -2178,7 +2178,7 @@ void setStateMenuItem( int i )
 
 static void changeState (GtkRadioMenuItem * radiomenuitem, gpointer user_data)
 {
-	printf("GTK Changing State: %li\n", (long)user_data);
+	//printf("GTK Changing State: %li\n", (long)user_data);
 	FCEUI_SelectState ((long) user_data, 1);
 }
 
