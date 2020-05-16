@@ -26,6 +26,46 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+static const char* HotkeyStrings[HK_MAX] = {
+		"CheatMenu",
+		"BindState",
+		"LoadLua",
+		"ToggleBG",
+		"SaveState",
+		"FDSSelect",
+		"LoadState",
+		"FDSEject",
+		"VSInsertCoin",
+		"VSToggleDip",
+		"MovieToggleFrameDisplay",
+		"SubtitleDisplay",
+		"Reset",
+		"Screenshot",
+		"Pause",
+		"DecreaseSpeed",
+		"IncreaseSpeed",
+		"FrameAdvance",
+		"Turbo",
+		"ToggleInputDisplay",
+		"ToggleMovieRW",
+		"MuteCapture",
+		"Quit",
+		"FrameAdvanceLagSkip",
+		"LagCounterDisplay",
+		"SelectState0", "SelectState1", "SelectState2", "SelectState3",
+		"SelectState4", "SelectState5", "SelectState6", "SelectState7", 
+		"SelectState8", "SelectState9", "SelectStateNext", "SelectStatePrev",
+		"VolumeDown", "VolumeUp" };
+
+const char *getHotkeyString( int i )
+{
+   if ( (i>=0) && (i<HK_MAX) )
+   {
+      return HotkeyStrings[i];
+   }
+   return NULL;
+}
+
 /**
  * Read a custom pallete from a file and load it into the core.
  */

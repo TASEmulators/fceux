@@ -528,7 +528,7 @@ static void hotKeyWindowRefresh (void)
 	int keycode;
 	for (int i = 0; i < HK_MAX; i++)
 	{
-		std::string optionName = prefix + HotkeyStrings[i];
+		std::string optionName = prefix + getHotkeyString(i);
 		g_config->getOption (optionName.c_str (), &keycode);
 		gtk_tree_store_set (hotkey_store, &iter,
 				    0, optionName.c_str (), 1,
@@ -578,7 +578,7 @@ static gint hotKeyPressCB (GtkTreeView * tree, GdkEventKey * event,
 		{
 			int sdlkey = 0;
 			std::string hotKeyName = "SDL.Hotkeys.";
-			hotKeyName.append (HotkeyStrings[indexArray[0]]);
+			hotKeyName.append ( getHotkeyString(indexArray[0]) );
 
 			// Convert this keypress from GDK to SDL.
 #if SDL_VERSION_ATLEAST(2, 0, 0)

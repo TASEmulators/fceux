@@ -183,7 +183,7 @@ setHotKeys (void)
 	std::string prefix = "SDL.Hotkeys.";
 	for (int i = 0; i < HK_MAX; i++)
 	{
-		g_config->getOption (prefix + HotkeyStrings[i], &Hotkeys[i]);
+		g_config->getOption (prefix + getHotkeyString(i), &Hotkeys[i]);
 	}
 	return;
 }
