@@ -111,4 +111,4 @@ $SCRIPT_DIR/debpkg.pl;
 echo '**************************************************************'
 echo 'Testing Install of Package'
 echo '**************************************************************'
-dpkg -i /tmp/fceux*.deb
+sudo dpkg -i /tmp/fceux-*.deb
