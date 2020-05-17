@@ -23,6 +23,8 @@
 #include "../../movie.h"
 #include "../../palette.h"
 #include "../../fds.h"
+#include "../../cart.h"
+#include "../../ines.h"
 #include "../common/configSys.h"
 
 #include "sdl.h"
@@ -38,6 +40,45 @@ extern Config *g_config;
 // Memory View (Hex Editor) Window
 //*******************************************************************************************************
 //
+static int getRAM( unsigned int i )
+{
+	return GetMem(i);
+}
+static int getPPU( unsigned int i )
+{
+	i &= 0x3FFF;
+	if (i < 0x2000)return VPage[(i) >> 10][(i)];
+	//NSF PPU Viewer crash here (UGETAB) (Also disabled by 'MaxSize = 0x2000')
+	if (GameInfo->type == GIT_NSF)
+		return 0;
+	else
+	{
+		if (i < 0x3F00)
+			return vnapage[(i >> 10) & 0x3][i & 0x3FF];
+		return READPAL_MOTHEROFALL(i & 0x1F);
+	}
+	return 0;
+}
+static int getOAM( unsigned int i )
+{
+	return SPRAM[i & 0xFF];
+}
+static int getROM( unsigned int offset)
+{
+	if (offset < 16)
+	{
+		return *((unsigned char *)&head+offset);
+	}
+	else if (offset < (16+PRGsize[0]) )
+	{
+		return PRGptr[0][offset-16];
+	}
+	else if (offset < (16+PRGsize[0]+CHRsize[0]) )
+	{
+		return CHRptr[0][offset-16-PRGsize[0]];
+	}
+	return -1;
+}
 //
 struct memViewWin_t
 {
@@ -53,7 +94,18 @@ struct memViewWin_t
 	int editColIdx;
 	int row_vis_start;
 	int row_vis_end;
+	int mode;
+	int evntSrcID;
+	unsigned char *mbuf;
+	int mbuf_size;
 	GtkCellRenderer *hexByte_renderer[16];
+
+	enum {
+		MODE_NES_RAM = 0,
+		MODE_NES_PPU,
+		MODE_NES_OAM,
+		MODE_NES_ROM
+	};
 
 	memViewWin_t(void)
 	{
@@ -69,6 +121,9 @@ struct memViewWin_t
 		selAddr = -1;
 		row_vis_start = 0;
 		row_vis_end   = 0;
+		mode = MODE_NES_RAM;
+		mbuf = NULL;
+		evntSrcID = 0;
 
 		for (int i=0; i<16; i++)
 		{
@@ -76,19 +131,126 @@ struct memViewWin_t
 		}
 	}
 
+	~memViewWin_t(void)
+	{
+		if ( mbuf != NULL )
+		{
+			free(mbuf); mbuf = NULL;
+		}
+	}
+
+	void setMode(int new_mode)
+	{
+		if ( mode != new_mode )
+		{
+			showMemViewResults(1);
+		}
+		mode = new_mode;
+	}
+
 	void showMemViewResults (int reset);
 
 };
+
+static int conv2xchar( int i )
+{
+   int c = 0;
+
+	if ( (i >= 0) && (i < 10) )
+	{
+      c = i + '0';
+	}
+	else if ( i < 16 )
+	{
+		c = (i - 10) + 'A';
+	}
+	return c;
+}
+
+static void initMem( unsigned char *c, int size )
+{
+	for (int i=0; i<size; i++)
+	{
+		c[i] = (i%2) ? 0xA5 : 0x5A;
+	}
+}
 
 void memViewWin_t::showMemViewResults (int reset)
 {
 	
 	int lineAddr = 0, line_addr_start, line_addr_end, i, row;
+	int addr, memSize = 0, un, ln;
 	unsigned int c;
 	GtkTreeIter iter;
-	char addrStr[16], valStr[16][16], ascii[18];
+	char addrStr[16], valStr[16][8], ascii[18], row_changed;
 	int *indexArray;
 	GtkTreePath *start_path = NULL, *end_path = NULL;
+   int (*memAccessFunc)( unsigned int offset) = NULL;
+
+	switch ( mode )
+	{
+		default:
+		case MODE_NES_RAM:
+			memAccessFunc = getRAM;
+			memSize       = 0x10000;
+		break;
+		case MODE_NES_PPU:
+			memAccessFunc = getPPU;
+			memSize       = (GameInfo->type == GIT_NSF ? 0x2000 : 0x4000);
+		break;
+		case MODE_NES_OAM:
+			memAccessFunc = getOAM;
+			memSize       = 0x100;
+		break;
+		case MODE_NES_ROM:
+			memAccessFunc = getROM;
+			memSize       = 16 + CHRsize[0] + PRGsize[0];
+		break;
+	}
+
+	if ( (mbuf == NULL) || (mbuf_size != memSize) )
+	{
+		printf("Mode: %i  MemSize:%i   0x%08x\n", mode, memSize, (unsigned int)memSize );
+		reset = 1;
+
+		if ( mbuf )
+		{
+         free(mbuf); mbuf = NULL;
+		}
+      mbuf = (unsigned char *)malloc( memSize );
+
+		if ( mbuf )
+		{
+         mbuf_size = memSize;
+			initMem( mbuf, memSize );
+		}
+		else
+		{
+			printf("Error: Failed to allocate memview buffer size\n");
+			mbuf_size = 0;
+			return;
+		}
+	}
+
+	if (reset)
+	{
+		line_addr_start = 0;
+		line_addr_end   = memSize;
+
+		gtk_tree_store_clear (memview_store);
+
+		for ( lineAddr=line_addr_start; lineAddr < (line_addr_end+1); lineAddr += 16 )
+		{
+			gtk_tree_store_append (memview_store, &iter, NULL);	// aquire iter
+		}
+		gtk_tree_model_get_iter_first( GTK_TREE_MODEL (memview_store), &iter );
+
+		line_addr_start = 0;
+		line_addr_end   = memSize;
+
+		row_vis_start   = 0;
+		row_vis_end     = 60;
+	}
 
 	if ( !reset )
 	{
@@ -97,11 +259,17 @@ void memViewWin_t::showMemViewResults (int reset)
 			int iterValid;
 			indexArray = gtk_tree_path_get_indices (start_path);
 
-			row_vis_start = indexArray[0];
+			if ( indexArray != NULL )
+			{
+				row_vis_start = indexArray[0];
+			}
 
 			indexArray = gtk_tree_path_get_indices (end_path);
 
-			row_vis_end = indexArray[0];
+			if ( indexArray != NULL )
+			{
+				row_vis_end = indexArray[0];
+			}
 
 			iterValid = gtk_tree_model_get_iter( GTK_TREE_MODEL (memview_store), &iter, start_path );
 
@@ -110,41 +278,35 @@ void memViewWin_t::showMemViewResults (int reset)
 
 			if ( !iterValid )
 			{
+				printf("Error: Failed to get start iterator.\n");
 				return;
 			}
 			//printf("Tree View Start: %i   End: %i  \n", row_vis_start, row_vis_end );
 		}
 	}
-
-	if (reset)
-	{
-		line_addr_start = 0;
-		line_addr_end   = 0x10000;
-
-		gtk_tree_store_clear (memview_store);
-	}
-	else
-	{
-		line_addr_start = row_vis_start * 16;
-		line_addr_end   = row_vis_end   * 16;
-	}
+	line_addr_start = row_vis_start * 16;
+	line_addr_end   = row_vis_end   * 16;
 
 	row = row_vis_start;
 
 	for ( lineAddr=line_addr_start; lineAddr < line_addr_end; lineAddr += 16 )
 	{
-		if (reset)
-		{
-			gtk_tree_store_append (memview_store, &iter, NULL);	// aquire iter
-		}
+		row_changed = reset;
 
-		sprintf( addrStr, "%06X", lineAddr );
+		sprintf( addrStr, "%08X", lineAddr );
 
 		for (i=0; i<16; i++)
 		{
-			c = GetMem(lineAddr+i);
+			addr = lineAddr+i;
 
-			sprintf( valStr[i], "%02X", c );
+			c = memAccessFunc(addr);
+
+			un = ( c & 0x00f0 ) >> 4;
+			ln = ( c & 0x000f );
+
+			valStr[i][0] = conv2xchar(un);
+			valStr[i][1] = conv2xchar(ln);
+			valStr[i][2] = 0;
 
 			if ( isprint(c) )
 			{
@@ -154,10 +316,15 @@ void memViewWin_t::showMemViewResults (int reset)
 			{
             ascii[i] = '.';
 			}
+			if ( c != mbuf[addr] )
+			{
+				row_changed = 1;
+				mbuf[addr] = c;
+			}
 		}
 		ascii[16] = 0;
 
-		if ( editRowIdx != row )
+		if ( row_changed && (editRowIdx != row) )
 		{
 			gtk_tree_store_set( memview_store, &iter, 0, addrStr, 
 					1 , valStr[0] ,  2, valStr[1] ,  3, valStr[2] ,  4, valStr[3], 
@@ -168,13 +335,10 @@ void memViewWin_t::showMemViewResults (int reset)
 					-1 );
 		}
 
-		if (!reset)
+		if (!gtk_tree_model_iter_next
+		    (GTK_TREE_MODEL (memview_store), &iter))
 		{
-			if (!gtk_tree_model_iter_next
-			    (GTK_TREE_MODEL (memview_store), &iter))
-			{
-				gtk_tree_store_append (memview_store, &iter, NULL);	// aquire iter
-			}
+			return;
 		}
 		row++;
 	}
@@ -183,14 +347,35 @@ void memViewWin_t::showMemViewResults (int reset)
 static int memViewEvntSrcID = 0;
 static std::list <memViewWin_t*> memViewWinList;
 
+static void changeModeRAM (GtkRadioMenuItem * radiomenuitem, memViewWin_t *mv)
+{
+	printf("Changing Mode RAM \n");
+	mv->setMode( memViewWin_t::MODE_NES_RAM );
+}
+static void changeModePPU (GtkRadioMenuItem * radiomenuitem, memViewWin_t *mv)
+{
+	printf("Changing Mode PPU \n");
+	mv->setMode( memViewWin_t::MODE_NES_PPU );
+}
+static void changeModeOAM (GtkRadioMenuItem * radiomenuitem, memViewWin_t *mv)
+{
+	printf("Changing Mode OAM \n");
+	mv->setMode( memViewWin_t::MODE_NES_OAM );
+}
+static void changeModeROM (GtkRadioMenuItem * radiomenuitem, memViewWin_t *mv)
+{
+	printf("Changing Mode ROM \n");
+	mv->setMode( memViewWin_t::MODE_NES_ROM );
+}
 
-static GtkWidget *CreateMemViewMenubar (GtkWidget * window)
+static GtkWidget *CreateMemViewMenubar (memViewWin_t * mv)
 {
 	GtkWidget *menubar, *menu, *item;
+	GSList *radioGroup;
 
 	menubar = gtk_menu_bar_new ();
 
-	item = gtk_menu_item_new_with_label ("File");
+	item = gtk_menu_item_new_with_label ("View");
 
 	gtk_menu_shell_append (GTK_MENU_SHELL (menubar), item);
 
@@ -198,17 +383,42 @@ static GtkWidget *CreateMemViewMenubar (GtkWidget * window)
 
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), menu);
 
-	item = gtk_menu_item_new_with_label ("Load Watch");
+	//-View --> RAM ------------------
+	radioGroup = NULL;
 
-	//g_signal_connect (item, "activate", G_CALLBACK (loadRamWatchCB), NULL);
+	item = gtk_radio_menu_item_new_with_label (radioGroup, "RAM");
+
+	radioGroup =
+			gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM(item));
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+
+	g_signal_connect (item, "activate", G_CALLBACK (changeModeRAM),
+				  (gpointer) mv);
+
+	//-View --> PPU ------------------
+	item = gtk_radio_menu_item_new_with_label (radioGroup, "PPU");
 
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
 
-	item = gtk_menu_item_new_with_label ("Save Watch");
+	g_signal_connect (item, "activate", G_CALLBACK (changeModePPU),
+				  (gpointer) mv);
 
-	//g_signal_connect (item, "activate", G_CALLBACK (saveRamWatchCB), NULL);
+	//-View --> OAM ------------------
+	item = gtk_radio_menu_item_new_with_label (radioGroup, "OAM");
 
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+
+	g_signal_connect (item, "activate", G_CALLBACK (changeModeOAM),
+				  (gpointer) mv);
+
+	//-View --> ROM ------------------
+	item = gtk_radio_menu_item_new_with_label (radioGroup, "ROM");
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+
+	g_signal_connect (item, "activate", G_CALLBACK (changeModeROM),
+				  (gpointer) mv);
 
 	// Finally, return the actual menu bar created
 	return menubar;
@@ -233,8 +443,6 @@ static void closeMemoryViewWindow (GtkWidget * w, GdkEvent * e, memViewWin_t * m
 
 	gtk_widget_destroy (w);
 }
-
-//static void memview_cell_edit_cb( int row, int col
 
 static void
 treeRowActivated (GtkTreeView       *tree_view,
@@ -334,7 +542,7 @@ void openMemoryViewWindow (void)
 
 	main_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 3);
 
-	menubar = CreateMemViewMenubar (mv->win);
+	menubar = CreateMemViewMenubar(mv);
 
 	gtk_box_pack_start (GTK_BOX (main_vbox), menubar, FALSE, TRUE, 0);
 
@@ -417,12 +625,6 @@ void openMemoryViewWindow (void)
 
    mv->vbar = gtk_scrolled_window_get_vscrollbar( GTK_SCROLLED_WINDOW(scroll) );
 
-	if (memViewEvntSrcID == 0)
-	{
-		memViewEvntSrcID =
-			g_timeout_add (100, updateMemViewTree, NULL);
-	}
-
 	g_signal_connect (mv->win, "delete-event",
 			  G_CALLBACK (closeMemoryViewWindow), mv);
 	g_signal_connect (mv->win, "response",
@@ -431,5 +633,11 @@ void openMemoryViewWindow (void)
 	gtk_widget_show_all (mv->win);
 
 	mv->showMemViewResults(1);
+
+	if (memViewEvntSrcID == 0)
+	{
+		memViewEvntSrcID =
+			g_timeout_add (100, updateMemViewTree, mv);
+	}
 
 }
