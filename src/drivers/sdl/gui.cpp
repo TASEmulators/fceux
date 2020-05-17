@@ -16,6 +16,7 @@
 #include "config.h"
 #include "cheat.h"
 #include "icon.xpm"
+#include "memview.h"
 #include "ramwatch.h"
 
 #ifdef _S9XLUA_H
@@ -2862,6 +2863,17 @@ static GtkWidget *CreateMenubar (GtkWidget * window)
 	item = gtk_menu_item_new_with_label ("Ram Watch...");
 
 	g_signal_connect (item, "activate", G_CALLBACK (openMemoryWatchWindow),
+			  NULL);
+
+	//gtk_widget_add_accelerator( item, "activate", accel_group,
+	//                           GDK_KEY_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+
+	//-Tools --> Memory Viewer ---------------------
+	item = gtk_menu_item_new_with_label ("Memory Viewer");
+
+	g_signal_connect (item, "activate", G_CALLBACK (openMemoryViewWindow),
 			  NULL);
 
 	//gtk_widget_add_accelerator( item, "activate", accel_group,
