@@ -85,8 +85,12 @@ struct memViewWin_t
 	GtkWidget *win;
 	GtkWidget *tree;
 	GtkWidget *vbar;
+	GtkWidget *ivbar;
 	GtkWidget *selCellLabel;
 	GtkTreeStore *memview_store;
+	GtkAdjustment *vadj;
+	int baseAddr;
+	int maxAddr;
 	int selAddr;
 	int selRowIdx;
 	int selColIdx;
@@ -94,11 +98,14 @@ struct memViewWin_t
 	int editColIdx;
 	int row_vis_start;
 	int row_vis_end;
+	int row_vis_center;
 	int mode;
 	int evntSrcID;
+	int treeViewLines;
 	unsigned char *mbuf;
 	int mbuf_size;
 	GtkCellRenderer *hexByte_renderer[16];
+	bool redraw;
 
 	enum {
 		MODE_NES_RAM = 0,
@@ -112,6 +119,7 @@ struct memViewWin_t
 		win = NULL;
 		tree = NULL;
 		vbar = NULL;
+		vadj = NULL;
 		selCellLabel = NULL;
 		memview_store = NULL;
 		selRowIdx  = -1;
@@ -119,11 +127,15 @@ struct memViewWin_t
 	   editRowIdx = -1;
 	   editColIdx = -1;
 		selAddr = -1;
+		baseAddr = 0;
 		row_vis_start = 0;
-		row_vis_end   = 0;
+		row_vis_end   = 64;
+		row_vis_center= 32;
 		mode = MODE_NES_RAM;
 		mbuf = NULL;
 		evntSrcID = 0;
+		treeViewLines = 64;
+		redraw = 1;
 
 		for (int i=0; i<16; i++)
 		{
@@ -148,7 +160,69 @@ struct memViewWin_t
 		mode = new_mode;
 	}
 
+	void setBaseAddr( double value )
+	{
+		int addr, r, max;
+		addr = (int)( value + 0.50 );
+
+		printf("Set BaseAddr Req: %i   0x%08x\n", addr, addr );
+
+		r = addr % 16;
+
+		addr = addr - r;
+
+		max = mbuf_size - (treeViewLines * 16);
+
+		if ( addr >= max )
+		{
+			addr = max;
+		}
+		baseAddr = addr;
+		redraw   = 1;
+	}
+
+	void incrBaseAddr( int value )
+	{
+		int addr, r, max;
+
+		addr = baseAddr + value;
+
+		printf("Set BaseAddr Req: %i   0x%08x\n", addr, addr );
+
+		r = addr % 16;
+
+		addr = addr - r;
+
+		max = mbuf_size - (treeViewLines * 16);
+
+		if ( addr >= max )
+		{
+			addr = max;
+		}
+		baseAddr = addr;
+		redraw   = 1;
+	}
+
+	int  set_inner_slider( double value )
+	{
+		GtkAdjustment *ivadj;
+		double l, u;
+
+		ivadj = gtk_range_get_adjustment( GTK_RANGE(ivbar) );
+
+		l = gtk_adjustment_get_lower( ivadj );
+		u = gtk_adjustment_get_upper( ivadj );
+
+		printf("Inner VBAR Limits: %f   %f   \n" , 
+				l, u );
+
+		gtk_range_set_value( GTK_RANGE(ivbar), l + value*(u-l) );
+
+		return 0;
+	}
+
 	void showMemViewResults (int reset);
+	int  calcVisibleRange( int *start_out, int *end_out, int *center_out );
 
 };
 
@@ -178,7 +252,7 @@ static void initMem( unsigned char *c, int size )
 void memViewWin_t::showMemViewResults (int reset)
 {
 	
-	int lineAddr = 0, line_addr_start, line_addr_end, i, row;
+	int lineAddr = 0, line_addr_start, line_addr_end, i, row=0;
 	int addr, memSize = 0, un, ln;
 	unsigned int c;
 	GtkTreeIter iter;
@@ -230,6 +304,14 @@ void memViewWin_t::showMemViewResults (int reset)
 			mbuf_size = 0;
 			return;
 		}
+
+		gtk_adjustment_configure ( vadj,
+                          0.0, // value,
+                          0.0, // lower,
+                    mbuf_size, // upper,
+                         16.0, // step_increment,
+                         32.0, // page_increment,
+                         32.0 ); // page_size);
 	}
 
 	if (reset)
@@ -239,17 +321,18 @@ void memViewWin_t::showMemViewResults (int reset)
 
 		gtk_tree_store_clear (memview_store);
 
-		for ( lineAddr=line_addr_start; lineAddr < (line_addr_end+1); lineAddr += 16 )
+		for ( i=0; i < treeViewLines; i++)
 		{
 			gtk_tree_store_append (memview_store, &iter, NULL);	// aquire iter
 		}
 		gtk_tree_model_get_iter_first( GTK_TREE_MODEL (memview_store), &iter );
 
 		line_addr_start = 0;
-		line_addr_end   = memSize;
+		line_addr_end   = treeViewLines * 16;
 
 		row_vis_start   = 0;
-		row_vis_end     = 60;
+		row_vis_end     = treeViewLines;
+		row_vis_center  = treeViewLines/2;
 	}
 
 	if ( !reset )
@@ -268,7 +351,7 @@ void memViewWin_t::showMemViewResults (int reset)
 
 			if ( indexArray != NULL )
 			{
-				row_vis_end = indexArray[0];
+				row_vis_end = indexArray[0] + 1;
 			}
 
 			iterValid = gtk_tree_model_get_iter( GTK_TREE_MODEL (memview_store), &iter, start_path );
@@ -281,17 +364,22 @@ void memViewWin_t::showMemViewResults (int reset)
 				printf("Error: Failed to get start iterator.\n");
 				return;
 			}
-			//printf("Tree View Start: %i   End: %i  \n", row_vis_start, row_vis_end );
+			row_vis_center  = row_vis_start + (row_vis_end - row_vis_start + 1) / 2;
+			//printf("Tree View Start: %i   End: %i    Center: %i \n", row_vis_start, row_vis_end, row_vis_center );
+
+			//if ( row_vis_center > 48 )
+			//{
+			//	set_inner_slider( 0.50 );
+			//}
 		}
 	}
 	line_addr_start = row_vis_start * 16;
 	line_addr_end   = row_vis_end   * 16;
 
-	row = row_vis_start;
-
-	for ( lineAddr=line_addr_start; lineAddr < line_addr_end; lineAddr += 16 )
+	for ( row=row_vis_start; row<row_vis_end; row++)
 	{
-		row_changed = reset;
+	   lineAddr = baseAddr + (row*16);
+		row_changed = reset || redraw;
 
 		sprintf( addrStr, "%08X", lineAddr );
 
@@ -340,8 +428,64 @@ void memViewWin_t::showMemViewResults (int reset)
 		{
 			return;
 		}
-		row++;
 	}
+	redraw = 0;
+}
+
+int memViewWin_t::calcVisibleRange( int *start_out, int *end_out, int *center_out )
+{
+	int retval = 0;
+	int *indexArray;
+	int start=0, end=64, center=32;
+	GtkTreePath *start_path = NULL, *end_path = NULL;
+
+	if ( gtk_tree_view_get_visible_range ( GTK_TREE_VIEW(tree), &start_path, &end_path ) )
+	{
+		indexArray = gtk_tree_path_get_indices (start_path);
+
+		if ( indexArray != NULL )
+		{
+			start = indexArray[0];
+		}
+		else
+		{
+			retval = -1;
+		}
+
+		indexArray = gtk_tree_path_get_indices (end_path);
+
+		if ( indexArray != NULL )
+		{
+			end = indexArray[0] + 1;
+		}
+		else
+		{
+			retval = -1;
+		}
+
+		gtk_tree_path_free( start_path );
+		gtk_tree_path_free( end_path );
+
+		center  = start + (end - start + 1) / 2;
+
+		if ( start_out != NULL )
+		{
+			*start_out = start;
+		}
+		if ( end_out != NULL )
+		{
+			*end_out = end;
+		}
+		if ( center_out != NULL )
+		{
+			*center_out = center;
+		}
+	}
+	else
+	{
+		retval = -1;
+	}
+	return retval;
 }
 
 static int memViewEvntSrcID = 0;
@@ -455,13 +599,52 @@ treeRowActivated (GtkTreeView       *tree_view,
 	mv->selRowIdx = strtol( gtk_tree_path_to_string(path), NULL, 0 );
 	mv->selColIdx = strtol( gtk_tree_view_column_get_title(column), NULL, 16 );
 
-	mv->selAddr = (mv->selRowIdx*16) + mv->selColIdx;
+	mv->selAddr = mv->baseAddr + (mv->selRowIdx*16) + mv->selColIdx;
 
 	sprintf( stmp, "<span font_desc=\"mono 12\">Selected Cell Address: 0x%04X</span>", mv->selAddr );
 
 	gtk_label_set_markup ( GTK_LABEL(mv->selCellLabel), stmp );
 
 	//printf("Row:Col Active: %i:%i   Addr: 0x%04X \n", mv->selRowIdx, mv->selColIdx, mv->selAddr );
+}
+
+static gboolean
+vscroll_changed (GtkRange     *range,
+               GtkScrollType scroll,
+               gdouble       value,
+               memViewWin_t * mv)
+{
+	mv->setBaseAddr( value );
+
+	return FALSE;
+}
+
+static void
+inner_vbar_changed (GtkRange *range,
+				      	memViewWin_t * mv)
+{
+	GtkAdjustment *ivadj;
+	double v, l, u, r;
+
+	ivadj = gtk_range_get_adjustment( range );
+
+
+	v = gtk_range_get_value( range );
+	l = gtk_adjustment_get_lower( ivadj );
+	u = gtk_adjustment_get_upper( ivadj );
+
+	r = (v - l) / (u - l);
+
+	printf("Inner VBAR: %f   %f   %f   %f   \n" , 
+			v, l, u, r );
+}
+
+static void
+outer_vbar_changed (GtkRange *range,
+				      	memViewWin_t * mv)
+{
+	//printf("Outer VBAR: %f \n", gtk_range_get_value( range ) );
+	mv->setBaseAddr( gtk_range_get_value( range ) );
 }
 
 static void memview_cell_edited_cb (GtkCellRendererText * cell,
@@ -476,7 +659,7 @@ static void memview_cell_edited_cb (GtkCellRendererText * cell,
 
 	rowIdx = atoi( path_string );
 
-	addr = (rowIdx*16) + mv->selColIdx;
+	addr = mv->baseAddr + (rowIdx*16) + mv->selColIdx;
 
 	wfunc = GetWriteHandler (addr);
 
@@ -520,6 +703,7 @@ void openMemoryViewWindow (void)
 {
 	GtkWidget *main_vbox;
 	GtkWidget *hbox;
+	GtkWidget *vbox;
 	GtkWidget *scroll;
 	GtkWidget *menubar;
 	GtkCellRenderer *renderer;
@@ -609,7 +793,28 @@ void openMemoryViewWindow (void)
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
 					GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_container_add (GTK_CONTAINER (scroll), mv->tree);
-	gtk_box_pack_start (GTK_BOX (main_vbox), scroll, TRUE, TRUE, 5);
+
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
+	gtk_box_pack_start (GTK_BOX (vbox), scroll, TRUE, TRUE, 2);
+	gtk_box_pack_start (GTK_BOX (hbox), vbox, TRUE, TRUE, 2);
+
+	mv->vadj = gtk_adjustment_new( 0, 0, 100, 1, 20, 20 );
+
+   mv->vbar = gtk_scrollbar_new( GTK_ORIENTATION_VERTICAL, mv->vadj );
+
+	g_signal_connect (mv->vbar, "change-value",
+			  G_CALLBACK (vscroll_changed), mv);
+	g_signal_connect (mv->vbar, "value-changed",
+			  G_CALLBACK (outer_vbar_changed), mv);
+
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
+
+	gtk_box_pack_start (GTK_BOX (vbox), mv->vbar, TRUE, TRUE, 2);
+
+	gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 2);
+
+	gtk_box_pack_start (GTK_BOX (main_vbox), hbox, TRUE, TRUE, 5);
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 1);
 
@@ -623,7 +828,10 @@ void openMemoryViewWindow (void)
 			     (GTK_DIALOG (mv->win))), main_vbox, TRUE, TRUE,
 			    0);
 
-   mv->vbar = gtk_scrolled_window_get_vscrollbar( GTK_SCROLLED_WINDOW(scroll) );
+   mv->ivbar = gtk_scrolled_window_get_vscrollbar( GTK_SCROLLED_WINDOW(scroll) );
+
+	g_signal_connect (mv->ivbar, "value-changed",
+			  G_CALLBACK (inner_vbar_changed), mv);
 
 	g_signal_connect (mv->win, "delete-event",
 			  G_CALLBACK (closeMemoryViewWindow), mv);
