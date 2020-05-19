@@ -87,6 +87,8 @@ struct memViewWin_t
 	GtkWidget *vbar;
 	GtkWidget *ivbar;
 	GtkWidget *selCellLabel;
+	GtkTextView *textview;
+	GtkTextBuffer *textbuf;
 	GtkTreeStore *memview_store;
 	GtkAdjustment *vadj;
 	int baseAddr;
@@ -102,6 +104,8 @@ struct memViewWin_t
 	int mode;
 	int evntSrcID;
 	int treeViewLines;
+	int numLines;
+	int numCharsPerLine;
 	unsigned char *mbuf;
 	int mbuf_size;
 	GtkCellRenderer *hexByte_renderer[16];
@@ -120,6 +124,8 @@ struct memViewWin_t
 		tree = NULL;
 		vbar = NULL;
 		vadj = NULL;
+		textview = NULL;
+		textbuf = NULL;
 		selCellLabel = NULL;
 		memview_store = NULL;
 		selRowIdx  = -1;
@@ -133,8 +139,10 @@ struct memViewWin_t
 		row_vis_center= 32;
 		mode = MODE_NES_RAM;
 		mbuf = NULL;
+		numLines = 0;
 		evntSrcID = 0;
 		treeViewLines = 64;
+		numCharsPerLine = 64;
 		redraw = 1;
 
 		for (int i=0; i<16; i++)
@@ -222,6 +230,7 @@ struct memViewWin_t
 	}
 
 	void showMemViewResults (int reset);
+	//int  calcVisibleRange( int *start_out, int *end_out, int *center_out );
 	int  calcVisibleRange( int *start_out, int *end_out, int *center_out );
 
 };
@@ -251,14 +260,15 @@ static void initMem( unsigned char *c, int size )
 
 void memViewWin_t::showMemViewResults (int reset)
 {
-	
-	int lineAddr = 0, line_addr_start, line_addr_end, i, row=0;
-	int addr, memSize = 0, un, ln;
-	unsigned int c;
-	GtkTreeIter iter;
-	char addrStr[16], valStr[16][8], ascii[18], row_changed;
-	int *indexArray;
-	GtkTreePath *start_path = NULL, *end_path = NULL;
+	int addr, memSize = 0;
+	int lineAddr = 0, c, un, ln;
+	int i, row, row_start, row_end, totalChars;
+	char addrStr[16], valStr[16][8], ascii[18];
+	char row_changed;
+	std::string  txt;
+	std::string line;
+	GtkTextIter iter, start_iter, end_iter;
+	GdkRectangle visible_rect;
    int (*memAccessFunc)( unsigned int offset) = NULL;
 
 	switch ( mode )
@@ -281,6 +291,7 @@ void memViewWin_t::showMemViewResults (int reset)
 			memSize       = 16 + CHRsize[0] + PRGsize[0];
 		break;
 	}
+	numLines = memSize / 16;
 
 	if ( (mbuf == NULL) || (mbuf_size != memSize) )
 	{
@@ -304,84 +315,41 @@ void memViewWin_t::showMemViewResults (int reset)
 			mbuf_size = 0;
 			return;
 		}
+	}
+	gtk_text_view_get_visible_rect ( textview, &visible_rect );
 
-		gtk_adjustment_configure ( vadj,
-                          0.0, // value,
-                          0.0, // lower,
-                    mbuf_size, // upper,
-                         16.0, // step_increment,
-                         32.0, // page_increment,
-                         32.0 ); // page_size);
+	//printf("Vis: x:%i  y:%i  w:%i   h:%i \n", visible_rect.x, visible_rect.y, visible_rect.width, visible_rect.height );
+
+	gtk_text_buffer_get_start_iter( textbuf, &start_iter );
+	gtk_text_buffer_get_end_iter( textbuf, &end_iter   );
+
+	if ( reset )
+	{
+		gtk_text_buffer_delete( textbuf, &start_iter, &end_iter );
+
+		row_start = 0;
+		row_end   = numLines;
+	}
+	else
+	{
+		calcVisibleRange( &row_start, &row_end, NULL );
 	}
 
-	if (reset)
+	gtk_text_buffer_get_iter_at_offset( textbuf, &iter, 0 );
+
+	totalChars = row_start * numCharsPerLine;
+
+	for (row=row_start; row<row_end; row++)
 	{
-		line_addr_start = 0;
-		line_addr_end   = memSize;
+		gtk_text_buffer_get_iter_at_offset( textbuf, &iter, totalChars );
 
-		gtk_tree_store_clear (memview_store);
+		row_changed = reset;
 
-		for ( i=0; i < treeViewLines; i++)
-		{
-			gtk_tree_store_append (memview_store, &iter, NULL);	// aquire iter
-		}
-		gtk_tree_model_get_iter_first( GTK_TREE_MODEL (memview_store), &iter );
+		line.clear();
 
-		line_addr_start = 0;
-		line_addr_end   = treeViewLines * 16;
+		lineAddr = (row*16);
 
-		row_vis_start   = 0;
-		row_vis_end     = treeViewLines;
-		row_vis_center  = treeViewLines/2;
-	}
-
-	if ( !reset )
-	{
-		if ( gtk_tree_view_get_visible_range ( GTK_TREE_VIEW(tree), &start_path, &end_path ) )
-		{
-			int iterValid;
-			indexArray = gtk_tree_path_get_indices (start_path);
-
-			if ( indexArray != NULL )
-			{
-				row_vis_start = indexArray[0];
-			}
-
-			indexArray = gtk_tree_path_get_indices (end_path);
-
-			if ( indexArray != NULL )
-			{
-				row_vis_end = indexArray[0] + 1;
-			}
-
-			iterValid = gtk_tree_model_get_iter( GTK_TREE_MODEL (memview_store), &iter, start_path );
-
-			gtk_tree_path_free( start_path );
-			gtk_tree_path_free( end_path );
-
-			if ( !iterValid )
-			{
-				printf("Error: Failed to get start iterator.\n");
-				return;
-			}
-			row_vis_center  = row_vis_start + (row_vis_end - row_vis_start + 1) / 2;
-			//printf("Tree View Start: %i   End: %i    Center: %i \n", row_vis_start, row_vis_end, row_vis_center );
-
-			//if ( row_vis_center > 48 )
-			//{
-			//	set_inner_slider( 0.50 );
-			//}
-		}
-	}
-	line_addr_start = row_vis_start * 16;
-	line_addr_end   = row_vis_end   * 16;
-
-	for ( row=row_vis_start; row<row_vis_end; row++)
-	{
-	   lineAddr = baseAddr + (row*16);
-		row_changed = reset || redraw;
-
-		sprintf( addrStr, "%08X", lineAddr );
+		sprintf( addrStr, "%08X ", lineAddr );
 
 		for (i=0; i<16; i++)
 		{
@@ -412,80 +380,335 @@ void memViewWin_t::showMemViewResults (int reset)
 		}
 		ascii[16] = 0;
 
-		if ( row_changed && (editRowIdx != row) )
+		line.assign( addrStr  );
+
+		for (i=0; i<16; i++)
 		{
-			gtk_tree_store_set( memview_store, &iter, 0, addrStr, 
-					1 , valStr[0] ,  2, valStr[1] ,  3, valStr[2] ,  4, valStr[3], 
-					5 , valStr[4] ,  6, valStr[5] ,  7, valStr[6] ,  8, valStr[7], 
-					9 , valStr[8] , 10, valStr[9] , 11, valStr[10], 12, valStr[11], 
-					13, valStr[12], 14, valStr[13], 15, valStr[14], 16, valStr[15], 
-					17, ascii,
-					-1 );
+			line.append( " ");
+			line.append( valStr[i] );
+			line.append( " ");
+		}
+		line.append( ascii );
+		line.append( "\n");
+
+		numCharsPerLine = line.size();
+
+		if ( row_changed )
+		{
+			if ( !reset )
+			{
+				//int k=0;
+				//char *bfp; char l[256];
+			
+				GtkTextIter next_iter;
+				gtk_text_buffer_get_iter_at_offset( textbuf, &next_iter, totalChars + numCharsPerLine );
+				gtk_text_buffer_delete ( textbuf, &iter, &next_iter );
+				//bfp = gtk_text_buffer_get_text ( textbuf, &iter, &next_iter, 0 );
+				//while ( bfp[k] != 0 )
+				//{
+				//	if ( bfp[k] == '\n') break;
+
+				//	l[k] = bfp[k]; k++;
+				//}
+				//l[k] = 0;
+				//printf("%s:%s\n", addrStr, l );
+				gtk_text_buffer_insert ( textbuf, &iter, line.c_str(), -1 );
+			}
+			if ( reset )
+			{
+				gtk_text_buffer_get_iter_at_offset( textbuf, &iter, totalChars );
+				gtk_text_buffer_insert ( textbuf, &iter, line.c_str(), -1 );
+			}
 		}
 
-		if (!gtk_tree_model_iter_next
-		    (GTK_TREE_MODEL (memview_store), &iter))
-		{
-			return;
-		}
+		totalChars += numCharsPerLine;
+
+		//txt.append( line );
 	}
-	redraw = 0;
+
+	//if ( reset )
+	//{
+	//	gtk_text_buffer_set_text( textbuf, txt.c_str(), -1 );
+	//}
 }
+
+	
+//void memViewWin_t::showMemViewResults (int reset)
+//{
+//	
+//	int lineAddr = 0, line_addr_start, line_addr_end, i, row=0;
+//	int addr, memSize = 0, un, ln;
+//	unsigned int c;
+//	GtkTreeIter iter;
+//	char addrStr[16], valStr[16][8], ascii[18], row_changed;
+//	int *indexArray;
+//	GtkTreePath *start_path = NULL, *end_path = NULL;
+//   int (*memAccessFunc)( unsigned int offset) = NULL;
+//
+//	switch ( mode )
+//	{
+//		default:
+//		case MODE_NES_RAM:
+//			memAccessFunc = getRAM;
+//			memSize       = 0x10000;
+//		break;
+//		case MODE_NES_PPU:
+//			memAccessFunc = getPPU;
+//			memSize       = (GameInfo->type == GIT_NSF ? 0x2000 : 0x4000);
+//		break;
+//		case MODE_NES_OAM:
+//			memAccessFunc = getOAM;
+//			memSize       = 0x100;
+//		break;
+//		case MODE_NES_ROM:
+//			memAccessFunc = getROM;
+//			memSize       = 16 + CHRsize[0] + PRGsize[0];
+//		break;
+//	}
+//
+//	if ( (mbuf == NULL) || (mbuf_size != memSize) )
+//	{
+//		printf("Mode: %i  MemSize:%i   0x%08x\n", mode, memSize, (unsigned int)memSize );
+//		reset = 1;
+//
+//		if ( mbuf )
+//		{
+//         free(mbuf); mbuf = NULL;
+//		}
+//      mbuf = (unsigned char *)malloc( memSize );
+//
+//		if ( mbuf )
+//		{
+//         mbuf_size = memSize;
+//			initMem( mbuf, memSize );
+//		}
+//		else
+//		{
+//			printf("Error: Failed to allocate memview buffer size\n");
+//			mbuf_size = 0;
+//			return;
+//		}
+//
+//		gtk_adjustment_configure ( vadj,
+//                          0.0, // value,
+//                          0.0, // lower,
+//                    mbuf_size, // upper,
+//                         16.0, // step_increment,
+//                         32.0, // page_increment,
+//                         32.0 ); // page_size);
+//	}
+//
+//	if (reset)
+//	{
+//		line_addr_start = 0;
+//		line_addr_end   = memSize;
+//
+//		gtk_tree_store_clear (memview_store);
+//
+//		for ( i=0; i < treeViewLines; i++)
+//		{
+//			gtk_tree_store_append (memview_store, &iter, NULL);	// aquire iter
+//		}
+//		gtk_tree_model_get_iter_first( GTK_TREE_MODEL (memview_store), &iter );
+//
+//		line_addr_start = 0;
+//		line_addr_end   = treeViewLines * 16;
+//
+//		row_vis_start   = 0;
+//		row_vis_end     = treeViewLines;
+//		row_vis_center  = treeViewLines/2;
+//	}
+//
+//	if ( !reset )
+//	{
+//		if ( gtk_tree_view_get_visible_range ( GTK_TREE_VIEW(tree), &start_path, &end_path ) )
+//		{
+//			int iterValid;
+//			indexArray = gtk_tree_path_get_indices (start_path);
+//
+//			if ( indexArray != NULL )
+//			{
+//				row_vis_start = indexArray[0];
+//			}
+//
+//			indexArray = gtk_tree_path_get_indices (end_path);
+//
+//			if ( indexArray != NULL )
+//			{
+//				row_vis_end = indexArray[0] + 1;
+//			}
+//
+//			iterValid = gtk_tree_model_get_iter( GTK_TREE_MODEL (memview_store), &iter, start_path );
+//
+//			gtk_tree_path_free( start_path );
+//			gtk_tree_path_free( end_path );
+//
+//			if ( !iterValid )
+//			{
+//				printf("Error: Failed to get start iterator.\n");
+//				return;
+//			}
+//			row_vis_center  = row_vis_start + (row_vis_end - row_vis_start + 1) / 2;
+//			//printf("Tree View Start: %i   End: %i    Center: %i \n", row_vis_start, row_vis_end, row_vis_center );
+//
+//			//if ( row_vis_center > 48 )
+//			//{
+//			//	set_inner_slider( 0.50 );
+//			//}
+//		}
+//	}
+//	line_addr_start = row_vis_start * 16;
+//	line_addr_end   = row_vis_end   * 16;
+//
+//	for ( row=row_vis_start; row<row_vis_end; row++)
+//	{
+//	   lineAddr = baseAddr + (row*16);
+//		row_changed = reset || redraw;
+//
+//		sprintf( addrStr, "%08X", lineAddr );
+//
+//		for (i=0; i<16; i++)
+//		{
+//			addr = lineAddr+i;
+//
+//			c = memAccessFunc(addr);
+//
+//			un = ( c & 0x00f0 ) >> 4;
+//			ln = ( c & 0x000f );
+//
+//			valStr[i][0] = conv2xchar(un);
+//			valStr[i][1] = conv2xchar(ln);
+//			valStr[i][2] = 0;
+//
+//			if ( isprint(c) )
+//			{
+//            ascii[i] = c;
+//			}
+//			else
+//			{
+//            ascii[i] = '.';
+//			}
+//			if ( c != mbuf[addr] )
+//			{
+//				row_changed = 1;
+//				mbuf[addr] = c;
+//			}
+//		}
+//		ascii[16] = 0;
+//
+//		if ( row_changed && (editRowIdx != row) )
+//		{
+//			gtk_tree_store_set( memview_store, &iter, 0, addrStr, 
+//					1 , valStr[0] ,  2, valStr[1] ,  3, valStr[2] ,  4, valStr[3], 
+//					5 , valStr[4] ,  6, valStr[5] ,  7, valStr[6] ,  8, valStr[7], 
+//					9 , valStr[8] , 10, valStr[9] , 11, valStr[10], 12, valStr[11], 
+//					13, valStr[12], 14, valStr[13], 15, valStr[14], 16, valStr[15], 
+//					17, ascii,
+//					-1 );
+//		}
+//
+//		if (!gtk_tree_model_iter_next
+//		    (GTK_TREE_MODEL (memview_store), &iter))
+//		{
+//			return;
+//		}
+//	}
+//	redraw = 0;
+//}
+
+//int memViewWin_t::calcVisibleRange( int *start_out, int *end_out, int *center_out )
+//{
+//	int retval = 0;
+//	int *indexArray;
+//	int start=0, end=64, center=32;
+//	GtkTreePath *start_path = NULL, *end_path = NULL;
+//
+//	if ( gtk_tree_view_get_visible_range ( GTK_TREE_VIEW(tree), &start_path, &end_path ) )
+//	{
+//		indexArray = gtk_tree_path_get_indices (start_path);
+//
+//		if ( indexArray != NULL )
+//		{
+//			start = indexArray[0];
+//		}
+//		else
+//		{
+//			retval = -1;
+//		}
+//
+//		indexArray = gtk_tree_path_get_indices (end_path);
+//
+//		if ( indexArray != NULL )
+//		{
+//			end = indexArray[0] + 1;
+//		}
+//		else
+//		{
+//			retval = -1;
+//		}
+//
+//		gtk_tree_path_free( start_path );
+//		gtk_tree_path_free( end_path );
+//
+//		center  = start + (end - start + 1) / 2;
+//
+//		if ( start_out != NULL )
+//		{
+//			*start_out = start;
+//		}
+//		if ( end_out != NULL )
+//		{
+//			*end_out = end;
+//		}
+//		if ( center_out != NULL )
+//		{
+//			*center_out = center;
+//		}
+//	}
+//	else
+//	{
+//		retval = -1;
+//	}
+//	return retval;
+//}
 
 int memViewWin_t::calcVisibleRange( int *start_out, int *end_out, int *center_out )
 {
-	int retval = 0;
-	int *indexArray;
-	int start=0, end=64, center=32;
-	GtkTreePath *start_path = NULL, *end_path = NULL;
+	GtkAdjustment *ivadj;
+	double v, l, u, r;
+	int start, end, center;
 
-	if ( gtk_tree_view_get_visible_range ( GTK_TREE_VIEW(tree), &start_path, &end_path ) )
+	ivadj = gtk_range_get_adjustment( GTK_RANGE(ivbar) );
+
+
+	v = gtk_range_get_value( GTK_RANGE(ivbar) );
+	l = gtk_adjustment_get_lower( ivadj );
+	u = gtk_adjustment_get_upper( ivadj );
+
+	r = (v - l) / (u - l);
+
+	start = ((int)( r * (double)numLines )) - 16;
+
+	if ( start < 0 )
 	{
-		indexArray = gtk_tree_path_get_indices (start_path);
-
-		if ( indexArray != NULL )
-		{
-			start = indexArray[0];
-		}
-		else
-		{
-			retval = -1;
-		}
-
-		indexArray = gtk_tree_path_get_indices (end_path);
-
-		if ( indexArray != NULL )
-		{
-			end = indexArray[0] + 1;
-		}
-		else
-		{
-			retval = -1;
-		}
-
-		gtk_tree_path_free( start_path );
-		gtk_tree_path_free( end_path );
-
-		center  = start + (end - start + 1) / 2;
-
-		if ( start_out != NULL )
-		{
-			*start_out = start;
-		}
-		if ( end_out != NULL )
-		{
-			*end_out = end;
-		}
-		if ( center_out != NULL )
-		{
-			*center_out = center;
-		}
+		start = 0;
 	}
-	else
+	end = start + 64;
+
+	if ( end > numLines )
 	{
-		retval = -1;
+		end = numLines;
 	}
-	return retval;
+
+	center = start + (end - start)/2;
+
+	printf(" Start:%i   End:%i      0x%08x -> 0x%08x \n", start, end, start * 16, end * 16 );
+
+	if ( start_out  ) *start_out  = start;
+	if ( end_out    ) *end_out    = end;
+	if ( center_out ) *center_out = center;
+
+   return 0;
 }
 
 static int memViewEvntSrcID = 0;
@@ -789,10 +1012,19 @@ void openMemoryViewWindow (void)
 							   "text", 17, NULL);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (mv->tree), column);
 
+	mv->textview = (GtkTextView*) gtk_text_view_new();
+
+	gtk_text_view_set_monospace( mv->textview, TRUE );
+	gtk_text_view_set_overwrite( mv->textview, TRUE );
+	gtk_text_view_set_wrap_mode( mv->textview, GTK_WRAP_NONE );
+
+	mv->textbuf = gtk_text_view_get_buffer( mv->textview );
+
 	scroll = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
 					GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-	gtk_container_add (GTK_CONTAINER (scroll), mv->tree);
+	//gtk_container_add (GTK_CONTAINER (scroll), mv->tree);
+	gtk_container_add (GTK_CONTAINER (scroll), GTK_WIDGET(mv->textview) );
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
@@ -845,7 +1077,7 @@ void openMemoryViewWindow (void)
 	if (memViewEvntSrcID == 0)
 	{
 		memViewEvntSrcID =
-			g_timeout_add (100, updateMemViewTree, mv);
+			g_timeout_add (1000, updateMemViewTree, mv);
 	}
 
 }
