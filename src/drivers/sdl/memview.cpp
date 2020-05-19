@@ -79,6 +79,7 @@ static int getROM( unsigned int offset)
 	}
 	return -1;
 }
+
 //
 struct memViewWin_t
 {
@@ -110,6 +111,7 @@ struct memViewWin_t
 	int mbuf_size;
 	GtkCellRenderer *hexByte_renderer[16];
 	bool redraw;
+   int (*memAccessFunc)( unsigned int offset);
 
 	enum {
 		MODE_NES_RAM = 0,
@@ -144,6 +146,7 @@ struct memViewWin_t
 		treeViewLines = 64;
 		numCharsPerLine = 90;
 		redraw = 1;
+		memAccessFunc = getRAM;
 
 		for (int i=0; i<16; i++)
 		{
@@ -211,6 +214,33 @@ struct memViewWin_t
 		redraw   = 1;
 	}
 
+	int writeMem( unsigned int addr, int value )
+	{
+		switch ( mode )
+		{
+			default:
+			case MODE_NES_RAM:
+			{
+				writefunc wfunc;
+
+				wfunc = GetWriteHandler (addr);
+
+				if (wfunc)
+				{
+					wfunc ((uint32) addr,
+					       (uint8) (value & 0x000000ff));
+				}
+			}
+			break;
+			case MODE_NES_PPU:
+			break;
+			case MODE_NES_OAM:
+			break;
+			case MODE_NES_ROM:
+			break;
+		}
+	}
+
 	//int  set_inner_slider( double value )
 	//{
 	//	GtkAdjustment *ivadj;
@@ -268,7 +298,6 @@ void memViewWin_t::showMemViewResults (int reset)
 	char row_changed;
 	std::string line;
 	GtkTextIter iter, start_iter, end_iter;
-   int (*memAccessFunc)( unsigned int offset) = NULL;
 
 	switch ( mode )
 	{
@@ -818,11 +847,53 @@ textbuffer_string_insert (GtkTextBuffer *textbuffer,
 {
 	if ( len == 1 )
 	{
-	printf("Line: %i   Offset: %i \n", 
-			gtk_text_iter_get_line( location ),
-			gtk_text_iter_get_line_offset( location ) );
+		int addr, line, offs, byte0, byte, bcol, c, d;
 
-	printf("Text: '%s'   \n", text );
+		line = gtk_text_iter_get_line( location ),
+		offs = gtk_text_iter_get_line_offset( location );
+
+		byte0 = (offs - 10);
+
+		byte = byte0 / 4;
+		bcol = byte0 % 4;
+
+		addr = (line*16) + byte;
+
+		//printf("Line: %i   Offset: %i   Byte:%i   Bcol:%i\n", line, offs, byte, bcol );
+		//printf("Text: '%s'   \n", text );
+
+		if ( !isxdigit( text[0] ) )
+		{
+			return;
+		}
+		d = toupper( text[0] );
+
+		if ( isdigit(d) )
+		{
+			d = d - '0';
+		}
+	  	else 
+		{
+			d = d - 'A';
+		}
+
+		c = mv->memAccessFunc( addr );
+
+		//printf("Changing Addr:0x%08x  from:0x%02x ", addr, c );
+
+		if ( bcol == 0 )
+		{
+			c = c & 0x0f;
+			c = c | (d << 4);
+		}
+		else if ( bcol == 1 )
+		{
+			c = c & 0xf0;
+			c = c | d;
+		}
+		//printf(" to:0x%02x \n", c );
+
+		mv->writeMem( addr, c );
 	}
 }
 
