@@ -142,7 +142,7 @@ struct memViewWin_t
 		numLines = 0;
 		evntSrcID = 0;
 		treeViewLines = 64;
-		numCharsPerLine = 64;
+		numCharsPerLine = 90;
 		redraw = 1;
 
 		for (int i=0; i<16; i++)
@@ -211,23 +211,23 @@ struct memViewWin_t
 		redraw   = 1;
 	}
 
-	int  set_inner_slider( double value )
-	{
-		GtkAdjustment *ivadj;
-		double l, u;
+	//int  set_inner_slider( double value )
+	//{
+	//	GtkAdjustment *ivadj;
+	//	double l, u;
 
-		ivadj = gtk_range_get_adjustment( GTK_RANGE(ivbar) );
+	//	ivadj = gtk_range_get_adjustment( GTK_RANGE(ivbar) );
 
-		l = gtk_adjustment_get_lower( ivadj );
-		u = gtk_adjustment_get_upper( ivadj );
+	//	l = gtk_adjustment_get_lower( ivadj );
+	//	u = gtk_adjustment_get_upper( ivadj );
 
-		printf("Inner VBAR Limits: %f   %f   \n" , 
-				l, u );
+	//	printf("Inner VBAR Limits: %f   %f   \n" , 
+	//			l, u );
 
-		gtk_range_set_value( GTK_RANGE(ivbar), l + value*(u-l) );
+	//	gtk_range_set_value( GTK_RANGE(ivbar), l + value*(u-l) );
 
-		return 0;
-	}
+	//	return 0;
+	//}
 
 	void showMemViewResults (int reset);
 	//int  calcVisibleRange( int *start_out, int *end_out, int *center_out );
@@ -263,12 +263,11 @@ void memViewWin_t::showMemViewResults (int reset)
 	int addr, memSize = 0;
 	int lineAddr = 0, c, un, ln;
 	int i, row, row_start, row_end, totalChars;
+	gint cpos;
 	char addrStr[16], valStr[16][8], ascii[18];
 	char row_changed;
-	std::string  txt;
 	std::string line;
 	GtkTextIter iter, start_iter, end_iter;
-	GdkRectangle visible_rect;
    int (*memAccessFunc)( unsigned int offset) = NULL;
 
 	switch ( mode )
@@ -316,9 +315,10 @@ void memViewWin_t::showMemViewResults (int reset)
 			return;
 		}
 	}
-	gtk_text_view_get_visible_rect ( textview, &visible_rect );
 
-	//printf("Vis: x:%i  y:%i  w:%i   h:%i \n", visible_rect.x, visible_rect.y, visible_rect.width, visible_rect.height );
+	g_object_get( textbuf, "cursor-position", &cpos, NULL );
+
+	//printf("CPOS: %i \n", cpos );
 
 	gtk_text_buffer_get_start_iter( textbuf, &start_iter );
 	gtk_text_buffer_get_end_iter( textbuf, &end_iter   );
@@ -343,7 +343,7 @@ void memViewWin_t::showMemViewResults (int reset)
 	{
 		gtk_text_buffer_get_iter_at_offset( textbuf, &iter, totalChars );
 
-		row_changed = reset;
+		row_changed = 1;
 
 		line.clear();
 
@@ -395,41 +395,30 @@ void memViewWin_t::showMemViewResults (int reset)
 
 		if ( row_changed )
 		{
-			if ( !reset )
-			{
-				//int k=0;
-				//char *bfp; char l[256];
-			
-				GtkTextIter next_iter;
-				gtk_text_buffer_get_iter_at_offset( textbuf, &next_iter, totalChars + numCharsPerLine );
-				gtk_text_buffer_delete ( textbuf, &iter, &next_iter );
-				//bfp = gtk_text_buffer_get_text ( textbuf, &iter, &next_iter, 0 );
-				//while ( bfp[k] != 0 )
-				//{
-				//	if ( bfp[k] == '\n') break;
-
-				//	l[k] = bfp[k]; k++;
-				//}
-				//l[k] = 0;
-				//printf("%s:%s\n", addrStr, l );
-				gtk_text_buffer_insert ( textbuf, &iter, line.c_str(), -1 );
-			}
 			if ( reset )
 			{
 				gtk_text_buffer_get_iter_at_offset( textbuf, &iter, totalChars );
 				gtk_text_buffer_insert ( textbuf, &iter, line.c_str(), -1 );
 			}
+			else
+			{
+				GtkTextIter next_iter;
+
+				gtk_text_buffer_get_iter_at_offset( textbuf, &next_iter, totalChars + numCharsPerLine - 1 );
+				gtk_text_buffer_delete ( textbuf, &iter, &next_iter );
+
+				gtk_text_buffer_get_iter_at_offset( textbuf, &iter, totalChars );
+				gtk_text_buffer_insert ( textbuf, &iter, line.c_str(), line.size()-1 );
+			}
 		}
 
 		totalChars += numCharsPerLine;
-
-		//txt.append( line );
 	}
 
-	//if ( reset )
-	//{
-	//	gtk_text_buffer_set_text( textbuf, txt.c_str(), -1 );
-	//}
+	// Put cursor back where it was
+	gtk_text_buffer_get_iter_at_offset( textbuf, &iter, cpos );
+	gtk_text_buffer_place_cursor( textbuf, &iter );
+
 }
 
 	
@@ -702,7 +691,7 @@ int memViewWin_t::calcVisibleRange( int *start_out, int *end_out, int *center_ou
 
 	center = start + (end - start)/2;
 
-	printf(" Start:%i   End:%i      0x%08x -> 0x%08x \n", start, end, start * 16, end * 16 );
+	//printf(" Start:%i   End:%i      0x%08x -> 0x%08x \n", start, end, start * 16, end * 16 );
 
 	if ( start_out  ) *start_out  = start;
 	if ( end_out    ) *end_out    = end;
@@ -812,6 +801,33 @@ static void closeMemoryViewWindow (GtkWidget * w, GdkEvent * e, memViewWin_t * m
 }
 
 static void
+textview_string_insert (GtkTextView *text_view,
+               gchar       *string,
+               memViewWin_t * mv )
+{
+	printf("String: '%s'\n", string );
+
+}
+
+static void
+textbuffer_string_insert (GtkTextBuffer *textbuffer,
+               GtkTextIter   *location,
+               gchar         *text,
+               gint           len,
+               memViewWin_t * mv )
+{
+	if ( len == 1 )
+	{
+	printf("Line: %i   Offset: %i \n", 
+			gtk_text_iter_get_line( location ),
+			gtk_text_iter_get_line_offset( location ) );
+
+	printf("Text: '%s'   \n", text );
+	}
+}
+
+
+static void
 treeRowActivated (GtkTreeView       *tree_view,
              		GtkTreePath       *path,
              		GtkTreeViewColumn *column,
@@ -837,7 +853,7 @@ vscroll_changed (GtkRange     *range,
                gdouble       value,
                memViewWin_t * mv)
 {
-	mv->setBaseAddr( value );
+	//mv->setBaseAddr( value );
 
 	return FALSE;
 }
@@ -858,8 +874,8 @@ inner_vbar_changed (GtkRange *range,
 
 	r = (v - l) / (u - l);
 
-	printf("Inner VBAR: %f   %f   %f   %f   \n" , 
-			v, l, u, r );
+	//printf("Inner VBAR: %f   %f   %f   %f   \n" , 
+	//		v, l, u, r );
 }
 
 static void
@@ -867,7 +883,7 @@ outer_vbar_changed (GtkRange *range,
 				      	memViewWin_t * mv)
 {
 	//printf("Outer VBAR: %f \n", gtk_range_get_value( range ) );
-	mv->setBaseAddr( gtk_range_get_value( range ) );
+	//mv->setBaseAddr( gtk_range_get_value( range ) );
 }
 
 static void memview_cell_edited_cb (GtkCellRendererText * cell,
@@ -1016,9 +1032,20 @@ void openMemoryViewWindow (void)
 
 	gtk_text_view_set_monospace( mv->textview, TRUE );
 	gtk_text_view_set_overwrite( mv->textview, TRUE );
+	gtk_text_view_set_editable( mv->textview, TRUE );
 	gtk_text_view_set_wrap_mode( mv->textview, GTK_WRAP_NONE );
+	gtk_text_view_set_cursor_visible( mv->textview, TRUE );
+
+	g_signal_connect (mv->textview, "insert-at-cursor",
+			  G_CALLBACK (textview_string_insert), mv);
+	g_signal_connect (mv->textview, "preedit-changed",
+			  G_CALLBACK (textview_string_insert), mv);
+
 
 	mv->textbuf = gtk_text_view_get_buffer( mv->textview );
+
+	g_signal_connect (mv->textbuf, "insert-text",
+			  G_CALLBACK (textbuffer_string_insert), mv);
 
 	scroll = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
@@ -1077,7 +1104,7 @@ void openMemoryViewWindow (void)
 	if (memViewEvntSrcID == 0)
 	{
 		memViewEvntSrcID =
-			g_timeout_add (1000, updateMemViewTree, mv);
+			g_timeout_add (100, updateMemViewTree, mv);
 	}
 
 }
