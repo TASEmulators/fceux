@@ -299,6 +299,12 @@ void memViewWin_t::showMemViewResults (int reset)
 	std::string line;
 	GtkTextIter iter, start_iter, end_iter;
 
+	if ( redraw )
+	{
+		reset = 1;
+		redraw = 0;
+	}
+
 	switch ( mode )
 	{
 		default:
@@ -866,15 +872,19 @@ textbuffer_string_insert (GtkTextBuffer *textbuffer,
 		{
 			return;
 		}
-		d = toupper( text[0] );
+		d = text[0];
 
-		if ( isdigit(d) )
+		if ( (d >= '0') && (d <= '9') )
 		{
 			d = d - '0';
 		}
+		else if ( (d >= 'a') && (d <= 'f') )
+		{
+			d = d - 'a' + 10;
+		}
 	  	else 
 		{
-			d = d - 'A';
+			d = d - 'A' + 10;
 		}
 
 		c = mv->memAccessFunc( addr );
@@ -955,6 +965,14 @@ outer_vbar_changed (GtkRange *range,
 {
 	//printf("Outer VBAR: %f \n", gtk_range_get_value( range ) );
 	//mv->setBaseAddr( gtk_range_get_value( range ) );
+}
+
+static void
+textview_backspace_cb (GtkTextView *text_view,
+				      	memViewWin_t * mv)
+{
+	printf("BackSpace:\n");
+	mv->redraw = 1;
 }
 
 static void memview_cell_edited_cb (GtkCellRendererText * cell,
@@ -1111,6 +1129,8 @@ void openMemoryViewWindow (void)
 			  G_CALLBACK (textview_string_insert), mv);
 	g_signal_connect (mv->textview, "preedit-changed",
 			  G_CALLBACK (textview_string_insert), mv);
+	g_signal_connect (mv->textview, "backspace",
+			  G_CALLBACK (textview_backspace_cb), mv);
 
 
 	mv->textbuf = gtk_text_view_get_buffer( mv->textview );
