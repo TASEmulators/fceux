@@ -612,6 +612,23 @@ textview_backspace_cb (GtkTextView *text_view,
 	mv->redraw = 1;
 }
 
+static void
+populate_context_menu (GtkTextView *text_view,
+               GtkWidget   *popup,
+               memViewWin_t * mv )
+{
+   //GtkWidget *menu;
+   GtkWidget *item;
+
+	//menu = gtk_menu_new ();
+
+   item = gtk_menu_item_new_with_label("Go to ROM");
+
+   gtk_menu_shell_append (GTK_MENU_SHELL (popup), item);
+
+	gtk_widget_show_all (popup);
+}
+
 static gint updateMemViewTree (void *userData)
 {
 	std::list <memViewWin_t*>::iterator it;
@@ -665,6 +682,8 @@ void openMemoryViewWindow (void)
 			  G_CALLBACK (textview_string_insert), mv);
 	g_signal_connect (mv->textview, "backspace",
 			  G_CALLBACK (textview_backspace_cb), mv);
+	g_signal_connect (mv->textview, "populate-popup",
+			  G_CALLBACK (populate_context_menu), mv);
 
 
 	mv->textbuf = gtk_text_view_get_buffer( mv->textview );
@@ -681,8 +700,6 @@ void openMemoryViewWindow (void)
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
 	gtk_box_pack_start (GTK_BOX (vbox), scroll, TRUE, TRUE, 2);
 	gtk_box_pack_start (GTK_BOX (hbox), vbox, TRUE, TRUE, 2);
-
-	gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 2);
 
 	gtk_box_pack_start (GTK_BOX (main_vbox), hbox, TRUE, TRUE, 5);
 
