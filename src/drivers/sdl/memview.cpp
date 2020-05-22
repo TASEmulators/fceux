@@ -89,6 +89,7 @@ struct memViewWin_t
 	GtkTextView *textview;
 	GtkTextBuffer *textbuf;
 	GtkTreeStore *memview_store;
+	int selAddr;
 	int row_vis_start;
 	int row_vis_end;
 	int row_vis_center;
@@ -119,6 +120,7 @@ struct memViewWin_t
 		row_vis_start = 0;
 		row_vis_end   = 64;
 		row_vis_center= 32;
+		selAddr = 0;
 		mode = MODE_NES_RAM;
 		mbuf = NULL;
 		numLines = 0;
@@ -180,6 +182,7 @@ struct memViewWin_t
 
 	void showMemViewResults (int reset);
 	int  calcVisibleRange( int *start_out, int *end_out, int *center_out );
+	int  getAddrFromCursor( int CursorTextOffset = -1 );
 
 };
 
@@ -206,13 +209,56 @@ static void initMem( unsigned char *c, int size )
 	}
 }
 
+int memViewWin_t::getAddrFromCursor( int CursorTextOffset )
+{
+	int line, offs, byte0, byte, bcol, addr = -1;
+
+	if ( CursorTextOffset < 0 )
+	{
+		gint cpos;
+		g_object_get( textbuf, "cursor-position", &cpos, NULL );
+		CursorTextOffset = cpos;
+	}
+	line = CursorTextOffset / numCharsPerLine;
+	offs = CursorTextOffset % numCharsPerLine;
+
+	if ( offs < 10 )
+	{
+		return addr;
+	}
+	else if ( offs < 73 )
+	{
+		byte0 = (offs - 10);
+
+		byte = byte0 / 4;
+		bcol = byte0 % 4;
+
+		if ( byte < 16 )
+		{
+			if (bcol < 2)
+			{
+				addr = (line*16) + byte;
+			}
+		}
+	}
+	else
+	{
+		if ( (offs >= 73) && (offs < 89) )
+		{
+			addr = (line*16) + (offs-73);
+		}
+	}
+
+	return addr;
+}
+
 void memViewWin_t::showMemViewResults (int reset)
 {
 	int addr, memSize = 0;
 	int lineAddr = 0, c, un, ln;
 	int i, row, row_start, row_end, totalChars;
 	gint cpos;
-	char addrStr[16], valStr[16][8], ascii[18];
+	char addrStr[128], valStr[16][8], ascii[18];
 	char row_changed;
 	std::string line;
 	GtkTextIter iter, start_iter, end_iter;
@@ -270,6 +316,8 @@ void memViewWin_t::showMemViewResults (int reset)
 	}
 
 	g_object_get( textbuf, "cursor-position", &cpos, NULL );
+
+	selAddr = getAddrFromCursor( cpos );
 
 	//printf("CPOS: %i \n", cpos );
 
@@ -371,6 +419,16 @@ void memViewWin_t::showMemViewResults (int reset)
 	// Put cursor back where it was
 	gtk_text_buffer_get_iter_at_offset( textbuf, &iter, cpos );
 	gtk_text_buffer_place_cursor( textbuf, &iter );
+
+	if ( selAddr >= 0 )
+	{
+		sprintf( addrStr, "Selected Addr: 0x%08X", selAddr );
+	}
+	else
+	{
+		addrStr[0] = 0;
+	}
+	gtk_label_set_text( GTK_LABEL(selCellLabel), addrStr );
 
 }
 
@@ -709,8 +767,6 @@ void openMemoryViewWindow (void)
 			  G_CALLBACK (populate_context_menu), mv);
 	g_signal_connect (mv->textview, "button-press-event",
 			  G_CALLBACK (textview_button_press_cb), mv);
-
-
 
 	mv->textbuf = gtk_text_view_get_buffer( mv->textview );
 
