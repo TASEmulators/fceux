@@ -175,6 +175,7 @@ struct memViewWin_t
 			case MODE_NES_ROM:
 			break;
 		}
+      return 0;
 	}
 
 	void showMemViewResults (int reset);
@@ -612,21 +613,43 @@ textview_backspace_cb (GtkTextView *text_view,
 	mv->redraw = 1;
 }
 
-static void
-populate_context_menu (GtkTextView *text_view,
-               GtkWidget   *popup,
+static gboolean
+populate_context_menu (GtkWidget *popup,
                memViewWin_t * mv )
 {
-   //GtkWidget *menu;
+   GtkWidget *menu;
    GtkWidget *item;
 
-	//menu = gtk_menu_new ();
+   //printf("Context Menu\n");
+
+	menu = gtk_menu_new ();
 
    item = gtk_menu_item_new_with_label("Go to ROM");
 
-   gtk_menu_shell_append (GTK_MENU_SHELL (popup), item);
+   gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+
+   gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL );
 
 	gtk_widget_show_all (popup);
+	gtk_widget_show_all (menu);
+
+   return TRUE;
+}
+
+static gboolean
+textview_button_press_cb (GtkWidget *widget,
+               GdkEventButton  *event,
+               memViewWin_t * mv )
+{
+   gboolean  ret = FALSE;
+   //printf("Press Button  %i   %u\n", event->type, event->button );
+
+   if ( event->button == 3 )
+   {
+      ret = populate_context_menu( widget, mv );
+   }
+
+   return ret;
 }
 
 static gint updateMemViewTree (void *userData)
@@ -682,8 +705,11 @@ void openMemoryViewWindow (void)
 			  G_CALLBACK (textview_string_insert), mv);
 	g_signal_connect (mv->textview, "backspace",
 			  G_CALLBACK (textview_backspace_cb), mv);
-	g_signal_connect (mv->textview, "populate-popup",
+	g_signal_connect (mv->textview, "popup-menu",
 			  G_CALLBACK (populate_context_menu), mv);
+	g_signal_connect (mv->textview, "button-press-event",
+			  G_CALLBACK (textview_button_press_cb), mv);
+
 
 
 	mv->textbuf = gtk_text_view_get_buffer( mv->textview );
