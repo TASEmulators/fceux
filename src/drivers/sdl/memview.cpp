@@ -695,11 +695,18 @@ populate_context_menu (GtkWidget *popup,
 
    			gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
 			}
-			if ( mv->selAddr >= 0x8000 )
+			if ( mv->selAddr >= 0x6000 )
 			{
-   			item = gtk_menu_item_new_with_label("Go to ROM");
+				int romAddr = GetNesFileAddress(mv->selAddr);
 
-   			gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+				if ( romAddr >= 0 )
+				{
+					sprintf( stmp, "Goto ROM 0x%08X", romAddr );
+
+					item = gtk_menu_item_new_with_label(stmp);
+
+					gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+				}
 			}
 		}
 		break;
