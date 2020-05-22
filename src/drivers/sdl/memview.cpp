@@ -675,20 +675,50 @@ static gboolean
 populate_context_menu (GtkWidget *popup,
                memViewWin_t * mv )
 {
-   GtkWidget *menu;
+   GtkWidget *menu = NULL;
    GtkWidget *item;
+	char stmp[256];
 
    //printf("Context Menu\n");
-
+	
 	menu = gtk_menu_new ();
+	
+	switch ( mv->mode )
+	{
+		case memViewWin_t::MODE_NES_RAM:
+		{
+			if ( mv->selAddr >= 0x0000 )
+			{
+				sprintf( stmp, "Poke RAM 0x%04X", mv->selAddr );
 
-   item = gtk_menu_item_new_with_label("Go to ROM");
+   			item = gtk_menu_item_new_with_label(stmp);
 
-   gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+   			gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+			}
+			if ( mv->selAddr >= 0x8000 )
+			{
+   			item = gtk_menu_item_new_with_label("Go to ROM");
+
+   			gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+			}
+		}
+		break;
+		case memViewWin_t::MODE_NES_ROM:
+		{
+			if ( mv->selAddr >= 0x0000 )
+			{
+				sprintf( stmp, "Poke ROM 0x%08X", mv->selAddr );
+
+   			item = gtk_menu_item_new_with_label(stmp);
+
+   			gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+			}
+		}
+		break;
+	}
 
    gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL );
-
-	gtk_widget_show_all (popup);
+	//gtk_widget_show_all (popup);
 	gtk_widget_show_all (menu);
 
    return TRUE;
