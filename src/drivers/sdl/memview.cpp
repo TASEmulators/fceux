@@ -804,6 +804,7 @@ static void handleDialogResponse (GtkWidget * w, gint response_id, memViewWin_t 
 
 	mv->addr_entry = NULL;
 }
+
 static void closeDialogWindow (GtkWidget * w, GdkEvent * e, memViewWin_t * mv)
 {
 	gtk_widget_destroy (w);
@@ -827,9 +828,13 @@ gotoLocationCB (GtkMenuItem *menuitem,
 					       "_Cancel", GTK_RESPONSE_CANCEL,
 					       "_Goto", GTK_RESPONSE_OK, NULL);
 
+	gtk_dialog_set_default_response( GTK_DIALOG(win), GTK_RESPONSE_OK );
+
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
 
 	mv->addr_entry = gtk_entry_new ();
+
+	gtk_entry_set_activates_default( GTK_ENTRY (mv->addr_entry), TRUE );
 
 	gtk_entry_set_text (GTK_ENTRY (mv->addr_entry), "0x0");
 
@@ -846,7 +851,6 @@ gotoLocationCB (GtkMenuItem *menuitem,
 	g_signal_connect (win, "response",
 			  G_CALLBACK (handleDialogResponse), mv);
 
-	//mv->gotoLocation( mv->selRomAddr );
 }
 
 static void
@@ -868,11 +872,15 @@ setValueCB (GtkMenuItem *menuitem,
 					       "_Cancel", GTK_RESPONSE_CANCEL,
 					       "_Write", GTK_RESPONSE_OK, NULL);
 
+	gtk_dialog_set_default_response( GTK_DIALOG(win), GTK_RESPONSE_OK );
+
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
 
 	mv->addr_entry = gtk_entry_new ();
 
 	gtk_entry_set_text (GTK_ENTRY (mv->addr_entry), "0x0");
+
+	gtk_entry_set_activates_default( GTK_ENTRY (mv->addr_entry), TRUE );
 
 	gtk_box_pack_start (GTK_BOX (vbox), mv->addr_entry, TRUE, TRUE, 0);
 
@@ -887,7 +895,6 @@ setValueCB (GtkMenuItem *menuitem,
 	g_signal_connect (win, "response",
 			  G_CALLBACK (handleDialogResponse), mv);
 
-	//mv->gotoLocation( mv->selRomAddr );
 }
 
 static void
