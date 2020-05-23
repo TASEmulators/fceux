@@ -949,53 +949,56 @@ static void ramWatch_cell_edited_cb (GtkCellRendererText * cell,
 		case 1:
 		case 2:
 		{
-			writefunc wfunc;
-
-			if (rw->size == 2)
+			if ( (rw->addr >= 0) && (rw->addr < 0x8000) )
 			{
-				if (rw->type)
+				writefunc wfunc;
+
+				if (rw->size == 2)
 				{
-					rw->val.u16 =
-						strtol (new_text, NULL, 0);
+					if (rw->type)
+					{
+						rw->val.u16 =
+							strtol (new_text, NULL, 0);
+					}
+					else
+					{
+						rw->val.i16 =
+							strtol (new_text, NULL, 0);
+					}
+					wfunc = GetWriteHandler (rw->addr);
+
+					if (wfunc)
+					{
+						wfunc ((uint32) rw->addr,
+						       (uint8) (rw->val.u16 & 0x00ff));
+					}
+
+					wfunc = GetWriteHandler (rw->addr + 1);
+
+					if (wfunc)
+					{
+						wfunc ((uint32) rw->addr + 1,
+						       (uint8) ((rw->val.
+								 u16 & 0xff00) >> 8));
+					}
 				}
 				else
 				{
-					rw->val.i16 =
-						strtol (new_text, NULL, 0);
-				}
-				wfunc = GetWriteHandler (rw->addr);
+					if (rw->type)
+					{
+						rw->val.u8 = strtol (new_text, NULL, 0);
+					}
+					else
+					{
+						rw->val.i8 = strtol (new_text, NULL, 0);
+					}
+					wfunc = GetWriteHandler (rw->addr);
 
-				if (wfunc)
-				{
-					wfunc ((uint32) rw->addr,
-					       (uint8) (rw->val.u16 & 0x00ff));
-				}
-
-				wfunc = GetWriteHandler (rw->addr + 1);
-
-				if (wfunc)
-				{
-					wfunc ((uint32) rw->addr + 1,
-					       (uint8) ((rw->val.
-							 u16 & 0xff00) >> 8));
-				}
-			}
-			else
-			{
-				if (rw->type)
-				{
-					rw->val.u8 = strtol (new_text, NULL, 0);
-				}
-				else
-				{
-					rw->val.i8 = strtol (new_text, NULL, 0);
-				}
-				wfunc = GetWriteHandler (rw->addr);
-
-				if (wfunc)
-				{
-					wfunc ((uint32) rw->addr,
-					       (uint8) rw->val.u8);
+					if (wfunc)
+					{
+						wfunc ((uint32) rw->addr,
+						       (uint8) rw->val.u8);
+					}
 				}
 			}
 		}
