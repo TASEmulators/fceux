@@ -116,9 +116,6 @@ struct memViewWin_t
 	int selRomAddr;
 	int jumpAddr;
 	int jumpDelay;
-	int row_vis_start;
-	int row_vis_end;
-	int row_vis_center;
 	int dialog_op;
 	int mode;
 	int evntSrcID;
@@ -145,9 +142,6 @@ struct memViewWin_t
 		addr_entry = NULL;
 		selCellLabel = NULL;
 		ivbar = NULL;
-		row_vis_start = 0;
-		row_vis_end   = 64;
-		row_vis_center= 32;
 		selAddr = 0;
 		selRomAddr = -1;
 		jumpAddr = -1;

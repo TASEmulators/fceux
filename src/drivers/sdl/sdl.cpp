@@ -861,6 +861,11 @@ int main(int argc, char *argv[])
 		InitGTKSubsystem(argc, argv);
 		while(gtk_events_pending())
 			gtk_main_iteration_do(FALSE);
+      // Ensure that the GUI has fully initialized. 
+      // Give the X-server a small amount of time to init.
+      usleep(100000);
+		while(gtk_events_pending())
+			gtk_main_iteration_do(FALSE);
 	}
 #endif
 

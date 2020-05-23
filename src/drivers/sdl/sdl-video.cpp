@@ -445,12 +445,12 @@ InitVideo(FCEUGI *gi)
 //		 }
 //#endif
 		 }
-	s_curbpp = s_screen->format->BitsPerPixel;
 	if(!s_screen) {
 		FCEUD_PrintError(SDL_GetError());
 		KillVideo();
 		return -1;
 	}
+	s_curbpp = s_screen->format->BitsPerPixel;
 
 #if 0
 	// XXX soules - this would be creating a surface on the video

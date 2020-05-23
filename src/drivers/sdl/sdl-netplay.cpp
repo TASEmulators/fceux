@@ -216,7 +216,7 @@ int FCEUD_GetDataFromServer(uint8 *data)
      }
 
   }
-  if(SDLNet_SocketReady(UDPSocket)
+  if(SDLNet_SocketReady(UDPSocket))
   {
 
 
