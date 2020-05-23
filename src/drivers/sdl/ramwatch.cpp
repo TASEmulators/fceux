@@ -936,6 +936,8 @@ static void ramWatch_cell_edited_cb (GtkCellRendererText * cell,
 
 	if ( rw == NULL )
 	{
+		rww->ramWatchEditRowIdx = -1;
+		rww->ramWatchEditColIdx = -1;
 		return;
 	}
 
