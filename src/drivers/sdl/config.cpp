@@ -312,7 +312,7 @@ InitConfig()
 	for(unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++) 
 	{
 		char buf[64];
-		snprintf(buf, sizeof(buf)-1, "SDL.Input.GamePad.%d.", i);
+		snprintf(buf, sizeof(buf)-1, "SDL.Input.GamePad.%u.", i);
 		prefix = buf;
 
 		config->addOption(prefix + "DeviceType", DefaultGamePadDevice[i]);
@@ -325,7 +325,7 @@ InitConfig()
 	// PowerPad 0 - 1
 	for(unsigned int i = 0; i < POWERPAD_NUM_DEVICES; i++) {
 		char buf[64];
-		snprintf(buf, sizeof(buf)-1, "SDL.Input.PowerPad.%d.", i);
+		snprintf(buf, sizeof(buf)-1, "SDL.Input.PowerPad.%u.", i);
 		prefix = buf;
 
 		config->addOption(prefix + "DeviceType", DefaultPowerPadDevice[i]);

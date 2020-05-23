@@ -2059,7 +2059,7 @@ UpdateInput (Config * config)
 
 	for (unsigned int i = 0; i < 3; i++)
 	{
-		snprintf (buf, 64, "SDL.Input.%d", i);
+		snprintf (buf, 64, "SDL.Input.%u", i);
 		config->getOption (buf, &device);
 
 		if (device == "None")
@@ -2145,7 +2145,7 @@ UpdateInput (Config * config)
 	for (unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++)
 	{
 		char buf[64];
-		snprintf (buf, sizeof(buf)-1, "SDL.Input.GamePad.%d.", i);
+		snprintf (buf, sizeof(buf)-1, "SDL.Input.GamePad.%u.", i);
 		prefix = buf;
 
 		config->getOption (prefix + "DeviceType", &device);
@@ -2178,7 +2178,7 @@ UpdateInput (Config * config)
 	for (unsigned int i = 0; i < POWERPAD_NUM_DEVICES; i++)
 	{
 		char buf[64];
-		snprintf (buf, 32, "SDL.Input.PowerPad.%d.", i);
+		snprintf (buf, 32, "SDL.Input.PowerPad.%u.", i);
 		prefix = buf;
 
 		config->getOption (prefix + "DeviceType", &device);

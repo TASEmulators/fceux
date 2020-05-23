@@ -80,19 +80,46 @@ static int getROM( unsigned int offset)
 	return -1;
 }
 
+static void PalettePoke(uint32 addr, uint8 data)
+{
+	data = data & 0x3F;
+	addr = addr & 0x1F;
+	if ((addr & 3) == 0)
+	{
+		addr = (addr & 0xC) >> 2;
+		if (addr == 0)
+		{
+			PALRAM[0x00] = PALRAM[0x04] = PALRAM[0x08] = PALRAM[0x0C] = data;
+		}
+		else
+		{
+			UPALRAM[addr-1] = UPALRAM[0x10|(addr-1)] = data;
+		}
+	}
+	else
+	{
+		PALRAM[addr] = data;
+	}
+}
+
 //
 struct memViewWin_t
 {
 	GtkWidget *win;
 	GtkWidget *ivbar;
 	GtkWidget *selCellLabel;
+	GtkWidget *addr_entry;
+	GtkWidget *memSelRadioItem[4];
 	GtkTextView *textview;
 	GtkTextBuffer *textbuf;
-	GtkTreeStore *memview_store;
 	int selAddr;
+	int selRomAddr;
+	int jumpAddr;
+	int jumpDelay;
 	int row_vis_start;
 	int row_vis_end;
 	int row_vis_center;
+	int dialog_op;
 	int mode;
 	int evntSrcID;
 	int numLines;
@@ -115,20 +142,30 @@ struct memViewWin_t
 		win = NULL;
 		textview = NULL;
 		textbuf = NULL;
+		addr_entry = NULL;
 		selCellLabel = NULL;
-		memview_store = NULL;
+		ivbar = NULL;
 		row_vis_start = 0;
 		row_vis_end   = 64;
 		row_vis_center= 32;
 		selAddr = 0;
+		selRomAddr = -1;
+		jumpAddr = -1;
+		jumpDelay = 0;
+		dialog_op = 0;
 		mode = MODE_NES_RAM;
 		mbuf = NULL;
+		mbuf_size = 0;
 		numLines = 0;
 		evntSrcID = 0;
 		numCharsPerLine = 90;
 		redraw = 1;
 		memAccessFunc = getRAM;
 
+		for (int i=0; i<4; i++)
+		{
+			memSelRadioItem[i] = NULL;
+		}
 		for (int i=0; i<16; i++)
 		{
 			hexByte_renderer[i] = NULL;
@@ -154,32 +191,75 @@ struct memViewWin_t
 
 	int writeMem( unsigned int addr, int value )
 	{
+		value = value & 0x000000ff;
+
 		switch ( mode )
 		{
 			default:
 			case MODE_NES_RAM:
 			{
-				writefunc wfunc;
-
-				wfunc = GetWriteHandler (addr);
-
-				if (wfunc)
+				if ( addr < 0x8000 )
 				{
-					wfunc ((uint32) addr,
-					       (uint8) (value & 0x000000ff));
+					writefunc wfunc;
+               
+					wfunc = GetWriteHandler (addr);
+               
+					if (wfunc)
+					{
+						wfunc ((uint32) addr,
+						       (uint8) (value & 0x000000ff));
+					}
+				}
+				else
+				{
+					fprintf( stdout, "Error: Writing into RAM addresses >= 0x8000 is unsafe. Operation Denied.\n");
 				}
 			}
 			break;
 			case MODE_NES_PPU:
+			{
+				addr &= 0x3FFF;
+				if (addr < 0x2000)
+				{
+					VPage[addr >> 10][addr] = value; //todo: detect if this is vrom and turn it red if so
+				}
+				if ((addr >= 0x2000) && (addr < 0x3F00))
+				{
+					vnapage[(addr >> 10) & 0x3][addr & 0x3FF] = value; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
+				}
+				if ((addr >= 0x3F00) && (addr < 0x3FFF))
+				{
+					PalettePoke(addr, value);
+				}
+			}
 			break;
 			case MODE_NES_OAM:
+			{
+				addr &= 0xFF;
+				SPRAM[addr] = value;
+			}
 			break;
 			case MODE_NES_ROM:
+			{
+				if (addr < 16)
+				{
+					fprintf( stdout, "You can't edit ROM header here, however you can use iNES Header Editor to edit the header if it's an iNES format file.");
+				}
+				else if ( (addr >= 16) && (addr < PRGsize[0]+16) )
+				{
+				  	*(uint8 *)(GetNesPRGPointer(addr-16)) = value;
+				}
+				else if ( (addr >= PRGsize[0]+16) && (addr < CHRsize[0]+PRGsize[0]+16) )
+				{
+					*(uint8 *)(GetNesCHRPointer(addr-16-PRGsize[0])) = value;
+				}
+			}
 			break;
 		}
       return 0;
 	}
 
+	int gotoLocation( int addr );
 	void showMemViewResults (int reset);
 	int  calcVisibleRange( int *start_out, int *end_out, int *center_out );
 	int  getAddrFromCursor( int CursorTextOffset = -1 );
@@ -420,6 +500,21 @@ void memViewWin_t::showMemViewResults (int reset)
 	gtk_text_buffer_get_iter_at_offset( textbuf, &iter, cpos );
 	gtk_text_buffer_place_cursor( textbuf, &iter );
 
+	// Check if a Jump Delay is set.
+	if ( jumpDelay <= 0 )
+	{
+		if ( jumpAddr >= 0 )
+		{
+         gotoLocation( jumpAddr );
+			jumpAddr = -1;
+		}
+		jumpDelay = 0;
+	}
+	else
+	{
+		jumpDelay--;
+	}
+
 	if ( selAddr >= 0 )
 	{
 		sprintf( addrStr, "Selected Addr: 0x%08X", selAddr );
@@ -471,6 +566,26 @@ int memViewWin_t::calcVisibleRange( int *start_out, int *end_out, int *center_ou
    return 0;
 }
 
+int memViewWin_t::gotoLocation( int addr )
+{
+	int linenum, bytenum, cpos;
+	GtkTextIter iter;
+
+	linenum = addr / 16;
+	bytenum = addr % 16;
+
+	cpos = (linenum*numCharsPerLine) + (bytenum*4) + 10;
+
+	//printf("Line:%i  Byte:%i   CPOS:%i  \n", linenum, bytenum, cpos );
+
+	gtk_text_buffer_get_iter_at_offset( textbuf, &iter, cpos );
+
+	gtk_text_view_scroll_to_iter ( textview, &iter, 0.0, 1, 0.0, 0.25 );
+	gtk_text_buffer_place_cursor( textbuf, &iter );
+                               
+   return 0;
+}
+
 static int memViewEvntSrcID = 0;
 static std::list <memViewWin_t*> memViewWinList;
 
@@ -513,38 +628,38 @@ static GtkWidget *CreateMemViewMenubar (memViewWin_t * mv)
 	//-View --> RAM ------------------
 	radioGroup = NULL;
 
-	item = gtk_radio_menu_item_new_with_label (radioGroup, "RAM");
+	mv->memSelRadioItem[0] = gtk_radio_menu_item_new_with_label (radioGroup, "RAM");
 
 	radioGroup =
-			gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM(item));
+			gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM(mv->memSelRadioItem[0]));
 
-	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), mv->memSelRadioItem[0]);
 
-	g_signal_connect (item, "activate", G_CALLBACK (changeModeRAM),
+	g_signal_connect (mv->memSelRadioItem[0], "activate", G_CALLBACK (changeModeRAM),
 				  (gpointer) mv);
 
 	//-View --> PPU ------------------
-	item = gtk_radio_menu_item_new_with_label (radioGroup, "PPU");
+	mv->memSelRadioItem[1] = gtk_radio_menu_item_new_with_label (radioGroup, "PPU");
 
-	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), mv->memSelRadioItem[1]);
 
-	g_signal_connect (item, "activate", G_CALLBACK (changeModePPU),
+	g_signal_connect (mv->memSelRadioItem[1], "activate", G_CALLBACK (changeModePPU),
 				  (gpointer) mv);
 
 	//-View --> OAM ------------------
-	item = gtk_radio_menu_item_new_with_label (radioGroup, "OAM");
+	mv->memSelRadioItem[2] = gtk_radio_menu_item_new_with_label (radioGroup, "OAM");
 
-	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), mv->memSelRadioItem[2]);
 
-	g_signal_connect (item, "activate", G_CALLBACK (changeModeOAM),
+	g_signal_connect (mv->memSelRadioItem[2], "activate", G_CALLBACK (changeModeOAM),
 				  (gpointer) mv);
 
 	//-View --> ROM ------------------
-	item = gtk_radio_menu_item_new_with_label (radioGroup, "ROM");
+	mv->memSelRadioItem[3] = gtk_radio_menu_item_new_with_label (radioGroup, "ROM");
 
-	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), mv->memSelRadioItem[3]);
 
-	g_signal_connect (item, "activate", G_CALLBACK (changeModeROM),
+	g_signal_connect (mv->memSelRadioItem[3], "activate", G_CALLBACK (changeModeROM),
 				  (gpointer) mv);
 
 	// Finally, return the actual menu bar created
@@ -644,31 +759,156 @@ textbuffer_string_insert (GtkTextBuffer *textbuffer,
 }
 
 static void
-inner_vbar_changed (GtkRange *range,
-				      	memViewWin_t * mv)
-{
-	GtkAdjustment *ivadj;
-	double v, l, u, r;
-
-	ivadj = gtk_range_get_adjustment( range );
-
-
-	v = gtk_range_get_value( range );
-	l = gtk_adjustment_get_lower( ivadj );
-	u = gtk_adjustment_get_upper( ivadj );
-
-	r = (v - l) / (u - l);
-
-	//printf("Inner VBAR: %f   %f   %f   %f   \n" , 
-	//		v, l, u, r );
-}
-
-static void
 textview_backspace_cb (GtkTextView *text_view,
 				      	memViewWin_t * mv)
 {
 	//printf("BackSpace:\n");
 	mv->redraw = 1;
+}
+
+static void handleDialogResponse (GtkWidget * w, gint response_id, memViewWin_t * mv)
+{
+	//printf("Response %i\n", response_id ); 
+
+	if ( response_id == GTK_RESPONSE_OK )
+	{
+		const char *txt;
+
+		//printf("Reponse OK\n");
+
+		txt = gtk_entry_get_text( GTK_ENTRY( mv->addr_entry ) );
+
+		if ( txt != NULL )
+		{
+			//printf("Text: '%s'\n", txt );
+			switch (mv->dialog_op)
+			{
+				case 1:
+					if ( isxdigit(txt[0]) )
+					{  // Address is always treated as hex number
+						mv->gotoLocation( strtol( txt, NULL, 16 ) );
+					}
+				break;
+				case 2:
+					if ( isdigit(txt[0]) )
+					{  // Value is numerical
+						mv->writeMem( mv->selAddr, strtol( txt, NULL, 0 ) );
+					}
+					else if ( (txt[0] == '\'') && (txt[2] == '\'') )
+					{  // Byte to be written is expressed as ASCII character
+						mv->writeMem( mv->selAddr, txt[1] );
+					}
+				break;
+			}
+		}
+	}
+	//else if ( response_id == GTK_RESPONSE_CANCEL )
+	//{
+	//	printf("Reponse Cancel\n");
+	//}
+	gtk_widget_destroy (w);
+
+	mv->addr_entry = NULL;
+}
+static void closeDialogWindow (GtkWidget * w, GdkEvent * e, memViewWin_t * mv)
+{
+	gtk_widget_destroy (w);
+
+	mv->addr_entry = NULL;
+}
+
+static void
+gotoLocationCB (GtkMenuItem *menuitem,
+				      	memViewWin_t * mv)
+{
+	GtkWidget *win;
+	GtkWidget *vbox;
+
+	mv->dialog_op = 1;
+
+	win = gtk_dialog_new_with_buttons ("Goto Address",
+					       GTK_WINDOW (mv->win),
+					       (GtkDialogFlags)
+					       (GTK_DIALOG_DESTROY_WITH_PARENT),
+					       "_Cancel", GTK_RESPONSE_CANCEL,
+					       "_Goto", GTK_RESPONSE_OK, NULL);
+
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
+
+	mv->addr_entry = gtk_entry_new ();
+
+	gtk_entry_set_text (GTK_ENTRY (mv->addr_entry), "0x0");
+
+	gtk_box_pack_start (GTK_BOX (vbox), mv->addr_entry, TRUE, TRUE, 0);
+
+	gtk_box_pack_start (GTK_BOX
+			    (gtk_dialog_get_content_area
+			     (GTK_DIALOG (win))), vbox, TRUE, TRUE, 1);
+
+	gtk_widget_show_all (win);
+
+	g_signal_connect (win, "delete-event",
+			  G_CALLBACK (closeDialogWindow), mv);
+	g_signal_connect (win, "response",
+			  G_CALLBACK (handleDialogResponse), mv);
+
+	//mv->gotoLocation( mv->selRomAddr );
+}
+
+static void
+setValueCB (GtkMenuItem *menuitem,
+				      	memViewWin_t * mv)
+{
+	GtkWidget *win;
+	GtkWidget *vbox;
+	char stmp[256];
+
+	mv->dialog_op = 2;
+
+	sprintf( stmp, "Poke Address 0x%08x", mv->selAddr );
+
+	win = gtk_dialog_new_with_buttons ( stmp,
+					       GTK_WINDOW (mv->win),
+					       (GtkDialogFlags)
+					       (GTK_DIALOG_DESTROY_WITH_PARENT),
+					       "_Cancel", GTK_RESPONSE_CANCEL,
+					       "_Write", GTK_RESPONSE_OK, NULL);
+
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
+
+	mv->addr_entry = gtk_entry_new ();
+
+	gtk_entry_set_text (GTK_ENTRY (mv->addr_entry), "0x0");
+
+	gtk_box_pack_start (GTK_BOX (vbox), mv->addr_entry, TRUE, TRUE, 0);
+
+	gtk_box_pack_start (GTK_BOX
+			    (gtk_dialog_get_content_area
+			     (GTK_DIALOG (win))), vbox, TRUE, TRUE, 1);
+
+	gtk_widget_show_all (win);
+
+	g_signal_connect (win, "delete-event",
+			  G_CALLBACK (closeDialogWindow), mv);
+	g_signal_connect (win, "response",
+			  G_CALLBACK (handleDialogResponse), mv);
+
+	//mv->gotoLocation( mv->selRomAddr );
+}
+
+static void
+gotoRomLocationCB (GtkMenuItem *menuitem,
+				      	memViewWin_t * mv)
+{
+	gtk_menu_item_activate( GTK_MENU_ITEM(mv->memSelRadioItem[3]) );
+
+	mv->setMode( memViewWin_t::MODE_NES_ROM );
+
+	mv->showMemViewResults(1);
+
+	mv->jumpAddr  = mv->selRomAddr;
+	mv->jumpDelay = 10;
+
 }
 
 static gboolean
@@ -683,6 +923,13 @@ populate_context_menu (GtkWidget *popup,
 	
 	menu = gtk_menu_new ();
 	
+	item = gtk_menu_item_new_with_label("Goto Address...");
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+
+	g_signal_connect (item, "activate",
+  			G_CALLBACK (gotoLocationCB), mv);
+
 	switch ( mv->mode )
 	{
 		case memViewWin_t::MODE_NES_RAM:
@@ -694,19 +941,55 @@ populate_context_menu (GtkWidget *popup,
    			item = gtk_menu_item_new_with_label(stmp);
 
    			gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+
+				g_signal_connect (item, "activate",
+  					G_CALLBACK (setValueCB), mv);
 			}
 			if ( mv->selAddr >= 0x6000 )
 			{
-				int romAddr = GetNesFileAddress(mv->selAddr);
+				mv->selRomAddr = GetNesFileAddress(mv->selAddr);
 
-				if ( romAddr >= 0 )
+				if ( mv->selRomAddr >= 0 )
 				{
-					sprintf( stmp, "Goto ROM 0x%08X", romAddr );
+					sprintf( stmp, "Goto ROM 0x%08X", mv->selRomAddr );
 
 					item = gtk_menu_item_new_with_label(stmp);
 
 					gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+
+					g_signal_connect (item, "activate",
+			  			G_CALLBACK (gotoRomLocationCB), mv);
 				}
+			}
+		}
+		break;
+		case memViewWin_t::MODE_NES_PPU:
+		{
+			if ( mv->selAddr >= 0x0000 )
+			{
+				sprintf( stmp, "Poke PPU 0x%08X", mv->selAddr );
+
+   			item = gtk_menu_item_new_with_label(stmp);
+
+   			gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+
+				g_signal_connect (item, "activate",
+  					G_CALLBACK (setValueCB), mv);
+			}
+		}
+		break;
+		case memViewWin_t::MODE_NES_OAM:
+		{
+			if ( mv->selAddr >= 0x0000 )
+			{
+				sprintf( stmp, "Poke OAM 0x%08X", mv->selAddr );
+
+   			item = gtk_menu_item_new_with_label(stmp);
+
+   			gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+
+				g_signal_connect (item, "activate",
+  					G_CALLBACK (setValueCB), mv);
 			}
 		}
 		break;
@@ -719,6 +1002,9 @@ populate_context_menu (GtkWidget *popup,
    			item = gtk_menu_item_new_with_label(stmp);
 
    			gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+
+				g_signal_connect (item, "activate",
+  					G_CALLBACK (setValueCB), mv);
 			}
 		}
 		break;
@@ -835,9 +1121,6 @@ void openMemoryViewWindow (void)
 			    0);
 
    mv->ivbar = gtk_scrolled_window_get_vscrollbar( GTK_SCROLLED_WINDOW(scroll) );
-
-	g_signal_connect (mv->ivbar, "value-changed",
-			  G_CALLBACK (inner_vbar_changed), mv);
 
 	g_signal_connect (mv->win, "delete-event",
 			  G_CALLBACK (closeMemoryViewWindow), mv);
