@@ -18,6 +18,7 @@
 #include "icon.xpm"
 #include "memview.h"
 #include "ramwatch.h"
+#include "debugger.h"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
@@ -2874,6 +2875,17 @@ static GtkWidget *CreateMenubar (GtkWidget * window)
 	item = gtk_menu_item_new_with_label ("Memory Viewer");
 
 	g_signal_connect (item, "activate", G_CALLBACK (openMemoryViewWindow),
+			  NULL);
+
+	//gtk_widget_add_accelerator( item, "activate", accel_group,
+	//                           GDK_KEY_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+
+   //-Tools --> Debugger ---------------------
+	item = gtk_menu_item_new_with_label ("Debugger");
+
+	g_signal_connect (item, "activate", G_CALLBACK (openDebuggerWindow),
 			  NULL);
 
 	//gtk_widget_add_accelerator( item, "activate", accel_group,
