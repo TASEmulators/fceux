@@ -49,11 +49,21 @@ struct debuggerWin_t
 	GtkTextView *stackview;
 	GtkTextBuffer *stackTextBuf;
 	GtkTreeStore *bp_store;
+	GtkTreeStore *bkm_store;
 	GtkWidget *bp_tree;
+	GtkWidget *bkm_tree;
 	GtkWidget *pc_entry;
 	GtkWidget *A_entry;
 	GtkWidget *X_entry;
 	GtkWidget *Y_entry;
+	GtkWidget *ppu_label;
+	GtkWidget *sprite_label;
+	GtkWidget *scanline_label;
+	GtkWidget *pixel_label;
+	GtkWidget *cpu_label1;
+	GtkWidget *cpu_label2;
+	GtkWidget *instr_label1;
+	GtkWidget *instr_label2;
 
 	debuggerWin_t(void)
 	{
@@ -64,6 +74,14 @@ struct debuggerWin_t
 		bp_tree = NULL;
 		stackview = NULL;
 		stackTextBuf = NULL;
+		ppu_label = NULL;
+		sprite_label = NULL;
+		scanline_label = NULL;
+		pixel_label = NULL;
+		cpu_label1 = NULL;
+		cpu_label2 = NULL;
+		instr_label1 = NULL;
+		instr_label2 = NULL;
 	}
 	
 	~debuggerWin_t(void)
@@ -97,7 +115,7 @@ void openDebuggerWindow (void)
 {
 	GtkWidget *main_hbox;
 	GtkWidget *vbox1, *vbox2, *vbox3;
-	GtkWidget *hbox1;
+	GtkWidget *hbox1, *hbox2;
 	GtkWidget *vbox;
 	GtkWidget *hbox;
 	GtkWidget *label;
@@ -121,7 +139,7 @@ void openDebuggerWindow (void)
 						"_Close", GTK_RESPONSE_OK,
 						NULL);
 
-	gtk_window_set_default_size (GTK_WINDOW (dw->win), 800, 600);
+	gtk_window_set_default_size (GTK_WINDOW (dw->win), 800, 800);
 
 	main_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 
@@ -410,6 +428,134 @@ void openDebuggerWindow (void)
 	 *  End Vertical Box 3
 	 */
 
+	/*
+	 *  Start PPU Frame
+	 */
+	grid = gtk_grid_new();
+
+	gtk_grid_set_row_homogeneous( GTK_GRID(grid), TRUE );
+	gtk_grid_set_column_homogeneous( GTK_GRID(grid), TRUE );
+	gtk_grid_set_row_spacing( GTK_GRID(grid), 5 );
+	gtk_grid_set_column_spacing( GTK_GRID(grid), 10 );
+
+	frame = gtk_frame_new ("");
+
+	hbox  = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 1);
+	vbox  = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+
+	dw->ppu_label      = gtk_label_new("PPU:");
+	dw->sprite_label   = gtk_label_new("Sprite:");
+	dw->scanline_label = gtk_label_new("Scanline:");
+	dw->pixel_label    = gtk_label_new("Pixel:");
+
+	gtk_box_pack_start (GTK_BOX (vbox), dw->ppu_label     , FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (vbox), dw->sprite_label  , FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (vbox), dw->scanline_label, FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (vbox), dw->pixel_label   , FALSE, FALSE, 2);
+
+	gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 2);
+	gtk_container_add (GTK_CONTAINER (frame), hbox);
+
+	gtk_grid_attach( GTK_GRID(grid), frame, 0, 0, 1, 4 );
+	/*
+	 *  End PPU Frame
+	 */
+
+	/*
+	 *  Start Cycle Break Block
+	 */
+	dw->cpu_label1      = gtk_label_new("CPU Cycles:");
+	dw->cpu_label2      = gtk_label_new("+(0)");
+
+	dw->instr_label1      = gtk_label_new("Instructions:");
+	dw->instr_label2      = gtk_label_new("+(0)");
+
+	gtk_grid_attach( GTK_GRID(grid), dw->cpu_label1, 1, 0, 1, 1 );
+	gtk_grid_attach( GTK_GRID(grid), dw->cpu_label2, 2, 0, 1, 1 );
+	gtk_grid_attach( GTK_GRID(grid), dw->instr_label1, 1, 2, 1, 1 );
+	gtk_grid_attach( GTK_GRID(grid), dw->instr_label2, 2, 2, 1, 1 );
+
+	button = gtk_check_button_new_with_label("Break when exceed");
+	gtk_grid_attach( GTK_GRID(grid), button, 1, 1, 1, 1 );
+	entry = gtk_entry_new ();
+	gtk_grid_attach( GTK_GRID(grid), entry, 2, 1, 1, 1 );
+
+	button = gtk_check_button_new_with_label("Break when exceed");
+	gtk_grid_attach( GTK_GRID(grid), button, 1, 3, 1, 1 );
+	entry = gtk_entry_new ();
+	gtk_grid_attach( GTK_GRID(grid), entry, 2, 3, 1, 1 );
+
+	gtk_box_pack_start (GTK_BOX (vbox1), grid, FALSE, FALSE, 2);
+	/*
+	 *  End Cycle Break Block
+	 */
+
+	/*
+	 *  Start Address Bookmarks
+	 */
+	hbox2 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
+
+	frame = gtk_frame_new ("Address Bookmarks");
+
+	vbox  = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 1);
+	hbox  = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
+
+	gtk_box_pack_start (GTK_BOX (vbox), hbox, TRUE, TRUE, 1);
+
+	gtk_container_add (GTK_CONTAINER (frame), vbox);
+
+	dw->bkm_store =
+		gtk_tree_store_new (1, G_TYPE_STRING );
+
+	dw->bkm_tree =
+		gtk_tree_view_new_with_model (GTK_TREE_MODEL
+					      (dw->bkm_store));
+
+	renderer = gtk_cell_renderer_text_new ();
+	g_object_set (renderer, "family", "MonoSpace", NULL);
+	column = gtk_tree_view_column_new_with_attributes ("Bookmarks", renderer,
+							   "text", 0, NULL);
+	gtk_tree_view_append_column (GTK_TREE_VIEW (dw->bkm_tree), column);
+
+	scroll = gtk_scrolled_window_new (NULL, NULL);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
+					GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_container_add (GTK_CONTAINER (scroll), dw->bkm_tree);
+	gtk_box_pack_start (GTK_BOX (hbox), scroll, TRUE, TRUE, 1);
+
+	vbox  = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+	gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 1);
+	entry = gtk_entry_new ();
+	gtk_box_pack_start (GTK_BOX (vbox), entry, FALSE, FALSE, 2);
+	button = gtk_button_new_with_label ("Add");
+	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
+	button = gtk_button_new_with_label ("Delete");
+	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
+	button = gtk_button_new_with_label ("Name");
+	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
+
+	gtk_box_pack_start (GTK_BOX (hbox2), frame, TRUE, TRUE, 2);
+	
+	vbox  = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+	gtk_box_pack_start (GTK_BOX (hbox2), vbox, FALSE, FALSE, 2);
+
+	button = gtk_button_new_with_label ("Reset Counters");
+	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
+	button = gtk_check_button_new_with_label("ROM Offsets");
+	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
+	button = gtk_check_button_new_with_label("Symbolic Debug");
+	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
+	button = gtk_check_button_new_with_label("Register Names");
+	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
+	button = gtk_button_new_with_label ("Reload Symbols");
+	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
+	button = gtk_button_new_with_label ("ROM Patcher");
+	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
+
+	gtk_box_pack_start (GTK_BOX (vbox1), hbox2, TRUE, TRUE, 2);
+	/*
+	 *  End Address Bookmarks
+	 */
 	gtk_box_pack_start (GTK_BOX (main_hbox), vbox1, TRUE, TRUE, 2);
 
 	gtk_box_pack_start (GTK_BOX
