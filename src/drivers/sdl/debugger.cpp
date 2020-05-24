@@ -64,6 +64,20 @@ struct debuggerWin_t
 	GtkWidget *cpu_label2;
 	GtkWidget *instr_label1;
 	GtkWidget *instr_label2;
+	GtkWidget *bp_start_entry;
+	GtkWidget *bp_end_entry;
+	GtkWidget *bp_read_chkbox;
+	GtkWidget *bp_write_chkbox;
+	GtkWidget *bp_execute_chkbox;
+	GtkWidget *bp_enable_chkbox;
+	GtkWidget *bp_forbid_chkbox;
+	GtkWidget *bp_cond_entry;
+	GtkWidget *bp_name_entry;
+	GtkWidget *cpu_radio_btn;
+	GtkWidget *ppu_radio_btn;
+	GtkWidget *sprite_radio_btn;
+
+	int  dialog_op;
 
 	debuggerWin_t(void)
 	{
@@ -82,15 +96,370 @@ struct debuggerWin_t
 		cpu_label2 = NULL;
 		instr_label1 = NULL;
 		instr_label2 = NULL;
+		bp_start_entry = NULL;
+		bp_end_entry = NULL;
+		bp_cond_entry = NULL;
+		bp_name_entry = NULL;
+		bp_read_chkbox = NULL;
+		bp_write_chkbox = NULL;
+		bp_execute_chkbox = NULL;
+		bp_enable_chkbox = NULL;
+		bp_forbid_chkbox = NULL;
+	   cpu_radio_btn = NULL;
+	   ppu_radio_btn = NULL;
+	   sprite_radio_btn = NULL;
+		dialog_op = 0;
 	}
 	
 	~debuggerWin_t(void)
 	{
 	
 	}
+
+	void  bpListUpdate(void);
 };
 
 static std::list <debuggerWin_t*> debuggerWinList;
+
+
+void debuggerWin_t::bpListUpdate(void)
+{
+	GtkTreeIter iter;
+	char line[256], addrStr[32], flags[16];
+
+	gtk_tree_store_clear( bp_store );
+
+	for (int i=0; i<numWPs; i++)
+	{
+		gtk_tree_store_append (bp_store, &iter, NULL);	// aquire iter
+
+		if ( watchpoint[i].endaddress > 0 )
+		{
+			sprintf( addrStr, "$%04X-%04X:", watchpoint[i].address, watchpoint[i].endaddress );
+		}
+		else
+		{
+			sprintf( addrStr, "$%04X:", watchpoint[i].address );
+		}
+
+		flags[0] = (watchpoint[i].flags & WP_E) ? 'E' : '-';
+
+		if ( watchpoint[i].flags & BT_P )
+		{
+			flags[1] = 'P';
+		}
+		else if ( watchpoint[i].flags & BT_S )
+		{
+			flags[1] = 'S';
+		}
+		else
+		{
+			flags[1] = 'C';
+		}
+
+		flags[2] = (watchpoint[i].flags & WP_R) ? 'R' : '-';
+		flags[3] = (watchpoint[i].flags & WP_W) ? 'W' : '-';
+		flags[4] = (watchpoint[i].flags & WP_X) ? 'X' : '-';
+		flags[5] = (watchpoint[i].flags & WP_F) ? 'F' : '-';
+		flags[6] = 0;
+
+		strcpy( line, addrStr );
+		strcat( line, flags   );
+
+		if (watchpoint[i].desc )
+		{
+			strcat( line, " ");
+			strcat( line, watchpoint[i].desc);
+			strcat( line, " ");
+		}
+
+		if (watchpoint[i].condText )
+		{
+			strcat( line, " Condition:");
+			strcat( line, watchpoint[i].condText);
+			strcat( line, " ");
+		}
+		gtk_tree_store_set( bp_store, &iter, 0, line, -1 );
+	}
+
+}
+
+static void handleDialogResponse (GtkWidget * w, gint response_id, debuggerWin_t * dw)
+{
+	//printf("Response %i\n", response_id ); 
+
+	if ( response_id == GTK_RESPONSE_OK )
+	{
+		const char *txt;
+
+		////printf("Reponse OK\n");
+		switch ( dw->dialog_op )
+		{
+			case 1: // Breakpoint Add
+			{
+				int  start_addr = -1, end_addr = -1, type = 0, enable = 1;;
+				const char *name; 
+				const char *cond;
+
+				txt = gtk_entry_get_text( GTK_ENTRY( dw->bp_start_entry ) );
+
+				if ( txt[0] != 0 )
+				{
+					start_addr = strtol( txt, NULL, 16 );
+				}
+
+				txt = gtk_entry_get_text( GTK_ENTRY( dw->bp_end_entry ) );
+
+				if ( txt[0] != 0 )
+				{
+					end_addr = strtol( txt, NULL, 16 );
+				}
+
+				if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dw->cpu_radio_btn ) ) )
+				{
+					type |= BT_C;
+				}
+				else if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dw->ppu_radio_btn ) ) )
+				{
+					type |= BT_P;
+				}
+				else if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dw->sprite_radio_btn ) ) )
+				{
+					type |= BT_S;
+				}
+
+				if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dw->bp_read_chkbox ) ) )
+				{
+					type |= WP_R;
+				}
+
+				if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dw->bp_write_chkbox ) ) )
+				{
+					type |= WP_W;
+				}
+
+				if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dw->bp_execute_chkbox ) ) )
+				{
+					type |= WP_X;
+				}
+
+				//this overrides all
+				if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dw->bp_forbid_chkbox ) ) )
+				{
+					type  = WP_F;
+				}
+
+				enable = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dw->bp_enable_chkbox ) );
+
+				name = gtk_entry_get_text( GTK_ENTRY( dw->bp_name_entry ) );
+				cond = gtk_entry_get_text( GTK_ENTRY( dw->bp_cond_entry ) );
+
+				if ( (start_addr >= 0) && (numWPs < 64) )
+				{
+					unsigned int retval;
+
+					retval = NewBreak( name, start_addr, end_addr, type, cond, numWPs, enable);
+
+					if ( (retval == 1) || (retval == 2) )
+					{
+						printf("Breakpoint Add Failed\n");
+					}
+					else
+					{
+						numWPs++;
+
+						dw->bpListUpdate();
+					}
+				}
+			}
+			break;
+		}
+
+
+		//if ( txt != NULL )
+		//{
+		//	//printf("Text: '%s'\n", txt );
+		//	switch (mv->dialog_op)
+		//	{
+		//		case 1:
+		//			if ( isxdigit(txt[0]) )
+		//			{  // Address is always treated as hex number
+		//				mv->gotoLocation( strtol( txt, NULL, 16 ) );
+		//			}
+		//		break;
+		//		case 2:
+		//			if ( isdigit(txt[0]) )
+		//			{  // Value is numerical
+		//				mv->writeMem( mv->selAddr, strtol( txt, NULL, 0 ) );
+		//			}
+		//			else if ( (txt[0] == '\'') && (txt[2] == '\'') )
+		//			{  // Byte to be written is expressed as ASCII character
+		//				mv->writeMem( mv->selAddr, txt[1] );
+		//			}
+		//		break;
+		//	}
+		//}
+	}
+	//else if ( response_id == GTK_RESPONSE_CANCEL )
+	//{
+	//	printf("Reponse Cancel\n");
+	//}
+	gtk_widget_destroy (w);
+
+}
+
+static void closeDialogWindow (GtkWidget * w, GdkEvent * e, debuggerWin_t * dw)
+{
+	gtk_widget_destroy (w);
+}
+
+static void create_breakpoint_dialog( int index, debuggerWin_t * dw )
+{
+	GtkWidget *win;
+	GtkWidget *vbox;
+	GtkWidget *hbox;
+	GtkWidget *vbox1;
+	GtkWidget *label;
+	GtkWidget *frame;
+	GtkWidget *grid;
+
+	if ( index < 0 )
+	{
+		win = gtk_dialog_new_with_buttons ("Add Breakpoint",
+						       GTK_WINDOW (dw->win),
+						       (GtkDialogFlags)
+						       (GTK_DIALOG_DESTROY_WITH_PARENT),
+						       "_Cancel", GTK_RESPONSE_CANCEL,
+						       "_Add", GTK_RESPONSE_OK, NULL);
+	}
+	else
+	{
+		win = gtk_dialog_new_with_buttons ("Edit Breakpoint",
+						       GTK_WINDOW (dw->win),
+						       (GtkDialogFlags)
+						       (GTK_DIALOG_DESTROY_WITH_PARENT),
+						       "_Cancel", GTK_RESPONSE_CANCEL,
+						       "_Edit", GTK_RESPONSE_OK, NULL);
+	}
+
+	gtk_dialog_set_default_response( GTK_DIALOG(win), GTK_RESPONSE_OK );
+
+	vbox1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+	hbox  = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
+
+	// Adress entry fields
+	label = gtk_label_new("Address:");
+	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+
+	dw->bp_start_entry = gtk_entry_new ();
+	gtk_entry_set_max_length (GTK_ENTRY (dw->bp_start_entry), 4);
+	gtk_entry_set_width_chars (GTK_ENTRY (dw->bp_start_entry), 4);
+
+	gtk_box_pack_start (GTK_BOX (hbox), dw->bp_start_entry, FALSE, FALSE, 2);
+
+	label = gtk_label_new("-");
+	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+
+	dw->bp_end_entry = gtk_entry_new ();
+	gtk_entry_set_max_length (GTK_ENTRY (dw->bp_end_entry), 4);
+	gtk_entry_set_width_chars (GTK_ENTRY (dw->bp_end_entry), 4);
+
+	gtk_box_pack_start (GTK_BOX (hbox), dw->bp_end_entry, FALSE, FALSE, 2);
+
+	dw->bp_forbid_chkbox = gtk_check_button_new_with_label("Forbid");
+	gtk_box_pack_start (GTK_BOX (hbox), dw->bp_forbid_chkbox, FALSE, FALSE, 2);
+
+	gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
+
+	// flags frame
+	frame = gtk_frame_new ("");
+	gtk_box_pack_start (GTK_BOX (vbox1), frame, FALSE, FALSE, 2);
+
+	vbox  = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
+	hbox  = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+
+	dw->bp_read_chkbox    = gtk_check_button_new_with_label("Read");
+	dw->bp_write_chkbox   = gtk_check_button_new_with_label("Write");
+	dw->bp_execute_chkbox = gtk_check_button_new_with_label("Execute");
+	dw->bp_enable_chkbox  = gtk_check_button_new_with_label("Enable");
+
+	gtk_box_pack_start (GTK_BOX (hbox), dw->bp_read_chkbox   , FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (hbox), dw->bp_write_chkbox  , FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (hbox), dw->bp_execute_chkbox, FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (hbox), dw->bp_enable_chkbox , FALSE, FALSE, 2);
+
+	gtk_box_pack_start (GTK_BOX (vbox), hbox , FALSE, FALSE, 2);
+
+	gtk_container_add (GTK_CONTAINER (frame), vbox);
+
+	frame = gtk_frame_new ("Memory");
+	gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 2);
+
+	hbox  = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
+
+	dw->cpu_radio_btn    = gtk_radio_button_new_with_label (NULL, "CPU");
+	dw->ppu_radio_btn    = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(dw->cpu_radio_btn), "PPU");
+	dw->sprite_radio_btn = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(dw->cpu_radio_btn), "Sprite");
+
+	gtk_box_pack_start (GTK_BOX (hbox), dw->cpu_radio_btn   , TRUE, TRUE, 2);
+	gtk_box_pack_start (GTK_BOX (hbox), dw->ppu_radio_btn   , TRUE, TRUE, 2);
+	gtk_box_pack_start (GTK_BOX (hbox), dw->sprite_radio_btn, TRUE, TRUE, 2);
+
+	gtk_container_add (GTK_CONTAINER (frame), hbox);
+
+	grid = gtk_grid_new();
+
+	gtk_grid_set_row_homogeneous( GTK_GRID(grid), TRUE );
+	gtk_grid_set_column_homogeneous( GTK_GRID(grid), TRUE );
+	gtk_grid_set_row_spacing( GTK_GRID(grid), 5 );
+	gtk_grid_set_column_spacing( GTK_GRID(grid), 10 );
+
+	label = gtk_label_new("Condition:");
+	gtk_grid_attach (GTK_GRID (grid), label, 0, 0, 1, 1 );
+
+	label = gtk_label_new("Name:");
+	gtk_grid_attach (GTK_GRID (grid), label, 0, 1, 1, 1 );
+
+	dw->bp_cond_entry = gtk_entry_new ();
+	dw->bp_name_entry = gtk_entry_new ();
+
+	gtk_grid_attach (GTK_GRID (grid), dw->bp_cond_entry, 1, 0, 3, 1 );
+	gtk_grid_attach (GTK_GRID (grid), dw->bp_name_entry, 1, 1, 3, 1 );
+
+	gtk_box_pack_start (GTK_BOX (vbox1), grid, FALSE, FALSE, 2);
+
+	gtk_box_pack_start (GTK_BOX
+			    (gtk_dialog_get_content_area
+			     (GTK_DIALOG (win))), vbox1, TRUE, TRUE, 1);
+
+	gtk_widget_show_all (win);
+
+	g_signal_connect (win, "delete-event",
+			  G_CALLBACK (closeDialogWindow), dw);
+	g_signal_connect (win, "response",
+			  G_CALLBACK (handleDialogResponse), dw);
+
+}
+
+static void addBreakpointCB (GtkButton * button, debuggerWin_t * dw)
+{
+	dw->dialog_op = 1;
+
+	create_breakpoint_dialog( -1, dw );
+}
+
+//this code enters the debugger when a breakpoint was hit
+void FCEUD_DebugBreakpoint(int bp_num)
+{
+
+	//std::list < debuggerWin_t * >::iterator it;
+
+	//for (it = debuggerWinList.begin (); it != debuggerWinList.end (); it++)
+	//{
+
+	//}
+
+}
 
 static void closeDebuggerWindow (GtkWidget * w, GdkEvent * e, debuggerWin_t * dw)
 {
@@ -371,6 +740,9 @@ void openDebuggerWindow (void)
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 1);
 
 	button = gtk_button_new_with_label ("Add");
+
+	g_signal_connect (button, "clicked",
+			  G_CALLBACK (addBreakpointCB), (gpointer) dw);
 
 	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
 
