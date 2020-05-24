@@ -25,6 +25,7 @@
 #include "../../fds.h"
 #include "../../cart.h"
 #include "../../ines.h"
+#include "../../x6502.h"
 #include "../common/configSys.h"
 
 #include "sdl.h"
@@ -56,6 +57,15 @@ struct debuggerWin_t
 	GtkWidget *A_entry;
 	GtkWidget *X_entry;
 	GtkWidget *Y_entry;
+	GtkWidget *P_N_chkbox;
+	GtkWidget *P_V_chkbox;
+	GtkWidget *P_U_chkbox;
+	GtkWidget *P_B_chkbox;
+	GtkWidget *P_D_chkbox;
+	GtkWidget *P_I_chkbox;
+	GtkWidget *P_Z_chkbox;
+	GtkWidget *P_C_chkbox;
+	GtkWidget *stack_frame;
 	GtkWidget *ppu_label;
 	GtkWidget *sprite_label;
 	GtkWidget *scanline_label;
@@ -108,6 +118,15 @@ struct debuggerWin_t
 	   cpu_radio_btn = NULL;
 	   ppu_radio_btn = NULL;
 	   sprite_radio_btn = NULL;
+		stack_frame = NULL;
+		P_N_chkbox = NULL;
+		P_V_chkbox = NULL;
+		P_U_chkbox = NULL;
+		P_B_chkbox = NULL;
+		P_D_chkbox = NULL;
+		P_I_chkbox = NULL;
+		P_Z_chkbox = NULL;
+		P_C_chkbox = NULL;
 		dialog_op = 0;
 	}
 	
@@ -117,6 +136,8 @@ struct debuggerWin_t
 	}
 
 	void  bpListUpdate(void);
+	void  updateViewPort(void);
+	void  updateRegisterView(void);
 };
 
 static std::list <debuggerWin_t*> debuggerWinList;
@@ -181,6 +202,75 @@ void debuggerWin_t::bpListUpdate(void)
 		}
 		gtk_tree_store_set( bp_store, &iter, 0, line, -1 );
 	}
+
+}
+
+void  debuggerWin_t::updateRegisterView(void)
+{
+	int stackPtr;
+	char stmp[32];
+	std::string  stackLine;
+
+	sprintf( stmp, "%04X", X.PC );
+
+	gtk_entry_set_text( GTK_ENTRY(pc_entry), stmp );
+
+	sprintf( stmp, "%02X", X.A );
+
+	gtk_entry_set_text( GTK_ENTRY(A_entry), stmp );
+
+	sprintf( stmp, "%02X", X.X );
+
+	gtk_entry_set_text( GTK_ENTRY(X_entry), stmp );
+
+	sprintf( stmp, "%02X", X.Y );
+
+	gtk_entry_set_text( GTK_ENTRY(Y_entry), stmp );
+
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( P_N_chkbox ), (X.P & N_FLAG) ? TRUE : FALSE );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( P_V_chkbox ), (X.P & V_FLAG) ? TRUE : FALSE );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( P_U_chkbox ), (X.P & U_FLAG) ? TRUE : FALSE );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( P_B_chkbox ), (X.P & B_FLAG) ? TRUE : FALSE );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( P_D_chkbox ), (X.P & D_FLAG) ? TRUE : FALSE );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( P_I_chkbox ), (X.P & I_FLAG) ? TRUE : FALSE );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( P_Z_chkbox ), (X.P & Z_FLAG) ? TRUE : FALSE );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( P_C_chkbox ), (X.P & C_FLAG) ? TRUE : FALSE );
+
+	stackPtr = X.S | 0x0100;
+
+	sprintf( stmp, "Stack: %04X", stackPtr );
+	gtk_frame_set_label( GTK_FRAME(stack_frame), stmp );
+
+	stackPtr++;
+
+	if ( stackPtr <= 0x01FF )
+	{
+		sprintf( stmp, "%02X", GetMem(stackPtr) );
+
+		stackLine.assign( stmp );
+
+		for (int i = 1; i < 128; i++)
+		{
+			//tmp = ((tmp+1)|0x0100)&0x01FF;  //increment and fix pointer to $0100-$01FF range
+			stackPtr++;
+			if (stackPtr > 0x1FF)
+				break;
+			if ((i & 7) == 0)
+				sprintf( stmp, ",\r\n%02X", GetMem(stackPtr) );
+			else
+				sprintf( stmp, ",%02X", GetMem(stackPtr) );
+
+			stackLine.append( stmp );
+		}
+	}
+
+	gtk_text_buffer_set_text( stackTextBuf, stackLine.c_str(), -1 ) ;
+
+}
+
+void  debuggerWin_t::updateViewPort(void)
+{
+	updateRegisterView();
 
 }
 
@@ -615,7 +705,7 @@ void openDebuggerWindow (void)
 	gtk_entry_set_max_length (GTK_ENTRY (dw->pc_entry), 4);
 	gtk_entry_set_width_chars (GTK_ENTRY (dw->pc_entry), 4);
 
-	gtk_box_pack_start (GTK_BOX (hbox), dw->pc_entry, FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (hbox), dw->pc_entry, TRUE, TRUE, 2);
 
 	gtk_grid_attach( GTK_GRID(grid), hbox, 0, 4, 1, 1 );
 
@@ -673,7 +763,7 @@ void openDebuggerWindow (void)
 	gtk_box_pack_start (GTK_BOX (vbox2), grid, FALSE, FALSE, 2);
 
 	// Stack Frame
-	frame = gtk_frame_new ("Stack");
+	dw->stack_frame = gtk_frame_new ("Stack");
 
 	dw->stackview = (GtkTextView*) gtk_text_view_new();
 
@@ -690,9 +780,9 @@ void openDebuggerWindow (void)
 					GTK_POLICY_ALWAYS, GTK_POLICY_ALWAYS);
 	gtk_container_add (GTK_CONTAINER (scroll), GTK_WIDGET(dw->stackview) );
 
-	gtk_container_add (GTK_CONTAINER (frame), scroll);
+	gtk_container_add (GTK_CONTAINER (dw->stack_frame), scroll);
 
-	gtk_box_pack_start (GTK_BOX (vbox2), frame, TRUE, TRUE, 2);
+	gtk_box_pack_start (GTK_BOX (vbox2), dw->stack_frame, TRUE, TRUE, 2);
 	/*
 	 *  Vertical box 3 contains:
 	 *     1. Breakpoints Frame
@@ -768,29 +858,29 @@ void openDebuggerWindow (void)
 	gtk_grid_set_row_spacing( GTK_GRID(grid), 5 );
 	gtk_grid_set_column_spacing( GTK_GRID(grid), 10 );
 
-	button = gtk_check_button_new_with_label("N");
-	gtk_grid_attach( GTK_GRID(grid), button, 0, 0, 1, 1 );
+	dw->P_N_chkbox = gtk_check_button_new_with_label("N");
+	gtk_grid_attach( GTK_GRID(grid), dw->P_N_chkbox, 0, 0, 1, 1 );
 
-	button = gtk_check_button_new_with_label("V");
-	gtk_grid_attach( GTK_GRID(grid), button, 1, 0, 1, 1 );
+	dw->P_V_chkbox = gtk_check_button_new_with_label("V");
+	gtk_grid_attach( GTK_GRID(grid), dw->P_V_chkbox, 1, 0, 1, 1 );
 
-	button = gtk_check_button_new_with_label("U");
-	gtk_grid_attach( GTK_GRID(grid), button, 2, 0, 1, 1 );
+	dw->P_U_chkbox = gtk_check_button_new_with_label("U");
+	gtk_grid_attach( GTK_GRID(grid), dw->P_U_chkbox, 2, 0, 1, 1 );
 
-	button = gtk_check_button_new_with_label("B");
-	gtk_grid_attach( GTK_GRID(grid), button, 3, 0, 1, 1 );
+	dw->P_B_chkbox = gtk_check_button_new_with_label("B");
+	gtk_grid_attach( GTK_GRID(grid), dw->P_B_chkbox, 3, 0, 1, 1 );
 
-	button = gtk_check_button_new_with_label("D");
-	gtk_grid_attach( GTK_GRID(grid), button, 0, 1, 1, 1 );
+	dw->P_D_chkbox = gtk_check_button_new_with_label("D");
+	gtk_grid_attach( GTK_GRID(grid), dw->P_D_chkbox, 0, 1, 1, 1 );
 
-	button = gtk_check_button_new_with_label("I");
-	gtk_grid_attach( GTK_GRID(grid), button, 1, 1, 1, 1 );
+	dw->P_I_chkbox = gtk_check_button_new_with_label("I");
+	gtk_grid_attach( GTK_GRID(grid), dw->P_I_chkbox, 1, 1, 1, 1 );
 
-	button = gtk_check_button_new_with_label("Z");
-	gtk_grid_attach( GTK_GRID(grid), button, 2, 1, 1, 1 );
+	dw->P_Z_chkbox = gtk_check_button_new_with_label("Z");
+	gtk_grid_attach( GTK_GRID(grid), dw->P_Z_chkbox, 2, 1, 1, 1 );
 
-	button = gtk_check_button_new_with_label("C");
-	gtk_grid_attach( GTK_GRID(grid), button, 3, 1, 1, 1 );
+	dw->P_C_chkbox = gtk_check_button_new_with_label("C");
+	gtk_grid_attach( GTK_GRID(grid), dw->P_C_chkbox, 3, 1, 1, 1 );
 
 	gtk_container_add (GTK_CONTAINER (frame), grid);
 
@@ -941,6 +1031,8 @@ void openDebuggerWindow (void)
 			  G_CALLBACK (closeDebuggerWindow), dw);
 
 	gtk_widget_show_all (dw->win);
+
+	dw->updateViewPort();
 
    return;
 }
