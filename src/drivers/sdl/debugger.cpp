@@ -196,7 +196,7 @@ int  debuggerWin_t::get_bpList_selrow(void)
 void debuggerWin_t::bpListUpdate(void)
 {
 	GtkTreeIter iter;
-	char line[256], addrStr[32], flags[16];
+	char line[256], addrStr[32], flags[16], enable;
 
 	gtk_tree_store_clear( bp_store );
 
@@ -234,6 +234,8 @@ void debuggerWin_t::bpListUpdate(void)
 		flags[5] = (watchpoint[i].flags & WP_F) ? 'F' : '-';
 		flags[6] = 0;
 
+		enable = (watchpoint[i].flags & WP_E) ? 1 : 0;
+
 		strcpy( line, addrStr );
 		strcat( line, flags   );
 
@@ -250,7 +252,7 @@ void debuggerWin_t::bpListUpdate(void)
 			strcat( line, watchpoint[i].condText);
 			strcat( line, " ");
 		}
-		gtk_tree_store_set( bp_store, &iter, 0, line, -1 );
+		gtk_tree_store_set( bp_store, &iter, 0, enable, 1, line, -1 );
 	}
 
 }
@@ -809,6 +811,43 @@ static void editBreakpointCB (GtkButton * button, debuggerWin_t * dw)
 	}
 }
 
+static void enableBreakpointCB (GtkCellRendererToggle * renderer,
+				   gchar * pathStr, debuggerWin_t * dw)
+{
+	GtkTreePath *path;
+	int depth;
+	int *indexArray;
+
+	path = gtk_tree_path_new_from_string (pathStr);
+
+	if (path == NULL)
+	{
+		printf ("Error: gtk_tree_path_new_from_string failed\n");
+		return;
+	}
+
+	depth = gtk_tree_path_get_depth (path);
+	indexArray = gtk_tree_path_get_indices (path);
+
+	if (depth > 0)
+	{
+		if ( !gtk_cell_renderer_toggle_get_active(renderer) )
+		{
+			//printf("Toggle: %i On\n", indexArray[0] );
+		   watchpoint[indexArray[0]].flags |=  WP_E;
+		}
+		else
+		{
+			//printf("Toggle: %i Off\n", indexArray[0] );
+		   watchpoint[indexArray[0]].flags &= ~WP_E;
+		}
+	}
+
+	gtk_tree_path_free (path);
+
+	dw->bpListUpdate();
+}
+
 static void DeleteBreak(int sel)
 {
 	if(sel<0) return;
@@ -1037,6 +1076,7 @@ void openDebuggerWindow (void)
 	GtkWidget *entry;
 	GtkWidget *grid;
 	GtkCellRenderer *renderer;
+	GtkCellRenderer *chkbox_renderer;
 	GtkTreeViewColumn *column;
 	debuggerWin_t *dw;
 
@@ -1278,16 +1318,30 @@ void openDebuggerWindow (void)
 	gtk_box_pack_start (GTK_BOX (vbox3), frame, TRUE, TRUE, 2);
 
 	dw->bp_store =
-		gtk_tree_store_new (1, G_TYPE_STRING );
+		gtk_tree_store_new (2, G_TYPE_BOOLEAN, G_TYPE_STRING );
 
 	dw->bp_tree =
 		gtk_tree_view_new_with_model (GTK_TREE_MODEL
 					      (dw->bp_store));
 
+	gtk_tree_view_set_grid_lines (GTK_TREE_VIEW (dw->bp_tree),
+				      GTK_TREE_VIEW_GRID_LINES_VERTICAL);
+
+	chkbox_renderer = gtk_cell_renderer_toggle_new ();
+	gtk_cell_renderer_toggle_set_activatable ((GtkCellRendererToggle *)
+						  chkbox_renderer, TRUE);
+	column = gtk_tree_view_column_new_with_attributes ("Ena",
+							   chkbox_renderer,
+							   "active", 0, NULL);
+	gtk_tree_view_append_column (GTK_TREE_VIEW (dw->bp_tree), column);
+
+	g_signal_connect (chkbox_renderer, "toggled",
+			  G_CALLBACK (enableBreakpointCB), (void *) dw);
+
 	renderer = gtk_cell_renderer_text_new ();
 	g_object_set (renderer, "family", "MonoSpace", NULL);
-	column = gtk_tree_view_column_new_with_attributes ("Breakpoint", renderer,
-							   "text", 0, NULL);
+	column = gtk_tree_view_column_new_with_attributes ("Addr/Flags", renderer,
+							   "text", 1, NULL);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (dw->bp_tree), column);
 
 	scroll = gtk_scrolled_window_new (NULL, NULL);
