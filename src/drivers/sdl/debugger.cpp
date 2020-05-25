@@ -25,6 +25,7 @@
 #include "../../fds.h"
 #include "../../cart.h"
 #include "../../ines.h"
+#include "../../asm.h"
 #include "../../x6502.h"
 #include "../common/configSys.h"
 
@@ -88,6 +89,8 @@ struct debuggerWin_t
 	GtkWidget *sprite_radio_btn;
 
 	int  dialog_op;
+	int  bpEditIdx;
+	char displayROMoffsets;
 
 	debuggerWin_t(void)
 	{
@@ -128,6 +131,8 @@ struct debuggerWin_t
 		P_Z_chkbox = NULL;
 		P_C_chkbox = NULL;
 		dialog_op = 0;
+		bpEditIdx = -1;
+		displayROMoffsets = 0;
 	}
 	
 	~debuggerWin_t(void)
@@ -138,10 +143,55 @@ struct debuggerWin_t
 	void  bpListUpdate(void);
 	void  updateViewPort(void);
 	void  updateRegisterView(void);
+	void  updateAssemblyView(void);
+	int   get_bpList_selrow(void);
 };
 
 static std::list <debuggerWin_t*> debuggerWinList;
 
+int  debuggerWin_t::get_bpList_selrow(void)
+{
+	int retval = -1, numListRows;
+	GList *selListRows, *tmpList;
+	GtkTreeModel *model = NULL;
+	GtkTreeSelection *treeSel;
+
+	treeSel =
+		gtk_tree_view_get_selection (GTK_TREE_VIEW(bp_tree) );
+
+	numListRows = gtk_tree_selection_count_selected_rows (treeSel);
+
+	if (numListRows == 0)
+	{
+		return retval;
+	}
+	//printf("Number of Rows Selected: %i\n", numListRows );
+
+	selListRows = gtk_tree_selection_get_selected_rows (treeSel, &model);
+
+	tmpList = selListRows;
+
+	while (tmpList)
+	{
+		int depth;
+		int *indexArray;
+		GtkTreePath *path = (GtkTreePath *) tmpList->data;
+
+		depth = gtk_tree_path_get_depth (path);
+		indexArray = gtk_tree_path_get_indices (path);
+
+		if (depth > 0)
+		{
+			retval = indexArray[0];
+			break;
+		}
+		tmpList = tmpList->next;
+	}
+
+	g_list_free_full (selListRows, (GDestroyNotify) gtk_tree_path_free);
+
+	return retval;
+}
 
 void debuggerWin_t::bpListUpdate(void)
 {
@@ -266,11 +316,191 @@ void  debuggerWin_t::updateRegisterView(void)
 
 	gtk_text_buffer_set_text( stackTextBuf, stackLine.c_str(), -1 ) ;
 
+	// update counters
+	int64 counter_value = timestampbase + (uint64)timestamp - total_cycles_base;
+	if (counter_value < 0)	// sanity check
+	{
+		ResetDebugStatisticsCounters();
+		counter_value = 0;
+	}
+	sprintf( stmp, "CPU Cycles: %llu", counter_value);
+
+	gtk_label_set_text( GTK_LABEL(cpu_label1), stmp );
+
+	//SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_CYCLES_COUNT, str);
+	counter_value = timestampbase + (uint64)timestamp - delta_cycles_base;
+	if (counter_value < 0)	// sanity check
+	{
+		ResetDebugStatisticsCounters();
+		counter_value = 0;
+	}
+	sprintf(stmp, "(+%llu)", counter_value);
+
+	gtk_label_set_text( GTK_LABEL(cpu_label2), stmp );
+
+	sprintf(stmp, "Instructions: %llu", total_instructions);
+	gtk_label_set_text( GTK_LABEL(instr_label1), stmp );
+
+	sprintf(stmp, "(+%llu)", delta_instructions);
+	gtk_label_set_text( GTK_LABEL(instr_label2), stmp );
+
+}
+
+// This function is for "smart" scrolling...
+// it attempts to scroll up one line by a whole instruction
+static int InstructionUp(int from)
+{
+	int i = std::min(16, from), j;
+
+	while (i > 0)
+	{
+		j = i;
+		while (j > 0)
+		{
+			if (GetMem(from - j) == 0x00)
+				break;	// BRK usually signifies data
+			if (opsize[GetMem(from - j)] == 0)
+				break;	// invalid instruction!
+			if (opsize[GetMem(from - j)] > j)
+				break;	// instruction is too long!
+			if (opsize[GetMem(from - j)] == j)
+				return (from - j);	// instruction is just right! :D
+			j -= opsize[GetMem(from - j)];
+		}
+		i--;
+	}
+
+	// if we get here, no suitable instruction was found
+	if ((from >= 2) && (GetMem(from - 2) == 0x00))
+		return (from - 2);	// if a BRK instruction is possible, use that
+	if (from)
+		return (from - 1);	// else, scroll up one byte
+	return 0;	// of course, if we can't scroll up, just return 0!
+}
+static int InstructionDown(int from)
+{
+	int tmp = opsize[GetMem(from)];
+	if ((tmp))
+		return from + tmp;
+	else
+		return from + 1;		// this is data or undefined instruction
+}
+
+void  debuggerWin_t::updateAssemblyView(void)
+{
+	int starting_address, start_address_lp, addr, size;
+	int instruction_addr;
+	std::string line, block;
+	char chr[64];
+	uint8 opcode[3];
+	const char *disassemblyText = NULL;
+
+	start_address_lp = starting_address = X.PC;
+
+	for (int i=0; i < 32; i++)
+	{
+		//printf("%i: Start Address: 0x%04X \n", i, start_address_lp );
+
+		starting_address = InstructionUp( start_address_lp );
+
+		if ( starting_address == start_address_lp )
+		{
+			break;
+		}
+		start_address_lp = starting_address;
+	}
+
+	addr = starting_address;
+
+	for (int i=0; i < 64; i++)
+	{
+		line.clear();
+
+		// PC pointer
+		if (addr > 0xFFFF) break;
+
+		instruction_addr = addr;
+
+		if (addr == X.PC)
+		{
+			line.assign(">");
+		} 
+		else
+		{
+			line.assign(" ");
+		}
+
+		if (addr >= 0x8000)
+		{
+			if (displayROMoffsets && (GetNesFileAddress(addr) != -1) )
+			{
+				sprintf(chr, " %06X: ", GetNesFileAddress(addr));
+			} 
+			else
+			{
+				sprintf(chr, "%02X:%04X: ", getBank(addr), addr);
+			}
+		} else
+		{
+			sprintf(chr, "  :%04X: ", addr);
+		}
+		line.append(chr);
+
+		size = opsize[GetMem(addr)];
+		if (size == 0)
+		{
+			sprintf(chr, "%02X        UNDEFINED", GetMem(addr++));
+			line.append(chr);
+		} else
+		{
+			if ((addr + size) > 0xFFFF)
+			{
+				while (addr < 0xFFFF)
+				{
+					sprintf(chr, "%02X        OVERFLOW\n", GetMem(addr++));
+					line.append(chr);
+				}
+				break;
+			}
+			for (int j = 0; j < size; j++)
+			{
+				sprintf(chr, "%02X ", opcode[j] = GetMem(addr++));
+				line.append(chr);
+			}
+			while (size < 3)
+			{
+				line.append("   ");  //pad output to align ASM
+				size++;
+			}
+
+			disassemblyText = Disassemble(addr, opcode);
+
+			if ( disassemblyText )
+			{
+				line.append( disassemblyText );
+			}
+		}
+
+		// special case: an RTS opcode
+		if (GetMem(instruction_addr) == 0x60)
+		{
+			line.append("-------------------------");
+		}
+		line.append("\n");
+
+		//printf("%s", line.c_str() );
+
+		block.append( line );
+	}
+
+	gtk_text_buffer_set_text( textbuf, block.c_str(), -1 );
+
 }
 
 void  debuggerWin_t::updateViewPort(void)
 {
 	updateRegisterView();
+	updateAssemblyView();
 
 }
 
@@ -286,24 +516,13 @@ static void handleDialogResponse (GtkWidget * w, gint response_id, debuggerWin_t
 		switch ( dw->dialog_op )
 		{
 			case 1: // Breakpoint Add
+			case 2: // Breakpoint Edit
 			{
-				int  start_addr = -1, end_addr = -1, type = 0, enable = 1;;
+				int  start_addr = -1, end_addr = -1, type = 0, enable = 1, slot;
 				const char *name; 
 				const char *cond;
 
-				txt = gtk_entry_get_text( GTK_ENTRY( dw->bp_start_entry ) );
-
-				if ( txt[0] != 0 )
-				{
-					start_addr = strtol( txt, NULL, 16 );
-				}
-
-				txt = gtk_entry_get_text( GTK_ENTRY( dw->bp_end_entry ) );
-
-				if ( txt[0] != 0 )
-				{
-					end_addr = strtol( txt, NULL, 16 );
-				}
+				slot = (dw->dialog_op == 1) ? numWPs : dw->bpEditIdx;
 
 				if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dw->cpu_radio_btn ) ) )
 				{
@@ -316,6 +535,20 @@ static void handleDialogResponse (GtkWidget * w, gint response_id, debuggerWin_t
 				else if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dw->sprite_radio_btn ) ) )
 				{
 					type |= BT_S;
+				}
+
+				txt = gtk_entry_get_text( GTK_ENTRY( dw->bp_start_entry ) );
+
+				if ( txt[0] != 0 )
+				{
+					start_addr = offsetStringToInt( type, txt );
+				}
+
+				txt = gtk_entry_get_text( GTK_ENTRY( dw->bp_end_entry ) );
+
+				if ( txt[0] != 0 )
+				{
+					end_addr = offsetStringToInt( type, txt );
 				}
 
 				if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dw->bp_read_chkbox ) ) )
@@ -348,7 +581,7 @@ static void handleDialogResponse (GtkWidget * w, gint response_id, debuggerWin_t
 				{
 					unsigned int retval;
 
-					retval = NewBreak( name, start_addr, end_addr, type, cond, numWPs, enable);
+					retval = NewBreak( name, start_addr, end_addr, type, cond, slot, enable);
 
 					if ( (retval == 1) || (retval == 2) )
 					{
@@ -356,7 +589,10 @@ static void handleDialogResponse (GtkWidget * w, gint response_id, debuggerWin_t
 					}
 					else
 					{
-						numWPs++;
+						if (dw->dialog_op == 1)
+						{
+							numWPs++;
+						}
 
 						dw->bpListUpdate();
 					}
@@ -430,6 +666,8 @@ static void create_breakpoint_dialog( int index, debuggerWin_t * dw )
 						       (GTK_DIALOG_DESTROY_WITH_PARENT),
 						       "_Cancel", GTK_RESPONSE_CANCEL,
 						       "_Edit", GTK_RESPONSE_OK, NULL);
+
+		dw->bpEditIdx = index;
 	}
 
 	gtk_dialog_set_default_response( GTK_DIALOG(win), GTK_RESPONSE_OK );
@@ -529,6 +767,25 @@ static void create_breakpoint_dialog( int index, debuggerWin_t * dw )
 	g_signal_connect (win, "response",
 			  G_CALLBACK (handleDialogResponse), dw);
 
+	if ( index >= 0 )
+	{
+		if ( watchpoint[index].flags & BT_P )
+		{
+		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->ppu_radio_btn ), TRUE );
+		}
+		else if ( watchpoint[index].flags & BT_S )
+		{
+		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->sprite_radio_btn ), TRUE );
+		}
+		else
+		{
+		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->cpu_radio_btn ), TRUE );
+		}
+	}
+	else
+	{
+
+	}
 }
 
 static void addBreakpointCB (GtkButton * button, debuggerWin_t * dw)
@@ -538,17 +795,214 @@ static void addBreakpointCB (GtkButton * button, debuggerWin_t * dw)
 	create_breakpoint_dialog( -1, dw );
 }
 
+static void editBreakpointCB (GtkButton * button, debuggerWin_t * dw)
+{
+	int selRow;
+
+	selRow = dw->get_bpList_selrow();
+
+	if ( selRow >= 0 )
+	{
+		dw->dialog_op = 2;
+
+		create_breakpoint_dialog( selRow, dw );
+	}
+}
+
+static void DeleteBreak(int sel)
+{
+	if(sel<0) return;
+	if(sel>=numWPs) return;
+	if (watchpoint[sel].cond)
+	{
+		freeTree(watchpoint[sel].cond);
+	}
+	if (watchpoint[sel].condText)
+	{
+		free(watchpoint[sel].condText);
+	}
+	if (watchpoint[sel].desc)
+	{
+		free(watchpoint[sel].desc);
+	}
+	// move all BP items up in the list
+	for (int i = sel; i < numWPs; i++) 
+	{
+		watchpoint[i].address = watchpoint[i+1].address;
+		watchpoint[i].endaddress = watchpoint[i+1].endaddress;
+		watchpoint[i].flags = watchpoint[i+1].flags;
+// ################################## Start of SP CODE ###########################
+		watchpoint[i].cond = watchpoint[i+1].cond;
+		watchpoint[i].condText = watchpoint[i+1].condText;
+		watchpoint[i].desc = watchpoint[i+1].desc;
+// ################################## End of SP CODE ###########################
+	}
+	// erase last BP item
+	watchpoint[numWPs].address = 0;
+	watchpoint[numWPs].endaddress = 0;
+	watchpoint[numWPs].flags = 0;
+	watchpoint[numWPs].cond = 0;
+	watchpoint[numWPs].condText = 0;
+	watchpoint[numWPs].desc = 0;
+	numWPs--;
+}
+
+static void deleteBreakpointCB (GtkButton * button, debuggerWin_t * dw)
+{
+	int selRow;
+
+	selRow = dw->get_bpList_selrow();
+
+	if ( (selRow >= 0) && (selRow < numWPs) )
+	{
+		DeleteBreak( selRow );
+		dw->bpListUpdate();
+	}
+}
+
+static void debugRunCB (GtkButton * button, debuggerWin_t * dw)
+{
+	if (FCEUI_EmulationPaused()) 
+	{
+		//UpdateRegs(hwndDlg);
+		FCEUI_ToggleEmulationPause();
+		//DebuggerWasUpdated = false done in above function;
+	}
+}
+
+static void debugStepIntoCB (GtkButton * button, debuggerWin_t * dw)
+{
+	FCEUI_Debugger().step = true;
+	FCEUI_SetEmulationPaused(0);
+}
+
+static void debugStepOutCB (GtkButton * button, debuggerWin_t * dw)
+{
+	if (FCEUI_EmulationPaused() > 0) 
+	{
+		DebuggerState &dbgstate = FCEUI_Debugger();
+		//UpdateRegs(hwndDlg);
+		if (dbgstate.stepout)
+		{
+			printf("Step Out is currently in process.\n");
+			return;
+		}
+		if (GetMem(X.PC) == 0x20)
+		{
+			dbgstate.jsrcount = 1;
+		}
+		else 
+		{
+			dbgstate.jsrcount = 0;
+		}
+		dbgstate.stepout = 1;
+		FCEUI_SetEmulationPaused(0);
+	}
+}
+
+static void debugStepOverCB (GtkButton * button, debuggerWin_t * dw)
+{
+	if (FCEUI_EmulationPaused()) 
+	{
+		//UpdateRegs(hwndDlg);
+		int tmp=X.PC;
+		uint8 opcode = GetMem(X.PC);
+		bool jsr = opcode==0x20;
+		bool call = jsr;
+		#ifdef BRK_3BYTE_HACK
+		//with this hack, treat BRK similar to JSR
+		if(opcode == 0x00)
+		{
+			call = true;
+		}
+		#endif
+		if (call) 
+		{
+			if (watchpoint[64].flags)
+			{
+				printf("Step Over is currently in process.\n");
+				return;
+			}
+			watchpoint[64].address = (tmp+3);
+			watchpoint[64].flags = WP_E|WP_X;
+		}
+		else 
+		{
+			FCEUI_Debugger().step = true;
+		}
+		FCEUI_SetEmulationPaused(0);
+	}
+}
+static void debugRunLineCB (GtkButton * button, debuggerWin_t * dw)
+{
+	uint64 ts=timestampbase;
+	ts+=timestamp;
+	ts+=341/3;
+	//if (scanline == 240) vblankScanLines++;
+	//else vblankScanLines = 0;
+	FCEUI_Debugger().runline = true;
+	FCEUI_Debugger().runline_end_time=ts;
+	FCEUI_SetEmulationPaused(0);
+}
+
+static void debugRunLine128CB (GtkButton * button, debuggerWin_t * dw)
+{
+	//if (FCEUI_EmulationPaused())
+	//{
+	//	UpdateRegs(hwndDlg);
+	//}
+	FCEUI_Debugger().runline = true;
+	{
+		uint64 ts=timestampbase;
+		ts+=timestamp;
+		ts+=128*341/3;
+		FCEUI_Debugger().runline_end_time=ts;
+		//if (scanline+128 >= 240 && scanline+128 <= 257) vblankScanLines = (scanline+128)-240;
+		//else vblankScanLines = 0;
+	}
+	FCEUI_SetEmulationPaused(0);
+}
+static void romOffsetToggleCB( GtkToggleButton *togglebutton, debuggerWin_t * dw)
+{
+	dw->displayROMoffsets = gtk_toggle_button_get_active( togglebutton );
+
+	dw->updateViewPort();
+
+	//printf("Toggle ROM Offset: %i \n", dw->displayROMoffsets );
+}
+
+static void updateAllDebugWindows(void)
+{
+	std::list < debuggerWin_t * >::iterator it;
+
+	for (it = debuggerWinList.begin (); it != debuggerWinList.end (); it++)
+	{
+		(*it)->updateViewPort();
+	}
+}
+
+static void winDebuggerLoopStep(void)
+{
+	FCEUD_UpdateInput();
+
+	while(gtk_events_pending())
+	{
+		gtk_main_iteration_do(FALSE);
+	}
+}
+
 //this code enters the debugger when a breakpoint was hit
 void FCEUD_DebugBreakpoint(int bp_num)
 {
+	//printf("Breakpoint Hit: %i \n", bp_num);
+	
+	updateAllDebugWindows();
 
-	//std::list < debuggerWin_t * >::iterator it;
-
-	//for (it = debuggerWinList.begin (); it != debuggerWinList.end (); it++)
-	//{
-
-	//}
-
+	while(FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
+	{
+		usleep(50000);
+		winDebuggerLoopStep();
+	}
 }
 
 static void closeDebuggerWindow (GtkWidget * w, GdkEvent * e, debuggerWin_t * dw)
@@ -559,7 +1013,6 @@ static void closeDebuggerWindow (GtkWidget * w, GdkEvent * e, debuggerWin_t * dw
 	{
 		if (dw == *it)
 		{
-			//printf("Removing MemView Window %p from List\n", cw);
 			debuggerWinList.erase (it);
 			break;
 		}
@@ -660,27 +1113,45 @@ void openDebuggerWindow (void)
 	//     Row 1
 	button = gtk_button_new_with_label ("Run");
 
+	g_signal_connect (button, "clicked",
+			  G_CALLBACK (debugRunCB), (gpointer) dw);
+
 	gtk_grid_attach( GTK_GRID(grid), button, 0, 0, 1, 1 );
 
 	button = gtk_button_new_with_label ("Step Into");
+
+	g_signal_connect (button, "clicked",
+			  G_CALLBACK (debugStepIntoCB), (gpointer) dw);
 
 	gtk_grid_attach( GTK_GRID(grid), button, 1, 0, 1, 1 );
 
 	//     Row 2
 	button = gtk_button_new_with_label ("Step Out");
 
+	g_signal_connect (button, "clicked",
+			  G_CALLBACK (debugStepOutCB), (gpointer) dw);
+
 	gtk_grid_attach( GTK_GRID(grid), button, 0, 1, 1, 1 );
 
 	button = gtk_button_new_with_label ("Step Over");
+
+	g_signal_connect (button, "clicked",
+			  G_CALLBACK (debugStepOverCB), (gpointer) dw);
 
 	gtk_grid_attach( GTK_GRID(grid), button, 1, 1, 1, 1 );
 
 	//     Row 3
 	button = gtk_button_new_with_label ("Run Line");
 
+	g_signal_connect (button, "clicked",
+			  G_CALLBACK (debugRunLineCB), (gpointer) dw);
+
 	gtk_grid_attach( GTK_GRID(grid), button, 0, 2, 1, 1 );
 
 	button = gtk_button_new_with_label ("128 Lines");
+
+	g_signal_connect (button, "clicked",
+			  G_CALLBACK (debugRunLine128CB), (gpointer) dw);
 
 	gtk_grid_attach( GTK_GRID(grid), button, 1, 2, 1, 1 );
 
@@ -838,9 +1309,15 @@ void openDebuggerWindow (void)
 
 	button = gtk_button_new_with_label ("Delete");
 
+	g_signal_connect (button, "clicked",
+			  G_CALLBACK (deleteBreakpointCB), (gpointer) dw);
+
 	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
 
 	button = gtk_button_new_with_label ("Edit");
+
+	g_signal_connect (button, "clicked",
+			  G_CALLBACK (editBreakpointCB), (gpointer) dw);
 
 	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
 
@@ -1004,6 +1481,8 @@ void openDebuggerWindow (void)
 	button = gtk_button_new_with_label ("Reset Counters");
 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
 	button = gtk_check_button_new_with_label("ROM Offsets");
+	g_signal_connect (button, "toggled",
+			  G_CALLBACK (romOffsetToggleCB), dw);
 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
 	button = gtk_check_button_new_with_label("Symbolic Debug");
 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);

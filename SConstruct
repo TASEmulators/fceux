@@ -186,7 +186,7 @@ else:
    
   if env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c', autoadd=1):
     conf.env.Append(CCFLAGS = "-DOPENGL")
-  conf.env.Append(CPPDEFINES = ['PSS_STYLE=1'])
+  conf.env.Append(CPPDEFINES = ['PSS_STYLE=1',"FCEUDEF_DEBUGGER"])
   
   env = conf.Finish()
 

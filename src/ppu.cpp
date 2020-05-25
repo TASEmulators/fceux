@@ -1375,7 +1375,9 @@ static void DoLine(void) {
 			GameHBIRQHook();
 	}
 
+#ifdef WIN32
 	DEBUG(FCEUD_UpdateNTView(scanline, 0));
+#endif
 
 	if (SpriteON)
 		RefreshSprites();
@@ -1852,7 +1854,9 @@ int FCEUPPU_Loop(int skip) {
 			for (scanline = 0; scanline < totalscanlines; ) {	//scanline is incremented in  DoLine.  Evil. :/
 				deempcnt[deemp]++;
 				if (scanline < 240)
+#ifdef WIN32
 					DEBUG(FCEUD_UpdatePPUView(scanline, 1));
+#endif
 				DoLine();
 
 				if (scanline < normalscanlines || scanline == totalscanlines)
@@ -2145,8 +2149,10 @@ int FCEUX_PPU_Loop(int skip) {
 			ppuphase = PPUPHASE_BG;
 
 			if (sl != 0 && sl < 241) { // ignore the invisible
+#ifdef WIN32
 				DEBUG(FCEUD_UpdatePPUView(scanline = yp, 1));
 				DEBUG(FCEUD_UpdateNTView(scanline = yp, 1));
+#endif
 			}
 
 			//hack to fix SDF ship intro screen with split. is it right?
