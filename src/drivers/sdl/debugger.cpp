@@ -650,6 +650,7 @@ static void create_breakpoint_dialog( int index, debuggerWin_t * dw )
 	GtkWidget *label;
 	GtkWidget *frame;
 	GtkWidget *grid;
+	char stmp[64];
 
 	if ( index < 0 )
 	{
@@ -685,7 +686,7 @@ static void create_breakpoint_dialog( int index, debuggerWin_t * dw )
 	gtk_entry_set_max_length (GTK_ENTRY (dw->bp_start_entry), 4);
 	gtk_entry_set_width_chars (GTK_ENTRY (dw->bp_start_entry), 4);
 
-	gtk_box_pack_start (GTK_BOX (hbox), dw->bp_start_entry, FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (hbox), dw->bp_start_entry, TRUE, TRUE, 2);
 
 	label = gtk_label_new("-");
 	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
@@ -694,7 +695,7 @@ static void create_breakpoint_dialog( int index, debuggerWin_t * dw )
 	gtk_entry_set_max_length (GTK_ENTRY (dw->bp_end_entry), 4);
 	gtk_entry_set_width_chars (GTK_ENTRY (dw->bp_end_entry), 4);
 
-	gtk_box_pack_start (GTK_BOX (hbox), dw->bp_end_entry, FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (hbox), dw->bp_end_entry, TRUE, TRUE, 2);
 
 	dw->bp_forbid_chkbox = gtk_check_button_new_with_label("Forbid");
 	gtk_box_pack_start (GTK_BOX (hbox), dw->bp_forbid_chkbox, FALSE, FALSE, 2);
@@ -770,7 +771,7 @@ static void create_breakpoint_dialog( int index, debuggerWin_t * dw )
 			  G_CALLBACK (handleDialogResponse), dw);
 
 	if ( index >= 0 )
-	{
+	{  // Sync entries to current breakpoint
 		if ( watchpoint[index].flags & BT_P )
 		{
 		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->ppu_radio_btn ), TRUE );
@@ -782,6 +783,48 @@ static void create_breakpoint_dialog( int index, debuggerWin_t * dw )
 		else
 		{
 		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->cpu_radio_btn ), TRUE );
+		}
+
+		sprintf( stmp, "%04X", watchpoint[index].address );
+
+		gtk_entry_set_text (GTK_ENTRY (dw->bp_start_entry), stmp );
+
+		if ( watchpoint[index].endaddress > 0 )
+		{
+			sprintf( stmp, "%04X", watchpoint[index].endaddress );
+
+			gtk_entry_set_text (GTK_ENTRY (dw->bp_end_entry), stmp );
+		}
+
+		if ( watchpoint[index].flags & WP_R )
+		{
+		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->bp_read_chkbox ), TRUE );
+		}
+		if ( watchpoint[index].flags & WP_W )
+		{
+		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->bp_write_chkbox ), TRUE );
+		}
+		if ( watchpoint[index].flags & WP_X )
+		{
+		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->bp_execute_chkbox ), TRUE );
+		}
+		if ( watchpoint[index].flags & WP_F )
+		{
+		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->bp_forbid_chkbox ), TRUE );
+		}
+		if ( watchpoint[index].flags & WP_E )
+		{
+		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->bp_enable_chkbox ), TRUE );
+		}
+
+		if ( watchpoint[index].condText )
+		{
+			gtk_entry_set_text (GTK_ENTRY (dw->bp_cond_entry), watchpoint[index].condText );
+		}
+
+		if ( watchpoint[index].desc )
+		{
+			gtk_entry_set_text (GTK_ENTRY (dw->bp_name_entry), watchpoint[index].desc );
 		}
 	}
 	else
