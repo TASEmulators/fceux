@@ -43,6 +43,26 @@ extern Config *g_config;
 //*******************************************************************************************************
 //
 
+struct dbg_asm_entry_t
+{
+	int  addr;
+	int  bank;
+	int  rom;
+	int  size;
+	uint8  opcode[3];
+
+
+	dbg_asm_entry_t(void)
+	{
+		addr = 0; bank = 0; rom = -1; size = 0;
+
+		for (int i=0; i<3; i++)
+		{
+			opcode[i] = 0;
+		}
+	}
+};
+
 struct debuggerWin_t
 {
 	GtkWidget *win;
@@ -92,6 +112,8 @@ struct debuggerWin_t
 	int  bpEditIdx;
 	char displayROMoffsets;
 
+	std::vector <dbg_asm_entry_t*> asmEntry;
+
 	debuggerWin_t(void)
 	{
 		win = NULL;
@@ -137,9 +159,10 @@ struct debuggerWin_t
 	
 	~debuggerWin_t(void)
 	{
-	
+		asmClear();
 	}
 
+	void  asmClear(void);
 	void  bpListUpdate(void);
 	void  updateViewPort(void);
 	void  updateRegisterView(void);
@@ -148,6 +171,15 @@ struct debuggerWin_t
 };
 
 static std::list <debuggerWin_t*> debuggerWinList;
+
+void debuggerWin_t::asmClear(void)
+{
+	for (size_t i=0; i<asmEntry.size(); i++)
+	{
+		delete asmEntry[i];
+	}
+	asmEntry.clear();
+}
 
 int  debuggerWin_t::get_bpList_selrow(void)
 {
@@ -396,6 +428,7 @@ void  debuggerWin_t::updateAssemblyView(void)
 	char chr[64];
 	uint8 opcode[3];
 	const char *disassemblyText = NULL;
+	dbg_asm_entry_t *a;
 
 	start_address_lp = starting_address = X.PC;
 
@@ -412,6 +445,8 @@ void  debuggerWin_t::updateAssemblyView(void)
 		start_address_lp = starting_address;
 	}
 
+	asmClear();
+
 	addr = starting_address;
 
 	for (int i=0; i < 64; i++)
@@ -420,6 +455,8 @@ void  debuggerWin_t::updateAssemblyView(void)
 
 		// PC pointer
 		if (addr > 0xFFFF) break;
+
+		a = new dbg_asm_entry_t;
 
 		instruction_addr = addr;
 
@@ -431,16 +468,20 @@ void  debuggerWin_t::updateAssemblyView(void)
 		{
 			line.assign(" ");
 		}
+		a->addr = addr;
 
 		if (addr >= 0x8000)
 		{
-			if (displayROMoffsets && (GetNesFileAddress(addr) != -1) )
+			a->bank = getBank(addr);
+			a->rom  = GetNesFileAddress(addr);
+
+			if (displayROMoffsets && (a->rom != -1) )
 			{
-				sprintf(chr, " %06X: ", GetNesFileAddress(addr));
+				sprintf(chr, " %06X: ", a->rom);
 			} 
 			else
 			{
-				sprintf(chr, "%02X:%04X: ", getBank(addr), addr);
+				sprintf(chr, "%02X:%04X: ", a->bank, addr);
 			}
 		} else
 		{
@@ -482,6 +523,11 @@ void  debuggerWin_t::updateAssemblyView(void)
 				line.append( disassemblyText );
 			}
 		}
+		for (int j=0; j<size; j++)
+		{
+			a->opcode[j] = opcode[j];
+		}
+		a->size = size;
 
 		// special case: an RTS opcode
 		if (GetMem(instruction_addr) == 0x60)
@@ -493,6 +539,8 @@ void  debuggerWin_t::updateAssemblyView(void)
 		//printf("%s", line.c_str() );
 
 		block.append( line );
+
+		asmEntry.push_back(a);
 	}
 
 	gtk_text_buffer_set_text( textbuf, block.c_str(), -1 );
@@ -503,7 +551,7 @@ void  debuggerWin_t::updateViewPort(void)
 {
 	updateRegisterView();
 	updateAssemblyView();
-
+	bpListUpdate();
 }
 
 static void handleDialogResponse (GtkWidget * w, gint response_id, debuggerWin_t * dw)
@@ -1044,6 +1092,66 @@ static void debugRunLine128CB (GtkButton * button, debuggerWin_t * dw)
 	}
 	FCEUI_SetEmulationPaused(0);
 }
+
+static gboolean
+populate_context_menu (GtkWidget *popup,
+               debuggerWin_t * dw )
+{
+   GtkWidget *menu = NULL;
+   GtkWidget *item;
+	GtkTextIter iter;
+	char stmp[256];
+	gint cpos, lineNum;
+	int addr;
+
+	g_object_get( dw->textbuf, "cursor-position", &cpos, NULL );
+
+	gtk_text_buffer_get_iter_at_offset( dw->textbuf, &iter, cpos );
+
+	lineNum = gtk_text_iter_get_line( &iter );
+	
+	if ( (lineNum < 0) || (lineNum >= (int)dw->asmEntry.size() ) )
+	{
+		return TRUE;
+	}
+	addr = dw->asmEntry[lineNum]->addr;
+
+   //printf("Context Menu:  CP:%i  Line:%i  Addr:0x%04X\n", cpos, lineNum, addr );
+	
+	menu = gtk_menu_new ();
+	
+	sprintf( stmp, "Add Breakpoint at 0x%04X", addr );
+
+	item = gtk_menu_item_new_with_label( stmp );
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+
+	//g_signal_connect (item, "activate",
+	//	G_CALLBACK (setValueCB), mv);
+
+   gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL );
+	//gtk_widget_show_all (popup);
+	gtk_widget_show_all (menu);
+
+   return TRUE;
+}
+
+static gboolean
+textview_button_press_cb (GtkWidget *widget,
+               GdkEventButton  *event,
+               debuggerWin_t * dw )
+{
+   gboolean  ret = FALSE;
+   //printf("Press Button  %i   %u\n", event->type, event->button );
+
+   if ( event->button == 3 )
+   {
+      ret = populate_context_menu( widget, dw );
+   }
+
+   return ret;
+}
+
 static void romOffsetToggleCB( GtkToggleButton *togglebutton, debuggerWin_t * dw)
 {
 	dw->displayROMoffsets = gtk_toggle_button_get_active( togglebutton );
@@ -1145,6 +1253,9 @@ void openDebuggerWindow (void)
 	gtk_text_view_set_editable( dw->textview, FALSE );
 	gtk_text_view_set_wrap_mode( dw->textview, GTK_WRAP_NONE );
 	gtk_text_view_set_cursor_visible( dw->textview, TRUE );
+
+	g_signal_connect (dw->textview, "button-press-event",
+			  G_CALLBACK (textview_button_press_cb), dw);
 
 	dw->textbuf = gtk_text_view_get_buffer( dw->textview );
 
