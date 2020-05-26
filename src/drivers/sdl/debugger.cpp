@@ -38,6 +38,7 @@
 
 extern Config *g_config;
 
+static void updateAllDebugWindows(void);
 //*******************************************************************************************************
 // Debugger Window
 //*******************************************************************************************************
@@ -107,6 +108,9 @@ struct debuggerWin_t
 	GtkWidget *cpu_radio_btn;
 	GtkWidget *ppu_radio_btn;
 	GtkWidget *sprite_radio_btn;
+	GtkWidget *badop_chkbox;
+	GtkWidget *brkcycles_chkbox;
+	GtkWidget *brkinstrs_chkbox;
 
 	int  dialog_op;
 	int  bpEditIdx;
@@ -153,6 +157,9 @@ struct debuggerWin_t
 		P_I_chkbox = NULL;
 		P_Z_chkbox = NULL;
 		P_C_chkbox = NULL;
+		badop_chkbox = NULL;
+		brkcycles_chkbox = NULL;
+		brkinstrs_chkbox = NULL;
 		dialog_op = 0;
 		bpEditIdx = -1;
 		ctx_menu_addr = 0;
@@ -379,6 +386,10 @@ void  debuggerWin_t::updateRegisterView(void)
 
 	sprintf(stmp, "(+%llu)", delta_instructions);
 	gtk_label_set_text( GTK_LABEL(instr_label2), stmp );
+
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(badop_chkbox    ), FCEUI_Debugger().badopbreak );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(brkcycles_chkbox), break_on_cycles             );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(brkinstrs_chkbox), break_on_instructions       );
 
 }
 
@@ -1153,6 +1164,34 @@ textview_button_press_cb (GtkWidget *widget,
    return ret;
 }
 
+static void resetCountersCB( GtkWidget *button, debuggerWin_t * dw)
+{
+	ResetDebugStatisticsCounters();
+
+	updateAllDebugWindows();
+}
+
+static void breakOnBadOpcodeCB( GtkToggleButton *togglebutton, debuggerWin_t * dw)
+{
+	FCEUI_Debugger().badopbreak = !FCEUI_Debugger().badopbreak;
+
+	updateAllDebugWindows();
+}
+
+static void breakOnCyclesCB( GtkToggleButton *togglebutton, debuggerWin_t * dw)
+{
+	break_on_cycles = !break_on_cycles;
+
+	updateAllDebugWindows();
+}
+
+static void breakOnInstructionsCB( GtkToggleButton *togglebutton, debuggerWin_t * dw)
+{
+	break_on_instructions = !break_on_instructions;
+
+	updateAllDebugWindows();
+}
+
 static void romOffsetToggleCB( GtkToggleButton *togglebutton, debuggerWin_t * dw)
 {
 	dw->displayROMoffsets = gtk_toggle_button_get_active( togglebutton );
@@ -1530,9 +1569,10 @@ void openDebuggerWindow (void)
 
 	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
 
-	button = gtk_check_button_new_with_label("Break on Bad Opcodes");
-
-	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 1);
+	dw->badop_chkbox = gtk_check_button_new_with_label("Break on Bad Opcodes");
+	g_signal_connect (dw->badop_chkbox, "toggled",
+			  G_CALLBACK (breakOnBadOpcodeCB), dw);
+	gtk_box_pack_start (GTK_BOX (vbox), dw->badop_chkbox, FALSE, FALSE, 1);
 
 	// Status Flags Frame
 	frame = gtk_frame_new ("Status Flags");
@@ -1623,13 +1663,17 @@ void openDebuggerWindow (void)
 	gtk_grid_attach( GTK_GRID(grid), dw->instr_label1, 1, 2, 1, 1 );
 	gtk_grid_attach( GTK_GRID(grid), dw->instr_label2, 2, 2, 1, 1 );
 
-	button = gtk_check_button_new_with_label("Break when exceed");
-	gtk_grid_attach( GTK_GRID(grid), button, 1, 1, 1, 1 );
+	dw->brkcycles_chkbox = gtk_check_button_new_with_label("Break when exceed");
+	g_signal_connect (dw->brkcycles_chkbox, "toggled",
+			  G_CALLBACK (breakOnCyclesCB), dw);
+	gtk_grid_attach( GTK_GRID(grid), dw->brkcycles_chkbox, 1, 1, 1, 1 );
 	entry = gtk_entry_new ();
 	gtk_grid_attach( GTK_GRID(grid), entry, 2, 1, 1, 1 );
 
-	button = gtk_check_button_new_with_label("Break when exceed");
-	gtk_grid_attach( GTK_GRID(grid), button, 1, 3, 1, 1 );
+	dw->brkinstrs_chkbox = gtk_check_button_new_with_label("Break when exceed");
+	g_signal_connect (dw->brkinstrs_chkbox, "toggled",
+			  G_CALLBACK (breakOnInstructionsCB), dw);
+	gtk_grid_attach( GTK_GRID(grid), dw->brkinstrs_chkbox, 1, 3, 1, 1 );
 	entry = gtk_entry_new ();
 	gtk_grid_attach( GTK_GRID(grid), entry, 2, 3, 1, 1 );
 
@@ -1688,6 +1732,8 @@ void openDebuggerWindow (void)
 	gtk_box_pack_start (GTK_BOX (hbox2), vbox, FALSE, FALSE, 2);
 
 	button = gtk_button_new_with_label ("Reset Counters");
+	g_signal_connect (button, "clicked",
+			  G_CALLBACK (resetCountersCB), dw);
 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
 	button = gtk_check_button_new_with_label("ROM Offsets");
 	g_signal_connect (button, "toggled",
