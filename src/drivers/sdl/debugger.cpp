@@ -110,6 +110,7 @@ struct debuggerWin_t
 
 	int  dialog_op;
 	int  bpEditIdx;
+	int  ctx_menu_addr;
 	char displayROMoffsets;
 
 	std::vector <dbg_asm_entry_t*> asmEntry;
@@ -154,6 +155,7 @@ struct debuggerWin_t
 		P_C_chkbox = NULL;
 		dialog_op = 0;
 		bpEditIdx = -1;
+		ctx_menu_addr = 0;
 		displayROMoffsets = 0;
 	}
 	
@@ -411,14 +413,14 @@ static int InstructionUp(int from)
 		return (from - 1);	// else, scroll up one byte
 	return 0;	// of course, if we can't scroll up, just return 0!
 }
-static int InstructionDown(int from)
-{
-	int tmp = opsize[GetMem(from)];
-	if ((tmp))
-		return from + tmp;
-	else
-		return from + 1;		// this is data or undefined instruction
-}
+//static int InstructionDown(int from)
+//{
+//	int tmp = opsize[GetMem(from)];
+//	if ((tmp))
+//		return from + tmp;
+//	else
+//		return from + 1;		// this is data or undefined instruction
+//}
 
 void  debuggerWin_t::updateAssemblyView(void)
 {
@@ -649,32 +651,10 @@ static void handleDialogResponse (GtkWidget * w, gint response_id, debuggerWin_t
 				}
 			}
 			break;
+			default:
+				// Do Nothing
+			break;
 		}
-
-
-		//if ( txt != NULL )
-		//{
-		//	//printf("Text: '%s'\n", txt );
-		//	switch (mv->dialog_op)
-		//	{
-		//		case 1:
-		//			if ( isxdigit(txt[0]) )
-		//			{  // Address is always treated as hex number
-		//				mv->gotoLocation( strtol( txt, NULL, 16 ) );
-		//			}
-		//		break;
-		//		case 2:
-		//			if ( isdigit(txt[0]) )
-		//			{  // Value is numerical
-		//				mv->writeMem( mv->selAddr, strtol( txt, NULL, 0 ) );
-		//			}
-		//			else if ( (txt[0] == '\'') && (txt[2] == '\'') )
-		//			{  // Byte to be written is expressed as ASCII character
-		//				mv->writeMem( mv->selAddr, txt[1] );
-		//			}
-		//		break;
-		//	}
-		//}
 	}
 	//else if ( response_id == GTK_RESPONSE_CANCEL )
 	//{
@@ -689,7 +669,7 @@ static void closeDialogWindow (GtkWidget * w, GdkEvent * e, debuggerWin_t * dw)
 	gtk_widget_destroy (w);
 }
 
-static void create_breakpoint_dialog( int index, debuggerWin_t * dw )
+static void create_breakpoint_dialog( int index, watchpointinfo *wp, debuggerWin_t * dw )
 {
 	GtkWidget *win;
 	GtkWidget *vbox;
@@ -702,6 +682,8 @@ static void create_breakpoint_dialog( int index, debuggerWin_t * dw )
 
 	if ( index < 0 )
 	{
+		dw->dialog_op = 1;
+
 		win = gtk_dialog_new_with_buttons ("Add Breakpoint",
 						       GTK_WINDOW (dw->win),
 						       (GtkDialogFlags)
@@ -711,6 +693,8 @@ static void create_breakpoint_dialog( int index, debuggerWin_t * dw )
 	}
 	else
 	{
+		dw->dialog_op = 2;
+
 		win = gtk_dialog_new_with_buttons ("Edit Breakpoint",
 						       GTK_WINDOW (dw->win),
 						       (GtkDialogFlags)
@@ -818,13 +802,13 @@ static void create_breakpoint_dialog( int index, debuggerWin_t * dw )
 	g_signal_connect (win, "response",
 			  G_CALLBACK (handleDialogResponse), dw);
 
-	if ( index >= 0 )
-	{  // Sync entries to current breakpoint
-		if ( watchpoint[index].flags & BT_P )
+	if ( wp != NULL )
+	{  // Sync entries to passed in breakpoint
+		if ( wp->flags & BT_P )
 		{
 		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->ppu_radio_btn ), TRUE );
 		}
-		else if ( watchpoint[index].flags & BT_S )
+		else if ( wp->flags & BT_S )
 		{
 		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->sprite_radio_btn ), TRUE );
 		}
@@ -833,59 +817,62 @@ static void create_breakpoint_dialog( int index, debuggerWin_t * dw )
 		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->cpu_radio_btn ), TRUE );
 		}
 
-		sprintf( stmp, "%04X", watchpoint[index].address );
+		sprintf( stmp, "%04X", wp->address );
 
 		gtk_entry_set_text (GTK_ENTRY (dw->bp_start_entry), stmp );
 
-		if ( watchpoint[index].endaddress > 0 )
+		if ( wp->endaddress > 0 )
 		{
-			sprintf( stmp, "%04X", watchpoint[index].endaddress );
+			sprintf( stmp, "%04X", wp->endaddress );
 
 			gtk_entry_set_text (GTK_ENTRY (dw->bp_end_entry), stmp );
 		}
 
-		if ( watchpoint[index].flags & WP_R )
+		if ( wp->flags & WP_R )
 		{
 		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->bp_read_chkbox ), TRUE );
 		}
-		if ( watchpoint[index].flags & WP_W )
+		if ( wp->flags & WP_W )
 		{
 		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->bp_write_chkbox ), TRUE );
 		}
-		if ( watchpoint[index].flags & WP_X )
+		if ( wp->flags & WP_X )
 		{
 		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->bp_execute_chkbox ), TRUE );
 		}
-		if ( watchpoint[index].flags & WP_F )
+		if ( wp->flags & WP_F )
 		{
 		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->bp_forbid_chkbox ), TRUE );
 		}
-		if ( watchpoint[index].flags & WP_E )
+		if ( wp->flags & WP_E )
 		{
 		   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->bp_enable_chkbox ), TRUE );
 		}
 
-		if ( watchpoint[index].condText )
+		if ( wp->condText )
 		{
-			gtk_entry_set_text (GTK_ENTRY (dw->bp_cond_entry), watchpoint[index].condText );
+			gtk_entry_set_text (GTK_ENTRY (dw->bp_cond_entry), wp->condText );
 		}
 
-		if ( watchpoint[index].desc )
+		if ( wp->desc )
 		{
-			gtk_entry_set_text (GTK_ENTRY (dw->bp_name_entry), watchpoint[index].desc );
+			gtk_entry_set_text (GTK_ENTRY (dw->bp_name_entry), wp->desc );
 		}
 	}
 	else
-	{
+	{  // New entry, fill in current PC
+		sprintf( stmp, "%04X", X.PC );
 
+		gtk_entry_set_text (GTK_ENTRY (dw->bp_start_entry), stmp );
+
+	   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->bp_enable_chkbox ), TRUE );
+	   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dw->bp_execute_chkbox ), TRUE );
 	}
 }
 
 static void addBreakpointCB (GtkButton * button, debuggerWin_t * dw)
 {
-	dw->dialog_op = 1;
-
-	create_breakpoint_dialog( -1, dw );
+	create_breakpoint_dialog( -1, NULL, dw );
 }
 
 static void editBreakpointCB (GtkButton * button, debuggerWin_t * dw)
@@ -896,9 +883,7 @@ static void editBreakpointCB (GtkButton * button, debuggerWin_t * dw)
 
 	if ( selRow >= 0 )
 	{
-		dw->dialog_op = 2;
-
-		create_breakpoint_dialog( selRow, dw );
+		create_breakpoint_dialog( selRow, &watchpoint[selRow], dw );
 	}
 }
 
@@ -1093,6 +1078,22 @@ static void debugRunLine128CB (GtkButton * button, debuggerWin_t * dw)
 	FCEUI_SetEmulationPaused(0);
 }
 
+static void
+addBreakpointMenuCB (GtkMenuItem *menuitem,
+				      	debuggerWin_t * dw)
+{
+	watchpointinfo wp;
+
+	wp.address = dw->ctx_menu_addr;
+	wp.endaddress = 0;
+	wp.flags   = WP_X | WP_E;
+	wp.condText = "K==#00";
+	wp.desc = NULL;
+
+	create_breakpoint_dialog( -1, &wp, dw );
+
+}
+
 static gboolean
 populate_context_menu (GtkWidget *popup,
                debuggerWin_t * dw )
@@ -1114,7 +1115,7 @@ populate_context_menu (GtkWidget *popup,
 	{
 		return TRUE;
 	}
-	addr = dw->asmEntry[lineNum]->addr;
+	dw->ctx_menu_addr = addr = dw->asmEntry[lineNum]->addr;
 
    //printf("Context Menu:  CP:%i  Line:%i  Addr:0x%04X\n", cpos, lineNum, addr );
 	
@@ -1126,8 +1127,8 @@ populate_context_menu (GtkWidget *popup,
 
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
 
-	//g_signal_connect (item, "activate",
-	//	G_CALLBACK (setValueCB), mv);
+	g_signal_connect (item, "activate",
+		G_CALLBACK (addBreakpointMenuCB), dw);
 
    gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL );
 	//gtk_widget_show_all (popup);
