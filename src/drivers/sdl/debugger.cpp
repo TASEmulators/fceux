@@ -1185,11 +1185,45 @@ static void breakOnCyclesCB( GtkToggleButton *togglebutton, debuggerWin_t * dw)
 	updateAllDebugWindows();
 }
 
+static void
+breakOnCyclesLimitCB (GtkEntry *entry,
+//                   gchar    *string,
+                     gpointer  user_data)
+{
+	const char *txt;
+
+	txt = gtk_entry_get_text( entry );
+
+   //printf("'%s'\n", txt );
+
+	if ( isdigit(txt[0]) )
+	{
+		break_cycles_limit = strtoul( txt, NULL, 0 );
+	}
+}
+
 static void breakOnInstructionsCB( GtkToggleButton *togglebutton, debuggerWin_t * dw)
 {
 	break_on_instructions = !break_on_instructions;
 
 	updateAllDebugWindows();
+}
+
+static void
+breakOnInstructionsLimitCB (GtkEntry *entry,
+//                   gchar    *string,
+                     gpointer  user_data)
+{
+	const char *txt;
+
+	txt = gtk_entry_get_text( entry );
+
+   //printf("'%s'\n", txt );
+
+	if ( isdigit(txt[0]) )
+	{
+		break_instructions_limit = strtoul( txt, NULL, 0 );
+	}
 }
 
 static void romOffsetToggleCB( GtkToggleButton *togglebutton, debuggerWin_t * dw)
@@ -1668,6 +1702,9 @@ void openDebuggerWindow (void)
 			  G_CALLBACK (breakOnCyclesCB), dw);
 	gtk_grid_attach( GTK_GRID(grid), dw->brkcycles_chkbox, 1, 1, 1, 1 );
 	entry = gtk_entry_new ();
+	//g_signal_connect (entry, "preedit-changed",
+	g_signal_connect (entry, "activate",
+			  G_CALLBACK (breakOnCyclesLimitCB), dw);
 	gtk_grid_attach( GTK_GRID(grid), entry, 2, 1, 1, 1 );
 
 	dw->brkinstrs_chkbox = gtk_check_button_new_with_label("Break when exceed");
@@ -1675,6 +1712,8 @@ void openDebuggerWindow (void)
 			  G_CALLBACK (breakOnInstructionsCB), dw);
 	gtk_grid_attach( GTK_GRID(grid), dw->brkinstrs_chkbox, 1, 3, 1, 1 );
 	entry = gtk_entry_new ();
+	g_signal_connect (entry, "activate",
+			  G_CALLBACK (breakOnInstructionsLimitCB), dw);
 	gtk_grid_attach( GTK_GRID(grid), entry, 2, 3, 1, 1 );
 
 	gtk_box_pack_start (GTK_BOX (vbox1), grid, FALSE, FALSE, 2);
