@@ -50,12 +50,14 @@ struct dbg_asm_entry_t
 	int  bank;
 	int  rom;
 	int  size;
+	int  line;
 	uint8  opcode[3];
 
 
 	dbg_asm_entry_t(void)
 	{
-		addr = 0; bank = 0; rom = -1; size = 0;
+		addr = 0; bank = 0; rom = -1; 
+		size = 0; line = 0;
 
 		for (int i=0; i<3; i++)
 		{
@@ -111,12 +113,16 @@ struct debuggerWin_t
 	GtkWidget *badop_chkbox;
 	GtkWidget *brkcycles_chkbox;
 	GtkWidget *brkinstrs_chkbox;
+	GtkWidget *brk_cycles_lim_entry;
+	GtkWidget *brk_instrs_lim_entry;
+	GtkWidget *seektoEntry;
 
 	int  dialog_op;
 	int  bpEditIdx;
 	int  ctx_menu_addr;
 	char displayROMoffsets;
 
+	dbg_asm_entry_t  *asmPC;
 	std::vector <dbg_asm_entry_t*> asmEntry;
 
 	debuggerWin_t(void)
@@ -160,10 +166,14 @@ struct debuggerWin_t
 		badop_chkbox = NULL;
 		brkcycles_chkbox = NULL;
 		brkinstrs_chkbox = NULL;
+		brk_cycles_lim_entry = NULL;
+		brk_instrs_lim_entry = NULL;
+		seektoEntry = NULL;
 		dialog_op = 0;
 		bpEditIdx = -1;
 		ctx_menu_addr = 0;
 		displayROMoffsets = 0;
+		asmPC = NULL;
 	}
 	
 	~debuggerWin_t(void)
@@ -177,6 +187,8 @@ struct debuggerWin_t
 	void  updateRegisterView(void);
 	void  updateAssemblyView(void);
 	int   get_bpList_selrow(void);
+	int   getAsmLineFromAddr(int addr);
+	int   scrollAsmLine(int line);
 };
 
 static std::list <debuggerWin_t*> debuggerWinList;
@@ -188,6 +200,39 @@ void debuggerWin_t::asmClear(void)
 		delete asmEntry[i];
 	}
 	asmEntry.clear();
+}
+
+int  debuggerWin_t::getAsmLineFromAddr(int addr)
+{
+	int  line = -1;
+
+	if ( asmEntry.size() <= 0 )
+	{
+      return -1;
+	}
+
+	line = 0;
+
+	for (size_t i=0; i<asmEntry.size(); i++)
+	{
+		if ( asmEntry[i]->addr >= addr )
+		{
+         line = i; break;
+		}
+	}
+
+	return line;
+}
+
+int  debuggerWin_t::scrollAsmLine(int line)
+{
+	GtkTextIter iter;
+
+	gtk_text_buffer_get_iter_at_line( textbuf, &iter, line );
+	gtk_text_view_scroll_to_iter ( textview, &iter, 0.0, 1, 0.0, 0.50 );
+	gtk_text_buffer_place_cursor( textbuf, &iter );
+
+   return 0;
 }
 
 int  debuggerWin_t::get_bpList_selrow(void)
@@ -391,6 +436,12 @@ void  debuggerWin_t::updateRegisterView(void)
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(brkcycles_chkbox), break_on_cycles             );
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(brkinstrs_chkbox), break_on_instructions       );
 
+	sprintf(stmp, "%llu", break_cycles_limit);
+	gtk_entry_set_text( GTK_ENTRY(brk_cycles_lim_entry), stmp );
+
+	sprintf(stmp, "%llu", break_instructions_limit);
+	gtk_entry_set_text( GTK_ENTRY(brk_instrs_lim_entry), stmp );
+
 }
 
 // This function is for "smart" scrolling...
@@ -445,7 +496,7 @@ void  debuggerWin_t::updateAssemblyView(void)
 
 	start_address_lp = starting_address = X.PC;
 
-	for (int i=0; i < 32; i++)
+	for (int i=0; i < 0xFFFF; i++)
 	{
 		//printf("%i: Start Address: 0x%04X \n", i, start_address_lp );
 
@@ -455,14 +506,20 @@ void  debuggerWin_t::updateAssemblyView(void)
 		{
 			break;
 		}
+		if ( starting_address <= 0x8000 )
+		{
+			//starting_address = 0x8000;
+			break;
+		}	
 		start_address_lp = starting_address;
 	}
 
 	asmClear();
 
-	addr = starting_address;
+	addr  = starting_address;
+	asmPC = NULL;
 
-	for (int i=0; i < 64; i++)
+	for (int i=0; i < 0xFFFF; i++)
 	{
 		line.clear();
 
@@ -475,6 +532,7 @@ void  debuggerWin_t::updateAssemblyView(void)
 
 		if (addr == X.PC)
 		{
+			asmPC = a;
 			line.assign(">");
 		} 
 		else
@@ -552,6 +610,8 @@ void  debuggerWin_t::updateAssemblyView(void)
 		//printf("%s", line.c_str() );
 
 		block.append( line );
+
+		a->line = asmEntry.size();
 
 		asmEntry.push_back(a);
 	}
@@ -1089,6 +1149,46 @@ static void debugRunLine128CB (GtkButton * button, debuggerWin_t * dw)
 	FCEUI_SetEmulationPaused(0);
 }
 
+static void seekPCCB (GtkButton * button, debuggerWin_t * dw)
+{
+	int line;
+	//const char *txt;
+
+	//txt = gtk_entry_get_text( GTK_ENTRY(dw->seektoEntry) );
+
+	//addr = strtol( txt, NULL, 16 );
+	
+	if ( dw->asmPC == NULL )
+	{
+		line = dw->getAsmLineFromAddr( X.PC );
+	}
+	else
+	{
+		line = dw->asmPC->line;
+	}
+
+	dw->scrollAsmLine( line );
+
+	//printf("Seek: 0x%04X  Line:%i\n", addr, line);
+}
+
+static void seekToCB (GtkButton * button, debuggerWin_t * dw)
+{
+	int addr, line;
+	const char *txt;
+
+	txt = gtk_entry_get_text( GTK_ENTRY(dw->seektoEntry) );
+
+	//addr = strtol( txt, NULL, 16 );
+	addr = offsetStringToInt( BT_C, txt );
+
+	line = dw->getAsmLineFromAddr( addr );
+
+	dw->scrollAsmLine( line );
+
+	//printf("Seek: 0x%04X  Line:%i\n", addr, line);
+}
+
 static void
 addBreakpointMenuCB (GtkMenuItem *menuitem,
 				      	debuggerWin_t * dw)
@@ -1180,7 +1280,18 @@ static void breakOnBadOpcodeCB( GtkToggleButton *togglebutton, debuggerWin_t * d
 
 static void breakOnCyclesCB( GtkToggleButton *togglebutton, debuggerWin_t * dw)
 {
+	const char *txt;
+
 	break_on_cycles = !break_on_cycles;
+
+	txt = gtk_entry_get_text( GTK_ENTRY(dw->brk_cycles_lim_entry) );
+
+   //printf("'%s'\n", txt );
+
+	if ( isdigit(txt[0]) )
+	{
+		break_cycles_limit = strtoul( txt, NULL, 0 );
+	}
 
 	updateAllDebugWindows();
 }
@@ -1200,11 +1311,23 @@ breakOnCyclesLimitCB (GtkEntry *entry,
 	{
 		break_cycles_limit = strtoul( txt, NULL, 0 );
 	}
+	updateAllDebugWindows();
 }
 
 static void breakOnInstructionsCB( GtkToggleButton *togglebutton, debuggerWin_t * dw)
 {
+	const char *txt;
+
 	break_on_instructions = !break_on_instructions;
+
+	txt = gtk_entry_get_text( GTK_ENTRY(dw->brk_instrs_lim_entry) );
+
+   //printf("'%s'\n", txt );
+
+	if ( isdigit(txt[0]) )
+	{
+		break_instructions_limit = strtoul( txt, NULL, 0 );
+	}
 
 	updateAllDebugWindows();
 }
@@ -1224,6 +1347,7 @@ breakOnInstructionsLimitCB (GtkEntry *entry,
 	{
 		break_instructions_limit = strtoul( txt, NULL, 0 );
 	}
+	updateAllDebugWindows();
 }
 
 static void romOffsetToggleCB( GtkToggleButton *togglebutton, debuggerWin_t * dw)
@@ -1327,6 +1451,7 @@ void openDebuggerWindow (void)
 	gtk_text_view_set_editable( dw->textview, FALSE );
 	gtk_text_view_set_wrap_mode( dw->textview, GTK_WRAP_NONE );
 	gtk_text_view_set_cursor_visible( dw->textview, TRUE );
+	//gtk_widget_set_size_request( GTK_WIDGET(dw->textview), 400, 400 );
 
 	g_signal_connect (dw->textview, "button-press-event",
 			  G_CALLBACK (textview_button_press_cb), dw);
@@ -1335,7 +1460,8 @@ void openDebuggerWindow (void)
 
 	scroll = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
-					GTK_POLICY_ALWAYS, GTK_POLICY_ALWAYS);
+					//GTK_POLICY_ALWAYS, GTK_POLICY_ALWAYS);
+					GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 	gtk_container_add (GTK_CONTAINER (scroll), GTK_WIDGET(dw->textview) );
 
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
@@ -1426,13 +1552,16 @@ void openDebuggerWindow (void)
 	//     Row 4
 	button = gtk_button_new_with_label ("Seek To:");
 
+	g_signal_connect (button, "clicked",
+			  G_CALLBACK (seekToCB), (gpointer) dw);
+
 	gtk_grid_attach( GTK_GRID(grid), button, 0, 3, 1, 1 );
 
-	entry = gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (entry), 4);
-	gtk_entry_set_width_chars (GTK_ENTRY (entry), 4);
+	dw->seektoEntry = gtk_entry_new ();
+	gtk_entry_set_max_length (GTK_ENTRY (dw->seektoEntry), 4);
+	gtk_entry_set_width_chars (GTK_ENTRY (dw->seektoEntry), 4);
 
-	gtk_grid_attach( GTK_GRID(grid), entry, 1, 3, 1, 1 );
+	gtk_grid_attach( GTK_GRID(grid), dw->seektoEntry, 1, 3, 1, 1 );
 
 	//     Row 5
 	hbox  = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
@@ -1449,6 +1578,9 @@ void openDebuggerWindow (void)
 	gtk_grid_attach( GTK_GRID(grid), hbox, 0, 4, 1, 1 );
 
 	button = gtk_button_new_with_label ("Seek PC");
+
+	g_signal_connect (button, "clicked",
+			  G_CALLBACK (seekPCCB), (gpointer) dw);
 
 	gtk_grid_attach( GTK_GRID(grid), button, 1, 4, 1, 1 );
 
@@ -1701,20 +1833,20 @@ void openDebuggerWindow (void)
 	g_signal_connect (dw->brkcycles_chkbox, "toggled",
 			  G_CALLBACK (breakOnCyclesCB), dw);
 	gtk_grid_attach( GTK_GRID(grid), dw->brkcycles_chkbox, 1, 1, 1, 1 );
-	entry = gtk_entry_new ();
-	//g_signal_connect (entry, "preedit-changed",
-	g_signal_connect (entry, "activate",
+	dw->brk_cycles_lim_entry = gtk_entry_new ();
+	//g_signal_connect (dw->brk_cycles_lim_entry, "preedit-changed",
+	g_signal_connect (dw->brk_cycles_lim_entry, "activate",
 			  G_CALLBACK (breakOnCyclesLimitCB), dw);
-	gtk_grid_attach( GTK_GRID(grid), entry, 2, 1, 1, 1 );
+	gtk_grid_attach( GTK_GRID(grid), dw->brk_cycles_lim_entry, 2, 1, 1, 1 );
 
 	dw->brkinstrs_chkbox = gtk_check_button_new_with_label("Break when exceed");
 	g_signal_connect (dw->brkinstrs_chkbox, "toggled",
 			  G_CALLBACK (breakOnInstructionsCB), dw);
 	gtk_grid_attach( GTK_GRID(grid), dw->brkinstrs_chkbox, 1, 3, 1, 1 );
-	entry = gtk_entry_new ();
-	g_signal_connect (entry, "activate",
+	dw->brk_instrs_lim_entry = gtk_entry_new ();
+	g_signal_connect (dw->brk_instrs_lim_entry, "activate",
 			  G_CALLBACK (breakOnInstructionsLimitCB), dw);
-	gtk_grid_attach( GTK_GRID(grid), entry, 2, 3, 1, 1 );
+	gtk_grid_attach( GTK_GRID(grid), dw->brk_instrs_lim_entry, 2, 3, 1, 1 );
 
 	gtk_box_pack_start (GTK_BOX (vbox1), grid, FALSE, FALSE, 2);
 	/*
