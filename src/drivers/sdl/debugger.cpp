@@ -38,6 +38,7 @@
 
 extern Config *g_config;
 
+static int  breakpoint_hit = 0;
 static void updateAllDebugWindows(void);
 //*******************************************************************************************************
 // Debugger Window
@@ -189,6 +190,8 @@ struct debuggerWin_t
 	int   get_bpList_selrow(void);
 	int   getAsmLineFromAddr(int addr);
 	int   scrollAsmLine(int line);
+	int   seekAsmPC(void);
+	int   seekAsmAddr(int addr);
 };
 
 static std::list <debuggerWin_t*> debuggerWinList;
@@ -205,21 +208,87 @@ void debuggerWin_t::asmClear(void)
 int  debuggerWin_t::getAsmLineFromAddr(int addr)
 {
 	int  line = -1;
+	int  incr, nextLine;
+	int  run = 1;
 
 	if ( asmEntry.size() <= 0 )
 	{
       return -1;
 	}
+	incr = asmEntry.size() / 2;
 
-	line = 0;
-
-	for (size_t i=0; i<asmEntry.size(); i++)
+	if ( addr < asmEntry[0]->addr )
 	{
-		if ( asmEntry[i]->addr >= addr )
+		return 0;
+	}
+	else if ( addr > asmEntry[ asmEntry.size() - 1 ]->addr )
+	{
+		return asmEntry.size() - 1;
+	}
+
+	if ( incr < 1 ) incr = 1;
+
+	nextLine = line = incr;
+
+	// algorithm to efficiently find line from address. Starts in middle of list and 
+	// keeps dividing the list in 2 until it arrives at an answer.
+	while ( run )
+	{
+		//printf("incr:%i   line:%i  addr:%04X   delta:%i\n", incr, line, asmEntry[line]->addr, addr - asmEntry[line]->addr);
+
+		if ( incr == 1 )
 		{
-         line = i; break;
+			if ( asmEntry[line]->addr < addr )
+			{
+				nextLine = line + 1;
+				if ( asmEntry[line]->addr > nextLine )
+				{
+					break;
+				}
+				line = nextLine;
+			}
+			else if ( asmEntry[line]->addr > addr )
+			{
+				nextLine = line - 1;
+				if ( asmEntry[line]->addr < nextLine )
+				{
+					break;
+				}
+				line = nextLine;
+			}
+			else 
+			{
+				run = 0; break;
+			}
+		} 
+		else
+		{
+			incr = incr / 2; 
+			if ( incr < 1 ) incr = 1;
+
+			if ( asmEntry[line]->addr < addr )
+			{
+				nextLine = line + incr;
+			}
+			else if ( asmEntry[line]->addr > addr )
+			{
+				nextLine = line - incr;
+			}
+			else
+			{
+				run = 0; break;
+			}
+			line = nextLine;
 		}
 	}
+
+	//for (size_t i=0; i<asmEntry.size(); i++)
+	//{
+	//	if ( asmEntry[i]->addr >= addr )
+	//	{
+   //      line = i; break;
+	//	}
+	//}
 
 	return line;
 }
@@ -228,11 +297,44 @@ int  debuggerWin_t::scrollAsmLine(int line)
 {
 	GtkTextIter iter;
 
+	if ( line < 0 )
+	{
+		return -1;
+	}
 	gtk_text_buffer_get_iter_at_line( textbuf, &iter, line );
 	gtk_text_view_scroll_to_iter ( textview, &iter, 0.0, 1, 0.0, 0.50 );
 	gtk_text_buffer_place_cursor( textbuf, &iter );
 
    return 0;
+}
+
+int  debuggerWin_t::seekAsmPC(void)
+{
+	int line;
+
+	if ( asmPC == NULL )
+	{
+		line = getAsmLineFromAddr( X.PC );
+	}
+	else
+	{
+		line = asmPC->line;
+	}
+
+	scrollAsmLine( line );
+
+	return 0;
+}
+
+int  debuggerWin_t::seekAsmAddr( int addr )
+{
+	int line;
+
+	line = getAsmLineFromAddr( addr );
+
+	scrollAsmLine( line );
+
+	return 0;
 }
 
 int  debuggerWin_t::get_bpList_selrow(void)
@@ -506,9 +608,9 @@ void  debuggerWin_t::updateAssemblyView(void)
 		{
 			break;
 		}
-		if ( starting_address <= 0x8000 )
+		if ( starting_address < 0x8000 )
 		{
-			//starting_address = 0x8000;
+			starting_address = start_address_lp;
 			break;
 		}	
 		start_address_lp = starting_address;
@@ -1151,42 +1253,19 @@ static void debugRunLine128CB (GtkButton * button, debuggerWin_t * dw)
 
 static void seekPCCB (GtkButton * button, debuggerWin_t * dw)
 {
-	int line;
-	//const char *txt;
-
-	//txt = gtk_entry_get_text( GTK_ENTRY(dw->seektoEntry) );
-
-	//addr = strtol( txt, NULL, 16 );
-	
-	if ( dw->asmPC == NULL )
-	{
-		line = dw->getAsmLineFromAddr( X.PC );
-	}
-	else
-	{
-		line = dw->asmPC->line;
-	}
-
-	dw->scrollAsmLine( line );
-
-	//printf("Seek: 0x%04X  Line:%i\n", addr, line);
+	dw->seekAsmPC();
 }
 
 static void seekToCB (GtkButton * button, debuggerWin_t * dw)
 {
-	int addr, line;
+	int addr;
 	const char *txt;
 
 	txt = gtk_entry_get_text( GTK_ENTRY(dw->seektoEntry) );
 
-	//addr = strtol( txt, NULL, 16 );
 	addr = offsetStringToInt( BT_C, txt );
 
-	line = dw->getAsmLineFromAddr( addr );
-
-	dw->scrollAsmLine( line );
-
-	//printf("Seek: 0x%04X  Line:%i\n", addr, line);
+	dw->seekAsmAddr(addr);
 }
 
 static void
@@ -1369,6 +1448,16 @@ static void updateAllDebugWindows(void)
 	}
 }
 
+static void seekPC_AllDebugWindows(void)
+{
+	std::list < debuggerWin_t * >::iterator it;
+
+	for (it = debuggerWinList.begin (); it != debuggerWinList.end (); it++)
+	{
+		(*it)->seekAsmPC();
+	}
+}
+
 static void winDebuggerLoopStep(void)
 {
 	FCEUD_UpdateInput();
@@ -1377,6 +1466,12 @@ static void winDebuggerLoopStep(void)
 	{
 		gtk_main_iteration_do(FALSE);
 	}
+
+	if ( breakpoint_hit )
+	{
+		seekPC_AllDebugWindows();
+		breakpoint_hit = 0;
+	}
 }
 
 //this code enters the debugger when a breakpoint was hit
@@ -1384,7 +1479,11 @@ void FCEUD_DebugBreakpoint(int bp_num)
 {
 	//printf("Breakpoint Hit: %i \n", bp_num);
 	
+	breakpoint_hit = 1;
+	
 	updateAllDebugWindows();
+
+	winDebuggerLoopStep();
 
 	while(FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
 	{
