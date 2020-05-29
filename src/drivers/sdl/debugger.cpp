@@ -1437,6 +1437,20 @@ populate_context_menu (GtkWidget *popup,
    return TRUE;
 }
 
+static gboolean textview_keypress_cb (GtkWidget * grab, GdkEventKey * event,  debuggerWin_t * dw)
+{
+	gboolean stopKeyPropagate;
+
+	stopKeyPropagate = (event->keyval != GDK_KEY_Up       ) &&
+		                (event->keyval != GDK_KEY_Down     ) &&
+		                (event->keyval != GDK_KEY_Left     ) &&
+		                (event->keyval != GDK_KEY_Right    ) &&
+		                (event->keyval != GDK_KEY_Page_Up  ) &&
+		                (event->keyval != GDK_KEY_Page_Down);
+
+	return stopKeyPropagate;
+}
+
 static gboolean
 textview_button_press_cb (GtkWidget *widget,
                GdkEventButton  *event,
@@ -1657,11 +1671,13 @@ void openDebuggerWindow (void)
 
 	gtk_text_view_set_monospace( dw->textview, TRUE );
 	gtk_text_view_set_overwrite( dw->textview, TRUE );
-	gtk_text_view_set_editable( dw->textview, FALSE );
+	gtk_text_view_set_editable( dw->textview, TRUE );
 	gtk_text_view_set_wrap_mode( dw->textview, GTK_WRAP_NONE );
 	gtk_text_view_set_cursor_visible( dw->textview, TRUE );
 	//gtk_widget_set_size_request( GTK_WIDGET(dw->textview), 400, 400 );
 
+	g_signal_connect (dw->textview, "key-press-event",
+			  G_CALLBACK (textview_keypress_cb), dw);
 	g_signal_connect (dw->textview, "button-press-event",
 			  G_CALLBACK (textview_button_press_cb), dw);
 
