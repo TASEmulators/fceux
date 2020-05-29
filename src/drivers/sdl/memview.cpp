@@ -36,6 +36,15 @@
 
 extern Config *g_config;
 
+#define HIGHLIGHT_ACTIVITY_NUM_COLORS 16
+
+static unsigned int  highlightActivityColors[HIGHLIGHT_ACTIVITY_NUM_COLORS] = 
+{ 
+   0x000000, 0x004035, 0x185218, 0x5e5c34, 
+   0x804c00, 0xba0300, 0xd10038, 0xb21272, 
+   0xba00ab, 0x6f00b0, 0x3700c2, 0x000cba,
+   0x002cc9, 0x0053bf, 0x0072cf, 0x3c8bc7
+};
 //*******************************************************************************************************
 // Memory View (Hex Editor) Window
 //*******************************************************************************************************
@@ -112,6 +121,7 @@ struct memViewWin_t
 	GtkWidget *memSelRadioItem[4];
 	GtkTextView *textview;
 	GtkTextBuffer *textbuf;
+	GtkTextTag *highlight[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
 	int selAddr;
 	int selRomAddr;
 	int jumpAddr;
@@ -122,6 +132,7 @@ struct memViewWin_t
 	int numLines;
 	int numCharsPerLine;
 	unsigned char *mbuf;
+	unsigned char *colorbuf;
 	int mbuf_size;
 	GtkCellRenderer *hexByte_renderer[16];
 	bool redraw;
@@ -149,6 +160,7 @@ struct memViewWin_t
 		dialog_op = 0;
 		mode = MODE_NES_RAM;
 		mbuf = NULL;
+		colorbuf = NULL;
 		mbuf_size = 0;
 		numLines = 0;
 		evntSrcID = 0;
@@ -164,6 +176,10 @@ struct memViewWin_t
 		{
 			hexByte_renderer[i] = NULL;
 		}
+		for (int i=0; i<HIGHLIGHT_ACTIVITY_NUM_COLORS; i++)
+      {
+         highlight[i] = NULL;
+      }
 	}
 
 	~memViewWin_t(void)
@@ -171,6 +187,10 @@ struct memViewWin_t
 		if ( mbuf != NULL )
 		{
 			free(mbuf); mbuf = NULL;
+		}
+		if ( colorbuf != NULL )
+		{
+			free(colorbuf); colorbuf = NULL;
 		}
 	}
 
@@ -375,6 +395,16 @@ void memViewWin_t::showMemViewResults (int reset)
 		}
       mbuf = (unsigned char *)malloc( memSize );
 
+		if ( colorbuf )
+		{
+         free(colorbuf); colorbuf = NULL;
+		}
+      colorbuf = (unsigned char *)malloc( memSize );
+
+		if ( colorbuf != NULL )
+		{
+			memset( colorbuf, 0, memSize );
+		}
 		if ( mbuf )
 		{
          mbuf_size = memSize;
@@ -455,6 +485,16 @@ void memViewWin_t::showMemViewResults (int reset)
 			{
 				valChg[i] = 1;
 				mbuf[addr] = c;
+				colorbuf[addr] = 15;
+				valChg[i] = 1;
+			}
+			else
+			{
+				if ( colorbuf[addr] > 0 )
+				{
+				   colorbuf[addr]--;
+					valChg[i] = 1;
+				}
 			}
 
 			un = ( c & 0x00f0 ) >> 4;
@@ -484,7 +524,8 @@ void memViewWin_t::showMemViewResults (int reset)
 				{
 					gtk_text_buffer_delete( textbuf, &iter, &next_iter );
 				}
-				gtk_text_buffer_insert( textbuf, &iter, valStr[i], -1 );
+				//gtk_text_buffer_insert( textbuf, &iter, valStr[i], -1 );
+				gtk_text_buffer_insert_with_tags( textbuf, &iter, valStr[i], -1, highlight[ colorbuf[addr] ], NULL );
 			}
 			else
 			{
@@ -765,12 +806,6 @@ textview_string_insert (GtkTextView *text_view,
 
 }
 
-//static void
-//textbuffer_string_insert (GtkTextBuffer *textbuffer,
-//               GtkTextIter   *location,
-//               gchar         *text,
-//               gint           len,
-//               memViewWin_t * mv )
 static gboolean textbuffer_string_insert (GtkWidget * grab, GdkEventKey * event,  memViewWin_t * mv)
 {
 	int addr, line, offs, byte0, byte, bcol, c, d;
@@ -1169,6 +1204,7 @@ void openMemoryViewWindow (void)
 	GtkWidget *scroll;
 	GtkWidget *menubar;
 	memViewWin_t *mv;
+	GdkRGBA  color;
 
 	mv = new memViewWin_t;
 
@@ -1214,6 +1250,27 @@ void openMemoryViewWindow (void)
 	//		  G_CALLBACK (textbuffer_string_insert), mv);
 	g_signal_connect (G_OBJECT (mv->textview), "key-press-event",
 			  G_CALLBACK (textbuffer_string_insert), mv);
+
+	for (int i=0; i<HIGHLIGHT_ACTIVITY_NUM_COLORS; i++)
+	{
+		int r,g,b;
+		char stmp[64];
+
+		sprintf( stmp, "hightlight%i\n", i );
+
+		r = (highlightActivityColors[i] & 0x000000ff);
+		g = (highlightActivityColors[i] & 0x0000ff00) >> 8;
+		b = (highlightActivityColors[i] & 0x00ff0000) >> 16;
+
+		color.red   = (double)r / 255.0f;
+		color.green = (double)g / 255.0f;
+		color.blue  = (double)b / 255.0f;
+		color.alpha = 1.0;
+
+		printf("%i  R:%f  G:%f  B:%f \n", i, color.red, color.green, color.blue );
+
+      mv->highlight[i] = gtk_text_buffer_create_tag( mv->textbuf, stmp, "foreground-rgba", &color, NULL );
+	}
 
 	scroll = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
