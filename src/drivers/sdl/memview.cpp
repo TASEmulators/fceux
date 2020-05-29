@@ -523,31 +523,50 @@ void memViewWin_t::showMemViewResults (int reset)
 
 int memViewWin_t::calcVisibleRange( int *start_out, int *end_out, int *center_out )
 {
-	GtkAdjustment *ivadj;
-	double v, l, u, r;
+	//GtkAdjustment *ivadj;
+	//double v, l, u, r;
 	int start, end, center;
+   GdkRectangle rect;
+   GtkTextIter iter;
 
-	ivadj = gtk_range_get_adjustment( GTK_RANGE(ivbar) );
+   gtk_text_view_get_visible_rect( textview, &rect );
+
+   gtk_text_view_get_line_at_y( textview, &iter, rect.y, NULL );
+   start = gtk_text_iter_get_line( &iter ) - 1;
+
+   gtk_text_view_get_line_at_y( textview, &iter, rect.y+rect.height, NULL );
+   end  = gtk_text_iter_get_line( &iter ) + 1;
+
+   if ( start < 0 ) start = 0;
+
+   if ( end > numLines )
+   {
+      end = numLines;
+   }
+
+   //printf("Line Iter: %i -> %i\n", start, end );
+
+	//ivadj = gtk_range_get_adjustment( GTK_RANGE(ivbar) );
 
 
-	v = gtk_range_get_value( GTK_RANGE(ivbar) );
-	l = gtk_adjustment_get_lower( ivadj );
-	u = gtk_adjustment_get_upper( ivadj );
+	//v = gtk_range_get_value( GTK_RANGE(ivbar) );
+	//l = gtk_adjustment_get_lower( ivadj );
+	//u = gtk_adjustment_get_upper( ivadj );
 
-	r = (v - l) / (u - l);
+	//r = (v - l) / (u - l);
 
-	start = ((int)( r * (double)numLines )) - 16;
+	//start = ((int)( r * (double)numLines )) - 16;
 
-	if ( start < 0 )
-	{
-		start = 0;
-	}
-	end = start + 64;
+	//if ( start < 0 )
+	//{
+	//	start = 0;
+	//}
+	//end = start + 64;
 
-	if ( end > numLines )
-	{
-		end = numLines;
-	}
+	//if ( end > numLines )
+	//{
+	//	end = numLines;
+	//}
 
 	center = start + (end - start)/2;
 
@@ -556,6 +575,9 @@ int memViewWin_t::calcVisibleRange( int *start_out, int *end_out, int *center_ou
 	if ( start_out  ) *start_out  = start;
 	if ( end_out    ) *end_out    = end;
 	if ( center_out ) *center_out = center;
+
+   //printf("Start:%i  End:%i   StartADDR:%08X  EndADDR:%08X  Rect:  X:%i   Y:%i   W:%i  H:%i \n", 
+   //      start, end, start*16, end*16, rect.x, rect.y, rect.width, rect.height );
 
    return 0;
 }
