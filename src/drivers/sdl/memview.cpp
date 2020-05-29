@@ -333,9 +333,8 @@ void memViewWin_t::showMemViewResults (int reset)
 	int i, row, row_start, row_end, totalChars;
 	gint cpos;
 	char addrStr[128], valStr[16][8], ascii[18];
-	char row_changed;
-	std::string line;
-	GtkTextIter iter, start_iter, end_iter;
+	char addrChg, valChg[16];
+	GtkTextIter iter, next_iter, start_iter, end_iter;
 
 	if ( redraw )
 	{
@@ -404,40 +403,68 @@ void memViewWin_t::showMemViewResults (int reset)
 
 		row_start = 0;
 		row_end   = numLines;
+
+	   gtk_text_buffer_get_iter_at_offset( textbuf, &iter, 0 );
 	}
 	else
 	{
 		calcVisibleRange( &row_start, &row_end, NULL );
+
+	   gtk_text_buffer_get_iter_at_line( textbuf, &iter, row_start );
 	}
 
-	gtk_text_buffer_get_iter_at_offset( textbuf, &iter, 0 );
+	//gtk_text_buffer_get_iter_at_offset( textbuf, &iter, 0 );
 
 	totalChars = row_start * numCharsPerLine;
 
 	for (row=row_start; row<row_end; row++)
 	{
-		gtk_text_buffer_get_iter_at_offset( textbuf, &iter, totalChars );
+		//gtk_text_buffer_get_iter_at_offset( textbuf, &iter, totalChars );
 
-		row_changed = 1;
-
-		line.clear();
+      addrChg = reset;
 
 		lineAddr = (row*16);
 
-		sprintf( addrStr, "%08X ", lineAddr );
+		if ( addrChg )
+		{
+			next_iter = iter;
+			gtk_text_iter_forward_chars( &next_iter, 9 );
+
+		   sprintf( addrStr, "%08X ", lineAddr );
+
+			if ( !reset )
+			{
+				gtk_text_buffer_delete( textbuf, &iter, &next_iter );
+			}
+			gtk_text_buffer_insert( textbuf, &iter, addrStr, -1 );
+		}
+		else
+		{
+			gtk_text_iter_forward_chars( &iter, 9 );
+		}
 
 		for (i=0; i<16; i++)
 		{
+			valChg[i] = reset;
+
 			addr = lineAddr+i;
 
 			c = memAccessFunc(addr);
 
+			if ( c != mbuf[addr] )
+			{
+				valChg[i] = 1;
+				mbuf[addr] = c;
+			}
+
 			un = ( c & 0x00f0 ) >> 4;
 			ln = ( c & 0x000f );
 
-			valStr[i][0] = conv2xchar(un);
-			valStr[i][1] = conv2xchar(ln);
-			valStr[i][2] = 0;
+			valStr[i][0] = ' ';
+			valStr[i][1] = conv2xchar(un);
+			valStr[i][2] = conv2xchar(ln);
+			valStr[i][3] = ' ';
+			valStr[i][4] = 0;
 
 			if ( isprint(c) )
 			{
@@ -447,45 +474,72 @@ void memViewWin_t::showMemViewResults (int reset)
 			{
             ascii[i] = '.';
 			}
-			if ( c != mbuf[addr] )
+
+			if ( valChg[i] )
 			{
-				row_changed = 1;
-				mbuf[addr] = c;
+				next_iter = iter;
+				gtk_text_iter_forward_chars( &next_iter, 4 );
+
+				if ( !reset )
+				{
+					gtk_text_buffer_delete( textbuf, &iter, &next_iter );
+				}
+				gtk_text_buffer_insert( textbuf, &iter, valStr[i], -1 );
+			}
+			else
+			{
+				gtk_text_iter_forward_chars( &iter, 4 );
 			}
 		}
 		ascii[16] = 0;
 
-		line.assign( addrStr  );
-
 		for (i=0; i<16; i++)
 		{
-			line.append( " ");
-			line.append( valStr[i] );
-			line.append( " ");
-		}
-		line.append( ascii );
-		line.append( "\n");
-
-		numCharsPerLine = line.size();
-
-		if ( row_changed )
-		{
-			if ( reset )
+			if ( valChg[i] )
 			{
-				gtk_text_buffer_get_iter_at_offset( textbuf, &iter, totalChars );
-				gtk_text_buffer_insert ( textbuf, &iter, line.c_str(), -1 );
+				next_iter = iter;
+				gtk_text_iter_forward_chars( &next_iter, 1 );
+
+				if ( !reset )
+				{
+					gtk_text_buffer_delete( textbuf, &iter, &next_iter );
+				}
+				gtk_text_buffer_insert( textbuf, &iter, &ascii[i], 1 );
 			}
 			else
 			{
-				GtkTextIter next_iter;
-
-				gtk_text_buffer_get_iter_at_offset( textbuf, &next_iter, totalChars + numCharsPerLine - 1 );
-				gtk_text_buffer_delete ( textbuf, &iter, &next_iter );
-
-				gtk_text_buffer_get_iter_at_offset( textbuf, &iter, totalChars );
-				gtk_text_buffer_insert ( textbuf, &iter, line.c_str(), line.size()-1 );
+				gtk_text_iter_forward_chars( &iter, 1 );
 			}
 		}
+
+		numCharsPerLine = 9 + (4*16) + 16 + 1;
+
+		if ( reset )
+		{
+			gtk_text_buffer_insert ( textbuf, &iter, "\n", -1 );
+		}
+		else
+		{
+			gtk_text_iter_forward_chars( &iter, 1 );
+		}
+		//if ( row_changed )
+		//{
+		//	if ( reset )
+		//	{
+		//		gtk_text_buffer_get_iter_at_offset( textbuf, &iter, totalChars );
+		//		gtk_text_buffer_insert ( textbuf, &iter, line.c_str(), -1 );
+		//	}
+		//	else
+		//	{
+		//		GtkTextIter next_iter;
+
+		//		gtk_text_buffer_get_iter_at_offset( textbuf, &next_iter, totalChars + numCharsPerLine - 1 );
+		//		gtk_text_buffer_delete ( textbuf, &iter, &next_iter );
+
+		//		gtk_text_buffer_get_iter_at_offset( textbuf, &iter, totalChars );
+		//		gtk_text_buffer_insert ( textbuf, &iter, line.c_str(), line.size()-1 );
+		//	}
+		//}
 
 		totalChars += numCharsPerLine;
 	}
@@ -711,35 +765,72 @@ textview_string_insert (GtkTextView *text_view,
 
 }
 
-static void
-textbuffer_string_insert (GtkTextBuffer *textbuffer,
-               GtkTextIter   *location,
-               gchar         *text,
-               gint           len,
-               memViewWin_t * mv )
+//static void
+//textbuffer_string_insert (GtkTextBuffer *textbuffer,
+//               GtkTextIter   *location,
+//               gchar         *text,
+//               gint           len,
+//               memViewWin_t * mv )
+static gboolean textbuffer_string_insert (GtkWidget * grab, GdkEventKey * event,  memViewWin_t * mv)
 {
-	if ( len == 1 )
+	int addr, line, offs, byte0, byte, bcol, c, d;
+	gint cpos;
+	gboolean stopKeyPropagate = TRUE;
+
+	g_object_get( mv->textbuf, "cursor-position", &cpos, NULL );
+
+	line = cpos / mv->numCharsPerLine;
+	offs = cpos % mv->numCharsPerLine;
+
+	byte0 = (offs - 10);
+
+	byte = byte0 / 4;
+	bcol = byte0 % 4;
+
+	addr = (line*16) + byte;
+
+	//printf("Line: %i   Offset: %i   Byte:%i   Bcol:%i\n", line, offs, byte, bcol );
+	
+	d = event->keyval;
+
+	//printf("Key: %i  '%c' \n", d, d );
+
+	stopKeyPropagate = (d != GDK_KEY_Up       ) &&
+		                (d != GDK_KEY_Down     ) &&
+		                (d != GDK_KEY_Left     ) &&
+		                (d != GDK_KEY_Right    ) &&
+		                (d != GDK_KEY_Page_Up  ) &&
+		                (d != GDK_KEY_Page_Down);
+
+	if ( !isascii( d ) )
 	{
-		int addr, line, offs, byte0, byte, bcol, c, d;
+		return stopKeyPropagate;
+	}
 
-		line = gtk_text_iter_get_line( location ),
-		offs = gtk_text_iter_get_line_offset( location );
+	if ( offs > (9 + (16*4)) )
+	{  // ASCII Text Area
+		byte = (offs - 73);
 
+		if ( (byte < 0) || (byte >= 16) )
+		{
+			return stopKeyPropagate;
+		}
+		addr = (line*16) + byte;
+
+		c = d;
+	}
+	else
+	{  // Hex Text Area
+		if ( !isxdigit( d ) )
+		{
+			return stopKeyPropagate;
+		}
 		byte0 = (offs - 10);
 
 		byte = byte0 / 4;
 		bcol = byte0 % 4;
 
 		addr = (line*16) + byte;
-
-		//printf("Line: %i   Offset: %i   Byte:%i   Bcol:%i\n", line, offs, byte, bcol );
-		//printf("Text: '%s'   \n", text );
-
-		if ( !isxdigit( text[0] ) )
-		{
-			return;
-		}
-		d = text[0];
 
 		if ( (d >= '0') && (d <= '9') )
 		{
@@ -749,7 +840,7 @@ textbuffer_string_insert (GtkTextBuffer *textbuffer,
 		{
 			d = d - 'a' + 10;
 		}
-	  	else 
+  		else 
 		{
 			d = d - 'A' + 10;
 		}
@@ -768,10 +859,13 @@ textbuffer_string_insert (GtkTextBuffer *textbuffer,
 			c = c & 0xf0;
 			c = c | d;
 		}
-		//printf(" to:0x%02x \n", c );
-
-		mv->writeMem( addr, c );
 	}
+	//printf(" to:0x%02x \n", c );
+
+	mv->writeMem( addr, c );
+
+	// Return wether to allow GTK+ to process this key.
+	return stopKeyPropagate;
 }
 
 static void
@@ -1116,7 +1210,9 @@ void openMemoryViewWindow (void)
 
 	mv->textbuf = gtk_text_view_get_buffer( mv->textview );
 
-	g_signal_connect (mv->textbuf, "insert-text",
+	//g_signal_connect (mv->textbuf, "insert-text",
+	//		  G_CALLBACK (textbuffer_string_insert), mv);
+	g_signal_connect (G_OBJECT (mv->textview), "key-press-event",
 			  G_CALLBACK (textbuffer_string_insert), mv);
 
 	scroll = gtk_scrolled_window_new (NULL, NULL);

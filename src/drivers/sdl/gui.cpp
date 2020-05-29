@@ -2360,7 +2360,7 @@ unsigned short GDKToSDLKeyval (int gdk_key)
 
 
 // Function adapted from Gens/GS (source/gens/input/input_sdl.c)
-static gint convertKeypress (GtkWidget * grab, GdkEventKey * event,
+static gboolean convertKeypress (GtkWidget * grab, GdkEventKey * event,
 			     gpointer user_data)
 {
 	SDL_Event sdlev;
