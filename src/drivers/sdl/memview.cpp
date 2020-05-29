@@ -45,6 +45,13 @@ static unsigned int  highlightActivityColors[HIGHLIGHT_ACTIVITY_NUM_COLORS] =
    0xba00ab, 0x6f00b0, 0x3700c2, 0x000cba,
    0x002cc9, 0x0053bf, 0x0072cf, 0x3c8bc7
 };
+
+struct memByte_t
+{
+	unsigned char data;
+	unsigned char color;
+	unsigned char actv;
+};
 //*******************************************************************************************************
 // Memory View (Hex Editor) Window
 //*******************************************************************************************************
@@ -131,12 +138,13 @@ struct memViewWin_t
 	int evntSrcID;
 	int numLines;
 	int numCharsPerLine;
-	unsigned char *mbuf;
-	unsigned char *colorbuf;
+	struct memByte_t *mbuf;
 	int mbuf_size;
 	GtkCellRenderer *hexByte_renderer[16];
 	bool redraw;
    int (*memAccessFunc)( unsigned int offset);
+
+	std::vector <GtkTextTag*> colorList;
 
 	enum {
 		MODE_NES_RAM = 0,
@@ -160,7 +168,6 @@ struct memViewWin_t
 		dialog_op = 0;
 		mode = MODE_NES_RAM;
 		mbuf = NULL;
-		colorbuf = NULL;
 		mbuf_size = 0;
 		numLines = 0;
 		evntSrcID = 0;
@@ -187,10 +194,6 @@ struct memViewWin_t
 		if ( mbuf != NULL )
 		{
 			free(mbuf); mbuf = NULL;
-		}
-		if ( colorbuf != NULL )
-		{
-			free(colorbuf); colorbuf = NULL;
 		}
 	}
 
@@ -295,11 +298,13 @@ static int conv2xchar( int i )
 	return c;
 }
 
-static void initMem( unsigned char *c, int size )
+static void initMem( struct memByte_t *c, int size )
 {
 	for (int i=0; i<size; i++)
 	{
-		c[i] = (i%2) ? 0xA5 : 0x5A;
+		c[i].data  = (i%2) ? 0xA5 : 0x5A;
+		c[i].color = 0;
+		c[i].actv  = 0;
 	}
 }
 
@@ -393,18 +398,8 @@ void memViewWin_t::showMemViewResults (int reset)
 		{
          free(mbuf); mbuf = NULL;
 		}
-      mbuf = (unsigned char *)malloc( memSize );
+      mbuf = (struct memByte_t *)malloc( memSize * sizeof(struct memByte_t) );
 
-		if ( colorbuf )
-		{
-         free(colorbuf); colorbuf = NULL;
-		}
-      colorbuf = (unsigned char *)malloc( memSize );
-
-		if ( colorbuf != NULL )
-		{
-			memset( colorbuf, 0, memSize );
-		}
 		if ( mbuf )
 		{
          mbuf_size = memSize;
@@ -481,18 +476,17 @@ void memViewWin_t::showMemViewResults (int reset)
 
 			c = memAccessFunc(addr);
 
-			if ( c != mbuf[addr] )
+			if ( c != mbuf[addr].data )
 			{
-				valChg[i] = 1;
-				mbuf[addr] = c;
-				colorbuf[addr] = 15;
+				mbuf[addr].data  = c;
+				mbuf[addr].color = 15;
 				valChg[i] = 1;
 			}
 			else
 			{
-				if ( colorbuf[addr] > 0 )
+				if ( mbuf[addr].color > 0 )
 				{
-				   colorbuf[addr]--;
+				   mbuf[addr].color--;
 					valChg[i] = 1;
 				}
 			}
@@ -525,7 +519,7 @@ void memViewWin_t::showMemViewResults (int reset)
 					gtk_text_buffer_delete( textbuf, &iter, &next_iter );
 				}
 				//gtk_text_buffer_insert( textbuf, &iter, valStr[i], -1 );
-				gtk_text_buffer_insert_with_tags( textbuf, &iter, valStr[i], -1, highlight[ colorbuf[addr] ], NULL );
+				gtk_text_buffer_insert_with_tags( textbuf, &iter, valStr[i], -1, highlight[ mbuf[addr].color ], NULL );
 			}
 			else
 			{
