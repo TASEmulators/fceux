@@ -1387,7 +1387,7 @@ addBreakpointMenuCB (GtkMenuItem *menuitem,
 	wp.address = dw->ctx_menu_addr;
 	wp.endaddress = 0;
 	wp.flags   = WP_X | WP_E;
-	wp.condText = "K==#00";
+	wp.condText = 0;
 	wp.desc = NULL;
 
 	create_breakpoint_dialog( -1, &wp, dw );
