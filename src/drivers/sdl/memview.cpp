@@ -280,6 +280,8 @@ struct memViewWin_t
 	void showMemViewResults (int reset);
 	int  calcVisibleRange( int *start_out, int *end_out, int *center_out );
 	int  getAddrFromCursor( int CursorTextOffset = -1 );
+	int  checkMemActivity(void);
+	void initMem(void);
 
 };
 
@@ -298,14 +300,20 @@ static int conv2xchar( int i )
 	return c;
 }
 
-static void initMem( struct memByte_t *c, int size )
+void memViewWin_t::initMem(void)
 {
-	for (int i=0; i<size; i++)
+
+	for (int i=0; i<mbuf_size; i++)
 	{
-		c[i].data  = (i%2) ? 0xA5 : 0x5A;
-		c[i].color = 0;
-		c[i].actv  = 0;
+		mbuf[i].data  = memAccessFunc(i);
+		mbuf[i].color = 0;
+		mbuf[i].actv  = 0;
 	}
+}
+
+int memViewWin_t::checkMemActivity(void)
+{
+   return 0;
 }
 
 int memViewWin_t::getAddrFromCursor( int CursorTextOffset )
@@ -403,7 +411,7 @@ void memViewWin_t::showMemViewResults (int reset)
 		if ( mbuf )
 		{
          mbuf_size = memSize;
-			initMem( mbuf, memSize );
+			initMem();
 		}
 		else
 		{
