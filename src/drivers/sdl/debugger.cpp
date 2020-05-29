@@ -26,6 +26,7 @@
 #include "../../cart.h"
 #include "../../ines.h"
 #include "../../asm.h"
+#include "../../ppu.h"
 #include "../../x6502.h"
 #include "../common/configSys.h"
 
@@ -37,6 +38,8 @@
 #include "debugger.h"
 
 extern Config *g_config;
+extern int vblankScanLines;
+extern int vblankPixel;
 
 static int  breakpoint_hit = 0;
 static void updateAllDebugWindows(void);
@@ -449,7 +452,8 @@ void debuggerWin_t::bpListUpdate(void)
 void  debuggerWin_t::updateRegisterView(void)
 {
 	int stackPtr;
-	char stmp[32];
+	char stmp[64];
+	char str[32], str2[32];
 	std::string  stackLine;
 
 	sprintf( stmp, "%04X", X.PC );
@@ -544,6 +548,56 @@ void  debuggerWin_t::updateRegisterView(void)
 
 	sprintf(stmp, "%llu", break_instructions_limit);
 	gtk_entry_set_text( GTK_ENTRY(brk_instrs_lim_entry), stmp );
+
+	sprintf(stmp, "PPU: 0x%04X", (int)FCEUPPU_PeekAddress());
+	gtk_label_set_text( GTK_LABEL(ppu_label), stmp );
+
+	sprintf(stmp, "Sprite: 0x%02X", PPU[3] );
+	gtk_label_set_text( GTK_LABEL(sprite_label), stmp );
+
+	extern int linestartts;
+	#define GETLASTPIXEL    (PAL?((timestamp*48-linestartts)/15) : ((timestamp*48-linestartts)/16) )
+	
+	int ppupixel = GETLASTPIXEL;
+
+	if (ppupixel>341)	//maximum number of pixels per scanline
+		ppupixel = 0;	//Currently pixel display is borked until Run 128 lines is clicked, this keeps garbage from displaying
+
+	// If not in the 0-239 pixel range, make special cases for display
+	if (scanline == 240 && vblankScanLines < (PAL?72:22))
+	{
+		if (!vblankScanLines)
+		{
+			// Idle scanline (240)
+			sprintf(str, "%d", scanline);	// was "Idle %d"
+		} else if (scanline + vblankScanLines == (PAL?311:261))
+		{
+			// Pre-render
+			sprintf(str, "-1");	// was "Prerender -1"
+		} else
+		{
+			// Vblank lines (241-260/310)
+			sprintf(str, "%d", scanline + vblankScanLines);	// was "Vblank %d"
+		}
+		sprintf(str2, "%d", vblankPixel);
+	} else
+	{
+		// Scanlines 0 - 239
+		sprintf(str, "%d", scanline);
+		sprintf(str2, "%d", ppupixel);
+	}
+
+	if(newppu)
+	{
+		sprintf(str ,"%d",newppu_get_scanline());
+		sprintf(str2,"%d",newppu_get_dot());
+	}
+
+	sprintf( stmp, "Scanline: %s", str );
+	gtk_label_set_text( GTK_LABEL(scanline_label), stmp );
+
+	sprintf( stmp, "Pixel: %s", str2 );
+	gtk_label_set_text( GTK_LABEL(pixel_label), stmp );
 
 }
 
