@@ -53,6 +53,7 @@ struct dbg_asm_entry_t
 	int  size;
 	int  line;
 	uint8  opcode[3];
+	std::string  text;
 
 
 	dbg_asm_entry_t(void)
@@ -589,12 +590,14 @@ static int InstructionUp(int from)
 void  debuggerWin_t::updateAssemblyView(void)
 {
 	int starting_address, start_address_lp, addr, size;
-	int instruction_addr;
-	std::string line, block;
+	int instruction_addr, textview_lines_allocated;
+	std::string line;
 	char chr[64];
 	uint8 opcode[3];
 	const char *disassemblyText = NULL;
 	dbg_asm_entry_t *a;
+	GtkTextIter iter, next_iter;
+	char pc_found = 0;
 
 	start_address_lp = starting_address = X.PC;
 
@@ -621,6 +624,12 @@ void  debuggerWin_t::updateAssemblyView(void)
 	addr  = starting_address;
 	asmPC = NULL;
 
+	gtk_text_buffer_get_start_iter( textbuf, &iter );
+
+	textview_lines_allocated = gtk_text_buffer_get_line_count( textbuf ) - 1;
+
+	//printf("Num Lines: %i\n", textview_lines_allocated );
+
 	for (int i=0; i < 0xFFFF; i++)
 	{
 		line.clear();
@@ -632,12 +641,26 @@ void  debuggerWin_t::updateAssemblyView(void)
 
 		instruction_addr = addr;
 
-		if (addr == X.PC)
+		if ( !pc_found )
 		{
-			asmPC = a;
-			line.assign(">");
-		} 
-		else
+			if (addr > X.PC)
+			{
+				asmPC = a;
+				line.assign(">");
+				pc_found = 1;
+			}
+			else if (addr == X.PC)
+			{
+				asmPC = a;
+				line.assign(">");
+				pc_found = 1;
+			} 
+			else
+			{
+				line.assign(" ");
+			}
+		}
+		else 
 		{
 			line.assign(" ");
 		}
@@ -656,7 +679,8 @@ void  debuggerWin_t::updateAssemblyView(void)
 			{
 				sprintf(chr, "%02X:%04X: ", a->bank, addr);
 			}
-		} else
+		} 
+		else
 		{
 			sprintf(chr, "  :%04X: ", addr);
 		}
@@ -707,18 +731,50 @@ void  debuggerWin_t::updateAssemblyView(void)
 		{
 			line.append("-------------------------");
 		}
-		line.append("\n");
 
-		//printf("%s", line.c_str() );
-
-		block.append( line );
+		a->text.assign( line );
 
 		a->line = asmEntry.size();
 
+		if ( i < textview_lines_allocated )
+		{
+			char *txt;
+
+			//gtk_text_buffer_get_iter_at_line( textbuf, &iter, i );
+
+			next_iter = iter;
+
+			gtk_text_iter_forward_to_line_end( &next_iter );
+
+			//gtk_text_iter_backward_chars( &next_iter, -1 );
+			txt = gtk_text_buffer_get_text( textbuf, &iter, &next_iter, FALSE);
+
+			if ( strcmp( txt, line.c_str() ) != 0 )
+			{
+				//printf("Text is the diff\n%s\n", txt);
+
+				gtk_text_buffer_delete( textbuf, &iter, &next_iter );
+
+				gtk_text_buffer_insert( textbuf, &iter, line.c_str(), -1 );
+			}
+			else 
+			{
+				iter = next_iter;
+			}
+			gtk_text_iter_forward_chars( &iter, 1 );
+
+			g_free(txt);
+		}
+		else
+		{
+			line.append("\n");
+
+			gtk_text_buffer_insert( textbuf, &iter, line.c_str(), -1 );
+			//gtk_text_buffer_get_end_iter( textbuf, &iter );
+		}
+
 		asmEntry.push_back(a);
 	}
-
-	gtk_text_buffer_set_text( textbuf, block.c_str(), -1 );
 
 }
 
