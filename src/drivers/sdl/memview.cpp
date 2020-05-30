@@ -129,6 +129,7 @@ struct memViewWin_t
 	GtkTextView *textview;
 	GtkTextBuffer *textbuf;
 	GtkTextTag *highlight[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
+	GtkCssProvider *cssProvider;
 	int selAddr;
 	int selRomAddr;
 	int jumpAddr;
@@ -142,7 +143,12 @@ struct memViewWin_t
 	int mbuf_size;
 	GtkCellRenderer *hexByte_renderer[16];
 	bool redraw;
+	bool useActivityColors;
    int (*memAccessFunc)( unsigned int offset);
+	uint64 total_instructions_lp;
+
+	GdkRGBA  bgColor;
+	GdkRGBA  fgColor;
 
 	std::vector <GtkTextTag*> colorList;
 
@@ -174,6 +180,9 @@ struct memViewWin_t
 		numCharsPerLine = 90;
 		redraw = 1;
 		memAccessFunc = getRAM;
+		useActivityColors = 1;
+		total_instructions_lp = 0;
+		cssProvider = NULL;
 
 		for (int i=0; i<4; i++)
 		{
@@ -282,6 +291,7 @@ struct memViewWin_t
 	int  getAddrFromCursor( int CursorTextOffset = -1 );
 	int  checkMemActivity(void);
 	void initMem(void);
+	int upDateTextViewStyle(void);
 
 };
 
@@ -313,6 +323,37 @@ void memViewWin_t::initMem(void)
 
 int memViewWin_t::checkMemActivity(void)
 {
+	int c;
+
+	// Don't perform memory activity checks when:
+	// 1. In ROM View Mode
+	// 2. The simulation is not cycling (paused)
+
+	if ( ( mode == MODE_NES_ROM ) ||
+	      ( total_instructions_lp == total_instructions ) )
+	{
+		return -1;
+	}
+
+	for (int i=0; i<mbuf_size; i++)
+	{
+		c = memAccessFunc(i);
+
+		if ( c != mbuf[i].data )
+		{
+			mbuf[i].actv  = 15;
+			mbuf[i].data  = c;
+		}
+		else
+		{
+			if ( mbuf[i].actv > 0 )
+			{
+				mbuf[i].actv--;
+			}
+		}
+	}
+	total_instructions_lp = total_instructions;
+
    return 0;
 }
 
@@ -391,8 +432,25 @@ void memViewWin_t::showMemViewResults (int reset)
 			memSize       = 0x100;
 		break;
 		case MODE_NES_ROM:
-			memAccessFunc = getROM;
-			memSize       = 16 + CHRsize[0] + PRGsize[0];
+
+			if ( GameInfo != NULL )
+			{
+				memAccessFunc = getROM;
+				memSize       = 16 + CHRsize[0] + PRGsize[0];
+			}
+			else
+			{  // No Game Loaded!!! Get out of Function
+				memAccessFunc = NULL;
+				memSize = 0;
+				if ( mbuf )
+				{
+  		    	   free(mbuf); mbuf = NULL;
+				}
+				mbuf_size = 0;
+				redraw = 1;
+				gtk_text_buffer_set_text( textbuf, "", -1 );
+				return;
+			}
 		break;
 	}
 	numLines = memSize / 16;
@@ -406,7 +464,7 @@ void memViewWin_t::showMemViewResults (int reset)
 		{
          free(mbuf); mbuf = NULL;
 		}
-      mbuf = (struct memByte_t *)malloc( memSize * sizeof(struct memByte_t) );
+		mbuf = (struct memByte_t *)malloc( memSize * sizeof(struct memByte_t) );
 
 		if ( mbuf )
 		{
@@ -427,24 +485,25 @@ void memViewWin_t::showMemViewResults (int reset)
 
 	//printf("CPOS: %i \n", cpos );
 
-	gtk_text_buffer_get_start_iter( textbuf, &start_iter );
-	gtk_text_buffer_get_end_iter( textbuf, &end_iter   );
-
 	if ( reset )
 	{
+		gtk_text_buffer_get_bounds( textbuf, &start_iter, &end_iter );
+
 		gtk_text_buffer_delete( textbuf, &start_iter, &end_iter );
 
 		row_start = 0;
 		row_end   = numLines;
 
-	   gtk_text_buffer_get_iter_at_offset( textbuf, &iter, 0 );
+		gtk_text_buffer_get_iter_at_offset( textbuf, &iter, 0 );
 	}
 	else
 	{
 		calcVisibleRange( &row_start, &row_end, NULL );
 
-	   gtk_text_buffer_get_iter_at_line( textbuf, &iter, row_start );
+		gtk_text_buffer_get_iter_at_line( textbuf, &iter, row_start );
 	}
+
+	checkMemActivity();
 
 	//gtk_text_buffer_get_iter_at_offset( textbuf, &iter, 0 );
 
@@ -484,19 +543,30 @@ void memViewWin_t::showMemViewResults (int reset)
 
 			c = memAccessFunc(addr);
 
-			if ( c != mbuf[addr].data )
+			//if ( c != mbuf[addr].data )
+			//{
+			//	printf("Value Change: %04X   %02X   %02X \n", addr, c, mbuf[addr].data );
+			//	mbuf[addr].data  = c;
+			//	mbuf[addr].color = 15;
+			//	valChg[i] = 1;
+			//}
+			//else
+			//{
+			//	if ( mbuf[addr].color > 0 )
+			//	{
+			//	   mbuf[addr].color--;
+			//		valChg[i] = 1;
+			//	}
+			//}
+
+			if ( mbuf[addr].actv )
 			{
-				mbuf[addr].data  = c;
-				mbuf[addr].color = 15;
-				valChg[i] = 1;
+				valChg[i] =  mbuf[addr].actv;
 			}
-			else
+
+			if ( useActivityColors )
 			{
-				if ( mbuf[addr].color > 0 )
-				{
-				   mbuf[addr].color--;
-					valChg[i] = 1;
-				}
+			   mbuf[addr].color = mbuf[addr].actv;
 			}
 
 			un = ( c & 0x00f0 ) >> 4;
@@ -517,13 +587,15 @@ void memViewWin_t::showMemViewResults (int reset)
             ascii[i] = '.';
 			}
 
+			next_iter = iter;
+
 			if ( valChg[i] )
 			{
-				next_iter = iter;
-				gtk_text_iter_forward_chars( &next_iter, 4 );
-
 				if ( !reset )
 				{
+					next_iter = iter;
+					gtk_text_iter_forward_chars( &next_iter, 4 );
+
 					gtk_text_buffer_delete( textbuf, &iter, &next_iter );
 				}
 				//gtk_text_buffer_insert( textbuf, &iter, valStr[i], -1 );
@@ -531,6 +603,13 @@ void memViewWin_t::showMemViewResults (int reset)
 			}
 			else
 			{
+				if ( !reset )
+				{
+					gtk_text_iter_forward_chars( &next_iter, 4 );
+
+					gtk_text_buffer_remove_all_tags( textbuf, &iter, &next_iter );
+				}
+
 				gtk_text_iter_forward_chars( &iter, 4 );
 			}
 		}
@@ -540,11 +619,10 @@ void memViewWin_t::showMemViewResults (int reset)
 		{
 			if ( valChg[i] )
 			{
-				next_iter = iter;
-				gtk_text_iter_forward_chars( &next_iter, 1 );
-
 				if ( !reset )
 				{
+					next_iter = iter;
+					gtk_text_iter_forward_chars( &next_iter, 1 );
 					gtk_text_buffer_delete( textbuf, &iter, &next_iter );
 				}
 				gtk_text_buffer_insert( textbuf, &iter, &ascii[i], 1 );
@@ -636,6 +714,10 @@ int memViewWin_t::calcVisibleRange( int *start_out, int *end_out, int *center_ou
 
    if ( start < 0 ) start = 0;
 
+	if ( end > (start+32) )
+	{
+		end = start + 32;
+	}
    if ( end > numLines )
    {
       end = numLines;
@@ -699,6 +781,30 @@ int memViewWin_t::gotoLocation( int addr )
    return 0;
 }
 
+static void gdkColorConv( GdkRGBA *in, int *out )
+{
+	*out  = 0;
+	*out |= ( (int)( (in->red   * 256.0) ) & 0x00ff) << 16;
+	*out |= ( (int)( (in->green * 256.0) ) & 0x00ff) <<  8;
+	*out |= ( (int)( (in->blue  * 256.0) ) & 0x00ff);
+}
+
+int memViewWin_t::upDateTextViewStyle(void)
+{
+	char styleString[256];
+	int fg, bg;
+
+	gdkColorConv( &bgColor, &bg );
+	gdkColorConv( &fgColor, &fg );
+
+	sprintf( styleString, 
+			"#hex_editor text { color: #%06X;\n background-color: #%06X;\n }", fg, bg );
+
+	gtk_css_provider_load_from_data(cssProvider, styleString, -1, NULL);
+
+	return 0;
+}
+
 static int memViewEvntSrcID = 0;
 static std::list <memViewWin_t*> memViewWinList;
 
@@ -721,6 +827,71 @@ static void changeModeROM (GtkRadioMenuItem * radiomenuitem, memViewWin_t *mv)
 {
 	printf("Changing Mode ROM \n");
 	mv->setMode( memViewWin_t::MODE_NES_ROM );
+}
+
+static void colorPickCB (GtkDialog *dialog,
+								gint         response_id,
+								memViewWin_t    *mv)
+{
+	GdkRGBA color;
+	const char *title;
+
+	gtk_color_chooser_get_rgba ( GTK_COLOR_CHOOSER( dialog ), &color );
+
+	title = gtk_window_get_title( GTK_WINDOW(dialog) );
+
+	//printf("Response: %s   %i   R:%f  G:%f  B:%f\n", 
+	//		gtk_window_get_title( GTK_WINDOW(dialog) ),
+	//		response_id, color.red, color.green, color.blue );
+
+	if ( GTK_RESPONSE_OK == response_id )
+	{
+		if ( strstr( title, "Background" ) )
+		{
+			mv->bgColor = color;
+			mv->upDateTextViewStyle();
+		}
+		else if ( strstr( title, "Foreground" ) )
+		{
+			mv->fgColor = color;
+			mv->upDateTextViewStyle();
+		}
+	}
+
+	gtk_widget_destroy ( GTK_WIDGET(dialog) );
+}
+
+static void openColorPicker (memViewWin_t *mv, int mode)
+{
+	GtkWidget *w;
+	char title[256];
+
+	printf("Open Color Picker \n");
+
+	if ( mode )
+	{
+		strcpy( title, "Pick Background Color");
+	}
+	else
+	{
+		strcpy( title, "Pick Foreground Color");
+	}
+
+	w = gtk_color_chooser_dialog_new( title, GTK_WINDOW(mv->win) );
+
+	g_signal_connect (w, "response", G_CALLBACK (colorPickCB),
+				  (gpointer) mv);
+
+	gtk_widget_show_all (w);
+}
+
+static void openColorPicker_FG_CB (GtkMenuItem * item, memViewWin_t *mv)
+{
+	openColorPicker (mv,0);
+}
+static void openColorPicker_BG_CB (GtkMenuItem * item, memViewWin_t *mv)
+{
+	openColorPicker (mv,1);
 }
 
 static GtkWidget *CreateMemViewMenubar (memViewWin_t * mv)
@@ -773,6 +944,31 @@ static GtkWidget *CreateMemViewMenubar (memViewWin_t * mv)
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), mv->memSelRadioItem[3]);
 
 	g_signal_connect (mv->memSelRadioItem[3], "activate", G_CALLBACK (changeModeROM),
+				  (gpointer) mv);
+
+	//-Color ------------------
+	item = gtk_menu_item_new_with_label ("Colors");
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (menubar), item);
+
+	menu = gtk_menu_new ();
+
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), menu);
+
+	//-Color --> Set Foreground ------------------
+	item = gtk_menu_item_new_with_label ("Set Foreground");
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item );
+
+	g_signal_connect (item, "activate", G_CALLBACK (openColorPicker_FG_CB),
+				  (gpointer) mv);
+
+	//-Color --> Set Background ------------------
+	item = gtk_menu_item_new_with_label ("Set Background");
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item );
+
+	g_signal_connect (item, "activate", G_CALLBACK (openColorPicker_BG_CB),
 				  (gpointer) mv);
 
 	// Finally, return the actual menu bar created
@@ -1229,6 +1425,7 @@ void openMemoryViewWindow (void)
 
 	mv->textview = (GtkTextView*) gtk_text_view_new();
 
+	gtk_widget_set_name( GTK_WIDGET(mv->textview), "hex_editor");
 	gtk_text_view_set_monospace( mv->textview, TRUE );
 	gtk_text_view_set_overwrite( mv->textview, TRUE );
 	gtk_text_view_set_editable( mv->textview, TRUE );
@@ -1304,6 +1501,27 @@ void openMemoryViewWindow (void)
 			  G_CALLBACK (closeMemoryViewWindow), mv);
 	g_signal_connect (mv->win, "response",
 			  G_CALLBACK (closeMemoryViewWindow), mv);
+
+	mv->bgColor.red   = 0.0;
+	mv->bgColor.green = 0.0;
+	mv->bgColor.blue  = 0.0;
+	mv->bgColor.alpha = 1.0;
+
+	mv->fgColor.red   = 1.0;
+	mv->fgColor.green = 1.0;
+	mv->fgColor.blue  = 1.0;
+	mv->fgColor.alpha = 1.0;
+
+	mv->cssProvider = gtk_css_provider_new();
+
+	mv->upDateTextViewStyle();
+
+	gtk_style_context_add_provider( gtk_widget_get_style_context( GTK_WIDGET(mv->textview) ),
+									GTK_STYLE_PROVIDER(mv->cssProvider),
+									GTK_STYLE_PROVIDER_PRIORITY_USER);
+	//gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
+	//							GTK_STYLE_PROVIDER(cssProvider),
+	//							GTK_STYLE_PROVIDER_PRIORITY_USER);
 
 	gtk_widget_show_all (mv->win);
 
