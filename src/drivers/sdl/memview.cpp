@@ -941,7 +941,7 @@ static void openColorPicker (memViewWin_t *mv, int mode)
 	GtkWidget *w;
 	char title[256];
 
-	printf("Open Color Picker \n");
+	//printf("Open Color Picker \n");
 
 	if ( mode )
 	{
@@ -1079,6 +1079,8 @@ static GtkWidget *CreateMemViewMenubar (memViewWin_t * mv)
 	g_signal_connect (item, "activate", G_CALLBACK (toggleActivityHighlight),
 				  (gpointer) mv);
 
+	gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(item), mv->useActivityColors );
+
 	//-HighLight -->  Reverse Video ------------------
 	item = gtk_check_menu_item_new_with_label ("Reverse Video");
 
@@ -1086,6 +1088,8 @@ static GtkWidget *CreateMemViewMenubar (memViewWin_t * mv)
 
 	g_signal_connect (item, "activate", G_CALLBACK (toggleActivityReverseVideo),
 				  (gpointer) mv);
+
+	gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(item), mv->actv_color_reverse_video );
 
 	// Finally, return the actual menu bar created
 	return menubar;
