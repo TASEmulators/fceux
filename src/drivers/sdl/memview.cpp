@@ -128,7 +128,6 @@ struct memViewWin_t
 	GtkWidget *memSelRadioItem[4];
 	GtkTextView *textview;
 	GtkTextBuffer *textbuf;
-	GtkTextTag *highlight[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
 	GtkCssProvider *cssProvider;
 	int selAddr;
 	int selRomAddr;
@@ -144,6 +143,7 @@ struct memViewWin_t
 	GtkCellRenderer *hexByte_renderer[16];
 	bool redraw;
 	bool useActivityColors;
+	bool actv_color_reverse_video;
    int (*memAccessFunc)( unsigned int offset);
 	uint64 total_instructions_lp;
 
@@ -183,6 +183,17 @@ struct memViewWin_t
 		useActivityColors = 1;
 		total_instructions_lp = 0;
 		cssProvider = NULL;
+		actv_color_reverse_video = 1;
+
+		bgColor.red   = 1.0;
+		bgColor.green = 1.0;
+		bgColor.blue  = 1.0;
+		bgColor.alpha = 1.0;
+
+		fgColor.red   = 0.0;
+		fgColor.green = 0.0;
+		fgColor.blue  = 0.0;
+		fgColor.alpha = 1.0;
 
 		for (int i=0; i<4; i++)
 		{
@@ -192,10 +203,6 @@ struct memViewWin_t
 		{
 			hexByte_renderer[i] = NULL;
 		}
-		for (int i=0; i<HIGHLIGHT_ACTIVITY_NUM_COLORS; i++)
-      {
-         highlight[i] = NULL;
-      }
 	}
 
 	~memViewWin_t(void)
@@ -291,7 +298,8 @@ struct memViewWin_t
 	int  getAddrFromCursor( int CursorTextOffset = -1 );
 	int  checkMemActivity(void);
 	void initMem(void);
-	int upDateTextViewStyle(void);
+	int  upDateTextViewStyle(void);
+	void initColors(void);
 
 };
 
@@ -407,7 +415,7 @@ void memViewWin_t::showMemViewResults (int reset)
 	int i, row, row_start, row_end, totalChars;
 	gint cpos;
 	char addrStr[128], valStr[16][8], ascii[18];
-	char addrChg, valChg[16];
+	char addrChg, valChg[16], activityColoringOn, colorEnable;
 	GtkTextIter iter, next_iter, start_iter, end_iter;
 
 	if ( redraw )
@@ -448,7 +456,7 @@ void memViewWin_t::showMemViewResults (int reset)
 				}
 				mbuf_size = 0;
 				redraw = 1;
-				gtk_text_buffer_set_text( textbuf, "", -1 );
+				gtk_text_buffer_set_text( textbuf, "No ROM Loaded", -1 );
 				return;
 			}
 		break;
@@ -503,6 +511,10 @@ void memViewWin_t::showMemViewResults (int reset)
 		gtk_text_buffer_get_iter_at_line( textbuf, &iter, row_start );
 	}
 
+	activityColoringOn = useActivityColors && (mode != MODE_NES_ROM);
+
+	colorEnable = activityColoringOn;
+
 	checkMemActivity();
 
 	//gtk_text_buffer_get_iter_at_offset( textbuf, &iter, 0 );
@@ -543,22 +555,6 @@ void memViewWin_t::showMemViewResults (int reset)
 
 			c = memAccessFunc(addr);
 
-			//if ( c != mbuf[addr].data )
-			//{
-			//	printf("Value Change: %04X   %02X   %02X \n", addr, c, mbuf[addr].data );
-			//	mbuf[addr].data  = c;
-			//	mbuf[addr].color = 15;
-			//	valChg[i] = 1;
-			//}
-			//else
-			//{
-			//	if ( mbuf[addr].color > 0 )
-			//	{
-			//	   mbuf[addr].color--;
-			//		valChg[i] = 1;
-			//	}
-			//}
-
 			if ( mbuf[addr].actv )
 			{
 				valChg[i] =  mbuf[addr].actv;
@@ -566,7 +562,14 @@ void memViewWin_t::showMemViewResults (int reset)
 
 			if ( useActivityColors )
 			{
-			   mbuf[addr].color = mbuf[addr].actv;
+				if ( actv_color_reverse_video )
+				{
+			   	mbuf[addr].color = mbuf[addr].actv + HIGHLIGHT_ACTIVITY_NUM_COLORS;
+				}
+				else
+				{
+			   	mbuf[addr].color = mbuf[addr].actv;
+				}
 			}
 
 			un = ( c & 0x00f0 ) >> 4;
@@ -599,7 +602,28 @@ void memViewWin_t::showMemViewResults (int reset)
 					gtk_text_buffer_delete( textbuf, &iter, &next_iter );
 				}
 				//gtk_text_buffer_insert( textbuf, &iter, valStr[i], -1 );
-				gtk_text_buffer_insert_with_tags( textbuf, &iter, valStr[i], -1, highlight[ mbuf[addr].color ], NULL );
+				if ( colorEnable )
+				{
+					if ( activityColoringOn )
+					{
+						if ( actv_color_reverse_video )
+						{
+							gtk_text_buffer_insert_with_tags( textbuf, &iter, valStr[i], -1, colorList[ mbuf[addr].actv + HIGHLIGHT_ACTIVITY_NUM_COLORS ], NULL );
+						}
+						else
+						{
+							gtk_text_buffer_insert_with_tags( textbuf, &iter, valStr[i], -1, colorList[ mbuf[addr].actv ], NULL );
+						}
+					}
+					else
+					{
+						gtk_text_buffer_insert_with_tags( textbuf, &iter, valStr[i], -1, colorList[ mbuf[addr].color ], NULL );
+					}
+				}
+				else
+				{
+					gtk_text_buffer_insert( textbuf, &iter, valStr[i], -1 );
+				}
 			}
 			else
 			{
@@ -609,7 +633,6 @@ void memViewWin_t::showMemViewResults (int reset)
 
 					gtk_text_buffer_remove_all_tags( textbuf, &iter, &next_iter );
 				}
-
 				gtk_text_iter_forward_chars( &iter, 4 );
 			}
 		}
@@ -723,33 +746,7 @@ int memViewWin_t::calcVisibleRange( int *start_out, int *end_out, int *center_ou
       end = numLines;
    }
 
-   //printf("Line Iter: %i -> %i\n", start, end );
-
-	//ivadj = gtk_range_get_adjustment( GTK_RANGE(ivbar) );
-
-
-	//v = gtk_range_get_value( GTK_RANGE(ivbar) );
-	//l = gtk_adjustment_get_lower( ivadj );
-	//u = gtk_adjustment_get_upper( ivadj );
-
-	//r = (v - l) / (u - l);
-
-	//start = ((int)( r * (double)numLines )) - 16;
-
-	//if ( start < 0 )
-	//{
-	//	start = 0;
-	//}
-	//end = start + 64;
-
-	//if ( end > numLines )
-	//{
-	//	end = numLines;
-	//}
-
 	center = start + (end - start)/2;
-
-	//printf(" Start:%i   End:%i      0x%08x -> 0x%08x \n", start, end, start * 16, end * 16 );
 
 	if ( start_out  ) *start_out  = start;
 	if ( end_out    ) *end_out    = end;
@@ -784,21 +781,99 @@ int memViewWin_t::gotoLocation( int addr )
 static void gdkColorConv( GdkRGBA *in, int *out )
 {
 	*out  = 0;
-	*out |= ( (int)( (in->red   * 256.0) ) & 0x00ff) << 16;
-	*out |= ( (int)( (in->green * 256.0) ) & 0x00ff) <<  8;
-	*out |= ( (int)( (in->blue  * 256.0) ) & 0x00ff);
+	*out |= ( (int)( (in->red   * 255.0) ) & 0x00ff) << 16;
+	*out |= ( (int)( (in->green * 255.0) ) & 0x00ff) <<  8;
+	*out |= ( (int)( (in->blue  * 255.0) ) & 0x00ff);
+}
+
+void memViewWin_t::initColors(void)
+{
+	GdkRGBA color, ivcolor;
+	GtkTextTag *tag;
+	float avg, grayScale;
+
+	// Normal Activity Colors
+	for (int i=0; i<HIGHLIGHT_ACTIVITY_NUM_COLORS; i++)
+	{
+		int r,g,b;
+		char stmp[64];
+
+		sprintf( stmp, "highlight%i\n", i );
+
+		r = (highlightActivityColors[i] & 0x000000ff);
+		g = (highlightActivityColors[i] & 0x0000ff00) >> 8;
+		b = (highlightActivityColors[i] & 0x00ff0000) >> 16;
+
+		color.red   = (double)r / 255.0f;
+		color.green = (double)g / 255.0f;
+		color.blue  = (double)b / 255.0f;
+		color.alpha = 1.0;
+
+     	tag = gtk_text_buffer_create_tag( textbuf, stmp, 
+				"foreground-rgba", &color, NULL );
+
+		colorList.push_back( tag );
+	}
+
+	// Reverse Video Activity Colors
+	for (int i=0; i<HIGHLIGHT_ACTIVITY_NUM_COLORS; i++)
+	{
+		int r,g,b;
+		char stmp[64];
+
+		sprintf( stmp, "highlight%i\n", i + HIGHLIGHT_ACTIVITY_NUM_COLORS);
+
+		r = (highlightActivityColors[i] & 0x000000ff);
+		g = (highlightActivityColors[i] & 0x0000ff00) >> 8;
+		b = (highlightActivityColors[i] & 0x00ff0000) >> 16;
+
+		color.red   = (double)r / 255.0f;
+		color.green = (double)g / 255.0f;
+		color.blue  = (double)b / 255.0f;
+		color.alpha = 1.0;
+
+		avg = (color.red + color.green + color.blue) / 3.0;
+
+		if ( avg >= 0.5 )
+		{
+			grayScale = 0.0;
+		}
+		else
+		{
+			grayScale = 1.0;
+		}
+
+		ivcolor.red   = grayScale;
+		ivcolor.green = grayScale;
+		ivcolor.blue  = grayScale;
+		ivcolor.alpha = 1.0;
+
+		//printf("%i  R:%f  G:%f  B:%f \n", i, color.red, color.green, color.blue );
+
+     	tag = gtk_text_buffer_create_tag( textbuf, stmp,
+			  	"background-rgba", &color, "foreground-rgba", &ivcolor, NULL );
+
+		colorList.push_back( tag );
+	}
+   return;
 }
 
 int memViewWin_t::upDateTextViewStyle(void)
 {
-	char styleString[256];
+	char styleString[512];
 	int fg, bg;
 
 	gdkColorConv( &bgColor, &bg );
 	gdkColorConv( &fgColor, &fg );
 
 	sprintf( styleString, 
-			"#hex_editor text { color: #%06X;\n background-color: #%06X;\n }", fg, bg );
+"#hex_editor text \
+{\
+  	color: #%06X;\
+  	background-color: #%06X; \
+}", fg, bg );
+
+	//printf("Style: %s\n",  styleString );
 
 	gtk_css_provider_load_from_data(cssProvider, styleString, -1, NULL);
 
@@ -894,6 +969,22 @@ static void openColorPicker_BG_CB (GtkMenuItem * item, memViewWin_t *mv)
 	openColorPicker (mv,1);
 }
 
+static void toggleActivityHighlight (GtkCheckMenuItem * item, memViewWin_t *mv)
+{
+	mv->useActivityColors = gtk_check_menu_item_get_active (item);
+
+	//printf("ToggleMenu: %i\n", (int)toggleMenu);
+	//g_config->setOption ("SDL.ToggleMenu", (int) toggleMenu);
+}
+
+static void toggleActivityReverseVideo (GtkCheckMenuItem * item, memViewWin_t *mv)
+{
+	mv->actv_color_reverse_video = gtk_check_menu_item_get_active (item);
+
+	//printf("ToggleMenu: %i\n", (int)toggleMenu);
+	//g_config->setOption ("SDL.ToggleMenu", (int) toggleMenu);
+}
+
 static GtkWidget *CreateMemViewMenubar (memViewWin_t * mv)
 {
 	GtkWidget *menubar, *menu, *item;
@@ -969,6 +1060,31 @@ static GtkWidget *CreateMemViewMenubar (memViewWin_t * mv)
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item );
 
 	g_signal_connect (item, "activate", G_CALLBACK (openColorPicker_BG_CB),
+				  (gpointer) mv);
+
+	//-HighLight ------------------
+	item = gtk_menu_item_new_with_label ("Highlight");
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (menubar), item);
+
+	menu = gtk_menu_new ();
+
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), menu);
+
+	//-HighLight -->  Activity ------------------
+	item = gtk_check_menu_item_new_with_label ("Activity");
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item );
+
+	g_signal_connect (item, "activate", G_CALLBACK (toggleActivityHighlight),
+				  (gpointer) mv);
+
+	//-HighLight -->  Reverse Video ------------------
+	item = gtk_check_menu_item_new_with_label ("Reverse Video");
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item );
+
+	g_signal_connect (item, "activate", G_CALLBACK (toggleActivityReverseVideo),
 				  (gpointer) mv);
 
 	// Finally, return the actual menu bar created
@@ -1402,7 +1518,6 @@ void openMemoryViewWindow (void)
 	GtkWidget *scroll;
 	GtkWidget *menubar;
 	memViewWin_t *mv;
-	GdkRGBA  color;
 
 	mv = new memViewWin_t;
 
@@ -1445,31 +1560,10 @@ void openMemoryViewWindow (void)
 
 	mv->textbuf = gtk_text_view_get_buffer( mv->textview );
 
-	//g_signal_connect (mv->textbuf, "insert-text",
-	//		  G_CALLBACK (textbuffer_string_insert), mv);
 	g_signal_connect (G_OBJECT (mv->textview), "key-press-event",
 			  G_CALLBACK (textbuffer_string_insert), mv);
 
-	for (int i=0; i<HIGHLIGHT_ACTIVITY_NUM_COLORS; i++)
-	{
-		int r,g,b;
-		char stmp[64];
-
-		sprintf( stmp, "hightlight%i\n", i );
-
-		r = (highlightActivityColors[i] & 0x000000ff);
-		g = (highlightActivityColors[i] & 0x0000ff00) >> 8;
-		b = (highlightActivityColors[i] & 0x00ff0000) >> 16;
-
-		color.red   = (double)r / 255.0f;
-		color.green = (double)g / 255.0f;
-		color.blue  = (double)b / 255.0f;
-		color.alpha = 1.0;
-
-		printf("%i  R:%f  G:%f  B:%f \n", i, color.red, color.green, color.blue );
-
-      mv->highlight[i] = gtk_text_buffer_create_tag( mv->textbuf, stmp, "foreground-rgba", &color, NULL );
-	}
+	mv->initColors();
 
 	scroll = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
@@ -1501,16 +1595,6 @@ void openMemoryViewWindow (void)
 			  G_CALLBACK (closeMemoryViewWindow), mv);
 	g_signal_connect (mv->win, "response",
 			  G_CALLBACK (closeMemoryViewWindow), mv);
-
-	mv->bgColor.red   = 0.0;
-	mv->bgColor.green = 0.0;
-	mv->bgColor.blue  = 0.0;
-	mv->bgColor.alpha = 1.0;
-
-	mv->fgColor.red   = 1.0;
-	mv->fgColor.green = 1.0;
-	mv->fgColor.blue  = 1.0;
-	mv->fgColor.alpha = 1.0;
 
 	mv->cssProvider = gtk_css_provider_new();
 
