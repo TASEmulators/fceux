@@ -38,6 +38,10 @@
 #include "sound.h"
 #include "keyscan.h"
 
+#ifdef _S9XLUA_H
+#include "fceulua.h"
+#endif
+
 LPDIRECTINPUT7 lpDI=0;
 
 void InitInputPorts(bool fourscore);
@@ -70,6 +74,13 @@ static void PresetImport(int preset);
 
 static uint32 MouseData[3];
 static int32 MouseRelative[3];
+
+#ifdef _S9XLUA_H
+static uint32 LuaMouseData[3];
+#else
+static uint32* const LuaMouseData = MouseData;
+#endif
+
 
 //force the input types suggested by the game
 void ParseGIInput(FCEUGI *gi)
@@ -505,7 +516,13 @@ void FCEUD_UpdateInput()
 		if(joy)
 			UpdateGamepad(false);
 
-		if (mouse) GetMouseData(MouseData);
+		if (mouse)
+		{
+			GetMouseData(MouseData);
+			#ifdef _S9XLUA_H
+				FCEU_LuaReadZapper(MouseData, LuaMouseData);
+			#endif
+		}
 		if (mouse_relative) GetMouseRelative(MouseRelative);
 	}
 }
@@ -553,7 +570,7 @@ void InitInputPorts(bool fourscore)
 				InputDPtr=MouseData;
 				break;
 			case SI_ZAPPER:
-				InputDPtr=MouseData;
+				InputDPtr=LuaMouseData;
 				break;
 			case SI_MOUSE:
 				InputDPtr=MouseRelative;
