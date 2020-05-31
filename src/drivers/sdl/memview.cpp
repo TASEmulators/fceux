@@ -420,7 +420,7 @@ void memViewWin_t::showMemViewResults (int reset)
 	gint cpos, textview_lines_allocated;
 	char addrStr[128], valStr[16][8], ascii[18];
 	char addrChg, valChg[16], activityColoringOn, colorEnable;
-	GtkTextIter iter, next_iter, start_iter, end_iter;
+	GtkTextIter iter, next_iter; //, start_iter, end_iter;
 
 	if ( redraw )
 	{
@@ -627,7 +627,7 @@ void memViewWin_t::showMemViewResults (int reset)
 					}
 				}
 				else
-				{
+				{  // No Color Options Active, other than regular fore/back ground coloring.
 					gtk_text_buffer_insert( textbuf, &iter, valStr[i], -1 );
 				}
 			}

@@ -2882,10 +2882,30 @@ static GtkWidget *CreateMenubar (GtkWidget * window)
 
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
 
-   //-Tools --> Debugger ---------------------
+	//---------------------------------------
+	// Create Debug Menu
+	item = gtk_menu_item_new_with_label ("Debug");
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (menubar), item);
+
+	menu = gtk_menu_new ();
+
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), menu);
+   //-Debugger --> Debugger ---------------------
 	item = gtk_menu_item_new_with_label ("Debugger");
 
 	g_signal_connect (item, "activate", G_CALLBACK (openDebuggerWindow),
+			  NULL);
+
+	//gtk_widget_add_accelerator( item, "activate", accel_group,
+	//                           GDK_KEY_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+
+	//-Debug --> Hex Editor ---------------------
+	item = gtk_menu_item_new_with_label ("Hex Editor");
+
+	g_signal_connect (item, "activate", G_CALLBACK (openMemoryViewWindow),
 			  NULL);
 
 	//gtk_widget_add_accelerator( item, "activate", accel_group,
