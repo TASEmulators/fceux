@@ -51,6 +51,7 @@ struct memByte_t
 	unsigned char data;
 	unsigned char color;
 	unsigned char actv;
+	unsigned char draw;
 };
 //*******************************************************************************************************
 // Memory View (Hex Editor) Window
@@ -326,6 +327,7 @@ void memViewWin_t::initMem(void)
 		mbuf[i].data  = memAccessFunc(i);
 		mbuf[i].color = 0;
 		mbuf[i].actv  = 0;
+		mbuf[i].draw  = 1;
 	}
 }
 
@@ -351,11 +353,13 @@ int memViewWin_t::checkMemActivity(void)
 		{
 			mbuf[i].actv  = 15;
 			mbuf[i].data  = c;
+			mbuf[i].draw  = 1;
 		}
 		else
 		{
 			if ( mbuf[i].actv > 0 )
 			{
+				mbuf[i].draw = 1;
 				mbuf[i].actv--;
 			}
 		}
@@ -413,7 +417,7 @@ void memViewWin_t::showMemViewResults (int reset)
 	int addr, memSize = 0;
 	int lineAddr = 0, c, un, ln;
 	int i, row, row_start, row_end, totalChars;
-	gint cpos;
+	gint cpos, textview_lines_allocated;
 	char addrStr[128], valStr[16][8], ascii[18];
 	char addrChg, valChg[16], activityColoringOn, colorEnable;
 	GtkTextIter iter, next_iter, start_iter, end_iter;
@@ -495,9 +499,10 @@ void memViewWin_t::showMemViewResults (int reset)
 
 	if ( reset )
 	{
-		gtk_text_buffer_get_bounds( textbuf, &start_iter, &end_iter );
+		//gtk_text_buffer_get_bounds( textbuf, &start_iter, &end_iter );
 
-		gtk_text_buffer_delete( textbuf, &start_iter, &end_iter );
+		//gtk_text_buffer_delete( textbuf, &start_iter, &end_iter );
+		gtk_text_buffer_set_text( textbuf, "", -1 );
 
 		row_start = 0;
 		row_end   = numLines;
@@ -521,9 +526,15 @@ void memViewWin_t::showMemViewResults (int reset)
 
 	totalChars = row_start * numCharsPerLine;
 
+	textview_lines_allocated = gtk_text_buffer_get_line_count( textbuf ) - 1;
+
 	for (row=row_start; row<row_end; row++)
 	{
 		//gtk_text_buffer_get_iter_at_offset( textbuf, &iter, totalChars );
+		if ( row >= textview_lines_allocated )
+		{
+			reset = 1;
+		}
 
       addrChg = reset;
 
@@ -555,21 +566,10 @@ void memViewWin_t::showMemViewResults (int reset)
 
 			c = memAccessFunc(addr);
 
-			if ( mbuf[addr].actv )
+			if ( mbuf[addr].draw )
 			{
-				valChg[i] =  mbuf[addr].actv;
-			}
-
-			if ( useActivityColors )
-			{
-				if ( actv_color_reverse_video )
-				{
-			   	mbuf[addr].color = mbuf[addr].actv + HIGHLIGHT_ACTIVITY_NUM_COLORS;
-				}
-				else
-				{
-			   	mbuf[addr].color = mbuf[addr].actv;
-				}
+				mbuf[addr].draw = 0;
+				valChg[i] = 1;
 			}
 
 			un = ( c & 0x00f0 ) >> 4;
@@ -601,18 +601,24 @@ void memViewWin_t::showMemViewResults (int reset)
 
 					gtk_text_buffer_delete( textbuf, &iter, &next_iter );
 				}
-				//gtk_text_buffer_insert( textbuf, &iter, valStr[i], -1 );
 				if ( colorEnable )
 				{
 					if ( activityColoringOn )
 					{
-						if ( actv_color_reverse_video )
+						if ( mbuf[addr].actv > 0 )
 						{
-							gtk_text_buffer_insert_with_tags( textbuf, &iter, valStr[i], -1, colorList[ mbuf[addr].actv + HIGHLIGHT_ACTIVITY_NUM_COLORS ], NULL );
+							if ( actv_color_reverse_video )
+							{
+								gtk_text_buffer_insert_with_tags( textbuf, &iter, valStr[i], -1, colorList[ mbuf[addr].actv + HIGHLIGHT_ACTIVITY_NUM_COLORS ], NULL );
+							}
+							else
+							{
+								gtk_text_buffer_insert_with_tags( textbuf, &iter, valStr[i], -1, colorList[ mbuf[addr].actv ], NULL );
+							}
 						}
 						else
 						{
-							gtk_text_buffer_insert_with_tags( textbuf, &iter, valStr[i], -1, colorList[ mbuf[addr].actv ], NULL );
+							gtk_text_buffer_insert( textbuf, &iter, valStr[i], -1 );
 						}
 					}
 					else
@@ -627,13 +633,24 @@ void memViewWin_t::showMemViewResults (int reset)
 			}
 			else
 			{
-				if ( !reset )
-				{
-					gtk_text_iter_forward_chars( &next_iter, 4 );
+				//if ( !reset )
+				//{
+				//	next_iter = iter;
 
-					gtk_text_buffer_remove_all_tags( textbuf, &iter, &next_iter );
+				//	if ( gtk_text_iter_forward_chars( &next_iter, 4 ) == FALSE )
+				//	{
+				//		return;
+				//	}
+
+				//	//gtk_text_buffer_remove_all_tags( textbuf, &iter, &next_iter );
+				//	//gtk_text_buffer_delete( textbuf, &iter, &next_iter );
+
+				//	//gtk_text_buffer_insert( textbuf, &iter, valStr[i], -1 );
+				//}
+				if ( gtk_text_iter_forward_chars( &iter, 4 ) == FALSE)
+				{
+					return;
 				}
-				gtk_text_iter_forward_chars( &iter, 4 );
 			}
 		}
 		ascii[16] = 0;
@@ -645,14 +662,21 @@ void memViewWin_t::showMemViewResults (int reset)
 				if ( !reset )
 				{
 					next_iter = iter;
-					gtk_text_iter_forward_chars( &next_iter, 1 );
+
+					if ( gtk_text_iter_forward_chars( &next_iter, 1 ) == FALSE )
+					{
+						return;
+					}
 					gtk_text_buffer_delete( textbuf, &iter, &next_iter );
 				}
 				gtk_text_buffer_insert( textbuf, &iter, &ascii[i], 1 );
 			}
 			else
 			{
-				gtk_text_iter_forward_chars( &iter, 1 );
+				if ( gtk_text_iter_forward_chars( &iter, 1 ) == FALSE )
+				{
+					return;
+				}
 			}
 		}
 
@@ -666,24 +690,6 @@ void memViewWin_t::showMemViewResults (int reset)
 		{
 			gtk_text_iter_forward_chars( &iter, 1 );
 		}
-		//if ( row_changed )
-		//{
-		//	if ( reset )
-		//	{
-		//		gtk_text_buffer_get_iter_at_offset( textbuf, &iter, totalChars );
-		//		gtk_text_buffer_insert ( textbuf, &iter, line.c_str(), -1 );
-		//	}
-		//	else
-		//	{
-		//		GtkTextIter next_iter;
-
-		//		gtk_text_buffer_get_iter_at_offset( textbuf, &next_iter, totalChars + numCharsPerLine - 1 );
-		//		gtk_text_buffer_delete ( textbuf, &iter, &next_iter );
-
-		//		gtk_text_buffer_get_iter_at_offset( textbuf, &iter, totalChars );
-		//		gtk_text_buffer_insert ( textbuf, &iter, line.c_str(), line.size()-1 );
-		//	}
-		//}
 
 		totalChars += numCharsPerLine;
 	}
@@ -1607,9 +1613,6 @@ void openMemoryViewWindow (void)
 	gtk_style_context_add_provider( gtk_widget_get_style_context( GTK_WIDGET(mv->textview) ),
 									GTK_STYLE_PROVIDER(mv->cssProvider),
 									GTK_STYLE_PROVIDER_PRIORITY_USER);
-	//gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
-	//							GTK_STYLE_PROVIDER(cssProvider),
-	//							GTK_STYLE_PROVIDER_PRIORITY_USER);
 
 	gtk_widget_show_all (mv->win);
 
