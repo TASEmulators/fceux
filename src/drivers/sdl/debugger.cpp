@@ -202,9 +202,18 @@ struct debuggerWin_t
 	int   scrollAsmLine(int line);
 	int   seekAsmPC(void);
 	int   seekAsmAddr(int addr);
+	void  setRegsFromEntry(void);
 };
 
 static std::list <debuggerWin_t*> debuggerWinList;
+
+void debuggerWin_t::setRegsFromEntry(void)
+{
+	X.PC = strtol( gtk_entry_get_text( GTK_ENTRY( pc_entry ) ), NULL, 16 );
+	X.A  = strtol( gtk_entry_get_text( GTK_ENTRY(  A_entry ) ), NULL, 16 );
+	X.X  = strtol( gtk_entry_get_text( GTK_ENTRY(  X_entry ) ), NULL, 16 );
+	X.Y  = strtol( gtk_entry_get_text( GTK_ENTRY(  Y_entry ) ), NULL, 16 );
+}
 
 void debuggerWin_t::asmClear(void)
 {
@@ -1284,7 +1293,7 @@ static void debugRunCB (GtkButton * button, debuggerWin_t * dw)
 {
 	if (FCEUI_EmulationPaused()) 
 	{
-		//UpdateRegs(hwndDlg);
+		dw->setRegsFromEntry();
 		FCEUI_ToggleEmulationPause();
 		//DebuggerWasUpdated = false done in above function;
 	}
@@ -1292,6 +1301,10 @@ static void debugRunCB (GtkButton * button, debuggerWin_t * dw)
 
 static void debugStepIntoCB (GtkButton * button, debuggerWin_t * dw)
 {
+	if (FCEUI_EmulationPaused())
+	{
+		dw->setRegsFromEntry();
+	}
 	FCEUI_Debugger().step = true;
 	FCEUI_SetEmulationPaused(0);
 }
@@ -1301,7 +1314,7 @@ static void debugStepOutCB (GtkButton * button, debuggerWin_t * dw)
 	if (FCEUI_EmulationPaused() > 0) 
 	{
 		DebuggerState &dbgstate = FCEUI_Debugger();
-		//UpdateRegs(hwndDlg);
+		dw->setRegsFromEntry();
 		if (dbgstate.stepout)
 		{
 			printf("Step Out is currently in process.\n");
@@ -1324,7 +1337,7 @@ static void debugStepOverCB (GtkButton * button, debuggerWin_t * dw)
 {
 	if (FCEUI_EmulationPaused()) 
 	{
-		//UpdateRegs(hwndDlg);
+		dw->setRegsFromEntry();
 		int tmp=X.PC;
 		uint8 opcode = GetMem(X.PC);
 		bool jsr = opcode==0x20;
@@ -1355,6 +1368,10 @@ static void debugStepOverCB (GtkButton * button, debuggerWin_t * dw)
 }
 static void debugRunLineCB (GtkButton * button, debuggerWin_t * dw)
 {
+	if (FCEUI_EmulationPaused())
+	{
+		dw->setRegsFromEntry();
+	}
 	uint64 ts=timestampbase;
 	ts+=timestamp;
 	ts+=341/3;
@@ -1367,10 +1384,10 @@ static void debugRunLineCB (GtkButton * button, debuggerWin_t * dw)
 
 static void debugRunLine128CB (GtkButton * button, debuggerWin_t * dw)
 {
-	//if (FCEUI_EmulationPaused())
-	//{
-	//	UpdateRegs(hwndDlg);
-	//}
+	if (FCEUI_EmulationPaused())
+	{
+		dw->setRegsFromEntry();
+	}
 	FCEUI_Debugger().runline = true;
 	{
 		uint64 ts=timestampbase;
@@ -1385,6 +1402,11 @@ static void debugRunLine128CB (GtkButton * button, debuggerWin_t * dw)
 
 static void seekPCCB (GtkButton * button, debuggerWin_t * dw)
 {
+	if (FCEUI_EmulationPaused())
+	{
+		dw->setRegsFromEntry();
+		updateAllDebugWindows();
+	}
 	dw->seekAsmPC();
 }
 
@@ -1393,11 +1415,48 @@ static void seekToCB (GtkButton * button, debuggerWin_t * dw)
 	int addr;
 	const char *txt;
 
+	if (FCEUI_EmulationPaused())
+	{
+		dw->setRegsFromEntry();
+	}
 	txt = gtk_entry_get_text( GTK_ENTRY(dw->seektoEntry) );
 
 	addr = offsetStringToInt( BT_C, txt );
 
 	dw->seekAsmAddr(addr);
+}
+
+static void Flag_N_CB (GtkToggleButton * button, debuggerWin_t * dw)
+{
+	X.P ^= N_FLAG;
+}
+static void Flag_V_CB (GtkToggleButton * button, debuggerWin_t * dw)
+{
+	X.P ^= V_FLAG;
+}
+static void Flag_U_CB (GtkToggleButton * button, debuggerWin_t * dw)
+{
+	X.P ^= U_FLAG;
+}
+static void Flag_B_CB (GtkToggleButton * button, debuggerWin_t * dw)
+{
+	X.P ^= B_FLAG;
+}
+static void Flag_D_CB (GtkToggleButton * button, debuggerWin_t * dw)
+{
+	X.P ^= D_FLAG;
+}
+static void Flag_I_CB (GtkToggleButton * button, debuggerWin_t * dw)
+{
+	X.P ^= I_FLAG;
+}
+static void Flag_Z_CB (GtkToggleButton * button, debuggerWin_t * dw)
+{
+	X.P ^= Z_FLAG;
+}
+static void Flag_C_CB (GtkToggleButton * button, debuggerWin_t * dw)
+{
+	X.P ^= C_FLAG;
 }
 
 static void
@@ -2005,27 +2064,43 @@ void openDebuggerWindow (void)
 	gtk_grid_set_column_spacing( GTK_GRID(grid), 10 );
 
 	dw->P_N_chkbox = gtk_check_button_new_with_label("N");
+	g_signal_connect (dw->P_N_chkbox, "toggled",
+			  G_CALLBACK (Flag_N_CB), dw);
 	gtk_grid_attach( GTK_GRID(grid), dw->P_N_chkbox, 0, 0, 1, 1 );
 
 	dw->P_V_chkbox = gtk_check_button_new_with_label("V");
+	g_signal_connect (dw->P_V_chkbox, "toggled",
+			  G_CALLBACK (Flag_V_CB), dw);
 	gtk_grid_attach( GTK_GRID(grid), dw->P_V_chkbox, 1, 0, 1, 1 );
 
 	dw->P_U_chkbox = gtk_check_button_new_with_label("U");
+	g_signal_connect (dw->P_U_chkbox, "toggled",
+			  G_CALLBACK (Flag_U_CB), dw);
 	gtk_grid_attach( GTK_GRID(grid), dw->P_U_chkbox, 2, 0, 1, 1 );
 
 	dw->P_B_chkbox = gtk_check_button_new_with_label("B");
+	g_signal_connect (dw->P_B_chkbox, "toggled",
+			  G_CALLBACK (Flag_B_CB), dw);
 	gtk_grid_attach( GTK_GRID(grid), dw->P_B_chkbox, 3, 0, 1, 1 );
 
 	dw->P_D_chkbox = gtk_check_button_new_with_label("D");
+	g_signal_connect (dw->P_D_chkbox, "toggled",
+			  G_CALLBACK (Flag_D_CB), dw);
 	gtk_grid_attach( GTK_GRID(grid), dw->P_D_chkbox, 0, 1, 1, 1 );
 
 	dw->P_I_chkbox = gtk_check_button_new_with_label("I");
+	g_signal_connect (dw->P_I_chkbox, "toggled",
+			  G_CALLBACK (Flag_I_CB), dw);
 	gtk_grid_attach( GTK_GRID(grid), dw->P_I_chkbox, 1, 1, 1, 1 );
 
 	dw->P_Z_chkbox = gtk_check_button_new_with_label("Z");
+	g_signal_connect (dw->P_Z_chkbox, "toggled",
+			  G_CALLBACK (Flag_Z_CB), dw);
 	gtk_grid_attach( GTK_GRID(grid), dw->P_Z_chkbox, 2, 1, 1, 1 );
 
 	dw->P_C_chkbox = gtk_check_button_new_with_label("C");
+	g_signal_connect (dw->P_C_chkbox, "toggled",
+			  G_CALLBACK (Flag_C_CB), dw);
 	gtk_grid_attach( GTK_GRID(grid), dw->P_C_chkbox, 3, 1, 1, 1 );
 
 	gtk_container_add (GTK_CONTAINER (frame), grid);
