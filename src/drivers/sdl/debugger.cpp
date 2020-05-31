@@ -94,6 +94,9 @@ struct debuggerWin_t
 	GtkWidget *P_I_chkbox;
 	GtkWidget *P_Z_chkbox;
 	GtkWidget *P_C_chkbox;
+	GtkWidget *add_bp_button;
+	GtkWidget *edit_bp_button;
+	GtkWidget *del_bp_button;
 	GtkWidget *stack_frame;
 	GtkWidget *ppu_label;
 	GtkWidget *sprite_label;
@@ -156,6 +159,9 @@ struct debuggerWin_t
 		bp_execute_chkbox = NULL;
 		bp_enable_chkbox = NULL;
 		bp_forbid_chkbox = NULL;
+		add_bp_button = NULL;
+		edit_bp_button = NULL;
+		del_bp_button = NULL;
 	   cpu_radio_btn = NULL;
 	   ppu_radio_btn = NULL;
 	   sprite_radio_btn = NULL;
@@ -945,6 +951,22 @@ static void handleDialogResponse (GtkWidget * w, gint response_id, debuggerWin_t
 	//}
 	gtk_widget_destroy (w);
 
+}
+
+static void
+tree_select_rowCB (GtkTreeView *treeview,
+               	debuggerWin_t * dw )
+{
+	int row, row_is_selected;
+
+	row = dw->get_bpList_selrow();
+
+	row_is_selected = (row >= 0);
+
+	//printf("Selected row = %i\n", row);
+
+	gtk_widget_set_sensitive( dw->del_bp_button , row_is_selected );
+	gtk_widget_set_sensitive( dw->edit_bp_button, row_is_selected );
 }
 
 static void closeDialogWindow (GtkWidget * w, GdkEvent * e, debuggerWin_t * dw)
@@ -1909,6 +1931,9 @@ void openDebuggerWindow (void)
 		gtk_tree_view_new_with_model (GTK_TREE_MODEL
 					      (dw->bp_store));
 
+	g_signal_connect (dw->bp_tree, "cursor-changed",
+			  G_CALLBACK (tree_select_rowCB), (gpointer) dw);
+
 	gtk_tree_view_set_grid_lines (GTK_TREE_VIEW (dw->bp_tree),
 				      GTK_TREE_VIEW_GRID_LINES_VERTICAL);
 
@@ -1939,26 +1964,30 @@ void openDebuggerWindow (void)
 
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 1);
 
-	button = gtk_button_new_with_label ("Add");
+	dw->add_bp_button = gtk_button_new_with_label ("Add");
 
-	g_signal_connect (button, "clicked",
+	g_signal_connect (dw->add_bp_button, "clicked",
 			  G_CALLBACK (addBreakpointCB), (gpointer) dw);
 
-	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
+	gtk_box_pack_start (GTK_BOX (hbox), dw->add_bp_button, TRUE, TRUE, 2);
 
-	button = gtk_button_new_with_label ("Delete");
+	dw->del_bp_button = gtk_button_new_with_label ("Delete");
 
-	g_signal_connect (button, "clicked",
+	gtk_widget_set_sensitive( dw->del_bp_button, FALSE );
+
+	g_signal_connect (dw->del_bp_button, "clicked",
 			  G_CALLBACK (deleteBreakpointCB), (gpointer) dw);
 
-	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
+	gtk_box_pack_start (GTK_BOX (hbox), dw->del_bp_button, TRUE, TRUE, 2);
 
-	button = gtk_button_new_with_label ("Edit");
+	dw->edit_bp_button = gtk_button_new_with_label ("Edit");
 
-	g_signal_connect (button, "clicked",
+	gtk_widget_set_sensitive( dw->edit_bp_button, FALSE );
+
+	g_signal_connect (dw->edit_bp_button, "clicked",
 			  G_CALLBACK (editBreakpointCB), (gpointer) dw);
 
-	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
+	gtk_box_pack_start (GTK_BOX (hbox), dw->edit_bp_button, TRUE, TRUE, 2);
 
 	dw->badop_chkbox = gtk_check_button_new_with_label("Break on Bad Opcodes");
 	g_signal_connect (dw->badop_chkbox, "toggled",
