@@ -21,6 +21,7 @@
 #include "types.h"
 
 #define ID_FIRST_BOOKMARK               30
+#define ID_BOOKMARKLIST_SEP				(ID_FIRST_BOOKMARK - 1)
 
 typedef struct
 {
@@ -32,8 +33,11 @@ typedef struct
 extern HexBookmark hexBookmarks[64];
 extern int nextBookmark;
 
-int toggleBookmark(HWND hwnd, uint32 address, int mode);
+int findBookmark(unsigned int address, int editmode);
+int addBookmark(HWND hwnd, unsigned int address, int editmode);
+int editBookmark(HWND hwnd, unsigned int index);
+int removeBookmark(unsigned int index);
+// int toggleBookmark(HWND hwnd, uint32 address, int mode);
 void updateBookmarkMenus(HMENU menu);
 int handleBookmarkMenu(int bookmark);
 void removeAllBookmarks(HMENU menu);
-

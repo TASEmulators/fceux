@@ -888,7 +888,6 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 		SetFocus(GetDlgItem(hwnd, IDC_MAPPER_COMBO));
 		return false;
 	}
-	printf("mapper: %d\n", mapper);
 
 	if (mapper < 4096)
 	{
@@ -1091,7 +1090,8 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 					return false;
 				}
 			}
-			else {
+			else
+			{
 				MessageBox(hwnd, "PRG NVRAM size exceeded the limit (4096KB)", "Error", MB_OK | MB_ICONERROR);
 				SetFocus(GetDlgItem(hwnd, IDC_PRGNVRAM_COMBO));
 				return false;
