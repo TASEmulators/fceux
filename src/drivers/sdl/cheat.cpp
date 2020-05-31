@@ -61,6 +61,10 @@ class cheat_win_t
 	GtkWidget *neq_chkbox;
 	GtkWidget *lt_chkbox;
 	GtkWidget *gt_chkbox;
+	GtkWidget *cheat_name_entry;
+	GtkWidget *cheat_addr_entry;
+	GtkWidget *cheat_val_entry;
+	GtkWidget *cheat_cmp_entry;
 
 	  cheat_win_t (void)
 	{
@@ -81,10 +85,15 @@ class cheat_win_t
 		neq_chkbox = NULL;
 		lt_chkbox = NULL;
 		gt_chkbox = NULL;
+		cheat_name_entry = NULL;
+		cheat_addr_entry = NULL;
+		cheat_val_entry = NULL;
+		cheat_cmp_entry = NULL;
 	}
 
 	void showActiveCheatList (bool reset);
 	void showCheatSearchResults (void);
+	int  getSelCheatRow(void);
 };
 
 static cheat_win_t *curr_cw = NULL;
@@ -359,6 +368,51 @@ void cheat_win_t::showActiveCheatList (bool reset)
 	actv_cheat_redraw = false;
 }
 
+int cheat_win_t::getSelCheatRow(void)
+{
+	int numListRows, retval = -1;
+	GList *selListRows, *tmpList;
+	GtkTreeModel *model = NULL;
+	GtkTreeSelection *treeSel;
+
+	treeSel =
+		gtk_tree_view_get_selection (GTK_TREE_VIEW
+					     (actv_cheat_tree));
+
+	numListRows = gtk_tree_selection_count_selected_rows (treeSel);
+
+	if (numListRows == 0)
+	{
+		return -1;
+	}
+	//printf("Number of Rows Selected: %i\n", numListRows );
+
+	selListRows = gtk_tree_selection_get_selected_rows (treeSel, &model);
+
+	tmpList = selListRows;
+
+	while (tmpList)
+	{
+		int depth;
+		int *indexArray;
+		GtkTreePath *path = (GtkTreePath *) tmpList->data;
+
+		depth = gtk_tree_path_get_depth (path);
+		indexArray = gtk_tree_path_get_indices (path);
+
+		if (depth > 0)
+		{
+			retval = indexArray[0];
+		}
+
+		tmpList = tmpList->next;
+	}
+
+	g_list_free_full (selListRows, (GDestroyNotify) gtk_tree_path_free);
+
+	return retval;
+}
+
 static void cheatListEnableToggle (GtkCellRendererToggle * renderer,
 				   gchar * pathStr, cheat_win_t * cw)
 {
@@ -387,6 +441,57 @@ static void cheatListEnableToggle (GtkCellRendererToggle * renderer,
 
 	updateAllActvCheatLists (0);
 
+}
+
+static void
+cheat_select_rowCB (GtkTreeView *treeview,
+							cheat_win_t * cw )
+{
+	int row, row_is_selected;
+
+	row = cw->getSelCheatRow();
+
+	row_is_selected = (row >= 0);
+
+	//printf("Selected row = %i\n", row);
+
+	if ( !row_is_selected )
+	{
+		return;
+	}
+	uint32 a;
+	uint8 v;
+	int c, s, type;
+	char *name = NULL;
+
+	if (FCEUI_GetCheat (row, &name, &a, &v, &c, &s, &type))
+	{
+		char txt[64];
+
+		if ( name )
+		{
+			gtk_entry_set_text( GTK_ENTRY(cw->cheat_name_entry), name );
+		}
+
+		sprintf( txt, "%04X", a );
+		gtk_entry_set_text( GTK_ENTRY(cw->cheat_addr_entry), txt );
+
+		sprintf( txt, "%02X", v );
+		gtk_entry_set_text( GTK_ENTRY(cw->cheat_val_entry), txt );
+
+		if ( c >= 0 )
+		{
+			sprintf( txt, "%02X", c );
+		}
+		else
+		{
+			txt[0] = 0;
+		}
+		gtk_entry_set_text( GTK_ENTRY(cw->cheat_cmp_entry), txt );
+	}
+
+	//gtk_widget_set_sensitive( dw->del_bp_button , row_is_selected );
+	//gtk_widget_set_sensitive( dw->edit_bp_button, row_is_selected );
 }
 
 static void openCheatFile (GtkWidget * widget, cheat_win_t * cw)
@@ -840,6 +945,9 @@ void openCheatsWindow (void)
 	GtkCellRenderer *chkbox_renderer;
 	GtkTreeViewColumn *column;
 
+	g_signal_connect (cw->actv_cheat_tree, "cursor-changed",
+			  G_CALLBACK (cheat_select_rowCB), (gpointer) cw);
+
 	gtk_tree_view_set_grid_lines (GTK_TREE_VIEW (cw->actv_cheat_tree),
 				      GTK_TREE_VIEW_GRID_LINES_VERTICAL);
 
@@ -904,57 +1012,57 @@ void openCheatsWindow (void)
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new ("Name:");
-	txt_entry = gtk_entry_new ();
+	cw->cheat_name_entry = gtk_entry_new ();
 
-	g_signal_connect (txt_entry, "activate",
+	g_signal_connect (cw->cheat_name_entry, "activate",
 			  G_CALLBACK (newCheatEntryCB4), (void *) cw);
-	g_signal_connect (txt_entry, "changed",
+	g_signal_connect (cw->cheat_name_entry, "changed",
 			  G_CALLBACK (newCheatEntryCB4), (void *) cw);
 
 	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 1);
-	gtk_box_pack_start (GTK_BOX (hbox), txt_entry, TRUE, TRUE, 1);
+	gtk_box_pack_start (GTK_BOX (hbox), cw->cheat_name_entry, TRUE, TRUE, 1);
 
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 1);
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 	label = gtk_label_new ("Addr:");
-	txt_entry = gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (txt_entry), 4);
-	gtk_entry_set_width_chars (GTK_ENTRY (txt_entry), 4);
+	cw->cheat_addr_entry = gtk_entry_new ();
+	gtk_entry_set_max_length (GTK_ENTRY (cw->cheat_addr_entry), 4);
+	gtk_entry_set_width_chars (GTK_ENTRY (cw->cheat_addr_entry), 4);
 
-	g_signal_connect (txt_entry, "activate",
+	g_signal_connect (cw->cheat_addr_entry, "activate",
 			  G_CALLBACK (newCheatEntryCB1), (void *) cw);
-	g_signal_connect (txt_entry, "changed",
+	g_signal_connect (cw->cheat_addr_entry, "changed",
 			  G_CALLBACK (newCheatEntryCB1), (void *) cw);
 
 	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 1);
-	gtk_box_pack_start (GTK_BOX (hbox), txt_entry, TRUE, TRUE, 1);
+	gtk_box_pack_start (GTK_BOX (hbox), cw->cheat_addr_entry, TRUE, TRUE, 1);
 
 	label = gtk_label_new ("Val:");
-	txt_entry = gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (txt_entry), 2);
-	gtk_entry_set_width_chars (GTK_ENTRY (txt_entry), 2);
+	cw->cheat_val_entry = gtk_entry_new ();
+	gtk_entry_set_max_length (GTK_ENTRY (cw->cheat_val_entry), 2);
+	gtk_entry_set_width_chars (GTK_ENTRY (cw->cheat_val_entry), 2);
 
-	g_signal_connect (txt_entry, "activate",
+	g_signal_connect (cw->cheat_val_entry, "activate",
 			  G_CALLBACK (newCheatEntryCB2), (void *) cw);
-	g_signal_connect (txt_entry, "changed",
+	g_signal_connect (cw->cheat_val_entry, "changed",
 			  G_CALLBACK (newCheatEntryCB2), (void *) cw);
 
 	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 1);
-	gtk_box_pack_start (GTK_BOX (hbox), txt_entry, TRUE, TRUE, 1);
+	gtk_box_pack_start (GTK_BOX (hbox), cw->cheat_val_entry, TRUE, TRUE, 1);
 
 	label = gtk_label_new ("Cmp:");
-	txt_entry = gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (txt_entry), 2);
-	gtk_entry_set_width_chars (GTK_ENTRY (txt_entry), 2);
+	cw->cheat_cmp_entry = gtk_entry_new ();
+	gtk_entry_set_max_length (GTK_ENTRY (cw->cheat_cmp_entry), 2);
+	gtk_entry_set_width_chars (GTK_ENTRY (cw->cheat_cmp_entry), 2);
 
-	g_signal_connect (txt_entry, "activate",
+	g_signal_connect (cw->cheat_cmp_entry, "activate",
 			  G_CALLBACK (newCheatEntryCB3), (void *) cw);
-	g_signal_connect (txt_entry, "changed",
+	g_signal_connect (cw->cheat_cmp_entry, "changed",
 			  G_CALLBACK (newCheatEntryCB3), (void *) cw);
 
 	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 1);
-	gtk_box_pack_start (GTK_BOX (hbox), txt_entry, TRUE, TRUE, 1);
+	gtk_box_pack_start (GTK_BOX (hbox), cw->cheat_cmp_entry, TRUE, TRUE, 1);
 
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 1);
 
