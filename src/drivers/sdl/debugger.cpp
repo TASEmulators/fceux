@@ -2147,8 +2147,10 @@ void openDebuggerWindow (void)
 	button = gtk_button_new_with_label ("Add");
 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
 	button = gtk_button_new_with_label ("Delete");
+	gtk_widget_set_sensitive( button , FALSE ); // TODO Insensitive until functionality implemented
 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
 	button = gtk_button_new_with_label ("Name");
+	gtk_widget_set_sensitive( button , FALSE ); // TODO Insensitive until functionality implemented
 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
 
 	gtk_box_pack_start (GTK_BOX (hbox2), frame, TRUE, TRUE, 2);
@@ -2165,12 +2167,16 @@ void openDebuggerWindow (void)
 			  G_CALLBACK (romOffsetToggleCB), dw);
 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
 	button = gtk_check_button_new_with_label("Symbolic Debug");
+	gtk_widget_set_sensitive( button , FALSE ); // TODO Insensitive until functionality implemented
 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
 	button = gtk_check_button_new_with_label("Register Names");
+	gtk_widget_set_sensitive( button , FALSE ); // TODO Insensitive until functionality implemented
 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
 	button = gtk_button_new_with_label ("Reload Symbols");
+	gtk_widget_set_sensitive( button , FALSE ); // TODO Insensitive until functionality implemented
 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
 	button = gtk_button_new_with_label ("ROM Patcher");
+	gtk_widget_set_sensitive( button , FALSE ); // TODO Insensitive until functionality implemented
 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 2);
 
 	gtk_box_pack_start (GTK_BOX (vbox1), hbox2, TRUE, TRUE, 2);
