@@ -518,6 +518,10 @@ cheat_select_rowCB (GtkTreeView *treeview,
 	//gtk_widget_set_sensitive( dw->del_bp_button , row_is_selected );
 	//gtk_widget_set_sensitive( dw->edit_bp_button, row_is_selected );
 }
+static void refreshCheatListCB(GtkWidget * widget, cheat_win_t * cw)
+{
+	updateAllActvCheatLists (1);
+}
 
 static void openCheatFile (GtkWidget * widget, cheat_win_t * cw)
 {
@@ -1118,7 +1122,12 @@ void openCheatsWindow (void)
 
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 1);
 
-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 1);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
+	button = gtk_button_new_with_label ("Refresh List");
+	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, FALSE, 1);
+	g_signal_connect (button, "clicked",
+			  G_CALLBACK (refreshCheatListCB), (gpointer) cw);
+
 	button = gtk_button_new_with_label ("Add from CHT file...");
 	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, FALSE, 1);
 	g_signal_connect (button, "clicked",
