@@ -56,6 +56,7 @@ class cheat_win_t
 	bool pauseWhileCheatsActv;
 	bool actv_cheat_redraw;
 
+	GtkWidget *win;
 	GtkWidget *actv_cheat_tree;
 	GtkWidget *search_cheat_tree;
 	GtkWidget *neq_chkbox;
@@ -65,9 +66,12 @@ class cheat_win_t
 	GtkWidget *cheat_addr_entry;
 	GtkWidget *cheat_val_entry;
 	GtkWidget *cheat_cmp_entry;
+	GtkWidget *cheat_del_button;
+	GtkWidget *cheat_edit_button;
 
 	  cheat_win_t (void)
 	{
+		win = NULL;
 		actv_cheats_store = NULL;
 		ram_match_store = NULL;
 		cheat_search_known_value = 0;
@@ -89,6 +93,8 @@ class cheat_win_t
 		cheat_addr_entry = NULL;
 		cheat_val_entry = NULL;
 		cheat_cmp_entry = NULL;
+		cheat_del_button = NULL;
+		cheat_edit_button = NULL;
 	}
 
 	void showActiveCheatList (bool reset);
@@ -454,6 +460,9 @@ cheat_select_rowCB (GtkTreeView *treeview,
 	row_is_selected = (row >= 0);
 
 	//printf("Selected row = %i\n", row);
+	//
+	gtk_widget_set_sensitive( cw->cheat_del_button , row_is_selected );
+	gtk_widget_set_sensitive( cw->cheat_edit_button, row_is_selected );
 
 	if ( !row_is_selected )
 	{
@@ -511,7 +520,7 @@ static void openCheatFile (GtkWidget * widget, cheat_win_t * cw)
 
 	fileChooser =
 		gtk_file_chooser_dialog_new ("Open Cheat",
-					     GTK_WINDOW (MainWindow),
+					     GTK_WINDOW (cw->win),
 					     GTK_FILE_CHOOSER_ACTION_OPEN,
 					     "_Cancel", GTK_RESPONSE_CANCEL,
 					     "_Open", GTK_RESPONSE_ACCEPT,
@@ -927,6 +936,8 @@ void openCheatsWindow (void)
 					   "_Close", GTK_RESPONSE_OK, NULL);
 	gtk_window_set_default_size (GTK_WINDOW (win), 600, 600);
 
+	cw->win = win;
+
 	main_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
 	frame = gtk_frame_new ("Active Cheats");
@@ -1073,16 +1084,20 @@ void openCheatsWindow (void)
 	g_signal_connect (button, "clicked",
 			  G_CALLBACK (addCheat2Active), (gpointer) cw);
 
-	button = gtk_button_new_with_label ("Delete");
-	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, FALSE, 1);
+	cw->cheat_del_button = gtk_button_new_with_label ("Delete");
+	gtk_box_pack_start (GTK_BOX (hbox), cw->cheat_del_button, TRUE, FALSE, 1);
 
-	g_signal_connect (button, "clicked",
+	gtk_widget_set_sensitive( cw->cheat_del_button, FALSE );
+
+	g_signal_connect (cw->cheat_del_button, "clicked",
 			  G_CALLBACK (removeCheatFromActive), (gpointer) cw);
 
-	button = gtk_button_new_with_label ("Update");
-	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, FALSE, 1);
+	cw->cheat_edit_button = gtk_button_new_with_label ("Update");
+	gtk_box_pack_start (GTK_BOX (hbox), cw->cheat_edit_button, TRUE, FALSE, 1);
 
-	g_signal_connect (button, "clicked",
+	gtk_widget_set_sensitive( cw->cheat_edit_button, FALSE );
+
+	g_signal_connect (cw->cheat_edit_button, "clicked",
 			  G_CALLBACK (updateCheatList), (gpointer) cw);
 
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 1);
