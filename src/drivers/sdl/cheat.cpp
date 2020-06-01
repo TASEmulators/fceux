@@ -68,6 +68,11 @@ class cheat_win_t
 	GtkWidget *cheat_cmp_entry;
 	GtkWidget *cheat_del_button;
 	GtkWidget *cheat_edit_button;
+	GtkWidget *cheat_search_known_btn;
+	GtkWidget *cheat_search_eq_btn;
+	GtkWidget *cheat_search_neq_btn;
+	GtkWidget *cheat_search_gr_btn;
+	GtkWidget *cheat_search_lt_btn;
 
 	  cheat_win_t (void)
 	{
@@ -95,6 +100,11 @@ class cheat_win_t
 		cheat_cmp_entry = NULL;
 		cheat_del_button = NULL;
 		cheat_edit_button = NULL;
+		cheat_search_known_btn = NULL;
+		cheat_search_eq_btn = NULL;
+		cheat_search_neq_btn = NULL;
+		cheat_search_gr_btn = NULL;
+		cheat_search_lt_btn = NULL;
 	}
 
 	void showActiveCheatList (bool reset);
@@ -149,6 +159,12 @@ static void cheatSearchReset (GtkButton * button, cheat_win_t * cw)
 	//cheat_search_neq_value = 0;
 	//cheat_search_gt_value = 0;
 	//cheat_search_lt_value = 0;
+
+	gtk_widget_set_sensitive( cw->cheat_search_known_btn , TRUE );
+	gtk_widget_set_sensitive( cw->cheat_search_eq_btn    , TRUE );
+	gtk_widget_set_sensitive( cw->cheat_search_neq_btn   , TRUE );
+	gtk_widget_set_sensitive( cw->cheat_search_gr_btn    , TRUE );
+	gtk_widget_set_sensitive( cw->cheat_search_lt_btn    , TRUE );
 
 	FCEUI_CheatSearchBegin ();
 	cw->showCheatSearchResults ();
@@ -1125,6 +1141,7 @@ void openCheatsWindow (void)
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
 	button = gtk_button_new_with_label ("Known Value:");
+	cw->cheat_search_known_btn = button;
 	g_signal_connect (button, "clicked",
 			  G_CALLBACK (cheatSearchKnown), (gpointer) cw);
 	gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 5);
@@ -1156,6 +1173,7 @@ void openCheatsWindow (void)
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 1);
 	button = gtk_button_new_with_label ("Equal");
+	cw->cheat_search_eq_btn = button;
 	//gtk_widget_set_halign( button, GTK_ALIGN_BASELINE);
 
 	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 5);
@@ -1165,6 +1183,7 @@ void openCheatsWindow (void)
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	button = gtk_button_new_with_label ("Not Equal");
+	cw->cheat_search_neq_btn = button;
 	//gtk_widget_set_halign( button, GTK_ALIGN_BASELINE);
 	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 5);
 	cw->neq_chkbox = gtk_check_button_new ();
@@ -1186,6 +1205,7 @@ void openCheatsWindow (void)
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	button = gtk_button_new_with_label ("Greater Than");
+	cw->cheat_search_gr_btn = button;
 	//gtk_widget_set_halign( button, GTK_ALIGN_BASELINE);
 	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 5);
 	cw->gt_chkbox = gtk_check_button_new ();
@@ -1207,6 +1227,7 @@ void openCheatsWindow (void)
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	button = gtk_button_new_with_label ("Less Than");
+	cw->cheat_search_lt_btn = button;
 	//gtk_widget_set_halign( button, GTK_ALIGN_BASELINE);
 	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 5);
 	cw->lt_chkbox = gtk_check_button_new ();
@@ -1228,6 +1249,12 @@ void openCheatsWindow (void)
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 	gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 1);
+
+	gtk_widget_set_sensitive( cw->cheat_search_known_btn , FALSE );
+	gtk_widget_set_sensitive( cw->cheat_search_eq_btn    , FALSE );
+	gtk_widget_set_sensitive( cw->cheat_search_neq_btn   , FALSE );
+	gtk_widget_set_sensitive( cw->cheat_search_gr_btn    , FALSE );
+	gtk_widget_set_sensitive( cw->cheat_search_lt_btn    , FALSE );
 
 	frame = gtk_frame_new ("Cheat Search");
 	gtk_container_add (GTK_CONTAINER (frame), hbox);
