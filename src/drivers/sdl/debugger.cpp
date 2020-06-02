@@ -20,6 +20,7 @@
 #include "../../debug.h"
 #include "../../driver.h"
 #include "../../version.h"
+#include "../../video.h"
 #include "../../movie.h"
 #include "../../palette.h"
 #include "../../fds.h"
@@ -1670,6 +1671,11 @@ static void winDebuggerLoopStep(void)
 	while(gtk_events_pending())
 	{
 		gtk_main_iteration_do(FALSE);
+	}
+
+	if ( XBackBuf )
+	{
+		BlitScreen(XBackBuf);
 	}
 
 	if ( breakpoint_hit )
