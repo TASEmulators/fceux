@@ -64,7 +64,9 @@ using namespace std;
 #define ID_ADDRESS_ADDBP_X              4
 #define ID_ADDRESS_SEEK_IN_ROM          5
 #define ID_ADDRESS_CREATE_GG_CODE       6
-#define ID_ADDRESS_BOOKMARK             20
+#define ID_ADDRESS_ADD_BOOKMARK         20
+#define ID_ADDRESS_REMOVE_BOOKMARK      21
+#define ID_ADDRESS_EDIT_BOOKMARK        22
 #define ID_ADDRESS_SYMBOLIC_NAME        30
 #define BOOKMARKS_SUBMENU_POS			4
 
@@ -122,11 +124,7 @@ popupmenu[] =
 	{0x0000,0x3FFF, MODE_NES_PPU,    ID_ADDRESS_ADDBP_W,        "Add Debugger Write Breakpoint"},
 	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_ADDBP_X,        "Add Debugger Execute Breakpoint"},
 	{0x8000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_SEEK_IN_ROM,    "Go Here In ROM File"},
-	{0x8000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_CREATE_GG_CODE, "Create Game Genie Code At This Address"},
-	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_BOOKMARK,       "Add / Remove bookmark"},
-	{0x0000,0xFFFF, MODE_NES_PPU,    ID_ADDRESS_BOOKMARK,       "Add / Remove bookmark"},
-	{0x0000,0xFFFF, MODE_NES_OAM,    ID_ADDRESS_BOOKMARK,       "Add / Remove bookmark"},
-	{0x0000,0xFFFF, MODE_NES_FILE,   ID_ADDRESS_BOOKMARK,       "Add / Remove bookmark"},
+	{0x8000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_CREATE_GG_CODE, "Create Game Genie Code At This Address"}
 };
 #define POPUPNUM (sizeof popupmenu / sizeof popupmenu[0])
 
@@ -849,7 +847,7 @@ void dumpToFile(const char* buffer, unsigned int size)
 
 bool loadFromFile(char* buffer, unsigned int size)
 {
-	char name[513] = {0};
+	char name[513] = { 0 };
 
 	OPENFILENAME ofn;
 	memset(&ofn, 0, sizeof(ofn));
@@ -914,8 +912,73 @@ void UnfreezeAllRam() {
 
 	return;
 }
+/*
+int saveBookmarks(HWND hwnd)
+{
+	char name[513] = { 0 };
 
+	OPENFILENAME ofn;
+	memset(&ofn, 0, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hInstance = fceu_hInstance;
+	ofn.lpstrTitle = "Save bookmarks as...";
+	ofn.lpstrFilter = "Bookmark list (*.bld)\0*.lst\0All Files (*.*)\0*.*\0\0";
+	strcpy(name, mass_replace(GetRomName(), "|", ".").c_str());
+	ofn.lpstrFile = name;
+	ofn.lpstrDefExt = "bld";
+	ofn.nMaxFile = 256;
+	ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY;
+	ofn.hwndOwner = hwnd;
 
+	bool success = false;
+	if (GetSaveFileName(&ofn))
+	{
+		FILE* bld = fopen(name, "wb");
+		if (bld)
+		{
+			fwrite("BOOKMARKLIST", strlen("BOOKMARKLIST"), 1, bld);
+			extern int storeHexPreferences(FILE*);
+			success = storeHexPreferences(bld);
+			fclose(bld);
+		}
+	}
+	
+	return success;
+}
+
+int loadBookmarks(HWND hwnd)
+{
+	char nameo[2048] = { 0 };
+	OPENFILENAME ofn;
+	memset(&ofn, 0, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hInstance = fceu_hInstance;
+	ofn.lpstrTitle = "Load bookmarks...";
+	ofn.lpstrFilter = "Bookmark list (*.bld)\0*.lst\0All Files (*.*)\0*.*\0\0";
+	ofn.lpstrFile = nameo;
+	ofn.nMaxFile = 256;
+	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+	ofn.hwndOwner = hwnd;
+
+	int success = 0;
+	if (GetOpenFileName(&ofn))
+	{
+		char buffer[13] = { 0 };
+		FILE* bld = fopen(nameo, "r");
+		if (bld)
+		{
+			fread(bld, strlen("BOOKMARKLIST"), 1, bld);
+			if (!strcpy(buffer, "BOOKMARKLIST"))
+			{
+				extern int loadHexPreferences(FILE*);
+				success = loadHexPreferences(bld);
+			}
+			fclose(bld);
+		}
+	}
+	return success;
+}
+*/
 void FreezeRam(int address, int mode, int final){
 	// mode: -1 == Unfreeze; 0 == Toggle; 1 == Freeze
 	if(FrozenAddressCount <= 256 && (address < 0x2000) || ((address >= 0x6000) && (address <= 0x7FFF))){
@@ -1198,7 +1261,6 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	HGLOBAL      hGlobal ;
 	PTSTR        pGlobal ;
 	HMENU        hMenu;
-	MENUITEMINFO MenuInfo;
 	POINT        point;
 	PAINTSTRUCT ps ;
 	TEXTMETRIC tm;
@@ -1525,11 +1587,11 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		//sprintf(str,"x = %d, y = %d, j = %d",mousex,mousey,j);
 		//MessageBox(hMemView,str, "mouse wheel dance!", MB_OK);
 		hMenu = CreatePopupMenu();
+
 		for(i = 0;i < POPUPNUM;i++)
 		{
 			if((j >= popupmenu[i].minaddress) && (j <= popupmenu[i].maxaddress) && (EditingMode == popupmenu[i].editingmode))
 			{
-				memset(&MenuInfo,0,sizeof(MENUITEMINFO));
 				switch(popupmenu[i].id)
 				{
 					//this will set the text for the menu dynamically based on the id
@@ -1608,15 +1670,21 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 						break;
 					}
 				}
-				MenuInfo.cbSize = sizeof(MENUITEMINFO);
-				MenuInfo.fMask = MIIM_TYPE | MIIM_ID | MIIM_DATA;
-				MenuInfo.fType = MF_STRING;
-				MenuInfo.dwTypeData = popupmenu[i].text;
-				MenuInfo.cch = strlen(popupmenu[i].text);
-				MenuInfo.wID = popupmenu[i].id;
-				InsertMenuItem(hMenu,i+1,1,&MenuInfo);
+				AppendMenu(hMenu, MF_STRING, popupmenu[i].id, popupmenu[i].text);
 			}
 		}
+
+		// Add / Edit / Remove bookmark
+		int foundBookmark = findBookmark(CursorStartAddy, EditingMode);
+		if (foundBookmark != -1)
+		{
+			AppendMenu(hMenu, MF_STRING, ID_ADDRESS_EDIT_BOOKMARK, "Edit Bookmark");
+			AppendMenu(hMenu, MF_STRING, ID_ADDRESS_REMOVE_BOOKMARK, "Remove Bookmark");
+		}
+		else
+			AppendMenu(hMenu, MF_STRING, ID_ADDRESS_ADD_BOOKMARK, "Add Bookmark");
+
+
 		if (i != 0)
 			i = TrackPopupMenuEx(hMenu, TPM_RETURNCMD | TPM_RIGHTBUTTON, x, y, hMemView, NULL);
 		switch(i)
@@ -1766,19 +1834,59 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			case ID_ADDRESS_CREATE_GG_CODE:
 				SetGGConvFocus(j,GetMem(j));
 				break;
-			case ID_ADDRESS_BOOKMARK:
+			case ID_ADDRESS_ADD_BOOKMARK:
 			{
-				if (toggleBookmark(hwnd, CursorStartAddy, EditingMode))
+				if (foundBookmark == -1)
 				{
-					MessageBox(hDebug, "Can't set more than 64 bookmarks", "Error", MB_OK | MB_ICONERROR);
+					if (nextBookmark >= 64)
+						MessageBox(hwnd, "Can't set more than 64 bookmarks.", "Error", MB_OK | MB_ICONERROR);
+					else
+					{
+						int ret = addBookmark(hwnd, CursorStartAddy, EditingMode);
+						if (ret == -1)
+							MessageBox(hwnd, "Error adding bookmark.", "Error", MB_OK | MB_ICONERROR);
+						else if (ret == 0)
+						{
+							updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
+							UpdateColorTable();
+						}
+					}
 				}
-				else
-				{
-					updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
-					UpdateColorTable();
-				}
+				else // usually it cannot reach here.
+					MessageBox(hwnd, "This address already has a bookmark.", "Error", MB_OK | MB_ICONERROR);
 				break;
 			}
+			case ID_ADDRESS_EDIT_BOOKMARK:
+				if (foundBookmark != -1)
+				{
+					int ret = editBookmark(hwnd, foundBookmark);
+					if (ret == -1)
+						MessageBox(hwnd, "Error editing bookmark.", "Error", MB_OK | MB_ICONERROR);
+					else if (ret == 0)
+					{
+						updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
+						UpdateColorTable();
+					}
+				}
+				else // usually it cannot reach here.
+					MessageBox(hwnd, "This address doesn't have a bookmark.", "Error", MB_OK | MB_ICONERROR);
+				break;
+			case ID_ADDRESS_REMOVE_BOOKMARK:
+				if (foundBookmark != -1)
+				{
+					int ret = removeBookmark(foundBookmark);
+					if (ret == -1)
+						MessageBox(hwnd, "Error removing bookmark.", "Error", MB_OK | MB_ICONERROR);
+					else if (ret == 0)
+					{
+						updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
+						UpdateColorTable();
+					}
+				}
+				else
+					// usually it cannot reach here.
+					MessageBox(hwnd, "This address doesn't have a bookmark.", "Error", MB_OK | MB_ICONERROR);
+				break;
 			case ID_ADDRESS_SYMBOLIC_NAME:
 			{
 				if (DoSymbolicDebugNaming(j, hMemView))
@@ -2117,14 +2225,22 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		case MENU_MV_BOOKMARKS_RM_ALL:
 			if (nextBookmark)
 			{
-				if (MessageBox(hwnd, "Remove All Bookmarks?", "Bookmarks", MB_YESNO) == IDYES)
+				if (MessageBox(hwnd, "Remove All Bookmarks?", "Bookmarks", MB_YESNO | MB_ICONINFORMATION) == IDYES)
 				{
 					removeAllBookmarks(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
 					UpdateColorTable();
 				}
 			}
 			return 0;
-
+/*
+		case MENU_MV_BOOKMARKS_EXPORT:
+			if (!saveBookmarks(hwnd))
+				MessageBox(hwnd, "Error saving bookmarks.", "Error", MB_OK | MB_ICONERROR);
+			return 0;
+		case MENU_MV_BOOKMARKS_IMPORT:
+			loadBookmarks(hwnd);
+			return 0;
+*/
 		case MENU_MV_HELP:
 			OpenHelpWindow(memviewhelp);
 			return 0;
@@ -2201,7 +2317,11 @@ void DoMemView()
 		wndclass.lpszMenuName  = "MEMVIEWMENU";
 		wndclass.lpszClassName = "MEMVIEW";
 
-		if(!RegisterClassEx(&wndclass)) {FCEUD_PrintError("Error Registering MEMVIEW Window Class."); return;}
+		if(!RegisterClassEx(&wndclass)) 
+		{
+			FCEUD_PrintError("Error Registering MEMVIEW Window Class.");
+			return;
+		}
 
 		hMemView = CreateWindowEx(0,"MEMVIEW","Memory Editor",
 			//WS_OVERLAPPEDWINDOW|WS_CLIPSIBLINGS,  /* Style */

@@ -72,6 +72,7 @@ void FCEU_ReloadLuaCode();
 void FCEU_LuaStop();
 int FCEU_LuaRunning();
 
+void FCEU_LuaReadZapper(const uint32* mouse_in, uint32* mouse_out);
 uint8 FCEU_LuaReadJoypad(int,uint8); // HACK - Function needs controller input
 int FCEU_LuaSpeed();
 int FCEU_LuaFrameskip();
