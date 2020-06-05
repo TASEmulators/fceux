@@ -1,0 +1,8 @@
+version: 1.0.{build}
+image:
+- Visual Studio 2019
+- Ubuntu2004
+  #- Ubuntu1804
+build_script:
+- cmd: msbuild "./vc/vc14_fceux.sln"
+- sh: ./pipelines/linux_build.sh

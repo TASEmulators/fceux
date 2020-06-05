@@ -9,7 +9,6 @@
 uint32 PtoV(uint16 x, uint16 y);
 bool FCEUD_ShouldDrawInputAids();
 bool FCEUI_AviDisableMovieMessages();
-static SDL_Surface *s_screen;
 bool FCEUI_AviEnableHUDrecording();
 void FCEUI_SetAviEnableHUDrecording(bool enable);
 bool FCEUI_AviDisableMovieMessages();

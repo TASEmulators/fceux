@@ -8,7 +8,11 @@ Export('env')
 source_list = Split(
     """
     input.cpp
+    cheat.cpp
     config.cpp
+    memview.cpp
+    ramwatch.cpp
+    debugger.cpp
     sdl.cpp
     sdl-joystick.cpp
     sdl-sound.cpp

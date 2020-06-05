@@ -193,9 +193,9 @@ static void ShowUsage(char *prog)
  */
 int LoadGame(const char *path)
 {
-    if (isloaded){
-        CloseGame();
-    }
+	if (isloaded){
+		CloseGame();
+	}
 	if(!FCEUI_LoadGame(path, 1)) {
 		return 0;
 	}
@@ -614,8 +614,8 @@ int main(int argc, char *argv[])
 	g_config->getOption("SDL.InputCfg", &s);
 	if(s.size() != 0)
 	{
-	InitVideo(GameInfo);
-	InputCfg(s);
+		InitVideo(GameInfo);
+		InputCfg(s);
 	}
 	// set the FAMICOM PAD 2 Mic thing 
 	{
@@ -861,10 +861,15 @@ int main(int argc, char *argv[])
 		InitGTKSubsystem(argc, argv);
 		while(gtk_events_pending())
 			gtk_main_iteration_do(FALSE);
+      // Ensure that the GUI has fully initialized. 
+      // Give the X-server a small amount of time to init.
+      usleep(100000);
+		while(gtk_events_pending())
+			gtk_main_iteration_do(FALSE);
 	}
 #endif
 
-  if(romIndex >= 0)
+	if(romIndex >= 0)
 	{
 		// load the specified game
 		error = LoadGame(argv[romIndex]);
@@ -915,6 +920,15 @@ int main(int argc, char *argv[])
 	g_config->setOption("SDL.LuaScript", "");
 	if (s != "")
 	{
+#ifdef __linux
+		// Resolve absolute path to file
+		char fullpath[2048];
+		if ( realpath( s.c_str(), fullpath ) != NULL )
+		{
+			//printf("Fullpath: '%s'\n", fullpath );
+			s.assign( fullpath );
+		}
+#endif
 		FCEU_LoadLuaCode(s.c_str());
 	}
 #endif

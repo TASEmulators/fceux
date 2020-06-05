@@ -31,6 +31,7 @@
 #include "../../movie.h"
 #include "../../fceu.h"
 #include "../../driver.h"
+#include "../../state.h"
 #include "../../utils/xstring.h"
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
@@ -177,12 +178,12 @@ int Hotkeys[HK_MAX] = { 0 };
 
 // on every cycle of keyboardinput()
 void
-setHotKeys ()
+setHotKeys (void)
 {
 	std::string prefix = "SDL.Hotkeys.";
 	for (int i = 0; i < HK_MAX; i++)
 	{
-		g_config->getOption (prefix + HotkeyStrings[i], &Hotkeys[i]);
+		g_config->getOption (prefix + getHotkeyString(i), &Hotkeys[i]);
 	}
 	return;
 }
@@ -281,16 +282,16 @@ std::string GetFilename (const char *title, bool save, const char *filter)
 	if (save)
 		fileChooser = gtk_file_chooser_dialog_new ("Save as", NULL,
 							GTK_FILE_CHOOSER_ACTION_SAVE,
-							GTK_STOCK_CANCEL,
+							"_Cancel",
 							GTK_RESPONSE_CANCEL,
-							GTK_STOCK_SAVE_AS,
+							"_Save",
 							GTK_RESPONSE_ACCEPT, NULL);
 	else
 		fileChooser = gtk_file_chooser_dialog_new ("Open", NULL,
 							GTK_FILE_CHOOSER_ACTION_OPEN,
-							GTK_STOCK_CANCEL,
+							"_Cancel",
 							GTK_RESPONSE_CANCEL,
-							GTK_STOCK_OPEN,
+							"_Open",
 							GTK_RESPONSE_ACCEPT, NULL);
 
 	// TODO: make file filters case insensitive     
@@ -739,22 +740,30 @@ static void KeyboardCommands ()
 #endif
 
 	for (int i = 0; i < 10; i++)
+	{
 		if (_keyonly (Hotkeys[HK_SELECT_STATE_0 + i]))
 		{
 #ifdef _GTK
-			gtk_radio_action_set_current_value (stateSlot, i);
+			setStateMenuItem(i);
 #endif
 			FCEUI_SelectState (i, 1);
 		}
+	}
 
 	if (_keyonly (Hotkeys[HK_SELECT_STATE_NEXT]))
 	{
 		FCEUI_SelectStateNext (1);
+#ifdef _GTK
+		setStateMenuItem( CurrentState );
+#endif
 	}
 
 	if (_keyonly (Hotkeys[HK_SELECT_STATE_PREV]))
 	{
 		FCEUI_SelectStateNext (-1);
+#ifdef _GTK
+		setStateMenuItem( CurrentState );
+#endif
 	}
 
 	if (_keyonly (Hotkeys[HK_BIND_STATE]))
@@ -1061,6 +1070,10 @@ int ButtonConfigBegin ()
 			// TODO - SDL2
 #else
 			screen = SDL_SetVideoMode (420, 200, 8, 0);
+         if ( screen == NULL )
+         {
+            printf("Error: SDL_SetVideoMode Failed\n");
+         }
 			SDL_WM_SetCaption ("Button Config", 0);
 #endif
 		}
@@ -1663,7 +1676,9 @@ const char * ButtonName (const ButtConfig * bc, int which)
 #else
 			return SDL_GetKeyName ((SDLKey) bc->ButtonNum[which]);
 #endif
+		break;
 		case BUTTC_JOYSTICK:
+		{
 			int joyNum, inputNum;
 			const char *inputType, *inputDirection;
 
@@ -1685,13 +1700,13 @@ const char * ButtonName (const ButtConfig * bc, int which)
 				inputValue = bc->ButtonNum[which] & 0xF;
 
 				if (inputValue & SDL_HAT_UP)
-					strncat (direction, "Up ", sizeof (direction));
+					strncat (direction, "Up ", sizeof (direction)-1);
 				if (inputValue & SDL_HAT_DOWN)
-					strncat (direction, "Down ", sizeof (direction));
+					strncat (direction, "Down ", sizeof (direction)-1);
 				if (inputValue & SDL_HAT_LEFT)
-					strncat (direction, "Left ", sizeof (direction));
+					strncat (direction, "Left ", sizeof (direction)-1);
 				if (inputValue & SDL_HAT_RIGHT)
-					strncat (direction, "Right ", sizeof (direction));
+					strncat (direction, "Right ", sizeof (direction)-1);
 
 				if (direction[0])
 					inputDirection = direction;
@@ -1704,6 +1719,9 @@ const char * ButtonName (const ButtConfig * bc, int which)
 				inputNum = bc->ButtonNum[which];
 				inputDirection = "";
 			}
+			sprintf( name, "js%i:%s%i%s", joyNum, inputType, inputNum, inputDirection );
+		}
+		break;
 	}
 
 	return name;
@@ -2041,7 +2059,7 @@ UpdateInput (Config * config)
 
 	for (unsigned int i = 0; i < 3; i++)
 	{
-		snprintf (buf, 64, "SDL.Input.%d", i);
+		snprintf (buf, 64, "SDL.Input.%u", i);
 		config->getOption (buf, &device);
 
 		if (device == "None")
@@ -2127,7 +2145,7 @@ UpdateInput (Config * config)
 	for (unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++)
 	{
 		char buf[64];
-		snprintf (buf, 20, "SDL.Input.GamePad.%d.", i);
+		snprintf (buf, sizeof(buf)-1, "SDL.Input.GamePad.%u.", i);
 		prefix = buf;
 
 		config->getOption (prefix + "DeviceType", &device);
@@ -2160,7 +2178,7 @@ UpdateInput (Config * config)
 	for (unsigned int i = 0; i < POWERPAD_NUM_DEVICES; i++)
 	{
 		char buf[64];
-		snprintf (buf, 20, "SDL.Input.PowerPad.%d.", i);
+		snprintf (buf, 32, "SDL.Input.PowerPad.%u.", i);
 		prefix = buf;
 
 		config->getOption (prefix + "DeviceType", &device);
