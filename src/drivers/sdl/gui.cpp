@@ -3005,9 +3005,19 @@ void pushOutputToGTK (const char *str)
 void showGui (bool b)
 {
 	if (b)
+	{
+		//gtk_window_unmaximize( GTK_WINDOW(MainWindow) );
+		gtk_window_unfullscreen( GTK_WINDOW(MainWindow) );
 		gtk_widget_show_all (MainWindow);
+		//gtk_window_unfullscreen( GTK_WINDOW(MainWindow) );
+	}
 	else
-		gtk_widget_hide (MainWindow);
+	{
+		//gtk_widget_hide (MainWindow);
+		//gtk_widget_hide (Menubar);
+		//gtk_window_maximize( GTK_WINDOW(MainWindow) );
+		gtk_window_fullscreen( GTK_WINDOW(MainWindow) );
+	}
 }
 
 gint handleKeyRelease (GtkWidget * w, GdkEvent * event, gpointer cb_data)
