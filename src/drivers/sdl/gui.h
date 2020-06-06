@@ -83,7 +83,10 @@ void saveStateAs();
 void loadStateFrom();
 void quickLoad();
 void quickSave();
-unsigned short GDKToSDLKeyval(int gdk_key);
+unsigned int GDKToSDLKeyval(int gdk_key);
 int InitGTKSubsystem(int argc, char** argv);
+
+uint32_t *getGuiPixelBuffer( int *w, int *h, int *s );
+int  guiPixelBufferReDraw(void);
 
 #endif // ifndef FCEUX_GUI_H

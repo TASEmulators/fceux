@@ -1019,65 +1019,65 @@ int ButtonConfigBegin ()
 	g_config->getOption ("SDL.NoGUI", &noGui);
 	if (noGui == 1)
 	{
-		SDL_QuitSubSystem (SDL_INIT_VIDEO);
+		//SDL_QuitSubSystem (SDL_INIT_VIDEO);
 		bcpv = KillVideo ();
 	}
 #else
 	// XXX soules - why are we doing this right before KillVideo()?
-	SDL_QuitSubSystem (SDL_INIT_VIDEO);
+	//SDL_QuitSubSystem (SDL_INIT_VIDEO);
 
 	// shut down the video and joystick subsystems
 	bcpv = KillVideo ();
 #endif
-	SDL_Surface *screen;
+	//SDL_Surface *screen;
 
 	bcpj = KillJoysticks ();
 
 	// reactivate the video subsystem
-	if (!SDL_WasInit (SDL_INIT_VIDEO))
-	{
-		if (!bcpv)
-		{
-			InitVideo (GameInfo);
-		}
-		else
-		{
-#if defined(_GTK) && defined(SDL_VIDEO_DRIVER_X11)
-			if (noGui == 0)
-			{
-				while (gtk_events_pending ())
-					gtk_main_iteration_do (FALSE);
-
-				char SDL_windowhack[128];
-				if (gtk_widget_get_window (evbox))
-					sprintf (SDL_windowhack, "SDL_WINDOWID=%u",
-					(unsigned int) GDK_WINDOW_XID (gtk_widget_get_window (evbox)));
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-					// TODO - SDL2
-#else
-					SDL_putenv (SDL_windowhack);
-#endif
-			}
-#endif
-			if (SDL_InitSubSystem (SDL_INIT_VIDEO) == -1)
-			{
-				FCEUD_Message (SDL_GetError ());
-				return 0;
-			}
-
-			// set the screen and notify the user of button configuration
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-			// TODO - SDL2
-#else
-			screen = SDL_SetVideoMode (420, 200, 8, 0);
-         if ( screen == NULL )
-         {
-            printf("Error: SDL_SetVideoMode Failed\n");
-         }
-			SDL_WM_SetCaption ("Button Config", 0);
-#endif
-		}
-	}
+//	if (!SDL_WasInit (SDL_INIT_VIDEO))
+//	{
+//		if (!bcpv)
+//		{
+//			InitVideo (GameInfo);
+//		}
+//		else
+//		{
+//#if defined(_GTK) && defined(SDL_VIDEO_DRIVER_X11)
+//			if (noGui == 0)
+//			{
+//				while (gtk_events_pending ())
+//					gtk_main_iteration_do (FALSE);
+//
+//				char SDL_windowhack[128];
+//				if (gtk_widget_get_window (evbox))
+//					sprintf (SDL_windowhack, "SDL_WINDOWID=%u",
+//					(unsigned int) GDK_WINDOW_XID (gtk_widget_get_window (evbox)));
+//#if SDL_VERSION_ATLEAST(2, 0, 0)
+//					// TODO - SDL2
+//#else
+//					SDL_putenv (SDL_windowhack);
+//#endif
+//			}
+//#endif
+//			if (SDL_InitSubSystem (SDL_INIT_VIDEO) == -1)
+//			{
+//				FCEUD_Message (SDL_GetError ());
+//				return 0;
+//			}
+//
+//			// set the screen and notify the user of button configuration
+//#if SDL_VERSION_ATLEAST(2, 0, 0)
+//			// TODO - SDL2
+//#else
+//			screen = SDL_SetVideoMode (420, 200, 8, 0);
+//         if ( screen == NULL )
+//         {
+//            printf("Error: SDL_SetVideoMode Failed\n");
+//         }
+//			SDL_WM_SetCaption ("Button Config", 0);
+//#endif
+//		}
+//	}
 
 	// XXX soules - why did we shut this down?
 	// initialize the joystick subsystem

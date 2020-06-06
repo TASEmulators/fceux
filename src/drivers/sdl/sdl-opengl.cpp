@@ -21,6 +21,9 @@
 #define APIENTRY
 #endif
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+static SDL_Window *s_window = NULL;
+#endif
 static GLuint textures[2]={0,0};	// Normal image, scanline overlay.
 
 static int left,right,top,bottom; // right and bottom are not inclusive.
@@ -104,7 +107,11 @@ BlitOpenGL(uint8 *buf)
 		glEnd();
 		glDisable(GL_BLEND);
 	}
+	#if SDL_VERSION_ATLEAST(2, 0, 0)
+	SDL_GL_SwapWindow(s_window);
+	#else
 	SDL_GL_SwapBuffers();
+	#endif
 }
 
 void
@@ -132,6 +139,9 @@ InitOpenGL(int l,
 		int ipolate,
 		int stretchx,
 		int stretchy,
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		SDL_Window *window,
+#endif
 		SDL_Surface *screen)
 {
 	const char *extensions;
@@ -167,6 +177,9 @@ InitOpenGL(int l,
 
 	HiBuffer=0;
  
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	s_window = window;
+#endif
 	extensions=(const char*)glGetString(GL_EXTENSIONS);
 
 	if((efx&2) || !extensions || !p_glColorTableEXT || !strstr(extensions,"GL_EXT_paletted_texture"))
@@ -182,6 +195,9 @@ InitOpenGL(int l,
   #endif
 	}
  
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	// FIXME
+#else
 	if(screen->flags & SDL_FULLSCREEN)
 	{
 		xscale=(double)screen->w / (double)(r-l);
@@ -189,6 +205,7 @@ InitOpenGL(int l,
 		if(xscale<yscale) yscale = xscale;
 		if(yscale<xscale) xscale = yscale;
 	}
+#endif
 
 	{
 		int rw=(int)((r-l)*xscale);
@@ -243,9 +260,20 @@ InitOpenGL(int l,
 
 	// In a double buffered setup with page flipping, be sure to clear both buffers.
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	#if SDL_VERSION_ATLEAST(2, 0, 0)
+	SDL_GL_SwapWindow(s_window);
+	#else
 	SDL_GL_SwapBuffers();
+	#endif
+
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	#if SDL_VERSION_ATLEAST(2, 0, 0)
+	SDL_GL_SwapWindow(s_window);
+	#else
 	SDL_GL_SwapBuffers();
+	#endif
 
 	return 1;
 }

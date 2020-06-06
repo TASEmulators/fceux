@@ -72,6 +72,7 @@ static unsigned int gtk_win_width = 0;
 static unsigned int gtk_win_height = 0;
 static int gtk_win_menu_ysize = 30;
 static GtkTreeStore *hotkey_store = NULL;
+static cairo_surface_t *cairo_surface = NULL;
 
 static gint convertKeypress (GtkWidget * grab, GdkEventKey * event, gpointer user_data);
 
@@ -2215,7 +2216,7 @@ static void changeState (GtkRadioMenuItem * radiomenuitem, gpointer user_data)
 #define SDLK_RMETA 0
 #endif
 // Adapted from Gens/GS.  Converts a GDK key value into an SDL key value.
-unsigned short GDKToSDLKeyval (int gdk_key)
+unsigned int GDKToSDLKeyval (int gdk_key)
 {
 	if (!(gdk_key & 0xFF00))
 	{
@@ -2242,7 +2243,7 @@ unsigned short GDKToSDLKeyval (int gdk_key)
 	}
 
 	// Non-ASCII symbol.
-	static const uint16_t gdk_to_sdl_table[0x100] = {
+	static const int gdk_to_sdl_table[0x100] = {
 		// 0x00 - 0x0F
 		0x0000, 0x0000, 0x0000, 0x0000,
 		0x0000, 0x0000, 0x0000, 0x0000,
@@ -2340,7 +2341,7 @@ unsigned short GDKToSDLKeyval (int gdk_key)
 		0x0000, 0x0000, 0x0000, SDLK_DELETE,
 	};
 
-	unsigned short sdl_key = gdk_to_sdl_table[gdk_key & 0xFF];
+	unsigned int sdl_key = gdk_to_sdl_table[gdk_key & 0xFF];
 	if (sdl_key == 0)
 	{
 		// Unhandled GDK key.
@@ -3070,8 +3071,126 @@ gint handleMouseClick (GtkWidget * widget, GdkEvent * event,
 	return 0;
 }
 
+uint32_t *getGuiPixelBuffer( int *w, int *h, int *s )
+{
+		
+	if ( cairo_surface == NULL )
+	{
+		if ( w ) *w = 0;
+		if ( h ) *h = 0;
+		if ( s ) *s = 0;
+		return NULL;
+	}
+	cairo_surface_flush( cairo_surface );
+
+	if ( w )
+	{
+		*w = cairo_image_surface_get_width (cairo_surface);
+	}
+	if ( h )
+	{
+		*h = cairo_image_surface_get_height (cairo_surface);
+	}
+	if ( s )
+	{
+		*s = cairo_image_surface_get_stride(cairo_surface);
+	}
+
+	//return NULL;
+	return (uint32_t*)cairo_image_surface_get_data (cairo_surface);
+}
+
+int  guiPixelBufferReDraw(void)
+{
+	if ( cairo_surface != NULL )
+	{
+		cairo_surface_mark_dirty( cairo_surface );
+
+		gtk_widget_queue_draw( evbox );
+	}
+	return 0;
+}
+
+int  guiClearSurface(void)
+{
+	uint32_t *p;
+	int w, h, z, i;
+	if ( cairo_surface != NULL )
+	{
+		cairo_surface_flush( cairo_surface );
+
+		p = (uint32_t*)cairo_image_surface_get_data (cairo_surface);
+		
+		w  = cairo_image_surface_get_width (cairo_surface);
+		h  = cairo_image_surface_get_height (cairo_surface);
+
+		z = w * h;
+		for (i=0; i<z; i++)
+		{
+			p[i] = 0x00000000;
+		}
+		cairo_surface_mark_dirty( cairo_surface );
+	}
+	return 0;
+}
+
+static void setPixels(void)
+{
+	int32_t *p;
+	int i,x,y,width,height,w2,h2;
+
+	width  = cairo_image_surface_get_width (cairo_surface);
+	height = cairo_image_surface_get_height (cairo_surface);
+
+	cairo_surface_flush( cairo_surface );
+
+	p = (int32_t*)cairo_image_surface_get_data (cairo_surface);
+
+	w2 = width / 2;
+	h2 = height / 2;
+
+	printf("W:%i   H:%i   W/2:%i  H/2:%i\n", width, height, w2, h2 );
+
+	i=0;
+	for (y=0; y<height; y++)
+	{
+		for (x=0; x<width; x++)
+		{
+			if ( x < w2 )
+			{
+				if ( y < h2 )
+				{
+			      p[i] = 0xff0000ff; 
+				}
+				else
+				{
+			      p[i] = 0xffffffff; 
+				}
+			}
+			else
+			{
+				if ( y < h2 )
+				{
+			      p[i] = 0xffff0000; 
+				}
+				else
+				{
+			      p[i] = 0xff00ff00; 
+				}
+			}
+			i++;
+		}
+	}
+	cairo_surface_mark_dirty( cairo_surface );
+
+	gtk_widget_queue_draw( evbox );
+}
+
+
+
 gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 {
+	cairo_format_t  cairo_format;
 	// This should handle resizing so the emulation takes up as much
 	// of the GTK window as possible
 
@@ -3112,6 +3231,36 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	if (yscale > xscale)
 		yscale = xscale;
 
+	if (cairo_surface)
+	{
+      cairo_surface_destroy (cairo_surface); cairo_surface = NULL;
+	}
+
+	//cairo_surface = gdk_window_create_similar_surface (
+	//								gtk_widget_get_window (evbox),
+   //                        CAIRO_CONTENT_COLOR_ALPHA,
+   //                        gtk_widget_get_allocated_width (evbox),
+   //                        gtk_widget_get_allocated_height (evbox) );
+
+	//cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_ARGB32, 
+	cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24, 
+                           gtk_widget_get_allocated_width (evbox),
+                           gtk_widget_get_allocated_height (evbox) );
+
+	printf("Cairo Surface: %p \n", cairo_surface );
+
+	cairo_format = cairo_image_surface_get_format( cairo_surface );
+
+		printf("Cairo Format: %i \n", cairo_format );
+	if ( cairo_format == CAIRO_FORMAT_ARGB32 )
+	{
+		printf("Cairo Format: ARGB32 \n" );
+	}
+	guiClearSurface();
+
+	//setPixels();
+	cairo_surface_mark_dirty( cairo_surface );
+
 	//TODO if openGL make these integers
 	g_config->setOption ("SDL.XScale", xscale);
 	g_config->setOption ("SDL.YScale", yscale);
@@ -3149,6 +3298,10 @@ static gboolean draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 	if ( gtk_draw_area_height < NES_HEIGHT ) gtk_draw_area_height = NES_HEIGHT;
 
 	gtk_win_menu_ysize = gtk_win_height - gtk_draw_area_height;
+
+	cairo_set_source_surface (cr, cairo_surface, 0, 0);
+   cairo_paint (cr);
+	return FALSE;
 
 	// Clear the screen on a window redraw
 	//if (GameInfo == 0)
@@ -3229,7 +3382,7 @@ int InitGTKSubsystem (int argc, char **argv)
 	g_signal_connect (MainWindow, "delete-event", quit, NULL);
 	g_signal_connect (MainWindow, "destroy-event", quit, NULL);
 	// resize handler
-	g_signal_connect (MainWindow, "configure-event",
+	g_signal_connect (evbox, "configure-event",
 			  G_CALLBACK (handle_resize), NULL);
 	g_signal_connect (evbox, "draw", G_CALLBACK (draw_cb), NULL);
 

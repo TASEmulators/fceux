@@ -55,31 +55,36 @@
 extern Config *g_config;
 
 // STATIC GLOBALS
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+static SDL_Window  *s_window  = NULL;
+static SDL_Renderer *s_renderer = NULL;
+static SDL_Texture *s_texture = NULL;
+#endif
 static SDL_Surface *s_screen = NULL;
 
 static SDL_Surface *s_BlitBuf; // Buffer when using hardware-accelerated blits.
 static SDL_Surface *s_IconSurface = NULL;
 
-static int s_curbpp;
+static int s_curbpp = 0;
 static int s_srendline, s_erendline;
 static int s_tlines;
-static int s_inited;
+static int s_inited = 0;
 
 #ifdef OPENGL
-static int s_useOpenGL;
+static int s_useOpenGL = 0;
 #endif
-static double s_exs, s_eys;
-static int s_eefx;
-static int s_clipSides;
-static int s_fullscreen;
-static int noframe;
+static double s_exs = 1.0, s_eys = 1.0;
+static int s_eefx = 0;
+static int s_clipSides = 0;
+static int s_fullscreen = 0;
+static int noframe = 0;
 static int s_nativeWidth = -1;
 static int s_nativeHeight = -1;
 
 #define NWIDTH	(256 - (s_clipSides ? 16 : 0))
 #define NOFFSET	(s_clipSides ? 8 : 0)
 
-static int s_paletterefresh;
+static int s_paletterefresh = 1;
 
 extern bool MaxSpeed;
 
@@ -89,6 +94,38 @@ extern unsigned int gtk_draw_area_height;
  * Attempts to destroy the graphical video display.  Returns 0 on
  * success, -1 on failure.
  */
+
+static void print_pixels(void)
+{
+	uint32_t i,j;
+	uint32_t *buf;
+	uint32_t pixel;
+
+	buf = (uint32_t*)s_screen->pixels;
+
+	i=0; j=0;
+	for (int x=0; x<s_screen->w; x++)
+	{
+		for (int y=0; y<s_screen->h; y++)
+		{
+         pixel = buf[i]; i++;
+
+			if ( pixel != 0 )
+			{
+				printf("(%i,%i) %08x ", x, y, pixel ); j++;
+				if ( j % 10 == 0 )
+				{
+					printf("\n");
+				}
+			}
+			//printf("(%i,%i) %08x ", x, y, pixel );
+
+		}
+	}
+
+
+
+}
 
 //draw input aids if we are fullscreen
 bool FCEUD_ShouldDrawInputAids()
@@ -100,7 +137,8 @@ int
 KillVideo()
 {
 	// if the IconSurface has been initialized, destroy it
-	if(s_IconSurface) {
+	if (s_IconSurface) 
+	{
 		SDL_FreeSurface(s_IconSurface);
 		s_IconSurface=0;
 	}
@@ -113,15 +151,46 @@ KillVideo()
 #ifdef OPENGL
 	// check for OpenGL and shut it down
 	if(s_useOpenGL)
+	{
 		KillOpenGL();
+	}
 	else
 #endif
+	{
 		// shut down the system that converts from 8 to 16/32 bpp
-		if(s_curbpp > 8)
+		if (s_curbpp > 8)
+		{
 			KillBlitToHigh();
+		}
+	}
+
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+
+	if ( s_screen != NULL )
+	{
+		SDL_FreeSurface( s_screen ); s_screen = NULL;
+	}
+
+	if ( s_texture != NULL )
+	{
+		SDL_DestroyTexture( s_texture ); s_texture = NULL;
+	}
+
+	if ( s_renderer != NULL )
+	{
+		SDL_DestroyRenderer( s_renderer ); s_renderer = NULL;
+	}
+
+	if ( s_window != NULL )
+	{
+		SDL_DestroyWindow( s_window ); 
+		s_window = NULL;
+	}
+
+#endif
 
 	// shut down the SDL video sub-system
-	SDL_QuitSubSystem(SDL_INIT_VIDEO);
+	//SDL_QuitSubSystem(SDL_INIT_VIDEO);
 
 	s_inited = 0;
 	return 0;
@@ -158,6 +227,203 @@ int InitVideo(FCEUGI *gi)
 	// This is a big TODO.  Stubbing this off into its own function,
 	// as the SDL surface routines have changed drastically in SDL2
 	// TODO - SDL2
+	// XXX soules - const?  is this necessary?
+	//const SDL_VideoInfo *vinf;
+	int error, flags = 0;
+	int doublebuf, xstretch, ystretch, xres, yres, show_fps;
+
+	FCEUI_printf("Initializing video...");
+
+	// load the relevant configuration variables
+	g_config->getOption("SDL.Fullscreen", &s_fullscreen);
+	g_config->getOption("SDL.DoubleBuffering", &doublebuf);
+#ifdef OPENGL
+	g_config->getOption("SDL.OpenGL", &s_useOpenGL);
+#endif
+	g_config->getOption("SDL.SpecialFilter", &s_sponge);
+	g_config->getOption("SDL.XStretch", &xstretch);
+	g_config->getOption("SDL.YStretch", &ystretch);
+	//g_config->getOption("SDL.LastXRes", &xres);
+	//g_config->getOption("SDL.LastYRes", &yres);
+	g_config->getOption("SDL.ClipSides", &s_clipSides);
+	g_config->getOption("SDL.NoFrame", &noframe);
+	g_config->getOption("SDL.ShowFPS", &show_fps);
+	g_config->getOption("SDL.XScale", &s_exs);
+	g_config->getOption("SDL.YScale", &s_eys);
+	uint32_t  rmask, gmask, bmask;
+
+	//s_exs = 1.0;
+	//s_eys = 1.0;
+	xres = gtk_draw_area_width;
+	yres = gtk_draw_area_height;
+	// check the starting, ending, and total scan lines
+
+	FCEUI_GetCurrentVidSystem(&s_srendline, &s_erendline);
+	s_tlines = s_erendline - s_srendline + 1;
+
+	// check if we should auto-set x/y resolution
+
+    // check for OpenGL and set the global flags
+#ifdef OPENGL
+	// FIXME
+	//if(s_useOpenGL && !s_sponge) {
+	//	flags = SDL_OPENGL;
+	//}
+#endif
+
+	s_inited = 1;
+
+	// check to see if we are showing FPS
+	FCEUI_SetShowFPS(show_fps);
+
+#ifdef LSB_FIRST
+	//rmask = 0x000000FF;
+	//gmask = 0x0000FF00;
+	//bmask = 0x00FF0000;
+	rmask = 0x00FF0000;
+	gmask = 0x0000FF00;
+	bmask = 0x000000FF;
+#else
+	rmask = 0x00FF0000;
+	gmask = 0x0000FF00;
+	bmask = 0x000000FF;
+#endif
+
+		// if all this hex scares you, check out SDL_PixelFormatEnumToMasks()!
+//#ifdef LSB_FIRST
+//	//printf("Little Endian\n");
+//	s_screen = SDL_CreateRGBSurface(0, xres, yres, 32,
+//											0xFF, 0xFF00, 0xFF0000, 0x00);
+//#else
+//	//printf("Big Endian\n");
+//	s_screen = SDL_CreateRGBSurface(0, xres, yres, 32,
+//											0xFF0000, 0xFF00, 0xFF, 0x00);
+//#endif
+//
+//	if ( s_screen == NULL )
+//	{
+//		fprintf(stderr, "Couldn't init SDL screen: %s\n", SDL_GetError());
+//		KillVideo();
+//		exit(-1);
+//	}
+//
+//	s_texture = SDL_CreateTexture(s_renderer,
+//#ifdef LSB_FIRST
+//                            SDL_PIXELFORMAT_ABGR8888,
+//#else
+//                            SDL_PIXELFORMAT_ARGB8888,
+//#endif
+//                            SDL_TEXTUREACCESS_STREAMING | SDL_TEXTUREACCESS_TARGET,
+//                             xres, yres );
+//
+//	if ( s_texture == NULL )
+//	{
+//		fprintf(stderr, "Couldn't init SDL texture: %s\n", SDL_GetError());
+//		KillVideo();
+//		exit(-1);
+//	}
+//	#endif
+
+	//s_curbpp = s_screen->format->BitsPerPixel;
+	s_curbpp = 32;
+
+	//FCEU_printf(" Video Mode: %d x %d x %d bpp %s\n",
+	//			s_screen->w, s_screen->h, s_screen->format->BitsPerPixel,
+	//			s_fullscreen ? "full screen" : "");
+	FCEU_printf(" Video Mode: %d x %d x %d bpp %s\n",
+				xres, yres, s_curbpp,
+				s_fullscreen ? "full screen" : "");
+
+	if (s_curbpp != 8 && s_curbpp != 16 && s_curbpp != 24 && s_curbpp != 32) 
+	{
+		FCEU_printf("  Sorry, %dbpp modes are not supported by FCE Ultra.  Supported bit depths are 8bpp, 16bpp, and 32bpp.\n", s_curbpp);
+		KillVideo();
+		return -1;
+	}
+
+		// create the surface for displaying graphical messages
+//#ifdef LSB_FIRST
+//	s_IconSurface = SDL_CreateRGBSurfaceFrom((void *)fceu_playicon.pixel_data,
+//											32, 32, 24, 32 * 3,
+//											0xFF, 0xFF00, 0xFF0000, 0x00);
+//#else
+//	s_IconSurface = SDL_CreateRGBSurfaceFrom((void *)fceu_playicon.pixel_data,
+//											32, 32, 24, 32 * 3,
+//											0xFF0000, 0xFF00, 0xFF, 0x00);
+//#endif
+//	SDL_SetWindowIcon( s_window, s_IconSurface);
+
+	//s_paletterefresh = 1;
+
+	// -Video Modes Tag-
+	if (s_sponge) 
+	{
+		if (s_sponge <= 3 && s_sponge >= 1)
+		{
+			s_exs = s_eys = 2;
+		} 
+		else if (s_sponge >=4 && s_sponge <= 5)
+		{
+			s_exs = s_eys = 3;
+		}
+	  	else if (s_sponge >= 6 && s_sponge <= 8)
+		{
+			s_exs = s_eys = s_sponge - 4;
+		}
+		else if(s_sponge == 9)
+		{
+			s_exs = s_eys = 3;
+		}
+		else
+		{
+			s_exs = s_eys = 1;
+		}
+		if(s_sponge == 3) {
+			xres = 301 * s_exs;
+		}
+		s_eefx = 0;
+		//if(s_sponge == 1 || s_sponge == 4) {
+		//	desbpp = 32;
+		//}
+	}
+
+	//int scrw = NWIDTH * s_exs;
+	//if(s_sponge == 3) {
+	//	scrw = 301 * s_exs;
+	//}
+
+#ifdef OPENGL
+	if(!s_useOpenGL) {
+		s_exs = (int)s_exs;
+		s_eys = (int)s_eys;
+	}
+	if(s_exs <= 0.01) {
+		FCEUD_PrintError("xscale out of bounds.");
+		KillVideo();
+		return -1;
+	}
+	if(s_eys <= 0.01) {
+		FCEUD_PrintError("yscale out of bounds.");
+		KillVideo();
+		return -1;
+	}
+	if(s_sponge && s_useOpenGL) {
+		FCEUD_PrintError("scalers not compatible with openGL mode.");
+		KillVideo();
+		return -1;
+	}
+#endif
+
+	if (s_curbpp > 8) 
+	{
+		InitBlitToHigh(s_curbpp >> 3,
+							rmask,
+							gmask,
+							bmask,
+							s_eefx, s_sponge, 0);
+	}
+
+	return 0;
 }
 #else
 /**
@@ -632,13 +898,14 @@ void UnlockConsole(){}
 void
 BlitScreen(uint8 *XBuf)
 {
-	SDL_Surface *TmpScreen;
+	//SDL_Surface *TmpScreen;
 	uint8 *dest;
 	int xo = 0, yo = 0;
+	int w, h, pitch;
 
-	if(!s_screen) {
-		return;
-	}
+	//if(!s_screen) {
+	//	return;
+	//}
 
 	// refresh the palette if required
 	if(s_paletterefresh) {
@@ -657,27 +924,32 @@ BlitScreen(uint8 *XBuf)
 	// XXX soules - not entirely sure why this is being done yet
 	XBuf += s_srendline * 256;
 
-	if(s_BlitBuf) {
-		TmpScreen = s_BlitBuf;
-	} else {
-		TmpScreen = s_screen;
-	}
+	//if(s_BlitBuf) {
+	//	TmpScreen = s_BlitBuf;
+	//} else {
+	//	TmpScreen = s_screen;
+	//}
 
 	// lock the display, if necessary
-	if(SDL_MUSTLOCK(TmpScreen)) {
-		if(SDL_LockSurface(TmpScreen) < 0) {
-			return;
-		}
-	}
+	//if(SDL_MUSTLOCK(TmpScreen)) {
+	//	if(SDL_LockSurface(TmpScreen) < 0) {
+	//		return;
+	//	}
+	//}
 
-	dest = (uint8*)TmpScreen->pixels;
+	//dest = (uint8*)TmpScreen->pixels;
+	dest = (uint8*)getGuiPixelBuffer( &w, &h, &pitch );
+
+	pitch = w * 4;
+
+	if ( dest == NULL ) return;
 
 	//if(s_fullscreen) { // Always do this calculation now. Screen resolution is always provided.
-		xo = (int)(((TmpScreen->w - NWIDTH * s_exs)) / 2);
+		xo = (int)(((w - NWIDTH * s_exs)) / 2);
 		dest += xo * (s_curbpp >> 3);
-		if(TmpScreen->h > (s_tlines * s_eys)) {
-			yo = (int)((TmpScreen->h - s_tlines * s_eys) / 2);
-			dest += yo * TmpScreen->pitch;
+		if(h > (s_tlines * s_eys)) {
+			yo = (int)((h - s_tlines * s_eys) / 2);
+			dest += yo * pitch;
 		}
 	//}
 
@@ -686,26 +958,29 @@ BlitScreen(uint8 *XBuf)
 	if(s_curbpp > 8) {
 		if(s_BlitBuf) {
 			Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
-						TmpScreen->pitch, 1, 1);
+						pitch, 1, 1);
 		} else {
 			Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
-						TmpScreen->pitch, (int)s_exs, (int)s_eys);
+						pitch, (int)s_exs, (int)s_eys);
 		}
 	} else {
 		if(s_BlitBuf) {
 			Blit8To8(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
-					TmpScreen->pitch, 1, 1, 0, s_sponge);
+					pitch, 1, 1, 0, s_sponge);
 		} else {
 			Blit8To8(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
-					TmpScreen->pitch, (int)s_exs, (int)s_eys,
+					pitch, (int)s_exs, (int)s_eys,
 					s_eefx, s_sponge);
 		}
 	}
+	//print_pixels();
+	//
+	guiPixelBufferReDraw();
 
 	// unlock the display, if necessary
-	if(SDL_MUSTLOCK(TmpScreen)) {
-		SDL_UnlockSurface(TmpScreen);
-	}
+	//if(SDL_MUSTLOCK(TmpScreen)) {
+	//	SDL_UnlockSurface(TmpScreen);
+	//}
 
 	int scrw;
 	if(s_sponge == 3) {  // NTSC 2x
@@ -715,29 +990,32 @@ BlitScreen(uint8 *XBuf)
 	}
 
 	 // if we have a hardware video buffer, do a fast video->video copy
-	if(s_BlitBuf) {
-		SDL_Rect srect;
-		SDL_Rect drect;
+	//if(s_BlitBuf) {
+	//	SDL_Rect srect;
+	//	SDL_Rect drect;
 
-		srect.x = 0;
-		srect.y = 0;
-		srect.w = scrw;
-		srect.h = s_tlines;
+	//	srect.x = 0;
+	//	srect.y = 0;
+	//	srect.w = scrw;
+	//	srect.h = s_tlines;
 
-		drect.x = 0;
-		drect.y = 0;
-		drect.w = (Uint16)(s_exs * scrw);
-		drect.h = (Uint16)(s_eys * s_tlines);
+	//	drect.x = 0;
+	//	drect.y = 0;
+	//	drect.w = (Uint16)(s_exs * scrw);
+	//	drect.h = (Uint16)(s_eys * s_tlines);
 
-		SDL_BlitSurface(s_BlitBuf, &srect, s_screen, &drect);
-	}
+	//	SDL_BlitSurface(s_BlitBuf, &srect, s_screen, &drect);
+	//}
 
 	 // ensure that the display is updated
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	//TODO - SDL2
+	//SDL_UpdateTexture(s_texture, NULL, s_screen->pixels, s_screen->pitch);
+	//SDL_RenderClear(s_renderer);
+	//SDL_RenderCopy(s_renderer, s_texture, NULL, NULL);
+	//SDL_RenderPresent(s_renderer);
 #else
-	SDL_UpdateRect(s_screen, xo, yo,
-				(Uint32)(scrw * s_exs), (Uint32)(s_tlines * s_eys));
+	//SDL_UpdateRect(s_screen, xo, yo,
+	//			(Uint32)(scrw * s_exs), (Uint32)(s_tlines * s_eys));
 #endif
 
 #ifdef CREATE_AVI
@@ -781,7 +1059,7 @@ BlitScreen(uint8 *XBuf)
        break;
    #endif
      default:
-       NESVideoLoggingVideo(s_screen->pixels, width,height, fps, s_curbpp);
+       NESVideoLoggingVideo( dest, width,height, fps, s_curbpp);
    }
  }
 #endif
@@ -814,14 +1092,14 @@ BlitScreen(uint8 *XBuf)
 #endif
 #endif
 
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	// TODO
-#else
-    // have to flip the displayed buffer in the case of double buffering
-	if(s_screen->flags & SDL_DOUBLEBUF) {
-		SDL_Flip(s_screen);
-	}
-#endif
+//#if SDL_VERSION_ATLEAST(2, 0, 0)
+//	// TODO
+//#else
+//    // have to flip the displayed buffer in the case of double buffering
+//	if(s_screen->flags & SDL_DOUBLEBUF) {
+//		SDL_Flip(s_screen);
+//	}
+//#endif
 }
 
 /**

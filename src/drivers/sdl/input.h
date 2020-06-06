@@ -7,7 +7,8 @@
 typedef struct {
 	uint8  ButtType[MAXBUTTCONFIG];
 	uint8  DeviceNum[MAXBUTTCONFIG];
-	uint16 ButtonNum[MAXBUTTCONFIG];
+	//uint16 ButtonNum[MAXBUTTCONFIG];
+	int    ButtonNum[MAXBUTTCONFIG];
 	uint32 NumC;
 	//uint64 DeviceID[MAXBUTTCONFIG];	/* TODO */
 } ButtConfig;
