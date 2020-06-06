@@ -2399,7 +2399,9 @@ static gboolean convertKeypress (GtkWidget * grab, GdkEventKey * event,
 #endif
 
 	// Create an SDL event from the keypress.
+	sdlev.key.keysym.scancode = SDL_GetScancodeFromKey(sdlkey);
 	sdlev.key.keysym.sym = sdlkey;
+	sdlev.key.keysym.mod = 0;
 	if (sdlkey != 0)
 	{
 		SDL_PushEvent (&sdlev);

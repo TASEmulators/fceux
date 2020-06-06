@@ -137,7 +137,11 @@ DoCheatSeq ()
 }
 
 #include "keyscan.h"
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+static uint8  g_keyState[SDL_NUM_SCANCODES];
+#else
 static uint8 *g_keyState = 0;
+#endif
 static int DIPS = 0;
 
 static uint8 keyonce[MKK_COUNT];
@@ -451,7 +455,7 @@ static void KeyboardCommands ()
 	char *movie_fname = "";
 	// get the keyboard input
 #if SDL_VERSION_ATLEAST(1, 3, 0)
-	g_keyState = (Uint8*)SDL_GetKeyboardState (NULL);
+	//g_keyState = (Uint8*)SDL_GetKeyboardState (NULL);
 #else
 	g_keyState = SDL_GetKeyState (NULL);
 #endif
@@ -461,7 +465,7 @@ static void KeyboardCommands ()
 	{
 #if SDL_VERSION_ATLEAST(1, 3, 0)
 		// TODO - SDL2
-		if (0)
+		if ( g_keyState[SDL_SCANCODE_SCROLLLOCK] )
 #else
 		if (keyonly (SCROLLLOCK))
 #endif
@@ -482,8 +486,8 @@ static void KeyboardCommands ()
 	}
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	if (g_keyState[SDL_GetScancodeFromKey (SDLK_LSHIFT)]
-		|| g_keyState[SDL_GetScancodeFromKey (SDLK_RSHIFT)])
+	if (g_keyState[SDL_SCANCODE_LSHIFT]
+		|| g_keyState[SDL_SCANCODE_RSHIFT])
 #else
 	if (g_keyState[SDLK_LSHIFT] || g_keyState[SDLK_RSHIFT])
 #endif
@@ -491,8 +495,8 @@ static void KeyboardCommands ()
   else
 	is_shift = 0;
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	if (g_keyState[SDL_GetScancodeFromKey (SDLK_LALT)]
-	|| g_keyState[SDL_GetScancodeFromKey (SDLK_RALT)])
+	if (g_keyState[SDL_SCANCODE_LALT]
+	|| g_keyState[SDL_SCANCODE_RALT])
 #else
 	if (g_keyState[SDLK_LALT] || g_keyState[SDLK_RALT])
 #endif
@@ -684,13 +688,13 @@ static void KeyboardCommands ()
 
 	// Toggle throttling
 	NoWaiting &= ~1;
-	if (g_keyState[Hotkeys[HK_TURBO]])
+	if ( _keyonly(Hotkeys[HK_TURBO]) )
 	{
 		NoWaiting |= 1;
 	}
 
 	static bool frameAdvancing = false;
-	if (g_keyState[Hotkeys[HK_FRAME_ADVANCE]])
+	if ( _keyonly(Hotkeys[HK_FRAME_ADVANCE]))
 	{
 		if (frameAdvancing == false)
 		{
@@ -968,6 +972,10 @@ void GetMouseRelative (int32 (&d)[3])
 	d[2] = md[2]; // buttons
 }
 
+//static void checkKeyBoardState( int scanCode )
+//{
+//	printf("Key State is: %i \n", g_keyState[ scanCode ] );
+//}
 /**
  * Handles outstanding SDL events.
  */
@@ -995,6 +1003,15 @@ UpdatePhysicalInput ()
 						FCEU_printf ("Warning: unknown hotkey event %d\n",
 									event.user.code);
 				}
+				break;
+			case SDL_KEYDOWN:
+			case SDL_KEYUP:
+				//printf("SDL_Event.type: %i  Keysym: %i  ScanCode: %i\n", 
+				//		event.type, event.key.keysym.sym, event.key.keysym.scancode );
+
+				g_keyState[ event.key.keysym.scancode ] = (event.type == SDL_KEYDOWN) ? 1 : 0;
+				//checkKeyBoardState( event.key.keysym.scancode );
+				break;
 			default:
 				break;
 		}
@@ -1200,6 +1217,7 @@ UpdateGamepad(void)
 		{
 			if (DTestButton (&GamePadConfig[wg][x]))
 			{
+				//printf("GamePad%i Button Hit: %i \n", wg, x );
 				if(opposite_dirs == 0)
 				{
 					// test for left+right and up+down
@@ -1425,6 +1443,10 @@ void InitInputInterface ()
 	int t;
 	int x;
 	int attrib;
+
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+   memset( g_keyState, 0, sizeof(g_keyState) );
+#endif
 
 	for (t = 0, x = 0; x < 2; x++)
 	{
