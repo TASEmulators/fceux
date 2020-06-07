@@ -78,9 +78,8 @@ static GtkRadioMenuItem *stateSlot[10] = { NULL };
 bool gtkIsStarted = false;
 bool menuTogglingEnabled = false;
 
+static char useCairoDraw = 0;
 static int drawAreaGL = 0;
-static GLuint gltexture = 0;
-static uint32_t *drawAreaGLpixBuf = NULL;
 unsigned int gtk_draw_area_width = NES_WIDTH;
 unsigned int gtk_draw_area_height = NES_HEIGHT;
 static unsigned int gtk_win_width = 0;
@@ -3100,51 +3099,43 @@ gint handleMouseClick (GtkWidget * widget, GdkEvent * event,
 
 uint32_t *getGuiPixelBuffer( int *w, int *h, int *s )
 {
-	if ( drawAreaGL )
-	{
-		if ( w ) *w = 256;
-		if ( h ) *h = 256;
-		if ( s ) *s = 256*4;
-
-		//return NULL;
-		return glx_shm->pixbuf;
-	}
-		
-	if ( cairo_surface == NULL )
-	{
-		if ( w ) *w = 0;
-		if ( h ) *h = 0;
-		if ( s ) *s = 0;
-		return NULL;
-	}
-	cairo_surface_flush( cairo_surface );
-
-	if ( w )
-	{
-		*w = cairo_image_surface_get_width (cairo_surface);
-	}
-	if ( h )
-	{
-		*h = cairo_image_surface_get_height (cairo_surface);
-	}
-	if ( s )
-	{
-		*s = cairo_image_surface_get_stride(cairo_surface);
-	}
+	if ( w ) *w = GLX_NES_WIDTH;
+	if ( h ) *h = GLX_NES_HEIGHT;
+	if ( s ) *s = GLX_NES_WIDTH*4;
 
 	//return NULL;
-	return (uint32_t*)cairo_image_surface_get_data (cairo_surface);
+	return glx_shm->pixbuf;
+		
+	//if ( cairo_surface == NULL )
+	//{
+	//	if ( w ) *w = 0;
+	//	if ( h ) *h = 0;
+	//	if ( s ) *s = 0;
+	//	return NULL;
+	//}
+	//cairo_surface_flush( cairo_surface );
+
+	//if ( w )
+	//{
+	//	*w = cairo_image_surface_get_width (cairo_surface);
+	//}
+	//if ( h )
+	//{
+	//	*h = cairo_image_surface_get_height (cairo_surface);
+	//}
+	//if ( s )
+	//{
+	//	*s = cairo_image_surface_get_stride(cairo_surface);
+	//}
+
+	////return NULL;
+	//return (uint32_t*)cairo_image_surface_get_data (cairo_surface);
 }
 
 int  guiPixelBufferReDraw(void)
 {
 	glx_shm->blit_count++;
 
-	if ( drawAreaGL )
-	{
-		gtk_gl_area_queue_render( (GtkGLArea*)evbox);
-		return 0;
-	}
 	if ( cairo_surface != NULL )
 	{
 		cairo_surface_mark_dirty( cairo_surface );
@@ -3158,6 +3149,7 @@ int  guiClearSurface(void)
 {
 	uint32_t *p;
 	int w, h, z, i;
+
 	if ( cairo_surface != NULL )
 	{
 		cairo_surface_flush( cairo_surface );
@@ -3177,27 +3169,14 @@ int  guiClearSurface(void)
 	return 0;
 }
 
-static void setPixels(void)
+static void loadPixelTestPattern(void)
 {
 	uint32_t *p;
 	int i,x,y,width,height,w2,h2;
 
-	if ( drawAreaGL )
-	{
-		width  = 256;
-		height = 256;
-		//p = (uint32_t*)drawAreaGLpixBuf;
-		p = (uint32_t*)glx_shm->pixbuf;
-	}
-	else
-	{
-		width  = cairo_image_surface_get_width (cairo_surface);
-		height = cairo_image_surface_get_height (cairo_surface);
-
-		cairo_surface_flush( cairo_surface );
-
-		p = (uint32_t*)cairo_image_surface_get_data (cairo_surface);
-	}
+	width  = 256;
+	height = 256;
+	p = (uint32_t*)glx_shm->pixbuf;
 
 	w2 = width / 2;
 	h2 = height / 2;
@@ -3234,23 +3213,41 @@ static void setPixels(void)
 			i++;
 		}
 	}
-	//cairo_surface_mark_dirty( cairo_surface );
 
-	if ( drawAreaGL )
-	{
-		gtk_gl_area_queue_render( (GtkGLArea*)evbox);
-	}
-	else
-	{
-		gtk_widget_queue_draw( evbox );
-	}
 }
 
+
+static void cairo_handle_resize( int width, int height )
+{
+	cairo_format_t  cairo_format;
+
+	if (cairo_surface)
+	{
+      cairo_surface_destroy (cairo_surface); cairo_surface = NULL;
+	}
+
+	cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24, 
+                           gtk_widget_get_allocated_width (evbox),
+                           gtk_widget_get_allocated_height (evbox) );
+
+	printf("Cairo Surface: %p \n", cairo_surface );
+
+	cairo_format = cairo_image_surface_get_format( cairo_surface );
+
+	printf("Cairo Format: %i \n", cairo_format );
+
+	if ( cairo_format == CAIRO_FORMAT_ARGB32 )
+	{
+		printf("Cairo Format: ARGB32 \n" );
+	}
+	guiClearSurface();
+
+	cairo_surface_mark_dirty( cairo_surface );
+}
 
 
 gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 {
-	cairo_format_t  cairo_format;
 	// This should handle resizing so the emulation takes up as much
 	// of the GTK window as possible
 
@@ -3291,35 +3288,10 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	if (yscale > xscale)
 		yscale = xscale;
 
-	if (cairo_surface)
+	if ( useCairoDraw )
 	{
-      cairo_surface_destroy (cairo_surface); cairo_surface = NULL;
+		cairo_handle_resize( draw_width, draw_height );
 	}
-
-	//cairo_surface = gdk_window_create_similar_surface (
-	//								gtk_widget_get_window (evbox),
-   //                        CAIRO_CONTENT_COLOR_ALPHA,
-   //                        gtk_widget_get_allocated_width (evbox),
-   //                        gtk_widget_get_allocated_height (evbox) );
-
-	//cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_ARGB32, 
-	cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24, 
-                           gtk_widget_get_allocated_width (evbox),
-                           gtk_widget_get_allocated_height (evbox) );
-
-	printf("Cairo Surface: %p \n", cairo_surface );
-
-	cairo_format = cairo_image_surface_get_format( cairo_surface );
-
-		printf("Cairo Format: %i \n", cairo_format );
-	if ( cairo_format == CAIRO_FORMAT_ARGB32 )
-	{
-		printf("Cairo Format: ARGB32 \n" );
-	}
-	guiClearSurface();
-
-	//setPixels();
-	cairo_surface_mark_dirty( cairo_surface );
 
 	//TODO if openGL make these integers
 	g_config->setOption ("SDL.XScale", xscale);
@@ -3342,219 +3314,31 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	return FALSE;
 }
 
-static void
-glwin_resize (GtkGLArea *area,
-               gint       width,
-               gint       height,
-               gpointer   user_data)
-{
-	//char sizeChange = 0;
-	//printf("GL Resize: %ix%i \n", width, height );
-
-	//sizeChange = (width != gtk_draw_area_width) || (height != gtk_draw_area_height);
-
-	//if ( sizeChange )
-	//{
-	//	if ( drawAreaGLpixBuf != NULL) 
-	//	{
-	//		free( drawAreaGLpixBuf ); drawAreaGLpixBuf = NULL;
-	//	}
-	//}
-	gtk_draw_area_width  = width;
-	gtk_draw_area_height = height;
-
-	if ( drawAreaGLpixBuf == NULL )
-	{
-		int bufSize;
-
-		bufSize = 256 * 256 * sizeof(uint32_t);
-
-		drawAreaGLpixBuf = (uint32_t*)malloc ( bufSize );
-
-		if ( drawAreaGLpixBuf )
-		{
-			memset( drawAreaGLpixBuf, 0, bufSize );
-		}
-	}
-	glViewport(0, 0, gtk_draw_area_width, gtk_draw_area_height);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-}
-
-static gboolean
-glwin_render (GtkGLArea    *area,
-               GdkGLContext *context,
-               gpointer      user_data)
-{
-	int l=0, r=256;
-	int t=0, b=256;
-
-	float xscale = 1.0;
-	float yscale = 1.0;
-	int rw=(int)((r-l)*xscale);
-	int rh=(int)((b-t)*yscale);
-	int sx=(gtk_draw_area_width-rw)/2;     // Start x
-	int sy=(gtk_draw_area_height-rh)/2;      // Start y
-	static float red = 1.0;
-	static int dir = 0;
-
-	if ( dir )
-	{
-		red += 0.01;
-		if ( red > 1.0 )
-		{
-			red = 1.0; dir = 0;
-		}
-	}
-	else
-	{
-		red -= 0.01;
-		if ( red < 0.0 )
-		{
-			red = 0.0; dir = 1;
-		}
-	}
-	//if(stretchx) { sx=0; rw=screen->w; }
-	//if(stretchy) { sy=0; rh=screen->h; }
-	//glViewport(sx, sy, rw, rh);
-	//glViewport(0, 0, gtk_draw_area_width, gtk_draw_area_height);
-
-	//glLoadIdentity();
-	//glPushMatrix();
-	//glLoadIdentity();
-	//glMatrixMode(GL_MODELVIEW);
-	//glOrtho( -1.0,  1.0,  -1.0,  1.0,  -1.0,  1.0);
-
-	//printf("GL Render!\n");
-	
-	glDisable(GL_DEPTH_TEST);
-	glClearColor( red, 0.0f, 0.0f, 0.0f);	// Background color to black.
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_LINE_SMOOTH);
-	//glEnable(GL_TEXTURE_2D);
-	//glBindTexture(GL_TEXTURE_2D, gltexture);
-	glBindTexture(GL_TEXTURE_2D, gltexture);
-
-
-	//setPixels();
-
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0,
-	//				GL_RGBA, GL_UNSIGNED_BYTE, drawAreaGLpixBuf );
-
-	//glBegin(GL_QUADS);
-	//glTexCoord2f(1.0f*l/256, 1.0f*b/256); // Bottom left of picture.
-	//glVertex2f(-1.0f, -1.0f);	// Bottom left of target.
-
-	//glTexCoord2f(1.0f*r/256, 1.0f*b/256);// Bottom right of picture.
-	//glVertex2f( 1.0f, -1.0f);	// Bottom right of target.
-
-	//glTexCoord2f(1.0f*r/256, 1.0f*t/256); // Top right of our picture.
-	//glVertex2f( 1.0f,  1.0f);	// Top right of target.
-
-	//glTexCoord2f(1.0f*l/256, 1.0f*t/256);  // Top left of our picture.
-	//glVertex2f(-1.0f,  1.0f);	// Top left of target.
-	//glEnd();
-
-	//glPushMatrix();
-
-	//glColor4f( 1.0, 1.0, 1.0, 1.0 );
-	//glLineWidth(5.0);
-	//glBegin(GL_LINES);
-	//glVertex2f(-1.0f, -1.0f);	// Bottom left of target.
-	//glVertex2f( 1.0f,  1.0f);	// Top right of target.
-	//glEnd();
-
-	//glPopMatrix();
-
-	glDisable(GL_TEXTURE_2D);
-
-	glFlush();
-
-	return TRUE;
-}
-
-static void
-glwin_realize (GtkGLArea *area)
-{
-	int ipolate = 0;
-   gboolean has_alpha;
-
-	printf("GL Realize!\n");
-  // We need to make the context current if we want to
-  // call GL API
-  gtk_gl_area_make_current (area);
-
-  // If there were errors during the initialization or
-  // when trying to make the context current, this
-  // function will return a #GError for you to catch
-  if (gtk_gl_area_get_error (area) != NULL)
-  {
-	  printf("GL Realize Error\n");
-     return;
-  }
-
-   if ( drawAreaGLpixBuf == NULL )
-	{
-		int bufSize;
-
-		bufSize = 256 * 256 * sizeof(uint32_t);
-
-		drawAreaGLpixBuf = (uint32_t*)malloc ( bufSize );
-
-		if ( drawAreaGLpixBuf )
-		{
-			memset( drawAreaGLpixBuf, 0, bufSize );
-		}
-	}
-
-	has_alpha = gtk_gl_area_get_has_alpha( area );
-
-	printf("Has Alpha: %i \n", has_alpha );
-
-	if ( has_alpha )
-	{
-	   gtk_gl_area_set_has_alpha( area, 0 );
-	}
-	// Enable depth buffer:
-	gtk_gl_area_set_has_depth_buffer(area, TRUE);
-
-	has_alpha = gtk_gl_area_get_has_alpha( area );
-
-	printf("Has Alpha: %i \n", has_alpha );
-
-	glEnable(GL_TEXTURE_2D);
-   glGenTextures(1, &gltexture);
-
-	glBindTexture(GL_TEXTURE_2D, gltexture);
-
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,ipolate?GL_LINEAR:GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,ipolate?GL_LINEAR:GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_DEPTH_TEST);
-	glClearColor(1.0f, 0.0f, 0.0f, 0.0f);	// Background color to black.
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	// In a double buffered setup with page flipping, be sure to clear both buffers.
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-}
-
-/* Redraw the screen from the surface. Note that the ::draw
- * signal receives a ready-to-be-used cairo_t that is already
- * clipped to only draw the exposed areas of the widget
- */
-static gboolean draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
+static gboolean cairo_clear_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 {
 	GdkRGBA color;
 	GtkStyleContext *context;
 
-	gtk_draw_area_width = gtk_widget_get_allocated_width (widget);
+	context = gtk_widget_get_style_context (widget);
+
+	color.red = 0, color.blue = 0; color.green = 0; color.alpha = 1.0;
+
+	gtk_render_background( context, cr, 0, 0, gtk_draw_area_width, gtk_draw_area_height );
+	gdk_cairo_set_source_rgba (cr, &color);
+
+	cairo_fill (cr);
+	cairo_paint (cr);
+
+	return FALSE;
+}
+/* Redraw the screen from the surface. Note that the ::draw
+ * signal receives a ready-to-be-used cairo_t that is already
+ * clipped to only draw the exposed areas of the widget
+ */
+
+static gboolean cairo_draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
+{
+	gtk_draw_area_width  = gtk_widget_get_allocated_width (widget);
 	gtk_draw_area_height = gtk_widget_get_allocated_height (widget);
 
 	if ( gtk_draw_area_width  < NES_WIDTH  ) gtk_draw_area_width  = NES_WIDTH;
@@ -3564,21 +3348,21 @@ static gboolean draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 
 	cairo_set_source_surface (cr, cairo_surface, 0, 0);
    cairo_paint (cr);
+
 	return FALSE;
+}
 
-	// Clear the screen on a window redraw
-	//if (GameInfo == 0)
-	//{
-		context = gtk_widget_get_style_context (widget);
+static gboolean draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
+{
 
-		color.red = 0, color.blue = 0; color.green = 0; color.alpha = 1.0;
+	if ( useCairoDraw )
+	{
+		cairo_draw_cb( widget, cr, data );
+	}
+	else
+	{
 
-		gtk_render_background( context, cr, 0, 0, gtk_draw_area_width, gtk_draw_area_height );
-		gdk_cairo_set_source_rgba (cr, &color);
-
-		cairo_fill (cr);
-		cairo_paint (cr);
-	//}
+	}
 
 	return FALSE;
 }
@@ -3626,16 +3410,8 @@ int InitGTKSubsystem (int argc, char **argv)
 
 	drawAreaGL = s_useOpenGL;
 
-	if ( drawAreaGL )
-	{
-		evbox = gtk_gl_area_new ();
-		gtk_gl_area_set_has_alpha( GTK_GL_AREA(evbox), TRUE);
-		gtk_gl_area_set_has_depth_buffer( GTK_GL_AREA(evbox), TRUE);
-	}
-	else
-	{
-		evbox = gtk_drawing_area_new ();
-	}
+	evbox = gtk_drawing_area_new ();
+
 	gtk_box_pack_start (GTK_BOX (vbox), evbox, TRUE, TRUE, 0);
 
 	double xscale, yscale;
@@ -3660,20 +3436,11 @@ int InitGTKSubsystem (int argc, char **argv)
 	// signal handlers
 	g_signal_connect (MainWindow, "delete-event", quit, NULL);
 	g_signal_connect (MainWindow, "destroy-event", quit, NULL);
-	// resize handler
-	if ( s_useOpenGL )
-	{
-		g_signal_connect (evbox, "resize" , G_CALLBACK (glwin_resize ), NULL);
-		g_signal_connect (evbox, "realize", G_CALLBACK (glwin_realize), NULL);
-		g_signal_connect (evbox, "render" , G_CALLBACK (glwin_render ), NULL);
-	}
-	else
-	{
-		g_signal_connect (evbox, "configure-event",
-				  G_CALLBACK (handle_resize), NULL);
 
-		g_signal_connect (evbox, "draw", G_CALLBACK (draw_cb), NULL);
-	}
+	g_signal_connect (evbox, "configure-event",
+			  G_CALLBACK (handle_resize), NULL);
+
+	g_signal_connect (evbox, "draw", G_CALLBACK (draw_cb), NULL);
 
 	gtk_widget_set_size_request (evbox, NES_WIDTH * xscale,
 				     NES_HEIGHT * yscale);
