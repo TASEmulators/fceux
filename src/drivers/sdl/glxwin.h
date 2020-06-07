@@ -10,6 +10,10 @@
 
 int  spawn_glxwin( int flags );
 
+int  init_gtk3_GLXContext( void );
+
+int  gtk3_glx_render(void);
+
 #define  GLX_NES_WIDTH   256
 #define  GLX_NES_HEIGHT  256
 

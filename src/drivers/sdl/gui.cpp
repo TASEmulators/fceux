@@ -3136,6 +3136,8 @@ int  guiPixelBufferReDraw(void)
 {
 	glx_shm->blit_count++;
 
+	gtk3_glx_render();
+
 	if ( cairo_surface != NULL )
 	{
 		cairo_surface_mark_dirty( cairo_surface );
@@ -3361,10 +3363,19 @@ static gboolean draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 	}
 	else
 	{
-
+		gtk3_glx_render();
 	}
 
 	return FALSE;
+}
+
+static void
+drawAreaRealizeCB (GtkWidget *widget,
+               	gpointer   user_data)
+{
+	printf("Draw Area Realize\n");
+
+	init_gtk3_GLXContext();
 }
 
 
@@ -3439,6 +3450,8 @@ int InitGTKSubsystem (int argc, char **argv)
 
 	g_signal_connect (evbox, "configure-event",
 			  G_CALLBACK (handle_resize), NULL);
+
+	g_signal_connect (evbox, "realize", G_CALLBACK (drawAreaRealizeCB), NULL);
 
 	g_signal_connect (evbox, "draw", G_CALLBACK (draw_cb), NULL);
 

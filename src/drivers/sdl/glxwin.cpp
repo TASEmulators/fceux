@@ -15,6 +15,12 @@
 #include <GL/glx.h>
 #include <GL/glu.h>
 
+#include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
+#ifdef GDK_WINDOWING_X11
+#include <gdk/gdkx.h>
+#endif
+
 #include "glxwin.h"
 
 static Display                 *dpy = NULL;
@@ -29,11 +35,16 @@ static XWindowAttributes       gwa;
 static XEvent                  xev;
 
 static GLuint gltexture = 0;
+static int    spawn_new_window = 0;
 
 glxwin_shm_t *glx_shm = NULL;
 
 static int screen_width  = 512;
 static int screen_height = 512;
+
+extern GtkWidget *evbox;
+extern unsigned int gtk_draw_area_width;
+extern unsigned int gtk_draw_area_height;
 //************************************************************************
 static glxwin_shm_t *open_shm(void)
 {
@@ -121,6 +132,11 @@ static int open_window(void)
 	XStoreName(dpy, win, "FCEUX VIEWPORT");
 
 	glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
+
+	if ( glc == NULL )
+	{
+		printf("Error: glXCreateContext Failed\n");
+	}
 	glXMakeCurrent(dpy, win, glc);
 
 	genTextures();
@@ -171,8 +187,8 @@ static void render_image(void)
 	glXMakeCurrent(dpy, win, glc);
 	//printf("Viewport: (%i,%i)   %i    %i    %i    %i \n", 
 	//		screen_width, screen_height, sx, sy, rw, rh );
-	//glViewport(sx, sy, rw, rh);
-	glViewport( 0, 0, screen_width, screen_height);
+	glViewport(sx, sy, rw, rh);
+	//glViewport( 0, 0, screen_width, screen_height);
 
 	glLoadIdentity();
 	glMatrixMode(GL_PROJECTION);
@@ -208,12 +224,12 @@ static void render_image(void)
 
 	glDisable(GL_TEXTURE_2D);
 
-	glColor4f( 1.0, 1.0, 1.0, 1.0 );
-	glLineWidth(5.0);
-	glBegin(GL_LINES);
-	glVertex2f(-1.0f, -1.0f);	// Bottom left of target.
-	glVertex2f( 1.0f,  1.0f);	// Top right of target.
-	glEnd();
+	//glColor4f( 1.0, 1.0, 1.0, 1.0 );
+	//glLineWidth(5.0);
+	//glBegin(GL_LINES);
+	//glVertex2f(-1.0f, -1.0f);	// Bottom left of target.
+	//glVertex2f( 1.0f,  1.0f);	// Top right of target.
+	//glEnd();
 
 	glFlush();
 
@@ -297,6 +313,10 @@ int  spawn_glxwin( int flags )
 
 	glx_shm = open_shm();
 
+	if ( !spawn_new_window )
+	{
+		return 0;
+	}
 	pid = fork();
 
 	if ( pid == 0 )
@@ -326,5 +346,79 @@ int  spawn_glxwin( int flags )
    return pid;
 }
 //************************************************************************
+int  init_gtk3_GLXContext( void )
+{
+	XWindowAttributes xattrb;
 
+	GdkWindow *gdkWin = gtk_widget_get_window(evbox);
+
+	if ( gdkWin == NULL )
+	{
+		printf("Error: Failed to obtain gdkWindow Handle for evbox widget\n");
+		return -1;
+	}
+	win = GDK_WINDOW_XID( gdkWin );
+
+	root = GDK_ROOT_WINDOW();
+
+	dpy = gdk_x11_get_default_xdisplay();
+
+	if ( dpy == NULL )
+	{
+		printf("Error: Failed to obtain X Display Handle for evbox widget\n");
+		return -1;
+	}
+
+	if ( XGetWindowAttributes( dpy, win, &xattrb ) == 0 )
+	{
+		printf("Error: XGetWindowAttributes failed\n");
+		return -1;
+	}
+	printf("XWinLocation: (%i,%i) \n", xattrb.x, xattrb.y );
+	printf("XWinSize: (%i x %i) \n", xattrb.width, xattrb.height );
+	printf("XWinDepth: %i \n", xattrb.depth );
+	printf("XWinVisual: %p \n", xattrb.visual );
+
+	vi = glXChooseVisual(dpy, 0, att);
+
+	if (vi == NULL) 
+	{
+		printf("\n\tno appropriate visual found\n\n");
+	   exit(0);
+	} 
+	else {
+		printf("\n\tvisual %p selected\n", (void *)vi->visualid); /* %p creates hexadecimal output like in glxinfo */
+	}
+
+	glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
+
+	if ( glc == NULL )
+	{
+		printf("Error: glXCreateContext Failed\n");
+	}
+	glXMakeCurrent(dpy, win, glc);
+
+	genTextures();
+	glDisable(GL_DEPTH_TEST);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);	// Background color to black.
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	// In a double buffered setup with page flipping, be sure to clear both buffers.
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	return 0;
+}
+//************************************************************************
+int  gtk3_glx_render(void)
+{
+	screen_width  = gtk_draw_area_width;
+	screen_height = gtk_draw_area_height;
+
+	render_image();
+
+	return 0;
+}
 //************************************************************************
