@@ -13,6 +13,7 @@ source_list = Split(
     memview.cpp
     ramwatch.cpp
     debugger.cpp
+    glxwin.cpp
     sdl.cpp
     sdl-joystick.cpp
     sdl-sound.cpp

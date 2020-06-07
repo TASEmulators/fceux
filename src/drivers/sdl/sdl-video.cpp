@@ -252,8 +252,8 @@ int InitVideo(FCEUGI *gi)
 	g_config->getOption("SDL.YScale", &s_eys);
 	uint32_t  rmask, gmask, bmask;
 
-	//s_exs = 1.0;
-	//s_eys = 1.0;
+	s_exs = 1.0;
+	s_eys = 1.0;
 	xres = gtk_draw_area_width;
 	yres = gtk_draw_area_height;
 	// check the starting, ending, and total scan lines
@@ -277,12 +277,12 @@ int InitVideo(FCEUGI *gi)
 	FCEUI_SetShowFPS(show_fps);
 
 #ifdef LSB_FIRST
-	//rmask = 0x000000FF;
-	//gmask = 0x0000FF00;
-	//bmask = 0x00FF0000;
-	rmask = 0x00FF0000;
+	rmask = 0x000000FF;
 	gmask = 0x0000FF00;
-	bmask = 0x000000FF;
+	bmask = 0x00FF0000;
+	//rmask = 0x00FF0000;
+	//gmask = 0x0000FF00;
+	//bmask = 0x000000FF;
 #else
 	rmask = 0x00FF0000;
 	gmask = 0x0000FF00;
@@ -866,11 +866,11 @@ FCEUD_GetPalette(uint8 index,
  */
 static void RedoPalette()
 {
-#ifdef OPENGL
-	if(s_useOpenGL)
-		SetOpenGLPalette((uint8*)s_psdl);
-	else 
-#endif
+//#ifdef OPENGL
+//	if(s_useOpenGL)
+//		SetOpenGLPalette((uint8*)s_psdl);
+//	else 
+//#endif
 	{
 		if(s_curbpp > 8) {
 			SetPaletteBlitToHigh((uint8*)s_psdl);
@@ -913,13 +913,13 @@ BlitScreen(uint8 *XBuf)
 		s_paletterefresh = 0;
 	}
 
-#ifdef OPENGL
-	// OpenGL is handled separately
-	if(s_useOpenGL) {
-		BlitOpenGL(XBuf);
-		return;
-	}
-#endif
+//#ifdef OPENGL
+//	// OpenGL is handled separately
+//	if(s_useOpenGL) {
+//		BlitOpenGL(XBuf);
+//		return;
+//	}
+//#endif
 
 	// XXX soules - not entirely sure why this is being done yet
 	XBuf += s_srendline * 256;
@@ -956,7 +956,7 @@ BlitScreen(uint8 *XBuf)
 	// XXX soules - again, I'm surprised SDL can't handle this
 	// perform the blit, converting bpp if necessary
 	if(s_curbpp > 8) {
-		if(s_BlitBuf) {
+		if(s_useOpenGL) {
 			Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
 						pitch, 1, 1);
 		} else {

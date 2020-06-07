@@ -16,6 +16,7 @@
 #include "sdl.h"
 #include "sdl-video.h"
 #include "unix-netplay.h"
+#include "glxwin.h"
 
 #include "../common/configSys.h"
 #include "../../oldmovie.h"
@@ -857,6 +858,7 @@ int main(int argc, char *argv[])
 #ifdef _GTK
 	if(noGui == 0)
 	{
+		int glxwin_pid = spawn_glxwin(0);
 		gtk_init(&argc, &argv);
 		InitGTKSubsystem(argc, argv);
 		while(gtk_events_pending())
