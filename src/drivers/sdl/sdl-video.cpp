@@ -908,7 +908,8 @@ BlitScreen(uint8 *XBuf)
 	//}
 
 	// refresh the palette if required
-	if(s_paletterefresh) {
+	if (s_paletterefresh) 
+	{
 		RedoPalette();
 		s_paletterefresh = 0;
 	}
@@ -945,34 +946,36 @@ BlitScreen(uint8 *XBuf)
 	if ( dest == NULL ) return;
 
 	//if(s_fullscreen) { // Always do this calculation now. Screen resolution is always provided.
-		xo = (int)(((w - NWIDTH * s_exs)) / 2);
-		dest += xo * (s_curbpp >> 3);
-		if(h > (s_tlines * s_eys)) {
-			yo = (int)((h - s_tlines * s_eys) / 2);
-			dest += yo * pitch;
-		}
+//		xo = (int)(((w - NWIDTH * s_exs)) / 2);
+//		dest += xo * (s_curbpp >> 3);
+//		if(h > (s_tlines * s_eys)) {
+//			yo = (int)((h - s_tlines * s_eys) / 2);
+//			dest += yo * pitch;
+//		}
 	//}
+
+	Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines, pitch, 1, 1);
 
 	// XXX soules - again, I'm surprised SDL can't handle this
 	// perform the blit, converting bpp if necessary
-	if(s_curbpp > 8) {
-		if(s_useOpenGL) {
-			Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
-						pitch, 1, 1);
-		} else {
-			Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
-						pitch, (int)s_exs, (int)s_eys);
-		}
-	} else {
-		if(s_BlitBuf) {
-			Blit8To8(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
-					pitch, 1, 1, 0, s_sponge);
-		} else {
-			Blit8To8(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
-					pitch, (int)s_exs, (int)s_eys,
-					s_eefx, s_sponge);
-		}
-	}
+	//if(s_curbpp > 8) {
+	//	if(s_useOpenGL) {
+	//		Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
+	//					pitch, 1, 1);
+	//	} else {
+	//		Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
+	//					pitch, (int)s_exs, (int)s_eys);
+	//	}
+	//} else {
+	//	if(s_BlitBuf) {
+	//		Blit8To8(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
+	//				pitch, 1, 1, 0, s_sponge);
+	//	} else {
+	//		Blit8To8(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
+	//				pitch, (int)s_exs, (int)s_eys,
+	//				s_eefx, s_sponge);
+	//	}
+	//}
 	//print_pixels();
 	//
 	guiPixelBufferReDraw();
@@ -982,12 +985,12 @@ BlitScreen(uint8 *XBuf)
 	//	SDL_UnlockSurface(TmpScreen);
 	//}
 
-	int scrw;
-	if(s_sponge == 3) {  // NTSC 2x
-		scrw = 301;
-	} else {
-		scrw = NWIDTH;
-	}
+	//int scrw;
+	//if(s_sponge == 3) {  // NTSC 2x
+	//	scrw = 301;
+	//} else {
+	//	scrw = NWIDTH;
+	//}
 
 	 // if we have a hardware video buffer, do a fast video->video copy
 	//if(s_BlitBuf) {

@@ -82,11 +82,9 @@ static char useCairoDraw = 0;
 static int drawAreaGL = 0;
 unsigned int gtk_draw_area_width = NES_WIDTH;
 unsigned int gtk_draw_area_height = NES_HEIGHT;
-static unsigned int gtk_win_width = 0;
-static unsigned int gtk_win_height = 0;
-static int gtk_win_menu_ysize = 30;
 static GtkTreeStore *hotkey_store = NULL;
 static cairo_surface_t *cairo_surface = NULL;
+static int *cairo_pix_remapper = NULL;
 
 static gint convertKeypress (GtkWidget * grab, GdkEventKey * event, gpointer user_data);
 
@@ -3097,6 +3095,53 @@ gint handleMouseClick (GtkWidget * widget, GdkEvent * event,
 	return 0;
 }
 
+union cairo_pixel_t
+{
+	uint32_t  u32;
+	uint8_t   u8[4];
+};
+
+static void transferPix2CairoSurface(void)
+{
+	union cairo_pixel_t *p;
+	int x, y, i,j, w, h;
+
+	if ( cairo_surface == NULL )
+	{
+		return;
+	}
+	cairo_surface_flush( cairo_surface );
+
+	w  = cairo_image_surface_get_width (cairo_surface);
+	h  = cairo_image_surface_get_height (cairo_surface);
+
+	p = (cairo_pixel_t*)cairo_image_surface_get_data (cairo_surface);
+
+	i=0;
+	for (y=0; y<h; y++)
+	{
+		for (x=0; x<w; x++)
+		{
+			j = cairo_pix_remapper[i];
+
+			if ( j < 0 )
+			{
+				p[i].u32 = 0;
+			}
+			else
+			{
+				p[i].u32 = glx_shm->pixbuf[j];
+				//p[i].u32 = 0xffffffff;
+			}
+			i++;
+		}
+	}
+
+	cairo_surface_mark_dirty( cairo_surface );
+
+	gtk_widget_queue_draw( evbox );
+}
+
 uint32_t *getGuiPixelBuffer( int *w, int *h, int *s )
 {
 	if ( w ) *w = GLX_NES_WIDTH;
@@ -3136,14 +3181,15 @@ int  guiPixelBufferReDraw(void)
 {
 	glx_shm->blit_count++;
 
-	gtk3_glx_render();
-
-	if ( cairo_surface != NULL )
+	if ( useCairoDraw )
 	{
-		cairo_surface_mark_dirty( cairo_surface );
-
-		gtk_widget_queue_draw( evbox );
+		transferPix2CairoSurface();
 	}
+	else
+	{
+		gtk3_glx_render();
+	}
+
 	return 0;
 }
 
@@ -3218,19 +3264,119 @@ static void loadPixelTestPattern(void)
 
 }
 
+static void cairo_recalc_mapper(void)
+{
+	int w, h, s;
+	int i, j, x, y;
+	int   sw, sh, rx, ry;
+	int llx, lly, urx, ury;
+	float sx, sy, nw, nh;
+
+	w  = cairo_image_surface_get_width (cairo_surface);
+	h  = cairo_image_surface_get_height (cairo_surface);
+	s = w * h * 4;
+
+	if ( cairo_pix_remapper != NULL )
+	{
+		::free( cairo_pix_remapper ); cairo_pix_remapper = NULL;
+	}
+	cairo_pix_remapper = (int*)malloc(s);
+
+	if ( cairo_pix_remapper == NULL )
+	{
+		printf("Error: Failed to allocate memory for Pixel Surface Remapper\n");
+		return;
+	}
+	memset( cairo_pix_remapper, 0, s );
+
+	sx = (float)w / (float)GLX_NES_WIDTH;
+	sy = (float)h / (float)GLX_NES_HEIGHT;
+
+	if (sx < sy )
+	{
+		sy = sx;
+	}
+	else 
+	{
+		sx = sy;
+	}
+
+	sw = (int) ( (float)GLX_NES_WIDTH  * sx );
+	sh = (int) ( (float)GLX_NES_HEIGHT * sy );
+
+	llx = (w - sw) / 2;
+	lly = (h - sh) / 2;
+	urx = llx + sw;
+	ury = lly + sh;
+
+	i=0;
+	for (y=0; y<h; y++)
+	{
+		if ( (y < lly) || (y > ury) )
+		{
+			for (x=0; x<w; x++)
+			{
+				cairo_pix_remapper[i] = -1; i++;
+			}
+		}
+		else
+		{
+			for (x=0; x<w; x++)
+			{
+				if ( (x < llx) || (x > urx) )
+				{
+					cairo_pix_remapper[i] = -1; i++;
+				}
+				else
+				{
+					nw = (float)(x - llx) / (float)sw;
+					nh = (float)(y - lly) / (float)sh;
+
+					rx = (int)((float)GLX_NES_WIDTH  * nw);
+					ry = (int)((float)GLX_NES_HEIGHT * nh);
+
+					if ( rx < 0 )
+					{
+						rx = 0;
+					}
+					else if ( rx >= GLX_NES_WIDTH )
+					{
+						rx = GLX_NES_WIDTH-1;
+					}
+					if ( ry < 0 )
+					{
+						ry = 0;
+					}
+					else if ( ry >= GLX_NES_HEIGHT )
+					{
+						ry = GLX_NES_HEIGHT-1;
+					}
+
+					j = (ry * GLX_NES_WIDTH) + rx;
+					//j = (rx * GLX_NES_WIDTH) + ry;
+
+					cairo_pix_remapper[i] = j; i++;
+
+					//printf("Remap: (%i,%i)=%i   (%i,%i)=%i \n", x,y,i, rx,ry,j );
+				}
+			}
+		}
+	}
+}
 
 static void cairo_handle_resize( int width, int height )
 {
+	int w, h;
 	cairo_format_t  cairo_format;
 
 	if (cairo_surface)
 	{
       cairo_surface_destroy (cairo_surface); cairo_surface = NULL;
 	}
+	w = gtk_widget_get_allocated_width( evbox );
+	h = gtk_widget_get_allocated_height( evbox );
 
-	cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24, 
-                           gtk_widget_get_allocated_width (evbox),
-                           gtk_widget_get_allocated_height (evbox) );
+	cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24, w, h );
 
 	printf("Cairo Surface: %p \n", cairo_surface );
 
@@ -3242,9 +3388,13 @@ static void cairo_handle_resize( int width, int height )
 	{
 		printf("Cairo Format: ARGB32 \n" );
 	}
+	cairo_recalc_mapper();
+
 	guiClearSurface();
 
-	cairo_surface_mark_dirty( cairo_surface );
+	transferPix2CairoSurface();
+
+	//cairo_surface_mark_dirty( cairo_surface );
 }
 
 
@@ -3254,31 +3404,26 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	// of the GTK window as possible
 
 	// get new window width/height
-	int width, height, draw_width, draw_height, winsize_changed = 0;
+	int width, height, winsize_changed = 0;
+
 	width = event->configure.width;
 	height = event->configure.height;
 	//printf ("DEBUG: Configure new window size: %dx%d\n", width, height);
 
-	winsize_changed = (width != gtk_win_width) || (height != gtk_win_height);
-
-	gtk_win_width  = width;
-	gtk_win_height = height;
+	winsize_changed = 0;
 
 	// get width/height multipliers
 	double xscale = width / (double) NES_WIDTH;
 	double yscale = height / (double) NES_HEIGHT;
 
-	draw_width  = gtk_win_width;
-	draw_height = gtk_win_height - gtk_win_menu_ysize;
-
 	//printf("DRAW: %ix%i   MenuY: %i \n", draw_width, draw_height, gtk_win_menu_ysize );
 
-	if ( (draw_width != gtk_draw_area_width) || (draw_height != gtk_draw_area_height) )
+	if ( (width != gtk_draw_area_width) || (height != gtk_draw_area_height) )
 	{
 		winsize_changed = 1;
 	}
-	gtk_draw_area_width  = draw_width;
-	gtk_draw_area_height = draw_height;
+	gtk_draw_area_width  = width;
+	gtk_draw_area_height = height;
 
 	if ( gtk_draw_area_width  < NES_WIDTH  ) gtk_draw_area_width  = NES_WIDTH;
 	if ( gtk_draw_area_height < NES_HEIGHT ) gtk_draw_area_height = NES_HEIGHT;
@@ -3292,7 +3437,7 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 
 	if ( useCairoDraw )
 	{
-		cairo_handle_resize( draw_width, draw_height );
+		cairo_handle_resize( width, height );
 	}
 
 	//TODO if openGL make these integers
@@ -3340,14 +3485,6 @@ static gboolean cairo_clear_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 
 static gboolean cairo_draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 {
-	gtk_draw_area_width  = gtk_widget_get_allocated_width (widget);
-	gtk_draw_area_height = gtk_widget_get_allocated_height (widget);
-
-	if ( gtk_draw_area_width  < NES_WIDTH  ) gtk_draw_area_width  = NES_WIDTH;
-	if ( gtk_draw_area_height < NES_HEIGHT ) gtk_draw_area_height = NES_HEIGHT;
-
-	gtk_win_menu_ysize = gtk_win_height - gtk_draw_area_height;
-
 	cairo_set_source_surface (cr, cairo_surface, 0, 0);
    cairo_paint (cr);
 
@@ -3356,6 +3493,12 @@ static gboolean cairo_draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 
 static gboolean draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 {
+
+	gtk_draw_area_width  = gtk_widget_get_allocated_width (widget);
+	gtk_draw_area_height = gtk_widget_get_allocated_height (widget);
+
+	if ( gtk_draw_area_width  < NES_WIDTH  ) gtk_draw_area_width  = NES_WIDTH;
+	if ( gtk_draw_area_height < NES_HEIGHT ) gtk_draw_area_height = NES_HEIGHT;
 
 	if ( useCairoDraw )
 	{
@@ -3419,7 +3562,8 @@ int InitGTKSubsystem (int argc, char **argv)
 	g_config->getOption("SDL.OpenGL", &s_useOpenGL);
 	#endif
 
-	drawAreaGL = s_useOpenGL;
+	drawAreaGL   =  s_useOpenGL;
+	useCairoDraw = !drawAreaGL;
 
 	evbox = gtk_drawing_area_new ();
 

@@ -35,7 +35,7 @@ static XWindowAttributes       gwa;
 static XEvent                  xev;
 
 static GLuint gltexture = 0;
-static int    spawn_new_window = 0;
+static int    spawn_new_window = 1;
 
 glxwin_shm_t *glx_shm = NULL;
 
