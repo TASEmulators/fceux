@@ -11,6 +11,7 @@
 int  spawn_glxwin( int flags );
 
 int  init_gtk3_GLXContext( void );
+int  destroy_gtk3_GLXContext( void );
 
 int  gtk3_glx_render(void);
 
@@ -24,6 +25,10 @@ struct  glxwin_shm_t
 	uint32_t  render_count;
 	uint32_t  blit_count;
 	sem_t     sem;
+
+	int   ncol;
+	int   nrow;
+	int   pitch;
 
 	// Pass Key Events back to GTK Gui
 	struct 
@@ -56,6 +61,11 @@ struct  glxwin_shm_t
 	} guiEvent;
 
 	uint32_t  pixbuf[65536]; // 256 x 256
+
+	void clear_pixbuf(void)
+	{
+		memset( pixbuf, 0, sizeof(pixbuf) );
+	}
 };
 
 extern glxwin_shm_t *glx_shm;

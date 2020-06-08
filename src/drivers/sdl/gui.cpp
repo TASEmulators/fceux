@@ -85,6 +85,8 @@ unsigned int gtk_draw_area_height = NES_HEIGHT;
 static GtkTreeStore *hotkey_store = NULL;
 static cairo_surface_t *cairo_surface = NULL;
 static int *cairo_pix_remapper = NULL;
+static int  numRendLines = 0;
+static void cairo_recalc_mapper(void);
 
 static gint convertKeypress (GtkWidget * grab, GdkEventKey * event, gpointer user_data);
 
@@ -3104,6 +3106,7 @@ union cairo_pixel_t
 static void transferPix2CairoSurface(void)
 {
 	union cairo_pixel_t *p;
+	union cairo_pixel_t *g;
 	int x, y, i,j, w, h;
 
 	if ( cairo_surface == NULL )
@@ -3112,10 +3115,16 @@ static void transferPix2CairoSurface(void)
 	}
 	cairo_surface_flush( cairo_surface );
 
+	if ( numRendLines != glx_shm->nrow )
+	{
+		cairo_recalc_mapper();
+	}
+
 	w  = cairo_image_surface_get_width (cairo_surface);
 	h  = cairo_image_surface_get_height (cairo_surface);
 
 	p = (cairo_pixel_t*)cairo_image_surface_get_data (cairo_surface);
+	g = (cairo_pixel_t*)glx_shm->pixbuf;
 
 	i=0;
 	for (y=0; y<h; y++)
@@ -3130,7 +3139,15 @@ static void transferPix2CairoSurface(void)
 			}
 			else
 			{
-				p[i].u32 = glx_shm->pixbuf[j];
+				// RGBA to ARGB
+				#ifdef LSB_FIRST
+				p[i].u8[2] = g[j].u8[0];
+				p[i].u8[1] = g[j].u8[1];
+				p[i].u8[0] = g[j].u8[2];
+				p[i].u8[3] = g[j].u8[3];
+				#else	
+				p[i].u32 = g[j].u32;
+				#endif
 				//p[i].u32 = 0xffffffff;
 			}
 			i++;
@@ -3268,13 +3285,16 @@ static void cairo_recalc_mapper(void)
 {
 	int w, h, s;
 	int i, j, x, y;
-	int   sw, sh, rx, ry;
+	int   sw, sh, rx, ry, gw, gh;
 	int llx, lly, urx, ury;
 	float sx, sy, nw, nh;
 
 	w  = cairo_image_surface_get_width (cairo_surface);
 	h  = cairo_image_surface_get_height (cairo_surface);
 	s = w * h * 4;
+
+	gw = glx_shm->ncol;
+	gh = glx_shm->nrow;
 
 	if ( cairo_pix_remapper != NULL )
 	{
@@ -3289,8 +3309,8 @@ static void cairo_recalc_mapper(void)
 	}
 	memset( cairo_pix_remapper, 0, s );
 
-	sx = (float)w / (float)GLX_NES_WIDTH;
-	sy = (float)h / (float)GLX_NES_HEIGHT;
+	sx = (float)w / (float)gw;
+	sy = (float)h / (float)gh;
 
 	if (sx < sy )
 	{
@@ -3301,8 +3321,8 @@ static void cairo_recalc_mapper(void)
 		sx = sy;
 	}
 
-	sw = (int) ( (float)GLX_NES_WIDTH  * sx );
-	sh = (int) ( (float)GLX_NES_HEIGHT * sy );
+	sw = (int) ( (float)gw * sx );
+	sh = (int) ( (float)gh * sy );
 
 	llx = (w - sw) / 2;
 	lly = (h - sh) / 2;
@@ -3332,8 +3352,8 @@ static void cairo_recalc_mapper(void)
 					nw = (float)(x - llx) / (float)sw;
 					nh = (float)(y - lly) / (float)sh;
 
-					rx = (int)((float)GLX_NES_WIDTH  * nw);
-					ry = (int)((float)GLX_NES_HEIGHT * nh);
+					rx = (int)((float)gw * nw);
+					ry = (int)((float)gh * nh);
 
 					if ( rx < 0 )
 					{
@@ -3353,7 +3373,6 @@ static void cairo_recalc_mapper(void)
 					}
 
 					j = (ry * GLX_NES_WIDTH) + rx;
-					//j = (rx * GLX_NES_WIDTH) + ry;
 
 					cairo_pix_remapper[i] = j; i++;
 
@@ -3362,9 +3381,10 @@ static void cairo_recalc_mapper(void)
 			}
 		}
 	}
+	numRendLines = gh;
 }
 
-static void cairo_handle_resize( int width, int height )
+static void cairo_handle_resize(void)
 {
 	int w, h;
 	cairo_format_t  cairo_format;
@@ -3376,18 +3396,15 @@ static void cairo_handle_resize( int width, int height )
 	w = gtk_widget_get_allocated_width( evbox );
 	h = gtk_widget_get_allocated_height( evbox );
 
+	//cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_ARGB32, w, h );
 	cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24, w, h );
 
 	printf("Cairo Surface: %p \n", cairo_surface );
 
 	cairo_format = cairo_image_surface_get_format( cairo_surface );
 
-	printf("Cairo Format: %i \n", cairo_format );
+	//printf("Cairo Format: %i \n", cairo_format );
 
-	if ( cairo_format == CAIRO_FORMAT_ARGB32 )
-	{
-		printf("Cairo Format: ARGB32 \n" );
-	}
 	cairo_recalc_mapper();
 
 	guiClearSurface();
@@ -3395,6 +3412,54 @@ static void cairo_handle_resize( int width, int height )
 	transferPix2CairoSurface();
 
 	//cairo_surface_mark_dirty( cairo_surface );
+}
+
+int destroy_gui_video( void )
+{
+	printf("Destroy GUI Video\n");
+
+	destroy_cairo_screen();
+    
+	destroy_gtk3_GLXContext();
+
+	return 0;
+}
+
+int init_gui_video( int use_openGL )
+{
+	drawAreaGL   =  use_openGL;
+	useCairoDraw = !drawAreaGL;
+
+	if ( use_openGL ) 
+	{
+		destroy_cairo_screen();
+		init_gtk3_GLXContext();
+	}
+	else
+	{
+		destroy_gtk3_GLXContext();
+		init_cairo_screen();
+	}
+	return 0;
+}
+
+void init_cairo_screen(void)
+{
+	cairo_handle_resize();
+}
+
+void destroy_cairo_screen(void)
+{
+	if (cairo_surface)
+	{
+		printf("Destroying Cairo Surface\n");
+      cairo_surface_destroy (cairo_surface); cairo_surface = NULL;
+	}
+	if ( cairo_pix_remapper != NULL )
+	{
+		printf("Destroying Cairo Pixel Remapper\n");
+		::free( cairo_pix_remapper ); cairo_pix_remapper = NULL;
+	}
 }
 
 
@@ -3435,9 +3500,9 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	if (yscale > xscale)
 		yscale = xscale;
 
-	if ( useCairoDraw )
+	if ( useCairoDraw && winsize_changed )
 	{
-		cairo_handle_resize( width, height );
+		cairo_handle_resize();
 	}
 
 	//TODO if openGL make these integers
@@ -3518,7 +3583,10 @@ drawAreaRealizeCB (GtkWidget *widget,
 {
 	printf("Draw Area Realize\n");
 
-	init_gtk3_GLXContext();
+	if ( drawAreaGL )
+	{
+		init_gtk3_GLXContext();
+	}
 }
 
 

@@ -23,6 +23,7 @@
 
 #include "sdl.h"
 #include "sdl-opengl.h"
+#include "glxwin.h"
 #include "../common/vidblit.h"
 #include "../../fceu.h"
 #include "../../version.h"
@@ -80,6 +81,7 @@ static int s_fullscreen = 0;
 static int noframe = 0;
 static int s_nativeWidth = -1;
 static int s_nativeHeight = -1;
+static int initBlitToHighDone = 0;
 
 #define NWIDTH	(256 - (s_clipSides ? 16 : 0))
 #define NOFFSET	(s_clipSides ? 8 : 0)
@@ -136,6 +138,13 @@ bool FCEUD_ShouldDrawInputAids()
 int
 KillVideo()
 {
+	printf("Killing Video\n");
+
+	if ( glx_shm != NULL )
+	{
+		glx_shm->clear_pixbuf();
+	}
+
 	// if the IconSurface has been initialized, destroy it
 	if (s_IconSurface) 
 	{
@@ -143,51 +152,53 @@ KillVideo()
 		s_IconSurface=0;
 	}
 
+	//destroy_gui_video();
+
 	// return failure if the video system was not initialized
-	if(s_inited == 0)
+	if (s_inited == 0)
 		return -1;
-    
+
 	// if the rest of the system has been initialized, shut it down
-#ifdef OPENGL
-	// check for OpenGL and shut it down
-	if(s_useOpenGL)
-	{
-		KillOpenGL();
-	}
-	else
-#endif
-	{
-		// shut down the system that converts from 8 to 16/32 bpp
-		if (s_curbpp > 8)
-		{
-			KillBlitToHigh();
-		}
-	}
+//#ifdef OPENGL
+//	// check for OpenGL and shut it down
+//	if(s_useOpenGL)
+//	{
+//		KillOpenGL();
+//	}
+//	else
+//#endif
+//	{
+//		// shut down the system that converts from 8 to 16/32 bpp
+//		if (s_curbpp > 8)
+//		{
+//			KillBlitToHigh();
+//		}
+//	}
 
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-
-	if ( s_screen != NULL )
-	{
-		SDL_FreeSurface( s_screen ); s_screen = NULL;
-	}
-
-	if ( s_texture != NULL )
-	{
-		SDL_DestroyTexture( s_texture ); s_texture = NULL;
-	}
-
-	if ( s_renderer != NULL )
-	{
-		SDL_DestroyRenderer( s_renderer ); s_renderer = NULL;
-	}
-
-	if ( s_window != NULL )
-	{
-		SDL_DestroyWindow( s_window ); 
-		s_window = NULL;
-	}
-
-#endif
+//#if SDL_VERSION_ATLEAST(2, 0, 0)
+//
+//	if ( s_screen != NULL )
+//	{
+//		SDL_FreeSurface( s_screen ); s_screen = NULL;
+//	}
+//
+//	if ( s_texture != NULL )
+//	{
+//		SDL_DestroyTexture( s_texture ); s_texture = NULL;
+//	}
+//
+//	if ( s_renderer != NULL )
+//	{
+//		SDL_DestroyRenderer( s_renderer ); s_renderer = NULL;
+//	}
+//
+//	if ( s_window != NULL )
+//	{
+//		SDL_DestroyWindow( s_window ); 
+//		s_window = NULL;
+//	}
+//
+//#endif
 
 	// shut down the SDL video sub-system
 	//SDL_QuitSubSystem(SDL_INIT_VIDEO);
@@ -198,7 +209,7 @@ KillVideo()
 
 
 // this variable contains information about the special scaling filters
-static int s_sponge;
+static int s_sponge = 0;
 
 /**
  * These functions determine an appropriate scale factor for fullscreen/
@@ -240,7 +251,7 @@ int InitVideo(FCEUGI *gi)
 #ifdef OPENGL
 	g_config->getOption("SDL.OpenGL", &s_useOpenGL);
 #endif
-	g_config->getOption("SDL.SpecialFilter", &s_sponge);
+	//g_config->getOption("SDL.SpecialFilter", &s_sponge);
 	g_config->getOption("SDL.XStretch", &xstretch);
 	g_config->getOption("SDL.YStretch", &ystretch);
 	//g_config->getOption("SDL.LastXRes", &xres);
@@ -248,10 +259,11 @@ int InitVideo(FCEUGI *gi)
 	g_config->getOption("SDL.ClipSides", &s_clipSides);
 	g_config->getOption("SDL.NoFrame", &noframe);
 	g_config->getOption("SDL.ShowFPS", &show_fps);
-	g_config->getOption("SDL.XScale", &s_exs);
-	g_config->getOption("SDL.YScale", &s_eys);
+	//g_config->getOption("SDL.XScale", &s_exs);
+	//g_config->getOption("SDL.YScale", &s_eys);
 	uint32_t  rmask, gmask, bmask;
 
+	s_sponge = 0;
 	s_exs = 1.0;
 	s_eys = 1.0;
 	xres = gtk_draw_area_width;
@@ -271,6 +283,8 @@ int InitVideo(FCEUGI *gi)
 	//}
 #endif
 
+	init_gui_video( s_useOpenGL );
+
 	s_inited = 1;
 
 	// check to see if we are showing FPS
@@ -280,9 +294,6 @@ int InitVideo(FCEUGI *gi)
 	rmask = 0x000000FF;
 	gmask = 0x0000FF00;
 	bmask = 0x00FF0000;
-	//rmask = 0x00FF0000;
-	//gmask = 0x0000FF00;
-	//bmask = 0x000000FF;
 #else
 	rmask = 0x00FF0000;
 	gmask = 0x0000FF00;
@@ -356,36 +367,36 @@ int InitVideo(FCEUGI *gi)
 	//s_paletterefresh = 1;
 
 	// -Video Modes Tag-
-	if (s_sponge) 
-	{
-		if (s_sponge <= 3 && s_sponge >= 1)
-		{
-			s_exs = s_eys = 2;
-		} 
-		else if (s_sponge >=4 && s_sponge <= 5)
-		{
-			s_exs = s_eys = 3;
-		}
-	  	else if (s_sponge >= 6 && s_sponge <= 8)
-		{
-			s_exs = s_eys = s_sponge - 4;
-		}
-		else if(s_sponge == 9)
-		{
-			s_exs = s_eys = 3;
-		}
-		else
-		{
-			s_exs = s_eys = 1;
-		}
-		if(s_sponge == 3) {
-			xres = 301 * s_exs;
-		}
-		s_eefx = 0;
-		//if(s_sponge == 1 || s_sponge == 4) {
-		//	desbpp = 32;
-		//}
-	}
+	//if (s_sponge) 
+	//{
+	//	if (s_sponge <= 3 && s_sponge >= 1)
+	//	{
+	//		s_exs = s_eys = 2;
+	//	} 
+	//	else if (s_sponge >=4 && s_sponge <= 5)
+	//	{
+	//		s_exs = s_eys = 3;
+	//	}
+	//  	else if (s_sponge >= 6 && s_sponge <= 8)
+	//	{
+	//		s_exs = s_eys = s_sponge - 4;
+	//	}
+	//	else if(s_sponge == 9)
+	//	{
+	//		s_exs = s_eys = 3;
+	//	}
+	//	else
+	//	{
+	//		s_exs = s_eys = 1;
+	//	}
+	//	if(s_sponge == 3) {
+	//		xres = 301 * s_exs;
+	//	}
+	//	s_eefx = 0;
+	//	//if(s_sponge == 1 || s_sponge == 4) {
+	//	//	desbpp = 32;
+	//	//}
+	//}
 
 	//int scrw = NWIDTH * s_exs;
 	//if(s_sponge == 3) {
@@ -414,13 +425,15 @@ int InitVideo(FCEUGI *gi)
 	}
 #endif
 
-	if (s_curbpp > 8) 
+	if ( !initBlitToHighDone )
 	{
 		InitBlitToHigh(s_curbpp >> 3,
 							rmask,
 							gmask,
 							bmask,
 							s_eefx, s_sponge, 0);
+
+		initBlitToHighDone = 1;
 	}
 
 	return 0;
@@ -466,7 +479,7 @@ InitVideo(FCEUGI *gi)
 
     // check for OpenGL and set the global flags
 #ifdef OPENGL
-	if(s_useOpenGL && !s_sponge) {
+	if (s_useOpenGL && !s_sponge) {
 		flags = SDL_OPENGL;
 	}
 #endif
@@ -941,7 +954,9 @@ BlitScreen(uint8 *XBuf)
 	//dest = (uint8*)TmpScreen->pixels;
 	dest = (uint8*)getGuiPixelBuffer( &w, &h, &pitch );
 
-	pitch = w * 4;
+	glx_shm->ncol    = NWIDTH;
+	glx_shm->nrow    = s_tlines;
+	glx_shm->pitch   = pitch;
 
 	if ( dest == NULL ) return;
 
@@ -954,6 +969,7 @@ BlitScreen(uint8 *XBuf)
 //		}
 	//}
 
+	//Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines, pitch, 1, 1);
 	Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines, pitch, 1, 1);
 
 	// XXX soules - again, I'm surprised SDL can't handle this

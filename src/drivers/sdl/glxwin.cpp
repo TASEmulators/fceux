@@ -30,7 +30,7 @@ static XVisualInfo             *vi = NULL;
 static Colormap                cmap;
 static XSetWindowAttributes    swa;
 static Window                  win;
-static GLXContext              glc;
+static GLXContext              glc = NULL;
 static XWindowAttributes       gwa;
 static XEvent                  xev;
 
@@ -77,6 +77,10 @@ static glxwin_shm_t *open_shm(void)
 
 	sem_init( &vaddr->sem, 1, 1 );
 
+	vaddr->ncol  = 256;
+	vaddr->nrow  = 256;
+	vaddr->pitch = 256 * 4;
+
 	return vaddr;
 }
 //************************************************************************
@@ -84,6 +88,11 @@ static void genTextures(void)
 {
 	int ipolate = 1;
 
+	if ( gltexture )
+	{
+		printf("GL Texture already exists\n");
+		return;
+	}
 	glEnable(GL_TEXTURE_2D);
    glGenTextures(1, &gltexture);
 
@@ -131,11 +140,18 @@ static int open_window(void)
 
 	XStoreName(dpy, win, "FCEUX VIEWPORT");
 
-	glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
-
 	if ( glc == NULL )
 	{
-		printf("Error: glXCreateContext Failed\n");
+		glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
+
+		if ( glc == NULL )
+		{
+			printf("Error: glXCreateContext Failed\n");
+		}
+	}
+	else
+	{
+		printf("GLX Context Already Exists\n");
 	}
 	glXMakeCurrent(dpy, win, glc);
 
@@ -166,11 +182,13 @@ static void print_pixbuf(void)
 //************************************************************************
 static void render_image(void)
 {
-	int l=0, r=GLX_NES_WIDTH;
-	int t=0, b=GLX_NES_HEIGHT;
+	static int null_glc_error = 0;
+	int l=0, r=glx_shm->ncol;
+	int t=0, b=glx_shm->nrow;
 
-	float xscale = (float)screen_width  / (float)GLX_NES_WIDTH;
-	float yscale = (float)screen_height / (float)GLX_NES_HEIGHT;
+	float xscale = (float)screen_width  / (float)glx_shm->ncol;
+	float yscale = (float)screen_height / (float)glx_shm->nrow;
+
 	if (xscale < yscale )
 	{
 		yscale = xscale;
@@ -183,6 +201,17 @@ static void render_image(void)
 	int rh=(int)((b-t)*yscale);
 	int sx=(screen_width-rw)/2;   
 	int sy=(screen_height-rh)/2;   
+
+	if ( glc == NULL )
+	{
+		if ( !null_glc_error )
+		{
+			printf("Error: GLX Render has NULL Context\n");
+			null_glc_error = 1;
+		}
+		return;
+	}
+	null_glc_error = 0;
 
 	glXMakeCurrent(dpy, win, glc);
 	//printf("Viewport: (%i,%i)   %i    %i    %i    %i \n", 
@@ -251,7 +280,7 @@ static int mainWindowLoop(void)
 	   	   //glViewport(0, 0, gwa.width, gwa.height);
 	   		//DrawAQuad(); 
 	   	   glXSwapBuffers(dpy, win);
-				printf("Expose\n");
+				//printf("Expose\n");
 	   	}
 			else if (xev.type == ConfigureNotify) 
 			{
@@ -267,7 +296,7 @@ static int mainWindowLoop(void)
 
 				//genTextures();
 
-				printf("Resize Request: (%i,%i)\n", screen_width, screen_height );
+				//printf("Resize Request: (%i,%i)\n", screen_width, screen_height );
 				render_image();
 	   	   //glViewport(0, 0, gwa.width, gwa.height);
 	   		//DrawAQuad(); 
@@ -350,6 +379,8 @@ int  init_gtk3_GLXContext( void )
 {
 	XWindowAttributes xattrb;
 
+	printf("Init GLX Context\n");
+
 	GdkWindow *gdkWin = gtk_widget_get_window(evbox);
 
 	if ( gdkWin == NULL )
@@ -390,11 +421,14 @@ int  init_gtk3_GLXContext( void )
 		printf("\n\tvisual %p selected\n", (void *)vi->visualid); /* %p creates hexadecimal output like in glxinfo */
 	}
 
-	glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
-
 	if ( glc == NULL )
 	{
-		printf("Error: glXCreateContext Failed\n");
+		glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
+
+		if ( glc == NULL )
+		{
+			printf("Error: glXCreateContext Failed\n");
+		}
 	}
 	glXMakeCurrent(dpy, win, glc);
 
@@ -409,6 +443,27 @@ int  init_gtk3_GLXContext( void )
 	// In a double buffered setup with page flipping, be sure to clear both buffers.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	return 0;
+}
+//************************************************************************
+int destroy_gtk3_GLXContext(void)
+{
+	if ( dpy != NULL )
+	{
+		glXMakeCurrent(dpy, None, NULL);
+	}
+
+	if (gltexture) 
+	{
+		printf("Destroying GLX Texture\n");
+		glDeleteTextures(1, &gltexture);
+		gltexture=0;
+	}
+	if ( glc != NULL )
+	{
+		printf("Destroying GLX Context\n");
+		glXDestroyContext(dpy, glc); glc = NULL;
+	}
 	return 0;
 }
 //************************************************************************

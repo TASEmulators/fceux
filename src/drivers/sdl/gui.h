@@ -89,4 +89,9 @@ int InitGTKSubsystem(int argc, char** argv);
 uint32_t *getGuiPixelBuffer( int *w, int *h, int *s );
 int  guiPixelBufferReDraw(void);
 
+int init_gui_video( int use_openGL );
+int destroy_gui_video( void );
+void init_cairo_screen(void);
+void destroy_cairo_screen(void);
+
 #endif // ifndef FCEUX_GUI_H
