@@ -153,6 +153,8 @@ static int open_window(void)
 	{
 		printf("GLX Context Already Exists\n");
 	}
+	XFree(vi); vi = NULL;
+
 	glXMakeCurrent(dpy, win, glc);
 
 	genTextures();
@@ -405,10 +407,10 @@ int  init_gtk3_GLXContext( void )
 		printf("Error: XGetWindowAttributes failed\n");
 		return -1;
 	}
-	printf("XWinLocation: (%i,%i) \n", xattrb.x, xattrb.y );
-	printf("XWinSize: (%i x %i) \n", xattrb.width, xattrb.height );
-	printf("XWinDepth: %i \n", xattrb.depth );
-	printf("XWinVisual: %p \n", xattrb.visual );
+	//printf("XWinLocation: (%i,%i) \n", xattrb.x, xattrb.y );
+	//printf("XWinSize: (%i x %i) \n", xattrb.width, xattrb.height );
+	//printf("XWinDepth: %i \n", xattrb.depth );
+	//printf("XWinVisual: %p \n", xattrb.visual );
 
 	vi = glXChooseVisual(dpy, 0, att);
 
@@ -430,6 +432,8 @@ int  init_gtk3_GLXContext( void )
 			printf("Error: glXCreateContext Failed\n");
 		}
 	}
+	XFree(vi); vi = NULL;
+
 	glXMakeCurrent(dpy, win, glc);
 
 	genTextures();
@@ -464,6 +468,11 @@ int destroy_gtk3_GLXContext(void)
 		printf("Destroying GLX Context\n");
 		glXDestroyContext(dpy, glc); glc = NULL;
 	}
+	if ( dpy != NULL )
+	{
+		XSync( dpy, False );
+	}
+
 	return 0;
 }
 //************************************************************************

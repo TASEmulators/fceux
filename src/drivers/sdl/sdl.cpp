@@ -561,9 +561,9 @@ int main(int argc, char *argv[])
 		return(-1);
 	}
 
-#ifdef OPENGL
-	SDL_GL_LoadLibrary(0);
-#endif
+//#ifdef OPENGL
+//	SDL_GL_LoadLibrary(0);
+//#endif
 
 	// Initialize the configuration system
 	g_config = InitConfig();

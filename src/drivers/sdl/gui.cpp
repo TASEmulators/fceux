@@ -84,6 +84,7 @@ unsigned int gtk_draw_area_width = NES_WIDTH;
 unsigned int gtk_draw_area_height = NES_HEIGHT;
 static GtkTreeStore *hotkey_store = NULL;
 static cairo_surface_t *cairo_surface = NULL;
+static cairo_pattern_t *cairo_pattern = NULL;
 static int *cairo_pix_remapper = NULL;
 static int  numRendLines = 0;
 static void cairo_recalc_mapper(void);
@@ -3113,6 +3114,7 @@ static void transferPix2CairoSurface(void)
 	{
 		return;
 	}
+	//printf("Cairo Pixel ReMap\n");
 	cairo_surface_flush( cairo_surface );
 
 	if ( numRendLines != glx_shm->nrow )
@@ -3135,7 +3137,7 @@ static void transferPix2CairoSurface(void)
 
 			if ( j < 0 )
 			{
-				p[i].u32 = 0;
+				p[i].u32 = 0xff000000;
 			}
 			else
 			{
@@ -3144,9 +3146,13 @@ static void transferPix2CairoSurface(void)
 				p[i].u8[2] = g[j].u8[0];
 				p[i].u8[1] = g[j].u8[1];
 				p[i].u8[0] = g[j].u8[2];
-				p[i].u8[3] = g[j].u8[3];
+				p[i].u8[3] = 0xff; // Force Alpha to full
 				#else	
-				p[i].u32 = g[j].u32;
+				// Big-Endian is untested.
+				p[i].u8[2] = g[j].u8[0];
+				p[i].u8[1] = g[j].u8[1];
+				p[i].u8[0] = g[j].u8[2];
+				p[i].u8[3] = 0xff; // Force Alpha to full
 				#endif
 				//p[i].u32 = 0xffffffff;
 			}
@@ -3396,12 +3402,18 @@ static void cairo_handle_resize(void)
 	w = gtk_widget_get_allocated_width( evbox );
 	h = gtk_widget_get_allocated_height( evbox );
 
-	//cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_ARGB32, w, h );
-	cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24, w, h );
+	cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_ARGB32, w, h );
+	//cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24, w, h );
 
 	printf("Cairo Surface: %p \n", cairo_surface );
 
 	cairo_format = cairo_image_surface_get_format( cairo_surface );
+
+	if (cairo_pattern)
+	{
+		cairo_pattern_destroy (cairo_pattern); cairo_pattern = NULL;
+	}
+	cairo_pattern = cairo_pattern_create_for_surface( cairo_surface );
 
 	//printf("Cairo Format: %i \n", cairo_format );
 
@@ -3450,6 +3462,11 @@ void init_cairo_screen(void)
 
 void destroy_cairo_screen(void)
 {
+	if (cairo_pattern)
+	{
+		printf("Destroying Cairo Pattern\n");
+		cairo_pattern_destroy (cairo_pattern); cairo_pattern = NULL;
+	}
 	if (cairo_surface)
 	{
 		printf("Destroying Cairo Surface\n");
@@ -3550,7 +3567,11 @@ static gboolean cairo_clear_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 
 static gboolean cairo_draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 {
-	cairo_set_source_surface (cr, cairo_surface, 0, 0);
+	//printf("Cairo Draw\n");
+	//cairo_clear_cb( widget, cr, data );
+	//cairo_surface_mark_dirty( cairo_surface );
+	//cairo_set_source_surface (cr, cairo_surface, 0, 0);
+	cairo_set_source (cr, cairo_pattern);
    cairo_paint (cr);
 
 	return FALSE;
