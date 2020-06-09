@@ -3444,8 +3444,18 @@ int init_gui_video( int use_openGL )
 
 	if ( use_openGL ) 
 	{
+		int flags=0;
+		int linear_interpolation_ena=0;
+		int double_buffer_ena=0;
+			
+		g_config->getOption("SDL.OpenGLip"       , &linear_interpolation_ena );
+		g_config->getOption("SDL.DoubleBuffering", &double_buffer_ena        );
+
+		if ( linear_interpolation_ena )  flags |= GLXWIN_PIXEL_LINEAR_FILTER;
+		if ( double_buffer_ena        )  flags |= GLXWIN_DOUBLE_BUFFER;
+
 		destroy_cairo_screen();
-		init_gtk3_GLXContext();
+		init_gtk3_GLXContext( flags );
 	}
 	else
 	{
@@ -3604,10 +3614,7 @@ drawAreaRealizeCB (GtkWidget *widget,
 {
 	printf("Draw Area Realize\n");
 
-	if ( drawAreaGL )
-	{
-		init_gtk3_GLXContext();
-	}
+	init_gui_video( drawAreaGL );
 }
 
 

@@ -206,7 +206,7 @@ InitConfig()
 	config->addOption("SDL.LastXRes", 0);
 	config->addOption("SDL.LastYRes", 0);
 	config->addOption('b', "bpp", "SDL.BitsPerPixel", 32);
-	config->addOption("doublebuf", "SDL.DoubleBuffering", 0);
+	config->addOption("doublebuf", "SDL.DoubleBuffering", 1);
 	config->addOption("autoscale", "SDL.AutoScale", 1);
 	config->addOption("keepratio", "SDL.KeepRatio", 1);
 	config->addOption("xscale", "SDL.XScale", 1.0);
@@ -219,8 +219,8 @@ InitConfig()
 	config->addOption("togglemenu", "SDL.ToggleMenu", 0);
 
 	// OpenGL options
-	config->addOption("opengl", "SDL.OpenGL", 0);
-	config->addOption("openglip", "SDL.OpenGLip", 0);
+	config->addOption("opengl", "SDL.OpenGL", 1);
+	config->addOption("openglip", "SDL.OpenGLip", 1);
 	config->addOption("SDL.SpecialFilter", 0);
 	config->addOption("SDL.SpecialFX", 0);
 	config->addOption("SDL.Vsync", 1);

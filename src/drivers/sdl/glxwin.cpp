@@ -25,7 +25,6 @@
 
 static Display                 *dpy = NULL;
 static Window                  root;
-static GLint                   att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
 static XVisualInfo             *vi = NULL;
 static Colormap                cmap;
 static XSetWindowAttributes    swa;
@@ -33,9 +32,10 @@ static Window                  win;
 static GLXContext              glc = NULL;
 static XWindowAttributes       gwa;
 static XEvent                  xev;
+static GLint  double_buffer_ena = True;
 
 static GLuint gltexture = 0;
-static int    spawn_new_window = 1;
+static int    spawn_new_window = 0;
 
 glxwin_shm_t *glx_shm = NULL;
 
@@ -84,17 +84,32 @@ static glxwin_shm_t *open_shm(void)
 	return vaddr;
 }
 //************************************************************************
-static void genTextures(void)
+static void getAttrbList( GLint *buf )
 {
-	int ipolate = 1;
+   int i=0;
+
+	buf[i] = GLX_RGBA; i++;
+	buf[i] = GLX_DEPTH_SIZE; i++;
+	buf[i] = 24; i++;
+	buf[i] = GLX_DOUBLEBUFFER ; i++;
+	buf[i] = double_buffer_ena; i++;
+	buf[i] = None;
+
+}
+//************************************************************************
+static void genTextures( int ipolate )
+{
+	glEnable(GL_TEXTURE_2D);
 
 	if ( gltexture )
 	{
 		printf("GL Texture already exists\n");
-		return;
 	}
-	glEnable(GL_TEXTURE_2D);
-   glGenTextures(1, &gltexture);
+	else
+	{
+   	glGenTextures(1, &gltexture);
+	}
+	printf("Linear Interpolation on GL Texture: %s \n", ipolate ? "Enabled" : "Disabled");
 
 	glBindTexture(GL_TEXTURE_2D, gltexture);
 
@@ -107,6 +122,9 @@ static void genTextures(void)
 //************************************************************************
 static int open_window(void)
 {
+	GLint  att[32];
+
+	getAttrbList( att );
 
 	dpy = XOpenDisplay(NULL);
 	 
@@ -157,7 +175,7 @@ static int open_window(void)
 
 	glXMakeCurrent(dpy, win, glc);
 
-	genTextures();
+	genTextures(1);
 	glDisable(GL_DEPTH_TEST);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);	// Background color to black.
 	glMatrixMode(GL_PROJECTION);
@@ -171,16 +189,16 @@ static int open_window(void)
 	return 0;
 }
 //************************************************************************
-static void print_pixbuf(void)
-{
-   for (int x=0; x<256; x++)
-	{
-		for (int y=0; y<256; y++)
-		{
-			printf("(%i,%i) = %08X \n", x, y, glx_shm->pixbuf[x*256+y] );
-		}
-	}
-}
+//static void print_pixbuf(void)
+//{
+//   for (int x=0; x<256; x++)
+//	{
+//		for (int y=0; y<256; y++)
+//		{
+//			printf("(%i,%i) = %08X \n", x, y, glx_shm->pixbuf[y*256+x] );
+//		}
+//	}
+//}
 //************************************************************************
 static void render_image(void)
 {
@@ -286,23 +304,10 @@ static int mainWindowLoop(void)
 	   	}
 			else if (xev.type == ConfigureNotify) 
 			{
-	   		//XGetWindowAttributes(dpy, win, &gwa);
-
 				screen_width  = xev.xconfigure.width;
 				screen_height = xev.xconfigure.height;
 
-				//if (gltexture) {
-				//	glDeleteTextures(1, &gltexture);
-				//}
-				//gltexture=0;
-
-				//genTextures();
-
-				//printf("Resize Request: (%i,%i)\n", screen_width, screen_height );
 				render_image();
-	   	   //glViewport(0, 0, gwa.width, gwa.height);
-	   		//DrawAQuad(); 
-	   	   //glXSwapBuffers(dpy, win);
 	   	}
 			else if (xev.type == KeyPress) 
 			{
@@ -377,11 +382,18 @@ int  spawn_glxwin( int flags )
    return pid;
 }
 //************************************************************************
-int  init_gtk3_GLXContext( void )
+int  init_gtk3_GLXContext( int flags )
 {
+	GLint  att[32];
+
 	XWindowAttributes xattrb;
 
+	double_buffer_ena = (flags & GLXWIN_DOUBLE_BUFFER) ? 1 : 0;
+
+	getAttrbList( att );
+
 	printf("Init GLX Context\n");
+	printf("Double Buffering: %s\n", double_buffer_ena ? "Enabled" : "Disabled");
 
 	GdkWindow *gdkWin = gtk_widget_get_window(evbox);
 
@@ -436,7 +448,7 @@ int  init_gtk3_GLXContext( void )
 
 	glXMakeCurrent(dpy, win, glc);
 
-	genTextures();
+	genTextures( flags & GLXWIN_PIXEL_LINEAR_FILTER ? 1 : 0 );
 	glDisable(GL_DEPTH_TEST);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);	// Background color to black.
 	glMatrixMode(GL_PROJECTION);

@@ -10,7 +10,11 @@
 
 int  spawn_glxwin( int flags );
 
-int  init_gtk3_GLXContext( void );
+#define  GLXWIN_PIXEL_LINEAR_FILTER  0x0001
+#define  GLXWIN_DOUBLE_BUFFER        0x0002
+
+int  init_gtk3_GLXContext( int flags );
+
 int  destroy_gtk3_GLXContext( void );
 
 int  gtk3_glx_render(void);
