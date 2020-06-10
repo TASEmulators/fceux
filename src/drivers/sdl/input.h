@@ -20,6 +20,7 @@ extern ARGPSTRUCT InputArgs[];
 extern int Hotkeys[];
 void ParseGIInput(FCEUGI *GI);
 void setHotKeys();
+int getKeyState( int k );
 int ButtonConfigBegin();
 void ButtonConfigEnd();
 void ConfigButton(char *text, ButtConfig *bc);

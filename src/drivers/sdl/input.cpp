@@ -147,6 +147,15 @@ static int DIPS = 0;
 static uint8 keyonce[MKK_COUNT];
 #define KEY(__a) g_keyState[MKK(__a)]
 
+int getKeyState( int k )
+{
+	if ( (k >= 0) && (k < SDL_NUM_SCANCODES) )
+	{
+		return g_keyState[k];
+	}
+	return 0;
+}
+
 static int
 _keyonly (int a)
 {

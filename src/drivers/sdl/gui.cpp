@@ -2434,6 +2434,17 @@ static gboolean convertKeypress (GtkWidget * grab, GdkEventKey * event,
 	}
 	sdlev.key.repeat = 0;
 
+
+	if ( (event->state & GDK_MOD1_MASK) ||
+			getKeyState( SDL_SCANCODE_LALT ) || getKeyState( SDL_SCANCODE_RALT ) )
+	{
+		// Don't pass ALT + Enter to game, as this toggles fullscreen in GTK
+		if ( sdlkey == SDLK_RETURN )
+		{
+			return FALSE;
+		}
+	}
+
 	if (sdlkey != 0)
 	{
 		SDL_PushEvent (&sdlev);
