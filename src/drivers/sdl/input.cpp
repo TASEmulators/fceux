@@ -49,7 +49,7 @@
 #include <cstdio>
 
 /** GLOBALS **/
-int NoWaiting = 1;
+int NoWaiting = 0;
 extern Config *g_config;
 extern bool bindSavestate, frameAdvanceLagSkip, lagCounterDisplay;
 
@@ -448,7 +448,7 @@ unsigned int *GetKeyboard(void)
 /**
  * Parse keyboard commands and execute accordingly.
  */
-static void KeyboardCommands ()
+static void KeyboardCommands (void)
 {
 	int is_shift, is_alt;
 
@@ -474,11 +474,6 @@ static void KeyboardCommands ()
 				FCEUI_DispMessage ("Family Keyboard %sabled.", 0,
 				g_fkbEnabled ? "en" : "dis");
 			}
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-		// TODO - SDL2
-#else
-		SDL_WM_GrabInput (g_fkbEnabled ? SDL_GRAB_ON : SDL_GRAB_OFF);
-#endif
 		if (g_fkbEnabled)
 		{
 			return;
@@ -502,23 +497,11 @@ static void KeyboardCommands ()
 #endif
 	{
 		is_alt = 1;
-#if !SDL_VERSION_ATLEAST(2, 0, 0)
-		// workaround for GDK->SDL in GTK problems where ALT release is never 
-        // getting sent
-        // I know this is sort of an ugly hack to fix this, but the bug is 
-        // rather annoying
-		// prg318 10/23/11
-		int fullscreen;
-		g_config->getOption ("SDL.Fullscreen", &fullscreen);
-		if (!fullscreen)
-		{
-			g_keyState[SDLK_LALT] = 0;
-			g_keyState[SDLK_RALT] = 0;
-		}
-#endif
 	}
 	else
+	{
 		is_alt = 0;
+	}
 
 
 	if (_keyonly (Hotkeys[HK_TOGGLE_BG]))
@@ -534,12 +517,11 @@ static void KeyboardCommands ()
 	}
 
 	// Alt-Enter to toggle full-screen
-	if (keyonly (ENTER) && is_alt)
-	{
-		ToggleFS ();
-	}
-
-
+	// This is already handled by GTK Accelerator
+	//if (keyonly (ENTER) && is_alt)
+	//{
+	//	ToggleFS ();
+	//}
 
 	// Toggle Movie auto-backup
 	if (keyonly (M) && is_shift)
@@ -687,10 +669,10 @@ static void KeyboardCommands ()
 	}
 
 	// Toggle throttling
-	NoWaiting &= ~1;
 	if ( _keyonly(Hotkeys[HK_TURBO]) )
 	{
-		NoWaiting |= 1;
+		NoWaiting ^= 1;
+		//printf("NoWaiting: 0x%04x\n", NoWaiting );
 	}
 
 	static bool frameAdvancing = false;

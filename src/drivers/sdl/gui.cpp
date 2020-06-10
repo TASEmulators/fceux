@@ -2366,10 +2366,11 @@ unsigned int GDKToSDLKeyval (int gdk_key)
 	}
 
 	// ignore pause and screenshot hotkeys since they is handled by GTK+ as accelerators
-	if (sdl_key == Hotkeys[HK_PAUSE] || sdl_key == Hotkeys[HK_SCREENSHOT] ||
-	    sdl_key == Hotkeys[HK_SAVE_STATE]
-	    || sdl_key == Hotkeys[HK_LOAD_STATE])
+	if ( (sdl_key == Hotkeys[HK_PAUSE]) || (sdl_key == Hotkeys[HK_SCREENSHOT]) ||
+	     (sdl_key == Hotkeys[HK_SAVE_STATE]) || (sdl_key == Hotkeys[HK_LOAD_STATE]) )
+	{
 		return 0;
+	}
 
 	return sdl_key;
 }
@@ -2416,7 +2417,23 @@ static gboolean convertKeypress (GtkWidget * grab, GdkEventKey * event,
 	// Create an SDL event from the keypress.
 	sdlev.key.keysym.scancode = SDL_GetScancodeFromKey(sdlkey);
 	sdlev.key.keysym.sym = sdlkey;
+
 	sdlev.key.keysym.mod = 0;
+
+	if ( event->state & GDK_SHIFT_MASK )
+	{
+		sdlev.key.keysym.mod |= KMOD_SHIFT;
+	}
+	if ( event->state & GDK_CONTROL_MASK )
+	{
+		sdlev.key.keysym.mod |= KMOD_CTRL;
+	}
+	if ( event->state & GDK_MOD1_MASK )
+	{
+		sdlev.key.keysym.mod |= KMOD_ALT;
+	}
+	sdlev.key.repeat = 0;
+
 	if (sdlkey != 0)
 	{
 		SDL_PushEvent (&sdlev);
