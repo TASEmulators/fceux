@@ -155,22 +155,32 @@ int getKeyState( int k )
 static int
 _keyonly (int a)
 {
-	// check for valid key
-	if (a > SDLK_LAST + 1 || a < 0)
+	int sc;
+
+	if ( a < 0 )
 	{
 		return 0;
 	}
 
-	if (g_keyState[SDL_GetScancodeFromKey (a)])
+	sc = SDL_GetScancodeFromKey(a);
+
+	// check for valid key
+	if (sc >= SDL_NUM_SCANCODES || sc < 0)
 	{
-		if (!keyonce[a])
+		return 0;
+	}
+
+	if (g_keyState[sc])
+	{
+		if (!keyonce[sc])
 		{
-			keyonce[a] = 1;
+			keyonce[sc] = 1;
 			return 1;
 		}
 	} 
-	else {
-		keyonce[a] = 0;
+	else 
+	{
+		keyonce[sc] = 0;
 	}
 	return 0;
 }
