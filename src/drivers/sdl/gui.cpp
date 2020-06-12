@@ -553,11 +553,7 @@ static void hotKeyWindowRefresh (void)
 		g_config->getOption (optionName.c_str (), &keycode);
 		gtk_tree_store_set (hotkey_store, &iter,
 				    0, optionName.c_str (), 1,
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 				    SDL_GetKeyName (keycode),
-#else
-				    SDL_GetKeyName ((SDLKey) keycode),
-#endif
 				    -1);
 		gtk_tree_store_append (hotkey_store, &iter, NULL);	// acquire child iterator
 	}
@@ -602,11 +598,8 @@ static gint hotKeyPressCB (GtkTreeView * tree, GdkEventKey * event,
 			hotKeyName.append ( getHotkeyString(indexArray[0]) );
 
 			// Convert this keypress from GDK to SDL.
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 			sdlkey = GDKToSDLKeyval (event->keyval);
-#else
-			sdlkey = (SDLKey) GDKToSDLKeyval (event->keyval);
-#endif
+
 			printf ("HotKey Index: %i   '%s'  %i   %i \n",
 				indexArray[0], hotKeyName.c_str (),
 				event->keyval, sdlkey);
@@ -706,16 +699,9 @@ void updateGamepadConfig (GtkWidget * w, gpointer p)
 		if (GamePadConfig[padNo][i].ButtType[configNo] ==
 		    BUTTC_KEYBOARD)
 		{
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 			snprintf (strBuf, sizeof (strBuf), "<tt>%s</tt>",
 				  SDL_GetKeyName (GamePadConfig[padNo][i].
 						  ButtonNum[configNo]));
-#else
-			snprintf (strBuf, sizeof (strBuf), "<tt>%s</tt>",
-				  SDL_GetKeyName ((SDLKey)
-						  GamePadConfig[padNo][i].
-						  ButtonNum[configNo]));
-#endif
 		}
 		else		
 			sprintf (strBuf, "<tt>%s</tt>", ButtonName( &GamePadConfig[padNo][i], configNo ) );
@@ -2208,28 +2194,15 @@ static void changeState (GtkRadioMenuItem * radiomenuitem, gpointer user_data)
 	FCEUI_SelectState ((long) user_data, 1);
 }
 
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 // SDL 1.2/2.0 compatibility macros
 #define SDLK_SCROLLOCK SDLK_SCROLLLOCK
 #define SDLK_PRINT SDLK_PRINTSCREEN
 #define SDLK_BREAK 0
 #define SDLK_COMPOSE 0
 #define SDLK_NUMLOCK SDLK_NUMLOCKCLEAR
-#define SDLK_KP0 SDLK_KP_0
-#define SDLK_KP1 SDLK_KP_1
-#define SDLK_KP2 SDLK_KP_2
-#define SDLK_KP3 SDLK_KP_3
-#define SDLK_KP4 SDLK_KP_4
-#define SDLK_KP5 SDLK_KP_5
-#define SDLK_KP6 SDLK_KP_6
-#define SDLK_KP7 SDLK_KP_7
-#define SDLK_KP8 SDLK_KP_8
-#define SDLK_KP9 SDLK_KP_9
-#define SDLK_LSUPER SDLK_LGUI
-#define SDLK_RSUPER SDLK_RGUI
 #define SDLK_LMETA 0
 #define SDLK_RMETA 0
-#endif
+
 // Adapted from Gens/GS.  Converts a GDK key value into an SDL key value.
 unsigned int GDKToSDLKeyval (int gdk_key)
 {
@@ -2308,16 +2281,16 @@ unsigned int GDKToSDLKeyval (int gdk_key)
 		0x0000, 0x0000, SDLK_MODE, SDLK_NUMLOCK,
 
 		// 0x80 - 0x8F [mostly unused, except for some numeric keypad keys]
-		SDLK_KP5, 0x0000, 0x0000, 0x0000,
+		SDLK_KP_5, 0x0000, 0x0000, 0x0000,
 		0x0000, 0x0000, 0x0000, 0x0000,
 		0x0000, 0x0000, 0x0000, 0x0000,
 		0x0000, SDLK_KP_ENTER, 0x0000, 0x0000,
 
 		// 0x90 - 0x9F
 		0x0000, 0x0000, 0x0000, 0x0000,
-		0x0000, SDLK_KP7, SDLK_KP4, SDLK_KP8,
-		SDLK_KP6, SDLK_KP2, SDLK_KP9, SDLK_KP3,
-		SDLK_KP1, SDLK_KP5, SDLK_KP0, SDLK_KP_PERIOD,
+		0x0000, SDLK_KP_7, SDLK_KP_4, SDLK_KP_8,
+		SDLK_KP_6, SDLK_KP_2, SDLK_KP_9, SDLK_KP_3,
+		SDLK_KP_1, SDLK_KP_5, SDLK_KP_0, SDLK_KP_PERIOD,
 
 		// 0xA0 - 0xAF
 		0x0000, 0x0000, 0x0000, 0x0000,
@@ -2326,9 +2299,9 @@ unsigned int GDKToSDLKeyval (int gdk_key)
 		0x0000, SDLK_KP_MINUS, SDLK_KP_PERIOD, SDLK_KP_DIVIDE,
 
 		// 0xB0 - 0xBF
-		SDLK_KP0, SDLK_KP1, SDLK_KP2, SDLK_KP3,
-		SDLK_KP4, SDLK_KP5, SDLK_KP6, SDLK_KP7,
-		SDLK_KP8, SDLK_KP9, 0x0000, 0x0000,
+		SDLK_KP_0, SDLK_KP_1, SDLK_KP_2, SDLK_KP_3,
+		SDLK_KP_4, SDLK_KP_5, SDLK_KP_6, SDLK_KP_7,
+		SDLK_KP_8, SDLK_KP_9, 0x0000, 0x0000,
 		0x0000, SDLK_KP_EQUALS, SDLK_F1, SDLK_F2,
 
 		// 0xC0 - 0xCF
@@ -2346,8 +2319,8 @@ unsigned int GDKToSDLKeyval (int gdk_key)
 		// 0xE0 - 0xEF
 		0x0000, SDLK_LSHIFT, SDLK_RSHIFT, SDLK_LCTRL,
 		SDLK_RCTRL, SDLK_CAPSLOCK, 0x0000, SDLK_LMETA,
-		SDLK_RMETA, SDLK_LALT, SDLK_RALT, SDLK_LSUPER,
-		SDLK_RSUPER, 0x0000, 0x0000, 0x0000,
+		SDLK_RMETA, SDLK_LALT, SDLK_RALT, SDLK_LGUI,
+		SDLK_RGUI, 0x0000, 0x0000, 0x0000,
 
 		// 0xF0 - 0xFF [mostly unused, except for Delete]
 		0x0000, 0x0000, 0x0000, 0x0000,
@@ -2381,24 +2354,18 @@ static gboolean convertKeypress (GtkWidget * grab, GdkEventKey * event,
 			     gpointer user_data)
 {
 	SDL_Event sdlev;
-	int keystate;
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_Keycode sdlkey;
-#else
-	SDLKey sdlkey;
-#endif
+
 	switch (event->type)
 	{
 		case GDK_KEY_PRESS:
 			sdlev.type = SDL_KEYDOWN;
 			sdlev.key.state = SDL_PRESSED;
-			keystate = 1;
 			break;
 
 		case GDK_KEY_RELEASE:
 			sdlev.type = SDL_KEYUP;
 			sdlev.key.state = SDL_RELEASED;
-			keystate = 0;
 			break;
 
 		default:
@@ -2408,11 +2375,7 @@ static gboolean convertKeypress (GtkWidget * grab, GdkEventKey * event,
 	}
 
 	// Convert this keypress from GDK to SDL.
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 	sdlkey = GDKToSDLKeyval (event->keyval);
-#else
-	sdlkey = (SDLKey) GDKToSDLKeyval (event->keyval);
-#endif
 
 	// Create an SDL event from the keypress.
 	sdlev.key.keysym.scancode = SDL_GetScancodeFromKey(sdlkey);
@@ -2448,19 +2411,6 @@ static gboolean convertKeypress (GtkWidget * grab, GdkEventKey * event,
 	if (sdlkey != 0)
 	{
 		SDL_PushEvent (&sdlev);
-
-		// Only let the emulator handle the key event if this window has the input focus.
-		//if (keystate == 0
-		//    || gtk_window_is_active (GTK_WINDOW (MainWindow)))
-		//{
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-			// Not sure how to do this yet with SDL 2.0
-			// TODO - SDL 2.0
-			//SDL_GetKeyboardState(NULL)[SDL_GetScancodeFromKey(sdlkey)] = keystate;
-#else
-			SDL_GetKeyState (NULL)[sdlkey] = keystate;
-#endif
-		//}
 	}
 
 	// Allow GTK+ to process this key.
@@ -3268,52 +3218,52 @@ int  guiClearSurface(void)
 	return 0;
 }
 
-static void loadPixelTestPattern(void)
-{
-	uint32_t *p;
-	int i,x,y,width,height,w2,h2;
-
-	width  = 256;
-	height = 256;
-	p = (uint32_t*)glx_shm->pixbuf;
-
-	w2 = width / 2;
-	h2 = height / 2;
-
-	//printf("W:%i   H:%i   W/2:%i  H/2:%i\n", width, height, w2, h2 );
-
-	i=0;
-	for (y=0; y<height; y++)
-	{
-		for (x=0; x<width; x++)
-		{
-			if ( x < w2 )
-			{
-				if ( y < h2 )
-				{
-			      p[i] = 0xff0000ff; 
-				}
-				else
-				{
-			      p[i] = 0xffffffff; 
-				}
-			}
-			else
-			{
-				if ( y < h2 )
-				{
-			      p[i] = 0xffff0000; 
-				}
-				else
-				{
-			      p[i] = 0xff00ff00; 
-				}
-			}
-			i++;
-		}
-	}
-
-}
+//static void loadPixelTestPattern(void)
+//{
+//	uint32_t *p;
+//	int i,x,y,width,height,w2,h2;
+//
+//	width  = 256;
+//	height = 256;
+//	p = (uint32_t*)glx_shm->pixbuf;
+//
+//	w2 = width / 2;
+//	h2 = height / 2;
+//
+//	//printf("W:%i   H:%i   W/2:%i  H/2:%i\n", width, height, w2, h2 );
+//
+//	i=0;
+//	for (y=0; y<height; y++)
+//	{
+//		for (x=0; x<width; x++)
+//		{
+//			if ( x < w2 )
+//			{
+//				if ( y < h2 )
+//				{
+//			      p[i] = 0xff0000ff; 
+//				}
+//				else
+//				{
+//			      p[i] = 0xffffffff; 
+//				}
+//			}
+//			else
+//			{
+//				if ( y < h2 )
+//				{
+//			      p[i] = 0xffff0000; 
+//				}
+//				else
+//				{
+//			      p[i] = 0xff00ff00; 
+//				}
+//			}
+//			i++;
+//		}
+//	}
+//
+//}
 
 static void cairo_recalc_mapper(void)
 {
@@ -3421,7 +3371,7 @@ static void cairo_recalc_mapper(void)
 static void cairo_handle_resize(void)
 {
 	int w, h;
-	cairo_format_t  cairo_format;
+	//cairo_format_t  cairo_format;
 
 	if (cairo_surface)
 	{
@@ -3435,7 +3385,7 @@ static void cairo_handle_resize(void)
 
 	printf("Cairo Surface: %p \n", cairo_surface );
 
-	cairo_format = cairo_image_surface_get_format( cairo_surface );
+	//cairo_format = cairo_image_surface_get_format( cairo_surface );
 
 	if (cairo_pattern)
 	{
@@ -3581,23 +3531,24 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	return FALSE;
 }
 
-static gboolean cairo_clear_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
-{
-	GdkRGBA color;
-	GtkStyleContext *context;
-
-	context = gtk_widget_get_style_context (widget);
-
-	color.red = 0, color.blue = 0; color.green = 0; color.alpha = 1.0;
-
-	gtk_render_background( context, cr, 0, 0, gtk_draw_area_width, gtk_draw_area_height );
-	gdk_cairo_set_source_rgba (cr, &color);
-
-	cairo_fill (cr);
-	cairo_paint (cr);
-
-	return FALSE;
-}
+// Clear Drawing Area to Black
+//static gboolean cairo_clear_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
+//{
+//	GdkRGBA color;
+//	GtkStyleContext *context;
+//
+//	context = gtk_widget_get_style_context (widget);
+//
+//	color.red = 0, color.blue = 0; color.green = 0; color.alpha = 1.0;
+//
+//	gtk_render_background( context, cr, 0, 0, gtk_draw_area_width, gtk_draw_area_height );
+//	gdk_cairo_set_source_rgba (cr, &color);
+//
+//	cairo_fill (cr);
+//	cairo_paint (cr);
+//
+//	return FALSE;
+//}
 /* Redraw the screen from the surface. Note that the ::draw
  * signal receives a ready-to-be-used cairo_t that is already
  * clipped to only draw the exposed areas of the widget
