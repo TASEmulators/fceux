@@ -137,14 +137,10 @@ DoCheatSeq ()
 }
 
 #include "keyscan.h"
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 static uint8  g_keyState[SDL_NUM_SCANCODES];
-#else
-static uint8 *g_keyState = 0;
-#endif
 static int DIPS = 0;
 
-static uint8 keyonce[MKK_COUNT];
+static uint8 keyonce[SDL_NUM_SCANCODES];
 #define KEY(__a) g_keyState[MKK(__a)]
 
 int getKeyState( int k )
@@ -161,12 +157,11 @@ _keyonly (int a)
 {
 	// check for valid key
 	if (a > SDLK_LAST + 1 || a < 0)
+	{
 		return 0;
-#if SDL_VERSION_ATLEAST(2, 0, 0)
+	}
+
 	if (g_keyState[SDL_GetScancodeFromKey (a)])
-#else
-	if (g_keyState[a])
-#endif
 	{
 		if (!keyonce[a])
 		{
@@ -215,24 +210,6 @@ TogglePause ()
 	int fullscreen;
 	g_config->getOption ("SDL.Fullscreen", &fullscreen);
 
-	// Don't touch grab when in windowed mode
-	if(fullscreen == 0)
-		return;
-
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	// TODO - SDL2
-#else
-	if (FCEUI_EmulationPaused () == 0)
-	{
-		SDL_WM_GrabInput (SDL_GRAB_ON);
-		if(no_cursor)
-			SDL_ShowCursor (0);
-	}
-	else {
-		SDL_WM_GrabInput (SDL_GRAB_OFF);
-		SDL_ShowCursor (1);
-	}
-#endif
 	return;
 }
 
@@ -446,11 +423,9 @@ void FCEUD_LoadStateFrom ()
 unsigned int *GetKeyboard(void)                                                     
 {
 	int size = 256;
-#if SDL_VERSION_ATLEAST(2, 0, 0)
+
 	Uint8* keystate = (Uint8*)SDL_GetKeyboardState(&size);
-#else
-	Uint8* keystate = SDL_GetKeyState(&size);
-#endif
+
 	return (unsigned int*)(keystate);
 }
 
@@ -463,47 +438,32 @@ static void KeyboardCommands (void)
 
 	char *movie_fname = "";
 	// get the keyboard input
-#if SDL_VERSION_ATLEAST(1, 3, 0)
-	//g_keyState = (Uint8*)SDL_GetKeyboardState (NULL);
-#else
-	g_keyState = SDL_GetKeyState (NULL);
-#endif
 
 	// check if the family keyboard is enabled
 	if (CurInputType[2] == SIFC_FKB)
 	{
-#if SDL_VERSION_ATLEAST(1, 3, 0)
-		// TODO - SDL2
 		if ( g_keyState[SDL_SCANCODE_SCROLLLOCK] )
-#else
-		if (keyonly (SCROLLLOCK))
-#endif
-			{
-				g_fkbEnabled ^= 1;
-				FCEUI_DispMessage ("Family Keyboard %sabled.", 0,
-				g_fkbEnabled ? "en" : "dis");
-			}
+		{
+			g_fkbEnabled ^= 1;
+			FCEUI_DispMessage ("Family Keyboard %sabled.", 0,
+			g_fkbEnabled ? "en" : "dis");
+		}
 		if (g_fkbEnabled)
 		{
 			return;
 		}
 	}
 
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	if (g_keyState[SDL_SCANCODE_LSHIFT]
-		|| g_keyState[SDL_SCANCODE_RSHIFT])
-#else
-	if (g_keyState[SDLK_LSHIFT] || g_keyState[SDLK_RSHIFT])
-#endif
-	is_shift = 1;
-  else
-	is_shift = 0;
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	if (g_keyState[SDL_SCANCODE_LALT]
-	|| g_keyState[SDL_SCANCODE_RALT])
-#else
-	if (g_keyState[SDLK_LALT] || g_keyState[SDLK_RALT])
-#endif
+	if (g_keyState[SDL_SCANCODE_LSHIFT]	|| g_keyState[SDL_SCANCODE_RSHIFT])
+	{
+		is_shift = 1;
+	}
+	else
+	{
+		is_shift = 0;
+	}
+
+	if (g_keyState[SDL_SCANCODE_LALT] || g_keyState[SDL_SCANCODE_RALT])
 	{
 		is_alt = 1;
 	}
@@ -1041,52 +1001,6 @@ int ButtonConfigBegin ()
 
 	bcpj = KillJoysticks ();
 
-	// reactivate the video subsystem
-//	if (!SDL_WasInit (SDL_INIT_VIDEO))
-//	{
-//		if (!bcpv)
-//		{
-//			InitVideo (GameInfo);
-//		}
-//		else
-//		{
-//#if defined(_GTK) && defined(SDL_VIDEO_DRIVER_X11)
-//			if (noGui == 0)
-//			{
-//				while (gtk_events_pending ())
-//					gtk_main_iteration_do (FALSE);
-//
-//				char SDL_windowhack[128];
-//				if (gtk_widget_get_window (evbox))
-//					sprintf (SDL_windowhack, "SDL_WINDOWID=%u",
-//					(unsigned int) GDK_WINDOW_XID (gtk_widget_get_window (evbox)));
-//#if SDL_VERSION_ATLEAST(2, 0, 0)
-//					// TODO - SDL2
-//#else
-//					SDL_putenv (SDL_windowhack);
-//#endif
-//			}
-//#endif
-//			if (SDL_InitSubSystem (SDL_INIT_VIDEO) == -1)
-//			{
-//				FCEUD_Message (SDL_GetError ());
-//				return 0;
-//			}
-//
-//			// set the screen and notify the user of button configuration
-//#if SDL_VERSION_ATLEAST(2, 0, 0)
-//			// TODO - SDL2
-//#else
-//			screen = SDL_SetVideoMode (420, 200, 8, 0);
-//         if ( screen == NULL )
-//         {
-//            printf("Error: SDL_SetVideoMode Failed\n");
-//         }
-//			SDL_WM_SetCaption ("Button Config", 0);
-//#endif
-//		}
-//	}
-
 	// XXX soules - why did we shut this down?
 	// initialize the joystick subsystem
 	InitJoysticks ();
@@ -1128,13 +1042,8 @@ DTestButton (ButtConfig * bc)
 	{
 		if (bc->ButtType[x] == BUTTC_KEYBOARD)
 		{
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 			if (g_keyState[SDL_GetScancodeFromKey (bc->ButtonNum[x])])
 			{
-#else
-			if (g_keyState[bc->ButtonNum[x]])
-			{
-#endif
 				return 1;
 			}
 		}
@@ -1145,8 +1054,8 @@ DTestButton (ButtConfig * bc)
 				return 1;
 			}
 		}
-    }
-  return 0;
+	}
+	return 0;
 }
 
 
@@ -1156,15 +1065,9 @@ DTestButton (ButtConfig * bc)
 #define GPZ()       {MKZ(), MKZ(), MKZ(), MKZ()}
 
 ButtConfig GamePadConfig[4][10] = {
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 /* Gamepad 1 */
 	{MK (KP_3), MK (KP_2), MK (SLASH), MK (ENTER),
 	MK (W), MK (Z), MK (A), MK (S), MKZ (), MKZ ()},
-#else
-	/* Gamepad 1 */
-	{MK (KP3), MK (KP2), MK (SLASH), MK (ENTER),
-	MK (W), MK (Z), MK (A), MK (S), MKZ (), MKZ ()},
-#endif
 
 	/* Gamepad 2 */
 	GPZ (),
@@ -1435,9 +1338,7 @@ void InitInputInterface ()
 	int x;
 	int attrib;
 
-#if SDL_VERSION_ATLEAST(2, 0, 0)
    memset( g_keyState, 0, sizeof(g_keyState) );
-#endif
 
 	for (t = 0, x = 0; x < 2; x++)
 	{
@@ -1684,11 +1585,7 @@ const char * ButtonName (const ButtConfig * bc, int which)
 	switch (bc->ButtType[which])
 	{
 		case BUTTC_KEYBOARD:
-#if SDL_VERSION_ATLEAST(2,0,0)
 			return SDL_GetKeyName (bc->ButtonNum[which]);
-#else
-			return SDL_GetKeyName ((SDLKey) bc->ButtonNum[which]);
-#endif
 		break;
 		case BUTTC_JOYSTICK:
 		{
@@ -1754,11 +1651,8 @@ int DWaitButton (const uint8 * text, ButtConfig * bc, int wb)
 	{
 		std::string title = "Press a key for ";
 		title += (const char *) text;
-#if SDL_VERSION_ATLEAST(2,0,0)
 		// TODO - SDL2
-#else
-		SDL_WM_SetCaption (title.c_str (), 0);
-#endif
+		//SDL_WM_SetCaption (title.c_str (), 0);
 		puts ((const char *) text);
 	}
 
