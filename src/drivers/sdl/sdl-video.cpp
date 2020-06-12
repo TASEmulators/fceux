@@ -22,7 +22,6 @@
 /// \brief Handles the graphical game display for the SDL implementation.
 
 #include "sdl.h"
-#include "sdl-opengl.h"
 #include "glxwin.h"
 #include "../common/vidblit.h"
 #include "../../fceu.h"
@@ -318,23 +317,10 @@ FCEUD_GetPalette(uint8 index,
  */
 static void RedoPalette()
 {
-//#ifdef OPENGL
-//	if(s_useOpenGL)
-//		SetOpenGLPalette((uint8*)s_psdl);
-//	else 
-//#endif
+	if (s_curbpp > 8) 
 	{
-		if(s_curbpp > 8) {
-			SetPaletteBlitToHigh((uint8*)s_psdl);
-		} else
-		{
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-			//TODO - SDL2
-#else
-			SDL_SetPalette(s_screen, SDL_PHYSPAL, s_psdl, 0, 256);
-#endif
-		}
-	}
+		SetPaletteBlitToHigh((uint8*)s_psdl);
+	} 
 }
 // XXX soules - console lock/unlock unimplemented?
 
@@ -350,13 +336,8 @@ void UnlockConsole(){}
 void
 BlitScreen(uint8 *XBuf)
 {
-	//SDL_Surface *TmpScreen;
 	uint8 *dest;
 	int w, h, pitch;
-
-	//if(!s_screen) {
-	//	return;
-	//}
 
 	// refresh the palette if required
 	if (s_paletterefresh) 
