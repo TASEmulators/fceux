@@ -72,11 +72,12 @@ GtkWidget *MainWindow = NULL;
 GtkWidget *evbox = NULL;
 GtkWidget *padNoCombo = NULL;
 GtkWidget *configNoCombo = NULL;
-GtkWidget *buttonMappings[10];
+GtkWidget *buttonMappings[10] = { NULL };
 static GtkWidget *Menubar = NULL;
 static GtkRadioMenuItem *stateSlot[10] = { NULL };
 bool gtkIsStarted = false;
 bool menuTogglingEnabled = false;
+static int buttonConfigStatus = 0;
 
 static char useCairoDraw = 0;
 static int drawAreaGL = 0;
@@ -145,11 +146,13 @@ int configGamepadButton (GtkButton * button, gpointer p)
 	if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (button)))
 		return 0;
 
+	buttonConfigStatus = 2;
+
 	ButtonConfigBegin ();
 
 	snprintf (buf, sizeof(buf)-1, "SDL.Input.GamePad.%d.", padNo);
 	prefix = buf;
-	DWaitButton (NULL, &GamePadConfig[padNo][x], configNo);
+	DWaitButton (NULL, &GamePadConfig[padNo][x], configNo, &buttonConfigStatus );
 
 	g_config->setOption (prefix + GamePadNames[x],
 			     GamePadConfig[padNo][x].ButtonNum[configNo]);
@@ -171,9 +174,15 @@ int configGamepadButton (GtkButton * button, gpointer p)
 
 	snprintf (buf, sizeof (buf), "<tt>%s</tt>",
 		  ButtonName (&GamePadConfig[padNo][x], configNo));
-	gtk_label_set_markup (GTK_LABEL (buttonMappings[x]), buf);
+
+	if ( buttonMappings[x] != NULL )
+	{
+		gtk_label_set_markup (GTK_LABEL (buttonMappings[x]), buf);
+	}
 
 	ButtonConfigEnd ();
+
+	buttonConfigStatus = 1;
 
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), FALSE);
 
@@ -686,6 +695,11 @@ void updateGamepadConfig (GtkWidget * w, gpointer p)
 {
 	int i;
 	char strBuf[128];
+
+	if ( (padNoCombo == NULL) || (configNoCombo == NULL) )
+	{
+		return;
+	}
 	int padNo =
 		atoi (gtk_combo_box_text_get_active_text
 		      (GTK_COMBO_BOX_TEXT (padNoCombo))) - 1;
@@ -696,8 +710,7 @@ void updateGamepadConfig (GtkWidget * w, gpointer p)
 	for (i = 0; i < 10; i++)
 	{
 		GtkWidget *mappedKey = buttonMappings[i];
-		if (GamePadConfig[padNo][i].ButtType[configNo] ==
-		    BUTTC_KEYBOARD)
+		if (GamePadConfig[padNo][i].ButtType[configNo] == BUTTC_KEYBOARD)
 		{
 			snprintf (strBuf, sizeof (strBuf), "<tt>%s</tt>",
 				  SDL_GetKeyName (GamePadConfig[padNo][i].
@@ -706,22 +719,31 @@ void updateGamepadConfig (GtkWidget * w, gpointer p)
 		else		
 			sprintf (strBuf, "<tt>%s</tt>", ButtonName( &GamePadConfig[padNo][i], configNo ) );
 
-		gtk_label_set_text (GTK_LABEL (mappedKey), strBuf);
-		gtk_label_set_use_markup (GTK_LABEL (mappedKey), TRUE);
+		if ( mappedKey != NULL )
+		{
+			gtk_label_set_text (GTK_LABEL (mappedKey), strBuf);
+			gtk_label_set_use_markup (GTK_LABEL (mappedKey), TRUE);
+		}
 	}
+}
+
+static void closeGamepadConfig (GtkWidget * w, GdkEvent * e, gpointer p)
+{
+	gtk_widget_destroy (w);
+
+	padNoCombo    = NULL;
+	configNoCombo = NULL;
+
+	for (int i = 0; i < 10; i++)
+	{
+		buttonMappings[i] = NULL;
+	}
+	buttonConfigStatus = 0;
 }
 
 // creates and opens the gamepad config window (requires GTK 2.24)
 void openGamepadConfig (void)
 {
-	// GTK 2.24 required for this dialog
-	if (checkGTKVersion (2, 24) == false)
-	{
-		// TODO: present this in a GTK MessageBox?
-		printf (" Warning: GTK >= 2.24 required for this dialog.\nTo configure the gamepads, use \"--inputcfg\" from the command line (ie: \"fceux --inputcfg gamepad1\").\n");
-		return;
-	}
-
 	GtkWidget *win;
 	GtkWidget *vbox;
 	GtkWidget *hboxPadNo;
@@ -861,8 +883,8 @@ void openGamepadConfig (void)
 
 	gtk_box_pack_start (GTK_BOX (vbox), buttonFrame, TRUE, TRUE, 5);
 
-	g_signal_connect (win, "delete-event", G_CALLBACK (closeDialog), NULL);
-	g_signal_connect (win, "response", G_CALLBACK (closeDialog), NULL);
+	g_signal_connect (win, "delete-event", G_CALLBACK (closeGamepadConfig), NULL);
+	g_signal_connect (win, "response", G_CALLBACK (closeGamepadConfig), NULL);
 
 	gtk_widget_show_all (win);
 
@@ -870,6 +892,8 @@ void openGamepadConfig (void)
 			  G_CALLBACK (convertKeypress), NULL);
 	g_signal_connect (G_OBJECT (win), "key-release-event",
 			  G_CALLBACK (convertKeypress), NULL);
+
+	buttonConfigStatus = 1;
 
 	return;
 }

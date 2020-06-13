@@ -1651,7 +1651,7 @@ const char * ButtonName (const ButtConfig * bc, int which)
  * Waits for a button input and returns the information as to which
  * button was pressed.  Used in button configuration.
  */
-int DWaitButton (const uint8 * text, ButtConfig * bc, int wb)
+int DWaitButton (const uint8 * text, ButtConfig * bc, int wb, int *buttonConfigStatus )
 {
 	SDL_Event event;
 	static int32 LastAx[64][64];
@@ -1742,6 +1742,16 @@ int DWaitButton (const uint8 * text, ButtConfig * bc, int wb)
 		}
 		if (done)
 			break;
+
+		// If the button config window is Closed, 
+		// get out of loop.
+		if ( buttonConfigStatus != NULL )
+		{
+			if ( *buttonConfigStatus == 0 )
+			{
+				break;
+			}
+		}
 	}
 
 	return (0);
@@ -1763,7 +1773,7 @@ ConfigButton (char *text, ButtConfig * bc)
 	for (wc = 0; wc < MAXBUTTCONFIG; wc++)
 	{
 		sprintf ((char *) buf, "%s (%d)", text, wc + 1);
-		DWaitButton (buf, bc, wc);
+		DWaitButton (buf, bc, wc, NULL);
 
 		if (wc &&
 				bc->ButtType[wc] == bc->ButtType[wc - 1] &&

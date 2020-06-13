@@ -24,7 +24,7 @@ int getKeyState( int k );
 int ButtonConfigBegin();
 void ButtonConfigEnd();
 void ConfigButton(char *text, ButtConfig *bc);
-int DWaitButton(const uint8 *text, ButtConfig *bc, int wb);
+int DWaitButton(const uint8 *text, ButtConfig *bc, int wb, int *buttonConfigStatus = NULL);
 
 #define BUTTC_KEYBOARD          0x00
 #define BUTTC_JOYSTICK          0x01
