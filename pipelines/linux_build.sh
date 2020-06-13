@@ -32,11 +32,12 @@ sudo apt-get --assume-yes  install lua5.1-dev
 pkg-config --cflags --libs  lua5.1
 
 # Install libSDL-1.2 and libSDL-2
-echo '****************************************'
-echo 'Install Dependency libsdl1.2-dev'
-echo '****************************************'
-sudo apt-get --assume-yes  install libsdl1.2-dev  
-sdl-config --cflags --libs
+# libSDL-1.2 no long needed
+#echo '****************************************'
+#echo 'Install Dependency libsdl1.2-dev'
+#echo '****************************************'
+#sudo apt-get --assume-yes  install libsdl1.2-dev  
+#sdl-config --cflags --libs
 echo '****************************************'
 echo 'Install Dependency libsdl2-dev'
 echo '****************************************'
