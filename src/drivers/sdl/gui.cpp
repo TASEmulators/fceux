@@ -3685,6 +3685,7 @@ int InitGTKSubsystem (int argc, char **argv)
 	g_signal_connect (G_OBJECT (evbox), "button-release-event",
 			  G_CALLBACK (handleMouseClick), NULL);
 
+	// TODO Menu Bar Toggle Needs Work
 	//g_signal_connect(G_OBJECT(MainWindow), "key-release-event", G_CALLBACK(handleKeyRelease), NULL);
 
 	// signal handlers
