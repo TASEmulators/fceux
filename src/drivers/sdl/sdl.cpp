@@ -819,7 +819,7 @@ int main(int argc, char *argv[])
 #ifdef _GTK
 	if(noGui == 0)
 	{
-		int glxwin_pid = spawn_glxwin(0);
+		spawn_glxwin(0); // even though it is not spawning a window, still needed for shared memory segment.
 		gtk_init(&argc, &argv);
 		InitGTKSubsystem(argc, argv);
 		while(gtk_events_pending())
