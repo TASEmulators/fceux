@@ -33,6 +33,7 @@ extern bool gtkIsStarted;
 int InitGTKSubsystem(int argc, char** argv);
 void pushOutputToGTK(const char* str);
 void showGui(bool b);
+void toggleMenuVis(void);
 
 bool checkGTKVersion(int major_required, int minor_required);
 

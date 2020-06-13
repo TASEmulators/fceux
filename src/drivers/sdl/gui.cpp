@@ -2698,7 +2698,7 @@ static GtkWidget *CreateMenubar (GtkWidget * window)
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
 
 	//-Options --> Toggle Menubar ---------------------
-	item = gtk_check_menu_item_new_with_label ("Toggle Menubar (alt)");
+	item = gtk_check_menu_item_new_with_label ("Toggle Menubar  (Alt+M)");
 
 	//gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(item), FALSE);
 
@@ -3039,27 +3039,19 @@ void showGui (bool b)
 	}
 }
 
-gint handleKeyRelease (GtkWidget * w, GdkEvent * event, gpointer cb_data)
+void toggleMenuVis(void)
 {
 	if (menuTogglingEnabled)
 	{
-		static bool menuShown = true;
-		if (((GdkEventKey *) event)->keyval == GDK_KEY_Alt_L
-		    || ((GdkEventKey *) event)->keyval == GDK_KEY_Alt_R)
+		if ( gtk_widget_get_visible(Menubar) )
 		{
-			if (menuShown)
-			{
-				gtk_widget_hide (Menubar);
-				menuShown = false;
-			}
-			else
-			{
-				gtk_widget_show (Menubar);
-				menuShown = true;
-			}
+			gtk_widget_hide (Menubar);
+		}
+		else
+		{
+			gtk_widget_show (Menubar);
 		}
 	}
-	return 0;
 };
 
 int GtkMouseData[3] = { 0, 0, 0 };
@@ -3684,9 +3676,6 @@ int InitGTKSubsystem (int argc, char **argv)
 			  G_CALLBACK (handleMouseClick), NULL);
 	g_signal_connect (G_OBJECT (evbox), "button-release-event",
 			  G_CALLBACK (handleMouseClick), NULL);
-
-	// TODO Menu Bar Toggle Needs Work
-	//g_signal_connect(G_OBJECT(MainWindow), "key-release-event", G_CALLBACK(handleKeyRelease), NULL);
 
 	// signal handlers
 	g_signal_connect (MainWindow, "delete-event", quit, NULL);

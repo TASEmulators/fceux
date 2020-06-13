@@ -501,31 +501,45 @@ static void KeyboardCommands (void)
 	//{
 	//	ToggleFS ();
 	//}
+	//
+	
+	// Alt-M to toggle Main Menu Visibility
+	if ( is_alt )
+	{
+		if (keyonly (M))
+		{
+			toggleMenuVis();
+		}
+	}
 
 	// Toggle Movie auto-backup
-	if (keyonly (M) && is_shift)
+	if ( is_shift )
 	{
-		autoMovieBackup ^= 1;
-		FCEUI_DispMessage ("Automatic movie backup %sabled.", 0,
-			 autoMovieBackup ? "en" : "dis");
+		if (keyonly (M))
+		{
+			autoMovieBackup ^= 1;
+			FCEUI_DispMessage ("Automatic movie backup %sabled.", 0,
+				 autoMovieBackup ? "en" : "dis");
+		}
 	}
 
-	// Start recording an FM2 movie on Alt+R
-	if (keyonly (R) && is_alt)
+	if ( is_alt )
 	{
-		FCEUD_MovieRecordTo ();
-	}
-
-	// Save a state from a file
-	if (keyonly (S) && is_alt)
-	{
-		FCEUD_SaveStateAs ();
-	}
-
-	// Load a state from a file
-	if (keyonly (L) && is_alt)
-	{
-		FCEUD_LoadStateFrom ();
+		// Start recording an FM2 movie on Alt+R
+		if (keyonly (R))
+		{
+			FCEUD_MovieRecordTo ();
+		}
+		// Save a state from a file
+		if (keyonly (S))
+		{
+			FCEUD_SaveStateAs ();
+		}
+		// Load a state from a file
+		if (keyonly (L))
+		{
+			FCEUD_LoadStateFrom ();
+		}
 	}
 
 		// Famicom disk-system games
