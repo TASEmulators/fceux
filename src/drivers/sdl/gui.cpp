@@ -191,7 +191,7 @@ int configGamepadButton (GtkButton * button, gpointer p)
 
 void resetVideo (void)
 {
-	resizeGtkWindow ();
+	//resizeGtkWindow ();
 	KillVideo ();
 	InitVideo (GameInfo);
 }
@@ -3399,7 +3399,7 @@ static void cairo_handle_resize(void)
 	cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_ARGB32, w, h );
 	//cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24, w, h );
 
-	printf("Cairo Surface: %p \n", cairo_surface );
+	//printf("Cairo Surface: %p \n", cairo_surface );
 
 	//cairo_format = cairo_image_surface_get_format( cairo_surface );
 
@@ -3532,11 +3532,11 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	//gtk_widget_realize(evbox);
 	
 	//flushGtkEvents ();
-	if ( winsize_changed && (GameInfo != 0) )
-	{
-		KillVideo ();
-		InitVideo (GameInfo);
-	}
+	//if ( winsize_changed && (GameInfo != 0) )
+	//{
+	//	KillVideo ();
+	//	InitVideo (GameInfo);
+	//}
 
 	gtk_widget_queue_draw( evbox );
 

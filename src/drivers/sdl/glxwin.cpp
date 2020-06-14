@@ -32,7 +32,7 @@ static Window                  win;
 static GLXContext              glc = NULL;
 static XWindowAttributes       gwa;
 static XEvent                  xev;
-static GLint  double_buffer_ena = True;
+static GLint  double_buffer_ena = 1;
 
 static GLuint gltexture = 0;
 static int    spawn_new_window = 0;
@@ -91,8 +91,11 @@ static void getAttrbList( GLint *buf )
 	buf[i] = GLX_RGBA; i++;
 	buf[i] = GLX_DEPTH_SIZE; i++;
 	buf[i] = 24; i++;
-	buf[i] = GLX_DOUBLEBUFFER ; i++;
-	buf[i] = double_buffer_ena; i++;
+
+	if ( double_buffer_ena )
+	{
+		buf[i] = GLX_DOUBLEBUFFER ; i++;
+	}
 	buf[i] = None;
 
 }
@@ -280,9 +283,14 @@ static void render_image(void)
 	//glVertex2f( 1.0f,  1.0f);	// Top right of target.
 	//glEnd();
 
-	glFlush();
-
-	glXSwapBuffers( dpy, win );
+	if ( double_buffer_ena )
+	{
+		glXSwapBuffers( dpy, win );
+	}
+	else
+	{
+		glFlush();
+	}
 }
 //************************************************************************
 static int mainWindowLoop(void)

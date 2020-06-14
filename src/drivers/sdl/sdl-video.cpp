@@ -100,7 +100,7 @@ KillVideo()
 		glx_shm->clear_pixbuf();
 	}
 
-	//destroy_gui_video();
+	destroy_gui_video();
 
 	// return failure if the video system was not initialized
 	if (s_inited == 0)
