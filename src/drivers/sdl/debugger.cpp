@@ -141,6 +141,12 @@ struct debuggerWin_t
 		textbuf = NULL;
 		bp_store = NULL;
 		bp_tree = NULL;
+		bkm_store = NULL;
+		bkm_tree = NULL;
+		pc_entry = NULL;
+		A_entry = NULL;
+		X_entry = NULL;
+		Y_entry = NULL;
 		stackview = NULL;
 		stackTextBuf = NULL;
 		ppu_label = NULL;
