@@ -911,11 +911,18 @@ int main(int argc, char *argv[])
 		while(1)
 		{
 			if(GameInfo)
+			{
 				DoFun(frameskip, periodic_saves);
+			}
 			else
+			{
 				SDL_Delay(1);
+			}
+
 			while(gtk_events_pending())
-			gtk_main_iteration_do(FALSE);
+			{
+				gtk_main_iteration_do(FALSE);
+			}
 		}
 	}
 	else
