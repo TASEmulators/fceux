@@ -446,7 +446,6 @@ static void KeyboardCommands (void)
 {
 	int is_shift, is_alt;
 
-	char *movie_fname = "";
 	// get the keyboard input
 
 	// check if the family keyboard is enabled
@@ -573,10 +572,9 @@ static void KeyboardCommands (void)
 		{
 			if (is_shift)
 			{
-				movie_fname =
-				const_cast <char *>(FCEU_MakeFName (FCEUMKF_MOVIE, 0, 0).c_str ());
-				FCEUI_printf ("Recording movie to %s\n", movie_fname);
-				FCEUI_SaveMovie (movie_fname, MOVIE_FLAG_NONE, L"");
+				std::string movie_fname = FCEU_MakeFName (FCEUMKF_MOVIE, 0, 0);
+				FCEUI_printf ("Recording movie to %s\n", movie_fname.c_str() );
+				FCEUI_SaveMovie(movie_fname.c_str() , MOVIE_FLAG_NONE, L"");
 			}
 			else
 			{
