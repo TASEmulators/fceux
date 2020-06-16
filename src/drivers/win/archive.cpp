@@ -181,7 +181,7 @@ protected:
 public:
 
 	explicit InStream()
-	: refCount(0)
+	: refCount(0), size(0)
 	{}
 };
 
@@ -374,17 +374,21 @@ void initArchiveSystem()
 	}
 }
 
-static std::string wstringFromPROPVARIANT(BSTR bstr, bool& success) {
+static std::string wstringFromPROPVARIANT(BSTR bstr, bool& success) 
+{
+	std::string strret;
 	std::wstring tempfname = bstr;
 	int buflen = tempfname.size()*2;
 	char* buf = new char[buflen];
 	int ret = WideCharToMultiByte(CP_ACP,0,tempfname.c_str(),tempfname.size(),buf,buflen,0,0);
-	if(ret == 0) {
+	if (ret == 0) 
+	{
 		delete[] buf;
 		success = false;
+		return strret;
 	}
 	buf[ret] = 0;
-	std::string strret = buf;
+	strret = buf;
 	delete[] buf;
 	success = true;
 	return strret;
