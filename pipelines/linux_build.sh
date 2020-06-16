@@ -112,3 +112,6 @@ echo '**************************************************************'
 echo 'Testing Install of Package'
 echo '**************************************************************'
 sudo dpkg -i /tmp/fceux-*.deb
+
+echo 'Pushing Debian Package to Build Artifacts'
+appveyor PushArtifact /tmp/fceux-*.deb
