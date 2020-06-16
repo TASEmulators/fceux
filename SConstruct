@@ -19,8 +19,8 @@ opts.AddVariables(
   BoolVariable('FRAMESKIP', 'Enable frameskipping', 1),
   BoolVariable('OPENGL',    'Enable OpenGL support', 1),
   BoolVariable('LUA',       'Enable Lua support', 1),
-  BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 1),
-  BoolVariable('GTK3', 'Enable GTK3 GUI (SDL only)', 0),
+  BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 0),
+  BoolVariable('GTK3', 'Enable GTK3 GUI (SDL only)', 1),
   BoolVariable('NEWPPU',    'Enable new PPU core', 1),
   BoolVariable('CREATE_AVI', 'Enable avi creation support (SDL only)', 1),
   BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', 1),
@@ -28,7 +28,7 @@ opts.AddVariables(
   BoolVariable('SYSTEM_MINIZIP', 'Use system minizip instead of static minizip provided with fceux', 0),
   BoolVariable('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
   BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 0),
-  BoolVariable('SDL2', 'Compile using SDL2 instead of SDL 1.2 (experimental/non-functional)', 0)
+  BoolVariable('SDL2', 'Compile using SDL2 instead of SDL 1.2 (experimental/non-functional)', 1)
 )
 AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', metavar='DIR', help='installation prefix')
 
@@ -44,7 +44,7 @@ if platform.system == "ppc":
   env['LSB_FIRST'] = 0
 
 # Default compiler flags:
-env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare'])
+env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare', '-Wno-parentheses', '-Wno-unused-local-typedefs'])
 env.Append(CXXFLAGS = ['-std=c++0x'])
 
 if 'PLATFORM' in os.environ:
@@ -97,7 +97,7 @@ else:
   if conf.CheckFunc('asprintf'):
     conf.env.Append(CCFLAGS = "-DHAVE_ASPRINTF")
   if env['SYSTEM_MINIZIP']:
-    assert conf.CheckLibWithHeader('minizip', 'minizip/unzip.h', 'C', 'unzOpen;', 1), "please install: libminizip"
+    assert env.ParseConfig('pkg-config minizip --cflags --libs'), "please install: libminizip"
     assert conf.CheckLibWithHeader('z', 'zlib.h', 'c', 'inflate;', 1), "please install: zlib"
     env.Append(CPPDEFINES=["_SYSTEM_MINIZIP"])
   else:
@@ -153,6 +153,9 @@ else:
       elif conf.CheckLib('lua5.1'):
         lua_link_flags  = "-llua5.1"
         lua_include_dir = "/usr/include/lua5.1"
+      elif conf.CheckLib('lua-5.1'):
+        lua_link_flags  = "-llua-5.1"
+        lua_include_dir = "/usr/include/lua-5.1"
       elif conf.CheckLib('lua'):
         lua_link_flags  = "-llua"
         lua_include_dir = "/usr/include/lua"
@@ -183,7 +186,7 @@ else:
    
   if env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c', autoadd=1):
     conf.env.Append(CCFLAGS = "-DOPENGL")
-  conf.env.Append(CPPDEFINES = ['PSS_STYLE=1'])
+  conf.env.Append(CPPDEFINES = ['PSS_STYLE=1',"FCEUDEF_DEBUGGER"])
   
   env = conf.Finish()
 

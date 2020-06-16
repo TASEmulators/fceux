@@ -75,9 +75,13 @@ SpeedThrottle()
 	else
 		InFrame = 0;
     
-	/*fprintf(stderr, "attempting to sleep %Ld ms, frame complete=%s\n",
-		time_left, InFrame?"no":"yes");*/
-	SDL_Delay(time_left);
+	//fprintf(stderr, "attempting to sleep %Ld ms, frame complete=%s\n",
+	//	time_left, InFrame?"no":"yes");
+
+	if ( time_left > 0 )
+	{
+		SDL_Delay(time_left);
+	}
     
 	if(!InFrame)
 	{
