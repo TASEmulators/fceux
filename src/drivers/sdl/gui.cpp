@@ -34,10 +34,22 @@
 #include <gdk/gdkkeysyms-compat.h>
 #endif
 
+#ifdef APPLEOPENGL
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#include <OpenGL/glext.h>
+#else
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+#endif
+
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
 #include <list>
+
+#include "glxwin.h"
 
 // Fix compliation errors for older version of GTK (Ubuntu 10.04 LTS)
 #if GTK_MINOR_VERSION < 24 && GTK_MAJOR_VERSION == 2
@@ -60,18 +72,23 @@ GtkWidget *MainWindow = NULL;
 GtkWidget *evbox = NULL;
 GtkWidget *padNoCombo = NULL;
 GtkWidget *configNoCombo = NULL;
-GtkWidget *buttonMappings[10];
+GtkWidget *buttonMappings[10] = { NULL };
 static GtkWidget *Menubar = NULL;
 static GtkRadioMenuItem *stateSlot[10] = { NULL };
 bool gtkIsStarted = false;
 bool menuTogglingEnabled = false;
+static int buttonConfigStatus = 0;
 
+static char useCairoDraw = 0;
+static int drawAreaGL = 0;
 unsigned int gtk_draw_area_width = NES_WIDTH;
 unsigned int gtk_draw_area_height = NES_HEIGHT;
-static unsigned int gtk_win_width = 0;
-static unsigned int gtk_win_height = 0;
-static int gtk_win_menu_ysize = 30;
 static GtkTreeStore *hotkey_store = NULL;
+static cairo_surface_t *cairo_surface = NULL;
+static cairo_pattern_t *cairo_pattern = NULL;
+static int *cairo_pix_remapper = NULL;
+static int  numRendLines = 0;
+static void cairo_recalc_mapper(void);
 
 static gint convertKeypress (GtkWidget * grab, GdkEventKey * event, gpointer user_data);
 
@@ -129,11 +146,13 @@ int configGamepadButton (GtkButton * button, gpointer p)
 	if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (button)))
 		return 0;
 
+	buttonConfigStatus = 2;
+
 	ButtonConfigBegin ();
 
 	snprintf (buf, sizeof(buf)-1, "SDL.Input.GamePad.%d.", padNo);
 	prefix = buf;
-	DWaitButton (NULL, &GamePadConfig[padNo][x], configNo);
+	DWaitButton (NULL, &GamePadConfig[padNo][x], configNo, &buttonConfigStatus );
 
 	g_config->setOption (prefix + GamePadNames[x],
 			     GamePadConfig[padNo][x].ButtonNum[configNo]);
@@ -155,9 +174,15 @@ int configGamepadButton (GtkButton * button, gpointer p)
 
 	snprintf (buf, sizeof (buf), "<tt>%s</tt>",
 		  ButtonName (&GamePadConfig[padNo][x], configNo));
-	gtk_label_set_markup (GTK_LABEL (buttonMappings[x]), buf);
+
+	if ( buttonMappings[x] != NULL )
+	{
+		gtk_label_set_markup (GTK_LABEL (buttonMappings[x]), buf);
+	}
 
 	ButtonConfigEnd ();
+
+	buttonConfigStatus = 1;
 
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), FALSE);
 
@@ -166,7 +191,7 @@ int configGamepadButton (GtkButton * button, gpointer p)
 
 void resetVideo (void)
 {
-	resizeGtkWindow ();
+	//resizeGtkWindow ();
 	KillVideo ();
 	InitVideo (GameInfo);
 }
@@ -537,11 +562,7 @@ static void hotKeyWindowRefresh (void)
 		g_config->getOption (optionName.c_str (), &keycode);
 		gtk_tree_store_set (hotkey_store, &iter,
 				    0, optionName.c_str (), 1,
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 				    SDL_GetKeyName (keycode),
-#else
-				    SDL_GetKeyName ((SDLKey) keycode),
-#endif
 				    -1);
 		gtk_tree_store_append (hotkey_store, &iter, NULL);	// acquire child iterator
 	}
@@ -586,11 +607,8 @@ static gint hotKeyPressCB (GtkTreeView * tree, GdkEventKey * event,
 			hotKeyName.append ( getHotkeyString(indexArray[0]) );
 
 			// Convert this keypress from GDK to SDL.
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 			sdlkey = GDKToSDLKeyval (event->keyval);
-#else
-			sdlkey = (SDLKey) GDKToSDLKeyval (event->keyval);
-#endif
+
 			printf ("HotKey Index: %i   '%s'  %i   %i \n",
 				indexArray[0], hotKeyName.c_str (),
 				event->keyval, sdlkey);
@@ -677,6 +695,11 @@ void updateGamepadConfig (GtkWidget * w, gpointer p)
 {
 	int i;
 	char strBuf[128];
+
+	if ( (padNoCombo == NULL) || (configNoCombo == NULL) )
+	{
+		return;
+	}
 	int padNo =
 		atoi (gtk_combo_box_text_get_active_text
 		      (GTK_COMBO_BOX_TEXT (padNoCombo))) - 1;
@@ -687,39 +710,40 @@ void updateGamepadConfig (GtkWidget * w, gpointer p)
 	for (i = 0; i < 10; i++)
 	{
 		GtkWidget *mappedKey = buttonMappings[i];
-		if (GamePadConfig[padNo][i].ButtType[configNo] ==
-		    BUTTC_KEYBOARD)
+		if (GamePadConfig[padNo][i].ButtType[configNo] == BUTTC_KEYBOARD)
 		{
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 			snprintf (strBuf, sizeof (strBuf), "<tt>%s</tt>",
 				  SDL_GetKeyName (GamePadConfig[padNo][i].
 						  ButtonNum[configNo]));
-#else
-			snprintf (strBuf, sizeof (strBuf), "<tt>%s</tt>",
-				  SDL_GetKeyName ((SDLKey)
-						  GamePadConfig[padNo][i].
-						  ButtonNum[configNo]));
-#endif
 		}
 		else		
 			sprintf (strBuf, "<tt>%s</tt>", ButtonName( &GamePadConfig[padNo][i], configNo ) );
 
-		gtk_label_set_text (GTK_LABEL (mappedKey), strBuf);
-		gtk_label_set_use_markup (GTK_LABEL (mappedKey), TRUE);
+		if ( mappedKey != NULL )
+		{
+			gtk_label_set_text (GTK_LABEL (mappedKey), strBuf);
+			gtk_label_set_use_markup (GTK_LABEL (mappedKey), TRUE);
+		}
 	}
+}
+
+static void closeGamepadConfig (GtkWidget * w, GdkEvent * e, gpointer p)
+{
+	gtk_widget_destroy (w);
+
+	padNoCombo    = NULL;
+	configNoCombo = NULL;
+
+	for (int i = 0; i < 10; i++)
+	{
+		buttonMappings[i] = NULL;
+	}
+	buttonConfigStatus = 0;
 }
 
 // creates and opens the gamepad config window (requires GTK 2.24)
 void openGamepadConfig (void)
 {
-	// GTK 2.24 required for this dialog
-	if (checkGTKVersion (2, 24) == false)
-	{
-		// TODO: present this in a GTK MessageBox?
-		printf (" Warning: GTK >= 2.24 required for this dialog.\nTo configure the gamepads, use \"--inputcfg\" from the command line (ie: \"fceux --inputcfg gamepad1\").\n");
-		return;
-	}
-
 	GtkWidget *win;
 	GtkWidget *vbox;
 	GtkWidget *hboxPadNo;
@@ -859,8 +883,8 @@ void openGamepadConfig (void)
 
 	gtk_box_pack_start (GTK_BOX (vbox), buttonFrame, TRUE, TRUE, 5);
 
-	g_signal_connect (win, "delete-event", G_CALLBACK (closeDialog), NULL);
-	g_signal_connect (win, "response", G_CALLBACK (closeDialog), NULL);
+	g_signal_connect (win, "delete-event", G_CALLBACK (closeGamepadConfig), NULL);
+	g_signal_connect (win, "response", G_CALLBACK (closeGamepadConfig), NULL);
 
 	gtk_widget_show_all (win);
 
@@ -868,6 +892,8 @@ void openGamepadConfig (void)
 			  G_CALLBACK (convertKeypress), NULL);
 	g_signal_connect (G_OBJECT (win), "key-release-event",
 			  G_CALLBACK (convertKeypress), NULL);
+
+	buttonConfigStatus = 1;
 
 	return;
 }
@@ -2192,30 +2218,17 @@ static void changeState (GtkRadioMenuItem * radiomenuitem, gpointer user_data)
 	FCEUI_SelectState ((long) user_data, 1);
 }
 
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 // SDL 1.2/2.0 compatibility macros
 #define SDLK_SCROLLOCK SDLK_SCROLLLOCK
 #define SDLK_PRINT SDLK_PRINTSCREEN
 #define SDLK_BREAK 0
 #define SDLK_COMPOSE 0
 #define SDLK_NUMLOCK SDLK_NUMLOCKCLEAR
-#define SDLK_KP0 SDLK_KP_0
-#define SDLK_KP1 SDLK_KP_1
-#define SDLK_KP2 SDLK_KP_2
-#define SDLK_KP3 SDLK_KP_3
-#define SDLK_KP4 SDLK_KP_4
-#define SDLK_KP5 SDLK_KP_5
-#define SDLK_KP6 SDLK_KP_6
-#define SDLK_KP7 SDLK_KP_7
-#define SDLK_KP8 SDLK_KP_8
-#define SDLK_KP9 SDLK_KP_9
-#define SDLK_LSUPER SDLK_LGUI
-#define SDLK_RSUPER SDLK_RGUI
 #define SDLK_LMETA 0
 #define SDLK_RMETA 0
-#endif
+
 // Adapted from Gens/GS.  Converts a GDK key value into an SDL key value.
-unsigned short GDKToSDLKeyval (int gdk_key)
+unsigned int GDKToSDLKeyval (int gdk_key)
 {
 	if (!(gdk_key & 0xFF00))
 	{
@@ -2242,7 +2255,7 @@ unsigned short GDKToSDLKeyval (int gdk_key)
 	}
 
 	// Non-ASCII symbol.
-	static const uint16_t gdk_to_sdl_table[0x100] = {
+	static const int gdk_to_sdl_table[0x100] = {
 		// 0x00 - 0x0F
 		0x0000, 0x0000, 0x0000, 0x0000,
 		0x0000, 0x0000, 0x0000, 0x0000,
@@ -2292,16 +2305,16 @@ unsigned short GDKToSDLKeyval (int gdk_key)
 		0x0000, 0x0000, SDLK_MODE, SDLK_NUMLOCK,
 
 		// 0x80 - 0x8F [mostly unused, except for some numeric keypad keys]
-		SDLK_KP5, 0x0000, 0x0000, 0x0000,
+		SDLK_KP_5, 0x0000, 0x0000, 0x0000,
 		0x0000, 0x0000, 0x0000, 0x0000,
 		0x0000, 0x0000, 0x0000, 0x0000,
 		0x0000, SDLK_KP_ENTER, 0x0000, 0x0000,
 
 		// 0x90 - 0x9F
 		0x0000, 0x0000, 0x0000, 0x0000,
-		0x0000, SDLK_KP7, SDLK_KP4, SDLK_KP8,
-		SDLK_KP6, SDLK_KP2, SDLK_KP9, SDLK_KP3,
-		SDLK_KP1, SDLK_KP5, SDLK_KP0, SDLK_KP_PERIOD,
+		0x0000, SDLK_KP_7, SDLK_KP_4, SDLK_KP_8,
+		SDLK_KP_6, SDLK_KP_2, SDLK_KP_9, SDLK_KP_3,
+		SDLK_KP_1, SDLK_KP_5, SDLK_KP_0, SDLK_KP_PERIOD,
 
 		// 0xA0 - 0xAF
 		0x0000, 0x0000, 0x0000, 0x0000,
@@ -2310,9 +2323,9 @@ unsigned short GDKToSDLKeyval (int gdk_key)
 		0x0000, SDLK_KP_MINUS, SDLK_KP_PERIOD, SDLK_KP_DIVIDE,
 
 		// 0xB0 - 0xBF
-		SDLK_KP0, SDLK_KP1, SDLK_KP2, SDLK_KP3,
-		SDLK_KP4, SDLK_KP5, SDLK_KP6, SDLK_KP7,
-		SDLK_KP8, SDLK_KP9, 0x0000, 0x0000,
+		SDLK_KP_0, SDLK_KP_1, SDLK_KP_2, SDLK_KP_3,
+		SDLK_KP_4, SDLK_KP_5, SDLK_KP_6, SDLK_KP_7,
+		SDLK_KP_8, SDLK_KP_9, 0x0000, 0x0000,
 		0x0000, SDLK_KP_EQUALS, SDLK_F1, SDLK_F2,
 
 		// 0xC0 - 0xCF
@@ -2330,8 +2343,8 @@ unsigned short GDKToSDLKeyval (int gdk_key)
 		// 0xE0 - 0xEF
 		0x0000, SDLK_LSHIFT, SDLK_RSHIFT, SDLK_LCTRL,
 		SDLK_RCTRL, SDLK_CAPSLOCK, 0x0000, SDLK_LMETA,
-		SDLK_RMETA, SDLK_LALT, SDLK_RALT, SDLK_LSUPER,
-		SDLK_RSUPER, 0x0000, 0x0000, 0x0000,
+		SDLK_RMETA, SDLK_LALT, SDLK_RALT, SDLK_LGUI,
+		SDLK_RGUI, 0x0000, 0x0000, 0x0000,
 
 		// 0xF0 - 0xFF [mostly unused, except for Delete]
 		0x0000, 0x0000, 0x0000, 0x0000,
@@ -2340,7 +2353,7 @@ unsigned short GDKToSDLKeyval (int gdk_key)
 		0x0000, 0x0000, 0x0000, SDLK_DELETE,
 	};
 
-	unsigned short sdl_key = gdk_to_sdl_table[gdk_key & 0xFF];
+	unsigned int sdl_key = gdk_to_sdl_table[gdk_key & 0xFF];
 	if (sdl_key == 0)
 	{
 		// Unhandled GDK key.
@@ -2350,10 +2363,11 @@ unsigned short GDKToSDLKeyval (int gdk_key)
 	}
 
 	// ignore pause and screenshot hotkeys since they is handled by GTK+ as accelerators
-	if (sdl_key == Hotkeys[HK_PAUSE] || sdl_key == Hotkeys[HK_SCREENSHOT] ||
-	    sdl_key == Hotkeys[HK_SAVE_STATE]
-	    || sdl_key == Hotkeys[HK_LOAD_STATE])
+	if ( (sdl_key == Hotkeys[HK_PAUSE]) || (sdl_key == Hotkeys[HK_SCREENSHOT]) ||
+	     (sdl_key == Hotkeys[HK_SAVE_STATE]) || (sdl_key == Hotkeys[HK_LOAD_STATE]) )
+	{
 		return 0;
+	}
 
 	return sdl_key;
 }
@@ -2364,24 +2378,18 @@ static gboolean convertKeypress (GtkWidget * grab, GdkEventKey * event,
 			     gpointer user_data)
 {
 	SDL_Event sdlev;
-	int keystate;
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_Keycode sdlkey;
-#else
-	SDLKey sdlkey;
-#endif
+
 	switch (event->type)
 	{
 		case GDK_KEY_PRESS:
 			sdlev.type = SDL_KEYDOWN;
 			sdlev.key.state = SDL_PRESSED;
-			keystate = 1;
 			break;
 
 		case GDK_KEY_RELEASE:
 			sdlev.type = SDL_KEYUP;
 			sdlev.key.state = SDL_RELEASED;
-			keystate = 0;
 			break;
 
 		default:
@@ -2391,30 +2399,42 @@ static gboolean convertKeypress (GtkWidget * grab, GdkEventKey * event,
 	}
 
 	// Convert this keypress from GDK to SDL.
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 	sdlkey = GDKToSDLKeyval (event->keyval);
-#else
-	sdlkey = (SDLKey) GDKToSDLKeyval (event->keyval);
-#endif
 
 	// Create an SDL event from the keypress.
+	sdlev.key.keysym.scancode = SDL_GetScancodeFromKey(sdlkey);
 	sdlev.key.keysym.sym = sdlkey;
+
+	sdlev.key.keysym.mod = 0;
+
+	if ( event->state & GDK_SHIFT_MASK )
+	{
+		sdlev.key.keysym.mod |= KMOD_SHIFT;
+	}
+	if ( event->state & GDK_CONTROL_MASK )
+	{
+		sdlev.key.keysym.mod |= KMOD_CTRL;
+	}
+	if ( event->state & GDK_MOD1_MASK )
+	{
+		sdlev.key.keysym.mod |= KMOD_ALT;
+	}
+	sdlev.key.repeat = 0;
+
+
+	if ( (event->state & GDK_MOD1_MASK) ||
+			getKeyState( SDL_SCANCODE_LALT ) || getKeyState( SDL_SCANCODE_RALT ) )
+	{
+		// Don't pass ALT + Enter to game, as this toggles fullscreen in GTK
+		if ( sdlkey == SDLK_RETURN )
+		{
+			return FALSE;
+		}
+	}
+
 	if (sdlkey != 0)
 	{
 		SDL_PushEvent (&sdlev);
-
-		// Only let the emulator handle the key event if this window has the input focus.
-		//if (keystate == 0
-		//    || gtk_window_is_active (GTK_WINDOW (MainWindow)))
-		//{
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-			// Not sure how to do this yet with SDL 2.0
-			// TODO - SDL 2.0
-			//SDL_GetKeyboardState(NULL)[SDL_GetScancodeFromKey(sdlkey)] = keystate;
-#else
-			SDL_GetKeyState (NULL)[sdlkey] = keystate;
-#endif
-		//}
 	}
 
 	// Allow GTK+ to process this key.
@@ -2678,7 +2698,7 @@ static GtkWidget *CreateMenubar (GtkWidget * window)
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
 
 	//-Options --> Toggle Menubar ---------------------
-	item = gtk_check_menu_item_new_with_label ("Toggle Menubar (alt)");
+	item = gtk_check_menu_item_new_with_label ("Toggle Menubar  (Alt+M)");
 
 	//gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(item), FALSE);
 
@@ -3004,32 +3024,34 @@ void pushOutputToGTK (const char *str)
 void showGui (bool b)
 {
 	if (b)
+	{
+		//gtk_window_unmaximize( GTK_WINDOW(MainWindow) );
+		gtk_window_unfullscreen( GTK_WINDOW(MainWindow) );
 		gtk_widget_show_all (MainWindow);
+		//gtk_window_unfullscreen( GTK_WINDOW(MainWindow) );
+	}
 	else
-		gtk_widget_hide (MainWindow);
+	{
+		//gtk_widget_hide (MainWindow);
+		//gtk_widget_hide (Menubar);
+		//gtk_window_maximize( GTK_WINDOW(MainWindow) );
+		gtk_window_fullscreen( GTK_WINDOW(MainWindow) );
+	}
 }
 
-gint handleKeyRelease (GtkWidget * w, GdkEvent * event, gpointer cb_data)
+void toggleMenuVis(void)
 {
 	if (menuTogglingEnabled)
 	{
-		static bool menuShown = true;
-		if (((GdkEventKey *) event)->keyval == GDK_KEY_Alt_L
-		    || ((GdkEventKey *) event)->keyval == GDK_KEY_Alt_R)
+		if ( gtk_widget_get_visible(Menubar) )
 		{
-			if (menuShown)
-			{
-				gtk_widget_hide (Menubar);
-				menuShown = false;
-			}
-			else
-			{
-				gtk_widget_show (Menubar);
-				menuShown = true;
-			}
+			gtk_widget_hide (Menubar);
+		}
+		else
+		{
+			gtk_widget_show (Menubar);
 		}
 	}
-	return 0;
 };
 
 int GtkMouseData[3] = { 0, 0, 0 };
@@ -3070,37 +3092,424 @@ gint handleMouseClick (GtkWidget * widget, GdkEvent * event,
 	return 0;
 }
 
+union cairo_pixel_t
+{
+	uint32_t  u32;
+	uint8_t   u8[4];
+};
+
+static void transferPix2CairoSurface(void)
+{
+	union cairo_pixel_t *p;
+	union cairo_pixel_t *g;
+	int x, y, i,j, w, h;
+
+	if ( cairo_surface == NULL )
+	{
+		return;
+	}
+	//printf("Cairo Pixel ReMap\n");
+	cairo_surface_flush( cairo_surface );
+
+	if ( numRendLines != glx_shm->nrow )
+	{
+		cairo_recalc_mapper();
+	}
+
+	w  = cairo_image_surface_get_width (cairo_surface);
+	h  = cairo_image_surface_get_height (cairo_surface);
+
+	p = (cairo_pixel_t*)cairo_image_surface_get_data (cairo_surface);
+	g = (cairo_pixel_t*)glx_shm->pixbuf;
+
+	i=0;
+	for (y=0; y<h; y++)
+	{
+		for (x=0; x<w; x++)
+		{
+			j = cairo_pix_remapper[i];
+
+			if ( j < 0 )
+			{
+				p[i].u32 = 0xff000000;
+			}
+			else
+			{
+				// RGBA to ARGB
+				#ifdef LSB_FIRST
+				p[i].u8[2] = g[j].u8[0];
+				p[i].u8[1] = g[j].u8[1];
+				p[i].u8[0] = g[j].u8[2];
+				p[i].u8[3] = 0xff; // Force Alpha to full
+				#else	
+				// Big-Endian is untested.
+				p[i].u8[2] = g[j].u8[0];
+				p[i].u8[1] = g[j].u8[1];
+				p[i].u8[0] = g[j].u8[2];
+				p[i].u8[3] = 0xff; // Force Alpha to full
+				#endif
+				//p[i].u32 = 0xffffffff;
+			}
+			i++;
+		}
+	}
+
+	cairo_surface_mark_dirty( cairo_surface );
+
+	gtk_widget_queue_draw( evbox );
+}
+
+uint32_t *getGuiPixelBuffer( int *w, int *h, int *s )
+{
+	if ( w ) *w = GLX_NES_WIDTH;
+	if ( h ) *h = GLX_NES_HEIGHT;
+	if ( s ) *s = GLX_NES_WIDTH*4;
+
+	//return NULL;
+	return glx_shm->pixbuf;
+		
+	//if ( cairo_surface == NULL )
+	//{
+	//	if ( w ) *w = 0;
+	//	if ( h ) *h = 0;
+	//	if ( s ) *s = 0;
+	//	return NULL;
+	//}
+	//cairo_surface_flush( cairo_surface );
+
+	//if ( w )
+	//{
+	//	*w = cairo_image_surface_get_width (cairo_surface);
+	//}
+	//if ( h )
+	//{
+	//	*h = cairo_image_surface_get_height (cairo_surface);
+	//}
+	//if ( s )
+	//{
+	//	*s = cairo_image_surface_get_stride(cairo_surface);
+	//}
+
+	////return NULL;
+	//return (uint32_t*)cairo_image_surface_get_data (cairo_surface);
+}
+
+int  guiPixelBufferReDraw(void)
+{
+	glx_shm->blit_count++;
+
+	if ( useCairoDraw )
+	{
+		transferPix2CairoSurface();
+	}
+	else
+	{
+		gtk3_glx_render();
+	}
+
+	return 0;
+}
+
+int  guiClearSurface(void)
+{
+	uint32_t *p;
+	int w, h, z, i;
+
+	if ( cairo_surface != NULL )
+	{
+		cairo_surface_flush( cairo_surface );
+
+		p = (uint32_t*)cairo_image_surface_get_data (cairo_surface);
+		
+		w  = cairo_image_surface_get_width (cairo_surface);
+		h  = cairo_image_surface_get_height (cairo_surface);
+
+		z = w * h;
+		for (i=0; i<z; i++)
+		{
+			p[i] = 0x00000000;
+		}
+		cairo_surface_mark_dirty( cairo_surface );
+	}
+	return 0;
+}
+
+//static void loadPixelTestPattern(void)
+//{
+//	uint32_t *p;
+//	int i,x,y,width,height,w2,h2;
+//
+//	width  = 256;
+//	height = 256;
+//	p = (uint32_t*)glx_shm->pixbuf;
+//
+//	w2 = width / 2;
+//	h2 = height / 2;
+//
+//	//printf("W:%i   H:%i   W/2:%i  H/2:%i\n", width, height, w2, h2 );
+//
+//	i=0;
+//	for (y=0; y<height; y++)
+//	{
+//		for (x=0; x<width; x++)
+//		{
+//			if ( x < w2 )
+//			{
+//				if ( y < h2 )
+//				{
+//			      p[i] = 0xff0000ff; 
+//				}
+//				else
+//				{
+//			      p[i] = 0xffffffff; 
+//				}
+//			}
+//			else
+//			{
+//				if ( y < h2 )
+//				{
+//			      p[i] = 0xffff0000; 
+//				}
+//				else
+//				{
+//			      p[i] = 0xff00ff00; 
+//				}
+//			}
+//			i++;
+//		}
+//	}
+//
+//}
+
+static void cairo_recalc_mapper(void)
+{
+	int w, h, s;
+	int i, j, x, y;
+	int   sw, sh, rx, ry, gw, gh;
+	int llx, lly, urx, ury;
+	float sx, sy, nw, nh;
+
+	w  = cairo_image_surface_get_width (cairo_surface);
+	h  = cairo_image_surface_get_height (cairo_surface);
+	s = w * h * 4;
+
+	gw = glx_shm->ncol;
+	gh = glx_shm->nrow;
+
+	if ( cairo_pix_remapper != NULL )
+	{
+		::free( cairo_pix_remapper ); cairo_pix_remapper = NULL;
+	}
+	cairo_pix_remapper = (int*)malloc(s);
+
+	if ( cairo_pix_remapper == NULL )
+	{
+		printf("Error: Failed to allocate memory for Pixel Surface Remapper\n");
+		return;
+	}
+	memset( cairo_pix_remapper, 0, s );
+
+	sx = (float)w / (float)gw;
+	sy = (float)h / (float)gh;
+
+	if (sx < sy )
+	{
+		sy = sx;
+	}
+	else 
+	{
+		sx = sy;
+	}
+
+	sw = (int) ( (float)gw * sx );
+	sh = (int) ( (float)gh * sy );
+
+	llx = (w - sw) / 2;
+	lly = (h - sh) / 2;
+	urx = llx + sw;
+	ury = lly + sh;
+
+	i=0;
+	for (y=0; y<h; y++)
+	{
+		if ( (y < lly) || (y > ury) )
+		{
+			for (x=0; x<w; x++)
+			{
+				cairo_pix_remapper[i] = -1; i++;
+			}
+		}
+		else
+		{
+			for (x=0; x<w; x++)
+			{
+				if ( (x < llx) || (x > urx) )
+				{
+					cairo_pix_remapper[i] = -1; i++;
+				}
+				else
+				{
+					nw = (float)(x - llx) / (float)sw;
+					nh = (float)(y - lly) / (float)sh;
+
+					rx = (int)((float)gw * nw);
+					ry = (int)((float)gh * nh);
+
+					if ( rx < 0 )
+					{
+						rx = 0;
+					}
+					else if ( rx >= GLX_NES_WIDTH )
+					{
+						rx = GLX_NES_WIDTH-1;
+					}
+					if ( ry < 0 )
+					{
+						ry = 0;
+					}
+					else if ( ry >= GLX_NES_HEIGHT )
+					{
+						ry = GLX_NES_HEIGHT-1;
+					}
+
+					j = (ry * GLX_NES_WIDTH) + rx;
+
+					cairo_pix_remapper[i] = j; i++;
+
+					//printf("Remap: (%i,%i)=%i   (%i,%i)=%i \n", x,y,i, rx,ry,j );
+				}
+			}
+		}
+	}
+	numRendLines = gh;
+}
+
+static void cairo_handle_resize(void)
+{
+	int w, h;
+	//cairo_format_t  cairo_format;
+
+	if (cairo_surface)
+	{
+      cairo_surface_destroy (cairo_surface); cairo_surface = NULL;
+	}
+	w = gtk_widget_get_allocated_width( evbox );
+	h = gtk_widget_get_allocated_height( evbox );
+
+	cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_ARGB32, w, h );
+	//cairo_surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24, w, h );
+
+	//printf("Cairo Surface: %p \n", cairo_surface );
+
+	//cairo_format = cairo_image_surface_get_format( cairo_surface );
+
+	if (cairo_pattern)
+	{
+		cairo_pattern_destroy (cairo_pattern); cairo_pattern = NULL;
+	}
+	cairo_pattern = cairo_pattern_create_for_surface( cairo_surface );
+
+	//printf("Cairo Format: %i \n", cairo_format );
+
+	cairo_recalc_mapper();
+
+	guiClearSurface();
+
+	transferPix2CairoSurface();
+
+	//cairo_surface_mark_dirty( cairo_surface );
+}
+
+int destroy_gui_video( void )
+{
+	printf("Destroy GUI Video\n");
+
+	destroy_cairo_screen();
+    
+	destroy_gtk3_GLXContext();
+
+	return 0;
+}
+
+int init_gui_video( int use_openGL )
+{
+	drawAreaGL   =  use_openGL;
+	useCairoDraw = !drawAreaGL;
+
+	if ( use_openGL ) 
+	{
+		int flags=0;
+		int linear_interpolation_ena=0;
+		int double_buffer_ena=0;
+			
+		g_config->getOption("SDL.OpenGLip"       , &linear_interpolation_ena );
+		g_config->getOption("SDL.DoubleBuffering", &double_buffer_ena        );
+
+		if ( linear_interpolation_ena )  flags |= GLXWIN_PIXEL_LINEAR_FILTER;
+		if ( double_buffer_ena        )  flags |= GLXWIN_DOUBLE_BUFFER;
+
+		destroy_cairo_screen();
+		init_gtk3_GLXContext( flags );
+	}
+	else
+	{
+		destroy_gtk3_GLXContext();
+		init_cairo_screen();
+	}
+	return 0;
+}
+
+void init_cairo_screen(void)
+{
+	cairo_handle_resize();
+}
+
+void destroy_cairo_screen(void)
+{
+	if (cairo_pattern)
+	{
+		printf("Destroying Cairo Pattern\n");
+		cairo_pattern_destroy (cairo_pattern); cairo_pattern = NULL;
+	}
+	if (cairo_surface)
+	{
+		printf("Destroying Cairo Surface\n");
+      cairo_surface_destroy (cairo_surface); cairo_surface = NULL;
+	}
+	if ( cairo_pix_remapper != NULL )
+	{
+		printf("Destroying Cairo Pixel Remapper\n");
+		::free( cairo_pix_remapper ); cairo_pix_remapper = NULL;
+	}
+}
+
+
 gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 {
 	// This should handle resizing so the emulation takes up as much
 	// of the GTK window as possible
 
 	// get new window width/height
-	int width, height, draw_width, draw_height, winsize_changed = 0;
+	int width, height, winsize_changed = 0;
+
 	width = event->configure.width;
 	height = event->configure.height;
 	//printf ("DEBUG: Configure new window size: %dx%d\n", width, height);
 
-	winsize_changed = (width != gtk_win_width) || (height != gtk_win_height);
-
-	gtk_win_width  = width;
-	gtk_win_height = height;
+	winsize_changed = 0;
 
 	// get width/height multipliers
 	double xscale = width / (double) NES_WIDTH;
 	double yscale = height / (double) NES_HEIGHT;
 
-	draw_width  = gtk_win_width;
-	draw_height = gtk_win_height - gtk_win_menu_ysize;
-
 	//printf("DRAW: %ix%i   MenuY: %i \n", draw_width, draw_height, gtk_win_menu_ysize );
 
-	if ( (draw_width != gtk_draw_area_width) || (draw_height != gtk_draw_area_height) )
+	if ( (width != gtk_draw_area_width) || (height != gtk_draw_area_height) )
 	{
 		winsize_changed = 1;
 	}
-	gtk_draw_area_width  = draw_width;
-	gtk_draw_area_height = draw_height;
+	gtk_draw_area_width  = width;
+	gtk_draw_area_height = height;
 
 	if ( gtk_draw_area_width  < NES_WIDTH  ) gtk_draw_area_width  = NES_WIDTH;
 	if ( gtk_draw_area_height < NES_HEIGHT ) gtk_draw_area_height = NES_HEIGHT;
@@ -3112,17 +3521,22 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	if (yscale > xscale)
 		yscale = xscale;
 
+	if ( useCairoDraw && winsize_changed )
+	{
+		cairo_handle_resize();
+	}
+
 	//TODO if openGL make these integers
 	g_config->setOption ("SDL.XScale", xscale);
 	g_config->setOption ("SDL.YScale", yscale);
 	//gtk_widget_realize(evbox);
 	
 	//flushGtkEvents ();
-	if ( winsize_changed && (GameInfo != 0) )
-	{
-		KillVideo ();
-		InitVideo (GameInfo);
-	}
+	//if ( winsize_changed && (GameInfo != 0) )
+	//{
+	//	KillVideo ();
+	//	InitVideo (GameInfo);
+	//}
 
 	gtk_widget_queue_draw( evbox );
 
@@ -3133,43 +3547,76 @@ gboolean handle_resize (GtkWindow * win, GdkEvent * event, gpointer data)
 	return FALSE;
 }
 
+// Clear Drawing Area to Black
+//static gboolean cairo_clear_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
+//{
+//	GdkRGBA color;
+//	GtkStyleContext *context;
+//
+//	context = gtk_widget_get_style_context (widget);
+//
+//	color.red = 0, color.blue = 0; color.green = 0; color.alpha = 1.0;
+//
+//	gtk_render_background( context, cr, 0, 0, gtk_draw_area_width, gtk_draw_area_height );
+//	gdk_cairo_set_source_rgba (cr, &color);
+//
+//	cairo_fill (cr);
+//	cairo_paint (cr);
+//
+//	return FALSE;
+//}
 /* Redraw the screen from the surface. Note that the ::draw
  * signal receives a ready-to-be-used cairo_t that is already
  * clipped to only draw the exposed areas of the widget
  */
+
+static gboolean cairo_draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
+{
+	//printf("Cairo Draw\n");
+	//cairo_clear_cb( widget, cr, data );
+	//cairo_surface_mark_dirty( cairo_surface );
+	//cairo_set_source_surface (cr, cairo_surface, 0, 0);
+	cairo_set_source (cr, cairo_pattern);
+   cairo_paint (cr);
+
+	return FALSE;
+}
+
 static gboolean draw_cb (GtkWidget * widget, cairo_t * cr, gpointer data)
 {
-	GdkRGBA color;
-	GtkStyleContext *context;
 
-	gtk_draw_area_width = gtk_widget_get_allocated_width (widget);
+	gtk_draw_area_width  = gtk_widget_get_allocated_width (widget);
 	gtk_draw_area_height = gtk_widget_get_allocated_height (widget);
 
 	if ( gtk_draw_area_width  < NES_WIDTH  ) gtk_draw_area_width  = NES_WIDTH;
 	if ( gtk_draw_area_height < NES_HEIGHT ) gtk_draw_area_height = NES_HEIGHT;
 
-	gtk_win_menu_ysize = gtk_win_height - gtk_draw_area_height;
-
-	// Clear the screen on a window redraw
-	//if (GameInfo == 0)
-	//{
-		context = gtk_widget_get_style_context (widget);
-
-		color.red = 0, color.blue = 0; color.green = 0; color.alpha = 1.0;
-
-		gtk_render_background( context, cr, 0, 0, gtk_draw_area_width, gtk_draw_area_height );
-		gdk_cairo_set_source_rgba (cr, &color);
-
-		cairo_fill (cr);
-		cairo_paint (cr);
-	//}
+	if ( useCairoDraw )
+	{
+		cairo_draw_cb( widget, cr, data );
+	}
+	else
+	{
+		gtk3_glx_render();
+	}
 
 	return FALSE;
+}
+
+static void
+drawAreaRealizeCB (GtkWidget *widget,
+               	gpointer   user_data)
+{
+	printf("Draw Area Realize\n");
+
+	init_gui_video( drawAreaGL );
 }
 
 
 int InitGTKSubsystem (int argc, char **argv)
 {
+
+	int s_useOpenGL=0;
 	GtkWidget *vbox;
 
 	MainWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -3202,8 +3649,15 @@ int InitGTKSubsystem (int argc, char **argv)
 	//
 	// prg - Bryan Cain, you are the man!
 
-	//evbox = gtk_event_box_new();
+	#ifdef OPENGL
+	g_config->getOption("SDL.OpenGL", &s_useOpenGL);
+	#endif
+
+	drawAreaGL   =  s_useOpenGL;
+	useCairoDraw = !drawAreaGL;
+
 	evbox = gtk_drawing_area_new ();
+
 	gtk_box_pack_start (GTK_BOX (vbox), evbox, TRUE, TRUE, 0);
 
 	double xscale, yscale;
@@ -3223,14 +3677,15 @@ int InitGTKSubsystem (int argc, char **argv)
 	g_signal_connect (G_OBJECT (evbox), "button-release-event",
 			  G_CALLBACK (handleMouseClick), NULL);
 
-	//g_signal_connect(G_OBJECT(MainWindow), "key-release-event", G_CALLBACK(handleKeyRelease), NULL);
-
 	// signal handlers
 	g_signal_connect (MainWindow, "delete-event", quit, NULL);
 	g_signal_connect (MainWindow, "destroy-event", quit, NULL);
-	// resize handler
-	g_signal_connect (MainWindow, "configure-event",
+
+	g_signal_connect (evbox, "configure-event",
 			  G_CALLBACK (handle_resize), NULL);
+
+	g_signal_connect (evbox, "realize", G_CALLBACK (drawAreaRealizeCB), NULL);
+
 	g_signal_connect (evbox, "draw", G_CALLBACK (draw_cb), NULL);
 
 	gtk_widget_set_size_request (evbox, NES_WIDTH * xscale,

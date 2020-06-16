@@ -13,6 +13,7 @@ source_list = Split(
     memview.cpp
     ramwatch.cpp
     debugger.cpp
+    glxwin.cpp
     sdl.cpp
     sdl-joystick.cpp
     sdl-sound.cpp
@@ -22,8 +23,6 @@ source_list = Split(
     """)
 
 Import('env')
-if 'GL' in env['LIBS']:
-  source_list.append('sdl-opengl.cpp')
 
 if env['GTK'] or env['GTK3']:
   source_list.append('gui.cpp')

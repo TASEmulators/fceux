@@ -49,7 +49,7 @@
 #include <cstdio>
 
 /** GLOBALS **/
-int NoWaiting = 1;
+int NoWaiting = 0;
 extern Config *g_config;
 extern bool bindSavestate, frameAdvanceLagSkip, lagCounterDisplay;
 
@@ -137,32 +137,50 @@ DoCheatSeq ()
 }
 
 #include "keyscan.h"
-static uint8 *g_keyState = 0;
+static uint8  g_keyState[SDL_NUM_SCANCODES];
 static int DIPS = 0;
 
-static uint8 keyonce[MKK_COUNT];
+static uint8 keyonce[SDL_NUM_SCANCODES];
 #define KEY(__a) g_keyState[MKK(__a)]
+
+int getKeyState( int k )
+{
+	if ( (k >= 0) && (k < SDL_NUM_SCANCODES) )
+	{
+		return g_keyState[k];
+	}
+	return 0;
+}
 
 static int
 _keyonly (int a)
 {
-	// check for valid key
-	if (a > SDLK_LAST + 1 || a < 0)
-		return 0;
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	if (g_keyState[SDL_GetScancodeFromKey (a)])
-#else
-	if (g_keyState[a])
-#endif
+	int sc;
+
+	if ( a < 0 )
 	{
-		if (!keyonce[a])
+		return 0;
+	}
+
+	sc = SDL_GetScancodeFromKey(a);
+
+	// check for valid key
+	if (sc >= SDL_NUM_SCANCODES || sc < 0)
+	{
+		return 0;
+	}
+
+	if (g_keyState[sc])
+	{
+		if (!keyonce[sc])
 		{
-			keyonce[a] = 1;
+			keyonce[sc] = 1;
 			return 1;
 		}
 	} 
-	else {
-		keyonce[a] = 0;
+	else 
+	{
+		keyonce[sc] = 0;
 	}
 	return 0;
 }
@@ -202,24 +220,6 @@ TogglePause ()
 	int fullscreen;
 	g_config->getOption ("SDL.Fullscreen", &fullscreen);
 
-	// Don't touch grab when in windowed mode
-	if(fullscreen == 0)
-		return;
-
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	// TODO - SDL2
-#else
-	if (FCEUI_EmulationPaused () == 0)
-	{
-		SDL_WM_GrabInput (SDL_GRAB_ON);
-		if(no_cursor)
-			SDL_ShowCursor (0);
-	}
-	else {
-		SDL_WM_GrabInput (SDL_GRAB_OFF);
-		SDL_ShowCursor (1);
-	}
-#endif
 	return;
 }
 
@@ -433,88 +433,53 @@ void FCEUD_LoadStateFrom ()
 unsigned int *GetKeyboard(void)                                                     
 {
 	int size = 256;
-#if SDL_VERSION_ATLEAST(2, 0, 0)
+
 	Uint8* keystate = (Uint8*)SDL_GetKeyboardState(&size);
-#else
-	Uint8* keystate = SDL_GetKeyState(&size);
-#endif
+
 	return (unsigned int*)(keystate);
 }
 
 /**
  * Parse keyboard commands and execute accordingly.
  */
-static void KeyboardCommands ()
+static void KeyboardCommands (void)
 {
 	int is_shift, is_alt;
 
-	char *movie_fname = "";
 	// get the keyboard input
-#if SDL_VERSION_ATLEAST(1, 3, 0)
-	g_keyState = (Uint8*)SDL_GetKeyboardState (NULL);
-#else
-	g_keyState = SDL_GetKeyState (NULL);
-#endif
 
 	// check if the family keyboard is enabled
 	if (CurInputType[2] == SIFC_FKB)
 	{
-#if SDL_VERSION_ATLEAST(1, 3, 0)
-		// TODO - SDL2
-		if (0)
-#else
-		if (keyonly (SCROLLLOCK))
-#endif
-			{
-				g_fkbEnabled ^= 1;
-				FCEUI_DispMessage ("Family Keyboard %sabled.", 0,
-				g_fkbEnabled ? "en" : "dis");
-			}
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-		// TODO - SDL2
-#else
-		SDL_WM_GrabInput (g_fkbEnabled ? SDL_GRAB_ON : SDL_GRAB_OFF);
-#endif
+		if ( g_keyState[SDL_SCANCODE_SCROLLLOCK] )
+		{
+			g_fkbEnabled ^= 1;
+			FCEUI_DispMessage ("Family Keyboard %sabled.", 0,
+			g_fkbEnabled ? "en" : "dis");
+		}
 		if (g_fkbEnabled)
 		{
 			return;
 		}
 	}
 
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	if (g_keyState[SDL_GetScancodeFromKey (SDLK_LSHIFT)]
-		|| g_keyState[SDL_GetScancodeFromKey (SDLK_RSHIFT)])
-#else
-	if (g_keyState[SDLK_LSHIFT] || g_keyState[SDLK_RSHIFT])
-#endif
-	is_shift = 1;
-  else
-	is_shift = 0;
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	if (g_keyState[SDL_GetScancodeFromKey (SDLK_LALT)]
-	|| g_keyState[SDL_GetScancodeFromKey (SDLK_RALT)])
-#else
-	if (g_keyState[SDLK_LALT] || g_keyState[SDLK_RALT])
-#endif
+	if (g_keyState[SDL_SCANCODE_LSHIFT]	|| g_keyState[SDL_SCANCODE_RSHIFT])
 	{
-		is_alt = 1;
-#if !SDL_VERSION_ATLEAST(2, 0, 0)
-		// workaround for GDK->SDL in GTK problems where ALT release is never 
-        // getting sent
-        // I know this is sort of an ugly hack to fix this, but the bug is 
-        // rather annoying
-		// prg318 10/23/11
-		int fullscreen;
-		g_config->getOption ("SDL.Fullscreen", &fullscreen);
-		if (!fullscreen)
-		{
-			g_keyState[SDLK_LALT] = 0;
-			g_keyState[SDLK_RALT] = 0;
-		}
-#endif
+		is_shift = 1;
 	}
 	else
+	{
+		is_shift = 0;
+	}
+
+	if (g_keyState[SDL_SCANCODE_LALT] || g_keyState[SDL_SCANCODE_RALT])
+	{
+		is_alt = 1;
+	}
+	else
+	{
 		is_alt = 0;
+	}
 
 
 	if (_keyonly (Hotkeys[HK_TOGGLE_BG]))
@@ -530,37 +495,50 @@ static void KeyboardCommands ()
 	}
 
 	// Alt-Enter to toggle full-screen
-	if (keyonly (ENTER) && is_alt)
+	// This is already handled by GTK Accelerator
+	//if (keyonly (ENTER) && is_alt)
+	//{
+	//	ToggleFS ();
+	//}
+	//
+	
+	// Alt-M to toggle Main Menu Visibility
+	if ( is_alt )
 	{
-		ToggleFS ();
+		if (keyonly (M))
+		{
+			toggleMenuVis();
+		}
 	}
-
-
 
 	// Toggle Movie auto-backup
-	if (keyonly (M) && is_shift)
+	if ( is_shift )
 	{
-		autoMovieBackup ^= 1;
-		FCEUI_DispMessage ("Automatic movie backup %sabled.", 0,
-			 autoMovieBackup ? "en" : "dis");
+		if (keyonly (M))
+		{
+			autoMovieBackup ^= 1;
+			FCEUI_DispMessage ("Automatic movie backup %sabled.", 0,
+				 autoMovieBackup ? "en" : "dis");
+		}
 	}
 
-	// Start recording an FM2 movie on Alt+R
-	if (keyonly (R) && is_alt)
+	if ( is_alt )
 	{
-		FCEUD_MovieRecordTo ();
-	}
-
-	// Save a state from a file
-	if (keyonly (S) && is_alt)
-	{
-		FCEUD_SaveStateAs ();
-	}
-
-	// Load a state from a file
-	if (keyonly (L) && is_alt)
-	{
-		FCEUD_LoadStateFrom ();
+		// Start recording an FM2 movie on Alt+R
+		if (keyonly (R))
+		{
+			FCEUD_MovieRecordTo ();
+		}
+		// Save a state from a file
+		if (keyonly (S))
+		{
+			FCEUD_SaveStateAs ();
+		}
+		// Load a state from a file
+		if (keyonly (L))
+		{
+			FCEUD_LoadStateFrom ();
+		}
 	}
 
 		// Famicom disk-system games
@@ -594,10 +572,9 @@ static void KeyboardCommands ()
 		{
 			if (is_shift)
 			{
-				movie_fname =
-				const_cast <char *>(FCEU_MakeFName (FCEUMKF_MOVIE, 0, 0).c_str ());
-				FCEUI_printf ("Recording movie to %s\n", movie_fname);
-				FCEUI_SaveMovie (movie_fname, MOVIE_FLAG_NONE, L"");
+				std::string movie_fname = FCEU_MakeFName (FCEUMKF_MOVIE, 0, 0);
+				FCEUI_printf ("Recording movie to %s\n", movie_fname.c_str() );
+				FCEUI_SaveMovie(movie_fname.c_str() , MOVIE_FLAG_NONE, L"");
 			}
 			else
 			{
@@ -683,14 +660,14 @@ static void KeyboardCommands ()
 	}
 
 	// Toggle throttling
-	NoWaiting &= ~1;
-	if (g_keyState[Hotkeys[HK_TURBO]])
+	if ( _keyonly(Hotkeys[HK_TURBO]) )
 	{
-		NoWaiting |= 1;
+		NoWaiting ^= 1;
+		//printf("NoWaiting: 0x%04x\n", NoWaiting );
 	}
 
 	static bool frameAdvancing = false;
-	if (g_keyState[Hotkeys[HK_FRAME_ADVANCE]])
+	if ( _keyonly(Hotkeys[HK_FRAME_ADVANCE]))
 	{
 		if (frameAdvancing == false)
 		{
@@ -968,6 +945,10 @@ void GetMouseRelative (int32 (&d)[3])
 	d[2] = md[2]; // buttons
 }
 
+//static void checkKeyBoardState( int scanCode )
+//{
+//	printf("Key State is: %i \n", g_keyState[ scanCode ] );
+//}
 /**
  * Handles outstanding SDL events.
  */
@@ -995,6 +976,15 @@ UpdatePhysicalInput ()
 						FCEU_printf ("Warning: unknown hotkey event %d\n",
 									event.user.code);
 				}
+				break;
+			case SDL_KEYDOWN:
+			case SDL_KEYUP:
+				//printf("SDL_Event.type: %i  Keysym: %i  ScanCode: %i\n", 
+				//		event.type, event.key.keysym.sym, event.key.keysym.scancode );
+
+				g_keyState[ event.key.keysym.scancode ] = (event.type == SDL_KEYDOWN) ? 1 : 0;
+				//checkKeyBoardState( event.key.keysym.scancode );
+				break;
 			default:
 				break;
 		}
@@ -1019,65 +1009,19 @@ int ButtonConfigBegin ()
 	g_config->getOption ("SDL.NoGUI", &noGui);
 	if (noGui == 1)
 	{
-		SDL_QuitSubSystem (SDL_INIT_VIDEO);
+		//SDL_QuitSubSystem (SDL_INIT_VIDEO);
 		bcpv = KillVideo ();
 	}
 #else
 	// XXX soules - why are we doing this right before KillVideo()?
-	SDL_QuitSubSystem (SDL_INIT_VIDEO);
+	//SDL_QuitSubSystem (SDL_INIT_VIDEO);
 
 	// shut down the video and joystick subsystems
 	bcpv = KillVideo ();
 #endif
-	SDL_Surface *screen;
+	//SDL_Surface *screen;
 
 	bcpj = KillJoysticks ();
-
-	// reactivate the video subsystem
-	if (!SDL_WasInit (SDL_INIT_VIDEO))
-	{
-		if (!bcpv)
-		{
-			InitVideo (GameInfo);
-		}
-		else
-		{
-#if defined(_GTK) && defined(SDL_VIDEO_DRIVER_X11)
-			if (noGui == 0)
-			{
-				while (gtk_events_pending ())
-					gtk_main_iteration_do (FALSE);
-
-				char SDL_windowhack[128];
-				if (gtk_widget_get_window (evbox))
-					sprintf (SDL_windowhack, "SDL_WINDOWID=%u",
-					(unsigned int) GDK_WINDOW_XID (gtk_widget_get_window (evbox)));
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-					// TODO - SDL2
-#else
-					SDL_putenv (SDL_windowhack);
-#endif
-			}
-#endif
-			if (SDL_InitSubSystem (SDL_INIT_VIDEO) == -1)
-			{
-				FCEUD_Message (SDL_GetError ());
-				return 0;
-			}
-
-			// set the screen and notify the user of button configuration
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-			// TODO - SDL2
-#else
-			screen = SDL_SetVideoMode (420, 200, 8, 0);
-         if ( screen == NULL )
-         {
-            printf("Error: SDL_SetVideoMode Failed\n");
-         }
-			SDL_WM_SetCaption ("Button Config", 0);
-#endif
-		}
-	}
 
 	// XXX soules - why did we shut this down?
 	// initialize the joystick subsystem
@@ -1120,13 +1064,8 @@ DTestButton (ButtConfig * bc)
 	{
 		if (bc->ButtType[x] == BUTTC_KEYBOARD)
 		{
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 			if (g_keyState[SDL_GetScancodeFromKey (bc->ButtonNum[x])])
 			{
-#else
-			if (g_keyState[bc->ButtonNum[x]])
-			{
-#endif
 				return 1;
 			}
 		}
@@ -1137,8 +1076,8 @@ DTestButton (ButtConfig * bc)
 				return 1;
 			}
 		}
-    }
-  return 0;
+	}
+	return 0;
 }
 
 
@@ -1148,15 +1087,9 @@ DTestButton (ButtConfig * bc)
 #define GPZ()       {MKZ(), MKZ(), MKZ(), MKZ()}
 
 ButtConfig GamePadConfig[4][10] = {
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 /* Gamepad 1 */
 	{MK (KP_3), MK (KP_2), MK (SLASH), MK (ENTER),
 	MK (W), MK (Z), MK (A), MK (S), MKZ (), MKZ ()},
-#else
-	/* Gamepad 1 */
-	{MK (KP3), MK (KP2), MK (SLASH), MK (ENTER),
-	MK (W), MK (Z), MK (A), MK (S), MKZ (), MKZ ()},
-#endif
 
 	/* Gamepad 2 */
 	GPZ (),
@@ -1200,6 +1133,7 @@ UpdateGamepad(void)
 		{
 			if (DTestButton (&GamePadConfig[wg][x]))
 			{
+				//printf("GamePad%i Button Hit: %i \n", wg, x );
 				if(opposite_dirs == 0)
 				{
 					// test for left+right and up+down
@@ -1425,6 +1359,8 @@ void InitInputInterface ()
 	int t;
 	int x;
 	int attrib;
+
+   memset( g_keyState, 0, sizeof(g_keyState) );
 
 	for (t = 0, x = 0; x < 2; x++)
 	{
@@ -1671,11 +1607,7 @@ const char * ButtonName (const ButtConfig * bc, int which)
 	switch (bc->ButtType[which])
 	{
 		case BUTTC_KEYBOARD:
-#if SDL_VERSION_ATLEAST(2,0,0)
 			return SDL_GetKeyName (bc->ButtonNum[which]);
-#else
-			return SDL_GetKeyName ((SDLKey) bc->ButtonNum[which]);
-#endif
 		break;
 		case BUTTC_JOYSTICK:
 		{
@@ -1731,7 +1663,7 @@ const char * ButtonName (const ButtConfig * bc, int which)
  * Waits for a button input and returns the information as to which
  * button was pressed.  Used in button configuration.
  */
-int DWaitButton (const uint8 * text, ButtConfig * bc, int wb)
+int DWaitButton (const uint8 * text, ButtConfig * bc, int wb, int *buttonConfigStatus )
 {
 	SDL_Event event;
 	static int32 LastAx[64][64];
@@ -1741,11 +1673,8 @@ int DWaitButton (const uint8 * text, ButtConfig * bc, int wb)
 	{
 		std::string title = "Press a key for ";
 		title += (const char *) text;
-#if SDL_VERSION_ATLEAST(2,0,0)
 		// TODO - SDL2
-#else
-		SDL_WM_SetCaption (title.c_str (), 0);
-#endif
+		//SDL_WM_SetCaption (title.c_str (), 0);
 		puts ((const char *) text);
 	}
 
@@ -1825,6 +1754,16 @@ int DWaitButton (const uint8 * text, ButtConfig * bc, int wb)
 		}
 		if (done)
 			break;
+
+		// If the button config window is Closed, 
+		// get out of loop.
+		if ( buttonConfigStatus != NULL )
+		{
+			if ( *buttonConfigStatus == 0 )
+			{
+				break;
+			}
+		}
 	}
 
 	return (0);
@@ -1846,7 +1785,7 @@ ConfigButton (char *text, ButtConfig * bc)
 	for (wc = 0; wc < MAXBUTTCONFIG; wc++)
 	{
 		sprintf ((char *) buf, "%s (%d)", text, wc + 1);
-		DWaitButton (buf, bc, wc);
+		DWaitButton (buf, bc, wc, NULL);
 
 		if (wc &&
 				bc->ButtType[wc] == bc->ButtType[wc - 1] &&
