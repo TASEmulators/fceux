@@ -12,7 +12,9 @@ copy vc14_bin_Debug\fceux.exe  ..\output\.
 copy vc14_bin_Debug\7z.dll     ..\output\.
 
 REM Create Zip Archive
-archive.bat
+REM archive.bat
+cd %PROJECT_ROOT%\output
+..\vc\zip -X -9 -r ..\vc\fceux.zip fceux.exe fceux.chm taseditor.chm 7z.dll *.dll palettes luaScripts tools
 
 cd %PROJECT_ROOT%
 
