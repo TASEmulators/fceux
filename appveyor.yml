@@ -18,7 +18,7 @@ for:
   -
     matrix:
       only:
-        job_name: Windows 32
+        - job_name: Windows 32
 
     build_script:
     - cmd: pipelines/win32_build.bat
@@ -26,7 +26,7 @@ for:
   -
     matrix:
       only:
-        job_name: Windows 64
+        - job_name: Windows 64
 
     build_script:
     - cmd: pipelines/win64_build.bat
@@ -34,7 +34,7 @@ for:
   -
     matrix:
       only:
-        job_name: Ubuntu
+        - job_name: Ubuntu
 
     build_script:
     - sh: ./pipelines/linux_build.sh
