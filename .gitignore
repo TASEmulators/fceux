@@ -24,6 +24,8 @@
 /output/sav/*.sav
 /output/fcs/*.fc*
 /vc/userconfig/scmrev.h
+/vc/fceux.zip
+/vc/fceux64.zip
 
 # linux build output
 bin
