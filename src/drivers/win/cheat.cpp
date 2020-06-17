@@ -23,7 +23,7 @@
 #include "memview.h"
 #include "memwatch.h"
 #include "debugger.h"
-#include "ramwatch.h"
+//#include "ramwatch.h"
 #include "../../fceu.h"
 #include "../../cart.h"
 #include "../../cheat.h" // For FCEU_LoadGameCheats()
