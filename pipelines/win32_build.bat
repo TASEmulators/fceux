@@ -12,8 +12,10 @@ copy vc14_bin_Debug\fceux.exe  ..\output\.
 copy vc14_bin_Debug\7z.dll     ..\output\.
 
 REM Create Zip Archive
-archive.bat
+cd %PROJECT_ROOT%
+appveyor  PushArtifact  output
+
+REM archive.bat
 
 cd %PROJECT_ROOT%
 
-appveyor  PushArtifact  "./vc/fceux.zip"
