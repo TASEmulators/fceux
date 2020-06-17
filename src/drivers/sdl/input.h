@@ -7,7 +7,8 @@
 typedef struct {
 	uint8  ButtType[MAXBUTTCONFIG];
 	uint8  DeviceNum[MAXBUTTCONFIG];
-	uint16 ButtonNum[MAXBUTTCONFIG];
+	//uint16 ButtonNum[MAXBUTTCONFIG];
+	int    ButtonNum[MAXBUTTCONFIG];
 	uint32 NumC;
 	//uint64 DeviceID[MAXBUTTCONFIG];	/* TODO */
 } ButtConfig;
@@ -19,10 +20,11 @@ extern ARGPSTRUCT InputArgs[];
 extern int Hotkeys[];
 void ParseGIInput(FCEUGI *GI);
 void setHotKeys();
+int getKeyState( int k );
 int ButtonConfigBegin();
 void ButtonConfigEnd();
 void ConfigButton(char *text, ButtConfig *bc);
-int DWaitButton(const uint8 *text, ButtConfig *bc, int wb);
+int DWaitButton(const uint8 *text, ButtConfig *bc, int wb, int *buttonConfigStatus = NULL);
 
 #define BUTTC_KEYBOARD          0x00
 #define BUTTC_JOYSTICK          0x01

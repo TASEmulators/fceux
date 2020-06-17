@@ -218,6 +218,11 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
 		return(0);
 	
 	//allocate adequate room for 32bpp palette
+	if ( palettetranslate )
+	{
+		free(palettetranslate);
+		palettetranslate=NULL;
+	}
 	palettetranslate=(uint32*)FCEU_dmalloc(256*4 + 512*4);
 	
 	if(!palettetranslate)

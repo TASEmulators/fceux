@@ -1,0 +1,8 @@
+version: 1.0.{build}
+image:
+- Visual Studio 2019
+- Ubuntu2004
+  #- Ubuntu1804
+build_script:
+- cmd: pipelines/win32_build.bat
+- sh: ./pipelines/linux_build.sh

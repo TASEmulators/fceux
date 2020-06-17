@@ -52,11 +52,17 @@ struct AddressWatcher
 {
 	unsigned int Address; // hardware address
 	unsigned int CurValue;
-	char* comment = NULL; // NULL means no comment, non-NULL means allocated comment
+	char* comment; // NULL means no comment, non-NULL means allocated comment
 	bool WrongEndian;
 	char Size; //'d' = 4 bytes, 'w' = 2 bytes, 'b' = 1 byte, and 'S' means it's a separator.
 	char Type;//'s' = signed integer, 'u' = unsigned, 'h' = hex, 'b' = binary, 'S' = separator
 	short Cheats; // how many bytes are affected by cheat
+
+	AddressWatcher(void)
+	{
+		Address = 0; CurValue = 0; comment = NULL; WrongEndian = false;
+		Size = 'b'; Type = 's'; Cheats = 0;
+	}
 };
 
 // the struct for communicating with add watch window

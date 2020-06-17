@@ -145,12 +145,14 @@ public:
 
 class ThreadData {
 public:
-	ThreadData() { kill = dead = false; }
+	ThreadData() { ds = NULL; kill = dead = false; }
 	OAKRA_Module_OutputDS *ds;
 	bool kill,dead;
 };
 
-OAKRA_Module_OutputDS::OAKRA_Module_OutputDS() {
+OAKRA_Module_OutputDS::OAKRA_Module_OutputDS() 
+{
+	threadData = NULL;
 	data = new Data();
 	((Data *)data)->global = false;
 	InitializeCriticalSection(&((Data *)data)->criticalSection);
@@ -179,6 +181,7 @@ OAKRA_Voice *OAKRA_Module_OutputDS::getVoice(OAKRA_Format &format, OAKRA_Module 
 	if(dsv->dead)
 	{
 		delete dsv;
+		dsv = 0;
 	}
 	else
 	{
@@ -214,7 +217,7 @@ void OAKRA_Module_OutputDS::freeVoiceInternal(OAKRA_Voice *voice, bool internal)
 	if(!internal)
 	{
 		delete voice;
-		voice = 0;
+		//voice = 0; // Assignment of function parameter has no effect outside the function, commenting out to avoid cppcheck warning
 	}
 	unlock();
 }

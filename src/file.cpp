@@ -104,12 +104,14 @@ void ApplyIPS(FILE *ips, FCEUFILE* fp)
 			if((offset+size)>(uint32)fp->size)
 			{
 				// Probably a little slow.
-				buf=(char *)realloc(buf,offset+size);
-				if(!buf)
+				char *newbuf=(char *)realloc(buf,offset+size);
+				if(!newbuf)
 				{
+					free(buf); buf=NULL;
 					FCEU_printf("  Oops.  IPS patch %d(type RLE) goes beyond end of file.  Could not allocate memory.\n",count);
 					goto end;
 				}
+				buf=newbuf;
 				memset(buf+fp->size,0,offset+size-fp->size);
 				fp->size=offset+size;
 			}
@@ -127,12 +129,14 @@ void ApplyIPS(FILE *ips, FCEUFILE* fp)
 			if((offset+size)>(uint32)fp->size)
 			{
 				// Probably a little slow.
-				buf=(char *)realloc(buf,offset+size);
-				if(!buf)
+				char *newbuf=(char *)realloc(buf,offset+size);
+				if(!newbuf)
 				{
+					free(buf); buf=NULL;
 					FCEU_printf("  Oops.  IPS patch %d(type normal) goes beyond end of file.  Could not allocate memory.\n",count);
 					goto end;
 				}
+				buf=newbuf;
 				memset(buf+fp->size,0,offset+size-fp->size);
 			}
 			fread(buf+offset,1,size,ips);
@@ -475,9 +479,9 @@ void FCEUI_SetDirOverride(int which, char *n)
 		va_list ap;
 		int ret;
 
-		va_start(ap,fmt);
 		if(!(*strp=(char*)FCEU_dmalloc(2048))) //mbg merge 7/17/06 cast to char*
 			return(0);
+		va_start(ap,fmt);
 		ret=vsnprintf(*strp,2048,fmt,ap);
 		va_end(ap);
 		return(ret);

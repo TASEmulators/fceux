@@ -42,7 +42,3 @@
 #define SDLK_SCROLLLOCK SDLK_SCROLLOCK		/* I guess the SDL people don't like lots of Ls... */
 #define SDLK_GRAVE	SDLK_BACKQUOTE
 #define MKK(k) SDLK_##k
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-#define SDLK_LAST SDL_NUM_SCANCODES
-#endif
-#define MKK_COUNT (SDLK_LAST+1)

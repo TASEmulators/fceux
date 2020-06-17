@@ -16,6 +16,7 @@
 #include "sdl.h"
 #include "sdl-video.h"
 #include "unix-netplay.h"
+#include "glxwin.h"
 
 #include "../common/configSys.h"
 #include "../../oldmovie.h"
@@ -171,13 +172,9 @@ static void ShowUsage(char *prog)
 #endif
 	puts("");
 	printf("Compiled with SDL version %d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL );
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	SDL_version* v; 
-	SDL_GetVersion(v);
-#else
-	const SDL_version* v = SDL_Linked_Version();
-#endif
-	printf("Linked with SDL version %d.%d.%d\n", v->major, v->minor, v->patch);
+	SDL_version v; 
+	SDL_GetVersion(&v);
+	printf("Linked with SDL version %d.%d.%d\n", v.major, v.minor, v.patch);
 #ifdef GTK
 	printf("Compiled with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
 	//printf("Linked with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
@@ -193,9 +190,9 @@ static void ShowUsage(char *prog)
  */
 int LoadGame(const char *path)
 {
-    if (isloaded){
-        CloseGame();
-    }
+	if (isloaded){
+		CloseGame();
+	}
 	if(!FCEUI_LoadGame(path, 1)) {
 		return 0;
 	}
@@ -560,9 +557,9 @@ int main(int argc, char *argv[])
 		return(-1);
 	}
 
-#ifdef OPENGL
-	SDL_GL_LoadLibrary(0);
-#endif
+//#ifdef OPENGL
+//	SDL_GL_LoadLibrary(0);
+//#endif
 
 	// Initialize the configuration system
 	g_config = InitConfig();
@@ -614,8 +611,8 @@ int main(int argc, char *argv[])
 	g_config->getOption("SDL.InputCfg", &s);
 	if(s.size() != 0)
 	{
-	InitVideo(GameInfo);
-	InputCfg(s);
+		InitVideo(GameInfo);
+		InputCfg(s);
 	}
 	// set the FAMICOM PAD 2 Mic thing 
 	{
@@ -679,41 +676,6 @@ int main(int argc, char *argv[])
 	int yres, xres;
 	g_config->getOption("SDL.XResolution", &xres);
 	g_config->getOption("SDL.YResolution", &yres);
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	// TODO _ SDL 2.0
-#else
-	const SDL_VideoInfo* vid_info = SDL_GetVideoInfo();
-	if(xres == 0) 
-    {
-        if(vid_info != NULL)
-        {
-			g_config->setOption("SDL.LastXRes", vid_info->current_w);
-        }
-        else
-        {
-			g_config->setOption("SDL.LastXRes", 512);
-        }
-    }
-	else
-	{
-		g_config->setOption("SDL.LastXRes", xres);
-	}	
-    if(yres == 0)
-    {
-        if(vid_info != NULL)
-        {
-			g_config->setOption("SDL.LastYRes", vid_info->current_h);
-        }
-        else
-        {
-			g_config->setOption("SDL.LastYRes", 448);
-        }
-    } 
-	else
-	{
-		g_config->setOption("SDL.LastYRes", yres);
-	}
-#endif
 	
 	int autoResume;
 	g_config->getOption("SDL.AutoResume", &autoResume);
@@ -857,14 +819,20 @@ int main(int argc, char *argv[])
 #ifdef _GTK
 	if(noGui == 0)
 	{
+		spawn_glxwin(0); // even though it is not spawning a window, still needed for shared memory segment.
 		gtk_init(&argc, &argv);
 		InitGTKSubsystem(argc, argv);
+		while(gtk_events_pending())
+			gtk_main_iteration_do(FALSE);
+      // Ensure that the GUI has fully initialized. 
+      // Give the X-server a small amount of time to init.
+      usleep(100000);
 		while(gtk_events_pending())
 			gtk_main_iteration_do(FALSE);
 	}
 #endif
 
-  if(romIndex >= 0)
+	if(romIndex >= 0)
 	{
 		// load the specified game
 		error = LoadGame(argv[romIndex]);
@@ -915,6 +883,15 @@ int main(int argc, char *argv[])
 	g_config->setOption("SDL.LuaScript", "");
 	if (s != "")
 	{
+#ifdef __linux
+		// Resolve absolute path to file
+		char fullpath[2048];
+		if ( realpath( s.c_str(), fullpath ) != NULL )
+		{
+			//printf("Fullpath: '%s'\n", fullpath );
+			s.assign( fullpath );
+		}
+#endif
 		FCEU_LoadLuaCode(s.c_str());
 	}
 #endif
@@ -934,11 +911,18 @@ int main(int argc, char *argv[])
 		while(1)
 		{
 			if(GameInfo)
+			{
 				DoFun(frameskip, periodic_saves);
+			}
 			else
+			{
 				SDL_Delay(1);
+			}
+
 			while(gtk_events_pending())
-			gtk_main_iteration_do(FALSE);
+			{
+				gtk_main_iteration_do(FALSE);
+			}
 		}
 	}
 	else

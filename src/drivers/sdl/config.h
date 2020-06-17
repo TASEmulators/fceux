@@ -22,36 +22,7 @@ enum HOTKEY { HK_CHEAT_MENU=0, HK_BIND_STATE, HK_LOAD_LUA, HK_TOGGLE_BG,
 	HK_SELECT_STATE_NEXT, HK_SELECT_STATE_PREV, HK_VOLUME_DOWN, HK_VOLUME_UP,
 	HK_MAX};
 
+const char *getHotkeyString( int i );
 
-static const char* HotkeyStrings[HK_MAX] = {
-		"CheatMenu",
-		"BindState",
-		"LoadLua",
-		"ToggleBG",
-		"SaveState",
-		"FDSSelect",
-		"LoadState",
-		"FDSEject",
-		"VSInsertCoin",
-		"VSToggleDip",
-		"MovieToggleFrameDisplay",
-		"SubtitleDisplay",
-		"Reset",
-		"Screenshot",
-		"Pause",
-		"DecreaseSpeed",
-		"IncreaseSpeed",
-		"FrameAdvance",
-		"Turbo",
-		"ToggleInputDisplay",
-		"ToggleMovieRW",
-		"MuteCapture",
-		"Quit",
-		"FrameAdvanceLagSkip",
-		"LagCounterDisplay",
-		"SelectState0", "SelectState1", "SelectState2", "SelectState3",
-		"SelectState4", "SelectState5", "SelectState6", "SelectState7", 
-		"SelectState8", "SelectState9", "SelectStateNext", "SelectStatePrev",
-		"VolumeDown", "VolumeUp" };
 #endif
 
