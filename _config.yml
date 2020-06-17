@@ -1,0 +1,5 @@
+# jekyll configuration for github pages
+
+# ignore stuff not part of the website
+# (especially ignore things that contain executables that generate a warning on every build)
+exclude: [ "vc", "src", "output", "pipelines", "m4", "gfceu", "getSDLKey", "fceux-server", "attic" ]
