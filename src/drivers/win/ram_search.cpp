@@ -1538,10 +1538,10 @@ INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 			SendDlgItemMessage(hDlg, IDC_EDIT_COMPAREADDRESS, EM_SETLIMITTEXT, 4, 0);
 
-			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_DIFFBY), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_MODBY), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_COMPAREVALUE), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_COMPAREADDRESS), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_DIFFBY), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_MODBY), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_COMPAREVALUE), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_COMPAREADDRESS), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 
 			return true;
 		}
