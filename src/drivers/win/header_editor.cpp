@@ -1454,7 +1454,7 @@ int GetComboBoxByteSize(HWND hwnd, UINT id, int* value)
 	if (!GetComboBoxListItemData(hwnd, id, value, buf, true))
 	{
 		char buf2[4];
-		if (sscanf(buf, "%d%[KMB]", value, buf2) < 2 || !strcmp(buf2, ""))
+		if (sscanf(buf, "%d%3[KMB]", value, buf2) < 2 || !strcmp(buf2, ""))
 			err = errors::FORMAT_ERR;
 		else
 		{
@@ -1524,15 +1524,15 @@ bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, bool exa
 				case IDC_VS_SYSTEM_COMBO:
 				case IDC_VS_PPU_COMBO:
 				case IDC_SYSTEM_EXTEND_COMBO:
-					if (!(success = sscanf(buf, "$%X", value) > 0))
+					if (!(success = sscanf(buf, "$%X", (unsigned int *)value) > 0))
 						success = SearchByString(hwnd, id, value, buf);
 					else
 						SetDlgItemText(hwnd, id, buf);
 					break;
 				case IDC_INPUT_DEVICE_COMBO:
-					if (success = sscanf(buf, "$%X", value) > 0)
+					if (success = sscanf(buf, "$%X", (unsigned int *)value) > 0)
 					{
-						char buf2[3];
+						char buf2[8];
 						sprintf(buf2, "$%02X", *value);
 						if (SendDlgItemMessage(hwnd, id, CB_SELECTSTRING, 0, (LPARAM)buf2) == CB_ERR)
 							SetDlgItemText(hwnd, id, buf);

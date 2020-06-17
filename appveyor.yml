@@ -4,5 +4,5 @@ image:
 - Ubuntu2004
   #- Ubuntu1804
 build_script:
-- cmd: msbuild "./vc/vc14_fceux.sln"
+- cmd: pipelines/win32_build.bat
 - sh: ./pipelines/linux_build.sh

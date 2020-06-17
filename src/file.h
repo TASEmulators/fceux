@@ -42,7 +42,7 @@ struct FCEUFILE {
 
 	FCEUFILE()
 		: stream(0)
-		, archiveCount(-1)
+		, archiveCount(-1), archiveIndex(0), size(0), mode(READ)
 	{}
 
 	~FCEUFILE()

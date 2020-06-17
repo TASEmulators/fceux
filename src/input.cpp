@@ -484,6 +484,7 @@ static void SetInputStuff(int port)
 		joyports[port].driver=FCEU_InitVirtualBoy(port);
 		break;
 	case SI_NONE:
+	case SI_UNSET:
 		joyports[port].driver=&DummyJPort;
 		break;
 	}
@@ -494,6 +495,7 @@ static void SetInputStuffFC()
 	switch(portFC.type)
 	{
 	case SIFC_NONE:
+	case SIFC_UNSET:
 		portFC.driver=&DummyPortFC;
 		break;
 	case SIFC_ARKANOID:
@@ -721,7 +723,7 @@ const char* FCEUI_CommandTypeNames[]=
 	"TAS Editor",
 };
 
-static void CommandUnImpl(void);
+//static void CommandUnImpl(void);
 static void CommandToggleDip(void);
 static void CommandStateLoad(void);
 static void CommandStateSave(void);
@@ -938,10 +940,11 @@ void FCEUI_HandleEmuCommands(TestCommandState* testfn)
 	}
 }
 
-static void CommandUnImpl(void)
-{
-	FCEU_DispMessage("command '%s' unimplemented.",0, FCEUI_CommandTable[i].name);
-}
+// Function not currently used
+//static void CommandUnImpl(void)
+//{
+//	FCEU_DispMessage("command '%s' unimplemented.",0, FCEUI_CommandTable[i].name);
+//}
 
 static void CommandToggleDip(void)
 {

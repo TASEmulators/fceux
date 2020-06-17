@@ -538,7 +538,7 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 						break;
 						case CHEAT_CONTEXT_POSSI_ADDTOMEMORYWATCH:
 						{
-							char addr[16] = { 0 };
+							char addr[32] = { 0 };
 							int sel = SendDlgItemMessage(hwndDlg, IDC_CHEAT_LIST_POSSIBILITIES, LVM_GETSELECTIONMARK, 0, 0);
 							if (sel != -1)
 							{
@@ -816,9 +816,9 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 									if (strchr(buf, ':'))
 									{
 										if (strchr(buf, '?'))
-											sscanf(buf, "%X:%X?%X", &a, &c, &v);
+											sscanf(buf, "%X:%X?%X", (unsigned int*)&a, (unsigned int*)&c, (unsigned int*)&v);
 										else
-											sscanf(buf, "%X:%X", &a, &v);
+											sscanf(buf, "%X:%X", (unsigned int*)&a, (unsigned int*)&v);
 									}
 
 									SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPCSTR)(a == -1 ? "" : U16ToStr(a)));
@@ -978,7 +978,7 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 							break;
 							case NM_DBLCLK:
 							{
-								char addr[16];
+								char addr[32];
 								sprintf(addr, "%04X", possiList[((NMITEMACTIVATE*)lParam)->iItem].addr);
 								AddMemWatch(addr);
 							}
@@ -1035,19 +1035,19 @@ void UpdateCheatListGroupBoxUI()
 	char temp[64];
 	if (FrozenAddressCount < 256)
 	{
-		sprintf(temp, "Active Cheats %d", FrozenAddressCount);
+		sprintf(temp, "Active Cheats %u", FrozenAddressCount);
 		EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_ADD), TRUE);
 		EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_ADDFROMFILE), TRUE);
 	}
 	else if (FrozenAddressCount == 256)
 	{
-		sprintf(temp, "Active Cheats %d (Max Limit)", FrozenAddressCount);
+		sprintf(temp, "Active Cheats %u (Max Limit)", FrozenAddressCount);
 		EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_ADD), FALSE);
 		EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_ADDFROMFILE), FALSE);
 	}
 	else
 	{
-		sprintf(temp, "%d Error: Too many cheats loaded!", FrozenAddressCount);
+		sprintf(temp, "%u Error: Too many cheats loaded!", FrozenAddressCount);
 		EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_ADD), FALSE);
 		EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_ADDFROMFILE), FALSE);
 	}
