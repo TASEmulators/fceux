@@ -5,4 +5,5 @@ image:
   #- Ubuntu1804
 build_script:
 - cmd: pipelines/win32_build.bat
+- cmd: pipelines/win64_build.bat
 - sh: ./pipelines/linux_build.sh
