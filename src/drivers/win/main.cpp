@@ -112,6 +112,15 @@ extern bool taseditorEnableAcceleratorKeys;
  #define __COMPILER__STRING__ "unknown"
 #endif
 
+// 64-bit build requires manifest to use common controls 6 (style adapts to windows version)
+#pragma comment(linker, \
+    "\"/manifestdependency:type='win32' "\
+    "name='Microsoft.Windows.Common-Controls' "\
+    "version='6.0.0.0' "\
+    "processorArchitecture='*' "\
+    "publicKeyToken='6595b64144ccf1df' "\
+    "language='*'\"")
+
 // External functions
 extern std::string cfgFile;		//Contains the filename of the config file used.
 extern bool turbo;				//Is game in turbo mode?
