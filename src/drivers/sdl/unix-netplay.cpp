@@ -252,9 +252,14 @@ FCEUD_SendData(void *data,
 	if(!error && check) {
 		char buf[1024];
 		char *f;
-		fgets(buf, 1024, stdin);
-		if((f=strrchr(buf,'\n'))) {
-			*f = 0;
+
+		buf[0] = 0;
+
+		if ( fgets(buf, 1024, stdin) )
+		{
+			if((f=strrchr(buf,'\n'))) {
+				*f = 0;
+			}
 		}
 		FCEUI_NetplayText((uint8 *)buf);
 	}
