@@ -354,4 +354,4 @@ target_link_libraries( fceux
 )
 
 install( TARGETS  fceux  
-	RUNTIME  bin )
+	RUNTIME  DESTINATION  bin )
