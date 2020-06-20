@@ -543,7 +543,7 @@ void PopulateMappingDisplay(HWND hwndDlg)
 			lvi.mask = LVIF_TEXT;
 			lvi.iItem = idx;
 			lvi.iSubItem = 1;
-			lvi.pszText = FCEUI_CommandTable[i].name;
+			lvi.pszText = (char*)FCEUI_CommandTable[i].name;
 
 			SendMessage(hwndListView, LVM_SETITEM, (WPARAM)0, (LPARAM)&lvi);
 
