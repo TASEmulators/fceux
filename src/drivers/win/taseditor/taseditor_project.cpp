@@ -35,7 +35,7 @@ extern SPLICER splicer;
 
 extern FCEUGI *GameInfo;
 
-extern void FCEU_PrintError(char *format, ...);
+extern void FCEU_PrintError(const char *format, ...);
 extern bool saveProject(bool save_compact = false);
 extern bool saveProjectAs(bool save_compact = false);
 extern int getInputType(MovieData& md);
