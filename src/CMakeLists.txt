@@ -44,6 +44,8 @@ else(WIN32)
 	  add_definitions( -D_SYSTEM_MINIZIP ${MINIZIP_CFLAGS} )
   endif()
 
+  #pkg_check_modules( ZLIB REQUIRED zlib)
+
   # Check for SDL2
   pkg_check_modules( SDL2 REQUIRED sdl2)
 

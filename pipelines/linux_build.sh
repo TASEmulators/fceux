@@ -84,7 +84,10 @@ mkdir -p $INSTALL_PREFIX/usr;
 #scons   --clean
 #scons   GTK3=1   SYSTEM_LUA=1   SYSTEM_MINIZIP=1   CREATE_AVI=1  install  --prefix=$INSTALL_PREFIX/usr
 mkdir build; cd build;
-cmake ..
+cmake  \
+   -DCMAKE_BUILD_TYPE=Release  \
+   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+	..
 make -j `nproc` 
 #DESTDIR=$INSTALL_PREFIX  make -j `nproc` install
 
