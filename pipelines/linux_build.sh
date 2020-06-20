@@ -87,10 +87,11 @@ echo "Num CPU: `nproc`";
 mkdir build; cd build;
 cmake  \
    -DCMAKE_BUILD_TYPE=Release  \
+   -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
    -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
 	..
 make -j `nproc` 
-#DESTDIR=$INSTALL_PREFIX  make -j `nproc` install
+make  install
 
 # Debug via ssh if necessary
 if [ ! -z $APPVEYOR_SSH_BLOCK ]; then

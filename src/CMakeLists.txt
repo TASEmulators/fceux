@@ -352,3 +352,6 @@ target_link_libraries( fceux
 	${LUA_LDFLAGS}
  	${SYS_LIBS}
 )
+
+install( TARGETS  fceux  
+	RUNTIME  bin )
