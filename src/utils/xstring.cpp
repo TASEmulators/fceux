@@ -157,7 +157,7 @@ int chr_replace(char *str, char search, char replace) {
 
 ///Replaces all instances of 'search' with 'replace'
 ///Returns number of sub-strings modified, or -1 on error
-int str_replace(char *str, char *search, char *replace) {
+int str_replace(char *str, const char *search, const char *replace) {
 	unsigned int i=0,j=0; //mbg merge 7/17/06 changed to unsigned int
 	int searchlen,replacelen;
 	char *astr;

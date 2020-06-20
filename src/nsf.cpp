@@ -262,7 +262,7 @@ int NSFLoad(const char *name, FCEUFILE *fp)
 	FCEU_printf(" Name:       %s\n Artist:     %s\n Copyright:  %s\n\n",NSFHeader.SongName,NSFHeader.Artist,NSFHeader.Copyright);
 	if(NSFHeader.SoundChip)
 	{
-		static char *tab[6]={"Konami VRCVI","Konami VRCVII","Nintendo FDS","Nintendo MMC5","Namco 106","Sunsoft FME-07"};
+		static const char *tab[6]={"Konami VRCVI","Konami VRCVII","Nintendo FDS","Nintendo MMC5","Namco 106","Sunsoft FME-07"};
 
 		for(x=0;x<6;x++)
 			if(NSFHeader.SoundChip&(1<<x))

@@ -117,7 +117,7 @@ FCEUD_NetworkConnect(void)
 
 	TSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if(TSocket < 0) {
-		char* s = "Error creating stream socket.";
+		const char* s = "Error creating stream socket.";
 		puts(s);
 		FCEU_DispMessage(s,0);
 		FCEUD_NetworkClose();

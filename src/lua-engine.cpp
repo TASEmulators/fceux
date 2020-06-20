@@ -515,6 +515,7 @@ static int emu_getdir(lua_State *L) {
 
 	return 1;
 #endif
+	return 0;
 }
 
 
@@ -545,6 +546,7 @@ static int emu_loadrom(lua_State *L) {
 		return 1;
 	}
 #endif
+	return 1;
 }
 
 
@@ -5227,7 +5229,7 @@ static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 	return 1;
 #else
 
-	char *t;
+	const char *t;
 #ifdef __linux
 
 	int pid; // appease compiler
@@ -5285,9 +5287,9 @@ static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 
 		// I'm gonna be dead in a matter of microseconds anyways, so wasted memory doesn't matter to me.
 		// Go ahead and abuse strdup.
-		char * parameters[] = {"xmessage", "-buttons", t, strdup(str), NULL};
+		const char * parameters[] = {"xmessage", "-buttons", t, strdup(str), NULL};
 
-		execvp("xmessage", parameters);
+		execvp("xmessage", (char* const*)parameters);
 
 		// Aw shitty
 		perror("exec xmessage");

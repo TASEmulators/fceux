@@ -1808,7 +1808,7 @@ void ConfigDevice (int which, int arg)
 	char buf[256];
 	int x;
 	std::string prefix;
-	char *str[10] =
+	const char *str[10] =
 	{ "A", "B", "SELECT", "START", "UP", "DOWN", "LEFT", "RIGHT", "Rapid A",
 		"Rapid B"
 	};

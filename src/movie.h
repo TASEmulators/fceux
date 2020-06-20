@@ -309,7 +309,7 @@ void FCEUI_ToggleInputDisplay(void);
 
 void LoadSubtitles(MovieData &);
 void ProcessSubtitles(void);
-void FCEU_DisplaySubtitles(char *format, ...);
+void FCEU_DisplaySubtitles(const char *format, ...);
 
 void poweron(bool shouldDisableBatteryLoading);
 

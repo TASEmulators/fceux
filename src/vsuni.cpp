@@ -35,7 +35,7 @@
 
 #define IOPTION_PREDIP    0x10
 typedef struct {
-	char *name;
+	const char *name;
 	uint64 md5partial;
 	int mapper;
 	int mirroring;

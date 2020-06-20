@@ -44,11 +44,11 @@ struct SFORMAT
 	uint32 s;
 
 	//a string description of the element
-	char *desc;
+	const char *desc;
 };
 
 void ResetExState(void (*PreSave)(void),void (*PostSave)(void));
-void AddExState(void *v, uint32 s, int type, char *desc);
+void AddExState(void *v, uint32 s, int type, const char *desc);
 
 //indicates that the value is a multibyte integer that needs to be put in the correct byte order
 #define FCEUSTATE_RLSB            0x80000000

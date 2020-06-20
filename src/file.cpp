@@ -260,7 +260,7 @@ zpfail:
 	return 0;
 }
 
-FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index, const char** extensions, int* userCancel)
+FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, const char *mode, char *ext, int index, const char** extensions, int* userCancel)
 {
 	FILE *ipsfile=0;
 	FCEUFILE *fceufp=0;

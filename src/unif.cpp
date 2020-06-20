@@ -45,13 +45,13 @@ typedef struct {
 } UNIF_HEADER;
 
 typedef struct {
-	char *name;
+	const char *name;
 	void (*init)(CartInfo *);
 	int flags;
 } BMAPPING;
 
 typedef struct {
-	char *name;
+	const char *name;
 	int (*init)(FCEUFILE *fp);
 } BFMAPPING;
 
@@ -129,7 +129,7 @@ static int DoMirroring(FCEUFILE *fp) {
 			return(0);
 		mirrortodo = t;
 		{
-			static char *stuffo[6] = { "Horizontal", "Vertical", "$2000", "$2400", "\"Four-screen\"", "Controlled by Mapper Hardware" };
+			static const char *stuffo[6] = { "Horizontal", "Vertical", "$2000", "$2400", "\"Four-screen\"", "Controlled by Mapper Hardware" };
 			if (t < 6)
 				FCEU_printf(" Name/Attribute Table Mirroring: %s\n", stuffo[t]);
 		}
@@ -190,7 +190,7 @@ static int DINF(FCEUFILE *fp) {
 	FCEU_printf(" Dumped by: %s\n", name);
 	FCEU_printf(" Dumped with: %s\n", method);
 	{
-		char *months[12] = {
+		const char *months[12] = {
 			"January", "February", "March", "April", "May", "June", "July",
 			"August", "September", "October", "November", "December"
 		};
@@ -232,7 +232,7 @@ static int TVCI(FCEUFILE *fp) {
 	if ((t = FCEU_fgetc(fp)) == EOF)
 		return(0);
 	if (t <= 2) {
-		char *stuffo[3] = { "NTSC", "PAL", "NTSC and PAL" };
+		const char *stuffo[3] = { "NTSC", "PAL", "NTSC and PAL" };
 		if (t == 0) {
 			GameInfo->vidsys = GIV_NTSC;
 			FCEUI_SetVidSystem(0);

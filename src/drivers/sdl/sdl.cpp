@@ -493,12 +493,12 @@ FILE *FCEUD_UTF8fopen(const char *fn, const char *mode)
 	return(fopen(fn,mode));
 }
 
-static char *s_linuxCompilerString = "g++ " __VERSION__;
+static const char *s_linuxCompilerString = "g++ " __VERSION__;
 /**
  * Returns the compiler string.
  */
 const char *FCEUD_GetCompilerString() {
-	return (const char *)s_linuxCompilerString;
+	return s_linuxCompilerString;
 }
 
 /**
@@ -590,7 +590,7 @@ int main(int argc, char *argv[])
 		else if(strcmp(argv[i], "--nogui") == 0)
 		{
 			noGui = 1;
-			argv[i] = "";
+			//argv[i] = "";
 		}
 #endif
 	}
