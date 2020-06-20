@@ -83,6 +83,7 @@ echo '**************************'
 mkdir -p $INSTALL_PREFIX/usr;
 #scons   --clean
 #scons   GTK3=1   SYSTEM_LUA=1   SYSTEM_MINIZIP=1   CREATE_AVI=1  install  --prefix=$INSTALL_PREFIX/usr
+echo "Num CPU: `nproc`";
 mkdir build; cd build;
 cmake  \
    -DCMAKE_BUILD_TYPE=Release  \

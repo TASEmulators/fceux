@@ -44,7 +44,12 @@ else(WIN32)
 	  add_definitions( -D_SYSTEM_MINIZIP ${MINIZIP_CFLAGS} )
   endif()
 
-  #pkg_check_modules( ZLIB REQUIRED zlib)
+  pkg_check_modules( ZLIB REQUIRED zlib)
+
+  # Check for zlib
+  if ( ${ZLIB_FOUND} )
+	  add_definitions( ${ZLIB_CFLAGS} )
+  endif()
 
   # Check for SDL2
   pkg_check_modules( SDL2 REQUIRED sdl2)
@@ -343,7 +348,7 @@ target_link_libraries( fceux
 	${X11_LDFLAGS}
  	${GL_LDFLAGS}
  	${SDL2_LDFLAGS}
- 	${MINIZIP_LDFLAGS}
+	${MINIZIP_LDFLAGS} ${ZLIB_LDFLAGS}
 	${LUA_LDFLAGS}
  	${SYS_LIBS}
 )
