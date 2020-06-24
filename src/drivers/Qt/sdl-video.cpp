@@ -45,6 +45,10 @@
 #include <cstring>
 #include <cstdlib>
 
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+#define  LSB_FIRST 
+#endif
+
 // GLOBALS
 extern Config *g_config;
 
@@ -322,6 +326,21 @@ void LockConsole(){}
 ///Currently unimplemented.
 void UnlockConsole(){}
 
+static int testPattern = 0;
+
+static void WriteTestPattern(void)
+{
+	int i, j, k;
+
+	k=0;
+	for (i=0; i<GL_NES_WIDTH; i++)
+	{
+		for (j=0; j<GL_NES_HEIGHT; j++)
+		{
+			gl_shm->pixbuf[k] = 0xffffffff; k++;
+		}
+	}
+}
 /**
  * Pushes the given buffer of bits to the screen.
  */
@@ -352,7 +371,14 @@ BlitScreen(uint8 *XBuf)
 
 	if ( dest == NULL ) return;
 
-	Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines, pitch, 1, 1);
+	if ( testPattern )
+	{
+		WriteTestPattern();
+	}
+	else
+	{
+		Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines, pitch, 1, 1);
+	}
 
 	//guiPixelBufferReDraw();
 

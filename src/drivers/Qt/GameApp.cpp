@@ -1,6 +1,7 @@
 // GameApp.cpp
 //
 #include "GameApp.h"
+#include "fceuWrapper.h"
 
 gameWin_t::gameWin_t(QWidget *parent)
 	: QMainWindow( parent )
@@ -81,7 +82,9 @@ void gameWin_t::runGameFrame(void)
 
 	t = (double)ts.tv_sec + (double)(ts.tv_nsec * 1.0e-9);
    //printf("Run Frame %f\n", t);
-	//
+	
+	fceuWrapperUpdate();
+
 	viewport->repaint();
 
    return;

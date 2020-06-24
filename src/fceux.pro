@@ -43,7 +43,9 @@ unix {
 		QMAKE_CXXFLAGS +=  -D_S9XLUA_H
 	}
 
-	QMAKE_CXXFLAGS +=  -Wall  -Wno-write-strings  -Wno-sign-compare  -Wno-parentheses  -Wno-unused-local-typedefs
+	QMAKE_CXXFLAGS -=  -O2 
+	QMAKE_CXXFLAGS +=  -O0  -g3  -Wall  -Wno-write-strings  -Wno-sign-compare  -Wno-parentheses  -Wno-unused-local-typedefs
+	QMAKE_CXXFLAGS_RELEASE -= -O2
 }
 
 # Input

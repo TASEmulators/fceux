@@ -21,6 +21,10 @@ class gameView_t : public QOpenGLWidget, protected QOpenGLFunctions
 	 void resizeGL(int w, int h);
 	 void paintGL(void);
 
+	 int  view_width;
+	 int  view_height;
+	 GLuint gltexture;
+
 	private slots:
 };
 

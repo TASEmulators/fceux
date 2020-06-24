@@ -21,3 +21,8 @@ extern Config *g_config;
 
 int LoadGame(const char *path);
 int CloseGame(void);
+
+int  fceuWrapperInit( int argc, char *argv[] );
+int  fceuWrapperClose( void );
+int  fceuWrapperUpdate( void );
+
