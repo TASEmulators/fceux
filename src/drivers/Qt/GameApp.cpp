@@ -32,6 +32,8 @@ gameWin_t::gameWin_t(QWidget *parent)
 
 gameWin_t::~gameWin_t(void)
 {
+	fceuWrapperClose();
+
 	delete viewport;
 }
 
