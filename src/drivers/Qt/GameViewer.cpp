@@ -18,22 +18,22 @@ gameView_t::gameView_t(QWidget *parent)
 	view_height = 0;
 	gltexture   = 0;
 
-	QSurfaceFormat  fmt = QSurfaceFormat::defaultFormat();
+	//QSurfaceFormat  fmt = QSurfaceFormat::defaultFormat();
 
-	fmt.setRedBufferSize(8);
-	fmt.setGreenBufferSize(8);
-	fmt.setBlueBufferSize(8);
-	fmt.setAlphaBufferSize(8);
-	fmt.setDepthBufferSize( 24 );
-	setTextureFormat(GL_RGBA8);
+	//fmt.setRedBufferSize(8);
+	//fmt.setGreenBufferSize(8);
+	//fmt.setBlueBufferSize(8);
+	//fmt.setAlphaBufferSize(8);
+	//fmt.setDepthBufferSize( 24 );
+	//setTextureFormat(GL_RGBA8);
 
-	printf("R: %i \n", fmt.redBufferSize() );
-	printf("G: %i \n", fmt.greenBufferSize() );
-	printf("B: %i \n", fmt.blueBufferSize() );
-	printf("A: %i \n", fmt.alphaBufferSize() );
-	printf("SW: %i \n", fmt.swapBehavior() );
+	////printf("R: %i \n", fmt.redBufferSize() );
+	////printf("G: %i \n", fmt.greenBufferSize() );
+	////printf("B: %i \n", fmt.blueBufferSize() );
+	////printf("A: %i \n", fmt.alphaBufferSize() );
+	////printf("SW: %i \n", fmt.swapBehavior() );
 
-	setFormat( fmt );
+	//setFormat( fmt );
 }
 
 gameView_t::~gameView_t(void)
@@ -161,7 +161,7 @@ void gameView_t::paintGL(void)
 	//glVertex2f( 1.0f,  1.0f);	// Top right of target.
 	//glEnd();
 
-	context()->swapBuffers( context()->surface() );
+	//context()->swapBuffers( context()->surface() );
 	//if ( double_buffer_ena )
 	//{
 	//	glXSwapBuffers( dpy, win );
@@ -170,7 +170,7 @@ void gameView_t::paintGL(void)
 	//{
 	//	glFlush();
 	//}
-	glFlush();
+	//glFlush();
 
 	//float x1, y1, x2, y2;
 
