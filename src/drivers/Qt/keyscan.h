@@ -39,6 +39,16 @@
 #define SDLK_APOSTROPHE SDLK_QUOTE
 #define SDLK_BRACKET_LEFT SDLK_LEFTBRACKET
 #define SDLK_BRACKET_RIGHT SDLK_RIGHTBRACKET
-#define SDLK_SCROLLLOCK SDLK_SCROLLOCK		/* I guess the SDL people don't like lots of Ls... */
+//#define SDLK_SCROLLLOCK SDLK_SCROLLOCK		/* I guess the SDL people don't like lots of Ls... */
 #define SDLK_GRAVE	SDLK_BACKQUOTE
 #define MKK(k) SDLK_##k
+
+#include <QtCore>
+#include <QKeyEvent>
+#include <SDL2/SDL.h>
+
+SDL_Keycode convQtKey2SDLKeyCode( Qt::Key q );
+
+SDL_Scancode convQtKey2SDLScanCode( Qt::Key q );
+
+int  pushKeyEvent( QKeyEvent *event, int pressDown );

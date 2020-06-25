@@ -2,6 +2,7 @@
 //
 #include "GameApp.h"
 #include "fceuWrapper.h"
+#include "keyscan.h"
 
 gameWin_t::gameWin_t(QWidget *parent)
 	: QMainWindow( parent )
@@ -35,6 +36,18 @@ gameWin_t::~gameWin_t(void)
 	fceuWrapperClose();
 
 	delete viewport;
+}
+
+void gameWin_t::keyPressEvent(QKeyEvent *event)
+{
+   //printf("Key Press: 0x%x \n", event->key() );
+	pushKeyEvent( event, 1 );
+}
+
+void gameWin_t::keyReleaseEvent(QKeyEvent *event)
+{
+   //printf("Key Release: 0x%x \n", event->key() );
+	pushKeyEvent( event, 0 );
 }
 
 void gameWin_t::createMainMenu(void)

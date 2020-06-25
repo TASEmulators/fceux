@@ -12,6 +12,7 @@
 #include <QMenuBar>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QKeyEvent>
 #include <QTimer>
 
 #include "GameViewer.h"
@@ -36,6 +37,10 @@ class  gameWin_t : public QMainWindow
     QAction *aboutAct;
 
 	 QTimer  *gameTimer;
+
+	protected:
+	 void keyPressEvent(QKeyEvent *event);
+	 void keyReleaseEvent(QKeyEvent *event);
 
 	private:
 		void createMainMenu(void);

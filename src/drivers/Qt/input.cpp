@@ -1043,7 +1043,7 @@ DTestButton (ButtConfig * bc)
 ButtConfig GamePadConfig[4][10] = {
 /* Gamepad 1 */
 	{MK (KP_3), MK (KP_2), MK (SLASH), MK (ENTER),
-	MK (W), MK (Z), MK (A), MK (S), MKZ (), MKZ ()},
+	MK (w), MK (z), MK (a), MK (s), MKZ (), MKZ ()},
 
 	/* Gamepad 2 */
 	GPZ (),
@@ -2259,7 +2259,7 @@ const char *GamePadNames[GAMEPAD_NUM_BUTTONS] = { "A", "B", "Select", "Start",
 const char *DefaultGamePadDevice[GAMEPAD_NUM_DEVICES] =
 { "Keyboard", "None", "None", "None" };
 const int DefaultGamePad[GAMEPAD_NUM_DEVICES][GAMEPAD_NUM_BUTTONS] =
-{ {SDLK_F, SDLK_D, SDLK_S, SDLK_RETURN,
+{ {SDLK_f, SDLK_d, SDLK_s, SDLK_RETURN,
 	SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT, 0, 0},
 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},

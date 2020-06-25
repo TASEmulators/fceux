@@ -282,6 +282,13 @@ int  fceuWrapperInit( int argc, char *argv[] )
 
 	FCEUD_Message("Starting " FCEU_NAME_AND_VERSION "...\n");
 
+	/* SDL_INIT_VIDEO Needed for (joystick config) event processing? */
+	if (SDL_Init(SDL_INIT_VIDEO)) 
+	{
+		printf("Could not initialize SDL: %s.\n", SDL_GetError());
+		return(-1);
+	}
+
 	// Initialize the configuration system
 	g_config = InitConfig();
 
