@@ -292,9 +292,11 @@ SOURCES += src/drivers/common/nes_ntsc.c
 
 HEADERS += src/drivers/Qt/GameApp.h  
 HEADERS += src/drivers/Qt/GameViewer.h  
+HEADERS += src/drivers/Qt/GamePadConf.h  
 SOURCES += src/drivers/Qt/main.cpp  
 SOURCES += src/drivers/Qt/GameApp.cpp  
 SOURCES += src/drivers/Qt/GameViewer.cpp  
+SOURCES += src/drivers/Qt/GamePadConf.cpp  
 SOURCES += src/drivers/Qt/fceuWrapper.cpp  
 SOURCES += src/drivers/Qt/config.cpp  
 SOURCES += src/drivers/Qt/input.cpp  

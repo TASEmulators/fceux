@@ -3,6 +3,7 @@
 #include <QFileDialog>
 
 #include "GameApp.h"
+#include "GamePadConf.h"
 #include "fceuWrapper.h"
 #include "keyscan.h"
 
@@ -54,9 +55,14 @@ void gameWin_t::keyReleaseEvent(QKeyEvent *event)
 
 void gameWin_t::createMainMenu(void)
 {
+    // This is needed for menu bar to show up on MacOS
 	 menuBar()->setNativeMenuBar(false);
+
+	 //-----------------------------------------------------------------------
+	 // File
     fileMenu = menuBar()->addMenu(tr("&File"));
 
+	 // File -> Open ROM
 	 openROM = new QAction(tr("&Open ROM"), this);
     openROM->setShortcuts(QKeySequence::Open);
     openROM->setStatusTip(tr("Open ROM File"));
@@ -64,12 +70,37 @@ void gameWin_t::createMainMenu(void)
 
     fileMenu->addAction(openROM);
 
+	 // File -> Close ROM
+	 closeROM = new QAction(tr("&Close ROM"), this);
+    closeROM->setShortcut( QKeySequence(tr("Ctrl+C")));
+    closeROM->setStatusTip(tr("Close Loaded ROM"));
+    connect(closeROM, SIGNAL(triggered()), this, SLOT(closeROMCB(void)) );
+
+    fileMenu->addAction(closeROM);
+
+    fileMenu->addSeparator();
+
+	 // File -> Quit
 	 quitAct = new QAction(tr("&Quit"), this);
     quitAct->setStatusTip(tr("Quit the Application"));
     connect(quitAct, SIGNAL(triggered()), qApp, SLOT(quit()));
 
     fileMenu->addAction(quitAct);
 
+	 //-----------------------------------------------------------------------
+	 // Options
+    optMenu = menuBar()->addMenu(tr("&Options"));
+
+	 // Options -> GamePad Config
+	 gamePadConfig = new QAction(tr("&GamePad Config"), this);
+    //gamePadConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+    gamePadConfig->setStatusTip(tr("GamePad Configure"));
+    connect(gamePadConfig, SIGNAL(triggered()), this, SLOT(openGamePadConfWin(void)) );
+
+    optMenu->addAction(gamePadConfig);
+
+	 //-----------------------------------------------------------------------
+	 // Help
     helpMenu = menuBar()->addMenu(tr("&Help"));
 
 	 aboutAct = new QAction(tr("&About"), this);
@@ -83,7 +114,7 @@ void gameWin_t::openROMFile(void)
 {
 	int ret;
 	QString filename;
-	QFileDialog  dialog(this);
+	QFileDialog  dialog(this, "Open ROM File");
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
@@ -126,6 +157,18 @@ void gameWin_t::openROMFile(void)
 
    return;
 }
+
+void gameWin_t::closeROMCB(void)
+{
+	CloseGame();
+}
+
+void gameWin_t::openGamePadConfWin(void)
+{
+	printf("Open GamePad Config Window\n");
+	GamePadConfDialog_t  gpConf(this);
+}
+
 void gameWin_t::aboutQPlot(void)
 {
    printf("About QPlot\n");

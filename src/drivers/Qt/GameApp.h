@@ -30,10 +30,13 @@ class  gameWin_t : public QMainWindow
 		//
 
 	 QMenu *fileMenu;
+    QMenu *optMenu;
     QMenu *helpMenu;
 
     QAction *openROM;
+    QAction *closeROM;
     QAction *quitAct;
+    QAction *gamePadConfig;
     QAction *aboutAct;
 
 	 QTimer  *gameTimer;
@@ -47,7 +50,9 @@ class  gameWin_t : public QMainWindow
 
 	private slots:
 		void openROMFile(void);
+		void closeROMCB(void);
       void aboutQPlot(void);
+      void openGamePadConfWin(void);
       void runGameFrame(void);
 
 };
