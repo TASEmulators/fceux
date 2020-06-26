@@ -32,7 +32,7 @@ class  gameWin_t : public QMainWindow
 	 QMenu *fileMenu;
     QMenu *helpMenu;
 
-    QAction *openAct;
+    QAction *openROM;
     QAction *quitAct;
     QAction *aboutAct;
 
@@ -46,7 +46,7 @@ class  gameWin_t : public QMainWindow
 		void createMainMenu(void);
 
 	private slots:
-		void openFile(void);
+		void openROMFile(void);
       void aboutQPlot(void);
       void runGameFrame(void);
 

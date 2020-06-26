@@ -1,5 +1,7 @@
 // GameApp.cpp
 //
+#include <QFileDialog>
+
 #include "GameApp.h"
 #include "fceuWrapper.h"
 #include "keyscan.h"
@@ -55,12 +57,12 @@ void gameWin_t::createMainMenu(void)
 	 menuBar()->setNativeMenuBar(false);
     fileMenu = menuBar()->addMenu(tr("&File"));
 
-	 openAct = new QAction(tr("&Open"), this);
-    openAct->setShortcuts(QKeySequence::Open);
-    openAct->setStatusTip(tr("Open an Existing File"));
-    connect(openAct, SIGNAL(triggered()), this, SLOT(openFile(void)) );
+	 openROM = new QAction(tr("&Open ROM"), this);
+    openROM->setShortcuts(QKeySequence::Open);
+    openROM->setStatusTip(tr("Open ROM File"));
+    connect(openROM, SIGNAL(triggered()), this, SLOT(openROMFile(void)) );
 
-    fileMenu->addAction(openAct);
+    fileMenu->addAction(openROM);
 
 	 quitAct = new QAction(tr("&Quit"), this);
     quitAct->setStatusTip(tr("Quit the Application"));
@@ -77,9 +79,51 @@ void gameWin_t::createMainMenu(void)
     helpMenu->addAction(aboutAct);
 };
 
-void gameWin_t::openFile(void)
+void gameWin_t::openROMFile(void)
 {
-   printf("Open File\n");
+	int ret;
+	QString filename;
+	QFileDialog  dialog(this);
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("All files (*.*) ;; NES files (*.nes)"));
+
+	dialog.setViewMode(QFileDialog::List);
+
+	// the gnome default file dialog is not playing nice with QT.
+	// TODO make this a config option to use native file dialog.
+	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+   //filename =  QFileDialog::getOpenFileName( this,
+   //       "Open ROM File",
+   //       QDir::currentPath(),
+   //       "All files (*.*) ;; NES files (*.nes)");
+ 
+   if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	g_config->setOption ("SDL.LastOpenFile", filename.toStdString().c_str() );
+	CloseGame ();
+	LoadGame ( filename.toStdString().c_str() );
+
    return;
 }
 void gameWin_t::aboutQPlot(void)
