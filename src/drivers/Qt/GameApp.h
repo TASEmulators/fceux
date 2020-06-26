@@ -16,6 +16,7 @@
 #include <QTimer>
 
 #include "GameViewer.h"
+#include "GamePadConf.h"
 
 class  gameWin_t : public QMainWindow
 {
@@ -41,7 +42,10 @@ class  gameWin_t : public QMainWindow
 
 	 QTimer  *gameTimer;
 
+    GamePadConfDialog_t *gamePadConfWin;
+
 	protected:
+    void closeEvent(QCloseEvent *event);
 	 void keyPressEvent(QKeyEvent *event);
 	 void keyReleaseEvent(QKeyEvent *event);
 

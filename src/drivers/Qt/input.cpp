@@ -52,6 +52,7 @@ extern bool bindSavestate, frameAdvanceLagSkip, lagCounterDisplay;
 static int UsrInputType[NUM_INPUT_DEVICES];
 static int CurInputType[NUM_INPUT_DEVICES];
 static int cspec = 0;
+static int buttonConfigInProgress = 0;
 
 extern int gametype;
 
@@ -963,7 +964,7 @@ UpdatePhysicalInput ()
 }
 
 
-static int bcpv, bcpj;
+static int bcpv=0, bcpj=0;
 
 /**
  *  Begin configuring the buttons by placing the video and joystick
@@ -980,6 +981,8 @@ int ButtonConfigBegin ()
 	// XXX soules - why did we shut this down?
 	// initialize the joystick subsystem
 	InitJoysticks ();
+
+   buttonConfigInProgress = 1;
 
 	return 1;
 }
@@ -1004,6 +1007,7 @@ ButtonConfigEnd ()
 	{
 		InitJoysticks ();
 	}
+   buttonConfigInProgress = 0;
 }
 
 /**
@@ -1197,6 +1201,10 @@ void FCEUD_UpdateInput ()
 	int x;
 	int t = 0;
 
+   if ( buttonConfigInProgress )
+   {
+      return;
+   }
 	UpdatePhysicalInput ();
 	KeyboardCommands ();
 
@@ -1622,6 +1630,7 @@ int DWaitButton (const uint8 * text, ButtConfig * bc, int wb, int *buttonConfigS
 	SDL_Event event;
 	static int32 LastAx[64][64];
 	int x, y;
+   int timeout_ms = 10000;
 
 	if (text)
 	{
@@ -1643,6 +1652,16 @@ int DWaitButton (const uint8 * text, ButtConfig * bc, int wb, int *buttonConfigS
 	while (1)
 	{
 		int done = 0;
+
+      usleep(10000);
+      timeout_ms -= 10;
+
+      if ( timeout_ms <= 0 )
+      {
+         break;
+      }
+
+      QCoreApplication::processEvents();
 //#ifdef _GTK
 //		while (gtk_events_pending ())
 //			gtk_main_iteration_do (FALSE);
@@ -1653,6 +1672,7 @@ int DWaitButton (const uint8 * text, ButtConfig * bc, int wb, int *buttonConfigS
 			switch (event.type)
 			{
 				case SDL_KEYDOWN:
+               //printf("SDL KeyDown:%i \n", event.key.keysym.sym );
 					bc->ButtType[wb] = BUTTC_KEYBOARD;
 					bc->DeviceNum[wb] = 0;
 					bc->ButtonNum[wb] = event.key.keysym.sym;

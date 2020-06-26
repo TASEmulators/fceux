@@ -32,24 +32,41 @@ gameWin_t::gameWin_t(QWidget *parent)
 
 	gameTimer->setTimerType( Qt::PreciseTimer );
 	gameTimer->start( 10 );
+
+   gamePadConfWin = NULL;
 }
 
 gameWin_t::~gameWin_t(void)
 {
+   if ( gamePadConfWin != NULL )
+   {
+      gamePadConfWin->closeWindow();
+   }
 	fceuWrapperClose();
 
 	delete viewport;
 }
 
+void gameWin_t::closeEvent(QCloseEvent *event)
+{
+   printf("Main Window Close Event\n");
+   if ( gamePadConfWin != NULL )
+   {
+      printf("Command Game Pad Close\n");
+      gamePadConfWin->closeWindow();
+   }
+   event->accept();
+}
+
 void gameWin_t::keyPressEvent(QKeyEvent *event)
 {
-   //printf("Key Press: 0x%x \n", event->key() );
+   printf("Key Press: 0x%x \n", event->key() );
 	pushKeyEvent( event, 1 );
 }
 
 void gameWin_t::keyReleaseEvent(QKeyEvent *event)
 {
-   //printf("Key Release: 0x%x \n", event->key() );
+   printf("Key Release: 0x%x \n", event->key() );
 	pushKeyEvent( event, 0 );
 }
 
@@ -165,8 +182,20 @@ void gameWin_t::closeROMCB(void)
 
 void gameWin_t::openGamePadConfWin(void)
 {
+   if ( gamePadConfWin != NULL )
+   {
+      printf("GamePad Config Window Already Open\n");
+      return;
+   }
 	printf("Open GamePad Config Window\n");
-	GamePadConfDialog_t  gpConf(this);
+   gamePadConfWin = new GamePadConfDialog_t(this);
+	
+   gamePadConfWin->show();
+   gamePadConfWin->exec();
+
+   delete gamePadConfWin;
+   gamePadConfWin = NULL;
+   printf("GamePad Config Window Destroyed\n");
 }
 
 void gameWin_t::aboutQPlot(void)
@@ -177,12 +206,12 @@ void gameWin_t::aboutQPlot(void)
 
 void gameWin_t::runGameFrame(void)
 {
-	struct timespec ts;
-	double t;
+	//struct timespec ts;
+	//double t;
 
-	clock_gettime( CLOCK_REALTIME, &ts );
+	//clock_gettime( CLOCK_REALTIME, &ts );
 
-	t = (double)ts.tv_sec + (double)(ts.tv_nsec * 1.0e-9);
+	//t = (double)ts.tv_sec + (double)(ts.tv_nsec * 1.0e-9);
    //printf("Run Frame %f\n", t);
 	
 	fceuWrapperUpdate();
