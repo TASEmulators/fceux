@@ -37,6 +37,14 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	efs_chkbox  = new QCheckBox("Enable Four Score");
 	udlr_chkbox = new QCheckBox("Allow Up+Down/Left+Right");
 
+	int fourScore;
+	g_config->getOption("SDL.FourScore", &fourScore);
+	efs_chkbox->setChecked( fourScore );
+
+	int opposite_dirs;
+	g_config->getOption("SDL.Input.EnableOppositeDirectionals", &opposite_dirs);
+	udlr_chkbox->setChecked( opposite_dirs );
+
    frame = new QGroupBox(tr("Buttons:"));
    grid  = new QGridLayout();
 
@@ -61,7 +69,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	   buttonName = new QLabel(tr(text));
 	   keyName[i] = new QLabel(tr(keyNameStr));
-      button[i]  = new QPushButton(tr("Change"));
+      button[i]  = new GamePadConfigButton_t(i);
 
       grid->addWidget( buttonName, i, 0, Qt::AlignCenter );
       grid->addWidget( keyName[i], i, 1, Qt::AlignCenter );
@@ -81,6 +89,9 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    connect(button[9], SIGNAL(clicked()), this, SLOT(changeButton9(void)) );
    connect(closebutton, SIGNAL(clicked()), this, SLOT(closeWindow(void)) );
 
+   connect(efs_chkbox , SIGNAL(stateChanged(int)), this, SLOT(ena4score(int)) );
+   connect(udlr_chkbox, SIGNAL(stateChanged(int)), this, SLOT(oppDirEna(int)) );
+
 	QVBoxLayout *mainLayout = new QVBoxLayout();
 
 	mainLayout->addLayout( hbox1 );
@@ -91,9 +102,6 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	setLayout( mainLayout );
 
-	//show();
-	//exec();
-
 }
 
 //----------------------------------------------------
@@ -103,14 +111,28 @@ GamePadConfDialog_t::~GamePadConfDialog_t(void)
 }
 void GamePadConfDialog_t::keyPressEvent(QKeyEvent *event)
 {
-   //printf("Key Press: 0x%x \n", event->key() );
+   //printf("GamePad Window Key Press: 0x%x \n", event->key() );
 	pushKeyEvent( event, 1 );
 }
 
 void GamePadConfDialog_t::keyReleaseEvent(QKeyEvent *event)
 {
-   //printf("Key Release: 0x%x \n", event->key() );
+   //printf("GamePad Window Key Release: 0x%x \n", event->key() );
 	pushKeyEvent( event, 0 );
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::ena4score(int state)
+{
+	int value = (state == Qt::Unchecked) ? 0 : 1;
+	printf("Set 'SDL.FourScore' = %i\n", value);
+	g_config->setOption("SDL.FourScore", value);
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::oppDirEna(int state)
+{
+	int value = (state == Qt::Unchecked) ? 0 : 1;
+	//printf("Set 'SDL.Input.EnableOppositeDirectionals' = %i\n", value);
+	g_config->setOption("SDL.Input.EnableOppositeDirectionals", value);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton(int padNo, int x)
@@ -165,7 +187,7 @@ void GamePadConfDialog_t::changeButton(int padNo, int x)
 //----------------------------------------------------
 void GamePadConfDialog_t::closeEvent(QCloseEvent *event)
 {
-   printf("GamePad Close Window Event\n");
+   //printf("GamePad Close Window Event\n");
    buttonConfigStatus = 0;
    done(0);
    event->accept();
@@ -173,7 +195,7 @@ void GamePadConfDialog_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------
 void GamePadConfDialog_t::closeWindow(void)
 {
-   printf("Close Window\n");
+   //printf("Close Window\n");
    buttonConfigStatus = 0;
    done(0);
 }
@@ -226,5 +248,23 @@ void GamePadConfDialog_t::changeButton8(void)
 void GamePadConfDialog_t::changeButton9(void)
 {
    changeButton( portNum, 9 );
+}
+//----------------------------------------------------
+GamePadConfigButton_t::GamePadConfigButton_t(int i)
+{
+	idx = i;
+	setText("Change");
+}
+//----------------------------------------------------
+void GamePadConfigButton_t::keyPressEvent(QKeyEvent *event)
+{
+   //printf("GamePad Button Key Press: 0x%x \n", event->key() );
+	pushKeyEvent( event, 1 );
+}
+
+void GamePadConfigButton_t::keyReleaseEvent(QKeyEvent *event)
+{
+   //printf("GamePad Button Key Release: 0x%x \n", event->key() );
+	pushKeyEvent( event, 0 );
 }
 //----------------------------------------------------

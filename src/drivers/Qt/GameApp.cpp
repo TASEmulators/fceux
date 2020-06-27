@@ -49,10 +49,10 @@ gameWin_t::~gameWin_t(void)
 
 void gameWin_t::closeEvent(QCloseEvent *event)
 {
-   printf("Main Window Close Event\n");
+   //printf("Main Window Close Event\n");
    if ( gamePadConfWin != NULL )
    {
-      printf("Command Game Pad Close\n");
+      //printf("Command Game Pad Close\n");
       gamePadConfWin->closeWindow();
    }
    event->accept();
@@ -60,13 +60,13 @@ void gameWin_t::closeEvent(QCloseEvent *event)
 
 void gameWin_t::keyPressEvent(QKeyEvent *event)
 {
-   printf("Key Press: 0x%x \n", event->key() );
+   //printf("Key Press: 0x%x \n", event->key() );
 	pushKeyEvent( event, 1 );
 }
 
 void gameWin_t::keyReleaseEvent(QKeyEvent *event)
 {
-   printf("Key Release: 0x%x \n", event->key() );
+   //printf("Key Release: 0x%x \n", event->key() );
 	pushKeyEvent( event, 0 );
 }
 
@@ -187,7 +187,7 @@ void gameWin_t::openGamePadConfWin(void)
       printf("GamePad Config Window Already Open\n");
       return;
    }
-	printf("Open GamePad Config Window\n");
+	//printf("Open GamePad Config Window\n");
    gamePadConfWin = new GamePadConfDialog_t(this);
 	
    gamePadConfWin->show();
@@ -195,7 +195,7 @@ void gameWin_t::openGamePadConfWin(void)
 
    delete gamePadConfWin;
    gamePadConfWin = NULL;
-   printf("GamePad Config Window Destroyed\n");
+   //printf("GamePad Config Window Destroyed\n");
 }
 
 void gameWin_t::aboutQPlot(void)

@@ -14,6 +14,18 @@
 #include <QFrame>
 #include <QGroupBox>
 
+class GamePadConfigButton_t : public QPushButton
+{   
+	public:
+ 		GamePadConfigButton_t(int i);
+
+	protected:
+   	void keyPressEvent(QKeyEvent *event);
+   	void keyReleaseEvent(QKeyEvent *event);
+
+		int idx;
+};
+
 class GamePadConfDialog_t : public QDialog
 {
    Q_OBJECT
@@ -24,8 +36,8 @@ class GamePadConfDialog_t : public QDialog
 
 	protected:
 		QComboBox *portSel;
-      QPushButton *button[10];
       QLabel      *keyName[10];
+      GamePadConfigButton_t *button[10];
 
       int  portNum;
       int  buttonConfigStatus;
@@ -48,5 +60,7 @@ class GamePadConfDialog_t : public QDialog
       void changeButton7(void);
       void changeButton8(void);
       void changeButton9(void);
+		void ena4score(int state);
+		void oppDirEna(int state);
 
 };
