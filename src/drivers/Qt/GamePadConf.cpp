@@ -124,7 +124,7 @@ void GamePadConfDialog_t::keyReleaseEvent(QKeyEvent *event)
 void GamePadConfDialog_t::ena4score(int state)
 {
 	int value = (state == Qt::Unchecked) ? 0 : 1;
-	printf("Set 'SDL.FourScore' = %i\n", value);
+	//printf("Set 'SDL.FourScore' = %i\n", value);
 	g_config->setOption("SDL.FourScore", value);
 }
 //----------------------------------------------------
