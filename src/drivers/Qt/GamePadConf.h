@@ -40,12 +40,15 @@ class GamePadConfDialog_t : public QDialog
       GamePadConfigButton_t *button[10];
 
       int  portNum;
+		int  configNo;
       int  buttonConfigStatus;
 
       void changeButton( int port, int button );
       void keyPressEvent(QKeyEvent *event);
 	   void keyReleaseEvent(QKeyEvent *event);
       void closeEvent(QCloseEvent *bar);
+	private:
+		void updateCntrlrDpy(void);
 
    public slots:
       void closeWindow(void);
@@ -62,5 +65,6 @@ class GamePadConfDialog_t : public QDialog
       void changeButton9(void);
 		void ena4score(int state);
 		void oppDirEna(int state);
+		void controllerSelect(int index);
 
 };

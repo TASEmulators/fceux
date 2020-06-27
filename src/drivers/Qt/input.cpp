@@ -1566,6 +1566,8 @@ const char * ButtonName (const ButtConfig * bc, int which)
 {
 	static char name[256];
 
+	name[0] = 0;
+
 	switch (bc->ButtType[which])
 	{
 		case BUTTC_KEYBOARD:
@@ -1649,6 +1651,13 @@ int DWaitButton (const uint8 * text, ButtConfig * bc, int wb, int *buttonConfigS
 		}
 	}
 
+	// Purge all pending events, so that this next button press 
+	// will be the one we want.
+	while (SDL_PollEvent (&event))
+	{
+
+	}
+
 	while (1)
 	{
 		int done = 0;
@@ -1662,10 +1671,7 @@ int DWaitButton (const uint8 * text, ButtConfig * bc, int wb, int *buttonConfigS
       }
 
       QCoreApplication::processEvents();
-//#ifdef _GTK
-//		while (gtk_events_pending ())
-//			gtk_main_iteration_do (FALSE);
-//#endif
+
 		while (SDL_PollEvent (&event))
 		{
 			done++;

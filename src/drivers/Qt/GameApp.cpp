@@ -56,6 +56,8 @@ void gameWin_t::closeEvent(QCloseEvent *event)
       gamePadConfWin->closeWindow();
    }
    event->accept();
+
+	closeApp();
 }
 
 void gameWin_t::keyPressEvent(QKeyEvent *event)
@@ -70,6 +72,7 @@ void gameWin_t::keyReleaseEvent(QKeyEvent *event)
 	pushKeyEvent( event, 0 );
 }
 
+//---------------------------------------------------------------------------
 void gameWin_t::createMainMenu(void)
 {
     // This is needed for menu bar to show up on MacOS
@@ -100,7 +103,7 @@ void gameWin_t::createMainMenu(void)
 	 // File -> Quit
 	 quitAct = new QAction(tr("&Quit"), this);
     quitAct->setStatusTip(tr("Quit the Application"));
-    connect(quitAct, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(quitAct, SIGNAL(triggered()), this, SLOT(closeApp()));
 
     fileMenu->addAction(quitAct);
 
@@ -126,6 +129,21 @@ void gameWin_t::createMainMenu(void)
 
     helpMenu->addAction(aboutAct);
 };
+//---------------------------------------------------------------------------
+void gameWin_t::closeApp(void)
+{
+	fceuWrapperClose();
+
+	// LoadGame() checks for an IP and if it finds one begins a network session
+	// clear the NetworkIP field so this doesn't happen unintentionally
+	g_config->setOption ("SDL.NetworkIP", "");
+	g_config->save ();
+	//SDL_Quit (); // Already called by fceuWrapperClose
+
+	//qApp::quit();
+	qApp->quit();
+}
+//---------------------------------------------------------------------------
 
 void gameWin_t::openROMFile(void)
 {

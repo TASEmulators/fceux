@@ -53,6 +53,7 @@ class  gameWin_t : public QMainWindow
 		void createMainMenu(void);
 
 	private slots:
+		void closeApp(void);
 		void openROMFile(void);
 		void closeROMCB(void);
       void aboutQPlot(void);

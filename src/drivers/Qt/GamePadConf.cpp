@@ -18,6 +18,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    QPushButton *closebutton;
 
    portNum = 0;
+   configNo = 0;
    buttonConfigStatus = 1;
 
    setWindowTitle("GamePad Config");
@@ -56,7 +57,6 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    for (int i=0; i<10; i++)
    {
       char text[64];
-      const char *keyNameStr;
 	   QLabel *buttonName;
 
       sprintf( text, "%s:", GamePadNames[i] );
@@ -65,16 +65,16 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
       //hbox2->setAlignment(Qt::AlignCenter);
 
-      keyNameStr = ButtonName( &GamePadConfig[portNum][i], portNum );
-
 	   buttonName = new QLabel(tr(text));
-	   keyName[i] = new QLabel(tr(keyNameStr));
+	   keyName[i] = new QLabel();
       button[i]  = new GamePadConfigButton_t(i);
 
       grid->addWidget( buttonName, i, 0, Qt::AlignCenter );
       grid->addWidget( keyName[i], i, 1, Qt::AlignCenter );
       grid->addWidget( button[i] , i, 2, Qt::AlignCenter );
    }
+	updateCntrlrDpy();
+
    closebutton     = new QPushButton(tr("Close"));
 
    connect(button[0], SIGNAL(clicked()), this, SLOT(changeButton0(void)) );
@@ -89,6 +89,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    connect(button[9], SIGNAL(clicked()), this, SLOT(changeButton9(void)) );
    connect(closebutton, SIGNAL(clicked()), this, SLOT(closeWindow(void)) );
 
+   connect(portSel    , SIGNAL(activated(int)), this, SLOT(controllerSelect(int)) );
    connect(efs_chkbox , SIGNAL(stateChanged(int)), this, SLOT(ena4score(int)) );
    connect(udlr_chkbox, SIGNAL(stateChanged(int)), this, SLOT(oppDirEna(int)) );
 
@@ -121,6 +122,32 @@ void GamePadConfDialog_t::keyReleaseEvent(QKeyEvent *event)
 	pushKeyEvent( event, 0 );
 }
 //----------------------------------------------------
+void GamePadConfDialog_t::updateCntrlrDpy(void)
+{
+   char keyNameStr[128];
+
+	for (int i=0; i<10; i++)
+	{
+		if (GamePadConfig[portNum][i].ButtType[configNo] == BUTTC_KEYBOARD)
+		{
+			snprintf( keyNameStr, sizeof (keyNameStr), "%s",
+				  SDL_GetKeyName (GamePadConfig[portNum][i].ButtonNum[configNo]));
+		}
+		else
+		{
+			strcpy( keyNameStr, ButtonName( &GamePadConfig[portNum][i], configNo ) );
+		}
+		keyName[i]->setText( tr(keyNameStr) );
+	}
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::controllerSelect(int index)
+{
+	printf("Port Number:%i \n", index);
+	portNum = index;
+	updateCntrlrDpy();
+}
+//----------------------------------------------------
 void GamePadConfDialog_t::ena4score(int state)
 {
 	int value = (state == Qt::Unchecked) ? 0 : 1;
@@ -137,7 +164,6 @@ void GamePadConfDialog_t::oppDirEna(int state)
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton(int padNo, int x)
 {
-   int configNo = 0;
    char buf[256];
    std::string prefix;
    const char *keyNameStr;
@@ -175,7 +201,7 @@ void GamePadConfDialog_t::changeButton(int padNo, int x)
 	g_config->setOption (prefix + "DeviceNum",
 			     GamePadConfig[padNo][x].DeviceNum[configNo]);
 
-   keyNameStr = ButtonName( &GamePadConfig[padNo][x], padNo );
+   keyNameStr = ButtonName( &GamePadConfig[padNo][x], configNo );
 
    keyName[x]->setText( keyNameStr );
    button[x]->setText("Change");
