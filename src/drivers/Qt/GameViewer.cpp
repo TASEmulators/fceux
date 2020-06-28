@@ -64,7 +64,8 @@ void gameView_t::initializeGL(void)
 
 	 printf("GL Init!\n");
 
-	 glEnable(GL_TEXTURE_2D);
+	 //glEnable(GL_TEXTURE_2D);
+	 glEnable(GL_TEXTURE_RECTANGLE);
 
 	 if ( gltexture )
 	 {
@@ -76,12 +77,19 @@ void gameView_t::initializeGL(void)
 	 }
 	 printf("Linear Interpolation on GL Texture: %s \n", ipolate ? "Enabled" : "Disabled");
 
-	 glBindTexture(GL_TEXTURE_2D, gltexture);
+	 //glBindTexture(GL_TEXTURE_2D, gltexture);
 
-	 glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,ipolate?GL_LINEAR:GL_NEAREST);
-	 glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,ipolate?GL_LINEAR:GL_NEAREST);
-	 glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-	 glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
+	 //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,ipolate?GL_LINEAR:GL_NEAREST);
+	 //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,ipolate?GL_LINEAR:GL_NEAREST);
+	 //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
+	 //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
+
+	 glBindTexture(GL_TEXTURE_RECTANGLE, gltexture);
+
+	 glTexParameteri(GL_TEXTURE_RECTANGLE,GL_TEXTURE_MAG_FILTER,ipolate?GL_LINEAR:GL_NEAREST);
+	 glTexParameteri(GL_TEXTURE_RECTANGLE,GL_TEXTURE_MIN_FILTER,ipolate?GL_LINEAR:GL_NEAREST);
+	 glTexParameteri(GL_TEXTURE_RECTANGLE,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+	 glTexParameteri(GL_TEXTURE_RECTANGLE,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 }
 
 void gameView_t::resizeGL(int w, int h)
@@ -124,35 +132,45 @@ void gameView_t::paintGL(void)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
-	glOrtho( -1.0,  1.0,  -1.0,  1.0,  -1.0,  1.0);
+	//glOrtho( -1.0,  1.0,  -1.0,  1.0,  -1.0,  1.0);
+	glOrtho( 0.0,  rw,  0.0,  rh,  -1.0,  1.0);
 
 	glDisable(GL_DEPTH_TEST);
 	glClearColor( 0.0, 0.0f, 0.0f, 0.0f);	// Background color to black.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_LINE_SMOOTH);
+	//glEnable(GL_TEXTURE_2D);
+	glEnable(GL_TEXTURE_RECTANGLE);
 	//glBindTexture(GL_TEXTURE_2D, gltexture);
-	glBindTexture(GL_TEXTURE_2D, gltexture);
+	glBindTexture(GL_TEXTURE_RECTANGLE, gltexture);
 
 	//print_pixbuf();
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0,
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0,
+	//				GL_RGBA, GL_UNSIGNED_BYTE, gl_shm->pixbuf );
+	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA8, 256, 256, 0,
 					GL_RGBA, GL_UNSIGNED_BYTE, gl_shm->pixbuf );
 
 	glBegin(GL_QUADS);
-	glTexCoord2f(1.0f*l/256, 1.0f*b/256); // Bottom left of picture.
-	glVertex2f(-1.0f, -1.0f);	// Bottom left of target.
+	//glTexCoord2f(1.0f*l/256, 1.0f*b/256); // Bottom left of picture.
+	//glVertex2f(-1.0f, -1.0f);	// Bottom left of target.
+	glTexCoord2f( l, b); // Bottom left of picture.
+	glVertex2f( 0.0, 0.0f);	// Bottom left of target.
 
-	glTexCoord2f(1.0f*r/256, 1.0f*b/256);// Bottom right of picture.
-	glVertex2f( 1.0f, -1.0f);	// Bottom right of target.
+	//glTexCoord2f(1.0f*r/256, 1.0f*b/256);// Bottom right of picture.
+	glTexCoord2f(r, b);// Bottom right of picture.
+	glVertex2f( rw, 0.0f);	// Bottom right of target.
 
-	glTexCoord2f(1.0f*r/256, 1.0f*t/256); // Top right of our picture.
-	glVertex2f( 1.0f,  1.0f);	// Top right of target.
+	//glTexCoord2f(1.0f*r/256, 1.0f*t/256); // Top right of our picture.
+	glTexCoord2f(r, t); // Top right of our picture.
+	glVertex2f( rw,  rh);	// Top right of target.
 
-	glTexCoord2f(1.0f*l/256, 1.0f*t/256);  // Top left of our picture.
-	glVertex2f(-1.0f,  1.0f);	// Top left of target.
+	//glTexCoord2f(1.0f*l/256, 1.0f*t/256);  // Top left of our picture.
+	glTexCoord2f(l, t);  // Top left of our picture.
+	glVertex2f( 0.0f,  rh);	// Top left of target.
 	glEnd();
 
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_RECTANGLE);
 
 	//glColor4f( 1.0, 1.0, 1.0, 1.0 );
 	//glLineWidth(5.0);
