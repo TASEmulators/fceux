@@ -7,9 +7,9 @@
 #include <SDL.h>
 #endif
 
-#include "main.h"
-#include "dface.h"
-#include "input.h"
+#include "Qt/main.h"
+#include "Qt/dface.h"
+#include "Qt/input.h"
 
 // I'm using this as a #define so the compiler can optimize the
 // modulo operation

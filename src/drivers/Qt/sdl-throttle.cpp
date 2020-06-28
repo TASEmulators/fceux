@@ -1,8 +1,8 @@
 /// \file
 /// \brief Handles emulation speed throttling using the SDL timing functions.
 
-#include "sdl.h"
-#include "throttle.h"
+#include "Qt/sdl.h"
+#include "Qt/throttle.h"
 
 static const double Slowest = 0.015625; // 1/64x speed (around 1 fps on NTSC)
 static const double Fastest = 32;       // 32x speed   (around 1920 fps on NTSC)

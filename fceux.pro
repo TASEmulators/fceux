@@ -21,6 +21,8 @@ QT += widgets
 
 CONFIG += object_parallel_to_source
 
+INCLUDEPATH = src   src/drivers
+
 unix {
 	QT_CONFIG -= no-pkg-config
 	CONFIG += link_pkgconfig
@@ -44,7 +46,7 @@ unix {
 	}
 
 	QMAKE_CXXFLAGS -=  -O2 
-	QMAKE_CXXFLAGS +=  -O0  -g3  -Wall  -Wno-write-strings  -Wno-sign-compare  -Wno-parentheses  -Wno-unused-local-typedefs
+	QMAKE_CXXFLAGS +=  -D__QT_DRIVER__  -O0  -g3  -Wall  -Wno-write-strings  -Wno-sign-compare  -Wno-parentheses  -Wno-unused-local-typedefs
 	QMAKE_CXXFLAGS_RELEASE -= -O2
 }
 

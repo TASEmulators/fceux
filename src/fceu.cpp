@@ -75,7 +75,11 @@ extern void RefreshThrottleFPS();
 #include "drivers/win/memwatch.h"
 #include "drivers/win/tracer.h"
 #else
+#ifdef __QT_DRIVER__
+#include "drivers/Qt/sdl.h"
+#else
 #include "drivers/sdl/sdl.h"
+#endif
 #endif
 
 #include <fstream>

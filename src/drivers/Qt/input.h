@@ -1,7 +1,7 @@
 #ifndef _aosdfjk02fmasf
 #define _aosdfjk02fmasf
 
-#include "../common/configSys.h"
+#include "common/configSys.h"
 
 #define MAXBUTTCONFIG   4
 typedef struct {

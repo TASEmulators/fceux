@@ -23,8 +23,8 @@
 
 #include "sdl.h"
 
-#include "../common/configSys.h"
-#include "../../utils/memory.h"
+#include "common/configSys.h"
+#include "utils/memory.h"
 
 #include <cstdio>
 #include <cstring>

@@ -9,7 +9,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include "gl_win.h"
+#include "Qt/gl_win.h"
 
 gl_win_shm_t *gl_shm = NULL;
 

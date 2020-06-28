@@ -1,7 +1,7 @@
 #include <QApplication>
 
-#include "GameApp.h"
-#include "fceuWrapper.h"
+#include "Qt/GameApp.h"
+#include "Qt/fceuWrapper.h"
 
 int main( int argc, char *argv[] )
 {

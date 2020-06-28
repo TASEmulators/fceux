@@ -1,15 +1,15 @@
-#include "main.h"
-#include "throttle.h"
-#include "config.h"
+#include "Qt/main.h"
+#include "Qt/throttle.h"
+#include "Qt/config.h"
 
 #include "../common/cheat.h"
 
-#include "input.h"
-#include "dface.h"
+#include "Qt/input.h"
+#include "Qt/dface.h"
 
-#include "sdl.h"
-#include "sdl-video.h"
-#include "unix-netplay.h"
+#include "Qt/sdl.h"
+#include "Qt/sdl-video.h"
+#include "Qt/unix-netplay.h"
 
 #ifdef WIN32
 #include <windows.h>

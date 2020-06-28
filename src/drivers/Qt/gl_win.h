@@ -1,8 +1,8 @@
-// glxwin.cpp
+// gl_win.cpp
 //
 
-#ifndef __GLXWIN_H__
-#define __GLXWIN_H__
+#ifndef __GL_WIN_H__
+#define __GL_WIN_H__
 
 #include <stdint.h>
 

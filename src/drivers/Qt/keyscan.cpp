@@ -4,7 +4,7 @@
 #include <QtCore>
 #include <SDL2/SDL.h>
 
-#include "keyscan.h"
+#include "Qt/keyscan.h"
 
 using namespace Qt;
 

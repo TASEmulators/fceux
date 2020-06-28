@@ -4,18 +4,18 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#include "main.h"
-#include "throttle.h"
-#include "config.h"
-#include "dface.h"
-#include "fceuWrapper.h"
-#include "input.h"
-#include "sdl.h"
-#include "sdl-video.h"
-#include "gl_win.h"
-#include "unix-netplay.h"
+#include "Qt/main.h"
+#include "Qt/throttle.h"
+#include "Qt/config.h"
+#include "Qt/dface.h"
+#include "Qt/fceuWrapper.h"
+#include "Qt/input.h"
+#include "Qt/sdl.h"
+#include "Qt/sdl-video.h"
+#include "Qt/gl_win.h"
+#include "Qt/unix-netplay.h"
 
-#include "../common/cheat.h"
+#include "common/cheat.h"
 #include "../../fceu.h"
 #include "../../movie.h"
 #include "../../version.h"
@@ -24,7 +24,7 @@
 #include "../../fceulua.h"
 #endif
 
-#include "../common/configSys.h"
+#include "common/configSys.h"
 #include "../../oldmovie.h"
 #include "../../types.h"
 

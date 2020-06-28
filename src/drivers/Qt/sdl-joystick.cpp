@@ -22,7 +22,7 @@
 /// \file
 /// \brief Handles joystick input using the SDL.
 
-#include "sdl.h"
+#include "Qt/sdl.h"
 
 #include <cstdlib>
 #include <unistd.h>

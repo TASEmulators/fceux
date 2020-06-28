@@ -1,11 +1,11 @@
 // GamePadConf.cpp
 //
-#include "GamePadConf.h"
-#include "main.h"
-#include "input.h"
-#include "config.h"
-#include "keyscan.h"
-#include "fceuWrapper.h"
+#include "Qt/GamePadConf.h"
+#include "Qt/main.h"
+#include "Qt/input.h"
+#include "Qt/config.h"
+#include "Qt/keyscan.h"
+#include "Qt/fceuWrapper.h"
 
 //----------------------------------------------------
 GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)

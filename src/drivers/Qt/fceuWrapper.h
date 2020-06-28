@@ -1,6 +1,6 @@
 // fceuWrapper.h
 //
-#include "config.h"
+#include "Qt/config.h"
 
 //*****************************************************************
 // Define Global Variables to be shared with FCEU Core

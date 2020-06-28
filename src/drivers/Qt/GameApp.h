@@ -15,8 +15,8 @@
 #include <QKeyEvent>
 #include <QTimer>
 
-#include "GameViewer.h"
-#include "GamePadConf.h"
+#include "Qt/GameViewer.h"
+#include "Qt/GamePadConf.h"
 
 class  gameWin_t : public QMainWindow
 {

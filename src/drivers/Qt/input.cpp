@@ -18,16 +18,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "main.h"
-#include "dface.h"
-#include "input.h"
-#include "config.h"
+#include "Qt/main.h"
+#include "Qt/dface.h"
+#include "Qt/input.h"
+#include "Qt/config.h"
 
 
-#include "sdl-video.h"
-#include "sdl.h"
+#include "Qt/sdl-video.h"
+#include "Qt/sdl.h"
 
-#include "../common/cheat.h"
+#include "common/cheat.h"
 #include "../../movie.h"
 #include "../../fceu.h"
 #include "../../driver.h"

@@ -21,18 +21,18 @@
 //todo - ensure that #ifdef WIN32 makes sense
 //consider changing this to use sdl net stuff?
 
-//#include "main.h"
-//#include "input.h"
-//#include "dface.h"
-#include "unix-netplay.h"
+//#include "Qt/main.h"
+//#include "Qt/input.h"
+//#include "Qt/dface.h"
+#include "Qt/unix-netplay.h"
 
 #include "../../fceu.h"
 #include "../../driver.h"
-#include "../../utils/md5.h"
-#include "../../utils/memory.h"
+#include "utils/md5.h"
+#include "utils/memory.h"
 
 #include <string>
-#include "../common/configSys.h"
+#include "common/configSys.h"
 
 #include <unistd.h>
 #include <sys/types.h>

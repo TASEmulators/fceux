@@ -21,21 +21,21 @@
 /// \file
 /// \brief Handles the graphical game display for the SDL implementation.
 
-#include "sdl.h"
-#include "gl_win.h"
-#include "../common/vidblit.h"
+#include "Qt/sdl.h"
+#include "Qt/gl_win.h"
+#include "common/vidblit.h"
 #include "../../fceu.h"
 #include "../../version.h"
 #include "../../video.h"
 
-#include "../../utils/memory.h"
+#include "utils/memory.h"
 
 //#include "sdl-icon.h"
-#include "dface.h"
+#include "Qt/dface.h"
 
-#include "../common/configSys.h"
-#include "sdl-video.h"
-#include "fceuWrapper.h"
+#include "common/configSys.h"
+#include "Qt/sdl-video.h"
+#include "Qt/fceuWrapper.h"
 
 #ifdef CREATE_AVI
 #include "../videolog/nesvideos-piece.h"

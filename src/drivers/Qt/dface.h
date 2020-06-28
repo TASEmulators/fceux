@@ -1,7 +1,7 @@
-#include "../common/args.h"
-#include "../common/config.h"
+#include "common/args.h"
+#include "common/config.h"
 
-#include "input.h"
+#include "Qt/input.h"
 
 extern CFGSTRUCT DriverConfig[];
 extern ARGPSTRUCT DriverArgs[];

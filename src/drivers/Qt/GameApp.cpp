@@ -2,10 +2,10 @@
 //
 #include <QFileDialog>
 
-#include "GameApp.h"
-#include "GamePadConf.h"
-#include "fceuWrapper.h"
-#include "keyscan.h"
+#include "Qt/GameApp.h"
+#include "Qt/GamePadConf.h"
+#include "Qt/fceuWrapper.h"
+#include "Qt/keyscan.h"
 
 gameWin_t::gameWin_t(QWidget *parent)
 	: QMainWindow( parent )

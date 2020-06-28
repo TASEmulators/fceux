@@ -5,8 +5,8 @@
 #include <string.h>
 #include <math.h>
 
-#include "gl_win.h"
-#include "GameViewer.h"
+#include "Qt/gl_win.h"
+#include "Qt/GameViewer.h"
 
 extern unsigned int gui_draw_area_width;
 extern unsigned int gui_draw_area_height;
