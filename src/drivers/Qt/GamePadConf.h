@@ -14,6 +14,8 @@
 #include <QFrame>
 #include <QGroupBox>
 
+#include "Qt/main.h"
+
 class GamePadConfigButton_t : public QPushButton
 {   
 	public:
@@ -36,14 +38,15 @@ class GamePadConfDialog_t : public QDialog
 
 	protected:
 		QComboBox *portSel;
-      QLabel      *keyName[10];
-      GamePadConfigButton_t *button[10];
+      QLabel      *keyName[GAMEPAD_NUM_BUTTONS];
+      GamePadConfigButton_t *button[GAMEPAD_NUM_BUTTONS];
 
       int  portNum;
 		int  configNo;
       int  buttonConfigStatus;
 
       void changeButton( int port, int button );
+      void clearButton( int port, int button );
       void keyPressEvent(QKeyEvent *event);
 	   void keyReleaseEvent(QKeyEvent *event);
       void closeEvent(QCloseEvent *bar);
@@ -63,6 +66,18 @@ class GamePadConfDialog_t : public QDialog
       void changeButton7(void);
       void changeButton8(void);
       void changeButton9(void);
+		void clearButton0(void);
+      void clearButton1(void);
+      void clearButton2(void);
+      void clearButton3(void);
+      void clearButton4(void);
+      void clearButton5(void);
+      void clearButton6(void);
+      void clearButton7(void);
+      void clearButton8(void);
+      void clearButton9(void);
+      void clearAllCallback(void);
+      void loadDefaults(void);
 		void ena4score(int state);
 		void oppDirEna(int state);
 		void controllerSelect(int index);

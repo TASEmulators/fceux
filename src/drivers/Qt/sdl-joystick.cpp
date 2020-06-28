@@ -45,7 +45,11 @@ DTestButtonJoy(ButtConfig *bc)
 
 	for(x = 0; x < bc->NumC; x++)
 	{
-		if(bc->ButtonNum[x] & 0x2000)
+		if (bc->ButtonNum[x] == -1)
+		{
+			continue;
+		}
+		if (bc->ButtonNum[x] & 0x2000)
 		{
 			/* Hat "button" */
 			if(SDL_JoystickGetHat(s_Joysticks[bc->DeviceNum[x]],
@@ -53,7 +57,7 @@ DTestButtonJoy(ButtConfig *bc)
 								(bc->ButtonNum[x]&0xFF))
 				return 1; 
 		}
-		else if(bc->ButtonNum[x] & 0x8000) 
+		else if (bc->ButtonNum[x] & 0x8000) 
 		{
 			/* Axis "button" */
 			int pos;

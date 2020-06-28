@@ -1041,10 +1041,11 @@ DTestButton (ButtConfig * bc)
 
 #define MK(x)       {{BUTTC_KEYBOARD},{0},{MKK(x)},1}
 #define MK2(x1,x2)  {{BUTTC_KEYBOARD},{0},{MKK(x1),MKK(x2)},2}
-#define MKZ()       {{0},{0},{0},0}
+#define MKZ()       {{0},{0},{-1},0}
 #define GPZ()       {MKZ(), MKZ(), MKZ(), MKZ()}
 
-ButtConfig GamePadConfig[4][10] = {
+ButtConfig GamePadConfig[ GAMEPAD_NUM_DEVICES ][ GAMEPAD_NUM_BUTTONS ] = 
+{
 /* Gamepad 1 */
 	{MK (KP_3), MK (KP_2), MK (SLASH), MK (ENTER),
 	MK (w), MK (z), MK (a), MK (s), MKZ (), MKZ ()},
@@ -1568,6 +1569,10 @@ const char * ButtonName (const ButtConfig * bc, int which)
 
 	name[0] = 0;
 
+	if (bc->ButtonNum[which] == -1)
+	{
+		return name;
+	}
 	switch (bc->ButtType[which])
 	{
 		case BUTTC_KEYBOARD:
@@ -2286,10 +2291,10 @@ const char *DefaultGamePadDevice[GAMEPAD_NUM_DEVICES] =
 { "Keyboard", "None", "None", "None" };
 const int DefaultGamePad[GAMEPAD_NUM_DEVICES][GAMEPAD_NUM_BUTTONS] =
 { {SDLK_f, SDLK_d, SDLK_s, SDLK_RETURN,
-	SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT, 0, 0},
-{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
 // PowerPad defaults

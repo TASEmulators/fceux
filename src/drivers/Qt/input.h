@@ -4,14 +4,20 @@
 #include "common/configSys.h"
 
 #define MAXBUTTCONFIG   4
-typedef struct {
-	uint8  ButtType[MAXBUTTCONFIG];
-	uint8  DeviceNum[MAXBUTTCONFIG];
-	//uint16 ButtonNum[MAXBUTTCONFIG];
+
+enum {
+  BUTTC_KEYBOARD  = 0,
+  BUTTC_JOYSTICK  = 1,
+  BUTTC_MOUSE     = 2
+};
+struct ButtConfig
+{
+	int    ButtType[MAXBUTTCONFIG];
+	int    DeviceNum[MAXBUTTCONFIG];
 	int    ButtonNum[MAXBUTTCONFIG];
 	uint32 NumC;
 	//uint64 DeviceID[MAXBUTTCONFIG];	/* TODO */
-} ButtConfig;
+};
 
 
 extern int NoWaiting;
@@ -26,9 +32,6 @@ void ButtonConfigEnd();
 void ConfigButton(char *text, ButtConfig *bc);
 int DWaitButton(const uint8 *text, ButtConfig *bc, int wb, int *buttonConfigStatus = NULL);
 
-#define BUTTC_KEYBOARD          0x00
-#define BUTTC_JOYSTICK          0x01
-#define BUTTC_MOUSE             0x02
 
 #define FCFGD_GAMEPAD   1
 #define FCFGD_POWERPAD  2
