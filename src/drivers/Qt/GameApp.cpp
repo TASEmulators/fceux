@@ -19,7 +19,8 @@ gameWin_t::gameWin_t(QWidget *parent)
 
 	createMainMenu();
 
-	viewport = new gameViewGL_t();
+	//viewport = new gameViewGL_t(this);
+	viewport = new gameViewSDL_t(this);
 	//viewport.resize( 200, 200 );
 
 	layout->addWidget(viewport);
@@ -234,7 +235,8 @@ void gameWin_t::runGameFrame(void)
 	
 	fceuWrapperUpdate();
 
-	viewport->repaint();
+	//viewport->repaint();
+	viewport->update();
 
    return;
 }

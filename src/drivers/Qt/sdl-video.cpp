@@ -184,9 +184,9 @@ int InitVideo(FCEUGI *gi)
 	FCEUI_SetShowFPS(show_fps);
 
 #ifdef LSB_FIRST
-	rmask = 0x000000FF;
+	rmask = 0x00FF0000;
 	gmask = 0x0000FF00;
-	bmask = 0x00FF0000;
+	bmask = 0x000000FF;
 #else
 	rmask = 0x00FF0000;
 	gmask = 0x0000FF00;
