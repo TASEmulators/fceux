@@ -19,7 +19,7 @@ gameWin_t::gameWin_t(QWidget *parent)
 
 	createMainMenu();
 
-	viewport = new gameView_t();
+	viewport = new gameViewGL_t();
 	//viewport.resize( 200, 200 );
 
 	layout->addWidget(viewport);

@@ -6,12 +6,12 @@
 #include <math.h>
 
 #include "Qt/gl_win.h"
-#include "Qt/GameViewer.h"
+#include "Qt/GameViewerGL.h"
 
 extern unsigned int gui_draw_area_width;
 extern unsigned int gui_draw_area_height;
 
-gameView_t::gameView_t(QWidget *parent)
+gameViewGL_t::gameViewGL_t(QWidget *parent)
 	: QOpenGLWidget( parent )
 {
 	view_width  = 0;
@@ -36,7 +36,7 @@ gameView_t::gameView_t(QWidget *parent)
 	//setFormat( fmt );
 }
 
-gameView_t::~gameView_t(void)
+gameViewGL_t::~gameViewGL_t(void)
 {
 	// Make sure the context is current and then explicitly
     // destroy all underlying OpenGL resources.
@@ -53,7 +53,7 @@ gameView_t::~gameView_t(void)
 	 doneCurrent();
 }
 
-void gameView_t::initializeGL(void)
+void gameViewGL_t::initializeGL(void)
 {
 	int ipolate = 0;
 
@@ -92,7 +92,7 @@ void gameView_t::initializeGL(void)
 	 glTexParameteri(GL_TEXTURE_RECTANGLE,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 }
 
-void gameView_t::resizeGL(int w, int h)
+void gameViewGL_t::resizeGL(int w, int h)
 {
 	printf("GL Resize: %i x %i \n", w, h );
 	glViewport(0, 0, w, h);
@@ -104,7 +104,7 @@ void gameView_t::resizeGL(int w, int h)
 	gui_draw_area_height = h;
 }
 
-void gameView_t::paintGL(void)
+void gameViewGL_t::paintGL(void)
 {
 	int l=0, r=gl_shm->ncol;
 	int t=0, b=gl_shm->nrow;

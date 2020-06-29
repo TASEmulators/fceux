@@ -15,7 +15,7 @@
 #include <QKeyEvent>
 #include <QTimer>
 
-#include "Qt/GameViewer.h"
+#include "Qt/GameViewerGL.h"
 #include "Qt/GamePadConf.h"
 
 class  gameWin_t : public QMainWindow
@@ -26,9 +26,7 @@ class  gameWin_t : public QMainWindow
 		gameWin_t(QWidget *parent = 0);
 	   ~gameWin_t(void);
 
-		gameView_t *viewport;
-		//QPushButton hello( "Hello world!", 0 );
-		//
+		gameViewGL_t *viewport;
 
 	 QMenu *fileMenu;
     QMenu *optMenu;
