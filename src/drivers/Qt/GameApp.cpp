@@ -10,22 +10,13 @@
 gameWin_t::gameWin_t(QWidget *parent)
 	: QMainWindow( parent )
 {
-	QWidget *widget = new QWidget( this );
-
-   setCentralWidget(widget);
-
-	QVBoxLayout *layout = new QVBoxLayout;
-   layout->setMargin(5);
 
 	createMainMenu();
 
 	//viewport = new gameViewGL_t(this);
 	viewport = new gameViewSDL_t(this);
-	//viewport.resize( 200, 200 );
 
-	layout->addWidget(viewport);
-
-	widget->setLayout(layout);
+   setCentralWidget(viewport);
 
 	gameTimer = new QTimer( this );
 

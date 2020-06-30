@@ -18,6 +18,10 @@ gameViewSDL_t::gameViewSDL_t(QWidget *parent)
 	view_width  = GL_NES_WIDTH;
 	view_height = GL_NES_HEIGHT;
 
+	sx = sy = 0;
+	rw = view_width;
+	rh = view_height;
+
 	sdlWindow   = NULL;
 	sdlRenderer = NULL;
 	sdlTexture  = NULL;
@@ -39,14 +43,14 @@ int gameViewSDL_t::init(void)
 		printf("[SDL] Failed to initialize video subsystem.\n");
 		return -1;
 	}
-	else
-	{
-		printf("Initialized SDL Video Subsystem\n");
-	}
+	//else
+	//{
+	//	printf("Initialized SDL Video Subsystem\n");
+	//}
 
 	windowHandle = this->winId();
 
-	printf("Window Handle: %llu \n", windowHandle );
+	//printf("Window Handle: %llu \n", windowHandle );
 
 	//sleep(1);
 
@@ -121,12 +125,39 @@ void gameViewSDL_t::resizeEvent(QResizeEvent *event)
 	s = event->size();
 	view_width  = s.width();
 	view_height = s.height();
-	printf("SDL Resize: %i x %i \n", view_width, view_height);
+	//printf("SDL Resize: %i x %i \n", view_width, view_height);
+
 	reset();
 }
 
 void gameViewSDL_t::update(void)
 {
+	int nesWidth  = GL_NES_WIDTH;
+	int nesHeight = GL_NES_HEIGHT;
+
+	if ( gl_shm != NULL )
+	{
+		nesWidth  = gl_shm->ncol;
+		nesHeight = gl_shm->nrow;
+	}
+	//printf(" %i x %i \n", nesWidth, nesHeight );
+	float xscale = (float)view_width  / (float)nesWidth;
+	float yscale = (float)view_height / (float)nesHeight;
+
+	if (xscale < yscale )
+	{
+		yscale = xscale;
+	}
+	else 
+	{
+		xscale = yscale;
+	}
+
+	rw=(int)(nesWidth*xscale);
+	rh=(int)(nesHeight*yscale);
+	sx=(view_width-rw)/2;   
+	sy=(view_height-rh)/2;
+
 	if ( (sdlRenderer == NULL) || (sdlTexture == NULL) )
   	{
 		return;
@@ -143,7 +174,7 @@ void gameViewSDL_t::update(void)
 	SDL_UnlockTexture(sdlTexture);
 
 	SDL_Rect source = {0, 0, GL_NES_WIDTH, GL_NES_HEIGHT };
-	SDL_Rect dest = {0, 0, view_width, view_height };
+	SDL_Rect dest = { sx, sy, rw, rh };
 	SDL_RenderCopy(sdlRenderer, sdlTexture, &source, &dest);
 
 	SDL_RenderPresent(sdlRenderer);

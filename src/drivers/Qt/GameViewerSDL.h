@@ -26,6 +26,11 @@ class gameViewSDL_t : public QWidget
 	 int  view_width;
 	 int  view_height;
 
+	 int  rw;
+	 int  rh;
+	 int  sx;
+	 int  sy;
+
 	 bool vsyncEnabled;
 
  	SDL_Window   *sdlWindow;
