@@ -27,8 +27,8 @@ class  gameWin_t : public QMainWindow
 		gameWin_t(QWidget *parent = 0);
 	   ~gameWin_t(void);
 
-		//gameViewGL_t *viewport;
-		gameViewSDL_t *viewport;
+		gameViewGL_t *viewport;
+		//gameViewSDL_t *viewport;
 
 	protected:
 	 QMenu *fileMenu;

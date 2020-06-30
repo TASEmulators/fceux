@@ -17,23 +17,10 @@ gameViewGL_t::gameViewGL_t(QWidget *parent)
 	view_width  = 0;
 	view_height = 0;
 	gltexture   = 0;
+	use_sw_pix_remap = 0;
+	remap_pixBuf = NULL;
+	remap_pixPtr = NULL;
 
-	//QSurfaceFormat  fmt = QSurfaceFormat::defaultFormat();
-
-	//fmt.setRedBufferSize(8);
-	//fmt.setGreenBufferSize(8);
-	//fmt.setBlueBufferSize(8);
-	//fmt.setAlphaBufferSize(8);
-	//fmt.setDepthBufferSize( 24 );
-	//setTextureFormat(GL_RGBA8);
-
-	////printf("R: %i \n", fmt.redBufferSize() );
-	////printf("G: %i \n", fmt.greenBufferSize() );
-	////printf("B: %i \n", fmt.blueBufferSize() );
-	////printf("A: %i \n", fmt.alphaBufferSize() );
-	////printf("SW: %i \n", fmt.swapBehavior() );
-
-	//setFormat( fmt );
 }
 
 gameViewGL_t::~gameViewGL_t(void)
@@ -51,30 +38,36 @@ gameViewGL_t::~gameViewGL_t(void)
 	 }
 
 	 doneCurrent();
+
+	 if ( remap_pixBuf )
+	 {
+		::free( remap_pixBuf ); remap_pixBuf = NULL;
+	 }
+	 if ( remap_pixPtr )
+	 {
+		::free( remap_pixPtr ); remap_pixPtr = NULL;
+	 }
 }
 
-void gameViewGL_t::initializeGL(void)
+int gameViewGL_t::init(void)
+{
+	return 0;
+}
+
+void gameViewGL_t::buildTextures(void)
 {
 	int ipolate = 0;
 
-	 initializeOpenGLFunctions();
-    // Set up the rendering context, load shaders and other resources, etc.:
-    //QOpenGLFunctions *gl = QOpenGLContext::currentContext()->functions();
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-	 printf("GL Init!\n");
-
-	 //glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 	 glEnable(GL_TEXTURE_RECTANGLE);
 
 	 if ( gltexture )
 	 {
-	 	printf("GL Texture already exists\n");
+	 	glDeleteTextures(1, &gltexture);
+	 	gltexture=0;
 	 }
-	 else
-	 {
-    	glGenTextures(1, &gltexture);
-	 }
+
+   glGenTextures(1, &gltexture);
 	 printf("Linear Interpolation on GL Texture: %s \n", ipolate ? "Enabled" : "Disabled");
 
 	 //glBindTexture(GL_TEXTURE_2D, gltexture);
@@ -90,6 +83,70 @@ void gameViewGL_t::initializeGL(void)
 	 glTexParameteri(GL_TEXTURE_RECTANGLE,GL_TEXTURE_MIN_FILTER,ipolate?GL_LINEAR:GL_NEAREST);
 	 glTexParameteri(GL_TEXTURE_RECTANGLE,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 	 glTexParameteri(GL_TEXTURE_RECTANGLE,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+
+	 if ( remap_pixBuf )
+	 {
+		::free( remap_pixBuf ); remap_pixBuf = NULL;
+	 }
+	 if ( remap_pixPtr )
+	 {
+		::free( remap_pixPtr ); remap_pixPtr = NULL;
+	 }
+
+	 if ( use_sw_pix_remap )
+	 {
+	 	texture_width  = view_width;
+	 	texture_height = view_height;
+	 }
+	 else
+	 {
+	 	texture_width  = GL_NES_WIDTH;
+	 	texture_height = GL_NES_HEIGHT;
+	 }
+	 if ( texture_width < GL_NES_WIDTH )
+	 {
+	 	 texture_width = GL_NES_WIDTH;
+	 }
+	 if ( texture_height < GL_NES_HEIGHT )
+	 {
+	 	 texture_height = GL_NES_HEIGHT;
+	 }
+
+	 if ( use_sw_pix_remap )
+	 {
+		remap_pixBuf = (uint32_t*)malloc( texture_width * texture_height * sizeof(uint32_t) );
+
+		if ( remap_pixBuf )
+		{
+			memset( remap_pixBuf, 0, texture_width * texture_height * sizeof(uint32_t) );
+		}
+
+		remap_pixPtr = (uint32_t**)malloc( texture_width * texture_height * sizeof(uintptr_t) );
+
+		if ( remap_pixPtr )
+		{
+			memset( remap_pixPtr, 0, texture_width * texture_height * sizeof(uintptr_t) );
+		}
+		calcPixRemap();
+	 }
+
+	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, 
+			GL_RGBA8, texture_width, texture_height, 0,
+					GL_BGRA, GL_UNSIGNED_BYTE, 0 );
+
+}
+
+void gameViewGL_t::initializeGL(void)
+{
+
+	 initializeOpenGLFunctions();
+    // Set up the rendering context, load shaders and other resources, etc.:
+    //QOpenGLFunctions *gl = QOpenGLContext::currentContext()->functions();
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+	 printf("GL Init!\n");
+
+	 buildTextures();
 }
 
 void gameViewGL_t::resizeGL(int w, int h)
@@ -102,15 +159,17 @@ void gameViewGL_t::resizeGL(int w, int h)
 
 	gui_draw_area_width = w;
 	gui_draw_area_height = h;
+
+	buildTextures();
 }
 
 void gameViewGL_t::paintGL(void)
 {
-	int l=0, r=gl_shm->ncol;
-	int t=0, b=gl_shm->nrow;
+	int l=0, r=texture_width;
+	int t=0, b=texture_height;
 
-	float xscale = (float)view_width  / (float)gl_shm->ncol;
-	float yscale = (float)view_height / (float)gl_shm->nrow;
+	float xscale = (float)view_width  / (float)texture_width;
+	float yscale = (float)view_height / (float)texture_height;
 
 	if (xscale < yscale )
 	{
@@ -139,7 +198,7 @@ void gameViewGL_t::paintGL(void)
 	glClearColor( 0.0, 0.0f, 0.0f, 0.0f);	// Background color to black.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//glEnable(GL_LINE_SMOOTH);
-	//glEnable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_TEXTURE_RECTANGLE);
 	//glBindTexture(GL_TEXTURE_2D, gltexture);
 	glBindTexture(GL_TEXTURE_RECTANGLE, gltexture);
@@ -147,8 +206,22 @@ void gameViewGL_t::paintGL(void)
 	//print_pixbuf();
 	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0,
 	//				GL_RGBA, GL_UNSIGNED_BYTE, gl_shm->pixbuf );
-	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA8, 256, 256, 0,
-					GL_RGBA, GL_UNSIGNED_BYTE, gl_shm->pixbuf );
+	//glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA8, 256, 256, 0,
+	//				GL_BGRA, GL_UNSIGNED_BYTE, gl_shm->pixbuf );
+	if ( use_sw_pix_remap )
+	{
+		doRemap();
+
+		glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0,
+			  	0, 0, texture_width, texture_height,
+					GL_BGRA, GL_UNSIGNED_BYTE, remap_pixBuf );
+	}
+	else
+	{
+		glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0,
+			  	0, 0, texture_width, texture_height,
+					GL_BGRA, GL_UNSIGNED_BYTE, gl_shm->pixbuf );
+	}
 
 	glBegin(GL_QUADS);
 	//glTexCoord2f(1.0f*l/256, 1.0f*b/256); // Bottom left of picture.
@@ -169,46 +242,122 @@ void gameViewGL_t::paintGL(void)
 	glVertex2f( 0.0f,  rh);	// Top left of target.
 	glEnd();
 
-	//glDisable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_TEXTURE_RECTANGLE);
 
-	//glColor4f( 1.0, 1.0, 1.0, 1.0 );
-	//glLineWidth(5.0);
-	//glBegin(GL_LINES);
-	//glVertex2f(-1.0f, -1.0f);	// Bottom left of target.
-	//glVertex2f( 1.0f,  1.0f);	// Top right of target.
-	//glEnd();
-
-	//context()->swapBuffers( context()->surface() );
-	//if ( double_buffer_ena )
-	//{
-	//	glXSwapBuffers( dpy, win );
-	//}
-	//else
-	//{
-	//	glFlush();
-	//}
-	//glFlush();
-
-	//float x1, y1, x2, y2;
-
-	//angle += (2.0 * 3.14 * 0.01); 
-	// 
-   //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-	//x1 = cos( angle );
-	//y1 = sin( angle );
-
-	//x2 = -x1;
-	//y2 = -y1;
-
-	//glColor4f( 1.0, 1.0, 1.0, 1.0 );
-	//glLineWidth(5.0);
-
-	//glBegin(GL_LINES);
-	//    glVertex2f( x1, y1 );
-	//    glVertex2f( x2, y2 );
-	//glEnd();
-
 	 //printf("Paint GL!\n");
+}
+
+void gameViewGL_t::doRemap(void)
+{
+	int x,y,i;
+
+	i=0;
+	for (x=0; x<texture_width; x++)
+	{
+		for (y=0; y<texture_height; y++)
+		{
+			if ( remap_pixPtr[i] == NULL )
+			{
+				remap_pixBuf[i] = 0x00000000;
+			}
+			else
+			{
+				remap_pixBuf[i] = *remap_pixPtr[i];
+			}
+			i++;
+		}
+	}
+
+}
+
+void gameViewGL_t::calcPixRemap(void)
+{
+	int w, h, s;
+	int i, j, x, y;
+	int   sw, sh, rx, ry, gw, gh;
+	int llx, lly, urx, ury;
+	float sx, sy, nw, nh;
+
+	w = view_width;
+	h = view_height;
+
+	s = w * h * 4;
+
+	gw = gl_shm->ncol;
+	gh = gl_shm->nrow;
+
+	sx = (float)w / (float)gw;
+	sy = (float)h / (float)gh;
+
+	if (sx < sy )
+	{
+		sy = sx;
+	}
+	else 
+	{
+		sx = sy;
+	}
+
+	sw = (int) ( (float)gw * sx );
+	sh = (int) ( (float)gh * sy );
+
+	llx = (w - sw) / 2;
+	lly = (h - sh) / 2;
+	urx = llx + sw;
+	ury = lly + sh;
+
+	i=0;
+	for (y=0; y<h; y++)
+	{
+		if ( (y < lly) || (y > ury) )
+		{
+			for (x=0; x<w; x++)
+			{
+				remap_pixPtr[i] = 0; i++;
+			}
+		}
+		else
+		{
+			for (x=0; x<w; x++)
+			{
+				if ( (x < llx) || (x > urx) )
+				{
+					remap_pixPtr[i] = 0; i++;
+				}
+				else
+				{
+					nw = (float)(x - llx) / (float)sw;
+					nh = (float)(y - lly) / (float)sh;
+
+					rx = (int)((float)gw * nw);
+					ry = (int)((float)gh * nh);
+
+					if ( rx < 0 )
+					{
+						rx = 0;
+					}
+					else if ( rx >= GL_NES_WIDTH )
+					{
+						rx = GL_NES_WIDTH-1;
+					}
+					if ( ry < 0 )
+					{
+						ry = 0;
+					}
+					else if ( ry >= GL_NES_HEIGHT )
+					{
+						ry = GL_NES_HEIGHT-1;
+					}
+
+					j = (ry * GL_NES_WIDTH) + rx;
+
+					remap_pixPtr[i] = &gl_shm->pixbuf[j]; i++;
+
+					//printf("Remap: (%i,%i)=%i   (%i,%i)=%i \n", x,y,i, rx,ry,j );
+				}
+			}
+		}
+	}
+	//numRendLines = gh;
 }
