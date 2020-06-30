@@ -226,8 +226,7 @@ void gameWin_t::runGameFrame(void)
 	
 	fceuWrapperUpdate();
 
-	//viewport->repaint();
-	viewport->update();
+	viewport->repaint();
 
    return;
 }

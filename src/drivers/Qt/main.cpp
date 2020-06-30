@@ -20,7 +20,7 @@ int main( int argc, char *argv[] )
 
 	 fceuWrapperInit( argc, argv );
 
-	 //win.resize( 512, 512 );
+	 win.resize( 512, 512 );
 	 win.show();
 
 	 win.viewport->init( devPixRatio );

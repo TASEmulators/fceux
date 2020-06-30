@@ -21,7 +21,10 @@ gameViewSDL_t::gameViewSDL_t(QWidget *parent)
 	sx = sy = 0;
 	rw = view_width;
 	rh = view_height;
+	sdlRendW = 0;
+	sdlRendH = 0;
 
+	devPixRatio = 1.0f;
 	sdlWindow   = NULL;
 	sdlRenderer = NULL;
 	sdlTexture  = NULL;
@@ -34,9 +37,11 @@ gameViewSDL_t::~gameViewSDL_t(void)
 
 }
 
-int gameViewSDL_t::init(void)
+int gameViewSDL_t::init( double devPixRatioIn )
 {
 	WId windowHandle;
+
+	devPixRatio = devPixRatioIn;
 
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) 
 	{
@@ -79,6 +84,10 @@ int gameViewSDL_t::init(void)
 			return -1;
 		}		
 	}
+
+	SDL_GetRendererOutputSize( sdlRenderer, &sdlRendW, &sdlRendH );
+
+	printf("[SDL] Renderer Output Size: %i x %i \n", sdlRendW, sdlRendH );
 
 	sdlTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GL_NES_WIDTH, GL_NES_HEIGHT);
 
@@ -128,9 +137,14 @@ void gameViewSDL_t::resizeEvent(QResizeEvent *event)
 	//printf("SDL Resize: %i x %i \n", view_width, view_height);
 
 	reset();
+
+	sdlViewport.x = sdlRendW - view_width;
+	sdlViewport.y = sdlRendH - view_height;
+	sdlViewport.w = view_width;
+	sdlViewport.h = view_height;
 }
 
-void gameViewSDL_t::update(void)
+void gameViewSDL_t::paintEvent( QPaintEvent *event )
 {
 	int nesWidth  = GL_NES_WIDTH;
 	int nesHeight = GL_NES_HEIGHT;
@@ -155,13 +169,15 @@ void gameViewSDL_t::update(void)
 
 	rw=(int)(nesWidth*xscale);
 	rh=(int)(nesHeight*yscale);
-	sx=(view_width-rw)/2;   
-	sy=(view_height-rh)/2;
+	sx=sdlViewport.x + (view_width-rw)/2;   
+	sy=sdlViewport.y + (view_height-rh)/2;
 
 	if ( (sdlRenderer == NULL) || (sdlTexture == NULL) )
   	{
 		return;
 	}
+
+	SDL_SetRenderDrawColor( sdlRenderer, 0, 0, 0, 0 );
 
 	SDL_RenderClear(sdlRenderer);
 
@@ -172,6 +188,8 @@ void gameViewSDL_t::update(void)
 		memcpy( textureBuffer, gl_shm->pixbuf, GL_NES_HEIGHT*GL_NES_WIDTH*sizeof(uint32_t) );
 	}
 	SDL_UnlockTexture(sdlTexture);
+
+	SDL_RenderSetViewport( sdlRenderer, &sdlViewport );
 
 	SDL_Rect source = {0, 0, GL_NES_WIDTH, GL_NES_HEIGHT };
 	SDL_Rect dest = { sx, sy, rw, rh };
