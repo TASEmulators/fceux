@@ -14,7 +14,7 @@ class gameViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 		gameViewGL_t(QWidget *parent = 0);
 	   ~gameViewGL_t(void);
 
-		int  init(void);
+		int  init( double devPixRatio = 1.0f );
 
 	protected:
     void initializeGL(void);
@@ -25,6 +25,7 @@ class gameViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 	 void calcPixRemap(void);
 	 void doRemap(void);
 
+	 double devPixRatio;
 	 int  texture_width;
 	 int  texture_height;
 	 int  view_width;

@@ -20,6 +20,7 @@ gameViewGL_t::gameViewGL_t(QWidget *parent)
 	use_sw_pix_remap = 0;
 	remap_pixBuf = NULL;
 	remap_pixPtr = NULL;
+	devPixRatio  = 1.0f;
 
 }
 
@@ -49,8 +50,9 @@ gameViewGL_t::~gameViewGL_t(void)
 	 }
 }
 
-int gameViewGL_t::init(void)
+int gameViewGL_t::init( double devPixRatioInput )
 {
+	devPixRatio = devPixRatioInput;
 	return 0;
 }
 
@@ -151,6 +153,8 @@ void gameViewGL_t::initializeGL(void)
 
 void gameViewGL_t::resizeGL(int w, int h)
 {
+	w = (int)( devPixRatio * w );
+	h = (int)( devPixRatio * h );
 	printf("GL Resize: %i x %i \n", w, h );
 	glViewport(0, 0, w, h);
 

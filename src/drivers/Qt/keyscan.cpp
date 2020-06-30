@@ -2,7 +2,7 @@
 //
 
 #include <QtCore>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "Qt/keyscan.h"
 

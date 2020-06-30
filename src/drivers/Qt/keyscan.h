@@ -45,7 +45,7 @@
 
 #include <QtCore>
 #include <QKeyEvent>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 SDL_Keycode convQtKey2SDLKeyCode( Qt::Key q );
 
