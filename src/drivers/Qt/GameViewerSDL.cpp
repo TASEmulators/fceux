@@ -37,11 +37,9 @@ gameViewSDL_t::~gameViewSDL_t(void)
 
 }
 
-int gameViewSDL_t::init( double devPixRatioIn )
+int gameViewSDL_t::init(void)
 {
 	WId windowHandle;
-
-	devPixRatio = devPixRatioIn;
 
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) 
 	{

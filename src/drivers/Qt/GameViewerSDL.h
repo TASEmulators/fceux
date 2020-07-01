@@ -16,7 +16,7 @@ class gameViewSDL_t : public QWidget
 		gameViewSDL_t(QWidget *parent = 0);
 	   ~gameViewSDL_t(void);
 
-		int  init(double devPixRatioIn = 1.0);
+		int  init(void);
 		void reset(void);
 		void cleanup(void);
 
