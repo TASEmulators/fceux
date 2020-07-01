@@ -13,6 +13,9 @@ environment:
     appveyor_build_worker_image: Ubuntu2004
     #appveyor_build_worker_image: Ubuntu1804
 
+  - job_name: macOS
+    appveyor_build_worker_image: macos
+
 for:
 
   -
@@ -38,3 +41,12 @@ for:
 
     build_script:
     - sh: ./pipelines/linux_build.sh
+
+  -
+    matrix:
+      only:
+        - job_name: macOS
+
+    build_script:
+    - sh: ./pipelines/macOS_build.sh
+

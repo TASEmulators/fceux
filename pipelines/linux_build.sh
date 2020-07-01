@@ -2,6 +2,7 @@
 
 id
 pwd
+uname -a
 cat /etc/os-release
 
 SCRIPT_DIR=$( cd $(dirname $BASH_SOURCE[0]); pwd );
