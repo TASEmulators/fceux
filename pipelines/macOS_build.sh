@@ -18,11 +18,15 @@ echo '****************************************'
 brew  install  sdl2
 brew  install  qt5
 brew  install  minizip
-brew  install  zlib
+#brew  install  zlib  # Already installed in appveyor macOS
+
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:
+
+QMAKE=`find /usr/local -name qmake`;
 
 mkdir build;
 cd build;
-/usr/local/Cellar/qt/5.15.0/bin/qmake ..
+$QMAKE ..
 make
 
 # Debug via ssh if necessary
