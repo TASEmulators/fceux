@@ -55,16 +55,22 @@ pkg-config --cflags --libs  minizip
 # GTK+-2 is no longer needed
 #sudo apt-get install libgtk2.0-dev
 
-# Install GTK+-3 
-echo '****************************************'
-echo 'Install Dependency libgtk-3-dev'
-echo '****************************************'
-sudo apt-get --assume-yes  install libgtk-3-dev
-pkg-config --cflags --libs  gtk+-3.0
+## Install GTK+-3 
+#echo '****************************************'
+#echo 'Install Dependency libgtk-3-dev'
+#echo '****************************************'
+#sudo apt-get --assume-yes  install libgtk-3-dev
+#pkg-config --cflags --libs  gtk+-3.0
+#
+## Install GTK+-3 Sourceview
+#sudo apt-get --assume-yes  install libgtksourceview-3.0-dev
+#pkg-config --cflags --libs  gtksourceview-3.0
 
-# Install GTK+-3 Sourceview
-sudo apt-get --assume-yes  install libgtksourceview-3.0-dev
-pkg-config --cflags --libs  gtksourceview-3.0
+# Install QT5 
+echo '****************************************'
+echo 'Install Dependency Qt5'
+echo '****************************************'
+sudo apt-get --assume-yes  install qt5-default
 
 # Install scons
 #echo '****************************************'
@@ -93,7 +99,7 @@ qmake ..
 #   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
 #	..
 make -j `nproc` 
-#make  install
+make  install
 
 # Debug via ssh if necessary
 if [ ! -z $APPVEYOR_SSH_BLOCK ]; then
