@@ -67,10 +67,10 @@ sudo apt-get --assume-yes  install libgtksourceview-3.0-dev
 pkg-config --cflags --libs  gtksourceview-3.0
 
 # Install scons
-echo '****************************************'
-echo 'Install Build Dependency scons'
-echo '****************************************'
-sudo apt-get --assume-yes  install scons
+#echo '****************************************'
+#echo 'Install Build Dependency scons'
+#echo '****************************************'
+#sudo apt-get --assume-yes  install scons
 
 # Install cppcheck
 echo '****************************************'
@@ -86,13 +86,14 @@ mkdir -p $INSTALL_PREFIX/usr;
 #scons   GTK3=1   SYSTEM_LUA=1   SYSTEM_MINIZIP=1   CREATE_AVI=1  install  --prefix=$INSTALL_PREFIX/usr
 echo "Num CPU: `nproc`";
 mkdir build; cd build;
-cmake  \
-   -DCMAKE_BUILD_TYPE=Release  \
-   -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
-   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-	..
+qmake ..
+#cmake  \
+#   -DCMAKE_BUILD_TYPE=Release  \
+#   -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
+#   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+#	..
 make -j `nproc` 
-make  install
+#make  install
 
 # Debug via ssh if necessary
 if [ ! -z $APPVEYOR_SSH_BLOCK ]; then
