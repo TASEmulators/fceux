@@ -1,6 +1,6 @@
 version: 1.0.{build}
 
-image: macos
+image: macOS
 
 build_script:
 - sh: ./pipelines/macOS_build.sh
