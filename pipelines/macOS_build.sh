@@ -17,6 +17,13 @@ echo '****************************************'
 
 brew  install  sdl2
 brew  install  qt5
+brew  install  minizip
+brew  install  zlib
+
+mkdir build;
+cd build;
+/usr/local/Cellar/qt/5.15.0/bin/qmake ..
+make
 
 # Debug via ssh if necessary
 if [ ! -z $APPVEYOR_SSH_BLOCK ]; then
