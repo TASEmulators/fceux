@@ -1,18 +1,7 @@
 version: 1.0.{build}
 
-environment:
-  matrix:
+image: macos
 
-  - job_name: MacOS
-    appveyor_build_worker_image: macos
-
-for:
-
-  -
-    matrix:
-      only:
-        - job_name: MacOS
-
-    build_script:
-    - sh: ./pipelines/macOS_build.sh
+build_script:
+- sh: ./pipelines/macOS_build.sh
 
