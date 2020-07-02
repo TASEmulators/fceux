@@ -103,8 +103,15 @@ make -j `nproc`
 
 # Install Files
 cd .. # cd out of build
+mkdir -p $INSTALL_PREFIX/usr/bin/.
+mkdir -p $INSTALL_PREFIX/usr/share/fceux
+mkdir -p $INSTALL_PREFIX/usr/share/pixmaps
+mkdir -p $INSTALL_PREFIX/usr/share/applications
+mkdir -p $INSTALL_PREFIX/usr/man/man6
+
 cp -f ./build/fceux                       $INSTALL_PREFIX/usr/bin/.
 cp -a ./output/*                          $INSTALL_PREFIX/usr/share/fceux/.
+cp -a ./src/auxlib.lua                    $INSTALL_PREFIX/usr/share/fceux/.
 cp -a ./fceux.png                         $INSTALL_PREFIX/usr/share/pixmaps/.
 cp -a ./fceux.desktop                     $INSTALL_PREFIX/usr/share/applications/.
 cp -a ./documentation/fceux.6             $INSTALL_PREFIX/usr/man/man6/.
