@@ -4,6 +4,7 @@
 
 #include "Qt/GameApp.h"
 #include "Qt/GamePadConf.h"
+#include "Qt/GameSoundConf.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/keyscan.h"
 
@@ -111,6 +112,14 @@ void gameWin_t::createMainMenu(void)
 
     optMenu->addAction(gamePadConfig);
 
+	 // Options -> Sound Config
+	 gameSoundConfig = new QAction(tr("&Sound Config"), this);
+    //gameSoundConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+    gameSoundConfig->setStatusTip(tr("Sound Configure"));
+    connect(gameSoundConfig, SIGNAL(triggered()), this, SLOT(openGameSndConfWin(void)) );
+
+    optMenu->addAction(gameSoundConfig);
+
 	 //-----------------------------------------------------------------------
 	 // Help
     helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -206,6 +215,22 @@ void gameWin_t::openGamePadConfWin(void)
    delete gamePadConfWin;
    gamePadConfWin = NULL;
    //printf("GamePad Config Window Destroyed\n");
+}
+
+void gameWin_t::openGameSndConfWin(void)
+{
+	GameSndConfDialog_t *sndConfWin;
+
+	printf("Open Sound Config Window\n");
+	
+   sndConfWin = new GameSndConfDialog_t(this);
+	
+   sndConfWin->show();
+   sndConfWin->exec();
+
+   delete sndConfWin;
+
+   printf("Sound Config Window Destroyed\n");
 }
 
 void gameWin_t::aboutQPlot(void)

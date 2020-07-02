@@ -39,6 +39,7 @@ class  gameWin_t : public QMainWindow
     QAction *closeROM;
     QAction *quitAct;
     QAction *gamePadConfig;
+    QAction *gameSoundConfig;
     QAction *aboutAct;
 
 	 QTimer  *gameTimer;
@@ -59,6 +60,7 @@ class  gameWin_t : public QMainWindow
 		void closeROMCB(void);
       void aboutQPlot(void);
       void openGamePadConfWin(void);
+      void openGameSndConfWin(void);
       void runGameFrame(void);
 
 };
