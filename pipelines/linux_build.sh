@@ -99,7 +99,17 @@ qmake PREFIX=$INSTALL_PREFIX/usr  ..
 #   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
 #	..
 make -j `nproc` 
-make  install
+#make  install
+
+# Install Files
+cd .. # cd out of build
+cp -f ./build/fceux                       $INSTALL_PREFIX/usr/bin/.
+cp -a ./output/*                          $INSTALL_PREFIX/usr/share/fceux/.
+cp -a ./fceux.png                         $INSTALL_PREFIX/usr/share/pixmaps/.
+cp -a ./fceux.desktop                     $INSTALL_PREFIX/usr/share/applications/.
+cp -a ./documentation/fceux.6             $INSTALL_PREFIX/usr/man/man6/.
+cp -a ./documentation/fceux-net-server.6  $INSTALL_PREFIX/usr/man/man6/.
+
 
 # Debug via ssh if necessary
 if [ ! -z $APPVEYOR_SSH_BLOCK ]; then
