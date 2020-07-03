@@ -51,6 +51,8 @@ GameSndConfDialog_t::GameSndConfDialog_t(QWidget *parent)
 
 	setComboBoxFromProperty( qualitySelect, "SDL.Sound.Quality" );
 
+	connect(qualitySelect, SIGNAL(currentIndexChanged(int)), this, SLOT(soundQualityChanged(int)) );
+
 	hbox2->addWidget( lbl );
 	hbox2->addWidget( qualitySelect );
 
@@ -70,6 +72,8 @@ GameSndConfDialog_t::GameSndConfDialog_t(QWidget *parent)
 	rateSelect->addItem( tr("96000"), 96000 );
 
 	setComboBoxFromProperty( rateSelect, "SDL.Sound.Rate" );
+
+	connect(rateSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(soundRateChanged(int)) );
 
 	g_config->getOption ("SDL.Sound.Rate", &buf);
 
@@ -231,7 +235,7 @@ void  GameSndConfDialog_t::setComboBoxFromProperty( QComboBox *cbx, const char *
 
 	for (i=0; i<cbx->count(); i++)
 	{
-		if ( pval == cbx->itemData(i) )
+		if ( pval == cbx->itemData(i).toInt() )
 		{
 			cbx->setCurrentIndex(i); break;
 		}
@@ -380,6 +384,29 @@ void GameSndConfDialog_t::swapDutyCallback(int value)
 		g_config->setOption ("SDL.SwapDuty", 0);
 		swapDuty = 0;
 	}
+	g_config->save ();
+}
+//----------------------------------------------------
+void GameSndConfDialog_t::soundQualityChanged(int index)
+{
+	//printf("Sound Quality: %i : %i \n", index, qualitySelect->itemData(index).toInt() );
+
+	g_config->setOption ("SDL.Sound.Quality", qualitySelect->itemData(index).toInt() );
+
+	// reset sound subsystem for changes to take effect
+	KillSound ();
+	InitSound ();
+	g_config->save ();
+}
+//----------------------------------------------------
+void GameSndConfDialog_t::soundRateChanged(int index)
+{
+	//printf("Sound Rate: %i : %i \n", index, rateSelect->itemData(index).toInt() );
+
+	g_config->setOption ("SDL.Sound.Rate", rateSelect->itemData(index).toInt() );
+	// reset sound subsystem for changes to take effect
+	KillSound ();
+	InitSound ();
 	g_config->save ();
 }
 //----------------------------------------------------
