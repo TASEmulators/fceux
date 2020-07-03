@@ -73,7 +73,7 @@ void gameWin_t::createMainMenu(void)
 
 	 //-----------------------------------------------------------------------
 	 // File
-    fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu = menuBar()->addMenu(tr("File"));
 
 	 // File -> Open ROM
 	 openROM = new QAction(tr("Open ROM"), this);
