@@ -9,18 +9,18 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include "Qt/gl_win.h"
+#include "Qt/nes_shm.h"
 
-gl_win_shm_t *gl_shm = NULL;
+nes_shm_t *nes_shm = NULL;
 
 //************************************************************************
-gl_win_shm_t *open_video_shm(void)
+nes_shm_t *open_nes_shm(void)
 {
 	int shmId;
-	gl_win_shm_t *vaddr;
+	nes_shm_t *vaddr;
 	struct shmid_ds ds;
 
-	shmId = shmget( IPC_PRIVATE, sizeof(struct gl_win_shm_t), IPC_CREAT | S_IRWXU | S_IRWXG );
+	shmId = shmget( IPC_PRIVATE, sizeof(struct nes_shm_t), IPC_CREAT | S_IRWXU | S_IRWXG );
 
 	if ( shmId == -1 )
 	{
@@ -29,14 +29,14 @@ gl_win_shm_t *open_video_shm(void)
 	}
 	printf("Created ShmID: %i \n", shmId );
 
-	vaddr = (gl_win_shm_t*)shmat( shmId, NULL, 0);
+	vaddr = (nes_shm_t*)shmat( shmId, NULL, 0);
 
-	if ( vaddr == (gl_win_shm_t*)-1 )
+	if ( vaddr == (nes_shm_t*)-1 )
 	{
-	   perror("Error: GLX shmat Failed:");
+	   perror("Error: NES shmat Failed:");
 		return NULL;
 	}
-	memset( vaddr, 0, sizeof(struct gl_win_shm_t));
+	memset( vaddr, 0, sizeof(struct nes_shm_t));
 
 	if ( shmctl( shmId, IPC_RMID, &ds ) != 0 )
 	{

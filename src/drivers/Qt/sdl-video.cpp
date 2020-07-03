@@ -22,7 +22,7 @@
 /// \brief Handles the graphical game display for the SDL implementation.
 
 #include "Qt/sdl.h"
-#include "Qt/gl_win.h"
+#include "Qt/nes_shm.h"
 #include "common/vidblit.h"
 #include "../../fceu.h"
 #include "../../version.h"
@@ -91,9 +91,9 @@ KillVideo()
 {
 	//printf("Killing Video\n");
 
-	if ( gl_shm != NULL )
+	if ( nes_shm != NULL )
 	{
-		gl_shm->clear_pixbuf();
+		nes_shm->clear_pixbuf();
 	}
 
 	//destroy_gui_video();
@@ -337,7 +337,7 @@ static void WriteTestPattern(void)
 	{
 		for (j=0; j<GL_NES_HEIGHT; j++)
 		{
-			gl_shm->pixbuf[k] = 0xffffffff; k++;
+			nes_shm->pixbuf[k] = 0xffffffff; k++;
 		}
 	}
 }
@@ -360,14 +360,14 @@ BlitScreen(uint8 *XBuf)
 	// XXX soules - not entirely sure why this is being done yet
 	XBuf += s_srendline * 256;
 
-	dest  = (uint8*)gl_shm->pixbuf;
+	dest  = (uint8*)nes_shm->pixbuf;
 	w     = GL_NES_WIDTH;
 	h     = GL_NES_HEIGHT;
 	pitch = w*4;
 
-	gl_shm->ncol    = NWIDTH;
-	gl_shm->nrow    = s_tlines;
-	gl_shm->pitch   = pitch;
+	nes_shm->ncol    = NWIDTH;
+	nes_shm->nrow    = s_tlines;
+	nes_shm->pitch   = pitch;
 
 	if ( dest == NULL ) return;
 

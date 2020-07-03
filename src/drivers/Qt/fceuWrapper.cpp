@@ -12,7 +12,7 @@
 #include "Qt/input.h"
 #include "Qt/sdl.h"
 #include "Qt/sdl-video.h"
-#include "Qt/gl_win.h"
+#include "Qt/nes_shm.h"
 #include "Qt/unix-netplay.h"
 
 #include "common/cheat.h"
@@ -471,11 +471,11 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		return 0;
 	}
 
-	gl_shm = open_video_shm();
+	nes_shm = open_nes_shm();
 
-	if ( gl_shm == NULL )
+	if ( nes_shm == NULL )
 	{
-		printf("Error: Failed to open video Shared memory\n");
+		printf("Error: Failed to open NES Shared memory\n");
 		return -1;
 	}
 

@@ -24,7 +24,7 @@ gameWin_t::gameWin_t(QWidget *parent)
 	connect( gameTimer, &QTimer::timeout, this, &gameWin_t::runGameFrame );
 
 	gameTimer->setTimerType( Qt::PreciseTimer );
-	gameTimer->start( 10 );
+	gameTimer->start( 16 );
 
    gamePadConfWin = NULL;
 }

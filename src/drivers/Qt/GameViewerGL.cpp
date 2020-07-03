@@ -8,7 +8,7 @@
 #include <QApplication>
 #include <QScreen>
 
-#include "Qt/gl_win.h"
+#include "Qt/nes_shm.h"
 #include "Qt/GameViewerGL.h"
 
 extern unsigned int gui_draw_area_width;
@@ -111,8 +111,8 @@ void gameViewGL_t::resizeGL(int w, int h)
 
 void gameViewGL_t::paintGL(void)
 {
-	int texture_width  = gl_shm->ncol;
-	int texture_height = gl_shm->nrow;
+	int texture_width  = nes_shm->ncol;
+	int texture_height = nes_shm->nrow;
 	int l=0, r=texture_width;
 	int t=0, b=texture_height;
 
@@ -149,7 +149,7 @@ void gameViewGL_t::paintGL(void)
 
 	glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0,
 		  	0, 0, GL_NES_WIDTH, GL_NES_HEIGHT,
-				GL_BGRA, GL_UNSIGNED_BYTE, gl_shm->pixbuf );
+				GL_BGRA, GL_UNSIGNED_BYTE, nes_shm->pixbuf );
 
 	glBegin(GL_QUADS);
 	glTexCoord2f( l, b); // Bottom left of picture.

@@ -6,7 +6,7 @@
 #include <math.h>
 #include <unistd.h>
 
-#include "Qt/gl_win.h"
+#include "Qt/nes_shm.h"
 #include "Qt/GameViewerSDL.h"
 
 extern unsigned int gui_draw_area_width;
@@ -147,10 +147,10 @@ void gameViewSDL_t::paintEvent( QPaintEvent *event )
 	int nesWidth  = GL_NES_WIDTH;
 	int nesHeight = GL_NES_HEIGHT;
 
-	if ( gl_shm != NULL )
+	if ( nes_shm != NULL )
 	{
-		nesWidth  = gl_shm->ncol;
-		nesHeight = gl_shm->nrow;
+		nesWidth  = nes_shm->ncol;
+		nesHeight = nes_shm->nrow;
 	}
 	//printf(" %i x %i \n", nesWidth, nesHeight );
 	float xscale = (float)view_width  / (float)nesWidth;
@@ -183,7 +183,7 @@ void gameViewSDL_t::paintEvent( QPaintEvent *event )
 	int rowPitch;
 	SDL_LockTexture( sdlTexture, nullptr, (void**)&textureBuffer, &rowPitch);
 	{
-		memcpy( textureBuffer, gl_shm->pixbuf, GL_NES_HEIGHT*GL_NES_WIDTH*sizeof(uint32_t) );
+		memcpy( textureBuffer, nes_shm->pixbuf, GL_NES_HEIGHT*GL_NES_WIDTH*sizeof(uint32_t) );
 	}
 	SDL_UnlockTexture(sdlTexture);
 

@@ -25,6 +25,7 @@
 
 #include "common/configSys.h"
 #include "utils/memory.h"
+#include "nes_shm.h"
 
 #include <cstdio>
 #include <cstring>
@@ -49,17 +50,26 @@ fillaudio(void *udata,
 			uint8 *stream,
 			int len)
 {
+   static int16_t sample = 0;
 	int16 *tmps = (int16*)stream;
 	len >>= 1;
-	while(len) {
-		int16 sample = 0;
-		if(s_BufferIn) {
+	while (len) 
+   {
+		//int16 sample = 0;
+		if (s_BufferIn) 
+      {
 			sample = s_Buffer[s_BufferRead];
 			s_BufferRead = (s_BufferRead + 1) % s_BufferSize;
 			s_BufferIn--;
 		} else {
-			sample = 0;
+         // Retain last known sample value, helps avoid clicking
+         // noise when sound system is starved of audio data.
+			//sample = 0; 
+         nes_shm->sndBuf.starveCounter++;
+         //printf("Starve:%u\n", nes_shm->sndBuf.starveCounter );
 		}
+
+      nes_shm->push_sound_sample( sample );
 
 		*tmps = sample;
 		tmps++;
@@ -179,6 +189,7 @@ WriteSound(int32 *buf,
 {
 	extern int EmulationPaused;
 	if (EmulationPaused == 0)
+   {
 		while(Count)
 		{
 			while(s_BufferIn == s_BufferSize) 
@@ -196,6 +207,7 @@ WriteSound(int32 *buf,
             
 			buf++;
 		}
+   }
 }
 
 /**

@@ -9,7 +9,7 @@ static const double Fastest = 32;       // 32x speed   (around 1920 fps on NTSC)
 static const double Normal  = 1.0;      // 1x speed    (around 60 fps on NTSC)
 
 static uint64 Lasttime, Nexttime;
-static long double desired_frametime;
+static double desired_frametime = (1.0 / 60.099823);
 static int InFrame;
 double g_fpsScale = Normal; // used by sdl.cpp
 bool MaxSpeed = false;
@@ -30,8 +30,14 @@ bool MaxSpeed = false;
 void
 RefreshThrottleFPS()
 {
-	uint64 fps = FCEUI_GetDesiredFPS(); // Do >> 24 to get in Hz
-	desired_frametime = 16777216.0l / (fps * g_fpsScale);
+   double hz;
+	int32_t fps = FCEUI_GetDesiredFPS(); // Do >> 24 to get in Hz
+
+   hz = ( ((double)fps) / 16777216.0 );
+
+	desired_frametime = 1.0 / ( hz * g_fpsScale );
+
+   printf("FrameTime: %llu  %llu  %f  %lf \n", fps, fps >> 24, hz, desired_frametime );
 
 	Lasttime=0;   
 	Nexttime=0;
@@ -44,6 +50,8 @@ RefreshThrottleFPS()
 int
 SpeedThrottle()
 {
+   return 0;
+
 	if(g_fpsScale >= 32)
 	{
 		return 0; /* Done waiting */
@@ -66,7 +74,7 @@ SpeedThrottle()
 	else
 		time_left = Nexttime - cur_time;
     
-	if(time_left > 50)
+	if (time_left > 50)
 	{
 		time_left = 50;
 		/* In order to keep input responsive, don't wait too long at once */

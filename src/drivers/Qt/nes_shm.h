@@ -1,8 +1,8 @@
-// gl_win.cpp
+// nes_shm.h
 //
 
-#ifndef __GL_WIN_H__
-#define __GL_WIN_H__
+#ifndef __NES_SHM_H__
+#define __NES_SHM_H__
 
 #include <stdint.h>
 
@@ -11,8 +11,9 @@
 
 #define  GL_NES_WIDTH   256
 #define  GL_NES_HEIGHT  256
+#define  NES_AUDIO_BUFLEN   480000
 
-struct  gl_win_shm_t
+struct  nes_shm_t
 {
 	int   pid;
 	int   run;
@@ -59,10 +60,24 @@ struct  gl_win_shm_t
 	{
 		memset( pixbuf, 0, sizeof(pixbuf) );
 	}
+
+   struct sndBuf_t
+   {
+      int  head;
+      int  tail;
+      int16_t  data[NES_AUDIO_BUFLEN];
+      unsigned int starveCounter;
+   } sndBuf;
+
+   void  push_sound_sample( int16_t sample )
+   {
+      sndBuf.data[ sndBuf.head ] = sample;
+      sndBuf.head = (sndBuf.head + 1) % NES_AUDIO_BUFLEN;
+   }
 };
 
-extern gl_win_shm_t *gl_shm;
+extern nes_shm_t *nes_shm;
 
-gl_win_shm_t *open_video_shm(void);
+nes_shm_t *open_nes_shm(void);
 
 #endif
