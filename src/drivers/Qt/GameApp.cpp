@@ -76,7 +76,7 @@ void gameWin_t::createMainMenu(void)
     fileMenu = menuBar()->addMenu(tr("&File"));
 
 	 // File -> Open ROM
-	 openROM = new QAction(tr("&Open ROM"), this);
+	 openROM = new QAction(tr("Open ROM"), this);
     openROM->setShortcuts(QKeySequence::Open);
     openROM->setStatusTip(tr("Open ROM File"));
     connect(openROM, SIGNAL(triggered()), this, SLOT(openROMFile(void)) );
@@ -84,7 +84,7 @@ void gameWin_t::createMainMenu(void)
     fileMenu->addAction(openROM);
 
 	 // File -> Close ROM
-	 closeROM = new QAction(tr("&Close ROM"), this);
+	 closeROM = new QAction(tr("Close ROM"), this);
     closeROM->setShortcut( QKeySequence(tr("Ctrl+C")));
     closeROM->setStatusTip(tr("Close Loaded ROM"));
     connect(closeROM, SIGNAL(triggered()), this, SLOT(closeROMCB(void)) );
@@ -94,7 +94,8 @@ void gameWin_t::createMainMenu(void)
     fileMenu->addSeparator();
 
 	 // File -> Quit
-	 quitAct = new QAction(tr("&Quit"), this);
+	 quitAct = new QAction(tr("Quit"), this);
+    quitAct->setShortcut( QKeySequence(tr("Ctrl+Q")));
     quitAct->setStatusTip(tr("Quit the Application"));
     connect(quitAct, SIGNAL(triggered()), this, SLOT(closeApp()));
 
@@ -102,10 +103,10 @@ void gameWin_t::createMainMenu(void)
 
 	 //-----------------------------------------------------------------------
 	 // Options
-    optMenu = menuBar()->addMenu(tr("&Options"));
+    optMenu = menuBar()->addMenu(tr("Options"));
 
 	 // Options -> GamePad Config
-	 gamePadConfig = new QAction(tr("&GamePad Config"), this);
+	 gamePadConfig = new QAction(tr("GamePad Config"), this);
     //gamePadConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
     gamePadConfig->setStatusTip(tr("GamePad Configure"));
     connect(gamePadConfig, SIGNAL(triggered()), this, SLOT(openGamePadConfWin(void)) );
@@ -113,7 +114,7 @@ void gameWin_t::createMainMenu(void)
     optMenu->addAction(gamePadConfig);
 
 	 // Options -> Sound Config
-	 gameSoundConfig = new QAction(tr("&Sound Config"), this);
+	 gameSoundConfig = new QAction(tr("Sound Config"), this);
     //gameSoundConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
     gameSoundConfig->setStatusTip(tr("Sound Configure"));
     connect(gameSoundConfig, SIGNAL(triggered()), this, SLOT(openGameSndConfWin(void)) );
@@ -122,9 +123,9 @@ void gameWin_t::createMainMenu(void)
 
 	 //-----------------------------------------------------------------------
 	 // Help
-    helpMenu = menuBar()->addMenu(tr("&Help"));
+    helpMenu = menuBar()->addMenu(tr("Help"));
 
-	 aboutAct = new QAction(tr("&About"), this);
+	 aboutAct = new QAction(tr("About"), this);
     aboutAct->setStatusTip(tr("About Qplot"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutQPlot(void)) );
 

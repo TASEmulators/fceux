@@ -31,8 +31,29 @@ class GameSndConfDialog_t : public QDialog
 		QComboBox   *qualitySelect;
 		QComboBox   *rateSelect;
 		QSlider     *bufSizeSlider;
+		QLabel      *bufSizeLabel;
+		QLabel      *volLbl;
+		QLabel      *triLbl;
+		QLabel      *sqr1Lbl;
+		QLabel      *sqr2Lbl;
+		QLabel      *nseLbl;
+		QLabel      *pcmLbl;
+
+		void  setCheckBoxFromProperty( QCheckBox *cbx, const char *property );
+		void  setComboBoxFromProperty( QComboBox *cbx, const char *property );
+		void  setSliderFromProperty( QSlider *slider, QLabel *lbl, const char *property );
 
 	private slots:
+		void  bufSizeChanged(int value);
+		void  volumeChanged(int value);
+		void  triangleChanged(int value);
+		void  square1Changed(int value);
+		void  square2Changed(int value);
+		void  noiseChanged(int value);
+		void  pcmChanged(int value);
+		void  enaSoundStateChange(int value);
+		void  enaSoundLowPassChange(int value);
+		void  swapDutyCallback(int value);
 
 };
 
