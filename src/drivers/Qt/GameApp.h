@@ -30,6 +30,8 @@ class  gameWin_t : public QMainWindow
 		gameViewGL_t *viewport;
 		//gameViewSDL_t *viewport;
 
+		void setCyclePeriodms( int ms );
+
 	protected:
 	 QMenu *fileMenu;
     QMenu *optMenu;
@@ -64,5 +66,7 @@ class  gameWin_t : public QMainWindow
       void runGameFrame(void);
 
 };
+
+extern gameWin_t *gameWindow;
 
 #endif

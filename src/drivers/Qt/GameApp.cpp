@@ -40,6 +40,14 @@ gameWin_t::~gameWin_t(void)
 	delete viewport;
 }
 
+void gameWin_t::setCyclePeriodms( int ms )
+{
+	// If timer is already running, it will be restarted.
+	gameTimer->start( ms );
+   
+	//printf("Period Set to: %i ms \n", ms );
+}
+
 void gameWin_t::closeEvent(QCloseEvent *event)
 {
    //printf("Main Window Close Event\n");

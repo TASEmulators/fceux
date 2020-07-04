@@ -758,7 +758,7 @@ SDL_Keycode convQtKey2SDLKeyCode( Qt::Key q )
 			s = SDLK_LESS;
 		break;
 		case  Key_Equal:
-			s = SDLK_LESS;
+			s = SDLK_EQUALS;
 		break;
 		case  Key_Greater:
 			s = SDLK_GREATER;

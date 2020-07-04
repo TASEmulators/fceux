@@ -3,6 +3,7 @@
 
 #include "Qt/sdl.h"
 #include "Qt/throttle.h"
+#include "Qt/GameApp.h"
 
 static const double Slowest = 0.015625; // 1/64x speed (around 1 fps on NTSC)
 static const double Fastest = 32;       // 32x speed   (around 1920 fps on NTSC)
@@ -10,7 +11,7 @@ static const double Normal  = 1.0;      // 1x speed    (around 60 fps on NTSC)
 
 static uint64 Lasttime, Nexttime;
 static double desired_frametime = (1.0 / 60.099823);
-static int InFrame;
+static int InFrame = 0;
 double g_fpsScale = Normal; // used by sdl.cpp
 bool MaxSpeed = false;
 
@@ -32,12 +33,19 @@ RefreshThrottleFPS()
 {
    double hz;
 	int32_t fps = FCEUI_GetDesiredFPS(); // Do >> 24 to get in Hz
+	int32_t T;
 
    hz = ( ((double)fps) / 16777216.0 );
 
 	desired_frametime = 1.0 / ( hz * g_fpsScale );
 
-   printf("FrameTime: %llu  %llu  %f  %lf \n", fps, fps >> 24, hz, desired_frametime );
+	T = (int32_t)( desired_frametime * 1000.0 );
+
+	if ( T < 0 ) T = 1;
+
+   //printf("FrameTime: %llu  %llu  %f  %lf \n", fps, fps >> 24, hz, desired_frametime );
+
+	gameWindow->setCyclePeriodms( T );
 
 	Lasttime=0;   
 	Nexttime=0;
