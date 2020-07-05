@@ -776,7 +776,7 @@ static void DoFun(int frameskip, int periodic_saves)
 
 void fceuWrapperLock(void)
 {
-	gameWindow->mutex->lock();
+	consoleWindow->mutex->lock();
 	mutexLocked = 1;
 }
 
@@ -784,7 +784,7 @@ bool fceuWrapperTryLock(int timeout)
 {
 	bool lockAcq;
 
-	lockAcq = gameWindow->mutex->tryLock( timeout );
+	lockAcq = consoleWindow->mutex->tryLock( timeout );
 
 	if ( lockAcq )
 	{
@@ -797,7 +797,7 @@ void fceuWrapperUnLock(void)
 {
 	if ( mutexLocked )
 	{
-		gameWindow->mutex->unlock();
+		consoleWindow->mutex->unlock();
 		mutexLocked = 0;
 	}
 	else

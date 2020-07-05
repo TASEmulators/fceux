@@ -9,7 +9,7 @@
 #include "Qt/keyscan.h"
 #include "Qt/nes_shm.h"
 
-gameWin_t::gameWin_t(QWidget *parent)
+consoleWin_t::consoleWin_t(QWidget *parent)
 	: QMainWindow( parent )
 {
 
@@ -21,27 +21,22 @@ gameWin_t::gameWin_t(QWidget *parent)
    setCentralWidget(viewport);
 
 	gameTimer  = new QTimer( this );
-	gameThread = new QThread( this );
-	worker     = new gameWorkerThread_t();
 	mutex      = new QMutex( QMutex::NonRecursive );
+	emulatorThread = new emulatorThread_t();
 
-	worker->moveToThread(gameThread);
-   connect(gameThread, &QThread::finished, worker, &QObject::deleteLater);
-	connect(gameThread, SIGNAL (started()), worker, SLOT( runEmulator() ));
-	connect(worker, SIGNAL (finished()), gameThread, SLOT (quit()));
-	connect(worker, SIGNAL (finished()), worker, SLOT (deleteLater()));
+   connect(emulatorThread, &QThread::finished, emulatorThread, &QObject::deleteLater);
 
-	connect( gameTimer, &QTimer::timeout, this, &gameWin_t::runGameFrame );
+	connect( gameTimer, &QTimer::timeout, this, &consoleWin_t::updateDisplay );
 
 	gameTimer->setTimerType( Qt::PreciseTimer );
-	gameTimer->start( 16 );
+	gameTimer->start( 16 ); // 60hz
 
-	gameThread->start();
+	emulatorThread->start();
 
    gamePadConfWin = NULL;
 }
 
-gameWin_t::~gameWin_t(void)
+consoleWin_t::~consoleWin_t(void)
 {
 	nes_shm->runEmulator = 0;
 
@@ -54,14 +49,14 @@ gameWin_t::~gameWin_t(void)
 	fceuWrapperUnLock();
 
 	//printf("Thread Finished: %i \n", gameThread->isFinished() );
-	gameThread->exit(0);
-	gameThread->wait();
+	emulatorThread->quit();
+	emulatorThread->wait();
 
 	delete viewport;
 	delete mutex;
 }
 
-void gameWin_t::setCyclePeriodms( int ms )
+void consoleWin_t::setCyclePeriodms( int ms )
 {
 	// If timer is already running, it will be restarted.
 	gameTimer->start( ms );
@@ -69,7 +64,7 @@ void gameWin_t::setCyclePeriodms( int ms )
 	//printf("Period Set to: %i ms \n", ms );
 }
 
-void gameWin_t::closeEvent(QCloseEvent *event)
+void consoleWin_t::closeEvent(QCloseEvent *event)
 {
    //printf("Main Window Close Event\n");
    if ( gamePadConfWin != NULL )
@@ -82,20 +77,20 @@ void gameWin_t::closeEvent(QCloseEvent *event)
 	closeApp();
 }
 
-void gameWin_t::keyPressEvent(QKeyEvent *event)
+void consoleWin_t::keyPressEvent(QKeyEvent *event)
 {
    //printf("Key Press: 0x%x \n", event->key() );
 	pushKeyEvent( event, 1 );
 }
 
-void gameWin_t::keyReleaseEvent(QKeyEvent *event)
+void consoleWin_t::keyReleaseEvent(QKeyEvent *event)
 {
    //printf("Key Release: 0x%x \n", event->key() );
 	pushKeyEvent( event, 0 );
 }
 
 //---------------------------------------------------------------------------
-void gameWin_t::createMainMenu(void)
+void consoleWin_t::createMainMenu(void)
 {
     // This is needed for menu bar to show up on MacOS
 	 menuBar()->setNativeMenuBar(false);
@@ -161,7 +156,7 @@ void gameWin_t::createMainMenu(void)
     helpMenu->addAction(aboutAct);
 };
 //---------------------------------------------------------------------------
-void gameWin_t::closeApp(void)
+void consoleWin_t::closeApp(void)
 {
 	nes_shm->runEmulator = 0;
 
@@ -180,7 +175,7 @@ void gameWin_t::closeApp(void)
 }
 //---------------------------------------------------------------------------
 
-void gameWin_t::openROMFile(void)
+void consoleWin_t::openROMFile(void)
 {
 	int ret;
 	QString filename;
@@ -231,14 +226,14 @@ void gameWin_t::openROMFile(void)
    return;
 }
 
-void gameWin_t::closeROMCB(void)
+void consoleWin_t::closeROMCB(void)
 {
 	fceuWrapperLock();
 	CloseGame();
 	fceuWrapperUnLock();
 }
 
-void gameWin_t::openGamePadConfWin(void)
+void consoleWin_t::openGamePadConfWin(void)
 {
    if ( gamePadConfWin != NULL )
    {
@@ -256,7 +251,7 @@ void gameWin_t::openGamePadConfWin(void)
    //printf("GamePad Config Window Destroyed\n");
 }
 
-void gameWin_t::openGameSndConfWin(void)
+void consoleWin_t::openGameSndConfWin(void)
 {
 	GameSndConfDialog_t *sndConfWin;
 
@@ -272,13 +267,13 @@ void gameWin_t::openGameSndConfWin(void)
    printf("Sound Config Window Destroyed\n");
 }
 
-void gameWin_t::aboutQPlot(void)
+void consoleWin_t::aboutQPlot(void)
 {
    printf("About QPlot\n");
    return;
 }
 
-void gameWin_t::runGameFrame(void)
+void consoleWin_t::updateDisplay(void)
 {
 	//struct timespec ts;
 	//double t;
@@ -293,7 +288,7 @@ void gameWin_t::runGameFrame(void)
    return;
 }
 
-void gameWorkerThread_t::runEmulator(void)
+void emulatorThread_t::run(void)
 {
 	printf("Emulator Start\n");
 	nes_shm->runEmulator = 1;

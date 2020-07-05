@@ -3,7 +3,7 @@
 #include "Qt/GameApp.h"
 #include "Qt/fceuWrapper.h"
 
-gameWin_t *gameWindow = NULL;
+consoleWin_t *consoleWindow = NULL;
 
 int main( int argc, char *argv[] )
 {
@@ -12,18 +12,18 @@ int main( int argc, char *argv[] )
 
 	fceuWrapperInit( argc, argv );
 
-	gameWindow = new gameWin_t();
+	consoleWindow = new consoleWin_t();
 
-	gameWindow->resize( 512, 512 );
-	gameWindow->show();
+	consoleWindow->resize( 512, 512 );
+	consoleWindow->show();
 
-	gameWindow->viewport->init();
+	consoleWindow->viewport->init();
 
 	retval = app.exec();
 
 	//printf("App Return: %i \n", retval );
 
-	delete gameWindow;
+	delete consoleWindow;
 
 	return retval;
 }

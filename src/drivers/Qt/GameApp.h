@@ -21,23 +21,23 @@
 #include "Qt/GameViewerSDL.h"
 #include "Qt/GamePadConf.h"
 
-class  gameWorkerThread_t : public QObject
+class  emulatorThread_t : public QThread
 {
 	Q_OBJECT
 
-	public slots:
-		void runEmulator( void );
+	//public slots:
+		void run( void ) override;
 	signals:
     void finished();
 };
 
-class  gameWin_t : public QMainWindow
+class  consoleWin_t : public QMainWindow
 {
 	Q_OBJECT
 
 	public:
-		gameWin_t(QWidget *parent = 0);
-	   ~gameWin_t(void);
+		consoleWin_t(QWidget *parent = 0);
+	   ~consoleWin_t(void);
 
 		gameViewGL_t *viewport;
 		//gameViewSDL_t *viewport;
@@ -59,8 +59,7 @@ class  gameWin_t : public QMainWindow
     QAction *aboutAct;
 
 	 QTimer  *gameTimer;
-	 QThread *gameThread;
-	 gameWorkerThread_t *worker;
+	 emulatorThread_t *emulatorThread;
 
     GamePadConfDialog_t *gamePadConfWin;
 
@@ -79,10 +78,10 @@ class  gameWin_t : public QMainWindow
       void aboutQPlot(void);
       void openGamePadConfWin(void);
       void openGameSndConfWin(void);
-      void runGameFrame(void);
+      void updateDisplay(void);
 
 };
 
-extern gameWin_t *gameWindow;
+extern consoleWin_t *consoleWindow;
 
 #endif
