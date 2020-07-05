@@ -14,7 +14,7 @@
 #include "Qt/sdl-video.h"
 #include "Qt/nes_shm.h"
 #include "Qt/unix-netplay.h"
-#include "Qt/GameApp.h"
+#include "Qt/ConsoleWindow.h"
 
 #include "common/cheat.h"
 #include "../../fceu.h"

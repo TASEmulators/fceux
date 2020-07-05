@@ -1,6 +1,6 @@
 #include <QApplication>
 
-#include "Qt/GameApp.h"
+#include "Qt/ConsoleWindow.h"
 #include "Qt/fceuWrapper.h"
 
 consoleWin_t *consoleWindow = NULL;

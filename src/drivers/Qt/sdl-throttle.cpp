@@ -3,8 +3,6 @@
 
 #include "Qt/sdl.h"
 #include "Qt/throttle.h"
-#include "Qt/GameApp.h"
-#include "Qt/fceuWrapper.h"
 
 static const double Slowest = 0.015625; // 1/64x speed (around 1 fps on NTSC)
 static const double Fastest = 32;       // 32x speed   (around 1920 fps on NTSC)
@@ -45,8 +43,6 @@ RefreshThrottleFPS()
 	if ( T < 0 ) T = 1;
 
    //printf("FrameTime: %llu  %llu  %f  %lf \n", fps, fps >> 24, hz, desired_frametime );
-
-	//gameWindow->setCyclePeriodms( T );
 
 	Lasttime=0;   
 	Nexttime=0;
@@ -99,9 +95,7 @@ SpeedThrottle()
 
 	if ( time_left > 0 )
 	{
-		//fceuWrapperUnLock();
 		SDL_Delay(time_left);
-		//fceuWrapperLock();
 	}
     
 	if (!InFrame)

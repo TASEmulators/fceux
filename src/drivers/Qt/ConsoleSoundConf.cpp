@@ -2,14 +2,14 @@
 //
 #include "../../fceu.h"
 #include "../../driver.h"
-#include "Qt/GameSoundConf.h"
+#include "Qt/ConsoleSoundConf.h"
 #include "Qt/main.h"
 #include "Qt/dface.h"
 #include "Qt/config.h"
 #include "Qt/fceuWrapper.h"
 
 //----------------------------------------------------
-GameSndConfDialog_t::GameSndConfDialog_t(QWidget *parent)
+ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
 	int buf;
@@ -215,12 +215,12 @@ GameSndConfDialog_t::GameSndConfDialog_t(QWidget *parent)
 	setLayout( hbox1 );
 }
 //----------------------------------------------------
-GameSndConfDialog_t::~GameSndConfDialog_t(void)
+ConsoleSndConfDialog_t::~ConsoleSndConfDialog_t(void)
 {
 
 }
 //----------------------------------------------------
-void  GameSndConfDialog_t::setCheckBoxFromProperty( QCheckBox *cbx, const char *property )
+void  ConsoleSndConfDialog_t::setCheckBoxFromProperty( QCheckBox *cbx, const char *property )
 {
 	int  pval;
 	g_config->getOption (property, &pval);
@@ -228,7 +228,7 @@ void  GameSndConfDialog_t::setCheckBoxFromProperty( QCheckBox *cbx, const char *
 	cbx->setCheckState( pval ? Qt::Checked : Qt::Unchecked );
 }
 //----------------------------------------------------
-void  GameSndConfDialog_t::setComboBoxFromProperty( QComboBox *cbx, const char *property )
+void  ConsoleSndConfDialog_t::setComboBoxFromProperty( QComboBox *cbx, const char *property )
 {
 	int  i, pval;
 	g_config->getOption (property, &pval);
@@ -242,7 +242,7 @@ void  GameSndConfDialog_t::setComboBoxFromProperty( QComboBox *cbx, const char *
 	}
 }
 //----------------------------------------------------
-void  GameSndConfDialog_t::setSliderFromProperty( QSlider *slider, QLabel *lbl, const char *property )
+void  ConsoleSndConfDialog_t::setSliderFromProperty( QSlider *slider, QLabel *lbl, const char *property )
 {
 	int  pval;
 	char stmp[32];
@@ -252,7 +252,7 @@ void  GameSndConfDialog_t::setSliderFromProperty( QSlider *slider, QLabel *lbl, 
 	lbl->setText( stmp );
 }
 //----------------------------------------------------
-void GameSndConfDialog_t::bufSizeChanged(int value)
+void ConsoleSndConfDialog_t::bufSizeChanged(int value)
 {
 	char stmp[32];
 
@@ -266,7 +266,7 @@ void GameSndConfDialog_t::bufSizeChanged(int value)
 	InitSound ();
 }
 //----------------------------------------------------
-void GameSndConfDialog_t::volumeChanged(int value)
+void ConsoleSndConfDialog_t::volumeChanged(int value)
 {
 	char stmp[32];
 
@@ -278,7 +278,7 @@ void GameSndConfDialog_t::volumeChanged(int value)
 	FCEUI_SetSoundVolume (value);
 }
 //----------------------------------------------------
-void GameSndConfDialog_t::triangleChanged(int value)
+void ConsoleSndConfDialog_t::triangleChanged(int value)
 {
 	char stmp[32];
 
@@ -290,7 +290,7 @@ void GameSndConfDialog_t::triangleChanged(int value)
 	FCEUI_SetTriangleVolume (value);
 }
 //----------------------------------------------------
-void GameSndConfDialog_t::square1Changed(int value)
+void ConsoleSndConfDialog_t::square1Changed(int value)
 {
 	char stmp[32];
 
@@ -302,7 +302,7 @@ void GameSndConfDialog_t::square1Changed(int value)
 	FCEUI_SetSquare1Volume (value);
 }
 //----------------------------------------------------
-void GameSndConfDialog_t::square2Changed(int value)
+void ConsoleSndConfDialog_t::square2Changed(int value)
 {
 	char stmp[32];
 
@@ -314,7 +314,7 @@ void GameSndConfDialog_t::square2Changed(int value)
 	FCEUI_SetSquare2Volume (value);
 }
 //----------------------------------------------------
-void GameSndConfDialog_t::noiseChanged(int value)
+void ConsoleSndConfDialog_t::noiseChanged(int value)
 {
 	char stmp[32];
 
@@ -326,7 +326,7 @@ void GameSndConfDialog_t::noiseChanged(int value)
 	FCEUI_SetNoiseVolume (value);
 }
 //----------------------------------------------------
-void GameSndConfDialog_t::pcmChanged(int value)
+void ConsoleSndConfDialog_t::pcmChanged(int value)
 {
 	char stmp[32];
 
@@ -338,7 +338,7 @@ void GameSndConfDialog_t::pcmChanged(int value)
 	FCEUI_SetPCMVolume (value);
 }
 //----------------------------------------------------
-void GameSndConfDialog_t::enaSoundStateChange(int value)
+void ConsoleSndConfDialog_t::enaSoundStateChange(int value)
 {
 	if ( value )
 	{
@@ -357,7 +357,7 @@ void GameSndConfDialog_t::enaSoundStateChange(int value)
 	}
 }
 //----------------------------------------------------
-void GameSndConfDialog_t::enaSoundLowPassChange(int value)
+void ConsoleSndConfDialog_t::enaSoundLowPassChange(int value)
 {
 	if (value)
 	{
@@ -372,7 +372,7 @@ void GameSndConfDialog_t::enaSoundLowPassChange(int value)
 	g_config->save ();
 }
 //----------------------------------------------------
-void GameSndConfDialog_t::swapDutyCallback(int value)
+void ConsoleSndConfDialog_t::swapDutyCallback(int value)
 {
 	if (value)
 	{
@@ -387,7 +387,7 @@ void GameSndConfDialog_t::swapDutyCallback(int value)
 	g_config->save ();
 }
 //----------------------------------------------------
-void GameSndConfDialog_t::soundQualityChanged(int index)
+void ConsoleSndConfDialog_t::soundQualityChanged(int index)
 {
 	//printf("Sound Quality: %i : %i \n", index, qualitySelect->itemData(index).toInt() );
 
@@ -399,7 +399,7 @@ void GameSndConfDialog_t::soundQualityChanged(int index)
 	g_config->save ();
 }
 //----------------------------------------------------
-void GameSndConfDialog_t::soundRateChanged(int index)
+void ConsoleSndConfDialog_t::soundRateChanged(int index)
 {
 	//printf("Sound Rate: %i : %i \n", index, rateSelect->itemData(index).toInt() );
 

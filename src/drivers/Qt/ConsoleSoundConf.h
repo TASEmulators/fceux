@@ -16,13 +16,13 @@
 #include <QFrame>
 #include <QGroupBox>
 
-class GameSndConfDialog_t : public QDialog
+class ConsoleSndConfDialog_t : public QDialog
 {
    Q_OBJECT
 
 	public:
-		GameSndConfDialog_t(QWidget *parent = 0);
-		~GameSndConfDialog_t(void);
+		ConsoleSndConfDialog_t(QWidget *parent = 0);
+		~ConsoleSndConfDialog_t(void);
 
 	protected:
 		QCheckBox   *enaChkbox;

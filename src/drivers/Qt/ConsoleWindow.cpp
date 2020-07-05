@@ -2,9 +2,9 @@
 //
 #include <QFileDialog>
 
-#include "Qt/GameApp.h"
+#include "Qt/ConsoleWindow.h"
 #include "Qt/GamePadConf.h"
-#include "Qt/GameSoundConf.h"
+#include "Qt/ConsoleSoundConf.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/keyscan.h"
 #include "Qt/nes_shm.h"
@@ -253,11 +253,11 @@ void consoleWin_t::openGamePadConfWin(void)
 
 void consoleWin_t::openGameSndConfWin(void)
 {
-	GameSndConfDialog_t *sndConfWin;
+	ConsoleSndConfDialog_t *sndConfWin;
 
 	printf("Open Sound Config Window\n");
 	
-   sndConfWin = new GameSndConfDialog_t(this);
+   sndConfWin = new ConsoleSndConfDialog_t(this);
 	
    sndConfWin->show();
    sndConfWin->exec();
