@@ -17,8 +17,8 @@
 #include <QThread>
 #include <QMutex>
 
-#include "Qt/GameViewerGL.h"
-#include "Qt/GameViewerSDL.h"
+#include "Qt/ConsoleViewerGL.h"
+#include "Qt/ConsoleViewerSDL.h"
 #include "Qt/GamePadConf.h"
 
 class  emulatorThread_t : public QThread
@@ -39,8 +39,8 @@ class  consoleWin_t : public QMainWindow
 		consoleWin_t(QWidget *parent = 0);
 	   ~consoleWin_t(void);
 
-		gameViewGL_t *viewport;
-		//gameViewSDL_t *viewport;
+		ConsoleViewGL_t *viewport;
+		//ConsoleViewSDL_t *viewport;
 
 		void setCyclePeriodms( int ms );
 

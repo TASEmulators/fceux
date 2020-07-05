@@ -6,13 +6,13 @@
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 
-class gameViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
+class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
 
 	public:
-		gameViewGL_t(QWidget *parent = 0);
-	   ~gameViewGL_t(void);
+		ConsoleViewGL_t(QWidget *parent = 0);
+	   ~ConsoleViewGL_t(void);
 
 		int  init( void );
 

@@ -15,8 +15,8 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	createMainMenu();
 
-	viewport = new gameViewGL_t(this);
-	//viewport = new gameViewSDL_t(this);
+	viewport = new ConsoleViewGL_t(this);
+	//viewport = new ConsoleViewSDL_t(this);
 
    setCentralWidget(viewport);
 

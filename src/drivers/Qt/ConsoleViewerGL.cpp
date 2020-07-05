@@ -9,12 +9,12 @@
 #include <QScreen>
 
 #include "Qt/nes_shm.h"
-#include "Qt/GameViewerGL.h"
+#include "Qt/ConsoleViewerGL.h"
 
 extern unsigned int gui_draw_area_width;
 extern unsigned int gui_draw_area_height;
 
-gameViewGL_t::gameViewGL_t(QWidget *parent)
+ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 	: QOpenGLWidget( parent )
 {
 	view_width  = 0;
@@ -32,7 +32,7 @@ gameViewGL_t::gameViewGL_t(QWidget *parent)
 	}
 }
 
-gameViewGL_t::~gameViewGL_t(void)
+ConsoleViewGL_t::~ConsoleViewGL_t(void)
 {
 	// Make sure the context is current and then explicitly
     // destroy all underlying OpenGL resources.
@@ -49,12 +49,12 @@ gameViewGL_t::~gameViewGL_t(void)
 	 doneCurrent();
 }
 
-int gameViewGL_t::init( void )
+int ConsoleViewGL_t::init( void )
 {
 	return 0;
 }
 
-void gameViewGL_t::buildTextures(void)
+void ConsoleViewGL_t::buildTextures(void)
 {
 	 glEnable(GL_TEXTURE_RECTANGLE);
 
@@ -80,7 +80,7 @@ void gameViewGL_t::buildTextures(void)
 
 }
 
-void gameViewGL_t::initializeGL(void)
+void ConsoleViewGL_t::initializeGL(void)
 {
 
 	 initializeOpenGLFunctions();
@@ -93,7 +93,7 @@ void gameViewGL_t::initializeGL(void)
 	 buildTextures();
 }
 
-void gameViewGL_t::resizeGL(int w, int h)
+void ConsoleViewGL_t::resizeGL(int w, int h)
 {
 	w = (int)( devPixRatio * w );
 	h = (int)( devPixRatio * h );
@@ -109,7 +109,7 @@ void gameViewGL_t::resizeGL(int w, int h)
 	buildTextures();
 }
 
-void gameViewGL_t::paintGL(void)
+void ConsoleViewGL_t::paintGL(void)
 {
 	int texture_width  = nes_shm->ncol;
 	int texture_height = nes_shm->nrow;

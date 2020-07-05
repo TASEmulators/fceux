@@ -7,12 +7,12 @@
 #include <unistd.h>
 
 #include "Qt/nes_shm.h"
-#include "Qt/GameViewerSDL.h"
+#include "Qt/ConsoleViewerSDL.h"
 
 extern unsigned int gui_draw_area_width;
 extern unsigned int gui_draw_area_height;
 
-gameViewSDL_t::gameViewSDL_t(QWidget *parent)
+ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	: QWidget( parent )
 {
 	view_width  = GL_NES_WIDTH;
@@ -32,12 +32,12 @@ gameViewSDL_t::gameViewSDL_t(QWidget *parent)
 	vsyncEnabled = false;
 }
 
-gameViewSDL_t::~gameViewSDL_t(void)
+ConsoleViewSDL_t::~ConsoleViewSDL_t(void)
 {
 
 }
 
-int gameViewSDL_t::init(void)
+int ConsoleViewSDL_t::init(void)
 {
 	WId windowHandle;
 
@@ -98,7 +98,7 @@ int gameViewSDL_t::init(void)
 	return 0;
 }
 
-void gameViewSDL_t::cleanup(void)
+void ConsoleViewSDL_t::cleanup(void)
 {
 	if (sdlTexture) 
 	{
@@ -112,7 +112,7 @@ void gameViewSDL_t::cleanup(void)
 	}
 }
 
-void gameViewSDL_t::reset(void)
+void ConsoleViewSDL_t::reset(void)
 {
 	cleanup();
 	if ( init() == 0 )
@@ -125,7 +125,7 @@ void gameViewSDL_t::reset(void)
 	}
 }
 
-void gameViewSDL_t::resizeEvent(QResizeEvent *event)
+void ConsoleViewSDL_t::resizeEvent(QResizeEvent *event)
 {
 	QSize s;
 
@@ -142,7 +142,7 @@ void gameViewSDL_t::resizeEvent(QResizeEvent *event)
 	sdlViewport.h = view_height;
 }
 
-void gameViewSDL_t::paintEvent( QPaintEvent *event )
+void ConsoleViewSDL_t::paintEvent( QPaintEvent *event )
 {
 	int nesWidth  = GL_NES_WIDTH;
 	int nesHeight = GL_NES_HEIGHT;

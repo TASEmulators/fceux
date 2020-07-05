@@ -8,13 +8,13 @@
 #include <QResizeEvent>
 #include <SDL.h>
 
-class gameViewSDL_t : public QWidget
+class ConsoleViewSDL_t : public QWidget
 {
     Q_OBJECT
 
 	public:
-		gameViewSDL_t(QWidget *parent = 0);
-	   ~gameViewSDL_t(void);
+		ConsoleViewSDL_t(QWidget *parent = 0);
+	   ~ConsoleViewSDL_t(void);
 
 		int  init(void);
 		void reset(void);
