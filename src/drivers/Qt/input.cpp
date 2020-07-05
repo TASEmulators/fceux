@@ -611,10 +611,10 @@ static void KeyboardCommands (void)
 
 	if (_keyonly (Hotkeys[HK_DECREASE_SPEED]))
 	{
-		DecreaseEmulationSpeed ();
+		DecreaseEmulationSpeed();
 	}
 
-	if (_keyonly (Hotkeys[HK_INCREASE_SPEED]))
+	if (_keyonly(Hotkeys[HK_INCREASE_SPEED]))
 	{
 		IncreaseEmulationSpeed ();
 	}

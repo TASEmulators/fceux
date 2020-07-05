@@ -24,6 +24,8 @@ struct  nes_shm_t
 	int   nrow;
 	int   pitch;
 
+	char  runEmulator;
+
 	// Pass Key Events back to QT Gui
 	struct 
 	{

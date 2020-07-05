@@ -25,4 +25,8 @@ int CloseGame(void);
 int  fceuWrapperInit( int argc, char *argv[] );
 int  fceuWrapperClose( void );
 int  fceuWrapperUpdate( void );
+void fceuWrapperLock(void);
+bool fceuWrapperTryLock(int timeout);
+bool fceuWrapperIsLocked(void);
+void fceuWrapperUnLock(void);
 

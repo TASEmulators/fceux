@@ -7,6 +7,7 @@
 #include "Qt/GameSoundConf.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/keyscan.h"
+#include "Qt/nes_shm.h"
 
 gameWin_t::gameWin_t(QWidget *parent)
 	: QMainWindow( parent )
@@ -19,25 +20,45 @@ gameWin_t::gameWin_t(QWidget *parent)
 
    setCentralWidget(viewport);
 
-	gameTimer = new QTimer( this );
+	gameTimer  = new QTimer( this );
+	gameThread = new QThread( this );
+	worker     = new gameWorkerThread_t();
+	mutex      = new QMutex( QMutex::NonRecursive );
+
+	worker->moveToThread(gameThread);
+   connect(gameThread, &QThread::finished, worker, &QObject::deleteLater);
+	connect(gameThread, SIGNAL (started()), worker, SLOT( runEmulator() ));
+	connect(worker, SIGNAL (finished()), gameThread, SLOT (quit()));
+	connect(worker, SIGNAL (finished()), worker, SLOT (deleteLater()));
 
 	connect( gameTimer, &QTimer::timeout, this, &gameWin_t::runGameFrame );
 
 	gameTimer->setTimerType( Qt::PreciseTimer );
 	gameTimer->start( 16 );
 
+	gameThread->start();
+
    gamePadConfWin = NULL;
 }
 
 gameWin_t::~gameWin_t(void)
 {
+	nes_shm->runEmulator = 0;
+
    if ( gamePadConfWin != NULL )
    {
       gamePadConfWin->closeWindow();
    }
+	fceuWrapperLock();
 	fceuWrapperClose();
+	fceuWrapperUnLock();
+
+	//printf("Thread Finished: %i \n", gameThread->isFinished() );
+	gameThread->exit(0);
+	gameThread->wait();
 
 	delete viewport;
+	delete mutex;
 }
 
 void gameWin_t::setCyclePeriodms( int ms )
@@ -142,7 +163,11 @@ void gameWin_t::createMainMenu(void)
 //---------------------------------------------------------------------------
 void gameWin_t::closeApp(void)
 {
+	nes_shm->runEmulator = 0;
+
+	fceuWrapperLock();
 	fceuWrapperClose();
+	fceuWrapperUnLock();
 
 	// LoadGame() checks for an IP and if it finds one begins a network session
 	// clear the NetworkIP field so this doesn't happen unintentionally
@@ -197,15 +222,20 @@ void gameWin_t::openROMFile(void)
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	g_config->setOption ("SDL.LastOpenFile", filename.toStdString().c_str() );
+
+	fceuWrapperLock();
 	CloseGame ();
 	LoadGame ( filename.toStdString().c_str() );
+	fceuWrapperUnLock();
 
    return;
 }
 
 void gameWin_t::closeROMCB(void)
 {
+	fceuWrapperLock();
 	CloseGame();
+	fceuWrapperUnLock();
 }
 
 void gameWin_t::openGamePadConfWin(void)
@@ -258,9 +288,20 @@ void gameWin_t::runGameFrame(void)
 	//t = (double)ts.tv_sec + (double)(ts.tv_nsec * 1.0e-9);
    //printf("Run Frame %f\n", t);
 	
-	fceuWrapperUpdate();
-
 	viewport->repaint();
 
    return;
+}
+
+void gameWorkerThread_t::runEmulator(void)
+{
+	printf("Emulator Start\n");
+	nes_shm->runEmulator = 1;
+
+	while ( nes_shm->runEmulator )
+	{
+		fceuWrapperUpdate();
+	}
+	printf("Emulator Exit\n");
+	emit finished();
 }

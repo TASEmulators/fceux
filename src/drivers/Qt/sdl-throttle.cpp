@@ -4,6 +4,7 @@
 #include "Qt/sdl.h"
 #include "Qt/throttle.h"
 #include "Qt/GameApp.h"
+#include "Qt/fceuWrapper.h"
 
 static const double Slowest = 0.015625; // 1/64x speed (around 1 fps on NTSC)
 static const double Fastest = 32;       // 32x speed   (around 1920 fps on NTSC)
@@ -45,7 +46,7 @@ RefreshThrottleFPS()
 
    //printf("FrameTime: %llu  %llu  %f  %lf \n", fps, fps >> 24, hz, desired_frametime );
 
-	gameWindow->setCyclePeriodms( T );
+	//gameWindow->setCyclePeriodms( T );
 
 	Lasttime=0;   
 	Nexttime=0;
@@ -58,19 +59,19 @@ RefreshThrottleFPS()
 int
 SpeedThrottle()
 {
-   return 0;
-
-	if(g_fpsScale >= 32)
+	if (g_fpsScale >= 32)
 	{
 		return 0; /* Done waiting */
 	}
 	uint64 time_left;
 	uint64 cur_time;
     
-	if(!Lasttime)
+	if (!Lasttime)
+	{
 		Lasttime = SDL_GetTicks();
+	}
     
-	if(!InFrame)
+	if (!InFrame)
 	{
 		InFrame = 1;
 		Nexttime = Lasttime + desired_frametime * 1000;
@@ -89,17 +90,21 @@ SpeedThrottle()
 		/* 50 ms wait gives us a 20 Hz responsetime which is nice. */
 	}
 	else
+	{
 		InFrame = 0;
+	}
     
 	//fprintf(stderr, "attempting to sleep %Ld ms, frame complete=%s\n",
 	//	time_left, InFrame?"no":"yes");
 
 	if ( time_left > 0 )
 	{
+		//fceuWrapperUnLock();
 		SDL_Delay(time_left);
+		//fceuWrapperLock();
 	}
     
-	if(!InFrame)
+	if (!InFrame)
 	{
 		Lasttime = SDL_GetTicks();
 		return 0; /* Done waiting */

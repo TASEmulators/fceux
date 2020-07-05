@@ -50,6 +50,7 @@ fillaudio(void *udata,
 			uint8 *stream,
 			int len)
 {
+	char bufStarveDetected = 0;
    static int16_t sample = 0;
 	int16 *tmps = (int16*)stream;
 	len >>= 1;
@@ -65,8 +66,8 @@ fillaudio(void *udata,
          // Retain last known sample value, helps avoid clicking
          // noise when sound system is starved of audio data.
 			//sample = 0; 
+			bufStarveDetected = 1;
          nes_shm->sndBuf.starveCounter++;
-         //printf("Starve:%u\n", nes_shm->sndBuf.starveCounter );
 		}
 
       nes_shm->push_sound_sample( sample );
@@ -74,6 +75,10 @@ fillaudio(void *udata,
 		*tmps = sample;
 		tmps++;
 		len--;
+	}
+	if ( bufStarveDetected )
+	{
+      //printf("Starve:%u\n", nes_shm->sndBuf.starveCounter );
 	}
 }
 

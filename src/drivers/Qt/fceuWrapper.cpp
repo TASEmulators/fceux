@@ -14,6 +14,7 @@
 #include "Qt/sdl-video.h"
 #include "Qt/nes_shm.h"
 #include "Qt/unix-netplay.h"
+#include "Qt/GameApp.h"
 
 #include "common/cheat.h"
 #include "../../fceu.h"
@@ -55,6 +56,7 @@ static int inited = 0;
 static int noconfig=0;
 static int frameskip=0;
 static int periodic_saves = 0;
+static bool  mutexLocked = 0;
 
 extern double g_fpsScale;
 //*****************************************************************
@@ -711,13 +713,13 @@ FCEUD_Update(uint8 *XBuf,
 	}
   	else 
 	{
-		if (!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
-		{
-			while (SpeedThrottle())
-			{
-				FCEUD_UpdateInput();
-			}
-		}
+		//if (!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
+		//{
+		//	while (SpeedThrottle())
+		//	{
+		//		FCEUD_UpdateInput();
+		//	}
+		//}
 		if (XBuf && (inited&4)) 
 		{
 			BlitScreen(XBuf); blitDone = 1;
@@ -772,13 +774,64 @@ static void DoFun(int frameskip, int periodic_saves)
 	}
 }
 
+void fceuWrapperLock(void)
+{
+	gameWindow->mutex->lock();
+	mutexLocked = 1;
+}
+
+bool fceuWrapperTryLock(int timeout)
+{
+	bool lockAcq;
+
+	lockAcq = gameWindow->mutex->tryLock( timeout );
+
+	if ( lockAcq )
+	{
+		mutexLocked = 1;
+	}
+	return lockAcq;
+}
+
+void fceuWrapperUnLock(void)
+{
+	if ( mutexLocked )
+	{
+		gameWindow->mutex->unlock();
+		mutexLocked = 0;
+	}
+	else
+	{
+		printf("Error: Mutex is Already UnLocked\n");
+	}
+}
+
+bool fceuWrapperIsLocked(void)
+{
+	return mutexLocked;
+}
+
 int  fceuWrapperUpdate( void )
 {
+	fceuWrapperLock();
+ 
 	if (GameInfo)
 	{
 		DoFun(frameskip, periodic_saves);
-	}
+	
+		fceuWrapperUnLock();
 
+		while ( SpeedThrottle() )
+		{
+			FCEUD_UpdateInput();
+		}
+	}
+	else
+	{
+		fceuWrapperUnLock();
+
+		usleep( 100000 );
+	}
 	return 0;
 }
 

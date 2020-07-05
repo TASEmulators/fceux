@@ -14,10 +14,22 @@
 #include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QTimer>
+#include <QThread>
+#include <QMutex>
 
 #include "Qt/GameViewerGL.h"
 #include "Qt/GameViewerSDL.h"
 #include "Qt/GamePadConf.h"
+
+class  gameWorkerThread_t : public QObject
+{
+	Q_OBJECT
+
+	public slots:
+		void runEmulator( void );
+	signals:
+    void finished();
+};
 
 class  gameWin_t : public QMainWindow
 {
@@ -32,6 +44,8 @@ class  gameWin_t : public QMainWindow
 
 		void setCyclePeriodms( int ms );
 
+		QMutex *mutex;
+
 	protected:
 	 QMenu *fileMenu;
     QMenu *optMenu;
@@ -45,6 +59,8 @@ class  gameWin_t : public QMainWindow
     QAction *aboutAct;
 
 	 QTimer  *gameTimer;
+	 QThread *gameThread;
+	 gameWorkerThread_t *worker;
 
     GamePadConfDialog_t *gamePadConfWin;
 
