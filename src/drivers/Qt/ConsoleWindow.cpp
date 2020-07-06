@@ -2,6 +2,9 @@
 //
 #include <QFileDialog>
 
+#include "Qt/main.h"
+#include "Qt/dface.h"
+#include "Qt/input.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/GamePadConf.h"
 #include "Qt/ConsoleSoundConf.h"
@@ -26,10 +29,11 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
    connect(emulatorThread, &QThread::finished, emulatorThread, &QObject::deleteLater);
 
-	connect( gameTimer, &QTimer::timeout, this, &consoleWin_t::updateDisplay );
+	connect( gameTimer, &QTimer::timeout, this, &consoleWin_t::update );
 
 	gameTimer->setTimerType( Qt::PreciseTimer );
-	gameTimer->start( 16 ); // 60hz
+	//gameTimer->start( 16 ); // 60hz
+	gameTimer->start( 8 ); // 120hz
 
 	emulatorThread->start();
 
@@ -273,7 +277,7 @@ void consoleWin_t::aboutQPlot(void)
    return;
 }
 
-void consoleWin_t::updateDisplay(void)
+void consoleWin_t::update(void)
 {
 	//struct timespec ts;
 	//double t;
@@ -283,7 +287,16 @@ void consoleWin_t::updateDisplay(void)
 	//t = (double)ts.tv_sec + (double)(ts.tv_nsec * 1.0e-9);
    //printf("Run Frame %f\n", t);
 	
-	viewport->repaint();
+	// Update Input Devices
+	FCEUD_UpdateInput();
+	
+	// RePaint Game Viewport
+	if ( nes_shm->blitUpdated )
+	{
+		nes_shm->blitUpdated = 0;
+
+		viewport->repaint();
+	}
 
    return;
 }

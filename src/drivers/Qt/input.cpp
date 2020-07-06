@@ -1197,7 +1197,7 @@ static uint8 fkbkeys[0x48];
 /**
  * Update all of the input devices required for the active game.
  */
-void FCEUD_UpdateInput ()
+void FCEUD_UpdateInput(void)
 {
 	int x;
 	int t = 0;
@@ -1632,7 +1632,7 @@ const char * ButtonName (const ButtConfig * bc, int which)
  * Waits for a button input and returns the information as to which
  * button was pressed.  Used in button configuration.
  */
-int DWaitButton (const uint8 * text, ButtConfig * bc, int wb, int *buttonConfigStatus )
+int DWaitButton (const uint8_t * text, ButtConfig * bc, int wb, int *buttonConfigStatus )
 {
 	SDL_Event event;
 	static int32 LastAx[64][64];

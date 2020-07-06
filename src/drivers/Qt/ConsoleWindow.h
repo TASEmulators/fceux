@@ -78,7 +78,7 @@ class  consoleWin_t : public QMainWindow
       void aboutQPlot(void);
       void openGamePadConfWin(void);
       void openGameSndConfWin(void);
-      void updateDisplay(void);
+      void update(void);
 
 };
 

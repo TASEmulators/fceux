@@ -1,6 +1,8 @@
 #ifndef _aosdfjk02fmasf
 #define _aosdfjk02fmasf
 
+#include <stdint.h>
+
 #include "common/configSys.h"
 
 #define MAXBUTTCONFIG   4
@@ -15,7 +17,7 @@ struct ButtConfig
 	int    ButtType[MAXBUTTCONFIG];
 	int    DeviceNum[MAXBUTTCONFIG];
 	int    ButtonNum[MAXBUTTCONFIG];
-	uint32 NumC;
+	uint32_t NumC;
 	//uint64 DeviceID[MAXBUTTCONFIG];	/* TODO */
 };
 
@@ -30,7 +32,7 @@ int getKeyState( int k );
 int ButtonConfigBegin();
 void ButtonConfigEnd();
 void ConfigButton(char *text, ButtConfig *bc);
-int DWaitButton(const uint8 *text, ButtConfig *bc, int wb, int *buttonConfigStatus = NULL);
+int DWaitButton(const uint8_t *text, ButtConfig *bc, int wb, int *buttonConfigStatus = NULL);
 
 
 #define FCFGD_GAMEPAD   1

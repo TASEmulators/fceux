@@ -610,36 +610,40 @@ FCEUD_Update(uint8 *XBuf,
 	extern int FCEUDnetplay;
 
 	#ifdef CREATE_AVI
-	if(LoggingEnabled == 2 || (eoptions&EO_NOTHROTTLE))
+	if (LoggingEnabled == 2 || (eoptions&EO_NOTHROTTLE))
 	{
-	  if(LoggingEnabled == 2)
-	  {
-		int16* MonoBuf = new int16[Count];
-		int n;
-		for(n=0; n<Count; ++n)
-			MonoBuf[n] = Buffer[n] & 0xFFFF;
-		NESVideoLoggingAudio
-		 (
-		  MonoBuf, 
-		  FSettings.SndRate, 16, 1,
-		  Count
-		 );
-		delete [] MonoBuf;
-	  }
-	  Count /= 2;
-	  if(inited & 1)
-	  {
-		if(Count > GetWriteSound()) Count = GetWriteSound();
-		if (!mutecapture)
-		  if(Count > 0 && Buffer) WriteSound(Buffer,Count);   
-	  }
-	  if(inited & 2)
-		FCEUD_UpdateInput();
-	  if(XBuf && (inited & 4)) BlitScreen(XBuf);
+		if(LoggingEnabled == 2)
+		{
+			int16* MonoBuf = new int16[Count];
+			int n;
+			for(n=0; n<Count; ++n)
+			{
+				MonoBuf[n] = Buffer[n] & 0xFFFF;
+			}
+			NESVideoLoggingAudio
+			(
+			  MonoBuf, 
+			  FSettings.SndRate, 16, 1,
+			  Count
+			);
+			delete [] MonoBuf;
+		}
+		Count /= 2;
+		if (inited & 1)
+		{
+			if (Count > GetWriteSound()) Count = GetWriteSound();
+
+			if (!mutecapture)
+			{
+				if(Count > 0 && Buffer) WriteSound(Buffer,Count);   
+			}
+		}
+		//if (inited & 2)
+		//	FCEUD_UpdateInput();
+	  	if(XBuf && (inited & 4)) BlitScreen(XBuf);
 	  
-	  //SpeedThrottle();
 		return;
-	 }
+	}
 	#endif
 	
 	int ocount = Count;
@@ -732,15 +736,6 @@ FCEUD_Update(uint8 *XBuf,
 			BlitScreen(XBuf); blitDone = 1;
 		}
 	}
-	FCEUD_UpdateInput();
-	//if(!Count && !NoWaiting && !(eoptions&EO_NOTHROTTLE))
-	// SpeedThrottle();
-	//if(XBuf && (inited&4))
-	//{
-	// BlitScreen(XBuf);
-	//}
-	//if(Count)
-	// WriteSound(Buffer,Count,NoWaiting);
 	//FCEUD_UpdateInput();
 }
 
@@ -823,7 +818,9 @@ int  fceuWrapperUpdate( void )
 
 		while ( SpeedThrottle() )
 		{
-			FCEUD_UpdateInput();
+			// Input device processing is in main thread
+			// because to MAC OS X SDL2 requires it.
+			//FCEUD_UpdateInput(); 
 		}
 	}
 	else

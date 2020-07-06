@@ -379,6 +379,7 @@ BlitScreen(uint8 *XBuf)
 	{
 		Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines, pitch, 1, 1);
 	}
+	nes_shm->blitUpdated = 1;
 
 	//guiPixelBufferReDraw();
 
