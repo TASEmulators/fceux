@@ -30,6 +30,14 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 		devPixRatio = screen->devicePixelRatio();
     	//printf("Ratio: %f \n", screen->devicePixelRatio() );
 	}
+	localBufSize = GL_NES_WIDTH * GL_NES_HEIGHT * sizeof(uint32_t);
+
+	localBuf = (uint32_t*)malloc( localBufSize );
+
+	if ( localBuf )
+	{
+		memset( localBuf, 0, localBufSize );
+	}
 }
 
 ConsoleViewGL_t::~ConsoleViewGL_t(void)
@@ -47,6 +55,11 @@ ConsoleViewGL_t::~ConsoleViewGL_t(void)
 	 }
 
 	 doneCurrent();
+
+	if ( localBuf )
+	{
+		free( localBuf ); localBuf = NULL;
+	}
 }
 
 int ConsoleViewGL_t::init( void )
@@ -109,6 +122,11 @@ void ConsoleViewGL_t::resizeGL(int w, int h)
 	buildTextures();
 }
 
+void ConsoleViewGL_t::transfer2LocalBuffer(void)
+{
+	memcpy( localBuf, nes_shm->pixbuf, localBufSize );
+}
+
 void ConsoleViewGL_t::paintGL(void)
 {
 	int texture_width  = nes_shm->ncol;
@@ -149,7 +167,7 @@ void ConsoleViewGL_t::paintGL(void)
 
 	glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0,
 		  	0, 0, GL_NES_WIDTH, GL_NES_HEIGHT,
-				GL_BGRA, GL_UNSIGNED_BYTE, nes_shm->pixbuf );
+				GL_BGRA, GL_UNSIGNED_BYTE, localBuf );
 
 	glBegin(GL_QUADS);
 	glTexCoord2f( l, b); // Bottom left of picture.

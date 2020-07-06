@@ -295,7 +295,10 @@ void consoleWin_t::update(void)
 	{
 		nes_shm->blitUpdated = 0;
 
-		viewport->repaint();
+		viewport->transfer2LocalBuffer();
+
+		//viewport->repaint();
+		viewport->update();
 	}
 
    return;

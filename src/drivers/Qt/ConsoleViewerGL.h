@@ -3,6 +3,8 @@
 
 #pragma  once
 
+#include <stdint.h>
+
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 
@@ -16,8 +18,10 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 
 		int  init( void );
 
+		void transfer2LocalBuffer(void);
+
 	protected:
-    void initializeGL(void);
+   void initializeGL(void);
 	void resizeGL(int w, int h);
 	void paintGL(void);
 
@@ -30,6 +34,9 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 	int  view_height;
 	GLuint gltexture;
 	bool   linearFilter;
+
+	uint32_t  *localBuf;
+	uint32_t   localBufSize;
 
 	private slots:
 };
