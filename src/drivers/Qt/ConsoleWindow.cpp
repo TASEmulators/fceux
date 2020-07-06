@@ -29,7 +29,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
    connect(emulatorThread, &QThread::finished, emulatorThread, &QObject::deleteLater);
 
-	connect( gameTimer, &QTimer::timeout, this, &consoleWin_t::update );
+	connect( gameTimer, &QTimer::timeout, this, &consoleWin_t::updatePeriodic );
 
 	gameTimer->setTimerType( Qt::PreciseTimer );
 	//gameTimer->start( 16 ); // 60hz
@@ -277,7 +277,7 @@ void consoleWin_t::aboutQPlot(void)
    return;
 }
 
-void consoleWin_t::update(void)
+void consoleWin_t::updatePeriodic(void)
 {
 	//struct timespec ts;
 	//double t;
