@@ -56,6 +56,7 @@ class  consoleWin_t : public QMainWindow
     QAction *quitAct;
     QAction *gamePadConfig;
     QAction *gameSoundConfig;
+    QAction *gameVideoConfig;
     QAction *hotkeyConfig;
     QAction *aboutAct;
 
@@ -79,6 +80,7 @@ class  consoleWin_t : public QMainWindow
       void aboutQPlot(void);
       void openGamePadConfWin(void);
       void openGameSndConfWin(void);
+      void openGameVideoConfWin(void);
       void openHotkeyConfWin(void);
       void updatePeriodic(void);
 

@@ -9,6 +9,7 @@
 #include "Qt/GamePadConf.h"
 #include "Qt/HotKeyConf.h"
 #include "Qt/ConsoleSoundConf.h"
+#include "Qt/ConsoleVideoConf.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/keyscan.h"
 #include "Qt/nes_shm.h"
@@ -150,6 +151,14 @@ void consoleWin_t::createMainMenu(void)
 
     optMenu->addAction(gameSoundConfig);
 
+	 // Options -> Video Config
+	 gameVideoConfig = new QAction(tr("Video Config"), this);
+    //gameVideoConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+    gameVideoConfig->setStatusTip(tr("Video Configure"));
+    connect(gameVideoConfig, SIGNAL(triggered()), this, SLOT(openGameVideoConfWin(void)) );
+
+    optMenu->addAction(gameVideoConfig);
+
 	 // Options -> HotKey Config
 	 hotkeyConfig = new QAction(tr("Hotkey Config"), this);
     //hotkeyConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
@@ -278,6 +287,22 @@ void consoleWin_t::openGameSndConfWin(void)
    delete sndConfWin;
 
    //printf("Sound Config Window Destroyed\n");
+}
+
+void consoleWin_t::openGameVideoConfWin(void)
+{
+	ConsoleVideoConfDialog_t *vidConfWin;
+
+	//printf("Open Video Config Window\n");
+	
+   vidConfWin = new ConsoleVideoConfDialog_t(this);
+	
+   vidConfWin->show();
+   vidConfWin->exec();
+
+   delete vidConfWin;
+
+   //printf("Video Config Window Destroyed\n");
 }
 
 void consoleWin_t::openHotkeyConfWin(void)
