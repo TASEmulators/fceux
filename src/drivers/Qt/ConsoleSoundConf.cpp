@@ -1,4 +1,4 @@
-// GameSoundConf.cpp
+// ConsoleSoundConf.cpp
 //
 #include "../../fceu.h"
 #include "../../driver.h"
@@ -19,15 +19,15 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	QGroupBox *frame;
 	QSlider *vslider;
 
-	setWindowTitle("Sound Config");
+	setWindowTitle( tr("Sound Config") );
 
 	hbox1 = new QHBoxLayout();
 	vbox1 = new QVBoxLayout();
 
 	// Enable Sound Select
-	enaChkbox  = new QCheckBox("Enable Sound");
+	enaChkbox  = new QCheckBox( tr("Enable Sound") );
 	// Enable Low Pass Filter Select
-	enaLowPass = new QCheckBox("Enable Low Pass Filter");
+	enaLowPass = new QCheckBox( tr("Enable Low Pass Filter") );
 
 	setCheckBoxFromProperty( enaChkbox , "SDL.Sound" );
 	setCheckBoxFromProperty( enaLowPass, "SDL.Sound.LowPass" );
@@ -86,7 +86,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	//
 	hbox2 = new QHBoxLayout();
 
-	lbl = new QLabel("Buffer Size (in ms):");
+	lbl = new QLabel( tr("Buffer Size (in ms):") );
 
 	bufSizeLabel  = new QLabel("128");
 	bufSizeSlider = new QSlider( Qt::Horizontal );
@@ -105,7 +105,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	connect(bufSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(bufSizeChanged(int)) );
 	
 	// Swap Duty Cycles
-	swapDutyChkbox  = new QCheckBox("Swap Duty Cycles");
+	swapDutyChkbox  = new QCheckBox( tr("Swap Duty Cycles") );
 	vbox1->addWidget( swapDutyChkbox );
 
 	setCheckBoxFromProperty( swapDutyChkbox , "SDL.SwapDuty" );

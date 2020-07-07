@@ -24,7 +24,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    configNo = 0;
    buttonConfigStatus = 1;
 
-   setWindowTitle("GamePad Config");
+   setWindowTitle( tr("GamePad Config") );
 
 	hbox1 = new QHBoxLayout();
 	hbox2 = new QHBoxLayout();
@@ -39,8 +39,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    portSel->addItem( tr("3"), 2 );
    portSel->addItem( tr("4"), 3 );
 
-	efs_chkbox  = new QCheckBox("Enable Four Score");
-	udlr_chkbox = new QCheckBox("Allow Up+Down/Left+Right");
+	efs_chkbox  = new QCheckBox( tr("Enable Four Score") );
+	udlr_chkbox = new QCheckBox( tr("Allow Up+Down/Left+Right") );
 
 	int fourScore;
 	g_config->getOption("SDL.FourScore", &fourScore);
@@ -72,7 +72,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	   buttonName     = new QLabel(tr(text));
 	   keyName[i]     = new QLabel();
       button[i]      = new GamePadConfigButton_t(i);
-      clearButton[i] = new QPushButton("Clear");
+      clearButton[i] = new QPushButton( tr("Clear") );
 
       grid->addWidget( buttonName    , i, 0, Qt::AlignCenter );
       grid->addWidget( keyName[i]    , i, 1, Qt::AlignCenter );

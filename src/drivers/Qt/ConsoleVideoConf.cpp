@@ -13,7 +13,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	QHBoxLayout *hbox1;
 	QLabel *lbl;
 
-	setWindowTitle("Video Config");
+	setWindowTitle( tr("Video Config") );
 
 	main_vbox = new QVBoxLayout();
 

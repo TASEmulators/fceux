@@ -201,7 +201,7 @@ void consoleWin_t::openROMFile(void)
 {
 	int ret;
 	QString filename;
-	QFileDialog  dialog(this, "Open ROM File");
+	QFileDialog  dialog(this, tr("Open ROM File") );
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
