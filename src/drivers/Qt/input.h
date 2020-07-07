@@ -27,7 +27,7 @@ extern CFGSTRUCT InputConfig[];
 extern ARGPSTRUCT InputArgs[];
 extern int Hotkeys[];
 void ParseGIInput(FCEUGI *GI);
-void setHotKeys();
+void setHotKeys(void);
 int getKeyState( int k );
 int ButtonConfigBegin();
 void ButtonConfigEnd();

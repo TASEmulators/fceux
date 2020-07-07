@@ -7,6 +7,7 @@
 #include "Qt/input.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/GamePadConf.h"
+#include "Qt/HotKeyConf.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/keyscan.h"
@@ -149,6 +150,14 @@ void consoleWin_t::createMainMenu(void)
 
     optMenu->addAction(gameSoundConfig);
 
+	 // Options -> HotKey Config
+	 hotkeyConfig = new QAction(tr("Hotkey Config"), this);
+    //hotkeyConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+    hotkeyConfig->setStatusTip(tr("Hotkey Configure"));
+    connect(hotkeyConfig, SIGNAL(triggered()), this, SLOT(openHotkeyConfWin(void)) );
+
+    optMenu->addAction(hotkeyConfig);
+
 	 //-----------------------------------------------------------------------
 	 // Help
     helpMenu = menuBar()->addMenu(tr("Help"));
@@ -259,7 +268,7 @@ void consoleWin_t::openGameSndConfWin(void)
 {
 	ConsoleSndConfDialog_t *sndConfWin;
 
-	printf("Open Sound Config Window\n");
+	//printf("Open Sound Config Window\n");
 	
    sndConfWin = new ConsoleSndConfDialog_t(this);
 	
@@ -268,7 +277,23 @@ void consoleWin_t::openGameSndConfWin(void)
 
    delete sndConfWin;
 
-   printf("Sound Config Window Destroyed\n");
+   //printf("Sound Config Window Destroyed\n");
+}
+
+void consoleWin_t::openHotkeyConfWin(void)
+{
+	HotKeyConfDialog_t *hkConfWin;
+
+	printf("Open Hot Key Config Window\n");
+	
+   hkConfWin = new HotKeyConfDialog_t(this);
+	
+   hkConfWin->show();
+   hkConfWin->exec();
+
+   delete hkConfWin;
+
+   printf("Hotkey Config Window Destroyed\n");
 }
 
 void consoleWin_t::aboutQPlot(void)
