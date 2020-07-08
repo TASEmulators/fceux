@@ -177,6 +177,17 @@ void consoleWin_t::createMainMenu(void)
 
     optMenu->addAction(autoResume);
 
+    optMenu->addSeparator();
+
+	 // Options -> Full Screen
+	 fullscreen = new QAction(tr("Fullscreen"), this);
+    fullscreen->setShortcut( QKeySequence(tr("Alt+Return")));
+    //fullscreen->setCheckable(true);
+    fullscreen->setStatusTip(tr("Fullscreen"));
+    connect(fullscreen, SIGNAL(triggered()), this, SLOT(toggleFullscreen(void)) );
+
+    optMenu->addAction(fullscreen);
+
 	 //-----------------------------------------------------------------------
 	 // Help
     helpMenu = menuBar()->addMenu(tr("Help"));
@@ -338,6 +349,18 @@ void consoleWin_t::toggleAutoResume(void)
 	g_config->setOption ("SDL.AutoResume", (int) autoResume->isChecked() );
 
 	AutoResumePlay = autoResume->isChecked();
+}
+
+void consoleWin_t::toggleFullscreen(void)
+{
+	if ( isFullScreen() )
+	{
+		showNormal();
+	}
+	else
+	{
+		showFullScreen();
+	}
 }
 
 void consoleWin_t::aboutQPlot(void)
