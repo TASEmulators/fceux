@@ -46,6 +46,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  useSpriteLimitChanged( int value );
 		void  clipSidesChanged( int value );
 		void  showFPSChanged( int value );
+		void  regionChanged(int index);
 		void  applyChanges( void );
 		void  closewindow( void );
 

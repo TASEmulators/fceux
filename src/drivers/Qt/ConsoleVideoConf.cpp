@@ -51,6 +51,8 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	regionSelect->addItem( tr("PAL")  , 1 );
 	regionSelect->addItem( tr("Dendy"), 2 );
 
+	connect(regionSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(regionChanged(int)) );
+
 	hbox1 = new QHBoxLayout();
 
 	hbox1->addWidget( lbl );
@@ -178,6 +180,23 @@ void ConsoleVideoConfDialog_t::showFPSChanged( int value )
 
 	fceuWrapperLock();
 	UpdateEMUCore (g_config);
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::regionChanged(int index)
+{
+	int region;
+	//printf("Region: %i : %i \n", index, regionSelect->itemData(index).toInt() );
+
+	region = regionSelect->itemData(index).toInt();
+
+	g_config->setOption ("SDL.PAL", region);
+
+	g_config->save ();
+
+	// reset sound subsystem for changes to take effect
+	fceuWrapperLock();
+	FCEUI_SetRegion (region);
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------
