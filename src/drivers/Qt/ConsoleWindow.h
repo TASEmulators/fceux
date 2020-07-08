@@ -58,6 +58,7 @@ class  consoleWin_t : public QMainWindow
     QAction *gameSoundConfig;
     QAction *gameVideoConfig;
     QAction *hotkeyConfig;
+    QAction *autoResume;
     QAction *aboutAct;
 
 	 QTimer  *gameTimer;
@@ -82,6 +83,7 @@ class  consoleWin_t : public QMainWindow
       void openGameSndConfWin(void);
       void openGameVideoConfWin(void);
       void openHotkeyConfWin(void);
+      void toggleAutoResume(void);
       void updatePeriodic(void);
 
 };
