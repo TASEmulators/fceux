@@ -25,15 +25,29 @@ class ConsoleVideoConfDialog_t : public QDialog
 		~ConsoleVideoConfDialog_t(void);
 
 	protected:
-		QCheckBox   *gl_LF_chkBox;
-		QComboBox   *drvSel;
+		QComboBox   *driverSelect;
 		QComboBox   *regionSelect;
+		QCheckBox   *gl_LF_chkBox;
+		QCheckBox   *new_PPU_ena;
+		QCheckBox   *frmskipcbx;
+		QCheckBox   *sprtLimCbx;
+		QCheckBox   *clipSidesCbx;
+		QCheckBox   *showFPS_cbx;
 
-		//void  setCheckBoxFromProperty( QCheckBox *cbx, const char *property );
+		void  setCheckBoxFromProperty( QCheckBox *cbx, const char *property );
 		//void  setComboBoxFromProperty( QComboBox *cbx, const char *property );
 		//void  setSliderFromProperty( QSlider *slider, QLabel *lbl, const char *property );
 
+		void  resetVideo(void);
+
 	private slots:
+		void  use_new_PPU_changed( int value );
+		void  frameskip_changed( int value );
+		void  useSpriteLimitChanged( int value );
+		void  clipSidesChanged( int value );
+		void  showFPSChanged( int value );
+		void  applyChanges( void );
+		void  closewindow( void );
 
 };
 

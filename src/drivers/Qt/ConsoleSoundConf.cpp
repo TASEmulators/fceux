@@ -41,7 +41,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	// Audio Quality Select
 	hbox2 = new QHBoxLayout();
 
-	lbl = new QLabel("Quality:");
+	lbl = new QLabel( tr("Quality:") );
 
 	qualitySelect = new QComboBox();
 

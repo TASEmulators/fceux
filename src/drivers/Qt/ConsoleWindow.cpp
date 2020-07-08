@@ -309,7 +309,7 @@ void consoleWin_t::openHotkeyConfWin(void)
 {
 	HotKeyConfDialog_t *hkConfWin;
 
-	printf("Open Hot Key Config Window\n");
+	//printf("Open Hot Key Config Window\n");
 	
    hkConfWin = new HotKeyConfDialog_t(this);
 	
@@ -318,7 +318,7 @@ void consoleWin_t::openHotkeyConfWin(void)
 
    delete hkConfWin;
 
-   printf("Hotkey Config Window Destroyed\n");
+   //printf("Hotkey Config Window Destroyed\n");
 }
 
 void consoleWin_t::aboutQPlot(void)
