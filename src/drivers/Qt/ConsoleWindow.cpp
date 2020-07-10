@@ -181,7 +181,7 @@ void consoleWin_t::createMainMenu(void)
 
 		 sprintf( stmp, "%i", i );
 
-		 state[i] = new QAction(tr(stmp));
+		 state[i] = new QAction(tr(stmp), this);
 		 state[i]->setCheckable(true);
 
 		 group->addAction(state[i]);
