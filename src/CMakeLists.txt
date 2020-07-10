@@ -33,7 +33,7 @@ else(WIN32)
 	  add_definitions( -D_SYSTEM_MINIZIP ${MINIZIP_CFLAGS} )
   endif()
 
-  pkg_check_modules( GL REQUIRED gl)
+  pkg_check_modules( GL gl)
 
   # Check for OpenGL
   if ( ${GL_FOUND} )
@@ -64,7 +64,11 @@ else(WIN32)
 
   add_definitions( -DHAVE_ASPRINTF ) # What system wouldn't have this?
 
-  set( SYS_LIBS  -lrt  -lpthread )
+  if(APPLE)
+	set( SYS_LIBS  "-framework OpenGL" )
+  else()
+  	set( SYS_LIBS  -lrt  -lpthread )
+  endif()
 
 endif(WIN32)
 
