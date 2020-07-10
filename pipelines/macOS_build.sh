@@ -52,9 +52,9 @@ cmake \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
 	-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-	..
-make 
-make install
+	.. || exit 1
+make  || exit 1
+make install || exit 1
 
 # Debug via ssh if necessary
 if [ ! -z $APPVEYOR_SSH_BLOCK ]; then

@@ -20,6 +20,8 @@ else(WIN32)
   # Use the package PkgConfig to detect headers/library files
   find_package(PkgConfig REQUIRED)
   find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
+  find_package(OpenGL REQUIRED)
+  find_package(zlib REQUIRED)
 
   add_definitions( ${Qt5Widgets_DEFINITIONS}  )
   include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
@@ -33,18 +35,19 @@ else(WIN32)
 	  add_definitions( -D_SYSTEM_MINIZIP ${MINIZIP_CFLAGS} )
   endif()
 
-  pkg_check_modules( GL gl)
+  #pkg_check_modules( GL gl) # Use built in find package instead for OpenGL
 
   # Check for OpenGL
-  if ( ${GL_FOUND} )
-     add_definitions( ${GL_CFLAGS} )
+  if ( ${OPENGL_FOUND} )
+	include_directories( ${OPENGL_INCLUDE_DIR} )
   endif()
 
-  pkg_check_modules( ZLIB REQUIRED zlib)
+  #pkg_check_modules( ZLIB REQUIRED zlib) # Use built in find package instead for zlib
 
   # Check for zlib
   if ( ${ZLIB_FOUND} )
-	  add_definitions( ${ZLIB_CFLAGS} )
+	  #add_definitions( ${ZLIB_CFLAGS} )
+	  include_directories( ${ZLIB_INCLUDE_DIRS} )
   endif()
 
   # Check for SDL2
@@ -106,8 +109,9 @@ else(WIN32)
   add_definitions( -DHAVE_ASPRINTF ) # What system wouldn't have this?
 
   if(APPLE)
-	set( SYS_LIBS  "-framework OpenGL" )
+	set( OPENGL_LDFLAGS  "-framework OpenGL" )
   else()
+	set( OPENGL_LDFLAGS  ${OPENGL_LIBRARIES} )
   	set( SYS_LIBS  -lrt  -lpthread )
   endif()
 
@@ -394,9 +398,9 @@ add_executable(  fceux  ${SOURCES} )
 target_link_libraries( fceux  
    ${Qt5Widgets_LIBRARIES}
    ${Qt5OpenGL_LIBRARIES}
-   ${GL_LDFLAGS}
+   ${OPENGL_LDFLAGS}
  	${SDL2_LDFLAGS}
-	${MINIZIP_LDFLAGS} ${ZLIB_LDFLAGS}
+	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES}
 	${LUA_LDFLAGS}
  	${SYS_LIBS}
 )
