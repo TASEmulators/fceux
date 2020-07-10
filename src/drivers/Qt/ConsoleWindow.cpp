@@ -3,6 +3,11 @@
 #include <QFileDialog>
 
 #include "../../fceu.h"
+
+#ifdef _S9XLUA_H
+#include "../../fceulua.h"
+#endif
+
 #include "Qt/main.h"
 #include "Qt/dface.h"
 #include "Qt/input.h"
@@ -201,6 +206,20 @@ void consoleWin_t::createMainMenu(void)
     connect(state[9], SIGNAL(triggered()), this, SLOT(changeState9(void)) );
 
     fileMenu->addSeparator();
+
+#ifdef _S9XLUA_H
+    // File -> Quick Save
+	 loadLuaAct = new QAction(tr("Load Lua Script"), this);
+    //loadLuaAct->setShortcut( QKeySequence(tr("F5")));
+    loadLuaAct->setStatusTip(tr("Load Lua Script"));
+    connect(loadLuaAct, SIGNAL(triggered()), this, SLOT(loadLua(void)) );
+
+    fileMenu->addAction(loadLuaAct);
+
+    fileMenu->addSeparator();
+#else
+    loadLuaAct = NULL;
+#endif
 
 	 // File -> Quit
 	 quitAct = new QAction(tr("Quit"), this);
@@ -580,6 +599,64 @@ void consoleWin_t::changeState9(void)
 	fceuWrapperLock();
 	FCEUI_SelectState( 9, 1 );
 	fceuWrapperUnLock();
+}
+
+void consoleWin_t::loadLua(void)
+{
+#ifdef _S9XLUA_H
+   int ret;
+	QString filename;
+	std::string last;
+	QFileDialog  dialog(this, tr("Open LUA Script") );
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("LUA Scripts (*.lua)(*.LUA) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+
+	g_config->getOption ("SDL.LastLoadLua", &last );
+
+   if ( last.size() == 0 )
+   {
+      last.assign( "/usr/share/fceux/luaScripts" );
+   }
+
+	dialog.setDirectory( tr(last.c_str()) );
+
+	// the gnome default file dialog is not playing nice with QT.
+	// TODO make this a config option to use native file dialog.
+	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	g_config->setOption ("SDL.LastLoadLua", filename.toStdString().c_str() );
+
+	fceuWrapperLock();
+	if ( FCEU_LoadLuaCode( filename.toStdString().c_str() ) )
+   {
+      printf("Error: Could not open the selected lua script: '%s'\n", filename.toStdString().c_str() );
+   }
+	fceuWrapperUnLock();
+#endif
 }
 
 void consoleWin_t::openGamePadConfWin(void)

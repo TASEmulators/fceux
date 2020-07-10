@@ -58,6 +58,7 @@ class  consoleWin_t : public QMainWindow
     QAction *saveStateAct;
     QAction *quickLoadAct;
     QAction *quickSaveAct;
+    QAction *loadLuaAct;
     QAction *quitAct;
     QAction *gamePadConfig;
     QAction *gameSoundConfig;
@@ -108,6 +109,7 @@ class  consoleWin_t : public QMainWindow
       void changeState7(void);
       void changeState8(void);
       void changeState9(void);
+      void loadLua(void);
 
 };
 

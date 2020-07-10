@@ -1,4 +1,8 @@
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
 if(WIN32)
   set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_WIN})
   include_directories( ${CMAKE_SOURCE_DIR}/src/drivers/win/directx ${CMAKE_SOURCE_DIR}/src/drivers/win/zlib )
@@ -15,33 +19,25 @@ else(WIN32)
   # Non Windows System
   # Use the package PkgConfig to detect headers/library files
   find_package(PkgConfig REQUIRED)
+  find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
 
-  # Check for GTK+3
-  pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+  add_definitions( ${Qt5Widgets_DEFINITIONS}  )
+  include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
 
-  if ( ${GTK3_FOUND} )
-	  add_definitions( -D_GTK ${GTK3_CFLAGS} )
-  endif()
+  add_definitions( -D__QT_DRIVER__  -Wall  -Wno-write-strings  -Wno-sign-compare  -Wno-parentheses  -Wno-unused-local-typedefs  -fPIC -DQT_DEPRECATED_WARNINGS )
 
-  # Check for X11
-  pkg_check_modules( X11 x11 )
-
-  if ( ${X11_FOUND} )
-	  add_definitions( ${X11_CFLAGS} )
-  endif()
-
-  # Check for OpenGL
-  pkg_check_modules( GL REQUIRED gl)
-
-  if ( ${GL_FOUND} )
-	  add_definitions( -DOPENGL ${GL_CFLAGS} )
-  endif()
-	  
   # Check for libminizip
   pkg_check_modules( MINIZIP REQUIRED minizip)
 
   if ( ${MINIZIP_FOUND} )
 	  add_definitions( -D_SYSTEM_MINIZIP ${MINIZIP_CFLAGS} )
+  endif()
+
+  pkg_check_modules( GL REQUIRED gl)
+
+  # Check for OpenGL
+  if ( ${GL_FOUND} )
+     add_definitions( ${GL_CFLAGS} )
   endif()
 
   pkg_check_modules( ZLIB REQUIRED zlib)
@@ -71,6 +67,9 @@ else(WIN32)
   set( SYS_LIBS  -lrt  -lpthread )
 
 endif(WIN32)
+
+include_directories( ${CMAKE_SOURCE_DIR}/src )
+include_directories( ${CMAKE_SOURCE_DIR}/src/drivers )
 
 if(APPLE)
   add_definitions( -DPSS_STYLE=4 )
@@ -323,20 +322,24 @@ set(SRC_DRIVERS_COMMON
 )
 
 set(SRC_DRIVERS_SDL
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/config.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/input.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/gui.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/cheat.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/debugger.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/memview.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/ramwatch.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl-joystick.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl-sound.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl-throttle.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl-video.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/glxwin.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/unix-netplay.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/main.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleWindow.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleViewerGL.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleViewerSDL.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/GamePadConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/HotKeyConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleVideoConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleSoundConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/fceuWrapper.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/config.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/input.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/nes_shm.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/keyscan.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-sound.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-video.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-joystick.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-throttle.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/unix-netplay.cpp
 )
 
 set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})
@@ -344,9 +347,9 @@ set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})
 add_executable(  fceux  ${SOURCES} )
 
 target_link_libraries( fceux  
-	${GTK3_LDFLAGS}  
-	${X11_LDFLAGS}
- 	${GL_LDFLAGS}
+   ${Qt5Widgets_LIBRARIES}
+   ${Qt5OpenGL_LIBRARIES}
+   ${GL_LDFLAGS}
  	${SDL2_LDFLAGS}
 	${MINIZIP_LDFLAGS} ${ZLIB_LDFLAGS}
 	${LUA_LDFLAGS}
