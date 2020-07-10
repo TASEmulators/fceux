@@ -99,6 +99,9 @@ void consoleWin_t::keyReleaseEvent(QKeyEvent *event)
 //---------------------------------------------------------------------------
 void consoleWin_t::createMainMenu(void)
 {
+	QMenu *subMenu;
+	QActionGroup *group;
+
     // This is needed for menu bar to show up on MacOS
 	 menuBar()->setNativeMenuBar(false);
 
@@ -165,6 +168,37 @@ void consoleWin_t::createMainMenu(void)
     connect(quickSaveAct, SIGNAL(triggered()), this, SLOT(quickSave(void)) );
 
     fileMenu->addAction(quickSaveAct);
+
+	 // File -> Change State
+	 subMenu = fileMenu->addMenu(tr("Change State"));
+	 group   = new QActionGroup(this);
+
+	 group->setExclusive(true);
+
+	 for (int i=0; i<10; i++)
+	 {
+		 char stmp[8];
+
+		 sprintf( stmp, "%i", i );
+
+		 state[i] = new QAction(tr(stmp));
+		 state[i]->setCheckable(true);
+
+		 group->addAction(state[i]);
+	 	 subMenu->addAction(state[i]);
+	 }
+	 state[0]->setChecked(true);
+
+    connect(state[0], SIGNAL(triggered()), this, SLOT(changeState0(void)) );
+    connect(state[1], SIGNAL(triggered()), this, SLOT(changeState1(void)) );
+    connect(state[2], SIGNAL(triggered()), this, SLOT(changeState2(void)) );
+    connect(state[3], SIGNAL(triggered()), this, SLOT(changeState3(void)) );
+    connect(state[4], SIGNAL(triggered()), this, SLOT(changeState4(void)) );
+    connect(state[5], SIGNAL(triggered()), this, SLOT(changeState5(void)) );
+    connect(state[6], SIGNAL(triggered()), this, SLOT(changeState6(void)) );
+    connect(state[7], SIGNAL(triggered()), this, SLOT(changeState7(void)) );
+    connect(state[8], SIGNAL(triggered()), this, SLOT(changeState8(void)) );
+    connect(state[9], SIGNAL(triggered()), this, SLOT(changeState9(void)) );
 
     fileMenu->addSeparator();
 
@@ -475,6 +509,76 @@ void consoleWin_t::quickSave(void)
 {
 	fceuWrapperLock();
 	FCEUI_SaveState( NULL );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::changeState0(void)
+{
+	fceuWrapperLock();
+	FCEUI_SelectState( 0, 1 );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::changeState1(void)
+{
+	fceuWrapperLock();
+	FCEUI_SelectState( 1, 1 );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::changeState2(void)
+{
+	fceuWrapperLock();
+	FCEUI_SelectState( 2, 1 );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::changeState3(void)
+{
+	fceuWrapperLock();
+	FCEUI_SelectState( 3, 1 );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::changeState4(void)
+{
+	fceuWrapperLock();
+	FCEUI_SelectState( 4, 1 );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::changeState5(void)
+{
+	fceuWrapperLock();
+	FCEUI_SelectState( 5, 1 );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::changeState6(void)
+{
+	fceuWrapperLock();
+	FCEUI_SelectState( 6, 1 );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::changeState7(void)
+{
+	fceuWrapperLock();
+	FCEUI_SelectState( 7, 1 );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::changeState8(void)
+{
+	fceuWrapperLock();
+	FCEUI_SelectState( 8, 1 );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::changeState9(void)
+{
+	fceuWrapperLock();
+	FCEUI_SelectState( 9, 1 );
 	fceuWrapperUnLock();
 }
 

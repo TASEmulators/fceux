@@ -66,6 +66,7 @@ class  consoleWin_t : public QMainWindow
     QAction *autoResume;
     QAction *fullscreen;
     QAction *aboutAct;
+	 QAction *state[10];
 
 	 QTimer  *gameTimer;
 	 emulatorThread_t *emulatorThread;
@@ -97,6 +98,16 @@ class  consoleWin_t : public QMainWindow
       void toggleAutoResume(void);
       void toggleFullscreen(void);
       void updatePeriodic(void);
+      void changeState0(void);
+      void changeState1(void);
+      void changeState2(void);
+      void changeState3(void);
+      void changeState4(void);
+      void changeState5(void);
+      void changeState6(void);
+      void changeState7(void);
+      void changeState8(void);
+      void changeState9(void);
 
 };
 
