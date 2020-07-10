@@ -8,6 +8,8 @@ sw_vers
 
 SCRIPT_DIR=$( cd $(dirname $BASH_SOURCE[0]); pwd );
 
+INSTALL_PREFIX=/tmp/fceux
+
 gcc --version
 
 echo '****************************************'
@@ -34,15 +36,25 @@ brew  install  minizip
 
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:
 
-QMAKE=`find /usr/local -name qmake`;
+#QMAKE=`find /usr/local -name qmake`;
+QT_CMAKE=`find /usr/local -name Qt5Config.cmake`
+echo $QT_CMAKE;
+export Qt5_DIR=`dirname $QT_CMAKE`;
+echo "Qt5_DIR=$Qt5_DIR";
 
 echo '**************************'
 echo '***  Building Project  ***'
 echo '**************************'
 mkdir build;
 cd build;
-$QMAKE ..
-make
+#$QMAKE ..
+cmake \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
+	-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+	..
+make 
+make install
 
 # Debug via ssh if necessary
 if [ ! -z $APPVEYOR_SSH_BLOCK ]; then
