@@ -21,7 +21,7 @@ else(WIN32)
   find_package(PkgConfig REQUIRED)
   find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
   find_package(OpenGL REQUIRED)
-  find_package(zlib REQUIRED)
+  find_package(ZLIB REQUIRED)
 
   add_definitions( ${Qt5Widgets_DEFINITIONS}  )
   include_directories( ${Qt5Widgets_INCLUDE_DIRS} )

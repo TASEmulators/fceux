@@ -8,6 +8,9 @@ sw_vers
 
 SCRIPT_DIR=$( cd $(dirname $BASH_SOURCE[0]); pwd );
 
+NPROC=`getconf _NPROCESSORS_ONLN`;
+echo "Number of Processors: $NPROC";
+
 INSTALL_PREFIX=/tmp/fceux
 
 gcc --version
@@ -53,7 +56,7 @@ cmake \
 	-DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
 	-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
 	.. || exit 1
-make  || exit 1
+make -j $NPROC || exit 1
 make install || exit 1
 
 # Debug via ssh if necessary

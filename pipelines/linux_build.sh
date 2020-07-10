@@ -55,6 +55,7 @@ pkg-config --cflags --libs  minizip
 # GTK+-2 is no longer needed
 #sudo apt-get install libgtk2.0-dev
 
+# GTK3 was retired in favor of cross platform QT
 ## Install GTK+-3 
 #echo '****************************************'
 #echo 'Install Dependency libgtk-3-dev'
