@@ -17,7 +17,13 @@ if(WIN32)
   link_directories( ${CMAKE_SOURCE_DIR}/src/drivers/win/directx )
 else(WIN32)
   # Non Windows System
-  # Use the package PkgConfig to detect headers/library files
+  # UNIX (Linux or Mac OSX)
+
+  #set (OpenGL_GL_PREFERENCE  GLVND)
+  set (OpenGL_GL_PREFERENCE  LEGACY)
+
+  # Use the built-in cmake find_package functions to find dependencies
+  # Use package PkgConfig to detect headers/library what find_package cannot find.
   find_package(PkgConfig REQUIRED)
   find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
   find_package(OpenGL REQUIRED)
