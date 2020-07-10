@@ -53,6 +53,11 @@ class  consoleWin_t : public QMainWindow
 
     QAction *openROM;
     QAction *closeROM;
+    QAction *playNSF;
+    QAction *loadStateAct;
+    QAction *saveStateAct;
+    QAction *quickLoadAct;
+    QAction *quickSaveAct;
     QAction *quitAct;
     QAction *gamePadConfig;
     QAction *gameSoundConfig;
@@ -78,6 +83,11 @@ class  consoleWin_t : public QMainWindow
 	private slots:
 		void closeApp(void);
 		void openROMFile(void);
+		void loadNSF(void);
+		void loadStateFrom(void);
+		void saveStateAs(void);
+		void quickLoad(void);
+		void quickSave(void);
 		void closeROMCB(void);
       void aboutQPlot(void);
       void openGamePadConfWin(void);

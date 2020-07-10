@@ -124,6 +124,50 @@ void consoleWin_t::createMainMenu(void)
 
     fileMenu->addSeparator();
 
+	 // File -> Play NSF
+	 playNSF = new QAction(tr("Play NSF"), this);
+    playNSF->setShortcut( QKeySequence(tr("Ctrl+N")));
+    playNSF->setStatusTip(tr("Play NSF"));
+    connect(playNSF, SIGNAL(triggered()), this, SLOT(loadNSF(void)) );
+
+    fileMenu->addAction(playNSF);
+
+    fileMenu->addSeparator();
+
+	 // File -> Load State From
+	 loadStateAct = new QAction(tr("Load State From"), this);
+    //loadStateAct->setShortcut( QKeySequence(tr("Ctrl+N")));
+    loadStateAct->setStatusTip(tr("Load State From"));
+    connect(loadStateAct, SIGNAL(triggered()), this, SLOT(loadStateFrom(void)) );
+
+    fileMenu->addAction(loadStateAct);
+
+	 // File -> Save State As
+	 saveStateAct = new QAction(tr("Save State As"), this);
+    //loadStateAct->setShortcut( QKeySequence(tr("Ctrl+N")));
+    saveStateAct->setStatusTip(tr("Save State As"));
+    connect(saveStateAct, SIGNAL(triggered()), this, SLOT(saveStateAs(void)) );
+
+    fileMenu->addAction(saveStateAct);
+
+	 // File -> Quick Load
+	 quickLoadAct = new QAction(tr("Quick Load"), this);
+    quickLoadAct->setShortcut( QKeySequence(tr("F7")));
+    quickLoadAct->setStatusTip(tr("Quick Load"));
+    connect(quickLoadAct, SIGNAL(triggered()), this, SLOT(quickLoad(void)) );
+
+    fileMenu->addAction(quickLoadAct);
+
+	 // File -> Quick Save
+	 quickSaveAct = new QAction(tr("Quick Save"), this);
+    quickSaveAct->setShortcut( QKeySequence(tr("F5")));
+    quickSaveAct->setStatusTip(tr("Quick Save"));
+    connect(quickSaveAct, SIGNAL(triggered()), this, SLOT(quickSave(void)) );
+
+    fileMenu->addAction(quickSaveAct);
+
+    fileMenu->addSeparator();
+
 	 // File -> Quit
 	 quitAct = new QAction(tr("Quit"), this);
     quitAct->setShortcut( QKeySequence(tr("Ctrl+Q")));
@@ -222,13 +266,18 @@ void consoleWin_t::openROMFile(void)
 {
 	int ret;
 	QString filename;
+	std::string last;
 	QFileDialog  dialog(this, tr("Open ROM File") );
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("All files (*.*) ;; NES files (*.nes)"));
+	dialog.setNameFilter(tr("NES files (*.nes)(*.NES) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+
+	g_config->getOption ("SDL.LastOpenFile", &last );
+
+	dialog.setDirectory( tr(last.c_str()) );
 
 	// the gnome default file dialog is not playing nice with QT.
 	// TODO make this a config option to use native file dialog.
@@ -248,11 +297,6 @@ void consoleWin_t::openROMFile(void)
 		}
 	}
 
-   //filename =  QFileDialog::getOpenFileName( this,
-   //       "Open ROM File",
-   //       QDir::currentPath(),
-   //       "All files (*.*) ;; NES files (*.nes)");
- 
    if ( filename.isNull() )
    {
       return;
@@ -273,6 +317,164 @@ void consoleWin_t::closeROMCB(void)
 {
 	fceuWrapperLock();
 	CloseGame();
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::loadNSF(void)
+{
+	int ret;
+	QString filename;
+	std::string last;
+	QFileDialog  dialog(this, tr("Load NSF File") );
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("NSF Sound Files (*.nsf)(*.NSF) ;; Zip Files (*.zip)(*.ZIP) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+
+	g_config->getOption ("SDL.LastOpenNSF", &last );
+
+	dialog.setDirectory( tr(last.c_str()) );
+
+	// the gnome default file dialog is not playing nice with QT.
+	// TODO make this a config option to use native file dialog.
+	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	g_config->setOption ("SDL.LastOpenNSF", filename.toStdString().c_str() );
+
+	fceuWrapperLock();
+	LoadGame( filename.toStdString().c_str() );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::loadStateFrom(void)
+{
+	int ret;
+	QString filename;
+	std::string last;
+	QFileDialog  dialog(this, tr("Load State From File") );
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("FCS Files (*.fc?)(*.FC?) ;; SAV Files (*.sav)(*.SAV) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+
+	g_config->getOption ("SDL.LastLoadStateFrom", &last );
+
+	dialog.setDirectory( tr(last.c_str()) );
+
+	// the gnome default file dialog is not playing nice with QT.
+	// TODO make this a config option to use native file dialog.
+	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	g_config->setOption ("SDL.LastLoadStateFrom", filename.toStdString().c_str() );
+
+	fceuWrapperLock();
+	FCEUI_LoadState( filename.toStdString().c_str() );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::saveStateAs(void)
+{
+	int ret;
+	QString filename;
+	std::string last;
+	QFileDialog  dialog(this, tr("Save State To File") );
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("FCS Files (*.fc?)(*.FC?) ;; SAV Files (*.sav)(*.SAV) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+
+	g_config->getOption ("SDL.LastSaveStateAs", &last );
+
+	dialog.setDirectory( tr(last.c_str()) );
+
+	// the gnome default file dialog is not playing nice with QT.
+	// TODO make this a config option to use native file dialog.
+	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	g_config->setOption ("SDL.LastSaveStateAs", filename.toStdString().c_str() );
+
+	fceuWrapperLock();
+	FCEUI_SaveState( filename.toStdString().c_str() );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::quickLoad(void)
+{
+	fceuWrapperLock();
+	FCEUI_LoadState( NULL );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::quickSave(void)
+{
+	fceuWrapperLock();
+	FCEUI_SaveState( NULL );
 	fceuWrapperUnLock();
 }
 
