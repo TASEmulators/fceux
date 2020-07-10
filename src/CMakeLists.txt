@@ -58,8 +58,49 @@ else(WIN32)
   pkg_check_modules( LUA lua-5.1)
 
   if ( ${LUA_FOUND} )
+     # Use System LUA
 	  add_definitions( -D_S9XLUA_H  ${LUA_CFLAGS} )
-	  set( LUA_ENGINE_SOURCE  lua-engine.cpp )
+
+	  set( LUA_ENGINE_SOURCE  ${CMAKE_CURRENT_SOURCE_DIR}/lua-engine.cpp )
+
+  else ()
+
+     # Use Internal LUA
+     add_definitions( -D_S9XLUA_H  -I${CMAKE_CURRENT_SOURCE_DIR}/lua/src )
+
+	  set( LUA_ENGINE_SOURCE  
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lapi.c 
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lauxlib.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lbaselib.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lcode.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ldblib.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ldebug.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ldo.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ldump.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lfunc.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lgc.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/linit.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/liolib.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/llex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lmathlib.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lmem.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/loadlib.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lobject.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lopcodes.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/loslib.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lparser.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lstate.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lstring.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lstrlib.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ltable.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ltablib.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ltm.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lundump.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lvm.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lzio.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/print.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/lua-engine.cpp 
+     )
   endif()
 
   add_definitions( -DHAVE_ASPRINTF ) # What system wouldn't have this?
@@ -362,3 +403,10 @@ target_link_libraries( fceux
 
 install( TARGETS  fceux  
 	RUNTIME  DESTINATION  bin )
+
+install( FILES     ${CMAKE_CURRENT_SOURCE_DIR}/auxlib.lua                DESTINATION share/fceux/luaScripts  )
+install( DIRECTORY ${CMAKE_SOURCE_DIR}/output/.                          DESTINATION share/fceux  )
+install( FILES     ${CMAKE_SOURCE_DIR}/fceux.png                         DESTINATION share/pixmaps  )
+install( FILES     ${CMAKE_SOURCE_DIR}/fceux.desktop                     DESTINATION share/applications  )
+install( FILES     ${CMAKE_SOURCE_DIR}/documentation/fceux.6             DESTINATION share/man/man6  )
+install( FILES     ${CMAKE_SOURCE_DIR}/documentation/fceux-net-server.6  DESTINATION share/man/man6  )

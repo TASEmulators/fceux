@@ -21,7 +21,10 @@ QT += widgets
 
 CONFIG += object_parallel_to_source
 
-INCLUDEPATH = src   src/drivers
+INCLUDEPATH += src   src/drivers
+
+ENABLE_LUA = 0
+USE_INTERNAL_LUA = 0
 
 unix {
 	QT_CONFIG -= no-pkg-config
@@ -42,8 +45,13 @@ unix {
 
 	packagesExist(lua-5.1){
 		PKGCONFIG +=  lua-5.1
+      USE_INTERNAL_LUA = 0;
+		QMAKE_CXXFLAGS +=  -D_S9XLUA_H
+   } else {
+      USE_INTERNAL_LUA = 1;
 		QMAKE_CXXFLAGS +=  -D_S9XLUA_H
 	}
+   ENABLE_LUA = 1
 
 	QMAKE_CXXFLAGS -=  -O2 
 	QMAKE_CXXFLAGS +=  -D__QT_DRIVER__  -O0  -g3  -Wall  -Wno-write-strings  -Wno-sign-compare  -Wno-parentheses  -Wno-unused-local-typedefs
@@ -81,11 +89,50 @@ SOURCES += src/vsuni.cpp
 SOURCES += src/wave.cpp
 SOURCES += src/x6502.cpp
 
-unix {
-	packagesExist(lua-5.1){
-	   SOURCES += src/lua-engine.cpp 
-	}
+isEqual( ENABLE_LUA, 1 ) {
+   isEqual( USE_INTERNAL_LUA, 1 ) {
+      message("Enabling Internal LUA")
+      INCLUDEPATH += src/lua/src
+      SOURCES += src/lua/src/lapi.c 
+      SOURCES += src/lua/src/lauxlib.c
+      SOURCES += src/lua/src/lbaselib.c
+      SOURCES += src/lua/src/lcode.c
+      SOURCES += src/lua/src/ldblib.c
+      SOURCES += src/lua/src/ldebug.c
+      SOURCES += src/lua/src/ldo.c
+      SOURCES += src/lua/src/ldump.c
+      SOURCES += src/lua/src/lfunc.c
+      SOURCES += src/lua/src/lgc.c
+      SOURCES += src/lua/src/linit.c
+      SOURCES += src/lua/src/liolib.c
+      SOURCES += src/lua/src/llex.c
+      SOURCES += src/lua/src/lmathlib.c
+      SOURCES += src/lua/src/lmem.c
+      SOURCES += src/lua/src/loadlib.c
+      SOURCES += src/lua/src/lobject.c
+      SOURCES += src/lua/src/lopcodes.c
+      SOURCES += src/lua/src/loslib.c
+      SOURCES += src/lua/src/lparser.c
+      SOURCES += src/lua/src/lstate.c
+      SOURCES += src/lua/src/lstring.c
+      SOURCES += src/lua/src/lstrlib.c
+      SOURCES += src/lua/src/ltable.c
+      SOURCES += src/lua/src/ltablib.c
+      SOURCES += src/lua/src/ltm.c
+      SOURCES += src/lua/src/lundump.c
+      SOURCES += src/lua/src/lvm.c
+      SOURCES += src/lua/src/lzio.c
+      SOURCES += src/lua/src/print.c
+      SOURCES += src/lua-engine.cpp
+   } else {
+      message("Enabling System LUA")
+      SOURCES += src/lua-engine.cpp
+   }
+   message("Enabling LUA")
+} else {
+   message("Disabling LUA")
 }
+
 SOURCES += src/boards/01-222.cpp
 SOURCES += src/boards/09-034a.cpp
 SOURCES += src/boards/103.cpp

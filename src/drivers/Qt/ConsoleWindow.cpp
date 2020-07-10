@@ -651,7 +651,7 @@ void consoleWin_t::loadLua(void)
 	g_config->setOption ("SDL.LastLoadLua", filename.toStdString().c_str() );
 
 	fceuWrapperLock();
-	if ( FCEU_LoadLuaCode( filename.toStdString().c_str() ) )
+	if ( 0 == FCEU_LoadLuaCode( filename.toStdString().c_str() ) )
    {
       printf("Error: Could not open the selected lua script: '%s'\n", filename.toStdString().c_str() );
    }

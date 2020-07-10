@@ -92,30 +92,30 @@ mkdir -p $INSTALL_PREFIX/usr;
 #scons   GTK3=1   SYSTEM_LUA=1   SYSTEM_MINIZIP=1   CREATE_AVI=1  install  --prefix=$INSTALL_PREFIX/usr
 echo "Num CPU: `nproc`";
 mkdir build; cd build;
-qmake PREFIX=$INSTALL_PREFIX/usr  ..
-#cmake  \
-#   -DCMAKE_BUILD_TYPE=Release  \
-#   -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
-#   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-#	..
+#qmake PREFIX=$INSTALL_PREFIX/usr  ..
+cmake  \
+   -DCMAKE_BUILD_TYPE=Release  \
+   -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
+   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+	..
 make -j `nproc` 
-#make  install
+make  install
 
 # Install Files
-cd .. # cd out of build
-mkdir -p $INSTALL_PREFIX/usr/bin/.
-mkdir -p $INSTALL_PREFIX/usr/share/fceux
-mkdir -p $INSTALL_PREFIX/usr/share/pixmaps
-mkdir -p $INSTALL_PREFIX/usr/share/applications
-mkdir -p $INSTALL_PREFIX/usr/man/man6
-
-cp -f ./build/fceux                       $INSTALL_PREFIX/usr/bin/.
-cp -a ./output/*                          $INSTALL_PREFIX/usr/share/fceux/.
-cp -a ./src/auxlib.lua                    $INSTALL_PREFIX/usr/share/fceux/.
-cp -a ./fceux.png                         $INSTALL_PREFIX/usr/share/pixmaps/.
-cp -a ./fceux.desktop                     $INSTALL_PREFIX/usr/share/applications/.
-cp -a ./documentation/fceux.6             $INSTALL_PREFIX/usr/man/man6/.
-cp -a ./documentation/fceux-net-server.6  $INSTALL_PREFIX/usr/man/man6/.
+#cd .. # cd out of build
+#mkdir -p $INSTALL_PREFIX/usr/bin/.
+#mkdir -p $INSTALL_PREFIX/usr/share/fceux
+#mkdir -p $INSTALL_PREFIX/usr/share/pixmaps
+#mkdir -p $INSTALL_PREFIX/usr/share/applications
+#mkdir -p $INSTALL_PREFIX/usr/man/man6
+#
+#cp -f ./build/fceux                       $INSTALL_PREFIX/usr/bin/.
+#cp -a ./output/*                          $INSTALL_PREFIX/usr/share/fceux/.
+#cp -a ./src/auxlib.lua                    $INSTALL_PREFIX/usr/share/fceux/.
+#cp -a ./fceux.png                         $INSTALL_PREFIX/usr/share/pixmaps/.
+#cp -a ./fceux.desktop                     $INSTALL_PREFIX/usr/share/applications/.
+#cp -a ./documentation/fceux.6             $INSTALL_PREFIX/usr/man/man6/.
+#cp -a ./documentation/fceux-net-server.6  $INSTALL_PREFIX/usr/man/man6/.
 
 
 # Debug via ssh if necessary
