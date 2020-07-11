@@ -400,7 +400,7 @@ set(SRC_DRIVERS_SDL
 
 set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})
 
-add_executable(  fceux  ${SOURCES} )
+add_executable(  fceux  ${SOURCES} ../resources.qrc )
 
 target_link_libraries( fceux  
    ${Qt5Widgets_LIBRARIES}
