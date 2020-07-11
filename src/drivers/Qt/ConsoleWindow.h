@@ -49,6 +49,7 @@ class  consoleWin_t : public QMainWindow
 	protected:
 	 QMenu *fileMenu;
     QMenu *optMenu;
+    QMenu *emuMenu;
     QMenu *helpMenu;
 
     QAction *openROM;
@@ -69,6 +70,10 @@ class  consoleWin_t : public QMainWindow
     QAction *fullscreen;
     QAction *aboutAct;
 	 QAction *state[10];
+	 QAction *powerAct;
+	 QAction *resetAct;
+	 QAction *sresetAct;
+	 QAction *pauseAct;
 
 	 QTimer  *gameTimer;
 	 emulatorThread_t *emulatorThread;
@@ -92,7 +97,7 @@ class  consoleWin_t : public QMainWindow
 		void quickLoad(void);
 		void quickSave(void);
 		void closeROMCB(void);
-      void aboutQPlot(void);
+      void aboutFCEUX(void);
       void openGamePadConfWin(void);
       void openGameSndConfWin(void);
       void openGameVideoConfWin(void);
@@ -112,6 +117,10 @@ class  consoleWin_t : public QMainWindow
       void changeState9(void);
       void loadLua(void);
       void takeScreenShot(void);
+      void powerConsoleCB(void);
+		void consoleHardReset(void);
+		void consoleSoftReset(void);
+		void consolePause(void);
 
 };
 

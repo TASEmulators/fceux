@@ -29,4 +29,7 @@ void fceuWrapperLock(void);
 bool fceuWrapperTryLock(int timeout);
 bool fceuWrapperIsLocked(void);
 void fceuWrapperUnLock(void);
+int  fceuWrapperSoftReset(void);
+int  fceuWrapperHardReset(void);
+int  fceuWrapperTogglePause(void);
 

@@ -285,8 +285,6 @@ InitConfig()
     //TODO implement this
     config->addOption("periodicsaves", "SDL.PeriodicSaves", 0);
 
-    
-    #ifdef _GTK
 	char* home_dir = getenv("HOME");
 	// prefixed with _ because they are internal (not cli options)
 	config->addOption("_lastopenfile", "SDL.LastOpenFile", home_dir);
@@ -294,7 +292,6 @@ InitConfig()
 	config->addOption("_lastopennsf", "SDL.LastOpenNSF", home_dir);
 	config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", home_dir);
 	config->addOption("_lastloadlua", "SDL.LastLoadLua", "");
-    #endif
     
 	// fcm -> fm2 conversion
 	config->addOption("fcmconvert", "SDL.FCMConvert", "");

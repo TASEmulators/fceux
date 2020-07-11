@@ -294,12 +294,48 @@ void consoleWin_t::createMainMenu(void)
     optMenu->addAction(fullscreen);
 
 	 //-----------------------------------------------------------------------
+	 // Emulation
+    emuMenu = menuBar()->addMenu(tr("Emulation"));
+
+	 // Emulation -> Power
+	 powerAct = new QAction(tr("Power"), this);
+    //powerAct->setShortcut( QKeySequence(tr("Ctrl+P")));
+    powerAct->setStatusTip(tr("Power On Console"));
+    connect(powerAct, SIGNAL(triggered()), this, SLOT(powerConsoleCB(void)) );
+
+    emuMenu->addAction(powerAct);
+
+	 // Emulation -> Reset
+	 resetAct = new QAction(tr("Reset"), this);
+    //resetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
+    resetAct->setStatusTip(tr("Reset Console"));
+    connect(resetAct, SIGNAL(triggered()), this, SLOT(consoleHardReset(void)) );
+
+    emuMenu->addAction(resetAct);
+
+	 // Emulation -> Soft Reset
+	 sresetAct = new QAction(tr("Soft Reset"), this);
+    //sresetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
+    sresetAct->setStatusTip(tr("Soft Reset of Console"));
+    connect(sresetAct, SIGNAL(triggered()), this, SLOT(consoleSoftReset(void)) );
+
+    emuMenu->addAction(sresetAct);
+
+	 // Emulation -> Pause
+	 pauseAct = new QAction(tr("Pause"), this);
+    pauseAct->setShortcut( QKeySequence(tr("Pause")));
+    pauseAct->setStatusTip(tr("Pause Console"));
+    connect(pauseAct, SIGNAL(triggered()), this, SLOT(consolePause(void)) );
+
+    emuMenu->addAction(pauseAct);
+
+	 //-----------------------------------------------------------------------
 	 // Help
     helpMenu = menuBar()->addMenu(tr("Help"));
 
 	 aboutAct = new QAction(tr("About"), this);
-    aboutAct->setStatusTip(tr("About Qplot"));
-    connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutQPlot(void)) );
+    aboutAct->setStatusTip(tr("About FCEUX"));
+    connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutFCEUX(void)) );
 
     helpMenu->addAction(aboutAct);
 };
@@ -761,9 +797,41 @@ void consoleWin_t::toggleFullscreen(void)
 	}
 }
 
-void consoleWin_t::aboutQPlot(void)
+void consoleWin_t::powerConsoleCB(void)
 {
-   printf("About QPlot\n");
+	fceuWrapperLock();
+	FCEUI_PowerNES();
+	fceuWrapperUnLock();
+   return;
+}
+
+void consoleWin_t::consoleHardReset(void)
+{
+	fceuWrapperLock();
+	fceuWrapperHardReset();
+	fceuWrapperUnLock();
+   return;
+}
+
+void consoleWin_t::consoleSoftReset(void)
+{
+	fceuWrapperLock();
+	fceuWrapperSoftReset();
+	fceuWrapperUnLock();
+   return;
+}
+
+void consoleWin_t::consolePause(void)
+{
+	fceuWrapperLock();
+	fceuWrapperTogglePause();
+	fceuWrapperUnLock();
+   return;
+}
+
+void consoleWin_t::aboutFCEUX(void)
+{
+   printf("About FCEUX\n");
    return;
 }
 

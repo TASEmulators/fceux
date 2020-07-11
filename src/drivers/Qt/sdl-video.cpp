@@ -248,29 +248,11 @@ void ToggleFS(void)
 	if(!paused)
 		FCEUI_ToggleEmulationPause();
 
-	int error, fullscreen = s_fullscreen;
-
-	// shut down the current video system
-	KillVideo();
-
 	// flip the fullscreen flag
-	g_config->setOption("SDL.Fullscreen", !fullscreen);
-#ifdef _GTK
-	if(noGui == 0)
-	{
-		if(!fullscreen)
-			showGui(0);
-		else
-			showGui(1);
-	}
-#endif
-	// try to initialize the video
-	error = InitVideo(GameInfo);
-	if(error) {
-		// if we fail, just continue with what worked before
-		g_config->setOption("SDL.Fullscreen", fullscreen);
-		InitVideo(GameInfo);
-	}
+	g_config->setOption("SDL.Fullscreen", !s_fullscreen);
+
+	// TODO Call method to make full Screen
+
 	// if we paused to make the switch; unpause
 	if(!paused)
 		FCEUI_ToggleEmulationPause();

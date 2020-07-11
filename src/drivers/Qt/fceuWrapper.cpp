@@ -278,6 +278,36 @@ CloseGame(void)
 	return(1);
 }
 
+int  fceuWrapperSoftReset(void)
+{
+	if ( isloaded )
+	{
+		ResetNES();
+	}
+	return 0;
+}
+
+int  fceuWrapperHardReset(void)
+{
+	if ( isloaded )
+	{
+		std::string lastFile;
+		CloseGame();
+		g_config->getOption ("SDL.LastOpenFile", &lastFile);
+		LoadGame (lastFile.c_str());
+	}
+	return 0;
+}
+
+int  fceuWrapperTogglePause(void)
+{
+	if ( isloaded )
+	{
+		FCEUI_ToggleEmulationPause();
+	}
+	return 0;
+}
+
 int  fceuWrapperInit( int argc, char *argv[] )
 {
 	int error;
@@ -745,7 +775,7 @@ static void DoFun(int frameskip, int periodic_saves)
 	int32 *sound;
 	int32 ssize;
 	static int fskipc = 0;
-	static int opause = 0;
+	//static int opause = 0;
 
     //TODO peroidic saves, working on it right now
     if (periodic_saves && FCEUD_GetTime() % PERIODIC_SAVE_INTERVAL < 30){
@@ -762,11 +792,11 @@ static void DoFun(int frameskip, int periodic_saves)
 	FCEUI_Emulate(&gfx, &sound, &ssize, fskipc);
 	FCEUD_Update(gfx, sound, ssize);
 
-	if(opause!=FCEUI_EmulationPaused()) 
-	{
-		opause=FCEUI_EmulationPaused();
-		SilenceSound(opause);
-	}
+	//if(opause!=FCEUI_EmulationPaused()) 
+	//{
+	//	opause=FCEUI_EmulationPaused();
+	//	SilenceSound(opause);
+	//}
 }
 
 void fceuWrapperLock(void)
@@ -810,7 +840,7 @@ int  fceuWrapperUpdate( void )
 {
 	fceuWrapperLock();
  
-	if (GameInfo)
+	if ( GameInfo && !FCEUI_EmulationPaused() )
 	{
 		DoFun(frameskip, periodic_saves);
 	
