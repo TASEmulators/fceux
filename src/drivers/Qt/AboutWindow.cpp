@@ -8,7 +8,7 @@
 #include <QPixmap>
 #include <QUrl>
 #include <QDesktopServices>
-#include "Qt/icon.xpm"
+//#include "Qt/icon.xpm"
 #include "Qt/AboutWindow.h"
 #include "../../version.h"
 
@@ -18,8 +18,12 @@ AboutWindow::AboutWindow(QWidget *parent)
 {
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox1;
-	QPixmap pm( icon_xpm );
+	//QPixmap pm( icon_xpm );
+	QPixmap pm(":fceux.png");
+	QPixmap pm2;
 	QLabel *lbl;
+
+	pm2 = pm.scaled( 64, 64 );
 
 	setWindowTitle( tr("About fceuX") );
 
@@ -29,7 +33,7 @@ AboutWindow::AboutWindow(QWidget *parent)
 
 	hbox1 = new QHBoxLayout();
 	lbl = new QLabel();
-	lbl->setPixmap(pm);
+	lbl->setPixmap(pm2);
 
 	hbox1->addWidget( lbl );
 	hbox1->setAlignment( Qt::AlignCenter );
