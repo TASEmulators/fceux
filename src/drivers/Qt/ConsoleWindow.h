@@ -76,6 +76,7 @@ class  consoleWin_t : public QMainWindow
 	 QAction *pauseAct;
 	 QAction *gameGenieAct;
 	 QAction *loadGgROMAct;
+	 QAction *insCoinAct;
 
 	 QTimer  *gameTimer;
 	 emulatorThread_t *emulatorThread;
@@ -126,6 +127,7 @@ class  consoleWin_t : public QMainWindow
 		void consolePause(void);
 		void toggleGameGenie(bool checked);
 		void loadGameGenieROM(void);
+		void insertCoin(void);
 
 };
 

@@ -355,6 +355,14 @@ void consoleWin_t::createMainMenu(void)
 
     emuMenu->addSeparator();
 
+	 // Emulation -> Insert Coin
+	 insCoinAct = new QAction(tr("Insert Coin"), this);
+    //insCoinAct->setShortcut( QKeySequence(tr("Ctrl+G")));
+    insCoinAct->setStatusTip(tr("Insert Coin"));
+    connect(insCoinAct, SIGNAL(triggered()), this, SLOT(insertCoin(void)) );
+
+    emuMenu->addAction(insCoinAct);
+
 	 //-----------------------------------------------------------------------
 	 // Help
     helpMenu = menuBar()->addMenu(tr("Help"));
@@ -918,6 +926,14 @@ void consoleWin_t::loadGameGenieROM(void)
 	std::fstream::trunc | std::fstream::binary);
 	f2 << f1.rdbuf ();
 
+   return;
+}
+
+void consoleWin_t::insertCoin(void)
+{
+	fceuWrapperLock();
+	FCEUI_VSUniCoin();
+	fceuWrapperUnLock();
    return;
 }
 
