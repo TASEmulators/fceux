@@ -7,21 +7,43 @@
 
 #include <QPixmap>
 #include <QUrl>
+#include <QTextEdit>
 #include <QDesktopServices>
 //#include "Qt/icon.xpm"
 #include "Qt/AboutWindow.h"
 #include "../../version.h"
 
+static const char *Authors[] = {
+	"Linux/SDL Developers:",
+	"\t Lukas Sabota //punkrockguy318", "\t Soules", "\t Bryan Cain", "\t radsaq",
+		"\t Shinydoofy",
+	"FceuX 2.0 Developers:",
+	"\t SP", "\t zeromus", "\t adelikat", "\t caH4e3", "\t qfox",
+	"\t Luke Gustafson", "\t _mz", "\t UncombedCoconut", "\t DwEdit", "\t AnS",
+		"\t rainwarrior", "\t feos",
+	"Pre 2.0 Guys:",
+	"\t Bero", "\t Xodnizel", "\t Aaron Oneal", "\t Joe Nahmias",
+	"\t Paul Kuliniewicz", "\t Quietust", "\t Ben Parnell",
+		"\t Parasyte &amp; bbitmaster",
+	"\t blip & nitsuja",
+	"Included components:",
+	"\t Mitsutaka Okazaki - YM2413 emulator",
+		"\t Andrea Mazzoleni - Scale2x/Scale3x scalers",
+		"\t Gilles Vollant - unzip.c PKZIP fileio",
+	NULL
+};
 //----------------------------------------------------------------------------
 AboutWindow::AboutWindow(QWidget *parent)
 	: QDialog( parent )
 {
+	int i;
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox1;
 	//QPixmap pm( icon_xpm );
 	QPixmap pm(":fceux.png");
 	QPixmap pm2;
 	QLabel *lbl;
+	QTextEdit *credits;
 
 	pm2 = pm.scaled( 64, 64 );
 
@@ -82,6 +104,19 @@ AboutWindow::AboutWindow(QWidget *parent)
 	hbox1->setAlignment( Qt::AlignCenter );
 
 	mainLayout->addLayout( hbox1 );
+
+	credits = new QTextEdit();
+
+	i=0;
+	while ( Authors[i] != NULL )
+	{
+		credits->insertPlainText( Authors[i] ); i++;
+		credits->insertPlainText( "\n");
+	}
+	credits->moveCursor(QTextCursor::Start);
+	credits->setReadOnly(true);
+
+	mainLayout->addWidget( credits );
 
 	setLayout( mainLayout );
 }
