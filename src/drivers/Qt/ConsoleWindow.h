@@ -74,6 +74,7 @@ class  consoleWin_t : public QMainWindow
 	 QAction *resetAct;
 	 QAction *sresetAct;
 	 QAction *pauseAct;
+	 QAction *gameGenieAct;
 
 	 QTimer  *gameTimer;
 	 emulatorThread_t *emulatorThread;
@@ -84,6 +85,7 @@ class  consoleWin_t : public QMainWindow
     void closeEvent(QCloseEvent *event);
 	 void keyPressEvent(QKeyEvent *event);
 	 void keyReleaseEvent(QKeyEvent *event);
+	 void syncActionConfig( QAction *act, const char *property );
 
 	private:
 		void createMainMenu(void);
@@ -121,6 +123,7 @@ class  consoleWin_t : public QMainWindow
 		void consoleHardReset(void);
 		void consoleSoftReset(void);
 		void consolePause(void);
+		void toggleGameGenie(bool checked);
 
 };
 

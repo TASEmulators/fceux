@@ -203,9 +203,19 @@ DriverKill()
  */
 int LoadGame(const char *path)
 {
+	int gg_enabled;
+
 	if (isloaded){
 		CloseGame();
 	}
+
+	// For some reason, the core of the emulator clears the state of 
+	// the game genie option selection. So check the config each time
+	// and re-enable the core game genie state if needed.
+	g_config->getOption ("SDL.GameGenie", &gg_enabled);
+
+	FCEUI_SetGameGenie (gg_enabled);
+
 	if(!FCEUI_LoadGame(path, 1)) {
 		return 0;
 	}

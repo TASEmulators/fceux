@@ -329,6 +329,19 @@ void consoleWin_t::createMainMenu(void)
 
     emuMenu->addAction(pauseAct);
 
+    emuMenu->addSeparator();
+
+	 // Options -> Full Screen
+	 gameGenieAct = new QAction(tr("Enable Game Genie"), this);
+    //gameGenieAct->setShortcut( QKeySequence(tr("Ctrl+G")));
+    gameGenieAct->setCheckable(true);
+    gameGenieAct->setStatusTip(tr("Enable Game Genie"));
+    connect(gameGenieAct, SIGNAL(triggered(bool)), this, SLOT(toggleGameGenie(bool)) );
+
+	 syncActionConfig( gameGenieAct, "SDL.GameGenie" );
+
+    emuMenu->addAction(gameGenieAct);
+
 	 //-----------------------------------------------------------------------
 	 // Help
     helpMenu = menuBar()->addMenu(tr("Help"));
@@ -829,10 +842,34 @@ void consoleWin_t::consolePause(void)
    return;
 }
 
+void consoleWin_t::toggleGameGenie(bool checked)
+{
+	int gg_enabled;
+
+	fceuWrapperLock();
+	g_config->getOption ("SDL.GameGenie", &gg_enabled);
+	g_config->setOption ("SDL.GameGenie", !gg_enabled);
+	g_config->save ();
+	FCEUI_SetGameGenie (gg_enabled);
+	fceuWrapperUnLock();
+   return;
+}
+
 void consoleWin_t::aboutFCEUX(void)
 {
    printf("About FCEUX\n");
    return;
+}
+
+void consoleWin_t::syncActionConfig( QAction *act, const char *property )
+{
+	if ( act->isCheckable() )
+	{
+		int enable;
+		g_config->getOption ( property, &enable);
+
+		act->setChecked( enable ? true : false );
+	}
 }
 
 void consoleWin_t::updatePeriodic(void)
