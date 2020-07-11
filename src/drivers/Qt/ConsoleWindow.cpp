@@ -1,5 +1,8 @@
 // GameApp.cpp
 //
+#include <fstream>
+#include <iostream>
+#include <cstdlib>
 #include <QFileDialog>
 
 #include "../../fceu.h"
@@ -331,7 +334,7 @@ void consoleWin_t::createMainMenu(void)
 
     emuMenu->addSeparator();
 
-	 // Options -> Full Screen
+	 // Emulation -> Enable Game Genie
 	 gameGenieAct = new QAction(tr("Enable Game Genie"), this);
     //gameGenieAct->setShortcut( QKeySequence(tr("Ctrl+G")));
     gameGenieAct->setCheckable(true);
@@ -341,6 +344,16 @@ void consoleWin_t::createMainMenu(void)
 	 syncActionConfig( gameGenieAct, "SDL.GameGenie" );
 
     emuMenu->addAction(gameGenieAct);
+
+	 // Emulation -> Load Game Genie ROM
+	 loadGgROMAct = new QAction(tr("Load Game Genie ROM"), this);
+    //loadGgROMAct->setShortcut( QKeySequence(tr("Ctrl+G")));
+    loadGgROMAct->setStatusTip(tr("Load Game Genie ROM"));
+    connect(loadGgROMAct, SIGNAL(triggered()), this, SLOT(loadGameGenieROM(void)) );
+
+    emuMenu->addAction(loadGgROMAct);
+
+    emuMenu->addSeparator();
 
 	 //-----------------------------------------------------------------------
 	 // Help
@@ -852,6 +865,59 @@ void consoleWin_t::toggleGameGenie(bool checked)
 	g_config->save ();
 	FCEUI_SetGameGenie (gg_enabled);
 	fceuWrapperUnLock();
+   return;
+}
+
+void consoleWin_t::loadGameGenieROM(void)
+{
+	int ret;
+	QString filename;
+	std::string last;
+	QFileDialog  dialog(this, tr("Open Game Genie ROM") );
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("GG ROM File (gg.rom)(*Genie*.nes) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+
+	g_config->getOption ("SDL.LastOpenFile", &last );
+
+	dialog.setDirectory( tr(last.c_str()) );
+
+	// the gnome default file dialog is not playing nice with QT.
+	// TODO make this a config option to use native file dialog.
+	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+   if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	g_config->setOption ("SDL.LastOpenFile", filename.toStdString().c_str() );
+
+	// copy file to proper place (~/.fceux/gg.rom)
+	std::ifstream f1 ( filename.toStdString().c_str(), std::fstream::binary);
+	std::string fn_out = FCEU_MakeFName (FCEUMKF_GGROM, 0, "");
+	std::ofstream f2 (fn_out.c_str (),
+	std::fstream::trunc | std::fstream::binary);
+	f2 << f1.rdbuf ();
+
    return;
 }
 
