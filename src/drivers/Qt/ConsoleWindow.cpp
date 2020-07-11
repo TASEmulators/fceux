@@ -6,6 +6,7 @@
 #include <QFileDialog>
 
 #include "../../fceu.h"
+#include "../../fds.h"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
@@ -362,6 +363,35 @@ void consoleWin_t::createMainMenu(void)
     connect(insCoinAct, SIGNAL(triggered()), this, SLOT(insertCoin(void)) );
 
     emuMenu->addAction(insCoinAct);
+
+    emuMenu->addSeparator();
+
+	 // Emulation -> FDS
+	 subMenu = emuMenu->addMenu(tr("FDS"));
+
+	 // Emulation -> FDS -> Switch Disk
+	 fdsSwitchAct = new QAction(tr("Switch Disk"), this);
+    //fdsSwitchAct->setShortcut( QKeySequence(tr("Ctrl+G")));
+    fdsSwitchAct->setStatusTip(tr("Switch Disk"));
+    connect(fdsSwitchAct, SIGNAL(triggered()), this, SLOT(fdsSwitchDisk(void)) );
+
+    subMenu->addAction(fdsSwitchAct);
+
+	 // Emulation -> FDS -> Eject Disk
+	 fdsEjectAct = new QAction(tr("Eject Disk"), this);
+    //fdsEjectAct->setShortcut( QKeySequence(tr("Ctrl+G")));
+    fdsEjectAct->setStatusTip(tr("Eject Disk"));
+    connect(fdsEjectAct, SIGNAL(triggered()), this, SLOT(fdsEjectDisk(void)) );
+
+    subMenu->addAction(fdsEjectAct);
+
+	 // Emulation -> FDS -> Load BIOS
+	 fdsLoadBiosAct = new QAction(tr("Load BIOS"), this);
+    //fdsLoadBiosAct->setShortcut( QKeySequence(tr("Ctrl+G")));
+    fdsLoadBiosAct->setStatusTip(tr("Load BIOS"));
+    connect(fdsLoadBiosAct, SIGNAL(triggered()), this, SLOT(fdsLoadBiosFile(void)) );
+
+    subMenu->addAction(fdsLoadBiosAct);
 
 	 //-----------------------------------------------------------------------
 	 // Help
@@ -934,6 +964,83 @@ void consoleWin_t::insertCoin(void)
 	fceuWrapperLock();
 	FCEUI_VSUniCoin();
 	fceuWrapperUnLock();
+   return;
+}
+
+void consoleWin_t::fdsSwitchDisk(void)
+{
+	fceuWrapperLock();
+	FCEU_FDSSelect();
+	fceuWrapperUnLock();
+   return;
+}
+
+void consoleWin_t::fdsEjectDisk(void)
+{
+	fceuWrapperLock();
+	FCEU_FDSInsert();
+	fceuWrapperUnLock();
+   return;
+}
+
+void consoleWin_t::fdsLoadBiosFile(void)
+{
+	int ret;
+	QString filename;
+	std::string last;
+	QFileDialog  dialog(this, tr("Load FDS BIOS (disksys.rom)") );
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("ROM files (*.rom)(*.ROM) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+
+	g_config->getOption ("SDL.LastOpenFile", &last );
+
+	dialog.setDirectory( tr(last.c_str()) );
+
+	// the gnome default file dialog is not playing nice with QT.
+	// TODO make this a config option to use native file dialog.
+	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+   if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	// copy BIOS file to proper place (~/.fceux/disksys.rom)
+	std::ifstream fdsBios (filename.toStdString().c_str(), std::fstream::binary);
+	std::string output_filename =
+		FCEU_MakeFName (FCEUMKF_FDSROM, 0, "");
+	std::ofstream outFile (output_filename.c_str (),
+			       std::fstream::trunc | std::fstream::
+			       binary);
+	outFile << fdsBios.rdbuf ();
+	if (outFile.fail ())
+	{
+		FCEUD_PrintError ("Error copying the FDS BIOS file.");
+	}
+	else
+	{
+		printf("Famicom Disk System BIOS loaded.  If you are you having issues, make sure your BIOS file is 8KB in size.\n");
+	}
+
    return;
 }
 

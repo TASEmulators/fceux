@@ -77,6 +77,9 @@ class  consoleWin_t : public QMainWindow
 	 QAction *gameGenieAct;
 	 QAction *loadGgROMAct;
 	 QAction *insCoinAct;
+	 QAction *fdsSwitchAct;
+	 QAction *fdsEjectAct;
+	 QAction *fdsLoadBiosAct;
 
 	 QTimer  *gameTimer;
 	 emulatorThread_t *emulatorThread;
@@ -128,6 +131,9 @@ class  consoleWin_t : public QMainWindow
 		void toggleGameGenie(bool checked);
 		void loadGameGenieROM(void);
 		void insertCoin(void);
+		void fdsSwitchDisk(void);
+		void fdsEjectDisk(void);
+		void fdsLoadBiosFile(void);
 
 };
 
