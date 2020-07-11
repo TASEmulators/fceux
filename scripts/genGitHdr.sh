@@ -2,15 +2,20 @@
 
 OUTPUT_DIR=$1;
 
-FILE="fceux_gitrev.h"
+FILE="fceux_git_info.cpp"
 TMP_FILE="/tmp/$FILE";
+
+echo "Output File: $OUTPUT_DIR/$FILE";
 
 GIT_URL=`git config --get remote.origin.url`;
 GIT_REV=`git rev-parse HEAD`;
 
-echo "// fceux_gitrev.h -- DO NOT EDIT: This file is auto-generated at build" >| $TMP_FILE;
+echo "// fceux_gitrev.cpp -- DO NOT EDIT: This file is auto-generated at build" >| $TMP_FILE;
+echo "#include \"Qt/fceux_git_info.h\" " >> $TMP_FILE;
 echo "#define FCEUX_GIT_URL  \"$GIT_URL\" " >> $TMP_FILE;
 echo "#define FCEUX_GIT_REV  \"$GIT_REV\" " >> $TMP_FILE;
+echo "const char *fceu_get_git_url(void){ return FCEUX_GIT_URL; }" >> $TMP_FILE
+echo "const char *fceu_get_git_rev(void){ return FCEUX_GIT_REV; }" >> $TMP_FILE
 
 if [ -e $OUTPUT_DIR/$FILE ]; then
 

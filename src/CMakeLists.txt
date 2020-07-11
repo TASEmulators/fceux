@@ -400,7 +400,15 @@ set(SRC_DRIVERS_SDL
 
 set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})
 
-add_executable(  fceux  ${SOURCES} ../resources.qrc )
+add_custom_command( 
+	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp  
+	COMMAND  ${CMAKE_SOURCE_DIR}/scripts/genGitHdr.sh  ${CMAKE_CURRENT_BINARY_DIR} 
+	VERBATIM )
+
+set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp PROPERTY SKIP_AUTOGEN ON)
+
+add_executable(  fceux  ${SOURCES} ../resources.qrc 
+	${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp)
 
 target_link_libraries( fceux  
    ${Qt5Widgets_LIBRARIES}

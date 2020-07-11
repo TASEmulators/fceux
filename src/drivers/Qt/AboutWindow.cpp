@@ -11,6 +11,7 @@
 #include <QDesktopServices>
 //#include "Qt/icon.xpm"
 #include "Qt/AboutWindow.h"
+#include "Qt/fceux_git_info.h"
 #include "../../version.h"
 
 static const char *Authors[] = {
@@ -44,6 +45,7 @@ AboutWindow::AboutWindow(QWidget *parent)
 	QPixmap pm2;
 	QLabel *lbl;
 	QTextEdit *credits;
+	char stmp[256];
 
 	pm2 = pm.scaled( 64, 64 );
 
@@ -72,6 +74,26 @@ AboutWindow::AboutWindow(QWidget *parent)
 
 	hbox1 = new QHBoxLayout();
 	lbl = new QLabel( tr(FCEU_VERSION_STRING) );
+
+	hbox1->addWidget( lbl );
+	hbox1->setAlignment( Qt::AlignCenter );
+
+	mainLayout->addLayout( hbox1 );
+
+	sprintf( stmp, "git URL: %s", fceu_get_git_url() );
+
+	hbox1 = new QHBoxLayout();
+	lbl = new QLabel( tr(stmp) );
+
+	hbox1->addWidget( lbl );
+	hbox1->setAlignment( Qt::AlignCenter );
+
+	mainLayout->addLayout( hbox1 );
+
+	sprintf( stmp, "git Revision: %s", fceu_get_git_rev() );
+
+	hbox1 = new QHBoxLayout();
+	lbl = new QLabel( tr(stmp) );
 
 	hbox1->addWidget( lbl );
 	hbox1->setAlignment( Qt::AlignCenter );
