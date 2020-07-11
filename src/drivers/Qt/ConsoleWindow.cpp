@@ -221,6 +221,14 @@ void consoleWin_t::createMainMenu(void)
     loadLuaAct = NULL;
 #endif
 
+	 // File -> Screenshort
+	 scrShotAct = new QAction(tr("Screenshot"), this);
+    scrShotAct->setShortcut( QKeySequence(tr("F12")));
+    scrShotAct->setStatusTip(tr("Screenshot"));
+    connect(scrShotAct, SIGNAL(triggered()), this, SLOT(takeScreenShot()));
+
+    fileMenu->addAction(scrShotAct);
+
 	 // File -> Quit
 	 quitAct = new QAction(tr("Quit"), this);
     quitAct->setShortcut( QKeySequence(tr("Ctrl+Q")));
@@ -598,6 +606,13 @@ void consoleWin_t::changeState9(void)
 {
 	fceuWrapperLock();
 	FCEUI_SelectState( 9, 1 );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::takeScreenShot(void)
+{
+	fceuWrapperLock();
+	FCEUI_SaveSnapshot();
 	fceuWrapperUnLock();
 }
 
