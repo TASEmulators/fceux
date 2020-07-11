@@ -385,6 +385,7 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/HotKeyConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleVideoConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleSoundConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/AboutWindow.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/fceuWrapper.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/config.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/input.cpp  

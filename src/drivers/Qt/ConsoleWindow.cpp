@@ -20,6 +20,7 @@
 #include "Qt/HotKeyConf.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
+#include "Qt/AboutWindow.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/keyscan.h"
 #include "Qt/nes_shm.h"
@@ -1046,7 +1047,18 @@ void consoleWin_t::fdsLoadBiosFile(void)
 
 void consoleWin_t::aboutFCEUX(void)
 {
-   printf("About FCEUX\n");
+	AboutWindow *aboutWin;
+
+	//printf("About FCEUX Window\n");
+	
+   aboutWin = new AboutWindow(this);
+	
+   aboutWin->show();
+   aboutWin->exec();
+
+   delete aboutWin;
+
+   //printf("About Window Destroyed\n");
    return;
 }
 
