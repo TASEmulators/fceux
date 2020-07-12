@@ -41,7 +41,7 @@ AboutWindow::AboutWindow(QWidget *parent)
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox1;
 	//QPixmap pm( icon_xpm );
-	QPixmap pm(":fceux.png");
+	QPixmap pm(":fceux1.png");
 	QPixmap pm2;
 	QLabel *lbl;
 	QTextEdit *credits;

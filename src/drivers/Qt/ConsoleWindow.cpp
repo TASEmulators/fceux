@@ -36,7 +36,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	//viewport = new ConsoleViewSDL_t(this);
 
    setCentralWidget(viewport);
-   setWindowIcon(QIcon(":fceux.png"));
+   setWindowIcon(QIcon(":fceux1.png"));
 
 	gameTimer  = new QTimer( this );
 	mutex      = new QMutex( QMutex::NonRecursive );
