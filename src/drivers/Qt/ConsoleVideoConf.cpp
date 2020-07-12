@@ -51,6 +51,8 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	regionSelect->addItem( tr("PAL")  , 1 );
 	regionSelect->addItem( tr("Dendy"), 2 );
 
+	setComboBoxFromProperty( regionSelect, "SDL.PAL");
+
 	connect(regionSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(regionChanged(int)) );
 
 	hbox1 = new QHBoxLayout();
@@ -128,6 +130,20 @@ void  ConsoleVideoConfDialog_t::setCheckBoxFromProperty( QCheckBox *cbx, const c
 	cbx->setCheckState( pval ? Qt::Checked : Qt::Unchecked );
 }
 //----------------------------------------------------
+void  ConsoleVideoConfDialog_t::setComboBoxFromProperty( QComboBox *cbx, const char *property )
+{
+	int  i, pval;
+	g_config->getOption (property, &pval);
+
+	for (i=0; i<cbx->count(); i++)
+	{
+		if ( pval == cbx->itemData(i).toInt() )
+		{
+			cbx->setCurrentIndex(i); break;
+		}
+	}
+}
+//----------------------------------------------------
 void ConsoleVideoConfDialog_t::use_new_PPU_changed( int value )
 {
 	//printf("Value:%i \n", value );
@@ -196,7 +212,7 @@ void ConsoleVideoConfDialog_t::regionChanged(int index)
 
 	// reset sound subsystem for changes to take effect
 	fceuWrapperLock();
-	FCEUI_SetRegion (region);
+	FCEUI_SetRegion (region, true);
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------

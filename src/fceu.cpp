@@ -1054,38 +1054,34 @@ void FCEUI_SetRegion(int region, int notify) {
 			normalscanlines = 240;
 			pal_emulation = 0;
 			dendy = 0;
-// until it's fixed on sdl. see issue #740
-#ifdef WIN32
+
 			if (notify)
 			{
 				FCEU_DispMessage("NTSC mode set", 0);
 				FCEUI_printf("NTSC mode set");
 			}
-#endif
 			break;
 		case 1: // PAL
 			normalscanlines = 240;
 			pal_emulation = 1;
 			dendy = 0;
-#ifdef WIN32			
+
 			if (notify)
 			{
 				FCEU_DispMessage("PAL mode set", 0);
 				FCEUI_printf("PAL mode set");
 			}
-#endif
 			break;
 		case 2: // Dendy
 			normalscanlines = 290;
 			pal_emulation = 0;
 			dendy = 1;
-#ifdef WIN32			
+
 			if (notify)
 			{
 				FCEU_DispMessage("Dendy mode set", 0);
 				FCEUI_printf("Dendy mode set");
 			}
-#endif
 			break;
 	}
 	normalscanlines += newppu;
