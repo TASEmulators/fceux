@@ -73,6 +73,11 @@ consoleWin_t::~consoleWin_t(void)
 
 	delete viewport;
 	delete mutex;
+
+	// LoadGame() checks for an IP and if it finds one begins a network session
+	// clear the NetworkIP field so this doesn't happen unintentionally
+	g_config->setOption ("SDL.NetworkIP", "");
+	g_config->save ();
 }
 
 void consoleWin_t::setCyclePeriodms( int ms )
@@ -463,12 +468,36 @@ void consoleWin_t::closeApp(void)
 	qApp->quit();
 }
 //---------------------------------------------------------------------------
+int  consoleWin_t::getDirFromFile( const char *path, char *dir )
+{
+	int i,j;
+
+	i=0; j = -1;
+	while ( path[i] != 0 )
+	{
+		if ( path[i] == '/' )
+		{
+			j = i;
+		}
+		dir[i] = path[i]; i++;
+	}
+	dir[i] = 0;
+
+	if ( j >= 0 )
+	{
+		dir[j] = 0;
+	}
+
+	return 0;
+}
+//---------------------------------------------------------------------------
 
 void consoleWin_t::openROMFile(void)
 {
 	int ret;
 	QString filename;
 	std::string last;
+	char dir[512];
 	QFileDialog  dialog(this, tr("Open ROM File") );
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
@@ -479,7 +508,9 @@ void consoleWin_t::openROMFile(void)
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
-	dialog.setDirectory( tr(last.c_str()) );
+	getDirFromFile( last.c_str(), dir );
+
+	dialog.setDirectory( tr(dir) );
 
 	// the gnome default file dialog is not playing nice with QT.
 	// TODO make this a config option to use native file dialog.
@@ -527,6 +558,7 @@ void consoleWin_t::loadNSF(void)
 	int ret;
 	QString filename;
 	std::string last;
+	char dir[512];
 	QFileDialog  dialog(this, tr("Load NSF File") );
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
@@ -537,7 +569,9 @@ void consoleWin_t::loadNSF(void)
 
 	g_config->getOption ("SDL.LastOpenNSF", &last );
 
-	dialog.setDirectory( tr(last.c_str()) );
+	getDirFromFile( last.c_str(), dir );
+
+	dialog.setDirectory( tr(dir) );
 
 	// the gnome default file dialog is not playing nice with QT.
 	// TODO make this a config option to use native file dialog.
@@ -575,6 +609,7 @@ void consoleWin_t::loadStateFrom(void)
 	int ret;
 	QString filename;
 	std::string last;
+	char dir[512];
 	QFileDialog  dialog(this, tr("Load State From File") );
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
@@ -585,7 +620,9 @@ void consoleWin_t::loadStateFrom(void)
 
 	g_config->getOption ("SDL.LastLoadStateFrom", &last );
 
-	dialog.setDirectory( tr(last.c_str()) );
+	getDirFromFile( last.c_str(), dir );
+
+	dialog.setDirectory( tr(dir) );
 
 	// the gnome default file dialog is not playing nice with QT.
 	// TODO make this a config option to use native file dialog.
@@ -623,6 +660,7 @@ void consoleWin_t::saveStateAs(void)
 	int ret;
 	QString filename;
 	std::string last;
+	char dir[512];
 	QFileDialog  dialog(this, tr("Save State To File") );
 
 	dialog.setFileMode(QFileDialog::AnyFile);
@@ -633,7 +671,9 @@ void consoleWin_t::saveStateAs(void)
 
 	g_config->getOption ("SDL.LastSaveStateAs", &last );
 
-	dialog.setDirectory( tr(last.c_str()) );
+	getDirFromFile( last.c_str(), dir );
+
+	dialog.setDirectory( tr(dir) );
 
 	// the gnome default file dialog is not playing nice with QT.
 	// TODO make this a config option to use native file dialog.
@@ -763,6 +803,7 @@ void consoleWin_t::loadLua(void)
    int ret;
 	QString filename;
 	std::string last;
+	char dir[512];
 	QFileDialog  dialog(this, tr("Open LUA Script") );
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
@@ -778,7 +819,9 @@ void consoleWin_t::loadLua(void)
       last.assign( "/usr/share/fceux/luaScripts" );
    }
 
-	dialog.setDirectory( tr(last.c_str()) );
+	getDirFromFile( last.c_str(), dir );
+
+	dialog.setDirectory( tr(dir) );
 
 	// the gnome default file dialog is not playing nice with QT.
 	// TODO make this a config option to use native file dialog.
@@ -952,6 +995,7 @@ void consoleWin_t::loadGameGenieROM(void)
 	int ret;
 	QString filename;
 	std::string last;
+	char dir[512];
 	QFileDialog  dialog(this, tr("Open Game Genie ROM") );
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
@@ -962,7 +1006,9 @@ void consoleWin_t::loadGameGenieROM(void)
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
-	dialog.setDirectory( tr(last.c_str()) );
+	getDirFromFile( last.c_str(), dir );
+
+	dialog.setDirectory( tr(dir) );
 
 	// the gnome default file dialog is not playing nice with QT.
 	// TODO make this a config option to use native file dialog.
@@ -1029,6 +1075,7 @@ void consoleWin_t::fdsLoadBiosFile(void)
 	int ret;
 	QString filename;
 	std::string last;
+	char dir[512];
 	QFileDialog  dialog(this, tr("Load FDS BIOS (disksys.rom)") );
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
@@ -1039,7 +1086,9 @@ void consoleWin_t::fdsLoadBiosFile(void)
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
-	dialog.setDirectory( tr(last.c_str()) );
+	getDirFromFile( last.c_str(), dir );
+
+	dialog.setDirectory( tr(dir) );
 
 	// the gnome default file dialog is not playing nice with QT.
 	// TODO make this a config option to use native file dialog.
@@ -1090,6 +1139,7 @@ void consoleWin_t::openMovie(void)
 	int ret;
 	QString filename;
 	std::string last;
+	char dir[512];
 	QFileDialog  dialog(this, tr("Open FM2 Movie") );
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
@@ -1100,7 +1150,9 @@ void consoleWin_t::openMovie(void)
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
-	dialog.setDirectory( tr(last.c_str()) );
+	getDirFromFile( last.c_str(), dir );
+
+	dialog.setDirectory( tr(dir) );
 
 	// the gnome default file dialog is not playing nice with QT.
 	// TODO make this a config option to use native file dialog.
@@ -1169,6 +1221,7 @@ void consoleWin_t::recordMovieAs(void)
 	int ret;
 	QString filename;
 	std::string last;
+	char dir[512];
 	QFileDialog  dialog(this, tr("Save FM2 Movie for Recording") );
 
 	dialog.setFileMode(QFileDialog::AnyFile);
@@ -1179,7 +1232,9 @@ void consoleWin_t::recordMovieAs(void)
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
-	dialog.setDirectory( tr(last.c_str()) );
+	getDirFromFile( last.c_str(), dir );
+
+	dialog.setDirectory( tr(dir) );
 
 	// the gnome default file dialog is not playing nice with QT.
 	// TODO make this a config option to use native file dialog.

@@ -97,6 +97,8 @@ class  consoleWin_t : public QMainWindow
 	 void keyReleaseEvent(QKeyEvent *event);
 	 void syncActionConfig( QAction *act, const char *property );
 
+	 int  getDirFromFile( const char *path, char *dir );
+
 	private:
 		void createMainMenu(void);
 
