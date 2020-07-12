@@ -470,22 +470,29 @@ void consoleWin_t::closeApp(void)
 //---------------------------------------------------------------------------
 int  consoleWin_t::getDirFromFile( const char *path, char *dir )
 {
-	int i,j;
+	int i, lastSlash = -1, lastPeriod = -1;
 
-	i=0; j = -1;
+	i=0; 
 	while ( path[i] != 0 )
 	{
 		if ( path[i] == '/' )
 		{
-			j = i;
+			lastSlash = i;
+		}
+		else if ( path[i] == '.' )
+		{
+			lastPeriod = i;
 		}
 		dir[i] = path[i]; i++;
 	}
 	dir[i] = 0;
 
-	if ( j >= 0 )
+	if ( lastPeriod >= 0 )
 	{
-		dir[j] = 0;
+		if ( lastPeriod > lastSlash )
+		{
+			dir[lastSlash] = 0;
+		}
 	}
 
 	return 0;
