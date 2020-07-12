@@ -454,7 +454,9 @@ set(CPACK_GENERATOR "DRAGNDROP")
 include(CPACK)
 
 install( CODE "include(BundleUtilities) 
-	fixup_bundle( \"${APPS}\" \"\" \"${DIRS}\") ")
+	fixup_bundle( \"${APPS}\" \"\" \"${DIRS}\") "
+	COMPONENT Runtime
+	)
 
 else(APPLE)
 
