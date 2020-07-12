@@ -448,8 +448,8 @@ set( DIRS  ${CMAKE_BINARY_DIR} /usr/local/lib)
 message(STATUS APPS: ${APPS})
 message(STATUS DIRS: ${DIRS} )
 
-#set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/fceux.icns )
-#set(CPACK_BUNDLE_ICON ${CMAKE_SOURCE_DIR}/fceux.icns )
+set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/fceux.icns )
+set(CPACK_BUNDLE_ICON ${CMAKE_SOURCE_DIR}/fceux.icns )
 set(CPACK_GENERATOR "DRAGNDROP")
 include(CPACK)
 
