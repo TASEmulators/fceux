@@ -32,4 +32,5 @@ void fceuWrapperUnLock(void);
 int  fceuWrapperSoftReset(void);
 int  fceuWrapperHardReset(void);
 int  fceuWrapperTogglePause(void);
+bool fceuWrapperGameLoaded(void);
 

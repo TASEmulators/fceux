@@ -7,6 +7,7 @@
 
 #include "../../fceu.h"
 #include "../../fds.h"
+#include "../../movie.h"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
@@ -394,6 +395,44 @@ void consoleWin_t::createMainMenu(void)
     connect(fdsLoadBiosAct, SIGNAL(triggered()), this, SLOT(fdsLoadBiosFile(void)) );
 
     subMenu->addAction(fdsLoadBiosAct);
+
+	 //-----------------------------------------------------------------------
+	 // Movie
+    movieMenu = menuBar()->addMenu(tr("Movie"));
+
+	 // Movie -> Open
+	 openMovAct = new QAction(tr("Open"), this);
+    openMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    openMovAct->setStatusTip(tr("Open Movie File"));
+    connect(openMovAct, SIGNAL(triggered()), this, SLOT(openMovie(void)) );
+
+    movieMenu->addAction(openMovAct);
+
+	 // Movie -> Stop
+	 stopMovAct = new QAction(tr("Stop"), this);
+    //stopMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    stopMovAct->setStatusTip(tr("Stop Movie Recording"));
+    connect(stopMovAct, SIGNAL(triggered()), this, SLOT(stopMovie(void)) );
+
+    movieMenu->addAction(stopMovAct);
+
+    movieMenu->addSeparator();
+
+	 // Movie -> Record
+	 recMovAct = new QAction(tr("Record"), this);
+    recMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
+    recMovAct->setStatusTip(tr("Record Movie"));
+    connect(recMovAct, SIGNAL(triggered()), this, SLOT(recordMovie(void)) );
+
+    movieMenu->addAction(recMovAct);
+
+	  // Movie -> Record As
+	 recAsMovAct = new QAction(tr("Record As"), this);
+    //recAsMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
+    recAsMovAct->setStatusTip(tr("Record Movie"));
+    connect(recAsMovAct, SIGNAL(triggered()), this, SLOT(recordMovieAs(void)) );
+
+    movieMenu->addAction(recAsMovAct);
 
 	 //-----------------------------------------------------------------------
 	 // Help
@@ -1042,6 +1081,142 @@ void consoleWin_t::fdsLoadBiosFile(void)
 	{
 		printf("Famicom Disk System BIOS loaded.  If you are you having issues, make sure your BIOS file is 8KB in size.\n");
 	}
+
+   return;
+}
+
+void consoleWin_t::openMovie(void)
+{
+	int ret;
+	QString filename;
+	std::string last;
+	QFileDialog  dialog(this, tr("Open FM2 Movie") );
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("FM2 Movies (*.fm2) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+
+	g_config->getOption ("SDL.LastOpenFile", &last );
+
+	dialog.setDirectory( tr(last.c_str()) );
+
+	// the gnome default file dialog is not playing nice with QT.
+	// TODO make this a config option to use native file dialog.
+	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+   if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	int pauseframe;
+	g_config->getOption ("SDL.PauseFrame", &pauseframe);
+	g_config->setOption ("SDL.PauseFrame", 0);
+
+	FCEUI_printf ("Playing back movie located at %s\n", filename.toStdString().c_str() );
+
+	fceuWrapperLock();
+	if (FCEUI_LoadMovie( filename.toStdString().c_str(),
+		    false, pauseframe ? pauseframe : false) == false)
+	{
+		printf("Error: Could not open movie file: %s \n", filename.toStdString().c_str() );
+	}
+	fceuWrapperUnLock();
+
+   return;
+}
+
+void consoleWin_t::stopMovie(void)
+{
+	fceuWrapperLock();
+	FCEUI_StopMovie();
+	fceuWrapperUnLock();
+   return;
+}
+
+void consoleWin_t::recordMovie(void)
+{
+	fceuWrapperLock();
+	if (fceuWrapperGameLoaded())
+	{
+		std::string name = FCEU_MakeFName (FCEUMKF_MOVIE, 0, 0);
+		FCEUI_printf ("Recording movie to %s\n", name.c_str ());
+		FCEUI_SaveMovie (name.c_str (), MOVIE_FLAG_NONE, L"");
+	}
+	fceuWrapperUnLock();
+   return;
+}
+
+void consoleWin_t::recordMovieAs(void)
+{
+	int ret;
+	QString filename;
+	std::string last;
+	QFileDialog  dialog(this, tr("Save FM2 Movie for Recording") );
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("FM2 Movies (*.fm2) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+
+	g_config->getOption ("SDL.LastOpenFile", &last );
+
+	dialog.setDirectory( tr(last.c_str()) );
+
+	// the gnome default file dialog is not playing nice with QT.
+	// TODO make this a config option to use native file dialog.
+	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+   if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	int pauseframe;
+	g_config->getOption ("SDL.PauseFrame", &pauseframe);
+	g_config->setOption ("SDL.PauseFrame", 0);
+
+	FCEUI_printf ("Recording movie to %s\n", filename.toStdString().c_str() );
+
+	fceuWrapperLock();
+	std::string s = GetUserText ("Author name");
+	std::wstring author (s.begin (), s.end ());
+
+	FCEUI_SaveMovie ( filename.toStdString().c_str(), MOVIE_FLAG_NONE, author);
+	fceuWrapperUnLock();
 
    return;
 }

@@ -50,6 +50,7 @@ class  consoleWin_t : public QMainWindow
 	 QMenu *fileMenu;
     QMenu *optMenu;
     QMenu *emuMenu;
+    QMenu *movieMenu;
     QMenu *helpMenu;
 
     QAction *openROM;
@@ -80,6 +81,10 @@ class  consoleWin_t : public QMainWindow
 	 QAction *fdsSwitchAct;
 	 QAction *fdsEjectAct;
 	 QAction *fdsLoadBiosAct;
+	 QAction *openMovAct;
+	 QAction *stopMovAct;
+	 QAction *recMovAct;
+	 QAction *recAsMovAct;
 
 	 QTimer  *gameTimer;
 	 emulatorThread_t *emulatorThread;
@@ -134,6 +139,10 @@ class  consoleWin_t : public QMainWindow
 		void fdsSwitchDisk(void);
 		void fdsEjectDisk(void);
 		void fdsLoadBiosFile(void);
+		void openMovie(void);
+		void stopMovie(void);
+		void recordMovie(void);
+		void recordMovieAs(void);
 
 };
 

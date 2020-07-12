@@ -318,6 +318,11 @@ int  fceuWrapperTogglePause(void)
 	return 0;
 }
 
+bool fceuWrapperGameLoaded(void)
+{
+	return (isloaded ? true : false);
+}
+
 int  fceuWrapperInit( int argc, char *argv[] )
 {
 	int error;
