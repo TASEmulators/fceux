@@ -70,6 +70,9 @@ make -j $NPROC || exit 1
 sudo make install || exit 1
 sudo cpack -G DragNDrop || exit 1
 
+echo 'Pushing DMG Package to Build Artifacts'
+appveyor PushArtifact fceux-*.dmg
+
 # Debug via ssh if necessary
 if [ ! -z $APPVEYOR_SSH_BLOCK ]; then
    curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
