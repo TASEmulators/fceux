@@ -6,6 +6,10 @@ pwd
 uname -a
 sw_vers
 
+FCEUX_VERSION_MAJOR=2
+FCEUX_VERSION_MINOR=2
+FCEUX_VERSION_PATCH=3
+
 SCRIPT_DIR=$( cd $(dirname $BASH_SOURCE[0]); pwd );
 
 NPROC=`getconf _NPROCESSORS_ONLN`;
@@ -53,23 +57,21 @@ cd build;
 #$QMAKE ..
 cmake \
 	-DCMAKE_BUILD_TYPE=Release \
-	-DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
+	-DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
 	-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+   -DCMAKE_PROJECT_VERSION_MAJOR=$FCEUX_VERSION_MAJOR \
+   -DCMAKE_PROJECT_VERSION_MINOR=$FCEUX_VERSION_MINOR \
+   -DCMAKE_PROJECT_VERSION_PATCH=$FCEUX_VERSION_PATCH \
+   -DCPACK_PACKAGE_VERSION_MAJOR=$FCEUX_VERSION_MAJOR \
+   -DCPACK_PACKAGE_VERSION_MINOR=$FCEUX_VERSION_MINOR \
+   -DCPACK_PACKAGE_VERSION_PATCH=$FCEUX_VERSION_PATCH \
 	.. || exit 1
 make -j $NPROC || exit 1
 make install || exit 1
+cpack -G DragNDrop || exit 1
 
 # Debug via ssh if necessary
 if [ ! -z $APPVEYOR_SSH_BLOCK ]; then
    curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
 fi
 
-if [ -e $INSTALL_PREFIX/usr/bin/fceux ]; then
-   echo '**************************************************************'
-   echo 'Printing Shared Object Dependencies for fceux Executable'
-   echo '**************************************************************'
-   otool -L  $INSTALL_PREFIX/usr/bin/fceux
-else
-   echo "Error: Executable Failed to build: $INSTALL_PREFIX/usr/bin/fceux";
-   exit 1;
-fi

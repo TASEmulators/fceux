@@ -3,6 +3,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+set( APP_NAME fceux)
+
 if(WIN32)
   set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_WIN})
   include_directories( ${CMAKE_SOURCE_DIR}/src/drivers/win/directx ${CMAKE_SOURCE_DIR}/src/drivers/win/zlib )
@@ -410,8 +412,19 @@ add_custom_command(
 
 set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp PROPERTY SKIP_AUTOGEN ON)
 
-add_executable(  fceux  ${SOURCES} ../resources.qrc 
+if (APPLE)
+
+set(MACOSX_BUNDLE_ICON_FILE fceux.icns)
+set(APP_ICON  ${CMAKE_SOURCE_DIR}/fceux.icns )
+set_source_files_properties( ${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources" )
+
+add_executable(  ${APP_NAME}  MACOSX_BUNDLE ${APP_ICON} ${SOURCES} ../resources.qrc 
 	${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp)
+
+else()
+add_executable(  ${APP_NAME}  ${SOURCES} ../resources.qrc 
+	${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp)
+endif()
 
 target_link_libraries( fceux  
    ${Qt5Widgets_LIBRARIES}
@@ -423,7 +436,29 @@ target_link_libraries( fceux
  	${SYS_LIBS}
 )
 
-install( TARGETS  fceux  
+if (APPLE)
+
+install( TARGETS  ${APP_NAME}  
+	BUNDLE  DESTINATION  . COMPONENT Runtime 
+	RUNTIME  DESTINATION  bin COMPONENT Runtime )
+
+set( APPS  ${CMAKE_INSTALL_PREFIX}/${APP_NAME}.app)
+set( DIRS  ${CMAKE_BINARY_DIR} /usr/local/lib)
+
+message(STATUS APPS: ${APPS})
+message(STATUS DIRS: ${DIRS} )
+
+#set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/fceux.icns )
+#set(CPACK_BUNDLE_ICON ${CMAKE_SOURCE_DIR}/fceux.icns )
+set(CPACK_GENERATOR "DRAGNDROP")
+include(CPACK)
+
+install( CODE "include(BundleUtilities) 
+	fixup_bundle( \"${APPS}\" \"\" \"${DIRS}\") ")
+
+else(APPLE)
+
+install( TARGETS  ${APP_NAME}  
 	RUNTIME  DESTINATION  bin )
 
 install( FILES     ${CMAKE_CURRENT_SOURCE_DIR}/auxlib.lua                DESTINATION share/fceux/luaScripts  )
@@ -432,3 +467,5 @@ install( FILES     ${CMAKE_SOURCE_DIR}/fceux.png                         DESTINA
 install( FILES     ${CMAKE_SOURCE_DIR}/fceux.desktop                     DESTINATION share/applications  )
 install( FILES     ${CMAKE_SOURCE_DIR}/documentation/fceux.6             DESTINATION share/man/man6  )
 install( FILES     ${CMAKE_SOURCE_DIR}/documentation/fceux-net-server.6  DESTINATION share/man/man6  )
+
+endif(APPLE)
