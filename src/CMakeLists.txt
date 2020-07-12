@@ -113,6 +113,7 @@ else(WIN32)
   endif()
 
   add_definitions( -DHAVE_ASPRINTF ) # What system wouldn't have this?
+  #add_definitions( -DCREATE_AVI    ) 
 
   if(APPLE)
 	set( OPENGL_LDFLAGS  "-framework OpenGL" )
@@ -374,6 +375,8 @@ set(SRC_DRIVERS_COMMON
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/scalebit.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/vidblit.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/nes_ntsc.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/nesvideos-piece.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/rgbtorgb.cpp
 )
 
 set(SRC_DRIVERS_SDL

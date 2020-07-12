@@ -59,6 +59,10 @@ static int periodic_saves = 0;
 static bool  mutexLocked = 0;
 
 extern double g_fpsScale;
+
+#ifdef CREATE_AVI
+int mutecapture = 0;
+#endif
 //*****************************************************************
 // Define Global Functions to be shared with FCEU Core
 //*****************************************************************
@@ -323,9 +327,99 @@ bool fceuWrapperGameLoaded(void)
 	return (isloaded ? true : false);
 }
 
+static const char *DriverUsage =
+"Option         Value   Description\n"
+"--pal          {0|1}   Use PAL timing.\n"
+"--newppu       {0|1}   Enable the new PPU core. (WARNING: May break savestates)\n"
+"--inputcfg     d       Configures input device d on startup.\n"
+"--input(1,2)   d       Set which input device to emulate for input 1 or 2.\n"
+"                         Devices:  gamepad zapper powerpad.0 powerpad.1\n"
+"                         arkanoid\n"
+"--input(3,4)   d       Set the famicom expansion device to emulate for\n"
+"                       input(3, 4)\n"
+"                          Devices: quizking hypershot mahjong toprider ftrainer\n"
+"                          familykeyboard oekakids arkanoid shadow bworld\n"
+"                          4player\n"
+"--gamegenie    {0|1}   Enable emulated Game Genie.\n"
+"--frameskip    x       Set # of frames to skip per emulated frame.\n"
+"--xres         x       Set horizontal resolution for full screen mode.\n"
+"--yres         x       Set vertical resolution for full screen mode.\n"
+"--autoscale    {0|1}   Enable autoscaling in fullscreen. \n"
+"--keepratio    {0|1}   Keep native NES aspect ratio when autoscaling. \n"
+"--(x/y)scale   x       Multiply width/height by x. \n"
+"                         (Real numbers >0 with OpenGL, otherwise integers >0).\n"
+"--(x/y)stretch {0|1}   Stretch to fill surface on x/y axis (OpenGL only).\n"
+"--bpp       {8|16|32}  Set bits per pixel.\n"
+"--opengl       {0|1}   Enable OpenGL support.\n"
+"--fullscreen   {0|1}   Enable full screen mode.\n"
+"--noframe      {0|1}   Hide title bar and window decorations.\n"
+"--special      {1-4}   Use special video scaling filters\n"
+"                         (1 = hq2x; 2 = Scale2x; 3 = NTSC 2x; 4 = hq3x;\n"
+"                         5 = Scale3x; 6 = Prescale2x; 7 = Prescale3x; 8=Precale4x; 9=PAL)\n"
+"--palette      f       Load custom global palette from file f.\n"
+"--sound        {0|1}   Enable sound.\n"
+"--soundrate    x       Set sound playback rate to x Hz.\n"
+"--soundq      {0|1|2}  Set sound quality. (0 = Low 1 = High 2 = Very High)\n"
+"--soundbufsize x       Set sound buffer size to x ms.\n"
+"--volume      {0-256}  Set volume to x.\n"
+"--soundrecord  f       Record sound to file f.\n"
+"--playmov      f       Play back a recorded FCM/FM2/FM3 movie from filename f.\n"
+"--pauseframe   x       Pause movie playback at frame x.\n"
+"--fcmconvert   f       Convert fcm movie file f to fm2.\n"
+"--ripsubs      f       Convert movie's subtitles to srt\n"
+"--subtitles    {0|1}   Enable subtitle display\n"
+"--fourscore    {0|1}   Enable fourscore emulation\n"
+"--no-config    {0|1}   Use default config file and do not save\n"
+"--net          s       Connect to server 's' for TCP/IP network play.\n"
+"--port         x       Use TCP/IP port x for network play.\n"
+"--user         x       Set the nickname to use in network play.\n"
+"--pass         x       Set password to use for connecting to the server.\n"
+"--netkey       s       Use string 's' to create a unique session for the\n"
+"                       game loaded.\n"
+"--players      x       Set the number of local players in a network play\n"
+"                       session.\n"
+"--rp2mic       {0|1}   Replace Port 2 Start with microphone (Famicom).\n"
+"--nogui                Don't load the GTK GUI\n"
+"--4buttonexit {0|1}    exit the emulator when A+B+Select+Start is pressed\n"
+"--loadstate {0-9|>9}   load from the given state when the game is loaded\n"
+"--savestate {0-9|>9}   save to the given state when the game is closed\n"
+"                         to not save/load automatically provide a number\n"
+"                         greater than 9\n"
+"--periodicsaves {0|1}  enable automatic periodic saving.  This will save to\n"
+"                         the state passed to --savestate\n";
+
+static void ShowUsage(const char *prog)
+{
+	printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);
+	puts(DriverUsage);
+#ifdef _S9XLUA_H
+	puts ("--loadlua      f       Loads lua script from filename f.");
+#endif
+#ifdef CREATE_AVI
+	puts ("--videolog     c       Calls mencoder to grab the video and audio streams to\n                         encode them. Check the documentation for more on this.");
+	puts ("--mute        {0|1}    Mutes FCEUX while still passing the audio stream to\n                         mencoder during avi creation.");
+#endif
+	puts("");
+	printf("Compiled with SDL version %d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL );
+	SDL_version v; 
+	SDL_GetVersion(&v);
+	printf("Linked with SDL version %d.%d.%d\n", v.major, v.minor, v.patch);
+  	printf("Compiled with QT version %d.%d.%d\n", QT_VERSION_MAJOR, QT_VERSION_MINOR, QT_VERSION_PATCH );
+	
+}
+
 int  fceuWrapperInit( int argc, char *argv[] )
 {
 	int error;
+
+	for (int i=0; i<argc; i++)
+	{
+		if ( (strcmp(argv[i], "--help") == 0) || (strcmp(argv[i],"-h") == 0) )
+		{
+			ShowUsage(argv[0]);
+			exit(0);
+		}
+	}
 
 	FCEUD_Message("Starting " FCEU_NAME_AND_VERSION "...\n");
 
@@ -333,7 +427,7 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	if (SDL_Init(SDL_INIT_VIDEO)) 
 	{
 		printf("Could not initialize SDL: %s.\n", SDL_GetError());
-		return(-1);
+		exit(-1);
 	}
 
 	// Initialize the configuration system
@@ -351,9 +445,9 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	if (error != 1) 
 	{
 		printf("Error: Initializing FCEUI\n");
-		//ShowUsage(argv[0]);
+		ShowUsage(argv[0]);
 		//SDL_Quit();
-		return -1;
+		exit(-1);
 	}
 
 	int romIndex = g_config->parse(argc, argv);
