@@ -63,3 +63,13 @@ make install || exit 1
 if [ ! -z $APPVEYOR_SSH_BLOCK ]; then
    curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
 fi
+
+if [ -e $INSTALL_PREFIX/usr/bin/fceux ]; then
+   echo '**************************************************************'
+   echo 'Printing Shared Object Dependencies for fceux Executable'
+   echo '**************************************************************'
+   otool -L  $INSTALL_PREFIX/usr/bin/fceux
+else
+   echo "Error: Executable Failed to build: $INSTALL_PREFIX/usr/bin/fceux";
+   exit 1;
+fi
