@@ -67,8 +67,8 @@ cmake \
    -DCPACK_PACKAGE_VERSION_PATCH=$FCEUX_VERSION_PATCH \
 	.. || exit 1
 make -j $NPROC || exit 1
-make install || exit 1
-cpack -G DragNDrop || exit 1
+sudo make install || exit 1
+sudo cpack -G DragNDrop || exit 1
 
 # Debug via ssh if necessary
 if [ ! -z $APPVEYOR_SSH_BLOCK ]; then
