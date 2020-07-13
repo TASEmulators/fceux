@@ -2000,7 +2000,7 @@ void ProcessSubtitles(void)
 	}
 }
 
-void FCEU_DisplaySubtitles(char *format, ...)
+void FCEU_DisplaySubtitles(const char *format, ...)
 {
 	va_list ap;
 

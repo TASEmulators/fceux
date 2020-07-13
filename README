@@ -1,12 +1,13 @@
-FCEUX SDL 2.2.1 SDL README
+FCEUX SDL 2.2.3 SDL README
 ==========================
-By Lukas Sabota (sf: punkrockguy318)
+Originally By Lukas Sabota (sf: punkrockguy318)
+Updated By mjbudd77
 
-[NOTE:  This is old and out of date and only applies to SDL (non windows) builds]
+[NOTE:  This only applies to SDL (non windows) builds]
 
 http://www.fceux.com
 
-Last Modified: March 10, 2013
+Last Modified: July 12, 2020
 
 Table of Contents
 -----------------
@@ -21,58 +22,64 @@ Table of Contents
 
 1 - Requirements
 ----------------
-* libsdl1.2 - It is strongly recommended that you upgrade to the latest
-	version of sdl (1.2.15 at the time of writing).
-* scons - Required to build fceux.
-* libgtk2.0 (optional) - version >= 2.24 recommended
-* libgtk3.0 (optional) - this compiles as of fceux 2.2.0
-* liblua5.1 (optional)
-* libgd (optional) - required for LOGO and CREATE_AVI options (https://bitbucket.org/libgd/gd-libgd/downloads)
-* minizip (optional) - you may chose to use the version of minizip on your system by enabling SYSTEM_MINIZIP in the SConstruct
+* sdl2  - Version >= 2.0
+* cmake - Required to build fceux.
+* qt5   - version >= 5.11 recommended
+* liblua5.1 (optional) - Will statically link internally if the system cannot provide this.
+* minizip  
+* zlib  
+* openGL
 * c++ compiler -- you may use g++ from gcc or clang++ from llvm.
 
 2 - Installation
 ----------------
-Fceux can be compiled and built using the scons build system.  To compile, run:
+Fceux can be compiled and built using the cmake build system.  To compile, run:
 
-	scons
+	mkdir build; cd build;
+   cmake  -DCMAKE_BUILD_TYPE=Release  ..    # For a release build
+
+To build a binary with debug information included in it:
+   cmake  -DCMAKE_BUILD_TYPE=Debug    ..    
+
+To do the actual compiling:
+   make
+
+To compile faster with multiple processes in parallel:
+   make -j `nproc`
 	
 After a sucessful compilation, the fceux binary will be generated to 
-./src/fceux .  You can install fceux to your system with the following command:
+./build/src/fceux .  You can install fceux to your system with the following command:
 
-	scons install
+	make install
 
-You can optionally define a prefix:
+You can optionally define a install prefix when running cmake from the previous step:
 
-	scons --prefix=/usr/local install
+	cmake -DCMAKE_INSTALL_PREFIX=/usr/local install
 
 You can choose to install the lua scripts (located in output/luaScripts) to a directory of your choosing:
 
 	cp -R output/luaScripts /usr/local/some/directory/that/i/will/find/later
 
-If you would like to clean the temporary scons files to perform a 'make clean' like function, you can do the following:
+If you would like to do a full clean build a 'make clean' like function, you can do either of following:
 
-	scons -c && rm -rf .scon*
+   make clean    # from inside build directory
+
+OR:
+	Delete build directory and start over at initial cmake step:
+   rm -rf build;
 
 3 - Compile-time options
 ------------------------
 You can enable and disable certain features of fceux at build time. 
-To edit these options, edit the "BoolOptions" following the "opts.AddVariables" method
-at the head of the "SConstruct" file in this source directory.  The
-default options will be fine for most users, but power users may want to
-tweak some of these options.
+Look in the src/CMakeList.txt file to tweak options.
 
 4 - GUI
 -------
-You can enable the GTK GUI by setting GTK to 1 in the SConstruct build file. 
-GfceuX is deprecated in favor of the new GTK GUI.  You can disable the GTK GUI at
-run-time by passing the --nogui option, or disable it at build-time by setting
-GTK to 0 in the SConstruct file.  If you prefer GTK3 to GTK2, you can set the
-GTK3 BoolVariable to 1 in the SConstruct.
+The Qt GUI is required and automatically builds as part of the build.
 
 5 - LUA Scripting
 -----------------
-FCEUX provides a LUA 5.1 engine that allows for in-game scripting capabilities.  LUA can be enabled or disabled at build time by adjusting the "LUA" BoolVariable in the SConstruct file.
+FCEUX provides a LUA 5.1 engine that allows for in-game scripting capabilities.  LUA is enabled either way. It is just a matter of whether LUA is statically linked internally or dynamically linked to a system library.
 
 A collection of LUA scripts are provided with the source distribuition in the output directory:
 
@@ -94,7 +101,7 @@ Finally, if any scripts complaints about "attempt to index global 'iup' (a nil v
 
 	require("iuplua")
 
-The latest version of iup (3.5 at the time of writing) is recomended.
+The latest version of iup (3.5 at the time of writing) is recommended.
 
 6 - FAQ
 -------
@@ -116,4 +123,4 @@ Running fceux through esddsp is known to fix some audio issues with pulseaudio o
 	
 7 - Contact
 -----------
-If you have an issue with fceux, report it in the sourceforge bug tracker (see fceux.com).  If you would like to contact the author of this readme personally, e-mail LTsmooth42 <at> gmail <dot> com.  You can also check us out at #fceu on irc.freenode.net.
+If you have an issue with fceux, report it in the github bug tracker (see fceux at github.com).  If you would like to contact the author of this readme personally, e-mail LTsmooth42 <at> gmail <dot> com.  You can also check us out at #fceu on irc.freenode.net.

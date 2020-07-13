@@ -1853,8 +1853,8 @@ int FCEUPPU_Loop(int skip) {
 
 			for (scanline = 0; scanline < totalscanlines; ) {	//scanline is incremented in  DoLine.  Evil. :/
 				deempcnt[deemp]++;
-				if (scanline < 240)
 #ifdef WIN32
+				if (scanline < 240)
 					DEBUG(FCEUD_UpdatePPUView(scanline, 1));
 #endif
 				DoLine();

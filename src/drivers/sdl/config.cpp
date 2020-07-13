@@ -102,7 +102,7 @@ LoadCPalette(const std::string &file)
 static void
 CreateDirs(const std::string &dir)
 {
-	char *subs[8]={"fcs","snaps","gameinfo","sav","cheats","movies","cfg.d"};
+	const char *subs[8]={"fcs","snaps","gameinfo","sav","cheats","movies","cfg.d"};
 	std::string subdir;
 	int x;
 
