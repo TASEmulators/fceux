@@ -1,0 +1,43 @@
+# jekyll configuration for github pages
+
+# ignore stuff not part of the website, everything except:
+# - documentation/
+# - web/
+# - fceux.png
+# - index.html
+exclude:
+- attic
+- fceux-server
+- getSDLKey
+- gfceu
+- m4
+- output
+- pipelines
+- src
+- vc
+- .gitignore
+- COPYING
+- ChangeLog
+- INSTALL
+- Makefile.am
+- NEWS
+- NewPPUtests.txt
+- README
+- SConstruct
+- STYLE-GUIDELINES-SDL
+- TODO-SDL
+- _config.yml
+- appveyor.yml
+- autogen.sh
+- azure-pipelines.yml
+- changelog.txt
+- configure.ac
+- debian-crossbuild.sh
+- doxygen
+- fceux.desktop
+- readme.md
+- fceux-server/fceux-net-server.exe
+- vc/BizHawk.Build.Tool.exe
+- vc/pscp.exe
+- vc/upx.exe
+- vc/zip.exe

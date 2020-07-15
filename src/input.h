@@ -295,7 +295,7 @@ struct EMUCMDTABLE
 	EMUCMDFN* fn_on;
 	EMUCMDFN* fn_off;
 	int state;
-	char* name;
+	const char* name;
 	int flags; //EMUCMDFLAG
 };
 

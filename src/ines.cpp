@@ -233,7 +233,7 @@ static void SetInput(void) {
 
 struct BADINF {
 	uint64 md5partial;
-	char *name;
+	const char *name;
 	uint32 type;
 };
 
@@ -417,7 +417,7 @@ static void CheckHInfo(void) {
 		if (tofix & 1)
 			sprintf(gigastr + strlen(gigastr), "The mapper number should be set to %d.  ", MapperNo);
 		if (tofix & 2) {
-			char *mstr[3] = { "Horizontal", "Vertical", "Four-screen" };
+			const char *mstr[3] = { "Horizontal", "Vertical", "Four-screen" };
 			sprintf(gigastr + strlen(gigastr), "Mirroring should be set to \"%s\".  ", mstr[Mirroring & 3]);
 		}
 		if (tofix & 4)
@@ -839,7 +839,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 		FCEU_printf("\n");
 	}
 
-	char* mappername = "Not Listed";
+	const char* mappername = "Not Listed";
 
 	for (int mappertest = 0; mappertest < (sizeof bmap / sizeof bmap[0]) - 1; mappertest++) {
 		if (bmap[mappertest].number == MapperNo) {

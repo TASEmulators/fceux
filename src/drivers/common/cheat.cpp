@@ -176,7 +176,7 @@ int AddToList(char *text, uint32 id)
 **/
 
 typedef struct MENU {
-	char *text;
+	const char *text;
 	void *action;
 	int type;	// 0 for menu, 1 for function.
 } MENU;
@@ -392,7 +392,7 @@ static void ShowRes(void)
  }
 }
 
-static int ShowShortList(char *moe[], int n, int def)
+static int ShowShortList(const char *moe[], int n, int def)
 {
  int x,c;
  int baa; //mbg merge 7/17/06 made to normal int
@@ -430,7 +430,7 @@ static void DoSearch(void)
 {
  static int v1=0,v2=0;
  static int method=0;
- char *m[9]={"O==V1 && C==V2",
+ const char *m[9]={"O==V1 && C==V2",
    "O==V1 && |O-C|==V2",
    "|O-C|==V2",
    "O!=C",

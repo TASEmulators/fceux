@@ -43,7 +43,7 @@ int str_ltrim(char *str, int flags);
 int str_rtrim(char *str, int flags);
 int str_strip(char *str, int flags);
 int chr_replace(char *str, char search, char replace);
-int str_replace(char *str, char *search, char *replace);
+int str_replace(char *str, const char *search, const char *replace);
 
 int HexStringToBytesLength(const std::string& str);
 int Base64StringToBytesLength(const std::string& str);

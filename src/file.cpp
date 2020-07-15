@@ -33,7 +33,11 @@
 #include "utils/memory.h"
 #include "utils/md5.h"
 #ifdef _SYSTEM_MINIZIP
+#ifdef __linux
 #include <minizip/unzip.h>
+#else // Apple Most Likely
+#include <unzip.h>
+#endif
 #else
 #include "utils/unzip.h"
 #endif
@@ -260,7 +264,7 @@ zpfail:
 	return 0;
 }
 
-FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index, const char** extensions, int* userCancel)
+FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, const char *mode, char *ext, int index, const char** extensions, int* userCancel)
 {
 	FILE *ipsfile=0;
 	FCEUFILE *fceufp=0;

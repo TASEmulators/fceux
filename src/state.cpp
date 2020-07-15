@@ -848,7 +848,7 @@ void ResetExState(void (*PreSave)(void), void (*PostSave)(void))
 	for(x=0;x<SFEXINDEX;x++)
 	{
 		if(SFMDATA[x].desc)
-			free(SFMDATA[x].desc);
+			free( (void*)SFMDATA[x].desc);
 	}
 	// adelikat, 3/14/09:  had to add this to clear out the size parameter.  NROM(mapper 0) games were having savestate crashes if loaded after a non NROM game	because the size variable was carrying over and causing savestates to save too much data
 	SFMDATA[0].s = 0;
@@ -858,7 +858,7 @@ void ResetExState(void (*PreSave)(void), void (*PostSave)(void))
 	SFEXINDEX=0;
 }
 
-void AddExState(void *v, uint32 s, int type, char *desc)
+void AddExState(void *v, uint32 s, int type, const char *desc)
 {
 	if(s==~0)
 	{
@@ -885,8 +885,8 @@ void AddExState(void *v, uint32 s, int type, char *desc)
 
 	if(desc)
 	{
-		SFMDATA[SFEXINDEX].desc=(char *)FCEU_malloc(strlen(desc)+1);
-		strcpy(SFMDATA[SFEXINDEX].desc,desc);
+		SFMDATA[SFEXINDEX].desc=(const char *)FCEU_malloc(strlen(desc)+1);
+		strcpy( (char*)SFMDATA[SFEXINDEX].desc,desc);
 	}
 	else
 		SFMDATA[SFEXINDEX].desc=0;

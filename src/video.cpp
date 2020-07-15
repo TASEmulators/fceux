@@ -398,7 +398,7 @@ void snapAVI()
 		FCEUI_AviVideoUpdate(XBuf);
 }
 
-void FCEU_DispMessageOnMovie(char *format, ...)
+void FCEU_DispMessageOnMovie(const char *format, ...)
 {
 	va_list ap;
 
@@ -414,7 +414,7 @@ void FCEU_DispMessageOnMovie(char *format, ...)
 		guiMessage.howlong = 0;
 }
 
-void FCEU_DispMessage(char *format, int disppos=0, ...)
+void FCEU_DispMessage(const char *format, int disppos=0, ...)
 {
 	va_list ap;
 
@@ -455,7 +455,7 @@ void FCEU_ResetMessages()
 }
 
 
-static int WritePNGChunk(FILE *fp, uint32 size, char *type, uint8 *data)
+static int WritePNGChunk(FILE *fp, uint32 size, const char *type, uint8 *data)
 {
 	uint32 crc;
 

@@ -912,7 +912,7 @@ INT_PTR CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			}
 
 			// limit the text
-			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, addrCtrlID), GWL_WNDPROC, (LONG)FilterEditCtrlProc);
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, addrCtrlID), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 
 			SetWindowText(hDlg, title);
 		}

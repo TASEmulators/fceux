@@ -2,6 +2,7 @@
 
 id
 pwd
+uname -a
 cat /etc/os-release
 
 SCRIPT_DIR=$( cd $(dirname $BASH_SOURCE[0]); pwd );
@@ -54,22 +55,29 @@ pkg-config --cflags --libs  minizip
 # GTK+-2 is no longer needed
 #sudo apt-get install libgtk2.0-dev
 
-# Install GTK+-3 
-echo '****************************************'
-echo 'Install Dependency libgtk-3-dev'
-echo '****************************************'
-sudo apt-get --assume-yes  install libgtk-3-dev
-pkg-config --cflags --libs  gtk+-3.0
+# GTK3 was retired in favor of cross platform QT
+## Install GTK+-3 
+#echo '****************************************'
+#echo 'Install Dependency libgtk-3-dev'
+#echo '****************************************'
+#sudo apt-get --assume-yes  install libgtk-3-dev
+#pkg-config --cflags --libs  gtk+-3.0
+#
+## Install GTK+-3 Sourceview
+#sudo apt-get --assume-yes  install libgtksourceview-3.0-dev
+#pkg-config --cflags --libs  gtksourceview-3.0
 
-# Install GTK+-3 Sourceview
-sudo apt-get --assume-yes  install libgtksourceview-3.0-dev
-pkg-config --cflags --libs  gtksourceview-3.0
+# Install QT5 
+echo '****************************************'
+echo 'Install Dependency Qt5'
+echo '****************************************'
+sudo apt-get --assume-yes  install qt5-default
 
 # Install scons
-echo '****************************************'
-echo 'Install Build Dependency scons'
-echo '****************************************'
-sudo apt-get --assume-yes  install scons
+#echo '****************************************'
+#echo 'Install Build Dependency scons'
+#echo '****************************************'
+#sudo apt-get --assume-yes  install scons
 
 # Install cppcheck
 echo '****************************************'
@@ -81,8 +89,35 @@ echo '**************************'
 echo '***  Building Project  ***'
 echo '**************************'
 mkdir -p $INSTALL_PREFIX/usr;
-scons   --clean
-scons   GTK3=1   SYSTEM_LUA=1   SYSTEM_MINIZIP=1   CREATE_AVI=1  install  --prefix=$INSTALL_PREFIX/usr
+#scons   --clean
+#scons   GTK3=1   SYSTEM_LUA=1   SYSTEM_MINIZIP=1   CREATE_AVI=1  install  --prefix=$INSTALL_PREFIX/usr
+echo "Num CPU: `nproc`";
+mkdir build; cd build;
+#qmake PREFIX=$INSTALL_PREFIX/usr  ..
+cmake  \
+   -DCMAKE_BUILD_TYPE=Release  \
+   -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
+   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+	..
+make -j `nproc` 
+make  install
+
+# Install Files
+#cd .. # cd out of build
+#mkdir -p $INSTALL_PREFIX/usr/bin/.
+#mkdir -p $INSTALL_PREFIX/usr/share/fceux
+#mkdir -p $INSTALL_PREFIX/usr/share/pixmaps
+#mkdir -p $INSTALL_PREFIX/usr/share/applications
+#mkdir -p $INSTALL_PREFIX/usr/man/man6
+#
+#cp -f ./build/fceux                       $INSTALL_PREFIX/usr/bin/.
+#cp -a ./output/*                          $INSTALL_PREFIX/usr/share/fceux/.
+#cp -a ./src/auxlib.lua                    $INSTALL_PREFIX/usr/share/fceux/.
+#cp -a ./fceux.png                         $INSTALL_PREFIX/usr/share/pixmaps/.
+#cp -a ./fceux.desktop                     $INSTALL_PREFIX/usr/share/applications/.
+#cp -a ./documentation/fceux.6             $INSTALL_PREFIX/usr/man/man6/.
+#cp -a ./documentation/fceux-net-server.6  $INSTALL_PREFIX/usr/man/man6/.
+
 
 # Debug via ssh if necessary
 if [ ! -z $APPVEYOR_SSH_BLOCK ]; then

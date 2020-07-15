@@ -75,7 +75,11 @@ extern void RefreshThrottleFPS();
 #include "drivers/win/memwatch.h"
 #include "drivers/win/tracer.h"
 #else
+#ifdef __QT_DRIVER__
+#include "drivers/Qt/sdl.h"
+#else
 #include "drivers/sdl/sdl.h"
+#endif
 #endif
 
 #include <fstream>
@@ -980,7 +984,8 @@ void FCEU_ResetVidSys(void) {
 
 FCEUS FSettings;
 
-void FCEU_printf(char *format, ...) {
+void FCEU_printf(const char *format, ...) 
+{
 	char temp[2048];
 
 	va_list ap;
@@ -999,7 +1004,8 @@ void FCEU_printf(char *format, ...) {
 	va_end(ap);
 }
 
-void FCEU_PrintError(char *format, ...) {
+void FCEU_PrintError(const char *format, ...) 
+{
 	char temp[2048];
 
 	va_list ap;
@@ -1048,38 +1054,34 @@ void FCEUI_SetRegion(int region, int notify) {
 			normalscanlines = 240;
 			pal_emulation = 0;
 			dendy = 0;
-// until it's fixed on sdl. see issue #740
-#ifdef WIN32
+
 			if (notify)
 			{
 				FCEU_DispMessage("NTSC mode set", 0);
 				FCEUI_printf("NTSC mode set");
 			}
-#endif
 			break;
 		case 1: // PAL
 			normalscanlines = 240;
 			pal_emulation = 1;
 			dendy = 0;
-#ifdef WIN32			
+
 			if (notify)
 			{
 				FCEU_DispMessage("PAL mode set", 0);
 				FCEUI_printf("PAL mode set");
 			}
-#endif
 			break;
 		case 2: // Dendy
 			normalscanlines = 290;
 			pal_emulation = 0;
 			dendy = 1;
-#ifdef WIN32			
+
 			if (notify)
 			{
 				FCEU_DispMessage("Dendy mode set", 0);
 				FCEUI_printf("Dendy mode set");
 			}
-#endif
 			break;
 	}
 	normalscanlines += newppu;
