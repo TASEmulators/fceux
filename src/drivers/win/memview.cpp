@@ -1409,13 +1409,19 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 			if (wParam >= '0' && wParam <= '9')
 			{
-				int bookmark = wParam - '0';
-				int newValue = handleBookmarkMenu(bookmark);
-
-				if (newValue != -1)
+				char buf[3];
+				sprintf(buf, "%c", wParam);
+				int key_num;
+				sscanf(buf, "%d", &key_num);
+				key_num = (key_num + 9) % 10;
+				if (hexBookmarkShortcut[key_num] != -1)
 				{
-					ChangeMemViewFocus(hexBookmarks[bookmark].editmode,newValue,-1);
-					UpdateColorTable();
+					int address = hexBookmarks[hexBookmarkShortcut[key_num]].address;
+					if (address != -1)
+					{
+						ChangeMemViewFocus(hexBookmarks[hexBookmarkShortcut[key_num]].editmode, address, -1);
+						UpdateColorTable();
+					}
 				}
 			}
 
