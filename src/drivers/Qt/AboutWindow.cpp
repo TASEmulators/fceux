@@ -16,6 +16,7 @@
 
 static const char *Authors[] = {
 	"Linux/SDL Developers:",
+	"\t mjbudd77",
 	"\t Lukas Sabota //punkrockguy318", "\t Soules", "\t Bryan Cain", "\t radsaq",
 		"\t Shinydoofy",
 	"FceuX 2.0 Developers:",

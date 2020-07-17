@@ -19,6 +19,7 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/GamePadConf.h"
 #include "Qt/HotKeyConf.h"
+#include "Qt/PaletteConf.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
 #include "Qt/AboutWindow.h"
@@ -284,6 +285,14 @@ void consoleWin_t::createMainMenu(void)
     connect(hotkeyConfig, SIGNAL(triggered()), this, SLOT(openHotkeyConfWin(void)) );
 
     optMenu->addAction(hotkeyConfig);
+
+	 // Options -> Palette Config
+	 paletteConfig = new QAction(tr("Palette Config"), this);
+    //paletteConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+    paletteConfig->setStatusTip(tr("Palette Configure"));
+    connect(paletteConfig, SIGNAL(triggered()), this, SLOT(openPaletteConfWin(void)) );
+
+    optMenu->addAction(paletteConfig);
 
 	 // Options -> Auto-Resume
 	 autoResume = new QAction(tr("Auto-Resume Play"), this);
@@ -929,6 +938,22 @@ void consoleWin_t::openHotkeyConfWin(void)
    delete hkConfWin;
 
    //printf("Hotkey Config Window Destroyed\n");
+}
+
+void consoleWin_t::openPaletteConfWin(void)
+{
+	PaletteConfDialog_t *paletteConfWin;
+
+	//printf("Open Palette Config Window\n");
+	
+   paletteConfWin = new PaletteConfDialog_t(this);
+	
+   paletteConfWin->show();
+   paletteConfWin->exec();
+
+   delete paletteConfWin;
+
+   //printf("Palette Config Window Destroyed\n");
 }
 
 void consoleWin_t::toggleAutoResume(void)
