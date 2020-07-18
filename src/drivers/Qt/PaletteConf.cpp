@@ -16,10 +16,11 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	QVBoxLayout *mainLayout, *vbox;
 	QHBoxLayout *hbox1;
    QGroupBox *frame;
-   QPushButton *closebutton;
+   //QPushButton *closebutton;
 	QPushButton *button;
 	int hue, tint;
 	char stmp[64];
+	std::string paletteFile;
 
 	// sync with config
 	g_config->getOption ("SDL.Hue", &hue);
@@ -37,8 +38,11 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	connect( button, SIGNAL(clicked(void)), this, SLOT(openPaletteFile(void)) );
 
+	g_config->getOption ("SDL.Palette", &paletteFile);
+
 	custom_palette_path = new QLineEdit();
 	custom_palette_path->setReadOnly(true);
+	custom_palette_path->setText( paletteFile.c_str() );
 	hbox1->addWidget( custom_palette_path );
 
 	button = new QPushButton( tr("Clear") );
@@ -124,9 +128,11 @@ void PaletteConfDialog_t::hueChanged(int v)
 	g_config->getOption ("SDL.Tint", &t);
 	g_config->getOption ("SDL.NTSCpalette", &c);
 
-	fceuWrapperLock();
-	FCEUI_SetNTSCTH (c, t, v);
-	fceuWrapperUnLock();
+	if ( fceuWrapperTryLock() )
+	{
+		FCEUI_SetNTSCTH (c, t, v);
+		fceuWrapperUnLock();
+	}
 }
 //----------------------------------------------------
 void PaletteConfDialog_t::tintChanged(int v)
@@ -143,24 +149,42 @@ void PaletteConfDialog_t::tintChanged(int v)
 	g_config->getOption ("SDL.NTSCpalette", &c);
 	g_config->getOption ("SDL.Hue", &h);
 
-	fceuWrapperLock();
-	FCEUI_SetNTSCTH (c, v, h);
-	fceuWrapperUnLock();
+	if ( fceuWrapperTryLock() )
+	{
+		FCEUI_SetNTSCTH (c, v, h);
+		fceuWrapperUnLock();
+	}
 }
 //----------------------------------------------------
 void PaletteConfDialog_t::use_NTSC_Changed(int state)
 {
+	int h, t;
 	int value = (state == Qt::Unchecked) ? 0 : 1;
 
 	g_config->setOption ("SDL.NTSCpalette", value);
 	g_config->save ();
-	UpdateEMUCore (g_config);
+
+	g_config->getOption ("SDL.Hue", &h);
+	g_config->getOption ("SDL.Tint", &t);
+
+	if ( fceuWrapperTryLock() )
+	{
+		FCEUI_SetNTSCTH (value, t, h);
+		//UpdateEMUCore (g_config);
+		fceuWrapperUnLock();
+	}
 }
 //----------------------------------------------------
 void PaletteConfDialog_t::clearPalette(void)
 {
-	g_config->setOption ("SDL.Palette", 0);
+	g_config->setOption ("SDL.Palette", "");
 	custom_palette_path->setText("");
+
+	if ( fceuWrapperTryLock() )
+	{
+		FCEUI_SetUserPalette( NULL, 0);
+		fceuWrapperUnLock();
+	}
 }
 //----------------------------------------------------
 void PaletteConfDialog_t::openPaletteFile(void)
@@ -204,9 +228,11 @@ void PaletteConfDialog_t::openPaletteFile(void)
 	g_config->setOption ("SDL.Palette", filename.toStdString().c_str() );
 	g_config->setOption ("SDL.NTSCpalette", 0);
 
-	fceuWrapperLock();
-	LoadCPalette ( filename.toStdString().c_str() );
-	fceuWrapperUnLock();
+	if ( fceuWrapperTryLock() )
+	{
+		LoadCPalette ( filename.toStdString().c_str() );
+		fceuWrapperUnLock();
+	}
 
 	custom_palette_path->setText( filename.toStdString().c_str() );
 

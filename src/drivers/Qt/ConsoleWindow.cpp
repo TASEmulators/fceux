@@ -40,7 +40,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
    setWindowIcon(QIcon(":fceux1.png"));
 
 	gameTimer  = new QTimer( this );
-	mutex      = new QMutex( QMutex::NonRecursive );
+	mutex      = new QMutex( QMutex::Recursive );
 	emulatorThread = new emulatorThread_t();
 
    connect(emulatorThread, &QThread::finished, emulatorThread, &QObject::deleteLater);

@@ -56,7 +56,8 @@ static int inited = 0;
 static int noconfig=0;
 static int frameskip=0;
 static int periodic_saves = 0;
-static bool  mutexLocked = 0;
+static int   mutexLocks = 0;
+static bool  emulatorHasMutux = 0;
 
 extern double g_fpsScale;
 
@@ -78,6 +79,7 @@ int mutecapture = 0;
 void FCEUD_Message(const char *text)
 {
 	fputs(text, stdout);
+	fprintf(stdout, "\n");
 }
 
 /**
@@ -911,7 +913,7 @@ static void DoFun(int frameskip, int periodic_saves)
 void fceuWrapperLock(void)
 {
 	consoleWindow->mutex->lock();
-	mutexLocked = 1;
+	mutexLocks++;
 }
 
 bool fceuWrapperTryLock(int timeout)
@@ -922,17 +924,17 @@ bool fceuWrapperTryLock(int timeout)
 
 	if ( lockAcq )
 	{
-		mutexLocked = 1;
+		mutexLocks++;
 	}
 	return lockAcq;
 }
 
 void fceuWrapperUnLock(void)
 {
-	if ( mutexLocked )
+	if ( mutexLocks > 0 )
 	{
 		consoleWindow->mutex->unlock();
-		mutexLocked = 0;
+		mutexLocks--;
 	}
 	else
 	{
@@ -942,18 +944,31 @@ void fceuWrapperUnLock(void)
 
 bool fceuWrapperIsLocked(void)
 {
-	return mutexLocked;
+	return mutexLocks > 0;
 }
 
 int  fceuWrapperUpdate( void )
 {
-	fceuWrapperLock();
+	bool lock_acq;
+
+	lock_acq = fceuWrapperTryLock();
+
+	if ( !lock_acq )
+	{
+		printf("Error: Emulator Failed to Acquire Mutex\n");
+		usleep( 100000 );
+
+		return -1;
+	}
+	emulatorHasMutux = 1;
  
 	if ( GameInfo && !FCEUI_EmulationPaused() )
 	{
 		DoFun(frameskip, periodic_saves);
 	
 		fceuWrapperUnLock();
+
+		emulatorHasMutux = 0;
 
 		while ( SpeedThrottle() )
 		{
@@ -965,6 +980,8 @@ int  fceuWrapperUpdate( void )
 	else
 	{
 		fceuWrapperUnLock();
+
+		emulatorHasMutux = 0;
 
 		usleep( 100000 );
 	}
