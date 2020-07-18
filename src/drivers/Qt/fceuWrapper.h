@@ -26,7 +26,7 @@ int  fceuWrapperInit( int argc, char *argv[] );
 int  fceuWrapperClose( void );
 int  fceuWrapperUpdate( void );
 void fceuWrapperLock(void);
-bool fceuWrapperTryLock(int timeout);
+bool fceuWrapperTryLock(int timeout = 1000);
 bool fceuWrapperIsLocked(void);
 void fceuWrapperUnLock(void);
 int  fceuWrapperSoftReset(void);

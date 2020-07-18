@@ -262,10 +262,12 @@ void ConsoleSndConfDialog_t::bufSizeChanged(int value)
 
 	g_config->setOption ("SDL.Sound.BufSize", value);
 	// reset sound subsystem for changes to take effect
-	fceuWrapperLock();
-	KillSound ();
-	InitSound ();
-	fceuWrapperUnLock();
+	if ( fceuWrapperTryLock() )
+	{
+		KillSound ();
+		InitSound ();
+		fceuWrapperUnLock();
+	}
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::volumeChanged(int value)
@@ -278,9 +280,11 @@ void ConsoleSndConfDialog_t::volumeChanged(int value)
 
 	g_config->setOption ("SDL.Sound.Volume", value);
 
-	fceuWrapperLock();
-	FCEUI_SetSoundVolume (value);
-	fceuWrapperUnLock();
+	if ( fceuWrapperTryLock() )
+	{
+		FCEUI_SetSoundVolume (value);
+		fceuWrapperUnLock();
+	}
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::triangleChanged(int value)
@@ -293,9 +297,11 @@ void ConsoleSndConfDialog_t::triangleChanged(int value)
 
 	g_config->setOption ("SDL.Sound.TriangleVolume", value);
 
-	fceuWrapperLock();
-	FCEUI_SetTriangleVolume (value);
-	fceuWrapperUnLock();
+	if ( fceuWrapperTryLock() )
+	{
+		FCEUI_SetTriangleVolume (value);
+		fceuWrapperUnLock();
+	}
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::square1Changed(int value)
@@ -308,9 +314,11 @@ void ConsoleSndConfDialog_t::square1Changed(int value)
 
 	g_config->setOption ("SDL.Sound.Square1Volume", value);
 
-	fceuWrapperLock();
-	FCEUI_SetSquare1Volume (value);
-	fceuWrapperUnLock();
+	if ( fceuWrapperTryLock() )
+	{
+		FCEUI_SetSquare1Volume (value);
+		fceuWrapperUnLock();
+	}
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::square2Changed(int value)
@@ -323,9 +331,11 @@ void ConsoleSndConfDialog_t::square2Changed(int value)
 
 	g_config->setOption ("SDL.Sound.Square2Volume", value);
 
-	fceuWrapperLock();
-	FCEUI_SetSquare2Volume (value);
-	fceuWrapperUnLock();
+	if ( fceuWrapperTryLock() )
+	{
+		FCEUI_SetSquare2Volume (value);
+		fceuWrapperUnLock();
+	}
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::noiseChanged(int value)
@@ -338,9 +348,11 @@ void ConsoleSndConfDialog_t::noiseChanged(int value)
 
 	g_config->setOption ("SDL.Sound.NoiseVolume", value);
 
-	fceuWrapperLock();
-	FCEUI_SetNoiseVolume (value);
-	fceuWrapperUnLock();
+	if ( fceuWrapperTryLock() )
+	{
+		FCEUI_SetNoiseVolume (value);
+		fceuWrapperUnLock();
+	}
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::pcmChanged(int value)
@@ -353,9 +365,11 @@ void ConsoleSndConfDialog_t::pcmChanged(int value)
 
 	g_config->setOption ("SDL.Sound.PCMVolume", value);
 
-	fceuWrapperLock();
-	FCEUI_SetPCMVolume (value);
-	fceuWrapperUnLock();
+	if ( fceuWrapperTryLock() )
+	{
+		FCEUI_SetPCMVolume (value);
+		fceuWrapperUnLock();
+	}
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::enaSoundStateChange(int value)
@@ -427,10 +441,12 @@ void ConsoleSndConfDialog_t::soundQualityChanged(int index)
 	g_config->setOption ("SDL.Sound.Quality", qualitySelect->itemData(index).toInt() );
 
 	// reset sound subsystem for changes to take effect
-	fceuWrapperLock();
-	KillSound ();
-	InitSound ();
-	fceuWrapperUnLock();
+	if ( fceuWrapperTryLock() )
+	{
+		KillSound ();
+		InitSound ();
+		fceuWrapperUnLock();
+	}
 	g_config->save ();
 }
 //----------------------------------------------------
@@ -440,10 +456,12 @@ void ConsoleSndConfDialog_t::soundRateChanged(int index)
 
 	g_config->setOption ("SDL.Sound.Rate", rateSelect->itemData(index).toInt() );
 	// reset sound subsystem for changes to take effect
-	fceuWrapperLock();
-	KillSound ();
-	InitSound ();
-	fceuWrapperUnLock();
+	if ( fceuWrapperTryLock() )
+	{
+		KillSound ();
+		InitSound ();
+		fceuWrapperUnLock();
+	}
 	g_config->save ();
 }
 //----------------------------------------------------

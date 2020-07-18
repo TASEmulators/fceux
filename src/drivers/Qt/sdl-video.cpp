@@ -297,6 +297,7 @@ static void RedoPalette()
 {
 	if (s_curbpp > 8) 
 	{
+		//printf("Refresh Palette\n");
 		SetPaletteBlitToHigh((uint8*)s_psdl);
 	} 
 }
