@@ -9,6 +9,9 @@
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 
+#include "../../ppu.h"
+
+extern bool force_grayscale;
 //----------------------------------------------------
 PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	: QDialog( parent )
@@ -31,7 +34,24 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	mainLayout = new QVBoxLayout();
 
 	frame = new QGroupBox( tr("Custom Palette:") );
+	vbox  = new QVBoxLayout();
 	hbox1 = new QHBoxLayout();
+
+	useCustom  = new QCheckBox( tr("Use Custom Palette") );
+	GrayScale  = new QCheckBox( tr("Force Grayscale") );
+	deemphSwap = new QCheckBox( tr("De-emphasis Bit Swap") );
+
+	GrayScale->setChecked( force_grayscale );
+	deemphSwap->setChecked( paldeemphswap );
+
+	connect(useCustom , SIGNAL(stateChanged(int)), this, SLOT(use_Custom_Changed(int)) );
+	connect(GrayScale , SIGNAL(stateChanged(int)), this, SLOT(force_GrayScale_Changed(int)) );
+	connect(deemphSwap, SIGNAL(stateChanged(int)), this, SLOT(deemphswap_Changed(int)) );
+
+	vbox->addWidget( useCustom );
+	vbox->addLayout( hbox1 );
+	vbox->addWidget( GrayScale );
+	vbox->addWidget( deemphSwap);
 
 	button = new QPushButton( tr("Open Palette") );
 	hbox1->addWidget( button );
@@ -50,7 +70,7 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	connect( button, SIGNAL(clicked(void)), this, SLOT(clearPalette(void)) );
 
-	frame->setLayout( hbox1 );
+	frame->setLayout( vbox );
 
 	mainLayout->addWidget( frame );
 
@@ -152,6 +172,59 @@ void PaletteConfDialog_t::tintChanged(int v)
 	if ( fceuWrapperTryLock() )
 	{
 		FCEUI_SetNTSCTH (c, v, h);
+		fceuWrapperUnLock();
+	}
+}
+//----------------------------------------------------
+void PaletteConfDialog_t::use_Custom_Changed(int state)
+{
+	int value = (state == Qt::Unchecked) ? 0 : 1;
+	std::string filename;
+
+	g_config->getOption ("SDL.Palette", &filename);
+
+	if ( fceuWrapperTryLock() )
+	{
+		if ( value && (filename.size() > 0) )
+		{
+			LoadCPalette ( filename.c_str() );
+		}
+		else
+		{
+			FCEUI_SetUserPalette( NULL, 0);
+		}
+		fceuWrapperUnLock();
+	}
+}
+//----------------------------------------------------
+void PaletteConfDialog_t::force_GrayScale_Changed(int state)
+{
+	int value = (state == Qt::Unchecked) ? 0 : 1;
+
+	if ( fceuWrapperTryLock() )
+	{
+		int e, h, t;
+		g_config->getOption ("SDL.NTSCpalette", &e);
+		g_config->getOption ("SDL.Hue", &h);
+		g_config->getOption ("SDL.Tint", &t);
+		force_grayscale = value ? true : false;
+		FCEUI_SetNTSCTH( e, t, h);
+		fceuWrapperUnLock();
+	}
+}
+//----------------------------------------------------
+void PaletteConfDialog_t::deemphswap_Changed(int state)
+{
+	int value = (state == Qt::Unchecked) ? 0 : 1;
+
+	if ( fceuWrapperTryLock() )
+	{
+		int e, h, t;
+		g_config->getOption ("SDL.NTSCpalette", &e);
+		g_config->getOption ("SDL.Hue", &h);
+		g_config->getOption ("SDL.Tint", &t);
+		paldeemphswap = value ? true : false;
+		FCEUI_SetNTSCTH( e, t, h);
 		fceuWrapperUnLock();
 	}
 }
