@@ -57,6 +57,7 @@ static int noconfig=0;
 static int frameskip=0;
 static int periodic_saves = 0;
 static int   mutexLocks = 0;
+static int   mutexPending = 0;
 static bool  emulatorHasMutux = 0;
 
 extern double g_fpsScale;
@@ -912,7 +913,9 @@ static void DoFun(int frameskip, int periodic_saves)
 
 void fceuWrapperLock(void)
 {
+	mutexPending++;
 	consoleWindow->mutex->lock();
+	mutexPending--;
 	mutexLocks++;
 }
 
@@ -920,7 +923,9 @@ bool fceuWrapperTryLock(int timeout)
 {
 	bool lockAcq;
 
+	mutexPending++;
 	lockAcq = consoleWindow->mutex->tryLock( timeout );
+	mutexPending--;
 
 	if ( lockAcq )
 	{
@@ -950,6 +955,13 @@ bool fceuWrapperIsLocked(void)
 int  fceuWrapperUpdate( void )
 {
 	bool lock_acq;
+
+	// If a request is pending, 
+	// sleep to allow request to be serviced.
+	if ( mutexPending > 0 )
+	{
+		usleep( 100000 );
+	}
 
 	lock_acq = fceuWrapperTryLock();
 
