@@ -751,8 +751,7 @@ void loadNameFiles()
 }
 
 // bookmarks
-std::vector<unsigned int> bookmarks_addr;
-std::vector<std::string> bookmarks_name;
+std::vector <std::pair<unsigned int, std::string>> bookmarks; // first:address second:name
 
 /**
 * Returns the bookmark address of a CPU bookmark identified by its index.
@@ -763,8 +762,8 @@ std::vector<std::string> bookmarks_name;
 **/
 unsigned int getBookmarkAddress(unsigned int index)
 {
-	if (index < bookmarks_addr.size())
-		return bookmarks_addr[index];
+	if (index < bookmarks.size())
+		return bookmarks[index].first;
 	else
 		return 0;
 }
@@ -777,18 +776,15 @@ unsigned int getBookmarkAddress(unsigned int index)
 **/
 void AddDebuggerBookmark2(HWND hwnd, unsigned int addr)
 {
-	int index = bookmarks_addr.size();
-	bookmarks_addr.push_back(addr);
+	int index = bookmarks.size();
 	// try to find Symbolic name for this address
 	Name* node = findNode(getNamesPointerForAddress(addr), addr);
-	if (node && node->name)
-		bookmarks_name.push_back(node->name);
-	else
-		bookmarks_name.push_back("");
+	std::pair<unsigned int, std::string> bookmark(addr, node && node->name ? node->name : "");
+	bookmarks.push_back(bookmark);
 
 	// add new item to ListBox
 	char buffer[256];
-	sprintf(buffer, "%04X %s", bookmarks_addr[index], bookmarks_name[index].c_str());
+	sprintf(buffer, "%04X %s", bookmark.first, bookmark.second.c_str());
 	SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_ADDSTRING, 0, (LPARAM)buffer);
 	// select this item
 	SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_SETCURSEL, index, 0);
@@ -833,13 +829,12 @@ void DeleteDebuggerBookmark(HWND hwnd)
 	} else
 	{
 		// Erase the selected bookmark
-		bookmarks_addr.erase(bookmarks_addr.begin() + selectedItem);
-		bookmarks_name.erase(bookmarks_name.begin() + selectedItem);
+		bookmarks.erase(bookmarks.begin() + selectedItem);
 		SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_DELETESTRING, selectedItem, 0);
 		// Select next item
-		if (selectedItem >= (bookmarks_addr.size() - 1))
+		if (selectedItem >= (bookmarks.size() - 1))
 			// select last item
-			SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_SETCURSEL, bookmarks_addr.size() - 1, 0);
+			SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_SETCURSEL, bookmarks.size() - 1, 0);
 		else
 			SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_SETCURSEL, selectedItem, 0);
 
@@ -850,36 +845,33 @@ void NameDebuggerBookmark(HWND hwnd)
 {
 	// Get the selected bookmark
 	int selectedItem = SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_GETCURSEL, 0, 0);
-	if (selectedItem == LB_ERR || selectedItem >= (int)bookmarks_name.size())
+	if (selectedItem == LB_ERR || selectedItem >= (int)bookmarks.size())
 	{
 		MessageBox(hwnd, "Please select a bookmark from the list", "Error", MB_OK | MB_ICONERROR);
 		return;
 	} else
 	{
-		char bookmarkDescription[51] = { 0 };
-		if (bookmarks_name[selectedItem].size())
-			strcpy(bookmarkDescription, bookmarks_name[selectedItem].c_str());
-		else
+		std::pair<unsigned int, std::string> bookmark = bookmarks[selectedItem];
+		if (!bookmark.second.size())
 		{
-			bookmarkDescription[0] = 0;
 			// try to find the same address in bookmarks
-			for (int i = bookmarks_addr.size() - 1; i>= 0; i--)
+			for (int i = bookmarks.size() - 1; i>= 0; i--)
 			{
-				if (i != selectedItem && bookmarks_addr[i] == bookmarks_addr[selectedItem] && bookmarks_name[i].size())
+				if (i != selectedItem && bookmarks[i].first == bookmarks[selectedItem].first && bookmarks[i].second.size())
 				{
-					strcpy(bookmarkDescription, bookmarks_name[i].c_str());
+					bookmark.second = bookmarks[i].second;
 					break;
 				}
 			}
 		}
 		// Show the bookmark name dialog
-		if (DialogBoxParam(fceu_hInstance, "NAMEBOOKMARKDLG", hwnd, nameBookmarkCallB, (LPARAM)bookmarkDescription))
+		if (DialogBoxParam(fceu_hInstance, "NAMEBOOKMARKDLG", hwnd, nameBookmarkCallB, (LPARAM)&bookmark))
 		{
 			// Rename the selected bookmark
-			bookmarks_name[selectedItem] = bookmarkDescription;
+			bookmarks[selectedItem] = bookmark;
 			SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_DELETESTRING, selectedItem, 0);
 			char buffer[256];
-			sprintf(buffer, "%04X %s", bookmarks_addr[selectedItem], bookmarks_name[selectedItem].c_str());
+			sprintf(buffer, "%04X %s", bookmarks[selectedItem].first, bookmarks[selectedItem].second.c_str());
 			SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_INSERTSTRING, selectedItem, (LPARAM)buffer);
 			// Reselect the item (selection disappeared when it was deleted)
 			SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_SETCURSEL, selectedItem, 0);
@@ -889,17 +881,16 @@ void NameDebuggerBookmark(HWND hwnd)
 
 void DeleteAllDebuggerBookmarks()
 {
-	bookmarks_addr.resize(0);
-	bookmarks_name.resize(0);
+	bookmarks.resize(0);
 }
 
 void FillDebuggerBookmarkListbox(HWND hwnd)
 {		
 	SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_RESETCONTENT, 0, 0);
 	char buffer[256];
-	for (unsigned int i = 0; i < bookmarks_addr.size(); ++i)
+	for (unsigned int i = 0; i < bookmarks.size(); ++i)
 	{
-		sprintf(buffer, "%04X %s", bookmarks_addr[i], bookmarks_name[i].c_str());
+		sprintf(buffer, "%04X %s", bookmarks[i].first, bookmarks[i].second.c_str());
 		SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_ADDSTRING, 0, (LPARAM)buffer);
 	}
 }

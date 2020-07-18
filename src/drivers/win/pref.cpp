@@ -47,16 +47,16 @@ int storeDebuggerPreferences(FILE* f)
 	uint8 tmp;
 
 	// Write the number of CPU bookmarks
-	size = bookmarks_addr.size();
-	bookmarks_name.resize(size);
+	size = bookmarks.size();
+	bookmarks.resize(size);
 	if (fwrite(&size, sizeof(unsigned int), 1, f) != 1) return 1;
 	// Write the data of those bookmarks
 	for (i = 0; i < (int)size; ++i)
 	{
-		if (fwrite(&bookmarks_addr[i], sizeof(unsigned int), 1, f) != 1) return 1;
-		len = bookmarks_name[i].size();
+		if (fwrite(&bookmarks[i].first, sizeof(unsigned int), 1, f) != 1) return 1;
+		len = bookmarks[i].second.size();
 		if (fwrite(&len, sizeof(unsigned int), 1, f) != 1) return 1;
-		if (fwrite(bookmarks_name[i].c_str(), 1, len, f) != len) return 1;
+		if (fwrite(bookmarks[i].second.c_str(), 1, len, f) != len) return 1;
 	}
 
 	// Write all breakpoints
@@ -142,7 +142,19 @@ int storeHexPreferences(FILE* f)
 		// Writes the actual bookmark description
 		if (fwrite(hexBookmarks[i].description, 1, len, f) != len) return 1;
 	}
-	
+
+	// optional section: save bookmark shortcut matches
+	if (numHexBookmarkShortcut)
+	{
+		fwrite(&numHexBookmarkShortcut, sizeof(numHexBookmarkShortcut), 1, f);
+		for (int i = 0; i < 10; ++i)
+			if (hexBookmarkShortcut[i] != -1)
+			{
+				fwrite(&hexBookmarkShortcut[i], sizeof(hexBookmarkShortcut[i]), 1, f);
+				fwrite(&i, sizeof(i), 1, f);
+			}
+	}
+
 	return 0;
 }
 
@@ -229,18 +241,17 @@ int loadDebuggerPreferences(FILE* f)
 
 	// Read the number of CPU bookmarks
 	if (fread(&size, sizeof(unsigned int), 1, f) != 1) return 1;
-	bookmarks_addr.resize(size);
-	bookmarks_name.resize(size);
+	bookmarks.resize(size);
 	// Read the data of those bookmarks
 	char buffer[256];
 	for (i = 0; i < (int)size; ++i)
 	{
-		if (fread(&bookmarks_addr[i], sizeof(unsigned int), 1, f) != 1) return 1;
+		if (fread(&bookmarks[i].first, sizeof(unsigned int), 1, f) != 1) return 1;
 		if (fread(&len, sizeof(unsigned int), 1, f) != 1) return 1;
 		if (len >= 256) return 1;
 		if (fread(&buffer, 1, len, f) != len) return 1;
 		buffer[len] = 0;
-		bookmarks_name[i] = buffer;
+		bookmarks[i].second = buffer;
 	}
 
 	myNumWPs = 0;
@@ -358,7 +369,27 @@ int loadHexPreferences(FILE* f)
 		// Read the bookmark description
 		if (fread(hexBookmarks[i].description, 1, len, f) != len) return 1;
 	}
-	
+
+	// optional section: read bookmark shortcut matches
+	// read number of shortcuts
+	// older versions of .deb file don't have this section, so the file would reach the end.
+	if (fread(&numHexBookmarkShortcut, sizeof(numHexBookmarkShortcut), 1, f) != EOF)
+	{
+		unsigned int bookmark_index, shortcut_index;
+		// read the matching index list of the shortcuts
+		for (unsigned int i = 0; i < numHexBookmarkShortcut; ++i)
+			if (fread(&bookmark_index, sizeof(bookmark_index), 1, f) != EOF && fread(&shortcut_index, sizeof(shortcut_index), 1, f) != EOF)
+				hexBookmarkShortcut[shortcut_index % 10] = bookmark_index;
+			else
+				break;
+	}
+	else {
+		// use the default configruation based on the order of the bookmark list
+		numHexBookmarkShortcut = nextBookmark > 10 ? 10 : nextBookmark;
+		for (int i = 0; i < numHexBookmarkShortcut; ++i)
+			hexBookmarkShortcut[i] = i;
+	}
+
 	return 0;
 }
 

@@ -41,8 +41,7 @@ struct MemoryMappedRegister
 
 extern bool symbDebugEnabled;
 extern bool symbRegNames;
-extern std::vector<unsigned int> bookmarks_addr;
-extern std::vector<std::string> bookmarks_name;
+extern std::vector<std::pair<unsigned int, std::string>> bookmarks;
 extern int debuggerWasActive;
 
 int checkCondition(const char* buffer, int num);
