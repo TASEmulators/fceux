@@ -20,6 +20,7 @@
 #include "Qt/GamePadConf.h"
 #include "Qt/HotKeyConf.h"
 #include "Qt/PaletteConf.h"
+#include "Qt/GuiConf.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
 #include "Qt/AboutWindow.h"
@@ -294,6 +295,14 @@ void consoleWin_t::createMainMenu(void)
 
     optMenu->addAction(paletteConfig);
 
+	 // Options -> GUI Config
+	 guiConfig = new QAction(tr("GUI Config"), this);
+    //guiConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+    guiConfig->setStatusTip(tr("GUI Configure"));
+    connect(guiConfig, SIGNAL(triggered()), this, SLOT(openGuiConfWin(void)) );
+
+    optMenu->addAction(guiConfig);
+
 	 // Options -> Auto-Resume
 	 autoResume = new QAction(tr("Auto-Resume Play"), this);
     //autoResume->setShortcut( QKeySequence(tr("Ctrl+C")));
@@ -510,7 +519,7 @@ int  consoleWin_t::getDirFromFile( const char *path, char *dir )
 
 void consoleWin_t::openROMFile(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -528,9 +537,10 @@ void consoleWin_t::openROMFile(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -571,7 +581,7 @@ void consoleWin_t::closeROMCB(void)
 
 void consoleWin_t::loadNSF(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -589,9 +599,10 @@ void consoleWin_t::loadNSF(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -622,7 +633,7 @@ void consoleWin_t::loadNSF(void)
 
 void consoleWin_t::loadStateFrom(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -640,9 +651,10 @@ void consoleWin_t::loadStateFrom(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -673,7 +685,7 @@ void consoleWin_t::loadStateFrom(void)
 
 void consoleWin_t::saveStateAs(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -691,9 +703,10 @@ void consoleWin_t::saveStateAs(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -816,7 +829,7 @@ void consoleWin_t::takeScreenShot(void)
 void consoleWin_t::loadLua(void)
 {
 #ifdef _S9XLUA_H
-   int ret;
+   int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -839,9 +852,10 @@ void consoleWin_t::loadLua(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -956,6 +970,22 @@ void consoleWin_t::openPaletteConfWin(void)
    //printf("Palette Config Window Destroyed\n");
 }
 
+void consoleWin_t::openGuiConfWin(void)
+{
+	GuiConfDialog_t *guiConfWin;
+
+	//printf("Open GUI Config Window\n");
+	
+   guiConfWin = new GuiConfDialog_t(this);
+	
+   guiConfWin->show();
+   guiConfWin->exec();
+
+   delete guiConfWin;
+
+   //printf("GUI Config Window Destroyed\n");
+}
+
 void consoleWin_t::toggleAutoResume(void)
 {
    //printf("Auto Resume: %i\n", autoResume->isChecked() );
@@ -1024,7 +1054,7 @@ void consoleWin_t::toggleGameGenie(bool checked)
 
 void consoleWin_t::loadGameGenieROM(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -1042,9 +1072,10 @@ void consoleWin_t::loadGameGenieROM(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -1104,7 +1135,7 @@ void consoleWin_t::fdsEjectDisk(void)
 
 void consoleWin_t::fdsLoadBiosFile(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -1122,9 +1153,10 @@ void consoleWin_t::fdsLoadBiosFile(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -1168,7 +1200,7 @@ void consoleWin_t::fdsLoadBiosFile(void)
 
 void consoleWin_t::openMovie(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -1186,9 +1218,10 @@ void consoleWin_t::openMovie(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -1250,7 +1283,7 @@ void consoleWin_t::recordMovie(void)
 
 void consoleWin_t::recordMovieAs(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -1268,9 +1301,10 @@ void consoleWin_t::recordMovieAs(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
