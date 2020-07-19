@@ -289,6 +289,11 @@ static void ApplyDeemphasisComplete(pal* pal512)
 	}
 }
 
+bool  FCEUI_GetUserPaletteAvail( void )
+{
+	return palette_user_available;
+}
+
 void FCEUI_SetUserPalette(uint8 *pal, int nEntries)
 {
 	if(!pal)

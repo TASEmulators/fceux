@@ -1,6 +1,7 @@
 // PaletteConf.cpp
 //
 #include <QFileDialog>
+#include <QTextEdit>
 
 #include "Qt/PaletteConf.h"
 #include "Qt/main.h"
@@ -9,6 +10,17 @@
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 
+#include "../../ppu.h"
+
+extern bool force_grayscale;
+
+static const char *commentText = 
+"Palette Selection uses the 1st Matching Condition:\n\
+   1. Game type is NSF (always uses fixed palette) \n\
+   2. Custom User Palette is Available and Enabled \n\
+   3. NTSC Color Emulation is Enabled \n\
+   4. Individual Game Palette is Available \n\
+   5. Default Built-in Palette   ";
 //----------------------------------------------------
 PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	: QDialog( parent )
@@ -18,9 +30,12 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
    QGroupBox *frame;
    //QPushButton *closebutton;
 	QPushButton *button;
+	QTextEdit *comments;
 	int hue, tint;
 	char stmp[64];
 	std::string paletteFile;
+
+	resize( 512, 600 );
 
 	// sync with config
 	g_config->getOption ("SDL.Hue", &hue);
@@ -31,7 +46,20 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	mainLayout = new QVBoxLayout();
 
 	frame = new QGroupBox( tr("Custom Palette:") );
+	vbox  = new QVBoxLayout();
 	hbox1 = new QHBoxLayout();
+
+	useCustom  = new QCheckBox( tr("Use Custom Palette") );
+	GrayScale  = new QCheckBox( tr("Force Grayscale") );
+	deemphSwap = new QCheckBox( tr("De-emphasis Bit Swap") );
+
+	useCustom->setChecked( FCEUI_GetUserPaletteAvail() );
+	GrayScale->setChecked( force_grayscale );
+	deemphSwap->setChecked( paldeemphswap );
+
+	connect(useCustom , SIGNAL(stateChanged(int)), this, SLOT(use_Custom_Changed(int)) );
+	connect(GrayScale , SIGNAL(stateChanged(int)), this, SLOT(force_GrayScale_Changed(int)) );
+	connect(deemphSwap, SIGNAL(stateChanged(int)), this, SLOT(deemphswap_Changed(int)) );
 
 	button = new QPushButton( tr("Open Palette") );
 	hbox1->addWidget( button );
@@ -43,14 +71,20 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	custom_palette_path = new QLineEdit();
 	custom_palette_path->setReadOnly(true);
 	custom_palette_path->setText( paletteFile.c_str() );
-	hbox1->addWidget( custom_palette_path );
+
+	vbox->addWidget( useCustom );
+	vbox->addLayout( hbox1 );
+	vbox->addWidget( custom_palette_path );
+	vbox->addWidget( GrayScale );
+	vbox->addWidget( deemphSwap);
+
 
 	button = new QPushButton( tr("Clear") );
 	hbox1->addWidget( button );
 
 	connect( button, SIGNAL(clicked(void)), this, SLOT(clearPalette(void)) );
 
-	frame->setLayout( hbox1 );
+	frame->setLayout( vbox );
 
 	mainLayout->addWidget( frame );
 
@@ -98,6 +132,14 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	frame->setLayout( vbox );
 
 	mainLayout->addWidget( frame );
+
+	comments = new QTextEdit();
+
+	comments->setText( commentText );
+	comments->moveCursor(QTextCursor::Start);
+	comments->setReadOnly(true);
+
+	mainLayout->addWidget( comments );
 
 	setLayout( mainLayout );
 }
@@ -156,6 +198,61 @@ void PaletteConfDialog_t::tintChanged(int v)
 	}
 }
 //----------------------------------------------------
+void PaletteConfDialog_t::use_Custom_Changed(int state)
+{
+	int value = (state == Qt::Unchecked) ? 0 : 1;
+	std::string filename;
+
+	//printf("Use Custom:%i \n", state );
+
+	g_config->getOption ("SDL.Palette", &filename);
+
+	if ( fceuWrapperTryLock() )
+	{
+		if ( value && (filename.size() > 0) )
+		{
+			LoadCPalette ( filename.c_str() );
+		}
+		else
+		{
+			FCEUI_SetUserPalette( NULL, 0);
+		}
+		fceuWrapperUnLock();
+	}
+}
+//----------------------------------------------------
+void PaletteConfDialog_t::force_GrayScale_Changed(int state)
+{
+	int value = (state == Qt::Unchecked) ? 0 : 1;
+
+	if ( fceuWrapperTryLock() )
+	{
+		int e, h, t;
+		g_config->getOption ("SDL.NTSCpalette", &e);
+		g_config->getOption ("SDL.Hue", &h);
+		g_config->getOption ("SDL.Tint", &t);
+		force_grayscale = value ? true : false;
+		FCEUI_SetNTSCTH( e, t, h);
+		fceuWrapperUnLock();
+	}
+}
+//----------------------------------------------------
+void PaletteConfDialog_t::deemphswap_Changed(int state)
+{
+	int value = (state == Qt::Unchecked) ? 0 : 1;
+
+	if ( fceuWrapperTryLock() )
+	{
+		int e, h, t;
+		g_config->getOption ("SDL.NTSCpalette", &e);
+		g_config->getOption ("SDL.Hue", &h);
+		g_config->getOption ("SDL.Tint", &t);
+		paldeemphswap = value ? true : false;
+		FCEUI_SetNTSCTH( e, t, h);
+		fceuWrapperUnLock();
+	}
+}
+//----------------------------------------------------
 void PaletteConfDialog_t::use_NTSC_Changed(int state)
 {
 	int h, t;
@@ -184,6 +281,7 @@ void PaletteConfDialog_t::clearPalette(void)
 	{
 		FCEUI_SetUserPalette( NULL, 0);
 		fceuWrapperUnLock();
+		useCustom->setChecked(false);
 	}
 }
 //----------------------------------------------------
@@ -225,18 +323,22 @@ void PaletteConfDialog_t::openPaletteFile(void)
    }
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	g_config->setOption ("SDL.Palette", filename.toStdString().c_str() );
-	g_config->setOption ("SDL.NTSCpalette", 0);
-
 	if ( fceuWrapperTryLock() )
 	{
-		LoadCPalette ( filename.toStdString().c_str() );
+		if ( LoadCPalette ( filename.toStdString().c_str() ) )
+		{
+			g_config->setOption ("SDL.Palette", filename.toStdString().c_str() );
+			custom_palette_path->setText( filename.toStdString().c_str() );
+		}
+		else
+		{
+			printf("Error: Failed to Load Palette File: %s \n", filename.toStdString().c_str() );
+		}
 		fceuWrapperUnLock();
+
+		useCustom->setChecked( FCEUI_GetUserPaletteAvail() );
 	}
 
-	custom_palette_path->setText( filename.toStdString().c_str() );
-
-	useNTSC->setChecked( 0 );
 
    return;
 }
