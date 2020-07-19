@@ -30,7 +30,16 @@ typedef struct
 	int editmode;
 } HexBookmark;
 
+typedef struct
+{
+	HexBookmark* bookmark;
+	int bookmark_index;
+	int shortcut_index = -1;
+} HexBookmarkMsg;
+
 extern HexBookmark hexBookmarks[64];
+extern int hexBookmarkShortcut[10];
+extern int numHexBookmarkShortcut;
 extern int nextBookmark;
 
 int findBookmark(unsigned int address, int editmode);

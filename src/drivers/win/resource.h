@@ -472,6 +472,7 @@
 #define MW_ADDR00                       1001
 #define IDC_MEMVIEWFIND_TYPE_HEX        1001
 #define IDC_NTVIEW_MIRROR_HORIZONTAL    1001
+#define IDC_BOOKMARK_ADDRESS            1001
 #define IDC_CHECK_STOPMOVIE             1002
 #define IDC_GAME_GENIE_COMP             1002
 #define IDC_MEMVIEWFIND_TYPE_TEXT       1002
@@ -508,6 +509,7 @@
 #define MW_ADDR04                       1013
 #define IDC_CHECK1                      1013
 #define IDC_CHEAT_AUTOLOADSAVE          1013
+#define IDC_CHECK_SHORTCUT              1013
 #define IDC_RESTORE_BUTTON              1014
 #define MW_VAL04                        1014
 #define MW_NAME05                       1015
@@ -629,6 +631,16 @@
 #define IDC_GAME_GENIE_LABEL            1097
 #define IDC_CHEAT_GAME_GENIE_TEXT       1098
 #define IDC_CHECK2                      1099
+#define IDC_RADIO_SHORTCUT1             1100
+#define IDC_RADIO_SHORTCUT2             1101
+#define IDC_RADIO_SHORTCUT3             1102
+#define IDC_RADIO_SHORTCUT4             1103
+#define IDC_RADIO_SHORTCUT5             1104
+#define IDC_RADIO_SHORTCUT6             1105
+#define IDC_RADIO_SHORTCUT7             1106
+#define IDC_RADIO_SHORTCUT8             1107
+#define IDC_RADIO_SHORTCUT9             1108
+#define IDC_RADIO_SHORTCUT0             1109
 #define BTN_ALLOW_LRUD                  1117
 #define IDC_PRGROM_EDIT                 1118
 #define IDC_CHRROM_EDIT                 1119
@@ -1142,15 +1154,17 @@
 #define MW_VALUELABEL1                  65426
 #define IDC_STATIC_SLASHTEXT            65442
 #define IDC_BOOKMARK_NAME_TEXT          65532
+#define IDC_BOOKMARK_ADDRESS_TEXT       65533
 #define IDC_NTVIEW_SCANLINE_TEXT        65534
+#define IDC_BOOKMARK_SHORTCUT_PREFIX_TEXT 65534
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        305
+#define _APS_NEXT_RESOURCE_VALUE        306
 #define _APS_NEXT_COMMAND_VALUE         40002
-#define _APS_NEXT_CONTROL_VALUE         1100
+#define _APS_NEXT_CONTROL_VALUE         1101
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
