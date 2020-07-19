@@ -438,6 +438,35 @@ static uint32 UpdateVirtualBoyData(int w)
 	return r;
 }
 
+// Holds the button configurations for the "Real" Zapper. 
+// Two collections of two buttons. 
+// One for each controller port.
+// The defaults shouldn't matter since this is intended to be configured by the user to match their custom hardware.
+ButtConfig realzappersc[2][2] = {
+	{
+		MK(A), MK(B)
+	},
+	{
+		MK(A), MK(B)
+	}
+};
+
+// buffer to hold the state of the zapper.
+static uint32 realzapperbuf[2];
+
+// Determines if the zapper trigger is pressed and/or if it's sensing light based on the button config and return
+// the result as a two bit value.
+static uint32 UpdateRealZapperData(int w)
+{
+	uint32 r = 0;
+	ButtConfig* realzappertsc = realzappersc[w];
+	int x;
+
+	for (x = 0; x < 2; x++)
+		if (DTestButton(&realzappertsc[x])) r |= 1 << x;
+
+	return r;
+}
 
 static uint8 fkbkeys[0x48];
 static uint8 suborkbkeys[0x65];
@@ -488,7 +517,10 @@ void FCEUD_UpdateInput()
 			case SI_VIRTUALBOY:
 				virtualboybuf[x]=UpdateVirtualBoyData(x);
 				break;
-		}
+            case SI_REAL_ZAPPER:
+                realzapperbuf[x] = UpdateRealZapperData(x);
+                break;
+			}
 
 		switch(InputType[2])
 		{
@@ -584,6 +616,9 @@ void InitInputPorts(bool fourscore)
 			case SI_VIRTUALBOY:
 				InputDPtr=&virtualboybuf[i];
 				break;
+            case SI_REAL_ZAPPER:
+                InputDPtr = &realzapperbuf[i];
+                break;
 			}
 			FCEUI_SetInput(i,(ESI)InputType[i],InputDPtr,attrib);
 		}
@@ -835,6 +870,7 @@ CFGSTRUCT InputConfig[]={
 	AC(fkbmap),
 	AC(suborkbmap),
 	AC(virtualboysc),
+	AC(realzappersc),
 	ENDCFGSTRUCT
 };
 
@@ -870,6 +906,10 @@ void InitInputStuff(void)
 	for(x=0; x<2; x++)
 		for(y=0; y<14; y++)
 			JoyClearBC(&virtualboysc[x][y]);
+
+	for (x = 0; x < 2; x++)
+        for (y = 0; y < 2; y++)
+            JoyClearBC(&realzappersc[x][y]);
 }
 
 static char *MakeButtString(ButtConfig *bc)
@@ -1206,7 +1246,7 @@ const unsigned int NUMBER_OF_PORTS = 2;
 const unsigned int NUMBER_OF_NES_DEVICES = SI_COUNT + 1;
 const static unsigned int NUMBER_OF_FAMICOM_DEVICES = SIFC_COUNT + 1;
 //these are unfortunate lists. they match the ESI and ESIFC enums
-static const int configurable_nes[NUMBER_OF_NES_DEVICES]= { 0, 1, 0, 1, 1, 0, 0, 1, 0, 1 };
+static const int configurable_nes[NUMBER_OF_NES_DEVICES]= { 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1 };
 static const int configurable_fam[NUMBER_OF_FAMICOM_DEVICES]= { 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0 };
 const unsigned int FAMICOM_POSITION = 2;
 
@@ -1539,6 +1579,9 @@ INT_PTR CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					case SI_VIRTUALBOY:
 						DoTBConfig(hwndDlg, text, "VIRTUALBOYDIALOG", virtualboysc[which], 14);
 						break;
+                    case SI_REAL_ZAPPER:
+                        DoTBConfig(hwndDlg, text, "REALZAPPERDIALOG", realzappersc[which], 2);
+                        break;
 					}
 				}
 
