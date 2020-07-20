@@ -20,6 +20,7 @@
 
 static bool luaScriptRunning = false;
 
+static std::string luaOutputText;
 static std::list <LuaControlDialog_t*> winList;
 //----------------------------------------------------
 LuaControlDialog_t::LuaControlDialog_t(QWidget *parent)
@@ -141,7 +142,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 
 	//getDirFromFile( last.c_str(), dir );
 
-	//dialog.setDirectory( tr(dir) );
+	dialog.setDirectory( tr("/usr/share/fceux/luaScripts") );
 
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
@@ -178,6 +179,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 void LuaControlDialog_t::startLuaScript(void)
 {
 #ifdef _S9XLUA_H
+	luaOutputText.clear();
 	fceuWrapperLock();
 	if ( 0 == FCEU_LoadLuaCode( scriptPath->text().toStdString().c_str(), scriptArgs->text().toStdString().c_str() ) )
    {
@@ -208,6 +210,7 @@ void LuaControlDialog_t::refreshState(void)
 		stopButton->setEnabled( false );
 		startButton->setText( tr("Start") );
 	}
+	luaOutput->setText( luaOutputText.c_str() );
 }
 //----------------------------------------------------
 void updateLuaWindows( void )
@@ -224,7 +227,7 @@ void WinLuaOnStart(intptr_t hDlgAsInt)
 {
 	luaScriptRunning = true;
 
-	printf("Lua Script Running: %i \n", luaScriptRunning );
+	//printf("Lua Script Running: %i \n", luaScriptRunning );
 
 	updateLuaWindows();
 }
@@ -233,14 +236,17 @@ void WinLuaOnStop(intptr_t hDlgAsInt)
 {
 	luaScriptRunning = false;
 
-	printf("Lua Script Running: %i \n", luaScriptRunning );
+	//printf("Lua Script Running: %i \n", luaScriptRunning );
 
 	updateLuaWindows();
 }
 //----------------------------------------------------
 void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str)
 {
-	printf("%s\n", str );
+	//printf("%s\n", str );
 
+	luaOutputText.append( str );
+	
+	updateLuaWindows();
 }
 //----------------------------------------------------
