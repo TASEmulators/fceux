@@ -1,6 +1,5 @@
 // PaletteConf.cpp
 //
-#include <QFileDialog>
 #include <QTextEdit>
 
 #include "Qt/GuiConf.h"
@@ -26,7 +25,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 
 	mainLayout = new QVBoxLayout();
 
-	useNativeFileDialog  = new QCheckBox( tr("Use Native File Dialog") );
+	useNativeFileDialog  = new QCheckBox( tr("Use Native OS File Dialog") );
 
 	useNativeFileDialog->setChecked( useNativeFileDialogVal );
 

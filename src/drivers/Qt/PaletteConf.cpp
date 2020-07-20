@@ -287,21 +287,22 @@ void PaletteConfDialog_t::clearPalette(void)
 //----------------------------------------------------
 void PaletteConfDialog_t::openPaletteFile(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	QFileDialog  dialog(this, tr("Open NES Palette") );
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("NES Palettes (*.pal)(*.PAL) ;; All files (*)"));
+	dialog.setNameFilter(tr("NES Palettes (*.pal *.PAL) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
 
 	dialog.setDirectory( tr("/usr/share/fceux/palettes") );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();

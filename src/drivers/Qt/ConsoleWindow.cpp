@@ -527,7 +527,7 @@ void consoleWin_t::openROMFile(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("NES files (*.nes)(*.NES) ;; All files (*)"));
+	dialog.setNameFilter(tr("NES files (*.nes *.NES) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
 
@@ -589,7 +589,7 @@ void consoleWin_t::loadNSF(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("NSF Sound Files (*.nsf)(*.NSF) ;; Zip Files (*.zip)(*.ZIP) ;; All files (*)"));
+	dialog.setNameFilter(tr("NSF Sound Files (*.nsf *.NSF) ;; Zip Files (*.zip *.ZIP) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
 
@@ -641,7 +641,7 @@ void consoleWin_t::loadStateFrom(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("FCS Files (*.fc?)(*.FC?) ;; SAV Files (*.sav)(*.SAV) ;; All files (*)"));
+	dialog.setNameFilter(tr("FCS Files (*.fc? *.FC?) ;; SAV Files (*.sav *.SAV) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
 
@@ -693,7 +693,7 @@ void consoleWin_t::saveStateAs(void)
 
 	dialog.setFileMode(QFileDialog::AnyFile);
 
-	dialog.setNameFilter(tr("FCS Files (*.fc?)(*.FC?) ;; SAV Files (*.sav)(*.SAV) ;; All files (*)"));
+	dialog.setNameFilter(tr("SAV Files (*.sav *.SAV) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
 
@@ -837,7 +837,7 @@ void consoleWin_t::loadLua(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("LUA Scripts (*.lua)(*.LUA) ;; All files (*)"));
+	dialog.setNameFilter(tr("LUA Scripts (*.lua *.LUA) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
 
@@ -1062,7 +1062,7 @@ void consoleWin_t::loadGameGenieROM(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("GG ROM File (gg.rom)(*Genie*.nes) ;; All files (*)"));
+	dialog.setNameFilter(tr("GG ROM File (gg.rom  *Genie*.nes) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
 
@@ -1143,7 +1143,7 @@ void consoleWin_t::fdsLoadBiosFile(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("ROM files (*.rom)(*.ROM) ;; All files (*)"));
+	dialog.setNameFilter(tr("ROM files (*.rom *.ROM) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
 
