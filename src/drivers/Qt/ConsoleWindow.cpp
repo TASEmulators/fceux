@@ -21,6 +21,7 @@
 #include "Qt/HotKeyConf.h"
 #include "Qt/PaletteConf.h"
 #include "Qt/GuiConf.h"
+#include "Qt/LuaControl.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
 #include "Qt/AboutWindow.h"
@@ -829,62 +830,18 @@ void consoleWin_t::takeScreenShot(void)
 void consoleWin_t::loadLua(void)
 {
 #ifdef _S9XLUA_H
-   int ret, useNativeFileDialogVal;
-	QString filename;
-	std::string last;
-	char dir[512];
-	QFileDialog  dialog(this, tr("Open LUA Script") );
+	LuaControlDialog_t *luaCtrlWin;
 
-	dialog.setFileMode(QFileDialog::ExistingFile);
+	//printf("Open Lua Control Window\n");
+	
+   luaCtrlWin = new LuaControlDialog_t(this);
+	
+   luaCtrlWin->show();
+   luaCtrlWin->exec();
 
-	dialog.setNameFilter(tr("LUA Scripts (*.lua *.LUA) ;; All files (*)"));
+   delete luaCtrlWin;
 
-	dialog.setViewMode(QFileDialog::List);
-
-	g_config->getOption ("SDL.LastLoadLua", &last );
-
-   if ( last.size() == 0 )
-   {
-      last.assign( "/usr/share/fceux/luaScripts" );
-   }
-
-	getDirFromFile( last.c_str(), dir );
-
-	dialog.setDirectory( tr(dir) );
-
-	// Check config option to use native file dialog or not
-	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
-
-	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
-
-	dialog.show();
-	ret = dialog.exec();
-
-	if ( ret )
-	{
-		QStringList fileList;
-		fileList = dialog.selectedFiles();
-
-		if ( fileList.size() > 0 )
-		{
-			filename = fileList[0];
-		}
-	}
-
-	if ( filename.isNull() )
-   {
-      return;
-   }
-	qDebug() << "selected file path : " << filename.toUtf8();
-
-	g_config->setOption ("SDL.LastLoadLua", filename.toStdString().c_str() );
-
-	fceuWrapperLock();
-	if ( 0 == FCEU_LoadLuaCode( filename.toStdString().c_str() ) )
-   {
-      printf("Error: Could not open the selected lua script: '%s'\n", filename.toStdString().c_str() );
-   }
-	fceuWrapperUnLock();
+   //printf("Lua Control Window Destroyed\n");
 #endif
 }
 
