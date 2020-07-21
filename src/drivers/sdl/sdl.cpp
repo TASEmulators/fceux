@@ -77,6 +77,8 @@ int pal_emulation;
 int dendy;
 bool swapDuty;
 
+static bool luaScriptRunning = false;
+
 // -Video Modes Tag- : See --special
 static const char *DriverUsage=
 "Option         Value   Description\n"
@@ -1001,6 +1003,27 @@ void FCEUD_PrintError(const char *errormsg)
 
 	fprintf(stderr, "%s\n", errormsg);
 }
+
+//----------------------------------------------------
+void WinLuaOnStart(intptr_t hDlgAsInt)
+{
+	luaScriptRunning = true;
+
+	//printf("Lua Script Running: %i \n", luaScriptRunning );
+}
+//----------------------------------------------------
+void WinLuaOnStop(intptr_t hDlgAsInt)
+{
+	luaScriptRunning = false;
+
+	//printf("Lua Script Running: %i \n", luaScriptRunning );
+}
+//----------------------------------------------------
+void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str)
+{
+	printf("Lua Output: %s\n", str );
+}
+//----------------------------------------------------
 
 
 // dummy functions

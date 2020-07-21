@@ -292,6 +292,8 @@ InitConfig()
 	config->addOption("_lastopennsf", "SDL.LastOpenNSF", home_dir);
 	config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", home_dir);
 	config->addOption("_lastloadlua", "SDL.LastLoadLua", "");
+
+	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
     
 	// fcm -> fm2 conversion
 	config->addOption("fcmconvert", "SDL.FCMConvert", "");
