@@ -22,6 +22,7 @@
 #include "Qt/PaletteConf.h"
 #include "Qt/GuiConf.h"
 #include "Qt/LuaControl.h"
+#include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
 #include "Qt/AboutWindow.h"
@@ -487,36 +488,6 @@ void consoleWin_t::closeApp(void)
 	qApp->quit();
 }
 //---------------------------------------------------------------------------
-int  consoleWin_t::getDirFromFile( const char *path, char *dir )
-{
-	int i, lastSlash = -1, lastPeriod = -1;
-
-	i=0; 
-	while ( path[i] != 0 )
-	{
-		if ( path[i] == '/' )
-		{
-			lastSlash = i;
-		}
-		else if ( path[i] == '.' )
-		{
-			lastPeriod = i;
-		}
-		dir[i] = path[i]; i++;
-	}
-	dir[i] = 0;
-
-	if ( lastPeriod >= 0 )
-	{
-		if ( lastPeriod > lastSlash )
-		{
-			dir[lastSlash] = 0;
-		}
-	}
-
-	return 0;
-}
-//---------------------------------------------------------------------------
 
 void consoleWin_t::openROMFile(void)
 {
@@ -531,6 +502,8 @@ void consoleWin_t::openROMFile(void)
 	dialog.setNameFilter(tr("NES files (*.nes *.NES) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
@@ -593,6 +566,8 @@ void consoleWin_t::loadNSF(void)
 	dialog.setNameFilter(tr("NSF Sound Files (*.nsf *.NSF) ;; Zip Files (*.zip *.ZIP) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
 	g_config->getOption ("SDL.LastOpenNSF", &last );
 
@@ -642,9 +617,11 @@ void consoleWin_t::loadStateFrom(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("FCS Files (*.fc? *.FC?) ;; SAV Files (*.sav *.SAV) ;; All files (*)"));
+	dialog.setNameFilter(tr("FCS & SAV Files (*.sav *.SAV *.fc? *.FC?) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
 	g_config->getOption ("SDL.LastLoadStateFrom", &last );
 
@@ -697,6 +674,9 @@ void consoleWin_t::saveStateAs(void)
 	dialog.setNameFilter(tr("SAV Files (*.sav *.SAV) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+	dialog.setDefaultSuffix( tr(".sav") );
 
 	g_config->getOption ("SDL.LastSaveStateAs", &last );
 
@@ -1022,6 +1002,8 @@ void consoleWin_t::loadGameGenieROM(void)
 	dialog.setNameFilter(tr("GG ROM File (gg.rom  *Genie*.nes) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
@@ -1103,6 +1085,8 @@ void consoleWin_t::fdsLoadBiosFile(void)
 	dialog.setNameFilter(tr("ROM files (*.rom *.ROM) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
@@ -1168,6 +1152,8 @@ void consoleWin_t::openMovie(void)
 	dialog.setNameFilter(tr("FM2 Movies (*.fm2) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
@@ -1251,6 +1237,8 @@ void consoleWin_t::recordMovieAs(void)
 	dialog.setNameFilter(tr("FM2 Movies (*.fm2) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
