@@ -65,7 +65,7 @@ extern INPUTC *FCEU_InitArkanoid(int w);
 extern INPUTC *FCEU_InitMouse(int w);
 extern INPUTC *FCEU_InitSNESMouse(int w);
 extern INPUTC *FCEU_InitVirtualBoy(int w);
-extern INPUTC *FCEU_InitRealZapper(int w);
+extern INPUTC *FCEU_InitLCDCompZapper(int w);
 
 extern INPUTCFC *FCEU_InitArkanoidFC(void);
 extern INPUTCFC *FCEU_InitSpaceShadow(void);
@@ -484,8 +484,8 @@ static void SetInputStuff(int port)
 	case SI_VIRTUALBOY:
 		joyports[port].driver=FCEU_InitVirtualBoy(port);
 		break;
-	case SI_REAL_ZAPPER:
-		joyports[port].driver = FCEU_InitRealZapper(port);
+	case SI_LCDCOMP_ZAPPER:
+		joyports[port].driver = FCEU_InitLCDCompZapper(port);
 		break;
 	case SI_NONE:
 	case SI_UNSET:

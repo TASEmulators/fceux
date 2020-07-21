@@ -1105,7 +1105,7 @@
     <ClCompile Include="..\src\input\virtualboy.cpp">
       <Filter>input</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\input\realzapper.cpp">
+    <ClCompile Include="..\src\input\lcdcompzapper.cpp">
       <Filter>input</Filter>
     </ClCompile>
   </ItemGroup>

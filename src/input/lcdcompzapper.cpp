@@ -17,32 +17,32 @@
 
 #include "share.h"
 
-static uint32 realZapperStrobe[2];
-static uint32 realZapperData[2];
+static uint32 lcdCompZapperStrobe[2];
+static uint32 lcdCompZapperData[2];
 
-static uint8 ReadRealZapper(int w)
+static uint8 ReadLCDCompZapper(int w)
 {
-	return realZapperData[w];
+	return lcdCompZapperData[w];
 }
 
-static void StrobeRealZapper(int w)
+static void StrobeLCDCompZapper(int w)
 {
-	realZapperStrobe[w] = 0;
+	lcdCompZapperStrobe[w] = 0;
 }
 
-void UpdateRealZapper(int w, void* data, int arg)
+void UpdateLCDCompZapper(int w, void* data, int arg)
 {
 	// In the '(*(uint32*)data)' variable, bit 0 holds the trigger value and bit 1 holds the light sense value.
 	// Ultimately this needs to be converted from 0000 00lt to 000t l000 where l is the light bit and t
 	// is the trigger bit.
-	realZapperData[w] = ((((*(uint32*)data) & 1) << 4) | 
+	lcdCompZapperData[w] = ((((*(uint32*)data) & 1) << 4) | 
 		                (((*(uint32*)data) & 2) << 2));
 }
 
-static INPUTC RealZapperCtrl = { ReadRealZapper,0,StrobeRealZapper,UpdateRealZapper,0,0 };
+static INPUTC LCDCompZapperCtrl = { ReadLCDCompZapper,0,StrobeLCDCompZapper,UpdateLCDCompZapper,0,0 };
 
-INPUTC* FCEU_InitRealZapper(int w)
+INPUTC* FCEU_InitLCDCompZapper(int w)
 {
-	realZapperStrobe[w] = realZapperData[w] = 0;
-	return(&RealZapperCtrl);
+	lcdCompZapperStrobe[w] = lcdCompZapperData[w] = 0;
+	return(&LCDCompZapperCtrl);
 }
