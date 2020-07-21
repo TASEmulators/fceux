@@ -47,6 +47,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  clipSidesChanged( int value );
 		void  showFPSChanged( int value );
 		void  regionChanged(int index);
+		void  driverChanged(int index);
 		void  applyChanges( void );
 		void  closewindow( void );
 

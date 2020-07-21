@@ -33,13 +33,28 @@
 consoleWin_t::consoleWin_t(QWidget *parent)
 	: QMainWindow( parent )
 {
+	int use_SDL_video = false;
 
 	createMainMenu();
 
-	viewport = new ConsoleViewGL_t(this);
-	//viewport = new ConsoleViewSDL_t(this);
+	g_config->getOption( "SDL.VideoDriver", &use_SDL_video );
 
-   setCentralWidget(viewport);
+	viewport_GL  = NULL;
+	viewport_SDL = NULL;
+
+	if ( use_SDL_video )
+	{
+		viewport_SDL = new ConsoleViewSDL_t(this);
+
+   	setCentralWidget(viewport_SDL);
+	}
+	else
+	{
+		viewport_GL = new ConsoleViewGL_t(this);
+
+   	setCentralWidget(viewport_GL);
+	}
+
    setWindowIcon(QIcon(":fceux1.png"));
 
 	gameTimer  = new QTimer( this );
@@ -75,7 +90,14 @@ consoleWin_t::~consoleWin_t(void)
 	emulatorThread->quit();
 	emulatorThread->wait();
 
-	delete viewport;
+	if ( viewport_GL != NULL )
+	{
+		delete viewport_GL; viewport_GL = NULL;
+	}
+	if ( viewport_SDL != NULL )
+	{
+		delete viewport_SDL; viewport_SDL = NULL;
+	}
 	delete mutex;
 
 	// LoadGame() checks for an IP and if it finds one begins a network session
@@ -1333,10 +1355,17 @@ void consoleWin_t::updatePeriodic(void)
 	{
 		nes_shm->blitUpdated = 0;
 
-		viewport->transfer2LocalBuffer();
-
-		//viewport->repaint();
-		viewport->update();
+		if ( viewport_SDL )
+		{
+			viewport_SDL->transfer2LocalBuffer();
+			viewport_SDL->render();
+		}
+		else
+		{
+			viewport_GL->transfer2LocalBuffer();
+			//viewport_GL->repaint();
+			viewport_GL->update();
+		}
 	}
 
    return;

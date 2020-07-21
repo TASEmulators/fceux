@@ -39,8 +39,8 @@ class  consoleWin_t : public QMainWindow
 		consoleWin_t(QWidget *parent = 0);
 	   ~consoleWin_t(void);
 
-		ConsoleViewGL_t *viewport;
-		//ConsoleViewSDL_t *viewport;
+		ConsoleViewGL_t   *viewport_GL;
+		ConsoleViewSDL_t  *viewport_SDL;
 
 		void setCyclePeriodms( int ms );
 
