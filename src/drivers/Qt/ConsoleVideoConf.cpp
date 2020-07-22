@@ -26,7 +26,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	driverSelect = new QComboBox();
 
 	driverSelect->addItem( tr("OpenGL"), 0 );
-	//driverSelect->addItem( tr("SDL"), 1 );
+	driverSelect->addItem( tr("SDL"), 1 );
 	
 	hbox1 = new QHBoxLayout();
 
@@ -52,8 +52,10 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	regionSelect->addItem( tr("Dendy"), 2 );
 
 	setComboBoxFromProperty( regionSelect, "SDL.PAL");
+	setComboBoxFromProperty( driverSelect, "SDL.VideoDriver");
 
 	connect(regionSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(regionChanged(int)) );
+	connect(driverSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(driverChanged(int)) );
 
 	hbox1 = new QHBoxLayout();
 
@@ -197,6 +199,20 @@ void ConsoleVideoConfDialog_t::showFPSChanged( int value )
 	fceuWrapperLock();
 	UpdateEMUCore (g_config);
 	fceuWrapperUnLock();
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::driverChanged(int index)
+{
+	int driver;
+	//printf("Driver: %i : %i \n", index, driverSelect->itemData(index).toInt() );
+
+	driver = driverSelect->itemData(index).toInt();
+
+	g_config->setOption ("SDL.VideoDriver", driver);
+
+	g_config->save ();
+
+	printf("Note: A restart of the application is needed for video driver change to take effect...\n");
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::regionChanged(int index)

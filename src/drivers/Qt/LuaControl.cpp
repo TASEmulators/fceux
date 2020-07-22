@@ -17,6 +17,7 @@
 #include "Qt/config.h"
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/ConsoleUtilities.h"
 
 static bool luaScriptRunning = false;
 
@@ -124,7 +125,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
    int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
-	//char dir[512];
+	char dir[512];
 	QFileDialog  dialog(this, tr("Open LUA Script") );
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
@@ -132,6 +133,8 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 	dialog.setNameFilter(tr("LUA Scripts (*.lua *.LUA) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
 	g_config->getOption ("SDL.LastLoadLua", &last );
 
@@ -140,9 +143,9 @@ void LuaControlDialog_t::openLuaScriptFile(void)
       last.assign( "/usr/share/fceux/luaScripts" );
    }
 
-	//getDirFromFile( last.c_str(), dir );
+	getDirFromFile( last.c_str(), dir );
 
-	dialog.setDirectory( tr("/usr/share/fceux/luaScripts") );
+	dialog.setDirectory( tr(dir) );
 
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);

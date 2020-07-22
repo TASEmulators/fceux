@@ -9,6 +9,7 @@
 #include "Qt/config.h"
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/ConsoleUtilities.h"
 
 #include "../../ppu.h"
 
@@ -289,6 +290,8 @@ void PaletteConfDialog_t::openPaletteFile(void)
 {
 	int ret, useNativeFileDialogVal;
 	QString filename;
+	std::string last;
+	char dir[512];
 	QFileDialog  dialog(this, tr("Open NES Palette") );
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
@@ -296,8 +299,19 @@ void PaletteConfDialog_t::openPaletteFile(void)
 	dialog.setNameFilter(tr("NES Palettes (*.pal *.PAL) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
-	dialog.setDirectory( tr("/usr/share/fceux/palettes") );
+	g_config->getOption ("SDL.Palette", &last );
+
+   if ( last.size() == 0 )
+   {
+      last.assign( "/usr/share/fceux/palettes" );
+   }
+
+	getDirFromFile( last.c_str(), dir );
+
+	dialog.setDirectory( tr(dir) );
 
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);

@@ -199,6 +199,7 @@ InitConfig()
 
 	// video controls
 	config->addOption('f', "fullscreen", "SDL.Fullscreen", 0);
+	config->addOption("videoDriver", "SDL.VideoDriver", 0);
 
 	// set x/y res to 0 for automatic fullscreen resolution detection (no change)
 	config->addOption('x', "xres", "SDL.XResolution", 0);
@@ -294,6 +295,7 @@ InitConfig()
 	config->addOption("_lastloadlua", "SDL.LastLoadLua", "");
 
 	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
+	config->addOption("_useNativeMenuBar"   , "SDL.UseNativeMenuBar", false);
     
 	// fcm -> fm2 conversion
 	config->addOption("fcmconvert", "SDL.FCMConvert", "");
