@@ -144,9 +144,12 @@ void consoleWin_t::createMainMenu(void)
 {
 	QMenu *subMenu;
 	QActionGroup *group;
+	int useNativeMenuBar;
 
-    // This is needed for menu bar to show up on MacOS
-	 menuBar()->setNativeMenuBar(false);
+   // This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar()->setNativeMenuBar( useNativeMenuBar ? true : false );
 
 	 //-----------------------------------------------------------------------
 	 // File

@@ -27,11 +27,13 @@ class GuiConfDialog_t : public QDialog
 
 	protected:
 		QCheckBox   *useNativeFileDialog;
+		QCheckBox   *useNativeMenuBar;
 	private:
 
    public slots:
       void closeWindow(void);
 	private slots:
 		void useNativeFileDialogChanged(int v);
+		void useNativeMenuBarChanged(int v);
 
 };

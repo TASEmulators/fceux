@@ -295,6 +295,7 @@ InitConfig()
 	config->addOption("_lastloadlua", "SDL.LastLoadLua", "");
 
 	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
+	config->addOption("_useNativeMenuBar"   , "SDL.UseNativeMenuBar", false);
     
 	// fcm -> fm2 conversion
 	config->addOption("fcmconvert", "SDL.FCMConvert", "");
