@@ -956,6 +956,12 @@ UpdatePhysicalInput ()
 				g_keyState[ event.key.keysym.scancode ] = (event.type == SDL_KEYDOWN) ? 1 : 0;
 				//checkKeyBoardState( event.key.keysym.scancode );
 				break;
+			case SDL_JOYDEVICEADDED:
+				AddJoystick( event.jdevice.which );
+				break;
+			case SDL_JOYDEVICEREMOVED:
+				RemoveJoystick( event.jdevice.which );
+				break;
 			default:
 				break;
 		}
@@ -964,8 +970,6 @@ UpdatePhysicalInput ()
 }
 
 
-static int bcpv=0, bcpj=0;
-
 /**
  *  Begin configuring the buttons by placing the video and joystick
  *  subsystems into a well-known state.  Button configuration really
@@ -973,13 +977,7 @@ static int bcpv=0, bcpj=0;
  */
 int ButtonConfigBegin ()
 {
-	// shut down the joystick subsystems
-	//SDL_Surface *screen;
-
-	bcpj = KillJoysticks ();
-
-	// XXX soules - why did we shut this down?
-	// initialize the joystick subsystem
+	// initialize the joystick subsystem (if not already inited)
 	InitJoysticks ();
 
    buttonConfigInProgress = 1;
@@ -995,18 +993,6 @@ int ButtonConfigBegin ()
 void
 ButtonConfigEnd ()
 {
-	// shutdown the joystick and video subsystems
-	KillJoysticks ();
-	//SDL_QuitSubSystem(SDL_INIT_VIDEO); 
-
-	// re-initialize joystick and video subsystems if they were active before
-	/*if(!bcpv) {
-		InitVideo(GameInfo);
-		} */
-	if (!bcpj)
-	{
-		InitJoysticks ();
-	}
    buttonConfigInProgress = 0;
 }
 

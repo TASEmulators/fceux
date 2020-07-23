@@ -2,6 +2,7 @@
 //
 #include "Qt/GamePadConf.h"
 #include "Qt/main.h"
+#include "Qt/dface.h"
 #include "Qt/input.h"
 #include "Qt/config.h"
 #include "Qt/keyscan.h"
@@ -19,6 +20,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    QPushButton *clearAllButton;
    QPushButton *closebutton;
    QPushButton *clearButton[GAMEPAD_NUM_BUTTONS];
+
+	InitJoysticks();
 
    portNum = 0;
    configNo = 0;
