@@ -120,41 +120,40 @@ static int s_jinited = 0;
 int
 DTestButtonJoy(ButtConfig *bc)
 {
-	int x;
    SDL_Joystick *js;
 
-	for(x = 0; x < bc->NumC; x++)
+	if (bc->ButtonNum == -1)
 	{
-		if (bc->ButtonNum[x] == -1)
-		{
-			continue;
-		}
-		js = jsDev[bc->DeviceNum[x]].getJS();
+		return 0;
+	}
+	js = jsDev[bc->DeviceNum].getJS();
 
-		if (bc->ButtonNum[x] & 0x2000)
-		{
-			/* Hat "button" */
-			if(SDL_JoystickGetHat( js,
-								((bc->ButtonNum[x] >> 8) & 0x1F)) & 
-								(bc->ButtonNum[x]&0xFF))
-				return 1; 
+	if (bc->ButtonNum & 0x2000)
+	{
+		/* Hat "button" */
+		if(SDL_JoystickGetHat( js,
+							((bc->ButtonNum >> 8) & 0x1F)) & 
+							(bc->ButtonNum&0xFF))
+			return 1; 
+	}
+	else if (bc->ButtonNum & 0x8000) 
+	{
+		/* Axis "button" */
+		int pos;
+		pos = SDL_JoystickGetAxis( js,
+								bc->ButtonNum & 16383);
+		if ((bc->ButtonNum & 0x4000) && pos <= -16383) {
+			return 1;
+		} else if (!(bc->ButtonNum & 0x4000) && pos >= 16363) {
+			return 1;
 		}
-		else if (bc->ButtonNum[x] & 0x8000) 
-		{
-			/* Axis "button" */
-			int pos;
-			pos = SDL_JoystickGetAxis( js,
-									bc->ButtonNum[x] & 16383);
-			if ((bc->ButtonNum[x] & 0x4000) && pos <= -16383) {
-				return 1;
-			} else if (!(bc->ButtonNum[x] & 0x4000) && pos >= 16363) {
-				return 1;
-			}
-		} 
-		else if(SDL_JoystickGetButton( js,
-									bc->ButtonNum[x]))
+	} 
+	else if(SDL_JoystickGetButton( js,
+								bc->ButtonNum))
+	{
 		return 1;
 	}
+
 	return 0;
 }
 

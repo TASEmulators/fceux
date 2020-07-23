@@ -24,7 +24,6 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	InitJoysticks();
 
    portNum = 0;
-   configNo = 0;
    buttonConfigStatus = 1;
 
    setWindowTitle( tr("GamePad Config") );
@@ -157,14 +156,14 @@ void GamePadConfDialog_t::updateCntrlrDpy(void)
 
 	for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
 	{
-		if (GamePadConfig[portNum][i].ButtType[configNo] == BUTTC_KEYBOARD)
+		if (GamePadConfig[portNum][i].ButtType == BUTTC_KEYBOARD)
 		{
 			snprintf( keyNameStr, sizeof (keyNameStr), "%s",
-				  SDL_GetKeyName (GamePadConfig[portNum][i].ButtonNum[configNo]));
+				  SDL_GetKeyName (GamePadConfig[portNum][i].ButtonNum));
 		}
 		else
 		{
-			strcpy( keyNameStr, ButtonName( &GamePadConfig[portNum][i], configNo ) );
+			strcpy( keyNameStr, ButtonName( &GamePadConfig[portNum][i] ) );
 		}
 		keyName[i]->setText( tr(keyNameStr) );
 	}
@@ -210,16 +209,16 @@ void GamePadConfDialog_t::changeButton(int padNo, int x)
 
    snprintf (buf, sizeof(buf)-1, "SDL.Input.GamePad.%d.", padNo);
 	prefix = buf;
-	DWaitButton (NULL, &GamePadConfig[padNo][x], configNo, &buttonConfigStatus );
+	DWaitButton (NULL, &GamePadConfig[padNo][x], &buttonConfigStatus );
 
    g_config->setOption (prefix + GamePadNames[x],
-			     GamePadConfig[padNo][x].ButtonNum[configNo]);
+			     GamePadConfig[padNo][x].ButtonNum);
 
-   if (GamePadConfig[padNo][x].ButtType[configNo] == BUTTC_KEYBOARD)
+   if (GamePadConfig[padNo][x].ButtType == BUTTC_KEYBOARD)
 	{
 		g_config->setOption (prefix + "DeviceType", "Keyboard");
 	}
-	else if (GamePadConfig[padNo][x].ButtType[configNo] == BUTTC_JOYSTICK)
+	else if (GamePadConfig[padNo][x].ButtType == BUTTC_JOYSTICK)
 	{
 		g_config->setOption (prefix + "DeviceType", "Joystick");
 	}
@@ -228,9 +227,9 @@ void GamePadConfDialog_t::changeButton(int padNo, int x)
 		g_config->setOption (prefix + "DeviceType", "Unknown");
 	}
 	g_config->setOption (prefix + "DeviceNum",
-			     GamePadConfig[padNo][x].DeviceNum[configNo]);
+			     GamePadConfig[padNo][x].DeviceNum);
 
-   keyNameStr = ButtonName( &GamePadConfig[padNo][x], configNo );
+   keyNameStr = ButtonName( &GamePadConfig[padNo][x] );
 
    keyName[x]->setText( keyNameStr );
    button[x]->setText("Change");
@@ -245,7 +244,7 @@ void GamePadConfDialog_t::clearButton( int padNo, int x )
    char buf[256];
    std::string prefix;
 
-	GamePadConfig[padNo][x].ButtonNum[configNo] = -1;
+	GamePadConfig[padNo][x].ButtonNum = -1;
 
    keyName[x]->setText("");
 
@@ -253,7 +252,7 @@ void GamePadConfDialog_t::clearButton( int padNo, int x )
 	prefix = buf;
 
    g_config->setOption (prefix + GamePadNames[x],
-			     GamePadConfig[padNo][x].ButtonNum[configNo]);
+			     GamePadConfig[padNo][x].ButtonNum);
 
 }
 //----------------------------------------------------
@@ -396,19 +395,18 @@ void GamePadConfDialog_t::loadDefaults(void)
 
 	for (int x=0; x<GAMEPAD_NUM_BUTTONS; x++)
 	{
-		GamePadConfig[portNum][x].ButtType[configNo]  = BUTTC_KEYBOARD;
-		GamePadConfig[portNum][x].DeviceNum[configNo] = 0;
-		GamePadConfig[portNum][x].ButtonNum[configNo] = DefaultGamePad[portNum][x];
-		GamePadConfig[portNum][x].NumC = 1;
+		GamePadConfig[portNum][x].ButtType  = BUTTC_KEYBOARD;
+		GamePadConfig[portNum][x].DeviceNum = 0;
+		GamePadConfig[portNum][x].ButtonNum = DefaultGamePad[portNum][x];
 
 		g_config->setOption (prefix + GamePadNames[x],
-			     GamePadConfig[portNum][x].ButtonNum[configNo]);
+			     GamePadConfig[portNum][x].ButtonNum);
 
-	   if (GamePadConfig[portNum][x].ButtType[configNo] == BUTTC_KEYBOARD)
+	   if (GamePadConfig[portNum][x].ButtType == BUTTC_KEYBOARD)
 		{
 			g_config->setOption (prefix + "DeviceType", "Keyboard");
 		}
-		else if (GamePadConfig[portNum][x].ButtType[configNo] == BUTTC_JOYSTICK)
+		else if (GamePadConfig[portNum][x].ButtType == BUTTC_JOYSTICK)
 		{
 			g_config->setOption (prefix + "DeviceType", "Joystick");
 		}
@@ -417,7 +415,7 @@ void GamePadConfDialog_t::loadDefaults(void)
 			g_config->setOption (prefix + "DeviceType", "Unknown");
 		}
 		g_config->setOption (prefix + "DeviceNum",
-				     GamePadConfig[portNum][x].DeviceNum[configNo]);
+				     GamePadConfig[portNum][x].DeviceNum);
 	}
 	updateCntrlrDpy();
 }
