@@ -21,7 +21,6 @@ struct ButtConfig
 	//uint64 DeviceID[MAXBUTTCONFIG];	/* TODO */
 };
 
-
 extern int NoWaiting;
 extern CFGSTRUCT InputConfig[];
 extern ARGPSTRUCT InputArgs[];
@@ -46,7 +45,7 @@ void InitInputInterface(void);
 void InputUserActiveFix(void);
 
 extern bool replaceP2StartWithMicrophone;
-extern ButtConfig GamePadConfig[4][10];
+//extern ButtConfig GamePadConfig[4][10];
 //extern ButtConfig powerpadsc[2][12];
 //extern ButtConfig QuizKingButtons[6];
 //extern ButtConfig FTrainerButtons[12];

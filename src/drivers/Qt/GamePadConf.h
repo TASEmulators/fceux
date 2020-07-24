@@ -38,11 +38,13 @@ class GamePadConfDialog_t : public QDialog
 
 	protected:
 		QComboBox *portSel;
+		QComboBox *devSel;
+		QComboBox *profSel;
+		QLabel      *guidLbl;
       QLabel      *keyName[GAMEPAD_NUM_BUTTONS];
       GamePadConfigButton_t *button[GAMEPAD_NUM_BUTTONS];
 
       int  portNum;
-		int  configNo;
       int  buttonConfigStatus;
 
       void changeButton( int port, int button );
@@ -80,6 +82,7 @@ class GamePadConfDialog_t : public QDialog
       void loadDefaults(void);
 		void ena4score(int state);
 		void oppDirEna(int state);
-		void controllerSelect(int index);
+		void portSelect(int index);
+		void deviceSelect(int index);
 
 };

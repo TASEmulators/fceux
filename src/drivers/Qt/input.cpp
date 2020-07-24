@@ -1956,6 +1956,8 @@ UpdateInput (Config * config)
 	char buf[64];
 	std::string device, prefix;
 
+	InitJoysticks();
+
 	for (unsigned int i = 0; i < 3; i++)
 	{
 		snprintf (buf, 64, "SDL.Input.%u", i);

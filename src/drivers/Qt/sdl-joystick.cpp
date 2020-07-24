@@ -23,97 +23,303 @@
 /// \brief Handles joystick input using the SDL.
 
 #include "Qt/sdl.h"
+#include "Qt/sdl-joystick.h"
 
 #include <cstdlib>
 #include <unistd.h>
 #include <fcntl.h>
 #include <cerrno>
 
-#define MAX_JOYSTICKS	32
-struct jsDev_t
+//#define MAX_JOYSTICKS	32
+
+GamePad_t GamePad[4];
+
+jsDev_t::jsDev_t(void)
 {
-   SDL_Joystick *js;
-	SDL_GameController *gc;
+	js = NULL;
+	gc = NULL;
+};	
 
-	jsDev_t(void)
+int jsDev_t::close(void)
+{
+	if ( gc )
 	{
-   	js = NULL;
-		gc = NULL;
-	};	
-
-	//~jsDev_t(void)
-	//{
-	//	if ( js )
-	//	{
-	//		SDL_JoystickClose( js ); js = NULL;
-	//	}
-	//	if ( gc )
-	//	{
-	//		SDL_GameControllerClose( gc ); gc = NULL;
-	//	}
-	//}
-
-	int close(void)
+		SDL_GameControllerClose( gc ); gc = NULL; js = NULL;
+	}
+	else
 	{
 		if ( js )
 		{
 			SDL_JoystickClose( js ); js = NULL;
 		}
-		if ( gc )
-		{
-			SDL_GameControllerClose( gc ); gc = NULL;
-		}
-		return 0;
 	}
+	return 0;
+}
 
-	SDL_Joystick *getJS(void)
+SDL_Joystick *jsDev_t::getJS(void)
+{
+	return js;
+}
+
+const char *jsDev_t::getName(void)
+{
+	return ( name.c_str() );
+}
+
+const char *jsDev_t::getGUID(void)
+{
+	return ( guidStr.c_str() );
+}
+
+bool jsDev_t::isGameController(void)
+{
+	return ( gc != NULL );
+}
+
+bool jsDev_t::inUse(void)
+{
+	return ( (js != NULL) || (gc != NULL) );
+}
+
+void jsDev_t::init( int idx )
+{
+	SDL_JoystickGUID guid;
+	char stmp[64];
+
+	devIdx = idx;
+
+	if ( gc ) 
 	{
-		if ( gc != NULL )
-		{
-			return SDL_GameControllerGetJoystick( gc );
-		}
-		return js;
-	}
+		js = SDL_GameControllerGetJoystick( gc );
 
-	bool isGameController(void)
+		guid = SDL_JoystickGetGUID( js );
+
+		name.assign( SDL_GameControllerName(gc) );
+	}
+	else
 	{
-		return ( gc != NULL );
-	}
+		guid = SDL_JoystickGetGUID( js );
 
-	bool inUse(void)
+		name.assign( SDL_JoystickName(js) );
+	}
+	SDL_JoystickGetGUIDString( guid, stmp, sizeof(stmp) );
+
+	guidStr.assign( stmp );
+
+}
+
+void jsDev_t::print(void)
+{
+	char guidStr[64];
+
+	SDL_JoystickGUID guid = SDL_JoystickGetGUID( js );
+
+	SDL_JoystickGetGUIDString( guid, guidStr, sizeof(guidStr) );
+
+	printf("JoyStickID: %i: '%s'  \n", 
+		SDL_JoystickInstanceID( js ),	SDL_JoystickName( js ) );
+	printf("GUID: %s \n", guidStr );
+	printf("NumAxes: %i \n", SDL_JoystickNumAxes(js) );
+	printf("NumButtons: %i \n", SDL_JoystickNumButtons(js) );
+	printf("NumHats: %i \n", SDL_JoystickNumHats(js) );
+
+	if ( gc )
 	{
-		return ( (js != NULL) || (gc != NULL) );
+		printf("GameController Name: '%s'\n", SDL_GameControllerName(gc) );
+		printf("GameController Mapping: %s\n", SDL_GameControllerMapping(gc) );
 	}
-
-	void print(void)
-	{
-		char guidStr[64];
-
-		SDL_JoystickGUID guid = SDL_JoystickGetGUID( getJS() );
-
-		SDL_JoystickGetGUIDString( guid, guidStr, sizeof(guidStr) );
-
-		printf("JoyStickID: %i: '%s'  \n", 
-			SDL_JoystickInstanceID( getJS() ),	SDL_JoystickName( getJS() ) );
-		printf("GUID: %s \n", guidStr );
-		printf("NumAxes: %i \n", SDL_JoystickNumAxes(getJS()) );
-		printf("NumButtons: %i \n", SDL_JoystickNumButtons(getJS()) );
-		printf("NumHats: %i \n", SDL_JoystickNumHats(getJS()) );
-
-		if ( gc )
-		{
-			printf("GameController Name: '%s'\n", SDL_GameControllerName(gc) );
-			printf("GameController Mapping: %s\n", SDL_GameControllerMapping(gc) );
-		}
-	}
-};
+}
 
 static jsDev_t  jsDev[ MAX_JOYSTICKS ];
-//static SDL_Joystick *s_Joysticks[MAX_JOYSTICKS] = {NULL};
+
+//********************************************************************************
+GamePad_t::GamePad_t(void)
+{
+	devIdx = 0;
+
+	for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
+	{
+		bmap[i].ButtType  =  BUTTC_KEYBOARD;
+		bmap[i].DeviceNum = -1;
+		bmap[i].ButtonNum = -1;
+	}
+}
+//********************************************************************************
+GamePad_t::~GamePad_t(void)
+{
+
+}
+//********************************************************************************
+static int sdlButton2NesGpIdx( const char *id )
+{
+	int idx = -1;
+
+	if ( strcmp( id, "a" ) == 0 )
+	{
+		idx = 0;
+	}
+	else if ( strcmp( id, "b" ) == 0 )
+	{
+		idx = 1;
+	}
+	else if ( strcmp( id, "back" ) == 0 )
+	{
+		idx = 2;
+	}
+	else if ( strcmp( id, "start" ) == 0 )
+	{
+		idx = 3;
+	}
+	else if ( strcmp( id, "dpup" ) == 0 )
+	{
+		idx = 4;
+	}
+	else if ( strcmp( id, "dpdown" ) == 0 )
+	{
+		idx = 5;
+	}
+	else if ( strcmp( id, "dpleft" ) == 0 )
+	{
+		idx = 6;
+	}
+	else if ( strcmp( id, "dpright" ) == 0 )
+	{
+		idx = 7;
+	}
+
+	return idx;
+}
+//********************************************************************************
+int GamePad_t::setMapping( const char *map )
+{
+	int i,j,k,bIdx;
+	char id[32][64];
+	char val[32][64];
+
+	//char guidStr[64];
+
+	i=0; j=0; k=0;
+
+	while ( map[i] )
+	{
+		while ( isspace(map[i]) ) i++;
+
+		j=0;
+		while ( (map[i] != 0) && (map[i] != ',') && (map[i] != ':') )
+		{
+			id[k][j] = map[i]; i++; j++;
+		}
+		id[k][j] = 0;
+		val[k][0] = 0;
+
+		if ( map[i] == ':' )
+		{
+			i++; j=0;
+
+			while ( (map[i] != 0) && (map[i] != ',') )
+			{
+				val[k][j] = map[i]; i++; j++;
+			}
+			val[k][j] = 0;
+		}
+
+		if ( map[i] == ',' )
+		{
+			k++; i++;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	for (i=0; i<k; i++)
+	{
+		bIdx = sdlButton2NesGpIdx( id[i] );
+
+			printf(" '%s' = '%s'  %i \n", id[i], val[i], bIdx );
+		if ( bIdx >= 0 )
+		{
+			bmap[bIdx].ButtType  = BUTTC_JOYSTICK;
+			bmap[bIdx].DeviceNum = devIdx;
+
+			if ( (val[i][0] == 'b') && isdigit( val[i][1] ) )
+			{
+				bmap[bIdx].ButtonNum = atoi( &val[i][1] );
+			}
+			else if ( (val[i][0] == 'h') && isdigit( val[i][1] ) &&
+							(val[i][2] == '.') && isdigit( val[i][3] ) )
+			{
+				int hatIdx, hatVal;
+
+				hatIdx = val[i][1] - '0';
+				hatVal = atoi( &val[i][3] );
+
+				bmap[bIdx].ButtonNum = 0x2000 | ( (hatIdx & 0x1F) << 8) | (hatVal & 0xFF);
+			}
+			else if ( (val[i][0] == 'a') || (val[i][1] == 'a') )
+			{
+				int l, axisIdx, axisSign = 0;
+
+				l=0;
+				if ( val[i][l] == '-' )
+				{
+					axisSign = 1; l++;
+				}
+				else if ( val[i][l] == '+' )
+				{
+					axisSign = 0; l++;
+				}
+
+				if ( val[i][l] == 'a' )
+				{
+					l++;
+				}
+				if ( isdigit( val[i][l] ) )
+				{
+					axisIdx = atoi( &val[i][l] );
+
+					bmap[bIdx].ButtonNum = 0x8000 | (axisSign ? 0x4000 : 0) | (axisIdx & 0xFF);
+				}
+			}	
+		}
+	}
+
+	return 0;
+}
+//********************************************************************************
+int GamePad_t::loadDefaults(void)
+{
+
+	if ( jsDev[ devIdx ].gc )
+	{	
+		char *mapping;
+
+		mapping = SDL_GameControllerMapping( jsDev[ devIdx ].gc );
+
+		if ( mapping == NULL ) return -1;
+
+		setMapping( mapping );
+
+   	SDL_free(mapping);
+	}
+	return 0;
+}
+//********************************************************************************
 
 static int s_jinited = 0;
 
+//********************************************************************************
+jsDev_t *getJoystickDevice( int devNum )
+{
+	if ( (devNum >= 0) && (devNum < MAX_JOYSTICKS) )
+	{
+		return &jsDev[ devNum ];
+	}
+	return NULL;
+}
 
+//********************************************************************************
 /**
  * Tests if the given button is active on the joystick.
  */
@@ -219,7 +425,8 @@ int AddJoystick( int which )
 			else
 			{
 				printf("Added Joystick: %i \n", which );
-				jsDev[which].print();
+				jsDev[which].init(which);
+				//jsDev[which].print();
 				//printJoystick( s_Joysticks[which] );
 			}
 		}
@@ -235,7 +442,8 @@ int AddJoystick( int which )
 			else
 			{
 				printf("Added Joystick: %i \n", which );
-				jsDev[which].print();
+				jsDev[which].init(which);
+				//jsDev[which].print();
 				//printJoystick( s_Joysticks[which] );
 			}
 		}
@@ -286,26 +494,6 @@ InitJoysticks(void)
 	{
 		/* Open the joystick under SDL. */
 		AddJoystick(n);
-		//if ( SDL_IsGameController(n) )
-		//{
-		//	SDL_GameController *gc = SDL_GameControllerOpen(n);
-		//	printf("Is Game Controller: %i \n", n);
-
-		//	printf("Mapping: %s \n", SDL_GameControllerMapping(gc) );
-		//}
-		//	s_Joysticks[n] = SDL_JoystickOpen(n);
-
-		//if ( s_Joysticks[n] == NULL )
-		//{
-		//	printf("Could not open joystick %d: %s.\n",
-		//		n, SDL_GetError());
-		//}
-		//else
-		//{
-		//	printf("Opened JS %i: \n", SDL_JoystickInstanceID( s_Joysticks[n] ) );
-		//	jsDev[which].print();
-		//	//printJoystick( s_Joysticks[n] );
-		//}
 	}
 
 	s_jinited = 1;
