@@ -250,6 +250,7 @@ GamePad_t::GamePad_t(void)
 		bmap[i].ButtType  =  BUTTC_KEYBOARD;
 		bmap[i].DeviceNum = -1;
 		bmap[i].ButtonNum = -1;
+		bmap[i].state     =  0;
 	}
 }
 //********************************************************************************
@@ -661,6 +662,38 @@ int GamePad_t::createProfile( const char *name )
    return 0;
 }
 //********************************************************************************
+int GamePad_t::deleteMapping( const char *name )
+{
+   const char *guid = NULL;
+   const char *baseDir = FCEUI_GetBaseDirectory();
+   std::string path;
+
+   if ( baseDir[0] == 0 )
+   {
+      printf("Error: Invalid base directory\n");
+      return -1;
+   }
+   if ( devIdx >= 0 )
+   {
+      if ( !jsDev[devIdx].isConnected() )
+      {
+         printf("Error: JS%i Not Connected\n", devIdx );
+         return -1;
+      } 
+      guid = jsDev[devIdx].getGUID();
+   }
+   else
+   {
+      guid = "keyboard";
+   }
+   path = std::string(baseDir) + "/input/" + std::string(guid) +
+      "/" + std::string(name) + ".txt";
+
+   //printf("File: '%s'\n", path.c_str() );
+
+   return remove( path.c_str() );
+}
+//********************************************************************************
 jsDev_t *getJoystickDevice( int devNum )
 {
 	if ( (devNum >= 0) && (devNum < MAX_JOYSTICKS) )
@@ -803,7 +836,7 @@ int AddJoystick( int which )
 			}
 			else
 			{
-				printf("Added Joystick: %i \n", which );
+				//printf("Added Joystick: %i \n", which );
 				jsDev[which].init(which);
 				//jsDev[which].print();
 				//printJoystick( s_Joysticks[which] );
@@ -820,7 +853,7 @@ int AddJoystick( int which )
 			}
 			else
 			{
-				printf("Added Joystick: %i \n", which );
+				//printf("Added Joystick: %i \n", which );
 				jsDev[which].init(which);
 				//jsDev[which].print();
 				//printJoystick( s_Joysticks[which] );

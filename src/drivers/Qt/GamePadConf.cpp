@@ -201,9 +201,10 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    connect(clearButton[8], SIGNAL(clicked()), this, SLOT(clearButton8(void)) );
    connect(clearButton[9], SIGNAL(clicked()), this, SLOT(clearButton9(void)) );
 
-   connect(newProfileButton  , SIGNAL(clicked()), this, SLOT(newProfileCallback(void)) );
-   connect(applyProfileButton, SIGNAL(clicked()), this, SLOT(loadProfileCallback(void)) );
-   connect(saveProfileButton , SIGNAL(clicked()), this, SLOT(saveProfileCallback(void)) );
+   connect(newProfileButton   , SIGNAL(clicked()), this, SLOT(newProfileCallback(void)) );
+   connect(applyProfileButton , SIGNAL(clicked()), this, SLOT(loadProfileCallback(void)) );
+   connect(saveProfileButton  , SIGNAL(clicked()), this, SLOT(saveProfileCallback(void)) );
+   connect(removeProfileButton, SIGNAL(clicked()), this, SLOT(deleteProfileCallback(void)) );
 
    connect(loadDefaultButton, SIGNAL(clicked()), this, SLOT(loadDefaults(void)) );
    connect(clearAllButton   , SIGNAL(clicked()), this, SLOT(clearAllCallback(void)) );
@@ -301,6 +302,9 @@ void GamePadConfDialog_t::loadMapList(void)
       fileName.erase( suffixIdx );
 
       //printf("File: %s \n", fileName.c_str() );
+      //
+
+      if ( fileName.compare("default") == 0 ) continue;
 
       mapSel->addItem( tr(fileName.c_str()), (int)i+1 );
    }
@@ -690,6 +694,29 @@ void GamePadConfDialog_t::saveProfileCallback(void)
    }
    mapMsg->setText( tr(stmp) );
 
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::deleteProfileCallback(void)
+{
+   int ret;
+   std::string mapName;
+   char stmp[256];
+
+   mapName = mapSel->currentText().toStdString();
+
+   ret = GamePad[portNum].deleteMapping( mapName.c_str() );
+
+   if ( ret == 0 )
+   {
+      sprintf( stmp, "Mapping Deleted: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str() );
+   }
+   else
+   {
+      sprintf( stmp, "Error: Failed to Delete Mapping: %s \n", mapName.c_str() );
+   }
+   mapMsg->setText( tr(stmp) );
+
+   loadMapList();
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::updatePeriodic(void)

@@ -74,6 +74,7 @@ class GamePad_t
    int  getDefaultMap( char *out, const char *guid = NULL );
    int  saveMappingToFile( const char *filename, const char *txtMap );
    int  saveCurrentMapToFile( const char *filename );
+   int  deleteMapping( const char *name );
 };
 
 extern GamePad_t GamePad[4];

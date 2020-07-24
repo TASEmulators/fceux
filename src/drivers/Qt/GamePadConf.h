@@ -94,6 +94,7 @@ class GamePadConfDialog_t : public QDialog
       void newProfileCallback(void);
       void loadProfileCallback(void);
       void saveProfileCallback(void);
+      void deleteProfileCallback(void);
 		void updatePeriodic(void);
 
 };
