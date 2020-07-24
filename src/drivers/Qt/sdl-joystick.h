@@ -15,8 +15,13 @@ struct nesGamePadMap_t
 {
    char guid[64];
    char name[128];
-   char btn[GAMEPAD_NUM_BUTTONS];
+   char btn[GAMEPAD_NUM_BUTTONS][32];
    char os[64];
+
+   nesGamePadMap_t(void);
+  ~nesGamePadMap_t(void);
+
+   int parseMapping( const char *text );
 };
 
 struct jsDev_t
@@ -57,6 +62,7 @@ class GamePad_t
 	int  loadDefaults(void);
 
 	int  setMapping( const char *map );
+	int  setMapping( nesGamePadMap_t *map );
 };
 
 extern GamePad_t GamePad[4];

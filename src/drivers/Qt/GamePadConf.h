@@ -41,6 +41,7 @@ class GamePadConfDialog_t : public QDialog
       QTimer    *inputTimer;
 		QComboBox *portSel;
 		QComboBox *devSel;
+		QComboBox *mapSel;
 		QComboBox *profSel;
 		QLabel      *guidLbl;
       QLabel      *keyName[GAMEPAD_NUM_BUTTONS];

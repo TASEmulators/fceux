@@ -32,14 +32,24 @@
 
 //#define MAX_JOYSTICKS	32
 
+// Public Variables
 GamePad_t GamePad[4];
 
+// Static Functions
+static int sdlButton2NesGpIdx( const char *id );
+
+// Static Variables
+static int s_jinited = 0;
+
+//********************************************************************************
+// Joystick Device 
 jsDev_t::jsDev_t(void)
 {
 	js = NULL;
 	gc = NULL;
 };	
 
+//********************************************************************************
 int jsDev_t::close(void)
 {
 	if ( gc )
@@ -56,31 +66,37 @@ int jsDev_t::close(void)
 	return 0;
 }
 
+//********************************************************************************
 SDL_Joystick *jsDev_t::getJS(void)
 {
 	return js;
 }
 
+//********************************************************************************
 const char *jsDev_t::getName(void)
 {
 	return ( name.c_str() );
 }
 
+//********************************************************************************
 const char *jsDev_t::getGUID(void)
 {
 	return ( guidStr.c_str() );
 }
 
+//********************************************************************************
 bool jsDev_t::isGameController(void)
 {
 	return ( gc != NULL );
 }
 
+//********************************************************************************
 bool jsDev_t::inUse(void)
 {
 	return ( (js != NULL) || (gc != NULL) );
 }
 
+//********************************************************************************
 void jsDev_t::init( int idx )
 {
 	SDL_JoystickGUID guid;
@@ -132,6 +148,79 @@ void jsDev_t::print(void)
 
 static jsDev_t  jsDev[ MAX_JOYSTICKS ];
 
+//********************************************************************************
+nesGamePadMap_t::nesGamePadMap_t(void)
+{
+   memset( guid, 0, sizeof(guid) );
+   memset( name, 0, sizeof(name) );
+   memset( os  , 0, sizeof(os) );
+   memset( btn , 0, sizeof(btn) );
+}
+//********************************************************************************
+nesGamePadMap_t::~nesGamePadMap_t(void)
+{
+
+}
+//********************************************************************************
+int nesGamePadMap_t::parseMapping( const char *map )
+{
+   int i,j,k,bIdx;
+	char id[32][64];
+	char val[32][64];
+
+   i=0; j=0; k=0;
+
+	while ( map[i] )
+	{
+		while ( isspace(map[i]) ) i++;
+
+		j=0;
+		while ( (map[i] != 0) && (map[i] != ',') && (map[i] != ':') )
+		{
+			id[k][j] = map[i]; i++; j++;
+		}
+		id[k][j] = 0;
+		val[k][0] = 0;
+
+		if ( map[i] == ':' )
+		{
+			i++; j=0;
+
+			while ( (map[i] != 0) && (map[i] != ',') )
+			{
+				val[k][j] = map[i]; i++; j++;
+			}
+			val[k][j] = 0;
+		}
+
+		if ( map[i] == ',' )
+		{
+			k++; i++;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+   strcpy( guid, id[0] ); // GUID is always 1st field
+   strcpy( name, id[1] ); // Name is always 2nd field
+
+	for (i=0; i<k; i++)
+	{
+		bIdx = sdlButton2NesGpIdx( id[i] );
+
+		//printf(" '%s' = '%s'  %i \n", id[i], val[i], bIdx );
+		if ( bIdx >= 0 )
+		{
+         strcpy( btn[bIdx], val[i] );
+      }
+      else if ( strcmp( id[i], "platform" ) == 0 )
+      {
+         strcpy( os, val[i] );
+      }
+	}
+}
 //********************************************************************************
 GamePad_t::GamePad_t(void)
 {
@@ -186,104 +275,96 @@ static int sdlButton2NesGpIdx( const char *id )
 	{
 		idx = 7;
 	}
+	else if ( strcmp( id, "turboA" ) == 0 )
+	{
+		idx = 8;
+	}
+	else if ( strcmp( id, "turboB" ) == 0 )
+	{
+		idx = 9;
+	}
 
 	return idx;
 }
 //********************************************************************************
+int GamePad_t::setMapping( nesGamePadMap_t *gpm )
+{
+   for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
+   {
+		bmap[i].ButtType  = BUTTC_KEYBOARD;
+		bmap[i].DeviceNum = -1;
+		bmap[i].ButtonNum = -1;
+
+      if (gpm->btn[i][0] == 'k')
+      {
+		   bmap[i].ButtType  = BUTTC_KEYBOARD;
+		   bmap[i].DeviceNum = 0;
+   		bmap[i].ButtonNum = 0; // FIXME
+      }
+      else if ( (gpm->btn[i][0] == 'b') && isdigit( gpm->btn[i][1] ) )
+   	{
+		   bmap[i].ButtType  = BUTTC_JOYSTICK;
+		   bmap[i].DeviceNum = devIdx;
+   		bmap[i].ButtonNum = atoi( &gpm->btn[i][1] );
+   	}
+   	else if ( (gpm->btn[i][0] == 'h') && isdigit( gpm->btn[i][1] ) &&
+   					(gpm->btn[i][2] == '.') && isdigit( gpm->btn[i][3] ) )
+   	{
+   		int hatIdx, hatVal;
+   
+   		hatIdx = gpm->btn[i][1] - '0';
+   		hatVal = atoi( &gpm->btn[i][3] );
+   
+		   bmap[i].ButtType  = BUTTC_JOYSTICK;
+		   bmap[i].DeviceNum = devIdx;
+   		bmap[i].ButtonNum = 0x2000 | ( (hatIdx & 0x1F) << 8) | (hatVal & 0xFF);
+   	}
+   	else if ( (gpm->btn[i][0] == 'a') || (gpm->btn[i][1] == 'a') )
+   	{
+   		int l=0, axisIdx=0, axisSign=0;
+   
+   		l=0;
+   		if ( gpm->btn[i][l] == '-' )
+   		{
+   			axisSign = 1; l++;
+   		}
+   		else if ( gpm->btn[i][l] == '+' )
+   		{
+   			axisSign = 0; l++;
+   		}
+   
+   		if ( gpm->btn[i][l] == 'a' )
+   		{
+   			l++;
+   		}
+   		if ( isdigit( gpm->btn[i][l] ) )
+   		{
+   			axisIdx = atoi( &gpm->btn[i][l] );
+
+            while ( isdigit(gpm->btn[i][l]) ) l++;
+   		}
+         if ( gpm->btn[i][l] == '-' )
+   		{
+   			axisSign = 1; l++;
+   		}
+   		else if ( gpm->btn[i][l] == '+' )
+   		{
+   			axisSign = 0; l++;
+   		}
+		   bmap[i].ButtType  = BUTTC_JOYSTICK;
+		   bmap[i].DeviceNum = devIdx;
+   		bmap[i].ButtonNum = 0x8000 | (axisSign ? 0x4000 : 0) | (axisIdx & 0xFF);
+   	}
+	}
+   return 0;
+}
+//********************************************************************************
 int GamePad_t::setMapping( const char *map )
 {
-	int i,j,k,bIdx;
-	char id[32][64];
-	char val[32][64];
+   nesGamePadMap_t gpm;
 
-	//char guidStr[64];
-
-	i=0; j=0; k=0;
-
-	while ( map[i] )
-	{
-		while ( isspace(map[i]) ) i++;
-
-		j=0;
-		while ( (map[i] != 0) && (map[i] != ',') && (map[i] != ':') )
-		{
-			id[k][j] = map[i]; i++; j++;
-		}
-		id[k][j] = 0;
-		val[k][0] = 0;
-
-		if ( map[i] == ':' )
-		{
-			i++; j=0;
-
-			while ( (map[i] != 0) && (map[i] != ',') )
-			{
-				val[k][j] = map[i]; i++; j++;
-			}
-			val[k][j] = 0;
-		}
-
-		if ( map[i] == ',' )
-		{
-			k++; i++;
-		}
-		else
-		{
-			break;
-		}
-	}
-
-	for (i=0; i<k; i++)
-	{
-		bIdx = sdlButton2NesGpIdx( id[i] );
-
-			printf(" '%s' = '%s'  %i \n", id[i], val[i], bIdx );
-		if ( bIdx >= 0 )
-		{
-			bmap[bIdx].ButtType  = BUTTC_JOYSTICK;
-			bmap[bIdx].DeviceNum = devIdx;
-
-			if ( (val[i][0] == 'b') && isdigit( val[i][1] ) )
-			{
-				bmap[bIdx].ButtonNum = atoi( &val[i][1] );
-			}
-			else if ( (val[i][0] == 'h') && isdigit( val[i][1] ) &&
-							(val[i][2] == '.') && isdigit( val[i][3] ) )
-			{
-				int hatIdx, hatVal;
-
-				hatIdx = val[i][1] - '0';
-				hatVal = atoi( &val[i][3] );
-
-				bmap[bIdx].ButtonNum = 0x2000 | ( (hatIdx & 0x1F) << 8) | (hatVal & 0xFF);
-			}
-			else if ( (val[i][0] == 'a') || (val[i][1] == 'a') )
-			{
-				int l, axisIdx, axisSign = 0;
-
-				l=0;
-				if ( val[i][l] == '-' )
-				{
-					axisSign = 1; l++;
-				}
-				else if ( val[i][l] == '+' )
-				{
-					axisSign = 0; l++;
-				}
-
-				if ( val[i][l] == 'a' )
-				{
-					l++;
-				}
-				if ( isdigit( val[i][l] ) )
-				{
-					axisIdx = atoi( &val[i][l] );
-
-					bmap[bIdx].ButtonNum = 0x8000 | (axisSign ? 0x4000 : 0) | (axisIdx & 0xFF);
-				}
-			}	
-		}
-	}
+   gpm.parseMapping( map );
+   setMapping( &gpm );
 
 	return 0;
 }
@@ -306,9 +387,6 @@ int GamePad_t::loadDefaults(void)
 	return 0;
 }
 //********************************************************************************
-
-static int s_jinited = 0;
-
 //********************************************************************************
 jsDev_t *getJoystickDevice( int devNum )
 {
@@ -383,6 +461,7 @@ DTestButtonJoy(ButtConfig *bc)
 
 	return 0;
 }
+//********************************************************************************
 
 
 //static void printJoystick( SDL_Joystick *js )
@@ -405,6 +484,7 @@ DTestButtonJoy(ButtConfig *bc)
 //
 //}
 
+//********************************************************************************
 /**
  * Shutdown the SDL joystick subsystem.
  */
@@ -425,6 +505,7 @@ KillJoysticks(void)
 	return 0;
 }
 
+//********************************************************************************
 int AddJoystick( int which )
 {
 	if ( jsDev[ which ].inUse() )
@@ -472,6 +553,7 @@ int AddJoystick( int which )
 	return 0;
 }
 
+//********************************************************************************
 int RemoveJoystick( int which )
 {
 	//printf("Remove Joystick: %i \n", which );
@@ -491,6 +573,7 @@ int RemoveJoystick( int which )
 	return -1;
 }
 
+//********************************************************************************
 /**
  * Initialize the SDL joystick subsystem.
  */
@@ -520,3 +603,4 @@ InitJoysticks(void)
 	s_jinited = 1;
 	return 1;
 }
+//********************************************************************************

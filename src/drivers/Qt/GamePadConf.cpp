@@ -16,8 +16,10 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	QHBoxLayout *hbox1, *hbox2, *hbox3, *hbox4;
 	QGridLayout *grid;
 	QCheckBox *efs_chkbox, *udlr_chkbox;
-   QGroupBox *frame;
+   QGroupBox *frame1, *frame2;
 	QLabel *label;
+   QPushButton *newProfileButton;
+   QPushButton *applyProfileButton;
    QPushButton *loadDefaultButton;
    QPushButton *clearAllButton;
    QPushButton *closebutton;
@@ -77,6 +79,21 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	hbox3->addWidget( label );
 	hbox3->addWidget( guidLbl );
 
+   frame1 = new QGroupBox(tr("Mapping Profile:"));
+   grid   = new QGridLayout();
+
+   frame1->setLayout( grid );
+
+	mapSel = new QComboBox();
+   applyProfileButton = new QPushButton( tr("Load") );
+   newProfileButton   = new QPushButton( tr("New") );
+
+	grid->addWidget( mapSel            , 0, 0, Qt::AlignCenter );
+	grid->addWidget( applyProfileButton, 0, 1, Qt::AlignCenter );
+	grid->addWidget( newProfileButton  , 0, 2, Qt::AlignCenter );
+
+   mapSel->addItem( tr("Default"), 0 );
+
 	efs_chkbox  = new QCheckBox( tr("Enable Four Score") );
 	udlr_chkbox = new QCheckBox( tr("Allow Up+Down/Left+Right") );
 
@@ -88,13 +105,12 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	g_config->getOption("SDL.Input.EnableOppositeDirectionals", &opposite_dirs);
 	udlr_chkbox->setChecked( opposite_dirs );
 
-   frame = new QGroupBox(tr("Buttons:"));
-   grid  = new QGridLayout();
+   frame2 = new QGroupBox(tr("Current Active Button Mappings:"));
+   grid   = new QGridLayout();
 
    grid-> setHorizontalSpacing(50);
 
-   //frame->setFrameStyle( QFrame::Box );
-   frame->setLayout( grid );
+   frame2->setLayout( grid );
 
    for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
    {
@@ -167,9 +183,10 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	mainLayout->addLayout( hbox1 );
 	mainLayout->addLayout( hbox2 );
 	mainLayout->addLayout( hbox3 );
+	mainLayout->addWidget( frame1 );
 	mainLayout->addWidget( efs_chkbox );
 	mainLayout->addWidget( udlr_chkbox );
-	mainLayout->addWidget( frame );
+	mainLayout->addWidget( frame2 );
 	mainLayout->addLayout( hbox4 );
 
 	setLayout( mainLayout );
