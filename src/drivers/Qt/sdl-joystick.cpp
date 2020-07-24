@@ -337,10 +337,17 @@ DTestButtonJoy(ButtConfig *bc)
 	if (bc->ButtonNum & 0x2000)
 	{
 		/* Hat "button" */
-		if(SDL_JoystickGetHat( js,
+		if (SDL_JoystickGetHat( js,
 							((bc->ButtonNum >> 8) & 0x1F)) & 
 							(bc->ButtonNum&0xFF))
+      {
+         bc->state = 1;
 			return 1; 
+      }
+      else
+      {
+         bc->state = 0;
+      }
 	}
 	else if (bc->ButtonNum & 0x8000) 
 	{
@@ -348,16 +355,30 @@ DTestButtonJoy(ButtConfig *bc)
 		int pos;
 		pos = SDL_JoystickGetAxis( js,
 								bc->ButtonNum & 16383);
-		if ((bc->ButtonNum & 0x4000) && pos <= -16383) {
-			return 1;
-		} else if (!(bc->ButtonNum & 0x4000) && pos >= 16363) {
+		if ((bc->ButtonNum & 0x4000) && pos <= -16383) 
+      {
+         bc->state = 1;
 			return 1;
 		}
+      else if (!(bc->ButtonNum & 0x4000) && pos >= 16363) 
+      {
+         bc->state = 1;
+			return 1;
+		}
+      else
+      {
+         bc->state = 0;
+      }
 	} 
-	else if(SDL_JoystickGetButton( js,
+	else if (SDL_JoystickGetButton( js,
 								bc->ButtonNum))
 	{
+      bc->state = 1;
 		return 1;
+   }
+   else
+   {
+      bc->state = 0;
 	}
 
 	return 0;

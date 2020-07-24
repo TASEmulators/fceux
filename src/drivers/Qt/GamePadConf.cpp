@@ -28,6 +28,10 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    portNum = 0;
    buttonConfigStatus = 1;
 
+   inputTimer  = new QTimer( this );
+
+   connect( inputTimer, &QTimer::timeout, this, &GamePadConfDialog_t::updatePeriodic );
+
    setWindowTitle( tr("GamePad Config") );
 
 	hbox1 = new QHBoxLayout();
@@ -35,7 +39,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	hbox3 = new QHBoxLayout();
 	hbox4 = new QHBoxLayout();
 
-	label = new QLabel(tr("Port:"));
+	label = new QLabel(tr("Console Port:"));
 	portSel = new QComboBox();
 	hbox1->addWidget( label );
 	hbox1->addWidget( portSel );
@@ -105,13 +109,17 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	   buttonName     = new QLabel(tr(text));
 	   keyName[i]     = new QLabel();
+	   keyState[i]    = new QLabel( tr("F") );
+	   label          = new QLabel( tr("State:") );
       button[i]      = new GamePadConfigButton_t(i);
       clearButton[i] = new QPushButton( tr("Clear") );
 
       grid->addWidget( buttonName    , i, 0, Qt::AlignCenter );
       grid->addWidget( keyName[i]    , i, 1, Qt::AlignCenter );
-      grid->addWidget( button[i]     , i, 2, Qt::AlignCenter );
-      grid->addWidget( clearButton[i], i, 3, Qt::AlignCenter );
+      grid->addWidget( label         , i, 2, Qt::AlignCenter );
+      grid->addWidget( keyState[i]   , i, 3, Qt::AlignCenter );
+      grid->addWidget( button[i]     , i, 4, Qt::AlignCenter );
+      grid->addWidget( clearButton[i], i, 5, Qt::AlignCenter );
    }
 	updateCntrlrDpy();
 
@@ -166,11 +174,13 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	setLayout( mainLayout );
 
+   inputTimer->start( 33 ); // 30hz
 }
 
 //----------------------------------------------------
 GamePadConfDialog_t::~GamePadConfDialog_t(void)
 {
+   inputTimer->stop();
    buttonConfigStatus = 0;
 }
 void GamePadConfDialog_t::keyPressEvent(QKeyEvent *event)
@@ -483,6 +493,26 @@ void GamePadConfDialog_t::loadDefaults(void)
 		GamePad[portNum].loadDefaults();
 	}
 	updateCntrlrDpy();
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::updatePeriodic(void)
+{
+   for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
+   {
+      const char *txt, *style;
+      if ( GamePad[portNum].bmap[i].state )
+      {
+         txt = "  T  ";
+         style = "background-color: green; color: white;";
+      }
+      else
+      {
+         txt = "  F  ";
+         style = "background-color: red; color: white;";
+      }
+      keyState[i]->setText( tr(txt) );
+      keyState[i]->setStyleSheet( style );
+   }
 }
 //----------------------------------------------------
 GamePadConfigButton_t::GamePadConfigButton_t(int i)

@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QFrame>
+#include <QTimer>
 #include <QGroupBox>
 
 #include "Qt/main.h"
@@ -37,11 +38,13 @@ class GamePadConfDialog_t : public QDialog
 		~GamePadConfDialog_t(void);
 
 	protected:
+      QTimer    *inputTimer;
 		QComboBox *portSel;
 		QComboBox *devSel;
 		QComboBox *profSel;
 		QLabel      *guidLbl;
       QLabel      *keyName[GAMEPAD_NUM_BUTTONS];
+      QLabel      *keyState[GAMEPAD_NUM_BUTTONS];
       GamePadConfigButton_t *button[GAMEPAD_NUM_BUTTONS];
 
       int  portNum;
@@ -84,5 +87,6 @@ class GamePadConfDialog_t : public QDialog
 		void oppDirEna(int state);
 		void portSelect(int index);
 		void deviceSelect(int index);
+		void updatePeriodic(void);
 
 };

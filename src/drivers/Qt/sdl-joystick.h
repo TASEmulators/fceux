@@ -11,6 +11,14 @@
 
 #define  MAX_JOYSTICKS  32
 
+struct nesGamePadMap_t
+{
+   char guid[64];
+   char name[128];
+   char btn[GAMEPAD_NUM_BUTTONS];
+   char os[64];
+};
+
 struct jsDev_t
 {
    SDL_Joystick *js;

@@ -24,8 +24,9 @@
 #include "Qt/config.h"
 
 
-#include "Qt/sdl-video.h"
 #include "Qt/sdl.h"
+#include "Qt/sdl-video.h"
+#include "Qt/sdl-joystick.h"
 
 #include "common/cheat.h"
 #include "../../movie.h"
@@ -49,8 +50,8 @@ extern bool bindSavestate, frameAdvanceLagSkip, lagCounterDisplay;
 /* UsrInputType[] is user-specified.  CurInputType[] is current
         (game loading can override user settings)
 */
-static int UsrInputType[NUM_INPUT_DEVICES];
-static int CurInputType[NUM_INPUT_DEVICES];
+static int UsrInputType[NUM_INPUT_DEVICES] = { SI_GAMEPAD, SI_GAMEPAD, SI_NONE };
+static int CurInputType[NUM_INPUT_DEVICES] = { SI_GAMEPAD, SI_GAMEPAD, SI_NONE };
 static int cspec = 0;
 static int buttonConfigInProgress = 0;
 
@@ -1007,8 +1008,13 @@ DTestButton (ButtConfig * bc)
 	{
 		if (g_keyState[SDL_GetScancodeFromKey (bc->ButtonNum)])
 		{
+         bc->state = 1;
 			return 1;
 		}
+      else
+      {
+         bc->state = 0;
+      }
 	}
 	else if (bc->ButtType == BUTTC_JOYSTICK)
 	{
@@ -1021,26 +1027,26 @@ DTestButton (ButtConfig * bc)
 }
 
 
-#define MK(x)       {BUTTC_KEYBOARD,0,MKK(x)}
+#define MK(x)       {BUTTC_KEYBOARD,0,MKK(x),0}
 //#define MK2(x1,x2)  {BUTTC_KEYBOARD,0,MKK(x1)}
-#define MKZ()       {0,0,-1}
+#define MKZ()       {0,0,-1,0}
 #define GPZ()       {MKZ(), MKZ(), MKZ(), MKZ()}
 
-ButtConfig GamePadConfig[ GAMEPAD_NUM_DEVICES ][ GAMEPAD_NUM_BUTTONS ] = 
-{
-/* Gamepad 1 */
-	{MK (KP_3), MK (KP_2), MK (SLASH), MK (ENTER),
-	MK (w), MK (z), MK (a), MK (s), MKZ (), MKZ ()},
-
-	/* Gamepad 2 */
-	GPZ (),
-
-	/* Gamepad 3 */
-	GPZ (),
-
-	/* Gamepad 4 */
-	GPZ ()
-};
+//ButtConfig GamePadConfig[ GAMEPAD_NUM_DEVICES ][ GAMEPAD_NUM_BUTTONS ] = 
+//{
+///* Gamepad 1 */
+//	{MK (KP_3), MK (KP_2), MK (SLASH), MK (ENTER),
+//	MK (w), MK (z), MK (a), MK (s), MKZ (), MKZ ()},
+//
+//	/* Gamepad 2 */
+//	GPZ (),
+//
+//	/* Gamepad 3 */
+//	GPZ (),
+//
+//	/* Gamepad 4 */
+//	GPZ ()
+//};
 
 /**
  * Update the status of the gamepad input devices.
@@ -1072,7 +1078,7 @@ UpdateGamepad(void)
 		// a, b, select, start, up, down, left, right
 		for (x = 0; x < 8; x++)
 		{
-			if (DTestButton (&GamePadConfig[wg][x]))
+			if (DTestButton (&GamePad[wg].bmap[x]))
 			{
 				//printf("GamePad%i Button Hit: %i \n", wg, x );
 				if(opposite_dirs == 0)
@@ -1110,7 +1116,7 @@ UpdateGamepad(void)
 		{
 			for (x = 0; x < 2; x++)
 			{
-				if (DTestButton (&GamePadConfig[wg][8 + x]))
+				if (DTestButton (&GamePad[wg].bmap[8 + x]))
 				{
 					JS |= (1 << x) << (wg << 3);
 				}
@@ -2063,15 +2069,16 @@ UpdateInput (Config * config)
 			type = 0;
 		}
 
-		config->getOption (prefix + "DeviceNum", &devnum);
-		for (unsigned int j = 0; j < GAMEPAD_NUM_BUTTONS; j++)
-		{
-			config->getOption (prefix + GamePadNames[j], &button);
+		//FIXME
+		//config->getOption (prefix + "DeviceNum", &devnum);
+		//for (unsigned int j = 0; j < GAMEPAD_NUM_BUTTONS; j++)
+		//{
+		//	config->getOption (prefix + GamePadNames[j], &button);
 
-			GamePadConfig[i][j].ButtType = type;
-			GamePadConfig[i][j].DeviceNum = devnum;
-			GamePadConfig[i][j].ButtonNum = button;
-		}
+		//	GamePadConfig[i][j].ButtType = type;
+		//	GamePadConfig[i][j].DeviceNum = devnum;
+		//	GamePadConfig[i][j].ButtonNum = button;
+		//}
 	}
 
 	// PowerPad 0 - 1

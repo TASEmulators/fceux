@@ -17,6 +17,7 @@ struct ButtConfig
 	int    ButtType; //[MAXBUTTCONFIG];
 	int    DeviceNum; //[MAXBUTTCONFIG];
 	int    ButtonNum; //[MAXBUTTCONFIG];
+   int    state;
 	//uint32_t NumC;
 	//uint64 DeviceID[MAXBUTTCONFIG];	/* TODO */
 };
