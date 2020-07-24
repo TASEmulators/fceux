@@ -21,6 +21,7 @@ struct nesGamePadMap_t
    nesGamePadMap_t(void);
   ~nesGamePadMap_t(void);
 
+   void clearMapping(void);
    int parseMapping( const char *text );
 };
 
@@ -36,7 +37,7 @@ struct jsDev_t
 	int close(void);
 	SDL_Joystick *getJS(void);
 	bool isGameController(void);
-	bool inUse(void);
+	bool isConnected(void);
 	void print(void);
 	const char *getName(void);
 	const char *getGUID(void);
@@ -51,7 +52,7 @@ class GamePad_t
 {
 	public:
 
-	int  type;
+	//int  type;
 	int  devIdx;
 
 	ButtConfig bmap[GAMEPAD_NUM_BUTTONS];
@@ -59,10 +60,20 @@ class GamePad_t
 	GamePad_t(void);
 	~GamePad_t(void);
 
-	int  loadDefaults(void);
+	const char *getGUID(void);
 
+	int  loadDefaults(void);
+   int  loadProfile( const char *name, const char *guid = NULL );
+
+	int  setDeviceIndex( int devIdx );
 	int  setMapping( const char *map );
 	int  setMapping( nesGamePadMap_t *map );
+
+   int  createProfile( const char *name );
+   int  getMapFromFile( const char *filename, char *out );
+   int  getDefaultMap( char *out, const char *guid = NULL );
+   int  saveMappingToFile( const char *filename, const char *txtMap );
+   int  saveCurrentMapToFile( const char *filename );
 };
 
 extern GamePad_t GamePad[4];

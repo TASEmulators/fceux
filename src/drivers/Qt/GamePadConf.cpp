@@ -1,5 +1,8 @@
 // GamePadConf.cpp
 //
+#include <QDir>
+#include <QInputDialog>
+
 #include "Qt/GamePadConf.h"
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -13,13 +16,16 @@
 GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
-	QHBoxLayout *hbox1, *hbox2, *hbox3, *hbox4;
+	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3, *hbox4;
+	QVBoxLayout *vbox;
 	QGridLayout *grid;
 	QCheckBox *efs_chkbox, *udlr_chkbox;
    QGroupBox *frame1, *frame2;
 	QLabel *label;
    QPushButton *newProfileButton;
+   QPushButton *saveProfileButton;
    QPushButton *applyProfileButton;
+   QPushButton *removeProfileButton;
    QPushButton *loadDefaultButton;
    QPushButton *clearAllButton;
    QPushButton *closebutton;
@@ -64,7 +70,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 		if ( js != NULL )
 		{
-			if ( js->inUse() )
+			if ( js->isConnected() )
 			{
 				char stmp[128];
 				sprintf( stmp, "%i: %s", i, js->getName() );
@@ -80,19 +86,45 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	hbox3->addWidget( guidLbl );
 
    frame1 = new QGroupBox(tr("Mapping Profile:"));
-   grid   = new QGridLayout();
+   //grid   = new QGridLayout();
+   vbox   = new QVBoxLayout();
 
-   frame1->setLayout( grid );
+   //frame1->setLayout( grid );
+   frame1->setLayout( vbox );
+
+	hbox = new QHBoxLayout();
+	vbox->addLayout( hbox );
 
 	mapSel = new QComboBox();
+   hbox->addWidget( mapSel );
+
+   mapSel->setWhatsThis( tr("Combo box for selection of a saved button mapping profile for the selected device"));
+   mapSel->addItem( tr("default"), 0 );
+
+	hbox = new QHBoxLayout();
+	vbox->addLayout( hbox );
+
    applyProfileButton = new QPushButton( tr("Load") );
+	applyProfileButton->setWhatsThis(tr("Sets Current Active Map to the Selected Profile"));
+   hbox->addWidget( applyProfileButton );
+
+   saveProfileButton = new QPushButton( tr("Save") );
+	saveProfileButton->setWhatsThis(tr("Stores Current Active Map to the Selected Profile"));
+   hbox->addWidget( saveProfileButton );
+
+	hbox = new QHBoxLayout();
+	vbox->addLayout( hbox );
+
    newProfileButton   = new QPushButton( tr("New") );
+	newProfileButton->setWhatsThis(tr("Create a New Map Profile"));
+   hbox->addWidget( newProfileButton );
 
-	grid->addWidget( mapSel            , 0, 0, Qt::AlignCenter );
-	grid->addWidget( applyProfileButton, 0, 1, Qt::AlignCenter );
-	grid->addWidget( newProfileButton  , 0, 2, Qt::AlignCenter );
+   removeProfileButton   = new QPushButton( tr("Delete") );
+	removeProfileButton->setWhatsThis(tr("Deletes the Selected Map Profile"));
+   hbox->addWidget( removeProfileButton );
 
-   mapSel->addItem( tr("Default"), 0 );
+   mapMsg = new QLabel();
+   vbox->addWidget(mapMsg);
 
 	efs_chkbox  = new QCheckBox( tr("Enable Four Score") );
 	udlr_chkbox = new QCheckBox( tr("Allow Up+Down/Left+Right") );
@@ -169,6 +201,10 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    connect(clearButton[8], SIGNAL(clicked()), this, SLOT(clearButton8(void)) );
    connect(clearButton[9], SIGNAL(clicked()), this, SLOT(clearButton9(void)) );
 
+   connect(newProfileButton  , SIGNAL(clicked()), this, SLOT(newProfileCallback(void)) );
+   connect(applyProfileButton, SIGNAL(clicked()), this, SLOT(loadProfileCallback(void)) );
+   connect(saveProfileButton , SIGNAL(clicked()), this, SLOT(saveProfileCallback(void)) );
+
    connect(loadDefaultButton, SIGNAL(clicked()), this, SLOT(loadDefaults(void)) );
    connect(clearAllButton   , SIGNAL(clicked()), this, SLOT(clearAllCallback(void)) );
    connect(closebutton      , SIGNAL(clicked()), this, SLOT(closeWindow(void)) );
@@ -192,6 +228,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	setLayout( mainLayout );
 
    inputTimer->start( 33 ); // 30hz
+
+   loadMapList();
 }
 
 //----------------------------------------------------
@@ -210,6 +248,62 @@ void GamePadConfDialog_t::keyReleaseEvent(QKeyEvent *event)
 {
    //printf("GamePad Window Key Release: 0x%x \n", event->key() );
 	pushKeyEvent( event, 0 );
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::loadMapList(void)
+{
+   QDir dir;
+   QStringList filters, fileList;
+   const char *baseDir = FCEUI_GetBaseDirectory();
+   const char *guid;
+   std::string path;
+   int index, devIdx;
+   jsDev_t *js;
+
+	index  = devSel->currentIndex();
+	devIdx = devSel->itemData(index).toInt();
+
+   if ( devIdx < 0 )
+   {
+      guid = "keyboard";
+   }
+   else
+   {
+      js = getJoystickDevice( devIdx );
+
+      guid = js->getGUID();
+   }
+
+   if ( guid == NULL )
+   {
+      return;
+   }
+
+   path = std::string(baseDir) + "/input/" + std::string(guid);
+
+   dir.setPath( QString::fromStdString(path) );
+
+   filters << "*.txt";
+   dir.setNameFilters(filters);
+   
+   fileList = dir.entryList( filters, QDir::Files, QDir::NoSort );
+
+   mapSel->clear();
+   mapSel->addItem( tr("default"), 0 );
+
+   for (size_t i=0; i < fileList.size(); i++)
+   {
+      size_t suffixIdx;
+      std::string fileName = fileList[i].toStdString();
+
+      suffixIdx = fileName.find_last_of('.');
+
+      fileName.erase( suffixIdx );
+
+      //printf("File: %s \n", fileName.c_str() );
+
+      mapSel->addItem( tr(fileName.c_str()), (int)i+1 );
+   }
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::updateCntrlrDpy(void)
@@ -247,7 +341,7 @@ void GamePadConfDialog_t::deviceSelect(int index)
 
 	if ( js != NULL )
 	{
-		if ( js->inUse() )
+		if ( js->isConnected() )
 		{
 			guidLbl->setText( js->getGUID() );
 		}
@@ -256,6 +350,9 @@ void GamePadConfDialog_t::deviceSelect(int index)
 	{
 		guidLbl->setText("");
 	}
+	GamePad[portNum].setDeviceIndex( devIdx );
+
+   loadMapList();
 
 	updateCntrlrDpy();
 }
@@ -472,7 +569,7 @@ void GamePadConfDialog_t::loadDefaults(void)
 	index  = devSel->currentIndex();
 	devIdx = devSel->itemData(index).toInt();
 
-	printf("Selected Device:%i : %i \n", index, devIdx );
+	//printf("Selected Device:%i : %i \n", index, devIdx );
 
 	if ( devIdx == -1 )
 	{
@@ -506,10 +603,93 @@ void GamePadConfDialog_t::loadDefaults(void)
 	}
 	else
 	{
-		GamePad[portNum].devIdx = devIdx;
+		GamePad[portNum].setDeviceIndex( devIdx );
 		GamePad[portNum].loadDefaults();
 	}
 	updateCntrlrDpy();
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::createNewProfile( const char *name )
+{
+   printf("Creating: %s \n", name );
+
+   GamePad[portNum].createProfile(name);
+
+   mapSel->addItem( tr(name) );
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::newProfileCallback(void)
+{
+   int ret;
+   QInputDialog dialog(this);
+
+   dialog.setWindowTitle( tr("New Profile") );
+   dialog.setLabelText( tr("Specify New Profile Name") );
+   dialog.setOkButtonText( tr("Create") );
+
+   dialog.show();
+   ret = dialog.exec();
+
+   if ( QDialog::Accepted == ret )
+   {
+      createNewProfile( dialog.textValue().toStdString().c_str() );
+   }
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::loadProfileCallback(void)
+{
+   char stmp[256];
+   int index, devIdx, ret;
+   std::string mapName;
+
+	index  = devSel->currentIndex();
+	devIdx = devSel->itemData(index).toInt();
+
+   mapName = mapSel->currentText().toStdString();
+
+	GamePad[portNum].setDeviceIndex( devIdx );
+
+   if ( mapName.compare("default") == 0 )
+   {
+      ret =GamePad[portNum].loadDefaults();
+   }
+   else
+   {
+      ret = GamePad[portNum].loadProfile( mapName.c_str() );
+   }
+   if ( ret == 0 )
+   {
+      sprintf( stmp, "Mapping Loaded: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str() );
+   }
+   else
+   {
+      sprintf( stmp, "Error: Failed to Load Mapping: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str() );
+   }
+   mapMsg->setText( tr(stmp) );
+
+	updateCntrlrDpy();
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::saveProfileCallback(void)
+{
+   int ret;
+   std::string mapName;
+   char stmp[256];
+
+   mapName = mapSel->currentText().toStdString();
+
+   ret = GamePad[portNum].saveCurrentMapToFile( mapName.c_str() );
+
+   if ( ret == 0 )
+   {
+      sprintf( stmp, "Mapping Saved: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str() );
+   }
+   else
+   {
+      sprintf( stmp, "Error: Failed to Save Mapping: %s \n", mapName.c_str() );
+   }
+   mapMsg->setText( tr(stmp) );
+
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::updatePeriodic(void)

@@ -44,6 +44,7 @@ class GamePadConfDialog_t : public QDialog
 		QComboBox *mapSel;
 		QComboBox *profSel;
 		QLabel      *guidLbl;
+		QLabel      *mapMsg;
       QLabel      *keyName[GAMEPAD_NUM_BUTTONS];
       QLabel      *keyState[GAMEPAD_NUM_BUTTONS];
       GamePadConfigButton_t *button[GAMEPAD_NUM_BUTTONS];
@@ -58,6 +59,8 @@ class GamePadConfDialog_t : public QDialog
       void closeEvent(QCloseEvent *bar);
 	private:
 		void updateCntrlrDpy(void);
+      void createNewProfile( const char *name );
+      void loadMapList(void);
 
    public slots:
       void closeWindow(void);
@@ -88,6 +91,9 @@ class GamePadConfDialog_t : public QDialog
 		void oppDirEna(int state);
 		void portSelect(int index);
 		void deviceSelect(int index);
+      void newProfileCallback(void);
+      void loadProfileCallback(void);
+      void saveProfileCallback(void);
 		void updatePeriodic(void);
 
 };
