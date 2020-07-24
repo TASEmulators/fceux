@@ -484,6 +484,18 @@ int GamePad_t::getDefaultMap( char *out, const char *guid )
          return 0;
 	   }
 	}
+	else
+	{
+		if ( strcmp( guid, "keyboard" ) == 0 )
+		{
+			for (int x=0; x<GAMEPAD_NUM_BUTTONS; x++)
+			{
+				bmap[x].ButtType  = BUTTC_KEYBOARD;
+				bmap[x].DeviceNum = 0;
+				bmap[x].ButtonNum = DefaultGamePad[0][x];
+			}
+		}
+	}
    return -1;
 }
 //********************************************************************************
