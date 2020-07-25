@@ -414,6 +414,7 @@ static void ShowUsage(const char *prog)
 int  fceuWrapperInit( int argc, char *argv[] )
 {
 	int error;
+	std::string s;
 
 	for (int i=0; i<argc; i++)
 	{
@@ -468,15 +469,14 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		g_config->save();
 	}
 
-	std::string s;
 
-	g_config->getOption("SDL.InputCfg", &s);
+	//g_config->getOption("SDL.InputCfg", &s);
 
-	if (s.size() != 0)
-	{
-		InitVideo(GameInfo);
-		InputCfg(s);
-	}
+	//if (s.size() != 0)
+	//{
+	//	InitVideo(GameInfo);
+	//	InputCfg(s);
+	//}
 
 	 // update the input devices
 	UpdateInput(g_config);

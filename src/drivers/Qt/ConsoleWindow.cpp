@@ -78,6 +78,8 @@ consoleWin_t::~consoleWin_t(void)
 {
 	nes_shm->runEmulator = 0;
 
+	gameTimer->stop(); 
+
    if ( gamePadConfWin != NULL )
    {
       gamePadConfWin->closeWindow();

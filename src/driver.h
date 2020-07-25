@@ -142,6 +142,7 @@ void FCEUI_SetRenderedLines(int ntscf, int ntscl, int palf, int pall);
 
 //Sets the base directory(save states, snapshots, etc. are saved in directories below this directory.
 void FCEUI_SetBaseDirectory(std::string const & dir);
+const char *FCEUI_GetBaseDirectory(void);
 
 bool FCEUI_GetUserPaletteAvail(void);
 void FCEUI_SetUserPalette(uint8 *pal, int nEntries);

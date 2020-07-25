@@ -465,6 +465,11 @@ void FCEUI_SetBaseDirectory(std::string const & dir)
 {
 	BaseDirectory = dir;
 }
+/// Gets the base directory
+const char *FCEUI_GetBaseDirectory(void)
+{
+	return BaseDirectory.c_str();
+}
 
 static char *odirs[FCEUIOD__COUNT]={0,0,0,0,0,0,0,0,0,0,0,0,0};     // odirs, odors. ^_^
 
