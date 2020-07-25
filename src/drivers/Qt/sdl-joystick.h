@@ -39,11 +39,15 @@ struct jsDev_t
 	bool isGameController(void);
 	bool isConnected(void);
 	void print(void);
+	int  bindPort( int idx );
+	int  unbindPort( int idx );
+	int  getBindPorts(void);
 	const char *getName(void);
 	const char *getGUID(void);
 
 	private:
 	int          devIdx;
+	int          portBindMask;
 	std::string  guidStr;
 	std::string  name;
 };
@@ -52,19 +56,18 @@ class GamePad_t
 {
 	public:
 
-	//int  type;
-	int  devIdx;
-
 	ButtConfig bmap[GAMEPAD_NUM_BUTTONS];
 
 	GamePad_t(void);
 	~GamePad_t(void);
 
+	int  init( int port, const char *guid, const char *profile = NULL );
 	const char *getGUID(void);
 
 	int  loadDefaults(void);
    int  loadProfile( const char *name, const char *guid = NULL );
 
+	int  getDeviceIndex(void){ return devIdx; }
 	int  setDeviceIndex( int devIdx );
 	int  setMapping( const char *map );
 	int  setMapping( nesGamePadMap_t *map );
@@ -75,6 +78,11 @@ class GamePad_t
    int  saveMappingToFile( const char *filename, const char *txtMap );
    int  saveCurrentMapToFile( const char *filename );
    int  deleteMapping( const char *name );
+
+	private:
+	int  devIdx;
+	int  portNum;
+
 };
 
 extern GamePad_t GamePad[4];

@@ -86,7 +86,7 @@ class GamePadConfDialog_t : public QDialog
       void clearButton8(void);
       void clearButton9(void);
       void clearAllCallback(void);
-      void loadDefaults(void);
+      //void loadDefaults(void);
 		void ena4score(int state);
 		void oppDirEna(int state);
 		void portSelect(int index);

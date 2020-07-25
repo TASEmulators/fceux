@@ -26,7 +26,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    QPushButton *saveProfileButton;
    QPushButton *applyProfileButton;
    QPushButton *removeProfileButton;
-   QPushButton *loadDefaultButton;
+   //QPushButton *loadDefaultButton;
    QPushButton *clearAllButton;
    QPushButton *closebutton;
    QPushButton *clearButton[GAMEPAD_NUM_BUTTONS];
@@ -75,7 +75,15 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 				char stmp[128];
 				sprintf( stmp, "%i: %s", i, js->getName() );
    			devSel->addItem( tr(stmp), i );
+
 			}
+		}
+	}
+	for (int i=0; i<devSel->count(); i++)
+	{
+		if ( devSel->itemData(i).toInt() == GamePad[portNum].getDeviceIndex() )
+		{
+			devSel->setCurrentIndex( i );
 		}
 	}
 
@@ -84,6 +92,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	hbox3->addWidget( label );
 	hbox3->addWidget( guidLbl );
+
+	guidLbl->setText( GamePad[portNum].getGUID() );
 
    frame1 = new QGroupBox(tr("Mapping Profile:"));
    //grid   = new QGridLayout();
@@ -171,11 +181,11 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    }
 	updateCntrlrDpy();
 
-   loadDefaultButton  = new QPushButton(tr("Load Defaults"));
+   //loadDefaultButton  = new QPushButton(tr("Load Defaults"));
    clearAllButton     = new QPushButton(tr("Clear All"));
    closebutton        = new QPushButton(tr("Close"));
 
-	hbox4->addWidget( loadDefaultButton );
+	//hbox4->addWidget( loadDefaultButton );
 	hbox4->addWidget( clearAllButton    );
 	hbox4->addWidget( closebutton       );
 
@@ -206,7 +216,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    connect(saveProfileButton  , SIGNAL(clicked()), this, SLOT(saveProfileCallback(void)) );
    connect(removeProfileButton, SIGNAL(clicked()), this, SLOT(deleteProfileCallback(void)) );
 
-   connect(loadDefaultButton, SIGNAL(clicked()), this, SLOT(loadDefaults(void)) );
+   //connect(loadDefaultButton, SIGNAL(clicked()), this, SLOT(loadDefaults(void)) );
    connect(clearAllButton   , SIGNAL(clicked()), this, SLOT(clearAllCallback(void)) );
    connect(closebutton      , SIGNAL(clicked()), this, SLOT(closeWindow(void)) );
 
@@ -334,6 +344,17 @@ void GamePadConfDialog_t::portSelect(int index)
 	//printf("Port Number:%i \n", index);
 	portNum = index;
 	updateCntrlrDpy();
+
+	for (int i=0; i<devSel->count(); i++)
+	{
+		if ( devSel->itemData(i).toInt() == GamePad[portNum].getDeviceIndex() )
+		{
+			devSel->setCurrentIndex( i );
+		}
+	}
+	guidLbl->setText( GamePad[portNum].getGUID() );
+
+   loadMapList();
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::deviceSelect(int index)
@@ -377,8 +398,8 @@ void GamePadConfDialog_t::oppDirEna(int state)
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton(int padNo, int x)
 {
-   char buf[256];
-   std::string prefix;
+   //char buf[256];
+   //std::string prefix;
    const char *keyNameStr;
 
    if ( buttonConfigStatus == 2 )
@@ -392,27 +413,7 @@ void GamePadConfDialog_t::changeButton(int padNo, int x)
 
    button[x]->setText("Waiting" );
 
-   snprintf (buf, sizeof(buf)-1, "SDL.Input.GamePad.%d.", padNo);
-	prefix = buf;
 	DWaitButton (NULL, &GamePad[padNo].bmap[x], &buttonConfigStatus );
-
-   g_config->setOption (prefix + GamePadNames[x],
-			     GamePad[padNo].bmap[x].ButtonNum);
-
-   if (GamePad[padNo].bmap[x].ButtType == BUTTC_KEYBOARD)
-	{
-		g_config->setOption (prefix + "DeviceType", "Keyboard");
-	}
-	else if (GamePad[padNo].bmap[x].ButtType == BUTTC_JOYSTICK)
-	{
-		g_config->setOption (prefix + "DeviceType", "Joystick");
-	}
-	else
-	{
-		g_config->setOption (prefix + "DeviceType", "Unknown");
-	}
-	g_config->setOption (prefix + "DeviceNum",
-			     GamePad[padNo].bmap[x].DeviceNum);
 
    keyNameStr = ButtonName( &GamePad[padNo].bmap[x] );
 
@@ -564,55 +565,6 @@ void GamePadConfDialog_t::clearAllCallback(void)
 	}
 }
 //----------------------------------------------------
-void GamePadConfDialog_t::loadDefaults(void)
-{
-	int index, devIdx;
-   char buf[256];
-   std::string prefix;
-
-	index  = devSel->currentIndex();
-	devIdx = devSel->itemData(index).toInt();
-
-	//printf("Selected Device:%i : %i \n", index, devIdx );
-
-	if ( devIdx == -1 )
-	{
-   	snprintf (buf, sizeof(buf)-1, "SDL.Input.GamePad.%d.", portNum);
-		prefix = buf;
-
-		for (int x=0; x<GAMEPAD_NUM_BUTTONS; x++)
-		{
-			GamePad[portNum].bmap[x].ButtType  = BUTTC_KEYBOARD;
-			GamePad[portNum].bmap[x].DeviceNum = 0;
-			GamePad[portNum].bmap[x].ButtonNum = DefaultGamePad[portNum][x];
-
-			g_config->setOption (prefix + GamePadNames[x],
-				     GamePad[portNum].bmap[x].ButtonNum);
-
-		   if (GamePad[portNum].bmap[x].ButtType == BUTTC_KEYBOARD)
-			{
-				g_config->setOption (prefix + "DeviceType", "Keyboard");
-			}
-			else if (GamePad[portNum].bmap[x].ButtType == BUTTC_JOYSTICK)
-			{
-				g_config->setOption (prefix + "DeviceType", "Joystick");
-			}
-			else
-			{
-				g_config->setOption (prefix + "DeviceType", "Unknown");
-			}
-			g_config->setOption (prefix + "DeviceNum",
-					     GamePad[portNum].bmap[x].DeviceNum);
-		}
-	}
-	else
-	{
-		GamePad[portNum].setDeviceIndex( devIdx );
-		GamePad[portNum].loadDefaults();
-	}
-	updateCntrlrDpy();
-}
-//----------------------------------------------------
 void GamePadConfDialog_t::createNewProfile( const char *name )
 {
    printf("Creating: %s \n", name );
@@ -663,6 +615,13 @@ void GamePadConfDialog_t::loadProfileCallback(void)
    }
    if ( ret == 0 )
    {
+		std::string prefix;
+		sprintf( stmp, "SDL.Input.GamePad.%u.", portNum );
+		prefix = stmp;
+
+		g_config->setOption(prefix + "DeviceGUID", GamePad[portNum].getGUID() );
+		g_config->setOption(prefix + "Profile"   , mapName.c_str()            );
+
       sprintf( stmp, "Mapping Loaded: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str() );
    }
    else

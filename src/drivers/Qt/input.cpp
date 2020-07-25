@@ -1960,7 +1960,7 @@ void InputCfg (const std::string & text)
 UpdateInput (Config * config)
 {
 	char buf[64];
-	std::string device, prefix;
+	std::string device, prefix, guid, mapping;
 
 	InitJoysticks();
 
@@ -2055,37 +2055,18 @@ UpdateInput (Config * config)
 		snprintf (buf, sizeof(buf)-1, "SDL.Input.GamePad.%u.", i);
 		prefix = buf;
 
-		config->getOption (prefix + "DeviceType", &device);
-		if (device.find ("Keyboard") != std::string::npos)
-		{
-			type = BUTTC_KEYBOARD;
-		}
-		else if (device.find ("Joystick") != std::string::npos)
-		{
-			type = BUTTC_JOYSTICK;
-		}
-		else
-		{
-			type = 0;
-		}
+		config->getOption (prefix + "DeviceType", &device );
+		config->getOption (prefix + "DeviceGUID", &guid   );
+		config->getOption (prefix + "Profile"   , &mapping);
 
-		//FIXME
-		//config->getOption (prefix + "DeviceNum", &devnum);
-		//for (unsigned int j = 0; j < GAMEPAD_NUM_BUTTONS; j++)
-		//{
-		//	config->getOption (prefix + GamePadNames[j], &button);
-
-		//	GamePadConfig[i][j].ButtType = type;
-		//	GamePadConfig[i][j].DeviceNum = devnum;
-		//	GamePadConfig[i][j].ButtonNum = button;
-		//}
+		GamePad[i].init( i, guid.c_str(), mapping.c_str() );
 	}
 
 	// PowerPad 0 - 1
 	for (unsigned int i = 0; i < POWERPAD_NUM_DEVICES; i++)
 	{
 		char buf[64];
-		snprintf (buf, 32, "SDL.Input.PowerPad.%u.", i);
+		snprintf (buf, sizeof(buf)-1, "SDL.Input.PowerPad.%u.", i);
 		prefix = buf;
 
 		config->getOption (prefix + "DeviceType", &device);

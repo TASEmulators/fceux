@@ -55,6 +55,8 @@ jsDev_t::jsDev_t(void)
 {
 	js = NULL;
 	gc = NULL;
+	devIdx = 0;
+	portBindMask = 0;
 };	
 
 //********************************************************************************
@@ -92,6 +94,25 @@ const char *jsDev_t::getGUID(void)
 	return ( guidStr.c_str() );
 }
 
+//********************************************************************************
+int  jsDev_t::bindPort( int idx )
+{
+	portBindMask |= (0x00000001 << idx);
+
+	return portBindMask;
+}
+//********************************************************************************
+int  jsDev_t::unbindPort( int idx )
+{
+	portBindMask &= ~(0x00000001 << idx);
+
+	return portBindMask;
+}
+//********************************************************************************
+int  jsDev_t::getBindPorts(void)
+{
+	return portBindMask;
+}
 //********************************************************************************
 bool jsDev_t::isGameController(void)
 {
@@ -243,7 +264,8 @@ int nesGamePadMap_t::parseMapping( const char *map )
 //********************************************************************************
 GamePad_t::GamePad_t(void)
 {
-	devIdx = -1;
+	devIdx  = -1;
+	portNum =  0;
 
 	for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
 	{
@@ -259,9 +281,90 @@ GamePad_t::~GamePad_t(void)
 
 }
 //********************************************************************************
+int GamePad_t::init( int port, const char *guid, const char *profile )
+{
+	int i, mask;
+
+	portNum = port;
+
+	// First look for a controller that matches the specific GUID
+	// that is not already in use by another port.
+	if ( devIdx < 0 )
+	{
+		for (i=0; i<MAX_JOYSTICKS; i++)
+		{
+			mask = jsDev[i].getBindPorts();
+
+			if ( mask != 0 )
+			{
+				continue;
+			}
+			if ( !jsDev[i].isConnected() )
+			{
+				continue;
+			}
+
+			if ( strcmp( jsDev[i].getGUID(), guid ) == 0 )
+			{
+				setDeviceIndex( i );
+				if ( loadProfile( profile, guid ) )
+				{
+					loadDefaults();
+				}
+				break;
+			}
+		}
+	}
+
+	// If a specific controller was not matched,
+	// then look for any game controller that is plugged in
+	// and not already bound.
+	if ( devIdx < 0 )
+	{
+		for (i=0; i<MAX_JOYSTICKS; i++)
+		{
+			mask = jsDev[i].getBindPorts();
+
+			if ( mask != 0 )
+			{
+				continue;
+			}
+
+			if ( jsDev[i].isGameController() )
+			{
+				setDeviceIndex( i );
+				if ( loadProfile( profile ) )
+				{
+					loadDefaults();
+				}
+				break;
+			}
+		}
+	}
+
+	// If we get to this point and still have not found a
+	// game controller, then load default keyboard.
+	if ( (portNum == 0) && (devIdx < 0) )
+	{
+		loadDefaults();
+	}
+
+	return 0;
+}
+//********************************************************************************
 int GamePad_t::setDeviceIndex( int in )
 {
+	if ( devIdx >= 0 )
+	{
+		jsDev[ devIdx ].unbindPort( portNum );
+	}
+
    devIdx = in;
+
+	if ( devIdx >= 0 )
+	{
+		jsDev[ devIdx ].bindPort( portNum );
+	}
    return 0;
 }
 //********************************************************************************
@@ -492,7 +595,7 @@ int GamePad_t::getDefaultMap( char *out, const char *guid )
 			{
 				bmap[x].ButtType  = BUTTC_KEYBOARD;
 				bmap[x].DeviceNum = 0;
-				bmap[x].ButtonNum = DefaultGamePad[0][x];
+				bmap[x].ButtonNum = DefaultGamePad[portNum][x];
 			}
 		}
 	}
@@ -505,6 +608,7 @@ int GamePad_t::loadDefaults(void)
 
    if ( getDefaultMap( txtMap ) == 0 )
    {
+		//printf("Map:%s\n", txtMap );
 	   setMapping( txtMap );
    }
 

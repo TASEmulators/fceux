@@ -317,10 +317,8 @@ InitConfig()
 		prefix = buf;
 
 		config->addOption(prefix + "DeviceType", DefaultGamePadDevice[i]);
-		config->addOption(prefix + "DeviceNum",  0);
-		for(unsigned int j = 0; j < GAMEPAD_NUM_BUTTONS; j++) {
-			config->addOption(prefix + GamePadNames[j], DefaultGamePad[i][j]);
-		}
+		config->addOption(prefix + "DeviceGUID", "");
+		config->addOption(prefix + "Profile"   , "");
 	}
     
 	// PowerPad 0 - 1
