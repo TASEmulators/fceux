@@ -59,8 +59,9 @@ class GamePadConfDialog_t : public QDialog
       void closeEvent(QCloseEvent *bar);
 	private:
 		void updateCntrlrDpy(void);
-      void createNewProfile( const char *name );
-      void loadMapList(void);
+		void createNewProfile( const char *name );
+		void loadMapList(void);
+		void saveConfig(void);
 
    public slots:
       void closeWindow(void);
@@ -86,7 +87,6 @@ class GamePadConfDialog_t : public QDialog
       void clearButton8(void);
       void clearButton9(void);
       void clearAllCallback(void);
-      //void loadDefaults(void);
 		void ena4score(int state);
 		void oppDirEna(int state);
 		void portSelect(int index);

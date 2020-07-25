@@ -26,7 +26,6 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    QPushButton *saveProfileButton;
    QPushButton *applyProfileButton;
    QPushButton *removeProfileButton;
-   //QPushButton *loadDefaultButton;
    QPushButton *clearAllButton;
    QPushButton *closebutton;
    QPushButton *clearButton[GAMEPAD_NUM_BUTTONS];
@@ -181,11 +180,9 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    }
 	updateCntrlrDpy();
 
-   //loadDefaultButton  = new QPushButton(tr("Load Defaults"));
    clearAllButton     = new QPushButton(tr("Clear All"));
    closebutton        = new QPushButton(tr("Close"));
 
-	//hbox4->addWidget( loadDefaultButton );
 	hbox4->addWidget( clearAllButton    );
 	hbox4->addWidget( closebutton       );
 
@@ -216,7 +213,6 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    connect(saveProfileButton  , SIGNAL(clicked()), this, SLOT(saveProfileCallback(void)) );
    connect(removeProfileButton, SIGNAL(clicked()), this, SLOT(deleteProfileCallback(void)) );
 
-   //connect(loadDefaultButton, SIGNAL(clicked()), this, SLOT(loadDefaults(void)) );
    connect(clearAllButton   , SIGNAL(clicked()), this, SLOT(clearAllCallback(void)) );
    connect(closebutton      , SIGNAL(clicked()), this, SLOT(closeWindow(void)) );
 
@@ -268,8 +264,11 @@ void GamePadConfDialog_t::loadMapList(void)
    const char *baseDir = FCEUI_GetBaseDirectory();
    const char *guid;
    std::string path;
+	std::string prefix, mapName;
    int index, devIdx;
    jsDev_t *js;
+	size_t n=0;
+	char stmp[256];
 
 	index  = devSel->currentIndex();
 	devIdx = devSel->itemData(index).toInt();
@@ -299,8 +298,13 @@ void GamePadConfDialog_t::loadMapList(void)
    
    fileList = dir.entryList( filters, QDir::Files, QDir::NoSort );
 
+	sprintf( stmp, "SDL.Input.GamePad.%u.", portNum );
+	prefix = stmp;
+
+	g_config->getOption(prefix + "Profile", &mapName );
+
    mapSel->clear();
-   mapSel->addItem( tr("default"), 0 );
+   mapSel->addItem( tr("default"), 0 ); n=1;
 
    for (size_t i=0; i < fileList.size(); i++)
    {
@@ -316,7 +320,13 @@ void GamePadConfDialog_t::loadMapList(void)
 
       if ( fileName.compare("default") == 0 ) continue;
 
-      mapSel->addItem( tr(fileName.c_str()), (int)i+1 );
+      mapSel->addItem( tr(fileName.c_str()), (int)i+1 ); 
+
+		if ( mapName.compare( fileName ) == 0 )
+		{
+			mapSel->setCurrentIndex(n);
+		}
+		n++;
    }
 }
 //----------------------------------------------------
@@ -427,19 +437,9 @@ void GamePadConfDialog_t::changeButton(int padNo, int x)
 //----------------------------------------------------
 void GamePadConfDialog_t::clearButton( int padNo, int x )
 {
-   char buf[256];
-   std::string prefix;
-
 	GamePad[padNo].bmap[x].ButtonNum = -1;
 
    keyName[x]->setText("");
-
-   snprintf (buf, sizeof(buf)-1, "SDL.Input.GamePad.%d.", padNo);
-	prefix = buf;
-
-   g_config->setOption (prefix + GamePadNames[x],
-			     GamePad[padNo].bmap[x].ButtonNum);
-
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::closeEvent(QCloseEvent *event)
@@ -565,6 +565,20 @@ void GamePadConfDialog_t::clearAllCallback(void)
 	}
 }
 //----------------------------------------------------
+void GamePadConfDialog_t::saveConfig(void)
+{
+	char stmp[256];
+	std::string prefix, mapName;
+
+	sprintf( stmp, "SDL.Input.GamePad.%u.", portNum );
+	prefix = stmp;
+
+   mapName = mapSel->currentText().toStdString();
+
+	g_config->setOption(prefix + "DeviceGUID", GamePad[portNum].getGUID() );
+	g_config->setOption(prefix + "Profile"   , mapName.c_str()            );
+}
+//----------------------------------------------------
 void GamePadConfDialog_t::createNewProfile( const char *name )
 {
    printf("Creating: %s \n", name );
@@ -615,12 +629,7 @@ void GamePadConfDialog_t::loadProfileCallback(void)
    }
    if ( ret == 0 )
    {
-		std::string prefix;
-		sprintf( stmp, "SDL.Input.GamePad.%u.", portNum );
-		prefix = stmp;
-
-		g_config->setOption(prefix + "DeviceGUID", GamePad[portNum].getGUID() );
-		g_config->setOption(prefix + "Profile"   , mapName.c_str()            );
+		saveConfig();
 
       sprintf( stmp, "Mapping Loaded: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str() );
    }
@@ -645,6 +654,8 @@ void GamePadConfDialog_t::saveProfileCallback(void)
 
    if ( ret == 0 )
    {
+		saveConfig();
+
       sprintf( stmp, "Mapping Saved: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str() );
    }
    else
