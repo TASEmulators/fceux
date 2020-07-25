@@ -932,6 +932,9 @@ KillJoysticks(void)
 		jsDev[n].close();
 	}
 	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+
+	s_jinited = 0;
+
 	return 0;
 }
 
