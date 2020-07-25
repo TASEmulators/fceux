@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used for res.rc
+// Used by res.rc
 //
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
@@ -867,6 +867,7 @@
 #define IDC_BINARY                      1317
 #define IDC_GAME_GENIE_ADDR             1501
 #define MENU_INESHEADEREDITOR           40001
+#define MENU_INPUT_BARCODE              40004
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1163,7 +1164,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        306
-#define _APS_NEXT_COMMAND_VALUE         40002
+#define _APS_NEXT_COMMAND_VALUE         40005
 #define _APS_NEXT_CONTROL_VALUE         1101
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

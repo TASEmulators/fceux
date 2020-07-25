@@ -921,7 +921,7 @@ inline void FCEUI_CreateCheatMap()
 inline void FCEUI_RefreshCheatMap()
 {
 	memset(cheatMap, 0, CHEATMAP_SIZE);
-	for (int i = 0; i < numsubcheats; ++i)
+	for (uint32 i = 0; i < numsubcheats; ++i)
 		FCEUI_SetCheatMapByte(SubCheats[i].addr, true);
 }
 

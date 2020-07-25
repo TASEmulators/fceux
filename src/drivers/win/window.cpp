@@ -148,6 +148,7 @@ int menuYoffset = 0;
 bool wasPausedByCheats = false;		//For unpausing the emulator if paused by the cheats dialog
 bool rightClickEnabled = true;		//If set to false, the right click context menu will be disabled.
 bool fullscreenByDoubleclick = false;
+uint8 BWorldData[1 + 13 + 1];
 
 //Function Prototypes
 void ChangeMenuItemText(int menuitem, string text);			//Alters a menu item name
@@ -381,6 +382,7 @@ void updateGameDependentMenus()
 		MENU_SWITCH_DISK,
 		MENU_EJECT_DISK,
 		MENU_RECORD_AVI,
+		MENU_INPUT_BARCODE,
 		MENU_STOP_AVI,
 		MENU_RECORD_WAV,
 		MENU_STOP_WAV,
@@ -1930,7 +1932,23 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_INSERT_COIN:
 				FCEUI_VSUniCoin();
 				break;
-			
+			case MENU_INPUT_BARCODE:
+				char bbuf[32 + 1];
+				if ((CWin32InputBox::GetString("Input Barcode", "Enter 13-digit decimal number.", bbuf, hWnd) == IDOK)) {
+					if (strlen(bbuf) == 13) {
+						if (InputType[2] == SIFC_BWORLD) {
+							strcpy((char *)&BWorldData[1], (char *)bbuf);
+							BWorldData[0] = 1;
+						}
+						else
+							FCEUI_DatachSet((uint8 *)bbuf);
+						FCEU_DispMessage("Barcode entered: %s", 0, bbuf);
+					}
+					else
+						FCEU_DispMessage("Wrong Barcode!", 0);
+				}
+				break;
+
 			//Emulation submenu
 			case ID_NES_PAUSE:
 				FCEUI_ToggleEmulationPause();
@@ -2521,6 +2539,7 @@ adelikat: Outsourced this to a remappable hotkey
 		EnableMenuItem(fceumenu,MENU_EJECT_DISK,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_EJECT_DISK)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_SWITCH_DISK,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_SWITCH_DISK)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_INSERT_COIN,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_INSERT_COIN)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_INPUT_BARCODE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_INPUT_BARCODE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_TASEDITOR,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_TASEDITOR)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_CLOSE_FILE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_CLOSEGAME) && GameInfo ?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_RECENT_FILES,MF_BYCOMMAND | ((FCEU_IsValidUI(FCEUI_OPENGAME) && HasRecentFiles()) ?MF_ENABLED:MF_GRAYED)); //adelikat - added && recent_files, otherwise this line prevents recent from ever being gray when TAS Editor is not engaged

@@ -1,5 +1,5 @@
 #ifndef WIN_INPUT_H
-#define WIN_INPU_H
+#define WIN_INPUT_H
 
 #include "dinput.h"
 
@@ -30,6 +30,8 @@ extern LPDIRECTINPUT7 lpDI;
 extern int InputType[3];
 //extern int UsrInputType[3];
 extern int cidisabled;
+extern uint8 BWorldData[1 + 13 + 1];
+
 #ifndef _aosdfjk02fmasf
 #define _aosdfjk02fmasf
 

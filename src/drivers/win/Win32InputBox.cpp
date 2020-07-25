@@ -246,6 +246,29 @@ INT_PTR CWin32InputBox::GetInteger(
   return ret;
 }
 
+INT_PTR CWin32InputBox::GetString(
+	LPCTSTR szTitle,
+	LPCTSTR szPrompt,
+	CHAR* result,
+	HWND hwndParent)
+{
+	WIN32INPUTBOX_PARAM param;
+
+	char szResult[32+1];
+	sprintf(szResult, "");
+	param.szTitle = szTitle;
+	param.szPrompt = szPrompt;
+	param.szResult = szResult;
+	param.nResultSize = sizeof(szResult);
+	param.bMultiline = false;
+	param.hwndOwner = hwndParent;
+
+	INT_PTR ret = InputBoxEx(&param);
+	if (ret == IDOK)
+		sprintf(result, "%s", szResult);
+	return ret;
+}
+
 void CWin32InputBox::InitDialog()
 {
   // Set the button captions
