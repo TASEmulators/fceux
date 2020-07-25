@@ -404,6 +404,10 @@ int GamePad_t::setMapping( nesGamePadMap_t *gpm )
 		bmap[i].DeviceNum = -1;
 		bmap[i].ButtonNum = -1;
 
+		if (gpm->btn[i][0] == 0)
+		{
+			continue;
+		}
       if (gpm->btn[i][0] == 'k')
       {
          SDL_Keycode key;
