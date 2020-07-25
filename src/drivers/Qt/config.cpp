@@ -242,7 +242,7 @@ InitConfig()
 	config->addOption("input4", "SDL.Input.3", "Gamepad.3");
 
 	// allow for input configuration
-	config->addOption('i', "inputcfg", "SDL.InputCfg", InputCfg);
+	//config->addOption('i', "inputcfg", "SDL.InputCfg", InputCfg);
     
 	// display input
 	config->addOption("inputdisplay", "SDL.InputDisplay", 0);

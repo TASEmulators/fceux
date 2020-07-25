@@ -1909,9 +1909,9 @@ extern Config *g_config;
 /**
  * Update the button configuration for a device, specified by a text string.
  */
-void InputCfg (const std::string & text)
-{
-
+//void InputCfg (const std::string & text)
+//{
+//
 //	if (noGui)
 //	{
 //		if (text.find ("gamepad") != std::string::npos)
@@ -1947,8 +1947,8 @@ void InputCfg (const std::string & text)
 //	}
 //	else
 //		printf ("Please run \"fceux --nogui\" before using --inputcfg\n");
-
-}
+//
+//}
 
 
 /**
