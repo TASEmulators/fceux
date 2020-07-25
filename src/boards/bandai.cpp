@@ -48,119 +48,204 @@ static SFORMAT StateRegs[] =
 #define X24C0X_READ			3
 #define X24C0X_WRITE		4
 
-static uint8 x24c0x_data[256], x24c0x_state;
-static uint8 x24c0x_addr, x24c0x_word, x24c0x_latch, x24c0x_bitcount;
-static uint8 x24c0x_sda, x24c0x_scl, x24c0x_out, x24c0x_oe;
+static uint8 x24c0x_data[512];
 
-static SFORMAT x24c0xStateRegs[] =
+static uint8 x24c01_state;
+static uint8 x24c01_addr, x24c01_word, x24c01_latch, x24c01_bitcount;
+static uint8 x24c01_sda, x24c01_scl, x24c01_out;
+
+static uint8 x24c02_state;
+static uint8 x24c02_addr, x24c02_word, x24c02_latch, x24c02_bitcount;
+static uint8 x24c02_sda, x24c02_scl, x24c02_out;
+
+static SFORMAT x24c01StateRegs[] =
 {
-	{ &x24c0x_addr, 1, "ADDR" },
-	{ &x24c0x_word, 1, "WORD" },
-	{ &x24c0x_latch, 1, "LATC" },
-	{ &x24c0x_bitcount, 1, "BITC" },
-	{ &x24c0x_sda, 1, "SDA" },
-	{ &x24c0x_scl, 1, "SCL" },
-	{ &x24c0x_out, 1, "OUT" },
-	{ &x24c0x_oe, 1, "OE" },
-	{ &x24c0x_state, 1, "STAT" },
+	{ &x24c01_addr, 1, "ADDR" },
+	{ &x24c01_word, 1, "WORD" },
+	{ &x24c01_latch, 1, "LATC" },
+	{ &x24c01_bitcount, 1, "BITC" },
+	{ &x24c01_sda, 1, "SDA" },
+	{ &x24c01_scl, 1, "SCL" },
+	{ &x24c01_out, 1, "OUT" },
+	{ &x24c01_state, 1, "STAT" },
 	{ 0 }
 };
 
-static void x24c0x_init() {
-	x24c0x_addr = x24c0x_word = x24c0x_latch = x24c0x_bitcount = x24c0x_sda = x24c0x_scl = x24c0x_oe = 0;
-	x24c0x_state = X24C0X_STANDBY;
+static SFORMAT x24c02StateRegs[] =
+{
+	{ &x24c02_addr, 1, "ADDR" },
+	{ &x24c02_word, 1, "WORD" },
+	{ &x24c02_latch, 1, "LATC" },
+	{ &x24c02_bitcount, 1, "BITC" },
+	{ &x24c02_sda, 1, "SDA" },
+	{ &x24c02_scl, 1, "SCL" },
+	{ &x24c02_out, 1, "OUT" },
+	{ &x24c02_state, 1, "STAT" },
+	{ 0 }
+};
+
+static void x24c01_init() {
+	x24c01_addr = x24c01_word = x24c01_latch = x24c01_bitcount = x24c01_sda = x24c01_scl = 0;
+	x24c01_state = X24C0X_STANDBY;
 }
 
-static void x24c0x_write(uint8 data) {
-	uint8 sda = (data >> 6) & 1;
-	uint8 scl = (data >> 5) & 1;
-	x24c0x_oe = (data >> 7);
+static void x24c02_init() {
+	x24c02_addr = x24c02_word = x24c02_latch = x24c02_bitcount = x24c02_sda = x24c02_scl = 0;
+	x24c02_state = X24C0X_STANDBY;
+}
 
-	if(x24c0x_scl && scl) {
-		if(x24c0x_sda && !sda) {		// START
-			x24c0x_state = X24C0X_ADDRESS;
-			x24c0x_bitcount = 0;
-			x24c0x_addr = 0;
-		} else if(!x24c0x_sda && sda) { //STOP
-			x24c0x_state = X24C0X_STANDBY;
+static void x24c01_write(uint8 data) {
+	uint8 scl = (data >> 5) & 1;
+	uint8 sda = (data >> 6) & 1;
+
+	if(x24c01_scl && scl) {
+		if(x24c01_sda && !sda) {			// START
+			x24c01_state = X24C0X_ADDRESS;
+			x24c01_bitcount = 0;
+			x24c01_addr = 0;
+		} else if(!x24c01_sda && sda) {		//STOP
+			x24c01_state = X24C0X_STANDBY;
 		}
-	} else if(!x24c0x_scl && scl) {		// RISING EDGE
-		switch(x24c0x_state) {
+	} else if(!x24c01_scl && scl) {			// RISING EDGE
+		switch(x24c01_state) {
 		case X24C0X_ADDRESS:
-			if(x24c0x_bitcount < 7) {
-				x24c0x_addr <<= 1;
-				x24c0x_addr |= sda;
+			if(x24c01_bitcount < 7) {
+				x24c01_addr <<= 1;
+				x24c01_addr |= sda;
 			} else {
-				if(!x24c02)				// X24C01 mode
-					x24c0x_word = x24c0x_addr;
-				if(sda) {				// READ COMMAND
-					x24c0x_state = X24C0X_READ;
-				} else {				// WRITE COMMAND
-					if(x24c02)			// X24C02 mode
-						x24c0x_state = X24C0X_WORD;
-					else
-						x24c0x_state = X24C0X_WRITE;
-				}
+				x24c01_word = x24c01_addr;
+				if(sda) 					// READ COMMAND
+					x24c01_state = X24C0X_READ;
+				 else 						// WRITE COMMAND
+					x24c01_state = X24C0X_WRITE;
 			}
-			x24c0x_bitcount++;
-			break;
-		case X24C0X_WORD:
-			if(x24c0x_bitcount == 8) {	// ACK
-				x24c0x_word = 0;
-				x24c0x_out = 0;
-			} else {					// WORD ADDRESS INPUT
-				x24c0x_word <<= 1;
-				x24c0x_word |= sda;
-				if(x24c0x_bitcount == 16) {	// END OF ADDRESS INPUT
-					x24c0x_bitcount = 7;
-					x24c0x_state = X24C0X_WRITE;
-				}
-			}
-			x24c0x_bitcount++;
+			x24c01_bitcount++;
 			break;
 		case X24C0X_READ:
-			if (x24c0x_bitcount == 8) {	// ACK
-				x24c0x_out = 0;
-				x24c0x_latch = x24c0x_data[x24c0x_word];
-				x24c0x_bitcount = 0;
-			} else {					// REAL OUTPUT
-				x24c0x_out = x24c0x_latch >> 7;
-				x24c0x_latch <<= 1;
-				x24c0x_bitcount++;
-				if(x24c0x_bitcount == 8) {
-					x24c0x_word++;
-					x24c0x_word &= 0xff;
+			if (x24c01_bitcount == 8) {		// ACK
+				x24c01_out = 0;
+				x24c01_latch = x24c0x_data[x24c01_word];
+				x24c01_bitcount = 0;
+			} else {						// REAL OUTPUT
+				x24c01_out = x24c01_latch >> 7;
+				x24c01_latch <<= 1;
+				x24c01_bitcount++;
+				if(x24c01_bitcount == 8) {
+					x24c01_word++;
+					x24c01_word &= 0xff;
 				}
 			}
 			break;
 		case X24C0X_WRITE:
-			if (x24c0x_bitcount == 8) {	// ACK
-				x24c0x_out = 0;
-				x24c0x_latch = 0;
-				x24c0x_bitcount = 0;
-			} else {					// REAL INPUT
-				x24c0x_latch <<= 1;
-				x24c0x_latch |= sda;
-				x24c0x_bitcount++;
-				if(x24c0x_bitcount == 8) {
-					x24c0x_data[x24c0x_word] = x24c0x_latch;
-					x24c0x_word++;
-					x24c0x_word &= 0xff;
+			if (x24c01_bitcount == 8) {		// ACK
+				x24c01_out = 0;
+				x24c01_latch = 0;
+				x24c01_bitcount = 0;
+			} else {						// REAL INPUT
+				x24c01_latch <<= 1;
+				x24c01_latch |= sda;
+				x24c01_bitcount++;
+				if(x24c01_bitcount == 8) {
+					x24c0x_data[x24c01_word] = x24c01_latch;
+					x24c01_word++;
+					x24c01_word &= 0xff;
 				}
 			}
 			break;
 		}
 	}
 
-	x24c0x_sda = sda;
-	x24c0x_scl = scl;
+	x24c01_sda = sda;
+	x24c01_scl = scl;
 }
 
-static uint8 x24c0x_read() {
-	return x24c0x_out << 4;
+static void x24c02_write(uint8 data) {
+	uint8 scl = (data >> 5) & 1;
+	uint8 sda = (data >> 6) & 1;
+
+	if (x24c02_scl && scl) {
+		if (x24c02_sda && !sda) {			// START
+			x24c02_state = X24C0X_ADDRESS;
+			x24c02_bitcount = 0;
+			x24c02_addr = 0;
+		} else if (!x24c02_sda && sda) {	//STOP
+			x24c02_state = X24C0X_STANDBY;
+		}
+	} else if (!x24c02_scl && scl) {		// RISING EDGE
+		switch (x24c02_state) {
+		case X24C0X_ADDRESS:
+			if (x24c02_bitcount < 7) {
+				x24c02_addr <<= 1;
+				x24c02_addr |= sda;
+			} else {
+				if (sda)					// READ COMMAND
+					x24c02_state = X24C0X_READ;
+				else						// WRITE COMMAND
+					x24c02_state = X24C0X_WORD;
+			}
+			x24c02_bitcount++;
+			break;
+		case X24C0X_WORD:
+			if (x24c02_bitcount == 8) {		// ACK
+				x24c02_word = 0;
+				x24c02_out = 0;
+			} else {						// WORD ADDRESS INPUT
+				x24c02_word <<= 1;
+				x24c02_word |= sda;
+				if (x24c02_bitcount == 16) {// END OF ADDRESS INPUT
+					x24c02_bitcount = 7;
+					x24c02_state = X24C0X_WRITE;
+				}
+			}
+			x24c02_bitcount++;
+			break;
+		case X24C0X_READ:
+			if (x24c02_bitcount == 8) {		// ACK
+				x24c02_out = 0;
+				x24c02_latch = x24c0x_data[x24c02_word|0x100];
+				x24c02_bitcount = 0;
+			} else {						// REAL OUTPUT
+				x24c02_out = x24c02_latch >> 7;
+				x24c02_latch <<= 1;
+				x24c02_bitcount++;
+				if (x24c02_bitcount == 8) {
+					x24c02_word++;
+					x24c02_word &= 0xff;
+				}
+			}
+			break;
+		case X24C0X_WRITE:
+			if (x24c02_bitcount == 8) {		// ACK
+				x24c02_out = 0;
+				x24c02_latch = 0;
+				x24c02_bitcount = 0;
+			} else {						// REAL INPUT
+				x24c02_latch <<= 1;
+				x24c02_latch |= sda;
+				x24c02_bitcount++;
+				if (x24c02_bitcount == 8) {
+					x24c0x_data[x24c02_word|0x100] = x24c02_latch;
+					x24c02_word++;
+					x24c02_word &= 0xff;
+				}
+			}
+			break;
+		}
+	}
+	x24c02_sda = sda;
+	x24c02_scl = scl;
 }
 
 //
+
+static void SyncMirror(void) {
+	switch (reg[9] & 3) {
+	case 0: setmirror(MI_V); break;
+	case 1: setmirror(MI_H); break;
+	case 2: setmirror(MI_0); break;
+	case 3: setmirror(MI_1); break;
+	}
+}
 
 static void Sync(void) {
 	if (is153) {
@@ -174,12 +259,7 @@ static void Sync(void) {
 		setprg16(0x8000, reg[8]);
 		setprg16(0xC000, ~0);
 	}
-	switch (reg[9] & 3) {
-	case 0: setmirror(MI_V); break;
-	case 1: setmirror(MI_H); break;
-	case 2: setmirror(MI_0); break;
-	case 3: setmirror(MI_1); break;
-	}
+	SyncMirror();
 }
 
 static DECLFW(BandaiWrite) {
@@ -192,12 +272,15 @@ static DECLFW(BandaiWrite) {
 		case 0x0A: X6502_IRQEnd(FCEU_IQEXT); IRQa = V & 1; IRQCount = IRQLatch; break;
 		case 0x0B: IRQLatch &= 0xFF00; IRQLatch |= V; break;
 		case 0x0C: IRQLatch &= 0xFF; IRQLatch |= V << 8; break;
-		case 0x0D: x24c0x_write(V); break;
+		case 0x0D: if(x24c02) x24c02_write(V); else x24c01_write(V); break;
 		}
 }
 
 static DECLFR(BandaiRead) {
-	return (X.DB & 0xEF) | x24c0x_read();
+	if(x24c02)
+		return (X.DB & 0xEF) | (x24c02_out << 4);
+	else
+		return (X.DB & 0xEF) | (x24c01_out << 4);
 }
 
 static void BandaiIRQHook(int a) {
@@ -213,11 +296,14 @@ static void BandaiIRQHook(int a) {
 
 static void BandaiPower(void) {
 	IRQa = 0;
-	x24c0x_init();
+	if(x24c02)
+		x24c02_init();
+	else
+		x24c01_init();
 	Sync();
 	SetReadHandler(0x6000, 0x7FFF, BandaiRead);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
-	SetWriteHandler(0x6000, 0xFFFF, BandaiWrite);
+	SetWriteHandler(0x8000, 0xFFFF, BandaiWrite);
 }
 
 static void StateRestore(int version) {
@@ -231,12 +317,12 @@ void Mapper16_Init(CartInfo *info) {
 	MapIRQHook = BandaiIRQHook;
 
 	info->battery = 1;
-	info->SaveGame[0] = x24c0x_data;
+	info->SaveGame[0] = x24c0x_data + 256;
 	info->SaveGameLen[0] = 256;
 	AddExState(x24c0x_data, 256, 0, "DATA");
+	AddExState(&x24c02StateRegs, ~0, 0, 0);
 
 	GameStateRestore = StateRestore;
-	AddExState(&x24c0xStateRegs, ~0, 0, 0);
 	AddExState(&StateRegs, ~0, 0, 0);
 }
 
@@ -250,9 +336,9 @@ void Mapper159_Init(CartInfo *info) {
 	info->SaveGame[0] = x24c0x_data;
 	info->SaveGameLen[0] = 128;
 	AddExState(x24c0x_data, 128, 0, "DATA");
+	AddExState(&x24c01StateRegs, ~0, 0, 0);
 
 	GameStateRestore = StateRestore;
-	AddExState(&x24c0xStateRegs, ~0, 0, 0);
 	AddExState(&StateRegs, ~0, 0, 0);
 }
 
@@ -343,7 +429,7 @@ int FCEUI_DatachSet(const uint8 *rcode) {
 
 	#define BS(x) BarcodeData[tmp_p] = x; tmp_p++
 
-	for (j = 0; j < 32; j++) {
+	for (j = 0; j < 32; j++) { // delay before sending a code
 		BS(0x00);
 	}
 
@@ -419,6 +505,26 @@ int FCEUI_DatachSet(const uint8 *rcode) {
 	return(1);
 }
 
+static void BarcodeSync(void) {
+	setchr8(0);
+	setprg16(0x8000, (reg[8] & 0x0F));
+	setprg16(0xC000, 0x0F);
+	SyncMirror();
+}
+
+static DECLFW(BarcodeWrite) {
+	A &= 0x0F;
+	switch (A) {
+	case 0x00: reg[0] = (V & 8) << 2; x24c01_write(reg[0xD] | reg[0]); break;		// extra EEPROM x24C01 used in Battle Rush mini-cart
+	case 0x08: 
+	case 0x09: reg[A] = V; BarcodeSync(); break;
+	case 0x0A: X6502_IRQEnd(FCEU_IQEXT); IRQa = V & 1; IRQCount = IRQLatch; break;
+	case 0x0B: IRQLatch &= 0xFF00; IRQLatch |= V; break;
+	case 0x0C: IRQLatch &= 0xFF; IRQLatch |= V << 8; break;
+	case 0x0D: reg[0xD] = V & (~0x20); x24c01_write(reg[0xD] | reg[0]);  x24c02_write(V); break;
+	}
+}
+
 static void BarcodeIRQHook(int a) {
 	BandaiIRQHook(a);
 
@@ -436,7 +542,7 @@ static void BarcodeIRQHook(int a) {
 }
 
 static DECLFR(BarcodeRead) {
-	return BarcodeOut;
+	return (X.DB & 0xE7) | ((x24c02_out | x24c01_out) << 4) | BarcodeOut;
 }
 
 static void M157Power(void) {
@@ -446,20 +552,29 @@ static void M157Power(void) {
 	BarcodeOut = 0;
 	BarcodeCycleCount = 0;
 
-	Sync();
+	x24c01_init();
+	x24c02_init();
+	BarcodeSync();
 
-	SetWriteHandler(0x6000, 0xFFFF, BandaiWrite);
 	SetReadHandler(0x6000, 0x7FFF, BarcodeRead);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	SetWriteHandler(0x8000, 0xFFFF, BarcodeWrite);
 }
 
 void Mapper157_Init(CartInfo *info) {
-	is153 = 1;
+	x24c02 = 1;
 	info->Power = M157Power;
 	MapIRQHook = BarcodeIRQHook;
 
 	GameInfo->cspecial = SIS_DATACH;
+	info->battery = 1;
+	info->SaveGame[0] = x24c0x_data;
+	info->SaveGameLen[0] = 512;
+	AddExState(x24c0x_data, 512, 0, "DATA");
+	AddExState(&x24c01StateRegs, ~0, 0, 0);
+	AddExState(&x24c02StateRegs, ~0, 0, 0);
 
+	GameStateRestore = StateRestore;
 	GameStateRestore = StateRestore;
 	AddExState(&StateRegs, ~0, 0, 0);
 }
