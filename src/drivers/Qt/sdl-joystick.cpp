@@ -742,7 +742,6 @@ int GamePad_t::saveMappingToFile( const char *filename, const char *txtMap )
 //********************************************************************************
 int GamePad_t::createProfile( const char *name )
 {
-   char txtMap[256];
    const char *guid = NULL;
    const char *baseDir = FCEUI_GetBaseDirectory();
    std::string path;
@@ -771,13 +770,11 @@ int GamePad_t::createProfile( const char *name )
    dir.mkpath( QString::fromStdString(path) );
    //printf("DIR: '%s'\n", path.c_str() );
 
-   path += "/" + std::string(name) + ".txt";
+   //path += "/" + std::string(name) + ".txt";
 
    //printf("File: '%s'\n", path.c_str() );
 
-   getDefaultMap( txtMap, guid );
-
-   saveMappingToFile( path.c_str(), txtMap );
+	saveCurrentMapToFile( name );
 
    return 0;
 }
