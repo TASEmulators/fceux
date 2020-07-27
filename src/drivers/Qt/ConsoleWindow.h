@@ -6,7 +6,6 @@
 
 #include <QApplication>
 #include <QMainWindow>
-#include <QErrorMessage>
 #include <QWidget>
 #include <QPushButton>
 #include <QMenu>
@@ -91,8 +90,6 @@ class  consoleWin_t : public QMainWindow
 	 QAction *stopMovAct;
 	 QAction *recMovAct;
 	 QAction *recAsMovAct;
-
-	 QErrorMessage *errorMsgBox;
 
 	 QTimer  *gameTimer;
 

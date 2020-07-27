@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QErrorMessage>
 
 #include "../../fceu.h"
 #include "../../fds.h"
@@ -36,8 +35,6 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	: QMainWindow( parent )
 {
 	int use_SDL_video = false;
-
-	errorMsgBox = QErrorMessage::qtHandler();
 
 	createMainMenu();
 
@@ -124,15 +121,15 @@ void consoleWin_t::setCyclePeriodms( int ms )
 
 void consoleWin_t::showErrorMsgWindow()
 {
-	//QErrorMessage msgBox;
+	QMessageBox msgBox(this);
 
 	fceuWrapperLock();
-	//msgBox.setIcon( QMessageBox::Warning );
-	//msgBox.showMessage( tr(errorMsg.c_str()) );
-	qWarning( errorMsg.c_str() );
+	msgBox.setIcon( QMessageBox::Critical );
+	msgBox.setText( tr(errorMsg.c_str()) );
 	errorMsg.clear();
 	fceuWrapperUnLock();
-	//msgBox.exec();
+	msgBox.show();
+	msgBox.exec();
 }
 
 void consoleWin_t::QueueErrorMsgWindow( const char *msg )
