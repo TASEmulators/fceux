@@ -46,6 +46,8 @@ class  consoleWin_t : public QMainWindow
 
 		QMutex *mutex;
 
+	 	void QueueErrorMsgWindow( const char *msg );
+
 	protected:
 	 QMenu *fileMenu;
     QMenu *optMenu;
@@ -72,6 +74,7 @@ class  consoleWin_t : public QMainWindow
     QAction *autoResume;
     QAction *fullscreen;
     QAction *aboutAct;
+    QAction *aboutActQt;
 	 QAction *state[10];
 	 QAction *powerAct;
 	 QAction *resetAct;
@@ -89,15 +92,20 @@ class  consoleWin_t : public QMainWindow
 	 QAction *recAsMovAct;
 
 	 QTimer  *gameTimer;
+
 	 emulatorThread_t *emulatorThread;
 
     GamePadConfDialog_t *gamePadConfWin;
+
+	 std::string errorMsg;
+	 bool        errorMsgValid;
 
 	protected:
     void closeEvent(QCloseEvent *event);
 	 void keyPressEvent(QKeyEvent *event);
 	 void keyReleaseEvent(QKeyEvent *event);
 	 void syncActionConfig( QAction *act, const char *property );
+	 void showErrorMsgWindow(void);
 
 	private:
 		void createMainMenu(void);
@@ -112,6 +120,7 @@ class  consoleWin_t : public QMainWindow
 		void quickSave(void);
 		void closeROMCB(void);
       void aboutFCEUX(void);
+      void aboutQt(void);
       void openGamePadConfWin(void);
       void openGameSndConfWin(void);
       void openGameVideoConfWin(void);

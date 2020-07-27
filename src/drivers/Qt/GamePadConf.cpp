@@ -2,6 +2,7 @@
 //
 #include <QDir>
 #include <QInputDialog>
+#include <QMessageBox>
 
 #include "Qt/GamePadConf.h"
 #include "Qt/main.h"
@@ -11,6 +12,29 @@
 #include "Qt/keyscan.h"
 #include "Qt/sdl-joystick.h"
 #include "Qt/fceuWrapper.h"
+
+struct GamePadConfigLocalData_t
+{
+	std::string  guid;
+	std::string  profile;
+
+	struct {
+
+		char needsSave;
+
+	} btn[GAMEPAD_NUM_BUTTONS];
+
+	GamePadConfigLocalData_t(void)
+	{
+		for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
+		{
+			btn[i].needsSave = 0;
+		}
+	}
+
+};
+
+static GamePadConfigLocalData_t lcl[GAMEPAD_NUM_DEVICES];
 
 //----------------------------------------------------
 GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
@@ -29,6 +53,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    QPushButton *clearAllButton;
    QPushButton *closebutton;
    QPushButton *clearButton[GAMEPAD_NUM_BUTTONS];
+	std::string prefix;
+	char stmp[256];
 
 	InitJoysticks();
 
@@ -71,10 +97,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 		{
 			if ( js->isConnected() )
 			{
-				char stmp[128];
 				sprintf( stmp, "%i: %s", i, js->getName() );
    			devSel->addItem( tr(stmp), i );
-
 			}
 		}
 	}
@@ -236,6 +260,16 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
    inputTimer->start( 33 ); // 30hz
 
+	for (int i=0; i<GAMEPAD_NUM_DEVICES; i++)
+	{
+		sprintf( stmp, "SDL.Input.GamePad.%i.", i );
+		prefix = stmp;
+
+		g_config->getOption(prefix + "Profile", &lcl[i].profile );
+
+		lcl[i].guid.assign( GamePad[i].getGUID() );
+	}
+
    loadMapList();
 }
 
@@ -345,7 +379,17 @@ void GamePadConfDialog_t::updateCntrlrDpy(void)
 		{
 			strcpy( keyNameStr, ButtonName( &GamePad[portNum].bmap[i] ) );
 		}
+
 		keyName[i]->setText( tr(keyNameStr) );
+
+		//if ( lcl[portNum].btn[i].needsSave )
+		//{
+      //	keyName[i]->setStyleSheet("color: red;");
+		//}
+		//else
+		//{
+      //	keyName[i]->setStyleSheet("color: black;");
+		//}
 	}
 }
 //----------------------------------------------------
@@ -386,6 +430,9 @@ void GamePadConfDialog_t::deviceSelect(int index)
 		guidLbl->setText("");
 	}
 	GamePad[portNum].setDeviceIndex( devIdx );
+
+	lcl[portNum].guid.assign( GamePad[portNum].getGUID() );
+	lcl[portNum].profile.assign("default");
 
    loadMapList();
 
@@ -429,6 +476,7 @@ void GamePadConfDialog_t::changeButton(int padNo, int x)
 
    keyName[x]->setText( keyNameStr );
    button[x]->setText("Change");
+	lcl[padNo].btn[x].needsSave = 1;
 
    ButtonConfigEnd ();
 
@@ -440,11 +488,15 @@ void GamePadConfDialog_t::clearButton( int padNo, int x )
 	GamePad[padNo].bmap[x].ButtonNum = -1;
 
    keyName[x]->setText("");
+
+	lcl[padNo].btn[x].needsSave = 1;
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::closeEvent(QCloseEvent *event)
 {
-   //printf("GamePad Close Window Event\n");
+	promptToSave();
+
+   printf("GamePad Close Window Event\n");
    buttonConfigStatus = 0;
    done(0);
    event->accept();
@@ -452,7 +504,9 @@ void GamePadConfDialog_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------
 void GamePadConfDialog_t::closeWindow(void)
 {
-   //printf("Close Window\n");
+	promptToSave();
+
+   printf("Close Window\n");
    buttonConfigStatus = 0;
    done(0);
 }
@@ -567,6 +621,7 @@ void GamePadConfDialog_t::clearAllCallback(void)
 //----------------------------------------------------
 void GamePadConfDialog_t::saveConfig(void)
 {
+	int i;
 	char stmp[256];
 	std::string prefix, mapName;
 
@@ -577,15 +632,27 @@ void GamePadConfDialog_t::saveConfig(void)
 
 	g_config->setOption(prefix + "DeviceGUID", GamePad[portNum].getGUID() );
 	g_config->setOption(prefix + "Profile"   , mapName.c_str()            );
+
+	for (i=0; i<GAMEPAD_NUM_BUTTONS; i++)
+	{
+		lcl[portNum].btn[i].needsSave = 0;
+	}
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::createNewProfile( const char *name )
 {
-   printf("Creating: %s \n", name );
+	char stmp[256];
+   //printf("Creating: %s \n", name );
 
    GamePad[portNum].createProfile(name);
 
    mapSel->addItem( tr(name) );
+
+	mapSel->setCurrentIndex( mapSel->count() - 1 );
+	saveConfig();
+
+   sprintf( stmp, "Mapping Created: %s/%s \n", GamePad[portNum].getGUID(), name );
+   mapMsg->setText( tr(stmp) );
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::newProfileCallback(void)
@@ -689,6 +756,71 @@ void GamePadConfDialog_t::deleteProfileCallback(void)
    loadMapList();
 }
 //----------------------------------------------------
+void GamePadConfDialog_t::promptToSave(void)
+{
+	int i,j,n;
+	std::string msg;
+	QMessageBox msgBox(this);
+	char saveRequired = 0;
+	char padNeedsSave[GAMEPAD_NUM_DEVICES];
+	char stmp[256];
+
+	n=0;
+	for (i=0; i<GAMEPAD_NUM_DEVICES; i++)
+	{
+		padNeedsSave[i] = 0;
+
+		for (j=0; j<GAMEPAD_NUM_BUTTONS; j++)
+		{
+			if ( lcl[i].btn[j].needsSave )
+			{
+				padNeedsSave[i] = 1;
+				saveRequired = 1; 
+				n++;
+				break;
+			}
+		}
+	}
+
+	if ( !saveRequired )
+	{
+		return;
+	}
+	sprintf( stmp, "Warning: Gamepad mappings have not been saved for port%c ", (n > 1) ? 's':' ');
+
+	msg.assign( stmp );
+
+	j=n;
+	for (i=0; i<GAMEPAD_NUM_DEVICES; i++)
+	{
+		if ( padNeedsSave[i] )
+		{
+			sprintf( stmp, "%i", i+1 );
+
+			msg.append(stmp);
+
+			j--;
+
+			if ( j > 1 )
+			{
+				msg.append(", ");
+			} 
+			else if ( j == 1 )
+			{
+				msg.append(" and ");
+			}
+		}
+	}
+	msg.append(".");
+
+	msgBox.setIcon( QMessageBox::Warning );
+	msgBox.setText( tr(msg.c_str()) );
+
+	msgBox.show();
+	//msgBox.resize( 512, 128 );
+	msgBox.exec();
+}
+//----------------------------------------------------
 void GamePadConfDialog_t::updatePeriodic(void)
 {
    for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
@@ -706,6 +838,15 @@ void GamePadConfDialog_t::updatePeriodic(void)
       }
       keyState[i]->setText( tr(txt) );
       keyState[i]->setStyleSheet( style );
+
+		if ( lcl[portNum].btn[i].needsSave )
+		{
+      	keyName[i]->setStyleSheet("color: red;");
+		}
+		else
+		{
+      	keyName[i]->setStyleSheet("color: black;");
+		}
    }
 }
 //----------------------------------------------------

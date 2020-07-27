@@ -62,6 +62,7 @@ class GamePadConfDialog_t : public QDialog
 		void createNewProfile( const char *name );
 		void loadMapList(void);
 		void saveConfig(void);
+		void promptToSave(void);
 
    public slots:
       void closeWindow(void);
