@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <QFileDialog>
+#include <QMessageBox>
+#include <QErrorMessage>
 
 #include "../../fceu.h"
 #include "../../fds.h"
@@ -35,10 +37,13 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 {
 	int use_SDL_video = false;
 
+	errorMsgBox = QErrorMessage::qtHandler();
+
 	createMainMenu();
 
 	g_config->getOption( "SDL.VideoDriver", &use_SDL_video );
 
+	errorMsgValid = false;
 	viewport_GL  = NULL;
 	viewport_SDL = NULL;
 
@@ -72,6 +77,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	emulatorThread->start();
 
    gamePadConfWin = NULL;
+
 }
 
 consoleWin_t::~consoleWin_t(void)
@@ -114,6 +120,26 @@ void consoleWin_t::setCyclePeriodms( int ms )
 	gameTimer->start( ms );
    
 	//printf("Period Set to: %i ms \n", ms );
+}
+
+void consoleWin_t::showErrorMsgWindow()
+{
+	//QErrorMessage msgBox;
+
+	fceuWrapperLock();
+	//msgBox.setIcon( QMessageBox::Warning );
+	//msgBox.showMessage( tr(errorMsg.c_str()) );
+	qWarning( errorMsg.c_str() );
+	errorMsg.clear();
+	fceuWrapperUnLock();
+	//msgBox.exec();
+}
+
+void consoleWin_t::QueueErrorMsgWindow( const char *msg )
+{
+	errorMsg.append( msg );
+	errorMsg.append("\n");
+	errorMsgValid = true;
 }
 
 void consoleWin_t::closeEvent(QCloseEvent *event)
@@ -489,12 +515,20 @@ void consoleWin_t::createMainMenu(void)
 	 //-----------------------------------------------------------------------
 	 // Help
     helpMenu = menuBar()->addMenu(tr("Help"));
-
-	 aboutAct = new QAction(tr("About"), this);
+ 
+	 // Help -> About FCEUX
+	 aboutAct = new QAction(tr("About FCEUX"), this);
     aboutAct->setStatusTip(tr("About FCEUX"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutFCEUX(void)) );
 
     helpMenu->addAction(aboutAct);
+
+	 // Help -> About Qt
+	 aboutActQt = new QAction(tr("About Qt"), this);
+    aboutActQt->setStatusTip(tr("About Qt"));
+    connect(aboutActQt, SIGNAL(triggered()), this, SLOT(aboutQt(void)) );
+
+    helpMenu->addAction(aboutActQt);
 };
 //---------------------------------------------------------------------------
 void consoleWin_t::closeApp(void)
@@ -1331,6 +1365,16 @@ void consoleWin_t::aboutFCEUX(void)
    return;
 }
 
+void consoleWin_t::aboutQt(void)
+{
+	//printf("About Qt Window\n");
+	
+	QMessageBox::aboutQt(this);
+
+   //printf("About Qt Destroyed\n");
+   return;
+}
+
 void consoleWin_t::syncActionConfig( QAction *act, const char *property )
 {
 	if ( act->isCheckable() )
@@ -1371,6 +1415,12 @@ void consoleWin_t::updatePeriodic(void)
 			//viewport_GL->repaint();
 			viewport_GL->update();
 		}
+	}
+
+	if ( errorMsgValid )
+	{
+		showErrorMsgWindow();
+		errorMsgValid = false;
 	}
 
    return;

@@ -262,7 +262,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	for (int i=0; i<GAMEPAD_NUM_DEVICES; i++)
 	{
-		sprintf( stmp, "SDL.Input.GamePad.%u.", i );
+		sprintf( stmp, "SDL.Input.GamePad.%i.", i );
 		prefix = stmp;
 
 		g_config->getOption(prefix + "Profile", &lcl[i].profile );
@@ -813,6 +813,7 @@ void GamePadConfDialog_t::promptToSave(void)
 	}
 	msg.append(".");
 
+	msgBox.setIcon( QMessageBox::Warning );
 	msgBox.setText( tr(msg.c_str()) );
 
 	msgBox.show();

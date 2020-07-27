@@ -80,20 +80,22 @@ int mutecapture = 0;
 void FCEUD_Message(const char *text)
 {
 	fputs(text, stdout);
-	fprintf(stdout, "\n");
+	//fprintf(stdout, "\n");
 }
 
 /**
 * Shows an error message in a message box.
 * (For now: prints to stderr.)
 * 
-* If running in GTK mode, display a dialog message box of the error.
+* If running in Qt mode, display a dialog message box of the error.
 *
 * @param errormsg Text of the error message.
 **/
 void FCEUD_PrintError(const char *errormsg)
 {
 	fprintf(stderr, "%s\n", errormsg);
+
+	consoleWindow->QueueErrorMsgWindow( errormsg );
 }
 
 /**
