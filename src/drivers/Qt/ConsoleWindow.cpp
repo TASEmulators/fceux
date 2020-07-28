@@ -23,6 +23,7 @@
 #include "Qt/PaletteConf.h"
 #include "Qt/GuiConf.h"
 #include "Qt/LuaControl.h"
+#include "Qt/CheatsConf.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
@@ -470,6 +471,18 @@ void consoleWin_t::createMainMenu(void)
     connect(fdsLoadBiosAct, SIGNAL(triggered()), this, SLOT(fdsLoadBiosFile(void)) );
 
     subMenu->addAction(fdsLoadBiosAct);
+
+	 //-----------------------------------------------------------------------
+	 // Tools
+    toolsMenu = menuBar()->addMenu(tr("Tools"));
+
+	 // Tools -> Cheats
+	 cheatsAct = new QAction(tr("Cheats..."), this);
+    //cheatsAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    cheatsAct->setStatusTip(tr("Open Cheat Window"));
+    connect(cheatsAct, SIGNAL(triggered()), this, SLOT(openCheats(void)) );
+
+    toolsMenu->addAction(cheatsAct);
 
 	 //-----------------------------------------------------------------------
 	 // Movie
@@ -979,6 +992,22 @@ void consoleWin_t::openGuiConfWin(void)
    delete guiConfWin;
 
    //printf("GUI Config Window Destroyed\n");
+}
+
+void consoleWin_t::openCheats(void)
+{
+	GuiCheatsDialog_t *cheatWin;
+
+	//printf("Open GUI Cheat Window\n");
+	
+   cheatWin = new GuiCheatsDialog_t(this);
+	
+   cheatWin->show();
+   cheatWin->exec();
+
+   delete cheatWin;
+
+   //printf("GUI Cheat Window Destroyed\n");
 }
 
 void consoleWin_t::toggleAutoResume(void)
