@@ -16,6 +16,7 @@
 #include <QGroupBox>
 #include <QTreeView>
 #include <QTreeWidget>
+#include <QTextEdit>
 
 #include "Qt/main.h"
 
@@ -39,12 +40,23 @@ class GuiCheatsDialog_t : public QDialog
 		QPushButton *exportCheatFileBtn;
 		QPushButton *srchResetBtn;
 		QPushButton *knownValBtn;
+		QPushButton *eqValBtn;
+		QPushButton *neValBtn;
+		QPushButton *grValBtn;
+		QPushButton *ltValBtn;
+		QCheckBox   *useNeVal;
+		QCheckBox   *useGrVal;
+		QCheckBox   *useLtVal;
 		QTreeWidget *tree;
+		QTreeWidget *srchResults;
 		QLineEdit   *cheatNameEntry;
 		QLineEdit   *cheatAddrEntry;
 		QLineEdit   *cheatValEntry;
 		QLineEdit   *cheatCmpEntry;
 		QLineEdit   *knownValEntry;
+		QLineEdit   *neValEntry;
+		QLineEdit   *grValEntry;
+		QLineEdit   *ltValEntry;
 
 	private:
 

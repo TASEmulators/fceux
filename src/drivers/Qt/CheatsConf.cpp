@@ -20,20 +20,25 @@
 GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
-	QHBoxLayout *mainLayout, *hbox;
-	QVBoxLayout *vbox;
+	QHBoxLayout *mainLayout, *hbox, *hbox1;
+	QVBoxLayout *vbox, *vbox1, *vbox2, *vbox3;
 	QTreeWidgetItem *item;
 	QLabel *lbl;
+	QGroupBox *groupBox;
+	QFrame *frame;
 
 	setWindowTitle("Cheat Search");
 
 	//resize( 512, 512 );
 
+	// Window Layout Box
 	mainLayout = new QHBoxLayout();
 
+	//-------------------------------------------------------
+	// Left Side Active Cheats Frame
 	actCheatFrame = new QGroupBox( tr("Active Cheats") );
 
-	vbox = new QVBoxLayout();
+	vbox1 = new QVBoxLayout();
 
 	mainLayout->addWidget( actCheatFrame );
 	
@@ -69,7 +74,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	//}
 	//
 	
-	vbox->addWidget( tree );
+	vbox1->addWidget( tree );
 
 	hbox = new QHBoxLayout();
 
@@ -79,7 +84,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	hbox->addWidget( lbl );
 	hbox->addWidget( cheatNameEntry );
 
-	vbox->addLayout( hbox );
+	vbox1->addLayout( hbox );
 
 	hbox = new QHBoxLayout();
 
@@ -101,7 +106,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	hbox->addWidget( lbl );
 	hbox->addWidget( cheatCmpEntry );
 
-	vbox->addLayout( hbox );
+	vbox1->addLayout( hbox );
 
 	hbox = new QHBoxLayout();
 
@@ -113,7 +118,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	hbox->addWidget( delCheatBtn );
 	hbox->addWidget( modCheatBtn );
 
-	vbox->addLayout( hbox );
+	vbox1->addLayout( hbox );
 
 	hbox = new QHBoxLayout();
 
@@ -123,35 +128,139 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	hbox->addWidget( importCheatFileBtn );
 	hbox->addWidget( exportCheatFileBtn );
 
-	vbox->addLayout( hbox );
+	vbox1->addLayout( hbox );
 
-	actCheatFrame->setLayout( vbox );
+	actCheatFrame->setLayout( vbox1 );
 
 	cheatSearchFrame = new QGroupBox( tr("Cheat Search") );
 	cheatResultFrame = new QGroupBox( tr("Possibilities") );
 
-	hbox = new QHBoxLayout();
+	srchResults = new QTreeWidget();
+	srchResults->setColumnCount(3);
+
+	item = new QTreeWidgetItem();
+	item->setText( 0, QString::fromStdString( "Addr" ) );
+	item->setText( 1, QString::fromStdString( "Pre"  ) );
+	item->setText( 2, QString::fromStdString( "Cur"  ) );
+	item->setTextAlignment( 0, Qt::AlignCenter);
+	item->setTextAlignment( 1, Qt::AlignCenter);
+	item->setTextAlignment( 2, Qt::AlignCenter);
+
+	srchResults->setHeaderItem( item );
+
+	//srchResults->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+	srchResults->header()->setSectionResizeMode( QHeaderView::Interactive );
+	//srchResults->header()->setSectionResizeMode( QHeaderView::Fixed );
+	//srchResults->header()->setSectionResizeMode( QHeaderView::Stretch );
+	//srchResults->header()->setDefaultSectionSize( 200 );
+	//srchResults->setReadOnly(true);
 
 	vbox = new QVBoxLayout();
+	vbox->addWidget( srchResults );
+	cheatResultFrame->setLayout( vbox );
 
-	hbox->addLayout( vbox );
-	hbox->addWidget( cheatResultFrame );
+	hbox1 = new QHBoxLayout();
 
-	cheatSearchFrame->setLayout( hbox );
+	vbox2 = new QVBoxLayout();
+
+	hbox1->addLayout( vbox2 );
+	hbox1->addWidget( cheatResultFrame );
+
+	cheatSearchFrame->setLayout( hbox1 );
 
 	srchResetBtn = new QPushButton( tr("Reset") );
+
+	vbox2->addWidget( srchResetBtn );
+
+	frame = new QFrame();
+	frame->setFrameShape( QFrame::Box );
+	vbox2->addWidget( frame );
+	vbox = new QVBoxLayout();
+
+	frame->setLayout( vbox );
+
 	knownValBtn  = new QPushButton( tr("Known Value:") );
 
-	vbox->addWidget( srchResetBtn );
 	vbox->addWidget( knownValBtn  );
 
-	hbox = new QHBoxLayout();
-	vbox->addLayout( hbox );
+	hbox1 = new QHBoxLayout();
+	vbox->addLayout( hbox1 );
 
 	lbl = new QLabel( tr("0x") );
 	knownValEntry = new QLineEdit();
-	hbox->addWidget( lbl );
-	hbox->addWidget( knownValEntry );
+	hbox1->addWidget( lbl );
+	hbox1->addWidget( knownValEntry );
+
+	groupBox = new QGroupBox( tr("Previous Compare") );
+	vbox2->addWidget( groupBox );
+
+	vbox3 = new QVBoxLayout();
+
+	frame = new QFrame();
+	frame->setFrameShape( QFrame::Box );
+	vbox3->addWidget( frame );
+	vbox = new QVBoxLayout();
+
+	eqValBtn = new QPushButton( tr("Equal") );
+	vbox->addWidget( eqValBtn );
+
+	frame->setLayout( vbox );
+
+	frame = new QFrame();
+	frame->setFrameShape( QFrame::Box );
+	vbox3->addWidget( frame );
+	vbox = new QVBoxLayout();
+
+	neValBtn = new QPushButton( tr("Not Equal") );
+
+	hbox = new QHBoxLayout();
+	useNeVal = new QCheckBox( tr("By:") );
+	neValEntry = new QLineEdit();
+
+	hbox->addWidget( useNeVal );
+	hbox->addWidget( neValEntry );
+
+	vbox->addWidget( neValBtn );
+	vbox->addLayout( hbox );
+	frame->setLayout( vbox );
+
+	frame = new QFrame();
+	frame->setFrameShape( QFrame::Box );
+	vbox3->addWidget( frame );
+	vbox = new QVBoxLayout();
+
+	grValBtn = new QPushButton( tr("Greater Than") );
+
+	hbox = new QHBoxLayout();
+	useGrVal = new QCheckBox( tr("By:") );
+	grValEntry = new QLineEdit();
+
+	hbox->addWidget( useGrVal );
+	hbox->addWidget( grValEntry );
+
+	vbox->addWidget( grValBtn );
+	vbox->addLayout( hbox );
+	frame->setLayout( vbox );
+
+	frame = new QFrame();
+	frame->setFrameShape( QFrame::Box );
+	vbox3->addWidget( frame );
+	vbox = new QVBoxLayout();
+
+	ltValBtn = new QPushButton( tr("Less Than") );
+
+	hbox = new QHBoxLayout();
+	useLtVal = new QCheckBox( tr("By:") );
+	ltValEntry = new QLineEdit();
+
+	hbox->addWidget( useLtVal );
+	hbox->addWidget( ltValEntry );
+
+	vbox->addWidget( ltValBtn );
+	vbox->addLayout( hbox );
+	frame->setLayout( vbox );
+
+	groupBox->setLayout( vbox3 );
 
 	mainLayout->addWidget( cheatSearchFrame );
 
