@@ -8,6 +8,11 @@
 #include <SDL.h>
 #include <QHeaderView>
 
+#include "../../types.h"
+#include "../../fceu.h"
+#include "../../cheat.h"
+#include "../../debug.h"
+#include "../../driver.h"
 #include "Qt/main.h"
 #include "Qt/dface.h"
 #include "Qt/input.h"
@@ -16,6 +21,7 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/CheatsConf.h"
 
+static GuiCheatsDialog_t *win = NULL;
 //----------------------------------------------------------------------------
 GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	: QDialog( parent )
@@ -26,6 +32,10 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	QLabel *lbl;
 	QGroupBox *groupBox;
 	QFrame *frame;
+	QFont font;
+
+	font.setStyle( QFont::StyleNormal );
+	font.setStyleHint( QFont::Monospace );
 
 	setWindowTitle("Cheat Search");
 
@@ -47,6 +57,8 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	tree->setColumnCount(2);
 
 	item = new QTreeWidgetItem();
+	item->setFont( 0, font );
+	item->setFont( 1, font );
 	item->setText( 0, QString::fromStdString( "Code" ) );
 	item->setText( 1, QString::fromStdString( "Name" ) );
 	item->setTextAlignment( 0, Qt::AlignLeft);
@@ -139,6 +151,9 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	srchResults->setColumnCount(3);
 
 	item = new QTreeWidgetItem();
+	item->setFont( 0, font );
+	item->setFont( 1, font );
+	item->setFont( 2, font );
 	item->setText( 0, QString::fromStdString( "Addr" ) );
 	item->setText( 1, QString::fromStdString( "Pre"  ) );
 	item->setText( 2, QString::fromStdString( "Cur"  ) );
@@ -188,6 +203,8 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	lbl = new QLabel( tr("0x") );
 	knownValEntry = new QLineEdit();
+	knownValEntry->setMaxLength(2);
+	//knownValEntry->setInputMask( "AA" );
 	hbox1->addWidget( lbl );
 	hbox1->addWidget( knownValEntry );
 
@@ -265,6 +282,12 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	mainLayout->addWidget( cheatSearchFrame );
 
 	setLayout( mainLayout );
+
+	connect( srchResetBtn, SIGNAL(clicked(void)), this, SLOT(resetSearchCallback(void)) );
+	connect( knownValBtn , SIGNAL(clicked(void)), this, SLOT(knownValueCallback(void)) );
+
+	cheat_search_known_value = 0;
+
 }
 //----------------------------------------------------------------------------
 GuiCheatsDialog_t::~GuiCheatsDialog_t(void)
@@ -276,5 +299,78 @@ void GuiCheatsDialog_t::closeWindow(void)
 {
    //printf("Close Window\n");
    done(0);
+}
+//----------------------------------------------------------------------------
+int GuiCheatsDialog_t::addSearchResult (uint32_t a, uint8_t last, uint8_t current)
+{
+	QTreeWidgetItem *item;
+	char addrStr[8], lastStr[8], curStr[8];
+
+	item = new QTreeWidgetItem();
+
+	sprintf (addrStr, "$%04X", a);
+	sprintf (lastStr, "%02X", last);
+	sprintf (curStr , "%02X", current);
+
+	item->setText( 0, tr(addrStr) );
+	item->setText( 1, tr(lastStr) );
+	item->setText( 2, tr(curStr)  );
+
+	item->setTextAlignment( 0, Qt::AlignCenter);
+	item->setTextAlignment( 1, Qt::AlignCenter);
+	item->setTextAlignment( 2, Qt::AlignCenter);
+
+	srchResults->addTopLevelItem( item );
+
+	return 1;
+}
+//----------------------------------------------------------------------------
+static int ShowCheatSearchResultsCallB (uint32 a, uint8 last, uint8 current)
+{
+	return win->addSearchResult( a, last, current );
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::showCheatSearchResults(void)
+{
+	int total_matches;
+
+	win = this;
+
+	srchResults->clear();
+
+	total_matches = FCEUI_CheatSearchGetCount ();
+
+	FCEUI_CheatSearchGetRange (0, total_matches,
+				   ShowCheatSearchResultsCallB);
+
+	printf("Num Matches: %i \n", total_matches );
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::resetSearchCallback(void)
+{
+	fceuWrapperLock();
+
+	FCEUI_CheatSearchBegin ();
+
+	showCheatSearchResults();
+
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::knownValueCallback(void)
+{
+	//printf("Cheat Search Known!\n");
+	fceuWrapperLock();
+
+	//printf("%s\n", knownValEntry->text().toStdString().c_str() );
+
+	cheat_search_known_value = strtol( knownValEntry->text().toStdString().c_str(), NULL, 16 );
+
+	FCEUI_CheatSearchEnd (FCEU_SEARCH_NEWVAL_KNOWN,
+			      cheat_search_known_value, 0);
+
+	showCheatSearchResults();
+
+	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------

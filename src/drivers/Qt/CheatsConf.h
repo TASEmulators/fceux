@@ -28,6 +28,8 @@ class GuiCheatsDialog_t : public QDialog
 		GuiCheatsDialog_t(QWidget *parent = 0);
 		~GuiCheatsDialog_t(void);
 
+		int addSearchResult( uint32_t a, uint8_t last, uint8_t current );
+
 	protected:
 
 		QGroupBox   *actCheatFrame;
@@ -58,10 +60,15 @@ class GuiCheatsDialog_t : public QDialog
 		QLineEdit   *grValEntry;
 		QLineEdit   *ltValEntry;
 
+		int cheat_search_known_value;
+
 	private:
+		void showCheatSearchResults(void);
 
    public slots:
       void closeWindow(void);
 	private slots:
+      void resetSearchCallback(void);
+      void knownValueCallback(void);
 
 };
