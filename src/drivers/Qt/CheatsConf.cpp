@@ -92,6 +92,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	lbl = new QLabel( tr("Name:") );
 	cheatNameEntry = new QLineEdit();
+	cheatNameEntry->setFont( font );
 
 	hbox->addWidget( lbl );
 	hbox->addWidget( cheatNameEntry );
@@ -102,18 +103,33 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	lbl = new QLabel( tr("Address:") );
 	cheatAddrEntry = new QLineEdit();
+	cheatAddrEntry->setMaxLength(4);
+	cheatAddrEntry->setInputMask( ">HHHH;0" );
+	cheatAddrEntry->setFont( font );
+	cheatAddrEntry->setCursorPosition(0);
+	cheatAddrEntry->setMaximumWidth( 5 * cheatAddrEntry->fontMetrics().boundingRect('0').width() );
 
 	hbox->addWidget( lbl );
 	hbox->addWidget( cheatAddrEntry );
 
 	lbl = new QLabel( tr("Value:") );
 	cheatValEntry = new QLineEdit();
+	cheatValEntry->setMaxLength(2);
+	cheatValEntry->setInputMask( ">HH;0" );
+	cheatValEntry->setFont( font );
+	cheatValEntry->setCursorPosition(0);
+	cheatValEntry->setMaximumWidth( 3 * cheatValEntry->fontMetrics().boundingRect('0').width() );
 
 	hbox->addWidget( lbl );
 	hbox->addWidget( cheatValEntry );
 
 	lbl = new QLabel( tr("Compare:") );
 	cheatCmpEntry = new QLineEdit();
+	cheatCmpEntry->setMaxLength(2);
+	cheatCmpEntry->setInputMask( ">HH;X" );
+	cheatCmpEntry->setFont( font );
+	cheatCmpEntry->setCursorPosition(0);
+	cheatCmpEntry->setMaximumWidth( 3 * cheatCmpEntry->fontMetrics().boundingRect('0').width() );
 
 	hbox->addWidget( lbl );
 	hbox->addWidget( cheatCmpEntry );
@@ -136,6 +152,8 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	importCheatFileBtn = new QPushButton( tr("Import") );
 	exportCheatFileBtn = new QPushButton( tr("Export") );
+	importCheatFileBtn->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	exportCheatFileBtn->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 
 	hbox->addWidget( importCheatFileBtn );
 	hbox->addWidget( exportCheatFileBtn );
@@ -184,17 +202,20 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	cheatSearchFrame->setLayout( hbox1 );
 
 	srchResetBtn = new QPushButton( tr("Reset") );
+	srchResetBtn->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 
 	vbox2->addWidget( srchResetBtn );
 
 	frame = new QFrame();
 	frame->setFrameShape( QFrame::Box );
+	frame->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	vbox2->addWidget( frame );
 	vbox = new QVBoxLayout();
 
 	frame->setLayout( vbox );
 
 	knownValBtn  = new QPushButton( tr("Known Value:") );
+	knownValBtn->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 
 	vbox->addWidget( knownValBtn  );
 
@@ -202,40 +223,57 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	vbox->addLayout( hbox1 );
 
 	lbl = new QLabel( tr("0x") );
+	lbl->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	knownValEntry = new QLineEdit();
 	knownValEntry->setMaxLength(2);
-	//knownValEntry->setInputMask( "AA" );
-	hbox1->addWidget( lbl );
-	hbox1->addWidget( knownValEntry );
+	knownValEntry->setInputMask( ">HH;0" );
+	knownValEntry->setFont( font );
+	knownValEntry->setCursorPosition(0);
+	knownValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	knownValEntry->setMaximumWidth( 3 * knownValEntry->fontMetrics().boundingRect('0').width() );
+	hbox1->addWidget( lbl, 0, Qt::AlignRight );
+	hbox1->addWidget( knownValEntry, 0, Qt::AlignLeft );
 
 	groupBox = new QGroupBox( tr("Previous Compare") );
 	vbox2->addWidget( groupBox );
+	groupBox->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 
 	vbox3 = new QVBoxLayout();
 
 	frame = new QFrame();
 	frame->setFrameShape( QFrame::Box );
+	frame->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	vbox3->addWidget( frame );
 	vbox = new QVBoxLayout();
 
 	eqValBtn = new QPushButton( tr("Equal") );
+	eqValBtn->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	vbox->addWidget( eqValBtn );
 
 	frame->setLayout( vbox );
 
 	frame = new QFrame();
 	frame->setFrameShape( QFrame::Box );
+	frame->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	vbox3->addWidget( frame );
 	vbox = new QVBoxLayout();
 
 	neValBtn = new QPushButton( tr("Not Equal") );
+	neValBtn->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 
 	hbox = new QHBoxLayout();
 	useNeVal = new QCheckBox( tr("By:") );
+	useNeVal->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	neValEntry = new QLineEdit();
+	neValEntry->setMaxLength(2);
+	neValEntry->setInputMask( ">HH;0" );
+	neValEntry->setFont( font );
+	neValEntry->setCursorPosition(0);
+	neValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	neValEntry->setMaximumWidth( 3 * neValEntry->fontMetrics().boundingRect('0').width() );
 
-	hbox->addWidget( useNeVal );
-	hbox->addWidget( neValEntry );
+	hbox->addWidget( useNeVal, 0, Qt::AlignRight );
+	hbox->addWidget( neValEntry, 0, Qt::AlignLeft );
 
 	vbox->addWidget( neValBtn );
 	vbox->addLayout( hbox );
@@ -243,17 +281,26 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	frame = new QFrame();
 	frame->setFrameShape( QFrame::Box );
+	frame->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	vbox3->addWidget( frame );
 	vbox = new QVBoxLayout();
 
 	grValBtn = new QPushButton( tr("Greater Than") );
+	grValBtn->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 
 	hbox = new QHBoxLayout();
 	useGrVal = new QCheckBox( tr("By:") );
+	useGrVal->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	grValEntry = new QLineEdit();
+	grValEntry->setMaxLength(2);
+	grValEntry->setInputMask( ">HH;0" );
+	grValEntry->setFont( font );
+	grValEntry->setCursorPosition(0);
+	grValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	grValEntry->setMaximumWidth( 3 * grValEntry->fontMetrics().boundingRect('0').width() );
 
-	hbox->addWidget( useGrVal );
-	hbox->addWidget( grValEntry );
+	hbox->addWidget( useGrVal, 0, Qt::AlignRight );
+	hbox->addWidget( grValEntry, 0, Qt::AlignLeft );
 
 	vbox->addWidget( grValBtn );
 	vbox->addLayout( hbox );
@@ -261,17 +308,26 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	frame = new QFrame();
 	frame->setFrameShape( QFrame::Box );
+	frame->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	vbox3->addWidget( frame );
 	vbox = new QVBoxLayout();
 
 	ltValBtn = new QPushButton( tr("Less Than") );
+	ltValBtn->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 
 	hbox = new QHBoxLayout();
 	useLtVal = new QCheckBox( tr("By:") );
+	useLtVal->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	ltValEntry = new QLineEdit();
+	ltValEntry->setMaxLength(2);
+	ltValEntry->setInputMask( ">HH;0" );
+	ltValEntry->setFont( font );
+	ltValEntry->setCursorPosition(0);
+	ltValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	ltValEntry->setMaximumWidth( 3 * ltValEntry->fontMetrics().boundingRect('0').width() );
 
-	hbox->addWidget( useLtVal );
-	hbox->addWidget( ltValEntry );
+	hbox->addWidget( useLtVal, 0, Qt::AlignRight );
+	hbox->addWidget( ltValEntry, 0, Qt::AlignLeft );
 
 	vbox->addWidget( ltValBtn );
 	vbox->addLayout( hbox );
