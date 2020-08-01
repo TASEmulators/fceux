@@ -30,6 +30,8 @@ class GuiCheatsDialog_t : public QDialog
 
 		int addSearchResult( uint32_t a, uint8_t last, uint8_t current );
 
+		int activeCheatListCB (char *name, uint32 a, uint8 v, int c, int s, int type, void *data);
+
 	protected:
 
 		QGroupBox   *actCheatFrame;
@@ -49,7 +51,7 @@ class GuiCheatsDialog_t : public QDialog
 		QCheckBox   *useNeVal;
 		QCheckBox   *useGrVal;
 		QCheckBox   *useLtVal;
-		QTreeWidget *tree;
+		QTreeWidget *actvCheatList;
 		QTreeWidget *srchResults;
 		QLineEdit   *cheatNameEntry;
 		QLineEdit   *cheatAddrEntry;
@@ -61,10 +63,13 @@ class GuiCheatsDialog_t : public QDialog
 		QLineEdit   *ltValEntry;
 		QFont        font;
 
-		int fontCharWidth;
+		int  fontCharWidth;
+		int  actvCheatIdx;
+		bool actvCheatRedraw;
 
 	private:
 		void showCheatSearchResults(void);
+		void showActiveCheatList(bool redraw);
 
    public slots:
       void closeWindow(void);
@@ -75,5 +80,7 @@ class GuiCheatsDialog_t : public QDialog
       void notEqualValueCallback(void);
       void lessThanValueCallback(void);
       void greaterThanValueCallback(void);
+		void openCheatFile(void);
+		void actvCheatItemClicked( QTreeWidgetItem *item, int column);
 
 };

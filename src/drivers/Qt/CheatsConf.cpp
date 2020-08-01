@@ -7,6 +7,7 @@
 
 #include <SDL.h>
 #include <QHeaderView>
+#include <QFileDialog>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -20,6 +21,7 @@
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/CheatsConf.h"
+#include "Qt/ConsoleUtilities.h"
 
 static GuiCheatsDialog_t *win = NULL;
 //----------------------------------------------------------------------------
@@ -55,41 +57,26 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	mainLayout->addWidget( actCheatFrame );
 	
-	tree = new QTreeWidget();
+	actvCheatList = new QTreeWidget();
 
-	tree->setColumnCount(2);
+	actvCheatList->setColumnCount(2);
 
 	item = new QTreeWidgetItem();
 	item->setFont( 0, font );
 	item->setFont( 1, font );
 	item->setText( 0, QString::fromStdString( "Code" ) );
 	item->setText( 1, QString::fromStdString( "Name" ) );
-	item->setTextAlignment( 0, Qt::AlignLeft);
-	item->setTextAlignment( 1, Qt::AlignLeft);
+	item->setTextAlignment( 0, Qt::AlignCenter);
+	item->setTextAlignment( 1, Qt::AlignCenter);
 
-	tree->setHeaderItem( item );
+	actvCheatList->setHeaderItem( item );
 
-	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+	actvCheatList->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
 
-	//for (int i=0; i<HK_MAX; i++)
-	//{
-	//	std::string optionName = prefix + getHotkeyString(i);
+	connect( actvCheatList, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+			   this, SLOT(actvCheatItemClicked( QTreeWidgetItem*, int)) );
 
-	//	g_config->getOption (optionName.c_str (), &keycode);
-
-	//	item = new QTreeWidgetItem();
-
-	//	item->setText( 0, QString::fromStdString( optionName ) );
-	//	item->setText( 1, QString::fromStdString( SDL_GetKeyName (keycode) ) );
-
-	//	item->setTextAlignment( 0, Qt::AlignLeft);
-	//	item->setTextAlignment( 1, Qt::AlignCenter);
-
-	//	tree->addTopLevelItem( item );
-	//}
-	//
-	
-	vbox1->addWidget( tree );
+	vbox1->addWidget( actvCheatList );
 
 	hbox = new QHBoxLayout();
 
@@ -353,6 +340,9 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	connect( ltValBtn    , SIGNAL(clicked(void)), this, SLOT(lessThanValueCallback(void)) );
 	connect( grValBtn    , SIGNAL(clicked(void)), this, SLOT(greaterThanValueCallback(void)) );
 
+	connect( importCheatFileBtn, SIGNAL(clicked(void)), this, SLOT(openCheatFile(void)) );
+
+	showActiveCheatList(true);
 }
 //----------------------------------------------------------------------------
 GuiCheatsDialog_t::~GuiCheatsDialog_t(void)
@@ -525,5 +515,142 @@ void GuiCheatsDialog_t::lessThanValueCallback(void)
 	showCheatSearchResults();
 
 	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+int GuiCheatsDialog_t::activeCheatListCB (char *name, uint32 a, uint8 v, int c, int s, int type, void *data)
+{
+	QTreeWidgetItem *item;
+	char codeStr[32];
+
+	if (c >= 0)
+	{
+		sprintf (codeStr, "$%04X:%02X:%02X", a,v,c);
+	}
+	else
+	{
+		sprintf (codeStr, "$%04X:%02X   ", a,v);
+	}
+
+	item = actvCheatList->topLevelItem(actvCheatIdx);
+
+	if ( item == NULL )
+	{
+		item = new QTreeWidgetItem();
+
+		actvCheatList->addTopLevelItem( item );
+	}
+
+	//item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsUserCheckable );
+	item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemNeverHasChildren );
+
+	item->setCheckState( 0, s ? Qt::Checked : Qt::Unchecked );
+
+	item->setText( 0, tr(codeStr));
+	item->setText( 1, tr(name)   );
+
+	item->setTextAlignment( 0, Qt::AlignLeft);
+	item->setTextAlignment( 1, Qt::AlignLeft);
+
+	actvCheatIdx++;
+
+	return 1;
+}
+//----------------------------------------------------------------------------
+static int activeCheatListCB (char *name, uint32 a, uint8 v, int c, int s, int type, void *data)
+{
+	return win->activeCheatListCB( name, a, v, c, s, type, data );
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::showActiveCheatList(bool redraw)
+{
+	win = this;
+
+	actvCheatRedraw = redraw;
+
+	if ( redraw )
+	{
+		actvCheatList->clear();
+	}
+	actvCheatIdx = 0;
+
+	FCEUI_ListCheats (::activeCheatListCB, (void *) this);
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::openCheatFile(void)
+{
+	FILE *fp;
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string last;
+	char dir[512];
+	QFileDialog  dialog(this, tr("Open Cheat File") );
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("Cheat files (*.cht *.CHT) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
+
+	g_config->getOption ("SDL.LastOpenFile", &last );
+
+	getDirFromFile( last.c_str(), dir );
+
+	dialog.setDirectory( tr(dir) );
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+   if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	g_config->setOption ("SDL.LastOpenFile", filename.toStdString().c_str() );
+
+	fceuWrapperLock();
+
+	fp = fopen (filename.toStdString().c_str(), "r");
+
+	if (fp != NULL)
+	{
+		FCEU_LoadGameCheats (fp, 0);
+		fclose (fp);
+	}
+	fceuWrapperUnLock();
+
+	showActiveCheatList(true);
+
+   return;
+}
+//----------------------------------------------------------------------------
+void 	GuiCheatsDialog_t::actvCheatItemClicked( QTreeWidgetItem *item, int column)
+{
+	int row = actvCheatList->indexOfTopLevelItem(item);
+
+	printf("Row: %i Column: %i \n", row, column );
+
+	if ( column == 0 )
+	{
+		FCEUI_ToggleCheat( row );
+	}
 }
 //----------------------------------------------------------------------------
