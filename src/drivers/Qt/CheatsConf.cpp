@@ -353,8 +353,6 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	connect( ltValBtn    , SIGNAL(clicked(void)), this, SLOT(lessThanValueCallback(void)) );
 	connect( grValBtn    , SIGNAL(clicked(void)), this, SLOT(greaterThanValueCallback(void)) );
 
-	cheat_search_known_value = 0;
-
 }
 //----------------------------------------------------------------------------
 GuiCheatsDialog_t::~GuiCheatsDialog_t(void)
@@ -430,15 +428,15 @@ void GuiCheatsDialog_t::resetSearchCallback(void)
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::knownValueCallback(void)
 {
+	int value;
 	//printf("Cheat Search Known!\n");
 	fceuWrapperLock();
 
 	//printf("%s\n", knownValEntry->text().toStdString().c_str() );
 
-	cheat_search_known_value = strtol( knownValEntry->text().toStdString().c_str(), NULL, 16 );
+	value = strtol( knownValEntry->text().toStdString().c_str(), NULL, 16 );
 
-	FCEUI_CheatSearchEnd (FCEU_SEARCH_NEWVAL_KNOWN,
-			      cheat_search_known_value, 0);
+	FCEUI_CheatSearchEnd (FCEU_SEARCH_NEWVAL_KNOWN, value, 0);
 
 	showCheatSearchResults();
 
@@ -460,15 +458,16 @@ void GuiCheatsDialog_t::equalValueCallback(void)
 void GuiCheatsDialog_t::notEqualValueCallback(void)
 {
 	//printf("Cheat Search Not Equal!\n");
+	int value;
 	int checked = useNeVal->checkState() != Qt::Unchecked;
 
 	fceuWrapperLock();
 
 	if (checked)
 	{
-		cheat_search_neq_value = strtol( neValEntry->text().toStdString().c_str(), NULL, 16 );
+		value = strtol( neValEntry->text().toStdString().c_str(), NULL, 16 );
 
-		FCEUI_CheatSearchEnd (FCEU_SEARCH_PUERLY_RELATIVE_CHANGE, 0, cheat_search_neq_value);
+		FCEUI_CheatSearchEnd (FCEU_SEARCH_PUERLY_RELATIVE_CHANGE, 0, value);
 	}
 	else
 	{
@@ -483,15 +482,16 @@ void GuiCheatsDialog_t::notEqualValueCallback(void)
 void GuiCheatsDialog_t::greaterThanValueCallback(void)
 {
 	//printf("Cheat Search Greater Than!\n");
+	int value;
 	int checked = useGrVal->checkState() != Qt::Unchecked;
 
 	fceuWrapperLock();
 
 	if (checked)
 	{
-		cheat_search_gt_value = strtol( grValEntry->text().toStdString().c_str(), NULL, 16 );
+		value = strtol( grValEntry->text().toStdString().c_str(), NULL, 16 );
 
-		FCEUI_CheatSearchEnd (FCEU_SEARCH_NEWVAL_GT_KNOWN, 0, cheat_search_gt_value);
+		FCEUI_CheatSearchEnd (FCEU_SEARCH_NEWVAL_GT_KNOWN, 0, value);
 	}
 	else
 	{
@@ -506,15 +506,16 @@ void GuiCheatsDialog_t::greaterThanValueCallback(void)
 void GuiCheatsDialog_t::lessThanValueCallback(void)
 {
 	//printf("Cheat Search Less Than!\n");
+	int value;
 	int checked = useLtVal->checkState() != Qt::Unchecked;
 
 	fceuWrapperLock();
 
 	if (checked)
 	{
-		cheat_search_lt_value = strtol( ltValEntry->text().toStdString().c_str(), NULL, 16 );
+		value = strtol( ltValEntry->text().toStdString().c_str(), NULL, 16 );
 
-		FCEUI_CheatSearchEnd (FCEU_SEARCH_NEWVAL_LT_KNOWN, 0, cheat_search_lt_value);
+		FCEUI_CheatSearchEnd (FCEU_SEARCH_NEWVAL_LT_KNOWN, 0, value);
 	}
 	else
 	{

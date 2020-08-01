@@ -62,10 +62,6 @@ class GuiCheatsDialog_t : public QDialog
 		QFont        font;
 
 		int fontCharWidth;
-		int cheat_search_known_value;
-		int cheat_search_neq_value;
-		int cheat_search_gt_value;
-		int cheat_search_lt_value;
 
 	private:
 		void showCheatSearchResults(void);
