@@ -59,8 +59,13 @@ class GuiCheatsDialog_t : public QDialog
 		QLineEdit   *neValEntry;
 		QLineEdit   *grValEntry;
 		QLineEdit   *ltValEntry;
+		QFont        font;
 
+		int fontCharWidth;
 		int cheat_search_known_value;
+		int cheat_search_neq_value;
+		int cheat_search_gt_value;
+		int cheat_search_lt_value;
 
 	private:
 		void showCheatSearchResults(void);
@@ -70,5 +75,9 @@ class GuiCheatsDialog_t : public QDialog
 	private slots:
       void resetSearchCallback(void);
       void knownValueCallback(void);
+      void equalValueCallback(void);
+      void notEqualValueCallback(void);
+      void lessThanValueCallback(void);
+      void greaterThanValueCallback(void);
 
 };

@@ -32,10 +32,13 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	QLabel *lbl;
 	QGroupBox *groupBox;
 	QFrame *frame;
-	QFont font;
 
 	font.setStyle( QFont::StyleNormal );
 	font.setStyleHint( QFont::Monospace );
+
+	QFontMetrics fm(font);
+
+	fontCharWidth = fm.boundingRect('0').width();
 
 	setWindowTitle("Cheat Search");
 
@@ -107,7 +110,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	cheatAddrEntry->setInputMask( ">HHHH;0" );
 	cheatAddrEntry->setFont( font );
 	cheatAddrEntry->setCursorPosition(0);
-	cheatAddrEntry->setMaximumWidth( 5 * cheatAddrEntry->fontMetrics().boundingRect('0').width() );
+	cheatAddrEntry->setMaximumWidth( 5 * fontCharWidth );
 
 	hbox->addWidget( lbl );
 	hbox->addWidget( cheatAddrEntry );
@@ -118,7 +121,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	cheatValEntry->setInputMask( ">HH;0" );
 	cheatValEntry->setFont( font );
 	cheatValEntry->setCursorPosition(0);
-	cheatValEntry->setMaximumWidth( 3 * cheatValEntry->fontMetrics().boundingRect('0').width() );
+	cheatValEntry->setMaximumWidth( 3 * fontCharWidth );
 
 	hbox->addWidget( lbl );
 	hbox->addWidget( cheatValEntry );
@@ -129,7 +132,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	cheatCmpEntry->setInputMask( ">HH;X" );
 	cheatCmpEntry->setFont( font );
 	cheatCmpEntry->setCursorPosition(0);
-	cheatCmpEntry->setMaximumWidth( 3 * cheatCmpEntry->fontMetrics().boundingRect('0').width() );
+	cheatCmpEntry->setMaximumWidth( 3 * fontCharWidth );
 
 	hbox->addWidget( lbl );
 	hbox->addWidget( cheatCmpEntry );
@@ -184,7 +187,11 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	//srchResults->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
 	srchResults->header()->setSectionResizeMode( QHeaderView::Interactive );
 	//srchResults->header()->setSectionResizeMode( QHeaderView::Fixed );
+	srchResults->header()->resizeSection( 0, 10 * fontCharWidth );
+	srchResults->header()->resizeSection( 1,  6 * fontCharWidth );
+	srchResults->header()->resizeSection( 2,  6 * fontCharWidth );
 	//srchResults->header()->setSectionResizeMode( QHeaderView::Stretch );
+	//srchResults->header()->setDefaultSectionSize( 200 );
 	//srchResults->header()->setDefaultSectionSize( 200 );
 	//srchResults->setReadOnly(true);
 
@@ -230,7 +237,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	knownValEntry->setFont( font );
 	knownValEntry->setCursorPosition(0);
 	knownValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
-	knownValEntry->setMaximumWidth( 3 * knownValEntry->fontMetrics().boundingRect('0').width() );
+	knownValEntry->setMaximumWidth( 3 * fontCharWidth );
 	hbox1->addWidget( lbl, 0, Qt::AlignRight );
 	hbox1->addWidget( knownValEntry, 0, Qt::AlignLeft );
 
@@ -270,7 +277,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	neValEntry->setFont( font );
 	neValEntry->setCursorPosition(0);
 	neValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
-	neValEntry->setMaximumWidth( 3 * neValEntry->fontMetrics().boundingRect('0').width() );
+	neValEntry->setMaximumWidth( 3 * fontCharWidth );
 
 	hbox->addWidget( useNeVal, 0, Qt::AlignRight );
 	hbox->addWidget( neValEntry, 0, Qt::AlignLeft );
@@ -297,7 +304,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	grValEntry->setFont( font );
 	grValEntry->setCursorPosition(0);
 	grValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
-	grValEntry->setMaximumWidth( 3 * grValEntry->fontMetrics().boundingRect('0').width() );
+	grValEntry->setMaximumWidth( 3 * fontCharWidth );
 
 	hbox->addWidget( useGrVal, 0, Qt::AlignRight );
 	hbox->addWidget( grValEntry, 0, Qt::AlignLeft );
@@ -324,7 +331,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	ltValEntry->setFont( font );
 	ltValEntry->setCursorPosition(0);
 	ltValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
-	ltValEntry->setMaximumWidth( 3 * ltValEntry->fontMetrics().boundingRect('0').width() );
+	ltValEntry->setMaximumWidth( 3 * fontCharWidth );
 
 	hbox->addWidget( useLtVal, 0, Qt::AlignRight );
 	hbox->addWidget( ltValEntry, 0, Qt::AlignLeft );
@@ -341,6 +348,10 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	connect( srchResetBtn, SIGNAL(clicked(void)), this, SLOT(resetSearchCallback(void)) );
 	connect( knownValBtn , SIGNAL(clicked(void)), this, SLOT(knownValueCallback(void)) );
+	connect( eqValBtn    , SIGNAL(clicked(void)), this, SLOT(equalValueCallback(void)) );
+	connect( neValBtn    , SIGNAL(clicked(void)), this, SLOT(notEqualValueCallback(void)) );
+	connect( ltValBtn    , SIGNAL(clicked(void)), this, SLOT(lessThanValueCallback(void)) );
+	connect( grValBtn    , SIGNAL(clicked(void)), this, SLOT(greaterThanValueCallback(void)) );
 
 	cheat_search_known_value = 0;
 
@@ -367,6 +378,10 @@ int GuiCheatsDialog_t::addSearchResult (uint32_t a, uint8_t last, uint8_t curren
 	sprintf (addrStr, "$%04X", a);
 	sprintf (lastStr, "%02X", last);
 	sprintf (curStr , "%02X", current);
+
+	//item->setFont( 0, font );
+	//item->setFont( 1, font );
+	//item->setFont( 2, font );
 
 	item->setText( 0, tr(addrStr) );
 	item->setText( 1, tr(lastStr) );
@@ -424,6 +439,87 @@ void GuiCheatsDialog_t::knownValueCallback(void)
 
 	FCEUI_CheatSearchEnd (FCEU_SEARCH_NEWVAL_KNOWN,
 			      cheat_search_known_value, 0);
+
+	showCheatSearchResults();
+
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::equalValueCallback(void)
+{
+	//printf("Cheat Search Equal!\n");
+	fceuWrapperLock();
+
+	FCEUI_CheatSearchEnd (FCEU_SEARCH_PUERLY_RELATIVE_CHANGE, 0, 0);
+
+	showCheatSearchResults();
+
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::notEqualValueCallback(void)
+{
+	//printf("Cheat Search Not Equal!\n");
+	int checked = useNeVal->checkState() != Qt::Unchecked;
+
+	fceuWrapperLock();
+
+	if (checked)
+	{
+		cheat_search_neq_value = strtol( neValEntry->text().toStdString().c_str(), NULL, 16 );
+
+		FCEUI_CheatSearchEnd (FCEU_SEARCH_PUERLY_RELATIVE_CHANGE, 0, cheat_search_neq_value);
+	}
+	else
+	{
+		FCEUI_CheatSearchEnd (FCEU_SEARCH_ANY_CHANGE, 0, 0);
+	}
+
+	showCheatSearchResults();
+
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::greaterThanValueCallback(void)
+{
+	//printf("Cheat Search Greater Than!\n");
+	int checked = useGrVal->checkState() != Qt::Unchecked;
+
+	fceuWrapperLock();
+
+	if (checked)
+	{
+		cheat_search_gt_value = strtol( grValEntry->text().toStdString().c_str(), NULL, 16 );
+
+		FCEUI_CheatSearchEnd (FCEU_SEARCH_NEWVAL_GT_KNOWN, 0, cheat_search_gt_value);
+	}
+	else
+	{
+		FCEUI_CheatSearchEnd (FCEU_SEARCH_NEWVAL_GT, 0, 0);
+	}
+
+	showCheatSearchResults();
+
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::lessThanValueCallback(void)
+{
+	//printf("Cheat Search Less Than!\n");
+	int checked = useLtVal->checkState() != Qt::Unchecked;
+
+	fceuWrapperLock();
+
+	if (checked)
+	{
+		cheat_search_lt_value = strtol( ltValEntry->text().toStdString().c_str(), NULL, 16 );
+
+		FCEUI_CheatSearchEnd (FCEU_SEARCH_NEWVAL_LT_KNOWN, 0, cheat_search_lt_value);
+	}
+	else
+	{
+		FCEUI_CheatSearchEnd (FCEU_SEARCH_NEWVAL_LT, 0, 0);
+	}
 
 	showCheatSearchResults();
 
