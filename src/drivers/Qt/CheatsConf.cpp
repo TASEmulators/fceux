@@ -83,6 +83,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	lbl = new QLabel( tr("Name:") );
 	cheatNameEntry = new QLineEdit();
 	cheatNameEntry->setFont( font );
+	//cheatNameEntry->setMaxLength(64);
 
 	hbox->addWidget( lbl );
 	hbox->addWidget( cheatNameEntry );
@@ -339,6 +340,9 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	connect( neValBtn    , SIGNAL(clicked(void)), this, SLOT(notEqualValueCallback(void)) );
 	connect( ltValBtn    , SIGNAL(clicked(void)), this, SLOT(lessThanValueCallback(void)) );
 	connect( grValBtn    , SIGNAL(clicked(void)), this, SLOT(greaterThanValueCallback(void)) );
+	connect( addCheatBtn , SIGNAL(clicked(void)), this, SLOT(addActvCheat(void)) );
+	connect( delCheatBtn , SIGNAL(clicked(void)), this, SLOT(deleteActvCheat(void)) );
+	connect( modCheatBtn , SIGNAL(clicked(void)), this, SLOT(updateCheatParameters(void)) );
 
 	connect( importCheatFileBtn, SIGNAL(clicked(void)), this, SLOT(openCheatFile(void)) );
 
@@ -642,15 +646,114 @@ void GuiCheatsDialog_t::openCheatFile(void)
    return;
 }
 //----------------------------------------------------------------------------
+void  GuiCheatsDialog_t::addActvCheat(void)
+{
+	// TODO
+}
+//----------------------------------------------------------------------------
+void  GuiCheatsDialog_t::deleteActvCheat(void)
+{
+	// TODO
+}
+//----------------------------------------------------------------------------
+void  GuiCheatsDialog_t::updateCheatParameters(void)
+{
+	uint32 a = 0;
+	uint8 v = 0;
+	int c = -1, s = 0, type = 0;
+	std::string name, cmpStr;
+	QTreeWidgetItem *item;
+
+	item = actvCheatList->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+
+	int row = actvCheatList->indexOfTopLevelItem(item);
+
+	if ( FCEUI_GetCheat( row, NULL, &a, &v, &c, &s, &type) == 0 )
+	{
+		return;
+	}
+	//printf("Row: %i \n", row );
+
+	a = strtoul( cheatAddrEntry->text().toStdString().c_str(), NULL, 16 );
+
+	v = strtoul( cheatValEntry->text().toStdString().c_str(), NULL, 16 );
+
+	cmpStr = cheatCmpEntry->text().toStdString();
+
+	if ( isdigit( cmpStr[0] ) )
+	{
+		c = strtoul( cmpStr.c_str(), NULL, 16 );
+	}
+	else
+	{
+		c = -1;
+	}
+
+	name = cheatNameEntry->text().toStdString();
+
+	//printf("Name: %s \n", name.c_str() );
+
+	FCEUI_SetCheat( row, name.c_str(), a, v, c, s, type);
+
+	showActiveCheatList(false);
+}
+//----------------------------------------------------------------------------
 void 	GuiCheatsDialog_t::actvCheatItemClicked( QTreeWidgetItem *item, int column)
 {
+	uint32 a = 0;
+	uint8 v = 0;
+	int c = -1, s = 0, type = 0;
+	char *name = NULL;
+	char stmp[64];
+
 	int row = actvCheatList->indexOfTopLevelItem(item);
 
 	printf("Row: %i Column: %i \n", row, column );
 
+	if ( FCEUI_GetCheat( row, &name, &a, &v, &c, &s, &type) == 0 )
+	{
+		return;
+	}
+
 	if ( column == 0 )
 	{
-		FCEUI_ToggleCheat( row );
+		int isChecked = item->checkState( column ) != Qt::Unchecked;
+
+		if ( isChecked != s )
+		{
+			//printf("Toggle Cheat: %i\n", isChecked);
+			FCEUI_ToggleCheat( row );
+		}
+	}
+	sprintf( stmp, "%04X", a );
+	cheatAddrEntry->setText( tr(stmp) );
+
+	sprintf( stmp, "%02X", v );
+	cheatValEntry->setText( tr(stmp) );
+
+	if ( c >= 0 )
+	{
+		sprintf( stmp, "%02X", c );
+		cheatCmpEntry->setText( tr(stmp) );
+	}
+	else
+	{
+		cheatCmpEntry->setText( tr("") );
+	}
+
+	if ( name != NULL )
+	{
+		cheatNameEntry->setText( tr(name) );
+	}
+	else
+	{
+		cheatNameEntry->setText( tr("") );
 	}
 }
 //----------------------------------------------------------------------------

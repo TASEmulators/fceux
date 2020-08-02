@@ -81,6 +81,9 @@ class GuiCheatsDialog_t : public QDialog
       void lessThanValueCallback(void);
       void greaterThanValueCallback(void);
 		void openCheatFile(void);
+		void addActvCheat(void);
+		void deleteActvCheat(void);
+		void updateCheatParameters(void);
 		void actvCheatItemClicked( QTreeWidgetItem *item, int column);
 
 };
