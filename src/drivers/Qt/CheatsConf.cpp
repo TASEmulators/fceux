@@ -221,6 +221,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	knownValBtn  = new QPushButton( tr("Known Value:") );
 	knownValBtn->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	knownValBtn->setEnabled(false);
 
 	vbox->addWidget( knownValBtn  );
 
@@ -236,6 +237,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	knownValEntry->setCursorPosition(0);
 	knownValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	knownValEntry->setMaximumWidth( 3 * fontCharWidth );
+	knownValEntry->setEnabled(false);
 	hbox1->addWidget( lbl, 0, Qt::AlignRight );
 	hbox1->addWidget( knownValEntry, 0, Qt::AlignLeft );
 
@@ -253,6 +255,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	eqValBtn = new QPushButton( tr("Equal") );
 	eqValBtn->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	eqValBtn->setEnabled(false);
 	vbox->addWidget( eqValBtn );
 
 	frame->setLayout( vbox );
@@ -265,10 +268,12 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	neValBtn = new QPushButton( tr("Not Equal") );
 	neValBtn->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	neValBtn->setEnabled(false);
 
 	hbox = new QHBoxLayout();
 	useNeVal = new QCheckBox( tr("By:") );
 	useNeVal->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	useNeVal->setEnabled(false);
 	neValEntry = new QLineEdit();
 	neValEntry->setMaxLength(2);
 	neValEntry->setInputMask( ">HH;0" );
@@ -276,6 +281,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	neValEntry->setCursorPosition(0);
 	neValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	neValEntry->setMaximumWidth( 3 * fontCharWidth );
+	neValEntry->setEnabled(false);
 
 	hbox->addWidget( useNeVal, 0, Qt::AlignRight );
 	hbox->addWidget( neValEntry, 0, Qt::AlignLeft );
@@ -292,10 +298,12 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	grValBtn = new QPushButton( tr("Greater Than") );
 	grValBtn->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	grValBtn->setEnabled(false);
 
 	hbox = new QHBoxLayout();
 	useGrVal = new QCheckBox( tr("By:") );
 	useGrVal->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	useGrVal->setEnabled(false);
 	grValEntry = new QLineEdit();
 	grValEntry->setMaxLength(2);
 	grValEntry->setInputMask( ">HH;0" );
@@ -303,6 +311,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	grValEntry->setCursorPosition(0);
 	grValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	grValEntry->setMaximumWidth( 3 * fontCharWidth );
+	grValEntry->setEnabled(false);
 
 	hbox->addWidget( useGrVal, 0, Qt::AlignRight );
 	hbox->addWidget( grValEntry, 0, Qt::AlignLeft );
@@ -319,10 +328,12 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	ltValBtn = new QPushButton( tr("Less Than") );
 	ltValBtn->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	ltValBtn->setEnabled(false);
 
 	hbox = new QHBoxLayout();
 	useLtVal = new QCheckBox( tr("By:") );
 	useLtVal->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	useLtVal->setEnabled(false);
 	ltValEntry = new QLineEdit();
 	ltValEntry->setMaxLength(2);
 	ltValEntry->setInputMask( ">HH;0" );
@@ -330,6 +341,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	ltValEntry->setCursorPosition(0);
 	ltValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	ltValEntry->setMaximumWidth( 3 * fontCharWidth );
+	ltValEntry->setEnabled(false);
 
 	hbox->addWidget( useLtVal, 0, Qt::AlignRight );
 	hbox->addWidget( ltValEntry, 0, Qt::AlignLeft );
@@ -428,6 +440,21 @@ void GuiCheatsDialog_t::resetSearchCallback(void)
 	showCheatSearchResults();
 
 	fceuWrapperUnLock();
+
+	knownValBtn->setEnabled(true);
+	eqValBtn->setEnabled(true);
+	neValBtn->setEnabled(true);
+	grValBtn->setEnabled(true);
+	ltValBtn->setEnabled(true);
+
+	useNeVal->setEnabled(true);
+	useGrVal->setEnabled(true);
+	useLtVal->setEnabled(true);
+
+	knownValEntry->setEnabled(true);
+	neValEntry->setEnabled(true);
+	grValEntry->setEnabled(true);
+	ltValEntry->setEnabled(true);
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::knownValueCallback(void)
@@ -702,6 +729,11 @@ void  GuiCheatsDialog_t::deleteActvCheat(void)
 	FCEUI_DelCheat (row);
 
 	showActiveCheatList(true);
+
+	cheatNameEntry->setText( tr("") );
+	cheatAddrEntry->setText( tr("") );
+	cheatValEntry->setText( tr("") );
+	cheatCmpEntry->setText( tr("") );
 }
 //----------------------------------------------------------------------------
 void  GuiCheatsDialog_t::updateCheatParameters(void)
