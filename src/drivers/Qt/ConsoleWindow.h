@@ -52,6 +52,7 @@ class  consoleWin_t : public QMainWindow
 	 QMenu *fileMenu;
     QMenu *optMenu;
     QMenu *emuMenu;
+    QMenu *toolsMenu;
     QMenu *movieMenu;
     QMenu *helpMenu;
 
@@ -86,6 +87,7 @@ class  consoleWin_t : public QMainWindow
 	 QAction *fdsSwitchAct;
 	 QAction *fdsEjectAct;
 	 QAction *fdsLoadBiosAct;
+	 QAction *cheatsAct;
 	 QAction *openMovAct;
 	 QAction *stopMovAct;
 	 QAction *recMovAct;
@@ -152,6 +154,7 @@ class  consoleWin_t : public QMainWindow
 		void fdsSwitchDisk(void);
 		void fdsEjectDisk(void);
 		void fdsLoadBiosFile(void);
+		void openCheats(void);
 		void openMovie(void);
 		void stopMovie(void);
 		void recordMovie(void);
