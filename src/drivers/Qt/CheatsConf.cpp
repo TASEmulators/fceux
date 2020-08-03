@@ -86,6 +86,19 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	connect( actvCheatList, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
 			   this, SLOT(actvCheatItemClicked( QTreeWidgetItem*, int)) );
 
+	hbox = new QHBoxLayout();
+
+	enaCheats = new QCheckBox( tr("Enable Cheats") );
+	autoSave  = new QCheckBox( tr("Auto Load / Save with Game") );
+
+	enaCheats->setChecked( !globalCheatDisabled );
+	autoSave->setChecked( !disableAutoLSCheats );
+
+	hbox->addWidget( enaCheats );
+	hbox->addWidget( autoSave  );
+
+	vbox1->addLayout( hbox );
+
 	vbox1->addWidget( actvCheatList );
 
 	hbox = new QHBoxLayout();
@@ -365,6 +378,9 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	connect( addCheatBtn , SIGNAL(clicked(void)), this, SLOT(addActvCheat(void)) );
 	connect( delCheatBtn , SIGNAL(clicked(void)), this, SLOT(deleteActvCheat(void)) );
 	connect( modCheatBtn , SIGNAL(clicked(void)), this, SLOT(updateCheatParameters(void)) );
+
+	connect( enaCheats, SIGNAL(stateChanged(int)), this, SLOT(globalEnableCheats(int)) );
+	connect( autoSave , SIGNAL(stateChanged(int)), this, SLOT(autoLoadSaveCheats(int)) );
 
 	connect( importCheatFileBtn, SIGNAL(clicked(void)), this, SLOT(openCheatFile(void)) );
 
@@ -842,6 +858,26 @@ void 	GuiCheatsDialog_t::actvCheatItemClicked( QTreeWidgetItem *item, int column
 	else
 	{
 		cheatNameEntry->setText( tr("") );
+	}
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::globalEnableCheats(int state)
+{
+	fceuWrapperLock();
+	FCEUI_GlobalToggleCheat( state != Qt::Unchecked );
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::autoLoadSaveCheats(int state)
+{
+	if ( state == Qt::Unchecked )
+	{
+		printf("If this option is unchecked, you must manually save the cheats by yourself, or all the changes you made to the cheat list would be discarded silently without any asking once you close the game!\nDo you really want to do it in this way?");
+		disableAutoLSCheats = 2;
+	}
+	else
+	{
+		disableAutoLSCheats = 0;
 	}
 }
 //----------------------------------------------------------------------------

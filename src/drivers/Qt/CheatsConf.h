@@ -51,6 +51,8 @@ class GuiCheatsDialog_t : public QDialog
 		QCheckBox   *useNeVal;
 		QCheckBox   *useGrVal;
 		QCheckBox   *useLtVal;
+		QCheckBox   *enaCheats;
+		QCheckBox   *autoSave;
 		QTreeWidget *actvCheatList;
 		QTreeWidget *srchResults;
 		QLineEdit   *cheatNameEntry;
@@ -84,6 +86,8 @@ class GuiCheatsDialog_t : public QDialog
 		void addActvCheat(void);
 		void deleteActvCheat(void);
 		void updateCheatParameters(void);
+		void autoLoadSaveCheats(int state);
+		void globalEnableCheats(int state);
 		void actvCheatItemClicked( QTreeWidgetItem *item, int column);
 
 };
