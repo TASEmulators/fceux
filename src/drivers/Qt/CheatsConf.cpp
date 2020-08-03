@@ -783,7 +783,11 @@ void  GuiCheatsDialog_t::updateCheatParameters(void)
 
 	//printf("Name: %s \n", name.c_str() );
 
+	fceuWrapperLock();
+
 	FCEUI_SetCheat( row, name.c_str(), a, v, c, s, type);
+
+	fceuWrapperUnLock();
 
 	showActiveCheatList(false);
 }
