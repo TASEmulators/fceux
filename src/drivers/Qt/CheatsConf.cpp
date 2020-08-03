@@ -707,7 +707,9 @@ void  GuiCheatsDialog_t::addActvCheat(void)
 
 	name = cheatNameEntry->text().toStdString();
 
+	fceuWrapperLock();
 	FCEUI_AddCheat( name.c_str(), a, v, c, 1 );
+	fceuWrapperUnLock();
 
 	showActiveCheatList(true);
 }
@@ -726,7 +728,9 @@ void  GuiCheatsDialog_t::deleteActvCheat(void)
 
 	int row = actvCheatList->indexOfTopLevelItem(item);
 
+	fceuWrapperLock();
 	FCEUI_DelCheat (row);
+	fceuWrapperUnLock();
 
 	showActiveCheatList(true);
 
