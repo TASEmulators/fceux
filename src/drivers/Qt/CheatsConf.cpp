@@ -54,6 +54,9 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	setWindowTitle("Cheat Search");
 
+	pauseWhileActive  = false;
+	wasPausedByCheats = false;
+
 	//resize( 512, 512 );
 
 	// Window Layout Box
@@ -365,7 +368,14 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	groupBox->setLayout( vbox3 );
 
-	mainLayout->addWidget( cheatSearchFrame );
+	vbox = new QVBoxLayout();
+
+	pauseBox = new QCheckBox( tr("Pause emulation when this window is active") );
+
+	vbox->addWidget( cheatSearchFrame );
+	vbox->addWidget( pauseBox         );
+
+	mainLayout->addLayout( vbox );
 
 	setLayout( mainLayout );
 
@@ -381,6 +391,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	connect( enaCheats, SIGNAL(stateChanged(int)), this, SLOT(globalEnableCheats(int)) );
 	connect( autoSave , SIGNAL(stateChanged(int)), this, SLOT(autoLoadSaveCheats(int)) );
+	connect( pauseBox , SIGNAL(stateChanged(int)), this, SLOT(pauseWindowState(int)) );
 
 	connect( importCheatFileBtn, SIGNAL(clicked(void)), this, SLOT(openCheatFile(void)) );
 
@@ -389,6 +400,12 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 //----------------------------------------------------------------------------
 GuiCheatsDialog_t::~GuiCheatsDialog_t(void)
 {
+	if (EmulationPaused && wasPausedByCheats)
+	{
+		EmulationPaused = 0;
+		FCEU_printf ("Emulation paused: %d\n", EmulationPaused);
+	}
+	wasPausedByCheats = false;
 
 }
 //----------------------------------------------------------------------------
@@ -879,5 +896,28 @@ void GuiCheatsDialog_t::autoLoadSaveCheats(int state)
 	{
 		disableAutoLSCheats = 0;
 	}
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::pauseWindowState(int state)
+{
+	pauseWhileActive = (state != Qt::Unchecked);
+
+	if (pauseWhileActive)
+	{
+		if (EmulationPaused == 0)
+		{
+			EmulationPaused = 1;
+			wasPausedByCheats = true;
+		}
+	}
+	else
+	{
+		if (EmulationPaused && wasPausedByCheats)
+		{
+			EmulationPaused = 0;
+		}
+		wasPausedByCheats = false;
+	}
+	FCEU_printf ("Emulation paused: %d\n", EmulationPaused);
 }
 //----------------------------------------------------------------------------

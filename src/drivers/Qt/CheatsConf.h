@@ -53,6 +53,7 @@ class GuiCheatsDialog_t : public QDialog
 		QCheckBox   *useLtVal;
 		QCheckBox   *enaCheats;
 		QCheckBox   *autoSave;
+		QCheckBox   *pauseBox;
 		QTreeWidget *actvCheatList;
 		QTreeWidget *srchResults;
 		QLineEdit   *cheatNameEntry;
@@ -68,6 +69,8 @@ class GuiCheatsDialog_t : public QDialog
 		int  fontCharWidth;
 		int  actvCheatIdx;
 		bool actvCheatRedraw;
+		bool pauseWhileActive;
+		bool wasPausedByCheats;
 
 	private:
 		void showCheatSearchResults(void);
@@ -88,6 +91,7 @@ class GuiCheatsDialog_t : public QDialog
 		void updateCheatParameters(void);
 		void autoLoadSaveCheats(int state);
 		void globalEnableCheats(int state);
+		void pauseWindowState(int state);
 		void actvCheatItemClicked( QTreeWidgetItem *item, int column);
 
 };
