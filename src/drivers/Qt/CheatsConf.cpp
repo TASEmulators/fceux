@@ -8,6 +8,8 @@
 #include <SDL.h>
 #include <QHeaderView>
 #include <QFileDialog>
+#include <QScreen>
+#include <QGuiApplication>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -34,13 +36,21 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	QLabel *lbl;
 	QGroupBox *groupBox;
 	QFrame *frame;
+	QScreen *screen = QGuiApplication::primaryScreen();
+	int devPixRatio = 1;
+
+	if ( screen != NULL )
+   {
+		devPixRatio = (int)( screen->devicePixelRatio() + 0.50f);
+    	printf("Pix Ratio: %i \n", devPixRatio );
+	}
 
 	font.setStyle( QFont::StyleNormal );
 	font.setStyleHint( QFont::Monospace );
 
 	QFontMetrics fm(font);
 
-	fontCharWidth = fm.boundingRect('0').width();
+	fontCharWidth = fm.boundingRect('0').width() * devPixRatio;
 
 	setWindowTitle("Cheat Search");
 
@@ -648,12 +658,50 @@ void GuiCheatsDialog_t::openCheatFile(void)
 //----------------------------------------------------------------------------
 void  GuiCheatsDialog_t::addActvCheat(void)
 {
-	// TODO
+	uint32 a = 0;
+	uint8 v = 0;
+	int c = -1;
+	std::string name, cmpStr;
+
+	a = strtoul( cheatAddrEntry->text().toStdString().c_str(), NULL, 16 );
+
+	v = strtoul( cheatValEntry->text().toStdString().c_str(), NULL, 16 );
+
+	cmpStr = cheatCmpEntry->text().toStdString();
+
+	if ( isdigit( cmpStr[0] ) )
+	{
+		c = strtoul( cmpStr.c_str(), NULL, 16 );
+	}
+	else
+	{
+		c = -1;
+	}
+
+	name = cheatNameEntry->text().toStdString();
+
+	FCEUI_AddCheat( name.c_str(), a, v, c, 1 );
+
+	showActiveCheatList(true);
 }
 //----------------------------------------------------------------------------
 void  GuiCheatsDialog_t::deleteActvCheat(void)
 {
-	// TODO
+	QTreeWidgetItem *item;
+
+	item = actvCheatList->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+
+	int row = actvCheatList->indexOfTopLevelItem(item);
+
+	FCEUI_DelCheat (row);
+
+	showActiveCheatList(true);
 }
 //----------------------------------------------------------------------------
 void  GuiCheatsDialog_t::updateCheatParameters(void)
@@ -714,7 +762,7 @@ void 	GuiCheatsDialog_t::actvCheatItemClicked( QTreeWidgetItem *item, int column
 
 	int row = actvCheatList->indexOfTopLevelItem(item);
 
-	printf("Row: %i Column: %i \n", row, column );
+	//printf("Row: %i Column: %i \n", row, column );
 
 	if ( FCEUI_GetCheat( row, &name, &a, &v, &c, &s, &type) == 0 )
 	{
