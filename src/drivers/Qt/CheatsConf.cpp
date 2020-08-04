@@ -37,12 +37,12 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	QGroupBox *groupBox;
 	QFrame *frame;
 	QScreen *screen = QGuiApplication::primaryScreen();
-	int devPixRatio = 1;
+	double devPixRatio = 1.0f;
 
 	if ( screen != NULL )
    {
 		devPixRatio = (int)( screen->devicePixelRatio() + 0.50f);
-    	printf("Pix Ratio: %i \n", devPixRatio );
+    	printf("Pix Ratio: %f \n", devPixRatio );
 	}
 
 	font.setStyle( QFont::StyleNormal );
@@ -50,7 +50,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	QFontMetrics fm(font);
 
-	fontCharWidth = fm.boundingRect('0').width() * devPixRatio;
+	fontCharWidth = fm.boundingRect('X').width() * devPixRatio;
 
 	setWindowTitle("Cheat Search");
 
