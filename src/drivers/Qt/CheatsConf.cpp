@@ -401,6 +401,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	connect( pauseBox , SIGNAL(stateChanged(int)), this, SLOT(pauseWindowState(int)) );
 
 	connect( importCheatFileBtn, SIGNAL(clicked(void)), this, SLOT(openCheatFile(void)) );
+	connect( exportCheatFileBtn, SIGNAL(clicked(void)), this, SLOT(saveCheatFile(void)) );
 
 	showActiveCheatList(true);
 }
@@ -714,6 +715,93 @@ void GuiCheatsDialog_t::openCheatFile(void)
 	if (fp != NULL)
 	{
 		FCEU_LoadGameCheats (fp, 0);
+		fclose (fp);
+	}
+	fceuWrapperUnLock();
+
+	showActiveCheatList(true);
+
+   return;
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::saveCheatFile(void)
+{
+	FILE *fp;
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	char dir[512];
+	QFileDialog  dialog(this, tr("Save Cheat File") );
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("Cheat files (*.cht *.CHT) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+
+	if ( GameInfo )
+	{
+		char *_filename;
+		if ((_filename = strrchr(GameInfo->filename, '\\')) || (_filename = strrchr(GameInfo->filename, '/')))
+		{
+			strcpy( dir, _filename + 1);
+		}
+		else
+		{
+			strcpy( dir, GameInfo->filename);
+		}
+
+		_filename = strrchr( dir, '.');
+		if (_filename)
+		{
+			strcpy(_filename, ".cht");
+		}
+		else
+		{
+			strcat( dir, ".cht");
+		}
+		dialog.selectFile( dir );
+	}
+
+	sprintf( dir, "%s/cheats", FCEUI_GetBaseDirectory() );
+
+	dialog.setDirectory( tr(dir) );
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+   if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	//g_config->setOption ("SDL.LastOpenFile", filename.toStdString().c_str() );
+
+	fceuWrapperLock();
+
+	fp = FCEUD_UTF8fopen (filename.toStdString().c_str(), "wb");
+
+	if (fp != NULL)
+	{
+		FCEU_SaveGameCheats (fp);
 		fclose (fp);
 	}
 	fceuWrapperUnLock();
