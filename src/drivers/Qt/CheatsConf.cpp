@@ -124,6 +124,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	cheatAddrEntry->setInputMask( ">HHHH;0" );
 	cheatAddrEntry->setFont( font );
 	cheatAddrEntry->setCursorPosition(0);
+	cheatAddrEntry->setAlignment(Qt::AlignCenter);
 	cheatAddrEntry->setMaximumWidth( 5 * fontCharWidth );
 
 	hbox->addWidget( lbl );
@@ -135,6 +136,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	cheatValEntry->setInputMask( ">HH;0" );
 	cheatValEntry->setFont( font );
 	cheatValEntry->setCursorPosition(0);
+	cheatValEntry->setAlignment(Qt::AlignCenter);
 	cheatValEntry->setMaximumWidth( 3 * fontCharWidth );
 
 	hbox->addWidget( lbl );
@@ -146,6 +148,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	cheatCmpEntry->setInputMask( ">HH;X" );
 	cheatCmpEntry->setFont( font );
 	cheatCmpEntry->setCursorPosition(0);
+	cheatCmpEntry->setAlignment(Qt::AlignCenter);
 	cheatCmpEntry->setMaximumWidth( 3 * fontCharWidth );
 
 	hbox->addWidget( lbl );
@@ -253,6 +256,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	knownValEntry->setCursorPosition(0);
 	knownValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	knownValEntry->setMaximumWidth( 3 * fontCharWidth );
+	knownValEntry->setAlignment(Qt::AlignCenter);
 	knownValEntry->setEnabled(false);
 	hbox1->addWidget( lbl, 0, Qt::AlignRight );
 	hbox1->addWidget( knownValEntry, 0, Qt::AlignLeft );
@@ -297,6 +301,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	neValEntry->setCursorPosition(0);
 	neValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	neValEntry->setMaximumWidth( 3 * fontCharWidth );
+	neValEntry->setAlignment(Qt::AlignCenter);
 	neValEntry->setEnabled(false);
 
 	hbox->addWidget( useNeVal, 0, Qt::AlignRight );
@@ -327,6 +332,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	grValEntry->setCursorPosition(0);
 	grValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	grValEntry->setMaximumWidth( 3 * fontCharWidth );
+	grValEntry->setAlignment(Qt::AlignCenter);
 	grValEntry->setEnabled(false);
 
 	hbox->addWidget( useGrVal, 0, Qt::AlignRight );
@@ -357,6 +363,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	ltValEntry->setCursorPosition(0);
 	ltValEntry->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	ltValEntry->setMaximumWidth( 3 * fontCharWidth );
+	ltValEntry->setAlignment(Qt::AlignCenter);
 	ltValEntry->setEnabled(false);
 
 	hbox->addWidget( useLtVal, 0, Qt::AlignRight );
