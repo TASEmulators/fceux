@@ -86,6 +86,7 @@ class GuiCheatsDialog_t : public QDialog
       void lessThanValueCallback(void);
       void greaterThanValueCallback(void);
 		void openCheatFile(void);
+		void saveCheatFile(void);
 		void addActvCheat(void);
 		void deleteActvCheat(void);
 		void updateCheatParameters(void);
