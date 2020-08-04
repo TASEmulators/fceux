@@ -42,7 +42,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	if ( screen != NULL )
    {
 		devPixRatio = (int)( screen->devicePixelRatio() + 0.50f);
-    	printf("Pix Ratio: %f \n", devPixRatio );
+    	//printf("Pix Ratio: %f \n", devPixRatio );
 	}
 
 	font.setStyle( QFont::StyleNormal );
