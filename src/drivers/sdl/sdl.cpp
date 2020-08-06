@@ -57,6 +57,7 @@ extern bool MaxSpeed;
 int isloaded;
 
 bool turbo = false;
+bool gtk_gui_run = true;
 
 int closeFinishedMovie = 0;
 
@@ -910,7 +911,7 @@ int main(int argc, char *argv[])
 #ifdef _GTK
 	if(noGui == 0)
 	{
-		while(1)
+		while ( gtk_gui_run )
 		{
 			if(GameInfo)
 			{
@@ -926,6 +927,7 @@ int main(int argc, char *argv[])
 				gtk_main_iteration_do(FALSE);
 			}
 		}
+		printf("Exiting GUI Main Loop...\n");
 	}
 	else
 	{
@@ -938,11 +940,20 @@ int main(int argc, char *argv[])
 		DoFun(frameskip, periodic_saves);
 	}
 #endif
+	printf("Closing Game...\n");
 	CloseGame();
 
+	printf("Exiting Infrastructure...\n");
 	// exit the infrastructure
 	FCEUI_Kill();
 	SDL_Quit();
+
+	// LoadGame() checks for an IP and if it finds one begins a network session
+	// clear the NetworkIP field so this doesn't happen unintentionally
+	g_config->setOption ("SDL.NetworkIP", "");
+	g_config->save ();
+
+	printf("Done!\n");
 	return 0;
 }
 
