@@ -57,8 +57,8 @@ extern bool bindSavestate, frameAdvanceLagSkip, lagCounterDisplay;
 /* UsrInputType[] is user-specified.  CurInputType[] is current
         (game loading can override user settings)
 */
-static int UsrInputType[NUM_INPUT_DEVICES];
-static int CurInputType[NUM_INPUT_DEVICES];
+static int UsrInputType[NUM_INPUT_DEVICES] = { SI_GAMEPAD, SI_GAMEPAD, SI_NONE };
+static int CurInputType[NUM_INPUT_DEVICES] = { SI_GAMEPAD, SI_GAMEPAD, SI_NONE };
 static int cspec = 0;
 
 extern int gametype;

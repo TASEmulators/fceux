@@ -67,6 +67,7 @@ void toggleSound (GtkWidget * check, gpointer data);
 void loadGame (void);
 void closeGame (void);
 extern Config *g_config;
+extern bool gtk_gui_run;
 
 GtkWidget *MainWindow = NULL;
 GtkWidget *evbox = NULL;
@@ -1452,21 +1453,25 @@ void openSoundConfig (void)
 
 void quit (void)
 {
-	// manually flush GTK event queue
-	while (gtk_events_pending ())
-		gtk_main_iteration_do (FALSE);
+	// Set gui run flag to false to allow main gui loop 
+	// to exit normally.
+	gtk_gui_run = false;
 
-	// this is not neccesary to be explicitly called
-	// it raises a GTK-Critical when its called
-	//gtk_main_quit();
-	FCEUI_CloseGame ();
-	FCEUI_Kill ();
-	// LoadGame() checks for an IP and if it finds one begins a network session
-	// clear the NetworkIP field so this doesn't happen unintentionally
-	g_config->setOption ("SDL.NetworkIP", "");
-	g_config->save ();
-	SDL_Quit ();
-	exit (0);
+//	// manually flush GTK event queue
+//	while (gtk_events_pending ())
+//		gtk_main_iteration_do (FALSE);
+//
+//	// this is not neccesary to be explicitly called
+//	// it raises a GTK-Critical when its called
+//	//gtk_main_quit();
+//	FCEUI_CloseGame ();
+//	FCEUI_Kill ();
+//	// LoadGame() checks for an IP and if it finds one begins a network session
+//	// clear the NetworkIP field so this doesn't happen unintentionally
+//	g_config->setOption ("SDL.NetworkIP", "");
+//	g_config->save ();
+//	SDL_Quit ();
+//	exit (0);
 }
 
 const char *Authors[] = {
