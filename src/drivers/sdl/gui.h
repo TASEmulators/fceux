@@ -59,7 +59,6 @@ void setStateMenuItem( int i );
 
 void openVideoConfig();
 void openSoundConfig();
-void quit ();
 void openAbout ();
 
 void emuReset ();

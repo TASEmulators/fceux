@@ -1451,8 +1451,11 @@ void openSoundConfig (void)
 	return;
 }
 
-void quit (void)
+static void mainMenuQuitCB(
+		GtkMenuItem *menuitem,
+      gpointer     user_data)
 {
+	printf("Main Menu Quit\n");
 	// Set gui run flag to false to allow main gui loop 
 	// to exit normally.
 	gtk_gui_run = false;
@@ -1472,6 +1475,30 @@ void quit (void)
 //	g_config->save ();
 //	SDL_Quit ();
 //	exit (0);
+}
+
+static gboolean deleteMainWindowCB(
+			GtkWidget *widget,
+         GdkEvent  *event,
+         gpointer   user_data)
+{
+	printf("Delete Main Window Requested...\n");
+
+	gtk_gui_run = false;
+
+	return(TRUE);
+}
+
+static gboolean destroyMainWindowCB(
+			GtkWidget *widget,
+         GdkEvent  *event,
+         gpointer   user_data)
+{
+	printf("Destroy Main Window\n");
+
+	gtk_gui_run = false;
+
+	return(FALSE);
 }
 
 const char *Authors[] = {
@@ -2612,7 +2639,7 @@ static GtkWidget *CreateMenubar (GtkWidget * window)
 	//-File --> Quit ------------------
 	item = gtk_menu_item_new_with_label ("Quit");
 
-	g_signal_connect (item, "activate", G_CALLBACK (quit), NULL);
+	g_signal_connect (item, "activate", G_CALLBACK (mainMenuQuitCB), NULL);
 
 	gtk_widget_add_accelerator (item, "activate", accel_group,
 				    GDK_KEY_q, GDK_CONTROL_MASK,
@@ -3683,8 +3710,8 @@ int InitGTKSubsystem (int argc, char **argv)
 			  G_CALLBACK (handleMouseClick), NULL);
 
 	// signal handlers
-	g_signal_connect (MainWindow, "delete-event", quit, NULL);
-	g_signal_connect (MainWindow, "destroy-event", quit, NULL);
+	g_signal_connect (MainWindow, "delete-event", G_CALLBACK(deleteMainWindowCB), NULL);
+	g_signal_connect (MainWindow, "destroy-event", G_CALLBACK(destroyMainWindowCB), NULL);
 
 	g_signal_connect (evbox, "configure-event",
 			  G_CALLBACK (handle_resize), NULL);

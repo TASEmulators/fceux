@@ -948,6 +948,20 @@ int main(int argc, char *argv[])
 	FCEUI_Kill();
 	SDL_Quit();
 
+#ifdef _GTK
+	usleep(50000);
+	if ( MainWindow != NULL )
+	{
+		printf("Destroying GUI Window...\n");
+		gtk_widget_destroy( MainWindow ); MainWindow = NULL;
+	}
+	usleep(50000);
+	while(gtk_events_pending())
+	{
+		//printf("Processing the last of the events...\n");
+		gtk_main_iteration_do(FALSE);
+	}
+#endif
 	// LoadGame() checks for an IP and if it finds one begins a network session
 	// clear the NetworkIP field so this doesn't happen unintentionally
 	g_config->setOption ("SDL.NetworkIP", "");
