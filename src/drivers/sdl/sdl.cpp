@@ -35,6 +35,8 @@
 #include "gui.h"
 #endif
 
+#include "fceux_git_info.h"
+
 #include <unistd.h>
 #include <csignal>
 #include <cstring>
@@ -182,6 +184,8 @@ static void ShowUsage(char *prog)
 	printf("Compiled with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
 	//printf("Linked with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
 #endif
+	printf("git URL: %s\n", fceu_get_git_url() );
+	printf("git Rev: %s\n", fceu_get_git_rev() );
 	
 }
 
