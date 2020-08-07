@@ -92,14 +92,24 @@ mkdir -p $INSTALL_PREFIX/usr;
 #scons   --clean
 #scons   GTK3=1   SYSTEM_LUA=1   SYSTEM_MINIZIP=1   CREATE_AVI=1  install  --prefix=$INSTALL_PREFIX/usr
 echo "Num CPU: `nproc`";
-mkdir build; cd build;
-#qmake PREFIX=$INSTALL_PREFIX/usr  ..
+mkdir buildQT; cd buildQT;
 cmake  \
    -DCMAKE_BUILD_TYPE=Release  \
    -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
    -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
 	..
-make -j `nproc` 
+make -j `nproc`
+make  install
+
+cd ..;
+mkdir buildGTK; cd buildGTK;
+cmake  \
+   -DGTK=1 \
+   -DCMAKE_BUILD_TYPE=Release  \
+   -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
+   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+	..
+make -j `nproc`
 make  install
 
 # Install Files
