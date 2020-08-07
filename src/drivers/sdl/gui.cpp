@@ -19,6 +19,7 @@
 #include "memview.h"
 #include "ramwatch.h"
 #include "debugger.h"
+#include "fceux_git_info.h"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
@@ -1503,6 +1504,7 @@ static gboolean destroyMainWindowCB(
 
 const char *Authors[] = {
 	"Linux/SDL Developers:",
+	" mjbudd77",
 	" Lukas Sabota //punkrockguy318", " Soules", " Bryan Cain", " radsaq",
 		" Shinydoofy",
 	"FceuX 2.0 Developers:",
@@ -1523,11 +1525,16 @@ const char *Authors[] = {
 
 void openAbout (void)
 {
+	char versionString[512];
+
 	GdkPixbuf *logo = gdk_pixbuf_new_from_xpm_data (icon_xpm);
+
+	sprintf( versionString, "%s\ngit URL: %s\ngit Rev: %s",
+		  	FCEU_VERSION_STRING, fceu_get_git_url(), fceu_get_git_rev() );
 
 	gtk_show_about_dialog (GTK_WINDOW (MainWindow),
 			       "program-name", "fceuX",
-			       "version", FCEU_VERSION_STRING,
+			       "version", versionString,
 			       "copyright", "© 2016 FceuX development team",
 			       "license", "GPL-2; See COPYING",
 			       //"license-type", GTK_LICENSE_GPL_2_0,

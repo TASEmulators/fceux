@@ -15,6 +15,7 @@
 #include "Qt/nes_shm.h"
 #include "Qt/unix-netplay.h"
 #include "Qt/ConsoleWindow.h"
+#include "Qt/fceux_git_info.h"
 
 #include "common/cheat.h"
 #include "../../fceu.h"
@@ -410,6 +411,8 @@ static void ShowUsage(const char *prog)
 	SDL_GetVersion(&v);
 	printf("Linked with SDL version %d.%d.%d\n", v.major, v.minor, v.patch);
   	printf("Compiled with QT version %d.%d.%d\n", QT_VERSION_MAJOR, QT_VERSION_MINOR, QT_VERSION_PATCH );
+	printf("git URL: %s\n", fceu_get_git_url() );
+	printf("git Rev: %s\n", fceu_get_git_rev() );
 	
 }
 
