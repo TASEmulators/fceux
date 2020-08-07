@@ -60,8 +60,8 @@ pkg-config --cflags --libs  minizip
 #echo '****************************************'
 #echo 'Install Dependency libgtk-3-dev'
 #echo '****************************************'
-#sudo apt-get --assume-yes  install libgtk-3-dev
-#pkg-config --cflags --libs  gtk+-3.0
+sudo apt-get --assume-yes  install libgtk-3-dev
+pkg-config --cflags --libs  gtk+-3.0
 #
 ## Install GTK+-3 Sourceview
 #sudo apt-get --assume-yes  install libgtksourceview-3.0-dev
