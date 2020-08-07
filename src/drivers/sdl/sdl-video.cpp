@@ -51,6 +51,10 @@
 #include <cstring>
 #include <cstdlib>
 
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+#define  LSB_FIRST 
+#endif
+
 // GLOBALS
 extern Config *g_config;
 
