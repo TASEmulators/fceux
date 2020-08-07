@@ -313,7 +313,7 @@ void CWin32InputBox::InitDialog()
       0, 
       0, 
       rectDlg.right - rectDlg.left, 
-      rectDlg.bottom - rectDlg.top - (rectEdit1.bottom - rectEdit1.top), 
+      rectDlg.bottom - rectDlg.top - (rectEdit1.bottom - rectEdit1.top) + 16, 
       SWP_NOMOVE);
 
   }
@@ -325,7 +325,7 @@ void CWin32InputBox::InitDialog()
       0, 
       0, 
       rectDlg.right - rectDlg.left, 
-      rectEdit1.bottom - rectDlg.top + 5,
+      rectEdit1.bottom - rectDlg.top + 5 + 16,
       SWP_NOMOVE);
 
     ::ShowWindow(hwndEdit2, SW_HIDE);
