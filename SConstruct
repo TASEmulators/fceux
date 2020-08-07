@@ -98,16 +98,16 @@ else:
     conf.env.Append(CCFLAGS = "-DHAVE_ASPRINTF")
   if env['SYSTEM_MINIZIP']:
     assert env.ParseConfig('pkg-config minizip --cflags --libs'), "please install: libminizip"
-    assert conf.CheckLibWithHeader('z', 'zlib.h', 'c', 'inflate;', 1), "please install: zlib"
+    assert env.ParseConfig('pkg-config zlib --cflags --libs'), "please install: zlib"
+    #assert conf.CheckLibWithHeader('z', 'zlib.h', 'c', 'inflate;', 1), "please install: zlib"
     env.Append(CPPDEFINES=["_SYSTEM_MINIZIP"])
   else:
-    assert conf.CheckLibWithHeader('z', 'zlib.h', 'c', 'inflate;', 1), "please install: zlib"
+    assert env.ParseConfig('pkg-config zlib --cflags --libs'), "please install: zlib"
+    #assert conf.CheckLibWithHeader('z', 'zlib.h', 'c', 'inflate;', 1), "please install: zlib"
   if env['SDL2']:
-    if not conf.CheckLib('SDL2'):
-      print('Did not find libSDL2 or SDL2.lib, exiting!')
-      Exit(1)
+    assert env.ParseConfig('pkg-config sdl2 --cflags --libs'), "please install: sdl2"
     env.Append(CPPDEFINES=["_SDL2"])
-    env.ParseConfig('pkg-config sdl2 --cflags --libs')
+    #env.ParseConfig('pkg-config sdl2 --cflags --libs')
   else:
     if not conf.CheckLib('SDL'):
       print('Did not find libSDL or SDL.lib, exiting!')
