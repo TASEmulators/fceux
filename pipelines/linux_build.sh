@@ -144,6 +144,16 @@ else
    exit 1;
 fi
 
+if [ -e $INSTALL_PREFIX/usr/bin/fceux-gtk ]; then
+   echo '**************************************************************'
+   echo 'Printing Shared Object Dependencies for fceux-gtk Executable'
+   echo '**************************************************************'
+   ldd  $INSTALL_PREFIX/usr/bin/fceux-gtk
+else
+   echo "Error: Executable Failed to build: $INSTALL_PREFIX/usr/bin/fceux-gtk";
+   exit 1;
+fi
+
 echo '**************************************************************'
 echo 'Printing To Be Packaged Files '
 echo '**************************************************************'
