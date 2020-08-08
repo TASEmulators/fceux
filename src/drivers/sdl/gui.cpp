@@ -83,8 +83,6 @@ bool menuTogglingEnabled = false;
 static int buttonConfigStatus = 0;
 
 enum videoDriver_t  videoDriver = VIDEO_NONE;
-//static char useCairoDraw = 0;
-//static int drawAreaGL = 0;
 unsigned int gtk_draw_area_width = NES_WIDTH;
 unsigned int gtk_draw_area_height = NES_HEIGHT;
 static GtkTreeStore *hotkey_store = NULL;
@@ -967,7 +965,7 @@ static void setVideoDriver (GtkWidget * w, gpointer p)
 	g_config->save ();
 }
 
-void setRegion (GtkWidget * w, gpointer p)
+static void setRegion (GtkWidget * w, gpointer p)
 {
 	int region = gtk_combo_box_get_active (GTK_COMBO_BOX (w));
 	g_config->setOption ("SDL.PAL", region);
@@ -977,7 +975,7 @@ void setRegion (GtkWidget * w, gpointer p)
 
 }
 
-int setXscale (GtkWidget * w, gpointer p)
+static int setXscale (GtkWidget * w, gpointer p)
 {
 	double v = gtk_spin_button_get_value (GTK_SPIN_BUTTON (w));
 	g_config->setOption ("SDL.XScale", v);
@@ -986,7 +984,7 @@ int setXscale (GtkWidget * w, gpointer p)
 	return 0;
 }
 
-int setYscale (GtkWidget * w, gpointer p)
+static int setYscale (GtkWidget * w, gpointer p)
 {
 	double v = gtk_spin_button_get_value (GTK_SPIN_BUTTON (w));
 	g_config->setOption ("SDL.YScale", v);
@@ -995,26 +993,7 @@ int setYscale (GtkWidget * w, gpointer p)
 	return 0;
 }
 
-#ifdef OPENGL
-void setGl (GtkWidget * w, gpointer p)
-{
-	int scaler;
-	int opengl = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (w));
-	g_config->getOption ("SDL.SpecialFilter", &scaler);
-	if (scaler && opengl)
-	{
-		FCEUD_PrintError ("Scalers not supported in OpenGL mode.");
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (w), 0);
-		return;
-	}
-	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (w)))
-		g_config->setOption ("SDL.OpenGL", 1);
-	else
-		g_config->setOption ("SDL.OpenGL", 0);
-	g_config->save ();
-}
-
-void setDoubleBuffering (GtkWidget * w, gpointer p)
+static void setDoubleBuffering (GtkWidget * w, gpointer p)
 {
 	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (w)))
 		g_config->setOption ("SDL.DoubleBuffering", 1);
@@ -1022,7 +1001,6 @@ void setDoubleBuffering (GtkWidget * w, gpointer p)
 		g_config->setOption ("SDL.DoubleBuffering", 0);
 	g_config->save ();
 }
-#endif
 
 void openVideoConfig (void)
 {
@@ -1032,7 +1010,6 @@ void openVideoConfig (void)
 	GtkWidget *hbox1;
 	GtkWidget *scalerLbl;
 	GtkWidget *DriverCombo;
-	//GtkWidget *glChk;
 	GtkWidget *linearChk;
 	GtkWidget *dbChk;
 	GtkWidget *palHbox;
@@ -1081,11 +1058,6 @@ void openVideoConfig (void)
 	g_signal_connect (DriverCombo, "changed", G_CALLBACK (setVideoDriver), NULL);
 	gtk_box_pack_start (GTK_BOX (hbox1), scalerLbl, FALSE, FALSE, 5);
 	gtk_box_pack_start (GTK_BOX (hbox1), DriverCombo, FALSE, FALSE, 5);
-#ifdef OPENGL
-	// openGL check
-	//glChk = gtk_check_button_new_with_label ("Enable OpenGL");
-	//g_signal_connect (glChk, "clicked", G_CALLBACK (setGl), NULL);
-	//setCheckbox (glChk, "SDL.OpenGL");
 
 	// openGL linear filter check
 	linearChk =
@@ -1099,7 +1071,6 @@ void openVideoConfig (void)
 	g_signal_connect (dbChk, "clicked", G_CALLBACK (setDoubleBuffering),
 			  NULL);
 	setCheckbox (dbChk, "SDL.DoubleBuffering");
-#endif
 
 	// Region (NTSC/PAL/Dendy)
 	palHbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
@@ -1176,11 +1147,10 @@ void openVideoConfig (void)
 
 	gtk_box_pack_start (GTK_BOX (vbox), lbl, FALSE, FALSE, 5);
 	gtk_box_pack_start (GTK_BOX (vbox), hbox1, FALSE, FALSE, 5);
-#ifdef OPENGL
-	//gtk_box_pack_start (GTK_BOX (vbox), glChk, FALSE, FALSE, 5);
+//#ifdef OPENGL
 	gtk_box_pack_start (GTK_BOX (vbox), linearChk, FALSE, FALSE, 5);
 	gtk_box_pack_start (GTK_BOX (vbox), dbChk, FALSE, FALSE, 5);
-#endif
+//#endif
 	gtk_box_pack_start (GTK_BOX (vbox), palHbox, FALSE, FALSE, 5);
 	gtk_box_pack_start (GTK_BOX (vbox), ppuChk, FALSE, FALSE, 5);
 #ifdef FRAMESKIP
@@ -3447,8 +3417,6 @@ int init_gui_video( videoDriver_t videoDriverSelect )
 	{
 		return 0;
 	}
-	//drawAreaGL   =  use_openGL;
-	//useCairoDraw = !drawAreaGL;
 
 	destroy_gui_video();
 

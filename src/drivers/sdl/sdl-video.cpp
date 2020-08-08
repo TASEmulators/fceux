@@ -84,6 +84,8 @@ extern bool MaxSpeed;
 extern unsigned int gtk_draw_area_width;
 extern unsigned int gtk_draw_area_height;
 
+static int sdl_win_width = 0;
+static int sdl_win_height = 0;
 static SDL_Window   *sdlWindow   = NULL;
 static SDL_Renderer *sdlRenderer = NULL;
 static SDL_Texture  *sdlTexture  = NULL;
@@ -467,6 +469,7 @@ int init_gtk3_sdl_video( void )
 {
 	GdkWindow *gdkWin = gtk_widget_get_window(evbox);
 	Window win;
+	int sdlRendW, sdlRendH;
 	int vsyncEnabled=0;
 
 	if ( gdkWin == NULL )
@@ -508,9 +511,9 @@ int init_gtk3_sdl_video( void )
 		}		
 	}
 
-	//SDL_GetRendererOutputSize( sdlRenderer, &sdlRendW, &sdlRendH );
+	SDL_GetRendererOutputSize( sdlRenderer, &sdlRendW, &sdlRendH );
 
-	//printf("[SDL] Renderer Output Size: %i x %i \n", sdlRendW, sdlRendH );
+	printf("[SDL] Renderer Output Size: %i x %i \n", sdlRendW, sdlRendH );
 
 	sdlTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GLX_NES_WIDTH, GLX_NES_HEIGHT);
 
@@ -519,6 +522,10 @@ int init_gtk3_sdl_video( void )
 		printf("[SDL] Failed to create texture: %i x %i", GLX_NES_WIDTH, GLX_NES_HEIGHT );
 		return -1;
 	}
+
+	sdl_win_width  = sdlRendW;
+	sdl_win_height = sdlRendH;
+
 	return 0;
 }
 
@@ -554,6 +561,11 @@ int gtk3_sdl_render(void)
 	int  sx, sy, rw, rh;
 	int nesWidth  = GLX_NES_WIDTH;
 	int nesHeight = GLX_NES_HEIGHT;
+
+	if ( (sdl_win_width != gtk_draw_area_width) || (sdl_win_height != gtk_draw_area_height) )
+	{
+		gtk3_sdl_resize();
+	}
 
 	if ( glx_shm != NULL )
 	{
