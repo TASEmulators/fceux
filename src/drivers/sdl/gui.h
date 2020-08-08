@@ -50,11 +50,6 @@ void openGamepadConfig();
 
 void resizeGtkWindow();
 
-#ifdef OPENGL
-void setGl(GtkWidget* w, gpointer p);
-void setDoubleBuffering(GtkWidget* w, gpointer p);
-#endif
-
 void setStateMenuItem( int i );
 
 void openVideoConfig();
@@ -89,7 +84,16 @@ int InitGTKSubsystem(int argc, char** argv);
 uint32_t *getGuiPixelBuffer( int *w, int *h, int *s );
 int  guiPixelBufferReDraw(void);
 
-int init_gui_video( int use_openGL );
+enum videoDriver_t
+{
+	VIDEO_NONE = -1,
+	VIDEO_OPENGL_GLX,
+	VIDEO_SDL,
+	VIDEO_CAIRO
+};
+extern enum videoDriver_t  videoDriver;
+
+int init_gui_video( videoDriver_t vd );
 int destroy_gui_video( void );
 void init_cairo_screen(void);
 void destroy_cairo_screen(void);

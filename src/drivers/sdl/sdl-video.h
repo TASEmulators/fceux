@@ -13,5 +13,11 @@ bool FCEUI_AviEnableHUDrecording();
 void FCEUI_SetAviEnableHUDrecording(bool enable);
 bool FCEUI_AviDisableMovieMessages();
 void FCEUI_SetAviDisableMovieMessages(bool disable);
+
+int init_gtk3_sdl_video(void);
+int destroy_gtk3_sdl_video(void);
+int gtk3_sdl_render(void);
+int gtk3_sdl_resize(void);
+
 #endif
 
