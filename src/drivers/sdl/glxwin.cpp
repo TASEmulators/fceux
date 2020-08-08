@@ -258,7 +258,7 @@ static void render_image(void)
 
 	//print_pixbuf();
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0,
-					GL_RGBA, GL_UNSIGNED_BYTE, glx_shm->pixbuf );
+					GL_BGRA, GL_UNSIGNED_BYTE, glx_shm->pixbuf );
 
 	glBegin(GL_QUADS);
 	glTexCoord2f(1.0f*l/256, 1.0f*b/256); // Bottom left of picture.

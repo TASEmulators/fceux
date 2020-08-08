@@ -207,24 +207,6 @@ int InitVideo(FCEUGI *gi)
 		return -1;
 	}
 
-#ifdef OPENGL
-	if(s_exs <= 0.01) {
-		FCEUD_PrintError("xscale out of bounds.");
-		KillVideo();
-		return -1;
-	}
-	if(s_eys <= 0.01) {
-		FCEUD_PrintError("yscale out of bounds.");
-		KillVideo();
-		return -1;
-	}
-	//if(s_sponge && s_useOpenGL) {
-	//	FCEUD_PrintError("scalers not compatible with openGL mode.");
-	//	KillVideo();
-	//	return -1;
-	//}
-#endif
-
 	if ( !initBlitToHighDone )
 	{
 		InitBlitToHigh(s_curbpp >> 3,
