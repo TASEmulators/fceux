@@ -74,8 +74,9 @@ extern bool gtk_gui_run;
 
 GtkWidget *MainWindow = NULL;
 GtkWidget *evbox = NULL;
-GtkWidget *padNoCombo = NULL;
-GtkWidget *buttonMappings[10] = { NULL };
+static GtkWidget *padNoCombo = NULL;
+static GtkWidget *devSelCombo = NULL;
+static GtkWidget *buttonMappings[10] = { NULL };
 static GtkWidget *Menubar = NULL;
 static GtkRadioMenuItem *stateSlot[10] = { NULL };
 bool gtkIsStarted = false;
@@ -739,15 +740,17 @@ static void closeGamepadConfig (GtkWidget * w, GdkEvent * e, gpointer p)
 // creates and opens the gamepad config window (requires GTK 2.24)
 void openGamepadConfig (void)
 {
+	int portNum = 0;
 	GtkWidget *win;
 	GtkWidget *vbox;
 	GtkWidget *hboxPadNo;
 	GtkWidget *padNoLabel;
-	//GtkWidget* configNoLabel;
+	GtkWidget* devSelLabel, *devSelHbox;
 	GtkWidget *fourScoreChk;
 	GtkWidget *oppositeDirChk;
 	GtkWidget *buttonFrame;
 	GtkWidget *buttonTable;
+	char stmp[256];
 
 	win = gtk_dialog_new_with_buttons ("Controller Configuration",
 					   GTK_WINDOW (MainWindow),
@@ -792,6 +795,67 @@ void openGamepadConfig (void)
 	g_signal_connect (padNoCombo, "changed",
 			  G_CALLBACK (updateGamepadConfig), NULL);
 
+	devSelHbox  = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	devSelLabel = gtk_label_new ("Device:");
+	devSelCombo = gtk_combo_box_text_new ();
+	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (devSelCombo), "Keyboard");
+
+ 	gtk_combo_box_set_active (GTK_COMBO_BOX (devSelCombo), 0);
+
+	for (int i=0; i<MAX_JOYSTICKS; i++)
+	{
+		jsDev_t *js = getJoystickDevice( i );
+
+		if ( js != NULL )
+		{
+			if ( js->isConnected() )
+			{
+				sprintf( stmp, "%i: %s", i, js->getName() );
+   			gtk_combo_box_text_append_text( GTK_COMBO_BOX_TEXT (devSelCombo), stmp );
+			}
+		}
+	}
+ 	gtk_combo_box_set_active (GTK_COMBO_BOX (devSelCombo), 0);
+
+	{
+		GtkTreeModel *treeModel = gtk_combo_box_get_model( GTK_COMBO_BOX (devSelCombo) );
+		GtkTreeIter iter;
+		gboolean iterValid;
+
+		iterValid = gtk_tree_model_get_iter_first( treeModel, &iter );
+
+		while ( iterValid )
+		{
+			GValue value;
+
+			memset( &value, 0, sizeof(value));
+
+			gtk_tree_model_get_value (treeModel, &iter, 0, &value );
+
+			if ( G_IS_VALUE(&value) )
+			{
+				if ( G_VALUE_TYPE(&value) == G_TYPE_STRING )
+				{
+					int devIdx = -1;
+					const char *s = (const char *)g_value_peek_pointer( &value );
+
+					if ( isdigit( s[0] ) )
+					{
+						devIdx = atoi(s);
+					}
+					if ( (devIdx >= 0) && (devIdx == GamePad[portNum].getDeviceIndex() ) )
+					{
+					 	gtk_combo_box_set_active_iter (GTK_COMBO_BOX (devSelCombo), &iter);
+					}
+					//printf("Type is String: '%s'\n", s );
+				}
+			}
+			g_value_unset(&value);
+
+			iterValid = gtk_tree_model_iter_next( treeModel, &iter );
+		}
+	}
+
 	//g_signal_connect (typeCombo, "changed", G_CALLBACK (setInputDevice),
 	//		  gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT
 	//						      (typeCombo)));
@@ -808,6 +872,10 @@ void openGamepadConfig (void)
 	gtk_box_pack_start (GTK_BOX (hboxPadNo), padNoCombo, TRUE, TRUE, 5);
 	gtk_box_pack_start (GTK_BOX (vbox), hboxPadNo, FALSE, TRUE, 5);
 	//gtk_box_pack_start_defaults(GTK_BOX(vbox), typeCombo);
+
+	gtk_box_pack_start (GTK_BOX (devSelHbox), devSelLabel, TRUE, TRUE, 5);
+	gtk_box_pack_start (GTK_BOX (devSelHbox), devSelCombo, TRUE, TRUE, 5);
+	gtk_box_pack_start (GTK_BOX (vbox), devSelHbox, FALSE, TRUE, 5);
 
 	gtk_box_pack_start (GTK_BOX (vbox), fourScoreChk, FALSE, TRUE, 5);
 	gtk_box_pack_start (GTK_BOX (vbox), oppositeDirChk, FALSE, TRUE, 5);
