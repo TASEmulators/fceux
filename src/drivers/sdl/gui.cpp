@@ -1052,7 +1052,7 @@ void openVideoConfig (void)
 
 	// sync with cfg
 	int buf;
-	g_config->getOption ("SDL.SpecialFilter", &buf);
+	g_config->getOption ("SDL.VideoDriver", &buf);
 	gtk_combo_box_set_active (GTK_COMBO_BOX (DriverCombo), buf);
 
 	g_signal_connect (DriverCombo, "changed", G_CALLBACK (setVideoDriver), NULL);
