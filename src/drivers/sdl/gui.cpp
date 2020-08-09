@@ -19,6 +19,7 @@
 #include "memview.h"
 #include "ramwatch.h"
 #include "debugger.h"
+#include "sdl-joystick.h"
 #include "fceux_git_info.h"
 
 #ifdef _S9XLUA_H
@@ -74,7 +75,6 @@ extern bool gtk_gui_run;
 GtkWidget *MainWindow = NULL;
 GtkWidget *evbox = NULL;
 GtkWidget *padNoCombo = NULL;
-GtkWidget *configNoCombo = NULL;
 GtkWidget *buttonMappings[10] = { NULL };
 static GtkWidget *Menubar = NULL;
 static GtkRadioMenuItem *stateSlot[10] = { NULL };
@@ -137,9 +137,6 @@ int configGamepadButton (GtkButton * button, gpointer p)
 	int padNo =
 		atoi (gtk_combo_box_text_get_active_text
 		      (GTK_COMBO_BOX_TEXT (padNoCombo))) - 1;
-	int configNo =
-		atoi (gtk_combo_box_text_get_active_text
-		      (GTK_COMBO_BOX_TEXT (configNoCombo))) - 1;
 
 	char buf[256];
 	std::string prefix;
@@ -154,28 +151,28 @@ int configGamepadButton (GtkButton * button, gpointer p)
 
 	snprintf (buf, sizeof(buf)-1, "SDL.Input.GamePad.%d.", padNo);
 	prefix = buf;
-	DWaitButton (NULL, &GamePadConfig[padNo][x], configNo, &buttonConfigStatus );
+	DWaitButton (NULL, &GamePad[padNo].bmap[x], &buttonConfigStatus );
 
-	g_config->setOption (prefix + GamePadNames[x],
-			     GamePadConfig[padNo][x].ButtonNum[configNo]);
-
-	if (GamePadConfig[padNo][x].ButtType[0] == BUTTC_KEYBOARD)
-	{
-		g_config->setOption (prefix + "DeviceType", "Keyboard");
-	}
-	else if (GamePadConfig[padNo][x].ButtType[0] == BUTTC_JOYSTICK)
-	{
-		g_config->setOption (prefix + "DeviceType", "Joystick");
-	}
-	else
-	{
-		g_config->setOption (prefix + "DeviceType", "Unknown");
-	}
-	g_config->setOption (prefix + "DeviceNum",
-			     GamePadConfig[padNo][x].DeviceNum[configNo]);
+//	g_config->setOption (prefix + GamePadNames[x],
+//			     GamePadConfig[padNo][x].ButtonNum[configNo]);
+//
+//	if (GamePadConfig[padNo][x].ButtType[0] == BUTTC_KEYBOARD)
+//	{
+//		g_config->setOption (prefix + "DeviceType", "Keyboard");
+//	}
+//	else if (GamePadConfig[padNo][x].ButtType[0] == BUTTC_JOYSTICK)
+//	{
+//		g_config->setOption (prefix + "DeviceType", "Joystick");
+//	}
+//	else
+//	{
+//		g_config->setOption (prefix + "DeviceType", "Unknown");
+//	}
+//	g_config->setOption (prefix + "DeviceNum",
+//			     GamePadConfig[padNo][x].DeviceNum[configNo]);
 
 	snprintf (buf, sizeof (buf), "<tt>%s</tt>",
-		  ButtonName (&GamePadConfig[padNo][x], configNo));
+		  ButtonName (&GamePad[padNo].bmap[x]));
 
 	if ( buttonMappings[x] != NULL )
 	{
@@ -698,28 +695,25 @@ void updateGamepadConfig (GtkWidget * w, gpointer p)
 	int i;
 	char strBuf[128];
 
-	if ( (padNoCombo == NULL) || (configNoCombo == NULL) )
+	if ( (padNoCombo == NULL) )
 	{
 		return;
 	}
 	int padNo =
 		atoi (gtk_combo_box_text_get_active_text
 		      (GTK_COMBO_BOX_TEXT (padNoCombo))) - 1;
-	int configNo =
-		atoi (gtk_combo_box_text_get_active_text
-		      (GTK_COMBO_BOX_TEXT (configNoCombo))) - 1;
 
 	for (i = 0; i < 10; i++)
 	{
 		GtkWidget *mappedKey = buttonMappings[i];
-		if (GamePadConfig[padNo][i].ButtType[configNo] == BUTTC_KEYBOARD)
+		if (GamePad[padNo].bmap[i].ButtType == BUTTC_KEYBOARD)
 		{
 			snprintf (strBuf, sizeof (strBuf), "<tt>%s</tt>",
-				  SDL_GetKeyName (GamePadConfig[padNo][i].
-						  ButtonNum[configNo]));
+				  SDL_GetKeyName (GamePad[padNo].bmap[i].
+						  ButtonNum));
 		}
 		else		
-			sprintf (strBuf, "<tt>%s</tt>", ButtonName( &GamePadConfig[padNo][i], configNo ) );
+			sprintf (strBuf, "<tt>%s</tt>", ButtonName( &GamePad[padNo].bmap[i] ) );
 
 		if ( mappedKey != NULL )
 		{
@@ -734,7 +728,6 @@ static void closeGamepadConfig (GtkWidget * w, GdkEvent * e, gpointer p)
 	gtk_widget_destroy (w);
 
 	padNoCombo    = NULL;
-	configNoCombo = NULL;
 
 	for (int i = 0; i < 10; i++)
 	{
@@ -799,20 +792,6 @@ void openGamepadConfig (void)
 	g_signal_connect (padNoCombo, "changed",
 			  G_CALLBACK (updateGamepadConfig), NULL);
 
-	configNoCombo = gtk_combo_box_text_new ();
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (configNoCombo),
-					"1");
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (configNoCombo),
-					"2");
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (configNoCombo),
-					"3");
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (configNoCombo),
-					"4");
-	gtk_combo_box_set_active (GTK_COMBO_BOX (configNoCombo), 0);
-	g_signal_connect (padNoCombo, "changed",
-			  G_CALLBACK (updateGamepadConfig), NULL);
-
-
 	//g_signal_connect (typeCombo, "changed", G_CALLBACK (setInputDevice),
 	//		  gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT
 	//						      (typeCombo)));
@@ -827,8 +806,6 @@ void openGamepadConfig (void)
 
 	gtk_box_pack_start (GTK_BOX (hboxPadNo), padNoLabel, TRUE, TRUE, 5);
 	gtk_box_pack_start (GTK_BOX (hboxPadNo), padNoCombo, TRUE, TRUE, 5);
-	//gtk_box_pack_start(GTK_BOX(hboxPadNo), configNoLabel, TRUE, TRUE, 5);
-	//gtk_box_pack_start(GTK_BOX(hboxPadNo), configNoCombo, TRUE, TRUE, 5);
 	gtk_box_pack_start (GTK_BOX (vbox), hboxPadNo, FALSE, TRUE, 5);
 	//gtk_box_pack_start_defaults(GTK_BOX(vbox), typeCombo);
 
