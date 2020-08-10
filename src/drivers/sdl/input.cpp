@@ -952,6 +952,8 @@ UpdatePhysicalInput ()
 {
 	SDL_Event event;
 
+	//SDL_JoystickUpdate();
+
 	// loop, handling all pending events
 	while (SDL_PollEvent (&event))
 	{
@@ -1330,8 +1332,8 @@ void InitInputInterface ()
 {
 	void *InputDPtr;
 
-	int t;
-	int x;
+	int t = 0;
+	int x = 0;
 	int attrib;
 
    memset( g_keyState, 0, sizeof(g_keyState) );
@@ -1691,6 +1693,7 @@ int DWaitButton (const uint8_t * text, ButtConfig * bc, int *buttonConfigStatus 
 #endif
 		while (SDL_PollEvent (&event))
 		{
+			printf("Event Type: %i \n", event.type );
 			done++;
 			switch (event.type)
 			{

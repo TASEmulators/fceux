@@ -930,6 +930,7 @@ KillJoysticks(void)
 	}
 	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 
+	printf("Kill Joysticks:\n");
 	s_jinited = 0;
 
 	return 0;
@@ -1018,6 +1019,9 @@ InitJoysticks(void)
 	}
 	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
 
+	SDL_JoystickEventState(SDL_ENABLE);
+	//SDL_JoystickEventState(SDL_DISABLE);
+
 	total = SDL_NumJoysticks();
 	if (total > MAX_JOYSTICKS) 
 	{
@@ -1029,6 +1033,7 @@ InitJoysticks(void)
 		/* Open the joystick under SDL. */
 		AddJoystick(n);
 	}
+	printf("Init Joysticks: %i \n", total );
 
 	s_jinited = 1;
 	return 1;
