@@ -355,6 +355,7 @@ FCEUD_Update(uint8 *XBuf,
 			 int32 *Buffer,
 			 int Count)
 {
+	int blitDone = 0;
 	extern int FCEUDnetplay;
 
 	#ifdef CREATE_AVI
@@ -381,8 +382,8 @@ FCEUD_Update(uint8 *XBuf,
 		if (!mutecapture)
 		  if(Count > 0 && Buffer) WriteSound(Buffer,Count);   
 	  }
-	  if(inited & 2)
-		FCEUD_UpdateInput();
+	//  if(inited & 2)
+	//	FCEUD_UpdateInput();
 	  if(XBuf && (inited & 4)) BlitScreen(XBuf);
 	  
 	  //SpeedThrottle();
@@ -414,7 +415,9 @@ FCEUD_Update(uint8 *XBuf,
 		// don't underflow when scaling fps
 		if(g_fpsScale>1.0 || ((tmpcan < Count*0.90) && !uflow)) {
 			if(XBuf && (inited&4) && !(NoWaiting & 2))
-				BlitScreen(XBuf);
+			{
+				BlitScreen(XBuf); blitDone = 1;
+			}
 			Buffer+=can;
 			Count-=can;
 			if(Count) {
@@ -449,24 +452,23 @@ FCEUD_Update(uint8 *XBuf,
 		}
 
 	} else {
-		if(!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
-		while (SpeedThrottle())
+		//if(!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
+		//while (SpeedThrottle())
+		//{
+		//	FCEUD_UpdateInput();
+		//}
+		if (XBuf && (inited&4)) 
 		{
-			FCEUD_UpdateInput();
-		}
-		if(XBuf && (inited&4)) {
-			BlitScreen(XBuf);
+			BlitScreen(XBuf); blitDone = 1;
 		}
 	}
-	FCEUD_UpdateInput();
-	//if(!Count && !NoWaiting && !(eoptions&EO_NOTHROTTLE))
-	// SpeedThrottle();
-	//if(XBuf && (inited&4))
-	//{
-	// BlitScreen(XBuf);
-	//}
-	//if(Count)
-	// WriteSound(Buffer,Count,NoWaiting);
+	if ( !blitDone )
+	{
+		if (XBuf && (inited&4)) 
+		{
+			BlitScreen(XBuf); blitDone = 1;
+		}
+	}
 	//FCEUD_UpdateInput();
 }
 
@@ -563,6 +565,10 @@ int main(int argc, char *argv[])
 	{
 		printf("Could not initialize SDL: %s.\n", SDL_GetError());
 		return(-1);
+	}
+	if ( SDL_SetHint( SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1" ) == SDL_FALSE )
+	{
+		printf("Error setting SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS\n");
 	}
 
 //#ifdef OPENGL
@@ -914,8 +920,9 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				SDL_Delay(1);
+				SDL_Delay(10);
 			}
+			FCEUD_UpdateInput();
 
 			while(gtk_events_pending())
 			{
