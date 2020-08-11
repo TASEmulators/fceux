@@ -585,6 +585,7 @@ void openGamepadConfig (void)
 	gtk_box_set_homogeneous (GTK_BOX (mainVbox), FALSE);
 
 	hboxPadNo = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_box_set_homogeneous( GTK_BOX(hboxPadNo), TRUE );
 	padNoLabel = gtk_label_new ("Port:");
 	//configNoLabel = gtk_label_new("Config Number:");
 	fourScoreChk = gtk_check_button_new_with_label ("Enable Four Score");
@@ -616,6 +617,7 @@ void openGamepadConfig (void)
 			  G_CALLBACK (selPortChanged), NULL);
 
 	devSelHbox  = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_box_set_homogeneous( GTK_BOX(devSelHbox), TRUE );
 	devSelLabel = gtk_label_new ("Device:");
 	devSelCombo = gtk_combo_box_text_new ();
 	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (devSelCombo), "Keyboard");
@@ -698,6 +700,7 @@ void openGamepadConfig (void)
 	gtk_box_pack_start (GTK_BOX (mainVbox), devSelHbox, TRUE, TRUE, 5);
 
 	hbox    = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_box_set_homogeneous( GTK_BOX(hbox), TRUE );
 	lbl     = gtk_label_new ("GUID:");
 	guidLbl = gtk_label_new ("");
 
