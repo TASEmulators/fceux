@@ -399,6 +399,7 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/debugger.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/glxwin.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/gui.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/GamePadConf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/input.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/memview.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/ramwatch.cpp

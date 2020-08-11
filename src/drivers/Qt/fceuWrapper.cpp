@@ -438,6 +438,10 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		printf("Could not initialize SDL: %s.\n", SDL_GetError());
 		exit(-1);
 	}
+	if ( SDL_SetHint( SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1" ) == SDL_FALSE )
+	{
+		printf("Error setting SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS\n");
+	}
 
 	// Initialize the configuration system
 	g_config = InitConfig();

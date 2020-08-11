@@ -35,6 +35,10 @@ void pushOutputToGTK(const char* str);
 void showGui(bool b);
 void toggleMenuVis(void);
 
+gint convertKeypress (GtkWidget * grab, GdkEventKey * event, gpointer user_data);
+void toggleOption (GtkWidget * w, gpointer p);
+void setCheckbox (GtkWidget * w, const char *configName);
+
 bool checkGTKVersion(int major_required, int minor_required);
 
 int configHotkey(char* hotkeyString);

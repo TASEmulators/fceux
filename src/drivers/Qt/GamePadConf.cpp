@@ -637,6 +637,7 @@ void GamePadConfDialog_t::saveConfig(void)
 	{
 		lcl[portNum].btn[i].needsSave = 0;
 	}
+	g_config->save();
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::createNewProfile( const char *name )

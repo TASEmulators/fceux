@@ -19,6 +19,7 @@
 #include "memview.h"
 #include "ramwatch.h"
 #include "debugger.h"
+#include "sdl-joystick.h"
 #include "fceux_git_info.h"
 
 #ifdef _S9XLUA_H
@@ -73,14 +74,10 @@ extern bool gtk_gui_run;
 
 GtkWidget *MainWindow = NULL;
 GtkWidget *evbox = NULL;
-GtkWidget *padNoCombo = NULL;
-GtkWidget *configNoCombo = NULL;
-GtkWidget *buttonMappings[10] = { NULL };
 static GtkWidget *Menubar = NULL;
 static GtkRadioMenuItem *stateSlot[10] = { NULL };
 bool gtkIsStarted = false;
 bool menuTogglingEnabled = false;
-static int buttonConfigStatus = 0;
 
 enum videoDriver_t  videoDriver = VIDEO_NONE;
 unsigned int gtk_draw_area_width = NES_WIDTH;
@@ -91,8 +88,6 @@ static cairo_pattern_t *cairo_pattern = NULL;
 static int *cairo_pix_remapper = NULL;
 static int  numRendLines = 0;
 static void cairo_recalc_mapper(void);
-
-static gint convertKeypress (GtkWidget * grab, GdkEventKey * event, gpointer user_data);
 
 // check to see if a particular GTK version is available
 // 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,24);
@@ -130,66 +125,63 @@ void setCheckbox (GtkWidget * w, const char *configName)
 }
 
 // This function configures a single button on a gamepad
-int configGamepadButton (GtkButton * button, gpointer p)
-{
-	gint x = ((gint) (glong) (p));
-	//gint x = GPOINTER_TO_INT(p);
-	int padNo =
-		atoi (gtk_combo_box_text_get_active_text
-		      (GTK_COMBO_BOX_TEXT (padNoCombo))) - 1;
-	int configNo =
-		atoi (gtk_combo_box_text_get_active_text
-		      (GTK_COMBO_BOX_TEXT (configNoCombo))) - 1;
-
-	char buf[256];
-	std::string prefix;
-
-	// only configure when the "Change" button is pressed in, not when it is unpressed
-	if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (button)))
-		return 0;
-
-	buttonConfigStatus = 2;
-
-	ButtonConfigBegin ();
-
-	snprintf (buf, sizeof(buf)-1, "SDL.Input.GamePad.%d.", padNo);
-	prefix = buf;
-	DWaitButton (NULL, &GamePadConfig[padNo][x], configNo, &buttonConfigStatus );
-
-	g_config->setOption (prefix + GamePadNames[x],
-			     GamePadConfig[padNo][x].ButtonNum[configNo]);
-
-	if (GamePadConfig[padNo][x].ButtType[0] == BUTTC_KEYBOARD)
-	{
-		g_config->setOption (prefix + "DeviceType", "Keyboard");
-	}
-	else if (GamePadConfig[padNo][x].ButtType[0] == BUTTC_JOYSTICK)
-	{
-		g_config->setOption (prefix + "DeviceType", "Joystick");
-	}
-	else
-	{
-		g_config->setOption (prefix + "DeviceType", "Unknown");
-	}
-	g_config->setOption (prefix + "DeviceNum",
-			     GamePadConfig[padNo][x].DeviceNum[configNo]);
-
-	snprintf (buf, sizeof (buf), "<tt>%s</tt>",
-		  ButtonName (&GamePadConfig[padNo][x], configNo));
-
-	if ( buttonMappings[x] != NULL )
-	{
-		gtk_label_set_markup (GTK_LABEL (buttonMappings[x]), buf);
-	}
-
-	ButtonConfigEnd ();
-
-	buttonConfigStatus = 1;
-
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), FALSE);
-
-	return 0;
-}
+//int configGamepadButton (GtkButton * button, gpointer p)
+//{
+//	gint x = ((gint) (glong) (p));
+//	//gint x = GPOINTER_TO_INT(p);
+//	int padNo =
+//		atoi (gtk_combo_box_text_get_active_text
+//		      (GTK_COMBO_BOX_TEXT (padNoCombo))) - 1;
+//
+//	char buf[256];
+//	std::string prefix;
+//
+//	// only configure when the "Change" button is pressed in, not when it is unpressed
+//	if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (button)))
+//		return 0;
+//
+//	buttonConfigStatus = 2;
+//
+//	ButtonConfigBegin ();
+//
+//	snprintf (buf, sizeof(buf)-1, "SDL.Input.GamePad.%d.", padNo);
+//	prefix = buf;
+//	DWaitButton (NULL, &GamePad[padNo].bmap[x], &buttonConfigStatus );
+//
+////	g_config->setOption (prefix + GamePadNames[x],
+////			     GamePadConfig[padNo][x].ButtonNum[configNo]);
+////
+////	if (GamePadConfig[padNo][x].ButtType[0] == BUTTC_KEYBOARD)
+////	{
+////		g_config->setOption (prefix + "DeviceType", "Keyboard");
+////	}
+////	else if (GamePadConfig[padNo][x].ButtType[0] == BUTTC_JOYSTICK)
+////	{
+////		g_config->setOption (prefix + "DeviceType", "Joystick");
+////	}
+////	else
+////	{
+////		g_config->setOption (prefix + "DeviceType", "Unknown");
+////	}
+////	g_config->setOption (prefix + "DeviceNum",
+////			     GamePadConfig[padNo][x].DeviceNum[configNo]);
+//
+//	snprintf (buf, sizeof (buf), "<tt>%s</tt>",
+//		  ButtonName (&GamePad[padNo].bmap[x]));
+//
+//	if ( buttonMappings[x] != NULL )
+//	{
+//		gtk_label_set_markup (GTK_LABEL (buttonMappings[x]), buf);
+//	}
+//
+//	ButtonConfigEnd ();
+//
+//	buttonConfigStatus = 1;
+//
+//	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), FALSE);
+//
+//	return 0;
+//}
 
 void resetVideo (void)
 {
@@ -677,228 +669,291 @@ void openHotkeyConfig (void)
 
 }
 
-//GtkWidget *typeCombo;
-
-// TODO: finish this
-//int setInputDevice (GtkWidget * w, gpointer p)
+//static void selInputDevice (GtkWidget * w, gpointer p)
 //{
-//	std::string s = "SDL.Input.";
-//	s = s + (char *) p;
-//	printf ("setInputDevice: %s", s.c_str ());
-//	g_config->setOption (s,
-//			     gtk_combo_box_text_get_active_text
-//			     (GTK_COMBO_BOX_TEXT (typeCombo)));
-//	g_config->save ();
+//	//std::string s = "SDL.Input.";
+//	int padNo = 0, devIdx = -1;
+//	const char *devTxt;
+//	jsDev_t *js;
 //
-//	return 1;
+//	if ( (padNoCombo == NULL) )
+//	{
+//		return;
+//	}
+//	padNo =
+//		atoi (gtk_combo_box_text_get_active_text
+//		      (GTK_COMBO_BOX_TEXT (padNoCombo))) - 1;
+//
+//	devTxt =	gtk_combo_box_text_get_active_text ( GTK_COMBO_BOX_TEXT(w) );
+//
+//	if ( isdigit( devTxt[0] ) )
+//	{
+//		devIdx = atoi( devTxt );
+//	}
+//	printf ("setInputDevice: %s  %i", devTxt, devIdx );
+//
+//			
+//	//g_config->setOption (s,
+//	//		     gtk_combo_box_text_get_active_text
+//	//		     (GTK_COMBO_BOX_TEXT (typeCombo)));
+//	//g_config->save ();
+//
+//	return;
 //}
-
-void updateGamepadConfig (GtkWidget * w, gpointer p)
-{
-	int i;
-	char strBuf[128];
-
-	if ( (padNoCombo == NULL) || (configNoCombo == NULL) )
-	{
-		return;
-	}
-	int padNo =
-		atoi (gtk_combo_box_text_get_active_text
-		      (GTK_COMBO_BOX_TEXT (padNoCombo))) - 1;
-	int configNo =
-		atoi (gtk_combo_box_text_get_active_text
-		      (GTK_COMBO_BOX_TEXT (configNoCombo))) - 1;
-
-	for (i = 0; i < 10; i++)
-	{
-		GtkWidget *mappedKey = buttonMappings[i];
-		if (GamePadConfig[padNo][i].ButtType[configNo] == BUTTC_KEYBOARD)
-		{
-			snprintf (strBuf, sizeof (strBuf), "<tt>%s</tt>",
-				  SDL_GetKeyName (GamePadConfig[padNo][i].
-						  ButtonNum[configNo]));
-		}
-		else		
-			sprintf (strBuf, "<tt>%s</tt>", ButtonName( &GamePadConfig[padNo][i], configNo ) );
-
-		if ( mappedKey != NULL )
-		{
-			gtk_label_set_text (GTK_LABEL (mappedKey), strBuf);
-			gtk_label_set_use_markup (GTK_LABEL (mappedKey), TRUE);
-		}
-	}
-}
-
-static void closeGamepadConfig (GtkWidget * w, GdkEvent * e, gpointer p)
-{
-	gtk_widget_destroy (w);
-
-	padNoCombo    = NULL;
-	configNoCombo = NULL;
-
-	for (int i = 0; i < 10; i++)
-	{
-		buttonMappings[i] = NULL;
-	}
-	buttonConfigStatus = 0;
-}
-
-// creates and opens the gamepad config window (requires GTK 2.24)
-void openGamepadConfig (void)
-{
-	GtkWidget *win;
-	GtkWidget *vbox;
-	GtkWidget *hboxPadNo;
-	GtkWidget *padNoLabel;
-	//GtkWidget* configNoLabel;
-	GtkWidget *fourScoreChk;
-	GtkWidget *oppositeDirChk;
-	GtkWidget *buttonFrame;
-	GtkWidget *buttonTable;
-
-	win = gtk_dialog_new_with_buttons ("Controller Configuration",
-					   GTK_WINDOW (MainWindow),
-					   (GtkDialogFlags)
-					   (GTK_DIALOG_DESTROY_WITH_PARENT),
-					   "_Close", GTK_RESPONSE_OK, NULL);
-	gtk_window_set_title (GTK_WINDOW (win), "Controller Configuration");
-	gtk_window_set_icon_name (GTK_WINDOW (win), "input-gaming");
-	gtk_widget_set_size_request (win, 350, 500);
-
-	vbox = gtk_dialog_get_content_area (GTK_DIALOG (win));
-	gtk_box_set_homogeneous (GTK_BOX (vbox), FALSE);
-
-	hboxPadNo = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-	padNoLabel = gtk_label_new ("Port:");
-	//configNoLabel = gtk_label_new("Config Number:");
-	fourScoreChk = gtk_check_button_new_with_label ("Enable Four Score");
-	oppositeDirChk =
-		gtk_check_button_new_with_label ("Allow Up+Down / Left+Right");
-
-	//typeCombo = gtk_combo_box_text_new ();
-	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
-	//				"gamepad");
-	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
-	//				"zapper");
-	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
-	//				"powerpad.0");
-	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
-	//				"powerpad.1");
-	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
-	//				"arkanoid");
-
-	//gtk_combo_box_set_active (GTK_COMBO_BOX (typeCombo), 0);
-
-
-	padNoCombo = gtk_combo_box_text_new ();
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (padNoCombo), "1");
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (padNoCombo), "2");
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (padNoCombo), "3");
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (padNoCombo), "4");
-	gtk_combo_box_set_active (GTK_COMBO_BOX (padNoCombo), 0);
-	g_signal_connect (padNoCombo, "changed",
-			  G_CALLBACK (updateGamepadConfig), NULL);
-
-	configNoCombo = gtk_combo_box_text_new ();
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (configNoCombo),
-					"1");
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (configNoCombo),
-					"2");
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (configNoCombo),
-					"3");
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (configNoCombo),
-					"4");
-	gtk_combo_box_set_active (GTK_COMBO_BOX (configNoCombo), 0);
-	g_signal_connect (padNoCombo, "changed",
-			  G_CALLBACK (updateGamepadConfig), NULL);
-
-
-	//g_signal_connect (typeCombo, "changed", G_CALLBACK (setInputDevice),
-	//		  gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT
-	//						      (typeCombo)));
-
-	setCheckbox (fourScoreChk, "SDL.FourScore");
-	g_signal_connect (fourScoreChk, "clicked", G_CALLBACK (toggleOption),
-			  (gpointer) "SDL.FourScore");
-	setCheckbox (oppositeDirChk, "SDL.Input.EnableOppositeDirectionals");
-	g_signal_connect (oppositeDirChk, "clicked", G_CALLBACK (toggleOption),
-			  (gpointer) "SDL.Input.EnableOppositeDirectionals");
-
-
-	gtk_box_pack_start (GTK_BOX (hboxPadNo), padNoLabel, TRUE, TRUE, 5);
-	gtk_box_pack_start (GTK_BOX (hboxPadNo), padNoCombo, TRUE, TRUE, 5);
-	//gtk_box_pack_start(GTK_BOX(hboxPadNo), configNoLabel, TRUE, TRUE, 5);
-	//gtk_box_pack_start(GTK_BOX(hboxPadNo), configNoCombo, TRUE, TRUE, 5);
-	gtk_box_pack_start (GTK_BOX (vbox), hboxPadNo, FALSE, TRUE, 5);
-	//gtk_box_pack_start_defaults(GTK_BOX(vbox), typeCombo);
-
-	gtk_box_pack_start (GTK_BOX (vbox), fourScoreChk, FALSE, TRUE, 5);
-	gtk_box_pack_start (GTK_BOX (vbox), oppositeDirChk, FALSE, TRUE, 5);
-
-
-	// create gamepad buttons
-	buttonFrame = gtk_frame_new ("<b><i>Buttons</i></b>");
-	gtk_label_set_use_markup (GTK_LABEL
-				  (gtk_frame_get_label_widget
-				   (GTK_FRAME (buttonFrame))), TRUE);
-	buttonTable = gtk_grid_new ();
-	gtk_container_add (GTK_CONTAINER (buttonFrame), buttonTable);
-
-	for (int i = 0; i < 3; i++)
-	{
-		gtk_grid_insert_column (GTK_GRID (buttonTable), i);
-	}
-	gtk_grid_set_column_spacing (GTK_GRID (buttonTable), 5);
-	gtk_grid_set_column_homogeneous (GTK_GRID (buttonTable), TRUE);
-	gtk_grid_set_row_spacing (GTK_GRID (buttonTable), 3);
-
-	for (int i = 0; i < 10; i++)
-	{
-		GtkWidget *buttonName = gtk_label_new (GamePadNames[i]);
-		GtkWidget *mappedKey = gtk_label_new (NULL);
-		GtkWidget *changeButton = gtk_toggle_button_new ();
-		char strBuf[128];
-
-		gtk_grid_insert_row (GTK_GRID (buttonTable), i);
-
-		sprintf (strBuf, "%s:", GamePadNames[i]);
-		gtk_label_set_text (GTK_LABEL (buttonName), strBuf);
-
-		gtk_button_set_label (GTK_BUTTON (changeButton), "Change");
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (changeButton),
-					      FALSE);
-
-		gtk_grid_attach (GTK_GRID (buttonTable), buttonName, 0, i, 1,
-				 1);
-		gtk_grid_attach (GTK_GRID (buttonTable), mappedKey, 1, i, 1, 1);
-		gtk_grid_attach (GTK_GRID (buttonTable), changeButton, 2, i, 1,
-				 1);
-
-		g_signal_connect (changeButton, "clicked",
-				  G_CALLBACK (configGamepadButton),
-				  GINT_TO_POINTER (i));
-		buttonMappings[i] = mappedKey;
-	}
-
-	// display the button mappings for the currently selected configuration
-	updateGamepadConfig (NULL, NULL);
-
-	gtk_box_pack_start (GTK_BOX (vbox), buttonFrame, TRUE, TRUE, 5);
-
-	g_signal_connect (win, "delete-event", G_CALLBACK (closeGamepadConfig), NULL);
-	g_signal_connect (win, "response", G_CALLBACK (closeGamepadConfig), NULL);
-
-	gtk_widget_show_all (win);
-
-	g_signal_connect (G_OBJECT (win), "key-press-event",
-			  G_CALLBACK (convertKeypress), NULL);
-	g_signal_connect (G_OBJECT (win), "key-release-event",
-			  G_CALLBACK (convertKeypress), NULL);
-
-	buttonConfigStatus = 1;
-
-	return;
-}
+//
+//static void updateGamepadConfig (GtkWidget * w, gpointer p)
+//{
+//	int i;
+//	char strBuf[128];
+//
+//	if ( (padNoCombo == NULL) )
+//	{
+//		return;
+//	}
+//	int padNo =
+//		atoi (gtk_combo_box_text_get_active_text
+//		      (GTK_COMBO_BOX_TEXT (padNoCombo))) - 1;
+//
+//	for (i = 0; i < 10; i++)
+//	{
+//		GtkWidget *mappedKey = buttonMappings[i];
+//		if (GamePad[padNo].bmap[i].ButtType == BUTTC_KEYBOARD)
+//		{
+//			snprintf (strBuf, sizeof (strBuf), "<tt>%s</tt>",
+//				  SDL_GetKeyName (GamePad[padNo].bmap[i].
+//						  ButtonNum));
+//		}
+//		else		
+//			sprintf (strBuf, "<tt>%s</tt>", ButtonName( &GamePad[padNo].bmap[i] ) );
+//
+//		if ( mappedKey != NULL )
+//		{
+//			gtk_label_set_text (GTK_LABEL (mappedKey), strBuf);
+//			gtk_label_set_use_markup (GTK_LABEL (mappedKey), TRUE);
+//		}
+//	}
+//}
+//
+//static void closeGamepadConfig (GtkWidget * w, GdkEvent * e, gpointer p)
+//{
+//	gtk_widget_destroy (w);
+//
+//	padNoCombo    = NULL;
+//
+//	for (int i = 0; i < 10; i++)
+//	{
+//		buttonMappings[i] = NULL;
+//	}
+//	buttonConfigStatus = 0;
+//}
+//
+//// creates and opens the gamepad config window (requires GTK 2.24)
+//void openGamepadConfig (void)
+//{
+//	int portNum = 0;
+//	GtkWidget *win;
+//	GtkWidget *vbox;
+//	GtkWidget *hboxPadNo;
+//	GtkWidget *padNoLabel;
+//	GtkWidget* devSelLabel, *devSelHbox;
+//	GtkWidget *fourScoreChk;
+//	GtkWidget *oppositeDirChk;
+//	GtkWidget *buttonFrame;
+//	GtkWidget *buttonTable;
+//	char stmp[256];
+//
+//	win = gtk_dialog_new_with_buttons ("Controller Configuration",
+//					   GTK_WINDOW (MainWindow),
+//					   (GtkDialogFlags)
+//					   (GTK_DIALOG_DESTROY_WITH_PARENT),
+//					   "_Close", GTK_RESPONSE_OK, NULL);
+//	gtk_window_set_title (GTK_WINDOW (win), "Controller Configuration");
+//	gtk_window_set_icon_name (GTK_WINDOW (win), "input-gaming");
+//	gtk_widget_set_size_request (win, 350, 500);
+//
+//	vbox = gtk_dialog_get_content_area (GTK_DIALOG (win));
+//	gtk_box_set_homogeneous (GTK_BOX (vbox), FALSE);
+//
+//	hboxPadNo = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+//	padNoLabel = gtk_label_new ("Port:");
+//	//configNoLabel = gtk_label_new("Config Number:");
+//	fourScoreChk = gtk_check_button_new_with_label ("Enable Four Score");
+//	oppositeDirChk =
+//		gtk_check_button_new_with_label ("Allow Up+Down / Left+Right");
+//
+//	//typeCombo = gtk_combo_box_text_new ();
+//	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
+//	//				"gamepad");
+//	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
+//	//				"zapper");
+//	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
+//	//				"powerpad.0");
+//	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
+//	//				"powerpad.1");
+//	//gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (typeCombo),
+//	//				"arkanoid");
+//
+//	//gtk_combo_box_set_active (GTK_COMBO_BOX (typeCombo), 0);
+//
+//
+//	padNoCombo = gtk_combo_box_text_new ();
+//	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (padNoCombo), "1");
+//	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (padNoCombo), "2");
+//	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (padNoCombo), "3");
+//	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (padNoCombo), "4");
+//	gtk_combo_box_set_active (GTK_COMBO_BOX (padNoCombo), 0);
+//	g_signal_connect (padNoCombo, "changed",
+//			  G_CALLBACK (updateGamepadConfig), NULL);
+//
+//	devSelHbox  = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+//	devSelLabel = gtk_label_new ("Device:");
+//	devSelCombo = gtk_combo_box_text_new ();
+//	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (devSelCombo), "Keyboard");
+//
+// 	gtk_combo_box_set_active (GTK_COMBO_BOX (devSelCombo), 0);
+//
+//	for (int i=0; i<MAX_JOYSTICKS; i++)
+//	{
+//		jsDev_t *js = getJoystickDevice( i );
+//
+//		if ( js != NULL )
+//		{
+//			if ( js->isConnected() )
+//			{
+//				sprintf( stmp, "%i: %s", i, js->getName() );
+//   			gtk_combo_box_text_append_text( GTK_COMBO_BOX_TEXT (devSelCombo), stmp );
+//			}
+//		}
+//	}
+// 	gtk_combo_box_set_active (GTK_COMBO_BOX (devSelCombo), 0);
+//
+//	{
+//		GtkTreeModel *treeModel = gtk_combo_box_get_model( GTK_COMBO_BOX (devSelCombo) );
+//		GtkTreeIter iter;
+//		gboolean iterValid;
+//
+//		iterValid = gtk_tree_model_get_iter_first( treeModel, &iter );
+//
+//		while ( iterValid )
+//		{
+//			GValue value;
+//
+//			memset( &value, 0, sizeof(value));
+//
+//			gtk_tree_model_get_value (treeModel, &iter, 0, &value );
+//
+//			if ( G_IS_VALUE(&value) )
+//			{
+//				if ( G_VALUE_TYPE(&value) == G_TYPE_STRING )
+//				{
+//					int devIdx = -1;
+//					const char *s = (const char *)g_value_peek_pointer( &value );
+//
+//					if ( isdigit( s[0] ) )
+//					{
+//						devIdx = atoi(s);
+//					}
+//					if ( (devIdx >= 0) && (devIdx == GamePad[portNum].getDeviceIndex() ) )
+//					{
+//					 	gtk_combo_box_set_active_iter (GTK_COMBO_BOX (devSelCombo), &iter);
+//					}
+//				}
+//			}
+//			g_value_unset(&value);
+//
+//			iterValid = gtk_tree_model_iter_next( treeModel, &iter );
+//		}
+//	}
+//	g_signal_connect (devSelCombo, "changed", G_CALLBACK (selInputDevice), NULL );
+//
+//	//g_signal_connect (typeCombo, "changed", G_CALLBACK (setInputDevice),
+//	//		  gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT
+//	//						      (typeCombo)));
+//
+//	setCheckbox (fourScoreChk, "SDL.FourScore");
+//	g_signal_connect (fourScoreChk, "clicked", G_CALLBACK (toggleOption),
+//			  (gpointer) "SDL.FourScore");
+//	setCheckbox (oppositeDirChk, "SDL.Input.EnableOppositeDirectionals");
+//	g_signal_connect (oppositeDirChk, "clicked", G_CALLBACK (toggleOption),
+//			  (gpointer) "SDL.Input.EnableOppositeDirectionals");
+//
+//
+//	gtk_box_pack_start (GTK_BOX (hboxPadNo), padNoLabel, TRUE, TRUE, 5);
+//	gtk_box_pack_start (GTK_BOX (hboxPadNo), padNoCombo, TRUE, TRUE, 5);
+//	gtk_box_pack_start (GTK_BOX (vbox), hboxPadNo, FALSE, TRUE, 5);
+//	//gtk_box_pack_start_defaults(GTK_BOX(vbox), typeCombo);
+//
+//	gtk_box_pack_start (GTK_BOX (devSelHbox), devSelLabel, TRUE, TRUE, 5);
+//	gtk_box_pack_start (GTK_BOX (devSelHbox), devSelCombo, TRUE, TRUE, 5);
+//	gtk_box_pack_start (GTK_BOX (vbox), devSelHbox, FALSE, TRUE, 5);
+//
+//	gtk_box_pack_start (GTK_BOX (vbox), fourScoreChk, FALSE, TRUE, 5);
+//	gtk_box_pack_start (GTK_BOX (vbox), oppositeDirChk, FALSE, TRUE, 5);
+//
+//
+//	// create gamepad buttons
+//	buttonFrame = gtk_frame_new ("<b><i>Buttons</i></b>");
+//	gtk_label_set_use_markup (GTK_LABEL
+//				  (gtk_frame_get_label_widget
+//				   (GTK_FRAME (buttonFrame))), TRUE);
+//	buttonTable = gtk_grid_new ();
+//	gtk_container_add (GTK_CONTAINER (buttonFrame), buttonTable);
+//
+//	for (int i = 0; i < 3; i++)
+//	{
+//		gtk_grid_insert_column (GTK_GRID (buttonTable), i);
+//	}
+//	gtk_grid_set_column_spacing (GTK_GRID (buttonTable), 5);
+//	gtk_grid_set_column_homogeneous (GTK_GRID (buttonTable), TRUE);
+//	gtk_grid_set_row_spacing (GTK_GRID (buttonTable), 3);
+//
+//	for (int i = 0; i < 10; i++)
+//	{
+//		GtkWidget *buttonName = gtk_label_new (GamePadNames[i]);
+//		GtkWidget *mappedKey = gtk_label_new (NULL);
+//		GtkWidget *changeButton = gtk_toggle_button_new ();
+//		char strBuf[128];
+//
+//		gtk_grid_insert_row (GTK_GRID (buttonTable), i);
+//
+//		sprintf (strBuf, "%s:", GamePadNames[i]);
+//		gtk_label_set_text (GTK_LABEL (buttonName), strBuf);
+//
+//		gtk_button_set_label (GTK_BUTTON (changeButton), "Change");
+//		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (changeButton),
+//					      FALSE);
+//
+//		gtk_grid_attach (GTK_GRID (buttonTable), buttonName, 0, i, 1,
+//				 1);
+//		gtk_grid_attach (GTK_GRID (buttonTable), mappedKey, 1, i, 1, 1);
+//		gtk_grid_attach (GTK_GRID (buttonTable), changeButton, 2, i, 1,
+//				 1);
+//
+//		g_signal_connect (changeButton, "clicked",
+//				  G_CALLBACK (configGamepadButton),
+//				  GINT_TO_POINTER (i));
+//		buttonMappings[i] = mappedKey;
+//	}
+//
+//	// display the button mappings for the currently selected configuration
+//	updateGamepadConfig (NULL, NULL);
+//
+//	gtk_box_pack_start (GTK_BOX (vbox), buttonFrame, TRUE, TRUE, 5);
+//
+//	g_signal_connect (win, "delete-event", G_CALLBACK (closeGamepadConfig), NULL);
+//	g_signal_connect (win, "response", G_CALLBACK (closeGamepadConfig), NULL);
+//
+//	gtk_widget_show_all (win);
+//
+//	g_signal_connect (G_OBJECT (win), "key-press-event",
+//			  G_CALLBACK (convertKeypress), NULL);
+//	g_signal_connect (G_OBJECT (win), "key-release-event",
+//			  G_CALLBACK (convertKeypress), NULL);
+//
+//	buttonConfigStatus = 1;
+//
+//	return;
+//}
 
 int setBufSize (GtkWidget * w, gpointer p)
 {
@@ -1052,7 +1107,7 @@ void openVideoConfig (void)
 
 	// sync with cfg
 	int buf;
-	g_config->getOption ("SDL.SpecialFilter", &buf);
+	g_config->getOption ("SDL.VideoDriver", &buf);
 	gtk_combo_box_set_active (GTK_COMBO_BOX (DriverCombo), buf);
 
 	g_signal_connect (DriverCombo, "changed", G_CALLBACK (setVideoDriver), NULL);
@@ -2341,7 +2396,7 @@ unsigned int GDKToSDLKeyval (int gdk_key)
 
 
 // Function adapted from Gens/GS (source/gens/input/input_sdl.c)
-static gboolean convertKeypress (GtkWidget * grab, GdkEventKey * event,
+gboolean convertKeypress (GtkWidget * grab, GdkEventKey * event,
 			     gpointer user_data)
 {
 	SDL_Event sdlev;

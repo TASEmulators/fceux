@@ -472,6 +472,21 @@ int init_gtk3_sdl_video( void )
 	int sdlRendW, sdlRendH;
 	int vsyncEnabled=0;
 
+	if ( (gtk_draw_area_width < GLX_NES_WIDTH) || (gtk_draw_area_height < GLX_NES_HEIGHT) )
+	{
+		usleep(100000);
+		return -1;
+	}
+	if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) 
+	{
+		printf("[SDL] Failed to initialize video subsystem.\n");
+		return -1;
+	}
+	else
+	{
+		printf("Initialized SDL Video Subsystem\n");
+	}
+
 	if ( gdkWin == NULL )
 	{
 		printf("Error: Failed to obtain gdkWindow Handle for evbox widget\n");
@@ -544,6 +559,7 @@ int destroy_gtk3_sdl_video(void)
 		SDL_DestroyRenderer(sdlRenderer);
 		sdlRenderer = NULL;
 	}
+	//SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	return 0;
 }
 //*****************************************************************************

@@ -49,16 +49,21 @@ fillaudio(void *udata,
 			uint8 *stream,
 			int len)
 {
+	static int16_t sample = 0;
 	int16 *tmps = (int16*)stream;
 	len >>= 1;
-	while(len) {
-		int16 sample = 0;
-		if(s_BufferIn) {
+	while (len)
+	{
+		if (s_BufferIn)
+		{
 			sample = s_Buffer[s_BufferRead];
 			s_BufferRead = (s_BufferRead + 1) % s_BufferSize;
 			s_BufferIn--;
 		} else {
-			sample = 0;
+			// Retain last known sample value, helps avoid clicking
+         // noise when sound system is starved of audio data.
+			//sample = 0; 
+			//bufStarveDetected = 1;
 		}
 
 		*tmps = sample;
@@ -179,11 +184,20 @@ WriteSound(int32 *buf,
 {
 	extern int EmulationPaused;
 	if (EmulationPaused == 0)
+   {
+		int waitCount = 0;
+
 		while(Count)
 		{
 			while(s_BufferIn == s_BufferSize) 
 			{
-				SDL_Delay(1);
+				SDL_Delay(1); waitCount++;
+
+				if ( waitCount > 1000 )
+				{
+					printf("Error: Sound sink is not draining... Breaking out of audio loop to prevent lockup.\n");
+					return;
+				}
 			}
 
 			s_Buffer[s_BufferWrite] = *buf;
@@ -196,6 +210,7 @@ WriteSound(int32 *buf,
             
 			buf++;
 		}
+   }
 }
 
 /**
