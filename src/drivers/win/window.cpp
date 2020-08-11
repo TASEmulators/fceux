@@ -1934,18 +1934,19 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 			case MENU_INPUT_BARCODE:
 				char bbuf[32 + 1];
-				if ((CWin32InputBox::GetString("Input Barcode", "Enter 13-digit decimal number.", bbuf, hWnd) == IDOK)) {
-					if (strlen(bbuf) == 13) {
-						if (InputType[2] == SIFC_BWORLD) {
-							strcpy((char *)&BWorldData[1], (char *)bbuf);
-							BWorldData[0] = 1;
-						}
-						else
-							FCEUI_DatachSet((uint8 *)bbuf);
+				if ((CWin32InputBox::GetString("Input Barcode", "Input full 13- or 8-digit barcode to be directly send to the reader. Or input partial 12- or 7-digit number to allow the program to calculate control code automatically.", bbuf, hWnd) == IDOK)) {
+					uint32 stl = strlen(bbuf);
+					if (InputType[2] == SIFC_BWORLD) {
+						strcpy((char *)&BWorldData[1], (char *)bbuf);
+						BWorldData[0] = 1;
 						FCEU_DispMessage("Barcode entered: %s", 0, bbuf);
 					}
-					else
-						FCEU_DispMessage("Wrong Barcode!", 0);
+					else {
+						if(FCEUI_DatachSet((uint8 *)bbuf) == 1)
+							FCEU_DispMessage("Barcode entered: %s", 0, bbuf);
+						else
+							FCEU_DispMessage("Invalid barcode size or characters!", 0);
+					}
 				}
 				break;
 
