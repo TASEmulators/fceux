@@ -41,6 +41,7 @@ else(WIN32)
   find_package(ZLIB REQUIRED)
 
   add_definitions( -Wall  -Wno-write-strings  -Wno-sign-compare  -Wno-parentheses  -Wno-unused-local-typedefs  -fPIC )
+  add_definitions( -DFCEUDEF_DEBUGGER )
 
   if ( ${GTK} )
      pkg_check_modules( GTK3 REQUIRED gtk+-3.0)
