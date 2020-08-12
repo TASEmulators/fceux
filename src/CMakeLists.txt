@@ -1,7 +1,9 @@
 
 if ( ${GTK} )
+message( STATUS "GUI backend: GTK")
 set( APP_NAME fceux-gtk)
 else()
+message( STATUS "GUI backend: QT")
 set( APP_NAME fceux)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -24,8 +26,13 @@ else(WIN32)
   # Non Windows System
   # UNIX (Linux or Mac OSX)
 
-  #set (OpenGL_GL_PREFERENCE  GLVND)
-  set (OpenGL_GL_PREFERENCE  LEGACY)
+	if ( ${GLVND} )
+		message( STATUS "OpenGL preference: GLVND")
+		set (OpenGL_GL_PREFERENCE  GLVND)
+	else()
+		message( STATUS "OpenGL preference: LEGACY")
+		set (OpenGL_GL_PREFERENCE  LEGACY)
+	endif()
 
   # Use the built-in cmake find_package functions to find dependencies
   # Use package PkgConfig to detect headers/library what find_package cannot find.
@@ -34,6 +41,7 @@ else(WIN32)
   find_package(ZLIB REQUIRED)
 
   add_definitions( -Wall  -Wno-write-strings  -Wno-sign-compare  -Wno-parentheses  -Wno-unused-local-typedefs  -fPIC )
+  add_definitions( -DFCEUDEF_DEBUGGER )
 
   if ( ${GTK} )
      pkg_check_modules( GTK3 REQUIRED gtk+-3.0)
