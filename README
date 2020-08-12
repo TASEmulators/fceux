@@ -84,6 +84,9 @@ Look in the src/CMakeList.txt file to tweak options.
 The Qt (or GTK) GUI is required and automatically builds as part of the build. The Qt GUI is the default.
 When invoking cmake, the GTK GUI can be built (instead of Qt) by specifying a -DGTK=1 on the command line.
 See above build instructions.
+OpenGL options:
+For Linux builds, the OpenGL library preference can be either GLVND or LEGACY (default). 
+To use GLVND OpenGL, add a -DGLVND=1 on the cmake command line.
 
 5 - LUA Scripting
 -----------------
