@@ -252,7 +252,7 @@ void FCEUI_FDSInsert(void); //mbg merge 7/17/06 changed to void fn(void) to make
 //int FCEUI_FDSEject(void);
 void FCEUI_FDSSelect(void);
 
-int FCEUI_DatachSet(const uint8 *rcode);
+int FCEUI_DatachSet(uint8 *rcode);
 
 ///returns a flag indicating whether emulation is paused
 int FCEUI_EmulationPaused();

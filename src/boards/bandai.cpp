@@ -393,7 +393,9 @@ static int BarcodeReadPos;
 static int BarcodeCycleCount;
 static uint32 BarcodeOut;
 
-int FCEUI_DatachSet(const uint8 *rcode) {
+// #define INTERL2OF5
+
+int FCEUI_DatachSet(uint8 *rcode) {
 	int prefix_parity_type[10][6] = {
 		{ 0, 0, 0, 0, 0, 0 }, { 0, 0, 1, 0, 1, 1 }, { 0, 0, 1, 1, 0, 1 }, { 0, 0, 1, 1, 1, 0 },
 		{ 0, 1, 0, 0, 1, 1 }, { 0, 1, 1, 0, 0, 1 }, { 0, 1, 1, 1, 0, 0 }, { 0, 1, 0, 1, 0, 1 },
@@ -416,6 +418,7 @@ int FCEUI_DatachSet(const uint8 *rcode) {
 	};
 	uint8 code[13 + 1];
 	uint32 tmp_p = 0;
+	uint32 csum = 0;
 	int i, j;
 	int len;
 
@@ -427,18 +430,46 @@ int FCEUI_DatachSet(const uint8 *rcode) {
 	}
 	if (len != 13 && len != 12 && len != 8 && len != 7) return(0);
 
-	#define BS(x) BarcodeData[tmp_p] = x; tmp_p++
+#define BS(x) BarcodeData[tmp_p] = x; tmp_p++
 
 	for (j = 0; j < 32; j++) { // delay before sending a code
 		BS(0x00);
 	}
 
-	/* Left guard bars */
+#ifdef INTERL2OF5
+	
+	BS(1); BS(1); BS(0); BS(0); // 1
+	BS(1); BS(1); BS(0); BS(0); // 1
+	BS(1); BS(1); BS(0); BS(0); // 1
+	BS(1); BS(1); BS(0); BS(0); // 1 
+	BS(1); BS(1); BS(0); BS(0); // 1
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0 
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0
+	BS(1);        BS(0); BS(0); // 0 cs
+	BS(1); BS(1); BS(0); BS(0); // 1
+
+#else
+	// Left guard bars
 	BS(1); BS(0); BS(1);
-
 	if (len == 13 || len == 12) {
-		uint32 csum;
-
 		for (i = 0; i < 6; i++)
 			if (prefix_parity_type[code[0]][i]) {
 				for (j = 0; j < 7; j++) {
@@ -448,53 +479,53 @@ int FCEUI_DatachSet(const uint8 *rcode) {
 				for (j = 0; j < 7; j++) {
 					BS(data_left_odd[code[i + 1]][j]);
 				}
-
-		/* Center guard bars */
+		// Center guard bars
 		BS(0); BS(1); BS(0); BS(1); BS(0);
-
 		for (i = 7; i < 12; i++)
 			for (j = 0; j < 7; j++) {
 				BS(data_right[code[i]][j]);
 			}
-		csum = 0;
-		for (i = 0; i < 12; i++) csum += code[i] * ((i & 1) ? 3 : 1);
-		csum = (10 - (csum % 10)) % 10;
+		// Calc and write down the control code if not assigned, instead, send code as is
+		// Battle Rush uses modified type of codes with different control code calculation
+		if (len == 12) {
+			for (i = 0; i < 12; i++)
+				csum += code[i] * ((i & 1) ? 3 : 1);
+			csum = (10 - (csum % 10)) % 10;
+			rcode[12] = csum + 0x30;	// update check code to the input string as well
+			rcode[13] = 0;
+			code[12] = csum;
+		} 
 		for (j = 0; j < 7; j++) {
-			BS(data_right[csum][j]);
+			BS(data_right[code[12]][j]);
 		}
 	} else if (len == 8 || len == 7) {
-		uint32 csum = 0;
-
-		for (i = 0; i < 7; i++) csum += (i & 1) ? code[i] : (code[i] * 3);
-
-		csum = (10 - (csum % 10)) % 10;
-
 		for (i = 0; i < 4; i++)
 			for (j = 0; j < 7; j++) {
 				BS(data_left_odd[code[i]][j]);
 			}
-
-
-		/* Center guard bars */
+		// Center guard bars
 		BS(0); BS(1); BS(0); BS(1); BS(0);
-
 		for (i = 4; i < 7; i++)
 			for (j = 0; j < 7; j++) {
 				BS(data_right[code[i]][j]);
 			}
-
+		csum = 0;
+		for (i = 0; i < 7; i++)
+			csum += (i & 1) ? code[i] : (code[i] * 3);
+		csum = (10 - (csum % 10)) % 10;
+		rcode[7] = csum + 0x30;	// update check code to the input string as well
+		rcode[8] = 0;
 		for (j = 0; j < 7; j++) {
 			BS(data_right[csum][j]);
 		}
 	}
-
-	/* Right guard bars */
+	// Right guard bars
 	BS(1); BS(0); BS(1);
+#endif
 
 	for (j = 0; j < 32; j++) {
 		BS(0x00);
 	}
-
 	BS(0xFF);
 
 	#undef BS
