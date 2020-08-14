@@ -56,6 +56,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	std::string prefix;
 	char stmp[256];
 
+	// Ensure that joysticks are enabled, no harm calling init again.
 	InitJoysticks();
 
    portNum = 0;
