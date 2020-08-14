@@ -196,8 +196,8 @@ DriverKill()
 	if (!noconfig)
 		g_config->save();
 
-	if(inited&2)
-		KillJoysticks();
+	KillJoysticks();
+
 	if(inited&4)
 		KillVideo();
 	if(inited&1)

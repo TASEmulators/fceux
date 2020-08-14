@@ -127,7 +127,7 @@ static void loadMapList(void)
 
    path = std::string(baseDir) + "/input/" + std::string(guid);
 
-	sprintf( stmp, "SDL.Input.GamePad.%u.", padNo );
+	sprintf( stmp, "SDL.Input.GamePad.%i.", padNo );
 	prefix = stmp;
 
 	g_config->getOption(prefix + "Profile", &mapName );
@@ -182,9 +182,15 @@ static void loadMapList(void)
 
 static void selPortChanged( GtkWidget * w, gpointer p )
 {
-	padNo =
-		atoi (gtk_combo_box_text_get_active_text
-		      (GTK_COMBO_BOX_TEXT (padNoCombo))) - 1;
+	const char *txt;
+
+	txt = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT (padNoCombo));
+
+	if ( txt == NULL )
+	{
+		return;
+	}
+	padNo = atoi(txt) - 1;
 
 	GtkTreeModel *treeModel = gtk_combo_box_get_model( GTK_COMBO_BOX (devSelCombo) );
 	GtkTreeIter iter;
@@ -270,12 +276,19 @@ static void saveConfig(void)
 {
 	int i;
 	char stmp[256];
+	const char *txt;
 	std::string prefix, mapName;
 
-	sprintf( stmp, "SDL.Input.GamePad.%u.", padNo );
+	sprintf( stmp, "SDL.Input.GamePad.%i.", padNo );
 	prefix = stmp;
 
-   mapName.assign( gtk_combo_box_text_get_active_text( GTK_COMBO_BOX_TEXT(mapProfCombo) ) );
+	txt = gtk_combo_box_text_get_active_text( GTK_COMBO_BOX_TEXT(mapProfCombo) );
+
+	if ( txt == NULL )
+	{
+		return;
+	}
+   mapName.assign( txt );
 
 	g_config->setOption(prefix + "DeviceGUID", GamePad[padNo].getGUID() );
 	g_config->setOption(prefix + "Profile"   , mapName.c_str()            );
@@ -312,10 +325,17 @@ static void loadProfileCB (GtkButton * button, gpointer p)
 	char stmp[256];
    int devIdx, ret;
    std::string mapName;
+	const char *txt;
 
 	devIdx = getDeviceIndex();
 
-   mapName.assign( gtk_combo_box_text_get_active_text( GTK_COMBO_BOX_TEXT(mapProfCombo) ) );
+	txt = gtk_combo_box_text_get_active_text( GTK_COMBO_BOX_TEXT(mapProfCombo) );
+
+	if ( txt == NULL )
+	{
+		return;
+	}
+   mapName.assign( txt );
 
 	GamePad[padNo].setDeviceIndex( devIdx );
 
@@ -347,8 +367,15 @@ static void saveProfileCB (GtkButton * button, gpointer p)
 	int ret;
    std::string mapName;
    char stmp[256];
+	const char *txt;
 
-   mapName.assign( gtk_combo_box_text_get_active_text( GTK_COMBO_BOX_TEXT(mapProfCombo) ) );
+	txt = gtk_combo_box_text_get_active_text( GTK_COMBO_BOX_TEXT(mapProfCombo) );
+
+	if ( txt == NULL )
+	{
+		return;
+	}
+   mapName.assign( txt );
 
    ret = GamePad[padNo].saveCurrentMapToFile( mapName.c_str() );
 
@@ -402,8 +429,15 @@ static void deleteProfileCB (GtkButton * button, gpointer p)
 	int ret;
    std::string mapName;
    char stmp[256];
+	const char *txt;
 
-   mapName.assign( gtk_combo_box_text_get_active_text( GTK_COMBO_BOX_TEXT(mapProfCombo) ) );
+	txt = gtk_combo_box_text_get_active_text( GTK_COMBO_BOX_TEXT(mapProfCombo) );
+
+	if ( txt == NULL )
+	{
+		return;
+	}
+   mapName.assign( txt );
 
    ret = GamePad[padNo].deleteMapping( mapName.c_str() );
 
@@ -570,6 +604,10 @@ void openGamepadConfig (void)
 	{
 		return;
 	}
+
+	// Ensure that joysticks are enabled, no harm calling init again.
+	InitJoysticks();
+
 	padNo = 0;
 
 	win = gtk_dialog_new_with_buttons ("Controller Configuration",
