@@ -22,7 +22,7 @@ int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 {
 	int offset = -1;
 
-	if (sscanf(offsetBuffer,"%4X",&offset) == EOF)
+	if (sscanf(offsetBuffer,"%4X",(unsigned int *)&offset) == EOF)
 	{
 		return -1;
 	}

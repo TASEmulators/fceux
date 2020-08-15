@@ -226,7 +226,7 @@ static void ModifyCheat(int num)
  printf("Address [$%04x]: ",(unsigned int)A);
  A=GetH16(A);
 
- printf("Value [%03d]: ",(unsigned int)V);
+ printf("Value [%03u]: ",(unsigned int)V);
  V=Get8(V);
 
  printf("Compare [%3d]: ",compare);
@@ -302,9 +302,9 @@ static void AddCheatParam(uint32 A, uint8 V)
  GetString(name,256);
  printf("Address [$%04x]: ",(unsigned int)A);
  A=GetH16(A);
- printf("Value [%03d]: ",(unsigned int)V);
+ printf("Value [%03u]: ",(unsigned int)V);
  V=Get8(V);
- printf("Add cheat \"%s\" for address $%04x with value %03d?",name,(unsigned int)A,(unsigned int)V);
+ printf("Add cheat \"%s\" for address $%04x with value %03u?",name,(unsigned int)A,(unsigned int)V);
  if(GetYN(0))
  {
   if(FCEUI_AddCheat(name,A,V,-1,0))
@@ -326,9 +326,9 @@ static int clistcallb(char *name, uint32 a, uint8 v, int compare, int s, int typ
  int ret;
 
  if(compare>=0)
-  sprintf(tmp,"%s   $%04x:%03d:%03d - %s",s?"*":" ",(unsigned int)a,(unsigned int)v,compare,name);
+  sprintf(tmp,"%s   $%04x:%03u:%03d - %s",s?"*":" ",(unsigned int)a,(unsigned int)v,compare,name);
  else
-  sprintf(tmp,"%s   $%04x:%03d     - %s",s?"*":" ",(unsigned int)a,(unsigned int)v,name);
+  sprintf(tmp,"%s   $%04x:%03u     - %s",s?"*":" ",(unsigned int)a,(unsigned int)v,name);
  if(type==1)
   tmp[2]='S';
  ret=AddToList(tmp,lid);
@@ -373,7 +373,7 @@ static void ResetSearch(void)
 static int srescallb(uint32 a, uint8 last, uint8 current, void *data)
 {
  char tmp[14];
- sprintf(tmp, "$%04x:%03d:%03d",(unsigned int)a,(unsigned int)last,(unsigned int)current);
+ sprintf(tmp, "$%04x:%03u:%03u",(unsigned int)a,(unsigned int)last,(unsigned int)current);
  return(AddToList(tmp,a));
 }
 

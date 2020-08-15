@@ -108,7 +108,7 @@ BOOL updateResults(HWND hwndDlg, int rule)
 	int chosen_rules[NUMBER_OF_RULES] = { 0 };
 	unsigned int values[NUMBER_OF_RULES] = { 0 };
 	
-	for (int i=0;i<sizeof(chosen_rules) && i <= rule;i++)
+	for (int i=0;i<NUMBER_OF_RULES && i <= rule;i++)
 	{
 		chosen_rules[i] = SendDlgItemMessage(hwndDlg, RULE_BOX_1 + i, CB_GETCURSEL, 0, 0);
 		
