@@ -5,9 +5,9 @@
 
 #include <string>
 
-#include "Qt/main.h"
-#include "Qt/input.h"
-#include "Qt/sdl.h"
+#include "sdl/main.h"
+#include "sdl/input.h"
+#include "sdl/sdl.h"
 
 #define  MAX_JOYSTICKS  32
 
