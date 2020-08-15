@@ -151,6 +151,47 @@ void jsDev_t::init( int idx )
 
 	guidStr.assign( stmp );
 
+	// If game controller, save default mapping if it does not already exist.
+	if ( gc )
+	{
+   	QDir dir;
+		QFile defaultMapFile;
+   	std::string path;
+   	const char *baseDir = FCEUI_GetBaseDirectory();
+		
+   	path = std::string(baseDir) + "/input/" + guidStr;
+
+   	dir.mkpath( QString::fromStdString(path) );
+
+   	path += "/default.txt";
+
+		defaultMapFile.setFileName( QString::fromStdString(path) );
+
+		if ( !defaultMapFile.exists() )
+		{
+			FILE *fp;
+
+			fp = ::fopen( path.c_str(), "w" );
+
+			if ( fp != NULL )
+			{
+				const char *defaultMap;
+
+				defaultMap = SDL_GameControllerMapping(gc);
+
+				if ( defaultMap )
+				{
+					//printf("GameController Mapping: %s\n", defaultMap );
+					fprintf( fp, "%s", defaultMap );
+				}
+				::fclose(fp); 
+			}
+		}
+		//else 
+		//{
+		//	printf("GameController Mapping Exists: '%s'\n", path.c_str() );
+		//}
+	}
 }
 
 void jsDev_t::print(void)

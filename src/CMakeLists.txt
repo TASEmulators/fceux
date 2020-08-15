@@ -395,6 +395,7 @@ set(SRC_DRIVERS_COMMON
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/scale3x.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/scalebit.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/vidblit.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/os_utils.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/nes_ntsc.c
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/nesvideos-piece.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/rgbtorgb.cpp
