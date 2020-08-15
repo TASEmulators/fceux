@@ -25,6 +25,7 @@
 //#include <QDir>
 #include "sdl/sdl.h"
 #include "sdl/sdl-joystick.h"
+#include "common/os_utils.h"
 
 #include <cstdlib>
 #include <unistd.h>
@@ -151,6 +152,39 @@ void jsDev_t::init( int idx )
 
 	guidStr.assign( stmp );
 
+	// If game controller, save default mapping if it does not already exist.
+	if ( gc )
+	{
+   	std::string path;
+   	const char *baseDir = FCEUI_GetBaseDirectory();
+		
+   	path = std::string(baseDir) + "/input/" + guidStr;
+
+   	fceu_mkpath( path.c_str() );
+
+   	path += "/default.txt";
+
+		if ( !fceu_file_exists( path.c_str() ) )
+		{
+			FILE *fp;
+
+			fp = ::fopen( path.c_str(), "w" );
+
+			if ( fp != NULL )
+			{
+				const char *defaultMap;
+
+				defaultMap = SDL_GameControllerMapping(gc);
+
+				if ( defaultMap )
+				{
+					//printf("GameController Mapping: %s\n", defaultMap );
+					fprintf( fp, "%s", defaultMap );
+				}
+				::fclose(fp); 
+			}
+		}
+	}
 }
 
 void jsDev_t::print(void)
@@ -679,7 +713,7 @@ int GamePad_t::saveCurrentMapToFile( const char *name )
    }
    path = std::string(baseDir) + "/input/" + std::string(guid);
 
-   //dir.mkpath( QString::fromStdString(path) );
+   fceu_mkpath( path.c_str() );
 
    path += "/" + std::string(name) + ".txt";
 
@@ -767,7 +801,7 @@ int GamePad_t::createProfile( const char *name )
    }
    path = std::string(baseDir) + "/input/" + std::string(guid);
 
-   //dir.mkpath( QString::fromStdString(path) );
+   fceu_mkpath( path.c_str() );
    //printf("DIR: '%s'\n", path.c_str() );
 
    //path += "/" + std::string(name) + ".txt";
