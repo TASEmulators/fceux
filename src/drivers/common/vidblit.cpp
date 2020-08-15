@@ -88,13 +88,13 @@ static int PAL_LUT(uint32 *buffer, int index, int x, int y)
 
 static void CalculateShift(uint32 *CBM, int *cshiftr, int *cshiftl)
 {
-	int a,x,z,y;
+	int a,x,z;
 	cshiftl[0]=cshiftl[1]=cshiftl[2]=-1;
 	for(a=0;a<3;a++)
 	{
-		for(x=0,y=-1,z=0;x<32;x++)
+		for(x=0,z=0;x<32;x++)
 		{
-			if(CBM[a]&(1<<x))
+			if(CBM[a]&(1u<<x))
 			{
 				if(cshiftl[a]==-1) cshiftl[a]=x;
 				z++;

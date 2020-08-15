@@ -194,9 +194,9 @@ Condition* Parentheses(const char** str, Condition* c, char openPar, char closeP
 	{
 		scan(str);
 
-		c->lhs = Connect(str);
-
 		if (!c) return 0;
+
+		c->lhs = Connect(str);
 
 		if (next == closePar)
 		{

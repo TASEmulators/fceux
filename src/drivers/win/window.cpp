@@ -1305,7 +1305,7 @@ void DumpSubtitles(HWND hWnd)
 
 			for (unsigned int i = 0; i < subtitleFrames.size(); i++)
 			{
-				fprintf(srtfile, "%i\n", i+1); // starts with 1, not 0
+				fprintf(srtfile, "%u\n", i+1); // starts with 1, not 0
 				double seconds, ms, endseconds, endms;
 				seconds = subtitleFrames[i]/fps;
 				if (i+1 < subtitleFrames.size()) // there's another subtitle coming after this one
@@ -1329,8 +1329,8 @@ void DumpSubtitles(HWND hWnd)
 				floor(endseconds/3600), (int)floor(endseconds/60) % 60, (int)floor(endseconds) % 60, (int)(endms*1000));
 				fprintf(srtfile, "%s\n\n", subtitleMessages[i].c_str()); // new line for every subtitle
 			}
+			fclose(srtfile);
 		}
-	fclose(srtfile);
 	}
 
 	return;
