@@ -33,6 +33,7 @@ static GLXContext              glc = NULL;
 static XWindowAttributes       gwa;
 static XEvent                  xev;
 static GLint  double_buffer_ena = 1;
+static bool   isDoubleBuffered  = true;
 
 static GLuint gltexture = 0;
 static int    spawn_new_window = 0;
@@ -289,7 +290,7 @@ static void render_image(void)
 	//glVertex2f( 1.0f,  1.0f);	// Top right of target.
 	//glEnd();
 
-	if ( double_buffer_ena )
+	if ( isDoubleBuffered )
 	{
 		glXSwapBuffers( dpy, win );
 	}
@@ -452,13 +453,13 @@ int  init_gtk3_GLXContext( int flags )
 
 	if (vi == NULL) 
 	{
-		printf("\n\tno appropriate visual found\n\n");
+		printf("\n\tERROR: GLX No appropriate visual found\n\n");
 	   exit(0);
 	} 
 	else 
 	{
 		int val;
-		printf("\n\tvisual %p selected\n", (void *)vi->visualid); /* %p creates hexadecimal output like in glxinfo */
+		printf("\n\tGLX visual %p selected\n", (void *)vi->visualid); /* %p creates hexadecimal output like in glxinfo */
 
 		if ( glXGetConfig( dpy, vi, GLX_RGBA, &val ) == 0 )
 		{
@@ -478,6 +479,7 @@ int  init_gtk3_GLXContext( int flags )
 		}
 		if ( glXGetConfig( dpy, vi, GLX_DOUBLEBUFFER, &val ) == 0 )
 		{
+			isDoubleBuffered = val ? true : false;
 			printf("GLX_DOUBLEBUFFER: %i \n", val );
 		}
 		if ( glXGetConfig( dpy, vi, GLX_RED_SIZE, &val ) == 0 )
@@ -512,7 +514,11 @@ int  init_gtk3_GLXContext( int flags )
 
 		if ( glc == NULL )
 		{
-			printf("Error: glXCreateContext Failed\n");
+			printf("ERROR: glXCreateContext Failed\n");
+		}
+		else
+		{
+			printf("glXIsDirect: %i \n", glXIsDirect( dpy, glc ) );
 		}
 	}
 	XFree(vi); vi = NULL;
