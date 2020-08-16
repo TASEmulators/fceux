@@ -24,6 +24,7 @@
 #include "Qt/GuiConf.h"
 #include "Qt/LuaControl.h"
 #include "Qt/CheatsConf.h"
+#include "Qt/HexEditor.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
@@ -483,6 +484,18 @@ void consoleWin_t::createMainMenu(void)
     connect(cheatsAct, SIGNAL(triggered()), this, SLOT(openCheats(void)) );
 
     toolsMenu->addAction(cheatsAct);
+
+	 //-----------------------------------------------------------------------
+	 // Debug
+    debugMenu = menuBar()->addMenu(tr("Debug"));
+
+	 // Debug -> Hex Editor
+	 hexEditAct = new QAction(tr("Hex Editor..."), this);
+    //hexEditAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    hexEditAct->setStatusTip(tr("Open Memory Hex Editor"));
+    connect(hexEditAct, SIGNAL(triggered()), this, SLOT(openHexEditor(void)) );
+
+    debugMenu->addAction(hexEditAct);
 
 	 //-----------------------------------------------------------------------
 	 // Movie
@@ -1006,6 +1019,22 @@ void consoleWin_t::openCheats(void)
    cheatWin->exec();
 
    delete cheatWin;
+
+   //printf("GUI Cheat Window Destroyed\n");
+}
+
+void consoleWin_t::openHexEditor(void)
+{
+	HexEditorDialog_t *hexEditWin;
+
+	//printf("Open GUI Hex Editor Window\n");
+	
+   hexEditWin = new HexEditorDialog_t(this);
+	
+   hexEditWin->show();
+   hexEditWin->exec();
+
+   delete hexEditWin;
 
    //printf("GUI Cheat Window Destroyed\n");
 }
