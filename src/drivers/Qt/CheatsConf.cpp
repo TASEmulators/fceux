@@ -50,7 +50,8 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	QFontMetrics fm(font);
 
-	fontCharWidth = fm.boundingRect('X').width() * devPixRatio;
+	//fontCharWidth = fm.boundingRect('X').width() * devPixRatio;
+	fontCharWidth = 2.00 * fm.averageCharWidth() * devPixRatio;
 
 	setWindowTitle("Cheat Search");
 
