@@ -47,6 +47,8 @@ class HexEditorDialog_t : public QDialog
 		void showMemViewResults (bool reset);
 		int  checkMemActivity(void);
 		int  calcVisibleRange( int *start_out, int *end_out, int *center_out );
+		void setCursor( int pos );
+		void advCursor( int num );
 
 		QFont      font;
 		QPlainTextEdit *txtBuf;
@@ -70,5 +72,7 @@ class HexEditorDialog_t : public QDialog
       void closeWindow(void);
 	private slots:
 		void updatePeriodic(void);
+		void vbarMoved( int pos );
+		void vbarPressed( void );
 
 };
