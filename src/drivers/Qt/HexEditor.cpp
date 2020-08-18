@@ -70,20 +70,20 @@ static int getROM( unsigned int offset)
 	}
 	return -1;
 }
-static int conv2xchar( int i )
-{
-   int c = 0;
-
-	if ( (i >= 0) && (i < 10) )
-	{
-      c = i + '0';
-	}
-	else if ( i < 16 )
-	{
-		c = (i - 10) + 'A';
-	}
-	return c;
-}
+//static int conv2xchar( int i )
+//{
+//   int c = 0;
+//
+//	if ( (i >= 0) && (i < 10) )
+//	{
+//      c = i + '0';
+//	}
+//	else if ( i < 16 )
+//	{
+//		c = (i - 10) + 'A';
+//	}
+//	return c;
+//}
 //----------------------------------------------------------------------------
 HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	: QDialog( parent )
@@ -100,20 +100,9 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	mainLayout = new QVBoxLayout();
 
-	txtBuf = new QPlainTextEdit();
+	editor = new QHexEdit(this);
 
-	txtBuf->setFont( font );
-	txtBuf->moveCursor(QTextCursor::Start);
-	//txtBuf->setReadOnly(true);
-	txtBuf->setOverwriteMode(true);
-	txtBuf->setCenterOnScroll(false);
-	txtBuf->setLineWrapMode( QPlainTextEdit::NoWrap );
-
-	connect( txtBuf->verticalScrollBar(), SIGNAL(sliderMoved(int)), this, SLOT(vbarMoved(int)) );
-	connect( txtBuf->verticalScrollBar(), SIGNAL(sliderPressed(void)), this, SLOT(vbarPressed(void)) );
-	//connect( txtBuf->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(vbarMoved(int)) );
-
-	mainLayout->addWidget( txtBuf );
+	mainLayout->addWidget( editor );
 
 	setLayout( mainLayout );
 
@@ -126,6 +115,28 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	memAccessFunc = getRAM;
 	redraw = false;
 	total_instructions_lp = 0;
+
+	dataArray  = new QByteArray( 0x20000, '0' );
+	dataBuffer = new QBuffer( dataArray, this );
+	dataBuffer->setBuffer( dataArray );
+
+	printf("DataArray: Size: %i \n", dataArray->size() );
+	editor->setData( *dataBuffer );
+
+	editor->setAddressArea(true);
+   editor->setAsciiArea(true);
+   editor->setHighlighting(true);
+   editor->setOverwriteMode(true);
+   editor->setReadOnly(true);
+   editor->setHexCaps(true);
+
+   editor->setHighlightingColor( QColor("yellow") );
+   editor->setAddressAreaColor( QColor("white") );
+   editor->setSelectionColor( QColor("blue") );
+	//editor->setFont( font );
+
+   editor->setAddressWidth(6);
+   editor->setBytesPerLine(16);
 
 	showMemViewResults(true);
 
@@ -164,39 +175,6 @@ void HexEditorDialog_t::keyReleaseEvent(QKeyEvent *event)
 	//assignHotkey( event );
 }
 //----------------------------------------------------------------------------
-int HexEditorDialog_t::calcVisibleRange( int *start_out, int *end_out, int *center_out )
-{
-	int start_pos, end_pos;
-	QPoint bottom_left( 0, txtBuf->viewport()->height() - 1);
-  
-	start_pos = txtBuf->cursorForPosition(QPoint(0, 0)).position();
-	end_pos   = txtBuf->cursorForPosition(bottom_left).position();
-
-	start_pos = (start_pos / numCharsPerLine) - 1;
-	end_pos   = (end_pos   / numCharsPerLine) + 1;
-
-	if ( start_pos < 0 )
-	{
-		start_pos = 0;
-	}
-
-	//printf("Start: %i   End: %i\n", start_pos, end_pos );
-
-	if ( start_out )
-	{
-		*start_out = start_pos;
-	}
-	if ( end_out )
-	{
-		*end_out = end_pos;
-	}
-	if ( center_out )
-	{
-		*center_out = (start_pos + end_pos) / 2;
-	}
-	return 0;
-}
-//----------------------------------------------------------------------------
 void HexEditorDialog_t::setMode(int new_mode)
 {
 	if ( mode != new_mode )
@@ -218,38 +196,8 @@ void HexEditorDialog_t::initMem(void)
 	}
 }
 //----------------------------------------------------------------------------
-void HexEditorDialog_t::vbarMoved( int pos )
-{
-	printf("VBAR: %i \n", pos );
-}
-//----------------------------------------------------------------------------
-void HexEditorDialog_t::vbarPressed( void )
-{
-	printf("VBAR: %i \n", txtBuf->verticalScrollBar()->value() );
-}
-//----------------------------------------------------------------------------
-void HexEditorDialog_t::setCursor( int pos )
-{
-	QTextCursor cursor = txtBuf->textCursor();
-	cursor.setPosition( pos );
-	txtBuf->setTextCursor( cursor );
-}
-//----------------------------------------------------------------------------
-void HexEditorDialog_t::advCursor( int num )
-{
-	QTextCursor cursor = txtBuf->textCursor();
-	cursor.setPosition( cursor.position() + num );
-	txtBuf->setTextCursor( cursor );
-}
-//----------------------------------------------------------------------------
 void HexEditorDialog_t::showMemViewResults (bool reset)
 {
-	int i, row, row_start, row_end;
-	int addr = 0, lineAddr = 0, c, un, ln;
-	char addrStr[128], valStr[16][8], ascii[18];
-	char valChg[16], asciiChg, activityColoringOn, colorEnable;
-	QTextCursor cursorSave;
-
 	switch ( mode )
 	{
 		default:
@@ -282,7 +230,7 @@ void HexEditorDialog_t::showMemViewResults (bool reset)
 				}
 				mbuf_size = 0;
 				redraw = true;
-				txtBuf->setPlainText("No ROM Loaded");
+				//txtBuf->setPlainText("No ROM Loaded");
 				return;
 			}
 		break;
@@ -293,6 +241,8 @@ void HexEditorDialog_t::showMemViewResults (bool reset)
 	{
 		printf("Mode: %i  MemSize:%i   0x%08x\n", mode, memSize, (unsigned int)memSize );
 		reset = 1;
+
+		dataArray->resize( mbuf_size );
 
 		if ( mbuf )
 		{
@@ -312,143 +262,6 @@ void HexEditorDialog_t::showMemViewResults (bool reset)
 			return;
 		}
 	}
-
-	if ( reset )
-	{
-		txtBuf->clear();
-		row_start = 0;
-		row_end   = numLines;
-	}
-	else
-	{
-		calcVisibleRange( &row_start, &row_end, NULL );
-	}
-	if ( row_start < 0 )
-	{
-		row_start = 0;
-	}
-	if ( row_end > numLines )
-	{
-		row_end = numLines;
-	}
-	cursorSave = txtBuf->textCursor();
-	//printf("Cursor Start Position: %i\n", txtBuf->textCursor().position() );
-
-	for (row=row_start; row<row_end; row++)
-	{
-		lineAddr = (row*16);
-
-		//printf("Pre  Cursor Line %i Position: %i\n", row,  txtBuf->textCursor().position() );
-
-		if ( !reset )
-		{
-			setCursor( row * numCharsPerLine );
-		}
-
-		//printf("Post Cursor Line %i Position: %i\n", row,  txtBuf->textCursor().position() );
-
-		if ( reset )
-		{
-		   sprintf( addrStr, "%08X ", lineAddr );
-
-			txtBuf->insertPlainText( addrStr );
-		}
-		else
-		{
-			advCursor(9);
-		}
-
-		asciiChg = reset;
-
-		for (i=0; i<16; i++)
-		{
-			valChg[i] = reset;
-
-			addr = lineAddr+i;
-
-			c = memAccessFunc(addr);
-
-			if ( mbuf[addr].draw )
-			{
-				mbuf[addr].draw = 0;
-				valChg[i] = 1;
-				asciiChg  = 1;
-			}
-
-			un = ( c & 0x00f0 ) >> 4;
-			ln = ( c & 0x000f );
-
-			valStr[i][0] = ' ';
-			valStr[i][1] = conv2xchar(un);
-			valStr[i][2] = conv2xchar(ln);
-			valStr[i][3] = ' ';
-			valStr[i][4] = 0;
-
-			if ( isprint(c) )
-			{
-            ascii[i] = c;
-			}
-			else
-			{
-            ascii[i] = '.';
-			}
-
-			if ( reset )
-			{
-				txtBuf->insertPlainText( valStr[i] );
-			}
-			else
-			{
-				if ( valChg[i] )
-				{
-					for (int j=0; j<4; j++)
-					{
-						txtBuf->textCursor().deleteChar();
-					}
-					txtBuf->insertPlainText( valStr[i] );
-				}
-				else
-				{
-					advCursor(4);
-				}
-			}
-		}
-		ascii[16] = 0;
-
-		if ( reset )
-		{
-			txtBuf->insertPlainText( ascii );
-		}
-		else
-		{
-			if ( asciiChg )
-			{
-				for (int j=0; j<16; j++)
-				{
-					txtBuf->textCursor().deleteChar();
-				}
-				txtBuf->insertPlainText( ascii );
-			}
-			else
-			{
-				advCursor(16);
-			}
-		}
-
-		if ( reset )
-		{
-			txtBuf->insertPlainText("\n");
-		}
-		else
-		{
-			advCursor(1);
-		}
-
-	}
-
-	// Restore Cursor to Saved Location
-	txtBuf->setTextCursor( cursorSave );
-	txtBuf->ensureCursorVisible();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::updatePeriodic(void)

@@ -14,7 +14,10 @@
 #include <QLabel>
 #include <QFrame>
 #include <QGroupBox>
-#include <QPlainTextEdit>
+#include <QBuffer>
+#include <QByteArray>
+
+#include "Qt/QHexEdit.h"
 
 struct memByte_t
 {
@@ -47,12 +50,12 @@ class HexEditorDialog_t : public QDialog
 		void showMemViewResults (bool reset);
 		int  checkMemActivity(void);
 		int  calcVisibleRange( int *start_out, int *end_out, int *center_out );
-		void setCursor( int pos );
-		void advCursor( int num );
 
-		QFont      font;
-		QPlainTextEdit *txtBuf;
+		QFont     font;
+		QHexEdit *editor;
 		QTimer   *periodicTimer;
+		QByteArray *dataArray;
+		QBuffer    *dataBuffer;
 
 		int mode;
 		int numLines;
@@ -72,7 +75,5 @@ class HexEditorDialog_t : public QDialog
       void closeWindow(void);
 	private slots:
 		void updatePeriodic(void);
-		void vbarMoved( int pos );
-		void vbarPressed( void );
 
 };
