@@ -100,7 +100,11 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	mainLayout = new QVBoxLayout();
 
-	editor = new QHexEdit(this);
+	editor = new QPlainTextEdit(this);
+
+	editor->setFont(font);
+	editor->setWordWrapMode(QTextOption::NoWrap);
+	editor->setOverwriteMode(true);
 
 	mainLayout->addWidget( editor );
 
@@ -116,35 +120,13 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	redraw = false;
 	total_instructions_lp = 0;
 
-	dataArray  = new QByteArray( 0x20000, '0' );
-	dataBuffer = new QBuffer( dataArray, this );
-	dataBuffer->setBuffer( dataArray );
-
-	printf("DataArray: Size: %i \n", dataArray->size() );
-	editor->setData( *dataBuffer );
-
-	editor->setAddressArea(true);
-   editor->setAsciiArea(true);
-   editor->setHighlighting(true);
-   editor->setOverwriteMode(true);
-   editor->setReadOnly(true);
-   editor->setHexCaps(true);
-
-   editor->setHighlightingColor( QColor("yellow") );
-   editor->setAddressAreaColor( QColor("white") );
-   editor->setSelectionColor( QColor("blue") );
-	//editor->setFont( font );
-
-   editor->setAddressWidth(6);
-   editor->setBytesPerLine(16);
-
 	showMemViewResults(true);
 
 	periodicTimer  = new QTimer( this );
 
    connect( periodicTimer, &QTimer::timeout, this, &HexEditorDialog_t::updatePeriodic );
 
-	periodicTimer->start( 1000 ); // 10hz
+	periodicTimer->start( 100 ); // 10hz
 }
 //----------------------------------------------------------------------------
 HexEditorDialog_t::~HexEditorDialog_t(void)
@@ -192,12 +174,16 @@ void HexEditorDialog_t::initMem(void)
 		mbuf[i].data  = memAccessFunc(i);
 		mbuf[i].color = 0;
 		mbuf[i].actv  = 0;
-		mbuf[i].draw  = 1;
+		//mbuf[i].draw  = 1;
 	}
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::showMemViewResults (bool reset)
 {
+	static unsigned int counter = 0;
+	std::string txt;
+	QTextCursor cursor;
+
 	switch ( mode )
 	{
 		default:
@@ -242,8 +228,6 @@ void HexEditorDialog_t::showMemViewResults (bool reset)
 		printf("Mode: %i  MemSize:%i   0x%08x\n", mode, memSize, (unsigned int)memSize );
 		reset = 1;
 
-		dataArray->resize( mbuf_size );
-
 		if ( mbuf )
 		{
          free(mbuf); mbuf = NULL;
@@ -262,6 +246,27 @@ void HexEditorDialog_t::showMemViewResults (bool reset)
 			return;
 		}
 	}
+
+	cursor = editor->textCursor();
+
+	txt.clear();
+
+	for (int i=0; i<20; i++)
+	{
+		char stmp[32];
+		sprintf( stmp, "%06X ", i*16 );
+		txt.append(stmp);
+
+		for (int j=0; j<16; j++)
+		{
+			sprintf( stmp, " %02X ", counter ); counter = (counter + 1) % 256;
+			txt.append(stmp);
+		}
+		txt.append("\n");
+	}
+	editor->setPlainText( QString::fromStdString(txt) );
+
+	editor->setTextCursor( cursor );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::updatePeriodic(void)
@@ -295,13 +300,13 @@ int HexEditorDialog_t::checkMemActivity(void)
 		{
 			mbuf[i].actv  = 15;
 			mbuf[i].data  = c;
-			mbuf[i].draw  = 1;
+			//mbuf[i].draw  = 1;
 		}
 		else
 		{
 			if ( mbuf[i].actv > 0 )
 			{
-				mbuf[i].draw = 1;
+				//mbuf[i].draw = 1;
 				mbuf[i].actv--;
 			}
 		}
