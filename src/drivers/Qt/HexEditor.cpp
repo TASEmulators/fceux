@@ -89,6 +89,7 @@ static int getROM( unsigned int offset)
 HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
+	QPalette pal;
 	QVBoxLayout *mainLayout;
 
 	font.setFamily("Courier New");
@@ -102,6 +103,14 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	mainLayout = new QVBoxLayout();
 
 	editor = new QWidget(this);
+
+	pal = editor->palette();
+	pal.setColor(QPalette::Base      , Qt::black);
+	pal.setColor(QPalette::Background, Qt::black);
+	pal.setColor(QPalette::WindowText, Qt::white);
+
+	//editor->setAutoFillBackground(true);
+	editor->setPalette(pal);
 
 	calcFontData();
 
@@ -310,7 +319,7 @@ void HexEditorDialog_t::calcFontData(void)
 	 pxLineSpacing = metrics.lineSpacing() * 1.25;
     pxLineLead    = pxLineSpacing - pxCharHeight;
 	 pxXoffset     = pxCharHeight;
-	 pxYoffset     = pxLineSpacing * 1.25;
+	 pxYoffset     = pxLineSpacing * 2.0;
 	 pxHexOffset   = pxXoffset + (7*pxCharWidth);
     pxHexAscii    = pxHexOffset + (16*3*pxCharWidth) + (2*pxCharWidth);
     //_pxGapAdr = _pxCharWidth / 2;
@@ -339,6 +348,7 @@ void HexEditorDialog_t::paintEvent(QPaintEvent *event)
 	//printf("Draw Area: %ix%i \n", event->rect().width(), event->rect().height() );
 	//
 	
+	painter.fillRect( 0, 0, w, h, editor->palette().color(QPalette::Background) );
 
 	if ( cursorBlinkCount >= 10 )
 	{
@@ -365,10 +375,13 @@ void HexEditorDialog_t::paintEvent(QPaintEvent *event)
 			x = pxHexAscii;
 		}
 
+		//painter.setPen( editor->palette().color(QPalette::WindowText));
 		painter.fillRect( x , y, pxCharWidth, pxCursorHeight, QColor("gray") );
 	}
 
+	painter.setPen( editor->palette().color(QPalette::WindowText));
 
+	//painter.setPen( QColor("white") );
 	addr = 0;
 	y = pxYoffset;
 
@@ -390,6 +403,10 @@ void HexEditorDialog_t::paintEvent(QPaintEvent *event)
 		addr += 16;
 		y += pxLineSpacing;
 	}
+
+	painter.drawText( pxHexOffset, pxLineSpacing, "00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F" );
+	painter.drawLine( pxHexOffset - (pxCharWidth/2), 0, pxHexOffset - (pxCharWidth/2), h );
+	painter.drawLine( 0, pxLineSpacing + (pxLineLead), w, pxLineSpacing + (pxLineLead) );
 
 }
 //----------------------------------------------------------------------------
