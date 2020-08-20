@@ -38,9 +38,11 @@ class HexEditorDialog_t : public QDialog
 			MODE_NES_ROM
 		};
 	protected:
+		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
    	void keyReleaseEvent(QKeyEvent *event);
 
+		void calcFontData(void);
 		void initMem(void);
 		void setMode(int new_mode);
 		void showMemViewResults (bool reset);
@@ -48,11 +50,24 @@ class HexEditorDialog_t : public QDialog
 		int  calcVisibleRange( int *start_out, int *end_out, int *center_out );
 
 		QFont      font;
-		QPlainTextEdit *editor;
+		QWidget   *editor;
 		QTimer    *periodicTimer;
 		//QByteArray *dataArray;
 		//QBuffer    *dataBuffer;
+		//
+		int pxCharWidth;
+		int pxCharHeight;
+		int pxCursorHeight;
+		int pxLineSpacing;
+		int pxLineLead;
+		int pxXoffset;
+		int pxYoffset;
+		int pxHexOffset;
+		int pxHexAscii;
 
+		int cursorPosX;
+		int cursorPosY;
+		int cursorBlinkCount;
 		int mode;
 		int numLines;
 		int numCharsPerLine;
@@ -64,6 +79,7 @@ class HexEditorDialog_t : public QDialog
 		uint64_t total_instructions_lp;
 
 		bool redraw;
+		bool cursorBlink;
 
 	private:
 

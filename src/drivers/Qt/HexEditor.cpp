@@ -8,6 +8,7 @@
 #include <SDL.h>
 #include <QHeaderView>
 #include <QScrollBar>
+#include <QPainter>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -100,16 +101,18 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	mainLayout = new QVBoxLayout();
 
-	editor = new QPlainTextEdit(this);
+	editor = new QWidget(this);
 
-	editor->setFont(font);
-	editor->setWordWrapMode(QTextOption::NoWrap);
-	editor->setOverwriteMode(true);
+	calcFontData();
 
 	mainLayout->addWidget( editor );
 
 	setLayout( mainLayout );
 
+	cursorPosX  = 0;
+	cursorPosY  = 0;
+	cursorBlink = true;
+	cursorBlinkCount = 0;
 	mode = MODE_NES_RAM;
 	numLines = 0;
 	numCharsPerLine = 90;
@@ -180,9 +183,6 @@ void HexEditorDialog_t::initMem(void)
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::showMemViewResults (bool reset)
 {
-	static unsigned int counter = 0;
-	std::string txt;
-	QTextCursor cursor;
 
 	switch ( mode )
 	{
@@ -246,27 +246,6 @@ void HexEditorDialog_t::showMemViewResults (bool reset)
 			return;
 		}
 	}
-
-	cursor = editor->textCursor();
-
-	txt.clear();
-
-	for (int i=0; i<20; i++)
-	{
-		char stmp[32];
-		sprintf( stmp, "%06X ", i*16 );
-		txt.append(stmp);
-
-		for (int j=0; j<16; j++)
-		{
-			sprintf( stmp, " %02X ", counter ); counter = (counter + 1) % 256;
-			txt.append(stmp);
-		}
-		txt.append("\n");
-	}
-	editor->setPlainText( QString::fromStdString(txt) );
-
-	editor->setTextCursor( cursor );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::updatePeriodic(void)
@@ -276,6 +255,8 @@ void HexEditorDialog_t::updatePeriodic(void)
 	checkMemActivity();
 
 	showMemViewResults(false);
+
+	editor->update();
 }
 //----------------------------------------------------------------------------
 int HexEditorDialog_t::checkMemActivity(void)
@@ -314,5 +295,101 @@ int HexEditorDialog_t::checkMemActivity(void)
 	total_instructions_lp = total_instructions;
 
    return 0;
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::calcFontData(void)
+{
+	 editor->setFont(font);
+    QFontMetrics metrics(font);
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+    pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
+#else
+    pxCharWidth = metrics.width(QLatin1Char('2'));
+#endif
+    pxCharHeight = metrics.height();
+	 pxLineSpacing = metrics.lineSpacing() * 1.25;
+    pxLineLead    = pxLineSpacing - pxCharHeight;
+	 pxXoffset     = pxCharHeight;
+	 pxYoffset     = pxLineSpacing * 1.25;
+	 pxHexOffset   = pxXoffset + (7*pxCharWidth);
+    pxHexAscii    = pxHexOffset + (16*3*pxCharWidth) + (2*pxCharWidth);
+    //_pxGapAdr = _pxCharWidth / 2;
+    //_pxGapAdrHex = _pxCharWidth;
+    //_pxGapHexAscii = 2 * _pxCharWidth;
+    pxCursorHeight = pxCharHeight;
+    //_pxSelectionSub = _pxCharHeight / 5;
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::paintEvent(QPaintEvent *event)
+{
+	int x, y, w, h, row, col, nrow, addr;
+	char txt[32];
+	QPainter painter(this);
+
+	painter.setFont(font);
+	w = event->rect().width();
+	h = event->rect().height();
+
+	//painter.fillRect( 0, 0, w, h, QColor("white") );
+
+	nrow = (h / pxLineSpacing) + 1;
+
+	if ( nrow < 1 ) nrow = 1;
+
+	//printf("Draw Area: %ix%i \n", event->rect().width(), event->rect().height() );
+	//
+	
+
+	if ( cursorBlinkCount >= 10 )
+	{
+		cursorBlink = !cursorBlink;
+		cursorBlinkCount = 0;
+	} 
+	else
+  	{
+		cursorBlinkCount++;
+	}
+
+	if ( cursorBlink )
+	{
+		y = pxYoffset + (pxLineSpacing*cursorPosY) - pxCursorHeight + pxLineLead;
+
+		if ( cursorPosX < 32 )
+		{
+			int a = (cursorPosX / 2);
+			int r = (cursorPosX % 2);
+			x = pxHexOffset + (a*3*pxCharWidth) + (r*pxCharWidth);
+		}
+		else
+		{
+			x = pxHexAscii;
+		}
+
+		painter.fillRect( x , y, pxCharWidth, pxCursorHeight, QColor("gray") );
+	}
+
+
+	addr = 0;
+	y = pxYoffset;
+
+	for ( row=0; row < nrow; row++)
+	{
+		x = pxXoffset;
+
+		sprintf( txt, "%06X", addr );
+		painter.drawText( x, y, txt );
+
+		x = pxHexOffset;
+
+		for (col=0; col<16; col++)
+		{
+			sprintf( txt, "%02X", mbuf[addr+col].data );
+			painter.drawText( x, y, txt );
+			x += (3*pxCharWidth);
+		}
+		addr += 16;
+		y += pxLineSpacing;
+	}
+
 }
 //----------------------------------------------------------------------------
