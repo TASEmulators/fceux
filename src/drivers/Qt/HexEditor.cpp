@@ -442,7 +442,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		}
 		resetCursorBlink();
    }
-   if (event->matches(QKeySequence::MoveToPreviousChar))
+	else if (event->matches(QKeySequence::MoveToPreviousChar))
    {
 		cursorPosX--;
 
@@ -452,7 +452,17 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		}
 		resetCursorBlink();
    }
-	if (event->matches(QKeySequence::MoveToPreviousLine))
+	else if (event->matches(QKeySequence::MoveToEndOfLine))
+   {
+		cursorPosX = 47;
+		resetCursorBlink();
+   }
+	else if (event->matches(QKeySequence::MoveToStartOfLine))
+   {
+		cursorPosX = 0;
+		resetCursorBlink();
+   }
+	else if (event->matches(QKeySequence::MoveToPreviousLine))
    {
 		cursorPosY--;
 
@@ -468,7 +478,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		}
 		resetCursorBlink();
    }
-   if (event->matches(QKeySequence::MoveToNextLine))
+	else if (event->matches(QKeySequence::MoveToNextLine))
    {
 		cursorPosY++;
 
