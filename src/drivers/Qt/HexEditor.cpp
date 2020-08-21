@@ -85,16 +85,64 @@ static int getROM( unsigned int offset)
 //	}
 //	return c;
 //}
+
+//----------------------------------------------------------------------------
+memBlock_t::memBlock_t( void )
+{
+	buf = NULL;
+	_size = 0;
+	memAccessFunc = NULL;
+}
+//----------------------------------------------------------------------------
+
+memBlock_t::~memBlock_t(void)
+{
+	if ( buf != NULL )
+	{
+		::free( buf ); buf = NULL;
+	}
+	_size = 0;
+}
+
+//----------------------------------------------------------------------------
+int memBlock_t::reAlloc( int newSize )
+{
+	if ( buf != NULL )
+	{
+		::free( buf ); buf = NULL;
+	}
+	_size = 0;
+
+	buf = (struct memByte_t *)malloc( newSize * sizeof(struct memByte_t) );
+
+	if ( buf != NULL )
+	{
+		_size = newSize;
+		init();
+	}
+	return (buf != NULL);
+}
+//----------------------------------------------------------------------------
+void memBlock_t::setAccessFunc( int (*newMemAccessFunc)( unsigned int offset) )
+{
+	memAccessFunc = newMemAccessFunc;
+}
+//----------------------------------------------------------------------------
+void memBlock_t::init(void)
+{
+	for (int i=0; i<_size; i++)
+	{
+		buf[i].data  = memAccessFunc(i);
+		buf[i].color = 0;
+		buf[i].actv  = 0;
+		//buf[i].draw  = 1;
+	}
+}
 //----------------------------------------------------------------------------
 HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
-	QPalette pal;
 	QVBoxLayout *mainLayout;
-
-	font.setFamily("Courier New");
-	font.setStyle( QFont::StyleNormal );
-	font.setStyleHint( QFont::Monospace );
 
 	setWindowTitle("Hex Editor");
 
@@ -102,32 +150,13 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	mainLayout = new QVBoxLayout();
 
-	editor = new QWidget(this);
-
-	pal = editor->palette();
-	pal.setColor(QPalette::Base      , Qt::black);
-	pal.setColor(QPalette::Background, Qt::black);
-	pal.setColor(QPalette::WindowText, Qt::white);
-
-	//editor->setAutoFillBackground(true);
-	editor->setPalette(pal);
-
-	calcFontData();
+	editor = new QHexEdit( &mb, this);
 
 	mainLayout->addWidget( editor );
 
 	setLayout( mainLayout );
 
-	cursorPosX  = 0;
-	cursorPosY  = 0;
-	cursorBlink = true;
-	cursorBlinkCount = 0;
 	mode = MODE_NES_RAM;
-	numLines = 0;
-	numCharsPerLine = 90;
-	mbuf = NULL;
-	memSize = 0;
-	mbuf_size = 0;
 	memAccessFunc = getRAM;
 	redraw = false;
 	total_instructions_lp = 0;
@@ -144,29 +173,12 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 HexEditorDialog_t::~HexEditorDialog_t(void)
 {
 	periodicTimer->stop();
-
-	if ( mbuf != NULL )
-	{
-		::free( mbuf ); mbuf = NULL;
-	}
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::closeWindow(void)
 {
    //printf("Close Window\n");
    done(0);
-}
-//----------------------------------------------------------------------------
-void HexEditorDialog_t::keyPressEvent(QKeyEvent *event)
-{
-   printf("Hex Window Key Press: 0x%x \n", event->key() );
-	//assignHotkey( event );
-}
-//----------------------------------------------------------------------------
-void HexEditorDialog_t::keyReleaseEvent(QKeyEvent *event)
-{
-   printf("Hex Window Key Release: 0x%x \n", event->key() );
-	//assignHotkey( event );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setMode(int new_mode)
@@ -178,20 +190,9 @@ void HexEditorDialog_t::setMode(int new_mode)
 	}
 }
 //----------------------------------------------------------------------------
-void HexEditorDialog_t::initMem(void)
-{
-
-	for (int i=0; i<mbuf_size; i++)
-	{
-		mbuf[i].data  = memAccessFunc(i);
-		mbuf[i].color = 0;
-		mbuf[i].actv  = 0;
-		//mbuf[i].draw  = 1;
-	}
-}
-//----------------------------------------------------------------------------
 void HexEditorDialog_t::showMemViewResults (bool reset)
 {
+	int memSize;
 
 	switch ( mode )
 	{
@@ -219,39 +220,18 @@ void HexEditorDialog_t::showMemViewResults (bool reset)
 			{  // No Game Loaded!!! Get out of Function
 				memAccessFunc = NULL;
 				memSize = 0;
-				if ( mbuf )
-				{
-  		    	   free(mbuf); mbuf = NULL;
-				}
-				mbuf_size = 0;
-				redraw = true;
-				//txtBuf->setPlainText("No ROM Loaded");
 				return;
 			}
 		break;
 	}
-	numLines = memSize / 16;
 
-	if ( (mbuf == NULL) || (mbuf_size != memSize) )
+	if ( memSize != mb.size() )
 	{
-		printf("Mode: %i  MemSize:%i   0x%08x\n", mode, memSize, (unsigned int)memSize );
-		reset = 1;
+		mb.setAccessFunc( memAccessFunc );
 
-		if ( mbuf )
-		{
-         free(mbuf); mbuf = NULL;
-		}
-		mbuf = (struct memByte_t *)malloc( memSize * sizeof(struct memByte_t) );
-
-		if ( mbuf )
-		{
-         mbuf_size = memSize;
-			initMem();
-		}
-		else
+		if ( mb.reAlloc( memSize ) )
 		{
 			printf("Error: Failed to allocate memview buffer size\n");
-			mbuf_size = 0;
 			return;
 		}
 	}
@@ -282,22 +262,22 @@ int HexEditorDialog_t::checkMemActivity(void)
 		return -1;
 	}
 
-	for (int i=0; i<mbuf_size; i++)
+	for (int i=0; i<mb.size(); i++)
 	{
 		c = memAccessFunc(i);
 
-		if ( c != mbuf[i].data )
+		if ( c != mb.buf[i].data )
 		{
-			mbuf[i].actv  = 15;
-			mbuf[i].data  = c;
-			//mbuf[i].draw  = 1;
+			mb.buf[i].actv  = 15;
+			mb.buf[i].data  = c;
+			//mb.buf[i].draw  = 1;
 		}
 		else
 		{
-			if ( mbuf[i].actv > 0 )
+			if ( mb.buf[i].actv > 0 )
 			{
-				//mbuf[i].draw = 1;
-				mbuf[i].actv--;
+				//mb.buf[i].draw = 1;
+				mb.buf[i].actv--;
 			}
 		}
 	}
@@ -306,9 +286,42 @@ int HexEditorDialog_t::checkMemActivity(void)
    return 0;
 }
 //----------------------------------------------------------------------------
-void HexEditorDialog_t::calcFontData(void)
+QHexEdit::QHexEdit(memBlock_t *blkPtr, QWidget *parent)
+	: QWidget( parent )
 {
-	 editor->setFont(font);
+	QPalette pal;
+
+	mb = blkPtr;
+
+	font.setFamily("Courier New");
+	font.setStyle( QFont::StyleNormal );
+	font.setStyleHint( QFont::Monospace );
+
+	pal = this->palette();
+	pal.setColor(QPalette::Base      , Qt::black);
+	pal.setColor(QPalette::Background, Qt::black);
+	pal.setColor(QPalette::WindowText, Qt::white);
+
+	//editor->setAutoFillBackground(true);
+	this->setPalette(pal);
+
+	calcFontData();
+
+	cursorPosX  = 0;
+	cursorPosY  = 0;
+	cursorBlink = true;
+	cursorBlinkCount = 0;
+
+}
+//----------------------------------------------------------------------------
+QHexEdit::~QHexEdit(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void QHexEdit::calcFontData(void)
+{
+	 this->setFont(font);
     QFontMetrics metrics(font);
 #if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
     pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
@@ -329,7 +342,19 @@ void HexEditorDialog_t::calcFontData(void)
     //_pxSelectionSub = _pxCharHeight / 5;
 }
 //----------------------------------------------------------------------------
-void HexEditorDialog_t::paintEvent(QPaintEvent *event)
+void QHexEdit::keyPressEvent(QKeyEvent *event)
+{
+   printf("Hex Window Key Press: 0x%x \n", event->key() );
+	//assignHotkey( event );
+}
+//----------------------------------------------------------------------------
+void QHexEdit::keyReleaseEvent(QKeyEvent *event)
+{
+   printf("Hex Window Key Release: 0x%x \n", event->key() );
+	//assignHotkey( event );
+}
+//----------------------------------------------------------------------------
+void QHexEdit::paintEvent(QPaintEvent *event)
 {
 	int x, y, w, h, row, col, nrow, addr;
 	char txt[32];
@@ -348,7 +373,7 @@ void HexEditorDialog_t::paintEvent(QPaintEvent *event)
 	//printf("Draw Area: %ix%i \n", event->rect().width(), event->rect().height() );
 	//
 	
-	painter.fillRect( 0, 0, w, h, editor->palette().color(QPalette::Background) );
+	painter.fillRect( 0, 0, w, h, this->palette().color(QPalette::Background) );
 
 	if ( cursorBlinkCount >= 10 )
 	{
@@ -375,11 +400,11 @@ void HexEditorDialog_t::paintEvent(QPaintEvent *event)
 			x = pxHexAscii;
 		}
 
-		//painter.setPen( editor->palette().color(QPalette::WindowText));
+		//painter.setPen( this->palette().color(QPalette::WindowText));
 		painter.fillRect( x , y, pxCharWidth, pxCursorHeight, QColor("gray") );
 	}
 
-	painter.setPen( editor->palette().color(QPalette::WindowText));
+	painter.setPen( this->palette().color(QPalette::WindowText));
 
 	//painter.setPen( QColor("white") );
 	addr = 0;
@@ -396,7 +421,7 @@ void HexEditorDialog_t::paintEvent(QPaintEvent *event)
 
 		for (col=0; col<16; col++)
 		{
-			sprintf( txt, "%02X", mbuf[addr+col].data );
+			sprintf( txt, "%02X", mb->buf[addr+col].data );
 			painter.drawText( x, y, txt );
 			x += (3*pxCharWidth);
 		}
