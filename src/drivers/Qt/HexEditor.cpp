@@ -9,6 +9,7 @@
 #include <QHeaderView>
 #include <QScrollBar>
 #include <QPainter>
+#include <QMenuBar>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -143,15 +144,38 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
 	QVBoxLayout *mainLayout;
+	QMenuBar *menuBar;
+	QMenu *fileMenu;
+	QAction *saveROM;
 
 	setWindowTitle("Hex Editor");
 
 	resize( 512, 512 );
 
+	menuBar = new QMenuBar(this);
+
+	//-----------------------------------------------------------------------
+	// Menu 
+	//-----------------------------------------------------------------------
+	// File
+   fileMenu = menuBar->addMenu(tr("File"));
+
+	// File -> Open ROM
+	saveROM = new QAction(tr("Save ROM"), this);
+   saveROM->setShortcuts(QKeySequence::Open);
+   saveROM->setStatusTip(tr("Save ROM File"));
+   //connect(saveROM, SIGNAL(triggered()), this, SLOT(saveROMFile(void)) );
+
+   fileMenu->addAction(saveROM);
+
+	//-----------------------------------------------------------------------
+	// Menu End 
+	//-----------------------------------------------------------------------
 	mainLayout = new QVBoxLayout();
 
 	editor = new QHexEdit( &mb, this);
 
+	mainLayout->setMenuBar( menuBar );
 	mainLayout->addWidget( editor );
 
 	setLayout( mainLayout );
