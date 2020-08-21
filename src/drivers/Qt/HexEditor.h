@@ -31,11 +31,13 @@ struct memBlock_t
 
 	void init(void);
 	int  size(void){ return _size; }
+	int  numLines(void){ return _maxLines; }
 	int  reAlloc( int newSize );
 	void setAccessFunc( int (*newMemAccessFunc)( unsigned int offset) );
 
 	struct memByte_t *buf;
 	int  _size;
+   int  _maxLines;
 	int (*memAccessFunc)( unsigned int offset);
 };
 
@@ -47,8 +49,10 @@ class QHexEdit : public QWidget
 		QHexEdit(memBlock_t *blkPtr, QWidget *parent = 0);
 		~QHexEdit(void);
 
+		void setMode( int mode );
 		void setLine( int newLineOffset );
 		void setAddr( int newAddrOffset );
+		void setScrollBars( QScrollBar *h, QScrollBar *v );
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
@@ -56,12 +60,16 @@ class QHexEdit : public QWidget
 		void resizeEvent(QResizeEvent *event);
 
 		void calcFontData(void);
-		void resetCursorBlink(void);
+		void resetCursor(void);
 
 		QFont      font;
 
 		memBlock_t *mb;
 
+		QScrollBar *vbar;
+		QScrollBar *hbar;
+
+      int viewMode;
 		int lineOffset;
 		int pxCharWidth;
 		int pxCharHeight;
@@ -78,6 +86,10 @@ class QHexEdit : public QWidget
 		int viewLines;
 		int viewWidth;
 		int viewHeight;
+      int maxLineOffset;
+      int editAddr;
+      int editValue;
+      int editMask;
 
 		bool cursorBlink;
 };
@@ -96,6 +108,8 @@ class HexEditorDialog_t : public QDialog
 			MODE_NES_OAM,
 			MODE_NES_ROM
 		};
+ 
+      int  getMode(void){ return mode; }
 	protected:
 
 		void initMem(void);

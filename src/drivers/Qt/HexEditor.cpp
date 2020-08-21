@@ -32,6 +32,12 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/HexEditor.h"
 
+//enum {
+//	MODE_NES_RAM = 0,
+//	MODE_NES_PPU,
+//	MODE_NES_OAM,
+//	MODE_NES_ROM
+//};
 //----------------------------------------------------------------------------
 static int getRAM( unsigned int i )
 {
@@ -72,26 +78,135 @@ static int getROM( unsigned int offset)
 	}
 	return -1;
 }
-//static int conv2xchar( int i )
-//{
-//   int c = 0;
-//
-//	if ( (i >= 0) && (i < 10) )
-//	{
-//      c = i + '0';
-//	}
-//	else if ( i < 16 )
-//	{
-//		c = (i - 10) + 'A';
-//	}
-//	return c;
-//}
+static void PalettePoke(uint32 addr, uint8 data)
+{
+	data = data & 0x3F;
+	addr = addr & 0x1F;
+	if ((addr & 3) == 0)
+	{
+		addr = (addr & 0xC) >> 2;
+		if (addr == 0)
+		{
+			PALRAM[0x00] = PALRAM[0x04] = PALRAM[0x08] = PALRAM[0x0C] = data;
+		}
+		else
+		{
+			UPALRAM[addr-1] = UPALRAM[0x10|(addr-1)] = data;
+		}
+	}
+	else
+	{
+		PALRAM[addr] = data;
+	}
+}
+static int writeMem( int mode, unsigned int addr, int value )
+{
+	value = value & 0x000000ff;
+
+	switch ( mode )
+	{
+		default:
+      case HexEditorDialog_t::MODE_NES_RAM:
+		{
+			if ( addr < 0x8000 )
+			{
+				writefunc wfunc;
+            
+				wfunc = GetWriteHandler (addr);
+            
+				if (wfunc)
+				{
+					wfunc ((uint32) addr,
+					       (uint8) (value & 0x000000ff));
+				}
+			}
+			else
+			{
+				fprintf( stdout, "Error: Writing into RAM addresses >= 0x8000 is unsafe. Operation Denied.\n");
+			}
+		}
+		break;
+      case HexEditorDialog_t::MODE_NES_PPU:
+		{
+			addr &= 0x3FFF;
+			if (addr < 0x2000)
+			{
+				VPage[addr >> 10][addr] = value; //todo: detect if this is vrom and turn it red if so
+			}
+			if ((addr >= 0x2000) && (addr < 0x3F00))
+			{
+				vnapage[(addr >> 10) & 0x3][addr & 0x3FF] = value; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
+			}
+			if ((addr >= 0x3F00) && (addr < 0x3FFF))
+			{
+				PalettePoke(addr, value);
+			}
+		}
+		break;
+      case HexEditorDialog_t::MODE_NES_OAM:
+		{
+			addr &= 0xFF;
+			SPRAM[addr] = value;
+		}
+		break;
+      case HexEditorDialog_t::MODE_NES_ROM:
+		{
+			if (addr < 16)
+			{
+				fprintf( stdout, "You can't edit ROM header here, however you can use iNES Header Editor to edit the header if it's an iNES format file.");
+			}
+			else if ( (addr >= 16) && (addr < PRGsize[0]+16) )
+			{
+			  	*(uint8 *)(GetNesPRGPointer(addr-16)) = value;
+			}
+			else if ( (addr >= PRGsize[0]+16) && (addr < CHRsize[0]+PRGsize[0]+16) )
+			{
+				*(uint8 *)(GetNesCHRPointer(addr-16-PRGsize[0])) = value;
+			}
+		}
+		break;
+	}
+   return 0;
+}
+
+static int convToXchar( int i )
+{
+   int c = 0;
+
+	if ( (i >= 0) && (i < 10) )
+	{
+      c = i + '0';
+	}
+	else if ( i < 16 )
+	{
+		c = (i - 10) + 'A';
+	}
+	return c;
+}
+
+static int convFromXchar( int i )
+{
+   int c = 0;
+
+   i = ::toupper(i);
+
+	if ( (i >= '0') && (i <= '9') )
+	{
+      c = i - '0';
+	}
+	else if ( (i >= 'A') && (i <= 'F') )
+	{
+		c = (i - 'A') + 10;
+	}
+	return c;
+}
 
 //----------------------------------------------------------------------------
 memBlock_t::memBlock_t( void )
 {
 	buf = NULL;
 	_size = 0;
+   _maxLines = 0;
 	memAccessFunc = NULL;
 }
 //----------------------------------------------------------------------------
@@ -103,6 +218,7 @@ memBlock_t::~memBlock_t(void)
 		::free( buf ); buf = NULL;
 	}
 	_size = 0;
+   _maxLines = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -122,6 +238,7 @@ int memBlock_t::reAlloc( int newSize )
 		::free( buf ); buf = NULL;
 	}
 	_size = 0;
+   _maxLines = 0;
 
 	buf = (struct memByte_t *)malloc( newSize * sizeof(struct memByte_t) );
 
@@ -129,6 +246,15 @@ int memBlock_t::reAlloc( int newSize )
 	{
 		_size = newSize;
 		init();
+
+      if ( (_size % 16) )
+	   {
+	   	_maxLines = (_size / 16) + 1;
+	   }
+	   else
+	   {
+	   	_maxLines = (_size / 16);
+	   }
 	}
 	return (buf == NULL);
 }
@@ -202,6 +328,8 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	vbar->setMinimum(0);
 	vbar->setMaximum( 0x10000 / 16 );
 
+   editor->setScrollBars( hbar, vbar );
+
    //connect( vbar, SIGNAL(sliderMoved(int)), this, SLOT(vbarMoved(int)) );
    connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
 
@@ -248,6 +376,7 @@ void HexEditorDialog_t::setMode(int new_mode)
 	{
 		mode = new_mode;
 		showMemViewResults(true);
+      editor->setMode( mode );
 	}
 }
 //----------------------------------------------------------------------------
@@ -370,11 +499,16 @@ QHexEdit::QHexEdit(memBlock_t *blkPtr, QWidget *parent)
 
 	calcFontData();
 
+   viewMode    = HexEditorDialog_t::MODE_NES_RAM;
 	lineOffset  = 0;
 	cursorPosX  = 0;
 	cursorPosY  = 0;
 	cursorBlink = true;
 	cursorBlinkCount = 0;
+   maxLineOffset = 0;
+   editAddr  = -1;
+   editValue =  0;
+   editMask  =  0;
 
 }
 //----------------------------------------------------------------------------
@@ -407,9 +541,19 @@ void QHexEdit::calcFontData(void)
 	 viewLines   = (viewHeight - pxLineSpacing) / pxLineSpacing;
 }
 //----------------------------------------------------------------------------
+void QHexEdit::setMode( int mode )
+{
+	viewMode = mode;
+}
+//----------------------------------------------------------------------------
 void QHexEdit::setLine( int newLineOffset )
 {
 	lineOffset = newLineOffset;
+}
+//----------------------------------------------------------------------------
+void QHexEdit::setScrollBars( QScrollBar *h, QScrollBar *v )
+{
+	hbar = h; vbar = v;
 }
 //----------------------------------------------------------------------------
 void QHexEdit::resizeEvent(QResizeEvent *event)
@@ -420,12 +564,17 @@ void QHexEdit::resizeEvent(QResizeEvent *event)
 	//printf("QHexEdit Resize: %ix%i\n", viewWidth, viewHeight );
 
 	viewLines = (viewHeight - pxLineSpacing) / pxLineSpacing;
+
+	maxLineOffset = mb->numLines() - viewLines + 1;
 }
 //----------------------------------------------------------------------------
-void QHexEdit::resetCursorBlink(void)
+void QHexEdit::resetCursor(void)
 {
 	cursorBlink = true;
 	cursorBlinkCount = 0;
+   editAddr = -1;
+   editValue = 0;
+   editMask  = 0;
 }
 //----------------------------------------------------------------------------
 void QHexEdit::keyPressEvent(QKeyEvent *event)
@@ -440,7 +589,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		{
 			cursorPosX = 47;
 		}
-		resetCursorBlink();
+		resetCursor();
    }
 	else if (event->matches(QKeySequence::MoveToPreviousChar))
    {
@@ -450,17 +599,17 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		{
 			cursorPosX = 0;
 		}
-		resetCursorBlink();
+		resetCursor();
    }
 	else if (event->matches(QKeySequence::MoveToEndOfLine))
    {
 		cursorPosX = 47;
-		resetCursorBlink();
+		resetCursor();
    }
 	else if (event->matches(QKeySequence::MoveToStartOfLine))
    {
 		cursorPosX = 0;
-		resetCursorBlink();
+		resetCursor();
    }
 	else if (event->matches(QKeySequence::MoveToPreviousLine))
    {
@@ -475,8 +624,10 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 				lineOffset = 0;
 			}
 			cursorPosY = 0;
+
+         vbar->setValue( lineOffset );
 		}
-		resetCursorBlink();
+		resetCursor();
    }
 	else if (event->matches(QKeySequence::MoveToNextLine))
    {
@@ -486,9 +637,112 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		{
 			lineOffset++;
 
+         if ( lineOffset >= maxLineOffset )
+         {
+            lineOffset = maxLineOffset;
+         }
 			cursorPosY = viewLines-1;
+
+         vbar->setValue( lineOffset );
 		}
-		resetCursorBlink();
+		resetCursor();
+
+   }
+   else if (event->matches(QKeySequence::MoveToNextPage))
+   {
+      lineOffset += ( (3 * viewLines) / 4);
+
+      if ( lineOffset >= maxLineOffset )
+      {
+         lineOffset = maxLineOffset;
+      }
+		resetCursor();
+   }
+   else if (event->matches(QKeySequence::MoveToPreviousPage))
+   {
+      lineOffset -= ( (3 * viewLines) / 4);
+
+      if ( lineOffset < 0 )
+      {
+         lineOffset = 0;
+      }
+		resetCursor();
+   }
+   else if (event->matches(QKeySequence::MoveToEndOfDocument))
+   {
+      lineOffset = maxLineOffset;
+		resetCursor();
+   }
+   else if (event->matches(QKeySequence::MoveToStartOfDocument))
+   {
+      lineOffset = 0;
+		resetCursor();
+   }
+   else if (event->key() == Qt::Key_Tab && (cursorPosX < 32) )
+   {  // switch from hex to ascii edit
+       cursorPosX = 32 + (cursorPosX / 2);
+   }
+   else if (event->key() == Qt::Key_Backtab  && (cursorPosX >= 32) )
+   {  // switch from ascii to hex edit
+      cursorPosX = 2 * (cursorPosX - 32);
+   }
+   else
+   {
+      int key;
+      if ( cursorPosX >= 32 )
+      {  // Edit Area is ASCII
+         key = (uchar)event->text()[0].toLatin1();
+
+         if ( ::isascii( key ) )
+         {
+            int offs = (cursorPosX-32);
+            int addr = 16*(lineOffset+cursorPosY) + offs;
+            writeMem( viewMode, addr, key );
+
+            editAddr  = -1;
+            editValue =  0;
+            editMask  =  0;
+         }
+      }
+      else
+      {  // Edit Area is Hex
+         key = int(event->text()[0].toUpper().toLatin1());
+
+         if ( ::isxdigit( key ) )
+         {
+            int offs, nibbleValue, nibbleIndex;
+
+            offs = (cursorPosX / 2);
+            nibbleIndex = (cursorPosX % 2);
+
+            editAddr = 16*(lineOffset+cursorPosY) + offs;
+
+            nibbleValue = convFromXchar( key );
+
+            if ( nibbleIndex )
+            {
+               nibbleValue = editValue | nibbleValue;
+
+               writeMem( viewMode, editAddr, nibbleValue );
+
+               editAddr  = -1;
+               editValue =  0;
+               editMask  =  0;
+            }
+            else
+            {
+               editValue = (nibbleValue << 4);
+               editMask  = 0x00f0;
+            }
+            cursorPosX++;
+
+            if ( cursorPosX >= 32 )
+            {
+               cursorPosX = 0;
+            }
+         }
+      }
+      //printf("Key: %c  %i \n", key, key);
    }
 }
 //----------------------------------------------------------------------------
@@ -501,7 +755,7 @@ void QHexEdit::keyReleaseEvent(QKeyEvent *event)
 void QHexEdit::paintEvent(QPaintEvent *event)
 {
 	int x, y, w, h, row, col, nrow, addr;
-	int c, maxLines, maxLineOffset;
+	int c;
 	char txt[32], asciiTxt[32];
 	QPainter painter(this);
 
@@ -525,15 +779,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	}
 	//printf("Draw Area: %ix%i \n", event->rect().width(), event->rect().height() );
 	//
-	if ( (mb->size() % 16) )
-	{
-		maxLines = (mb->size() / 16) + 1;
-	}
-	else
-	{
-		maxLines = (mb->size() / 16);
-	}
-	maxLineOffset = maxLines - nrow + 1;
+	maxLineOffset = mb->numLines() - nrow + 1;
 
 	if ( lineOffset > maxLineOffset )
 	{
@@ -600,8 +846,22 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 				{
 					asciiTxt[col] = '.';
 				}
-				sprintf( txt, "%02X", c );
-				painter.drawText( x, y, tr(txt) );
+            if ( addr == editAddr )
+            {  // Set a cell currently being editting to red text
+	            painter.setPen( QColor("red") );
+               txt[0] = convToXchar( (editValue >> 4) & 0x0F );
+               txt[1] = convToXchar( c & 0x0F );
+               txt[2] = 0;
+				   painter.drawText( x, y, tr(txt) );
+	            painter.setPen( this->palette().color(QPalette::WindowText));
+            } 
+            else
+            {
+               txt[0] = convToXchar( (c >> 4) & 0x0F );
+               txt[1] = convToXchar( c & 0x0F );
+               txt[2] = 0;
+				   painter.drawText( x, y, tr(txt) );
+            }
 			}
 			else
 			{
