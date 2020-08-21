@@ -432,6 +432,26 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 {
    printf("Hex Window Key Press: 0x%x \n", event->key() );
 	
+	if (event->matches(QKeySequence::MoveToNextChar))
+   {
+		cursorPosX++;
+
+		if ( cursorPosX >= 48  )
+		{
+			cursorPosX = 47;
+		}
+		resetCursorBlink();
+   }
+   if (event->matches(QKeySequence::MoveToPreviousChar))
+   {
+		cursorPosX--;
+
+		if ( cursorPosX < 0 )
+		{
+			cursorPosX = 0;
+		}
+		resetCursorBlink();
+   }
 	if (event->matches(QKeySequence::MoveToPreviousLine))
    {
 		cursorPosY--;
@@ -534,7 +554,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		}
 		else
 		{
-			x = pxHexAscii;
+			x = pxHexAscii + (cursorPosX - 32)*pxCharWidth;
 		}
 
 		//painter.setPen( this->palette().color(QPalette::WindowText));
