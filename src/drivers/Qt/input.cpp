@@ -1570,6 +1570,7 @@ const char * ButtonName (const ButtConfig * bc)
 		{
 			int joyNum, inputNum;
 			const char *inputType, *inputDirection;
+			char direction[128] = "";
 
 			joyNum = bc->DeviceNum;
 
@@ -1582,7 +1583,6 @@ const char * ButtonName (const ButtConfig * bc)
 			else if (bc->ButtonNum & 0x2000)
 			{
 				int inputValue;
-				char direction[128] = "";
 
 				inputType = "Hat";
 				inputNum = (bc->ButtonNum >> 8) & 0x1F;

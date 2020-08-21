@@ -104,7 +104,8 @@ void FCEUD_PrintError(const char *errormsg)
  */
 FILE *FCEUD_UTF8fopen(const char *fn, const char *mode)
 {
-	return(fopen(fn,mode));
+   FILE *fp = ::fopen(fn,mode);
+	return(fp);
 }
 
 /**
