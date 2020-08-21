@@ -144,6 +144,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
 	QVBoxLayout *mainLayout;
+	QGridLayout *grid;
 	QMenuBar *menuBar;
 	QMenu *fileMenu;
 	QAction *saveROM;
@@ -173,12 +174,27 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	//-----------------------------------------------------------------------
 	mainLayout = new QVBoxLayout();
 
+	grid   = new QGridLayout(this);
 	editor = new QHexEdit( &mb, this);
+	vbar   = new QScrollBar( Qt::Vertical, this );
+	hbar   = new QScrollBar( Qt::Horizontal, this );
 
-	mainLayout->setMenuBar( menuBar );
-	mainLayout->addWidget( editor );
+	grid->setMenuBar( menuBar );
+
+	grid->addWidget( editor, 0, 0 );
+	grid->addWidget( vbar  , 0, 1 );
+	grid->addWidget( hbar  , 1, 0 );
+	mainLayout->addLayout( grid );
 
 	setLayout( mainLayout );
+
+	hbar->setMinimum(0);
+	hbar->setMaximum(100);
+	vbar->setMinimum(0);
+	vbar->setMaximum( 0x10000 / 16 );
+
+   //connect( vbar, SIGNAL(sliderMoved(int)), this, SLOT(vbarMoved(int)) );
+   connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
 
 	mode = MODE_NES_RAM;
 	memAccessFunc = getRAM;
@@ -203,6 +219,18 @@ void HexEditorDialog_t::closeWindow(void)
 {
    //printf("Close Window\n");
    done(0);
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::vbarMoved(int value)
+{
+	printf("VBar Moved: %i\n", value);
+	editor->setLine( value );
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::vbarChanged(int value)
+{
+	printf("VBar Changed: %i\n", value);
+	editor->setLine( value );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setMode(int new_mode)
@@ -331,6 +359,7 @@ QHexEdit::QHexEdit(memBlock_t *blkPtr, QWidget *parent)
 
 	calcFontData();
 
+	lineOffset  = 0;
 	cursorPosX  = 0;
 	cursorPosY  = 0;
 	cursorBlink = true;
@@ -352,10 +381,10 @@ void QHexEdit::calcFontData(void)
 #else
     pxCharWidth = metrics.width(QLatin1Char('2'));
 #endif
-    pxCharHeight = metrics.height();
+    pxCharHeight  = metrics.height();
 	 pxLineSpacing = metrics.lineSpacing() * 1.25;
     pxLineLead    = pxLineSpacing - pxCharHeight;
-	 pxXoffset     = pxCharHeight;
+	 pxXoffset     = pxCharWidth;
 	 pxYoffset     = pxLineSpacing * 2.0;
 	 pxHexOffset   = pxXoffset + (7*pxCharWidth);
     pxHexAscii    = pxHexOffset + (16*3*pxCharWidth) + (2*pxCharWidth);
@@ -364,6 +393,11 @@ void QHexEdit::calcFontData(void)
     //_pxGapHexAscii = 2 * _pxCharWidth;
     pxCursorHeight = pxCharHeight;
     //_pxSelectionSub = _pxCharHeight / 5;
+}
+//----------------------------------------------------------------------------
+void QHexEdit::setLine( int newLineOffset )
+{
+	lineOffset = newLineOffset;
 }
 //----------------------------------------------------------------------------
 void QHexEdit::keyPressEvent(QKeyEvent *event)
@@ -381,6 +415,7 @@ void QHexEdit::keyReleaseEvent(QKeyEvent *event)
 void QHexEdit::paintEvent(QPaintEvent *event)
 {
 	int x, y, w, h, row, col, nrow, addr;
+	int maxLines, maxLineOffset;
 	char txt[32];
 	QPainter painter(this);
 
@@ -390,7 +425,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 	//painter.fillRect( 0, 0, w, h, QColor("white") );
 
-	nrow = (h / pxLineSpacing) + 1;
+	nrow = (h / pxLineSpacing);
 
 	if ( nrow < 1 ) nrow = 1;
 
@@ -430,8 +465,16 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 	painter.setPen( this->palette().color(QPalette::WindowText));
 
+	maxLines = (mb->size() / 16);
+	maxLineOffset = maxLines - nrow + 2;
+
+	if ( lineOffset > maxLineOffset )
+	{
+		lineOffset = maxLineOffset;
+	}
+
 	//painter.setPen( QColor("white") );
-	addr = 0;
+	addr = lineOffset * 16;
 	y = pxYoffset;
 
 	for ( row=0; row < nrow; row++)
@@ -445,11 +488,15 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 		for (col=0; col<16; col++)
 		{
-			sprintf( txt, "%02X", mb->buf[addr+col].data );
-			painter.drawText( x, y, txt );
+			if ( addr < mb->size() )
+			{
+				sprintf( txt, "%02X", mb->buf[addr].data );
+				painter.drawText( x, y, txt );
+			}
 			x += (3*pxCharWidth);
+			addr++;
 		}
-		addr += 16;
+		//addr += 16;
 		y += pxLineSpacing;
 	}
 

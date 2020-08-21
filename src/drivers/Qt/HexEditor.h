@@ -46,6 +46,8 @@ class QHexEdit : public QWidget
 		QHexEdit(memBlock_t *blkPtr, QWidget *parent = 0);
 		~QHexEdit(void);
 
+		void setLine( int newLineOffset );
+		void setAddr( int newAddrOffset );
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
@@ -57,6 +59,7 @@ class QHexEdit : public QWidget
 
 		memBlock_t *mb;
 
+		int lineOffset;
 		int pxCharWidth;
 		int pxCharHeight;
 		int pxCursorHeight;
@@ -97,8 +100,10 @@ class HexEditorDialog_t : public QDialog
 		int  checkMemActivity(void);
 		int  calcVisibleRange( int *start_out, int *end_out, int *center_out );
 
-		QHexEdit  *editor;
-		QTimer    *periodicTimer;
+		QScrollBar *vbar;
+		QScrollBar *hbar;
+		QHexEdit   *editor;
+		QTimer     *periodicTimer;
 
 		int mode;
 		//int memSize;
@@ -116,5 +121,7 @@ class HexEditorDialog_t : public QDialog
       void closeWindow(void);
 	private slots:
 		void updatePeriodic(void);
+		void vbarMoved(int value);
+		void vbarChanged(int value);
 
 };
