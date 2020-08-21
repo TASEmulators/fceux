@@ -152,7 +152,7 @@ void memBlock_t::init(void)
 HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
-	QVBoxLayout *mainLayout;
+	//QVBoxLayout *mainLayout;
 	QGridLayout *grid;
 	QMenuBar *menuBar;
 	QMenu *fileMenu;
@@ -181,7 +181,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	//-----------------------------------------------------------------------
 	// Menu End 
 	//-----------------------------------------------------------------------
-	mainLayout = new QVBoxLayout();
+	//mainLayout = new QVBoxLayout();
 
 	grid   = new QGridLayout(this);
 	editor = new QHexEdit( &mb, this);
@@ -193,9 +193,9 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	grid->addWidget( editor, 0, 0 );
 	grid->addWidget( vbar  , 0, 1 );
 	grid->addWidget( hbar  , 1, 0 );
-	mainLayout->addLayout( grid );
+	//mainLayout->addLayout( grid );
 
-	setLayout( mainLayout );
+	setLayout( grid );
 
 	hbar->setMinimum(0);
 	hbar->setMaximum(100);
@@ -354,6 +354,8 @@ QHexEdit::QHexEdit(memBlock_t *blkPtr, QWidget *parent)
 
 	mb = blkPtr;
 
+	this->setFocusPolicy(Qt::StrongFocus);
+
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
 	font.setStyleHint( QFont::Monospace );
@@ -402,6 +404,7 @@ void QHexEdit::calcFontData(void)
     //_pxGapHexAscii = 2 * _pxCharWidth;
     pxCursorHeight = pxCharHeight;
     //_pxSelectionSub = _pxCharHeight / 5;
+	 viewLines   = (viewHeight - pxLineSpacing) / pxLineSpacing;
 }
 //----------------------------------------------------------------------------
 void QHexEdit::setLine( int newLineOffset )
@@ -409,10 +412,54 @@ void QHexEdit::setLine( int newLineOffset )
 	lineOffset = newLineOffset;
 }
 //----------------------------------------------------------------------------
+void QHexEdit::resizeEvent(QResizeEvent *event)
+{
+	viewWidth  = event->size().width();
+	viewHeight = event->size().height();
+
+	//printf("QHexEdit Resize: %ix%i\n", viewWidth, viewHeight );
+
+	viewLines = (viewHeight - pxLineSpacing) / pxLineSpacing;
+}
+//----------------------------------------------------------------------------
+void QHexEdit::resetCursorBlink(void)
+{
+	cursorBlink = true;
+	cursorBlinkCount = 0;
+}
+//----------------------------------------------------------------------------
 void QHexEdit::keyPressEvent(QKeyEvent *event)
 {
    printf("Hex Window Key Press: 0x%x \n", event->key() );
-	//assignHotkey( event );
+	
+	if (event->matches(QKeySequence::MoveToPreviousLine))
+   {
+		cursorPosY--;
+
+		if ( cursorPosY < 0 )
+		{
+			lineOffset--;
+
+			if ( lineOffset < 0 )
+			{
+				lineOffset = 0;
+			}
+			cursorPosY = 0;
+		}
+		resetCursorBlink();
+   }
+   if (event->matches(QKeySequence::MoveToNextLine))
+   {
+		cursorPosY++;
+
+		if ( cursorPosY >= viewLines )
+		{
+			lineOffset++;
+
+			cursorPosY = viewLines-1;
+		}
+		resetCursorBlink();
+   }
 }
 //----------------------------------------------------------------------------
 void QHexEdit::keyReleaseEvent(QKeyEvent *event)
@@ -432,18 +479,40 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	w = event->rect().width();
 	h = event->rect().height();
 
+	viewWidth  = w;
+	viewHeight = h;
 	//painter.fillRect( 0, 0, w, h, QColor("white") );
 
-	nrow = (h / pxLineSpacing);
+	nrow = (h - pxLineSpacing) / pxLineSpacing;
 
 	if ( nrow < 1 ) nrow = 1;
 
+	viewLines = nrow;
+
+	if ( cursorPosY >= viewLines )
+	{
+		cursorPosY = viewLines-1;
+	}
 	//printf("Draw Area: %ix%i \n", event->rect().width(), event->rect().height() );
 	//
+	if ( (mb->size() % 16) )
+	{
+		maxLines = (mb->size() / 16) + 1;
+	}
+	else
+	{
+		maxLines = (mb->size() / 16);
+	}
+	maxLineOffset = maxLines - nrow + 1;
+
+	if ( lineOffset > maxLineOffset )
+	{
+		lineOffset = maxLineOffset;
+	}
 	
 	painter.fillRect( 0, 0, w, h, this->palette().color(QPalette::Background) );
 
-	if ( cursorBlinkCount >= 10 )
+	if ( cursorBlinkCount >= 5 )
 	{
 		cursorBlink = !cursorBlink;
 		cursorBlinkCount = 0;
@@ -474,14 +543,6 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 	painter.setPen( this->palette().color(QPalette::WindowText));
 
-	maxLines = (mb->size() / 16);
-	maxLineOffset = maxLines - nrow + 2;
-
-	if ( lineOffset > maxLineOffset )
-	{
-		lineOffset = maxLineOffset;
-	}
-
 	//painter.setPen( QColor("white") );
 	addr = lineOffset * 16;
 	y = pxYoffset;
@@ -491,7 +552,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		x = pxXoffset;
 
 		sprintf( txt, "%06X", addr );
-		painter.drawText( x, y, txt );
+		painter.drawText( x, y, tr(txt) );
 
 		x = pxHexOffset;
 
@@ -510,7 +571,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 					asciiTxt[col] = '.';
 				}
 				sprintf( txt, "%02X", c );
-				painter.drawText( x, y, txt );
+				painter.drawText( x, y, tr(txt) );
 			}
 			else
 			{

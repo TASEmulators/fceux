@@ -15,6 +15,7 @@
 #include <QFrame>
 #include <QGroupBox>
 #include <QPlainTextEdit>
+#include <QKeyEvent>
 
 struct memByte_t
 {
@@ -52,8 +53,10 @@ class QHexEdit : public QWidget
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
    	void keyReleaseEvent(QKeyEvent *event);
+		void resizeEvent(QResizeEvent *event);
 
 		void calcFontData(void);
+		void resetCursorBlink(void);
 
 		QFont      font;
 
@@ -72,8 +75,9 @@ class QHexEdit : public QWidget
 		int cursorPosX;
 		int cursorPosY;
 		int cursorBlinkCount;
-		int numLines;
-		int numCharsPerLine;
+		int viewLines;
+		int viewWidth;
+		int viewHeight;
 
 		bool cursorBlink;
 };
