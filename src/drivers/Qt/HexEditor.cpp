@@ -108,6 +108,15 @@ memBlock_t::~memBlock_t(void)
 //----------------------------------------------------------------------------
 int memBlock_t::reAlloc( int newSize )
 {
+	if ( newSize == 0 )
+	{
+		return 0;
+	}
+	if ( _size == newSize )
+	{
+		return 0;
+	}
+
 	if ( buf != NULL )
 	{
 		::free( buf ); buf = NULL;
@@ -121,7 +130,7 @@ int memBlock_t::reAlloc( int newSize )
 		_size = newSize;
 		init();
 	}
-	return (buf != NULL);
+	return (buf == NULL);
 }
 //----------------------------------------------------------------------------
 void memBlock_t::setAccessFunc( int (*newMemAccessFunc)( unsigned int offset) )
@@ -223,13 +232,13 @@ void HexEditorDialog_t::closeWindow(void)
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::vbarMoved(int value)
 {
-	printf("VBar Moved: %i\n", value);
+	//printf("VBar Moved: %i\n", value);
 	editor->setLine( value );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::vbarChanged(int value)
 {
-	printf("VBar Changed: %i\n", value);
+	//printf("VBar Changed: %i\n", value);
 	editor->setLine( value );
 }
 //----------------------------------------------------------------------------
@@ -387,7 +396,7 @@ void QHexEdit::calcFontData(void)
 	 pxXoffset     = pxCharWidth;
 	 pxYoffset     = pxLineSpacing * 2.0;
 	 pxHexOffset   = pxXoffset + (7*pxCharWidth);
-    pxHexAscii    = pxHexOffset + (16*3*pxCharWidth) + (2*pxCharWidth);
+    pxHexAscii    = pxHexOffset + (16*3*pxCharWidth) + (pxCharWidth);
     //_pxGapAdr = _pxCharWidth / 2;
     //_pxGapAdrHex = _pxCharWidth;
     //_pxGapHexAscii = 2 * _pxCharWidth;
@@ -415,8 +424,8 @@ void QHexEdit::keyReleaseEvent(QKeyEvent *event)
 void QHexEdit::paintEvent(QPaintEvent *event)
 {
 	int x, y, w, h, row, col, nrow, addr;
-	int maxLines, maxLineOffset;
-	char txt[32];
+	int c, maxLines, maxLineOffset;
+	char txt[32], asciiTxt[32];
 	QPainter painter(this);
 
 	painter.setFont(font);
@@ -490,18 +499,37 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		{
 			if ( addr < mb->size() )
 			{
-				sprintf( txt, "%02X", mb->buf[addr].data );
+				c =  mb->buf[addr].data;
+
+				if ( ::isprint(c) )
+				{
+					asciiTxt[col] = c;
+				}
+				else
+				{
+					asciiTxt[col] = '.';
+				}
+				sprintf( txt, "%02X", c );
 				painter.drawText( x, y, txt );
+			}
+			else
+			{
+				asciiTxt[col] = 0;
 			}
 			x += (3*pxCharWidth);
 			addr++;
 		}
+		asciiTxt[16] = 0;
+
+		painter.drawText( pxHexAscii, y, tr(asciiTxt) );
+
 		//addr += 16;
 		y += pxLineSpacing;
 	}
 
 	painter.drawText( pxHexOffset, pxLineSpacing, "00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F" );
 	painter.drawLine( pxHexOffset - (pxCharWidth/2), 0, pxHexOffset - (pxCharWidth/2), h );
+	painter.drawLine( pxHexAscii  - (pxCharWidth/2), 0, pxHexAscii  - (pxCharWidth/2), h );
 	painter.drawLine( 0, pxLineSpacing + (pxLineLead), w, pxLineSpacing + (pxLineLead) );
 
 }
