@@ -288,10 +288,10 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	//QVBoxLayout *mainLayout;
 	QGridLayout *grid;
 	QMenuBar *menuBar;
-	QMenu *fileMenu;
-	QMenu *viewMenu;
+	QMenu *fileMenu, *viewMenu, *hlgtMenu;
 	QAction *saveROM;
 	QAction *viewRAM, *viewPPU, *viewOAM, *viewROM;
+	QAction *actHlgt, *actHlgtRV;
 	QActionGroup *group;
 
 	setWindowTitle("Hex Editor");
@@ -362,6 +362,30 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
    viewMenu->addAction(viewROM);
 
 	viewRAM->setChecked(true); // Set default view
+
+	// Highlighting
+   hlgtMenu = menuBar->addMenu(tr("Highlight"));
+
+	// Highlighting -> Highlight Activity
+	actHlgt = new QAction(tr("Highlight Activity"), this);
+   //actHlgt->setShortcuts(QKeySequence::Open);
+   actHlgt->setStatusTip(tr("Highlight Activity"));
+	actHlgt->setCheckable(true);
+	actHlgt->setChecked(true);
+   connect(actHlgt, SIGNAL(triggered(bool)), this, SLOT(actvHighlightCB(bool)) );
+
+   hlgtMenu->addAction(actHlgt);
+
+	// Highlighting -> Highlight Reverse Video
+	actHlgtRV = new QAction(tr("Highlight Reverse Video"), this);
+   //actHlgtRV->setShortcuts(QKeySequence::Open);
+   actHlgtRV->setStatusTip(tr("Highlight Reverse Video"));
+	actHlgtRV->setCheckable(true);
+	actHlgtRV->setChecked(false);
+   connect(actHlgtRV, SIGNAL(triggered(bool)), this, SLOT(actvHighlightRVCB(bool)) );
+
+   hlgtMenu->addAction(actHlgtRV);
+
 	//-----------------------------------------------------------------------
 	// Menu End 
 	//-----------------------------------------------------------------------
@@ -456,6 +480,18 @@ void HexEditorDialog_t::setViewOAM(void)
 void HexEditorDialog_t::setViewROM(void)
 {
 	setMode( MODE_NES_ROM );
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::actvHighlightCB(bool enable)
+{
+	//printf("Highlight: %i \n", enable );
+	editor->setHighlightActivity( enable );
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::actvHighlightRVCB(bool enable)
+{
+	//printf("Highlight: %i \n", enable );
+	editor->setHighlightReverseVideo( enable );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::showMemViewResults (bool reset)
@@ -587,6 +623,8 @@ QHexEdit::QHexEdit(memBlock_t *blkPtr, QWidget *parent)
    editAddr  = -1;
    editValue =  0;
    editMask  =  0;
+	reverseVideo = false;
+	actvHighlightEnable = true;
 
 	highLightColor[ 0].setRgb( 0x00, 0x00, 0x00 );
 	highLightColor[ 1].setRgb( 0x35, 0x40, 0x00 );
@@ -605,6 +643,26 @@ QHexEdit::QHexEdit(memBlock_t *blkPtr, QWidget *parent)
 	highLightColor[14].setRgb( 0xCF, 0x72, 0x00 );
 	highLightColor[15].setRgb( 0xC7, 0x8B, 0x3C );
 
+	for (int i=0; i<HIGHLIGHT_ACTIVITY_NUM_COLORS; i++)
+	{
+		float red, green, blue, avg, grayScale;
+
+		red   = highLightColor[i].redF();
+		green = highLightColor[i].greenF();
+		blue  = highLightColor[i].blueF();
+
+		avg = (red + green + blue) / 3.0;
+
+		if ( avg >= 0.5 )
+		{
+			grayScale = 0.0;
+		}
+		else
+		{
+			grayScale = 1.0;
+		}
+		rvActvTextColor[i].setRgbF( grayScale, grayScale, grayScale );
+	}
 }
 //----------------------------------------------------------------------------
 QHexEdit::~QHexEdit(void)
@@ -634,6 +692,16 @@ void QHexEdit::calcFontData(void)
     pxCursorHeight = pxCharHeight;
     //_pxSelectionSub = _pxCharHeight / 5;
 	 viewLines   = (viewHeight - pxLineSpacing) / pxLineSpacing;
+}
+//----------------------------------------------------------------------------
+void QHexEdit::setHighlightActivity( int enable )
+{
+	actvHighlightEnable = enable;
+}
+//----------------------------------------------------------------------------
+void QHexEdit::setHighlightReverseVideo( int enable )
+{
+	reverseVideo = enable;
 }
 //----------------------------------------------------------------------------
 void QHexEdit::setMode( int mode )
@@ -1042,9 +1110,17 @@ void QHexEdit::paintEvent(QPaintEvent *event)
             } 
             else
             {
-					if ( mb->buf[addr].actv > 0 )
+					if ( actvHighlightEnable && (mb->buf[addr].actv > 0) )
 					{
-	            	painter.setPen( highLightColor[ mb->buf[addr].actv ] );
+						if ( reverseVideo )
+						{
+	            		painter.setPen( rvActvTextColor[ mb->buf[addr].actv ] );
+							painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, highLightColor[ mb->buf[addr].actv ] );
+						}
+						else
+						{
+	            		painter.setPen( highLightColor[ mb->buf[addr].actv ] );
+						}
 					}
 					else
 					{

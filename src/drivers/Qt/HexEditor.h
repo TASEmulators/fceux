@@ -53,6 +53,8 @@ class QHexEdit : public QWidget
 		void setLine( int newLineOffset );
 		void setAddr( int newAddrOffset );
 		void setScrollBars( QScrollBar *h, QScrollBar *v );
+		void setHighlightActivity( int enable );
+		void setHighlightReverseVideo( int enable );
 
 		static const int HIGHLIGHT_ACTIVITY_NUM_COLORS = 16;
 	protected:
@@ -73,6 +75,7 @@ class QHexEdit : public QWidget
 		QScrollBar *vbar;
 		QScrollBar *hbar;
 		QColor      highLightColor[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
+		QColor      rvActvTextColor[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
 
       int viewMode;
 		int lineOffset;
@@ -97,6 +100,8 @@ class QHexEdit : public QWidget
       int editMask;
 
 		bool cursorBlink;
+		bool reverseVideo;
+		bool actvHighlightEnable;
 };
 
 class HexEditorDialog_t : public QDialog
@@ -150,5 +155,6 @@ class HexEditorDialog_t : public QDialog
 		void setViewPPU(void);
 		void setViewOAM(void);
 		void setViewROM(void);
-
+		void actvHighlightCB(bool value); 
+		void actvHighlightRVCB(bool value); 
 };
