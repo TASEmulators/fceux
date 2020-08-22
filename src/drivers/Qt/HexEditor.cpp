@@ -752,6 +752,86 @@ void QHexEdit::keyReleaseEvent(QKeyEvent *event)
 	//assignHotkey( event );
 }
 //----------------------------------------------------------------------------
+void QHexEdit::mousePressEvent(QMouseEvent * event)
+{
+	int cx = 0, cy = 0;
+	QPoint p = event->pos();
+
+	//printf("Pos: %ix%i \n", p.x(), p.y() );
+
+	if ( p.x() < pxHexOffset )
+	{
+		cx = 0;
+	}
+	else if ( (p.x() >= pxHexOffset) && (p.x() < pxHexAscii) )
+	{
+		float px = ( (float)p.x() - (float)pxHexOffset) / (float)(pxCharWidth);
+		float ox = (px/3.0);
+		float rx = fmodf(px,3.0);
+
+		if ( rx >= 2.50 )
+		{
+			cx = 2*( (int)ox + 1 );
+		}
+		else
+		{
+			if ( rx >= 1.0 )
+			{
+				cx = 2*( (int)ox ) + 1;
+			}
+			else
+			{
+				cx = 2*( (int)ox );
+			}
+		}
+	}
+	else
+	{
+		cx = 32 + (p.x() - pxHexAscii) / pxCharWidth;
+	}
+	if ( cx >= 48 )
+	{
+		cx = 47;
+	}
+
+	if ( p.y() < pxYoffset )
+	{
+		cy = 0;
+	}
+	else
+	{
+		float ly = ( (float)pxLineLead / (float)pxLineSpacing );
+		float py = ( (float)p.y() -  (float)pxLineSpacing) /  (float)pxLineSpacing;
+		float ry = fmod( py, 1.0 );
+
+		if ( ry < ly )
+		{
+			cy = ((int)py) - 1;
+		}
+		else
+		{
+			cy = (int)py;
+		}
+	}
+	if ( cy < 0 )
+	{
+		cy = 0;
+	}
+	else if ( cy >= viewLines )
+	{
+		cy = viewLines - 1;
+	}
+	//printf("c: %ix%i \n", cx, cy );
+
+	if ( event->button() == Qt::LeftButton )
+	{
+		cursorPosX = cx;
+		cursorPosY = cy;
+		resetCursor();
+	}
+
+}
+//----------------------------------------------------------------------------
 void QHexEdit::paintEvent(QPaintEvent *event)
 {
 	int x, y, w, h, row, col, nrow, addr;
