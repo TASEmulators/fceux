@@ -282,7 +282,10 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	QGridLayout *grid;
 	QMenuBar *menuBar;
 	QMenu *fileMenu;
+	QMenu *viewMenu;
 	QAction *saveROM;
+	QAction *viewRAM, *viewPPU, *viewOAM, *viewROM;
+	QActionGroup *group;
 
 	setWindowTitle("Hex Editor");
 
@@ -298,12 +301,60 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	// File -> Open ROM
 	saveROM = new QAction(tr("Save ROM"), this);
-   saveROM->setShortcuts(QKeySequence::Open);
+   //saveROM->setShortcuts(QKeySequence::Open);
    saveROM->setStatusTip(tr("Save ROM File"));
    //connect(saveROM, SIGNAL(triggered()), this, SLOT(saveROMFile(void)) );
 
    fileMenu->addAction(saveROM);
 
+	// View
+	viewMenu = menuBar->addMenu(tr("View"));
+
+	group   = new QActionGroup(this);
+
+	group->setExclusive(true);
+
+	// View -> RAM
+	viewRAM = new QAction(tr("RAM"), this);
+   //viewRAM->setShortcuts(QKeySequence::Open);
+   viewRAM->setStatusTip(tr("View RAM"));
+	viewRAM->setCheckable(true);
+   connect(viewRAM, SIGNAL(triggered()), this, SLOT(setViewRAM(void)) );
+
+	group->addAction(viewRAM);
+   viewMenu->addAction(viewRAM);
+
+	// View -> PPU
+	viewPPU = new QAction(tr("PPU"), this);
+   //viewPPU->setShortcuts(QKeySequence::Open);
+   viewPPU->setStatusTip(tr("View PPU"));
+	viewPPU->setCheckable(true);
+   connect(viewPPU, SIGNAL(triggered()), this, SLOT(setViewPPU(void)) );
+
+	group->addAction(viewPPU);
+   viewMenu->addAction(viewPPU);
+
+	// View -> OAM
+	viewOAM = new QAction(tr("OAM"), this);
+   //viewOAM->setShortcuts(QKeySequence::Open);
+   viewOAM->setStatusTip(tr("View OAM"));
+	viewOAM->setCheckable(true);
+   connect(viewOAM, SIGNAL(triggered()), this, SLOT(setViewOAM(void)) );
+
+	group->addAction(viewOAM);
+   viewMenu->addAction(viewOAM);
+
+	// View -> ROM
+	viewROM = new QAction(tr("ROM"), this);
+   //viewROM->setShortcuts(QKeySequence::Open);
+   viewROM->setStatusTip(tr("View ROM"));
+	viewROM->setCheckable(true);
+   connect(viewROM, SIGNAL(triggered()), this, SLOT(setViewROM(void)) );
+
+	group->addAction(viewROM);
+   viewMenu->addAction(viewROM);
+
+	viewRAM->setChecked(true); // Set default view
 	//-----------------------------------------------------------------------
 	// Menu End 
 	//-----------------------------------------------------------------------
@@ -378,6 +429,26 @@ void HexEditorDialog_t::setMode(int new_mode)
 		showMemViewResults(true);
       editor->setMode( mode );
 	}
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::setViewRAM(void)
+{
+	setMode( MODE_NES_RAM );
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::setViewPPU(void)
+{
+	setMode( MODE_NES_PPU );
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::setViewOAM(void)
+{
+	setMode( MODE_NES_OAM );
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::setViewROM(void)
+{
+	setMode( MODE_NES_ROM );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::showMemViewResults (bool reset)

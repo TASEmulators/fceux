@@ -143,5 +143,9 @@ class HexEditorDialog_t : public QDialog
 		void updatePeriodic(void);
 		void vbarMoved(int value);
 		void vbarChanged(int value);
+		void setViewRAM(void);
+		void setViewPPU(void);
+		void setViewOAM(void);
+		void setViewROM(void);
 
 };
