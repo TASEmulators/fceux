@@ -43,6 +43,7 @@ static int getRAM( unsigned int i )
 {
 	return GetMem(i);
 }
+//----------------------------------------------------------------------------
 static int getPPU( unsigned int i )
 {
 	i &= 0x3FFF;
@@ -58,10 +59,12 @@ static int getPPU( unsigned int i )
 	}
 	return 0;
 }
+//----------------------------------------------------------------------------
 static int getOAM( unsigned int i )
 {
 	return SPRAM[i & 0xFF];
 }
+//----------------------------------------------------------------------------
 static int getROM( unsigned int offset)
 {
 	if (offset < 16)
@@ -78,6 +81,7 @@ static int getROM( unsigned int offset)
 	}
 	return -1;
 }
+//----------------------------------------------------------------------------
 static void PalettePoke(uint32 addr, uint8 data)
 {
 	data = data & 0x3F;
@@ -99,6 +103,7 @@ static void PalettePoke(uint32 addr, uint8 data)
 		PALRAM[addr] = data;
 	}
 }
+//----------------------------------------------------------------------------
 static int writeMem( int mode, unsigned int addr, int value )
 {
 	value = value & 0x000000ff;
@@ -168,6 +173,7 @@ static int writeMem( int mode, unsigned int addr, int value )
 	}
    return 0;
 }
+//----------------------------------------------------------------------------
 
 static int convToXchar( int i )
 {
@@ -183,6 +189,7 @@ static int convToXchar( int i )
 	}
 	return c;
 }
+//----------------------------------------------------------------------------
 
 static int convFromXchar( int i )
 {
@@ -580,6 +587,23 @@ QHexEdit::QHexEdit(memBlock_t *blkPtr, QWidget *parent)
    editAddr  = -1;
    editValue =  0;
    editMask  =  0;
+
+	highLightColor[ 0].setRgb( 0x00, 0x00, 0x00 );
+	highLightColor[ 1].setRgb( 0x35, 0x40, 0x00 );
+	highLightColor[ 2].setRgb( 0x18, 0x52, 0x18 );
+	highLightColor[ 3].setRgb( 0x34, 0x5C, 0x5E );
+	highLightColor[ 4].setRgb( 0x00, 0x4C, 0x80 );
+	highLightColor[ 5].setRgb( 0x00, 0x03, 0xBA );
+	highLightColor[ 6].setRgb( 0x38, 0x00, 0xD1 );
+	highLightColor[ 7].setRgb( 0x72, 0x12, 0xB2 );
+	highLightColor[ 8].setRgb( 0xAB, 0x00, 0xBA );
+	highLightColor[ 9].setRgb( 0xB0, 0x00, 0x6F );
+	highLightColor[10].setRgb( 0xC2, 0x00, 0x37 );
+	highLightColor[11].setRgb( 0xBA, 0x0C, 0x00 );
+	highLightColor[12].setRgb( 0xC9, 0x2C, 0x00 );
+	highLightColor[13].setRgb( 0xBF, 0x53, 0x00 );
+	highLightColor[14].setRgb( 0xCF, 0x72, 0x00 );
+	highLightColor[15].setRgb( 0xC7, 0x8B, 0x3C );
 
 }
 //----------------------------------------------------------------------------
@@ -987,6 +1011,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	{
 		x = pxXoffset;
 
+		painter.setPen( this->palette().color(QPalette::WindowText));
 		sprintf( txt, "%06X", addr );
 		painter.drawText( x, y, tr(txt) );
 
@@ -1017,6 +1042,14 @@ void QHexEdit::paintEvent(QPaintEvent *event)
             } 
             else
             {
+					if ( mb->buf[addr].actv > 0 )
+					{
+	            	painter.setPen( highLightColor[ mb->buf[addr].actv ] );
+					}
+					else
+					{
+	            	painter.setPen( this->palette().color(QPalette::WindowText));
+					}
                txt[0] = convToXchar( (c >> 4) & 0x0F );
                txt[1] = convToXchar( c & 0x0F );
                txt[2] = 0;
@@ -1032,6 +1065,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		}
 		asciiTxt[16] = 0;
 
+		painter.setPen( this->palette().color(QPalette::WindowText));
 		painter.drawText( pxHexAscii, y, tr(asciiTxt) );
 
 		//addr += 16;

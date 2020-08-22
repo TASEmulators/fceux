@@ -53,6 +53,8 @@ class QHexEdit : public QWidget
 		void setLine( int newLineOffset );
 		void setAddr( int newAddrOffset );
 		void setScrollBars( QScrollBar *h, QScrollBar *v );
+
+		static const int HIGHLIGHT_ACTIVITY_NUM_COLORS = 16;
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
@@ -70,6 +72,7 @@ class QHexEdit : public QWidget
 
 		QScrollBar *vbar;
 		QScrollBar *hbar;
+		QColor      highLightColor[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
 
       int viewMode;
 		int lineOffset;
