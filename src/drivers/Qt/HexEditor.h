@@ -62,6 +62,7 @@ class QHexEdit : public QWidget
 
 		void calcFontData(void);
 		void resetCursor(void);
+		QPoint convPixToCursor( QPoint p );
 
 		QFont      font;
 

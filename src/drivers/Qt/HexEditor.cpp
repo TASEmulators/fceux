@@ -577,6 +577,80 @@ void QHexEdit::resetCursor(void)
    editMask  = 0;
 }
 //----------------------------------------------------------------------------
+QPoint QHexEdit::convPixToCursor( QPoint p )
+{
+	QPoint c(0,0);
+
+	//printf("Pos: %ix%i \n", p.x(), p.y() );
+
+	if ( p.x() < pxHexOffset )
+	{
+		c.setX(0);
+	}
+	else if ( (p.x() >= pxHexOffset) && (p.x() < pxHexAscii) )
+	{
+		float px = ( (float)p.x() - (float)pxHexOffset) / (float)(pxCharWidth);
+		float ox = (px/3.0);
+		float rx = fmodf(px,3.0);
+
+		if ( rx >= 2.50 )
+		{
+			c.setX( 2*( (int)ox + 1 ) );
+		}
+		else
+		{
+			if ( rx >= 1.0 )
+			{
+				c.setX( 2*( (int)ox ) + 1 );
+			}
+			else
+			{
+				c.setX( 2*( (int)ox ) );
+			}
+		}
+	}
+	else
+	{
+		c.setX( 32 + (p.x() - pxHexAscii) / pxCharWidth );
+	}
+	if ( c.x() >= 48 )
+	{
+		c.setX( 47 );
+	}
+
+	if ( p.y() < pxYoffset )
+	{
+		c.setY( 0 );
+	}
+	else
+	{
+		float ly = ( (float)pxLineLead / (float)pxLineSpacing );
+		float py = ( (float)p.y() -  (float)pxLineSpacing) /  (float)pxLineSpacing;
+		float ry = fmod( py, 1.0 );
+
+		if ( ry < ly )
+		{
+			c.setY( ((int)py) - 1 );
+		}
+		else
+		{
+			c.setY( (int)py );
+		}
+	}
+	if ( c.y() < 0 )
+	{
+		c.setY(0);
+	}
+	else if ( c.y() >= viewLines )
+	{
+		c.setY( viewLines - 1 );
+	}
+	//printf("c: %ix%i \n", cx, cy );
+	//
+
+	return c;
+}
+//----------------------------------------------------------------------------
 void QHexEdit::keyPressEvent(QKeyEvent *event)
 {
    printf("Hex Window Key Press: 0x%x \n", event->key() );
@@ -754,79 +828,14 @@ void QHexEdit::keyReleaseEvent(QKeyEvent *event)
 //----------------------------------------------------------------------------
 void QHexEdit::mousePressEvent(QMouseEvent * event)
 {
-	int cx = 0, cy = 0;
-	QPoint p = event->pos();
+	QPoint c = convPixToCursor( event->pos() );
 
-	//printf("Pos: %ix%i \n", p.x(), p.y() );
-
-	if ( p.x() < pxHexOffset )
-	{
-		cx = 0;
-	}
-	else if ( (p.x() >= pxHexOffset) && (p.x() < pxHexAscii) )
-	{
-		float px = ( (float)p.x() - (float)pxHexOffset) / (float)(pxCharWidth);
-		float ox = (px/3.0);
-		float rx = fmodf(px,3.0);
-
-		if ( rx >= 2.50 )
-		{
-			cx = 2*( (int)ox + 1 );
-		}
-		else
-		{
-			if ( rx >= 1.0 )
-			{
-				cx = 2*( (int)ox ) + 1;
-			}
-			else
-			{
-				cx = 2*( (int)ox );
-			}
-		}
-	}
-	else
-	{
-		cx = 32 + (p.x() - pxHexAscii) / pxCharWidth;
-	}
-	if ( cx >= 48 )
-	{
-		cx = 47;
-	}
-
-	if ( p.y() < pxYoffset )
-	{
-		cy = 0;
-	}
-	else
-	{
-		float ly = ( (float)pxLineLead / (float)pxLineSpacing );
-		float py = ( (float)p.y() -  (float)pxLineSpacing) /  (float)pxLineSpacing;
-		float ry = fmod( py, 1.0 );
-
-		if ( ry < ly )
-		{
-			cy = ((int)py) - 1;
-		}
-		else
-		{
-			cy = (int)py;
-		}
-	}
-	if ( cy < 0 )
-	{
-		cy = 0;
-	}
-	else if ( cy >= viewLines )
-	{
-		cy = viewLines - 1;
-	}
-	//printf("c: %ix%i \n", cx, cy );
+	//printf("c: %ix%i \n", c.x(), c.y() );
 
 	if ( event->button() == Qt::LeftButton )
 	{
-		cursorPosX = cx;
-		cursorPosY = cy;
+		cursorPosX = c.x();
+		cursorPosY = c.y();
 		resetCursor();
 	}
 
