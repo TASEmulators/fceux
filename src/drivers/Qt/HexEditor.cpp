@@ -1012,6 +1012,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
       {
          lineOffset = maxLineOffset;
       }
+      vbar->setValue( lineOffset );
 		resetCursor();
    }
    else if (event->matches(QKeySequence::MoveToPreviousPage))
@@ -1022,16 +1023,19 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
       {
          lineOffset = 0;
       }
+      vbar->setValue( lineOffset );
 		resetCursor();
    }
    else if (event->matches(QKeySequence::MoveToEndOfDocument))
    {
       lineOffset = maxLineOffset;
+      vbar->setValue( lineOffset );
 		resetCursor();
    }
    else if (event->matches(QKeySequence::MoveToStartOfDocument))
    {
       lineOffset = 0;
+      vbar->setValue( lineOffset );
 		resetCursor();
    }
    else if (event->key() == Qt::Key_Tab && (cursorPosX < 32) )
