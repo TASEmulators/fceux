@@ -12,6 +12,7 @@
 #include <QCheckBox>
 #include <QPushButton>
 #include <QLabel>
+#include <QMenu>
 #include <QFrame>
 #include <QGroupBox>
 #include <QPlainTextEdit>
@@ -131,11 +132,13 @@ class HexEditorDialog_t : public QDialog
 		void showMemViewResults (bool reset);
 		int  checkMemActivity(void);
 		int  calcVisibleRange( int *start_out, int *end_out, int *center_out );
+		void populateBookmarkMenu(void);
 
 		QScrollBar *vbar;
 		QScrollBar *hbar;
 		QHexEdit   *editor;
 		QTimer     *periodicTimer;
+		QMenu      *bookmarkMenu;
 
 		int mode;
 		//int memSize;

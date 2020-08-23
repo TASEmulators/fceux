@@ -403,6 +403,11 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
    colorMenu->addAction(actColorBG);
 
+	// Bookmarks Menu
+   bookmarkMenu = menuBar->addMenu(tr("Bookmarks"));
+
+	populateBookmarkMenu();
+
 	//-----------------------------------------------------------------------
 	// Menu End 
 	//-----------------------------------------------------------------------
@@ -449,6 +454,22 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 HexEditorDialog_t::~HexEditorDialog_t(void)
 {
 	periodicTimer->stop();
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::populateBookmarkMenu(void)
+{
+	QAction *act;
+
+	bookmarkMenu->clear();
+
+	// Bookmarks -> Remove All Bookmarks
+	act = new QAction(tr("Remove All Bookmarks"), this);
+   //act->setShortcuts(QKeySequence::Open);
+   act->setStatusTip(tr("Remove All Bookmarks"));
+   //connect(act, SIGNAL(triggered(void)), this, SLOT(pickBackGroundColor(void)) );
+
+   bookmarkMenu->addAction(act);
+	bookmarkMenu->addSeparator();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::closeWindow(void)
