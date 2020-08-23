@@ -833,14 +833,14 @@ QPoint QHexEdit::convPixToCursor( QPoint p )
 		}
 		else
 		{
-			if ( rx >= 1.0 )
-			{
-				c.setX( 2*( (int)ox ) + 1 );
-			}
-			else
-			{
+			//if ( rx >= 1.0 )
+			//{
+			//	c.setX( 2*( (int)ox ) + 1 );
+			//}
+			//else
+			//{
 				c.setX( 2*( (int)ox ) );
-			}
+			//}
 		}
 	}
 	else
@@ -1078,8 +1078,8 @@ void QHexEdit::mousePressEvent(QMouseEvent * event)
 void QHexEdit::paintEvent(QPaintEvent *event)
 {
 	int x, y, w, h, row, col, nrow, addr;
-	int c;
-	char txt[32], asciiTxt[32];
+	int c, cx, cy, ca;
+	char txt[32], asciiTxt[4];
 	QPainter painter(this);
 
 	painter.setFont(font);
@@ -1121,23 +1121,27 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		cursorBlinkCount++;
 	}
 
+	cy = pxYoffset + (pxLineSpacing*cursorPosY) - pxCursorHeight + pxLineLead;
+
+	if ( cursorPosX < 32 )
+	{
+		int a = (cursorPosX / 2);
+		int r = (cursorPosX % 2);
+		cx = pxHexOffset + (a*3*pxCharWidth) + (r*pxCharWidth);
+
+		ca = 16*(lineOffset + cursorPosY) + a;
+	}
+	else
+	{
+		int a = (cursorPosX-32);
+		cx = pxHexAscii + (a*pxCharWidth);
+
+		ca = 16*(lineOffset + cursorPosY) + a;
+	}
+
 	if ( cursorBlink )
 	{
-		y = pxYoffset + (pxLineSpacing*cursorPosY) - pxCursorHeight + pxLineLead;
-
-		if ( cursorPosX < 32 )
-		{
-			int a = (cursorPosX / 2);
-			int r = (cursorPosX % 2);
-			x = pxHexOffset + (a*3*pxCharWidth) + (r*pxCharWidth);
-		}
-		else
-		{
-			x = pxHexAscii + (cursorPosX - 32)*pxCharWidth;
-		}
-
-		//painter.setPen( this->palette().color(QPalette::WindowText));
-		painter.fillRect( x , y, pxCharWidth, pxCursorHeight, QColor("gray") );
+		painter.fillRect( cx , cy, pxCharWidth, pxCursorHeight, QColor("gray") );
 	}
 
 	painter.setPen( this->palette().color(QPalette::WindowText));
@@ -1164,12 +1168,14 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 				if ( ::isprint(c) )
 				{
-					asciiTxt[col] = c;
+					asciiTxt[0] = c;
 				}
 				else
 				{
-					asciiTxt[col] = '.';
+					asciiTxt[0] = '.';
 				}
+				asciiTxt[1] = 0;
+
             if ( addr == editAddr )
             {  // Set a cell currently being editting to red text
 	            painter.setPen( QColor("red") );
@@ -1187,6 +1193,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 						{
 	            		painter.setPen( rvActvTextColor[ mb->buf[addr].actv ] );
 							painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, highLightColor[ mb->buf[addr].actv ] );
+							painter.fillRect( pxHexAscii + (col*pxCharWidth) , y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, highLightColor[ mb->buf[addr].actv ] );
 						}
 						else
 						{
@@ -1200,25 +1207,24 @@ void QHexEdit::paintEvent(QPaintEvent *event)
                txt[0] = convToXchar( (c >> 4) & 0x0F );
                txt[1] = convToXchar( c & 0x0F );
                txt[2] = 0;
+
+					if ( cursorBlink && (ca == addr) )
+					{
+						painter.fillRect( cx , cy, pxCharWidth, pxCursorHeight, QColor("gray") );
+					}
 				   painter.drawText( x, y, tr(txt) );
+					painter.drawText( pxHexAscii + (col*pxCharWidth), y, tr(asciiTxt) );
             }
-			}
-			else
-			{
-				asciiTxt[col] = 0;
 			}
 			x += (3*pxCharWidth);
 			addr++;
 		}
-		asciiTxt[16] = 0;
-
-		painter.setPen( this->palette().color(QPalette::WindowText));
-		painter.drawText( pxHexAscii, y, tr(asciiTxt) );
 
 		//addr += 16;
 		y += pxLineSpacing;
 	}
 
+   painter.setPen( this->palette().color(QPalette::WindowText));
 	painter.drawText( pxHexOffset, pxLineSpacing, "00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F" );
 	painter.drawLine( pxHexOffset - (pxCharWidth/2), 0, pxHexOffset - (pxCharWidth/2), h );
 	painter.drawLine( pxHexAscii  - (pxCharWidth/2), 0, pxHexAscii  - (pxCharWidth/2), h );
