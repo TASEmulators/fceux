@@ -891,8 +891,21 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 	
 	if (event->matches(QKeySequence::MoveToNextChar))
    {
-		cursorPosX++;
-
+		if ( cursorPosX < 32 )
+		{
+			if ( cursorPosX % 2 )
+			{
+				cursorPosX++;
+			}
+			else 
+			{
+				cursorPosX += 2;
+			}
+		}
+		else
+		{
+			cursorPosX++;
+		}
 		if ( cursorPosX >= 48  )
 		{
 			cursorPosX = 47;
@@ -901,8 +914,21 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
    }
 	else if (event->matches(QKeySequence::MoveToPreviousChar))
    {
-		cursorPosX--;
-
+		if ( cursorPosX < 33 )
+		{
+			if ( cursorPosX % 2 )
+			{
+				cursorPosX -= 3;
+			}
+			else 
+			{
+				cursorPosX -= 2;
+			}
+		}
+		else
+		{
+			cursorPosX--;
+		}
 		if ( cursorPosX < 0 )
 		{
 			cursorPosX = 0;
