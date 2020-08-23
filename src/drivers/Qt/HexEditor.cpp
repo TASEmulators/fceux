@@ -10,6 +10,7 @@
 #include <QScrollBar>
 #include <QPainter>
 #include <QMenuBar>
+#include <QColorDialog>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -288,10 +289,10 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	//QVBoxLayout *mainLayout;
 	QGridLayout *grid;
 	QMenuBar *menuBar;
-	QMenu *fileMenu, *viewMenu, *hlgtMenu;
+	QMenu *fileMenu, *viewMenu, *colorMenu;
 	QAction *saveROM;
 	QAction *viewRAM, *viewPPU, *viewOAM, *viewROM;
-	QAction *actHlgt, *actHlgtRV;
+	QAction *actHlgt, *actHlgtRV, *actColorFG, *actColorBG;
 	QActionGroup *group;
 
 	setWindowTitle("Hex Editor");
@@ -363,10 +364,10 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	viewRAM->setChecked(true); // Set default view
 
-	// Highlighting
-   hlgtMenu = menuBar->addMenu(tr("Highlight"));
+	// Color Menu
+   colorMenu = menuBar->addMenu(tr("Color"));
 
-	// Highlighting -> Highlight Activity
+	// Color -> Highlight Activity
 	actHlgt = new QAction(tr("Highlight Activity"), this);
    //actHlgt->setShortcuts(QKeySequence::Open);
    actHlgt->setStatusTip(tr("Highlight Activity"));
@@ -374,17 +375,33 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	actHlgt->setChecked(true);
    connect(actHlgt, SIGNAL(triggered(bool)), this, SLOT(actvHighlightCB(bool)) );
 
-   hlgtMenu->addAction(actHlgt);
+   colorMenu->addAction(actHlgt);
 
-	// Highlighting -> Highlight Reverse Video
+	// Color -> Highlight Reverse Video
 	actHlgtRV = new QAction(tr("Highlight Reverse Video"), this);
    //actHlgtRV->setShortcuts(QKeySequence::Open);
    actHlgtRV->setStatusTip(tr("Highlight Reverse Video"));
 	actHlgtRV->setCheckable(true);
-	actHlgtRV->setChecked(false);
+	actHlgtRV->setChecked(true);
    connect(actHlgtRV, SIGNAL(triggered(bool)), this, SLOT(actvHighlightRVCB(bool)) );
 
-   hlgtMenu->addAction(actHlgtRV);
+   colorMenu->addAction(actHlgtRV);
+
+	// Color -> ForeGround Color
+	actColorFG = new QAction(tr("ForeGround Color"), this);
+   //actColorFG->setShortcuts(QKeySequence::Open);
+   actColorFG->setStatusTip(tr("ForeGround Color"));
+   connect(actColorFG, SIGNAL(triggered(void)), this, SLOT(pickForeGroundColor(void)) );
+
+   colorMenu->addAction(actColorFG);
+
+	// Color -> BackGround Color
+	actColorBG = new QAction(tr("BackGround Color"), this);
+   //actColorBG->setShortcuts(QKeySequence::Open);
+   actColorBG->setStatusTip(tr("BackGround Color"));
+   connect(actColorBG, SIGNAL(triggered(void)), this, SLOT(pickBackGroundColor(void)) );
+
+   colorMenu->addAction(actColorBG);
 
 	//-----------------------------------------------------------------------
 	// Menu End 
@@ -438,6 +455,36 @@ void HexEditorDialog_t::closeWindow(void)
 {
    //printf("Close Window\n");
    done(0);
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::pickForeGroundColor(void)
+{
+	int ret;
+	QColorDialog dialog( this );
+
+	dialog.setOption( QColorDialog::DontUseNativeDialog, true );
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		editor->setForeGroundColor( dialog.selectedColor() );
+	}
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::pickBackGroundColor(void)
+{
+	int ret;
+	QColorDialog dialog( this );
+
+	dialog.setOption( QColorDialog::DontUseNativeDialog, true );
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		editor->setBackGroundColor( dialog.selectedColor() );
+	}
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::vbarMoved(int value)
@@ -623,7 +670,7 @@ QHexEdit::QHexEdit(memBlock_t *blkPtr, QWidget *parent)
    editAddr  = -1;
    editValue =  0;
    editMask  =  0;
-	reverseVideo = false;
+	reverseVideo = true;
 	actvHighlightEnable = true;
 
 	highLightColor[ 0].setRgb( 0x00, 0x00, 0x00 );
@@ -702,6 +749,30 @@ void QHexEdit::setHighlightActivity( int enable )
 void QHexEdit::setHighlightReverseVideo( int enable )
 {
 	reverseVideo = enable;
+}
+//----------------------------------------------------------------------------
+void QHexEdit::setForeGroundColor( QColor fg )
+{
+	QPalette pal;
+
+	pal = this->palette();
+	//pal.setColor(QPalette::Base      , Qt::black);
+	//pal.setColor(QPalette::Background, Qt::black);
+	pal.setColor(QPalette::WindowText, fg );
+
+	this->setPalette(pal);
+}
+//----------------------------------------------------------------------------
+void QHexEdit::setBackGroundColor( QColor bg )
+{
+	QPalette pal;
+
+	pal = this->palette();
+	//pal.setColor(QPalette::Base      , Qt::black);
+	pal.setColor(QPalette::Background, bg );
+	//pal.setColor(QPalette::WindowText, fg );
+
+	this->setPalette(pal);
 }
 //----------------------------------------------------------------------------
 void QHexEdit::setMode( int mode )

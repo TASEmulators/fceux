@@ -55,6 +55,8 @@ class QHexEdit : public QWidget
 		void setScrollBars( QScrollBar *h, QScrollBar *v );
 		void setHighlightActivity( int enable );
 		void setHighlightReverseVideo( int enable );
+		void setForeGroundColor( QColor fg );
+		void setBackGroundColor( QColor bg );
 
 		static const int HIGHLIGHT_ACTIVITY_NUM_COLORS = 16;
 	protected:
@@ -157,4 +159,6 @@ class HexEditorDialog_t : public QDialog
 		void setViewROM(void);
 		void actvHighlightCB(bool value); 
 		void actvHighlightRVCB(bool value); 
+		void pickForeGroundColor(void);
+		void pickBackGroundColor(void);
 };
