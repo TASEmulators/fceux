@@ -33,12 +33,6 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/HexEditor.h"
 
-//enum {
-//	MODE_NES_RAM = 0,
-//	MODE_NES_PPU,
-//	MODE_NES_OAM,
-//	MODE_NES_ROM
-//};
 //----------------------------------------------------------------------------
 static int getRAM( unsigned int i )
 {
@@ -112,7 +106,7 @@ static int writeMem( int mode, unsigned int addr, int value )
 	switch ( mode )
 	{
 		default:
-      case HexEditorDialog_t::MODE_NES_RAM:
+      case QHexEdit::MODE_NES_RAM:
 		{
 			if ( addr < 0x8000 )
 			{
@@ -132,7 +126,7 @@ static int writeMem( int mode, unsigned int addr, int value )
 			}
 		}
 		break;
-      case HexEditorDialog_t::MODE_NES_PPU:
+      case QHexEdit::MODE_NES_PPU:
 		{
 			addr &= 0x3FFF;
 			if (addr < 0x2000)
@@ -149,13 +143,13 @@ static int writeMem( int mode, unsigned int addr, int value )
 			}
 		}
 		break;
-      case HexEditorDialog_t::MODE_NES_OAM:
+      case QHexEdit::MODE_NES_OAM:
 		{
 			addr &= 0xFF;
 			SPRAM[addr] = value;
 		}
 		break;
-      case HexEditorDialog_t::MODE_NES_ROM:
+      case QHexEdit::MODE_NES_ROM:
 		{
 			if (addr < 16)
 			{
@@ -414,7 +408,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	//mainLayout = new QVBoxLayout();
 
 	grid   = new QGridLayout(this);
-	editor = new QHexEdit( &mb, this);
+	editor = new QHexEdit(this);
 	vbar   = new QScrollBar( Qt::Vertical, this );
 	hbar   = new QScrollBar( Qt::Horizontal, this );
 
@@ -437,12 +431,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
    //connect( vbar, SIGNAL(sliderMoved(int)), this, SLOT(vbarMoved(int)) );
    connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
 
-	mode = MODE_NES_RAM;
-	memAccessFunc = getRAM;
-	redraw = false;
-	total_instructions_lp = 0;
-
-	showMemViewResults(true);
+	editor->memModeUpdate();
 
 	periodicTimer  = new QTimer( this );
 
@@ -520,34 +509,29 @@ void HexEditorDialog_t::vbarChanged(int value)
 	editor->setLine( value );
 }
 //----------------------------------------------------------------------------
-void HexEditorDialog_t::setMode(int new_mode)
+void HexEditorDialog_t::gotoAddress( int newAddr )
 {
-	if ( mode != new_mode )
-	{
-		mode = new_mode;
-		showMemViewResults(true);
-      editor->setMode( mode );
-	}
+	editor->setAddr( newAddr );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setViewRAM(void)
 {
-	setMode( MODE_NES_RAM );
+	editor->setMode( QHexEdit::MODE_NES_RAM );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setViewPPU(void)
 {
-	setMode( MODE_NES_PPU );
+	editor->setMode( QHexEdit::MODE_NES_PPU );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setViewOAM(void)
 {
-	setMode( MODE_NES_OAM );
+	editor->setMode( QHexEdit::MODE_NES_OAM );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setViewROM(void)
 {
-	setMode( MODE_NES_ROM );
+	editor->setMode( QHexEdit::MODE_NES_ROM );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::actvHighlightCB(bool enable)
@@ -562,108 +546,21 @@ void HexEditorDialog_t::actvHighlightRVCB(bool enable)
 	editor->setHighlightReverseVideo( enable );
 }
 //----------------------------------------------------------------------------
-void HexEditorDialog_t::showMemViewResults (bool reset)
-{
-	int memSize;
-
-	switch ( mode )
-	{
-		default:
-		case MODE_NES_RAM:
-			memAccessFunc = getRAM;
-			memSize       = 0x10000;
-		break;
-		case MODE_NES_PPU:
-			memAccessFunc = getPPU;
-			memSize       = (GameInfo->type == GIT_NSF ? 0x2000 : 0x4000);
-		break;
-		case MODE_NES_OAM:
-			memAccessFunc = getOAM;
-			memSize       = 0x100;
-		break;
-		case MODE_NES_ROM:
-
-			if ( GameInfo != NULL )
-			{
-				memAccessFunc = getROM;
-				memSize       = 16 + CHRsize[0] + PRGsize[0];
-			}
-			else
-			{  // No Game Loaded!!! Get out of Function
-				memAccessFunc = NULL;
-				memSize = 0;
-				return;
-			}
-		break;
-	}
-
-	if ( memSize != mb.size() )
-	{
-		mb.setAccessFunc( memAccessFunc );
-
-		if ( mb.reAlloc( memSize ) )
-		{
-			printf("Error: Failed to allocate memview buffer size\n");
-			return;
-		}
-	}
-}
-//----------------------------------------------------------------------------
 void HexEditorDialog_t::updatePeriodic(void)
 {
 	//printf("Update Periodic\n");
 
-	checkMemActivity();
+	editor->checkMemActivity();
 
-	showMemViewResults(false);
+	editor->memModeUpdate();
 
 	editor->update();
 }
 //----------------------------------------------------------------------------
-int HexEditorDialog_t::checkMemActivity(void)
-{
-	int c;
-
-	// Don't perform memory activity checks when:
-	// 1. In ROM View Mode
-	// 2. The simulation is not cycling (paused)
-
-	if ( ( mode == MODE_NES_ROM ) ||
-	      ( total_instructions_lp == total_instructions ) )
-	{
-		return -1;
-	}
-
-	for (int i=0; i<mb.size(); i++)
-	{
-		c = memAccessFunc(i);
-
-		if ( c != mb.buf[i].data )
-		{
-			mb.buf[i].actv  = 15;
-			mb.buf[i].data  = c;
-			//mb.buf[i].draw  = 1;
-		}
-		else
-		{
-			if ( mb.buf[i].actv > 0 )
-			{
-				//mb.buf[i].draw = 1;
-				mb.buf[i].actv--;
-			}
-		}
-	}
-	total_instructions_lp = total_instructions;
-
-   return 0;
-}
-//----------------------------------------------------------------------------
-QHexEdit::QHexEdit(memBlock_t *blkPtr, QWidget *parent)
+QHexEdit::QHexEdit(QWidget *parent)
 	: QWidget( parent )
 {
 	QPalette pal;
-
-	mb = blkPtr;
 
 	this->setFocusPolicy(Qt::StrongFocus);
 
@@ -681,7 +578,8 @@ QHexEdit::QHexEdit(memBlock_t *blkPtr, QWidget *parent)
 
 	calcFontData();
 
-   viewMode    = HexEditorDialog_t::MODE_NES_RAM;
+	memAccessFunc = getRAM;
+   viewMode    = MODE_NES_RAM;
 	lineOffset  = 0;
 	cursorPosX  = 0;
 	cursorPosY  = 0;
@@ -693,6 +591,7 @@ QHexEdit::QHexEdit(memBlock_t *blkPtr, QWidget *parent)
    editMask  =  0;
 	reverseVideo = true;
 	actvHighlightEnable = true;
+	total_instructions_lp = 0;
 
 	highLightColor[ 0].setRgb( 0x00, 0x00, 0x00 );
 	highLightColor[ 1].setRgb( 0x35, 0x40, 0x00 );
@@ -798,12 +697,36 @@ void QHexEdit::setBackGroundColor( QColor bg )
 //----------------------------------------------------------------------------
 void QHexEdit::setMode( int mode )
 {
-	viewMode = mode;
+	if ( viewMode != mode )
+	{
+		viewMode = mode;
+		memModeUpdate();
+	}
 }
 //----------------------------------------------------------------------------
 void QHexEdit::setLine( int newLineOffset )
 {
 	lineOffset = newLineOffset;
+}
+//----------------------------------------------------------------------------
+void QHexEdit::setAddr( int newAddr )
+{
+	int addr;
+	lineOffset = newAddr / 16;
+
+	if ( lineOffset < 0 )
+	{
+		lineOffset = 0;
+	}
+	else if ( lineOffset >= maxLineOffset )
+   {
+      lineOffset = maxLineOffset;
+   }
+
+	addr = 16*lineOffset;
+
+	cursorPosX = 2*((newAddr - addr)%16);
+	cursorPosY =    (newAddr - addr)/16;
 }
 //----------------------------------------------------------------------------
 void QHexEdit::setScrollBars( QScrollBar *h, QScrollBar *v )
@@ -820,7 +743,7 @@ void QHexEdit::resizeEvent(QResizeEvent *event)
 
 	viewLines = (viewHeight - pxLineSpacing) / pxLineSpacing;
 
-	maxLineOffset = mb->numLines() - viewLines + 1;
+	maxLineOffset = mb.numLines() - viewLines + 1;
 }
 //----------------------------------------------------------------------------
 void QHexEdit::resetCursor(void)
@@ -1078,7 +1001,9 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
          {
             int offs = (cursorPosX-32);
             int addr = 16*(lineOffset+cursorPosY) + offs;
+				fceuWrapperLock();
             writeMem( viewMode, addr, key );
+				fceuWrapperUnLock();
 
             editAddr  = -1;
             editValue =  0;
@@ -1104,7 +1029,9 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
             {
                nibbleValue = editValue | nibbleValue;
 
+					fceuWrapperLock();
                writeMem( viewMode, editAddr, nibbleValue );
+					fceuWrapperUnLock();
 
                editAddr  = -1;
                editValue =  0;
@@ -1160,7 +1087,7 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 
 	switch ( viewMode )
 	{
-		case HexEditorDialog_t::MODE_NES_RAM:
+		case MODE_NES_RAM:
 		{
 			act = new QAction(tr("Add Symbolic Debug Name"), this);
    		menu.addAction(act);
@@ -1183,9 +1110,11 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 
 				if ( romAddr >= 0 )
 				{
+					jumpToRomValue = romAddr;
 					sprintf( stmp, "Go Here in ROM File: (%08X)", romAddr );
 					act = new QAction(tr(stmp), this);
    				menu.addAction(act);
+					connect( act, SIGNAL(triggered(void)), this, SLOT(jumpToROM(void)) );
 				}
 			}
 
@@ -1193,19 +1122,19 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
    		menu.addAction(act);
 		}
 		break;
-		case HexEditorDialog_t::MODE_NES_PPU:
+		case MODE_NES_PPU:
 		{
 			act = new QAction(tr("Add Bookmark"), this);
    		menu.addAction(act);
 		}
 		break;
-		case HexEditorDialog_t::MODE_NES_OAM:
+		case MODE_NES_OAM:
 		{
 			act = new QAction(tr("Add Bookmark"), this);
    		menu.addAction(act);
 		}
 		break;
-		case HexEditorDialog_t::MODE_NES_ROM:
+		case MODE_NES_ROM:
 		{
 			act = new QAction(tr("Add Bookmark"), this);
    		menu.addAction(act);
@@ -1215,6 +1144,111 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 
    menu.exec(event->globalPos());
 
+}
+//----------------------------------------------------------------------------
+void QHexEdit::jumpToROM(void)
+{
+	setMode( MODE_NES_ROM );
+
+	maxLineOffset = mb.numLines() - viewLines + 1;
+
+	if ( lineOffset > maxLineOffset )
+	{
+		lineOffset = maxLineOffset;
+	}
+	setAddr( jumpToRomValue );
+}
+//----------------------------------------------------------------------------
+int QHexEdit::checkMemActivity(void)
+{
+	int c;
+
+	// Don't perform memory activity checks when:
+	// 1. In ROM View Mode
+	// 2. The simulation is not cycling (paused)
+
+	if ( ( viewMode == MODE_NES_ROM ) ||
+	      ( total_instructions_lp == total_instructions ) )
+	{
+		return -1;
+	}
+
+	for (int i=0; i<mb.size(); i++)
+	{
+		c = memAccessFunc(i);
+
+		if ( c != mb.buf[i].data )
+		{
+			mb.buf[i].actv  = 15;
+			mb.buf[i].data  = c;
+			//mb.buf[i].draw  = 1;
+		}
+		else
+		{
+			if ( mb.buf[i].actv > 0 )
+			{
+				//mb.buf[i].draw = 1;
+				mb.buf[i].actv--;
+			}
+		}
+	}
+	total_instructions_lp = total_instructions;
+
+   return 0;
+}
+//----------------------------------------------------------------------------
+void QHexEdit::memModeUpdate(void)
+{
+	int memSize;
+
+	switch ( getMode() )
+	{
+		default:
+		case MODE_NES_RAM:
+			memAccessFunc = getRAM;
+			memSize       = 0x10000;
+		break;
+		case MODE_NES_PPU:
+			memAccessFunc = getPPU;
+			if ( GameInfo )
+			{
+				memSize = (GameInfo->type == GIT_NSF ? 0x2000 : 0x4000);
+			}
+			else
+			{
+				memSize = 0x4000;
+			}
+		break;
+		case MODE_NES_OAM:
+			memAccessFunc = getOAM;
+			memSize       = 0x100;
+		break;
+		case MODE_NES_ROM:
+
+			if ( GameInfo != NULL )
+			{
+				memAccessFunc = getROM;
+				memSize       = 16 + CHRsize[0] + PRGsize[0];
+			}
+			else
+			{  // No Game Loaded!!! Get out of Function
+				memAccessFunc = NULL;
+				memSize = 0;
+				return;
+			}
+		break;
+	}
+
+	if ( memSize != mb.size() )
+	{
+		mb.setAccessFunc( memAccessFunc );
+
+		if ( mb.reAlloc( memSize ) )
+		{
+			printf("Error: Failed to allocate memview buffer size\n");
+			return;
+		}
+	}
 }
 //----------------------------------------------------------------------------
 void QHexEdit::paintEvent(QPaintEvent *event)
@@ -1244,7 +1278,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	}
 	//printf("Draw Area: %ix%i \n", event->rect().width(), event->rect().height() );
 	//
-	maxLineOffset = mb->numLines() - nrow + 1;
+	maxLineOffset = mb.numLines() - nrow + 1;
 
 	if ( lineOffset > maxLineOffset )
 	{
@@ -1304,9 +1338,9 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 		for (col=0; col<16; col++)
 		{
-			if ( addr < mb->size() )
+			if ( addr < mb.size() )
 			{
-				c =  mb->buf[addr].data;
+				c =  mb.buf[addr].data;
 
 				if ( ::isprint(c) )
 				{
@@ -1329,17 +1363,17 @@ void QHexEdit::paintEvent(QPaintEvent *event)
             } 
             else
             {
-					if ( actvHighlightEnable && (mb->buf[addr].actv > 0) )
+					if ( actvHighlightEnable && (mb.buf[addr].actv > 0) )
 					{
 						if ( reverseVideo )
 						{
-	            		painter.setPen( rvActvTextColor[ mb->buf[addr].actv ] );
-							painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, highLightColor[ mb->buf[addr].actv ] );
-							painter.fillRect( pxHexAscii + (col*pxCharWidth) , y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, highLightColor[ mb->buf[addr].actv ] );
+	            		painter.setPen( rvActvTextColor[ mb.buf[addr].actv ] );
+							painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
+							painter.fillRect( pxHexAscii + (col*pxCharWidth) , y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
 						}
 						else
 						{
-	            		painter.setPen( highLightColor[ mb->buf[addr].actv ] );
+	            		painter.setPen( highLightColor[ mb.buf[addr].actv ] );
 						}
 					}
 					else

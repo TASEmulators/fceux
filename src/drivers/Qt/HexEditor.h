@@ -47,9 +47,10 @@ class QHexEdit : public QWidget
    Q_OBJECT
 
 	public:
-		QHexEdit(memBlock_t *blkPtr, QWidget *parent = 0);
+		QHexEdit(QWidget *parent = 0);
 		~QHexEdit(void);
 
+		int  getMode(void){ return viewMode; };
 		void setMode( int mode );
 		void setLine( int newLineOffset );
 		void setAddr( int newAddrOffset );
@@ -58,7 +59,15 @@ class QHexEdit : public QWidget
 		void setHighlightReverseVideo( int enable );
 		void setForeGroundColor( QColor fg );
 		void setBackGroundColor( QColor bg );
+		void memModeUpdate(void);
+		int  checkMemActivity(void);
 
+		enum {
+			MODE_NES_RAM = 0,
+			MODE_NES_PPU,
+			MODE_NES_OAM,
+			MODE_NES_ROM
+		};
 		static const int HIGHLIGHT_ACTIVITY_NUM_COLORS = 16;
 	protected:
 		void paintEvent(QPaintEvent *event);
@@ -75,12 +84,15 @@ class QHexEdit : public QWidget
 
 		QFont      font;
 
-		memBlock_t *mb;
+		memBlock_t  mb;
+		int (*memAccessFunc)( unsigned int offset);
 
 		QScrollBar *vbar;
 		QScrollBar *hbar;
 		QColor      highLightColor[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
 		QColor      rvActvTextColor[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
+
+		uint64_t total_instructions_lp;
 
       int viewMode;
 		int lineOffset;
@@ -103,10 +115,15 @@ class QHexEdit : public QWidget
       int editAddr;
       int editValue;
       int editMask;
+		int jumpToRomValue;
 
 		bool cursorBlink;
 		bool reverseVideo;
 		bool actvHighlightEnable;
+
+	private slots:
+		void jumpToROM(void);
+
 };
 
 class HexEditorDialog_t : public QDialog
@@ -117,21 +134,9 @@ class HexEditorDialog_t : public QDialog
 		HexEditorDialog_t(QWidget *parent = 0);
 		~HexEditorDialog_t(void);
 
-		enum {
-			MODE_NES_RAM = 0,
-			MODE_NES_PPU,
-			MODE_NES_OAM,
-			MODE_NES_ROM
-		};
- 
-      int  getMode(void){ return mode; }
 	protected:
 
-		void initMem(void);
-		void setMode(int new_mode);
-		void showMemViewResults (bool reset);
-		int  checkMemActivity(void);
-		int  calcVisibleRange( int *start_out, int *end_out, int *center_out );
+		void gotoAddress(int newAddr);
 		void populateBookmarkMenu(void);
 
 		QScrollBar *vbar;
@@ -139,16 +144,6 @@ class HexEditorDialog_t : public QDialog
 		QHexEdit   *editor;
 		QTimer     *periodicTimer;
 		QMenu      *bookmarkMenu;
-
-		int mode;
-		//int memSize;
-		//int mbuf_size;
-		memBlock_t mb;
-		int (*memAccessFunc)( unsigned int offset);
-
-		uint64_t total_instructions_lp;
-
-		bool redraw;
 
 	private:
 
