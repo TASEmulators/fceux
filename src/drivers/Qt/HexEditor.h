@@ -65,10 +65,12 @@ class QHexEdit : public QWidget
    	void keyReleaseEvent(QKeyEvent *event);
 		void mousePressEvent(QMouseEvent * event);
 		void resizeEvent(QResizeEvent *event);
+		void contextMenuEvent(QContextMenuEvent *event);
 
 		void calcFontData(void);
 		void resetCursor(void);
 		QPoint convPixToCursor( QPoint p );
+		int convPixToAddr( QPoint p );
 
 		QFont      font;
 

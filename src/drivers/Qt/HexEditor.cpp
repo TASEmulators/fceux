@@ -885,6 +885,28 @@ QPoint QHexEdit::convPixToCursor( QPoint p )
 	return c;
 }
 //----------------------------------------------------------------------------
+int QHexEdit::convPixToAddr( QPoint p )
+{
+	int a,addr;
+	QPoint c = convPixToCursor(p);
+
+	//printf("Cursor: %ix%i\n", c.x(), c.y() );
+	
+	if ( c.x() < 32 )
+	{
+		a = (c.x() / 2);
+
+		addr = 16*(lineOffset + c.y()) + a;
+	}
+	else
+	{
+		a = (c.x()-32);
+
+		addr = 16*(lineOffset + c.y()) + a;
+	}
+	return addr;
+}
+//----------------------------------------------------------------------------
 void QHexEdit::keyPressEvent(QKeyEvent *event)
 {
    printf("Hex Window Key Press: 0x%x \n", event->key() );
@@ -1098,6 +1120,75 @@ void QHexEdit::mousePressEvent(QMouseEvent * event)
 		cursorPosY = c.y();
 		resetCursor();
 	}
+
+}
+//----------------------------------------------------------------------------
+void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
+{
+	QAction *act;
+	QMenu menu(this);
+	int addr;
+	char stmp[128];
+
+	addr = convPixToAddr( event->pos() );
+	//printf("contextMenuEvent\n");
+
+	switch ( viewMode )
+	{
+		case HexEditorDialog_t::MODE_NES_RAM:
+		{
+			act = new QAction(tr("Add Symbolic Debug Name"), this);
+   		menu.addAction(act);
+
+			sprintf( stmp, "Add Read Breakpoint for Address $%04X", addr );
+			act = new QAction(tr(stmp), this);
+   		menu.addAction(act);
+
+			sprintf( stmp, "Add Write Breakpoint for Address $%04X", addr );
+			act = new QAction(tr(stmp), this);
+   		menu.addAction(act);
+
+			sprintf( stmp, "Add Execute Breakpoint for Address $%04X", addr );
+			act = new QAction(tr(stmp), this);
+   		menu.addAction(act);
+
+			if ( addr > 0x6000 )
+			{
+				int romAddr = GetNesFileAddress(addr);
+
+				if ( romAddr >= 0 )
+				{
+					sprintf( stmp, "Go Here in ROM File: (%08X)", romAddr );
+					act = new QAction(tr(stmp), this);
+   				menu.addAction(act);
+				}
+			}
+
+			act = new QAction(tr("Add Bookmark"), this);
+   		menu.addAction(act);
+		}
+		break;
+		case HexEditorDialog_t::MODE_NES_PPU:
+		{
+			act = new QAction(tr("Add Bookmark"), this);
+   		menu.addAction(act);
+		}
+		break;
+		case HexEditorDialog_t::MODE_NES_OAM:
+		{
+			act = new QAction(tr("Add Bookmark"), this);
+   		menu.addAction(act);
+		}
+		break;
+		case HexEditorDialog_t::MODE_NES_ROM:
+		{
+			act = new QAction(tr("Add Bookmark"), this);
+   		menu.addAction(act);
+		}
+		break;
+	}
+
+   menu.exec(event->globalPos());
 
 }
 //----------------------------------------------------------------------------
