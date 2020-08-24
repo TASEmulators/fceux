@@ -32,6 +32,7 @@
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/HexEditor.h"
+#include "Qt/ConsoleUtilities.h"
 
 //----------------------------------------------------------------------------
 static int getRAM( unsigned int i )
@@ -301,11 +302,11 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	// File
    fileMenu = menuBar->addMenu(tr("File"));
 
-	// File -> Open ROM
+	// File -> Save ROM
 	saveROM = new QAction(tr("Save ROM"), this);
    //saveROM->setShortcuts(QKeySequence::Open);
    saveROM->setStatusTip(tr("Save ROM File"));
-   //connect(saveROM, SIGNAL(triggered()), this, SLOT(saveROMFile(void)) );
+   connect(saveROM, SIGNAL(triggered()), this, SLOT(saveRomFile(void)) );
 
    fileMenu->addAction(saveROM);
 
@@ -429,6 +430,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
    editor->setScrollBars( hbar, vbar );
 
    //connect( vbar, SIGNAL(sliderMoved(int)), this, SLOT(vbarMoved(int)) );
+   connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
    connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
 
 	editor->memModeUpdate();
@@ -509,9 +511,20 @@ void HexEditorDialog_t::vbarChanged(int value)
 	editor->setLine( value );
 }
 //----------------------------------------------------------------------------
+void HexEditorDialog_t::hbarChanged(int value)
+{
+	//printf("HBar Changed: %i\n", value);
+	editor->setHorzScroll( value );
+}
+//----------------------------------------------------------------------------
 void HexEditorDialog_t::gotoAddress( int newAddr )
 {
 	editor->setAddr( newAddr );
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::saveRomFile(void)
+{
+	printf("ROM File: '%s'\n", getRomFile() );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setViewRAM(void)
@@ -592,6 +605,7 @@ QHexEdit::QHexEdit(QWidget *parent)
 	reverseVideo = true;
 	actvHighlightEnable = true;
 	total_instructions_lp = 0;
+	pxLineXScroll = 0;
 
 	highLightColor[ 0].setRgb( 0x00, 0x00, 0x00 );
 	highLightColor[ 1].setRgb( 0x35, 0x40, 0x00 );
@@ -653,6 +667,7 @@ void QHexEdit::calcFontData(void)
 	 pxYoffset     = pxLineSpacing * 2.0;
 	 pxHexOffset   = pxXoffset + (7*pxCharWidth);
     pxHexAscii    = pxHexOffset + (16*3*pxCharWidth) + (pxCharWidth);
+	 pxLineWidth   = pxHexAscii + (17*pxCharWidth);
     //_pxGapAdr = _pxCharWidth / 2;
     //_pxGapAdrHex = _pxCharWidth;
     //_pxGapHexAscii = 2 * _pxCharWidth;
@@ -729,6 +744,23 @@ void QHexEdit::setAddr( int newAddr )
 	cursorPosY =    (newAddr - addr)/16;
 }
 //----------------------------------------------------------------------------
+void QHexEdit::setHorzScroll( int value )
+{
+	float f;
+	//printf("Value: %i \n", value);
+
+	if ( viewWidth >= pxLineWidth )
+	{
+		f = 0.0;
+	}
+	else
+	{
+		f = 0.010f * (float)value * (float)(pxLineWidth - viewWidth);
+	}
+
+	pxLineXScroll = (int)f;
+}
+//----------------------------------------------------------------------------
 void QHexEdit::setScrollBars( QScrollBar *h, QScrollBar *v )
 {
 	hbar = h; vbar = v;
@@ -744,6 +776,16 @@ void QHexEdit::resizeEvent(QResizeEvent *event)
 	viewLines = (viewHeight - pxLineSpacing) / pxLineSpacing;
 
 	maxLineOffset = mb.numLines() - viewLines + 1;
+
+	if ( viewWidth >= pxLineWidth )
+	{
+		pxLineXScroll = 0;
+	}
+	else
+	{
+		pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth) );
+	}
+
 }
 //----------------------------------------------------------------------------
 void QHexEdit::resetCursor(void)
@@ -760,6 +802,8 @@ QPoint QHexEdit::convPixToCursor( QPoint p )
 	QPoint c(0,0);
 
 	//printf("Pos: %ix%i \n", p.x(), p.y() );
+	
+	p.setX( p.x() + pxLineXScroll );
 
 	if ( p.x() < pxHexOffset )
 	{
@@ -1303,14 +1347,14 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	{
 		int a = (cursorPosX / 2);
 		int r = (cursorPosX % 2);
-		cx = pxHexOffset + (a*3*pxCharWidth) + (r*pxCharWidth);
+		cx = pxHexOffset + (a*3*pxCharWidth) + (r*pxCharWidth) - pxLineXScroll;
 
 		ca = 16*(lineOffset + cursorPosY) + a;
 	}
 	else
 	{
 		int a = (cursorPosX-32);
-		cx = pxHexAscii + (a*pxCharWidth);
+		cx = pxHexAscii + (a*pxCharWidth) - pxLineXScroll;
 
 		ca = 16*(lineOffset + cursorPosY) + a;
 	}
@@ -1328,13 +1372,13 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 	for ( row=0; row < nrow; row++)
 	{
-		x = pxXoffset;
+		x = pxXoffset - pxLineXScroll;
 
 		painter.setPen( this->palette().color(QPalette::WindowText));
 		sprintf( txt, "%06X", addr );
 		painter.drawText( x, y, tr(txt) );
 
-		x = pxHexOffset;
+		x = pxHexOffset - pxLineXScroll;
 
 		for (col=0; col<16; col++)
 		{
@@ -1369,7 +1413,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 						{
 	            		painter.setPen( rvActvTextColor[ mb.buf[addr].actv ] );
 							painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
-							painter.fillRect( pxHexAscii + (col*pxCharWidth) , y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
+							painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
 						}
 						else
 						{
@@ -1389,7 +1433,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 						painter.fillRect( cx , cy, pxCharWidth, pxCursorHeight, QColor("gray") );
 					}
 				   painter.drawText( x, y, tr(txt) );
-					painter.drawText( pxHexAscii + (col*pxCharWidth), y, tr(asciiTxt) );
+					painter.drawText( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y, tr(asciiTxt) );
             }
 			}
 			x += (3*pxCharWidth);
@@ -1401,9 +1445,9 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	}
 
    painter.setPen( this->palette().color(QPalette::WindowText));
-	painter.drawText( pxHexOffset, pxLineSpacing, "00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F" );
-	painter.drawLine( pxHexOffset - (pxCharWidth/2), 0, pxHexOffset - (pxCharWidth/2), h );
-	painter.drawLine( pxHexAscii  - (pxCharWidth/2), 0, pxHexAscii  - (pxCharWidth/2), h );
+	painter.drawText( pxHexOffset - pxLineXScroll, pxLineSpacing, "00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F" );
+	painter.drawLine( pxHexOffset - (pxCharWidth/2) - pxLineXScroll, 0, pxHexOffset - (pxCharWidth/2) - pxLineXScroll, h );
+	painter.drawLine( pxHexAscii  - (pxCharWidth/2) - pxLineXScroll, 0, pxHexAscii  - (pxCharWidth/2) - pxLineXScroll, h );
 	painter.drawLine( 0, pxLineSpacing + (pxLineLead), w, pxLineSpacing + (pxLineLead) );
 
 }

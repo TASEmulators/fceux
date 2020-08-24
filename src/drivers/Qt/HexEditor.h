@@ -55,6 +55,7 @@ class QHexEdit : public QWidget
 		void setLine( int newLineOffset );
 		void setAddr( int newAddrOffset );
 		void setScrollBars( QScrollBar *h, QScrollBar *v );
+		void setHorzScroll( int value );
 		void setHighlightActivity( int enable );
 		void setHighlightReverseVideo( int enable );
 		void setForeGroundColor( QColor fg );
@@ -101,6 +102,8 @@ class QHexEdit : public QWidget
 		int pxCursorHeight;
 		int pxLineSpacing;
 		int pxLineLead;
+		int pxLineWidth;
+		int pxLineXScroll;
 		int pxXoffset;
 		int pxYoffset;
 		int pxHexOffset;
@@ -153,6 +156,8 @@ class HexEditorDialog_t : public QDialog
 		void updatePeriodic(void);
 		void vbarMoved(int value);
 		void vbarChanged(int value);
+		void hbarChanged(int value);
+		void saveRomFile(void);
 		void setViewRAM(void);
 		void setViewPPU(void);
 		void setViewOAM(void);
