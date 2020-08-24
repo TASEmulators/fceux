@@ -45,25 +45,41 @@ const char *getRomFile( void )
 	return NULL;
 }
 //---------------------------------------------------------------------------
-// TODO Finish writing this func
+// Return file base name stripping out preceding path and trailing suffix.
 int getFileBaseName( const char *filepath, char *base )
 {
-	int i,j=0, start=0;
+	int i=0,j=0,end=0;
 	if ( filepath == NULL )
 	{
+		base[0] = 0;
 		return 0;
 	}
 	i=0; j=0;
 	while ( filepath[i] != 0 )
 	{
-		if ( filepath[i] == '/' )
+		if ( (filepath[i] == '/') || (filepath[i] == '\\') )
 		{
 			j = i;
 		}
 		i++;
 	}
-	start = j;
+	i = j;
 
-	return 0;
+	j=0;
+	while ( filepath[i] != 0 )
+	{
+		base[j] = filepath[i]; i++; j++;
+	}
+	base[j] = 0; end=j;
+
+	while ( j > 1 )
+	{
+		j--;
+		if ( base[j] == '.' )
+		{
+			end=j; base[j] = 0; break;
+		}
+	}
+	return end;
 }
 //---------------------------------------------------------------------------

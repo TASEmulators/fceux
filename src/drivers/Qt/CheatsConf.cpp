@@ -743,25 +743,10 @@ void GuiCheatsDialog_t::saveCheatFile(void)
 
 	if ( GameInfo )
 	{
-		char *_filename;
-		if ((_filename = strrchr(GameInfo->filename, '\\')) || (_filename = strrchr(GameInfo->filename, '/')))
-		{
-			strcpy( dir, _filename + 1);
-		}
-		else
-		{
-			strcpy( dir, GameInfo->filename);
-		}
+		getFileBaseName( GameInfo->filename, dir );
 
-		_filename = strrchr( dir, '.');
-		if (_filename)
-		{
-			strcpy(_filename, ".cht");
-		}
-		else
-		{
-			strcat( dir, ".cht");
-		}
+		strcat( dir, ".cht");
+
 		dialog.selectFile( dir );
 	}
 
