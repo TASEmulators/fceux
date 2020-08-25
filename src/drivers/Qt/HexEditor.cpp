@@ -286,7 +286,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	QGridLayout *grid;
 	QMenuBar *menuBar;
 	QMenu *fileMenu, *viewMenu, *colorMenu;
-	QAction *saveROM;
+	QAction *saveROM, *closeAct;
 	QAction *viewRAM, *viewPPU, *viewOAM, *viewROM;
 	QAction *actHlgt, *actHlgtRV, *actColorFG, *actColorBG;
 	QActionGroup *group;
@@ -318,6 +318,16 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
    connect(saveROM, SIGNAL(triggered()), this, SLOT(saveRomFileAs(void)) );
 
    fileMenu->addAction(saveROM);
+
+	fileMenu->addSeparator();
+
+	// File -> Close
+	closeAct = new QAction(tr("Close"), this);
+   //closeAct->setShortcuts(QKeySequence::Open);
+   closeAct->setStatusTip(tr("Close Window"));
+   connect(closeAct, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+
+   fileMenu->addAction(closeAct);
 
 	// View
 	viewMenu = menuBar->addMenu(tr("View"));
