@@ -1197,18 +1197,18 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 	{
 		case MODE_NES_RAM:
 		{
-			act = new QAction(tr("Add Symbolic Debug Name"), this);
+			act = new QAction(tr("TODO Add Symbolic Debug Name"), this);
    		menu.addAction(act);
 
-			sprintf( stmp, "Add Read Breakpoint for Address $%04X", addr );
+			sprintf( stmp, "TODO Add Read Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), this);
    		menu.addAction(act);
 
-			sprintf( stmp, "Add Write Breakpoint for Address $%04X", addr );
+			sprintf( stmp, "TODO Add Write Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), this);
    		menu.addAction(act);
 
-			sprintf( stmp, "Add Execute Breakpoint for Address $%04X", addr );
+			sprintf( stmp, "TODO Add Execute Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), this);
    		menu.addAction(act);
 
@@ -1226,25 +1226,25 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 				}
 			}
 
-			act = new QAction(tr("Add Bookmark"), this);
+			act = new QAction(tr("TODO Add Bookmark"), this);
    		menu.addAction(act);
 		}
 		break;
 		case MODE_NES_PPU:
 		{
-			act = new QAction(tr("Add Bookmark"), this);
+			act = new QAction(tr("TODO Add Bookmark"), this);
    		menu.addAction(act);
 		}
 		break;
 		case MODE_NES_OAM:
 		{
-			act = new QAction(tr("Add Bookmark"), this);
+			act = new QAction(tr("TODO Add Bookmark"), this);
    		menu.addAction(act);
 		}
 		break;
 		case MODE_NES_ROM:
 		{
-			act = new QAction(tr("Add Bookmark"), this);
+			act = new QAction(tr("TODO Add Bookmark"), this);
    		menu.addAction(act);
 		}
 		break;
