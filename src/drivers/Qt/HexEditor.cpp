@@ -10,6 +10,7 @@
 #include <QScrollBar>
 #include <QPainter>
 #include <QMenuBar>
+#include <QFileDialog>
 #include <QColorDialog>
 
 #include "../../types.h"
@@ -310,6 +311,14 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
    fileMenu->addAction(saveROM);
 
+	// File -> Save ROM As
+	saveROM = new QAction(tr("Save ROM As"), this);
+   //saveROM->setShortcuts(QKeySequence::Open);
+   saveROM->setStatusTip(tr("Save ROM File As"));
+   connect(saveROM, SIGNAL(triggered()), this, SLOT(saveRomFileAs(void)) );
+
+   fileMenu->addAction(saveROM);
+
 	// View
 	viewMenu = menuBar->addMenu(tr("View"));
 
@@ -524,7 +533,52 @@ void HexEditorDialog_t::gotoAddress( int newAddr )
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::saveRomFile(void)
 {
-	printf("ROM File: '%s'\n", getRomFile() );
+	//FlushUndoBuffer();
+	iNesSave();
+	//UpdateColorTable();
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::saveRomFileAs(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	QFileDialog  dialog(this, tr("Save ROM To File") );
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("NES Files (*.nes *.NES) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+	dialog.setDefaultSuffix( tr(".nes") );
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	iNesSaveAs( filename.toStdString().c_str() );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setViewRAM(void)

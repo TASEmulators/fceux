@@ -158,6 +158,7 @@ class HexEditorDialog_t : public QDialog
 		void vbarChanged(int value);
 		void hbarChanged(int value);
 		void saveRomFile(void);
+		void saveRomFileAs(void);
 		void setViewRAM(void);
 		void setViewPPU(void);
 		void setViewOAM(void);
