@@ -290,6 +290,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	QAction *viewRAM, *viewPPU, *viewOAM, *viewROM;
 	QAction *actHlgt, *actHlgtRV, *actColorFG, *actColorBG;
 	QActionGroup *group;
+	int useNativeMenuBar;
 
 	setWindowTitle("Hex Editor");
 
@@ -297,6 +298,10 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	menuBar = new QMenuBar(this);
 
+   // This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
 	//-----------------------------------------------------------------------
 	// Menu 
 	//-----------------------------------------------------------------------

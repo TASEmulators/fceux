@@ -1036,7 +1036,7 @@ void consoleWin_t::openHexEditor(void)
 
    delete hexEditWin;
 
-   //printf("GUI Cheat Window Destroyed\n");
+   //printf("GUI Hex Editor Window Destroyed\n");
 }
 
 void consoleWin_t::toggleAutoResume(void)
