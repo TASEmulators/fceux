@@ -26,6 +26,8 @@ class PaletteConfDialog_t : public QDialog
 		~PaletteConfDialog_t(void);
 
 	protected:
+		void closeEvent(QCloseEvent *event);
+
 		QLineEdit   *custom_palette_path;
 		QCheckBox   *useCustom;
 		QCheckBox   *GrayScale;

@@ -50,7 +50,8 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	QFontMetrics fm(font);
 
-	fontCharWidth = fm.boundingRect('X').width() * devPixRatio;
+	//fontCharWidth = fm.boundingRect('X').width() * devPixRatio;
+	fontCharWidth = 2.00 * fm.averageCharWidth() * devPixRatio;
 
 	setWindowTitle("Cheat Search");
 
@@ -415,12 +416,22 @@ GuiCheatsDialog_t::~GuiCheatsDialog_t(void)
 	}
 	wasPausedByCheats = false;
 
+   printf("Destroy Cheat Window Event\n");
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::closeEvent(QCloseEvent *event)
+{
+   printf("Cheat Close Window Event\n");
+   done(0);
+	deleteLater();
+   event->accept();
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::closeWindow(void)
 {
    //printf("Close Window\n");
    done(0);
+	deleteLater();
 }
 //----------------------------------------------------------------------------
 int GuiCheatsDialog_t::addSearchResult (uint32_t a, uint8_t last, uint8_t current)
@@ -742,25 +753,10 @@ void GuiCheatsDialog_t::saveCheatFile(void)
 
 	if ( GameInfo )
 	{
-		char *_filename;
-		if ((_filename = strrchr(GameInfo->filename, '\\')) || (_filename = strrchr(GameInfo->filename, '/')))
-		{
-			strcpy( dir, _filename + 1);
-		}
-		else
-		{
-			strcpy( dir, GameInfo->filename);
-		}
+		getFileBaseName( GameInfo->filename, dir );
 
-		_filename = strrchr( dir, '.');
-		if (_filename)
-		{
-			strcpy(_filename, ".cht");
-		}
-		else
-		{
-			strcat( dir, ".cht");
-		}
+		strcat( dir, ".cht");
+
 		dialog.selectFile( dir );
 	}
 

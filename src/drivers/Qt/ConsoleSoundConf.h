@@ -25,6 +25,8 @@ class ConsoleSndConfDialog_t : public QDialog
 		~ConsoleSndConfDialog_t(void);
 
 	protected:
+		void closeEvent(QCloseEvent *event);
+
 		QCheckBox   *enaChkbox;
 		QCheckBox   *enaLowPass;
 		QCheckBox   *swapDutyChkbox;
@@ -44,6 +46,7 @@ class ConsoleSndConfDialog_t : public QDialog
 		void  setSliderFromProperty( QSlider *slider, QLabel *lbl, const char *property );
 
 	private slots:
+		void  closeWindow(void);
 		void  bufSizeChanged(int value);
 		void  volumeChanged(int value);
 		void  triangleChanged(int value);

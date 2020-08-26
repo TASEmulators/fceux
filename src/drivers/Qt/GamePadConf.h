@@ -99,3 +99,7 @@ class GamePadConfDialog_t : public QDialog
 		void updatePeriodic(void);
 
 };
+
+int openGamePadConfWindow( QWidget *parent );
+
+int closeGamePadConfWindow(void);

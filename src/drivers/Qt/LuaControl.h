@@ -29,6 +29,8 @@ class LuaControlDialog_t : public QDialog
 		void refreshState(void);
 
 	protected:
+		void closeEvent(QCloseEvent *bar);
+
 		QLineEdit   *scriptPath;
 		QLineEdit   *scriptArgs;
 		QPushButton *browseButton;
