@@ -894,11 +894,6 @@ void consoleWin_t::loadLua(void)
    luaCtrlWin = new LuaControlDialog_t(this);
 	
    luaCtrlWin->show();
-   //luaCtrlWin->exec();
-
-   //delete luaCtrlWin;
-
-   //printf("Lua Control Window Destroyed\n");
 #endif
 }
 
@@ -918,11 +913,6 @@ void consoleWin_t::openGameSndConfWin(void)
    sndConfWin = new ConsoleSndConfDialog_t(this);
 	
    sndConfWin->show();
-   //sndConfWin->exec();
-
-   //delete sndConfWin;
-
-   //printf("Sound Config Window Destroyed\n");
 }
 
 void consoleWin_t::openGameVideoConfWin(void)
@@ -934,11 +924,6 @@ void consoleWin_t::openGameVideoConfWin(void)
    vidConfWin = new ConsoleVideoConfDialog_t(this);
 	
    vidConfWin->show();
-   //vidConfWin->exec();
-
-   //delete vidConfWin;
-
-   //printf("Video Config Window Destroyed\n");
 }
 
 void consoleWin_t::openHotkeyConfWin(void)
@@ -950,11 +935,6 @@ void consoleWin_t::openHotkeyConfWin(void)
    hkConfWin = new HotKeyConfDialog_t(this);
 	
    hkConfWin->show();
-   //hkConfWin->exec();
-
-   //delete hkConfWin;
-
-   //printf("Hotkey Config Window Destroyed\n");
 }
 
 void consoleWin_t::openPaletteConfWin(void)
@@ -966,11 +946,6 @@ void consoleWin_t::openPaletteConfWin(void)
    paletteConfWin = new PaletteConfDialog_t(this);
 	
    paletteConfWin->show();
-   //paletteConfWin->exec();
-
-   //delete paletteConfWin;
-
-   //printf("Palette Config Window Destroyed\n");
 }
 
 void consoleWin_t::openGuiConfWin(void)
@@ -982,11 +957,6 @@ void consoleWin_t::openGuiConfWin(void)
    guiConfWin = new GuiConfDialog_t(this);
 	
    guiConfWin->show();
-   //guiConfWin->exec();
-
-   //delete guiConfWin;
-
-   //printf("GUI Config Window Destroyed\n");
 }
 
 void consoleWin_t::openCheats(void)
@@ -998,11 +968,6 @@ void consoleWin_t::openCheats(void)
    cheatWin = new GuiCheatsDialog_t(this);
 	
    cheatWin->show();
-   //cheatWin->exec();
-
-   //delete cheatWin;
-
-   //printf("GUI Cheat Window Destroyed\n");
 }
 
 void consoleWin_t::openHexEditor(void)
@@ -1014,11 +979,6 @@ void consoleWin_t::openHexEditor(void)
    hexEditWin = new HexEditorDialog_t(this);
 	
    hexEditWin->show();
-   //hexEditWin->exec();
-
-   //delete hexEditWin;
-
-   //printf("GUI Hex Editor Window Destroyed\n");
 }
 
 void consoleWin_t::toggleAutoResume(void)
@@ -1394,11 +1354,6 @@ void consoleWin_t::aboutFCEUX(void)
    aboutWin = new AboutWindow(this);
 	
    aboutWin->show();
-   //aboutWin->exec();
-
-   //delete aboutWin;
-
-   //printf("About Window Destroyed\n");
    return;
 }
 
