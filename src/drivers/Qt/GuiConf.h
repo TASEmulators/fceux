@@ -26,6 +26,8 @@ class GuiConfDialog_t : public QDialog
 		~GuiConfDialog_t(void);
 
 	protected:
+		void closeEvent(QCloseEvent *event);
+
 		QCheckBox   *useNativeFileDialog;
 		QCheckBox   *useNativeMenuBar;
 	private:

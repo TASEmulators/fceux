@@ -33,6 +33,7 @@ class GuiCheatsDialog_t : public QDialog
 		int activeCheatListCB (char *name, uint32 a, uint8 v, int c, int s, int type, void *data);
 
 	protected:
+		void closeEvent(QCloseEvent *event);
 
 		QGroupBox   *actCheatFrame;
 		QGroupBox   *cheatSearchFrame;

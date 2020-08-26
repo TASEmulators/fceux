@@ -27,6 +27,7 @@ class HotKeyConfDialog_t : public QDialog
 		~HotKeyConfDialog_t(void);
 
 	protected:
+		void closeEvent(QCloseEvent *event);
 		void keyPressEvent(QKeyEvent *event);
    	void keyReleaseEvent(QKeyEvent *event);
 		void assignHotkey(QKeyEvent *event);

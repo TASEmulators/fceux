@@ -36,6 +36,30 @@ struct GamePadConfigLocalData_t
 
 static GamePadConfigLocalData_t lcl[GAMEPAD_NUM_DEVICES];
 
+static GamePadConfDialog_t *gamePadConfWin = NULL;
+
+//----------------------------------------------------
+int openGamePadConfWindow( QWidget *parent )
+{
+	if ( gamePadConfWin != NULL )
+	{
+		return -1;
+	}
+	gamePadConfWin = new GamePadConfDialog_t(parent);
+
+	gamePadConfWin->show();
+
+	return 0;
+}
+//----------------------------------------------------
+int closeGamePadConfWindow(void)
+{
+	if ( gamePadConfWin != NULL )
+	{
+   	gamePadConfWin->closeWindow();
+	}
+	return 0;
+}
 //----------------------------------------------------
 GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	: QDialog( parent )
@@ -55,6 +79,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    QPushButton *clearButton[GAMEPAD_NUM_BUTTONS];
 	std::string prefix;
 	char stmp[256];
+
+	gamePadConfWin = this;
 
 	// Ensure that joysticks are enabled, no harm calling init again.
 	InitJoysticks();
@@ -279,6 +305,9 @@ GamePadConfDialog_t::~GamePadConfDialog_t(void)
 {
    inputTimer->stop();
    buttonConfigStatus = 0;
+	gamePadConfWin = NULL;
+
+	printf("GamePad Window Deleted\n");
 }
 void GamePadConfDialog_t::keyPressEvent(QKeyEvent *event)
 {
@@ -500,6 +529,7 @@ void GamePadConfDialog_t::closeEvent(QCloseEvent *event)
    printf("GamePad Close Window Event\n");
    buttonConfigStatus = 0;
    done(0);
+	deleteLater();
    event->accept();
 }
 //----------------------------------------------------
@@ -510,6 +540,7 @@ void GamePadConfDialog_t::closeWindow(void)
    printf("Close Window\n");
    buttonConfigStatus = 0;
    done(0);
+	deleteLater();
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton0(void)

@@ -99,8 +99,6 @@ class  consoleWin_t : public QMainWindow
 
 	 emulatorThread_t *emulatorThread;
 
-    GamePadConfDialog_t *gamePadConfWin;
-
 	 std::string errorMsg;
 	 bool        errorMsgValid;
 

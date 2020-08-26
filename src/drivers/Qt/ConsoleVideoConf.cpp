@@ -1,5 +1,7 @@
 // ConsoleVideoConf.cpp
 //
+#include <QCloseEvent>
+
 #include "../../fceu.h"
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -105,7 +107,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	button = new QPushButton( tr("Close") );
 	hbox1->addWidget( button );
-	connect(button, SIGNAL(clicked()), this, SLOT(closewindow(void)) );
+	connect(button, SIGNAL(clicked()), this, SLOT(closeWindow(void)) );
 
 	main_vbox->addLayout( hbox1 );
 
@@ -115,7 +117,23 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 //----------------------------------------------------
 ConsoleVideoConfDialog_t::~ConsoleVideoConfDialog_t(void)
 {
+	printf("Destroy Video Config Window\n");
 
+}
+//----------------------------------------------------------------------------
+void ConsoleVideoConfDialog_t::closeEvent(QCloseEvent *event)
+{
+   printf("Video Config Close Window Event\n");
+   done(0);
+	deleteLater();
+   event->accept();
+}
+//----------------------------------------------------------------------------
+void ConsoleVideoConfDialog_t::closeWindow(void)
+{
+   //printf("Video Config Close Window\n");
+   done(0);
+	deleteLater();
 }
 //----------------------------------------------------
 void  ConsoleVideoConfDialog_t::resetVideo(void)
@@ -235,10 +253,5 @@ void ConsoleVideoConfDialog_t::regionChanged(int index)
 void ConsoleVideoConfDialog_t::applyChanges( void )
 { 
 	resetVideo();
-}
-//----------------------------------------------------
-void ConsoleVideoConfDialog_t::closewindow( void )
-{ 
-	done(0);
 }
 //----------------------------------------------------

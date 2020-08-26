@@ -102,6 +102,8 @@ LuaControlDialog_t::~LuaControlDialog_t(void)
 {
 	std::list <LuaControlDialog_t*>::iterator it;
 	  
+	printf("Destroy Lua Control Window\n");
+
 	for (it = winList.begin(); it != winList.end(); it++)
 	{
 		if ( (*it) == this )
@@ -113,10 +115,19 @@ LuaControlDialog_t::~LuaControlDialog_t(void)
 	}
 }
 //----------------------------------------------------
+void LuaControlDialog_t::closeEvent(QCloseEvent *event)
+{
+   printf("Lua Control Close Window Event\n");
+   done(0);
+	deleteLater();
+   event->accept();
+}
+//----------------------------------------------------
 void LuaControlDialog_t::closeWindow(void)
 {
-   //printf("Close Window\n");
+   //printf("Lua Control Close Window\n");
    done(0);
+	deleteLater();
 }
 //----------------------------------------------------
 void LuaControlDialog_t::openLuaScriptFile(void)

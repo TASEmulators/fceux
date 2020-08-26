@@ -75,8 +75,6 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	emulatorThread->start();
 
-   gamePadConfWin = NULL;
-
 }
 
 consoleWin_t::~consoleWin_t(void)
@@ -85,10 +83,8 @@ consoleWin_t::~consoleWin_t(void)
 
 	gameTimer->stop(); 
 
-   if ( gamePadConfWin != NULL )
-   {
-      gamePadConfWin->closeWindow();
-   }
+	closeGamePadConfWindow();
+
 	fceuWrapperLock();
 	fceuWrapperClose();
 	fceuWrapperUnLock();
@@ -144,11 +140,8 @@ void consoleWin_t::QueueErrorMsgWindow( const char *msg )
 void consoleWin_t::closeEvent(QCloseEvent *event)
 {
    //printf("Main Window Close Event\n");
-   if ( gamePadConfWin != NULL )
-   {
-      //printf("Command Game Pad Close\n");
-      gamePadConfWin->closeWindow();
-   }
+	closeGamePadConfWindow();
+
    event->accept();
 
 	closeApp();
@@ -901,9 +894,9 @@ void consoleWin_t::loadLua(void)
    luaCtrlWin = new LuaControlDialog_t(this);
 	
    luaCtrlWin->show();
-   luaCtrlWin->exec();
+   //luaCtrlWin->exec();
 
-   delete luaCtrlWin;
+   //delete luaCtrlWin;
 
    //printf("Lua Control Window Destroyed\n");
 #endif
@@ -911,20 +904,9 @@ void consoleWin_t::loadLua(void)
 
 void consoleWin_t::openGamePadConfWin(void)
 {
-   if ( gamePadConfWin != NULL )
-   {
-      printf("GamePad Config Window Already Open\n");
-      return;
-   }
 	//printf("Open GamePad Config Window\n");
-   gamePadConfWin = new GamePadConfDialog_t(this);
 	
-   gamePadConfWin->show();
-   gamePadConfWin->exec();
-
-   delete gamePadConfWin;
-   gamePadConfWin = NULL;
-   //printf("GamePad Config Window Destroyed\n");
+	openGamePadConfWindow(this);
 }
 
 void consoleWin_t::openGameSndConfWin(void)
@@ -936,9 +918,9 @@ void consoleWin_t::openGameSndConfWin(void)
    sndConfWin = new ConsoleSndConfDialog_t(this);
 	
    sndConfWin->show();
-   sndConfWin->exec();
+   //sndConfWin->exec();
 
-   delete sndConfWin;
+   //delete sndConfWin;
 
    //printf("Sound Config Window Destroyed\n");
 }
@@ -952,9 +934,9 @@ void consoleWin_t::openGameVideoConfWin(void)
    vidConfWin = new ConsoleVideoConfDialog_t(this);
 	
    vidConfWin->show();
-   vidConfWin->exec();
+   //vidConfWin->exec();
 
-   delete vidConfWin;
+   //delete vidConfWin;
 
    //printf("Video Config Window Destroyed\n");
 }
@@ -968,9 +950,9 @@ void consoleWin_t::openHotkeyConfWin(void)
    hkConfWin = new HotKeyConfDialog_t(this);
 	
    hkConfWin->show();
-   hkConfWin->exec();
+   //hkConfWin->exec();
 
-   delete hkConfWin;
+   //delete hkConfWin;
 
    //printf("Hotkey Config Window Destroyed\n");
 }
@@ -984,9 +966,9 @@ void consoleWin_t::openPaletteConfWin(void)
    paletteConfWin = new PaletteConfDialog_t(this);
 	
    paletteConfWin->show();
-   paletteConfWin->exec();
+   //paletteConfWin->exec();
 
-   delete paletteConfWin;
+   //delete paletteConfWin;
 
    //printf("Palette Config Window Destroyed\n");
 }
@@ -1000,9 +982,9 @@ void consoleWin_t::openGuiConfWin(void)
    guiConfWin = new GuiConfDialog_t(this);
 	
    guiConfWin->show();
-   guiConfWin->exec();
+   //guiConfWin->exec();
 
-   delete guiConfWin;
+   //delete guiConfWin;
 
    //printf("GUI Config Window Destroyed\n");
 }
@@ -1016,9 +998,9 @@ void consoleWin_t::openCheats(void)
    cheatWin = new GuiCheatsDialog_t(this);
 	
    cheatWin->show();
-   cheatWin->exec();
+   //cheatWin->exec();
 
-   delete cheatWin;
+   //delete cheatWin;
 
    //printf("GUI Cheat Window Destroyed\n");
 }
@@ -1032,9 +1014,9 @@ void consoleWin_t::openHexEditor(void)
    hexEditWin = new HexEditorDialog_t(this);
 	
    hexEditWin->show();
-   hexEditWin->exec();
+   //hexEditWin->exec();
 
-   delete hexEditWin;
+   //delete hexEditWin;
 
    //printf("GUI Hex Editor Window Destroyed\n");
 }
@@ -1412,9 +1394,9 @@ void consoleWin_t::aboutFCEUX(void)
    aboutWin = new AboutWindow(this);
 	
    aboutWin->show();
-   aboutWin->exec();
+   //aboutWin->exec();
 
-   delete aboutWin;
+   //delete aboutWin;
 
    //printf("About Window Destroyed\n");
    return;

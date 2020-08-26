@@ -416,12 +416,22 @@ GuiCheatsDialog_t::~GuiCheatsDialog_t(void)
 	}
 	wasPausedByCheats = false;
 
+   printf("Destroy Cheat Window Event\n");
+}
+//----------------------------------------------------------------------------
+void GuiCheatsDialog_t::closeEvent(QCloseEvent *event)
+{
+   printf("Cheat Close Window Event\n");
+   done(0);
+	deleteLater();
+   event->accept();
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::closeWindow(void)
 {
    //printf("Close Window\n");
    done(0);
+	deleteLater();
 }
 //----------------------------------------------------------------------------
 int GuiCheatsDialog_t::addSearchResult (uint32_t a, uint8_t last, uint8_t current)

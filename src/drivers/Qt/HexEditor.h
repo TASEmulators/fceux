@@ -138,6 +138,7 @@ class HexEditorDialog_t : public QDialog
 		~HexEditorDialog_t(void);
 
 	protected:
+		void closeEvent(QCloseEvent *bar);
 
 		void gotoAddress(int newAddr);
 		void populateBookmarkMenu(void);
