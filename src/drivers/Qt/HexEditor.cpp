@@ -12,6 +12,7 @@
 #include <QMenuBar>
 #include <QFileDialog>
 #include <QColorDialog>
+#include <QInputDialog>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -35,6 +36,7 @@
 #include "Qt/HexEditor.h"
 #include "Qt/ConsoleUtilities.h"
 
+static HexBookMarkManager_t hbm;
 //----------------------------------------------------------------------------
 static int getRAM( unsigned int i )
 {
@@ -279,6 +281,114 @@ void memBlock_t::init(void)
 	}
 }
 //----------------------------------------------------------------------------
+HexBookMark::HexBookMark(void)
+{
+	addr = 0;
+	mode = 0;
+	desc[0] = 0;
+}
+//----------------------------------------------------------------------------
+HexBookMark::~HexBookMark(void)
+{
+
+}
+//----------------------------------------------------------------------------
+HexBookMarkManager_t::HexBookMarkManager_t(void)
+{
+
+}
+//----------------------------------------------------------------------------
+HexBookMarkManager_t::~HexBookMarkManager_t(void)
+{
+	removeAll();
+}
+//----------------------------------------------------------------------------
+void HexBookMarkManager_t::removeAll(void)
+{
+	HexBookMark *b;
+
+	while ( !ls.empty() )
+	{
+		b = ls.front();
+
+		delete b;
+
+		ls.pop_front();
+	}
+}
+//----------------------------------------------------------------------------
+int HexBookMarkManager_t::addBookMark( int addr, int mode, const char *desc )
+{
+	HexBookMark *b;
+
+	b = new HexBookMark();
+	b->addr = addr;
+	b->mode = mode;
+
+	if ( desc )
+	{
+		strncpy( b->desc, desc, 63 );
+	}
+
+	b->desc[63] = 0;
+
+	ls.push_back(b);
+
+	updateVector();
+
+	return 0;
+}
+//----------------------------------------------------------------------------
+void HexBookMarkManager_t::updateVector(void)
+{
+	std::list <HexBookMark*>::iterator it;
+
+	v.clear();
+
+	for (it=ls.begin(); it!=ls.end(); it++)
+	{
+		v.push_back( *it );
+	}
+
+	return;
+}
+//----------------------------------------------------------------------------
+int HexBookMarkManager_t::size(void)
+{
+	return ls.size();
+}
+//----------------------------------------------------------------------------
+HexBookMark *HexBookMarkManager_t::getBookMark( int index )
+{
+	if ( index < 0 )
+	{
+		return NULL;
+	}
+	else if ( index >= (int)v.size() )
+	{
+		return NULL;
+	}
+	return v[index];
+}
+//----------------------------------------------------------------------------
+HexBookMarkMenuAction::HexBookMarkMenuAction(QString desc, QWidget *parent)
+	: QAction( desc, parent )
+{
+	bm = NULL; qedit = NULL;
+}
+//----------------------------------------------------------------------------
+HexBookMarkMenuAction::~HexBookMarkMenuAction(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void HexBookMarkMenuAction::activateCB(void)
+{
+	//printf("Activate Bookmark: %p \n", bm );
+	qedit->setMode( bm->mode );
+	qedit->setAddr( bm->addr );
+}
+//----------------------------------------------------------------------------
 HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
@@ -472,9 +582,17 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 	periodicTimer->stop();
 }
 //----------------------------------------------------------------------------
+void HexEditorDialog_t::removeAllBookmarks(void)
+{
+	hbm.removeAll();
+
+	populateBookmarkMenu();
+}
+//----------------------------------------------------------------------------
 void HexEditorDialog_t::populateBookmarkMenu(void)
 {
 	QAction *act;
+	HexBookMarkMenuAction *hAct;
 
 	bookmarkMenu->clear();
 
@@ -482,10 +600,23 @@ void HexEditorDialog_t::populateBookmarkMenu(void)
 	act = new QAction(tr("Remove All Bookmarks"), this);
    //act->setShortcuts(QKeySequence::Open);
    act->setStatusTip(tr("Remove All Bookmarks"));
-   //connect(act, SIGNAL(triggered(void)), this, SLOT(pickBackGroundColor(void)) );
+   connect(act, SIGNAL(triggered(void)), this, SLOT(removeAllBookmarks(void)) );
 
    bookmarkMenu->addAction(act);
 	bookmarkMenu->addSeparator();
+
+	for (int i=0; i<hbm.size(); i++)
+	{
+		HexBookMark *b = hbm.getBookMark(i);
+
+		if ( b )
+		{
+			hAct = new HexBookMarkMenuAction(tr(b->desc), this);
+   		bookmarkMenu->addAction(hAct);
+			hAct->bm = b; hAct->qedit = editor;
+   		connect(hAct, SIGNAL(triggered(void)), hAct, SLOT(activateCB(void)) );
+		}
+	}
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::closeEvent(QCloseEvent *event)
@@ -654,6 +785,7 @@ QHexEdit::QHexEdit(QWidget *parent)
 {
 	QPalette pal;
 
+	this->parent = (HexEditorDialog_t*)parent;
 	this->setFocusPolicy(Qt::StrongFocus);
 
 	font.setFamily("Courier New");
@@ -821,6 +953,8 @@ void QHexEdit::setAddr( int newAddr )
 
 	cursorPosX = 2*((newAddr - addr)%16);
 	cursorPosY =    (newAddr - addr)/16;
+
+   vbar->setValue( lineOffset );
 }
 //----------------------------------------------------------------------------
 void QHexEdit::setHorzScroll( int value )
@@ -1205,7 +1339,7 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 	int addr;
 	char stmp[128];
 
-	addr = convPixToAddr( event->pos() );
+	ctxAddr = addr = convPixToAddr( event->pos() );
 	//printf("contextMenuEvent\n");
 
 	switch ( viewMode )
@@ -1241,32 +1375,74 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 				}
 			}
 
-			act = new QAction(tr("TODO Add Bookmark"), this);
+			act = new QAction(tr("Add Bookmark"), this);
    		menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
 		}
 		break;
 		case MODE_NES_PPU:
 		{
-			act = new QAction(tr("TODO Add Bookmark"), this);
+			act = new QAction(tr("Add Bookmark"), this);
    		menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
 		}
 		break;
 		case MODE_NES_OAM:
 		{
-			act = new QAction(tr("TODO Add Bookmark"), this);
+			act = new QAction(tr("Add Bookmark"), this);
    		menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
 		}
 		break;
 		case MODE_NES_ROM:
 		{
-			act = new QAction(tr("TODO Add Bookmark"), this);
+			act = new QAction(tr("Add Bookmark"), this);
    		menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
 		}
 		break;
 	}
 
    menu.exec(event->globalPos());
 
+}
+//----------------------------------------------------------------------------
+void QHexEdit::addBookMarkCB(void)
+{
+	int ret;
+	char stmp[64];
+	QInputDialog dialog(this);
+
+	switch ( viewMode )
+	{
+		default:
+		case MODE_NES_RAM:
+			sprintf( stmp, "RAM %04X", ctxAddr );
+		break;
+		case MODE_NES_PPU:
+			sprintf( stmp, "PPU %04X", ctxAddr );
+		break;
+		case MODE_NES_OAM:
+			sprintf( stmp, "OAM %04X", ctxAddr );
+		break;
+		case MODE_NES_ROM:
+			sprintf( stmp, "ROM %04X", ctxAddr );
+		break;
+	}
+
+   dialog.setWindowTitle( tr("Add Bookmark") );
+   dialog.setLabelText( tr("Specify New Bookmark Description") );
+   dialog.setOkButtonText( tr("Add") );
+	dialog.setTextValue( tr(stmp) );
+
+   dialog.show();
+   ret = dialog.exec();
+
+   if ( QDialog::Accepted == ret )
+   {
+		hbm.addBookMark( ctxAddr, viewMode, dialog.textValue().toStdString().c_str() );
+		parent->populateBookmarkMenu();
+   }
 }
 //----------------------------------------------------------------------------
 void QHexEdit::jumpToROM(void)
