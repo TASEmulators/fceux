@@ -379,7 +379,7 @@ HexBookMarkMenuAction::HexBookMarkMenuAction(QString desc, QWidget *parent)
 //----------------------------------------------------------------------------
 HexBookMarkMenuAction::~HexBookMarkMenuAction(void)
 {
-
+	//printf("Hex Bookmark Menu Action Deleted\n");
 }
 //----------------------------------------------------------------------------
 void HexBookMarkMenuAction::activateCB(void)
@@ -597,7 +597,7 @@ void HexEditorDialog_t::populateBookmarkMenu(void)
 	bookmarkMenu->clear();
 
 	// Bookmarks -> Remove All Bookmarks
-	act = new QAction(tr("Remove All Bookmarks"), this);
+	act = new QAction(tr("Remove All Bookmarks"), bookmarkMenu);
    //act->setShortcuts(QKeySequence::Open);
    act->setStatusTip(tr("Remove All Bookmarks"));
    connect(act, SIGNAL(triggered(void)), this, SLOT(removeAllBookmarks(void)) );
@@ -611,7 +611,7 @@ void HexEditorDialog_t::populateBookmarkMenu(void)
 
 		if ( b )
 		{
-			hAct = new HexBookMarkMenuAction(tr(b->desc), this);
+			hAct = new HexBookMarkMenuAction(tr(b->desc), bookmarkMenu);
    		bookmarkMenu->addAction(hAct);
 			hAct->bm = b; hAct->qedit = editor;
    		connect(hAct, SIGNAL(triggered(void)), hAct, SLOT(activateCB(void)) );
