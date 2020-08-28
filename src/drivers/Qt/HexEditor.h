@@ -67,6 +67,8 @@ class HexBookMarkManager_t
 		int  addBookMark( int addr, int mode, const char *desc );
 		int  size(void);
 		HexBookMark *getBookMark( int index );
+		int  saveToFile(void);
+		int  loadFromFile(void);
 	private:
 		void updateVector(void);
 		std::list <HexBookMark*> ls;
@@ -224,3 +226,6 @@ class HexEditorDialog_t : public QDialog
 		void pickBackGroundColor(void);
 		void removeAllBookmarks(void);
 };
+
+void hexEditorLoadBookmarks(void);
+void hexEditorSaveBookmarks(void);

@@ -37,6 +37,8 @@
 #include "Qt/ConsoleUtilities.h"
 
 static HexBookMarkManager_t hbm;
+static std::list <HexEditorDialog_t*> winList;
+static const char *memViewNames[] = { "RAM", "PPU", "OAM", "ROM", NULL };
 //----------------------------------------------------------------------------
 static int getRAM( unsigned int i )
 {
@@ -315,6 +317,7 @@ void HexBookMarkManager_t::removeAll(void)
 
 		ls.pop_front();
 	}
+	v.clear();
 }
 //----------------------------------------------------------------------------
 int HexBookMarkManager_t::addBookMark( int addr, int mode, const char *desc )
@@ -369,6 +372,142 @@ HexBookMark *HexBookMarkManager_t::getBookMark( int index )
 		return NULL;
 	}
 	return v[index];
+}
+//----------------------------------------------------------------------------
+int HexBookMarkManager_t::loadFromFile(void)
+{
+	int i,j,mode,addr;
+	FILE *fp;
+	QDir dir;
+	char line[256], fd[256], baseFile[512];
+	const char *romFile = getRomFile();
+	const char *baseDir = FCEUI_GetBaseDirectory();
+	std::string path;
+
+	if ( romFile == NULL )
+	{
+		return -1;
+	}
+	path = std::string(baseDir) + "/bookmarks/";
+
+	dir.mkpath( QString::fromStdString(path) );
+
+	getFileBaseName( romFile, baseFile );
+
+	path += std::string(baseFile) + ".txt";
+
+	fp = ::fopen( path.c_str(), "r");
+
+	if ( fp == NULL )
+	{
+		return -1;
+	}
+
+	while ( ::fgets( line, sizeof(line), fp ) != NULL )
+	{
+		i=0; j=0;
+		//printf("%s\n", line );
+		//
+		while ( isspace(line[i]) ) i++;
+
+		while ( isalpha(line[i]) )
+		{
+			fd[j] = line[i]; i++; j++;
+		}
+		fd[j] = 0;
+
+		mode = -1;
+
+		for (j=0; j<4; j++)
+		{
+			if ( strcmp( fd, memViewNames[j] ) == 0 )
+			{
+				mode = j; break;
+			}
+		}
+		if ( mode < 0 ) continue;
+
+		while ( isspace(line[i]) ) i++;
+		if ( line[i] == ':' ) i++;
+		while ( isspace(line[i]) ) i++;
+
+		j=0;
+		while ( isxdigit(line[i]) )
+		{
+			fd[j] = line[i]; i++; j++;
+		}
+		fd[j] = 0;
+
+		addr = strtol( fd, NULL, 16 );
+
+		while ( isspace(line[i]) ) i++;
+		if ( line[i] == ':' ) i++;
+		while ( isspace(line[i]) ) i++;
+
+		j=0;
+		while ( line[i] ) 
+		{
+			fd[j] = line[i]; i++; j++;
+		}
+		fd[j] = 0;
+		j--;
+
+		while ( j >= 0 )
+		{
+			if ( isspace( fd[j] ) )
+			{
+				fd[j] = 0; 
+			}
+			else
+			{
+				break;
+			}
+			j--;
+		}
+
+		addBookMark( addr, mode, fd );
+	}
+	::fclose(fp);
+
+	return 0;
+}
+//----------------------------------------------------------------------------
+int HexBookMarkManager_t::saveToFile(void)
+{
+	FILE *fp;
+	QDir dir;
+	char baseFile[512];
+	const char *romFile = getRomFile();
+	const char *baseDir = FCEUI_GetBaseDirectory();
+	std::string path;
+
+	if ( romFile == NULL )
+	{
+		return -1;
+	}
+	path = std::string(baseDir) + "/bookmarks/";
+
+	dir.mkpath( QString::fromStdString(path) );
+
+	getFileBaseName( romFile, baseFile );
+
+	path += std::string(baseFile) + ".txt";
+
+	fp = ::fopen( path.c_str(), "w");
+
+	if ( fp == NULL )
+	{
+		return -1;
+	}
+
+	for (int i=0; i<v.size(); i++)
+	{
+		fprintf( fp, "%s:%08X:%s\n", 
+				memViewNames[ v[i]->mode ], v[i]->addr, v[i]->desc );
+	}
+	::fclose(fp);
+
+	return 0;
 }
 //----------------------------------------------------------------------------
 HexBookMarkMenuAction::HexBookMarkMenuAction(QString desc, QWidget *parent)
@@ -535,8 +674,6 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	// Bookmarks Menu
    bookmarkMenu = menuBar->addMenu(tr("Bookmarks"));
 
-	populateBookmarkMenu();
-
 	//-----------------------------------------------------------------------
 	// Menu End 
 	//-----------------------------------------------------------------------
@@ -574,12 +711,29 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
    connect( periodicTimer, &QTimer::timeout, this, &HexEditorDialog_t::updatePeriodic );
 
 	periodicTimer->start( 100 ); // 10hz
+
+	winList.push_back(this);
+
+	populateBookmarkMenu();
+
 }
 //----------------------------------------------------------------------------
 HexEditorDialog_t::~HexEditorDialog_t(void)
 {
+	std::list <HexEditorDialog_t*>::iterator it;
+	  
 	printf("Hex Editor Deleted\n");
 	periodicTimer->stop();
+
+	for (it = winList.begin(); it != winList.end(); it++)
+	{
+		if ( (*it) == this )
+		{
+			winList.erase(it);
+			//printf("Removing Hex Edit Window\n");
+			break;
+		}
+	}
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::removeAllBookmarks(void)
@@ -611,6 +765,7 @@ void HexEditorDialog_t::populateBookmarkMenu(void)
 
 		if ( b )
 		{
+			//printf("%p  %p  \n", b, editor );
 			hAct = new HexBookMarkMenuAction(tr(b->desc), bookmarkMenu);
    		bookmarkMenu->addAction(hAct);
 			hAct->bm = b; hAct->qedit = editor;
@@ -1705,5 +1860,32 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	painter.drawLine( pxHexAscii  - (pxCharWidth/2) - pxLineXScroll, 0, pxHexAscii  - (pxCharWidth/2) - pxLineXScroll, h );
 	painter.drawLine( 0, pxLineSpacing + (pxLineLead), w, pxLineSpacing + (pxLineLead) );
 
+}
+//----------------------------------------------------------------------------
+void hexEditorLoadBookmarks(void)
+{
+	std::list <HexEditorDialog_t*>::iterator it;
+
+	hbm.removeAll();
+	hbm.loadFromFile();
+
+	for (it = winList.begin(); it != winList.end(); it++)
+	{
+		(*it)->populateBookmarkMenu();
+	}
+}
+//----------------------------------------------------------------------------
+void hexEditorSaveBookmarks(void)
+{
+	std::list <HexEditorDialog_t*>::iterator it;
+
+	printf("Save Bookmarks\n");
+	hbm.saveToFile();
+	hbm.removeAll();
+
+	for (it = winList.begin(); it != winList.end(); it++)
+	{
+		(*it)->populateBookmarkMenu();
+	}
 }
 //----------------------------------------------------------------------------

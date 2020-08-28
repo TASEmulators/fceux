@@ -14,6 +14,7 @@
 #include "Qt/sdl-video.h"
 #include "Qt/nes_shm.h"
 #include "Qt/unix-netplay.h"
+#include "Qt/HexEditor.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/fceux_git_info.h"
 
@@ -231,6 +232,8 @@ int LoadGame(const char *path)
 		return 0;
 	}
 
+	hexEditorLoadBookmarks();
+
     int state_to_load;
     g_config->getOption("SDL.AutoLoadState", &state_to_load);
     if (state_to_load >= 0 && state_to_load < 10){
@@ -277,6 +280,7 @@ CloseGame(void)
 	if(!isloaded) {
 		return(0);
 	}
+	hexEditorSaveBookmarks();
 
     int state_to_save;
     g_config->getOption("SDL.AutoSaveState", &state_to_save);
