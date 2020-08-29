@@ -13,6 +13,7 @@
 #include <QFileDialog>
 #include <QColorDialog>
 #include <QInputDialog>
+#include <QMessageBox>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -738,9 +739,23 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::removeAllBookmarks(void)
 {
-	hbm.removeAll();
+	int ret;
+	QMessageBox mbox(this);
 
-	populateBookmarkMenu();
+	mbox.setWindowTitle( tr("Bookmarks") );
+	mbox.setText( tr("Remove All Bookmarks?") );
+	mbox.setIcon( QMessageBox::Question );
+	mbox.setStandardButtons( QMessageBox::Cancel | QMessageBox::Ok );
+
+	ret = mbox.exec();
+
+	//printf("Ret: %i \n", ret );
+	if ( ret == QMessageBox::Ok )
+	{
+		hbm.removeAll();
+
+		populateBookmarkMenu();
+	}
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::populateBookmarkMenu(void)
