@@ -59,7 +59,7 @@ int getFileBaseName( const char *filepath, char *base )
 	{
 		if ( (filepath[i] == '/') || (filepath[i] == '\\') )
 		{
-			j = i;
+			j = i+1;
 		}
 		i++;
 	}

@@ -3,9 +3,13 @@
 
 #pragma once
 
+#include <list>
+#include <vector>
+
 #include <QWidget>
 #include <QDialog>
 #include <QTimer>
+#include <QAction>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QComboBox>
@@ -41,6 +45,54 @@ struct memBlock_t
    int  _maxLines;
 	int (*memAccessFunc)( unsigned int offset);
 };
+
+class HexBookMark
+{
+	public:
+		HexBookMark(void);
+		~HexBookMark(void);
+
+	int  addr;
+	int  mode;
+	char desc[64];
+};
+
+class HexBookMarkManager_t
+{
+	public:
+		HexBookMarkManager_t(void);
+		~HexBookMarkManager_t(void);
+
+		void removeAll(void);
+		int  addBookMark( int addr, int mode, const char *desc );
+		int  size(void);
+		HexBookMark *getBookMark( int index );
+		int  saveToFile(void);
+		int  loadFromFile(void);
+	private:
+		void updateVector(void);
+		std::list <HexBookMark*> ls;
+		std::vector <HexBookMark*> v;
+};
+
+class QHexEdit;
+
+class HexBookMarkMenuAction : public QAction
+{
+   Q_OBJECT
+
+	public:
+		HexBookMarkMenuAction( QString desc, QWidget *parent = 0);
+		~HexBookMarkMenuAction(void);
+
+		QHexEdit    *qedit;
+		HexBookMark *bm;
+	public slots:
+		void activateCB(void);
+
+};
+
+class HexEditorDialog_t;
 
 class QHexEdit : public QWidget
 {
@@ -93,6 +145,8 @@ class QHexEdit : public QWidget
 		QColor      highLightColor[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
 		QColor      rvActvTextColor[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
 
+		HexEditorDialog_t *parent;
+
 		uint64_t total_instructions_lp;
 
       int viewMode;
@@ -119,6 +173,7 @@ class QHexEdit : public QWidget
       int editValue;
       int editMask;
 		int jumpToRomValue;
+		int ctxAddr;
 
 		bool cursorBlink;
 		bool reverseVideo;
@@ -126,6 +181,7 @@ class QHexEdit : public QWidget
 
 	private slots:
 		void jumpToROM(void);
+		void addBookMarkCB(void);
 
 };
 
@@ -137,11 +193,11 @@ class HexEditorDialog_t : public QDialog
 		HexEditorDialog_t(QWidget *parent = 0);
 		~HexEditorDialog_t(void);
 
-	protected:
-		void closeEvent(QCloseEvent *bar);
-
 		void gotoAddress(int newAddr);
 		void populateBookmarkMenu(void);
+	protected:
+
+		void closeEvent(QCloseEvent *bar);
 
 		QScrollBar *vbar;
 		QScrollBar *hbar;
@@ -168,4 +224,8 @@ class HexEditorDialog_t : public QDialog
 		void actvHighlightRVCB(bool value); 
 		void pickForeGroundColor(void);
 		void pickBackGroundColor(void);
+		void removeAllBookmarks(void);
 };
+
+void hexEditorLoadBookmarks(void);
+void hexEditorSaveBookmarks(void);
