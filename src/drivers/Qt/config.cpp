@@ -254,6 +254,10 @@ InitConfig()
 	config->addOption("pauseframe", "SDL.PauseFrame", 0);
 	config->addOption("recordhud", "SDL.RecordHUD", 1);
 	config->addOption("moviemsg", "SDL.MovieMsg", 1);
+
+	// Hex Editor Options
+	config->addOption("hexEditBgColor", "SDL.HexEditBgColor", "#000000");
+	config->addOption("hexEditFgColor", "SDL.HexEditFgColor", "#FFFFFF");
     
 	// overwrite the config file?
 	config->addOption("no-config", "SDL.NoConfig", 0);

@@ -815,6 +815,10 @@ void HexEditorDialog_t::pickForeGroundColor(void)
 
 	if ( ret == QDialog::Accepted )
 	{
+		QString colorText;
+		colorText = dialog.selectedColor().name();
+		//printf("FG Color string '%s'\n", colorText.toStdString().c_str() );
+		g_config->setOption("SDL.HexEditFgColor", colorText.toStdString().c_str() );
 		editor->setForeGroundColor( dialog.selectedColor() );
 	}
 }
@@ -830,6 +834,10 @@ void HexEditorDialog_t::pickBackGroundColor(void)
 
 	if ( ret == QDialog::Accepted )
 	{
+		QString colorText;
+		colorText = dialog.selectedColor().name();
+		//printf("BG Color string '%s'\n", colorText.toStdString().c_str() );
+		g_config->setOption("SDL.HexEditBgColor", colorText.toStdString().c_str() );
 		editor->setBackGroundColor( dialog.selectedColor() );
 	}
 }
@@ -954,6 +962,8 @@ QHexEdit::QHexEdit(QWidget *parent)
 	: QWidget( parent )
 {
 	QPalette pal;
+	QColor bg, fg;
+	std::string colorString;
 
 	this->parent = (HexEditorDialog_t*)parent;
 	this->setFocusPolicy(Qt::StrongFocus);
@@ -962,10 +972,15 @@ QHexEdit::QHexEdit(QWidget *parent)
 	font.setStyle( QFont::StyleNormal );
 	font.setStyleHint( QFont::Monospace );
 
+	g_config->getOption("SDL.HexEditBgColor", &colorString);
+	bg.setNamedColor( colorString.c_str() );
+	g_config->getOption("SDL.HexEditFgColor", &colorString);
+	fg.setNamedColor( colorString.c_str() );
+
 	pal = this->palette();
-	pal.setColor(QPalette::Base      , Qt::black);
-	pal.setColor(QPalette::Background, Qt::black);
-	pal.setColor(QPalette::WindowText, Qt::white);
+	pal.setColor(QPalette::Base      , bg );
+	pal.setColor(QPalette::Background, bg );
+	pal.setColor(QPalette::WindowText, fg );
 
 	//editor->setAutoFillBackground(true);
 	this->setPalette(pal);
