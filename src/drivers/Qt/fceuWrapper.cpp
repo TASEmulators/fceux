@@ -14,7 +14,9 @@
 #include "Qt/sdl-video.h"
 #include "Qt/nes_shm.h"
 #include "Qt/unix-netplay.h"
+#include "Qt/HexEditor.h"
 #include "Qt/ConsoleWindow.h"
+#include "Qt/fceux_git_info.h"
 
 #include "common/cheat.h"
 #include "../../fceu.h"
@@ -56,7 +58,9 @@ static int inited = 0;
 static int noconfig=0;
 static int frameskip=0;
 static int periodic_saves = 0;
-static bool  mutexLocked = 0;
+static int   mutexLocks = 0;
+static int   mutexPending = 0;
+static bool  emulatorHasMutux = 0;
 
 extern double g_fpsScale;
 
@@ -78,19 +82,22 @@ int mutecapture = 0;
 void FCEUD_Message(const char *text)
 {
 	fputs(text, stdout);
+	//fprintf(stdout, "\n");
 }
 
 /**
 * Shows an error message in a message box.
 * (For now: prints to stderr.)
 * 
-* If running in GTK mode, display a dialog message box of the error.
+* If running in Qt mode, display a dialog message box of the error.
 *
 * @param errormsg Text of the error message.
 **/
 void FCEUD_PrintError(const char *errormsg)
 {
 	fprintf(stderr, "%s\n", errormsg);
+
+	consoleWindow->QueueErrorMsgWindow( errormsg );
 }
 
 /**
@@ -98,7 +105,8 @@ void FCEUD_PrintError(const char *errormsg)
  */
 FILE *FCEUD_UTF8fopen(const char *fn, const char *mode)
 {
-	return(fopen(fn,mode));
+   FILE *fp = ::fopen(fn,mode);
+	return(fp);
 }
 
 /**
@@ -190,8 +198,8 @@ DriverKill()
 	if (!noconfig)
 		g_config->save();
 
-	if(inited&2)
-		KillJoysticks();
+	KillJoysticks();
+
 	if(inited&4)
 		KillVideo();
 	if(inited&1)
@@ -223,6 +231,8 @@ int LoadGame(const char *path)
 	if(!FCEUI_LoadGame(path, 1)) {
 		return 0;
 	}
+
+	hexEditorLoadBookmarks();
 
     int state_to_load;
     g_config->getOption("SDL.AutoLoadState", &state_to_load);
@@ -270,6 +280,7 @@ CloseGame(void)
 	if(!isloaded) {
 		return(0);
 	}
+	hexEditorSaveBookmarks();
 
     int state_to_save;
     g_config->getOption("SDL.AutoSaveState", &state_to_save);
@@ -405,12 +416,15 @@ static void ShowUsage(const char *prog)
 	SDL_GetVersion(&v);
 	printf("Linked with SDL version %d.%d.%d\n", v.major, v.minor, v.patch);
   	printf("Compiled with QT version %d.%d.%d\n", QT_VERSION_MAJOR, QT_VERSION_MINOR, QT_VERSION_PATCH );
+	printf("git URL: %s\n", fceu_get_git_url() );
+	printf("git Rev: %s\n", fceu_get_git_rev() );
 	
 }
 
 int  fceuWrapperInit( int argc, char *argv[] )
 {
 	int error;
+	std::string s;
 
 	for (int i=0; i<argc; i++)
 	{
@@ -428,6 +442,10 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	{
 		printf("Could not initialize SDL: %s.\n", SDL_GetError());
 		exit(-1);
+	}
+	if ( SDL_SetHint( SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1" ) == SDL_FALSE )
+	{
+		printf("Error setting SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS\n");
 	}
 
 	// Initialize the configuration system
@@ -465,15 +483,14 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		g_config->save();
 	}
 
-	std::string s;
 
-	g_config->getOption("SDL.InputCfg", &s);
+	//g_config->getOption("SDL.InputCfg", &s);
 
-	if (s.size() != 0)
-	{
-		InitVideo(GameInfo);
-		InputCfg(s);
-	}
+	//if (s.size() != 0)
+	//{
+	//	InitVideo(GameInfo);
+	//	InputCfg(s);
+	//}
 
 	 // update the input devices
 	UpdateInput(g_config);
@@ -910,29 +927,33 @@ static void DoFun(int frameskip, int periodic_saves)
 
 void fceuWrapperLock(void)
 {
+	mutexPending++;
 	consoleWindow->mutex->lock();
-	mutexLocked = 1;
+	mutexPending--;
+	mutexLocks++;
 }
 
 bool fceuWrapperTryLock(int timeout)
 {
 	bool lockAcq;
 
+	mutexPending++;
 	lockAcq = consoleWindow->mutex->tryLock( timeout );
+	mutexPending--;
 
 	if ( lockAcq )
 	{
-		mutexLocked = 1;
+		mutexLocks++;
 	}
 	return lockAcq;
 }
 
 void fceuWrapperUnLock(void)
 {
-	if ( mutexLocked )
+	if ( mutexLocks > 0 )
 	{
 		consoleWindow->mutex->unlock();
-		mutexLocked = 0;
+		mutexLocks--;
 	}
 	else
 	{
@@ -942,18 +963,38 @@ void fceuWrapperUnLock(void)
 
 bool fceuWrapperIsLocked(void)
 {
-	return mutexLocked;
+	return mutexLocks > 0;
 }
 
 int  fceuWrapperUpdate( void )
 {
-	fceuWrapperLock();
+	bool lock_acq;
+
+	// If a request is pending, 
+	// sleep to allow request to be serviced.
+	if ( mutexPending > 0 )
+	{
+		usleep( 100000 );
+	}
+
+	lock_acq = fceuWrapperTryLock();
+
+	if ( !lock_acq )
+	{
+		printf("Error: Emulator Failed to Acquire Mutex\n");
+		usleep( 100000 );
+
+		return -1;
+	}
+	emulatorHasMutux = 1;
  
 	if ( GameInfo && !FCEUI_EmulationPaused() )
 	{
 		DoFun(frameskip, periodic_saves);
 	
 		fceuWrapperUnLock();
+
+		emulatorHasMutux = 0;
 
 		while ( SpeedThrottle() )
 		{
@@ -965,6 +1006,8 @@ int  fceuWrapperUpdate( void )
 	else
 	{
 		fceuWrapperUnLock();
+
+		emulatorHasMutux = 0;
 
 		usleep( 100000 );
 	}

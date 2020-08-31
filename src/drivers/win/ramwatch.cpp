@@ -1419,6 +1419,7 @@ INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 								if (target[i].comment)
 									free(target[i].comment);
 							}
+							free(target);
 						}
 						if(msg.Addresses)
 							free(msg.Addresses);
@@ -1442,6 +1443,7 @@ INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 						InsertWatch(*sep);
 						if (sep->comment)
 							free(sep->comment);
+						free(sep);
 					}
 					if (msg.comment)
 						free(msg.comment);

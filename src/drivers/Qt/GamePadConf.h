@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QFrame>
+#include <QTimer>
 #include <QGroupBox>
 
 #include "Qt/main.h"
@@ -37,12 +38,18 @@ class GamePadConfDialog_t : public QDialog
 		~GamePadConfDialog_t(void);
 
 	protected:
+      QTimer    *inputTimer;
 		QComboBox *portSel;
+		QComboBox *devSel;
+		QComboBox *mapSel;
+		QComboBox *profSel;
+		QLabel      *guidLbl;
+		QLabel      *mapMsg;
       QLabel      *keyName[GAMEPAD_NUM_BUTTONS];
+      QLabel      *keyState[GAMEPAD_NUM_BUTTONS];
       GamePadConfigButton_t *button[GAMEPAD_NUM_BUTTONS];
 
       int  portNum;
-		int  configNo;
       int  buttonConfigStatus;
 
       void changeButton( int port, int button );
@@ -52,6 +59,10 @@ class GamePadConfDialog_t : public QDialog
       void closeEvent(QCloseEvent *bar);
 	private:
 		void updateCntrlrDpy(void);
+		void createNewProfile( const char *name );
+		void loadMapList(void);
+		void saveConfig(void);
+		void promptToSave(void);
 
    public slots:
       void closeWindow(void);
@@ -77,9 +88,18 @@ class GamePadConfDialog_t : public QDialog
       void clearButton8(void);
       void clearButton9(void);
       void clearAllCallback(void);
-      void loadDefaults(void);
 		void ena4score(int state);
 		void oppDirEna(int state);
-		void controllerSelect(int index);
+		void portSelect(int index);
+		void deviceSelect(int index);
+      void newProfileCallback(void);
+      void loadProfileCallback(void);
+      void saveProfileCallback(void);
+      void deleteProfileCallback(void);
+		void updatePeriodic(void);
 
 };
+
+int openGamePadConfWindow( QWidget *parent );
+
+int closeGamePadConfWindow(void);

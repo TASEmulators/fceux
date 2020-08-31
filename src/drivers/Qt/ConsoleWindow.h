@@ -39,17 +39,21 @@ class  consoleWin_t : public QMainWindow
 		consoleWin_t(QWidget *parent = 0);
 	   ~consoleWin_t(void);
 
-		ConsoleViewGL_t *viewport;
-		//ConsoleViewSDL_t *viewport;
+		ConsoleViewGL_t   *viewport_GL;
+		ConsoleViewSDL_t  *viewport_SDL;
 
 		void setCyclePeriodms( int ms );
 
 		QMutex *mutex;
 
+	 	void QueueErrorMsgWindow( const char *msg );
+
 	protected:
 	 QMenu *fileMenu;
     QMenu *optMenu;
     QMenu *emuMenu;
+    QMenu *toolsMenu;
+    QMenu *debugMenu;
     QMenu *movieMenu;
     QMenu *helpMenu;
 
@@ -67,9 +71,12 @@ class  consoleWin_t : public QMainWindow
     QAction *gameSoundConfig;
     QAction *gameVideoConfig;
     QAction *hotkeyConfig;
+    QAction *paletteConfig;
+    QAction *guiConfig;
     QAction *autoResume;
     QAction *fullscreen;
     QAction *aboutAct;
+    QAction *aboutActQt;
 	 QAction *state[10];
 	 QAction *powerAct;
 	 QAction *resetAct;
@@ -81,23 +88,26 @@ class  consoleWin_t : public QMainWindow
 	 QAction *fdsSwitchAct;
 	 QAction *fdsEjectAct;
 	 QAction *fdsLoadBiosAct;
+	 QAction *cheatsAct;
+	 QAction *hexEditAct;
 	 QAction *openMovAct;
 	 QAction *stopMovAct;
 	 QAction *recMovAct;
 	 QAction *recAsMovAct;
 
 	 QTimer  *gameTimer;
+
 	 emulatorThread_t *emulatorThread;
 
-    GamePadConfDialog_t *gamePadConfWin;
+	 std::string errorMsg;
+	 bool        errorMsgValid;
 
 	protected:
     void closeEvent(QCloseEvent *event);
 	 void keyPressEvent(QKeyEvent *event);
 	 void keyReleaseEvent(QKeyEvent *event);
 	 void syncActionConfig( QAction *act, const char *property );
-
-	 int  getDirFromFile( const char *path, char *dir );
+	 void showErrorMsgWindow(void);
 
 	private:
 		void createMainMenu(void);
@@ -112,10 +122,13 @@ class  consoleWin_t : public QMainWindow
 		void quickSave(void);
 		void closeROMCB(void);
       void aboutFCEUX(void);
+      void aboutQt(void);
       void openGamePadConfWin(void);
       void openGameSndConfWin(void);
       void openGameVideoConfWin(void);
       void openHotkeyConfWin(void);
+      void openPaletteConfWin(void);
+      void openGuiConfWin(void);
       void toggleAutoResume(void);
       void toggleFullscreen(void);
       void updatePeriodic(void);
@@ -141,6 +154,8 @@ class  consoleWin_t : public QMainWindow
 		void fdsSwitchDisk(void);
 		void fdsEjectDisk(void);
 		void fdsLoadBiosFile(void);
+		void openCheats(void);
+		void openHexEditor(void);
 		void openMovie(void);
 		void stopMovie(void);
 		void recordMovie(void);

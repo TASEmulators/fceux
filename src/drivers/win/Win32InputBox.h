@@ -99,6 +99,12 @@ public:
 	LPCTSTR szPrompt,
 	int& result,
 	HWND hwndParent = 0);
+
+  static INT_PTR GetString(
+	  LPCTSTR szTitle,
+	  LPCTSTR szPrompt,
+	  CHAR* result,
+	  HWND hwndParent = 0);
 };
 
 #endif

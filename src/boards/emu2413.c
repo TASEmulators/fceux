@@ -604,8 +604,8 @@ void OPLL_reset(OPLL * opll) {
 	for (i = 0; i < 0x40; i++)
 		OPLL_writeReg(opll, i, 0);
 
-	opll->realstep = (uint32)((1 << 31) / rate);
-	opll->opllstep = (uint32)((1 << 31) / (clk / 72));
+	opll->realstep = (uint32)((1u << 31) / rate);
+	opll->opllstep = (uint32)((1u << 31) / (clk / 72));
 	opll->oplltime = 0;
 }
 

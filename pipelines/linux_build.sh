@@ -60,8 +60,8 @@ pkg-config --cflags --libs  minizip
 #echo '****************************************'
 #echo 'Install Dependency libgtk-3-dev'
 #echo '****************************************'
-#sudo apt-get --assume-yes  install libgtk-3-dev
-#pkg-config --cflags --libs  gtk+-3.0
+sudo apt-get --assume-yes  install libgtk-3-dev
+pkg-config --cflags --libs  gtk+-3.0
 #
 ## Install GTK+-3 Sourceview
 #sudo apt-get --assume-yes  install libgtksourceview-3.0-dev
@@ -92,14 +92,24 @@ mkdir -p $INSTALL_PREFIX/usr;
 #scons   --clean
 #scons   GTK3=1   SYSTEM_LUA=1   SYSTEM_MINIZIP=1   CREATE_AVI=1  install  --prefix=$INSTALL_PREFIX/usr
 echo "Num CPU: `nproc`";
-mkdir build; cd build;
-#qmake PREFIX=$INSTALL_PREFIX/usr  ..
+mkdir buildQT; cd buildQT;
 cmake  \
    -DCMAKE_BUILD_TYPE=Release  \
    -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
    -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
 	..
-make -j `nproc` 
+make -j `nproc`
+make  install
+
+cd ..;
+mkdir buildGTK; cd buildGTK;
+cmake  \
+   -DGTK=1 \
+   -DCMAKE_BUILD_TYPE=Release  \
+   -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
+   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+	..
+make -j `nproc`
 make  install
 
 # Install Files
@@ -131,6 +141,16 @@ if [ -e $INSTALL_PREFIX/usr/bin/fceux ]; then
    ldd  $INSTALL_PREFIX/usr/bin/fceux
 else
    echo "Error: Executable Failed to build: $INSTALL_PREFIX/usr/bin/fceux";
+   exit 1;
+fi
+
+if [ -e $INSTALL_PREFIX/usr/bin/fceux-gtk ]; then
+   echo '**************************************************************'
+   echo 'Printing Shared Object Dependencies for fceux-gtk Executable'
+   echo '**************************************************************'
+   ldd  $INSTALL_PREFIX/usr/bin/fceux-gtk
+else
+   echo "Error: Executable Failed to build: $INSTALL_PREFIX/usr/bin/fceux-gtk";
    exit 1;
 fi
 

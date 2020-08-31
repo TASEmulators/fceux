@@ -15,6 +15,12 @@ extern unsigned int gui_draw_area_height;
 ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	: QWidget( parent )
 {
+	QPalette pal = palette();
+
+	pal.setColor(QPalette::Background, Qt::black);
+	setAutoFillBackground(true);
+	setPalette(pal);
+
 	view_width  = GL_NES_WIDTH;
 	view_height = GL_NES_HEIGHT;
 
@@ -30,11 +36,29 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	sdlTexture  = NULL;
 
 	vsyncEnabled = false;
+
+	localBufSize = GL_NES_WIDTH * GL_NES_HEIGHT * sizeof(uint32_t);
+
+	localBuf = (uint32_t*)malloc( localBufSize );
+
+	if ( localBuf )
+	{
+		memset( localBuf, 0, localBufSize );
+	}
+
 }
 
 ConsoleViewSDL_t::~ConsoleViewSDL_t(void)
 {
+	if ( localBuf )
+	{
+		free( localBuf ); localBuf = NULL;
+	}
+}
 
+void ConsoleViewSDL_t::transfer2LocalBuffer(void)
+{
+	memcpy( localBuf, nes_shm->pixbuf, localBufSize );
 }
 
 int ConsoleViewSDL_t::init(void)
@@ -46,10 +70,16 @@ int ConsoleViewSDL_t::init(void)
 		printf("[SDL] Failed to initialize video subsystem.\n");
 		return -1;
 	}
-	//else
-	//{
-	//	printf("Initialized SDL Video Subsystem\n");
-	//}
+	else
+	{
+		printf("Initialized SDL Video Subsystem\n");
+	}
+
+	for (int i=0; i<SDL_GetNumVideoDrivers(); i++)
+	{
+		printf("SDL Video Driver %i: %s\n", i, SDL_GetVideoDriver(i) );
+	}
+	printf("Using Video Driver: %s \n", SDL_GetCurrentVideoDriver() );
 
 	windowHandle = this->winId();
 
@@ -132,17 +162,18 @@ void ConsoleViewSDL_t::resizeEvent(QResizeEvent *event)
 	s = event->size();
 	view_width  = s.width();
 	view_height = s.height();
-	//printf("SDL Resize: %i x %i \n", view_width, view_height);
+	printf("SDL Resize: %i x %i \n", view_width, view_height);
 
 	reset();
 
-	sdlViewport.x = sdlRendW - view_width;
-	sdlViewport.y = sdlRendH - view_height;
-	sdlViewport.w = view_width;
-	sdlViewport.h = view_height;
+	//sdlViewport.x = sdlRendW - view_width;
+	//sdlViewport.y = sdlRendH - view_height;
+	//sdlViewport.w = view_width;
+	//sdlViewport.h = view_height;
 }
 
-void ConsoleViewSDL_t::paintEvent( QPaintEvent *event )
+//void ConsoleViewSDL_t::paintEvent( QPaintEvent *event )
+void ConsoleViewSDL_t::render(void)
 {
 	int nesWidth  = GL_NES_WIDTH;
 	int nesHeight = GL_NES_HEIGHT;
@@ -167,8 +198,10 @@ void ConsoleViewSDL_t::paintEvent( QPaintEvent *event )
 
 	rw=(int)(nesWidth*xscale);
 	rh=(int)(nesHeight*yscale);
-	sx=sdlViewport.x + (view_width-rw)/2;   
-	sy=sdlViewport.y + (view_height-rh)/2;
+	//sx=sdlViewport.x + (view_width-rw)/2;   
+	//sy=sdlViewport.y + (view_height-rh)/2;
+	sx=(view_width-rw)/2;   
+	sy=(view_height-rh)/2;
 
 	if ( (sdlRenderer == NULL) || (sdlTexture == NULL) )
   	{
@@ -183,13 +216,13 @@ void ConsoleViewSDL_t::paintEvent( QPaintEvent *event )
 	int rowPitch;
 	SDL_LockTexture( sdlTexture, nullptr, (void**)&textureBuffer, &rowPitch);
 	{
-		memcpy( textureBuffer, nes_shm->pixbuf, GL_NES_HEIGHT*GL_NES_WIDTH*sizeof(uint32_t) );
+		memcpy( textureBuffer, localBuf, GL_NES_HEIGHT*GL_NES_WIDTH*sizeof(uint32_t) );
 	}
 	SDL_UnlockTexture(sdlTexture);
 
-	SDL_RenderSetViewport( sdlRenderer, &sdlViewport );
+	//SDL_RenderSetViewport( sdlRenderer, &sdlViewport );
 
-	SDL_Rect source = {0, 0, GL_NES_WIDTH, GL_NES_HEIGHT };
+	SDL_Rect source = {0, 0, nesWidth, nesHeight };
 	SDL_Rect dest = { sx, sy, rw, rh };
 	SDL_RenderCopy(sdlRenderer, sdlTexture, &source, &dest);
 

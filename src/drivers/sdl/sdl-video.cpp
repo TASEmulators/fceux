@@ -51,6 +51,10 @@
 #include <cstring>
 #include <cstdlib>
 
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+#define  LSB_FIRST 
+#endif
+
 // GLOBALS
 extern Config *g_config;
 
@@ -79,6 +83,13 @@ extern bool MaxSpeed;
 
 extern unsigned int gtk_draw_area_width;
 extern unsigned int gtk_draw_area_height;
+
+static int sdl_win_width = 0;
+static int sdl_win_height = 0;
+static SDL_Window   *sdlWindow   = NULL;
+static SDL_Renderer *sdlRenderer = NULL;
+static SDL_Texture  *sdlTexture  = NULL;
+
 /**
  * Attempts to destroy the graphical video display.  Returns 0 on
  * success, -1 on failure.
@@ -148,6 +159,7 @@ void FCEUD_VideoChanged()
 
 int InitVideo(FCEUGI *gi)
 {
+	int vdSel;
 	int doublebuf, xstretch, ystretch, xres, yres, show_fps;
 
 	FCEUI_printf("Initializing video...");
@@ -180,7 +192,9 @@ int InitVideo(FCEUGI *gi)
 	FCEUI_GetCurrentVidSystem(&s_srendline, &s_erendline);
 	s_tlines = s_erendline - s_srendline + 1;
 
-	init_gui_video( s_useOpenGL );
+	g_config->getOption("SDL.VideoDriver", &vdSel);
+
+	init_gui_video( (videoDriver_t)vdSel );
 
 	s_inited = 1;
 
@@ -188,9 +202,9 @@ int InitVideo(FCEUGI *gi)
 	FCEUI_SetShowFPS(show_fps);
 
 #ifdef LSB_FIRST
-	rmask = 0x000000FF;
+	rmask = 0x00FF0000;
 	gmask = 0x0000FF00;
-	bmask = 0x00FF0000;
+	bmask = 0x000000FF;
 #else
 	rmask = 0x00FF0000;
 	gmask = 0x0000FF00;
@@ -209,24 +223,6 @@ int InitVideo(FCEUGI *gi)
 		KillVideo();
 		return -1;
 	}
-
-#ifdef OPENGL
-	if(s_exs <= 0.01) {
-		FCEUD_PrintError("xscale out of bounds.");
-		KillVideo();
-		return -1;
-	}
-	if(s_eys <= 0.01) {
-		FCEUD_PrintError("yscale out of bounds.");
-		KillVideo();
-		return -1;
-	}
-	if(s_sponge && s_useOpenGL) {
-		FCEUD_PrintError("scalers not compatible with openGL mode.");
-		KillVideo();
-		return -1;
-	}
-#endif
 
 	if ( !initBlitToHighDone )
 	{
@@ -467,3 +463,176 @@ void FCEUI_SetAviDisableMovieMessages(bool disable)
 {
 	disableMovieMessages = disable;
 }
+
+//*****************************************************************************
+int init_gtk3_sdl_video( void )
+{
+	GdkWindow *gdkWin = gtk_widget_get_window(evbox);
+	Window win;
+	int sdlRendW, sdlRendH;
+	int vsyncEnabled=0;
+
+	if ( (gtk_draw_area_width < GLX_NES_WIDTH) || (gtk_draw_area_height < GLX_NES_HEIGHT) )
+	{
+		usleep(100000);
+		return -1;
+	}
+	if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) 
+	{
+		printf("[SDL] Failed to initialize video subsystem.\n");
+		return -1;
+	}
+	else
+	{
+		printf("Initialized SDL Video Subsystem\n");
+	}
+
+	if ( gdkWin == NULL )
+	{
+		printf("Error: Failed to obtain gdkWindow Handle for evbox widget\n");
+		return -1;
+	}
+	win = GDK_WINDOW_XID( gdkWin );
+
+	for (int i=0; i<SDL_GetNumVideoDrivers(); i++)
+	{
+		printf("SDL Video Driver %i: %s\n", i, SDL_GetVideoDriver(i) );
+	}
+	printf("Using Video Driver: %s \n", SDL_GetCurrentVideoDriver() );
+
+	sdlWindow = SDL_CreateWindowFrom( (void*)win);
+	if (sdlWindow == NULL) 
+	{
+		printf("[SDL] Failed to create window from handle.\n");
+		return -1;
+	}
+
+	uint32_t baseFlags = vsyncEnabled ? SDL_RENDERER_PRESENTVSYNC : 0;
+
+	sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, baseFlags | SDL_RENDERER_ACCELERATED);
+
+	if (sdlRenderer == NULL) 
+	{
+		printf("[SDL] Failed to create accelerated renderer.\n");
+
+		printf("[SDL] Attempting to create software renderer...\n");
+
+		sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, baseFlags | SDL_RENDERER_SOFTWARE);
+
+		if (sdlRenderer == NULL)
+	  	{
+			printf("[SDL] Failed to create software renderer.\n");
+			return -1;
+		}		
+	}
+
+	SDL_GetRendererOutputSize( sdlRenderer, &sdlRendW, &sdlRendH );
+
+	printf("[SDL] Renderer Output Size: %i x %i \n", sdlRendW, sdlRendH );
+
+	sdlTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GLX_NES_WIDTH, GLX_NES_HEIGHT);
+
+	if (sdlTexture == NULL) 
+	{
+		printf("[SDL] Failed to create texture: %i x %i", GLX_NES_WIDTH, GLX_NES_HEIGHT );
+		return -1;
+	}
+
+	sdl_win_width  = sdlRendW;
+	sdl_win_height = sdlRendH;
+
+	return 0;
+}
+
+//*****************************************************************************
+int destroy_gtk3_sdl_video(void)
+{
+	if (sdlTexture) 
+	{
+		printf("Destroying SDL Texture...\n");
+		SDL_DestroyTexture(sdlTexture);
+		sdlTexture = NULL;		
+	}
+	if (sdlRenderer) 
+	{
+		printf("Destroying SDL Renderer...\n");
+		SDL_DestroyRenderer(sdlRenderer);
+		sdlRenderer = NULL;
+	}
+	//SDL_QuitSubSystem(SDL_INIT_VIDEO);
+	return 0;
+}
+//*****************************************************************************
+int gtk3_sdl_resize(void)
+{
+	destroy_gtk3_sdl_video();
+
+	init_gtk3_sdl_video();
+
+	return 0;
+}
+//*****************************************************************************
+int gtk3_sdl_render(void)
+{
+	int  sx, sy, rw, rh;
+	int nesWidth  = GLX_NES_WIDTH;
+	int nesHeight = GLX_NES_HEIGHT;
+
+	if ( (sdl_win_width != gtk_draw_area_width) || (sdl_win_height != gtk_draw_area_height) )
+	{
+		gtk3_sdl_resize();
+	}
+
+	if ( glx_shm != NULL )
+	{
+		nesWidth  = glx_shm->ncol;
+		nesHeight = glx_shm->nrow;
+	}
+	//printf(" %i x %i \n", nesWidth, nesHeight );
+	float xscale = (float)gtk_draw_area_width  / (float)nesWidth;
+	float yscale = (float)gtk_draw_area_height / (float)nesHeight;
+
+	if (xscale < yscale )
+	{
+		yscale = xscale;
+	}
+	else 
+	{
+		xscale = yscale;
+	}
+
+	rw=(int)(nesWidth*xscale);
+	rh=(int)(nesHeight*yscale);
+	//sx=sdlViewport.x + (view_width-rw)/2;   
+	//sy=sdlViewport.y + (view_height-rh)/2;
+	sx=(gtk_draw_area_width-rw)/2;   
+	sy=(gtk_draw_area_height-rh)/2;
+
+	if ( (sdlRenderer == NULL) || (sdlTexture == NULL) )
+  	{
+		return -1;
+	}
+
+	SDL_SetRenderDrawColor( sdlRenderer, 0, 0, 0, 0 );
+
+	SDL_RenderClear(sdlRenderer);
+
+	uint8_t *textureBuffer;
+	int rowPitch;
+	SDL_LockTexture( sdlTexture, nullptr, (void**)&textureBuffer, &rowPitch);
+	{
+		memcpy( textureBuffer, glx_shm->pixbuf, GLX_NES_HEIGHT*GLX_NES_WIDTH*sizeof(uint32_t) );
+	}
+	SDL_UnlockTexture(sdlTexture);
+
+	//SDL_RenderSetViewport( sdlRenderer, &sdlViewport );
+
+	SDL_Rect source = {0, 0, nesWidth, nesHeight };
+	SDL_Rect dest = { sx, sy, rw, rh };
+	SDL_RenderCopy(sdlRenderer, sdlTexture, &source, &dest);
+
+	SDL_RenderPresent(sdlRenderer);
+
+	return 0;
+}
+//*****************************************************************************

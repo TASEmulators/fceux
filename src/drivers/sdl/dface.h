@@ -18,6 +18,8 @@ void SilenceSound(int s); /* DOS and SDL */
 
 int InitJoysticks(void);
 int KillJoysticks(void);
+int AddJoystick( int which );
+int RemoveJoystick( int which );
 uint32 *GetJSOr(void);
 
 int InitVideo(FCEUGI *gi);

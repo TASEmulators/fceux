@@ -25,6 +25,8 @@ class ConsoleVideoConfDialog_t : public QDialog
 		~ConsoleVideoConfDialog_t(void);
 
 	protected:
+		void closeEvent(QCloseEvent *bar);
+
 		QComboBox   *driverSelect;
 		QComboBox   *regionSelect;
 		QCheckBox   *gl_LF_chkBox;
@@ -40,6 +42,9 @@ class ConsoleVideoConfDialog_t : public QDialog
 
 		void  resetVideo(void);
 
+	public slots:
+      void closeWindow(void);
+
 	private slots:
 		void  use_new_PPU_changed( int value );
 		void  frameskip_changed( int value );
@@ -47,8 +52,8 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  clipSidesChanged( int value );
 		void  showFPSChanged( int value );
 		void  regionChanged(int index);
+		void  driverChanged(int index);
 		void  applyChanges( void );
-		void  closewindow( void );
 
 };
 

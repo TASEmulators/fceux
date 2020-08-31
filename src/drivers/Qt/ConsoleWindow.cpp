@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <QFileDialog>
+#include <QMessageBox>
 
 #include "../../fceu.h"
 #include "../../fds.h"
@@ -19,6 +20,12 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/GamePadConf.h"
 #include "Qt/HotKeyConf.h"
+#include "Qt/PaletteConf.h"
+#include "Qt/GuiConf.h"
+#include "Qt/LuaControl.h"
+#include "Qt/CheatsConf.h"
+#include "Qt/HexEditor.h"
+#include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
 #include "Qt/AboutWindow.h"
@@ -29,17 +36,33 @@
 consoleWin_t::consoleWin_t(QWidget *parent)
 	: QMainWindow( parent )
 {
+	int use_SDL_video = false;
 
 	createMainMenu();
 
-	viewport = new ConsoleViewGL_t(this);
-	//viewport = new ConsoleViewSDL_t(this);
+	g_config->getOption( "SDL.VideoDriver", &use_SDL_video );
 
-   setCentralWidget(viewport);
+	errorMsgValid = false;
+	viewport_GL  = NULL;
+	viewport_SDL = NULL;
+
+	if ( use_SDL_video )
+	{
+		viewport_SDL = new ConsoleViewSDL_t(this);
+
+   	setCentralWidget(viewport_SDL);
+	}
+	else
+	{
+		viewport_GL = new ConsoleViewGL_t(this);
+
+   	setCentralWidget(viewport_GL);
+	}
+
    setWindowIcon(QIcon(":fceux1.png"));
 
 	gameTimer  = new QTimer( this );
-	mutex      = new QMutex( QMutex::NonRecursive );
+	mutex      = new QMutex( QMutex::Recursive );
 	emulatorThread = new emulatorThread_t();
 
    connect(emulatorThread, &QThread::finished, emulatorThread, &QObject::deleteLater);
@@ -52,17 +75,16 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	emulatorThread->start();
 
-   gamePadConfWin = NULL;
 }
 
 consoleWin_t::~consoleWin_t(void)
 {
 	nes_shm->runEmulator = 0;
 
-   if ( gamePadConfWin != NULL )
-   {
-      gamePadConfWin->closeWindow();
-   }
+	gameTimer->stop(); 
+
+	closeGamePadConfWindow();
+
 	fceuWrapperLock();
 	fceuWrapperClose();
 	fceuWrapperUnLock();
@@ -71,7 +93,14 @@ consoleWin_t::~consoleWin_t(void)
 	emulatorThread->quit();
 	emulatorThread->wait();
 
-	delete viewport;
+	if ( viewport_GL != NULL )
+	{
+		delete viewport_GL; viewport_GL = NULL;
+	}
+	if ( viewport_SDL != NULL )
+	{
+		delete viewport_SDL; viewport_SDL = NULL;
+	}
 	delete mutex;
 
 	// LoadGame() checks for an IP and if it finds one begins a network session
@@ -88,14 +117,31 @@ void consoleWin_t::setCyclePeriodms( int ms )
 	//printf("Period Set to: %i ms \n", ms );
 }
 
+void consoleWin_t::showErrorMsgWindow()
+{
+	QMessageBox msgBox(this);
+
+	fceuWrapperLock();
+	msgBox.setIcon( QMessageBox::Critical );
+	msgBox.setText( tr(errorMsg.c_str()) );
+	errorMsg.clear();
+	fceuWrapperUnLock();
+	msgBox.show();
+	msgBox.exec();
+}
+
+void consoleWin_t::QueueErrorMsgWindow( const char *msg )
+{
+	errorMsg.append( msg );
+	errorMsg.append("\n");
+	errorMsgValid = true;
+}
+
 void consoleWin_t::closeEvent(QCloseEvent *event)
 {
    //printf("Main Window Close Event\n");
-   if ( gamePadConfWin != NULL )
-   {
-      //printf("Command Game Pad Close\n");
-      gamePadConfWin->closeWindow();
-   }
+	closeGamePadConfWindow();
+
    event->accept();
 
 	closeApp();
@@ -118,9 +164,12 @@ void consoleWin_t::createMainMenu(void)
 {
 	QMenu *subMenu;
 	QActionGroup *group;
+	int useNativeMenuBar;
 
-    // This is needed for menu bar to show up on MacOS
-	 menuBar()->setNativeMenuBar(false);
+   // This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar()->setNativeMenuBar( useNativeMenuBar ? true : false );
 
 	 //-----------------------------------------------------------------------
 	 // File
@@ -285,6 +334,22 @@ void consoleWin_t::createMainMenu(void)
 
     optMenu->addAction(hotkeyConfig);
 
+	 // Options -> Palette Config
+	 paletteConfig = new QAction(tr("Palette Config"), this);
+    //paletteConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+    paletteConfig->setStatusTip(tr("Palette Configure"));
+    connect(paletteConfig, SIGNAL(triggered()), this, SLOT(openPaletteConfWin(void)) );
+
+    optMenu->addAction(paletteConfig);
+
+	 // Options -> GUI Config
+	 guiConfig = new QAction(tr("GUI Config"), this);
+    //guiConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+    guiConfig->setStatusTip(tr("GUI Configure"));
+    connect(guiConfig, SIGNAL(triggered()), this, SLOT(openGuiConfWin(void)) );
+
+    optMenu->addAction(guiConfig);
+
 	 // Options -> Auto-Resume
 	 autoResume = new QAction(tr("Auto-Resume Play"), this);
     //autoResume->setShortcut( QKeySequence(tr("Ctrl+C")));
@@ -402,6 +467,30 @@ void consoleWin_t::createMainMenu(void)
     subMenu->addAction(fdsLoadBiosAct);
 
 	 //-----------------------------------------------------------------------
+	 // Tools
+    toolsMenu = menuBar()->addMenu(tr("Tools"));
+
+	 // Tools -> Cheats
+	 cheatsAct = new QAction(tr("Cheats..."), this);
+    //cheatsAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    cheatsAct->setStatusTip(tr("Open Cheat Window"));
+    connect(cheatsAct, SIGNAL(triggered()), this, SLOT(openCheats(void)) );
+
+    toolsMenu->addAction(cheatsAct);
+
+	 //-----------------------------------------------------------------------
+	 // Debug
+    debugMenu = menuBar()->addMenu(tr("Debug"));
+
+	 // Debug -> Hex Editor
+	 hexEditAct = new QAction(tr("Hex Editor..."), this);
+    //hexEditAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    hexEditAct->setStatusTip(tr("Open Memory Hex Editor"));
+    connect(hexEditAct, SIGNAL(triggered()), this, SLOT(openHexEditor(void)) );
+
+    debugMenu->addAction(hexEditAct);
+
+	 //-----------------------------------------------------------------------
 	 // Movie
     movieMenu = menuBar()->addMenu(tr("Movie"));
 
@@ -442,12 +531,20 @@ void consoleWin_t::createMainMenu(void)
 	 //-----------------------------------------------------------------------
 	 // Help
     helpMenu = menuBar()->addMenu(tr("Help"));
-
-	 aboutAct = new QAction(tr("About"), this);
+ 
+	 // Help -> About FCEUX
+	 aboutAct = new QAction(tr("About FCEUX"), this);
     aboutAct->setStatusTip(tr("About FCEUX"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutFCEUX(void)) );
 
     helpMenu->addAction(aboutAct);
+
+	 // Help -> About Qt
+	 aboutActQt = new QAction(tr("About Qt"), this);
+    aboutActQt->setStatusTip(tr("About Qt"));
+    connect(aboutActQt, SIGNAL(triggered()), this, SLOT(aboutQt(void)) );
+
+    helpMenu->addAction(aboutActQt);
 };
 //---------------------------------------------------------------------------
 void consoleWin_t::closeApp(void)
@@ -468,40 +565,10 @@ void consoleWin_t::closeApp(void)
 	qApp->quit();
 }
 //---------------------------------------------------------------------------
-int  consoleWin_t::getDirFromFile( const char *path, char *dir )
-{
-	int i, lastSlash = -1, lastPeriod = -1;
-
-	i=0; 
-	while ( path[i] != 0 )
-	{
-		if ( path[i] == '/' )
-		{
-			lastSlash = i;
-		}
-		else if ( path[i] == '.' )
-		{
-			lastPeriod = i;
-		}
-		dir[i] = path[i]; i++;
-	}
-	dir[i] = 0;
-
-	if ( lastPeriod >= 0 )
-	{
-		if ( lastPeriod > lastSlash )
-		{
-			dir[lastSlash] = 0;
-		}
-	}
-
-	return 0;
-}
-//---------------------------------------------------------------------------
 
 void consoleWin_t::openROMFile(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -509,9 +576,11 @@ void consoleWin_t::openROMFile(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("NES files (*.nes)(*.NES) ;; All files (*)"));
+	dialog.setNameFilter(tr("NES files (*.nes *.NES) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
@@ -519,9 +588,10 @@ void consoleWin_t::openROMFile(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -562,7 +632,7 @@ void consoleWin_t::closeROMCB(void)
 
 void consoleWin_t::loadNSF(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -570,9 +640,11 @@ void consoleWin_t::loadNSF(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("NSF Sound Files (*.nsf)(*.NSF) ;; Zip Files (*.zip)(*.ZIP) ;; All files (*)"));
+	dialog.setNameFilter(tr("NSF Sound Files (*.nsf *.NSF) ;; Zip Files (*.zip *.ZIP) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
 	g_config->getOption ("SDL.LastOpenNSF", &last );
 
@@ -580,9 +652,10 @@ void consoleWin_t::loadNSF(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -613,7 +686,7 @@ void consoleWin_t::loadNSF(void)
 
 void consoleWin_t::loadStateFrom(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -621,9 +694,11 @@ void consoleWin_t::loadStateFrom(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("FCS Files (*.fc?)(*.FC?) ;; SAV Files (*.sav)(*.SAV) ;; All files (*)"));
+	dialog.setNameFilter(tr("FCS & SAV Files (*.sav *.SAV *.fc? *.FC?) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
 	g_config->getOption ("SDL.LastLoadStateFrom", &last );
 
@@ -631,9 +706,10 @@ void consoleWin_t::loadStateFrom(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -664,7 +740,7 @@ void consoleWin_t::loadStateFrom(void)
 
 void consoleWin_t::saveStateAs(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -672,9 +748,12 @@ void consoleWin_t::saveStateAs(void)
 
 	dialog.setFileMode(QFileDialog::AnyFile);
 
-	dialog.setNameFilter(tr("FCS Files (*.fc?)(*.FC?) ;; SAV Files (*.sav)(*.SAV) ;; All files (*)"));
+	dialog.setNameFilter(tr("SAV Files (*.sav *.SAV) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+	dialog.setDefaultSuffix( tr(".sav") );
 
 	g_config->getOption ("SDL.LastSaveStateAs", &last );
 
@@ -682,9 +761,10 @@ void consoleWin_t::saveStateAs(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -807,80 +887,21 @@ void consoleWin_t::takeScreenShot(void)
 void consoleWin_t::loadLua(void)
 {
 #ifdef _S9XLUA_H
-   int ret;
-	QString filename;
-	std::string last;
-	char dir[512];
-	QFileDialog  dialog(this, tr("Open LUA Script") );
+	LuaControlDialog_t *luaCtrlWin;
 
-	dialog.setFileMode(QFileDialog::ExistingFile);
-
-	dialog.setNameFilter(tr("LUA Scripts (*.lua)(*.LUA) ;; All files (*)"));
-
-	dialog.setViewMode(QFileDialog::List);
-
-	g_config->getOption ("SDL.LastLoadLua", &last );
-
-   if ( last.size() == 0 )
-   {
-      last.assign( "/usr/share/fceux/luaScripts" );
-   }
-
-	getDirFromFile( last.c_str(), dir );
-
-	dialog.setDirectory( tr(dir) );
-
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
-
-	dialog.show();
-	ret = dialog.exec();
-
-	if ( ret )
-	{
-		QStringList fileList;
-		fileList = dialog.selectedFiles();
-
-		if ( fileList.size() > 0 )
-		{
-			filename = fileList[0];
-		}
-	}
-
-	if ( filename.isNull() )
-   {
-      return;
-   }
-	qDebug() << "selected file path : " << filename.toUtf8();
-
-	g_config->setOption ("SDL.LastLoadLua", filename.toStdString().c_str() );
-
-	fceuWrapperLock();
-	if ( 0 == FCEU_LoadLuaCode( filename.toStdString().c_str() ) )
-   {
-      printf("Error: Could not open the selected lua script: '%s'\n", filename.toStdString().c_str() );
-   }
-	fceuWrapperUnLock();
+	//printf("Open Lua Control Window\n");
+	
+   luaCtrlWin = new LuaControlDialog_t(this);
+	
+   luaCtrlWin->show();
 #endif
 }
 
 void consoleWin_t::openGamePadConfWin(void)
 {
-   if ( gamePadConfWin != NULL )
-   {
-      printf("GamePad Config Window Already Open\n");
-      return;
-   }
 	//printf("Open GamePad Config Window\n");
-   gamePadConfWin = new GamePadConfDialog_t(this);
 	
-   gamePadConfWin->show();
-   gamePadConfWin->exec();
-
-   delete gamePadConfWin;
-   gamePadConfWin = NULL;
-   //printf("GamePad Config Window Destroyed\n");
+	openGamePadConfWindow(this);
 }
 
 void consoleWin_t::openGameSndConfWin(void)
@@ -892,11 +913,6 @@ void consoleWin_t::openGameSndConfWin(void)
    sndConfWin = new ConsoleSndConfDialog_t(this);
 	
    sndConfWin->show();
-   sndConfWin->exec();
-
-   delete sndConfWin;
-
-   //printf("Sound Config Window Destroyed\n");
 }
 
 void consoleWin_t::openGameVideoConfWin(void)
@@ -908,11 +924,6 @@ void consoleWin_t::openGameVideoConfWin(void)
    vidConfWin = new ConsoleVideoConfDialog_t(this);
 	
    vidConfWin->show();
-   vidConfWin->exec();
-
-   delete vidConfWin;
-
-   //printf("Video Config Window Destroyed\n");
 }
 
 void consoleWin_t::openHotkeyConfWin(void)
@@ -924,11 +935,50 @@ void consoleWin_t::openHotkeyConfWin(void)
    hkConfWin = new HotKeyConfDialog_t(this);
 	
    hkConfWin->show();
-   hkConfWin->exec();
+}
 
-   delete hkConfWin;
+void consoleWin_t::openPaletteConfWin(void)
+{
+	PaletteConfDialog_t *paletteConfWin;
 
-   //printf("Hotkey Config Window Destroyed\n");
+	//printf("Open Palette Config Window\n");
+	
+   paletteConfWin = new PaletteConfDialog_t(this);
+	
+   paletteConfWin->show();
+}
+
+void consoleWin_t::openGuiConfWin(void)
+{
+	GuiConfDialog_t *guiConfWin;
+
+	//printf("Open GUI Config Window\n");
+	
+   guiConfWin = new GuiConfDialog_t(this);
+	
+   guiConfWin->show();
+}
+
+void consoleWin_t::openCheats(void)
+{
+	GuiCheatsDialog_t *cheatWin;
+
+	//printf("Open GUI Cheat Window\n");
+	
+   cheatWin = new GuiCheatsDialog_t(this);
+	
+   cheatWin->show();
+}
+
+void consoleWin_t::openHexEditor(void)
+{
+	HexEditorDialog_t *hexEditWin;
+
+	//printf("Open GUI Hex Editor Window\n");
+	
+   hexEditWin = new HexEditorDialog_t(this);
+	
+   hexEditWin->show();
 }
 
 void consoleWin_t::toggleAutoResume(void)
@@ -999,7 +1049,7 @@ void consoleWin_t::toggleGameGenie(bool checked)
 
 void consoleWin_t::loadGameGenieROM(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -1007,9 +1057,11 @@ void consoleWin_t::loadGameGenieROM(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("GG ROM File (gg.rom)(*Genie*.nes) ;; All files (*)"));
+	dialog.setNameFilter(tr("GG ROM File (gg.rom  *Genie*.nes) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
@@ -1017,9 +1069,10 @@ void consoleWin_t::loadGameGenieROM(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -1079,7 +1132,7 @@ void consoleWin_t::fdsEjectDisk(void)
 
 void consoleWin_t::fdsLoadBiosFile(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -1087,9 +1140,11 @@ void consoleWin_t::fdsLoadBiosFile(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("ROM files (*.rom)(*.ROM) ;; All files (*)"));
+	dialog.setNameFilter(tr("ROM files (*.rom *.ROM) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
@@ -1097,9 +1152,10 @@ void consoleWin_t::fdsLoadBiosFile(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -1143,7 +1199,7 @@ void consoleWin_t::fdsLoadBiosFile(void)
 
 void consoleWin_t::openMovie(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -1154,6 +1210,8 @@ void consoleWin_t::openMovie(void)
 	dialog.setNameFilter(tr("FM2 Movies (*.fm2) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
@@ -1161,9 +1219,10 @@ void consoleWin_t::openMovie(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -1225,7 +1284,7 @@ void consoleWin_t::recordMovie(void)
 
 void consoleWin_t::recordMovieAs(void)
 {
-	int ret;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
@@ -1236,6 +1295,8 @@ void consoleWin_t::recordMovieAs(void)
 	dialog.setNameFilter(tr("FM2 Movies (*.fm2) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
@@ -1243,9 +1304,10 @@ void consoleWin_t::recordMovieAs(void)
 
 	dialog.setDirectory( tr(dir) );
 
-	// the gnome default file dialog is not playing nice with QT.
-	// TODO make this a config option to use native file dialog.
-	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -1292,11 +1354,16 @@ void consoleWin_t::aboutFCEUX(void)
    aboutWin = new AboutWindow(this);
 	
    aboutWin->show();
-   aboutWin->exec();
+   return;
+}
 
-   delete aboutWin;
+void consoleWin_t::aboutQt(void)
+{
+	//printf("About Qt Window\n");
+	
+	QMessageBox::aboutQt(this);
 
-   //printf("About Window Destroyed\n");
+   //printf("About Qt Destroyed\n");
    return;
 }
 
@@ -1329,10 +1396,23 @@ void consoleWin_t::updatePeriodic(void)
 	{
 		nes_shm->blitUpdated = 0;
 
-		viewport->transfer2LocalBuffer();
+		if ( viewport_SDL )
+		{
+			viewport_SDL->transfer2LocalBuffer();
+			viewport_SDL->render();
+		}
+		else
+		{
+			viewport_GL->transfer2LocalBuffer();
+			//viewport_GL->repaint();
+			viewport_GL->update();
+		}
+	}
 
-		//viewport->repaint();
-		viewport->update();
+	if ( errorMsgValid )
+	{
+		showErrorMsgWindow();
+		errorMsgValid = false;
 	}
 
    return;

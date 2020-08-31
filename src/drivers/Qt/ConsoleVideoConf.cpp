@@ -1,5 +1,7 @@
 // ConsoleVideoConf.cpp
 //
+#include <QCloseEvent>
+
 #include "../../fceu.h"
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -26,7 +28,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	driverSelect = new QComboBox();
 
 	driverSelect->addItem( tr("OpenGL"), 0 );
-	//driverSelect->addItem( tr("SDL"), 1 );
+	driverSelect->addItem( tr("SDL"), 1 );
 	
 	hbox1 = new QHBoxLayout();
 
@@ -52,8 +54,10 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	regionSelect->addItem( tr("Dendy"), 2 );
 
 	setComboBoxFromProperty( regionSelect, "SDL.PAL");
+	setComboBoxFromProperty( driverSelect, "SDL.VideoDriver");
 
 	connect(regionSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(regionChanged(int)) );
+	connect(driverSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(driverChanged(int)) );
 
 	hbox1 = new QHBoxLayout();
 
@@ -103,7 +107,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	button = new QPushButton( tr("Close") );
 	hbox1->addWidget( button );
-	connect(button, SIGNAL(clicked()), this, SLOT(closewindow(void)) );
+	connect(button, SIGNAL(clicked()), this, SLOT(closeWindow(void)) );
 
 	main_vbox->addLayout( hbox1 );
 
@@ -113,7 +117,23 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 //----------------------------------------------------
 ConsoleVideoConfDialog_t::~ConsoleVideoConfDialog_t(void)
 {
+	printf("Destroy Video Config Window\n");
 
+}
+//----------------------------------------------------------------------------
+void ConsoleVideoConfDialog_t::closeEvent(QCloseEvent *event)
+{
+   printf("Video Config Close Window Event\n");
+   done(0);
+	deleteLater();
+   event->accept();
+}
+//----------------------------------------------------------------------------
+void ConsoleVideoConfDialog_t::closeWindow(void)
+{
+   //printf("Video Config Close Window\n");
+   done(0);
+	deleteLater();
 }
 //----------------------------------------------------
 void  ConsoleVideoConfDialog_t::resetVideo(void)
@@ -199,6 +219,20 @@ void ConsoleVideoConfDialog_t::showFPSChanged( int value )
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------
+void ConsoleVideoConfDialog_t::driverChanged(int index)
+{
+	int driver;
+	//printf("Driver: %i : %i \n", index, driverSelect->itemData(index).toInt() );
+
+	driver = driverSelect->itemData(index).toInt();
+
+	g_config->setOption ("SDL.VideoDriver", driver);
+
+	g_config->save ();
+
+	printf("Note: A restart of the application is needed for video driver change to take effect...\n");
+}
+//----------------------------------------------------
 void ConsoleVideoConfDialog_t::regionChanged(int index)
 {
 	int region;
@@ -219,10 +253,5 @@ void ConsoleVideoConfDialog_t::regionChanged(int index)
 void ConsoleVideoConfDialog_t::applyChanges( void )
 { 
 	resetVideo();
-}
-//----------------------------------------------------
-void ConsoleVideoConfDialog_t::closewindow( void )
-{ 
-	done(0);
 }
 //----------------------------------------------------
