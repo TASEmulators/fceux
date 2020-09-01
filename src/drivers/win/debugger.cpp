@@ -2359,7 +2359,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							}
 							case IDC_DEBUGGER_BOOKMARK_ADD: AddDebuggerBookmark(hwndDlg); break;
 							case IDC_DEBUGGER_BOOKMARK_DEL: DeleteDebuggerBookmark(hwndDlg); break;
-							case IDC_DEBUGGER_BOOKMARK_NAME: NameDebuggerBookmark(hwndDlg); break;
+							case IDC_DEBUGGER_BOOKMARK_EDIT: EditDebuggerBookmark(hwndDlg); break;
 							case IDC_DEBUGGER_ENABLE_SYMBOLIC:
 							{
 								symbDebugEnabled ^= 1;

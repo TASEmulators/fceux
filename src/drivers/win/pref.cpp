@@ -143,7 +143,7 @@ int storeHexPreferences(FILE* f)
 		if (fwrite(hexBookmarks[i].description, 1, len, f) != len) return 1;
 	}
 
-	// optional section: save bookmark shortcut matches
+	// Optional Section 1: Save bookmark shortcut matches
 	if (numHexBookmarkShortcut)
 	{
 		fwrite(&numHexBookmarkShortcut, sizeof(numHexBookmarkShortcut), 1, f);
@@ -154,6 +154,18 @@ int storeHexPreferences(FILE* f)
 				fwrite(&i, sizeof(i), 1, f);
 			}
 	}
+
+	/* Optional Section 2: Edit mode
+	   The Hex Editor used to have a bug, it doesn't store the edit mode to
+	   the preferences, which make the bookmarks outside NES memory are all
+	   treated as NES memory bookmarks.
+	   However, for the consideration of backward compatibility of the older
+	   version of FCEUX, we can only add the extra data to the last of the file
+	   to fix this problem.
+	*/
+	for (int i = 0; i < nextBookmark; ++i)
+		if (fwrite(&hexBookmarks[i].editmode, sizeof(hexBookmarks[i].editmode), 1, f) != 1)
+			return 1;
 
 	return 0;
 }
@@ -358,6 +370,10 @@ int loadHexPreferences(FILE* f)
 	if (fread(&nextBookmark, sizeof(nextBookmark), 1, f) != 1) return 1;
 	if (nextBookmark >= 64) return 1;
 
+	// clean the garbage values
+	memset(hexBookmarks, 0, sizeof(HexBookmark) * nextBookmark);
+
+
 	for (i=0;i<nextBookmark;i++)
 	{
 		unsigned int len;
@@ -370,11 +386,14 @@ int loadHexPreferences(FILE* f)
 		if (fread(hexBookmarks[i].description, 1, len, f) != len) return 1;
 	}
 
-	// optional section: read bookmark shortcut matches
-	// read number of shortcuts
-	// older versions of .deb file don't have this section, so the file would reach the end.
-	if (fread(&numHexBookmarkShortcut, sizeof(numHexBookmarkShortcut), 1, f) != EOF)
+	/* Optional Section 1: read bookmark shortcut matches
+	   read number of shortcuts
+	   older versions of .deb file don't have this section, so the file would reach the end.
+	*/
+	if (!feof(f))
 	{
+		fread(&numHexBookmarkShortcut, sizeof(numHexBookmarkShortcut), 1, f);
+	
 		unsigned int bookmark_index, shortcut_index;
 		// read the matching index list of the shortcuts
 		for (unsigned int i = 0; i < numHexBookmarkShortcut; ++i)
@@ -390,6 +409,23 @@ int loadHexPreferences(FILE* f)
 			hexBookmarkShortcut[i] = i;
 	}
 
+	/*
+       Optional Section 2: Edit mode
+	   The Hex Editor used to have a bug, it doesn't store the edit mode to 
+	   the preferences, which make the bookmarks outside NES memory are all
+	   treated as NES memory bookmarks.
+	   However, for the consideration of backward compatibility of the older
+	   version of FCEUX, we can only add the extra data to the last of the file
+	   to fix this problem.
+	*/
+	int editmode;
+	if (!feof(f))
+		for (int i = 0; i < nextBookmark; i++)
+		{
+			if (fread(&editmode, sizeof(editmode), 1, f) != EOF)
+				hexBookmarks[i].editmode = editmode;
+			else break;
+		}
 	return 0;
 }
 

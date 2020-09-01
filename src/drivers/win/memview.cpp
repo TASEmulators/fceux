@@ -615,7 +615,7 @@ void UpdateMemoryView(int draw_all)
 	return;
 }
 
-char EditString[4][20] = {"RAM","PPU","OAM","ROM"};
+char* EditString[4] = {"RAM","PPU","OAM","ROM"};
 
 void UpdateCaption()
 {
@@ -1254,6 +1254,19 @@ void KillMemView()
 		ReleaseCheatMap();
 	return;
 }
+
+int GetMaxSize(int EditingMode)
+{
+	switch (EditingMode)
+	{
+		case MODE_NES_MEMORY: return 0x10000;
+		case MODE_NES_PPU: return (GameInfo->type == GIT_NSF ? 0x2000 : 0x4000);
+		case MODE_NES_OAM: return 0x100;
+		case MODE_NES_FILE: return 16 + CHRsize[0] + PRGsize[0]; //todo: add trainer size
+	}
+	return 0;
+}
+
 
 LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -2162,17 +2175,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					break;
 				}
 
-			switch (EditingMode)
-			{
-				case MODE_NES_MEMORY:
-					MaxSize = 0x10000; break;
-				case MODE_NES_PPU:
-					MaxSize = (GameInfo->type == GIT_NSF ? 0x2000 : 0x4000); break;
-				case MODE_NES_OAM:
-					MaxSize = 0x100; break;
-				case MODE_NES_FILE: //todo: add trainer size
-					MaxSize = 16 + CHRsize[0] + PRGsize[0]; break;
-			}
+			MaxSize = GetMaxSize(EditingMode);
 
 			if (CurOffset >= MaxSize - DataAmount) CurOffset = MaxSize - DataAmount;
 			if (CurOffset < 0) CurOffset = 0;

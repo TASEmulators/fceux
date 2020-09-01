@@ -50,3 +50,6 @@ int removeBookmark(unsigned int index);
 void updateBookmarkMenus(HMENU menu);
 int handleBookmarkMenu(int bookmark);
 void removeAllBookmarks(HMENU menu);
+
+extern LRESULT APIENTRY FilterEditCtrlProc(HWND hDlg, UINT msg, WPARAM wP, LPARAM lP);
+extern WNDPROC DefaultEditCtrlProc;
