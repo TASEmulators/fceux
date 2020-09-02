@@ -45,6 +45,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
     	//printf("Pix Ratio: %f \n", devPixRatio );
 	}
 
+	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
 	font.setStyleHint( QFont::Monospace );
 

@@ -25,6 +25,7 @@
 #include "Qt/LuaControl.h"
 #include "Qt/CheatsConf.h"
 #include "Qt/HexEditor.h"
+#include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
@@ -481,6 +482,14 @@ void consoleWin_t::createMainMenu(void)
 	 //-----------------------------------------------------------------------
 	 // Debug
     debugMenu = menuBar()->addMenu(tr("Debug"));
+
+	 // Debug -> Hex Editor
+	 debuggerAct = new QAction(tr("Debugger..."), this);
+    //debuggerAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    debuggerAct->setStatusTip(tr("Open 6502 Debugger"));
+    connect(debuggerAct, SIGNAL(triggered()), this, SLOT(openDebugWindow(void)) );
+
+    debugMenu->addAction(debuggerAct);
 
 	 // Debug -> Hex Editor
 	 hexEditAct = new QAction(tr("Hex Editor..."), this);
@@ -968,6 +977,17 @@ void consoleWin_t::openCheats(void)
    cheatWin = new GuiCheatsDialog_t(this);
 	
    cheatWin->show();
+}
+
+void consoleWin_t::openDebugWindow(void)
+{
+	ConsoleDebugger *debugWin;
+
+	//printf("Open GUI 6502 Debugger Window\n");
+	
+   debugWin = new ConsoleDebugger(this);
+	
+   debugWin->show();
 }
 
 void consoleWin_t::openHexEditor(void)
