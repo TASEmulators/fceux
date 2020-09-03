@@ -61,14 +61,17 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	mainLayout = new QHBoxLayout();
 
-	asmText = new QTextEdit(this);
+	asmText = new QPlainTextEdit(this);
 	vbox1   = new QVBoxLayout();
 	vbox2   = new QVBoxLayout();
 	hbox1   = new QHBoxLayout();
 	grid    = new QGridLayout();
 
 	asmText->setFont(font);
+	asmText->setReadOnly(true);
+	asmText->setOverwriteMode(true);
 	asmText->setMinimumWidth( 20 * fontCharWidth );
+	asmText->setLineWrapMode( QPlainTextEdit::NoWrap );
 
 	vbox1->addLayout( hbox1 );
 	hbox1->addLayout( vbox2 );
@@ -152,7 +155,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	vbox2->addLayout( hbox );
 
 	stackFrame = new QGroupBox(tr("Stack $0100"));
-	stackText  = new QTextEdit(this);
+	stackText  = new QPlainTextEdit(this);
 	hbox       = new QHBoxLayout();
 	hbox->addWidget( stackText );
 	vbox2->addWidget( stackFrame );
@@ -264,17 +267,23 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	setLayout( mainLayout );
 
-	displayROMoffsets = 0;
+	displayROMoffsets = false;
+	windowUpdateReq   = true;
 	asmPC = NULL;
 
 	dbgWinList.push_back( this );
 
-	updateWindowData();
+	periodicTimer  = new QTimer( this );
+
+   connect( periodicTimer, &QTimer::timeout, this, &ConsoleDebugger::updatePeriodic );
+
+	periodicTimer->start( 100 ); // 10hz
 }
 //----------------------------------------------------------------------------
 ConsoleDebugger::~ConsoleDebugger(void)
 {
 	printf("Destroy Debugger Window\n");
+	periodicTimer->stop();
 	asmClear();
 }
 //----------------------------------------------------------------------------
@@ -467,6 +476,8 @@ void  ConsoleDebugger::updateAssemblyView(void)
 	addr  = starting_address;
 	asmPC = NULL;
 
+	asmText->clear();
+
 	//gtk_text_buffer_get_start_iter( textbuf, &iter );
 
 	//textview_lines_allocated = gtk_text_buffer_get_line_count( textbuf ) - 1;
@@ -592,16 +603,43 @@ void ConsoleDebugger::updateWindowData(void)
 {
 	updateAssemblyView();
 	
+	windowUpdateReq = false;
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::updatePeriodic(void)
+{
+	//printf("Update Periodic\n");
+
+	if ( windowUpdateReq )
+	{
+		fceuWrapperLock();
+		updateWindowData();
+		fceuWrapperUnLock();
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::breakPointNotify( int addr )
+{
+	windowUpdateReq = true;
 }
 //----------------------------------------------------------------------------
 void FCEUD_DebugBreakpoint( int addr )
 {
 	std::list <ConsoleDebugger*>::iterator it;
+
 	printf("Breakpoint Hit: 0x%04X \n", addr );
+
+	fceuWrapperUnLock();
 	
 	for (it=dbgWinList.begin(); it!=dbgWinList.end(); it++)
 	{
-		(*it)->updateWindowData();
+		(*it)->breakPointNotify( addr );
 	}
+
+	while (FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
+	{
+		usleep(100000);
+	}
+	fceuWrapperLock();
 }
 //----------------------------------------------------------------------------

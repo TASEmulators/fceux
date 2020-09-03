@@ -13,12 +13,14 @@
 #include <QPushButton>
 #include <QFont>
 #include <QLabel>
+#include <QTimer>
 #include <QFrame>
 #include <QGroupBox>
 #include <QTreeView>
 #include <QTreeWidget>
 #include <QLineEdit>
 #include <QTextEdit>
+#include <QPlainTextEdit>
 
 #include "Qt/main.h"
 
@@ -57,6 +59,7 @@ class ConsoleDebugger : public QDialog
 		void updateAssemblyView(void);
 		void asmClear(void);
 		int  getAsmLineFromAddr(int addr);
+		void breakPointNotify(int addr);
 
 	protected:
 		void closeEvent(QCloseEvent *event);
@@ -64,8 +67,8 @@ class ConsoleDebugger : public QDialog
    	//void keyReleaseEvent(QKeyEvent *event);
 
 		//QTreeWidget *tree;
-		QTextEdit *asmText;
-		QTextEdit *stackText;
+		QPlainTextEdit *asmText;
+		QPlainTextEdit *stackText;
 		QLineEdit *seekEntry;
 		QLineEdit *pcEntry;
 		QLineEdit *regAEntry;
@@ -94,17 +97,20 @@ class ConsoleDebugger : public QDialog
 		QLabel    *pixLbl;
 		QLabel    *cpuCyclesLbl;
 		QLabel    *cpuInstrsLbl;
+		QTimer    *periodicTimer;
 		QFont      font;
 
 		dbg_asm_entry_t  *asmPC;
 		std::vector <dbg_asm_entry_t*> asmEntry;
 
-		char  displayROMoffsets;
+		bool  displayROMoffsets;
+		bool  windowUpdateReq;
 
 	private:
 
    public slots:
       void closeWindow(void);
 	private slots:
+		void updatePeriodic(void);
 
 };
