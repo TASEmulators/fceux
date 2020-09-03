@@ -159,11 +159,6 @@ FCEUD_GetTimeFreq(void)
 	return 1000;
 }
 
-void FCEUD_DebugBreakpoint( int addr )
-{
-   // TODO
-}
-
 /**
  * Initialize all of the subsystem drivers: video, audio, and joystick.
  */

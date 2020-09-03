@@ -22,6 +22,29 @@
 
 #include "Qt/main.h"
 
+struct dbg_asm_entry_t
+{
+	int  addr;
+	int  bank;
+	int  rom;
+	int  size;
+	int  line;
+	uint8  opcode[3];
+	std::string  text;
+
+
+	dbg_asm_entry_t(void)
+	{
+		addr = 0; bank = 0; rom = -1; 
+		size = 0; line = 0;
+
+		for (int i=0; i<3; i++)
+		{
+			opcode[i] = 0;
+		}
+	}
+};
+
 class ConsoleDebugger : public QDialog
 {
    Q_OBJECT
@@ -29,6 +52,11 @@ class ConsoleDebugger : public QDialog
 	public:
 		ConsoleDebugger(QWidget *parent = 0);
 		~ConsoleDebugger(void);
+
+		void updateWindowData(void);
+		void updateAssemblyView(void);
+		void asmClear(void);
+		int  getAsmLineFromAddr(int addr);
 
 	protected:
 		void closeEvent(QCloseEvent *event);
@@ -67,6 +95,11 @@ class ConsoleDebugger : public QDialog
 		QLabel    *cpuCyclesLbl;
 		QLabel    *cpuInstrsLbl;
 		QFont      font;
+
+		dbg_asm_entry_t  *asmPC;
+		std::vector <dbg_asm_entry_t*> asmEntry;
+
+		char  displayROMoffsets;
 
 	private:
 

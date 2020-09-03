@@ -4,11 +4,29 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <list>
 
 #include <SDL.h>
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QGridLayout>
+
+#include "../../types.h"
+#include "../../fceu.h"
+#include "../../cheat.h"
+#include "../../debug.h"
+#include "../../driver.h"
+#include "../../version.h"
+#include "../../video.h"
+#include "../../movie.h"
+#include "../../palette.h"
+#include "../../fds.h"
+#include "../../cart.h"
+#include "../../ines.h"
+#include "../../asm.h"
+#include "../../ppu.h"
+#include "../../x6502.h"
+#include "common/configSys.h"
 
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -16,6 +34,7 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleDebugger.h"
 
+static std::list <ConsoleDebugger*> dbgWinList;
 //----------------------------------------------------------------------------
 ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	: QDialog( parent )
@@ -55,8 +74,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	hbox1->addLayout( vbox2 );
 	vbox2->addLayout( grid  );
 
-	mainLayout->addWidget( asmText );
-	mainLayout->addLayout( vbox1 );
+	mainLayout->addWidget( asmText, 10 );
+	mainLayout->addLayout( vbox1, 1 );
 
 	button = new QPushButton( tr("Run") );
 	grid->addWidget( button, 0, 0, Qt::AlignLeft );
@@ -140,7 +159,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	stackFrame->setLayout( hbox );
 	stackText->setFont(font);
 	stackText->setReadOnly(true);
-	stackText->setMaximumWidth( 16 * fontCharWidth );
+	//stackText->setMaximumWidth( 16 * fontCharWidth );
 
 	bpFrame = new QGroupBox(tr("Breakpoints"));
 	vbox3   = new QVBoxLayout();
@@ -232,23 +251,31 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	hbox2->addLayout( vbox );
 
 	cpuCycExdVal->setFont( font );
-	cpuCycExdVal->setMaxLength( 10 );
-	cpuCycExdVal->setInputMask( ">DDDD;0" );
-	cpuCycExdVal->setAlignment(Qt::AlignCenter);
-	cpuCycExdVal->setMaximumWidth( 12 * fontCharWidth );
+	cpuCycExdVal->setMaxLength( 16 );
+	cpuCycExdVal->setInputMask( ">9000000000000000;" );
+	cpuCycExdVal->setAlignment(Qt::AlignLeft);
+	cpuCycExdVal->setMaximumWidth( 18 * fontCharWidth );
 
 	instrExdVal->setFont( font );
-	instrExdVal->setMaxLength( 10 );
-	instrExdVal->setInputMask( ">DDDD;0" );
-	instrExdVal->setAlignment(Qt::AlignCenter);
-	instrExdVal->setMaximumWidth( 12 * fontCharWidth );
+	instrExdVal->setMaxLength( 16 );
+	instrExdVal->setInputMask( ">9000000000000000;" );
+	instrExdVal->setAlignment(Qt::AlignLeft);
+	instrExdVal->setMaximumWidth( 18 * fontCharWidth );
 
 	setLayout( mainLayout );
+
+	displayROMoffsets = 0;
+	asmPC = NULL;
+
+	dbgWinList.push_back( this );
+
+	updateWindowData();
 }
 //----------------------------------------------------------------------------
 ConsoleDebugger::~ConsoleDebugger(void)
 {
 	printf("Destroy Debugger Window\n");
+	asmClear();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::closeEvent(QCloseEvent *event)
@@ -264,5 +291,317 @@ void ConsoleDebugger::closeWindow(void)
    //printf("Close Window\n");
    done(0);
 	deleteLater();
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::asmClear(void)
+{
+	for (size_t i=0; i<asmEntry.size(); i++)
+	{
+		delete asmEntry[i];
+	}
+	asmEntry.clear();
+}
+//----------------------------------------------------------------------------
+int  ConsoleDebugger::getAsmLineFromAddr(int addr)
+{
+	int  line = -1;
+	int  incr, nextLine;
+	int  run = 1;
+
+	if ( asmEntry.size() <= 0 )
+	{
+      return -1;
+	}
+	incr = asmEntry.size() / 2;
+
+	if ( addr < asmEntry[0]->addr )
+	{
+		return 0;
+	}
+	else if ( addr > asmEntry[ asmEntry.size() - 1 ]->addr )
+	{
+		return asmEntry.size() - 1;
+	}
+
+	if ( incr < 1 ) incr = 1;
+
+	nextLine = line = incr;
+
+	// algorithm to efficiently find line from address. Starts in middle of list and 
+	// keeps dividing the list in 2 until it arrives at an answer.
+	while ( run )
+	{
+		//printf("incr:%i   line:%i  addr:%04X   delta:%i\n", incr, line, asmEntry[line]->addr, addr - asmEntry[line]->addr);
+
+		if ( incr == 1 )
+		{
+			if ( asmEntry[line]->addr < addr )
+			{
+				nextLine = line + 1;
+				if ( asmEntry[line]->addr > nextLine )
+				{
+					break;
+				}
+				line = nextLine;
+			}
+			else if ( asmEntry[line]->addr > addr )
+			{
+				nextLine = line - 1;
+				if ( asmEntry[line]->addr < nextLine )
+				{
+					break;
+				}
+				line = nextLine;
+			}
+			else 
+			{
+				run = 0; break;
+			}
+		} 
+		else
+		{
+			incr = incr / 2; 
+			if ( incr < 1 ) incr = 1;
+
+			if ( asmEntry[line]->addr < addr )
+			{
+				nextLine = line + incr;
+			}
+			else if ( asmEntry[line]->addr > addr )
+			{
+				nextLine = line - incr;
+			}
+			else
+			{
+				run = 0; break;
+			}
+			line = nextLine;
+		}
+	}
+
+	//for (size_t i=0; i<asmEntry.size(); i++)
+	//{
+	//	if ( asmEntry[i]->addr >= addr )
+	//	{
+   //      line = i; break;
+	//	}
+	//}
+
+	return line;
+}
+//----------------------------------------------------------------------------
+// This function is for "smart" scrolling...
+// it attempts to scroll up one line by a whole instruction
+static int InstructionUp(int from)
+{
+	int i = std::min(16, from), j;
+
+	while (i > 0)
+	{
+		j = i;
+		while (j > 0)
+		{
+			if (GetMem(from - j) == 0x00)
+				break;	// BRK usually signifies data
+			if (opsize[GetMem(from - j)] == 0)
+				break;	// invalid instruction!
+			if (opsize[GetMem(from - j)] > j)
+				break;	// instruction is too long!
+			if (opsize[GetMem(from - j)] == j)
+				return (from - j);	// instruction is just right! :D
+			j -= opsize[GetMem(from - j)];
+		}
+		i--;
+	}
+
+	// if we get here, no suitable instruction was found
+	if ((from >= 2) && (GetMem(from - 2) == 0x00))
+		return (from - 2);	// if a BRK instruction is possible, use that
+	if (from)
+		return (from - 1);	// else, scroll up one byte
+	return 0;	// of course, if we can't scroll up, just return 0!
+}
+//static int InstructionDown(int from)
+//{
+//	int tmp = opsize[GetMem(from)];
+//	if ((tmp))
+//		return from + tmp;
+//	else
+//		return from + 1;		// this is data or undefined instruction
+//}
+//----------------------------------------------------------------------------
+void  ConsoleDebugger::updateAssemblyView(void)
+{
+	int starting_address, start_address_lp, addr, size;
+	int instruction_addr;
+	std::string line;
+	char chr[64];
+	uint8 opcode[3];
+	const char *disassemblyText = NULL;
+	dbg_asm_entry_t *a;
+	//GtkTextIter iter, next_iter;
+	char pc_found = 0;
+
+	start_address_lp = starting_address = X.PC;
+
+	for (int i=0; i < 0xFFFF; i++)
+	{
+		//printf("%i: Start Address: 0x%04X \n", i, start_address_lp );
+
+		starting_address = InstructionUp( start_address_lp );
+
+		if ( starting_address == start_address_lp )
+		{
+			break;
+		}
+		if ( starting_address < 0 )
+		{
+			starting_address = start_address_lp;
+			break;
+		}	
+		start_address_lp = starting_address;
+	}
+
+	asmClear();
+
+	addr  = starting_address;
+	asmPC = NULL;
+
+	//gtk_text_buffer_get_start_iter( textbuf, &iter );
+
+	//textview_lines_allocated = gtk_text_buffer_get_line_count( textbuf ) - 1;
+
+	//printf("Num Lines: %i\n", textview_lines_allocated );
+
+	for (int i=0; i < 0xFFFF; i++)
+	{
+		line.clear();
+
+		// PC pointer
+		if (addr > 0xFFFF) break;
+
+		a = new dbg_asm_entry_t;
+
+		instruction_addr = addr;
+
+		if ( !pc_found )
+		{
+			if (addr > X.PC)
+			{
+				asmPC = a;
+				line.assign(">");
+				pc_found = 1;
+			}
+			else if (addr == X.PC)
+			{
+				asmPC = a;
+				line.assign(">");
+				pc_found = 1;
+			} 
+			else
+			{
+				line.assign(" ");
+			}
+		}
+		else 
+		{
+			line.assign(" ");
+		}
+		a->addr = addr;
+
+		if (addr >= 0x8000)
+		{
+			a->bank = getBank(addr);
+			a->rom  = GetNesFileAddress(addr);
+
+			if (displayROMoffsets && (a->rom != -1) )
+			{
+				sprintf(chr, " %06X: ", a->rom);
+			} 
+			else
+			{
+				sprintf(chr, "%02X:%04X: ", a->bank, addr);
+			}
+		} 
+		else
+		{
+			sprintf(chr, "  :%04X: ", addr);
+		}
+		line.append(chr);
+
+		size = opsize[GetMem(addr)];
+		if (size == 0)
+		{
+			sprintf(chr, "%02X        UNDEFINED", GetMem(addr++));
+			line.append(chr);
+		} else
+		{
+			if ((addr + size) > 0xFFFF)
+			{
+				while (addr < 0xFFFF)
+				{
+					sprintf(chr, "%02X        OVERFLOW\n", GetMem(addr++));
+					line.append(chr);
+				}
+				break;
+			}
+			for (int j = 0; j < size; j++)
+			{
+				sprintf(chr, "%02X ", opcode[j] = GetMem(addr++));
+				line.append(chr);
+			}
+			while (size < 3)
+			{
+				line.append("   ");  //pad output to align ASM
+				size++;
+			}
+
+			disassemblyText = Disassemble(addr, opcode);
+
+			if ( disassemblyText )
+			{
+				line.append( disassemblyText );
+			}
+		}
+		for (int j=0; j<size; j++)
+		{
+			a->opcode[j] = opcode[j];
+		}
+		a->size = size;
+
+		// special case: an RTS opcode
+		if (GetMem(instruction_addr) == 0x60)
+		{
+			line.append("-------------------------");
+		}
+
+		a->text.assign( line );
+
+		a->line = asmEntry.size();
+
+		line.append("\n");
+
+		asmText->insertPlainText( tr(line.c_str()) );
+
+		asmEntry.push_back(a);
+	}
+
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::updateWindowData(void)
+{
+	updateAssemblyView();
+	
+}
+//----------------------------------------------------------------------------
+void FCEUD_DebugBreakpoint( int addr )
+{
+	std::list <ConsoleDebugger*>::iterator it;
+	printf("Breakpoint Hit: 0x%04X \n", addr );
+	
+	for (it=dbgWinList.begin(); it!=dbgWinList.end(); it++)
+	{
+		(*it)->updateWindowData();
+	}
 }
 //----------------------------------------------------------------------------
