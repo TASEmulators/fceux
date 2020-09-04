@@ -7,6 +7,7 @@
 #include <list>
 
 #include <SDL.h>
+#include <QPainter>
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QGridLayout>
@@ -61,24 +62,40 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	mainLayout = new QHBoxLayout();
 
-	asmText = new QPlainTextEdit(this);
+	grid    = new QGridLayout();
+	asmView = new QAsmView(this);
+	vbar    = new QScrollBar( Qt::Vertical, this );
+	hbar    = new QScrollBar( Qt::Horizontal, this );
+
+   asmView->setScrollBars( hbar, vbar );
+
+	grid->addWidget( asmView, 0, 0 );
+	grid->addWidget( vbar   , 0, 1 );
+	grid->addWidget( hbar   , 1, 0 );
+
 	vbox1   = new QVBoxLayout();
 	vbox2   = new QVBoxLayout();
 	hbox1   = new QHBoxLayout();
-	grid    = new QGridLayout();
 
-	asmText->setFont(font);
-	asmText->setReadOnly(true);
-	asmText->setOverwriteMode(true);
-	asmText->setMinimumWidth( 20 * fontCharWidth );
-	asmText->setLineWrapMode( QPlainTextEdit::NoWrap );
+	hbar->setMinimum(0);
+	hbar->setMaximum(100);
+	vbar->setMinimum(0);
+	vbar->setMaximum( 0x10000 );
+
+	//asmText->setFont(font);
+	//asmText->setReadOnly(true);
+	//asmText->setOverwriteMode(true);
+	//asmText->setMinimumWidth( 20 * fontCharWidth );
+	//asmText->setLineWrapMode( QPlainTextEdit::NoWrap );
+
+	mainLayout->addLayout( grid, 10 );
+	mainLayout->addLayout( vbox1, 1 );
+
+	grid    = new QGridLayout();
 
 	vbox1->addLayout( hbox1 );
 	hbox1->addLayout( vbox2 );
 	vbox2->addLayout( grid  );
-
-	mainLayout->addWidget( asmText, 10 );
-	mainLayout->addLayout( vbox1, 1 );
 
 	button = new QPushButton( tr("Run") );
 	grid->addWidget( button, 0, 0, Qt::AlignLeft );
@@ -267,9 +284,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	setLayout( mainLayout );
 
-	displayROMoffsets = false;
 	windowUpdateReq   = true;
-	asmPC = NULL;
 
 	dbgWinList.push_back( this );
 
@@ -284,7 +299,6 @@ ConsoleDebugger::~ConsoleDebugger(void)
 {
 	printf("Destroy Debugger Window\n");
 	periodicTimer->stop();
-	asmClear();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::closeEvent(QCloseEvent *event)
@@ -302,16 +316,7 @@ void ConsoleDebugger::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::asmClear(void)
-{
-	for (size_t i=0; i<asmEntry.size(); i++)
-	{
-		delete asmEntry[i];
-	}
-	asmEntry.clear();
-}
-//----------------------------------------------------------------------------
-int  ConsoleDebugger::getAsmLineFromAddr(int addr)
+int  QAsmView::getAsmLineFromAddr(int addr)
 {
 	int  line = -1;
 	int  incr, nextLine;
@@ -439,7 +444,7 @@ static int InstructionUp(int from)
 //		return from + 1;		// this is data or undefined instruction
 //}
 //----------------------------------------------------------------------------
-void  ConsoleDebugger::updateAssemblyView(void)
+void  QAsmView::updateAssemblyView(void)
 {
 	int starting_address, start_address_lp, addr, size;
 	int instruction_addr;
@@ -476,7 +481,7 @@ void  ConsoleDebugger::updateAssemblyView(void)
 	addr  = starting_address;
 	asmPC = NULL;
 
-	asmText->clear();
+	//asmText->clear();
 
 	//gtk_text_buffer_get_start_iter( textbuf, &iter );
 
@@ -592,7 +597,7 @@ void  ConsoleDebugger::updateAssemblyView(void)
 
 		line.append("\n");
 
-		asmText->insertPlainText( tr(line.c_str()) );
+		//asmText->insertPlainText( tr(line.c_str()) );
 
 		asmEntry.push_back(a);
 	}
@@ -601,7 +606,7 @@ void  ConsoleDebugger::updateAssemblyView(void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::updateWindowData(void)
 {
-	updateAssemblyView();
+	asmView->updateAssemblyView();
 	
 	windowUpdateReq = false;
 }
@@ -616,6 +621,7 @@ void ConsoleDebugger::updatePeriodic(void)
 		updateWindowData();
 		fceuWrapperUnLock();
 	}
+	asmView->update();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::breakPointNotify( int addr )
@@ -641,5 +647,151 @@ void FCEUD_DebugBreakpoint( int addr )
 		usleep(100000);
 	}
 	fceuWrapperLock();
+}
+//----------------------------------------------------------------------------
+QAsmView::QAsmView(QWidget *parent)
+	: QWidget( parent )
+{
+	QPalette pal;
+	QColor fg("black"), bg("white");
+
+	font.setFamily("Courier New");
+	font.setStyle( QFont::StyleNormal );
+	font.setStyleHint( QFont::Monospace );
+
+	pal = this->palette();
+	pal.setColor(QPalette::Base      , bg );
+	pal.setColor(QPalette::Background, bg );
+	pal.setColor(QPalette::WindowText, fg );
+
+	this->setPalette(pal);
+
+	calcFontData();
+
+	vbar = NULL;
+	hbar = NULL;
+	asmPC = NULL;
+	displayROMoffsets = false;
+	lineOffset = 0;
+	maxLineOffset = 0;
+}
+//----------------------------------------------------------------------------
+QAsmView::~QAsmView(void)
+{
+	asmClear();
+}
+//----------------------------------------------------------------------------
+void QAsmView::asmClear(void)
+{
+	for (size_t i=0; i<asmEntry.size(); i++)
+	{
+		delete asmEntry[i];
+	}
+	asmEntry.clear();
+}
+//----------------------------------------------------------------------------
+void QAsmView::calcFontData(void)
+{
+	 this->setFont(font);
+    QFontMetrics metrics(font);
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+    pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
+#else
+    pxCharWidth = metrics.width(QLatin1Char('2'));
+#endif
+    pxCharHeight   = metrics.height();
+	 pxLineSpacing  = metrics.lineSpacing() * 1.25;
+    pxLineLead     = pxLineSpacing - pxCharHeight;
+    pxCursorHeight = pxCharHeight;
+
+	 viewLines   = (viewHeight / pxLineSpacing) + 1;
+}
+//----------------------------------------------------------------------------
+void QAsmView::setScrollBars( QScrollBar *h, QScrollBar *v )
+{
+	hbar = h; vbar = v;
+}
+//----------------------------------------------------------------------------
+void QAsmView::resizeEvent(QResizeEvent *event)
+{
+	viewWidth  = event->size().width();
+	viewHeight = event->size().height();
+
+	//printf("QAsmView Resize: %ix%i\n", viewWidth, viewHeight );
+
+	viewLines = (viewHeight / pxLineSpacing) + 1;
+
+	maxLineOffset = 0; // mb.numLines() - viewLines + 1;
+
+	//if ( viewWidth >= pxLineWidth )
+	//{
+	//	pxLineXScroll = 0;
+	//}
+	//else
+	//{
+	//	pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth) );
+	//}
+
+}
+//----------------------------------------------------------------------------
+void QAsmView::keyPressEvent(QKeyEvent *event)
+{
+	printf("Debug ASM Window Key Press: 0x%x \n", event->key() );
+
+}
+//----------------------------------------------------------------------------
+void QAsmView::keyReleaseEvent(QKeyEvent *event)
+{
+   printf("Debug ASM Window Key Release: 0x%x \n", event->key() );
+	//assignHotkey( event );
+}
+//----------------------------------------------------------------------------
+void QAsmView::mousePressEvent(QMouseEvent * event)
+{
+	// TODO QPoint c = convPixToCursor( event->pos() );
+
+}
+//----------------------------------------------------------------------------
+void QAsmView::contextMenuEvent(QContextMenuEvent *event)
+{
+	// TODO
+}
+//----------------------------------------------------------------------------
+void QAsmView::paintEvent(QPaintEvent *event)
+{
+	int x,y,l, row, nrow;
+	QPainter painter(this);
+
+	painter.setFont(font);
+	viewWidth  = event->rect().width();
+	viewHeight = event->rect().height();
+
+	nrow = (viewHeight / pxLineSpacing) + 1;
+
+	if ( nrow < 1 ) nrow = 1;
+
+	viewLines = nrow;
+
+	if ( cursorPosY >= viewLines )
+	{
+		cursorPosY = viewLines-1;
+	}
+
+	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Background) );
+
+	y = pxLineSpacing;
+
+	for (row=0; row < nrow; row++)
+	{
+		x=0;
+		l = lineOffset + row;
+		painter.setPen( this->palette().color(QPalette::WindowText));
+
+		if ( l < asmEntry.size() )
+		{
+			painter.drawText( x, y, tr(asmEntry[l]->text.c_str()) );
+		}
+		y += pxLineSpacing;
+	}
 }
 //----------------------------------------------------------------------------

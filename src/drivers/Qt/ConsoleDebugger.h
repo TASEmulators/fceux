@@ -21,6 +21,7 @@
 #include <QLineEdit>
 #include <QTextEdit>
 #include <QPlainTextEdit>
+#include <QScrollBar>
 
 #include "Qt/main.h"
 
@@ -47,6 +48,53 @@ struct dbg_asm_entry_t
 	}
 };
 
+class QAsmView : public QWidget
+{
+   Q_OBJECT
+
+	public:
+		QAsmView(QWidget *parent = 0);
+		~QAsmView(void);
+
+		void setScrollBars( QScrollBar *h, QScrollBar *v );
+		void updateAssemblyView(void);
+		void asmClear(void);
+		int  getAsmLineFromAddr(int addr);
+	protected:
+		void paintEvent(QPaintEvent *event);
+		void keyPressEvent(QKeyEvent *event);
+   	void keyReleaseEvent(QKeyEvent *event);
+		void mousePressEvent(QMouseEvent * event);
+		void resizeEvent(QResizeEvent *event);
+		void contextMenuEvent(QContextMenuEvent *event);
+
+		void calcFontData(void);
+
+	private:
+		QFont       font;
+		QScrollBar *vbar;
+		QScrollBar *hbar;
+
+		int pxCharWidth;
+		int pxCharHeight;
+		int pxCursorHeight;
+		int pxLineSpacing;
+		int pxLineLead;
+		int viewLines;
+		int viewWidth;
+		int viewHeight;
+		int lineOffset;
+		int maxLineOffset;
+		int pxLineXScroll;
+		int cursorPosX;
+		int cursorPosY;
+
+		dbg_asm_entry_t  *asmPC;
+		std::vector <dbg_asm_entry_t*> asmEntry;
+
+		bool  displayROMoffsets;
+};
+
 class ConsoleDebugger : public QDialog
 {
    Q_OBJECT
@@ -56,9 +104,6 @@ class ConsoleDebugger : public QDialog
 		~ConsoleDebugger(void);
 
 		void updateWindowData(void);
-		void updateAssemblyView(void);
-		void asmClear(void);
-		int  getAsmLineFromAddr(int addr);
 		void breakPointNotify(int addr);
 
 	protected:
@@ -67,7 +112,9 @@ class ConsoleDebugger : public QDialog
    	//void keyReleaseEvent(QKeyEvent *event);
 
 		//QTreeWidget *tree;
-		QPlainTextEdit *asmText;
+		QScrollBar  *vbar;
+		QScrollBar  *hbar;
+		QAsmView    *asmView;
 		QPlainTextEdit *stackText;
 		QLineEdit *seekEntry;
 		QLineEdit *pcEntry;
@@ -100,10 +147,6 @@ class ConsoleDebugger : public QDialog
 		QTimer    *periodicTimer;
 		QFont      font;
 
-		dbg_asm_entry_t  *asmPC;
-		std::vector <dbg_asm_entry_t*> asmEntry;
-
-		bool  displayROMoffsets;
 		bool  windowUpdateReq;
 
 	private:
