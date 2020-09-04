@@ -61,6 +61,7 @@ class QAsmView : public QWidget
 		void asmClear(void);
 		int  getAsmLineFromAddr(int addr);
 		void setLine(int lineNum);
+		void scrollToPC(void);
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
@@ -105,6 +106,7 @@ class ConsoleDebugger : public QDialog
 		~ConsoleDebugger(void);
 
 		void updateWindowData(void);
+		void updateRegisterView(void);
 		void breakPointNotify(int addr);
 
 	protected:
@@ -143,19 +145,29 @@ class ConsoleDebugger : public QDialog
 		QLabel    *spriteLbl;
 		QLabel    *scanLineLbl;
 		QLabel    *pixLbl;
-		QLabel    *cpuCyclesLbl;
-		QLabel    *cpuInstrsLbl;
+		QLabel    *cpuCyclesLbl1;
+		QLabel    *cpuCyclesLbl2;
+		QLabel    *cpuInstrsLbl1;
+		QLabel    *cpuInstrsLbl2;
 		QTimer    *periodicTimer;
 		QFont      font;
 
 		bool  windowUpdateReq;
 
 	private:
+		void setRegsFromEntry(void);
 
    public slots:
       void closeWindow(void);
 	private slots:
 		void updatePeriodic(void);
 		void vbarChanged(int value);
+		void debugRunCB(void);
+		void debugStepIntoCB(void);
+		void debugStepOutCB(void);
+		void debugStepOverCB(void);
+		void debugRunLineCB(void);
+		void debugRunLine128CB(void);
+		void seekPCCB(void);
 
 };

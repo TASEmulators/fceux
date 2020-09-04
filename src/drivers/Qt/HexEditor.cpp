@@ -1769,6 +1769,10 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		maxLineOffset = 0;
 	}
 
+	if ( lineOffset < 0 )
+	{
+		lineOffset = 0;
+	}
 	if ( lineOffset > maxLineOffset )
 	{
 		lineOffset = maxLineOffset;

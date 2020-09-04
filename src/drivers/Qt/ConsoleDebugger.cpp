@@ -99,29 +99,36 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	button = new QPushButton( tr("Run") );
 	grid->addWidget( button, 0, 0, Qt::AlignLeft );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunCB(void)) );
 
 	button = new QPushButton( tr("Step Into") );
 	grid->addWidget( button, 0, 1, Qt::AlignLeft );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepIntoCB(void)) );
 
 	button = new QPushButton( tr("Step Out") );
 	grid->addWidget( button, 1, 0, Qt::AlignLeft );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepOutCB(void)) );
 
 	button = new QPushButton( tr("Step Over") );
 	grid->addWidget( button, 1, 1, Qt::AlignLeft );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepOverCB(void)) );
 
 	button = new QPushButton( tr("Run Line") );
 	grid->addWidget( button, 2, 0, Qt::AlignLeft );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunLineCB(void)) );
 
 	button = new QPushButton( tr("128 Lines") );
 	grid->addWidget( button, 2, 1, Qt::AlignLeft );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunLine128CB(void)) );
 
 	button = new QPushButton( tr("Seek To:") );
 	grid->addWidget( button, 3, 0, Qt::AlignLeft );
+   //connect( button, SIGNAL(clicked(void)), this, SLOT(seekPCCB(void)) );
 
 	seekEntry = new QLineEdit();
 	seekEntry->setFont( font );
 	seekEntry->setMaxLength( 4 );
-	seekEntry->setInputMask( ">HHHH;0" );
+	seekEntry->setInputMask( ">HHHH;" );
 	seekEntry->setAlignment(Qt::AlignCenter);
 	seekEntry->setMaximumWidth( 6 * fontCharWidth );
 	grid->addWidget( seekEntry, 3, 1, Qt::AlignLeft );
@@ -131,7 +138,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	pcEntry = new QLineEdit();
 	pcEntry->setFont( font );
 	pcEntry->setMaxLength( 4 );
-	pcEntry->setInputMask( ">HHHH;0" );
+	pcEntry->setInputMask( ">HHHH;" );
 	pcEntry->setAlignment(Qt::AlignCenter);
 	pcEntry->setMaximumWidth( 6 * fontCharWidth );
 	hbox->addWidget( lbl );
@@ -140,13 +147,14 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	button = new QPushButton( tr("Seek PC") );
 	grid->addWidget( button, 4, 1, Qt::AlignLeft );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(seekPCCB(void)) );
 
 	hbox = new QHBoxLayout();
 	lbl  = new QLabel( tr("A:") );
 	regAEntry = new QLineEdit();
 	regAEntry->setFont( font );
 	regAEntry->setMaxLength( 2 );
-	regAEntry->setInputMask( ">HH;0" );
+	regAEntry->setInputMask( ">HH;" );
 	regAEntry->setAlignment(Qt::AlignCenter);
 	regAEntry->setMaximumWidth( 4 * fontCharWidth );
 	hbox->addWidget( lbl );
@@ -155,7 +163,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	regXEntry = new QLineEdit();
 	regXEntry->setFont( font );
 	regXEntry->setMaxLength( 2 );
-	regXEntry->setInputMask( ">HH;0" );
+	regXEntry->setInputMask( ">HH;" );
 	regXEntry->setAlignment(Qt::AlignCenter);
 	regXEntry->setMaximumWidth( 4 * fontCharWidth );
 	hbox->addWidget( lbl );
@@ -164,7 +172,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	regYEntry = new QLineEdit();
 	regYEntry->setFont( font );
 	regYEntry->setMaxLength( 2 );
-	regYEntry->setInputMask( ">HH;0" );
+	regYEntry->setInputMask( ">HH;" );
 	regYEntry->setAlignment(Qt::AlignCenter);
 	regYEntry->setMaximumWidth( 4 * fontCharWidth );
 	hbox->addWidget( lbl );
@@ -250,21 +258,29 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	frame->setLayout( vbox  );
 	frame->setFrameShape( QFrame::Box );
 
-	vbox         = new QVBoxLayout();
+	vbox          = new QVBoxLayout();
+	cpuCyclesLbl1 = new QLabel( tr("CPU Cycles:") );
+	cpuCyclesLbl2 = new QLabel( tr("(+0):") );
+	cpuInstrsLbl1 = new QLabel( tr("Instructions:") );
+	cpuInstrsLbl2 = new QLabel( tr("(+0):") );
+	brkCpuCycExd  = new QCheckBox( tr("Break when Exceed") );
+	brkInstrsExd  = new QCheckBox( tr("Break when Exceed") );
+	cpuCycExdVal  = new QLineEdit( tr("0") );
+	instrExdVal   = new QLineEdit( tr("0") );
+	hbox          = new QHBoxLayout();
+	vbox->addLayout( hbox );
+	hbox->addWidget( cpuCyclesLbl1 );
+	hbox->addWidget( cpuCyclesLbl2 );
 	hbox         = new QHBoxLayout();
-	cpuCyclesLbl = new QLabel( tr("CPU Cycles:") );
-	cpuInstrsLbl = new QLabel( tr("Instructions:") );
-	brkCpuCycExd = new QCheckBox( tr("Break when Exceed") );
-	brkInstrsExd = new QCheckBox( tr("Break when Exceed") );
-	cpuCycExdVal = new QLineEdit( tr("0") );
-	instrExdVal  = new QLineEdit( tr("0") );
-	vbox->addWidget( cpuCyclesLbl );
 	vbox->addLayout( hbox );
 	hbox->addWidget( brkCpuCycExd );
 	hbox->addWidget( cpuCycExdVal, 1, Qt::AlignLeft );
 
 	hbox         = new QHBoxLayout();
-	vbox->addWidget( cpuInstrsLbl );
+	vbox->addLayout( hbox );
+	hbox->addWidget( cpuInstrsLbl1 );
+	hbox->addWidget( cpuInstrsLbl2 );
+	hbox         = new QHBoxLayout();
 	vbox->addLayout( hbox );
 	hbox->addWidget( brkInstrsExd );
 	hbox->addWidget( instrExdVal, 1, Qt::AlignLeft );
@@ -316,6 +332,129 @@ void ConsoleDebugger::closeWindow(void)
    //printf("Close Window\n");
    done(0);
 	deleteLater();
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::debugRunCB(void)
+{
+	if (FCEUI_EmulationPaused()) 
+	{
+		setRegsFromEntry();
+		FCEUI_ToggleEmulationPause();
+		//DebuggerWasUpdated = false done in above function;
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::debugStepIntoCB(void)
+{
+	if (FCEUI_EmulationPaused())
+	{
+		setRegsFromEntry();
+	}
+	FCEUI_Debugger().step = true;
+	FCEUI_SetEmulationPaused(0);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::debugStepOutCB(void)
+{
+	if (FCEUI_EmulationPaused() > 0) 
+	{
+		DebuggerState &dbgstate = FCEUI_Debugger();
+		setRegsFromEntry();
+		if (dbgstate.stepout)
+		{
+			printf("Step Out is currently in process.\n");
+			return;
+		}
+		if (GetMem(X.PC) == 0x20)
+		{
+			dbgstate.jsrcount = 1;
+		}
+		else 
+		{
+			dbgstate.jsrcount = 0;
+		}
+		dbgstate.stepout = 1;
+		FCEUI_SetEmulationPaused(0);
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::debugStepOverCB(void)
+{
+	if (FCEUI_EmulationPaused()) 
+	{
+		setRegsFromEntry();
+		int tmp=X.PC;
+		uint8 opcode = GetMem(X.PC);
+		bool jsr = opcode==0x20;
+		bool call = jsr;
+		#ifdef BRK_3BYTE_HACK
+		//with this hack, treat BRK similar to JSR
+		if(opcode == 0x00)
+		{
+			call = true;
+		}
+		#endif
+		if (call) 
+		{
+			if (watchpoint[64].flags)
+			{
+				printf("Step Over is currently in process.\n");
+				return;
+			}
+			watchpoint[64].address = (tmp+3);
+			watchpoint[64].flags = WP_E|WP_X;
+		}
+		else 
+		{
+			FCEUI_Debugger().step = true;
+		}
+		FCEUI_SetEmulationPaused(0);
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::debugRunLineCB(void)
+{
+	if (FCEUI_EmulationPaused())
+	{
+		setRegsFromEntry();
+	}
+	uint64 ts=timestampbase;
+	ts+=timestamp;
+	ts+=341/3;
+	//if (scanline == 240) vblankScanLines++;
+	//else vblankScanLines = 0;
+	FCEUI_Debugger().runline = true;
+	FCEUI_Debugger().runline_end_time=ts;
+	FCEUI_SetEmulationPaused(0);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::debugRunLine128CB(void)
+{
+	if (FCEUI_EmulationPaused())
+	{
+		setRegsFromEntry();
+	}
+	FCEUI_Debugger().runline = true;
+	{
+		uint64 ts=timestampbase;
+		ts+=timestamp;
+		ts+=128*341/3;
+		FCEUI_Debugger().runline_end_time=ts;
+		//if (scanline+128 >= 240 && scanline+128 <= 257) vblankScanLines = (scanline+128)-240;
+		//else vblankScanLines = 0;
+	}
+	FCEUI_SetEmulationPaused(0);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::seekPCCB (void)
+{
+	if (FCEUI_EmulationPaused())
+	{
+		setRegsFromEntry();
+		//updateAllDebugWindows();
+	}
+	windowUpdateReq = true;
+	//asmView->scrollToPC();
 }
 //----------------------------------------------------------------------------
 int  QAsmView::getAsmLineFromAddr(int addr)
@@ -607,10 +746,159 @@ void  QAsmView::updateAssemblyView(void)
 	vbar->setMaximum( asmEntry.size() );
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::setRegsFromEntry(void)
+{
+	std::string s;
+	long int i;
+
+	s = pcEntry->text().toStdString();
+	if ( s.size() > 0 )
+	{
+		i = strtol( s.c_str(), NULL, 16 );
+	}
+	else
+	{
+		i = 0;
+	}
+	X.PC = i;
+	//printf("Set PC: '%s'  %04X\n", s.c_str(), X.PC );
+
+	s = regAEntry->text().toStdString();
+	if ( s.size() > 0 )
+	{
+		i = strtol( s.c_str(), NULL, 16 );
+	}
+	else
+	{
+		i = 0;
+	}
+	X.A  = i;
+	//printf("Set A: '%s'  %02X\n", s.c_str(), X.A );
+
+	s = regXEntry->text().toStdString();
+	if ( s.size() > 0 )
+	{
+		i = strtol( s.c_str(), NULL, 16 );
+	}
+	else
+	{
+		i = 0;
+	}
+	X.X  = i;
+	//printf("Set X: '%s'  %02X\n", s.c_str(), X.X );
+
+	s = regYEntry->text().toStdString();
+	if ( s.size() > 0 )
+	{
+		i = strtol( s.c_str(), NULL, 16 );
+	}
+	else
+	{
+		i = 0;
+	}
+	X.Y  = i;
+	//printf("Set Y: '%s'  %02X\n", s.c_str(), X.Y );
+}
+//----------------------------------------------------------------------------
+void  ConsoleDebugger::updateRegisterView(void)
+{
+	int stackPtr;
+	char stmp[64];
+	char str[32], str2[32];
+	std::string  stackLine;
+
+	sprintf( stmp, "%04X", X.PC );
+
+	pcEntry->setText( tr(stmp) );
+
+	sprintf( stmp, "%02X", X.A );
+
+	regAEntry->setText( tr(stmp) );
+
+	sprintf( stmp, "%02X", X.X );
+
+	regXEntry->setText( tr(stmp) );
+
+	sprintf( stmp, "%02X", X.Y );
+
+	regYEntry->setText( tr(stmp) );
+
+	N_chkbox->setChecked( (X.P & N_FLAG) ? true : false );
+	V_chkbox->setChecked( (X.P & V_FLAG) ? true : false );
+	U_chkbox->setChecked( (X.P & U_FLAG) ? true : false );
+	B_chkbox->setChecked( (X.P & B_FLAG) ? true : false );
+	D_chkbox->setChecked( (X.P & D_FLAG) ? true : false );
+	I_chkbox->setChecked( (X.P & I_FLAG) ? true : false );
+	Z_chkbox->setChecked( (X.P & Z_FLAG) ? true : false );
+	C_chkbox->setChecked( (X.P & C_FLAG) ? true : false );
+
+	stackPtr = X.S | 0x0100;
+
+	sprintf( stmp, "Stack: $%04X", stackPtr );
+	stackFrame->setTitle( tr(stmp) );
+
+	stackPtr++;
+
+	if ( stackPtr <= 0x01FF )
+	{
+		sprintf( stmp, "%02X", GetMem(stackPtr) );
+
+		stackLine.assign( stmp );
+
+		for (int i = 1; i < 128; i++)
+		{
+			//tmp = ((tmp+1)|0x0100)&0x01FF;  //increment and fix pointer to $0100-$01FF range
+			stackPtr++;
+			if (stackPtr > 0x1FF)
+				break;
+			if ((i & 7) == 0)
+				sprintf( stmp, ",\r\n%02X", GetMem(stackPtr) );
+			else
+				sprintf( stmp, ",%02X", GetMem(stackPtr) );
+
+			stackLine.append( stmp );
+		}
+	}
+
+	stackText->setPlainText( tr(stackLine.c_str()) );
+
+	// update counters
+	int64 counter_value = timestampbase + (uint64)timestamp - total_cycles_base;
+	if (counter_value < 0)	// sanity check
+	{
+		ResetDebugStatisticsCounters();
+		counter_value = 0;
+	}
+	sprintf( stmp, "CPU Cycles: %llu", counter_value);
+
+	cpuCyclesLbl1->setText( tr(stmp) );
+
+	counter_value = timestampbase + (uint64)timestamp - delta_cycles_base;
+	if (counter_value < 0)	// sanity check
+	{
+		ResetDebugStatisticsCounters();
+		counter_value = 0;
+	}
+	sprintf(stmp, "(+%llu)", counter_value);
+
+	cpuCyclesLbl2->setText( tr(stmp) );
+
+	sprintf(stmp, "Instructions: %llu", total_instructions);
+	cpuInstrsLbl1->setText( tr(stmp) );
+
+	sprintf(stmp, "(+%llu)", delta_instructions);
+	cpuInstrsLbl2->setText( tr(stmp) );
+
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::updateWindowData(void)
 {
 	asmView->updateAssemblyView();
 	
+	asmView->scrollToPC();
+
+	updateRegisterView();
+
 	windowUpdateReq = false;
 }
 //----------------------------------------------------------------------------
@@ -702,6 +990,14 @@ void QAsmView::asmClear(void)
 void QAsmView::setLine(int lineNum)
 {
 	lineOffset = lineNum;
+}
+//----------------------------------------------------------------------------
+void QAsmView::scrollToPC(void)
+{
+	if ( asmPC != NULL )
+	{
+		lineOffset = asmPC->line;
+	}
 }
 //----------------------------------------------------------------------------
 void QAsmView::calcFontData(void)
@@ -797,6 +1093,10 @@ void QAsmView::paintEvent(QPaintEvent *event)
 		maxLineOffset = 0;
 	}
 
+	if ( lineOffset < 0 )
+	{
+		lineOffset = 0;
+	}
 	if ( lineOffset > maxLineOffset )
 	{
 		lineOffset = maxLineOffset;
