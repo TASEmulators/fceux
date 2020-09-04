@@ -35,6 +35,10 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleDebugger.h"
 
+// Where are these defined?
+extern int vblankScanLines;
+extern int vblankPixel;
+
 static std::list <ConsoleDebugger*> dbgWinList;
 //----------------------------------------------------------------------------
 ConsoleDebugger::ConsoleDebugger(QWidget *parent)
@@ -888,6 +892,57 @@ void  ConsoleDebugger::updateRegisterView(void)
 
 	sprintf(stmp, "(+%llu)", delta_instructions);
 	cpuInstrsLbl2->setText( tr(stmp) );
+
+	// PPU Labels
+	sprintf(stmp, "PPU: 0x%04X", (int)FCEUPPU_PeekAddress());
+	ppuLbl->setText( tr(stmp) );
+
+	sprintf(stmp, "Sprite: 0x%02X", PPU[3] );
+	spriteLbl->setText( tr(stmp) );
+
+	extern int linestartts;
+	#define GETLASTPIXEL    (PAL?((timestamp*48-linestartts)/15) : ((timestamp*48-linestartts)/16) )
+	
+	int ppupixel = GETLASTPIXEL;
+
+	if (ppupixel>341)	//maximum number of pixels per scanline
+		ppupixel = 0;	//Currently pixel display is borked until Run 128 lines is clicked, this keeps garbage from displaying
+
+	// If not in the 0-239 pixel range, make special cases for display
+	if (scanline == 240 && vblankScanLines < (PAL?72:22))
+	{
+		if (!vblankScanLines)
+		{
+			// Idle scanline (240)
+			sprintf(str, "%d", scanline);	// was "Idle %d"
+		} else if (scanline + vblankScanLines == (PAL?311:261))
+		{
+			// Pre-render
+			sprintf(str, "-1");	// was "Prerender -1"
+		} else
+		{
+			// Vblank lines (241-260/310)
+			sprintf(str, "%d", scanline + vblankScanLines);	// was "Vblank %d"
+		}
+		sprintf(str2, "%d", vblankPixel);
+	} else
+	{
+		// Scanlines 0 - 239
+		sprintf(str, "%d", scanline);
+		sprintf(str2, "%d", ppupixel);
+	}
+
+	if(newppu)
+	{
+		sprintf(str ,"%d",newppu_get_scanline());
+		sprintf(str2,"%d",newppu_get_dot());
+	}
+
+	sprintf( stmp, "Scanline: %s", str );
+	scanLineLbl->setText( tr(stmp) );
+
+	sprintf( stmp, "Pixel: %s", str2 );
+	pixLbl->setText( tr(stmp) );
 
 }
 //----------------------------------------------------------------------------
