@@ -291,6 +291,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	periodicTimer  = new QTimer( this );
 
    connect( periodicTimer, &QTimer::timeout, this, &ConsoleDebugger::updatePeriodic );
+	//connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
+   connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
 
 	periodicTimer->start( 100 ); // 10hz
 }
@@ -602,6 +604,7 @@ void  QAsmView::updateAssemblyView(void)
 		asmEntry.push_back(a);
 	}
 
+	vbar->setMaximum( asmEntry.size() );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::updateWindowData(void)
@@ -627,6 +630,12 @@ void ConsoleDebugger::updatePeriodic(void)
 void ConsoleDebugger::breakPointNotify( int addr )
 {
 	windowUpdateReq = true;
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::vbarChanged(int value)
+{
+	//printf("VBar Changed: %i\n", value);
+	asmView->setLine( value );
 }
 //----------------------------------------------------------------------------
 void FCEUD_DebugBreakpoint( int addr )
@@ -688,6 +697,11 @@ void QAsmView::asmClear(void)
 		delete asmEntry[i];
 	}
 	asmEntry.clear();
+}
+//----------------------------------------------------------------------------
+void QAsmView::setLine(int lineNum)
+{
+	lineOffset = lineNum;
 }
 //----------------------------------------------------------------------------
 void QAsmView::calcFontData(void)
@@ -775,6 +789,17 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	if ( cursorPosY >= viewLines )
 	{
 		cursorPosY = viewLines-1;
+	}
+	maxLineOffset = asmEntry.size() - nrow + 1;
+
+	if ( maxLineOffset < 0 )
+	{
+		maxLineOffset = 0;
+	}
+
+	if ( lineOffset > maxLineOffset )
+	{
+		lineOffset = maxLineOffset;
 	}
 
 	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Background) );

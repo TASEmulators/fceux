@@ -60,6 +60,7 @@ class QAsmView : public QWidget
 		void updateAssemblyView(void);
 		void asmClear(void);
 		int  getAsmLineFromAddr(int addr);
+		void setLine(int lineNum);
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
@@ -155,5 +156,6 @@ class ConsoleDebugger : public QDialog
       void closeWindow(void);
 	private slots:
 		void updatePeriodic(void);
+		void vbarChanged(int value);
 
 };
