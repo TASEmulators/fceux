@@ -71,20 +71,21 @@ char *GetRomName(bool force = false);	//Checks if rom is loaded, if so, outputs 
 char *GetRomPath(bool force = false);	//Checks if rom is loaded, if so, outputs the Rom path only
 
 ///Contains the names of the default directories.
-static const char *default_directory_names[13] = {
-	"",         // roms
-	"sav",      // nonvol
-	"fcs",      // states
-	"",         // fdsrom
-	"snaps",    // snaps
-	"cheats",   // cheats
-	"movies",   // movies
-	"tools",    // memwatch
-	"tools",    // macro
-	"tools",    // input presets
-	"tools",    // lua scripts
-	"",			// avi output
-	""			// adelikat - adding a dummy one here ( [13] but only 12 entries)
+static const char *default_directory_names[14] = {
+	"",                 // roms
+	"sav",              // novol
+	"fcs",              // states
+	"",                 // fdsrom
+	"snaps",            // snaps
+	"cheats",           // cheats
+	"movies",           // movies
+	"tools",            // memwatch
+    "tools",            // bot
+	"tools",            // macro
+	"tools",            // input presets
+	"luascripts",       // lua scripts
+	"",			        // avi output
+	""			        // adelikat - adding a dummy one here ( [14] but only 13 entries)
 };
 
 #define NUMBER_OF_DIRECTORIES sizeof(directory_names) / sizeof(*directory_names)
