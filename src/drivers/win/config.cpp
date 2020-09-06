@@ -58,6 +58,7 @@ extern int CurrentState;
 extern bool pauseWhileActive; //adelikat: Cheats dialog
 extern int globalCheatDisabled;
 extern int disableAutoLSCheats;
+extern bool disableShowGG;
 extern bool enableHUDrecording;
 extern bool disableMovieMessages;
 extern bool replaceP2StartWithMicrophone;
@@ -469,6 +470,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(compressSavestates),
 	AC(pauseWhileActive),
 	AC(disableAutoLSCheats),
+	AC(disableShowGG),
 	AC(globalCheatDisabled),
 	AC(enableHUDrecording),
 	AC(disableMovieMessages),

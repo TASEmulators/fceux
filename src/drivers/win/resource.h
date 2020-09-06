@@ -625,12 +625,10 @@
 #define IDC_MISCELLANEOUS_ROMS_EDIT     1087
 #define IDC_EXTEND_SYSTEM_GROUP         1089
 #define IDC_EXTEND_SYSTEM_TEXT          1090
-#define IDC_BUTTON1                     1094
 #define IDC_CHEAT_SWITCH                1096
 #define IDC_CHEAT_GLOBAL_SWITCH         1096
 #define IDC_GAME_GENIE_LABEL            1097
 #define IDC_CHEAT_GAME_GENIE_TEXT       1098
-#define IDC_CHECK2                      1099
 #define IDC_RADIO_SHORTCUT1             1100
 #define IDC_RADIO_SHORTCUT2             1101
 #define IDC_RADIO_SHORTCUT3             1102
@@ -643,6 +641,7 @@
 #define IDC_RADIO_SHORTCUT0             1109
 #define IDC_BOOKMARK_VIEW_TEXT          1110
 #define IDC_BOOKMARK_COMBO_VIEW         1112
+#define IDC_CHEAT_SHOWGG                1112
 #define BTN_ALLOW_LRUD                  1117
 #define IDC_PRGROM_EDIT                 1118
 #define IDC_CHRROM_EDIT                 1119
@@ -1167,7 +1166,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        309
 #define _APS_NEXT_COMMAND_VALUE         40005
-#define _APS_NEXT_CONTROL_VALUE         1112
+#define _APS_NEXT_CONTROL_VALUE         1113
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
