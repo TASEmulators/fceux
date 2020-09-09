@@ -282,7 +282,7 @@ HWND InitializeCheatList(HWND hwnd)
 	SendMessage(hwndChtList, LVM_INSERTCOLUMN, 0, (LPARAM)&lv);
 
 	lv.pszText = "Name";
-	lv.cx = 132;
+	lv.cx = 152;
 	SendMessage(hwndChtList, LVM_INSERTCOLUMN, 1, (LPARAM)&lv);
 
 	// Add a checkbox to indicate if the cheat is activated
