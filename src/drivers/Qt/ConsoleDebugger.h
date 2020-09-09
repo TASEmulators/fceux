@@ -18,12 +18,14 @@
 #include <QGroupBox>
 #include <QTreeView>
 #include <QTreeWidget>
+#include <QTreeWidgetItem>
 #include <QLineEdit>
 #include <QTextEdit>
 #include <QPlainTextEdit>
 #include <QScrollBar>
 
 #include "Qt/main.h"
+#include "../../debug.h"
 
 struct dbg_asm_entry_t
 {
@@ -156,6 +158,8 @@ class ConsoleDebugger : public QDialog
 
 	private:
 		void setRegsFromEntry(void);
+		void openBpEditWindow(int editIdx = -1, watchpointinfo *wp = NULL );
+		void bpListUpdate( bool reset = false );
 
    public slots:
       void closeWindow(void);
@@ -169,5 +173,9 @@ class ConsoleDebugger : public QDialog
 		void debugRunLineCB(void);
 		void debugRunLine128CB(void);
 		void seekPCCB(void);
+		void add_BP_CB(void);
+		void edit_BP_CB(void);
+		void delete_BP_CB(void);
+		void bpItemClicked( QTreeWidgetItem *item, int column);
 
 };

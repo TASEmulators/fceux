@@ -86,13 +86,13 @@ consoleWin_t::~consoleWin_t(void)
 
 	closeGamePadConfWindow();
 
+	//printf("Thread Finished: %i \n", gameThread->isFinished() );
+	emulatorThread->quit();
+	emulatorThread->wait( 1000 );
+
 	fceuWrapperLock();
 	fceuWrapperClose();
 	fceuWrapperUnLock();
-
-	//printf("Thread Finished: %i \n", gameThread->isFinished() );
-	emulatorThread->quit();
-	emulatorThread->wait();
 
 	if ( viewport_GL != NULL )
 	{
@@ -560,6 +560,9 @@ void consoleWin_t::closeApp(void)
 {
 	nes_shm->runEmulator = 0;
 
+	emulatorThread->quit();
+	emulatorThread->wait( 1000 );
+
 	fceuWrapperLock();
 	fceuWrapperClose();
 	fceuWrapperUnLock();
@@ -568,7 +571,6 @@ void consoleWin_t::closeApp(void)
 	// clear the NetworkIP field so this doesn't happen unintentionally
 	g_config->setOption ("SDL.NetworkIP", "");
 	g_config->save ();
-	//SDL_Quit (); // Already called by fceuWrapperClose
 
 	//qApp::quit();
 	qApp->quit();

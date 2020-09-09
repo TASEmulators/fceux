@@ -11,6 +11,7 @@
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QGridLayout>
+#include <QRadioButton>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -32,6 +33,7 @@
 #include "Qt/main.h"
 #include "Qt/dface.h"
 #include "Qt/config.h"
+#include "Qt/nes_shm.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleDebugger.h"
 
@@ -52,6 +54,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	QFrame      *frame;
 	QLabel      *lbl;
 	float fontCharWidth;
+	QTreeWidgetItem * item;
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
@@ -191,6 +194,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	stackFrame->setLayout( hbox );
 	stackText->setFont(font);
 	stackText->setReadOnly(true);
+	stackText->setWordWrapMode( QTextOption::WordWrap );
+	stackText->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
 	//stackText->setMaximumWidth( 16 * fontCharWidth );
 
 	bpFrame = new QGroupBox(tr("Breakpoints"));
@@ -199,19 +204,40 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	hbox    = new QHBoxLayout();
 	bpTree  = new QTreeWidget();
 
-	bpTree->setColumnCount(1);
+	bpTree->setColumnCount(2);
+
+	item = new QTreeWidgetItem();
+	item->setFont( 0, font );
+	item->setFont( 1, font );
+	item->setFont( 2, font );
+	item->setText( 0, QString::fromStdString( "Addr" ) );
+	item->setText( 1, QString::fromStdString( "Flags" ) );
+	item->setText( 2, QString::fromStdString( "Desc" ) );
+	item->setTextAlignment( 0, Qt::AlignCenter);
+	item->setTextAlignment( 1, Qt::AlignCenter);
+	item->setTextAlignment( 2, Qt::AlignCenter);
+
+	bpTree->setHeaderItem( item );
+
+	bpTree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+
+	connect( bpTree, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+			   this, SLOT(bpItemClicked( QTreeWidgetItem*, int)) );
 
 	hbox->addWidget( bpTree );
 
 	hbox    = new QHBoxLayout();
 	button = new QPushButton( tr("Add") );
 	hbox->addWidget( button );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(add_BP_CB(void)) );
 
 	button = new QPushButton( tr("Delete") );
 	hbox->addWidget( button );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(delete_BP_CB(void)) );
 
 	button = new QPushButton( tr("Edit") );
 	hbox->addWidget( button );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(edit_BP_CB(void)) );
 
 	brkBadOpsCbox = new QCheckBox( tr("Break on Bad Opcodes") );
 
@@ -314,6 +340,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	//connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
    connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
 
+	bpListUpdate( false );
+
 	periodicTimer->start( 100 ); // 10hz
 }
 //----------------------------------------------------------------------------
@@ -336,6 +364,415 @@ void ConsoleDebugger::closeWindow(void)
    //printf("Close Window\n");
    done(0);
 	deleteLater();
+}
+//----------------------------------------------------------------------------
+void 	ConsoleDebugger::bpItemClicked( QTreeWidgetItem *item, int column)
+{
+	int row = bpTree->indexOfTopLevelItem(item);
+
+	printf("Row: %i Column: %i \n", row, column );
+
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
+{
+	int ret;
+	QDialog dialog(this);
+	QHBoxLayout *hbox;
+	QVBoxLayout *mainLayout, *vbox;
+	QLabel *lbl;
+	QLineEdit *addr1, *addr2, *cond, *name;
+	QCheckBox *forbidChkBox, *rbp, *wbp, *xbp;
+	QGridLayout *grid;
+	QFrame *frame;
+	QGroupBox *gbox;
+	QPushButton *okButton, *cancelButton;
+	QRadioButton *cpu_radio, *ppu_radio, *sprite_radio;
+
+	dialog.setWindowTitle( tr("Add Breakpoint") );
+
+	hbox       = new QHBoxLayout();
+	mainLayout = new QVBoxLayout();
+
+	mainLayout->addLayout( hbox );
+
+	lbl   = new QLabel( tr("Address") );
+	addr1 = new QLineEdit();
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( addr1 );
+
+	lbl   = new QLabel( tr("-") );
+	addr2 = new QLineEdit();
+	hbox->addWidget( lbl );
+	hbox->addWidget( addr2 );
+
+	forbidChkBox = new QCheckBox( tr("Forbid") );
+	hbox->addWidget( forbidChkBox );
+
+	frame = new QFrame();
+	vbox  = new QVBoxLayout();
+	hbox  = new QHBoxLayout();
+	gbox  = new QGroupBox();
+
+	rbp = new QCheckBox( tr("Read") );
+	wbp = new QCheckBox( tr("Write") );
+	xbp = new QCheckBox( tr("Execute") );
+
+	gbox->setTitle( tr("Memory") );
+	mainLayout->addWidget( frame );
+	frame->setLayout( vbox );
+	frame->setFrameShape( QFrame::Box );
+	vbox->addLayout( hbox );
+	vbox->addWidget( gbox );
+
+	hbox->addWidget( rbp );
+	hbox->addWidget( wbp );
+	hbox->addWidget( xbp );
+	
+	hbox         = new QHBoxLayout();
+	cpu_radio    = new QRadioButton( tr("CPU Mem") );
+	ppu_radio    = new QRadioButton( tr("PPU Mem") );
+	sprite_radio = new QRadioButton( tr("Sprite Mem") );
+	cpu_radio->setChecked(true);
+
+	gbox->setLayout( hbox );
+	hbox->addWidget( cpu_radio );
+	hbox->addWidget( ppu_radio );
+	hbox->addWidget( sprite_radio );
+
+	grid  = new QGridLayout();
+
+	mainLayout->addLayout( grid );
+	lbl   = new QLabel( tr("Condition") );
+	cond  = new QLineEdit();
+
+	grid->addWidget(  lbl, 0, 0 );
+	grid->addWidget( cond, 0, 1 );
+
+	lbl   = new QLabel( tr("Name") );
+	name  = new QLineEdit();
+
+	grid->addWidget(  lbl, 1, 0 );
+	grid->addWidget( name, 1, 1 );
+
+	hbox         = new QHBoxLayout();
+	okButton     = new QPushButton( tr("OK") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	mainLayout->addLayout( hbox );
+	hbox->addWidget( cancelButton );
+	hbox->addWidget(     okButton );
+
+   connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+   connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+
+	if ( wp != NULL )
+	{
+		char stmp[256];
+
+		if ( wp->flags & BT_P )
+		{
+			ppu_radio->setChecked(true);
+		}
+		else if ( wp->flags & BT_S )
+		{
+			sprite_radio->setChecked(true);
+		}
+
+		sprintf( stmp, "%04X", wp->address );
+
+		addr1->setText( tr(stmp) );
+
+		if ( wp->endaddress > 0 )
+		{
+			sprintf( stmp, "%04X", wp->endaddress );
+
+			addr2->setText( tr(stmp) );
+		}
+
+		if ( wp->flags & WP_R )
+		{
+		   rbp->setChecked(true);
+		}
+		if ( wp->flags & WP_W )
+		{
+		   wbp->setChecked(true);
+		}
+		if ( wp->flags & WP_X )
+		{
+		   xbp->setChecked(true);
+		}
+		if ( wp->flags & WP_F )
+		{
+		   forbidChkBox->setChecked(true);
+		}
+		if ( wp->flags & WP_E )
+		{
+		   //forbidChkBox->setChecked(true);
+		}
+
+		if ( wp->condText )
+		{
+			cond->setText( tr(wp->condText) );
+		}
+
+		if ( wp->desc )
+		{
+			name->setText( tr(wp->desc) );
+		}
+	}
+
+	dialog.setLayout( mainLayout );
+
+	ret = dialog.exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		int  start_addr = -1, end_addr = -1, type = 0, enable = 1, slot;
+		std::string s;
+		printf("Accepted\n");
+
+		slot = (editIdx < 0) ? numWPs : editIdx;
+
+		if ( cpu_radio->isChecked() )
+		{
+			type |= BT_C;
+		}
+		else if ( ppu_radio->isChecked() ) 
+		{
+			type |= BT_P;
+		}
+		else if ( sprite_radio->isChecked() ) 
+		{
+			type |= BT_S;
+		}
+
+		s = addr1->text().toStdString();
+
+		if ( s.size() > 0 )
+		{
+			start_addr = offsetStringToInt( type, s.c_str() );
+		}
+
+		s = addr2->text().toStdString();
+
+		if ( s.size() > 0 )
+		{
+			end_addr = offsetStringToInt( type, s.c_str() );
+		}
+
+		if ( rbp->isChecked() )
+		{
+			type |= WP_R;
+		}
+		if ( wbp->isChecked() )
+		{
+			type |= WP_W;
+		}
+		if ( xbp->isChecked() )
+		{
+			type |= WP_X;
+		}
+
+		if ( forbidChkBox->isChecked() )
+		{
+			type |= WP_F;
+		}
+
+		if ( (start_addr >= 0) && (numWPs < 64) )
+		{
+			unsigned int retval;
+			std::string nameString, condString;
+
+			nameString = name->text().toStdString();
+			condString = cond->text().toStdString();
+
+			retval = NewBreak( nameString.c_str(), start_addr, end_addr, type, condString.c_str(), slot, enable);
+
+			if ( (retval == 1) || (retval == 2) )
+			{
+				printf("Breakpoint Add Failed\n");
+			}
+			else
+			{
+				if (editIdx < 0)
+				{
+					numWPs++;
+				}
+
+				bpListUpdate( false );
+			}
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::bpListUpdate( bool reset )
+{
+	QTreeWidgetItem *item;
+	char line[256], addrStr[32], flags[16], enable;
+
+	if ( reset )
+	{
+		bpTree->clear();
+	}
+
+	for (int i=0; i<numWPs; i++)
+	{
+		item = bpTree->topLevelItem(i);
+
+		if ( item == NULL )
+		{
+			item = new QTreeWidgetItem();
+
+			bpTree->addTopLevelItem( item );
+		}
+
+		//item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsUserCheckable );
+		item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemNeverHasChildren );
+
+		if ( watchpoint[i].endaddress > 0 )
+		{
+			sprintf( addrStr, "$%04X-%04X:", watchpoint[i].address, watchpoint[i].endaddress );
+		}
+		else
+		{
+			sprintf( addrStr, "$%04X:", watchpoint[i].address );
+		}
+
+		flags[0] = (watchpoint[i].flags & WP_E) ? 'E' : '-';
+
+		if ( watchpoint[i].flags & BT_P )
+		{
+			flags[1] = 'P';
+		}
+		else if ( watchpoint[i].flags & BT_S )
+		{
+			flags[1] = 'S';
+		}
+		else
+		{
+			flags[1] = 'C';
+		}
+
+		flags[2] = (watchpoint[i].flags & WP_R) ? 'R' : '-';
+		flags[3] = (watchpoint[i].flags & WP_W) ? 'W' : '-';
+		flags[4] = (watchpoint[i].flags & WP_X) ? 'X' : '-';
+		flags[5] = (watchpoint[i].flags & WP_F) ? 'F' : '-';
+		flags[6] = 0;
+
+		enable = (watchpoint[i].flags & WP_E) ? 1 : 0;
+
+		//strcpy( line, addrStr );
+		//strcpy( line, flags   );
+		line[0] = 0;
+
+		if (watchpoint[i].desc )
+		{
+			strcat( line, watchpoint[i].desc);
+		}
+
+		if (watchpoint[i].condText )
+		{
+			strcat( line, " Condition:");
+			strcat( line, watchpoint[i].condText);
+			strcat( line, " ");
+		}
+
+		item->setCheckState( 0, enable ? Qt::Checked : Qt::Unchecked );
+
+		item->setFont( 0, font );
+		item->setFont( 1, font );
+		item->setFont( 2, font );
+
+		item->setText( 0, tr(addrStr));
+		item->setText( 1, tr(flags)  );
+		item->setText( 2, tr(line)   );
+
+		item->setTextAlignment( 0, Qt::AlignLeft);
+		item->setTextAlignment( 1, Qt::AlignLeft);
+		item->setTextAlignment( 2, Qt::AlignLeft);
+	}
+
+	bpTree->update();
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::add_BP_CB(void)
+{
+	openBpEditWindow(-1);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::edit_BP_CB(void)
+{
+	QTreeWidgetItem *item;
+
+	item = bpTree->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+
+	int row = bpTree->indexOfTopLevelItem(item);
+
+	openBpEditWindow( row, &watchpoint[row] );
+}
+//----------------------------------------------------------------------------
+static void DeleteBreak(int sel)
+{
+	if(sel<0) return;
+	if(sel>=numWPs) return;
+	if (watchpoint[sel].cond)
+	{
+		freeTree(watchpoint[sel].cond);
+	}
+	if (watchpoint[sel].condText)
+	{
+		free(watchpoint[sel].condText);
+	}
+	if (watchpoint[sel].desc)
+	{
+		free(watchpoint[sel].desc);
+	}
+	// move all BP items up in the list
+	for (int i = sel; i < numWPs; i++) 
+	{
+		watchpoint[i].address = watchpoint[i+1].address;
+		watchpoint[i].endaddress = watchpoint[i+1].endaddress;
+		watchpoint[i].flags = watchpoint[i+1].flags;
+// ################################## Start of SP CODE ###########################
+		watchpoint[i].cond = watchpoint[i+1].cond;
+		watchpoint[i].condText = watchpoint[i+1].condText;
+		watchpoint[i].desc = watchpoint[i+1].desc;
+// ################################## End of SP CODE ###########################
+	}
+	// erase last BP item
+	watchpoint[numWPs].address = 0;
+	watchpoint[numWPs].endaddress = 0;
+	watchpoint[numWPs].flags = 0;
+	watchpoint[numWPs].cond = 0;
+	watchpoint[numWPs].condText = 0;
+	watchpoint[numWPs].desc = 0;
+	numWPs--;
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::delete_BP_CB(void)
+{
+	QTreeWidgetItem *item;
+
+	item = bpTree->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+
+	int row = bpTree->indexOfTopLevelItem(item);
+
+	DeleteBreak( row );
+	bpListUpdate( true );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::debugRunCB(void)
@@ -985,7 +1422,11 @@ void FCEUD_DebugBreakpoint( int addr )
 {
 	std::list <ConsoleDebugger*>::iterator it;
 
-	printf("Breakpoint Hit: 0x%04X \n", addr );
+	if ( !nes_shm->runEmulator )
+	{
+		return;
+	}
+	//printf("Breakpoint Hit: 0x%04X \n", addr );
 
 	fceuWrapperUnLock();
 	
@@ -994,7 +1435,7 @@ void FCEUD_DebugBreakpoint( int addr )
 		(*it)->breakPointNotify( addr );
 	}
 
-	while (FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
+	while ( nes_shm->runEmulator && FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
 	{
 		usleep(100000);
 	}
