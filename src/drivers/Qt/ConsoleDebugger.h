@@ -172,10 +172,16 @@ class ConsoleDebugger : public QDialog
 		void debugStepOverCB(void);
 		void debugRunLineCB(void);
 		void debugRunLine128CB(void);
+		void seekToCB(void);
 		void seekPCCB(void);
 		void add_BP_CB(void);
 		void edit_BP_CB(void);
 		void delete_BP_CB(void);
+		void breakOnBadOpcodeCB(int value);
+		void breakOnCyclesCB( int value );
+		void breakOnInstructionsCB( int value );
 		void bpItemClicked( QTreeWidgetItem *item, int column);
+		void cpuCycleThresChanged(const QString &txt);
+		void instructionsThresChanged(const QString &txt);
 
 };

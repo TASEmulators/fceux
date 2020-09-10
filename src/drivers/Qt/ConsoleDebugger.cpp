@@ -130,10 +130,11 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	button = new QPushButton( tr("Seek To:") );
 	grid->addWidget( button, 3, 0, Qt::AlignLeft );
-   //connect( button, SIGNAL(clicked(void)), this, SLOT(seekPCCB(void)) );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(seekToCB(void)) );
 
 	seekEntry = new QLineEdit();
 	seekEntry->setFont( font );
+	seekEntry->setText("0000");
 	seekEntry->setMaxLength( 4 );
 	seekEntry->setInputMask( ">HHHH;" );
 	seekEntry->setAlignment(Qt::AlignCenter);
@@ -240,6 +241,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
    connect( button, SIGNAL(clicked(void)), this, SLOT(edit_BP_CB(void)) );
 
 	brkBadOpsCbox = new QCheckBox( tr("Break on Bad Opcodes") );
+	brkBadOpsCbox->setChecked( FCEUI_Debugger().badopbreak );
+   connect( brkBadOpsCbox, SIGNAL(stateChanged(int)), this, SLOT(breakOnBadOpcodeCB(int)) );
 
 	vbox->addWidget( bpTree );
 	vbox->addLayout( hbox   );
@@ -321,12 +324,20 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	cpuCycExdVal->setInputMask( ">9000000000000000;" );
 	cpuCycExdVal->setAlignment(Qt::AlignLeft);
 	cpuCycExdVal->setMaximumWidth( 18 * fontCharWidth );
+	connect( cpuCycExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(cpuCycleThresChanged(const QString &)));
 
 	instrExdVal->setFont( font );
 	instrExdVal->setMaxLength( 16 );
 	instrExdVal->setInputMask( ">9000000000000000;" );
 	instrExdVal->setAlignment(Qt::AlignLeft);
 	instrExdVal->setMaximumWidth( 18 * fontCharWidth );
+	connect( instrExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(instructionsThresChanged(const QString &)));
+
+	brkCpuCycExd->setChecked( break_on_cycles );
+   connect( brkCpuCycExd, SIGNAL(stateChanged(int)), this, SLOT(breakOnCyclesCB(int)) );
+
+	brkInstrsExd->setChecked( break_on_instructions );
+   connect( brkInstrsExd, SIGNAL(stateChanged(int)), this, SLOT(breakOnInstructionsCB(int)) );
 
 	setLayout( mainLayout );
 
@@ -775,6 +786,72 @@ void ConsoleDebugger::delete_BP_CB(void)
 	bpListUpdate( true );
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::breakOnBadOpcodeCB(int value)
+{
+	//printf("Value:%i\n", value);
+	FCEUI_Debugger().badopbreak = (value != Qt::Unchecked);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::breakOnCyclesCB( int value )
+{
+	std::string s;
+
+	break_on_cycles = (value != Qt::Unchecked);
+
+	s = cpuCycExdVal->text().toStdString();
+
+   //printf("'%s'\n", txt );
+
+	if ( s.size() > 0 )
+	{
+		break_cycles_limit = strtoul( s.c_str(), NULL, 10 );
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::cpuCycleThresChanged(const QString &txt)
+{
+	std::string s;
+
+	s = txt.toStdString();
+
+	//printf("Cycles: '%s'\n", s.c_str() );
+
+	if ( s.size() > 0 )
+	{
+		break_cycles_limit = strtoul( s.c_str(), NULL, 10 );
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::breakOnInstructionsCB( int value )
+{
+	std::string s;
+
+	break_on_instructions = (value != Qt::Unchecked);
+
+	s = instrExdVal->text().toStdString();
+
+   //printf("'%s'\n", txt );
+
+	if ( s.size() > 0 )
+	{
+		break_instructions_limit = strtoul( s.c_str(), NULL, 10 );
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::instructionsThresChanged(const QString &txt)
+{
+	std::string s;
+
+	s = txt.toStdString();
+
+	//printf("Instructions: '%s'\n", s.c_str() );
+
+	if ( s.size() > 0 )
+	{
+		break_instructions_limit = strtoul( s.c_str(), NULL, 10 );
+	}
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::debugRunCB(void)
 {
 	if (FCEUI_EmulationPaused()) 
@@ -885,6 +962,27 @@ void ConsoleDebugger::debugRunLine128CB(void)
 		//else vblankScanLines = 0;
 	}
 	FCEUI_SetEmulationPaused(0);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::seekToCB (void)
+{
+	std::string s;
+
+	s = seekEntry->text().toStdString();
+
+	//printf("Seek To: '%s'\n", s.c_str() );
+
+	if ( s.size() > 0 )
+	{
+		long int addr, line;
+
+		addr = strtol( s.c_str(), NULL, 16 );
+		
+		line = asmView->getAsmLineFromAddr(addr);
+
+		asmView->setLine( line );
+		vbar->setValue( line );
+	}
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::seekPCCB (void)
@@ -1418,7 +1516,7 @@ void ConsoleDebugger::vbarChanged(int value)
 	asmView->setLine( value );
 }
 //----------------------------------------------------------------------------
-void FCEUD_DebugBreakpoint( int addr )
+void FCEUD_DebugBreakpoint( int bpNum )
 {
 	std::list <ConsoleDebugger*>::iterator it;
 
@@ -1426,13 +1524,13 @@ void FCEUD_DebugBreakpoint( int addr )
 	{
 		return;
 	}
-	//printf("Breakpoint Hit: 0x%04X \n", addr );
+	printf("Breakpoint Hit: %i \n", bpNum );
 
 	fceuWrapperUnLock();
 	
 	for (it=dbgWinList.begin(); it!=dbgWinList.end(); it++)
 	{
-		(*it)->breakPointNotify( addr );
+		(*it)->breakPointNotify( bpNum );
 	}
 
 	while ( nes_shm->runEmulator && FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
@@ -1493,6 +1591,7 @@ void QAsmView::scrollToPC(void)
 	if ( asmPC != NULL )
 	{
 		lineOffset = asmPC->line;
+		vbar->setValue( lineOffset );
 	}
 }
 //----------------------------------------------------------------------------
@@ -1607,6 +1706,14 @@ void QAsmView::paintEvent(QPaintEvent *event)
 		x=0;
 		l = lineOffset + row;
 		painter.setPen( this->palette().color(QPalette::WindowText));
+
+		if ( asmPC != NULL )
+		{
+			if ( l == asmPC->line )
+			{
+				painter.fillRect( 0, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("light blue") );
+			}
+		}
 
 		if ( l < asmEntry.size() )
 		{
