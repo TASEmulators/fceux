@@ -48,7 +48,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 {
 	QHBoxLayout *mainLayout;
 	QVBoxLayout *vbox, *vbox1, *vbox2, *vbox3;
-	QHBoxLayout *hbox, *hbox1, *hbox2;
+	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3;
 	QGridLayout *grid;
 	QPushButton *button;
 	QFrame      *frame;
@@ -227,7 +227,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	hbox->addWidget( bpTree );
 
-	hbox    = new QHBoxLayout();
+	hbox   = new QHBoxLayout();
 	button = new QPushButton( tr("Add") );
 	hbox->addWidget( button );
    connect( button, SIGNAL(clicked(void)), this, SLOT(add_BP_CB(void)) );
@@ -339,6 +339,86 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	brkInstrsExd->setChecked( break_on_instructions );
    connect( brkInstrsExd, SIGNAL(stateChanged(int)), this, SLOT(breakOnInstructionsCB(int)) );
 
+	hbox3     = new QHBoxLayout();
+	hbox      = new QHBoxLayout();
+	vbox      = new QVBoxLayout();
+	bmFrame   = new QGroupBox( tr("Address Bookmarks") );
+	bmTree    = new QTreeWidget();
+	selBmAddr = new QLineEdit();
+
+	bmTree->setColumnCount(2);
+
+	item = new QTreeWidgetItem();
+	item->setFont( 0, font );
+	item->setFont( 1, font );
+	item->setText( 0, QString::fromStdString( "Addr" ) );
+	item->setText( 1, QString::fromStdString( "Name" ) );
+	item->setTextAlignment( 0, Qt::AlignCenter);
+	item->setTextAlignment( 1, Qt::AlignCenter);
+
+	bmTree->setHeaderItem( item );
+
+	bmTree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+
+	connect( bmTree, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+			   this, SLOT(bmItemClicked( QTreeWidgetItem*, int)) );
+
+	vbox->addWidget( selBmAddr );
+
+	button    = new QPushButton( tr("Add") );
+	vbox->addWidget( button );
+
+	button    = new QPushButton( tr("Delete") );
+	vbox->addWidget( button );
+
+	button    = new QPushButton( tr("Name") );
+	vbox->addWidget( button );
+
+	hbox->addWidget( bmTree );
+	hbox->addLayout( vbox   );
+	bmFrame->setLayout( hbox );
+	hbox3->addWidget( bmFrame );
+	vbox1->addLayout( hbox3 );
+
+	frame        = new QFrame();
+	vbox         = new QVBoxLayout();
+	button       = new QPushButton( tr("Reset Counters") );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(resetCountersCB(void)) );
+	vbox->addWidget( button );
+	vbox->addWidget( frame  );
+	hbox3->addLayout( vbox  );
+
+	vbox         = new QVBoxLayout();
+	romOfsChkBox = new QCheckBox( tr("ROM Offsets") );
+	symDbgChkBox = new QCheckBox( tr("Symbolic Debug") );
+	regNamChkBox = new QCheckBox( tr("Register Names") );
+	vbox->addWidget( romOfsChkBox );
+	vbox->addWidget( symDbgChkBox );
+	vbox->addWidget( regNamChkBox );
+
+   connect( romOfsChkBox, SIGNAL(stateChanged(int)), this, SLOT(displayROMoffsetCB(int)) );
+
+	button       = new QPushButton( tr("Reload Symbols") );
+	vbox->addWidget( button );
+
+	button       = new QPushButton( tr("ROM Patcher") );
+	vbox->addWidget( button );
+
+	frame->setLayout( vbox );
+	frame->setFrameShape( QFrame::Box );
+
+	hbox      = new QHBoxLayout();
+	vbox1->addLayout( hbox );
+
+	button         = new QPushButton( tr("Default Window Size") );
+	autoOpenChkBox = new QCheckBox( tr("Auto-Open") );
+	debFileChkBox  = new QCheckBox( tr("DEB Files") );
+	idaFontChkBox  = new QCheckBox( tr("IDA Font") );
+	hbox->addWidget( button );
+	hbox->addWidget( autoOpenChkBox );
+	hbox->addWidget( debFileChkBox  );
+	hbox->addWidget( idaFontChkBox  );
+
 	setLayout( mainLayout );
 
 	windowUpdateReq   = true;
@@ -380,6 +460,14 @@ void ConsoleDebugger::closeWindow(void)
 void 	ConsoleDebugger::bpItemClicked( QTreeWidgetItem *item, int column)
 {
 	int row = bpTree->indexOfTopLevelItem(item);
+
+	printf("Row: %i Column: %i \n", row, column );
+
+}
+//----------------------------------------------------------------------------
+void 	ConsoleDebugger::bmItemClicked( QTreeWidgetItem *item, int column)
+{
+	int row = bmTree->indexOfTopLevelItem(item);
 
 	printf("Row: %i Column: %i \n", row, column );
 
@@ -852,6 +940,11 @@ void ConsoleDebugger::instructionsThresChanged(const QString &txt)
 	}
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::displayROMoffsetCB( int value )
+{
+	asmView->setDisplayROMoffsets(value != Qt::Unchecked);
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::debugRunCB(void)
 {
 	if (FCEUI_EmulationPaused()) 
@@ -994,6 +1087,13 @@ void ConsoleDebugger::seekPCCB (void)
 	}
 	windowUpdateReq = true;
 	//asmView->scrollToPC();
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::resetCountersCB (void)
+{
+	ResetDebugStatisticsCounters();
+
+	updateRegisterView();
 }
 //----------------------------------------------------------------------------
 int  QAsmView::getAsmLineFromAddr(int addr)
@@ -1156,6 +1256,8 @@ void  QAsmView::updateAssemblyView(void)
 		start_address_lp = starting_address;
 	}
 
+	maxLineLen = 0;
+
 	asmClear();
 
 	addr  = starting_address;
@@ -1275,12 +1377,19 @@ void  QAsmView::updateAssemblyView(void)
 
 		a->line = asmEntry.size();
 
+		if ( maxLineLen < line.size() )
+		{
+			maxLineLen = line.size();
+		}
+
 		line.append("\n");
 
 		//asmText->insertPlainText( tr(line.c_str()) );
 
 		asmEntry.push_back(a);
 	}
+
+	setMinimumWidth( maxLineLen * pxCharWidth );
 
 	vbar->setMaximum( asmEntry.size() );
 }
@@ -1563,8 +1672,11 @@ QAsmView::QAsmView(QWidget *parent)
 	hbar = NULL;
 	asmPC = NULL;
 	displayROMoffsets = false;
+	maxLineLen = 0;
 	lineOffset = 0;
 	maxLineOffset = 0;
+
+	//setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
 }
 //----------------------------------------------------------------------------
 QAsmView::~QAsmView(void)
@@ -1592,6 +1704,16 @@ void QAsmView::scrollToPC(void)
 	{
 		lineOffset = asmPC->line;
 		vbar->setValue( lineOffset );
+	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::setDisplayROMoffsets( bool value )
+{
+	if ( value != displayROMoffsets )
+	{
+		displayROMoffsets = value;
+
+		updateAssemblyView();
 	}
 }
 //----------------------------------------------------------------------------

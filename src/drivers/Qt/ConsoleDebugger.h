@@ -64,6 +64,7 @@ class QAsmView : public QWidget
 		int  getAsmLineFromAddr(int addr);
 		void setLine(int lineNum);
 		void scrollToPC(void);
+		void setDisplayROMoffsets( bool value );
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
@@ -79,6 +80,7 @@ class QAsmView : public QWidget
 		QScrollBar *vbar;
 		QScrollBar *hbar;
 
+		int maxLineLen;
 		int pxCharWidth;
 		int pxCharHeight;
 		int pxCursorHeight;
@@ -128,10 +130,13 @@ class ConsoleDebugger : public QDialog
 		QLineEdit *regYEntry;
 		QLineEdit *cpuCycExdVal;
 		QLineEdit *instrExdVal;
+		QLineEdit *selBmAddr;
 		QGroupBox *stackFrame;
 		QGroupBox *bpFrame;
 		QGroupBox *sfFrame;
-		QTreeWidget * bpTree;
+		QGroupBox *bmFrame;
+		QTreeWidget *bpTree;
+		QTreeWidget *bmTree;
 		QCheckBox *brkBadOpsCbox;
 		QCheckBox *N_chkbox;
 		QCheckBox *V_chkbox;
@@ -143,6 +148,12 @@ class ConsoleDebugger : public QDialog
 		QCheckBox *C_chkbox;
 		QCheckBox *brkCpuCycExd;
 		QCheckBox *brkInstrsExd;
+		QCheckBox *romOfsChkBox;
+		QCheckBox *symDbgChkBox;
+		QCheckBox *regNamChkBox;
+		QCheckBox *autoOpenChkBox;
+		QCheckBox *debFileChkBox;
+		QCheckBox *idaFontChkBox;
 		QLabel    *ppuLbl;
 		QLabel    *spriteLbl;
 		QLabel    *scanLineLbl;
@@ -177,10 +188,13 @@ class ConsoleDebugger : public QDialog
 		void add_BP_CB(void);
 		void edit_BP_CB(void);
 		void delete_BP_CB(void);
+		void resetCountersCB (void);
+		void displayROMoffsetCB(int value);
 		void breakOnBadOpcodeCB(int value);
 		void breakOnCyclesCB( int value );
 		void breakOnInstructionsCB( int value );
 		void bpItemClicked( QTreeWidgetItem *item, int column);
+		void bmItemClicked( QTreeWidgetItem *item, int column);
 		void cpuCycleThresChanged(const QString &txt);
 		void instructionsThresChanged(const QString &txt);
 
