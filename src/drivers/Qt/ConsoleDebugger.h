@@ -111,7 +111,7 @@ class ConsoleDebugger : public QDialog
 
 		void updateWindowData(void);
 		void updateRegisterView(void);
-		void breakPointNotify(int addr);
+		void breakPointNotify(int bpNum);
 
 	protected:
 		void closeEvent(QCloseEvent *event);

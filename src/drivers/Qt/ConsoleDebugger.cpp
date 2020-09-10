@@ -206,6 +206,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	bpTree  = new QTreeWidget();
 
 	bpTree->setColumnCount(2);
+	bpTree->setSelectionMode( QAbstractItemView::SingleSelection );
 
 	item = new QTreeWidgetItem();
 	item->setFont( 0, font );
@@ -871,7 +872,9 @@ void ConsoleDebugger::delete_BP_CB(void)
 	int row = bpTree->indexOfTopLevelItem(item);
 
 	DeleteBreak( row );
-	bpListUpdate( true );
+	delete item;
+	//delete bpTree->takeTopLevelItem(row);
+	//bpListUpdate( true );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::breakOnBadOpcodeCB(int value)
@@ -1614,8 +1617,42 @@ void ConsoleDebugger::updatePeriodic(void)
 	asmView->update();
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::breakPointNotify( int addr )
+void ConsoleDebugger::breakPointNotify( int bpNum )
 {
+	if ( bpNum >= 0 )
+	{
+		// TODO highlight bp_num item list
+		QTreeWidgetItem * item;
+
+		item = bpTree->currentItem();
+
+		if ( item != NULL )
+		{
+			//bpTree->setCurrentItem( item, 0, QItemSelectionModel::Clear );
+			item->setSelected(false);
+		}
+
+		item = bpTree->topLevelItem( bpNum );
+
+		if ( item != NULL )
+		{
+			item->setSelected(true);
+			//bpTree->setCurrentItem( item, 0, QItemSelectionModel::Select );
+		}
+		//bpTree->redraw();
+	}
+	else
+	{
+		if (bpNum == BREAK_TYPE_CYCLES_EXCEED)
+		{
+			// TODO
+		}
+		else if (bpNum == BREAK_TYPE_INSTRUCTIONS_EXCEED)
+		{
+			// TODO
+		}
+	}
+
 	windowUpdateReq = true;
 }
 //----------------------------------------------------------------------------
@@ -1636,7 +1673,7 @@ void FCEUD_DebugBreakpoint( int bpNum )
 	printf("Breakpoint Hit: %i \n", bpNum );
 
 	fceuWrapperUnLock();
-	
+
 	for (it=dbgWinList.begin(); it!=dbgWinList.end(); it++)
 	{
 		(*it)->breakPointNotify( bpNum );
@@ -1646,6 +1683,9 @@ void FCEUD_DebugBreakpoint( int bpNum )
 	{
 		usleep(100000);
 	}
+	// since we unfreezed emulation, reset delta_cycles counter
+	ResetDebugStatisticsDeltaCounters();
+
 	fceuWrapperLock();
 }
 //----------------------------------------------------------------------------
