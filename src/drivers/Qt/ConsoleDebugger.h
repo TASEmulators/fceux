@@ -50,6 +50,8 @@ struct dbg_asm_entry_t
 	}
 };
 
+class ConsoleDebugger;
+
 class QAsmView : public QWidget
 {
    Q_OBJECT
@@ -70,12 +72,15 @@ class QAsmView : public QWidget
 		void keyPressEvent(QKeyEvent *event);
    	void keyReleaseEvent(QKeyEvent *event);
 		void mousePressEvent(QMouseEvent * event);
+		void mouseMoveEvent(QMouseEvent * event);
 		void resizeEvent(QResizeEvent *event);
 		void contextMenuEvent(QContextMenuEvent *event);
 
 		void calcFontData(void);
+		QPoint convPixToCursor( QPoint p );
 
 	private:
+		ConsoleDebugger *parent;
 		QFont       font;
 		QScrollBar *vbar;
 		QScrollBar *hbar;
@@ -113,6 +118,7 @@ class ConsoleDebugger : public QDialog
 		void updateRegisterView(void);
 		void breakPointNotify(int bpNum);
 
+		QLabel    *asmLineSelLbl;
 	protected:
 		void closeEvent(QCloseEvent *event);
 		//void keyPressEvent(QKeyEvent *event);
@@ -154,7 +160,6 @@ class ConsoleDebugger : public QDialog
 		QCheckBox *autoOpenChkBox;
 		QCheckBox *debFileChkBox;
 		QCheckBox *idaFontChkBox;
-		QLabel    *asmLineSelLbl;
 		QLabel    *emuStatLbl;
 		QLabel    *ppuLbl;
 		QLabel    *spriteLbl;

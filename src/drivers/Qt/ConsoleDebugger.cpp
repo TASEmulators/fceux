@@ -1757,7 +1757,9 @@ QAsmView::QAsmView(QWidget *parent)
 	pal.setColor(QPalette::Background, bg );
 	pal.setColor(QPalette::WindowText, fg );
 
+	this->parent = (ConsoleDebugger*)parent;
 	this->setPalette(pal);
+	this->setMouseTracking(true);
 
 	calcFontData();
 
@@ -1864,6 +1866,99 @@ void QAsmView::keyReleaseEvent(QKeyEvent *event)
 {
    printf("Debug ASM Window Key Release: 0x%x \n", event->key() );
 	//assignHotkey( event );
+}
+//----------------------------------------------------------------------------
+QPoint QAsmView::convPixToCursor( QPoint p )
+{
+	QPoint c(0,0);
+
+	if ( p.x() < 0 )
+	{
+		c.setX(0);
+	}
+	else
+	{
+		float x = (float)p.x() / pxCharWidth;
+
+		c.setX( (int)x );
+	}
+
+	if ( p.y() < 0 )
+	{
+		c.setY( 0 );
+	}
+	else 
+	{
+		float ly = ( (float)pxLineLead / (float)pxLineSpacing );
+		float py = ( (float)p.y() ) /  (float)pxLineSpacing;
+		float ry = fmod( py, 1.0 );
+
+		if ( ry < ly )
+		{
+			c.setY( ((int)py) - 1 );
+		}
+		else
+		{
+			c.setY( (int)py );
+		}
+	}
+	return c;
+}
+//----------------------------------------------------------------------------
+void QAsmView::mouseMoveEvent(QMouseEvent * event)
+{
+	int line;
+	QPoint c = convPixToCursor( event->pos() );
+	char txt[256];
+	std::string s;
+
+	line = lineOffset + c.y();
+
+	//printf("c (%i,%i) : Line %i : %04X \n", c.x(), c.y(), line, asmEntry[line]->addr );
+
+	if ( line < asmEntry.size() )
+	{
+		int addr;
+
+		addr = asmEntry[line]->addr;
+
+		if (addr >= 0x8000)
+		{
+			int bank, romOfs;
+			bank   = getBank(addr);
+			romOfs = GetNesFileAddress(addr);
+
+			sprintf( txt, "CPU Address: %02X:%04X", bank, addr);
+
+			s.assign( txt );
+
+			if (romOfs != -1)
+			{
+				const char *fileName;
+
+				fileName = iNesShortFName();
+
+				if ( fileName == NULL )
+				{
+					fileName = "...";
+				}
+				sprintf( txt, ", Offset 0x%06X in File \"%s\" (NL file: %X)", romOfs, fileName, bank);
+
+				s.append( txt );
+			}
+		}
+		else
+		{
+			sprintf( txt, "CPU Address: %04X", addr);
+
+			s.assign( txt );
+		}
+	}
+
+	if ( parent != NULL )
+	{
+		parent->asmLineSelLbl->setText( tr(s.c_str()) );
+	}
 }
 //----------------------------------------------------------------------------
 void QAsmView::mousePressEvent(QMouseEvent * event)
