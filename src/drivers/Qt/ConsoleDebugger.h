@@ -154,6 +154,8 @@ class ConsoleDebugger : public QDialog
 		QCheckBox *autoOpenChkBox;
 		QCheckBox *debFileChkBox;
 		QCheckBox *idaFontChkBox;
+		QLabel    *asmLineSelLbl;
+		QLabel    *emuStatLbl;
 		QLabel    *ppuLbl;
 		QLabel    *spriteLbl;
 		QLabel    *scanLineLbl;

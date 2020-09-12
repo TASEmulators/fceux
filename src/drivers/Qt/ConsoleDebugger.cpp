@@ -47,7 +47,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	: QDialog( parent )
 {
 	QHBoxLayout *mainLayout;
-	QVBoxLayout *vbox, *vbox1, *vbox2, *vbox3;
+	QVBoxLayout *vbox, *vbox1, *vbox2, *vbox3, *vbox4;
 	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3;
 	QGridLayout *grid;
 	QPushButton *button;
@@ -69,10 +69,13 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	mainLayout = new QHBoxLayout();
 
-	grid    = new QGridLayout();
-	asmView = new QAsmView(this);
-	vbar    = new QScrollBar( Qt::Vertical, this );
-	hbar    = new QScrollBar( Qt::Horizontal, this );
+	vbox4      = new QVBoxLayout();
+	grid       = new QGridLayout();
+	asmView    = new QAsmView(this);
+	vbar       = new QScrollBar( Qt::Vertical, this );
+	hbar       = new QScrollBar( Qt::Horizontal, this );
+	asmLineSelLbl = new QLabel( tr("Line Select") );
+	emuStatLbl    = new QLabel( tr("Emulator is Running") );
 
    asmView->setScrollBars( hbar, vbar );
 
@@ -89,13 +92,16 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	vbar->setMinimum(0);
 	vbar->setMaximum( 0x10000 );
 
+	vbox4->addLayout( grid, 100 );
+	vbox4->addWidget( asmLineSelLbl, 1 );
+	vbox4->addWidget( emuStatLbl   , 1 );
 	//asmText->setFont(font);
 	//asmText->setReadOnly(true);
 	//asmText->setOverwriteMode(true);
 	//asmText->setMinimumWidth( 20 * fontCharWidth );
 	//asmText->setLineWrapMode( QPlainTextEdit::NoWrap );
 
-	mainLayout->addLayout( grid, 10 );
+	mainLayout->addLayout( vbox4, 10 );
 	mainLayout->addLayout( vbox1, 1 );
 
 	grid    = new QGridLayout();
@@ -1651,6 +1657,17 @@ void ConsoleDebugger::updatePeriodic(void)
 		fceuWrapperUnLock();
 	}
 	asmView->update();
+
+	if ( FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
+	{
+		emuStatLbl->setText( tr(" Emulator Stopped / Paused") );
+		emuStatLbl->setStyleSheet("background-color: red; color: white;");
+	}
+	else
+	{
+		emuStatLbl->setText( tr(" Emulator is Running") );
+		emuStatLbl->setStyleSheet("background-color: green; color: white;");
+	}
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::breakPointNotify( int bpNum )
