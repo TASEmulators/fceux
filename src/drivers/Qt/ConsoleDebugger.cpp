@@ -7,6 +7,8 @@
 #include <list>
 
 #include <SDL.h>
+#include <QMenu>
+#include <QAction>
 #include <QPainter>
 #include <QHeaderView>
 #include <QCloseEvent>
@@ -1105,6 +1107,20 @@ void ConsoleDebugger::resetCountersCB (void)
 	updateRegisterView();
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::asmViewCtxMenuAddBP(void)
+{
+	watchpointinfo wp;
+
+	wp.address = asmView->getCtxMenuAddr();
+	wp.endaddress = 0;
+	wp.flags   = WP_X | WP_E;
+	wp.condText = 0;
+	wp.desc = NULL;
+
+	openBpEditWindow( -1, &wp );
+
+}
+//----------------------------------------------------------------------------
 int  QAsmView::getAsmLineFromAddr(int addr)
 {
 	int  line = -1;
@@ -1668,6 +1684,12 @@ void ConsoleDebugger::updatePeriodic(void)
 		emuStatLbl->setText( tr(" Emulator is Running") );
 		emuStatLbl->setStyleSheet("background-color: green; color: white;");
 	}
+
+	if ( bpTree->topLevelItemCount() != numWPs )
+	{
+		printf("Breakpoint Tree Update\n");
+		bpListUpdate( true );
+	}
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::breakPointNotify( int bpNum )
@@ -1770,6 +1792,7 @@ QAsmView::QAsmView(QWidget *parent)
 	maxLineLen = 0;
 	lineOffset = 0;
 	maxLineOffset = 0;
+	ctxMenuAddr = -1;
 
 	//setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
 }
@@ -1963,13 +1986,46 @@ void QAsmView::mouseMoveEvent(QMouseEvent * event)
 //----------------------------------------------------------------------------
 void QAsmView::mousePressEvent(QMouseEvent * event)
 {
-	// TODO QPoint c = convPixToCursor( event->pos() );
+	//int line;
+	//QPoint c = convPixToCursor( event->pos() );
 
+	//line = lineOffset + c.y();
+	//
+	//if ( line < asmEntry.size() )
+	//{
+	//	int addr;
+
+	//	addr = asmEntry[line]->addr;
+	//}
 }
 //----------------------------------------------------------------------------
 void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 {
-	// TODO
+	int line;
+	QAction *act;
+	QMenu menu(this);
+	QPoint c = convPixToCursor( event->pos() );
+
+	line = lineOffset + c.y();
+
+	ctxMenuAddr = -1;
+
+	if ( line < asmEntry.size() )
+	{
+		int addr;
+
+		ctxMenuAddr = addr = asmEntry[line]->addr;
+
+		act = new QAction(tr("Add Breakpoint"), this);
+   	menu.addAction(act);
+		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBP(void)) );
+
+		act = new QAction(tr("Add Symbolic Debug Name"), this);
+   	menu.addAction(act);
+		//connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
+		
+		menu.exec(event->globalPos());
+	}
 }
 //----------------------------------------------------------------------------
 void QAsmView::paintEvent(QPaintEvent *event)

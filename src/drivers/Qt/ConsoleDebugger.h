@@ -67,6 +67,7 @@ class QAsmView : public QWidget
 		void setLine(int lineNum);
 		void scrollToPC(void);
 		void setDisplayROMoffsets( bool value );
+		int  getCtxMenuAddr(void){ return ctxMenuAddr; };
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
@@ -85,6 +86,7 @@ class QAsmView : public QWidget
 		QScrollBar *vbar;
 		QScrollBar *hbar;
 
+		int ctxMenuAddr;
 		int maxLineLen;
 		int pxCharWidth;
 		int pxCharHeight;
@@ -117,6 +119,7 @@ class ConsoleDebugger : public QDialog
 		void updateWindowData(void);
 		void updateRegisterView(void);
 		void breakPointNotify(int bpNum);
+		void openBpEditWindow(int editIdx = -1, watchpointinfo *wp = NULL );
 
 		QLabel    *asmLineSelLbl;
 	protected:
@@ -176,11 +179,11 @@ class ConsoleDebugger : public QDialog
 
 	private:
 		void setRegsFromEntry(void);
-		void openBpEditWindow(int editIdx = -1, watchpointinfo *wp = NULL );
 		void bpListUpdate( bool reset = false );
 
    public slots:
       void closeWindow(void);
+		void asmViewCtxMenuAddBP(void);
 	private slots:
 		void updatePeriodic(void);
 		void vbarChanged(int value);
