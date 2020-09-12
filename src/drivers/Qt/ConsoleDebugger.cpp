@@ -794,7 +794,7 @@ void ConsoleDebugger::bpListUpdate( bool reset )
 		item->setTextAlignment( 2, Qt::AlignLeft);
 	}
 
-	bpTree->update();
+	bpTree->viewport()->update();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::add_BP_CB(void)
@@ -1449,6 +1449,42 @@ void ConsoleDebugger::setRegsFromEntry(void)
 	}
 	X.Y  = i;
 	//printf("Set Y: '%s'  %02X\n", s.c_str(), X.Y );
+
+	i=0;
+	if ( N_chkbox->isChecked() )
+	{
+		i |= N_FLAG;
+	}
+	if ( V_chkbox->isChecked() )
+	{
+		i |= V_FLAG;
+	}
+	if ( U_chkbox->isChecked() )
+	{
+		i |= U_FLAG;
+	}
+	if ( B_chkbox->isChecked() )
+	{
+		i |= B_FLAG;
+	}
+	if ( D_chkbox->isChecked() )
+	{
+		i |= D_FLAG;
+	}
+	if ( I_chkbox->isChecked() )
+	{
+		i |= I_FLAG;
+	}
+	if ( Z_chkbox->isChecked() )
+	{
+		i |= Z_FLAG;
+	}
+	if ( C_chkbox->isChecked() )
+	{
+		i |= C_FLAG;
+	}
+	X.P = i;
+
 }
 //----------------------------------------------------------------------------
 void  ConsoleDebugger::updateRegisterView(void)
@@ -1639,7 +1675,7 @@ void ConsoleDebugger::breakPointNotify( int bpNum )
 			item->setSelected(true);
 			//bpTree->setCurrentItem( item, 0, QItemSelectionModel::Select );
 		}
-		//bpTree->redraw();
+		bpTree->viewport()->update();
 	}
 	else
 	{
