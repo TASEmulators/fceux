@@ -220,12 +220,15 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	item->setFont( 0, font );
 	item->setFont( 1, font );
 	item->setFont( 2, font );
+	item->setFont( 3, font );
 	item->setText( 0, QString::fromStdString( "Addr" ) );
 	item->setText( 1, QString::fromStdString( "Flags" ) );
-	item->setText( 2, QString::fromStdString( "Desc" ) );
+	item->setText( 2, QString::fromStdString( "Cond" ) );
+	item->setText( 3, QString::fromStdString( "Desc" ) );
 	item->setTextAlignment( 0, Qt::AlignCenter);
 	item->setTextAlignment( 1, Qt::AlignCenter);
 	item->setTextAlignment( 2, Qt::AlignCenter);
+	item->setTextAlignment( 3, Qt::AlignCenter);
 
 	bpTree->setHeaderItem( item );
 
@@ -624,6 +627,19 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
 		{
 			cond->setText( tr(wp->condText) );
 		}
+		else
+		{
+			if ( editIdx < 0 )
+			{
+				// If new breakpoint, suggest condition if in ROM Mapping area of memory.
+				if ( wp->address >= 0x8000 )
+				{
+					char str[64];
+					sprintf(str, "K==#%02X", getBank(wp->address));
+					cond->setText( tr(str) );
+				}
+			}
+		}
 
 		if ( wp->desc )
 		{
@@ -718,7 +734,7 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
 void ConsoleDebugger::bpListUpdate( bool reset )
 {
 	QTreeWidgetItem *item;
-	char line[256], addrStr[32], flags[16], enable;
+	char cond[128], desc[128], addrStr[32], flags[16], enable;
 
 	if ( reset )
 	{
@@ -727,7 +743,14 @@ void ConsoleDebugger::bpListUpdate( bool reset )
 
 	for (int i=0; i<numWPs; i++)
 	{
-		item = bpTree->topLevelItem(i);
+		if ( bpTree->topLevelItemCount() > i )
+		{
+			item = bpTree->topLevelItem(i);
+		}
+		else
+		{
+			item = NULL;
+		}
 
 		if ( item == NULL )
 		{
@@ -771,20 +794,19 @@ void ConsoleDebugger::bpListUpdate( bool reset )
 
 		enable = (watchpoint[i].flags & WP_E) ? 1 : 0;
 
-		//strcpy( line, addrStr );
-		//strcpy( line, flags   );
-		line[0] = 0;
+		cond[0] = 0;
+		desc[0] = 0;
 
 		if (watchpoint[i].desc )
 		{
-			strcat( line, watchpoint[i].desc);
+			strcat( desc, watchpoint[i].desc);
 		}
 
 		if (watchpoint[i].condText )
 		{
-			strcat( line, " Condition:");
-			strcat( line, watchpoint[i].condText);
-			strcat( line, " ");
+			strcat( cond, " (");
+			strcat( cond, watchpoint[i].condText);
+			strcat( cond, ") ");
 		}
 
 		item->setCheckState( 0, enable ? Qt::Checked : Qt::Unchecked );
@@ -792,14 +814,17 @@ void ConsoleDebugger::bpListUpdate( bool reset )
 		item->setFont( 0, font );
 		item->setFont( 1, font );
 		item->setFont( 2, font );
+		item->setFont( 3, font );
 
 		item->setText( 0, tr(addrStr));
 		item->setText( 1, tr(flags)  );
-		item->setText( 2, tr(line)   );
+		item->setText( 2, tr(cond)   );
+		item->setText( 3, tr(desc)   );
 
 		item->setTextAlignment( 0, Qt::AlignLeft);
 		item->setTextAlignment( 1, Qt::AlignLeft);
 		item->setTextAlignment( 2, Qt::AlignLeft);
+		item->setTextAlignment( 3, Qt::AlignLeft);
 	}
 
 	bpTree->viewport()->update();
@@ -1696,25 +1721,27 @@ void ConsoleDebugger::breakPointNotify( int bpNum )
 {
 	if ( bpNum >= 0 )
 	{
-		// TODO highlight bp_num item list
-		QTreeWidgetItem * item;
+		// highlight bp_num item list
 
-		item = bpTree->currentItem();
-
-		if ( item != NULL )
+		if ( bpTree->topLevelItemCount() > 0 )
 		{
-			//bpTree->setCurrentItem( item, 0, QItemSelectionModel::Clear );
-			item->setSelected(false);
-		}
+			QTreeWidgetItem * item;
 
-		item = bpTree->topLevelItem( bpNum );
+			item = bpTree->currentItem();
 
-		if ( item != NULL )
-		{
-			item->setSelected(true);
-			//bpTree->setCurrentItem( item, 0, QItemSelectionModel::Select );
+			if ( item != NULL )
+			{
+				item->setSelected(false);
+			}
+
+			item = bpTree->topLevelItem( bpNum );
+
+			if ( item != NULL )
+			{
+				item->setSelected(true);
+			}
+			bpTree->viewport()->update();
 		}
-		bpTree->viewport()->update();
 	}
 	else
 	{
