@@ -15,6 +15,7 @@
 #include "Qt/nes_shm.h"
 #include "Qt/unix-netplay.h"
 #include "Qt/HexEditor.h"
+#include "Qt/SymbolicDebug.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/fceux_git_info.h"
 
@@ -228,6 +229,8 @@ int LoadGame(const char *path)
 	}
 
 	hexEditorLoadBookmarks();
+
+	debugSymbolTable.loadGameSymbols();
 
     int state_to_load;
     g_config->getOption("SDL.AutoLoadState", &state_to_load);
