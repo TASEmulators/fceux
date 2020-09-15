@@ -61,6 +61,106 @@ debugSymbol_t *debugSymbolPage_t::getSymbolAtOffset( int ofs )
 	return sym;
 }
 //--------------------------------------------------------------
+int debugSymbolPage_t::save(void)
+{
+	FILE *fp;
+	debugSymbol_t *sym;
+	std::map <int, debugSymbol_t*>::iterator it;
+	const char *romFile;
+	char stmp[512];
+	int i,j;
+
+	romFile = getRomFile();
+
+	if ( romFile == NULL )
+	{
+		return -1;
+	}
+	i=0;
+	while ( romFile[i] != 0 )
+	{
+
+		if ( romFile[i] == '|' )
+		{
+			stmp[i] = '.';
+		}
+		else
+		{
+			stmp[i] = romFile[i];
+		}
+		i++;
+	}
+	stmp[i] = 0;
+
+	if ( pageNum > 0 )
+	{
+		char suffix[32];
+
+		sprintf( suffix, ".%X.nl", pageNum );
+
+		strcat( stmp, suffix );
+	}
+	else
+	{
+		strcat( stmp, ".ram.nl" );
+	}
+
+	fp = fopen( stmp, "w" );
+
+	if ( fp == NULL )
+	{
+		printf("Error: Could not open file '%s' for writing\n", stmp );
+		return -1;
+	}
+
+	for (it=symMap.begin(); it!=symMap.end(); it++)
+	{
+		const char *c;
+
+		sym = it->second;
+
+		i=0; j=0; c = sym->comment.c_str();
+		
+		while ( c[i] != 0 )
+		{
+			if ( c[i] == '\n' )
+			{
+				i++; break;
+			}
+			else
+			{
+				stmp[j] = c[i]; j++; i++;
+			}
+		}
+		stmp[j] = 0;
+
+		fprintf( fp, "$%04X#%s#%s\n", sym->ofs, sym->name.c_str(), stmp );
+
+		j=0;
+		while ( c[i] != 0 )
+		{
+			if ( c[i] == '\n' )
+			{
+				i++; stmp[j] = 0;
+
+				if ( j > 0 )
+				{
+					fprintf( fp, "\\%s\n", stmp );
+				}
+				j=0;
+			}
+			else
+			{
+				stmp[j] = c[i]; j++; i++;
+			}
+		}
+	}
+
+	fclose(fp);
+
+	return 0;
+}
+//--------------------------------------------------------------
 void debugSymbolPage_t::print(void)
 {
 	FILE *fp;
@@ -356,6 +456,7 @@ int debugSymbolTable_t::loadGameSymbols(void)
 {
 	int nPages;
 
+	this->save();
 	this->clear();
 
 	loadFileNL( 0x0000 );
@@ -389,6 +490,19 @@ debugSymbol_t *debugSymbolTable_t::getSymbolAtBankOffset( int bank, int ofs )
 		sym = (it->second)->getSymbolAtOffset( ofs );
 	}
 	return sym;
+}
+//--------------------------------------------------------------
+void debugSymbolTable_t::save(void)
+{
+	debugSymbolPage_t *page;
+	std::map <int, debugSymbolPage_t*>::iterator it;
+
+	for (it=pageMap.begin(); it!=pageMap.end(); it++)
+	{
+		page = it->second;
+
+		page->save();
+	}
 }
 //--------------------------------------------------------------
 void debugSymbolTable_t::print(void)

@@ -26,6 +26,7 @@ struct debugSymbolPage_t
 	debugSymbolPage_t(void);
 	~debugSymbolPage_t(void);
 
+	int  save(void);
 	void print(void);
 	int size(void){ return symMap.size(); }
 
@@ -47,6 +48,7 @@ class debugSymbolTable_t
 		int loadGameSymbols(void);
 		int numPages(void){ return pageMap.size(); }
 
+		void save(void);
 		void clear(void);
 		void print(void);
 

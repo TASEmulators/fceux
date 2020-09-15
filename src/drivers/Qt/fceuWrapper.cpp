@@ -280,6 +280,9 @@ CloseGame(void)
 	}
 	hexEditorSaveBookmarks();
 
+	debugSymbolTable.save();
+	debugSymbolTable.clear();
+
     int state_to_save;
     g_config->getOption("SDL.AutoSaveState", &state_to_save);
     if (state_to_save < 10 && state_to_save >= 0){
