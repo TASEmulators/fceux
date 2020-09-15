@@ -210,6 +210,7 @@ class ConsoleDebugger : public QDialog
 		void edit_BP_CB(void);
 		void delete_BP_CB(void);
 		void resetCountersCB (void);
+		void reloadSymbolsCB(void);
 		void displayROMoffsetCB(int value);
 		void symbolDebugEnableCB(int value);
 		void registerNameEnableCB(int value);

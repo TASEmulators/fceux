@@ -409,7 +409,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	vbox->addWidget( regNamChkBox );
 
 	symDbgChkBox->setChecked(true);
-	regNamChkBox->setChecked(true);
+	//regNamChkBox->setChecked(true);
+	regNamChkBox->setEnabled(false); // TODO
 
    connect( romOfsChkBox, SIGNAL(stateChanged(int)), this, SLOT(displayROMoffsetCB(int)) );
    connect( symDbgChkBox, SIGNAL(stateChanged(int)), this, SLOT(symbolDebugEnableCB(int)) );
@@ -417,9 +418,11 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	button       = new QPushButton( tr("Reload Symbols") );
 	vbox->addWidget( button );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(reloadSymbolsCB(void)) );
 
 	button       = new QPushButton( tr("ROM Patcher") );
 	vbox->addWidget( button );
+	button->setEnabled(false); // TODO
 
 	frame->setLayout( vbox );
 	frame->setFrameShape( QFrame::Box );
@@ -435,6 +438,11 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	hbox->addWidget( autoOpenChkBox );
 	hbox->addWidget( debFileChkBox  );
 	hbox->addWidget( idaFontChkBox  );
+
+	button->setEnabled(false); // TODO
+	autoOpenChkBox->setEnabled(false); // TODO
+	debFileChkBox->setEnabled(false); // TODO
+	idaFontChkBox->setEnabled(false); // TODO
 
 	setLayout( mainLayout );
 
@@ -994,6 +1002,13 @@ void ConsoleDebugger::symbolDebugEnableCB( int value )
 void ConsoleDebugger::registerNameEnableCB( int value )
 {
 	asmView->setRegisterNameEnable(value != Qt::Unchecked);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::reloadSymbolsCB(void)
+{
+	debugSymbolTable.loadGameSymbols();
+
+	asmView->updateAssemblyView();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::debugRunCB(void)
