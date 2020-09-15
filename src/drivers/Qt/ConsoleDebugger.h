@@ -74,6 +74,8 @@ class QAsmView : public QWidget
 		void setLine(int lineNum);
 		void scrollToPC(void);
 		void setDisplayROMoffsets( bool value );
+		void setSymbolDebugEnable( bool value );
+		void setRegisterNameEnable( bool value );
 		int  getCtxMenuAddr(void){ return ctxMenuAddr; };
 	protected:
 		void paintEvent(QPaintEvent *event);
@@ -114,6 +116,7 @@ class QAsmView : public QWidget
 
 		bool  displayROMoffsets;
 		bool  symbolicDebugEnable;
+		bool  registerNameEnable;
 };
 
 class ConsoleDebugger : public QDialog
@@ -208,6 +211,8 @@ class ConsoleDebugger : public QDialog
 		void delete_BP_CB(void);
 		void resetCountersCB (void);
 		void displayROMoffsetCB(int value);
+		void symbolDebugEnableCB(int value);
+		void registerNameEnableCB(int value);
 		void breakOnBadOpcodeCB(int value);
 		void breakOnCyclesCB( int value );
 		void breakOnInstructionsCB( int value );

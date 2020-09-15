@@ -408,7 +408,12 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	vbox->addWidget( symDbgChkBox );
 	vbox->addWidget( regNamChkBox );
 
+	symDbgChkBox->setChecked(true);
+	regNamChkBox->setChecked(true);
+
    connect( romOfsChkBox, SIGNAL(stateChanged(int)), this, SLOT(displayROMoffsetCB(int)) );
+   connect( symDbgChkBox, SIGNAL(stateChanged(int)), this, SLOT(symbolDebugEnableCB(int)) );
+   connect( regNamChkBox, SIGNAL(stateChanged(int)), this, SLOT(registerNameEnableCB(int)) );
 
 	button       = new QPushButton( tr("Reload Symbols") );
 	vbox->addWidget( button );
@@ -979,6 +984,16 @@ void ConsoleDebugger::instructionsThresChanged(const QString &txt)
 void ConsoleDebugger::displayROMoffsetCB( int value )
 {
 	asmView->setDisplayROMoffsets(value != Qt::Unchecked);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::symbolDebugEnableCB( int value )
+{
+	asmView->setSymbolDebugEnable(value != Qt::Unchecked);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::registerNameEnableCB( int value )
+{
+	asmView->setRegisterNameEnable(value != Qt::Unchecked);
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::debugRunCB(void)
@@ -1907,6 +1922,7 @@ QAsmView::QAsmView(QWidget *parent)
 	asmPC = NULL;
 	displayROMoffsets = false;
 	symbolicDebugEnable = true;
+	registerNameEnable = true;
 	maxLineLen = 0;
 	lineOffset = 0;
 	maxLineOffset = 0;
@@ -1948,6 +1964,26 @@ void QAsmView::setDisplayROMoffsets( bool value )
 	if ( value != displayROMoffsets )
 	{
 		displayROMoffsets = value;
+
+		updateAssemblyView();
+	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::setSymbolDebugEnable( bool value )
+{
+	if ( value != symbolicDebugEnable )
+	{
+		symbolicDebugEnable = value;
+
+		updateAssemblyView();
+	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::setRegisterNameEnable( bool value )
+{
+	if ( value != registerNameEnable )
+	{
+		registerNameEnable = value;
 
 		updateAssemblyView();
 	}
