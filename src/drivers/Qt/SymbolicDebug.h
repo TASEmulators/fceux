@@ -9,13 +9,13 @@
 
 struct debugSymbol_t 
 {
-	int   addr;
+	int   ofs;
 	std::string  name;
 	std::string  comment;
 
 	debugSymbol_t(void)
 	{
-		addr = 0;
+		ofs = 0;
 	};
 };
 
@@ -25,6 +25,13 @@ struct debugSymbolPage_t
 
 	debugSymbolPage_t(void);
 	~debugSymbolPage_t(void);
+
+	void print(void);
+	int size(void){ return symMap.size(); }
+
+	int addSymbol( debugSymbol_t *sym );
+
+	debugSymbol_t *getSymbolAtOffset( int ofs );
 
 	std::map <int, debugSymbol_t*> symMap;
 };
@@ -38,8 +45,12 @@ class debugSymbolTable_t
 
 		int loadFileNL( int addr );
 		int loadGameSymbols(void);
+		int numPages(void){ return pageMap.size(); }
 
 		void clear(void);
+		void print(void);
+
+		debugSymbol_t *getSymbolAtBankOffset( int bank, int ofs );
 
 	private:
 		std::map <int, debugSymbolPage_t*> pageMap;

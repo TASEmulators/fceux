@@ -1199,6 +1199,20 @@ int  QAsmView::getAsmLineFromAddr(int addr)
 			}
 			else 
 			{
+				nextLine = line - 1;
+
+				if ( nextLine >= 0 )
+				{
+					while ( asmEntry[nextLine]->addr == asmEntry[line]->addr )
+					{
+						line = nextLine;
+						nextLine--;
+						if ( nextLine < 0 )
+						{
+							break;
+						}
+					}
+				}
 				run = 0; break;
 			}
 		} 
@@ -1217,6 +1231,20 @@ int  QAsmView::getAsmLineFromAddr(int addr)
 			}
 			else
 			{
+				nextLine = line - 1;
+
+				if ( nextLine >= 0 )
+				{
+					while ( asmEntry[nextLine]->addr == asmEntry[line]->addr )
+					{
+						line = nextLine;
+						nextLine--;
+						if ( nextLine < 0 )
+						{
+							break;
+						}
+					}
+				}
 				run = 0; break;
 			}
 			line = nextLine;
@@ -1282,7 +1310,7 @@ void  QAsmView::updateAssemblyView(void)
 	char chr[64];
 	uint8 opcode[3];
 	const char *disassemblyText = NULL;
-	dbg_asm_entry_t *a;
+	dbg_asm_entry_t *a, *d;
 	//GtkTextIter iter, next_iter;
 	char pc_found = 0;
 
@@ -1423,6 +1451,70 @@ void  QAsmView::updateAssemblyView(void)
 			line.append("-------------------------");
 		}
 
+		if ( symbolicDebugEnable )
+		{
+			debugSymbol_t *dbgSym;
+
+			dbgSym = debugSymbolTable.getSymbolAtBankOffset( a->bank, a->addr );
+
+			if ( dbgSym != NULL )
+			{
+				int i,j;
+				const char *c;
+				char stmp[256];
+				printf("Debug symbol Found at $%04X \n", dbgSym->ofs );
+				d = new dbg_asm_entry_t();
+
+				*d = *a;
+				d->type = dbg_asm_entry_t::SYMBOL_NAME;
+				d->text.assign( dbgSym->name );
+				d->line = asmEntry.size();
+				
+				asmEntry.push_back(d);
+
+				i=0; j=0;
+				c = dbgSym->comment.c_str();
+
+				while ( c[i] != 0 )
+				{
+					if ( c[i] == '\n' )
+					{
+						if ( j > 0 )
+						{
+							stmp[j] = 0;
+
+							d = new dbg_asm_entry_t();
+
+							*d = *a;
+							d->type = dbg_asm_entry_t::SYMBOL_COMMENT;
+							d->text.assign( stmp );
+							d->line = asmEntry.size();
+							
+							asmEntry.push_back(d);
+						}
+						i++; j=0;
+					}
+					else
+					{
+						stmp[j] = c[i]; j++; i++;
+					}
+				}
+				stmp[j] = 0;
+
+				if ( j > 0 )
+				{
+					d = new dbg_asm_entry_t();
+
+					*d = *a;
+					d->type = dbg_asm_entry_t::SYMBOL_COMMENT;
+					d->text.assign( stmp );
+					d->line = asmEntry.size();
+				
+					asmEntry.push_back(d);
+				}
+			}
+		}
+
 		a->text.assign( line );
 
 		a->line = asmEntry.size();
@@ -1433,8 +1525,6 @@ void  QAsmView::updateAssemblyView(void)
 		}
 
 		line.append("\n");
-
-		//asmText->insertPlainText( tr(line.c_str()) );
 
 		asmEntry.push_back(a);
 	}
@@ -1816,6 +1906,7 @@ QAsmView::QAsmView(QWidget *parent)
 	hbar = NULL;
 	asmPC = NULL;
 	displayROMoffsets = false;
+	symbolicDebugEnable = true;
 	maxLineLen = 0;
 	lineOffset = 0;
 	maxLineOffset = 0;
@@ -2104,12 +2195,16 @@ void QAsmView::paintEvent(QPaintEvent *event)
 		{
 			if ( l == asmPC->line )
 			{
-				painter.fillRect( 0, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("light blue") );
+				painter.fillRect( 0, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("pink") );
 			}
 		}
 
 		if ( l < asmEntry.size() )
 		{
+			if ( asmEntry[l]->type != dbg_asm_entry_t::ASM_TEXT )
+			{
+				painter.fillRect( 0, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("light blue") );
+			}
 			painter.drawText( x, y, tr(asmEntry[l]->text.c_str()) );
 		}
 		y += pxLineSpacing;

@@ -25,6 +25,7 @@
 #include <QScrollBar>
 
 #include "Qt/main.h"
+#include "Qt/SymbolicDebug.h"
 #include "../../debug.h"
 
 struct dbg_asm_entry_t
@@ -37,11 +38,17 @@ struct dbg_asm_entry_t
 	uint8  opcode[3];
 	std::string  text;
 
+	enum
+	{
+		ASM_TEXT = 0,
+		SYMBOL_NAME,
+		SYMBOL_COMMENT
+	} type;
 
 	dbg_asm_entry_t(void)
 	{
 		addr = 0; bank = 0; rom = -1; 
-		size = 0; line = 0;
+		size = 0; line = 0; type = ASM_TEXT;
 
 		for (int i=0; i<3; i++)
 		{
@@ -106,6 +113,7 @@ class QAsmView : public QWidget
 		std::vector <dbg_asm_entry_t*> asmEntry;
 
 		bool  displayROMoffsets;
+		bool  symbolicDebugEnable;
 };
 
 class ConsoleDebugger : public QDialog
