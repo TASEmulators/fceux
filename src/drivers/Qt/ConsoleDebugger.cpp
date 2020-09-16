@@ -486,8 +486,24 @@ void 	ConsoleDebugger::bpItemClicked( QTreeWidgetItem *item, int column)
 {
 	int row = bpTree->indexOfTopLevelItem(item);
 
-	printf("Row: %i Column: %i \n", row, column );
+	//printf("Row: %i Column: %i \n", row, column );
 
+	if ( column == 0 )
+	{
+		if ( (row >= 0) && (row < numWPs) )
+		{	
+			int isChecked = item->checkState( column ) != Qt::Unchecked;
+
+			if ( isChecked )
+			{
+				watchpoint[row].flags |=  WP_E;
+			}
+			else
+			{
+				watchpoint[row].flags &= ~WP_E;
+			}
+		}
+	}
 }
 //----------------------------------------------------------------------------
 void 	ConsoleDebugger::bmItemClicked( QTreeWidgetItem *item, int column)
@@ -506,7 +522,7 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
 	QVBoxLayout *mainLayout, *vbox;
 	QLabel *lbl;
 	QLineEdit *addr1, *addr2, *cond, *name;
-	QCheckBox *forbidChkBox, *rbp, *wbp, *xbp;
+	QCheckBox *forbidChkBox, *rbp, *wbp, *xbp, *ebp;
 	QGridLayout *grid;
 	QFrame *frame;
 	QGroupBox *gbox;
@@ -542,6 +558,7 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
 	rbp = new QCheckBox( tr("Read") );
 	wbp = new QCheckBox( tr("Write") );
 	xbp = new QCheckBox( tr("Execute") );
+	ebp = new QCheckBox( tr("Enable") );
 
 	gbox->setTitle( tr("Memory") );
 	mainLayout->addWidget( frame );
@@ -553,6 +570,7 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
 	hbox->addWidget( rbp );
 	hbox->addWidget( wbp );
 	hbox->addWidget( xbp );
+	hbox->addWidget( ebp );
 	
 	hbox         = new QHBoxLayout();
 	cpu_radio    = new QRadioButton( tr("CPU Mem") );
@@ -633,7 +651,7 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
 		}
 		if ( wp->flags & WP_E )
 		{
-		   //forbidChkBox->setChecked(true);
+		   ebp->setChecked(true);
 		}
 
 		if ( wp->condText )
@@ -716,6 +734,8 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
 		{
 			type |= WP_F;
 		}
+
+		enable = ebp->isChecked();
 
 		if ( (start_addr >= 0) && (numWPs < 64) )
 		{
