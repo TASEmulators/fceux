@@ -792,7 +792,7 @@ void ConsoleDebugger::openDebugSymbolEditWindow( int addr )
 
 	 if ( addr < 0x8000 )
 	 {
-		 bank = 0;
+		 bank = -1;
 	 }
 	 else
 	 {

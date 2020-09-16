@@ -6,6 +6,9 @@
 #include "../../types.h"
 #include "../../fceu.h"
 #include "../../debug.h"
+#include "../../driver.h"
+#include "../../cart.h"
+#include "../../ines.h"
 
 #include "Qt/SymbolicDebug.h"
 #include "Qt/ConsoleUtilities.h"
@@ -17,7 +20,7 @@ debugSymbolTable_t  debugSymbolTable;
 //--------------------------------------------------------------
 debugSymbolPage_t::debugSymbolPage_t(void)
 {
-	pageNum = 0;
+	pageNum = -1;
 
 }
 //--------------------------------------------------------------
@@ -92,17 +95,17 @@ int debugSymbolPage_t::save(void)
 	}
 	stmp[i] = 0;
 
-	if ( pageNum > 0 )
+	if ( pageNum < 0 )
+	{
+		strcat( stmp, ".ram.nl" );
+	}
+	else
 	{
 		char suffix[32];
 
 		sprintf( suffix, ".%X.nl", pageNum );
 
 		strcat( stmp, suffix );
-	}
-	else
-	{
-		strcat( stmp, ".ram.nl" );
 	}
 
 	fp = fopen( stmp, "w" );
@@ -204,6 +207,25 @@ void debugSymbolTable_t::clear(void)
 //--------------------------------------------------------------
 int generateNLFilenameForAddress(int address, char *NLfilename)
 {
+	int bank;
+
+	if (address < 0x8000)
+	{
+		bank = -1;
+	} 
+	else
+	{
+		bank = getBank(address);
+		#ifdef DW3_NL_0F_1F_HACK
+		if(bank == 0x0F)
+			bank = 0x1F;
+		#endif
+	}
+	return generateNLFilenameForBank( bank, NLfilename );
+}
+//--------------------------------------------------------------
+int generateNLFilenameForBank(int bank, char *NLfilename)
+{
 	int i;
 	const char *romFile;
 
@@ -229,14 +251,13 @@ int generateNLFilenameForAddress(int address, char *NLfilename)
 	}
 	NLfilename[i] = 0;
 
-	if (address < 0x8000)
+	if (bank < 0)
 	{
 		// The NL file for the RAM addresses has the name nesrom.nes.ram.nl
 		strcat(NLfilename, ".ram.nl");
 	} 
 	else
 	{
-		int bank = getBank(address);
 		char stmp[64];
 		#ifdef DW3_NL_0F_1F_HACK
 		if(bank == 0x0F)
@@ -248,7 +269,7 @@ int generateNLFilenameForAddress(int address, char *NLfilename)
 	return 0;
 }
 //--------------------------------------------------------------
-int debugSymbolTable_t::loadFileNL( int addr )
+int debugSymbolTable_t::loadFileNL( int bank )
 {
 	FILE *fp;
 	int i, j, ofs, lineNum = 0, literal = 0;
@@ -257,9 +278,9 @@ int debugSymbolTable_t::loadFileNL( int addr )
 	debugSymbolPage_t *page = NULL;
 	debugSymbol_t *sym = NULL;
 
-	printf("Looking to Load Debug Addr: $%04X \n", addr );
+	printf("Looking to Load Debug Bank: $%X \n", bank );
 
-	if ( generateNLFilenameForAddress( addr, fileName ) )
+	if ( generateNLFilenameForBank( bank, fileName ) )
 	{
 		return -1;
 	}
@@ -273,10 +294,8 @@ int debugSymbolTable_t::loadFileNL( int addr )
 	}
 	page = new debugSymbolPage_t;
 
-	if ( addr >= 0x8000 )
-	{
-		page->pageNum = getBank( addr );
-	}
+	page->pageNum = bank;
+
 	pageMap[ page->pageNum ] = page;
 
 	while ( fgets( line, sizeof(line), fp ) != 0 )
@@ -454,23 +473,33 @@ int debugSymbolTable_t::loadFileNL( int addr )
 //--------------------------------------------------------------
 int debugSymbolTable_t::loadGameSymbols(void)
 {
-	int nPages;
+	int nPages, pageSize, romSize = 0x10000;
 
 	this->save();
 	this->clear();
 
-	loadFileNL( 0x0000 );
+	if ( GameInfo != NULL )
+	{
+		romSize = 16 + CHRsize[0] + PRGsize[0];
+	}
 
-	nPages = 1<<(15-debuggerPageSize);
+	loadFileNL( -1 );
+
+	pageSize = (1<<debuggerPageSize);
+
+	//nPages = 1<<(15-debuggerPageSize);
+	nPages = romSize / pageSize;
+
+	printf("RomSize: %i    NumPages: %i \n", romSize, nPages );
 
 	for(int i=0;i<nPages;i++)
 	{
-		int pageIndexAddress = 0x8000 + (1<<debuggerPageSize)*i;
+		//int pageIndexAddress = 0x8000 + (1<<debuggerPageSize)*i;
+		//int pageIndexAddress = pageSize*i;
 
-		// Find out which bank is loaded at the page index
-		//cb = getBank(pageIndexAddress);
+		printf("Loading Page Offset: $%06X\n", pageSize*i );
 
-		loadFileNL( pageIndexAddress );
+		loadFileNL( i );
 	}
 
 	print();

@@ -70,6 +70,7 @@ extern  debugSymbolTable_t  debugSymbolTable;
 //};
 
 
+int generateNLFilenameForBank(int bank, char *NLfilename);
 int generateNLFilenameForAddress(int address, char *NLfilename);
 
 #endif

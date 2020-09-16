@@ -47,8 +47,8 @@ struct dbg_asm_entry_t
 
 	dbg_asm_entry_t(void)
 	{
-		addr = 0; bank = 0; rom = -1; 
-		size = 0; line = 0; type = ASM_TEXT;
+		addr = 0; bank = -1; rom = -1; 
+		size = 0; line =  0; type = ASM_TEXT;
 
 		for (int i=0; i<3; i++)
 		{
