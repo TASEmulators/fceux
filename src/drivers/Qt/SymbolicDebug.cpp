@@ -202,7 +202,7 @@ void debugSymbolTable_t::clear(void)
 	pageMap.clear();
 }
 //--------------------------------------------------------------
-static int generateNLFilenameForAddress(int address, char *NLfilename)
+int generateNLFilenameForAddress(int address, char *NLfilename)
 {
 	int i;
 	const char *romFile;
@@ -474,6 +474,28 @@ int debugSymbolTable_t::loadGameSymbols(void)
 	}
 
 	print();
+
+	return 0;
+}
+//--------------------------------------------------------------
+int debugSymbolTable_t::addSymbolAtBankOffset( int bank, int ofs, debugSymbol_t *sym )
+{
+	debugSymbolPage_t *page;
+	std::map <int, debugSymbolPage_t*>::iterator it;
+
+	it = pageMap.find( bank );
+
+	if ( it == pageMap.end() )
+	{
+		page = new debugSymbolPage_t();
+		page->pageNum = bank;
+		pageMap[ bank ] = page;
+	}
+	else
+	{
+		page = it->second;
+	}
+	page->addSymbol( sym );
 
 	return 0;
 }

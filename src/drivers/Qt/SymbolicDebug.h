@@ -54,9 +54,10 @@ class debugSymbolTable_t
 
 		debugSymbol_t *getSymbolAtBankOffset( int bank, int ofs );
 
+		int addSymbolAtBankOffset(  int bank, int ofs, debugSymbol_t *sym );
+
 	private:
 		std::map <int, debugSymbolPage_t*> pageMap;
-	
 
 };
 
@@ -69,5 +70,6 @@ extern  debugSymbolTable_t  debugSymbolTable;
 //};
 
 
+int generateNLFilenameForAddress(int address, char *NLfilename);
 
 #endif

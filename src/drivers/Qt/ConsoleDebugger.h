@@ -131,6 +131,7 @@ class ConsoleDebugger : public QDialog
 		void updateRegisterView(void);
 		void breakPointNotify(int bpNum);
 		void openBpEditWindow(int editIdx = -1, watchpointinfo *wp = NULL );
+		void openDebugSymbolEditWindow( int addr );
 
 		QLabel    *asmLineSelLbl;
 	protected:
@@ -195,6 +196,7 @@ class ConsoleDebugger : public QDialog
    public slots:
       void closeWindow(void);
 		void asmViewCtxMenuAddBP(void);
+		void asmViewCtxMenuAddSym(void);
 	private slots:
 		void updatePeriodic(void);
 		void vbarChanged(int value);

@@ -529,7 +529,14 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
 	QPushButton *okButton, *cancelButton;
 	QRadioButton *cpu_radio, *ppu_radio, *sprite_radio;
 
-	dialog.setWindowTitle( tr("Add Breakpoint") );
+	if ( editIdx >= 0 )
+	{
+		dialog.setWindowTitle( tr("Edit Breakpoint") );
+	}
+	else
+	{
+		dialog.setWindowTitle( tr("Add Breakpoint") );
+	}
 
 	hbox       = new QHBoxLayout();
 	mainLayout = new QVBoxLayout();
@@ -761,6 +768,129 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
 				bpListUpdate( false );
 			}
 		}
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::openDebugSymbolEditWindow( int addr )
+{
+	int ret, bank, charWidth;
+	QDialog dialog(this);
+	QHBoxLayout *hbox;
+	QVBoxLayout *mainLayout;
+	QLabel *lbl;
+	QLineEdit *filepath, *addrEntry, *nameEntry, *commentEntry;
+	QPushButton *okButton, *cancelButton;
+	char stmp[512];
+	debugSymbol_t *sym;
+	QFontMetrics fm(font);
+
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+    charWidth = fm.horizontalAdvance(QLatin1Char('2'));
+#else
+    charWidth = fm.width(QLatin1Char('2'));
+#endif
+
+	 if ( addr < 0x8000 )
+	 {
+		 bank = 0;
+	 }
+	 else
+	 {
+		 bank = getBank( addr );
+	 }
+
+	sym = debugSymbolTable.getSymbolAtBankOffset( bank, addr );
+
+	generateNLFilenameForAddress( addr, stmp );
+
+	dialog.setWindowTitle( tr("Symbolic Debug Naming") );
+
+	hbox       = new QHBoxLayout();
+	mainLayout = new QVBoxLayout();
+
+	lbl = new QLabel( tr("File") );
+	filepath = new QLineEdit();
+	filepath->setFont( font );
+	filepath->setText( tr(stmp) );
+	filepath->setReadOnly( true );
+	filepath->setMinimumWidth( charWidth * (filepath->text().size() + 4) );
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( filepath );
+
+	mainLayout->addLayout( hbox );
+
+	sprintf( stmp, "%04X", addr );
+
+	hbox = new QHBoxLayout();
+	lbl  = new QLabel( tr("Address") );
+	addrEntry = new QLineEdit();
+	addrEntry->setFont( font );
+	addrEntry->setText( tr(stmp) );
+	addrEntry->setReadOnly( true );
+	addrEntry->setAlignment(Qt::AlignCenter);
+	addrEntry->setMaximumWidth( charWidth * 6 );
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( addrEntry );
+
+	lbl  = new QLabel( tr("Name") );
+	nameEntry = new QLineEdit();
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( nameEntry );
+
+	mainLayout->addLayout( hbox );
+
+	hbox = new QHBoxLayout();
+	lbl  = new QLabel( tr("Comment") );
+	commentEntry = new QLineEdit();
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( commentEntry );
+
+	mainLayout->addLayout( hbox );
+
+	hbox         = new QHBoxLayout();
+	okButton     = new QPushButton( tr("OK") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	mainLayout->addLayout( hbox );
+	hbox->addWidget( cancelButton );
+	hbox->addWidget(     okButton );
+
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+   connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+
+	if ( sym != NULL )
+	{
+		nameEntry->setText( tr(sym->name.c_str()) );
+		commentEntry->setText( tr(sym->comment.c_str()) );
+	}
+
+	dialog.setLayout( mainLayout );
+
+	ret = dialog.exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		if ( sym == NULL )
+		{
+			sym = new debugSymbol_t();
+			sym->ofs     = addr;
+			sym->name    = nameEntry->text().toStdString();
+			sym->comment = commentEntry->text().toStdString();
+
+			debugSymbolTable.addSymbolAtBankOffset( bank, addr, sym );
+		}
+		else
+		{
+			sym->name    = nameEntry->text().toStdString();
+			sym->comment = commentEntry->text().toStdString();
+		}
+		fceuWrapperLock();
+		asmView->updateAssemblyView();
+		fceuWrapperUnLock();
 	}
 }
 //----------------------------------------------------------------------------
@@ -1194,6 +1324,11 @@ void ConsoleDebugger::asmViewCtxMenuAddBP(void)
 
 	openBpEditWindow( -1, &wp );
 
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::asmViewCtxMenuAddSym(void)
+{
+	openDebugSymbolEditWindow( asmView->getCtxMenuAddr() );
 }
 //----------------------------------------------------------------------------
 int  QAsmView::getAsmLineFromAddr(int addr)
@@ -2211,6 +2346,7 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 
 		act = new QAction(tr("Add Symbolic Debug Name"), this);
    	menu.addAction(act);
+		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddSym(void)) );
 		//connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
 		
 		menu.exec(event->globalPos());
