@@ -278,13 +278,13 @@ int debugSymbolTable_t::loadFileNL( int bank )
 	debugSymbolPage_t *page = NULL;
 	debugSymbol_t *sym = NULL;
 
-	printf("Looking to Load Debug Bank: $%X \n", bank );
+	//printf("Looking to Load Debug Bank: $%X \n", bank );
 
 	if ( generateNLFilenameForBank( bank, fileName ) )
 	{
 		return -1;
 	}
-	printf("Loading NL File: %s\n", fileName );
+	//printf("Loading NL File: %s\n", fileName );
 
 	fp = ::fopen( fileName, "r" );
 
@@ -494,10 +494,7 @@ int debugSymbolTable_t::loadGameSymbols(void)
 
 	for(int i=0;i<nPages;i++)
 	{
-		//int pageIndexAddress = 0x8000 + (1<<debuggerPageSize)*i;
-		//int pageIndexAddress = pageSize*i;
-
-		printf("Loading Page Offset: $%06X\n", pageSize*i );
+		//printf("Loading Page Offset: $%06X\n", pageSize*i );
 
 		loadFileNL( i );
 	}

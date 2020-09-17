@@ -225,3 +225,6 @@ class ConsoleDebugger : public QDialog
 		void instructionsThresChanged(const QString &txt);
 
 };
+
+void saveGameDebugBreakpoints(void);
+void loadGameDebugBreakpoints(void);

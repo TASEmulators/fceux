@@ -16,6 +16,7 @@
 #include "Qt/unix-netplay.h"
 #include "Qt/HexEditor.h"
 #include "Qt/SymbolicDebug.h"
+#include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/fceux_git_info.h"
 
@@ -229,6 +230,7 @@ int LoadGame(const char *path)
 	}
 
 	hexEditorLoadBookmarks();
+	loadGameDebugBreakpoints();
 
 	debugSymbolTable.loadGameSymbols();
 
@@ -279,6 +281,7 @@ CloseGame(void)
 		return(0);
 	}
 	hexEditorSaveBookmarks();
+	saveGameDebugBreakpoints();
 
 	debugSymbolTable.save();
 	debugSymbolTable.clear();

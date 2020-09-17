@@ -38,6 +38,7 @@
 #include "Qt/nes_shm.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleDebugger.h"
+#include "Qt/ConsoleUtilities.h"
 
 // Where are these defined?
 extern int vblankScanLines;
@@ -693,7 +694,6 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
 	{
 		int  start_addr = -1, end_addr = -1, type = 0, enable = 1, slot;
 		std::string s;
-		printf("Accepted\n");
 
 		slot = (editIdx < 0) ? numWPs : editIdx;
 
@@ -2064,6 +2064,283 @@ void FCEUD_DebugBreakpoint( int bpNum )
 	ResetDebugStatisticsDeltaCounters();
 
 	fceuWrapperLock();
+}
+//----------------------------------------------------------------------------
+static int getGameDebugBreakpointFileName(char *filepath)
+{
+	int i,j;
+	const char *romFile;
+
+	romFile = getRomFile();
+
+	if ( romFile == NULL )
+	{
+		return -1;
+	}
+	i=0; j = -1;
+	while ( romFile[i] != 0 )
+	{
+
+		if ( romFile[i] == '|' )
+		{
+			filepath[i] = '.';
+		}
+		else
+		{
+			if ( romFile[i] == '/' )
+			{
+				j = -1;
+			}
+			else if ( romFile[i] == '.' )
+			{
+				j = i;
+			}
+			filepath[i] = romFile[i];
+		}
+		i++;
+	}
+	if ( j >= 0 )
+	{
+		filepath[j] = 0; i=j;
+	}
+
+	filepath[i] = '.'; i++;
+	filepath[i] = 'd'; i++;
+	filepath[i] = 'b'; i++;
+	filepath[i] = 'g'; i++;
+	filepath[i] =  0;
+
+	return 0;
+}
+//----------------------------------------------------------------------------
+void saveGameDebugBreakpoints(void)
+{
+	int i;
+	FILE *fp;
+	char stmp[512];
+	char flags[8];
+
+	if ( numWPs == 0 )
+	{
+		return;
+	}
+	getGameDebugBreakpointFileName( stmp );
+
+	printf("Debug Save File: '%s' \n", stmp );
+
+	fp = fopen( stmp, "w");
+
+	if ( fp == NULL )
+	{
+		printf("Error: Failed to open file '%s' for writing\n", stmp );
+		return;
+	}
+
+	for (i=0; i<numWPs; i++)
+	{
+		flags[0] = (watchpoint[i].flags & WP_E) ? 'E' : '-';
+
+		if ( watchpoint[i].flags & BT_P )
+		{
+			flags[1] = 'P';
+		}
+		else if ( watchpoint[i].flags & BT_S )
+		{
+			flags[1] = 'S';
+		}
+		else
+		{
+			flags[1] = 'C';
+		}
+
+		flags[2] = (watchpoint[i].flags & WP_R) ? 'R' : '-';
+		flags[3] = (watchpoint[i].flags & WP_W) ? 'W' : '-';
+		flags[4] = (watchpoint[i].flags & WP_X) ? 'X' : '-';
+		flags[5] = (watchpoint[i].flags & WP_F) ? 'F' : '-';
+		flags[6] = 0;
+
+		fprintf( fp, "BreakPoint: startAddr=%04X  endAddr=%04X  flags=%s  condition=\"%s\"  desc=\"%s\" \n",
+			  	watchpoint[i].address, watchpoint[i].endaddress, flags,
+			  		(watchpoint[i].condText != NULL) ? watchpoint[i].condText : "",
+			  		(watchpoint[i].desc != NULL) ? watchpoint[i].desc : "");
+	}
+
+	fclose(fp);
+
+	return;
+}
+//----------------------------------------------------------------------------
+void loadGameDebugBreakpoints(void)
+{
+	int i,j;
+	FILE *fp;
+	char stmp[512];
+	char id[64], data[128];
+	char literal;
+
+	getGameDebugBreakpointFileName( stmp );
+
+	printf("Debug Load File: '%s' \n", stmp );
+
+	fp = fopen( stmp, "r");
+
+	if ( fp == NULL )
+	{
+		printf("Error: Failed to open file '%s' for writing\n", stmp );
+		return;
+	}
+
+	while ( fgets( stmp, sizeof(stmp), fp ) != 0 )
+	{
+		i=0; j=0;
+
+		while ( isspace(stmp[i]) ) i++;
+
+		while ( isalnum(stmp[i]) )
+		{
+			id[j] = stmp[i]; j++; i++;
+		}
+		id[j] = 0;
+
+		while ( isspace(stmp[i]) ) i++;
+
+		if ( stmp[i] != ':' )
+		{
+			continue;
+		}
+		i++;
+		while ( isspace(stmp[i]) ) i++;
+
+		if ( strcmp( id, "BreakPoint" ) == 0 )
+		{
+			int retval;
+			int start_addr = -1, end_addr = -1, type = 0, enable = 1;
+			char cond[256], desc[256];
+
+			cond[0] = 0; desc[0] = 0;
+
+			while ( stmp[i] != 0 )
+			{
+				while ( isspace(stmp[i]) ) i++;
+
+				j=0;
+				while ( isalnum(stmp[i]) )
+				{
+					id[j] = stmp[i]; j++; i++;
+				}
+				id[j] = 0;
+
+				if ( j == 0 )
+				{
+				  	break;
+				}
+				if ( stmp[i] != '=' )
+				{
+				  	break;
+				}
+				i++; j=0;
+				if ( stmp[i] == '\"' )
+				{
+					literal = 0;
+					i++;
+					while ( stmp[i] != 0 )
+					{
+						if ( literal )
+						{
+							data[j] = stmp[i]; i++; j++;
+							literal = 0;
+						}
+						else
+						{
+							if ( stmp[i] == '\\' )
+							{
+								literal = 1; i++;
+							}
+							else if ( stmp[i] == '\"' )
+							{
+								i++; break;
+							}
+							else
+							{
+								data[j] = stmp[i]; j++; i++;
+							}
+						}
+					}
+					data[j] = 0;
+				}
+				else
+				{
+					j=0;
+					while ( !isspace(stmp[i]) )
+					{
+						data[j] = stmp[i]; j++; i++;
+					}
+					data[j] = 0;
+				}
+
+				printf("ID:'%s'  DATA:'%s' \n", id, data );
+
+				if ( strcmp( id, "startAddr" ) == 0 )
+				{
+					start_addr = strtol( data, NULL, 16 );
+				}
+				else if ( strcmp( id, "endAddr" ) == 0 )
+				{
+					end_addr = strtol( data, NULL, 16 );
+				}
+				else if ( strcmp( id, "flags" ) == 0 )
+				{
+					type = 0;
+					enable = (data[0] == 'E');
+
+					if ( data[1] == 'P' )
+					{
+						type |= BT_P;
+					}
+					else if ( data[1] == 'S' )
+					{
+						type |= BT_S;
+					}
+					else 
+					{
+						type |= BT_C;
+					}
+
+					type |= (data[2] == 'R') ? WP_R : 0;
+					type |= (data[3] == 'W') ? WP_W : 0;
+					type |= (data[4] == 'X') ? WP_X : 0;
+					type |= (data[5] == 'F') ? WP_F : 0;
+				}
+				else if ( strcmp( id, "condition" ) == 0 )
+				{
+					strcpy( cond, data );
+				}
+				else if ( strcmp( id, "desc" ) == 0 )
+				{
+					strcpy( desc, data );
+				}
+			}
+
+			if ( (start_addr >= 0) && (numWPs < 64) )
+			{
+				retval = NewBreak( desc, start_addr, end_addr, type, cond, numWPs, enable);
+
+				if ( (retval == 1) || (retval == 2) )
+				{
+					printf("Breakpoint Add Failed\n");
+				}
+				else
+				{
+					numWPs++;
+				}
+			}
+
+
+		}
+	}
+	fclose(fp);
+
+	return;
 }
 //----------------------------------------------------------------------------
 QAsmView::QAsmView(QWidget *parent)
