@@ -45,6 +45,8 @@ extern int vblankScanLines;
 extern int vblankPixel;
 
 static std::list <ConsoleDebugger*> dbgWinList;
+
+static void DeleteBreak(int sel);
 //----------------------------------------------------------------------------
 ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	: QDialog( parent )
@@ -460,12 +462,36 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	bpListUpdate( false );
 
 	periodicTimer->start( 100 ); // 10hz
+
+	// If this is the first debug window to open, load breakpoints fresh
+	if ( dbgWinList.size() == 1 )
+	{
+		loadGameDebugBreakpoints();
+	}
 }
 //----------------------------------------------------------------------------
 ConsoleDebugger::~ConsoleDebugger(void)
 {
+	std::list <ConsoleDebugger*>::iterator it;
+
 	printf("Destroy Debugger Window\n");
 	periodicTimer->stop();
+
+	for (it = dbgWinList.begin(); it != dbgWinList.end(); it++)
+	{
+		if ( (*it) == this )
+		{
+			dbgWinList.erase(it);
+			printf("Removing Debugger Window\n");
+			break;
+		}
+	}
+
+	if ( dbgWinList.size() == 0 )
+	{
+		saveGameDebugBreakpoints();
+		debuggerClearAllBreakpoints();
+	}
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::closeEvent(QCloseEvent *event)
@@ -1019,6 +1045,9 @@ static void DeleteBreak(int sel)
 {
 	if(sel<0) return;
 	if(sel>=numWPs) return;
+
+	fceuWrapperLock();
+
 	if (watchpoint[sel].cond)
 	{
 		freeTree(watchpoint[sel].cond);
@@ -1051,6 +1080,41 @@ static void DeleteBreak(int sel)
 	watchpoint[numWPs].condText = 0;
 	watchpoint[numWPs].desc = 0;
 	numWPs--;
+
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void debuggerClearAllBreakpoints(void)
+{
+	int i;
+
+	fceuWrapperLock();
+
+	for (i=0; i<numWPs; i++)
+	{
+	   if (watchpoint[i].cond)
+	   {
+	   	freeTree(watchpoint[i].cond);
+	   }
+	   if (watchpoint[i].condText)
+	   {
+	   	free(watchpoint[i].condText);
+	   }
+	   if (watchpoint[i].desc)
+	   {
+	   	free(watchpoint[i].desc);
+	   }
+
+		watchpoint[i].address = 0;
+	   watchpoint[i].endaddress = 0;
+	   watchpoint[i].flags = 0;
+	   watchpoint[i].cond = 0;
+	   watchpoint[i].condText = 0;
+	   watchpoint[i].desc = 0;
+	}
+	numWPs = 0;
+
+	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::delete_BP_CB(void)
@@ -2120,13 +2184,14 @@ void saveGameDebugBreakpoints(void)
 	char stmp[512];
 	char flags[8];
 
+	// If no breakpoints are loaded, skip saving
 	if ( numWPs == 0 )
 	{
 		return;
 	}
 	getGameDebugBreakpointFileName( stmp );
 
-	printf("Debug Save File: '%s' \n", stmp );
+	//printf("Debug Save File: '%s' \n", stmp );
 
 	fp = fopen( stmp, "w");
 
@@ -2178,9 +2243,15 @@ void loadGameDebugBreakpoints(void)
 	char id[64], data[128];
 	char literal;
 
+	// If no debug windows are open, skip loading breakpoints
+	if ( dbgWinList.size() == 0 )
+	{
+		printf("No Debug Windows Open: Skipping loading of breakpoint data\n");
+		return;
+	}
 	getGameDebugBreakpointFileName( stmp );
 
-	printf("Debug Load File: '%s' \n", stmp );
+	//printf("Debug Load File: '%s' \n", stmp );
 
 	fp = fopen( stmp, "r");
 
@@ -2214,7 +2285,7 @@ void loadGameDebugBreakpoints(void)
 		if ( strcmp( id, "BreakPoint" ) == 0 )
 		{
 			int retval;
-			int start_addr = -1, end_addr = -1, type = 0, enable = 1;
+			int start_addr = -1, end_addr = -1, type = 0, enable = 0;
 			char cond[256], desc[256];
 
 			cond[0] = 0; desc[0] = 0;
@@ -2291,7 +2362,7 @@ void loadGameDebugBreakpoints(void)
 				else if ( strcmp( id, "flags" ) == 0 )
 				{
 					type = 0;
-					enable = (data[0] == 'E');
+					//enable = (data[0] == 'E'); // Always start with breakpoints disabled.
 
 					if ( data[1] == 'P' )
 					{
@@ -2334,8 +2405,6 @@ void loadGameDebugBreakpoints(void)
 					numWPs++;
 				}
 			}
-
-
 		}
 	}
 	fclose(fp);

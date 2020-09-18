@@ -282,6 +282,7 @@ CloseGame(void)
 	}
 	hexEditorSaveBookmarks();
 	saveGameDebugBreakpoints();
+	debuggerClearAllBreakpoints();
 
 	debugSymbolTable.save();
 	debugSymbolTable.clear();

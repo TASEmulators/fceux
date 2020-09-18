@@ -228,3 +228,4 @@ class ConsoleDebugger : public QDialog
 
 void saveGameDebugBreakpoints(void);
 void loadGameDebugBreakpoints(void);
+void debuggerClearAllBreakpoints(void);
