@@ -56,7 +56,7 @@ To compile faster with multiple processes in parallel:
 After a sucessful compilation, the fceux binary will be generated to 
 ./build/src/fceux .  You can install fceux to your system with the following command:
 
-	make install
+	sudo make install
 
 You can optionally define a install prefix when running cmake from the previous step:
 
