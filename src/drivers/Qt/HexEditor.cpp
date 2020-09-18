@@ -1764,6 +1764,15 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	//
 	maxLineOffset = mb.numLines() - nrow + 1;
 
+	if ( maxLineOffset < 0 )
+	{
+		maxLineOffset = 0;
+	}
+
+	if ( lineOffset < 0 )
+	{
+		lineOffset = 0;
+	}
 	if ( lineOffset > maxLineOffset )
 	{
 		lineOffset = maxLineOffset;

@@ -89,6 +89,7 @@ class  consoleWin_t : public QMainWindow
 	 QAction *fdsEjectAct;
 	 QAction *fdsLoadBiosAct;
 	 QAction *cheatsAct;
+	 QAction *debuggerAct;
 	 QAction *hexEditAct;
 	 QAction *openMovAct;
 	 QAction *stopMovAct;
@@ -155,6 +156,7 @@ class  consoleWin_t : public QMainWindow
 		void fdsEjectDisk(void);
 		void fdsLoadBiosFile(void);
 		void openCheats(void);
+		void openDebugWindow(void);
 		void openHexEditor(void);
 		void openMovie(void);
 		void stopMovie(void);

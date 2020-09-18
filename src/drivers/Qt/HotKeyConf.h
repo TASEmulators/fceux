@@ -1,4 +1,4 @@
-// GamePadConf.h
+// HotKeyConf.h
 //
 
 #pragma once

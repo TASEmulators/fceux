@@ -25,6 +25,7 @@
 #include "Qt/LuaControl.h"
 #include "Qt/CheatsConf.h"
 #include "Qt/HexEditor.h"
+#include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
@@ -85,13 +86,13 @@ consoleWin_t::~consoleWin_t(void)
 
 	closeGamePadConfWindow();
 
+	//printf("Thread Finished: %i \n", gameThread->isFinished() );
+	emulatorThread->quit();
+	emulatorThread->wait( 1000 );
+
 	fceuWrapperLock();
 	fceuWrapperClose();
 	fceuWrapperUnLock();
-
-	//printf("Thread Finished: %i \n", gameThread->isFinished() );
-	emulatorThread->quit();
-	emulatorThread->wait();
 
 	if ( viewport_GL != NULL )
 	{
@@ -483,6 +484,14 @@ void consoleWin_t::createMainMenu(void)
     debugMenu = menuBar()->addMenu(tr("Debug"));
 
 	 // Debug -> Hex Editor
+	 debuggerAct = new QAction(tr("Debugger..."), this);
+    //debuggerAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    debuggerAct->setStatusTip(tr("Open 6502 Debugger"));
+    connect(debuggerAct, SIGNAL(triggered()), this, SLOT(openDebugWindow(void)) );
+
+    debugMenu->addAction(debuggerAct);
+
+	 // Debug -> Hex Editor
 	 hexEditAct = new QAction(tr("Hex Editor..."), this);
     //hexEditAct->setShortcut( QKeySequence(tr("Shift+F7")));
     hexEditAct->setStatusTip(tr("Open Memory Hex Editor"));
@@ -551,6 +560,9 @@ void consoleWin_t::closeApp(void)
 {
 	nes_shm->runEmulator = 0;
 
+	emulatorThread->quit();
+	emulatorThread->wait( 1000 );
+
 	fceuWrapperLock();
 	fceuWrapperClose();
 	fceuWrapperUnLock();
@@ -559,7 +571,6 @@ void consoleWin_t::closeApp(void)
 	// clear the NetworkIP field so this doesn't happen unintentionally
 	g_config->setOption ("SDL.NetworkIP", "");
 	g_config->save ();
-	//SDL_Quit (); // Already called by fceuWrapperClose
 
 	//qApp::quit();
 	qApp->quit();
@@ -968,6 +979,17 @@ void consoleWin_t::openCheats(void)
    cheatWin = new GuiCheatsDialog_t(this);
 	
    cheatWin->show();
+}
+
+void consoleWin_t::openDebugWindow(void)
+{
+	ConsoleDebugger *debugWin;
+
+	//printf("Open GUI 6502 Debugger Window\n");
+	
+   debugWin = new ConsoleDebugger(this);
+	
+   debugWin->show();
 }
 
 void consoleWin_t::openHexEditor(void)

@@ -15,6 +15,8 @@
 #include "Qt/nes_shm.h"
 #include "Qt/unix-netplay.h"
 #include "Qt/HexEditor.h"
+#include "Qt/SymbolicDebug.h"
+#include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/fceux_git_info.h"
 
@@ -159,11 +161,6 @@ FCEUD_GetTimeFreq(void)
 	return 1000;
 }
 
-void FCEUD_DebugBreakpoint( int addr )
-{
-   // TODO
-}
-
 /**
  * Initialize all of the subsystem drivers: video, audio, and joystick.
  */
@@ -215,7 +212,7 @@ DriverKill()
  */
 int LoadGame(const char *path)
 {
-	int gg_enabled;
+	int gg_enabled, autoLoadDebug, autoOpenDebugger;
 
 	if (isloaded){
 		CloseGame();
@@ -232,7 +229,23 @@ int LoadGame(const char *path)
 		return 0;
 	}
 
+	g_config->getOption( "SDL.AutoOpenDebugger", &autoOpenDebugger );
+
+	if ( autoOpenDebugger )
+	{
+		// TODO Auto Open Debugger
+	}
+
 	hexEditorLoadBookmarks();
+
+	g_config->getOption( "SDL.AutoLoadDebugFiles", &autoLoadDebug );
+
+	if ( autoLoadDebug )
+	{
+		loadGameDebugBreakpoints();
+	}
+
+	debugSymbolTable.loadGameSymbols();
 
     int state_to_load;
     g_config->getOption("SDL.AutoLoadState", &state_to_load);
@@ -281,6 +294,11 @@ CloseGame(void)
 		return(0);
 	}
 	hexEditorSaveBookmarks();
+	saveGameDebugBreakpoints();
+	debuggerClearAllBreakpoints();
+
+	debugSymbolTable.save();
+	debugSymbolTable.clear();
 
     int state_to_save;
     g_config->getOption("SDL.AutoSaveState", &state_to_save);

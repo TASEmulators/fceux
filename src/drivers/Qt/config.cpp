@@ -259,6 +259,10 @@ InitConfig()
 	config->addOption("hexEditBgColor", "SDL.HexEditBgColor", "#000000");
 	config->addOption("hexEditFgColor", "SDL.HexEditFgColor", "#FFFFFF");
     
+	// Debugger Options
+	config->addOption("autoLoadDebugFiles", "SDL.AutoLoadDebugFiles", 1);
+	config->addOption("autoOpenDebugger"  , "SDL.AutoOpenDebugger"  , 0);
+
 	// overwrite the config file?
 	config->addOption("no-config", "SDL.NoConfig", 0);
 

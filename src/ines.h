@@ -46,6 +46,7 @@ extern uint8 *ExtraNTARAM;
 extern int iNesSave(void); //bbit Edited: line added
 extern int iNesSaveAs(const char* name);
 extern char LoadedRomFName[2048]; //bbit Edited: line added
+extern char *iNesShortFName(void);
 extern const TMasterRomInfo* MasterRomInfo;
 extern TMasterRomInfoParams MasterRomInfoParams;
 
