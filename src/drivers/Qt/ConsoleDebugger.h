@@ -72,6 +72,7 @@ class QAsmView : public QWidget
 		void asmClear(void);
 		int  getAsmLineFromAddr(int addr);
 		void setLine(int lineNum);
+		void setXScroll(int value);
 		void scrollToPC(void);
 		void setDisplayROMoffsets( bool value );
 		void setSymbolDebugEnable( bool value );
@@ -107,6 +108,7 @@ class QAsmView : public QWidget
 		int viewHeight;
 		int lineOffset;
 		int maxLineOffset;
+		int pxLineWidth;
 		int pxLineXScroll;
 		int cursorPosX;
 		int cursorPosY;
@@ -199,6 +201,7 @@ class ConsoleDebugger : public QDialog
 		void asmViewCtxMenuAddSym(void);
 	private slots:
 		void updatePeriodic(void);
+		void hbarChanged(int value);
 		void vbarChanged(int value);
 		void debugRunCB(void);
 		void debugStepIntoCB(void);

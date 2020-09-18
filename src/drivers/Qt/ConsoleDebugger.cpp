@@ -383,12 +383,15 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	button    = new QPushButton( tr("Add") );
 	vbox->addWidget( button );
+	button->setEnabled(false); // TODO
 
 	button    = new QPushButton( tr("Delete") );
 	vbox->addWidget( button );
+	button->setEnabled(false); // TODO
 
 	button    = new QPushButton( tr("Name") );
 	vbox->addWidget( button );
+	button->setEnabled(false); // TODO
 
 	hbox->addWidget( bmTree );
 	hbox->addLayout( vbox   );
@@ -467,7 +470,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	periodicTimer  = new QTimer( this );
 
    connect( periodicTimer, &QTimer::timeout, this, &ConsoleDebugger::updatePeriodic );
-	//connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
+	connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
    connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
 
 	bpListUpdate( false );
@@ -1813,7 +1816,9 @@ void  QAsmView::updateAssemblyView(void)
 		asmEntry.push_back(a);
 	}
 
-	setMinimumWidth( maxLineLen * pxCharWidth );
+	pxLineWidth = maxLineLen * pxCharWidth;
+
+	setMinimumWidth( pxLineWidth );
 
 	vbar->setMaximum( asmEntry.size() );
 }
@@ -2130,6 +2135,12 @@ void ConsoleDebugger::breakPointNotify( int bpNum )
 	}
 
 	windowUpdateReq = true;
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::hbarChanged(int value)
+{
+	//printf("HBar Changed: %i\n", value);
+	asmView->setXScroll( value );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::vbarChanged(int value)
@@ -2475,6 +2486,7 @@ QAsmView::QAsmView(QWidget *parent)
 	symbolicDebugEnable = true;
 	registerNameEnable = true;
 	maxLineLen = 0;
+	pxLineWidth = 0;
 	lineOffset = 0;
 	maxLineOffset = 0;
 	ctxMenuAddr = -1;
@@ -2499,6 +2511,18 @@ void QAsmView::asmClear(void)
 void QAsmView::setLine(int lineNum)
 {
 	lineOffset = lineNum;
+}
+//----------------------------------------------------------------------------
+void QAsmView::setXScroll(int value)
+{
+	if ( viewWidth >= pxLineWidth )
+	{
+		pxLineXScroll = 0;
+	}
+	else
+	{
+		pxLineXScroll = (int)(0.010f * (float)value * (float)(pxLineWidth - viewWidth) );
+	}
 }
 //----------------------------------------------------------------------------
 void QAsmView::scrollToPC(void)
@@ -2573,14 +2597,14 @@ void QAsmView::resizeEvent(QResizeEvent *event)
 
 	maxLineOffset = 0; // mb.numLines() - viewLines + 1;
 
-	//if ( viewWidth >= pxLineWidth )
-	//{
-	//	pxLineXScroll = 0;
-	//}
-	//else
-	//{
-	//	pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth) );
-	//}
+	if ( viewWidth >= pxLineWidth )
+	{
+		pxLineXScroll = 0;
+	}
+	else
+	{
+		pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth) );
+	}
 
 }
 //----------------------------------------------------------------------------
@@ -2775,7 +2799,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 
 	for (row=0; row < nrow; row++)
 	{
-		x=0;
+		x = -pxLineXScroll;
 		l = lineOffset + row;
 		painter.setPen( this->palette().color(QPalette::WindowText));
 
