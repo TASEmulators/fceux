@@ -457,7 +457,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
    connect( debFileChkBox , SIGNAL(stateChanged(int)), this, SLOT(debFileAutoLoadCB(int)) );
 
 	button->setEnabled(false); // TODO
-	autoOpenChkBox->setEnabled(false); // TODO
+	//autoOpenChkBox->setEnabled(false); // TODO
 	//debFileChkBox->setEnabled(false); // TODO
 	idaFontChkBox->setEnabled(false); // TODO
 
@@ -2174,6 +2174,11 @@ void FCEUD_DebugBreakpoint( int bpNum )
 	ResetDebugStatisticsDeltaCounters();
 
 	fceuWrapperLock();
+}
+//----------------------------------------------------------------------------
+bool debuggerWindowIsOpen(void)
+{
+	return (dbgWinList.size() > 0);
 }
 //----------------------------------------------------------------------------
 static int getGameDebugBreakpointFileName(char *filepath)
