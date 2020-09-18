@@ -60,6 +60,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	QLabel      *lbl;
 	float fontCharWidth;
 	QTreeWidgetItem * item;
+	int opt;
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
@@ -419,6 +420,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
    connect( symDbgChkBox, SIGNAL(stateChanged(int)), this, SLOT(symbolDebugEnableCB(int)) );
    connect( regNamChkBox, SIGNAL(stateChanged(int)), this, SLOT(registerNameEnableCB(int)) );
 
+
 	button       = new QPushButton( tr("Reload Symbols") );
 	vbox->addWidget( button );
    connect( button, SIGNAL(clicked(void)), this, SLOT(reloadSymbolsCB(void)) );
@@ -442,9 +444,18 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	hbox->addWidget( debFileChkBox  );
 	hbox->addWidget( idaFontChkBox  );
 
+	g_config->getOption( "SDL.AutoOpenDebugger", &opt );
+	autoOpenChkBox->setChecked( opt );
+
+	g_config->getOption( "SDL.AutoLoadDebugFiles", &opt );
+	debFileChkBox->setChecked( opt );
+
+   connect( autoOpenChkBox, SIGNAL(stateChanged(int)), this, SLOT(autoOpenDebugCB(int)) );
+   connect( debFileChkBox , SIGNAL(stateChanged(int)), this, SLOT(debFileAutoLoadCB(int)) );
+
 	button->setEnabled(false); // TODO
 	autoOpenChkBox->setEnabled(false); // TODO
-	debFileChkBox->setEnabled(false); // TODO
+	//debFileChkBox->setEnabled(false); // TODO
 	idaFontChkBox->setEnabled(false); // TODO
 
 	setLayout( mainLayout );
@@ -465,8 +476,15 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	// If this is the first debug window to open, load breakpoints fresh
 	if ( dbgWinList.size() == 1 )
-	{
-		loadGameDebugBreakpoints();
+	{ 
+		int autoLoadDebug;
+
+		g_config->getOption( "SDL.AutoLoadDebugFiles", &autoLoadDebug );
+
+		if ( autoLoadDebug )
+		{
+			loadGameDebugBreakpoints();
+		}
 	}
 }
 //----------------------------------------------------------------------------
@@ -1216,6 +1234,23 @@ void ConsoleDebugger::symbolDebugEnableCB( int value )
 void ConsoleDebugger::registerNameEnableCB( int value )
 {
 	asmView->setRegisterNameEnable(value != Qt::Unchecked);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::autoOpenDebugCB( int value )
+{
+	g_config->setOption( "SDL.AutoOpenDebugger", value != Qt::Unchecked);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::debFileAutoLoadCB( int value )
+{
+	int autoLoadDebug = value != Qt::Unchecked;
+
+	g_config->setOption("SDL.AutoLoadDebugFiles", autoLoadDebug);
+
+	if ( autoLoadDebug && (numWPs == 0) )
+	{
+		loadGameDebugBreakpoints();
+	}
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::reloadSymbolsCB(void)
@@ -2349,7 +2384,7 @@ void loadGameDebugBreakpoints(void)
 					data[j] = 0;
 				}
 
-				printf("ID:'%s'  DATA:'%s' \n", id, data );
+				//printf("ID:'%s'  DATA:'%s' \n", id, data );
 
 				if ( strcmp( id, "startAddr" ) == 0 )
 				{

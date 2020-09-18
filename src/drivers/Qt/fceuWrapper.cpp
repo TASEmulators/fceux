@@ -212,7 +212,7 @@ DriverKill()
  */
 int LoadGame(const char *path)
 {
-	int gg_enabled;
+	int gg_enabled, autoLoadDebug, autoOpenDebugger;
 
 	if (isloaded){
 		CloseGame();
@@ -229,8 +229,21 @@ int LoadGame(const char *path)
 		return 0;
 	}
 
+	g_config->getOption( "SDL.AutoOpenDebugger", &autoOpenDebugger );
+
+	if ( autoOpenDebugger )
+	{
+		// TODO Auto Open Debugger
+	}
+
 	hexEditorLoadBookmarks();
-	loadGameDebugBreakpoints();
+
+	g_config->getOption( "SDL.AutoLoadDebugFiles", &autoLoadDebug );
+
+	if ( autoLoadDebug )
+	{
+		loadGameDebugBreakpoints();
+	}
 
 	debugSymbolTable.loadGameSymbols();
 

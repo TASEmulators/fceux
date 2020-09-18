@@ -216,6 +216,8 @@ class ConsoleDebugger : public QDialog
 		void displayROMoffsetCB(int value);
 		void symbolDebugEnableCB(int value);
 		void registerNameEnableCB(int value);
+		void autoOpenDebugCB( int value );
+		void debFileAutoLoadCB( int value );
 		void breakOnBadOpcodeCB(int value);
 		void breakOnCyclesCB( int value );
 		void breakOnInstructionsCB( int value );
