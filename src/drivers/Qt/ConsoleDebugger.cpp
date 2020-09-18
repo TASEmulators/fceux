@@ -457,9 +457,13 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
    connect( debFileChkBox , SIGNAL(stateChanged(int)), this, SLOT(debFileAutoLoadCB(int)) );
 
 	button->setEnabled(false); // TODO
-	//autoOpenChkBox->setEnabled(false); // TODO
-	//debFileChkBox->setEnabled(false); // TODO
-	idaFontChkBox->setEnabled(false); // TODO
+
+	// IDA font is just a monospace font, we are forcing this anyway. It is just easier to read the assembly.
+	// If a different font is desired, my thought is to open a QFontDialog and let the user pick a new font,
+	// rather than use a checkbox that selects between two. But for the moment, I have more important things
+	// to do.
+	idaFontChkBox->setEnabled(false); 
+	idaFontChkBox->setChecked(true); 
 
 	setLayout( mainLayout );
 
