@@ -361,6 +361,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	bmFrame   = new QGroupBox( tr("Address Bookmarks") );
 	bmTree    = new QTreeWidget();
 	selBmAddr = new QLineEdit();
+	selBmAddrVal = 0;
 
 	bmTree->setColumnCount(2);
 
@@ -383,15 +384,12 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	button    = new QPushButton( tr("Add") );
 	vbox->addWidget( button );
-	button->setEnabled(false); // TODO
 
 	button    = new QPushButton( tr("Delete") );
 	vbox->addWidget( button );
-	button->setEnabled(false); // TODO
 
 	button    = new QPushButton( tr("Name") );
 	vbox->addWidget( button );
-	button->setEnabled(false); // TODO
 
 	hbox->addWidget( bmTree );
 	hbox->addLayout( vbox   );
@@ -1430,6 +1428,17 @@ void ConsoleDebugger::asmViewCtxMenuAddBP(void)
 
 	openBpEditWindow( -1, &wp );
 
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::setBookmarkSelectedAddress( int addr )
+{
+	char stmp[32];
+
+	sprintf( stmp, "%04X", addr );
+
+	selBmAddr->setText( tr(stmp) );
+
+	selBmAddrVal = addr;
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuAddSym(void)
@@ -2724,17 +2733,19 @@ void QAsmView::mouseMoveEvent(QMouseEvent * event)
 //----------------------------------------------------------------------------
 void QAsmView::mousePressEvent(QMouseEvent * event)
 {
-	//int line;
-	//QPoint c = convPixToCursor( event->pos() );
+	int line;
+	QPoint c = convPixToCursor( event->pos() );
 
-	//line = lineOffset + c.y();
-	//
-	//if ( line < asmEntry.size() )
-	//{
-	//	int addr;
+	line = lineOffset + c.y();
+	
+	if ( line < asmEntry.size() )
+	{
+		int addr;
 
-	//	addr = asmEntry[line]->addr;
-	//}
+		addr = asmEntry[line]->addr;
+
+		parent->setBookmarkSelectedAddress( addr );
+	}
 }
 //----------------------------------------------------------------------------
 void QAsmView::contextMenuEvent(QContextMenuEvent *event)
@@ -2769,7 +2780,7 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 //----------------------------------------------------------------------------
 void QAsmView::paintEvent(QPaintEvent *event)
 {
-	int x,y,l, row, nrow;
+	int x,y,l, row, nrow, selAddr;
 	QPainter painter(this);
 
 	painter.setFont(font);
@@ -2801,6 +2812,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	{
 		lineOffset = maxLineOffset;
 	}
+	selAddr = parent->getBookmarkSelectedAddress();
 
 	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Background) );
 
@@ -2827,6 +2839,27 @@ void QAsmView::paintEvent(QPaintEvent *event)
 				painter.fillRect( 0, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("light blue") );
 			}
 			painter.drawText( x, y, tr(asmEntry[l]->text.c_str()) );
+
+			if ( selAddr == asmEntry[l]->addr )
+			{	// Highlight ASM line for selected address.
+				if ( asmEntry[l]->type == dbg_asm_entry_t::ASM_TEXT )
+				{
+					int ax;
+					char addrString[16];
+
+					ax = 4*pxCharWidth;
+
+					painter.fillRect( ax, y - pxLineSpacing + pxLineLead, 4*pxCharWidth, pxLineSpacing, QColor("blue") );
+
+					sprintf( addrString, "%04X", selAddr );
+
+					painter.setPen( this->palette().color(QPalette::Background));
+
+					painter.drawText( ax, y, tr(addrString) );
+
+					painter.setPen( this->palette().color(QPalette::WindowText));
+				}
+			}
 		}
 		y += pxLineSpacing;
 	}

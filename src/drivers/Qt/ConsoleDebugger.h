@@ -134,6 +134,8 @@ class ConsoleDebugger : public QDialog
 		void breakPointNotify(int bpNum);
 		void openBpEditWindow(int editIdx = -1, watchpointinfo *wp = NULL );
 		void openDebugSymbolEditWindow( int addr );
+		void setBookmarkSelectedAddress( int addr );
+		int  getBookmarkSelectedAddress(void){ return selBmAddrVal; };
 
 		QLabel    *asmLineSelLbl;
 	protected:
@@ -189,6 +191,7 @@ class ConsoleDebugger : public QDialog
 		QTimer    *periodicTimer;
 		QFont      font;
 
+		int   selBmAddrVal;
 		bool  windowUpdateReq;
 
 	private:
