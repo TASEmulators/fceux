@@ -14,6 +14,7 @@
 #include <QCloseEvent>
 #include <QGridLayout>
 #include <QRadioButton>
+#include <QInputDialog>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -44,6 +45,7 @@
 extern int vblankScanLines;
 extern int vblankPixel;
 
+debuggerBookmarkManager_t dbgBmMgr;
 static std::list <ConsoleDebugger*> dbgWinList;
 
 static void DeleteBreak(int sel);
@@ -384,12 +386,15 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	button    = new QPushButton( tr("Add") );
 	vbox->addWidget( button );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(add_BM_CB(void)) );
 
 	button    = new QPushButton( tr("Delete") );
 	vbox->addWidget( button );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(delete_BM_CB(void)) );
 
 	button    = new QPushButton( tr("Name") );
 	vbox->addWidget( button );
+   connect( button, SIGNAL(clicked(void)), this, SLOT(edit_BM_CB(void)) );
 
 	hbox->addWidget( bmTree );
 	hbox->addLayout( vbox   );
@@ -1040,6 +1045,135 @@ void ConsoleDebugger::bpListUpdate( bool reset )
 	}
 
 	bpTree->viewport()->update();
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::add_BM_CB(void)
+{
+	dbgBmMgr.addBookmark( selBmAddrVal );
+
+	bmListUpdate(false);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::edit_BM_CB(void)
+{
+	int addr;
+	std::string s;
+	QTreeWidgetItem *item;
+
+	item = bmTree->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+	s = item->text(0).toStdString();
+
+	addr = strtol( s.c_str(), NULL, 16 );
+
+	edit_BM_name( addr );
+	
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::delete_BM_CB(void)
+{
+	int addr;
+	std::string s;
+	QTreeWidgetItem *item;
+
+	item = bmTree->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+	s = item->text(0).toStdString();
+
+	addr = strtol( s.c_str(), NULL, 16 );
+
+	dbgBmMgr.deleteBookmark( addr );
+
+	bmListUpdate(true);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::edit_BM_name( int addr )
+{
+	int ret;
+	debuggerBookmark_t *bm;
+	QInputDialog dialog(this);
+
+	bm = dbgBmMgr.getAddr( addr );
+
+	dialog.setWindowTitle( tr("Edit Bookmark") );
+   dialog.setLabelText( tr("Specify Bookmark Name") );
+   dialog.setOkButtonText( tr("Edit") );
+
+	if ( bm != NULL )
+	{
+		dialog.setTextValue( tr(bm->name.c_str()) );
+	}
+
+   dialog.show();
+   ret = dialog.exec();
+
+	if ( QDialog::Accepted == ret )
+   {
+		bm->name = dialog.textValue().toStdString();
+		bmListUpdate(false);
+   }
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::bmListUpdate( bool reset )
+{
+	int i=0;
+	QTreeWidgetItem *item;
+	debuggerBookmark_t *bm;
+	char addrStr[32];
+
+	if ( reset )
+	{
+		bmTree->clear();
+	}
+
+	bm = dbgBmMgr.begin();
+
+	while ( bm != NULL )
+	{
+		if ( bmTree->topLevelItemCount() > i )
+		{
+			item = bmTree->topLevelItem(i);
+		}
+		else
+		{
+			item = NULL;
+		}
+
+		if ( item == NULL )
+		{
+			item = new QTreeWidgetItem();
+
+			bmTree->addTopLevelItem( item );
+		}
+
+		sprintf( addrStr, "%04X", bm->addr );
+
+		//item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsUserCheckable );
+		item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemNeverHasChildren );
+
+		item->setFont( 0, font );
+		item->setFont( 1, font );
+
+		item->setText( 0, tr(addrStr));
+		item->setText( 1, tr(bm->name.c_str()) );
+
+		item->setTextAlignment( 0, Qt::AlignLeft);
+		item->setTextAlignment( 1, Qt::AlignLeft);
+
+		bm = dbgBmMgr.next(); i++;
+	}
+
+	bmTree->viewport()->update();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::add_BP_CB(void)
@@ -2107,6 +2241,12 @@ void ConsoleDebugger::updatePeriodic(void)
 		printf("Breakpoint Tree Update\n");
 		bpListUpdate( true );
 	}
+
+	if ( bmTree->topLevelItemCount() != dbgBmMgr.size() )
+	{
+		printf("Bookmark Tree Update\n");
+		bmListUpdate( true );
+	}
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::breakPointNotify( int bpNum )
@@ -2863,5 +3003,138 @@ void QAsmView::paintEvent(QPaintEvent *event)
 		}
 		y += pxLineSpacing;
 	}
+}
+//----------------------------------------------------------------------------
+// Bookmark Manager Methods
+//----------------------------------------------------------------------------
+debuggerBookmarkManager_t::debuggerBookmarkManager_t(void)
+{
+	internal_iter = bmMap.begin();
+
+}
+//----------------------------------------------------------------------------
+debuggerBookmarkManager_t::~debuggerBookmarkManager_t(void)
+{
+	this->clear();
+}
+//----------------------------------------------------------------------------
+void debuggerBookmarkManager_t::clear(void)
+{
+	std::map <int, debuggerBookmark_t*>::iterator it;
+
+	for (it=bmMap.begin(); it!=bmMap.end(); it++)
+	{
+		delete it->second;
+	}
+	bmMap.clear();
+
+	internal_iter = bmMap.begin();
+}
+//----------------------------------------------------------------------------
+int debuggerBookmarkManager_t::addBookmark( int addr, const char *name )
+{
+	int retval = -1;
+	debuggerBookmark_t *bm = NULL;
+	std::map <int, debuggerBookmark_t*>::iterator it;
+
+	it = bmMap.find( addr );
+
+	if ( it == bmMap.end() )
+	{
+		bm = new debuggerBookmark_t();
+		bm->addr = addr;
+
+		if ( name != NULL )
+		{
+			bm->name.assign( name );
+		}
+		bmMap[ addr ] = bm;
+
+		retval = 0;
+	}
+
+	return retval;
+}
+//----------------------------------------------------------------------------
+int debuggerBookmarkManager_t::editBookmark( int addr, const char *name )
+{
+	int retval = -1;
+	debuggerBookmark_t *bm = NULL;
+	std::map <int, debuggerBookmark_t*>::iterator it;
+
+	it = bmMap.find( addr );
+
+	if ( it != bmMap.end() )
+	{
+		bm = it->second;
+
+		if ( name != NULL )
+		{
+			bm->name.assign( name );
+		}
+		retval = 0;
+	}
+
+	return retval;
+}
+//----------------------------------------------------------------------------
+int debuggerBookmarkManager_t::deleteBookmark( int addr )
+{
+	int retval = -1;
+	std::map <int, debuggerBookmark_t*>::iterator it;
+
+	it = bmMap.find( addr );
+
+	if ( it != bmMap.end() )
+	{
+		bmMap.erase(it);
+
+		retval = 0;
+	}
+	return retval;
+}
+//----------------------------------------------------------------------------
+int debuggerBookmarkManager_t::size(void)
+{
+	return bmMap.size();
+}
+//----------------------------------------------------------------------------
+debuggerBookmark_t *debuggerBookmarkManager_t::begin(void)
+{
+	internal_iter = bmMap.begin();
+
+	if ( internal_iter == bmMap.end() )
+	{
+		return NULL;
+	}
+	return internal_iter->second;
+}
+//----------------------------------------------------------------------------
+debuggerBookmark_t *debuggerBookmarkManager_t::next(void)
+{
+	if ( internal_iter == bmMap.end() )
+	{
+		return NULL;
+	}
+	internal_iter++;
+
+	if ( internal_iter == bmMap.end() )
+	{
+		return NULL;
+	}
+	return internal_iter->second;
+}
+//----------------------------------------------------------------------------
+debuggerBookmark_t *debuggerBookmarkManager_t::getAddr( int addr )
+{
+	std::map <int, debuggerBookmark_t*>::iterator it;
+
+	it = bmMap.find( addr );
+
+	if ( it != bmMap.end() )
+	{
+		return it->second;
+	}
+	return NULL;
 }
 //----------------------------------------------------------------------------
