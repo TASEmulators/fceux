@@ -1128,11 +1128,14 @@ void ConsoleDebugger::edit_BM_name( int addr )
 	int ret;
 	debuggerBookmark_t *bm;
 	QInputDialog dialog(this);
+	char stmp[128];
 
 	bm = dbgBmMgr.getAddr( addr );
 
+	sprintf( stmp, "Specify Bookmark Name for %04X", addr );
+
 	dialog.setWindowTitle( tr("Edit Bookmark") );
-   dialog.setLabelText( tr("Specify Bookmark Name") );
+   dialog.setLabelText( tr(stmp) );
    dialog.setOkButtonText( tr("Edit") );
 
 	if ( bm != NULL )
@@ -1588,6 +1591,17 @@ void ConsoleDebugger::asmViewCtxMenuAddBP(void)
 
 	openBpEditWindow( -1, &wp );
 
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::asmViewCtxMenuAddBM(void)
+{
+	int addr = asmView->getCtxMenuAddr();
+
+	dbgBmMgr.addBookmark( addr );
+
+	edit_BM_name( addr );
+
+	bmListUpdate(false);
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::setBookmarkSelectedAddress( int addr )
@@ -2935,10 +2949,13 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
    	menu.addAction(act);
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBP(void)) );
 
-		act = new QAction(tr("Add Symbolic Debug Name"), this);
+		act = new QAction(tr("Add Symbolic Debug Marker"), this);
    	menu.addAction(act);
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddSym(void)) );
-		//connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
+
+		act = new QAction(tr("Add Bookmark"), this);
+   	menu.addAction(act);
+		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBM(void)) );
 		
 		menu.exec(event->globalPos());
 	}

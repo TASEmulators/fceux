@@ -235,6 +235,7 @@ class ConsoleDebugger : public QDialog
    public slots:
       void closeWindow(void);
 		void asmViewCtxMenuAddBP(void);
+		void asmViewCtxMenuAddBM(void);
 		void asmViewCtxMenuAddSym(void);
 	private slots:
 		void updatePeriodic(void);
