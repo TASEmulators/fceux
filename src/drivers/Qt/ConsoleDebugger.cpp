@@ -38,6 +38,7 @@
 #include "Qt/config.h"
 #include "Qt/nes_shm.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/HexEditor.h"
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleUtilities.h"
 
@@ -1604,6 +1605,26 @@ void ConsoleDebugger::asmViewCtxMenuAddBM(void)
 	bmListUpdate(false);
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::asmViewCtxMenuOpenHexEdit(void)
+{
+	int romAddr = -1;
+	int addr = asmView->getCtxMenuAddr();
+
+	if (addr >= 0x8000)
+	{
+		romAddr  = GetNesFileAddress(addr);
+	}
+
+	if ( romAddr >= 0 )
+	{
+		hexEditorOpenFromDebugger( QHexEdit::MODE_NES_ROM, romAddr );
+	}
+	else
+	{
+		hexEditorOpenFromDebugger( QHexEdit::MODE_NES_RAM, addr );
+	}
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::setBookmarkSelectedAddress( int addr )
 {
 	char stmp[32];
@@ -2956,6 +2977,10 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 		act = new QAction(tr("Add Bookmark"), this);
    	menu.addAction(act);
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBM(void)) );
+		
+		act = new QAction(tr("Open Hex Editor"), this);
+   	menu.addAction(act);
+		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuOpenHexEdit(void)) );
 		
 		menu.exec(event->globalPos());
 	}

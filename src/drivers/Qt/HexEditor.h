@@ -195,13 +195,14 @@ class HexEditorDialog_t : public QDialog
 
 		void gotoAddress(int newAddr);
 		void populateBookmarkMenu(void);
+
+		QHexEdit   *editor;
 	protected:
 
 		void closeEvent(QCloseEvent *bar);
 
 		QScrollBar *vbar;
 		QScrollBar *hbar;
-		QHexEdit   *editor;
 		QTimer     *periodicTimer;
 		QMenu      *bookmarkMenu;
 
@@ -227,5 +228,7 @@ class HexEditorDialog_t : public QDialog
 		void removeAllBookmarks(void);
 };
 
+int hexEditorNumWindows(void);
 void hexEditorLoadBookmarks(void);
 void hexEditorSaveBookmarks(void);
+int hexEditorOpenFromDebugger( int mode, int addr );

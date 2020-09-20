@@ -36,6 +36,7 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/HexEditor.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/ConsoleWindow.h"
 
 static HexBookMarkManager_t hbm;
 static std::list <HexEditorDialog_t*> winList;
@@ -1926,5 +1927,32 @@ void hexEditorSaveBookmarks(void)
 	{
 		(*it)->populateBookmarkMenu();
 	}
+}
+//----------------------------------------------------------------------------
+int hexEditorNumWindows(void)
+{
+	return winList.size();
+}
+//----------------------------------------------------------------------------
+int hexEditorOpenFromDebugger( int mode, int addr )
+{
+	HexEditorDialog_t *win = NULL;
+
+	if ( winList.size() > 0 )
+	{
+		win = winList.front();
+	}
+
+	if ( win == NULL )
+	{
+		win = new HexEditorDialog_t(consoleWindow);
+
+		win->show();
+	}
+
+	win->editor->setMode( mode );
+	win->editor->setAddr( addr );
+
+	return 0;
 }
 //----------------------------------------------------------------------------
