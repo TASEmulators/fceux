@@ -365,6 +365,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	selBmAddr = new QLineEdit();
 	selBmAddrVal = 0;
 
+	connect( selBmAddr, SIGNAL(textChanged(const QString &)), this, SLOT(selBmAddrChanged(const QString &)));
+
 	bmTree->setColumnCount(2);
 
 	item = new QTreeWidgetItem();
@@ -381,6 +383,9 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	connect( bmTree, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
 			   this, SLOT(bmItemClicked( QTreeWidgetItem*, int)) );
+
+	connect( bmTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
+			   this, SLOT(bmItemDoubleClicked( QTreeWidgetItem*, int)) );
 
 	vbox->addWidget( selBmAddr );
 
@@ -563,10 +568,31 @@ void 	ConsoleDebugger::bpItemClicked( QTreeWidgetItem *item, int column)
 //----------------------------------------------------------------------------
 void 	ConsoleDebugger::bmItemClicked( QTreeWidgetItem *item, int column)
 {
-	int row = bmTree->indexOfTopLevelItem(item);
+	//int row = bmTree->indexOfTopLevelItem(item);
 
-	printf("Row: %i Column: %i \n", row, column );
+	//printf("Row: %i Column: %i \n", row, column );
 
+}
+//----------------------------------------------------------------------------
+void 	ConsoleDebugger::bmItemDoubleClicked( QTreeWidgetItem *item, int column)
+{
+	int addr, line;
+	//int row = bmTree->indexOfTopLevelItem(item);
+
+	//printf("Row: %i Column: %i \n", row, column );
+
+	addr = strtol( item->text(0).toStdString().c_str(), NULL, 16 );
+
+	line = asmView->getAsmLineFromAddr( addr );
+
+	asmView->setLine( line );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::selBmAddrChanged(const QString &txt)
+{
+	selBmAddrVal = strtol( txt.toStdString().c_str(), NULL, 16 );
+
+	//printf("selBmAddrVal = %04X\n", selBmAddrVal );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )

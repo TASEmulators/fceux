@@ -266,8 +266,10 @@ class ConsoleDebugger : public QDialog
 		void breakOnInstructionsCB( int value );
 		void bpItemClicked( QTreeWidgetItem *item, int column);
 		void bmItemClicked( QTreeWidgetItem *item, int column);
+		void bmItemDoubleClicked( QTreeWidgetItem *item, int column);
 		void cpuCycleThresChanged(const QString &txt);
 		void instructionsThresChanged(const QString &txt);
+		void selBmAddrChanged(const QString &txt);
 
 };
 
