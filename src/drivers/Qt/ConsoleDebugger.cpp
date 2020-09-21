@@ -2274,6 +2274,11 @@ void ConsoleDebugger::updateWindowData(void)
 	windowUpdateReq = false;
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::queueUpdate(void)
+{
+	windowUpdateReq = true;
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::updatePeriodic(void)
 {
 	//printf("Update Periodic\n");
@@ -2393,6 +2398,16 @@ void FCEUD_DebugBreakpoint( int bpNum )
 bool debuggerWindowIsOpen(void)
 {
 	return (dbgWinList.size() > 0);
+}
+//----------------------------------------------------------------------------
+void updateAllDebuggerWindows( void )
+{
+	std::list <ConsoleDebugger*>::iterator it;
+
+	for (it=dbgWinList.begin(); it!=dbgWinList.end(); it++)
+	{
+		(*it)->queueUpdate();
+	}
 }
 //----------------------------------------------------------------------------
 static int getGameDebugBreakpointFileName(char *filepath)

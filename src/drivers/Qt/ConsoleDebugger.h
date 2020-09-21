@@ -169,6 +169,7 @@ class ConsoleDebugger : public QDialog
 		void setBookmarkSelectedAddress( int addr );
 		int  getBookmarkSelectedAddress(void){ return selBmAddrVal; };
 		void edit_BM_name( int addr );
+		void queueUpdate(void);
 
 		QLabel    *asmLineSelLbl;
 	protected:
@@ -279,5 +280,6 @@ bool debuggerWindowIsOpen(void);
 void saveGameDebugBreakpoints(void);
 void loadGameDebugBreakpoints(void);
 void debuggerClearAllBreakpoints(void);
+void updateAllDebuggerWindows(void);
 
 extern debuggerBookmarkManager_t dbgBmMgr;

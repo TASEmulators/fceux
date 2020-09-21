@@ -184,6 +184,7 @@ class QHexEdit : public QWidget
 	private slots:
 		void jumpToROM(void);
 		void addBookMarkCB(void);
+		void addDebugSym(void);
 		void addRamReadBP(void);
 		void addRamWriteBP(void);
 		void addRamExecuteBP(void);
@@ -203,6 +204,7 @@ class HexEditorDialog_t : public QDialog
 		void gotoAddress(int newAddr);
 		void populateBookmarkMenu(void);
 		void setWindowTitle(void);
+		void openDebugSymbolEditWindow( int addr );
 
 		QHexEdit   *editor;
 	protected:
