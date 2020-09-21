@@ -538,12 +538,11 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	QMenuBar *menuBar;
 	QMenu *fileMenu, *viewMenu, *colorMenu;
 	QAction *saveROM, *closeAct;
-	QAction *viewRAM, *viewPPU, *viewOAM, *viewROM;
 	QAction *actHlgt, *actHlgtRV, *actColorFG, *actColorBG;
 	QActionGroup *group;
 	int useNativeMenuBar;
 
-	setWindowTitle("Hex Editor");
+	QDialog::setWindowTitle( tr("Hex Editor") );
 
 	resize( 512, 512 );
 
@@ -736,6 +735,19 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 			break;
 		}
 	}
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::setWindowTitle(void)
+{
+	const char *modeString;
+	char stmp[128];
+
+	modeString = memViewNames[ editor->getMode() ];
+
+	sprintf( stmp, "Hex Editor - %s: 0x%04X", modeString, editor->getAddr() );
+
+	QDialog::setWindowTitle( tr(stmp) );
+
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::removeAllBookmarks(void)
@@ -957,6 +969,36 @@ void HexEditorDialog_t::updatePeriodic(void)
 	editor->memModeUpdate();
 
 	editor->update();
+
+	setWindowTitle();
+
+	switch ( editor->getMode() )
+	{
+		case QHexEdit::MODE_NES_RAM:
+			if ( !viewRAM->isChecked() )
+			{
+				viewRAM->setChecked(true);
+			}
+		break;
+		case QHexEdit::MODE_NES_PPU:
+			if ( !viewPPU->isChecked() )
+			{
+				viewPPU->setChecked(true);
+			}
+		break;
+		case QHexEdit::MODE_NES_OAM:
+			if ( !viewOAM->isChecked() )
+			{
+				viewOAM->setChecked(true);
+			}
+		break;
+		case QHexEdit::MODE_NES_ROM:
+			if ( !viewROM->isChecked() )
+			{
+				viewROM->setChecked(true);
+			}
+		break;
+	}
 }
 //----------------------------------------------------------------------------
 QHexEdit::QHexEdit(QWidget *parent)
@@ -993,6 +1035,7 @@ QHexEdit::QHexEdit(QWidget *parent)
 	lineOffset  = 0;
 	cursorPosX  = 0;
 	cursorPosY  = 0;
+	cursorAddr  = 0;
 	cursorBlink = true;
 	cursorBlinkCount = 0;
    maxLineOffset = 0;
@@ -1733,6 +1776,9 @@ void QHexEdit::memModeUpdate(void)
 			printf("Error: Failed to allocate memview buffer size\n");
 			return;
 		}
+		maxLineOffset = mb.numLines() - viewLines + 1;
+
+		vbar->setMaximum( memSize / 16 );
 	}
 }
 //----------------------------------------------------------------------------
@@ -1808,6 +1854,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 		ca = 16*(lineOffset + cursorPosY) + a;
 	}
+	cursorAddr = ca;
 
 	if ( cursorBlink )
 	{

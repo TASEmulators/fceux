@@ -114,6 +114,7 @@ class QHexEdit : public QWidget
 		void setBackGroundColor( QColor bg );
 		void memModeUpdate(void);
 		int  checkMemActivity(void);
+		int  getAddr(void){ return cursorAddr; };
 
 		enum {
 			MODE_NES_RAM = 0,
@@ -164,6 +165,7 @@ class QHexEdit : public QWidget
 		int pxHexAscii;
 		int cursorPosX;
 		int cursorPosY;
+		int cursorAddr;
 		int cursorBlinkCount;
 		int viewLines;
 		int viewWidth;
@@ -195,6 +197,7 @@ class HexEditorDialog_t : public QDialog
 
 		void gotoAddress(int newAddr);
 		void populateBookmarkMenu(void);
+		void setWindowTitle(void);
 
 		QHexEdit   *editor;
 	protected:
@@ -205,6 +208,10 @@ class HexEditorDialog_t : public QDialog
 		QScrollBar *hbar;
 		QTimer     *periodicTimer;
 		QMenu      *bookmarkMenu;
+		QAction    *viewRAM;
+		QAction    *viewPPU;
+		QAction    *viewOAM;
+		QAction    *viewROM;
 
 	private:
 

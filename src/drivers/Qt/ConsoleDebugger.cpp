@@ -2967,19 +2967,19 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 		ctxMenuAddr = addr = asmEntry[line]->addr;
 
 		act = new QAction(tr("Add Breakpoint"), this);
-   	menu.addAction(act);
+		menu.addAction(act);
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBP(void)) );
 
 		act = new QAction(tr("Add Symbolic Debug Marker"), this);
-   	menu.addAction(act);
+	 	menu.addAction(act);
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddSym(void)) );
 
 		act = new QAction(tr("Add Bookmark"), this);
-   	menu.addAction(act);
+	 	menu.addAction(act);
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBM(void)) );
 		
 		act = new QAction(tr("Open Hex Editor"), this);
-   	menu.addAction(act);
+	 	menu.addAction(act);
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuOpenHexEdit(void)) );
 		
 		menu.exec(event->globalPos());
@@ -3050,7 +3050,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 
 			if ( selAddr == asmEntry[l]->addr )
 			{	// Highlight ASM line for selected address.
-				if ( asmEntry[l]->type == dbg_asm_entry_t::ASM_TEXT )
+				if ( !displayROMoffsets && (asmEntry[l]->type == dbg_asm_entry_t::ASM_TEXT) )
 				{
 					int ax;
 					char addrString[16];
