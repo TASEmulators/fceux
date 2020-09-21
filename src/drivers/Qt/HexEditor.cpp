@@ -1578,17 +1578,20 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 			act = new QAction(tr("TODO Add Symbolic Debug Name"), this);
    		menu.addAction(act);
 
-			sprintf( stmp, "TODO Add Read Breakpoint for Address $%04X", addr );
+			sprintf( stmp, "Add Read Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), this);
-   		menu.addAction(act);
+			menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamReadBP(void)) );
 
-			sprintf( stmp, "TODO Add Write Breakpoint for Address $%04X", addr );
+			sprintf( stmp, "Add Write Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), this);
-   		menu.addAction(act);
+			menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamWriteBP(void)) );
 
-			sprintf( stmp, "TODO Add Execute Breakpoint for Address $%04X", addr );
+			sprintf( stmp, "Add Execute Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), this);
-   		menu.addAction(act);
+			menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamExecuteBP(void)) );
 
 			if ( addr > 0x6000 )
 			{
@@ -1611,6 +1614,16 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 		break;
 		case MODE_NES_PPU:
 		{
+			sprintf( stmp, "Add Read Breakpoint for Address $%04X", addr );
+			act = new QAction(tr(stmp), this);
+			menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addPpuReadBP(void)) );
+
+			sprintf( stmp, "Add Write Breakpoint for Address $%04X", addr );
+			act = new QAction(tr(stmp), this);
+			menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addPpuWriteBP(void)) );
+
 			act = new QAction(tr("Add Bookmark"), this);
    		menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
@@ -1672,6 +1685,131 @@ void QHexEdit::addBookMarkCB(void)
 		hbm.addBookMark( ctxAddr, viewMode, dialog.textValue().toStdString().c_str() );
 		parent->populateBookmarkMenu();
    }
+}
+//----------------------------------------------------------------------------
+void QHexEdit::addRamReadBP(void)
+{
+	int retval, type;
+	char cond[64], name[64];
+
+	type = BT_C | WP_R;
+
+	cond[0] = 0;
+	name[0] = 0;
+
+	if ( ctxAddr >= 0x8000 )
+	{
+		sprintf(cond, "K==#%02X", getBank(ctxAddr));
+	}
+
+	retval = NewBreak( name, ctxAddr, -1, type, cond, numWPs, true);
+
+	if ( (retval == 1) || (retval == 2) )
+	{
+		printf("Breakpoint Add Failed\n");
+	}
+	else
+	{
+		numWPs++;
+	}
+}
+//----------------------------------------------------------------------------
+void QHexEdit::addRamWriteBP(void)
+{
+	int retval, type;
+	char cond[64], name[64];
+
+	type = BT_C | WP_W;
+
+	cond[0] = 0;
+	name[0] = 0;
+
+	if ( ctxAddr >= 0x8000 )
+	{
+		sprintf(cond, "K==#%02X", getBank(ctxAddr));
+	}
+
+	retval = NewBreak( name, ctxAddr, -1, type, cond, numWPs, true);
+
+	if ( (retval == 1) || (retval == 2) )
+	{
+		printf("Breakpoint Add Failed\n");
+	}
+	else
+	{
+		numWPs++;
+	}
+}
+//----------------------------------------------------------------------------
+void QHexEdit::addRamExecuteBP(void)
+{
+	int retval, type;
+	char cond[64], name[64];
+
+	type = BT_C | WP_X;
+
+	cond[0] = 0;
+	name[0] = 0;
+
+	if ( ctxAddr >= 0x8000 )
+	{
+		sprintf(cond, "K==#%02X", getBank(ctxAddr));
+	}
+
+	retval = NewBreak( name, ctxAddr, -1, type, cond, numWPs, true);
+
+	if ( (retval == 1) || (retval == 2) )
+	{
+		printf("Breakpoint Add Failed\n");
+	}
+	else
+	{
+		numWPs++;
+	}
+}
+//----------------------------------------------------------------------------
+void QHexEdit::addPpuReadBP(void)
+{
+	int retval, type;
+	char cond[64], name[64];
+
+	type = BT_P | WP_R;
+
+	cond[0] = 0;
+	name[0] = 0;
+
+	retval = NewBreak( name, ctxAddr, -1, type, cond, numWPs, true);
+
+	if ( (retval == 1) || (retval == 2) )
+	{
+		printf("Breakpoint Add Failed\n");
+	}
+	else
+	{
+		numWPs++;
+	}
+}
+//----------------------------------------------------------------------------
+void QHexEdit::addPpuWriteBP(void)
+{
+	int retval, type;
+	char cond[64], name[64];
+
+	type = BT_P | WP_W;
+
+	cond[0] = 0;
+	name[0] = 0;
+
+	retval = NewBreak( name, ctxAddr, -1, type, cond, numWPs, true);
+
+	if ( (retval == 1) || (retval == 2) )
+	{
+		printf("Breakpoint Add Failed\n");
+	}
+	else
+	{
+		numWPs++;
+	}
 }
 //----------------------------------------------------------------------------
 void QHexEdit::jumpToROM(void)

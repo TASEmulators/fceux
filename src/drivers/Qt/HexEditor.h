@@ -184,6 +184,11 @@ class QHexEdit : public QWidget
 	private slots:
 		void jumpToROM(void);
 		void addBookMarkCB(void);
+		void addRamReadBP(void);
+		void addRamWriteBP(void);
+		void addRamExecuteBP(void);
+		void addPpuReadBP(void);
+		void addPpuWriteBP(void);
 
 };
 
