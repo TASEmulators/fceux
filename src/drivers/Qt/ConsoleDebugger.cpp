@@ -14,6 +14,7 @@
 #include <QCloseEvent>
 #include <QGridLayout>
 #include <QRadioButton>
+#include <QInputDialog>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -37,6 +38,7 @@
 #include "Qt/config.h"
 #include "Qt/nes_shm.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/HexEditor.h"
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleUtilities.h"
 
@@ -44,6 +46,7 @@
 extern int vblankScanLines;
 extern int vblankPixel;
 
+debuggerBookmarkManager_t dbgBmMgr;
 static std::list <ConsoleDebugger*> dbgWinList;
 
 static void DeleteBreak(int sel);
@@ -361,6 +364,9 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	bmFrame   = new QGroupBox( tr("Address Bookmarks") );
 	bmTree    = new QTreeWidget();
 	selBmAddr = new QLineEdit();
+	selBmAddrVal = 0;
+
+	connect( selBmAddr, SIGNAL(textChanged(const QString &)), this, SLOT(selBmAddrChanged(const QString &)));
 
 	bmTree->setColumnCount(2);
 
@@ -379,19 +385,22 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	connect( bmTree, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
 			   this, SLOT(bmItemClicked( QTreeWidgetItem*, int)) );
 
+	connect( bmTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
+			   this, SLOT(bmItemDoubleClicked( QTreeWidgetItem*, int)) );
+
 	vbox->addWidget( selBmAddr );
 
 	button    = new QPushButton( tr("Add") );
 	vbox->addWidget( button );
-	button->setEnabled(false); // TODO
+   connect( button, SIGNAL(clicked(void)), this, SLOT(add_BM_CB(void)) );
 
 	button    = new QPushButton( tr("Delete") );
 	vbox->addWidget( button );
-	button->setEnabled(false); // TODO
+   connect( button, SIGNAL(clicked(void)), this, SLOT(delete_BM_CB(void)) );
 
 	button    = new QPushButton( tr("Name") );
 	vbox->addWidget( button );
-	button->setEnabled(false); // TODO
+   connect( button, SIGNAL(clicked(void)), this, SLOT(edit_BM_CB(void)) );
 
 	hbox->addWidget( bmTree );
 	hbox->addLayout( vbox   );
@@ -457,9 +466,13 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
    connect( debFileChkBox , SIGNAL(stateChanged(int)), this, SLOT(debFileAutoLoadCB(int)) );
 
 	button->setEnabled(false); // TODO
-	autoOpenChkBox->setEnabled(false); // TODO
-	//debFileChkBox->setEnabled(false); // TODO
-	idaFontChkBox->setEnabled(false); // TODO
+
+	// IDA font is just a monospace font, we are forcing this anyway. It is just easier to read the assembly.
+	// If a different font is desired, my thought is to open a QFontDialog and let the user pick a new font,
+	// rather than use a checkbox that selects between two. But for the moment, I have more important things
+	// to do.
+	idaFontChkBox->setEnabled(false); 
+	idaFontChkBox->setChecked(true); 
 
 	setLayout( mainLayout );
 
@@ -556,10 +569,31 @@ void 	ConsoleDebugger::bpItemClicked( QTreeWidgetItem *item, int column)
 //----------------------------------------------------------------------------
 void 	ConsoleDebugger::bmItemClicked( QTreeWidgetItem *item, int column)
 {
-	int row = bmTree->indexOfTopLevelItem(item);
+	//int row = bmTree->indexOfTopLevelItem(item);
 
-	printf("Row: %i Column: %i \n", row, column );
+	//printf("Row: %i Column: %i \n", row, column );
 
+}
+//----------------------------------------------------------------------------
+void 	ConsoleDebugger::bmItemDoubleClicked( QTreeWidgetItem *item, int column)
+{
+	int addr, line;
+	//int row = bmTree->indexOfTopLevelItem(item);
+
+	//printf("Row: %i Column: %i \n", row, column );
+
+	addr = strtol( item->text(0).toStdString().c_str(), NULL, 16 );
+
+	line = asmView->getAsmLineFromAddr( addr );
+
+	asmView->setLine( line );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::selBmAddrChanged(const QString &txt)
+{
+	selBmAddrVal = strtol( txt.toStdString().c_str(), NULL, 16 );
+
+	//printf("selBmAddrVal = %04X\n", selBmAddrVal );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
@@ -1040,6 +1074,138 @@ void ConsoleDebugger::bpListUpdate( bool reset )
 	bpTree->viewport()->update();
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::add_BM_CB(void)
+{
+	dbgBmMgr.addBookmark( selBmAddrVal );
+
+	bmListUpdate(false);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::edit_BM_CB(void)
+{
+	int addr;
+	std::string s;
+	QTreeWidgetItem *item;
+
+	item = bmTree->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+	s = item->text(0).toStdString();
+
+	addr = strtol( s.c_str(), NULL, 16 );
+
+	edit_BM_name( addr );
+	
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::delete_BM_CB(void)
+{
+	int addr;
+	std::string s;
+	QTreeWidgetItem *item;
+
+	item = bmTree->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+	s = item->text(0).toStdString();
+
+	addr = strtol( s.c_str(), NULL, 16 );
+
+	dbgBmMgr.deleteBookmark( addr );
+
+	bmListUpdate(true);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::edit_BM_name( int addr )
+{
+	int ret;
+	debuggerBookmark_t *bm;
+	QInputDialog dialog(this);
+	char stmp[128];
+
+	bm = dbgBmMgr.getAddr( addr );
+
+	sprintf( stmp, "Specify Bookmark Name for %04X", addr );
+
+	dialog.setWindowTitle( tr("Edit Bookmark") );
+   dialog.setLabelText( tr(stmp) );
+   dialog.setOkButtonText( tr("Edit") );
+
+	if ( bm != NULL )
+	{
+		dialog.setTextValue( tr(bm->name.c_str()) );
+	}
+
+   dialog.show();
+   ret = dialog.exec();
+
+	if ( QDialog::Accepted == ret )
+   {
+		bm->name = dialog.textValue().toStdString();
+		bmListUpdate(false);
+   }
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::bmListUpdate( bool reset )
+{
+	int i=0;
+	QTreeWidgetItem *item;
+	debuggerBookmark_t *bm;
+	char addrStr[32];
+
+	if ( reset )
+	{
+		bmTree->clear();
+	}
+
+	bm = dbgBmMgr.begin();
+
+	while ( bm != NULL )
+	{
+		if ( bmTree->topLevelItemCount() > i )
+		{
+			item = bmTree->topLevelItem(i);
+		}
+		else
+		{
+			item = NULL;
+		}
+
+		if ( item == NULL )
+		{
+			item = new QTreeWidgetItem();
+
+			bmTree->addTopLevelItem( item );
+		}
+
+		sprintf( addrStr, "%04X", bm->addr );
+
+		//item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsUserCheckable );
+		item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemNeverHasChildren );
+
+		item->setFont( 0, font );
+		item->setFont( 1, font );
+
+		item->setText( 0, tr(addrStr));
+		item->setText( 1, tr(bm->name.c_str()) );
+
+		item->setTextAlignment( 0, Qt::AlignLeft);
+		item->setTextAlignment( 1, Qt::AlignLeft);
+
+		bm = dbgBmMgr.next(); i++;
+	}
+
+	bmTree->viewport()->update();
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::add_BP_CB(void)
 {
 	openBpEditWindow(-1);
@@ -1426,6 +1592,48 @@ void ConsoleDebugger::asmViewCtxMenuAddBP(void)
 
 	openBpEditWindow( -1, &wp );
 
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::asmViewCtxMenuAddBM(void)
+{
+	int addr = asmView->getCtxMenuAddr();
+
+	dbgBmMgr.addBookmark( addr );
+
+	edit_BM_name( addr );
+
+	bmListUpdate(false);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::asmViewCtxMenuOpenHexEdit(void)
+{
+	int romAddr = -1;
+	int addr = asmView->getCtxMenuAddr();
+
+	if (addr >= 0x8000)
+	{
+		romAddr  = GetNesFileAddress(addr);
+	}
+
+	if ( romAddr >= 0 )
+	{
+		hexEditorOpenFromDebugger( QHexEdit::MODE_NES_ROM, romAddr );
+	}
+	else
+	{
+		hexEditorOpenFromDebugger( QHexEdit::MODE_NES_RAM, addr );
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::setBookmarkSelectedAddress( int addr )
+{
+	char stmp[32];
+
+	sprintf( stmp, "%04X", addr );
+
+	selBmAddr->setText( tr(stmp) );
+
+	selBmAddrVal = addr;
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuAddSym(void)
@@ -2066,6 +2274,11 @@ void ConsoleDebugger::updateWindowData(void)
 	windowUpdateReq = false;
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::queueUpdate(void)
+{
+	windowUpdateReq = true;
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::updatePeriodic(void)
 {
 	//printf("Update Periodic\n");
@@ -2093,6 +2306,12 @@ void ConsoleDebugger::updatePeriodic(void)
 	{
 		printf("Breakpoint Tree Update\n");
 		bpListUpdate( true );
+	}
+
+	if ( bmTree->topLevelItemCount() != dbgBmMgr.size() )
+	{
+		printf("Bookmark Tree Update\n");
+		bmListUpdate( true );
 	}
 }
 //----------------------------------------------------------------------------
@@ -2176,6 +2395,21 @@ void FCEUD_DebugBreakpoint( int bpNum )
 	fceuWrapperLock();
 }
 //----------------------------------------------------------------------------
+bool debuggerWindowIsOpen(void)
+{
+	return (dbgWinList.size() > 0);
+}
+//----------------------------------------------------------------------------
+void updateAllDebuggerWindows( void )
+{
+	std::list <ConsoleDebugger*>::iterator it;
+
+	for (it=dbgWinList.begin(); it!=dbgWinList.end(); it++)
+	{
+		(*it)->queueUpdate();
+	}
+}
+//----------------------------------------------------------------------------
 static int getGameDebugBreakpointFileName(char *filepath)
 {
 	int i,j;
@@ -2229,6 +2463,7 @@ void saveGameDebugBreakpoints(void)
 	FILE *fp;
 	char stmp[512];
 	char flags[8];
+   debuggerBookmark_t *bm;
 
 	// If no breakpoints are loaded, skip saving
 	if ( numWPs == 0 )
@@ -2276,9 +2511,86 @@ void saveGameDebugBreakpoints(void)
 			  		(watchpoint[i].desc != NULL) ? watchpoint[i].desc : "");
 	}
 
+   bm = dbgBmMgr.begin();
+
+   while ( bm != NULL )
+   {
+		fprintf( fp, "Bookmark: addr=%04X  desc=\"%s\" \n", bm->addr, bm->name.c_str() );
+
+      bm = dbgBmMgr.next();
+   }
+
 	fclose(fp);
 
 	return;
+}
+//----------------------------------------------------------------------------
+static int getKeyValuePair( int i, const char *stmp, char *id, char *data )
+{
+   int j=0;
+   char literal=0;
+
+   id[0] = 0; data[0] = 0;
+
+   if ( stmp[i] == 0 ) return i;
+
+	while ( isspace(stmp[i]) ) i++;
+
+	j=0;
+	while ( isalnum(stmp[i]) )
+	{
+		id[j] = stmp[i]; j++; i++;
+	}
+	id[j] = 0;
+
+	if ( j == 0 )
+	{
+	  	return i;
+	}
+	if ( stmp[i] != '=' )
+	{
+	  	return i;
+	}
+	i++; j=0;
+	if ( stmp[i] == '\"' )
+	{
+		literal = 0;
+		i++;
+		while ( stmp[i] != 0 )
+		{
+			if ( literal )
+			{
+				data[j] = stmp[i]; i++; j++;
+				literal = 0;
+			}
+			else
+			{
+				if ( stmp[i] == '\\' )
+				{
+					literal = 1; i++;
+				}
+				else if ( stmp[i] == '\"' )
+				{
+					i++; break;
+				}
+				else
+				{
+					data[j] = stmp[i]; j++; i++;
+				}
+			}
+		}
+		data[j] = 0;
+	}
+	else
+	{
+		j=0;
+		while ( !isspace(stmp[i]) )
+		{
+			data[j] = stmp[i]; j++; i++;
+		}
+		data[j] = 0;
+	}
+   return i;
 }
 //----------------------------------------------------------------------------
 void loadGameDebugBreakpoints(void)
@@ -2287,7 +2599,6 @@ void loadGameDebugBreakpoints(void)
 	FILE *fp;
 	char stmp[512];
 	char id[64], data[128];
-	char literal;
 
 	// If no debug windows are open, skip loading breakpoints
 	if ( dbgWinList.size() == 0 )
@@ -2338,62 +2649,7 @@ void loadGameDebugBreakpoints(void)
 
 			while ( stmp[i] != 0 )
 			{
-				while ( isspace(stmp[i]) ) i++;
-
-				j=0;
-				while ( isalnum(stmp[i]) )
-				{
-					id[j] = stmp[i]; j++; i++;
-				}
-				id[j] = 0;
-
-				if ( j == 0 )
-				{
-				  	break;
-				}
-				if ( stmp[i] != '=' )
-				{
-				  	break;
-				}
-				i++; j=0;
-				if ( stmp[i] == '\"' )
-				{
-					literal = 0;
-					i++;
-					while ( stmp[i] != 0 )
-					{
-						if ( literal )
-						{
-							data[j] = stmp[i]; i++; j++;
-							literal = 0;
-						}
-						else
-						{
-							if ( stmp[i] == '\\' )
-							{
-								literal = 1; i++;
-							}
-							else if ( stmp[i] == '\"' )
-							{
-								i++; break;
-							}
-							else
-							{
-								data[j] = stmp[i]; j++; i++;
-							}
-						}
-					}
-					data[j] = 0;
-				}
-				else
-				{
-					j=0;
-					while ( !isspace(stmp[i]) )
-					{
-						data[j] = stmp[i]; j++; i++;
-					}
-					data[j] = 0;
-				}
+            i = getKeyValuePair( i, stmp, id, data );
 
 				//printf("ID:'%s'  DATA:'%s' \n", id, data );
 
@@ -2452,6 +2708,37 @@ void loadGameDebugBreakpoints(void)
 				}
 			}
 		}
+      else if ( strcmp( id, "Bookmark" ) == 0 )
+		{
+			int addr = -1;
+			char desc[256];
+
+			desc[0] = 0;
+
+			while ( stmp[i] != 0 )
+			{
+            i = getKeyValuePair( i, stmp, id, data );
+
+				//printf("ID:'%s'  DATA:'%s' \n", id, data );
+
+				if ( strcmp( id, "addr" ) == 0 )
+				{
+					addr = strtol( data, NULL, 16 );
+				}
+				else if ( strcmp( id, "desc" ) == 0 )
+				{
+					strcpy( desc, data );
+				}
+         }
+
+         if ( addr >= 0 )
+         {
+            if ( dbgBmMgr.addBookmark( addr, desc ) )
+            {
+               printf("Error:Failed to add debug bookmark: $%04X  '%s' \n", addr, desc );
+            }
+         }
+      }
 	}
 	fclose(fp);
 
@@ -2715,17 +3002,19 @@ void QAsmView::mouseMoveEvent(QMouseEvent * event)
 //----------------------------------------------------------------------------
 void QAsmView::mousePressEvent(QMouseEvent * event)
 {
-	//int line;
-	//QPoint c = convPixToCursor( event->pos() );
+	int line;
+	QPoint c = convPixToCursor( event->pos() );
 
-	//line = lineOffset + c.y();
-	//
-	//if ( line < asmEntry.size() )
-	//{
-	//	int addr;
+	line = lineOffset + c.y();
+	
+	if ( line < asmEntry.size() )
+	{
+		int addr;
 
-	//	addr = asmEntry[line]->addr;
-	//}
+		addr = asmEntry[line]->addr;
+
+		parent->setBookmarkSelectedAddress( addr );
+	}
 }
 //----------------------------------------------------------------------------
 void QAsmView::contextMenuEvent(QContextMenuEvent *event)
@@ -2746,13 +3035,20 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 		ctxMenuAddr = addr = asmEntry[line]->addr;
 
 		act = new QAction(tr("Add Breakpoint"), this);
-   	menu.addAction(act);
+		menu.addAction(act);
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBP(void)) );
 
-		act = new QAction(tr("Add Symbolic Debug Name"), this);
-   	menu.addAction(act);
+		act = new QAction(tr("Add Symbolic Debug Marker"), this);
+	 	menu.addAction(act);
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddSym(void)) );
-		//connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
+
+		act = new QAction(tr("Add Bookmark"), this);
+	 	menu.addAction(act);
+		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBM(void)) );
+		
+		act = new QAction(tr("Open Hex Editor"), this);
+	 	menu.addAction(act);
+		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuOpenHexEdit(void)) );
 		
 		menu.exec(event->globalPos());
 	}
@@ -2760,7 +3056,7 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 //----------------------------------------------------------------------------
 void QAsmView::paintEvent(QPaintEvent *event)
 {
-	int x,y,l, row, nrow;
+	int x,y,l, row, nrow, selAddr;
 	QPainter painter(this);
 
 	painter.setFont(font);
@@ -2792,6 +3088,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	{
 		lineOffset = maxLineOffset;
 	}
+	selAddr = parent->getBookmarkSelectedAddress();
 
 	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Background) );
 
@@ -2818,8 +3115,162 @@ void QAsmView::paintEvent(QPaintEvent *event)
 				painter.fillRect( 0, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("light blue") );
 			}
 			painter.drawText( x, y, tr(asmEntry[l]->text.c_str()) );
+
+			if ( selAddr == asmEntry[l]->addr )
+			{	// Highlight ASM line for selected address.
+				if ( !displayROMoffsets && (asmEntry[l]->type == dbg_asm_entry_t::ASM_TEXT) )
+				{
+					int ax;
+					char addrString[16];
+
+					ax = 4*pxCharWidth;
+
+					painter.fillRect( ax, y - pxLineSpacing + pxLineLead, 4*pxCharWidth, pxLineSpacing, QColor("blue") );
+
+					sprintf( addrString, "%04X", selAddr );
+
+					painter.setPen( this->palette().color(QPalette::Background));
+
+					painter.drawText( ax, y, tr(addrString) );
+
+					painter.setPen( this->palette().color(QPalette::WindowText));
+				}
+			}
 		}
 		y += pxLineSpacing;
 	}
+}
+//----------------------------------------------------------------------------
+// Bookmark Manager Methods
+//----------------------------------------------------------------------------
+debuggerBookmarkManager_t::debuggerBookmarkManager_t(void)
+{
+	internal_iter = bmMap.begin();
+
+}
+//----------------------------------------------------------------------------
+debuggerBookmarkManager_t::~debuggerBookmarkManager_t(void)
+{
+	this->clear();
+}
+//----------------------------------------------------------------------------
+void debuggerBookmarkManager_t::clear(void)
+{
+	std::map <int, debuggerBookmark_t*>::iterator it;
+
+	for (it=bmMap.begin(); it!=bmMap.end(); it++)
+	{
+		delete it->second;
+	}
+	bmMap.clear();
+
+	internal_iter = bmMap.begin();
+}
+//----------------------------------------------------------------------------
+int debuggerBookmarkManager_t::addBookmark( int addr, const char *name )
+{
+	int retval = -1;
+	debuggerBookmark_t *bm = NULL;
+	std::map <int, debuggerBookmark_t*>::iterator it;
+
+	it = bmMap.find( addr );
+
+	if ( it == bmMap.end() )
+	{
+		bm = new debuggerBookmark_t();
+		bm->addr = addr;
+
+		if ( name != NULL )
+		{
+			bm->name.assign( name );
+		}
+		bmMap[ addr ] = bm;
+
+		retval = 0;
+	}
+
+	return retval;
+}
+//----------------------------------------------------------------------------
+int debuggerBookmarkManager_t::editBookmark( int addr, const char *name )
+{
+	int retval = -1;
+	debuggerBookmark_t *bm = NULL;
+	std::map <int, debuggerBookmark_t*>::iterator it;
+
+	it = bmMap.find( addr );
+
+	if ( it != bmMap.end() )
+	{
+		bm = it->second;
+
+		if ( name != NULL )
+		{
+			bm->name.assign( name );
+		}
+		retval = 0;
+	}
+
+	return retval;
+}
+//----------------------------------------------------------------------------
+int debuggerBookmarkManager_t::deleteBookmark( int addr )
+{
+	int retval = -1;
+	std::map <int, debuggerBookmark_t*>::iterator it;
+
+	it = bmMap.find( addr );
+
+	if ( it != bmMap.end() )
+	{
+		bmMap.erase(it);
+
+		retval = 0;
+	}
+	return retval;
+}
+//----------------------------------------------------------------------------
+int debuggerBookmarkManager_t::size(void)
+{
+	return bmMap.size();
+}
+//----------------------------------------------------------------------------
+debuggerBookmark_t *debuggerBookmarkManager_t::begin(void)
+{
+	internal_iter = bmMap.begin();
+
+	if ( internal_iter == bmMap.end() )
+	{
+		return NULL;
+	}
+	return internal_iter->second;
+}
+//----------------------------------------------------------------------------
+debuggerBookmark_t *debuggerBookmarkManager_t::next(void)
+{
+	if ( internal_iter == bmMap.end() )
+	{
+		return NULL;
+	}
+	internal_iter++;
+
+	if ( internal_iter == bmMap.end() )
+	{
+		return NULL;
+	}
+	return internal_iter->second;
+}
+//----------------------------------------------------------------------------
+debuggerBookmark_t *debuggerBookmarkManager_t::getAddr( int addr )
+{
+	std::map <int, debuggerBookmark_t*>::iterator it;
+
+	it = bmMap.find( addr );
+
+	if ( it != bmMap.end() )
+	{
+		return it->second;
+	}
+	return NULL;
 }
 //----------------------------------------------------------------------------

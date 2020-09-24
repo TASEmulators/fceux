@@ -113,6 +113,9 @@ class  consoleWin_t : public QMainWindow
 	private:
 		void createMainMenu(void);
 
+	public slots:
+		void openDebugWindow(void);
+		void openHexEditor(void);
 	private slots:
 		void closeApp(void);
 		void openROMFile(void);
@@ -156,8 +159,6 @@ class  consoleWin_t : public QMainWindow
 		void fdsEjectDisk(void);
 		void fdsLoadBiosFile(void);
 		void openCheats(void);
-		void openDebugWindow(void);
-		void openHexEditor(void);
 		void openMovie(void);
 		void stopMovie(void);
 		void recordMovie(void);

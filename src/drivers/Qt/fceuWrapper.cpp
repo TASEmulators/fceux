@@ -229,13 +229,6 @@ int LoadGame(const char *path)
 		return 0;
 	}
 
-	g_config->getOption( "SDL.AutoOpenDebugger", &autoOpenDebugger );
-
-	if ( autoOpenDebugger )
-	{
-		// TODO Auto Open Debugger
-	}
-
 	hexEditorLoadBookmarks();
 
 	g_config->getOption( "SDL.AutoLoadDebugFiles", &autoLoadDebug );
@@ -243,6 +236,13 @@ int LoadGame(const char *path)
 	if ( autoLoadDebug )
 	{
 		loadGameDebugBreakpoints();
+	}
+
+	g_config->getOption( "SDL.AutoOpenDebugger", &autoOpenDebugger );
+
+	if ( autoOpenDebugger && !debuggerWindowIsOpen() )
+	{
+		consoleWindow->openDebugWindow();
 	}
 
 	debugSymbolTable.loadGameSymbols();

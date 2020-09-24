@@ -57,6 +57,38 @@ struct dbg_asm_entry_t
 	}
 };
 
+class debuggerBookmark_t
+{
+	public:
+		int  addr;
+		std::string  name;
+
+		debuggerBookmark_t(void)
+		{
+			addr = 0;
+		}
+};
+
+class debuggerBookmarkManager_t
+{
+	public:
+		debuggerBookmarkManager_t(void);
+		~debuggerBookmarkManager_t(void);
+
+		int addBookmark( int addr, const char *name = NULL );
+		int editBookmark( int addr, const char *name );
+		int deleteBookmark( int addr );
+
+		int  size(void);
+		void clear(void);
+		debuggerBookmark_t *begin(void);
+		debuggerBookmark_t *next(void);
+		debuggerBookmark_t *getAddr( int addr );
+	private:
+		std::map <int, debuggerBookmark_t*> bmMap;
+		std::map <int, debuggerBookmark_t*>::iterator internal_iter;
+};
+
 class ConsoleDebugger;
 
 class QAsmView : public QWidget
@@ -134,6 +166,10 @@ class ConsoleDebugger : public QDialog
 		void breakPointNotify(int bpNum);
 		void openBpEditWindow(int editIdx = -1, watchpointinfo *wp = NULL );
 		void openDebugSymbolEditWindow( int addr );
+		void setBookmarkSelectedAddress( int addr );
+		int  getBookmarkSelectedAddress(void){ return selBmAddrVal; };
+		void edit_BM_name( int addr );
+		void queueUpdate(void);
 
 		QLabel    *asmLineSelLbl;
 	protected:
@@ -189,16 +225,20 @@ class ConsoleDebugger : public QDialog
 		QTimer    *periodicTimer;
 		QFont      font;
 
+		int   selBmAddrVal;
 		bool  windowUpdateReq;
 
 	private:
 		void setRegsFromEntry(void);
 		void bpListUpdate( bool reset = false );
+		void bmListUpdate( bool reset = false );
 
    public slots:
       void closeWindow(void);
 		void asmViewCtxMenuAddBP(void);
+		void asmViewCtxMenuAddBM(void);
 		void asmViewCtxMenuAddSym(void);
+		void asmViewCtxMenuOpenHexEdit(void);
 	private slots:
 		void updatePeriodic(void);
 		void hbarChanged(int value);
@@ -214,6 +254,9 @@ class ConsoleDebugger : public QDialog
 		void add_BP_CB(void);
 		void edit_BP_CB(void);
 		void delete_BP_CB(void);
+		void add_BM_CB(void);
+		void edit_BM_CB(void);
+		void delete_BM_CB(void);
 		void resetCountersCB (void);
 		void reloadSymbolsCB(void);
 		void displayROMoffsetCB(int value);
@@ -226,11 +269,17 @@ class ConsoleDebugger : public QDialog
 		void breakOnInstructionsCB( int value );
 		void bpItemClicked( QTreeWidgetItem *item, int column);
 		void bmItemClicked( QTreeWidgetItem *item, int column);
+		void bmItemDoubleClicked( QTreeWidgetItem *item, int column);
 		void cpuCycleThresChanged(const QString &txt);
 		void instructionsThresChanged(const QString &txt);
+		void selBmAddrChanged(const QString &txt);
 
 };
 
+bool debuggerWindowIsOpen(void);
 void saveGameDebugBreakpoints(void);
 void loadGameDebugBreakpoints(void);
 void debuggerClearAllBreakpoints(void);
+void updateAllDebuggerWindows(void);
+
+extern debuggerBookmarkManager_t dbgBmMgr;

@@ -114,6 +114,7 @@ class QHexEdit : public QWidget
 		void setBackGroundColor( QColor bg );
 		void memModeUpdate(void);
 		int  checkMemActivity(void);
+		int  getAddr(void){ return cursorAddr; };
 
 		enum {
 			MODE_NES_RAM = 0,
@@ -164,6 +165,7 @@ class QHexEdit : public QWidget
 		int pxHexAscii;
 		int cursorPosX;
 		int cursorPosY;
+		int cursorAddr;
 		int cursorBlinkCount;
 		int viewLines;
 		int viewWidth;
@@ -182,6 +184,12 @@ class QHexEdit : public QWidget
 	private slots:
 		void jumpToROM(void);
 		void addBookMarkCB(void);
+		void addDebugSym(void);
+		void addRamReadBP(void);
+		void addRamWriteBP(void);
+		void addRamExecuteBP(void);
+		void addPpuReadBP(void);
+		void addPpuWriteBP(void);
 
 };
 
@@ -195,15 +203,22 @@ class HexEditorDialog_t : public QDialog
 
 		void gotoAddress(int newAddr);
 		void populateBookmarkMenu(void);
+		void setWindowTitle(void);
+		void openDebugSymbolEditWindow( int addr );
+
+		QHexEdit   *editor;
 	protected:
 
 		void closeEvent(QCloseEvent *bar);
 
 		QScrollBar *vbar;
 		QScrollBar *hbar;
-		QHexEdit   *editor;
 		QTimer     *periodicTimer;
 		QMenu      *bookmarkMenu;
+		QAction    *viewRAM;
+		QAction    *viewPPU;
+		QAction    *viewOAM;
+		QAction    *viewROM;
 
 	private:
 
@@ -227,5 +242,7 @@ class HexEditorDialog_t : public QDialog
 		void removeAllBookmarks(void);
 };
 
+int hexEditorNumWindows(void);
 void hexEditorLoadBookmarks(void);
 void hexEditorSaveBookmarks(void);
+int hexEditorOpenFromDebugger( int mode, int addr );
