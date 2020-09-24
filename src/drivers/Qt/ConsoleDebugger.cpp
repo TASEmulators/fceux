@@ -2463,6 +2463,7 @@ void saveGameDebugBreakpoints(void)
 	FILE *fp;
 	char stmp[512];
 	char flags[8];
+   debuggerBookmark_t *bm;
 
 	// If no breakpoints are loaded, skip saving
 	if ( numWPs == 0 )
@@ -2510,9 +2511,86 @@ void saveGameDebugBreakpoints(void)
 			  		(watchpoint[i].desc != NULL) ? watchpoint[i].desc : "");
 	}
 
+   bm = dbgBmMgr.begin();
+
+   while ( bm != NULL )
+   {
+		fprintf( fp, "Bookmark: addr=%04X  desc=\"%s\" \n", bm->addr, bm->name.c_str() );
+
+      bm = dbgBmMgr.next();
+   }
+
 	fclose(fp);
 
 	return;
+}
+//----------------------------------------------------------------------------
+static int getKeyValuePair( int i, const char *stmp, char *id, char *data )
+{
+   int j=0;
+   char literal=0;
+
+   id[0] = 0; data[0] = 0;
+
+   if ( stmp[i] == 0 ) return i;
+
+	while ( isspace(stmp[i]) ) i++;
+
+	j=0;
+	while ( isalnum(stmp[i]) )
+	{
+		id[j] = stmp[i]; j++; i++;
+	}
+	id[j] = 0;
+
+	if ( j == 0 )
+	{
+	  	return i;
+	}
+	if ( stmp[i] != '=' )
+	{
+	  	return i;
+	}
+	i++; j=0;
+	if ( stmp[i] == '\"' )
+	{
+		literal = 0;
+		i++;
+		while ( stmp[i] != 0 )
+		{
+			if ( literal )
+			{
+				data[j] = stmp[i]; i++; j++;
+				literal = 0;
+			}
+			else
+			{
+				if ( stmp[i] == '\\' )
+				{
+					literal = 1; i++;
+				}
+				else if ( stmp[i] == '\"' )
+				{
+					i++; break;
+				}
+				else
+				{
+					data[j] = stmp[i]; j++; i++;
+				}
+			}
+		}
+		data[j] = 0;
+	}
+	else
+	{
+		j=0;
+		while ( !isspace(stmp[i]) )
+		{
+			data[j] = stmp[i]; j++; i++;
+		}
+		data[j] = 0;
+	}
+   return i;
 }
 //----------------------------------------------------------------------------
 void loadGameDebugBreakpoints(void)
@@ -2521,7 +2599,6 @@ void loadGameDebugBreakpoints(void)
 	FILE *fp;
 	char stmp[512];
 	char id[64], data[128];
-	char literal;
 
 	// If no debug windows are open, skip loading breakpoints
 	if ( dbgWinList.size() == 0 )
@@ -2572,62 +2649,7 @@ void loadGameDebugBreakpoints(void)
 
 			while ( stmp[i] != 0 )
 			{
-				while ( isspace(stmp[i]) ) i++;
-
-				j=0;
-				while ( isalnum(stmp[i]) )
-				{
-					id[j] = stmp[i]; j++; i++;
-				}
-				id[j] = 0;
-
-				if ( j == 0 )
-				{
-				  	break;
-				}
-				if ( stmp[i] != '=' )
-				{
-				  	break;
-				}
-				i++; j=0;
-				if ( stmp[i] == '\"' )
-				{
-					literal = 0;
-					i++;
-					while ( stmp[i] != 0 )
-					{
-						if ( literal )
-						{
-							data[j] = stmp[i]; i++; j++;
-							literal = 0;
-						}
-						else
-						{
-							if ( stmp[i] == '\\' )
-							{
-								literal = 1; i++;
-							}
-							else if ( stmp[i] == '\"' )
-							{
-								i++; break;
-							}
-							else
-							{
-								data[j] = stmp[i]; j++; i++;
-							}
-						}
-					}
-					data[j] = 0;
-				}
-				else
-				{
-					j=0;
-					while ( !isspace(stmp[i]) )
-					{
-						data[j] = stmp[i]; j++; i++;
-					}
-					data[j] = 0;
-				}
+            i = getKeyValuePair( i, stmp, id, data );
 
 				//printf("ID:'%s'  DATA:'%s' \n", id, data );
 
@@ -2686,6 +2708,37 @@ void loadGameDebugBreakpoints(void)
 				}
 			}
 		}
+      else if ( strcmp( id, "Bookmark" ) == 0 )
+		{
+			int addr = -1;
+			char desc[256];
+
+			desc[0] = 0;
+
+			while ( stmp[i] != 0 )
+			{
+            i = getKeyValuePair( i, stmp, id, data );
+
+				//printf("ID:'%s'  DATA:'%s' \n", id, data );
+
+				if ( strcmp( id, "addr" ) == 0 )
+				{
+					addr = strtol( data, NULL, 16 );
+				}
+				else if ( strcmp( id, "desc" ) == 0 )
+				{
+					strcpy( desc, data );
+				}
+         }
+
+         if ( addr >= 0 )
+         {
+            if ( dbgBmMgr.addBookmark( addr, desc ) )
+            {
+               printf("Error:Failed to add debug bookmark: $%04X  '%s' \n", addr, desc );
+            }
+         }
+      }
 	}
 	fclose(fp);
 
