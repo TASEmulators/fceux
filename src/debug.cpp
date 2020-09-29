@@ -421,12 +421,12 @@ int condition(watchpointinfo* wp)
 
 //---------------------
 
-volatile int codecount, datacount, undefinedcount;
-unsigned char *cdloggerdata;
+volatile int codecount = 0, datacount = 0, undefinedcount = 0;
+unsigned char *cdloggerdata = NULL;
 unsigned int cdloggerdataSize = 0;
-static int indirectnext;
+static int indirectnext = 0;
 
-int debug_loggingCD;
+int debug_loggingCD = 0;
 
 //called by the cpu to perform logging if CDLogging is enabled
 void LogCDVectors(int which){

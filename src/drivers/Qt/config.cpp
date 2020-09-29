@@ -263,6 +263,11 @@ InitConfig()
 	config->addOption("autoLoadDebugFiles", "SDL.AutoLoadDebugFiles", 1);
 	config->addOption("autoOpenDebugger"  , "SDL.AutoOpenDebugger"  , 0);
 
+	// Code Data Logger Options
+	config->addOption("autoSaveCDL"  , "SDL.AutoSaveCDL", 1);
+	config->addOption("autoLoadCDL"  , "SDL.AutoLoadCDL", 1);
+	config->addOption("autoResumeCDL", "SDL.AutoResumeCDL", 0);
+	
 	// overwrite the config file?
 	config->addOption("no-config", "SDL.NoConfig", 0);
 

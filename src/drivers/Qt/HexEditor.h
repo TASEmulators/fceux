@@ -138,6 +138,8 @@ class QHexEdit : public QWidget
 
 		QFont      font;
 
+		int  getRomAddrColor( int addr, QColor &fg, QColor &bg );
+
 		memBlock_t  mb;
 		int (*memAccessFunc)( unsigned int offset);
 

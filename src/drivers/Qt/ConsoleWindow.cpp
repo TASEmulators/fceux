@@ -25,6 +25,7 @@
 #include "Qt/LuaControl.h"
 #include "Qt/CheatsConf.h"
 #include "Qt/HexEditor.h"
+#include "Qt/CodeDataLogger.h"
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleSoundConf.h"
@@ -483,7 +484,7 @@ void consoleWin_t::createMainMenu(void)
 	 // Debug
     debugMenu = menuBar()->addMenu(tr("Debug"));
 
-	 // Debug -> Hex Editor
+	 // Debug -> Debugger 
 	 debuggerAct = new QAction(tr("Debugger..."), this);
     //debuggerAct->setShortcut( QKeySequence(tr("Shift+F7")));
     debuggerAct->setStatusTip(tr("Open 6502 Debugger"));
@@ -498,6 +499,14 @@ void consoleWin_t::createMainMenu(void)
     connect(hexEditAct, SIGNAL(triggered()), this, SLOT(openHexEditor(void)) );
 
     debugMenu->addAction(hexEditAct);
+
+	 // Debug -> Code/Data Logger
+	 codeDataLogAct = new QAction(tr("Code/Data Logger..."), this);
+    //codeDataLogAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    codeDataLogAct->setStatusTip(tr("Open Code Data Logger"));
+    connect(codeDataLogAct, SIGNAL(triggered()), this, SLOT(openCodeDataLogger(void)) );
+
+    debugMenu->addAction(codeDataLogAct);
 
 	 //-----------------------------------------------------------------------
 	 // Movie
@@ -1001,6 +1010,17 @@ void consoleWin_t::openHexEditor(void)
    hexEditWin = new HexEditorDialog_t(this);
 	
    hexEditWin->show();
+}
+
+void consoleWin_t::openCodeDataLogger(void)
+{
+	CodeDataLoggerDialog_t *cdlWin;
+
+	//printf("Open Code Data Logger Window\n");
+	
+   cdlWin = new CodeDataLoggerDialog_t(this);
+	
+   cdlWin->show();
 }
 
 void consoleWin_t::toggleAutoResume(void)
