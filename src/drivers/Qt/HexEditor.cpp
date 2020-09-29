@@ -24,6 +24,7 @@
 #include "../../movie.h"
 #include "../../palette.h"
 #include "../../fds.h"
+#include "../../ppu.h"
 #include "../../cart.h"
 #include "../../ines.h"
 #include "../common/configSys.h"
@@ -1999,6 +2000,106 @@ int QHexEdit::checkMemActivity(void)
    return 0;
 }
 //----------------------------------------------------------------------------
+int QHexEdit::getRomAddrColor( int addr, QColor &fg, QColor &bg )
+{
+	int temp_offset;
+	QColor color, oppColor; 
+			
+	fg = this->palette().color(QPalette::WindowText);
+	bg = this->palette().color(QPalette::Background);
+
+	if ( reverseVideo )
+	{
+		color    = this->palette().color(QPalette::Background);
+		oppColor = this->palette().color(QPalette::WindowText);
+	}
+	else
+	{
+		color    = this->palette().color(QPalette::WindowText);
+		oppColor = this->palette().color(QPalette::Background);
+	}
+
+	if ( viewMode != MODE_NES_ROM )
+	{
+		return -1;
+	}
+	if (cdloggerdataSize == 0)
+	{
+		return -1;
+	}
+	temp_offset = addr - 16;
+
+	if (temp_offset >= 0)
+	{
+		if ((unsigned int)temp_offset < cdloggerdataSize)
+		{
+			// PRG
+			if ((cdloggerdata[temp_offset] & 3) == 3)
+			{
+				// the byte is both Code and Data - green
+				color.setRgb(0, 190, 0);
+			}
+			else if ((cdloggerdata[temp_offset] & 3) == 1)
+			{
+				// the byte is Code - dark-yellow
+				color.setRgb(160, 140, 0);
+				oppColor.setRgb( 0, 0, 0 );
+			}
+			else if ((cdloggerdata[temp_offset] & 3) == 2)
+			{
+				// the byte is Data - blue/cyan
+				if (cdloggerdata[temp_offset] & 0x40)
+				{
+					// PCM data - cyan
+					color.setRgb(0, 130, 160);
+				}
+				else
+				{
+					// non-PCM data - blue
+					color.setRgb(0, 0, 210);
+				}
+			}
+		}
+		else
+		{
+			temp_offset -= cdloggerdataSize;
+			if (((unsigned int)temp_offset < cdloggerVideoDataSize))
+			{
+				// CHR
+				if ((cdloggervdata[temp_offset] & 3) == 3)
+				{
+					// the byte was both rendered and read programmatically - light-green
+					color.setRgb(5, 255, 5);
+				}
+				else if ((cdloggervdata[temp_offset] & 3) == 1)
+				{
+					// the byte was rendered - yellow
+					color.setRgb(210, 190, 0);
+					oppColor.setRgb( 0, 0, 0 );
+				}
+				else if ((cdloggervdata[temp_offset] & 3) == 2)
+				{
+					// the byte was read programmatically - light-blue
+					color.setRgb(15, 15, 255);
+				}
+			}
+		}
+	}
+
+	if ( reverseVideo )
+	{
+		bg = color;
+		fg = oppColor;
+	}
+	else
+	{
+		fg = color;
+		bg = oppColor;
+	}
+
+	return 0;
+}
+//----------------------------------------------------------------------------
 void QHexEdit::memModeUpdate(void)
 {
 	int memSize;
@@ -2178,7 +2279,24 @@ void QHexEdit::paintEvent(QPaintEvent *event)
             } 
             else
             {
-					if ( actvHighlightEnable && (mb.buf[addr].actv > 0) )
+					if ( viewMode == MODE_NES_ROM )
+					{
+						QColor romBgColor, romFgColor;
+					  
+						getRomAddrColor( addr, romFgColor, romBgColor );
+
+						if ( reverseVideo )
+						{
+	            		painter.setPen( romFgColor );
+							painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, romBgColor );
+							painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, romBgColor );
+						}
+						else
+						{
+	            		painter.setPen( romFgColor );
+						}
+					}
+					else if ( actvHighlightEnable && (mb.buf[addr].actv > 0) )
 					{
 						if ( reverseVideo )
 						{
