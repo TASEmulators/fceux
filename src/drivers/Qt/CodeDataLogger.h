@@ -45,6 +45,9 @@ class CodeDataLoggerDialog_t : public QDialog
    public slots:
       void closeWindow(void);
 	private slots:
+		void loadCdlFile(void);
+		void saveCdlFile(void);
+		void saveCdlFileAs(void);
 		void updatePeriodic(void);
 		void ResetCDLogClicked(void);
 		void StartPauseCDLogClicked(void);

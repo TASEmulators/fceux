@@ -1,6 +1,7 @@
 // CodeDataLogger.cpp
 //
 #include <QDir>
+#include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
 
@@ -133,12 +134,15 @@ CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
 
 	btn = new QPushButton( tr("Save") );
 	grid->addWidget( btn, 0, 2, Qt::AlignCenter );
+   connect( btn, SIGNAL(clicked(void)), this, SLOT(saveCdlFile(void)));
 
 	btn = new QPushButton( tr("Load") );
 	grid->addWidget( btn, 1, 0, Qt::AlignCenter );
+   connect( btn, SIGNAL(clicked(void)), this, SLOT(loadCdlFile(void)));
 
 	btn = new QPushButton( tr("Save As") );
 	grid->addWidget( btn, 1, 2, Qt::AlignCenter );
+   connect( btn, SIGNAL(clicked(void)), this, SLOT(saveCdlFileAs(void)));
 
 	hbox = new QHBoxLayout();
 	vbox1->addLayout( hbox );
@@ -287,16 +291,140 @@ void CodeDataLoggerDialog_t::StartPauseCDLogClicked(void)
 {
 	if ( FCEUI_GetLoggingCD() )
 	{
-		printf("CD Logging Paused\n");
+		//printf("CD Logging Paused\n");
 		PauseCDLogging();
 		startPauseButton->setText( tr("Start") );
 	}
 	else
 	{
-		printf("CD Logging Started\n");
+		//printf("CD Logging Started\n");
 		StartCDLogging();
 		startPauseButton->setText( tr("Pause") );
 	}
+}
+//----------------------------------------------------
+void CodeDataLoggerDialog_t::saveCdlFile(void)
+{
+	SaveCDLogFile();
+}
+//----------------------------------------------------
+void CodeDataLoggerDialog_t::saveCdlFileAs(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	const char *romFile;
+	QFileDialog  dialog(this, tr("Save CDL To File") );
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("CDL Files (*.cdl *.CDL) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+	dialog.setDefaultSuffix( tr(".cdl") );
+
+	romFile = getRomFile();
+
+	if ( romFile != NULL )
+	{
+		char dir[512], base[256];
+
+		parseFilepath( romFile, dir, base );
+
+		strcat( base, ".cdl");
+
+		dialog.setDirectory( tr(dir) );
+
+		dialog.selectFile( tr(base) );
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+   {
+      return;
+   }
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	fceuWrapperLock();
+	strcpy( loadedcdfile, filename.toStdString().c_str() );
+	SaveCDLogFile();
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------
+void CodeDataLoggerDialog_t::loadCdlFile(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	char dir[512];
+	const char *romFile;
+	QFileDialog  dialog(this, tr("Load CDL File") );
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("CDL files (*.cdl *.CDL) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
+
+	romFile = getRomFile();
+
+	if ( romFile )
+	{
+		getDirFromFile( romFile, dir );
+
+		dialog.setDirectory( tr(dir) );
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+   if ( filename.isNull() )
+   {
+      return;
+   }
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	fceuWrapperLock();
+	LoadCDLog ( filename.toStdString().c_str() );
+	fceuWrapperUnLock();
+
+   return;
 }
 //----------------------------------------------------
 static int getDefaultCDLFile( char *filepath )
@@ -399,7 +527,9 @@ bool LoadCDLog(const char* nameo)
 
 	FP = fopen(nameo, "rb");
 	if (FP == NULL)
+	{
 		return false;
+	}
 
 	for(i = 0;i < (int)cdloggerdataSize;i++)
 	{

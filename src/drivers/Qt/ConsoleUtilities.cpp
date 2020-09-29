@@ -88,7 +88,9 @@ int parseFilepath( const char *filepath, char *dir, char *base, char *suffix )
 	int i=0,j=0,end=0;
 	if ( filepath == NULL )
 	{
-		base[0] = 0;
+		if ( dir   ) dir[0] = 0;
+		if ( base  ) base[0] = 0;
+		if ( suffix) suffix[0] = 0;
 		return 0;
 	}
 	i=0; j=0;
