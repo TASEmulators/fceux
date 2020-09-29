@@ -40,6 +40,8 @@ class CodeDataLoggerDialog_t : public QDialog
 		QPushButton *startPauseButton;
       void closeEvent(QCloseEvent *bar);
 
+		void SaveStrippedROM(int invert);
+
 	private:
 
    public slots:
@@ -54,7 +56,8 @@ class CodeDataLoggerDialog_t : public QDialog
 		void autoSaveCdlStateChange(int state);
 		void autoLoadCdlStateChange(int state);
 		void autoResumeCdlStateChange(int state);
-
+		void SaveStrippedROMClicked(void);
+		void SaveUnusedROMClicked(void);
 };
 
 void InitCDLog(void);

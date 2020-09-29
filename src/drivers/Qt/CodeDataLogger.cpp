@@ -11,6 +11,8 @@
 #include "../../x6502.h"
 #include "../../debug.h"
 #include "../../ppu.h"
+#include "../../ines.h"
+#include "../../nsf.h"
 
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/CodeDataLogger.h"
@@ -160,8 +162,10 @@ CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
 
 	btn = new QPushButton( tr("Save Stripped Data") );
 	vbox->addWidget( btn );
+   connect( btn, SIGNAL(clicked(void)), this, SLOT(SaveStrippedROMClicked(void)));
 	btn = new QPushButton( tr("Save Unused Data") );
 	vbox->addWidget( btn );
+   connect( btn, SIGNAL(clicked(void)), this, SLOT(SaveUnusedROMClicked(void)));
 	subframe->setLayout( vbox );
 	hbox->addWidget( subframe );
 
@@ -169,7 +173,7 @@ CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
 
 	setLayout( mainLayout );
 
-   updateTimer->start( 100 ); // 10hz
+   updateTimer->start( 200 ); // 5hz
 
 	if (autoLoadCDL)
 	{
@@ -425,6 +429,182 @@ void CodeDataLoggerDialog_t::loadCdlFile(void)
 	fceuWrapperUnLock();
 
    return;
+}
+//----------------------------------------------------
+void CodeDataLoggerDialog_t::SaveStrippedROM(int invert)
+{
+
+	//this is based off of iNesSave()
+	//todo: make this support NSF
+	//
+	if (!GameInfo)
+		return;
+
+	if (GameInfo->type==GIT_NSF)
+	{
+		printf("Sorry, you're not allowed to save optimized NSFs yet. Please don't optimize individual banks, as there are still some issues with several NSFs to be fixed, and it is easier to fix those issues with as much of the bank data intact as possible.");
+		return;
+	}
+
+	if (codecount == 0)
+	{
+		printf("Unable to Generate Stripped ROM. Get Something Logged and try again.");
+		return;
+	}
+
+	int i, ret, useNativeFileDialogVal;
+	QString filename;
+	const char *romFile;
+	QFileDialog  dialog(this, tr("Save Stripped File As...") );
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	if (GameInfo->type==GIT_NSF) 
+	{
+		dialog.setNameFilter(tr("NSF Files (*.nsf *.NSF) ;; All files (*)"));
+		dialog.setDefaultSuffix( tr(".nsf") );
+	} 
+	else
+  	{
+		dialog.setNameFilter(tr("NES Files (*.nes *.NES) ;; All files (*)"));
+		dialog.setDefaultSuffix( tr(".nes") );
+	}
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+
+	romFile = getRomFile();
+
+	if ( romFile != NULL )
+	{
+		char dir[512], base[256];
+
+		parseFilepath( romFile, dir, base );
+
+		dialog.setDirectory( tr(dir) );
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+   {
+      return;
+   }
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	FILE *fp = fopen( filename.toStdString().c_str(),"wb");
+	if (!fp) 
+	{
+		FCEUD_PrintError("Error opening target stripped rom file!");
+		return;
+	}
+
+	if (GameInfo->type==GIT_NSF)
+	{
+		uint8 NSFLoadLow;
+		uint8 NSFLoadHigh;
+		//Not used because if bankswitching, the addresses involved
+		//could still end up being used through writes
+		//static uint16 LoadAddr;
+		//LoadAddr=NSFHeader.LoadAddressLow;
+		//LoadAddr|=(NSFHeader.LoadAddressHigh&0x7F)<<8;
+
+		//Simple store/restore for writing a working NSF header
+		NSFLoadLow = NSFHeader.LoadAddressLow;
+		NSFLoadHigh = NSFHeader.LoadAddressHigh;
+		NSFHeader.LoadAddressLow=0;
+		NSFHeader.LoadAddressHigh&=0xF0;
+		fwrite(&NSFHeader,1,0x8,fp);
+		NSFHeader.LoadAddressLow = NSFLoadLow;
+		NSFHeader.LoadAddressHigh = NSFLoadHigh;
+
+		fseek(fp,0x8,SEEK_SET);
+		for (i = 0;i < ((NSFMaxBank+1)*4096);i++){
+			unsigned char pchar;
+			if (cdloggerdata[i] & 3)
+			{
+				pchar = invert?0:NSFDATA[i];
+			}
+			else
+			{
+				pchar = invert?NSFDATA[i]:0;
+			}
+			fputc(pchar, fp);
+		}
+
+	}
+	else
+	{
+		iNES_HEADER cdlhead;
+
+		cdlhead.ID[0] = 'N';
+		cdlhead.ID[1] = 'E';
+		cdlhead.ID[2] = 'S';
+		cdlhead.ID[3] = 0x1A;
+
+		cdlhead.ROM_size = cdloggerdataSize >> 14;
+		cdlhead.VROM_size = cdloggerVideoDataSize >> 13;
+
+		fwrite(&cdlhead,1,16,fp);
+
+		for (i = 0; i < (int)cdloggerdataSize; i++){
+			unsigned char pchar;
+			if (cdloggerdata[i] & 3)
+			{
+				pchar = invert?0:PRGptr[0][i];
+			}
+			else
+			{
+				pchar = invert?PRGptr[0][i]:0;
+			}
+			fputc(pchar, fp);
+		}
+
+		if (cdloggerVideoDataSize != 0)
+		{
+			// since the OldPPU at least logs the $2007 read accesses, we should save the data anyway
+			for (i = 0; i < (int)cdloggerVideoDataSize; i++) {
+				unsigned char vchar;
+				if (cdloggervdata[i] & 3)
+				{
+					vchar = invert?0:CHRptr[0][i];
+				}
+				else
+				{
+					vchar = invert?CHRptr[0][i]:0;
+				}
+				fputc(vchar, fp);
+			}
+		}
+	}
+	fclose(fp);
+}
+//----------------------------------------------------
+void CodeDataLoggerDialog_t::SaveStrippedROMClicked(void)
+{
+	SaveStrippedROM(0);
+}
+//----------------------------------------------------
+void CodeDataLoggerDialog_t::SaveUnusedROMClicked(void)
+{
+	SaveStrippedROM(1);
 }
 //----------------------------------------------------
 static int getDefaultCDLFile( char *filepath )
