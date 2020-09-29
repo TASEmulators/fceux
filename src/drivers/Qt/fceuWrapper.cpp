@@ -16,6 +16,7 @@
 #include "Qt/unix-netplay.h"
 #include "Qt/HexEditor.h"
 #include "Qt/SymbolicDebug.h"
+#include "Qt/CodeDataLogger.h"
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/fceux_git_info.h"
@@ -247,6 +248,8 @@ int LoadGame(const char *path)
 
 	debugSymbolTable.loadGameSymbols();
 
+	CDLoggerROMChanged();
+
     int state_to_load;
     g_config->getOption("SDL.AutoLoadState", &state_to_load);
     if (state_to_load >= 0 && state_to_load < 10){
@@ -299,6 +302,7 @@ CloseGame(void)
 
 	debugSymbolTable.save();
 	debugSymbolTable.clear();
+	CDLoggerROMClosed();
 
     int state_to_save;
     g_config->getOption("SDL.AutoSaveState", &state_to_save);
@@ -946,17 +950,23 @@ static void DoFun(int frameskip, int periodic_saves)
 void fceuWrapperLock(void)
 {
 	mutexPending++;
-	consoleWindow->mutex->lock();
+	if ( consoleWindow != NULL )
+	{
+		consoleWindow->mutex->lock();
+	}
 	mutexPending--;
 	mutexLocks++;
 }
 
 bool fceuWrapperTryLock(int timeout)
 {
-	bool lockAcq;
+	bool lockAcq = false;
 
 	mutexPending++;
-	lockAcq = consoleWindow->mutex->tryLock( timeout );
+	if ( consoleWindow != NULL )
+	{
+		lockAcq = consoleWindow->mutex->tryLock( timeout );
+	}
 	mutexPending--;
 
 	if ( lockAcq )
@@ -970,7 +980,10 @@ void fceuWrapperUnLock(void)
 {
 	if ( mutexLocks > 0 )
 	{
-		consoleWindow->mutex->unlock();
+		if ( consoleWindow != NULL )
+		{
+			consoleWindow->mutex->unlock();
+		}
 		mutexLocks--;
 	}
 	else
