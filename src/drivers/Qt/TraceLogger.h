@@ -14,7 +14,19 @@
 #include <QFrame>
 #include <QTimer>
 #include <QGroupBox>
+#include <QScrollBar>
 #include <QCloseEvent>
+
+class QTraceLogView : public QWidget
+{
+   Q_OBJECT
+
+	public:
+		QTraceLogView(QWidget *parent = 0);
+		~QTraceLogView(void);
+
+	protected:
+};
 
 class TraceLoggerDialog_t : public QDialog
 {
@@ -46,6 +58,10 @@ class TraceLoggerDialog_t : public QDialog
 
 		QPushButton *selLogFileButton;
 		QPushButton *startStopButton;
+
+		QTraceLogView *traceView;
+		QScrollBar    *hbar;
+		QScrollBar    *vbar;
 
       void closeEvent(QCloseEvent *bar);
 
