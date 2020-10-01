@@ -1,9 +1,10 @@
-// CodeDataLogger.cpp
+// TraceLogger.cpp
 //
 #include <QDir>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QPainter>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -85,18 +86,24 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 
 	mainLayout   = new QVBoxLayout();
 	grid         = new QGridLayout();
-	mainLayout->addLayout( grid  );
+	mainLayout->addLayout( grid, 100 );
 
 	traceView = new QTraceLogView(this);
 	vbar      = new QScrollBar( Qt::Vertical, this );
 	hbar      = new QScrollBar( Qt::Horizontal, this );
+
+	traceView->setScrollBars( hbar, vbar );
+	hbar->setMinimum(0);
+	hbar->setMaximum(100);
+	vbar->setMinimum(0);
+	vbar->setMaximum(10000);
 
 	grid->addWidget( traceView, 0, 0);
 	grid->addWidget( vbar     , 0, 1 );
 	grid->addWidget( hbar     , 1, 0 );
 
 	grid         = new QGridLayout();
-	mainLayout->addLayout( grid  );
+	mainLayout->addLayout( grid, 1 );
 
 	lbl = new QLabel( tr("Lines") );
 	logLastCbox  = new QCheckBox( tr("Log Last") );
@@ -150,7 +157,7 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	grid->addWidget( logInstrCountCbox    , 1, 2, Qt::AlignLeft );
 	grid->addWidget( logBankNumCbox       , 2, 2, Qt::AlignLeft );
 
-	mainLayout->addWidget( frame );
+	mainLayout->addWidget( frame, 1 );
 
 	grid  = new QGridLayout();
 	frame = new QGroupBox(tr("Extra Log Options that work with the Code/Data Logger"));
@@ -162,7 +169,7 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	grid->addWidget( logNewMapCodeCbox, 0, 0, Qt::AlignLeft );
 	grid->addWidget( logNewMapDataCbox, 0, 1, Qt::AlignLeft );
 
-	mainLayout->addWidget( frame );
+	mainLayout->addWidget( frame, 1 );
 
 	setLayout( mainLayout );
 
@@ -448,11 +455,73 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 QTraceLogView::QTraceLogView(QWidget *parent)
 	: QWidget(parent)
 {
+	font.setFamily("Courier New");
+	font.setStyle( QFont::StyleNormal );
+	font.setStyleHint( QFont::Monospace );
 
+	calcFontData();
+
+	vbar = NULL;
+	hbar = NULL;
 }
 //----------------------------------------------------
 QTraceLogView::~QTraceLogView(void)
 {
+
+}
+//----------------------------------------------------
+void QTraceLogView::calcFontData(void)
+{
+	this->setFont(font);
+    QFontMetrics metrics(font);
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+    pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
+#else
+    pxCharWidth = metrics.width(QLatin1Char('2'));
+#endif
+    pxCharHeight   = metrics.height();
+	 pxLineSpacing  = metrics.lineSpacing() * 1.25;
+    pxLineLead     = pxLineSpacing - pxCharHeight;
+    pxCursorHeight = pxCharHeight;
+	 pxLineWidth    = pxCharWidth * LOG_LINE_MAX_LEN;
+
+	 viewLines   = (viewHeight / pxLineSpacing) + 1;
+}
+//----------------------------------------------------------------------------
+void QTraceLogView::setScrollBars( QScrollBar *h, QScrollBar *v )
+{
+	hbar = h; vbar = v;
+}
+//----------------------------------------------------
+void QTraceLogView::resizeEvent(QResizeEvent *event)
+{
+	viewWidth  = event->size().width();
+	viewHeight = event->size().height();
+
+	//printf("QAsmView Resize: %ix%i\n", viewWidth, viewHeight );
+
+	viewLines = (viewHeight / pxLineSpacing) + 1;
+
+	//maxLineOffset = 0; // mb.numLines() - viewLines + 1;
+
+	if ( viewWidth >= pxLineWidth )
+	{
+		pxLineXScroll = 0;
+	}
+	else
+	{
+		pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth) );
+	}
+
+}
+//----------------------------------------------------
+void QTraceLogView::paintEvent(QPaintEvent *event)
+{
+	QPainter painter(this);
+
+	painter.setFont(font);
+	viewWidth  = event->rect().width();
+	viewHeight = event->rect().height();
 
 }
 //----------------------------------------------------

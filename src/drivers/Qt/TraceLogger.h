@@ -1,4 +1,4 @@
-// CodeDataLogger.h
+// TraceLogger.h
 //
 
 #pragma once
@@ -25,7 +25,28 @@ class QTraceLogView : public QWidget
 		QTraceLogView(QWidget *parent = 0);
 		~QTraceLogView(void);
 
+		void setScrollBars( QScrollBar *h, QScrollBar *v );
 	protected:
+		void paintEvent(QPaintEvent *event);
+		void resizeEvent(QResizeEvent *event);
+
+		void calcFontData(void);
+
+	protected:
+		QFont       font;
+		QScrollBar *vbar;
+		QScrollBar *hbar;
+
+		int  pxCharWidth;
+		int  pxCharHeight;
+		int  pxLineSpacing;
+		int  pxLineLead;
+		int  pxCursorHeight;
+		int  pxLineXScroll;
+		int  pxLineWidth;
+		int  viewLines;
+		int  viewWidth;
+		int  viewHeight;
 };
 
 class TraceLoggerDialog_t : public QDialog
