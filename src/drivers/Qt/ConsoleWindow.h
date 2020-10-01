@@ -91,6 +91,7 @@ class  consoleWin_t : public QMainWindow
 	 QAction *cheatsAct;
 	 QAction *debuggerAct;
 	 QAction *codeDataLogAct;
+	 QAction *traceLogAct;
 	 QAction *hexEditAct;
 	 QAction *openMovAct;
 	 QAction *stopMovAct;
@@ -135,6 +136,7 @@ class  consoleWin_t : public QMainWindow
       void openPaletteConfWin(void);
       void openGuiConfWin(void);
 		void openCodeDataLogger(void);
+		void openTraceLogger(void);
       void toggleAutoResume(void);
       void toggleFullscreen(void);
       void updatePeriodic(void);
