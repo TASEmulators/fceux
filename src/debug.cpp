@@ -865,10 +865,5 @@ void DebugCycle()
 	if(debug_loggingCD)
 		LogCDData(opcode, A, size);
 
-#ifdef WIN32
-	//This needs to be windows only or else the linux build system will fail since logging is declared in a
-	//windows source file
 	FCEUD_TraceInstruction(opcode, size);
-#endif
-
 }

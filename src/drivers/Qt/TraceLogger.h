@@ -91,5 +91,6 @@ class TraceLoggerDialog_t : public QDialog
    public slots:
       void closeWindow(void);
 	private slots:
+		void toggleLoggingOnOff(void);
 };
 

@@ -1709,6 +1709,11 @@ void FCEUD_DebugBreakpoint(int bp_num)
 	}
 }
 
+void FCEUD_TraceInstruction(uint8 *opcode, int size)
+{
+   // Place holder to allow for compiling. GTK GUI doesn't support this. Qt Does.
+}
+
 static void closeDebuggerWindow (GtkWidget * w, GdkEvent * e, debuggerWin_t * dw)
 {
 	std::list < debuggerWin_t * >::iterator it;

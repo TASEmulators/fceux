@@ -114,6 +114,12 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	startStopButton = new QPushButton( tr("Start Logging") );
 	autoUpdateCbox = new QCheckBox( tr("Automatically update this window while logging") );
 
+	if ( logging )
+	{
+		startStopButton->setText( tr("Stop Logging") );
+	}
+	connect( startStopButton, SIGNAL(clicked(void)), this, SLOT(toggleLoggingOnOff(void)) );
+
 	hbox = new QHBoxLayout();
 	hbox->addWidget( logLastCbox );
 	hbox->addWidget( logMaxLinesComboBox );
@@ -194,6 +200,21 @@ void TraceLoggerDialog_t::closeWindow(void)
    done(0);
 	deleteLater();
 }
+//----------------------------------------------------
+void TraceLoggerDialog_t::toggleLoggingOnOff(void)
+{
+	logging = !logging;
+
+	if ( logging )
+	{
+		startStopButton->setText( tr("Stop Logging") );
+	}
+	else
+	{
+		startStopButton->setText( tr("Start Logging") );
+	}
+}
+//----------------------------------------------------
 //todo: really speed this up
 void FCEUD_TraceInstruction(uint8 *opcode, int size)
 {
