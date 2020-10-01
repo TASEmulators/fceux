@@ -17,6 +17,37 @@
 #include <QScrollBar>
 #include <QCloseEvent>
 
+struct traceRecord_t
+{
+	struct {
+		uint16_t  PC;
+		uint8_t   A;
+		uint8_t   X;
+		uint8_t   Y;
+		uint8_t   S;
+		uint8_t   P;
+	} cpu;
+
+	uint8_t  opCode[3];
+	uint8_t  opSize;
+	uint8_t  asmTxtSize;
+	char     asmTxt[46];
+
+	uint64_t  frameCount;
+	uint64_t  cycleCount;
+	uint64_t  instrCount;
+	uint64_t  flags;
+
+	int32_t   callAddr;
+	int32_t   romAddr;
+	int32_t   bank;
+	int32_t   skippedLines;
+
+	traceRecord_t(void);
+
+	int  appendAsmText( const char *txt );
+};
+
 class QTraceLogView : public QWidget
 {
    Q_OBJECT

@@ -66,7 +66,7 @@ static char str_axystate[LOG_AXYSTATE_MAX_LEN] = {0}, str_procstatus[LOG_PROCSTA
 static char str_tabs[LOG_TABS_MASK+1] = {0}, str_address[LOG_ADDRESS_MAX_LEN] = {0}, str_data[LOG_DATA_MAX_LEN] = {0}, str_disassembly[LOG_DISASSEMBLY_MAX_LEN] = {0};
 static char str_result[LOG_LINE_MAX_LEN] = {0};
 static char str_temp[LOG_LINE_MAX_LEN] = {0};
-static char str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
+//static char str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
 //static char str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
 //static char* tracer_decoration_comment = 0;
 //static char* tracer_decoration_comment_end_pos = 0;
@@ -215,19 +215,86 @@ void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 	}
 }
 //----------------------------------------------------
+traceRecord_t::traceRecord_t(void)
+{
+	cpu.PC = 0;
+	cpu.A = 0;
+	cpu.X = 0;
+	cpu.Y = 0;
+	cpu.S = 0;
+	cpu.P = 0;
+
+	opCode[0] = 0;
+	opCode[1] = 0;
+	opCode[2] = 0;
+	opSize = 0;
+	asmTxtSize = 0;
+	asmTxt[0] = 0;
+
+	cycleCount = 0;
+	instrCount = 0;
+	flags = 0;
+
+	callAddr = -1;
+	romAddr = -1;
+	bank = -1;
+	skippedLines = 0;
+}
+//----------------------------------------------------
+int traceRecord_t::appendAsmText( const char *txt )
+{
+	int i=0;
+
+	while ( txt[i] != 0 )
+	{
+		asmTxt[ asmTxtSize ] = txt[i]; i++; asmTxtSize++;
+	}
+	asmTxt[ asmTxtSize ] = 0;
+
+	return 0;
+}
+//----------------------------------------------------
 //todo: really speed this up
 void FCEUD_TraceInstruction(uint8 *opcode, int size)
 {
 	if (!logging)
 		return;
 
+	traceRecord_t  rec;
+
 	unsigned int addr = X.PC;
 	uint8 tmp;
 	static int unloggedlines = 0;
 
+	rec.cpu.PC = X.PC;
+	rec.cpu.A  = X.A;
+	rec.cpu.X  = X.X;
+	rec.cpu.Y  = X.Y;
+	rec.cpu.S  = X.S;
+	rec.cpu.P  = X.P;
+
+	for (int i=0; i<size; i++)
+	{
+		rec.opCode[i] = opcode[i];
+	}
+	rec.opSize  = size;
+	rec.romAddr = GetPRGAddress(addr);
+	rec.bank    = getBank(addr);
+
+	rec.frameCount = currFrameCounter;
+	rec.instrCount = total_instructions;
+
+	int64 counter_value = timestampbase + (uint64)timestamp - total_cycles_base;
+	if (counter_value < 0)	// sanity check
+	{
+		ResetDebugStatisticsCounters();
+		counter_value = 0;
+	}
+	rec.cycleCount = counter_value;
+
 	// if instruction executed from the RAM, skip this, log all instead
 	// TODO: loops folding mame-lyke style
-	if (GetPRGAddress(addr) != -1)
+	if (rec.romAddr != -1)
 	{
 		if (((logging_options & LOG_NEW_INSTRUCTIONS) && (oldcodecount != codecount)) ||
 		    ((logging_options & LOG_NEW_DATA) && (olddatacount != datacount)))
@@ -235,10 +302,11 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			//something new was logged
 			oldcodecount = codecount;
 			olddatacount = datacount;
-			if(unloggedlines > 0)
+			if (unloggedlines > 0)
 			{
-				sprintf(str_result, "(%d lines skipped)", unloggedlines);
+				//sprintf(str_result, "(%d lines skipped)", unloggedlines);
 				//OutputLogLine(str_result);
+				rec.skippedLines = unloggedlines;
 				unloggedlines = 0;
 			}
 		} 
@@ -258,8 +326,9 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 
 	if ((addr + size) > 0xFFFF)
 	{
-		sprintf(str_data, "%02X        ", opcode[0]);
-		sprintf(str_disassembly, "OVERFLOW");
+		//sprintf(str_data, "%02X        ", opcode[0]);
+		//sprintf(str_disassembly, "OVERFLOW");
+		rec.flags |= 0x01;
 	} 
 	else
 	{
@@ -267,12 +336,13 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		switch (size)
 		{
 			case 0:
-				sprintf(str_data, "%02X        ", opcode[0]);
-				sprintf(str_disassembly,"UNDEFINED");
+				//sprintf(str_data, "%02X        ", opcode[0]);
+				//sprintf(str_disassembly,"UNDEFINED");
+				rec.flags |= 0x02;
 				break;
 			case 1:
 			{
-				sprintf(str_data, "%02X        ", opcode[0]);
+				//sprintf(str_data, "%02X        ", opcode[0]);
 				a = Disassemble(addr + 1, opcode);
 				// special case: an RTS opcode
 				if (opcode[0] == 0x60)
@@ -283,18 +353,19 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 					{
 						// this was a JSR instruction - take the subroutine address from it
 						unsigned int call_addr = GetMem(caller_addr + 1) + (GetMem(caller_addr + 2) << 8);
-						sprintf(str_decoration, " (from $%04X)", call_addr);
-						strcat(a, str_decoration);
+						//sprintf(str_decoration, " (from $%04X)", call_addr);
+						//strcat(a, str_decoration);
+						rec.callAddr = call_addr;
 					}
 				}
 				break;
 			}
 			case 2:
-				sprintf(str_data, "%02X %02X     ", opcode[0],opcode[1]);
+				//sprintf(str_data, "%02X %02X     ", opcode[0],opcode[1]);
 				a = Disassemble(addr + 2, opcode);
 				break;
 			case 3:
-				sprintf(str_data, "%02X %02X %02X  ", opcode[0],opcode[1],opcode[2]);
+				//sprintf(str_data, "%02X %02X %02X  ", opcode[0],opcode[1],opcode[2]);
 				a = Disassemble(addr + 3, opcode);
 				break;
 		}
@@ -343,10 +414,15 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			//	//	replaceNames(pageNames[i], a, &tempAddressesLog);
 			//	//}
 			//}
-			strncpy(str_disassembly, a, LOG_DISASSEMBLY_MAX_LEN);
-			str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+			//strncpy(str_disassembly, a, LOG_DISASSEMBLY_MAX_LEN);
+			//str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+
+			rec.appendAsmText(a);
 		}
 	}
+	return; // TEST
+	// All of the following log text creation is very cpu intensive, to keep emulation 
+	// running realtime save data and have a separate thread do this translation.
 
 	if (size == 1 && GetMem(addr) == 0x60)
 	{
