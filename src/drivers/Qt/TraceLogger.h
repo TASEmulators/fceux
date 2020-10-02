@@ -46,6 +46,8 @@ struct traceRecord_t
 	traceRecord_t(void);
 
 	int  appendAsmText( const char *txt );
+
+   int  convToText( char *line );
 };
 
 class QTraceLogView : public QWidget
@@ -89,6 +91,7 @@ class TraceLoggerDialog_t : public QDialog
 		~TraceLoggerDialog_t(void);
 
 	protected:
+      QTimer      *updateTimer;
 		QCheckBox   *logLastCbox;
 		QCheckBox   *logFileCbox;
 		QComboBox   *logMaxLinesComboBox;
@@ -122,6 +125,23 @@ class TraceLoggerDialog_t : public QDialog
    public slots:
       void closeWindow(void);
 	private slots:
+      void updatePeriodic(void);
 		void toggleLoggingOnOff(void);
+      void logRegStateChanged(int state);
+      void logFrameStateChanged(int state);
+      void logEmuMsgStateChanged(int state);
+      void symTraceEnaStateChanged(int state);
+      void logProcStatFlagStateChanged(int state);
+      void logCyclesCountStateChanged(int state);
+      void logBreakpointStateChanged(int state);
+      void useStackPointerStateChanged(int state);
+      void toLeftDisassemblyStateChanged(int state);
+      void logInstrCountStateChanged(int state);
+      void logBankNumStateChanged(int state);
+      void logNewMapCodeChanged(int state);
+      void logNewMapDataChanged(int state);
+      void hbarChanged(int value);
+      void vbarChanged(int value);
 };
 
+int  initTraceLogBuffer( int maxRecs );

@@ -62,16 +62,20 @@
 
 static int logging = 0;
 static int logging_options = LOG_REGISTERS | LOG_PROCESSOR_STATUS | LOG_TO_THE_LEFT | LOG_MESSAGES | LOG_BREAKPOINTS | LOG_CODE_TABBING;
-static char str_axystate[LOG_AXYSTATE_MAX_LEN] = {0}, str_procstatus[LOG_PROCSTATUS_MAX_LEN] = {0};
-static char str_tabs[LOG_TABS_MASK+1] = {0}, str_address[LOG_ADDRESS_MAX_LEN] = {0}, str_data[LOG_DATA_MAX_LEN] = {0}, str_disassembly[LOG_DISASSEMBLY_MAX_LEN] = {0};
-static char str_result[LOG_LINE_MAX_LEN] = {0};
-static char str_temp[LOG_LINE_MAX_LEN] = {0};
+//static char str_axystate[LOG_AXYSTATE_MAX_LEN] = {0}, str_procstatus[LOG_PROCSTATUS_MAX_LEN] = {0};
+//static char str_tabs[LOG_TABS_MASK+1] = {0}, str_address[LOG_ADDRESS_MAX_LEN] = {0}, str_data[LOG_DATA_MAX_LEN] = {0}, str_disassembly[LOG_DISASSEMBLY_MAX_LEN] = {0};
+//static char str_result[LOG_LINE_MAX_LEN] = {0};
+//static char str_temp[LOG_LINE_MAX_LEN] = {0};
 //static char str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
 //static char str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
 //static char* tracer_decoration_comment = 0;
 //static char* tracer_decoration_comment_end_pos = 0;
 static int oldcodecount = 0, olddatacount = 0;
 
+static traceRecord_t  *recBuf = NULL;
+static int  recBufMax  = 0;
+static int  recBufHead = 0;
+//static int  recBufTail = 0;
 //----------------------------------------------------
 TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	: QDialog( parent )
@@ -81,6 +85,11 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	QGridLayout *grid;
 	QGroupBox *frame;
 	QLabel    *lbl;
+
+   if ( recBufMax == 0 )
+   {
+      initTraceLogBuffer( 10000 );
+   }
 
    setWindowTitle( tr("Trace Logger") );
 
@@ -92,11 +101,15 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	vbar      = new QScrollBar( Qt::Vertical, this );
 	hbar      = new QScrollBar( Qt::Horizontal, this );
 
+   connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
+   connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
+
 	traceView->setScrollBars( hbar, vbar );
 	hbar->setMinimum(0);
 	hbar->setMaximum(100);
 	vbar->setMinimum(0);
-	vbar->setMaximum(10000);
+	vbar->setMaximum(recBufMax);
+   vbar->setValue(recBufMax);
 
 	grid->addWidget( traceView, 0, 0);
 	grid->addWidget( vbar     , 0, 1 );
@@ -151,6 +164,30 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	logInstrCountCbox     = new QCheckBox( tr("Log Instructions Count") );
 	logBankNumCbox        = new QCheckBox( tr("Log Bank Number") );
 
+   logRegCbox->setChecked( (logging_options & LOG_REGISTERS) ? true : false );
+   logFrameCbox->setChecked( (logging_options & LOG_FRAMES_COUNT) ? true : false );
+   logEmuMsgCbox->setChecked( (logging_options & LOG_MESSAGES) ? true : false );
+   symTraceEnaCbox->setChecked( (logging_options & LOG_SYMBOLIC) ? true : false );
+   logProcStatFlagCbox->setChecked( (logging_options & LOG_PROCESSOR_STATUS) ? true : false );
+   logCyclesCountCbox->setChecked( (logging_options & LOG_CYCLES_COUNT) ? true : false );
+   logBreakpointCbox->setChecked( (logging_options & LOG_BREAKPOINTS) ? true : false );
+   useStackPointerCbox->setChecked( (logging_options & LOG_CODE_TABBING) ? true : false );
+   toLeftDisassemblyCbox->setChecked( (logging_options & LOG_TO_THE_LEFT) ? true : false );
+   logInstrCountCbox->setChecked( (logging_options & LOG_INSTRUCTIONS_COUNT) ? true : false );
+   logBankNumCbox->setChecked( (logging_options & LOG_BANK_NUMBER) ? true : false );
+
+   connect( logRegCbox, SIGNAL(stateChanged(int)), this, SLOT(logRegStateChanged(int)) );
+   connect( logFrameCbox, SIGNAL(stateChanged(int)), this, SLOT(logFrameStateChanged(int)) );
+   connect( logEmuMsgCbox, SIGNAL(stateChanged(int)), this, SLOT(logEmuMsgStateChanged(int)) );
+   connect( symTraceEnaCbox, SIGNAL(stateChanged(int)), this, SLOT(symTraceEnaStateChanged(int)) );
+   connect( logProcStatFlagCbox, SIGNAL(stateChanged(int)), this, SLOT(logProcStatFlagStateChanged(int)) );
+   connect( logCyclesCountCbox, SIGNAL(stateChanged(int)), this, SLOT(logCyclesCountStateChanged(int)) );
+   connect( logBreakpointCbox, SIGNAL(stateChanged(int)), this, SLOT(logBreakpointStateChanged(int)) );
+   connect( useStackPointerCbox, SIGNAL(stateChanged(int)), this, SLOT(useStackPointerStateChanged(int)) );
+   connect( toLeftDisassemblyCbox, SIGNAL(stateChanged(int)), this, SLOT(toLeftDisassemblyStateChanged(int)) );
+   connect( logInstrCountCbox, SIGNAL(stateChanged(int)), this, SLOT(logInstrCountStateChanged(int)) );
+   connect( logBankNumCbox, SIGNAL(stateChanged(int)), this, SLOT(logBankNumStateChanged(int)) );
+
 	grid->addWidget( logRegCbox     , 0, 0, Qt::AlignLeft );
 	grid->addWidget( logFrameCbox   , 1, 0, Qt::AlignLeft );
 	grid->addWidget( logEmuMsgCbox  , 2, 0, Qt::AlignLeft );
@@ -172,6 +209,12 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	logNewMapCodeCbox = new QCheckBox( tr("Only Log Newly Mapped Code") );
 	logNewMapDataCbox = new QCheckBox( tr("Only Log that Accesses Newly Mapped Data") );
 
+   logNewMapCodeCbox->setChecked( (logging_options & LOG_NEW_INSTRUCTIONS) ? true : false );
+   logNewMapDataCbox->setChecked( (logging_options & LOG_NEW_DATA) ? true : false );
+
+   connect( logNewMapCodeCbox, SIGNAL(stateChanged(int)), this, SLOT(logNewMapCodeChanged(int)) );
+   connect( logNewMapDataCbox, SIGNAL(stateChanged(int)), this, SLOT(logNewMapDataChanged(int)) );
+
 	grid->addWidget( logNewMapCodeCbox, 0, 0, Qt::AlignLeft );
 	grid->addWidget( logNewMapDataCbox, 0, 1, Qt::AlignLeft );
 
@@ -179,10 +222,17 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 
 	setLayout( mainLayout );
 
+   updateTimer  = new QTimer( this );
+
+   connect( updateTimer, &QTimer::timeout, this, &TraceLoggerDialog_t::updatePeriodic );
+
+   updateTimer->start( 200 ); // 5hz
 }
 //----------------------------------------------------
 TraceLoggerDialog_t::~TraceLoggerDialog_t(void)
 {
+   updateTimer->stop();
+
 	printf("Trace Logger Window Deleted\n");
 }
 //----------------------------------------------------
@@ -201,6 +251,12 @@ void TraceLoggerDialog_t::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------
+void TraceLoggerDialog_t::updatePeriodic(void)
+{
+
+   traceView->update();
+}
+//----------------------------------------------------
 void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 {
 	logging = !logging;
@@ -213,6 +269,172 @@ void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 	{
 		startStopButton->setText( tr("Start Logging") );
 	}
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::hbarChanged(int val)
+{
+   traceView->update();
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::vbarChanged(int val)
+{
+   traceView->update();
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::logRegStateChanged(int state)
+{
+   if ( state == Qt::Unchecked )
+   {
+      logging_options &= ~LOG_REGISTERS;
+   }
+   else
+   {
+      logging_options |=  LOG_REGISTERS;
+   }
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::logFrameStateChanged(int state)
+{
+   if ( state == Qt::Unchecked )
+   {
+      logging_options &= ~LOG_FRAMES_COUNT;
+   }
+   else
+   {
+      logging_options |=  LOG_FRAMES_COUNT;
+   }
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::logEmuMsgStateChanged(int state)
+{
+   if ( state == Qt::Unchecked )
+   {
+      logging_options &= ~LOG_MESSAGES;
+   }
+   else
+   {
+      logging_options |=  LOG_MESSAGES;
+   }
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::symTraceEnaStateChanged(int state)
+{
+   if ( state == Qt::Unchecked )
+   {
+      logging_options &= ~LOG_SYMBOLIC;
+   }
+   else
+   {
+      logging_options |=  LOG_SYMBOLIC;
+   }
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::logProcStatFlagStateChanged(int state)
+{
+   if ( state == Qt::Unchecked )
+   {
+      logging_options &= ~LOG_PROCESSOR_STATUS;
+   }
+   else
+   {
+      logging_options |=  LOG_PROCESSOR_STATUS;
+   }
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::logCyclesCountStateChanged(int state)
+{
+   if ( state == Qt::Unchecked )
+   {
+      logging_options &= ~LOG_CYCLES_COUNT;
+   }
+   else
+   {
+      logging_options |=  LOG_CYCLES_COUNT;
+   }
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::logBreakpointStateChanged(int state)
+{
+   if ( state == Qt::Unchecked )
+   {
+      logging_options &= ~LOG_BREAKPOINTS;
+   }
+   else
+   {
+      logging_options |=  LOG_BREAKPOINTS;
+   }
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::useStackPointerStateChanged(int state)
+{
+   if ( state == Qt::Unchecked )
+   {
+      logging_options &= ~LOG_CODE_TABBING;
+   }
+   else
+   {
+      logging_options |=  LOG_CODE_TABBING;
+   }
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::toLeftDisassemblyStateChanged(int state)
+{
+   if ( state == Qt::Unchecked )
+   {
+      logging_options &= ~LOG_TO_THE_LEFT;
+   }
+   else
+   {
+      logging_options |=  LOG_TO_THE_LEFT;
+   }
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::logInstrCountStateChanged(int state)
+{
+   if ( state == Qt::Unchecked )
+   {
+      logging_options &= ~LOG_INSTRUCTIONS_COUNT;
+   }
+   else
+   {
+      logging_options |=  LOG_INSTRUCTIONS_COUNT;
+   }
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::logBankNumStateChanged(int state)
+{
+   if ( state == Qt::Unchecked )
+   {
+      logging_options &= ~LOG_BANK_NUMBER;
+   }
+   else
+   {
+      logging_options |=  LOG_BANK_NUMBER;
+   }
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::logNewMapCodeChanged(int state)
+{
+   if ( state == Qt::Unchecked )
+   {
+      logging_options &= ~LOG_NEW_INSTRUCTIONS;
+   }
+   else
+   {
+      logging_options |=  LOG_NEW_INSTRUCTIONS;
+   }
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::logNewMapDataChanged(int state)
+{
+   if ( state == Qt::Unchecked )
+   {
+      logging_options &= ~LOG_NEW_DATA;
+   }
+   else
+   {
+      logging_options |=  LOG_NEW_DATA;
+   }
 }
 //----------------------------------------------------
 traceRecord_t::traceRecord_t(void)
@@ -254,6 +476,223 @@ int traceRecord_t::appendAsmText( const char *txt )
 	return 0;
 }
 //----------------------------------------------------
+static int convToXchar( int i )
+{
+   int c = 0;
+
+	if ( (i >= 0) && (i < 10) )
+	{
+      c = i + '0';
+	}
+	else if ( i < 16 )
+	{
+		c = (i - 10) + 'A';
+	}
+	return c;
+}
+//----------------------------------------------------
+int traceRecord_t::convToText( char *txt )
+{
+   int i=0, j=0;
+   char stmp[128];
+   char str_axystate[32], str_procstatus[32];
+
+   txt[0] = 0;
+   if ( opSize == 0 ) return -1;
+
+   // Start filling the str_temp line: Frame count, Cycles count, Instructions count, AXYS state, Processor status, Tabs, Address, Data, Disassembly
+	if (logging_options & LOG_FRAMES_COUNT)
+	{
+		sprintf(stmp, "f%-6llu ", (long long unsigned int)frameCount);
+
+      j=0;
+      while ( stmp[j] != 0 )
+      {
+         txt[i] = stmp[j]; i++; j++;
+      }
+	}
+
+   if (logging_options & LOG_CYCLES_COUNT)
+	{
+		sprintf(stmp, "c%-11llu ", (long long unsigned int)cycleCount);
+
+      j=0;
+      while ( stmp[j] != 0 )
+      {
+         txt[i] = stmp[j]; i++; j++;
+      }
+	}
+
+	if (logging_options & LOG_INSTRUCTIONS_COUNT)
+	{
+		sprintf(stmp, "i%-11llu ", (long long unsigned int)instrCount);
+
+      j=0;
+      while ( stmp[j] != 0 )
+      {
+         txt[i] = stmp[j]; i++; j++;
+      }
+	}
+	
+	if (logging_options & LOG_REGISTERS)
+	{
+		sprintf(str_axystate,"A:%02X X:%02X Y:%02X S:%02X ",(cpu.A),(cpu.X),(cpu.Y),(cpu.S));
+	}
+
+   if (logging_options & LOG_PROCESSOR_STATUS)
+	{
+		int tmp = cpu.P^0xFF;
+		sprintf(str_procstatus,"P:%c%c%c%c%c%c%c%c ",
+			'N'|(tmp&0x80)>>2,
+			'V'|(tmp&0x40)>>1,
+			'U'|(tmp&0x20),
+			'B'|(tmp&0x10)<<1,
+			'D'|(tmp&0x08)<<2,
+			'I'|(tmp&0x04)<<3,
+			'Z'|(tmp&0x02)<<4,
+			'C'|(tmp&0x01)<<5
+			);
+	}
+
+   if (logging_options & LOG_TO_THE_LEFT)
+	{
+		if (logging_options & LOG_REGISTERS)
+		{
+         j=0;
+         while ( str_axystate[j] != 0 )
+         {
+            txt[i] = str_axystate[j]; i++; j++;
+         }
+		}
+		if (logging_options & LOG_PROCESSOR_STATUS)
+		{
+         j=0;
+         while ( str_procstatus[j] != 0 )
+         {
+            txt[i] = str_procstatus[j]; i++; j++;
+         }
+		}
+	}
+
+   if (logging_options & LOG_CODE_TABBING)
+	{
+		// add spaces at the beginning of the line according to stack pointer
+		int spaces = (0xFF - cpu.S) & LOG_TABS_MASK;
+
+		while ( spaces > 0 )
+		{
+			txt[i] = ' '; i++; spaces--;
+		}
+	} 
+	else if (logging_options & LOG_TO_THE_LEFT)
+	{
+		txt[i] = ' '; i++; 
+	}
+
+   if (logging_options & LOG_BANK_NUMBER)
+	{
+		if (cpu.PC >= 0x8000)
+		{
+			sprintf(stmp, "$%02X:%04X: ", bank, cpu.PC);
+		}
+		else
+		{
+			sprintf(stmp, "  $%04X: ", cpu.PC);
+		}
+	} 
+	else
+	{
+		sprintf(stmp, "$%04X: ", cpu.PC);
+	}
+   j=0;
+   while ( stmp[j] != 0 )
+   {
+      txt[i] = stmp[j]; i++; j++;
+   }
+
+   for (j=0; j<opSize; j++)
+   {
+      txt[i] = convToXchar( (opCode[j] >> 4) & 0x0F ); i++;
+      txt[i] = convToXchar(  opCode[j] & 0x0F ); i++;
+      txt[i] = ' '; i++;
+   }
+   while ( j < 3 )
+   {
+      txt[i] = ' '; i++;
+      txt[i] = ' '; i++;
+      txt[i] = ' '; i++;
+      j++;
+   }
+   j=0;
+   while ( asmTxt[j] != 0 )
+   {
+      txt[i] = asmTxt[j]; i++; j++;
+   }
+   if ( callAddr >= 0 )
+   {
+		sprintf(stmp, " (from $%04X)", callAddr);
+
+      j=0;
+      while ( stmp[j] != 0 )
+      {
+         txt[i] = stmp[j]; i++; j++;
+      }
+   }
+
+   if (!(logging_options & LOG_TO_THE_LEFT))
+	{
+		if (logging_options & LOG_REGISTERS)
+		{
+         j=0;
+         while ( str_axystate[j] != 0 )
+         {
+            txt[i] = str_axystate[j]; i++; j++;
+         }
+		}
+		if (logging_options & LOG_PROCESSOR_STATUS)
+		{
+         j=0;
+         while ( str_procstatus[j] != 0 )
+         {
+            txt[i] = str_procstatus[j]; i++; j++;
+         }
+		}
+	}
+
+   txt[i] = 0;
+
+	return 0;
+}
+//----------------------------------------------------
+int initTraceLogBuffer( int maxRecs )
+{
+   if ( maxRecs != recBufMax )
+   {
+      size_t size;
+
+      size = maxRecs * sizeof(traceRecord_t);
+
+      recBuf = (traceRecord_t*)malloc( size );
+
+      if ( recBuf )
+      {
+         memset( (void*)recBuf, 0, size );
+         recBufMax = maxRecs;
+      }
+      else
+      {
+         recBufMax = 0;
+      }
+   }
+   return recBuf == NULL;
+}
+//----------------------------------------------------
+static void pushToLogBuffer( traceRecord_t &rec )
+{
+   recBuf[ recBufHead ] = rec;
+   recBufHead = (recBufHead + 1) % recBufMax;
+}
+//----------------------------------------------------
 //todo: really speed this up
 void FCEUD_TraceInstruction(uint8 *opcode, int size)
 {
@@ -263,7 +702,6 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 	traceRecord_t  rec;
 
 	unsigned int addr = X.PC;
-	uint8 tmp;
 	static int unloggedlines = 0;
 
 	rec.cpu.PC = X.PC;
@@ -420,131 +858,20 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			rec.appendAsmText(a);
 		}
 	}
+
+   pushToLogBuffer( rec );
+
 	return; // TEST
 	// All of the following log text creation is very cpu intensive, to keep emulation 
 	// running realtime save data and have a separate thread do this translation.
 
-	if (size == 1 && GetMem(addr) == 0x60)
-	{
-		// special case: an RTS opcode
-		// add "----------" to emphasize the end of subroutine
-		static const char* emphasize = " -------------------------------------------------------------------------------------------------------------------------";
-		strncat(str_disassembly, emphasize, LOG_DISASSEMBLY_MAX_LEN - strlen(str_disassembly) - 1);
-	}
-	// stretch the disassembly string out if we have to output other stuff.
-	if ((logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)) && !(logging_options & LOG_TO_THE_LEFT))
-	{
-		for (int i = strlen(str_disassembly); i < (LOG_DISASSEMBLY_MAX_LEN - 1); ++i)
-			str_disassembly[i] = ' ';
-		str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
-	}
-
-	// Start filling the str_temp line: Frame count, Cycles count, Instructions count, AXYS state, Processor status, Tabs, Address, Data, Disassembly
-	if (logging_options & LOG_FRAMES_COUNT)
-	{
-		sprintf(str_result, "f%-6u ", currFrameCounter);
-	} else
-	{
-		str_result[0] = 0;
-	}
-	if (logging_options & LOG_CYCLES_COUNT)
-	{
-		int64 counter_value = timestampbase + (uint64)timestamp - total_cycles_base;
-		if (counter_value < 0)	// sanity check
-		{
-			ResetDebugStatisticsCounters();
-			counter_value = 0;
-		}
-		sprintf(str_temp, "c%-11llu ", counter_value);
-		strcat(str_result, str_temp);
-	}
-	if (logging_options & LOG_INSTRUCTIONS_COUNT)
-	{
-		sprintf(str_temp, "i%-11llu ", total_instructions);
-		strcat(str_result, str_temp);
-	}
-	
-	if (logging_options & LOG_REGISTERS)
-	{
-		sprintf(str_axystate,"A:%02X X:%02X Y:%02X S:%02X ",(X.A),(X.X),(X.Y),(X.S));
-	}
-	
-	if (logging_options & LOG_PROCESSOR_STATUS)
-	{
-		tmp = X.P^0xFF;
-		sprintf(str_procstatus,"P:%c%c%c%c%c%c%c%c ",
-			'N'|(tmp&0x80)>>2,
-			'V'|(tmp&0x40)>>1,
-			'U'|(tmp&0x20),
-			'B'|(tmp&0x10)<<1,
-			'D'|(tmp&0x08)<<2,
-			'I'|(tmp&0x04)<<3,
-			'Z'|(tmp&0x02)<<4,
-			'C'|(tmp&0x01)<<5
-			);
-	}
-
-	if (logging_options & LOG_TO_THE_LEFT)
-	{
-		if (logging_options & LOG_REGISTERS)
-		{
-			strcat(str_result, str_axystate);
-		}
-		if (logging_options & LOG_PROCESSOR_STATUS)
-		{
-			strcat(str_result, str_procstatus);
-		}
-	}
-
-	if (logging_options & LOG_CODE_TABBING)
-	{
-		// add spaces at the beginning of the line according to stack pointer
-		int spaces = (0xFF - X.S) & LOG_TABS_MASK;
-		for (int i = 0; i < spaces; i++)
-		{
-			str_tabs[i] = ' ';
-		}
-		str_tabs[spaces] = 0;
-		strcat(str_result, str_tabs);
-	} 
-	else if (logging_options & LOG_TO_THE_LEFT)
-	{
-		strcat(str_result, " ");
-	}
-
-	if (logging_options & LOG_BANK_NUMBER)
-	{
-		if (addr >= 0x8000)
-		{
-			sprintf(str_address, "$%02X:%04X: ", getBank(addr), addr);
-		}
-		else
-		{
-			sprintf(str_address, "  $%04X: ", addr);
-		}
-	} 
-	else
-	{
-		sprintf(str_address, "$%04X: ", addr);
-	}
-
-	strcat(str_result, str_address);
-	strcat(str_result, str_data);
-	strcat(str_result, str_disassembly);
-
-	if (!(logging_options & LOG_TO_THE_LEFT))
-	{
-		if (logging_options & LOG_REGISTERS)
-		{
-			strcat(str_result, str_axystate);
-		}
-		if (logging_options & LOG_PROCESSOR_STATUS)
-		{
-			strcat(str_result, str_procstatus);
-		}
-	}
-
-	//OutputLogLine(str_result, &tempAddressesLog);
+	//if (size == 1 && GetMem(addr) == 0x60)
+	//{
+	//	// special case: an RTS opcode
+	//	// add "----------" to emphasize the end of subroutine
+	//	static const char* emphasize = " -------------------------------------------------------------------------------------------------------------------------";
+	//	strncat(str_disassembly, emphasize, LOG_DISASSEMBLY_MAX_LEN - strlen(str_disassembly) - 1);
+	//}
 	
 	return;
 }
@@ -614,11 +941,56 @@ void QTraceLogView::resizeEvent(QResizeEvent *event)
 //----------------------------------------------------
 void QTraceLogView::paintEvent(QPaintEvent *event)
 {
+   int x,y, ofs, row, start, end, nrow;
 	QPainter painter(this);
+   char line[256];
+   traceRecord_t rec[64];
 
 	painter.setFont(font);
 	viewWidth  = event->rect().width();
 	viewHeight = event->rect().height();
+
+   nrow = (viewHeight - pxLineSpacing) / pxLineSpacing;
+
+	if (nrow < 1 ) nrow = 1;
+
+   viewLines = nrow;
+
+   painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Background) );
+
+   painter.setPen( this->palette().color(QPalette::WindowText));
+
+   ofs = recBufMax - vbar->value();
+
+   end = recBufHead - ofs;
+
+   if ( end < 0 ) end += recBufMax;
+  
+   start = (end - nrow - 1);
+
+   if ( start < 0 ) start += recBufMax;
+
+   row = 0;
+   while ( start != end )
+   {
+      rec[row] = recBuf[ start ]; row++;
+      start = (start + 1) % recBufMax;
+   }
+
+   y = pxLineSpacing;
+
+   for (row=0; row<nrow; row++)
+   {
+      x = pxLineXScroll;
+
+      rec[row].convToText( line );
+
+      //printf("Line %i: '%s'\n", row, line );
+
+      painter.drawText( x, y, tr(line) );
+
+      y += pxLineSpacing;
+   }
 
 }
 //----------------------------------------------------
