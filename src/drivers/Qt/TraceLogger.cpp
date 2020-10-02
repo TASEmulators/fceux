@@ -500,6 +500,17 @@ int traceRecord_t::convToText( char *txt )
    txt[0] = 0;
    if ( opSize == 0 ) return -1;
 
+   if ( skippedLines > 0 )
+   {
+		sprintf(stmp, "(%d lines skipped) ", skippedLines);
+
+      j=0;
+      while ( stmp[j] != 0 )
+      {
+         txt[i] = stmp[j]; i++; j++;
+      }
+   }
+
    // Start filling the str_temp line: Frame count, Cycles count, Instructions count, AXYS state, Processor status, Tabs, Address, Data, Disassembly
 	if (logging_options & LOG_FRAMES_COUNT)
 	{
@@ -743,7 +754,6 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			if (unloggedlines > 0)
 			{
 				//sprintf(str_result, "(%d lines skipped)", unloggedlines);
-				//OutputLogLine(str_result);
 				rec.skippedLines = unloggedlines;
 				unloggedlines = 0;
 			}
@@ -774,13 +784,11 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		switch (size)
 		{
 			case 0:
-				//sprintf(str_data, "%02X        ", opcode[0]);
 				//sprintf(str_disassembly,"UNDEFINED");
 				rec.flags |= 0x02;
 				break;
 			case 1:
 			{
-				//sprintf(str_data, "%02X        ", opcode[0]);
 				a = Disassemble(addr + 1, opcode);
 				// special case: an RTS opcode
 				if (opcode[0] == 0x60)
@@ -791,19 +799,15 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 					{
 						// this was a JSR instruction - take the subroutine address from it
 						unsigned int call_addr = GetMem(caller_addr + 1) + (GetMem(caller_addr + 2) << 8);
-						//sprintf(str_decoration, " (from $%04X)", call_addr);
-						//strcat(a, str_decoration);
 						rec.callAddr = call_addr;
 					}
 				}
 				break;
 			}
 			case 2:
-				//sprintf(str_data, "%02X %02X     ", opcode[0],opcode[1]);
 				a = Disassemble(addr + 2, opcode);
 				break;
 			case 3:
-				//sprintf(str_data, "%02X %02X %02X  ", opcode[0],opcode[1],opcode[2]);
 				a = Disassemble(addr + 3, opcode);
 				break;
 		}
