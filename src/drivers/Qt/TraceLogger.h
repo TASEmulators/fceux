@@ -31,7 +31,7 @@ struct traceRecord_t
 	uint8_t  opCode[3];
 	uint8_t  opSize;
 	uint8_t  asmTxtSize;
-	char     asmTxt[46];
+	char     asmTxt[64];
 
 	uint64_t  frameCount;
 	uint64_t  cycleCount;
@@ -118,6 +118,8 @@ class TraceLoggerDialog_t : public QDialog
 		QScrollBar    *hbar;
 		QScrollBar    *vbar;
 
+		int  traceViewCounter;
+
       void closeEvent(QCloseEvent *bar);
 
 	private:
@@ -140,8 +142,12 @@ class TraceLoggerDialog_t : public QDialog
       void logBankNumStateChanged(int state);
       void logNewMapCodeChanged(int state);
       void logNewMapDataChanged(int state);
+		void logMaxLinesChanged(int index);
       void hbarChanged(int value);
       void vbarChanged(int value);
+		void openLogFile(void);
 };
 
 int  initTraceLogBuffer( int maxRecs );
+
+void openTraceLoggerWindow( QWidget *parent );

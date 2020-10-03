@@ -501,14 +501,6 @@ void consoleWin_t::createMainMenu(void)
 
     debugMenu->addAction(hexEditAct);
 
-	 // Debug -> Code/Data Logger
-	 codeDataLogAct = new QAction(tr("Code/Data Logger..."), this);
-    //codeDataLogAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    codeDataLogAct->setStatusTip(tr("Open Code Data Logger"));
-    connect(codeDataLogAct, SIGNAL(triggered()), this, SLOT(openCodeDataLogger(void)) );
-
-    debugMenu->addAction(codeDataLogAct);
-
 	 // Debug -> Trace Logger
 	 traceLogAct = new QAction(tr("Trace Logger..."), this);
     //traceLogAct->setShortcut( QKeySequence(tr("Shift+F7")));
@@ -516,6 +508,14 @@ void consoleWin_t::createMainMenu(void)
     connect(traceLogAct, SIGNAL(triggered()), this, SLOT(openTraceLogger(void)) );
 
     debugMenu->addAction(traceLogAct);
+
+	 // Debug -> Code/Data Logger
+	 codeDataLogAct = new QAction(tr("Code/Data Logger..."), this);
+    //codeDataLogAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    codeDataLogAct->setStatusTip(tr("Open Code Data Logger"));
+    connect(codeDataLogAct, SIGNAL(triggered()), this, SLOT(openCodeDataLogger(void)) );
+
+    debugMenu->addAction(codeDataLogAct);
 
 	 //-----------------------------------------------------------------------
 	 // Movie
@@ -1034,13 +1034,7 @@ void consoleWin_t::openCodeDataLogger(void)
 
 void consoleWin_t::openTraceLogger(void)
 {
-	TraceLoggerDialog_t *tlWin;
-
-	//printf("Open Trace Logger Window\n");
-	
-   tlWin = new TraceLoggerDialog_t(this);
-	
-   tlWin->show();
+	openTraceLoggerWindow(this);
 }
 
 void consoleWin_t::toggleAutoResume(void)

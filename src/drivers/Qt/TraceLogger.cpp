@@ -1,5 +1,7 @@
 // TraceLogger.cpp
 //
+#include <stdio.h>
+
 #include <QDir>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -62,20 +64,15 @@
 
 static int logging = 0;
 static int logging_options = LOG_REGISTERS | LOG_PROCESSOR_STATUS | LOG_TO_THE_LEFT | LOG_MESSAGES | LOG_BREAKPOINTS | LOG_CODE_TABBING;
-//static char str_axystate[LOG_AXYSTATE_MAX_LEN] = {0}, str_procstatus[LOG_PROCSTATUS_MAX_LEN] = {0};
-//static char str_tabs[LOG_TABS_MASK+1] = {0}, str_address[LOG_ADDRESS_MAX_LEN] = {0}, str_data[LOG_DATA_MAX_LEN] = {0}, str_disassembly[LOG_DISASSEMBLY_MAX_LEN] = {0};
-//static char str_result[LOG_LINE_MAX_LEN] = {0};
-//static char str_temp[LOG_LINE_MAX_LEN] = {0};
-//static char str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
-//static char str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
-//static char* tracer_decoration_comment = 0;
-//static char* tracer_decoration_comment_end_pos = 0;
 static int oldcodecount = 0, olddatacount = 0;
 
 static traceRecord_t  *recBuf = NULL;
 static int  recBufMax  = 0;
 static int  recBufHead = 0;
-//static int  recBufTail = 0;
+static int  recBufTail = 0;
+static FILE *logFile   = NULL;
+static TraceLoggerDialog_t *traceLogWindow =  NULL;
+static void pushMsgToLogBuffer( const char *msg );
 //----------------------------------------------------
 TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	: QDialog( parent )
@@ -88,7 +85,7 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 
    if ( recBufMax == 0 )
    {
-      initTraceLogBuffer( 10000 );
+      initTraceLogBuffer( 1000000 );
    }
 
    setWindowTitle( tr("Trace Logger") );
@@ -122,16 +119,38 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	logLastCbox  = new QCheckBox( tr("Log Last") );
 	logMaxLinesComboBox = new QComboBox();
 
+	logLastCbox->setChecked(true);
+	logMaxLinesComboBox->addItem( tr("3,000,000"), 3000000 );
+	logMaxLinesComboBox->addItem( tr("1,000,000"), 1000000 );
+	logMaxLinesComboBox->addItem( tr("300,000")  , 300000 );
+	logMaxLinesComboBox->addItem( tr("100,000")  , 100000 );
+	logMaxLinesComboBox->addItem( tr("30,000")   , 30000 );
+	logMaxLinesComboBox->addItem( tr("10,000")   , 10000 );
+	logMaxLinesComboBox->addItem( tr("3,000")    , 3000 );
+	logMaxLinesComboBox->addItem( tr("1,000")    , 1000 );
+
+	for (int i=0; i<logMaxLinesComboBox->count(); i++)
+	{
+		if ( logMaxLinesComboBox->itemData(i).toInt() == recBufMax )
+		{
+			logMaxLinesComboBox->setCurrentIndex( i );
+		}
+	}
+	connect( logMaxLinesComboBox, SIGNAL(activated(int)), this, SLOT(logMaxLinesChanged(int)) );
+
 	logFileCbox  = new QCheckBox( tr("Log to File") );
 	selLogFileButton = new QPushButton( tr("Browse...") );
 	startStopButton = new QPushButton( tr("Start Logging") );
 	autoUpdateCbox = new QCheckBox( tr("Automatically update this window while logging") );
+
+	autoUpdateCbox->setChecked(true);
 
 	if ( logging )
 	{
 		startStopButton->setText( tr("Stop Logging") );
 	}
 	connect( startStopButton, SIGNAL(clicked(void)), this, SLOT(toggleLoggingOnOff(void)) );
+   connect( selLogFileButton, SIGNAL(clicked(void)), this, SLOT(openLogFile(void)) );
 
 	hbox = new QHBoxLayout();
 	hbox->addWidget( logLastCbox );
@@ -222,17 +241,26 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 
 	setLayout( mainLayout );
 
+	traceViewCounter = 0;
+
    updateTimer  = new QTimer( this );
 
    connect( updateTimer, &QTimer::timeout, this, &TraceLoggerDialog_t::updatePeriodic );
 
-   updateTimer->start( 200 ); // 5hz
+   updateTimer->start( 10 ); // 100hz
 }
 //----------------------------------------------------
 TraceLoggerDialog_t::~TraceLoggerDialog_t(void)
 {
    updateTimer->stop();
 
+	traceLogWindow = NULL;
+	logging = 0;
+
+	if ( logFile )
+	{
+		fclose( logFile ); logFile = NULL;
+	}
 	printf("Trace Logger Window Deleted\n");
 }
 //----------------------------------------------------
@@ -253,22 +281,147 @@ void TraceLoggerDialog_t::closeWindow(void)
 //----------------------------------------------------
 void TraceLoggerDialog_t::updatePeriodic(void)
 {
+	char traceViewDrawEnable;
 
-   traceView->update();
+	if ( logLastCbox->isChecked() )
+	{
+		if ( FCEUI_EmulationPaused() )
+		{
+			traceViewDrawEnable = 1;
+		}
+		else
+		{
+			traceViewDrawEnable = autoUpdateCbox->isChecked();
+		}
+	}
+	else
+	{
+		traceViewDrawEnable = 0;
+	}
+
+	if ( logFile && logFileCbox->isChecked() )
+	{
+		char line[256];
+
+		while ( recBufHead != recBufTail )
+		{
+			recBuf[ recBufTail ].convToText( line );
+
+			fprintf( logFile, "%s\n", line );
+
+			recBufTail = (recBufTail + 1) % recBufMax;
+		}
+	}
+	else
+	{
+		recBufTail = recBufHead;
+	}
+
+	if ( traceViewCounter > 20 )
+	{
+		if ( traceViewDrawEnable )
+		{
+   		traceView->update();
+		}
+		traceViewCounter = 0;
+	}
+	traceViewCounter++;
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::logMaxLinesChanged(int index)
+{
+	int logPrev;
+	int maxLines = logMaxLinesComboBox->itemData(index).toInt();
+
+	logPrev = logging;
+	logging = 0;
+
+	usleep(1000);
+
+	initTraceLogBuffer( maxLines );
+
+	vbar->setMaximum(recBufMax);
+	vbar->setValue(recBufMax);
+
+	logging = logPrev;
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 {
-	logging = !logging;
-
 	if ( logging )
 	{
-		startStopButton->setText( tr("Stop Logging") );
+		logging = 0;
+		usleep( 1000 );
+		pushMsgToLogBuffer("Logging Finished");
+		startStopButton->setText( tr("Start Logging") );
 	}
 	else
 	{
-		startStopButton->setText( tr("Start Logging") );
+		pushMsgToLogBuffer("Log Start");
+		startStopButton->setText( tr("Stop Logging") );
+		logging = 1;
 	}
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::openLogFile(void)
+{
+	const char *romFile;
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	QFileDialog  dialog(this, tr("Select Log File") );
+
+	printf("Log File Select\n");
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("LOG files (*.log *.LOG) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
+	dialog.setDefaultSuffix( tr(".log") );
+
+	romFile = getRomFile();
+
+	if ( romFile != NULL )
+	{
+		char dir[512];
+		getDirFromFile( romFile, dir );
+		dialog.setDirectory( tr(dir) );
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+   if ( filename.isNull() )
+   {
+      return;
+   }
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	if ( logFile )
+	{
+		fclose( logFile ); logFile = NULL;
+	}
+	logFile = fopen( filename.toStdString().c_str(), "w");
+
+   return;
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::hbarChanged(int val)
@@ -498,7 +651,17 @@ int traceRecord_t::convToText( char *txt )
    char str_axystate[32], str_procstatus[32];
 
    txt[0] = 0;
-   if ( opSize == 0 ) return -1;
+   if ( opSize == 0 )
+	{
+		j=0;
+   	while ( asmTxt[j] != 0 )
+   	{
+   	   txt[i] = asmTxt[j]; i++; j++;
+   	}
+		txt[i] = 0;
+
+		return -1;
+	}
 
    if ( skippedLines > 0 )
    {
@@ -698,10 +861,40 @@ int initTraceLogBuffer( int maxRecs )
    return recBuf == NULL;
 }
 //----------------------------------------------------
+void openTraceLoggerWindow( QWidget *parent )
+{
+	// Only allow one trace logger window to be open
+	if ( traceLogWindow != NULL )
+	{
+		return;
+	}
+	//printf("Open Trace Logger Window\n");
+	
+   traceLogWindow = new TraceLoggerDialog_t(parent);
+	
+   traceLogWindow->show();
+}
+//----------------------------------------------------
 static void pushToLogBuffer( traceRecord_t &rec )
 {
    recBuf[ recBufHead ] = rec;
    recBufHead = (recBufHead + 1) % recBufMax;
+
+	if ( recBufHead == recBufTail )
+	{
+		printf("Trace Log Overrun!!!\n");
+	}
+}
+//----------------------------------------------------
+static void pushMsgToLogBuffer( const char *msg )
+{
+	traceRecord_t rec;
+
+	strncpy( rec.asmTxt, msg, sizeof(rec.asmTxt) );
+	
+	rec.asmTxt[ sizeof(rec.asmTxt)-1 ] = 0;
+
+	pushToLogBuffer( rec );
 }
 //----------------------------------------------------
 //todo: really speed this up
@@ -945,7 +1138,7 @@ void QTraceLogView::resizeEvent(QResizeEvent *event)
 //----------------------------------------------------
 void QTraceLogView::paintEvent(QPaintEvent *event)
 {
-   int x,y, ofs, row, start, end, nrow;
+   int x,y, v, ofs, row, start, end, nrow;
 	QPainter painter(this);
    char line[256];
    traceRecord_t rec[64];
@@ -954,7 +1147,7 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 	viewWidth  = event->rect().width();
 	viewHeight = event->rect().height();
 
-   nrow = (viewHeight - pxLineSpacing) / pxLineSpacing;
+	nrow = (viewHeight / pxLineSpacing);
 
 	if (nrow < 1 ) nrow = 1;
 
@@ -964,13 +1157,17 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 
    painter.setPen( this->palette().color(QPalette::WindowText));
 
-   ofs = recBufMax - vbar->value();
+	v = vbar->value();
+
+	if ( v < viewLines ) v = viewLines;
+
+   ofs = recBufMax - v;
 
    end = recBufHead - ofs;
 
    if ( end < 0 ) end += recBufMax;
   
-   start = (end - nrow - 1);
+   start = (end - nrow);
 
    if ( start < 0 ) start += recBufMax;
 
@@ -981,11 +1178,13 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
       start = (start + 1) % recBufMax;
    }
 
-   y = pxLineSpacing;
+	pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth) );
+
+   x = -pxLineXScroll;
+   y =  pxLineSpacing;
 
    for (row=0; row<nrow; row++)
    {
-      x = pxLineXScroll;
 
       rec[row].convToText( line );
 
