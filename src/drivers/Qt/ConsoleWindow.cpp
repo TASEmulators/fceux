@@ -33,6 +33,7 @@
 #include "Qt/ConsoleVideoConf.h"
 #include "Qt/AboutWindow.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/ppuViewer.h"
 #include "Qt/keyscan.h"
 #include "Qt/nes_shm.h"
 
@@ -500,6 +501,14 @@ void consoleWin_t::createMainMenu(void)
     connect(hexEditAct, SIGNAL(triggered()), this, SLOT(openHexEditor(void)) );
 
     debugMenu->addAction(hexEditAct);
+
+	 // Debug -> PPU Viewer
+	 ppuViewAct = new QAction(tr("PPU Viewer..."), this);
+    //ppuViewAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    ppuViewAct->setStatusTip(tr("Open PPU Viewer"));
+    connect(ppuViewAct, SIGNAL(triggered()), this, SLOT(openPPUViewer(void)) );
+
+    debugMenu->addAction(ppuViewAct);
 
 	 // Debug -> Trace Logger
 	 traceLogAct = new QAction(tr("Trace Logger..."), this);
@@ -1019,6 +1028,13 @@ void consoleWin_t::openHexEditor(void)
    hexEditWin = new HexEditorDialog_t(this);
 	
    hexEditWin->show();
+}
+
+void consoleWin_t::openPPUViewer(void)
+{
+	//printf("Open GUI PPU Viewer Window\n");
+	
+	openPPUViewWindow(this);
 }
 
 void consoleWin_t::openCodeDataLogger(void)
