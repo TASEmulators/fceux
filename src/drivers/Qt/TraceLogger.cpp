@@ -354,9 +354,18 @@ void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 		usleep( 1000 );
 		pushMsgToLogBuffer("Logging Finished");
 		startStopButton->setText( tr("Start Logging") );
+
+		if ( logFile )
+		{
+			fclose( logFile ); logFile = NULL;
+		}
 	}
 	else
 	{
+		if ( logFileCbox->isChecked() )
+		{
+			openLogFile();
+		}
 		pushMsgToLogBuffer("Log Start");
 		startStopButton->setText( tr("Stop Logging") );
 		logging = 1;
