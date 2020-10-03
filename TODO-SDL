@@ -46,8 +46,8 @@ TAS Editor                                           |     NO      |     NO     
 PPU Viewer                                           |     NO      |     NO      |
 Name Table Viewer                                    |     NO      |     NO      |
 Memory Hex Editor                                    |     YES     |     YES     |
-Trace Logger                                         |     NO      |     NO      |
-Code/Data Logger                                     |     NO      |     NO      |
+Trace Logger                                         |     YES     |     NO      |
+Code/Data Logger                                     |     YES     |     NO      |
 Game Genie Encoder/Decoder                           |     NO      |     NO      |
 iNES Header Editor                                   |     NO      |     NO      |
 Built in help pages                                  |     NO      |     NO      |
