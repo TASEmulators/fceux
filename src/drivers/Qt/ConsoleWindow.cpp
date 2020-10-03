@@ -25,6 +25,7 @@
 #include "Qt/LuaControl.h"
 #include "Qt/CheatsConf.h"
 #include "Qt/HexEditor.h"
+#include "Qt/TraceLogger.h"
 #include "Qt/CodeDataLogger.h"
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleUtilities.h"
@@ -499,6 +500,14 @@ void consoleWin_t::createMainMenu(void)
     connect(hexEditAct, SIGNAL(triggered()), this, SLOT(openHexEditor(void)) );
 
     debugMenu->addAction(hexEditAct);
+
+	 // Debug -> Trace Logger
+	 traceLogAct = new QAction(tr("Trace Logger..."), this);
+    //traceLogAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    traceLogAct->setStatusTip(tr("Open Trace Logger"));
+    connect(traceLogAct, SIGNAL(triggered()), this, SLOT(openTraceLogger(void)) );
+
+    debugMenu->addAction(traceLogAct);
 
 	 // Debug -> Code/Data Logger
 	 codeDataLogAct = new QAction(tr("Code/Data Logger..."), this);
@@ -1021,6 +1030,11 @@ void consoleWin_t::openCodeDataLogger(void)
    cdlWin = new CodeDataLoggerDialog_t(this);
 	
    cdlWin->show();
+}
+
+void consoleWin_t::openTraceLogger(void)
+{
+	openTraceLoggerWindow(this);
 }
 
 void consoleWin_t::toggleAutoResume(void)
