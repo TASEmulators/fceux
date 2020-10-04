@@ -13,6 +13,8 @@
 #include <QLabel>
 #include <QFrame>
 #include <QTimer>
+#include <QSlider>
+#include <QLineEdit>
 #include <QGroupBox>
 #include <QCloseEvent>
 
@@ -59,10 +61,19 @@ class ppuViewerDialog_t : public QDialog
       void closeEvent(QCloseEvent *bar);
 	private:
 
+		QGroupBox  *paletteFrame;
+		QLabel     *tileLabel[2];
+		QCheckBox  *sprite8x16Cbox;
+		QCheckBox  *maskUnusedCbox;
+		QCheckBox  *invertMaskCbox;
+		QSlider    *refreshSlider;
+		QLineEdit  *scanLineEdit;
+
    public slots:
       void closeWindow(void);
 	private slots:
 		//void updatePeriodic(void);
+		void sprite8x16Changed(int state);
 
 };
 

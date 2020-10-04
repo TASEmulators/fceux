@@ -73,7 +73,10 @@ int openPPUViewWindow( QWidget *parent )
 ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
-	QVBoxLayout *mainLayout;
+	QVBoxLayout *mainLayout, *vbox;
+	QHBoxLayout *hbox;
+	QGroupBox   *frame;
+	QGridLayout *grid;
 
 	ppuViewWindow = this;
 
@@ -83,11 +86,56 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 
 	setLayout( mainLayout );
 
+	vbox        = new QVBoxLayout();
+	frame       = new QGroupBox( tr("Pattern Tables") );
 	patternView = new ppuPatternView_t(this);
-	paletteView = new ppuPalatteView_t(this);
+	grid        = new QGridLayout;
 
-	mainLayout->addWidget( patternView, 10 );
-	mainLayout->addWidget( paletteView,  1 );
+	vbox->addWidget( patternView, 10 );
+	vbox->addLayout( grid, 1 );
+	frame->setLayout( vbox );
+
+	tileLabel[0] = new QLabel( tr("Pattern 0 Tile:") );
+	tileLabel[1] = new QLabel( tr("Pattern 1 Tile:") );
+	sprite8x16Cbox = new QCheckBox( tr("Sprites 8x16 Mode") );
+	maskUnusedCbox = new QCheckBox( tr("Mask unused Graphics (Code/Data Logger)") );
+	invertMaskCbox = new QCheckBox( tr("Invert the Mask (Code/Data Logger)") );
+
+	sprite8x16Cbox->setChecked( PPUView_sprite16Mode );
+	maskUnusedCbox->setChecked( PPUView_maskUnusedGraphics );
+	invertMaskCbox->setChecked( PPUView_invertTheMask );
+
+	connect( sprite8x16Cbox, SIGNAL(stateChanged(int)), this, SLOT(sprite8x16Changed(int)));
+
+	hbox           = new QHBoxLayout();
+	refreshSlider  = new QSlider( Qt::Horizontal );
+	hbox->addWidget( new QLabel( tr("Refresh: More") ) );
+	hbox->addWidget( refreshSlider );
+	hbox->addWidget( new QLabel( tr("Less") ) );
+
+	grid->addWidget( tileLabel[0], 0, 0, Qt::AlignLeft );
+	grid->addWidget( tileLabel[1], 0, 1, Qt::AlignLeft );
+	grid->addWidget( sprite8x16Cbox, 1, 0, Qt::AlignLeft );
+	grid->addWidget( maskUnusedCbox, 2, 0, Qt::AlignLeft );
+	grid->addWidget( invertMaskCbox, 3, 0, Qt::AlignLeft );
+	grid->addLayout( hbox, 1, 1, Qt::AlignRight );
+
+	hbox         = new QHBoxLayout();
+	scanLineEdit = new QLineEdit();
+	hbox->addWidget( new QLabel( tr("Display on Scanline:") ) );
+	hbox->addWidget( scanLineEdit );
+	grid->addLayout( hbox, 2, 1, Qt::AlignRight );
+
+	mainLayout->addWidget( frame, 10 );
+
+	vbox         = new QVBoxLayout();
+	paletteFrame = new QGroupBox( tr("Palettes:") );
+	paletteView  = new ppuPalatteView_t(this);
+
+	vbox->addWidget( paletteView, 1 );
+	paletteFrame->setLayout( vbox );
+
+	mainLayout->addWidget( paletteFrame,  1 );
 
 	FCEUD_UpdatePPUView( -1, 1 );
 }
@@ -115,12 +163,16 @@ void ppuViewerDialog_t::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------
+void ppuViewerDialog_t::sprite8x16Changed(int state)
+{
+	PPUView_sprite16Mode = (state == Qt::Unchecked) ? 0 : 1;
+}
+//----------------------------------------------------
 ppuPatternView_t::ppuPatternView_t(QWidget *parent)
 	: QWidget(parent)
 {
 	setMinimumWidth( 512 );
 	setMinimumHeight( 256 );
-
 }
 //----------------------------------------------------
 ppuPatternView_t::~ppuPatternView_t(void)
@@ -188,52 +240,44 @@ void ppuPatternView_t::paintEvent(QPaintEvent *event)
 //----------------------------------------------------
 static void DrawPatternTable( patternTable_t *pattern, uint8_t *table, uint8_t *log, uint8_t pal)
 {
-	int i,j,k,x,y,index=0;
+	int i,j,x,y,index=0;
 	int p=0,tmp;
 	uint8_t chr0,chr1,logs,shift;
 
 	pal <<= 2;
-	for (i = 0; i < (16 >> PPUView_sprite16Mode); i++)		//Columns
+	for (i = 0; i < 16; i++)		//Columns
 	{
 		for (j = 0; j < 16; j++)	//Rows
 		{
-			//index =  (i<<4)|(j<<8);
 			//printf("Tile: %X%X  index:%04X   %04X\n", j,i,index, (i<<4)|(j<<8));
 			//-----------------------------------------------
-			for (k = 0; k < (PPUView_sprite16Mode + 1); k++) 
+			for (y = 0; y < 8; y++)
 			{
-				for (y = 0; y < 8; y++)
+				chr0 = table[index];
+				chr1 = table[index + 8];
+				logs = log[index] & log[index + 8];
+				tmp = 7;
+				shift=(PPUView_maskUnusedGraphics && debug_loggingCD && (((logs & 3) != 0) == PPUView_invertTheMask))?3:0;
+				for (x = 0; x < 8; x++)
 				{
-					chr0 = table[index];
-					chr1 = table[index + 8];
-					logs = log[index] & log[index + 8];
-					tmp = 7;
-					//shift=(PPUView_maskUnusedGraphics && debug_loggingCD && (((logs & 3) != 0) == PPUView_invertTheMask))?3:0;
-					shift=0;
-					for (x = 0; x < 8; x++)
-					{
-						p  =  (chr0 >> tmp) & 1;
-						p |= ((chr1 >> tmp) & 1) << 1;
-						p = palcache[p | pal];
-						tmp--;
-						pattern->tile[i][j].pixel[y][x].color.setBlue( palo[p].b >> shift );
-						pattern->tile[i][j].pixel[y][x].color.setGreen( palo[p].g >> shift );
-						pattern->tile[i][j].pixel[y][x].color.setRed( palo[p].r >> shift );
+					p  =  (chr0 >> tmp) & 1;
+					p |= ((chr1 >> tmp) & 1) << 1;
+					p = palcache[p | pal];
+					tmp--;
+					pattern->tile[i][j].pixel[y][x].color.setBlue( palo[p].b >> shift );
+					pattern->tile[i][j].pixel[y][x].color.setGreen( palo[p].g >> shift );
+					pattern->tile[i][j].pixel[y][x].color.setRed( palo[p].r >> shift );
 
-						//printf("Tile: %X%X Pixel: (%i,%i)  P:%i RGB: (%i,%i,%i)\n", j, i, x, y, p,
-						//	  pattern->tile[j][i].pixel[y][x].color.red(), 
-						//	  pattern->tile[j][i].pixel[y][x].color.green(), 
-						//	  pattern->tile[j][i].pixel[y][x].color.blue() );
-					}
-					index++;
-					//pbitmap += (PATTERNBITWIDTH-24);
+					//printf("Tile: %X%X Pixel: (%i,%i)  P:%i RGB: (%i,%i,%i)\n", j, i, x, y, p,
+					//	  pattern->tile[j][i].pixel[y][x].color.red(), 
+					//	  pattern->tile[j][i].pixel[y][x].color.green(), 
+					//	  pattern->tile[j][i].pixel[y][x].color.blue() );
 				}
-				index+=8;
+				index++;
 			}
-			//pbitmap -= ((PATTERNBITWIDTH<<(3+PPUView_sprite16Mode))-24);
+			index+=8;
 			//------------------------------------------------
 		}
-		//pbitmap += (PATTERNBITWIDTH*((8<<PPUView_sprite16Mode)-1));
 	}
 }
 //----------------------------------------------------
