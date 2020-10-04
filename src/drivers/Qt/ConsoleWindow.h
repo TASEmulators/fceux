@@ -89,6 +89,9 @@ class  consoleWin_t : public QMainWindow
 	 QAction *fdsEjectAct;
 	 QAction *fdsLoadBiosAct;
 	 QAction *cheatsAct;
+	 QAction *debuggerAct;
+	 QAction *codeDataLogAct;
+	 QAction *traceLogAct;
 	 QAction *hexEditAct;
 	 QAction *openMovAct;
 	 QAction *stopMovAct;
@@ -112,6 +115,9 @@ class  consoleWin_t : public QMainWindow
 	private:
 		void createMainMenu(void);
 
+	public slots:
+		void openDebugWindow(void);
+		void openHexEditor(void);
 	private slots:
 		void closeApp(void);
 		void openROMFile(void);
@@ -129,6 +135,8 @@ class  consoleWin_t : public QMainWindow
       void openHotkeyConfWin(void);
       void openPaletteConfWin(void);
       void openGuiConfWin(void);
+		void openCodeDataLogger(void);
+		void openTraceLogger(void);
       void toggleAutoResume(void);
       void toggleFullscreen(void);
       void updatePeriodic(void);
@@ -155,7 +163,6 @@ class  consoleWin_t : public QMainWindow
 		void fdsEjectDisk(void);
 		void fdsLoadBiosFile(void);
 		void openCheats(void);
-		void openHexEditor(void);
 		void openMovie(void);
 		void stopMovie(void);
 		void recordMovie(void);

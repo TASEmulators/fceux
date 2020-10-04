@@ -24,6 +24,7 @@
 #include "../../movie.h"
 #include "../../palette.h"
 #include "../../fds.h"
+#include "../../ppu.h"
 #include "../../cart.h"
 #include "../../ines.h"
 #include "../common/configSys.h"
@@ -35,7 +36,10 @@
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/HexEditor.h"
+#include "Qt/SymbolicDebug.h"
+#include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/ConsoleWindow.h"
 
 static HexBookMarkManager_t hbm;
 static std::list <HexEditorDialog_t*> winList;
@@ -537,12 +541,11 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	QMenuBar *menuBar;
 	QMenu *fileMenu, *viewMenu, *colorMenu;
 	QAction *saveROM, *closeAct;
-	QAction *viewRAM, *viewPPU, *viewOAM, *viewROM;
 	QAction *actHlgt, *actHlgtRV, *actColorFG, *actColorBG;
 	QActionGroup *group;
 	int useNativeMenuBar;
 
-	setWindowTitle("Hex Editor");
+	QDialog::setWindowTitle( tr("Hex Editor") );
 
 	resize( 512, 512 );
 
@@ -735,6 +738,19 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 			break;
 		}
 	}
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::setWindowTitle(void)
+{
+	const char *modeString;
+	char stmp[128];
+
+	modeString = memViewNames[ editor->getMode() ];
+
+	sprintf( stmp, "Hex Editor - %s: 0x%04X", modeString, editor->getAddr() );
+
+	QDialog::setWindowTitle( tr(stmp) );
+
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::removeAllBookmarks(void)
@@ -947,6 +963,134 @@ void HexEditorDialog_t::actvHighlightRVCB(bool enable)
 	editor->setHighlightReverseVideo( enable );
 }
 //----------------------------------------------------------------------------
+void HexEditorDialog_t::openDebugSymbolEditWindow( int addr )
+{
+	int ret, bank, charWidth;
+	QDialog dialog(this);
+	QHBoxLayout *hbox;
+	QVBoxLayout *mainLayout;
+	QLabel *lbl;
+	QLineEdit *filepath, *addrEntry, *nameEntry, *commentEntry;
+	QPushButton *okButton, *cancelButton;
+	char stmp[512];
+	debugSymbol_t *sym;
+	QFont font;
+	font.setFamily("Courier New");
+	font.setStyle( QFont::StyleNormal );
+	font.setStyleHint( QFont::Monospace );
+
+	QFontMetrics fm(font);
+
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+    charWidth = fm.horizontalAdvance(QLatin1Char('2'));
+#else
+    charWidth = fm.width(QLatin1Char('2'));
+#endif
+
+	 if ( addr < 0x8000 )
+	 {
+		 bank = -1;
+	 }
+	 else
+	 {
+		 bank = getBank( addr );
+	 }
+
+	sym = debugSymbolTable.getSymbolAtBankOffset( bank, addr );
+
+	generateNLFilenameForAddress( addr, stmp );
+
+	dialog.setWindowTitle( tr("Symbolic Debug Naming") );
+
+	hbox       = new QHBoxLayout();
+	mainLayout = new QVBoxLayout();
+
+	lbl = new QLabel( tr("File") );
+	filepath = new QLineEdit();
+	filepath->setFont( font );
+	filepath->setText( tr(stmp) );
+	filepath->setReadOnly( true );
+	filepath->setMinimumWidth( charWidth * (filepath->text().size() + 4) );
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( filepath );
+
+	mainLayout->addLayout( hbox );
+
+	sprintf( stmp, "%04X", addr );
+
+	hbox = new QHBoxLayout();
+	lbl  = new QLabel( tr("Address") );
+	addrEntry = new QLineEdit();
+	addrEntry->setFont( font );
+	addrEntry->setText( tr(stmp) );
+	addrEntry->setReadOnly( true );
+	addrEntry->setAlignment(Qt::AlignCenter);
+	addrEntry->setMaximumWidth( charWidth * 6 );
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( addrEntry );
+
+	lbl  = new QLabel( tr("Name") );
+	nameEntry = new QLineEdit();
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( nameEntry );
+
+	mainLayout->addLayout( hbox );
+
+	hbox = new QHBoxLayout();
+	lbl  = new QLabel( tr("Comment") );
+	commentEntry = new QLineEdit();
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( commentEntry );
+
+	mainLayout->addLayout( hbox );
+
+	hbox         = new QHBoxLayout();
+	okButton     = new QPushButton( tr("OK") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	mainLayout->addLayout( hbox );
+	hbox->addWidget( cancelButton );
+	hbox->addWidget(     okButton );
+
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+   connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+
+	if ( sym != NULL )
+	{
+		nameEntry->setText( tr(sym->name.c_str()) );
+		commentEntry->setText( tr(sym->comment.c_str()) );
+	}
+
+	dialog.setLayout( mainLayout );
+
+	ret = dialog.exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		if ( sym == NULL )
+		{
+			sym = new debugSymbol_t();
+			sym->ofs     = addr;
+			sym->name    = nameEntry->text().toStdString();
+			sym->comment = commentEntry->text().toStdString();
+
+			debugSymbolTable.addSymbolAtBankOffset( bank, addr, sym );
+		}
+		else
+		{
+			sym->name    = nameEntry->text().toStdString();
+			sym->comment = commentEntry->text().toStdString();
+		}
+		//fceuWrapperLock();
+		updateAllDebuggerWindows();
+		//fceuWrapperUnLock();
+	}
+}
+//----------------------------------------------------------------------------
 void HexEditorDialog_t::updatePeriodic(void)
 {
 	//printf("Update Periodic\n");
@@ -956,6 +1100,36 @@ void HexEditorDialog_t::updatePeriodic(void)
 	editor->memModeUpdate();
 
 	editor->update();
+
+	setWindowTitle();
+
+	switch ( editor->getMode() )
+	{
+		case QHexEdit::MODE_NES_RAM:
+			if ( !viewRAM->isChecked() )
+			{
+				viewRAM->setChecked(true);
+			}
+		break;
+		case QHexEdit::MODE_NES_PPU:
+			if ( !viewPPU->isChecked() )
+			{
+				viewPPU->setChecked(true);
+			}
+		break;
+		case QHexEdit::MODE_NES_OAM:
+			if ( !viewOAM->isChecked() )
+			{
+				viewOAM->setChecked(true);
+			}
+		break;
+		case QHexEdit::MODE_NES_ROM:
+			if ( !viewROM->isChecked() )
+			{
+				viewROM->setChecked(true);
+			}
+		break;
+	}
 }
 //----------------------------------------------------------------------------
 QHexEdit::QHexEdit(QWidget *parent)
@@ -992,6 +1166,7 @@ QHexEdit::QHexEdit(QWidget *parent)
 	lineOffset  = 0;
 	cursorPosX  = 0;
 	cursorPosY  = 0;
+	cursorAddr  = 0;
 	cursorBlink = true;
 	cursorBlinkCount = 0;
    maxLineOffset = 0;
@@ -1531,20 +1706,24 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 	{
 		case MODE_NES_RAM:
 		{
-			act = new QAction(tr("TODO Add Symbolic Debug Name"), this);
+			act = new QAction(tr("Add Symbolic Debug Name"), this);
    		menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addDebugSym(void)) );
 
-			sprintf( stmp, "TODO Add Read Breakpoint for Address $%04X", addr );
+			sprintf( stmp, "Add Read Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), this);
-   		menu.addAction(act);
+			menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamReadBP(void)) );
 
-			sprintf( stmp, "TODO Add Write Breakpoint for Address $%04X", addr );
+			sprintf( stmp, "Add Write Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), this);
-   		menu.addAction(act);
+			menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamWriteBP(void)) );
 
-			sprintf( stmp, "TODO Add Execute Breakpoint for Address $%04X", addr );
+			sprintf( stmp, "Add Execute Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), this);
-   		menu.addAction(act);
+			menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamExecuteBP(void)) );
 
 			if ( addr > 0x6000 )
 			{
@@ -1567,6 +1746,16 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 		break;
 		case MODE_NES_PPU:
 		{
+			sprintf( stmp, "Add Read Breakpoint for Address $%04X", addr );
+			act = new QAction(tr(stmp), this);
+			menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addPpuReadBP(void)) );
+
+			sprintf( stmp, "Add Write Breakpoint for Address $%04X", addr );
+			act = new QAction(tr(stmp), this);
+			menu.addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(addPpuWriteBP(void)) );
+
 			act = new QAction(tr("Add Bookmark"), this);
    		menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
@@ -1630,6 +1819,136 @@ void QHexEdit::addBookMarkCB(void)
    }
 }
 //----------------------------------------------------------------------------
+void QHexEdit::addDebugSym(void)
+{
+	parent->openDebugSymbolEditWindow( ctxAddr );
+}
+//----------------------------------------------------------------------------
+void QHexEdit::addRamReadBP(void)
+{
+	int retval, type;
+	char cond[64], name[64];
+
+	type = BT_C | WP_R;
+
+	cond[0] = 0;
+	name[0] = 0;
+
+	if ( ctxAddr >= 0x8000 )
+	{
+		sprintf(cond, "K==#%02X", getBank(ctxAddr));
+	}
+
+	retval = NewBreak( name, ctxAddr, -1, type, cond, numWPs, true);
+
+	if ( (retval == 1) || (retval == 2) )
+	{
+		printf("Breakpoint Add Failed\n");
+	}
+	else
+	{
+		numWPs++;
+	}
+}
+//----------------------------------------------------------------------------
+void QHexEdit::addRamWriteBP(void)
+{
+	int retval, type;
+	char cond[64], name[64];
+
+	type = BT_C | WP_W;
+
+	cond[0] = 0;
+	name[0] = 0;
+
+	if ( ctxAddr >= 0x8000 )
+	{
+		sprintf(cond, "K==#%02X", getBank(ctxAddr));
+	}
+
+	retval = NewBreak( name, ctxAddr, -1, type, cond, numWPs, true);
+
+	if ( (retval == 1) || (retval == 2) )
+	{
+		printf("Breakpoint Add Failed\n");
+	}
+	else
+	{
+		numWPs++;
+	}
+}
+//----------------------------------------------------------------------------
+void QHexEdit::addRamExecuteBP(void)
+{
+	int retval, type;
+	char cond[64], name[64];
+
+	type = BT_C | WP_X;
+
+	cond[0] = 0;
+	name[0] = 0;
+
+	if ( ctxAddr >= 0x8000 )
+	{
+		sprintf(cond, "K==#%02X", getBank(ctxAddr));
+	}
+
+	retval = NewBreak( name, ctxAddr, -1, type, cond, numWPs, true);
+
+	if ( (retval == 1) || (retval == 2) )
+	{
+		printf("Breakpoint Add Failed\n");
+	}
+	else
+	{
+		numWPs++;
+	}
+}
+//----------------------------------------------------------------------------
+void QHexEdit::addPpuReadBP(void)
+{
+	int retval, type;
+	char cond[64], name[64];
+
+	type = BT_P | WP_R;
+
+	cond[0] = 0;
+	name[0] = 0;
+
+	retval = NewBreak( name, ctxAddr, -1, type, cond, numWPs, true);
+
+	if ( (retval == 1) || (retval == 2) )
+	{
+		printf("Breakpoint Add Failed\n");
+	}
+	else
+	{
+		numWPs++;
+	}
+}
+//----------------------------------------------------------------------------
+void QHexEdit::addPpuWriteBP(void)
+{
+	int retval, type;
+	char cond[64], name[64];
+
+	type = BT_P | WP_W;
+
+	cond[0] = 0;
+	name[0] = 0;
+
+	retval = NewBreak( name, ctxAddr, -1, type, cond, numWPs, true);
+
+	if ( (retval == 1) || (retval == 2) )
+	{
+		printf("Breakpoint Add Failed\n");
+	}
+	else
+	{
+		numWPs++;
+	}
+}
+//----------------------------------------------------------------------------
 void QHexEdit::jumpToROM(void)
 {
 	setMode( MODE_NES_ROM );
@@ -1679,6 +1998,106 @@ int QHexEdit::checkMemActivity(void)
 	total_instructions_lp = total_instructions;
 
    return 0;
+}
+//----------------------------------------------------------------------------
+int QHexEdit::getRomAddrColor( int addr, QColor &fg, QColor &bg )
+{
+	int temp_offset;
+	QColor color, oppColor; 
+			
+	fg = this->palette().color(QPalette::WindowText);
+	bg = this->palette().color(QPalette::Background);
+
+	if ( reverseVideo )
+	{
+		color    = this->palette().color(QPalette::Background);
+		oppColor = this->palette().color(QPalette::WindowText);
+	}
+	else
+	{
+		color    = this->palette().color(QPalette::WindowText);
+		oppColor = this->palette().color(QPalette::Background);
+	}
+
+	if ( viewMode != MODE_NES_ROM )
+	{
+		return -1;
+	}
+	if (cdloggerdataSize == 0)
+	{
+		return -1;
+	}
+	temp_offset = addr - 16;
+
+	if (temp_offset >= 0)
+	{
+		if ((unsigned int)temp_offset < cdloggerdataSize)
+		{
+			// PRG
+			if ((cdloggerdata[temp_offset] & 3) == 3)
+			{
+				// the byte is both Code and Data - green
+				color.setRgb(0, 190, 0);
+			}
+			else if ((cdloggerdata[temp_offset] & 3) == 1)
+			{
+				// the byte is Code - dark-yellow
+				color.setRgb(160, 140, 0);
+				oppColor.setRgb( 0, 0, 0 );
+			}
+			else if ((cdloggerdata[temp_offset] & 3) == 2)
+			{
+				// the byte is Data - blue/cyan
+				if (cdloggerdata[temp_offset] & 0x40)
+				{
+					// PCM data - cyan
+					color.setRgb(0, 130, 160);
+				}
+				else
+				{
+					// non-PCM data - blue
+					color.setRgb(0, 0, 210);
+				}
+			}
+		}
+		else
+		{
+			temp_offset -= cdloggerdataSize;
+			if (((unsigned int)temp_offset < cdloggerVideoDataSize))
+			{
+				// CHR
+				if ((cdloggervdata[temp_offset] & 3) == 3)
+				{
+					// the byte was both rendered and read programmatically - light-green
+					color.setRgb(5, 255, 5);
+				}
+				else if ((cdloggervdata[temp_offset] & 3) == 1)
+				{
+					// the byte was rendered - yellow
+					color.setRgb(210, 190, 0);
+					oppColor.setRgb( 0, 0, 0 );
+				}
+				else if ((cdloggervdata[temp_offset] & 3) == 2)
+				{
+					// the byte was read programmatically - light-blue
+					color.setRgb(15, 15, 255);
+				}
+			}
+		}
+	}
+
+	if ( reverseVideo )
+	{
+		bg = color;
+		fg = oppColor;
+	}
+	else
+	{
+		fg = color;
+		bg = oppColor;
+	}
+
+	return 0;
 }
 //----------------------------------------------------------------------------
 void QHexEdit::memModeUpdate(void)
@@ -1732,6 +2151,9 @@ void QHexEdit::memModeUpdate(void)
 			printf("Error: Failed to allocate memview buffer size\n");
 			return;
 		}
+		maxLineOffset = mb.numLines() - viewLines + 1;
+
+		vbar->setMaximum( memSize / 16 );
 	}
 }
 //----------------------------------------------------------------------------
@@ -1764,6 +2186,15 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	//
 	maxLineOffset = mb.numLines() - nrow + 1;
 
+	if ( maxLineOffset < 0 )
+	{
+		maxLineOffset = 0;
+	}
+
+	if ( lineOffset < 0 )
+	{
+		lineOffset = 0;
+	}
 	if ( lineOffset > maxLineOffset )
 	{
 		lineOffset = maxLineOffset;
@@ -1798,6 +2229,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 		ca = 16*(lineOffset + cursorPosY) + a;
 	}
+	cursorAddr = ca;
 
 	if ( cursorBlink )
 	{
@@ -1847,7 +2279,24 @@ void QHexEdit::paintEvent(QPaintEvent *event)
             } 
             else
             {
-					if ( actvHighlightEnable && (mb.buf[addr].actv > 0) )
+					if ( viewMode == MODE_NES_ROM )
+					{
+						QColor romBgColor, romFgColor;
+					  
+						getRomAddrColor( addr, romFgColor, romBgColor );
+
+						if ( reverseVideo )
+						{
+	            		painter.setPen( romFgColor );
+							painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, romBgColor );
+							painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, romBgColor );
+						}
+						else
+						{
+	            		painter.setPen( romFgColor );
+						}
+					}
+					else if ( actvHighlightEnable && (mb.buf[addr].actv > 0) )
 					{
 						if ( reverseVideo )
 						{
@@ -1917,5 +2366,32 @@ void hexEditorSaveBookmarks(void)
 	{
 		(*it)->populateBookmarkMenu();
 	}
+}
+//----------------------------------------------------------------------------
+int hexEditorNumWindows(void)
+{
+	return winList.size();
+}
+//----------------------------------------------------------------------------
+int hexEditorOpenFromDebugger( int mode, int addr )
+{
+	HexEditorDialog_t *win = NULL;
+
+	if ( winList.size() > 0 )
+	{
+		win = winList.front();
+	}
+
+	if ( win == NULL )
+	{
+		win = new HexEditorDialog_t(consoleWindow);
+
+		win->show();
+	}
+
+	win->editor->setMode( mode );
+	win->editor->setAddr( addr );
+
+	return 0;
 }
 //----------------------------------------------------------------------------

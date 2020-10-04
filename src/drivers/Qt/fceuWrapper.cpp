@@ -15,6 +15,9 @@
 #include "Qt/nes_shm.h"
 #include "Qt/unix-netplay.h"
 #include "Qt/HexEditor.h"
+#include "Qt/SymbolicDebug.h"
+#include "Qt/CodeDataLogger.h"
+#include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/fceux_git_info.h"
 
@@ -159,11 +162,6 @@ FCEUD_GetTimeFreq(void)
 	return 1000;
 }
 
-void FCEUD_DebugBreakpoint( int addr )
-{
-   // TODO
-}
-
 /**
  * Initialize all of the subsystem drivers: video, audio, and joystick.
  */
@@ -215,7 +213,7 @@ DriverKill()
  */
 int LoadGame(const char *path)
 {
-	int gg_enabled;
+	int gg_enabled, autoLoadDebug, autoOpenDebugger;
 
 	if (isloaded){
 		CloseGame();
@@ -233,6 +231,24 @@ int LoadGame(const char *path)
 	}
 
 	hexEditorLoadBookmarks();
+
+	g_config->getOption( "SDL.AutoLoadDebugFiles", &autoLoadDebug );
+
+	if ( autoLoadDebug )
+	{
+		loadGameDebugBreakpoints();
+	}
+
+	g_config->getOption( "SDL.AutoOpenDebugger", &autoOpenDebugger );
+
+	if ( autoOpenDebugger && !debuggerWindowIsOpen() )
+	{
+		consoleWindow->openDebugWindow();
+	}
+
+	debugSymbolTable.loadGameSymbols();
+
+	CDLoggerROMChanged();
 
     int state_to_load;
     g_config->getOption("SDL.AutoLoadState", &state_to_load);
@@ -281,6 +297,12 @@ CloseGame(void)
 		return(0);
 	}
 	hexEditorSaveBookmarks();
+	saveGameDebugBreakpoints();
+	debuggerClearAllBreakpoints();
+
+	debugSymbolTable.save();
+	debugSymbolTable.clear();
+	CDLoggerROMClosed();
 
     int state_to_save;
     g_config->getOption("SDL.AutoSaveState", &state_to_save);
@@ -928,17 +950,23 @@ static void DoFun(int frameskip, int periodic_saves)
 void fceuWrapperLock(void)
 {
 	mutexPending++;
-	consoleWindow->mutex->lock();
+	if ( consoleWindow != NULL )
+	{
+		consoleWindow->mutex->lock();
+	}
 	mutexPending--;
 	mutexLocks++;
 }
 
 bool fceuWrapperTryLock(int timeout)
 {
-	bool lockAcq;
+	bool lockAcq = false;
 
 	mutexPending++;
-	lockAcq = consoleWindow->mutex->tryLock( timeout );
+	if ( consoleWindow != NULL )
+	{
+		lockAcq = consoleWindow->mutex->tryLock( timeout );
+	}
 	mutexPending--;
 
 	if ( lockAcq )
@@ -952,7 +980,10 @@ void fceuWrapperUnLock(void)
 {
 	if ( mutexLocks > 0 )
 	{
-		consoleWindow->mutex->unlock();
+		if ( consoleWindow != NULL )
+		{
+			consoleWindow->mutex->unlock();
+		}
 		mutexLocks--;
 	}
 	else

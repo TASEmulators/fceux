@@ -42,12 +42,12 @@ RAM Search Window                                    |     NO      |     NO     
 RAM Watch Window                                     |     NO      |     YES     |
 Memory Watch Window                                  |     NO      |     NO      |
 TAS Editor                                           |     NO      |     NO      |
-6502 Debugger Window                                 |     NO      |     YES     |
+6502 Debugger Window                                 |     YES     |     YES     |
 PPU Viewer                                           |     NO      |     NO      |
 Name Table Viewer                                    |     NO      |     NO      |
-Memory Hex Editor                                    |     NO      |     YES     |
-Trace Logger                                         |     NO      |     NO      |
-Code/Data Logger                                     |     NO      |     NO      |
+Memory Hex Editor                                    |     YES     |     YES     |
+Trace Logger                                         |     YES     |     NO      |
+Code/Data Logger                                     |     YES     |     NO      |
 Game Genie Encoder/Decoder                           |     NO      |     NO      |
 iNES Header Editor                                   |     NO      |     NO      |
 Built in help pages                                  |     NO      |     NO      |

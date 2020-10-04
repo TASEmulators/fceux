@@ -48,3 +48,7 @@ enum PPUPHASE {
 };
 
 extern PPUPHASE ppuphase;
+
+extern unsigned char *cdloggervdata;
+extern unsigned int cdloggerVideoDataSize;
+extern volatile int rendercount, vromreadcount, undefinedvromcount;

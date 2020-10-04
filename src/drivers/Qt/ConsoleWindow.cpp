@@ -25,6 +25,9 @@
 #include "Qt/LuaControl.h"
 #include "Qt/CheatsConf.h"
 #include "Qt/HexEditor.h"
+#include "Qt/TraceLogger.h"
+#include "Qt/CodeDataLogger.h"
+#include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
@@ -85,13 +88,13 @@ consoleWin_t::~consoleWin_t(void)
 
 	closeGamePadConfWindow();
 
+	//printf("Thread Finished: %i \n", gameThread->isFinished() );
+	emulatorThread->quit();
+	emulatorThread->wait( 1000 );
+
 	fceuWrapperLock();
 	fceuWrapperClose();
 	fceuWrapperUnLock();
-
-	//printf("Thread Finished: %i \n", gameThread->isFinished() );
-	emulatorThread->quit();
-	emulatorThread->wait();
 
 	if ( viewport_GL != NULL )
 	{
@@ -482,6 +485,14 @@ void consoleWin_t::createMainMenu(void)
 	 // Debug
     debugMenu = menuBar()->addMenu(tr("Debug"));
 
+	 // Debug -> Debugger 
+	 debuggerAct = new QAction(tr("Debugger..."), this);
+    //debuggerAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    debuggerAct->setStatusTip(tr("Open 6502 Debugger"));
+    connect(debuggerAct, SIGNAL(triggered()), this, SLOT(openDebugWindow(void)) );
+
+    debugMenu->addAction(debuggerAct);
+
 	 // Debug -> Hex Editor
 	 hexEditAct = new QAction(tr("Hex Editor..."), this);
     //hexEditAct->setShortcut( QKeySequence(tr("Shift+F7")));
@@ -489,6 +500,22 @@ void consoleWin_t::createMainMenu(void)
     connect(hexEditAct, SIGNAL(triggered()), this, SLOT(openHexEditor(void)) );
 
     debugMenu->addAction(hexEditAct);
+
+	 // Debug -> Trace Logger
+	 traceLogAct = new QAction(tr("Trace Logger..."), this);
+    //traceLogAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    traceLogAct->setStatusTip(tr("Open Trace Logger"));
+    connect(traceLogAct, SIGNAL(triggered()), this, SLOT(openTraceLogger(void)) );
+
+    debugMenu->addAction(traceLogAct);
+
+	 // Debug -> Code/Data Logger
+	 codeDataLogAct = new QAction(tr("Code/Data Logger..."), this);
+    //codeDataLogAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    codeDataLogAct->setStatusTip(tr("Open Code Data Logger"));
+    connect(codeDataLogAct, SIGNAL(triggered()), this, SLOT(openCodeDataLogger(void)) );
+
+    debugMenu->addAction(codeDataLogAct);
 
 	 //-----------------------------------------------------------------------
 	 // Movie
@@ -551,6 +578,9 @@ void consoleWin_t::closeApp(void)
 {
 	nes_shm->runEmulator = 0;
 
+	emulatorThread->quit();
+	emulatorThread->wait( 1000 );
+
 	fceuWrapperLock();
 	fceuWrapperClose();
 	fceuWrapperUnLock();
@@ -559,7 +589,6 @@ void consoleWin_t::closeApp(void)
 	// clear the NetworkIP field so this doesn't happen unintentionally
 	g_config->setOption ("SDL.NetworkIP", "");
 	g_config->save ();
-	//SDL_Quit (); // Already called by fceuWrapperClose
 
 	//qApp::quit();
 	qApp->quit();
@@ -970,6 +999,17 @@ void consoleWin_t::openCheats(void)
    cheatWin->show();
 }
 
+void consoleWin_t::openDebugWindow(void)
+{
+	ConsoleDebugger *debugWin;
+
+	//printf("Open GUI 6502 Debugger Window\n");
+	
+   debugWin = new ConsoleDebugger(this);
+	
+   debugWin->show();
+}
+
 void consoleWin_t::openHexEditor(void)
 {
 	HexEditorDialog_t *hexEditWin;
@@ -979,6 +1019,22 @@ void consoleWin_t::openHexEditor(void)
    hexEditWin = new HexEditorDialog_t(this);
 	
    hexEditWin->show();
+}
+
+void consoleWin_t::openCodeDataLogger(void)
+{
+	CodeDataLoggerDialog_t *cdlWin;
+
+	//printf("Open Code Data Logger Window\n");
+	
+   cdlWin = new CodeDataLoggerDialog_t(this);
+	
+   cdlWin->show();
+}
+
+void consoleWin_t::openTraceLogger(void)
+{
+	openTraceLoggerWindow(this);
 }
 
 void consoleWin_t::toggleAutoResume(void)
