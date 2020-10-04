@@ -18,6 +18,30 @@
 
 #include "Qt/main.h"
 
+class ppuPatternView_t : public QWidget
+{
+	Q_OBJECT
+
+	public:
+		ppuPatternView_t(QWidget *parent = 0);
+		~ppuPatternView_t(void);
+
+	protected:
+		void paintEvent(QPaintEvent *event);
+};
+
+class ppuPalatteView_t : public QWidget
+{
+	Q_OBJECT
+
+	public:
+		ppuPalatteView_t(QWidget *parent = 0);
+		~ppuPalatteView_t(void);
+
+	protected:
+		void paintEvent(QPaintEvent *event);
+};
+
 class ppuViewerDialog_t : public QDialog
 {
    Q_OBJECT
@@ -28,6 +52,9 @@ class ppuViewerDialog_t : public QDialog
 
 	protected:
       //QTimer    *inputTimer;
+
+		ppuPatternView_t *patternView;
+		ppuPalatteView_t *paletteView;
 
       void closeEvent(QCloseEvent *bar);
 	private:
