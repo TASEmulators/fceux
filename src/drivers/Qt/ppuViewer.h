@@ -53,6 +53,7 @@ class ppuPatternView_t : public QWidget
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
 		void mouseMoveEvent(QMouseEvent *event);
+		void mousePressEvent(QMouseEvent * event);
 
 		int patternIndex;
 		int viewWidth;
@@ -105,6 +106,7 @@ class ppuViewerDialog_t : public QDialog
 		//void updatePeriodic(void);
 		void sprite8x16Changed0(int state);
 		void sprite8x16Changed1(int state);
+		void refreshSliderChanged(int value);
 
 };
 

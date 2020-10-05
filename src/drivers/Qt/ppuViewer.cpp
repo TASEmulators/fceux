@@ -32,18 +32,18 @@
 
 static ppuViewerDialog_t *ppuViewWindow = NULL;
 static int PPUViewScanline = 0;
-//static int PPUViewSkip = 0;
-//static int PPUViewRefresh = 0;
+static int PPUViewSkip = 0;
+static int PPUViewRefresh = 1;
 static bool PPUView_maskUnusedGraphics = true;
 static bool PPUView_invertTheMask = false;
 static int PPUView_sprite16Mode[2] = { 0, 0 };
-static int pindex0 = 0, pindex1 = 0;
+static int pindex[2] = { 0, 0 };
 static QColor ppuv_palette[PALETTEHEIGHT][PALETTEWIDTH];
 static uint8_t pallast[32+3] = { 0 }; // palette cache for change comparison
 static uint8_t palcache[36] = { 0 }; //palette cache for drawing
 static uint8_t chrcache0[0x1000] = {0}, chrcache1[0x1000] = {0}, logcache0[0x1000] = {0}, logcache1[0x1000] = {0}; //cache CHR, fixes a refresh problem when right-clicking
-//pattern table bitmap arrays
 
+static void initPPUViewer(void);
 static ppuPatternTable_t pattern0;
 static ppuPatternTable_t pattern1;
 //----------------------------------------------------
@@ -53,6 +53,8 @@ int openPPUViewWindow( QWidget *parent )
 	{
 		return -1;
 	}
+	initPPUViewer();
+
 	ppuViewWindow = new ppuViewerDialog_t(parent);
 
 	ppuViewWindow->show();
@@ -148,6 +150,12 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	patternView[0]->setTileLabel( tileLabel[0] );
 	patternView[1]->setTileLabel( tileLabel[1] );
 
+	refreshSlider->setMinimum( 0);
+	refreshSlider->setMaximum(25);
+	refreshSlider->setValue(PPUViewRefresh);
+
+	connect( refreshSlider, SIGNAL(valueChanged(int)), this, SLOT(refreshSliderChanged(int)));
+
 	FCEUD_UpdatePPUView( -1, 1 );
 }
 
@@ -182,6 +190,11 @@ void ppuViewerDialog_t::sprite8x16Changed0(int state)
 void ppuViewerDialog_t::sprite8x16Changed1(int state)
 {
 	PPUView_sprite16Mode[1] = (state == Qt::Unchecked) ? 0 : 1;
+}
+//----------------------------------------------------
+void ppuViewerDialog_t::refreshSliderChanged(int value)
+{
+	PPUViewRefresh = value;
 }
 //----------------------------------------------------
 ppuPatternView_t::ppuPatternView_t( int patternIndexID, QWidget *parent)
@@ -273,6 +286,21 @@ void ppuPatternView_t::mouseMoveEvent(QMouseEvent *event)
 
 	tileLabel->setText( tr(stmp) );
 }
+//----------------------------------------------------------------------------
+void ppuPatternView_t::mousePressEvent(QMouseEvent * event)
+{
+	//QPoint tile = convPixToTile( event->pos() );
+
+	if ( event->button() == Qt::LeftButton )
+	{
+		// TODO Load Tile Viewport
+	}
+	else if ( event->button() == Qt::RightButton )
+	{
+		pindex[ patternIndex ] = (pindex[ patternIndex ] + 1) % 9;
+		PPUViewSkip = 100;
+	}
+}
 //----------------------------------------------------
 void ppuPatternView_t::paintEvent(QPaintEvent *event)
 {
@@ -355,6 +383,26 @@ void ppuPatternView_t::paintEvent(QPaintEvent *event)
 			}
 		}
 	}
+}
+//----------------------------------------------------
+static void initPPUViewer(void)
+{
+	memset( pallast  , 0, sizeof(pallast)   );
+	memset( palcache , 0, sizeof(palcache)  );
+	memset( chrcache0, 0, sizeof(chrcache0) );
+	memset( chrcache1, 0, sizeof(chrcache1) );
+	memset( logcache0, 0, sizeof(logcache0) );
+	memset( logcache1, 0, sizeof(logcache1) );
+
+	// forced palette (e.g. for debugging CHR when palettes are all-black)
+	palcache[(8*4)+0] = 0x0F;
+	palcache[(8*4)+1] = 0x00;
+	palcache[(8*4)+2] = 0x10;
+	palcache[(8*4)+3] = 0x20;
+
+	pindex[0] = 0;
+	pindex[1] = 0;
+
 }
 //----------------------------------------------------
 static void DrawPatternTable( ppuPatternTable_t *pattern, uint8_t *table, uint8_t *log, uint8_t pal)
@@ -440,10 +488,12 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 		}
 	}
 
-	//if (PPUViewSkip < PPUViewRefresh) 
-	//{
-	//	return;
-	//}
+	if (PPUViewSkip < PPUViewRefresh) 
+	{
+		PPUViewSkip++;
+		return;
+	}
+	PPUViewSkip = 0;
 	
 	// update palette only if required
 	if ((memcmp(pallast, PALRAM, 32) != 0) || (memcmp(pallast+32, UPALRAM, 3) != 0))
@@ -473,8 +523,8 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 		}
 	}
 
-	DrawPatternTable( &pattern0,chrcache0,logcache0,pindex0);
-	DrawPatternTable( &pattern1,chrcache1,logcache1,pindex1);
+	DrawPatternTable( &pattern0,chrcache0,logcache0,pindex[0]);
+	DrawPatternTable( &pattern1,chrcache1,logcache1,pindex[1]);
 
 	if ( ppuViewWindow )
 	{
@@ -519,6 +569,20 @@ void ppuPalatteView_t::paintEvent(QPaintEvent *event)
 		}
 		yy += h;
 	}
-	painter.drawLine( 0, viewHeight / 2, viewWidth, viewHeight / 2 );
+
+	y = PALETTEHEIGHT*h;
+	for (int i=0; i<=PALETTEWIDTH; i++)
+	{
+		x = i*w; 
+		painter.drawLine( x, 0 , x, y );
+	}
+
+	
+	x = PALETTEWIDTH*w; 
+	for (int i=0; i<=PALETTEHEIGHT; i++)
+	{
+		y = i*h;
+		painter.drawLine( 0, y, x, y );
+	}
 }
 //----------------------------------------------------
