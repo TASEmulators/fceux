@@ -20,16 +20,31 @@
 
 #include "Qt/main.h"
 
+struct ppuPatternTable_t
+{
+	struct 
+	{
+		struct 
+		{
+			QColor color;
+		} pixel[8][8];
+	} tile[16][16];
+};
+
 class ppuPatternView_t : public QWidget
 {
 	Q_OBJECT
 
 	public:
-		ppuPatternView_t(QWidget *parent = 0);
+		ppuPatternView_t( int patternIndex, QWidget *parent = 0);
 		~ppuPatternView_t(void);
 
+		void setPattern( ppuPatternTable_t *p );
 	protected:
 		void paintEvent(QPaintEvent *event);
+
+		int patternIndex;
+		ppuPatternTable_t *pattern;
 };
 
 class ppuPalatteView_t : public QWidget
@@ -55,15 +70,16 @@ class ppuViewerDialog_t : public QDialog
 	protected:
       //QTimer    *inputTimer;
 
-		ppuPatternView_t *patternView;
+		ppuPatternView_t *patternView[2];
 		ppuPalatteView_t *paletteView;
 
       void closeEvent(QCloseEvent *bar);
 	private:
 
+		QGroupBox  *patternFrame[2];
 		QGroupBox  *paletteFrame;
 		QLabel     *tileLabel[2];
-		QCheckBox  *sprite8x16Cbox;
+		QCheckBox  *sprite8x16Cbox[2];
 		QCheckBox  *maskUnusedCbox;
 		QCheckBox  *invertMaskCbox;
 		QSlider    *refreshSlider;
@@ -73,7 +89,8 @@ class ppuViewerDialog_t : public QDialog
       void closeWindow(void);
 	private slots:
 		//void updatePeriodic(void);
-		void sprite8x16Changed(int state);
+		void sprite8x16Changed0(int state);
+		void sprite8x16Changed1(int state);
 
 };
 
