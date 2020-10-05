@@ -1180,14 +1180,16 @@ void AutoScrollFromCoord(int x,int y)
 
 void KillMemView()
 {
-	ReleaseDC(hMemView,mDC);
-	DestroyWindow(hMemView);
-	UnregisterClass("MEMVIEW",fceu_hInstance);
-	hMemView = 0;
-	hMemFind = 0;
-	if (EditingMode == MODE_NES_MEMORY)
-		ReleaseCheatMap();
-	return;
+	if (hMemView)
+	{
+		ReleaseDC(hMemView, mDC);
+		DestroyWindow(hMemView);
+		UnregisterClass("MEMVIEW", fceu_hInstance);
+		hMemView = NULL;
+		hMemFind = NULL;
+		if (EditingMode == MODE_NES_MEMORY)
+			ReleaseCheatMap();
+	}
 }
 
 int GetMaxSize(int EditingMode)
@@ -2485,10 +2487,6 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 	case WM_CLOSE:
 		KillMemView();
-		//ReleaseDC (hwnd, mDC) ;
-		//DestroyWindow(hMemView);
-		//UnregisterClass("MEMVIEW",fceu_hInstance);
-		//hMemView = 0;
 		return 0;
 	}
 	return DefWindowProc (hwnd, message, wParam, lParam) ;

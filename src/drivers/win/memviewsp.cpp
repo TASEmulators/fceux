@@ -338,7 +338,7 @@ int toggleBookmark(HWND hwnd, uint32 address, int editmode)
 void updateBookmarkMenus(HMENU menu)
 {
 	// Remove all bookmark menus
-	for (int i = 0; i<hexBookmarks.bookmarkCount + 1; i++)
+	for (int i = 0; i < hexBookmarks.bookmarkCount + 1; i++)
 		RemoveMenu(menu, ID_FIRST_BOOKMARK + i, MF_BYCOMMAND);
 	RemoveMenu(menu, ID_BOOKMARKLIST_SEP, MF_BYCOMMAND);
 
@@ -346,7 +346,7 @@ void updateBookmarkMenus(HMENU menu)
 	{
 		// Add the menus again
 		InsertMenu(menu, ID_BOOKMARKS_IMPORT, MF_SEPARATOR | MF_BYCOMMAND, ID_BOOKMARKLIST_SEP, NULL);
-		for (int i = 0;i<hexBookmarks.bookmarkCount;i++)
+		for (int i = 0; i < hexBookmarks.bookmarkCount; i++)
 		{
 			// Get the text of the menu
 			char buffer[0x100];
@@ -372,7 +372,6 @@ void updateBookmarkMenus(HMENU menu)
 				ModifyMenu(menu, ID_FIRST_BOOKMARK + hexBookmarks.shortcuts[i], MF_BYCOMMAND, ID_FIRST_BOOKMARK + hexBookmarks.shortcuts[i], buffer);
 			}
 		}
-
 	}
 }
 
