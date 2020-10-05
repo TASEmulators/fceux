@@ -202,7 +202,7 @@ ppuPatternView_t::~ppuPatternView_t(void)
 //----------------------------------------------------
 void ppuPatternView_t::paintEvent(QPaintEvent *event)
 {
-	int i,j,x,y,w,h,xx,yy;
+	int i,j,x,y,w,h,xx,yy,ii,jj,rr;
 	QPainter painter(this);
 	int viewWidth  = event->rect().width();
 	int viewHeight = event->rect().height();
@@ -212,24 +212,72 @@ void ppuPatternView_t::paintEvent(QPaintEvent *event)
 	w = viewWidth / 128;
   	h = viewHeight / 128;
 
+	pattern->w = w;
+	pattern->h = h;
+
 	xx = 0; yy = 0;
 
-	for (i=0; i<16; i++) //Columns
+	if ( PPUView_sprite16Mode[ patternIndex ] )
 	{
-		for (j=0; j<16; j++) //Rows
+		for (i=0; i<16; i++) //Columns
 		{
-			xx = (i*8)*w;
-
-			for (x=0; x < 8; x++)
+			for (j=0; j<16; j++) //Rows
 			{
-				yy = (j*8)*h;
+				rr = (j%2);
+				jj =  j;
 
-				for (y=0; y < 8; y++)
+				if ( rr )
 				{
-					painter.fillRect( xx, yy, w, h, pattern->tile[j][i].pixel[y][x].color );
-					yy += h;
+					jj--;
 				}
-				xx += w;
+
+				ii = (i*2)+rr;
+
+				if ( ii >= 16 )
+				{
+					ii = ii % 16;
+					jj++;
+				}
+
+				xx = (i*8)*w;
+
+				for (x=0; x < 8; x++)
+				{
+					yy = (j*8)*h;
+
+					for (y=0; y < 8; y++)
+					{
+						pattern->tile[jj][ii].x = xx;
+						pattern->tile[jj][ii].y = yy;
+						painter.fillRect( xx, yy, w, h, pattern->tile[jj][ii].pixel[y][x].color );
+						yy += h;
+					}
+					xx += w;
+				}
+			}
+		}
+	}
+	else
+	{
+		for (i=0; i<16; i++) //Columns
+		{
+			for (j=0; j<16; j++) //Rows
+			{
+				xx = (i*8)*w;
+
+				for (x=0; x < 8; x++)
+				{
+					yy = (j*8)*h;
+
+					for (y=0; y < 8; y++)
+					{
+						pattern->tile[j][i].x = xx;
+						pattern->tile[j][i].y = yy;
+						painter.fillRect( xx, yy, w, h, pattern->tile[j][i].pixel[y][x].color );
+						yy += h;
+					}
+					xx += w;
+				}
 			}
 		}
 	}
@@ -392,8 +440,6 @@ void ppuPalatteView_t::paintEvent(QPaintEvent *event)
 
 		for (x=0; x < PALETTEWIDTH; x++)
 		{
-		
-			//painter.setPen( pattern0.tile[j][i].pixel[y][x].color );
 			painter.fillRect( xx, yy, w, h, ppuv_palette[y][x] );
 			xx += w;
 		}

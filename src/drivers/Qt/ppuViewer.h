@@ -28,7 +28,14 @@ struct ppuPatternTable_t
 		{
 			QColor color;
 		} pixel[8][8];
+
+		int  x;
+		int  y;
+
 	} tile[16][16];
+
+	int  w;
+	int  h;
 };
 
 class ppuPatternView_t : public QWidget
