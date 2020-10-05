@@ -87,8 +87,8 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	patternView[1]    = new ppuPatternView_t( 1, this);
 	sprite8x16Cbox[0] = new QCheckBox( tr("Sprites 8x16 Mode") );
 	sprite8x16Cbox[1] = new QCheckBox( tr("Sprites 8x16 Mode") );
-	tileLabel[0]      = new QLabel( tr("Pattern 0 Tile:") );
-	tileLabel[1]      = new QLabel( tr("Pattern 1 Tile:") );
+	tileLabel[0]      = new QLabel( tr("Tile:") );
+	tileLabel[1]      = new QLabel( tr("Tile:") );
 
 	sprite8x16Cbox[0]->setChecked( PPUView_sprite16Mode[0] );
 	sprite8x16Cbox[1]->setChecked( PPUView_sprite16Mode[1] );
@@ -145,6 +145,8 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 
 	patternView[0]->setPattern( &pattern0 );
 	patternView[1]->setPattern( &pattern1 );
+	patternView[0]->setTileLabel( tileLabel[0] );
+	patternView[1]->setTileLabel( tileLabel[1] );
 
 	FCEUD_UpdatePPUView( -1, 1 );
 }
@@ -185,9 +187,14 @@ void ppuViewerDialog_t::sprite8x16Changed1(int state)
 ppuPatternView_t::ppuPatternView_t( int patternIndexID, QWidget *parent)
 	: QWidget(parent)
 {
+	this->setFocusPolicy(Qt::StrongFocus);
+	this->setMouseTracking(true);
 	patternIndex = patternIndexID;
 	setMinimumWidth( 256 );
 	setMinimumHeight( 256 );
+	viewWidth = 256;
+	viewHeight = 256;
+	tileLabel = NULL;
 }
 //----------------------------------------------------
 void ppuPatternView_t::setPattern( ppuPatternTable_t *p )
@@ -195,17 +202,84 @@ void ppuPatternView_t::setPattern( ppuPatternTable_t *p )
 	pattern = p;
 }
 //----------------------------------------------------
+void ppuPatternView_t::setTileLabel( QLabel *l )
+{
+	tileLabel = l;
+}
+//----------------------------------------------------
 ppuPatternView_t::~ppuPatternView_t(void)
 {
 
+}
+//----------------------------------------------------
+QPoint ppuPatternView_t::convPixToTile( QPoint p )
+{
+	QPoint t(0,0);
+	int x,y,w,h,i,j,ii,jj,rr;
+
+	x = p.x(); y = p.y();
+
+	w = pattern->w;
+	h = pattern->h;
+
+	i = x / (w*8);
+	j = y / (h*8);
+
+	if ( PPUView_sprite16Mode[ patternIndex ] )
+	{
+		rr = (j%2);
+		jj =  j;
+
+		if ( rr )
+		{
+			jj--;
+		}
+
+		ii = (i*2)+rr;
+
+		if ( ii >= 16 )
+		{
+			ii = ii % 16;
+			jj++;
+		}
+	}
+	else
+	{
+		ii = i; jj = j;
+	}
+	//printf("(x,y) = (%i,%i) w=%i h=%i  $%X%X \n", x, y, w, h, jj, ii );
+
+	t.setX(ii);
+	t.setY(jj);
+
+	return t;
+}
+//----------------------------------------------------
+void ppuPatternView_t::resizeEvent(QResizeEvent *event)
+{
+	viewWidth  = event->size().width();
+	viewHeight = event->size().height();
+
+	pattern->w = viewWidth / 128;
+  	pattern->h = viewHeight / 128;
+}
+//----------------------------------------------------
+void ppuPatternView_t::mouseMoveEvent(QMouseEvent *event)
+{
+	char stmp[64];
+	QPoint tile = convPixToTile( event->pos() );
+
+	sprintf( stmp, "Tile: $%X%X", tile.y(), tile.x() );
+
+	tileLabel->setText( tr(stmp) );
 }
 //----------------------------------------------------
 void ppuPatternView_t::paintEvent(QPaintEvent *event)
 {
 	int i,j,x,y,w,h,xx,yy,ii,jj,rr;
 	QPainter painter(this);
-	int viewWidth  = event->rect().width();
-	int viewHeight = event->rect().height();
+	viewWidth  = event->rect().width();
+	viewHeight = event->rect().height();
 
 	//printf("PPU PatternView %ix%i \n", viewWidth, viewHeight );
 

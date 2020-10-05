@@ -47,10 +47,17 @@ class ppuPatternView_t : public QWidget
 		~ppuPatternView_t(void);
 
 		void setPattern( ppuPatternTable_t *p );
+		void setTileLabel( QLabel *l );
+		QPoint convPixToTile( QPoint p );
 	protected:
 		void paintEvent(QPaintEvent *event);
+		void resizeEvent(QResizeEvent *event);
+		void mouseMoveEvent(QMouseEvent *event);
 
 		int patternIndex;
+		int viewWidth;
+		int viewHeight;
+		QLabel *tileLabel;
 		ppuPatternTable_t *pattern;
 };
 
