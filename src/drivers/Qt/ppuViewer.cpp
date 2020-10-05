@@ -96,10 +96,10 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	sprite8x16Cbox[0]->setChecked( PPUView_sprite16Mode[0] );
 	sprite8x16Cbox[1]->setChecked( PPUView_sprite16Mode[1] );
 
-	patternVbox[0]->addWidget( patternView[0], 10 );
+	patternVbox[0]->addWidget( patternView[0], 100 );
 	patternVbox[0]->addWidget( tileLabel[0], 1 );
 	patternVbox[0]->addWidget( sprite8x16Cbox[0], 1 );
-	patternVbox[1]->addWidget( patternView[1], 10 );
+	patternVbox[1]->addWidget( patternView[1], 100 );
 	patternVbox[1]->addWidget( tileLabel[1], 1 );
 	patternVbox[1]->addWidget( sprite8x16Cbox[1], 1 );
 
@@ -300,12 +300,14 @@ void ppuPatternView_t::resizeEvent(QResizeEvent *event)
 //----------------------------------------------------
 void ppuPatternView_t::mouseMoveEvent(QMouseEvent *event)
 {
-	char stmp[64];
 	QPoint tile = convPixToTile( event->pos() );
 
-	sprintf( stmp, "Tile: $%X%X", tile.y(), tile.x() );
-
-	tileLabel->setText( tr(stmp) );
+	if ( (tile.x() < 16) && (tile.y() < 16) )
+	{
+		char stmp[64];
+		sprintf( stmp, "Tile: $%X%X", tile.y(), tile.x() );
+		tileLabel->setText( tr(stmp) );
+	}
 }
 //----------------------------------------------------------------------------
 void ppuPatternView_t::mousePressEvent(QMouseEvent * event)
