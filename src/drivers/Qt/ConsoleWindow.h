@@ -93,6 +93,7 @@ class  consoleWin_t : public QMainWindow
 	 QAction *codeDataLogAct;
 	 QAction *traceLogAct;
 	 QAction *hexEditAct;
+	 QAction *ppuViewAct;
 	 QAction *openMovAct;
 	 QAction *stopMovAct;
 	 QAction *recMovAct;
@@ -162,6 +163,7 @@ class  consoleWin_t : public QMainWindow
 		void fdsSwitchDisk(void);
 		void fdsEjectDisk(void);
 		void fdsLoadBiosFile(void);
+		void openPPUViewer(void);
 		void openCheats(void);
 		void openMovie(void);
 		void stopMovie(void);

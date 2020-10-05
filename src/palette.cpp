@@ -72,7 +72,7 @@ static void ChoosePalette(void);
 static void WritePalette(void);
 
 //points to the actually selected current palette
-pal *palo;
+pal *palo = NULL;
 
 #define RGB_TO_YIQ( r, g, b, y, i ) (\
 	(y = (r) * 0.299f + (g) * 0.587f + (b) * 0.114f),\
