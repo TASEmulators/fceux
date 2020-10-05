@@ -69,6 +69,7 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	QVBoxLayout *patternVbox[2];
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
+	char stmp[64];
 
 	ppuViewWindow = this;
 
@@ -150,6 +151,13 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	patternView[0]->setTileLabel( tileLabel[0] );
 	patternView[1]->setTileLabel( tileLabel[1] );
 
+	scanLineEdit->setMaxLength( 3 );
+	scanLineEdit->setInputMask( ">900;" );
+	sprintf( stmp, "%i", PPUViewScanline );
+	scanLineEdit->setText( tr(stmp) );
+
+	connect( scanLineEdit, SIGNAL(textEdited(const QString &)), this, SLOT(scanLineChanged(const QString &)));
+
 	refreshSlider->setMinimum( 0);
 	refreshSlider->setMaximum(25);
 	refreshSlider->setValue(PPUViewRefresh);
@@ -180,6 +188,19 @@ void ppuViewerDialog_t::closeWindow(void)
    printf("Close Window\n");
    done(0);
 	deleteLater();
+}
+//----------------------------------------------------
+void ppuViewerDialog_t::scanLineChanged( const QString &txt )
+{
+	std::string s;
+
+	s = txt.toStdString();
+
+	if ( s.size() > 0 )
+	{
+		PPUViewScanline = strtoul( s.c_str(), NULL, 10 );
+	}
+	//printf("ScanLine: '%s'  %i\n", s.c_str(), PPUViewScanline );
 }
 //----------------------------------------------------
 void ppuViewerDialog_t::sprite8x16Changed0(int state)

@@ -107,7 +107,7 @@ class ppuViewerDialog_t : public QDialog
 		void sprite8x16Changed0(int state);
 		void sprite8x16Changed1(int state);
 		void refreshSliderChanged(int value);
-
+		void scanLineChanged( const QString &s );
 };
 
 int openPPUViewWindow( QWidget *parent );
