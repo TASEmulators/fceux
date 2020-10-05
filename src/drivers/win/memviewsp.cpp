@@ -26,10 +26,9 @@
 #include "memview.h"
 #include "common.h"
 
-HexBookmark hexBookmarks[64];
-int hexBookmarkShortcut[10] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
-int numHexBookmarkShortcut = 0;
-int nextBookmark = 0;
+int importBookmarkProps = IMPORT_OVERWRITE_NONE;
+
+HexBookmarkList hexBookmarks;
 
 /// Finds the bookmark for a given address
 /// @param address The address to find.
@@ -45,7 +44,7 @@ int findBookmark(unsigned int address, int editmode)
 		return -1;
 	}
 	
-	for (i=0;i<nextBookmark;i++)
+	for (i=0;i<hexBookmarks.bookmarkCount;i++)
 	{
 		if (hexBookmarks[i].address == address && hexBookmarks[i].editmode == editmode)
 			return i;
@@ -57,11 +56,6 @@ int findBookmark(unsigned int address, int editmode)
 BOOL CenterWindow(HWND hwndDlg);
 
 /// Callback function for the name bookmark dialog
-/*
- TODO: The bookmarks of Debugger and Hex Editor uses the same dialog box,
- but different bookmark systems, either decouple their callback into separate
- functions or unify them to use the same bookmark system.
-*/
 INT_PTR CALLBACK nameHexBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	// For Hex Editor
@@ -96,11 +90,11 @@ INT_PTR CALLBACK nameHexBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 				EnableWindow(GetDlgItem(hwndDlg, IDC_BOOKMARK_SHORTCUT_PREFIX_TEXT), FALSE);
 
 			for (int i = 0; i < 10; ++i)
-				if (!shortcut_assigned || hexBookmarkShortcut[i] != -1 && hexBookmarkShortcut[i] != hexBookmarkMsg->bookmark_index)
+				if (!shortcut_assigned || hexBookmarks.shortcuts[i] != -1 && hexBookmarks.shortcuts[i] != hexBookmarkMsg->bookmark_index)
 					// this bookmark doesn't have a shortcut, or the shortcut number is occupied but it doesn't belongs to this bookmark
 					EnableWindow(GetDlgItem(hwndDlg, dlgShortcutRadioCheck[i]), FALSE);
 
-			if (!shortcut_assigned && numHexBookmarkShortcut >= 10)
+			if (!shortcut_assigned && hexBookmarks.shortcutCount >= 10)
 			{
 				// all the shortcuts are occupied and this one doesn't have a shortcut, it's impossible to assign a new shortcut
 				EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_SHORTCUT), FALSE);
@@ -138,7 +132,7 @@ INT_PTR CALLBACK nameHexBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 							EnableWindow(GetDlgItem(hwndDlg, IDC_BOOKMARK_SHORTCUT_PREFIX_TEXT), shortcut_assigned);
 
 							for (int i = 0; i < 10; ++i)
-								EnableWindow(GetDlgItem(hwndDlg, dlgShortcutRadioCheck[i]), shortcut_assigned && (hexBookmarkShortcut[i] == -1 || hexBookmarkShortcut[i] == hexBookmarkMsg->bookmark_index));
+								EnableWindow(GetDlgItem(hwndDlg, dlgShortcutRadioCheck[i]), shortcut_assigned && (hexBookmarks.shortcuts[i] == -1 || hexBookmarks.shortcuts[i] == hexBookmarkMsg->bookmark_index));
 						}
 						break;
 						case IDOK:
@@ -152,7 +146,6 @@ INT_PTR CALLBACK nameHexBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 
 							// Get the view which the address in
 							editmode = SendDlgItemMessage(hwndDlg, IDC_BOOKMARK_COMBO_VIEW, CB_GETCURSEL, 0, 0);
-							extern int GetMaxSize(int editingMode);
 							int MaxSize = GetMaxSize(editmode);
 
 							// Update the address
@@ -182,11 +175,11 @@ INT_PTR CALLBACK nameHexBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 							GetDlgItemText(hwndDlg, IDC_BOOKMARK_DESCRIPTION, hexBookmarkMsg->bookmark->description, 50);
 								
 							// Update the shortcut key
-							if (hexBookmarkMsg->shortcut_index != -1 && hexBookmarkShortcut[hexBookmarkMsg->shortcut_index] == hexBookmarkMsg->bookmark_index)
+							if (hexBookmarkMsg->shortcut_index != -1 && hexBookmarks.shortcuts[hexBookmarkMsg->shortcut_index] == hexBookmarkMsg->bookmark_index)
 							{
 
-								hexBookmarkShortcut[hexBookmarkMsg->shortcut_index] = -1;
-								--numHexBookmarkShortcut;
+								hexBookmarks.shortcuts[hexBookmarkMsg->shortcut_index] = -1;
+								--hexBookmarks.shortcutCount;
 							}
 
 							if (IsDlgButtonChecked(hwndDlg, IDC_CHECK_SHORTCUT))
@@ -194,8 +187,8 @@ INT_PTR CALLBACK nameHexBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 									if (IsDlgButtonChecked(hwndDlg, dlgShortcutRadioCheck[i]))
 									{
 										// Update the shortcut index
-										hexBookmarkShortcut[i] = hexBookmarkMsg->bookmark_index;
-										++numHexBookmarkShortcut;
+										hexBookmarks.shortcuts[i] = hexBookmarkMsg->bookmark_index;
+										++hexBookmarks.shortcutCount;
 										break;
 									}
 
@@ -219,38 +212,38 @@ INT_PTR CALLBACK nameHexBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 int addBookmark(HWND hwnd, unsigned int address, int editmode)
 {
 	// Enforce a maximum of 64 bookmarks
-	if (nextBookmark < 64)
+	if (hexBookmarks.bookmarkCount < 64)
 	{
-		hexBookmarks[nextBookmark].address = address;
-		hexBookmarks[nextBookmark].editmode = editmode;
-		sprintf(hexBookmarks[nextBookmark].description, "%s %04X", EditString[editmode], address);
+		hexBookmarks[hexBookmarks.bookmarkCount].address = address;
+		hexBookmarks[hexBookmarks.bookmarkCount].editmode = editmode;
+		sprintf(hexBookmarks[hexBookmarks.bookmarkCount].description, "%s %04X", EditString[editmode], address);
 
 		HexBookmarkMsg msg;
 
 		// Pre-define a shortcut if possible
 		for (int i = 0; i < 10; ++i)
-			if (hexBookmarkShortcut[i] == -1)
+			if (hexBookmarks.shortcuts[i] == -1)
 			{
 				msg.shortcut_index = i;
 				break;
 			}
 
-		msg.bookmark = &hexBookmarks[nextBookmark];
-		msg.bookmark_index = nextBookmark;
+		msg.bookmark = &hexBookmarks[hexBookmarks.bookmarkCount];
+		msg.bookmark_index = hexBookmarks.bookmarkCount;
 
 		// Show the bookmark name dialog
 		if (DialogBoxParam(fceu_hInstance, "NAMEBOOKMARKDLGMEMVIEW", hwnd, nameHexBookmarkCallB, (LPARAM)&msg))
 		{
-			nextBookmark++;
+			hexBookmarks.bookmarkCount++;
 			return 0;
 		}
 		else
 		{
 			if (msg.shortcut_index != -1)
 			{
-				if (hexBookmarkShortcut[msg.shortcut_index] != -1)
-					--numHexBookmarkShortcut;
-				hexBookmarkShortcut[msg.shortcut_index] = -1;
+				if (hexBookmarks.shortcuts[msg.shortcut_index] != -1)
+					--hexBookmarks.shortcutCount;
+				hexBookmarks.shortcuts[msg.shortcut_index] = -1;
 			}
 			return 1;
 		}
@@ -273,7 +266,7 @@ int editBookmark(HWND hwnd, unsigned int index)
 
 	// find its shortcut index
 	for (int i = 0; i < 10; ++i)
-		if (index == hexBookmarkShortcut[i])
+		if (index == hexBookmarks.shortcuts[i])
 		{
 			msg.shortcut_index = i;
 			break;
@@ -299,23 +292,23 @@ int removeBookmark(unsigned int index)
 	for (int i = 0; i < 10; ++i)
 	{
 		// all the indexes after the deleted one sould decrease by 1
-		if (hexBookmarkShortcut[i] != -1 && hexBookmarkShortcut[i] > index)
-			--hexBookmarkShortcut[i];
-		else if (hexBookmarkShortcut[i] == index)
+		if (hexBookmarks.shortcuts[i] != -1 && hexBookmarks.shortcuts[i] > index)
+			--hexBookmarks.shortcuts[i];
+		else if (hexBookmarks.shortcuts[i] == index)
 		{
 			// delete the shortcut index itself
-			hexBookmarkShortcut[i] = -1;
-			--numHexBookmarkShortcut;
+			hexBookmarks.shortcuts[i] = -1;
+			--hexBookmarks.shortcutCount;
 		}
 	}
 
 	// At this point it's necessary to move the content of the bookmark list
-	for (int i=index;i<nextBookmark - 1;i++)
+	for (int i=index;i<hexBookmarks.bookmarkCount - 1;i++)
 	{
 		hexBookmarks[i] = hexBookmarks[i+1];
 	}
 	
-	--nextBookmark;
+	--hexBookmarks.bookmarkCount;
 
 	return 0;
 }
@@ -345,31 +338,38 @@ int toggleBookmark(HWND hwnd, uint32 address, int editmode)
 void updateBookmarkMenus(HMENU menu)
 {
 	// Remove all bookmark menus
-	for (int i = 0; i<nextBookmark + 1; i++)
+	for (int i = 0; i<hexBookmarks.bookmarkCount + 1; i++)
 		RemoveMenu(menu, ID_FIRST_BOOKMARK + i, MF_BYCOMMAND);
 	RemoveMenu(menu, ID_BOOKMARKLIST_SEP, MF_BYCOMMAND);
 
-	if (nextBookmark != 0)
+	if (hexBookmarks.bookmarkCount != 0)
 	{
 		// Add the menus again
-		AppendMenu(menu, MF_SEPARATOR, ID_BOOKMARKLIST_SEP, NULL);
-		for (int i = 0;i<nextBookmark;i++)
+		InsertMenu(menu, ID_BOOKMARKS_IMPORT, MF_SEPARATOR | MF_BYCOMMAND, ID_BOOKMARKLIST_SEP, NULL);
+		for (int i = 0;i<hexBookmarks.bookmarkCount;i++)
 		{
 			// Get the text of the menu
 			char buffer[0x100];
-			sprintf(buffer, i < 10 ? "&%d. %s:$%04X - %s" : "%d. $%04X - %s", i, EditString[hexBookmarks[i].editmode], hexBookmarks[i].address, hexBookmarks[i].description);
+			if (i < 9)
+				sprintf(buffer, "&%d. %s:$%04X - %s", i + 1, EditString[hexBookmarks[i].editmode], hexBookmarks[i].address, hexBookmarks[i].description);
+			else if (i == 9)
+				sprintf(buffer, "1&0. %s:$%04X - %s", EditString[hexBookmarks[i].editmode], hexBookmarks[i].address, hexBookmarks[i].description);
+			else 
+				sprintf(buffer, "%d. %s:$%04X - %s", i + 1, EditString[hexBookmarks[i].editmode], hexBookmarks[i].address, hexBookmarks[i].description);
 
-			AppendMenu(menu, MF_STRING, ID_FIRST_BOOKMARK + i, buffer);
+			InsertMenu(menu, ID_BOOKMARKLIST_SEP, MF_STRING | MF_BYCOMMAND, ID_FIRST_BOOKMARK + i, buffer);
 		}
 
 		for (int i = 0; i < 10; ++i)
 		{
-			if (hexBookmarkShortcut[i] != -1)
+			if (hexBookmarks.shortcuts[i] != -1)
 			{
 				char buffer[0x100];
-				GetMenuString(menu, ID_FIRST_BOOKMARK + hexBookmarkShortcut[i], buffer, 50, MF_BYCOMMAND);
-				sprintf(&buffer[strlen(buffer)], "\tCtrl+%d\0", (i + 1) % 10);
-				ModifyMenu(menu, ID_FIRST_BOOKMARK + hexBookmarkShortcut[i], MF_BYCOMMAND, ID_FIRST_BOOKMARK + hexBookmarkShortcut[i], buffer);
+				char shortcut[16];
+				GetMenuString(menu, ID_FIRST_BOOKMARK + hexBookmarks.shortcuts[i], buffer, 50, MF_BYCOMMAND);
+				sprintf(shortcut, "\tCtrl+%d\0", (i + 1) % 10);
+				strcat(buffer, shortcut);
+				ModifyMenu(menu, ID_FIRST_BOOKMARK + hexBookmarks.shortcuts[i], MF_BYCOMMAND, ID_FIRST_BOOKMARK + hexBookmarks.shortcuts[i], buffer);
 			}
 		}
 
@@ -381,7 +381,7 @@ void updateBookmarkMenus(HMENU menu)
 /// @return The address to scroll to or -1 if the bookmark index is invalid.
 int handleBookmarkMenu(int bookmark)
 {
-	if (bookmark < nextBookmark)
+	if (bookmark < hexBookmarks.bookmarkCount)
 	{
 		return hexBookmarks[bookmark].address;
 	}
@@ -393,14 +393,19 @@ int handleBookmarkMenu(int bookmark)
 /// @param menu Handle of the bookmark menu
 void removeAllBookmarks(HMENU menu)
 {
-	for (int i = 0;i<nextBookmark;i++)
+	for (int i = 0;i<hexBookmarks.bookmarkCount;i++)
 	{
 		RemoveMenu(menu, ID_FIRST_BOOKMARK + i, MF_BYCOMMAND);
 	}
 	RemoveMenu(menu, ID_BOOKMARKLIST_SEP, MF_BYCOMMAND);
 	
-	nextBookmark = 0;
-	numHexBookmarkShortcut = 0;
+	hexBookmarks.bookmarkCount = 0;
+	hexBookmarks.shortcutCount = 0;
 	for (int i = 0; i < 10; ++i)
-		hexBookmarkShortcut[i] = -1;
+		hexBookmarks.shortcuts[i] = -1;
+}
+
+HexBookmark& HexBookmarkList::operator[](int index)
+{
+	return bookmarks[index];
 }

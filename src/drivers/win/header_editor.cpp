@@ -628,7 +628,7 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 	// Mapper#
 	int mapper = header->ROM_type >> 4 | header->ROM_type2 & 0xF0;
 	if (ines20)
-		mapper |= (header->ROM_type3 & 0x0F) << 8;
+		mapper |= (header->ROM_type3 & 0xF0) << 4;
 	sprintf(buf, "%d ", mapper);
 	if (SendDlgItemMessage(hwnd, IDC_MAPPER_COMBO, CB_SELECTSTRING, 0, (LPARAM)buf) == CB_ERR)
 		SetDlgItemText(hwnd, IDC_MAPPER_COMBO, buf);

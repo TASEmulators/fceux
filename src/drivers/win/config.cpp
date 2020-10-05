@@ -132,6 +132,7 @@ extern int RomFreezeColorB;
 extern int HexBoundColorR;
 extern int HexBoundColorG;
 extern int HexBoundColorB;
+extern int importBookmarkProps;
 
 //adelikat:  Hacky fix for Ram Watch recent menu
 char* ramWatchRecent[] = {0, 0, 0, 0, 0};
@@ -459,6 +460,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(HexBoundColorR),
 	AC(HexBoundColorG),
 	AC(HexBoundColorB),
+	AC(importBookmarkProps),
 	//ACS(memwLastfile[2048]),
 
 	AC(AutoRWLoad),
