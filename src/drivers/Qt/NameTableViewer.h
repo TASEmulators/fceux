@@ -9,6 +9,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QRadioButton>
 #include <QLabel>
 #include <QFrame>
 #include <QTimer>
@@ -74,6 +75,14 @@ class ppuNameTableViewerDialog_t : public QDialog
 		QSlider   *refreshSlider;
 		QLineEdit *scanLineEdit;
 		QTimer    *updateTimer;
+		QRadioButton *horzMirrorBtn;
+		QRadioButton *vertMirrorBtn;
+		QRadioButton *fourScreenBtn;
+		QRadioButton *singleScreenBtn[4];
+		QLabel *tileID;
+		QLabel *tileXY;
+		QLabel *ppuAddrLbl;
+		QLabel *attrbLbl;
 
 	public slots:
       void closeWindow(void);

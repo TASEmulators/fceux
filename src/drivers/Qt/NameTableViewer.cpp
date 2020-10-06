@@ -139,6 +139,45 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 
 	connect( scanLineEdit, SIGNAL(textEdited(const QString &)), this, SLOT(scanLineChanged(const QString &)));
 
+	hbox   = new QHBoxLayout();
+	frame  = new QGroupBox( tr("Current Mirroring") );
+	grid   = new QGridLayout();
+
+	mainLayout->addLayout( hbox, 1 );
+	hbox->addWidget( frame );
+	frame->setLayout( grid );
+
+	horzMirrorBtn = new QRadioButton( tr("Horizontal") );
+	vertMirrorBtn = new QRadioButton( tr("Vertical") );
+	fourScreenBtn = new QRadioButton( tr("Four Screen") );
+	singleScreenBtn[0] = new QRadioButton( tr("Single Screen 0") );
+	singleScreenBtn[1] = new QRadioButton( tr("Single Screen 1") );
+	singleScreenBtn[2] = new QRadioButton( tr("Single Screen 2") );
+	singleScreenBtn[3] = new QRadioButton( tr("Single Screen 3") );
+
+	grid->addWidget( horzMirrorBtn, 0, 0, Qt::AlignLeft );
+	grid->addWidget( vertMirrorBtn, 1, 0, Qt::AlignLeft );
+	grid->addWidget( fourScreenBtn, 2, 0, Qt::AlignLeft );
+	grid->addWidget( singleScreenBtn[0], 0, 1, Qt::AlignLeft );
+	grid->addWidget( singleScreenBtn[1], 1, 1, Qt::AlignLeft );
+	grid->addWidget( singleScreenBtn[2], 2, 1, Qt::AlignLeft );
+	grid->addWidget( singleScreenBtn[3], 3, 1, Qt::AlignLeft );
+
+	vbox   = new QVBoxLayout();
+	frame  = new QGroupBox( tr("Properties") );
+	hbox->addWidget( frame );
+	frame->setLayout( vbox );
+
+	tileID     = new QLabel( tr("Tile ID:") );
+	tileXY     = new QLabel( tr("X/Y :") );
+	ppuAddrLbl = new QLabel( tr("PPU Address:") );
+	attrbLbl   = new QLabel( tr("Attribute:") );
+
+	vbox->addWidget( tileID );
+	vbox->addWidget( tileXY );
+	vbox->addWidget( ppuAddrLbl );
+	vbox->addWidget( attrbLbl );
+
 	FCEUD_UpdateNTView( -1, true);
 	
 	updateTimer  = new QTimer( this );
