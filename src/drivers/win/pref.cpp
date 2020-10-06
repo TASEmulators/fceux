@@ -120,40 +120,53 @@ int storeDebuggerPreferences(FILE* f)
 * Stores the preferences from the Hex window
 *
 * @param f File to write the preferences to
+* @param source The source the preferences are read from
 * @return 0 if everything went fine. An error code if something went wrong.
 **/
-int storeHexPreferences(FILE* f)
+int storeHexPreferences(FILE* f, HexBookmarkList& source = hexBookmarks)
 {
 	int i;
 
 	// Writes the number of bookmarks to save
-	if (fwrite(&nextBookmark, sizeof(nextBookmark), 1, f) != 1) return 1;
+	if (fwrite(&source.bookmarkCount, sizeof(source.bookmarkCount), 1, f) != 1) return 1;
 	
-	for (i=0;i<nextBookmark;i++)
+	for (i=0;i<source.bookmarkCount;i++)
 	{
 		unsigned int len;
 
 		// Writes the bookmark address
-		if (fwrite(&hexBookmarks[i].address, sizeof(hexBookmarks[i].address), 1, f) != 1) return 1;
+		if (fwrite(&source[i].address, sizeof(source[i].address), 1, f) != 1) return 1;
 		
-		len = strlen(hexBookmarks[i].description);
+		len = strlen(source[i].description);
 		// Writes the length of the bookmark description
 		if (fwrite(&len, sizeof(len), 1, f) != 1) return 1;
 		// Writes the actual bookmark description
-		if (fwrite(hexBookmarks[i].description, 1, len, f) != len) return 1;
+		if (fwrite(source[i].description, 1, len, f) != len) return 1;
 	}
 
-	// optional section: save bookmark shortcut matches
-	if (numHexBookmarkShortcut)
+	// Optional Section 1: Save bookmark shortcut matches
+	if (source.shortcutCount)
 	{
-		fwrite(&numHexBookmarkShortcut, sizeof(numHexBookmarkShortcut), 1, f);
+		fwrite(&source.shortcutCount, sizeof(source.shortcutCount), 1, f);
 		for (int i = 0; i < 10; ++i)
-			if (hexBookmarkShortcut[i] != -1)
+			if (source.shortcuts[i] != -1)
 			{
-				fwrite(&hexBookmarkShortcut[i], sizeof(hexBookmarkShortcut[i]), 1, f);
+				fwrite(&source.shortcuts[i], sizeof(source.shortcuts[i]), 1, f);
 				fwrite(&i, sizeof(i), 1, f);
 			}
 	}
+
+	/* Optional Section 2: Edit mode
+	   The Hex Editor used to have a bug, it doesn't store the edit mode to
+	   the preferences, which make the bookmarks outside NES memory are all
+	   treated as NES memory bookmarks.
+	   However, for the consideration of backward compatibility of the older
+	   version of FCEUX, we can only add the extra data to the last of the file
+	   to fix this problem.
+	*/
+	for (int i = 0; i < source.bookmarkCount; ++i)
+		if (fwrite(&source[i].editmode, sizeof(source[i].editmode), 1, f) != 1)
+			return 1;
 
 	return 0;
 }
@@ -348,48 +361,73 @@ int loadDebuggerPreferences(FILE* f)
 * Loads HexView preferences from a file
 *
 * @param f File to write the preferences to
+* @param target The target to load the preferences to
 * @return 0 if everything went fine. An error code if something went wrong.
 **/	
-int loadHexPreferences(FILE* f)
+int loadHexPreferences(FILE* f, HexBookmarkList& target = hexBookmarks)
 {
 	int i;
 
 	// Read number of bookmarks
-	if (fread(&nextBookmark, sizeof(nextBookmark), 1, f) != 1) return 1;
-	if (nextBookmark >= 64) return 1;
+	if (fread(&target.bookmarkCount, sizeof(target.bookmarkCount), 1, f) != 1) return 1;
+	if (target.bookmarkCount >= 64) return 1;
 
-	for (i=0;i<nextBookmark;i++)
+	// clean the garbage values
+	memset(&target.bookmarks, 0, sizeof(HexBookmark) * target.bookmarkCount);
+
+
+	for (i=0;i<target.bookmarkCount;i++)
 	{
 		unsigned int len;
 		
 		// Read address
-		if (fread(&hexBookmarks[i].address, sizeof(hexBookmarks[i].address), 1, f) != 1) return 1;
+		if (fread(&target[i].address, sizeof(target[i].address), 1, f) != 1) return 1;
 		// Read length of description
 		if (fread(&len, sizeof(len), 1, f) != 1) return 1;
 		// Read the bookmark description
-		if (fread(hexBookmarks[i].description, 1, len, f) != len) return 1;
+		if (fread(target[i].description, 1, len, f) != len) return 1;
 	}
 
-	// optional section: read bookmark shortcut matches
-	// read number of shortcuts
-	// older versions of .deb file don't have this section, so the file would reach the end.
-	if (fread(&numHexBookmarkShortcut, sizeof(numHexBookmarkShortcut), 1, f) != EOF)
+	/* Optional Section 1: read bookmark shortcut matches
+	   read number of shortcuts
+	   older versions of .deb file don't have this section, so the file would reach the end.
+	*/
+	if (!feof(f))
 	{
+		fread(&target.shortcutCount, sizeof(target.shortcutCount), 1, f);
+	
 		unsigned int bookmark_index, shortcut_index;
 		// read the matching index list of the shortcuts
-		for (unsigned int i = 0; i < numHexBookmarkShortcut; ++i)
+		for (unsigned int i = 0; i < target.shortcutCount; ++i)
 			if (fread(&bookmark_index, sizeof(bookmark_index), 1, f) != EOF && fread(&shortcut_index, sizeof(shortcut_index), 1, f) != EOF)
-				hexBookmarkShortcut[shortcut_index % 10] = bookmark_index;
+				target.shortcuts[shortcut_index % 10] = bookmark_index;
 			else
 				break;
 	}
 	else {
 		// use the default configruation based on the order of the bookmark list
-		numHexBookmarkShortcut = nextBookmark > 10 ? 10 : nextBookmark;
-		for (int i = 0; i < numHexBookmarkShortcut; ++i)
-			hexBookmarkShortcut[i] = i;
+		target.shortcutCount = target.bookmarkCount > 10 ? 10 : target.bookmarkCount;
+		for (int i = 0; i < target.shortcutCount; ++i)
+			target.shortcuts[i] = i;
 	}
 
+	/*
+       Optional Section 2: Edit mode
+	   The Hex Editor used to have a bug, it doesn't store the edit mode to 
+	   the preferences, which make the bookmarks outside NES memory are all
+	   treated as NES memory bookmarks.
+	   However, for the consideration of backward compatibility of the older
+	   version of FCEUX, we can only add the extra data to the last of the file
+	   to fix this problem.
+	*/
+	int editmode;
+	if (!feof(f))
+		for (int i = 0; i < target.bookmarkCount; i++)
+		{
+			if (fread(&editmode, sizeof(editmode), 1, f) != EOF)
+				target[i].editmode = editmode;
+			else break;
+		}
 	return 0;
 }
 
@@ -429,7 +467,7 @@ int loadPreferences(const char* romname)
 			myNumWPs = 0;
 			break_on_instructions = break_on_cycles = FCEUI_Debugger().badopbreak = false;
 			break_instructions_limit = break_cycles_limit = 0;
-			nextBookmark = 0;
+			hexBookmarks.bookmarkCount = 0;
 		}
 		fclose(f);
 	} else

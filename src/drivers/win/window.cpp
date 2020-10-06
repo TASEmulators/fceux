@@ -3374,7 +3374,6 @@ bool inline (*GetIsLetterLegal(UINT id))(char letter)
 		case MW_ADDR16: case MW_ADDR17: case MW_ADDR18: case MW_ADDR19:
 		case MW_ADDR20: case MW_ADDR21: case MW_ADDR22: case MW_ADDR23:
 		case IDC_EDIT_COMPAREADDRESS:
-
 			return IsLetterLegalHex;
 
 		// Specific Address in RAM Search

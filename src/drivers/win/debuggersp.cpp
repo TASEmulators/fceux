@@ -62,7 +62,9 @@ int debuggerWasActive = 0;
 char temp_chr[40] = {0};
 char delimiterChar[2] = "#";
 
-extern INT_PTR CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK nameDebuggerBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+extern WNDPROC DefaultEditCtrlProc;
+extern LRESULT APIENTRY FilterEditCtrlProc(HWND hDlg, UINT uMsg, WPARAM wP, LPARAM lP);
 
 MemoryMappedRegister RegNames[] = {
 	{"$2000", "PPU_CTRL"},
@@ -769,28 +771,6 @@ unsigned int getBookmarkAddress(unsigned int index)
 }
 
 /**
-* Adds a debugger bookmark to the list on the debugger window.
-*
-* @param hwnd HWMD of the debugger window
-* @param buffer Text of the debugger bookmark
-**/
-void AddDebuggerBookmark2(HWND hwnd, unsigned int addr)
-{
-	int index = bookmarks.size();
-	// try to find Symbolic name for this address
-	Name* node = findNode(getNamesPointerForAddress(addr), addr);
-	std::pair<unsigned int, std::string> bookmark(addr, node && node->name ? node->name : "");
-	bookmarks.push_back(bookmark);
-
-	// add new item to ListBox
-	char buffer[256];
-	sprintf(buffer, "%04X %s", bookmark.first, bookmark.second.c_str());
-	SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_ADDSTRING, 0, (LPARAM)buffer);
-	// select this item
-	SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_SETCURSEL, index, 0);
-}
-
-/**
 * Takes the offset from the debugger bookmark edit field and adds a debugger
 * bookmark with that offset to the bookmark list if the offset is valid.
 *
@@ -798,18 +778,44 @@ void AddDebuggerBookmark2(HWND hwnd, unsigned int addr)
 **/
 void AddDebuggerBookmark(HWND hwnd)
 {
-	int n;
 	char buffer[5] = {0};
-	
 	GetDlgItemText(hwnd, IDC_DEBUGGER_BOOKMARK, buffer, 5);
-	n = offsetStringToInt(BT_C, buffer);
+	int address = offsetStringToInt(BT_C, buffer);
 	// Make sure the offset is valid
-	if (n == -1 || n > 0xFFFF)
+	if (address == -1 || address > 0xFFFF)
 	{
 		MessageBox(hwnd, "Invalid offset", "Error", MB_OK | MB_ICONERROR);
 		return;
 	}
-	AddDebuggerBookmark2(hwnd, n);
+/*
+	int index = 0;
+	for (std::vector<std::pair<unsigned int, std::string>>::iterator it = bookmarks.begin(); it != bookmarks.end(); ++it)
+	{
+		if (it->first == address)
+		{
+			// select this bookmark to notify it already have a bookmark
+			SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_SETCURSEL, index, 0);
+			return;
+		}
+		++index;
+	}
+	*/
+
+	int index = bookmarks.size();
+	// try to find Symbolic name for this address
+	Name* node = findNode(getNamesPointerForAddress(address), address);
+	std::pair<unsigned int, std::string> bookmark(address, node && node->name ? node->name : "");
+	if (DialogBoxParam(fceu_hInstance, "NAMEBOOKMARKDLGDEBUGGER", hwnd, nameDebuggerBookmarkCallB, (LPARAM)&bookmark))
+	{
+		bookmarks.push_back(bookmark);
+		// add new item to ListBox
+		char buffer[256];
+		sprintf(buffer, "%04X %s", bookmark.first, bookmark.second.c_str());
+		SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_ADDSTRING, 0, (LPARAM)buffer);
+		// select this item
+		SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_SETCURSEL, index, 0);
+	}
+
 }
 
 /**
@@ -841,7 +847,7 @@ void DeleteDebuggerBookmark(HWND hwnd)
 	}
 }
 
-void NameDebuggerBookmark(HWND hwnd)
+void EditDebuggerBookmark(HWND hwnd)
 {
 	// Get the selected bookmark
 	int selectedItem = SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_GETCURSEL, 0, 0);
@@ -865,7 +871,7 @@ void NameDebuggerBookmark(HWND hwnd)
 			}
 		}
 		// Show the bookmark name dialog
-		if (DialogBoxParam(fceu_hInstance, "NAMEBOOKMARKDLG", hwnd, nameBookmarkCallB, (LPARAM)&bookmark))
+		if (DialogBoxParam(fceu_hInstance, "NAMEBOOKMARKDLGDEBUGGER", hwnd, nameDebuggerBookmarkCallB, (LPARAM)&bookmark))
 		{
 			// Rename the selected bookmark
 			bookmarks[selectedItem] = bookmark;
@@ -1159,4 +1165,88 @@ void WriteNameFileToDisk(const char* filename, Name* node)
 	}
 }
 
+INT_PTR CALLBACK nameDebuggerBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	static std::pair<unsigned int, std::string>* debuggerBookmark;
+
+	switch (uMsg)
+	{
+		case WM_INITDIALOG:
+		{
+			// Limit bookmark descriptions to 50 characters
+			SendDlgItemMessage(hwndDlg, IDC_BOOKMARK_DESCRIPTION, EM_SETLIMITTEXT, 50, 0);
+
+			// Limit the address text
+			SendDlgItemMessage(hwndDlg, IDC_BOOKMARK_ADDRESS, EM_SETLIMITTEXT, 4, 0);
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_BOOKMARK_ADDRESS), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+
+			debuggerBookmark = (std::pair<unsigned int, std::string>*)lParam;
+			char addr[8];
+			sprintf(addr, "%04X", debuggerBookmark->first);
+
+			// Set address and description
+			sprintf(addr, "%04X", debuggerBookmark->first);
+			SetDlgItemText(hwndDlg, IDC_BOOKMARK_ADDRESS, addr);
+			SetDlgItemText(hwndDlg, IDC_BOOKMARK_DESCRIPTION, debuggerBookmark->second.c_str());
+
+			// Set focus to the edit field.
+			SetFocus(GetDlgItem(hwndDlg, IDC_BOOKMARK_DESCRIPTION));
+			SendDlgItemMessage(hwndDlg, IDC_BOOKMARK_DESCRIPTION, EM_SETSEL, 0, 52);
+
+			break;
+		}
+		case WM_QUIT:
+		case WM_CLOSE:
+			EndDialog(hwndDlg, 0);
+			break;
+		case WM_COMMAND:
+			switch (HIWORD(wParam))
+			{
+				case BN_CLICKED:
+					switch (LOWORD(wParam))
+					{
+						case IDOK:
+						{
+							char addr_str[8];
+							GetDlgItemText(hwndDlg, IDC_BOOKMARK_ADDRESS, addr_str, 8);
+							sscanf(addr_str, "%X", &debuggerBookmark->first);
+
+							if (debuggerBookmark->first > 0xFFFE)
+							{
+								// if the address is out of range
+								char errmsg[64];
+								sprintf(errmsg, "The address must be in range of 0-%X", 0xFFFE);
+								MessageBox(hwndDlg, errmsg, "Address out of range", MB_OK | MB_ICONERROR);
+								SetFocus(GetDlgItem(hwndDlg, IDC_BOOKMARK_ADDRESS));
+								return FALSE;
+							}
+
+						/*
+							extern std::vector<std::pair<unsigned int, std::string>> bookmarks;
+							for (std::vector<std::pair<unsigned int, std::string>>::iterator it = bookmarks.begin(); it != bookmarks.end(); ++it)
+							{
+								if (it->first == debuggerBookmark->first && it->second == debuggerBookmark->second)
+								{
+									// if the address already have a bookmark
+									MessageBox(hwndDlg, "This address already have a bookmark", "Bookmark duplicated", MB_OK | MB_ICONASTERISK);
+									return FALSE;
+								}
+							}
+						*/
+
+							// Update the description
+							char description[51];
+							GetDlgItemText(hwndDlg, IDC_BOOKMARK_DESCRIPTION, description, 50);
+							debuggerBookmark->second = description;
+							EndDialog(hwndDlg, 1);
+							break;
+						}
+						case IDCANCEL:
+							EndDialog(hwndDlg, 0);
+					}
+			}
+	}
+
+	return FALSE;
+}
 

@@ -63,6 +63,7 @@ CHEATF_SUBFAST SubCheats[256] = { 0 };
 uint32 numsubcheats = 0;
 int globalCheatDisabled = 0;
 int disableAutoLSCheats = 0;
+bool disableShowGG = 0;
 static _8BYTECHEATMAP* cheatMap = NULL;
 struct CHEATF *cheats = 0, *cheatsl = 0;
 

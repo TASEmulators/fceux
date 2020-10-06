@@ -1659,6 +1659,16 @@ void SeparatorCache::Init(HWND hBox)
 		GetObject((HANDLE)SendMessage(hBox, WM_GETFONT, NULL, NULL), sizeof(logFont), &logFont);
 		sepFon = (HFONT)CreateFontIndirect((logFont.lfWeight = FW_SEMIBOLD, &logFont));
 	}
+
+	// if watches exists before separator cache initialize,
+	// recalculate their values as they are porbably incorrect.
+	if (WatchCount)
+	{
+		separatorCache.clear();
+		for (int i = 0; i < WatchCount; ++i)
+			if (rswatches[i].Type == 'S')
+				separatorCache[i] = SeparatorCache(RamWatchHWnd, rswatches[i].comment);
+	}
 }
 
 void SeparatorCache::DeInit()
@@ -1670,6 +1680,8 @@ void SeparatorCache::DeInit()
 	sepPen = NULL;
 	sepPenSel = NULL;
 	sepFon = NULL;
+
+	separatorCache.clear();
 }
 
 
