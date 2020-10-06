@@ -93,7 +93,6 @@ class ppuViewerDialog_t : public QDialog
 		~ppuViewerDialog_t(void);
 
 	protected:
-      //QTimer    *inputTimer;
 
 		ppuPatternView_t *patternView[2];
 		ppuPalatteView_t *paletteView;
@@ -113,7 +112,6 @@ class ppuViewerDialog_t : public QDialog
    public slots:
       void closeWindow(void);
 	private slots:
-		//void updatePeriodic(void);
 		void sprite8x16Changed0(int state);
 		void sprite8x16Changed1(int state);
 		void refreshSliderChanged(int value);
