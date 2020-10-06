@@ -140,10 +140,17 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	connect( scanLineEdit, SIGNAL(textEdited(const QString &)), this, SLOT(scanLineChanged(const QString &)));
 
 	FCEUD_UpdateNTView( -1, true);
+	
+	updateTimer  = new QTimer( this );
+
+   connect( updateTimer, &QTimer::timeout, this, &ppuNameTableViewerDialog_t::periodicUpdate );
+
+	updateTimer->start( 33 ); // 30hz
 }
 //----------------------------------------------------
 ppuNameTableViewerDialog_t::~ppuNameTableViewerDialog_t(void)
 {
+	updateTimer->stop();
 	nameTableViewWindow = NULL;
 
 	printf("Name Table Viewer Window Deleted\n");
@@ -162,6 +169,16 @@ void ppuNameTableViewerDialog_t::closeWindow(void)
    printf("Close Window\n");
    done(0);
 	deleteLater();
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::periodicUpdate(void)
+{
+
+	if ( redrawtables )
+	{
+		this->update();
+		redrawtables = false;
+	}
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::scanLineChanged( const QString &txt )
@@ -391,8 +408,8 @@ static void DrawNameTable(int scanline, int ntnum, bool invalidateCache)
 			int attraddr = 0x3C0+((y>>2)<<3)+(x>>2);
 			if (invalid
 				|| (table[ntaddr] != tablecache[ntaddr]) 
-				|| (table[attraddr] != tablecache[attraddr])) {
-				redrawtables = true;
+				|| (table[attraddr] != tablecache[attraddr])) 
+			{
 				int temp = (((y&2)<<1)+(x&2));
 				a = (table[attraddr] & (3<<temp)) >> temp;
 				
@@ -504,11 +521,7 @@ void FCEUD_UpdateNTView(int scanline, bool drawall)
 	}
 
 	chrchanged = 0;
-
-	if ( nameTableViewWindow )
-	{
-		nameTableViewWindow->update();
-	}
+	redrawtables = true;
 	return;	
 }
 //----------------------------------------------------

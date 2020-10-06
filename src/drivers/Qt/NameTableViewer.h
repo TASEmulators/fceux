@@ -73,10 +73,12 @@ class ppuNameTableViewerDialog_t : public QDialog
 		QCheckBox *ignorePaletteCbox;
 		QSlider   *refreshSlider;
 		QLineEdit *scanLineEdit;
+		QTimer    *updateTimer;
 
 	public slots:
       void closeWindow(void);
 	private slots:
+		void periodicUpdate(void);
 		void refreshSliderChanged(int value);
 		void scanLineChanged( const QString &txt );
 };
