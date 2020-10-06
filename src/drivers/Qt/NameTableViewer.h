@@ -64,6 +64,13 @@ class ppuNameTableViewerDialog_t : public QDialog
 	protected:
 		void closeEvent(QCloseEvent *bar);
 
+		ppuNameTableView_t *ntView;
+		QCheckBox *showScrollLineCbox;
+		QCheckBox *showAttrbCbox;
+		QCheckBox *ignorePaletteCbox;
+		QSlider   *refreshSlider;
+		QLineEdit *scanLineEdit;
+
 	public slots:
       void closeWindow(void);
 	private slots:

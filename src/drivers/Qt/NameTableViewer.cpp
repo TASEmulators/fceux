@@ -44,6 +44,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	QVBoxLayout *mainLayout, *vbox;
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
+	QGroupBox   *frame;
 	char stmp[64];
 
 	nameTableViewWindow = this;
@@ -53,6 +54,41 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	mainLayout = new QVBoxLayout();
 
 	setLayout( mainLayout );
+
+	vbox   = new QVBoxLayout();
+	frame  = new QGroupBox( tr("Name Tables") );
+	ntView = new ppuNameTableView_t(this);
+	grid   = new QGridLayout();
+
+	vbox->addWidget( ntView );
+	frame->setLayout( vbox );
+	mainLayout->addWidget( frame, 100 );
+	mainLayout->addLayout( grid ,   1 );
+
+	showScrollLineCbox = new QCheckBox( tr("Show Scroll Lines") );
+	showAttrbCbox      = new QCheckBox( tr("Show Attributes") );
+	ignorePaletteCbox  = new QCheckBox( tr("Ignore Palette") );
+
+	grid->addWidget( showScrollLineCbox, 0, 0, Qt::AlignLeft );
+	grid->addWidget( showAttrbCbox     , 1, 0, Qt::AlignLeft );
+	grid->addWidget( ignorePaletteCbox , 2, 0, Qt::AlignLeft );
+
+	hbox   = new QHBoxLayout();
+	refreshSlider  = new QSlider( Qt::Horizontal );
+	hbox->addWidget( new QLabel( tr("Refresh: More") ) );
+	hbox->addWidget( refreshSlider );
+	hbox->addWidget( new QLabel( tr("Less") ) );
+	grid->addLayout( hbox, 0, 1, Qt::AlignRight );
+
+	refreshSlider->setMinimum( 0);
+	refreshSlider->setMaximum(25);
+	refreshSlider->setValue(1);
+
+	hbox         = new QHBoxLayout();
+	scanLineEdit = new QLineEdit();
+	hbox->addWidget( new QLabel( tr("Display on Scanline:") ) );
+	hbox->addWidget( scanLineEdit );
+	grid->addLayout( hbox, 1, 1, Qt::AlignRight );
 }
 //----------------------------------------------------
 ppuNameTableViewerDialog_t::~ppuNameTableViewerDialog_t(void)
@@ -82,10 +118,10 @@ ppuNameTableView_t::ppuNameTableView_t(QWidget *parent)
 {
 	this->setFocusPolicy(Qt::StrongFocus);
 	this->setMouseTracking(true);
-	setMinimumWidth( 256 );
-	setMinimumHeight( 256 );
-	viewWidth = 256;
-	viewHeight = 256;
+	viewWidth = 240 * 2;
+	viewHeight = 256 * 2;
+	setMinimumWidth( viewWidth );
+	setMinimumHeight( viewHeight );
 }
 //----------------------------------------------------
 ppuNameTableView_t::~ppuNameTableView_t(void)
