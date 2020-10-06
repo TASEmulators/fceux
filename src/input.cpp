@@ -372,7 +372,39 @@ static void StrobeSNES(int w)
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+//--------Hori 4 player driver for expansion port--------
+static uint8 Hori4ReadBit[2];
+static void StrobeHori4(void)
+{
+	Hori4ReadBit[0] = Hori4ReadBit[1] = 0;
+}
 
+static uint8 ReadHori4(int w, uint8 ret)
+{
+	ret &= 1;
+
+	if (Hori4ReadBit[w] < 8)
+	{
+		ret |= ((joy[w] >> (Hori4ReadBit[w])) & 1) << 1;
+	}
+	else if (Hori4ReadBit[w] < 16)
+	{
+		ret |= ((joy[2 + w] >> (Hori4ReadBit[w] - 8)) & 1) << 1;
+	}
+	else if (Hori4ReadBit[w] < 24)
+	{
+		ret |= (((w ? 0x10 : 0x20) >> (7 - (Hori4ReadBit[w] - 16))) & 1) << 1;
+	}
+	if (Hori4ReadBit[w] >= 24) ret |= 2;
+	else Hori4ReadBit[w]++;
+
+	return(ret);
+}
+
+static INPUTCFC HORI4C = { ReadHori4,0,StrobeHori4,0,0,0 };
+//------------------
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 static INPUTC GPC={ReadGP,0,StrobeGP,UpdateGP,0,0,LogGP,LoadGP};
 static INPUTC GPCVS={ReadGPVS,0,StrobeGP,UpdateGP,0,0,LogGP,LoadGP};
@@ -543,6 +575,10 @@ static void SetInputStuffFC()
 		break;
 	case SIFC_FAMINETSYS:
 		portFC.driver = FCEU_InitFamiNetSys();
+		break;
+	case SIFC_HORI4PLAYER:
+		portFC.driver = &HORI4C;
+		memset(&Hori4ReadBit, 0, sizeof(Hori4ReadBit));
 		break;
 	}
 }
