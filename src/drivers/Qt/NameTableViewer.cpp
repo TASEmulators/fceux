@@ -59,9 +59,10 @@ enum NT_MirrorType
 	NT_SINGLE_SCREEN_TABLE_2, NT_SINGLE_SCREEN_TABLE_3,
 	NT_NUM_MIRROR_TYPES
 };
-static NT_MirrorType ntmirroring, oldntmirroring = NT_NONE;
+static NT_MirrorType ntmirroring = NT_NONE, oldntmirroring = NT_NONE;
 
 static void initNameTableViewer(void);
+static void ChangeMirroring(void);
 //----------------------------------------------------
 int openNameTableViewWindow( QWidget *parent )
 {
@@ -163,6 +164,16 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	grid->addWidget( singleScreenBtn[2], 2, 1, Qt::AlignLeft );
 	grid->addWidget( singleScreenBtn[3], 3, 1, Qt::AlignLeft );
 
+	connect( horzMirrorBtn     , SIGNAL(clicked(void)), this, SLOT(horzMirrorClicked(void)));
+	connect( vertMirrorBtn     , SIGNAL(clicked(void)), this, SLOT(vertMirrorClicked(void)));
+	connect( fourScreenBtn     , SIGNAL(clicked(void)), this, SLOT(fourScreenClicked(void)));
+	connect( singleScreenBtn[0], SIGNAL(clicked(void)), this, SLOT(singleScreen0Clicked(void)));
+	connect( singleScreenBtn[1], SIGNAL(clicked(void)), this, SLOT(singleScreen1Clicked(void)));
+	connect( singleScreenBtn[2], SIGNAL(clicked(void)), this, SLOT(singleScreen2Clicked(void)));
+	connect( singleScreenBtn[3], SIGNAL(clicked(void)), this, SLOT(singleScreen3Clicked(void)));
+
+	updateMirrorButtons();
+
 	vbox   = new QVBoxLayout();
 	frame  = new QGroupBox( tr("Properties") );
 	hbox->addWidget( frame );
@@ -212,12 +223,84 @@ void ppuNameTableViewerDialog_t::closeWindow(void)
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::periodicUpdate(void)
 {
+	updateMirrorButtons();
 
 	if ( redrawtables )
 	{
 		this->update();
 		redrawtables = false;
 	}
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::updateMirrorButtons(void)
+{
+	switch ( ntmirroring )
+	{
+		default:
+		case NT_NONE:
+		break;
+		case NT_HORIZONTAL:
+			horzMirrorBtn->setChecked(true);
+		break;
+		case NT_VERTICAL:
+			vertMirrorBtn->setChecked(true);
+		break;
+		case NT_FOUR_SCREEN:
+			fourScreenBtn->setChecked(true);
+		break;
+		case NT_SINGLE_SCREEN_TABLE_0:
+		case NT_SINGLE_SCREEN_TABLE_1:
+		case NT_SINGLE_SCREEN_TABLE_2:
+		case NT_SINGLE_SCREEN_TABLE_3:
+		{
+			int i = ntmirroring - NT_SINGLE_SCREEN_TABLE_0;
+
+			singleScreenBtn[i]->setChecked(true);
+		}
+		break;
+	}
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::horzMirrorClicked(void)
+{
+	ntmirroring = NT_HORIZONTAL;
+	ChangeMirroring();
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::vertMirrorClicked(void)
+{
+	ntmirroring = NT_VERTICAL;
+	ChangeMirroring();
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::fourScreenClicked(void)
+{
+	ntmirroring = NT_FOUR_SCREEN;
+	ChangeMirroring();
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::singleScreen0Clicked(void)
+{
+	ntmirroring = NT_SINGLE_SCREEN_TABLE_0;
+	ChangeMirroring();
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::singleScreen1Clicked(void)
+{
+	ntmirroring = NT_SINGLE_SCREEN_TABLE_1;
+	ChangeMirroring();
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::singleScreen2Clicked(void)
+{
+	ntmirroring = NT_SINGLE_SCREEN_TABLE_2;
+	ChangeMirroring();
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::singleScreen3Clicked(void)
+{
+	ntmirroring = NT_SINGLE_SCREEN_TABLE_3;
+	ChangeMirroring();
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::scanLineChanged( const QString &txt )

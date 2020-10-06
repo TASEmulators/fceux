@@ -88,6 +88,14 @@ class ppuNameTableViewerDialog_t : public QDialog
       void closeWindow(void);
 	private slots:
 		void periodicUpdate(void);
+		void updateMirrorButtons(void);
+		void horzMirrorClicked(void);
+		void vertMirrorClicked(void);
+		void fourScreenClicked(void);
+		void singleScreen0Clicked(void);
+		void singleScreen1Clicked(void);
+		void singleScreen2Clicked(void);
+		void singleScreen3Clicked(void);
 		void refreshSliderChanged(int value);
 		void scanLineChanged( const QString &txt );
 };
