@@ -17,19 +17,22 @@
 #include <QGroupBox>
 #include <QCloseEvent>
 
+struct  ppuNameTablePixel_t
+{
+	QColor color;
+};
+
+struct ppuNameTableTile_t
+{
+	struct ppuNameTablePixel_t pixel[8][8];
+
+	int  x;
+	int  y;
+};
+
 struct ppuNameTable_t
 {
-	struct 
-	{
-		struct 
-		{
-			QColor color;
-		} pixel[8][8];
-
-		int  x;
-		int  y;
-
-	} tile[30][32];
+	struct ppuNameTableTile_t tile[30][32];
 
 	int  w;
 	int  h;
@@ -74,6 +77,8 @@ class ppuNameTableViewerDialog_t : public QDialog
 	public slots:
       void closeWindow(void);
 	private slots:
+		void refreshSliderChanged(int value);
+		void scanLineChanged( const QString &txt );
 };
 
 int openNameTableViewWindow( QWidget *parent );

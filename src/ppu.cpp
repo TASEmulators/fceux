@@ -1375,9 +1375,7 @@ static void DoLine(void) {
 			GameHBIRQHook();
 	}
 
-#ifdef WIN32
 	DEBUG(FCEUD_UpdateNTView(scanline, 0));
-#endif
 
 	if (SpriteON)
 		RefreshSprites();
@@ -2152,9 +2150,7 @@ int FCEUX_PPU_Loop(int skip) {
 			if (sl != 0 && sl < 241)  // ignore the invisible
 			{
 				DEBUG(FCEUD_UpdatePPUView(scanline = yp, 1));
-#ifdef WIN32
 				DEBUG(FCEUD_UpdateNTView(scanline = yp, 1));
-#endif
 			}
 
 			//hack to fix SDF ship intro screen with split. is it right?
