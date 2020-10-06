@@ -96,10 +96,10 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	sprite8x16Cbox[0]->setChecked( PPUView_sprite16Mode[0] );
 	sprite8x16Cbox[1]->setChecked( PPUView_sprite16Mode[1] );
 
-	patternVbox[0]->addWidget( patternView[0], 10 );
+	patternVbox[0]->addWidget( patternView[0], 100 );
 	patternVbox[0]->addWidget( tileLabel[0], 1 );
 	patternVbox[0]->addWidget( sprite8x16Cbox[0], 1 );
-	patternVbox[1]->addWidget( patternView[1], 10 );
+	patternVbox[1]->addWidget( patternView[1], 100 );
 	patternVbox[1]->addWidget( tileLabel[1], 1 );
 	patternVbox[1]->addWidget( sprite8x16Cbox[1], 1 );
 
@@ -150,6 +150,7 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	patternView[1]->setPattern( &pattern1 );
 	patternView[0]->setTileLabel( tileLabel[0] );
 	patternView[1]->setTileLabel( tileLabel[1] );
+	paletteView->setTileLabel( paletteFrame );
 
 	scanLineEdit->setMaxLength( 3 );
 	scanLineEdit->setInputMask( ">900;" );
@@ -300,12 +301,14 @@ void ppuPatternView_t::resizeEvent(QResizeEvent *event)
 //----------------------------------------------------
 void ppuPatternView_t::mouseMoveEvent(QMouseEvent *event)
 {
-	char stmp[64];
 	QPoint tile = convPixToTile( event->pos() );
 
-	sprintf( stmp, "Tile: $%X%X", tile.y(), tile.x() );
-
-	tileLabel->setText( tr(stmp) );
+	if ( (tile.x() < 16) && (tile.y() < 16) )
+	{
+		char stmp[64];
+		sprintf( stmp, "Tile: $%X%X", tile.y(), tile.x() );
+		tileLabel->setText( tr(stmp) );
+	}
 }
 //----------------------------------------------------------------------------
 void ppuPatternView_t::mousePressEvent(QMouseEvent * event)
@@ -314,12 +317,18 @@ void ppuPatternView_t::mousePressEvent(QMouseEvent * event)
 
 	if ( event->button() == Qt::LeftButton )
 	{
-		// TODO Load Tile Viewport
+		// Load Tile Viewport
+		PPUViewSkip = 100;
+
+		FCEUD_UpdatePPUView( -1, 0 );
 	}
 	else if ( event->button() == Qt::RightButton )
 	{
 		pindex[ patternIndex ] = (pindex[ patternIndex ] + 1) % 9;
+
 		PPUViewSkip = 100;
+
+		FCEUD_UpdatePPUView( -1, 0 );
 	}
 }
 //----------------------------------------------------
@@ -556,9 +565,19 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 ppuPalatteView_t::ppuPalatteView_t(QWidget *parent)
 	: QWidget(parent)
 {
-	setMinimumWidth( 32 * PALETTEHEIGHT );
+	this->setFocusPolicy(Qt::StrongFocus);
+	this->setMouseTracking(true);
+
+	setMinimumWidth( 32 * PALETTEWIDTH );
 	setMinimumHeight( 32 * PALETTEHEIGHT );
 
+	viewWidth  = 32 * PALETTEWIDTH;
+	viewHeight = 32 * PALETTEHEIGHT;
+
+	boxWidth  = viewWidth / PALETTEWIDTH;
+   boxHeight = viewHeight / PALETTEHEIGHT;
+
+	frame = NULL;
 }
 //----------------------------------------------------
 ppuPalatteView_t::~ppuPalatteView_t(void)
@@ -566,12 +585,63 @@ ppuPalatteView_t::~ppuPalatteView_t(void)
 
 }
 //----------------------------------------------------
+void ppuPalatteView_t::setTileLabel( QGroupBox *l )
+{
+	frame = l;
+}
+//----------------------------------------------------
+QPoint ppuPalatteView_t::convPixToTile( QPoint p )
+{
+	QPoint t(0,0);
+
+	t.setX( p.x() / boxWidth );
+	t.setY( p.y() / boxHeight );
+
+	return t;
+}
+//----------------------------------------------------
+void ppuPalatteView_t::resizeEvent(QResizeEvent *event)
+{
+	viewWidth  = event->size().width();
+	viewHeight = event->size().height();
+
+	boxWidth  = viewWidth / PALETTEWIDTH;
+   boxHeight = viewHeight / PALETTEHEIGHT;
+}
+//----------------------------------------------------
+void ppuPalatteView_t::mouseMoveEvent(QMouseEvent *event)
+{
+	QPoint tile = convPixToTile( event->pos() );
+
+	if ( (tile.x() < PALETTEWIDTH) && (tile.y() < PALETTEHEIGHT) )
+	{
+		char stmp[64];
+		int ix = (tile.y()<<4)|tile.x();
+
+		sprintf( stmp, "Palette: $%02X", palcache[ix]);
+
+		frame->setTitle( tr(stmp) );
+	}
+}
+//----------------------------------------------------------------------------
+void ppuPalatteView_t::mousePressEvent(QMouseEvent * event)
+{
+	//QPoint tile = convPixToTile( event->pos() );
+
+	//if ( event->button() == Qt::LeftButton )
+	//{
+	//}
+	//else if ( event->button() == Qt::RightButton )
+	//{
+	//}
+}
+//----------------------------------------------------
 void ppuPalatteView_t::paintEvent(QPaintEvent *event)
 {
 	int x,y,w,h,xx,yy;
 	QPainter painter(this);
-	int viewWidth  = event->rect().width();
-	int viewHeight = event->rect().height();
+	viewWidth  = event->rect().width();
+	viewHeight = event->rect().height();
 
 	//printf("PPU PatternView %ix%i \n", viewWidth, viewHeight );
 
@@ -597,7 +667,6 @@ void ppuPalatteView_t::paintEvent(QPaintEvent *event)
 		x = i*w; 
 		painter.drawLine( x, 0 , x, y );
 	}
-
 	
 	x = PALETTEWIDTH*w; 
 	for (int i=0; i<=PALETTEHEIGHT; i++)

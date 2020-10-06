@@ -301,7 +301,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 	while ( fgets( line, sizeof(line), fp ) != 0 )
 	{
 		i=0; lineNum++;
-		printf("%4i:%s", lineNum, line );
+		//printf("%4i:%s", lineNum, line );
 
 		if ( line[i] == '\\' )
 		{
@@ -490,7 +490,7 @@ int debugSymbolTable_t::loadGameSymbols(void)
 	//nPages = 1<<(15-debuggerPageSize);
 	nPages = romSize / pageSize;
 
-	printf("RomSize: %i    NumPages: %i \n", romSize, nPages );
+	//printf("RomSize: %i    NumPages: %i \n", romSize, nPages );
 
 	for(int i=0;i<nPages;i++)
 	{
@@ -499,7 +499,7 @@ int debugSymbolTable_t::loadGameSymbols(void)
 		loadFileNL( i );
 	}
 
-	print();
+	//print();
 
 	return 0;
 }

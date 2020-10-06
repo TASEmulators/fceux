@@ -1957,7 +1957,7 @@ void  QAsmView::updateAssemblyView(void)
 				int i,j;
 				const char *c;
 				char stmp[256];
-				printf("Debug symbol Found at $%04X \n", dbgSym->ofs );
+				//printf("Debug symbol Found at $%04X \n", dbgSym->ofs );
 				d = new dbg_asm_entry_t();
 
 				*d = *a;

@@ -70,8 +70,18 @@ class ppuPalatteView_t : public QWidget
 		ppuPalatteView_t(QWidget *parent = 0);
 		~ppuPalatteView_t(void);
 
+		void setTileLabel( QGroupBox *l );
+		QPoint convPixToTile( QPoint p );
 	protected:
 		void paintEvent(QPaintEvent *event);
+		void resizeEvent(QResizeEvent *event);
+		void mouseMoveEvent(QMouseEvent *event);
+		void mousePressEvent(QMouseEvent * event);
+		int viewWidth;
+		int viewHeight;
+		int boxWidth;
+		int boxHeight;
+		QGroupBox *frame;
 };
 
 class ppuViewerDialog_t : public QDialog
@@ -83,7 +93,6 @@ class ppuViewerDialog_t : public QDialog
 		~ppuViewerDialog_t(void);
 
 	protected:
-      //QTimer    *inputTimer;
 
 		ppuPatternView_t *patternView[2];
 		ppuPalatteView_t *paletteView;
@@ -103,7 +112,6 @@ class ppuViewerDialog_t : public QDialog
    public slots:
       void closeWindow(void);
 	private slots:
-		//void updatePeriodic(void);
 		void sprite8x16Changed0(int state);
 		void sprite8x16Changed1(int state);
 		void refreshSliderChanged(int value);
