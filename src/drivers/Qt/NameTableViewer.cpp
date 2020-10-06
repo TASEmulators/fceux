@@ -30,13 +30,12 @@ static int NTViewRefresh = 1;
 static int chrchanged = 0;
 
 static int xpos = 0, ypos = 0;
-//static int scrolllines = 1;
 static int attview = 0;
 static int hidepal = 0;
 static bool redrawtables = true;
 
 // checkerboard tile for attribute view
-static const uint8_t ATTRIBUTE_VIEW_TILE[16] = {	0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF };
+static const uint8_t ATTRIBUTE_VIEW_TILE[16] = { 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF };
 
 
 static class NTCache 
@@ -47,11 +46,7 @@ public:
 	{}
 
 	uint8_t* curr_vnapage;
-	uint8_t* bitmap;
 	uint8_t cache[0x400];
-	//HDC hdc;
-	//HBITMAP hbmp;
-	//HGDIOBJ tmpobj;
 } cache[4];
 
 static ppuNameTable_t nameTable[4];
@@ -192,8 +187,8 @@ ppuNameTableView_t::ppuNameTableView_t(QWidget *parent)
 {
 	this->setFocusPolicy(Qt::StrongFocus);
 	this->setMouseTracking(true);
-	viewWidth = 240 * 2;
-	viewHeight = 256 * 2;
+	viewWidth = 256 * 2;
+	viewHeight = 240 * 2;
 	setMinimumWidth( viewWidth );
 	setMinimumHeight( viewHeight );
 }
@@ -207,6 +202,8 @@ void ppuNameTableView_t::resizeEvent(QResizeEvent *event)
 {
 	viewWidth  = event->size().width();
 	viewHeight = event->size().height();
+
+	//printf("%ix%i\n", viewWidth, viewHeight );
 }
 //----------------------------------------------------
 void ppuNameTableView_t::mouseMoveEvent(QMouseEvent *event)
@@ -241,8 +238,10 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 	viewWidth  = event->rect().width();
 	viewHeight = event->rect().height();
 
-	w = viewWidth / (240*2);
-  	h = viewHeight / (256*2);
+	w = viewWidth / (256*2);
+  	h = viewHeight / (240*2);
+
+	//printf("%ix%i\n", viewWidth, viewHeight );
 
 	xx = 0; yy = 0;
 
@@ -252,22 +251,20 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 		
 		xx = (n%2) * (viewWidth / 2);
 		yy = (n/2) * (viewHeight / 2);
-		//xx = 0;
-		//yy = 0;
 
 		for (j=0; j<30; j++)
 		{
-			jj = (j*8)+yy;
+			jj = (j*8);
 
 			for (i=0; i<32; i++)
 			{
-				ii = (i*8)+xx;
+				ii = (i*8);
 
 				for (y=0; y<8; y++)
 				{
 					for (x=0; x<8; x++)
 					{
-						painter.fillRect( ii+x, jj+y, w, h, nt->tile[j][i].pixel[y][x].color );
+						painter.fillRect( xx+(ii+x)*w, yy+(jj+y)*h, w, h, nt->tile[j][i].pixel[y][x].color );
 					}
 				}
 			}
