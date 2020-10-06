@@ -22,13 +22,18 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <uxtheme.h>
 #include "memviewsp.h"
 #include "memview.h"
+#include "debugger.h"
 #include "common.h"
 
-int importBookmarkProps = IMPORT_OVERWRITE_NONE;
+#pragma comment(lib, "uxtheme.lib")
 
+int importBookmarkProps = IMPORT_OVERWRITE_NONE;
 HexBookmarkList hexBookmarks;
+
+static HFONT hFont, hNewFont;
 
 /// Finds the bookmark for a given address
 /// @param address The address to find.
@@ -38,13 +43,13 @@ int findBookmark(unsigned int address, int editmode)
 {
 	int i;
 
-	if (address > 0xFFFF)
+	if (address > GetMaxSize(editmode))
 	{
 		MessageBox(0, "Error: Invalid address was specified as parameter to findBookmark", "Error", MB_OK | MB_ICONERROR);
 		return -1;
 	}
-	
-	for (i=0;i<hexBookmarks.bookmarkCount;i++)
+
+	for (i=0; i < hexBookmarks.bookmarkCount; i++)
 	{
 		if (hexBookmarks[i].address == address && hexBookmarks[i].editmode == editmode)
 			return i;
@@ -53,14 +58,12 @@ int findBookmark(unsigned int address, int editmode)
 	return -1;
 }
 
-BOOL CenterWindow(HWND hwndDlg);
-
 /// Callback function for the name bookmark dialog
 INT_PTR CALLBACK nameHexBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	// For Hex Editor
 	static HexBookmarkMsg* hexBookmarkMsg;
-	int dlgShortcutRadioCheck[10] = { IDC_RADIO_SHORTCUT0, IDC_RADIO_SHORTCUT1, IDC_RADIO_SHORTCUT2, IDC_RADIO_SHORTCUT3, IDC_RADIO_SHORTCUT4, IDC_RADIO_SHORTCUT5, IDC_RADIO_SHORTCUT6, IDC_RADIO_SHORTCUT7, IDC_RADIO_SHORTCUT8, IDC_RADIO_SHORTCUT9 };
+	static int dlgShortcutRadio[10] = { IDC_RADIO_SHORTCUT0, IDC_RADIO_SHORTCUT1, IDC_RADIO_SHORTCUT2, IDC_RADIO_SHORTCUT3, IDC_RADIO_SHORTCUT4, IDC_RADIO_SHORTCUT5, IDC_RADIO_SHORTCUT6, IDC_RADIO_SHORTCUT7, IDC_RADIO_SHORTCUT8, IDC_RADIO_SHORTCUT9 };
+	static int dlgShortcutCaption[10] = { IDC_EDIT_SHORTCUT0, IDC_EDIT_SHORTCUT1, IDC_EDIT_SHORTCUT2, IDC_EDIT_SHORTCUT3, IDC_EDIT_SHORTCUT4, IDC_EDIT_SHORTCUT5, IDC_EDIT_SHORTCUT6, IDC_EDIT_SHORTCUT7, IDC_EDIT_SHORTCUT8, IDC_EDIT_SHORTCUT9 };
 
 	switch (uMsg)
 	{
@@ -68,7 +71,7 @@ INT_PTR CALLBACK nameHexBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 		{
 			// Limit bookmark descriptions to 50 characters
 			SendDlgItemMessage(hwndDlg, IDC_BOOKMARK_DESCRIPTION, EM_SETLIMITTEXT, 50, 0);
-			
+
 			// Limit the address text
 			SendDlgItemMessage(hwndDlg, IDC_BOOKMARK_ADDRESS, EM_SETLIMITTEXT, 6, 0);
 			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_BOOKMARK_ADDRESS), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
@@ -80,21 +83,39 @@ INT_PTR CALLBACK nameHexBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 			hexBookmarkMsg = (HexBookmarkMsg*)lParam;
 			HexBookmark* hexBookmark = hexBookmarkMsg->bookmark;
 
-			bool shortcut_assigned = hexBookmarkMsg->shortcut_index != -1;
-			if (shortcut_assigned)
+			if (hexBookmarkMsg->shortcut_index != -1)
 			{
 				CheckDlgButton(hwndDlg, IDC_CHECK_SHORTCUT, BST_CHECKED);
-				CheckDlgButton(hwndDlg, dlgShortcutRadioCheck[hexBookmarkMsg->shortcut_index], BST_CHECKED);
+				CheckDlgButton(hwndDlg, dlgShortcutRadio[hexBookmarkMsg->shortcut_index], BST_CHECKED);
 			}
 			else
 				EnableWindow(GetDlgItem(hwndDlg, IDC_BOOKMARK_SHORTCUT_PREFIX_TEXT), FALSE);
 
-			for (int i = 0; i < 10; ++i)
-				if (!shortcut_assigned || hexBookmarks.shortcuts[i] != -1 && hexBookmarks.shortcuts[i] != hexBookmarkMsg->bookmark_index)
-					// this bookmark doesn't have a shortcut, or the shortcut number is occupied but it doesn't belongs to this bookmark
-					EnableWindow(GetDlgItem(hwndDlg, dlgShortcutRadioCheck[i]), FALSE);
+			hFont = (HFONT)SendMessage(hwndDlg, WM_GETFONT, 0, 0);
+			LOGFONT lf;
+			GetObject(hFont, sizeof(LOGFONT), &lf);
+			strcpy(lf.lfFaceName, "Courier New");
+			hNewFont = CreateFontIndirect(&lf);
 
-			if (!shortcut_assigned && hexBookmarks.shortcutCount >= 10)
+			for (int i = 0; i < 10; ++i)
+			{
+				SetWindowTheme(GetDlgItem(hwndDlg, dlgShortcutRadio[i]), L"", L"");
+				
+				// The slot is not occupied, or it is the same slot of the bookmark
+				EnableWindow(GetDlgItem(hwndDlg, dlgShortcutRadio[i]), hexBookmarkMsg->shortcut_index != -1 && (hexBookmarks.shortcuts[i] == -1 || hexBookmarks.shortcuts[i] == hexBookmarkMsg->bookmark_index));
+
+				if (hexBookmarks.shortcuts[i] != -1) {
+					// Fill the caption block with the address information
+					char buf[16];
+					sprintf(buf, "%s: $%04X", EditString[hexBookmarks[hexBookmarks.shortcuts[i]].editmode], hexBookmarks[hexBookmarks.shortcuts[i]].address);
+					SetDlgItemText(hwndDlg, dlgShortcutCaption[i], buf);
+					SendDlgItemMessage(hwndDlg, dlgShortcutCaption[i], WM_SETFONT, (WPARAM)hNewFont, FALSE);
+				}
+				else
+					EnableWindow(GetDlgItem(hwndDlg, dlgShortcutCaption[i]), FALSE);
+			}
+
+			if (hexBookmarkMsg->shortcut_index == -1 && hexBookmarks.shortcutCount >= 10)
 			{
 				// all the shortcuts are occupied and this one doesn't have a shortcut, it's impossible to assign a new shortcut
 				EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_SHORTCUT), FALSE);
@@ -116,8 +137,18 @@ INT_PTR CALLBACK nameHexBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 
 			break;
 		}
+		case WM_CTLCOLORSTATIC:
+			if (hexBookmarkMsg->shortcut_index != -1 && hexBookmarks.shortcuts[hexBookmarkMsg->shortcut_index] == hexBookmarkMsg->bookmark_index && ((HWND)lParam == GetDlgItem(hwndDlg, dlgShortcutCaption[hexBookmarkMsg->shortcut_index]) || (HWND)lParam == GetDlgItem(hwndDlg, dlgShortcutRadio[hexBookmarkMsg->shortcut_index])))
+			{
+				SetBkMode((HDC)wParam, TRANSPARENT);
+				SetTextColor((HDC)wParam, RGB(0, 128, 0));
+				return (INT_PTR)GetSysColorBrush(COLOR_BTNFACE);
+			}
+		break;
 		case WM_CLOSE:
 		case WM_QUIT:
+			DeleteObject(hNewFont);
+			DeleteObject(hFont);
 			EndDialog(hwndDlg, 0);
 			break;
 		case WM_COMMAND:
@@ -129,10 +160,10 @@ INT_PTR CALLBACK nameHexBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 						case IDC_CHECK_SHORTCUT:
 						{
 							UINT shortcut_assigned = IsDlgButtonChecked(hwndDlg, IDC_CHECK_SHORTCUT);
-							EnableWindow(GetDlgItem(hwndDlg, IDC_BOOKMARK_SHORTCUT_PREFIX_TEXT), shortcut_assigned);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_BOOKMARK_SHORTCUT_PREFIX_TEXT), shortcut_assigned == BST_CHECKED);
 
 							for (int i = 0; i < 10; ++i)
-								EnableWindow(GetDlgItem(hwndDlg, dlgShortcutRadioCheck[i]), shortcut_assigned && (hexBookmarks.shortcuts[i] == -1 || hexBookmarks.shortcuts[i] == hexBookmarkMsg->bookmark_index));
+								EnableWindow(GetDlgItem(hwndDlg, dlgShortcutRadio[i]), shortcut_assigned && (hexBookmarks.shortcuts[i] == -1 || hexBookmarks.shortcuts[i] == hexBookmarkMsg->bookmark_index));
 						}
 						break;
 						case IDOK:
@@ -184,7 +215,7 @@ INT_PTR CALLBACK nameHexBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 
 							if (IsDlgButtonChecked(hwndDlg, IDC_CHECK_SHORTCUT))
 								for (int i = 0; i < 10; ++i)
-									if (IsDlgButtonChecked(hwndDlg, dlgShortcutRadioCheck[i]))
+									if (IsDlgButtonChecked(hwndDlg, dlgShortcutRadio[i]))
 									{
 										// Update the shortcut index
 										hexBookmarks.shortcuts[i] = hexBookmarkMsg->bookmark_index;

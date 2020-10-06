@@ -18,12 +18,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifndef MEMVIEWSP_H
+#define MEMVIEWSP_H
+
 #include "types.h"
 
 #define ID_FIRST_BOOKMARK               30
 #define ID_BOOKMARKLIST_SEP				(ID_FIRST_BOOKMARK - 1)
 
-typedef struct HEXBOOKMARK
+typedef struct
 {
 	char description[51];
 	unsigned int address;
@@ -37,14 +40,15 @@ typedef struct
 	int shortcut_index = -1;
 } HexBookmarkMsg;
 
-typedef struct {
+extern struct HexBookmarkList
+{
 	HexBookmark bookmarks[64];
 	int shortcuts[10] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 	int bookmarkCount = 0;
 	int shortcutCount = 0;
 
 	HexBookmark& operator[](int index);
-} HexBookmarkList;
+} hexBookmarks;
 
 #define IMPORT_OVERWRITE_NONE 0 // Overwrite nothing
 #define IMPORT_OVERWRITE_BOOKMARK 1 // Overwrite duplicated bookmarks but don't overwrite duplicated shortcuts
@@ -54,8 +58,6 @@ typedef struct {
 #define IMPORT_DISCARD_ORIGINAL 8 // Discard all the original bookmarks
 
 extern int importBookmarkProps;
-
-extern HexBookmarkList hexBookmarks;
 
 int findBookmark(unsigned int address, int editmode);
 int addBookmark(HWND hwnd, unsigned int address, int editmode);
@@ -68,3 +70,5 @@ void removeAllBookmarks(HMENU menu);
 
 extern LRESULT APIENTRY FilterEditCtrlProc(HWND hDlg, UINT msg, WPARAM wP, LPARAM lP);
 extern WNDPROC DefaultEditCtrlProc;
+
+#endif

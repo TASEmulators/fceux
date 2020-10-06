@@ -2232,7 +2232,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			bool success = false;
 			if (GetOpenFileName(&ofn))
 			{
-				char buffer[128] = { 0 };
+				char buffer[256] = { 0 };
 				FILE* bld = fopen(nameo, "r");
 				if (bld)
 				{
@@ -2247,7 +2247,10 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 						{
 							if (importBookmarkProps & IMPORT_DISCARD_ORIGINAL)
 							{
+								discard_original:
 								if (importBookmarkProps & IMPORT_OVERWRITE_NO_PROMPT || hexBookmarks.bookmarkCount == 0 || MessageBox(hwnd, "All your existing bookmarks will be discarded after importing the new bookmarks! Do you want to continue?", "Bookmark Import", MB_YESNO | MB_ICONWARNING) == IDYES)
+								{
+									removeAllBookmarks(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
 									for (i = 0; i < import.bookmarkCount; ++i)
 									{
 										hexBookmarks[i].address = import[i].address;
@@ -2257,6 +2260,9 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 										hexBookmarks.bookmarkCount = import.bookmarkCount;
 										hexBookmarks.shortcutCount = import.shortcutCount;
 									}
+									updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
+									UpdateColorTable();
+								}
 							}
 							else
 							{
@@ -2382,6 +2388,14 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 									strcat(buffer, " with yours.\r\nYou must choose which side would be reserved. Do you want to continue?");
 
 									continue_ = MessageBox(hwnd, buffer, "Bookmark conflict", MB_YESNO | MB_ICONEXCLAMATION) == IDYES && DialogBoxParam(fceu_hInstance, "IMPORTBOOKMARKOPTIONDIALOG", hwnd, importBookmarkCallB, (LPARAM)&tmpImportBookmarkProps);
+									
+									if (tmpImportBookmarkProps & IMPORT_OVERWRITE_NO_PROMPT)
+										importBookmarkProps = tmpImportBookmarkProps;
+
+									// in case user's mind changes on the fly
+									if (tmpImportBookmarkProps & IMPORT_DISCARD_ORIGINAL)
+										goto discard_original;
+
 								}
 
 								if (continue_)

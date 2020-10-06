@@ -1,3 +1,6 @@
+#ifndef MEMVIEW_H
+#define MEMVIEW_H
+
 void DoMemView();
 void KillMemView();
 void UpdateMemoryView(int draw_all);
@@ -16,3 +19,5 @@ extern HWND hMemView, hMemFind;
 extern int EditingMode;
 
 extern char* EditString[4];
+
+#endif

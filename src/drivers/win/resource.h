@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by res.rc
+// Microsoft Visual C++ 生成的包含文件。
+// 供 res.rc 使用
 //
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
@@ -514,22 +514,33 @@
 #define MW_VAL04                        1014
 #define MW_NAME05                       1015
 #define MW_ADDR05                       1016
+#define IDC_EDIT_SHORTCUT0              1016
 #define MW_VAL05                        1017
+#define IDC_EDIT_SHORTCUT1              1017
 #define IDC_PRGROM_COMBO                1018
 #define MW_NAME06                       1018
+#define IDC_EDIT_SHORTCUT2              1018
 #define MW_ADDR06                       1019
 #define IDC_CHRROM_COMBO                1019
+#define IDC_EDIT_SHORTCUT7              1019
 #define IDC_RADIO_MIRR_HORIZONTAL       1020
 #define MW_VAL06                        1020
+#define IDC_EDIT_SHORTCUT6              1020
 #define IDC_RADIO_MIRR_VERTICAL         1021
 #define MW_NAME07                       1021
+#define IDC_EDIT6                       1021
+#define IDC_EDIT_SHORTCUT9              1021
 #define MW_ADDR07                       1022
 #define IDC_RADIO_MIRR_4SCREEN          1022
+#define IDC_EDIT_SHORTCUT5              1022
 #define MW_VAL07                        1023
+#define IDC_EDIT_SHORTCUT4              1023
 #define IDC_CHECK_TRAINER               1024
 #define MW_NAME08                       1024
+#define IDC_EDIT_SHORTCUT8              1024
 #define MW_ADDR08                       1025
 #define IDC_PRGRAM_COMBO                1025
+#define IDC_EDIT_SHORTCUT3              1025
 #define IDC_MAPPER_COMBO                1026
 #define MW_VAL08                        1026
 #define IDC_SUBMAPPER_EDIT              1027
@@ -676,6 +687,7 @@
 #define TASEDITOR_REWIND                1133
 #define TASEDITOR_FORWARD               1134
 #define TASEDITOR_REWIND_FULL           1135
+#define IDC_EDIT10                      1135
 #define TASEDITOR_FORWARD_FULL          1136
 #define TASEDITOR_PLAYSTOP              1137
 #define IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES 1138
@@ -1181,7 +1193,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        311
 #define _APS_NEXT_COMMAND_VALUE         40009
-#define _APS_NEXT_CONTROL_VALUE         1126
+#define _APS_NEXT_CONTROL_VALUE         1017
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
