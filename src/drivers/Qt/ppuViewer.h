@@ -70,8 +70,18 @@ class ppuPalatteView_t : public QWidget
 		ppuPalatteView_t(QWidget *parent = 0);
 		~ppuPalatteView_t(void);
 
+		void setTileLabel( QGroupBox *l );
+		QPoint convPixToTile( QPoint p );
 	protected:
 		void paintEvent(QPaintEvent *event);
+		void resizeEvent(QResizeEvent *event);
+		void mouseMoveEvent(QMouseEvent *event);
+		void mousePressEvent(QMouseEvent * event);
+		int viewWidth;
+		int viewHeight;
+		int boxWidth;
+		int boxHeight;
+		QGroupBox *frame;
 };
 
 class ppuViewerDialog_t : public QDialog
