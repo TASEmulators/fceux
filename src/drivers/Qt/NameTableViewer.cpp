@@ -110,9 +110,16 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	showAttrbCbox      = new QCheckBox( tr("Show Attributes") );
 	ignorePaletteCbox  = new QCheckBox( tr("Ignore Palette") );
 
+	//showScrollLineCbox->setChecked( attview );
+	showAttrbCbox->setChecked( attview );
+	ignorePaletteCbox->setChecked( hidepal );
+
 	grid->addWidget( showScrollLineCbox, 0, 0, Qt::AlignLeft );
 	grid->addWidget( showAttrbCbox     , 1, 0, Qt::AlignLeft );
 	grid->addWidget( ignorePaletteCbox , 2, 0, Qt::AlignLeft );
+
+	connect( showAttrbCbox    , SIGNAL(stateChanged(int)), this, SLOT(showAttrbChanged(int)));
+	connect( ignorePaletteCbox, SIGNAL(stateChanged(int)), this, SLOT(ignorePaletteChanged(int)));
 
 	hbox   = new QHBoxLayout();
 	refreshSlider  = new QSlider( Qt::Horizontal );
@@ -335,6 +342,16 @@ void ppuNameTableViewerDialog_t::scanLineChanged( const QString &txt )
 		NTViewScanline = strtoul( s.c_str(), NULL, 10 );
 	}
 	//printf("ScanLine: '%s'  %i\n", s.c_str(), PPUViewScanline );
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::showAttrbChanged(int state)
+{
+	attview = (state != Qt::Unchecked);
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::ignorePaletteChanged(int state)
+{
+	hidepal = (state != Qt::Unchecked);
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::refreshSliderChanged(int value)
