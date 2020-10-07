@@ -34,6 +34,7 @@
 #include "Qt/AboutWindow.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ppuViewer.h"
+#include "Qt/NameTableViewer.h"
 #include "Qt/keyscan.h"
 #include "Qt/nes_shm.h"
 
@@ -509,6 +510,14 @@ void consoleWin_t::createMainMenu(void)
     connect(ppuViewAct, SIGNAL(triggered()), this, SLOT(openPPUViewer(void)) );
 
     debugMenu->addAction(ppuViewAct);
+
+	 // Debug -> Name Table Viewer
+	 ntViewAct = new QAction(tr("Name Table Viewer..."), this);
+    //ntViewAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    ntViewAct->setStatusTip(tr("Open Name Table Viewer"));
+    connect(ntViewAct, SIGNAL(triggered()), this, SLOT(openNTViewer(void)) );
+
+    debugMenu->addAction(ntViewAct);
 
 	 // Debug -> Trace Logger
 	 traceLogAct = new QAction(tr("Trace Logger..."), this);
@@ -1035,6 +1044,13 @@ void consoleWin_t::openPPUViewer(void)
 	//printf("Open GUI PPU Viewer Window\n");
 	
 	openPPUViewWindow(this);
+}
+
+void consoleWin_t::openNTViewer(void)
+{
+	//printf("Open GUI Name Table Viewer Window\n");
+	
+	openNameTableViewWindow(this);
 }
 
 void consoleWin_t::openCodeDataLogger(void)

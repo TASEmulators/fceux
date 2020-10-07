@@ -42,6 +42,7 @@ static QColor ppuv_palette[PALETTEHEIGHT][PALETTEWIDTH];
 static uint8_t pallast[32+3] = { 0 }; // palette cache for change comparison
 static uint8_t palcache[36] = { 0 }; //palette cache for drawing
 static uint8_t chrcache0[0x1000] = {0}, chrcache1[0x1000] = {0}, logcache0[0x1000] = {0}, logcache1[0x1000] = {0}; //cache CHR, fixes a refresh problem when right-clicking
+static bool	redrawWindow = true;
 
 static void initPPUViewer(void);
 static ppuPatternTable_t pattern0;
@@ -166,11 +167,18 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	connect( refreshSlider, SIGNAL(valueChanged(int)), this, SLOT(refreshSliderChanged(int)));
 
 	FCEUD_UpdatePPUView( -1, 1 );
+
+	updateTimer  = new QTimer( this );
+
+   connect( updateTimer, &QTimer::timeout, this, &ppuViewerDialog_t::periodicUpdate );
+
+	updateTimer->start( 33 ); // 30hz
 }
 
 //----------------------------------------------------
 ppuViewerDialog_t::~ppuViewerDialog_t(void)
 {
+	updateTimer->stop();
 	ppuViewWindow = NULL;
 
 	printf("PPU Viewer Window Deleted\n");
@@ -189,6 +197,15 @@ void ppuViewerDialog_t::closeWindow(void)
    printf("Close Window\n");
    done(0);
 	deleteLater();
+}
+//----------------------------------------------------
+void ppuViewerDialog_t::periodicUpdate(void)
+{
+	if ( redrawWindow )
+	{
+		this->update();
+		redrawWindow = false;
+	}
 }
 //----------------------------------------------------
 void ppuViewerDialog_t::scanLineChanged( const QString &txt )
@@ -493,19 +510,28 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 
 	if (refreshchr)
 	{
+		int i10, x10;
 		for (i = 0, x=0x1000; i < 0x1000; i++, x++)
 		{
-			chrcache0[i] = VPage[i>>10][i];
-			chrcache1[i] = VPage[x>>10][x];
+			i10 = i>>10;
+			x10 = x>>10;
+
+			if ( VPage[i10] == NULL )
+			{
+				continue;
+			}
+			chrcache0[i] = VPage[i10][i];
+			chrcache1[i] = VPage[x10][x];
+
 			if (debug_loggingCD) 
 			{
 				if (cdloggerVideoDataSize)
 				{
 					int addr;
-					addr = &VPage[i >> 10][i] - CHRptr[0];
+					addr = &VPage[i10][i] - CHRptr[0];
 					if ((addr >= 0) && (addr < (int)cdloggerVideoDataSize))
 						logcache0[i] = cdloggervdata[addr];
-					addr = &VPage[x >> 10][x] - CHRptr[0];
+					addr = &VPage[x10][x] - CHRptr[0];
 					if ((addr >= 0) && (addr < (int)cdloggerVideoDataSize))
 						logcache1[i] = cdloggervdata[addr];
 				}
@@ -556,10 +582,7 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 	DrawPatternTable( &pattern0,chrcache0,logcache0,pindex[0]);
 	DrawPatternTable( &pattern1,chrcache1,logcache1,pindex[1]);
 
-	if ( ppuViewWindow )
-	{
-		ppuViewWindow->update();
-	}
+	redrawWindow = true;
 }
 //----------------------------------------------------
 ppuPalatteView_t::ppuPalatteView_t(QWidget *parent)

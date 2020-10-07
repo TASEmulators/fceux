@@ -108,10 +108,12 @@ class ppuViewerDialog_t : public QDialog
 		QCheckBox  *invertMaskCbox;
 		QSlider    *refreshSlider;
 		QLineEdit  *scanLineEdit;
+		QTimer     *updateTimer;
 
    public slots:
       void closeWindow(void);
 	private slots:
+		void periodicUpdate(void);
 		void sprite8x16Changed0(int state);
 		void sprite8x16Changed1(int state);
 		void refreshSliderChanged(int value);

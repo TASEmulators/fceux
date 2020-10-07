@@ -44,7 +44,7 @@ Memory Watch Window                                  |     NO      |     NO     
 TAS Editor                                           |     NO      |     NO      |
 6502 Debugger Window                                 |     YES     |     YES     |
 PPU Viewer                                           |     YES     |     NO      |
-Name Table Viewer                                    |     NO      |     NO      |
+Name Table Viewer                                    |     YES     |     NO      |
 Memory Hex Editor                                    |     YES     |     YES     |
 Trace Logger                                         |     YES     |     NO      |
 Code/Data Logger                                     |     YES     |     NO      |
