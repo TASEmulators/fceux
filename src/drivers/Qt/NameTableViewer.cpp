@@ -32,6 +32,7 @@ static int chrchanged = 0;
 static int xpos = 0, ypos = 0;
 static int attview = 0;
 static int hidepal = 0;
+static bool drawScrollLines = true;
 static bool redrawtables = true;
 
 // checkerboard tile for attribute view
@@ -110,7 +111,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	showAttrbCbox      = new QCheckBox( tr("Show Attributes") );
 	ignorePaletteCbox  = new QCheckBox( tr("Ignore Palette") );
 
-	//showScrollLineCbox->setChecked( attview );
+	showScrollLineCbox->setChecked( drawScrollLines );
 	showAttrbCbox->setChecked( attview );
 	ignorePaletteCbox->setChecked( hidepal );
 
@@ -118,8 +119,9 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	grid->addWidget( showAttrbCbox     , 1, 0, Qt::AlignLeft );
 	grid->addWidget( ignorePaletteCbox , 2, 0, Qt::AlignLeft );
 
-	connect( showAttrbCbox    , SIGNAL(stateChanged(int)), this, SLOT(showAttrbChanged(int)));
-	connect( ignorePaletteCbox, SIGNAL(stateChanged(int)), this, SLOT(ignorePaletteChanged(int)));
+	connect( showScrollLineCbox, SIGNAL(stateChanged(int)), this, SLOT(showScrollLinesChanged(int)));
+	connect( showAttrbCbox     , SIGNAL(stateChanged(int)), this, SLOT(showAttrbChanged(int)));
+	connect( ignorePaletteCbox , SIGNAL(stateChanged(int)), this, SLOT(ignorePaletteChanged(int)));
 
 	hbox   = new QHBoxLayout();
 	refreshSlider  = new QSlider( Qt::Horizontal );
@@ -344,6 +346,11 @@ void ppuNameTableViewerDialog_t::scanLineChanged( const QString &txt )
 	//printf("ScanLine: '%s'  %i\n", s.c_str(), PPUViewScanline );
 }
 //----------------------------------------------------
+void ppuNameTableViewerDialog_t::showScrollLinesChanged(int state)
+{
+	drawScrollLines = (state != Qt::Unchecked);
+}
+//----------------------------------------------------
 void ppuNameTableViewerDialog_t::showAttrbChanged(int state)
 {
 	attview = (state != Qt::Unchecked);
@@ -473,8 +480,9 @@ void ppuNameTableView_t::mousePressEvent(QMouseEvent * event)
 void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 {
 	ppuNameTable_t *nt;
-	int n,i,j,ii,jj,w,h,x,y,xx,yy;
+	int n,i,j,ii,jj,w,h,x,y,xx,yy,ww,hh;
 	QPainter painter(this);
+	QColor scanLineColor(255,255,255);
 	viewWidth  = event->rect().width();
 	viewHeight = event->rect().height();
 
@@ -514,7 +522,25 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 				}
 			}
 		}
+		if ( drawScrollLines )
+		{
+			ww = nt->w * 256;
+			hh = nt->h * 240;
+
+			painter.setPen( scanLineColor );
+
+			if ( (xpos >= xx) && (xpos < (xx+ww)) )
+			{
+				painter.drawLine( xpos, yy, xpos, yy + hh );
+			}
+
+			if ( (ypos >= yy) && (ypos < (yy+hh)) )
+			{
+				painter.drawLine( xx, ypos, xx + ww, ypos );
+			}
+		}
 	}
+
 }
 //----------------------------------------------------
 static void initNameTableViewer(void)

@@ -105,6 +105,7 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void singleScreen3Clicked(void);
 		void showAttrbChanged(int state);
 		void ignorePaletteChanged(int state);
+		void showScrollLinesChanged(int state);
 		void refreshSliderChanged(int value);
 		void scanLineChanged( const QString &txt );
 };
