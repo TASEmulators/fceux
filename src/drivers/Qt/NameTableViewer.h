@@ -35,9 +35,13 @@ struct ppuNameTable_t
 {
 	struct ppuNameTableTile_t tile[30][32];
 
+	int  x;
+	int  y;
 	int  w;
 	int  h;
 };
+
+class ppuNameTableViewerDialog_t;
 
 class ppuNameTableView_t : public QWidget
 {
@@ -52,7 +56,9 @@ class ppuNameTableView_t : public QWidget
 		void resizeEvent(QResizeEvent *event);
 		void mouseMoveEvent(QMouseEvent *event);
 		void mousePressEvent(QMouseEvent * event);
+		void computeNameTableProperties( int x, int y );
 
+		ppuNameTableViewerDialog_t *parent;
 		int viewWidth;
 		int viewHeight;
 };
@@ -65,6 +71,7 @@ class ppuNameTableViewerDialog_t : public QDialog
 		ppuNameTableViewerDialog_t(QWidget *parent = 0);
 		~ppuNameTableViewerDialog_t(void);
 
+		void setPropertyLabels( int TileID, int TileX, int TileY, int NameTable, int PPUAddress, int AttAddress, int Attrib );
 	protected:
 		void closeEvent(QCloseEvent *bar);
 

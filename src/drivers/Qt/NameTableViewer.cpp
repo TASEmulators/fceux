@@ -232,6 +232,27 @@ void ppuNameTableViewerDialog_t::periodicUpdate(void)
 	}
 }
 //----------------------------------------------------
+void ppuNameTableViewerDialog_t::setPropertyLabels( int TileID, int TileX, int TileY, int NameTable, int PPUAddress, int AttAddress, int Attrib )
+{
+	char stmp[64];
+
+	sprintf( stmp, "Tile ID: %02X", TileID);
+
+	tileID->setText( tr(stmp) );
+
+	sprintf( stmp, "X/Y : %0d/%0d", TileX, TileY);
+
+	tileXY->setText( tr(stmp) );
+
+	sprintf(stmp,"PPU Address: %04X",PPUAddress);
+
+	ppuAddrLbl->setText( tr(stmp) );
+
+	sprintf(stmp,"Attribute: %1X (%04X)",Attrib,AttAddress);
+
+	attrbLbl->setText( tr(stmp) );
+}
+//----------------------------------------------------
 void ppuNameTableViewerDialog_t::updateMirrorButtons(void)
 {
 	switch ( ntmirroring )
@@ -324,6 +345,7 @@ void ppuNameTableViewerDialog_t::refreshSliderChanged(int value)
 ppuNameTableView_t::ppuNameTableView_t(QWidget *parent)
 	: QWidget(parent)
 {
+	this->parent = (ppuNameTableViewerDialog_t*)parent;
 	this->setFocusPolicy(Qt::StrongFocus);
 	this->setMouseTracking(true);
 	viewWidth = 256 * 2;
@@ -345,16 +367,78 @@ void ppuNameTableView_t::resizeEvent(QResizeEvent *event)
 	//printf("%ix%i\n", viewWidth, viewHeight );
 }
 //----------------------------------------------------
+void ppuNameTableView_t::computeNameTableProperties( int x, int y )
+{
+	int i, xx, yy, w, h, TileID, TileX, TileY, NameTable, PPUAddress, AttAddress, Attrib;
+	ppuNameTable_t *tbl = NULL;
+
+	NameTable = 0;
+
+	if ( vnapage[0] == NULL )
+	{
+		return;
+	}
+	for (i=0; i<4; i++)
+	{
+		xx = nameTable[i].x;
+		yy = nameTable[i].y;
+		w = (nameTable[i].w * 256);
+		h = (nameTable[i].h * 240);
+
+		if ( (x >= xx) && (x < (xx+w) ) &&
+		     (y >= yy) && (y < (yy+h) ) )
+		{
+			tbl = &nameTable[i];
+			NameTable = i;
+			break;
+		}
+	}
+
+	if ( tbl == NULL )
+	{
+		//printf("Mouse not over a tile\n");
+		return;
+	}
+	xx = tbl->x; yy = tbl->y;
+	w  = tbl->w;  h = tbl->h;
+
+	if ( (NameTable%2) == 1 )
+	{
+		TileX = ((x - xx) / (w*8)) + 32;
+	}
+	else
+	{
+		TileX = (x - xx) / (w*8);
+	}
+
+	if ( (NameTable/2) == 1 )
+	{
+		TileY = ((y - yy) / (h*8)) + 30;
+	}
+	else
+	{
+		TileY = (y - yy) / (h*8);
+	}
+
+	PPUAddress = 0x2000+(NameTable*0x400)+((TileY%30)*32)+(TileX%32);
+
+	TileID = vnapage[(PPUAddress>>10)&0x3][PPUAddress&0x3FF];
+
+	AttAddress = 0x23C0 | (PPUAddress & 0x0C00) | ((PPUAddress >> 4) & 0x38) | ((PPUAddress >> 2) & 0x07);
+	Attrib = vnapage[(AttAddress>>10)&0x3][AttAddress&0x3FF];
+	Attrib = (Attrib >> ((PPUAddress&2) | ((PPUAddress&64)>>4))) & 0x3;
+
+	//printf("NT:%i Tile X/Y : %i/%i \n", NameTable, TileX, TileY );
+
+	if ( parent )
+	{
+		parent->setPropertyLabels( TileID, TileX, TileY, NameTable, PPUAddress, AttAddress, Attrib );
+	}
+}
+//----------------------------------------------------
 void ppuNameTableView_t::mouseMoveEvent(QMouseEvent *event)
 {
-	//QPoint tile = convPixToTile( event->pos() );
-
-	//if ( (tile.x() < 16) && (tile.y() < 16) )
-	//{
-	//	char stmp[64];
-	//	sprintf( stmp, "Tile: $%X%X", tile.y(), tile.x() );
-	//	tileLabel->setText( tr(stmp) );
-	//}
+	computeNameTableProperties( event->pos().x(), event->pos().y() );
 }
 //----------------------------------------------------------------------------
 void ppuNameTableView_t::mousePressEvent(QMouseEvent * event)
@@ -387,9 +471,11 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 	for (n=0; n<4; n++)
 	{
 		nt = &nameTable[n];
+
+		nt->w = w; nt->h = h;
 		
-		xx = (n%2) * (viewWidth / 2);
-		yy = (n/2) * (viewHeight / 2);
+		nt->x = xx = (n%2) * (viewWidth / 2);
+		nt->y = yy = (n/2) * (viewHeight / 2);
 
 		for (j=0; j<30; j++)
 		{
@@ -398,6 +484,9 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 			for (i=0; i<32; i++)
 			{
 				ii = (i*8);
+
+				nt->tile[j][i].x = xx+(ii*w);
+				nt->tile[j][i].y = yy+(jj*h);
 
 				for (y=0; y<8; y++)
 				{
