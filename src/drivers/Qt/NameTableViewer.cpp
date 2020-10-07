@@ -572,15 +572,8 @@ static void DrawNameTable(int scanline, int ntnum, bool invalidateCache)
 
 				//obviously this whole scheme of nt cache doesnt work if an mmc5 game is playing tricks with the attribute table
 			}
-			//pbitmap += (8*3);
 		}
-		//pbitmap += 7*((NTWIDTH*3));
 	}
-
-	 //this copies the attribute tables to the cache if needed. but we arent using it now because 
-	//if(redrawtables){
-	//	memcpy(tablecache+0x3c0,table+0x3c0,0x40);
-	//}
 }
 //----------------------------------------------------
 void FCEUD_UpdateNTView(int scanline, bool drawall) 
@@ -594,11 +587,7 @@ void FCEUD_UpdateNTView(int scanline, bool drawall)
 		return;
 	}
 
-	//uint8 *pbitmap = ppuv_palette;
-	//if (!hNTView) return;
-	
 	ppu_getScroll(xpos,ypos);
-
 
 	if (NTViewSkip < NTViewRefresh)
 	{
@@ -618,13 +607,19 @@ void FCEUD_UpdateNTView(int scanline, bool drawall)
 		memcpy(palcache,PALRAM,32);
 		drawall = 1; //palette has changed, so redraw all
 	}
+
+	if ( vnapage[0] == NULL )
+	{
+		return;
+	}
 	 
 	ntmirroring = NT_NONE;
-	if(vnapage[0] == vnapage[1])ntmirroring = NT_HORIZONTAL;
-	if(vnapage[0] == vnapage[2])ntmirroring = NT_VERTICAL;
-	if((vnapage[0] != vnapage[1]) && (vnapage[0] != vnapage[2]))ntmirroring = NT_FOUR_SCREEN;
+	if (vnapage[0] == vnapage[1])ntmirroring = NT_HORIZONTAL;
+	if (vnapage[0] == vnapage[2])ntmirroring = NT_VERTICAL;
+	if ((vnapage[0] != vnapage[1]) && (vnapage[0] != vnapage[2]))ntmirroring = NT_FOUR_SCREEN;
 
-	if((vnapage[0] == vnapage[1]) && (vnapage[1] == vnapage[2]) && (vnapage[2] == vnapage[3])){ 
+	if ((vnapage[0] == vnapage[1]) && (vnapage[1] == vnapage[2]) && (vnapage[2] == vnapage[3]))
+	{ 
 		if(vnapage[0] == &NTARAM[0x000])ntmirroring = NT_SINGLE_SCREEN_TABLE_0;
 		if(vnapage[0] == &NTARAM[0x400])ntmirroring = NT_SINGLE_SCREEN_TABLE_1;
 		if(vnapage[0] == ExtraNTARAM)ntmirroring = NT_SINGLE_SCREEN_TABLE_2;
