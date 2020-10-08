@@ -398,7 +398,7 @@ void RamWatchDialog_t::loadWatchFile (const char *filename)
 		return;
 	}
 
-	while (fgets (line, sizeof (line) - 1, fp) > 0)
+	while (fgets (line, sizeof (line) - 1, fp) != NULL)
 	{
 		a = -1;
 		t = -1;
