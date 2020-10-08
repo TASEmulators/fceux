@@ -371,6 +371,7 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/input/suborkb.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/toprider.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/virtualboy.cpp
+  	${CMAKE_CURRENT_SOURCE_DIR}/input/lcdcompzapper.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/zapper.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/backward.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/ConvertUTF.c
