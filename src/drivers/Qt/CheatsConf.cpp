@@ -639,6 +639,7 @@ int GuiCheatsDialog_t::activeCheatListCB (char *name, uint32 a, uint8 v, int c, 
 
 	item->setTextAlignment( 0, Qt::AlignLeft);
 	item->setTextAlignment( 1, Qt::AlignLeft);
+	item->setTextAlignment( 2, Qt::AlignLeft);
 
 	actvCheatIdx++;
 

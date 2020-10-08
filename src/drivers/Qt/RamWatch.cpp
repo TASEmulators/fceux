@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <string>
 
 #include <SDL.h>
@@ -11,6 +12,11 @@
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QGroupBox>
+
+#include "../../types.h"
+#include "../../fceu.h"
+#include "../../cheat.h"
+#include "../../debug.h"
 
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -250,5 +256,281 @@ void RamWatchDialog_t::closeWindow(void)
    //printf("Close Window\n");
    done(0);
 	deleteLater();
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::updateRamWatchDisplay(void)
+{
+	int idx=0;
+	QTreeWidgetItem *item;
+	std::list < ramWatch_t * >::iterator it;
+	char addrStr[32], valStr1[16], valStr2[16];
+	ramWatch_t *rw;
+
+	for (it = ramWatchList.ls.begin (); it != ramWatchList.ls.end (); it++)
+	{
+		rw = *it;
+
+		item = tree->topLevelItem(idx);
+
+		if ( item == NULL )
+		{
+			item = new QTreeWidgetItem();
+
+			tree->addTopLevelItem( item );
+		}
+		sprintf (addrStr, "0x%04X", rw->addr);
+
+		rw->updateMem ();
+
+		if (rw->size == 2)
+		{
+			if (rw->type)
+			{
+				sprintf (valStr1, "%6u", rw->val.u16);
+			}
+			else
+			{
+				sprintf (valStr1, "%6i", rw->val.i16);
+			}
+			sprintf (valStr2, "0x%04X", rw->val.u16);
+		}
+		else
+		{
+			if (rw->type)
+			{
+				sprintf (valStr1, "%6u", rw->val.u8);
+			}
+			else
+			{
+				sprintf (valStr1, "%6i", rw->val.i8);
+			}
+			sprintf (valStr2, "0x%02X", rw->val.u8);
+		}
+
+		item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren );
+
+		//item->setFont(font);
+		item->setText( 0, tr(addrStr) );
+		item->setText( 1, tr(valStr1) );
+		item->setText( 2, tr(rw->name.c_str())  );
+   
+		item->setTextAlignment( 0, Qt::AlignLeft);
+		item->setTextAlignment( 1, Qt::AlignLeft);
+		item->setTextAlignment( 2, Qt::AlignLeft);
+
+		idx++;
+	}
+}
+//----------------------------------------------------------------------------
+void ramWatch_t::updateMem (void)
+{
+	if (size == 1)
+	{
+		val.u8 = GetMem (addr);
+	}
+	else if (size == 2)
+	{
+		val.u16 = GetMem (addr) | (GetMem (addr + 1) << 8);
+	}
+	else
+	{
+		val.u8 = GetMem (addr);
+	}
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::saveWatchFile (const char *filename)
+{
+	int i;
+	FILE *fp;
+	const char *c;
+	std::list < ramWatch_t * >::iterator it;
+	ramWatch_t *rw;
+
+	fp = fopen (filename, "w");
+
+	if (fp == NULL)
+	{
+		printf ("Error: Failed to open file: %s\n", filename);
+		return;
+	}
+
+	for (it = ramWatchList.ls.begin (); it != ramWatchList.ls.end (); it++)
+	{
+		rw = *it;
+
+		c = rw->name.c_str ();
+
+		fprintf (fp, "0x%04x   %c%i   ", rw->addr, rw->type ? 'U' : 'S',
+			 rw->size);
+
+		i = 0;
+		fprintf (fp, "\"");
+		while (c[i])
+		{
+			if (c[i] == '"')
+			{
+				fprintf (fp, "\\%c", c[i]);
+			}
+			else
+			{
+				fprintf (fp, "%c", c[i]);
+			}
+			i++;
+		}
+		fprintf (fp, "\"\n");
+	}
+	fclose (fp);
+
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::loadWatchFile (const char *filename)
+{
+	FILE *fp;
+	int i, j, a, t, s, literal;
+	char line[512], stmp[512];
+	ramWatch_t *rw;
+
+	fp = fopen (filename, "r");
+
+	if (fp == NULL)
+	{
+		printf ("Error: Failed to open file: %s\n", filename);
+		return;
+	}
+
+	while (fgets (line, sizeof (line) - 1, fp) > 0)
+	{
+		a = -1;
+		t = -1;
+		s = -1;
+		// Check for Comments
+		i = 0;
+		while (line[i] != 0)
+		{
+			if (literal)
+			{
+				literal = 0;
+			}
+			else
+			{
+				if (line[i] == '#')
+				{
+					line[i] = 0;
+					break;
+				}
+				else if (line[i] == '\\')
+				{
+					literal = 1;
+				}
+			}
+			i++;
+		}
+
+		i = 0;
+		j = 0;
+		while (isspace (line[i])) i++;
+
+		if ((line[i] == '0') && (tolower (line[i + 1]) == 'x'))
+		{
+			stmp[j] = '0';
+			j++;
+			i++;
+			stmp[j] = 'x';
+			j++;
+			i++;
+
+			while (isxdigit (line[i]))
+			{
+				stmp[j] = line[i];
+				i++;
+				j++;
+			}
+		}
+		else
+		{
+			while (isxdigit (line[i]))
+			{
+				stmp[j] = line[i];
+				i++;
+				j++;
+			}
+		}
+		stmp[j] = 0;
+
+		if (j == 0) continue;
+
+		a = strtol (stmp, NULL, 0);
+
+		while (isspace (line[i])) i++;
+
+		t = line[i];
+		i++;
+		s = line[i];
+		i++;
+
+		if ((t != 'U') && (t != 'S'))
+		{
+			printf ("Error: Invalid RAM Watch Byte Type: %c", t);
+			continue;
+		}
+		if (!isdigit (s))
+		{
+			printf ("Error: Invalid RAM Watch Byte Size: %c", s);
+			continue;
+		}
+		s = s - '0';
+
+		if ((s != 1) && (s != 2) && (s != 4))
+		{
+			printf ("Error: Invalid RAM Watch Byte Size: %i", s);
+			continue;
+		}
+
+		while (isspace (line[i])) i++;
+
+		if (line[i] == '"')
+		{
+			i++;
+			j = 0;
+			literal = 0;
+			while ((line[i] != 0))
+			{
+				if (literal)
+				{
+					literal = 0;
+				}
+				else
+				{
+					if (line[i] == '"')
+					{
+						break;
+					}
+					else if (line[i] == '\\')
+					{
+						literal = 1;
+					}
+				}
+				if (!literal)
+				{
+					stmp[j] = line[i];
+					j++;
+				}
+				i++;
+			}
+			stmp[j] = 0;
+		}
+		rw = new ramWatch_t;
+
+		rw->addr = a;
+		rw->type = (t == 'U') ? 1 : 0;
+		rw->size = s;
+		rw->name.assign (stmp);
+
+		ramWatchList.ls.push_back (rw);
+	}
+
+	fclose (fp);
+
+	//showAllRamWatchResults (1);
 }
 //----------------------------------------------------------------------------
