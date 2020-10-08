@@ -35,6 +35,7 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/ppuViewer.h"
 #include "Qt/NameTableViewer.h"
+#include "Qt/RamWatch.h"
 #include "Qt/keyscan.h"
 #include "Qt/nes_shm.h"
 
@@ -482,6 +483,14 @@ void consoleWin_t::createMainMenu(void)
     connect(cheatsAct, SIGNAL(triggered()), this, SLOT(openCheats(void)) );
 
     toolsMenu->addAction(cheatsAct);
+
+	 // Tools -> RAM Watch
+	 ramWatchAct = new QAction(tr("RAM Watch..."), this);
+    //ramWatchAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    ramWatchAct->setStatusTip(tr("Open RAM Watch Window"));
+    connect(ramWatchAct, SIGNAL(triggered()), this, SLOT(openRamWatch(void)) );
+
+    toolsMenu->addAction(ramWatchAct);
 
 	 //-----------------------------------------------------------------------
 	 // Debug
@@ -1015,6 +1024,17 @@ void consoleWin_t::openCheats(void)
    cheatWin = new GuiCheatsDialog_t(this);
 	
    cheatWin->show();
+}
+
+void consoleWin_t::openRamWatch(void)
+{
+	RamWatchDialog_t *ramWatchWin;
+
+	//printf("Open GUI RAM Watch Window\n");
+	
+   ramWatchWin = new RamWatchDialog_t(this);
+	
+   ramWatchWin->show();
 }
 
 void consoleWin_t::openDebugWindow(void)
