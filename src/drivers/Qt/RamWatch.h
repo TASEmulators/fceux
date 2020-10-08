@@ -163,9 +163,11 @@ class RamWatchDialog_t : public QDialog
 
 	private:
 		void updateRamWatchDisplay(void);
+		void openWatchEditWindow( int idx = -1);
 
    public slots:
       void closeWindow(void);
 	private slots:
+		void newWatchClicked(void);
 
 };

@@ -12,6 +12,8 @@
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QGroupBox>
+#include <QLineEdit>
+#include <QRadioButton>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -221,6 +223,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	new_btn = new QPushButton( tr("New") );
 	vbox->addWidget( new_btn );
+	connect( new_btn, SIGNAL(clicked(void)), this, SLOT(newWatchClicked(void)));
 
 	dup_btn = new QPushButton( tr("Duplicate") );
 	vbox->addWidget( dup_btn );
@@ -336,6 +339,84 @@ void ramWatch_t::updateMem (void)
 	{
 		val.u8 = GetMem (addr);
 	}
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::openWatchEditWindow(int idx)
+{
+	int ret;
+	QDialog dialog(this);
+	QVBoxLayout *mainLayout, *vbox;
+	QHBoxLayout *hbox;
+	QLabel *lbl;
+	QLineEdit *addrEntry, *notesEntry;
+	QGroupBox *frame;
+	QRadioButton *signedTypeBtn, *unsignedTypeBtn, *hexTypeBtn, *binaryTypeBtn;
+	QRadioButton *dataSize1Btn, *dataSize2Btn, *dataSize4Btn;
+
+	dialog.setWindowTitle("Add Watch");
+
+	mainLayout = new QVBoxLayout();
+
+	dialog.setLayout( mainLayout );
+
+	hbox      = new QHBoxLayout();
+	lbl       = new QLabel( tr("Address") );
+	addrEntry = new QLineEdit();
+
+	mainLayout->addLayout( hbox );
+	hbox->addWidget( lbl );
+	hbox->addWidget( addrEntry );
+
+	hbox       = new QHBoxLayout();
+	lbl        = new QLabel( tr("Notes") );
+	notesEntry = new QLineEdit();
+
+	mainLayout->addLayout( hbox );
+	hbox->addWidget( lbl );
+	hbox->addWidget( notesEntry );
+
+	hbox  = new QHBoxLayout();
+	mainLayout->addLayout( hbox );
+
+	vbox  = new QVBoxLayout();
+	frame = new QGroupBox( tr("Data Type") );
+	hbox->addWidget( frame );
+	frame->setLayout( vbox  );
+
+	signedTypeBtn   = new QRadioButton( tr("Signed") );
+	unsignedTypeBtn = new QRadioButton( tr("Unsigned") );
+	hexTypeBtn      = new QRadioButton( tr("Hex") );
+	binaryTypeBtn   = new QRadioButton( tr("Binary") );
+
+	vbox->addWidget( signedTypeBtn   );
+	vbox->addWidget( unsignedTypeBtn );
+	vbox->addWidget( hexTypeBtn      );
+	vbox->addWidget( binaryTypeBtn   );
+
+	vbox  = new QVBoxLayout();
+	frame = new QGroupBox( tr("Data Size") );
+	hbox->addWidget( frame );
+	frame->setLayout( vbox  );
+
+	dataSize1Btn = new QRadioButton( tr("1 Byte") );
+	dataSize2Btn = new QRadioButton( tr("2 Bytes") );
+	dataSize4Btn = new QRadioButton( tr("4 Bytes") );
+
+	vbox->addWidget( dataSize1Btn );
+	vbox->addWidget( dataSize2Btn );
+	vbox->addWidget( dataSize4Btn );
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+
+	}
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::newWatchClicked(void)
+{
+	openWatchEditWindow();
 }
 //----------------------------------------------------------------------------
 void RamWatchDialog_t::saveWatchFile (const char *filename)
