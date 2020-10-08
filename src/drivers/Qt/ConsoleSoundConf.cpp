@@ -1,5 +1,7 @@
 // ConsoleSoundConf.cpp
 //
+#include <QCloseEvent>
+
 #include "../../fceu.h"
 #include "../../driver.h"
 #include "Qt/ConsoleSoundConf.h"
@@ -217,7 +219,22 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 //----------------------------------------------------
 ConsoleSndConfDialog_t::~ConsoleSndConfDialog_t(void)
 {
-
+   printf("Destroy Sound Config Window\n");
+}
+//----------------------------------------------------------------------------
+void ConsoleSndConfDialog_t::closeEvent(QCloseEvent *event)
+{
+   printf("Sound Config Close Window Event\n");
+   done(0);
+	deleteLater();
+   event->accept();
+}
+//----------------------------------------------------------------------------
+void ConsoleSndConfDialog_t::closeWindow(void)
+{
+   //printf("Sound Close Window\n");
+   done(0);
+	deleteLater();
 }
 //----------------------------------------------------
 void  ConsoleSndConfDialog_t::setCheckBoxFromProperty( QCheckBox *cbx, const char *property )

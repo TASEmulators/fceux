@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used for res.rc
+// Microsoft Visual C++ 生成的包含文件。
+// 供 res.rc 使用
 //
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
@@ -161,7 +161,7 @@
 #define IDC_CHECK_CODE_TABBING          117
 #define CHEAT_CONTEXT_LIST_POKECHEATVALUE 118
 #define IDC_CHECK_LOG_STATUSES_TO_THE_LEFT 118
-#define IDC_DEBUGGER_BOOKMARK_NAME      118
+#define IDC_DEBUGGER_BOOKMARK_EDIT      118
 #define CHEAT_CONTEXT_LIST_GOTOINHEXEDITOR 119
 #define IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS 119
 #define IDC_CHECK_LOG_FRAMES_COUNT      119
@@ -514,22 +514,33 @@
 #define MW_VAL04                        1014
 #define MW_NAME05                       1015
 #define MW_ADDR05                       1016
+#define IDC_EDIT_SHORTCUT0              1016
 #define MW_VAL05                        1017
+#define IDC_EDIT_SHORTCUT1              1017
 #define IDC_PRGROM_COMBO                1018
 #define MW_NAME06                       1018
+#define IDC_EDIT_SHORTCUT2              1018
 #define MW_ADDR06                       1019
 #define IDC_CHRROM_COMBO                1019
+#define IDC_EDIT_SHORTCUT7              1019
 #define IDC_RADIO_MIRR_HORIZONTAL       1020
 #define MW_VAL06                        1020
+#define IDC_EDIT_SHORTCUT6              1020
 #define IDC_RADIO_MIRR_VERTICAL         1021
 #define MW_NAME07                       1021
+#define IDC_EDIT6                       1021
+#define IDC_EDIT_SHORTCUT9              1021
 #define MW_ADDR07                       1022
 #define IDC_RADIO_MIRR_4SCREEN          1022
+#define IDC_EDIT_SHORTCUT5              1022
 #define MW_VAL07                        1023
+#define IDC_EDIT_SHORTCUT4              1023
 #define IDC_CHECK_TRAINER               1024
 #define MW_NAME08                       1024
+#define IDC_EDIT_SHORTCUT8              1024
 #define MW_ADDR08                       1025
 #define IDC_PRGRAM_COMBO                1025
+#define IDC_EDIT_SHORTCUT3              1025
 #define IDC_MAPPER_COMBO                1026
 #define MW_VAL08                        1026
 #define IDC_SUBMAPPER_EDIT              1027
@@ -625,12 +636,10 @@
 #define IDC_MISCELLANEOUS_ROMS_EDIT     1087
 #define IDC_EXTEND_SYSTEM_GROUP         1089
 #define IDC_EXTEND_SYSTEM_TEXT          1090
-#define IDC_BUTTON1                     1094
 #define IDC_CHEAT_SWITCH                1096
 #define IDC_CHEAT_GLOBAL_SWITCH         1096
 #define IDC_GAME_GENIE_LABEL            1097
 #define IDC_CHEAT_GAME_GENIE_TEXT       1098
-#define IDC_CHECK2                      1099
 #define IDC_RADIO_SHORTCUT1             1100
 #define IDC_RADIO_SHORTCUT2             1101
 #define IDC_RADIO_SHORTCUT3             1102
@@ -641,17 +650,31 @@
 #define IDC_RADIO_SHORTCUT8             1107
 #define IDC_RADIO_SHORTCUT9             1108
 #define IDC_RADIO_SHORTCUT0             1109
+#define IDC_BOOKMARK_VIEW_TEXT          1110
+#define IDC_BOOKMARK_COMBO_VIEW         1112
+#define IDC_CHEAT_SHOWGG                1112
+#define IDC_RADIO_BOOKMARKIMPORTOPTION_DISCARD 1114
+#define IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKOVERWRITE 1115
+#define IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKIGNORE 1116
 #define BTN_ALLOW_LRUD                  1117
+#define IDC_RADIO_BOOKMARKIMPORTOPTION_MERGE 1117
 #define IDC_PRGROM_EDIT                 1118
+#define IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTREASSIGN 1118
 #define IDC_CHRROM_EDIT                 1119
 #define BTN_PRESET_SET1                 1119
+#define IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTKEEP 1119
 #define BTN_PRESET_SET2                 1120
 #define BTN_PRESET_SET3                 1121
+#define IDC_CHECK_BOOKMARKIMPORTOPTION_CONFIRMEVERYTIMEONCONFLICT 1121
 #define BTN_PRESET_IMPORT1              1122
+#define IDC_TEXT_BOOKMARKIMPORTOPTION   1122
 #define BTN_PRESET_IMPORT2              1123
+#define IDC_TEXT_BOOKMARKIMPORTOPTION_BOOKMARK 1123
 #define BTN_PRESET_IMPORT3              1124
+#define IDC_TEXT_BOOKMARKIMPORTOPTION_SHORTCUT 1124
 #define IDC_PRGRAM_EDIT                 1125
 #define BTN_PRESET_EXPORT1              1125
+#define IDC_GROUP_BOOKMARKIMPORTOPTION_SOLVECONFLICT 1125
 #define BTN_PRESET_EXPORT2              1126
 #define BTN_PRESET_EXPORT3              1127
 #define IDC_CHRRAM_EDIT                 1128
@@ -664,6 +687,7 @@
 #define TASEDITOR_REWIND                1133
 #define TASEDITOR_FORWARD               1134
 #define TASEDITOR_REWIND_FULL           1135
+#define IDC_EDIT10                      1135
 #define TASEDITOR_FORWARD_FULL          1136
 #define TASEDITOR_PLAYSTOP              1137
 #define IDC_RADIO_GREENZONE_SAVINGMODE_ALLFRAMES 1138
@@ -867,6 +891,11 @@
 #define IDC_BINARY                      1317
 #define IDC_GAME_GENIE_ADDR             1501
 #define MENU_INESHEADEREDITOR           40001
+#define MENU_INPUT_BARCODE              40004
+#define ID_BOOKMARKS_IMPORT             40005
+#define ID_BOOKMARKS_SAVEAS             40006
+#define ID_BOOKMARKS_OPTION             40007
+#define ID_BOOKMARKS_EXPORT             40008
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1162,9 +1191,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        306
-#define _APS_NEXT_COMMAND_VALUE         40002
-#define _APS_NEXT_CONTROL_VALUE         1101
+#define _APS_NEXT_RESOURCE_VALUE        311
+#define _APS_NEXT_COMMAND_VALUE         40009
+#define _APS_NEXT_CONTROL_VALUE         1017
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -63,6 +63,7 @@ CHEATF_SUBFAST SubCheats[256] = { 0 };
 uint32 numsubcheats = 0;
 int globalCheatDisabled = 0;
 int disableAutoLSCheats = 0;
+bool disableShowGG = 0;
 static _8BYTECHEATMAP* cheatMap = NULL;
 struct CHEATF *cheats = 0, *cheatsl = 0;
 
@@ -569,7 +570,7 @@ int FCEUI_DecodeGG(const char *str, int *a, int *v, int *c)
 
 int FCEUI_DecodePAR(const char *str, int *a, int *v, int *c, int *type)
 {
-	int boo[4];
+	unsigned int boo[4];
 	if(strlen(str)!=8) return(0);
 
 	sscanf(str,"%02x%02x%02x%02x",boo,boo+1,boo+2,boo+3);
@@ -921,7 +922,7 @@ inline void FCEUI_CreateCheatMap()
 inline void FCEUI_RefreshCheatMap()
 {
 	memset(cheatMap, 0, CHEATMAP_SIZE);
-	for (int i = 0; i < numsubcheats; ++i)
+	for (uint32 i = 0; i < numsubcheats; ++i)
 		FCEUI_SetCheatMapByte(SubCheats[i].addr, true);
 }
 

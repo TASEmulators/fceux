@@ -31,65 +31,42 @@
   <a href="links.html">Links</a>
 </div>
 <div id="container">
-<div id="left_col">
-	<script type="text/javascript"><!--
-		google_ad_client = "pub-0764229755985190";
-		/* 180x150, created 5/22/10 */
-		google_ad_slot = "7648866201";
-		google_ad_width = 180;
-		google_ad_height = 150;
-		//-->
-	</script>
-	<script type="text/javascript"
-		src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-	</script>
-	
-	<script type="text/javascript"><!--
-		google_ad_client = "pub-0764229755985190";
-		/* 180x150, created 5/22/10 */
-		google_ad_slot = "7648866201";
-		google_ad_width = 180;
-		google_ad_height = 150;
-		//-->
-	</script>
-	<script type="text/javascript"
-		src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-	</script>
-
-
-</div>
+	<div id="left_col">
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	 		style="display:inline-block;width:180px;height:150px"
+	 		data-ad-client="ca-pub-0764229755985190"
+	 		data-ad-slot="7648866201"></ins>
+		<script>
+	     (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>	
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	    	 style="display:inline-block;width:180px;height:150px"
+	     	data-ad-client="ca-pub-0764229755985190"
+	     	data-ad-slot="7648866201"></ins>
+		<script>
+	    	 (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>
+	</div>
 	<div id="page_content">
-    To compile FCEUX in osx, you must have fink or macports. The FCEUX developers recommend fink, since that's what they use, but then again, the only time they compile software on osx is when folks come nagging.<p>
+    To run FCEUX in Mac OSX, you must have the following library dependencies installed on your system:
        <p>
-first, install the prerequisites.<p>
-<p>
-macports requires these prerequisites: scons, libsdl, zenity, lua, gtk2<p>
-fink requires these prerequisites: try all the same ones as macports, but i know at least one of them is named gtk+2 instead. please report your results.<p>
-<p>
-Building instructions for fink:<p>
-<p>
-CFLAGS=-I/sw/include LDFLAGS=-L/sw/lib scons<p>
-if you are getting link errors about 64bitness then your system is compiling fceux as 64bit but fink is providing i386 libraries. you need to force fceux to compile 32 bits:<p>
-CFLAGS="-I/sw/include -arch i386" LDFLAGS="-L/sw/lib -arch i386" scons<p>
-<p>
-None of the modifications listed at the paperkettle URL were necessary in our latest fink test only 18-jul-2010<p>
-<p>
-This URL is a little old, but he got FCEUX compiling via fink<p>
-http://beesbuzz.biz/blog/e/2009/04/14-how_to_build_fceux_for_mac_os_x.php<p>
-<p>
-Building instructions for macports:<p>
-<p>
-CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib scons<p>
-<p>
-This URL is fresh, and he got FCEUX compiling via macports:<p>
-http://www.paperkettle.com/blog/2010/07/17/fceux-2-14a-compiled-on-mac-osx-10-6/<p>
-<p>
----<p>
-<p>
-At any given time while fooling around you may discover that scons begins behaving irrationally. To fix this, try deleting .sconsign.dblite which will clear out its memory of what has come before.<p>
-<p>
-To clean your scons build, issue the main scons build command as discussed above with the -c parameter<p>
-
+		 Qt5, SDL2, minizip, and zlib
+		 <p>
+		 If you are attempting to use the appveyor pipeline autobuild of fceux, you must install these
+		 dependencies via the home brew package management tool. The following commands will install
+		 the necessary dependencies to run the autobuild:
+		 <pre>
+		 brew install qt5
+		 brew install sdl2
+		 brew install minizip
+		 </pre>
+		 If you are attempting to compile fceux, you can either install the dependencies via home brew
+		 or you can install the dmg packages available from the Qt and SDL websites. The cmake and make 
+		 build tools are required to compile fceux. See the README file in the root directory of the 
+		 project for build instructions. You can also look at what is being done in the ./pipelines/macOS_build.sh
+		 script if you wish to build fceux in the same way the autobuild does.
 	</div>
 </div>
 

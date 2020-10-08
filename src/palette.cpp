@@ -72,7 +72,7 @@ static void ChoosePalette(void);
 static void WritePalette(void);
 
 //points to the actually selected current palette
-pal *palo;
+pal *palo = NULL;
 
 #define RGB_TO_YIQ( r, g, b, y, i ) (\
 	(y = (r) * 0.299f + (g) * 0.587f + (b) * 0.114f),\
@@ -287,6 +287,11 @@ static void ApplyDeemphasisComplete(pal* pal512)
 			ApplyDeemphasisBisqwit(idx,pal512[idx].r,pal512[idx].g,pal512[idx].b);
 		}
 	}
+}
+
+bool  FCEUI_GetUserPaletteAvail( void )
+{
+	return palette_user_available;
 }
 
 void FCEUI_SetUserPalette(uint8 *pal, int nEntries)

@@ -1,9 +1,14 @@
 
+if ( ${GTK} )
+message( STATUS "GUI backend: GTK")
+set( APP_NAME fceux-gtk)
+else()
+message( STATUS "GUI backend: QT")
+set( APP_NAME fceux)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
-
-set( APP_NAME fceux)
+endif()
 
 if(WIN32)
   set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_WIN})
@@ -21,20 +26,34 @@ else(WIN32)
   # Non Windows System
   # UNIX (Linux or Mac OSX)
 
-  #set (OpenGL_GL_PREFERENCE  GLVND)
-  set (OpenGL_GL_PREFERENCE  LEGACY)
+	if ( ${GLVND} )
+		message( STATUS "OpenGL preference: GLVND")
+		set (OpenGL_GL_PREFERENCE  GLVND)
+	else()
+		message( STATUS "OpenGL preference: LEGACY")
+		set (OpenGL_GL_PREFERENCE  LEGACY)
+	endif()
 
   # Use the built-in cmake find_package functions to find dependencies
   # Use package PkgConfig to detect headers/library what find_package cannot find.
   find_package(PkgConfig REQUIRED)
-  find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
   find_package(OpenGL REQUIRED)
   find_package(ZLIB REQUIRED)
 
-  add_definitions( ${Qt5Widgets_DEFINITIONS}  )
-  include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
+  add_definitions( -Wall  -Wno-write-strings  -Wno-sign-compare  -Wno-parentheses  -Wno-unused-local-typedefs  -fPIC )
+  add_definitions( -DFCEUDEF_DEBUGGER )
 
-  add_definitions( -D__QT_DRIVER__  -Wall  -Wno-write-strings  -Wno-sign-compare  -Wno-parentheses  -Wno-unused-local-typedefs  -fPIC -DQT_DEPRECATED_WARNINGS )
+  if ( ${GTK} )
+     pkg_check_modules( GTK3 REQUIRED gtk+-3.0)
+     pkg_check_modules( X11  REQUIRED x11)
+     add_definitions( ${GTK3_CFLAGS}  ${X11_CFLAGS} )
+     add_definitions( -D_GTK -DOPENGL )
+  else(${GTK})
+     find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
+     add_definitions( ${Qt5Widgets_DEFINITIONS}  )
+     include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
+     add_definitions( -D__QT_DRIVER__  -DQT_DEPRECATED_WARNINGS )
+  endif()
 
   # Check for libminizip
   pkg_check_modules( MINIZIP REQUIRED minizip)
@@ -377,11 +396,31 @@ set(SRC_DRIVERS_COMMON
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/scale3x.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/scalebit.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/vidblit.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/os_utils.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/nes_ntsc.c
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/nesvideos-piece.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/rgbtorgb.cpp
 )
 
+if ( ${GTK} )
+set(SRC_DRIVERS_SDL
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/cheat.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/config.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/debugger.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/glxwin.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/gui.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/GamePadConf.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/input.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/memview.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/ramwatch.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl-joystick.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl-sound.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl-throttle.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl-video.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/unix-netplay.cpp
+)
+else()
 set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/main.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleWindow.cpp  
@@ -390,10 +429,21 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/GamePadConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/HotKeyConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/PaletteConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/GuiConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/LuaControl.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/CheatsConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/HexEditor.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/CodeDataLogger.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/SymbolicDebug.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleDebugger.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleUtilities.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleVideoConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleSoundConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TraceLogger.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/AboutWindow.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/fceuWrapper.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ppuViewer.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/NameTableViewer.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/config.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/input.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/nes_shm.cpp  
@@ -404,6 +454,7 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-throttle.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/unix-netplay.cpp
 )
+endif()
 
 set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})
 
@@ -424,11 +475,27 @@ add_executable(  ${APP_NAME}  MACOSX_BUNDLE ${APP_ICON} ${SOURCES} ../resources.
 	${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp)
 
 else()
-add_executable(  ${APP_NAME}  ${SOURCES} ../resources.qrc 
-	${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp)
+
+   if ( ${GTK} )
+      add_executable(  ${APP_NAME}  ${SOURCES} 
+   	   ${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp)
+   else()
+      add_executable(  ${APP_NAME}  ${SOURCES} ../resources.qrc 
+   	   ${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp)
+   endif()
 endif()
 
-target_link_libraries( fceux  
+if ( ${GTK} )
+   target_link_libraries( ${APP_NAME}  
+   ${GTK3_LDFLAGS} ${X11_LDFLAGS}
+   ${OPENGL_LDFLAGS}
+ 	${SDL2_LDFLAGS}
+	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES}
+	${LUA_LDFLAGS}
+ 	${SYS_LIBS}
+)
+else()
+target_link_libraries( ${APP_NAME}  
    ${Qt5Widgets_LIBRARIES}
    ${Qt5OpenGL_LIBRARIES}
    ${OPENGL_LDFLAGS}
@@ -437,6 +504,7 @@ target_link_libraries( fceux
 	${LUA_LDFLAGS}
  	${SYS_LIBS}
 )
+endif()
 
 if (APPLE)
 

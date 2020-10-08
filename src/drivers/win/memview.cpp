@@ -141,6 +141,7 @@ int GetAddyFromCoord(int x,int y);
 void AutoScrollFromCoord(int x,int y);
 LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK importBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 void FindNext();
 void OpenFindDialog();
 static int GetFileData(uint32 offset);
@@ -615,7 +616,7 @@ void UpdateMemoryView(int draw_all)
 	return;
 }
 
-char EditString[4][20] = {"RAM","PPU","OAM","ROM"};
+char* EditString[4] = {"RAM","PPU","OAM","ROM"};
 
 void UpdateCaption()
 {
@@ -713,7 +714,7 @@ void UpdateColorTable()
 		TextColorList[i] = RGB(HexForeColorR,HexForeColorG,HexForeColorB);		//Regular color text - 2 columns
 	}
 
-	for (j=0;j<nextBookmark;j++)
+	for (j=0;j<hexBookmarks.bookmarkCount;j++)
 	{
 		if(hexBookmarks[j].editmode != EditingMode) continue;
 		if(((int)hexBookmarks[j].address >= CurOffset) && ((int)hexBookmarks[j].address < CurOffset+DataAmount))
@@ -912,73 +913,7 @@ void UnfreezeAllRam() {
 
 	return;
 }
-/*
-int saveBookmarks(HWND hwnd)
-{
-	char name[513] = { 0 };
 
-	OPENFILENAME ofn;
-	memset(&ofn, 0, sizeof(ofn));
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hInstance = fceu_hInstance;
-	ofn.lpstrTitle = "Save bookmarks as...";
-	ofn.lpstrFilter = "Bookmark list (*.bld)\0*.lst\0All Files (*.*)\0*.*\0\0";
-	strcpy(name, mass_replace(GetRomName(), "|", ".").c_str());
-	ofn.lpstrFile = name;
-	ofn.lpstrDefExt = "bld";
-	ofn.nMaxFile = 256;
-	ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY;
-	ofn.hwndOwner = hwnd;
-
-	bool success = false;
-	if (GetSaveFileName(&ofn))
-	{
-		FILE* bld = fopen(name, "wb");
-		if (bld)
-		{
-			fwrite("BOOKMARKLIST", strlen("BOOKMARKLIST"), 1, bld);
-			extern int storeHexPreferences(FILE*);
-			success = storeHexPreferences(bld);
-			fclose(bld);
-		}
-	}
-	
-	return success;
-}
-
-int loadBookmarks(HWND hwnd)
-{
-	char nameo[2048] = { 0 };
-	OPENFILENAME ofn;
-	memset(&ofn, 0, sizeof(ofn));
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hInstance = fceu_hInstance;
-	ofn.lpstrTitle = "Load bookmarks...";
-	ofn.lpstrFilter = "Bookmark list (*.bld)\0*.lst\0All Files (*.*)\0*.*\0\0";
-	ofn.lpstrFile = nameo;
-	ofn.nMaxFile = 256;
-	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-	ofn.hwndOwner = hwnd;
-
-	int success = 0;
-	if (GetOpenFileName(&ofn))
-	{
-		char buffer[13] = { 0 };
-		FILE* bld = fopen(nameo, "r");
-		if (bld)
-		{
-			fread(bld, strlen("BOOKMARKLIST"), 1, bld);
-			if (!strcpy(buffer, "BOOKMARKLIST"))
-			{
-				extern int loadHexPreferences(FILE*);
-				success = loadHexPreferences(bld);
-			}
-			fclose(bld);
-		}
-	}
-	return success;
-}
-*/
 void FreezeRam(int address, int mode, int final){
 	// mode: -1 == Unfreeze; 0 == Toggle; 1 == Freeze
 	if(FrozenAddressCount <= 256 && (address < 0x2000) || ((address >= 0x6000) && (address <= 0x7FFF))){
@@ -1078,7 +1013,7 @@ void InputData(char *input){
 				break;
 			case MODE_NES_FILE:
 				// ROM
-				ApplyPatch(addr, datasize, data);
+				ApplyPatch(addr, 1, &data[i]);
 				break;
 		}
 	}
@@ -1245,15 +1180,30 @@ void AutoScrollFromCoord(int x,int y)
 
 void KillMemView()
 {
-	ReleaseDC(hMemView,mDC);
-	DestroyWindow(hMemView);
-	UnregisterClass("MEMVIEW",fceu_hInstance);
-	hMemView = 0;
-	hMemFind = 0;
-	if (EditingMode == MODE_NES_MEMORY)
-		ReleaseCheatMap();
-	return;
+	if (hMemView)
+	{
+		ReleaseDC(hMemView, mDC);
+		DestroyWindow(hMemView);
+		UnregisterClass("MEMVIEW", fceu_hInstance);
+		hMemView = NULL;
+		hMemFind = NULL;
+		if (EditingMode == MODE_NES_MEMORY)
+			ReleaseCheatMap();
+	}
 }
+
+int GetMaxSize(int EditingMode)
+{
+	switch (EditingMode)
+	{
+		case MODE_NES_MEMORY: return 0x10000;
+		case MODE_NES_PPU: return (GameInfo->type == GIT_NSF ? 0x2000 : 0x4000);
+		case MODE_NES_OAM: return 0x100;
+		case MODE_NES_FILE: return 16 + CHRsize[0] + PRGsize[0]; //todo: add trainer size
+	}
+	return 0;
+}
+
 
 LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -1414,12 +1364,12 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 				int key_num;
 				sscanf(buf, "%d", &key_num);
 				key_num = (key_num + 9) % 10;
-				if (hexBookmarkShortcut[key_num] != -1)
+				if (hexBookmarks.shortcuts[key_num] != -1)
 				{
-					int address = hexBookmarks[hexBookmarkShortcut[key_num]].address;
+					int address = hexBookmarks[hexBookmarks.shortcuts[key_num]].address;
 					if (address != -1)
 					{
-						ChangeMemViewFocus(hexBookmarks[hexBookmarkShortcut[key_num]].editmode, address, -1);
+						ChangeMemViewFocus(hexBookmarks[hexBookmarks.shortcuts[key_num]].editmode, address, -1);
 						UpdateColorTable();
 					}
 				}
@@ -1844,7 +1794,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			{
 				if (foundBookmark == -1)
 				{
-					if (nextBookmark >= 64)
+					if (hexBookmarks.bookmarkCount >= 64)
 						MessageBox(hwnd, "Can't set more than 64 bookmarks.", "Error", MB_OK | MB_ICONERROR);
 					else
 					{
@@ -2162,17 +2112,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					break;
 				}
 
-			switch (EditingMode)
-			{
-				case MODE_NES_MEMORY:
-					MaxSize = 0x10000; break;
-				case MODE_NES_PPU:
-					MaxSize = (GameInfo->type == GIT_NSF ? 0x2000 : 0x4000); break;
-				case MODE_NES_OAM:
-					MaxSize = 0x100; break;
-				case MODE_NES_FILE: //todo: add trainer size
-					MaxSize = 16 + CHRsize[0] + PRGsize[0]; break;
-			}
+			MaxSize = GetMaxSize(EditingMode);
 
 			if (CurOffset >= MaxSize - DataAmount) CurOffset = MaxSize - DataAmount;
 			if (CurOffset < 0) CurOffset = 0;
@@ -2229,7 +2169,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		}
 
 		case MENU_MV_BOOKMARKS_RM_ALL:
-			if (nextBookmark)
+			if (hexBookmarks.bookmarkCount)
 			{
 				if (MessageBox(hwnd, "Remove All Bookmarks?", "Bookmarks", MB_YESNO | MB_ICONINFORMATION) == IDYES)
 				{
@@ -2238,15 +2178,294 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 				}
 			}
 			return 0;
-/*
-		case MENU_MV_BOOKMARKS_EXPORT:
-			if (!saveBookmarks(hwnd))
-				MessageBox(hwnd, "Error saving bookmarks.", "Error", MB_OK | MB_ICONERROR);
+		case ID_BOOKMARKS_EXPORT:
+		{
+			char name[2048] = { 0 };
+
+			OPENFILENAME ofn;
+			memset(&ofn, 0, sizeof(ofn));
+			ofn.lStructSize = sizeof(ofn);
+			ofn.hInstance = fceu_hInstance;
+			ofn.lpstrTitle = "Save bookmarks as...";
+			ofn.lpstrFilter = "Hex Editor Bookmark list (*.hbm)\0*.hbm\0All Files (*.*)\0*.*\0\0";
+			strcpy(name, mass_replace(GetRomName(), "|", ".").c_str());
+			ofn.lpstrFile = name;
+			ofn.lpstrDefExt = "hbm";
+			ofn.nMaxFile = 2048;
+			ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+			ofn.hwndOwner = hwnd;
+
+			int success = false;
+			if (GetSaveFileName(&ofn))
+			{
+				FILE* bld = fopen(name, "wb");
+				if (bld)
+				{
+					// write the header
+					fwrite("HexBookmarkList", strlen("HexBookmarkList"), 1, bld);
+					// it shares the same logic of creating the hexpreference part of .deb file
+					extern int storeHexPreferences(FILE*, HexBookmarkList& = hexBookmarks);
+					if (!storeHexPreferences(bld))
+						success = true;
+					fclose(bld);
+				}
+				if (!success)
+					MessageBox(hwnd, "Error saving bookmarks.", "Error saving bookmarks", MB_OK | MB_ICONERROR);
+			}
 			return 0;
-		case MENU_MV_BOOKMARKS_IMPORT:
-			loadBookmarks(hwnd);
-			return 0;
-*/
+		}
+		case ID_BOOKMARKS_IMPORT:
+		{
+			char nameo[2048] = { 0 };
+			OPENFILENAME ofn;
+			memset(&ofn, 0, sizeof(ofn));
+			ofn.lStructSize = sizeof(ofn);
+			ofn.hInstance = fceu_hInstance;
+			ofn.lpstrTitle = "Load bookmarks...";
+			ofn.lpstrFilter = "Hex Editor Bookmarks (*.hbm)\0*.hbm\0All Files (*.*)\0*.*\0\0";
+			ofn.lpstrFile = nameo;
+			ofn.lpstrDefExt = "hbm";
+			ofn.nMaxFile = 2048;
+			ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+			ofn.hwndOwner = hwnd;
+
+			bool success = false;
+			if (GetOpenFileName(&ofn))
+			{
+				char buffer[256] = { 0 };
+				FILE* bld = fopen(nameo, "r");
+				if (bld)
+				{
+					// Read the header to know it's hex bookmark list
+					fread(buffer, strlen("HexBookmarkList"), 1, bld);
+					if (!strcmp(buffer, "HexBookmarkList"))
+					{
+						HexBookmarkList import;
+						// it shares the same logic of creating the hexpreference part of .deb file
+						extern int loadHexPreferences(FILE*, HexBookmarkList& = hexBookmarks);
+						if (!loadHexPreferences(bld, import) && import.bookmarkCount > 0)
+						{
+							if (importBookmarkProps & IMPORT_DISCARD_ORIGINAL)
+							{
+								discard_original:
+								if (importBookmarkProps & IMPORT_OVERWRITE_NO_PROMPT || hexBookmarks.bookmarkCount == 0 || MessageBox(hwnd, "All your existing bookmarks will be discarded after importing the new bookmarks! Do you want to continue?", "Bookmark Import", MB_YESNO | MB_ICONWARNING) == IDYES)
+								{
+									removeAllBookmarks(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
+									for (i = 0; i < import.bookmarkCount; ++i)
+									{
+										hexBookmarks[i].address = import[i].address;
+										hexBookmarks[i].editmode = import[i].editmode;
+										strcpy(hexBookmarks[i].description, import[i].description);
+										memcpy(hexBookmarks.shortcuts, import.shortcuts, sizeof(hexBookmarks.shortcuts));
+										hexBookmarks.bookmarkCount = import.bookmarkCount;
+										hexBookmarks.shortcutCount = import.shortcutCount;
+									}
+									updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
+									UpdateColorTable();
+								}
+							}
+							else
+							{
+								// conflict bookmark count
+								int conflictBookmarkCount = 0;
+								// the conflict bookmark indexes of the main list
+								int conflictBookmarkIndex[64];
+								// conflict shortcut count
+								int conflictShortcutCount = 0;
+								// discarded bookmark count
+								int discardBookmarkCount = 0;
+								// bookmark that is out of scope
+								int outOfRangeBookmarkCount = 0;
+
+								// store the count of bookmarks after importing finished
+								int finalBookmarkCount = hexBookmarks.bookmarkCount;
+								// the reference index number in main bookmark list
+								// -1 means this bookmark is not be indexed
+								int indexRef[64];
+								memset(indexRef, -1, sizeof(indexRef));
+
+								for (i = 0; i < import.bookmarkCount; ++i)
+								{
+									bool conflict = false;
+									for (j = 0; j < hexBookmarks.bookmarkCount; ++j)
+									{
+										// to find if there are any conflict bookmarks
+										// currently, one address can have only one bookmark
+										// if the address and editmode are the same, then they are considered conflict
+										if (import[i].address == hexBookmarks[j].address && import[j].editmode == hexBookmarks[j].editmode)
+										{
+											conflictBookmarkIndex[conflictBookmarkCount] = i;
+											indexRef[i] = j;
+											++conflictBookmarkCount;
+											conflict = true;
+											break;
+										}
+									}
+
+									// after a loop, this bookmark doesn't have conflict with the original one
+									if (!conflict)
+										if (finalBookmarkCount >= 64)
+											// the total bookmark count has reached the limit of bookmarks (64),
+											// discard it
+											++discardBookmarkCount;
+										else if (import[j].address > GetMaxSize(import[j].editmode))
+											// the bookmark is out of valid range for current game,
+											// discard it.
+											++outOfRangeBookmarkCount;
+										else
+										{
+											// if the bookmark is still not discarded,
+											// then it's not a conflict one, append it to the last of the main list
+											indexRef[i] = finalBookmarkCount;
+											hexBookmarks[finalBookmarkCount].address = import[i].address;
+											hexBookmarks[finalBookmarkCount].editmode = import[i].editmode;
+											strcpy(hexBookmarks[finalBookmarkCount].description, import[i].description);
+											++finalBookmarkCount;
+										}
+
+								}
+
+								// the result of overwriting the shortcuts
+								int shortcutListOverwrite[10];
+								memcpy(shortcutListOverwrite, hexBookmarks.shortcuts, sizeof(hexBookmarks.shortcuts));
+								int shortcutListOverwriteCount = hexBookmarks.shortcutCount;
+								// the result of keep the shortcut as original
+								int shortcutListKeep[10];
+								memcpy(shortcutListKeep, hexBookmarks.shortcuts, sizeof(hexBookmarks.shortcuts));
+								int shortcutListKeepCount = hexBookmarks.shortcutCount;
+
+								for (i = 0; i < 10; ++i)
+									if (import.shortcuts[i] != -1)
+									{
+										bool repeat = false;
+										for (j = 0; j < 10; ++j)
+											if (indexRef[import.shortcuts[i]] == hexBookmarks.shortcuts[j] && i != j)
+											{
+												// the slot in the original list had this bookmark but different
+												// slot, remove the bookmark in the original slot
+												shortcutListOverwrite[j] = -1;
+												--shortcutListOverwriteCount;
+												++conflictShortcutCount;
+												repeat = true;
+												break;
+											}
+
+										if (shortcutListOverwrite[i] == -1)
+											++shortcutListOverwriteCount;
+										shortcutListOverwrite[i] = indexRef[import.shortcuts[i]];
+
+										// after a loop, the original list doesn't have a slot with same
+										// bookmark but different slot, and the slot in original list
+										// is empty, then the bookmark can occupy it.
+										if (!repeat && hexBookmarks.shortcuts[i] == -1)
+										{
+											shortcutListKeep[i] = indexRef[import.shortcuts[i]];
+											++shortcutListKeepCount;
+										}
+									}
+
+								int tmpImportBookmarkProps = importBookmarkProps;
+								bool continue_ = true;
+
+								// show the prompt message if there are conflicts
+								if (!(tmpImportBookmarkProps & IMPORT_OVERWRITE_NO_PROMPT) && (conflictBookmarkCount || conflictShortcutCount))
+								{
+									char units[32];
+									strcpy(buffer, "The importing bookmark list has ");
+									sprintf(units, "%d duplicate bookmark", conflictBookmarkCount);
+									if (conflictBookmarkCount != 1)
+										strcat(units, "s");
+									strcat(buffer, units);
+
+									if (conflictShortcutCount)
+									{
+										if (conflictBookmarkCount) strcat(buffer, " and ");
+										sprintf(units, "%d conflict shortcut", conflictShortcutCount);
+										if (conflictShortcutCount != 1)
+											strcat(units, "s");
+										strcat(buffer, units);
+									}
+									strcat(buffer, " with yours.\r\nYou must choose which side would be reserved. Do you want to continue?");
+
+									continue_ = MessageBox(hwnd, buffer, "Bookmark conflict", MB_YESNO | MB_ICONEXCLAMATION) == IDYES && DialogBoxParam(fceu_hInstance, "IMPORTBOOKMARKOPTIONDIALOG", hwnd, importBookmarkCallB, (LPARAM)&tmpImportBookmarkProps);
+									
+									if (tmpImportBookmarkProps & IMPORT_OVERWRITE_NO_PROMPT)
+										importBookmarkProps = tmpImportBookmarkProps;
+
+									// in case user's mind changes on the fly
+									if (tmpImportBookmarkProps & IMPORT_DISCARD_ORIGINAL)
+										goto discard_original;
+
+								}
+
+								if (continue_)
+								{
+									if (tmpImportBookmarkProps & IMPORT_OVERWRITE_BOOKMARK)
+										// when it is set to overwrite conflicted bookmark, otherwise do nothing
+										for (i = 0; i < conflictBookmarkCount; ++i)
+											// the conflict bookmarks are all before the bookmark count in main list
+											strcpy(hexBookmarks[indexRef[conflictBookmarkIndex[i]]].description, import[conflictBookmarkIndex[i]].description);
+
+									// update the bookmark shortcut mapping 
+									if (tmpImportBookmarkProps & IMPORT_OVERWRITE_SHORTCUT)
+									{
+										memcpy(hexBookmarks.shortcuts, shortcutListOverwrite, sizeof(hexBookmarks.shortcuts));
+										hexBookmarks.shortcutCount = shortcutListOverwriteCount;
+									}
+									else
+									{
+										memcpy(hexBookmarks.shortcuts, shortcutListKeep, sizeof(hexBookmarks.shortcuts));
+										hexBookmarks.shortcutCount = shortcutListKeepCount;
+									}
+
+									// set the count of the main list to the imported count
+									hexBookmarks.bookmarkCount = finalBookmarkCount;
+
+									updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
+									UpdateColorTable();
+								}
+
+								// tell user there are bookmarks that imported failed.
+								if (discardBookmarkCount || outOfRangeBookmarkCount)
+								{
+									char reason[64];
+									sprintf(buffer, "Import complete, but %d bookmark%s %s are not imported:\n", discardBookmarkCount + outOfRangeBookmarkCount, discardBookmarkCount + outOfRangeBookmarkCount == 1 ? "" : "s", discardBookmarkCount + outOfRangeBookmarkCount == 1 ? "is" : "are");
+									if (outOfRangeBookmarkCount)
+									{
+										sprintf(reason, "%d %s outside the valid address range of the game.", outOfRangeBookmarkCount, outOfRangeBookmarkCount == 1 ? "is" : "are");
+										strcat(buffer, reason);
+									}
+
+									if (discardBookmarkCount)
+									{
+										if (outOfRangeBookmarkCount)
+											strcat(buffer, "\n");
+										sprintf(reason, "%d %s discaded due to the list has reached its max limit (64).", discardBookmarkCount, discardBookmarkCount == 1 ? "is" : "are");
+										strcat(buffer, reason);
+									}
+									MessageBox(hwnd, buffer, "Loading Hex Editor bookmarks", MB_OK | MB_ICONEXCLAMATION);
+								}
+							}
+						}
+						else
+							MessageBox(hwnd, "An error occurred while loading bookmarks.", "Error loading bookmarks", MB_OK | MB_ICONERROR);
+					}
+					else
+						MessageBox(hwnd, "This file is not a Hex Editor bookmark list.", "Error loading bookmarks", MB_OK | MB_ICONERROR);
+					fclose(bld);
+				} 
+				else
+					MessageBox(hwnd, "Error opening bookmark file", "Error loading bookmarks", MB_OK | MB_ICONERROR);
+			}
+		}
+		return 0;
+		case ID_BOOKMARKS_OPTION:
+		{
+			int tmpImportBookmarkProps = importBookmarkProps;
+			if (DialogBoxParam(fceu_hInstance, "IMPORTBOOKMARKOPTIONDIALOG", hwnd, importBookmarkCallB, (LPARAM)&tmpImportBookmarkProps))
+				importBookmarkProps = tmpImportBookmarkProps;
+		}
+		return 0;
 		case MENU_MV_HELP:
 			OpenHelpWindow(memviewhelp);
 			return 0;
@@ -2282,10 +2501,6 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 	case WM_CLOSE:
 		KillMemView();
-		//ReleaseDC (hwnd, mDC) ;
-		//DestroyWindow(hMemView);
-		//UnregisterClass("MEMVIEW",fceu_hInstance);
-		//hMemView = 0;
 		return 0;
 	}
 	return DefWindowProc (hwnd, message, wParam, lParam) ;
@@ -2550,4 +2765,183 @@ void PalettePoke(uint32 addr, uint8 data)
 	{
 		PALRAM[addr] = data;
 	}
+}
+
+INT_PTR CALLBACK importBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	static int* tmpImportBookmarkProps;
+
+	static HWND hTipMerge;
+	static HWND hTipIgnore;
+	static HWND hTipOverwrite;
+	static HWND hTipKeep;
+	static HWND hTipReassign;
+	static HWND hTipDiscard;
+	static HWND hTipConfirm;
+
+	switch (uMsg)
+	{
+		case WM_INITDIALOG:
+			CenterWindow(hwndDlg);
+			tmpImportBookmarkProps = (int*)lParam;
+			if (!(*tmpImportBookmarkProps & IMPORT_OVERWRITE_NO_PROMPT))
+				CheckDlgButton(hwndDlg, IDC_CHECK_BOOKMARKIMPORTOPTION_CONFIRMEVERYTIMEONCONFLICT, BST_CHECKED);
+
+			if (*tmpImportBookmarkProps & IMPORT_DISCARD_ORIGINAL)
+			{
+				CheckDlgButton(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_DISCARD, BST_CHECKED);
+
+				EnableWindow(GetDlgItem(hwndDlg, IDC_GROUP_BOOKMARKIMPORTOPTION_SOLVECONFLICT), FALSE);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_TEXT_BOOKMARKIMPORTOPTION_BOOKMARK), FALSE);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_TEXT_BOOKMARKIMPORTOPTION_SHORTCUT), FALSE);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKIGNORE), FALSE);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKOVERWRITE), FALSE);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTKEEP), FALSE);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTREASSIGN), FALSE);
+			}
+			else
+			{
+				CheckDlgButton(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_MERGE, BST_CHECKED);
+
+				EnableWindow(GetDlgItem(hwndDlg, IDC_GROUP_BOOKMARKIMPORTOPTION_SOLVECONFLICT), TRUE);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_TEXT_BOOKMARKIMPORTOPTION_BOOKMARK), TRUE);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_TEXT_BOOKMARKIMPORTOPTION_SHORTCUT), TRUE);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKIGNORE), TRUE);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKOVERWRITE), TRUE);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTKEEP), TRUE);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTREASSIGN), TRUE);
+			}
+
+			if (*tmpImportBookmarkProps & IMPORT_OVERWRITE_BOOKMARK)
+				CheckDlgButton(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKOVERWRITE, BST_CHECKED);
+			else
+				CheckDlgButton(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKIGNORE, BST_CHECKED);
+
+			if (*tmpImportBookmarkProps & IMPORT_OVERWRITE_SHORTCUT)
+				CheckDlgButton(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTREASSIGN, BST_CHECKED);
+			else
+				CheckDlgButton(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTKEEP, BST_CHECKED);
+
+			TOOLINFO info;
+			memset(&info, 0, sizeof(TOOLINFO));
+			info.cbSize = sizeof(TOOLINFO);
+			info.uFlags = TTF_SUBCLASS | TTF_IDISHWND;
+			info.hwnd = hwndDlg;
+
+			hTipMerge = CreateWindow(TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_ALWAYSTIP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hwndDlg, NULL, fceu_hInstance, NULL);
+			info.lpszText = "Merge the importing bookmarks into my list. \nThe non-conflict bookmarks will be append to the last. \nIf bookmarks or shortcuts have conflicts, \nsolve them according to the import settings.";
+			info.uId = (UINT_PTR)GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_MERGE);
+			SendMessage(hTipMerge, TTM_ADDTOOL, 0, (LPARAM)&info);
+			SendMessage(hTipMerge, TTM_SETMAXTIPWIDTH, 0, 8000);
+			SendMessage(hTipMerge, TTM_SETDELAYTIME, TTDT_AUTOPOP, 30000);
+
+			hTipIgnore = CreateWindow(TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_ALWAYSTIP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hwndDlg, NULL, fceu_hInstance, NULL);
+			info.lpszText = "If the importing bookmark has the same address \nand edit mode with one of the original bookmarks,\nkeep the exsiting one unchanged.";
+			info.uId = (UINT_PTR)GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKIGNORE);
+			SendMessage(hTipIgnore, TTM_ADDTOOL, 0, (LPARAM)&info);
+			SendMessage(hTipIgnore, TTM_SETMAXTIPWIDTH, 0, 8000);
+			SendMessage(hTipIgnore, TTM_SETDELAYTIME, TTDT_AUTOPOP, 30000);
+
+			hTipOverwrite = CreateWindow(TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_ALWAYSTIP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hwndDlg, NULL, fceu_hInstance, NULL);
+			info.lpszText = "If the importing bookmark has the same address \nand edit mode with one of the existing bookmarks,\noverwrite the information of the existing one with the importing one.";
+			info.uId = (UINT_PTR)GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKOVERWRITE);
+			SendMessage(hTipOverwrite, TTM_ADDTOOL, 0, (LPARAM)&info);
+			SendMessage(hTipOverwrite, TTM_SETMAXTIPWIDTH, 0, 8000);
+			SendMessage(hTipOverwrite, TTM_SETDELAYTIME, TTDT_AUTOPOP, 30000);
+
+			hTipKeep = CreateWindow(TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_ALWAYSTIP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hwndDlg, NULL, fceu_hInstance, NULL);
+			info.lpszText = "If two different bookmarks from importing and existing \nuse the same shortcut,\nthe shortcut is remained using by the existing one.\nthe importing one will not use the shortcut.";
+			info.uId = (UINT_PTR)GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTKEEP);
+			SendMessage(hTipKeep, TTM_ADDTOOL, 0, (LPARAM)&info);
+			SendMessage(hTipKeep, TTM_SETMAXTIPWIDTH, 0, 8000);
+			SendMessage(hTipKeep, TTM_SETDELAYTIME, TTDT_AUTOPOP, 30000);
+
+			hTipReassign = CreateWindow(TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_ALWAYSTIP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hwndDlg, NULL, fceu_hInstance, NULL);
+			info.lpszText = "If two different bookmarks from importing and existing \nuse the same shortcut,\nthe shortcut is assigned to the importing one.\nthe existing one will not use the shortcut.";
+			info.uId = (UINT_PTR)GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTREASSIGN);
+			SendMessage(hTipReassign, TTM_ADDTOOL, 0, (LPARAM)&info);
+			SendMessage(hTipReassign, TTM_SETMAXTIPWIDTH, 0, 8000);
+			SendMessage(hTipReassign, TTM_SETDELAYTIME, TTDT_AUTOPOP, 30000);
+
+			hTipDiscard = CreateWindow(TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_ALWAYSTIP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hwndDlg, NULL, fceu_hInstance, NULL);
+			info.lpszText = "Discard all existing bookmarks and then import.\nThis is not recommended.";
+			info.uId = (UINT_PTR)GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_DISCARD);
+			SendMessage(hTipDiscard, TTM_ADDTOOL, 0, (LPARAM)&info);
+			SendMessage(hTipDiscard, TTM_SETMAXTIPWIDTH, 0, 8000);
+			SendMessage(hTipDiscard, TTM_SETDELAYTIME, TTDT_AUTOPOP, 30000);
+
+			hTipConfirm = CreateWindow(TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_ALWAYSTIP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hwndDlg, NULL, fceu_hInstance, NULL);
+			info.lpszText = "Ask what to do every time when conflict occurs between existing and importing bookmarks.";
+			info.uId = (UINT_PTR)GetDlgItem(hwndDlg, IDC_CHECK_BOOKMARKIMPORTOPTION_CONFIRMEVERYTIMEONCONFLICT);
+			SendMessage(hTipConfirm, TTM_ADDTOOL, 0, (LPARAM)&info);
+			SendMessage(hTipConfirm, TTM_SETMAXTIPWIDTH, 0, 8000);
+			SendMessage(hTipConfirm, TTM_SETDELAYTIME, TTDT_AUTOPOP, 30000);
+
+			break;
+		case WM_CLOSE:
+		case WM_QUIT:
+			DestroyWindow(hTipMerge);
+			DestroyWindow(hTipIgnore);
+			DestroyWindow(hTipOverwrite);
+			DestroyWindow(hTipKeep);
+			DestroyWindow(hTipReassign);
+			DestroyWindow(hTipDiscard);
+			DestroyWindow(hTipConfirm);
+
+			EndDialog(hwndDlg, 0);
+			break;
+		case WM_COMMAND:
+			switch (HIWORD(wParam))
+			{
+				case BN_CLICKED:
+					switch (LOWORD(wParam))
+					{
+						case IDC_RADIO_BOOKMARKIMPORTOPTION_DISCARD:
+							EnableWindow(GetDlgItem(hwndDlg, IDC_GROUP_BOOKMARKIMPORTOPTION_SOLVECONFLICT), FALSE);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_TEXT_BOOKMARKIMPORTOPTION_BOOKMARK), FALSE);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_TEXT_BOOKMARKIMPORTOPTION_SHORTCUT), FALSE);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKIGNORE), FALSE);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKOVERWRITE), FALSE);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTKEEP), FALSE);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTREASSIGN), FALSE);
+							break;
+						case IDC_RADIO_BOOKMARKIMPORTOPTION_MERGE:
+							EnableWindow(GetDlgItem(hwndDlg, IDC_GROUP_BOOKMARKIMPORTOPTION_SOLVECONFLICT), TRUE);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_TEXT_BOOKMARKIMPORTOPTION_BOOKMARK), TRUE);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_TEXT_BOOKMARKIMPORTOPTION_SHORTCUT), TRUE);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKIGNORE), TRUE);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKOVERWRITE), TRUE);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTKEEP), TRUE);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTREASSIGN), TRUE);
+						break;
+						case IDOK:
+							if (IsDlgButtonChecked(hwndDlg, IDC_CHECK_BOOKMARKIMPORTOPTION_CONFIRMEVERYTIMEONCONFLICT) == BST_UNCHECKED)
+								*tmpImportBookmarkProps |= IMPORT_OVERWRITE_NO_PROMPT;
+							else
+								*tmpImportBookmarkProps &= ~IMPORT_OVERWRITE_NO_PROMPT;
+
+							if (IsDlgButtonChecked(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_DISCARD))
+								*tmpImportBookmarkProps |= IMPORT_DISCARD_ORIGINAL;
+							if (IsDlgButtonChecked(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_MERGE))
+								*tmpImportBookmarkProps &= ~IMPORT_DISCARD_ORIGINAL;
+
+							if (IsDlgButtonChecked(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKOVERWRITE))
+								*tmpImportBookmarkProps |= IMPORT_OVERWRITE_BOOKMARK;
+							if (IsDlgButtonChecked(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKIGNORE))
+								*tmpImportBookmarkProps &= ~IMPORT_OVERWRITE_BOOKMARK;
+
+							if (IsDlgButtonChecked(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTREASSIGN))
+								*tmpImportBookmarkProps |= IMPORT_OVERWRITE_SHORTCUT;
+							if (IsDlgButtonChecked(hwndDlg, IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTKEEP))
+								*tmpImportBookmarkProps &= ~IMPORT_OVERWRITE_SHORTCUT;
+							EndDialog(hwndDlg, 1);
+						break;
+					case IDCANCEL:
+					case IDCLOSE:
+						EndDialog(hwndDlg, 0);
+						break;
+					}
+			}
+	}
+	return FALSE;
 }

@@ -17,7 +17,14 @@ int main( int argc, char *argv[] )
 	consoleWindow->resize( 512, 512 );
 	consoleWindow->show();
 
-	consoleWindow->viewport->init();
+	if ( consoleWindow->viewport_SDL )
+	{
+		consoleWindow->viewport_SDL->init();
+	}
+	else
+	{
+		consoleWindow->viewport_GL->init();
+	}
 
 	retval = app.exec();
 

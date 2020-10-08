@@ -19,10 +19,13 @@ class ConsoleViewSDL_t : public QWidget
 		int  init(void);
 		void reset(void);
 		void cleanup(void);
+		void render(void);
+
+		void transfer2LocalBuffer(void);
 
 	protected:
 
-	void paintEvent(QPaintEvent *event);
+	//void paintEvent(QPaintEvent *event);
 	void resizeEvent(QResizeEvent *event);
 	 int  view_width;
 	 int  view_height;
@@ -37,10 +40,13 @@ class ConsoleViewSDL_t : public QWidget
 
 	 bool vsyncEnabled;
 
+	 uint32_t  *localBuf;
+	uint32_t   localBufSize;
+
  	SDL_Window   *sdlWindow;
 	SDL_Renderer *sdlRenderer;
 	SDL_Texture  *sdlTexture;
-	SDL_Rect      sdlViewport;
+	//SDL_Rect      sdlViewport;
 
 	private slots:
 };

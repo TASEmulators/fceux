@@ -82,10 +82,10 @@ static int prg_mask;
 //PRG wrapper
 static void BMCFK23CPW(uint32 A, uint8 V)
 {
-	uint32 bank = (EXPREGS[1] & 0x1F);
-	uint32 hiblock = ((EXPREGS[0] & 8) << 4)|((EXPREGS[0] & 0x80) << 1)|(UNIFchrrama?((EXPREGS[2] & 0x40)<<3):0);
-	uint32 block = (EXPREGS[1] & 0x60) | hiblock;
-	uint32 extra = (EXPREGS[3] & 2);
+	//uint32 bank = (EXPREGS[1] & 0x1F);
+	//uint32 hiblock = ((EXPREGS[0] & 8) << 4)|((EXPREGS[0] & 0x80) << 1)|(UNIFchrrama?((EXPREGS[2] & 0x40)<<3):0);
+	//uint32 block = (EXPREGS[1] & 0x60) | hiblock;
+	//uint32 extra = (EXPREGS[3] & 2);
 //			 FCEU_printf("0:%04X:%02X\n",A,V);
 
 	if((EXPREGS[0]&7)==4)
@@ -161,7 +161,7 @@ static DECLFW(BMCFK23CWrite)
 		EXPREGS[A&3]=V;
 
 //		BUT WHY is there any rom that need it actually?
-		bool remap = false;
+//		bool remap = false;
 //		FCEU_printf("K3:(exp0=%02x)\n",EXPREGS[0]);
 //		FCEU_printf("WH0:%04X:%02X\n",A,V);
 
@@ -199,7 +199,7 @@ static void BMCFK23CReset(void)
 	//this little hack makes sure that we try all the dip switch settings eventually, if we reset enough
 	 dipswitch++;
 	 dipswitch&=7;
-	printf("BMCFK23C dipswitch set to %d\n",dipswitch);
+	printf("BMCFK23C dipswitch set to %u\n",dipswitch);
 
 	EXPREGS[0]=EXPREGS[1]=EXPREGS[2]=EXPREGS[3]=0;
 	EXPREGS[4]=EXPREGS[5]=EXPREGS[6]=EXPREGS[7]=0xFF;

@@ -1,34 +1,39 @@
 #ifndef _aosdfjk02fmasf
 #define _aosdfjk02fmasf
 
-#include "../common/configSys.h"
+#include <stdint.h>
 
-#define MAXBUTTCONFIG   4
-typedef struct {
-	uint8  ButtType[MAXBUTTCONFIG];
-	uint8  DeviceNum[MAXBUTTCONFIG];
-	//uint16 ButtonNum[MAXBUTTCONFIG];
-	int    ButtonNum[MAXBUTTCONFIG];
-	uint32 NumC;
+#include "common/configSys.h"
+
+//#define MAXBUTTCONFIG   4
+
+enum {
+  BUTTC_KEYBOARD  = 0,
+  BUTTC_JOYSTICK  = 1,
+  BUTTC_MOUSE     = 2
+};
+struct ButtConfig
+{
+	int    ButtType; //[MAXBUTTCONFIG];
+	int    DeviceNum; //[MAXBUTTCONFIG];
+	int    ButtonNum; //[MAXBUTTCONFIG];
+   int    state;
+	//uint32_t NumC;
 	//uint64 DeviceID[MAXBUTTCONFIG];	/* TODO */
-} ButtConfig;
-
+};
 
 extern int NoWaiting;
 extern CFGSTRUCT InputConfig[];
 extern ARGPSTRUCT InputArgs[];
 extern int Hotkeys[];
 void ParseGIInput(FCEUGI *GI);
-void setHotKeys();
+void setHotKeys(void);
 int getKeyState( int k );
 int ButtonConfigBegin();
 void ButtonConfigEnd();
 void ConfigButton(char *text, ButtConfig *bc);
-int DWaitButton(const uint8 *text, ButtConfig *bc, int wb, int *buttonConfigStatus = NULL);
+int DWaitButton(const uint8_t *text, ButtConfig *bc, int *buttonConfigStatus = NULL);
 
-#define BUTTC_KEYBOARD          0x00
-#define BUTTC_JOYSTICK          0x01
-#define BUTTC_MOUSE             0x02
 
 #define FCFGD_GAMEPAD   1
 #define FCFGD_POWERPAD  2
@@ -41,7 +46,7 @@ void InitInputInterface(void);
 void InputUserActiveFix(void);
 
 extern bool replaceP2StartWithMicrophone;
-extern ButtConfig GamePadConfig[4][10];
+//extern ButtConfig GamePadConfig[4][10];
 //extern ButtConfig powerpadsc[2][12];
 //extern ButtConfig QuizKingButtons[6];
 //extern ButtConfig FTrainerButtons[12];
@@ -54,9 +59,9 @@ int DTestButtonJoy(ButtConfig *bc);
 void FCEUD_UpdateInput(void);
 
 void UpdateInput(Config *config);
-void InputCfg(const std::string &);
+//void InputCfg(const std::string &);
 
 std::string GetUserText(const char* title);
-const char* ButtonName(const ButtConfig* bc, int which);
+const char* ButtonName(const ButtConfig* bc);
 #endif
 

@@ -828,7 +828,7 @@ extern "C"
         || new_height != LogoInfo::height)
         {
             if(new_height < LogoInfo::height || new_height > LogoInfo::height+20)
-            fprintf(stderr, "'%s': ERROR, expected %dx%d, got %dx%d\n", fn,
+            fprintf(stderr, "'%s': ERROR, expected %ux%u, got %ux%u\n", fn,
                 LogoInfo::width, LogoInfo::height,
                 new_width, new_height);
         }
@@ -857,7 +857,7 @@ extern "C"
         std::string avdir = "/home/you/yourlogo/";
         
         char AvName[512];
-        sprintf(AvName, "logo_%d_%d_f%03u.png",
+        sprintf(AvName, "logo_%u_%u_f%03u.png",
             LogoInfo::width,
             LogoInfo::height,
             frameno);

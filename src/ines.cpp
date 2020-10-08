@@ -956,7 +956,7 @@ init_ok:
 }
 
 // bbit edited: the whole function below was added
-int iNesSave() {
+int iNesSave(void) {
 	char name[2048];
 
 	strcpy(name, LoadedRomFName);
@@ -967,7 +967,7 @@ int iNesSave() {
 	return iNesSaveAs(name);
 }
 
-int iNesSaveAs(char* name)
+int iNesSaveAs(const char* name)
 {
 	//adelikat: TODO: iNesSave() and this have pretty much the same code, outsource the common code to a single function
 	//caitsith2: done. iNesSave() now gets filename and calls iNesSaveAs with that filename.
@@ -1002,7 +1002,7 @@ int iNesSaveAs(char* name)
 }
 
 //para edit: added function below
-char *iNesShortFName() {
+char *iNesShortFName(void) {
 	char *ret;
 
 	if (!(ret = strrchr(LoadedRomFName, '\\')))

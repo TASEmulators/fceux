@@ -26,7 +26,12 @@ class PaletteConfDialog_t : public QDialog
 		~PaletteConfDialog_t(void);
 
 	protected:
+		void closeEvent(QCloseEvent *event);
+
 		QLineEdit   *custom_palette_path;
+		QCheckBox   *useCustom;
+		QCheckBox   *GrayScale;
+		QCheckBox   *deemphSwap;
 		QCheckBox   *useNTSC;
 		QSlider     *tintSlider;
 		QSlider     *hueSlider;
@@ -42,5 +47,8 @@ class PaletteConfDialog_t : public QDialog
 		void openPaletteFile(void);
 		void clearPalette(void);
 		void use_NTSC_Changed(int v);
+		void use_Custom_Changed(int v);
+		void force_GrayScale_Changed(int v);
+		void deemphswap_Changed(int v);
 
 };

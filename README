@@ -24,7 +24,7 @@ Table of Contents
 ----------------
 * sdl2  - Version >= 2.0
 * cmake - Required to build fceux.
-* qt5   - version >= 5.11 recommended
+* qt5 OR gtk3  - (qt version >= 5.11 recommended) (gtk3 >= 3.22 recommended)
 * liblua5.1 (optional) - Will statically link internally if the system cannot provide this.
 * minizip  
 * zlib  
@@ -33,6 +33,7 @@ Table of Contents
 
 2 - Installation
 ----------------
+The old scons build system is no longer supported.
 Fceux can be compiled and built using the cmake build system.  To compile, run:
 
 	mkdir build; cd build;
@@ -40,6 +41,11 @@ Fceux can be compiled and built using the cmake build system.  To compile, run:
 
 To build a binary with debug information included in it:
    cmake  -DCMAKE_BUILD_TYPE=Debug    ..    
+
+The Qt version of the GUI builds by default and this is the preferred GUI for use. 
+For those who must have GTK/Gnome style, 
+the GTK version of the GUI can be selected to build with:
+	cmake -DCMAKE_BUILD_TYPE=Release -DGTK=1 ..  # Release build using GTK GUI
 
 To do the actual compiling:
    make
@@ -50,7 +56,7 @@ To compile faster with multiple processes in parallel:
 After a sucessful compilation, the fceux binary will be generated to 
 ./build/src/fceux .  You can install fceux to your system with the following command:
 
-	make install
+	sudo make install
 
 You can optionally define a install prefix when running cmake from the previous step:
 
@@ -75,7 +81,12 @@ Look in the src/CMakeList.txt file to tweak options.
 
 4 - GUI
 -------
-The Qt GUI is required and automatically builds as part of the build.
+The Qt (or GTK) GUI is required and automatically builds as part of the build. The Qt GUI is the default.
+When invoking cmake, the GTK GUI can be built (instead of Qt) by specifying a -DGTK=1 on the command line.
+See above build instructions.
+OpenGL options:
+For Linux builds, the OpenGL library preference can be either GLVND or LEGACY (default). 
+To use GLVND OpenGL, add a -DGLVND=1 on the cmake command line.
 
 5 - LUA Scripting
 -----------------
@@ -107,7 +118,7 @@ The latest version of iup (3.5 at the time of writing) is recommended.
 -------
 
 * Q.  Im having issues with my sound!
-* A.  First of all, for the best sound quality be sure you are using SDL 1.2.14 or later.  Versions 1.2.13 and earlier are known to have problems with fceux!  Next, try different SDL audio drivers to see if this makes any difference.  You can do this by using this command before running fceux:
+* A.  Try different SDL audio drivers to see if this makes any difference.  You can do this by using this command before running fceux:
 
 	export SDL_AUDIODRIVER=driver
 

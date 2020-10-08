@@ -14,7 +14,12 @@
 #include "Qt/sdl-video.h"
 #include "Qt/nes_shm.h"
 #include "Qt/unix-netplay.h"
+#include "Qt/HexEditor.h"
+#include "Qt/SymbolicDebug.h"
+#include "Qt/CodeDataLogger.h"
+#include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleWindow.h"
+#include "Qt/fceux_git_info.h"
 
 #include "common/cheat.h"
 #include "../../fceu.h"
@@ -80,20 +85,22 @@ int mutecapture = 0;
 void FCEUD_Message(const char *text)
 {
 	fputs(text, stdout);
-	fprintf(stdout, "\n");
+	//fprintf(stdout, "\n");
 }
 
 /**
 * Shows an error message in a message box.
 * (For now: prints to stderr.)
 * 
-* If running in GTK mode, display a dialog message box of the error.
+* If running in Qt mode, display a dialog message box of the error.
 *
 * @param errormsg Text of the error message.
 **/
 void FCEUD_PrintError(const char *errormsg)
 {
 	fprintf(stderr, "%s\n", errormsg);
+
+	consoleWindow->QueueErrorMsgWindow( errormsg );
 }
 
 /**
@@ -101,7 +108,8 @@ void FCEUD_PrintError(const char *errormsg)
  */
 FILE *FCEUD_UTF8fopen(const char *fn, const char *mode)
 {
-	return(fopen(fn,mode));
+   FILE *fp = ::fopen(fn,mode);
+	return(fp);
 }
 
 /**
@@ -154,11 +162,6 @@ FCEUD_GetTimeFreq(void)
 	return 1000;
 }
 
-void FCEUD_DebugBreakpoint( int addr )
-{
-   // TODO
-}
-
 /**
  * Initialize all of the subsystem drivers: video, audio, and joystick.
  */
@@ -193,8 +196,8 @@ DriverKill()
 	if (!noconfig)
 		g_config->save();
 
-	if(inited&2)
-		KillJoysticks();
+	KillJoysticks();
+
 	if(inited&4)
 		KillVideo();
 	if(inited&1)
@@ -210,7 +213,7 @@ DriverKill()
  */
 int LoadGame(const char *path)
 {
-	int gg_enabled;
+	int gg_enabled, autoLoadDebug, autoOpenDebugger;
 
 	if (isloaded){
 		CloseGame();
@@ -226,6 +229,26 @@ int LoadGame(const char *path)
 	if(!FCEUI_LoadGame(path, 1)) {
 		return 0;
 	}
+
+	hexEditorLoadBookmarks();
+
+	g_config->getOption( "SDL.AutoLoadDebugFiles", &autoLoadDebug );
+
+	if ( autoLoadDebug )
+	{
+		loadGameDebugBreakpoints();
+	}
+
+	g_config->getOption( "SDL.AutoOpenDebugger", &autoOpenDebugger );
+
+	if ( autoOpenDebugger && !debuggerWindowIsOpen() )
+	{
+		consoleWindow->openDebugWindow();
+	}
+
+	debugSymbolTable.loadGameSymbols();
+
+	CDLoggerROMChanged();
 
     int state_to_load;
     g_config->getOption("SDL.AutoLoadState", &state_to_load);
@@ -273,6 +296,13 @@ CloseGame(void)
 	if(!isloaded) {
 		return(0);
 	}
+	hexEditorSaveBookmarks();
+	saveGameDebugBreakpoints();
+	debuggerClearAllBreakpoints();
+
+	debugSymbolTable.save();
+	debugSymbolTable.clear();
+	CDLoggerROMClosed();
 
     int state_to_save;
     g_config->getOption("SDL.AutoSaveState", &state_to_save);
@@ -408,12 +438,15 @@ static void ShowUsage(const char *prog)
 	SDL_GetVersion(&v);
 	printf("Linked with SDL version %d.%d.%d\n", v.major, v.minor, v.patch);
   	printf("Compiled with QT version %d.%d.%d\n", QT_VERSION_MAJOR, QT_VERSION_MINOR, QT_VERSION_PATCH );
+	printf("git URL: %s\n", fceu_get_git_url() );
+	printf("git Rev: %s\n", fceu_get_git_rev() );
 	
 }
 
 int  fceuWrapperInit( int argc, char *argv[] )
 {
 	int error;
+	std::string s;
 
 	for (int i=0; i<argc; i++)
 	{
@@ -431,6 +464,10 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	{
 		printf("Could not initialize SDL: %s.\n", SDL_GetError());
 		exit(-1);
+	}
+	if ( SDL_SetHint( SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1" ) == SDL_FALSE )
+	{
+		printf("Error setting SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS\n");
 	}
 
 	// Initialize the configuration system
@@ -468,15 +505,14 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		g_config->save();
 	}
 
-	std::string s;
 
-	g_config->getOption("SDL.InputCfg", &s);
+	//g_config->getOption("SDL.InputCfg", &s);
 
-	if (s.size() != 0)
-	{
-		InitVideo(GameInfo);
-		InputCfg(s);
-	}
+	//if (s.size() != 0)
+	//{
+	//	InitVideo(GameInfo);
+	//	InputCfg(s);
+	//}
 
 	 // update the input devices
 	UpdateInput(g_config);
@@ -914,17 +950,23 @@ static void DoFun(int frameskip, int periodic_saves)
 void fceuWrapperLock(void)
 {
 	mutexPending++;
-	consoleWindow->mutex->lock();
+	if ( consoleWindow != NULL )
+	{
+		consoleWindow->mutex->lock();
+	}
 	mutexPending--;
 	mutexLocks++;
 }
 
 bool fceuWrapperTryLock(int timeout)
 {
-	bool lockAcq;
+	bool lockAcq = false;
 
 	mutexPending++;
-	lockAcq = consoleWindow->mutex->tryLock( timeout );
+	if ( consoleWindow != NULL )
+	{
+		lockAcq = consoleWindow->mutex->tryLock( timeout );
+	}
 	mutexPending--;
 
 	if ( lockAcq )
@@ -938,7 +980,10 @@ void fceuWrapperUnLock(void)
 {
 	if ( mutexLocks > 0 )
 	{
-		consoleWindow->mutex->unlock();
+		if ( consoleWindow != NULL )
+		{
+			consoleWindow->mutex->unlock();
+		}
 		mutexLocks--;
 	}
 	else

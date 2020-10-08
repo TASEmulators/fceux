@@ -246,6 +246,29 @@ INT_PTR CWin32InputBox::GetInteger(
   return ret;
 }
 
+INT_PTR CWin32InputBox::GetString(
+	LPCTSTR szTitle,
+	LPCTSTR szPrompt,
+	CHAR* result,
+	HWND hwndParent)
+{
+	WIN32INPUTBOX_PARAM param;
+
+	char szResult[32+1];
+	sprintf(szResult, "");
+	param.szTitle = szTitle;
+	param.szPrompt = szPrompt;
+	param.szResult = szResult;
+	param.nResultSize = sizeof(szResult);
+	param.bMultiline = false;
+	param.hwndOwner = hwndParent;
+
+	INT_PTR ret = InputBoxEx(&param);
+	if (ret == IDOK)
+		sprintf(result, "%s", szResult);
+	return ret;
+}
+
 void CWin32InputBox::InitDialog()
 {
   // Set the button captions
@@ -290,7 +313,7 @@ void CWin32InputBox::InitDialog()
       0, 
       0, 
       rectDlg.right - rectDlg.left, 
-      rectDlg.bottom - rectDlg.top - (rectEdit1.bottom - rectEdit1.top), 
+      rectDlg.bottom - rectDlg.top - (rectEdit1.bottom - rectEdit1.top) + 16, 
       SWP_NOMOVE);
 
   }
@@ -302,7 +325,7 @@ void CWin32InputBox::InitDialog()
       0, 
       0, 
       rectDlg.right - rectDlg.left, 
-      rectEdit1.bottom - rectDlg.top + 5,
+      rectEdit1.bottom - rectDlg.top + 5 + 16,
       SWP_NOMOVE);
 
     ::ShowWindow(hwndEdit2, SW_HIDE);

@@ -114,8 +114,7 @@ static INT_PTR CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 
 		case WM_CLOSE:
 		case WM_QUIT:
-			CloseDirectoriesDialog(hwndDlg);
-			CloseDirectoriesDialog(hwndDlg);	//adelikat:  Hacky but this fixes the directory overides bug (or at least some instances of it).  This of course really just puts a band-aid on the real problem.
+			EndDialog(hwndDlg, 0);
 			break;
 
 		case WM_COMMAND:
@@ -126,9 +125,7 @@ static INT_PTR CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 					{
 						case CLOSE_BUTTON:
 							CloseDirectoriesDialog(hwndDlg);
-							break;
-						case BTN_CANCEL:
-							EndDialog(hwndDlg, 0);
+							CloseDirectoriesDialog(hwndDlg);	//adelikat:  Hacky but this fixes the directory overides bug (or at least some instances of it).  This of course really just puts a band-aid on the real problem.
 							break;
 						default:
 							static char *helpert[14] = {

@@ -148,6 +148,7 @@ int menuYoffset = 0;
 bool wasPausedByCheats = false;		//For unpausing the emulator if paused by the cheats dialog
 bool rightClickEnabled = true;		//If set to false, the right click context menu will be disabled.
 bool fullscreenByDoubleclick = false;
+uint8 BWorldData[1 + 13 + 1];
 
 //Function Prototypes
 void ChangeMenuItemText(int menuitem, string text);			//Alters a menu item name
@@ -381,6 +382,7 @@ void updateGameDependentMenus()
 		MENU_SWITCH_DISK,
 		MENU_EJECT_DISK,
 		MENU_RECORD_AVI,
+		MENU_INPUT_BARCODE,
 		MENU_STOP_AVI,
 		MENU_RECORD_WAV,
 		MENU_STOP_WAV,
@@ -1303,7 +1305,7 @@ void DumpSubtitles(HWND hWnd)
 
 			for (unsigned int i = 0; i < subtitleFrames.size(); i++)
 			{
-				fprintf(srtfile, "%i\n", i+1); // starts with 1, not 0
+				fprintf(srtfile, "%u\n", i+1); // starts with 1, not 0
 				double seconds, ms, endseconds, endms;
 				seconds = subtitleFrames[i]/fps;
 				if (i+1 < subtitleFrames.size()) // there's another subtitle coming after this one
@@ -1327,8 +1329,8 @@ void DumpSubtitles(HWND hWnd)
 				floor(endseconds/3600), (int)floor(endseconds/60) % 60, (int)floor(endseconds) % 60, (int)(endms*1000));
 				fprintf(srtfile, "%s\n\n", subtitleMessages[i].c_str()); // new line for every subtitle
 			}
+			fclose(srtfile);
 		}
-	fclose(srtfile);
 	}
 
 	return;
@@ -1930,7 +1932,24 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_INSERT_COIN:
 				FCEUI_VSUniCoin();
 				break;
-			
+			case MENU_INPUT_BARCODE:
+				char bbuf[32 + 1];
+				if ((CWin32InputBox::GetString("Input Barcode", "Input full 13- or 8-digit barcode to be directly send to the reader. Or input partial 12- or 7-digit number to allow the program to calculate control code automatically.", bbuf, hWnd) == IDOK)) {
+					uint32 stl = strlen(bbuf);
+					if (InputType[2] == SIFC_BWORLD) {
+						strcpy((char *)&BWorldData[1], (char *)bbuf);
+						BWorldData[0] = 1;
+						FCEU_DispMessage("Barcode entered: %s", 0, bbuf);
+					}
+					else {
+						if(FCEUI_DatachSet((uint8 *)bbuf) == 1)
+							FCEU_DispMessage("Barcode entered: %s", 0, bbuf);
+						else
+							FCEU_DispMessage("Invalid barcode size or characters!", 0);
+					}
+				}
+				break;
+
 			//Emulation submenu
 			case ID_NES_PAUSE:
 				FCEUI_ToggleEmulationPause();
@@ -2521,6 +2540,7 @@ adelikat: Outsourced this to a remappable hotkey
 		EnableMenuItem(fceumenu,MENU_EJECT_DISK,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_EJECT_DISK)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_SWITCH_DISK,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_SWITCH_DISK)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_INSERT_COIN,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_INSERT_COIN)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_INPUT_BARCODE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_INPUT_BARCODE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_TASEDITOR,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_TASEDITOR)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_CLOSE_FILE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_CLOSEGAME) && GameInfo ?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_RECENT_FILES,MF_BYCOMMAND | ((FCEU_IsValidUI(FCEUI_OPENGAME) && HasRecentFiles()) ?MF_ENABLED:MF_GRAYED)); //adelikat - added && recent_files, otherwise this line prevents recent from ever being gray when TAS Editor is not engaged
@@ -3354,7 +3374,6 @@ bool inline (*GetIsLetterLegal(UINT id))(char letter)
 		case MW_ADDR16: case MW_ADDR17: case MW_ADDR18: case MW_ADDR19:
 		case MW_ADDR20: case MW_ADDR21: case MW_ADDR22: case MW_ADDR23:
 		case IDC_EDIT_COMPAREADDRESS:
-
 			return IsLetterLegalHex;
 
 		// Specific Address in RAM Search

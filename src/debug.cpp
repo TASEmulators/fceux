@@ -22,7 +22,7 @@ int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 {
 	int offset = -1;
 
-	if (sscanf(offsetBuffer,"%4X",&offset) == EOF)
+	if (sscanf(offsetBuffer,"%4X",(unsigned int *)&offset) == EOF)
 	{
 		return -1;
 	}
@@ -421,12 +421,12 @@ int condition(watchpointinfo* wp)
 
 //---------------------
 
-volatile int codecount, datacount, undefinedcount;
-unsigned char *cdloggerdata;
+volatile int codecount = 0, datacount = 0, undefinedcount = 0;
+unsigned char *cdloggerdata = NULL;
 unsigned int cdloggerdataSize = 0;
-static int indirectnext;
+static int indirectnext = 0;
 
-int debug_loggingCD;
+int debug_loggingCD = 0;
 
 //called by the cpu to perform logging if CDLogging is enabled
 void LogCDVectors(int which){
@@ -865,10 +865,5 @@ void DebugCycle()
 	if(debug_loggingCD)
 		LogCDData(opcode, A, size);
 
-#ifdef WIN32
-	//This needs to be windows only or else the linux build system will fail since logging is declared in a
-	//windows source file
 	FCEUD_TraceInstruction(opcode, size);
-#endif
-
 }

@@ -33,6 +33,7 @@ static GLXContext              glc = NULL;
 static XWindowAttributes       gwa;
 static XEvent                  xev;
 static GLint  double_buffer_ena = 1;
+static bool   isDoubleBuffered  = true;
 
 static GLuint gltexture = 0;
 static int    spawn_new_window = 0;
@@ -89,8 +90,14 @@ static void getAttrbList( GLint *buf )
    int i=0;
 
 	buf[i] = GLX_RGBA; i++;
-	buf[i] = GLX_DEPTH_SIZE; i++;
-	buf[i] = 24; i++;
+	//buf[i] = GLX_DEPTH_SIZE; i++;
+	//buf[i] = 24; i++;
+	buf[i] = GLX_RED_SIZE; i++;
+	buf[i] = 8; i++;
+	buf[i] = GLX_GREEN_SIZE; i++;
+	buf[i] = 8; i++;
+	buf[i] = GLX_BLUE_SIZE; i++;
+	buf[i] = 8; i++;
 
 	if ( double_buffer_ena )
 	{
@@ -258,7 +265,7 @@ static void render_image(void)
 
 	//print_pixbuf();
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0,
-					GL_RGBA, GL_UNSIGNED_BYTE, glx_shm->pixbuf );
+					GL_BGRA, GL_UNSIGNED_BYTE, glx_shm->pixbuf );
 
 	glBegin(GL_QUADS);
 	glTexCoord2f(1.0f*l/256, 1.0f*b/256); // Bottom left of picture.
@@ -283,7 +290,7 @@ static void render_image(void)
 	//glVertex2f( 1.0f,  1.0f);	// Top right of target.
 	//glEnd();
 
-	if ( double_buffer_ena )
+	if ( isDoubleBuffered )
 	{
 		glXSwapBuffers( dpy, win );
 	}
@@ -392,6 +399,7 @@ int  spawn_glxwin( int flags )
 //************************************************************************
 int  init_gtk3_GLXContext( int flags )
 {
+	int screenNumber;
 	GLint  att[32];
 
 	XWindowAttributes xattrb;
@@ -410,11 +418,19 @@ int  init_gtk3_GLXContext( int flags )
 		printf("Error: Failed to obtain gdkWindow Handle for evbox widget\n");
 		return -1;
 	}
+	if (!GDK_IS_X11_WINDOW (gdkWin))
+	{
+		printf("Error: GDK Window is not of X11 Type\n");
+		return -1;
+	}
+	GdkDisplay *gdk_display = gdk_window_get_display (gdkWin);
+	GdkScreen *gdk_screen   = gdk_window_get_screen (gdkWin);
+   screenNumber = gdk_x11_screen_get_screen_number (gdk_screen);
+	dpy = GDK_DISPLAY_XDISPLAY( gdk_display );
+
 	win = GDK_WINDOW_XID( gdkWin );
 
 	root = GDK_ROOT_WINDOW();
-
-	dpy = gdk_x11_get_default_xdisplay();
 
 	if ( dpy == NULL )
 	{
@@ -431,16 +447,65 @@ int  init_gtk3_GLXContext( int flags )
 	//printf("XWinSize: (%i x %i) \n", xattrb.width, xattrb.height );
 	//printf("XWinDepth: %i \n", xattrb.depth );
 	//printf("XWinVisual: %p \n", xattrb.visual );
+	printf("XScreenNumber: %i \n", screenNumber );
 
-	vi = glXChooseVisual(dpy, 0, att);
+	vi = glXChooseVisual(dpy, screenNumber, att);
 
 	if (vi == NULL) 
 	{
-		printf("\n\tno appropriate visual found\n\n");
+		printf("\n\tERROR: GLX No appropriate visual found\n\n");
 	   exit(0);
 	} 
-	else {
-		printf("\n\tvisual %p selected\n", (void *)vi->visualid); /* %p creates hexadecimal output like in glxinfo */
+	else 
+	{
+		int val;
+		printf("\n\tGLX visual %p selected\n", (void *)vi->visualid); /* %p creates hexadecimal output like in glxinfo */
+
+		if ( glXGetConfig( dpy, vi, GLX_RGBA, &val ) == 0 )
+		{
+			printf("GLX_RGBA: %i \n", val );
+		}
+		if ( glXGetConfig( dpy, vi, GLX_USE_GL, &val ) == 0 )
+		{
+			printf("GLX_USE_GL: %i \n", val );
+		}
+		if ( glXGetConfig( dpy, vi, GLX_LEVEL, &val ) == 0 )
+		{
+			printf("GLX_LEVEL: %i \n", val );
+		}
+		if ( glXGetConfig( dpy, vi, GLX_BUFFER_SIZE, &val ) == 0 )
+		{
+			printf("GLX_BUFFER_SIZE: %i \n", val );
+		}
+		if ( glXGetConfig( dpy, vi, GLX_DOUBLEBUFFER, &val ) == 0 )
+		{
+			isDoubleBuffered = val ? true : false;
+			printf("GLX_DOUBLEBUFFER: %i \n", val );
+		}
+		if ( glXGetConfig( dpy, vi, GLX_RED_SIZE, &val ) == 0 )
+		{
+			printf("GLX_RED_SIZE: %i \n", val );
+		}
+		if ( glXGetConfig( dpy, vi, GLX_GREEN_SIZE, &val ) == 0 )
+		{
+			printf("GLX_GREEN_SIZE: %i \n", val );
+		}
+		if ( glXGetConfig( dpy, vi, GLX_BLUE_SIZE, &val ) == 0 )
+		{
+			printf("GLX_BLUE_SIZE: %i \n", val );
+		}
+		if ( glXGetConfig( dpy, vi, GLX_ALPHA_SIZE, &val ) == 0 )
+		{
+			printf("GLX_ALPHA_SIZE: %i \n", val );
+		}
+		if ( glXGetConfig( dpy, vi, GLX_DEPTH_SIZE, &val ) == 0 )
+		{
+			printf("GLX_DEPTH_SIZE: %i \n", val );
+		}
+		if ( glXGetConfig( dpy, vi, GLX_STENCIL_SIZE, &val ) == 0 )
+		{
+			printf("GLX_STENCIL_SIZE: %i \n", val );
+		}
 	}
 
 	if ( glc == NULL )
@@ -449,11 +514,20 @@ int  init_gtk3_GLXContext( int flags )
 
 		if ( glc == NULL )
 		{
-			printf("Error: glXCreateContext Failed\n");
+			printf("ERROR: glXCreateContext Failed\n");
+		}
+		else
+		{
+			printf("glXIsDirect: %i \n", glXIsDirect( dpy, glc ) );
 		}
 	}
 	XFree(vi); vi = NULL;
 
+	if ( glc == NULL )
+	{
+		return -1;
+	}
+	
 	glXMakeCurrent(dpy, win, glc);
 
 	genTextures( flags & GLXWIN_PIXEL_LINEAR_FILTER ? 1 : 0 );

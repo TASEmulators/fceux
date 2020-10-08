@@ -106,8 +106,6 @@ static uint32 FTrainerData=0;
 static uint8 TopRiderData=0;
 static uint32 FamiNetSysData = 0;
 
-static uint8 BWorldData[1+13+1];
-
 static void UpdateFKB(void);
 static void UpdateSuborKB(void);
 void UpdateGamepad(void);

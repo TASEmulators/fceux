@@ -1,21 +1,66 @@
 Priorities
 ==========
    * Clean out old unused files - scons build system is dead, cmake is the way to go.
-   * GTK GUI was not cross-platform. Has been replaced in favor of Qt5. Need to clean out dead code.
-   * Cheat Editor will be a high priority.
-   * Code cleanup. Lots of compiler warning with newer GCC. Maybe I'm OCD... but these warnings bother me.
+   * GTK GUI was not cross-platform. A Qt5 version of the GUI has been created to meet this need. 
+     I will keep the GTK GUI around for Linux users who prefer it, but when it comes to adding new features
+     the Qt GUI is where I plan to add them first (if at all).
+   * Code cleanup. Lots of compiler warnings with newer GCC. Maybe I'm OCD... but these warnings bother me.
 
 Features
 ========
    * Emulator no runs as a separate thread from the GUI. Much improved performance.
-   * Cross platform QT GUI is fully functional minus Debug Tools and Cheat Menu.
+   * Cross platform QT GUI is fully functional minus Debug Tools.
   
+---------------------------------------------------------------------------------|
+----------------------  GUI Capability Matrix -----------------------------------|
+---------------------------------------------------------------------------------|
+Feature                                              |     Qt5     |     GTK3    |
+-----------------------------------------------------|-------------|-------------|
+Basic game ROM open/run and close via menu functions |     YES     |     YES     |
+Load/save game states                                |     YES     |     YES     |
+Select and execute Lua script via file browser       |     YES     |     YES     |
+Lua Console/Control Window                           |     YES     |     NO      |
+Screenshot snap/save functionality                   |     YES     |     YES     |
+Virtual game pad button mapping window               |     YES     |     YES     |
+Other input device type button mapping window        |     NO      |     NO      |
+Audio mixer / config window                          |     YES     |     YES     |
+Video config window                                  |     YES     |     YES     |
+OpenGL graphics                                      |     YES     |     YES     |
+Hot key config window                                |     YES     |     YES     |
+Palette config window                                |     YES     |     YES     |
+Multi-thread (GUI and emulation on separate threads) |     YES     |     NO      |
+Emulation speed control via menu                     |     NO      |     NO      |
+Emulation speed control via hotkeys                  |     YES     |     YES     |
+Fullscreen functionality                             |     YES     |     YES     |
+AVI Record Functionality                             |     NO      |     NO      |
+NES Emulation Power/Reset/Pause functionality        |     YES     |     YES     |
+Game genie load/enable capability                    |     YES     |     YES     |
+Movie record/save/play functionality                 |     YES     |     YES     |
+Cheat search window                                  |     YES     |     YES     |
+Active Cheat window                                  |     YES     |     YES     |
+RAM Search Window                                    |     NO      |     NO      |
+RAM Watch Window                                     |     NO      |     YES     |
+Memory Watch Window                                  |     NO      |     NO      |
+TAS Editor                                           |     NO      |     NO      |
+6502 Debugger Window                                 |     YES     |     YES     |
+PPU Viewer                                           |     YES     |     NO      |
+Name Table Viewer                                    |     YES     |     NO      |
+Memory Hex Editor                                    |     YES     |     YES     |
+Trace Logger                                         |     YES     |     NO      |
+Code/Data Logger                                     |     YES     |     NO      |
+Game Genie Encoder/Decoder                           |     NO      |     NO      |
+iNES Header Editor                                   |     NO      |     NO      |
+Built in help pages                                  |     NO      |     NO      |
+Network play (who actually uses this???)             |     NO      |     NO      |
+-----------------------------------------------------|-------------|-------------|
+---------------------------------------------------------------------------------|
+---------------------------------------------------------------------------------|
+
 QT
 ===
    * Clean out rest of old GTK comments and #ifdefs
-	* GUI Cheat editor TODO
 	* GUI Debug Tools TODO
-   * GUI should compile in windows as well.... but testing is not a priority since the windows gui has a totally separate backend.
+   * GUI should compile in windows as well.... but testing is not a priority since the windows gui already has a totally separate backend.
 
 BUGS
 ====

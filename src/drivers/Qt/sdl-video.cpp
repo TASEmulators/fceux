@@ -51,6 +51,7 @@
 
 // GLOBALS
 extern Config *g_config;
+extern bool force_grayscale;
 
 // STATIC GLOBALS
 static int s_curbpp = 0;
@@ -206,24 +207,6 @@ int InitVideo(FCEUGI *gi)
 		return -1;
 	}
 
-#ifdef OPENGL
-	if(s_exs <= 0.01) {
-		FCEUD_PrintError("xscale out of bounds.");
-		KillVideo();
-		return -1;
-	}
-	if(s_eys <= 0.01) {
-		FCEUD_PrintError("yscale out of bounds.");
-		KillVideo();
-		return -1;
-	}
-	//if(s_sponge && s_useOpenGL) {
-	//	FCEUD_PrintError("scalers not compatible with openGL mode.");
-	//	KillVideo();
-	//	return -1;
-	//}
-#endif
-
 	if ( !initBlitToHighDone )
 	{
 		InitBlitToHigh(s_curbpp >> 3,
@@ -269,9 +252,21 @@ FCEUD_SetPalette(uint8 index,
                  uint8 g,
                  uint8 b)
 {
-	s_psdl[index].r = r;
-	s_psdl[index].g = g;
-	s_psdl[index].b = b;
+	if ( force_grayscale )
+	{
+		// convert the palette entry to grayscale
+		int gray = ((float)r * 0.299 + (float)g * 0.587 + (float)b * 0.114);
+
+		s_psdl[index].r = gray;
+		s_psdl[index].g = gray;
+		s_psdl[index].b = gray;
+	}
+	else
+	{
+		s_psdl[index].r = r;
+		s_psdl[index].g = g;
+		s_psdl[index].b = b;
+	}
 
 	s_paletterefresh = 1;
 }

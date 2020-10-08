@@ -171,7 +171,7 @@ unsigned int skippy = 0;  //Frame skip
 int frameSkipCounter = 0; //Counter for managing frame skip
 // Contains the names of the overridden standard directories
 // in the order roms, nonvol, states, fdsrom, snaps, cheats, movies, memwatch, basic bot, macro, input presets, lua scripts, avi, base
-char *directory_names[14] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+char *directory_names[14] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int edit_id[14] = { EDIT_ROM, EDIT_BATTERY, EDIT_STATE, EDIT_FDSBIOS, EDIT_SCREENSHOT, EDIT_CHEAT, EDIT_MOVIE, EDIT_MEMWATCH, EDIT_BOT, EDIT_MACRO, EDIT_PRESET, EDIT_LUA, EDIT_AVI, EDIT_ROOT };
 int browse_btn_id[14] = {BUTTON_ROM, BUTTON_BATTERY, BUTTON_STATE, BUTTON_FDSBIOS, BUTTON_SCREENSHOT, BUTTON_CHEAT, BUTTON_MOVIE, BUTTON_MEMWATCH, BUTTON_BOT, BUTTON_MACRO, BUTTON_PRESET, BUTTON_LUA, BUTTON_AVI, BUTTON_ROOT };
 std::string cfgFile = "fceux.cfg";
@@ -286,7 +286,7 @@ void DefaultDirectoryWalker(void (*callback)(const char*))
 			sprintf(
 				TempArray,
 				"%s\\%s",
-				directory_names[NUMBER_OF_DEFAULT_DIRECTORIES] ? directory_names[NUMBER_OF_DEFAULT_DIRECTORIES] : BaseDirectory.c_str(),
+				directory_names[NUMBER_OF_DEFAULT_DIRECTORIES - 1] ? directory_names[NUMBER_OF_DEFAULT_DIRECTORIES - 1] : BaseDirectory.c_str(),
 				default_directory_names[curr_dir]
 			);
 

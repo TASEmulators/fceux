@@ -35,6 +35,8 @@
 #include "gui.h"
 #endif
 
+#include "fceux_git_info.h"
+
 #include <unistd.h>
 #include <csignal>
 #include <cstring>
@@ -57,6 +59,7 @@ extern bool MaxSpeed;
 int isloaded;
 
 bool turbo = false;
+bool gtk_gui_run = true;
 
 int closeFinishedMovie = 0;
 
@@ -76,6 +79,8 @@ static int noconfig;
 int pal_emulation;
 int dendy;
 bool swapDuty;
+
+static bool luaScriptRunning = false;
 
 // -Video Modes Tag- : See --special
 static const char *DriverUsage=
@@ -179,6 +184,8 @@ static void ShowUsage(char *prog)
 	printf("Compiled with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
 	//printf("Linked with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
 #endif
+	printf("git URL: %s\n", fceu_get_git_url() );
+	printf("git Rev: %s\n", fceu_get_git_rev() );
 	
 }
 
@@ -330,8 +337,8 @@ DriverKill()
 	if (!noconfig)
 		g_config->save();
 
-	if(inited&2)
-		KillJoysticks();
+	KillJoysticks();
+
 	if(inited&4)
 		KillVideo();
 	if(inited&1)
@@ -348,6 +355,7 @@ FCEUD_Update(uint8 *XBuf,
 			 int32 *Buffer,
 			 int Count)
 {
+	int blitDone = 0;
 	extern int FCEUDnetplay;
 
 	#ifdef CREATE_AVI
@@ -374,8 +382,8 @@ FCEUD_Update(uint8 *XBuf,
 		if (!mutecapture)
 		  if(Count > 0 && Buffer) WriteSound(Buffer,Count);   
 	  }
-	  if(inited & 2)
-		FCEUD_UpdateInput();
+	//  if(inited & 2)
+	//	FCEUD_UpdateInput();
 	  if(XBuf && (inited & 4)) BlitScreen(XBuf);
 	  
 	  //SpeedThrottle();
@@ -407,7 +415,9 @@ FCEUD_Update(uint8 *XBuf,
 		// don't underflow when scaling fps
 		if(g_fpsScale>1.0 || ((tmpcan < Count*0.90) && !uflow)) {
 			if(XBuf && (inited&4) && !(NoWaiting & 2))
-				BlitScreen(XBuf);
+			{
+				BlitScreen(XBuf); blitDone = 1;
+			}
 			Buffer+=can;
 			Count-=can;
 			if(Count) {
@@ -442,24 +452,23 @@ FCEUD_Update(uint8 *XBuf,
 		}
 
 	} else {
-		if(!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
-		while (SpeedThrottle())
+		//if(!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
+		//while (SpeedThrottle())
+		//{
+		//	FCEUD_UpdateInput();
+		//}
+		if (XBuf && (inited&4)) 
 		{
-			FCEUD_UpdateInput();
-		}
-		if(XBuf && (inited&4)) {
-			BlitScreen(XBuf);
+			BlitScreen(XBuf); blitDone = 1;
 		}
 	}
-	FCEUD_UpdateInput();
-	//if(!Count && !NoWaiting && !(eoptions&EO_NOTHROTTLE))
-	// SpeedThrottle();
-	//if(XBuf && (inited&4))
-	//{
-	// BlitScreen(XBuf);
-	//}
-	//if(Count)
-	// WriteSound(Buffer,Count,NoWaiting);
+	if ( !blitDone )
+	{
+		if (XBuf && (inited&4)) 
+		{
+			BlitScreen(XBuf); blitDone = 1;
+		}
+	}
 	//FCEUD_UpdateInput();
 }
 
@@ -552,9 +561,14 @@ int main(int argc, char *argv[])
 #endif
 
 	/* SDL_INIT_VIDEO Needed for (joystick config) event processing? */
-	if(SDL_Init(SDL_INIT_VIDEO)) {
+	if (SDL_Init(SDL_INIT_VIDEO))
+	{
 		printf("Could not initialize SDL: %s.\n", SDL_GetError());
 		return(-1);
+	}
+	if ( SDL_SetHint( SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1" ) == SDL_FALSE )
+	{
+		printf("Error setting SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS\n");
 	}
 
 //#ifdef OPENGL
@@ -608,12 +622,14 @@ int main(int argc, char *argv[])
 	
 	std::string s;
 
-	g_config->getOption("SDL.InputCfg", &s);
-	if(s.size() != 0)
-	{
-		InitVideo(GameInfo);
-		InputCfg(s);
-	}
+	//g_config->getOption("SDL.InputCfg", &s);
+	//
+	//if(s.size() != 0)
+	//{
+	//	InitVideo(GameInfo);
+	//	InputCfg(s);
+	//}
+	
 	// set the FAMICOM PAD 2 Mic thing 
 	{
 	int t;
@@ -624,18 +640,6 @@ int main(int argc, char *argv[])
 
     // update the input devices
 	UpdateInput(g_config);
-
-	// check if opengl is enabled with a scaler and display an error and bail	
-	int opengl;
-	int scaler;
-	g_config->getOption("SDL.OpenGL", &opengl);
-	g_config->getOption("SDL.SpecialFilter", &scaler);
-	if(opengl && scaler)
-	{
-		printf("Scalers are not supported in OpenGL mode.  Terminating.\n");
-		exit(2);
-	}
-
 
 	// check for a .fcm file to convert to .fm2
 	g_config->getOption ("SDL.FCMConvert", &s);
@@ -908,7 +912,7 @@ int main(int argc, char *argv[])
 #ifdef _GTK
 	if(noGui == 0)
 	{
-		while(1)
+		while ( gtk_gui_run )
 		{
 			if(GameInfo)
 			{
@@ -916,14 +920,16 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				SDL_Delay(1);
+				SDL_Delay(10);
 			}
+			FCEUD_UpdateInput();
 
 			while(gtk_events_pending())
 			{
 				gtk_main_iteration_do(FALSE);
 			}
 		}
+		printf("Exiting GUI Main Loop...\n");
 	}
 	else
 	{
@@ -936,11 +942,34 @@ int main(int argc, char *argv[])
 		DoFun(frameskip, periodic_saves);
 	}
 #endif
+	printf("Closing Game...\n");
 	CloseGame();
 
+	printf("Exiting Infrastructure...\n");
 	// exit the infrastructure
 	FCEUI_Kill();
 	SDL_Quit();
+
+#ifdef _GTK
+	usleep(50000);
+	if ( MainWindow != NULL )
+	{
+		printf("Destroying GUI Window...\n");
+		gtk_widget_destroy( MainWindow ); MainWindow = NULL;
+	}
+	usleep(50000);
+	while(gtk_events_pending())
+	{
+		//printf("Processing the last of the events...\n");
+		gtk_main_iteration_do(FALSE);
+	}
+#endif
+	// LoadGame() checks for an IP and if it finds one begins a network session
+	// clear the NetworkIP field so this doesn't happen unintentionally
+	g_config->setOption ("SDL.NetworkIP", "");
+	g_config->save ();
+
+	printf("Done!\n");
 	return 0;
 }
 
@@ -1001,6 +1030,27 @@ void FCEUD_PrintError(const char *errormsg)
 
 	fprintf(stderr, "%s\n", errormsg);
 }
+
+//----------------------------------------------------
+void WinLuaOnStart(intptr_t hDlgAsInt)
+{
+	luaScriptRunning = true;
+
+	//printf("Lua Script Running: %i \n", luaScriptRunning );
+}
+//----------------------------------------------------
+void WinLuaOnStop(intptr_t hDlgAsInt)
+{
+	luaScriptRunning = false;
+
+	//printf("Lua Script Running: %i \n", luaScriptRunning );
+}
+//----------------------------------------------------
+void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str)
+{
+	printf("Lua Output: %s\n", str );
+}
+//----------------------------------------------------
 
 
 // dummy functions

@@ -37,6 +37,7 @@ HMENU hCheatcontext = 0;     //Handle to cheat context menu
 bool pauseWhileActive = false;	//For checkbox "Pause while active"
 extern int globalCheatDisabled;
 extern int disableAutoLSCheats;
+extern bool disableShowGG;
 extern bool wasPausedByCheats;
 
 int CheatWindow;
@@ -281,7 +282,7 @@ HWND InitializeCheatList(HWND hwnd)
 	SendMessage(hwndChtList, LVM_INSERTCOLUMN, 0, (LPARAM)&lv);
 
 	lv.pszText = "Name";
-	lv.cx = 132;
+	lv.cx = 152;
 	SendMessage(hwndChtList, LVM_INSERTCOLUMN, 1, (LPARAM)&lv);
 
 	// Add a checkbox to indicate if the cheat is activated
@@ -316,6 +317,7 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			CheckDlgButton(hwndDlg, IDC_CHEAT_PAUSEWHENACTIVE, pauseWhileActive ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHEAT_GLOBAL_SWITCH, globalCheatDisabled ? BST_UNCHECKED : BST_CHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHEAT_AUTOLOADSAVE, disableAutoLSCheats == 2 ? BST_UNCHECKED : disableAutoLSCheats == 1 ? BST_INDETERMINATE : BST_CHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHEAT_SHOWGG, disableShowGG ? BST_UNCHECKED : BST_CHECKED);
 
 			//setup font
 			SetupCheatFont(hwndDlg);
@@ -760,6 +762,31 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 									}
 							}
 							SetCheatToolTip(hwndDlg, IDC_CHEAT_AUTOLOADSAVE);
+						}
+						break;
+						case IDC_CHEAT_SHOWGG:
+						{
+							disableShowGG ^= 1;
+							void(*CreateCheatStr)(char* buf, int a, int v, int c) = disableShowGG ? GetCheatCodeStr : EncodeGG;
+							
+							int i = 0;
+							char buf[32];
+
+							LVITEM lvi;
+							lvi.iSubItem = 0;
+							struct CHEATF* cheat = cheats;
+							 
+							while (cheat != NULL)
+							{
+								if (cheat->addr > 0x7FFF)
+								{
+									CreateCheatStr(buf, cheat->addr, cheat->val, cheat->compare);
+									lvi.pszText = buf;
+									SendDlgItemMessage(hwndDlg, IDC_LIST_CHEATS, LVM_SETITEMTEXT, i, (LPARAM)&lvi);
+								}
+								cheat = cheat->next;
+								++i;
+							}
 						}
 					}
 					break;
@@ -1311,11 +1338,10 @@ void DoGGConv()
 
 inline void GetCheatStr(char* buf, int a, int v, int c)
 {
-	if (a > 0x7FFF)
-		EncodeGG(buf, a, v, c);
-	else {
+	if (a < 0x8000 || disableShowGG)
 		GetCheatCodeStr(buf, a, v, c);
-	}
+	else
+		EncodeGG(buf, a, v, c);
 }
 
 inline void GetCheatCodeStr(char* buf, int a, int v, int c)

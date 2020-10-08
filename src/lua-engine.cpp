@@ -170,11 +170,11 @@ static intptr_t info_uid;
 #ifdef WIN32
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+void TaseditorDisableManualFunctionIfNeeded();
+#endif
 extern void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str);
 extern void WinLuaOnStart(intptr_t hDlgAsInt);
 extern void WinLuaOnStop(intptr_t hDlgAsInt);
-void TaseditorDisableManualFunctionIfNeeded();
-#endif
 
 static lua_State *L;
 
@@ -6249,9 +6249,10 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		LuaConsoleHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_LUA), hAppWnd, DlgLuaScriptDialog);
 	info_uid = (intptr_t)LuaConsoleHWnd;
 #else
-	info_print = NULL;
-	info_onstart = NULL;
-	info_onstop = NULL;
+	info_print = PrintToWindowConsole;
+	info_onstart = WinLuaOnStart;
+	info_onstop = WinLuaOnStop;
+	info_uid = (intptr_t)0;
 #endif
 	if (info_onstart)
 		info_onstart(info_uid);

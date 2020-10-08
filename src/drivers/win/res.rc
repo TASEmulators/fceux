@@ -7,7 +7,8 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -18,691 +19,49 @@
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
 
-#ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// TEXTINCLUDE
-//
-
-1 TEXTINCLUDE 
-BEGIN
-    "resource.h\0"
-END
-
-3 TEXTINCLUDE 
-BEGIN
-    "\r\0"
-END
-
-2 TEXTINCLUDE 
-BEGIN
-    "#include ""afxres.h""\r\0"
-END
-
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDI_ICON3               ICON                    "res/taseditor-icon.ico"
-IDI_ICON4               ICON                    "res/taseditor-icon32.ico"
-ICON_1                  ICON                    "res/ICON_1.ico"
-ICON_2                  ICON                    "res/ICON_2.ico"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-FCEUMENU MENU
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Open...",                    MENU_OPEN_FILE
-        MENUITEM "&Close",                      MENU_CLOSE_FILE
-        MENUITEM "&Recent",                     MENU_RECENT_FILES
-        MENUITEM SEPARATOR
-        POPUP "&Savestate"
-        BEGIN
-            MENUITEM "&Load State",                 MENU_LOADSTATE
-            MENUITEM "&Save State",                 MENU_SAVESTATE
-            MENUITEM "Load State &From...",         MENU_LOAD_STATE
-            MENUITEM "Save State &As...",           MENU_SAVE_STATE
-            MENUITEM SEPARATOR
-            MENUITEM "&Next save slot",             MENU_NEXTSAVESTATE
-            MENUITEM "&Previous save slot",         MENU_PREVIOUSSAVESTATE
-            MENUITEM "&View save slots",            MENU_VIEWSAVESLOTS
-        END
-        POPUP "&Movie"
-        BEGIN
-            MENUITEM "Recent",                      MENU_MOVIE_RECENT
-            MENUITEM "&Record Movie...",            MENU_RECORD_MOVIE
-            MENUITEM "&Play Movie...",              MENU_REPLAY_MOVIE
-            MENUITEM "&Stop Movie",                 MENU_STOP_MOVIE
-            MENUITEM "Play from &Beginning",        ID_FILE_PLAYMOVIEFROMBEGINNING
-            MENUITEM "&Toggle Recording/Playing",   ID_FILE_TOGGLE_RECORDING_MOVIE
-            POPUP "&Quickly Modify"
-            BEGIN
-                MENUITEM "&Insert 1 Frame",             ID_FILE_INSERT_1_FRAME
-                MENUITEM "&Delete 1 Frame",             ID_FILE_DELETE_1_FRAME
-                MENUITEM SEPARATOR
-                MENUITEM "&Truncate at Current Frame",  ID_FILE_TRUNCATE_MOVIE
-            END
-            MENUITEM SEPARATOR
-            POPUP "Record &Mode"
-            BEGIN
-                MENUITEM "&Next Record Mode",           ID_FILE_NEXTRECORDMODE
-                MENUITEM SEPARATOR
-                MENUITEM "&Truncate",                   ID_FILE_RECORDMODE_TRUNCATE
-                MENUITEM "&Overwrite[W]",               ID_FILE_RECORDMODE_OVERWRITE
-                MENUITEM "&Insert[I]",                  ID_FILE_RECORDMODE_INSERT
-            END
-            MENUITEM "&Read-only",                  ID_FILE_MOVIE_TOGGLEREAD
-        END
-        POPUP "&AVI/Wav"
-        BEGIN
-            MENUITEM "&Record AVI...",              MENU_RECORD_AVI
-            MENUITEM "&Stop AVI",                   MENU_STOP_AVI
-            MENUITEM "&Record WAV...",              MENU_RECORD_WAV
-            MENUITEM "&Stop WAV",                   MENU_STOP_WAV
-            MENUITEM SEPARATOR
-            MENUITEM "Enable HUD recording",        ID_AVI_ENABLEHUDRECORDING
-            MENUITEM "Disable messages recording",  ID_AVI_DISMOVIEMESSAGE
-        END
-        POPUP "&Lua"
-        BEGIN
-            MENUITEM "&Recent",                     MENU_LUA_RECENT
-            MENUITEM "&New Lua Script Window...",   ID_FILE_OPENLUAWINDOW
-            MENUITEM "&Close All Script Windows",   ID_FILE_CLOSELUAWINDOWS
-        END
-        MENUITEM "&Screenshot",                 ID_FILE_SCREENSHOT
-        MENUITEM "Save Screenshot As...",       ID_FILE_SAVESCREENSHOTAS
-        MENUITEM SEPARATOR
-        MENUITEM "E&xit\tAlt+F4",               MENU_EXIT
-    END
-    POPUP "&NES"
-    BEGIN
-        MENUITEM "&Reset",                      MENU_RESET
-        MENUITEM "&Power",                      MENU_POWER
-        MENUITEM SEPARATOR
-        MENUITEM "&Eject/Insert Disk",          MENU_EJECT_DISK
-        MENUITEM "&Switch Disk Side",           MENU_SWITCH_DISK
-        MENUITEM "&Insert Coin",                MENU_INSERT_COIN
-        MENUITEM SEPARATOR
-        POPUP "E&mulation Speed"
-        BEGIN
-            MENUITEM "&Pause",                      ID_NES_PAUSE
-            MENUITEM "&Turbo",                      ID_NES_TURBO
-            MENUITEM SEPARATOR
-            MENUITEM "Speed &Up",                   ID_NES_SPEEDUP
-            MENUITEM "Slow &Down",                  ID_NES_SLOWDOWN
-            MENUITEM "&Slowest Speed",              ID_NES_SLOWESTSPEED
-            MENUITEM "&Normal Speed",               ID_NES_NORMALSPEED
-            MENUITEM "Set &Custom Speed",           ID_EMULATIONSPEED_CUSTOMSPEED
-            MENUITEM SEPARATOR
-            MENUITEM "Set FrameAdvance Delay",      ID_EMULATIONSPEED_SETFRAMEADVANCEDELAY
-            MENUITEM "Set custom speed for FrameAdvance", ID_EMULATIONSPEED_SETCUSTOMSPEEDFORFRAMEADVANCE
-        END
-    END
-    POPUP "&Config"
-    BEGIN
-        MENUITEM "&Hide Menu",                  MENU_HIDE_MENU
-        POPUP "&Enable"
-        BEGIN
-            MENUITEM "&Run in Background",          MENU_RUN_IN_BACKGROUND
-            MENUITEM "&Background Input",           MENU_BACKGROUND_INPUT
-            MENUITEM "&Auto-savestates",            MENU_ENABLE_AUTOSAVE
-            MENUITEM "&Frame Adv. - Skip Lag",      MENU_DISPLAY_FA_LAGSKIP
-            MENUITEM "Backup Savestates",           ID_ENABLE_BACKUPSAVESTATES
-            MENUITEM "Compress Savestates",         ID_ENABLE_COMPRESSSAVESTATES
-            MENUITEM "&Game Genie ROM",             MENU_GAME_GENIE
-            MENUITEM "Auto-resume old play session", ID_ENABLE_AUTORESUME
-        END
-        POPUP "&Display"
-        BEGIN
-            POPUP "&Input Display"
-            BEGIN
-                MENUITEM "&Off",                        MENU_INPUTDISPLAY_0
-                MENUITEM "&1 player",                   MENU_INPUTDISPLAY_1
-                MENUITEM "&2 player",                   MENU_INPUTDISPLAY_2
-                MENUITEM "&4 player",                   MENU_INPUTDISPLAY_4
-                MENUITEM SEPARATOR
-                MENUITEM "old style disp.",             ID_INPUTDISPLAY_OLDSTYLEDISP
-            END
-            MENUITEM "&Lag Counter",                MENU_DISPLAY_LAGCOUNTER
-            MENUITEM "&Frame Counter",              ID_DISPLAY_FRAMECOUNTER
-            MENUITEM "&Rerecord Counter",           ID_DISPLAY_RERECORDCOUNTER
-            MENUITEM "&Movie status icon",          ID_DISPLAY_MOVIESTATUSICON
-            MENUITEM "FPS",                         ID_DISPLAY_FPS
-            MENUITEM SEPARATOR
-            MENUITEM "Graphics: &BG",               MENU_DISPLAY_BG
-            MENUITEM "Graphics: &OBJ",              MENU_DISPLAY_OBJ
-        END
-        MENUITEM SEPARATOR
-        POPUP "Region"
-        BEGIN
-            MENUITEM "NTSC",                        MENU_NTSC
-            MENUITEM "&PAL",                        MENU_PAL
-            MENUITEM "Dendy",                       MENU_DENDY
-        END
-        POPUP "PPU"
-        BEGIN
-            MENUITEM "Old PPU",                     ID_OLDPPU
-            MENUITEM "New PPU",                     ID_NEWPPU
-        END
-        POPUP "RAM Init"
-        BEGIN
-            MENUITEM "&Default",                    MENU_RAMINIT_DEFAULT
-            MENUITEM "Fill $&FF",                   MENU_RAMINIT_FF
-            MENUITEM "Fill $&00",                   MENU_RAMINIT_00
-            MENUITEM "&Random",                     MENU_RAMINIT_RANDOM
-        END
-        MENUITEM SEPARATOR
-        MENUITEM "&Directories...",             MENU_DIRECTORIES
-        MENUITEM "&GUI...",                     MENU_GUI_OPTIONS
-        MENUITEM "&Input...",                   MENU_INPUT
-        MENUITEM "&Network Play...",            MENU_NETWORK
-        MENUITEM "&Palette...",                 MENU_PALETTE
-        MENUITEM "&Sound...",                   MENU_SOUND
-        MENUITEM "&Timing...",                  MENU_TIMING
-        MENUITEM "&Video...",                   MENU_VIDEO
-        MENUITEM "&Movie options...",           MENU_MOVIEOPTIONS
-        MENUITEM "&Map Hotkeys...",             MENU_HOTKEYS
-        MENUITEM SEPARATOR
-        MENUITEM "Save Config File",            ID_CONFIG_SAVECONFIGFILE
-    END
-    POPUP "&Tools"
-    BEGIN
-        MENUITEM "&Cheats...",                  MENU_CHEATS
-        MENUITEM "RAM Search...",               ID_RAM_SEARCH
-        MENUITEM "RAM Watch...",                ID_RAM_WATCH
-        MENUITEM "&Memory Watch...",            MENU_MEMORY_WATCH
-        MENUITEM "&TAS Editor...",              MENU_TASEDITOR
-        MENUITEM "Convert &FCM...",             MENU_CONVERT_MOVIE
-        MENUITEM SEPARATOR
-        POPUP "Autofire &Pattern"
-        BEGIN
-            MENUITEM "1 on, 1 off",                 MENU_AUTOFIRE_PATTERN_1
-            MENUITEM "1 on, 2 off",                 MENU_AUTOFIRE_PATTERN_2
-            MENUITEM "1 on, 3 off",                 MENU_AUTOFIRE_PATTERN_3
-            MENUITEM "1 on, 4 off",                 MENU_AUTOFIRE_PATTERN_4
-            MENUITEM "1 on, 5 off",                 MENU_AUTOFIRE_PATTERN_5
-            MENUITEM "2 on, 1 off",                 MENU_AUTOFIRE_PATTERN_6
-            MENUITEM "2 on, 2 off",                 MENU_AUTOFIRE_PATTERN_7
-            MENUITEM "2 on, 3 off",                 MENU_AUTOFIRE_PATTERN_8
-            MENUITEM "2 on, 4 off",                 MENU_AUTOFIRE_PATTERN_9
-            MENUITEM "3 on, 1 off",                 MENU_AUTOFIRE_PATTERN_10
-            MENUITEM "3 on, 2 off",                 MENU_AUTOFIRE_PATTERN_11
-            MENUITEM "3 on, 3 off",                 MENU_AUTOFIRE_PATTERN_12
-            MENUITEM "4 on, 1 off",                 MENU_AUTOFIRE_PATTERN_13
-            MENUITEM "4 on, 2 off",                 MENU_AUTOFIRE_PATTERN_14
-            MENUITEM "5 on, 1 off",                 MENU_AUTOFIRE_PATTERN_15
-        END
-        POPUP "Autofire &Offset"
-        BEGIN
-            MENUITEM "0 frames",                    MENU_AUTOFIRE_OFFSET_1
-            MENUITEM "1 frame",                     MENU_AUTOFIRE_OFFSET_2
-            MENUITEM "2 frames",                    MENU_AUTOFIRE_OFFSET_3
-            MENUITEM "3 frames",                    MENU_AUTOFIRE_OFFSET_4
-            MENUITEM "4 frames",                    MENU_AUTOFIRE_OFFSET_5
-            MENUITEM "5 frames",                    MENU_AUTOFIRE_OFFSET_6
-        END
-        MENUITEM "&Alternate A and B",          MENU_ALTERNATE_AB
-        MENUITEM SEPARATOR
-        MENUITEM "Te&xt Hooker...",             ID_TOOLS_TEXTHOOKER
-    END
-    POPUP "&Debug"
-    BEGIN
-        MENUITEM "&Debugger...",                MENU_DEBUGGER
-        MENUITEM "&PPU Viewer...",              MENU_PPUVIEWER
-        MENUITEM "&Name Table Viewer...",       MENU_NAMETABLEVIEWER
-        MENUITEM "&Hex Editor...",              MENU_HEXEDITOR
-        MENUITEM "&Trace Logger...",            MENU_TRACELOGGER
-        MENUITEM "&Code/Data Logger...",        MENU_CDLOGGER
-        MENUITEM "&Game Genie Decoder/Encoder...", MENU_GAMEGENIEDECODER
-        MENUITEM "&iNES Header Editor...",      MENU_INESHEADEREDITOR
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&Help...",                    MENU_HELP
-        MENUITEM "&Message Log",                MENU_MSGLOG
-        MENUITEM SEPARATOR
-        MENUITEM "&About",                      MENU_ABOUT
-    END
-END
-
-TASEDITORMENU MENUEX
-BEGIN
-    POPUP "File",                           65535,MFT_STRING,MFS_ENABLED
-    BEGIN
-        MENUITEM "New",                         ID_FILE_NEW,MFT_STRING,MFS_ENABLED
-        MENUITEM "Open",                        ID_FILE_OPENPROJECT,MFT_STRING,MFS_ENABLED
-        MENUITEM "Save\tCtrl+S",                ID_FILE_SAVEPROJECT,MFT_STRING,MFS_ENABLED
-        MENUITEM "Save As",                     ID_FILE_SAVEPROJECTAS,MFT_STRING,MFS_ENABLED
-        MENUITEM "Save Compact",                ID_FILE_SAVECOMPACT,MFT_STRING,MFS_ENABLED
-        MENUITEM "Recent",                      ID_FILE_RECENT,MFT_STRING,MFS_ENABLED
-        MENUITEM MFT_SEPARATOR
-        MENUITEM "Import Input",                ID_FILE_IMPORT,MFT_STRING,MFS_ENABLED
-        MENUITEM "Export to FM2",               ID_FILE_EXPORTFM2,MFT_STRING,MFS_ENABLED
-        MENUITEM MFT_SEPARATOR
-        MENUITEM "Close\tAlt+F4",               ID_FILE_CLOSE,MFT_STRING,MFS_ENABLED
-    END
-    POPUP "Edit",                           65535,MFT_STRING,MFS_ENABLED
-    BEGIN
-        MENUITEM "Undo\tCtrl+Z",                ID_EDIT_UNDO,MFT_STRING,MFS_ENABLED
-        MENUITEM "Redo\tCtrl+Y",                ID_EDIT_REDO,MFT_STRING,MFS_ENABLED
-        MENUITEM "Selection Undo\tCtrl+Q",      ID_EDIT_SELECTIONUNDO,MFT_STRING,MFS_ENABLED
-        MENUITEM "Selection Redo\tCtrl+W",      ID_EDIT_SELECTIONREDO,MFT_STRING,MFS_ENABLED
-        MENUITEM MFT_SEPARATOR
-        MENUITEM "Deselect",                    ID_EDIT_DESELECT,MFT_STRING,MFS_ENABLED
-        MENUITEM "Select All",                  ID_EDIT_SELECTALL,MFT_STRING,MFS_ENABLED
-        MENUITEM "Select between Markers\tCtrl+A", ID_EDIT_SELECTMIDMARKERS,MFT_STRING,MFS_ENABLED
-        MENUITEM "Reselect Clipboard\tCtrl+B",  ID_EDIT_RESELECTCLIPBOARD,MFT_STRING,MFS_ENABLED
-        MENUITEM MFT_SEPARATOR
-        MENUITEM "Copy\tCtrl+C",                ID_EDIT_COPY,MFT_STRING,MFS_ENABLED
-        MENUITEM "Paste\tCtrl+V",               ID_EDIT_PASTE,MFT_STRING,MFS_ENABLED
-        MENUITEM "PasteInsert\tCtrl+Shift+V",   ID_EDIT_PASTEINSERT,MFT_STRING,MFS_ENABLED
-        MENUITEM "Cut\tCtrl+X",                 ID_EDIT_CUT,MFT_STRING,MFS_ENABLED
-        MENUITEM MFT_SEPARATOR
-        MENUITEM "Clear\tDel",                  ID_EDIT_CLEAR,MFT_STRING,MFS_ENABLED
-        MENUITEM "Delete\tCtrl+Del",            ID_EDIT_DELETE,MFT_STRING,MFS_ENABLED
-        MENUITEM "Clone\tCtrl+Ins",             ID_EDIT_CLONEFRAMES,MFT_STRING,MFS_ENABLED
-        MENUITEM "Insert\tCtrl+Shift+Ins",      ID_EDIT_INSERTFRAMES,MFT_STRING,MFS_ENABLED
-        MENUITEM "Insert # of Frames\tIns",     ID_EDIT_INSERT,MFT_STRING,MFS_ENABLED
-        MENUITEM MFT_SEPARATOR
-        MENUITEM "Truncate movie",              ID_EDIT_TRUNCATE,MFT_STRING,MFS_ENABLED
-    END
-    POPUP "View",                           65535,MFT_STRING,MFS_ENABLED
-    BEGIN
-        MENUITEM "Find Note window\tCtrl+F",    ID_VIEW_FINDNOTE,MFT_STRING,MFS_ENABLED
-        MENUITEM MFT_SEPARATOR
-        MENUITEM "Display Branch Screenshots",  ID_VIEW_SHOWBRANCHSCREENSHOTS,MFT_STRING,MFS_ENABLED
-        MENUITEM "Display Branch Descriptions", ID_VIEW_SHOWBRANCHTOOLTIPS,MFT_STRING,MFS_ENABLED
-        MENUITEM "Enable Hot Changes",          ID_VIEW_ENABLEHOTCHANGES,MFT_STRING,MFS_ENABLED
-        MENUITEM MFT_SEPARATOR
-        MENUITEM "Follow Undo context",         ID_VIEW_JUMPWHENMAKINGUNDO,MFT_STRING,MFS_ENABLED
-        MENUITEM "Follow Marker Note context",  ID_VIEW_FOLLOWMARKERNOTECONTEXT,MFT_STRING,MFS_ENABLED
-    END
-    POPUP "Config",                         65535,MFT_STRING,MFS_ENABLED
-    BEGIN
-        MENUITEM "Project file saving options", ID_CONFIG_SAVING_OPTIONS,MFT_STRING,MFS_ENABLED
-        MENUITEM "Set max Undo levels",         ID_CONFIG_SETMAXUNDOLEVELS,MFT_STRING,MFS_ENABLED
-        MENUITEM "Set Greenzone capacity",      ID_CONFIG_SETGREENZONECAPACITY,MFT_STRING,MFS_ENABLED
-        MENUITEM MFT_SEPARATOR
-        MENUITEM "Enable Greenzoning",          ID_CONFIG_ENABLEGREENZONING,MFT_STRING,MFS_ENABLED
-        MENUITEM "Autofire Pattern skips Lag",  ID_CONFIG_PATTERNSKIPSLAG,MFT_STRING,MFS_ENABLED
-        MENUITEM "Auto-adjust Input according to Lag", ID_CONFIG_ADJUSTLAG,MFT_STRING,MFS_ENABLED
-        MENUITEM MFT_SEPARATOR
-        MENUITEM "Draw Input by dragging",      ID_CONFIG_DRAWINPUTBYDRAGGING,MFT_STRING,MFS_ENABLED
-        MENUITEM "Combine consecutive Recordings/Draws", ID_CONFIG_COMBINECONSECUTIVERECORDINGS,MFT_STRING,MFS_ENABLED
-        MENUITEM "Use 1P keys for all single Recordings", ID_CONFIG_USE1PFORRECORDING,MFT_STRING,MFS_ENABLED
-        MENUITEM "Use Input keys for Column Set", ID_CONFIG_USEINPUTKEYSFORCOLUMNSET,MFT_STRING,MFS_ENABLED
-        MENUITEM MFT_SEPARATOR
-        MENUITEM "Bind Markers to Input",       ID_CONFIG_BINDMARKERSTOINPUT,MFT_STRING,MFS_ENABLED
-        MENUITEM "Empty new Marker Notes",      ID_CONFIG_EMPTYNEWMARKERNOTES,MFT_STRING,MFS_ENABLED
-        MENUITEM MFT_SEPARATOR
-        MENUITEM "Old control scheme for Branching", ID_CONFIG_OLDBRANCHINGCONTROLS,MFT_STRING,MFS_ENABLED
-        MENUITEM "Branches restore entire Movie", ID_CONFIG_BRANCHESRESTOREFULLMOVIE,MFT_STRING,MFS_ENABLED
-        MENUITEM "HUD in Branch screenshots",   ID_CONFIG_HUDINBRANCHSCREENSHOTS,MFT_STRING,MFS_ENABLED
-        MENUITEM MFT_SEPARATOR
-        MENUITEM "Autopause at the end of Movie", ID_CONFIG_AUTOPAUSEATTHEENDOFMOVIE,MFT_STRING,MFS_ENABLED
-    END
-    POPUP "Help",                           65535,MFT_STRING,MFS_ENABLED
-    BEGIN
-        MENUITEM "Open TAS Editor Manual",      ID_HELP_OPEN_MANUAL,MFT_STRING,MFS_ENABLED
-        MENUITEM "Enable Tooltips",             ID_HELP_TOOLTIPS,MFT_STRING,MFS_ENABLED
-        MENUITEM MFT_SEPARATOR
-        MENUITEM "About",                       ID_HELP_ABOUT,MFT_STRING,MFS_ENABLED
-    END
-    POPUP "Pattern",                        65535,MFT_STRING | MFT_RIGHTJUSTIFY,MFS_ENABLED
-    BEGIN
-        MENUITEM "Dummy",                       ID_PATTERN_TEST,MFT_STRING,MFS_ENABLED
-    END
-END
-
-MEMVIEWMENU MENU
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Save Rom",                   MENU_MV_FILE_SAVE
-        MENUITEM "S&ave Rom As...",             MENU_MV_FILE_SAVE_AS
-        MENUITEM "&Load *.TBL File",            MENU_MV_FILE_LOAD_TBL
-        MENUITEM "&Unload *.TBL file",          MENU_MV_FILE_UNLOAD_TBL
-        POPUP "&Dump to file"
-        BEGIN
-            MENUITEM "&Ram",                        MENU_MV_FILE_DUMP_RAM
-            MENUITEM "&PPU Memory",                 MENU_MV_FILE_DUMP_PPU
-            MENUITEM "&OAM Memory",                 MENU_MV_FILE_DUMP_OAM
-            MENUITEM "6502 64K",                    MENU_MV_FILE_DUMP_64K
-        END
-        POPUP "Load from &file"
-        BEGIN
-            MENUITEM "&Ram",                        MENU_MV_FILE_LOAD_RAM
-            MENUITEM "&PPU Memory",                 MENU_MV_FILE_LOAD_PPU
-            MENUITEM "&OAM Memory",                 MENU_MV_FILE_LOAD_OAM
-        END
-        MENUITEM "&Goto Address\tCtrl+A",       MENU_MV_FILE_GOTO_ADDRESS
-        MENUITEM SEPARATOR
-        MENUITEM "&Close\tAlt+F4",              ID_MEMWVIEW_FILE_CLOSE
-    END
-    POPUP "&Edit"
-    BEGIN
-        MENUITEM "&Undo\tCtrl+Z",               MENU_MV_EDIT_UNDO
-        MENUITEM SEPARATOR
-        MENUITEM "&Copy",                       MENU_MV_EDIT_COPY
-        MENUITEM "&Paste",                      MENU_MV_EDIT_PASTE
-        MENUITEM SEPARATOR
-        MENUITEM "&Find...",                    MENU_MV_EDIT_FIND
-    END
-    POPUP "&View"
-    BEGIN
-        MENUITEM "&NES Memory",                 MENU_MV_VIEW_RAM
-        MENUITEM "&PPU Memory",                 MENU_MV_VIEW_PPU
-        MENUITEM "&OAM Memory",                 MENU_MV_VIEW_OAM
-        MENUITEM "&ROM File",                   MENU_MV_VIEW_ROM
-    END
-    POPUP "Highlighting"
-    BEGIN
-        MENUITEM "Highlight Activity",          ID_HIGHLIGHTING_HIGHLIGHT_ACTIVITY
-        MENUITEM "Set fading period...",        ID_HIGHLIGHTING_SETFADINGPERIOD
-        MENUITEM "Fade when paused",            ID_HIGHLIGHTING_FADEWHENPAUSED
-    END
-    POPUP "&Bookmarks"
-    BEGIN
-        MENUITEM "&Remove all bookmarks",       MENU_MV_BOOKMARKS_RM_ALL
-    END
-    POPUP "Help"
-    BEGIN
-        MENUITEM "&Help...",                    MENU_MV_HELP
-    END
-END
-
-MEMWATCHMENU MENU
-BEGIN
-    POPUP "&File  "
-    BEGIN
-        MENUITEM "&New...\tCtrl+N",             MEMW_FILE_NEW
-        MENUITEM "&Open...\tCtrl+O",            MEMW_FILE_OPEN
-        MENUITEM "&Save\tCtrl+S",               MEMW_FILE_SAVE
-        MENUITEM "S&ave As..\tCtrl+Shift+S",    MEMW_FILE_SAVEAS
-        MENUITEM "&Recent",                     ID_FILE_RECENT
-        MENUITEM SEPARATOR
-        MENUITEM "&Close\tAlt+F4",              MEMW_FILE_CLOSE
-    END
-    POPUP "&Options"
-    BEGIN
-        MENUITEM "&Load on Startup",            MEMW_OPTIONS_LOADSTART
-        MENUITEM "Load Last &File on Startup",  MEMW_OPTIONS_LOADLASTFILE
-        MENUITEM SEPARATOR
-        MENUITEM "&Collapse to 1 column",       MEMW_OPTIONS_EXPANDCOLLAPSE
-        MENUITEM SEPARATOR
-        MENUITEM "Bind to Main Window",         ID_OPTIONS_BINDTOMAINWINDOW
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&MemWatch Commands",          MEMW_HELP_WCOMMANDS
-    END
-END
-
-TASEDITORCONTEXTMENUS MENU
-BEGIN
-    POPUP "Selected"
-    BEGIN
-        MENUITEM "Set Markers\tDbl-Clk",        ID_SELECTED_SETMARKERS
-        MENUITEM "Remove Markers",              ID_SELECTED_REMOVEMARKERS
-        MENUITEM SEPARATOR
-        MENUITEM "Deselect",                    ID_SELECTED_DESELECT
-        MENUITEM "Select between Markers\tCtrl+A", ID_SELECTED_SELECTMIDMARKERS
-        MENUITEM SEPARATOR
-        MENUITEM "Ungreenzone",                 ID_SELECTED_UNGREENZONE
-        MENUITEM SEPARATOR
-        MENUITEM "Clear\tDel",                  ID_CONTEXT_SELECTED_CLEARFRAMES
-        MENUITEM "Delete\tCtrl+Del",            ID_CONTEXT_SELECTED_DELETEFRAMES
-        MENUITEM "Clone\tCtrl+Ins",             ID_SELECTED_CLONE
-        MENUITEM "Insert\tCtrl+Shift+Ins",      ID_CONTEXT_SELECTED_INSERTFRAMES
-        MENUITEM "Insert # of Frames\tIns",     ID_CONTEXT_SELECTED_INSERTFRAMES2
-        MENUITEM SEPARATOR
-        MENUITEM "Truncate movie",              ID_CONTEXT_SELECTED_TRUNCATE
-    END
-END
-
-FCEUCONTEXTMENUS MENU
-BEGIN
-    POPUP "NoGame"
-    BEGIN
-        MENUITEM "Open ROM",                    FCEU_CONTEXT_OPENROM
-        MENUITEM "Last ROM used",               FCEUX_CONTEXT_RECENTROM1
-        MENUITEM SEPARATOR
-        MENUITEM "Help...",                     FCEU_CONTEXT_FCEUHELP
-        MENUITEM SEPARATOR
-        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
-    END
-    POPUP "Game+NoMovie"
-    BEGIN
-        MENUITEM "Play Movie...",               FCEUX_CONTEXT_REPLAYMOVIE
-        MENUITEM "Record Movie...",             FCEUX_CONTEXT_RECORDMOVIE
-        MENUITEM "Load Last Movie",             FCEUX_CONTEXT_LOADLASTMOVIE
-        MENUITEM SEPARATOR
-        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
-        MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
-        MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
-        MENUITEM "Screenshot",                  FCEUX_CONTEXT_SCREENSHOT
-        MENUITEM SEPARATOR
-        MENUITEM "Close ROM",                   FCEU_CONTEXT_CLOSEROM
-        MENUITEM SEPARATOR
-        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
-    END
-    POPUP "Game+Movie+Playing+readonly"
-    BEGIN
-        MENUITEM "Toggle to read+write",        FCEUX_CONTEXT_READONLYTOGGLE
-        MENUITEM "Play Movie from Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
-        MENUITEM "Stop Movie Replay",           FCEU_CONTEXT_STOPMOVIE
-        MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
-        MENUITEM SEPARATOR
-        MENUITEM "Toggle to Recording",         FCEUX_CONTEXT_TOGGLE_RECORDING
-        POPUP "Modify Movie"
-        BEGIN
-            MENUITEM "Insert 1 Frame",              FCEUX_CONTEXT_INSERT_1_FRAME
-            MENUITEM "Delete 1 Frame",              FCEUX_CONTEXT_DELETE_1_FRAME
-            MENUITEM SEPARATOR
-            MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
-        END
-        POPUP "Record Mode"
-        BEGIN
-            MENUITEM "&Truncate",                   FCEUX_CONTEXT_RECORDMODE_TRUNCATE
-            MENUITEM "&Overwrite[W]",               FCEUX_CONTEXT_RECORDMODE_OVERWRITE
-            MENUITEM "&Insert[I]",                  FCEUX_CONTEXT_RECORDMODE_INSERT
-        END
-        MENUITEM SEPARATOR
-        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
-        MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
-        MENUITEM SEPARATOR
-        MENUITEM "Help....",                    FCEU_CONTEXT_MOVIEHELP
-        MENUITEM SEPARATOR
-        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
-    END
-    POPUP "Game+Movie+Playing+readwrite"
-    BEGIN
-        MENUITEM "Toggle to Read-only",         FCEUX_CONTEXT_READONLYTOGGLE
-        MENUITEM "Play Movie From Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
-        MENUITEM "Stop Movie Replay",           FCEU_CONTEXT_STOPMOVIE
-        MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
-        MENUITEM "Make backup",                 FCEUX_CONTEXT_MAKEBACKUP
-        MENUITEM "Save Movie As...",            FCEUX_CONTEXT_SAVEMOVIEAS
-        MENUITEM SEPARATOR
-        MENUITEM "Toggle to Recording",         FCEUX_CONTEXT_TOGGLE_RECORDING
-        POPUP "Modify Movie"
-        BEGIN
-            MENUITEM "Insert 1 Frame",              FCEUX_CONTEXT_INSERT_1_FRAME
-            MENUITEM "Delete 1 Frame",              FCEUX_CONTEXT_DELETE_1_FRAME
-            MENUITEM SEPARATOR
-            MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
-        END
-        POPUP "Record Mode"
-        BEGIN
-            MENUITEM "&Truncate",                   FCEUX_CONTEXT_RECORDMODE_TRUNCATE
-            MENUITEM "&Overwrite[W]",               FCEUX_CONTEXT_RECORDMODE_OVERWRITE
-            MENUITEM "&Insert[I]",                  FCEUX_CONTEXT_RECORDMODE_INSERT
-        END
-        MENUITEM SEPARATOR
-        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
-        MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
-        MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
-        MENUITEM SEPARATOR
-        MENUITEM "&Mode: Full state-movie loads", ID_CONTEXT_FULLSAVESTATES
-        MENUITEM SEPARATOR
-        MENUITEM "Help...",                     FCEU_CONTEXT_MOVIEHELP
-        MENUITEM SEPARATOR
-        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
-    END
-    POPUP "Game+Movie+Recording+readonly"
-    BEGIN
-        MENUITEM "Toggle to read+write",        FCEUX_CONTEXT_READONLYTOGGLE
-        MENUITEM "Play Movie from Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
-        MENUITEM "Stop Movie Recording",        FCEU_CONTEXT_STOPMOVIE
-        MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
-        MENUITEM SEPARATOR
-        MENUITEM "Toggle to Playing",           FCEUX_CONTEXT_TOGGLE_RECORDING
-        POPUP "Modify Movie"
-        BEGIN
-            MENUITEM "Insert 1 Frame",              FCEUX_CONTEXT_INSERT_1_FRAME
-            MENUITEM "Delete 1 Frame",              FCEUX_CONTEXT_DELETE_1_FRAME
-            MENUITEM SEPARATOR
-            MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
-        END
-        POPUP "Record Mode"
-        BEGIN
-            MENUITEM "&Truncate",                   FCEUX_CONTEXT_RECORDMODE_TRUNCATE
-            MENUITEM "&Overwrite[W]",               FCEUX_CONTEXT_RECORDMODE_OVERWRITE
-            MENUITEM "&Insert[I]",                  FCEUX_CONTEXT_RECORDMODE_INSERT
-        END
-        MENUITEM SEPARATOR
-        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
-        MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
-        MENUITEM SEPARATOR
-        MENUITEM "Help....",                    FCEU_CONTEXT_MOVIEHELP
-        MENUITEM SEPARATOR
-        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
-    END
-    POPUP "Game+Movie+Recording+readwrite"
-    BEGIN
-        MENUITEM "Toggle to Read-only",         FCEUX_CONTEXT_READONLYTOGGLE
-        MENUITEM "Play Movie From Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
-        MENUITEM "Stop Movie Recording",        FCEU_CONTEXT_STOPMOVIE
-        MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
-        MENUITEM "Make backup",                 FCEUX_CONTEXT_MAKEBACKUP
-        MENUITEM "Save Movie As...",            FCEUX_CONTEXT_SAVEMOVIEAS
-        MENUITEM SEPARATOR
-        MENUITEM "Toggle to Playing",           FCEUX_CONTEXT_TOGGLE_RECORDING
-        POPUP "Modify Movie"
-        BEGIN
-            MENUITEM "Insert 1 Frame",              FCEUX_CONTEXT_INSERT_1_FRAME
-            MENUITEM "Delete 1 Frame",              FCEUX_CONTEXT_DELETE_1_FRAME
-            MENUITEM SEPARATOR
-            MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
-        END
-        POPUP "Record Mode"
-        BEGIN
-            MENUITEM "&Truncate",                   FCEUX_CONTEXT_RECORDMODE_TRUNCATE
-            MENUITEM "&Overwrite[W]",               FCEUX_CONTEXT_RECORDMODE_OVERWRITE
-            MENUITEM "&Insert[I]",                  FCEUX_CONTEXT_RECORDMODE_INSERT
-        END
-        MENUITEM SEPARATOR
-        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
-        MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
-        MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
-        MENUITEM SEPARATOR
-        MENUITEM "&Mode: Full state-movie loads", ID_CONTEXT_FULLSAVESTATES
-        MENUITEM SEPARATOR
-        MENUITEM "Help...",                     FCEU_CONTEXT_MOVIEHELP
-        MENUITEM SEPARATOR
-        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
-    END
-END
-
-RAMWATCH_MENU MENU
-BEGIN
-    POPUP "File"
-    BEGIN
-        MENUITEM "&New list\tCtrl N",           RAMMENU_FILE_NEW
-        MENUITEM "&Open...\tCtrl O",            RAMMENU_FILE_OPEN
-        MENUITEM "&Save\tCtrl S",               RAMMENU_FILE_SAVE
-        MENUITEM "Sa&ve As...\tCtrl Shift S",   RAMMENU_FILE_SAVEAS
-        MENUITEM "&Append file...",             RAMMENU_FILE_APPEND
-        MENUITEM "Recent",                      RAMMENU_FILE_RECENT
-        MENUITEM SEPARATOR
-        MENUITEM "Auto-&load",                  RAMMENU_FILE_AUTOLOAD
-        MENUITEM "Save Window Position",        RAMMENU_FILE_SAVEWINDOW
-        MENUITEM SEPARATOR
-        MENUITEM "&Close\tAlt F4",              IDCANCEL
-    END
-    POPUP "Watches"
-    BEGIN
-        MENUITEM "&New Watch\tN",               IDC_C_WATCH
-        MENUITEM "&Edit Watch\tE",              IDC_C_WATCH_EDIT
-        MENUITEM "&Remove Watch\tR",            IDC_C_WATCH_REMOVE
-        MENUITEM "Duplicate Watch\tA",          IDC_C_WATCH_DUPLICATE
-        MENUITEM "Add &Separator\tS",           IDC_C_WATCH_SEPARATE
-        MENUITEM SEPARATOR
-        MENUITEM "Move Up\tU",                  IDC_C_WATCH_UP
-        MENUITEM "Move Down\tD",                IDC_C_WATCH_DOWN
-    END
-END
-
-CHEATCONTEXTMENUS MENU
-BEGIN
-    POPUP "CheatListPopup"
-    BEGIN
-        MENUITEM "Toggle selected Cheats",      CHEAT_CONTEXT_LIST_TOGGLECHEAT
-        MENUITEM "Poke Cheat Value",            CHEAT_CONTEXT_LIST_POKECHEATVALUE
-        MENUITEM "Goto in Hex Editor",          CHEAT_CONTEXT_LIST_GOTOINHEXEDITOR
-        MENUITEM "Delete selected Cheats",      CHEAT_CONTEXT_LIST_DELETESELECTEDCHEATS
-    END
-    POPUP "CheatPossiPopup"
-    BEGIN
-        MENUITEM "Add to Memory Watch",         CHEAT_CONTEXT_POSSI_ADDTOMEMORYWATCH
-        MENUITEM "Add cheat",                   CHEAT_CONTEXT_POSSI_ADDCHEAT
-        MENUITEM "Add to RAM Watch",            CHEAT_CONTEXT_POSSI_ADDTORAMWATCH
-        MENUITEM "Go to in Hex Editor",         CHEAT_CONTEXT_POSSI_GOTOINHEXEDITOR
-    END
-END
-
-DEBUGCONTEXTMENUS MENU
-BEGIN
-    POPUP "DebugListPopup"
-    BEGIN
-        MENUITEM "Toggle Breakpoint\tDbl-Clk",  DEBUGGER_CONTEXT_TOGGLEBREAK
-    END
-END
-
-LUAWINDOW_MENU MENU
-BEGIN
-    POPUP "Console"
-    BEGIN
-        MENUITEM "&Font...",                    IDC_LUACONSOLE_CHOOSEFONT
-        MENUITEM "Clear",                       IDC_LUACONSOLE_CLEAR
-    END
-END
-
-DISASMCONTEXTMENUS MENU
-BEGIN
-    POPUP "DisasmPopup"
-    BEGIN
-        MENUITEM "Copy\tCtrl+C",                DISASM_CONTEXT_COPY
-        MENUITEM "Select All\tCtrl+A",          DISASM_CONTEXT_SELECTALL
-    END
-END
-
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
 //
+
+IMPORTBOOKMARKOPTIONDIALOG DIALOGEX 0, 0, 144, 110
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Bookmark Importing Options"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "&Merge into my bookmarks",IDC_RADIO_BOOKMARKIMPORTOPTION_MERGE,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,7,6,129,10
+    CONTROL         "&Discard all my bookmarks",IDC_RADIO_BOOKMARKIMPORTOPTION_DISCARD,
+                    "Button",BS_AUTORADIOBUTTON,7,60,126,14
+    GROUPBOX        "Solving conflicts",IDC_GROUP_BOOKMARKIMPORTOPTION_SOLVECONFLICT,7,19,130,38
+    LTEXT           "&Bookmark:",IDC_TEXT_BOOKMARKIMPORTOPTION_BOOKMARK,14,30,36,8
+    CONTROL         "&Ignore",IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKIGNORE,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,53,29,35,10
+    CONTROL         "&Overwrite",IDC_RADIO_BOOKMARKIMPORTOPTION_BOOKMARKOVERWRITE,
+                    "Button",BS_AUTORADIOBUTTON,89,29,45,10
+    LTEXT           "&Shortcut:",IDC_TEXT_BOOKMARKIMPORTOPTION_SHORTCUT,14,43,31,8
+    CONTROL         "&Keep",IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTKEEP,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,53,42,34,10
+    CONTROL         "&Re-assign",IDC_RADIO_BOOKMARKIMPORTOPTION_SHORTCUTREASSIGN,
+                    "Button",BS_AUTORADIOBUTTON,89,42,44,10
+    CONTROL         "&Confirm every time on conflict",IDC_CHECK_BOOKMARKIMPORTOPTION_CONFIRMEVERYTIMEONCONFLICT,
+                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,7,76,130,10
+    DEFPUSHBUTTON   "OK",IDOK,34,89,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,87,89,50,14
+END
+
+NAMEBOOKMARKDLGDEBUGGER DIALOGEX 0, 0, 268, 67
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Debugger Bookmark"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "&Address:",IDC_BOOKMARK_ADDRESS_TEXT,8,10,30,8
+    EDITTEXT        IDC_BOOKMARK_ADDRESS,41,7,48,14,ES_UPPERCASE | ES_AUTOHSCROLL
+    LTEXT           "&Name:",IDC_BOOKMARK_NAME_TEXT,8,28,23,8
+    EDITTEXT        IDC_BOOKMARK_DESCRIPTION,41,26,220,14,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,82,46,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,136,46,50,14
+END
 
 DIRCONFIG DIALOGEX 63, 7, 305, 255
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
@@ -738,10 +97,10 @@ BEGIN
     PUSHBUTTON      "Browse...",BUTTON_MEMWATCH,239,152,56,14
     LTEXT           "&Input Presets",IDC_STATIC,10,172,42,8
     EDITTEXT        EDIT_PRESET,71,171,158,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse...",210,239,170,56,14
+    PUSHBUTTON      "Browse...",BUTTON_PRESET,239,170,56,14
     LTEXT           "&Lua Scripts",IDC_STATIC,10,190,36,8
     EDITTEXT        EDIT_LUA,71,189,158,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse...",211,239,188,56,14
+    PUSHBUTTON      "Browse...",BUTTON_LUA,239,188,56,14
     LTEXT           "A&vi Output",IDC_STATIC,10,208,34,8
     EDITTEXT        EDIT_AVI,71,207,158,12,ES_AUTOHSCROLL
     PUSHBUTTON      "Browse...",BUTTON_AVI,239,206,56,14
@@ -1086,20 +445,20 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "Close",BTN_CLOSE,177,97,56,14
     GROUPBOX        "",GRP_GAMEPAD1,4,8,232,82,WS_GROUP
-    PUSHBUTTON      "Up",    304, 40,36,30,12
-    PUSHBUTTON      "Left",  306, 10,50,30,12
-    PUSHBUTTON      "Right", 307, 70,50,30,12
-    PUSHBUTTON      "Down",  305, 40,64,30,12
-    PUSHBUTTON      "Select",302, 46,19,32,12
-    PUSHBUTTON      "Start", 303, 82,19,32,12
-    PUSHBUTTON      "Left",  301,140,50,30,12
-    PUSHBUTTON      "Down",  300,170,64,30,12
-    PUSHBUTTON      "Right", 308,200,50,30,12
-    PUSHBUTTON      "Up",    309,170,36,30,12
-    PUSHBUTTON      "L",     310, 10,19,32,12
-    PUSHBUTTON      "R",     311,198,19,32,12
-    PUSHBUTTON      "B",     312,126,19,32,12
-    PUSHBUTTON      "A",     313,162,19,32,12
+    PUSHBUTTON      "Up",304,40,36,30,12
+    PUSHBUTTON      "Left",306,10,50,30,12
+    PUSHBUTTON      "Right",307,70,50,30,12
+    PUSHBUTTON      "Down",305,40,64,30,12
+    PUSHBUTTON      "Select",302,46,19,32,12
+    PUSHBUTTON      "Start",303,82,19,32,12
+    PUSHBUTTON      "Left",301,140,50,30,12
+    PUSHBUTTON      "Down",300,170,64,30,12
+    PUSHBUTTON      "Right",308,200,50,30,12
+    PUSHBUTTON      "Up",309,170,36,30,12
+    PUSHBUTTON      "L",310,10,19,32,12
+    PUSHBUTTON      "R",311,198,19,32,12
+    PUSHBUTTON      "B",312,126,19,32,12
+    PUSHBUTTON      "A",313,162,19,32,12
 END
 
 LCDCOMPZAPPERDIALOG DIALOGEX 4, 109, 129, 116
@@ -1503,7 +862,7 @@ BEGIN
     EDITTEXT        IDC_DEBUGGER_INSTRUCTIONS_EXCEED,484,215,55,12,ES_UPPERCASE | ES_NOHIDESEL | ES_WANTRETURN | ES_NUMBER
     GROUPBOX        "",IDC_STATIC,468,241,72,75
     CONTROL         "ROM offsets",IDC_DEBUGGER_ROM_OFFSETS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,249,62,10
-    PUSHBUTTON      "Name",IDC_DEBUGGER_BOOKMARK_NAME,431,288,30,14
+    PUSHBUTTON      "Edit",IDC_DEBUGGER_BOOKMARK_EDIT,431,288,30,14
     EDITTEXT        IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL,4,5,14,317,ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_DISABLED
     CONTROL         "Register names",IDC_DEBUGGER_PREDEFINED_REGS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,272,65,10
     CONTROL         "IDA font",DEBUGIDAFONT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,506,319,38,13
@@ -1912,28 +1271,41 @@ BEGIN
     LISTBOX         IDC_ASSEMBLER_PATCH_DISASM,7,50,188,59,LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_DISABLENOSCROLL | LBS_NOSEL | WS_VSCROLL | WS_TABSTOP
 END
 
-NAMEBOOKMARKDLG DIALOGEX 0, 0, 269, 79
+NAMEBOOKMARKDLGMEMVIEW DIALOGEX 0, 0, 425, 85
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Bookmark name"
+CAPTION "Hex Editor Bookmark"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LTEXT           "&Address:",IDC_BOOKMARK_ADDRESS_TEXT,7,10,30,8
-    EDITTEXT        IDC_BOOKMARK_ADDRESS,42,7,48,14,ES_UPPERCASE | ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "&Name:",IDC_BOOKMARK_NAME_TEXT,7,27,23,8
-    EDITTEXT        IDC_BOOKMARK_DESCRIPTION,42,25,220,14,ES_AUTOHSCROLL
-    DEFPUSHBUTTON   "&OK",IDOK,107,58,50,14
-    CONTROL         "&Shortcut:",IDC_CHECK_SHORTCUT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,44,46,10
-    LTEXT           "Ctrl+",IDC_BOOKMARK_SHORTCUT_PREFIX_TEXT,54,45,17,8
-    CONTROL         "&1",IDC_RADIO_SHORTCUT0,"Button",BS_AUTORADIOBUTTON,73,44,18,10
-    CONTROL         "&2",IDC_RADIO_SHORTCUT1,"Button",BS_AUTORADIOBUTTON,92,44,18,10
-    CONTROL         "&3",IDC_RADIO_SHORTCUT2,"Button",BS_AUTORADIOBUTTON,111,44,18,10
-    CONTROL         "&4",IDC_RADIO_SHORTCUT3,"Button",BS_AUTORADIOBUTTON,130,44,18,10
-    CONTROL         "&5",IDC_RADIO_SHORTCUT4,"Button",BS_AUTORADIOBUTTON,149,44,18,10
-    CONTROL         "&6",IDC_RADIO_SHORTCUT5,"Button",BS_AUTORADIOBUTTON,168,44,18,10
-    CONTROL         "&7",IDC_RADIO_SHORTCUT6,"Button",BS_AUTORADIOBUTTON,187,44,18,10
-    CONTROL         "&8",IDC_RADIO_SHORTCUT7,"Button",BS_AUTORADIOBUTTON,206,44,18,10
-    CONTROL         "&9",IDC_RADIO_SHORTCUT8,"Button",BS_AUTORADIOBUTTON,225,44,18,10
-    CONTROL         "&0",IDC_RADIO_SHORTCUT9,"Button",BS_AUTORADIOBUTTON,244,44,18,10
+    LTEXT           "&View:",IDC_BOOKMARK_VIEW_TEXT,11,10,20,8
+    COMBOBOX        IDC_BOOKMARK_COMBO_VIEW,34,7,36,30,CBS_DROPDOWNLIST | CBS_SORT | WS_TABSTOP
+    LTEXT           "&Address:",IDC_BOOKMARK_ADDRESS_TEXT,77,10,30,8
+    EDITTEXT        IDC_BOOKMARK_ADDRESS,110,7,48,14,ES_UPPERCASE | ES_AUTOHSCROLL
+    LTEXT           "&Name:",IDC_BOOKMARK_NAME_TEXT,166,10,23,8
+    EDITTEXT        IDC_BOOKMARK_DESCRIPTION,190,7,228,14,ES_AUTOHSCROLL
+    CONTROL         "&Shortcut:",IDC_CHECK_SHORTCUT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,27,42,10
+    LTEXT           "Ctrl+",IDC_BOOKMARK_SHORTCUT_PREFIX_TEXT,55,27,17,8
+    CONTROL         "&1",IDC_RADIO_SHORTCUT0,"Button",BS_AUTORADIOBUTTON,78,26,28,10
+    CONTROL         "&2",IDC_RADIO_SHORTCUT1,"Button",BS_AUTORADIOBUTTON,112,26,28,10
+    CONTROL         "&3",IDC_RADIO_SHORTCUT2,"Button",BS_AUTORADIOBUTTON,146,26,28,10
+    CONTROL         "&4",IDC_RADIO_SHORTCUT3,"Button",BS_AUTORADIOBUTTON,180,26,28,10
+    CONTROL         "&5",IDC_RADIO_SHORTCUT4,"Button",BS_AUTORADIOBUTTON,214,26,28,10
+    CONTROL         "&6",IDC_RADIO_SHORTCUT5,"Button",BS_AUTORADIOBUTTON,248,26,28,10
+    CONTROL         "&7",IDC_RADIO_SHORTCUT6,"Button",BS_AUTORADIOBUTTON,282,26,28,10
+    CONTROL         "&8",IDC_RADIO_SHORTCUT7,"Button",BS_AUTORADIOBUTTON,316,26,28,10
+    CONTROL         "&9",IDC_RADIO_SHORTCUT8,"Button",BS_AUTORADIOBUTTON,350,26,28,10
+    CONTROL         "&0",IDC_RADIO_SHORTCUT9,"Button",BS_AUTORADIOBUTTON,384,26,28,10
+    EDITTEXT        IDC_EDIT_SHORTCUT0,78,38,34,21,ES_MULTILINE | ES_UPPERCASE | ES_AUTOVSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_SHORTCUT1,112,38,34,21,ES_MULTILINE | ES_UPPERCASE | ES_AUTOVSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_SHORTCUT2,146,38,34,21,ES_MULTILINE | ES_UPPERCASE | ES_AUTOVSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_SHORTCUT3,180,38,34,21,ES_MULTILINE | ES_UPPERCASE | ES_AUTOVSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_SHORTCUT4,214,38,34,21,ES_MULTILINE | ES_UPPERCASE | ES_AUTOVSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_SHORTCUT5,248,38,34,21,ES_MULTILINE | ES_UPPERCASE | ES_AUTOVSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_SHORTCUT6,282,38,34,21,ES_MULTILINE | ES_UPPERCASE | ES_AUTOVSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_SHORTCUT7,316,38,34,21,ES_MULTILINE | ES_UPPERCASE | ES_AUTOVSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_SHORTCUT8,350,38,34,21,ES_MULTILINE | ES_UPPERCASE | ES_AUTOVSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_SHORTCUT9,384,38,34,21,ES_MULTILINE | ES_UPPERCASE | ES_AUTOVSCROLL | ES_READONLY
+    DEFPUSHBUTTON   "OK",IDOK,160,64,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,219,64,50,14
 END
 
 CDLOGGER DIALOGEX 0, 0, 307, 254
@@ -2050,53 +1422,54 @@ BEGIN
     LTEXT           "New Selection Name:",-1,5,240,68,8
 END
 
-CHEATCONSOLE DIALOGEX 0, 0, 387, 226
+CHEATCONSOLE DIALOGEX 0, 0, 417, 227
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Cheat Search"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    GROUPBOX        "Active Cheats",IDC_GROUPBOX_CHEATLIST,5,2,169,219,WS_TABSTOP
-    CONTROL         "Enable cheats",IDC_CHEAT_GLOBAL_SWITCH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,12,58,10
+    GROUPBOX        "Active Cheats",IDC_GROUPBOX_CHEATLIST,5,2,199,219,WS_TABSTOP
+    CONTROL         "Enable",IDC_CHEAT_GLOBAL_SWITCH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,12,35,10
     CONTROL         "Auto load / save with game",IDC_CHEAT_AUTOLOADSAVE,
-                    "Button",BS_AUTO3STATE | WS_TABSTOP,71,12,100,10
-    CONTROL         "",IDC_LIST_CHEATS,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,11,24,157,133
-    LTEXT           "Name:",IDC_STATIC,12,162,22,10
-    EDITTEXT        IDC_CHEAT_NAME,37,160,131,12,ES_AUTOHSCROLL | ES_WANTRETURN
+                    "Button",BS_AUTO3STATE | WS_TABSTOP,50,12,102,10
+    CONTROL         "Show GG",IDC_CHEAT_SHOWGG,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,156,12,42,10
+    CONTROL         "",IDC_LIST_CHEATS,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,11,24,187,133
+    LTEXT           "Name:",IDC_STATIC,12,162,23,8
+    EDITTEXT        IDC_CHEAT_NAME,40,160,158,12,ES_AUTOHSCROLL | ES_WANTRETURN
     LTEXT           "Address:",IDC_CHEAT_ADDRESS_LABEL,12,176,30,8
-    EDITTEXT        IDC_CHEAT_ADDR,44,174,25,12,ES_UPPERCASE | ES_WANTRETURN
-    LTEXT           "Value:",IDC_CHEAT_VAL_LABEL,73,176,22,8
-    EDITTEXT        IDC_CHEAT_VAL,97,174,16,12,ES_UPPERCASE | ES_WANTRETURN
-    LTEXT           "Compare:",IDC_CHEAT_COM_LABEL,117,176,34,8
-    EDITTEXT        IDC_CHEAT_COM,152,174,16,12,ES_UPPERCASE | ES_WANTRETURN
+    EDITTEXT        IDC_CHEAT_ADDR,46,174,25,12,ES_UPPERCASE | ES_WANTRETURN
+    LTEXT           "Value:",IDC_CHEAT_VAL_LABEL,89,176,22,8
+    EDITTEXT        IDC_CHEAT_VAL,115,174,16,12,ES_UPPERCASE | ES_WANTRETURN
+    LTEXT           "Compare:",IDC_CHEAT_COM_LABEL,145,176,34,8
+    EDITTEXT        IDC_CHEAT_COM,182,174,16,12,ES_UPPERCASE | ES_WANTRETURN
     LTEXT           "Cheat Code:",IDC_CHEAT_CODE_LABEL,12,190,42,8
-    EDITTEXT        IDC_CHEAT_TEXT,55,188,47,12,ES_UPPERCASE | ES_AUTOHSCROLL
-    LTEXT           "GG:",IDC_GAME_GENIE_LABEL,106,191,13,8
-    EDITTEXT        IDC_CHEAT_GAME_GENIE_TEXT,120,188,47,12,ES_UPPERCASE | ES_AUTOHSCROLL
-    DEFPUSHBUTTON   "Add",IDC_BTN_CHEAT_ADD,7,202,30,16
-    PUSHBUTTON      "Delete",IDC_BTN_CHEAT_DEL,37,202,30,16
-    PUSHBUTTON      "Update",IDC_BTN_CHEAT_UPD,67,202,30,16
-    PUSHBUTTON      "Import...",IDC_BTN_CHEAT_ADDFROMFILE,100,202,36,16
-    PUSHBUTTON      "Export...",IDC_BTN_CHEAT_EXPORTTOFILE,136,202,36,16
-    GROUPBOX        "Cheat Search",IDC_GROUPBOX_CHEATSEARCH,180,2,201,206,WS_TABSTOP
-    PUSHBUTTON      "Reset",IDC_BTN_CHEAT_RESET,192,12,55,15
-    PUSHBUTTON      "Known Value:",IDC_BTN_CHEAT_KNOWN,192,36,55,15
-    LTEXT           "0x",IDC_CHEAT_LABEL_KNOWN,217,55,9,8
-    EDITTEXT        IDC_CHEAT_VAL_KNOWN,228,53,18,12,ES_UPPERCASE
-    GROUPBOX        "Previous Compare",IDC_GROUP_PREV_COM,185,68,69,135
-    PUSHBUTTON      "Equal",IDC_BTN_CHEAT_EQ,192,79,55,15,WS_GROUP
-    PUSHBUTTON      "Not Equal",IDC_BTN_CHEAT_NE,192,99,55,15
-    CONTROL         "By:",IDC_CHEAT_CHECK_NE_BY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,204,117,22,10
-    EDITTEXT        IDC_CHEAT_VAL_NE_BY,228,116,18,12,ES_UPPERCASE | ES_WANTRETURN
-    PUSHBUTTON      "Greater Than",IDC_BTN_CHEAT_GT,192,134,55,15
-    CONTROL         "By:",IDC_CHEAT_CHECK_GT_BY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,204,152,22,10
-    EDITTEXT        IDC_CHEAT_VAL_GT_BY,228,151,18,12,ES_UPPERCASE | ES_WANTRETURN
-    PUSHBUTTON      "Less Than",IDC_BTN_CHEAT_LT,192,169,55,15
-    CONTROL         "By:",IDC_CHEAT_CHECK_LT_BY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,204,187,22,10
-    EDITTEXT        IDC_CHEAT_VAL_LT_BY,228,186,18,12,ES_UPPERCASE | ES_WANTRETURN
-    GROUPBOX        "Possibilities",IDC_CHEAT_BOX_POSSIBILITIES,258,8,117,195,WS_TABSTOP
-    CONTROL         "",IDC_CHEAT_LIST_POSSIBILITIES,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,264,18,106,179
+    EDITTEXT        IDC_CHEAT_TEXT,56,188,47,12,ES_UPPERCASE | ES_AUTOHSCROLL
+    LTEXT           "Game Genie:",IDC_GAME_GENIE_LABEL,107,190,43,8
+    EDITTEXT        IDC_CHEAT_GAME_GENIE_TEXT,151,188,47,12,ES_UPPERCASE | ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "Add",IDC_BTN_CHEAT_ADD,10,202,32,16
+    PUSHBUTTON      "Delete",IDC_BTN_CHEAT_DEL,43,202,32,16
+    PUSHBUTTON      "Update",IDC_BTN_CHEAT_UPD,76,202,32,16
+    PUSHBUTTON      "Import...",IDC_BTN_CHEAT_ADDFROMFILE,117,202,40,16
+    PUSHBUTTON      "Export...",IDC_BTN_CHEAT_EXPORTTOFILE,157,202,40,16
+    GROUPBOX        "Cheat Search",IDC_GROUPBOX_CHEATSEARCH,209,2,201,206,WS_TABSTOP
+    PUSHBUTTON      "Reset",IDC_BTN_CHEAT_RESET,221,12,55,15
+    PUSHBUTTON      "Known Value:",IDC_BTN_CHEAT_KNOWN,221,36,55,15
+    LTEXT           "0x",IDC_CHEAT_LABEL_KNOWN,246,55,9,8
+    EDITTEXT        IDC_CHEAT_VAL_KNOWN,257,53,18,12,ES_UPPERCASE
+    GROUPBOX        "Previous Compare",IDC_GROUP_PREV_COM,214,68,69,135
+    PUSHBUTTON      "Equal",IDC_BTN_CHEAT_EQ,221,79,55,15,WS_GROUP
+    PUSHBUTTON      "Not Equal",IDC_BTN_CHEAT_NE,221,99,55,15
+    CONTROL         "By:",IDC_CHEAT_CHECK_NE_BY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,233,117,22,10
+    EDITTEXT        IDC_CHEAT_VAL_NE_BY,257,116,18,12,ES_UPPERCASE | ES_WANTRETURN
+    PUSHBUTTON      "Greater Than",IDC_BTN_CHEAT_GT,221,134,55,15
+    CONTROL         "By:",IDC_CHEAT_CHECK_GT_BY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,233,152,22,10
+    EDITTEXT        IDC_CHEAT_VAL_GT_BY,257,151,18,12,ES_UPPERCASE | ES_WANTRETURN
+    PUSHBUTTON      "Less Than",IDC_BTN_CHEAT_LT,221,169,55,15
+    CONTROL         "By:",IDC_CHEAT_CHECK_LT_BY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,233,187,22,10
+    EDITTEXT        IDC_CHEAT_VAL_LT_BY,257,186,18,12,ES_UPPERCASE | ES_WANTRETURN
+    GROUPBOX        "Possibilities",IDC_CHEAT_BOX_POSSIBILITIES,287,8,117,195,WS_TABSTOP
+    CONTROL         "",IDC_CHEAT_LIST_POSSIBILITIES,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,293,18,106,179
     CONTROL         "Pause emulation when this window is active",IDC_CHEAT_PAUSEWHENACTIVE,
-                    "Button",BS_AUTOCHECKBOX,180,211,157,10
+                    "Button",BS_AUTOCHECKBOX,209,211,157,10
 END
 
 IDD_LUA DIALOGEX 0, 0, 270, 150
@@ -2425,6 +1798,22 @@ END
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO
 BEGIN
+    "IMPORTBOOKMARKOPTIONDIALOG", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 137
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 103
+    END
+
+    "NAMEBOOKMARKDLGDEBUGGER", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 261
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 60
+    END
+
     "DIRCONFIG", DIALOG
     BEGIN
         LEFTMARGIN, 10
@@ -2481,10 +1870,6 @@ BEGIN
     END
 
     "VIRTUALBOYDIALOG", DIALOG
-    BEGIN
-    END
-
-    "LCDCOMPZAPPERDIALOG", DIALOG
     BEGIN
     END
 
@@ -2615,12 +2000,12 @@ BEGIN
         BOTTOMMARGIN, 128
     END
 
-    "NAMEBOOKMARKDLG", DIALOG
+    "NAMEBOOKMARKDLGMEMVIEW", DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 262
+        RIGHTMARGIN, 418
         TOPMARGIN, 7
-        BOTTOMMARGIN, 72
+        BOTTOMMARGIN, 78
     END
 
     "CDLOGGER", DIALOG
@@ -2649,10 +2034,15 @@ BEGIN
 
     "CHEATCONSOLE", DIALOG
     BEGIN
-        RIGHTMARGIN, 386
-        BOTTOMMARGIN, 225
+        RIGHTMARGIN, 416
+        BOTTOMMARGIN, 226
     END
 
+    "LCDCOMPZAPPERDIALOG", DIALOG
+    BEGIN
+    END
+
+    "QUIZKINGDIALOG", DIALOG
     IDD_LUA, DIALOG
     BEGIN
     END
@@ -2710,6 +2100,16 @@ END
 //
 // AFX_DIALOG_LAYOUT
 //
+
+IMPORTBOOKMARKOPTIONDIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+NAMEBOOKMARKDLGDEBUGGER AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
 
 NTVIEW AFX_DIALOG_LAYOUT
 BEGIN
@@ -2804,6 +2204,697 @@ END
 IDD_RAMSEARCH AFX_DIALOG_LAYOUT
 BEGIN
     0
+END
+
+NAMEBOOKMARKDLGMEMVIEW AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON3               ICON                    "res/taseditor-icon.ico"
+IDI_ICON4               ICON                    "res/taseditor-icon32.ico"
+ICON_1                  ICON                    "res/ICON_1.ico"
+ICON_2                  ICON                    "res/ICON_2.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+FCEUMENU MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Open...",                    MENU_OPEN_FILE
+        MENUITEM "&Close",                      MENU_CLOSE_FILE
+        MENUITEM "&Recent",                     MENU_RECENT_FILES
+        MENUITEM SEPARATOR
+        POPUP "&Savestate"
+        BEGIN
+            MENUITEM "&Load State",                 MENU_LOADSTATE
+            MENUITEM "&Save State",                 MENU_SAVESTATE
+            MENUITEM "Load State &From...",         MENU_LOAD_STATE
+            MENUITEM "Save State &As...",           MENU_SAVE_STATE
+            MENUITEM SEPARATOR
+            MENUITEM "&Next save slot",             MENU_NEXTSAVESTATE
+            MENUITEM "&Previous save slot",         MENU_PREVIOUSSAVESTATE
+            MENUITEM "&View save slots",            MENU_VIEWSAVESLOTS
+        END
+        POPUP "&Movie"
+        BEGIN
+            MENUITEM "Recent",                      MENU_MOVIE_RECENT
+            MENUITEM "&Record Movie...",            MENU_RECORD_MOVIE
+            MENUITEM "&Play Movie...",              MENU_REPLAY_MOVIE
+            MENUITEM "&Stop Movie",                 MENU_STOP_MOVIE
+            MENUITEM "Play from &Beginning",        ID_FILE_PLAYMOVIEFROMBEGINNING
+            MENUITEM "&Toggle Recording/Playing",   ID_FILE_TOGGLE_RECORDING_MOVIE
+            POPUP "&Quickly Modify"
+            BEGIN
+                MENUITEM "&Insert 1 Frame",             ID_FILE_INSERT_1_FRAME
+                MENUITEM "&Delete 1 Frame",             ID_FILE_DELETE_1_FRAME
+                MENUITEM SEPARATOR
+                MENUITEM "&Truncate at Current Frame",  ID_FILE_TRUNCATE_MOVIE
+            END
+            MENUITEM SEPARATOR
+            POPUP "Record &Mode"
+            BEGIN
+                MENUITEM "&Next Record Mode",           ID_FILE_NEXTRECORDMODE
+                MENUITEM SEPARATOR
+                MENUITEM "&Truncate",                   ID_FILE_RECORDMODE_TRUNCATE
+                MENUITEM "&Overwrite[W]",               ID_FILE_RECORDMODE_OVERWRITE
+                MENUITEM "&Insert[I]",                  ID_FILE_RECORDMODE_INSERT
+            END
+            MENUITEM "&Read-only",                  ID_FILE_MOVIE_TOGGLEREAD
+        END
+        POPUP "&AVI/Wav"
+        BEGIN
+            MENUITEM "&Record AVI...",              MENU_RECORD_AVI
+            MENUITEM "&Stop AVI",                   MENU_STOP_AVI
+            MENUITEM "&Record WAV...",              MENU_RECORD_WAV
+            MENUITEM "&Stop WAV",                   MENU_STOP_WAV
+            MENUITEM SEPARATOR
+            MENUITEM "Enable HUD recording",        ID_AVI_ENABLEHUDRECORDING
+            MENUITEM "Disable messages recording",  ID_AVI_DISMOVIEMESSAGE
+        END
+        POPUP "&Lua"
+        BEGIN
+            MENUITEM "&Recent",                     MENU_LUA_RECENT
+            MENUITEM "&New Lua Script Window...",   ID_FILE_OPENLUAWINDOW
+            MENUITEM "&Close All Script Windows",   ID_FILE_CLOSELUAWINDOWS
+        END
+        MENUITEM "&Screenshot",                 ID_FILE_SCREENSHOT
+        MENUITEM "Save Screenshot As...",       ID_FILE_SAVESCREENSHOTAS
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit\tAlt+F4",               MENU_EXIT
+    END
+    POPUP "&NES"
+    BEGIN
+        MENUITEM "&Reset",                      MENU_RESET
+        MENUITEM "&Power",                      MENU_POWER
+        MENUITEM SEPARATOR
+        MENUITEM "&Eject/Insert Disk",          MENU_EJECT_DISK
+        MENUITEM "&Switch Disk Side",           MENU_SWITCH_DISK
+        MENUITEM "&Insert Coin",                MENU_INSERT_COIN
+        MENUITEM "Input &Barcode",              MENU_INPUT_BARCODE
+        MENUITEM SEPARATOR
+        POPUP "E&mulation Speed"
+        BEGIN
+            MENUITEM "&Pause",                      ID_NES_PAUSE
+            MENUITEM "&Turbo",                      ID_NES_TURBO
+            MENUITEM SEPARATOR
+            MENUITEM "Speed &Up",                   ID_NES_SPEEDUP
+            MENUITEM "Slow &Down",                  ID_NES_SLOWDOWN
+            MENUITEM "&Slowest Speed",              ID_NES_SLOWESTSPEED
+            MENUITEM "&Normal Speed",               ID_NES_NORMALSPEED
+            MENUITEM "Set &Custom Speed",           ID_EMULATIONSPEED_CUSTOMSPEED
+            MENUITEM SEPARATOR
+            MENUITEM "Set FrameAdvance Delay",      ID_EMULATIONSPEED_SETFRAMEADVANCEDELAY
+            MENUITEM "Set custom speed for FrameAdvance", ID_EMULATIONSPEED_SETCUSTOMSPEEDFORFRAMEADVANCE
+        END
+    END
+    POPUP "&Config"
+    BEGIN
+        MENUITEM "&Hide Menu",                  MENU_HIDE_MENU
+        POPUP "&Enable"
+        BEGIN
+            MENUITEM "&Run in Background",          MENU_RUN_IN_BACKGROUND
+            MENUITEM "&Background Input",           MENU_BACKGROUND_INPUT
+            MENUITEM "&Auto-savestates",            MENU_ENABLE_AUTOSAVE
+            MENUITEM "&Frame Adv. - Skip Lag",      MENU_DISPLAY_FA_LAGSKIP
+            MENUITEM "Backup Savestates",           ID_ENABLE_BACKUPSAVESTATES
+            MENUITEM "Compress Savestates",         ID_ENABLE_COMPRESSSAVESTATES
+            MENUITEM "&Game Genie ROM",             MENU_GAME_GENIE
+            MENUITEM "Auto-resume old play session", ID_ENABLE_AUTORESUME
+        END
+        POPUP "&Display"
+        BEGIN
+            POPUP "&Input Display"
+            BEGIN
+                MENUITEM "&Off",                        MENU_INPUTDISPLAY_0
+                MENUITEM "&1 player",                   MENU_INPUTDISPLAY_1
+                MENUITEM "&2 player",                   MENU_INPUTDISPLAY_2
+                MENUITEM "&4 player",                   MENU_INPUTDISPLAY_4
+                MENUITEM SEPARATOR
+                MENUITEM "old style disp.",             ID_INPUTDISPLAY_OLDSTYLEDISP
+            END
+            MENUITEM "&Lag Counter",                MENU_DISPLAY_LAGCOUNTER
+            MENUITEM "&Frame Counter",              ID_DISPLAY_FRAMECOUNTER
+            MENUITEM "&Rerecord Counter",           ID_DISPLAY_RERECORDCOUNTER
+            MENUITEM "&Movie status icon",          ID_DISPLAY_MOVIESTATUSICON
+            MENUITEM "FPS",                         ID_DISPLAY_FPS
+            MENUITEM SEPARATOR
+            MENUITEM "Graphics: &BG",               MENU_DISPLAY_BG
+            MENUITEM "Graphics: &OBJ",              MENU_DISPLAY_OBJ
+        END
+        MENUITEM SEPARATOR
+        POPUP "Region"
+        BEGIN
+            MENUITEM "NTSC",                        MENU_NTSC
+            MENUITEM "&PAL",                        MENU_PAL
+            MENUITEM "Dendy",                       MENU_DENDY
+        END
+        POPUP "PPU"
+        BEGIN
+            MENUITEM "Old PPU",                     ID_OLDPPU
+            MENUITEM "New PPU",                     ID_NEWPPU
+        END
+        POPUP "RAM Init"
+        BEGIN
+            MENUITEM "&Default",                    MENU_RAMINIT_DEFAULT
+            MENUITEM "Fill $&FF",                   MENU_RAMINIT_FF
+            MENUITEM "Fill $&00",                   MENU_RAMINIT_00
+            MENUITEM "&Random",                     MENU_RAMINIT_RANDOM
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "&Directories...",             MENU_DIRECTORIES
+        MENUITEM "&GUI...",                     MENU_GUI_OPTIONS
+        MENUITEM "&Input...",                   MENU_INPUT
+        MENUITEM "&Network Play...",            MENU_NETWORK
+        MENUITEM "&Palette...",                 MENU_PALETTE
+        MENUITEM "&Sound...",                   MENU_SOUND
+        MENUITEM "&Timing...",                  MENU_TIMING
+        MENUITEM "&Video...",                   MENU_VIDEO
+        MENUITEM "&Movie options...",           MENU_MOVIEOPTIONS
+        MENUITEM "&Map Hotkeys...",             MENU_HOTKEYS
+        MENUITEM SEPARATOR
+        MENUITEM "Save Config File",            ID_CONFIG_SAVECONFIGFILE
+    END
+    POPUP "&Tools"
+    BEGIN
+        MENUITEM "&Cheats...",                  MENU_CHEATS
+        MENUITEM "RAM Search...",               ID_RAM_SEARCH
+        MENUITEM "RAM Watch...",                ID_RAM_WATCH
+        MENUITEM "&Memory Watch...",            MENU_MEMORY_WATCH
+        MENUITEM "&TAS Editor...",              MENU_TASEDITOR
+        MENUITEM "Convert &FCM...",             MENU_CONVERT_MOVIE
+        MENUITEM SEPARATOR
+        POPUP "Autofire &Pattern"
+        BEGIN
+            MENUITEM "1 on, 1 off",                 MENU_AUTOFIRE_PATTERN_1
+            MENUITEM "1 on, 2 off",                 MENU_AUTOFIRE_PATTERN_2
+            MENUITEM "1 on, 3 off",                 MENU_AUTOFIRE_PATTERN_3
+            MENUITEM "1 on, 4 off",                 MENU_AUTOFIRE_PATTERN_4
+            MENUITEM "1 on, 5 off",                 MENU_AUTOFIRE_PATTERN_5
+            MENUITEM "2 on, 1 off",                 MENU_AUTOFIRE_PATTERN_6
+            MENUITEM "2 on, 2 off",                 MENU_AUTOFIRE_PATTERN_7
+            MENUITEM "2 on, 3 off",                 MENU_AUTOFIRE_PATTERN_8
+            MENUITEM "2 on, 4 off",                 MENU_AUTOFIRE_PATTERN_9
+            MENUITEM "3 on, 1 off",                 MENU_AUTOFIRE_PATTERN_10
+            MENUITEM "3 on, 2 off",                 MENU_AUTOFIRE_PATTERN_11
+            MENUITEM "3 on, 3 off",                 MENU_AUTOFIRE_PATTERN_12
+            MENUITEM "4 on, 1 off",                 MENU_AUTOFIRE_PATTERN_13
+            MENUITEM "4 on, 2 off",                 MENU_AUTOFIRE_PATTERN_14
+            MENUITEM "5 on, 1 off",                 MENU_AUTOFIRE_PATTERN_15
+        END
+        POPUP "Autofire &Offset"
+        BEGIN
+            MENUITEM "0 frames",                    MENU_AUTOFIRE_OFFSET_1
+            MENUITEM "1 frame",                     MENU_AUTOFIRE_OFFSET_2
+            MENUITEM "2 frames",                    MENU_AUTOFIRE_OFFSET_3
+            MENUITEM "3 frames",                    MENU_AUTOFIRE_OFFSET_4
+            MENUITEM "4 frames",                    MENU_AUTOFIRE_OFFSET_5
+            MENUITEM "5 frames",                    MENU_AUTOFIRE_OFFSET_6
+        END
+        MENUITEM "&Alternate A and B",          MENU_ALTERNATE_AB
+        MENUITEM SEPARATOR
+        MENUITEM "Te&xt Hooker...",             ID_TOOLS_TEXTHOOKER
+    END
+    POPUP "&Debug"
+    BEGIN
+        MENUITEM "&Debugger...",                MENU_DEBUGGER
+        MENUITEM "&PPU Viewer...",              MENU_PPUVIEWER
+        MENUITEM "&Name Table Viewer...",       MENU_NAMETABLEVIEWER
+        MENUITEM "&Hex Editor...",              MENU_HEXEDITOR
+        MENUITEM "&Trace Logger...",            MENU_TRACELOGGER
+        MENUITEM "&Code/Data Logger...",        MENU_CDLOGGER
+        MENUITEM "&Game Genie Decoder/Encoder...", MENU_GAMEGENIEDECODER
+        MENUITEM "&iNES Header Editor...",      MENU_INESHEADEREDITOR
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Help...",                    MENU_HELP
+        MENUITEM "&Message Log",                MENU_MSGLOG
+        MENUITEM SEPARATOR
+        MENUITEM "&About",                      MENU_ABOUT
+    END
+END
+
+TASEDITORMENU MENUEX
+BEGIN
+    POPUP "File",                           65535,MFT_STRING,MFS_ENABLED
+    BEGIN
+        MENUITEM "New",                         ID_FILE_NEW,MFT_STRING,MFS_ENABLED
+        MENUITEM "Open",                        ID_FILE_OPENPROJECT,MFT_STRING,MFS_ENABLED
+        MENUITEM "Save\tCtrl+S",                ID_FILE_SAVEPROJECT,MFT_STRING,MFS_ENABLED
+        MENUITEM "Save As",                     ID_FILE_SAVEPROJECTAS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Save Compact",                ID_FILE_SAVECOMPACT,MFT_STRING,MFS_ENABLED
+        MENUITEM "Recent",                      ID_FILE_RECENT,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Import Input",                ID_FILE_IMPORT,MFT_STRING,MFS_ENABLED
+        MENUITEM "Export to FM2",               ID_FILE_EXPORTFM2,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Close\tAlt+F4",               ID_FILE_CLOSE,MFT_STRING,MFS_ENABLED
+    END
+    POPUP "Edit",                           65535,MFT_STRING,MFS_ENABLED
+    BEGIN
+        MENUITEM "Undo\tCtrl+Z",                ID_EDIT_UNDO,MFT_STRING,MFS_ENABLED
+        MENUITEM "Redo\tCtrl+Y",                ID_EDIT_REDO,MFT_STRING,MFS_ENABLED
+        MENUITEM "Selection Undo\tCtrl+Q",      ID_EDIT_SELECTIONUNDO,MFT_STRING,MFS_ENABLED
+        MENUITEM "Selection Redo\tCtrl+W",      ID_EDIT_SELECTIONREDO,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Deselect",                    ID_EDIT_DESELECT,MFT_STRING,MFS_ENABLED
+        MENUITEM "Select All",                  ID_EDIT_SELECTALL,MFT_STRING,MFS_ENABLED
+        MENUITEM "Select between Markers\tCtrl+A", ID_EDIT_SELECTMIDMARKERS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Reselect Clipboard\tCtrl+B",  ID_EDIT_RESELECTCLIPBOARD,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Copy\tCtrl+C",                ID_EDIT_COPY,MFT_STRING,MFS_ENABLED
+        MENUITEM "Paste\tCtrl+V",               ID_EDIT_PASTE,MFT_STRING,MFS_ENABLED
+        MENUITEM "PasteInsert\tCtrl+Shift+V",   ID_EDIT_PASTEINSERT,MFT_STRING,MFS_ENABLED
+        MENUITEM "Cut\tCtrl+X",                 ID_EDIT_CUT,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Clear\tDel",                  ID_EDIT_CLEAR,MFT_STRING,MFS_ENABLED
+        MENUITEM "Delete\tCtrl+Del",            ID_EDIT_DELETE,MFT_STRING,MFS_ENABLED
+        MENUITEM "Clone\tCtrl+Ins",             ID_EDIT_CLONEFRAMES,MFT_STRING,MFS_ENABLED
+        MENUITEM "Insert\tCtrl+Shift+Ins",      ID_EDIT_INSERTFRAMES,MFT_STRING,MFS_ENABLED
+        MENUITEM "Insert # of Frames\tIns",     ID_EDIT_INSERT,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Truncate movie",              ID_EDIT_TRUNCATE,MFT_STRING,MFS_ENABLED
+    END
+    POPUP "View",                           65535,MFT_STRING,MFS_ENABLED
+    BEGIN
+        MENUITEM "Find Note window\tCtrl+F",    ID_VIEW_FINDNOTE,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Display Branch Screenshots",  ID_VIEW_SHOWBRANCHSCREENSHOTS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Display Branch Descriptions", ID_VIEW_SHOWBRANCHTOOLTIPS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Enable Hot Changes",          ID_VIEW_ENABLEHOTCHANGES,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Follow Undo context",         ID_VIEW_JUMPWHENMAKINGUNDO,MFT_STRING,MFS_ENABLED
+        MENUITEM "Follow Marker Note context",  ID_VIEW_FOLLOWMARKERNOTECONTEXT,MFT_STRING,MFS_ENABLED
+    END
+    POPUP "Config",                         65535,MFT_STRING,MFS_ENABLED
+    BEGIN
+        MENUITEM "Project file saving options", ID_CONFIG_SAVING_OPTIONS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Set max Undo levels",         ID_CONFIG_SETMAXUNDOLEVELS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Set Greenzone capacity",      ID_CONFIG_SETGREENZONECAPACITY,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Enable Greenzoning",          ID_CONFIG_ENABLEGREENZONING,MFT_STRING,MFS_ENABLED
+        MENUITEM "Autofire Pattern skips Lag",  ID_CONFIG_PATTERNSKIPSLAG,MFT_STRING,MFS_ENABLED
+        MENUITEM "Auto-adjust Input according to Lag", ID_CONFIG_ADJUSTLAG,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Draw Input by dragging",      ID_CONFIG_DRAWINPUTBYDRAGGING,MFT_STRING,MFS_ENABLED
+        MENUITEM "Combine consecutive Recordings/Draws", ID_CONFIG_COMBINECONSECUTIVERECORDINGS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Use 1P keys for all single Recordings", ID_CONFIG_USE1PFORRECORDING,MFT_STRING,MFS_ENABLED
+        MENUITEM "Use Input keys for Column Set", ID_CONFIG_USEINPUTKEYSFORCOLUMNSET,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Bind Markers to Input",       ID_CONFIG_BINDMARKERSTOINPUT,MFT_STRING,MFS_ENABLED
+        MENUITEM "Empty new Marker Notes",      ID_CONFIG_EMPTYNEWMARKERNOTES,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Old control scheme for Branching", ID_CONFIG_OLDBRANCHINGCONTROLS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Branches restore entire Movie", ID_CONFIG_BRANCHESRESTOREFULLMOVIE,MFT_STRING,MFS_ENABLED
+        MENUITEM "HUD in Branch screenshots",   ID_CONFIG_HUDINBRANCHSCREENSHOTS,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Autopause at the end of Movie", ID_CONFIG_AUTOPAUSEATTHEENDOFMOVIE,MFT_STRING,MFS_ENABLED
+    END
+    POPUP "Help",                           65535,MFT_STRING,MFS_ENABLED
+    BEGIN
+        MENUITEM "Open TAS Editor Manual",      ID_HELP_OPEN_MANUAL,MFT_STRING,MFS_ENABLED
+        MENUITEM "Enable Tooltips",             ID_HELP_TOOLTIPS,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "About",                       ID_HELP_ABOUT,MFT_STRING,MFS_ENABLED
+    END
+    POPUP "Pattern",                        65535,MFT_STRING | MFT_RIGHTJUSTIFY,MFS_ENABLED
+    BEGIN
+        MENUITEM "Dummy",                       ID_PATTERN_TEST,MFT_STRING,MFS_ENABLED
+    END
+END
+
+MEMVIEWMENU MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Save Rom",                   MENU_MV_FILE_SAVE
+        MENUITEM "S&ave Rom As...",             MENU_MV_FILE_SAVE_AS
+        MENUITEM "&Load *.TBL File",            MENU_MV_FILE_LOAD_TBL
+        MENUITEM "&Unload *.TBL file",          MENU_MV_FILE_UNLOAD_TBL
+        POPUP "&Dump to file"
+        BEGIN
+            MENUITEM "&Ram",                        MENU_MV_FILE_DUMP_RAM
+            MENUITEM "&PPU Memory",                 MENU_MV_FILE_DUMP_PPU
+            MENUITEM "&OAM Memory",                 MENU_MV_FILE_DUMP_OAM
+            MENUITEM "6502 64K",                    MENU_MV_FILE_DUMP_64K
+        END
+        POPUP "Load from &file"
+        BEGIN
+            MENUITEM "&Ram",                        MENU_MV_FILE_LOAD_RAM
+            MENUITEM "&PPU Memory",                 MENU_MV_FILE_LOAD_PPU
+            MENUITEM "&OAM Memory",                 MENU_MV_FILE_LOAD_OAM
+        END
+        MENUITEM "&Goto Address\tCtrl+A",       MENU_MV_FILE_GOTO_ADDRESS
+        MENUITEM SEPARATOR
+        MENUITEM "&Close\tAlt+F4",              ID_MEMWVIEW_FILE_CLOSE
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               MENU_MV_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "&Copy",                       MENU_MV_EDIT_COPY
+        MENUITEM "&Paste",                      MENU_MV_EDIT_PASTE
+        MENUITEM SEPARATOR
+        MENUITEM "&Find...",                    MENU_MV_EDIT_FIND
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&NES Memory",                 MENU_MV_VIEW_RAM
+        MENUITEM "&PPU Memory",                 MENU_MV_VIEW_PPU
+        MENUITEM "&OAM Memory",                 MENU_MV_VIEW_OAM
+        MENUITEM "&ROM File",                   MENU_MV_VIEW_ROM
+    END
+    POPUP "Highlighting"
+    BEGIN
+        MENUITEM "Highlight Activity",          ID_HIGHLIGHTING_HIGHLIGHT_ACTIVITY
+        MENUITEM "Set fading period...",        ID_HIGHLIGHTING_SETFADINGPERIOD
+        MENUITEM "Fade when paused",            ID_HIGHLIGHTING_FADEWHENPAUSED
+    END
+    POPUP "&Bookmarks"
+    BEGIN
+        MENUITEM "&Remove all bookmarks",       MENU_MV_BOOKMARKS_RM_ALL
+        MENUITEM SEPARATOR
+        MENUITEM "&Import...",                  ID_BOOKMARKS_IMPORT
+        MENUITEM "&Export...",                  ID_BOOKMARKS_EXPORT
+        MENUITEM "&Option...",                  ID_BOOKMARKS_OPTION
+    END
+    POPUP "Help"
+    BEGIN
+        MENUITEM "&Help...",                    MENU_MV_HELP
+    END
+END
+
+MEMWATCHMENU MENU
+BEGIN
+    POPUP "&File  "
+    BEGIN
+        MENUITEM "&New...\tCtrl+N",             MEMW_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            MEMW_FILE_OPEN
+        MENUITEM "&Save\tCtrl+S",               MEMW_FILE_SAVE
+        MENUITEM "S&ave As..\tCtrl+Shift+S",    MEMW_FILE_SAVEAS
+        MENUITEM "&Recent",                     ID_FILE_RECENT
+        MENUITEM SEPARATOR
+        MENUITEM "&Close\tAlt+F4",              MEMW_FILE_CLOSE
+    END
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "&Load on Startup",            MEMW_OPTIONS_LOADSTART
+        MENUITEM "Load Last &File on Startup",  MEMW_OPTIONS_LOADLASTFILE
+        MENUITEM SEPARATOR
+        MENUITEM "&Collapse to 1 column",       MEMW_OPTIONS_EXPANDCOLLAPSE
+        MENUITEM SEPARATOR
+        MENUITEM "Bind to Main Window",         ID_OPTIONS_BINDTOMAINWINDOW
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&MemWatch Commands",          MEMW_HELP_WCOMMANDS
+    END
+END
+
+TASEDITORCONTEXTMENUS MENU
+BEGIN
+    POPUP "Selected"
+    BEGIN
+        MENUITEM "Set Markers\tDbl-Clk",        ID_SELECTED_SETMARKERS
+        MENUITEM "Remove Markers",              ID_SELECTED_REMOVEMARKERS
+        MENUITEM SEPARATOR
+        MENUITEM "Deselect",                    ID_SELECTED_DESELECT
+        MENUITEM "Select between Markers\tCtrl+A", ID_SELECTED_SELECTMIDMARKERS
+        MENUITEM SEPARATOR
+        MENUITEM "Ungreenzone",                 ID_SELECTED_UNGREENZONE
+        MENUITEM SEPARATOR
+        MENUITEM "Clear\tDel",                  ID_CONTEXT_SELECTED_CLEARFRAMES
+        MENUITEM "Delete\tCtrl+Del",            ID_CONTEXT_SELECTED_DELETEFRAMES
+        MENUITEM "Clone\tCtrl+Ins",             ID_SELECTED_CLONE
+        MENUITEM "Insert\tCtrl+Shift+Ins",      ID_CONTEXT_SELECTED_INSERTFRAMES
+        MENUITEM "Insert # of Frames\tIns",     ID_CONTEXT_SELECTED_INSERTFRAMES2
+        MENUITEM SEPARATOR
+        MENUITEM "Truncate movie",              ID_CONTEXT_SELECTED_TRUNCATE
+    END
+END
+
+FCEUCONTEXTMENUS MENU
+BEGIN
+    POPUP "NoGame"
+    BEGIN
+        MENUITEM "Open ROM",                    FCEU_CONTEXT_OPENROM
+        MENUITEM "Last ROM used",               FCEUX_CONTEXT_RECENTROM1
+        MENUITEM SEPARATOR
+        MENUITEM "Help...",                     FCEU_CONTEXT_FCEUHELP
+        MENUITEM SEPARATOR
+        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
+    END
+    POPUP "Game+NoMovie"
+    BEGIN
+        MENUITEM "Play Movie...",               FCEUX_CONTEXT_REPLAYMOVIE
+        MENUITEM "Record Movie...",             FCEUX_CONTEXT_RECORDMOVIE
+        MENUITEM "Load Last Movie",             FCEUX_CONTEXT_LOADLASTMOVIE
+        MENUITEM SEPARATOR
+        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
+        MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
+        MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
+        MENUITEM "Screenshot",                  FCEUX_CONTEXT_SCREENSHOT
+        MENUITEM SEPARATOR
+        MENUITEM "Close ROM",                   FCEU_CONTEXT_CLOSEROM
+        MENUITEM SEPARATOR
+        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
+    END
+    POPUP "Game+Movie+Playing+readonly"
+    BEGIN
+        MENUITEM "Toggle to read+write",        FCEUX_CONTEXT_READONLYTOGGLE
+        MENUITEM "Play Movie from Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
+        MENUITEM "Stop Movie Replay",           FCEU_CONTEXT_STOPMOVIE
+        MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
+        MENUITEM SEPARATOR
+        MENUITEM "Toggle to Recording",         FCEUX_CONTEXT_TOGGLE_RECORDING
+        POPUP "Modify Movie"
+        BEGIN
+            MENUITEM "Insert 1 Frame",              FCEUX_CONTEXT_INSERT_1_FRAME
+            MENUITEM "Delete 1 Frame",              FCEUX_CONTEXT_DELETE_1_FRAME
+            MENUITEM SEPARATOR
+            MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
+        END
+        POPUP "Record Mode"
+        BEGIN
+            MENUITEM "&Truncate",                   FCEUX_CONTEXT_RECORDMODE_TRUNCATE
+            MENUITEM "&Overwrite[W]",               FCEUX_CONTEXT_RECORDMODE_OVERWRITE
+            MENUITEM "&Insert[I]",                  FCEUX_CONTEXT_RECORDMODE_INSERT
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
+        MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
+        MENUITEM SEPARATOR
+        MENUITEM "Help....",                    FCEU_CONTEXT_MOVIEHELP
+        MENUITEM SEPARATOR
+        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
+    END
+    POPUP "Game+Movie+Playing+readwrite"
+    BEGIN
+        MENUITEM "Toggle to Read-only",         FCEUX_CONTEXT_READONLYTOGGLE
+        MENUITEM "Play Movie From Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
+        MENUITEM "Stop Movie Replay",           FCEU_CONTEXT_STOPMOVIE
+        MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
+        MENUITEM "Make backup",                 FCEUX_CONTEXT_MAKEBACKUP
+        MENUITEM "Save Movie As...",            FCEUX_CONTEXT_SAVEMOVIEAS
+        MENUITEM SEPARATOR
+        MENUITEM "Toggle to Recording",         FCEUX_CONTEXT_TOGGLE_RECORDING
+        POPUP "Modify Movie"
+        BEGIN
+            MENUITEM "Insert 1 Frame",              FCEUX_CONTEXT_INSERT_1_FRAME
+            MENUITEM "Delete 1 Frame",              FCEUX_CONTEXT_DELETE_1_FRAME
+            MENUITEM SEPARATOR
+            MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
+        END
+        POPUP "Record Mode"
+        BEGIN
+            MENUITEM "&Truncate",                   FCEUX_CONTEXT_RECORDMODE_TRUNCATE
+            MENUITEM "&Overwrite[W]",               FCEUX_CONTEXT_RECORDMODE_OVERWRITE
+            MENUITEM "&Insert[I]",                  FCEUX_CONTEXT_RECORDMODE_INSERT
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
+        MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
+        MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
+        MENUITEM SEPARATOR
+        MENUITEM "&Mode: Full state-movie loads", ID_CONTEXT_FULLSAVESTATES
+        MENUITEM SEPARATOR
+        MENUITEM "Help...",                     FCEU_CONTEXT_MOVIEHELP
+        MENUITEM SEPARATOR
+        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
+    END
+    POPUP "Game+Movie+Recording+readonly"
+    BEGIN
+        MENUITEM "Toggle to read+write",        FCEUX_CONTEXT_READONLYTOGGLE
+        MENUITEM "Play Movie from Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
+        MENUITEM "Stop Movie Recording",        FCEU_CONTEXT_STOPMOVIE
+        MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
+        MENUITEM SEPARATOR
+        MENUITEM "Toggle to Playing",           FCEUX_CONTEXT_TOGGLE_RECORDING
+        POPUP "Modify Movie"
+        BEGIN
+            MENUITEM "Insert 1 Frame",              FCEUX_CONTEXT_INSERT_1_FRAME
+            MENUITEM "Delete 1 Frame",              FCEUX_CONTEXT_DELETE_1_FRAME
+            MENUITEM SEPARATOR
+            MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
+        END
+        POPUP "Record Mode"
+        BEGIN
+            MENUITEM "&Truncate",                   FCEUX_CONTEXT_RECORDMODE_TRUNCATE
+            MENUITEM "&Overwrite[W]",               FCEUX_CONTEXT_RECORDMODE_OVERWRITE
+            MENUITEM "&Insert[I]",                  FCEUX_CONTEXT_RECORDMODE_INSERT
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
+        MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
+        MENUITEM SEPARATOR
+        MENUITEM "Help....",                    FCEU_CONTEXT_MOVIEHELP
+        MENUITEM SEPARATOR
+        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
+    END
+    POPUP "Game+Movie+Recording+readwrite"
+    BEGIN
+        MENUITEM "Toggle to Read-only",         FCEUX_CONTEXT_READONLYTOGGLE
+        MENUITEM "Play Movie From Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
+        MENUITEM "Stop Movie Recording",        FCEU_CONTEXT_STOPMOVIE
+        MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
+        MENUITEM "Make backup",                 FCEUX_CONTEXT_MAKEBACKUP
+        MENUITEM "Save Movie As...",            FCEUX_CONTEXT_SAVEMOVIEAS
+        MENUITEM SEPARATOR
+        MENUITEM "Toggle to Playing",           FCEUX_CONTEXT_TOGGLE_RECORDING
+        POPUP "Modify Movie"
+        BEGIN
+            MENUITEM "Insert 1 Frame",              FCEUX_CONTEXT_INSERT_1_FRAME
+            MENUITEM "Delete 1 Frame",              FCEUX_CONTEXT_DELETE_1_FRAME
+            MENUITEM SEPARATOR
+            MENUITEM "Truncate at Current Frame",   FCEUX_CONTEXT_TRUNCATE_MOVIE
+        END
+        POPUP "Record Mode"
+        BEGIN
+            MENUITEM "&Truncate",                   FCEUX_CONTEXT_RECORDMODE_TRUNCATE
+            MENUITEM "&Overwrite[W]",               FCEUX_CONTEXT_RECORDMODE_OVERWRITE
+            MENUITEM "&Insert[I]",                  FCEUX_CONTEXT_RECORDMODE_INSERT
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
+        MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
+        MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
+        MENUITEM SEPARATOR
+        MENUITEM "&Mode: Full state-movie loads", ID_CONTEXT_FULLSAVESTATES
+        MENUITEM SEPARATOR
+        MENUITEM "Help...",                     FCEU_CONTEXT_MOVIEHELP
+        MENUITEM SEPARATOR
+        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
+    END
+END
+
+RAMWATCH_MENU MENU
+BEGIN
+    POPUP "File"
+    BEGIN
+        MENUITEM "&New list\tCtrl N",           RAMMENU_FILE_NEW
+        MENUITEM "&Open...\tCtrl O",            RAMMENU_FILE_OPEN
+        MENUITEM "&Save\tCtrl S",               RAMMENU_FILE_SAVE
+        MENUITEM "Sa&ve As...\tCtrl Shift S",   RAMMENU_FILE_SAVEAS
+        MENUITEM "&Append file...",             RAMMENU_FILE_APPEND
+        MENUITEM "Recent",                      RAMMENU_FILE_RECENT
+        MENUITEM SEPARATOR
+        MENUITEM "Auto-&load",                  RAMMENU_FILE_AUTOLOAD
+        MENUITEM "Save Window Position",        RAMMENU_FILE_SAVEWINDOW
+        MENUITEM SEPARATOR
+        MENUITEM "&Close\tAlt F4",              IDCANCEL
+    END
+    POPUP "Watches"
+    BEGIN
+        MENUITEM "&New Watch\tN",               IDC_C_WATCH
+        MENUITEM "&Edit Watch\tE",              IDC_C_WATCH_EDIT
+        MENUITEM "&Remove Watch\tR",            IDC_C_WATCH_REMOVE
+        MENUITEM "Duplicate Watch\tA",          IDC_C_WATCH_DUPLICATE
+        MENUITEM "Add &Separator\tS",           IDC_C_WATCH_SEPARATE
+        MENUITEM SEPARATOR
+        MENUITEM "Move Up\tU",                  IDC_C_WATCH_UP
+        MENUITEM "Move Down\tD",                IDC_C_WATCH_DOWN
+    END
+END
+
+CHEATCONTEXTMENUS MENU
+BEGIN
+    POPUP "CheatListPopup"
+    BEGIN
+        MENUITEM "Toggle selected Cheats",      CHEAT_CONTEXT_LIST_TOGGLECHEAT
+        MENUITEM "Poke Cheat Value",            CHEAT_CONTEXT_LIST_POKECHEATVALUE
+        MENUITEM "Goto in Hex Editor",          CHEAT_CONTEXT_LIST_GOTOINHEXEDITOR
+        MENUITEM "Delete selected Cheats",      CHEAT_CONTEXT_LIST_DELETESELECTEDCHEATS
+    END
+    POPUP "CheatPossiPopup"
+    BEGIN
+        MENUITEM "Add to Memory Watch",         CHEAT_CONTEXT_POSSI_ADDTOMEMORYWATCH
+        MENUITEM "Add cheat",                   CHEAT_CONTEXT_POSSI_ADDCHEAT
+        MENUITEM "Add to RAM Watch",            CHEAT_CONTEXT_POSSI_ADDTORAMWATCH
+        MENUITEM "Go to in Hex Editor",         CHEAT_CONTEXT_POSSI_GOTOINHEXEDITOR
+    END
+END
+
+DEBUGCONTEXTMENUS MENU
+BEGIN
+    POPUP "DebugListPopup"
+    BEGIN
+        MENUITEM "Toggle Breakpoint\tDbl-Clk",  DEBUGGER_CONTEXT_TOGGLEBREAK
+    END
+END
+
+LUAWINDOW_MENU MENU
+BEGIN
+    POPUP "Console"
+    BEGIN
+        MENUITEM "&Font...",                    IDC_LUACONSOLE_CHOOSEFONT
+        MENUITEM "Clear",                       IDC_LUACONSOLE_CLEAR
+    END
+END
+
+DISASMCONTEXTMENUS MENU
+BEGIN
+    POPUP "DisasmPopup"
+    BEGIN
+        MENUITEM "Copy\tCtrl+C",                DISASM_CONTEXT_COPY
+        MENUITEM "Select All\tCtrl+A",          DISASM_CONTEXT_SELECTALL
+    END
 END
 
 
@@ -2987,7 +3078,8 @@ IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

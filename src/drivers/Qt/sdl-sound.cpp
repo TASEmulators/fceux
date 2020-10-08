@@ -195,11 +195,19 @@ WriteSound(int32 *buf,
 	extern int EmulationPaused;
 	if (EmulationPaused == 0)
    {
+		int waitCount = 0;
+
 		while(Count)
 		{
 			while(s_BufferIn == s_BufferSize) 
 			{
-				SDL_Delay(1);
+				SDL_Delay(1); waitCount++;
+
+				if ( waitCount > 1000 )
+				{
+					printf("Error: Sound sink is not draining... Breaking out of audio loop to prevent lockup.\n");
+					return;
+				}
 			}
 
 			s_Buffer[s_BufferWrite] = *buf;

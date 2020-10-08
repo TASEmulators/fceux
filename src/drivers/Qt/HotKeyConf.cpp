@@ -7,6 +7,7 @@
 
 #include <SDL.h>
 #include <QHeaderView>
+#include <QCloseEvent>
 
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -68,13 +69,22 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 //----------------------------------------------------------------------------
 HotKeyConfDialog_t::~HotKeyConfDialog_t(void)
 {
-
+	printf("Destroy Hot Key Config Window\n");
+}
+//----------------------------------------------------------------------------
+void HotKeyConfDialog_t::closeEvent(QCloseEvent *event)
+{
+   printf("Hot Key Close Window Event\n");
+   done(0);
+	deleteLater();
+   event->accept();
 }
 //----------------------------------------------------------------------------
 void HotKeyConfDialog_t::closeWindow(void)
 {
    //printf("Close Window\n");
    done(0);
+	deleteLater();
 }
 //----------------------------------------------------------------------------
 void HotKeyConfDialog_t::assignHotkey(QKeyEvent *event)
