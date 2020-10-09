@@ -32,6 +32,8 @@ struct ramWatch_t
 		uint8_t u8;
 		int16_t i16;
 		uint16_t u16;
+		int32_t i32;
+		uint32_t u32;
 	} val;
 
 	  ramWatch_t (void)
@@ -39,7 +41,7 @@ struct ramWatch_t
 		addr = 0;
 		type = 0;
 		size = 0;
-		val.u16 = 0;
+		val.u32 = 0;
 	};
 
 	void updateMem (void);
@@ -156,6 +158,7 @@ class RamWatchDialog_t : public QDialog
 		QPushButton *dup_btn;
 		QPushButton *sep_btn;
 		QPushButton *cht_btn;
+		QTimer      *updateTimer;
 
 		ramWatchList_t ramWatchList;
 
@@ -168,6 +171,12 @@ class RamWatchDialog_t : public QDialog
    public slots:
       void closeWindow(void);
 	private slots:
+		void periodicUpdate(void);
 		void newWatchClicked(void);
+		void editWatchClicked(void);
+		void removeWatchClicked(void);
+		void moveWatchUpClicked(void);
+		void moveWatchDownClicked(void);
+		void watchClicked( QTreeWidgetItem *item, int column);
 
 };

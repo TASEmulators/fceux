@@ -127,7 +127,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	menuAct = new QAction(tr("New Watch"), this);
    menuAct->setShortcut( QKeySequence(tr("N")) );
    menuAct->setStatusTip(tr("New Watch"));
-   //connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
+   connect(menuAct, SIGNAL(triggered()), this, SLOT(newWatchClicked(void)) );
 
    watchMenu->addAction(menuAct);
 
@@ -135,7 +135,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	menuAct = new QAction(tr("Edit Watch"), this);
    menuAct->setShortcut( QKeySequence(tr("E")) );
    menuAct->setStatusTip(tr("Edit Watch"));
-   //connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
+   connect(menuAct, SIGNAL(triggered()), this, SLOT(editWatchClicked(void)) );
 
    watchMenu->addAction(menuAct);
 
@@ -143,7 +143,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	menuAct = new QAction(tr("Remove Watch"), this);
    menuAct->setShortcut( QKeySequence(tr("R")) );
    menuAct->setStatusTip(tr("Remove Watch"));
-   //connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
+   connect(menuAct, SIGNAL(triggered()), this, SLOT(removeWatchClicked(void)) );
 
    watchMenu->addAction(menuAct);
 
@@ -169,7 +169,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	menuAct = new QAction(tr("Move Up"), this);
    menuAct->setShortcut( QKeySequence(tr("U")) );
    menuAct->setStatusTip(tr("Move Up"));
-   //connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
+   connect(menuAct, SIGNAL(triggered()), this, SLOT(moveWatchUpClicked(void)) );
 
    watchMenu->addAction(menuAct);
 
@@ -177,7 +177,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	menuAct = new QAction(tr("Move Down"), this);
    menuAct->setShortcut( QKeySequence(tr("D")) );
    menuAct->setStatusTip(tr("Move Down"));
-   //connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
+   connect(menuAct, SIGNAL(triggered()), this, SLOT(moveWatchDownClicked(void)) );
 
    watchMenu->addAction(menuAct);
 
@@ -189,15 +189,20 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	tree = new QTreeWidget();
 
-	tree->setColumnCount(3);
+	tree->setColumnCount(4);
 
 	item = new QTreeWidgetItem();
 	item->setText( 0, QString::fromStdString( "Address" ) );
-	item->setText( 1, QString::fromStdString( "Value" ) );
-	item->setText( 2, QString::fromStdString( "Notes" ) );
+	item->setText( 1, QString::fromStdString( "Value Dec" ) );
+	item->setText( 2, QString::fromStdString( "Value Hex" ) );
+	item->setText( 3, QString::fromStdString( "Notes" ) );
 	item->setTextAlignment( 0, Qt::AlignLeft);
 	item->setTextAlignment( 1, Qt::AlignLeft);
 	item->setTextAlignment( 2, Qt::AlignLeft);
+	item->setTextAlignment( 3, Qt::AlignLeft);
+
+	connect( tree, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+			   this, SLOT(watchClicked( QTreeWidgetItem*, int)) );
 
 	tree->setHeaderItem( item );
 
@@ -211,15 +216,19 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	up_btn = new QPushButton( tr("Up") );
 	vbox->addWidget( up_btn );
+	connect( up_btn, SIGNAL(clicked(void)), this, SLOT(moveWatchUpClicked(void)));
 
 	down_btn = new QPushButton( tr("Down") );
 	vbox->addWidget( down_btn );
+	connect( down_btn, SIGNAL(clicked(void)), this, SLOT(moveWatchDownClicked(void)));
 
 	edit_btn = new QPushButton( tr("Edit") );
 	vbox->addWidget( edit_btn );
+	connect( edit_btn, SIGNAL(clicked(void)), this, SLOT(editWatchClicked(void)));
 
 	del_btn = new QPushButton( tr("Remove") );
 	vbox->addWidget( del_btn );
+	connect( del_btn, SIGNAL(clicked(void)), this, SLOT(removeWatchClicked(void)));
 
 	new_btn = new QPushButton( tr("New") );
 	vbox->addWidget( new_btn );
@@ -239,10 +248,17 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	vbox1->addWidget( cht_btn );
 
 	setLayout( mainLayout );
+
+	updateTimer  = new QTimer( this );
+
+   connect( updateTimer, &QTimer::timeout, this, &RamWatchDialog_t::periodicUpdate );
+
+	updateTimer->start( 100 ); // 10hz
 }
 //----------------------------------------------------------------------------
 RamWatchDialog_t::~RamWatchDialog_t(void)
 {
+	updateTimer->stop();
 	printf("Destroy RAM Watch Config Window\n");
 }
 //----------------------------------------------------------------------------
@@ -259,6 +275,13 @@ void RamWatchDialog_t::closeWindow(void)
    //printf("Close Window\n");
    done(0);
 	deleteLater();
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::periodicUpdate(void)
+{
+
+	updateRamWatchDisplay();
+
 }
 //----------------------------------------------------------------------------
 void RamWatchDialog_t::updateRamWatchDisplay(void)
@@ -281,11 +304,23 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 
 			tree->addTopLevelItem( item );
 		}
-		sprintf (addrStr, "0x%04X", rw->addr);
+		sprintf (addrStr, "$%04X", rw->addr);
 
 		rw->updateMem ();
 
-		if (rw->size == 2)
+		if (rw->size == 4)
+		{
+			if (rw->type)
+			{
+				sprintf (valStr1, "%u", rw->val.u32);
+			}
+			else
+			{
+				sprintf (valStr1, "%i", rw->val.i32);
+			}
+			sprintf (valStr2, "0x%08X", rw->val.u32);
+		}
+		else if (rw->size == 2)
 		{
 			if (rw->type)
 			{
@@ -315,14 +350,23 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 		//item->setFont(font);
 		item->setText( 0, tr(addrStr) );
 		item->setText( 1, tr(valStr1) );
-		item->setText( 2, tr(rw->name.c_str())  );
+		item->setText( 2, tr(valStr2) );
+		item->setText( 3, tr(rw->name.c_str())  );
    
 		item->setTextAlignment( 0, Qt::AlignLeft);
 		item->setTextAlignment( 1, Qt::AlignLeft);
 		item->setTextAlignment( 2, Qt::AlignLeft);
+		item->setTextAlignment( 3, Qt::AlignLeft);
 
 		idx++;
 	}
+	tree->viewport()->update();
+}
+//----------------------------------------------------------------------------
+void 	RamWatchDialog_t::watchClicked( QTreeWidgetItem *item, int column)
+{
+//	int row = tree->indexOfTopLevelItem(item);
+
 }
 //----------------------------------------------------------------------------
 void ramWatch_t::updateMem (void)
@@ -350,10 +394,24 @@ void RamWatchDialog_t::openWatchEditWindow(int idx)
 	QLabel *lbl;
 	QLineEdit *addrEntry, *notesEntry;
 	QGroupBox *frame;
-	QRadioButton *signedTypeBtn, *unsignedTypeBtn, *hexTypeBtn, *binaryTypeBtn;
+	QRadioButton *signedTypeBtn, *unsignedTypeBtn;
 	QRadioButton *dataSize1Btn, *dataSize2Btn, *dataSize4Btn;
+	QPushButton *cancelButton, *okButton;
+	ramWatch_t *rw = NULL;
 
-	dialog.setWindowTitle("Add Watch");
+	if ( idx >= 0 )
+	{
+		rw = ramWatchList.getIndex(idx);
+	}
+
+	if ( rw == NULL )
+	{
+		dialog.setWindowTitle("Add Watch");
+	}
+	else
+	{
+		dialog.setWindowTitle("Edit Watch");
+	}	
 
 	mainLayout = new QVBoxLayout();
 
@@ -362,6 +420,10 @@ void RamWatchDialog_t::openWatchEditWindow(int idx)
 	hbox      = new QHBoxLayout();
 	lbl       = new QLabel( tr("Address") );
 	addrEntry = new QLineEdit();
+
+	addrEntry->setMaxLength(4);
+	addrEntry->setInputMask( ">HHHH;0" );
+	addrEntry->setCursorPosition(0);
 
 	mainLayout->addLayout( hbox );
 	hbox->addWidget( lbl );
@@ -385,13 +447,9 @@ void RamWatchDialog_t::openWatchEditWindow(int idx)
 
 	signedTypeBtn   = new QRadioButton( tr("Signed") );
 	unsignedTypeBtn = new QRadioButton( tr("Unsigned") );
-	hexTypeBtn      = new QRadioButton( tr("Hex") );
-	binaryTypeBtn   = new QRadioButton( tr("Binary") );
 
 	vbox->addWidget( signedTypeBtn   );
 	vbox->addWidget( unsignedTypeBtn );
-	vbox->addWidget( hexTypeBtn      );
-	vbox->addWidget( binaryTypeBtn   );
 
 	vbox  = new QVBoxLayout();
 	frame = new QGroupBox( tr("Data Size") );
@@ -406,17 +464,180 @@ void RamWatchDialog_t::openWatchEditWindow(int idx)
 	vbox->addWidget( dataSize2Btn );
 	vbox->addWidget( dataSize4Btn );
 
+	hbox = new QHBoxLayout();
+	mainLayout->addLayout( hbox );
+
+	okButton     = new QPushButton( tr("OK") );
+	cancelButton = new QPushButton( tr("Cancel") );
+	hbox->addWidget( cancelButton );
+	hbox->addWidget( okButton );
+	okButton->setDefault(true);
+
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+   connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+
+	if ( rw != NULL )
+	{
+		char stmp[64];
+
+		sprintf( stmp, "%04X", rw->addr );
+		addrEntry->setText( tr(stmp) );
+		notesEntry->setText( tr(rw->name.c_str()) );
+	   signedTypeBtn->setChecked( !rw->type );
+	   unsignedTypeBtn->setChecked( rw->type );
+		dataSize1Btn->setChecked( rw->size == 1 );
+		dataSize2Btn->setChecked( rw->size == 2 );
+		dataSize4Btn->setChecked( rw->size == 4 );
+	}
+	else
+	{
+	   signedTypeBtn->setChecked( true );
+	   unsignedTypeBtn->setChecked( false );
+		dataSize1Btn->setChecked( true );
+		dataSize2Btn->setChecked( false );
+		dataSize4Btn->setChecked( false );
+	}
+
 	ret = dialog.exec();
 
-	if ( ret )
+	if ( ret == QDialog::Accepted )
 	{
+		int addr = -1, size = 1;
 
+		addr = ::strtol( addrEntry->text().toStdString().c_str(), NULL, 16 );
+
+		if ( dataSize4Btn->isChecked() )
+		{
+			size = 4;
+		}
+		else if ( dataSize2Btn->isChecked() )
+		{
+			size = 2;
+		}
+		else
+		{
+			size = 1;
+		}	
+
+		if ( rw == NULL )
+		{
+			ramWatchList.add_entry( notesEntry->text().toStdString().c_str(), 
+				addr, unsignedTypeBtn->isChecked(), size );
+		}
+		else 
+		{
+			rw->name = notesEntry->text().toStdString();
+			rw->type = unsignedTypeBtn->isChecked();
+			rw->addr = addr;
+			rw->size = size;
+		}
 	}
 }
 //----------------------------------------------------------------------------
 void RamWatchDialog_t::newWatchClicked(void)
 {
 	openWatchEditWindow();
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::editWatchClicked(void)
+{
+	QTreeWidgetItem *item;
+
+	item = tree->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+	int row = tree->indexOfTopLevelItem(item);
+
+	openWatchEditWindow(row);
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::removeWatchClicked(void)
+{
+	QTreeWidgetItem *item;
+
+	item = tree->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+	int row = tree->indexOfTopLevelItem(item);
+
+	ramWatchList.deleteIndex(row);
+
+	tree->clear();
+
+	updateRamWatchDisplay();
+
+	if ( row > 0 )
+	{
+		item = tree->topLevelItem( row-1 );
+	}
+	else
+	{
+		item = tree->topLevelItem( 0 );
+	}
+
+	if ( item )
+	{
+		tree->setCurrentItem(item);
+		tree->viewport()->update();
+	}
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::moveWatchUpClicked(void)
+{
+	QTreeWidgetItem *item;
+
+	item = tree->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+	int row = tree->indexOfTopLevelItem(item);
+
+	if ( row > 0 )
+	{
+		item = tree->topLevelItem( row-1 );
+
+		if ( item )
+		{
+			tree->setCurrentItem(item);
+			tree->viewport()->update();
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::moveWatchDownClicked(void)
+{
+	QTreeWidgetItem *item;
+
+	item = tree->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+	int row = tree->indexOfTopLevelItem(item);
+
+	if ( row < (tree->topLevelItemCount()-1) )
+	{
+		item = tree->topLevelItem( row+1 );
+
+		if ( item )
+		{
+			tree->setCurrentItem(item);
+			tree->viewport()->update();
+		}
+	}
 }
 //----------------------------------------------------------------------------
 void RamWatchDialog_t::saveWatchFile (const char *filename)
