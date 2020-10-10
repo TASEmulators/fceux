@@ -40,7 +40,7 @@ struct ramWatch_t
 	  ramWatch_t (void)
 	{
 		addr = 0;
-		type = 0;
+		type = 's';
 		size = 0;
 		isSep = 0;
 		val.u32 = 0;

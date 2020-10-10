@@ -358,7 +358,7 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 		{
 		   if (rw->size == 4)
 		   {
-		   	if (rw->type)
+		   	if (rw->type == 'u')
 		   	{
 		   		sprintf (valStr1, "%u", rw->val.u32);
 		   	}
@@ -370,7 +370,7 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 		   }
 		   else if (rw->size == 2)
 		   {
-		   	if (rw->type)
+		   	if (rw->type == 'u')
 		   	{
 		   		sprintf (valStr1, "%6u", rw->val.u16);
 		   	}
@@ -382,7 +382,7 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 		   }
 		   else
 		   {
-		   	if (rw->type)
+		   	if (rw->type == 'u')
 		   	{
 		   		sprintf (valStr1, "%6u", rw->val.u8);
 		   	}
@@ -755,8 +755,8 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 			addrEntry->setEnabled(false);
 		}
 		notesEntry->setText( tr(rw->name.c_str()) );
-	   signedTypeBtn->setChecked( !rw->type );
-	   unsignedTypeBtn->setChecked( rw->type );
+	   signedTypeBtn->setChecked( rw->type != 'u' );
+	   unsignedTypeBtn->setChecked( rw->type == 'u' );
 		dataSize1Btn->setChecked( rw->size == 1 );
 		dataSize2Btn->setChecked( rw->size == 2 );
 		dataSize4Btn->setChecked( rw->size == 4 );
@@ -799,7 +799,7 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 		else 
 		{
 			rw->name  = notesEntry->text().toStdString();
-			rw->type  = unsignedTypeBtn->isChecked();
+			rw->type  = unsignedTypeBtn->isChecked() ? 'u' : 's';
 			rw->addr  = addr;
 			rw->size  = size;
 			rw->isSep = isSep;
@@ -986,7 +986,7 @@ void RamWatchDialog_t::moveWatchDownClicked(void)
 //----------------------------------------------------------------------------
 void RamWatchDialog_t::saveWatchFile (const char *filename, int append )
 {
-	int i;
+	int i, lineCount = 0, sizeChar;
 	FILE *fp;
 	const char *c, *mode;
 	std::list < ramWatch_t * >::iterator it;
@@ -1003,6 +1003,8 @@ void RamWatchDialog_t::saveWatchFile (const char *filename, int append )
 	}
 	saveFileName.assign( filename );
 
+	fprintf( fp, "\n%zi\n", ramWatchList.size() );
+
 	for (it = ramWatchList.ls.begin (); it != ramWatchList.ls.end (); it++)
 	{
 		rw = *it;
@@ -1011,16 +1013,26 @@ void RamWatchDialog_t::saveWatchFile (const char *filename, int append )
 
 		if ( rw->isSep )
 		{
-			fprintf (fp, "0x%04x   %c%c   ", rw->addr, 'S', 'S' );
+			fprintf (fp, "%05i %04X  %c  %c  0  ", lineCount, rw->addr, 'S', 'S' );
 		}
 		else
 		{
-			fprintf (fp, "0x%04x   %c%i   ", rw->addr, rw->type ? 'U' : 'S',
-				 rw->size);
+			if ( rw->size == 4 )
+			{
+				sizeChar = 'd';
+			}
+			else if ( rw->size == 2 )
+			{
+				sizeChar = 'w';
+			}
+			else 
+			{
+				sizeChar = 'b';
+			}
+			fprintf (fp, "%05i %04X  %c  %c  0  ", lineCount, rw->addr, sizeChar, rw->type);
 		}
 
 		i = 0;
-		fprintf (fp, "\"");
 		while (c[i])
 		{
 			if (c[i] == '"')
@@ -1033,7 +1045,9 @@ void RamWatchDialog_t::saveWatchFile (const char *filename, int append )
 			}
 			i++;
 		}
-		fprintf (fp, "\"\n");
+		fprintf (fp, "\n");
+
+		lineCount++;
 	}
 	fclose (fp);
 
@@ -1088,14 +1102,13 @@ void RamWatchDialog_t::loadWatchFile (const char *filename)
 		j = 0;
 		while (isspace (line[i])) i++;
 
+		while ( isdigit(line[i]) ) i++;
+
+		while (isspace (line[i])) i++;
+
 		if ((line[i] == '0') && (tolower (line[i + 1]) == 'x'))
 		{
-			stmp[j] = '0';
-			j++;
-			i++;
-			stmp[j] = 'x';
-			j++;
-			i++;
+			i += 2;
 
 			while (isxdigit (line[i]))
 			{
@@ -1117,30 +1130,45 @@ void RamWatchDialog_t::loadWatchFile (const char *filename)
 
 		if (j == 0) continue;
 
-		a = strtol (stmp, NULL, 0);
+		a = strtol (stmp, NULL, 16);
 
 		while (isspace (line[i])) i++;
 
-		t = line[i];
-		i++;
-		s = line[i];
+		s = tolower(line[i]);
 		i++;
 
-		if ((t != 'U') && (t != 'S'))
+		while (isspace (line[i])) i++;
+
+		t = tolower(line[i]);
+		i++;
+
+		if ((t != 'u') && (t != 's') && (t != 'h') && (t != 'b') )
 		{
 			printf ("Error: Invalid RAM Watch Byte Type: %c", t);
 			continue;
 		}
-		if (!isdigit (s) && (s != 'S'))
+		if (!isdigit (s) && (s != 's') && (s != 'b') && (s != 'w') && (s != 'd') )
 		{
 			printf ("Error: Invalid RAM Watch Byte Size: %c", s);
 			continue;
 		}
-		if (s == 'S')
+		if (s == 's')
 		{
 			isSep = 1; s = 1;
 		}
-		else
+		else if ( s == 'b' )
+		{
+			s = 1;
+		}
+		else if ( s == 'w' )
+		{
+			s = 2;
+		}
+		else if ( s == 'd' )
+		{
+			s = 4;
+		}
+		else if ( isdigit(s) )
 		{
 			s = s - '0';
 		}
@@ -1150,6 +1178,9 @@ void RamWatchDialog_t::loadWatchFile (const char *filename)
 			printf ("Error: Invalid RAM Watch Byte Size: %i", s);
 			continue;
 		}
+		while (isspace (line[i])) i++;
+
+		while (isdigit(line[i])) i++;
 
 		while (isspace (line[i])) i++;
 
@@ -1184,10 +1215,37 @@ void RamWatchDialog_t::loadWatchFile (const char *filename)
 			}
 			stmp[j] = 0;
 		}
+		else
+		{
+			j=0;
+			while (line[i] != 0)
+			{
+				if ( line[i] == '\n')
+				{
+					break;
+				}
+				stmp[j] = line[i]; i++; j++;
+			}
+			stmp[j] = 0;
+		}
+
+		j--;
+		while ( j >= 0 )
+		{
+			if ( isspace(stmp[j]) )
+			{
+				stmp[j] = 0;
+			}
+			else
+			{
+				break;
+			}
+			j--;
+		}
 		rw = new ramWatch_t;
 
 		rw->addr  = a;
-		rw->type  = (t == 'U') ? 1 : 0;
+		rw->type  = t;
 		rw->size  = s;
 		rw->isSep = isSep;
 		rw->name.assign (stmp);
