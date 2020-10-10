@@ -337,6 +337,11 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 			item = new QTreeWidgetItem();
 
 			tree->addTopLevelItem( item );
+
+			item->setFont( 0, font);
+			item->setFont( 1, font);
+			item->setFont( 2, font);
+			item->setFont( 3, font);
 		}
 		if ( rw->isSep || (rw->addr < 0) )
 		{
@@ -365,37 +370,37 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 		{
 		   if (rw->size == 4)
 		   {
-		   	if (rw->type == 'u')
+		   	if (rw->type == 's')
 		   	{
-		   		sprintf (valStr1, "%u", rw->val.u32);
+		   		sprintf (valStr1, "%i", rw->val.i32);
 		   	}
 		   	else
 		   	{
-		   		sprintf (valStr1, "%i", rw->val.i32);
+		   		sprintf (valStr1, "%u", rw->val.u32);
 		   	}
 		   	sprintf (valStr2, "0x%08X", rw->val.u32);
 		   }
 		   else if (rw->size == 2)
 		   {
-		   	if (rw->type == 'u')
+		   	if (rw->type == 's')
 		   	{
-		   		sprintf (valStr1, "%6u", rw->val.u16);
+		   		sprintf (valStr1, "%6i", rw->val.i16);
 		   	}
 		   	else
 		   	{
-		   		sprintf (valStr1, "%6i", rw->val.i16);
+		   		sprintf (valStr1, "%6u", rw->val.u16);
 		   	}
 		   	sprintf (valStr2, "0x%04X", rw->val.u16);
 		   }
 		   else
 		   {
-		   	if (rw->type == 'u')
+		   	if (rw->type == 's')
 		   	{
-		   		sprintf (valStr1, "%6u", rw->val.u8);
+		   		sprintf (valStr1, "%6i", rw->val.i8);
 		   	}
 		   	else
 		   	{
-		   		sprintf (valStr1, "%6i", rw->val.i8);
+		   		sprintf (valStr1, "%6u", rw->val.u8);
 		   	}
 		   	sprintf (valStr2, "0x%02X", rw->val.u8);
 		   }
@@ -403,11 +408,45 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 
 		item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren );
 
-		//item->setFont(font);
-		item->setText( 0, tr(addrStr) );
-		item->setText( 1, tr(valStr1) );
-		item->setText( 2, tr(valStr2) );
-		item->setText( 3, tr(rw->name.c_str())  );
+		if ( rw->isSep )
+		{
+			int i,j;
+			char stmp[256];
+			const char *c;
+
+			j=0;
+
+			for (i=0; i<3; i++)
+			{
+				stmp[j] = '-'; j++;
+			}
+			stmp[j] = ' '; j++;
+
+			c = rw->name.c_str(); i = 0;
+
+			while ( c[i] != 0 )
+			{
+				stmp[j] = c[i]; j++; i++;
+			}
+			stmp[j] = ' '; j++;
+
+			while ( j < 64 )
+			{
+				stmp[j] = '-'; j++;
+			}
+			stmp[j] = 0;
+
+			item->setFirstColumnSpanned(true);
+			item->setText( 0, tr(stmp) );
+		}
+		else
+		{
+			item->setFirstColumnSpanned(false);
+			item->setText( 0, tr(addrStr) );
+			item->setText( 1, tr(valStr1) );
+			item->setText( 2, tr(valStr2) );
+			item->setText( 3, tr(rw->name.c_str())  );
+		}
    
 		item->setTextAlignment( 0, Qt::AlignLeft);
 		item->setTextAlignment( 1, Qt::AlignCenter);
@@ -676,7 +715,21 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 	}
 	else
 	{
-		dialog.setWindowTitle("Edit Watch");
+		if ( rw->isSep )
+		{
+			if ( mode )
+			{
+				dialog.setWindowTitle("Add Separator");
+			}
+			else
+			{
+				dialog.setWindowTitle("Edit Separator");
+			}
+		}
+		else
+		{
+			dialog.setWindowTitle("Edit Watch");
+		}
 	}	
 
 	mainLayout = new QVBoxLayout();
@@ -757,12 +810,25 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 		{
 			addrEntry->setEnabled(false);
 		}
+
 		notesEntry->setText( tr(rw->name.c_str()) );
-	   signedTypeBtn->setChecked( rw->type != 'u' );
-	   unsignedTypeBtn->setChecked( rw->type == 'u' );
-		dataSize1Btn->setChecked( rw->size == 1 );
-		dataSize2Btn->setChecked( rw->size == 2 );
-		dataSize4Btn->setChecked( rw->size == 4 );
+
+		if ( rw->isSep )
+		{
+			signedTypeBtn->setEnabled(false);
+			unsignedTypeBtn->setEnabled(false);
+			dataSize1Btn->setEnabled(false);
+			dataSize2Btn->setEnabled(false);
+			dataSize4Btn->setEnabled(false);
+		}
+		else
+		{
+	   	signedTypeBtn->setChecked( rw->type == 's' );
+	   	unsignedTypeBtn->setChecked( rw->type != 's' );
+			dataSize1Btn->setChecked( rw->size == 1 );
+			dataSize2Btn->setChecked( rw->size == 2 );
+			dataSize4Btn->setChecked( rw->size == 4 );
+		}
 	}
 	else
 	{
