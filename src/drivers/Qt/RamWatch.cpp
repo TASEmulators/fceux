@@ -106,9 +106,9 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
    fileMenu->addAction(menuAct);
 
 	// File -> Append
-	menuAct = new QAction(tr("Append"), this);
+	menuAct = new QAction(tr("Append from File"), this);
    //menuAct->setShortcut( QKeySequence(tr("Ctrl+A")) );
-   menuAct->setStatusTip(tr("Append to Watch File"));
+   menuAct->setStatusTip(tr("Append from File"));
    connect(menuAct, SIGNAL(triggered()), this, SLOT(appendListCB(void)) );
 
    fileMenu->addAction(menuAct);
@@ -209,7 +209,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	tree->setHeaderItem( item );
 
-	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+	//tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
 
 	vbox1 = new QVBoxLayout();
 	vbox  = new QVBoxLayout();
@@ -344,7 +344,14 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 		}
 		else
 		{
-			sprintf (addrStr, "$%04X", rw->addr);
+			if ( rw->size > 1 )
+			{
+				sprintf (addrStr, "$%04X-$%04X", rw->addr, rw->addr + rw->size - 1);
+			}
+			else
+			{
+				sprintf (addrStr, "$%04X", rw->addr);
+			}
 		}
 
 		rw->updateMem ();
@@ -403,8 +410,8 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 		item->setText( 3, tr(rw->name.c_str())  );
    
 		item->setTextAlignment( 0, Qt::AlignLeft);
-		item->setTextAlignment( 1, Qt::AlignLeft);
-		item->setTextAlignment( 2, Qt::AlignLeft);
+		item->setTextAlignment( 1, Qt::AlignCenter);
+		item->setTextAlignment( 2, Qt::AlignCenter);
 		item->setTextAlignment( 3, Qt::AlignLeft);
 
 		idx++;
@@ -492,19 +499,15 @@ void RamWatchDialog_t::appendListCB(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	const char *romFile = NULL;
-	QFileDialog  dialog(this, tr("Append Watch List To File") );
+	QFileDialog  dialog(this, tr("Append from Watch File") );
 
-	if ( ramWatchList.size() == 0 )
-	{
-		return;
-	}
-	dialog.setFileMode(QFileDialog::AnyFile);
+	dialog.setFileMode(QFileDialog::ExistingFile);
 
 	dialog.setNameFilter(tr("Watch Files (*.wch *.WCH) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
-	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 	dialog.setDefaultSuffix( tr(".wch") );
 
 	romFile = getRomFile();
@@ -547,7 +550,7 @@ void RamWatchDialog_t::appendListCB(void)
    }
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	saveWatchFile( filename.toStdString().c_str(), 1 );
+	loadWatchFile( filename.toStdString().c_str(), 1 );
 }
 //----------------------------------------------------------------------------
 void RamWatchDialog_t::saveListCB(void)
@@ -1053,7 +1056,7 @@ void RamWatchDialog_t::saveWatchFile (const char *filename, int append )
 
 }
 //----------------------------------------------------------------------------
-void RamWatchDialog_t::loadWatchFile (const char *filename)
+void RamWatchDialog_t::loadWatchFile (const char *filename, int append )
 {
 	FILE *fp;
 	int i, j, a, t, s, isSep, literal;
@@ -1068,6 +1071,13 @@ void RamWatchDialog_t::loadWatchFile (const char *filename)
 		return;
 	}
 	saveFileName.assign( filename );
+
+	if ( !append )
+	{
+		ramWatchList.clear();
+		tree->clear();
+		tree->viewport()->update();
+	}
 
 	while (fgets (line, sizeof (line) - 1, fp) != NULL)
 	{

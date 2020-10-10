@@ -207,7 +207,7 @@ class RamWatchDialog_t : public QDialog
 
 	protected:
 		void closeEvent(QCloseEvent *event);
-		void loadWatchFile (const char *filename);
+		void loadWatchFile (const char *filename, int append = 0);
 		void saveWatchFile (const char *filename, int append = 0);
 
 		QFont        font;
