@@ -89,6 +89,7 @@ class  consoleWin_t : public QMainWindow
 	 QAction *fdsEjectAct;
 	 QAction *fdsLoadBiosAct;
 	 QAction *cheatsAct;
+	 QAction *ramWatchAct;
 	 QAction *debuggerAct;
 	 QAction *codeDataLogAct;
 	 QAction *traceLogAct;
@@ -167,6 +168,7 @@ class  consoleWin_t : public QMainWindow
 		void openPPUViewer(void);
 		void openNTViewer(void);
 		void openCheats(void);
+		void openRamWatch(void);
 		void openMovie(void);
 		void stopMovie(void);
 		void recordMovie(void);

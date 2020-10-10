@@ -659,6 +659,9 @@ int traceRecord_t::convToText( char *txt )
    char stmp[128];
    char str_axystate[32], str_procstatus[32];
 
+	str_axystate[0] = 0;
+	str_procstatus[0] = 0;
+
    txt[0] = 0;
    if ( opSize == 0 )
 	{

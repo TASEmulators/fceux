@@ -36,14 +36,6 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	QLabel *lbl;
 	QGroupBox *groupBox;
 	QFrame *frame;
-	QScreen *screen = QGuiApplication::primaryScreen();
-	double devPixRatio = 1.0f;
-
-	if ( screen != NULL )
-   {
-		devPixRatio = (int)( screen->devicePixelRatio() + 0.50f);
-    	//printf("Pix Ratio: %f \n", devPixRatio );
-	}
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
@@ -51,8 +43,11 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	QFontMetrics fm(font);
 
-	//fontCharWidth = fm.boundingRect('X').width() * devPixRatio;
-	fontCharWidth = 2.00 * fm.averageCharWidth() * devPixRatio;
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+    fontCharWidth = 2 * fm.horizontalAdvance(QLatin1Char('2'));
+#else
+    fontCharWidth = 2 * fm.width(QLatin1Char('2'));
+#endif
 
 	setWindowTitle("Cheat Search");
 
@@ -644,6 +639,7 @@ int GuiCheatsDialog_t::activeCheatListCB (char *name, uint32 a, uint8 v, int c, 
 
 	item->setTextAlignment( 0, Qt::AlignLeft);
 	item->setTextAlignment( 1, Qt::AlignLeft);
+	item->setTextAlignment( 2, Qt::AlignLeft);
 
 	actvCheatIdx++;
 
