@@ -14,6 +14,7 @@
 #include <QGroupBox>
 #include <QLineEdit>
 #include <QRadioButton>
+#include <QFileDialog>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -27,7 +28,9 @@
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/RamWatch.h"
+#include "Qt/ConsoleUtilities.h"
 
+ramWatchList_t ramWatchList;
 //----------------------------------------------------------------------------
 RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	: QDialog( parent )
@@ -74,7 +77,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	menuAct = new QAction(tr("New List"), this);
    menuAct->setShortcut( QKeySequence(tr("Ctrl+N")) );
    menuAct->setStatusTip(tr("New List"));
-   //connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
+   connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
 
    fileMenu->addAction(menuAct);
 
@@ -82,7 +85,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	menuAct = new QAction(tr("Open"), this);
    menuAct->setShortcut( QKeySequence(tr("Ctrl+O")) );
    menuAct->setStatusTip(tr("Open Watch File"));
-   //connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
+   connect(menuAct, SIGNAL(triggered()), this, SLOT(openListCB(void)) );
 
    fileMenu->addAction(menuAct);
 
@@ -90,7 +93,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	menuAct = new QAction(tr("Save"), this);
    menuAct->setShortcut( QKeySequence(tr("Ctrl+S")) );
    menuAct->setStatusTip(tr("Save Watch File"));
-   //connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
+   connect(menuAct, SIGNAL(triggered()), this, SLOT(saveListCB(void)) );
 
    fileMenu->addAction(menuAct);
 
@@ -98,7 +101,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	menuAct = new QAction(tr("Save As"), this);
    menuAct->setShortcut( QKeySequence(tr("Ctrl+Shift+S")) );
    menuAct->setStatusTip(tr("Save As Watch File"));
-   //connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
+   connect(menuAct, SIGNAL(triggered()), this, SLOT(saveListAs(void)) );
 
    fileMenu->addAction(menuAct);
 
@@ -106,7 +109,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	menuAct = new QAction(tr("Append"), this);
    //menuAct->setShortcut( QKeySequence(tr("Ctrl+A")) );
    menuAct->setStatusTip(tr("Append to Watch File"));
-   //connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
+   connect(menuAct, SIGNAL(triggered()), this, SLOT(appendListCB(void)) );
 
    fileMenu->addAction(menuAct);
 
@@ -151,7 +154,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	menuAct = new QAction(tr("Duplicate Watch"), this);
    menuAct->setShortcut( QKeySequence(tr("A")) );
    menuAct->setStatusTip(tr("Duplicate Watch"));
-   //connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
+   connect(menuAct, SIGNAL(triggered()), this, SLOT(dupWatchClicked(void)) );
 
    watchMenu->addAction(menuAct);
 
@@ -217,28 +220,37 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	up_btn = new QPushButton( tr("Up") );
 	vbox->addWidget( up_btn );
 	connect( up_btn, SIGNAL(clicked(void)), this, SLOT(moveWatchUpClicked(void)));
+	up_btn->setEnabled(false);
 
 	down_btn = new QPushButton( tr("Down") );
 	vbox->addWidget( down_btn );
 	connect( down_btn, SIGNAL(clicked(void)), this, SLOT(moveWatchDownClicked(void)));
+	down_btn->setEnabled(false);
 
 	edit_btn = new QPushButton( tr("Edit") );
 	vbox->addWidget( edit_btn );
 	connect( edit_btn, SIGNAL(clicked(void)), this, SLOT(editWatchClicked(void)));
+	edit_btn->setEnabled(false);
 
 	del_btn = new QPushButton( tr("Remove") );
 	vbox->addWidget( del_btn );
 	connect( del_btn, SIGNAL(clicked(void)), this, SLOT(removeWatchClicked(void)));
+	del_btn->setEnabled(false);
 
 	new_btn = new QPushButton( tr("New") );
 	vbox->addWidget( new_btn );
 	connect( new_btn, SIGNAL(clicked(void)), this, SLOT(newWatchClicked(void)));
+	new_btn->setEnabled(true);
 
 	dup_btn = new QPushButton( tr("Duplicate") );
 	vbox->addWidget( dup_btn );
+	connect( dup_btn, SIGNAL(clicked(void)), this, SLOT(dupWatchClicked(void)));
+	dup_btn->setEnabled(false);
 
 	sep_btn = new QPushButton( tr("Separator") );
 	vbox->addWidget( sep_btn );
+	sep_btn->setEnabled(true);
+	connect( sep_btn, SIGNAL(clicked(void)), this, SLOT(sepWatchClicked(void)));
 
 	mainLayout->addWidget( tree  );
 	mainLayout->addLayout( vbox1 );
@@ -246,6 +258,8 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	cht_btn = new QPushButton( tr("Add Cheat") );
 	vbox1->addWidget( cht_btn );
+	cht_btn->setEnabled(false);
+	connect( cht_btn, SIGNAL(clicked(void)), this, SLOT(addCheatClicked(void)));
 
 	setLayout( mainLayout );
 
@@ -279,6 +293,26 @@ void RamWatchDialog_t::closeWindow(void)
 //----------------------------------------------------------------------------
 void RamWatchDialog_t::periodicUpdate(void)
 {
+	bool buttonEnable;
+	QTreeWidgetItem *item;
+
+	item = tree->currentItem();
+
+	if ( item == NULL )
+	{
+		buttonEnable = false;
+	}
+	else
+	{
+		buttonEnable = true;
+	}
+	up_btn->setEnabled(buttonEnable);
+	down_btn->setEnabled(buttonEnable);
+	edit_btn->setEnabled(buttonEnable);
+	del_btn->setEnabled(buttonEnable);
+	dup_btn->setEnabled(buttonEnable);
+	cht_btn->setEnabled(buttonEnable);
+
 
 	updateRamWatchDisplay();
 
@@ -304,45 +338,60 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 
 			tree->addTopLevelItem( item );
 		}
-		sprintf (addrStr, "$%04X", rw->addr);
-
-		rw->updateMem ();
-
-		if (rw->size == 4)
+		if ( rw->isSep || (rw->addr < 0) )
 		{
-			if (rw->type)
-			{
-				sprintf (valStr1, "%u", rw->val.u32);
-			}
-			else
-			{
-				sprintf (valStr1, "%i", rw->val.i32);
-			}
-			sprintf (valStr2, "0x%08X", rw->val.u32);
-		}
-		else if (rw->size == 2)
-		{
-			if (rw->type)
-			{
-				sprintf (valStr1, "%6u", rw->val.u16);
-			}
-			else
-			{
-				sprintf (valStr1, "%6i", rw->val.i16);
-			}
-			sprintf (valStr2, "0x%04X", rw->val.u16);
+			strcpy (addrStr, "--------");
 		}
 		else
 		{
-			if (rw->type)
-			{
-				sprintf (valStr1, "%6u", rw->val.u8);
-			}
-			else
-			{
-				sprintf (valStr1, "%6i", rw->val.i8);
-			}
-			sprintf (valStr2, "0x%02X", rw->val.u8);
+			sprintf (addrStr, "$%04X", rw->addr);
+		}
+
+		rw->updateMem ();
+
+		if ( rw->isSep || (rw->addr < 0) )
+		{
+			strcpy( valStr1, "--------");
+			strcpy( valStr2, "--------");
+		}
+		else
+		{
+		   if (rw->size == 4)
+		   {
+		   	if (rw->type)
+		   	{
+		   		sprintf (valStr1, "%u", rw->val.u32);
+		   	}
+		   	else
+		   	{
+		   		sprintf (valStr1, "%i", rw->val.i32);
+		   	}
+		   	sprintf (valStr2, "0x%08X", rw->val.u32);
+		   }
+		   else if (rw->size == 2)
+		   {
+		   	if (rw->type)
+		   	{
+		   		sprintf (valStr1, "%6u", rw->val.u16);
+		   	}
+		   	else
+		   	{
+		   		sprintf (valStr1, "%6i", rw->val.i16);
+		   	}
+		   	sprintf (valStr2, "0x%04X", rw->val.u16);
+		   }
+		   else
+		   {
+		   	if (rw->type)
+		   	{
+		   		sprintf (valStr1, "%6u", rw->val.u8);
+		   	}
+		   	else
+		   	{
+		   		sprintf (valStr1, "%6i", rw->val.i8);
+		   	}
+		   	sprintf (valStr2, "0x%02X", rw->val.u8);
+		   }
 		}
 
 		item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren );
@@ -369,8 +418,228 @@ void 	RamWatchDialog_t::watchClicked( QTreeWidgetItem *item, int column)
 
 }
 //----------------------------------------------------------------------------
+void RamWatchDialog_t::newListCB(void)
+{
+	ramWatchList.clear();
+	tree->clear();
+	tree->viewport()->update();
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::openListCB(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	const char *romFile = NULL;
+	QFileDialog  dialog(this, tr("Open Watch File") );
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("Watch files (*.wch *.WCH) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
+
+	//g_config->getOption ("SDL.LastOpenFile", &last );
+
+	romFile = getRomFile();
+
+	if ( romFile != NULL )
+	{
+		char dir[512], base[256];
+
+		parseFilepath( romFile, dir, base );
+
+		strcat( base, ".wch");
+
+		dialog.setDirectory( tr(dir) );
+
+		dialog.selectFile( tr(base) );
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+   if ( filename.isNull() )
+   {
+      return;
+   }
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	loadWatchFile ( filename.toStdString().c_str() );
+
+   return;
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::appendListCB(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	const char *romFile = NULL;
+	QFileDialog  dialog(this, tr("Append Watch List To File") );
+
+	if ( ramWatchList.size() == 0 )
+	{
+		return;
+	}
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("Watch Files (*.wch *.WCH) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+	dialog.setDefaultSuffix( tr(".wch") );
+
+	romFile = getRomFile();
+
+	if ( romFile != NULL )
+	{
+		char dir[512], base[256];
+
+		parseFilepath( romFile, dir, base );
+
+		strcat( base, ".wch");
+
+		dialog.setDirectory( tr(dir) );
+
+		dialog.selectFile( tr(base) );
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+   {
+      return;
+   }
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	saveWatchFile( filename.toStdString().c_str(), 1 );
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::saveListCB(void)
+{
+	if ( ramWatchList.size() == 0 )
+	{
+		return;
+	}
+
+	if ( saveFileName.size() > 0 )
+	{
+		char file[512];
+
+		strcpy( file, saveFileName.c_str() );
+
+		saveWatchFile( file );
+	}
+	else
+	{
+		saveListAs();
+	}
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::saveListAs(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	const char *romFile = NULL;
+	QFileDialog  dialog(this, tr("Save Watch List To File") );
+
+	if ( ramWatchList.size() == 0 )
+	{
+		return;
+	}
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("Watch Files (*.wch *.WCH) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+	dialog.setDefaultSuffix( tr(".wch") );
+
+	romFile = getRomFile();
+
+	if ( romFile != NULL )
+	{
+		char dir[512], base[256];
+
+		parseFilepath( romFile, dir, base );
+
+		strcat( base, ".wch");
+
+		dialog.setDirectory( tr(dir) );
+
+		dialog.selectFile( tr(base) );
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+   {
+      return;
+   }
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	saveWatchFile( filename.toStdString().c_str() );
+}
+//----------------------------------------------------------------------------
 void ramWatch_t::updateMem (void)
 {
+	if ( addr < 0 )
+	{
+		return;
+	}
 	if (size == 1)
 	{
 		val.u8 = GetMem (addr);
@@ -385,9 +654,9 @@ void ramWatch_t::updateMem (void)
 	}
 }
 //----------------------------------------------------------------------------
-void RamWatchDialog_t::openWatchEditWindow(int idx)
+void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 {
-	int ret;
+	int ret, isSep = 0;
 	QDialog dialog(this);
 	QVBoxLayout *mainLayout, *vbox;
 	QHBoxLayout *hbox;
@@ -397,12 +666,6 @@ void RamWatchDialog_t::openWatchEditWindow(int idx)
 	QRadioButton *signedTypeBtn, *unsignedTypeBtn;
 	QRadioButton *dataSize1Btn, *dataSize2Btn, *dataSize4Btn;
 	QPushButton *cancelButton, *okButton;
-	ramWatch_t *rw = NULL;
-
-	if ( idx >= 0 )
-	{
-		rw = ramWatchList.getIndex(idx);
-	}
 
 	if ( rw == NULL )
 	{
@@ -422,7 +685,7 @@ void RamWatchDialog_t::openWatchEditWindow(int idx)
 	addrEntry = new QLineEdit();
 
 	addrEntry->setMaxLength(4);
-	addrEntry->setInputMask( ">HHHH;0" );
+	addrEntry->setInputMask( ">HHHH;" );
 	addrEntry->setCursorPosition(0);
 
 	mainLayout->addLayout( hbox );
@@ -480,8 +743,17 @@ void RamWatchDialog_t::openWatchEditWindow(int idx)
 	{
 		char stmp[64];
 
-		sprintf( stmp, "%04X", rw->addr );
-		addrEntry->setText( tr(stmp) );
+		isSep = rw->isSep;
+
+		if ( (rw->addr >= 0) && !rw->isSep )
+		{
+			sprintf( stmp, "%04X", rw->addr );
+			addrEntry->setText( tr(stmp) );
+		}
+		else
+		{
+			addrEntry->setEnabled(false);
+		}
 		notesEntry->setText( tr(rw->name.c_str()) );
 	   signedTypeBtn->setChecked( !rw->type );
 	   unsignedTypeBtn->setChecked( rw->type );
@@ -519,28 +791,25 @@ void RamWatchDialog_t::openWatchEditWindow(int idx)
 			size = 1;
 		}	
 
-		if ( rw == NULL )
+		if ( (rw == NULL) || mode )
 		{
 			ramWatchList.add_entry( notesEntry->text().toStdString().c_str(), 
-				addr, unsignedTypeBtn->isChecked(), size );
+				addr, unsignedTypeBtn->isChecked(), size, isSep);
 		}
 		else 
 		{
-			rw->name = notesEntry->text().toStdString();
-			rw->type = unsignedTypeBtn->isChecked();
-			rw->addr = addr;
-			rw->size = size;
+			rw->name  = notesEntry->text().toStdString();
+			rw->type  = unsignedTypeBtn->isChecked();
+			rw->addr  = addr;
+			rw->size  = size;
+			rw->isSep = isSep;
 		}
 	}
 }
 //----------------------------------------------------------------------------
-void RamWatchDialog_t::newWatchClicked(void)
+void RamWatchDialog_t::addCheatClicked(void)
 {
-	openWatchEditWindow();
-}
-//----------------------------------------------------------------------------
-void RamWatchDialog_t::editWatchClicked(void)
-{
+	ramWatch_t *rw = NULL;
 	QTreeWidgetItem *item;
 
 	item = tree->currentItem();
@@ -552,7 +821,72 @@ void RamWatchDialog_t::editWatchClicked(void)
 	}
 	int row = tree->indexOfTopLevelItem(item);
 
-	openWatchEditWindow(row);
+	if ( row >= 0 )
+	{
+		rw = ramWatchList.getIndex(row);
+	}
+
+	if ( rw != NULL )
+	{
+		FCEUI_AddCheat( rw->name.c_str(), rw->addr, GetMem(rw->addr), -1, 1 );
+	}
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::newWatchClicked(void)
+{
+	openWatchEditWindow();
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::sepWatchClicked(void)
+{
+	ramWatch_t rw;
+
+	rw.addr  = -1;
+	rw.isSep =  1;
+
+	openWatchEditWindow( &rw, 1 );
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::editWatchClicked(void)
+{
+	ramWatch_t *rw = NULL;
+	QTreeWidgetItem *item;
+
+	item = tree->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+	int row = tree->indexOfTopLevelItem(item);
+
+	if ( row >= 0 )
+	{
+		rw = ramWatchList.getIndex(row);
+	}
+	openWatchEditWindow(rw, 0);
+}
+//----------------------------------------------------------------------------
+void RamWatchDialog_t::dupWatchClicked(void)
+{
+	ramWatch_t *rw = NULL;
+	QTreeWidgetItem *item;
+
+	item = tree->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+	int row = tree->indexOfTopLevelItem(item);
+
+	if ( row >= 0 )
+	{
+		rw = ramWatchList.getIndex(row);
+	}
+	openWatchEditWindow(rw, 1);
 }
 //----------------------------------------------------------------------------
 void RamWatchDialog_t::removeWatchClicked(void)
@@ -576,7 +910,14 @@ void RamWatchDialog_t::removeWatchClicked(void)
 
 	if ( row > 0 )
 	{
-		item = tree->topLevelItem( row-1 );
+		if ( row >= tree->topLevelItemCount() ) 
+		{
+			item = tree->topLevelItem( tree->topLevelItemCount()-1 );
+		}
+		else
+		{
+			item = tree->topLevelItem( row );
+		}
 	}
 	else
 	{
@@ -605,6 +946,7 @@ void RamWatchDialog_t::moveWatchUpClicked(void)
 
 	if ( row > 0 )
 	{
+		ramWatchList.moveIndexUp(row);
 		item = tree->topLevelItem( row-1 );
 
 		if ( item )
@@ -630,6 +972,8 @@ void RamWatchDialog_t::moveWatchDownClicked(void)
 
 	if ( row < (tree->topLevelItemCount()-1) )
 	{
+	   ramWatchList.moveIndexDown(row);
+
 		item = tree->topLevelItem( row+1 );
 
 		if ( item )
@@ -640,21 +984,24 @@ void RamWatchDialog_t::moveWatchDownClicked(void)
 	}
 }
 //----------------------------------------------------------------------------
-void RamWatchDialog_t::saveWatchFile (const char *filename)
+void RamWatchDialog_t::saveWatchFile (const char *filename, int append )
 {
 	int i;
 	FILE *fp;
-	const char *c;
+	const char *c, *mode;
 	std::list < ramWatch_t * >::iterator it;
 	ramWatch_t *rw;
 
-	fp = fopen (filename, "w");
+	mode = (append) ? "a" : "w";
+
+	fp = fopen (filename, mode);
 
 	if (fp == NULL)
 	{
 		printf ("Error: Failed to open file: %s\n", filename);
 		return;
 	}
+	saveFileName.assign( filename );
 
 	for (it = ramWatchList.ls.begin (); it != ramWatchList.ls.end (); it++)
 	{
@@ -662,8 +1009,15 @@ void RamWatchDialog_t::saveWatchFile (const char *filename)
 
 		c = rw->name.c_str ();
 
-		fprintf (fp, "0x%04x   %c%i   ", rw->addr, rw->type ? 'U' : 'S',
-			 rw->size);
+		if ( rw->isSep )
+		{
+			fprintf (fp, "0x%04x   %c%c   ", rw->addr, 'S', 'S' );
+		}
+		else
+		{
+			fprintf (fp, "0x%04x   %c%i   ", rw->addr, rw->type ? 'U' : 'S',
+				 rw->size);
+		}
 
 		i = 0;
 		fprintf (fp, "\"");
@@ -688,7 +1042,7 @@ void RamWatchDialog_t::saveWatchFile (const char *filename)
 void RamWatchDialog_t::loadWatchFile (const char *filename)
 {
 	FILE *fp;
-	int i, j, a, t, s, literal;
+	int i, j, a, t, s, isSep, literal;
 	char line[512], stmp[512];
 	ramWatch_t *rw;
 
@@ -699,12 +1053,14 @@ void RamWatchDialog_t::loadWatchFile (const char *filename)
 		printf ("Error: Failed to open file: %s\n", filename);
 		return;
 	}
+	saveFileName.assign( filename );
 
 	while (fgets (line, sizeof (line) - 1, fp) != NULL)
 	{
 		a = -1;
 		t = -1;
 		s = -1;
+		isSep = 0;
 		// Check for Comments
 		i = 0;
 		while (line[i] != 0)
@@ -775,12 +1131,19 @@ void RamWatchDialog_t::loadWatchFile (const char *filename)
 			printf ("Error: Invalid RAM Watch Byte Type: %c", t);
 			continue;
 		}
-		if (!isdigit (s))
+		if (!isdigit (s) && (s != 'S'))
 		{
 			printf ("Error: Invalid RAM Watch Byte Size: %c", s);
 			continue;
 		}
-		s = s - '0';
+		if (s == 'S')
+		{
+			isSep = 1; s = 1;
+		}
+		else
+		{
+			s = s - '0';
+		}
 
 		if ((s != 1) && (s != 2) && (s != 4))
 		{
@@ -823,16 +1186,15 @@ void RamWatchDialog_t::loadWatchFile (const char *filename)
 		}
 		rw = new ramWatch_t;
 
-		rw->addr = a;
-		rw->type = (t == 'U') ? 1 : 0;
-		rw->size = s;
+		rw->addr  = a;
+		rw->type  = (t == 'U') ? 1 : 0;
+		rw->size  = s;
+		rw->isSep = isSep;
 		rw->name.assign (stmp);
 
 		ramWatchList.ls.push_back (rw);
 	}
 
 	fclose (fp);
-
-	//showAllRamWatchResults (1);
 }
 //----------------------------------------------------------------------------

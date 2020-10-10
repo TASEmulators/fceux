@@ -25,6 +25,7 @@ struct ramWatch_t
 	int addr;
 	int type;
 	int size;
+	int isSep;
 
 	union
 	{
@@ -41,6 +42,7 @@ struct ramWatch_t
 		addr = 0;
 		type = 0;
 		size = 0;
+		isSep = 0;
 		val.u32 = 0;
 	};
 
@@ -76,14 +78,29 @@ struct ramWatchList_t
 		return ls.size ();
 	};
 
-	void add_entry (const char *name, int addr, int type, int size)
+	void clear(void)
+	{
+		ramWatch_t *rw;
+
+		while (!ls.empty ())
+		{
+			rw = ls.front ();
+
+			delete rw;
+
+			ls.pop_front ();
+		}
+	}
+
+	void add_entry (const char *name, int addr, int type, int size, int isSep = 0)
 	{
 		ramWatch_t *rw = new ramWatch_t;
 
 		rw->name.assign (name);
-		rw->addr = addr;
-		rw->type = type;
-		rw->size = size;
+		rw->addr  = addr;
+		rw->type  = type;
+		rw->size  = size;
+		rw->isSep = isSep;
 		ls.push_back (rw);
 	}
 
@@ -133,6 +150,51 @@ struct ramWatchList_t
 		}
 		return -1;
 	}
+
+	int moveIndexUp(size_t idx)
+	{
+		size_t i = 0;
+		std::list < ramWatch_t * >::iterator it, lp;
+		
+		lp = ls.begin();
+
+		for (it = ls.begin (); it != ls.end (); it++)
+		{
+			if (i == idx)
+			{
+				ls.insert( lp, *it );
+				ls.erase (it);
+				return 0;
+			}
+			lp = it;
+
+			i++;
+		}
+		return -1;
+	}
+
+	int moveIndexDown(size_t idx)
+	{
+		size_t i = 0;
+		std::list < ramWatch_t * >::iterator it, next;
+		
+		for (it = ls.begin (); it != ls.end (); it++)
+		{
+			if (i == idx)
+			{
+				next = it; next++;
+
+				if ( next != ls.end() )
+				{
+					ls.insert( it, *next );
+					ls.erase (next);
+				}
+				return 0;
+			}
+			i++;
+		}
+		return -1;
+	}
 };
 
 class RamWatchDialog_t : public QDialog
@@ -146,7 +208,7 @@ class RamWatchDialog_t : public QDialog
 	protected:
 		void closeEvent(QCloseEvent *event);
 		void loadWatchFile (const char *filename);
-		void saveWatchFile (const char *filename);
+		void saveWatchFile (const char *filename, int append = 0);
 
 		QFont        font;
 		QTreeWidget *tree;
@@ -160,19 +222,29 @@ class RamWatchDialog_t : public QDialog
 		QPushButton *cht_btn;
 		QTimer      *updateTimer;
 
-		ramWatchList_t ramWatchList;
+		std::string  saveFileName;
+
+		//ramWatchList_t ramWatchList;
 
 		int  fontCharWidth;
 
 	private:
 		void updateRamWatchDisplay(void);
-		void openWatchEditWindow( int idx = -1);
+		void openWatchEditWindow( ramWatch_t *rw = NULL, int mode = 0);
 
    public slots:
       void closeWindow(void);
 	private slots:
+		void newListCB(void);
+		void openListCB(void);
+		void saveListCB(void);
+		void saveListAs(void);
+		void appendListCB(void);
 		void periodicUpdate(void);
+		void addCheatClicked(void);
 		void newWatchClicked(void);
+		void sepWatchClicked(void);
+		void dupWatchClicked(void);
 		void editWatchClicked(void);
 		void removeWatchClicked(void);
 		void moveWatchUpClicked(void);
@@ -180,3 +252,5 @@ class RamWatchDialog_t : public QDialog
 		void watchClicked( QTreeWidgetItem *item, int column);
 
 };
+
+extern ramWatchList_t ramWatchList;

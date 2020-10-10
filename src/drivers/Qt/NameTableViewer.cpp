@@ -44,7 +44,9 @@ static class NTCache
 public:
 	NTCache(void) 
 		: curr_vnapage(0)
-	{}
+	{
+		memset( cache, 0, sizeof(cache) );
+	}
 
 	uint8_t* curr_vnapage;
 	uint8_t cache[0x400];
