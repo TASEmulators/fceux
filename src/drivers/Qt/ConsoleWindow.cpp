@@ -1048,13 +1048,8 @@ void consoleWin_t::openRamWatch(void)
 
 void consoleWin_t::openRamSearch(void)
 {
-	RamSearchDialog_t *ramSearchWin;
-
 	//printf("Open GUI RAM Search Window\n");
-	
-   ramSearchWin = new RamSearchDialog_t(this);
-	
-   ramSearchWin->show();
+	openRamSearchWindow(this);
 }
 
 void consoleWin_t::openDebugWindow(void)

@@ -87,3 +87,4 @@ class RamSearchDialog_t : public QDialog
 
 };
 
+void openRamSearchWindow(QWidget *parent);
