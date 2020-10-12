@@ -15,10 +15,47 @@
 #include <QLabel>
 #include <QFrame>
 #include <QGroupBox>
-#include <QTreeView>
-#include <QTreeWidget>
+#include <QScrollBar>
 
 #include "Qt/main.h"
+
+class QRamSearchView : public QWidget
+{
+	Q_OBJECT
+
+	public:
+		QRamSearchView(QWidget *parent = 0);
+		~QRamSearchView(void);
+
+		void setScrollBars( QScrollBar *hbar, QScrollBar *vbar );
+
+	protected:
+		void paintEvent(QPaintEvent *event);
+		//void keyPressEvent(QKeyEvent *event);
+   	//void keyReleaseEvent(QKeyEvent *event);
+		//void mousePressEvent(QMouseEvent * event);
+		void resizeEvent(QResizeEvent *event);
+
+		void calcFontData(void);
+
+		QFont       font;
+		QScrollBar *vbar;
+		QScrollBar *hbar;
+
+		int  lineOffset;
+		int  maxLineOffset;
+		int  pxCharWidth;
+		int  pxCharHeight;
+		int  pxLineSpacing;
+		int  pxLineLead;
+		int  pxCursorHeight;
+		int  pxLineXScroll;
+		int  pxLineWidth;
+		int  pxColWidth[4];
+		int  viewLines;
+		int  viewWidth;
+		int  viewHeight;
+};
 
 class RamSearchDialog_t : public QDialog
 {
@@ -31,8 +68,9 @@ class RamSearchDialog_t : public QDialog
 	protected:
 		void closeEvent(QCloseEvent *event);
 
-		QFont        font;
-		QTreeWidget *tree;
+		QRamSearchView *ramView;
+		QScrollBar  *vbar;
+		QScrollBar  *hbar;
 		QTimer      *updateTimer;
 		QPushButton *searchButton;
 		QPushButton *resetButton;
@@ -84,9 +122,9 @@ class RamSearchDialog_t : public QDialog
 	private slots:
 		void runSearch(void);
 		void resetSearch(void);
-		void refreshRamList(void);
 		void periodicUpdate(void);
-		//void watchClicked( QTreeWidgetItem *item, int column);
+		void hbarChanged(int val);
+		void vbarChanged(int val);
 
 };
 

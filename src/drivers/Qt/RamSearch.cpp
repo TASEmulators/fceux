@@ -16,6 +16,7 @@
 #include <QLineEdit>
 #include <QRadioButton>
 #include <QFileDialog>
+#include <QPainter>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -97,21 +98,8 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3;
 	QVBoxLayout *vbox, *vbox1, *vbox2;
-	QTreeWidgetItem *item;
 	QGridLayout *grid;
 	QGroupBox *frame;
-
-	font.setFamily("Courier New");
-	font.setStyle( QFont::StyleNormal );
-	font.setStyleHint( QFont::Monospace );
-
-	QFontMetrics fm(font);
-
-#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
-    fontCharWidth = 2 * fm.horizontalAdvance(QLatin1Char('2'));
-#else
-    fontCharWidth = 2 * fm.width(QLatin1Char('2'));
-#endif
 
 	setWindowTitle("RAM Search");
 
@@ -122,30 +110,27 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 
 	mainLayout->addLayout( hbox1 );
 
-	tree = new QTreeWidget();
+	grid    = new QGridLayout();
+	ramView = new QRamSearchView(this);
+	vbar    = new QScrollBar( Qt::Vertical, this );
+	hbar    = new QScrollBar( Qt::Horizontal, this );
+	grid->addWidget( ramView, 0, 0 );
+	grid->addWidget( vbar   , 0, 1 );
+	grid->addWidget( hbar   , 1, 0 );
 
-	tree->setColumnCount(4);
+	connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
+   connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
 
-	item = new QTreeWidgetItem();
-	item->setText( 0, QString::fromStdString( "Address" ) );
-	item->setText( 1, QString::fromStdString( "Value" ) );
-	item->setText( 2, QString::fromStdString( "Previous" ) );
-	item->setText( 3, QString::fromStdString( "Changes" ) );
-	item->setTextAlignment( 0, Qt::AlignLeft);
-	item->setTextAlignment( 1, Qt::AlignLeft);
-	item->setTextAlignment( 2, Qt::AlignLeft);
-	item->setTextAlignment( 3, Qt::AlignLeft);
-
-	//connect( tree, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
-	//		   this, SLOT(watchClicked( QTreeWidgetItem*, int)) );
-
-	tree->setHeaderItem( item );
-
-	//tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+	ramView->setScrollBars( hbar, vbar );
+	hbar->setMinimum(0);
+	hbar->setMaximum(100);
+	vbar->setMinimum(0);
+	vbar->setMaximum(0x8000);
+   vbar->setValue(0);
 
 	vbox  = new QVBoxLayout();
-	hbox1->addWidget( tree  );
-	hbox1->addLayout( vbox  );
+	hbox1->addLayout( grid, 100);
+	hbox1->addLayout( vbox, 1  );
 
 	searchButton = new QPushButton( tr("Search") );
 	vbox->addWidget( searchButton );
@@ -339,7 +324,19 @@ void RamSearchDialog_t::closeWindow(void)
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::periodicUpdate(void)
 {
-	refreshRamList();
+	//refreshRamList();
+	
+	ramView->update();
+}
+//----------------------------------------------------
+void RamSearchDialog_t::hbarChanged(int val)
+{
+   ramView->update();
+}
+//----------------------------------------------------
+void RamSearchDialog_t::vbarChanged(int val)
+{
+   ramView->update();
 }
 //----------------------------------------------------------------------------
 static unsigned int ReadValueAtHardwareAddress(int address, unsigned int size)
@@ -378,34 +375,191 @@ void RamSearchDialog_t::resetSearch(void)
 	}
 	iterMask = 0x01;
 
-	refreshRamList();
+	//refreshRamList();
 }
 //----------------------------------------------------------------------------
-void RamSearchDialog_t::refreshRamList(void)
+QRamSearchView::QRamSearchView(QWidget *parent)
+	: QWidget(parent)
 {
-	int idx=0;
-	QTreeWidgetItem *item;
+	QPalette pal;
+	QColor fg(0,0,0), bg(255,255,255);
+
+	pal = this->palette();
+	pal.setColor(QPalette::Base      , bg );
+	pal.setColor(QPalette::Background, bg );
+	pal.setColor(QPalette::WindowText, fg );
+	this->setPalette(pal);
+
+	font.setFamily("Courier New");
+	font.setStyle( QFont::StyleNormal );
+	font.setStyleHint( QFont::Monospace );
+
+	calcFontData();
+
+	lineOffset = 0;
+	maxLineOffset = 0;
+}
+//----------------------------------------------------------------------------
+QRamSearchView::~QRamSearchView(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void QRamSearchView::calcFontData(void)
+{
+	this->setFont(font);
+    QFontMetrics metrics(font);
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+    pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
+#else
+    pxCharWidth = metrics.width(QLatin1Char('2'));
+#endif
+    pxCharHeight   = metrics.height();
+	 pxLineSpacing  = metrics.lineSpacing() * 1.25;
+    pxLineLead     = pxLineSpacing - pxCharHeight;
+    pxCursorHeight = pxCharHeight;
+	 pxColWidth[0]  = pxCharWidth * 10;
+	 pxColWidth[1]  = pxCharWidth * 15;
+	 pxColWidth[2]  = pxCharWidth * 15;
+	 pxColWidth[3]  = pxCharWidth * 15;
+	 pxLineWidth    = pxColWidth[0] + pxColWidth[1] + pxColWidth[2] + pxColWidth[3];
+
+	 viewLines   = (viewHeight / pxLineSpacing) + 1;
+}
+//----------------------------------------------------------------------------
+void QRamSearchView::setScrollBars( QScrollBar *hbar, QScrollBar *vbar )
+{
+	this->hbar = hbar; this->vbar = vbar;
+}
+//----------------------------------------------------
+void QRamSearchView::resizeEvent(QResizeEvent *event)
+{
+	viewWidth  = event->size().width();
+	viewHeight = event->size().height();
+
+	//printf("QAsmView Resize: %ix%i\n", viewWidth, viewHeight );
+
+	viewLines = (viewHeight / pxLineSpacing) + 1;
+
+	//maxLineOffset = 0; // mb.numLines() - viewLines + 1;
+
+	if ( viewWidth >= pxLineWidth )
+	{
+		pxLineXScroll = 0;
+	}
+	else
+	{
+		pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth) );
+	}
+
+}
+//----------------------------------------------------------------------------
+void QRamSearchView::paintEvent(QPaintEvent *event)
+{
+   int i,x,y, v, ofs, row, start, end, nrow;
 	std::list <struct memoryLocation_t*>::iterator it;
 	char addrStr[32], valStr[32], prevStr[32], chgStr[32];
-	memoryLocation_t *loc;
+	QPainter painter(this);
+   char line[256];
+  	memoryLocation_t *loc = NULL;
+	int fieldWidth, fieldPad[4], fieldLen[4], fieldStart[4];
+	const char *fieldText[4];
 
-	for (it=actvSrchList.begin(); it != actvSrchList.end(); it++)
+	painter.setFont(font);
+	viewWidth  = event->rect().width();
+	viewHeight = event->rect().height();
+	fieldWidth = viewWidth / 4;
+	
+	for (i=0; i<4; i++)
 	{
-		loc = *it;
+		fieldStart[i] = fieldWidth * i;
+	}
 
-		item = tree->topLevelItem(idx);
+	nrow = (viewHeight / pxLineSpacing)-1;
 
-		if ( item == NULL )
+	if (nrow < 1 ) nrow = 1;
+
+   viewLines = nrow;
+
+	maxLineOffset = actvSrchList.size() - nrow;
+
+	if ( maxLineOffset < 1 ) maxLineOffset = 1;
+
+	lineOffset = vbar->value();
+
+	if ( lineOffset > maxLineOffset )
+	{
+		lineOffset = maxLineOffset;
+		vbar->setValue( lineOffset );
+	}
+	if ( lineOffset < 0 )
+	{
+		lineOffset = 0;
+		vbar->setValue( 0 );
+	}
+
+	i=0;
+	it = actvSrchList.begin();
+	while ( it != actvSrchList.end() )
+	{
+		if ( i == lineOffset )
 		{
-			item = new QTreeWidgetItem();
-
-			tree->addTopLevelItem( item );
-
-			item->setFont( 0, font);
-			item->setFont( 1, font);
-			item->setFont( 2, font);
-			item->setFont( 3, font);
+			break;
 		}
+		i++; it++;
+	}
+
+   painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Background) );
+
+   painter.setPen( this->palette().color(QPalette::WindowText));
+
+	pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth) );
+
+	x = -pxLineXScroll;
+	y =  pxLineSpacing;
+
+	strcpy( addrStr, "Address");
+	strcpy( valStr , "Value");
+	strcpy( prevStr, "Previous");
+	strcpy( chgStr , "Changes");
+
+	fieldText[0] = addrStr;
+	fieldText[1] = valStr;
+	fieldText[2] = prevStr;
+	fieldText[3] = chgStr;
+
+	for (i=0; i<4; i++)
+	{
+		fieldLen[i] = strlen(fieldText[i]) * pxCharWidth;
+
+		fieldPad[i] = (fieldWidth - fieldLen[i]) / 2;
+
+		painter.drawText( x+fieldStart[i]+fieldPad[i], y, tr(fieldText[i]) );
+
+	}
+	painter.drawLine( 0, y+pxLineLead, viewWidth, y+pxLineLead );
+	painter.drawLine( x+fieldStart[1], 0, x+fieldStart[1], viewHeight );
+	painter.drawLine( x+fieldStart[2], 0, x+fieldStart[2], viewHeight );
+	painter.drawLine( x+fieldStart[3], 0, x+fieldStart[3], viewHeight );
+
+	y += pxLineSpacing;
+
+	for (row=0; row<nrow; row++)
+	{
+		if ( it != actvSrchList.end() )
+		{
+			loc = *it;
+		}
+		else
+		{
+			loc = NULL;
+		}
+
+		if ( loc == NULL )
+		{
+			continue;
+		}
+		it++;
 
 		sprintf (addrStr, "$%04X", loc->addr);
 
@@ -465,19 +619,17 @@ void RamSearchDialog_t::refreshRamList(void)
 		}
 		sprintf( chgStr, "%i", loc->chgCount );
 
-		item->setText( 0, tr(addrStr) );
-		item->setText( 1, tr(valStr)  );
-		item->setText( 2, tr(prevStr) );
-		item->setText( 3, tr(chgStr)  );
 
+		for (i=0; i<4; i++)
+		{
+			fieldLen[i] = strlen(fieldText[i]) * pxCharWidth;
 
-		item->setTextAlignment( 0, Qt::AlignLeft);
-		item->setTextAlignment( 1, Qt::AlignCenter);
-		item->setTextAlignment( 2, Qt::AlignCenter);
-		item->setTextAlignment( 3, Qt::AlignCenter);
+			fieldPad[i] = (fieldWidth - fieldLen[i]) / 2;
 
-		idx++;
+			painter.drawText( x+fieldStart[i]+fieldPad[i], y, tr(fieldText[i]) );
+		}
+
+		y += pxLineSpacing;
 	}
-
 }
 //----------------------------------------------------------------------------
