@@ -72,12 +72,13 @@ struct memoryLocation_t
 		chgCount = 0; elimMask = 0;
 	}
 };
-static struct memoryLocation_t  memLoc[0x8000];
+static struct memoryLocation_t  memLoc[0x10000];
 
 static std::list <struct memoryLocation_t*> actvSrchList;
 
 static int dpySize = 'b';
 static int dpyType = 's';
+static bool  chkMisAligned = false;
 
 //----------------------------------------------------------------------------
 void openRamSearchWindow( QWidget *parent )
@@ -125,7 +126,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	hbar->setMinimum(0);
 	hbar->setMaximum(100);
 	vbar->setMinimum(0);
-	vbar->setMaximum(0x8000);
+	vbar->setMaximum(ShowROM ? 0x10000 : 0x8000);
    vbar->setValue(0);
 
 	vbox  = new QVBoxLayout();
@@ -135,32 +136,29 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	searchButton = new QPushButton( tr("Search") );
 	vbox->addWidget( searchButton );
 	connect( searchButton, SIGNAL(clicked(void)), this, SLOT(runSearch(void)));
-	//searchButton->setEnabled(false);
 
 	resetButton = new QPushButton( tr("Reset") );
 	vbox->addWidget( resetButton );
 	connect( resetButton, SIGNAL(clicked(void)), this, SLOT(resetSearch(void)));
-	//down_btn->setEnabled(false);
 
 	clearChangeButton = new QPushButton( tr("Clear Change") );
 	vbox->addWidget( clearChangeButton );
-	//connect( clearChangeButton, SIGNAL(clicked(void)), this, SLOT(editWatchClicked(void)));
-	//clearChangeButton->setEnabled(false);
+	connect( clearChangeButton, SIGNAL(clicked(void)), this, SLOT(clearChangeCounts(void)));
 
-	undoButton = new QPushButton( tr("Remove") );
+	undoButton = new QPushButton( tr("Undo") );
 	vbox->addWidget( undoButton );
 	//connect( undoButton, SIGNAL(clicked(void)), this, SLOT(removeWatchClicked(void)));
 	//undoButton->setEnabled(false);
 	
 	searchROMCbox = new QCheckBox( tr("Search ROM") );
 	vbox->addWidget( searchROMCbox );
-	//connect( undoButton, SIGNAL(clicked(void)), this, SLOT(removeWatchClicked(void)));
-	//undoButton->setEnabled(false);
+	searchROMCbox->setChecked( ShowROM );
+	connect( searchROMCbox, SIGNAL(stateChanged(int)), this, SLOT(searchROMChanged(int)));
 
 	elimButton = new QPushButton( tr("Eliminate") );
 	vbox->addWidget( elimButton );
 	//connect( elimButton, SIGNAL(clicked(void)), this, SLOT(newWatchClicked(void)));
-	//elimButton->setEnabled(false);
+	elimButton->setEnabled(false);
 
 	watchButton = new QPushButton( tr("Watch") );
 	vbox->addWidget( watchButton );
@@ -253,9 +251,17 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	ds2_btn = new QRadioButton( tr("2 Byte") );
 	ds4_btn = new QRadioButton( tr("4 Byte") );
 	misalignedCbox = new QCheckBox( tr("Check Misaligned") );
-	misalignedCbox->setEnabled(false);
+	misalignedCbox->setEnabled(dpySize != 'b');
+	misalignedCbox->setChecked(chkMisAligned);
+	connect( misalignedCbox, SIGNAL(stateChanged(int)), this, SLOT(misalignedChanged(int)));
 
-	ds1_btn->setChecked(true);
+	ds1_btn->setChecked( dpySize == 'b' );
+	ds2_btn->setChecked( dpySize == 'w' );
+	ds4_btn->setChecked( dpySize == 'd' );
+
+	connect( ds1_btn, SIGNAL(clicked(void)), this, SLOT(ds1Clicked(void)));
+	connect( ds2_btn, SIGNAL(clicked(void)), this, SLOT(ds2Clicked(void)));
+	connect( ds4_btn, SIGNAL(clicked(void)), this, SLOT(ds4Clicked(void)));
 
 	vbox->addWidget( ds1_btn );
 	vbox->addWidget( ds2_btn );
@@ -276,7 +282,14 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	vbox->addWidget( signed_btn );
 	vbox->addWidget( unsigned_btn );
 	vbox->addWidget( hex_btn );
-	signed_btn->setChecked(true);
+
+	signed_btn->setChecked( dpyType == 's' );
+	unsigned_btn->setChecked( dpyType == 'u' );
+	hex_btn->setChecked( dpyType == 'h' );
+
+	connect( signed_btn  , SIGNAL(clicked(void)), this, SLOT(signedTypeClicked(void)));
+	connect( unsigned_btn, SIGNAL(clicked(void)), this, SLOT(unsignedTypeClicked(void)));
+	connect( hex_btn     , SIGNAL(clicked(void)), this, SLOT(hexTypeClicked(void)));
 
 	autoSearchCbox = new QCheckBox( tr("Auto-Search") );
 	autoSearchCbox->setEnabled(true);
@@ -324,7 +337,7 @@ void RamSearchDialog_t::closeWindow(void)
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::periodicUpdate(void)
 {
-	//refreshRamList();
+	updateRamValues();
 	
 	ramView->update();
 }
@@ -338,17 +351,33 @@ void RamSearchDialog_t::vbarChanged(int val)
 {
    ramView->update();
 }
+//----------------------------------------------------
+void RamSearchDialog_t::searchROMChanged(int state)
+{
+	ShowROM = (state != Qt::Unchecked);
+}
+//----------------------------------------------------
+void RamSearchDialog_t::misalignedChanged(int state)
+{
+	chkMisAligned = (state != Qt::Unchecked);
+
+	calcRamList();
+}
 //----------------------------------------------------------------------------
 static unsigned int ReadValueAtHardwareAddress(int address, unsigned int size)
 {
 	unsigned int value = 0;
+	int maxAddr = ShowROM ? 0x10000 : 0x8000;
 
 	// read as little endian
 	for (unsigned int i = 0; i < size; i++)
 	{
-		value <<= 8;
-		value |= GetMem(address);
-		address++;
+		if ( address < maxAddr )
+		{
+			value <<= 8;
+			value |= GetMem(address);
+			address++;
+		}
 	}
 	return value;
 }
@@ -361,7 +390,7 @@ void RamSearchDialog_t::resetSearch(void)
 {
 	actvSrchList.clear();
 
-	for (unsigned int addr=0; addr<0x08000; addr++)
+	for (unsigned int addr=0; addr<0x10000; addr++)
 	{
 		memLoc[addr].hist.clear();
 		memLoc[addr].addr      = addr;
@@ -369,13 +398,160 @@ void RamSearchDialog_t::resetSearch(void)
 		memLoc[addr].val.v16.u = ReadValueAtHardwareAddress(addr, 2);
 		memLoc[addr].val.v32.u = ReadValueAtHardwareAddress(addr, 4);
 		memLoc[addr].elimMask  = 0;
+		memLoc[addr].chgCount  = 0;
 		memLoc[addr].hist.push_back( memLoc[addr].val );
-
-		actvSrchList.push_back( &memLoc[addr] );
 	}
 	iterMask = 0x01;
 
-	//refreshRamList();
+	calcRamList();
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::clearChangeCounts(void)
+{
+	for (unsigned int addr=0; addr<0x10000; addr++)
+	{
+		memLoc[addr].chgCount  = 0;
+	}
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::ds1Clicked(void)
+{
+	dpySize = 'b';
+	misalignedCbox->setEnabled(false);
+	calcRamList();
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::ds2Clicked(void)
+{
+	dpySize = 'w';
+	misalignedCbox->setEnabled(true);
+	calcRamList();
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::ds4Clicked(void)
+{
+	dpySize = 'd';
+	misalignedCbox->setEnabled(true);
+	calcRamList();
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::signedTypeClicked(void)
+{
+	dpyType = 's';
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::unsignedTypeClicked(void)
+{
+	dpyType = 'u';
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::hexTypeClicked(void)
+{
+	dpyType = 'h';
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::calcRamList(void)
+{
+	int addr;
+	int dataSize = 1;
+	int endAddr = ShowROM ? 0x10000 : 0x8000;
+
+	if ( chkMisAligned )
+	{
+		dataSize = 1;
+	}
+	else if ( dpySize == 'd' )
+	{
+		dataSize = 4;
+	}
+	else if ( dpySize == 'w' )
+	{
+		dataSize = 2;
+	}
+	else 
+	{
+		dataSize = 1;
+	}
+
+	actvSrchList.clear();
+
+	for (addr=0; addr<endAddr; addr += dataSize)
+	{
+		switch ( dpySize )
+		{
+			case 'd':
+				if ( (addr+3) < endAddr )
+				{
+					if ( (memLoc[addr].elimMask == 0) &&
+					     (memLoc[addr+1].elimMask == 0)	&&
+					     (memLoc[addr+2].elimMask == 0)	&&
+					     (memLoc[addr+3].elimMask == 0)	)
+					{
+						actvSrchList.push_back( &memLoc[addr] );
+					}
+				}
+			break;
+			case 'w':
+				if ( (addr+1) < endAddr )
+				{
+					if ( (memLoc[addr].elimMask == 0) &&
+					     (memLoc[addr+1].elimMask == 0)	)
+					{
+						actvSrchList.push_back( &memLoc[addr] );
+					}
+				}
+			break;
+			default:
+			case 'b':
+				if ( memLoc[addr].elimMask == 0 )
+				{
+					actvSrchList.push_back( &memLoc[addr] );
+				}
+			break;
+		}
+	}
+	vbar->setMaximum( actvSrchList.size() );
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::updateRamValues(void)
+{
+	std::list <struct memoryLocation_t*>::iterator it;
+  	memoryLocation_t *loc = NULL;
+	memoryState_t  val;
+
+	for (it = actvSrchList.begin(); it != actvSrchList.end(); it++)
+	{
+		loc = *it;
+
+		val.v8.u  = GetMem(loc->addr);
+		val.v16.u = ReadValueAtHardwareAddress(loc->addr, 2);
+		val.v32.u = ReadValueAtHardwareAddress(loc->addr, 4);
+
+		if ( dpySize == 'd' )
+		{
+			if ( memLoc[loc->addr].val.v32.u != val.v32.u )
+			{
+				memLoc[loc->addr].val = val;
+				memLoc[loc->addr].chgCount++;
+			}
+		}
+		else if ( dpySize == 'w' )
+		{
+			if ( memLoc[loc->addr].val.v16.u != val.v16.u )
+			{
+				memLoc[loc->addr].val = val;
+				memLoc[loc->addr].chgCount++;
+			}
+		}
+		else 
+		{
+			if ( memLoc[loc->addr].val.v8.u != val.v8.u )
+			{
+				memLoc[loc->addr].val = val;
+				memLoc[loc->addr].chgCount++;
+			}
+		}
+	}
 }
 //----------------------------------------------------------------------------
 QRamSearchView::QRamSearchView(QWidget *parent)
@@ -456,11 +632,10 @@ void QRamSearchView::resizeEvent(QResizeEvent *event)
 //----------------------------------------------------------------------------
 void QRamSearchView::paintEvent(QPaintEvent *event)
 {
-   int i,x,y, v, ofs, row, start, end, nrow;
+   int i,x,y,row,nrow;
 	std::list <struct memoryLocation_t*>::iterator it;
 	char addrStr[32], valStr[32], prevStr[32], chgStr[32];
 	QPainter painter(this);
-   char line[256];
   	memoryLocation_t *loc = NULL;
 	int fieldWidth, fieldPad[4], fieldLen[4], fieldStart[4];
 	const char *fieldText[4];
@@ -535,7 +710,6 @@ void QRamSearchView::paintEvent(QPaintEvent *event)
 		fieldPad[i] = (fieldWidth - fieldLen[i]) / 2;
 
 		painter.drawText( x+fieldStart[i]+fieldPad[i], y, tr(fieldText[i]) );
-
 	}
 	painter.drawLine( 0, y+pxLineLead, viewWidth, y+pxLineLead );
 	painter.drawLine( x+fieldStart[1], 0, x+fieldStart[1], viewHeight );

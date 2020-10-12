@@ -116,15 +116,26 @@ class RamSearchDialog_t : public QDialog
 		int  fontCharWidth;
 
 	private:
+		void updateRamValues(void);
+		void calcRamList(void);
 
    public slots:
       void closeWindow(void);
 	private slots:
 		void runSearch(void);
 		void resetSearch(void);
+		void clearChangeCounts(void);
 		void periodicUpdate(void);
 		void hbarChanged(int val);
 		void vbarChanged(int val);
+		void searchROMChanged(int state);
+		void misalignedChanged(int state);
+		void ds1Clicked(void);
+		void ds2Clicked(void);
+		void ds4Clicked(void);
+		void signedTypeClicked(void);
+		void unsignedTypeClicked(void);
+		void hexTypeClicked(void);
 
 };
 
