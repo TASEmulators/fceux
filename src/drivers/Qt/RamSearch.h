@@ -114,6 +114,9 @@ class RamSearchDialog_t : public QDialog
 		QCheckBox    *autoSearchCbox;
 
 		int  fontCharWidth;
+		int  frameCounterLastPass;
+		unsigned int cycleCounter;
+
 
 	private:
 		void updateRamValues(void);

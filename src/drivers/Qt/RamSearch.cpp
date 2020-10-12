@@ -22,6 +22,7 @@
 #include "../../fceu.h"
 #include "../../cheat.h"
 #include "../../debug.h"
+#include "../../movie.h"
 
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -74,7 +75,9 @@ struct memoryLocation_t
 };
 static struct memoryLocation_t  memLoc[0x10000];
 
-static std::list <struct memoryLocation_t*> actvSrchList;
+static std::list <struct memoryLocation_t*>   actvSrchList;
+static std::list <struct memoryLocation_t*> deactvSrchList;
+static std::vector <int> deactvFrameStack;
 
 static int dpySize = 'b';
 static int dpyType = 's';
@@ -148,7 +151,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	undoButton = new QPushButton( tr("Undo") );
 	vbox->addWidget( undoButton );
 	//connect( undoButton, SIGNAL(clicked(void)), this, SLOT(removeWatchClicked(void)));
-	//undoButton->setEnabled(false);
+	undoButton->setEnabled(false);
 	
 	searchROMCbox = new QCheckBox( tr("Search ROM") );
 	vbox->addWidget( searchROMCbox );
@@ -297,22 +300,26 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 
 	setLayout( mainLayout );
 
+	cycleCounter = 0;
+
 	resetSearch();
 
 	updateTimer  = new QTimer( this );
 
    connect( updateTimer, &QTimer::timeout, this, &RamSearchDialog_t::periodicUpdate );
 
-	updateTimer->start( 100 ); // 10hz
+	updateTimer->start( 8 ); // ~120hz
 }
 //----------------------------------------------------------------------------
 RamSearchDialog_t::~RamSearchDialog_t(void)
 {
 	updateTimer->stop();
-	printf("Destroy RAM Watch Config Window\n");
+	printf("Destroy RAM Search Window\n");
 	ramSearchWin = NULL;
 
 	actvSrchList.clear();
+	deactvSrchList.clear();
+	deactvFrameStack.clear();
 
 	for (unsigned int addr=0; addr<0x08000; addr++)
 	{
@@ -322,7 +329,7 @@ RamSearchDialog_t::~RamSearchDialog_t(void)
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::closeEvent(QCloseEvent *event)
 {
-   printf("RAM Watch Close Window Event\n");
+   printf("RAM Search Close Window Event\n");
    done(0);
 	deleteLater();
    event->accept();
@@ -337,9 +344,18 @@ void RamSearchDialog_t::closeWindow(void)
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::periodicUpdate(void)
 {
-	updateRamValues();
+	if ( currFrameCounter != frameCounterLastPass )
+	{
+		updateRamValues();
+
+		frameCounterLastPass = currFrameCounter;
+	}
 	
-	ramView->update();
+	if ( (cycleCounter % 10) == 0)
+	{
+		ramView->update();
+	}
+	cycleCounter++;
 }
 //----------------------------------------------------
 void RamSearchDialog_t::hbarChanged(int val)
@@ -362,6 +378,15 @@ void RamSearchDialog_t::misalignedChanged(int state)
 	chkMisAligned = (state != Qt::Unchecked);
 
 	calcRamList();
+}
+//----------------------------------------------------------------------------
+static bool memoryAddrCompare( memoryLocation_t *loc1, memoryLocation_t *loc2 )
+{
+	return loc1->addr < loc2->addr;
+}
+static void sortActvMemList(void)
+{
+	actvSrchList.sort( memoryAddrCompare );
 }
 //----------------------------------------------------------------------------
 static unsigned int ReadValueAtHardwareAddress(int address, unsigned int size)
@@ -389,6 +414,8 @@ void RamSearchDialog_t::runSearch(void)
 void RamSearchDialog_t::resetSearch(void)
 {
 	actvSrchList.clear();
+	deactvSrchList.clear();
+	deactvFrameStack.clear();
 
 	for (unsigned int addr=0; addr<0x10000; addr++)
 	{
@@ -601,6 +628,8 @@ void QRamSearchView::calcFontData(void)
 	 pxLineWidth    = pxColWidth[0] + pxColWidth[1] + pxColWidth[2] + pxColWidth[3];
 
 	 viewLines   = (viewHeight / pxLineSpacing) + 1;
+
+	 setMinimumWidth( pxLineWidth );
 }
 //----------------------------------------------------------------------------
 void QRamSearchView::setScrollBars( QScrollBar *hbar, QScrollBar *vbar )
