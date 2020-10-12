@@ -82,6 +82,9 @@ class RamSearchDialog_t : public QDialog
    public slots:
       void closeWindow(void);
 	private slots:
+		void runSearch(void);
+		void resetSearch(void);
+		void refreshRamList(void);
 		void periodicUpdate(void);
 		//void watchClicked( QTreeWidgetItem *item, int column);
 
