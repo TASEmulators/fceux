@@ -220,6 +220,14 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	diffByEdit->setEnabled( cmpOp == 'd' );
 	moduloEdit->setEnabled( cmpOp == '%' );
 
+   diffByEdit->setMaxLength( 16 );
+	//diffByEdit->setInputMask( ">H000000000000000;" );
+   diffByEdit->setCursorPosition(0);
+
+   moduloEdit->setMaxLength( 16 );
+	//moduloEdit->setInputMask( ">H000000000000000;" );
+   moduloEdit->setCursorPosition(0);
+
 	vbox->addWidget( lt_btn );
 	vbox->addWidget( gt_btn );
 	vbox->addWidget( le_btn );
@@ -899,6 +907,8 @@ void QRamSearchView::paintEvent(QPaintEvent *event)
 	if ( maxLineOffset < 1 ) maxLineOffset = 1;
 
 	lineOffset = vbar->value();
+
+	vbar->setMaximum( maxLineOffset );
 
 	if ( lineOffset > maxLineOffset )
 	{
