@@ -121,6 +121,7 @@ class RamSearchDialog_t : public QDialog
 	private:
 		void updateRamValues(void);
 		void calcRamList(void);
+      void SearchRelative(void);
 
    public slots:
       void closeWindow(void);
@@ -139,6 +140,14 @@ class RamSearchDialog_t : public QDialog
 		void signedTypeClicked(void);
 		void unsignedTypeClicked(void);
 		void hexTypeClicked(void);
+		void opLtClicked(void);
+		void opGtClicked(void);
+		void opLeClicked(void);
+		void opGeClicked(void);
+		void opEqClicked(void);
+		void opNeClicked(void);
+		void opDfClicked(void);
+		void opMdClicked(void);
 
 };
 

@@ -79,6 +79,7 @@ static std::list <struct memoryLocation_t*>   actvSrchList;
 static std::list <struct memoryLocation_t*> deactvSrchList;
 static std::vector <int> deactvFrameStack;
 
+static int cmpOp = '=';
 static int dpySize = 'b';
 static int dpyType = 's';
 static bool  chkMisAligned = false;
@@ -195,10 +196,29 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	df_btn = new QRadioButton( tr("Different By:") );
 	md_btn = new QRadioButton( tr("Modulo") );
 
-	eq_btn->setChecked(true);
+	lt_btn->setChecked( cmpOp == '<' );
+	gt_btn->setChecked( cmpOp == '>' );
+	le_btn->setChecked( cmpOp == 'l' );
+	ge_btn->setChecked( cmpOp == 'm' );
+	eq_btn->setChecked( cmpOp == '=' );
+	ne_btn->setChecked( cmpOp == '!' );
+	df_btn->setChecked( cmpOp == 'd' );
+	md_btn->setChecked( cmpOp == '%' );
+
+   connect( lt_btn, SIGNAL(clicked(void)), this, SLOT(opLtClicked(void)) );
+   connect( gt_btn, SIGNAL(clicked(void)), this, SLOT(opGtClicked(void)) );
+   connect( le_btn, SIGNAL(clicked(void)), this, SLOT(opLeClicked(void)) );
+   connect( ge_btn, SIGNAL(clicked(void)), this, SLOT(opGeClicked(void)) );
+   connect( eq_btn, SIGNAL(clicked(void)), this, SLOT(opEqClicked(void)) );
+   connect( ne_btn, SIGNAL(clicked(void)), this, SLOT(opNeClicked(void)) );
+   connect( df_btn, SIGNAL(clicked(void)), this, SLOT(opDfClicked(void)) );
+   connect( md_btn, SIGNAL(clicked(void)), this, SLOT(opMdClicked(void)) );
 
 	diffByEdit = new QLineEdit();
 	moduloEdit = new QLineEdit();
+
+	diffByEdit->setEnabled( cmpOp == 'd' );
+	moduloEdit->setEnabled( cmpOp == '%' );
 
 	vbox->addWidget( lt_btn );
 	vbox->addWidget( gt_btn );
@@ -301,6 +321,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	setLayout( mainLayout );
 
 	cycleCounter = 0;
+	frameCounterLastPass = currFrameCounter;
 
 	resetSearch();
 
@@ -346,6 +367,10 @@ void RamSearchDialog_t::periodicUpdate(void)
 {
 	if ( currFrameCounter != frameCounterLastPass )
 	{
+      //if ( currFrameCounter != (frameCounterLastPass+1) )
+      //{
+      //   printf("Warning: Ram Search Missed Frame: %i \n", currFrameCounter );
+      //}  
 		updateRamValues();
 
 		frameCounterLastPass = currFrameCounter;
@@ -388,6 +413,133 @@ static void sortActvMemList(void)
 {
 	actvSrchList.sort( memoryAddrCompare );
 }
+
+template<typename T>
+T ReadLocalValue(const unsigned char* data)
+{
+	return *(const T*)data;
+}
+// basic comparison functions:
+static bool LessCmp (int64_t x, int64_t y, int64_t i)        { return x < y; }
+static bool MoreCmp (int64_t x, int64_t y, int64_t i)        { return x > y; }
+static bool LessEqualCmp (int64_t x, int64_t y, int64_t i)   { return x <= y; }
+static bool MoreEqualCmp (int64_t x, int64_t y, int64_t i)   { return x >= y; }
+static bool EqualCmp (int64_t x, int64_t y, int64_t i)       { return x == y; }
+static bool UnequalCmp (int64_t x, int64_t y, int64_t i)     { return x != y; }
+static bool DiffByCmp (int64_t x, int64_t y, int64_t p)      { return x - y == p || y - x == p; }
+static bool ModIsCmp (int64_t x, int64_t y, int64_t p)       { return p && x % p == y; }
+
+void RamSearchDialog_t::SearchRelative(void)
+{
+	std::list <struct memoryLocation_t*>::iterator it;
+  	memoryLocation_t *loc = NULL;
+   int64_t x = 0, y = 0, p = 0;
+   bool (*cmpFun)(int64_t x, int64_t y, int64_t p) = NULL;
+
+   switch ( cmpOp )
+   {
+      case '<':
+         cmpFun = LessCmp;
+      break;
+      case '>':
+         cmpFun = MoreCmp;
+      break;
+      case '=':
+         cmpFun = EqualCmp;
+      break;
+      case '!':
+         cmpFun = UnequalCmp;
+      break;
+      case 'l':
+         cmpFun = LessEqualCmp;
+      break;
+      case 'm':
+         cmpFun = MoreEqualCmp;
+      break;
+      case 'd':
+         cmpFun = DiffByCmp;
+      break;
+      case '%':
+         cmpFun = ModIsCmp;
+      break;
+      default:
+         cmpFun = NULL;
+      break;
+   }
+
+   if ( cmpFun == NULL )
+   {
+      return;
+   }
+
+	it = actvSrchList.begin();
+
+	while (it != actvSrchList.end())
+	{
+      loc = *it;
+
+      switch ( dpySize )
+      {
+         default:
+         case 'b':
+         {
+            if ( dpyType == 's')
+            {
+               x = loc->val.v8.i;
+				   y = loc->hist.back().v8.i;
+            }
+            else
+            {
+               x = loc->val.v8.u;
+				   y = loc->hist.back().v8.u;
+            }
+         }
+         break;
+         case 'w':
+         {
+            if ( dpyType == 's')
+            {
+               x = loc->val.v16.i;
+				   y = loc->hist.back().v16.i;
+            }
+            else
+            {
+               x = loc->val.v16.u;
+				   y = loc->hist.back().v16.u;
+            }
+         }
+         break;
+         case 'd':
+         {
+            if ( dpyType == 's')
+            {
+               x = loc->val.v32.i;
+				   y = loc->hist.back().v32.i;
+            }
+            else
+            {
+               x = loc->val.v32.u;
+				   y = loc->hist.back().v32.u;
+            }
+         }
+         break;
+      }
+
+      if ( cmpFun( x, y, p ) == false )
+      {
+         //printf("Function: Returns False %li %c %li \n", x, cmpOp, y );
+         printf("Eliminated Address: $%04X\n", loc->addr );
+         it = actvSrchList.erase(it);
+      }
+      else 
+      {
+			loc->hist.push_back( loc->val );
+         it++;
+      }
+   }
+
+	vbar->setMaximum( actvSrchList.size() );
+}
 //----------------------------------------------------------------------------
 static unsigned int ReadValueAtHardwareAddress(int address, unsigned int size)
 {
@@ -409,6 +561,7 @@ static unsigned int ReadValueAtHardwareAddress(int address, unsigned int size)
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::runSearch(void)
 {
+   SearchRelative();
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::resetSearch(void)
@@ -439,6 +592,62 @@ void RamSearchDialog_t::clearChangeCounts(void)
 	{
 		memLoc[addr].chgCount  = 0;
 	}
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::opLtClicked(void)
+{
+	cmpOp = '<';
+	diffByEdit->setEnabled(false);
+	moduloEdit->setEnabled(false);
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::opGtClicked(void)
+{
+	cmpOp = '>';
+	diffByEdit->setEnabled(false);
+	moduloEdit->setEnabled(false);
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::opLeClicked(void)
+{
+	cmpOp = 'l';
+	diffByEdit->setEnabled(false);
+	moduloEdit->setEnabled(false);
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::opGeClicked(void)
+{
+	cmpOp = 'm';
+	diffByEdit->setEnabled(false);
+	moduloEdit->setEnabled(false);
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::opEqClicked(void)
+{
+	cmpOp = '=';
+	diffByEdit->setEnabled(false);
+	moduloEdit->setEnabled(false);
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::opNeClicked(void)
+{
+	cmpOp = '!';
+	diffByEdit->setEnabled(false);
+	moduloEdit->setEnabled(false);
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::opDfClicked(void)
+{
+	cmpOp = 'd';
+	diffByEdit->setEnabled(true);
+	moduloEdit->setEnabled(false);
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::opMdClicked(void)
+{
+	cmpOp = '%';
+	diffByEdit->setEnabled(false);
+	moduloEdit->setEnabled(true);
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::ds1Clicked(void)
