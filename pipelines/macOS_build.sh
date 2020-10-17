@@ -43,7 +43,6 @@ brew  install  minizip
 
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:
 
-#QMAKE=`find /usr/local -name qmake`;
 QT_CMAKE=`find /usr/local -name Qt5Config.cmake`
 echo $QT_CMAKE;
 export Qt5_DIR=`dirname $QT_CMAKE`;
@@ -54,7 +53,6 @@ echo '***  Building Project  ***'
 echo '**************************'
 mkdir build;
 cd build;
-#$QMAKE ..
 cmake \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
