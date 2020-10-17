@@ -1813,7 +1813,7 @@ void QRamSearchView::paintEvent(QPaintEvent *event)
 				sprintf( prevStr, "%i", loc->hist.back().v8.i );
 			}
 		}
-		sprintf( chgStr, "%i", loc->chgCount );
+		sprintf( chgStr, "%u", loc->chgCount );
 
 
 		for (i=0; i<4; i++)
