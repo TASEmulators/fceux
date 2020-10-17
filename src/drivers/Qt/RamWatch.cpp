@@ -28,6 +28,7 @@
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/RamWatch.h"
+#include "Qt/CheatsConf.h"
 #include "Qt/ConsoleUtilities.h"
 
 ramWatchList_t ramWatchList;
@@ -898,6 +899,8 @@ void RamWatchDialog_t::addCheatClicked(void)
 	if ( rw != NULL )
 	{
 		FCEUI_AddCheat( rw->name.c_str(), rw->addr, GetMem(rw->addr), -1, 1 );
+
+      updateCheatDialog();
 	}
 }
 //----------------------------------------------------------------------------

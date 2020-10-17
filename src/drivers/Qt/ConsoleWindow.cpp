@@ -1026,13 +1026,9 @@ void consoleWin_t::openGuiConfWin(void)
 
 void consoleWin_t::openCheats(void)
 {
-	GuiCheatsDialog_t *cheatWin;
-
 	//printf("Open GUI Cheat Window\n");
 	
-   cheatWin = new GuiCheatsDialog_t(this);
-	
-   cheatWin->show();
+   openCheatDialog(this);
 }
 
 void consoleWin_t::openRamWatch(void)

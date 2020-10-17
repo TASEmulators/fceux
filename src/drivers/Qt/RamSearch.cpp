@@ -242,7 +242,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 
 	addCheatButton = new QPushButton( tr("Add Cheat") );
 	vbox->addWidget( addCheatButton );
-	//connect( addCheatButton, SIGNAL(clicked(void)), this, SLOT(sepWatchClicked(void)));
+	connect( addCheatButton, SIGNAL(clicked(void)), this, SLOT(addCheatClicked(void)));
 	addCheatButton->setEnabled(false);
 
 	hexEditButton = new QPushButton( tr("Hex Editor") );
@@ -1153,6 +1153,22 @@ void RamSearchDialog_t::eliminateSelAddr(void)
    deactvFrameStack.push_back( elimCount );
    
 	vbar->setMaximum( actvSrchList.size() );
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::addCheatClicked(void)
+{
+   int addr = ramView->getSelAddr();
+   char desc[128];
+
+   if ( addr < 0 )
+   {
+      return;
+   }
+   strcpy( desc, "Quick Cheat Add");
+
+	FCEUI_AddCheat( desc, addr, GetMem(addr), -1, 1 );
+
+   updateCheatDialog();
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::hexEditSelAddr(void)

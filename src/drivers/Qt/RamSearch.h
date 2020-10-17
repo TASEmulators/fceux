@@ -139,6 +139,7 @@ class RamSearchDialog_t : public QDialog
 		void clearChangeCounts(void);
 		void eliminateSelAddr(void);
 		void hexEditSelAddr(void);
+		void addCheatClicked(void);
 		void periodicUpdate(void);
 		void hbarChanged(int val);
 		void vbarChanged(int val);
