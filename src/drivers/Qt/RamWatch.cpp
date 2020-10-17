@@ -1,4 +1,4 @@
-// HotKeyConf.cpp
+// RamWatch.cpp
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,9 +28,22 @@
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/RamWatch.h"
+#include "Qt/CheatsConf.h"
 #include "Qt/ConsoleUtilities.h"
 
 ramWatchList_t ramWatchList;
+static RamWatchDialog_t *ramWatchMainWin = NULL;
+//----------------------------------------------------------------------------
+void openRamWatchWindow( QWidget *parent, int force )
+{
+   if ( !force )
+   {
+      if ( ramWatchMainWin != NULL ) return;
+   }
+   ramWatchMainWin = new RamWatchDialog_t(parent);
+
+   ramWatchMainWin->show();
+}
 //----------------------------------------------------------------------------
 RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	: QDialog( parent )
@@ -263,6 +276,8 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	setLayout( mainLayout );
 
+   ramWatchMainWin = this;
+
 	updateTimer  = new QTimer( this );
 
    connect( updateTimer, &QTimer::timeout, this, &RamWatchDialog_t::periodicUpdate );
@@ -273,6 +288,11 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 RamWatchDialog_t::~RamWatchDialog_t(void)
 {
 	updateTimer->stop();
+
+   if ( ramWatchMainWin == this )
+   {
+      ramWatchMainWin = NULL;
+   }
 	printf("Destroy RAM Watch Config Window\n");
 }
 //----------------------------------------------------------------------------
@@ -898,6 +918,8 @@ void RamWatchDialog_t::addCheatClicked(void)
 	if ( rw != NULL )
 	{
 		FCEUI_AddCheat( rw->name.c_str(), rw->addr, GetMem(rw->addr), -1, 1 );
+
+      updateCheatDialog();
 	}
 }
 //----------------------------------------------------------------------------

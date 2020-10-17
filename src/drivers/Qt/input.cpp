@@ -139,6 +139,7 @@ static uint8 keyonce[SDL_NUM_SCANCODES];
 
 int getKeyState( int k )
 {
+	k = SDL_GetScancodeFromKey(k);
 	if ( (k >= 0) && (k < SDL_NUM_SCANCODES) )
 	{
 		return g_keyState[k];
@@ -661,12 +662,13 @@ static void KeyboardCommands (void)
 	}
 
 	static bool frameAdvancing = false;
-	if ( _keyonly(Hotkeys[HK_FRAME_ADVANCE]))
+	if ( getKeyState(Hotkeys[HK_FRAME_ADVANCE]))
 	{
 		if (frameAdvancing == false)
 		{
 			FCEUI_FrameAdvance ();
 			frameAdvancing = true;
+			//printf("Frame Advance Start\n");
 		}
 	}
 	else
@@ -675,6 +677,7 @@ static void KeyboardCommands (void)
 		{
 			FCEUI_FrameAdvanceEnd ();
 			frameAdvancing = false;
+			//printf("Frame Advance End\n");
 		}
 	}
 

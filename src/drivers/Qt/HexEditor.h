@@ -113,6 +113,7 @@ class QHexEdit : public QWidget
 		void setForeGroundColor( QColor fg );
 		void setBackGroundColor( QColor bg );
 		void memModeUpdate(void);
+      void openGotoAddrDialog(void);
 		int  checkMemActivity(void);
 		int  getAddr(void){ return cursorAddr; };
 
@@ -221,6 +222,7 @@ class HexEditorDialog_t : public QDialog
 		QAction    *viewPPU;
 		QAction    *viewOAM;
 		QAction    *viewROM;
+		QAction    *gotoAddrAct;
 
 	private:
 
@@ -242,6 +244,7 @@ class HexEditorDialog_t : public QDialog
 		void pickForeGroundColor(void);
 		void pickBackGroundColor(void);
 		void removeAllBookmarks(void);
+      void openGotoAddrDialog(void);
 };
 
 int hexEditorNumWindows(void);

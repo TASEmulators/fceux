@@ -254,3 +254,5 @@ class RamWatchDialog_t : public QDialog
 };
 
 extern ramWatchList_t ramWatchList;
+
+void openRamWatchWindow( QWidget *parent, int force = 0 );

@@ -38,7 +38,7 @@ Game genie load/enable capability                    |     YES     |     YES    
 Movie record/save/play functionality                 |     YES     |     YES     |
 Cheat search window                                  |     YES     |     YES     |
 Active Cheat window                                  |     YES     |     YES     |
-RAM Search Window                                    |     NO      |     NO      |
+RAM Search Window                                    |     YES     |     NO      |
 RAM Watch Window                                     |     YES     |     YES     |
 Memory Watch Window                                  |     NO      |     NO      |
 TAS Editor                                           |     NO      |     NO      |

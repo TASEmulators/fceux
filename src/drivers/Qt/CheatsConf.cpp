@@ -27,6 +27,26 @@
 
 static GuiCheatsDialog_t *win = NULL;
 //----------------------------------------------------------------------------
+void openCheatDialog(QWidget *parent)
+{
+   if ( win != NULL )
+   {
+      return;
+   }
+   win = new GuiCheatsDialog_t(parent);
+	
+   win->show();
+}
+//----------------------------------------------------------------------------
+void updateCheatDialog(void)
+{
+   if ( win == NULL )
+   {
+      return;
+   }
+   win->showActiveCheatList( true );
+}
+//----------------------------------------------------------------------------
 GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
@@ -412,6 +432,7 @@ GuiCheatsDialog_t::~GuiCheatsDialog_t(void)
 	}
 	wasPausedByCheats = false;
 
+   win = NULL;
    printf("Destroy Cheat Window Event\n");
 }
 //----------------------------------------------------------------------------

@@ -343,6 +343,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	cpuCycExdVal->setInputMask( ">9000000000000000;" );
 	cpuCycExdVal->setAlignment(Qt::AlignLeft);
 	cpuCycExdVal->setMaximumWidth( 18 * fontCharWidth );
+   cpuCycExdVal->setCursorPosition(0);
 	connect( cpuCycExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(cpuCycleThresChanged(const QString &)));
 
 	instrExdVal->setFont( font );
@@ -350,6 +351,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	instrExdVal->setInputMask( ">9000000000000000;" );
 	instrExdVal->setAlignment(Qt::AlignLeft);
 	instrExdVal->setMaximumWidth( 18 * fontCharWidth );
+   instrExdVal->setCursorPosition(0);
 	connect( instrExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(instructionsThresChanged(const QString &)));
 
 	brkCpuCycExd->setChecked( break_on_cycles );

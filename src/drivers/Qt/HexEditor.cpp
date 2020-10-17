@@ -563,7 +563,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	// File -> Save ROM
 	saveROM = new QAction(tr("Save ROM"), this);
-   //saveROM->setShortcuts(QKeySequence::Open);
+   //saveROM->setShortcut(QKeySequence::Open);
    saveROM->setStatusTip(tr("Save ROM File"));
    connect(saveROM, SIGNAL(triggered()), this, SLOT(saveRomFile(void)) );
 
@@ -571,11 +571,19 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	// File -> Save ROM As
 	saveROM = new QAction(tr("Save ROM As"), this);
-   //saveROM->setShortcuts(QKeySequence::Open);
+   //saveROM->setShortcut(QKeySequence::Open);
    saveROM->setStatusTip(tr("Save ROM File As"));
    connect(saveROM, SIGNAL(triggered()), this, SLOT(saveRomFileAs(void)) );
 
    fileMenu->addAction(saveROM);
+
+   // File -> Goto Address
+	gotoAddrAct = new QAction(tr("Goto Addresss"), this);
+   gotoAddrAct->setShortcut(QKeySequence(tr("Ctrl+A")));
+   gotoAddrAct->setStatusTip(tr("Goto Address"));
+   connect(gotoAddrAct, SIGNAL(triggered()), this, SLOT(openGotoAddrDialog(void)) );
+
+   fileMenu->addAction(gotoAddrAct);
 
 	fileMenu->addSeparator();
 
@@ -1132,6 +1140,11 @@ void HexEditorDialog_t::updatePeriodic(void)
 	}
 }
 //----------------------------------------------------------------------------
+void HexEditorDialog_t::openGotoAddrDialog(void)
+{
+   editor->openGotoAddrDialog();
+}
+//----------------------------------------------------------------------------
 QHexEdit::QHexEdit(QWidget *parent)
 	: QWidget( parent )
 {
@@ -1359,6 +1372,33 @@ void QHexEdit::resizeEvent(QResizeEvent *event)
 		pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth) );
 	}
 
+}
+//----------------------------------------------------------------------------
+void QHexEdit::openGotoAddrDialog(void)
+{
+	int ret;
+	char stmp[128];
+	QInputDialog dialog(this);
+
+	sprintf( stmp, "Specify Address [ 0x0 -> 0x%X ]", mb.size()-1 );
+
+   dialog.setWindowTitle( tr("Goto Address") );
+   dialog.setLabelText( tr(stmp) );
+   dialog.setOkButtonText( tr("Go") );
+	//dialog.setTextValue( tr("0") );
+
+   dialog.show();
+   ret = dialog.exec();
+
+   if ( QDialog::Accepted == ret )
+   {
+      int addr;
+      std::string s = dialog.textValue().toStdString();
+
+      addr = strtol( s.c_str(), NULL, 16 );
+
+		parent->gotoAddress(addr);
+   }
 }
 //----------------------------------------------------------------------------
 void QHexEdit::resetCursor(void)
@@ -1598,6 +1638,13 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
       lineOffset = 0;
       vbar->setValue( lineOffset );
 		resetCursor();
+   }
+   else if (Qt::ControlModifier == event->modifiers())
+   {
+      if ( event->key() == Qt::Key_A )
+      {
+         openGotoAddrDialog();
+      }
    }
    else if (event->key() == Qt::Key_Tab && (cursorPosX < 32) )
    {  // switch from hex to ascii edit

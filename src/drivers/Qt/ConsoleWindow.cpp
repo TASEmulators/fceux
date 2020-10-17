@@ -36,6 +36,7 @@
 #include "Qt/ppuViewer.h"
 #include "Qt/NameTableViewer.h"
 #include "Qt/RamWatch.h"
+#include "Qt/RamSearch.h"
 #include "Qt/keyscan.h"
 #include "Qt/nes_shm.h"
 
@@ -483,6 +484,14 @@ void consoleWin_t::createMainMenu(void)
     connect(cheatsAct, SIGNAL(triggered()), this, SLOT(openCheats(void)) );
 
     toolsMenu->addAction(cheatsAct);
+
+	 // Tools -> RAM Search
+	 ramSearchAct = new QAction(tr("RAM Search..."), this);
+    //ramSearchAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    ramSearchAct->setStatusTip(tr("Open RAM Search Window"));
+    connect(ramSearchAct, SIGNAL(triggered()), this, SLOT(openRamSearch(void)) );
+
+    toolsMenu->addAction(ramSearchAct);
 
 	 // Tools -> RAM Watch
 	 ramWatchAct = new QAction(tr("RAM Watch..."), this);
@@ -1017,13 +1026,9 @@ void consoleWin_t::openGuiConfWin(void)
 
 void consoleWin_t::openCheats(void)
 {
-	GuiCheatsDialog_t *cheatWin;
-
 	//printf("Open GUI Cheat Window\n");
 	
-   cheatWin = new GuiCheatsDialog_t(this);
-	
-   cheatWin->show();
+   openCheatDialog(this);
 }
 
 void consoleWin_t::openRamWatch(void)
@@ -1035,6 +1040,12 @@ void consoleWin_t::openRamWatch(void)
    ramWatchWin = new RamWatchDialog_t(this);
 	
    ramWatchWin->show();
+}
+
+void consoleWin_t::openRamSearch(void)
+{
+	//printf("Open GUI RAM Search Window\n");
+	openRamSearchWindow(this);
 }
 
 void consoleWin_t::openDebugWindow(void)

@@ -64,6 +64,7 @@ static int periodic_saves = 0;
 static int   mutexLocks = 0;
 static int   mutexPending = 0;
 static bool  emulatorHasMutux = 0;
+static unsigned int emulatorCycleCount = 0;
 
 extern double g_fpsScale;
 
@@ -945,6 +946,8 @@ static void DoFun(int frameskip, int periodic_saves)
 	//	opause=FCEUI_EmulationPaused();
 	//	SilenceSound(opause);
 	//}
+	
+	emulatorCycleCount++;
 }
 
 void fceuWrapperLock(void)
@@ -1019,7 +1022,7 @@ int  fceuWrapperUpdate( void )
 	}
 	emulatorHasMutux = 1;
  
-	if ( GameInfo && !FCEUI_EmulationPaused() )
+	if ( GameInfo /*&& !FCEUI_EmulationPaused()*/ )
 	{
 		DoFun(frameskip, periodic_saves);
 	
