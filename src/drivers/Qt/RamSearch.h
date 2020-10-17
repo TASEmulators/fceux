@@ -123,6 +123,8 @@ class RamSearchDialog_t : public QDialog
 		void calcRamList(void);
       void SearchRelative(void);
       void SearchSpecificValue(void);
+      void SearchSpecificAddress(void);
+      void SearchNumberChanges(void);
 
    public slots:
       void closeWindow(void);

@@ -467,6 +467,10 @@ void RamSearchDialog_t::periodicUpdate(void)
       //}  
 		updateRamValues();
 
+      if ( autoSearchCbox->isChecked() )
+      {
+         runSearch();
+      }
 		frameCounterLastPass = currFrameCounter;
 	}
 
@@ -520,7 +524,7 @@ static bool UnequalCmp (int64_t x, int64_t y, int64_t i)     { return x != y; }
 static bool DiffByCmp (int64_t x, int64_t y, int64_t p)      { return x - y == p || y - x == p; }
 static bool ModIsCmp (int64_t x, int64_t y, int64_t p)       { return p && x % p == y; }
 
-static int64_t getLineEditValue( QLineEdit *edit )
+static int64_t getLineEditValue( QLineEdit *edit, bool forceHex = false )
 {
    int64_t val=0;
    std::string s;
@@ -529,7 +533,7 @@ static int64_t getLineEditValue( QLineEdit *edit )
 
    if ( s.size() > 0 )
    {
-      val = strtoll( s.c_str(), NULL, 0 );
+      val = strtoll( s.c_str(), NULL, forceHex ? 16 : 0 );
    }
    return val;
 }
@@ -770,6 +774,160 @@ void RamSearchDialog_t::SearchSpecificValue(void)
 	vbar->setMaximum( actvSrchList.size() );
 }
 //----------------------------------------------------------------------------
+void RamSearchDialog_t::SearchSpecificAddress(void)
+{
+   int elimCount = 0;
+	std::list <struct memoryLocation_t*>::iterator it;
+  	memoryLocation_t *loc = NULL;
+   int64_t x = 0, y = 0, p = 0;
+   bool (*cmpFun)(int64_t x, int64_t y, int64_t p) = NULL;
+
+   switch ( cmpOp )
+   {
+      case '<':
+         cmpFun = LessCmp;
+      break;
+      case '>':
+         cmpFun = MoreCmp;
+      break;
+      case '=':
+         cmpFun = EqualCmp;
+      break;
+      case '!':
+         cmpFun = UnequalCmp;
+      break;
+      case 'l':
+         cmpFun = LessEqualCmp;
+      break;
+      case 'm':
+         cmpFun = MoreEqualCmp;
+      break;
+      case 'd':
+         cmpFun = DiffByCmp;
+         p      = getLineEditValue( diffByEdit );
+      break;
+      case '%':
+         cmpFun = ModIsCmp;
+         p      = getLineEditValue( moduloEdit );
+      break;
+      default:
+         cmpFun = NULL;
+      break;
+   }
+
+   if ( cmpFun == NULL )
+   {
+      return;
+   }
+   y = getLineEditValue( specAddrEdit );
+
+   printf("Performing Specific Address Search Operation %zi: 'x %c 0x%llx' '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp,
+        (unsigned long long int)y, (long long int)p, (unsigned long long int)p );
+
+	it = actvSrchList.begin();
+
+	while (it != actvSrchList.end())
+	{
+      loc = *it;
+
+      x = loc->addr;
+
+      if ( cmpFun( x, y, p ) == false )
+      {
+         //printf("Eliminated Address: $%04X\n", loc->addr );
+         it = actvSrchList.erase(it);
+
+         deactvSrchList.push_back( loc ); elimCount++;
+      }
+      else 
+      {
+			loc->hist.push_back( loc->val );
+         it++;
+      }
+   }
+
+   deactvFrameStack.push_back( elimCount );
+   
+	vbar->setMaximum( actvSrchList.size() );
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::SearchNumberChanges(void)
+{
+   int elimCount = 0;
+	std::list <struct memoryLocation_t*>::iterator it;
+  	memoryLocation_t *loc = NULL;
+   int64_t x = 0, y = 0, p = 0;
+   bool (*cmpFun)(int64_t x, int64_t y, int64_t p) = NULL;
+
+   switch ( cmpOp )
+   {
+      case '<':
+         cmpFun = LessCmp;
+      break;
+      case '>':
+         cmpFun = MoreCmp;
+      break;
+      case '=':
+         cmpFun = EqualCmp;
+      break;
+      case '!':
+         cmpFun = UnequalCmp;
+      break;
+      case 'l':
+         cmpFun = LessEqualCmp;
+      break;
+      case 'm':
+         cmpFun = MoreEqualCmp;
+      break;
+      case 'd':
+         cmpFun = DiffByCmp;
+         p      = getLineEditValue( diffByEdit );
+      break;
+      case '%':
+         cmpFun = ModIsCmp;
+         p      = getLineEditValue( moduloEdit );
+      break;
+      default:
+         cmpFun = NULL;
+      break;
+   }
+
+   if ( cmpFun == NULL )
+   {
+      return;
+   }
+   y = getLineEditValue( numChangeEdit );
+
+   printf("Performing Number of Changes Search Operation %zi: 'x %c 0x%llx' '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp,
+        (unsigned long long int)y, (long long int)p, (unsigned long long int)p );
+
+	it = actvSrchList.begin();
+
+	while (it != actvSrchList.end())
+	{
+      loc = *it;
+
+      x = loc->chgCount;
+
+      if ( cmpFun( x, y, p ) == false )
+      {
+         //printf("Eliminated Address: $%04X\n", loc->addr );
+         it = actvSrchList.erase(it);
+
+         deactvSrchList.push_back( loc ); elimCount++;
+      }
+      else 
+      {
+			loc->hist.push_back( loc->val );
+         it++;
+      }
+   }
+
+   deactvFrameStack.push_back( elimCount );
+   
+	vbar->setMaximum( actvSrchList.size() );
+}
+//----------------------------------------------------------------------------
 static unsigned int ReadValueAtHardwareAddress(int address, unsigned int size)
 {
 	unsigned int value = 0;
@@ -790,6 +948,8 @@ static unsigned int ReadValueAtHardwareAddress(int address, unsigned int size)
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::runSearch(void)
 {
+   fceuWrapperLock();
+
    if ( pv_btn->isChecked() )
    {
       // Relative Value
@@ -803,11 +963,14 @@ void RamSearchDialog_t::runSearch(void)
    else if ( sa_btn->isChecked() )
    {
       // Specific Address
+      SearchSpecificAddress();
    }
    else if ( nc_btn->isChecked() )
    {
       // Number of Changes
+      SearchNumberChanges();
    }
+   fceuWrapperUnLock();
 
    undoButton->setEnabled( deactvFrameStack.size() > 0 );
 }
