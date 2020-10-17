@@ -567,6 +567,7 @@ void RamSearchDialog_t::SearchRelative(void)
   	memoryLocation_t *loc = NULL;
    int64_t x = 0, y = 0, p = 0;
    bool (*cmpFun)(int64_t x, int64_t y, int64_t p) = NULL;
+   bool storeHistory = !autoSearchCbox->isChecked();
 
    switch ( cmpOp )
    {
@@ -605,7 +606,7 @@ void RamSearchDialog_t::SearchRelative(void)
    {
       return;
    }
-   printf("Performing Relative Search Operation %zi: '%c'  '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp, (long long int)p, (unsigned long long int)p );
+   //printf("Performing Relative Search Operation %zi: '%c'  '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp, (long long int)p, (unsigned long long int)p );
 
 	it = actvSrchList.begin();
 
@@ -665,16 +666,25 @@ void RamSearchDialog_t::SearchRelative(void)
          //printf("Eliminated Address: $%04X\n", loc->addr );
          it = actvSrchList.erase(it);
 
-         deactvSrchList.push_back( loc ); elimCount++;
+         if ( storeHistory )
+         {
+            deactvSrchList.push_back( loc ); elimCount++;
+         }
       }
       else 
       {
-			loc->hist.push_back( loc->val );
+         if ( storeHistory )
+         {
+			   loc->hist.push_back( loc->val );
+         }
          it++;
       }
    }
 
-   deactvFrameStack.push_back( elimCount );
+   if ( storeHistory )
+   {
+      deactvFrameStack.push_back( elimCount );
+   }
    
 	vbar->setMaximum( actvSrchList.size() );
 }
@@ -686,6 +696,7 @@ void RamSearchDialog_t::SearchSpecificValue(void)
   	memoryLocation_t *loc = NULL;
    int64_t x = 0, y = 0, p = 0;
    bool (*cmpFun)(int64_t x, int64_t y, int64_t p) = NULL;
+   bool storeHistory = !autoSearchCbox->isChecked();
 
    switch ( cmpOp )
    {
@@ -726,8 +737,8 @@ void RamSearchDialog_t::SearchSpecificValue(void)
    }
    y = getLineEditValue( specValEdit );
 
-   printf("Performing Specific Value Search Operation %zi: 'x %c %lli' '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp,
-        (long long int)y, (long long int)p, (unsigned long long int)p );
+   //printf("Performing Specific Value Search Operation %zi: 'x %c %lli' '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp,
+   //     (long long int)y, (long long int)p, (unsigned long long int)p );
 
 	it = actvSrchList.begin();
 
@@ -781,16 +792,25 @@ void RamSearchDialog_t::SearchSpecificValue(void)
          //printf("Eliminated Address: $%04X\n", loc->addr );
          it = actvSrchList.erase(it);
 
-         deactvSrchList.push_back( loc ); elimCount++;
+         if ( storeHistory )
+         {
+            deactvSrchList.push_back( loc ); elimCount++;
+         }
       }
       else 
       {
-			loc->hist.push_back( loc->val );
+         if ( storeHistory )
+         {
+			   loc->hist.push_back( loc->val );
+         }
          it++;
       }
    }
 
-   deactvFrameStack.push_back( elimCount );
+   if ( storeHistory )
+   {
+      deactvFrameStack.push_back( elimCount );
+   }
    
 	vbar->setMaximum( actvSrchList.size() );
 }
@@ -802,6 +822,7 @@ void RamSearchDialog_t::SearchSpecificAddress(void)
   	memoryLocation_t *loc = NULL;
    int64_t x = 0, y = 0, p = 0;
    bool (*cmpFun)(int64_t x, int64_t y, int64_t p) = NULL;
+   bool storeHistory = !autoSearchCbox->isChecked();
 
    switch ( cmpOp )
    {
@@ -842,8 +863,8 @@ void RamSearchDialog_t::SearchSpecificAddress(void)
    }
    y = getLineEditValue( specAddrEdit );
 
-   printf("Performing Specific Address Search Operation %zi: 'x %c 0x%llx' '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp,
-        (unsigned long long int)y, (long long int)p, (unsigned long long int)p );
+   //printf("Performing Specific Address Search Operation %zi: 'x %c 0x%llx' '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp,
+   //     (unsigned long long int)y, (long long int)p, (unsigned long long int)p );
 
 	it = actvSrchList.begin();
 
@@ -858,16 +879,25 @@ void RamSearchDialog_t::SearchSpecificAddress(void)
          //printf("Eliminated Address: $%04X\n", loc->addr );
          it = actvSrchList.erase(it);
 
-         deactvSrchList.push_back( loc ); elimCount++;
+         if ( storeHistory )
+         {
+            deactvSrchList.push_back( loc ); elimCount++;
+         }
       }
       else 
       {
-			loc->hist.push_back( loc->val );
+         if ( storeHistory )
+         {
+			   loc->hist.push_back( loc->val );
+         }
          it++;
       }
    }
 
-   deactvFrameStack.push_back( elimCount );
+   if ( storeHistory )
+   {
+      deactvFrameStack.push_back( elimCount );
+   }
    
 	vbar->setMaximum( actvSrchList.size() );
 }
@@ -879,6 +909,7 @@ void RamSearchDialog_t::SearchNumberChanges(void)
   	memoryLocation_t *loc = NULL;
    int64_t x = 0, y = 0, p = 0;
    bool (*cmpFun)(int64_t x, int64_t y, int64_t p) = NULL;
+   bool storeHistory = !autoSearchCbox->isChecked();
 
    switch ( cmpOp )
    {
@@ -919,8 +950,8 @@ void RamSearchDialog_t::SearchNumberChanges(void)
    }
    y = getLineEditValue( numChangeEdit );
 
-   printf("Performing Number of Changes Search Operation %zi: 'x %c 0x%llx' '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp,
-        (unsigned long long int)y, (long long int)p, (unsigned long long int)p );
+   //printf("Performing Number of Changes Search Operation %zi: 'x %c 0x%llx' '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp,
+   //     (unsigned long long int)y, (long long int)p, (unsigned long long int)p );
 
 	it = actvSrchList.begin();
 
@@ -935,16 +966,25 @@ void RamSearchDialog_t::SearchNumberChanges(void)
          //printf("Eliminated Address: $%04X\n", loc->addr );
          it = actvSrchList.erase(it);
 
-         deactvSrchList.push_back( loc ); elimCount++;
+         if ( storeHistory )
+         {
+            deactvSrchList.push_back( loc ); elimCount++;
+         }
       }
       else 
       {
-			loc->hist.push_back( loc->val );
+         if ( storeHistory )
+         {
+			   loc->hist.push_back( loc->val );
+         }
          it++;
       }
    }
 
-   deactvFrameStack.push_back( elimCount );
+   if ( storeHistory )
+   {
+      deactvFrameStack.push_back( elimCount );
+   }
    
 	vbar->setMaximum( actvSrchList.size() );
 }
