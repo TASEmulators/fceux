@@ -29,13 +29,15 @@ class QRamSearchView : public QWidget
 
 		void setScrollBars( QScrollBar *hbar, QScrollBar *vbar );
 
+      int  getSelAddr(void){ return selAddr; }
 	protected:
 		void paintEvent(QPaintEvent *event);
-		//void keyPressEvent(QKeyEvent *event);
+		void keyPressEvent(QKeyEvent *event);
    	//void keyReleaseEvent(QKeyEvent *event);
-		//void mousePressEvent(QMouseEvent * event);
+		void mousePressEvent(QMouseEvent * event);
 		void resizeEvent(QResizeEvent *event);
 
+      int  convPixToLine( QPoint p );
 		void calcFontData(void);
 
 		QFont       font;
@@ -55,6 +57,8 @@ class QRamSearchView : public QWidget
 		int  viewLines;
 		int  viewWidth;
 		int  viewHeight;
+      int  selAddr;
+      int  selLine;
 };
 
 class RamSearchDialog_t : public QDialog
@@ -133,6 +137,8 @@ class RamSearchDialog_t : public QDialog
 		void resetSearch(void);
 		void undoSearch(void);
 		void clearChangeCounts(void);
+		void eliminateSelAddr(void);
+		void hexEditSelAddr(void);
 		void periodicUpdate(void);
 		void hbarChanged(int val);
 		void vbarChanged(int val);

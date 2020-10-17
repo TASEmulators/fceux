@@ -33,13 +33,12 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/RamWatch.h"
 #include "Qt/RamSearch.h"
+#include "Qt/HexEditor.h"
 #include "Qt/CheatsConf.h"
 #include "Qt/ConsoleUtilities.h"
 
 static bool ShowROM = false;
 static RamSearchDialog_t *ramSearchWin = NULL;
-
-static uint64_t iterMask = 0x01;
 
 struct memoryState_t
 {
@@ -185,7 +184,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	mainLayout = new QVBoxLayout();
 	hbox1      = new QHBoxLayout();
 
-	mainLayout->addLayout( hbox1 );
+	mainLayout->addLayout( hbox1, 100 );
 
 	grid    = new QGridLayout();
 	ramView = new QRamSearchView(this);
@@ -233,7 +232,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 
 	elimButton = new QPushButton( tr("Eliminate") );
 	vbox->addWidget( elimButton );
-	//connect( elimButton, SIGNAL(clicked(void)), this, SLOT(newWatchClicked(void)));
+	connect( elimButton, SIGNAL(clicked(void)), this, SLOT(eliminateSelAddr(void)));
 	elimButton->setEnabled(false);
 
 	watchButton = new QPushButton( tr("Watch") );
@@ -248,11 +247,11 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 
 	hexEditButton = new QPushButton( tr("Hex Editor") );
 	vbox->addWidget( hexEditButton );
-	//connect( hexEditButton, SIGNAL(clicked(void)), this, SLOT(sepWatchClicked(void)));
+	connect( hexEditButton, SIGNAL(clicked(void)), this, SLOT(hexEditSelAddr(void)));
 	hexEditButton->setEnabled(false);
 
 	hbox2 = new QHBoxLayout();
-	mainLayout->addLayout( hbox2 );
+	mainLayout->addLayout( hbox2, 1 );
 	frame = new QGroupBox( tr("Comparison Operator") );
 	vbox  = new QVBoxLayout();
 
@@ -459,6 +458,9 @@ void RamSearchDialog_t::closeWindow(void)
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::periodicUpdate(void)
 {
+   int selAddr = -1;
+
+   fceuWrapperLock();
 	if ( currFrameCounter != frameCounterLastPass )
 	{
       //if ( currFrameCounter != (frameCounterLastPass+1) )
@@ -473,8 +475,26 @@ void RamSearchDialog_t::periodicUpdate(void)
       }
 		frameCounterLastPass = currFrameCounter;
 	}
+   fceuWrapperUnLock();
 
    undoButton->setEnabled( deactvFrameStack.size() > 0 );
+
+   selAddr = ramView->getSelAddr();
+
+   if ( selAddr >= 0 )
+   {
+      elimButton->setEnabled(true);
+      watchButton->setEnabled(true);
+      addCheatButton->setEnabled(true);
+      hexEditButton->setEnabled(true);
+   }
+   else
+   {
+      elimButton->setEnabled(false);
+      watchButton->setEnabled(false);
+      addCheatButton->setEnabled(false);
+      hexEditButton->setEnabled(false);
+   }
 
 	if ( (cycleCounter % 10) == 0)
 	{
@@ -948,8 +968,6 @@ static unsigned int ReadValueAtHardwareAddress(int address, unsigned int size)
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::runSearch(void)
 {
-   fceuWrapperLock();
-
    if ( pv_btn->isChecked() )
    {
       // Relative Value
@@ -970,7 +988,6 @@ void RamSearchDialog_t::runSearch(void)
       // Number of Changes
       SearchNumberChanges();
    }
-   fceuWrapperUnLock();
 
    undoButton->setEnabled( deactvFrameStack.size() > 0 );
 }
@@ -992,7 +1009,6 @@ void RamSearchDialog_t::resetSearch(void)
 		memLoc[addr].chgCount  = 0;
 		memLoc[addr].hist.push_back( memLoc[addr].val );
 	}
-	iterMask = 0x01;
 
 	calcRamList();
 
@@ -1055,6 +1071,99 @@ void RamSearchDialog_t::clearChangeCounts(void)
 	{
 		memLoc[addr].chgCount  = 0;
 	}
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::eliminateSelAddr(void)
+{
+   int elimCount = 0, op = '!';
+	std::list <struct memoryLocation_t*>::iterator it;
+  	memoryLocation_t *loc = NULL;
+   int64_t x = 0, y = 0, p = 0;
+   bool (*cmpFun)(int64_t x, int64_t y, int64_t p) = NULL;
+
+   switch ( op )
+   {
+      case '<':
+         cmpFun = LessCmp;
+      break;
+      case '>':
+         cmpFun = MoreCmp;
+      break;
+      case '=':
+         cmpFun = EqualCmp;
+      break;
+      case '!':
+         cmpFun = UnequalCmp;
+      break;
+      case 'l':
+         cmpFun = LessEqualCmp;
+      break;
+      case 'm':
+         cmpFun = MoreEqualCmp;
+      break;
+      case 'd':
+         cmpFun = DiffByCmp;
+         p      = getLineEditValue( diffByEdit );
+      break;
+      case '%':
+         cmpFun = ModIsCmp;
+         p      = getLineEditValue( moduloEdit );
+      break;
+      default:
+         cmpFun = NULL;
+      break;
+   }
+
+   if ( cmpFun == NULL )
+   {
+      return;
+   }
+   y = ramView->getSelAddr();
+
+   if ( y < 0 )
+   {
+      return;
+   }
+
+   printf("Performing Eliminate Address Operation %zi: 'x %c 0x%llx' '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp,
+        (unsigned long long int)y, (long long int)p, (unsigned long long int)p );
+
+	it = actvSrchList.begin();
+
+	while (it != actvSrchList.end())
+	{
+      loc = *it;
+
+      x = loc->addr;
+
+      if ( cmpFun( x, y, p ) == false )
+      {
+         //printf("Eliminated Address: $%04X\n", loc->addr );
+         it = actvSrchList.erase(it);
+
+         deactvSrchList.push_back( loc ); elimCount++;
+      }
+      else 
+      {
+			loc->hist.push_back( loc->val );
+         it++;
+      }
+   }
+
+   deactvFrameStack.push_back( elimCount );
+   
+	vbar->setMaximum( actvSrchList.size() );
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::hexEditSelAddr(void)
+{
+   int addr = ramView->getSelAddr();
+
+   if ( addr < 0 )
+   {
+      return;
+   }
+   hexEditorOpenFromDebugger( QHexEdit::MODE_NES_RAM, addr );
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::opLtClicked(void)
@@ -1301,6 +1410,11 @@ QRamSearchView::QRamSearchView(QWidget *parent)
 
 	lineOffset = 0;
 	maxLineOffset = 0;
+   selAddr = -1;
+   selLine = -1;
+
+   setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
+   setFocusPolicy(Qt::StrongFocus);
 }
 //----------------------------------------------------------------------------
 QRamSearchView::~QRamSearchView(void)
@@ -1357,6 +1471,102 @@ void QRamSearchView::resizeEvent(QResizeEvent *event)
 		pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth) );
 	}
 
+}
+//----------------------------------------------------------------------------
+int QRamSearchView::convPixToLine( QPoint p )
+{
+   int lineNum = 0;
+	float ly = ( (float)pxLineLead / (float)pxLineSpacing );
+	float py = ( (float)p.y() -  (float)pxLineSpacing) /  (float)pxLineSpacing;
+	float ry = fmod( py, 1.0 );
+
+   if ( ry < ly )
+	{
+		lineNum = ( ((int)py) - 1 );
+	}
+	else
+	{
+		lineNum = ( ((int)py) );
+	}
+	//printf("Pos: %ix%i = %i\n", p.x(), p.y(), lineNum );
+
+	return lineNum;
+}
+//----------------------------------------------------------------------------
+void QRamSearchView::keyPressEvent(QKeyEvent *event)
+{
+	//printf("Ram Search View Key Press: 0x%x \n", event->key() );
+
+   if (event->matches(QKeySequence::MoveToPreviousLine))
+   {
+      selAddr = -1;
+      if ( selLine > 0 )
+      {
+         selLine--;
+      }
+      if ( selLine < lineOffset )
+      {
+         lineOffset = selLine;
+      }
+      if ( lineOffset < 0 )
+      {
+         lineOffset = 0;
+      }
+      vbar->setValue( lineOffset );
+   }
+  	else if (event->matches(QKeySequence::MoveToNextLine))
+   {
+      selAddr = -1;
+      selLine++;
+
+      if ( selLine >= actvSrchList.size() )
+      {
+         selLine = actvSrchList.size() - 1;
+      }
+
+      if ( selLine >= (lineOffset+viewLines) )
+      {
+         lineOffset = selLine - viewLines + 1;
+      }
+
+      if ( lineOffset >= maxLineOffset )
+      {
+         lineOffset = maxLineOffset;
+      }
+      vbar->setValue( lineOffset );
+   }
+   else if (event->matches(QKeySequence::MoveToNextPage))
+   {
+      lineOffset += ( (3 * viewLines) / 4);
+
+      if ( lineOffset >= maxLineOffset )
+      {
+         lineOffset = maxLineOffset;
+      }
+      vbar->setValue( lineOffset );
+   }
+   else if (event->matches(QKeySequence::MoveToPreviousPage))
+   {
+      lineOffset -= ( (3 * viewLines) / 4);
+
+      if ( lineOffset < 0 )
+      {
+         lineOffset = 0;
+      }
+      vbar->setValue( lineOffset );
+   }
+}
+//----------------------------------------------------------------------------
+void QRamSearchView::mousePressEvent(QMouseEvent * event)
+{
+	int lineNum = convPixToLine( event->pos() );
+
+	//printf("c: %ix%i \n", c.x(), c.y() );
+
+	if ( event->button() == Qt::LeftButton )
+	{
+      selLine = lineOffset + lineNum;
+	}
 }
 //----------------------------------------------------------------------------
 void QRamSearchView::paintEvent(QPaintEvent *event)
@@ -1442,10 +1652,6 @@ void QRamSearchView::paintEvent(QPaintEvent *event)
 
 		painter.drawText( x+fieldStart[i]+fieldPad[i], y, tr(fieldText[i]) );
 	}
-	painter.drawLine( 0, y+pxLineLead, viewWidth, y+pxLineLead );
-	painter.drawLine( x+fieldStart[1], 0, x+fieldStart[1], viewHeight );
-	painter.drawLine( x+fieldStart[2], 0, x+fieldStart[2], viewHeight );
-	painter.drawLine( x+fieldStart[3], 0, x+fieldStart[3], viewHeight );
 
 	y += pxLineSpacing;
 
@@ -1464,7 +1670,19 @@ void QRamSearchView::paintEvent(QPaintEvent *event)
 		{
 			continue;
 		}
+      if ( selLine >= 0 )
+      {
+         if ( selLine == (lineOffset+row) )
+         {
+            selAddr = loc->addr;
+         }
+      }
 		it++;
+
+      if ( selAddr == loc->addr )
+      {
+         painter.fillRect( 0, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("light blue") );
+      }
 
 		sprintf (addrStr, "$%04X", loc->addr);
 
@@ -1536,5 +1754,11 @@ void QRamSearchView::paintEvent(QPaintEvent *event)
 
 		y += pxLineSpacing;
 	}
+
+	painter.drawLine( 0, pxLineSpacing+pxLineLead, viewWidth, pxLineSpacing+pxLineLead );
+	painter.drawLine( x+fieldStart[1], 0, x+fieldStart[1], viewHeight );
+	painter.drawLine( x+fieldStart[2], 0, x+fieldStart[2], viewHeight );
+	painter.drawLine( x+fieldStart[3], 0, x+fieldStart[3], viewHeight );
+
 }
 //----------------------------------------------------------------------------
