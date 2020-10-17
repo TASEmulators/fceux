@@ -16,6 +16,7 @@
 #include <QLineEdit>
 #include <QRadioButton>
 #include <QFileDialog>
+#include <QValidator>
 #include <QPainter>
 
 #include "../../types.h"
@@ -84,6 +85,76 @@ static int dpySize = 'b';
 static int dpyType = 's';
 static bool  chkMisAligned = false;
 
+class ramSearchInputValidator : public QValidator
+{ 
+   public:
+   ramSearchInputValidator(QObject *parent)
+      : QValidator(parent)
+   {
+   }
+
+   QValidator::State validate(QString &input, int &pos) const
+   {
+      int i;
+      //printf("Validate: %i '%s'\n", input.size(), input.toStdString().c_str() );
+
+      if ( input.size() == 0 )
+      {
+         return QValidator::Acceptable;
+      }
+      std::string s = input.toStdString();
+      i=0;
+
+      if ( (s[i] == '-') || (s[i] == '+') )
+      {
+         i++;
+      }
+      if ( s[i] == 0 )
+      {
+         return QValidator::Acceptable;
+      }
+
+      if ( (s[i] == '$') || ((s[i] == '0') && ( tolower(s[i+1]) == 'x')) )
+      {
+         if ( s[i] == '$' )
+         {
+            i++;
+         }
+         else
+         {
+            i += 2;
+         }
+
+         if ( s[i] == 0 )
+         {
+            return QValidator::Acceptable;
+         }
+
+         if ( !isxdigit(s[i]) )
+         {
+            return QValidator::Invalid;
+         }
+         while ( isxdigit(s[i]) ) i++;
+
+         if ( s[i] == 0 )
+         {
+            return QValidator::Acceptable;
+         }
+      }
+      else if ( isdigit(s[i]) )
+      {
+         while ( isdigit(s[i]) ) i++;
+
+         if ( s[i] == 0 )
+         {
+            return QValidator::Acceptable;
+         }
+      }
+      return QValidator::Invalid;
+   }
+
+};
+
 //----------------------------------------------------------------------------
 void openRamSearchWindow( QWidget *parent )
 {
@@ -105,6 +176,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	QVBoxLayout *vbox, *vbox1, *vbox2;
 	QGridLayout *grid;
 	QGroupBox *frame;
+   ramSearchInputValidator *inpValidator;
 
 	setWindowTitle("RAM Search");
 
@@ -151,7 +223,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 
 	undoButton = new QPushButton( tr("Undo") );
 	vbox->addWidget( undoButton );
-	//connect( undoButton, SIGNAL(clicked(void)), this, SLOT(removeWatchClicked(void)));
+	connect( undoButton, SIGNAL(clicked(void)), this, SLOT(undoSearch(void)));
 	undoButton->setEnabled(false);
 	
 	searchROMCbox = new QCheckBox( tr("Search ROM") );
@@ -220,13 +292,14 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	diffByEdit->setEnabled( cmpOp == 'd' );
 	moduloEdit->setEnabled( cmpOp == '%' );
 
+   inpValidator = new ramSearchInputValidator(this);
    diffByEdit->setMaxLength( 16 );
-	//diffByEdit->setInputMask( ">H000000000000000;" );
    diffByEdit->setCursorPosition(0);
+   diffByEdit->setValidator( inpValidator );
 
    moduloEdit->setMaxLength( 16 );
-	//moduloEdit->setInputMask( ">H000000000000000;" );
    moduloEdit->setCursorPosition(0);
+   moduloEdit->setValidator( inpValidator );
 
 	vbox->addWidget( lt_btn );
 	vbox->addWidget( gt_btn );
@@ -383,7 +456,9 @@ void RamSearchDialog_t::periodicUpdate(void)
 
 		frameCounterLastPass = currFrameCounter;
 	}
-	
+
+   undoButton->setEnabled( deactvFrameStack.size() > 0 );
+
 	if ( (cycleCounter % 10) == 0)
 	{
 		ramView->update();
@@ -422,11 +497,6 @@ static void sortActvMemList(void)
 	actvSrchList.sort( memoryAddrCompare );
 }
 
-template<typename T>
-T ReadLocalValue(const unsigned char* data)
-{
-	return *(const T*)data;
-}
 // basic comparison functions:
 static bool LessCmp (int64_t x, int64_t y, int64_t i)        { return x < y; }
 static bool MoreCmp (int64_t x, int64_t y, int64_t i)        { return x > y; }
@@ -437,8 +507,23 @@ static bool UnequalCmp (int64_t x, int64_t y, int64_t i)     { return x != y; }
 static bool DiffByCmp (int64_t x, int64_t y, int64_t p)      { return x - y == p || y - x == p; }
 static bool ModIsCmp (int64_t x, int64_t y, int64_t p)       { return p && x % p == y; }
 
+static int64_t getLineEditValue( QLineEdit *edit )
+{
+   int64_t val=0;
+   std::string s;
+
+   s = edit->text().toStdString();
+
+   if ( s.size() > 0 )
+   {
+      val = strtoll( s.c_str(), NULL, 0 );
+   }
+   return val;
+}
+
 void RamSearchDialog_t::SearchRelative(void)
 {
+   int elimCount = 0;
 	std::list <struct memoryLocation_t*>::iterator it;
   	memoryLocation_t *loc = NULL;
    int64_t x = 0, y = 0, p = 0;
@@ -466,9 +551,11 @@ void RamSearchDialog_t::SearchRelative(void)
       break;
       case 'd':
          cmpFun = DiffByCmp;
+         p      = getLineEditValue( diffByEdit );
       break;
       case '%':
          cmpFun = ModIsCmp;
+         p      = getLineEditValue( moduloEdit );
       break;
       default:
          cmpFun = NULL;
@@ -479,6 +566,7 @@ void RamSearchDialog_t::SearchRelative(void)
    {
       return;
    }
+   printf("Performing Search Operation %zi: '%c'  '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp, (long long int)p, (unsigned long long int)p );
 
 	it = actvSrchList.begin();
 
@@ -535,9 +623,10 @@ void RamSearchDialog_t::SearchRelative(void)
 
       if ( cmpFun( x, y, p ) == false )
       {
-         //printf("Function: Returns False %li %c %li \n", x, cmpOp, y );
-         printf("Eliminated Address: $%04X\n", loc->addr );
+         //printf("Eliminated Address: $%04X\n", loc->addr );
          it = actvSrchList.erase(it);
+
+         deactvSrchList.push_back( loc ); elimCount++;
       }
       else 
       {
@@ -546,6 +635,8 @@ void RamSearchDialog_t::SearchRelative(void)
       }
    }
 
+   deactvFrameStack.push_back( elimCount );
+   
 	vbar->setMaximum( actvSrchList.size() );
 }
 //----------------------------------------------------------------------------
@@ -570,6 +661,8 @@ static unsigned int ReadValueAtHardwareAddress(int address, unsigned int size)
 void RamSearchDialog_t::runSearch(void)
 {
    SearchRelative();
+
+   undoButton->setEnabled( deactvFrameStack.size() > 0 );
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::resetSearch(void)
@@ -592,6 +685,58 @@ void RamSearchDialog_t::resetSearch(void)
 	iterMask = 0x01;
 
 	calcRamList();
+
+	undoButton->setEnabled(false);
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::undoSearch(void)
+{
+   int elimCount = 0;
+  	memoryLocation_t *loc = NULL;
+	std::list <struct memoryLocation_t*>::iterator it;
+
+   if ( deactvFrameStack.empty() )
+   {
+      printf("Error: UNDO Stack is empty\n");
+      return;
+   }
+   printf("UNDO Search Operation: %zi \n", deactvFrameStack.size() );
+   // To Undo a search operation:
+   // 1. Loop through all current active values and revert previous value back to what it was before the search
+   // 2. Get the number of eliminated values from the deactivate search stack and tranfer those values back into the active search list.
+
+	it = actvSrchList.begin();
+
+   while (it != actvSrchList.end())
+	{
+      loc = *it;
+
+      if ( !loc->hist.empty() )
+      {
+         loc->hist.pop_back();
+      }
+      it++;
+   }
+
+   elimCount = deactvFrameStack.back();
+   deactvFrameStack.pop_back();
+
+   while ( elimCount > 0 )
+   {
+      if ( deactvSrchList.empty() )
+      {
+         printf("Error: Something went wrong with UNDO operation\n");
+         break;
+      }
+      loc = deactvSrchList.back();
+      deactvSrchList.pop_back();
+      actvSrchList.push_back( loc );
+      elimCount--;
+   }
+
+   sortActvMemList();
+
+	undoButton->setEnabled( deactvFrameStack.size() > 0 );
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::clearChangeCounts(void)

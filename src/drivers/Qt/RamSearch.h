@@ -128,6 +128,7 @@ class RamSearchDialog_t : public QDialog
 	private slots:
 		void runSearch(void);
 		void resetSearch(void);
+		void undoSearch(void);
 		void clearChangeCounts(void);
 		void periodicUpdate(void);
 		void hbarChanged(int val);
