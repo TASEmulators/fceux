@@ -35,6 +35,7 @@
 #include "Qt/RamSearch.h"
 #include "Qt/HexEditor.h"
 #include "Qt/CheatsConf.h"
+#include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 
 static bool ShowROM = false;
@@ -237,7 +238,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 
 	watchButton = new QPushButton( tr("Watch") );
 	vbox->addWidget( watchButton );
-	//connect( watchButton, SIGNAL(clicked(void)), this, SLOT(dupWatchClicked(void)));
+	connect( watchButton, SIGNAL(clicked(void)), this, SLOT(addRamWatchClicked(void)));
 	watchButton->setEnabled(false);
 
 	addCheatButton = new QPushButton( tr("Add Cheat") );
@@ -1169,6 +1170,22 @@ void RamSearchDialog_t::addCheatClicked(void)
 	FCEUI_AddCheat( desc, addr, GetMem(addr), -1, 1 );
 
    updateCheatDialog();
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::addRamWatchClicked(void)
+{
+   int addr = ramView->getSelAddr();
+   char desc[128];
+
+   if ( addr < 0 )
+   {
+      return;
+   }
+   strcpy( desc, "Quick Watch Add");
+
+   ramWatchList.add_entry( desc, addr, dpyType, dpySize, 0 );
+
+   openRamWatchWindow(consoleWindow);
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::hexEditSelAddr(void)
