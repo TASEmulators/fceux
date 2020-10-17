@@ -332,9 +332,22 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 
 	pv_btn->setChecked(true);
 
+   connect( pv_btn, SIGNAL(clicked(void)), this, SLOT(pvBtnClicked(void)) );
+   connect( sv_btn, SIGNAL(clicked(void)), this, SLOT(svBtnClicked(void)) );
+   connect( sa_btn, SIGNAL(clicked(void)), this, SLOT(saBtnClicked(void)) );
+   connect( nc_btn, SIGNAL(clicked(void)), this, SLOT(ncBtnClicked(void)) );
+
 	specValEdit   = new QLineEdit();
 	specAddrEdit  = new QLineEdit();
 	numChangeEdit = new QLineEdit();
+
+   specValEdit->setValidator( inpValidator );
+   specAddrEdit->setValidator( inpValidator );
+   numChangeEdit->setValidator( inpValidator );
+
+   specValEdit->setEnabled(false);
+   specAddrEdit->setEnabled(false);
+   numChangeEdit->setEnabled(false);
 
 	grid->addWidget( pv_btn       , 0, 0, Qt::AlignLeft );
 	grid->addWidget( sv_btn       , 1, 0, Qt::AlignLeft );
@@ -521,6 +534,7 @@ static int64_t getLineEditValue( QLineEdit *edit )
    return val;
 }
 
+//----------------------------------------------------------------------------
 void RamSearchDialog_t::SearchRelative(void)
 {
    int elimCount = 0;
@@ -566,7 +580,7 @@ void RamSearchDialog_t::SearchRelative(void)
    {
       return;
    }
-   printf("Performing Search Operation %zi: '%c'  '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp, (long long int)p, (unsigned long long int)p );
+   printf("Performing Relative Search Operation %zi: '%c'  '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp, (long long int)p, (unsigned long long int)p );
 
 	it = actvSrchList.begin();
 
@@ -640,6 +654,122 @@ void RamSearchDialog_t::SearchRelative(void)
 	vbar->setMaximum( actvSrchList.size() );
 }
 //----------------------------------------------------------------------------
+void RamSearchDialog_t::SearchSpecificValue(void)
+{
+   int elimCount = 0;
+	std::list <struct memoryLocation_t*>::iterator it;
+  	memoryLocation_t *loc = NULL;
+   int64_t x = 0, y = 0, p = 0;
+   bool (*cmpFun)(int64_t x, int64_t y, int64_t p) = NULL;
+
+   switch ( cmpOp )
+   {
+      case '<':
+         cmpFun = LessCmp;
+      break;
+      case '>':
+         cmpFun = MoreCmp;
+      break;
+      case '=':
+         cmpFun = EqualCmp;
+      break;
+      case '!':
+         cmpFun = UnequalCmp;
+      break;
+      case 'l':
+         cmpFun = LessEqualCmp;
+      break;
+      case 'm':
+         cmpFun = MoreEqualCmp;
+      break;
+      case 'd':
+         cmpFun = DiffByCmp;
+         p      = getLineEditValue( diffByEdit );
+      break;
+      case '%':
+         cmpFun = ModIsCmp;
+         p      = getLineEditValue( moduloEdit );
+      break;
+      default:
+         cmpFun = NULL;
+      break;
+   }
+
+   if ( cmpFun == NULL )
+   {
+      return;
+   }
+   y = getLineEditValue( specValEdit );
+
+   printf("Performing Specific Value Search Operation %zi: 'x %c %lli' '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp,
+        (long long int)y, (long long int)p, (unsigned long long int)p );
+
+	it = actvSrchList.begin();
+
+	while (it != actvSrchList.end())
+	{
+      loc = *it;
+
+      switch ( dpySize )
+      {
+         default:
+         case 'b':
+         {
+            if ( dpyType == 's')
+            {
+               x = loc->val.v8.i;
+            }
+            else
+            {
+               x = loc->val.v8.u;
+            }
+         }
+         break;
+         case 'w':
+         {
+            if ( dpyType == 's')
+            {
+               x = loc->val.v16.i;
+            }
+            else
+            {
+               x = loc->val.v16.u;
+            }
+         }
+         break;
+         case 'd':
+         {
+            if ( dpyType == 's')
+            {
+               x = loc->val.v32.i;
+            }
+            else
+            {
+               x = loc->val.v32.u;
+            }
+         }
+         break;
+      }
+
+      if ( cmpFun( x, y, p ) == false )
+      {
+         //printf("Eliminated Address: $%04X\n", loc->addr );
+         it = actvSrchList.erase(it);
+
+         deactvSrchList.push_back( loc ); elimCount++;
+      }
+      else 
+      {
+			loc->hist.push_back( loc->val );
+         it++;
+      }
+   }
+
+   deactvFrameStack.push_back( elimCount );
+   
+	vbar->setMaximum( actvSrchList.size() );
+}
+//----------------------------------------------------------------------------
 static unsigned int ReadValueAtHardwareAddress(int address, unsigned int size)
 {
 	unsigned int value = 0;
@@ -660,7 +790,24 @@ static unsigned int ReadValueAtHardwareAddress(int address, unsigned int size)
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::runSearch(void)
 {
-   SearchRelative();
+   if ( pv_btn->isChecked() )
+   {
+      // Relative Value
+      SearchRelative();
+   }
+   else if ( sv_btn->isChecked() )
+   {
+      // Specific Value
+      SearchSpecificValue();
+   }
+   else if ( sa_btn->isChecked() )
+   {
+      // Specific Address
+   }
+   else if ( nc_btn->isChecked() )
+   {
+      // Number of Changes
+   }
 
    undoButton->setEnabled( deactvFrameStack.size() > 0 );
 }
@@ -801,6 +948,34 @@ void RamSearchDialog_t::opMdClicked(void)
 	cmpOp = '%';
 	diffByEdit->setEnabled(false);
 	moduloEdit->setEnabled(true);
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::pvBtnClicked(void)
+{
+   specValEdit->setEnabled(false);
+   specAddrEdit->setEnabled(false);
+   numChangeEdit->setEnabled(false);
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::svBtnClicked(void)
+{
+   specValEdit->setEnabled(true);
+   specAddrEdit->setEnabled(false);
+   numChangeEdit->setEnabled(false);
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::saBtnClicked(void)
+{
+   specValEdit->setEnabled(false);
+   specAddrEdit->setEnabled(true);
+   numChangeEdit->setEnabled(false);
+}
+//----------------------------------------------------------------------------
+void RamSearchDialog_t::ncBtnClicked(void)
+{
+   specValEdit->setEnabled(false);
+   specAddrEdit->setEnabled(false);
+   numChangeEdit->setEnabled(true);
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::ds1Clicked(void)
