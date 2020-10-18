@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QInputDialog>
 
 #include "../../fceu.h"
 #include "../../fds.h"
@@ -175,6 +176,7 @@ void consoleWin_t::keyReleaseEvent(QKeyEvent *event)
 //---------------------------------------------------------------------------
 void consoleWin_t::createMainMenu(void)
 {
+   QAction *act;
 	QMenu *subMenu;
 	QActionGroup *group;
 	int useNativeMenuBar;
@@ -478,6 +480,61 @@ void consoleWin_t::createMainMenu(void)
     connect(fdsLoadBiosAct, SIGNAL(triggered()), this, SLOT(fdsLoadBiosFile(void)) );
 
     subMenu->addAction(fdsLoadBiosAct);
+
+    emuMenu->addSeparator();
+
+    // Emulation -> Speed
+	 subMenu = emuMenu->addMenu(tr("Speed"));
+
+	 // Emulation -> Speed -> Speed Up
+	 act = new QAction(tr("Speed Up"), this);
+    act->setShortcut( QKeySequence(tr("=")));
+    act->setStatusTip(tr("Speed Up"));
+    connect(act, SIGNAL(triggered()), this, SLOT(emuSpeedUp(void)) );
+
+    subMenu->addAction(act);
+
+    // Emulation -> Speed -> Slow Down
+	 act = new QAction(tr("Slow Down"), this);
+    act->setShortcut( QKeySequence(tr("-")));
+    act->setStatusTip(tr("Slow Down"));
+    connect(act, SIGNAL(triggered()), this, SLOT(emuSlowDown(void)) );
+
+    subMenu->addAction(act);
+
+    subMenu->addSeparator();
+
+    // Emulation -> Speed -> Slowest Speed
+	 act = new QAction(tr("Slowest"), this);
+    //act->setShortcut( QKeySequence(tr("-")));
+    act->setStatusTip(tr("Slowest"));
+    connect(act, SIGNAL(triggered()), this, SLOT(emuSlowestSpd(void)) );
+
+    subMenu->addAction(act);
+
+    // Emulation -> Speed -> Normal Speed
+	 act = new QAction(tr("Normal"), this);
+    //act->setShortcut( QKeySequence(tr("-")));
+    act->setStatusTip(tr("Normal"));
+    connect(act, SIGNAL(triggered()), this, SLOT(emuNormalSpd(void)) );
+
+    subMenu->addAction(act);
+
+    // Emulation -> Speed -> Fastest Speed
+	 act = new QAction(tr("Turbo"), this);
+    //act->setShortcut( QKeySequence(tr("-")));
+    act->setStatusTip(tr("Turbo (Fastest)"));
+    connect(act, SIGNAL(triggered()), this, SLOT(emuFastestSpd(void)) );
+
+    subMenu->addAction(act);
+
+    // Emulation -> Speed -> Custom Speed
+	 act = new QAction(tr("Custom"), this);
+    //act->setShortcut( QKeySequence(tr("-")));
+    act->setStatusTip(tr("Custom"));
+    connect(act, SIGNAL(triggered()), this, SLOT(emuCustomSpd(void)) );
+
+    subMenu->addAction(act);
 
 	 //-----------------------------------------------------------------------
 	 // Tools
@@ -1320,6 +1377,56 @@ void consoleWin_t::fdsLoadBiosFile(void)
 	}
 
    return;
+}
+
+void consoleWin_t::emuSpeedUp(void)
+{
+   IncreaseEmulationSpeed();
+}
+
+void consoleWin_t::emuSlowDown(void)
+{
+   DecreaseEmulationSpeed();
+}
+
+void consoleWin_t::emuSlowestSpd(void)
+{
+   FCEUD_SetEmulationSpeed( EMUSPEED_SLOWEST );
+}
+
+void consoleWin_t::emuNormalSpd(void)
+{
+   FCEUD_SetEmulationSpeed( EMUSPEED_NORMAL );
+}
+
+void consoleWin_t::emuFastestSpd(void)
+{
+   FCEUD_SetEmulationSpeed( EMUSPEED_FASTEST );
+}
+
+void consoleWin_t::emuCustomSpd(void)
+{
+	int ret;
+	QInputDialog dialog(this);
+
+   dialog.setWindowTitle( tr("Emulation Speed") );
+   dialog.setLabelText( tr("Enter a percentage from 1 to 1000.") );
+   dialog.setOkButtonText( tr("Ok") );
+   dialog.setInputMode( QInputDialog::IntInput );
+   dialog.setIntRange( 1, 1000 );
+   dialog.setIntValue( 100 );
+
+   dialog.show();
+   ret = dialog.exec();
+
+   if ( QDialog::Accepted == ret )
+   {
+      int spdPercent;
+
+      spdPercent = dialog.intValue();
+
+      CustomEmulationSpeed( spdPercent );
+   }
 }
 
 void consoleWin_t::openMovie(void)
