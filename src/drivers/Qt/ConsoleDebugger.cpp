@@ -3254,6 +3254,7 @@ DebuggerStackDisplay::DebuggerStackDisplay(QWidget *parent)
    : QPlainTextEdit(parent)
 {
    stackBytesPerLine = 4;
+   showAddrs = true;
 }
 //----------------------------------------------------------------------------
 DebuggerStackDisplay::~DebuggerStackDisplay(void)
@@ -3270,15 +3271,27 @@ void DebuggerStackDisplay::keyPressEvent(QKeyEvent *event)
       stackBytesPerLine = event->key() - Qt::Key_0;
       updateText();
    }
+   else if ( event->key() == Qt::Key_A )
+   {
+      showAddrs = !showAddrs;
+      updateText();
+   }
 }
 //----------------------------------------------------------------------------
 void DebuggerStackDisplay::contextMenuEvent(QContextMenuEvent *event)
 {
-	//QAction *act;
+	QAction *act;
 	QMenu menu(this);
    QMenu *subMenu;
 	QActionGroup *group;
 	QAction *bytesPerLineAct[4];
+
+	act = new QAction(tr("Show Addresses"), &menu);
+	act->setCheckable(true);
+	act->setChecked(showAddrs);
+	connect( act, SIGNAL(triggered(void)), this, SLOT(toggleShowAddr(void)) );
+
+   menu.addAction( act );
 
 	subMenu = menu.addMenu(tr("Display Bytes Per Line"));
 	group   = new QActionGroup(this);
@@ -3306,6 +3319,13 @@ void DebuggerStackDisplay::contextMenuEvent(QContextMenuEvent *event)
 	connect( bytesPerLineAct[3], SIGNAL(triggered(void)), this, SLOT(sel4BytesPerLine(void)) );
 
 	menu.exec(event->globalPos());
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::toggleShowAddr(void)
+{
+   showAddrs = !showAddrs;
+
+   updateText();
 }
 //----------------------------------------------------------------------------
 void DebuggerStackDisplay::sel1BytePerLine(void)
@@ -3342,7 +3362,14 @@ void DebuggerStackDisplay::updateText(void)
 
 	if ( stackPtr <= 0x01FF )
 	{
-		sprintf( stmp, " $%04X : %02X", stackPtr, GetMem(stackPtr) );
+      if ( showAddrs || (stackBytesPerLine <= 1) )
+      {
+		   sprintf( stmp, " $%04X : %02X", stackPtr, GetMem(stackPtr) );
+      }
+      else
+      {
+		   sprintf( stmp, " %02X", GetMem(stackPtr) );
+      }
 
 		stackLine.assign( stmp );
 
@@ -3357,7 +3384,14 @@ void DebuggerStackDisplay::updateText(void)
          {
 			   if ((i % stackBytesPerLine) == 0)
             {
-			   	sprintf( stmp, "\n $%04X : %02X", stackPtr, GetMem(stackPtr) );
+               if ( showAddrs )
+               {
+			   	   sprintf( stmp, "\n $%04X : %02X", stackPtr, GetMem(stackPtr) );
+               }
+               else
+               {
+			   	   sprintf( stmp, "\n %02X", GetMem(stackPtr) );
+               }
             }
 			   else
             {
