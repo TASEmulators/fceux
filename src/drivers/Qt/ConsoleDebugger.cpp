@@ -203,15 +203,15 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	vbox2->addLayout( hbox );
 
 	stackFrame = new QGroupBox(tr("Stack $0100"));
-	stackText  = new QPlainTextEdit(this);
+	stackText  = new DebuggerStackDisplay(this);
 	hbox       = new QHBoxLayout();
 	hbox->addWidget( stackText );
 	vbox2->addWidget( stackFrame );
 	stackFrame->setLayout( hbox );
 	stackText->setFont(font);
 	stackText->setReadOnly(true);
-	stackText->setWordWrapMode( QTextOption::WordWrap );
-	stackText->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+	stackText->setWordWrapMode( QTextOption::NoWrap );
+	//stackText->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
 	//stackText->setMaximumWidth( 16 * fontCharWidth );
 
 	bpFrame = new QGroupBox(tr("Breakpoints"));
@@ -2128,7 +2128,6 @@ void  ConsoleDebugger::updateRegisterView(void)
 	int stackPtr;
 	char stmp[64];
 	char str[32], str2[32];
-	std::string  stackLine;
 
 	sprintf( stmp, "%04X", X.PC );
 
@@ -2159,31 +2158,7 @@ void  ConsoleDebugger::updateRegisterView(void)
 
 	sprintf( stmp, "Stack: $%04X", stackPtr );
 	stackFrame->setTitle( tr(stmp) );
-
-	stackPtr++;
-
-	if ( stackPtr <= 0x01FF )
-	{
-		sprintf( stmp, "%02X", GetMem(stackPtr) );
-
-		stackLine.assign( stmp );
-
-		for (int i = 1; i < 128; i++)
-		{
-			//tmp = ((tmp+1)|0x0100)&0x01FF;  //increment and fix pointer to $0100-$01FF range
-			stackPtr++;
-			if (stackPtr > 0x1FF)
-				break;
-			if ((i & 7) == 0)
-				sprintf( stmp, ",\r\n%02X", GetMem(stackPtr) );
-			else
-				sprintf( stmp, ",%02X", GetMem(stackPtr) );
-
-			stackLine.append( stmp );
-		}
-	}
-
-	stackText->setPlainText( tr(stackLine.c_str()) );
+   stackText->updateText();
 
 	// update counters
 	int64 counter_value = timestampbase + (uint64)timestamp - total_cycles_base;
@@ -2781,6 +2756,7 @@ QAsmView::QAsmView(QWidget *parent)
 	ctxMenuAddr = -1;
 
 	//setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
+   setFocusPolicy(Qt::StrongFocus);
 }
 //----------------------------------------------------------------------------
 QAsmView::~QAsmView(void)
@@ -2899,14 +2875,12 @@ void QAsmView::resizeEvent(QResizeEvent *event)
 //----------------------------------------------------------------------------
 void QAsmView::keyPressEvent(QKeyEvent *event)
 {
-	printf("Debug ASM Window Key Press: 0x%x \n", event->key() );
-
+	//printf("Debug ASM Window Key Press: 0x%x \n", event->key() );
 }
 //----------------------------------------------------------------------------
 void QAsmView::keyReleaseEvent(QKeyEvent *event)
 {
-   printf("Debug ASM Window Key Release: 0x%x \n", event->key() );
-	//assignHotkey( event );
+   //printf("Debug ASM Window Key Release: 0x%x \n", event->key() );
 }
 //----------------------------------------------------------------------------
 QPoint QAsmView::convPixToCursor( QPoint p )
@@ -3274,5 +3248,132 @@ debuggerBookmark_t *debuggerBookmarkManager_t::getAddr( int addr )
 		return it->second;
 	}
 	return NULL;
+}
+//----------------------------------------------------------------------------
+DebuggerStackDisplay::DebuggerStackDisplay(QWidget *parent)
+   : QPlainTextEdit(parent)
+{
+   stackBytesPerLine = 4;
+}
+//----------------------------------------------------------------------------
+DebuggerStackDisplay::~DebuggerStackDisplay(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::keyPressEvent(QKeyEvent *event)
+{
+	//printf("Debug Stack Window Key Press: 0x%x \n", event->key() );
+
+   if ( (event->key() >= Qt::Key_1) && ( (event->key() < Qt::Key_9) ) )
+   {
+      stackBytesPerLine = event->key() - Qt::Key_0;
+      updateText();
+   }
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::contextMenuEvent(QContextMenuEvent *event)
+{
+	//QAction *act;
+	QMenu menu(this);
+   QMenu *subMenu;
+	QActionGroup *group;
+	QAction *bytesPerLineAct[4];
+
+	subMenu = menu.addMenu(tr("Display Bytes Per Line"));
+	group   = new QActionGroup(this);
+
+	group->setExclusive(true);
+
+	for (int i=0; i<4; i++)
+	{
+	   char stmp[8];
+
+	   sprintf( stmp, "%i", i+1 );
+
+	   bytesPerLineAct[i] = new QAction(tr(stmp), &menu);
+	   bytesPerLineAct[i]->setCheckable(true);
+
+	   group->addAction(bytesPerLineAct[i]);
+		subMenu->addAction(bytesPerLineAct[i]);
+      
+	   bytesPerLineAct[i]->setChecked( stackBytesPerLine == (i+1) );
+	}
+
+	connect( bytesPerLineAct[0], SIGNAL(triggered(void)), this, SLOT(sel1BytePerLine(void)) );
+	connect( bytesPerLineAct[1], SIGNAL(triggered(void)), this, SLOT(sel2BytesPerLine(void)) );
+	connect( bytesPerLineAct[2], SIGNAL(triggered(void)), this, SLOT(sel3BytesPerLine(void)) );
+	connect( bytesPerLineAct[3], SIGNAL(triggered(void)), this, SLOT(sel4BytesPerLine(void)) );
+
+	menu.exec(event->globalPos());
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::sel1BytePerLine(void)
+{
+   stackBytesPerLine = 1;
+   updateText();
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::sel2BytesPerLine(void)
+{
+   stackBytesPerLine = 2;
+   updateText();
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::sel3BytesPerLine(void)
+{
+   stackBytesPerLine = 3;
+   updateText();
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::sel4BytesPerLine(void)
+{
+   stackBytesPerLine = 4;
+   updateText();
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::updateText(void)
+{
+   char stmp[128];
+   int stackPtr = X.S | 0x0100;
+   std::string stackLine;
+
+	stackPtr++;
+
+	if ( stackPtr <= 0x01FF )
+	{
+		sprintf( stmp, " $%04X : %02X", stackPtr, GetMem(stackPtr) );
+
+		stackLine.assign( stmp );
+
+		for (int i = 1; i < 128; i++)
+		{
+			//tmp = ((tmp+1)|0x0100)&0x01FF;  //increment and fix pointer to $0100-$01FF range
+			stackPtr++;
+			if (stackPtr > 0x1FF)
+				break;
+
+         if ( stackBytesPerLine > 1 )
+         {
+			   if ((i % stackBytesPerLine) == 0)
+            {
+			   	sprintf( stmp, "\n $%04X : %02X", stackPtr, GetMem(stackPtr) );
+            }
+			   else
+            {
+			   	sprintf( stmp, ",%02X", GetMem(stackPtr) );
+            }
+         }
+         else
+         {
+			   sprintf( stmp, "\n $%04X : %02X", stackPtr, GetMem(stackPtr) );
+         }
+			stackLine.append( stmp );
+
+         //printf("Stack $%X: %s\n", stackPtr, stmp );
+		}
+	}
+
+	setPlainText( tr(stackLine.c_str()) );
 }
 //----------------------------------------------------------------------------
