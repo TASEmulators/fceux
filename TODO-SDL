@@ -29,7 +29,7 @@ OpenGL graphics                                      |     YES     |     YES    
 Hot key config window                                |     YES     |     YES     |
 Palette config window                                |     YES     |     YES     |
 Multi-thread (GUI and emulation on separate threads) |     YES     |     NO      |
-Emulation speed control via menu                     |     NO      |     NO      |
+Emulation speed control via menu                     |     YES     |     NO      |
 Emulation speed control via hotkeys                  |     YES     |     YES     |
 Fullscreen functionality                             |     YES     |     YES     |
 AVI Record Functionality                             |     NO      |     NO      |

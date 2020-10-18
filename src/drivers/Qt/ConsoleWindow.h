@@ -166,6 +166,13 @@ class  consoleWin_t : public QMainWindow
 		void fdsSwitchDisk(void);
 		void fdsEjectDisk(void);
 		void fdsLoadBiosFile(void);
+		void emuSpeedUp(void);
+		void emuSlowDown(void);
+		void emuSlowestSpd(void);
+		void emuNormalSpd(void);
+		void emuFastestSpd(void);
+		void emuCustomSpd(void);
+		void emuSetFrameAdvDelay(void);
 		void openPPUViewer(void);
 		void openNTViewer(void);
 		void openCheats(void);

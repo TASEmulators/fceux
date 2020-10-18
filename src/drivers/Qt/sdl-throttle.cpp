@@ -134,6 +134,31 @@ void DecreaseEmulationSpeed(void)
 	FCEU_DispMessage("Emulation speed %.1f%%",0, g_fpsScale*100.0);
 }
 
+int CustomEmulationSpeed(int spdPercent)
+{
+   if ( spdPercent < 1 )
+   {
+      return -1;
+   }
+	g_fpsScale = ((double)spdPercent) / 100.0f;
+
+	if (g_fpsScale < Slowest)
+   {
+	   g_fpsScale = Slowest;
+   }
+   else if (g_fpsScale > Fastest)
+   {
+	   g_fpsScale = Fastest;
+   }
+
+	RefreshThrottleFPS();
+
+	FCEU_DispMessage("Emulation speed %.1f%%",0, g_fpsScale*100.0);
+
+   return 0;
+}
+
+
 /**
  * Set the emulation speed throttling to a specific value.
  */

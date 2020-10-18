@@ -53,6 +53,7 @@ extern bool replaceP2StartWithMicrophone;
 
 void IncreaseEmulationSpeed(void);
 void DecreaseEmulationSpeed(void);
+int CustomEmulationSpeed(int spdPercent);
 
 int DTestButtonJoy(ButtConfig *bc);
 
