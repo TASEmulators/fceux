@@ -31,6 +31,7 @@ class LuaControlDialog_t : public QDialog
 	protected:
 		void closeEvent(QCloseEvent *bar);
 
+      QTimer      *periodicTimer;
 		QLineEdit   *scriptPath;
 		QLineEdit   *scriptArgs;
 		QPushButton *browseButton;
@@ -42,6 +43,7 @@ class LuaControlDialog_t : public QDialog
    public slots:
       void closeWindow(void);
 	private slots:
+      void updatePeriodic(void);
 		void openLuaScriptFile(void);
 		void startLuaScript(void);
 		void stopLuaScript(void);

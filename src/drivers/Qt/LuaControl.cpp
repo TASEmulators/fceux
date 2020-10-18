@@ -1,5 +1,7 @@
 // LuaControl.cpp
 //
+#include <stdio.h>
+#include <string.h>
 #include <list>
 
 #include <QTextEdit>
@@ -20,9 +22,76 @@
 #include "Qt/ConsoleUtilities.h"
 
 static bool luaScriptRunning = false;
+static bool updateLuaDisplay = false;
 
-static std::string luaOutputText;
+struct luaConsoleOutputLine
+{
+   char text[256];
+
+   luaConsoleOutputLine(void)
+   {
+      memset( text, 0, sizeof(text) );
+   }
+
+   void clear(void)
+   {
+      memset( text, 0, sizeof(text) );
+   }
+
+   void setText( const char *txt )
+   {
+      strncpy( text, txt, sizeof(text)-1 );
+      text[sizeof(text)-1] = 0;
+   }
+};
+
+struct luaConsoleOutputBuffer
+{
+   int  head;
+   int  tail;
+   int  size;
+   struct luaConsoleOutputLine  *line;
+
+   luaConsoleOutputBuffer(void)
+   {
+      tail = head = 0;
+      size = 64;
+
+      line = new luaConsoleOutputLine[size];
+   }
+
+  ~luaConsoleOutputBuffer(void)
+   {
+      if ( line )
+      {
+         delete [] line; line = NULL;
+      }
+   }
+   
+   void addLine( const char *l )
+   {
+      //printf("Adding Line %i: '%s'\n", head, l );
+      line[head].setText( l );
+
+      head = (head + 1) % size;
+
+      if ( head == tail )
+      {
+         tail = (tail + 1) % size;
+      }
+   }
+
+   void clear(void)
+   {
+      tail = head = 0;
+   }
+};
+
+static luaConsoleOutputBuffer outBuf;
+
 static std::list <LuaControlDialog_t*> winList;
+
+static void updateLuaWindows( void );
 //----------------------------------------------------
 LuaControlDialog_t::LuaControlDialog_t(QWidget *parent)
 	: QDialog( parent )
@@ -95,6 +164,12 @@ LuaControlDialog_t::LuaControlDialog_t(QWidget *parent)
 	setLayout( mainLayout );
 
 	winList.push_back( this );
+
+   periodicTimer  = new QTimer( this );
+
+   connect( periodicTimer, &QTimer::timeout, this, &LuaControlDialog_t::updatePeriodic );
+
+   periodicTimer->start( 200 ); // 5hz
 }
 
 //----------------------------------------------------
@@ -103,6 +178,8 @@ LuaControlDialog_t::~LuaControlDialog_t(void)
 	std::list <LuaControlDialog_t*>::iterator it;
 	  
 	printf("Destroy Lua Control Window\n");
+
+   periodicTimer->stop();
 
 	for (it = winList.begin(); it != winList.end(); it++)
 	{
@@ -128,6 +205,16 @@ void LuaControlDialog_t::closeWindow(void)
    //printf("Lua Control Close Window\n");
    done(0);
 	deleteLater();
+}
+//----------------------------------------------------
+void LuaControlDialog_t::updatePeriodic(void)
+{
+   //printf("Update Lua\n");
+   if ( updateLuaDisplay )
+   {
+      updateLuaWindows();
+      updateLuaDisplay = false;
+   }
 }
 //----------------------------------------------------
 void LuaControlDialog_t::openLuaScriptFile(void)
@@ -193,7 +280,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 void LuaControlDialog_t::startLuaScript(void)
 {
 #ifdef _S9XLUA_H
-	luaOutputText.clear();
+	outBuf.clear();
 	fceuWrapperLock();
 	if ( 0 == FCEU_LoadLuaCode( scriptPath->text().toStdString().c_str(), scriptArgs->text().toStdString().c_str() ) )
    {
@@ -214,6 +301,9 @@ void LuaControlDialog_t::stopLuaScript(void)
 //----------------------------------------------------
 void LuaControlDialog_t::refreshState(void)
 {
+   int i;
+   std::string luaOutputText;
+
 	if ( luaScriptRunning )
 	{
 		stopButton->setEnabled( true );
@@ -224,10 +314,22 @@ void LuaControlDialog_t::refreshState(void)
 		stopButton->setEnabled( false );
 		startButton->setText( tr("Start") );
 	}
+
+   i = outBuf.tail;
+
+   while ( i != outBuf.head )
+   {
+      luaOutputText.append( outBuf.line[i].text );
+
+      i = (i + 1) % outBuf.size;
+   }
+
 	luaOutput->setText( luaOutputText.c_str() );
+
+   luaOutput->moveCursor( QTextCursor::End );
 }
 //----------------------------------------------------
-void updateLuaWindows( void )
+static void updateLuaWindows( void )
 {
 	std::list <LuaControlDialog_t*>::iterator it;
 	  
@@ -259,8 +361,8 @@ void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str)
 {
 	//printf("%s\n", str );
 
-	luaOutputText.append( str );
+   outBuf.addLine( str );
 	
-	updateLuaWindows();
+	updateLuaDisplay = true;
 }
 //----------------------------------------------------
