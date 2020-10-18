@@ -69,6 +69,7 @@ extern uint8 qtaintramreg;
 
 extern  uint8  *RAM;            //shared memory modifications
 extern int EmulationPaused;
+extern int frameAdvance_Delay;
 
 uint8 FCEU_ReadRomByte(uint32 i);
 void FCEU_WriteRomByte(uint32 i, uint8 value);

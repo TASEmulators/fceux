@@ -172,6 +172,7 @@ class  consoleWin_t : public QMainWindow
 		void emuNormalSpd(void);
 		void emuFastestSpd(void);
 		void emuCustomSpd(void);
+		void emuSetFrameAdvDelay(void);
 		void openPPUViewer(void);
 		void openNTViewer(void);
 		void openCheats(void);

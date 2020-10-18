@@ -536,6 +536,16 @@ void consoleWin_t::createMainMenu(void)
 
     subMenu->addAction(act);
 
+    subMenu->addSeparator();
+
+    // Emulation -> Speed -> Set Frame Advance Delay
+	 act = new QAction(tr("Set Frame Advance Delay"), this);
+    //act->setShortcut( QKeySequence(tr("-")));
+    act->setStatusTip(tr("Set Frame Advance Delay"));
+    connect(act, SIGNAL(triggered()), this, SLOT(emuSetFrameAdvDelay(void)) );
+
+    subMenu->addAction(act);
+
 	 //-----------------------------------------------------------------------
 	 // Tools
     toolsMenu = menuBar()->addMenu(tr("Tools"));
@@ -1426,6 +1436,27 @@ void consoleWin_t::emuCustomSpd(void)
       spdPercent = dialog.intValue();
 
       CustomEmulationSpeed( spdPercent );
+   }
+}
+
+void consoleWin_t::emuSetFrameAdvDelay(void)
+{
+	int ret;
+	QInputDialog dialog(this);
+
+   dialog.setWindowTitle( tr("Frame Advance Delay") );
+   dialog.setLabelText( tr("How much time should elapse before holding the frame advance unpauses the simulation?") );
+   dialog.setOkButtonText( tr("Ok") );
+   dialog.setInputMode( QInputDialog::IntInput );
+   dialog.setIntRange( 0, 1000 );
+   dialog.setIntValue( frameAdvance_Delay );
+
+   dialog.show();
+   ret = dialog.exec();
+
+   if ( QDialog::Accepted == ret )
+   {
+      frameAdvance_Delay = dialog.intValue();
    }
 }
 
