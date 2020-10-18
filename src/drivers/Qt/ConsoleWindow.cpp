@@ -114,6 +114,12 @@ consoleWin_t::~consoleWin_t(void)
 	// clear the NetworkIP field so this doesn't happen unintentionally
 	g_config->setOption ("SDL.NetworkIP", "");
 	g_config->save ();
+
+	if ( this == consoleWindow )
+	{
+		consoleWindow = NULL;
+	}
+
 }
 
 void consoleWin_t::setCyclePeriodms( int ms )
