@@ -3364,7 +3364,7 @@ void DebuggerStackDisplay::updateText(void)
 	{
       if ( showAddrs || (stackBytesPerLine <= 1) )
       {
-		   sprintf( stmp, " $%04X : %02X", stackPtr, GetMem(stackPtr) );
+		   sprintf( stmp, "%03X: %02X", stackPtr, GetMem(stackPtr) );
       }
       else
       {
@@ -3386,7 +3386,7 @@ void DebuggerStackDisplay::updateText(void)
             {
                if ( showAddrs )
                {
-			   	   sprintf( stmp, "\n $%04X : %02X", stackPtr, GetMem(stackPtr) );
+			   	   sprintf( stmp, "\n%03X: %02X", stackPtr, GetMem(stackPtr) );
                }
                else
                {
@@ -3400,7 +3400,7 @@ void DebuggerStackDisplay::updateText(void)
          }
          else
          {
-			   sprintf( stmp, "\n $%04X : %02X", stackPtr, GetMem(stackPtr) );
+			   sprintf( stmp, "\n%03X: %02X", stackPtr, GetMem(stackPtr) );
          }
 			stackLine.append( stmp );
 
