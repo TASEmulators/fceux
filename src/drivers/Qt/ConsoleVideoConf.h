@@ -46,6 +46,7 @@ class ConsoleVideoConfDialog_t : public QDialog
       void closeWindow(void);
 
 	private slots:
+		void  openGL_linearFilterChanged( int value );
 		void  use_new_PPU_changed( int value );
 		void  frameskip_changed( int value );
 		void  useSpriteLimitChanged( int value );

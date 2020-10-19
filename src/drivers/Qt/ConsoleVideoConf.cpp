@@ -7,6 +7,7 @@
 #include "Qt/dface.h"
 #include "Qt/config.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleVideoConf.h"
 
 //----------------------------------------------------
@@ -41,6 +42,8 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	gl_LF_chkBox  = new QCheckBox( tr("Enable OpenGL Linear Filter") );
 
 	setCheckBoxFromProperty( gl_LF_chkBox  , "SDL.OpenGLip");
+
+	connect(gl_LF_chkBox , SIGNAL(stateChanged(int)), this, SLOT(openGL_linearFilterChanged(int)) );
 
 	main_vbox->addWidget( gl_LF_chkBox );
 
@@ -162,6 +165,21 @@ void  ConsoleVideoConfDialog_t::setComboBoxFromProperty( QComboBox *cbx, const c
 			cbx->setCurrentIndex(i); break;
 		}
 	}
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::openGL_linearFilterChanged( int value )
+{
+   bool opt =  (value != Qt::Unchecked);
+   g_config->setOption("SDL.OpenGLip", opt );
+	g_config->save ();
+
+   if ( consoleWindow != NULL )
+   {
+      if ( consoleWindow->viewport_GL )
+      {
+         consoleWindow->viewport_GL->setLinearFilterEnable( opt );
+      }
+   }
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::use_new_PPU_changed( int value )
