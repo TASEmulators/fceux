@@ -1088,9 +1088,19 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 QTraceLogView::QTraceLogView(QWidget *parent)
 	: QWidget(parent)
 {
+   QPalette pal;
+	QColor fg("black"), bg("white");
+
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
 	font.setStyleHint( QFont::Monospace );
+
+   pal = this->palette();
+	pal.setColor(QPalette::Base      , bg );
+	pal.setColor(QPalette::Background, bg );
+	pal.setColor(QPalette::WindowText, fg );
+
+	this->setPalette(pal);
 
 	calcFontData();
 
