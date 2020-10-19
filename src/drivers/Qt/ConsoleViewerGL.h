@@ -20,6 +20,8 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 
 		void transfer2LocalBuffer(void);
 
+      void setLinearFilterEnable( bool ena );
+
 	protected:
    void initializeGL(void);
 	void resizeGL(int w, int h);

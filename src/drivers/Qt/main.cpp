@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <QApplication>
 
 #include "Qt/ConsoleWindow.h"
@@ -9,6 +11,27 @@ int main( int argc, char *argv[] )
 {
 	int retval;
 	QApplication app(argc, argv);
+   const char *styleSheetEnv = NULL;
+
+   styleSheetEnv = ::getenv("FCEUX_QT_STYLESHEET");
+
+   if ( styleSheetEnv != NULL )
+   {
+      QFile File(styleSheetEnv);
+
+      if ( File.open(QFile::ReadOnly) )
+      {
+         QString StyleSheet = QLatin1String(File.readAll());
+
+         app.setStyleSheet(StyleSheet);
+
+         printf("Using Qt Stylesheet file '%s'\n", styleSheetEnv );
+      }
+      else
+      {
+         printf("Warning: Could not open Qt Stylesheet file '%s'\n", styleSheetEnv );
+      }
+   }
 
 	fceuWrapperInit( argc, argv );
 
