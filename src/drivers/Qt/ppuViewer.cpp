@@ -4,6 +4,8 @@
 #include <stdint.h>
 
 #include <QDir>
+#include <QMenu>
+#include <QAction>
 #include <QPainter>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -247,6 +249,8 @@ ppuPatternView_t::ppuPatternView_t( int patternIndexID, QWidget *parent)
 	viewWidth = 256;
 	viewHeight = 256;
 	tileLabel = NULL;
+   mode = 0;
+   drawTileGrid = true;
 }
 //----------------------------------------------------
 void ppuPatternView_t::setPattern( ppuPatternTable_t *p )
@@ -316,15 +320,46 @@ void ppuPatternView_t::resizeEvent(QResizeEvent *event)
   	pattern->h = viewHeight / 128;
 }
 //----------------------------------------------------
+void ppuPatternView_t::keyPressEvent(QKeyEvent *event)
+{
+	//printf("Pattern View Key Press: 0x%x \n", event->key() );
+
+   if ( event->key() == Qt::Key_Z )
+   {
+      mode = !mode;
+   }
+   else if ( event->key() == Qt::Key_G )
+   {
+      if ( mode )
+      {
+         drawTileGrid = !drawTileGrid;
+      }
+   }
+   else if ( event->key() == Qt::Key_P )
+   {
+      pindex[ patternIndex ] = (pindex[ patternIndex ] + 1) % 9;
+
+		PPUViewSkip = 100;
+
+		FCEUD_UpdatePPUView( -1, 0 );
+   }
+
+}
+//----------------------------------------------------
 void ppuPatternView_t::mouseMoveEvent(QMouseEvent *event)
 {
-	QPoint tile = convPixToTile( event->pos() );
+   if ( mode == 0 )
+   {
+	   QPoint tile = convPixToTile( event->pos() );
 
-	if ( (tile.x() < 16) && (tile.y() < 16) )
-	{
-		char stmp[64];
-		sprintf( stmp, "Tile: $%X%X", tile.y(), tile.x() );
-		tileLabel->setText( tr(stmp) );
+	   if ( (tile.x() < 16) && (tile.y() < 16) )
+	   {
+	   	char stmp[64];
+	   	sprintf( stmp, "Tile: $%X%X", tile.y(), tile.x() );
+	   	tileLabel->setText( tr(stmp) );
+
+         selTile = tile;
+	   }
 	}
 }
 //----------------------------------------------------------------------------
@@ -339,14 +374,132 @@ void ppuPatternView_t::mousePressEvent(QMouseEvent * event)
 
 		FCEUD_UpdatePPUView( -1, 0 );
 	}
-	else if ( event->button() == Qt::RightButton )
+}
+//----------------------------------------------------
+void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
+{
+	QAction *act;
+	QMenu menu(this);
+   QMenu *subMenu;
+	QActionGroup *group;
+	QAction *paletteAct[9];
+   char stmp[64];
+
+   if ( mode )
+   {
+      sprintf( stmp, "Exit Tile View: %X%X", selTile.y(), selTile.x() );
+
+      act = new QAction(tr(stmp), &menu);
+	   connect( act, SIGNAL(triggered(void)), this, SLOT(exitTileMode(void)) );
+      menu.addAction( act );
+
+      act = new QAction(tr("Draw Tile Grid Lines"), &menu);
+      act->setCheckable(true);
+      act->setChecked(drawTileGrid);
+	   connect( act, SIGNAL(triggered(void)), this, SLOT(toggleTileGridLines(void)) );
+      menu.addAction( act );
+   }
+   else
+   {
+      sprintf( stmp, "View Tile: %X%X", selTile.y(), selTile.x() );
+
+      act = new QAction(tr(stmp), &menu);
+	   connect( act, SIGNAL(triggered(void)), this, SLOT(showTileMode(void)) );
+      menu.addAction( act );
+   }
+
+
+	subMenu = menu.addMenu(tr("Palette Select"));
+	group   = new QActionGroup(this);
+
+	group->setExclusive(true);
+
+	for (int i=0; i<9; i++)
 	{
-		pindex[ patternIndex ] = (pindex[ patternIndex ] + 1) % 9;
+	   char stmp[8];
 
-		PPUViewSkip = 100;
+	   sprintf( stmp, "%i", i+1 );
 
-		FCEUD_UpdatePPUView( -1, 0 );
+	   paletteAct[i] = new QAction(tr(stmp), &menu);
+	   paletteAct[i]->setCheckable(true);
+
+	   group->addAction(paletteAct[i]);
+		subMenu->addAction(paletteAct[i]);
+      
+	   paletteAct[i]->setChecked( pindex[ patternIndex ] == i );
 	}
+
+   connect( paletteAct[0], SIGNAL(triggered(void)), this, SLOT(selPalette0(void)) );
+   connect( paletteAct[1], SIGNAL(triggered(void)), this, SLOT(selPalette1(void)) );
+   connect( paletteAct[2], SIGNAL(triggered(void)), this, SLOT(selPalette2(void)) );
+   connect( paletteAct[3], SIGNAL(triggered(void)), this, SLOT(selPalette3(void)) );
+   connect( paletteAct[4], SIGNAL(triggered(void)), this, SLOT(selPalette4(void)) );
+   connect( paletteAct[5], SIGNAL(triggered(void)), this, SLOT(selPalette5(void)) );
+   connect( paletteAct[6], SIGNAL(triggered(void)), this, SLOT(selPalette6(void)) );
+   connect( paletteAct[7], SIGNAL(triggered(void)), this, SLOT(selPalette7(void)) );
+   connect( paletteAct[8], SIGNAL(triggered(void)), this, SLOT(selPalette8(void)) );
+
+   menu.exec(event->globalPos());
+}
+//----------------------------------------------------
+void ppuPatternView_t::toggleTileGridLines(void)
+{
+   drawTileGrid = !drawTileGrid;
+}
+//----------------------------------------------------
+void ppuPatternView_t::showTileMode(void)
+{
+   mode = 1;
+}
+//----------------------------------------------------
+void ppuPatternView_t::exitTileMode(void)
+{
+   mode = 0;
+}
+//----------------------------------------------------
+void ppuPatternView_t::selPalette0(void)
+{
+   pindex[ patternIndex ] = 0;
+}
+//----------------------------------------------------
+void ppuPatternView_t::selPalette1(void)
+{
+   pindex[ patternIndex ] = 1;
+}
+//----------------------------------------------------
+void ppuPatternView_t::selPalette2(void)
+{
+   pindex[ patternIndex ] = 2;
+}
+//----------------------------------------------------
+void ppuPatternView_t::selPalette3(void)
+{
+   pindex[ patternIndex ] = 3;
+}
+//----------------------------------------------------
+void ppuPatternView_t::selPalette4(void)
+{
+   pindex[ patternIndex ] = 4;
+}
+//----------------------------------------------------
+void ppuPatternView_t::selPalette5(void)
+{
+   pindex[ patternIndex ] = 5;
+}
+//----------------------------------------------------
+void ppuPatternView_t::selPalette6(void)
+{
+   pindex[ patternIndex ] = 6;
+}
+//----------------------------------------------------
+void ppuPatternView_t::selPalette7(void)
+{
+   pindex[ patternIndex ] = 7;
+}
+//----------------------------------------------------
+void ppuPatternView_t::selPalette8(void)
+{
+   pindex[ patternIndex ] = 8;
 }
 //----------------------------------------------------
 void ppuPatternView_t::paintEvent(QPaintEvent *event)
@@ -366,7 +519,54 @@ void ppuPatternView_t::paintEvent(QPaintEvent *event)
 
 	xx = 0; yy = 0;
 
-	if ( PPUView_sprite16Mode[ patternIndex ] )
+   if ( mode == 1 )
+   {
+	   w = viewWidth / 8;
+  	   h = viewHeight / 8;
+
+      if ( w < h )
+      {
+         h = w;
+      }
+      else
+      {
+         w = h;
+      }
+
+      ii = selTile.x();
+      jj = selTile.y();
+
+      // Draw Tile Pixels as rectangles
+      for (x=0; x < 8; x++)
+		{
+			yy = 0;
+
+			for (y=0; y < 8; y++)
+			{
+				painter.fillRect( xx, yy, w, h, pattern->tile[jj][ii].pixel[y][x].color );
+				yy += h;
+			}
+			xx += w;
+		}
+
+      if ( drawTileGrid )
+      {
+         // Draw Tile Pixel grid lines
+         xx = 0; y = 8*h;
+
+         for (x=0; x<9; x++)
+         {
+		      painter.drawLine( xx, 0 , xx, y ); xx += w;
+         }
+         yy = 0; x = 8*w;
+
+         for (y=0; y<9; y++)
+         {
+		      painter.drawLine( 0, yy , x, yy ); yy += h;
+         }
+      }
+   }
+   else if ( PPUView_sprite16Mode[ patternIndex ] )
 	{
 		for (i=0; i<16; i++) //Columns
 		{
