@@ -23,6 +23,8 @@ class ConsoleViewSDL_t : public QWidget
 
 		void transfer2LocalBuffer(void);
 
+      void setLinearFilterEnable( bool ena );
+
 	protected:
 
 	//void paintEvent(QPaintEvent *event);
@@ -39,6 +41,7 @@ class ConsoleViewSDL_t : public QWidget
 	 int  sdlRendH;
 
 	 bool vsyncEnabled;
+    bool linearFilter;
 
 	 uint32_t  *localBuf;
 	uint32_t   localBufSize;
