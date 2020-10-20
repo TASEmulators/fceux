@@ -40,6 +40,8 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 		memset( localBuf, 0, localBufSize );
 	}
 
+   linearFilter = false;
+
    if ( g_config )
    {
       int opt;
