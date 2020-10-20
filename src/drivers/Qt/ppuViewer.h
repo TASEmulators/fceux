@@ -77,6 +77,7 @@ class ppuPatternView_t : public QWidget
       void selPalette6(void);
       void selPalette7(void);
       void selPalette8(void);
+      void cycleNextPalette(void);
       void toggleTileGridLines(void);
 };
 

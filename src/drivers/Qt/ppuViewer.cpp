@@ -390,12 +390,14 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
       sprintf( stmp, "Exit Tile View: %X%X", selTile.y(), selTile.x() );
 
       act = new QAction(tr(stmp), &menu);
+      act->setShortcut( QKeySequence(tr("Z")));
 	   connect( act, SIGNAL(triggered(void)), this, SLOT(exitTileMode(void)) );
       menu.addAction( act );
 
       act = new QAction(tr("Draw Tile Grid Lines"), &menu);
       act->setCheckable(true);
       act->setChecked(drawTileGrid);
+      act->setShortcut( QKeySequence(tr("G")));
 	   connect( act, SIGNAL(triggered(void)), this, SLOT(toggleTileGridLines(void)) );
       menu.addAction( act );
    }
@@ -404,10 +406,15 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
       sprintf( stmp, "View Tile: %X%X", selTile.y(), selTile.x() );
 
       act = new QAction(tr(stmp), &menu);
+      act->setShortcut( QKeySequence(tr("Z")));
 	   connect( act, SIGNAL(triggered(void)), this, SLOT(showTileMode(void)) );
       menu.addAction( act );
    }
 
+   act = new QAction(tr("Next Palette"), &menu);
+   act->setShortcut( QKeySequence(tr("P")));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(cycleNextPalette(void)) );
+   menu.addAction( act );
 
 	subMenu = menu.addMenu(tr("Palette Select"));
 	group   = new QActionGroup(this);
@@ -455,6 +462,15 @@ void ppuPatternView_t::showTileMode(void)
 void ppuPatternView_t::exitTileMode(void)
 {
    mode = 0;
+}
+//----------------------------------------------------
+void ppuPatternView_t::cycleNextPalette(void)
+{
+   pindex[ patternIndex ] = (pindex[ patternIndex ] + 1) % 9;
+
+	PPUViewSkip = 100;
+
+	FCEUD_UpdatePPUView( -1, 0 );
 }
 //----------------------------------------------------
 void ppuPatternView_t::selPalette0(void)
