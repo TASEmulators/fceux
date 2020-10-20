@@ -52,14 +52,33 @@ class ppuPatternView_t : public QWidget
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
+      void keyPressEvent(QKeyEvent *event);
 		void mouseMoveEvent(QMouseEvent *event);
 		void mousePressEvent(QMouseEvent * event);
+      void contextMenuEvent(QContextMenuEvent *event);
 
 		int patternIndex;
 		int viewWidth;
 		int viewHeight;
+      int mode;
+      bool drawTileGrid;
 		QLabel *tileLabel;
+      QPoint  selTile;
 		ppuPatternTable_t *pattern;
+   private slots:
+      void showTileMode(void);
+      void exitTileMode(void);
+      void selPalette0(void);
+      void selPalette1(void);
+      void selPalette2(void);
+      void selPalette3(void);
+      void selPalette4(void);
+      void selPalette5(void);
+      void selPalette6(void);
+      void selPalette7(void);
+      void selPalette8(void);
+      void cycleNextPalette(void);
+      void toggleTileGridLines(void);
 };
 
 class ppuPalatteView_t : public QWidget
