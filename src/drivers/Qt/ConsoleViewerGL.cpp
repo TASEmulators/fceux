@@ -40,6 +40,8 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 		memset( localBuf, 0, localBufSize );
 	}
 
+   linearFilter = false;
+
    if ( g_config )
    {
       int opt;
@@ -133,9 +135,12 @@ void ConsoleViewGL_t::resizeGL(int w, int h)
 
 void ConsoleViewGL_t::setLinearFilterEnable( bool ena )
 {
-   linearFilter = ena;
+   if ( linearFilter != ena )
+   {
+      linearFilter = ena;
 
-	buildTextures();
+	   buildTextures();
+   }
 }
 
 void ConsoleViewGL_t::transfer2LocalBuffer(void)

@@ -179,6 +179,10 @@ void ConsoleVideoConfDialog_t::openGL_linearFilterChanged( int value )
       {
          consoleWindow->viewport_GL->setLinearFilterEnable( opt );
       }
+      if ( consoleWindow->viewport_SDL )
+      {
+         consoleWindow->viewport_SDL->setLinearFilterEnable( opt );
+      }
    }
 }
 //----------------------------------------------------

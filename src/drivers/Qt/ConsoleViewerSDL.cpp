@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "Qt/nes_shm.h"
+#include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleViewerSDL.h"
 
 extern unsigned int gui_draw_area_width;
@@ -46,6 +47,15 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 		memset( localBuf, 0, localBufSize );
 	}
 
+   linearFilter = false;
+
+   if ( g_config )
+   {
+      int opt;
+      g_config->getOption("SDL.OpenGLip", &opt );
+
+      linearFilter = (opt) ? true : false;
+   }
 }
 
 ConsoleViewSDL_t::~ConsoleViewSDL_t(void)
@@ -56,6 +66,16 @@ ConsoleViewSDL_t::~ConsoleViewSDL_t(void)
 	}
 }
 
+void ConsoleViewSDL_t::setLinearFilterEnable( bool ena )
+{
+   if ( ena != linearFilter )
+   {
+      linearFilter = ena;
+
+	   reset();
+   }
+}
+
 void ConsoleViewSDL_t::transfer2LocalBuffer(void)
 {
 	memcpy( localBuf, nes_shm->pixbuf, localBufSize );
@@ -64,6 +84,15 @@ void ConsoleViewSDL_t::transfer2LocalBuffer(void)
 int ConsoleViewSDL_t::init(void)
 {
 	WId windowHandle;
+
+   if ( linearFilter )
+   {
+       SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
+   }
+   else
+   {
+       SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "0" );
+   }
 
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) 
 	{
