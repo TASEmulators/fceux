@@ -206,10 +206,13 @@ DriverKill()
 	inited=0;
 }
 
+/**
+ * Reloads last game
+ */
 int reloadLastGame() {
 	std::string lastRom;
 	g_config->getOption(std::string("SDL.LastOpenFile"), &lastRom);
-	return LoadGame(lastRom.c_str());
+	return LoadGame(lastRom.c_str(), false);
 }
 
 /**
@@ -218,7 +221,7 @@ int reloadLastGame() {
  * provides data necessary for the driver code(number of scanlines to
  * render, what virtual input devices to use, etc.).
  */
-int LoadGame(const char *path)
+int LoadGame(const char *path, bool silent)
 {
 	int gg_enabled, autoLoadDebug, autoOpenDebugger;
 
@@ -233,7 +236,7 @@ int LoadGame(const char *path)
 
 	FCEUI_SetGameGenie (gg_enabled);
 
-	if(!FCEUI_LoadGame(path, 1)) {
+	if(!FCEUI_LoadGame(path, 1, silent)) {
 		return 0;
 	}
 

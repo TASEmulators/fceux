@@ -520,6 +520,7 @@ static int emu_getdir(lua_State *L) {
 
 
 extern void ReloadRom(void);
+extern int LoadGame(const char*, bool);
 
 // emu.loadrom(string filename)
 //
@@ -549,7 +550,7 @@ static int emu_loadrom(lua_State *L) {
 	const char *nameo2 = luaL_checkstring(L,1);
 	char nameo[2048];
 	strncpy(nameo, nameo2, sizeof(nameo));
-	if(!FCEUI_LoadGame(nameo, 0, true)) {
+	if(!LoadGame(nameo, true)) {
 		extern void reloadLastGame();
 		reloadLastGame();
 		return 0;
