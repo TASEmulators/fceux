@@ -189,6 +189,12 @@ static void ShowUsage(char *prog)
 	
 }
 
+int reloadLastGame() {
+	std::string lastRom;
+	g_config->getOption(std::string("SDL.LastOpenFile"), &lastRom);
+	return LoadGame(lastRom.c_str());
+}
+
 /**
  * Loads a game, given a full path/filename.  The driver code must be
  * initialized after the game is loaded, because the emulator code

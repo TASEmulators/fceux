@@ -545,6 +545,17 @@ static int emu_loadrom(lua_State *L) {
 	} else {
 		return 1;
 	}
+#else
+	const char *nameo2 = luaL_checkstring(L,1);
+	char nameo[2048];
+	strncpy(nameo, nameo2, sizeof(nameo));
+	if(!FCEUI_LoadGame(nameo, 0, true)) {
+		extern void reloadLastGame();
+		reloadLastGame();
+		return 0;
+	} else {
+		return 1;
+	}
 #endif
 	return 1;
 }
