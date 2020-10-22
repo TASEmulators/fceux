@@ -324,7 +324,7 @@ void CodeDataLoggerDialog_t::saveCdlFileAs(void)
 	dialog.setNameFilter(tr("CDL Files (*.cdl *.CDL) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
 	dialog.setDefaultSuffix( tr(".cdl") );
 
@@ -387,7 +387,7 @@ void CodeDataLoggerDialog_t::loadCdlFile(void)
 	dialog.setNameFilter(tr("CDL files (*.cdl *.CDL) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
 	romFile = getRomFile();
@@ -470,7 +470,7 @@ void CodeDataLoggerDialog_t::SaveStrippedROM(int invert)
 		dialog.setDefaultSuffix( tr(".nes") );
 	}
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
 
 	romFile = getRomFile();

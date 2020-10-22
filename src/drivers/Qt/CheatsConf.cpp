@@ -701,7 +701,7 @@ void GuiCheatsDialog_t::openCheatFile(void)
 	dialog.setNameFilter(tr("Cheat files (*.cht *.CHT) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
@@ -766,7 +766,7 @@ void GuiCheatsDialog_t::saveCheatFile(void)
 	dialog.setNameFilter(tr("Cheat files (*.cht *.CHT) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
 
 	if ( GameInfo )
