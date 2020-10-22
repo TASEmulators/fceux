@@ -1,8 +1,10 @@
 #ifdef __linux
+#include <stdlib.h>
 #include <unistd.h>
 #define SetCurrentDir chdir
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <libgen.h>
 #endif
 
 #ifdef WIN32
@@ -525,6 +527,52 @@ static int emu_getdir(lua_State *L) {
 	lua_pushstring(L, finalPath);
 
 	return 1;
+#elif __linux__
+	char exePath[ 2048 ];
+   ssize_t count = ::readlink( "/proc/self/exe", exePath, sizeof(exePath)-1 );
+
+	if ( count > 0 )
+	{
+		char *dir;
+		exePath[count] = 0;
+		//printf("EXE Path: '%s' \n", exePath );
+
+		dir = ::dirname( exePath );
+
+		if ( dir )
+		{
+			//printf("DIR Path: '%s' \n", dir );
+	   	lua_pushstring(L, dir);
+			return 1;
+		}
+	}
+#elif	  __APPLE__
+	char exePath[ 2048 ];
+	uint32_t bufSize = sizeof(exePath);
+	int result = _NSGetExecutablePath( exePath, &bufSize );
+
+	if ( result == 0 )
+	{
+		int i = bufSize;
+		exePath[ bufSize ] = 0;
+		//printf("EXE Path: '%s' \n", exePath );
+
+		while ( i >= 0 )
+		{
+			if ( exePath[i] == '/' )
+			{
+				break;
+			}
+			exePath[i] = 0; i--;
+		}
+
+		if ( i > 0 )
+		{
+			//printf("DIR Path: '%s' \n", exePath );
+	  		lua_pushstring(L, exePath);
+			return 1;
+		}
+	}
 #endif
 	return 0;
 }
