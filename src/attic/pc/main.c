@@ -275,12 +275,12 @@ static void DoArgs(int argc, char *argv[])
    provides data necessary for the driver code(number of scanlines to
    render, what virtual input devices to use, etc.).
 */
-int LoadGame(const char *path)
+int LoadGame(const char *path, bool silent)
 {
 	FCEUGI *tmp;
 
 	CloseGame();
-        if(!(tmp=FCEUI_LoadGame(path,1)))
+        if(!(tmp=FCEUI_LoadGame(path,1,silent)))
 	 return 0;
 	CurGame=tmp;
         ParseGI(tmp);

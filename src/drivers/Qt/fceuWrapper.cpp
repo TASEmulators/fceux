@@ -207,12 +207,21 @@ DriverKill()
 }
 
 /**
+ * Reloads last game
+ */
+int reloadLastGame() {
+	std::string lastRom;
+	g_config->getOption(std::string("SDL.LastOpenFile"), &lastRom);
+	return LoadGame(lastRom.c_str(), false);
+}
+
+/**
  * Loads a game, given a full path/filename.  The driver code must be
  * initialized after the game is loaded, because the emulator code
  * provides data necessary for the driver code(number of scanlines to
  * render, what virtual input devices to use, etc.).
  */
-int LoadGame(const char *path)
+int LoadGame(const char *path, bool silent)
 {
 	int gg_enabled, autoLoadDebug, autoOpenDebugger;
 
@@ -227,7 +236,7 @@ int LoadGame(const char *path)
 
 	FCEUI_SetGameGenie (gg_enabled);
 
-	if(!FCEUI_LoadGame(path, 1)) {
+	if(!FCEUI_LoadGame(path, 1, silent)) {
 		return 0;
 	}
 
