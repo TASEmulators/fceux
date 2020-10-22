@@ -44,7 +44,7 @@ void LockConsole(void);
 void UnlockConsole(void);
 void ToggleFS();		/* SDL */
 
-int LoadGame(const char *path);
+int LoadGame(const char *path, bool silent = false);
 int CloseGame(void);
 int GUI_Init(int argc, char **argv, int (*dofunc)(void));
 int GUI_Idle(void);
