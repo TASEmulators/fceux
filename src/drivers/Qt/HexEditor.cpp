@@ -1753,22 +1753,22 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 	{
 		case MODE_NES_RAM:
 		{
-			act = new QAction(tr("Add Symbolic Debug Name"), this);
+			act = new QAction(tr("Add Symbolic Debug Name"), &menu);
    		menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addDebugSym(void)) );
 
 			sprintf( stmp, "Add Read Breakpoint for Address $%04X", addr );
-			act = new QAction(tr(stmp), this);
+			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamReadBP(void)) );
 
 			sprintf( stmp, "Add Write Breakpoint for Address $%04X", addr );
-			act = new QAction(tr(stmp), this);
+			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamWriteBP(void)) );
 
 			sprintf( stmp, "Add Execute Breakpoint for Address $%04X", addr );
-			act = new QAction(tr(stmp), this);
+			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamExecuteBP(void)) );
 
@@ -1780,13 +1780,13 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 				{
 					jumpToRomValue = romAddr;
 					sprintf( stmp, "Go Here in ROM File: (%08X)", romAddr );
-					act = new QAction(tr(stmp), this);
+					act = new QAction(tr(stmp), &menu);
    				menu.addAction(act);
 					connect( act, SIGNAL(triggered(void)), this, SLOT(jumpToROM(void)) );
 				}
 			}
 
-			act = new QAction(tr("Add Bookmark"), this);
+			act = new QAction(tr("Add Bookmark"), &menu);
    		menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
 		}
@@ -1794,30 +1794,30 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 		case MODE_NES_PPU:
 		{
 			sprintf( stmp, "Add Read Breakpoint for Address $%04X", addr );
-			act = new QAction(tr(stmp), this);
+			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addPpuReadBP(void)) );
 
 			sprintf( stmp, "Add Write Breakpoint for Address $%04X", addr );
-			act = new QAction(tr(stmp), this);
+			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addPpuWriteBP(void)) );
 
-			act = new QAction(tr("Add Bookmark"), this);
+			act = new QAction(tr("Add Bookmark"), &menu);
    		menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
 		}
 		break;
 		case MODE_NES_OAM:
 		{
-			act = new QAction(tr("Add Bookmark"), this);
+			act = new QAction(tr("Add Bookmark"), &menu);
    		menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
 		}
 		break;
 		case MODE_NES_ROM:
 		{
-			act = new QAction(tr("Add Bookmark"), this);
+			act = new QAction(tr("Add Bookmark"), &menu);
    		menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
 		}

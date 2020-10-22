@@ -143,13 +143,13 @@ int CustomEmulationSpeed(int spdPercent)
 	g_fpsScale = ((double)spdPercent) / 100.0f;
 
 	if (g_fpsScale < Slowest)
-   {
-	   g_fpsScale = Slowest;
-   }
-   else if (g_fpsScale > Fastest)
-   {
-	   g_fpsScale = Fastest;
-   }
+	{
+		g_fpsScale = Slowest;
+	}
+	else if (g_fpsScale > Fastest)
+	{
+		g_fpsScale = Fastest;
+	}
 
 	RefreshThrottleFPS();
 

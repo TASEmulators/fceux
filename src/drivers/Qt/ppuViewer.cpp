@@ -417,7 +417,7 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
    menu.addAction( act );
 
 	subMenu = menu.addMenu(tr("Palette Select"));
-	group   = new QActionGroup(this);
+	group   = new QActionGroup(&menu);
 
 	group->setExclusive(true);
 

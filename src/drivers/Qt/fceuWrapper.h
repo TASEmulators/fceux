@@ -19,8 +19,9 @@ extern unsigned int gui_draw_area_height;
 // global configuration object
 extern Config *g_config;
 
-int LoadGame(const char *path);
+int LoadGame(const char *path, bool silent = false);
 int CloseGame(void);
+int reloadLastGame(void);
 
 int  fceuWrapperInit( int argc, char *argv[] );
 int  fceuWrapperClose( void );

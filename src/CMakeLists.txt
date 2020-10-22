@@ -81,7 +81,7 @@ else(WIN32)
   pkg_check_modules( SDL2 REQUIRED sdl2)
 
   if ( ${SDL2_FOUND} )
-	  add_definitions( ${SDL2_CFLAGS} )
+	  add_definitions( ${SDL2_CFLAGS} -D__SDL__ )
   endif()
 
   # Check for LUA

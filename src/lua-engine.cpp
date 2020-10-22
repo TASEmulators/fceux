@@ -1,8 +1,14 @@
 #ifdef __linux
+#include <stdlib.h>
 #include <unistd.h>
 #define SetCurrentDir chdir
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <libgen.h>
+#elif   __APPLE__
+#include <stdlib.h>
+#include <libgen.h>
+#include <mach-o/dyld.h>
 #endif
 
 #ifdef WIN32
@@ -40,6 +46,17 @@ extern char FileBase[];
 #include "drivers/win/taseditor/taseditor_lua.h"
 #include "drivers/win/cdlogger.h"
 extern TASEDITOR_LUA taseditor_lua;
+#endif
+
+#ifdef __SDL__
+
+#ifdef __QT_DRIVER__
+#include "drivers/Qt/fceuWrapper.h"
+#else
+int LoadGame(const char *path, bool silent = false);
+int reloadLastGame(void);
+#endif
+
 #endif
 
 #include <cstdio>
@@ -514,6 +531,45 @@ static int emu_getdir(lua_State *L) {
 	lua_pushstring(L, finalPath);
 
 	return 1;
+#elif __linux__
+	char exePath[ 2048 ];
+   ssize_t count = ::readlink( "/proc/self/exe", exePath, sizeof(exePath)-1 );
+
+	if ( count > 0 )
+	{
+		char *dir;
+		exePath[count] = 0;
+		//printf("EXE Path: '%s' \n", exePath );
+
+		dir = ::dirname( exePath );
+
+		if ( dir )
+		{
+			//printf("DIR Path: '%s' \n", dir );
+	   	lua_pushstring(L, dir);
+			return 1;
+		}
+	}
+#elif	  __APPLE__
+	char exePath[ 2048 ];
+	uint32_t bufSize = sizeof(exePath);
+	int result = _NSGetExecutablePath( exePath, &bufSize );
+
+	if ( result == 0 )
+	{
+		char *dir;
+		exePath[ bufSize ] = 0;
+		//printf("EXE Path: '%s' \n", exePath );
+
+		dir = ::dirname( exePath );
+
+		if ( dir )
+		{
+			//printf("DIR Path: '%s' \n", dir );
+			lua_pushstring(L, dir);
+			return 1;
+		}
+	}
 #endif
 	return 0;
 }
@@ -521,11 +577,13 @@ static int emu_getdir(lua_State *L) {
 
 extern void ReloadRom(void);
 
+
 // emu.loadrom(string filename)
 //
 //  Loads the rom from the directory relative to the lua script or from the absolute path.
 //  If the rom can't be loaded, loads the most recent one.
-static int emu_loadrom(lua_State *L) {
+static int emu_loadrom(lua_State *L) 
+{
 #ifdef WIN32
 	const char* str = lua_tostring(L,1);
 
@@ -541,6 +599,17 @@ static int emu_loadrom(lua_State *L) {
 	if (!ALoad(nameo)) {
 		extern void LoadRecentRom(int slot);
 		LoadRecentRom(0);
+		return 0;
+	} else {
+		return 1;
+	}
+#else
+	const char *nameo2 = luaL_checkstring(L,1);
+	char nameo[2048];
+	strncpy(nameo, nameo2, sizeof(nameo));
+	if (!LoadGame(nameo, true)) 
+	{
+		reloadLastGame();
 		return 0;
 	} else {
 		return 1;
@@ -6011,7 +6080,8 @@ static const struct luaL_reg cdloglib[] = {
 	{ NULL,NULL }
 };
 
-void CallExitFunction() {
+void CallExitFunction() 
+{
 	if (!L)
 		return;
 

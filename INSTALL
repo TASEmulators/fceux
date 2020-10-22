@@ -1,9 +1,9 @@
-To compile and install FCEUX for SDL, follow the instructions in the README-SDL.md file.
+To compile and install FCEUX for SDL, follow the instructions in the README file.
 
 Users of Microsoft Visual Studio can use the solution files within the vc directory. The Windows XP toolset is required to open and build this solution. If it
 is not installed, go to "Tools" > "Get Tools and Features". Select "Individual Components" and then install "C++ Windows XP Support for VS 2017 (v141) tools".
 These solution files will compile FCEUX and some included libraries for full functionality.
 
 The SDL port build tool of choice has come full circle back to Cmake. The cmake build tool will compile the new Qt version of the SDL GUI.
-The scons build tool will build the older GTK based GUI which currently only builds on Linux. 
+Building of the SDL fceux no longer supports use of the scons build tool.
 

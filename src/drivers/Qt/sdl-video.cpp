@@ -30,7 +30,6 @@
 
 #include "utils/memory.h"
 
-//#include "sdl-icon.h"
 #include "Qt/dface.h"
 
 #include "common/configSys.h"
