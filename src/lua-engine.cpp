@@ -42,6 +42,17 @@ extern char FileBase[];
 extern TASEDITOR_LUA taseditor_lua;
 #endif
 
+#ifdef __SDL__
+
+#ifdef __QT_DRIVER__
+#include "drivers/Qt/fceuWrapper.h"
+#else
+int LoadGame(const char *path, bool silent = false);
+int reloadLastGame(void);
+#endif
+
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -520,13 +531,14 @@ static int emu_getdir(lua_State *L) {
 
 
 extern void ReloadRom(void);
-extern int LoadGame(const char*, bool);
+
 
 // emu.loadrom(string filename)
 //
 //  Loads the rom from the directory relative to the lua script or from the absolute path.
 //  If the rom can't be loaded, loads the most recent one.
-static int emu_loadrom(lua_State *L) {
+static int emu_loadrom(lua_State *L) 
+{
 #ifdef WIN32
 	const char* str = lua_tostring(L,1);
 
@@ -550,8 +562,8 @@ static int emu_loadrom(lua_State *L) {
 	const char *nameo2 = luaL_checkstring(L,1);
 	char nameo[2048];
 	strncpy(nameo, nameo2, sizeof(nameo));
-	if(!LoadGame(nameo, true)) {
-		extern void reloadLastGame();
+	if (!LoadGame(nameo, true)) 
+	{
 		reloadLastGame();
 		return 0;
 	} else {

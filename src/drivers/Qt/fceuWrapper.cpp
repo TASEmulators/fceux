@@ -209,7 +209,8 @@ DriverKill()
 /**
  * Reloads last game
  */
-int reloadLastGame() {
+int reloadLastGame(void)
+{
 	std::string lastRom;
 	g_config->getOption(std::string("SDL.LastOpenFile"), &lastRom);
 	return LoadGame(lastRom.c_str(), false);
