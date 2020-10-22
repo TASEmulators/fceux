@@ -9,7 +9,6 @@
 #include <QUrl>
 #include <QTextEdit>
 #include <QDesktopServices>
-//#include "Qt/icon.xpm"
 #include "Qt/AboutWindow.h"
 #include "Qt/fceux_git_info.h"
 #include "../../version.h"
@@ -41,7 +40,6 @@ AboutWindow::AboutWindow(QWidget *parent)
 	int i;
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox1;
-	//QPixmap pm( icon_xpm );
 	QPixmap pm(":fceux1.png");
 	QPixmap pm2;
 	QLabel *lbl;
