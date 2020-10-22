@@ -6,7 +6,9 @@
 #include <sys/wait.h>
 #include <libgen.h>
 #elif   __APPLE__
+#include <stdlib.h>
 #include <libgen.h>
+#include <mach-o/dyld.h>
 #endif
 
 #ifdef WIN32
