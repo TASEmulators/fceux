@@ -308,7 +308,7 @@ void PaletteConfDialog_t::openPaletteFile(void)
 	dialog.setNameFilter(tr("NES Palettes (*.pal *.PAL) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
 	g_config->getOption ("SDL.Palette", &last );

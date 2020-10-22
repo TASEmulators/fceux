@@ -907,7 +907,7 @@ void HexEditorDialog_t::saveRomFileAs(void)
 	dialog.setNameFilter(tr("NES Files (*.nes *.NES) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
 	dialog.setDefaultSuffix( tr(".nes") );
 

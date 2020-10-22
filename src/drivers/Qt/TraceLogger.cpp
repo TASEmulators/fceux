@@ -386,7 +386,7 @@ void TraceLoggerDialog_t::openLogFile(void)
 	dialog.setNameFilter(tr("LOG files (*.log *.LOG) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
 	dialog.setDefaultSuffix( tr(".log") );
 

@@ -503,7 +503,7 @@ void RamWatchDialog_t::openListCB(void)
 	dialog.setNameFilter(tr("Watch files (*.wch *.WCH) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
 
 	//g_config->getOption ("SDL.LastOpenFile", &last );
@@ -565,7 +565,7 @@ void RamWatchDialog_t::appendListCB(void)
 	dialog.setNameFilter(tr("Watch Files (*.wch *.WCH) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 	dialog.setDefaultSuffix( tr(".wch") );
 
@@ -649,7 +649,7 @@ void RamWatchDialog_t::saveListAs(void)
 	dialog.setNameFilter(tr("Watch Files (*.wch *.WCH) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
 	dialog.setDefaultSuffix( tr(".wch") );
 
