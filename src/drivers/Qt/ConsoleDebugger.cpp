@@ -3010,19 +3010,19 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 
 		ctxMenuAddr = addr = asmEntry[line]->addr;
 
-		act = new QAction(tr("Add Breakpoint"), this);
+		act = new QAction(tr("Add Breakpoint"), &menu);
 		menu.addAction(act);
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBP(void)) );
 
-		act = new QAction(tr("Add Symbolic Debug Marker"), this);
+		act = new QAction(tr("Add Symbolic Debug Marker"), &menu);
 	 	menu.addAction(act);
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddSym(void)) );
 
-		act = new QAction(tr("Add Bookmark"), this);
+		act = new QAction(tr("Add Bookmark"), &menu);
 	 	menu.addAction(act);
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBM(void)) );
 		
-		act = new QAction(tr("Open Hex Editor"), this);
+		act = new QAction(tr("Open Hex Editor"), &menu);
 	 	menu.addAction(act);
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuOpenHexEdit(void)) );
 		
@@ -3294,7 +3294,7 @@ void DebuggerStackDisplay::contextMenuEvent(QContextMenuEvent *event)
    menu.addAction( act );
 
 	subMenu = menu.addMenu(tr("Display Bytes Per Line"));
-	group   = new QActionGroup(this);
+	group   = new QActionGroup(&menu);
 
 	group->setExclusive(true);
 
