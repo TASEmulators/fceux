@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <libgen.h>
+#elif   __APPLE__
+#include <libgen.h>
 #endif
 
 #ifdef WIN32
@@ -553,23 +555,16 @@ static int emu_getdir(lua_State *L) {
 
 	if ( result == 0 )
 	{
-		int i = bufSize;
+		char *dir;
 		exePath[ bufSize ] = 0;
 		//printf("EXE Path: '%s' \n", exePath );
 
-		while ( i >= 0 )
-		{
-			if ( exePath[i] == '/' )
-			{
-				break;
-			}
-			exePath[i] = 0; i--;
-		}
+		dir = ::dirname( exePath );
 
-		if ( i > 0 )
+		if ( dir )
 		{
-			//printf("DIR Path: '%s' \n", exePath );
-	  		lua_pushstring(L, exePath);
+			//printf("DIR Path: '%s' \n", dir );
+			lua_pushstring(L, dir);
 			return 1;
 		}
 	}
@@ -6083,7 +6078,8 @@ static const struct luaL_reg cdloglib[] = {
 	{ NULL,NULL }
 };
 
-void CallExitFunction() {
+void CallExitFunction() 
+{
 	if (!L)
 		return;
 
