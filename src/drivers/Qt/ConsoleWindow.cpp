@@ -712,9 +712,18 @@ void consoleWin_t::openROMFile(void)
 	char dir[512];
 	QFileDialog  dialog(this, tr("Open ROM File") );
 
+	const QStringList filters(
+			{ "All Useable files (*.nes *.NES *.nsf *.NSF *.fds *.FDS *.unf *.UNF *.unif *.UNIF)",
+           "NES files (*.nes *.NES)",
+           "NSF files (*.nsf *.NSF)",
+           "UNF files (*.unf *.UNF *.unif *.UNIF)",
+           "FDS files (*.fds *.FDS)",
+           "Any files (*)"
+         });
+
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("NES files (*.nes *.NES) ;; All files (*)"));
+	dialog.setNameFilters( filters );
 
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
