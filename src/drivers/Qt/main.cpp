@@ -64,7 +64,6 @@ int main( int argc, char *argv[] )
 
 	consoleWindow = new consoleWin_t();
 
-	consoleWindow->resize( 512, 512 );
 	consoleWindow->show();
 
 	if ( consoleWindow->viewport_SDL )

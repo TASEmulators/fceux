@@ -46,6 +46,17 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	: QMainWindow( parent )
 {
 	int use_SDL_video = false;
+   int setFullScreen = false;
+
+	this->resize( 512, 512 );
+
+	g_config->getOption( "SDL.Fullscreen", &setFullScreen );
+	g_config->setOption( "SDL.Fullscreen", 0 ); // Reset full screen config parameter to false so it is never saved this way
+
+	if ( setFullScreen )
+	{
+		this->showFullScreen();
+	}
 
 	createMainMenu();
 
