@@ -40,7 +40,17 @@ const char *getRomFile( void )
 {
 	if ( GameInfo )
 	{
-		return GameInfo->filename;
+		//printf("filename: '%s' \n", GameInfo->filename );
+		//printf("archiveFilename: '%s' \n", GameInfo->archiveFilename );
+
+		if ( GameInfo->archiveFilename != NULL )
+		{
+			return GameInfo->archiveFilename;
+		}
+		else
+		{
+			return GameInfo->filename;
+		}
 	}
 	return NULL;
 }
