@@ -46,9 +46,14 @@ const char *getRomFile( void )
 }
 //---------------------------------------------------------------------------
 // Return file base name stripping out preceding path and trailing suffix.
-int getFileBaseName( const char *filepath, char *base )
+int getFileBaseName( const char *filepath, char *base, char *suffix )
 {
 	int i=0,j=0,end=0;
+
+	if ( suffix != NULL )
+	{
+		suffix[0] = 0;
+	}
 	if ( filepath == NULL )
 	{
 		base[0] = 0;
@@ -77,6 +82,10 @@ int getFileBaseName( const char *filepath, char *base )
 		j--;
 		if ( base[j] == '.' )
 		{
+			if ( suffix != NULL )
+			{
+				strcpy( suffix, &base[j] );
+			}
 			end=j; base[j] = 0; break;
 		}
 	}
@@ -86,6 +95,11 @@ int getFileBaseName( const char *filepath, char *base )
 int parseFilepath( const char *filepath, char *dir, char *base, char *suffix )
 {
 	int i=0,j=0,end=0;
+
+	if ( suffix != NULL )
+	{
+		suffix[0] = 0;
+	}
 	if ( filepath == NULL )
 	{
 		if ( dir   ) dir[0] = 0;
