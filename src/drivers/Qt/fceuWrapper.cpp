@@ -1028,14 +1028,17 @@ int  fceuWrapperUpdate( void )
 
 	if ( !lock_acq )
 	{
-		printf("Error: Emulator Failed to Acquire Mutex\n");
+		if ( GameInfo )
+		{
+			printf("Error: Emulator Failed to Acquire Mutex\n");
+		}
 		usleep( 100000 );
 
 		return -1;
 	}
 	emulatorHasMutux = 1;
  
-	if ( GameInfo /*&& !FCEUI_EmulationPaused()*/ )
+	if ( GameInfo )
 	{
 		DoFun(frameskip, periodic_saves);
 	
@@ -1118,30 +1121,59 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 	void *tmpMem = NULL;
 	std::string searchFile;
 
-	zf = unzOpen( fname.c_str() );
-
-	if ( zf == NULL )
-	{
-		//printf("Error: Failed to open Zip File: '%s'\n", fname.c_str() );
-		return fp;
-	}
 	if ( innerFilename != NULL )
 	{
 		searchFile = *innerFilename;
 	}
 	else
 	{
+		std::vector <std::string> fileList;
+
 		for (size_t i=0; i<asr.files.size(); i++)
 		{
 			char base[512], suffix[32];
 
 			getFileBaseName( asr.files[i].name.c_str(), base, suffix );
 
-			if ( strcasecmp( suffix, ".nes" ) == 0 )
+			if ( (strcasecmp( suffix, ".nes" ) == 0) ||
+			     (strcasecmp( suffix, ".nsf" ) == 0) ||
+			     (strcasecmp( suffix, ".fds" ) == 0) ||
+			     (strcasecmp( suffix, ".unf" ) == 0) ||
+			     (strcasecmp( suffix, ".unif") == 0) )
 			{
-				searchFile = asr.files[i].name; break;
+				fileList.push_back( asr.files[i].name );
 			}
 		}
+
+		if ( fileList.size() > 1 )
+		{
+			if ( consoleWindow != NULL )
+			{
+				int sel = consoleWindow->showListSelectDialog( "Select ROM From Archive", fileList );
+
+				if ( sel < 0 )
+				{
+					if ( userCancel )
+					{
+						*userCancel = 1;
+					}
+					return fp;
+				}
+				searchFile = fileList[sel];
+			}
+		}
+		else if ( fileList.size() > 0 )
+		{
+			searchFile = fileList[0];
+		}
+	}
+
+	zf = unzOpen( fname.c_str() );
+
+	if ( zf == NULL )
+	{
+		//printf("Error: Failed to open Zip File: '%s'\n", fname.c_str() );
+		return fp;
 	}
 
 	//printf("Searching for %s in %s \n", searchFile.c_str(), fname.c_str() );

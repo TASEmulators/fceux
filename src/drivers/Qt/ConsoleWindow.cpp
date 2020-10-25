@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
+#include <QHeaderView>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QInputDialog>
@@ -701,6 +702,82 @@ void consoleWin_t::closeApp(void)
 
 	//qApp::quit();
 	qApp->quit();
+}
+//---------------------------------------------------------------------------
+int  consoleWin_t::showListSelectDialog( const char *title, std::vector <std::string> &l )
+{
+	if ( QThread::currentThread() == emulatorThread )
+	{
+		printf("Cannot display list selection dialog from within emulation thread...\n");
+		return 0;
+	}
+	int ret, idx = 0;
+	QDialog dialog(this);
+	QVBoxLayout *mainLayout;
+	QHBoxLayout *hbox;
+	QPushButton *okButton, *cancelButton;
+	QTreeWidget *tree;
+	QTreeWidgetItem *item;
+
+	dialog.setWindowTitle( tr(title) );
+
+	tree = new QTreeWidget();
+
+	tree->setColumnCount(1);
+
+	item = new QTreeWidgetItem();
+	item->setText( 0, QString::fromStdString( "File" ) );
+	item->setTextAlignment( 0, Qt::AlignLeft);
+
+	tree->setHeaderItem( item );
+
+	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+
+	for (size_t i=0; i<l.size(); i++)
+	{
+		item = new QTreeWidgetItem();
+
+		item->setText( 0, QString::fromStdString( l[i] ) );
+
+		item->setTextAlignment( 0, Qt::AlignLeft);
+
+		tree->addTopLevelItem( item );
+	}
+
+	mainLayout = new QVBoxLayout();
+
+	hbox         = new QHBoxLayout();
+	okButton     = new QPushButton( tr("OK") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	mainLayout->addWidget( tree );
+	mainLayout->addLayout( hbox );
+	hbox->addWidget( cancelButton );
+	hbox->addWidget(     okButton );
+
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+
+	dialog.setLayout( mainLayout );
+
+	ret = dialog.exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		idx = 0;
+
+		item = tree->currentItem();
+
+	   if ( item != NULL )
+	   {
+			idx = tree->indexOfTopLevelItem(item);
+		}
+	}
+	else
+	{
+		idx = -1;
+	}
+	return idx;
 }
 //---------------------------------------------------------------------------
 

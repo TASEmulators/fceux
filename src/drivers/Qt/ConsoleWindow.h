@@ -4,6 +4,9 @@
 #ifndef __GameAppH__
 #define __GameAppH__
 
+#include <vector>
+#include <string>
+
 #include <QApplication>
 #include <QMainWindow>
 #include <QWidget>
@@ -47,6 +50,8 @@ class  consoleWin_t : public QMainWindow
 		QMutex *mutex;
 
 	 	void QueueErrorMsgWindow( const char *msg );
+
+		int  showListSelectDialog( const char *title, std::vector <std::string> &l );
 
 	protected:
 	 QMenu *fileMenu;
