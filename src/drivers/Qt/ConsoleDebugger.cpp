@@ -2443,7 +2443,7 @@ void saveGameDebugBreakpoints(void)
    debuggerBookmark_t *bm;
 
 	// If no breakpoints are loaded, skip saving
-	if ( numWPs == 0 )
+	if ( (numWPs == 0) && (dbgBmMgr.size() == 0) )
 	{
 		return;
 	}

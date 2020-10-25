@@ -38,9 +38,39 @@ int  getDirFromFile( const char *path, char *dir )
 //---------------------------------------------------------------------------
 const char *getRomFile( void )
 {
+	static char filePath[2048];
+
 	if ( GameInfo )
 	{
-		return GameInfo->filename;
+		//printf("filename: '%s' \n", GameInfo->filename );
+		//printf("archiveFilename: '%s' \n", GameInfo->archiveFilename );
+
+		if ( GameInfo->archiveFilename != NULL )
+		{
+			char dir[1024], base[512], suffix[64];
+
+			parseFilepath( GameInfo->archiveFilename, dir, base, suffix );
+
+			filePath[0] = 0;
+
+			if ( dir[0] != 0 )
+			{
+				strcat( filePath, dir );
+			}
+
+			parseFilepath( GameInfo->filename, dir, base, suffix );
+
+			strcat( filePath, base   );
+			strcat( filePath, suffix );
+
+			//printf("ArchivePath: '%s' \n", filePath );
+
+			return filePath;
+		}
+		else
+		{
+			return GameInfo->filename;
+		}
 	}
 	return NULL;
 }
