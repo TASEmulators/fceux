@@ -713,7 +713,7 @@ void consoleWin_t::openROMFile(void)
 	QFileDialog  dialog(this, tr("Open ROM File") );
 
 	const QStringList filters(
-			{ "All Useable files (*.nes *.NES *.nsf *.NSF *.fds *.FDS *.unf *.UNF *.unif *.UNIF)",
+			{ "All Useable files (*.nes *.NES *.nsf *.NSF *.fds *.FDS *.unf *.UNF *.unif *.UNIF *.zip *.ZIP)",
            "NES files (*.nes *.NES)",
            "NSF files (*.nsf *.NSF)",
            "UNF files (*.unf *.UNF *.unif *.UNIF)",
