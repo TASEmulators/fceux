@@ -36,6 +36,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QCheckBox   *sprtLimCbx;
 		QCheckBox   *clipSidesCbx;
 		QCheckBox   *showFPS_cbx;
+		QCheckBox   *autoScaleCbx;
 		QCheckBox   *sqrPixCbx;
 		QDoubleSpinBox *xScaleBox;
 		QDoubleSpinBox *yScaleBox;

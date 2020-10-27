@@ -85,6 +85,9 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	// Show FPS Checkbox
 	showFPS_cbx  = new QCheckBox( tr("Show FPS") );
 
+	// Auto Scale on Resize
+	autoScaleCbx  = new QCheckBox( tr("Auto Scale on Resize") );
+
 	// Square Pixels
 	sqrPixCbx  = new QCheckBox( tr("Square Pixels") );
 
@@ -98,10 +101,12 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	{
 		if ( consoleWindow->viewport_GL )
 		{
+			autoScaleCbx->setChecked( consoleWindow->viewport_GL->getAutoScaleOpt() );
 			sqrPixCbx->setChecked( consoleWindow->viewport_GL->getSqrPixelOpt() );
 		}
 		else if ( consoleWindow->viewport_SDL )
 		{
+			autoScaleCbx->setChecked( consoleWindow->viewport_SDL->getAutoScaleOpt() );
 			sqrPixCbx->setChecked( consoleWindow->viewport_SDL->getSqrPixelOpt() );
 		}
 	}
@@ -118,7 +123,8 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	main_vbox->addWidget( sprtLimCbx  );
 	main_vbox->addWidget( clipSidesCbx);
 	main_vbox->addWidget( showFPS_cbx );
-	main_vbox->addWidget( sqrPixCbx );
+	main_vbox->addWidget( autoScaleCbx);
+	main_vbox->addWidget( sqrPixCbx   );
 
 	xScaleBox = new QDoubleSpinBox(this);
 	yScaleBox = new QDoubleSpinBox(this);
@@ -411,15 +417,30 @@ void ConsoleVideoConfDialog_t::applyChanges( void )
 
 	if ( consoleWindow )
 	{
+		float xscale, yscale;
 		QSize s = calcNewScreenSize();
+
+		if ( sqrPixCbx->isChecked() )
+		{
+			yscale = xscale = xScaleBox->value();
+		}
+		else
+		{
+			xscale = xScaleBox->value();
+			yscale = yScaleBox->value();
+		}
 
 		if ( consoleWindow->viewport_GL )
 		{
 		   consoleWindow->viewport_GL->setSqrPixelOpt( sqrPixCbx->isChecked() );
+		   consoleWindow->viewport_GL->setAutoScaleOpt( autoScaleCbx->isChecked() );
+		   consoleWindow->viewport_GL->setScaleXY( xscale, yscale );
 		}
 		if ( consoleWindow->viewport_SDL )
 		{
 		   consoleWindow->viewport_SDL->setSqrPixelOpt( sqrPixCbx->isChecked() );
+		   consoleWindow->viewport_SDL->setAutoScaleOpt( autoScaleCbx->isChecked() );
+		   consoleWindow->viewport_SDL->setScaleXY( xscale, yscale );
 		}
 
 		consoleWindow->resize( s );
