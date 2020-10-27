@@ -24,6 +24,7 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 	devPixRatio = 1.0f;
 	linearFilter = false;
 	sqrPixels    = true;
+	autoScaleEna = true;
 	xscale = 2.0;
 	yscale = 2.0;
 
@@ -46,15 +47,15 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 		memset( localBuf, 0, localBufSize );
 	}
 
-   linearFilter = false;
+	linearFilter = false;
 
-   if ( g_config )
-   {
-      int opt;
-      g_config->getOption("SDL.OpenGLip", &opt );
-
-      linearFilter = (opt) ? true : false;
-   }
+	if ( g_config )
+	{
+		int opt;
+		g_config->getOption("SDL.OpenGLip", &opt );
+		
+		linearFilter = (opt) ? true : false;
+	}
 }
 
 ConsoleViewGL_t::~ConsoleViewGL_t(void)
@@ -149,20 +150,10 @@ void ConsoleViewGL_t::setLinearFilterEnable( bool ena )
    }
 }
 
-void ConsoleViewGL_t::transfer2LocalBuffer(void)
+void ConsoleViewGL_t::setScaleXY( double xs, double ys )
 {
-	memcpy( localBuf, nes_shm->pixbuf, localBufSize );
-}
-
-void ConsoleViewGL_t::paintGL(void)
-{
-	int texture_width  = nes_shm->ncol;
-	int texture_height = nes_shm->nrow;
-	int l=0, r=texture_width;
-	int t=0, b=texture_height;
-
-	xscale = (float)view_width  / (float)texture_width;
-	yscale = (float)view_height / (float)texture_height;
+	xscale = xs;
+	yscale = ys;
 
 	if ( sqrPixels )
 	{
@@ -175,8 +166,53 @@ void ConsoleViewGL_t::paintGL(void)
 			xscale = yscale;
 		}
 	}
-	int rw=(int)((r-l)*xscale);
-	int rh=(int)((b-t)*yscale);
+}
+
+void ConsoleViewGL_t::transfer2LocalBuffer(void)
+{
+	memcpy( localBuf, nes_shm->pixbuf, localBufSize );
+}
+
+void ConsoleViewGL_t::paintGL(void)
+{
+	int texture_width  = nes_shm->ncol;
+	int texture_height = nes_shm->nrow;
+	int l=0, r=texture_width;
+	int t=0, b=texture_height;
+
+	float xscaleTmp = (float)view_width  / (float)texture_width;
+	float yscaleTmp = (float)view_height / (float)texture_height;
+
+	if ( sqrPixels )
+	{
+		if (xscaleTmp < yscaleTmp )
+		{
+			yscaleTmp = xscaleTmp;
+		}
+		else 
+		{
+			xscaleTmp = yscaleTmp;
+		}
+	}
+
+	if ( autoScaleEna )
+	{
+		xscale = xscaleTmp;
+		yscale = yscaleTmp;
+	}
+	else
+	{
+		if ( xscaleTmp > xscale )
+		{
+			xscaleTmp = xscale;
+		}
+		if ( yscaleTmp > yscale )
+		{
+			yscaleTmp = yscale;
+		}
+	}
+	int rw=(int)((r-l)*xscaleTmp);
+	int rh=(int)((b-t)*yscaleTmp);
 	int sx=(view_width-rw)/2;   
 	int sy=(view_height-rh)/2;
 

@@ -53,15 +53,16 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	}
 
 	sqrPixels = true;
-   linearFilter = false;
+	autoScaleEna = true;
+	linearFilter = false;
 
-   if ( g_config )
-   {
-      int opt;
-      g_config->getOption("SDL.OpenGLip", &opt );
-
-      linearFilter = (opt) ? true : false;
-   }
+	if ( g_config )
+	{
+		int opt;
+		g_config->getOption("SDL.OpenGLip", &opt );
+		
+		linearFilter = (opt) ? true : false;
+	}
 }
 
 ConsoleViewSDL_t::~ConsoleViewSDL_t(void)
@@ -80,6 +81,24 @@ void ConsoleViewSDL_t::setLinearFilterEnable( bool ena )
 
 	   reset();
    }
+}
+
+void ConsoleViewSDL_t::setScaleXY( double xs, double ys )
+{
+	xscale = xs;
+	yscale = ys;
+
+	if ( sqrPixels )
+	{
+		if (xscale < yscale )
+		{
+			yscale = xscale;
+		}
+		else 
+		{
+			xscale = yscale;
+		}
+	}
 }
 
 void ConsoleViewSDL_t::transfer2LocalBuffer(void)
@@ -219,25 +238,40 @@ void ConsoleViewSDL_t::render(void)
 		nesHeight = nes_shm->nrow;
 	}
 	//printf(" %i x %i \n", nesWidth, nesHeight );
-	xscale = (float)view_width  / (float)nesWidth;
-	yscale = (float)view_height / (float)nesHeight;
+	float xscaleTmp = (float)view_width  / (float)nesWidth;
+	float yscaleTmp = (float)view_height / (float)nesHeight;
 
 	if ( sqrPixels )
 	{
-		if (xscale < yscale )
+		if (xscaleTmp < yscaleTmp )
 		{
-			yscale = xscale;
+			yscaleTmp = xscaleTmp;
 		}
 		else 
 		{
-			xscale = yscale;
+			xscaleTmp = yscaleTmp;
 		}
 	}
 
-	rw=(int)(nesWidth*xscale);
-	rh=(int)(nesHeight*yscale);
-	//sx=sdlViewport.x + (view_width-rw)/2;   
-	//sy=sdlViewport.y + (view_height-rh)/2;
+	if ( autoScaleEna )
+	{
+		xscale = xscaleTmp;
+		yscale = yscaleTmp;
+	}
+	else
+	{
+		if ( xscaleTmp > xscale )
+		{
+			xscaleTmp = xscale;
+		}
+		if ( yscaleTmp > yscale )
+		{
+			yscaleTmp = yscale;
+		}
+	}
+
+	rw=(int)(nesWidth*xscaleTmp);
+	rh=(int)(nesHeight*yscaleTmp);
 	sx=(view_width-rw)/2;   
 	sy=(view_height-rh)/2;
 
