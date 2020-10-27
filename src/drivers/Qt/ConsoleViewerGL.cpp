@@ -23,13 +23,19 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 	gltexture   = 0;
 	devPixRatio = 1.0f;
 	linearFilter = false;
+	sqrPixels    = true;
+	xscale = 2.0;
+	yscale = 2.0;
 
-    QScreen *screen = QGuiApplication::primaryScreen();
+	setMinimumWidth( GL_NES_WIDTH );
+	setMinimumHeight( GL_NES_HEIGHT );
 
-    if ( screen != NULL )
-    {
+	QScreen *screen = QGuiApplication::primaryScreen();
+
+	if ( screen != NULL )
+	{
 		devPixRatio = screen->devicePixelRatio();
-    	//printf("Ratio: %f \n", screen->devicePixelRatio() );
+		//printf("Ratio: %f \n", screen->devicePixelRatio() );
 	}
 	localBufSize = GL_NES_WIDTH * GL_NES_HEIGHT * sizeof(uint32_t);
 
@@ -155,16 +161,19 @@ void ConsoleViewGL_t::paintGL(void)
 	int l=0, r=texture_width;
 	int t=0, b=texture_height;
 
-	float xscale = (float)view_width  / (float)texture_width;
-	float yscale = (float)view_height / (float)texture_height;
+	xscale = (float)view_width  / (float)texture_width;
+	yscale = (float)view_height / (float)texture_height;
 
-	if (xscale < yscale )
+	if ( sqrPixels )
 	{
-		yscale = xscale;
-	}
-	else 
-	{
-		xscale = yscale;
+		if (xscale < yscale )
+		{
+			yscale = xscale;
+		}
+		else 
+		{
+			xscale = yscale;
+		}
 	}
 	int rw=(int)((r-l)*xscale);
 	int rh=(int)((b-t)*yscale);

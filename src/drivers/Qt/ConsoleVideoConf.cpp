@@ -9,6 +9,7 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleVideoConf.h"
+#include "Qt/nes_shm.h"
 
 //----------------------------------------------------
 ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
@@ -84,23 +85,89 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	// Show FPS Checkbox
 	showFPS_cbx  = new QCheckBox( tr("Show FPS") );
 
+	// Square Pixels
+	sqrPixCbx  = new QCheckBox( tr("Square Pixels") );
+
 	setCheckBoxFromProperty( new_PPU_ena  , "SDL.NewPPU");
 	setCheckBoxFromProperty( frmskipcbx   , "SDL.Frameskip");
 	setCheckBoxFromProperty( sprtLimCbx   , "SDL.DisableSpriteLimit");
 	setCheckBoxFromProperty( clipSidesCbx , "SDL.ClipSides");
 	setCheckBoxFromProperty( showFPS_cbx  , "SDL.ShowFPS");
+	
+	if ( consoleWindow )
+	{
+		if ( consoleWindow->viewport_GL )
+		{
+			sqrPixCbx->setChecked( consoleWindow->viewport_GL->getSqrPixelOpt() );
+		}
+		else if ( consoleWindow->viewport_SDL )
+		{
+			sqrPixCbx->setChecked( consoleWindow->viewport_SDL->getSqrPixelOpt() );
+		}
+	}
 
 	connect(new_PPU_ena , SIGNAL(stateChanged(int)), this, SLOT(use_new_PPU_changed(int)) );
 	connect(frmskipcbx  , SIGNAL(stateChanged(int)), this, SLOT(frameskip_changed(int)) );
 	connect(sprtLimCbx  , SIGNAL(stateChanged(int)), this, SLOT(useSpriteLimitChanged(int)) );
 	connect(clipSidesCbx, SIGNAL(stateChanged(int)), this, SLOT(clipSidesChanged(int)) );
 	connect(showFPS_cbx , SIGNAL(stateChanged(int)), this, SLOT(showFPSChanged(int)) );
+	connect(sqrPixCbx   , SIGNAL(stateChanged(int)), this, SLOT(sqrPixChanged(int)) );
 
 	main_vbox->addWidget( new_PPU_ena );
 	main_vbox->addWidget( frmskipcbx  );
 	main_vbox->addWidget( sprtLimCbx  );
 	main_vbox->addWidget( clipSidesCbx);
 	main_vbox->addWidget( showFPS_cbx );
+	main_vbox->addWidget( sqrPixCbx );
+
+	xScaleBox = new QDoubleSpinBox(this);
+	yScaleBox = new QDoubleSpinBox(this);
+
+	xScaleBox->setRange( 1.0, 16.0 );
+	yScaleBox->setRange( 1.0, 16.0 );
+
+	xScaleBox->setSingleStep( 0.10 );
+	yScaleBox->setSingleStep( 0.10 );
+
+	if ( consoleWindow )
+	{
+		if ( consoleWindow->viewport_GL )
+		{
+			xScaleBox->setValue( consoleWindow->viewport_GL->getScaleX() );
+			yScaleBox->setValue( consoleWindow->viewport_GL->getScaleY() );
+		}
+		else if ( consoleWindow->viewport_SDL )
+		{
+			xScaleBox->setValue( consoleWindow->viewport_SDL->getScaleX() );
+			yScaleBox->setValue( consoleWindow->viewport_SDL->getScaleY() );
+		}
+	}
+
+	if ( sqrPixCbx->isChecked() )
+	{
+		xScaleLabel = new QLabel( tr("Scale:") );
+	}
+	else
+	{
+		xScaleLabel = new QLabel( tr("X Scale:") );
+	}
+	yScaleLabel = new QLabel( tr("Y Scale:") );
+
+	hbox1 = new QHBoxLayout();
+	hbox1->addWidget( xScaleLabel );
+	hbox1->addWidget( xScaleBox );
+	main_vbox->addLayout( hbox1 );
+
+	hbox1 = new QHBoxLayout();
+	hbox1->addWidget( yScaleLabel );
+	hbox1->addWidget( yScaleBox );
+	main_vbox->addLayout( hbox1 );
+
+	if ( sqrPixCbx->isChecked() )
+	{
+		yScaleLabel->hide();
+		yScaleBox->hide();
+	}
 
 	hbox1 = new QHBoxLayout();
 
@@ -241,6 +308,26 @@ void ConsoleVideoConfDialog_t::showFPSChanged( int value )
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------
+void ConsoleVideoConfDialog_t::sqrPixChanged( int value )
+{
+	//printf("Value:%i \n", value );
+	int useSqrPix = (value != Qt::Unchecked);
+
+	if ( useSqrPix )
+	{
+		xScaleLabel->setText( tr("Scale:") );
+		yScaleLabel->hide();
+		yScaleBox->hide();
+	}
+	else
+	{
+		xScaleLabel->setText( tr("X Scale:") );
+		yScaleLabel->show();
+		yScaleBox->show();
+	}
+
+}
+//----------------------------------------------------
 void ConsoleVideoConfDialog_t::driverChanged(int index)
 {
 	int driver;
@@ -272,8 +359,71 @@ void ConsoleVideoConfDialog_t::regionChanged(int index)
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------
+QSize ConsoleVideoConfDialog_t::calcNewScreenSize(void)
+{
+	QSize out( GL_NES_WIDTH, GL_NES_HEIGHT );
+
+	if ( consoleWindow )
+	{
+		QSize w, v;
+		double xscale, yscale;
+		int texture_width  = nes_shm->ncol;
+		int texture_height = nes_shm->nrow;
+		int l=0, r=texture_width;
+		int t=0, b=texture_height;
+		int dw=0, dh=0, rw, rh;
+
+		w = consoleWindow->size();
+
+		if ( consoleWindow->viewport_GL )
+		{
+			v = consoleWindow->viewport_GL->size();
+		}
+		else if ( consoleWindow->viewport_SDL )
+		{
+			v = consoleWindow->viewport_SDL->size();
+		}
+
+		dw = w.width()  - v.width();
+		dh = w.height() - v.height();
+
+		if ( sqrPixCbx->isChecked() )
+		{
+			yscale = xscale = xScaleBox->value();
+		}
+		else
+		{
+			xscale = xScaleBox->value();
+			yscale = yScaleBox->value();
+		}
+		rw=(int)((r-l)*xscale);
+		rh=(int)((b-t)*yscale);
+
+		out.setWidth( rw + dw );
+		out.setHeight( rh + dh );
+	}
+	return out;
+}
+//----------------------------------------------------
 void ConsoleVideoConfDialog_t::applyChanges( void )
 { 
 	resetVideo();
+
+	if ( consoleWindow )
+	{
+		QSize s = calcNewScreenSize();
+
+		if ( consoleWindow->viewport_GL )
+		{
+		   consoleWindow->viewport_GL->setSqrPixelOpt( sqrPixCbx->isChecked() );
+		}
+		if ( consoleWindow->viewport_SDL )
+		{
+		   consoleWindow->viewport_SDL->setSqrPixelOpt( sqrPixCbx->isChecked() );
+		}
+
+		consoleWindow->resize( s );
+	}
+
 }
 //----------------------------------------------------
