@@ -25,25 +25,33 @@ class ConsoleViewSDL_t : public QWidget
 
       void setLinearFilterEnable( bool ena );
 
+		bool   getSqrPixelOpt(void){ return sqrPixels; };
+		void   setSqrPixelOpt( bool val ){ sqrPixels = val; return; };
+		double getScaleX(void){ return xscale; };
+		double getScaleY(void){ return yscale; };
+
 	protected:
 
 	//void paintEvent(QPaintEvent *event);
 	void resizeEvent(QResizeEvent *event);
-	 int  view_width;
-	 int  view_height;
+	int  view_width;
+	int  view_height;
 
-	 double devPixRatio;
-	 int  rw;
-	 int  rh;
-	 int  sx;
-	 int  sy;
-	 int  sdlRendW;
-	 int  sdlRendH;
+	double devPixRatio;
+	double xscale;
+	double yscale;
+	int  rw;
+	int  rh;
+	int  sx;
+	int  sy;
+	int  sdlRendW;
+	int  sdlRendH;
 
-	 bool vsyncEnabled;
-    bool linearFilter;
+	bool vsyncEnabled;
+	bool linearFilter;
+	bool sqrPixels;
 
-	 uint32_t  *localBuf;
+	uint32_t  *localBuf;
 	uint32_t   localBufSize;
 
  	SDL_Window   *sdlWindow;

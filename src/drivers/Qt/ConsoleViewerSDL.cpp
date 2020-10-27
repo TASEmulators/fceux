@@ -22,6 +22,9 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	setAutoFillBackground(true);
 	setPalette(pal);
 
+	setMinimumWidth( GL_NES_WIDTH );
+	setMinimumHeight( GL_NES_HEIGHT );
+
 	view_width  = GL_NES_WIDTH;
 	view_height = GL_NES_HEIGHT;
 
@@ -30,6 +33,8 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	rh = view_height;
 	sdlRendW = 0;
 	sdlRendH = 0;
+	xscale = 2.0;
+	yscale = 2.0;
 
 	devPixRatio = 1.0f;
 	sdlWindow   = NULL;
@@ -47,6 +52,7 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 		memset( localBuf, 0, localBufSize );
 	}
 
+	sqrPixels = true;
    linearFilter = false;
 
    if ( g_config )
@@ -213,16 +219,19 @@ void ConsoleViewSDL_t::render(void)
 		nesHeight = nes_shm->nrow;
 	}
 	//printf(" %i x %i \n", nesWidth, nesHeight );
-	float xscale = (float)view_width  / (float)nesWidth;
-	float yscale = (float)view_height / (float)nesHeight;
+	xscale = (float)view_width  / (float)nesWidth;
+	yscale = (float)view_height / (float)nesHeight;
 
-	if (xscale < yscale )
+	if ( sqrPixels )
 	{
-		yscale = xscale;
-	}
-	else 
-	{
-		xscale = yscale;
+		if (xscale < yscale )
+		{
+			yscale = xscale;
+		}
+		else 
+		{
+			xscale = yscale;
+		}
 	}
 
 	rw=(int)(nesWidth*xscale);

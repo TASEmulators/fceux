@@ -183,6 +183,10 @@ int InitVideo(FCEUGI *gi)
 	// check to see if we are showing FPS
 	FCEUI_SetShowFPS(show_fps);
 
+	nes_shm->ncol  = NWIDTH;
+	nes_shm->nrow  = s_tlines;
+	nes_shm->pitch = GL_NES_WIDTH * 4;
+
 #ifdef LSB_FIRST
 	rmask = 0x00FF0000;
 	gmask = 0x0000FF00;
