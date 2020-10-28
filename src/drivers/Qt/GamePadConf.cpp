@@ -63,7 +63,7 @@ int closeGamePadConfWindow(void)
 }
 //----------------------------------------------------
 GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
-	: QDialog( parent, Qt::Window )
+	: QDialog( parent )
 {
 	QWidget *mainWidget;
 	QVBoxLayout *mainLayout;
