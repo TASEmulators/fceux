@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QScrollArea>
 
 #include "Qt/GamePadConf.h"
 #include "Qt/main.h"
@@ -64,8 +65,10 @@ int closeGamePadConfWindow(void)
 GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
-	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3, *hbox4;
-	QVBoxLayout *vbox;
+	QWidget *mainWidget;
+	QVBoxLayout *mainLayout;
+	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3, *hbox4, *hbox5;
+	QVBoxLayout *vbox, *vbox1, *vbox2;
 	QGridLayout *grid;
 	QCheckBox *efs_chkbox, *udlr_chkbox;
    QGroupBox *frame1, *frame2;
@@ -77,6 +80,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    QPushButton *clearAllButton;
    QPushButton *closebutton;
    QPushButton *clearButton[GAMEPAD_NUM_BUTTONS];
+	QScrollArea *scroll;
 	std::string prefix;
 	char stmp[256];
 
@@ -84,6 +88,9 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	// Ensure that joysticks are enabled, no harm calling init again.
 	InitJoysticks();
+
+	scroll = new QScrollArea(this);
+	mainWidget = new QWidget();
 
    portNum = 0;
    buttonConfigStatus = 1;
@@ -98,6 +105,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	hbox2 = new QHBoxLayout();
 	hbox3 = new QHBoxLayout();
 	hbox4 = new QHBoxLayout();
+	hbox5 = new QHBoxLayout();
 
 	label = new QLabel(tr("Console Port:"));
 	portSel = new QComboBox();
@@ -272,18 +280,39 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    connect(efs_chkbox , SIGNAL(stateChanged(int)), this, SLOT(ena4score(int)) );
    connect(udlr_chkbox, SIGNAL(stateChanged(int)), this, SLOT(oppDirEna(int)) );
 
-	QVBoxLayout *mainLayout = new QVBoxLayout();
+	mainLayout = new QVBoxLayout();
+	vbox1      = new QVBoxLayout();
+	vbox2      = new QVBoxLayout();
 
-	mainLayout->addLayout( hbox1 );
-	mainLayout->addLayout( hbox2 );
-	mainLayout->addLayout( hbox3 );
-	mainLayout->addWidget( frame1 );
-	mainLayout->addWidget( efs_chkbox );
-	mainLayout->addWidget( udlr_chkbox );
-	mainLayout->addWidget( frame2 );
-	mainLayout->addLayout( hbox4 );
+	hbox5->addWidget( efs_chkbox );
+	hbox5->addWidget( udlr_chkbox );
 
-	setLayout( mainLayout );
+	vbox1->addLayout( hbox1 );
+	vbox1->addLayout( hbox2 );
+	vbox1->addLayout( hbox3 );
+	vbox1->addWidget( frame1);
+	vbox1->addLayout( hbox5 );
+
+	vbox2->addWidget( frame2 );
+	vbox2->addLayout( hbox4 );
+
+	mainLayout->addLayout( vbox1 );
+	mainLayout->addLayout( vbox2 );
+
+	mainWidget->setLayout( mainLayout );
+	mainWidget->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+
+	scroll->setWidget( mainWidget );
+	scroll->setWidgetResizable(true);
+	scroll->setSizeAdjustPolicy( QAbstractScrollArea::AdjustToContents );
+	scroll->setHorizontalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+	scroll->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+	
+	QHBoxLayout *dialogLayout = new QHBoxLayout();
+
+	dialogLayout->addWidget( scroll );
+
+	setLayout( dialogLayout );
 
    inputTimer->start( 33 ); // 30hz
 
