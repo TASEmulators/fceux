@@ -46,7 +46,7 @@ void openRamWatchWindow( QWidget *parent, int force )
 }
 //----------------------------------------------------------------------------
 RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
-	: QDialog( parent )
+	: QDialog( parent, Qt::Window )
 {
 	QMenuBar *menuBar;
 	QHBoxLayout *mainLayout;

@@ -534,7 +534,7 @@ void HexBookMarkMenuAction::activateCB(void)
 }
 //----------------------------------------------------------------------------
 HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
-	: QDialog( parent )
+	: QDialog( parent, Qt::Window )
 {
 	//QVBoxLayout *mainLayout;
 	QGridLayout *grid;

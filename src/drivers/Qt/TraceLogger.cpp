@@ -75,7 +75,7 @@ static TraceLoggerDialog_t *traceLogWindow =  NULL;
 static void pushMsgToLogBuffer( const char *msg );
 //----------------------------------------------------
 TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
-	: QDialog( parent )
+	: QDialog( parent, Qt::Window )
 {
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;

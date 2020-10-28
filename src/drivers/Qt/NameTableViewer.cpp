@@ -83,7 +83,7 @@ int openNameTableViewWindow( QWidget *parent )
 }
 //----------------------------------------------------
 ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
-	: QDialog( parent )
+	: QDialog( parent, Qt::Window )
 {
 	QVBoxLayout *mainLayout, *vbox;
 	QHBoxLayout *hbox;
