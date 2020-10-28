@@ -66,7 +66,7 @@ int openPPUViewWindow( QWidget *parent )
 }
 //----------------------------------------------------
 ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
-	: QDialog( parent )
+	: QDialog( parent, Qt::Window )
 {
 	QVBoxLayout *mainLayout, *vbox;
 	QVBoxLayout *patternVbox[2];

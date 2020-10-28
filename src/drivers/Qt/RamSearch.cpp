@@ -169,7 +169,7 @@ void openRamSearchWindow( QWidget *parent )
 
 //----------------------------------------------------------------------------
 RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
-	: QDialog( parent )
+	: QDialog( parent, Qt::Window )
 {
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3;

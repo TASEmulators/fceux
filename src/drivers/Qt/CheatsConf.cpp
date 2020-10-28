@@ -48,7 +48,7 @@ void updateCheatDialog(void)
 }
 //----------------------------------------------------------------------------
 GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
-	: QDialog( parent )
+	: QDialog( parent, Qt::Window )
 {
 	QHBoxLayout *mainLayout, *hbox, *hbox1;
 	QVBoxLayout *vbox, *vbox1, *vbox2, *vbox3;

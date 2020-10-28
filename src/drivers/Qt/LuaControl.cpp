@@ -94,7 +94,7 @@ static std::list <LuaControlDialog_t*> winList;
 static void updateLuaWindows( void );
 //----------------------------------------------------
 LuaControlDialog_t::LuaControlDialog_t(QWidget *parent)
-	: QDialog( parent )
+	: QDialog( parent, Qt::Window )
 {
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;

@@ -52,7 +52,7 @@ static std::list <ConsoleDebugger*> dbgWinList;
 static void DeleteBreak(int sel);
 //----------------------------------------------------------------------------
 ConsoleDebugger::ConsoleDebugger(QWidget *parent)
-	: QDialog( parent )
+	: QDialog( parent, Qt::Window )
 {
 	QHBoxLayout *mainLayout;
 	QVBoxLayout *vbox, *vbox1, *vbox2, *vbox3, *vbox4;
