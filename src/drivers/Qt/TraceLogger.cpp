@@ -1030,51 +1030,6 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 
 		if (a)
 		{
-			//if (logging_options & LOG_SYMBOLIC)
-			//{
-			//	loadNameFiles();
-			//	tempAddressesLog.resize(0);
-			//	// Insert Name and Comment lines if needed
-			//	Name* node = findNode(getNamesPointerForAddress(addr), addr);
-			//	if (node)
-			//	{
-			//		if (node->name)
-			//		{
-			//			strcpy(str_decoration, node->name);
-			//			strcat(str_decoration, ":");
-			//			tempAddressesLog.push_back(addr);
-			//			//OutputLogLine(str_decoration, &tempAddressesLog);
-			//		}
-			//		if (node->comment)
-			//		{
-			//			// make a copy
-			//			strcpy(str_decoration_comment, node->comment);
-			//			strcat(str_decoration_comment, "\r\n");
-			//			tracer_decoration_comment = str_decoration_comment;
-			//			// divide the str_decoration_comment into strings (Comment1, Comment2, ...)
-			//			char* tracer_decoration_comment_end_pos = strstr(tracer_decoration_comment, "\r\n");
-			//			while (tracer_decoration_comment_end_pos)
-			//			{
-			//				tracer_decoration_comment_end_pos[0] = 0;		// set \0 instead of \r
-			//				strcpy(str_decoration, "; ");
-			//				strcat(str_decoration, tracer_decoration_comment);
-			//				//OutputLogLine(str_decoration, &tempAddressesLog);
-			//				tracer_decoration_comment_end_pos += 2;
-			//				tracer_decoration_comment = tracer_decoration_comment_end_pos;
-			//				tracer_decoration_comment_end_pos = strstr(tracer_decoration_comment_end_pos, "\r\n");
-			//			}
-			//		}
-			//	}
-			//	
-			//	//replaceNames(ramBankNames, a, &tempAddressesLog);
-			//	//for(int i=0;i<ARRAY_SIZE(pageNames);i++)
-			//	//{
-			//	//	replaceNames(pageNames[i], a, &tempAddressesLog);
-			//	//}
-			//}
-			//strncpy(str_disassembly, a, LOG_DISASSEMBLY_MAX_LEN);
-			//str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
-
 			rec.appendAsmText(a);
 		}
 	}
