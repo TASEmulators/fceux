@@ -427,8 +427,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	vbox->addWidget( regNamChkBox );
 
 	symDbgChkBox->setChecked(true);
-	//regNamChkBox->setChecked(true);
-	regNamChkBox->setEnabled(false); // TODO
+	regNamChkBox->setChecked(true);
 
    connect( romOfsChkBox, SIGNAL(stateChanged(int)), this, SLOT(displayROMoffsetCB(int)) );
    connect( symDbgChkBox, SIGNAL(stateChanged(int)), this, SLOT(symbolDebugEnableCB(int)) );
@@ -957,6 +956,7 @@ void ConsoleDebugger::openDebugSymbolEditWindow( int addr )
 
 	if ( ret == QDialog::Accepted )
 	{
+		fceuWrapperLock();
 		if ( sym == NULL )
 		{
 			sym = new debugSymbol_t();
@@ -971,7 +971,6 @@ void ConsoleDebugger::openDebugSymbolEditWindow( int addr )
 			sym->name    = nameEntry->text().toStdString();
 			sym->comment = commentEntry->text().toStdString();
 		}
-		fceuWrapperLock();
 		asmView->updateAssemblyView();
 		fceuWrapperUnLock();
 	}
@@ -1426,7 +1425,9 @@ void ConsoleDebugger::debFileAutoLoadCB( int value )
 //----------------------------------------------------------------------------
 void ConsoleDebugger::reloadSymbolsCB(void)
 {
+	fceuWrapperLock();
 	debugSymbolTable.loadGameSymbols();
+	fceuWrapperUnLock();
 
 	asmView->updateAssemblyView();
 }
@@ -1802,11 +1803,11 @@ static int InstructionUp(int from)
 void  QAsmView::updateAssemblyView(void)
 {
 	int starting_address, start_address_lp, addr, size;
-	int instruction_addr;
+	int instruction_addr, asmFlags = 0;
 	std::string line;
 	char chr[64];
 	uint8 opcode[3];
-	const char *disassemblyText = NULL;
+	char asmTxt[256];
 	dbg_asm_entry_t *a, *d;
 	//GtkTextIter iter, next_iter;
 	char pc_found = 0;
@@ -1838,6 +1839,15 @@ void  QAsmView::updateAssemblyView(void)
 	addr  = starting_address;
 	asmPC = NULL;
 
+	if ( symbolicDebugEnable )
+	{
+		asmFlags |= ASM_DEBUG_SYMS;
+
+		if ( registerNameEnable )
+		{
+			asmFlags |= ASM_DEBUG_REGS;
+		}
+	}
 	//asmText->clear();
 
 	//gtk_text_buffer_get_start_iter( textbuf, &iter );
@@ -1929,12 +1939,9 @@ void  QAsmView::updateAssemblyView(void)
 				size++;
 			}
 
-			disassemblyText = Disassemble(addr, opcode);
+			DisassembleWithDebug(addr, opcode, asmFlags, asmTxt);
 
-			if ( disassemblyText )
-			{
-				line.append( disassemblyText );
-			}
+			line.append( asmTxt );
 		}
 		for (int j=0; j<size; j++)
 		{
