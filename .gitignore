@@ -40,3 +40,6 @@ fceux-net-server
 /output/cheats
 /output/snaps
 /output/sav
+
+# typical CMake build directory
+/build
