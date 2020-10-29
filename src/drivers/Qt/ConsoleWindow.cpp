@@ -37,6 +37,7 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/ppuViewer.h"
 #include "Qt/NameTableViewer.h"
+#include "Qt/iNesHeaderEditor.h"
 #include "Qt/RamWatch.h"
 #include "Qt/RamSearch.h"
 #include "Qt/keyscan.h"
@@ -637,6 +638,14 @@ void consoleWin_t::createMainMenu(void)
     connect(codeDataLogAct, SIGNAL(triggered()), this, SLOT(openCodeDataLogger(void)) );
 
     debugMenu->addAction(codeDataLogAct);
+
+	 // Debug -> iNES Header Editor
+	 iNesEditAct = new QAction(tr("iNES Header Editor..."), this);
+    //iNesEditAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    iNesEditAct->setStatusTip(tr("Open iNES Header Editor"));
+    connect(iNesEditAct, SIGNAL(triggered()), this, SLOT(openNesHeaderEditor(void)) );
+
+    debugMenu->addAction(iNesEditAct);
 
 	 //-----------------------------------------------------------------------
 	 // Movie
@@ -1263,6 +1272,17 @@ void consoleWin_t::openCodeDataLogger(void)
    cdlWin = new CodeDataLoggerDialog_t(this);
 	
    cdlWin->show();
+}
+
+void consoleWin_t::openNesHeaderEditor(void)
+{
+	iNesHeaderEditor_t *win;
+
+	//printf("Open iNES Header Editor Window\n");
+	
+   win = new iNesHeaderEditor_t(this);
+	
+   win->show();
 }
 
 void consoleWin_t::openTraceLogger(void)
