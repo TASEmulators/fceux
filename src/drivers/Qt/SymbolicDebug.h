@@ -17,6 +17,17 @@ struct debugSymbol_t
 	{
 		ofs = 0;
 	};
+
+	debugSymbol_t( int ofs, const char *name, const char *comment = NULL )
+	{
+		this->ofs = ofs;
+		this->name.assign( name );
+
+		if ( comment )
+		{
+			this->comment.assign( comment );
+		}
+	}
 };
 
 struct debugSymbolPage_t
@@ -59,6 +70,8 @@ class debugSymbolTable_t
 	private:
 		std::map <int, debugSymbolPage_t*> pageMap;
 
+		int loadRegisterMap(void);
+
 };
 
 extern  debugSymbolTable_t  debugSymbolTable;
@@ -72,5 +85,10 @@ extern  debugSymbolTable_t  debugSymbolTable;
 
 int generateNLFilenameForBank(int bank, char *NLfilename);
 int generateNLFilenameForAddress(int address, char *NLfilename);
+
+#define  ASM_DEBUG_SYMS  0x0001
+#define  ASM_DEBUG_REGS  0x0002
+
+int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str );
 
 #endif

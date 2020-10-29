@@ -25,6 +25,7 @@
 #include "Qt/dface.h"
 #include "Qt/input.h"
 #include "Qt/config.h"
+#include "Qt/SymbolicDebug.h"
 #include "Qt/fceuWrapper.h"
 
 #define LOG_REGISTERS           0x00000001
@@ -917,8 +918,10 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 
 	traceRecord_t  rec;
 
+	char asmTxt[256];
 	unsigned int addr = X.PC;
 	static int unloggedlines = 0;
+	int asmFlags = 0;
 
 	rec.cpu.PC = X.PC;
 	rec.cpu.A  = X.A;
@@ -945,6 +948,11 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		counter_value = 0;
 	}
 	rec.cycleCount = counter_value;
+
+	if ( logging_options & LOG_SYMBOLIC )
+	{
+		asmFlags = ASM_DEBUG_SYMS | ASM_DEBUG_REGS;
+	}
 
 	// if instruction executed from the RAM, skip this, log all instead
 	// TODO: loops folding mame-lyke style
@@ -994,7 +1002,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 				break;
 			case 1:
 			{
-				a = Disassemble(addr + 1, opcode);
+				DisassembleWithDebug(addr + 1, opcode, asmFlags, asmTxt);
 				// special case: an RTS opcode
 				if (opcode[0] == 0x60)
 				{
@@ -1007,63 +1015,21 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 						rec.callAddr = call_addr;
 					}
 				}
+				a = asmTxt;
 				break;
 			}
 			case 2:
-				a = Disassemble(addr + 2, opcode);
+				DisassembleWithDebug(addr + 2, opcode, asmFlags, asmTxt);
+				a = asmTxt;
 				break;
 			case 3:
-				a = Disassemble(addr + 3, opcode);
+				DisassembleWithDebug(addr + 3, opcode, asmFlags, asmTxt);
+				a = asmTxt;
 				break;
 		}
 
 		if (a)
 		{
-			//if (logging_options & LOG_SYMBOLIC)
-			//{
-			//	loadNameFiles();
-			//	tempAddressesLog.resize(0);
-			//	// Insert Name and Comment lines if needed
-			//	Name* node = findNode(getNamesPointerForAddress(addr), addr);
-			//	if (node)
-			//	{
-			//		if (node->name)
-			//		{
-			//			strcpy(str_decoration, node->name);
-			//			strcat(str_decoration, ":");
-			//			tempAddressesLog.push_back(addr);
-			//			//OutputLogLine(str_decoration, &tempAddressesLog);
-			//		}
-			//		if (node->comment)
-			//		{
-			//			// make a copy
-			//			strcpy(str_decoration_comment, node->comment);
-			//			strcat(str_decoration_comment, "\r\n");
-			//			tracer_decoration_comment = str_decoration_comment;
-			//			// divide the str_decoration_comment into strings (Comment1, Comment2, ...)
-			//			char* tracer_decoration_comment_end_pos = strstr(tracer_decoration_comment, "\r\n");
-			//			while (tracer_decoration_comment_end_pos)
-			//			{
-			//				tracer_decoration_comment_end_pos[0] = 0;		// set \0 instead of \r
-			//				strcpy(str_decoration, "; ");
-			//				strcat(str_decoration, tracer_decoration_comment);
-			//				//OutputLogLine(str_decoration, &tempAddressesLog);
-			//				tracer_decoration_comment_end_pos += 2;
-			//				tracer_decoration_comment = tracer_decoration_comment_end_pos;
-			//				tracer_decoration_comment_end_pos = strstr(tracer_decoration_comment_end_pos, "\r\n");
-			//			}
-			//		}
-			//	}
-			//	
-			//	//replaceNames(ramBankNames, a, &tempAddressesLog);
-			//	//for(int i=0;i<ARRAY_SIZE(pageNames);i++)
-			//	//{
-			//	//	replaceNames(pageNames[i], a, &tempAddressesLog);
-			//	//}
-			//}
-			//strncpy(str_disassembly, a, LOG_DISASSEMBLY_MAX_LEN);
-			//str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
-
 			rec.appendAsmText(a);
 		}
 	}

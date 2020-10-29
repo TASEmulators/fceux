@@ -9,6 +9,8 @@
 #include "../../driver.h"
 #include "../../cart.h"
 #include "../../ines.h"
+#include "../../asm.h"
+#include "../../x6502.h"
 
 #include "Qt/SymbolicDebug.h"
 #include "Qt/ConsoleUtilities.h"
@@ -471,6 +473,52 @@ int debugSymbolTable_t::loadFileNL( int bank )
 	return 0;
 }
 //--------------------------------------------------------------
+int debugSymbolTable_t::loadRegisterMap(void)
+{
+	debugSymbolPage_t *page;
+
+	page = new debugSymbolPage_t();
+
+	page->pageNum = -2;
+
+	page->addSymbol( new debugSymbol_t( 0x2000, "PPU_CTRL" ) );
+	page->addSymbol( new debugSymbol_t( 0x2001, "PPU_MASK" ) );
+	page->addSymbol( new debugSymbol_t( 0x2002, "PPU_STATUS" ) );
+	page->addSymbol( new debugSymbol_t( 0x2003, "PPU_OAM_ADDR" ) );
+	page->addSymbol( new debugSymbol_t( 0x2004, "PPU_OAM_DATA" ) );
+	page->addSymbol( new debugSymbol_t( 0x2005, "PPU_SCROLL" ) );
+	page->addSymbol( new debugSymbol_t( 0x2006, "PPU_ADDRESS" ) );
+	page->addSymbol( new debugSymbol_t( 0x2007, "PPU_DATA" ) );
+	page->addSymbol( new debugSymbol_t( 0x4000, "SQ1_VOL" ) );
+	page->addSymbol( new debugSymbol_t( 0x4001, "SQ1_SWEEP" ) );
+	page->addSymbol( new debugSymbol_t( 0x4002, "SQ1_LO" ) );
+	page->addSymbol( new debugSymbol_t( 0x4003, "SQ1_HI" ) );
+	page->addSymbol( new debugSymbol_t( 0x4004, "SQ2_VOL" ) );
+	page->addSymbol( new debugSymbol_t( 0x4005, "SQ2_SWEEP" ) );
+	page->addSymbol( new debugSymbol_t( 0x4006, "SQ2_LO" ) );
+	page->addSymbol( new debugSymbol_t( 0x4007, "SQ2_HI" ) );
+	page->addSymbol( new debugSymbol_t( 0x4008, "TRI_LINEAR" ) );
+//	page->addSymbol( new debugSymbol_t( 0x4009, "UNUSED" ) );
+	page->addSymbol( new debugSymbol_t( 0x400A, "TRI_LO" ) );
+	page->addSymbol( new debugSymbol_t( 0x400B, "TRI_HI" ) );
+	page->addSymbol( new debugSymbol_t( 0x400C, "NOISE_VOL" ) );
+//	page->addSymbol( new debugSymbol_t( 0x400D, "UNUSED" ) );
+	page->addSymbol( new debugSymbol_t( 0x400E, "NOISE_LO" ) );
+	page->addSymbol( new debugSymbol_t( 0x400F, "NOISE_HI" ) );
+	page->addSymbol( new debugSymbol_t( 0x4010, "DMC_FREQ" ) );
+	page->addSymbol( new debugSymbol_t( 0x4011, "DMC_RAW" ) );
+	page->addSymbol( new debugSymbol_t( 0x4012, "DMC_START" ) );
+	page->addSymbol( new debugSymbol_t( 0x4013, "DMC_LEN" ) );
+	page->addSymbol( new debugSymbol_t( 0x4014, "OAM_DMA" ) );
+	page->addSymbol( new debugSymbol_t( 0x4015, "APU_STATUS" ) );
+	page->addSymbol( new debugSymbol_t( 0x4016, "JOY1" ) );
+	page->addSymbol( new debugSymbol_t( 0x4017, "JOY2_FRAME" ) );
+
+	pageMap[ page->pageNum ] = page;
+
+	return 0;
+}
+//--------------------------------------------------------------
 int debugSymbolTable_t::loadGameSymbols(void)
 {
 	int nPages, pageSize, romSize = 0x10000;
@@ -484,6 +532,8 @@ int debugSymbolTable_t::loadGameSymbols(void)
 	}
 
 	loadFileNL( -1 );
+
+	loadRegisterMap();
 
 	pageSize = (1<<debuggerPageSize);
 
@@ -564,5 +614,398 @@ void debugSymbolTable_t::print(void)
 
 		page->print();
 	}
+}
+//--------------------------------------------------------------
+static int replaceSymbols( int flags, int addr, char *str )
+{
+	debugSymbol_t *sym;
+  
+	if ( addr >= 0x8000 )
+	{
+		int bank = getBank(addr);
+
+  		sym = debugSymbolTable.getSymbolAtBankOffset( bank, addr );
+	}
+	else
+	{
+  		sym = debugSymbolTable.getSymbolAtBankOffset( -1, addr );
+
+		if ( (sym == NULL) && (flags & ASM_DEBUG_REGS) )
+		{
+  			sym = debugSymbolTable.getSymbolAtBankOffset( -2, addr );
+		}
+	}
+
+	if ( sym )
+	{
+		strcpy( str, sym->name.c_str() );
+	}
+	else
+	{
+		sprintf( str, "%04X", addr );
+	}
+
+	return 0;
+}
+//--------------------------------------------------------------
+int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
+{
+	static char chr[8]={0};
+	uint16_t tmp,tmp2;
+	char stmp[128];
+
+	//these may be replaced later with passed-in values to make a lighter-weight disassembly mode that may not query the referenced values
+	#define RX (X.X)
+	#define RY (X.Y)
+
+	switch (opcode[0]) 
+	{
+		#define relative(a) { \
+			if (((a)=opcode[1])&0x80) (a) = addr-(((a)-1)^0xFF); \
+			else (a)+=addr; \
+		}
+		#define absolute(a) { \
+			(a) = opcode[1] | opcode[2]<<8; \
+		}
+		#define zpIndex(a,i) { \
+			(a) = (opcode[1]+(i))&0xFF; \
+		}
+		#define indirectX(a) { \
+			(a) = (opcode[1]+RX)&0xFF; \
+			(a) = GetMem((a)) | (GetMem(((a)+1)&0xff))<<8; \
+		}
+		#define indirectY(a) { \
+			(a) = GetMem(opcode[1]) | (GetMem((opcode[1]+1)&0xff))<<8; \
+			(a) += RY; \
+		}
+
+
+		#ifdef BRK_3BYTE_HACK
+			case 0x00:
+			sprintf(str,"BRK %02X %02X", opcode[1], opcode[2]);
+			break;
+		#else
+			case 0x00: strcpy(str,"BRK"); break;
+		#endif
+
+		//odd, 1-byte opcodes
+		case 0x08: strcpy(str,"PHP"); break;
+		case 0x0A: strcpy(str,"ASL"); break;
+		case 0x18: strcpy(str,"CLC"); break;
+		case 0x28: strcpy(str,"PLP"); break;
+		case 0x2A: strcpy(str,"ROL"); break;
+		case 0x38: strcpy(str,"SEC"); break;
+		case 0x40: strcpy(str,"RTI"); break;
+		case 0x48: strcpy(str,"PHA"); break;
+		case 0x4A: strcpy(str,"LSR"); break;
+		case 0x58: strcpy(str,"CLI"); break;
+		case 0x60: strcpy(str,"RTS"); break;
+		case 0x68: strcpy(str,"PLA"); break;
+		case 0x6A: strcpy(str,"ROR"); break;
+		case 0x78: strcpy(str,"SEI"); break;
+		case 0x88: strcpy(str,"DEY"); break;
+		case 0x8A: strcpy(str,"TXA"); break;
+		case 0x98: strcpy(str,"TYA"); break;
+		case 0x9A: strcpy(str,"TXS"); break;
+		case 0xA8: strcpy(str,"TAY"); break;
+		case 0xAA: strcpy(str,"TAX"); break;
+		case 0xB8: strcpy(str,"CLV"); break;
+		case 0xBA: strcpy(str,"TSX"); break;
+		case 0xC8: strcpy(str,"INY"); break;
+		case 0xCA: strcpy(str,"DEX"); break;
+		case 0xD8: strcpy(str,"CLD"); break;
+		case 0xE8: strcpy(str,"INX"); break;
+		case 0xEA: strcpy(str,"NOP"); break;
+		case 0xF8: strcpy(str,"SED"); break;
+
+		//(Indirect,X)
+		case 0x01: strcpy(chr,"ORA"); goto _indirectx;
+		case 0x21: strcpy(chr,"AND"); goto _indirectx;
+		case 0x41: strcpy(chr,"EOR"); goto _indirectx;
+		case 0x61: strcpy(chr,"ADC"); goto _indirectx;
+		case 0x81: strcpy(chr,"STA"); goto _indirectx;
+		case 0xA1: strcpy(chr,"LDA"); goto _indirectx;
+		case 0xC1: strcpy(chr,"CMP"); goto _indirectx;
+		case 0xE1: strcpy(chr,"SBC"); goto _indirectx;
+		_indirectx:
+			indirectX(tmp);
+
+			if ( flags )
+			{
+				replaceSymbols( flags, tmp, stmp );
+				sprintf(str,"%s ($%02X,X) @ $%s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
+			}
+			else
+			{
+				sprintf(str,"%s ($%02X,X) @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
+			}
+			break;
+
+		//Zero Page
+		case 0x05: strcpy(chr,"ORA"); goto _zeropage;
+		case 0x06: strcpy(chr,"ASL"); goto _zeropage;
+		case 0x24: strcpy(chr,"BIT"); goto _zeropage;
+		case 0x25: strcpy(chr,"AND"); goto _zeropage;
+		case 0x26: strcpy(chr,"ROL"); goto _zeropage;
+		case 0x45: strcpy(chr,"EOR"); goto _zeropage;
+		case 0x46: strcpy(chr,"LSR"); goto _zeropage;
+		case 0x65: strcpy(chr,"ADC"); goto _zeropage;
+		case 0x66: strcpy(chr,"ROR"); goto _zeropage;
+		case 0x84: strcpy(chr,"STY"); goto _zeropage;
+		case 0x85: strcpy(chr,"STA"); goto _zeropage;
+		case 0x86: strcpy(chr,"STX"); goto _zeropage;
+		case 0xA4: strcpy(chr,"LDY"); goto _zeropage;
+		case 0xA5: strcpy(chr,"LDA"); goto _zeropage;
+		case 0xA6: strcpy(chr,"LDX"); goto _zeropage;
+		case 0xC4: strcpy(chr,"CPY"); goto _zeropage;
+		case 0xC5: strcpy(chr,"CMP"); goto _zeropage;
+		case 0xC6: strcpy(chr,"DEC"); goto _zeropage;
+		case 0xE4: strcpy(chr,"CPX"); goto _zeropage;
+		case 0xE5: strcpy(chr,"SBC"); goto _zeropage;
+		case 0xE6: strcpy(chr,"INC"); goto _zeropage;
+		_zeropage:
+		// ################################## Start of SP CODE ###########################
+		// Change width to %04X // don't!
+			if ( flags )
+			{
+				replaceSymbols( flags, opcode[1], stmp );
+				sprintf(str,"%s $%s = #$%02X", chr,stmp,GetMem(opcode[1]));
+			}
+			else
+			{
+				sprintf(str,"%s $%02X = #$%02X", chr,opcode[1],GetMem(opcode[1]));
+			}
+		// ################################## End of SP CODE ###########################
+			break;
+
+		//#Immediate
+		case 0x09: strcpy(chr,"ORA"); goto _immediate;
+		case 0x29: strcpy(chr,"AND"); goto _immediate;
+		case 0x49: strcpy(chr,"EOR"); goto _immediate;
+		case 0x69: strcpy(chr,"ADC"); goto _immediate;
+		//case 0x89: strcpy(chr,"STA"); goto _immediate;  //baka, no STA #imm!!
+		case 0xA0: strcpy(chr,"LDY"); goto _immediate;
+		case 0xA2: strcpy(chr,"LDX"); goto _immediate;
+		case 0xA9: strcpy(chr,"LDA"); goto _immediate;
+		case 0xC0: strcpy(chr,"CPY"); goto _immediate;
+		case 0xC9: strcpy(chr,"CMP"); goto _immediate;
+		case 0xE0: strcpy(chr,"CPX"); goto _immediate;
+		case 0xE9: strcpy(chr,"SBC"); goto _immediate;
+		_immediate:
+			sprintf(str,"%s #$%02X", chr,opcode[1]);
+			break;
+
+		//Absolute
+		case 0x0D: strcpy(chr,"ORA"); goto _absolute;
+		case 0x0E: strcpy(chr,"ASL"); goto _absolute;
+		case 0x2C: strcpy(chr,"BIT"); goto _absolute;
+		case 0x2D: strcpy(chr,"AND"); goto _absolute;
+		case 0x2E: strcpy(chr,"ROL"); goto _absolute;
+		case 0x4D: strcpy(chr,"EOR"); goto _absolute;
+		case 0x4E: strcpy(chr,"LSR"); goto _absolute;
+		case 0x6D: strcpy(chr,"ADC"); goto _absolute;
+		case 0x6E: strcpy(chr,"ROR"); goto _absolute;
+		case 0x8C: strcpy(chr,"STY"); goto _absolute;
+		case 0x8D: strcpy(chr,"STA"); goto _absolute;
+		case 0x8E: strcpy(chr,"STX"); goto _absolute;
+		case 0xAC: strcpy(chr,"LDY"); goto _absolute;
+		case 0xAD: strcpy(chr,"LDA"); goto _absolute;
+		case 0xAE: strcpy(chr,"LDX"); goto _absolute;
+		case 0xCC: strcpy(chr,"CPY"); goto _absolute;
+		case 0xCD: strcpy(chr,"CMP"); goto _absolute;
+		case 0xCE: strcpy(chr,"DEC"); goto _absolute;
+		case 0xEC: strcpy(chr,"CPX"); goto _absolute;
+		case 0xED: strcpy(chr,"SBC"); goto _absolute;
+		case 0xEE: strcpy(chr,"INC"); goto _absolute;
+		_absolute:
+			absolute(tmp);
+
+			if ( flags )
+			{
+				replaceSymbols( flags, tmp, stmp );
+				sprintf(str,"%s $%s = #$%02X", chr,stmp,GetMem(tmp));
+			}
+			else
+			{
+				sprintf(str,"%s $%04X = #$%02X", chr,tmp,GetMem(tmp));
+			}
+			break;
+
+		//branches
+		case 0x10: strcpy(chr,"BPL"); goto _branch;
+		case 0x30: strcpy(chr,"BMI"); goto _branch;
+		case 0x50: strcpy(chr,"BVC"); goto _branch;
+		case 0x70: strcpy(chr,"BVS"); goto _branch;
+		case 0x90: strcpy(chr,"BCC"); goto _branch;
+		case 0xB0: strcpy(chr,"BCS"); goto _branch;
+		case 0xD0: strcpy(chr,"BNE"); goto _branch;
+		case 0xF0: strcpy(chr,"BEQ"); goto _branch;
+		_branch:
+			relative(tmp);
+
+			if ( flags )
+			{
+				replaceSymbols( flags, tmp, stmp );
+				sprintf(str,"%s $%s", chr,stmp);
+			}
+			else
+			{
+				sprintf(str,"%s $%04X", chr,tmp);
+			}
+			break;
+
+		//(Indirect),Y
+		case 0x11: strcpy(chr,"ORA"); goto _indirecty;
+		case 0x31: strcpy(chr,"AND"); goto _indirecty;
+		case 0x51: strcpy(chr,"EOR"); goto _indirecty;
+		case 0x71: strcpy(chr,"ADC"); goto _indirecty;
+		case 0x91: strcpy(chr,"STA"); goto _indirecty;
+		case 0xB1: strcpy(chr,"LDA"); goto _indirecty;
+		case 0xD1: strcpy(chr,"CMP"); goto _indirecty;
+		case 0xF1: strcpy(chr,"SBC"); goto _indirecty;
+		_indirecty:
+			indirectY(tmp);
+
+			if ( flags )
+			{
+				replaceSymbols( flags, tmp, stmp );
+				sprintf(str,"%s ($%02X),Y @ $%s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
+			}
+			else
+			{
+				sprintf(str,"%s ($%02X),Y @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
+			}
+			break;
+
+		//Zero Page,X
+		case 0x15: strcpy(chr,"ORA"); goto _zeropagex;
+		case 0x16: strcpy(chr,"ASL"); goto _zeropagex;
+		case 0x35: strcpy(chr,"AND"); goto _zeropagex;
+		case 0x36: strcpy(chr,"ROL"); goto _zeropagex;
+		case 0x55: strcpy(chr,"EOR"); goto _zeropagex;
+		case 0x56: strcpy(chr,"LSR"); goto _zeropagex;
+		case 0x75: strcpy(chr,"ADC"); goto _zeropagex;
+		case 0x76: strcpy(chr,"ROR"); goto _zeropagex;
+		case 0x94: strcpy(chr,"STY"); goto _zeropagex;
+		case 0x95: strcpy(chr,"STA"); goto _zeropagex;
+		case 0xB4: strcpy(chr,"LDY"); goto _zeropagex;
+		case 0xB5: strcpy(chr,"LDA"); goto _zeropagex;
+		case 0xD5: strcpy(chr,"CMP"); goto _zeropagex;
+		case 0xD6: strcpy(chr,"DEC"); goto _zeropagex;
+		case 0xF5: strcpy(chr,"SBC"); goto _zeropagex;
+		case 0xF6: strcpy(chr,"INC"); goto _zeropagex;
+		_zeropagex:
+			zpIndex(tmp,RX);
+		// ################################## Start of SP CODE ###########################
+		// Change width to %04X // don't!
+			if ( flags )
+			{
+				replaceSymbols( flags, tmp, stmp );
+				sprintf(str,"%s $%02X,X @ $%s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
+			}
+			else
+			{
+				sprintf(str,"%s $%02X,X @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
+			}
+		// ################################## End of SP CODE ###########################
+			break;
+
+		//Absolute,Y
+		case 0x19: strcpy(chr,"ORA"); goto _absolutey;
+		case 0x39: strcpy(chr,"AND"); goto _absolutey;
+		case 0x59: strcpy(chr,"EOR"); goto _absolutey;
+		case 0x79: strcpy(chr,"ADC"); goto _absolutey;
+		case 0x99: strcpy(chr,"STA"); goto _absolutey;
+		case 0xB9: strcpy(chr,"LDA"); goto _absolutey;
+		case 0xBE: strcpy(chr,"LDX"); goto _absolutey;
+		case 0xD9: strcpy(chr,"CMP"); goto _absolutey;
+		case 0xF9: strcpy(chr,"SBC"); goto _absolutey;
+		_absolutey:
+			absolute(tmp);
+			tmp2=(tmp+RY);
+			if ( flags )
+			{
+				replaceSymbols( flags, tmp2, stmp );
+				sprintf(str,"%s $%04X,Y @ $%s = #$%02X", chr,tmp,stmp,GetMem(tmp2));
+			}
+			else
+			{
+				sprintf(str,"%s $%04X,Y @ $%04X = #$%02X", chr,tmp,tmp2,GetMem(tmp2));
+			}
+			break;
+
+		//Absolute,X
+		case 0x1D: strcpy(chr,"ORA"); goto _absolutex;
+		case 0x1E: strcpy(chr,"ASL"); goto _absolutex;
+		case 0x3D: strcpy(chr,"AND"); goto _absolutex;
+		case 0x3E: strcpy(chr,"ROL"); goto _absolutex;
+		case 0x5D: strcpy(chr,"EOR"); goto _absolutex;
+		case 0x5E: strcpy(chr,"LSR"); goto _absolutex;
+		case 0x7D: strcpy(chr,"ADC"); goto _absolutex;
+		case 0x7E: strcpy(chr,"ROR"); goto _absolutex;
+		case 0x9D: strcpy(chr,"STA"); goto _absolutex;
+		case 0xBC: strcpy(chr,"LDY"); goto _absolutex;
+		case 0xBD: strcpy(chr,"LDA"); goto _absolutex;
+		case 0xDD: strcpy(chr,"CMP"); goto _absolutex;
+		case 0xDE: strcpy(chr,"DEC"); goto _absolutex;
+		case 0xFD: strcpy(chr,"SBC"); goto _absolutex;
+		case 0xFE: strcpy(chr,"INC"); goto _absolutex;
+		_absolutex:
+			absolute(tmp);
+			tmp2=(tmp+RX);
+			if ( flags )
+			{
+				replaceSymbols( flags, tmp2, stmp );
+				sprintf(str,"%s $%04X,X @ $%s = #$%02X", chr,tmp,stmp,GetMem(tmp2));
+			}
+			else
+			{
+				sprintf(str,"%s $%04X,X @ $%04X = #$%02X", chr,tmp,tmp2,GetMem(tmp2));
+			}
+			break;
+
+		//jumps
+		case 0x20: strcpy(chr,"JSR"); goto _jump;
+		case 0x4C: strcpy(chr,"JMP"); goto _jump;
+		case 0x6C: absolute(tmp); sprintf(str,"JMP ($%04X) = $%04X", tmp,GetMem(tmp)|GetMem(tmp+1)<<8); break;
+		_jump:
+			absolute(tmp);
+
+			if ( flags )
+			{
+				replaceSymbols( flags, tmp, stmp );
+				sprintf(str,"%s $%s", chr,stmp);
+			}
+			else
+			{
+				sprintf(str,"%s $%04X", chr,tmp);
+			}
+			break;
+
+		//Zero Page,Y
+		case 0x96: strcpy(chr,"STX"); goto _zeropagey;
+		case 0xB6: strcpy(chr,"LDX"); goto _zeropagey;
+		_zeropagey:
+			zpIndex(tmp,RY);
+		// ################################## Start of SP CODE ###########################
+		// Change width to %04X // don't!
+			if ( flags )
+			{
+				replaceSymbols( flags, tmp, stmp );
+				sprintf(str,"%s $%02X,Y @ $%s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
+			}
+			else
+			{
+				sprintf(str,"%s $%02X,Y @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
+			}
+		// ################################## End of SP CODE ###########################
+			break;
+
+		//UNDEFINED
+		default: strcpy(str,"ERROR"); break;
+
+	}
+
+	return 0;
 }
 //--------------------------------------------------------------
