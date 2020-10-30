@@ -18,6 +18,8 @@
 
 #include "Qt/main.h"
 
+class iNES_HEADER;
+
 class iNesHeaderEditor_t : public QDialog
 {
    Q_OBJECT
@@ -49,6 +51,7 @@ class iNesHeaderEditor_t : public QDialog
 		QCheckBox    *iNesDualRegBox;
 		QCheckBox    *iNesBusCfltBox;
 		QCheckBox    *iNesPrgRamBox;
+		QCheckBox    *battNvRamBox;
 		QRadioButton *horzMirrorBtn;
 		QRadioButton *vertMirrorBtn;
 		QRadioButton *fourMirrorBtn;
@@ -60,7 +63,21 @@ class iNesHeaderEditor_t : public QDialog
 		QRadioButton *vsSysbtn;
 		QRadioButton *plySysbtn;
 		QRadioButton *extSysbtn;
+		QPushButton  *restoreBtn;
+		QPushButton  *saveAsBtn;
+		QPushButton  *closeBtn;
+		QGroupBox    *iNesUnOfGroupBox;
+		QGroupBox    *sysGroupBox;
+		QGroupBox    *vsGroupBox;
+		QGroupBox    *extGroupBox;
+		QLabel       *prgNvRamLbl;
+		iNES_HEADER  *iNesHdr;
 	private:
+
+		bool loadHeader(iNES_HEADER *header);
+		void setHeaderData(iNES_HEADER *header);
+		void showErrorMsgWindow(const char *str);
+		void ToggleINES20(bool ines20);
 
    public slots:
       void closeWindow(void);
