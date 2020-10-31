@@ -1060,6 +1060,43 @@ void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str)
 	printf("Lua Output: %s\n", str );
 }
 //----------------------------------------------------
+int LuaKillMessageBox(void)
+{
+	int kill = 0;
+	fprintf(stderr, "The Lua script running has been running a long time.\nIt may have gone crazy. Kill it? (I won't ask again if you say No)\n");
+	char buffer[64];
+	while (true) {
+		fprintf(stderr, "(y/n): ");
+		fgets(buffer, sizeof(buffer), stdin);
+		if (buffer[0] == 'y' || buffer[0] == 'Y') {
+			kill = 1;
+			break;
+		}
+
+		if (buffer[0] == 'n' || buffer[0] == 'N')
+			break;
+	}
+	return 0;
+}
+//----------------------------------------------------
+#ifdef  WIN32
+int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char* const format, ...) 
+#else
+int LuaPrintfToWindowConsole(const char *__restrict format, ...)  throw()
+#endif
+{
+   int retval;
+   va_list args;
+	char msg[2048];
+   va_start( args, format );
+   retval = ::vfprintf( stdout, format, args );
+   va_end(args);
+
+	msg[ sizeof(msg)-1 ] = 0;
+
+   return(retval);
+};
+//----------------------------------------------------
 
 
 // dummy functions
