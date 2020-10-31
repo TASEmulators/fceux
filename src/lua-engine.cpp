@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <libgen.h>
 #include <mach-o/dyld.h>
+#define SetCurrentDir chdir
 #endif
 
 #ifdef WIN32
