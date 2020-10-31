@@ -7,8 +7,10 @@
 #include <libgen.h>
 #elif   __APPLE__
 #include <stdlib.h>
+#include <unistd.h>
 #include <libgen.h>
 #include <mach-o/dyld.h>
+#define SetCurrentDir chdir
 #endif
 
 #ifdef WIN32
@@ -616,7 +618,12 @@ static int emu_loadrom(lua_State *L)
 #else
 	const char *nameo2 = luaL_checkstring(L,1);
 	char nameo[2048];
-	strncpy(nameo, nameo2, sizeof(nameo));
+
+	if ( realpath( nameo2, nameo ) == NULL )
+	{
+		strncpy(nameo, nameo2, sizeof(nameo));
+	}
+	//printf("Load ROM: '%s'\n", nameo );
 	if (!LoadGame(nameo, true)) 
 	{
 		reloadLastGame();
@@ -6183,7 +6190,8 @@ void FCEU_LuaFrameBoundary()
  *
  * Returns true on success, false on failure.
  */
-int FCEU_LoadLuaCode(const char *filename, const char *arg) {
+int FCEU_LoadLuaCode(const char *filename, const char *arg) 
+{
 	if (!DemandLua())
 	{
 		return 0;
@@ -6195,13 +6203,11 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		luaScriptName = strdup(filename);
 	}
 
-#if defined(WIN32) || defined(__linux)
 	std::string getfilepath = filename;
 
 	getfilepath = getfilepath.substr(0,getfilepath.find_last_of("/\\") + 1);
 
 	SetCurrentDir(getfilepath.c_str());
-#endif
 
 	//stop any lua we might already have had running
 	FCEU_LuaStop();
