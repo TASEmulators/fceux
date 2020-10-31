@@ -618,15 +618,9 @@ static int emu_loadrom(lua_State *L)
 	const char *nameo2 = luaL_checkstring(L,1);
 	char nameo[2048];
 
-	if ( nameo2[0] == '/' )
+	if ( realpath( nameo2, nameo ) == NULL )
 	{
 		strncpy(nameo, nameo2, sizeof(nameo));
-	}
-	else
-	{
-		char cwd[1024];
-		getcwd( cwd, sizeof(cwd) );
-		snprintf( nameo, sizeof(nameo), "%s/%s", cwd, nameo2 );
 	}
 	//printf("Load ROM: '%s'\n", nameo );
 	if (!LoadGame(nameo, true)) 
