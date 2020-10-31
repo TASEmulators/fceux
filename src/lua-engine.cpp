@@ -191,8 +191,13 @@ void TaseditorDisableManualFunctionIfNeeded();
 
 #else
 int LuaKillMessageBox(void);
+#ifdef __linux__
 int LuaPrintfToWindowConsole(const char *__restrict format, ...) 
                   __THROWNL __attribute__ ((__format__ (__printf__, 1, 2)));
+#else
+int LuaPrintfToWindowConsole(const char *__restrict format, ...) throw();
+#endif
+
 #endif
 extern void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str);
 extern void WinLuaOnStart(intptr_t hDlgAsInt);
