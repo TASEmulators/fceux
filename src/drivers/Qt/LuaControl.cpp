@@ -27,60 +27,43 @@ static bool updateLuaDisplay = false;
 static bool openLuaKillMsgBox = false;
 static int  luaKillMsgBoxRetVal = 0;
 
-struct luaConsoleOutputLine
-{
-   char text[256];
-
-   luaConsoleOutputLine(void)
-   {
-      memset( text, 0, sizeof(text) );
-   }
-
-   void clear(void)
-   {
-      memset( text, 0, sizeof(text) );
-   }
-
-   void setText( const char *txt )
-   {
-      strncpy( text, txt, sizeof(text)-1 );
-      text[sizeof(text)-1] = 0;
-   }
-};
-
 struct luaConsoleOutputBuffer
 {
    int  head;
    int  tail;
    int  size;
-   struct luaConsoleOutputLine  *line;
+   char *buf;
 
    luaConsoleOutputBuffer(void)
    {
       tail = head = 0;
-      size = 64;
+      size = 4096;
 
-      line = new luaConsoleOutputLine[size];
+      buf = (char*)malloc(size);
    }
 
   ~luaConsoleOutputBuffer(void)
    {
-      if ( line )
+      if ( buf )
       {
-         delete [] line; line = NULL;
+         free(buf); buf = NULL;
       }
    }
    
    void addLine( const char *l )
    {
+		int i=0;
       //printf("Adding Line %i: '%s'\n", head, l );
-      line[head].setText( l );
+		while ( l[i] != 0 )
+		{
+      	buf[head] = l[i]; i++;
 
-      head = (head + 1) % size;
+      	head = (head + 1) % size;
 
-      if ( head == tail )
-      {
-         tail = (tail + 1) % size;
+      	if ( head == tail )
+      	{
+      	   tail = (tail + 1) % size;
+      	}
       }
    }
 
@@ -349,7 +332,7 @@ void LuaControlDialog_t::refreshState(void)
 
    while ( i != outBuf.head )
    {
-      luaOutputText.append( outBuf.line[i].text );
+      luaOutputText.append( 1, outBuf.buf[i] );
 
       i = (i + 1) % outBuf.size;
    }
