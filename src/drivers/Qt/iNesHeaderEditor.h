@@ -70,7 +70,13 @@ class iNesHeaderEditor_t : public QDialog
 		QGroupBox    *sysGroupBox;
 		QGroupBox    *vsGroupBox;
 		QGroupBox    *extGroupBox;
+		QLabel       *prgRamLbl;
 		QLabel       *prgNvRamLbl;
+		QLabel       *mapperSubLbl;
+		QLabel       *chrRamLbl;
+		QLabel       *chrNvRamLbl;
+		QLabel       *inputDevLbl;
+		QLabel       *miscRomsLbl;
 		iNES_HEADER  *iNesHdr;
 	private:
 
@@ -78,9 +84,14 @@ class iNesHeaderEditor_t : public QDialog
 		void setHeaderData(iNES_HEADER *header);
 		void showErrorMsgWindow(const char *str);
 		void ToggleINES20(bool ines20);
+		void ToggleUnofficialPropertiesEnabled(bool ines20, bool check);
+		void ToggleUnofficialExtraRegionCode(bool ines20, bool unofficial_check, bool check);
+		void ToggleUnofficialPrgRamPresent(bool ines20, bool unofficial_check, bool check);
 
    public slots:
       void closeWindow(void);
 	private slots:
+		void iNes1Clicked(bool checked);
+		void iNes2Clicked(bool checked);
 
 };

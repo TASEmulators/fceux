@@ -161,6 +161,9 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	iNes1Btn = new QRadioButton( tr("iNES") );
 	iNes2Btn = new QRadioButton( tr("NES 2.0") );
 
+	connect( iNes1Btn, SIGNAL(clicked(bool)), this, SLOT(iNes1Clicked(bool)) );
+	connect( iNes2Btn, SIGNAL(clicked(bool)), this, SLOT(iNes2Clicked(bool)) );
+
 	hbox->addWidget( iNes1Btn );
 	hbox->addWidget( iNes2Btn );
 
@@ -175,7 +178,7 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 
 	hbox->addWidget( new QLabel( tr("Mapper #:") ) );
 	hbox->addWidget( mapperComboBox );
-	hbox->addWidget( new QLabel( tr("Sub #:") ) );
+	hbox->addWidget( mapperSubLbl = new QLabel( tr("Sub #:") ) );
 	hbox->addWidget( mapperSubEdit );
 
 	for (i = 0; bmap[i].init; ++i)
@@ -203,7 +206,7 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	hbox->addWidget( prgRomBox, 0, Qt::AlignLeft );
 	hbox  = new QHBoxLayout();
 	grid->addLayout( hbox, 0, 1 );
-	hbox->addWidget( new QLabel( tr("PRG RAM:") ), 0, Qt::AlignRight );
+	hbox->addWidget( prgRamLbl = new QLabel( tr("PRG RAM:") ), 0, Qt::AlignRight );
 	hbox->addWidget( prgRamBox, 0, Qt::AlignLeft );
 	hbox  = new QHBoxLayout();
 	grid->addLayout( hbox, 0, 2 );
@@ -227,11 +230,11 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	hbox->addWidget( chrRomBox, 0, Qt::AlignLeft );
 	hbox  = new QHBoxLayout();
 	grid->addLayout( hbox, 0, 1 );
-	hbox->addWidget( new QLabel( tr("CHR RAM:") ), 0, Qt::AlignRight );
+	hbox->addWidget( chrRamLbl = new QLabel( tr("CHR RAM:") ), 0, Qt::AlignRight );
 	hbox->addWidget( chrRamBox, 0, Qt::AlignLeft );
 	hbox  = new QHBoxLayout();
 	grid->addLayout( hbox, 0, 2 );
-	hbox->addWidget( new QLabel( tr("CHR NVRAM:") ), 0, Qt::AlignRight );
+	hbox->addWidget( chrNvRamLbl = new QLabel( tr("CHR NVRAM:") ), 0, Qt::AlignRight );
 	hbox->addWidget( chrNvRamBox, 0, Qt::AlignLeft );
 
 	// add usually used size strings
@@ -387,8 +390,8 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	miscRomsEdit = new QLineEdit();
 	hdrLayout->addLayout( hbox );
 	hbox->addWidget( miscRomsEdit );
-	hbox->addWidget( new QLabel( tr("Misc. ROM(s)") ) );
-	hbox->addWidget( new QLabel( tr("Input Device:") ) );
+	hbox->addWidget( miscRomsLbl = new QLabel( tr("Misc. ROM(s)") ) );
+	hbox->addWidget( inputDevLbl = new QLabel( tr("Input Device:") ) );
 	hbox->addWidget( inputDevBox );
 
 	grid = new QGridLayout();
@@ -403,6 +406,8 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	mainLayout->addLayout( grid );
 
 	setLayout( mainLayout );
+
+	connect( closeBtn, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)) );
 
 	i=0;
 	while ( vsSysList[i] != NULL )
@@ -463,6 +468,18 @@ void iNesHeaderEditor_t::closeWindow(void)
    //printf("Close Window\n");
    done(0);
 	deleteLater();
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::iNes1Clicked(bool checked)
+{
+	//printf("INES 1.0 State: %i \n", checked);
+	ToggleINES20(false);
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::iNes2Clicked(bool checked)
+{
+	//printf("INES 2.0 State: %i \n", checked);
+	ToggleINES20(true);
 }
 //----------------------------------------------------------------------------
 void iNesHeaderEditor_t::showErrorMsgWindow(const char *str)
@@ -807,6 +824,87 @@ void iNesHeaderEditor_t::setHeaderData(iNES_HEADER* header)
 		}
 	}
 
+	// System
+	int system = header->ROM_type2 & 3;
+	switch (system)
+	{
+		default:
+		// Normal
+		case 0:
+			normSysbtn->setChecked(true);
+			break;
+		// VS. System
+		case 1:
+			vsSysbtn->setChecked(true);
+			break;
+		// PlayChoice-10
+		case 2:
+			// PlayChoice-10 is an unofficial setting for ines 1.0
+			plySysbtn->setChecked(true);
+			unofficial = !ines20;
+			break;
+		// Extend
+		case 3:
+			// The 7th byte is different between ines 1.0 and 2.0, so we need to check it
+			if (ines20) 
+			{
+				extSysbtn->setChecked(true);
+			}
+			break;
+	}
+
+	// it's quite ambiguous to put them here, but it's better to have a default selection than leave the dropdown blank, because user might switch to ines 2.0 anytime
+	// Hardware type
+	int hardware = header->VS_hardware >> 4;
+	for (i=0; i<vsHwBox->count(); i++)
+	{
+		if ( vsHwBox->itemData(i).toInt() == hardware )
+		{
+			vsHwBox->setCurrentIndex(i); break;
+		}
+	}
+
+	// PPU type
+	int ppu = header->VS_hardware & 0xF;
+	for (i=0; i<vsPpuBox->count(); i++)
+	{
+		if ( vsPpuBox->itemData(i).toInt() == ppu )
+		{
+			vsPpuBox->setCurrentIndex(i); break;
+		}
+	}
+	// Extend Console
+	for (i=0; i<extCslBox->count(); i++)
+	{
+		if ( extCslBox->itemData(i).toInt() == ppu )
+		{
+			extCslBox->setCurrentIndex(i); break;
+		}
+	}
+
+	// Input Device:
+	int input = header->reserved[1] & 0x1F;
+	for (i=0; i<inputDevBox->count(); i++)
+	{
+		if ( inputDevBox->itemData(i).toInt() == input )
+		{
+			inputDevBox->setCurrentIndex(i); break;
+		}
+	}
+
+	// Miscellaneous ROM Area(s)
+	sprintf(buf, "%d", header->reserved[0] & 3);
+	miscRomsEdit->setText( tr(buf) );
+
+	// Trainer
+	trainerCBox->setChecked( header->ROM_type & 4 ? true : false );
+
+	// Unofficial Properties Checkmark
+	iNesUnOfBox->setChecked( unofficial );
+
+	// Switch the UI to the proper version
+	ToggleINES20( ines20 );
+
 }
 //----------------------------------------------------------------------------
 void iNesHeaderEditor_t::ToggleINES20(bool ines20)
@@ -814,29 +912,116 @@ void iNesHeaderEditor_t::ToggleINES20(bool ines20)
 	// only ines 2.0 has these values
 	// these are always have when in 2.0
 	// Submapper#
-	//EnableWindow(GetDlgItem(hwnd, IDC_SUBMAPPER_TEXT), ines20);
+	mapperSubLbl->setEnabled(ines20);
 	mapperSubEdit->setEnabled(ines20);
 	// PRG NVRAM
+	prgNvRamLbl->setEnabled(ines20);
 	prgNvRamBox->setEnabled(ines20);
-	//EnableWindow(GetDlgItem(hwnd, IDC_PRGNVRAM_TEXT), ines20);
 	// CHR RAM
+	chrRamLbl->setEnabled(ines20);
 	chrRamBox->setEnabled(ines20);
-	//EnableWindow(GetDlgItem(hwnd, IDC_CHRRAM_TEXT), ines20);
 	// CHR NVRAM
 	chrNvRamBox->setEnabled(ines20);
-	//EnableWindow(GetDlgItem(hwnd, IDC_CHRNVRAM_TEXT), ines20);
+	chrNvRamLbl->setEnabled(ines20);
 	// Dendy in Region Groupbox
 	dendyRegionBtn->setEnabled(ines20);
 	// Multiple in Regtion Groupbox
 	dualRegionBtn->setEnabled(ines20);
 	// Extend in System Groupbox
 	extGroupBox->setEnabled(ines20);
+	extSysbtn->setEnabled(ines20);
 	// Input Device
+	inputDevLbl->setEnabled(ines20);
 	inputDevBox->setEnabled(ines20);
-	//EnableWindow(GetDlgItem(hwnd, IDC_INPUT_DEVICE_TEXT), ines20);
 	// Miscellaneous ROMs
+	miscRomsLbl->setEnabled(ines20);
 	miscRomsEdit->setEnabled(ines20);
-	//EnableWindow(GetDlgItem(hwnd, IDC_MISCELLANEOUS_ROMS_TEXT), ines20);
 	//
+	
+	if ( ines20 )
+	{
+		battNvRamBox->hide();
+		prgNvRamLbl->show();
+		prgNvRamBox->show();
+	}
+	else
+	{
+		battNvRamBox->show();
+		prgNvRamLbl->hide();
+		prgNvRamBox->hide();
+	}
+
+	if ( ines20 )
+	{
+		if ( vsSysbtn->isChecked() )
+		{
+			vsGroupBox->setEnabled(true);
+		}
+
+		if ( dendyRegionBtn->isChecked() )
+		{
+			dendyRegionBtn->setChecked(false);
+			palRegionBtn->setChecked(true);
+		}
+
+		if ( extSysbtn->isChecked() )
+		{
+			extSysbtn->setChecked(false);
+			normSysbtn->setChecked(true);
+		}
+
+	}
+	else
+	{
+		vsGroupBox->setEnabled(false);
+	}
+
+	iNesUnOfBox->setEnabled(ines20);
+	ToggleUnofficialPropertiesEnabled( ines20, iNesUnOfBox->isChecked() );
+
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::ToggleUnofficialPropertiesEnabled(bool ines20, bool check)
+{
+	bool sub_enable = !ines20 && check;
+
+	// Unofficial Properties only available in ines 1.0
+	iNesUnOfGroupBox->setEnabled(sub_enable);
+	// when unofficial properties is enabled or in ines 2.0 standard, Playchoice-10 in System groupbox is available
+	plySysbtn->setEnabled(ines20 || sub_enable);
+
+	ToggleUnofficialPrgRamPresent(ines20, check, iNesPrgRamBox->isChecked() );
+	ToggleUnofficialExtraRegionCode(ines20, check, iNesDualRegBox->isChecked() );
+
+	// Playchoice-10 is not available in ines 1.0 and unofficial is not checked, switch back to normal
+	if (!ines20 && !check && plySysbtn->isChecked() )
+	{
+		normSysbtn->setChecked(true);
+	}
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::ToggleUnofficialExtraRegionCode(bool ines20, bool unofficial_check, bool check)
+{
+	// The unofficial byte to determine whether multiple region is valid
+
+	// Multiple in Region Groupbox
+	dualRegionBtn->setEnabled(ines20 || unofficial_check && check);
+
+	// Dual region is not avalable when in ines 1.0 and extra region in unofficial is not checked, switch it back to NTSC 
+	if (!ines20 && (!unofficial_check || !check) && dualRegionBtn->isChecked() )
+	{
+		ntscRegionBtn->setChecked(true);
+	}
+}
+//----------------------------------------------------------------------------
+
+void iNesHeaderEditor_t::ToggleUnofficialPrgRamPresent(bool ines20, bool unofficial_check, bool check)
+{
+	// The unofficial byte to determine wheter PRGRAM exists
+	// PRG RAM
+	bool enable = ines20 || !unofficial_check || check;
+	// When unofficial 10th byte was not set, the PRG RAM is defaultly enabled
+	prgRamLbl->setEnabled( enable );
+	prgRamBox->setEnabled( enable );
 }
 //----------------------------------------------------------------------------
