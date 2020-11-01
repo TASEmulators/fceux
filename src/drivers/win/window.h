@@ -31,6 +31,7 @@ void DoTimingConfigFix();
 int CreateMainWindow();
 void UpdateCheckedMenuItems();
 void LoadNewGamey(HWND hParent, const char *initialdir);
+// Returns nullptr on failure.
 char* LoadRecentRom(int slot);
 int BrowseForFolder(HWND hParent, const char *htext, char *buf);
 void SetMainWindowStuff();

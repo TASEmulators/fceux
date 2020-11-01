@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <tuple>
 
 class Config {
 private:
@@ -95,8 +96,9 @@ public:
 extern Config* g_config;
 
 /**
- * Reloads last game
+ * Reloads last game. Result is a pair of error code and the file that we attempted to load. Code 1 means success, 0
+ * failure.
  */
-int reloadLastGame();
+std::pair<int, std::string> reloadLastGame();
 
 #endif // !__CONFIGSYS_H

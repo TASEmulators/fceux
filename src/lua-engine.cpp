@@ -602,6 +602,7 @@ static int emu_loadrom(lua_State *L)
 	//special case: reload rom
 	if(!str) {
 		ReloadRom();
+		lua_pushstring(L, ""); // TODO
 		return 0;
 	}
 
@@ -609,9 +610,15 @@ static int emu_loadrom(lua_State *L)
 	char nameo[2048];
 	strncpy(nameo, nameo2, sizeof(nameo));
 	if (!ALoad(nameo)) {
-		LoadRecentRom(0);
-		return 0;
+		if (auto* fname = LoadRecentRom(0)) {
+			lua_pushstring(L, LoadRecentRom(0));
+			return 1;
+		} else {
+			lua_pushnil(L);
+			return 0;
+		}
 	} else {
+		lua_pushstring(L, nameo);
 		return 1;
 	}
 #else
@@ -625,9 +632,15 @@ static int emu_loadrom(lua_State *L)
 	//printf("Load ROM: '%s'\n", nameo );
 	if (!LoadGame(nameo, true)) 
 	{
-		reloadLastGame();
-		return 0;
+		auto errPathPair = reloadLastGame();
+		if (errPathPair.first)
+			lua_pushstring(L, errPathPair.second.c_str());
+		else
+			lua_pushnil(L);
+
+		return errPathPair.first;
 	} else {
+		lua_pushstring(L, nameo2); // return the original relative path
 		return 1;
 	}
 #endif
