@@ -1302,7 +1302,6 @@ void ReloadRom(void)
 	} else
 	{
 		// load most recent ROM
-		extern void LoadRecentRom(int slot);
 		LoadRecentRom(0);
 	}
 #endif

@@ -33,6 +33,7 @@ void DoTimingConfigFix();
 int CreateMainWindow();
 void UpdateCheckedMenuItems();
 void LoadNewGamey(HWND hParent, const char *initialdir);
+char* LoadRecentRom(int slot);
 int BrowseForFolder(HWND hParent, const char *htext, char *buf);
 void SetMainWindowStuff();
 void GetMouseData(uint32 (&md)[3]);

@@ -41,6 +41,7 @@ extern char FileBase[];
 #ifdef WIN32
 #include "drivers/win/common.h"
 #include "drivers/win/main.h"
+#include "drivers/win/window.h"
 #include "drivers/win/taseditor/selection.h"
 #include "drivers/win/taseditor/laglog.h"
 #include "drivers/win/taseditor/markers.h"
@@ -609,7 +610,6 @@ static int emu_loadrom(lua_State *L)
 	char nameo[2048];
 	strncpy(nameo, nameo2, sizeof(nameo));
 	if (!ALoad(nameo)) {
-		extern void LoadRecentRom(int slot);
 		LoadRecentRom(0);
 		return 0;
 	} else {

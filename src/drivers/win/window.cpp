@@ -761,7 +761,7 @@ void AddRecentFile(const char *filename)
 	UpdateRecentArray(filename, recent_files, MAX_NUMBER_OF_RECENT_FILES, recentmenu, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
 }
 
-void LoadRecentRom(int slot)
+char* LoadRecentRom(int slot)
 {
 	char*& fname = recent_files[slot];
 	if(fname)
@@ -775,7 +775,13 @@ void LoadRecentRom(int slot)
 				UpdateRMenu(recentmenu, recent_files, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
 			}
 		}
+		else
+		{
+			return fname;
+		}
 	}
+
+	return nullptr;
 }
 
 void UpdateLuaRMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int baseid)
