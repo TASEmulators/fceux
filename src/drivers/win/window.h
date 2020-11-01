@@ -4,8 +4,6 @@
 #include "common.h"
 #include <string>
 
-using namespace std;
-
 // Type definitions
 
 struct CreateMovieParameters
@@ -38,7 +36,7 @@ int BrowseForFolder(HWND hParent, const char *htext, char *buf);
 void SetMainWindowStuff();
 void GetMouseData(uint32 (&md)[3]);
 void GetMouseRelative(int32 (&md)[3]);
-//void ChangeMenuItemText(int menuitem, string text);
+//void ChangeMenuItemText(int menuitem, std::string text);
 POINT CalcSubWindowPos(HWND hDlg, POINT* conf);
 
 template<int BUFSIZE>
