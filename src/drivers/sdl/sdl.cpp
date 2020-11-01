@@ -161,9 +161,6 @@ static const char *DriverUsage=
 //--slstart	{0-239}   Sets the first drawn emulated scanline.\n
 //--clipsides	{0|1}   Clips left and rightmost 8 columns of pixels.\n
 
-// global configuration object
-Config *g_config;
-
 static void ShowUsage(char *prog)
 {
 	printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);

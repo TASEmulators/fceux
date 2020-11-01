@@ -57,9 +57,6 @@ bool turbo = false;
 unsigned int gui_draw_area_width   = 256;
 unsigned int gui_draw_area_height  = 256;
 
-// global configuration object
-Config *g_config = NULL;
-
 static int inited = 0;
 static int noconfig=0;
 static int frameskip=0;

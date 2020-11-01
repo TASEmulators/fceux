@@ -91,4 +91,7 @@ public:
     int save();
 };
 
+// Global configuration object
+extern Config* g_config;
+
 #endif // !__CONFIGSYS_H

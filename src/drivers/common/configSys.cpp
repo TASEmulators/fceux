@@ -745,3 +745,5 @@ Config::save()
 
 	return 0;
 }
+
+Config* g_config = nullptr;
