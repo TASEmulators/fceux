@@ -57,7 +57,6 @@ extern TASEDITOR_LUA taseditor_lua;
 #include "drivers/Qt/fceuWrapper.h"
 #else
 int LoadGame(const char *path, bool silent = false);
-int reloadLastGame(void);
 #endif
 
 #endif

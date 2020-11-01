@@ -207,16 +207,6 @@ DriverKill()
 }
 
 /**
- * Reloads last game
- */
-int reloadLastGame(void)
-{
-	std::string lastRom;
-	g_config->getOption(std::string("SDL.LastOpenFile"), &lastRom);
-	return LoadGame(lastRom.c_str(), false);
-}
-
-/**
  * Loads a game, given a full path/filename.  The driver code must be
  * initialized after the game is loaded, because the emulator code
  * provides data necessary for the driver code(number of scanlines to

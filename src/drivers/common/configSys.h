@@ -94,4 +94,9 @@ public:
 // Global configuration object
 extern Config* g_config;
 
+/**
+ * Reloads last game
+ */
+int reloadLastGame();
+
 #endif // !__CONFIGSYS_H

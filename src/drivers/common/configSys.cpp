@@ -747,3 +747,12 @@ Config::save()
 }
 
 Config* g_config = nullptr;
+
+int LoadGame(const char *path, bool silent); // defined differently in Qt vs SDL code
+
+int reloadLastGame()
+{
+	std::string lastRom;
+	g_config->getOption("SDL.LastOpenFile", &lastRom);
+	return LoadGame(lastRom.c_str(), false);
+}
