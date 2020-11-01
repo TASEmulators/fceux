@@ -446,7 +446,7 @@ static void KeyboardCommands (void)
 	// check if the family keyboard is enabled
 	if (CurInputType[2] == SIFC_FKB)
 	{
-		if ( g_keyState[SDL_SCANCODE_SCROLLLOCK] )
+		if (_keyonly (Hotkeys[HK_FKB_ENABLE]))
 		{
 			g_fkbEnabled ^= 1;
 			FCEUI_DispMessage ("Family Keyboard %sabled.", 0,

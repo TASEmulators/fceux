@@ -55,7 +55,7 @@ static const char* HotkeyStrings[HK_MAX] = {
 		"SelectState0", "SelectState1", "SelectState2", "SelectState3",
 		"SelectState4", "SelectState5", "SelectState6", "SelectState7", 
 		"SelectState8", "SelectState9", "SelectStateNext", "SelectStatePrev",
-		"VolumeDown", "VolumeUp" };
+		"VolumeDown", "VolumeUp", "FKB_Enable" };
 
 const char *getHotkeyString( int i )
 {
@@ -433,7 +433,10 @@ InitConfig()
 		SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
 		SDLK_6, SDLK_7, SDLK_8, SDLK_9,
 		SDLK_PAGEUP, // select state next
-		SDLK_PAGEDOWN}; // select state prev
+		SDLK_PAGEDOWN, // select state prev
+		0, // Volume Up Internal 
+		0, // Volume Down Internal 
+		SDLK_SCROLLLOCK }; // FKB Enable Toggle
 
 	prefix = "SDL.Hotkeys.";
 	for(int i=0; i < HK_MAX; i++)
