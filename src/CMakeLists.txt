@@ -515,19 +515,24 @@ install( TARGETS  ${APP_NAME}
 	BUNDLE  DESTINATION  . COMPONENT Runtime 
 	RUNTIME  DESTINATION  bin COMPONENT Runtime )
 
-set( APPS  ${CMAKE_INSTALL_PREFIX}/${APP_NAME}.app)
-set( DIRS  ${CMAKE_BINARY_DIR} /usr/local/lib)
-
-message(STATUS APPS: ${APPS})
-message(STATUS DIRS: ${DIRS} )
+# Use \$ to defer expansion until install script is called; CPack will call it with its own CMAKE_INSTALL_PREFIX
+set(APP \${CMAKE_INSTALL_PREFIX}/${APP_NAME}.app)
 
 set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/fceux.icns )
-set(CPACK_BUNDLE_ICON ${CMAKE_SOURCE_DIR}/fceux.icns )
 set(CPACK_GENERATOR "DRAGNDROP")
 include(CPACK)
 
-install( CODE "include(BundleUtilities) 
-	fixup_bundle( \"${APPS}\" \"\" \"${DIRS}\") "
+# macdeployqt tool that comes with Qt: https://doc.qt.io/qt-5/macos-deployment.html#macdeploy
+# Compared to fixup_bundle, correctly finds and installs Qt-specific resources as well as non-Qt dependencies
+find_program(MACDEPLOYQT macdeployqt)
+if(NOT MACDEPLOYQT)
+	message(FATAL_ERROR "Could not find macdeployqt executable")
+endif()
+
+install( CODE "
+	message(STATUS \"Deploying and fixing up dependencies in app: ${APP}\")
+	execute_process(COMMAND \"${MACDEPLOYQT}\" \"${APP}\" -verbose=1)
+		"
 	COMPONENT Runtime
 	)
 

@@ -7,8 +7,10 @@
 #include <libgen.h>
 #elif   __APPLE__
 #include <stdlib.h>
+#include <unistd.h>
 #include <libgen.h>
 #include <mach-o/dyld.h>
+#define SetCurrentDir chdir
 #endif
 
 #ifdef WIN32
@@ -188,6 +190,16 @@ static intptr_t info_uid;
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void TaseditorDisableManualFunctionIfNeeded();
+
+#else
+int LuaKillMessageBox(void);
+#ifdef __linux__
+int LuaPrintfToWindowConsole(const char *__restrict format, ...) 
+                  __THROWNL __attribute__ ((__format__ (__printf__, 1, 2)));
+#else
+int LuaPrintfToWindowConsole(const char *__restrict format, ...) throw();
+#endif
+
 #endif
 extern void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str);
 extern void WinLuaOnStart(intptr_t hDlgAsInt);
@@ -606,7 +618,12 @@ static int emu_loadrom(lua_State *L)
 #else
 	const char *nameo2 = luaL_checkstring(L,1);
 	char nameo[2048];
-	strncpy(nameo, nameo2, sizeof(nameo));
+
+	if ( realpath( nameo2, nameo ) == NULL )
+	{
+		strncpy(nameo, nameo2, sizeof(nameo));
+	}
+	//printf("Load ROM: '%s'\n", nameo );
 	if (!LoadGame(nameo, true)) 
 	{
 		reloadLastGame();
@@ -1328,6 +1345,7 @@ void CallRegisteredLuaSaveFunctions(int savestateNumber, LuaSaveData& saveData)
 #ifdef WIN32
 				MessageBox(hAppWnd, lua_tostring(L, -1), "Lua Error in SAVE function", MB_OK);
 #else
+				LuaPrintfToWindowConsole("Lua error in registersave function: %s\n", lua_tostring(L, -1));
 				fprintf(stderr, "Lua error in registersave function: %s\n", lua_tostring(L, -1));
 #endif
 			}
@@ -1380,6 +1398,7 @@ void CallRegisteredLuaLoadFunctions(int savestateNumber, const LuaSaveData& save
 #ifdef WIN32
 				MessageBox(hAppWnd, lua_tostring(L, -1), "Lua Error in LOAD function", MB_OK);
 #else
+				LuaPrintfToWindowConsole("Lua error in registerload function: %s\n", lua_tostring(L, -1));
 				fprintf(stderr, "Lua error in registerload function: %s\n", lua_tostring(L, -1));
 #endif
 			}
@@ -2021,6 +2040,7 @@ void HandleCallbackError(lua_State* L)
 #ifdef WIN32
 		MessageBox( hAppWnd, errmsg, "Lua run error", MB_OK | MB_ICONSTOP);
 #else
+		LuaPrintfToWindowConsole("Lua thread bombed out: %s\n", errmsg);
 		fprintf(stderr, "Lua thread bombed out: %s\n", errmsg);
 #endif
 
@@ -5729,19 +5749,23 @@ static void FCEU_LuaHookFunction(lua_State *L, lua_Debug *dbg) {
 		}
 
 #else
-		fprintf(stderr, "The Lua script running has been running a long time.\nIt may have gone crazy. Kill it? (I won't ask again if you say No)\n");
-		char buffer[64];
-		while (TRUE) {
-			fprintf(stderr, "(y/n): ");
-			fgets(buffer, sizeof(buffer), stdin);
-			if (buffer[0] == 'y' || buffer[0] == 'Y') {
-				kill = 1;
-				break;
-			}
-
-			if (buffer[0] == 'n' || buffer[0] == 'N')
-				break;
+		if ( LuaKillMessageBox() )
+		{
+			kill = 1;
 		}
+		//fprintf(stderr, "The Lua script running has been running a long time.\nIt may have gone crazy. Kill it? (I won't ask again if you say No)\n");
+		//char buffer[64];
+		//while (TRUE) {
+		//	fprintf(stderr, "(y/n): ");
+		//	fgets(buffer, sizeof(buffer), stdin);
+		//	if (buffer[0] == 'y' || buffer[0] == 'Y') {
+		//		kill = 1;
+		//		break;
+		//	}
+
+		//	if (buffer[0] == 'n' || buffer[0] == 'N')
+		//		break;
+		//}
 #endif
 
 		if (kill) {
@@ -6138,6 +6162,7 @@ void FCEU_LuaFrameBoundary()
 				//StopSound();//StopSound(); //mbg merge 7/23/08
 		MessageBox( hAppWnd, errmsg, "Lua run error", MB_OK | MB_ICONSTOP);
 #else
+		LuaPrintfToWindowConsole("Lua thread bombed out: %s\n", errmsg);
 		fprintf(stderr, "Lua thread bombed out: %s\n", errmsg);
 #endif
 	} else {
@@ -6165,7 +6190,8 @@ void FCEU_LuaFrameBoundary()
  *
  * Returns true on success, false on failure.
  */
-int FCEU_LoadLuaCode(const char *filename, const char *arg) {
+int FCEU_LoadLuaCode(const char *filename, const char *arg) 
+{
 	if (!DemandLua())
 	{
 		return 0;
@@ -6177,13 +6203,11 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		luaScriptName = strdup(filename);
 	}
 
-#if defined(WIN32) || defined(__linux)
 	std::string getfilepath = filename;
 
 	getfilepath = getfilepath.substr(0,getfilepath.find_last_of("/\\") + 1);
 
 	SetCurrentDir(getfilepath.c_str());
-#endif
 
 	//stop any lua we might already have had running
 	FCEU_LuaStop();
@@ -6279,6 +6303,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 				//StopSound();//StopSound(); //mbg merge 7/23/08
 		MessageBox(NULL, lua_tostring(L,-1), "Lua load error", MB_OK | MB_ICONSTOP);
 #else
+		LuaPrintfToWindowConsole("Failed to compile file: %s\n", lua_tostring(L,-1));
 		fprintf(stderr, "Failed to compile file: %s\n", lua_tostring(L,-1));
 #endif
 
@@ -6497,6 +6522,7 @@ void FCEU_LuaGui(uint8 *XBuf)
 			//StopSound();//StopSound(); //mbg merge 7/23/08
 			MessageBox(hAppWnd, lua_tostring(L, -1), "Lua Error in GUI function", MB_OK);
 #else
+			LuaPrintfToWindowConsole("Lua error in gui.register function: %s\n", lua_tostring(L, -1));
 			fprintf(stderr, "Lua error in gui.register function: %s\n", lua_tostring(L, -1));
 #endif
 			// This is grounds for trashing the function

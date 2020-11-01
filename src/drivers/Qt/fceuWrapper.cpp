@@ -753,7 +753,8 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	g_config->setOption("SDL.LuaScript", "");
 	if (s != "")
 	{
-#ifdef __linux
+#if defined(__linux) || defined(__APPLE__)
+
 		// Resolve absolute path to file
 		char fullpath[2048];
 		if ( realpath( s.c_str(), fullpath ) != NULL )
