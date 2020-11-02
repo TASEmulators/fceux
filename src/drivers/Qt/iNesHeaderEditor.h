@@ -28,6 +28,7 @@ class iNesHeaderEditor_t : public QDialog
 		iNesHeaderEditor_t(QWidget *parent = 0);
 		~iNesHeaderEditor_t(void);
 
+		bool  isInitialized(void){ return initOK; };
 	protected:
 		void closeEvent(QCloseEvent *event);
 
@@ -78,10 +79,14 @@ class iNesHeaderEditor_t : public QDialog
 		QLabel       *inputDevLbl;
 		QLabel       *miscRomsLbl;
 		iNES_HEADER  *iNesHdr;
+
+		bool          initOK;
 	private:
 
+		bool openFile(void);
 		void printHeader(iNES_HEADER* _header);
 		bool loadHeader(iNES_HEADER *header);
+		bool SaveINESFile(const char* path, iNES_HEADER* header);
 		bool WriteHeaderData(iNES_HEADER* header);
 		void setHeaderData(iNES_HEADER *header);
 		void showErrorMsgWindow(const char *str);
@@ -96,6 +101,7 @@ class iNesHeaderEditor_t : public QDialog
       void closeWindow(void);
 	private slots:
 		void saveHeader(void);
+		void saveFileAs(void);
 		void restoreHeader(void);
 		void iNes1Clicked(bool checked);
 		void iNes2Clicked(bool checked);

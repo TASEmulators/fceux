@@ -9,6 +9,7 @@
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QMessageBox>
+#include <QFileDialog>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -22,6 +23,7 @@
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/iNesHeaderEditor.h"
+#include "Qt/ConsoleUtilities.h"
 
 extern BMAPPINGLocal bmap[];
 
@@ -141,6 +143,8 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	QGroupBox *box, *hdrBox;
 	QGridLayout *grid;
 	char stmp[128];
+
+	initOK = false;
 
 	setWindowTitle("iNES Header Editor");
 
@@ -449,12 +453,21 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 
 	::memset( iNesHdr, 0, sizeof(iNES_HEADER) );
 
-	if (GameInfo)
+	if (GameInfo == NULL)
 	{
-		loadHeader( iNesHdr );
+		if ( openFile() == false )
+		{
+			return;
+		}
+	}
+	if ( loadHeader( iNesHdr ) == false )
+	{
+		return;
 	}
 
 	setHeaderData( iNesHdr );
+
+	initOK = true;
 }
 //----------------------------------------------------------------------------
 iNesHeaderEditor_t::~iNesHeaderEditor_t(void)
@@ -492,21 +505,7 @@ void iNesHeaderEditor_t::restoreHeader(void)
 //----------------------------------------------------------------------------
 void iNesHeaderEditor_t::saveHeader(void)
 {
-	iNES_HEADER newHeader;
-
-	WriteHeaderData( &newHeader );
-
-	if ( iNesHdr != NULL )
-	{
-		if ( memcmp( iNesHdr, &newHeader, sizeof(iNES_HEADER) ) == 0 )
-		{
-			printf("Headers Match\n");
-		}
-		else
-		{
-			printf("Headers Changed\n");
-		}
-	}
+	saveFileAs();
 }
 //----------------------------------------------------------------------------
 void iNesHeaderEditor_t::iNes1Clicked(bool checked)
@@ -588,10 +587,11 @@ bool iNesHeaderEditor_t::loadHeader(iNES_HEADER* header)
 	};
 
 	FCEUFILE* fp = FCEU_fopen(LoadedRomFName, NULL, "rb", NULL);
-	if (!GameInfo)
-	{
-		strcpy(LoadedRomFName, fp->fullFilename.c_str());
-	}
+
+	//if (!GameInfo)
+	//{
+	//	strcpy(LoadedRomFName, fp->fullFilename.c_str());
+	//}
 
 	if (fp)
 	{
@@ -663,6 +663,164 @@ bool iNesHeaderEditor_t::loadHeader(iNES_HEADER* header)
 
 
 	return true;
+}
+//----------------------------------------------------------------------------
+bool iNesHeaderEditor_t::SaveINESFile(const char* path, iNES_HEADER* header)
+{
+	char buf[4096];
+	const char* ext[] = { "nes", 0 };
+
+	// Source file
+	FCEUFILE* source = FCEU_fopen(LoadedRomFName, NULL, "rb", 0, -1, ext);
+	if (!source)
+	{
+		sprintf(buf, "Opening source file %s failed.", LoadedRomFName);
+		showErrorMsgWindow(buf);
+		return false;
+	}
+
+	// Destination file
+	FILE* target = FCEUD_UTF8fopen(path, "wb");
+	if (!target)
+	{
+		sprintf(buf, "Creating target file %s failed.", path);
+		showErrorMsgWindow(buf);
+		return false;
+	}
+
+	memset(buf, 0, sizeof(buf));
+
+	// Write the header first
+	fwrite(header, 1, sizeof(iNES_HEADER), target);
+	// Skip the original header
+	FCEU_fseek(source, sizeof(iNES_HEADER), SEEK_SET);
+	int len;
+	while (len = FCEU_fread(buf, 1, sizeof(buf), source))
+	{
+		fwrite(buf, len, 1, target);
+	}
+
+	FCEU_fclose(source);
+	fclose(target);
+
+	return true;
+
+}
+
+//----------------------------------------------------------------------------
+bool iNesHeaderEditor_t::openFile(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string last;
+	char dir[512];
+	QFileDialog  dialog(this, tr("Open NES File") );
+
+	const QStringList filters(
+			{ 
+           "NES files (*.nes *.NES)",
+           "Any files (*)"
+         });
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilters( filters );
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
+
+	g_config->getOption ("SDL.LastOpenFile", &last );
+
+	getDirFromFile( last.c_str(), dir );
+
+	dialog.setDirectory( tr(dir) );
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+   if ( filename.isNull() )
+   {
+      return false;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	if ( GameInfo == NULL )
+	{
+		strcpy( LoadedRomFName, filename.toStdString().c_str() );
+	}
+
+   return true;
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::saveFileAs(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string last;
+	char dir[512];
+	QFileDialog  dialog(this, tr("Save iNES File") );
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("NES Files (*.nes *.NES) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+	dialog.setDefaultSuffix( tr(".nes") );
+
+	getDirFromFile( LoadedRomFName, dir );
+
+	dialog.setDirectory( tr(dir) );
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	WriteHeaderData( iNesHdr );
+
+	if ( SaveINESFile( filename.toStdString().c_str(), iNesHdr ) )
+	{
+		// Error
+	}
 }
 //----------------------------------------------------------------------------
 void iNesHeaderEditor_t::setHeaderData(iNES_HEADER* header)

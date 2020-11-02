@@ -1282,7 +1282,14 @@ void consoleWin_t::openNesHeaderEditor(void)
 	
    win = new iNesHeaderEditor_t(this);
 	
-   win->show();
+	if ( win->isInitialized() )
+	{
+		win->show();
+	}
+	else
+	{
+		delete win;
+	}
 }
 
 void consoleWin_t::openTraceLogger(void)
