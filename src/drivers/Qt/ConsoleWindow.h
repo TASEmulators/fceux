@@ -102,6 +102,7 @@ class  consoleWin_t : public QMainWindow
 	 QAction *hexEditAct;
 	 QAction *ppuViewAct;
 	 QAction *ntViewAct;
+	 QAction *iNesEditAct;
 	 QAction *openMovAct;
 	 QAction *stopMovAct;
 	 QAction *recMovAct;
@@ -180,6 +181,7 @@ class  consoleWin_t : public QMainWindow
 		void emuSetFrameAdvDelay(void);
 		void openPPUViewer(void);
 		void openNTViewer(void);
+		void openNesHeaderEditor(void);
 		void openCheats(void);
 		void openRamWatch(void);
 		void openRamSearch(void);

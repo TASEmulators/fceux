@@ -600,7 +600,7 @@ static int emu_loadrom(lua_State *L)
 	const char* str = lua_tostring(L,1);
 
 	//special case: reload rom
-	if(!str) {
+	if (!str) {
 		ReloadRom();
 		return 0;
 	}
@@ -611,10 +611,14 @@ static int emu_loadrom(lua_State *L)
 	if (!ALoad(nameo)) {
 		extern void LoadRecentRom(int slot);
 		LoadRecentRom(0);
-		return 0;
-	} else {
+	}
+	if ( GameInfo )
+	{
+		//printf("Currently Loaded ROM: '%s'\n", GameInfo->filename );
+		lua_pushstring(L, GameInfo->filename);
 		return 1;
 	}
+	return 0;
 #else
 	const char *nameo2 = luaL_checkstring(L,1);
 	char nameo[2048];
@@ -623,16 +627,22 @@ static int emu_loadrom(lua_State *L)
 	{
 		strncpy(nameo, nameo2, sizeof(nameo));
 	}
-	//printf("Load ROM: '%s'\n", nameo );
+	//printf("Attempting to Load ROM: '%s'\n", nameo );
 	if (!LoadGame(nameo, true)) 
 	{
+		//printf("Failed to Load ROM: '%s'\n", nameo );
 		reloadLastGame();
-		return 0;
-	} else {
+	}
+	if ( GameInfo )
+	{
+		//printf("Currently Loaded ROM: '%s'\n", GameInfo->filename );
+		lua_pushstring(L, GameInfo->filename);
 		return 1;
+	} else {
+		return 0;
 	}
 #endif
-	return 1;
+	return 0;
 }
 
 

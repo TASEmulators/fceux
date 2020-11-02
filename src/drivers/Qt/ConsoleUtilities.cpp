@@ -189,3 +189,64 @@ int parseFilepath( const char *filepath, char *dir, char *base, char *suffix )
 	return end;
 }
 //---------------------------------------------------------------------------
+// FCEU Data Entry Custom Validators
+//---------------------------------------------------------------------------
+fceuDecIntValidtor::fceuDecIntValidtor( int min, int max, QObject *parent)
+     : QValidator(parent)
+{
+	this->min = min;
+	this->max = max;
+}
+//---------------------------------------------------------------------------
+QValidator::State fceuDecIntValidtor::validate(QString &input, int &pos) const
+{
+   int i, v;
+   //printf("Validate: %i '%s'\n", input.size(), input.toStdString().c_str() );
+
+   if ( input.size() == 0 )
+   {
+      return QValidator::Acceptable;
+   }
+   std::string s = input.toStdString();
+   i=0;
+
+   if (s[i] == '-')
+	{
+		if ( min >= 0 )
+		{
+   		return QValidator::Invalid;
+		}
+		i++;
+	}
+	else if ( s[i] == '+' )
+   {
+      i++;
+   }
+
+   if ( s[i] == 0 )
+   {
+      return QValidator::Acceptable;
+   }
+
+   if ( isdigit(s[i]) )
+   {
+      while ( isdigit(s[i]) ) i++;
+
+      if ( s[i] == 0 )
+      {
+			v = strtol( s.c_str(), NULL, 0 );
+
+			if ( v < min )
+			{
+   			return QValidator::Invalid;
+			}
+			else if ( v > max )
+			{
+   			return QValidator::Invalid;
+			}
+         return QValidator::Acceptable;
+      }
+   }
+   return QValidator::Invalid;
+}
+//---------------------------------------------------------------------------
