@@ -299,6 +299,8 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	trainerCBox = new QCheckBox( tr("Trainer") );
 	iNesUnOfBox = new QCheckBox( tr("iNES 1.0 Unofficial Properties") );
 
+	connect( iNesUnOfBox, SIGNAL(stateChanged(int)), this, SLOT(unofficialStateChange(int)) );
+
 	box = new QGroupBox( tr("Mirroring:") );
 	box->setLayout( vbox );
 	vbox5->addWidget( box );
@@ -331,6 +333,9 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	iNesBusCfltBox = new QCheckBox( tr("Bus Conflict") );
 	iNesPrgRamBox  = new QCheckBox( tr("PRG RAM Exists") );
 
+	connect( iNesPrgRamBox , SIGNAL(stateChanged(int)), this, SLOT(unofficialPrgRamStateChange(int)) );
+	connect( iNesDualRegBox, SIGNAL(stateChanged(int)), this, SLOT(unofficialDualRegionStateChange(int)) );
+
 	iNesUnOfGroupBox = new QGroupBox( tr("iNES 1.0 Unofficial Properties:") );
 	vbox = new QVBoxLayout();
 
@@ -352,6 +357,11 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	vsSysbtn    = new QRadioButton( tr("VS. Sys") );
 	plySysbtn   = new QRadioButton( tr("PlayChoice-10") );
 	extSysbtn   = new QRadioButton( tr("Extend") );
+
+	connect( normSysbtn, SIGNAL(clicked(bool)), this, SLOT(normSysClicked(bool)) );
+	connect( vsSysbtn  , SIGNAL(clicked(bool)), this, SLOT(vsSysClicked(bool)) );
+	connect( plySysbtn , SIGNAL(clicked(bool)), this, SLOT(plySysClicked(bool)) );
+	connect( extSysbtn , SIGNAL(clicked(bool)), this, SLOT(extSysClicked(bool)) );
 
 	hbox->addWidget( normSysbtn );
 	hbox->addWidget( vsSysbtn   );
@@ -407,7 +417,9 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 
 	setLayout( mainLayout );
 
-	connect( closeBtn, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)) );
+	connect( restoreBtn, SIGNAL(clicked(void)), this, SLOT(restoreHeader(void)) );
+	connect( saveAsBtn , SIGNAL(clicked(void)), this, SLOT(saveHeader(void)) );
+	connect( closeBtn  , SIGNAL(clicked(void)), this, SLOT(closeWindow(void)) );
 
 	i=0;
 	while ( vsSysList[i] != NULL )
@@ -470,6 +482,33 @@ void iNesHeaderEditor_t::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------------------------------
+void iNesHeaderEditor_t::restoreHeader(void)
+{
+	if ( iNesHdr != NULL )
+	{
+		setHeaderData( iNesHdr );
+	}
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::saveHeader(void)
+{
+	iNES_HEADER newHeader;
+
+	WriteHeaderData( &newHeader );
+
+	if ( iNesHdr != NULL )
+	{
+		if ( memcmp( iNesHdr, &newHeader, sizeof(iNES_HEADER) ) == 0 )
+		{
+			printf("Headers Match\n");
+		}
+		else
+		{
+			printf("Headers Changed\n");
+		}
+	}
+}
+//----------------------------------------------------------------------------
 void iNesHeaderEditor_t::iNes1Clicked(bool checked)
 {
 	//printf("INES 1.0 State: %i \n", checked);
@@ -480,6 +519,48 @@ void iNesHeaderEditor_t::iNes2Clicked(bool checked)
 {
 	//printf("INES 2.0 State: %i \n", checked);
 	ToggleINES20(true);
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::normSysClicked(bool checked)
+{
+	ToggleVSSystemGroup(false);
+	ToggleExtendSystemList(false);
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::vsSysClicked(bool checked)
+{
+
+	ToggleVSSystemGroup(true);
+	ToggleExtendSystemList(false);
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::plySysClicked(bool checked)
+{
+
+	ToggleVSSystemGroup(false);
+	ToggleExtendSystemList(false);
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::extSysClicked(bool checked)
+{
+
+	ToggleVSSystemGroup(false);
+	ToggleExtendSystemList(true);
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::unofficialStateChange(int state)
+{
+	ToggleUnofficialPropertiesEnabled( iNes2Btn->isChecked(), state != Qt::Unchecked );
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::unofficialPrgRamStateChange(int state)
+{
+	ToggleUnofficialPrgRamPresent( false, true, state != Qt::Unchecked );
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::unofficialDualRegionStateChange(int state)
+{
+	ToggleUnofficialExtraRegionCode( false, true, state != Qt::Unchecked );
 }
 //----------------------------------------------------------------------------
 void iNesHeaderEditor_t::showErrorMsgWindow(const char *str)
@@ -953,11 +1034,6 @@ void iNesHeaderEditor_t::ToggleINES20(bool ines20)
 
 	if ( ines20 )
 	{
-		if ( vsSysbtn->isChecked() )
-		{
-			vsGroupBox->setEnabled(true);
-		}
-
 		if ( dendyRegionBtn->isChecked() )
 		{
 			dendyRegionBtn->setChecked(false);
@@ -971,12 +1047,14 @@ void iNesHeaderEditor_t::ToggleINES20(bool ines20)
 		}
 
 	}
-	else
-	{
-		vsGroupBox->setEnabled(false);
-	}
 
-	iNesUnOfBox->setEnabled(ines20);
+	// enable extend dialog only when ines 2.0 and extend button is checked
+	ToggleExtendSystemList( ines20 && extSysbtn->isChecked() );
+
+	// enable vs dialog only when ines 2.0 and vs button is checked
+	ToggleVSSystemGroup( ines20 && vsSysbtn->isChecked() );
+
+	iNesUnOfBox->setEnabled(!ines20);
 	ToggleUnofficialPropertiesEnabled( ines20, iNesUnOfBox->isChecked() );
 
 }
@@ -1023,5 +1101,698 @@ void iNesHeaderEditor_t::ToggleUnofficialPrgRamPresent(bool ines20, bool unoffic
 	// When unofficial 10th byte was not set, the PRG RAM is defaultly enabled
 	prgRamLbl->setEnabled( enable );
 	prgRamBox->setEnabled( enable );
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::ToggleExtendSystemList(bool enable)
+{
+	// Extend combo box only enabled when in iNES 2.0 and Extend System was chosen
+	// Extend combo box
+	extGroupBox->setEnabled( enable );
+	//EnableWindow(GetDlgItem(hwnd, IDC_EXTEND_SYSTEM_GROUP), enable);
+	//EnableWindow(GetDlgItem(hwnd, IDC_SYSTEM_EXTEND_COMBO), enable);
+	//EnableWindow(GetDlgItem(hwnd, IDC_EXTEND_SYSTEM_TEXT), enable);
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::ToggleVSSystemGroup(bool enable)
+{
+	// VS System Groupbox only enabled when in iNES 2.0 and VS System in System groupbox is chosen
+	// VS System Groupbox
+	vsGroupBox->setEnabled(enable);
+	// System
+	//EnableWindow(GetDlgItem(hwnd, IDC_VS_SYSTEM_COMBO), enable);
+	//EnableWindow(GetDlgItem(hwnd, IDC_VS_SYSTEM_TEXT), enable);
+	// PPU
+	//EnableWindow(GetDlgItem(hwnd, IDC_VS_PPU_COMBO), enable);
+	//EnableWindow(GetDlgItem(hwnd, IDC_VS_PPU_TEXT), enable);
+}
+//----------------------------------------------------------------------------
+bool iNesHeaderEditor_t::WriteHeaderData(iNES_HEADER* header)
+{
+	// Temporary buffers
+	int idx;
+	char buf[256];
+
+	iNES_HEADER _header;
+	memset(&_header, 0, sizeof(iNES_HEADER));
+
+	// Check iNES 2.0
+	bool ines20 = iNes2Btn->isChecked();
+	// iNES 1.0 unofficial byte available
+	bool unofficial = !ines20 && iNesUnOfBox->isChecked();
+
+	// iNES 2.0 signature
+	if (ines20)
+	{
+		_header.ROM_type2 |= 8;
+	}
+
+	// Mapper
+	idx = mapperComboBox->currentIndex();
+	int mapper = mapperComboBox->itemData(idx).toInt();
+
+	if (mapper < 4096)
+	{
+		if (mapper < 256)
+		{
+			_header.ROM_type |= (mapper & 0xF) << 4;
+			_header.ROM_type2 |= (mapper & 0xF0);
+		} 
+		else
+		{
+			if (ines20)
+			{
+				_header.ROM_type3 |= mapper >> 8;
+			}
+			else
+			{
+				sprintf(buf, "Error: Mapper# should be less than %d in iNES %d.0 format.", 256, 1);
+				showErrorMsgWindow(buf);
+				return false;
+			}
+		}	
+	}
+	else 
+	{
+		sprintf(buf, "Mapper# should be less than %d in iNES %d.0 format.", 4096, 2);
+		showErrorMsgWindow(buf);
+		return false;
+	}
+
+	// Sub mapper
+	if (ines20) 
+	{
+		strcpy( buf, mapperSubEdit->text().toStdString().c_str() );
+		int submapper;
+		if (sscanf(buf, "%d", &submapper) > 0)
+		{
+			if (submapper < 16)
+			{
+				_header.ROM_type3 |= submapper << 4;
+			}
+			else
+			{
+				showErrorMsgWindow("Error: The sub mapper# should less than 16 in iNES 2.0 format.");
+				return false;
+			}
+		} 
+		else
+		{
+			showErrorMsgWindow("Error: The sub mapper# you have entered is invalid. Please enter a decimal number.");
+			return false;
+		}
+	}
+
+	// PRG ROM
+	idx = prgRomBox->currentIndex();
+	int prg_rom = prgRomBox->itemData(idx).toInt();
+
+	if (prg_rom >= 0)
+	{
+		// max value which a iNES 2.0 header can hold
+		if (prg_rom < 16 * 1024 * 0xEFF)
+		{
+			// try to fit the irregular value with the alternative way
+			if (prg_rom % (16 * 1024) != 0)
+			{
+				if (ines20)
+				{
+					// try to calculate the nearest value
+					bool fit = false;
+					int result = 0x7FFFFFFF;
+					for (int multiplier = 0; multiplier < 4; ++multiplier)
+					{
+						for (int exponent = 0; exponent < 64; ++exponent)
+						{
+							int new_result = pow(2, exponent) * (multiplier * 2 + 1);
+							if (new_result == prg_rom)
+							{
+								_header.Upper_ROM_VROM_size |= 0xF;
+								_header.ROM_size |= exponent << 2;
+								_header.ROM_size |= multiplier & 3;
+								fit = true;
+								break;
+							}
+							if (new_result > prg_rom && result > new_result)
+							{
+								result = new_result;
+							}
+						}
+						if (fit) break;
+					}
+
+					if (!fit)
+					{
+						int result10 = (prg_rom / 16 / 1024 + 1) * 16 * 1024;
+						if (result10 < result)
+						{
+							result = result10;
+						}
+						char buf2[64];
+						if (result % 1024 != 0)
+						{
+							sprintf(buf2, "%dB", result);
+						}
+						else
+						{
+							sprintf(buf2, "%dKB", result / 1024);
+						}
+						sprintf(buf, "PRG ROM size you entered is invalid in iNES 2.0, do you want to set to its nearest value %s?", buf2);
+						showErrorMsgWindow(buf);
+						//if (MessageBox(hwnd, buf, "Error", MB_YESNO | MB_ICONERROR) == IDYES)
+						//{
+						//	SetDlgItemText(hwnd, IDC_PRGROM_COMBO, buf2);
+						//}
+						//else
+						//{
+						//	SetFocus(GetDlgItem(hwnd, IDC_PRGROM_COMBO));
+						//	return false;
+						//}
+						return false;
+					}
+				}
+				else 
+				{
+					// ines 1.0 can't handle this kind of value
+					showErrorMsgWindow("PRG ROM size must be multiple of 16KB in iNES 1.0");
+					return false;
+				}
+			}
+			// it's multiple size of 16KB
+			else {
+				// it can be fitted in iNES 1.0
+				if (prg_rom < 16 * 1024 * 0xFF)
+				{
+					_header.ROM_size |= prg_rom / 16 / 1024 & 0xFF;
+				}
+				else
+				{
+					if (ines20)
+					{
+						_header.Upper_ROM_VROM_size |= prg_rom / 16 / 1024 >> 8 & 0xF;
+					}
+					else 
+					{
+						showErrorMsgWindow("PRG ROM size exceeded the limit of iNES 1.0 (4080KB).");
+						return false;
+					}
+				}
+			}
+		}
+		// A too large size
+		else 
+		{
+			showErrorMsgWindow("PRG ROM size you entered is too large to fit into a cartridge, by the way this is an NES emulator, not for XBOX360 or PlayStation2.");
+			return false;
+		}
+	} 
+	else
+	{
+		return false;
+	}
+
+	// PRG RAM
+	if (ines20 || !unofficial || iNesPrgRamBox->isChecked() )
+	{
+		idx = prgRamBox->currentIndex();
+		int prg_ram = prgRamBox->itemData(idx).toInt();
+
+		if (prg_ram >= 0)
+		{
+			if (ines20)
+			{
+				if (prg_ram < 64 << 0xF)
+				{
+					if (prg_ram % 64 == 0)
+					{
+						_header.RAM_size |= (int)log2(prg_ram / 64);
+					}
+					else
+					{
+						showErrorMsgWindow("Invalid PRG RAM size");
+						return false;
+					}
+				}
+				else 
+				{
+					showErrorMsgWindow("PRG RAM size exceeded the limit (4096KB)");
+					return false;
+				}
+			}
+			else 
+			{
+				if (prg_ram < 8 * 1024 * 255)
+				{
+					if (prg_ram % (8 * 1024) == 0)
+					{
+						_header.ROM_type3 |= prg_ram / 8 / 1024;
+					}
+					else 
+					{
+						showErrorMsgWindow("PRG RAM size must be multiple of 8KB in iNES 1.0");
+						return false;
+					}
+				}
+				else {
+					showErrorMsgWindow("PRG RAM size exceeded the limit (2040KB)");
+					return false;
+				}
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	// PRG NVRAM
+	if (ines20)
+	{
+		// only iNES 2.0 has value for PRG VMRAM
+		idx = prgNvRamBox->currentIndex();
+		int prg_nvram = prgNvRamBox->itemData(idx).toInt();
+
+		if (prg_nvram >= 0)
+		{
+			if (prg_nvram < 64 << 0xF)
+			{
+				if (prg_nvram % 64 == 0)
+				{
+					_header.RAM_size |= (int)log2(prg_nvram / 64) << 4;
+				}
+				else
+				{
+					showErrorMsgWindow("Invalid PRG NVRAM size");
+					return false;
+				}
+			}
+			else
+			{
+				showErrorMsgWindow("PRG NVRAM size exceeded the limit (4096KB)");
+				return false;
+			}
+
+			if (prg_nvram != 0)
+			{
+				_header.ROM_type |= 2;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else 
+	{
+		// iNES 1.0 is much simpler, it has only 1 bit for check
+		if ( battNvRamBox->isChecked() )
+		{
+			_header.ROM_type |= 2;
+		}
+	}
+
+	// CHR ROM
+	idx = chrRomBox->currentIndex();
+	int chr_rom = chrRomBox->itemData(idx).toInt();
+
+	if (chr_rom >= 0)
+	{
+		// max value which a iNES 2.0 header can hold
+		if (chr_rom < 8 * 1024 * 0xEFF)
+		{
+			// try to fit the irregular value with the alternative way
+			if (chr_rom % (8 * 1024) != 0)
+			{
+				if (ines20)
+				{
+					// try to calculate the nearest value
+					bool fit = false;
+					int result = 0;
+					for (int multiplier = 0; multiplier < 4; ++multiplier)
+					{
+						for (int exponent = 0; exponent < 64; ++exponent)
+						{
+							int new_result = pow(2, exponent) * (multiplier * 2 + 1);
+							if (new_result == chr_rom)
+							{
+								_header.Upper_ROM_VROM_size |= 0xF0;
+								_header.VROM_size |= exponent << 2;
+								_header.VROM_size |= multiplier & 3;
+								fit = true;
+								break;
+							}
+							if (result > new_result && new_result > chr_rom)
+							{
+								result = new_result;
+							}
+						}
+						if (fit) break;
+					}
+
+					if (!fit)
+					{
+						int result10 = (chr_rom / 1024 / 8 + 1) * 8 * 1024;
+						if (result10 < result)
+						{
+							result = result10;
+						}
+						char buf2[64];
+						if (result % 1024 != 0)
+						{
+							sprintf(buf2, "%dB", result);
+						}
+						else
+						{
+							sprintf(buf2, "%dKB", result / 1024);
+						}
+						sprintf(buf, "CHR ROM size you entered is invalid in iNES 2.0, do you want to set to its nearest value %s?", buf2);
+						showErrorMsgWindow(buf);
+						//if (MessageBox(hwnd, buf, "Error", MB_YESNO | MB_ICONERROR) == IDYES)
+						//	SetDlgItemText(hwnd, IDC_CHRROM_COMBO, buf2);
+						//else
+						//{
+						//	SetFocus(GetDlgItem(hwnd, IDC_CHRROM_COMBO));
+						//	return false;
+						//}
+						return false;
+					}
+				}
+				else 
+				{
+					// ines 1.0 can't handle this kind of value
+					showErrorMsgWindow("CHR ROM size must be multiple of 8KB in iNES 1.0");
+					return false;
+				}
+			}
+			// it's multiple size of 8KB
+			else {
+				// it can be fitted in iNES 1.0
+				if (chr_rom < 8 * 1024 * 0xFF)
+				{
+					_header.VROM_size |= chr_rom / 8 / 1024 & 0xFF;
+				}
+				else
+				{
+					if (ines20)
+					{
+						_header.Upper_ROM_VROM_size |= chr_rom / 8 / 1024 >> 4 & 0xF0;
+					}
+					else
+					{
+						showErrorMsgWindow("CHR ROM size exceeded the limit of iNES 1.0 (2040KB).");
+						return false;
+					}
+				}
+			}
+		}
+		// A too large size
+		else 
+		{
+			showErrorMsgWindow("CHR ROM size you entered cannot be fitted in iNES 2.0.");
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+
+	// CHR RAM
+	if (ines20)
+	{
+		// only iNES 2.0 has value for CHR RAM
+		idx = chrRamBox->currentIndex();
+		int chr_ram = chrRamBox->itemData(idx).toInt();
+
+		if (chr_ram >= 0)
+		{
+			if (chr_ram < 64 << 0xF)
+			{
+				if (chr_ram % 64 == 0)
+				{
+					_header.VRAM_size |= (int)log2(chr_ram / 64);
+				}
+				else
+				{
+					showErrorMsgWindow("Invalid CHR RAM size");
+					return false;
+				}
+			}
+			else 
+			{
+				showErrorMsgWindow("CHR RAM size exceeded the limit (4096KB)");
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	// CHR NVRAM
+	if (ines20)
+	{
+		// only iNES 2.0 has value for CHR NVRAM
+		idx = chrNvRamBox->currentIndex();
+		int chr_nvram = chrNvRamBox->itemData(idx).toInt();
+
+		if (chr_nvram >= 0)
+		{
+			if (chr_nvram < 64 << 0xF)
+			{
+				if (chr_nvram % 64 == 0)
+				{
+					_header.VRAM_size |= (int)log2(chr_nvram / 64) << 4;
+				}
+				else 
+				{
+					showErrorMsgWindow("Invalid CHR NVRAM size");
+					return false;
+				}
+			}
+			else 
+			{
+				showErrorMsgWindow("CHR NVRAM size exceeded the limit (4096KB)");
+				return false;
+			}
+
+			if (chr_nvram != 0)
+			{
+				_header.ROM_type |= 2;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	// Mirroring
+	if ( fourMirrorBtn->isChecked() )
+	{
+		_header.ROM_type |= 8;
+	}
+	else if ( vertMirrorBtn->isChecked() )
+	{
+		_header.ROM_type |= 1;
+	}
+
+	// Region
+	if ( palRegionBtn->isChecked() )
+	{
+		if (ines20)
+		{
+			_header.TV_system |= 1;
+		}
+		else 
+		{
+			_header.Upper_ROM_VROM_size |= 1;
+			if ( unofficial && iNesDualRegBox->isChecked() )
+			{
+				_header.RAM_size |= 2;
+			}
+		}
+	}
+	else if ( dualRegionBtn->isChecked() )
+	{
+		if (ines20)
+		{
+			_header.TV_system |= 2;
+		}
+		else
+		{
+			_header.RAM_size |= 3;
+		}
+	}
+	else if ( dendyRegionBtn->isChecked() )
+	{
+		_header.TV_system |= 3;
+	}
+
+	// System
+	if ( vsSysbtn->isChecked() )
+	{
+		_header.ROM_type2 |= 1;
+		if (ines20) {
+			// VS System type
+			idx = vsHwBox->currentIndex();
+			int system = vsHwBox->itemData(idx).toInt();
+
+			if (system <= 0xF)
+			{
+				_header.VS_hardware |= (system & 0xF) << 4;
+			}
+			else
+			{
+				showErrorMsgWindow("Invalid VS System hardware type.");
+				return false;
+			}
+			// VS PPU type
+			idx = vsPpuBox->currentIndex();
+			int ppu = vsPpuBox->itemData(idx).toInt();
+			if ( (ppu >= 0) && (system <= 0xF) )
+			{
+				_header.VS_hardware |= ppu & 0xF;
+			}
+			else
+			{
+				showErrorMsgWindow("Invalid VS System PPU type.");
+				return false;
+			}
+		}
+	}
+	else if ( plySysbtn->isChecked() )
+	{
+		_header.ROM_type2 |= 2;
+	}
+	else if ( extSysbtn->isChecked() )
+	{
+		// Extend System
+		_header.ROM_type2 |= 3;
+		idx = extCslBox->currentIndex();
+		int extend = extCslBox->itemData(idx).toInt();
+
+		if (extend >= 0)
+		{
+			_header.VS_hardware |= extend & 0x3F;
+		}
+		else
+		{
+			showErrorMsgWindow("Invalid extend system type");
+			return false;
+		}			
+	}
+
+	// Input device
+	if (ines20)
+	{
+		idx = inputDevBox->currentIndex();
+		int input = inputDevBox->itemData(idx).toInt();
+		if (input <= 0x3F)
+		{
+			_header.reserved[1] |= input & 0x3F;
+		}
+		else
+		{
+			showErrorMsgWindow("Invalid input device.");
+			return false;
+		}
+	}
+
+	// Miscellanous ROM(s)
+	if (ines20)
+	{
+		strcpy( buf, miscRomsEdit->text().toStdString().c_str() );
+		int misc_roms = 0;
+		if (sscanf(buf, "%d", &misc_roms) < 1)
+		{
+			showErrorMsgWindow("Invalid miscellanous ROM(s) count. If you don't know what value should be, we recommend to set it to 0.");
+			return false;
+		}
+		if (misc_roms > 3)
+		{
+			showErrorMsgWindow("Miscellanous ROM(s) count has exceeded the limit of iNES 2.0 (3)");
+			return false;
+		}
+		_header.reserved[0] |= misc_roms & 3;
+	}
+
+	// iNES 1.0 unofficial properties
+	if ( !ines20 && unofficial )
+	{
+		// bus conflict configure in unoffcial bit of iNES 1.0
+		if ( iNesBusCfltBox->isChecked() )
+		{
+			_header.RAM_size |= 0x20;
+		}
+		// PRG RAM non exist bit flag
+		if ( iNesPrgRamBox->isChecked() )
+		{
+			_header.RAM_size |= 0x10;
+		}
+	}
+
+	// Trainer
+	if ( trainerCBox->isChecked() )
+	{
+		_header.ROM_type |= 4;
+	}
+
+	bool fceux_support = false;
+	for (int i = 0; bmap[i].init; ++i)
+	{
+		if (mapper == bmap[i].number)
+		{
+			fceux_support = true;
+			break;
+		}
+	}
+
+	if (!fceux_support)
+	{
+		int ret;
+		QMessageBox msgBox(this);
+
+		sprintf(buf, "FCEUX doesn't support iNES Mapper# %d, this is not a serious problem, but the ROM will not be run in FCEUX properly.\nDo you want to continue?", mapper);
+
+		msgBox.setIcon( QMessageBox::Warning );
+		msgBox.setText( tr(buf) );
+		ret = msgBox.exec();
+
+		if (ret == 0)
+		{
+			return false;
+		}
+	}
+
+	memcpy(_header.ID, "NES\x1A", 4);
+
+	if (header)
+	{
+		memcpy(header, &_header, sizeof(iNES_HEADER));
+	}
+
+	return true;
+}
+//----------------------------------------------------------------------------
+void iNesHeaderEditor_t::printHeader(iNES_HEADER* _header)
+{
+	printf("header: ");
+	printf("%02X ", _header->ID[0]);
+	printf("%02X ", _header->ID[1]);
+	printf("%02X ", _header->ID[2]);
+	printf("%02X ", _header->ID[3]);
+	printf("%02X ", _header->ROM_size);
+	printf("%02X ", _header->VROM_size);
+	printf("%02X ", _header->ROM_type);
+	printf("%02X ", _header->ROM_type2);
+	printf("%02X ", _header->ROM_type3);
+	printf("%02X ", _header->Upper_ROM_VROM_size);
+	printf("%02X ", _header->RAM_size);
+	printf("%02X ", _header->VRAM_size);
+	printf("%02X ", _header->TV_system);
+	printf("%02X ", _header->VS_hardware);
+	printf("%02X ", _header->reserved[0]);
+	printf("%02X\n", _header->reserved[1]);
 }
 //----------------------------------------------------------------------------

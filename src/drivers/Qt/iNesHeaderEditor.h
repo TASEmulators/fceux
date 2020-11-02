@@ -80,18 +80,31 @@ class iNesHeaderEditor_t : public QDialog
 		iNES_HEADER  *iNesHdr;
 	private:
 
+		void printHeader(iNES_HEADER* _header);
 		bool loadHeader(iNES_HEADER *header);
+		bool WriteHeaderData(iNES_HEADER* header);
 		void setHeaderData(iNES_HEADER *header);
 		void showErrorMsgWindow(const char *str);
 		void ToggleINES20(bool ines20);
 		void ToggleUnofficialPropertiesEnabled(bool ines20, bool check);
 		void ToggleUnofficialExtraRegionCode(bool ines20, bool unofficial_check, bool check);
 		void ToggleUnofficialPrgRamPresent(bool ines20, bool unofficial_check, bool check);
+		void ToggleVSSystemGroup(bool enable);
+		void ToggleExtendSystemList(bool enable);
 
    public slots:
       void closeWindow(void);
 	private slots:
+		void saveHeader(void);
+		void restoreHeader(void);
 		void iNes1Clicked(bool checked);
 		void iNes2Clicked(bool checked);
+		void normSysClicked(bool checked);
+		void vsSysClicked(bool checked);
+		void plySysClicked(bool checked);
+		void extSysClicked(bool checked);
+		void unofficialStateChange(int state);
+		void unofficialPrgRamStateChange(int state);
+		void unofficialDualRegionStateChange(int state);
 
 };
