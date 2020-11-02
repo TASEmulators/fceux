@@ -137,6 +137,8 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	: QDialog( parent )
 {
 	int i;
+	int fontCharWidth;
+	fceuDecIntValidtor *validator; 
 	QVBoxLayout *mainLayout, *hdrLayout;
 	QVBoxLayout *vbox, *vbox1, *vbox2, *vbox3, *vbox4, *vbox5;
 	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3;
@@ -145,6 +147,17 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	char stmp[128];
 
 	initOK = false;
+
+	font.setFamily("Courier New");
+	font.setStyle( QFont::StyleNormal );
+	font.setStyleHint( QFont::Monospace );
+	QFontMetrics fm(font);
+
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+    fontCharWidth = fm.horizontalAdvance(QLatin1Char('2'));
+#else
+    fontCharWidth = fm.width(QLatin1Char('2'));
+#endif
 
 	setWindowTitle("iNES Header Editor");
 
@@ -184,6 +197,14 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	hbox->addWidget( mapperComboBox );
 	hbox->addWidget( mapperSubLbl = new QLabel( tr("Sub #:") ) );
 	hbox->addWidget( mapperSubEdit );
+
+	validator = new fceuDecIntValidtor(0, 15, this);
+
+	mapperSubEdit->setFont( font );
+	mapperSubEdit->setMaxLength( 2 );
+	mapperSubEdit->setValidator( validator );
+	mapperSubEdit->setAlignment(Qt::AlignCenter);
+	mapperSubEdit->setMaximumWidth( 4 * fontCharWidth );
 
 	for (i = 0; bmap[i].init; ++i)
 	{
@@ -403,10 +424,18 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	inputDevBox  = new QComboBox();
 	miscRomsEdit = new QLineEdit();
 	hdrLayout->addLayout( hbox );
-	hbox->addWidget( miscRomsEdit );
-	hbox->addWidget( miscRomsLbl = new QLabel( tr("Misc. ROM(s)") ) );
-	hbox->addWidget( inputDevLbl = new QLabel( tr("Input Device:") ) );
-	hbox->addWidget( inputDevBox );
+	hbox->addWidget( miscRomsEdit, 1, Qt::AlignLeft );
+	hbox->addWidget( miscRomsLbl = new QLabel( tr("Misc. ROM(s)") ), 10, Qt::AlignLeft);
+	hbox->addWidget( inputDevLbl = new QLabel( tr("Input Device:") ), 1, Qt::AlignRight );
+	hbox->addWidget( inputDevBox, 10, Qt::AlignLeft );
+
+	validator = new fceuDecIntValidtor(0, 3, this);
+
+	miscRomsEdit->setFont( font );
+	miscRomsEdit->setMaxLength( 1 );
+	miscRomsEdit->setValidator( validator );
+	miscRomsEdit->setAlignment(Qt::AlignCenter);
+	miscRomsEdit->setMaximumWidth( 3 * fontCharWidth );
 
 	grid = new QGridLayout();
 	restoreBtn = new QPushButton( tr("Restore") );
@@ -587,11 +616,6 @@ bool iNesHeaderEditor_t::loadHeader(iNES_HEADER* header)
 	};
 
 	FCEUFILE* fp = FCEU_fopen(LoadedRomFName, NULL, "rb", NULL);
-
-	//if (!GameInfo)
-	//{
-	//	strcpy(LoadedRomFName, fp->fullFilename.c_str());
-	//}
 
 	if (fp)
 	{
@@ -848,7 +872,7 @@ void iNesHeaderEditor_t::setHeaderData(iNES_HEADER* header)
 	// Sub Mapper
 	sprintf(buf, "%d", ines20 ? header->ROM_type3 >> 4 : 0);
 
-	mapperSubEdit->setText( buf );
+	mapperSubEdit->setText( tr(buf) );
 
 	// PRG ROM
 	int prg_rom = header->ROM_size;

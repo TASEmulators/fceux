@@ -15,6 +15,7 @@
 #include <QLabel>
 #include <QFrame>
 #include <QGroupBox>
+#include <QFont>
 
 #include "Qt/main.h"
 
@@ -32,6 +33,7 @@ class iNesHeaderEditor_t : public QDialog
 	protected:
 		void closeEvent(QCloseEvent *event);
 
+		QFont         font;
 		QRadioButton *iNes1Btn;
 		QRadioButton *iNes2Btn;
 		QComboBox    *mapperComboBox;
