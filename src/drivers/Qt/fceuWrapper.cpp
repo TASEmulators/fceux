@@ -1043,6 +1043,8 @@ int  fceuWrapperUpdate( void )
 	{
 		DoFun(frameskip, periodic_saves);
 	
+		hexEditorUpdateMemoryValues();
+
 		fceuWrapperUnLock();
 
 		emulatorHasMutux = 0;

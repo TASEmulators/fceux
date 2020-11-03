@@ -1427,9 +1427,9 @@ void ConsoleDebugger::reloadSymbolsCB(void)
 {
 	fceuWrapperLock();
 	debugSymbolTable.loadGameSymbols();
-	fceuWrapperUnLock();
 
 	asmView->updateAssemblyView();
+	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::debugRunCB(void)
@@ -2812,7 +2812,9 @@ void QAsmView::setDisplayROMoffsets( bool value )
 	{
 		displayROMoffsets = value;
 
+		fceuWrapperLock();
 		updateAssemblyView();
+		fceuWrapperUnLock();
 	}
 }
 //----------------------------------------------------------------------------
@@ -2822,7 +2824,9 @@ void QAsmView::setSymbolDebugEnable( bool value )
 	{
 		symbolicDebugEnable = value;
 
+		fceuWrapperLock();
 		updateAssemblyView();
+		fceuWrapperUnLock();
 	}
 }
 //----------------------------------------------------------------------------
@@ -2832,7 +2836,9 @@ void QAsmView::setRegisterNameEnable( bool value )
 	{
 		registerNameEnable = value;
 
+		fceuWrapperLock();
 		updateAssemblyView();
+		fceuWrapperUnLock();
 	}
 }
 //----------------------------------------------------------------------------

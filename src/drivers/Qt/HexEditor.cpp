@@ -41,6 +41,7 @@
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleWindow.h"
 
+static bool memNeedsCheck = false;
 static HexBookMarkManager_t hbm;
 static std::list <HexEditorDialog_t*> winList;
 static const char *memViewNames[] = { "RAM", "PPU", "OAM", "ROM", NULL };
@@ -724,7 +725,12 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	periodicTimer->start( 100 ); // 10hz
 
+	// Lock the mutex before adding a new window to the list,
+	// we want to be sure that the emulator is not iterating the list
+	// when we change it.
+	fceuWrapperLock();
 	winList.push_back(this);
+	fceuWrapperUnLock();
 
 	populateBookmarkMenu();
 
@@ -737,6 +743,11 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 	printf("Hex Editor Deleted\n");
 	periodicTimer->stop();
 
+	// Lock the emulation thread mutex to ensure
+	// that the emulator is not attempting to update memory values
+	// for window while we are destroying it or editing the window list.
+	fceuWrapperLock();
+
 	for (it = winList.begin(); it != winList.end(); it++)
 	{
 		if ( (*it) == this )
@@ -746,6 +757,7 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 			break;
 		}
 	}
+	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setWindowTitle(void)
@@ -1103,7 +1115,18 @@ void HexEditorDialog_t::updatePeriodic(void)
 {
 	//printf("Update Periodic\n");
 
-	editor->checkMemActivity();
+	if ( fceuWrapperTryLock(0) )
+	{
+		memNeedsCheck = false;
+
+		editor->checkMemActivity();
+
+		fceuWrapperUnLock();
+	}
+	else
+	{
+		memNeedsCheck = true;
+	}
 
 	editor->memModeUpdate();
 
@@ -2009,6 +2032,9 @@ void QHexEdit::jumpToROM(void)
 	setAddr( jumpToRomValue );
 }
 //----------------------------------------------------------------------------
+// Calling of checkMemActivity must always be synchronized with the emulation
+// thread as calling GetMem while the emulation is executing can mess up certain
+// registers (especially controller registers $4016 and $4017)
 int QHexEdit::checkMemActivity(void)
 {
 	int c;
@@ -2440,5 +2466,22 @@ int hexEditorOpenFromDebugger( int mode, int addr )
 	win->editor->setAddr( addr );
 
 	return 0;
+}
+//----------------------------------------------------------------------------
+// This function must be called from within the emulation thread
+void hexEditorUpdateMemoryValues(void)
+{
+	std::list <HexEditorDialog_t*>::iterator it;
+
+	if ( !memNeedsCheck )
+	{
+		return;
+	}
+
+	for (it = winList.begin(); it != winList.end(); it++)
+	{
+		(*it)->editor->checkMemActivity();
+	}
+	memNeedsCheck = false;
 }
 //----------------------------------------------------------------------------
