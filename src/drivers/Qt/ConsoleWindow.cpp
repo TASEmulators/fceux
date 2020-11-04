@@ -1600,7 +1600,7 @@ void consoleWin_t::openMovie(void)
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
 
-	g_config->getOption ("SDL.LastOpenFile", &last );
+	g_config->getOption ("SDL.LastOpenMovie", &last );
 
 	getDirFromFile( last.c_str(), dir );
 
@@ -1643,6 +1643,7 @@ void consoleWin_t::openMovie(void)
 	{
 		printf("Error: Could not open movie file: %s \n", filename.toStdString().c_str() );
 	}
+	g_config->setOption ("SDL.LastOpenMovie", filename.toStdString().c_str() );
 	fceuWrapperUnLock();
 
    return;
@@ -1685,7 +1686,7 @@ void consoleWin_t::recordMovieAs(void)
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
 
-	g_config->getOption ("SDL.LastOpenFile", &last );
+	g_config->getOption ("SDL.LastOpenMovie", &last );
 
 	getDirFromFile( last.c_str(), dir );
 
