@@ -31,6 +31,7 @@ MoviePlayDialog_t::MoviePlayDialog_t(QWidget *parent)
 	QGroupBox *frame;
 	QGridLayout *grid;
 	QLabel *lbl;
+	QPushButton *okButton, *cancelButton;
 
 	setWindowTitle("Movie Play");
 
@@ -41,9 +42,9 @@ MoviePlayDialog_t::MoviePlayDialog_t(QWidget *parent)
 	movSelBox    = new QComboBox();
 	movBrowseBtn = new QPushButton( tr("Browse") );
 
-	hbox->addWidget( lbl );
-	hbox->addWidget( movSelBox    );
-	hbox->addWidget( movBrowseBtn );
+	hbox->addWidget( lbl, 1 );
+	hbox->addWidget( movSelBox, 100    );
+	hbox->addWidget( movBrowseBtn, 1 );
 
 	mainLayout->addLayout( hbox  );
 
@@ -66,6 +67,8 @@ MoviePlayDialog_t::MoviePlayDialog_t(QWidget *parent)
 	mainLayout->addWidget( frame  );
 
 	grid = new QGridLayout();
+	grid->setColumnStretch( 0,  1 );
+	grid->setColumnStretch( 1, 10 );
 
 	mainLayout->addLayout( grid );
 
@@ -102,7 +105,17 @@ MoviePlayDialog_t::MoviePlayDialog_t(QWidget *parent)
 	grid->addWidget( palUsedLbl    , 8, 1, Qt::AlignLeft );
 	grid->addWidget( newppuUsedLbl , 9, 1, Qt::AlignLeft );
 
+	hbox         = new QHBoxLayout();
+	okButton     = new QPushButton( tr("Play") );
+	cancelButton = new QPushButton( tr("Cancel") );
+	hbox->addWidget( cancelButton );
+	hbox->addWidget( okButton );
+	okButton->setDefault(true);
+	mainLayout->addLayout( hbox  );
+
 	setLayout( mainLayout );
+
+	connect( cancelButton , SIGNAL(clicked(void)), this, SLOT(closeWindow(void)) );
 
 	connect( movBrowseBtn , SIGNAL(clicked(void)), this, SLOT(openMovie(void))  );
 }
@@ -195,6 +208,7 @@ void MoviePlayDialog_t::openMovie(void)
 		replayReadOnlySetting = FCEUI_GetMovieToggleReadOnly();
 	}
 
+	movSelBox->addItem( filename, movSelBox->count() );
 	//fceuWrapperLock();
 	//if (FCEUI_LoadMovie( filename.toStdString().c_str(),
 	//	    replayReadOnlySetting, pauseframe ? pauseframe : false) == false)
