@@ -54,6 +54,8 @@ int KillFCEUXonFrame = 0;
 
 bool swapDuty = 0;
 bool turbo = false;
+bool pauseAfterPlayback = false;
+bool suggestReadOnlyReplay = true;
 unsigned int gui_draw_area_width   = 256;
 unsigned int gui_draw_area_height  = 256;
 
@@ -696,8 +698,7 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		input_display = id;
 		// not exactly an id as an true/false switch; still better than creating another int for that
 		g_config->getOption("SDL.SubtitleDisplay", &id); 
-		extern int movieSubtitles;
-		movieSubtitles = id;
+		movieSubtitles = id ? true : false;
 	}
 	
 	// load the hotkeys from the config life
@@ -725,10 +726,20 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		if(s.find(".fm2") != std::string::npos || s.find(".fm3") != std::string::npos)
 		{
 			static int pauseframe;
+			char replayReadOnlySetting;
 			g_config->getOption("SDL.PauseFrame", &pauseframe);
 			g_config->setOption("SDL.PauseFrame", 0);
+
+			if (suggestReadOnlyReplay)
+			{
+				replayReadOnlySetting = true;
+			}
+			else
+			{
+				replayReadOnlySetting = FCEUI_GetMovieToggleReadOnly();
+			}
 			FCEUI_printf("Playing back movie located at %s\n", s.c_str());
-			FCEUI_LoadMovie(s.c_str(), false, pauseframe ? pauseframe : false);
+			FCEUI_LoadMovie(s.c_str(), replayReadOnlySetting, pauseframe ? pauseframe : false);
 		}
 		else
 		{
@@ -1354,7 +1365,7 @@ void FCEUI_AviVideoUpdate(const unsigned char* buffer) { }
 int FCEUD_ShowStatusIcon(void) {return 0;}
 bool FCEUI_AviIsRecording(void) {return false;}
 void FCEUI_UseInputPreset(int preset) { }
-bool FCEUD_PauseAfterPlayback() { return false; }
+bool FCEUD_PauseAfterPlayback() { return pauseAfterPlayback; }
 
 void FCEUD_TurboOn	 (void) { /* TODO */ };
 void FCEUD_TurboOff   (void) { /* TODO */ };

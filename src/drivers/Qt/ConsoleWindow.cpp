@@ -24,6 +24,7 @@
 #include "Qt/HotKeyConf.h"
 #include "Qt/PaletteConf.h"
 #include "Qt/GuiConf.h"
+#include "Qt/MovieOptions.h"
 #include "Qt/LuaControl.h"
 #include "Qt/CheatsConf.h"
 #include "Qt/HexEditor.h"
@@ -377,6 +378,14 @@ void consoleWin_t::createMainMenu(void)
     connect(guiConfig, SIGNAL(triggered()), this, SLOT(openGuiConfWin(void)) );
 
     optMenu->addAction(guiConfig);
+
+	 // Options -> Movie Options
+	 movieConfig = new QAction(tr("Movie Options"), this);
+    //movieConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+    movieConfig->setStatusTip(tr("Movie Options"));
+    connect(movieConfig, SIGNAL(triggered()), this, SLOT(openMovieOptWin(void)) );
+
+    optMenu->addAction(movieConfig);
 
 	 // Options -> Auto-Resume
 	 autoResume = new QAction(tr("Auto-Resume Play"), this);
@@ -1203,6 +1212,17 @@ void consoleWin_t::openGuiConfWin(void)
    guiConfWin->show();
 }
 
+void consoleWin_t::openMovieOptWin(void)
+{
+	MovieOptionsDialog_t *win;
+
+	//printf("Open Movie Options Window\n");
+	
+   win = new MovieOptionsDialog_t(this);
+	
+   win->show();
+}
+
 void consoleWin_t::openCheats(void)
 {
 	//printf("Open GUI Cheat Window\n");
@@ -1590,6 +1610,7 @@ void consoleWin_t::openMovie(void)
 	QString filename;
 	std::string last;
 	char dir[512];
+	char replayReadOnlySetting;
 	QFileDialog  dialog(this, tr("Open FM2 Movie") );
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
@@ -1637,9 +1658,18 @@ void consoleWin_t::openMovie(void)
 
 	FCEUI_printf ("Playing back movie located at %s\n", filename.toStdString().c_str() );
 
+	if (suggestReadOnlyReplay)
+	{
+		replayReadOnlySetting = true;
+	}
+	else
+	{
+		replayReadOnlySetting = FCEUI_GetMovieToggleReadOnly();
+	}
+
 	fceuWrapperLock();
 	if (FCEUI_LoadMovie( filename.toStdString().c_str(),
-		    false, pauseframe ? pauseframe : false) == false)
+		    replayReadOnlySetting, pauseframe ? pauseframe : false) == false)
 	{
 		printf("Error: Could not open movie file: %s \n", filename.toStdString().c_str() );
 	}
