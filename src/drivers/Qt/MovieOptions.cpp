@@ -1,4 +1,4 @@
-// HotKeyConf.cpp
+// MovieOptions.cpp
 //
 #include <stdio.h>
 #include <stdlib.h>
