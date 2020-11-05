@@ -94,6 +94,7 @@ extern int GameAttributes;
 
 extern uint8 PAL;
 extern int dendy;
+extern bool movieSubtitles;
 
 //#include "driver.h"
 

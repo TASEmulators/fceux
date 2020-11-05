@@ -13,6 +13,8 @@ extern int gametype;
 extern int closeFinishedMovie;
 extern bool turbo;
 extern bool swapDuty;
+extern bool pauseAfterPlayback;
+extern bool suggestReadOnlyReplay;
 extern unsigned int gui_draw_area_width;
 extern unsigned int gui_draw_area_height;
 

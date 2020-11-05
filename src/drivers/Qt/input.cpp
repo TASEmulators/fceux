@@ -754,8 +754,7 @@ static void KeyboardCommands (void)
 
 	if (_keyonly (Hotkeys[HK_TOGGLE_SUBTITLE]))
 	{
-		extern int movieSubtitles;
-		movieSubtitles ^= 1;
+		movieSubtitles = !movieSubtitles;
 		FCEUI_DispMessage ("Movie subtitles o%s.", 0,
 		movieSubtitles ? "n" : "ff");
 	}

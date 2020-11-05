@@ -822,7 +822,6 @@ int main(int argc, char *argv[])
 		input_display = id;
 		// not exactly an id as an true/false switch; still better than creating another int for that
 		g_config->getOption("SDL.SubtitleDisplay", &id); 
-		extern int movieSubtitles;
 		movieSubtitles = id;
 	}
 	
