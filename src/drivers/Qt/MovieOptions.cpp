@@ -23,6 +23,7 @@
 MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
+	QLabel *lbl;
 	QVBoxLayout *mainLayout;
 
 	setWindowTitle("Movie Options");
@@ -38,6 +39,9 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	autoBackUp      = new QCheckBox( tr("Automatically Backup Movies") );
 	loadFullStates  = new QCheckBox( tr("Load Full Save-State Movies:") );
 
+	lbl = new QLabel( tr("Loading states in record mode will not immediately truncate movie, next frame input will. (VBA-rr and SNES9x style)") );
+	lbl->setWordWrap(true);
+
 	mainLayout->addWidget( readOnlyReplay  );
 	mainLayout->addWidget( pauseAfterPlay  );
 	mainLayout->addWidget( closeAfterPlay  );
@@ -46,6 +50,7 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	mainLayout->addWidget( putSubTitlesAvi );
 	mainLayout->addWidget( autoBackUp      );
 	mainLayout->addWidget( loadFullStates  );
+	mainLayout->addWidget( lbl  );
 
 	readOnlyReplay->setChecked( suggestReadOnlyReplay );
 	pauseAfterPlay->setChecked( pauseAfterPlayback );
