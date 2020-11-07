@@ -116,8 +116,13 @@ MoviePlayDialog_t::MoviePlayDialog_t(QWidget *parent)
 	setLayout( mainLayout );
 
 	connect( cancelButton , SIGNAL(clicked(void)), this, SLOT(closeWindow(void)) );
+	connect( okButton     , SIGNAL(clicked(void)), this, SLOT(playMovie(void)) );
 
 	connect( movBrowseBtn , SIGNAL(clicked(void)), this, SLOT(openMovie(void))  );
+
+	doScan();
+
+	updateMovieText();
 }
 //----------------------------------------------------------------------------
 MoviePlayDialog_t::~MoviePlayDialog_t(void)
@@ -145,13 +150,228 @@ void MoviePlayDialog_t::closeWindow(void)
 //	suggestReadOnlyReplay = (state != Qt::Unchecked);
 //}
 //----------------------------------------------------------------------------
+void  MoviePlayDialog_t::updateMovieText(void)
+{
+	int idx;
+	std::string path;
+	FCEUFILE* fp;
+	MOVIE_INFO info;
+	bool scanok;
+	char stmp[256];
+
+	if ( movSelBox->count() == 0 )
+	{
+		return;
+	}
+	idx = movSelBox->currentIndex();
+
+	path = movSelBox->itemText(idx).toStdString();
+
+	fp = FCEU_fopen( path.c_str(),0,"rb",0);
+
+	if ( fp == NULL )
+	{
+		return;
+	}
+	scanok = FCEUI_MovieGetInfo(fp, info, false);
+
+	if ( scanok )
+	{
+		double div;
+
+		sprintf(stmp, "%u", (unsigned)info.num_frames);
+
+		movFramesLbl->setText( tr(stmp) );
+
+		div = (FCEUI_GetCurrentVidSystem(0,0)) ? 50.006977968268290849 : 60.098813897440515532;				// PAL timing
+		double tempCount = (info.num_frames / div) + 0.005; // +0.005s for rounding
+		int num_seconds = (int)tempCount;
+		int fraction = (int)((tempCount - num_seconds) * 100);
+		int seconds = num_seconds % 60;
+		int minutes = (num_seconds / 60) % 60;
+		int hours = (num_seconds / 60 / 60) % 60;
+		sprintf(stmp, "%02d:%02d:%02d.%02d", hours, minutes, seconds, fraction);
+
+		movLenLbl->setText( tr(stmp) );
+
+		sprintf(stmp, "%u", (unsigned)info.rerecord_count);
+
+		recCountLbl->setText( tr(stmp) );
+
+		recFromLbl->setText( tr(info.poweron ? "Power-On" : (info.reset?"Soft-Reset":"Savestate") ) );
+
+		romUsedLbl->setText( tr(info.name_of_rom_used.c_str()) );
+
+		romCsumLbl->setText( tr(md5_asciistr(info.md5_of_rom_used)) );
+
+		if ( GameInfo )
+		{
+			curCsumLbl->setText( tr(md5_asciistr(GameInfo->MD5)) );
+		}
+		else
+		{
+			curCsumLbl->clear();
+		}
+
+		if (info.emu_version_used < 20000 )
+		{
+			sprintf( stmp, "FCEU %d.%02d.%02d%s", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100, info.emu_version_used < 9813 ? " (blip)" : "");
+		}
+		else 
+		{
+			sprintf( stmp, "FCEUX %d.%02d.%02d", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100);
+		}
+		emuUsedLbl->setText( tr(stmp) );
+
+		palUsedLbl->setText( tr(info.pal ? "On" : "Off") );
+
+		newppuUsedLbl->setText( tr(info.ppuflag ? "On" : "Off") );
+	}
+	delete fp;
+
+	return;
+}
+//----------------------------------------------------------------------------
+int  MoviePlayDialog_t::addFileToList( const char *file, bool setActive )
+{
+	int n=0;
+
+	for (int i=0; i<movSelBox->count(); i++)
+	{
+		 if ( strcmp( file, movSelBox->itemText(i).toStdString().c_str() ) == 0 )
+		 {
+			 if ( setActive )
+			 {
+				 movSelBox->setCurrentIndex(i);
+			 }
+			 return -1;
+		 }
+	}
+
+	n = movSelBox->count();
+
+	movSelBox->addItem( tr(file), n );
+
+	if ( setActive )
+	{
+		movSelBox->setCurrentIndex(n);
+	}
+
+	return 0;
+}
+//----------------------------------------------------------------------------
+bool MoviePlayDialog_t::checkMD5Sum( const char *path, const char *md5 )
+{
+	FCEUFILE* fp;
+	MOVIE_INFO info;
+	bool scanok, md5Match = false;
+	
+	fp = FCEU_fopen( path,0,"rb",0);
+
+	if ( fp == NULL )
+	{
+		return md5Match;
+	}
+	scanok = FCEUI_MovieGetInfo(fp, info, true);
+
+	if ( scanok )
+	{
+		if ( strcmp( md5, md5_asciistr(info.md5_of_rom_used) ) == 0 )
+		{
+			md5Match = true;
+		}
+	}
+	delete fp;
+
+	return md5Match;
+}
+//----------------------------------------------------------------------------
+void MoviePlayDialog_t::doScan(void)
+{
+	std::string path;
+	QDir dir;
+	QFileInfoList list;
+	const char *baseDir = FCEUI_GetBaseDirectory();
+	const QStringList filters( { "*.fm2" } );
+	char md5[256];
+
+	md5[0] = 0;
+
+	if ( GameInfo )
+	{
+		strcpy( md5, md5_asciistr(GameInfo->MD5) );
+	}
+		
+ 	path = std::string(baseDir) + "/movies/";
+
+	dir.setPath( QString::fromStdString(path) );
+
+	list = dir.entryInfoList( filters, QDir::Files );
+
+	for (int i = 0; i < list.size(); ++i) 
+	{
+		QFileInfo fileInfo = list.at(i);
+
+ 		path = std::string(baseDir) + "/movies/" + fileInfo.fileName().toStdString();
+
+		//printf("File: '%s'\n", path.c_str() );
+
+		if ( checkMD5Sum( path.c_str(), md5 ) )
+		{
+			addFileToList( path.c_str() );
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void MoviePlayDialog_t::playMovie(void)
+{
+	int idx, pauseframe = 0;
+	bool replayReadOnlySetting, movieLoadError = false;
+
+	if ( movSelBox->count() == 0 )
+	{
+		return;
+	}
+	std::string path;
+
+	idx = movSelBox->currentIndex();
+
+	path = movSelBox->itemText(idx).toStdString();
+
+	if (suggestReadOnlyReplay)
+	{
+		replayReadOnlySetting = true;
+	}
+	else
+	{
+		replayReadOnlySetting = FCEUI_GetMovieToggleReadOnly();
+	}
+
+	fceuWrapperLock();
+	if (FCEUI_LoadMovie( path.c_str(),
+		    replayReadOnlySetting, pauseframe ? pauseframe : false) == false)
+	{
+		movieLoadError = true;
+	}
+	fceuWrapperUnLock();
+
+	if ( movieLoadError )
+	{
+		printf("Error: Could not open movie file: %s \n", path.c_str() );
+	}
+	else
+	{
+		closeWindow();
+	}
+}
+//----------------------------------------------------------------------------
 void MoviePlayDialog_t::openMovie(void)
 {
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
-	char replayReadOnlySetting;
+	char md5Match = 0;
 	QFileDialog  dialog(this, tr("Open FM2 Movie") );
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
@@ -193,22 +413,26 @@ void MoviePlayDialog_t::openMovie(void)
    }
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	int pauseframe;
-	g_config->getOption ("SDL.PauseFrame", &pauseframe);
-	g_config->setOption ("SDL.PauseFrame", 0);
-
-	FCEUI_printf ("Playing back movie located at %s\n", filename.toStdString().c_str() );
-
-	if (suggestReadOnlyReplay)
+	if ( GameInfo )
 	{
-		replayReadOnlySetting = true;
-	}
-	else
-	{
-		replayReadOnlySetting = FCEUI_GetMovieToggleReadOnly();
+		char md5[256];
+
+		strcpy( md5, md5_asciistr(GameInfo->MD5) );
+
+		if ( checkMD5Sum( filename.toStdString().c_str(), md5 ) )
+		{
+			md5Match = 1;
+		}
+
+		if ( !md5Match )
+		{
+			printf("Warning MD5 Mismatch\n");
+		}
 	}
 
-	movSelBox->addItem( filename, movSelBox->count() );
+	addFileToList( filename.toStdString().c_str(), true );
+
+	updateMovieText();
 	//fceuWrapperLock();
 	//if (FCEUI_LoadMovie( filename.toStdString().c_str(),
 	//	    replayReadOnlySetting, pauseframe ? pauseframe : false) == false)

@@ -46,11 +46,16 @@ class MoviePlayDialog_t : public QDialog
 		QLabel       *newppuUsedLbl;
 
 	private:
+		void   doScan(void);
+		void   updateMovieText(void);
+		int    addFileToList( const char *file, bool setActive = false );
+		bool   checkMD5Sum( const char *path, const char *md5 );
 
    public slots:
       void closeWindow(void);
 	private slots:
 		void openMovie(void);
+		void playMovie(void);
 		//void  readOnlyReplayChanged( int state );
 
 };

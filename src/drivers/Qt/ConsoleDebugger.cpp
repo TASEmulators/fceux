@@ -2734,15 +2734,45 @@ QAsmView::QAsmView(QWidget *parent)
 {
 	QPalette pal;
 	QColor fg("black"), bg("white");
+	QColor c;
+
+	useDarkTheme = false;
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
 	font.setStyleHint( QFont::Monospace );
 
 	pal = this->palette();
-	pal.setColor(QPalette::Base      , bg );
-	pal.setColor(QPalette::Background, bg );
-	pal.setColor(QPalette::WindowText, fg );
+
+	//c = pal.color(QPalette::Base);
+	//printf("Base: R:%i  G:%i  B:%i \n", c.red(), c.green(), c.blue() );
+
+	//c = pal.color(QPalette::Background);
+	//printf("BackGround: R:%i  G:%i  B:%i \n", c.red(), c.green(), c.blue() );
+
+	// Figure out if we are using a light or dark theme by checking the 
+	// default window text grayscale color. If more white, then we will
+	// use white text on black background, else we do the opposite.
+	c = pal.color(QPalette::WindowText);
+
+	if ( qGray( c.red(), c.green(), c.blue() ) > 128 )
+	{
+		useDarkTheme = true;
+	}
+	//printf("WindowText: R:%i  G:%i  B:%i \n", c.red(), c.green(), c.blue() );
+
+	if ( useDarkTheme )
+	{
+		pal.setColor(QPalette::Base      , fg );
+		pal.setColor(QPalette::Background, fg );
+		pal.setColor(QPalette::WindowText, bg );
+	}
+	else 
+	{
+		pal.setColor(QPalette::Base      , bg );
+		pal.setColor(QPalette::Background, bg );
+		pal.setColor(QPalette::WindowText, fg );
+	}
 
 	this->parent = (ConsoleDebugger*)parent;
 	this->setPalette(pal);
@@ -3047,6 +3077,8 @@ void QAsmView::paintEvent(QPaintEvent *event)
 {
 	int x,y,l, row, nrow, selAddr;
 	QPainter painter(this);
+	QColor black("black");
+	bool forceDarkColor = false;
 
 	painter.setFont(font);
 	viewWidth  = event->rect().width();
@@ -3087,13 +3119,15 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	{
 		x = -pxLineXScroll;
 		l = lineOffset + row;
-		painter.setPen( this->palette().color(QPalette::WindowText));
+
+		forceDarkColor = false;
 
 		if ( asmPC != NULL )
 		{
 			if ( l == asmPC->line )
 			{
 				painter.fillRect( 0, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("pink") );
+				forceDarkColor = true;
 			}
 		}
 
@@ -3102,6 +3136,16 @@ void QAsmView::paintEvent(QPaintEvent *event)
 			if ( asmEntry[l]->type != dbg_asm_entry_t::ASM_TEXT )
 			{
 				painter.fillRect( 0, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("light blue") );
+				forceDarkColor = true;
+			}
+
+			if ( forceDarkColor )
+			{
+				painter.setPen( black );
+			}
+			else
+			{
+				painter.setPen( this->palette().color(QPalette::WindowText));
 			}
 			painter.drawText( x, y, tr(asmEntry[l]->text.c_str()) );
 
