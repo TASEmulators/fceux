@@ -118,7 +118,8 @@ MoviePlayDialog_t::MoviePlayDialog_t(QWidget *parent)
 	connect( cancelButton , SIGNAL(clicked(void)), this, SLOT(closeWindow(void)) );
 	connect( okButton     , SIGNAL(clicked(void)), this, SLOT(playMovie(void)) );
 
-	connect( movBrowseBtn , SIGNAL(clicked(void)), this, SLOT(openMovie(void))  );
+	connect( movBrowseBtn , SIGNAL(clicked(void)) , this, SLOT(openMovie(void))  );
+	connect( movSelBox    , SIGNAL(activated(int)), this, SLOT(movieSelect(int)) );
 
 	doScan();
 
@@ -150,6 +151,25 @@ void MoviePlayDialog_t::closeWindow(void)
 //	suggestReadOnlyReplay = (state != Qt::Unchecked);
 //}
 //----------------------------------------------------------------------------
+void MoviePlayDialog_t::movieSelect(int index)
+{
+	updateMovieText();
+}
+//----------------------------------------------------------------------------
+void  MoviePlayDialog_t::clearMovieText(void)
+{
+	movLenLbl->clear();
+	movFramesLbl->clear();
+	recCountLbl->clear();
+	recFromLbl->clear();
+	romUsedLbl->clear();
+	romCsumLbl->clear();
+	curCsumLbl->clear();
+	emuUsedLbl->clear();
+	palUsedLbl->clear();
+	newppuUsedLbl->clear();
+}
+//----------------------------------------------------------------------------
 void  MoviePlayDialog_t::updateMovieText(void)
 {
 	int idx;
@@ -171,6 +191,7 @@ void  MoviePlayDialog_t::updateMovieText(void)
 
 	if ( fp == NULL )
 	{
+		clearMovieText();
 		return;
 	}
 	scanok = FCEUI_MovieGetInfo(fp, info, false);
@@ -215,17 +236,21 @@ void  MoviePlayDialog_t::updateMovieText(void)
 
 		if (info.emu_version_used < 20000 )
 		{
-			sprintf( stmp, "FCEU %d.%02d.%02d%s", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100, info.emu_version_used < 9813 ? " (blip)" : "");
+			sprintf( stmp, "FCEU %u.%02u.%02d%s", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100, info.emu_version_used < 9813 ? " (blip)" : "");
 		}
 		else 
 		{
-			sprintf( stmp, "FCEUX %d.%02d.%02d", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100);
+			sprintf( stmp, "FCEUX %u.%02u.%02d", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100);
 		}
 		emuUsedLbl->setText( tr(stmp) );
 
 		palUsedLbl->setText( tr(info.pal ? "On" : "Off") );
 
 		newppuUsedLbl->setText( tr(info.ppuflag ? "On" : "Off") );
+	}
+	else
+	{
+		clearMovieText();
 	}
 	delete fp;
 
@@ -286,14 +311,42 @@ bool MoviePlayDialog_t::checkMD5Sum( const char *path, const char *md5 )
 	return md5Match;
 }
 //----------------------------------------------------------------------------
-void MoviePlayDialog_t::doScan(void)
+void MoviePlayDialog_t::scanDirectory( const char *dirPath, const char *md5 )
 {
-	std::string path;
 	QDir dir;
 	QFileInfoList list;
-	const char *baseDir = FCEUI_GetBaseDirectory();
+	std::string path;
 	const QStringList filters( { "*.fm2" } );
+
+	path.assign( dirPath );
+
+	dir.setPath( QString::fromStdString(path) );
+
+	list = dir.entryInfoList( filters, QDir::Files );
+
+	for (int i = 0; i < list.size(); ++i) 
+	{
+		QFileInfo fileInfo = list.at(i);
+
+ 		path = std::string(dirPath) + fileInfo.fileName().toStdString();
+
+		//printf("File: '%s'\n", path.c_str() );
+
+		if ( checkMD5Sum( path.c_str(), md5 ) )
+		{
+			addFileToList( path.c_str() );
+		}
+	}
+
+}
+//----------------------------------------------------------------------------
+void MoviePlayDialog_t::doScan(void)
+{
+	std::string path, last;
+	const char *romFile;
+	const char *baseDir = FCEUI_GetBaseDirectory();
 	char md5[256];
+	char dir[512], base[256];
 
 	md5[0] = 0;
 
@@ -304,23 +357,24 @@ void MoviePlayDialog_t::doScan(void)
 		
  	path = std::string(baseDir) + "/movies/";
 
-	dir.setPath( QString::fromStdString(path) );
+	scanDirectory( path.c_str(), md5 );
 
-	list = dir.entryInfoList( filters, QDir::Files );
+	romFile = getRomFile();
 
-	for (int i = 0; i < list.size(); ++i) 
+	if ( romFile != NULL )
 	{
-		QFileInfo fileInfo = list.at(i);
+		parseFilepath( romFile, dir, base );
 
- 		path = std::string(baseDir) + "/movies/" + fileInfo.fileName().toStdString();
+ 		path = std::string(dir);
 
-		//printf("File: '%s'\n", path.c_str() );
-
-		if ( checkMD5Sum( path.c_str(), md5 ) )
-		{
-			addFileToList( path.c_str() );
-		}
+		scanDirectory( path.c_str(), md5 );
 	}
+
+	g_config->getOption ("SDL.LastOpenMovie", &last );
+
+	getDirFromFile( last.c_str(), dir );
+
+	scanDirectory( dir, md5 );
 }
 //----------------------------------------------------------------------------
 void MoviePlayDialog_t::playMovie(void)

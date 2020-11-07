@@ -47,15 +47,18 @@ class MoviePlayDialog_t : public QDialog
 
 	private:
 		void   doScan(void);
+		void   clearMovieText(void);
 		void   updateMovieText(void);
 		int    addFileToList( const char *file, bool setActive = false );
 		bool   checkMD5Sum( const char *path, const char *md5 );
+		void   scanDirectory( const char *dirPath, const char *md5 );
 
    public slots:
       void closeWindow(void);
 	private slots:
 		void openMovie(void);
 		void playMovie(void);
+		void movieSelect(int index);
 		//void  readOnlyReplayChanged( int state );
 
 };
