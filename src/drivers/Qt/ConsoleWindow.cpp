@@ -24,6 +24,7 @@
 #include "Qt/HotKeyConf.h"
 #include "Qt/PaletteConf.h"
 #include "Qt/GuiConf.h"
+#include "Qt/MoviePlay.h"
 #include "Qt/MovieOptions.h"
 #include "Qt/LuaControl.h"
 #include "Qt/CheatsConf.h"
@@ -660,10 +661,10 @@ void consoleWin_t::createMainMenu(void)
 	 // Movie
     movieMenu = menuBar()->addMenu(tr("Movie"));
 
-	 // Movie -> Open
-	 openMovAct = new QAction(tr("Open"), this);
+	 // Movie -> Play
+	 openMovAct = new QAction(tr("Play"), this);
     openMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    openMovAct->setStatusTip(tr("Open Movie File"));
+    openMovAct->setStatusTip(tr("Play Movie File"));
     connect(openMovAct, SIGNAL(triggered()), this, SLOT(openMovie(void)) );
 
     movieMenu->addAction(openMovAct);
@@ -1606,77 +1607,11 @@ void consoleWin_t::emuSetFrameAdvDelay(void)
 
 void consoleWin_t::openMovie(void)
 {
-	int ret, useNativeFileDialogVal;
-	QString filename;
-	std::string last;
-	char dir[512];
-	char replayReadOnlySetting;
-	QFileDialog  dialog(this, tr("Open FM2 Movie") );
+	MoviePlayDialog_t *win;
 
-	dialog.setFileMode(QFileDialog::ExistingFile);
+	win = new MoviePlayDialog_t(this);
 
-	dialog.setNameFilter(tr("FM2 Movies (*.fm2) ;; All files (*)"));
-
-	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
-	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
-
-	g_config->getOption ("SDL.LastOpenMovie", &last );
-
-	getDirFromFile( last.c_str(), dir );
-
-	dialog.setDirectory( tr(dir) );
-
-	// Check config option to use native file dialog or not
-	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
-
-	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
-
-	dialog.show();
-	ret = dialog.exec();
-
-	if ( ret )
-	{
-		QStringList fileList;
-		fileList = dialog.selectedFiles();
-
-		if ( fileList.size() > 0 )
-		{
-			filename = fileList[0];
-		}
-	}
-
-   if ( filename.isNull() )
-   {
-      return;
-   }
-	qDebug() << "selected file path : " << filename.toUtf8();
-
-	int pauseframe;
-	g_config->getOption ("SDL.PauseFrame", &pauseframe);
-	g_config->setOption ("SDL.PauseFrame", 0);
-
-	FCEUI_printf ("Playing back movie located at %s\n", filename.toStdString().c_str() );
-
-	if (suggestReadOnlyReplay)
-	{
-		replayReadOnlySetting = true;
-	}
-	else
-	{
-		replayReadOnlySetting = FCEUI_GetMovieToggleReadOnly();
-	}
-
-	fceuWrapperLock();
-	if (FCEUI_LoadMovie( filename.toStdString().c_str(),
-		    replayReadOnlySetting, pauseframe ? pauseframe : false) == false)
-	{
-		printf("Error: Could not open movie file: %s \n", filename.toStdString().c_str() );
-	}
-	g_config->setOption ("SDL.LastOpenMovie", filename.toStdString().c_str() );
-	fceuWrapperUnLock();
-
-   return;
+	win->show();
 }
 
 void consoleWin_t::stopMovie(void)

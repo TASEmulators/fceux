@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <unzip.h>
 
+#include <QStyleFactory>
 #include "Qt/main.h"
 #include "Qt/throttle.h"
 #include "Qt/config.h"
@@ -439,6 +440,7 @@ static const char *DriverUsage =
 
 static void ShowUsage(const char *prog)
 {
+	int i,j;
 	printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);
 	puts(DriverUsage);
 #ifdef _S9XLUA_H
@@ -448,6 +450,25 @@ static void ShowUsage(const char *prog)
 	puts ("--videolog     c       Calls mencoder to grab the video and audio streams to\n                         encode them. Check the documentation for more on this.");
 	puts ("--mute        {0|1}    Mutes FCEUX while still passing the audio stream to\n                         mencoder during avi creation.");
 #endif
+	puts ("--style=KEY            Use Qt GUI Style based on supplied key. Available system style keys are:\n");
+
+	QStringList styleList = QStyleFactory::keys();
+
+	j=0;
+	for (i=0; i<styleList.size(); i++)
+	{
+		printf("  %16s  ", styleList[i].toStdString().c_str() ); j++;
+
+		if ( j >= 4 )
+		{
+			printf("\n"); j=0;
+		}
+	}
+	printf("\n\n");
+	printf(" Custom Qt stylesheets (.qss files) may be used by setting an\n");
+	printf(" environment variable named FCEUX_QT_STYLESHEET equal to the \n");
+	printf(" full (absolute) path to the qss file.\n");
+
 	puts("");
 	printf("Compiled with SDL version %d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL );
 	SDL_version v; 

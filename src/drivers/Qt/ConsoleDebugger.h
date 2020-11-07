@@ -148,6 +148,7 @@ class QAsmView : public QWidget
 		dbg_asm_entry_t  *asmPC;
 		std::vector <dbg_asm_entry_t*> asmEntry;
 
+		bool  useDarkTheme;
 		bool  displayROMoffsets;
 		bool  symbolicDebugEnable;
 		bool  registerNameEnable;

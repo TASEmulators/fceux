@@ -198,6 +198,12 @@ fceuDecIntValidtor::fceuDecIntValidtor( int min, int max, QObject *parent)
 	this->max = max;
 }
 //---------------------------------------------------------------------------
+void fceuDecIntValidtor::setMinMax( int min, int max)
+{
+	this->min = min;
+	this->max = max;
+}
+//---------------------------------------------------------------------------
 QValidator::State fceuDecIntValidtor::validate(QString &input, int &pos) const
 {
    int i, v;
