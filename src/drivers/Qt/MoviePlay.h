@@ -16,6 +16,7 @@
 #include <QGroupBox>
 
 #include "Qt/main.h"
+#include "Qt/ConsoleUtilities.h"
 
 class MoviePlayDialog_t : public QDialog
 {
@@ -45,6 +46,8 @@ class MoviePlayDialog_t : public QDialog
 		QLabel       *palUsedLbl;
 		QLabel       *newppuUsedLbl;
 
+		fceuDecIntValidtor *validator;
+
 	private:
 		void   doScan(void);
 		void   clearMovieText(void);
@@ -52,6 +55,8 @@ class MoviePlayDialog_t : public QDialog
 		int    addFileToList( const char *file, bool setActive = false );
 		bool   checkMD5Sum( const char *path, const char *md5 );
 		void   scanDirectory( const char *dirPath, const char *md5 );
+		void   showErrorMsgWindow(const char *str);
+		void   showWarningMsgWindow(const char *str);
 
    public slots:
       void closeWindow(void);
@@ -59,6 +64,6 @@ class MoviePlayDialog_t : public QDialog
 		void openMovie(void);
 		void playMovie(void);
 		void movieSelect(int index);
-		//void  readOnlyReplayChanged( int state );
+		void pauseAtFrameChange(int state);
 
 };

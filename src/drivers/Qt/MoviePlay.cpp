@@ -8,6 +8,7 @@
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <QGridLayout>
 
 #include "../../fceu.h"
@@ -32,6 +33,7 @@ MoviePlayDialog_t::MoviePlayDialog_t(QWidget *parent)
 	QGridLayout *grid;
 	QLabel *lbl;
 	QPushButton *okButton, *cancelButton;
+	bool replayReadOnlySetting;
 
 	setWindowTitle("Movie Play");
 
@@ -57,7 +59,11 @@ MoviePlayDialog_t::MoviePlayDialog_t(QWidget *parent)
 	openReadOnly = new QCheckBox( tr("Open Read-Only") );
 	pauseAtFrame = new QCheckBox( tr("Pause Movie At Frame") );
 
+	validator = new fceuDecIntValidtor( 0, 100000000, this );
+
 	pauseAtFrameEntry = new QLineEdit();
+
+	pauseAtFrameEntry->setValidator( validator );
 
 	vbox->addWidget( openReadOnly );
 	vbox->addLayout( hbox );
@@ -121,6 +127,20 @@ MoviePlayDialog_t::MoviePlayDialog_t(QWidget *parent)
 	connect( movBrowseBtn , SIGNAL(clicked(void)) , this, SLOT(openMovie(void))  );
 	connect( movSelBox    , SIGNAL(activated(int)), this, SLOT(movieSelect(int)) );
 
+	connect( pauseAtFrame , SIGNAL(stateChanged(int)), this, SLOT(pauseAtFrameChange(int)) );
+
+	if (suggestReadOnlyReplay)
+	{
+		replayReadOnlySetting = true;
+	}
+	else
+	{
+		replayReadOnlySetting = FCEUI_GetMovieToggleReadOnly();
+	}
+	openReadOnly->setChecked( replayReadOnlySetting );
+
+	pauseAtFrameEntry->setEnabled( pauseAtFrame->isChecked() );
+
 	doScan();
 
 	updateMovieText();
@@ -156,6 +176,11 @@ void MoviePlayDialog_t::movieSelect(int index)
 	updateMovieText();
 }
 //----------------------------------------------------------------------------
+void MoviePlayDialog_t::pauseAtFrameChange(int state)
+{
+	pauseAtFrameEntry->setEnabled( state != Qt::Unchecked );
+}
+//----------------------------------------------------------------------------
 void  MoviePlayDialog_t::clearMovieText(void)
 {
 	movLenLbl->clear();
@@ -168,6 +193,7 @@ void  MoviePlayDialog_t::clearMovieText(void)
 	emuUsedLbl->clear();
 	palUsedLbl->clear();
 	newppuUsedLbl->clear();
+	pauseAtFrameEntry->clear();
 }
 //----------------------------------------------------------------------------
 void  MoviePlayDialog_t::updateMovieText(void)
@@ -191,6 +217,8 @@ void  MoviePlayDialog_t::updateMovieText(void)
 
 	if ( fp == NULL )
 	{
+		sprintf( stmp, "Error: Failed to open file '%s'", path.c_str() );
+		showErrorMsgWindow( stmp );
 		clearMovieText();
 		return;
 	}
@@ -200,9 +228,12 @@ void  MoviePlayDialog_t::updateMovieText(void)
 	{
 		double div;
 
+		validator->setMinMax( 0, info.num_frames );
+
 		sprintf(stmp, "%u", (unsigned)info.num_frames);
 
 		movFramesLbl->setText( tr(stmp) );
+		pauseAtFrameEntry->setText( tr(stmp) );
 
 		div = (FCEUI_GetCurrentVidSystem(0,0)) ? 50.006977968268290849 : 60.098813897440515532;				// PAL timing
 		double tempCount = (info.num_frames / div) + 0.005; // +0.005s for rounding
@@ -247,9 +278,22 @@ void  MoviePlayDialog_t::updateMovieText(void)
 		palUsedLbl->setText( tr(info.pal ? "On" : "Off") );
 
 		newppuUsedLbl->setText( tr(info.ppuflag ? "On" : "Off") );
+
+		if ( GameInfo )
+		{
+			strcpy( stmp, md5_asciistr(GameInfo->MD5) );
+
+			if ( strcmp( stmp, md5_asciistr(info.md5_of_rom_used) ) != 0 )
+			{
+				sprintf( stmp, "Warning: Selected movie file '%s' may not have been created using the currently loaded ROM.", path.c_str() );
+				showWarningMsgWindow( stmp );
+			}
+		}
 	}
 	else
 	{
+		sprintf( stmp, "Error: Selected file '%s' does not have a recognized movie format.", path.c_str() );
+		showErrorMsgWindow( stmp );
 		clearMovieText();
 	}
 	delete fp;
@@ -392,13 +436,11 @@ void MoviePlayDialog_t::playMovie(void)
 
 	path = movSelBox->itemText(idx).toStdString();
 
-	if (suggestReadOnlyReplay)
+	replayReadOnlySetting = openReadOnly->isChecked();
+
+	if ( pauseAtFrame->isChecked() )
 	{
-		replayReadOnlySetting = true;
-	}
-	else
-	{
-		replayReadOnlySetting = FCEUI_GetMovieToggleReadOnly();
+		pauseframe = strtol( pauseAtFrameEntry->text().toStdString().c_str(), NULL, 0 );
 	}
 
 	fceuWrapperLock();
@@ -411,7 +453,9 @@ void MoviePlayDialog_t::playMovie(void)
 
 	if ( movieLoadError )
 	{
-		printf("Error: Could not open movie file: %s \n", path.c_str() );
+		char stmp[256];
+		sprintf( stmp, "Error: Could not load movie file: %s \n", path.c_str() );
+		showErrorMsgWindow( stmp );
 	}
 	else
 	{
@@ -487,15 +531,29 @@ void MoviePlayDialog_t::openMovie(void)
 	addFileToList( filename.toStdString().c_str(), true );
 
 	updateMovieText();
-	//fceuWrapperLock();
-	//if (FCEUI_LoadMovie( filename.toStdString().c_str(),
-	//	    replayReadOnlySetting, pauseframe ? pauseframe : false) == false)
-	//{
-	//	printf("Error: Could not open movie file: %s \n", filename.toStdString().c_str() );
-	//}
+	
 	g_config->setOption ("SDL.LastOpenMovie", filename.toStdString().c_str() );
-	//fceuWrapperUnLock();
 
    return;
+}
+//----------------------------------------------------------------------------
+void MoviePlayDialog_t::showErrorMsgWindow(const char *str)
+{
+	QMessageBox msgBox(this);
+
+	msgBox.setIcon( QMessageBox::Critical );
+	msgBox.setText( tr(str) );
+	msgBox.show();
+	msgBox.exec();
+}
+//----------------------------------------------------------------------------
+void MoviePlayDialog_t::showWarningMsgWindow(const char *str)
+{
+	QMessageBox msgBox(this);
+
+	msgBox.setIcon( QMessageBox::Warning );
+	msgBox.setText( tr(str) );
+	msgBox.show();
+	msgBox.exec();
 }
 //----------------------------------------------------------------------------
