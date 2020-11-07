@@ -1467,12 +1467,33 @@ QRamSearchView::QRamSearchView(QWidget *parent)
 	: QWidget(parent)
 {
 	QPalette pal;
-	QColor fg(0,0,0), bg(255,255,255);
+	QColor c, fg(0,0,0), bg(255,255,255);
+	bool useDarkTheme = false;
 
 	pal = this->palette();
-	pal.setColor(QPalette::Base      , bg );
-	pal.setColor(QPalette::Background, bg );
-	pal.setColor(QPalette::WindowText, fg );
+
+	// Figure out if we are using a light or dark theme by checking the 
+	// default window text grayscale color. If more white, then we will
+	// use white text on black background, else we do the opposite.
+	c = pal.color(QPalette::WindowText);
+
+	if ( qGray( c.red(), c.green(), c.blue() ) > 128 )
+	{
+		useDarkTheme = true;
+	}
+
+	if ( useDarkTheme )
+	{
+		pal.setColor(QPalette::Base      , fg );
+		pal.setColor(QPalette::Background, fg );
+		pal.setColor(QPalette::WindowText, bg );
+	}
+	else 
+	{
+		pal.setColor(QPalette::Base      , bg );
+		pal.setColor(QPalette::Background, bg );
+		pal.setColor(QPalette::WindowText, fg );
+	}
 	this->setPalette(pal);
 
 	font.setFamily("Courier New");
