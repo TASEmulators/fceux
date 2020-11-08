@@ -634,7 +634,7 @@ int GuiCheatsDialog_t::activeCheatListCB (char *name, uint32 a, uint8 v, int c, 
 
 	if (c >= 0)
 	{
-		sprintf (codeStr, "$%04X:%02X:%02X", a,v,c);
+		sprintf (codeStr, "$%04X?%02X:%02X", a,c,v);
 	}
 	else
 	{
