@@ -25,3 +25,17 @@ class fceuDecIntValidtor : public QValidator
 		int  min;
 		int  max;
 };
+
+class fceuHexIntValidtor : public QValidator
+{ 
+   public:
+   	fceuHexIntValidtor( int min, int max, QObject *parent);
+
+		QValidator::State validate(QString &input, int &pos) const;
+
+		void  setMinMax( int min, int max );
+	private:
+		int  min;
+		int  max;
+};
+

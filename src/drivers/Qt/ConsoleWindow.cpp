@@ -28,6 +28,7 @@
 #include "Qt/MovieOptions.h"
 #include "Qt/LuaControl.h"
 #include "Qt/CheatsConf.h"
+#include "Qt/GameGenie.h"
 #include "Qt/HexEditor.h"
 #include "Qt/TraceLogger.h"
 #include "Qt/CodeDataLogger.h"
@@ -648,6 +649,14 @@ void consoleWin_t::createMainMenu(void)
     connect(codeDataLogAct, SIGNAL(triggered()), this, SLOT(openCodeDataLogger(void)) );
 
     debugMenu->addAction(codeDataLogAct);
+
+	 // Debug -> Game Genie Encode/Decode Viewer
+	 ggEncodeAct = new QAction(tr("Game Genie Encode/Decode"), this);
+    //ggEncodeAct->setShortcut( QKeySequence(tr("Shift+F7")));
+    ggEncodeAct->setStatusTip(tr("Open Game Genie Encode/Decode"));
+    connect(ggEncodeAct, SIGNAL(triggered()), this, SLOT(openGGEncoder(void)) );
+
+    debugMenu->addAction(ggEncodeAct);
 
 	 // Debug -> iNES Header Editor
 	 iNesEditAct = new QAction(tr("iNES Header Editor..."), this);
@@ -1293,6 +1302,17 @@ void consoleWin_t::openCodeDataLogger(void)
    cdlWin = new CodeDataLoggerDialog_t(this);
 	
    cdlWin->show();
+}
+
+void consoleWin_t::openGGEncoder(void)
+{
+	GameGenieDialog_t *win;
+
+	//printf("Open Game Genie Window\n");
+	
+   win = new GameGenieDialog_t(this);
+	
+   win->show();
 }
 
 void consoleWin_t::openNesHeaderEditor(void)
