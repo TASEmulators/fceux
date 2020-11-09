@@ -2371,7 +2371,22 @@ void FCEUD_DebugBreakpoint( int bpNum )
 
 	while ( nes_shm->runEmulator && FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
 	{
-		usleep(100000);
+		// HACK: break when Frame Advance is pressed
+		extern bool frameAdvanceRequested;
+		extern int frameAdvance_Delay_count, frameAdvance_Delay;
+
+		if (frameAdvanceRequested)
+		{
+			if ( (frameAdvance_Delay_count == 0) || (frameAdvance_Delay_count >= frameAdvance_Delay) )
+			{
+				FCEUI_SetEmulationPaused(EMULATIONPAUSED_FA);
+			}
+			if (frameAdvance_Delay_count < frameAdvance_Delay)
+			{
+				frameAdvance_Delay_count++;
+			}
+		}
+		usleep(16667);
 	}
 	// since we unfreezed emulation, reset delta_cycles counter
 	ResetDebugStatisticsDeltaCounters();
