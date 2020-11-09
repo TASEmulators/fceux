@@ -51,4 +51,6 @@ SDL_Keycode convQtKey2SDLKeyCode( Qt::Key q );
 
 SDL_Scancode convQtKey2SDLScanCode( Qt::Key q );
 
+SDL_Keymod convQtKey2SDLModifier( Qt::KeyboardModifiers m );
+
 int  pushKeyEvent( QKeyEvent *event, int pressDown );

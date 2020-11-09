@@ -132,6 +132,7 @@ DoCheatSeq ()
 
 #include "keyscan.h"
 static uint8  g_keyState[SDL_NUM_SCANCODES];
+static int    keyModifier = 0;
 static int DIPS = 0;
 
 static uint8 keyonce[SDL_NUM_SCANCODES];
@@ -187,16 +188,213 @@ static int g_fkbEnabled = 0;
 // this function loads the sdl hotkeys from the config file into the
 // global scope.  this elimates the need for accessing the config file
 
-int Hotkeys[HK_MAX] = { 0 };
+struct hotkey_t Hotkeys[HK_MAX];
+
+hotkey_t::hotkey_t(void)
+{
+	value = 0; modifier = 0; prevState = 0;
+}
+
+int  hotkey_t::getString( char *s )
+{
+	s[0] = 0;
+
+	if ( modifier != 0 )
+	{
+		if ( modifier & (KMOD_LSHIFT | KMOD_RSHIFT) )
+		{
+			strcat( s, "Shift+" );
+		}
+
+		if ( modifier & (KMOD_LALT | KMOD_RALT) )
+		{
+			strcat( s, "Alt+" );
+		}
+
+		if ( modifier & (KMOD_LCTRL | KMOD_RCTRL) )
+		{
+			strcat( s, "Ctrl+" );
+		}
+	}
+
+	strcat( s, SDL_GetKeyName(value) );
+
+	return 0;
+}
+
+int  hotkey_t::getState(void)
+{
+	int k;
+
+	if ( modifier != 0 )
+	{
+		if ( modifier & (KMOD_LSHIFT | KMOD_RSHIFT) )
+		{
+			if ( !g_keyState[SDL_SCANCODE_LSHIFT] && !g_keyState[SDL_SCANCODE_RSHIFT] )
+			{
+				return 0;
+			}
+		}
+
+		if ( modifier & (KMOD_LALT | KMOD_RALT) )
+		{
+			if ( !g_keyState[SDL_SCANCODE_LALT] && !g_keyState[SDL_SCANCODE_RALT] )
+			{
+				return 0;
+			}
+		}
+
+		if ( modifier & (KMOD_LCTRL | KMOD_RCTRL) )
+		{
+			if ( !g_keyState[SDL_SCANCODE_LCTRL] && !g_keyState[SDL_SCANCODE_RCTRL] )
+			{
+				return 0;
+			}
+		}
+	}
+	else
+	{
+		if ( keyModifier != 0 )
+		{
+			return 0;
+		}
+	}
+
+	k = SDL_GetScancodeFromKey(value);
+	if ( (k >= 0) && (k < SDL_NUM_SCANCODES) )
+	{
+		return g_keyState[k];
+	}
+	return 0;
+}
+
+int hotkey_t::getRisingEdge(void)
+{
+	if ( value < 0 )
+	{
+		return 0;
+	}
+
+	if ( getState() )
+	{
+		if (!prevState)
+		{
+			prevState = 1;
+			return 1;
+		}
+	} 
+	else 
+	{
+		prevState = 0;
+	}
+	return 0;
+}
+
+void hotkey_t::setModifierFromString( const char *s )
+{
+	int i,j;
+	char id[128];
+
+	i=0; j=0;
+	modifier = 0;
+
+	while ( s[i] != 0 )
+	{
+		j=0;
+		while ( isalnum(s[i]) || (s[i] == '_') )
+		{
+			id[j] = tolower(s[i]); j++; i++;
+		}
+		id[j] = 0;
+
+		if ( j == 0 ) break;
+
+		if ( strcmp( id, "ctrl" ) == 0 )
+		{
+			modifier |= (KMOD_LCTRL | KMOD_RCTRL);
+		}
+		else if ( strcmp( id, "alt" ) == 0 )
+		{
+			modifier |= (KMOD_LALT | KMOD_RALT);
+		}
+		else if ( strcmp( id, "shift" ) == 0 )
+		{
+			modifier |= (KMOD_LSHIFT | KMOD_RSHIFT);
+		}
+
+		if ( (s[i] == '+') || (s[i] == '|') )
+		{
+			i++;
+		}
+		else
+		{
+			break;
+		}
+	}
+}
 
 // on every cycle of keyboardinput()
 void
 setHotKeys (void)
 {
+	int j,k;
+	std::string keyText;
 	std::string prefix = "SDL.Hotkeys.";
+	char id[64], val[128];
+//SDL_Keycode SDL_GetKeyFromName(const char* name)
+
 	for (int i = 0; i < HK_MAX; i++)
 	{
-		g_config->getOption (prefix + getHotkeyString(i), &Hotkeys[i]);
+		g_config->getOption (prefix + getHotkeyString(i), &keyText);
+
+		//printf("Key: '%s'\n", keyText.c_str() );
+
+		j=0;
+
+		while ( keyText[j] != 0 )
+		{
+			while ( isspace(keyText[j]) ) j++;
+
+			if ( isalpha( keyText[j] ) || (keyText[j] == '_') )
+			{
+				k=0;
+				while ( isalnum( keyText[j] ) || (keyText[j] == '_') )
+				{
+					id[k] = keyText[j]; j++; k++;
+				}
+				id[k] = 0;
+
+				if ( keyText[j] != '=' )
+				{
+					printf("Error: Invalid Hot Key Config for %s = %s \n", getHotkeyString(i), keyText.c_str() );
+					break;
+				}
+				j++;
+
+				k=0;
+				while ( !isspace(keyText[j]) && (keyText[j] != 0) )
+				{
+					val[k] = keyText[j]; j++; k++;
+				}
+				val[k] = 0;
+
+				//printf("ID:%s  Val:%s \n", id, val );
+
+				if ( strcmp( id, "key" ) == 0 )
+				{
+					Hotkeys[i].value = SDL_GetKeyFromName( val );
+				}
+				else if ( strcmp( id, "mod" ) == 0 )
+				{
+					Hotkeys[i].setModifierFromString( val );
+				}
+			}
+			else
+			{
+				break;
+			}
+		}
+
 	}
 	return;
 }
@@ -446,7 +644,7 @@ static void KeyboardCommands (void)
 	// check if the family keyboard is enabled
 	if (CurInputType[2] == SIFC_FKB)
 	{
-		if (_keyonly (Hotkeys[HK_FKB_ENABLE]))
+		if ( Hotkeys[HK_FKB_ENABLE].getRisingEdge() )
 		{
 			g_fkbEnabled ^= 1;
 			FCEUI_DispMessage ("Family Keyboard %sabled.", 0,
@@ -477,7 +675,7 @@ static void KeyboardCommands (void)
 	}
 
 
-	if (_keyonly (Hotkeys[HK_TOGGLE_BG]))
+	if ( Hotkeys[HK_TOGGLE_BG].getRisingEdge() )
 	{
 		if (is_shift)
 		{
@@ -539,17 +737,17 @@ static void KeyboardCommands (void)
 		// Famicom disk-system games
 	if (gametype == GIT_FDS)
 	{
-		if (_keyonly (Hotkeys[HK_FDS_SELECT]))
+		if ( Hotkeys[HK_FDS_SELECT].getRisingEdge() )
 		{
 			FCEUI_FDSSelect ();
 		}
-		if (_keyonly (Hotkeys[HK_FDS_EJECT]))
+		if ( Hotkeys[HK_FDS_EJECT].getRisingEdge() )
 		{
 			FCEUI_FDSInsert ();
 		}
 	}
 
-	if (_keyonly (Hotkeys[HK_SCREENSHOT]))
+	if ( Hotkeys[HK_SCREENSHOT].getRisingEdge() )
 	{
 		FCEUI_SaveSnapshot ();
 	}
@@ -557,13 +755,13 @@ static void KeyboardCommands (void)
 	// if not NES Sound Format
 	if (gametype != GIT_NSF)
 	{
-		if (_keyonly (Hotkeys[HK_CHEAT_MENU]))
+		if ( Hotkeys[HK_CHEAT_MENU].getRisingEdge() )
 		{
 			DoCheatSeq ();
 		}
 
 		// f5 (default) save key, hold shift to save movie
-		if (_keyonly (Hotkeys[HK_SAVE_STATE]))
+		if ( Hotkeys[HK_SAVE_STATE].getRisingEdge() )
 		{
 			if (is_shift)
 			{
@@ -578,7 +776,7 @@ static void KeyboardCommands (void)
 		}
 
 		// f7 to load state, Shift-f7 to load movie
-		if (_keyonly (Hotkeys[HK_LOAD_STATE]))
+		if ( Hotkeys[HK_LOAD_STATE].getRisingEdge() )
 		{
 			if (is_shift)
 			{
@@ -611,42 +809,42 @@ static void KeyboardCommands (void)
 	}
 
 
-	if (_keyonly (Hotkeys[HK_DECREASE_SPEED]))
+	if ( Hotkeys[HK_DECREASE_SPEED].getRisingEdge() )
 	{
 		DecreaseEmulationSpeed();
 	}
 
-	if (_keyonly(Hotkeys[HK_INCREASE_SPEED]))
+	if ( Hotkeys[HK_INCREASE_SPEED].getRisingEdge() )
 	{
 		IncreaseEmulationSpeed ();
 	}
 
-	if (_keyonly (Hotkeys[HK_TOGGLE_FRAME_DISPLAY]))
+	if ( Hotkeys[HK_TOGGLE_FRAME_DISPLAY].getRisingEdge() )
 	{
 		FCEUI_MovieToggleFrameDisplay ();
 	}
 
-	if (_keyonly (Hotkeys[HK_TOGGLE_INPUT_DISPLAY]))
+	if ( Hotkeys[HK_TOGGLE_INPUT_DISPLAY].getRisingEdge() )
 	{
 		FCEUI_ToggleInputDisplay ();
 		extern int input_display;
 		g_config->setOption ("SDL.InputDisplay", input_display);
 	}
 
-	if (_keyonly (Hotkeys[HK_MOVIE_TOGGLE_RW]))
+	if ( Hotkeys[HK_MOVIE_TOGGLE_RW].getRisingEdge() )
 	{
 		FCEUI_SetMovieToggleReadOnly (!FCEUI_GetMovieToggleReadOnly ());
 	}
 
 #ifdef CREATE_AVI
-	if (_keyonly (Hotkeys[HK_MUTE_CAPTURE]))
+	if ( Hotkeys[HK_MUTE_CAPTURE].getRisingEdge() )
 	{
 		extern int mutecapture;
 		mutecapture ^= 1;
 	}
 #endif
 
-	if (_keyonly (Hotkeys[HK_PAUSE]))
+	if ( Hotkeys[HK_PAUSE].getRisingEdge() )
 	{
 		//FCEUI_ToggleEmulationPause(); 
 		// use the wrapper function instead of the fceui function directly
@@ -655,14 +853,14 @@ static void KeyboardCommands (void)
 	}
 
 	// Toggle throttling
-	if ( _keyonly(Hotkeys[HK_TURBO]) )
+	if ( Hotkeys[HK_TURBO].getRisingEdge() )
 	{
 		NoWaiting ^= 1;
 		//printf("NoWaiting: 0x%04x\n", NoWaiting );
 	}
 
 	static bool frameAdvancing = false;
-	if ( getKeyState(Hotkeys[HK_FRAME_ADVANCE]))
+	if ( Hotkeys[HK_FRAME_ADVANCE].getState() )
 	{
 		if (frameAdvancing == false)
 		{
@@ -681,14 +879,15 @@ static void KeyboardCommands (void)
 		}
 	}
 
-	if (_keyonly (Hotkeys[HK_RESET]))
+	if ( Hotkeys[HK_RESET].getRisingEdge() )
 	{
 		FCEUI_ResetNES ();
 	}
-	//if(_keyonly(Hotkeys[HK_POWER])) {
+	//if( Hotkeys[HK_POWER].getRisingEdge() ) 
+	//{
 	//    FCEUI_PowerNES();
 	//}
-	if (_keyonly (Hotkeys[HK_QUIT]))
+	if ( Hotkeys[HK_QUIT].getRisingEdge() )
 	{
 		CloseGame();
 		FCEUI_Kill();
@@ -697,7 +896,7 @@ static void KeyboardCommands (void)
 	}
 	else
 #ifdef _S9XLUA_H
-	if (_keyonly (Hotkeys[HK_LOAD_LUA]))
+	if ( Hotkeys[HK_LOAD_LUA].getRisingEdge() )
 	{
 		std::string fname;
 		fname = GetFilename ("Open LUA script...", false, "Lua scripts|*.lua");
@@ -708,7 +907,7 @@ static void KeyboardCommands (void)
 
 	for (int i = 0; i < 10; i++)
 	{
-		if (_keyonly (Hotkeys[HK_SELECT_STATE_0 + i]))
+		if ( Hotkeys[HK_SELECT_STATE_0 + i].getRisingEdge() )
 		{
 #ifdef _GTK
 			setStateMenuItem(i);
@@ -717,7 +916,7 @@ static void KeyboardCommands (void)
 		}
 	}
 
-	if (_keyonly (Hotkeys[HK_SELECT_STATE_NEXT]))
+	if ( Hotkeys[HK_SELECT_STATE_NEXT].getRisingEdge() )
 	{
 		FCEUI_SelectStateNext (1);
 #ifdef _GTK
@@ -725,7 +924,7 @@ static void KeyboardCommands (void)
 #endif
 	}
 
-	if (_keyonly (Hotkeys[HK_SELECT_STATE_PREV]))
+	if ( Hotkeys[HK_SELECT_STATE_PREV].getRisingEdge() )
 	{
 		FCEUI_SelectStateNext (-1);
 #ifdef _GTK
@@ -733,38 +932,38 @@ static void KeyboardCommands (void)
 #endif
 	}
 
-	if (_keyonly (Hotkeys[HK_BIND_STATE]))
+	if ( Hotkeys[HK_BIND_STATE].getRisingEdge() )
 	{
 		bindSavestate ^= 1;
 		FCEUI_DispMessage ("Savestate binding to movie %sabled.", 0,
 		bindSavestate ? "en" : "dis");
 	}
 
-	if (_keyonly (Hotkeys[HK_FA_LAG_SKIP]))
+	if ( Hotkeys[HK_FA_LAG_SKIP].getRisingEdge() )
 	{
 		frameAdvanceLagSkip ^= 1;
 		FCEUI_DispMessage ("Skipping lag in Frame Advance %sabled.", 0,
 		frameAdvanceLagSkip ? "en" : "dis");
 	}
 
-	if (_keyonly (Hotkeys[HK_LAG_COUNTER_DISPLAY]))
+	if ( Hotkeys[HK_LAG_COUNTER_DISPLAY].getRisingEdge() )
 	{
 		lagCounterDisplay ^= 1;
 	}
 
-	if (_keyonly (Hotkeys[HK_TOGGLE_SUBTITLE]))
+	if ( Hotkeys[HK_TOGGLE_SUBTITLE].getRisingEdge() )
 	{
 		movieSubtitles = !movieSubtitles;
 		FCEUI_DispMessage ("Movie subtitles o%s.", 0,
 		movieSubtitles ? "n" : "ff");
 	}
 
-	if (_keyonly (Hotkeys[HK_VOLUME_DOWN]))
+	if ( Hotkeys[HK_VOLUME_DOWN].getRisingEdge() )
 	{
 		FCEUD_SoundVolumeAdjust(-1);
 	}
 
-	if (_keyonly (Hotkeys[HK_VOLUME_UP]))
+	if ( Hotkeys[HK_VOLUME_UP].getRisingEdge() )
 	{
 		FCEUD_SoundVolumeAdjust(1);
 	}
@@ -773,11 +972,13 @@ static void KeyboardCommands (void)
 	if (gametype == GIT_VSUNI)
 	{
 		// insert coin
-		if (_keyonly (Hotkeys[HK_VS_INSERT_COIN]))
+		if ( Hotkeys[HK_VS_INSERT_COIN].getRisingEdge() )
+		{
 			FCEUI_VSUniCoin ();
+		}
 
 		// toggle dipswitch display
-		if (_keyonly (Hotkeys[HK_VS_TOGGLE_DIPSWITCH]))
+		if ( Hotkeys[HK_VS_TOGGLE_DIPSWITCH].getRisingEdge() )
 		{
 			DIPS ^= 1;
 			FCEUI_VSUniToggleDIPView ();
@@ -803,10 +1004,14 @@ static void KeyboardCommands (void)
 		if (keyonly (T))
 			FCEUI_NTSCSELTINT ();
 
-		if (_keyonly (Hotkeys[HK_DECREASE_SPEED]))
+		if (Hotkeys[HK_DECREASE_SPEED].getRisingEdge())
+		{
 			FCEUI_NTSCDEC ();
-		if (_keyonly (Hotkeys[HK_INCREASE_SPEED]))
+		}
+		if (Hotkeys[HK_INCREASE_SPEED].getRisingEdge())
+		{
 			FCEUI_NTSCINC ();
+		}
 
 		if ((CurInputType[2] == SIFC_BWORLD) || (cspec == SIS_DATACH))
 		{
@@ -956,8 +1161,16 @@ UpdatePhysicalInput ()
 				//printf("SDL_Event.type: %i  Keysym: %i  ScanCode: %i\n", 
 				//		event.type, event.key.keysym.sym, event.key.keysym.scancode );
 
+				keyModifier = event.key.keysym.mod;
+				g_keyState[SDL_SCANCODE_LSHIFT] = ( event.key.keysym.mod & KMOD_LSHIFT ) ? 1 : 0;
+				g_keyState[SDL_SCANCODE_RSHIFT] = ( event.key.keysym.mod & KMOD_RSHIFT ) ? 1 : 0;
+			   g_keyState[SDL_SCANCODE_LALT]   = ( event.key.keysym.mod & KMOD_LALT   ) ? 1 : 0;
+				g_keyState[SDL_SCANCODE_RALT]   = ( event.key.keysym.mod & KMOD_RALT   ) ? 1 : 0;
+			   g_keyState[SDL_SCANCODE_LCTRL]  = ( event.key.keysym.mod & KMOD_LCTRL  ) ? 1 : 0;
+				g_keyState[SDL_SCANCODE_RCTRL]  = ( event.key.keysym.mod & KMOD_RCTRL  ) ? 1 : 0;
+
 				g_keyState[ event.key.keysym.scancode ] = (event.type == SDL_KEYDOWN) ? 1 : 0;
-				//checkKeyBoardState( event.key.keysym.scancode );
+
 				break;
 			case SDL_JOYDEVICEADDED:
 				AddJoystick( event.jdevice.which );
