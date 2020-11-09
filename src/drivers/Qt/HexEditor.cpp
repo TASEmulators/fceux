@@ -1079,6 +1079,8 @@ void HexEditorDialog_t::openDebugSymbolEditWindow( int addr )
 	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
    connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
 
+	okButton->setDefault(true);
+
 	if ( sym != NULL )
 	{
 		nameEntry->setText( tr(sym->name.c_str()) );

@@ -699,6 +699,8 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
    connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
    connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
 
+	okButton->setDefault(true);
+
 	if ( wp != NULL )
 	{
 		char stmp[256];
@@ -943,6 +945,8 @@ void ConsoleDebugger::openDebugSymbolEditWindow( int addr )
 
 	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
    connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+
+	okButton->setDefault(true);
 
 	if ( sym != NULL )
 	{
