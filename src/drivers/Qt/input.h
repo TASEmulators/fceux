@@ -14,18 +14,15 @@ enum {
 };
 struct ButtConfig
 {
-	int    ButtType; //[MAXBUTTCONFIG];
-	int    DeviceNum; //[MAXBUTTCONFIG];
-	int    ButtonNum; //[MAXBUTTCONFIG];
+	int    ButtType; 
+	int    DeviceNum; 
+	int    ButtonNum; 
    int    state;
-	//uint32_t NumC;
-	//uint64 DeviceID[MAXBUTTCONFIG];	/* TODO */
 };
 
 extern int NoWaiting;
 extern CFGSTRUCT InputConfig[];
 extern ARGPSTRUCT InputArgs[];
-extern int Hotkeys[];
 void ParseGIInput(FCEUGI *GI);
 void setHotKeys(void);
 int getKeyState( int k );
@@ -34,6 +31,23 @@ void ButtonConfigEnd();
 void ConfigButton(char *text, ButtConfig *bc);
 int DWaitButton(const uint8_t *text, ButtConfig *bc, int *buttonConfigStatus = NULL);
 
+struct hotkey_t
+{
+	int value;
+	int modifier;
+	char prevState;
+
+	hotkey_t(void);
+
+	int getState(void);
+
+	int getRisingEdge(void);
+
+	int getString( char *s );
+
+	void setModifierFromString( const char *s );
+};
+extern struct hotkey_t Hotkeys[];
 
 #define FCFGD_GAMEPAD   1
 #define FCFGD_POWERPAD  2

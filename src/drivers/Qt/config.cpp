@@ -435,13 +435,24 @@ InitConfig()
 		SDLK_6, SDLK_7, SDLK_8, SDLK_9,
 		SDLK_PAGEUP, // select state next
 		SDLK_PAGEDOWN, // select state prev
-		0, // Volume Up Internal 
 		0, // Volume Down Internal 
+		0, // Volume Up Internal 
 		SDLK_SCROLLLOCK }; // FKB Enable Toggle
 
 	prefix = "SDL.Hotkeys.";
 	for(int i=0; i < HK_MAX; i++)
-		config->addOption(prefix + HotkeyStrings[i], Hotkeys[i]);
+	{
+		char buf[256];
+		std::string keyText;
+
+		keyText.assign(" mod=");
+
+		sprintf( buf, "  key=%s", SDL_GetKeyName( Hotkeys[i] ) );
+
+		keyText.append( buf );
+
+		config->addOption(prefix + HotkeyStrings[i], keyText);
+	}
 	// All mouse devices
 	config->addOption("SDL.OekaKids.0.DeviceType", "Mouse");
 	config->addOption("SDL.OekaKids.0.DeviceNum", 0);

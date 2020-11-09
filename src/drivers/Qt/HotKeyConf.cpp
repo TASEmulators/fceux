@@ -24,7 +24,6 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 	QVBoxLayout *mainLayout;
 	QTreeWidgetItem *item;
 	std::string prefix = "SDL.Hotkeys.";
-	int keycode;
 
 	setWindowTitle("Hotkey Configuration");
 
@@ -48,14 +47,16 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 
 	for (int i=0; i<HK_MAX; i++)
 	{
+		char keyName[128];
 		std::string optionName = prefix + getHotkeyString(i);
 
-		g_config->getOption (optionName.c_str (), &keycode);
+		//g_config->getOption (optionName.c_str (), &keycode);
+		Hotkeys[i].getString( keyName );
 
 		item = new QTreeWidgetItem();
 
 		item->setText( 0, QString::fromStdString( optionName ) );
-		item->setText( 1, QString::fromStdString( SDL_GetKeyName (keycode) ) );
+		item->setText( 1, QString::fromStdString( keyName ) );
 
 		item->setTextAlignment( 0, Qt::AlignLeft);
 		item->setTextAlignment( 1, Qt::AlignCenter);
@@ -89,9 +90,17 @@ void HotKeyConfDialog_t::closeWindow(void)
 //----------------------------------------------------------------------------
 void HotKeyConfDialog_t::assignHotkey(QKeyEvent *event)
 {
+	bool keyIsModifier;
 	SDL_Keycode k = convQtKey2SDLKeyCode( (Qt::Key)event->key() );
+	SDL_Keymod  m = convQtKey2SDLModifier( event->modifiers() );
 	
-	if ( k != SDLK_UNKNOWN )
+	keyIsModifier = (k == SDLK_LCTRL ) || (k == SDLK_RCTRL ) ||
+	                (k == SDLK_LSHIFT) || (k == SDLK_RSHIFT) ||
+	                (k == SDLK_LALT  ) || (k == SDLK_RALT  ) ||
+	                (k == SDLK_LGUI  ) || (k == SDLK_RGUI  ) ||
+						 (k == SDLK_CAPSLOCK);
+
+	if ( (k != SDLK_UNKNOWN) && !keyIsModifier )
 	{
 		QList <QTreeWidgetItem *> l;
 			
@@ -99,21 +108,59 @@ void HotKeyConfDialog_t::assignHotkey(QKeyEvent *event)
 
 		for (size_t i=0; i < l.size(); i++)
 		{
-			//int idx;
+			int j,idx;
 			QString qs;
 			QTreeWidgetItem *item;
+			std::string keyText;
+			char keyName[128];
+			char buf[256];
+
+
+			keyText.assign(" mod=");
+
+			j=0;
+			if ( m & (KMOD_LSHIFT | KMOD_RSHIFT) )
+			{
+				if ( j > 0 )
+				{
+					keyText.append("+"); 
+				}
+				keyText.append("Shift"); j++;
+			}
+			if ( m & (KMOD_LALT | KMOD_RALT) )
+			{
+				if ( j > 0 )
+				{
+					keyText.append("+"); 
+				}
+				keyText.append("Alt"); j++;
+			}
+			if ( m & (KMOD_LCTRL | KMOD_RCTRL) )
+			{
+				if ( j > 0 )
+				{
+					keyText.append("+"); 
+				}
+				keyText.append("Ctrl"); j++;
+			}
+
+			sprintf( buf, "  key=%s", SDL_GetKeyName( k ) );
+
+			keyText.append( buf );
 
 			item = l.at(i);
 
-			//idx = tree->indexOfTopLevelItem( item );
+			idx = tree->indexOfTopLevelItem( item );
 
 			qs = item->text(0);
 
-			g_config->setOption ( qs.toStdString(), k );
+			g_config->setOption ( qs.toStdString(), keyText );
 
 			setHotKeys();
 
-			item->setText( 1, QString::fromStdString( SDL_GetKeyName (k) ) );
+			Hotkeys[idx].getString( keyName );
+
+			item->setText( 1, QString::fromStdString( keyName ) );
 
    		//printf("Hotkey Window Key Press: 0x%x  item:%p\n  '%s' : %i\n", 
 			//		k, item, qs.toStdString().c_str(), idx );
