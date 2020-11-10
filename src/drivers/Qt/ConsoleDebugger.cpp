@@ -2944,6 +2944,27 @@ void QAsmView::resizeEvent(QResizeEvent *event)
 void QAsmView::keyPressEvent(QKeyEvent *event)
 {
 	//printf("Debug ASM Window Key Press: 0x%x \n", event->key() );
+	if ( selAddrValue >= 0 )
+	{
+		ctxMenuAddr = selAddrValue;
+
+		if ( event->key() == Qt::Key_B )
+   	{
+			parent->asmViewCtxMenuAddBP();
+   	}
+		else if ( event->key() == Qt::Key_S )
+   	{
+			parent->asmViewCtxMenuAddSym();
+   	}
+		else if ( event->key() == Qt::Key_M )
+   	{
+			parent->asmViewCtxMenuAddBM();
+   	}
+		else if ( event->key() == Qt::Key_H )
+   	{
+			parent->asmViewCtxMenuOpenHexEdit();
+   	}
+   }
 }
 //----------------------------------------------------------------------------
 void QAsmView::keyReleaseEvent(QKeyEvent *event)
@@ -3144,18 +3165,22 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 
 		act = new QAction(tr("Add Breakpoint"), &menu);
 		menu.addAction(act);
+		act->setShortcut( QKeySequence(tr("B")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBP(void)) );
 
 		act = new QAction(tr("Add Symbolic Debug Marker"), &menu);
 	 	menu.addAction(act);
+		act->setShortcut( QKeySequence(tr("S")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddSym(void)) );
 
 		act = new QAction(tr("Add Bookmark"), &menu);
 	 	menu.addAction(act);
+		act->setShortcut( QKeySequence(tr("M")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBM(void)) );
 		
 		act = new QAction(tr("Open Hex Editor"), &menu);
 	 	menu.addAction(act);
+		act->setShortcut( QKeySequence(tr("H")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuOpenHexEdit(void)) );
 		
 		menu.exec(event->globalPos());
