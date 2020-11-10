@@ -145,6 +145,12 @@ class QAsmView : public QWidget
 		int cursorPosX;
 		int cursorPosY;
 
+		int  selAddrLine;
+		int  selAddrChar;
+		int  selAddrWidth;
+		int  selAddrValue;
+		char selAddrText[16];
+
 		dbg_asm_entry_t  *asmPC;
 		std::vector <dbg_asm_entry_t*> asmEntry;
 

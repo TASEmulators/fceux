@@ -2811,6 +2811,12 @@ QAsmView::QAsmView(QWidget *parent)
 	maxLineOffset = 0;
 	ctxMenuAddr = -1;
 
+	selAddrLine  = -1;
+	selAddrChar  =  0;
+	selAddrWidth =  0;
+	selAddrValue = -1;
+	memset( selAddrText, 0, sizeof(selAddrText) );
+
 	//setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
    setFocusPolicy(Qt::StrongFocus);
 }
@@ -3047,11 +3053,68 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 	
 	if ( line < asmEntry.size() )
 	{
-		int addr;
+		int i,j, addr = -1, addrTextLoc = -1, selChar;
+		char addrClicked = 0;
+		char stmp[64];
 
-		addr = asmEntry[line]->addr;
+		selChar = c.x();
 
-		parent->setBookmarkSelectedAddress( addr );
+		if ( selChar < (int)asmEntry[line]->text.size() )
+		{
+			i = selChar;
+			
+			if ( isxdigit( asmEntry[line]->text[i] ) )
+			{
+				addrClicked = 1;
+				addrTextLoc = i;
+
+				while ( isxdigit( asmEntry[line]->text[i] ) )
+				{
+					addrTextLoc = i;
+					i--;
+				}
+				if ( asmEntry[line]->text[i] == '$' || asmEntry[line]->text[i] == ':' )
+				{
+					i--;
+				}
+				else
+				{
+					addrClicked = 0;
+				}
+				if ( asmEntry[line]->text[i] == '#' )
+				{
+					addrClicked = 0;
+				}
+				if ( addrClicked )
+				{
+					j=0; i = addrTextLoc;
+					
+					while ( isxdigit( asmEntry[line]->text[i] ) )
+					{
+						stmp[j] = asmEntry[line]->text[i]; i++; j++;
+					}
+					stmp[j] = 0;
+
+					//printf("Addr: '%s'\n", stmp );
+
+					addr = strtol( stmp, NULL, 16 );
+
+					selAddrLine  = line;
+					selAddrChar  = addrTextLoc;
+					selAddrWidth = j;
+					selAddrValue = addr;
+					strcpy( selAddrText, stmp );
+				}
+			}
+		}
+
+		//printf("Line: '%s'\n", asmEntry[line]->text.c_str() );
+
+		if ( addr >= 0 )
+		{
+			parent->setBookmarkSelectedAddress( addr );
+		}
+
 	}
 }
 //----------------------------------------------------------------------------
@@ -3070,7 +3133,14 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 	{
 		int addr;
 
-		ctxMenuAddr = addr = asmEntry[line]->addr;
+		if ( selAddrValue < 0 )
+		{
+			ctxMenuAddr = addr = asmEntry[line]->addr;
+		}
+		else
+		{
+			ctxMenuAddr = addr = selAddrValue;
+		}
 
 		act = new QAction(tr("Add Breakpoint"), &menu);
 		menu.addAction(act);
@@ -3168,22 +3238,20 @@ void QAsmView::paintEvent(QPaintEvent *event)
 			}
 			painter.drawText( x, y, tr(asmEntry[l]->text.c_str()) );
 
-			if ( selAddr == asmEntry[l]->addr )
+			if ( (selAddrLine == l) )
 			{	// Highlight ASM line for selected address.
-				if ( !displayROMoffsets && (asmEntry[l]->type == dbg_asm_entry_t::ASM_TEXT) )
+				if ( (selAddr == selAddrValue) && (asmEntry[l]->type == dbg_asm_entry_t::ASM_TEXT) &&
+				  	    ( asmEntry[l]->text.compare( selAddrChar, selAddrWidth, selAddrText ) == 0 ) )
 				{
 					int ax;
-					char addrString[16];
 
-					ax = 4*pxCharWidth;
+					ax = selAddrChar*pxCharWidth;
 
-					painter.fillRect( ax, y - pxLineSpacing + pxLineLead, 4*pxCharWidth, pxLineSpacing, QColor("blue") );
+					painter.fillRect( ax, y - pxLineSpacing + pxLineLead, selAddrWidth*pxCharWidth, pxLineSpacing, QColor("blue") );
 
-					sprintf( addrString, "%04X", selAddr );
+					painter.setPen( QColor("white"));
 
-					painter.setPen( this->palette().color(QPalette::Background));
-
-					painter.drawText( ax, y, tr(addrString) );
+					painter.drawText( ax, y, tr(selAddrText) );
 
 					painter.setPen( this->palette().color(QPalette::WindowText));
 				}
