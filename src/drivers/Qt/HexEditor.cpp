@@ -1110,6 +1110,7 @@ void HexEditorDialog_t::openDebugSymbolEditWindow( int addr )
 			sym->name    = nameEntry->text().toStdString();
 			sym->comment = commentEntry->text().toStdString();
 		}
+		sym->trimTrailingSpaces();
 		//fceuWrapperLock();
 		updateAllDebuggerWindows();
 		//fceuWrapperUnLock();

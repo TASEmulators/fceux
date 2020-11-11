@@ -149,7 +149,7 @@ class QAsmView : public QWidget
 		int  selAddrChar;
 		int  selAddrWidth;
 		int  selAddrValue;
-		char selAddrText[16];
+		char selAddrText[128];
 
 		dbg_asm_entry_t  *asmPC;
 		std::vector <dbg_asm_entry_t*> asmEntry;

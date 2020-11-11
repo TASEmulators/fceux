@@ -642,7 +642,8 @@ static int replaceSymbols( int flags, int addr, char *str )
 	}
 	else
 	{
-		sprintf( str, "%04X", addr );
+		//sprintf( str, "%04X", addr );
+		str[0] = 0;
 	}
 
 	return 0;
@@ -733,7 +734,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 			if ( flags )
 			{
 				replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s ($%02X,X) @ $%s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
+				sprintf(str,"%s ($%02X,X) @ $%04X %s = #$%02X", chr,opcode[1],tmp,stmp,GetMem(tmp));
 			}
 			else
 			{
@@ -769,7 +770,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 			if ( flags )
 			{
 				replaceSymbols( flags, opcode[1], stmp );
-				sprintf(str,"%s $%s = #$%02X", chr,stmp,GetMem(opcode[1]));
+				sprintf(str,"%s $%02X %s = #$%02X", chr,opcode[1],stmp,GetMem(opcode[1]));
 			}
 			else
 			{
@@ -823,7 +824,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 			if ( flags )
 			{
 				replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s $%s = #$%02X", chr,stmp,GetMem(tmp));
+				sprintf(str,"%s $%04X %s = #$%02X", chr,tmp,stmp,GetMem(tmp));
 			}
 			else
 			{
@@ -846,7 +847,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 			if ( flags )
 			{
 				replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s $%s", chr,stmp);
+				sprintf(str,"%s $%04X %s", chr,tmp,stmp);
 			}
 			else
 			{
@@ -869,7 +870,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 			if ( flags )
 			{
 				replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s ($%02X),Y @ $%s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
+				sprintf(str,"%s ($%02X),Y @ $%04X %s = #$%02X", chr,opcode[1],tmp,stmp,GetMem(tmp));
 			}
 			else
 			{
@@ -901,7 +902,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 			if ( flags )
 			{
 				replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s $%02X,X @ $%s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
+				sprintf(str,"%s $%02X,X @ $%04X %s = #$%02X", chr,opcode[1],tmp,stmp,GetMem(tmp));
 			}
 			else
 			{
@@ -926,7 +927,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 			if ( flags )
 			{
 				replaceSymbols( flags, tmp2, stmp );
-				sprintf(str,"%s $%04X,Y @ $%s = #$%02X", chr,tmp,stmp,GetMem(tmp2));
+				sprintf(str,"%s $%04X,Y @ $%04X %s = #$%02X", chr,tmp,tmp2,stmp,GetMem(tmp2));
 			}
 			else
 			{
@@ -956,7 +957,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 			if ( flags )
 			{
 				replaceSymbols( flags, tmp2, stmp );
-				sprintf(str,"%s $%04X,X @ $%s = #$%02X", chr,tmp,stmp,GetMem(tmp2));
+				sprintf(str,"%s $%04X,X @ $%04X %s = #$%02X", chr,tmp,tmp2,stmp,GetMem(tmp2));
 			}
 			else
 			{
@@ -974,7 +975,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 			if ( flags )
 			{
 				replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s $%s", chr,stmp);
+				sprintf(str,"%s $%04X %s", chr,tmp,stmp);
 			}
 			else
 			{
@@ -992,7 +993,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 			if ( flags )
 			{
 				replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s $%02X,Y @ $%s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
+				sprintf(str,"%s $%02X,Y @ $%04X %s = #$%02X", chr,opcode[1],tmp,stmp,GetMem(tmp));
 			}
 			else
 			{

@@ -28,6 +28,32 @@ struct debugSymbol_t
 			this->comment.assign( comment );
 		}
 	}
+
+	void trimTrailingSpaces(void)
+	{
+		while ( name.size() > 0 )
+		{
+			if ( isspace( name.back() ) )
+			{
+				name.pop_back();
+			}
+			else
+			{
+				break;
+			}
+		}
+		while ( comment.size() > 0 )
+		{
+			if ( isspace( comment.back() ) )
+			{
+				comment.pop_back();
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
 };
 
 struct debugSymbolPage_t

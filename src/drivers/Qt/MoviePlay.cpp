@@ -267,11 +267,11 @@ void  MoviePlayDialog_t::updateMovieText(void)
 
 		if (info.emu_version_used < 20000 )
 		{
-			sprintf( stmp, "FCEU %u.%02u.%02d%s", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100, info.emu_version_used < 9813 ? " (blip)" : "");
+			sprintf( stmp, "FCEU %u.%02u.%02u%s", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100, info.emu_version_used < 9813 ? " (blip)" : "");
 		}
 		else 
 		{
-			sprintf( stmp, "FCEUX %u.%02u.%02d", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100);
+			sprintf( stmp, "FCEUX %u.%02u.%02u", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100);
 		}
 		emuUsedLbl->setText( tr(stmp) );
 
