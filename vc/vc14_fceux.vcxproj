@@ -454,6 +454,7 @@
     <ClCompile Include="..\src\boards\ac-08.cpp" />
     <ClCompile Include="..\src\boards\bb.cpp" />
     <ClCompile Include="..\src\boards\BMW8544.cpp" />
+    <ClCompile Include="..\src\boards\bs4xxxr.cpp" />
     <ClCompile Include="..\src\boards\cheapocabra.cpp" />
     <ClCompile Include="..\src\boards\cityfighter.cpp" />
     <ClCompile Include="..\src\boards\coolboy.cpp" />
