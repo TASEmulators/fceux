@@ -912,21 +912,21 @@ inline void FCEUI_SetCheatMapByte(uint16 address, bool cheat)
 	cheat ? cheatMap[address / 8] |= (1 << address % 8) : cheatMap[address / 8] ^= (1 << address % 8);
 }
 
-inline void FCEUI_CreateCheatMap()
+void FCEUI_CreateCheatMap(void)
 {
 	if (!cheatMap)
 		cheatMap = (unsigned char*)malloc(CHEATMAP_SIZE);
 	FCEUI_RefreshCheatMap();
 }
 
-inline void FCEUI_RefreshCheatMap()
+void FCEUI_RefreshCheatMap(void)
 {
 	memset(cheatMap, 0, CHEATMAP_SIZE);
 	for (uint32 i = 0; i < numsubcheats; ++i)
 		FCEUI_SetCheatMapByte(SubCheats[i].addr, true);
 }
 
-inline void FCEUI_ReleaseCheatMap()
+void FCEUI_ReleaseCheatMap(void)
 {
 	if (cheatMap)
 	{

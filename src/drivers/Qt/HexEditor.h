@@ -116,6 +116,7 @@ class QHexEdit : public QWidget
       void openGotoAddrDialog(void);
 		int  checkMemActivity(void);
 		int  getAddr(void){ return cursorAddr; };
+		int  FreezeRam( const char *name, uint32_t a, uint8_t v, int c, int s, int type );
 
 		enum {
 			MODE_NES_RAM = 0,
@@ -136,6 +137,7 @@ class QHexEdit : public QWidget
 		void resetCursor(void);
 		QPoint convPixToCursor( QPoint p );
 		int convPixToAddr( QPoint p );
+		bool frzRamAddrValid( int addr );
 
 		QFont      font;
 
@@ -179,6 +181,10 @@ class QHexEdit : public QWidget
       int editMask;
 		int jumpToRomValue;
 		int ctxAddr;
+		int frzRamAddr;
+		int frzRamVal;
+		int frzRamMode;
+		int frzIdx;
 
 		bool cursorBlink;
 		bool reverseVideo;
@@ -193,6 +199,10 @@ class QHexEdit : public QWidget
 		void addRamExecuteBP(void);
 		void addPpuReadBP(void);
 		void addPpuWriteBP(void);
+		void frzRamSet(void);
+		void frzRamUnset(void);
+		void frzRamToggle(void);
+		void frzRamUnsetAll(void);
 
 };
 

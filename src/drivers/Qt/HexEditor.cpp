@@ -36,6 +36,7 @@
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/HexEditor.h"
+#include "Qt/CheatsConf.h"
 #include "Qt/SymbolicDebug.h"
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleUtilities.h"
@@ -734,6 +735,8 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	populateBookmarkMenu();
 
+	FCEUI_CreateCheatMap();
+
 }
 //----------------------------------------------------------------------------
 HexEditorDialog_t::~HexEditorDialog_t(void)
@@ -1216,6 +1219,11 @@ QHexEdit::QHexEdit(QWidget *parent)
 	total_instructions_lp = 0;
 	pxLineXScroll = 0;
 
+	frzRamAddr = -1;
+	frzRamVal = 0;
+	frzRamMode = 0;
+	frzIdx = 0;
+
 	highLightColor[ 0].setRgb( 0x00, 0x00, 0x00 );
 	highLightColor[ 1].setRgb( 0x35, 0x40, 0x00 );
 	highLightColor[ 2].setRgb( 0x18, 0x52, 0x18 );
@@ -1535,7 +1543,7 @@ int QHexEdit::convPixToAddr( QPoint p )
 //----------------------------------------------------------------------------
 void QHexEdit::keyPressEvent(QKeyEvent *event)
 {
-   printf("Hex Window Key Press: 0x%x \n", event->key() );
+   //printf("Hex Window Key Press: 0x%x \n", event->key() );
 	
 	if (event->matches(QKeySequence::MoveToNextChar))
    {
@@ -1666,10 +1674,15 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
    }
    else if (Qt::ControlModifier == event->modifiers())
    {
-      if ( event->key() == Qt::Key_A )
-      {
-         openGotoAddrDialog();
-      }
+		if ( event->key() == Qt::Key_A )
+		{
+		   openGotoAddrDialog();
+		}
+		else if ( event->key() == Qt::Key_F )
+		{
+			frzRamAddr = ctxAddr = cursorAddr;
+		   frzRamToggle();
+		}
    }
    else if (event->key() == Qt::Key_Tab && (cursorPosX < 32) )
    {  // switch from hex to ascii edit
@@ -1745,8 +1758,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 //----------------------------------------------------------------------------
 void QHexEdit::keyReleaseEvent(QKeyEvent *event)
 {
-   printf("Hex Window Key Release: 0x%x \n", event->key() );
-	//assignHotkey( event );
+   //printf("Hex Window Key Release: 0x%x \n", event->key() );
 }
 //----------------------------------------------------------------------------
 void QHexEdit::mousePressEvent(QMouseEvent * event)
@@ -1771,6 +1783,11 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 	int addr;
 	char stmp[128];
 
+	QPoint c = convPixToCursor( event->pos() );
+	cursorPosX = c.x();
+	cursorPosY = c.y();
+	resetCursor();
+
 	ctxAddr = addr = convPixToAddr( event->pos() );
 	//printf("contextMenuEvent\n");
 
@@ -1778,9 +1795,32 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 	{
 		case MODE_NES_RAM:
 		{
+			QMenu *subMenu;
+
 			act = new QAction(tr("Add Symbolic Debug Name"), &menu);
    		menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addDebugSym(void)) );
+
+			subMenu = menu.addMenu(tr("Freeze/Unfreeze Address"));
+
+			act = new QAction(tr("Toggle State"), &menu);
+			act->setShortcut( QKeySequence(tr("Ctrl+F")));
+			subMenu->addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamToggle(void)) );
+
+			act = new QAction(tr("Freeze"), &menu);
+			subMenu->addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamSet(void)) );
+
+			act = new QAction(tr("Unfreeze"), &menu);
+			subMenu->addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamUnset(void)) );
+
+			subMenu->addSeparator();
+
+			act = new QAction(tr("Unfreeze All"), &menu);
+			subMenu->addAction(act);
+			connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamUnsetAll(void)) );
 
 			sprintf( stmp, "Add Read Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), &menu);
@@ -1889,6 +1929,160 @@ void QHexEdit::addBookMarkCB(void)
 		hbm.addBookMark( ctxAddr, viewMode, dialog.textValue().toStdString().c_str() );
 		parent->populateBookmarkMenu();
    }
+}
+//----------------------------------------------------------------------------
+static int RamFreezeCB(char *name, uint32 a, uint8 v, int compare,int s,int type, void *data)
+{
+	return ((QHexEdit*)data)->FreezeRam( name, a, v, compare, s, type );
+}	
+//----------------------------------------------------------------------------
+int QHexEdit::FreezeRam( const char *name, uint32_t a, uint8_t v, int c, int s, int type )
+{
+
+	//if ( c >= 0 )
+	//{
+	//	printf("$%04X?%02X:%02X   %i: %s\n", a, c, v, s, name );
+	//}
+	//else
+	//{
+	//	printf("$%04X:%02X   %i: %s\n", a, v, s, name );
+	//}
+
+	if ( a == frzRamAddr )
+	{
+		switch ( frzRamMode )
+		{
+			case 0: // Toggle
+
+				if ( s )
+				{
+					FCEUI_DelCheat( frzIdx );
+					frzRamAddr = -1;
+					return 0;
+				}
+			break;
+			case 1: // Freeze
+
+				if ( s )
+				{
+					// Already Set so there is nothing further to do
+					frzRamAddr = -1;
+					return 0;
+				}
+			break;
+			case 2: // Unfreeze
+				if ( s )
+				{
+					FCEUI_DelCheat( frzIdx );
+				}
+			break;
+			default:
+			case 3: // Unfreeze All Handled Below
+				// Nothing to do
+			break;
+		}
+	}
+
+	if ( frzRamMode == 3 )
+	{
+		if ( s )
+		{
+			FCEUI_DelCheat( frzIdx );
+		}
+	}
+
+	frzIdx++;
+
+	return 1;
+}
+//----------------------------------------------------------------------------
+bool QHexEdit::frzRamAddrValid( int addr )
+{
+	if ( addr < 0 )
+	{
+		return false;
+	}
+
+	if ( (addr < 0x2000) || ( (addr >= 0x6000) && (addr <= 0x7FFF) ) )
+	{
+		return true;
+	}
+	return false;
+}
+//----------------------------------------------------------------------------
+void QHexEdit::frzRamSet(void)
+{
+	frzIdx = 0;
+	frzRamMode = 1;
+	frzRamAddr = ctxAddr;
+
+	if ( !frzRamAddrValid( frzRamAddr ) )
+	{
+		return;
+	}
+
+	fceuWrapperLock();
+	FCEUI_ListCheats( RamFreezeCB, this);
+
+	if ( (frzRamAddr >= 0) && (FrozenAddressCount < 256) )
+	{
+		FCEUI_AddCheat("", frzRamAddr, GetMem(frzRamAddr), -1, 1);
+	}
+	updateCheatDialog();
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void QHexEdit::frzRamUnset(void)
+{
+	frzIdx = 0;
+	frzRamMode = 2;
+	frzRamAddr = ctxAddr;
+
+	if ( !frzRamAddrValid( frzRamAddr ) )
+	{
+		return;
+	}
+	fceuWrapperLock();
+	FCEUI_ListCheats( RamFreezeCB, this);
+	updateCheatDialog();
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void QHexEdit::frzRamUnsetAll(void)
+{
+	frzIdx = 0;
+	frzRamMode = 3;
+	frzRamAddr = ctxAddr;
+
+	if ( !frzRamAddrValid( frzRamAddr ) )
+	{
+		return;
+	}
+	fceuWrapperLock();
+	FCEUI_ListCheats( RamFreezeCB, this);
+	updateCheatDialog();
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void QHexEdit::frzRamToggle(void)
+{
+	frzIdx = 0;
+	frzRamMode = 0;
+	frzRamAddr = ctxAddr;
+
+	if ( !frzRamAddrValid( frzRamAddr ) )
+	{
+		return;
+	}
+	fceuWrapperLock();
+	FCEUI_ListCheats( RamFreezeCB, this);
+
+	if ( (frzRamAddr >= 0) && (FrozenAddressCount < 256) )
+	{
+		FCEUI_AddCheat("", frzRamAddr, GetMem(frzRamAddr), -1, 1);
+	}
+	updateCheatDialog();
+	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::addDebugSym(void)
@@ -2238,6 +2432,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	int c, cx, cy, ca;
 	char txt[32], asciiTxt[4];
 	QPainter painter(this);
+	QColor white("white"), black("black"), blue("blue");
 
 	painter.setFont(font);
 	w = event->rect().width();
@@ -2369,6 +2564,39 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 						else
 						{
 	            		painter.setPen( romFgColor );
+						}
+					}
+					else if ( viewMode == MODE_NES_RAM )
+					{
+						if ( FCEUI_FindCheatMapByte( addr ) )
+						{
+							if ( reverseVideo )
+							{
+	            			painter.setPen( white );
+								painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, blue );
+								painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, blue );
+							}
+							else
+							{
+	            			painter.setPen( blue );
+							}
+						}
+						else if ( actvHighlightEnable && (mb.buf[addr].actv > 0) )
+						{
+							if ( reverseVideo )
+							{
+	            			painter.setPen( rvActvTextColor[ mb.buf[addr].actv ] );
+								painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
+								painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
+							}
+							else
+							{
+	            			painter.setPen( highLightColor[ mb.buf[addr].actv ] );
+							}
+						}
+						else 
+						{
+	            		painter.setPen( this->palette().color(QPalette::WindowText));
 						}
 					}
 					else if ( actvHighlightEnable && (mb.buf[addr].actv > 0) )
