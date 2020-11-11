@@ -975,6 +975,7 @@ void ConsoleDebugger::openDebugSymbolEditWindow( int addr )
 			sym->name    = nameEntry->text().toStdString();
 			sym->comment = commentEntry->text().toStdString();
 		}
+		sym->trimTrailingSpaces();
 		asmView->updateAssemblyView();
 		fceuWrapperUnLock();
 	}
@@ -1971,14 +1972,19 @@ void  QAsmView::updateAssemblyView(void)
 				const char *c;
 				char stmp[256];
 				//printf("Debug symbol Found at $%04X \n", dbgSym->ofs );
-				d = new dbg_asm_entry_t();
 
-				*d = *a;
-				d->type = dbg_asm_entry_t::SYMBOL_NAME;
-				d->text.assign( dbgSym->name );
-				d->line = asmEntry.size();
-				
-				asmEntry.push_back(d);
+				if ( dbgSym->name.size() > 0 )
+				{
+					d = new dbg_asm_entry_t();
+
+					*d = *a;
+					d->type = dbg_asm_entry_t::SYMBOL_NAME;
+					d->text.assign( dbgSym->name );
+					d->text.append( ":");
+					d->line = asmEntry.size();
+					
+					asmEntry.push_back(d);
+				}
 
 				i=0; j=0;
 				c = dbgSym->comment.c_str();
@@ -3072,6 +3078,12 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 
 	line = lineOffset + c.y();
 	
+	selAddrLine  = -1;
+	selAddrChar  =  0;
+	selAddrWidth =  0;
+	selAddrValue = -1;
+	selAddrText[0] = 0;
+
 	if ( line < asmEntry.size() )
 	{
 		int i,j, addr = -1, addrTextLoc = -1, selChar;
@@ -3080,55 +3092,88 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 
 		selChar = c.x();
 
-		if ( selChar < (int)asmEntry[line]->text.size() )
+		if ( asmEntry[line]->type == dbg_asm_entry_t::ASM_TEXT )
 		{
-			i = selChar;
-			
-			if ( isxdigit( asmEntry[line]->text[i] ) )
+			if ( selChar < (int)asmEntry[line]->text.size() )
 			{
-				addrClicked = 1;
-				addrTextLoc = i;
+				i = selChar;
 
-				while ( isxdigit( asmEntry[line]->text[i] ) )
+				if ( isxdigit( asmEntry[line]->text[i] ) )
 				{
+					addrClicked = 1;
 					addrTextLoc = i;
-					i--;
-				}
-				if ( asmEntry[line]->text[i] == '$' || asmEntry[line]->text[i] == ':' )
-				{
-					i--;
-				}
-				else
-				{
-					addrClicked = 0;
-				}
-				if ( asmEntry[line]->text[i] == '#' )
-				{
-					addrClicked = 0;
-				}
-				if ( addrClicked )
-				{
-					j=0; i = addrTextLoc;
-					
+
 					while ( isxdigit( asmEntry[line]->text[i] ) )
 					{
-						stmp[j] = asmEntry[line]->text[i]; i++; j++;
+						addrTextLoc = i;
+						i--;
 					}
-					stmp[j] = 0;
+					if ( asmEntry[line]->text[i] == '$' || asmEntry[line]->text[i] == ':' )
+					{
+						i--;
+					}
+					else
+					{
+						addrClicked = 0;
+					}
+					if ( asmEntry[line]->text[i] == '#' )
+					{
+						addrClicked = 0;
+					}
+					if ( addrClicked )
+					{
+						j=0; i = addrTextLoc;
+						
+						while ( isxdigit( asmEntry[line]->text[i] ) )
+						{
+							stmp[j] = asmEntry[line]->text[i]; i++; j++;
+						}
+						stmp[j] = 0;
 
-					//printf("Addr: '%s'\n", stmp );
+						//printf("Addr: '%s'\n", stmp );
 
-					addr = strtol( stmp, NULL, 16 );
+						addr = strtol( stmp, NULL, 16 );
 
-					selAddrLine  = line;
-					selAddrChar  = addrTextLoc;
-					selAddrWidth = j;
-					selAddrValue = addr;
-					strcpy( selAddrText, stmp );
+						selAddrLine  = line;
+						selAddrChar  = addrTextLoc;
+						selAddrWidth = j;
+						selAddrValue = addr;
+						strcpy( selAddrText, stmp );
+					}
 				}
 			}
 		}
+		else if ( asmEntry[line]->type == dbg_asm_entry_t::SYMBOL_NAME )
+		{
+			selAddrLine  = line;
+			selAddrChar  = 0;
+			selAddrValue = addr = asmEntry[line]->addr;
 
+			if ( asmEntry[line]->text.size() > 0 )
+			{
+				selAddrWidth = asmEntry[line]->text.size()-1;
+			}
+			else
+			{
+				selAddrWidth = 0;
+			}
+			if ( selAddrWidth > (int)sizeof(selAddrText) )
+			{
+				selAddrWidth = sizeof(selAddrText);
+			}
+			strncpy( selAddrText, asmEntry[line]->text.c_str(), selAddrWidth );
+			selAddrText[ sizeof(selAddrText)-1 ] = 0;
+		}
+
+		if ( addr < 0 )
+		{
+			addr = asmEntry[line]->addr;
+			selAddrLine  = line;
+			selAddrChar  = 4;
+			selAddrWidth = 4;
+			selAddrValue = addr;
+			sprintf( selAddrText, "%04X", addr );
+		}
 		//printf("Line: '%s'\n", asmEntry[line]->text.c_str() );
 
 		if ( addr >= 0 )
@@ -3265,8 +3310,9 @@ void QAsmView::paintEvent(QPaintEvent *event)
 
 			if ( (selAddrLine == l) )
 			{	// Highlight ASM line for selected address.
-				if ( (selAddr == selAddrValue) && (asmEntry[l]->type == dbg_asm_entry_t::ASM_TEXT) &&
-				  	    ( asmEntry[l]->text.compare( selAddrChar, selAddrWidth, selAddrText ) == 0 ) )
+				if ( (selAddr == selAddrValue) && 
+				  	    (asmEntry[l]->text.size() >= (selAddrChar + selAddrWidth) ) && 
+						    ( asmEntry[l]->text.compare( selAddrChar, selAddrWidth, selAddrText ) == 0 ) )
 				{
 					int ax;
 
