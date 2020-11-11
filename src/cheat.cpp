@@ -902,12 +902,12 @@ int FCEU_DisableAllCheats(){
 	return count;
 }
 
-inline int FCEUI_FindCheatMapByte(uint16 address)
+int FCEUI_FindCheatMapByte(uint16 address)
 {
 	return cheatMap[address / 8] >> (address % 8) & 1;
 }
 
-inline void FCEUI_SetCheatMapByte(uint16 address, bool cheat)
+void FCEUI_SetCheatMapByte(uint16 address, bool cheat)
 {
 	cheat ? cheatMap[address / 8] |= (1 << address % 8) : cheatMap[address / 8] ^= (1 << address % 8);
 }
