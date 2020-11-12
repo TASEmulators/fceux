@@ -45,9 +45,12 @@ nes_shm_t *open_nes_shm(void)
 
 	//sem_init( &vaddr->sem, 1, 1 );
 
-	vaddr->ncol  = 256;
-	vaddr->nrow  = 256;
-	vaddr->pitch = 256 * 4;
+	vaddr->video.ncol      = 256;
+	vaddr->video.nrow      = 256;
+	vaddr->video.pitch     = 256 * 4;
+	vaddr->video.scale     = 1;
+	vaddr->video.xyRatio   = 1;
+	vaddr->video.preScaler = 0;
 
 	return vaddr;
 }

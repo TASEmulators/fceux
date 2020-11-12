@@ -29,6 +29,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void closeEvent(QCloseEvent *bar);
 
 		QComboBox   *driverSelect;
+		QComboBox   *scalerSelect;
 		QComboBox   *regionSelect;
 		QCheckBox   *gl_LF_chkBox;
 		QCheckBox   *new_PPU_ena;
@@ -63,6 +64,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  showFPSChanged( int value );
 		void  regionChanged(int index);
 		void  driverChanged(int index);
+		void  scalerChanged(int index);
 		void  applyChanges( void );
 
 };
