@@ -38,7 +38,7 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 		devPixRatio = screen->devicePixelRatio();
 		//printf("Ratio: %f \n", screen->devicePixelRatio() );
 	}
-	localBufSize = GL_NES_WIDTH * GL_NES_HEIGHT * sizeof(uint32_t);
+	localBufSize = (4 * GL_NES_WIDTH) * (4 * GL_NES_HEIGHT) * sizeof(uint32_t);
 
 	localBuf = (uint32_t*)malloc( localBufSize );
 
@@ -87,6 +87,7 @@ int ConsoleViewGL_t::init( void )
 
 void ConsoleViewGL_t::buildTextures(void)
 {
+	int w, h;
 	 glEnable(GL_TEXTURE_RECTANGLE);
 
 	 if ( gltexture )
@@ -105,8 +106,11 @@ void ConsoleViewGL_t::buildTextures(void)
 	glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
 	glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 
+	w = nes_shm->video.ncol;
+	h = nes_shm->video.nrow;
+
 	glTexImage2D( GL_TEXTURE_RECTANGLE, 0, 
-			GL_RGBA8, GL_NES_WIDTH, GL_NES_HEIGHT, 0,
+			GL_RGBA8, w, h, 0,
 					GL_BGRA, GL_UNSIGNED_BYTE, 0 );
 
 }
@@ -152,46 +156,78 @@ void ConsoleViewGL_t::setLinearFilterEnable( bool ena )
 
 void ConsoleViewGL_t::setScaleXY( double xs, double ys )
 {
+	float xyRatio   = (float)nes_shm->video.xyRatio;
+
 	xscale = xs;
 	yscale = ys;
 
 	if ( sqrPixels )
 	{
-		if (xscale < yscale )
+		if ( (xscale*xyRatio) < yscale )
 		{
-			yscale = xscale;
+			yscale = (xscale*xyRatio);
 		}
 		else 
 		{
-			xscale = yscale;
+			xscale = (yscale/xyRatio);
 		}
 	}
 }
 
 void ConsoleViewGL_t::transfer2LocalBuffer(void)
 {
-	memcpy( localBuf, nes_shm->pixbuf, localBufSize );
+	int i=0, hq = 0;
+	int numPixels = nes_shm->video.ncol * nes_shm->video.nrow;
+	int cpSize = numPixels * 4;
+ 	uint8_t *src, *dest;
+
+	if ( cpSize > localBufSize )
+	{
+		cpSize = localBufSize;
+	}
+	src  = (uint8_t*)nes_shm->pixbuf;
+	dest = (uint8_t*)localBuf;
+
+	hq = (nes_shm->video.preScaler == 1) || (nes_shm->video.preScaler == 4); // hq2x and hq3x
+
+	if ( hq )
+	{
+		for (i=0; i<numPixels; i++)
+		{
+			dest[3] = 0xFF;
+			dest[1] = src[1];
+			dest[2] = src[2];
+			dest[0] = src[0];
+
+			src += 4; dest += 4;
+		}
+	}
+	else
+	{
+		memcpy( localBuf, nes_shm->pixbuf, cpSize );
+	}
 }
 
 void ConsoleViewGL_t::paintGL(void)
 {
-	int texture_width  = nes_shm->ncol;
-	int texture_height = nes_shm->nrow;
+	int texture_width  = nes_shm->video.ncol;
+	int texture_height = nes_shm->video.nrow;
 	int l=0, r=texture_width;
 	int t=0, b=texture_height;
 
-	float xscaleTmp = (float)view_width  / (float)texture_width;
-	float yscaleTmp = (float)view_height / (float)texture_height;
+	float xyRatio   = (float)nes_shm->video.xyRatio;
+	float xscaleTmp = (float)(view_width)  / (float)(texture_width);
+	float yscaleTmp = (float)(view_height) / (float)(texture_height);
 
 	if ( sqrPixels )
 	{
-		if (xscaleTmp < yscaleTmp )
+		if ( (xscaleTmp*xyRatio) < yscaleTmp )
 		{
-			yscaleTmp = xscaleTmp;
+			yscaleTmp = (xscaleTmp*xyRatio);
 		}
 		else 
 		{
-			xscaleTmp = yscaleTmp;
+			xscaleTmp = (yscaleTmp/xyRatio);
 		}
 	}
 
@@ -232,7 +268,7 @@ void ConsoleViewGL_t::paintGL(void)
 	glBindTexture(GL_TEXTURE_RECTANGLE, gltexture);
 
 	glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0,
-		  	0, 0, GL_NES_WIDTH, GL_NES_HEIGHT,
+		  	0, 0, texture_width, texture_height,
 				GL_BGRA, GL_UNSIGNED_BYTE, localBuf );
 
 	glBegin(GL_QUADS);

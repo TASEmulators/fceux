@@ -43,7 +43,7 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 
 	vsyncEnabled = false;
 
-	localBufSize = GL_NES_WIDTH * GL_NES_HEIGHT * sizeof(uint32_t);
+	localBufSize = (4 * GL_NES_WIDTH) * (4 * GL_NES_HEIGHT) * sizeof(uint32_t);
 
 	localBuf = (uint32_t*)malloc( localBufSize );
 
@@ -85,25 +85,56 @@ void ConsoleViewSDL_t::setLinearFilterEnable( bool ena )
 
 void ConsoleViewSDL_t::setScaleXY( double xs, double ys )
 {
+	float xyRatio   = (float)nes_shm->video.xyRatio;
+
 	xscale = xs;
 	yscale = ys;
 
 	if ( sqrPixels )
 	{
-		if (xscale < yscale )
+		if ( (xscale*xyRatio) < yscale )
 		{
-			yscale = xscale;
+			yscale = (xscale*xyRatio);
 		}
 		else 
 		{
-			xscale = yscale;
+			xscale = (yscale/xyRatio);
 		}
 	}
 }
 
 void ConsoleViewSDL_t::transfer2LocalBuffer(void)
 {
-	memcpy( localBuf, nes_shm->pixbuf, localBufSize );
+	int i=0, hq = 0;
+	int numPixels = nes_shm->video.ncol * nes_shm->video.nrow;
+	int cpSize = numPixels * 4;
+ 	uint8_t *src, *dest;
+
+	if ( cpSize > localBufSize )
+	{
+		cpSize = localBufSize;
+	}
+	src  = (uint8_t*)nes_shm->pixbuf;
+	dest = (uint8_t*)localBuf;
+
+	hq = (nes_shm->video.preScaler == 1) || (nes_shm->video.preScaler == 4); // hq2x and hq3x
+
+	if ( hq )
+	{
+		for (i=0; i<numPixels; i++)
+		{
+			dest[3] = 0xFF;
+			dest[1] = src[1];
+			dest[2] = src[2];
+			dest[0] = src[0];
+
+			src += 4; dest += 4;
+		}
+	}
+	else
+	{
+		memcpy( localBuf, nes_shm->pixbuf, cpSize );
+	}
 }
 
 int ConsoleViewSDL_t::init(void)
@@ -171,11 +202,11 @@ int ConsoleViewSDL_t::init(void)
 
 	printf("[SDL] Renderer Output Size: %i x %i \n", sdlRendW, sdlRendH );
 
-	sdlTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GL_NES_WIDTH, GL_NES_HEIGHT);
+	sdlTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, nes_shm->video.ncol, nes_shm->video.nrow);
 
 	if (sdlTexture == NULL) 
 	{
-		printf("[SDL] Failed to create texture: %i x %i", GL_NES_WIDTH, GL_NES_HEIGHT );
+		printf("[SDL] Failed to create texture: %i x %i", nes_shm->video.ncol, nes_shm->video.nrow );
 		return -1;
 	}
 
@@ -201,7 +232,7 @@ void ConsoleViewSDL_t::reset(void)
 	cleanup();
 	if ( init() == 0 )
   	{
-		//console->GetVideoRenderer()->RegisterRenderingDevice(this);
+	
 	}
   	else 
 	{
@@ -219,23 +250,19 @@ void ConsoleViewSDL_t::resizeEvent(QResizeEvent *event)
 	printf("SDL Resize: %i x %i \n", view_width, view_height);
 
 	reset();
-
-	//sdlViewport.x = sdlRendW - view_width;
-	//sdlViewport.y = sdlRendH - view_height;
-	//sdlViewport.w = view_width;
-	//sdlViewport.h = view_height;
 }
 
-//void ConsoleViewSDL_t::paintEvent( QPaintEvent *event )
 void ConsoleViewSDL_t::render(void)
 {
 	int nesWidth  = GL_NES_WIDTH;
 	int nesHeight = GL_NES_HEIGHT;
+	float xyRatio = 1.0;
 
 	if ( nes_shm != NULL )
 	{
-		nesWidth  = nes_shm->ncol;
-		nesHeight = nes_shm->nrow;
+		nesWidth  = nes_shm->video.ncol;
+		nesHeight = nes_shm->video.nrow;
+		xyRatio   = (float)nes_shm->video.xyRatio;
 	}
 	//printf(" %i x %i \n", nesWidth, nesHeight );
 	float xscaleTmp = (float)view_width  / (float)nesWidth;
@@ -243,13 +270,13 @@ void ConsoleViewSDL_t::render(void)
 
 	if ( sqrPixels )
 	{
-		if (xscaleTmp < yscaleTmp )
+		if ( (xscaleTmp*xyRatio) < yscaleTmp )
 		{
-			yscaleTmp = xscaleTmp;
+			yscaleTmp = (xscaleTmp*xyRatio);
 		}
 		else 
 		{
-			xscaleTmp = yscaleTmp;
+			xscaleTmp = (yscaleTmp/xyRatio);
 		}
 	}
 
@@ -288,11 +315,9 @@ void ConsoleViewSDL_t::render(void)
 	int rowPitch;
 	SDL_LockTexture( sdlTexture, nullptr, (void**)&textureBuffer, &rowPitch);
 	{
-		memcpy( textureBuffer, localBuf, GL_NES_HEIGHT*GL_NES_WIDTH*sizeof(uint32_t) );
+		memcpy( textureBuffer, localBuf, nesWidth*nesHeight*sizeof(uint32_t) );
 	}
 	SDL_UnlockTexture(sdlTexture);
-
-	//SDL_RenderSetViewport( sdlRenderer, &sdlViewport );
 
 	SDL_Rect source = {0, 0, nesWidth, nesHeight };
 	SDL_Rect dest = { sx, sy, rw, rh };
