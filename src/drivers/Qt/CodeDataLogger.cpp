@@ -792,6 +792,8 @@ void CDLoggerROMChanged(void)
 	ResetCDLog();
 	RenameCDLog("");
 
+	g_config->getOption("SDL.AutoResumeCDL", &autoResumeCDL);
+
 	if (!autoResumeCDL)
 		return;
 
