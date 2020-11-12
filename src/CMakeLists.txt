@@ -279,6 +279,7 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/BMW8544.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/bonza.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/bs-5.cpp
+  	${CMAKE_CURRENT_SOURCE_DIR}/boards/bs4xxxr.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/cheapocabra.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/cityfighter.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/coolboy.cpp
