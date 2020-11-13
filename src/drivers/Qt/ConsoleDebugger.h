@@ -22,6 +22,7 @@
 #include <QLineEdit>
 #include <QTextEdit>
 #include <QPlainTextEdit>
+#include <QClipboard>
 #include <QScrollBar>
 
 #include "Qt/main.h"
@@ -116,18 +117,25 @@ class QAsmView : public QWidget
 		void keyPressEvent(QKeyEvent *event);
    	void keyReleaseEvent(QKeyEvent *event);
 		void mousePressEvent(QMouseEvent * event);
+		void mouseReleaseEvent(QMouseEvent * event);
 		void mouseMoveEvent(QMouseEvent * event);
 		void resizeEvent(QResizeEvent *event);
 		void contextMenuEvent(QContextMenuEvent *event);
+		void loadHighlightToClipboard(void);
 
 		void calcFontData(void);
 		QPoint convPixToCursor( QPoint p );
+		bool textIsHighlighted(void);
+		void setHighlightEndCoord( int x, int y );
+		void loadClipboard( const char *txt );
+		void drawText( QPainter *painter, int x, int y, const char *txt );
 
 	private:
 		ConsoleDebugger *parent;
 		QFont       font;
 		QScrollBar *vbar;
 		QScrollBar *hbar;
+		QClipboard *clipboard;
 
 		int ctxMenuAddr;
 		int maxLineLen;
@@ -152,6 +160,13 @@ class QAsmView : public QWidget
 		int  selAddrValue;
 		char selAddrText[128];
 
+		int  txtHlgtAnchorChar;
+		int  txtHlgtAnchorLine;
+		int  txtHlgtStartChar;
+		int  txtHlgtStartLine;
+		int  txtHlgtEndChar;
+		int  txtHlgtEndLine;
+
 		dbg_asm_entry_t  *asmPC;
 		std::vector <dbg_asm_entry_t*> asmEntry;
 
@@ -159,6 +174,7 @@ class QAsmView : public QWidget
 		bool  displayROMoffsets;
 		bool  symbolicDebugEnable;
 		bool  registerNameEnable;
+		bool  mouseLeftBtnDown;
 };
 
 class DebuggerStackDisplay : public QPlainTextEdit
