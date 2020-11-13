@@ -616,7 +616,7 @@ void debugSymbolTable_t::print(void)
 	}
 }
 //--------------------------------------------------------------
-static int replaceSymbols( int flags, int addr, char *str )
+debugSymbol_t *replaceSymbols( int flags, int addr, char *str )
 {
 	debugSymbol_t *sym;
   
@@ -638,22 +638,45 @@ static int replaceSymbols( int flags, int addr, char *str )
 
 	if ( sym )
 	{
-		strcpy( str, sym->name.c_str() );
+		if ( flags & ASM_DEBUG_REPLACE )
+		{
+			strcpy( str, sym->name.c_str() );
+		}
+		else
+		{
+			if ( flags & ASM_DEBUG_ADDR_02X )
+			{
+				sprintf( str, "%02X ", addr );
+			}
+			else
+			{
+				sprintf( str, "%04X ", addr );
+			}
+			strcat( str, sym->name.c_str() );
+		}
 	}
 	else
 	{
-		//sprintf( str, "%04X", addr );
-		str[0] = 0;
+		if ( flags & ASM_DEBUG_ADDR_02X )
+		{
+			sprintf( str, "%02X", addr );
+		}
+		else
+		{
+			sprintf( str, "%04X", addr );
+		}
 	}
 
-	return 0;
+	return sym;
 }
 //--------------------------------------------------------------
-int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
+int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugSymbol_t *symOut, debugSymbol_t *symOut2 )
 {
+	debugSymbol_t *sym  = NULL;
+	debugSymbol_t *sym2 = NULL;
 	static char chr[8]={0};
 	uint16_t tmp,tmp2;
-	char stmp[128];
+	char stmp[128], stmp2[128];
 
 	//these may be replaced later with passed-in values to make a lighter-weight disassembly mode that may not query the referenced values
 	#define RX (X.X)
@@ -733,8 +756,8 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 
 			if ( flags )
 			{
-				replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s ($%02X,X) @ $%04X %s = #$%02X", chr,opcode[1],tmp,stmp,GetMem(tmp));
+				sym = replaceSymbols( flags, tmp, stmp );
+				sprintf(str,"%s ($%02X,X) @ $%s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
 			}
 			else
 			{
@@ -769,8 +792,8 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 		// Change width to %04X // don't!
 			if ( flags )
 			{
-				replaceSymbols( flags, opcode[1], stmp );
-				sprintf(str,"%s $%02X %s = #$%02X", chr,opcode[1],stmp,GetMem(opcode[1]));
+				sym = replaceSymbols( flags | ASM_DEBUG_ADDR_02X, opcode[1], stmp );
+				sprintf(str,"%s $%s = #$%02X", chr,stmp,GetMem(opcode[1]));
 			}
 			else
 			{
@@ -823,8 +846,8 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 
 			if ( flags )
 			{
-				replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s $%04X %s = #$%02X", chr,tmp,stmp,GetMem(tmp));
+				sym = replaceSymbols( flags, tmp, stmp );
+				sprintf(str,"%s $%s = #$%02X", chr,stmp,GetMem(tmp));
 			}
 			else
 			{
@@ -846,8 +869,8 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 
 			if ( flags )
 			{
-				replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s $%04X %s", chr,tmp,stmp);
+				sym = replaceSymbols( flags, tmp, stmp );
+				sprintf(str,"%s $%s", chr,stmp);
 			}
 			else
 			{
@@ -869,8 +892,8 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 
 			if ( flags )
 			{
-				replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s ($%02X),Y @ $%04X %s = #$%02X", chr,opcode[1],tmp,stmp,GetMem(tmp));
+				sym = replaceSymbols( flags, tmp, stmp );
+				sprintf(str,"%s ($%02X),Y @ $%s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
 			}
 			else
 			{
@@ -901,8 +924,8 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 		// Change width to %04X // don't!
 			if ( flags )
 			{
-				replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s $%02X,X @ $%04X %s = #$%02X", chr,opcode[1],tmp,stmp,GetMem(tmp));
+				sym = replaceSymbols( flags, tmp, stmp );
+				sprintf(str,"%s $%02X,X @ $%s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
 			}
 			else
 			{
@@ -926,8 +949,9 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 			tmp2=(tmp+RY);
 			if ( flags )
 			{
-				replaceSymbols( flags, tmp2, stmp );
-				sprintf(str,"%s $%04X,Y @ $%04X %s = #$%02X", chr,tmp,tmp2,stmp,GetMem(tmp2));
+				sym  = replaceSymbols( flags, tmp , stmp  );
+				sym2 = replaceSymbols( flags, tmp2, stmp2 );
+				sprintf(str,"%s $%s,Y @ $%s = #$%02X", chr,stmp,stmp2,GetMem(tmp2));
 			}
 			else
 			{
@@ -956,8 +980,9 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 			tmp2=(tmp+RX);
 			if ( flags )
 			{
-				replaceSymbols( flags, tmp2, stmp );
-				sprintf(str,"%s $%04X,X @ $%04X %s = #$%02X", chr,tmp,tmp2,stmp,GetMem(tmp2));
+				sym  = replaceSymbols( flags, tmp , stmp  );
+				sym2 = replaceSymbols( flags, tmp2, stmp2 );
+				sprintf(str,"%s $%s,X @ $%s = #$%02X", chr,stmp,stmp2,GetMem(tmp2));
 			}
 			else
 			{
@@ -974,8 +999,8 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 
 			if ( flags )
 			{
-				replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s $%04X %s", chr,tmp,stmp);
+				sym = replaceSymbols( flags, tmp, stmp );
+				sprintf(str,"%s $%s", chr,stmp);
 			}
 			else
 			{
@@ -992,8 +1017,8 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 		// Change width to %04X // don't!
 			if ( flags )
 			{
-				replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s $%02X,Y @ $%04X %s = #$%02X", chr,opcode[1],tmp,stmp,GetMem(tmp));
+				sym = replaceSymbols( flags, tmp, stmp );
+				sprintf(str,"%s $%02X,Y @ $%s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
 			}
 			else
 			{
@@ -1007,6 +1032,25 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str )
 
 	}
 
+	if ( symOut )
+	{
+		if ( sym )
+		{
+			*symOut = *sym;
+		}
+		else if ( sym2 )
+		{
+			*symOut = *sym2; sym2 = NULL;
+		}
+	}
+	if ( symOut2 )
+	{
+		if ( sym2 )
+		{
+			*symOut2 = *sym2;
+		}
+	}
+	
 	return 0;
 }
 //--------------------------------------------------------------

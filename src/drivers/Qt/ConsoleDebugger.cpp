@@ -1944,7 +1944,7 @@ void  QAsmView::updateAssemblyView(void)
 				size++;
 			}
 
-			DisassembleWithDebug(addr, opcode, asmFlags, asmTxt);
+			DisassembleWithDebug(addr, opcode, asmFlags, asmTxt, &a->sym);
 
 			line.append( asmTxt );
 		}
@@ -3087,6 +3087,7 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 	if ( line < asmEntry.size() )
 	{
 		int i,j, addr = -1, addrTextLoc = -1, selChar;
+		int symTextStart = -1, symTextEnd = -1;
 		char addrClicked = 0;
 		char stmp[64];
 
@@ -3096,9 +3097,36 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 		{
 			if ( selChar < (int)asmEntry[line]->text.size() )
 			{
+
 				i = selChar;
 
-				if ( isxdigit( asmEntry[line]->text[i] ) )
+				if ( asmEntry[line]->sym.name.size() > 0 )
+				{
+					size_t subStrLoc = asmEntry[line]->text.find( asmEntry[line]->sym.name, 22 );
+
+					if ( (subStrLoc != std::string::npos) && (subStrLoc > 22) )
+					{
+						//printf("Line:%i asmEntry DB Sym: %zi  '%s'\n", line, subStrLoc, asmEntry[line]->sym.name.c_str() );
+						symTextStart = subStrLoc;
+						symTextEnd   = subStrLoc + asmEntry[line]->sym.name.size();
+					}
+				}
+
+				if ( (i >= symTextStart) && (i < symTextEnd) )
+				{
+					selAddrLine  = line;
+					selAddrChar  = symTextStart;
+					selAddrWidth = symTextEnd - symTextStart;
+					selAddrValue = addr = asmEntry[line]->sym.ofs;
+
+					if ( selAddrWidth >= (int)sizeof(selAddrText) )
+					{
+						selAddrWidth = sizeof(selAddrText)-1;
+					}
+					strncpy( selAddrText, asmEntry[line]->sym.name.c_str(), selAddrWidth );
+					selAddrText[ selAddrWidth ] = 0;
+				}
+				else if ( isxdigit( asmEntry[line]->text[i] ) )
 				{
 					addrClicked = 1;
 					addrTextLoc = i;
@@ -3157,12 +3185,12 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 			{
 				selAddrWidth = 0;
 			}
-			if ( selAddrWidth > (int)sizeof(selAddrText) )
+			if ( selAddrWidth >= (int)sizeof(selAddrText) )
 			{
-				selAddrWidth = sizeof(selAddrText);
+				selAddrWidth = sizeof(selAddrText)-1;
 			}
 			strncpy( selAddrText, asmEntry[line]->text.c_str(), selAddrWidth );
-			selAddrText[ sizeof(selAddrText)-1 ] = 0;
+			selAddrText[ selAddrWidth ] = 0;
 		}
 
 		if ( addr < 0 )
