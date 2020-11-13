@@ -2837,6 +2837,8 @@ QAsmView::QAsmView(QWidget *parent)
 	selAddrValue = -1;
 	memset( selAddrText, 0, sizeof(selAddrText) );
 
+	wheelPixelCounter = 0;
+
 	//setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
    setFocusPolicy(Qt::StrongFocus);
 
@@ -3251,6 +3253,8 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 
 	line = lineOffset + c.y();
 
+	//printf("Mouse Button Pressed: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
+	
 	if ( event->button() == Qt::LeftButton )
 	{
 		//printf("Left Button Pressed: (%i,%i)\n", c.x(), c.y() );
@@ -3397,6 +3401,54 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 			loadClipboard( selAddrText );
 		}
 	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::wheelEvent(QWheelEvent *event)
+{
+
+	QPoint numPixels = event->pixelDelta();
+	QPoint numDegrees = event->angleDelta() / 8;
+
+	if (!numPixels.isNull()) 
+	{
+		wheelPixelCounter += numPixels.y();
+	   //printf("numPixels: (%i,%i) \n", numPixels.x(), numPixels.y() );
+	} 
+	else if (!numDegrees.isNull()) 
+	{
+		//QPoint numSteps = numDegrees / 15;
+		//printf("numSteps: (%i,%i) \n", numSteps.x(), numSteps.y() );
+		//printf("numDegrees: (%i,%i)  %i\n", numDegrees.x(), numDegrees.y(), pxLineSpacing );
+		wheelPixelCounter += (pxLineSpacing * numDegrees.y()) / 15;
+	}
+	//printf("Wheel Event: %i\n", wheelPixelCounter);
+
+	if ( wheelPixelCounter >= pxLineSpacing )
+	{
+		lineOffset += (wheelPixelCounter / pxLineSpacing);
+
+		if ( lineOffset > maxLineOffset )
+		{
+			lineOffset = maxLineOffset;
+		}
+		vbar->setValue( lineOffset );
+
+		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+	}
+	else if ( wheelPixelCounter <= -pxLineSpacing )
+	{
+		lineOffset += (wheelPixelCounter / pxLineSpacing);
+
+		if ( lineOffset < 0 )
+		{
+			lineOffset = 0;
+		}
+		vbar->setValue( lineOffset );
+
+		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+	}
+
+	 event->accept();
 }
 //----------------------------------------------------------------------------
 void QAsmView::contextMenuEvent(QContextMenuEvent *event)

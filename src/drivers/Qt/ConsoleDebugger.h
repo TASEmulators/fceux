@@ -120,6 +120,7 @@ class QAsmView : public QWidget
 		void mouseReleaseEvent(QMouseEvent * event);
 		void mouseMoveEvent(QMouseEvent * event);
 		void resizeEvent(QResizeEvent *event);
+		void wheelEvent(QWheelEvent *event);
 		void contextMenuEvent(QContextMenuEvent *event);
 		void loadHighlightToClipboard(void);
 
@@ -166,6 +167,8 @@ class QAsmView : public QWidget
 		int  txtHlgtStartLine;
 		int  txtHlgtEndChar;
 		int  txtHlgtEndLine;
+
+		int  wheelPixelCounter;
 
 		dbg_asm_entry_t  *asmPC;
 		std::vector <dbg_asm_entry_t*> asmEntry;
