@@ -3441,6 +3441,21 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 	}
 }
 //----------------------------------------------------------------------------
+void QAsmView::drawText( QPainter *painter, int x, int y, const char *txt )
+{
+	int i=0;
+	char c[2];
+
+	c[0] = 0; c[1] = 0;
+
+	while ( txt[i] != 0 )
+	{
+		c[0] = txt[i];
+		painter->drawText( x, y, tr(c) );
+		i++; x += pxCharWidth;
+	}
+}
+//----------------------------------------------------------------------------
 void QAsmView::paintEvent(QPaintEvent *event)
 {
 	int x,y,l, row, nrow, selAddr;
@@ -3519,7 +3534,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 			{
 				painter.setPen( this->palette().color(QPalette::WindowText));
 			}
-			painter.drawText( x, y, tr(asmEntry[l]->text.c_str()) );
+			drawText( &painter, x, y, asmEntry[l]->text.c_str() );
 
 			if ( (selAddrLine == l) )
 			{	// Highlight ASM line for selected address.
@@ -3535,7 +3550,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 
 					painter.setPen( white );
 
-					painter.drawText( ax, y, tr(selAddrText) );
+					drawText( &painter, ax, y, selAddrText );
 
 					painter.setPen( this->palette().color(QPalette::WindowText));
 				}
@@ -3588,7 +3603,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 
 				painter.fillRect( ax, y - pxLineSpacing + pxLineLead, hlgtXd * pxCharWidth, pxLineSpacing, hlgtBG );
 
-				painter.drawText( ax, y, tr(s.c_str()) );
+				drawText( &painter, ax, y, s.c_str() );
 			}
 			y += pxLineSpacing;
 		}

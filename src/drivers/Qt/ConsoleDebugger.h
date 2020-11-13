@@ -128,6 +128,7 @@ class QAsmView : public QWidget
 		bool textIsHighlighted(void);
 		void setHighlightEndCoord( int x, int y );
 		void loadClipboard( const char *txt );
+		void drawText( QPainter *painter, int x, int y, const char *txt );
 
 	private:
 		ConsoleDebugger *parent;
