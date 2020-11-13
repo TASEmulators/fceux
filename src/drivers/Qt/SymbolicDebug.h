@@ -112,9 +112,11 @@ extern  debugSymbolTable_t  debugSymbolTable;
 int generateNLFilenameForBank(int bank, char *NLfilename);
 int generateNLFilenameForAddress(int address, char *NLfilename);
 
-#define  ASM_DEBUG_SYMS  0x0001
-#define  ASM_DEBUG_REGS  0x0002
+#define  ASM_DEBUG_SYMS       0x0001
+#define  ASM_DEBUG_REGS       0x0002
+#define  ASM_DEBUG_REPLACE    0x0004
+#define  ASM_DEBUG_ADDR_02X   0x0008
 
-int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str );
+int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugSymbol_t *symOut = NULL, debugSymbol_t *symOut2 = NULL );
 
 #endif

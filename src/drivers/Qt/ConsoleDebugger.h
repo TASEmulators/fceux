@@ -37,6 +37,7 @@ struct dbg_asm_entry_t
 	int  line;
 	uint8  opcode[3];
 	std::string  text;
+	debugSymbol_t  sym;
 
 	enum
 	{
