@@ -2480,7 +2480,10 @@ void saveGameDebugBreakpoints(void)
 	{
 		return;
 	}
-	getGameDebugBreakpointFileName( stmp );
+	if ( getGameDebugBreakpointFileName( stmp ) )
+	{
+		return;
+	}
 
 	//printf("Debug Save File: '%s' \n", stmp );
 
@@ -2616,7 +2619,10 @@ void loadGameDebugBreakpoints(void)
 		printf("No Debug Windows Open: Skipping loading of breakpoint data\n");
 		return;
 	}
-	getGameDebugBreakpointFileName( stmp );
+	if ( getGameDebugBreakpointFileName( stmp ) )
+	{
+		return;
+	}
 
 	//printf("Debug Load File: '%s' \n", stmp );
 
