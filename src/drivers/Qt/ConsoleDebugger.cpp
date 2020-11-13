@@ -15,6 +15,7 @@
 #include <QGridLayout>
 #include <QRadioButton>
 #include <QInputDialog>
+#include <QGuiApplication>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -2817,6 +2818,13 @@ QAsmView::QAsmView(QWidget *parent)
 	maxLineOffset = 0;
 	ctxMenuAddr = -1;
 
+	mouseLeftBtnDown = false;
+	txtHlgtStartChar = -1;
+	txtHlgtStartLine = -1;
+	txtHlgtEndChar   = -1;
+	txtHlgtEndLine   = -1;
+
+
 	selAddrLine  = -1;
 	selAddrChar  =  0;
 	selAddrWidth =  0;
@@ -2825,6 +2833,12 @@ QAsmView::QAsmView(QWidget *parent)
 
 	//setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
    setFocusPolicy(Qt::StrongFocus);
+
+	clipboard = QGuiApplication::clipboard();
+
+	//printf("clipboard->supportsSelection() : '%i' \n", clipboard->supportsSelection() );
+	//printf("clipboard->supportsFindBuffer(): '%i' \n", clipboard->supportsFindBuffer() );
+
 }
 //----------------------------------------------------------------------------
 QAsmView::~QAsmView(void)
@@ -3015,14 +3029,77 @@ QPoint QAsmView::convPixToCursor( QPoint p )
 	return c;
 }
 //----------------------------------------------------------------------------
+bool QAsmView::textIsHighlighted(void)
+{
+	bool set = false;
+
+	if ( txtHlgtStartLine == txtHlgtEndLine )
+	{
+		set = (txtHlgtStartChar != txtHlgtEndChar);
+	}
+	else
+	{
+		set = true;
+	}
+	return set;
+}
+//----------------------------------------------------------------------------
+void QAsmView::setHighlightEndCoord( int x, int y )
+{
+
+	if ( txtHlgtAnchorLine < y )
+	{
+		txtHlgtStartLine = txtHlgtAnchorLine;
+		txtHlgtStartChar = txtHlgtAnchorChar;
+		txtHlgtEndLine   = y;
+		txtHlgtEndChar   = x;
+	}
+	else if ( txtHlgtAnchorLine > y )
+	{
+		txtHlgtStartLine = y;
+		txtHlgtStartChar = x;
+		txtHlgtEndLine   = txtHlgtAnchorLine;
+		txtHlgtEndChar   = txtHlgtAnchorChar;
+	}
+	else
+	{
+		txtHlgtStartLine = txtHlgtAnchorLine;
+		txtHlgtEndLine   = txtHlgtAnchorLine;
+
+		if ( txtHlgtAnchorChar < x )
+		{
+			txtHlgtStartChar = txtHlgtAnchorChar;
+			txtHlgtEndChar   = x;
+		}
+		else if ( txtHlgtAnchorChar > x )
+		{
+			txtHlgtStartChar = x;
+			txtHlgtEndChar   = txtHlgtAnchorChar;
+		}
+		else
+		{
+			txtHlgtStartChar = txtHlgtAnchorChar;
+			txtHlgtEndChar   = txtHlgtAnchorChar;
+		}
+	}
+	return;
+}
+//----------------------------------------------------------------------------
 void QAsmView::mouseMoveEvent(QMouseEvent * event)
 {
 	int line;
-	QPoint c = convPixToCursor( event->pos() );
 	char txt[256];
 	std::string s;
 
+	QPoint c = convPixToCursor( event->pos() );
+
 	line = lineOffset + c.y();
+
+	if ( mouseLeftBtnDown )
+	{
+		//printf("Left Button Move: (%i,%i)\n", c.x(), c.y() );
+		setHighlightEndCoord( c.x(), line );
+	}
 
 	//printf("c (%i,%i) : Line %i : %04X \n", c.x(), c.y(), line, asmEntry[line]->addr );
 
@@ -3071,12 +3148,112 @@ void QAsmView::mouseMoveEvent(QMouseEvent * event)
 	}
 }
 //----------------------------------------------------------------------------
+void QAsmView::loadClipboard( const char *txt )
+{
+	clipboard->setText( tr(txt), QClipboard::Clipboard );
+
+	if ( clipboard->supportsSelection() )
+	{
+		clipboard->setText( tr(txt), QClipboard::Selection );
+	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::loadHighlightToClipboard(void)
+{
+	if ( !textIsHighlighted() )
+	{
+		return;
+	}
+	int l, row, nrow;
+	std::string txt;
+
+	nrow = (viewHeight / pxLineSpacing) + 1;
+
+	if ( nrow < 1 ) nrow = 1;
+
+	for (row=0; row < nrow; row++)
+	{
+		l = lineOffset + row;
+
+	   if ( (l >= txtHlgtStartLine) && (l <= txtHlgtEndLine) )
+		{
+			int hlgtXs, hlgtXe, hlgtXd;
+			std::string s;
+			bool addNewLine;
+
+			if ( l == txtHlgtStartLine )
+			{
+				hlgtXs = txtHlgtStartChar;
+			}
+			else
+			{
+				hlgtXs = 0;
+			}
+
+			if ( l == txtHlgtEndLine )
+			{
+				hlgtXe = txtHlgtEndChar;
+				addNewLine = false;
+			}
+			else
+			{
+				hlgtXe = (viewWidth / pxCharWidth) + 1;
+				addNewLine = true;
+			}
+			hlgtXd = (hlgtXe - hlgtXs);
+
+			if ( hlgtXs < asmEntry[l]->text.size() )
+			{
+				s = asmEntry[l]->text.substr( hlgtXs, hlgtXd );
+			}
+			txt.append(s);
+
+			if ( addNewLine )
+			{
+				txt.append("\n");
+			}
+		}
+	}
+
+	//printf("Load Text to Clipboard:\n%s\n", txt.c_str() );
+
+	loadClipboard( txt.c_str() );
+
+}
+//----------------------------------------------------------------------------
+void QAsmView::mouseReleaseEvent(QMouseEvent * event)
+{
+	int line;
+	QPoint c = convPixToCursor( event->pos() );
+
+	line = lineOffset + c.y();
+
+	if ( event->button() == Qt::LeftButton )
+	{
+		//printf("Left Button Release: (%i,%i)\n", c.x(), c.y() );
+		mouseLeftBtnDown = false;
+		setHighlightEndCoord( c.x(), line );
+
+		loadHighlightToClipboard();
+	}
+}
+//----------------------------------------------------------------------------
 void QAsmView::mousePressEvent(QMouseEvent * event)
 {
 	int line;
 	QPoint c = convPixToCursor( event->pos() );
 
 	line = lineOffset + c.y();
+
+	if ( event->button() == Qt::LeftButton )
+	{
+		//printf("Left Button Pressed: (%i,%i)\n", c.x(), c.y() );
+		mouseLeftBtnDown = true;
+		txtHlgtAnchorChar = c.x();
+		txtHlgtAnchorLine = line;
+
+		setHighlightEndCoord( c.x(), line );
+	}
 	
 	selAddrLine  = -1;
 	selAddrChar  =  0;
@@ -3209,6 +3386,10 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 			parent->setBookmarkSelectedAddress( addr );
 		}
 
+		if ( selAddrText[0] != 0 )
+		{
+			loadClipboard( selAddrText );
+		}
 	}
 }
 //----------------------------------------------------------------------------
@@ -3264,8 +3445,10 @@ void QAsmView::paintEvent(QPaintEvent *event)
 {
 	int x,y,l, row, nrow, selAddr;
 	QPainter painter(this);
-	QColor black("black");
+	QColor white("white"), black("black"), blue("blue");
+	QColor hlgtFG("white"), hlgtBG("blue");
 	bool forceDarkColor = false;
+	bool txtHlgtSet = false;
 
 	painter.setFont(font);
 	viewWidth  = event->rect().width();
@@ -3301,6 +3484,8 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Background) );
 
 	y = pxLineSpacing;
+
+	txtHlgtSet = textIsHighlighted();
 
 	for (row=0; row < nrow; row++)
 	{
@@ -3338,17 +3523,17 @@ void QAsmView::paintEvent(QPaintEvent *event)
 
 			if ( (selAddrLine == l) )
 			{	// Highlight ASM line for selected address.
-				if ( (selAddr == selAddrValue) && 
+				if ( !txtHlgtSet && (selAddr == selAddrValue) && 
 				  	    (asmEntry[l]->text.size() >= (selAddrChar + selAddrWidth) ) && 
 						    ( asmEntry[l]->text.compare( selAddrChar, selAddrWidth, selAddrText ) == 0 ) )
 				{
 					int ax;
 
-					ax = selAddrChar*pxCharWidth;
+					ax = x + selAddrChar*pxCharWidth;
 
-					painter.fillRect( ax, y - pxLineSpacing + pxLineLead, selAddrWidth*pxCharWidth, pxLineSpacing, QColor("blue") );
+					painter.fillRect( ax, y - pxLineSpacing + pxLineLead, selAddrWidth*pxCharWidth, pxLineSpacing, blue );
 
-					painter.setPen( QColor("white"));
+					painter.setPen( white );
 
 					painter.drawText( ax, y, tr(selAddrText) );
 
@@ -3357,6 +3542,56 @@ void QAsmView::paintEvent(QPaintEvent *event)
 			}
 		}
 		y += pxLineSpacing;
+	}
+
+	y = pxLineSpacing;
+
+	painter.setPen( hlgtFG );
+
+	if ( txtHlgtSet )
+	{
+		for (row=0; row < nrow; row++)
+		{
+			x = -pxLineXScroll;
+			l = lineOffset + row;
+
+		   if ( (l >= txtHlgtStartLine) && (l <= txtHlgtEndLine) )
+			{
+				int ax, hlgtXs, hlgtXe, hlgtXd;
+				std::string s;
+
+				if ( l == txtHlgtStartLine )
+				{
+					hlgtXs = txtHlgtStartChar;
+				}
+				else
+				{
+					hlgtXs = 0;
+				}
+
+				if ( l == txtHlgtEndLine )
+				{
+					hlgtXe = txtHlgtEndChar;
+				}
+				else
+				{
+					hlgtXe = (viewWidth / pxCharWidth) + 1;
+				}
+				hlgtXd = (hlgtXe - hlgtXs);
+
+				if ( hlgtXs < asmEntry[l]->text.size() )
+				{
+					s = asmEntry[l]->text.substr( hlgtXs, hlgtXd );
+				}
+
+				ax = x + (hlgtXs * pxCharWidth);
+
+				painter.fillRect( ax, y - pxLineSpacing + pxLineLead, hlgtXd * pxCharWidth, pxLineSpacing, hlgtBG );
+
+				painter.drawText( ax, y, tr(s.c_str()) );
+			}
+			y += pxLineSpacing;
+		}
 	}
 }
 //----------------------------------------------------------------------------
