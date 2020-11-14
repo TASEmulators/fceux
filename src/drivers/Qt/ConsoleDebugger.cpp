@@ -87,6 +87,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	asmLineSelLbl = new QLabel( tr("Line Select") );
 	emuStatLbl    = new QLabel( tr("Emulator is Running") );
 
+	asmLineSelLbl->setWordWrap( true );
+
    asmView->setScrollBars( hbar, vbar );
 
 	grid->addWidget( asmView, 0, 0 );
@@ -2046,7 +2048,7 @@ void  QAsmView::updateAssemblyView(void)
 
 	pxLineWidth = maxLineLen * pxCharWidth;
 
-	setMinimumWidth( pxLineWidth );
+	setMinimumWidth( 50 * pxCharWidth );
 
 	vbar->setMaximum( asmEntry.size() );
 }
@@ -3137,7 +3139,7 @@ void QAsmView::mouseMoveEvent(QMouseEvent * event)
 				{
 					fileName = "...";
 				}
-				sprintf( txt, ", Offset 0x%06X in File \"%s\" (NL file: %X)", romOfs, fileName, bank);
+				sprintf( txt, "\nOffset 0x%06X in File \"%s\" (NL file: %X)", romOfs, fileName, bank);
 
 				s.append( txt );
 			}
