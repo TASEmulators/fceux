@@ -1094,6 +1094,8 @@ QTraceLogView::QTraceLogView(QWidget *parent)
 
 	vbar = NULL;
 	hbar = NULL;
+
+	wheelPixelCounter = 0;
 }
 //----------------------------------------------------
 QTraceLogView::~QTraceLogView(void)
@@ -1122,6 +1124,57 @@ void QTraceLogView::calcFontData(void)
 void QTraceLogView::setScrollBars( QScrollBar *h, QScrollBar *v )
 {
 	hbar = h; vbar = v;
+}
+//----------------------------------------------------
+void QTraceLogView::wheelEvent(QWheelEvent *event)
+{
+	int lineOffset;
+
+	QPoint numPixels  = event->pixelDelta();
+	QPoint numDegrees = event->angleDelta();
+
+	lineOffset = vbar->value();
+
+	if (!numPixels.isNull()) 
+	{
+		wheelPixelCounter += numPixels.y();
+	   //printf("numPixels: (%i,%i) \n", numPixels.x(), numPixels.y() );
+	} 
+	else if (!numDegrees.isNull()) 
+	{
+		//QPoint numSteps = numDegrees / 15;
+		//printf("numSteps: (%i,%i) \n", numSteps.x(), numSteps.y() );
+		//printf("numDegrees: (%i,%i)  %i\n", numDegrees.x(), numDegrees.y(), pxLineSpacing );
+		wheelPixelCounter += (pxLineSpacing * numDegrees.y()) / (15*8);
+	}
+	//printf("Wheel Event: %i\n", wheelPixelCounter);
+
+	if ( wheelPixelCounter >= pxLineSpacing )
+	{
+		lineOffset += (wheelPixelCounter / pxLineSpacing);
+
+		if ( lineOffset > recBufMax )
+		{
+			lineOffset = recBufMax;
+		}
+		vbar->setValue( lineOffset );
+
+		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+	}
+	else if ( wheelPixelCounter <= -pxLineSpacing )
+	{
+		lineOffset += (wheelPixelCounter / pxLineSpacing);
+
+		if ( lineOffset < 0 )
+		{
+			lineOffset = 0;
+		}
+		vbar->setValue( lineOffset );
+
+		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+	}
+
+	 event->accept();
 }
 //----------------------------------------------------
 void QTraceLogView::resizeEvent(QResizeEvent *event)

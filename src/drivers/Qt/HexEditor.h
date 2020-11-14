@@ -130,6 +130,7 @@ class QHexEdit : public QWidget
 		void keyPressEvent(QKeyEvent *event);
    	void keyReleaseEvent(QKeyEvent *event);
 		void mousePressEvent(QMouseEvent * event);
+		void wheelEvent(QWheelEvent *event);
 		void resizeEvent(QResizeEvent *event);
 		void contextMenuEvent(QContextMenuEvent *event);
 
@@ -185,6 +186,7 @@ class QHexEdit : public QWidget
 		int frzRamVal;
 		int frzRamMode;
 		int frzIdx;
+		int wheelPixelCounter;
 
 		bool cursorBlink;
 		bool reverseVideo;

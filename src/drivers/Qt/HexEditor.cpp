@@ -1225,6 +1225,8 @@ QHexEdit::QHexEdit(QWidget *parent)
 	frzRamMode = 0;
 	frzIdx = 0;
 
+	wheelPixelCounter = 0;
+
 	highLightColor[ 0].setRgb( 0x00, 0x00, 0x00 );
 	highLightColor[ 1].setRgb( 0x35, 0x40, 0x00 );
 	highLightColor[ 2].setRgb( 0x18, 0x52, 0x18 );
@@ -1775,6 +1777,54 @@ void QHexEdit::mousePressEvent(QMouseEvent * event)
 		resetCursor();
 	}
 
+}
+//----------------------------------------------------------------------------
+void QHexEdit::wheelEvent(QWheelEvent *event)
+{
+
+	QPoint numPixels  = event->pixelDelta();
+	QPoint numDegrees = event->angleDelta();
+
+	if (!numPixels.isNull()) 
+	{
+		wheelPixelCounter += numPixels.y();
+	   //printf("numPixels: (%i,%i) \n", numPixels.x(), numPixels.y() );
+	} 
+	else if (!numDegrees.isNull()) 
+	{
+		//QPoint numSteps = numDegrees / 15;
+		//printf("numSteps: (%i,%i) \n", numSteps.x(), numSteps.y() );
+		//printf("numDegrees: (%i,%i)  %i\n", numDegrees.x(), numDegrees.y(), pxLineSpacing );
+		wheelPixelCounter += (pxLineSpacing * numDegrees.y()) / (15*8);
+	}
+	//printf("Wheel Event: %i\n", wheelPixelCounter);
+
+	if ( wheelPixelCounter >= pxLineSpacing )
+	{
+		lineOffset += (wheelPixelCounter / pxLineSpacing);
+
+		if ( lineOffset > maxLineOffset )
+		{
+			lineOffset = maxLineOffset;
+		}
+		vbar->setValue( lineOffset );
+
+		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+	}
+	else if ( wheelPixelCounter <= -pxLineSpacing )
+	{
+		lineOffset += (wheelPixelCounter / pxLineSpacing);
+
+		if ( lineOffset < 0 )
+		{
+			lineOffset = 0;
+		}
+		vbar->setValue( lineOffset );
+
+		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+	}
+
+	 event->accept();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::contextMenuEvent(QContextMenuEvent *event)

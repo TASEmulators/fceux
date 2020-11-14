@@ -62,6 +62,7 @@ class QTraceLogView : public QWidget
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
+		void wheelEvent(QWheelEvent *event);
 
 		void calcFontData(void);
 
@@ -80,6 +81,7 @@ class QTraceLogView : public QWidget
 		int  viewLines;
 		int  viewWidth;
 		int  viewHeight;
+		int  wheelPixelCounter;
 };
 
 class TraceLoggerDialog_t : public QDialog
