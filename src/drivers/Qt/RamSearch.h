@@ -36,6 +36,7 @@ class QRamSearchView : public QWidget
    	//void keyReleaseEvent(QKeyEvent *event);
 		void mousePressEvent(QMouseEvent * event);
 		void resizeEvent(QResizeEvent *event);
+		void wheelEvent(QWheelEvent *event);
 
       int  convPixToLine( QPoint p );
 		void calcFontData(void);
@@ -59,6 +60,7 @@ class QRamSearchView : public QWidget
 		int  viewHeight;
       int  selAddr;
       int  selLine;
+		int  wheelPixelCounter;
 };
 
 class RamSearchDialog_t : public QDialog

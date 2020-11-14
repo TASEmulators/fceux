@@ -3407,7 +3407,7 @@ void QAsmView::wheelEvent(QWheelEvent *event)
 {
 
 	QPoint numPixels = event->pixelDelta();
-	QPoint numDegrees = event->angleDelta() / 8;
+	QPoint numDegrees = event->angleDelta();
 
 	if (!numPixels.isNull()) 
 	{
@@ -3419,7 +3419,7 @@ void QAsmView::wheelEvent(QWheelEvent *event)
 		//QPoint numSteps = numDegrees / 15;
 		//printf("numSteps: (%i,%i) \n", numSteps.x(), numSteps.y() );
 		//printf("numDegrees: (%i,%i)  %i\n", numDegrees.x(), numDegrees.y(), pxLineSpacing );
-		wheelPixelCounter += (pxLineSpacing * numDegrees.y()) / 15;
+		wheelPixelCounter += (pxLineSpacing * numDegrees.y()) / (15*8);
 	}
 	//printf("Wheel Event: %i\n", wheelPixelCounter);
 
