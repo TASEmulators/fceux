@@ -15,6 +15,9 @@
 #include <QGridLayout>
 #include <QRadioButton>
 #include <QInputDialog>
+#include <QMenuBar>
+#include <QMenu>
+#include <QAction>
 #include <QGuiApplication>
 
 #include "../../types.h"
@@ -62,9 +65,12 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	QPushButton *button;
 	QFrame      *frame;
 	QLabel      *lbl;
+	QMenuBar    *menuBar;
+	QMenu       *debugMenu;
+	QAction     *act;
 	float fontCharWidth;
 	QTreeWidgetItem * item;
-	int opt;
+	int opt, useNativeMenuBar;
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
@@ -76,8 +82,74 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	setWindowTitle("6502 Debugger");
 
 	//resize( 512, 512 );
+	
+	menuBar = new QMenuBar(this);
 
+   // This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// Debug
+   debugMenu = menuBar->addMenu(tr("Debug"));
+
+	// Debug -> Run
+	act = new QAction(tr("Run"), this);
+   act->setShortcut(QKeySequence( tr("F5") ) );
+   act->setStatusTip(tr("Run"));
+   connect( act, SIGNAL(triggered()), this, SLOT(debugRunCB(void)) );
+
+   debugMenu->addAction(act);
+
+	// Debug -> Step Into
+	act = new QAction(tr("Step Into"), this);
+   act->setShortcut(QKeySequence( tr("F11") ) );
+   act->setStatusTip(tr("Step Into"));
+   connect( act, SIGNAL(triggered()), this, SLOT(debugStepIntoCB(void)) );
+
+   debugMenu->addAction(act);
+
+	// Debug -> Step Out
+	act = new QAction(tr("Step Out"), this);
+   act->setShortcut(QKeySequence( tr("Shift+F11") ) );
+   act->setStatusTip(tr("Step Out"));
+   connect( act, SIGNAL(triggered()), this, SLOT(debugStepOutCB(void)) );
+
+   debugMenu->addAction(act);
+
+	// Debug -> Step Over
+	act = new QAction(tr("Step Over"), this);
+   act->setShortcut(QKeySequence( tr("F10") ) );
+   act->setStatusTip(tr("Step Over"));
+   connect( act, SIGNAL(triggered()), this, SLOT(debugStepOverCB(void)) );
+
+   debugMenu->addAction(act);
+
+	// Debug -> Run Line
+	act = new QAction(tr("Run Line"), this);
+   act->setShortcut(QKeySequence( tr("F6") ) );
+   act->setStatusTip(tr("Run Line"));
+   connect( act, SIGNAL(triggered()), this, SLOT(debugRunLineCB(void)) );
+
+   debugMenu->addAction(act);
+
+	// Debug -> Run 128 Lines
+	act = new QAction(tr("Run 128 Lines"), this);
+   act->setShortcut(QKeySequence( tr("F7") ) );
+   act->setStatusTip(tr("Run 128 Lines"));
+   connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
+
+   debugMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Menu End
+	//-----------------------------------------------------------------------
 	mainLayout = new QHBoxLayout();
+
+	mainLayout->setMenuBar( menuBar );
 
 	vbox4      = new QVBoxLayout();
 	grid       = new QGridLayout();
@@ -2974,25 +3046,73 @@ void QAsmView::resizeEvent(QResizeEvent *event)
 void QAsmView::keyPressEvent(QKeyEvent *event)
 {
 	//printf("Debug ASM Window Key Press: 0x%x \n", event->key() );
-	if ( selAddrValue >= 0 )
+	if (event->matches(QKeySequence::MoveToPreviousLine))
+	{
+		lineOffset--;
+
+		if ( lineOffset < 0 )
+		{
+			lineOffset = 0;
+		}
+		vbar->setValue( lineOffset );
+		event->accept();
+	}
+	else if (event->matches(QKeySequence::MoveToNextLine))
+	{
+		lineOffset++;
+
+		if ( lineOffset > maxLineOffset )
+		{
+			lineOffset = maxLineOffset;
+		}
+		vbar->setValue( lineOffset );
+		event->accept();
+	}
+	else if (event->matches(QKeySequence::MoveToNextPage))
+   {
+      lineOffset += ( (3 * viewLines) / 4);
+
+      if ( lineOffset >= maxLineOffset )
+      {
+         lineOffset = maxLineOffset;
+      }
+      vbar->setValue( lineOffset );
+		event->accept();
+   }
+   else if (event->matches(QKeySequence::MoveToPreviousPage))
+   {
+      lineOffset -= ( (3 * viewLines) / 4);
+
+      if ( lineOffset < 0 )
+      {
+         lineOffset = 0;
+      }
+      vbar->setValue( lineOffset );
+		event->accept();
+   }
+	else if ( selAddrValue >= 0 )
 	{
 		ctxMenuAddr = selAddrValue;
 
 		if ( event->key() == Qt::Key_B )
    	{
 			parent->asmViewCtxMenuAddBP();
+			event->accept();
    	}
 		else if ( event->key() == Qt::Key_S )
    	{
 			parent->asmViewCtxMenuAddSym();
+			event->accept();
    	}
 		else if ( event->key() == Qt::Key_M )
    	{
 			parent->asmViewCtxMenuAddBM();
+			event->accept();
    	}
 		else if ( event->key() == Qt::Key_H )
    	{
 			parent->asmViewCtxMenuOpenHexEdit();
+			event->accept();
    	}
    }
 }
