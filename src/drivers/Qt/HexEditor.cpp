@@ -1787,7 +1787,7 @@ void QHexEdit::wheelEvent(QWheelEvent *event)
 
 	if (!numPixels.isNull()) 
 	{
-		wheelPixelCounter += numPixels.y();
+		wheelPixelCounter -= numPixels.y();
 	   //printf("numPixels: (%i,%i) \n", numPixels.x(), numPixels.y() );
 	} 
 	else if (!numDegrees.isNull()) 
@@ -1795,7 +1795,7 @@ void QHexEdit::wheelEvent(QWheelEvent *event)
 		//QPoint numSteps = numDegrees / 15;
 		//printf("numSteps: (%i,%i) \n", numSteps.x(), numSteps.y() );
 		//printf("numDegrees: (%i,%i)  %i\n", numDegrees.x(), numDegrees.y(), pxLineSpacing );
-		wheelPixelCounter += (pxLineSpacing * numDegrees.y()) / (15*8);
+		wheelPixelCounter -= (pxLineSpacing * numDegrees.y()) / (15*8);
 	}
 	//printf("Wheel Event: %i\n", wheelPixelCounter);
 

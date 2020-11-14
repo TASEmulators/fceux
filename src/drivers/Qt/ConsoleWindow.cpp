@@ -103,6 +103,8 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 consoleWin_t::~consoleWin_t(void)
 {
+	QClipboard *clipboard;
+
 	nes_shm->runEmulator = 0;
 
 	gameTimer->stop(); 
@@ -131,6 +133,18 @@ consoleWin_t::~consoleWin_t(void)
 	// clear the NetworkIP field so this doesn't happen unintentionally
 	g_config->setOption ("SDL.NetworkIP", "");
 	g_config->save ();
+
+	// Clear Clipboard Contents on Program Exit
+	clipboard = QGuiApplication::clipboard();
+
+	if ( clipboard->ownsClipboard() )
+	{
+		clipboard->clear( QClipboard::Clipboard );
+	}
+	if ( clipboard->ownsSelection() )
+	{
+		clipboard->clear( QClipboard::Selection );
+	}
 
 	if ( this == consoleWindow )
 	{
