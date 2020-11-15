@@ -112,6 +112,7 @@ class QAsmView : public QWidget
 		void setSymbolDebugEnable( bool value );
 		void setRegisterNameEnable( bool value );
 		int  getCtxMenuAddr(void){ return ctxMenuAddr; };
+		int  getCursorAddr(void){ return cursorLineAddr; };
 		void setPC_placement( int mode, int ofs = 0 );
 	protected:
 		void paintEvent(QPaintEvent *event);
@@ -155,6 +156,7 @@ class QAsmView : public QWidget
 		int pxLineXScroll;
 		int cursorPosX;
 		int cursorPosY;
+		int cursorLineAddr;
 		int pcLinePlacement;
 		int pcLineOffset;
 
@@ -304,6 +306,7 @@ class ConsoleDebugger : public QDialog
 		void debugStepIntoCB(void);
 		void debugStepOutCB(void);
 		void debugStepOverCB(void);
+		void debugRunToCursorCB(void);
 		void debugRunLineCB(void);
 		void debugRunLine128CB(void);
 		void seekToCB(void);

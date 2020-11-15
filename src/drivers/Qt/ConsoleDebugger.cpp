@@ -129,6 +129,14 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
    debugMenu->addAction(act);
 
+	// Debug -> Run to Cursor
+	act = new QAction(tr("Run to Cursor"), this);
+   act->setShortcut(QKeySequence( tr("Ctrl+F10") ) );
+   act->setStatusTip(tr("Run to Cursor"));
+   connect( act, SIGNAL(triggered()), this, SLOT(debugRunToCursorCB(void)) );
+
+   debugMenu->addAction(act);
+
 	// Debug -> Run Line
 	act = new QAction(tr("Run Line"), this);
    act->setShortcut(QKeySequence( tr("F6") ) );
@@ -1707,6 +1715,19 @@ void ConsoleDebugger::debugStepOverCB(void)
 	}
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::debugRunToCursorCB(void)
+{
+	int addr = asmView->getCursorAddr();
+
+	if ( addr >= 0 )
+	{
+		watchpoint[64].address = addr;
+		watchpoint[64].flags = WP_E|WP_X;
+		
+		FCEUI_SetEmulationPaused(0);
+	}
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::debugRunLineCB(void)
 {
 	if (FCEUI_EmulationPaused())
@@ -3055,7 +3076,8 @@ QAsmView::QAsmView(QWidget *parent)
 	selAddrValue = -1;
 	memset( selAddrText, 0, sizeof(selAddrText) );
 
-	wheelPixelCounter = 0;
+	cursorLineAddr    = -1;
+	wheelPixelCounter =  0;
 
 	//setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
    setFocusPolicy(Qt::StrongFocus);
@@ -3426,7 +3448,7 @@ void QAsmView::mouseMoveEvent(QMouseEvent * event)
 	{
 		int addr;
 
-		addr = asmEntry[line]->addr;
+		cursorLineAddr = addr = asmEntry[line]->addr;
 
 		if (addr >= 0x8000)
 		{
