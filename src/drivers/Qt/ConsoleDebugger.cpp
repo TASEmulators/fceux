@@ -1663,6 +1663,14 @@ void ConsoleDebugger::resetCountersCB (void)
 	updateRegisterView();
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::asmViewCtxMenuRunToCursor(void)
+{
+	watchpoint[64].address = asmView->getCtxMenuAddr();
+	watchpoint[64].flags   = WP_E|WP_X;
+
+	FCEUI_SetEmulationPaused(0);
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuAddBP(void)
 {
 	watchpointinfo wp;
@@ -2958,7 +2966,12 @@ void QAsmView::scrollToPC(void)
 {
 	if ( asmPC != NULL )
 	{
-		lineOffset = asmPC->line;
+		lineOffset = asmPC->line - (viewLines / 2);
+
+		if ( lineOffset < 0 )
+		{
+			lineOffset = 0;
+		}
 		vbar->setValue( lineOffset );
 	}
 }
@@ -3579,6 +3592,7 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 	QAction *act;
 	QMenu menu(this);
 	QPoint c = convPixToCursor( event->pos() );
+	bool enableRunToCursor = false;
 
 	line = lineOffset + c.y();
 
@@ -3591,10 +3605,22 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 		if ( selAddrValue < 0 )
 		{
 			ctxMenuAddr = addr = asmEntry[line]->addr;
+
+			enableRunToCursor = true;
 		}
 		else
 		{
 			ctxMenuAddr = addr = selAddrValue;
+
+			enableRunToCursor = (selAddrValue == asmEntry[line]->addr);
+		}
+
+		if ( enableRunToCursor )
+		{
+			act = new QAction(tr("Run To Cursor"), &menu);
+			menu.addAction(act);
+			act->setShortcut( QKeySequence(tr("Ctrl+F10")));
+			connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuRunToCursor(void)) );
 		}
 
 		act = new QAction(tr("Add Breakpoint"), &menu);

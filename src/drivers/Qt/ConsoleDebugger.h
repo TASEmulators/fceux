@@ -291,6 +291,7 @@ class ConsoleDebugger : public QDialog
 		void asmViewCtxMenuAddBM(void);
 		void asmViewCtxMenuAddSym(void);
 		void asmViewCtxMenuOpenHexEdit(void);
+		void asmViewCtxMenuRunToCursor(void);
 	private slots:
 		void updatePeriodic(void);
 		void hbarChanged(int value);
