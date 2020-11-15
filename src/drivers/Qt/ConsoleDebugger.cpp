@@ -66,7 +66,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	QFrame      *frame;
 	QLabel      *lbl;
 	QMenuBar    *menuBar;
-	QMenu       *debugMenu;
+	QMenu       *debugMenu, *optMenu, *subMenu;
+	QActionGroup *actGroup;
 	QAction     *act;
 	float fontCharWidth;
 	QTreeWidgetItem * item;
@@ -143,6 +144,71 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
    connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
 
    debugMenu->addAction(act);
+
+	// Options
+   optMenu = menuBar->addMenu(tr("Options"));
+
+	// Options -> PC Position
+	subMenu  = optMenu->addMenu(tr("PC Line Positioning"));
+	actGroup = new QActionGroup(this);
+
+	actGroup->setExclusive(true);
+
+	g_config->getOption( "SDL.DebuggerPCPlacement", &opt );
+
+	// Options -> PC Position -> Top Line
+	act = new QAction(tr("Top Line"), this);
+   act->setStatusTip(tr("Top Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 0 );
+   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceTop(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// Options -> PC Position -> Upper Mid-Line
+	act = new QAction(tr("Upper Mid-Line"), this);
+   act->setStatusTip(tr("Upper Mid-Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 1 );
+   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceUpperMid(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// Options -> PC Position -> Center Line
+	act = new QAction(tr("Center Line"), this);
+   act->setStatusTip(tr("Center Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 2 );
+   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceCenter(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// Options -> PC Position -> Lower Mid-Line
+	act = new QAction(tr("Lower Mid-Line"), this);
+   act->setStatusTip(tr("Lower Mid-Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 3 );
+   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceLowerMid(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// Options -> PC Position -> Bottom
+	act = new QAction(tr("Bottom Line"), this);
+   act->setStatusTip(tr("Bottom Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 4 );
+   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceBottom(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// Options -> PC Position -> Custom Line 
+	act = new QAction(tr("Custom Line Offset"), this);
+   act->setStatusTip(tr("Custom Line Offset"));
+	act->setChecked( opt == 5 );
+	act->setCheckable(true);
+   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceCustom(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
 
 	//-----------------------------------------------------------------------
 	// Menu End
@@ -1512,6 +1578,57 @@ void ConsoleDebugger::reloadSymbolsCB(void)
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::pcSetPlaceTop(void)
+{
+	asmView->setPC_placement( 0 );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::pcSetPlaceUpperMid(void)
+{
+	asmView->setPC_placement( 1 );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::pcSetPlaceCenter(void)
+{
+	asmView->setPC_placement( 2 );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::pcSetPlaceLowerMid(void)
+{
+	asmView->setPC_placement( 3 );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::pcSetPlaceBottom(void)
+{
+	asmView->setPC_placement( 4 );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::pcSetPlaceCustom(void)
+{
+	int ret, ofs;
+	QInputDialog dialog(this);
+
+	g_config->getOption("SDL.DebuggerPCLineOffset" , &ofs );
+
+   dialog.setWindowTitle( tr("PC Line Offset") );
+   dialog.setLabelText( tr("Enter a line offset from 0 to 100.") );
+   dialog.setOkButtonText( tr("Ok") );
+   dialog.setInputMode( QInputDialog::IntInput );
+   dialog.setIntRange( 0, 100 );
+   dialog.setIntValue( ofs );
+
+   dialog.show();
+   ret = dialog.exec();
+
+   if ( QDialog::Accepted == ret )
+   {
+      ofs = dialog.intValue();
+
+		asmView->setPC_placement( 5, ofs );
+   }
+
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::debugRunCB(void)
 {
 	if (FCEUI_EmulationPaused()) 
@@ -1730,6 +1847,20 @@ void ConsoleDebugger::setBookmarkSelectedAddress( int addr )
 void ConsoleDebugger::asmViewCtxMenuAddSym(void)
 {
 	openDebugSymbolEditWindow( asmView->getCtxMenuAddr() );
+}
+//----------------------------------------------------------------------------
+void QAsmView::setPC_placement( int mode, int ofs )
+{
+	pcLinePlacement = mode;
+
+	if ( mode == 5 )
+	{
+		pcLineOffset = ofs;
+	}
+
+	g_config->setOption("SDL.DebuggerPCPlacement"  , pcLinePlacement);
+	g_config->setOption("SDL.DebuggerPCLineOffset" , pcLineOffset   );
+	g_config->save();
 }
 //----------------------------------------------------------------------------
 int  QAsmView::getAsmLineFromAddr(int addr)
@@ -2912,6 +3043,11 @@ QAsmView::QAsmView(QWidget *parent)
 	txtHlgtEndChar   = -1;
 	txtHlgtEndLine   = -1;
 
+	pcLinePlacement = 0;
+	pcLineOffset    = 0;
+
+	g_config->getOption( "SDL.DebuggerPCPlacement" , &pcLinePlacement );
+	g_config->getOption( "SDL.DebuggerPCLineOffset", &pcLineOffset    );
 
 	selAddrLine  = -1;
 	selAddrChar  =  0;
@@ -2966,7 +3102,47 @@ void QAsmView::scrollToPC(void)
 {
 	if ( asmPC != NULL )
 	{
-		lineOffset = asmPC->line - (viewLines / 2);
+		int ofs = 0;
+		int maxOfs = (viewLines-3);
+
+		if ( maxOfs < 0 )
+		{
+			maxOfs = 0;
+		}
+
+		switch ( pcLinePlacement )
+		{
+			default:
+			case 0:
+				ofs = 0;
+			break;
+			case 1:
+				ofs = (viewLines / 4);
+			break;
+			case 2:
+				ofs = (viewLines / 2);
+			break;
+			case 3:
+				ofs = (viewLines*3) / 4;
+			break;
+			case 4:
+				ofs =  maxOfs;
+			break;
+			case 5:
+				ofs = pcLineOffset;
+
+				if ( ofs < 0 )
+				{
+					ofs = 0;
+				}
+				else if ( ofs > maxOfs )
+				{
+					ofs = maxOfs;
+				}
+			break;
+		}
+
+		lineOffset = asmPC->line - ofs;
 
 		if ( lineOffset < 0 )
 		{

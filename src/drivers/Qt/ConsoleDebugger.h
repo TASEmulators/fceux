@@ -112,6 +112,7 @@ class QAsmView : public QWidget
 		void setSymbolDebugEnable( bool value );
 		void setRegisterNameEnable( bool value );
 		int  getCtxMenuAddr(void){ return ctxMenuAddr; };
+		void setPC_placement( int mode, int ofs = 0 );
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
@@ -154,6 +155,8 @@ class QAsmView : public QWidget
 		int pxLineXScroll;
 		int cursorPosX;
 		int cursorPosY;
+		int pcLinePlacement;
+		int pcLineOffset;
 
 		int  selAddrLine;
 		int  selAddrChar;
@@ -178,6 +181,7 @@ class QAsmView : public QWidget
 		bool  symbolicDebugEnable;
 		bool  registerNameEnable;
 		bool  mouseLeftBtnDown;
+
 };
 
 class DebuggerStackDisplay : public QPlainTextEdit
@@ -326,6 +330,12 @@ class ConsoleDebugger : public QDialog
 		void cpuCycleThresChanged(const QString &txt);
 		void instructionsThresChanged(const QString &txt);
 		void selBmAddrChanged(const QString &txt);
+		void pcSetPlaceTop(void);
+		void pcSetPlaceUpperMid(void);
+		void pcSetPlaceCenter(void);
+		void pcSetPlaceLowerMid(void);
+		void pcSetPlaceBottom(void);
+		void pcSetPlaceCustom(void);
 
 };
 
