@@ -114,6 +114,7 @@ class QAsmView : public QWidget
 		int  getCtxMenuAddr(void){ return ctxMenuAddr; };
 		int  getCursorAddr(void){ return cursorLineAddr; };
 		void setPC_placement( int mode, int ofs = 0 );
+		void setBreakpointAtSelectedLine(void);
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);

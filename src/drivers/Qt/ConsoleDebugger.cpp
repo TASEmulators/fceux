@@ -129,10 +129,10 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
    debugMenu->addAction(act);
 
-	// Debug -> Run to Cursor
-	act = new QAction(tr("Run to Cursor"), this);
-   act->setShortcut(QKeySequence( tr("Ctrl+F10") ) );
-   act->setStatusTip(tr("Run to Cursor"));
+	// Debug -> Run to Selected Line
+	act = new QAction(tr("Run to Selected Line"), this);
+   act->setShortcut(QKeySequence( tr("F1") ) );
+   act->setStatusTip(tr("Run to Selected Line"));
    connect( act, SIGNAL(triggered()), this, SLOT(debugRunToCursorCB(void)) );
 
    debugMenu->addAction(act);
@@ -1717,15 +1717,7 @@ void ConsoleDebugger::debugStepOverCB(void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::debugRunToCursorCB(void)
 {
-	int addr = asmView->getCursorAddr();
-
-	if ( addr >= 0 )
-	{
-		watchpoint[64].address = addr;
-		watchpoint[64].flags = WP_E|WP_X;
-		
-		FCEUI_SetEmulationPaused(0);
-	}
+	asmView->setBreakpointAtSelectedLine();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::debugRunLineCB(void)
@@ -1803,10 +1795,12 @@ void ConsoleDebugger::resetCountersCB (void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuRunToCursor(void)
 {
+	fceuWrapperLock();
 	watchpoint[64].address = asmView->getCtxMenuAddr();
 	watchpoint[64].flags   = WP_E|WP_X;
 
 	FCEUI_SetEmulationPaused(0);
+	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuAddBP(void)
@@ -1882,6 +1876,29 @@ void QAsmView::setPC_placement( int mode, int ofs )
 	g_config->setOption("SDL.DebuggerPCPlacement"  , pcLinePlacement);
 	g_config->setOption("SDL.DebuggerPCLineOffset" , pcLineOffset   );
 	g_config->save();
+}
+//----------------------------------------------------------------------------
+void QAsmView::setBreakpointAtSelectedLine(void)
+{
+	int addr = -1;
+
+	if ( (selAddrLine >= 0) && (selAddrLine < asmEntry.size()) )
+	{
+		if ( selAddrValue == asmEntry[ selAddrLine ]->addr )
+		{
+			addr = selAddrValue;
+		}
+	}
+
+	if ( addr >= 0 )
+	{
+		fceuWrapperLock();
+		watchpoint[64].address = addr;
+		watchpoint[64].flags = WP_E|WP_X;
+		
+		FCEUI_SetEmulationPaused(0);
+		fceuWrapperUnLock();
+	}
 }
 //----------------------------------------------------------------------------
 int  QAsmView::getAsmLineFromAddr(int addr)
@@ -3817,7 +3834,7 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 		{
 			act = new QAction(tr("Run To Cursor"), &menu);
 			menu.addAction(act);
-			act->setShortcut( QKeySequence(tr("Ctrl+F10")));
+			//act->setShortcut( QKeySequence(tr("Ctrl+F10")));
 			connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuRunToCursor(void)) );
 		}
 
