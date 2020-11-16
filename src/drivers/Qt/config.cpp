@@ -260,8 +260,10 @@ InitConfig()
 	config->addOption("hexEditFgColor", "SDL.HexEditFgColor", "#FFFFFF");
     
 	// Debugger Options
-	config->addOption("autoLoadDebugFiles", "SDL.AutoLoadDebugFiles", 1);
-	config->addOption("autoOpenDebugger"  , "SDL.AutoOpenDebugger"  , 0);
+	config->addOption("autoLoadDebugFiles"     , "SDL.AutoLoadDebugFiles", 1);
+	config->addOption("autoOpenDebugger"       , "SDL.AutoOpenDebugger"  , 0);
+	config->addOption("debuggerPCPlacementMode", "SDL.DebuggerPCPlacement"  , 0);
+	config->addOption("debuggerPCDLineOffset"  , "SDL.DebuggerPCLineOffset" , 0);
 
 	// Code Data Logger Options
 	config->addOption("autoSaveCDL"  , "SDL.AutoSaveCDL", 1);

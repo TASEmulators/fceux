@@ -112,6 +112,9 @@ class QAsmView : public QWidget
 		void setSymbolDebugEnable( bool value );
 		void setRegisterNameEnable( bool value );
 		int  getCtxMenuAddr(void){ return ctxMenuAddr; };
+		int  getCursorAddr(void){ return cursorLineAddr; };
+		void setPC_placement( int mode, int ofs = 0 );
+		void setBreakpointAtSelectedLine(void);
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
@@ -154,6 +157,9 @@ class QAsmView : public QWidget
 		int pxLineXScroll;
 		int cursorPosX;
 		int cursorPosY;
+		int cursorLineAddr;
+		int pcLinePlacement;
+		int pcLineOffset;
 
 		int  selAddrLine;
 		int  selAddrChar;
@@ -178,6 +184,7 @@ class QAsmView : public QWidget
 		bool  symbolicDebugEnable;
 		bool  registerNameEnable;
 		bool  mouseLeftBtnDown;
+
 };
 
 class DebuggerStackDisplay : public QPlainTextEdit
@@ -291,6 +298,7 @@ class ConsoleDebugger : public QDialog
 		void asmViewCtxMenuAddBM(void);
 		void asmViewCtxMenuAddSym(void);
 		void asmViewCtxMenuOpenHexEdit(void);
+		void asmViewCtxMenuRunToCursor(void);
 	private slots:
 		void updatePeriodic(void);
 		void hbarChanged(int value);
@@ -299,6 +307,7 @@ class ConsoleDebugger : public QDialog
 		void debugStepIntoCB(void);
 		void debugStepOutCB(void);
 		void debugStepOverCB(void);
+		void debugRunToCursorCB(void);
 		void debugRunLineCB(void);
 		void debugRunLine128CB(void);
 		void seekToCB(void);
@@ -325,6 +334,12 @@ class ConsoleDebugger : public QDialog
 		void cpuCycleThresChanged(const QString &txt);
 		void instructionsThresChanged(const QString &txt);
 		void selBmAddrChanged(const QString &txt);
+		void pcSetPlaceTop(void);
+		void pcSetPlaceUpperMid(void);
+		void pcSetPlaceCenter(void);
+		void pcSetPlaceLowerMid(void);
+		void pcSetPlaceBottom(void);
+		void pcSetPlaceCustom(void);
 
 };
 
