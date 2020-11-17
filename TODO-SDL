@@ -50,8 +50,8 @@ Name Table Viewer                                    |     YES     |     NO     
 Memory Hex Editor                                    |     YES     |     YES     |
 Trace Logger                                         |     YES     |     NO      |
 Code/Data Logger                                     |     YES     |     NO      |
-Game Genie Encoder/Decoder                           |     NO      |     NO      |
-iNES Header Editor                                   |     NO      |     NO      |
+Game Genie Encoder/Decoder                           |     YES     |     NO      |
+iNES Header Editor                                   |     YES     |     NO      |
 Built in help pages                                  |     NO      |     NO      |
 Network play (who actually uses this???)             |     NO      |     NO      |
 -----------------------------------------------------|-------------|-------------|
