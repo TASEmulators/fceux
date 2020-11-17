@@ -14,6 +14,7 @@
 #include <QColorDialog>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QPushButton>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -535,6 +536,143 @@ void HexBookMarkMenuAction::activateCB(void)
 	qedit->setAddr( bm->addr );
 }
 //----------------------------------------------------------------------------
+HexEditorFindDialog_t::HexEditorFindDialog_t(QWidget *parent)
+	: QDialog( parent )
+{
+	QVBoxLayout *mainLayout, *vbox;
+	QHBoxLayout *hbox;
+	QPushButton *nextBtn;
+	QGroupBox   *dirGroup, *typeGroup;
+	
+	QDialog::setWindowTitle( tr("Find") );
+
+	this->parent = (HexEditorDialog_t*)parent;
+
+	mainLayout = new QVBoxLayout();
+	hbox       = new QHBoxLayout();
+
+	searchBox = new QLineEdit();
+	nextBtn   = new QPushButton( tr("Find Next") );
+	dirGroup  = new QGroupBox( tr("Direction") );
+	typeGroup = new QGroupBox( tr("Type") );
+
+	hbox->addWidget( new QLabel( tr("Find What:") ) );
+	hbox->addWidget( searchBox );
+	hbox->addWidget( nextBtn   );
+
+	mainLayout->addLayout( hbox );
+
+	hbox   = new QHBoxLayout();
+	hbox->addWidget( dirGroup  );
+	hbox->addWidget( typeGroup );
+
+	mainLayout->addLayout( hbox );
+
+	vbox   = new QVBoxLayout();
+	upBtn  = new QRadioButton( tr("Up") );
+	dnBtn  = new QRadioButton( tr("Down") );
+
+	dnBtn->setChecked(true);
+
+	vbox->addWidget( upBtn );
+	vbox->addWidget( dnBtn );
+
+	dirGroup->setLayout( vbox );
+
+	vbox   = new QVBoxLayout();
+	hexBtn = new QRadioButton( tr("Hex") );
+	txtBtn = new QRadioButton( tr("Text") );
+
+	vbox->addWidget( hexBtn );
+	vbox->addWidget( txtBtn );
+
+	hexBtn->setChecked(true);
+
+	typeGroup->setLayout( vbox );
+
+	setLayout( mainLayout );
+
+	connect( nextBtn, SIGNAL(clicked(void)), this, SLOT(runSearch(void)) );
+}
+//----------------------------------------------------------------------------
+HexEditorFindDialog_t::~HexEditorFindDialog_t(void)
+{
+	parent->findDialog = NULL;
+}
+//----------------------------------------------------------------------------
+void HexEditorFindDialog_t::closeEvent(QCloseEvent *event)
+{
+	printf("Hex Editor Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void HexEditorFindDialog_t::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void HexEditorFindDialog_t::runSearch(void)
+{
+	int i=0;
+	unsigned char v;
+	std::string s = searchBox->text().toStdString();
+	std::vector <unsigned char> varray;
+
+	if ( s.size() == 0 )
+	{
+		return;
+	}
+	//printf("Run Search: '%s'\n", s.c_str() );
+
+	if ( hexBtn->isChecked() )
+	{
+		i=0;
+		while ( s[i] != 0 )
+		{
+			while ( isspace(s[i]) ) i++;
+			v = 0;
+
+			if ( isxdigit(s[i]) )
+			{
+				v = convFromXchar(s[i]) << 4; i++;
+			}
+			else 
+			{
+				return;
+			}
+
+			if ( isxdigit(s[i]) )
+			{
+				v |= convFromXchar(s[i]); i++;
+			}
+			else 
+			{
+				return;
+			}
+			varray.push_back(v);
+
+			while ( isspace(s[i]) ) i++;
+		}
+	}
+	else
+	{
+		i=0;
+		while ( s[i] != 0 )
+		{
+			v = s[i];
+			varray.push_back(v);
+			i++;
+		}
+	}
+	fceuWrapperLock();
+	parent->editor->findPattern( varray, upBtn->isChecked() );
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
 HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	: QDialog( parent, Qt::Window )
 {
@@ -631,7 +769,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	act = new QAction(tr("Find"), this);
 	act->setShortcut(QKeySequence(tr("Ctrl+F")));
 	act->setStatusTip(tr("Find"));
-	//connect(act, SIGNAL(triggered()), this, SLOT(saveRomFile(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(openFindDialog(void)) );
 
 	editMenu->addAction(act);
 
@@ -756,6 +894,8 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
    connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
    connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
 
+	findDialog = NULL;
+
 	editor->memModeUpdate();
 
 	periodicTimer  = new QTimer( this );
@@ -868,16 +1008,16 @@ void HexEditorDialog_t::populateBookmarkMenu(void)
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::closeEvent(QCloseEvent *event)
 {
-   printf("Hex Editor Close Window Event\n");
-   done(0);
+	printf("Hex Editor Close Window Event\n");
+	done(0);
 	deleteLater();
-   event->accept();
+	event->accept();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::closeWindow(void)
 {
-   //printf("Close Window\n");
-   done(0);
+	//printf("Close Window\n");
+	done(0);
 	deleteLater();
 }
 //----------------------------------------------------------------------------
@@ -1207,6 +1347,16 @@ void HexEditorDialog_t::updatePeriodic(void)
 	}
 }
 //----------------------------------------------------------------------------
+void HexEditorDialog_t::openFindDialog(void)
+{
+	if ( findDialog == NULL )
+	{
+		findDialog = new HexEditorFindDialog_t(this);
+
+		findDialog->show();
+	}
+}
+//----------------------------------------------------------------------------
 void HexEditorDialog_t::openGotoAddrDialog(void)
 {
    editor->openGotoAddrDialog();
@@ -1319,8 +1469,10 @@ QHexEdit::QHexEdit(QWidget *parent)
 	txtHlgtAnchorLine = -1;
 	txtHlgtStartChar = -1;
 	txtHlgtStartLine = -1;
+	txtHlgtStartAddr = -1;
 	txtHlgtEndChar = -1;
 	txtHlgtEndLine = -1;
+	txtHlgtEndAddr = -1;
 
 	clipboard = QGuiApplication::clipboard();
 }
@@ -1574,13 +1726,87 @@ void QHexEdit::loadHighlightToClipboard(void)
 
 	for (a=startAddr; a<=endAddr; a++)
 	{
-		sprintf( c, "%02X ", GetMem(a) );
+		sprintf( c, "%02X ", memAccessFunc(a) );
 
 		s.append(c);
 	}
 	fceuWrapperUnLock();
 
 	loadClipboard( s.c_str() );
+}
+//----------------------------------------------------------------------------
+int QHexEdit::findPattern( std::vector <unsigned char> &varray, int dir )
+{
+	int addr, inc, match;
+
+	inc   = dir ? -1 : 1;
+	addr  = cursorAddr;
+	match = 0;
+
+	//printf("Looking for pattern %zi\n", varray.size() );
+
+	while ( !match )
+	{
+		addr = (addr + inc);
+
+		if ( addr < 0 )
+		{
+			addr = mb.size() - 1;
+		}
+		else if ( addr >= mb.size() )
+		{
+			addr = 0;
+		}
+
+		if ( addr == cursorAddr )
+		{
+			return -1;
+		}
+		match = 1;
+		for (int i=0; i<varray.size(); i++)
+		{
+			if ( (addr+i) >= mb.size() )
+			{
+				match = 0; break;
+			}
+			if ( memAccessFunc(addr+i) != varray[i] )
+			{
+				match = 0; break;
+			}
+		}
+	}
+
+	if ( match )
+	{
+		int endAddr = addr + varray.size() - 1;
+		//printf("Found Match at $%04X\n", addr );
+		txtHlgtStartChar = (addr%16);
+		txtHlgtStartLine = (addr/16);
+		txtHlgtStartAddr = addr;
+		txtHlgtEndChar = (endAddr%16);
+		txtHlgtEndLine = (endAddr/16);
+		txtHlgtEndAddr = (endAddr);
+		cursorAddr     = addr;
+		cursorPosX     = txtHlgtStartChar*2;
+
+		if ( txtHlgtStartLine < lineOffset )
+		{
+			lineOffset = txtHlgtStartLine;
+			vbar->setValue( lineOffset );
+		}
+		else if ( txtHlgtStartLine >= (lineOffset+viewLines-3) )
+		{
+			lineOffset = txtHlgtStartLine - viewLines + 3;
+
+			if ( lineOffset >= maxLineOffset )
+			{
+			   lineOffset = maxLineOffset;
+			}
+			vbar->setValue( lineOffset );
+		}
+		cursorPosY = txtHlgtStartLine - lineOffset;
+	}
+	return 0;
 }
 //----------------------------------------------------------------------------
 QPoint QHexEdit::convPixToCursor( QPoint p )
@@ -1957,6 +2183,9 @@ void QHexEdit::setHighlightEndCoord( int x, int y )
 			txtHlgtEndChar   = txtHlgtAnchorChar;
 		}
 	}
+	txtHlgtStartAddr = (txtHlgtStartLine*16) + txtHlgtStartChar;
+	txtHlgtEndAddr   = (txtHlgtEndLine  *16) + txtHlgtEndChar;
+
 	//printf(" (%i,%i) -> (%i,%i) \n", txtHlgtStartChar, txtHlgtStartLine, txtHlgtEndChar, txtHlgtEndLine );
 	return;
 }
@@ -2587,6 +2816,12 @@ int QHexEdit::getRomAddrColor( int addr, QColor &fg, QColor &bg )
 	if ( viewMode != MODE_NES_ROM )
 	{
 		return -1;
+	}
+	if ( (txtHlgtStartAddr != txtHlgtEndAddr) && (addr >= txtHlgtStartAddr) && (addr <= txtHlgtEndAddr) )
+	{
+		fg = QColor("white");
+		bg = QColor("blue");
+		return 0;
 	}
 	if (cdloggerdataSize == 0)
 	{
