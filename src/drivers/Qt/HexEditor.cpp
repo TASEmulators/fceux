@@ -541,9 +541,9 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	//QVBoxLayout *mainLayout;
 	QGridLayout *grid;
 	QMenuBar *menuBar;
-	QMenu *fileMenu, *viewMenu, *colorMenu;
+	QMenu *fileMenu, *editMenu, *viewMenu, *colorMenu;
 	QAction *saveROM, *closeAct;
-	QAction *actHlgt, *actHlgtRV, *actColorFG, *actColorBG;
+	QAction *act, *actHlgt, *actHlgtRV, *actColorFG, *actColorBG;
 	QActionGroup *group;
 	int useNativeMenuBar;
 
@@ -553,7 +553,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	menuBar = new QMenuBar(this);
 
-   // This is needed for menu bar to show up on MacOS
+	// This is needed for menu bar to show up on MacOS
 	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
 
 	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
@@ -561,41 +561,79 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	// Menu 
 	//-----------------------------------------------------------------------
 	// File
-   fileMenu = menuBar->addMenu(tr("File"));
+	fileMenu = menuBar->addMenu(tr("File"));
 
 	// File -> Save ROM
 	saveROM = new QAction(tr("Save ROM"), this);
-   //saveROM->setShortcut(QKeySequence::Open);
-   saveROM->setStatusTip(tr("Save ROM File"));
-   connect(saveROM, SIGNAL(triggered()), this, SLOT(saveRomFile(void)) );
-
-   fileMenu->addAction(saveROM);
+	//saveROM->setShortcut(QKeySequence::Open);
+	saveROM->setStatusTip(tr("Save ROM File"));
+	connect(saveROM, SIGNAL(triggered()), this, SLOT(saveRomFile(void)) );
+	
+	fileMenu->addAction(saveROM);
 
 	// File -> Save ROM As
 	saveROM = new QAction(tr("Save ROM As"), this);
-   //saveROM->setShortcut(QKeySequence::Open);
-   saveROM->setStatusTip(tr("Save ROM File As"));
-   connect(saveROM, SIGNAL(triggered()), this, SLOT(saveRomFileAs(void)) );
+	//saveROM->setShortcut(QKeySequence::Open);
+	saveROM->setStatusTip(tr("Save ROM File As"));
+	connect(saveROM, SIGNAL(triggered()), this, SLOT(saveRomFileAs(void)) );
+	
+	fileMenu->addAction(saveROM);
 
-   fileMenu->addAction(saveROM);
-
-   // File -> Goto Address
+	// File -> Goto Address
 	gotoAddrAct = new QAction(tr("Goto Addresss"), this);
-   gotoAddrAct->setShortcut(QKeySequence(tr("Ctrl+A")));
-   gotoAddrAct->setStatusTip(tr("Goto Address"));
-   connect(gotoAddrAct, SIGNAL(triggered()), this, SLOT(openGotoAddrDialog(void)) );
+	gotoAddrAct->setShortcut(QKeySequence(tr("Ctrl+A")));
+	gotoAddrAct->setStatusTip(tr("Goto Address"));
+	connect(gotoAddrAct, SIGNAL(triggered()), this, SLOT(openGotoAddrDialog(void)) );
 
-   fileMenu->addAction(gotoAddrAct);
+	fileMenu->addAction(gotoAddrAct);
 
 	fileMenu->addSeparator();
 
 	// File -> Close
 	closeAct = new QAction(tr("Close"), this);
-   //closeAct->setShortcuts(QKeySequence::Open);
-   closeAct->setStatusTip(tr("Close Window"));
-   connect(closeAct, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	//closeAct->setShortcuts(QKeySequence::Open);
+	closeAct->setStatusTip(tr("Close Window"));
+	connect(closeAct, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(closeAct);
 
-   fileMenu->addAction(closeAct);
+	// Edit
+	editMenu = menuBar->addMenu(tr("Edit"));
+
+	// Edit -> Undo
+	undoEditAct = new QAction(tr("Undo"), this);
+	undoEditAct->setShortcut(QKeySequence(tr("U")));
+	undoEditAct->setStatusTip(tr("Undo Edit"));
+	undoEditAct->setEnabled(false);
+	//connect(undoEditAct, SIGNAL(triggered()), this, SLOT(saveRomFile(void)) );
+	
+	editMenu->addAction(undoEditAct);
+	editMenu->addSeparator();
+
+	// Edit -> Copy
+	act = new QAction(tr("Copy"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+C")));
+	act->setStatusTip(tr("Copy"));
+	connect(act, SIGNAL(triggered()), this, SLOT(copyToClipboard(void)) );
+	
+	editMenu->addAction(act);
+
+	// Edit -> Paste
+	act = new QAction(tr("Paste"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+V")));
+	act->setStatusTip(tr("Paste"));
+	connect(act, SIGNAL(triggered()), this, SLOT(pasteFromClipboard(void)) );
+	
+	editMenu->addAction(act);
+	editMenu->addSeparator();
+
+	// Edit -> Find
+	act = new QAction(tr("Find"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+F")));
+	act->setStatusTip(tr("Find"));
+	//connect(act, SIGNAL(triggered()), this, SLOT(saveRomFile(void)) );
+
+	editMenu->addAction(act);
 
 	// View
 	viewMenu = menuBar->addMenu(tr("View"));
@@ -606,13 +644,13 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	// View -> RAM
 	viewRAM = new QAction(tr("RAM"), this);
-   //viewRAM->setShortcuts(QKeySequence::Open);
-   viewRAM->setStatusTip(tr("View RAM"));
+	//viewRAM->setShortcuts(QKeySequence::Open);
+	viewRAM->setStatusTip(tr("View RAM"));
 	viewRAM->setCheckable(true);
-   connect(viewRAM, SIGNAL(triggered()), this, SLOT(setViewRAM(void)) );
+	connect(viewRAM, SIGNAL(triggered()), this, SLOT(setViewRAM(void)) );
 
 	group->addAction(viewRAM);
-   viewMenu->addAction(viewRAM);
+	viewMenu->addAction(viewRAM);
 
 	// View -> PPU
 	viewPPU = new QAction(tr("PPU"), this);
@@ -1174,6 +1212,16 @@ void HexEditorDialog_t::openGotoAddrDialog(void)
    editor->openGotoAddrDialog();
 }
 //----------------------------------------------------------------------------
+void HexEditorDialog_t::copyToClipboard(void)
+{
+   editor->loadHighlightToClipboard();
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::pasteFromClipboard(void)
+{
+   editor->pasteFromClipboard();
+}
+//----------------------------------------------------------------------------
 QHexEdit::QHexEdit(QWidget *parent)
 	: QWidget( parent )
 {
@@ -1204,17 +1252,17 @@ QHexEdit::QHexEdit(QWidget *parent)
 	calcFontData();
 
 	memAccessFunc = getRAM;
-   viewMode    = MODE_NES_RAM;
+	viewMode    = MODE_NES_RAM;
 	lineOffset  = 0;
 	cursorPosX  = 0;
 	cursorPosY  = 0;
 	cursorAddr  = 0;
 	cursorBlink = true;
 	cursorBlinkCount = 0;
-   maxLineOffset = 0;
-   editAddr  = -1;
-   editValue =  0;
-   editMask  =  0;
+	maxLineOffset = 0;
+	editAddr  = -1;
+	editValue =  0;
+	editMask  =  0;
 	reverseVideo = true;
 	actvHighlightEnable = true;
 	total_instructions_lp = 0;
@@ -1264,6 +1312,17 @@ QHexEdit::QHexEdit(QWidget *parent)
 		}
 		rvActvTextColor[i].setRgbF( grayScale, grayScale, grayScale );
 	}
+
+	mouseLeftBtnDown = false;
+
+	txtHlgtAnchorChar = -1;
+	txtHlgtAnchorLine = -1;
+	txtHlgtStartChar = -1;
+	txtHlgtStartLine = -1;
+	txtHlgtEndChar = -1;
+	txtHlgtEndLine = -1;
+
+	clipboard = QGuiApplication::clipboard();
 }
 //----------------------------------------------------------------------------
 QHexEdit::~QHexEdit(void)
@@ -1280,14 +1339,14 @@ void QHexEdit::calcFontData(void)
 #else
     pxCharWidth = metrics.width(QLatin1Char('2'));
 #endif
-    pxCharHeight  = metrics.height();
-	 pxLineSpacing = metrics.lineSpacing() * 1.25;
-    pxLineLead    = pxLineSpacing - pxCharHeight;
-	 pxXoffset     = pxCharWidth;
-	 pxYoffset     = pxLineSpacing * 2.0;
-	 pxHexOffset   = pxXoffset + (7*pxCharWidth);
-    pxHexAscii    = pxHexOffset + (16*3*pxCharWidth) + (pxCharWidth);
-	 pxLineWidth   = pxHexAscii + (17*pxCharWidth);
+	pxCharHeight  = metrics.height();
+	pxLineSpacing = metrics.lineSpacing() * 1.25;
+	pxLineLead    = pxLineSpacing - pxCharHeight;
+	pxXoffset     = pxCharWidth;
+	pxYoffset     = pxLineSpacing * 2.0;
+	pxHexOffset   = pxXoffset + (7*pxCharWidth);
+	pxHexAscii    = pxHexOffset + (16*3*pxCharWidth) + (pxCharWidth);
+	pxLineWidth   = pxHexAscii + (17*pxCharWidth);
     //_pxGapAdr = _pxCharWidth / 2;
     //_pxGapAdrHex = _pxCharWidth;
     //_pxGapHexAscii = 2 * _pxCharWidth;
@@ -1441,9 +1500,87 @@ void QHexEdit::resetCursor(void)
 {
 	cursorBlink = true;
 	cursorBlinkCount = 0;
-   editAddr = -1;
-   editValue = 0;
-   editMask  = 0;
+	editAddr = -1;
+	editValue = 0;
+	editMask  = 0;
+}
+//----------------------------------------------------------------------------
+void QHexEdit::loadClipboard( const char *txt )
+{
+	//printf("Load Clipboard: '%s'\n", txt );
+	clipboard->setText( tr(txt), QClipboard::Clipboard );
+
+	if ( clipboard->supportsSelection() )
+	{
+		clipboard->setText( tr(txt), QClipboard::Selection );
+	}
+}
+//----------------------------------------------------------------------------
+void QHexEdit::pasteFromClipboard(void)
+{
+	int i, val, addr;
+	std::string s = clipboard->text().toStdString();
+	const char *c;
+
+	fceuWrapperLock();
+
+	//printf("Paste: '%s'\n", s.c_str() );
+
+	addr = cursorAddr;
+
+	c = s.c_str();
+
+	i=0;
+	while ( c[i] != 0 )
+	{
+		while ( isspace(c[i]) ) i++;
+
+		val = 0;
+
+		if ( isxdigit(c[i]) )
+		{
+			val = convFromXchar(c[i]) << 4; i++;
+		}
+		else 
+		{
+			break;
+		}
+
+		if ( isxdigit(c[i]) )
+		{
+			val |= convFromXchar(c[i]); i++;
+		}
+		else 
+		{
+			break;
+		}
+		writeMem( viewMode, addr, val );
+
+		addr++;
+	}
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void QHexEdit::loadHighlightToClipboard(void)
+{
+	int a, startAddr, endAddr;
+	std::string s;
+	char c[8];
+
+	fceuWrapperLock();
+
+	startAddr = (txtHlgtStartLine*16) + txtHlgtStartChar;
+	endAddr   = (txtHlgtEndLine  *16) + txtHlgtEndChar;
+
+	for (a=startAddr; a<=endAddr; a++)
+	{
+		sprintf( c, "%02X ", GetMem(a) );
+
+		s.append(c);
+	}
+	fceuWrapperUnLock();
+
+	loadClipboard( s.c_str() );
 }
 //----------------------------------------------------------------------------
 QPoint QHexEdit::convPixToCursor( QPoint p )
@@ -1546,10 +1683,10 @@ int QHexEdit::convPixToAddr( QPoint p )
 //----------------------------------------------------------------------------
 void QHexEdit::keyPressEvent(QKeyEvent *event)
 {
-   //printf("Hex Window Key Press: 0x%x \n", event->key() );
+	//printf("Hex Window Key Press: 0x%x \n", event->key() );
 	
 	if (event->matches(QKeySequence::MoveToNextChar))
-   {
+	{
 		if ( cursorPosX < 32 )
 		{
 			if ( cursorPosX % 2 )
@@ -1570,9 +1707,9 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 			cursorPosX = 47;
 		}
 		resetCursor();
-   }
+	}
 	else if (event->matches(QKeySequence::MoveToPreviousChar))
-   {
+	{
 		if ( cursorPosX < 33 )
 		{
 			if ( cursorPosX % 2 )
@@ -1593,19 +1730,19 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 			cursorPosX = 0;
 		}
 		resetCursor();
-   }
+	}
 	else if (event->matches(QKeySequence::MoveToEndOfLine))
-   {
+	{
 		cursorPosX = 47;
 		resetCursor();
-   }
+	}
 	else if (event->matches(QKeySequence::MoveToStartOfLine))
-   {
+	{
 		cursorPosX = 0;
 		resetCursor();
-   }
+	}
 	else if (event->matches(QKeySequence::MoveToPreviousLine))
-   {
+	{
 		cursorPosY--;
 
 		if ( cursorPosY < 0 )
@@ -1618,145 +1755,148 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 			}
 			cursorPosY = 0;
 
-         vbar->setValue( lineOffset );
+			vbar->setValue( lineOffset );
 		}
 		resetCursor();
-   }
+	}
 	else if (event->matches(QKeySequence::MoveToNextLine))
-   {
+	{
 		cursorPosY++;
 
 		if ( cursorPosY >= viewLines )
 		{
 			lineOffset++;
 
-         if ( lineOffset >= maxLineOffset )
-         {
-            lineOffset = maxLineOffset;
-         }
+			if ( lineOffset >= maxLineOffset )
+			{
+			   lineOffset = maxLineOffset;
+			}
 			cursorPosY = viewLines-1;
 
-         vbar->setValue( lineOffset );
+			vbar->setValue( lineOffset );
 		}
 		resetCursor();
 
-   }
-   else if (event->matches(QKeySequence::MoveToNextPage))
-   {
-      lineOffset += ( (3 * viewLines) / 4);
+	}
+	else if (event->matches(QKeySequence::MoveToNextPage))
+	{
+		lineOffset += ( (3 * viewLines) / 4);
+		
+		if ( lineOffset >= maxLineOffset )
+		{
+		   lineOffset = maxLineOffset;
+		}
+		vbar->setValue( lineOffset );
+	     	resetCursor();
+	}
+	else if (event->matches(QKeySequence::MoveToPreviousPage))
+	{
+		lineOffset -= ( (3 * viewLines) / 4);
 
-      if ( lineOffset >= maxLineOffset )
-      {
-         lineOffset = maxLineOffset;
-      }
-      vbar->setValue( lineOffset );
+		if ( lineOffset < 0 )
+		{
+		   lineOffset = 0;
+		}
+		vbar->setValue( lineOffset );
 		resetCursor();
-   }
-   else if (event->matches(QKeySequence::MoveToPreviousPage))
-   {
-      lineOffset -= ( (3 * viewLines) / 4);
-
-      if ( lineOffset < 0 )
-      {
-         lineOffset = 0;
-      }
-      vbar->setValue( lineOffset );
+	}
+	else if (event->matches(QKeySequence::MoveToEndOfDocument))
+	{
+		lineOffset = maxLineOffset;
+		vbar->setValue( lineOffset );
+	     	resetCursor();
+	}
+	else if (event->matches(QKeySequence::MoveToStartOfDocument))
+	{
+		lineOffset = 0;
+		vbar->setValue( lineOffset );
 		resetCursor();
-   }
-   else if (event->matches(QKeySequence::MoveToEndOfDocument))
-   {
-      lineOffset = maxLineOffset;
-      vbar->setValue( lineOffset );
-		resetCursor();
-   }
-   else if (event->matches(QKeySequence::MoveToStartOfDocument))
-   {
-      lineOffset = 0;
-      vbar->setValue( lineOffset );
-		resetCursor();
-   }
-   else if (Qt::ControlModifier == event->modifiers())
-   {
+	}
+	else if (Qt::ControlModifier == event->modifiers())
+	{
 		if ( event->key() == Qt::Key_A )
 		{
-		   openGotoAddrDialog();
+			openGotoAddrDialog();
 		}
-		else if ( event->key() == Qt::Key_F )
+	}
+	else if (Qt::ShiftModifier == event->modifiers())
+	{
+		if ( event->key() == Qt::Key_F )
 		{
 			frzRamAddr = ctxAddr = cursorAddr;
-		   frzRamToggle();
+			frzRamToggle();
 		}
-   }
-   else if (event->key() == Qt::Key_Tab && (cursorPosX < 32) )
-   {  // switch from hex to ascii edit
-       cursorPosX = 32 + (cursorPosX / 2);
-   }
-   else if (event->key() == Qt::Key_Backtab  && (cursorPosX >= 32) )
-   {  // switch from ascii to hex edit
-      cursorPosX = 2 * (cursorPosX - 32);
-   }
-   else
-   {
-      int key;
-      if ( cursorPosX >= 32 )
-      {  // Edit Area is ASCII
-         key = (uchar)event->text()[0].toLatin1();
+	}
+	else if (event->key() == Qt::Key_Tab && (cursorPosX < 32) )
+	{  // switch from hex to ascii edit
+	    cursorPosX = 32 + (cursorPosX / 2);
+	}
+	else if (event->key() == Qt::Key_Backtab  && (cursorPosX >= 32) )
+	{  // switch from ascii to hex edit
+	   cursorPosX = 2 * (cursorPosX - 32);
+	}
+	else
+	{
+		int key;
+		if ( cursorPosX >= 32 )
+		{  // Edit Area is ASCII
+			key = (uchar)event->text()[0].toLatin1();
 
-         if ( ::isascii( key ) )
-         {
-            int offs = (cursorPosX-32);
-            int addr = 16*(lineOffset+cursorPosY) + offs;
+			if ( ::isascii( key ) )
+			{
+				int offs = (cursorPosX-32);
+				int addr = 16*(lineOffset+cursorPosY) + offs;
 				fceuWrapperLock();
-            writeMem( viewMode, addr, key );
-				fceuWrapperUnLock();
-
-            editAddr  = -1;
-            editValue =  0;
-            editMask  =  0;
-         }
-      }
-      else
-      {  // Edit Area is Hex
-         key = int(event->text()[0].toUpper().toLatin1());
-
-         if ( ::isxdigit( key ) )
-         {
-            int offs, nibbleValue, nibbleIndex;
-
-            offs = (cursorPosX / 2);
-            nibbleIndex = (cursorPosX % 2);
-
-            editAddr = 16*(lineOffset+cursorPosY) + offs;
-
-            nibbleValue = convFromXchar( key );
-
-            if ( nibbleIndex )
-            {
-               nibbleValue = editValue | nibbleValue;
-
-					fceuWrapperLock();
-               writeMem( viewMode, editAddr, nibbleValue );
-					fceuWrapperUnLock();
-
-               editAddr  = -1;
-               editValue =  0;
-               editMask  =  0;
-            }
-            else
-            {
-               editValue = (nibbleValue << 4);
-               editMask  = 0x00f0;
-            }
-            cursorPosX++;
-
-            if ( cursorPosX >= 32 )
-            {
-               cursorPosX = 0;
-            }
-         }
-      }
-      //printf("Key: %c  %i \n", key, key);
-   }
+				writeMem( viewMode, addr, key );
+			       	fceuWrapperUnLock();
+			
+				editAddr  = -1;
+				editValue =  0;
+				editMask  =  0;
+			}
+		}
+		else
+		{  // Edit Area is Hex
+		   key = int(event->text()[0].toUpper().toLatin1());
+		
+		   if ( ::isxdigit( key ) )
+		   {
+		      int offs, nibbleValue, nibbleIndex;
+		
+		      offs = (cursorPosX / 2);
+		      nibbleIndex = (cursorPosX % 2);
+		
+		      editAddr = 16*(lineOffset+cursorPosY) + offs;
+		
+		      nibbleValue = convFromXchar( key );
+		
+		      if ( nibbleIndex )
+		      {
+		         nibbleValue = editValue | nibbleValue;
+		
+		  	fceuWrapperLock();
+			writeMem( viewMode, editAddr, nibbleValue );
+		  	fceuWrapperUnLock();
+		
+		         editAddr  = -1;
+		         editValue =  0;
+		         editMask  =  0;
+		      }
+		      else
+		      {
+		         editValue = (nibbleValue << 4);
+		         editMask  = 0x00f0;
+		      }
+		      cursorPosX++;
+		
+		      if ( cursorPosX >= 32 )
+		      {
+		         cursorPosX = 0;
+		      }
+		   }
+		}
+		//printf("Key: %c  %i \n", key, key);
+	}
 }
 //----------------------------------------------------------------------------
 void QHexEdit::keyReleaseEvent(QKeyEvent *event)
@@ -1764,10 +1904,87 @@ void QHexEdit::keyReleaseEvent(QKeyEvent *event)
    //printf("Hex Window Key Release: 0x%x \n", event->key() );
 }
 //----------------------------------------------------------------------------
+bool QHexEdit::textIsHighlighted(void)
+{
+	bool set = false;
+
+	if ( txtHlgtStartLine == txtHlgtEndLine )
+	{
+		set = (txtHlgtStartChar != txtHlgtEndChar);
+	}
+	else
+	{
+		set = true;
+	}
+	return set;
+}
+//----------------------------------------------------------------------------
+void QHexEdit::setHighlightEndCoord( int x, int y )
+{
+
+	if ( txtHlgtAnchorLine < y )
+	{
+		txtHlgtStartLine = txtHlgtAnchorLine;
+		txtHlgtStartChar = txtHlgtAnchorChar;
+		txtHlgtEndLine   = y;
+		txtHlgtEndChar   = x;
+	}
+	else if ( txtHlgtAnchorLine > y )
+	{
+		txtHlgtStartLine = y;
+		txtHlgtStartChar = x;
+		txtHlgtEndLine   = txtHlgtAnchorLine;
+		txtHlgtEndChar   = txtHlgtAnchorChar;
+	}
+	else
+	{
+		txtHlgtStartLine = txtHlgtAnchorLine;
+		txtHlgtEndLine   = txtHlgtAnchorLine;
+
+		if ( txtHlgtAnchorChar < x )
+		{
+			txtHlgtStartChar = txtHlgtAnchorChar;
+			txtHlgtEndChar   = x;
+		}
+		else if ( txtHlgtAnchorChar > x )
+		{
+			txtHlgtStartChar = x;
+			txtHlgtEndChar   = txtHlgtAnchorChar;
+		}
+		else
+		{
+			txtHlgtStartChar = txtHlgtAnchorChar;
+			txtHlgtEndChar   = txtHlgtAnchorChar;
+		}
+	}
+	//printf(" (%i,%i) -> (%i,%i) \n", txtHlgtStartChar, txtHlgtStartLine, txtHlgtEndChar, txtHlgtEndLine );
+	return;
+}
+//----------------------------------------------------------------------------
+void QHexEdit::mouseMoveEvent(QMouseEvent * event)
+{
+	//int line;
+	//QPoint c = convPixToCursor( event->pos() );
+	int addr = convPixToAddr( event->pos() );
+
+	//line = lineOffset + c.y();
+
+	//printf("Move c: %ix%i \n", c.x(), c.y() );
+
+	if ( mouseLeftBtnDown )
+	{
+		//printf("Left Button Move: (%i,%i)\n", c.x(), c.y() );
+		setHighlightEndCoord( addr % 16, addr / 16 );
+	}
+}
+//----------------------------------------------------------------------------
 void QHexEdit::mousePressEvent(QMouseEvent * event)
 {
+	int addr;
 	QPoint c = convPixToCursor( event->pos() );
+	addr     = convPixToAddr( event->pos() );
 
+	//line = lineOffset + c.y();
 	//printf("c: %ix%i \n", c.x(), c.y() );
 
 	if ( event->button() == Qt::LeftButton )
@@ -1775,6 +1992,34 @@ void QHexEdit::mousePressEvent(QMouseEvent * event)
 		cursorPosX = c.x();
 		cursorPosY = c.y();
 		resetCursor();
+		mouseLeftBtnDown = true;
+
+		txtHlgtAnchorChar = addr % 16;
+		txtHlgtAnchorLine = addr / 16;
+		setHighlightEndCoord( txtHlgtAnchorChar, txtHlgtAnchorLine );
+	}
+
+}
+//----------------------------------------------------------------------------
+void QHexEdit::mouseReleaseEvent(QMouseEvent * event)
+{
+	//int line;
+	//QPoint c = convPixToCursor( event->pos() );
+	int addr   = convPixToAddr( event->pos() );
+
+	//line = lineOffset + c.y();
+	//printf("c: %ix%i \n", c.x(), c.y() );
+
+	if ( event->button() == Qt::LeftButton )
+	{
+		mouseLeftBtnDown = false;
+
+		setHighlightEndCoord( addr % 16, addr / 16 );
+
+		if ( textIsHighlighted() )
+		{
+			loadHighlightToClipboard();
+		}
 	}
 
 }
@@ -1855,7 +2100,7 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 			subMenu = menu.addMenu(tr("Freeze/Unfreeze Address"));
 
 			act = new QAction(tr("Toggle State"), &menu);
-			act->setShortcut( QKeySequence(tr("Ctrl+F")));
+			act->setShortcut( QKeySequence(tr("Shift+F")));
 			subMenu->addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamToggle(void)) );
 
@@ -2480,10 +2725,11 @@ void QHexEdit::memModeUpdate(void)
 void QHexEdit::paintEvent(QPaintEvent *event)
 {
 	int x, y, w, h, row, col, nrow, addr;
-	int c, cx, cy, ca;
+	int c, cx, cy, ca, l;
 	char txt[32], asciiTxt[4];
 	QPainter painter(this);
 	QColor white("white"), black("black"), blue("blue");
+	bool txtHlgtSet;
 
 	painter.setFont(font);
 	w = event->rect().width();
@@ -2559,17 +2805,73 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 	painter.setPen( this->palette().color(QPalette::WindowText));
 
-	//painter.setPen( QColor("white") );
 	addr = lineOffset * 16;
 	y = pxYoffset;
 
+	txtHlgtSet = textIsHighlighted();
+
+
 	for ( row=0; row < nrow; row++)
 	{
+		l = lineOffset + row;
 		x = pxXoffset - pxLineXScroll;
 
 		painter.setPen( this->palette().color(QPalette::WindowText));
 		sprintf( txt, "%06X", addr );
 		painter.drawText( x, y, tr(txt) );
+
+		x = pxHexOffset - pxLineXScroll;
+
+		if ( txtHlgtSet && (l >= txtHlgtStartLine) && (l <= txtHlgtEndLine) )
+		{
+			int hlgtXs, hlgtXe, hlgtXd;
+
+			if ( l == txtHlgtStartLine )
+			{
+				hlgtXs = txtHlgtStartChar*3;
+			}
+			else
+			{
+				hlgtXs = 0;
+			}
+
+			if ( l == txtHlgtEndLine )
+			{
+				hlgtXe = (txtHlgtEndChar+1)*3;
+			}
+			else
+			{
+				hlgtXe = 16*3;
+			}
+			hlgtXd = hlgtXe - hlgtXs;
+
+			x = pxHexOffset - pxLineXScroll;
+
+			painter.fillRect( x + (hlgtXs*pxCharWidth), y - pxLineSpacing + pxLineLead, hlgtXd*pxCharWidth, pxLineSpacing, blue );
+
+			if ( l == txtHlgtStartLine )
+			{
+				hlgtXs = txtHlgtStartChar;
+			}
+			else
+			{
+				hlgtXs = 0;
+			}
+
+			if ( l == txtHlgtEndLine )
+			{
+				hlgtXe = (txtHlgtEndChar+1);
+			}
+			else
+			{
+				hlgtXe = 16;
+			}
+			hlgtXd = hlgtXe - hlgtXs;
+
+			x = pxHexAscii - pxLineXScroll;
+
+			painter.fillRect( x + (hlgtXs*pxCharWidth), y - pxLineSpacing + pxLineLead, hlgtXd*pxCharWidth, pxLineSpacing, blue );
+		}
 
 		x = pxHexOffset - pxLineXScroll;
 
@@ -2589,17 +2891,17 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 				}
 				asciiTxt[1] = 0;
 
-            if ( addr == editAddr )
-            {  // Set a cell currently being editting to red text
-	            painter.setPen( QColor("red") );
-               txt[0] = convToXchar( (editValue >> 4) & 0x0F );
-               txt[1] = convToXchar( c & 0x0F );
-               txt[2] = 0;
-				   painter.drawText( x, y, tr(txt) );
-	            painter.setPen( this->palette().color(QPalette::WindowText));
-            } 
-            else
-            {
+				if ( addr == editAddr )
+				{  // Set a cell currently being editting to red text
+					painter.setPen( QColor("red") );
+					txt[0] = convToXchar( (editValue >> 4) & 0x0F );
+					txt[1] = convToXchar( c & 0x0F );
+					txt[2] = 0;
+					painter.drawText( x, y, tr(txt) );
+				        painter.setPen( this->palette().color(QPalette::WindowText));
+				} 
+				else
+				{
 					if ( viewMode == MODE_NES_ROM )
 					{
 						QColor romBgColor, romFgColor;
@@ -2608,13 +2910,13 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 						if ( reverseVideo )
 						{
-	            		painter.setPen( romFgColor );
+							painter.setPen( romFgColor );
 							painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, romBgColor );
 							painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, romBgColor );
 						}
 						else
 						{
-	            		painter.setPen( romFgColor );
+							painter.setPen( romFgColor );
 						}
 					}
 					else if ( viewMode == MODE_NES_RAM )
@@ -2623,61 +2925,61 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 						{
 							if ( reverseVideo )
 							{
-	            			painter.setPen( white );
+								painter.setPen( white );
 								painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, blue );
 								painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, blue );
 							}
 							else
 							{
-	            			painter.setPen( blue );
+								painter.setPen( blue );
 							}
 						}
 						else if ( actvHighlightEnable && (mb.buf[addr].actv > 0) )
 						{
 							if ( reverseVideo )
 							{
-	            			painter.setPen( rvActvTextColor[ mb.buf[addr].actv ] );
+								painter.setPen( rvActvTextColor[ mb.buf[addr].actv ] );
 								painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
 								painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
 							}
 							else
 							{
-	            			painter.setPen( highLightColor[ mb.buf[addr].actv ] );
+								painter.setPen( highLightColor[ mb.buf[addr].actv ] );
 							}
 						}
 						else 
 						{
-	            		painter.setPen( this->palette().color(QPalette::WindowText));
+							painter.setPen( this->palette().color(QPalette::WindowText));
 						}
 					}
 					else if ( actvHighlightEnable && (mb.buf[addr].actv > 0) )
 					{
 						if ( reverseVideo )
 						{
-	            		painter.setPen( rvActvTextColor[ mb.buf[addr].actv ] );
+							painter.setPen( rvActvTextColor[ mb.buf[addr].actv ] );
 							painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
 							painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
 						}
 						else
 						{
-	            		painter.setPen( highLightColor[ mb.buf[addr].actv ] );
+							painter.setPen( highLightColor[ mb.buf[addr].actv ] );
 						}
 					}
 					else
 					{
-	            	painter.setPen( this->palette().color(QPalette::WindowText));
+						painter.setPen( this->palette().color(QPalette::WindowText));
 					}
-               txt[0] = convToXchar( (c >> 4) & 0x0F );
-               txt[1] = convToXchar( c & 0x0F );
-               txt[2] = 0;
+					txt[0] = convToXchar( (c >> 4) & 0x0F );
+					txt[1] = convToXchar( c & 0x0F );
+					txt[2] = 0;
 
 					if ( cursorBlink && (ca == addr) )
 					{
 						painter.fillRect( cx , cy, pxCharWidth, pxCursorHeight, QColor("gray") );
 					}
-				   painter.drawText( x, y, tr(txt) );
+					painter.drawText( x, y, tr(txt) );
 					painter.drawText( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y, tr(asciiTxt) );
-            }
+				}
 			}
 			x += (3*pxCharWidth);
 			addr++;
@@ -2687,7 +2989,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		y += pxLineSpacing;
 	}
 
-   painter.setPen( this->palette().color(QPalette::WindowText));
+	painter.setPen( this->palette().color(QPalette::WindowText));
 	painter.drawText( pxHexOffset - pxLineXScroll, pxLineSpacing, "00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F" );
 	painter.drawLine( pxHexOffset - (pxCharWidth/2) - pxLineXScroll, 0, pxHexOffset - (pxCharWidth/2) - pxLineXScroll, h );
 	painter.drawLine( pxHexAscii  - (pxCharWidth/2) - pxLineXScroll, 0, pxHexAscii  - (pxCharWidth/2) - pxLineXScroll, h );

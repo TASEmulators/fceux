@@ -113,10 +113,12 @@ class QHexEdit : public QWidget
 		void setForeGroundColor( QColor fg );
 		void setBackGroundColor( QColor bg );
 		void memModeUpdate(void);
-      void openGotoAddrDialog(void);
+		void openGotoAddrDialog(void);
 		int  checkMemActivity(void);
 		int  getAddr(void){ return cursorAddr; };
 		int  FreezeRam( const char *name, uint32_t a, uint8_t v, int c, int s, int type );
+		void loadHighlightToClipboard(void);
+		void pasteFromClipboard(void);
 
 		enum {
 			MODE_NES_RAM = 0,
@@ -128,17 +130,22 @@ class QHexEdit : public QWidget
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
-   	void keyReleaseEvent(QKeyEvent *event);
+		void keyReleaseEvent(QKeyEvent *event);
 		void mousePressEvent(QMouseEvent * event);
+		void mouseReleaseEvent(QMouseEvent * event);
+		void mouseMoveEvent(QMouseEvent * event);
 		void wheelEvent(QWheelEvent *event);
 		void resizeEvent(QResizeEvent *event);
 		void contextMenuEvent(QContextMenuEvent *event);
 
 		void calcFontData(void);
 		void resetCursor(void);
+		bool textIsHighlighted(void);
+		void setHighlightEndCoord( int x, int y );
 		QPoint convPixToCursor( QPoint p );
 		int convPixToAddr( QPoint p );
 		bool frzRamAddrValid( int addr );
+		void loadClipboard( const char *txt );
 
 		QFont      font;
 
@@ -151,12 +158,13 @@ class QHexEdit : public QWidget
 		QScrollBar *hbar;
 		QColor      highLightColor[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
 		QColor      rvActvTextColor[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
+		QClipboard *clipboard;
 
 		HexEditorDialog_t *parent;
 
 		uint64_t total_instructions_lp;
 
-      int viewMode;
+		int viewMode;
 		int lineOffset;
 		int pxCharWidth;
 		int pxCharHeight;
@@ -176,10 +184,10 @@ class QHexEdit : public QWidget
 		int viewLines;
 		int viewWidth;
 		int viewHeight;
-      int maxLineOffset;
-      int editAddr;
-      int editValue;
-      int editMask;
+		int maxLineOffset;
+		int editAddr;
+		int editValue;
+		int editMask;
 		int jumpToRomValue;
 		int ctxAddr;
 		int frzRamAddr;
@@ -187,10 +195,17 @@ class QHexEdit : public QWidget
 		int frzRamMode;
 		int frzIdx;
 		int wheelPixelCounter;
+		int txtHlgtAnchorChar;
+		int txtHlgtAnchorLine;
+		int txtHlgtStartChar;
+		int txtHlgtStartLine;
+		int txtHlgtEndChar;
+		int txtHlgtEndLine;
 
 		bool cursorBlink;
 		bool reverseVideo;
 		bool actvHighlightEnable;
+		bool mouseLeftBtnDown;
 
 	private slots:
 		void jumpToROM(void);
@@ -235,11 +250,12 @@ class HexEditorDialog_t : public QDialog
 		QAction    *viewOAM;
 		QAction    *viewROM;
 		QAction    *gotoAddrAct;
+		QAction    *undoEditAct;
 
 	private:
 
    public slots:
-      void closeWindow(void);
+		void closeWindow(void);
 	private slots:
 		void updatePeriodic(void);
 		void vbarMoved(int value);
@@ -256,7 +272,9 @@ class HexEditorDialog_t : public QDialog
 		void pickForeGroundColor(void);
 		void pickBackGroundColor(void);
 		void removeAllBookmarks(void);
-      void openGotoAddrDialog(void);
+		void openGotoAddrDialog(void);
+		void copyToClipboard(void);
+		void pasteFromClipboard(void);
 };
 
 int hexEditorNumWindows(void);

@@ -3097,7 +3097,7 @@ QAsmView::QAsmView(QWidget *parent)
 	wheelPixelCounter =  0;
 
 	//setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
-   setFocusPolicy(Qt::StrongFocus);
+	setFocusPolicy(Qt::StrongFocus);
 
 	clipboard = QGuiApplication::clipboard();
 
@@ -3533,7 +3533,7 @@ void QAsmView::loadHighlightToClipboard(void)
 	{
 		l = lineOffset + row;
 
-	   if ( (l >= txtHlgtStartLine) && (l <= txtHlgtEndLine) )
+		if ( (l >= txtHlgtStartLine) && (l <= txtHlgtEndLine) )
 		{
 			int hlgtXs, hlgtXe, hlgtXd;
 			std::string s;
