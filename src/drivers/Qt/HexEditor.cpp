@@ -560,6 +560,8 @@ HexEditorFindDialog_t::HexEditorFindDialog_t(QWidget *parent)
 	hbox->addWidget( searchBox );
 	hbox->addWidget( nextBtn   );
 
+	nextBtn->setDefault(true);
+
 	mainLayout->addLayout( hbox );
 
 	hbox   = new QHBoxLayout();
@@ -1547,6 +1549,7 @@ void QHexEdit::setMode( int mode )
 	{
 		viewMode = mode;
 		memModeUpdate();
+		clearHighlight();
 	}
 }
 //----------------------------------------------------------------------------
@@ -1565,16 +1568,16 @@ void QHexEdit::setAddr( int newAddr )
 		lineOffset = 0;
 	}
 	else if ( lineOffset >= maxLineOffset )
-   {
-      lineOffset = maxLineOffset;
-   }
+	{
+		lineOffset = maxLineOffset;
+	}
 
 	addr = 16*lineOffset;
 
 	cursorPosX = 2*((newAddr - addr)%16);
 	cursorPosY =    (newAddr - addr)/16;
 
-   vbar->setValue( lineOffset );
+	vbar->setValue( lineOffset );
 }
 //----------------------------------------------------------------------------
 void QHexEdit::setHorzScroll( int value )
@@ -1629,23 +1632,23 @@ void QHexEdit::openGotoAddrDialog(void)
 
 	sprintf( stmp, "Specify Address [ 0x0 -> 0x%X ]", mb.size()-1 );
 
-   dialog.setWindowTitle( tr("Goto Address") );
-   dialog.setLabelText( tr(stmp) );
-   dialog.setOkButtonText( tr("Go") );
+	dialog.setWindowTitle( tr("Goto Address") );
+	dialog.setLabelText( tr(stmp) );
+	dialog.setOkButtonText( tr("Go") );
 	//dialog.setTextValue( tr("0") );
 
-   dialog.show();
-   ret = dialog.exec();
+	dialog.show();
+	ret = dialog.exec();
 
-   if ( QDialog::Accepted == ret )
-   {
-      int addr;
-      std::string s = dialog.textValue().toStdString();
-
-      addr = strtol( s.c_str(), NULL, 16 );
-
+	if ( QDialog::Accepted == ret )
+	{
+		int addr;
+		std::string s = dialog.textValue().toStdString();
+	
+		addr = strtol( s.c_str(), NULL, 16 );
+	
 		parent->gotoAddress(addr);
-   }
+	}
 }
 //----------------------------------------------------------------------------
 void QHexEdit::resetCursor(void)
@@ -1655,6 +1658,18 @@ void QHexEdit::resetCursor(void)
 	editAddr = -1;
 	editValue = 0;
 	editMask  = 0;
+}
+//----------------------------------------------------------------------------
+void QHexEdit::clearHighlight(void)
+{
+	txtHlgtAnchorChar = -1;
+	txtHlgtAnchorLine = -1;
+	txtHlgtStartChar = -1;
+	txtHlgtStartLine = -1;
+	txtHlgtStartAddr = -1;
+	txtHlgtEndChar = -1;
+	txtHlgtEndLine = -1;
+	txtHlgtEndAddr = -1;
 }
 //----------------------------------------------------------------------------
 void QHexEdit::loadClipboard( const char *txt )

@@ -121,6 +121,7 @@ class QHexEdit : public QWidget
 		int  FreezeRam( const char *name, uint32_t a, uint8_t v, int c, int s, int type );
 		void loadHighlightToClipboard(void);
 		void pasteFromClipboard(void);
+		void clearHighlight(void);
 		int  findPattern( std::vector <unsigned char> &varray, int dir );
 
 		enum {
