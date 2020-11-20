@@ -2931,7 +2931,7 @@ void loadGameDebugBreakpoints(void)
 				else if ( strcmp( id, "flags" ) == 0 )
 				{
 					type = 0;
-					enable = (data[0] == 'E'); // Always start with breakpoints disabled.
+					enable = (data[0] == 'E');
 
 					if ( data[1] == 'P' )
 					{
