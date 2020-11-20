@@ -123,6 +123,7 @@ class QHexEdit : public QWidget
 		void pasteFromClipboard(void);
 		void clearHighlight(void);
 		int  findPattern( std::vector <unsigned char> &varray, int dir );
+		void requestUpdate(void);
 
 		enum {
 			MODE_NES_RAM = 0,
@@ -212,6 +213,7 @@ class QHexEdit : public QWidget
 		bool reverseVideo;
 		bool actvHighlightEnable;
 		bool mouseLeftBtnDown;
+		bool updateRequested;
 
 	private slots:
 		void jumpToROM(void);
@@ -305,9 +307,11 @@ class HexEditorDialog_t : public QDialog
 		void copyToClipboard(void);
 		void pasteFromClipboard(void);
 		void openFindDialog(void);
+		void undoRomPatch(void);
 };
 
 int hexEditorNumWindows(void);
+void hexEditorRequestUpdateAll(void);
 void hexEditorUpdateMemoryValues(void);
 void hexEditorLoadBookmarks(void);
 void hexEditorSaveBookmarks(void);

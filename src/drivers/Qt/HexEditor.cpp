@@ -47,6 +47,171 @@ static bool memNeedsCheck = false;
 static HexBookMarkManager_t hbm;
 static std::list <HexEditorDialog_t*> winList;
 static const char *memViewNames[] = { "RAM", "PPU", "OAM", "ROM", NULL };
+
+static int getROM( unsigned int offset);
+static int writeMem( int mode, unsigned int addr, int value );
+//----------------------------------------------------------------------------
+struct  romEditEntry_t
+{
+	int       addr;
+	int       size;
+	uint8_t  *data;
+
+	romEditEntry_t(void)
+	{
+		addr = -1; size = 0; data = NULL;
+	}
+
+	~romEditEntry_t(void)
+	{
+		if ( data != NULL )
+		{
+			free(data); data = NULL;
+		}
+	}
+};
+
+struct  romEditList_t
+{
+	uint8_t  *modMem;
+	int       modMemSize;
+
+	std::list <romEditEntry_t*> undoList;
+	//std::list <romEditEntry_t*> redoList; // TODO
+
+	romEditList_t(void)
+	{
+		modMem = NULL;
+		modMemSize = 0;
+	}
+
+	~romEditList_t(void)
+	{
+		clear();
+	}
+
+	void clear(void)
+	{
+		while ( !undoList.empty() )
+		{
+			delete undoList.back();
+
+			undoList.pop_back();
+		}
+		if ( modMem != NULL )
+		{
+			free(modMem); modMem = NULL; modMemSize = 0;
+		}
+	}	
+
+	void applyPatch( int addr, int data )
+	{
+		uint8_t u8;
+
+		u8 = data;
+
+		applyPatch( addr, &u8, 1 );
+	}
+
+	void applyPatch( int addr, uint8_t *data, int size )
+	{
+		int ofs;
+		romEditEntry_t *entry;
+
+		if ( GameInfo == NULL )
+		{
+			return;
+		}
+		if ( modMem == NULL )
+		{
+			modMemSize = 16 + CHRsize[0] + PRGsize[0];
+
+			modMem = (uint8_t*)malloc( modMemSize );
+
+			if ( modMem == NULL )
+			{
+				printf("Error: Failed to allocate ROM modification memory buffer\n");
+				return;
+			}
+			memset( modMem, 0, modMemSize );
+		}
+		entry = new romEditEntry_t();
+		entry->addr = addr;
+		entry->size = size;
+		entry->data = (uint8_t*)malloc(sizeof(uint8_t)*size);
+
+		for (int i = 0; i < size; i++)
+		{
+			ofs = addr+i;
+
+			entry->data[i] = getROM(ofs);
+
+			writeMem( QHexEdit::MODE_NES_ROM, ofs, data[i] );
+
+			modMem[ofs]++;
+		}
+		undoList.push_back( entry );
+	}
+
+	int undoPatch(void)
+	{
+		int ofs, ret = -1;
+		romEditEntry_t *entry;
+
+		if ( undoList.empty() )
+		{
+			return ret;
+		}
+		entry = undoList.back();  undoList.pop_back();
+
+		ret = entry->addr;
+
+		for (int i=0; i<entry->size; i++)
+		{
+			ofs = entry->addr + i;
+
+			writeMem( QHexEdit::MODE_NES_ROM, ofs, entry->data[i] );
+
+			if ( modMem )
+			{	
+				if ( (ofs >= 0) && (ofs < modMemSize) )
+				{
+					if ( modMem[ofs] > 0 )
+					{
+						modMem[ofs]--;
+					}
+				}
+			}
+		}
+		delete entry;
+
+		return ret;
+	}
+
+	bool isModified( int addr )
+	{
+		if ( modMem == NULL )
+		{
+			return false;
+		}
+		if ( addr < 0 )
+		{
+			return false;
+		}
+		else if ( addr >= modMemSize )
+		{
+			return false;
+		}
+		return modMem[addr] ? true : false;
+	}
+
+	size_t undoQueueSize(void)
+	{
+		return undoList.size();
+	}
+};
+
+static romEditList_t romEditList;
 //----------------------------------------------------------------------------
 static int getRAM( unsigned int i )
 {
@@ -180,6 +345,9 @@ static int writeMem( int mode, unsigned int addr, int value )
 		}
 		break;
 	}
+
+	hexEditorRequestUpdateAll();
+
    return 0;
 }
 //----------------------------------------------------------------------------
@@ -745,7 +913,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	undoEditAct->setShortcut(QKeySequence(tr("U")));
 	undoEditAct->setStatusTip(tr("Undo Edit"));
 	undoEditAct->setEnabled(false);
-	//connect(undoEditAct, SIGNAL(triggered()), this, SLOT(saveRomFile(void)) );
+	connect(undoEditAct, SIGNAL(triggered()), this, SLOT(undoRomPatch(void)) );
 	
 	editMenu->addAction(undoEditAct);
 	editMenu->addSeparator();
@@ -1086,7 +1254,7 @@ void HexEditorDialog_t::gotoAddress( int newAddr )
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::saveRomFile(void)
 {
-	//FlushUndoBuffer();
+	romEditList.clear();
 	iNesSave();
 	//UpdateColorTable();
 }
@@ -1300,6 +1468,8 @@ void HexEditorDialog_t::openDebugSymbolEditWindow( int addr )
 void HexEditorDialog_t::updatePeriodic(void)
 {
 	//printf("Update Periodic\n");
+	
+	undoEditAct->setEnabled( romEditList.undoQueueSize() > 0 );
 
 	if ( fceuWrapperTryLock(0) )
 	{
@@ -1346,6 +1516,17 @@ void HexEditorDialog_t::updatePeriodic(void)
 				viewROM->setChecked(true);
 			}
 		break;
+	}
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::undoRomPatch(void)
+{
+	int addr = romEditList.undoPatch();
+
+	if ( addr >= 0 )
+	{
+		editor->setMode( QHexEdit::MODE_NES_ROM );
+		editor->setAddr( addr );
 	}
 }
 //----------------------------------------------------------------------------
@@ -1465,6 +1646,7 @@ QHexEdit::QHexEdit(QWidget *parent)
 		rvActvTextColor[i].setRgbF( grayScale, grayScale, grayScale );
 	}
 
+	updateRequested = false;
 	mouseLeftBtnDown = false;
 
 	txtHlgtAnchorChar = -1;
@@ -1720,6 +1902,11 @@ void QHexEdit::pasteFromClipboard(void)
 		else 
 		{
 			break;
+		}
+
+		if ( viewMode == QHexEdit::MODE_NES_ROM )
+		{
+			romEditList.applyPatch( addr, val );
 		}
 		writeMem( viewMode, addr, val );
 
@@ -2088,8 +2275,12 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 				int offs = (cursorPosX-32);
 				int addr = 16*(lineOffset+cursorPosY) + offs;
 				fceuWrapperLock();
+				if ( viewMode == QHexEdit::MODE_NES_ROM )
+				{
+					romEditList.applyPatch( addr, key );
+				}
 				writeMem( viewMode, addr, key );
-			       	fceuWrapperUnLock();
+				fceuWrapperUnLock();
 			
 				editAddr  = -1;
 				editValue =  0;
@@ -2115,9 +2306,13 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		      {
 		         nibbleValue = editValue | nibbleValue;
 		
-		  	fceuWrapperLock();
-			writeMem( viewMode, editAddr, nibbleValue );
-		  	fceuWrapperUnLock();
+					fceuWrapperLock();
+					if ( viewMode == QHexEdit::MODE_NES_ROM )
+					{
+						romEditList.applyPatch( editAddr, nibbleValue );
+					}
+					writeMem( viewMode, editAddr, nibbleValue );
+					fceuWrapperUnLock();
 		
 		         editAddr  = -1;
 		         editValue =  0;
@@ -2768,6 +2963,11 @@ void QHexEdit::jumpToROM(void)
 	setAddr( jumpToRomValue );
 }
 //----------------------------------------------------------------------------
+void QHexEdit::requestUpdate(void)
+{
+	updateRequested = true;
+}
+//----------------------------------------------------------------------------
 // Calling of checkMemActivity must always be synchronized with the emulation
 // thread as calling GetMem while the emulation is executing can mess up certain
 // registers (especially controller registers $4016 and $4017)
@@ -2779,10 +2979,13 @@ int QHexEdit::checkMemActivity(void)
 	// 1. In ROM View Mode
 	// 2. The simulation is not cycling (paused)
 
-	if ( ( viewMode == MODE_NES_ROM ) ||
-	      ( total_instructions_lp == total_instructions ) )
+	if ( !updateRequested )
 	{
-		return -1;
+		if ( ( viewMode == MODE_NES_ROM ) ||
+		      ( total_instructions_lp == total_instructions ) )
+		{
+			return -1;
+		}
 	}
 
 	for (int i=0; i<mb.size(); i++)
@@ -2805,6 +3008,7 @@ int QHexEdit::checkMemActivity(void)
 		}
 	}
 	total_instructions_lp = total_instructions;
+	updateRequested = false;
 
    return 0;
 }
@@ -2832,10 +3036,18 @@ int QHexEdit::getRomAddrColor( int addr, QColor &fg, QColor &bg )
 	{
 		return -1;
 	}
+	mb.buf[addr].data = memAccessFunc(addr);
+
 	if ( (txtHlgtStartAddr != txtHlgtEndAddr) && (addr >= txtHlgtStartAddr) && (addr <= txtHlgtEndAddr) )
 	{
-		fg = QColor("white");
-		bg = QColor("blue");
+		fg.setRgb( 255, 255, 255 ); // white
+		bg.setRgb(   0,   0, 255 ); // blue
+		return 0;
+	}
+	if ( romEditList.isModified( addr ) )
+	{
+		fg.setRgb( 255, 255, 255 ); // white
+		bg.setRgb( 255,   0,   0 ); // red
 		return 0;
 	}
 	if (cdloggerdataSize == 0)
@@ -3271,6 +3483,16 @@ void hexEditorSaveBookmarks(void)
 	for (it = winList.begin(); it != winList.end(); it++)
 	{
 		(*it)->populateBookmarkMenu();
+	}
+}
+//----------------------------------------------------------------------------
+void hexEditorRequestUpdateAll(void)
+{
+	std::list <HexEditorDialog_t*>::iterator it;
+
+	for (it = winList.begin(); it != winList.end(); it++)
+	{
+		(*it)->editor->requestUpdate();
 	}
 }
 //----------------------------------------------------------------------------
