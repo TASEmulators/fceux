@@ -22,6 +22,7 @@
 #include "Qt/dface.h"
 #include "Qt/input.h"
 #include "Qt/config.h"
+#include "Qt/ConsoleWindow.h"
 
 
 #include "Qt/sdl.h"
@@ -1068,31 +1069,46 @@ do {                                              \
  * Return the state of the mouse buttons.  Input 'd' is an array of 3
  * integers that store <x, y, button state>.
  */
-void				// removed static for a call in lua-engine.cpp
-GetMouseData (uint32 (&d)[3])
+void GetMouseData (uint32 (&d)[3])
 {
-	int x, y;
-	uint32 t;
+	uint32 t, b;
+	double nx = 0.0, ny = 0.0;
 
-	// retrieve the state of the mouse from SDL
-	t = SDL_GetMouseState (&x, &y);
+	b = 0; // map mouse buttons
 
-	d[2] = 0;
-	if (t & SDL_BUTTON (1))
+	if ( consoleWindow->viewport_SDL )
 	{
-		d[2] |= 0x1;
+		consoleWindow->viewport_SDL->getNormalizedCursorPos(nx,ny);
+
+		if ( consoleWindow->viewport_SDL->getMouseButtonState( Qt::LeftButton ) )
+		{
+			b |= 0x01;
+		}
+		if ( consoleWindow->viewport_SDL->getMouseButtonState( Qt::RightButton ) )
+		{
+			b |= 0x02;
+		}
 	}
-	if (t & SDL_BUTTON (3))
+	else
 	{
-		d[2] |= 0x2;
+		consoleWindow->viewport_GL->getNormalizedCursorPos(nx,ny);
+
+		if ( consoleWindow->viewport_GL->getMouseButtonState( Qt::LeftButton ) )
+		{
+			b |= 0x01;
+		}
+		if ( consoleWindow->viewport_GL->getMouseButtonState( Qt::RightButton ) )
+		{
+			b |= 0x02;
+		}
 	}
 
-	// get the mouse position from the SDL video driver
-	t = PtoV (x, y);
+	t = PtoV (nx, ny);
+	d[2] = b;
 	d[0] = t & 0xFFFF;
 	d[1] = (t >> 16) & 0xFFFF;
-	// debug print 
-	// printf("mouse %d %d %d\n", d[0], d[1], d[2]);
+
+	//printf("mouse %d %d %d\n", d[0], d[1], d[2]);
 }
 
 void GetMouseRelative (int32 (&d)[3])

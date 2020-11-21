@@ -32,11 +32,16 @@ class ConsoleViewSDL_t : public QWidget
 		double getScaleX(void){ return xscale; };
 		double getScaleY(void){ return yscale; };
 		void   setScaleXY( double xs, double ys );
+		void   getNormalizedCursorPos( double &x, double &y );
+		bool   getMouseButtonState( unsigned int btn );
 
 	protected:
 
 	//void paintEvent(QPaintEvent *event);
 	void resizeEvent(QResizeEvent *event);
+	void mousePressEvent(QMouseEvent * event);
+	void mouseReleaseEvent(QMouseEvent * event);
+
 	int  view_width;
 	int  view_height;
 
@@ -57,6 +62,7 @@ class ConsoleViewSDL_t : public QWidget
 
 	uint32_t  *localBuf;
 	uint32_t   localBufSize;
+	unsigned int mouseButtonMask;
 
  	SDL_Window   *sdlWindow;
 	SDL_Renderer *sdlRenderer;

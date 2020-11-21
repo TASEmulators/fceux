@@ -492,16 +492,28 @@ BlitScreen(uint8 *XBuf)
  *  Converts an x-y coordinate in the window manager into an x-y
  *  coordinate on FCEU's screen.
  */
-uint32
-PtoV(uint16 x,
-	uint16 y)
+uint32 PtoV(double nx, double ny)
 {
-	y = (uint16)((double)y / s_eys);
-	x = (uint16)((double)x / s_exs);
-	if(s_clipSides) {
+	int x, y;
+	y = (int)( ny * (double)nes_shm->video.nrow );
+	x = (int)( nx * (double)nes_shm->video.ncol );
+
+	//printf("Scaled (%i,%i) \n", x, y);
+
+	x = x / nes_shm->video.scale;
+
+	if ( nes_shm->video.xyRatio == 1 )
+	{
+		y = y / nes_shm->video.scale;
+	}
+	//printf("UnScaled (%i,%i) \n", x, y);
+
+	if (s_clipSides) 
+	{
 		x += 8;
 	}
 	y += s_srendline;
+
 	return (x | (y << 16));
 }
 
