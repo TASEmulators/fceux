@@ -7,6 +7,7 @@
 
 #include <QApplication>
 #include <QScreen>
+#include <QMouseEvent>
 
 #include "Qt/nes_shm.h"
 #include "Qt/fceuWrapper.h"
@@ -27,6 +28,10 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 	autoScaleEna = true;
 	xscale = 2.0;
 	yscale = 2.0;
+	sx = 0; sy = 0;
+	rw = 256;
+	rh = 240;
+	mouseButtonMask = 0;
 
 	setMinimumWidth( GL_NES_WIDTH );
 	setMinimumHeight( GL_NES_HEIGHT );
@@ -208,6 +213,61 @@ void ConsoleViewGL_t::transfer2LocalBuffer(void)
 	}
 }
 
+void ConsoleViewGL_t::mousePressEvent(QMouseEvent * event)
+{
+	//printf("Mouse Button Press: (%i,%i) %x  %x\n", 
+	//		event->pos().x(), event->pos().y(), event->button(), event->buttons() );
+
+	mouseButtonMask = event->buttons();
+}
+
+void ConsoleViewGL_t::mouseReleaseEvent(QMouseEvent * event)
+{
+	//printf("Mouse Button Release: (%i,%i) %x  %x\n", 
+	//		event->pos().x(), event->pos().y(), event->button(), event->buttons() );
+
+	mouseButtonMask = event->buttons();
+}
+
+bool ConsoleViewGL_t::getMouseButtonState( unsigned int btn )
+{
+	return (mouseButtonMask & btn) ? true : false;
+}
+
+void  ConsoleViewGL_t::getNormalizedCursorPos( double &x, double &y )
+{
+	QPoint cursor;
+
+	cursor = QCursor::pos();
+
+	//printf("Global Cursor (%i,%i) \n", cursor.x(), cursor.y() );
+
+	cursor = mapFromGlobal( cursor );
+
+	//printf("Window Cursor (%i,%i) \n", cursor.x(), cursor.y() );
+
+	x = (double)(cursor.x() - sx) / (double)rw;
+	y = (double)(cursor.y() - sy) / (double)rh;
+
+	if ( x < 0.0 )
+	{
+		x = 0.0;
+	}
+	else if ( x > 1.0 )
+	{
+		x = 1.0;
+	}
+	if ( y < 0.0 )
+	{
+		y = 0.0;
+	}
+	else if ( y > 1.0 )
+	{
+		y = 1.0;
+	}
+	//printf("Normalized Cursor (%f,%f) \n", x, y );
+}
+
 void ConsoleViewGL_t::paintGL(void)
 {
 	int texture_width  = nes_shm->video.ncol;
@@ -247,10 +307,10 @@ void ConsoleViewGL_t::paintGL(void)
 			yscaleTmp = yscale;
 		}
 	}
-	int rw=(int)((r-l)*xscaleTmp);
-	int rh=(int)((b-t)*yscaleTmp);
-	int sx=(view_width-rw)/2;   
-	int sy=(view_height-rh)/2;
+	rw=(int)((r-l)*xscaleTmp);
+	rh=(int)((b-t)*yscaleTmp);
+	sx=(view_width-rw)/2;   
+	sy=(view_height-rh)/2;
 
 	glViewport(sx, sy, rw, rh);
 

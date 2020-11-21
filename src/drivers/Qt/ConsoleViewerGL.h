@@ -29,11 +29,15 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 		double getScaleX(void){ return xscale; };
 		double getScaleY(void){ return yscale; };
 		void   setScaleXY( double xs, double ys );
+		void   getNormalizedCursorPos( double &x, double &y );
+		bool   getMouseButtonState( unsigned int btn );
 
 	protected:
    void initializeGL(void);
 	void resizeGL(int w, int h);
 	void paintGL(void);
+	void mousePressEvent(QMouseEvent * event);
+	void mouseReleaseEvent(QMouseEvent * event);
 
 	void buildTextures(void);
 	void calcPixRemap(void);
@@ -44,10 +48,16 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 	double yscale;
 	int  view_width;
 	int  view_height;
+	int  sx;
+	int  sy;
+	int  rw;
+	int  rh;
 	GLuint gltexture;
 	bool   linearFilter;
 	bool   sqrPixels;
 	bool   autoScaleEna;
+
+	unsigned int  mouseButtonMask;
 
 	uint32_t  *localBuf;
 	uint32_t   localBufSize;

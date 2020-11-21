@@ -42,6 +42,7 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	sdlTexture  = NULL;
 
 	vsyncEnabled = false;
+	mouseButtonMask = 0;
 
 	localBufSize = (4 * GL_NES_WIDTH) * (4 * GL_NES_HEIGHT) * sizeof(uint32_t);
 
@@ -250,6 +251,61 @@ void ConsoleViewSDL_t::resizeEvent(QResizeEvent *event)
 	printf("SDL Resize: %i x %i \n", view_width, view_height);
 
 	reset();
+}
+
+void ConsoleViewSDL_t::mousePressEvent(QMouseEvent * event)
+{
+	//printf("Mouse Button Press: (%i,%i) %x  %x\n", 
+	//		event->pos().x(), event->pos().y(), event->button(), event->buttons() );
+
+	mouseButtonMask = event->buttons();
+}
+
+void ConsoleViewSDL_t::mouseReleaseEvent(QMouseEvent * event)
+{
+	//printf("Mouse Button Release: (%i,%i) %x  %x\n", 
+	//		event->pos().x(), event->pos().y(), event->button(), event->buttons() );
+
+	mouseButtonMask = event->buttons();
+}
+
+bool ConsoleViewSDL_t::getMouseButtonState( unsigned int btn )
+{
+	return (mouseButtonMask & btn) ? true : false;
+}
+
+void  ConsoleViewSDL_t::getNormalizedCursorPos( double &x, double &y )
+{
+	QPoint cursor;
+
+	cursor = QCursor::pos();
+
+	//printf("Global Cursor (%i,%i) \n", cursor.x(), cursor.y() );
+
+	cursor = mapFromGlobal( cursor );
+
+	//printf("Window Cursor (%i,%i) \n", cursor.x(), cursor.y() );
+
+	x = (double)(cursor.x() - sx) / (double)rw;
+	y = (double)(cursor.y() - sy) / (double)rh;
+
+	if ( x < 0.0 )
+	{
+		x = 0.0;
+	}
+	else if ( x > 1.0 )
+	{
+		x = 1.0;
+	}
+	if ( y < 0.0 )
+	{
+		y = 0.0;
+	}
+	else if ( y > 1.0 )
+	{
+		y = 1.0;
+	}
+	//printf("Normalized Cursor (%f,%f) \n", x, y );
 }
 
 void ConsoleViewSDL_t::render(void)
