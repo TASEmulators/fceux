@@ -98,6 +98,22 @@ ParseGIInput (FCEUGI * gi)
 	cspec = gi->cspecial;
 }
 
+int getInputSelection( int port, int *cur, int *usr )
+{
+	if ( (port >= 0) && (port < 3) )
+	{
+		if ( cur )
+		{
+			*cur = CurInputType[port];
+		}
+		if ( usr )
+		{
+			*usr = UsrInputType[port];
+		}
+	}
+	return 0;
+}
+
 
 static uint8 QuizKingData = 0;
 static uint8 HyperShotData = 0;

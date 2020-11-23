@@ -130,6 +130,7 @@ class  consoleWin_t : public QMainWindow
 	public slots:
 		void openDebugWindow(void);
 		void openHexEditor(void);
+      void openGamePadConfWin(void);
 	private slots:
 		void closeApp(void);
 		void openROMFile(void);
@@ -141,7 +142,7 @@ class  consoleWin_t : public QMainWindow
 		void closeROMCB(void);
       void aboutFCEUX(void);
       void aboutQt(void);
-      void openGamePadConfWin(void);
+      void openInputConfWin(void);
       void openGameSndConfWin(void);
       void openGameVideoConfWin(void);
       void openHotkeyConfWin(void);

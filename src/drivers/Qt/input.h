@@ -78,5 +78,8 @@ void UpdateInput(Config *config);
 
 std::string GetUserText(const char* title);
 const char* ButtonName(const ButtConfig* bc);
+
+int getInputSelection( int port, int *cur, int *usr );
+
 #endif
 
