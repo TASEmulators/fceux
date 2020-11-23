@@ -108,6 +108,20 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 
 	vbox  = new QVBoxLayout();
 	hbox  = new QHBoxLayout();
+	vbox->addLayout( hbox );
+	hbox->addWidget( new QLabel( tr("File:") ) );
+	hbox->addWidget( saveFileName = new QLineEdit() );
+	saveFileName->setReadOnly(true);
+
+	hbox  = new QHBoxLayout();
+	vbox->addLayout( hbox );
+	hbox->addWidget( loadConfigButton = new QPushButton( tr("Load") ) );
+	hbox->addWidget( saveConfigButton = new QPushButton( tr("Save") ) );
+
+	presetFrame->setLayout( vbox );
+
+	vbox  = new QVBoxLayout();
+	hbox  = new QHBoxLayout();
 
 	vbox->addLayout( hbox );
 	hbox->addWidget( expPortLabel      = new QLabel( tr("<None>") ) );

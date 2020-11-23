@@ -10,6 +10,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QLineEdit>
 #include <QLabel>
 #include <QFrame>
 #include <QGroupBox>
@@ -39,6 +40,9 @@ class InputConfDialog_t : public QDialog
 		QLabel      *expPortLabel;
 		QPushButton *expPortConfButton;
 		QComboBox   *expPortComboxBox;
+		QPushButton *loadConfigButton;
+		QPushButton *saveConfigButton;
+		QLineEdit   *saveFileName;
 
 		int          curNesInput[3];
 		int          usrNesInput[3];

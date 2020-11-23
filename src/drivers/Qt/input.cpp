@@ -2189,7 +2189,7 @@ int loadInputSettingsFromFile( const char *filename )
 			printf("Warning: No Value Specified for Token ID: '%s'\n", id );
 			continue;
 		}
-		printf("ID: '%s'   Val: '%s' \n", id, val );
+		//printf("ID: '%s'   Val: '%s' \n", id, val );
 
 		if ( strcmp( id, "InputTypePort1" ) == 0 )
 		{
