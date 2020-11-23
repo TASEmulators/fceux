@@ -274,6 +274,8 @@ int LoadGame(const char *path, bool silent)
         FCEUI_LoadState(NULL, false);
     }
 
+	 loadInputSettingsFromFile();
+
 	ParseGIInput(GameInfo);
 	RefreshThrottleFPS();
 
@@ -321,12 +323,14 @@ CloseGame(void)
 	debugSymbolTable.clear();
 	CDLoggerROMClosed();
 
-    int state_to_save;
-    g_config->getOption("SDL.AutoSaveState", &state_to_save);
-    if (state_to_save < 10 && state_to_save >= 0){
-        FCEUI_SelectState(state_to_save, 0);
-        FCEUI_SaveState(NULL, false);
-    }
+   int state_to_save;
+   g_config->getOption("SDL.AutoSaveState", &state_to_save);
+   if (state_to_save < 10 && state_to_save >= 0){
+       FCEUI_SelectState(state_to_save, 0);
+       FCEUI_SaveState(NULL, false);
+   }
+	saveInputSettingsToFile();
+
 	FCEUI_CloseGame();
 
 	DriverKill();

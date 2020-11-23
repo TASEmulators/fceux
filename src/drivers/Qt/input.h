@@ -80,6 +80,8 @@ std::string GetUserText(const char* title);
 const char* ButtonName(const ButtConfig* bc);
 
 int getInputSelection( int port, int *cur, int *usr );
+int saveInputSettingsToFile( const char *fileBase = NULL );
+int loadInputSettingsFromFile( const char *filename = NULL );
 
 #endif
 

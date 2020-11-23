@@ -23,7 +23,7 @@
 #include "Qt/input.h"
 #include "Qt/config.h"
 #include "Qt/ConsoleWindow.h"
-
+#include "Qt/ConsoleUtilities.h"
 
 #include "Qt/sdl.h"
 #include "Qt/sdl-video.h"
@@ -1989,214 +1989,229 @@ int DWaitButton (const uint8_t * text, ButtConfig * bc, int *buttonConfigStatus 
 	return (0);
 }
 
-/**
- * This function takes in button inputs until either it sees two of
- * the same button presses in a row or gets four inputs and then saves
- * the total number of button presses.  Each of the keys pressed is
- * used as input for the specified button, thus allowing up to four
- * possible settings for each input button.
- */
-//	void
-//ConfigButton (char *text, ButtConfig * bc)
-//{
-//	uint8 buf[256];
-//	int wc;
-//
-//	for (wc = 0; wc < MAXBUTTCONFIG; wc++)
-//	{
-//		sprintf ((char *) buf, "%s (%d)", text, wc + 1);
-//		DWaitButton (buf, bc, wc, NULL);
-//
-//		if (wc &&
-//				bc->ButtType[wc] == bc->ButtType[wc - 1] &&
-//				bc->DeviceNum[wc] == bc->DeviceNum[wc - 1] &&
-//				bc->ButtonNum[wc] == bc->ButtonNum[wc - 1])
-//		{
-//			break;
-//		}
-//	}
-//}
-
-/**
- * Update the button configuration for a specified device.
- */
 extern Config *g_config;
 
-//void ConfigDevice (int which, int arg)
-//{
-//	char buf[256];
-//	int x;
-//	std::string prefix;
-//	const char *str[10] =
-//	{ "A", "B", "SELECT", "START", "UP", "DOWN", "LEFT", "RIGHT", "Rapid A",
-//		"Rapid B"
-//	};
-//
-//	// XXX soules - set the configuration options so that later calls
-//	//              don't override these.  This is a temp hack until I
-//	//              can clean up this file.
-//
-//	ButtonConfigBegin ();
-//	switch (which)
-//	{
-//		case FCFGD_QUIZKING:
-//			prefix = "SDL.Input.QuizKing.";
-//			for (x = 0; x < 6; x++)
-//			{
-//				sprintf (buf, "Quiz King Buzzer #%d", x + 1);
-//				ConfigButton (buf, &QuizKingButtons[x]);
-//
-//				g_config->setOption (prefix + QuizKingNames[x],
-//						QuizKingButtons[x].ButtonNum);
-//			}
-//
-//			if (QuizKingButtons[0].ButtType == BUTTC_KEYBOARD)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Keyboard");
-//			}
-//			else if (QuizKingButtons[0].ButtType == BUTTC_JOYSTICK)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Joystick");
-//			}
-//			else
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Unknown");
-//			}
-//			g_config->setOption (prefix + "DeviceNum",
-//					QuizKingButtons[0].DeviceNum);
-//			break;
-//		case FCFGD_HYPERSHOT:
-//			prefix = "SDL.Input.HyperShot.";
-//			for (x = 0; x < 4; x++)
-//			{
-//				sprintf (buf, "Hyper Shot %d: %s",
-//						((x & 2) >> 1) + 1, (x & 1) ? "JUMP" : "RUN");
-//				ConfigButton (buf, &HyperShotButtons[x]);
-//
-//				g_config->setOption (prefix + HyperShotNames[x],
-//						HyperShotButtons[x].ButtonNum);
-//			}
-//
-//			if (HyperShotButtons[0].ButtType == BUTTC_KEYBOARD)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Keyboard");
-//			}
-//			else if (HyperShotButtons[0].ButtType == BUTTC_JOYSTICK)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Joystick");
-//			}
-//			else
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Unknown");
-//			}
-//			g_config->setOption (prefix + "DeviceNum",
-//					HyperShotButtons[0].DeviceNum);
-//			break;
-//		case FCFGD_POWERPAD:
-//			snprintf (buf, 256, "SDL.Input.PowerPad.%d", (arg & 1));
-//			prefix = buf;
-//			for (x = 0; x < 12; x++)
-//			{
-//				sprintf (buf, "PowerPad %d: %d", (arg & 1) + 1, x + 11);
-//				ConfigButton (buf, &powerpadsc[arg & 1][x]);
-//
-//				g_config->setOption (prefix + PowerPadNames[x],
-//						powerpadsc[arg & 1][x].ButtonNum);
-//			}
-//
-//			if (powerpadsc[arg & 1][0].ButtType == BUTTC_KEYBOARD)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Keyboard");
-//			}
-//			else if (powerpadsc[arg & 1][0].ButtType == BUTTC_JOYSTICK)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Joystick");
-//			}
-//			else
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Unknown");
-//			}
-//			g_config->setOption (prefix + "DeviceNum",
-//					powerpadsc[arg & 1][0].DeviceNum);
-//			break;
-//
-//		case FCFGD_GAMEPAD:
-//			snprintf (buf, 256, "SDL.Input.GamePad.%d", arg);
-//			prefix = buf;
-//			for (x = 0; x < 10; x++)
-//			{
-//				sprintf (buf, "GamePad #%d: %s", arg + 1, str[x]);
-//				ConfigButton (buf, &GamePadConfig[arg][x]);
-//
-//				g_config->setOption (prefix + GamePadNames[x],
-//						GamePadConfig[arg][x].ButtonNum);
-//			}
-//
-//			if (GamePadConfig[arg][0].ButtType == BUTTC_KEYBOARD)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Keyboard");
-//			}
-//			else if (GamePadConfig[arg][0].ButtType == BUTTC_JOYSTICK)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Joystick");
-//			}
-//			else
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Unknown");
-//			}
-//			g_config->setOption (prefix + "DeviceNum",
-//					GamePadConfig[arg][0].DeviceNum);
-//			break;
-//	}
-//
-//	ButtonConfigEnd ();
-//}
+static const char *stdPortInputEncode( int v )
+{
+	const char *s;
 
+	switch ( v )
+	{
+		default:
+		case SI_NONE:
+			s = "SI_NONE";
+		break;
+		case SI_GAMEPAD:
+			s = "SI_GAMEPAD";
+		break;
+		case SI_ZAPPER:
+			s = "SI_ZAPPER";
+		break;
+		case SI_POWERPADA:
+			s = "SI_POWERPADA";
+		break;
+		case SI_POWERPADB:
+			s = "SI_POWERPADB";
+		break;
+		case SI_ARKANOID:
+			s = "SI_ARKANOID";
+		break;
+	}
+	return s;
+}
 
-/**
- * Update the button configuration for a device, specified by a text string.
- */
-//void InputCfg (const std::string & text)
-//{
-//
-//	if (noGui)
-//	{
-//		if (text.find ("gamepad") != std::string::npos)
-//		{
-//			int device = (text[strlen ("gamepad")] - '1');
-//			if (device < 0 || device > 3)
-//			{
-//				FCEUD_PrintError
-//					("Invalid gamepad device specified; must be one of gamepad1 through gamepad4");
-//				exit (-1);
-//			}
-//			ConfigDevice (FCFGD_GAMEPAD, device);
-//		}
-//		else if (text.find ("powerpad") != std::string::npos)
-//		{
-//			int device = (text[strlen ("powerpad")] - '1');
-//			if (device < 0 || device > 1)
-//			{
-//				FCEUD_PrintError
-//					("Invalid powerpad device specified; must be powerpad1 or powerpad2");
-//				exit (-1);
-//			}
-//			ConfigDevice (FCFGD_POWERPAD, device);
-//		}
-//		else if (text.find ("hypershot") != std::string::npos)
-//		{
-//			ConfigDevice (FCFGD_HYPERSHOT, 0);
-//		}
-//		else if (text.find ("quizking") != std::string::npos)
-//		{
-//			ConfigDevice (FCFGD_QUIZKING, 0);
-//		}
-//	}
-//	else
-//		printf ("Please run \"fceux --nogui\" before using --inputcfg\n");
-//
-//}
+static int stdPortInputDecode( const char *s )
+{
+	int ret = SI_NONE;
 
+	if ( s[0] == 0 )
+	{
+		return ret;
+	}
+
+	if ( isdigit(s[0]) )
+	{
+		ret = atoi(s);
+	}
+	else 
+	{
+		if ( strcmp( s, "SI_GAMEPAD" ) == 0 )
+		{
+			ret = SI_GAMEPAD;
+		}
+		else if ( strcmp( s, "SI_ZAPPER" ) == 0 )
+		{
+			ret = SI_ZAPPER;
+		}
+		else if ( strcmp( s, "SI_POWERPADA" ) == 0 )
+		{
+			ret = SI_POWERPADA;
+		}
+		else if ( strcmp( s, "SI_POWERPADB" ) == 0 )
+		{
+			ret = SI_POWERPADB;
+		}
+		else if ( strcmp( s, "SI_ARKANOID" ) == 0 )
+		{
+			ret = SI_ARKANOID;
+		}
+	}
+
+	return ret;
+}
+
+int saveInputSettingsToFile( const char *filename )
+{
+	QDir dir;
+	std::string path;
+	const char *baseDir = FCEUI_GetBaseDirectory();
+	char base[256];
+
+	path = std::string(baseDir) + "/input/presets/";
+
+	dir.mkpath( QString::fromStdString(path) );
+
+	if ( filename != NULL )
+	{
+		getFileBaseName( filename, base, NULL );
+
+		path += std::string(base) + ".pre";
+	}
+	else
+	{
+		const char *romFile = getRomFile();
+
+		if ( romFile == NULL )
+		{
+			return -1;
+		}
+		getFileBaseName( romFile, base, NULL );
+
+		path += std::string(base) + ".pre";
+	}
+
+	FILE *fp = fopen( path.c_str(), "w");
+
+	if ( fp == NULL )
+	{
+		return -1;
+	}
+	fprintf( fp, "# Input Port Settings\n");
+	fprintf( fp, "InputTypePort1   = %s \n", stdPortInputEncode( CurInputType[0] ) );
+	fprintf( fp, "InputTypePort2   = %s \n", stdPortInputEncode( CurInputType[1] ) );
+	fprintf( fp, "InputTypeExpPort = %i \n", CurInputType[2] );
+	fprintf( fp, "Enable4Score     = %i \n", (eoptions & EO_FOURSCORE) ? 1 : 0 );
+	fprintf( fp, "EnableMicPort2   = %i \n", replaceP2StartWithMicrophone );
+
+	fclose(fp);
+
+	return 0;
+}
+
+int loadInputSettingsFromFile( const char *filename )
+{
+	QDir dir;
+	std::string path;
+	const char *baseDir = FCEUI_GetBaseDirectory();
+	char base[256], line[256];
+	char id[128], val[128];
+	int i, j;
+
+	path = std::string(baseDir) + "/input/presets/";
+
+	dir.mkpath( QString::fromStdString(path) );
+
+	if ( filename != NULL )
+	{
+		getFileBaseName( filename, base, NULL );
+
+		path += std::string(base) + ".pre";
+	}
+	else
+	{
+		const char *romFile = getRomFile();
+
+		if ( romFile == NULL )
+		{
+			return -1;
+		}
+		getFileBaseName( romFile, base, NULL );
+
+		path += std::string(base) + ".pre";
+	}
+
+	FILE *fp = fopen( path.c_str(), "r");
+
+	if ( fp == NULL )
+	{
+		return -1;
+	}
+
+	while ( fgets( line, sizeof(line)-1, fp ) != 0 )
+	{
+		i=0;
+		while ( line[i] != 0 )
+		{
+			if ( line[i] == '#' )
+			{
+				line[i] = 0; break;
+			}
+			i++;
+		}
+
+		i=0;
+		while ( isspace(line[i]) ) i++;
+
+		j=0;
+		while ( isalnum(line[i]) || (line[i] == '_') )
+		{
+			id[j] = line[i]; i++; j++;
+		}
+		id[j] = 0;
+
+		if ( j == 0 ) continue;
+
+		while ( isspace(line[i]) ) i++;
+
+		if ( line[i] == '=' ) i++;
+
+		while ( isspace(line[i]) ) i++;
+
+		j=0;
+		while ( line[i] && !isspace(line[i]) )
+		{
+			val[j] = line[i]; i++; j++;
+		}
+		val[j] = 0;
+
+		if ( j == 0 )
+		{
+			printf("Warning: No Value Specified for Token ID: '%s'\n", id );
+			continue;
+		}
+		printf("ID: '%s'   Val: '%s' \n", id, val );
+
+		if ( strcmp( id, "InputTypePort1" ) == 0 )
+		{
+			CurInputType[0] = UsrInputType[0] = stdPortInputDecode( val );
+		}
+		else if ( strcmp( id, "InputTypePort2" ) == 0 )
+		{
+			CurInputType[1] = UsrInputType[1] = stdPortInputDecode( val );
+		}
+	}
+
+	//fprintf( fp, "# Input Port Settings\n");
+	//fprintf( fp, "InputTypePort1   = %i \n", CurInputType[0] );
+	//fprintf( fp, "InputTypePort2   = %i \n", CurInputType[1] );
+	//fprintf( fp, "InputTypeExpPort = %i \n", CurInputType[2] );
+	//fprintf( fp, "Enable4Score     = %i \n", (eoptions & EO_FOURSCORE) ? 1 : 0 );
+	//fprintf( fp, "EnableMicPort2   = %i \n", replaceP2StartWithMicrophone );
+
+	fclose(fp);
+
+	return 0;
+}
 
 /**
  * Hack to map the new configuration onto the existing button
