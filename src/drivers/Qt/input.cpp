@@ -2060,6 +2060,125 @@ static int stdPortInputDecode( const char *s )
 	return ret;
 }
 
+static const char *expPortInputEncode( int v )
+{
+	const char *s;
+
+	switch ( v )
+	{
+		default:
+		case SIFC_NONE:
+			s = "SIFC_NONE";
+		break;
+		case SIFC_ARKANOID:
+			s = "SIFC_ARKANOID";
+		break;
+		case SIFC_SHADOW:
+			s = "SIFC_SHADOW";
+		break;
+		case SIFC_HYPERSHOT:
+			s = "SIFC_HYPERSHOT";
+		break;
+		case SIFC_FKB:
+			s = "SIFC_FKB";
+		break;
+		case SIFC_MAHJONG:
+			s = "SIFC_MAHJONG";
+		break;
+		case SIFC_QUIZKING:
+			s = "SIFC_QUIZKING";
+		break;
+		case SIFC_FTRAINERA:
+			s = "SIFC_FTRAINERA";
+		break;
+		case SIFC_FTRAINERB:
+			s = "SIFC_FTRAINERB";
+		break;
+		case SIFC_OEKAKIDS:
+			s = "SIFC_OEKAKIDS";
+		break;
+		case SIFC_TOPRIDER:
+			s = "SIFC_TOPRIDER";
+		break;
+	}
+	return s;
+}
+
+static int expPortInputDecode( const char *s )
+{
+	int ret = SIFC_NONE;
+
+	if ( s[0] == 0 )
+	{
+		return ret;
+	}
+
+	if ( isdigit(s[0]) )
+	{
+		ret = atoi(s);
+	}
+	else 
+	{
+		if ( strcmp( s, "SIFC_ARKANOID" ) == 0 )
+		{
+			ret = SIFC_ARKANOID;
+		}
+		else if ( strcmp( s, "SIFC_SHADOW" ) == 0 )
+		{
+			ret = SIFC_SHADOW;
+		}
+		else if ( strcmp( s, "SIFC_HYPERSHOT" ) == 0 )
+		{
+			ret = SIFC_HYPERSHOT;
+		}
+		else if ( strcmp( s, "SIFC_FKB" ) == 0 )
+		{
+			ret = SIFC_FKB;
+		}
+		else if ( strcmp( s, "SIFC_MAHJONG" ) == 0 )
+		{
+			ret = SIFC_MAHJONG;
+		}
+		else if ( strcmp( s, "SIFC_QUIZKING" ) == 0 )
+		{
+			ret = SIFC_QUIZKING;
+		}
+		else if ( strcmp( s, "SIFC_FTRAINERA" ) == 0 )
+		{
+			ret = SIFC_FTRAINERA;
+		}
+		else if ( strcmp( s, "SIFC_FTRAINERB" ) == 0 )
+		{
+			ret = SIFC_FTRAINERB;
+		}
+		else if ( strcmp( s, "SIFC_OEKAKIDS" ) == 0 )
+		{
+			ret = SIFC_OEKAKIDS;
+		}
+		else if ( strcmp( s, "SIFC_TOPRIDER" ) == 0 )
+		{
+			ret = SIFC_TOPRIDER;
+		}
+	}
+
+	return ret;
+}
+
+static bool boolDecode( const char *s )
+{
+	bool ret = false;
+
+	if ( isdigit(s[0]) )
+	{
+		ret = atoi(s) != 0;
+	}
+	else if ( strcasecmp( s, "true" ) == 0 )
+	{
+		ret = true;
+	}
+	return ret;
+}
+
 int saveInputSettingsToFile( const char *filename )
 {
 	QDir dir;
@@ -2099,7 +2218,7 @@ int saveInputSettingsToFile( const char *filename )
 	fprintf( fp, "# Input Port Settings\n");
 	fprintf( fp, "InputTypePort1   = %s \n", stdPortInputEncode( CurInputType[0] ) );
 	fprintf( fp, "InputTypePort2   = %s \n", stdPortInputEncode( CurInputType[1] ) );
-	fprintf( fp, "InputTypeExpPort = %i \n", CurInputType[2] );
+	fprintf( fp, "InputTypeExpPort = %s \n", expPortInputEncode( CurInputType[2] ) );
 	fprintf( fp, "Enable4Score     = %i \n", (eoptions & EO_FOURSCORE) ? 1 : 0 );
 	fprintf( fp, "EnableMicPort2   = %i \n", replaceP2StartWithMicrophone );
 
@@ -2199,14 +2318,26 @@ int loadInputSettingsFromFile( const char *filename )
 		{
 			CurInputType[1] = UsrInputType[1] = stdPortInputDecode( val );
 		}
+		else if ( strcmp( id, "InputTypeExpPort" ) == 0 )
+		{
+			CurInputType[2] = UsrInputType[2] = expPortInputDecode( val );
+		}
+		else if ( strcmp( id, "Enable4Score" ) == 0 )
+		{
+			if ( boolDecode( val ) )
+			{
+				eoptions &= ~EO_FOURSCORE;
+			}
+			else
+			{
+				eoptions |= EO_FOURSCORE;
+			}
+		}
+		else if ( strcmp( id, "EnableMicPort2" ) == 0 )
+		{
+			replaceP2StartWithMicrophone = boolDecode( val );
+		}
 	}
-
-	//fprintf( fp, "# Input Port Settings\n");
-	//fprintf( fp, "InputTypePort1   = %i \n", CurInputType[0] );
-	//fprintf( fp, "InputTypePort2   = %i \n", CurInputType[1] );
-	//fprintf( fp, "InputTypeExpPort = %i \n", CurInputType[2] );
-	//fprintf( fp, "Enable4Score     = %i \n", (eoptions & EO_FOURSCORE) ? 1 : 0 );
-	//fprintf( fp, "EnableMicPort2   = %i \n", replaceP2StartWithMicrophone );
 
 	fclose(fp);
 

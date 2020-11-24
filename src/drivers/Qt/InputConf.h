@@ -29,8 +29,6 @@ class InputConfDialog_t : public QDialog
 
 	protected:
 		void closeEvent(QCloseEvent *event);
-		//void keyPressEvent(QKeyEvent *event);
-   	//void keyReleaseEvent(QKeyEvent *event);
 
 		QCheckBox   *fourScoreEna;
 		QCheckBox   *port2Mic;
@@ -50,6 +48,7 @@ class InputConfDialog_t : public QDialog
 	private:
 		void  setInputs(void);
 		void  updatePortLabels(void);
+		void  updatePortComboBoxes(void);
 		void  openPortConfig(int portNum);
 
    public slots:
@@ -60,6 +59,8 @@ class InputConfDialog_t : public QDialog
 		void port1Select(int index);
 		void port2Select(int index);
 		void expSelect(int index);
+		void openLoadPresetFile(void);
+		void openSavePresetFile(void);
 
 };
 

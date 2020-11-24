@@ -8,6 +8,7 @@
 #include <SDL.h>
 #include <QHeaderView>
 #include <QCloseEvent>
+#include <QFileDialog>
 #include <QGroupBox>
 
 #include "Qt/main.h"
@@ -135,7 +136,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 
 	sprintf( stmp, "border: 2px solid #%02X%02X%02X", color.red(), color.green(), color.blue() );
 			
-	printf("%s\n", stmp);
+	//printf("%s\n", stmp);
 	nesPortLabel[0]->setAlignment(Qt::AlignCenter);
 	nesPortLabel[1]->setAlignment(Qt::AlignCenter);
 	expPortLabel->setAlignment(Qt::AlignCenter);
@@ -199,6 +200,9 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 
 	connect( nesPortConfButton[0], SIGNAL(clicked(void)), this, SLOT(port1Configure(void)) );
 	connect( nesPortConfButton[1], SIGNAL(clicked(void)), this, SLOT(port2Configure(void)) );
+
+	connect( loadConfigButton, SIGNAL(clicked(void)), this, SLOT(openLoadPresetFile(void)) );
+	connect( saveConfigButton, SIGNAL(clicked(void)), this, SLOT(openSavePresetFile(void)) );
 
 	updatePortLabels();
 }
@@ -277,6 +281,30 @@ void InputConfDialog_t::updatePortLabels(void)
 	}
 }
 //----------------------------------------------------------------------------
+void InputConfDialog_t::updatePortComboBoxes(void)
+{
+	for (int i=0; i<2; i++)
+	{
+		getInputSelection( i, &curNesInput[i], &usrNesInput[i] );
+
+		for (int j=0; j<nesPortComboxBox[i]->count(); j++)
+		{
+			if ( nesPortComboxBox[i]->itemData(j).toInt() == usrNesInput[i] )
+			{
+				nesPortComboxBox[i]->setCurrentIndex( j );
+			}
+		}
+	}
+
+	for (int j=0; j<expPortComboxBox->count(); j++)
+	{
+		if ( expPortComboxBox->itemData(j).toInt() == usrNesInput[2] )
+		{
+			expPortComboxBox->setCurrentIndex( j );
+		}
+	}
+}
+//----------------------------------------------------------------------------
 void InputConfDialog_t::port1Select(int index)
 {
 	//printf("Port 1 Number:%i \n", index);
@@ -323,13 +351,117 @@ void InputConfDialog_t::port2Configure(void)
 	openPortConfig(1);
 }
 //----------------------------------------------------------------------------
-//void InputConfDialog_t::keyPressEvent(QKeyEvent *event)
-//{
-//   //printf("Hotkey Window Key Press: 0x%x \n", event->key() );
-//}
-////----------------------------------------------------------------------------
-//void InputConfDialog_t::keyReleaseEvent(QKeyEvent *event)
-//{
-//   //printf("Hotkey Window Key Release: 0x%x \n", event->key() );
-//}
+void InputConfDialog_t::openLoadPresetFile(void)
+{
+   int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string last;
+	std::string path;
+	const char *baseDir;
+	QFileDialog  dialog(this, tr("Load Preset From File") );
+	QDir dir;
+
+	baseDir = FCEUI_GetBaseDirectory();
+
+	path = std::string(baseDir) + "/input/presets/";
+
+	dir.mkpath( QString::fromStdString(path) );
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("Preset File (*.pre *.PRE) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
+
+	dialog.setDirectory( tr(path.c_str()) );
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	fceuWrapperLock();
+	loadInputSettingsFromFile( filename.toStdString().c_str() );
+	fceuWrapperUnLock();
+
+	updatePortLabels();
+	updatePortComboBoxes();
+}
+
+//----------------------------------------------------------------------------
+void InputConfDialog_t::openSavePresetFile(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string path;
+	const char *baseDir;
+	QFileDialog  dialog(this, tr("Save Preset to File") );
+	QDir dir;
+
+	baseDir = FCEUI_GetBaseDirectory();
+
+	path = std::string(baseDir) + "/input/presets/";
+
+	dir.mkpath( QString::fromStdString(path) );
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("Preset Files (*.pre *.PRE) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+	dialog.setDefaultSuffix( tr(".pre") );
+
+	dialog.setDirectory( tr(path.c_str()) );
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+   {
+      return;
+   }
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	saveInputSettingsToFile( filename.toStdString().c_str() );
+}
 //----------------------------------------------------------------------------
