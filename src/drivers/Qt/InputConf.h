@@ -16,6 +16,7 @@
 #include <QGroupBox>
 #include <QTreeView>
 #include <QTreeWidget>
+#include <QTimer>
 
 #include "Qt/main.h"
 
@@ -30,6 +31,7 @@ class InputConfDialog_t : public QDialog
 	protected:
 		void closeEvent(QCloseEvent *event);
 
+		QTimer      *inputTimer;
 		QCheckBox   *fourScoreEna;
 		QCheckBox   *port2Mic;
 		QLabel      *nesPortLabel[2];
@@ -63,6 +65,7 @@ class InputConfDialog_t : public QDialog
 		void port2MicChanged(int state);
 		void openLoadPresetFile(void);
 		void openSavePresetFile(void);
+		void updatePeriodic(void);
 
 };
 

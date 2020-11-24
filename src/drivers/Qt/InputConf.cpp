@@ -47,6 +47,10 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 
 	pal = this->palette();
 
+	inputTimer  = new QTimer( this );
+
+   connect( inputTimer, &QTimer::timeout, this, &InputConfDialog_t::updatePeriodic );
+
 	setWindowTitle("Input Configuration");
 
 	mainLayout = new QVBoxLayout();
@@ -213,11 +217,14 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	connect( saveConfigButton, SIGNAL(clicked(void)), this, SLOT(openSavePresetFile(void)) );
 
 	updatePortLabels();
+
+	inputTimer->start( 500 ); // 2hz
 }
 //----------------------------------------------------------------------------
 InputConfDialog_t::~InputConfDialog_t(void)
 {
 	printf("Destroy Input Config Window\n");
+	inputTimer->stop();
 
 	if ( win == this )
 	{
@@ -356,6 +363,8 @@ void InputConfDialog_t::port2MicChanged(int state)
 //----------------------------------------------------------------------------
 void InputConfDialog_t::openPortConfig(int portNum)
 {
+	updatePortLabels();
+
 	switch ( curNesInput[portNum] )
 	{
 		default:
@@ -491,5 +500,31 @@ void InputConfDialog_t::openSavePresetFile(void)
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	saveInputSettingsToFile( filename.toStdString().c_str() );
+}
+//----------------------------------------------------------------------------
+void InputConfDialog_t::updatePeriodic(void)
+{
+	bool updateNeeded = false;
+	int tmpCurInputType[3], tmpUsrInputType[3];
+
+	for (int i=0; i<3; i++)
+	{
+		getInputSelection( i, &tmpCurInputType[i], &tmpUsrInputType[i] );
+
+		if ( curNesInput[i] != tmpCurInputType[i] )
+		{
+			updateNeeded = true;
+		}
+		if ( usrNesInput[i] != tmpUsrInputType[i] )
+		{
+			updateNeeded = true;
+		}
+	}
+
+	if ( updateNeeded )
+	{
+		updatePortLabels();
+		updatePortComboBoxes();
+	}
 }
 //----------------------------------------------------------------------------
