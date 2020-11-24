@@ -40,7 +40,7 @@ class InputConfDialog_t : public QDialog
 		QComboBox   *expPortComboxBox;
 		QPushButton *loadConfigButton;
 		QPushButton *saveConfigButton;
-		QLineEdit   *saveFileName;
+		//QLineEdit   *saveFileName;
 
 		int          curNesInput[3];
 		int          usrNesInput[3];
@@ -59,6 +59,8 @@ class InputConfDialog_t : public QDialog
 		void port1Select(int index);
 		void port2Select(int index);
 		void expSelect(int index);
+		void fourScoreChanged(int state);
+		void port2MicChanged(int state);
 		void openLoadPresetFile(void);
 		void openSavePresetFile(void);
 

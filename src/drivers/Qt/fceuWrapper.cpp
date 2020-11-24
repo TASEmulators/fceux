@@ -267,14 +267,14 @@ int LoadGame(const char *path, bool silent)
 
 	CDLoggerROMChanged();
 
-    int state_to_load;
-    g_config->getOption("SDL.AutoLoadState", &state_to_load);
-    if (state_to_load >= 0 && state_to_load < 10){
-        FCEUI_SelectState(state_to_load, 0);
-        FCEUI_LoadState(NULL, false);
-    }
+	int state_to_load;
+	g_config->getOption("SDL.AutoLoadState", &state_to_load);
+	if (state_to_load >= 0 && state_to_load < 10){
+	    FCEUI_SelectState(state_to_load, 0);
+	    FCEUI_LoadState(NULL, false);
+	}
 
-	 loadInputSettingsFromFile();
+	loadInputSettingsFromFile();
 
 	ParseGIInput(GameInfo);
 	RefreshThrottleFPS();

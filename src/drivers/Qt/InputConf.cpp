@@ -43,6 +43,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	QPalette     pal;
 	QColor       color;
 	char stmp[256];
+	int  fourscore;
 
 	pal = this->palette();
 
@@ -55,6 +56,10 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	hbox          = new QHBoxLayout();
 	fourScoreEna  = new QCheckBox( tr("Attach 4-Score (Implies four gamepads)") );
 	port2Mic      = new QCheckBox( tr("Replace Port 2 Start with Microphone") );
+
+	g_config->getOption("SDL.FourScore", &fourscore);
+	fourScoreEna->setChecked( fourscore );
+	port2Mic->setChecked( replaceP2StartWithMicrophone );
 
 	hbox->addWidget( fourScoreEna );
 	hbox->addWidget( port2Mic );
@@ -108,11 +113,11 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	mainLayout->addLayout( hbox );
 
 	vbox  = new QVBoxLayout();
-	hbox  = new QHBoxLayout();
-	vbox->addLayout( hbox );
-	hbox->addWidget( new QLabel( tr("File:") ) );
-	hbox->addWidget( saveFileName = new QLineEdit() );
-	saveFileName->setReadOnly(true);
+	//hbox  = new QHBoxLayout();
+	//vbox->addLayout( hbox );
+	//hbox->addWidget( new QLabel( tr("File:") ) );
+	//hbox->addWidget( saveFileName = new QLineEdit() );
+	//saveFileName->setReadOnly(true);
 
 	hbox  = new QHBoxLayout();
 	vbox->addLayout( hbox );
@@ -158,7 +163,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 
 		for (int j=0; j<nesPortComboxBox[i]->count(); j++)
 		{
-			if ( nesPortComboxBox[i]->itemData(j).toInt() == usrNesInput[i] )
+			if ( nesPortComboxBox[i]->itemData(j).toInt() == curNesInput[i] )
 			{
 				nesPortComboxBox[i]->setCurrentIndex( j );
 			}
@@ -184,7 +189,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 
 	for (int j=0; j<expPortComboxBox->count(); j++)
 	{
-		if ( expPortComboxBox->itemData(j).toInt() == usrNesInput[2] )
+		if ( expPortComboxBox->itemData(j).toInt() == curNesInput[2] )
 		{
 			expPortComboxBox->setCurrentIndex( j );
 		}
@@ -193,6 +198,9 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 			expPortLabel->setText( expPortComboxBox->itemText(j) );
 		}
 	}
+
+	connect( fourScoreEna, SIGNAL(stateChanged(int)), this, SLOT(fourScoreChanged(int)) );
+	connect( port2Mic    , SIGNAL(stateChanged(int)), this, SLOT(port2MicChanged(int))  );
 
 	connect( nesPortComboxBox[0], SIGNAL(activated(int)), this, SLOT(port1Select(int)) );
 	connect( nesPortComboxBox[1], SIGNAL(activated(int)), this, SLOT(port2Select(int)) );
@@ -240,6 +248,8 @@ void InputConfDialog_t::setInputs(void)
 	int fourscore = false, microphone = false;
 
 	g_config->getOption("SDL.FourScore", &fourscore);
+
+	microphone = port2Mic->isChecked();
 
 	idx[0] = nesPortComboxBox[0]->currentIndex();
 	idx[1] = nesPortComboxBox[1]->currentIndex();
@@ -289,16 +299,18 @@ void InputConfDialog_t::updatePortComboBoxes(void)
 
 		for (int j=0; j<nesPortComboxBox[i]->count(); j++)
 		{
-			if ( nesPortComboxBox[i]->itemData(j).toInt() == usrNesInput[i] )
+			if ( nesPortComboxBox[i]->itemData(j).toInt() == curNesInput[i] )
 			{
 				nesPortComboxBox[i]->setCurrentIndex( j );
 			}
 		}
 	}
 
+	getInputSelection( 2, &curNesInput[2], &usrNesInput[2] );
+
 	for (int j=0; j<expPortComboxBox->count(); j++)
 	{
-		if ( expPortComboxBox->itemData(j).toInt() == usrNesInput[2] )
+		if ( expPortComboxBox->itemData(j).toInt() == curNesInput[2] )
 		{
 			expPortComboxBox->setCurrentIndex( j );
 		}
@@ -322,6 +334,22 @@ void InputConfDialog_t::port2Select(int index)
 void InputConfDialog_t::expSelect(int index)
 {
 	//printf("Expansion Port Number:%i \n", index);
+	setInputs();
+	updatePortLabels();
+}
+//----------------------------------------------------------------------------
+void InputConfDialog_t::fourScoreChanged(int state)
+{
+	int value = (state == Qt::Unchecked) ? 0 : 1;
+	//printf("Set 'SDL.FourScore' = %i\n", value);
+	g_config->setOption("SDL.FourScore", value);
+
+	setInputs();
+	updatePortLabels();
+}
+//----------------------------------------------------------------------------
+void InputConfDialog_t::port2MicChanged(int state)
+{
 	setInputs();
 	updatePortLabels();
 }
