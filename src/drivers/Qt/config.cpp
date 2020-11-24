@@ -241,6 +241,8 @@ InitConfig()
 	config->addOption("input3", "SDL.Input.2", "Gamepad.2");
 	config->addOption("input4", "SDL.Input.3", "Gamepad.3");
 
+	config->addOption("autoInputPreset", "SDL.AutoInputPreset", 0);
+
 	// allow for input configuration
 	//config->addOption('i', "inputcfg", "SDL.InputCfg", InputCfg);
     

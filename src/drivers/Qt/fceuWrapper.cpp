@@ -230,7 +230,7 @@ int reloadLastGame(void)
  */
 int LoadGame(const char *path, bool silent)
 {
-	int gg_enabled, autoLoadDebug, autoOpenDebugger;
+	int gg_enabled, autoLoadDebug, autoOpenDebugger, autoInputPreset;
 
 	if (isloaded){
 		CloseGame();
@@ -274,7 +274,12 @@ int LoadGame(const char *path, bool silent)
 	    FCEUI_LoadState(NULL, false);
 	}
 
-	loadInputSettingsFromFile();
+	g_config->getOption( "SDL.AutoInputPreset", &autoInputPreset );
+
+	if ( autoInputPreset )
+	{
+		loadInputSettingsFromFile();
+	}
 
 	ParseGIInput(GameInfo);
 	RefreshThrottleFPS();
@@ -329,7 +334,14 @@ CloseGame(void)
        FCEUI_SelectState(state_to_save, 0);
        FCEUI_SaveState(NULL, false);
    }
-	saveInputSettingsToFile();
+
+	int autoInputPreset;
+	g_config->getOption( "SDL.AutoInputPreset", &autoInputPreset );
+
+	if ( autoInputPreset )
+	{
+		saveInputSettingsToFile();
+	}
 
 	FCEUI_CloseGame();
 

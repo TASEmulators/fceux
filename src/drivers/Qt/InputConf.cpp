@@ -18,6 +18,7 @@
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleWindow.h"
+#include "Qt/ConsoleUtilities.h"
 #include "Qt/InputConf.h"
 
 static InputConfDialog_t *win = NULL;
@@ -43,7 +44,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	QPalette     pal;
 	QColor       color;
 	char stmp[256];
-	int  fourscore;
+	int  fourscore, autoInputPreset;
 
 	pal = this->palette();
 
@@ -60,10 +61,14 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	hbox          = new QHBoxLayout();
 	fourScoreEna  = new QCheckBox( tr("Attach 4-Score (Implies four gamepads)") );
 	port2Mic      = new QCheckBox( tr("Replace Port 2 Start with Microphone") );
+	autoPreset    = new QCheckBox( tr("Auto Load/Save Presets at ROM Open/Close") );
 
 	g_config->getOption("SDL.FourScore", &fourscore);
 	fourScoreEna->setChecked( fourscore );
 	port2Mic->setChecked( replaceP2StartWithMicrophone );
+
+	g_config->getOption( "SDL.AutoInputPreset", &autoInputPreset );
+	autoPreset->setChecked( autoInputPreset );
 
 	hbox->addWidget( fourScoreEna );
 	hbox->addWidget( port2Mic );
@@ -117,11 +122,9 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	mainLayout->addLayout( hbox );
 
 	vbox  = new QVBoxLayout();
-	//hbox  = new QHBoxLayout();
-	//vbox->addLayout( hbox );
-	//hbox->addWidget( new QLabel( tr("File:") ) );
-	//hbox->addWidget( saveFileName = new QLineEdit() );
-	//saveFileName->setReadOnly(true);
+	hbox  = new QHBoxLayout();
+	vbox->addLayout( hbox );
+	hbox->addWidget( autoPreset );
 
 	hbox  = new QHBoxLayout();
 	vbox->addLayout( hbox );
@@ -205,6 +208,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 
 	connect( fourScoreEna, SIGNAL(stateChanged(int)), this, SLOT(fourScoreChanged(int)) );
 	connect( port2Mic    , SIGNAL(stateChanged(int)), this, SLOT(port2MicChanged(int))  );
+	connect( autoPreset  , SIGNAL(stateChanged(int)), this, SLOT(autoPresetChanged(int)));
 
 	connect( nesPortComboxBox[0], SIGNAL(activated(int)), this, SLOT(port1Select(int)) );
 	connect( nesPortComboxBox[1], SIGNAL(activated(int)), this, SLOT(port2Select(int)) );
@@ -361,6 +365,13 @@ void InputConfDialog_t::port2MicChanged(int state)
 	updatePortLabels();
 }
 //----------------------------------------------------------------------------
+void InputConfDialog_t::autoPresetChanged(int state)
+{
+	int value = (state == Qt::Unchecked) ? 0 : 1;
+	//printf("Set 'SDL.AutoInputPreset' = %i\n", value);
+	g_config->setOption("SDL.AutoInputPreset", value);
+}
+//----------------------------------------------------------------------------
 void InputConfDialog_t::openPortConfig(int portNum)
 {
 	updatePortLabels();
@@ -453,7 +464,7 @@ void InputConfDialog_t::openSavePresetFile(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string path;
-	const char *baseDir;
+	const char *baseDir, *romFile;
 	QFileDialog  dialog(this, tr("Save Preset to File") );
 	QDir dir;
 
@@ -471,6 +482,19 @@ void InputConfDialog_t::openSavePresetFile(void)
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
 	dialog.setDefaultSuffix( tr(".pre") );
+
+	romFile = getRomFile();
+
+	if ( romFile != NULL )
+	{
+		char dirStr[256], base[256];
+
+		parseFilepath( romFile, dirStr, base );
+
+		strcat( base, ".pre");
+
+		dialog.selectFile( tr(base) );
+	}
 
 	dialog.setDirectory( tr(path.c_str()) );
 

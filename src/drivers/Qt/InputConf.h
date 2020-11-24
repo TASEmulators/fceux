@@ -34,6 +34,7 @@ class InputConfDialog_t : public QDialog
 		QTimer      *inputTimer;
 		QCheckBox   *fourScoreEna;
 		QCheckBox   *port2Mic;
+		QCheckBox   *autoPreset;
 		QLabel      *nesPortLabel[2];
 		QPushButton *nesPortConfButton[2];
 		QComboBox   *nesPortComboxBox[2];
@@ -63,6 +64,7 @@ class InputConfDialog_t : public QDialog
 		void expSelect(int index);
 		void fourScoreChanged(int state);
 		void port2MicChanged(int state);
+		void autoPresetChanged(int state);
 		void openLoadPresetFile(void);
 		void openSavePresetFile(void);
 		void updatePeriodic(void);
