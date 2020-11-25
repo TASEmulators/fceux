@@ -43,7 +43,6 @@ class InputConfDialog_t : public QDialog
 		QComboBox   *expPortComboxBox;
 		QPushButton *loadConfigButton;
 		QPushButton *saveConfigButton;
-		//QLineEdit   *saveFileName;
 
 		int          curNesInput[3];
 		int          usrNesInput[3];

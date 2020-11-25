@@ -43,6 +43,7 @@ class GamePadConfDialog_t : public QDialog
 		QComboBox *devSel;
 		QComboBox *mapSel;
 		QComboBox *profSel;
+		QCheckBox *efs_chkbox;
 		QLabel      *guidLbl;
 		QLabel      *mapMsg;
       QLabel      *keyName[GAMEPAD_NUM_BUTTONS];

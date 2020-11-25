@@ -352,7 +352,7 @@ void InputConfDialog_t::expSelect(int index)
 void InputConfDialog_t::fourScoreChanged(int state)
 {
 	int value = (state == Qt::Unchecked) ? 0 : 1;
-	//printf("Set 'SDL.FourScore' = %i\n", value);
+	printf("Set 'SDL.FourScore' = %i\n", value);
 	g_config->setOption("SDL.FourScore", value);
 
 	setInputs();
@@ -530,6 +530,7 @@ void InputConfDialog_t::updatePeriodic(void)
 {
 	bool updateNeeded = false;
 	int tmpCurInputType[3], tmpUsrInputType[3];
+	int fourScoreValue;
 
 	for (int i=0; i<3; i++)
 	{
@@ -549,6 +550,13 @@ void InputConfDialog_t::updatePeriodic(void)
 	{
 		updatePortLabels();
 		updatePortComboBoxes();
+	}
+
+	g_config->getOption("SDL.FourScore", &fourScoreValue);
+
+	if ( fourScoreValue != fourScoreEna->isChecked() )
+	{
+		fourScoreEna->setChecked( fourScoreValue );
 	}
 }
 //----------------------------------------------------------------------------
