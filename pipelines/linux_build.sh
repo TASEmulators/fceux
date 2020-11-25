@@ -25,6 +25,10 @@ echo '****************************************'
 echo '***  Installing Package Dependencies ***'
 echo '****************************************'
 echo '****************************************'
+echo '****************************************'
+echo 'Install Dependency Updates'
+echo '****************************************'
+sudo apt-get --assume-yes update
 # Install Lua-5.1 development package
 echo '****************************************'
 echo 'Install Dependency lua5.1-dev'
