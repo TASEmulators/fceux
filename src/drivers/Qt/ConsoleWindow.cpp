@@ -20,6 +20,7 @@
 #include "Qt/dface.h"
 #include "Qt/input.h"
 #include "Qt/ConsoleWindow.h"
+#include "Qt/InputConf.h"
 #include "Qt/GamePadConf.h"
 #include "Qt/HotKeyConf.h"
 #include "Qt/PaletteConf.h"
@@ -346,6 +347,14 @@ void consoleWin_t::createMainMenu(void)
 	 //-----------------------------------------------------------------------
 	 // Options
     optMenu = menuBar()->addMenu(tr("Options"));
+
+	 // Options -> Input Config
+	 gamePadConfig = new QAction(tr("Input Config"), this);
+    //gamePadConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+    gamePadConfig->setStatusTip(tr("Input Configure"));
+    connect(gamePadConfig, SIGNAL(triggered()), this, SLOT(openInputConfWin(void)) );
+
+    optMenu->addAction(gamePadConfig);
 
 	 // Options -> GamePad Config
 	 gamePadConfig = new QAction(tr("GamePad Config"), this);
@@ -1172,6 +1181,13 @@ void consoleWin_t::loadLua(void)
 	
    luaCtrlWin->show();
 #endif
+}
+
+void consoleWin_t::openInputConfWin(void)
+{
+	//printf("Open Input Config Window\n");
+	
+	openInputConfWindow(this);
 }
 
 void consoleWin_t::openGamePadConfWin(void)

@@ -230,7 +230,7 @@ int reloadLastGame(void)
  */
 int LoadGame(const char *path, bool silent)
 {
-	int gg_enabled, autoLoadDebug, autoOpenDebugger;
+	int gg_enabled, autoLoadDebug, autoOpenDebugger, autoInputPreset;
 
 	if (isloaded){
 		CloseGame();
@@ -267,12 +267,19 @@ int LoadGame(const char *path, bool silent)
 
 	CDLoggerROMChanged();
 
-    int state_to_load;
-    g_config->getOption("SDL.AutoLoadState", &state_to_load);
-    if (state_to_load >= 0 && state_to_load < 10){
-        FCEUI_SelectState(state_to_load, 0);
-        FCEUI_LoadState(NULL, false);
-    }
+	int state_to_load;
+	g_config->getOption("SDL.AutoLoadState", &state_to_load);
+	if (state_to_load >= 0 && state_to_load < 10){
+	    FCEUI_SelectState(state_to_load, 0);
+	    FCEUI_LoadState(NULL, false);
+	}
+
+	g_config->getOption( "SDL.AutoInputPreset", &autoInputPreset );
+
+	if ( autoInputPreset )
+	{
+		loadInputSettingsFromFile();
+	}
 
 	ParseGIInput(GameInfo);
 	RefreshThrottleFPS();
@@ -321,12 +328,21 @@ CloseGame(void)
 	debugSymbolTable.clear();
 	CDLoggerROMClosed();
 
-    int state_to_save;
-    g_config->getOption("SDL.AutoSaveState", &state_to_save);
-    if (state_to_save < 10 && state_to_save >= 0){
-        FCEUI_SelectState(state_to_save, 0);
-        FCEUI_SaveState(NULL, false);
-    }
+   int state_to_save;
+   g_config->getOption("SDL.AutoSaveState", &state_to_save);
+   if (state_to_save < 10 && state_to_save >= 0){
+       FCEUI_SelectState(state_to_save, 0);
+       FCEUI_SaveState(NULL, false);
+   }
+
+	int autoInputPreset;
+	g_config->getOption( "SDL.AutoInputPreset", &autoInputPreset );
+
+	if ( autoInputPreset )
+	{
+		saveInputSettingsToFile();
+	}
+
 	FCEUI_CloseGame();
 
 	DriverKill();

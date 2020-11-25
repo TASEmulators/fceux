@@ -1147,7 +1147,7 @@ void RamWatchDialog_t::saveWatchFile (const char *filename, int append )
 void RamWatchDialog_t::loadWatchFile (const char *filename, int append )
 {
 	FILE *fp;
-	int i, j, a, t, s, isSep, literal;
+	int i, j, a, t, s, isSep, literal=0;
 	char line[512], stmp[512];
 	ramWatch_t *rw;
 

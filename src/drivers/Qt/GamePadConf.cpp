@@ -70,7 +70,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3, *hbox4, *hbox5;
 	QVBoxLayout *vbox, *vbox1, *vbox2;
 	QGridLayout *grid;
-	QCheckBox *efs_chkbox, *udlr_chkbox;
+	QCheckBox *udlr_chkbox;
    QGroupBox *frame1, *frame2;
 	QLabel *label;
    QPushButton *newProfileButton;
@@ -910,6 +910,13 @@ void GamePadConfDialog_t::updatePeriodic(void)
       	keyName[i]->setStyleSheet("color: black;");
 		}
    }
+
+	int fourScore;
+	g_config->getOption("SDL.FourScore", &fourScore);
+	if ( fourScore != efs_chkbox->isChecked() )
+	{
+		efs_chkbox->setChecked( fourScore );
+	}
 }
 //----------------------------------------------------
 GamePadConfigButton_t::GamePadConfigButton_t(int i)
