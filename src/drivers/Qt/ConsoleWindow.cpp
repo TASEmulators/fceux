@@ -110,7 +110,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	emulatorThread->start();
 	//emulatorThread->setPriority( QThread::TimeCriticalPriority );
 
-	//setPriority( QThread::TimeCriticalPriority );
+	setPriority( QThread::TimeCriticalPriority );
 }
 
 consoleWin_t::~consoleWin_t(void)
@@ -1783,6 +1783,7 @@ void consoleWin_t::aboutQt(void)
 
 void consoleWin_t::setPriority( QThread::Priority priority_req )
 {
+
 #ifdef __linux__
 	struct sched_param  p;
 	int minPrio, maxPrio;
@@ -1808,6 +1809,12 @@ void consoleWin_t::setPriority( QThread::Priority priority_req )
 	}
 	printf("sched_getscheduler(): %i \n", sched_getscheduler( getpid() ) );
 
+#else
+	QThread *mainThread;
+
+	mainThread = QThread::currentThread();
+
+	mainThread->setPriority( priority_req );
 #endif
 }
 
