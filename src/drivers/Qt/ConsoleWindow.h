@@ -28,10 +28,18 @@ class  emulatorThread_t : public QThread
 {
 	Q_OBJECT
 
-	//public slots:
+	protected:
 		void run( void ) override;
+
+	public:
+		emulatorThread_t(void);
+
+		void setPriority( QThread::Priority priority );
+
+	private:
+
 	signals:
-    void finished();
+		void finished();
 };
 
 class  consoleWin_t : public QMainWindow
@@ -52,6 +60,8 @@ class  consoleWin_t : public QMainWindow
 	 	void QueueErrorMsgWindow( const char *msg );
 
 		int  showListSelectDialog( const char *title, std::vector <std::string> &l );
+
+		void setPriority( QThread::Priority priority_req );
 
 	protected:
 	 QMenu *fileMenu;

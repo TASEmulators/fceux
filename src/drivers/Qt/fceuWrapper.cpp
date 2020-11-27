@@ -958,13 +958,6 @@ FCEUD_Update(uint8 *XBuf,
 	}
   	else 
 	{
-		//if (!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
-		//{
-		//	while (SpeedThrottle())
-		//	{
-		//		FCEUD_UpdateInput();
-		//	}
-		//}
 		if (XBuf && (inited&4)) 
 		{
 			BlitScreen(XBuf); blitDone = 1;

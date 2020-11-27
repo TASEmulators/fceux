@@ -1,5 +1,14 @@
 // GameApp.cpp
 //
+#ifdef __linux__
+#include <unistd.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <sys/types.h>
+#include <sys/syscall.h>
+#include <pthread.h>
+#endif
+
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
@@ -99,7 +108,9 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	gameTimer->start( 8 ); // 120hz
 
 	emulatorThread->start();
+	//emulatorThread->setPriority( QThread::TimeCriticalPriority );
 
+	//setPriority( QThread::TimeCriticalPriority );
 }
 
 consoleWin_t::~consoleWin_t(void)
@@ -1770,6 +1781,36 @@ void consoleWin_t::aboutQt(void)
    return;
 }
 
+void consoleWin_t::setPriority( QThread::Priority priority_req )
+{
+#ifdef __linux__
+	struct sched_param  p;
+	int minPrio, maxPrio;
+
+	minPrio = sched_get_priority_min( SCHED_FIFO );
+	maxPrio = sched_get_priority_max( SCHED_FIFO );
+
+	p.sched_priority = maxPrio;
+
+	if ( ::setpriority( PRIO_PROCESS, getpid(), -20 ) )
+	{
+		perror("Qt Window thread setpriority error: ");
+	}
+	printf("sched_getscheduler(): %i \n", sched_getscheduler( getpid() ) );
+	printf("sched_get_priority_min(SCHED_FIFO): %i \n", minPrio );
+	printf("sched_get_priority_max(SCHED_FIFO): %i \n", maxPrio );
+
+	printf("setpriority(): %i \n", ::getpriority( PRIO_PROCESS, getpid() ) );
+
+	if ( sched_setscheduler( getpid(), SCHED_FIFO, &p ) )
+	{
+		perror("Qt Window thread sched_setscheduler error:");
+	}
+	printf("sched_getscheduler(): %i \n", sched_getscheduler( getpid() ) );
+
+#endif
+}
+
 void consoleWin_t::syncActionConfig( QAction *act, const char *property )
 {
 	if ( act->isCheckable() )
@@ -1821,10 +1862,79 @@ void consoleWin_t::updatePeriodic(void)
    return;
 }
 
+emulatorThread_t::emulatorThread_t(void)
+{
+
+}
+
+#ifdef __linux__
+#ifndef SYS_gettid
+#error "SYS_gettid unavailable on this system"
+#endif
+
+#define gettid() ((pid_t)syscall(SYS_gettid))
+#endif
+
+
+void emulatorThread_t::setPriority( QThread::Priority priority_req )
+{
+	printf("New Priority: %i \n", priority_req );
+	printf("Old Priority: %i \n", priority() );
+
+	QThread::setPriority( priority_req );
+
+	printf("Set Priority: %i \n", priority() );
+
+#ifdef __linux__
+	struct sched_param  p;
+	int oldPolicy, newPolicy, minPrio, maxPrio;
+	pthread_t self;
+
+	self = pthread_self();
+	newPolicy = SCHED_FIFO;
+
+	minPrio = sched_get_priority_min( SCHED_FIFO );
+	maxPrio = sched_get_priority_max( SCHED_FIFO );
+
+	pthread_getschedparam( self, &oldPolicy, &p );
+
+	printf("pthread_getschedparam(): %i, %i \n", oldPolicy, p.sched_priority );
+
+	p.sched_priority = maxPrio;
+
+	if ( ::pthread_setschedparam( self, newPolicy, &p ) != 0 )
+	{
+		perror("Emulator thread pthread_setschedparam error: ");
+	}
+
+	if ( ::setpriority( PRIO_PROCESS, gettid(), -20 ) )
+	{
+		perror("Emulator thread setpriority error: ");
+	}
+	printf("sched_getscheduler(): %i \n", sched_getscheduler( getpid() ) );
+	printf("sched_get_priority_min(SCHED_FIFO): %i \n", minPrio );
+	printf("sched_get_priority_max(SCHED_FIFO): %i \n", maxPrio );
+
+	printf("setpriority(): %i \n", ::getpriority( PRIO_PROCESS, getpid() ) );
+
+	//if ( sched_setscheduler( getpid(), SCHED_FIFO, &p ) )
+	//{
+	//	perror("Emulator thread sched_setscheduler error:");
+	//}
+	printf("sched_getscheduler(): %i \n", sched_getscheduler( getpid() ) );
+
+	pthread_getschedparam( self, &oldPolicy, &p );
+
+	printf("pthread_getschedparam(): %i, %i \n", oldPolicy, p.sched_priority );
+#endif
+}
+
 void emulatorThread_t::run(void)
 {
 	printf("Emulator Start\n");
 	nes_shm->runEmulator = 1;
+
+	setPriority( QThread::TimeCriticalPriority );
 
 	while ( nes_shm->runEmulator )
 	{
