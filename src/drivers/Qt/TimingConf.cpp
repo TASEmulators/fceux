@@ -23,7 +23,7 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
 	QVBoxLayout *mainLayout, *vbox;
-	QHBoxLayout *hbox;
+	//QHBoxLayout *hbox;
 	QGridLayout *grid;
 	QGroupBox   *emuPrioBox;
 
@@ -93,10 +93,25 @@ void TimingConfDialog_t::emuSchedNiceChange(int val)
 	{
 		return;
 	}
+	fceuWrapperLock();
 	if ( consoleWindow->emulatorThread->setNicePriority( -val ) )
 	{
-		printf("Set Nice Failed\n");
+		char msg[1024];
+
+		sprintf( msg, "Error: system call setPriority Failed\nReason: %s\n", strerror(errno) );
+#ifdef __linux__
+		strcat( msg, "Ensure that your system has the proper resource permissions set in the file:\n\n");
+		strcat( msg, "        /etc/security/limits.conf \n\n");
+		strcat( msg, "Adding the following lines to that file and rebooting will usually fix the issue:\n\n");
+		strcat( msg, "*  -  priority   99 \n");
+		strcat( msg, "*  -  rtprio     99 \n");
+		strcat( msg, "*  -  nice      -20 \n");
+#endif
+		printf("%s\n", msg );
+		consoleWindow->QueueErrorMsgWindow( msg );
+		updateSliderValues();
 	}
+	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::emuSchedPrioChange(int val)
@@ -107,12 +122,27 @@ void TimingConfDialog_t::emuSchedPrioChange(int val)
 	{
 		return;
 	}
+	fceuWrapperLock();
 	consoleWindow->emulatorThread->getSchedParam( policy, prio );
 
 	if ( consoleWindow->emulatorThread->setSchedParam( policy, val ) )
 	{
-		printf("Set setSchedParam Failed\n");
+		char msg[1024];
+
+		sprintf( msg, "Error: system call pthread_setschedparam Failed\nReason: %s\n", strerror(errno) );
+#ifdef __linux__
+		strcat( msg, "Ensure that your system has the proper resource permissions set in the file:\n\n");
+		strcat( msg, "        /etc/security/limits.conf \n\n");
+		strcat( msg, "Adding the following lines to that file and rebooting will usually fix the issue:\n\n");
+		strcat( msg, "*  -  priority   99 \n");
+		strcat( msg, "*  -  rtprio     99 \n");
+		strcat( msg, "*  -  nice      -20 \n");
+#endif
+		printf("%s\n", msg );
+		consoleWindow->QueueErrorMsgWindow( msg );
+		updateSliderValues();
 	}
+	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::emuSchedPolicyChange( int index )
@@ -123,15 +153,32 @@ void TimingConfDialog_t::emuSchedPolicyChange( int index )
 	{
 		return;
 	}
+	fceuWrapperLock();
 	consoleWindow->emulatorThread->getSchedParam( policy, prio );
 
 	policy = emuSchedPolicyBox->itemData( index ).toInt();
 
-	consoleWindow->emulatorThread->setSchedParam( policy, prio );
+	if ( consoleWindow->emulatorThread->setSchedParam( policy, prio ) )
+	{
+		char msg[1024];
+
+		sprintf( msg, "Error: system call pthread_setschedparam Failed\nReason: %s\n", strerror(errno) );
+#ifdef __linux__
+		strcat( msg, "Ensure that your system has the proper resource permissions set in the file:\n\n");
+		strcat( msg, "        /etc/security/limits.conf \n\n");
+		strcat( msg, "Adding the following lines to that file and rebooting will usually fix the issue:\n\n");
+		strcat( msg, "*  -  priority   99 \n");
+		strcat( msg, "*  -  rtprio     99 \n");
+		strcat( msg, "*  -  nice      -20 \n");
+#endif
+		printf("%s\n", msg );
+		consoleWindow->QueueErrorMsgWindow( msg );
+	}
 
 	updatePolicyBox();
 	updateSliderLimits();
 	updateSliderValues();
+	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::updatePolicyBox(void)

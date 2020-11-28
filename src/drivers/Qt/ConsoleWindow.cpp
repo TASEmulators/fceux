@@ -109,9 +109,8 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	gameTimer->start( 8 ); // 120hz
 
 	emulatorThread->start();
-	//emulatorThread->setPriority( QThread::TimeCriticalPriority );
 
-	setPriority( QThread::TimeCriticalPriority );
+	//setPriority( QThread::TimeCriticalPriority );
 }
 
 consoleWin_t::~consoleWin_t(void)
@@ -2106,8 +2105,6 @@ void emulatorThread_t::run(void)
 	nes_shm->runEmulator = 1;
 
 	init();
-
-	//setPriority( QThread::TimeCriticalPriority );
 
 	while ( nes_shm->runEmulator )
 	{
