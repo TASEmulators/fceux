@@ -1885,7 +1885,7 @@ int consoleWin_t::getSchedParam( int &policy, int &priority )
 #elif defined(__APPLE__)
 	struct sched_param  p;
 
-	if ( pthread_getschedparam( pself, &policy, &p ) )
+	if ( pthread_getschedparam( pthread_self(), &policy, &p ) )
 	{
 		perror("GUI thread pthread_getschedparam error: ");
 		ret = -1;
@@ -1936,7 +1936,7 @@ int consoleWin_t::setSchedParam( int policy, int priority )
 	}
 	p.sched_priority = priority;
 
-	if ( ::pthread_setschedparam( pself, policy, &p ) != 0 )
+	if ( ::pthread_setschedparam( pthread_self(), policy, &p ) != 0 )
 	{
 		perror("GUI thread pthread_setschedparam error: ");
 	}
