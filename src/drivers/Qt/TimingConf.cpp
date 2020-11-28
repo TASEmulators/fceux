@@ -5,6 +5,11 @@
 #include <string.h>
 #include <string>
 
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+
 #include <SDL.h>
 #include <QHeaderView>
 #include <QCloseEvent>
@@ -18,6 +23,38 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/TimingConf.h"
 
+//----------------------------------------------------------------------------
+static bool hasNicePermissions( int val )
+{
+	int usrID;
+	bool usrRoot;
+
+	usrID = geteuid();
+
+	usrRoot = (usrID == 0);
+
+	if ( usrRoot )
+	{
+		return true;
+	}
+#ifdef __linux__
+	struct rlimit r;
+
+	if ( getrlimit( RLIMIT_NICE, &r ) == 0 )
+	{
+		int ncur = 20 - r.rlim_cur;
+
+		if ( val >= ncur )
+		{
+			return true;
+		}
+		//printf("RLim Cur: %lu \n", r.rlim_cur );
+		//printf("RLim Max: %lu \n", r.rlim_max );
+	}
+#endif
+
+	return false;
+}
 //----------------------------------------------------------------------------
 TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	: QDialog( parent )
@@ -43,6 +80,7 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	emuSchedPrioSlider = new QSlider( Qt::Horizontal );
 	emuSchedNiceSlider = new QSlider( Qt::Horizontal );
 	emuSchedPrioLabel  = new QLabel( tr("Priority (RT)") );
+	emuSchedNiceLabel  = new QLabel( tr("Priority (Nice)") );
 
 	emuSchedPolicyBox->addItem( tr("SCHED_OTHER") , SCHED_OTHER );
 	emuSchedPolicyBox->addItem( tr("SCHED_FIFO")  , SCHED_FIFO  );
@@ -52,7 +90,7 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	grid->addWidget( emuSchedPolicyBox, 0, 1 );
 	grid->addWidget( emuSchedPrioLabel, 1, 0 );
 	grid->addWidget( emuSchedPrioSlider, 1, 1 );
-	grid->addWidget( new QLabel( tr("Priority (Nice)") ), 2, 0 );
+	grid->addWidget( emuSchedNiceLabel, 2, 0 );
 	grid->addWidget( emuSchedNiceSlider, 2, 1 );
 
 	mainLayout->addWidget( emuPrioCtlEna );
@@ -65,6 +103,7 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	guiSchedPrioSlider = new QSlider( Qt::Horizontal );
 	guiSchedNiceSlider = new QSlider( Qt::Horizontal );
 	guiSchedPrioLabel  = new QLabel( tr("Priority (RT)") );
+	guiSchedNiceLabel  = new QLabel( tr("Priority (Nice)") );
 
 	guiSchedPolicyBox->addItem( tr("SCHED_OTHER") , SCHED_OTHER );
 	guiSchedPolicyBox->addItem( tr("SCHED_FIFO")  , SCHED_FIFO  );
@@ -74,7 +113,7 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	grid->addWidget( guiSchedPolicyBox, 0, 1 );
 	grid->addWidget( guiSchedPrioLabel, 1, 0 );
 	grid->addWidget( guiSchedPrioSlider, 1, 1 );
-	grid->addWidget( new QLabel( tr("Priority (Nice)") ), 2, 0 );
+	grid->addWidget( guiSchedNiceLabel, 2, 0 );
 	grid->addWidget( guiSchedNiceSlider, 2, 1 );
 
 	mainLayout->addWidget( guiPrioBox );
@@ -371,6 +410,7 @@ void TimingConfDialog_t::updatePolicyBox(void)
 void TimingConfDialog_t::updateSliderValues(void)
 {
 	int policy, prio;
+	bool hasNicePerms;
 
 	if ( consoleWindow == NULL )
 	{
@@ -391,6 +431,10 @@ void TimingConfDialog_t::updateSliderValues(void)
 		emuSchedPrioLabel->setEnabled(false);
 		emuSchedPrioSlider->setEnabled(false);
 	}
+	hasNicePerms = hasNicePermissions( consoleWindow->emulatorThread->getNicePriority() );
+
+	emuSchedNiceLabel->setEnabled( hasNicePerms );
+	emuSchedNiceSlider->setEnabled( hasNicePerms );
 
 	consoleWindow->getSchedParam( policy, prio );
 
@@ -407,6 +451,11 @@ void TimingConfDialog_t::updateSliderValues(void)
 		guiSchedPrioLabel->setEnabled(false);
 		guiSchedPrioSlider->setEnabled(false);
 	}
+	hasNicePerms = hasNicePermissions( consoleWindow->getNicePriority() );
+
+	guiSchedNiceLabel->setEnabled( hasNicePerms );
+	guiSchedNiceSlider->setEnabled( hasNicePerms );
+
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::updateSliderLimits(void)

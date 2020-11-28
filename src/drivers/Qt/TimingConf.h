@@ -35,10 +35,12 @@ class TimingConfDialog_t : public QDialog
 		QSlider    *emuSchedPrioSlider;
 		QSlider    *emuSchedNiceSlider;
 		QLabel     *emuSchedPrioLabel;
+		QLabel     *emuSchedNiceLabel;
 		QComboBox  *guiSchedPolicyBox;
 		QSlider    *guiSchedPrioSlider;
 		QSlider    *guiSchedNiceSlider;
 		QLabel     *guiSchedPrioLabel;
+		QLabel     *guiSchedNiceLabel;
 
 	private:
 		void  updatePolicyBox(void);
