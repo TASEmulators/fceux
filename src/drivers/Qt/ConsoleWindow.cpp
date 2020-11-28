@@ -1878,9 +1878,12 @@ int consoleWin_t::getSchedParam( int &policy, int &priority )
 	if ( sched_getparam( getpid(), &p ) )
 	{
 		ret = -1;
+		priority = 0;
 	}
-
-	priority = p.sched_priority;
+	else
+	{
+		priority = p.sched_priority;
+	}
 
 #elif defined(__APPLE__)
 	struct sched_param  p;

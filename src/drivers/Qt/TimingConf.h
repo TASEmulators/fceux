@@ -44,10 +44,12 @@ class TimingConfDialog_t : public QDialog
 		void  updatePolicyBox(void);
 		void  updateSliderLimits(void);
 		void  updateSliderValues(void);
+		void  saveValues(void);
 
    public slots:
       void closeWindow(void);
 	private slots:
+		void emuSchedCtlChange( int state );
 		void emuSchedNiceChange( int val );
 		void emuSchedPrioChange( int val );
 		void emuSchedPolicyChange( int index );

@@ -22,6 +22,7 @@
 TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
+	int opt;
 	QVBoxLayout *mainLayout, *vbox;
 	//QHBoxLayout *hbox;
 	QGridLayout *grid;
@@ -80,6 +81,10 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 
 	setLayout( mainLayout );
 
+	g_config->getOption( "SDL.SetSchedParam", &opt );
+	
+	emuPrioCtlEna->setChecked( opt );
+
 	updatePolicyBox();
 	updateSliderLimits();
 	updateSliderValues();
@@ -90,6 +95,7 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	connect( guiSchedPolicyBox   , SIGNAL(activated(int))   , this, SLOT(guiSchedPolicyChange(int))   );
 	connect( guiSchedNiceSlider  , SIGNAL(valueChanged(int)), this, SLOT(guiSchedNiceChange(int))     );
 	connect( guiSchedPrioSlider  , SIGNAL(valueChanged(int)), this, SLOT(guiSchedPrioChange(int))     );
+	connect( emuPrioCtlEna       , SIGNAL(stateChanged(int)), this, SLOT(emuSchedCtlChange(int))      );
 }
 //----------------------------------------------------------------------------
 TimingConfDialog_t::~TimingConfDialog_t(void)
@@ -103,6 +109,7 @@ void TimingConfDialog_t::closeEvent(QCloseEvent *event)
    done(0);
 	deleteLater();
    event->accept();
+	saveValues();
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::closeWindow(void)
@@ -110,6 +117,35 @@ void TimingConfDialog_t::closeWindow(void)
    //printf("Close Window\n");
    done(0);
 	deleteLater();
+	saveValues();
+}
+//----------------------------------------------------------------------------
+void TimingConfDialog_t::emuSchedCtlChange( int state )
+{
+	g_config->setOption( "SDL.SetSchedParam", (state != Qt::Unchecked) );
+}
+//----------------------------------------------------------------------------
+void TimingConfDialog_t::saveValues(void)
+{
+	int policy, prio;
+
+	if ( consoleWindow == NULL )
+	{
+		return;
+	}
+	consoleWindow->emulatorThread->getSchedParam( policy, prio );
+
+	g_config->setOption( "SDL.EmuSchedPolicy", policy );
+	g_config->setOption( "SDL.EmuSchedPrioRt", prio   );
+	g_config->setOption( "SDL.EmuSchedNice"  , consoleWindow->emulatorThread->getNicePriority() );
+
+	consoleWindow->getSchedParam( policy, prio );
+
+	g_config->setOption( "SDL.GuiSchedPolicy", policy );
+	g_config->setOption( "SDL.GuiSchedPrioRt", prio   );
+	g_config->setOption( "SDL.GuiSchedNice"  , consoleWindow->getNicePriority() );
+
+	g_config->save();
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::emuSchedNiceChange(int val)
