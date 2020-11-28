@@ -36,6 +36,7 @@
 #include "Qt/GuiConf.h"
 #include "Qt/MoviePlay.h"
 #include "Qt/MovieOptions.h"
+#include "Qt/TimingConf.h"
 #include "Qt/LuaControl.h"
 #include "Qt/CheatsConf.h"
 #include "Qt/GameGenie.h"
@@ -414,6 +415,14 @@ void consoleWin_t::createMainMenu(void)
     connect(guiConfig, SIGNAL(triggered()), this, SLOT(openGuiConfWin(void)) );
 
     optMenu->addAction(guiConfig);
+
+	 // Options -> Timing Config
+	 timingConfig = new QAction(tr("Timing Config"), this);
+    //timingConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+    timingConfig->setStatusTip(tr("Timing Configure"));
+    connect(timingConfig, SIGNAL(triggered()), this, SLOT(openTimingConfWin(void)) );
+
+    optMenu->addAction(timingConfig);
 
 	 // Options -> Movie Options
 	 movieConfig = new QAction(tr("Movie Options"), this);
@@ -1263,6 +1272,17 @@ void consoleWin_t::openGuiConfWin(void)
    guiConfWin->show();
 }
 
+void consoleWin_t::openTimingConfWin(void)
+{
+	TimingConfDialog_t *tmConfWin;
+
+	//printf("Open Timing Config Window\n");
+	
+   tmConfWin = new TimingConfDialog_t(this);
+	
+   tmConfWin->show();
+}
+
 void consoleWin_t::openMovieOptWin(void)
 {
 	MovieOptionsDialog_t *win;
@@ -1924,105 +1944,8 @@ emulatorThread_t::emulatorThread_t(void)
 #endif
 
 
-void emulatorThread_t::setPriority( QThread::Priority priority_req )
+void emulatorThread_t::init(void)
 {
-	printf("New Priority: %i \n", priority_req );
-	printf("Old Priority: %i \n", priority() );
-
-	//QThread::setPriority( priority_req );
-
-	printf("Set Priority: %i \n", priority() );
-
-#if defined(__linux__)
-	struct sched_param  p;
-	int oldPolicy, newPolicy, minPrio, maxPrio;
-
-	newPolicy = SCHED_FIFO;
-
-	minPrio = sched_get_priority_min( SCHED_FIFO );
-	maxPrio = sched_get_priority_max( SCHED_FIFO );
-
-	pthread_getschedparam( pself, &oldPolicy, &p );
-
-	printf("pthread_getschedparam(): %i, %i \n", oldPolicy, p.sched_priority );
-
-	p.sched_priority = maxPrio;
-
-	if ( ::pthread_setschedparam( pself, newPolicy, &p ) != 0 )
-	{
-		perror("Emulator thread pthread_setschedparam error: ");
-	}
-
-	if ( ::setpriority( PRIO_PROCESS, gettid(), -20 ) )
-	{
-		perror("Emulator thread setpriority error: ");
-	}
-	printf("sched_getscheduler(): %i \n", sched_getscheduler( getpid() ) );
-	printf("sched_get_priority_min(SCHED_FIFO): %i \n", minPrio );
-	printf("sched_get_priority_max(SCHED_FIFO): %i \n", maxPrio );
-
-	printf("setpriority(): %i \n", ::getpriority( PRIO_PROCESS, getpid() ) );
-
-	//if ( sched_setscheduler( getpid(), SCHED_FIFO, &p ) )
-	//{
-	//	perror("Emulator thread sched_setscheduler error:");
-	//}
-	printf("sched_getscheduler(): %i \n", sched_getscheduler( getpid() ) );
-
-	pthread_getschedparam( pself, &oldPolicy, &p );
-
-	printf("pthread_getschedparam(): %i, %i \n", oldPolicy, p.sched_priority );
-#elif defined(__APPLE__)
-	struct sched_param  p;
-	int oldPolicy, newPolicy, minPrio, maxPrio;
-
-	newPolicy = SCHED_FIFO;
-
-	if ( ::setpriority( PRIO_PROCESS, getpid(), -20 ) )
-	{
-		perror("Emulator thread setpriority error: ");
-	}
-	printf("EMU setpriority(): %i \n", ::getpriority( PRIO_PROCESS, getpid() ) );
-
-	minPrio = sched_get_priority_min( SCHED_FIFO );
-	maxPrio = sched_get_priority_max( SCHED_FIFO );
-
-	printf("sched_get_priority_min(SCHED_FIFO): %i \n", minPrio );
-	printf("sched_get_priority_max(SCHED_FIFO): %i \n", maxPrio );
-
-	pthread_getschedparam( pself, &oldPolicy, &p );
-
-	printf("EMU pthread_getschedparam(): %i, %i \n", oldPolicy, p.sched_priority );
-
-	//for (int i=0; i<7; i++)
-	//{
-	//	QThread::setPriority( (QThread::Priority)i);
-
-	//	pthread_getschedparam( pself, &oldPolicy, &p );
-
-	//	printf("%i: EMU pthread_getschedparam(): %i, %i \n", i, oldPolicy, p.sched_priority );
-	//}
-
-	p.sched_priority = maxPrio;
-
-	if ( ::pthread_setschedparam( pself, newPolicy, &p ) != 0 )
-	{
-		perror("Emulator thread pthread_setschedparam error: ");
-	}
-
-	pthread_getschedparam( pself, &oldPolicy, &p );
-
-	printf("EMU pthread_getschedparam(): %i, %i \n", oldPolicy, p.sched_priority );
-
-
-#endif
-}
-
-void emulatorThread_t::run(void)
-{
-	printf("Emulator Start\n");
-	nes_shm->runEmulator = 1;
-
 	#if defined(__linux__) || defined(__APPLE__)
 	if ( pthread_self() == (pthread_t)QThread::currentThreadId() )
 	{
@@ -2031,7 +1954,160 @@ void emulatorThread_t::run(void)
 	}
 	#endif
 
-	setPriority( QThread::TimeCriticalPriority );
+	#if defined(__linux__)
+	pid = gettid();
+	#elif defined(__APPLE__)
+	pid = getpid();
+	#endif
+}
+
+void emulatorThread_t::setPriority( QThread::Priority priority_req )
+{
+	//printf("New Priority: %i \n", priority_req );
+	//printf("Old Priority: %i \n", priority() );
+
+	QThread::setPriority( priority_req );
+
+	//printf("Set Priority: %i \n", priority() );
+}
+
+int emulatorThread_t::setNicePriority( int value )
+{
+	int ret = 0;
+#if defined(__linux__)
+
+	if ( value < -20 )
+	{
+		value = -20;
+	}
+	else if ( value > 19 )
+	{
+		value =  19;
+	}
+
+	if ( ::setpriority( PRIO_PROCESS, pid, value ) )
+	{
+		perror("Emulator thread setpriority error: ");
+		ret = -1;
+	}
+#elif defined(__APPLE__)
+
+	if ( value < -20 )
+	{
+		value = -20;
+	}
+	else if ( value > 20 )
+	{
+		value =  20;
+	}
+
+	if ( ::setpriority( PRIO_PROCESS, pid, value ) )
+	{
+		perror("Emulator thread setpriority error: ");
+		ret = -1;
+	}
+#endif
+	return ret;
+}
+
+int emulatorThread_t::getNicePriority(void)
+{
+	return ::getpriority( PRIO_PROCESS, pid );
+}
+
+int emulatorThread_t::getMinSchedPriority(void)
+{
+	int policy, prio;
+
+	if ( getSchedParam( policy, prio ) )
+	{
+		return 0;
+	}
+	return sched_get_priority_min( policy );
+}
+
+int emulatorThread_t::getMaxSchedPriority(void)
+{
+	int policy, prio;
+
+	if ( getSchedParam( policy, prio ) )
+	{
+		return 0;
+	}
+	return sched_get_priority_max( policy );
+}
+
+int emulatorThread_t::getSchedParam( int &policy, int &priority )
+{
+	struct sched_param  p;
+
+	if ( pthread_getschedparam( pself, &policy, &p ) )
+	{
+		perror("Emulator thread pthread_getschedparam error: ");
+		return -1;
+	}
+	return 0;
+}
+
+int emulatorThread_t::setSchedParam( int policy, int priority )
+{
+	int ret = 0;
+#if defined(__linux__)
+	struct sched_param  p;
+	int minPrio, maxPrio;
+
+	minPrio = sched_get_priority_min( policy );
+	maxPrio = sched_get_priority_max( policy );
+
+	if ( priority < minPrio )
+	{
+		priority = minPrio;
+	}
+	else if ( priority > maxPrio )
+	{
+		priority = maxPrio;
+	}
+	p.sched_priority = priority;
+
+	if ( ::pthread_setschedparam( pself, policy, &p ) != 0 )
+	{
+		perror("Emulator thread pthread_setschedparam error: ");
+		ret = -1;
+	}
+
+#elif defined(__APPLE__)
+	struct sched_param  p;
+	int minPrio, maxPrio;
+
+	minPrio = sched_get_priority_min( policy );
+	maxPrio = sched_get_priority_max( policy );
+
+	if ( priority < minPrio )
+	{
+		priority = minPrio;
+	}
+	else if ( priority > maxPrio )
+	{
+		priority = maxPrio;
+	}
+	p.sched_priority = priority;
+
+	if ( ::pthread_setschedparam( pself, policy, &p ) != 0 )
+	{
+		perror("Emulator thread pthread_setschedparam error: ");
+	}
+#endif
+	return ret;
+}
+
+void emulatorThread_t::run(void)
+{
+	printf("Emulator Start\n");
+	nes_shm->runEmulator = 1;
+
+	init();
+
+	//setPriority( QThread::TimeCriticalPriority );
 
 	while ( nes_shm->runEmulator )
 	{

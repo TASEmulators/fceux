@@ -36,9 +36,20 @@ class  emulatorThread_t : public QThread
 
 		void setPriority( QThread::Priority priority );
 
+		#if defined(__linux__) || defined(__APPLE__)
+		int setSchedParam( int policy, int priority );
+		int getSchedParam( int &policy, int &priority );
+		int setNicePriority( int value );
+		int getNicePriority( void );
+		int getMinSchedPriority(void);
+		int getMaxSchedPriority(void);
+		#endif
 	private:
+		void init(void);
+
 		#if defined(__linux__) || defined(__APPLE__)
 		pthread_t  pself;
+		int        pid;
 		#endif
 
 	signals:
@@ -66,6 +77,8 @@ class  consoleWin_t : public QMainWindow
 
 		void setPriority( QThread::Priority priority_req );
 
+		emulatorThread_t *emulatorThread;
+
 	protected:
 	 QMenu *fileMenu;
     QMenu *optMenu;
@@ -91,6 +104,7 @@ class  consoleWin_t : public QMainWindow
     QAction *hotkeyConfig;
     QAction *paletteConfig;
     QAction *guiConfig;
+    QAction *timingConfig;
     QAction *movieConfig;
     QAction *autoResume;
     QAction *fullscreen;
@@ -124,8 +138,6 @@ class  consoleWin_t : public QMainWindow
 	 QAction *recAsMovAct;
 
 	 QTimer  *gameTimer;
-
-	 emulatorThread_t *emulatorThread;
 
 	 std::string errorMsg;
 	 bool        errorMsgValid;
@@ -161,6 +173,7 @@ class  consoleWin_t : public QMainWindow
       void openHotkeyConfWin(void);
       void openPaletteConfWin(void);
       void openGuiConfWin(void);
+      void openTimingConfWin(void);
       void openMovieOptWin(void);
 		void openCodeDataLogger(void);
 		void openTraceLogger(void);
