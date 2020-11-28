@@ -37,6 +37,9 @@ class  emulatorThread_t : public QThread
 		void setPriority( QThread::Priority priority );
 
 	private:
+		#if defined(__linux__) || defined(__APPLE__)
+		pthread_t  pself;
+		#endif
 
 	signals:
 		void finished();
