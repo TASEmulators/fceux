@@ -75,7 +75,14 @@ class  consoleWin_t : public QMainWindow
 
 		int  showListSelectDialog( const char *title, std::vector <std::string> &l );
 
-		void setPriority( QThread::Priority priority_req );
+		#if defined(__linux__) || defined(__APPLE__)
+		int setSchedParam( int policy, int priority );
+		int getSchedParam( int &policy, int &priority );
+		int setNicePriority( int value );
+		int getNicePriority( void );
+		int getMinSchedPriority(void);
+		int getMaxSchedPriority(void);
+		#endif
 
 		emulatorThread_t *emulatorThread;
 

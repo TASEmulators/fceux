@@ -35,6 +35,10 @@ class TimingConfDialog_t : public QDialog
 		QSlider    *emuSchedPrioSlider;
 		QSlider    *emuSchedNiceSlider;
 		QLabel     *emuSchedPrioLabel;
+		QComboBox  *guiSchedPolicyBox;
+		QSlider    *guiSchedPrioSlider;
+		QSlider    *guiSchedNiceSlider;
+		QLabel     *guiSchedPrioLabel;
 
 	private:
 		void  updatePolicyBox(void);
@@ -47,5 +51,8 @@ class TimingConfDialog_t : public QDialog
 		void emuSchedNiceChange( int val );
 		void emuSchedPrioChange( int val );
 		void emuSchedPolicyChange( int index );
+		void guiSchedNiceChange( int val );
+		void guiSchedPrioChange( int val );
+		void guiSchedPolicyChange( int index );
 
 };

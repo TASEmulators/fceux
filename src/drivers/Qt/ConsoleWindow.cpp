@@ -1800,80 +1800,225 @@ void consoleWin_t::aboutQt(void)
    return;
 }
 
-void consoleWin_t::setPriority( QThread::Priority priority_req )
+int consoleWin_t::setNicePriority( int value )
 {
+	int ret = 0;
+#if defined(__linux__)
+
+	if ( value < -20 )
+	{
+		value = -20;
+	}
+	else if ( value > 19 )
+	{
+		value =  19;
+	}
+
+	if ( ::setpriority( PRIO_PROCESS, getpid(), value ) )
+	{
+		perror("Emulator thread setpriority error: ");
+		ret = -1;
+	}
+#elif defined(__APPLE__)
+
+	if ( value < -20 )
+	{
+		value = -20;
+	}
+	else if ( value > 20 )
+	{
+		value =  20;
+	}
+
+	if ( ::setpriority( PRIO_PROCESS, getpid(), value ) )
+	{
+		perror("Emulator thread setpriority error: ");
+		ret = -1;
+	}
+#endif
+	return ret;
+}
+
+int consoleWin_t::getNicePriority(void)
+{
+	return ::getpriority( PRIO_PROCESS, getpid() );
+}
+
+int consoleWin_t::getMinSchedPriority(void)
+{
+	int policy, prio;
+
+	if ( getSchedParam( policy, prio ) )
+	{
+		return 0;
+	}
+	return sched_get_priority_min( policy );
+}
+
+int consoleWin_t::getMaxSchedPriority(void)
+{
+	int policy, prio;
+
+	if ( getSchedParam( policy, prio ) )
+	{
+		return 0;
+	}
+	return sched_get_priority_max( policy );
+}
+
+int consoleWin_t::getSchedParam( int &policy, int &priority )
+{
+	int ret = 0;
+
+#if defined(__linux__)
+	struct sched_param  p;
+
+	policy = sched_getscheduler( getpid() );
+
+	if ( sched_getparam( getpid(), &p ) )
+	{
+		ret = -1;
+	}
+
+	priority = p.sched_priority;
+
+#elif defined(__APPLE__)
+	struct sched_param  p;
+
+	if ( pthread_getschedparam( pself, &policy, &p ) )
+	{
+		perror("GUI thread pthread_getschedparam error: ");
+		ret = -1;
+	}
+#endif
+	return ret;
+}
+
+int consoleWin_t::setSchedParam( int policy, int priority )
+{
+	int ret = 0;
 #if defined(__linux__)
 	struct sched_param  p;
 	int minPrio, maxPrio;
 
-	minPrio = sched_get_priority_min( SCHED_FIFO );
-	maxPrio = sched_get_priority_max( SCHED_FIFO );
+	minPrio = sched_get_priority_min( policy );
+	maxPrio = sched_get_priority_max( policy );
 
-	p.sched_priority = maxPrio;
-
-	if ( ::setpriority( PRIO_PROCESS, getpid(), -20 ) )
+	if ( priority < minPrio )
 	{
-		perror("Qt Window thread setpriority error: ");
+		priority = minPrio;
 	}
-	printf("sched_getscheduler(): %i \n", sched_getscheduler( getpid() ) );
-	printf("sched_get_priority_min(SCHED_FIFO): %i \n", minPrio );
-	printf("sched_get_priority_max(SCHED_FIFO): %i \n", maxPrio );
-
-	printf("setpriority(): %i \n", ::getpriority( PRIO_PROCESS, getpid() ) );
-
-	if ( sched_setscheduler( getpid(), SCHED_FIFO, &p ) )
+	else if ( priority > maxPrio )
 	{
-		perror("Qt Window thread sched_setscheduler error:");
+		priority = maxPrio;
 	}
-	printf("sched_getscheduler(): %i \n", sched_getscheduler( getpid() ) );
+	p.sched_priority = priority;
 
+	if ( sched_setscheduler( getpid(), policy, &p ) )
+	{
+		perror("GUI thread sched_setscheduler error");
+		ret = -1;
+	}
 #elif defined(__APPLE__)
-
 	struct sched_param  p;
-	int oldPolicy, newPolicy, minPrio, maxPrio;
-	QThread *qself;
-	pthread_t self;
+	int minPrio, maxPrio;
 
-	qself = QThread::currentThread();
+	minPrio = sched_get_priority_min( policy );
+	maxPrio = sched_get_priority_max( policy );
 
-	self = pthread_self();
-	newPolicy = SCHED_FIFO;
-
-	printf("QThreadID: %p \n", QThread::currentThreadId() );
-	printf("PThreadID: %p \n", self );
-
-	minPrio = sched_get_priority_min( SCHED_FIFO );
-	maxPrio = sched_get_priority_max( SCHED_FIFO );
-
-	pthread_getschedparam( self, &oldPolicy, &p );
-
-	printf("GUI pthread_getschedparam(): %i, %i \n", oldPolicy, p.sched_priority );
-
-	qself->setPriority( priority_req );
-
-	p.sched_priority = maxPrio;
-
-	//if ( ::pthread_setschedparam( self, newPolicy, &p ) != 0 )
-	//{
-		//perror("GUI thread pthread_setschedparam error: ");
-	//}
-	pthread_getschedparam( self, &oldPolicy, &p );
-
-	printf("GUI pthread_getschedparam(): %i, %i \n", oldPolicy, p.sched_priority );
-
-	if ( ::setpriority( PRIO_PROCESS, getpid(), -20 ) )
+	if ( priority < minPrio )
 	{
-		perror("GUI thread setpriority error: ");
+		priority = minPrio;
 	}
-	printf("GUI Thread setpriority(): %i \n", ::getpriority( PRIO_PROCESS, getpid() ) );
-#else
-	QThread *mainThread;
+	else if ( priority > maxPrio )
+	{
+		priority = maxPrio;
+	}
+	p.sched_priority = priority;
 
-	mainThread = QThread::currentThread();
-
-	mainThread->setPriority( priority_req );
+	if ( ::pthread_setschedparam( pself, policy, &p ) != 0 )
+	{
+		perror("GUI thread pthread_setschedparam error: ");
+	}
 #endif
+	return ret;
 }
+
+
+//void consoleWin_t::setPriority( QThread::Priority priority_req )
+//{
+//#if defined(__linux__)
+//	struct sched_param  p;
+//	int minPrio, maxPrio;
+//
+//	minPrio = sched_get_priority_min( SCHED_FIFO );
+//	maxPrio = sched_get_priority_max( SCHED_FIFO );
+//
+//	p.sched_priority = maxPrio;
+//
+//	if ( ::setpriority( PRIO_PROCESS, getpid(), -20 ) )
+//	{
+//		perror("Qt Window thread setpriority error ");
+//	}
+//	printf("sched_getscheduler(): %i \n", sched_getscheduler( getpid() ) );
+//	printf("sched_get_priority_min(SCHED_FIFO): %i \n", minPrio );
+//	printf("sched_get_priority_max(SCHED_FIFO): %i \n", maxPrio );
+//
+//	printf("setpriority(): %i \n", ::getpriority( PRIO_PROCESS, getpid() ) );
+//
+//	if ( sched_setscheduler( getpid(), SCHED_FIFO, &p ) )
+//	{
+//		perror("Qt Window thread sched_setscheduler error:");
+//	}
+//	printf("sched_getscheduler(): %i \n", sched_getscheduler( getpid() ) );
+//
+//#elif defined(__APPLE__)
+//
+//	struct sched_param  p;
+//	int oldPolicy, newPolicy, minPrio, maxPrio;
+//	QThread *qself;
+//	pthread_t self;
+//
+//	qself = QThread::currentThread();
+//
+//	self = pthread_self();
+//	newPolicy = SCHED_FIFO;
+//
+//	printf("QThreadID: %p \n", QThread::currentThreadId() );
+//	printf("PThreadID: %p \n", self );
+//
+//	minPrio = sched_get_priority_min( SCHED_FIFO );
+//	maxPrio = sched_get_priority_max( SCHED_FIFO );
+//
+//	pthread_getschedparam( self, &oldPolicy, &p );
+//
+//	printf("GUI pthread_getschedparam(): %i, %i \n", oldPolicy, p.sched_priority );
+//
+//	qself->setPriority( priority_req );
+//
+//	p.sched_priority = maxPrio;
+//
+//	//if ( ::pthread_setschedparam( self, newPolicy, &p ) != 0 )
+//	//{
+//		//perror("GUI thread pthread_setschedparam error: ");
+//	//}
+//	pthread_getschedparam( self, &oldPolicy, &p );
+//
+//	printf("GUI pthread_getschedparam(): %i, %i \n", oldPolicy, p.sched_priority );
+//
+//	if ( ::setpriority( PRIO_PROCESS, getpid(), -20 ) )
+//	{
+//		perror("GUI thread setpriority error: ");
+//	}
+//	printf("GUI Thread setpriority(): %i \n", ::getpriority( PRIO_PROCESS, getpid() ) );
+//#else
+//	QThread *mainThread;
+//
+//	mainThread = QThread::currentThread();
+//
+//	mainThread->setPriority( priority_req );
+//#endif
+//}
 
 void consoleWin_t::syncActionConfig( QAction *act, const char *property )
 {
