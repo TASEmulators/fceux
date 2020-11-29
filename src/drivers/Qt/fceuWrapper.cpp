@@ -737,6 +737,15 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		g_config->getOption("SDL.SubtitleDisplay", &id); 
 		movieSubtitles = id ? true : false;
 	}
+
+	// Emulation Timing Mechanism
+	{
+		int timingMode;
+
+		g_config->getOption("SDL.EmuTimingMech", &timingMode);
+
+		setTimingMode( timingMode );
+	}
 	
 	// load the hotkeys from the config life
 	setHotKeys();
@@ -958,13 +967,6 @@ FCEUD_Update(uint8 *XBuf,
 	}
   	else 
 	{
-		//if (!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
-		//{
-		//	while (SpeedThrottle())
-		//	{
-		//		FCEUD_UpdateInput();
-		//	}
-		//}
 		if (XBuf && (inited&4)) 
 		{
 			BlitScreen(XBuf); blitDone = 1;

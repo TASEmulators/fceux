@@ -315,6 +315,15 @@ InitConfig()
 	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
 	config->addOption("_useNativeMenuBar"   , "SDL.UseNativeMenuBar", false);
     
+	config->addOption("_setSchedParam"      , "SDL.SetSchedParam" , 0);
+	config->addOption("_emuSchedPolicy"     , "SDL.EmuSchedPolicy", 0);
+	config->addOption("_emuSchedNice"       , "SDL.EmuSchedNice"  , 0);
+	config->addOption("_emuSchedPrioRt"     , "SDL.EmuSchedPrioRt", 40);
+	config->addOption("_guiSchedPolicy"     , "SDL.GuiSchedPolicy", 0);
+	config->addOption("_guiSchedNice"       , "SDL.GuiSchedNice"  , 0);
+	config->addOption("_guiSchedPrioRt"     , "SDL.GuiSchedPrioRt", 40);
+	config->addOption("_emuTimingMech"      , "SDL.EmuTimingMech" , 0);
+
 	// fcm -> fm2 conversion
 	config->addOption("fcmconvert", "SDL.FCMConvert", "");
     

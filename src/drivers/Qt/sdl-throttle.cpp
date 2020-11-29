@@ -4,15 +4,111 @@
 #include "Qt/sdl.h"
 #include "Qt/throttle.h"
 
+#if defined(__linux) || defined(__APPLE__)
+#include <time.h>
+#endif
+
+#ifdef __linux__
+#include <sys/timerfd.h>
+#endif
+
 static const double Slowest = 0.015625; // 1/64x speed (around 1 fps on NTSC)
 static const double Fastest = 32;       // 32x speed   (around 1920 fps on NTSC)
 static const double Normal  = 1.0;      // 1x speed    (around 60 fps on NTSC)
 
-static uint64 Lasttime, Nexttime;
+static uint32 frameLateCounter = 0;
+static double Lasttime=0, Nexttime=0, Latetime=0;
 static double desired_frametime = (1.0 / 60.099823);
+static double frameDeltaMin = 99999.0;
+static double frameDeltaMax =     0.0;
+static bool   keepFrameTimeStats = false;
 static int InFrame = 0;
 double g_fpsScale = Normal; // used by sdl.cpp
 bool MaxSpeed = false;
+
+double getHighPrecTimeStamp(void)
+{
+#if defined(__linux) || defined(__APPLE__)
+	struct timespec ts;
+	double t;
+
+	clock_gettime( CLOCK_REALTIME, &ts );
+
+	t = (double)ts.tv_sec + (double)(ts.tv_nsec * 1.0e-9);
+#else
+	double t;
+
+	t = (double)SDL_GetTicks();
+
+	t = t * 1e-3;
+#endif
+
+	return t;
+}
+
+#ifdef __linux__
+static char useTimerFD = 0;
+static int  timerfd = -1;
+
+static void setTimer( double hz )
+{
+	struct itimerspec ispec;
+
+	if ( !useTimerFD )
+	{
+		if ( timerfd != -1 )
+		{
+			::close( timerfd ); timerfd = -1;
+		}
+		return;
+	}
+
+	if ( timerfd == -1 )
+	{
+		timerfd = timerfd_create( CLOCK_REALTIME, 0 );
+
+		if ( timerfd == -1 )
+		{
+			perror("timerfd_create failed: ");
+			return;
+		}
+	}
+	ispec.it_interval.tv_sec  = 0;
+	ispec.it_interval.tv_nsec = (long)( 1.0e9 / hz );
+	ispec.it_value.tv_sec  = ispec.it_interval.tv_sec;
+	ispec.it_value.tv_nsec = ispec.it_interval.tv_nsec;
+
+	if ( timerfd_settime( timerfd, 0, &ispec, NULL ) == -1 )
+	{
+		perror("timerfd_settime failed: ");
+	}
+
+	//printf("Timer Set: %li ns\n", ispec.it_value.tv_nsec );
+
+	Lasttime = getHighPrecTimeStamp();
+	Nexttime = Lasttime + desired_frametime;
+	Latetime = Nexttime + desired_frametime;
+}
+#endif
+
+int getTimingMode(void)
+{
+#ifdef __linux__
+	if ( useTimerFD )
+	{
+		return 1;
+	}
+#endif
+	return 0;
+}
+
+int setTimingMode( int mode )
+{
+#ifdef __linux__
+	useTimerFD = (mode == 1);
+#endif
+	return 0;
+}
 
 /* LOGMUL = exp(log(2) / 3)
  *
@@ -28,7 +124,7 @@ bool MaxSpeed = false;
  * Refreshes the FPS throttling variables.
  */
 void
-RefreshThrottleFPS()
+RefreshThrottleFPS(void)
 {
    double hz;
 	int32_t fps = FCEUI_GetDesiredFPS(); // Do >> 24 to get in Hz
@@ -47,37 +143,67 @@ RefreshThrottleFPS()
 	Lasttime=0;   
 	Nexttime=0;
 	InFrame=0;
+
+#ifdef __linux__
+	setTimer( hz * g_fpsScale );
+#endif
+
+}
+
+int highPrecSleep( double timeSeconds )
+{
+	int ret = 0;
+#if defined(__linux) || defined(__APPLE__)
+	struct timespec req, rem;
+	
+	req.tv_sec  = (long)timeSeconds;
+	req.tv_nsec = (long)((timeSeconds - (double)req.tv_sec) * 1e9);
+
+	ret = nanosleep( &req, &rem );
+#else
+	SDL_Delay( (long)(time_left * 1e3) );
+#endif
+	return ret;
 }
 
 /**
  * Perform FPS speed throttling by delaying until the next time slot.
  */
 int
-SpeedThrottle()
+SpeedThrottle(void)
 {
 	if (g_fpsScale >= 32)
 	{
 		return 0; /* Done waiting */
 	}
-	uint64 time_left;
-	uint64 cur_time;
+	double time_left;
+	double cur_time;
+	double frame_time = desired_frametime;
+	double quarterFrame = 0.250 * frame_time;
     
-	if (!Lasttime)
+	cur_time  = getHighPrecTimeStamp();
+
+	if (Lasttime < 1.0)
 	{
-		Lasttime = SDL_GetTicks();
+		Lasttime = cur_time;
+		Latetime = Lasttime + frame_time;
 	}
     
 	if (!InFrame)
 	{
 		InFrame = 1;
-		Nexttime = Lasttime + desired_frametime * 1000;
+		Nexttime = Lasttime + frame_time;
+		Latetime = Nexttime + frame_time;
 	}
     
-	cur_time  = SDL_GetTicks();
-	if(cur_time >= Nexttime)
+	if (cur_time >= Nexttime)
+	{
 		time_left = 0;
+	}
 	else
+	{
 		time_left = Nexttime - cur_time;
+	}
     
 	if (time_left > 50)
 	{
@@ -93,16 +219,81 @@ SpeedThrottle()
 	//fprintf(stderr, "attempting to sleep %Ld ms, frame complete=%s\n",
 	//	time_left, InFrame?"no":"yes");
 
+#ifdef __linux__
+	if ( timerfd != -1 )
+	{
+		uint64_t val;
+
+		if ( read( timerfd, &val, sizeof(val) ) > 0 )
+		{
+			if ( val > 1 )
+			{
+				frameLateCounter += (val - 1);
+				//printf("Late Frame: %u \n", frameLateCounter);
+			}
+		}
+	}
+	else if ( time_left > 0 )
+	{
+		highPrecSleep( time_left );
+	}
+	else
+	{
+		if ( cur_time >= Latetime )
+		{
+			frameLateCounter++;
+			//printf("Late Frame: %u  - %llu ms\n", frameLateCounter, cur_time - Latetime);
+		}
+	}
+#else
 	if ( time_left > 0 )
 	{
-		SDL_Delay(time_left);
+		highPrecSleep( time_left );
 	}
-    
-	if (!InFrame)
+	else
 	{
-		Lasttime = SDL_GetTicks();
+		if ( cur_time >= Latetime )
+		{
+			frameLateCounter++;
+			//printf("Late Frame: %u  - %llu ms\n", frameLateCounter, cur_time - Latetime);
+		}
+	}
+#endif
+    
+	cur_time = getHighPrecTimeStamp();
+
+	if ( cur_time >= (Nexttime - quarterFrame) )
+	{
+		if ( keepFrameTimeStats )
+		{
+			double frameDelta;
+
+			frameDelta = (cur_time - Lasttime);
+
+			if ( frameDelta < frameDeltaMin )
+			{
+				frameDeltaMin = frameDelta;
+			}
+			if ( frameDelta > frameDeltaMax )
+			{
+				frameDeltaMax = frameDelta;
+			}
+			//printf("Frame Delta: %f us   min:%f   max:%f \n", frameDelta * 1e6, frameDeltaMin * 1e6, frameDeltaMax * 1e6 );
+			//printf("Frame Sleep Time: %f   Target Error: %f us\n", time_left * 1e6, (cur_time - Nexttime) * 1e6 );
+		}
+		Lasttime = Nexttime;
+		Nexttime = Lasttime + frame_time;
+		Latetime = Nexttime + frame_time;
+
+		if ( cur_time >= Nexttime )
+		{
+			Lasttime = cur_time;
+			Nexttime = Lasttime + frame_time;
+			Latetime = Nexttime + frame_time;
+		}
 		return 0; /* Done waiting */
 	}
+
 	return 1; /* Must still wait some more */
 }
 
@@ -113,7 +304,7 @@ void IncreaseEmulationSpeed(void)
 {
 	g_fpsScale *= LOGMUL;
     
-	if(g_fpsScale > Fastest) g_fpsScale = Fastest;
+	if (g_fpsScale > Fastest) g_fpsScale = Fastest;
 
 	RefreshThrottleFPS();
      
