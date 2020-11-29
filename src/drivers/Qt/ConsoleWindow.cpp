@@ -2042,7 +2042,7 @@ void emulatorThread_t::init(void)
 	if ( pthread_self() == (pthread_t)QThread::currentThreadId() )
 	{
 		pself = pthread_self();
-		printf("EMU is using PThread: %p\n", (void*)pself);
+		//printf("EMU is using PThread: %p\n", (void*)pself);
 	}
 	#endif
 
