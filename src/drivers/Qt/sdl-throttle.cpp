@@ -21,7 +21,7 @@ static double Lasttime=0, Nexttime=0, Latetime=0;
 static double desired_frametime = (1.0 / 60.099823);
 static double frameDeltaMin = 99999.0;
 static double frameDeltaMax =     0.0;
-static bool   keepFrameTimeStats = true;
+static bool   keepFrameTimeStats = false;
 static int InFrame = 0;
 double g_fpsScale = Normal; // used by sdl.cpp
 bool MaxSpeed = false;
