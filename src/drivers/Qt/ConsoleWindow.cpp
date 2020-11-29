@@ -60,6 +60,7 @@
 consoleWin_t::consoleWin_t(QWidget *parent)
 	: QMainWindow( parent )
 {
+	int opt;
 	int use_SDL_video = false;
    int setFullScreen = false;
 
@@ -105,12 +106,24 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	connect( gameTimer, &QTimer::timeout, this, &consoleWin_t::updatePeriodic );
 
 	gameTimer->setTimerType( Qt::PreciseTimer );
-	//gameTimer->start( 16 ); // 60hz
 	gameTimer->start( 8 ); // 120hz
 
 	emulatorThread->start();
 
-	//setPriority( QThread::TimeCriticalPriority );
+	g_config->getOption( "SDL.SetSchedParam", &opt );
+
+	if ( opt )
+	{
+		int policy, prio, nice;
+
+		g_config->getOption( "SDL.GuiSchedPolicy", &policy );
+		g_config->getOption( "SDL.GuiSchedPrioRt", &prio   );
+		g_config->getOption( "SDL.GuiSchedNice"  , &nice   );
+
+		setNicePriority( nice );
+
+		setSchedParam( policy, prio );
+	}
 }
 
 consoleWin_t::~consoleWin_t(void)
@@ -1953,82 +1966,6 @@ int consoleWin_t::setSchedParam( int policy, int priority )
 	return ret;
 }
 
-
-//void consoleWin_t::setPriority( QThread::Priority priority_req )
-//{
-//#if defined(__linux__)
-//	struct sched_param  p;
-//	int minPrio, maxPrio;
-//
-//	minPrio = sched_get_priority_min( SCHED_FIFO );
-//	maxPrio = sched_get_priority_max( SCHED_FIFO );
-//
-//	p.sched_priority = maxPrio;
-//
-//	if ( ::setpriority( PRIO_PROCESS, getpid(), -20 ) )
-//	{
-//		perror("Qt Window thread setpriority error ");
-//	}
-//	printf("sched_getscheduler(): %i \n", sched_getscheduler( getpid() ) );
-//	printf("sched_get_priority_min(SCHED_FIFO): %i \n", minPrio );
-//	printf("sched_get_priority_max(SCHED_FIFO): %i \n", maxPrio );
-//
-//	printf("setpriority(): %i \n", ::getpriority( PRIO_PROCESS, getpid() ) );
-//
-//	if ( sched_setscheduler( getpid(), SCHED_FIFO, &p ) )
-//	{
-//		perror("Qt Window thread sched_setscheduler error:");
-//	}
-//	printf("sched_getscheduler(): %i \n", sched_getscheduler( getpid() ) );
-//
-//#elif defined(__APPLE__)
-//
-//	struct sched_param  p;
-//	int oldPolicy, newPolicy, minPrio, maxPrio;
-//	QThread *qself;
-//	pthread_t self;
-//
-//	qself = QThread::currentThread();
-//
-//	self = pthread_self();
-//	newPolicy = SCHED_FIFO;
-//
-//	printf("QThreadID: %p \n", QThread::currentThreadId() );
-//	printf("PThreadID: %p \n", self );
-//
-//	minPrio = sched_get_priority_min( SCHED_FIFO );
-//	maxPrio = sched_get_priority_max( SCHED_FIFO );
-//
-//	pthread_getschedparam( self, &oldPolicy, &p );
-//
-//	printf("GUI pthread_getschedparam(): %i, %i \n", oldPolicy, p.sched_priority );
-//
-//	qself->setPriority( priority_req );
-//
-//	p.sched_priority = maxPrio;
-//
-//	//if ( ::pthread_setschedparam( self, newPolicy, &p ) != 0 )
-//	//{
-//		//perror("GUI thread pthread_setschedparam error: ");
-//	//}
-//	pthread_getschedparam( self, &oldPolicy, &p );
-//
-//	printf("GUI pthread_getschedparam(): %i, %i \n", oldPolicy, p.sched_priority );
-//
-//	if ( ::setpriority( PRIO_PROCESS, getpid(), -20 ) )
-//	{
-//		perror("GUI thread setpriority error: ");
-//	}
-//	printf("GUI Thread setpriority(): %i \n", ::getpriority( PRIO_PROCESS, getpid() ) );
-//#else
-//	QThread *mainThread;
-//
-//	mainThread = QThread::currentThread();
-//
-//	mainThread->setPriority( priority_req );
-//#endif
-//}
-
 void consoleWin_t::syncActionConfig( QAction *act, const char *property )
 {
 	if ( act->isCheckable() )
@@ -2099,6 +2036,8 @@ emulatorThread_t::emulatorThread_t(void)
 
 void emulatorThread_t::init(void)
 {
+	int opt;
+
 	#if defined(__linux__) || defined(__APPLE__)
 	if ( pthread_self() == (pthread_t)QThread::currentThreadId() )
 	{
@@ -2112,6 +2051,21 @@ void emulatorThread_t::init(void)
 	#elif defined(__APPLE__)
 	pid = getpid();
 	#endif
+
+	g_config->getOption( "SDL.SetSchedParam", &opt );
+
+	if ( opt )
+	{
+		int policy, prio, nice;
+
+		g_config->getOption( "SDL.EmuSchedPolicy", &policy );
+		g_config->getOption( "SDL.EmuSchedPrioRt", &prio   );
+		g_config->getOption( "SDL.EmuSchedNice"  , &nice   );
+
+		setNicePriority( nice );
+
+		setSchedParam( policy, prio );
+	}
 }
 
 void emulatorThread_t::setPriority( QThread::Priority priority_req )
