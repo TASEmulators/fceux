@@ -194,6 +194,10 @@ void TaseditorDisableManualFunctionIfNeeded();
 #else
 int LuaKillMessageBox(void);
 #ifdef __linux__
+
+#ifndef __THROWNL
+#define __THROWNL throw () // Build fix Alpine Linux libc
+#endif
 int LuaPrintfToWindowConsole(const char *__restrict format, ...) 
                   __THROWNL __attribute__ ((__format__ (__printf__, 1, 2)));
 #else
