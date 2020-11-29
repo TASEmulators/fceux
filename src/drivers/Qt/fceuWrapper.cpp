@@ -107,7 +107,10 @@ void FCEUD_PrintError(const char *errormsg)
 {
 	fprintf(stderr, "%s\n", errormsg);
 
-	consoleWindow->QueueErrorMsgWindow( errormsg );
+	if ( consoleWindow )
+	{
+		consoleWindow->QueueErrorMsgWindow( errormsg );
+	}
 }
 
 /**
