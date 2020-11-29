@@ -60,7 +60,7 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
 	int opt;
-	QVBoxLayout *mainLayout, *vbox;
+	QVBoxLayout *mainLayout;
 	//QHBoxLayout *hbox;
 	QGridLayout *grid;
 	QGroupBox   *emuPrioBox, *guiPrioBox;
@@ -140,6 +140,7 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 TimingConfDialog_t::~TimingConfDialog_t(void)
 {
 	printf("Destroy Timing Config Window\n");
+	saveValues();
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::closeEvent(QCloseEvent *event)
@@ -148,7 +149,6 @@ void TimingConfDialog_t::closeEvent(QCloseEvent *event)
    done(0);
 	deleteLater();
    event->accept();
-	saveValues();
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::closeWindow(void)
@@ -156,7 +156,6 @@ void TimingConfDialog_t::closeWindow(void)
    //printf("Close Window\n");
    done(0);
 	deleteLater();
-	saveValues();
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::emuSchedCtlChange( int state )
@@ -166,23 +165,31 @@ void TimingConfDialog_t::emuSchedCtlChange( int state )
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::saveValues(void)
 {
-	int policy, prio;
+	int policy, prio, nice;
 
 	if ( consoleWindow == NULL )
 	{
 		return;
 	}
+	nice = consoleWindow->emulatorThread->getNicePriority();
+
 	consoleWindow->emulatorThread->getSchedParam( policy, prio );
 
 	g_config->setOption( "SDL.EmuSchedPolicy", policy );
 	g_config->setOption( "SDL.EmuSchedPrioRt", prio   );
-	g_config->setOption( "SDL.EmuSchedNice"  , consoleWindow->emulatorThread->getNicePriority() );
+	g_config->setOption( "SDL.EmuSchedNice"  , nice   );
+
+	//printf("EMU Sched: %i  %i  %i\n", policy, prio, nice );
+
+	nice = consoleWindow->getNicePriority();
 
 	consoleWindow->getSchedParam( policy, prio );
 
 	g_config->setOption( "SDL.GuiSchedPolicy", policy );
 	g_config->setOption( "SDL.GuiSchedPrioRt", prio   );
-	g_config->setOption( "SDL.GuiSchedNice"  , consoleWindow->getNicePriority() );
+	g_config->setOption( "SDL.GuiSchedNice"  , nice   );
+
+	//printf("GUI Sched: %i  %i  %i\n", policy, prio, nice );
 
 	g_config->save();
 }

@@ -1877,6 +1877,7 @@ int consoleWin_t::getSchedParam( int &policy, int &priority )
 
 	if ( sched_getparam( getpid(), &p ) )
 	{
+		perror("GUI thread sched_getparam error: ");
 		ret = -1;
 		priority = 0;
 	}
@@ -1892,6 +1893,11 @@ int consoleWin_t::getSchedParam( int &policy, int &priority )
 	{
 		perror("GUI thread pthread_getschedparam error: ");
 		ret = -1;
+		priority = 0;
+	}
+	else
+	{
+		priority = p.sched_priority;
 	}
 #endif
 	return ret;
@@ -2193,6 +2199,8 @@ int emulatorThread_t::getSchedParam( int &policy, int &priority )
 		perror("Emulator thread pthread_getschedparam error: ");
 		return -1;
 	}
+	priority = p.sched_priority;
+
 	return 0;
 }
 
