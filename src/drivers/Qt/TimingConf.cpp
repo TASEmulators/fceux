@@ -19,6 +19,7 @@
 #include "Qt/input.h"
 #include "Qt/config.h"
 #include "Qt/keyscan.h"
+#include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/TimingConf.h"
@@ -61,7 +62,7 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 {
 	int opt;
 	QVBoxLayout *mainLayout;
-	//QHBoxLayout *hbox;
+	QHBoxLayout *hbox;
 	QGridLayout *grid;
 	QGroupBox   *emuPrioBox, *guiPrioBox;
 
@@ -118,6 +119,17 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 
 	mainLayout->addWidget( guiPrioBox );
 
+	hbox = new QHBoxLayout();
+	timingDevSelBox = new QComboBox();
+	timingDevSelBox->addItem( tr("NanoSleep") , 0 );
+
+#ifdef __linux__
+	timingDevSelBox->addItem( tr("Timer FD")  , 1 );
+#endif
+	hbox->addWidget( new QLabel( tr("Timing Mechanism:") ) );
+	hbox->addWidget( timingDevSelBox );
+	mainLayout->addLayout( hbox );
+
 	setLayout( mainLayout );
 
 	g_config->getOption( "SDL.SetSchedParam", &opt );
@@ -127,6 +139,7 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	updatePolicyBox();
 	updateSliderLimits();
 	updateSliderValues();
+	updateTimingMech();
 
 	connect( emuSchedPolicyBox   , SIGNAL(activated(int))   , this, SLOT(emuSchedPolicyChange(int))   );
 	connect( emuSchedNiceSlider  , SIGNAL(valueChanged(int)), this, SLOT(emuSchedNiceChange(int))     );
@@ -135,6 +148,7 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	connect( guiSchedNiceSlider  , SIGNAL(valueChanged(int)), this, SLOT(guiSchedNiceChange(int))     );
 	connect( guiSchedPrioSlider  , SIGNAL(valueChanged(int)), this, SLOT(guiSchedPrioChange(int))     );
 	connect( emuPrioCtlEna       , SIGNAL(stateChanged(int)), this, SLOT(emuSchedCtlChange(int))      );
+	connect( timingDevSelBox     , SIGNAL(activated(int))   , this, SLOT(emuTimingMechChange(int))    );
 }
 //----------------------------------------------------------------------------
 TimingConfDialog_t::~TimingConfDialog_t(void)
@@ -482,5 +496,39 @@ void TimingConfDialog_t::updateSliderLimits(void)
 	guiSchedPrioSlider->setMinimum( consoleWindow->getMinSchedPriority() );
 	guiSchedPrioSlider->setMaximum( consoleWindow->getMaxSchedPriority() );
 
+}
+//----------------------------------------------------------------------------
+void TimingConfDialog_t::emuTimingMechChange( int index )
+{
+	int mode;
+
+	if ( consoleWindow == NULL )
+	{
+		return;
+	}
+	fceuWrapperLock();
+
+	mode = timingDevSelBox->itemData( index ).toInt();
+
+	setTimingMode( mode );
+
+	RefreshThrottleFPS();
+
+	g_config->setOption("SDL.EmuTimingMech", mode);
+
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void TimingConfDialog_t::updateTimingMech(void)
+{
+	int mode = getTimingMode();
+
+	for (int j=0; j<timingDevSelBox->count(); j++)
+	{
+		if ( timingDevSelBox->itemData(j).toInt() == mode )
+		{
+			timingDevSelBox->setCurrentIndex( j );
+		}
+	}
 }
 //----------------------------------------------------------------------------

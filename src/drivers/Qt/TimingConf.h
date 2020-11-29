@@ -41,11 +41,13 @@ class TimingConfDialog_t : public QDialog
 		QSlider    *guiSchedNiceSlider;
 		QLabel     *guiSchedPrioLabel;
 		QLabel     *guiSchedNiceLabel;
+		QComboBox  *timingDevSelBox;
 
 	private:
 		void  updatePolicyBox(void);
 		void  updateSliderLimits(void);
 		void  updateSliderValues(void);
+		void  updateTimingMech(void);
 		void  saveValues(void);
 
    public slots:
@@ -58,5 +60,6 @@ class TimingConfDialog_t : public QDialog
 		void guiSchedNiceChange( int val );
 		void guiSchedPrioChange( int val );
 		void guiSchedPolicyChange( int index );
+		void emuTimingMechChange( int index );
 
 };

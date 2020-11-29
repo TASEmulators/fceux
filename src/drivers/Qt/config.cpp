@@ -322,6 +322,7 @@ InitConfig()
 	config->addOption("_guiSchedPolicy"     , "SDL.GuiSchedPolicy", 0);
 	config->addOption("_guiSchedNice"       , "SDL.GuiSchedNice"  , 0);
 	config->addOption("_guiSchedPrioRt"     , "SDL.GuiSchedPrioRt", 40);
+	config->addOption("_emuTimingMech"      , "SDL.EmuTimingMech" , 0);
 
 	// fcm -> fm2 conversion
 	config->addOption("fcmconvert", "SDL.FCMConvert", "");

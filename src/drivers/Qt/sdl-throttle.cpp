@@ -47,7 +47,7 @@ double getHighPrecTimeStamp(void)
 }
 
 #ifdef __linux__
-static char useTimerFD = 1;
+static char useTimerFD = 0;
 static int  timerfd = -1;
 
 static void setTimer( double hz )
@@ -83,13 +83,32 @@ static void setTimer( double hz )
 		perror("timerfd_settime failed: ");
 	}
 
-	printf("Timer Set: %li ns\n", ispec.it_value.tv_nsec );
+	//printf("Timer Set: %li ns\n", ispec.it_value.tv_nsec );
 
 	Lasttime = getHighPrecTimeStamp();
 	Nexttime = Lasttime + desired_frametime;
 	Latetime = Nexttime + desired_frametime;
 }
 #endif
+
+int getTimingMode(void)
+{
+#ifdef __linux__
+	if ( useTimerFD )
+	{
+		return 1;
+	}
+#endif
+	return 0;
+}
+
+int setTimingMode( int mode )
+{
+#ifdef __linux__
+	useTimerFD = (mode == 1);
+#endif
+	return 0;
+}
 
 /* LOGMUL = exp(log(2) / 3)
  *
