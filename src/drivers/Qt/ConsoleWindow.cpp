@@ -47,6 +47,7 @@
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
+#include "Qt/MsgLogViewer.h"
 #include "Qt/AboutWindow.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ppuViewer.h"
@@ -776,6 +777,13 @@ void consoleWin_t::createMainMenu(void)
     connect(aboutActQt, SIGNAL(triggered()), this, SLOT(aboutQt(void)) );
 
     helpMenu->addAction(aboutActQt);
+
+	 // Help -> Message Log
+	 msgLogAct = new QAction(tr("Message Log"), this);
+    msgLogAct->setStatusTip(tr("Message Log"));
+    connect(msgLogAct, SIGNAL(triggered()), this, SLOT(openMsgLogWin(void)) );
+
+    helpMenu->addAction(msgLogAct);
 };
 //---------------------------------------------------------------------------
 void consoleWin_t::closeApp(void)
@@ -1810,6 +1818,18 @@ void consoleWin_t::aboutQt(void)
 	QMessageBox::aboutQt(this);
 
    //printf("About Qt Destroyed\n");
+   return;
+}
+
+void consoleWin_t::openMsgLogWin(void)
+{
+	//printf("Open Message Log Window\n");
+	MsgLogViewDialog_t *msgLogWin;
+	
+	msgLogWin = new MsgLogViewDialog_t(this);
+
+	msgLogWin->show();
+
    return;
 }
 
