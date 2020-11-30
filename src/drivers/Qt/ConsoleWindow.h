@@ -117,6 +117,7 @@ class  consoleWin_t : public QMainWindow
     QAction *fullscreen;
     QAction *aboutAct;
     QAction *aboutActQt;
+    QAction *msgLogAct;
 	 QAction *state[10];
 	 QAction *powerAct;
 	 QAction *resetAct;
@@ -174,6 +175,7 @@ class  consoleWin_t : public QMainWindow
 		void closeROMCB(void);
       void aboutFCEUX(void);
       void aboutQt(void);
+      void openMsgLogWin(void);
       void openInputConfWin(void);
       void openGameSndConfWin(void);
       void openGameVideoConfWin(void);

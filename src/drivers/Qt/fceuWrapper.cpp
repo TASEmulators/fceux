@@ -82,36 +82,9 @@ int mutecapture = 0;
 //*****************************************************************
 //
 
-/**
-* Prints a textual message without adding a newline at the end.
-*
-* @param text The text of the message.
-*
-* TODO: This function should have a better name.
-**/
-void FCEUD_Message(const char *text)
-{
-	fputs(text, stdout);
-	//fprintf(stdout, "\n");
-}
-
-/**
-* Shows an error message in a message box.
-* (For now: prints to stderr.)
-* 
-* If running in Qt mode, display a dialog message box of the error.
-*
-* @param errormsg Text of the error message.
-**/
-void FCEUD_PrintError(const char *errormsg)
-{
-	fprintf(stderr, "%s\n", errormsg);
-
-	if ( consoleWindow )
-	{
-		consoleWindow->QueueErrorMsgWindow( errormsg );
-	}
-}
+// Message functions defined in MsgLogViewer.cpp
+//void FCEUD_Message(const char *text)
+//void FCEUD_PrintError(const char *errormsg)
 
 /**
  * Opens a file, C++ style, to be read a byte at a time.
