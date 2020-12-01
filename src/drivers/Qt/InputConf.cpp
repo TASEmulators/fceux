@@ -238,7 +238,7 @@ InputConfDialog_t::~InputConfDialog_t(void)
 //----------------------------------------------------------------------------
 void InputConfDialog_t::closeEvent(QCloseEvent *event)
 {
-   printf("Hot Key Close Window Event\n");
+   printf("Input Config Close Window Event\n");
    done(0);
 	deleteLater();
    event->accept();

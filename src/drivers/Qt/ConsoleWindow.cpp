@@ -37,6 +37,7 @@
 #include "Qt/MoviePlay.h"
 #include "Qt/MovieOptions.h"
 #include "Qt/TimingConf.h"
+#include "Qt/FrameTimingStats.h"
 #include "Qt/LuaControl.h"
 #include "Qt/CheatsConf.h"
 #include "Qt/GameGenie.h"
@@ -653,6 +654,14 @@ void consoleWin_t::createMainMenu(void)
     connect(ramWatchAct, SIGNAL(triggered()), this, SLOT(openRamWatch(void)) );
 
     toolsMenu->addAction(ramWatchAct);
+
+	// Tools -> Frame Timing
+	act = new QAction(tr("Frame Timing ..."), this);
+	//act->setShortcut( QKeySequence(tr("Shift+F7")));
+	act->setStatusTip(tr("Open Frame Timing Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openTimingStatWin(void)) );
+
+	toolsMenu->addAction(act);
 
 	 //-----------------------------------------------------------------------
 	 // Debug
@@ -1301,6 +1310,17 @@ void consoleWin_t::openTimingConfWin(void)
    tmConfWin = new TimingConfDialog_t(this);
 	
    tmConfWin->show();
+}
+
+void consoleWin_t::openTimingStatWin(void)
+{
+	FrameTimingDialog_t *tmStatWin;
+
+	//printf("Open Timing Statistics Window\n");
+	
+   tmStatWin = new FrameTimingDialog_t(this);
+	
+   tmStatWin->show();
 }
 
 void consoleWin_t::openMovieOptWin(void)
