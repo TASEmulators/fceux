@@ -19,8 +19,12 @@ static const double Normal  = 1.0;      // 1x speed    (around 60 fps on NTSC)
 static uint32 frameLateCounter = 0;
 static double Lasttime=0, Nexttime=0, Latetime=0;
 static double desired_frametime = (1.0 / 60.099823);
-static double frameDeltaMin = 99999.0;
-static double frameDeltaMax =     0.0;
+static double frameDeltaCur = 0.0;
+static double frameDeltaMin = 1.0;
+static double frameDeltaMax = 0.0;
+static double frameIdleCur = 0.0;
+static double frameIdleMin = 1.0;
+static double frameIdleMax = 0.0;
 static bool   keepFrameTimeStats = false;
 static int InFrame = 0;
 double g_fpsScale = Normal; // used by sdl.cpp
@@ -87,7 +91,7 @@ static void setTimer( double hz )
 
 	Lasttime = getHighPrecTimeStamp();
 	Nexttime = Lasttime + desired_frametime;
-	Latetime = Nexttime + desired_frametime;
+	Latetime = Nexttime + (desired_frametime*0.50);
 }
 #endif
 
@@ -108,6 +112,61 @@ int setTimingMode( int mode )
 	useTimerFD = (mode == 1);
 #endif
 	return 0;
+}
+
+void setFrameTimingEnable( bool enable )
+{
+	keepFrameTimeStats = enable;
+}
+
+int  getFrameTimingStats( struct frameTimingStat_t *stats )
+{
+	stats->enabled   = keepFrameTimeStats;
+	stats->lateCount = frameLateCounter;
+
+	stats->frameTimeAbs.tgt = desired_frametime;
+	stats->frameTimeAbs.cur = frameDeltaCur;
+	stats->frameTimeAbs.min = frameDeltaMin;
+	stats->frameTimeAbs.max = frameDeltaMax;
+
+	stats->frameTimeDel.tgt = 0.0;
+	stats->frameTimeDel.cur = frameDeltaCur - desired_frametime;
+	stats->frameTimeDel.min = frameDeltaMin - desired_frametime;
+	stats->frameTimeDel.max = frameDeltaMax - desired_frametime;
+
+	stats->frameTimeIdle.tgt = desired_frametime * 0.50;
+	stats->frameTimeIdle.cur = frameIdleCur;
+	stats->frameTimeIdle.min = frameIdleMin;
+	stats->frameTimeIdle.max = frameIdleMax;
+
+	stats->frameTimeWork.tgt = desired_frametime - stats->frameTimeIdle.tgt;
+	stats->frameTimeWork.cur = desired_frametime - frameIdleCur;
+	stats->frameTimeWork.min = desired_frametime - frameIdleMax;
+	stats->frameTimeWork.max = desired_frametime - frameIdleMin;
+
+	if ( stats->frameTimeWork.cur < 0 )
+	{
+		stats->frameTimeWork.cur = 0;
+	}
+	if ( stats->frameTimeWork.min < 0 )
+	{
+		stats->frameTimeWork.min = 0;
+	}
+	if ( stats->frameTimeWork.max < 0 )
+	{
+		stats->frameTimeWork.max = 0;
+	}
+
+	return 0;
+}
+
+void resetFrameTiming(void)
+{
+	frameLateCounter = 0;
+	frameDeltaMax = 0.0;
+	frameDeltaMin = 1.0;
+	frameIdleMax = 0.0;
+	frameIdleMin = 1.0;
 }
 
 /* LOGMUL = exp(log(2) / 3)
@@ -177,23 +236,24 @@ SpeedThrottle(void)
 		return 0; /* Done waiting */
 	}
 	double time_left;
-	double cur_time;
+	double cur_time, idleStart;
 	double frame_time = desired_frametime;
+	double halfFrame = 0.500 * frame_time;
 	double quarterFrame = 0.250 * frame_time;
     
-	cur_time  = getHighPrecTimeStamp();
+	idleStart = cur_time = getHighPrecTimeStamp();
 
 	if (Lasttime < 1.0)
 	{
 		Lasttime = cur_time;
-		Latetime = Lasttime + frame_time;
+		Latetime = Lasttime + 2.0*frame_time;
 	}
     
 	if (!InFrame)
 	{
 		InFrame = 1;
 		Nexttime = Lasttime + frame_time;
-		Latetime = Nexttime + frame_time;
+		Latetime = Nexttime + halfFrame;
 	}
     
 	if (cur_time >= Nexttime)
@@ -266,30 +326,40 @@ SpeedThrottle(void)
 	{
 		if ( keepFrameTimeStats )
 		{
-			double frameDelta;
 
-			frameDelta = (cur_time - Lasttime);
+			frameDeltaCur = (cur_time - Lasttime);
 
-			if ( frameDelta < frameDeltaMin )
+			if ( frameDeltaCur < frameDeltaMin )
 			{
-				frameDeltaMin = frameDelta;
+				frameDeltaMin = frameDeltaCur;
 			}
-			if ( frameDelta > frameDeltaMax )
+			if ( frameDeltaCur > frameDeltaMax )
 			{
-				frameDeltaMax = frameDelta;
+				frameDeltaMax = frameDeltaCur;
+			}
+
+			frameIdleCur = (cur_time - idleStart);
+
+			if ( frameIdleCur < frameIdleMin )
+			{
+				frameIdleMin = frameIdleCur;
+			}
+			if ( frameIdleCur > frameIdleMax )
+			{
+				frameIdleMax = frameIdleCur;
 			}
 			//printf("Frame Delta: %f us   min:%f   max:%f \n", frameDelta * 1e6, frameDeltaMin * 1e6, frameDeltaMax * 1e6 );
 			//printf("Frame Sleep Time: %f   Target Error: %f us\n", time_left * 1e6, (cur_time - Nexttime) * 1e6 );
 		}
 		Lasttime = Nexttime;
 		Nexttime = Lasttime + frame_time;
-		Latetime = Nexttime + frame_time;
+		Latetime = Nexttime + halfFrame;
 
 		if ( cur_time >= Nexttime )
 		{
 			Lasttime = cur_time;
 			Nexttime = Lasttime + frame_time;
-			Latetime = Nexttime + frame_time;
+			Latetime = Nexttime + halfFrame;
 		}
 		return 0; /* Done waiting */
 	}
