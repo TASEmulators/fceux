@@ -3104,11 +3104,13 @@ QAsmView::QAsmView(QWidget *parent)
 	maxLineOffset = 0;
 	ctxMenuAddr = -1;
 
-	mouseLeftBtnDown = false;
-	txtHlgtStartChar = -1;
-	txtHlgtStartLine = -1;
-	txtHlgtEndChar   = -1;
-	txtHlgtEndLine   = -1;
+	mouseLeftBtnDown  = false;
+	txtHlgtAnchorLine = -1;
+	txtHlgtAnchorChar = -1;
+	txtHlgtStartChar  = -1;
+	txtHlgtStartLine  = -1;
+	txtHlgtEndChar    = -1;
+	txtHlgtEndLine    = -1;
 
 	pcLinePlacement = 0;
 	pcLineOffset    = 0;

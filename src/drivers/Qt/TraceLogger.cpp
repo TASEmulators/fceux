@@ -1112,6 +1112,8 @@ QTraceLogView::QTraceLogView(QWidget *parent)
 
 	wheelPixelCounter = 0;
 	mouseLeftBtnDown  = false;
+	txtHlgtAnchorLine = -1;
+	txtHlgtAnchorChar = -1;
 	txtHlgtStartChar  = -1;
 	txtHlgtStartLine  = -1;
 	txtHlgtEndChar    = -1;
