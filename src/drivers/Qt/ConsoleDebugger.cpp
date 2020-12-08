@@ -54,6 +54,8 @@ debuggerBookmarkManager_t dbgBmMgr;
 static std::list <ConsoleDebugger*> dbgWinList;
 
 static void DeleteBreak(int sel);
+static bool waitingAtBp = false;
+static int  lastBpIdx   = 0;
 //----------------------------------------------------------------------------
 ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	: QDialog( parent, Qt::Window )
@@ -72,6 +74,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	float fontCharWidth;
 	QTreeWidgetItem * item;
 	int opt, useNativeMenuBar;
+	fceuDecIntValidtor *validator;
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
@@ -487,17 +490,19 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	hbox->addWidget( instrExdVal, 1, Qt::AlignLeft );
 	hbox2->addLayout( vbox );
 
+	validator = new fceuDecIntValidtor( 0, 0x3FFFFFFF, this );
 	cpuCycExdVal->setFont( font );
 	cpuCycExdVal->setMaxLength( 16 );
-	cpuCycExdVal->setInputMask( ">9000000000000000;" );
+	cpuCycExdVal->setValidator( validator );
 	cpuCycExdVal->setAlignment(Qt::AlignLeft);
 	cpuCycExdVal->setMaximumWidth( 18 * fontCharWidth );
    cpuCycExdVal->setCursorPosition(0);
 	connect( cpuCycExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(cpuCycleThresChanged(const QString &)));
 
+	validator = new fceuDecIntValidtor( 0, 0x3FFFFFFF, this );
 	instrExdVal->setFont( font );
 	instrExdVal->setMaxLength( 16 );
-	instrExdVal->setInputMask( ">9000000000000000;" );
+	instrExdVal->setValidator( validator );
 	instrExdVal->setAlignment(Qt::AlignLeft);
 	instrExdVal->setMaximumWidth( 18 * fontCharWidth );
    instrExdVal->setCursorPosition(0);
@@ -2548,6 +2553,24 @@ void ConsoleDebugger::updatePeriodic(void)
 		emuStatLbl->setStyleSheet("background-color: green; color: white;");
 	}
 
+	if ( waitingAtBp && (lastBpIdx == BREAK_TYPE_CYCLES_EXCEED) )
+	{
+		cpuCyclesLbl1->setStyleSheet("background-color: blue; color: white;");
+	}
+	else
+	{
+		cpuCyclesLbl1->setStyleSheet(NULL);
+	}
+
+	if ( waitingAtBp && (lastBpIdx == BREAK_TYPE_INSTRUCTIONS_EXCEED) )
+	{
+		cpuInstrsLbl1->setStyleSheet("background-color: blue; color: white;");
+	}
+	else
+	{
+		cpuInstrsLbl1->setStyleSheet(NULL);
+	}
+
 	if ( bpTree->topLevelItemCount() != numWPs )
 	{
 		printf("Breakpoint Tree Update\n");
@@ -2583,6 +2606,7 @@ void ConsoleDebugger::breakPointNotify( int bpNum )
 			if ( item != NULL )
 			{
 				item->setSelected(true);
+				bpTree->setCurrentItem( item );
 			}
 			bpTree->viewport()->update();
 		}
@@ -2591,11 +2615,11 @@ void ConsoleDebugger::breakPointNotify( int bpNum )
 	{
 		if (bpNum == BREAK_TYPE_CYCLES_EXCEED)
 		{
-			// TODO
+			// Label Coloring done in periodic update
 		}
 		else if (bpNum == BREAK_TYPE_INSTRUCTIONS_EXCEED)
 		{
-			// TODO
+			// Label Coloring done in periodic update
 		}
 	}
 
@@ -2622,6 +2646,9 @@ void FCEUD_DebugBreakpoint( int bpNum )
 	{
 		return;
 	}
+	lastBpIdx   = bpNum;
+	waitingAtBp = true;
+
 	printf("Breakpoint Hit: %i \n", bpNum );
 
 	fceuWrapperUnLock();
@@ -2654,6 +2681,8 @@ void FCEUD_DebugBreakpoint( int bpNum )
 	ResetDebugStatisticsDeltaCounters();
 
 	fceuWrapperLock();
+
+	waitingAtBp = false;
 }
 //----------------------------------------------------------------------------
 bool debuggerWindowIsOpen(void)
@@ -3075,11 +3104,13 @@ QAsmView::QAsmView(QWidget *parent)
 	maxLineOffset = 0;
 	ctxMenuAddr = -1;
 
-	mouseLeftBtnDown = false;
-	txtHlgtStartChar = -1;
-	txtHlgtStartLine = -1;
-	txtHlgtEndChar   = -1;
-	txtHlgtEndLine   = -1;
+	mouseLeftBtnDown  = false;
+	txtHlgtAnchorLine = -1;
+	txtHlgtAnchorChar = -1;
+	txtHlgtStartChar  = -1;
+	txtHlgtStartLine  = -1;
+	txtHlgtEndChar    = -1;
+	txtHlgtEndLine    = -1;
 
 	pcLinePlacement = 0;
 	pcLineOffset    = 0;

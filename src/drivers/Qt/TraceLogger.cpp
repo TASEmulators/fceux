@@ -1,12 +1,14 @@
 // TraceLogger.cpp
 //
 #include <stdio.h>
+#include <math.h>
 
 #include <QDir>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QPainter>
+#include <QGuiApplication>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -243,6 +245,7 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	setLayout( mainLayout );
 
 	traceViewCounter = 0;
+	recbufHeadLp     = recBufHead;
 
    updateTimer  = new QTimer( this );
 
@@ -320,6 +323,12 @@ void TraceLoggerDialog_t::updatePeriodic(void)
 
 	if ( traceViewCounter > 20 )
 	{
+		if ( recBufHead != recbufHeadLp )
+		{
+			traceView->highlightClear();
+		}
+		recbufHeadLp = recBufHead;
+
 		if ( traceViewDrawEnable )
 		{
    		traceView->update();
@@ -654,7 +663,7 @@ static int convToXchar( int i )
 	return c;
 }
 //----------------------------------------------------
-int traceRecord_t::convToText( char *txt )
+int traceRecord_t::convToText( char *txt, int *len )
 {
    int i=0, j=0;
    char stmp[128];
@@ -847,6 +856,11 @@ int traceRecord_t::convToText( char *txt )
 	}
 
    txt[i] = 0;
+
+	if ( len )
+	{
+		*len = i;
+	}
 
 	return 0;
 }
@@ -1089,6 +1103,7 @@ QTraceLogView::QTraceLogView(QWidget *parent)
 	}
 
 	this->setPalette(pal);
+	this->setMouseTracking(true);
 
 	calcFontData();
 
@@ -1096,6 +1111,14 @@ QTraceLogView::QTraceLogView(QWidget *parent)
 	hbar = NULL;
 
 	wheelPixelCounter = 0;
+	mouseLeftBtnDown  = false;
+	txtHlgtAnchorLine = -1;
+	txtHlgtAnchorChar = -1;
+	txtHlgtStartChar  = -1;
+	txtHlgtStartLine  = -1;
+	txtHlgtEndChar    = -1;
+	txtHlgtEndLine    = -1;
+	captureHighLightText = false;
 }
 //----------------------------------------------------
 QTraceLogView::~QTraceLogView(void)
@@ -1124,6 +1147,159 @@ void QTraceLogView::calcFontData(void)
 void QTraceLogView::setScrollBars( QScrollBar *h, QScrollBar *v )
 {
 	hbar = h; vbar = v;
+}
+//----------------------------------------------------
+void QTraceLogView::highlightClear(void)
+{
+	txtHlgtEndLine = txtHlgtStartLine = txtHlgtAnchorLine;
+	txtHlgtEndChar = txtHlgtStartChar = txtHlgtAnchorChar;
+}
+//----------------------------------------------------
+QPoint QTraceLogView::convPixToCursor( QPoint p )
+{
+	QPoint c(0,0);
+
+	if ( p.x() < 0 )
+	{
+		c.setX(0);
+	}
+	else
+	{
+		float x = (float)p.x() / pxCharWidth;
+
+		c.setX( (int)x );
+	}
+
+	if ( p.y() < 0 )
+	{
+		c.setY( 0 );
+	}
+	else 
+	{
+		float ly = ( (float)pxLineLead / (float)pxLineSpacing );
+		float py = ( (float)p.y() ) /  (float)pxLineSpacing;
+		float ry = fmod( py, 1.0 );
+
+		if ( ry < ly )
+		{
+			c.setY( ((int)py) - 1 );
+		}
+		else
+		{
+			c.setY( (int)py );
+		}
+	}
+	return c;
+}
+//----------------------------------------------------------------------------
+bool QTraceLogView::textIsHighlighted(void)
+{
+	bool set = false;
+
+	if ( txtHlgtStartLine == txtHlgtEndLine )
+	{
+		set = (txtHlgtStartChar != txtHlgtEndChar);
+	}
+	else
+	{
+		set = true;
+	}
+	return set;
+}
+//----------------------------------------------------------------------------
+void QTraceLogView::setHighlightEndCoord( int x, int y )
+{
+
+	if ( txtHlgtAnchorLine < y )
+	{
+		txtHlgtStartLine = txtHlgtAnchorLine;
+		txtHlgtStartChar = txtHlgtAnchorChar;
+		txtHlgtEndLine   = y;
+		txtHlgtEndChar   = x;
+	}
+	else if ( txtHlgtAnchorLine > y )
+	{
+		txtHlgtStartLine = y;
+		txtHlgtStartChar = x;
+		txtHlgtEndLine   = txtHlgtAnchorLine;
+		txtHlgtEndChar   = txtHlgtAnchorChar;
+	}
+	else
+	{
+		txtHlgtStartLine = txtHlgtAnchorLine;
+		txtHlgtEndLine   = txtHlgtAnchorLine;
+
+		if ( txtHlgtAnchorChar < x )
+		{
+			txtHlgtStartChar = txtHlgtAnchorChar;
+			txtHlgtEndChar   = x;
+		}
+		else if ( txtHlgtAnchorChar > x )
+		{
+			txtHlgtStartChar = x;
+			txtHlgtEndChar   = txtHlgtAnchorChar;
+		}
+		else
+		{
+			txtHlgtStartChar = txtHlgtAnchorChar;
+			txtHlgtEndChar   = txtHlgtAnchorChar;
+		}
+	}
+	return;
+}
+//----------------------------------------------------------------------------
+void QTraceLogView::loadClipboard( const char *txt )
+{
+	QClipboard *clipboard = QGuiApplication::clipboard();
+
+	clipboard->setText( tr(txt), QClipboard::Clipboard );
+
+	if ( clipboard->supportsSelection() )
+	{
+		clipboard->setText( tr(txt), QClipboard::Selection );
+	}
+}
+//----------------------------------------------------
+void QTraceLogView::mouseMoveEvent(QMouseEvent * event)
+{
+	QPoint c = convPixToCursor( event->pos() );
+
+	if ( mouseLeftBtnDown )
+	{
+		//printf("Left Button Move: (%i,%i)\n", c.x(), c.y() );
+		setHighlightEndCoord( c.x(), c.y() );
+	}
+}
+//----------------------------------------------------
+void QTraceLogView::mouseReleaseEvent(QMouseEvent * event)
+{
+	QPoint c = convPixToCursor( event->pos() );
+
+	if ( event->button() == Qt::LeftButton )
+	{
+		//printf("Left Button Release: (%i,%i)\n", c.x(), c.y() );
+		mouseLeftBtnDown = false;
+		setHighlightEndCoord( c.x(), c.y() );
+
+		captureHighLightText = true;
+	}
+}
+//----------------------------------------------------
+void QTraceLogView::mousePressEvent(QMouseEvent * event)
+{
+	QPoint c = convPixToCursor( event->pos() );
+
+	//printf("Line: %i,%i\n", c.x(), c.y() );
+
+	if ( event->button() == Qt::LeftButton )
+	{
+		//printf("Left Button Pressed: (%i,%i)\n", c.x(), c.y() );
+		mouseLeftBtnDown = true;
+		txtHlgtAnchorChar = c.x();
+		txtHlgtAnchorLine = c.y();
+
+		setHighlightEndCoord( c.x(), c.y() );
+	}
 }
 //----------------------------------------------------
 void QTraceLogView::wheelEvent(QWheelEvent *event)
@@ -1199,12 +1375,28 @@ void QTraceLogView::resizeEvent(QResizeEvent *event)
 
 }
 //----------------------------------------------------
+void QTraceLogView::drawText( QPainter *painter, int x, int y, const char *txt, int maxChars )
+{
+	int i=0;
+	char c[2];
+
+	c[0] = 0; c[1] = 0;
+
+	while ( (txt[i] != 0) && (i < maxChars) )
+	{
+		c[0] = txt[i];
+		painter->drawText( x, y, tr(c) );
+		i++; x += pxCharWidth;
+	}
+}
+//----------------------------------------------------
 void QTraceLogView::paintEvent(QPaintEvent *event)
 {
-   int x,y, v, ofs, row, start, end, nrow;
+   int x,y, v, ofs, row, start, end, nrow, lineLen;
 	QPainter painter(this);
    char line[256];
    traceRecord_t rec[64];
+	QColor hlgtFG("white"), hlgtBG("blue");
 
 	painter.setFont(font);
 	viewWidth  = event->rect().width();
@@ -1241,6 +1433,11 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
       start = (start + 1) % recBufMax;
    }
 
+	if ( captureHighLightText )
+	{
+		hlgtText.clear();
+	}
+
 	pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth) );
 
    x = -pxLineXScroll;
@@ -1248,15 +1445,80 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 
    for (row=0; row<nrow; row++)
    {
+		lineLen = 0;
 
-      rec[row].convToText( line );
+      rec[row].convToText( line, &lineLen );
 
       //printf("Line %i: '%s'\n", row, line );
 
-      painter.drawText( x, y, tr(line) );
+      drawText( &painter, x, y, line, 256 );
 
+		if ( textIsHighlighted() )
+		{
+			int l = row;
+
+			if ( (l >= txtHlgtStartLine) && (l <= txtHlgtEndLine) )
+			{
+				int ax, hlgtXs, hlgtXe, hlgtXd;
+
+				if ( l == txtHlgtStartLine )
+				{
+					hlgtXs = txtHlgtStartChar;
+				}
+				else
+				{
+					hlgtXs = 0;
+				}
+
+				if ( l == txtHlgtEndLine )
+				{
+					hlgtXe = txtHlgtEndChar;
+				}
+				else
+				{
+					hlgtXe = (viewWidth / pxCharWidth) + 1;
+				}
+				hlgtXd = (hlgtXe - hlgtXs);
+
+				ax = x + (hlgtXs * pxCharWidth);
+
+				painter.fillRect( ax, y - pxLineSpacing + pxLineLead, hlgtXd * pxCharWidth, pxLineSpacing, hlgtBG );
+
+				if ( hlgtXs < lineLen )
+				{
+					painter.setPen( hlgtFG );
+
+					drawText( &painter, ax, y, &line[hlgtXs], hlgtXd );
+
+					painter.setPen( this->palette().color(QPalette::WindowText));
+
+					for (int i=0; i<hlgtXd; i++)
+					{
+						if ( line[hlgtXs+i] == 0 )
+						{
+							break;
+						}
+						hlgtText.append( 1, line[hlgtXs+i] );
+					}
+				}
+				if ( l != txtHlgtEndLine )
+				{
+					hlgtText.append( "\n");
+				}
+			}
+		}
       y += pxLineSpacing;
    }
 
+	if ( captureHighLightText )
+	{
+		//printf("Highlighted Text:\n%s\n", hlgtText.c_str() );
+
+		if ( textIsHighlighted() )
+		{
+			loadClipboard( hlgtText.c_str() );
+		}
+		captureHighLightText = false;
+	}
 }
 //----------------------------------------------------

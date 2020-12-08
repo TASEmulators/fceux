@@ -38,6 +38,11 @@ class msgLogBuf_t
 		maxLines   = MSG_LOG_MAX_LINES;
 		totalLines = 0;
 		head = tail = 0;
+
+		for (int i=0; i<MSG_LOG_MAX_LINES; i++)
+		{
+			fpOfsList[i] = 0;
+		}
 	}
 
 	~msgLogBuf_t(void)
