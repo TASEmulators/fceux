@@ -16,6 +16,7 @@
 #include <QGroupBox>
 #include <QScrollBar>
 #include <QCloseEvent>
+#include <QClipboard>
 
 struct traceRecord_t
 {
@@ -47,7 +48,7 @@ struct traceRecord_t
 
 	int  appendAsmText( const char *txt );
 
-   int  convToText( char *line );
+   int  convToText( char *line, int *len = 0 );
 };
 
 class QTraceLogView : public QWidget
@@ -59,12 +60,21 @@ class QTraceLogView : public QWidget
 		~QTraceLogView(void);
 
 		void setScrollBars( QScrollBar *h, QScrollBar *v );
+		void highlightClear(void);
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
 		void wheelEvent(QWheelEvent *event);
+		void mousePressEvent(QMouseEvent * event);
+		void mouseReleaseEvent(QMouseEvent * event);
+		void mouseMoveEvent(QMouseEvent * event);
 
 		void calcFontData(void);
+		QPoint convPixToCursor( QPoint p );
+		bool textIsHighlighted(void);
+		void setHighlightEndCoord( int x, int y );
+		void loadClipboard( const char *txt );
+		void drawText( QPainter *painter, int x, int y, const char *txt, int maxChars = 256 );
 
 	protected:
 		QFont       font;
@@ -82,6 +92,17 @@ class QTraceLogView : public QWidget
 		int  viewWidth;
 		int  viewHeight;
 		int  wheelPixelCounter;
+		int  txtHlgtAnchorChar;
+		int  txtHlgtAnchorLine;
+		int  txtHlgtStartChar;
+		int  txtHlgtStartLine;
+		int  txtHlgtEndChar;
+		int  txtHlgtEndLine;
+
+		bool mouseLeftBtnDown;
+		bool captureHighLightText;
+
+		std::string  hlgtText;
 };
 
 class TraceLoggerDialog_t : public QDialog
@@ -121,6 +142,7 @@ class TraceLoggerDialog_t : public QDialog
 		QScrollBar    *vbar;
 
 		int  traceViewCounter;
+		int  recbufHeadLp;
 
       void closeEvent(QCloseEvent *bar);
 
