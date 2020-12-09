@@ -10,6 +10,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QRadioButton>
 #include <QLabel>
 #include <QFrame>
 #include <QTimer>
@@ -17,6 +18,10 @@
 #include <QScrollBar>
 #include <QCloseEvent>
 #include <QClipboard>
+
+#include "Qt/SymbolicDebug.h"
+#include "Qt/ConsoleDebugger.h"
+#include "../../debug.h"
 
 struct traceRecord_t
 {
@@ -74,12 +79,17 @@ class QTraceLogView : public QWidget
 		bool textIsHighlighted(void);
 		void setHighlightEndCoord( int x, int y );
 		void loadClipboard( const char *txt );
+		void contextMenuEvent(QContextMenuEvent *event);
 		void drawText( QPainter *painter, int x, int y, const char *txt, int maxChars = 256 );
+		void calcTextSel( int x, int y );
+		void openBpEditWindow( int editIdx, watchpointinfo *wp, traceRecord_t *recp );
+		void openDebugSymbolEditWindow( int addr, int bank = -1 );
 
 	protected:
 		QFont       font;
 		QScrollBar *vbar;
 		QScrollBar *hbar;
+		traceRecord_t rec[64];
 
 		int  pxCharWidth;
 		int  pxCharHeight;
@@ -102,7 +112,20 @@ class QTraceLogView : public QWidget
 		bool mouseLeftBtnDown;
 		bool captureHighLightText;
 
+		int  selAddrIdx;
+		int  selAddrLine;
+		int  selAddrChar;
+		int  selAddrWidth;
+		int  selAddrValue;
+		char selAddrText[128];
+
+		int          lineBufIdx[64];
 		std::string  hlgtText;
+		std::string  lineText[64];
+
+		private slots:
+		void ctxMenuAddBP(void);
+		void ctxMenuAddSym(void);
 };
 
 class TraceLoggerDialog_t : public QDialog

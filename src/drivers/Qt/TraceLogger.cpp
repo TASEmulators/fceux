@@ -4,6 +4,7 @@
 #include <math.h>
 
 #include <QDir>
+#include <QMenu>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -1119,6 +1120,18 @@ QTraceLogView::QTraceLogView(QWidget *parent)
 	txtHlgtEndChar    = -1;
 	txtHlgtEndLine    = -1;
 	captureHighLightText = false;
+
+	selAddrIdx   = -1;
+	selAddrLine  = -1;
+	selAddrChar  = -1;
+	selAddrWidth = -1;
+	selAddrValue = -1;
+	memset( selAddrText, 0, sizeof(selAddrText) );
+
+	for (int i=0; i<64; i++)
+	{
+		lineBufIdx[i] = -1;
+	}
 }
 //----------------------------------------------------
 QTraceLogView::~QTraceLogView(void)
@@ -1153,6 +1166,13 @@ void QTraceLogView::highlightClear(void)
 {
 	txtHlgtEndLine = txtHlgtStartLine = txtHlgtAnchorLine;
 	txtHlgtEndChar = txtHlgtStartChar = txtHlgtAnchorChar;
+
+	selAddrIdx   = -1;
+	selAddrLine  = -1;
+	selAddrChar  = -1;
+	selAddrWidth = -1;
+	selAddrValue = -1;
+	selAddrText[0] = 0;
 }
 //----------------------------------------------------
 QPoint QTraceLogView::convPixToCursor( QPoint p )
@@ -1190,6 +1210,57 @@ QPoint QTraceLogView::convPixToCursor( QPoint p )
 		}
 	}
 	return c;
+}
+//----------------------------------------------------------------------------
+void QTraceLogView::calcTextSel( int x, int y )
+{
+	int i,j;
+	char id[128];
+	//printf("Line: '%s'  Char: %c\n", lineText[y].c_str(), lineText[y][x] );
+
+	selAddrIdx     = -1;
+	selAddrLine    = -1;
+	selAddrChar    = -1;
+	selAddrWidth   = -1;
+	selAddrValue   = -1;
+	selAddrText[0] =  0;
+
+	if ( x < lineText[y].size() )
+	{
+		int ax = x;
+
+		if ( isxdigit( lineText[y][ax] ) )
+		{
+			while ( (ax >= 0) && isxdigit(lineText[y][ax]) )
+			{
+				ax--;
+			}
+			if ( (ax >= 0) && ( (lineText[y][ax] == '$') || (lineText[y][ax] == ':') ) )
+			{
+				ax--;
+				if (lineText[y][ax] != '#')
+				{
+					i=0; ax += 2; j=ax;
+					while ( isxdigit(lineText[y][j]) )
+					{
+						id[i] = lineText[y][j]; i++; j++;
+					}
+					id[i] = 0;
+
+					selAddrIdx   = lineBufIdx[y];
+					selAddrLine  = y;
+					selAddrChar  = ax;
+					selAddrWidth = i;
+					selAddrValue = strtol( id, NULL, 16 );
+					strcpy( selAddrText, id );
+
+					//printf("Sel Addr: $%04X \n", selAddrValue );
+				}
+			}
+		}
+
+	}
+
 }
 //----------------------------------------------------------------------------
 bool QTraceLogView::textIsHighlighted(void)
@@ -1282,6 +1353,11 @@ void QTraceLogView::mouseReleaseEvent(QMouseEvent * event)
 		setHighlightEndCoord( c.x(), c.y() );
 
 		captureHighLightText = true;
+
+		if ( !textIsHighlighted() )
+		{
+			calcTextSel( c.x(), c.y() );
+		}
 	}
 }
 //----------------------------------------------------
@@ -1374,6 +1450,477 @@ void QTraceLogView::resizeEvent(QResizeEvent *event)
 	}
 
 }
+//----------------------------------------------------------------------------
+void QTraceLogView::openBpEditWindow( int editIdx, watchpointinfo *wp, traceRecord_t *recp )
+{
+	int ret;
+	QDialog dialog(this);
+	QHBoxLayout *hbox;
+	QVBoxLayout *mainLayout, *vbox;
+	QLabel *lbl;
+	QLineEdit *addr1, *addr2, *cond, *name;
+	QCheckBox *forbidChkBox, *rbp, *wbp, *xbp, *ebp;
+	QGridLayout *grid;
+	QFrame *frame;
+	QGroupBox *gbox;
+	QPushButton *okButton, *cancelButton;
+	QRadioButton *cpu_radio, *ppu_radio, *sprite_radio;
+
+	if ( editIdx >= 0 )
+	{
+		dialog.setWindowTitle( tr("Edit Breakpoint") );
+	}
+	else
+	{
+		dialog.setWindowTitle( tr("Add Breakpoint") );
+	}
+
+	hbox       = new QHBoxLayout();
+	mainLayout = new QVBoxLayout();
+
+	mainLayout->addLayout( hbox );
+
+	lbl   = new QLabel( tr("Address") );
+	addr1 = new QLineEdit();
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( addr1 );
+
+	lbl   = new QLabel( tr("-") );
+	addr2 = new QLineEdit();
+	hbox->addWidget( lbl );
+	hbox->addWidget( addr2 );
+
+	forbidChkBox = new QCheckBox( tr("Forbid") );
+	hbox->addWidget( forbidChkBox );
+
+	frame = new QFrame();
+	vbox  = new QVBoxLayout();
+	hbox  = new QHBoxLayout();
+	gbox  = new QGroupBox();
+
+	rbp = new QCheckBox( tr("Read") );
+	wbp = new QCheckBox( tr("Write") );
+	xbp = new QCheckBox( tr("Execute") );
+	ebp = new QCheckBox( tr("Enable") );
+
+	gbox->setTitle( tr("Memory") );
+	mainLayout->addWidget( frame );
+	frame->setLayout( vbox );
+	frame->setFrameShape( QFrame::Box );
+	vbox->addLayout( hbox );
+	vbox->addWidget( gbox );
+
+	hbox->addWidget( rbp );
+	hbox->addWidget( wbp );
+	hbox->addWidget( xbp );
+	hbox->addWidget( ebp );
+	
+	hbox         = new QHBoxLayout();
+	cpu_radio    = new QRadioButton( tr("CPU Mem") );
+	ppu_radio    = new QRadioButton( tr("PPU Mem") );
+	sprite_radio = new QRadioButton( tr("Sprite Mem") );
+	cpu_radio->setChecked(true);
+
+	gbox->setLayout( hbox );
+	hbox->addWidget( cpu_radio );
+	hbox->addWidget( ppu_radio );
+	hbox->addWidget( sprite_radio );
+
+	grid  = new QGridLayout();
+
+	mainLayout->addLayout( grid );
+	lbl   = new QLabel( tr("Condition") );
+	cond  = new QLineEdit();
+
+	grid->addWidget(  lbl, 0, 0 );
+	grid->addWidget( cond, 0, 1 );
+
+	lbl   = new QLabel( tr("Name") );
+	name  = new QLineEdit();
+
+	grid->addWidget(  lbl, 1, 0 );
+	grid->addWidget( name, 1, 1 );
+
+	hbox         = new QHBoxLayout();
+	okButton     = new QPushButton( tr("OK") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	mainLayout->addLayout( hbox );
+	hbox->addWidget( cancelButton );
+	hbox->addWidget(     okButton );
+
+   connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+   connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+
+	okButton->setDefault(true);
+
+	if ( wp != NULL )
+	{
+		char stmp[256];
+
+		if ( wp->flags & BT_P )
+		{
+			ppu_radio->setChecked(true);
+		}
+		else if ( wp->flags & BT_S )
+		{
+			sprite_radio->setChecked(true);
+		}
+
+		sprintf( stmp, "%04X", wp->address );
+
+		addr1->setText( tr(stmp) );
+
+		if ( wp->endaddress > 0 )
+		{
+			sprintf( stmp, "%04X", wp->endaddress );
+
+			addr2->setText( tr(stmp) );
+		}
+
+		if ( wp->flags & WP_R )
+		{
+		   rbp->setChecked(true);
+		}
+		if ( wp->flags & WP_W )
+		{
+		   wbp->setChecked(true);
+		}
+		if ( wp->flags & WP_X )
+		{
+		   xbp->setChecked(true);
+		}
+		if ( wp->flags & WP_F )
+		{
+		   forbidChkBox->setChecked(true);
+		}
+		if ( wp->flags & WP_E )
+		{
+		   ebp->setChecked(true);
+		}
+
+		if ( wp->condText )
+		{
+			cond->setText( tr(wp->condText) );
+		}
+		else
+		{
+			if ( editIdx < 0 )
+			{
+				// If new breakpoint, suggest condition if in ROM Mapping area of memory.
+				if ( wp->address >= 0x8000 )
+				{
+					char str[64];
+					if ( (wp->address == recp->cpu.PC) && (recp->bank >= 0) )
+					{
+						sprintf(str, "K==#%02X", recp->bank );
+					}
+					else
+					{
+						sprintf(str, "K==#%02X", getBank(wp->address));
+					}
+					cond->setText( tr(str) );
+				}
+			}
+		}
+
+		if ( wp->desc )
+		{
+			name->setText( tr(wp->desc) );
+		}
+	}
+
+	dialog.setLayout( mainLayout );
+
+	ret = dialog.exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		int  start_addr = -1, end_addr = -1, type = 0, enable = 1, slot;
+		std::string s;
+
+		slot = (editIdx < 0) ? numWPs : editIdx;
+
+		if ( cpu_radio->isChecked() )
+		{
+			type |= BT_C;
+		}
+		else if ( ppu_radio->isChecked() ) 
+		{
+			type |= BT_P;
+		}
+		else if ( sprite_radio->isChecked() ) 
+		{
+			type |= BT_S;
+		}
+
+		s = addr1->text().toStdString();
+
+		if ( s.size() > 0 )
+		{
+			start_addr = offsetStringToInt( type, s.c_str() );
+		}
+
+		s = addr2->text().toStdString();
+
+		if ( s.size() > 0 )
+		{
+			end_addr = offsetStringToInt( type, s.c_str() );
+		}
+
+		if ( rbp->isChecked() )
+		{
+			type |= WP_R;
+		}
+		if ( wbp->isChecked() )
+		{
+			type |= WP_W;
+		}
+		if ( xbp->isChecked() )
+		{
+			type |= WP_X;
+		}
+
+		if ( forbidChkBox->isChecked() )
+		{
+			type |= WP_F;
+		}
+
+		enable = ebp->isChecked();
+
+		if ( (start_addr >= 0) && (numWPs < 64) )
+		{
+			unsigned int retval;
+			std::string nameString, condString;
+
+			nameString = name->text().toStdString();
+			condString = cond->text().toStdString();
+
+			retval = NewBreak( nameString.c_str(), start_addr, end_addr, type, condString.c_str(), slot, enable);
+
+			if ( (retval == 1) || (retval == 2) )
+			{
+				printf("Breakpoint Add Failed\n");
+			}
+			else
+			{
+				if (editIdx < 0)
+				{
+					numWPs++;
+				}
+
+				updateAllDebuggerWindows();
+			}
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void QTraceLogView::ctxMenuAddBP(void)
+{
+	watchpointinfo wp;
+	traceRecord_t *recp = NULL;
+
+	wp.address = selAddrValue;
+	wp.endaddress = 0;
+	wp.flags   = WP_X | WP_E;
+	wp.condText = 0;
+	wp.desc = NULL;
+
+	if ( selAddrLine >= 0 )
+	{
+		recp = &rec[selAddrLine];
+	}
+
+	if ( recp != NULL )
+	{
+		openBpEditWindow( -1, &wp, recp );
+	}
+
+}
+//----------------------------------------------------------------------------
+void QTraceLogView::openDebugSymbolEditWindow( int addr, int bank )
+{
+	int ret, charWidth;
+	QDialog dialog(this);
+	QHBoxLayout *hbox;
+	QVBoxLayout *mainLayout;
+	QLabel *lbl;
+	QLineEdit *filepath, *addrEntry, *nameEntry, *commentEntry;
+	QPushButton *okButton, *cancelButton;
+	char stmp[512];
+	debugSymbol_t *sym;
+	QFontMetrics fm(font);
+
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+    charWidth = fm.horizontalAdvance(QLatin1Char('2'));
+#else
+    charWidth = fm.width(QLatin1Char('2'));
+#endif
+
+	sym = debugSymbolTable.getSymbolAtBankOffset( bank, addr );
+
+	generateNLFilenameForAddress( addr, stmp );
+
+	dialog.setWindowTitle( tr("Symbolic Debug Naming") );
+
+	hbox       = new QHBoxLayout();
+	mainLayout = new QVBoxLayout();
+
+	lbl = new QLabel( tr("File") );
+	filepath = new QLineEdit();
+	filepath->setFont( font );
+	filepath->setText( tr(stmp) );
+	filepath->setReadOnly( true );
+	filepath->setMinimumWidth( charWidth * (filepath->text().size() + 4) );
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( filepath );
+
+	mainLayout->addLayout( hbox );
+
+	sprintf( stmp, "%04X", addr );
+
+	hbox = new QHBoxLayout();
+	lbl  = new QLabel( tr("Address") );
+	addrEntry = new QLineEdit();
+	addrEntry->setFont( font );
+	addrEntry->setText( tr(stmp) );
+	addrEntry->setReadOnly( true );
+	addrEntry->setAlignment(Qt::AlignCenter);
+	addrEntry->setMaximumWidth( charWidth * 6 );
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( addrEntry );
+
+	lbl  = new QLabel( tr("Name") );
+	nameEntry = new QLineEdit();
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( nameEntry );
+
+	mainLayout->addLayout( hbox );
+
+	hbox = new QHBoxLayout();
+	lbl  = new QLabel( tr("Comment") );
+	commentEntry = new QLineEdit();
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( commentEntry );
+
+	mainLayout->addLayout( hbox );
+
+	hbox         = new QHBoxLayout();
+	okButton     = new QPushButton( tr("OK") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	mainLayout->addLayout( hbox );
+	hbox->addWidget( cancelButton );
+	hbox->addWidget(     okButton );
+
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+   connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+
+	okButton->setDefault(true);
+
+	if ( sym != NULL )
+	{
+		nameEntry->setText( tr(sym->name.c_str()) );
+		commentEntry->setText( tr(sym->comment.c_str()) );
+	}
+
+	dialog.setLayout( mainLayout );
+
+	ret = dialog.exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		fceuWrapperLock();
+		if ( sym == NULL )
+		{
+			sym = new debugSymbol_t();
+			sym->ofs     = addr;
+			sym->name    = nameEntry->text().toStdString();
+			sym->comment = commentEntry->text().toStdString();
+
+			debugSymbolTable.addSymbolAtBankOffset( bank, addr, sym );
+		}
+		else
+		{
+			sym->name    = nameEntry->text().toStdString();
+			sym->comment = commentEntry->text().toStdString();
+		}
+		sym->trimTrailingSpaces();
+		fceuWrapperUnLock();
+
+		updateAllDebuggerWindows();
+	}
+}
+//----------------------------------------------------------------------------
+void QTraceLogView::ctxMenuAddSym(void)
+{
+	int addr, bank = -1;
+	traceRecord_t *recp = NULL;
+
+	addr = selAddrValue;
+
+	if ( selAddrLine >= 0 )
+	{
+		recp = &rec[selAddrLine];
+	}
+
+	if ( addr < 0x8000 )
+	{
+	   bank = -1;
+	}
+	else
+	{
+		if ( recp != NULL )
+		{
+			if ( (addr == recp->cpu.PC) && (recp->bank >= 0) )
+			{
+				bank = recp->bank;
+			}
+			else
+			{
+	   		bank = getBank( addr );
+			}
+		}
+		else
+		{
+	   	bank = getBank( addr );
+		}
+	}
+
+	openDebugSymbolEditWindow( addr, bank );
+}
+//----------------------------------------------------------------------------
+void QTraceLogView::contextMenuEvent(QContextMenuEvent *event)
+{
+	QAction *act;
+	QMenu menu(this);
+	QPoint c = convPixToCursor( event->pos() );
+
+	if ( !textIsHighlighted() )
+	{
+		calcTextSel( c.x(), c.y() );
+
+		if ( selAddrIdx >= 0 )
+		{
+			act = new QAction(tr("Add Symbolic Debug Marker"), &menu);
+		 	menu.addAction(act);
+			//act->setShortcut( QKeySequence(tr("S")));
+			connect( act, SIGNAL(triggered(void)), this, SLOT(ctxMenuAddSym(void)) );
+
+			act = new QAction(tr("Add Breakpoint"), &menu);
+			menu.addAction(act);
+			//act->setShortcut( QKeySequence(tr("B")));
+			connect( act, SIGNAL(triggered(void)), this, SLOT(ctxMenuAddBP(void)) );
+
+			menu.exec(event->globalPos());
+		}
+	}
+}
 //----------------------------------------------------
 void QTraceLogView::drawText( QPainter *painter, int x, int y, const char *txt, int maxChars )
 {
@@ -1392,10 +1939,10 @@ void QTraceLogView::drawText( QPainter *painter, int x, int y, const char *txt, 
 //----------------------------------------------------
 void QTraceLogView::paintEvent(QPaintEvent *event)
 {
-   int x,y, v, ofs, row, start, end, nrow, lineLen;
+   int i,x,y, v, ofs, row, start, end, nrow, lineLen;
 	QPainter painter(this);
    char line[256];
-   traceRecord_t rec[64];
+   //traceRecord_t rec[64];
 	QColor hlgtFG("white"), hlgtBG("blue");
 
 	painter.setFont(font);
@@ -1426,12 +1973,19 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 
    if ( start < 0 ) start += recBufMax;
 
+	for (i=0; i<64; i++)
+	{
+		lineBufIdx[i] = -1;
+	}
+
    row = 0;
    while ( start != end )
    {
+		lineBufIdx[row] = start;
       rec[row] = recBuf[ start ]; row++;
       start = (start + 1) % recBufMax;
    }
+
 
 	if ( captureHighLightText )
 	{
@@ -1449,6 +2003,7 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 
       rec[row].convToText( line, &lineLen );
 
+		lineText[row].assign( line );
       //printf("Line %i: '%s'\n", row, line );
 
       drawText( &painter, x, y, line, 256 );
@@ -1504,6 +2059,24 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 				if ( l != txtHlgtEndLine )
 				{
 					hlgtText.append( "\n");
+				}
+			}
+		}
+		else if ( (selAddrIdx >= 0) && (selAddrIdx == lineBufIdx[row]) )
+		{
+			if ( (selAddrChar >= 0) && (selAddrChar < lineLen) )
+			{
+				if ( strncmp( &line[selAddrChar], selAddrText, selAddrWidth ) == 0 )
+				{
+					int ax = x + (selAddrChar * pxCharWidth);
+
+					painter.fillRect( ax, y - pxLineSpacing + pxLineLead, selAddrWidth * pxCharWidth, pxLineSpacing, hlgtBG );
+
+					painter.setPen( hlgtFG );
+
+					drawText( &painter, ax, y, selAddrText );
+
+					painter.setPen( this->palette().color(QPalette::WindowText));
 				}
 			}
 		}
