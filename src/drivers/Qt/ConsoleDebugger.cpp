@@ -2573,13 +2573,13 @@ void ConsoleDebugger::updatePeriodic(void)
 
 	if ( bpTree->topLevelItemCount() != numWPs )
 	{
-		printf("Breakpoint Tree Update\n");
+		//printf("Breakpoint Tree Update\n");
 		bpListUpdate( true );
 	}
 
 	if ( bmTree->topLevelItemCount() != dbgBmMgr.size() )
 	{
-		printf("Bookmark Tree Update\n");
+		//printf("Bookmark Tree Update\n");
 		bmListUpdate( true );
 	}
 }
