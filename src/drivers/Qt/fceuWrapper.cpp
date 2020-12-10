@@ -206,11 +206,25 @@ int reloadLastGame(void)
  */
 int LoadGame(const char *path, bool silent)
 {
+	char fullpath[4096];
 	int gg_enabled, autoLoadDebug, autoOpenDebugger, autoInputPreset;
 
 	if (isloaded){
 		CloseGame();
 	}
+
+#if defined(__linux) || defined(__APPLE__)
+
+	// Resolve absolute path to file
+	if ( realpath( path, fullpath ) == NULL )
+	{
+		strcpy( fullpath, path );
+	}
+#else
+	strcpy( fullpath, path );
+#endif
+
+	//printf("Fullpath: %zi '%s'\n", sizeof(fullpath), fullpath );
 
 	// For some reason, the core of the emulator clears the state of 
 	// the game genie option selection. So check the config each time
@@ -219,7 +233,7 @@ int LoadGame(const char *path, bool silent)
 
 	FCEUI_SetGameGenie (gg_enabled);
 
-	if(!FCEUI_LoadGame(path, 1, silent)) {
+	if(!FCEUI_LoadGame(fullpath, 1, silent)) {
 		return 0;
 	}
 
