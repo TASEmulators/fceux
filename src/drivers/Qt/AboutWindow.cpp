@@ -119,7 +119,7 @@ AboutWindow::AboutWindow(QWidget *parent)
 	mainLayout->addLayout( hbox1 );
 
 	hbox1 = new QHBoxLayout();
-	lbl = new QLabel( tr("© 2016 FceuX Development Team") );
+	lbl = new QLabel( tr("© 2020 FceuX Development Team") );
 
 	hbox1->addWidget( lbl );
 	hbox1->setAlignment( Qt::AlignCenter );

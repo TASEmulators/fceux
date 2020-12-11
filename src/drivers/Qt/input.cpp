@@ -469,58 +469,6 @@ std::string GetFilename (const char *title, bool save, const char *filter)
 	fname = GetOpenFileName (&ofn);
 
 #endif
-//#ifdef _GTK
-//	int fullscreen = 0;
-//	g_config->getOption ("SDL.Fullscreen", &fullscreen);
-//	if (fullscreen)
-//		ToggleFS ();
-//
-//	GtkWidget *fileChooser;
-//
-//	GtkFileFilter *filterX;
-//	GtkFileFilter *filterAll;
-//
-//	filterX = gtk_file_filter_new ();
-//	gtk_file_filter_add_pattern (filterX, filter);
-//	gtk_file_filter_set_name (filterX, filter);
-//
-//
-//	filterAll = gtk_file_filter_new ();
-//	gtk_file_filter_add_pattern (filterAll, "*");
-//	gtk_file_filter_set_name (filterAll, "All Files");
-//
-//	if (save)
-//		fileChooser = gtk_file_chooser_dialog_new ("Save as", NULL,
-//							GTK_FILE_CHOOSER_ACTION_SAVE,
-//							"_Cancel",
-//							GTK_RESPONSE_CANCEL,
-//							"_Save",
-//							GTK_RESPONSE_ACCEPT, NULL);
-//	else
-//		fileChooser = gtk_file_chooser_dialog_new ("Open", NULL,
-//							GTK_FILE_CHOOSER_ACTION_OPEN,
-//							"_Cancel",
-//							GTK_RESPONSE_CANCEL,
-//							"_Open",
-//							GTK_RESPONSE_ACCEPT, NULL);
-//
-//	// TODO: make file filters case insensitive     
-//	//gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterX);
-//	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (fileChooser), filterAll);
-//	int response = gtk_dialog_run (GTK_DIALOG (fileChooser));
-//
-//	// flush gtk events
-//	while (gtk_events_pending ())
-//		gtk_main_iteration_do (TRUE);
-//
-//	if (response == GTK_RESPONSE_ACCEPT)
-//		fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
-//
-//	gtk_widget_destroy (fileChooser);
-//
-//	while (gtk_events_pending ())
-//		gtk_main_iteration_do (TRUE);
-//#endif
 	FCEUI_ToggleEmulationPause ();
 	return fname;
 }
@@ -530,71 +478,6 @@ std::string GetFilename (const char *title, bool save, const char *filter)
  */
 std::string GetUserText (const char *title)
 {
-#ifdef _GTK
-/*	prg318 - 10/13/11 - this is broken in recent build and causes 
- *	segfaults/very weird behavior i'd rather remove it for now than it cause 
- *	accidental segfaults
- *	TODO fix it
-*/
-#if 0
-//
-//	GtkWidget* d;
-//	GtkWidget* entry;
-//	
-//	d = gtk_dialog_new_with_buttons(title, NULL, GTK_DIALOG_MODAL, GTK_STOCK_OK, GTK_RESPONSE_OK); 
-//	
-//	entry = gtk_entry_new();
-//
-//	GtkWidget* vbox = gtk_dialog_get_content_area(GTK_DIALOG(d));
-//	
-//	gtk_container_add(GTK_CONTAINER(vbox), entry);
-//	
-//	gtk_widget_show_all(d);
-//	
-//	gtk_dialog_run(GTK_DIALOG(d));
-//	
-//	// flush gtk events
-//	while(gtk_events_pending())
-//			gtk_main_iteration_do(TRUE);
-//
-//		std::string input = gtk_entry_get_text(GTK_ENTRY(entry));
-//	
-//		if (FCEUI_EmulationPaused() == 0)
-//        	FCEUI_ToggleEmulationPause(); // pause emulation
-//	
-//		int fullscreen = 0; 
-//		g_config->getOption("SDL.Fullscreen", &fullscreen);
-//		if(fullscreen)
-//			ToggleFS(); // disable fullscreen emulation
-//	
-//	FILE *fpipe;
-//	std::string command = "zenity --entry --title=\"";
-//	command.append(title);
-//	command.append("\" --text=\"");
-//	command.append(title);
-//	command.append(":\"");
-//	
-//	if (!(fpipe = (FILE*)popen(command.c_str(),"r"))) // If fpipe is NULL
-//		FCEUD_PrintError("Pipe error on opening zenity");
-//	int c;
-//	std::string input;
-//	while((c = fgetc(fpipe)))
-//	{
-//		if (c == EOF || c == '\n')
-//			break;
-//		input += c;
-//	}
-//    	pclose(fpipe);
-//     gtk_widget_destroy(d);
-//
-//
-//     while(gtk_events_pending())
-//     gtk_main_iteration_do(TRUE);
-//
-//     FCEUI_ToggleEmulationPause(); // unpause emulation
-//     return input;
-#endif // #if 0
-#endif
   return "";
 }
 
@@ -926,9 +809,6 @@ static void KeyboardCommands (void)
 	{
 		if ( Hotkeys[HK_SELECT_STATE_0 + i].getRisingEdge() )
 		{
-#ifdef _GTK
-			setStateMenuItem(i);
-#endif
 			FCEUI_SelectState (i, 1);
 		}
 	}
@@ -936,17 +816,11 @@ static void KeyboardCommands (void)
 	if ( Hotkeys[HK_SELECT_STATE_NEXT].getRisingEdge() )
 	{
 		FCEUI_SelectStateNext (1);
-#ifdef _GTK
-		setStateMenuItem( CurrentState );
-#endif
 	}
 
 	if ( Hotkeys[HK_SELECT_STATE_PREV].getRisingEdge() )
 	{
 		FCEUI_SelectStateNext (-1);
-#ifdef _GTK
-		setStateMenuItem( CurrentState );
-#endif
 	}
 
 	if ( Hotkeys[HK_BIND_STATE].getRisingEdge() )
