@@ -23,7 +23,6 @@ exclude:
 - NEWS
 - NewPPUtests.txt
 - README
-- SConstruct
 - STYLE-GUIDELINES-SDL
 - TODO-SDL
 - _config.yml
@@ -32,7 +31,6 @@ exclude:
 - azure-pipelines.yml
 - changelog.txt
 - configure.ac
-- debian-crossbuild.sh
 - doxygen
 - fceux.desktop
 - readme.md
