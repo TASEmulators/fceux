@@ -58,9 +58,6 @@ static int s_srendline, s_erendline;
 static int s_tlines;
 static int s_inited = 0;
 
-//#ifdef OPENGL
-//static int s_useOpenGL = 0;
-//#endif
 static double s_exs = 1.0, s_eys = 1.0;
 static int s_eefx = 0;
 static int s_clipSides = 0;
@@ -152,9 +149,6 @@ int InitVideo(FCEUGI *gi)
 	// load the relevant configuration variables
 	g_config->getOption("SDL.Fullscreen", &s_fullscreen);
 	g_config->getOption("SDL.DoubleBuffering", &doublebuf);
-//#ifdef OPENGL
-//	g_config->getOption("SDL.OpenGL", &s_useOpenGL);
-//#endif
 	g_config->getOption("SDL.SpecialFilter", &s_sponge);
 	g_config->getOption("SDL.XStretch", &xstretch);
 	g_config->getOption("SDL.YStretch", &ystretch);

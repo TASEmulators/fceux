@@ -2071,7 +2071,6 @@ void  QAsmView::updateAssemblyView(void)
 	uint8 opcode[3];
 	char asmTxt[256];
 	dbg_asm_entry_t *a, *d;
-	//GtkTextIter iter, next_iter;
 	char pc_found = 0;
 
 	start_address_lp = starting_address = X.PC;
@@ -2111,12 +2110,6 @@ void  QAsmView::updateAssemblyView(void)
 		}
 	}
 	//asmText->clear();
-
-	//gtk_text_buffer_get_start_iter( textbuf, &iter );
-
-	//textview_lines_allocated = gtk_text_buffer_get_line_count( textbuf ) - 1;
-
-	//printf("Num Lines: %i\n", textview_lines_allocated );
 
 	for (int i=0; i < 0xFFFF; i++)
 	{

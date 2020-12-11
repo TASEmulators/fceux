@@ -206,7 +206,6 @@ InitConfig()
 	config->addOption('y', "yres", "SDL.YResolution", 0);
 	config->addOption("SDL.LastXRes", 0);
 	config->addOption("SDL.LastYRes", 0);
-	config->addOption('b', "bpp", "SDL.BitsPerPixel", 32);
 	config->addOption("doublebuf", "SDL.DoubleBuffering", 1);
 	config->addOption("autoscale", "SDL.AutoScale", 1);
 	config->addOption("keepratio", "SDL.KeepRatio", 1);
@@ -243,9 +242,6 @@ InitConfig()
 
 	config->addOption("autoInputPreset", "SDL.AutoInputPreset", 0);
 
-	// allow for input configuration
-	//config->addOption('i', "inputcfg", "SDL.InputCfg", InputCfg);
-    
 	// display input
 	config->addOption("inputdisplay", "SDL.InputDisplay", 0);
 

@@ -387,7 +387,6 @@ static const char *DriverUsage =
 "Option         Value   Description\n"
 "--pal          {0|1}   Use PAL timing.\n"
 "--newppu       {0|1}   Enable the new PPU core. (WARNING: May break savestates)\n"
-"--inputcfg     d       Configures input device d on startup.\n"
 "--input(1,2)   d       Set which input device to emulate for input 1 or 2.\n"
 "                         Devices:  gamepad zapper powerpad.0 powerpad.1\n"
 "                         arkanoid\n"
@@ -405,8 +404,6 @@ static const char *DriverUsage =
 "--(x/y)scale   x       Multiply width/height by x. \n"
 "                         (Real numbers >0 with OpenGL, otherwise integers >0).\n"
 "--(x/y)stretch {0|1}   Stretch to fill surface on x/y axis (OpenGL only).\n"
-"--bpp       {8|16|32}  Set bits per pixel.\n"
-"--opengl       {0|1}   Enable OpenGL support.\n"
 "--fullscreen   {0|1}   Enable full screen mode.\n"
 "--noframe      {0|1}   Hide title bar and window decorations.\n"
 "--special      {1-4}   Use special video scaling filters\n"
@@ -435,7 +432,6 @@ static const char *DriverUsage =
 "--players      x       Set the number of local players in a network play\n"
 "                       session.\n"
 "--rp2mic       {0|1}   Replace Port 2 Start with microphone (Famicom).\n"
-"--nogui                Don't load the GTK GUI\n"
 "--4buttonexit {0|1}    exit the emulator when A+B+Select+Start is pressed\n"
 "--loadstate {0-9|>9}   load from the given state when the game is loaded\n"
 "--savestate {0-9|>9}   save to the given state when the game is closed\n"
@@ -548,16 +544,7 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		g_config->save();
 	}
 
-
-	//g_config->getOption("SDL.InputCfg", &s);
-
-	//if (s.size() != 0)
-	//{
-	//	InitVideo(GameInfo);
-	//	InputCfg(s);
-	//}
-
-	 // update the input devices
+	// update the input devices
 	UpdateInput(g_config);
 
 	// check for a .fcm file to convert to .fm2
