@@ -310,6 +310,8 @@ CTASSERT(sizeof(luaMemHookTypeStrings)/sizeof(*luaMemHookTypeStrings) ==  LUAMEM
 static char* rawToCString(lua_State* L, int idx=0);
 static const char* toCString(lua_State* L, int idx=0);
 
+static int exitScheduled = FALSE;
+
 /**
  * Resets emulator speed / pause states after script exit.
  */
@@ -649,6 +651,13 @@ static int emu_loadrom(lua_State *L)
 	return 0;
 }
 
+// emu.exit()
+//
+// Closes the fceux
+static int emu_exit(lua_State *L) {
+	exitScheduled = TRUE;
+	return 0;
+}
 
 static int emu_registerbefore(lua_State *L) {
 	if (!lua_isnil(L,1))
@@ -5895,6 +5904,7 @@ static const struct luaL_reg emulib [] = {
 	{"getdir", emu_getdir},
 	{"loadrom", emu_loadrom},
 	{"print", print}, // sure, why not
+	{"exit", emu_exit}, // useful for run-and-close scripts
 	{NULL,NULL}
 };
 
@@ -6195,6 +6205,8 @@ void FCEU_LuaFrameBoundary()
 		FCEU_LuaOnStop();
 	}
 
+	if (exitScheduled)
+		DoFCEUExit();
 }
 
 /**
