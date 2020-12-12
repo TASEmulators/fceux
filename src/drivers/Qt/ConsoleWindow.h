@@ -71,6 +71,8 @@ class  consoleWin_t : public QMainWindow
 
 		QMutex *mutex;
 
+		void requestClose(void);
+
 	 	void QueueErrorMsgWindow( const char *msg );
 
 		int  showListSelectDialog( const char *title, std::vector <std::string> &l );
@@ -149,6 +151,7 @@ class  consoleWin_t : public QMainWindow
 
 	 std::string errorMsg;
 	 bool        errorMsgValid;
+	 bool        closeRequested;
 
 	protected:
     void closeEvent(QCloseEvent *event);

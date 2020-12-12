@@ -80,9 +80,10 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	g_config->getOption( "SDL.VideoDriver", &use_SDL_video );
 
-	errorMsgValid = false;
-	viewport_GL  = NULL;
-	viewport_SDL = NULL;
+	closeRequested = false;
+	errorMsgValid  = false;
+	viewport_GL    = NULL;
+	viewport_SDL   = NULL;
 
 	if ( use_SDL_video )
 	{
@@ -216,6 +217,11 @@ void consoleWin_t::closeEvent(QCloseEvent *event)
    event->accept();
 
 	closeApp();
+}
+
+void consoleWin_t::requestClose(void)
+{
+	closeRequested = true;
 }
 
 void consoleWin_t::keyPressEvent(QKeyEvent *event)
@@ -2052,6 +2058,12 @@ void consoleWin_t::updatePeriodic(void)
 	{
 		showErrorMsgWindow();
 		errorMsgValid = false;
+	}
+
+	if ( closeRequested )
+	{
+		closeApp();
+		closeRequested = false;
 	}
 
    return;

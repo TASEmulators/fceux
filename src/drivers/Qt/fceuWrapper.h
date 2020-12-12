@@ -36,4 +36,5 @@ int  fceuWrapperSoftReset(void);
 int  fceuWrapperHardReset(void);
 int  fceuWrapperTogglePause(void);
 bool fceuWrapperGameLoaded(void);
+void fceuWrapperRequestAppExit(void);
 

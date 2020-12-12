@@ -383,6 +383,14 @@ bool fceuWrapperGameLoaded(void)
 	return (isloaded ? true : false);
 }
 
+void fceuWrapperRequestAppExit(void)
+{
+	if ( consoleWindow )
+	{
+		consoleWindow->requestClose();
+	}
+}
+
 static const char *DriverUsage =
 "Option         Value   Description\n"
 "--pal          {0|1}   Use PAL timing.\n"

@@ -57,6 +57,7 @@ extern TASEDITOR_LUA taseditor_lua;
 #else
 int LoadGame(const char *path, bool silent = false);
 int reloadLastGame(void);
+void fceuWrapperRequestAppExit(void);
 #endif
 
 #endif
@@ -6205,8 +6206,17 @@ void FCEU_LuaFrameBoundary()
 		FCEU_LuaOnStop();
 	}
 
+#if defined(__linux) || defined(__APPLE__)
+	if (exitScheduled)
+	{  // This function does not exit immediately, 
+		// it requests for the application to exit when next convenient.
+		fceuWrapperRequestAppExit();
+		exitScheduled = FALSE;
+	}
+#else
 	if (exitScheduled)
 		DoFCEUExit();
+#endif
 }
 
 /**

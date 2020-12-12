@@ -533,6 +533,10 @@ void FCEUD_TraceInstruction() {
 	return;
 }
 
+void fceuWrapperRequestAppExit(void)
+{
+	gtk_gui_run = false;
+}
 
 #ifdef _GTK
 	int noGui = 0;
