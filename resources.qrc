@@ -3,5 +3,6 @@
         <file>fceux.png</file>
         <file>fceux1.png</file>
         <file>icons/power.png</file>
+        <file>icons/record.png</file>
     </qresource>
 </RCC>

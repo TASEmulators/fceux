@@ -593,6 +593,7 @@ void consoleWin_t::createMainMenu(void)
 	 act = new QAction(tr("Speed Up"), this);
     act->setShortcut( QKeySequence(tr("=")));
     act->setStatusTip(tr("Speed Up"));
+    act->setIcon( style->standardIcon( QStyle::SP_MediaSeekForward ) );
     connect(act, SIGNAL(triggered()), this, SLOT(emuSpeedUp(void)) );
 
     subMenu->addAction(act);
@@ -601,6 +602,7 @@ void consoleWin_t::createMainMenu(void)
 	 act = new QAction(tr("Slow Down"), this);
     act->setShortcut( QKeySequence(tr("-")));
     act->setStatusTip(tr("Slow Down"));
+    act->setIcon( style->standardIcon( QStyle::SP_MediaSeekBackward ) );
     connect(act, SIGNAL(triggered()), this, SLOT(emuSlowDown(void)) );
 
     subMenu->addAction(act);
@@ -611,6 +613,7 @@ void consoleWin_t::createMainMenu(void)
 	 act = new QAction(tr("Slowest"), this);
     //act->setShortcut( QKeySequence(tr("-")));
     act->setStatusTip(tr("Slowest"));
+    act->setIcon( style->standardIcon( QStyle::SP_MediaSkipBackward ) );
     connect(act, SIGNAL(triggered()), this, SLOT(emuSlowestSpd(void)) );
 
     subMenu->addAction(act);
@@ -619,6 +622,7 @@ void consoleWin_t::createMainMenu(void)
 	 act = new QAction(tr("Normal"), this);
     //act->setShortcut( QKeySequence(tr("-")));
     act->setStatusTip(tr("Normal"));
+    act->setIcon( style->standardIcon( QStyle::SP_MediaPlay ) );
     connect(act, SIGNAL(triggered()), this, SLOT(emuNormalSpd(void)) );
 
     subMenu->addAction(act);
@@ -627,6 +631,7 @@ void consoleWin_t::createMainMenu(void)
 	 act = new QAction(tr("Turbo"), this);
     //act->setShortcut( QKeySequence(tr("-")));
     act->setStatusTip(tr("Turbo (Fastest)"));
+    act->setIcon( style->standardIcon( QStyle::SP_MediaSkipForward ) );
     connect(act, SIGNAL(triggered()), this, SLOT(emuFastestSpd(void)) );
 
     subMenu->addAction(act);
@@ -781,6 +786,7 @@ void consoleWin_t::createMainMenu(void)
 	 recMovAct = new QAction(tr("Record"), this);
     recMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
     recMovAct->setStatusTip(tr("Record Movie"));
+    recMovAct->setIcon( QIcon(":icons/record.png") );
     connect(recMovAct, SIGNAL(triggered()), this, SLOT(recordMovie(void)) );
 
     movieMenu->addAction(recMovAct);
