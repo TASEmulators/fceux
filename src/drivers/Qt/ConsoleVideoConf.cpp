@@ -19,6 +19,9 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	QHBoxLayout *hbox1;
 	QLabel *lbl;
 	QPushButton *button;
+	QStyle *style;
+
+	style = this->style();
 
 	setWindowTitle( tr("Video Config") );
 
@@ -205,9 +208,11 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	button = new QPushButton( tr("Apply") );
 	hbox1->addWidget( button );
 	connect(button, SIGNAL(clicked()), this, SLOT(applyChanges(void)) );
+	button->setIcon( style->standardIcon( QStyle::SP_DialogApplyButton ) );
 
 	button = new QPushButton( tr("Close") );
 	hbox1->addWidget( button );
+	button->setIcon( style->standardIcon( QStyle::SP_DialogCloseButton ) );
 	connect(button, SIGNAL(clicked()), this, SLOT(closeWindow(void)) );
 
 	main_vbox->addLayout( hbox1 );
