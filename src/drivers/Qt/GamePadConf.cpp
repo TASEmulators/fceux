@@ -81,8 +81,11 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    QPushButton *closebutton;
    QPushButton *clearButton[GAMEPAD_NUM_BUTTONS];
 	QScrollArea *scroll;
+	QStyle      *style;
 	std::string prefix;
 	char stmp[256];
+
+	style = this->style();
 
 	gamePadConfWin = this;
 
@@ -174,10 +177,12 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
    applyProfileButton = new QPushButton( tr("Load") );
 	applyProfileButton->setWhatsThis(tr("Sets Current Active Map to the Selected Profile"));
+	applyProfileButton->setIcon( style->standardIcon( QStyle::SP_DialogApplyButton ) );
    hbox->addWidget( applyProfileButton );
 
    saveProfileButton = new QPushButton( tr("Save") );
 	saveProfileButton->setWhatsThis(tr("Stores Current Active Map to the Selected Profile"));
+	saveProfileButton->setIcon( style->standardIcon( QStyle::SP_DialogSaveButton ) );
    hbox->addWidget( saveProfileButton );
 
 	hbox = new QHBoxLayout();
@@ -185,10 +190,12 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
    newProfileButton   = new QPushButton( tr("New") );
 	newProfileButton->setWhatsThis(tr("Create a New Map Profile"));
+	newProfileButton->setIcon( style->standardIcon( QStyle::SP_FileIcon ) );
    hbox->addWidget( newProfileButton );
 
    removeProfileButton   = new QPushButton( tr("Delete") );
 	removeProfileButton->setWhatsThis(tr("Deletes the Selected Map Profile"));
+	removeProfileButton->setIcon( style->standardIcon( QStyle::SP_TrashIcon ) );
    hbox->addWidget( removeProfileButton );
 
    mapMsg = new QLabel();
@@ -241,6 +248,9 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
    clearAllButton     = new QPushButton(tr("Clear All"));
    closebutton        = new QPushButton(tr("Close"));
+
+	clearAllButton->setIcon( style->standardIcon( QStyle::SP_LineEditClearButton ) );
+	closebutton->setIcon( style->standardIcon( QStyle::SP_DialogCloseButton ) );
 
 	hbox4->addWidget( clearAllButton    );
 	hbox4->addWidget( closebutton       );
