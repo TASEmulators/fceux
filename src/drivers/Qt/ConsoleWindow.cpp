@@ -261,7 +261,8 @@ void consoleWin_t::createMainMenu(void)
     openROM->setShortcuts(QKeySequence::Open);
     openROM->setStatusTip(tr("Open ROM File"));
     //openROM->setIcon( QIcon(":icons/rom.png") );
-    openROM->setIcon( style->standardIcon( QStyle::SP_FileIcon ) );
+    //openROM->setIcon( style->standardIcon( QStyle::SP_FileIcon ) );
+    openROM->setIcon( style->standardIcon( QStyle::SP_FileDialogStart ) );
     connect(openROM, SIGNAL(triggered()), this, SLOT(openROMFile(void)) );
 
     fileMenu->addAction(openROM);
@@ -270,6 +271,7 @@ void consoleWin_t::createMainMenu(void)
 	 closeROM = new QAction(tr("Close ROM"), this);
     closeROM->setShortcut( QKeySequence(tr("Ctrl+C")));
     closeROM->setStatusTip(tr("Close Loaded ROM"));
+    closeROM->setIcon( style->standardIcon( QStyle::SP_BrowserStop ) );
     connect(closeROM, SIGNAL(triggered()), this, SLOT(closeROMCB(void)) );
 
     fileMenu->addAction(closeROM);
@@ -290,6 +292,7 @@ void consoleWin_t::createMainMenu(void)
 	 loadStateAct = new QAction(tr("Load State From"), this);
     //loadStateAct->setShortcut( QKeySequence(tr("Ctrl+N")));
     loadStateAct->setStatusTip(tr("Load State From"));
+    loadStateAct->setIcon( style->standardIcon( QStyle::SP_FileDialogStart ) );
     connect(loadStateAct, SIGNAL(triggered()), this, SLOT(loadStateFrom(void)) );
 
     fileMenu->addAction(loadStateAct);
@@ -503,6 +506,7 @@ void consoleWin_t::createMainMenu(void)
 	 resetAct = new QAction(tr("Reset"), this);
     //resetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
     resetAct->setStatusTip(tr("Reset Console"));
+    resetAct->setIcon( style->standardIcon( QStyle::SP_DialogResetButton ) );
     connect(resetAct, SIGNAL(triggered()), this, SLOT(consoleHardReset(void)) );
 
     emuMenu->addAction(resetAct);
@@ -511,6 +515,7 @@ void consoleWin_t::createMainMenu(void)
 	 sresetAct = new QAction(tr("Soft Reset"), this);
     //sresetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
     sresetAct->setStatusTip(tr("Soft Reset of Console"));
+    sresetAct->setIcon( style->standardIcon( QStyle::SP_BrowserReload ) );
     connect(sresetAct, SIGNAL(triggered()), this, SLOT(consoleSoftReset(void)) );
 
     emuMenu->addAction(sresetAct);
