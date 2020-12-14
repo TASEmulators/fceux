@@ -3,6 +3,15 @@
         <file>fceux.png</file>
         <file>fceux1.png</file>
         <file>icons/power.png</file>
-        <file>icons/record.png</file>
+        <file>icons/media-record.png</file>
+        <file>icons/application-exit.png</file>
+        <file>icons/graphics-palette.png</file>
+        <file>icons/view-fullscreen.png</file>
+        <file>icons/input-keyboard.png</file>
+        <file>icons/input-gaming.png</file>
+        <file>icons/input-gaming-symbolic.png</file>
+        <file>icons/timer.png</file>
+        <file>icons/movie.png</file>
+        <file>icons/camera.png</file>
     </qresource>
 </RCC>

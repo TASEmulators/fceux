@@ -360,6 +360,7 @@ void consoleWin_t::createMainMenu(void)
 	 loadLuaAct = new QAction(tr("Load Lua Script"), this);
     //loadLuaAct->setShortcut( QKeySequence(tr("F5")));
     loadLuaAct->setStatusTip(tr("Load Lua Script"));
+    //loadLuaAct->setIcon( QIcon(":icons/lua-logo.png") );
     connect(loadLuaAct, SIGNAL(triggered()), this, SLOT(loadLua(void)) );
 
     fileMenu->addAction(loadLuaAct);
@@ -373,7 +374,7 @@ void consoleWin_t::createMainMenu(void)
 	 scrShotAct = new QAction(tr("Screenshot"), this);
     scrShotAct->setShortcut( QKeySequence(tr("F12")));
     scrShotAct->setStatusTip(tr("Screenshot"));
-    //scrShotAct->setIcon( QIcon(":icons/camera.png") );
+    scrShotAct->setIcon( QIcon(":icons/camera.png") );
     connect(scrShotAct, SIGNAL(triggered()), this, SLOT(takeScreenShot()));
 
     fileMenu->addAction(scrShotAct);
@@ -382,7 +383,8 @@ void consoleWin_t::createMainMenu(void)
 	 quitAct = new QAction(tr("Quit"), this);
     quitAct->setShortcut( QKeySequence(tr("Ctrl+Q")));
     quitAct->setStatusTip(tr("Quit the Application"));
-    quitAct->setIcon( style->standardIcon( QStyle::SP_DialogCloseButton ) );
+    //quitAct->setIcon( style->standardIcon( QStyle::SP_DialogCloseButton ) );
+    quitAct->setIcon( QIcon(":icons/application-exit.png") );
     connect(quitAct, SIGNAL(triggered()), this, SLOT(closeApp()));
 
     fileMenu->addAction(quitAct);
@@ -395,7 +397,7 @@ void consoleWin_t::createMainMenu(void)
 	 inputConfig = new QAction(tr("Input Config"), this);
     //inputConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
     inputConfig->setStatusTip(tr("Input Configure"));
-    //inputConfig->setIcon( QIcon(":icons/zapper.png") );
+    inputConfig->setIcon( QIcon(":icons/input-gaming.png") );
     connect(inputConfig, SIGNAL(triggered()), this, SLOT(openInputConfWin(void)) );
 
     optMenu->addAction(inputConfig);
@@ -404,7 +406,7 @@ void consoleWin_t::createMainMenu(void)
 	 gamePadConfig = new QAction(tr("GamePad Config"), this);
     //gamePadConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
     gamePadConfig->setStatusTip(tr("GamePad Configure"));
-    //gamePadConfig->setIcon( QIcon(":icons/gamepad.png") );
+    gamePadConfig->setIcon( QIcon(":icons/input-gaming-symbolic.png") );
     connect(gamePadConfig, SIGNAL(triggered()), this, SLOT(openGamePadConfWin(void)) );
 
     optMenu->addAction(gamePadConfig);
@@ -431,7 +433,7 @@ void consoleWin_t::createMainMenu(void)
 	 hotkeyConfig = new QAction(tr("Hotkey Config"), this);
     //hotkeyConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
     hotkeyConfig->setStatusTip(tr("Hotkey Configure"));
-    //hotkeyConfig->setIcon( QIcon(":icons/keyboard.png") );
+    hotkeyConfig->setIcon( QIcon(":icons/input-keyboard.png") );
     connect(hotkeyConfig, SIGNAL(triggered()), this, SLOT(openHotkeyConfWin(void)) );
 
     optMenu->addAction(hotkeyConfig);
@@ -440,6 +442,7 @@ void consoleWin_t::createMainMenu(void)
 	 paletteConfig = new QAction(tr("Palette Config"), this);
     //paletteConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
     paletteConfig->setStatusTip(tr("Palette Configure"));
+    paletteConfig->setIcon( QIcon(":icons/graphics-palette.png") );
     connect(paletteConfig, SIGNAL(triggered()), this, SLOT(openPaletteConfWin(void)) );
 
     optMenu->addAction(paletteConfig);
@@ -448,6 +451,7 @@ void consoleWin_t::createMainMenu(void)
 	 guiConfig = new QAction(tr("GUI Config"), this);
     //guiConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
     guiConfig->setStatusTip(tr("GUI Configure"));
+    guiConfig->setIcon( style->standardIcon( QStyle::SP_TitleBarNormalButton ) );
     connect(guiConfig, SIGNAL(triggered()), this, SLOT(openGuiConfWin(void)) );
 
     optMenu->addAction(guiConfig);
@@ -456,6 +460,7 @@ void consoleWin_t::createMainMenu(void)
 	 timingConfig = new QAction(tr("Timing Config"), this);
     //timingConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
     timingConfig->setStatusTip(tr("Timing Configure"));
+    timingConfig->setIcon( QIcon(":icons/timer.png") );
     connect(timingConfig, SIGNAL(triggered()), this, SLOT(openTimingConfWin(void)) );
 
     optMenu->addAction(timingConfig);
@@ -464,6 +469,7 @@ void consoleWin_t::createMainMenu(void)
 	 movieConfig = new QAction(tr("Movie Options"), this);
     //movieConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
     movieConfig->setStatusTip(tr("Movie Options"));
+    movieConfig->setIcon( QIcon(":icons/movie.png") );
     connect(movieConfig, SIGNAL(triggered()), this, SLOT(openMovieOptWin(void)) );
 
     optMenu->addAction(movieConfig);
@@ -482,9 +488,9 @@ void consoleWin_t::createMainMenu(void)
 	 // Options -> Full Screen
 	 fullscreen = new QAction(tr("Fullscreen"), this);
     fullscreen->setShortcut( QKeySequence(tr("Alt+Return")));
-    //fullscreen->setCheckable(true);
     fullscreen->setStatusTip(tr("Fullscreen"));
-    fullscreen->setIcon( style->standardIcon( QStyle::SP_TitleBarMaxButton ) );
+    //fullscreen->setIcon( style->standardIcon( QStyle::SP_TitleBarMaxButton ) );
+    fullscreen->setIcon( QIcon(":icons/view-fullscreen.png") );
     connect(fullscreen, SIGNAL(triggered()), this, SLOT(toggleFullscreen(void)) );
 
     optMenu->addAction(fullscreen);
@@ -791,7 +797,7 @@ void consoleWin_t::createMainMenu(void)
 	 recMovAct = new QAction(tr("Record"), this);
     recMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
     recMovAct->setStatusTip(tr("Record Movie"));
-    recMovAct->setIcon( QIcon(":icons/record.png") );
+    recMovAct->setIcon( QIcon(":icons/media-record.png") );
     connect(recMovAct, SIGNAL(triggered()), this, SLOT(recordMovie(void)) );
 
     movieMenu->addAction(recMovAct);
