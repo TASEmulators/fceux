@@ -107,6 +107,7 @@ class  consoleWin_t : public QMainWindow
     QAction *loadLuaAct;
     QAction *scrShotAct;
     QAction *quitAct;
+    QAction *inputConfig;
     QAction *gamePadConfig;
     QAction *gameSoundConfig;
     QAction *gameVideoConfig;
