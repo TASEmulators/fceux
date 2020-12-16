@@ -1,117 +1,310 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>.nl files format</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("NLFilesFormat");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>.nl files format</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content=".nl files format">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content=".nl files format" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>.nl files format</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Technicalinformation.html">Technical Information</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Technicalinformation.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="NESScrolling2.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts12">.nl files format</span></p>
-<p><br/></p>
-<p><br/></p>
-<p>FCEUX implements Symbolic Debugger which uses "NameList" files to store the data about labels and comments. The needed files are created automatically when user right-clicks an address in Disassembly and enters a symbolic name or a comment for it. The files are stored in the same folder as the debugged ROM, and they inherit the name of the ROM.</p>
-<p>These files are simple ASCII text files. You can edit them in any text editor like Notepad.</p>
-<p><br/></p>
-<p>When reverse-engineering a game for which you don't have a source, you can reconstruct the logic incrementally, by adding labels/comments while debugging (right-clicking addresses).</p>
-<p><br/></p>
-<p>But if you want to debug your own homebrew game, you can setup your workflow to automatically export all names and comments when building the game using your favourite assembler (e.g. ca65 or ASM6). This way you can use FCEUX as a Source-Level Debugger.</p>
-<p><br/></p>
-<p><span class="rvts15">Example:</span> for the ROM called "NES Test Cart (PD).nes" the NL files will be named "NES Test Cart (PD).nes.0.nl", "NES Test Cart (PD).nes.ram.nl", etc. </p>
-<p><br/></p>
-<p><span class="rvts15">Example of contents of a NL file:</span></p>
-<p><br/></p>
-<p>$C000#NewName1#Comment1</p>
-<p>$C002##Comment2</p>
-<p>$C004#NewName2#</p>
-<p>$C006#NewName3#MultilineComment-Part1</p>
-<p>\MultilineComment-Part2</p>
-<p>\MultilineComment-Part3</p>
-<p>$C008/10#NewName4#</p>
-<p><br/></p>
-<p>Every line contains two # characters which separate the three parts of one line:</p>
-<p>* The first part (starting with a $ character) is the address to be renamed. Optionally you can add a "/number" part which marks the offsets as a beginning of an array of the given size (the size must be specified in hex form).</p>
-<p>* The second (optional) part is the new name of that address. Whenever the line of that address is shown in the disassembly window, an extra line saying "NewName1: " is shown above it. &nbsp;Instructions referencing this address, for example JSR $C000 are also changed to JSR NewName1 (in that example).</p>
-<p>* The third (optional) part is the comment that's also added above the disassembly line the comment refers to. It works exactly like the additional name line, only the prefix of that line is different. Comment lines start with "; ". &nbsp;Multi-lines comments are possible. Lines in an NL file starting with the \ character are just appended to the comment of the preceding line. Multi-line comments are also shown in multiple lines in the disassembly window.</p>
-<p><br/></p>
-<p>In the example above, the first line contains all three parts. Using this NL file, all references to the address $C000 are replaced with NewName1, and whenever line $C000 is shown in the disassembly window (or Trace Logger window) an additional comment is also visible right above the actual disassembled line. The second example line defines only a comment while the third line defines only a name. Following that, there's a multi-line comment definition for address $C006. The last line defines an array called NewName4 of size 0x10 (= 16) bytes starting at offset $C008. FCEUX will regard the line like there are 16 lines describing 16 adjacent addresses with names like NewName4[0], NewName4[1], ... NewName4[F].</p>
-<p><br/></p>
-<p>NL files must follow a specific naming convention to account for bank swapping. Each bank needs its own NL file with a hexadecimal number of the bank.</p>
-<p>For instance, an NES file named "mygame.nes" that has 4 banks (i.e. ROM size = 64k) would have these NL files:</p>
-<p><br/></p>
-<p>mygame.nes.ram.nl</p>
-<p>mygame.nes.0.nl</p>
-<p>mygame.nes.1.nl</p>
-<p>mygame.nes.2.nl</p>
-<p>mygame.nes.3.nl</p>
-<p><br/></p>
-<p>All NL files must be in the same directory as the ROM file itself.</p>
-<p><br/></p>
-<p>RAM can also be given its own NL file. In the *.ram.nl file you can name and comment RAM addresses (system bus range of 0x0000 - 0x7FFF) instead of ROM addresses. In this case, you might use a line such as:</p>
-<p><br/></p>
-<p>$00A5#Mic Test OK#00=Not Passed, 01=Passed</p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Full-featured Kindle eBooks generator</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="NLFilesFormat"
+		  data-hnd-context="83"
+		  data-hnd-title=".nl files format"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Technicalinformation.html">Technical Information</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Technicalinformation.html" title="Technical Information" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="NESScrolling2.html" title="NES Scrolling 2" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>.nl files format</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts17">.nl files format</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">FCEUX implements Symbolic Debugger which uses "NameList" files to store the data about labels and comments. The needed files are created automatically when user right-clicks an address in Disassembly and enters a symbolic name or a comment for it. The files are stored in the same folder as the debugged ROM, and they inherit the name of the ROM.</span></p>
+<p class="rvps2"><span class="rvts6">These files are simple ASCII text files. You can edit them in any text editor like Notepad.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">When reverse-engineering a game for which you don't have a source, you can reconstruct the logic incrementally, by adding labels/comments while debugging (right-clicking addresses).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">But if you want to debug your own homebrew game, you can setup your workflow to automatically export all names and comments when building the game using your favourite assembler (e.g. ca65 or ASM6). This way you can use FCEUX as a Source-Level Debugger.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts20">Example:</span><span class="rvts6"> for the ROM called "NES Test Cart (PD).nes" the NL files will be named "NES Test Cart (PD).nes.0.nl", "NES Test Cart (PD).nes.ram.nl", etc.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts20">Example of contents of a NL file:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$C000#NewName1#Comment1</span></p>
+<p class="rvps2"><span class="rvts6">$C002##Comment2</span></p>
+<p class="rvps2"><span class="rvts6">$C004#NewName2#</span></p>
+<p class="rvps2"><span class="rvts6">$C006#NewName3#MultilineComment-Part1</span></p>
+<p class="rvps2"><span class="rvts6">\MultilineComment-Part2</span></p>
+<p class="rvps2"><span class="rvts6">\MultilineComment-Part3</span></p>
+<p class="rvps2"><span class="rvts6">$C008/10#NewName4#</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Every line contains two # characters which separate the three parts of one line:</span></p>
+<p class="rvps2"><span class="rvts6">* The first part (starting with a $ character) is the address to be renamed. Optionally you can add a "/number" part which marks the offsets as a beginning of an array of the given size (the size must be specified in hex form).</span></p>
+<p class="rvps2"><span class="rvts6">* The second (optional) part is the new name of that address. Whenever the line of that address is shown in the disassembly window, an extra line saying "NewName1: " is shown above it. &nbsp;Instructions referencing this address, for example JSR $C000 are also changed to JSR NewName1 (in that example).</span></p>
+<p class="rvps2"><span class="rvts6">* The third (optional) part is the comment that's also added above the disassembly line the comment refers to. It works exactly like the additional name line, only the prefix of that line is different. Comment lines start with "; ". &nbsp;Multi-lines comments are possible. Lines in an NL file starting with the \ character are just appended to the comment of the preceding line. Multi-line comments are also shown in multiple lines in the disassembly window.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">In the example above, the first line contains all three parts. Using this NL file, all references to the address $C000 are replaced with NewName1, and whenever line $C000 is shown in the disassembly window (or Trace Logger window) an additional comment is also visible right above the actual disassembled line. The second example line defines only a comment while the third line defines only a name. Following that, there's a multi-line comment definition for address $C006. The last line defines an array called NewName4 of size 0x10 (= 16) bytes starting at offset $C008. FCEUX will regard the line like there are 16 lines describing 16 adjacent addresses with names like NewName4[0], NewName4[1], ... NewName4[F].</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">NL files must follow a specific naming convention to account for bank swapping. Each bank needs its own NL file with a hexadecimal number of the bank.</span></p>
+<p class="rvps2"><span class="rvts6">For instance, an NES file named "mygame.nes" that has 4 banks (i.e. ROM size = 64k) would have these NL files:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">mygame.nes.ram.nl</span></p>
+<p class="rvps2"><span class="rvts6">mygame.nes.0.nl</span></p>
+<p class="rvps2"><span class="rvts6">mygame.nes.1.nl</span></p>
+<p class="rvps2"><span class="rvts6">mygame.nes.2.nl</span></p>
+<p class="rvps2"><span class="rvts6">mygame.nes.3.nl</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">All NL files must be in the same directory as the ROM file itself.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">RAM can also be given its own NL file. In the *.ram.nl file you can name and comment RAM addresses (system bus range of 0x0000 - 0x7FFF) instead of ROM addresses. In this case, you might use a line such as:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$00A5#Mic Test OK#00=Not Passed, 01=Passed</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/feature-tour">Easily create CHM Help documents</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

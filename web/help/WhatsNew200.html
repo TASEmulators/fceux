@@ -1,178 +1,369 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>What's New? 2.0.0</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("WhatsNew200");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>What's New? 2.0.0</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="What's New?">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="What's New? 2.0.0">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="What's New? 2.0.0" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>What's New? 2.0.0</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="WhatsNew201.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="General.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts17">What's New? </span><span class="rvts20">2.0.0</span></p>
-<p>Released August 02, 2008</p>
-<p><br/></p>
-<p>FCEUX has all the latest tools, enhancements, and features from FCEU 0.28 rerecording and FCEUXDSP 1.07 &nbsp;In addition, it has many new tools, bug fixes, and enhancements not seen in previous branches.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts20">General</span></p>
-<p><br/></p>
-<p>-A detailed Help Menu! &nbsp;No longer are you aimlessly searching the internet for long lost info on FCEU's options!</p>
-<p>-Numerous Dialog box reformats.</p>
-<p>-FCEU remembers its last screen (x,y) position.</p>
-<p>-Increased <a class="rvts18" href="CommandLineOptions.html">command line options</a></p>
-<p>-More options under the <a class="rvts18" href="Directories.html">Directory Override Menu</a></p>
-<p>-A Turbo Toggle option (turbo now can be toggled on rather than having to hold the key down)</p>
-<p>-More hotkey assignable options in the <a class="rvts18" href="MapHotkeys.html">Map Hotkeys Menu</a>.</p>
-<p>-A lag counter</p>
-<p>-Autofire uses the lag counter (so it will skip over lag frames)</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts20">Movie support</span></p>
-<p><br/></p>
-<p>Overhauls in both the movie and savestate file formats.</p>
-<p><br/></p>
-<p><span class="rvts16">.fm2 File format</span></p>
-<p><br/></p>
-<p>The .fcm file format has been overhauled into a new .fm2 format. &nbsp;Changes include:</p>
-<p><br/></p>
-<p>-Uncompressed and text based format. &nbsp;Movie editing can be done simply in a text editor.</p>
-<p>-Recording from soft reset option removed.</p>
-<p>-Recording from start (hard reset) no longer has an empty savestate at the beginning.</p>
-<p>-GUID inserted into movies for better savestate/loadstate error handling.</p>
-<p>-Rather than an Author field, it has a full metadata menu where an author can put any info needed.</p>
-<p>-A tool to <a class="rvts18" href="Covertfcm.html">convert .fcm</a> files to .fm2 files.</p>
-<p>-More specific info on .fm2 files in the <a class="rvts18" href="fm2.html">.fm2 documentation</a>. </p>
-<p><br/></p>
-<p><span class="rvts16">Savestate/Loadstate</span></p>
-<p><br/></p>
-<p>-New savestate file format. &nbsp;NOTE: &nbsp;Savestates from previous FCEU versions CAN NOT be used in FCEUX.</p>
-<p>-Fully functional error handling (savestates from other movies cannot be loaded).</p>
-<p>-Read-only toggling related bugs fixed.</p>
-<p>-Savestate filenames include the name of the movie (if a movie was playing when made). &nbsp;This prevents loading wrong savestates. (This also means that savestate 0 is different when a movie is playing and when it is not).</p>
-<p><br/></p>
-<p><span class="rvts16">7z Archive Support</span></p>
-<p><br/></p>
-<p>-ROMs in any 7z compatible compressed format can be opened directly.</p>
-<p>-If more than one valid ROM exists in an archive file, then a dialog box will open with a list of available ROM choices.</p>
-<p><br/></p>
-<p><span class="rvts16">TAS Edit</span></p>
-<p><br/></p>
-<p>-A brand new powerful movie making tool that revolutionizes the way TAS movies are made. &nbsp;See <a class="rvts18" href="TASEditor.html">TAS edit</a>.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts20">New Tools</span></p>
-<p><br/></p>
-<p><a class="rvts25" href="TASEditor.html">TAS Edit</a> - a revolutionary new way of making TAS movies.</p>
-<p><br/></p>
-<p><a class="rvts25" href="Input.html">Input Presets</a> - a system for quickly toggling different input configurations.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts20">Tool Upgrades</span></p>
-<p><br/></p>
-<p>Numerous enhancements have been made to various Tools/Options.</p>
-<p><br/></p>
-<p><span class="rvts16">Memory Watch</span></p>
-<p><br/></p>
-<p>-Resource management optimized so that memory watch now uses a minimal amount of CPU</p>
-<p>-FCEUX remembers memory watch's last screen position (x,y)</p>
-<p>-Tab-able Edit boxes</p>
-<p>-Edit boxes now can hold 64 characters</p>
-<p>-A Menu bar for all Memory watch functions</p>
-<p>-Both "Save as" and "Save" options</p>
-<p>-Hotkeys for New, Open, Save, Save As and Close</p>
-<p>-A recent files Menu</p>
-<p>-A "load on startup" option. If checked, memory watch will open automatically when FCEUX is opened</p>
-<p>-A "load last file" option. &nbsp;If checked, memory watch will load the last file used</p>
-<p><br/></p>
-<p><span class="rvts16">Cheat Search</span></p>
-<p><br/></p>
-<p>-Now has a minimize button</p>
-<p>-Cheat Search Menu from FCEUXDSP (a major overhaul compared to other FCEU branches)</p>
-<p>-Possibilities update while playing/frame advancing a game</p>
-<p>-Double clicking a value in the possibilities window sends the value directly to Memory Watch</p>
-<p><br/></p>
-<p><span class="rvts16">RAM Filter</span></p>
-<p><br/></p>
-<p>-Double clicking a value in the possibilities window sends the value directly to Memory Watch</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Lua Scripting</span></p>
-<p><br/></p>
-<p>-Uses the latest features of <span class="rvts18">Lua Scripting</span> from FCEU 0.28</p>
-<p>-Many enhancements and new commands including dialog creation commands! &nbsp;Now scripts can create their own dialog's and GUI features.</p>
-<p><br/></p>
-<p><span class="rvts16">Lua Basic Bot</span></p>
-<p><br/></p>
-<p>-Basicbot removed (from the rerecording version of FCE Ultra). &nbsp;In its place is <a class="rvts18" href="LuaBot.html">lua bot.</a></p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts20">AVI Recording</span></p>
-<p><br/></p>
-<p>-"Movie playback stopped" message recorded in AVI by default</p>
-<p>-Turbo Toggle Hotkey. &nbsp;(Allows turbo to be left on for a faster AVI capture).</p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour">Full-featured Help generator</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="WhatsNew200"
+		  data-hnd-context="22"
+		  data-hnd-title="What's New? 2.0.0"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Intro.html">Introduction</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew201.html" title="What's New? 2.0.1 (changelog)" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="General.html" title="General" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>What's New? 2.0.0</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.0.0</span></p>
+<p class="rvps2"><span class="rvts6">Released August 02, 2008</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">FCEUX has all the latest tools, enhancements, and features from FCEU 0.28 rerecording and FCEUXDSP 1.07 &nbsp;In addition, it has many new tools, bug fixes, and enhancements not seen in previous branches.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts26">General</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">-A detailed Help Menu! &nbsp;No longer are you aimlessly searching the internet for long lost info on FCEU's options!</span></p>
+<p class="rvps2"><span class="rvts6">-Numerous Dialog box reformats.</span></p>
+<p class="rvps2"><span class="rvts6">-FCEU remembers its last screen (x,y) position.</span></p>
+<p class="rvps2"><span class="rvts6">-Increased </span><a class="rvts36" href="CommandLineOptions.html">command line options</a></p>
+<p class="rvps2"><span class="rvts6">-More options under the </span><a class="rvts36" href="Directories.html">Directory Override Menu</a></p>
+<p class="rvps2"><span class="rvts6">-A Turbo Toggle option (turbo now can be toggled on rather than having to hold the key down)</span></p>
+<p class="rvps2"><span class="rvts6">-More hotkey assignable options in the </span><a class="rvts36" href="MapHotkeys.html">Map Hotkeys Menu</a><span class="rvts6">.</span></p>
+<p class="rvps2"><span class="rvts6">-A lag counter</span></p>
+<p class="rvps2"><span class="rvts6">-Autofire uses the lag counter (so it will skip over lag frames)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts26">Movie support</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Overhauls in both the movie and savestate file formats.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">.fm2 File format</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The .fcm file format has been overhauled into a new .fm2 format. &nbsp;Changes include:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">-Uncompressed and text based format. &nbsp;Movie editing can be done simply in a text editor.</span></p>
+<p class="rvps2"><span class="rvts6">-Recording from soft reset option removed.</span></p>
+<p class="rvps2"><span class="rvts6">-Recording from start (hard reset) no longer has an empty savestate at the beginning.</span></p>
+<p class="rvps2"><span class="rvts6">-GUID inserted into movies for better savestate/loadstate error handling.</span></p>
+<p class="rvps2"><span class="rvts6">-Rather than an Author field, it has a full metadata menu where an author can put any info needed.</span></p>
+<p class="rvps2"><span class="rvts6">-A tool to </span><a class="rvts36" href="Covertfcm.html">convert .fcm</a><span class="rvts6"> files to .fm2 files.</span></p>
+<p class="rvps2"><span class="rvts6">-More specific info on .fm2 files in the </span><a class="rvts36" href="fm2.html">.fm2 documentation</a><span class="rvts6">.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Savestate/Loadstate</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">-New savestate file format. &nbsp;NOTE: &nbsp;Savestates from previous FCEU versions CAN NOT be used in FCEUX.</span></p>
+<p class="rvps2"><span class="rvts6">-Fully functional error handling (savestates from other movies cannot be loaded).</span></p>
+<p class="rvps2"><span class="rvts6">-Read-only toggling related bugs fixed.</span></p>
+<p class="rvps2"><span class="rvts6">-Savestate filenames include the name of the movie (if a movie was playing when made). &nbsp;This prevents loading wrong savestates. (This also means that savestate 0 is different when a movie is playing and when it is not).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">7z Archive Support</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">-ROMs in any 7z compatible compressed format can be opened directly.</span></p>
+<p class="rvps2"><span class="rvts6">-If more than one valid ROM exists in an archive file, then a dialog box will open with a list of available ROM choices.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">TAS Edit</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">-A brand new powerful movie making tool that revolutionizes the way TAS movies are made. &nbsp;See </span><a class="rvts36" href="TASEditor.html">TAS edit</a><span class="rvts6">.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts26">New Tools</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><a class="rvts16" href="TASEditor.html">TAS Edit</a><span class="rvts6"> - a revolutionary new way of making TAS movies.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><a class="rvts16" href="Input.html">Input Presets</a><span class="rvts6"> - a system for quickly toggling different input configurations.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts26">Tool Upgrades</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Numerous enhancements have been made to various Tools/Options.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Memory Watch</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">-Resource management optimized so that memory watch now uses a minimal amount of CPU</span></p>
+<p class="rvps2"><span class="rvts6">-FCEUX remembers memory watch's last screen position (x,y)</span></p>
+<p class="rvps2"><span class="rvts6">-Tab-able Edit boxes</span></p>
+<p class="rvps2"><span class="rvts6">-Edit boxes now can hold 64 characters</span></p>
+<p class="rvps2"><span class="rvts6">-A Menu bar for all Memory watch functions</span></p>
+<p class="rvps2"><span class="rvts6">-Both "Save as" and "Save" options</span></p>
+<p class="rvps2"><span class="rvts6">-Hotkeys for New, Open, Save, Save As and Close</span></p>
+<p class="rvps2"><span class="rvts6">-A recent files Menu</span></p>
+<p class="rvps2"><span class="rvts6">-A "load on startup" option. If checked, memory watch will open automatically when FCEUX is opened</span></p>
+<p class="rvps2"><span class="rvts6">-A "load last file" option. &nbsp;If checked, memory watch will load the last file used</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Cheat Search</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">-Now has a minimize button</span></p>
+<p class="rvps2"><span class="rvts6">-Cheat Search Menu from FCEUXDSP (a major overhaul compared to other FCEU branches)</span></p>
+<p class="rvps2"><span class="rvts6">-Possibilities update while playing/frame advancing a game</span></p>
+<p class="rvps2"><span class="rvts6">-Double clicking a value in the possibilities window sends the value directly to Memory Watch</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">RAM Filter</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">-Double clicking a value in the possibilities window sends the value directly to Memory Watch</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Lua Scripting</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">-Uses the latest features of </span><span class="rvts36">Lua Scripting</span><span class="rvts6"> from FCEU 0.28</span></p>
+<p class="rvps2"><span class="rvts6">-Many enhancements and new commands including dialog creation commands! &nbsp;Now scripts can create their own dialog's and GUI features.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Lua Basic Bot</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">-Basicbot removed (from the rerecording version of FCE Ultra). &nbsp;In its place is </span><a class="rvts36" href="LuaBot.html">lua bot.</a></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts26">AVI Recording</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">-"Movie playback stopped" message recorded in AVI by default</span></p>
+<p class="rvps2"><span class="rvts6">-Turbo Toggle Hotkey. &nbsp;(Allows turbo to be left on for a faster AVI capture).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/feature-tour">Easily create Help documents</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

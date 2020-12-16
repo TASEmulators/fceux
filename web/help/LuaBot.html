@@ -1,219 +1,410 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Lua Bot</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("LuaBot");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Lua Bot</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Lua Bot">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Lua Bot" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Lua Bot</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="LuaScripting.html">Lua Scripting</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="LuaScripting.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="LuaPerks.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="OverviewofIncludedScripts.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts17">LuaBot</span></p>
-<p><br/></p>
-<p>LuaBot employs a new concept in FCEUX Tool creation. &nbsp;It is an external lua script that creates the Basic bot GUI. &nbsp;The GUI then uses lua scripting to perform botting tasks.</p>
-<p><br/></p>
-<p>To run it you must have lua scripting enabled (see <a class="rvts18" href="LuaGettingStarted.html">Getting Started</a>). &nbsp;LuaBot is included in the lua pack under /luaScripts. &nbsp;to get started run &nbsp;luabot_framework.lua.</p>
-<p><br/></p>
-<p><span class="rvts12">What is Lua Bot?</span></p>
-<p>LuaBot is...well, a bot. It uses a combination of probability, scripting and RAM monitoring to play games. &nbsp;Specifically &nbsp;basic bot is used to create portions of <a class="rvts18" href="ToolAssistedSpeedruns.html">Tool Assisted Speedrun</a>. &nbsp; It is most powerful for finding solutions in highly random situations, or highly improbably events (such as manipulating a critical hit in an RPG). &nbsp;Basic bot comes with a rather powerful scripting language in order to be "programmed" to handle these specific situations. &nbsp;LuaBot in its most extreme application can even be "taught" to play video games!</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts12">How to Use Lua Bot</span></p>
-<p><br/></p>
-<p>LuaBot is a trial and error script that exhausts the input-search-space by simply trying to push buttons. </p>
-<p><br/></p>
-<p>You can program it to limit this searchspace, as it can become exponentially large. You can press eight possible buttons at any frame, each on or off. That's 2 raised to the 8, or 256 possible combinations in that one frame. There are 60 frames in one second, so you have 256 raised to the power of 60. Write a three. Now start writing 144 zeroes after it. It's not a small number.</p>
-<p><br/></p>
-<p>Anyways, the bot has two parts. The frontend, which we'll call BeeBee, and the Lua part, which we call LuaBot.</p>
-<p><br/></p>
-<p>You start the bot by opening the LuaBot_front.lua script file. Make sure the LuaBot_backend.lua file is in the same directory.</p>
-<p><br/></p>
-<p>BeeBee</p>
-<p><br/></p>
-<p>BeeBee (who received it's name from BasicBot, its predecessor) just writes it's contents into the LuaBot framework and produces a big Lua script for you.</p>
-<p>All you need to do is enter Lua code for the specific functions and the code will generate the script.</p>
-<p><br/></p>
-<p>You can also save and load the contents of the front-end. That way you can easily manage your bot scripts, without actually having to look into the LuaBot code.</p>
-<p><br/></p>
-<p>BeeBee is only a pasting mechanism. It does not compile Lua or warn for errors.</p>
-<p><br/></p>
-<p>LuaBot</p>
-<p><br/></p>
-<p>LuaBot is a generic trial-and-error script that serves as a bot framework. It will set inputs as you program them for a number of frames (called an attempt). When the isAttemptEnd() says the attempt ends, a new attempt is started. All the attempts fall under one segment. At the end of a segment (denoted by the isSegmentEnd() function), the best attempt is kept (judged by the score and tie functions) and the next segment is started. The bot is capable of rolling back if a segment runs into a dead end. This allows you to backtrack and restart a previous segment.</p>
-<p><br/></p>
-<p>The bot evaluates a true or false by checking to see whether the return value of a function is bigger then a certain value. It does this for EVERY function that returns something and every function that returns something must return a number (or Lua _will_ complain). For absolute true or false you can return "yes" and "no", "maxvalue" and "minvalue" or "pressed" and "released". Read variable info for more information.</p>
-<p><br/></p>
-<p>The script takes a number of variables and functions into account. Some variables become important to prevent desyncing over segments.</p>
-<p><br/></p>
-<p>- maxvalue</p>
-<p>The maximum value (exclusive) of the random evaluation. If a value is higher than rand(minvalue, maxvalue), it evaluates as true, else false. By default this is set to 100.</p>
-<p><br/></p>
-<p>- minvalue</p>
-<p>The lowest value (inclusive) of the random evaluation. If a value is lower than rand(minvalue, maxvalue), it evaluates to false, else true. By default this is set to 0.</p>
-<p><br/></p>
-<p>- yes / no</p>
-<p>- pressed / released</p>
-<p>These map to the minvalue/maxvalue.</p>
-<p><br/></p>
-<p>- loopcounter</p>
-<p>The number of times a frameadvance has been called by the main botloop.</p>
-<p><br/></p>
-<p>- key1 key2 key3 key4</p>
-<p>The input table of players 1-4. The keys are: A B up down left right select start. Set any to 1 if you want them to be set and to nil if you don't want them set.</p>
-<p>Note that these get cleared right before onInputStart is called. This variable is saved in a pseudo-movie table if the attempt is better then the previous one and used for playback when moving to the next segment.</p>
-<p><br/></p>
-<p>- lastkey1 lastkey2 lastkey3 lastkey4</p>
-<p>The inputs that were given to FCEU on the PREVIOUS frame. This holds for segments as well (at the beginning of a new segment, the lastkeys of the previous segment are set). This also goes for the start. If you use key1-4 in onStart, the first segment will have those keys as lastkey.</p>
-<p><br/></p>
-<p>- frame</p>
-<p>The number of frames of the current attempt. Starts at 1.</p>
-<p><br/></p>
-<p>- attempt</p>
-<p>The number of attempts in the current segment. Starts at 1.</p>
-<p><br/></p>
-<p>- segment</p>
-<p>The segment the bot is currently running. Note that rolledback segments are deducted from this number.</p>
-<p><br/></p>
-<p>- okattempts</p>
-<p>The number of attempts that have been deemed ok. This is a statistical variable. It might tell you how well your bot is doing (combined with the number of failed attempts).</p>
-<p><br/></p>
-<p>- failattempts</p>
-<p>The number of attempts in the current segment that have been deemed bad. This is a statistical variable. It might tell you how well your bot is doing (combined with the number of approved attempts).</p>
-<p><br/></p>
-<p>- segments</p>
-<p>This is the big table that holds everything together. Don't mess with it.</p>
-<p><br/></p>
-<p>- maxframes</p>
-<p>You can set maxframes and check it in the isAttemptEnd function to simply limit a attempt by this many frames. You can also just ignore this and do something else instead.</p>
-<p><br/></p>
-<p>- maxattempts</p>
-<p>Same as maxframes, except for attempts in a segment.</p>
-<p><br/></p>
-<p>- maxsegments</p>
-<p>Same as maxframes, except for segments in a run.</p>
-<p><br/></p>
-<p>- playingbest</p>
-<p>Will be set to true when the bot is playing back it's best attempt to advance to the next segment. Not really used by other functions.</p>
-<p><br/></p>
-<p>- keyrecording1-4</p>
-<p>A simple table with the pressed keys for playback.</p>
-<p><br/></p>
-<p>- X Y Z P Q</p>
-<p>Some "static" variables. These allow you to easily set them onStart and use them in various functions to return the same number. Like a global variable. The P and Q numbers used to denote a random number between 0 and P or Q, but they don't right now.</p>
-<p><br/></p>
-<p>- vars</p>
-<p>This is your variable table. It's contents is saved at the end of an attempt and will be loaded at the beginning of a segment. On rollback, this table is also kept. Put any variable you want to keep across segments in this table.</p>
-<p><br/></p>
-<p><br/></p>
-<p>Ok. That's it for the variables. Now for functions. There are basically three types of functions. The functions that determine whether a button is pressed (8 for each player), to determine whether an attempt/segment/run has ended or was ok and functions for certain events. This number is not evaluated by the random-eval function.</p>
-<p><br/></p>
-<p>- getScore</p>
-<p>This returns how "well" the current attempt is. At the end of a segment, the best scoring good attempt will be used to continue to the next segment. In case of a tie, see the tie functions. This number is not evaluated by the random-eval function!</p>
-<p><br/></p>
-<p>- getTie1-4</p>
-<p>If the score ends in a tie, that is, two attempts score equally well (have an equal number of points for instance), you can use these functions to break that tie. Like, which attempt has the most health or is the fastest or whatever. This number is not evaluated by the random-eval function!</p>
-<p><br/></p>
-<p>- isRunEnd</p>
-<p>Return whether the bot should stop running. If the returned number is bigger then the random number rand(minvalue-maxvalue), the bot will stop.</p>
-<p><br/></p>
-<p>- mustRollBack</p>
-<p>Returns whether the bot should rollback the current attempt. In such case, the previous segment is loaded and the current segment is completely discarded. If the returned number is bigger then the random number rand(minvalue-maxvalue), the segment will rollback one segment.</p>
-<p><br/></p>
-<p>- isSegmentEnd</p>
-<p>If the returned number is bigger then the random number rand(minvalue-maxvalue), the bot will stop the current segment, play back the best recorded attempt and start a new segment. Mostly done when a certain number of attempts is reached, but possibly you know when have the best possible attempt and can move on.</p>
-<p><br/></p>
-<p>- isAttemptEnd</p>
-<p>If the returned number is bigger then the random number rand(minvalue-maxvalue), the attempt will stop and a new attempt will be started. Some examples when this function should return yes is when you reached a certain goal, a number of frames or when you died (in which case the bot should try again :).</p>
-<p><br/></p>
-<p>- isAttemptOk</p>
-<p>If the returned number is bigger then the random number rand(minvalue-maxvalue), the current attempt (which has just ended) is deemed ok. Only attempts that are deemed ok are up for being saved. For instance, when the player died in the current attempt, you should return no.</p>
-<p><br/></p>
-<p>- pressKeyX (pressKeyA1, pressKeyStart4, etc...)</p>
-<p>These functions determine whether a button should be pressed in the next frame. If the returned number is bigger then the random number rand(minvalue-maxvalue), the button is pressed, otherwise it is not. To absolutely press a button, simply return yes or no. To use some odds, return a number between minvalue and maxvalue. For instance, using the default settings, if you return 50, there is a 50% chance the button will be pressed.</p>
-<p><br/></p>
-<p>- onStart</p>
-<p>Maybe a little misleading, but the onStart function is called BEFORE the main botloop starts. You can do some non-generic startup stuff here like press start at the title screen and get the game started. Returns nothing.</p>
-<p><br/></p>
-<p>- onFinish</p>
-<p>The opposite to onStart, this function is called when the main botloop exits. You can cleanup, or write stuff or whatever.</p>
-<p><br/></p>
-<p>- onSegmentStart</p>
-<p>When a new segment is started, this is called. After initializing variables and such, but before onAttemptStart is called. Returns nothing.</p>
-<p><br/></p>
-<p>- onSegmentEnd</p>
-<p>When isSegmentEnd evaluates to true, this function is called. Returns nothing.</p>
-<p><br/></p>
-<p>- onAttemptStart</p>
-<p>Called at the start of a new attempt, after onSegmentStart (in case of a new segment) but before onInputStart. Returns nothing.</p>
-<p><br/></p>
-<p>- onAttemptEnd(wasOk)</p>
-<p>Called at the end of an attempt. The only function to have a parameter (note: case sensitive). The parameter wasOk will return (boolean) whether isAttemptOk evaluated to true or false. Returns nothing.</p>
-<p><br/></p>
-<p>- onInputStart</p>
-<p>In a frame, this is the first place where the key1-4 variables are cleared. This is called before all the input (pressKeyX) functions are called. Returns nothing.</p>
-<p><br/></p>
-<p>- onInputEnd</p>
-<p>This is called immediately after the input (pressKeyX) functions have been called. Returns nothing.</p>
-<p><br/></p>
-<p><br/></p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour">Easily create Help documents</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="LuaBot"
+		  data-hnd-context="63"
+		  data-hnd-title="Lua Bot"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="LuaScripting.html">Lua Scripting</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="LuaScripting.html" title="Lua Scripting" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="LuaPerks.html" title="LuaPerks" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="OverviewofIncludedScripts.html" title="Overview of Included Scripts" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Lua Bot</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts22">LuaBot</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">LuaBot employs a new concept in FCEUX Tool creation. &nbsp;It is an external lua script that creates the Basic bot GUI. &nbsp;The GUI then uses lua scripting to perform botting tasks.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">To run it you must have lua scripting enabled (see </span><a class="rvts23" href="LuaGettingStarted.html">Getting Started</a><span class="rvts6">). &nbsp;LuaBot is included in the lua pack under /luaScripts. &nbsp;to get started run &nbsp;luabot_framework.lua.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts17">What is Lua Bot?</span></p>
+<p class="rvps2"><span class="rvts6">LuaBot is...well, a bot. It uses a combination of probability, scripting and RAM monitoring to play games. &nbsp;Specifically &nbsp;basic bot is used to create portions of </span><a class="rvts23" href="ToolAssistedSpeedruns.html">Tool Assisted Speedrun</a><span class="rvts6">. &nbsp; It is most powerful for finding solutions in highly random situations, or highly improbably events (such as manipulating a critical hit in an RPG). &nbsp;Basic bot comes with a rather powerful scripting language in order to be "programmed" to handle these specific situations. &nbsp;LuaBot in its most extreme application can even be "taught" to play video games!</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts17">How to Use Lua Bot</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">LuaBot is a trial and error script that exhausts the input-search-space by simply trying to push buttons.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">You can program it to limit this searchspace, as it can become exponentially large. You can press eight possible buttons at any frame, each on or off. That's 2 raised to the 8, or 256 possible combinations in that one frame. There are 60 frames in one second, so you have 256 raised to the power of 60. Write a three. Now start writing 144 zeroes after it. It's not a small number.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Anyways, the bot has two parts. The frontend, which we'll call BeeBee, and the Lua part, which we call LuaBot.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">You start the bot by opening the LuaBot_front.lua script file. Make sure the LuaBot_backend.lua file is in the same directory.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">BeeBee</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">BeeBee (who received it's name from BasicBot, its predecessor) just writes it's contents into the LuaBot framework and produces a big Lua script for you.</span></p>
+<p class="rvps2"><span class="rvts6">All you need to do is enter Lua code for the specific functions and the code will generate the script.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">You can also save and load the contents of the front-end. That way you can easily manage your bot scripts, without actually having to look into the LuaBot code.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">BeeBee is only a pasting mechanism. It does not compile Lua or warn for errors.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">LuaBot</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">LuaBot is a generic trial-and-error script that serves as a bot framework. It will set inputs as you program them for a number of frames (called an attempt). When the isAttemptEnd() says the attempt ends, a new attempt is started. All the attempts fall under one segment. At the end of a segment (denoted by the isSegmentEnd() function), the best attempt is kept (judged by the score and tie functions) and the next segment is started. The bot is capable of rolling back if a segment runs into a dead end. This allows you to backtrack and restart a previous segment.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The bot evaluates a true or false by checking to see whether the return value of a function is bigger then a certain value. It does this for EVERY function that returns something and every function that returns something must return a number (or Lua _will_ complain). For absolute true or false you can return "yes" and "no", "maxvalue" and "minvalue" or "pressed" and "released". Read variable info for more information.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The script takes a number of variables and functions into account. Some variables become important to prevent desyncing over segments.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- maxvalue</span></p>
+<p class="rvps2"><span class="rvts6">The maximum value (exclusive) of the random evaluation. If a value is higher than rand(minvalue, maxvalue), it evaluates as true, else false. By default this is set to 100.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- minvalue</span></p>
+<p class="rvps2"><span class="rvts6">The lowest value (inclusive) of the random evaluation. If a value is lower than rand(minvalue, maxvalue), it evaluates to false, else true. By default this is set to 0.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- yes / no</span></p>
+<p class="rvps2"><span class="rvts6">- pressed / released</span></p>
+<p class="rvps2"><span class="rvts6">These map to the minvalue/maxvalue.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- loopcounter</span></p>
+<p class="rvps2"><span class="rvts6">The number of times a frameadvance has been called by the main botloop.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- key1 key2 key3 key4</span></p>
+<p class="rvps2"><span class="rvts6">The input table of players 1-4. The keys are: A B up down left right select start. Set any to 1 if you want them to be set and to nil if you don't want them set.</span></p>
+<p class="rvps2"><span class="rvts6">Note that these get cleared right before onInputStart is called. This variable is saved in a pseudo-movie table if the attempt is better then the previous one and used for playback when moving to the next segment.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- lastkey1 lastkey2 lastkey3 lastkey4</span></p>
+<p class="rvps2"><span class="rvts6">The inputs that were given to FCEU on the PREVIOUS frame. This holds for segments as well (at the beginning of a new segment, the lastkeys of the previous segment are set). This also goes for the start. If you use key1-4 in onStart, the first segment will have those keys as lastkey.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- frame</span></p>
+<p class="rvps2"><span class="rvts6">The number of frames of the current attempt. Starts at 1.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- attempt</span></p>
+<p class="rvps2"><span class="rvts6">The number of attempts in the current segment. Starts at 1.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- segment</span></p>
+<p class="rvps2"><span class="rvts6">The segment the bot is currently running. Note that rolledback segments are deducted from this number.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- okattempts</span></p>
+<p class="rvps2"><span class="rvts6">The number of attempts that have been deemed ok. This is a statistical variable. It might tell you how well your bot is doing (combined with the number of failed attempts).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- failattempts</span></p>
+<p class="rvps2"><span class="rvts6">The number of attempts in the current segment that have been deemed bad. This is a statistical variable. It might tell you how well your bot is doing (combined with the number of approved attempts).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- segments</span></p>
+<p class="rvps2"><span class="rvts6">This is the big table that holds everything together. Don't mess with it.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- maxframes</span></p>
+<p class="rvps2"><span class="rvts6">You can set maxframes and check it in the isAttemptEnd function to simply limit a attempt by this many frames. You can also just ignore this and do something else instead.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- maxattempts</span></p>
+<p class="rvps2"><span class="rvts6">Same as maxframes, except for attempts in a segment.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- maxsegments</span></p>
+<p class="rvps2"><span class="rvts6">Same as maxframes, except for segments in a run.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- playingbest</span></p>
+<p class="rvps2"><span class="rvts6">Will be set to true when the bot is playing back it's best attempt to advance to the next segment. Not really used by other functions.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- keyrecording1-4</span></p>
+<p class="rvps2"><span class="rvts6">A simple table with the pressed keys for playback.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- X Y Z P Q</span></p>
+<p class="rvps2"><span class="rvts6">Some "static" variables. These allow you to easily set them onStart and use them in various functions to return the same number. Like a global variable. The P and Q numbers used to denote a random number between 0 and P or Q, but they don't right now.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- vars</span></p>
+<p class="rvps2"><span class="rvts6">This is your variable table. It's contents is saved at the end of an attempt and will be loaded at the beginning of a segment. On rollback, this table is also kept. Put any variable you want to keep across segments in this table.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Ok. That's it for the variables. Now for functions. There are basically three types of functions. The functions that determine whether a button is pressed (8 for each player), to determine whether an attempt/segment/run has ended or was ok and functions for certain events. This number is not evaluated by the random-eval function.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- getScore</span></p>
+<p class="rvps2"><span class="rvts6">This returns how "well" the current attempt is. At the end of a segment, the best scoring good attempt will be used to continue to the next segment. In case of a tie, see the tie functions. This number is not evaluated by the random-eval function!</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- getTie1-4</span></p>
+<p class="rvps2"><span class="rvts6">If the score ends in a tie, that is, two attempts score equally well (have an equal number of points for instance), you can use these functions to break that tie. Like, which attempt has the most health or is the fastest or whatever. This number is not evaluated by the random-eval function!</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- isRunEnd</span></p>
+<p class="rvps2"><span class="rvts6">Return whether the bot should stop running. If the returned number is bigger then the random number rand(minvalue-maxvalue), the bot will stop.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- mustRollBack</span></p>
+<p class="rvps2"><span class="rvts6">Returns whether the bot should rollback the current attempt. In such case, the previous segment is loaded and the current segment is completely discarded. If the returned number is bigger then the random number rand(minvalue-maxvalue), the segment will rollback one segment.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- isSegmentEnd</span></p>
+<p class="rvps2"><span class="rvts6">If the returned number is bigger then the random number rand(minvalue-maxvalue), the bot will stop the current segment, play back the best recorded attempt and start a new segment. Mostly done when a certain number of attempts is reached, but possibly you know when have the best possible attempt and can move on.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- isAttemptEnd</span></p>
+<p class="rvps2"><span class="rvts6">If the returned number is bigger then the random number rand(minvalue-maxvalue), the attempt will stop and a new attempt will be started. Some examples when this function should return yes is when you reached a certain goal, a number of frames or when you died (in which case the bot should try again :).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- isAttemptOk</span></p>
+<p class="rvps2"><span class="rvts6">If the returned number is bigger then the random number rand(minvalue-maxvalue), the current attempt (which has just ended) is deemed ok. Only attempts that are deemed ok are up for being saved. For instance, when the player died in the current attempt, you should return no.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- pressKeyX (pressKeyA1, pressKeyStart4, etc...)</span></p>
+<p class="rvps2"><span class="rvts6">These functions determine whether a button should be pressed in the next frame. If the returned number is bigger then the random number rand(minvalue-maxvalue), the button is pressed, otherwise it is not. To absolutely press a button, simply return yes or no. To use some odds, return a number between minvalue and maxvalue. For instance, using the default settings, if you return 50, there is a 50% chance the button will be pressed.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- onStart</span></p>
+<p class="rvps2"><span class="rvts6">Maybe a little misleading, but the onStart function is called BEFORE the main botloop starts. You can do some non-generic startup stuff here like press start at the title screen and get the game started. Returns nothing.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- onFinish</span></p>
+<p class="rvps2"><span class="rvts6">The opposite to onStart, this function is called when the main botloop exits. You can cleanup, or write stuff or whatever.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- onSegmentStart</span></p>
+<p class="rvps2"><span class="rvts6">When a new segment is started, this is called. After initializing variables and such, but before onAttemptStart is called. Returns nothing.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- onSegmentEnd</span></p>
+<p class="rvps2"><span class="rvts6">When isSegmentEnd evaluates to true, this function is called. Returns nothing.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- onAttemptStart</span></p>
+<p class="rvps2"><span class="rvts6">Called at the start of a new attempt, after onSegmentStart (in case of a new segment) but before onInputStart. Returns nothing.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- onAttemptEnd(wasOk)</span></p>
+<p class="rvps2"><span class="rvts6">Called at the end of an attempt. The only function to have a parameter (note: case sensitive). The parameter wasOk will return (boolean) whether isAttemptOk evaluated to true or false. Returns nothing.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- onInputStart</span></p>
+<p class="rvps2"><span class="rvts6">In a frame, this is the first place where the key1-4 variables are cleared. This is called before all the input (pressKeyX) functions are called. Returns nothing.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">- onInputEnd</span></p>
+<p class="rvps2"><span class="rvts6">This is called immediately after the input (pressKeyX) functions have been called. Returns nothing.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/feature-tour">Easily create PDF Help documents</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

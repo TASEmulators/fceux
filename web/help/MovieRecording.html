@@ -1,157 +1,348 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Movie Recording</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("MovieRecording");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Movie Recording</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="Movie Recording">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Movie Recording">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Movie Recording" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Movie Recording</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="General.html">General</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="General.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="AVICapturing.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="NES.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts17">Movie Recording</span></p>
-<p><br/></p>
-<p><span class="rvts16">Introduction</span></p>
-<p><br/></p>
-<p>A movie file is a file which contains data needed to reconstruct actions in a game. In most emulators, the movie files consist of simply the buttons that were pressed during the game. Because the emulation is completely predictable (deterministic), it will always play back the same way.</p>
-<p><br/></p>
-<p>Unless the movie starts from the console power-on or from reset, the movie file might also contain a savestate that loads the beginning point of the game. &nbsp;Movie files don’t contain any sound or image data. Such data is not needed, because the emulator can reconstruct it during movie playback. </p>
-<p><br/></p>
-<p>Movie files in FCEUX are .fm2 files. &nbsp;The file format is unique to FCEUX and not compatible with other movie recording versions of FCE Ultra. &nbsp;Movie files from other versions (.fcm) can be converted to .fm2 for playback with the <a class="rvts18" href="Covertfcm.html">.fcm to .fm2 converter</a>.</p>
-<p><br/></p>
-<p>Movie features in FCEUX are designed specifically for making Tool-assisted Speedruns. &nbsp;For more information visit <a class="rvts18" href="http://tasvideos.org" target="_blank">TASVideos</a>.</p>
-<p><br/></p>
-<p><span class="rvts16">Recording Movies</span></p>
-<p><br/></p>
-<p>To record a movie, open a ROM. &nbsp;Then simply select "Record Movie" in the File &gt; Movie Menu. &nbsp;You will be prompted to name the file and to select where to record from. &nbsp;Selecting "Start" will begin the recording from a Power-on (Hard Reset). &nbsp;If you select "Now", a savestate will be made at your current location in the game, and the movie will begin recording from there. &nbsp;If you select browse, you will be prompted to find a preexisting savestate file to begin recording from.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Savestates, Slowdown, and Frame Advance</span></p>
-<p><br/></p>
-<p>At anytime while recording, you can make a *savestate. &nbsp;This is a snapshot of the game's current memory contents. &nbsp;Once a savestate is made, it can be loaded with the *loadstate command. &nbsp;This will return the movie back to the spot in the game where the savestate was made. &nbsp;This can be used to undo mistakes or to test different strategies for a particular segment.</p>
-<p><br/></p>
-<p>(The default key for making a savestate is "I" and the default key for loading a state is "P". &nbsp;Both of these can be assigned under the <a class="rvts18" href="MapHotkeys.html">Map Hotkeys Menu</a>). &nbsp;Both can also be access through the File &gt; Savestate Menu</p>
-<p><br/></p>
-<p>Tool Assisted movies take advantage of slowing the emulator down in order to increase precision of the movie making process. &nbsp;Navigating to NES &gt; Emulation Speed &gt; Slow down or pressing the "-" key will slow down emulation. &nbsp;NES &gt; Emulation Speed &gt; Speed up or the "=" will speed it up. &nbsp;(These can be re-mapped in the <a class="rvts18" href="MapHotkeys.html">Map Hotkeys Menu</a>).</p>
-<p><br/></p>
-<p>Even greater precision can be made using the frame advance key. &nbsp;Pressing the frame advance key will pause emulation and advance it a single frame (1/60th of a second NTSC ). &nbsp;By holding down input and pressing the frame advance key, it will record that input for that particular frame.</p>
-<p><br/></p>
-<p>For more info seeing <a class="rvts18" href="ToolAssistedSpeedruns.html">Tool Assisted Speedruns</a>.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">"Bullet Proof Rerecording"</span></p>
-<p><br/></p>
-<p>All savestates made during movie recording contain the movie information up to the frame of the savestate. &nbsp;When a savestate is loaded, the movie file in the savestate is also loaded. &nbsp;This is referred to as "Bullet Proof Rerecording" because it prevents possible desyncs and lost data from improper/out of order savestate loading.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Playing Back Movies</span></p>
-<p><br/></p>
-<p>To play back a recorded movie, open the ROM. &nbsp;Then select "Replay Movie" in the File Menu. &nbsp;A movie dialog box will open where you can select the movie file. &nbsp;</p>
-<p><br/></p>
-<p>You can also select whether the movie is in Read-only mode. &nbsp;If a movie is in read-only mode, the movie file can not be altered in any way. &nbsp;If you make a savestate while playing the movie and load that state, the playback will simply "rewind" to that state. &nbsp;If the movie is not in read-only, however, loading a state will set the movie to record mode and begin recording from that savestate.</p>
-<p><br/></p>
-<p>You can also select "Pause movie at frame" x. &nbsp;If selected, the movie will automatically pause when reaching the frame selected (the default is the last frame of the movie).</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Read only</span></p>
-<p><br/></p>
-<p>You can select read-only when playing a movie. &nbsp;You can also toggle the read-only status by navigating to File &gt; Movie &gt; Read only.</p>
-<p>In read-only mode a movie can not be edited. &nbsp;Loading a savestate will take the movie to that point in the movie and stay in playback mode.</p>
-<p><br/></p>
-<p>In read-write status, loading a state will change a movie from playback mode to record mode.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Resuming Recording</span></p>
-<p><br/></p>
-<p>You can resume recording a previous movie by playing back the movie, setting the record status to read+write, and then loading a state.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Play Movie from Beginning</span></p>
-<p><br/></p>
-<p>At any point while recording or playing back a movie, you can navigate to File &gt; Movie &gt; Play Movie from Beginning. &nbsp;This will set the movie to read only status and reset playback to frame 0.</p>
-<p><br/></p>
-<p><span class="rvts16">Frame Counter</span></p>
-<p><br/></p>
-<p>The Frame counter displays what frame the movie is currently on. &nbsp;If the movie is playing in read-only mode, it will also display the total number of frames in the movie. &nbsp;The default key for toggling the Frame Counter display is the "." (period) key. &nbsp;(This can be re-mapped in the <a class="rvts18" href="MapHotkeys.html">Map Hotkeys Menu</a>).</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Frame Advance</span></p>
-<p><br/></p>
-<p>The frame advance key ("backlash" key by default. &nbsp;Re-mappable under the <a class="rvts18" href="MapHotkeys.html">Map Hotkeys Menu</a>) will advance the game by a single frame and then pause the game. &nbsp; If the hotkey is held down, it will auto advance quickly through the game.</p>
-<p><br/></p>
-<p>This is a critical tool when perfecting input in movie recording.</p>
-<p><br/></p>
-<p><span class="rvts16">Metadata</span></p>
-<p><br/></p>
-<p>When you record a new movie via the record movie dialog there is an author field. &nbsp;This sends the info to the .fm2 file in the form of comment Author [author name] (see <a class="rvts18" href="fm2.html">.fm2</a>). &nbsp;</p>
-<p><br/></p>
-<p>Any line in the .fm2 that starts with "comment" is known as metadata. &nbsp;You can include any number of comments manually by editing the .fm2 file with any text editor. &nbsp;</p>
-<p><br/></p>
-<p>On the replay movie dialog, clicking the metadata button will display all metadata in a separate dialog box (If a movie is currently loaded you can also access the meta-data by right-clicking and selecting Metadata in the context menu).</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Subtitles</span></p>
-<p><br/></p>
-<p>FCEUX now supports subtitles in the .fm2 file format. &nbsp;Subtitles will be displayed on the screen automatically as a movie plays. &nbsp;You can turn on/off subtitles by navigating to Config &gt; Movie Options &gt; Display movie subtitles (see <a class="rvts18" href="MovieOptions.html">Movie options</a>).</p>
-<p><br/></p>
-<p>For adding subtitles to a movie see the <a class="rvts18" href="fm2.html">.fm2 documentation</a>.</p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour">Easily create Web Help sites</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="MovieRecording"
+		  data-hnd-context="5"
+		  data-hnd-title="Movie Recording"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="General.html">General</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="General.html" title="General" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="AVICapturing.html" title="AVI Capturing" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="NES.html" title="NES Menu" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Movie Recording</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts22">Movie Recording</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Introduction</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">A movie file is a file which contains data needed to reconstruct actions in a game. In most emulators, the movie files consist of simply the buttons that were pressed during the game. Because the emulation is completely predictable (deterministic), it will always play back the same way.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Unless the movie starts from the console power-on or from reset, the movie file might also contain a savestate that loads the beginning point of the game. &nbsp;Movie files don’t contain any sound or image data. Such data is not needed, because the emulator can reconstruct it during movie playback.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Movie files in FCEUX are .fm2 files. &nbsp;The file format is unique to FCEUX and not compatible with other movie recording versions of FCE Ultra. &nbsp;Movie files from other versions (.fcm) can be converted to .fm2 for playback with the </span><a class="rvts46" href="Covertfcm.html">.fcm to .fm2 converter</a><span class="rvts6">.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Movie features in FCEUX are designed specifically for making Tool-assisted Speedruns. &nbsp;For more information visit </span><a class="rvts46" href="http://tasvideos.org" target="_blank">TASVideos</a><span class="rvts6">.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Recording Movies</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">To record a movie, open a ROM. &nbsp;Then simply select "Record Movie" in the File &gt; Movie Menu. &nbsp;You will be prompted to name the file and to select where to record from. &nbsp;Selecting "Start" will begin the recording from a Power-on (Hard Reset). &nbsp;If you select "Now", a savestate will be made at your current location in the game, and the movie will begin recording from there. &nbsp;If you select browse, you will be prompted to find a preexisting savestate file to begin recording from.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Savestates, Slowdown, and Frame Advance</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">At anytime while recording, you can make a *savestate. &nbsp;This is a snapshot of the game's current memory contents. &nbsp;Once a savestate is made, it can be loaded with the *loadstate command. &nbsp;This will return the movie back to the spot in the game where the savestate was made. &nbsp;This can be used to undo mistakes or to test different strategies for a particular segment.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">(The default key for making a savestate is "I" and the default key for loading a state is "P". &nbsp;Both of these can be assigned under the </span><a class="rvts46" href="MapHotkeys.html">Map Hotkeys Menu</a><span class="rvts6">). &nbsp;Both can also be access through the File &gt; Savestate Menu</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Tool Assisted movies take advantage of slowing the emulator down in order to increase precision of the movie making process. &nbsp;Navigating to NES &gt; Emulation Speed &gt; Slow down or pressing the "-" key will slow down emulation. &nbsp;NES &gt; Emulation Speed &gt; Speed up or the "=" will speed it up. &nbsp;(These can be re-mapped in the </span><a class="rvts46" href="MapHotkeys.html">Map Hotkeys Menu</a><span class="rvts6">).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Even greater precision can be made using the frame advance key. &nbsp;Pressing the frame advance key will pause emulation and advance it a single frame (1/60th of a second NTSC ). &nbsp;By holding down input and pressing the frame advance key, it will record that input for that particular frame.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">For more info seeing </span><a class="rvts46" href="ToolAssistedSpeedruns.html">Tool Assisted Speedruns</a><span class="rvts6">.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">"Bullet Proof Rerecording"</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">All savestates made during movie recording contain the movie information up to the frame of the savestate. &nbsp;When a savestate is loaded, the movie file in the savestate is also loaded. &nbsp;This is referred to as "Bullet Proof Rerecording" because it prevents possible desyncs and lost data from improper/out of order savestate loading.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Playing Back Movies</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">To play back a recorded movie, open the ROM. &nbsp;Then select "Replay Movie" in the File Menu. &nbsp;A movie dialog box will open where you can select the movie file. &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">You can also select whether the movie is in Read-only mode. &nbsp;If a movie is in read-only mode, the movie file can not be altered in any way. &nbsp;If you make a savestate while playing the movie and load that state, the playback will simply "rewind" to that state. &nbsp;If the movie is not in read-only, however, loading a state will set the movie to record mode and begin recording from that savestate.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">You can also select "Pause movie at frame" x. &nbsp;If selected, the movie will automatically pause when reaching the frame selected (the default is the last frame of the movie).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Read only</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">You can select read-only when playing a movie. &nbsp;You can also toggle the read-only status by navigating to File &gt; Movie &gt; Read only.</span></p>
+<p class="rvps2"><span class="rvts6">In read-only mode a movie can not be edited. &nbsp;Loading a savestate will take the movie to that point in the movie and stay in playback mode.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">In read-write status, loading a state will change a movie from playback mode to record mode.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Resuming Recording</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">You can resume recording a previous movie by playing back the movie, setting the record status to read+write, and then loading a state.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Play Movie from Beginning</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">At any point while recording or playing back a movie, you can navigate to File &gt; Movie &gt; Play Movie from Beginning. &nbsp;This will set the movie to read only status and reset playback to frame 0.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Frame Counter</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The Frame counter displays what frame the movie is currently on. &nbsp;If the movie is playing in read-only mode, it will also display the total number of frames in the movie. &nbsp;The default key for toggling the Frame Counter display is the "." (period) key. &nbsp;(This can be re-mapped in the </span><a class="rvts46" href="MapHotkeys.html">Map Hotkeys Menu</a><span class="rvts6">).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Frame Advance</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The frame advance key ("backlash" key by default. &nbsp;Re-mappable under the </span><a class="rvts46" href="MapHotkeys.html">Map Hotkeys Menu</a><span class="rvts6">) will advance the game by a single frame and then pause the game. &nbsp; If the hotkey is held down, it will auto advance quickly through the game.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">This is a critical tool when perfecting input in movie recording.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Metadata</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">When you record a new movie via the record movie dialog there is an author field. &nbsp;This sends the info to the .fm2 file in the form of comment Author [author name] (see </span><a class="rvts46" href="fm2.html">.fm2</a><span class="rvts6">). &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Any line in the .fm2 that starts with "comment" is known as metadata. &nbsp;You can include any number of comments manually by editing the .fm2 file with any text editor. &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">On the replay movie dialog, clicking the metadata button will display all metadata in a separate dialog box (If a movie is currently loaded you can also access the meta-data by right-clicking and selecting Metadata in the context menu).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Subtitles</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">FCEUX now supports subtitles in the .fm2 file format. &nbsp;Subtitles will be displayed on the screen automatically as a movie plays. &nbsp;You can turn on/off subtitles by navigating to Config &gt; Movie Options &gt; Display movie subtitles (see </span><a class="rvts46" href="MovieOptions.html">Movie options</a><span class="rvts6">).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">For adding subtitles to a movie see the </span><a class="rvts46" href="fm2.html">.fm2 documentation</a><span class="rvts6">.</span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/feature-tour/create-help-files-for-the-qt-help-framework">Produce online help for Qt applications</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

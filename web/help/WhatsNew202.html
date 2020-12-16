@@ -1,166 +1,357 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>What's New? 2.0.2 (changelog)</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("WhatsNew202");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>What's New? 2.0.2 (changelog)</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="What's New? 2.0.2 (changelog)">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="What's New? 2.0.2 (changelog)" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>What's New? 2.0.2 (changelog)</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="WhatsNew203.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="WhatsNew201.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts17">What's New? </span><span class="rvts20">2.0.2</span></p>
-<p>Released August 14, 2008</p>
-<p><br/></p>
-<p>This release includes a large number of bug fixes, feature enhancements, and new features.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Fixed Crashing Bugs</span></p>
-<p><br/></p>
-<p>* restore savestate error recovery functionality. &nbsp;Will prevent crashes after savestate error messages</p>
-<p>* Fixed - Low speeds (1%) crash FCEUX</p>
-<p>* fixes bug where palflag 1 in .fm2 files crashes fceux</p>
-<p>* FCEUX no longer crashes when attempting to open a non movie file</p>
-<p>* Buffer overflow (change vsprintf to vsnprintf)</p>
-<p><br/></p>
-<p><span class="rvts16">Minor Bug fixes</span></p>
-<p><br/></p>
-<p>* SRAM not wiped on power cycle (during movies)</p>
-<p>* Moviefilenames without extension now automatically get fm2</p>
-<p>* auto-fill .fcs extension in save state as dialog</p>
-<p>* FCM&gt;FM2 converter releases file handle</p>
-<p>* fix a new bug in windows build which caused fourscore emulation to fail in some cases</p>
-<p>* Player 3 no longer inputs when not used</p>
-<p>* prints a special message when trying to open an FCM reminding user to convert.</p>
-<p>* fixes bug where Avi recording with no sound messes up the format</p>
-<p>* Fixed bug where Convert .fcm didn't do special characters</p>
-<p>* fixed the (null) in the default lua directory listing</p>
-<p>* Ctrl+X now works in the memory watch dialog</p>
-<p>* Dialog window positions won't "disappear" (-32000 protection on all dialogs that remember x,y)</p>
-<p>* fixed View Slots bug - will now always show the used slots</p>
-<p><br/></p>
-<p>* added shift+L as default hotkey for reload lua script</p>
-<p>* added input display to the FCEUX main menu</p>
-<p>* change config filename from fceu98.cfg to fceux.cfg</p>
-<p><br/></p>
-<p><span class="rvts16">New Features</span></p>
-<p><br/></p>
-<p>* restore IPS patching capability which was lost when archive support was added</p>
-<p>* restore ungzipping (and unzipping in sdl) capability which was lost when archive support was added</p>
-<p>* re-enable an "author" text field in the record movie dialog</p>
-<p>* re-enable support for old-format savestates. (Note: can not be loaded into a movie!)</p>
-<p><br/></p>
-<p>* Added new toggle - frame adv. - lag skip (menu item + hotkey mapping + saved in config), will cause frame adv. to skip frames where input is not read</p>
-<p>* Added support for loading movies from archives (just like ROM files). &nbsp;Note: Movies loaded from an archive file will be read-only.</p>
-<p>* movie replay dialog displays fractions of a second on movie length</p>
-<p><br/></p>
-<p>* Savestates now save the Lagcounter information.</p>
-<p>* added a mute turbo option in sound config</p>
-<p><br/></p>
-<p>* add an option to pick a constant color to draw in place of BG when BG rendering is disabled (look for gNoBGFillColor in config).</p>
-<p><br/></p>
-<p><span class="rvts16">Mappers</span></p>
-<p><br/></p>
-<p>* remove cnrom chr rom size limit for homebrew roms</p>
-<p>* mmc5 - 64KB WRAM games now work correctly</p>
-<p>* mmc5 - use of chr A regs for BG in sprite 8x8 mode is fixed</p>
-<p>* upgrade to cah4e3's latest mapper 163&amp;164 code to fix a crash in a game</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Debugging Tools</span></p>
-<p><br/></p>
-<p>* Debugger - restore snap functionality</p>
-<p>* Debugger - add FORBID breakpoints - regions which block breakpoints from happening if they contain the PC</p>
-<p>* Debugger - debugger window is now resizeable</p>
-<p>* nametable viewer &nbsp;will display correct NT,CHR,ATTR data in more cases (specifically, including some exotic mmc5 cases).</p>
-<p><br/></p>
-<p><span class="rvts16">Lua</span></p>
-<p><br/></p>
-<p>* Savestates remember Lua painting</p>
-<p>* add memory.readbyterange to emulua</p>
-<p><br/></p>
-<p><span class="rvts16">SDL only</span></p>
-<p><br/></p>
-<p>* SDL: fixed --input(1-4) options. &nbsp;input1 and 2 are regular inputs, input3 and 4 are famicom expansion inputs</p>
-<p>* SDL fix configfile woes. configfile now goes to ~/.fceux/fceux.cfg</p>
-<p>* SDL: fixed segfault when opening .fcm files</p>
-<p>* SDL: Saner sound defaults for less choppy sound</p>
-<p>* SDL: "--special" option fixed for special video scaling filters</p>
-<p>* SDL: cleaned up the SConsruct</p>
-<p>* SDL: fixed issue where fceu would lock up when file dialogs were opened during fullscreen</p>
-<p>* SDL: fixed bug where fceux would close when file dialogs were closed</p>
-<p>* SDL: File open dialog is now used to movie playback</p>
-<p>* SDL: File open wrapper now takes a titlebar argument</p>
-<p>* SDL: Cleanup of usage</p>
-<p>* SDL: rename options --no8lim -&gt; --nospritelim and --color -&gt; --ntsccolor</p>
-<p>* SDL: Screenshots now always prepend the game name.</p>
-<p>* SDL: Changed default A/B from numpad 2 and 3 to j and k.</p>
-<p>* SDL: Enable frameskip by default</p>
-<p>* SDL: Fixed a bug that would crash fceux if the emulation speed was overincreased</p>
-<p>* SDL: New default hotkeys to more closely match win32 defaults</p>
-<p>* SDL: Added lua script loading hotkey (f3). &nbsp;Non win32 SDL requires zenity for this to function.</p>
-<p>* SDL: Build script cleanup; also added option for DEBUG builds.</p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Produce Kindle eBooks easily</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="WhatsNew202"
+		  data-hnd-context="62"
+		  data-hnd-title="What's New? 2.0.2 (changelog)"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Intro.html">Introduction</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew203.html" title="What's New? 2.0.3 (changelog)" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew201.html" title="What's New? 2.0.1 (changelog)" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>What's New? 2.0.2 (changelog)</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.0.2</span></p>
+<p class="rvps2"><span class="rvts6">Released August 14, 2008</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">This release includes a large number of bug fixes, feature enhancements, and new features.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Fixed Crashing Bugs</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* restore savestate error recovery functionality. &nbsp;Will prevent crashes after savestate error messages</span></p>
+<p class="rvps2"><span class="rvts6">* Fixed - Low speeds (1%) crash FCEUX</span></p>
+<p class="rvps2"><span class="rvts6">* fixes bug where palflag 1 in .fm2 files crashes fceux</span></p>
+<p class="rvps2"><span class="rvts6">* FCEUX no longer crashes when attempting to open a non movie file</span></p>
+<p class="rvps2"><span class="rvts6">* Buffer overflow (change vsprintf to vsnprintf)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Minor Bug fixes</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* SRAM not wiped on power cycle (during movies)</span></p>
+<p class="rvps2"><span class="rvts6">* Moviefilenames without extension now automatically get fm2</span></p>
+<p class="rvps2"><span class="rvts6">* auto-fill .fcs extension in save state as dialog</span></p>
+<p class="rvps2"><span class="rvts6">* FCM&gt;FM2 converter releases file handle</span></p>
+<p class="rvps2"><span class="rvts6">* fix a new bug in windows build which caused fourscore emulation to fail in some cases</span></p>
+<p class="rvps2"><span class="rvts6">* Player 3 no longer inputs when not used</span></p>
+<p class="rvps2"><span class="rvts6">* prints a special message when trying to open an FCM reminding user to convert.</span></p>
+<p class="rvps2"><span class="rvts6">* fixes bug where Avi recording with no sound messes up the format</span></p>
+<p class="rvps2"><span class="rvts6">* Fixed bug where Convert .fcm didn't do special characters</span></p>
+<p class="rvps2"><span class="rvts6">* fixed the (null) in the default lua directory listing</span></p>
+<p class="rvps2"><span class="rvts6">* Ctrl+X now works in the memory watch dialog</span></p>
+<p class="rvps2"><span class="rvts6">* Dialog window positions won't "disappear" (-32000 protection on all dialogs that remember x,y)</span></p>
+<p class="rvps2"><span class="rvts6">* fixed View Slots bug - will now always show the used slots</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* added shift+L as default hotkey for reload lua script</span></p>
+<p class="rvps2"><span class="rvts6">* added input display to the FCEUX main menu</span></p>
+<p class="rvps2"><span class="rvts6">* change config filename from fceu98.cfg to fceux.cfg</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">New Features</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* restore IPS patching capability which was lost when archive support was added</span></p>
+<p class="rvps2"><span class="rvts6">* restore ungzipping (and unzipping in sdl) capability which was lost when archive support was added</span></p>
+<p class="rvps2"><span class="rvts6">* re-enable an "author" text field in the record movie dialog</span></p>
+<p class="rvps2"><span class="rvts6">* re-enable support for old-format savestates. (Note: can not be loaded into a movie!)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* Added new toggle - frame adv. - lag skip (menu item + hotkey mapping + saved in config), will cause frame adv. to skip frames where input is not read</span></p>
+<p class="rvps2"><span class="rvts6">* Added support for loading movies from archives (just like ROM files). &nbsp;Note: Movies loaded from an archive file will be read-only.</span></p>
+<p class="rvps2"><span class="rvts6">* movie replay dialog displays fractions of a second on movie length</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* Savestates now save the Lagcounter information.</span></p>
+<p class="rvps2"><span class="rvts6">* added a mute turbo option in sound config</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* add an option to pick a constant color to draw in place of BG when BG rendering is disabled (look for gNoBGFillColor in config).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Mappers</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* remove cnrom chr rom size limit for homebrew roms</span></p>
+<p class="rvps2"><span class="rvts6">* mmc5 - 64KB WRAM games now work correctly</span></p>
+<p class="rvps2"><span class="rvts6">* mmc5 - use of chr A regs for BG in sprite 8x8 mode is fixed</span></p>
+<p class="rvps2"><span class="rvts6">* upgrade to cah4e3's latest mapper 163&amp;164 code to fix a crash in a game</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Debugging Tools</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* Debugger - restore snap functionality</span></p>
+<p class="rvps2"><span class="rvts6">* Debugger - add FORBID breakpoints - regions which block breakpoints from happening if they contain the PC</span></p>
+<p class="rvps2"><span class="rvts6">* Debugger - debugger window is now resizeable</span></p>
+<p class="rvps2"><span class="rvts6">* nametable viewer &nbsp;will display correct NT,CHR,ATTR data in more cases (specifically, including some exotic mmc5 cases).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Lua</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* Savestates remember Lua painting</span></p>
+<p class="rvps2"><span class="rvts6">* add memory.readbyterange to emulua</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">SDL only</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* SDL: fixed --input(1-4) options. &nbsp;input1 and 2 are regular inputs, input3 and 4 are famicom expansion inputs</span></p>
+<p class="rvps2"><span class="rvts6">* SDL fix configfile woes. configfile now goes to ~/.fceux/fceux.cfg</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: fixed segfault when opening .fcm files</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: Saner sound defaults for less choppy sound</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: "--special" option fixed for special video scaling filters</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: cleaned up the SConsruct</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: fixed issue where fceu would lock up when file dialogs were opened during fullscreen</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: fixed bug where fceux would close when file dialogs were closed</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: File open dialog is now used to movie playback</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: File open wrapper now takes a titlebar argument</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: Cleanup of usage</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: rename options --no8lim -&gt; --nospritelim and --color -&gt; --ntsccolor</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: Screenshots now always prepend the game name.</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: Changed default A/B from numpad 2 and 3 to j and k.</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: Enable frameskip by default</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: Fixed a bug that would crash fceux if the emulation speed was overincreased</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: New default hotkeys to more closely match win32 defaults</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: Added lua script loading hotkey (f3). &nbsp;Non win32 SDL requires zenity for this to function.</span></p>
+<p class="rvps2"><span class="rvts6">* SDL: Build script cleanup; also added option for DEBUG builds.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/help-authoring-tool">Free help authoring environment</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

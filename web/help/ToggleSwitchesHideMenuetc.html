@@ -1,205 +1,396 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Menu Items &amp; Submenus</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("ToggleSwitchesHideMenuetc");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Menu Items &amp; Submenus</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="Enable Background Input,Enable Rewind,Enable Run in Background,Game Genie,Hide Menu,PAL Emulation,Pause After Movie Playback,Show Movie Status Icon">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Menu Items &amp; Submenus">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Menu Items &amp; Submenus" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Menu Items &amp; Submenus</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Config.html">Config</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Config.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="Config.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="Directories.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts35">Config Toggle Switches</span></p>
-<p><br/></p>
-<p>Explains the various toggle switch commands in the top two groups of commands under the Config Menu.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Hide Menu</span></p>
-<p><br/></p>
-<p>Hides the Menu commands on the FCEUX main window. &nbsp;Press ESC to unhide the menu.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Region</span></p>
-<p><br/></p>
-<p>Allows to choose between NTSC (224p@60fps), PAL and Dendy (240p@50fps) modes. For PAL, FCEUX will detect the proper choice when loading a ROM and set the flag accordingly (based on file name, where<span class="rvts40"> (E) </span>is used by GoodTools to mark European ROMs). Dendy mode (sometimes also called Hybrid) is a modification of the NTSC one, it was used in some Famiclones and supports games released for the NTSC region, slowing them down to PAL speed.</p>
-<p>Note: you can't change this setting while a movie is being played or recorded.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts33">PPU </span><span class="rvts36">(Sub-menu)</span></p>
-<p><br/></p>
-<p><span class="rvts32">New PPU / Old PPU</span></p>
-<p>As of FCEUX 2.1.2, FCEUX has a new PPU core. &nbsp;The new PPU has improved accuracy and greater game compatibility than the old PPU. &nbsp;However, some games may not work properly and there will be slight timing differences that would hurt movie compatibility. Also then New PPU is much slower than the Old PPU. Therefore, the old PPU is still the preferred setting.</p>
-<p>Note: you can't change this setting while a movie is being played or recorded.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts33">Enable </span><span class="rvts36">(Sub-menu)</span></p>
-<p><br/></p>
-<p><span class="rvts16">Run in Background</span></p>
-<p><br/></p>
-<p>If enabled, FCEUX will continue to emulate when the window is not in focus. &nbsp;If disabled, the emulator will pause when out of focus.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Background Input</span></p>
-<p><br/></p>
-<p>If enabled, FCEUX can continue to receive input while not in focus. &nbsp;(Useful for playing 2 FCEUX's simultaneously)</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Auto-savestates</span></p>
-<p><br/></p>
-<p>Enables the Auto-save feature. &nbsp;If enabled, FCEUX will make periodic savestates (once per every 256 frames) as you play or record a movie. &nbsp;You can right-click and select the "load last auto-save" in the context menu or press "Load Last Auto-save" <a class="rvts18" href="MapHotkeys.html">hotkey</a> to back up to the last auto-save savestate.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts27">Frame Adv. - Skip Lag</span></p>
-<p><br/></p>
-<p>This feature, if enabled, will cause the frame advance key (see <a class="rvts18" href="MovieRecording.html">movie recording</a>) to skip over lag frames. &nbsp;It does this by reading the lag counter and skipping past any frames where input is not polled. &nbsp;</p>
-<p><br/></p>
-<p>For instance, in a 30fps game (such as double dragon), frame advance will advance 2 frames instead of 1.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts27">Backup Savestates</span></p>
-<p><br/></p>
-<p>Enabled by default. &nbsp;This option allows for savestate &amp; loadstate Undo (&amp; redo).&nbsp;<span class="rvts38"> (see </span><a class="rvts39" href="ContextMenuItems.html">context menu</a><span class="rvts38">)</span></p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts27">Compress Savestates</span></p>
-<p><br/></p>
-<p>Enabled by default. &nbsp;This option compresses non movie savestates.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Game Genie ROM</span></p>
-<p><br/></p>
-<p>Allows the use of the game genie ROM. &nbsp;You must have a game genie ROM named gg.rom (it is safe to rename a game genie.nes file to gg.rom) and it must be in the FCEUX base directory (which is the folder fceux.exe is in unless you specified a different folder in the <a class="rvts18" href="Directories.html">Directory Override Menu</a>).</p>
-<p><br/></p>
-<p>If enabled, FCEUX will open gg.rom first when you load a new game. &nbsp;Any codes applied in the game genie screen will be applied to the game just like on a real NES. &nbsp;</p>
-<p><br/></p>
-<p>(Remember that enabling/disabling Game Genie emulation will not take effect until a new game is loaded)</p>
-<p><br/></p>
-<p>Note: &nbsp;Game genie codes can also be added with the <a class="rvts18" href="GameGenieEncoderDecoder.html">Game Genie Encoder/Decoder</a> via the <a class="rvts18" href="CheatSearch.html">Cheat Search Menu</a> (and this method does not require a game genie ROM).</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts27">Auto-resume old play session</span></p>
-<p><br/></p>
-<p>If enabled, FCEUX will make a special savestate every time you close ROM, and will automatically load the savestate when you open this ROM next time, so you can continue from where you left the game. In addition, when this option is enabled, FCEUX automatically loads the last used ROM on startup.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts33">Display </span><span class="rvts36">(Sub-Menu)</span></p>
-<p><br/></p>
-<p><span class="rvts16">Input Display</span></p>
-<p><br/></p>
-<p>The input display will display 1-4 pictures of a NES controller at the bottom of the screen. &nbsp;When playing/recording a movie, these controllers will display the input that is captured in the file. &nbsp;</p>
-<p><br/></p>
-<p>When input comes from a movie file rather than then user, it is displayed in a different color (silver)</p>
-<p><br/></p>
-<p>The input display can also be toggled by hotkey. &nbsp;The default key for toggling the Input display is the "," (comma) key. &nbsp;(This can be re-mapped in the <a class="rvts18" href="MapHotkeys.html">Map Hotkeys Menu</a>).</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Lag Counter</span></p>
-<p><br/></p>
-<p>The lag counter will increment every time to the game fails to poll for user input. &nbsp;It will display in red on any frame that is currently lagging and will increment the lag counter by 1. &nbsp;These situations occur when the game is lagging (too much information to process), or the game is in a screen transition state (so not polling for user input). &nbsp;In &nbsp;a 30fps game (such as Double Dragon 2), it will increment every other frame.</p>
-<p><br/></p>
-<p>The lag counter value is stored in savestates. &nbsp; &nbsp;</p>
-<p><br/></p>
-<p>Displaying the lag counter can also be toggled by hotkey. &nbsp;The default key is the "/" (slash) key. &nbsp;(This can be re-mapped in the <a class="rvts18" href="MapHotkeys.html">Map Hokeys Menu)</a>.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Frame Counter</span></p>
-<p><br/></p>
-<p>Toggles the display of the frame counter. &nbsp;The frame counter will increment once per frame.</p>
-<p><br/></p>
-<p>The frame counter display can also be toggled by hotkey. &nbsp;The default key is the "." (period) key. &nbsp;(This can be re-mapped in the <a class="rvts18" href="MapHotkeys.html">Map Hotkeys Menu</a>).</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Rerecord Counter</span></p>
-<p><br/></p>
-<p>Toggles the display of the number of Rerecords done when making a movie. &nbsp;The Rerecord counter will increment every time you load a savestate in Recording mode.</p>
-<p><br/></p>
-<p>The rerecord counter display can also be toggled by hotkey. &nbsp;The default key is the "M" key. &nbsp;(This can be re-mapped in the <a class="rvts18" href="MapHotkeys.html">Map Hotkeys Menu</a>).</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Movie status icon</span></p>
-<p><br/></p>
-<p>Toggles the display of "pause", "play" or "record" icons in the lower right corner.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">FPS</span></p>
-<p><br/></p>
-<p>Toggles the display of average FPS counter in the upper right corner.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Graphics: BG</span></p>
-<p><br/></p>
-<p>Turning this off will turn off the backgrounds in the game.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Graphics: OBJ</span></p>
-<p><br/></p>
-<p>Turning this off will turn off the objects (sprites) in the game.</p>
-<p><br/></p>
-<p>Note: You can set the default color when the Backgrounds are turned off. &nbsp;To do so, open fceux.cfg and change the value of the entry named: <span class="rvts37">gNoBGFillColor </span></p>
-<p><span class="rvts37"><br/></span></p>
-<p><span class="rvts37"><br/></span></p>
-<p><span class="rvts16">Save Config File</span></p>
-<p><span class="rvts37"><br/></span></p>
-<p><span class="rvts21">Saves current settings to fceux.cfg. &nbsp;Normally settings are not saved until FCEUX is closed.</span></p>
-<p><span class="rvts37"><br/></span></p>
-<p><span class="rvts37"><br/></span></p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/iphone-website-generation">Free iPhone documentation generator</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="ToggleSwitchesHideMenuetc"
+		  data-hnd-context="51"
+		  data-hnd-title="Menu Items & Submenus"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Config.html">Config</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Config.html" title="Config" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="Config.html" title="Config" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="Directories.html" title="Directories" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Menu Items &amp; Submenus</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts50">Config Toggle Switches</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Explains the various toggle switch commands in the top two groups of commands under the Config Menu.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Hide Menu</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Hides the Menu commands on the FCEUX main window. &nbsp;Press ESC to unhide the menu.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Region</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Allows to choose between NTSC (224p@60fps), PAL and Dendy (240p@50fps) modes. For PAL, FCEUX will detect the proper choice when loading a ROM and set the flag accordingly (based on file name, where</span><span class="rvts56"> (E) </span><span class="rvts6">is used by GoodTools to mark European ROMs). Dendy mode (sometimes also called Hybrid) is a modification of the NTSC one, it was used in some Famiclones and supports games released for the NTSC region, slowing them down to PAL speed.</span></p>
+<p class="rvps2"><span class="rvts6">Note: you can't change this setting while a movie is being played or recorded.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts48">PPU </span><span class="rvts52">(Sub-menu)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts45">New PPU / Old PPU</span></p>
+<p class="rvps2"><span class="rvts6">As of FCEUX 2.1.2, FCEUX has a new PPU core. &nbsp;The new PPU has improved accuracy and greater game compatibility than the old PPU. &nbsp;However, some games may not work properly and there will be slight timing differences that would hurt movie compatibility. Also then New PPU is much slower than the Old PPU. Therefore, the old PPU is still the preferred setting.</span></p>
+<p class="rvps2"><span class="rvts6">Note: you can't change this setting while a movie is being played or recorded.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts48">Enable </span><span class="rvts52">(Sub-menu)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Run in Background</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">If enabled, FCEUX will continue to emulate when the window is not in focus. &nbsp;If disabled, the emulator will pause when out of focus.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Background Input</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">If enabled, FCEUX can continue to receive input while not in focus. &nbsp;(Useful for playing 2 FCEUX's simultaneously)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Auto-savestates</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Enables the Auto-save feature. &nbsp;If enabled, FCEUX will make periodic savestates (once per every 256 frames) as you play or record a movie. &nbsp;You can right-click and select the "load last auto-save" in the context menu or press "Load Last Auto-save" </span><a class="rvts51" href="MapHotkeys.html">hotkey</a><span class="rvts6"> to back up to the last auto-save savestate.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Frame Adv. - Skip Lag</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">This feature, if enabled, will cause the frame advance key (see </span><a class="rvts51" href="MovieRecording.html">movie recording</a><span class="rvts6">) to skip over lag frames. &nbsp;It does this by reading the lag counter and skipping past any frames where input is not polled. &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">For instance, in a 30fps game (such as double dragon), frame advance will advance 2 frames instead of 1.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Backup Savestates</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Enabled by default. &nbsp;This option allows for savestate &amp; loadstate Undo (&amp; redo).&nbsp;</span><span class="rvts54"> (see </span><a class="rvts55" href="ContextMenuItems.html">context menu</a><span class="rvts54">)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Compress Savestates</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Enabled by default. &nbsp;This option compresses non movie savestates.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Game Genie ROM</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Allows the use of the game genie ROM. &nbsp;You must have a game genie ROM named gg.rom (it is safe to rename a game genie.nes file to gg.rom) and it must be in the FCEUX base directory (which is the folder fceux.exe is in unless you specified a different folder in the </span><a class="rvts51" href="Directories.html">Directory Override Menu</a><span class="rvts6">).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">If enabled, FCEUX will open gg.rom first when you load a new game. &nbsp;Any codes applied in the game genie screen will be applied to the game just like on a real NES. &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">(Remember that enabling/disabling Game Genie emulation will not take effect until a new game is loaded)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Note: &nbsp;Game genie codes can also be added with the </span><a class="rvts51" href="GameGenieEncoderDecoder.html">Game Genie Encoder/Decoder</a><span class="rvts6"> via the </span><a class="rvts51" href="CheatSearch.html">Cheat Search Menu</a><span class="rvts6"> (and this method does not require a game genie ROM).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Auto-resume old play session</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">If enabled, FCEUX will make a special savestate every time you close ROM, and will automatically load the savestate when you open this ROM next time, so you can continue from where you left the game. In addition, when this option is enabled, FCEUX automatically loads the last used ROM on startup.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts48">Display </span><span class="rvts52">(Sub-Menu)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Input Display</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The input display will display 1-4 pictures of a NES controller at the bottom of the screen. &nbsp;When playing/recording a movie, these controllers will display the input that is captured in the file. &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">When input comes from a movie file rather than then user, it is displayed in a different color (silver)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The input display can also be toggled by hotkey. &nbsp;The default key for toggling the Input display is the "," (comma) key. &nbsp;(This can be re-mapped in the </span><a class="rvts51" href="MapHotkeys.html">Map Hotkeys Menu</a><span class="rvts6">).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Lag Counter</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The lag counter will increment every time to the game fails to poll for user input. &nbsp;It will display in red on any frame that is currently lagging and will increment the lag counter by 1. &nbsp;These situations occur when the game is lagging (too much information to process), or the game is in a screen transition state (so not polling for user input). &nbsp;In &nbsp;a 30fps game (such as Double Dragon 2), it will increment every other frame.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The lag counter value is stored in savestates. &nbsp; &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Displaying the lag counter can also be toggled by hotkey. &nbsp;The default key is the "/" (slash) key. &nbsp;(This can be re-mapped in the </span><a class="rvts51" href="MapHotkeys.html">Map Hokeys Menu)</a><span class="rvts6">.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Frame Counter</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Toggles the display of the frame counter. &nbsp;The frame counter will increment once per frame.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The frame counter display can also be toggled by hotkey. &nbsp;The default key is the "." (period) key. &nbsp;(This can be re-mapped in the </span><a class="rvts51" href="MapHotkeys.html">Map Hotkeys Menu</a><span class="rvts6">).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Rerecord Counter</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Toggles the display of the number of Rerecords done when making a movie. &nbsp;The Rerecord counter will increment every time you load a savestate in Recording mode.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The rerecord counter display can also be toggled by hotkey. &nbsp;The default key is the "M" key. &nbsp;(This can be re-mapped in the </span><a class="rvts51" href="MapHotkeys.html">Map Hotkeys Menu</a><span class="rvts6">).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Movie status icon</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Toggles the display of "pause", "play" or "record" icons in the lower right corner.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">FPS</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Toggles the display of average FPS counter in the upper right corner.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Graphics: BG</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Turning this off will turn off the backgrounds in the game.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Graphics: OBJ</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Turning this off will turn off the objects (sprites) in the game.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Note: You can set the default color when the Backgrounds are turned off. &nbsp;To do so, open fceux.cfg and change the value of the entry named: </span><span class="rvts53">gNoBGFillColor&nbsp;</span></p>
+<p class="rvps2"><span class="rvts53"><br/></span></p>
+<p class="rvps2"><span class="rvts53"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Save Config File</span></p>
+<p class="rvps2"><span class="rvts53"><br/></span></p>
+<p class="rvps2"><span class="rvts32">Saves current settings to fceux.cfg. &nbsp;Normally settings are not saved until FCEUX is closed.</span></p>
+<p class="rvps2"><span class="rvts53"><br/></span></p>
+<p class="rvps2"><span class="rvts53"><br/></span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/feature-tour">Full-featured Help generator</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

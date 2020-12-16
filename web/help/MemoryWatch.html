@@ -1,133 +1,324 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Memory Watch</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("MemoryWatch");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Memory Watch</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="Memory Watch">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Memory Watch">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Memory Watch" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Memory Watch</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Tools2.html">Tools</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Tools2.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="RAMWatch.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="TASEditor.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts17">Memory Watch</span></p>
-<p><span class="rvts12"><br/></span></p>
-<p><span class="rvts12">Overview</span></p>
-<p><span class="rvts12"><br/></span></p>
-<p>Memory watch is a tool designed to values of specific known memory values in the game's <a class="rvts18" href="NESRAMMappingFindingValues.html">RAM</a>. Memory watch does not find values. &nbsp;To find useful values to monitor, see <a class="rvts18" href="CheatSearch.html">Cheats</a>, <span class="rvts18">Ram filter</span>, <a class="rvts18" href="HexEditor.html">Hex Editor</a>, and <a class="rvts18" href="Debugger.html">Debugger</a>.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Inserting Values</span></p>
-<p><br/></p>
-<p>To display a ram value, simply type its address into one of the address fields. &nbsp;The name field allows you to put a brief description of the value. &nbsp; </p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts27">Prefixes</span></p>
-<p><br/></p>
-<p>You must put in the hexi-decimal value of the address, &nbsp;but the value will be displayed will be decimal by default.</p>
-<p><br/></p>
-<p>To display the value in hex, use a prefix of "x" (such as x00FD). &nbsp;</p>
-<p><br/></p>
-<p>Use the prefix "!" to display a 2 byte value. </p>
-<p><br/></p>
-<p>Use a prefix of "X" to watch a 2 byte value in hex.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts27">Saving/Loading Watch files</span></p>
-<p><br/></p>
-<p>You can save your addresses into watch files, as well as loading previous files using the standard save,load,new options in the File menu.</p>
-<p><br/></p>
-<p>FCEUX uses the /memw folder by default but you can specify a new default folder in the <a class="rvts18" href="Directories.html">Directory Override</a> menu.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts27">Options Menu</span></p>
-<p><br/></p>
-<p>If you select <span class="rvts32">Load on Start up</span>, Memory watch will load up automatically when FCEU is started. </p>
-<p><br/></p>
-<p>If you select <span class="rvts32">Load Last File on Start up</span>, the most recent file in the Recent folder will be loaded when memory watch is loaded.</p>
-<p><br/></p>
-<p>If you select <span class="rvts32">Collapse to 1 Column </span>(or press the right arrow button on the bottom left of the dialog), the memory watch dialog is reduced to just 1 column.</p>
-<p><br/></p>
-<p><span class="rvts16">Frozen Memory Addresses</span></p>
-<p><br/></p>
-<p>If one of the watched addresses is frozen by the <a class="rvts18" href="CheatSearch.html">cheats dialog</a> or the <a class="rvts18" href="HexEditor.html">hex editor</a>, it will display blue in the memory watch dialog.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts12">Memory Change Monitor</span></p>
-<p><br/></p>
-<p>The bottom of the memory watch dialog displays a memory change monitoring section. &nbsp;This monitors the 1st two values of each memory watch column. &nbsp;Rather than monitoring the value itself, this monitors the value's behavior. &nbsp;</p>
-<p><br/></p>
-<p>The address being monitored is under the address column.</p>
-<p><br/></p>
-<p>The Formula drop down box shows which criteria the change monitoring is using.</p>
-<p><br/></p>
-<p>The count value displays how many times the value has changed based on the criteria.</p>
-<p><br/></p>
-<p>Reset will reset the count to 0.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts43">Usage Example:</span></p>
-<p><br/></p>
-<p>As an example of the memory change monitoring, Let's say we are recording a movie of the game Super C and want to keep track of when the game lags.</p>
-<p>The ram address 001C functions as a "lag flag". &nbsp;It will remain 0, then change to a positive value on a frame that the game lags.</p>
-<p><br/></p>
-<p>We could put 001C in one of the 1st two memory watch edit boxes. &nbsp;Then set the corresponding formula in the memory change monitoring to "&gt; then" (greater than). &nbsp;Now the count will show us how many lag frames occur in the movie.</p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour">Easily create HTML Help documents</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="MemoryWatch"
+		  data-hnd-context="10"
+		  data-hnd-title="Memory Watch"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Tools2.html">Tools</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Tools2.html" title="Tools" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="RAMWatch.html" title="RAM Watch" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="TASEditor.html" title="TAS Editor" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Memory Watch</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts22">Memory Watch</span></p>
+<p class="rvps2"><span class="rvts17"><br/></span></p>
+<p class="rvps2"><span class="rvts17">Overview</span></p>
+<p class="rvps2"><span class="rvts17"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Memory watch is a tool designed to values of specific known memory values in the game's </span><a class="rvts67" href="NESRAMMappingFindingValues.html">RAM</a><span class="rvts6">. Memory watch does not find values. &nbsp;To find useful values to monitor, see </span><a class="rvts67" href="CheatSearch.html">Cheats</a><span class="rvts6">, </span><span class="rvts67">Ram filter</span><span class="rvts6">, </span><a class="rvts67" href="HexEditor.html">Hex Editor</a><span class="rvts6">, and </span><a class="rvts67" href="Debugger.html">Debugger</a><span class="rvts6">.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Inserting Values</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">To display a ram value, simply type its address into one of the address fields. &nbsp;The name field allows you to put a brief description of the value. &nbsp;&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Prefixes</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">You must put in the hexi-decimal value of the address, &nbsp;but the value will be displayed will be decimal by default.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">To display the value in hex, use a prefix of "x" (such as x00FD). &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Use the prefix "!" to display a 2 byte value.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Use a prefix of "X" to watch a 2 byte value in hex.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Saving/Loading Watch files</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">You can save your addresses into watch files, as well as loading previous files using the standard save,load,new options in the File menu.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">FCEUX uses the /memw folder by default but you can specify a new default folder in the </span><a class="rvts67" href="Directories.html">Directory Override</a><span class="rvts6"> menu.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Options Menu</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">If you select </span><span class="rvts45">Load on Start up</span><span class="rvts6">, Memory watch will load up automatically when FCEU is started.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">If you select </span><span class="rvts45">Load Last File on Start up</span><span class="rvts6">, the most recent file in the Recent folder will be loaded when memory watch is loaded.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">If you select </span><span class="rvts45">Collapse to 1 Column </span><span class="rvts6">(or press the right arrow button on the bottom left of the dialog), the memory watch dialog is reduced to just 1 column.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Frozen Memory Addresses</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">If one of the watched addresses is frozen by the </span><a class="rvts67" href="CheatSearch.html">cheats dialog</a><span class="rvts6"> or the </span><a class="rvts67" href="HexEditor.html">hex editor</a><span class="rvts6">, it will display blue in the memory watch dialog.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts17">Memory Change Monitor</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The bottom of the memory watch dialog displays a memory change monitoring section. &nbsp;This monitors the 1st two values of each memory watch column. &nbsp;Rather than monitoring the value itself, this monitors the value's behavior. &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The address being monitored is under the address column.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The Formula drop down box shows which criteria the change monitoring is using.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The count value displays how many times the value has changed based on the criteria.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Reset will reset the count to 0.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts68">Usage Example:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">As an example of the memory change monitoring, Let's say we are recording a movie of the game Super C and want to keep track of when the game lags.</span></p>
+<p class="rvps2"><span class="rvts6">The ram address 001C functions as a "lag flag". &nbsp;It will remain 0, then change to a positive value on a frame that the game lags.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">We could put 001C in one of the 1st two memory watch edit boxes. &nbsp;Then set the corresponding formula in the memory change monitoring to "&gt; then" (greater than). &nbsp;Now the count will show us how many lag frames occur in the movie.</span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com">Easy CHM and documentation editor</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 
