@@ -5,6 +5,13 @@
 # - web/
 # - fceux.png
 # - index.html
+include:
+- web/help/_translations.js
+- web/help/_keywords.json
+- web/help/_toc.json
+- web/help/taseditor/_translations.json
+- web/help/taseditor/_keywords.json
+- web/help/taseditor/_toc.json
 exclude:
 - attic
 - fceux-server
