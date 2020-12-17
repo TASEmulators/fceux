@@ -1,167 +1,347 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Speedrunning synopsis</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("SpeedrunningSynopsis");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Speedrunning synopsis</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Speedrunning synopsis">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Speedrunning synopsis" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Speedrunning synopsis</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Reference.html">Reference</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Reference.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="FAQ.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="TASEditorInside.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="SpeedrunningSynopsis"
+		  data-hnd-context="21"
+		  data-hnd-title="Speedrunning synopsis"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Reference.html">Reference</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Reference.html" title="Reference" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="FAQ.html" title="FAQ" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="TASEditorInside.html" title="TAS Editor Inside" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Speedrunning synopsis</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">Speedrunning synopsis</span></p>
+<p class="rvps2"><span class="rvts18">Speedrunning synopsis</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Thanks to having a definite goal, creating tool-assisted speedruns is the easiest application of TASing, and all relevant techniques are examined pretty well. Here you can find the summary of generic tasks emerging in the process of polishing the Input for a speedrun. Before reading this, make sure you've learned the materials in </span><a class="rvts27" href="TASingProcess.html">TASing Process</a><span class="rvts21"> and </span><a class="rvts27" href="TASingMethodology.html">TASing Methodology</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Speedrunners have to search for the shortest way of completing every segment of the game. This process of searching consists of testing a multitude of approaches for playing the segment and finally choosing the best approach. Here we will discuss only the problem of choice.</span></p>
-<p class="rvps10"><span class="rvts21">To simplify the problem, TASers usually compare only two approaches: the </span><span class="rvts25">new working</span><span class="rvts21"> approach and the </span><span class="rvts25">old best</span><span class="rvts21"> approach; all other old approaches are promptly forgotten (although the interesting ones can always be saved in the Bookmarks).</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The best of all old (previously tested) approaches can be stored:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">in Bookmarks – recommended</span></li>
-<li class="rvps10"><span class="rvts21">in the History Log – automatically but temporary</span></li>
-<li class="rvps10"><span class="rvts21">in TASer's own memory – not recommended</span></li>
+<p class="rvps7"><span class="rvts20">Thanks to having a definite goal, creating tool-assisted speedruns is the easiest application of TASing, and all relevant techniques are examined pretty well. Here you can find the summary of generic tasks emerging in the process of polishing the Input for a speedrun. Before reading this, make sure you've learned the materials in </span><a class="rvts24" href="TASingProcess.html">TASing Process</a><span class="rvts20"> and </span><a class="rvts24" href="TASingMethodology.html">TASing Methodology</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Speedrunners have to search for the shortest way of completing every segment of the game. This process of searching consists of testing a multitude of approaches for playing the segment and finally choosing the best approach. Here we will discuss only the problem of choice.</span></p>
+<p class="rvps7"><span class="rvts20">To simplify the problem, TASers usually compare only two approaches: the </span><span class="rvts22">new working</span><span class="rvts20"> approach and the </span><span class="rvts22">old best</span><span class="rvts20"> approach; all other old approaches are promptly forgotten (although the interesting ones can always be saved in the Bookmarks).</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The best of all old (previously tested) approaches can be stored:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">in Bookmarks – recommended</span></li>
+ <li class="rvps7"><span class="rvts20">in the History Log – automatically but temporary</span></li>
+ <li class="rvps7"><span class="rvts20">in TASer's own memory – not recommended</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When the new working approach is considered to be better (more optimal) than the old best approach, it's naturally assumed that it's also better than any of the old approaches, so this working approach instantly becomes the best. In the case of using Bookmarks you should re-save the new approach to the slot where the old best approach was stored. At the end of the search the contents of this Bookmark slot are loaded into the final movie.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Optimality criteria in speedruns:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">presence/absence of the specific event in the new and old approach </span><span class="rvts70">(bool)</span></li>
-<li class="rvps10"><span class="rvts21">the time of occurrence of the target event in the new and old approach </span><span class="rvts70">(int)</span></li>
-<li class="rvps10"><span class="rvts21">the state of the game at the same frame in the new and old movie </span><span class="rvts70">(string)</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When the new working approach is considered to be better (more optimal) than the old best approach, it's naturally assumed that it's also better than any of the old approaches, so this working approach instantly becomes the best. In the case of using Bookmarks you should re-save the new approach to the slot where the old best approach was stored. At the end of the search the contents of this Bookmark slot are loaded into the final movie.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Optimality criteria in speedruns:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">presence/absence of the specific event in the new and old approach </span><span class="rvts63">(bool)</span></li>
+ <li class="rvps7"><span class="rvts20">the time of occurrence of the target event in the new and old approach </span><span class="rvts63">(int)</span></li>
+ <li class="rvps7"><span class="rvts20">the state of the game at the same frame in the new and old movie </span><span class="rvts63">(string)</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Respectively, when you're comparing any pair of approaches you are doing one of the three possible actions:</span></p>
-<p class="rvps10"><a class="rvts27" href="SpeedrunningSynopsis.html#CompareEvent">1. Comparing presence/absence of the event.</a></p>
-<p class="rvps31"><a class="rvts57" href="SpeedrunningSynopsis.html#CompareEvent-A">A. By memory</a></p>
-<p class="rvps31"><a class="rvts57" href="SpeedrunningSynopsis.html#CompareEvent-B">B. Using Bookmarks</a></p>
-<p class="rvps10"><a class="rvts27" href="SpeedrunningSynopsis.html#CompareTime">2. Comparing the time of occurrence.</a></p>
-<p class="rvps31"><a class="rvts57" href="SpeedrunningSynopsis.html#CompareTime-A">A. By memory</a></p>
-<p class="rvps31"><a class="rvts57" href="SpeedrunningSynopsis.html#CompareTime-B">B. Using the green arrow</a></p>
-<p class="rvps31"><a class="rvts57" href="SpeedrunningSynopsis.html#CompareTime-C">C. Using a Marker</a></p>
-<p class="rvps31"><a class="rvts57" href="SpeedrunningSynopsis.html#CompareTime-D">D. Using Bookmarks</a></p>
-<p class="rvps10"><a class="rvts27" href="SpeedrunningSynopsis.html#CompareState">3. Comparing the state of the game at one and the same frame.</a></p>
-<p class="rvps31"><a class="rvts57" href="SpeedrunningSynopsis.html#CompareState-A">A. By memory</a></p>
-<p class="rvps31"><a class="rvts57" href="SpeedrunningSynopsis.html#CompareState-B">B. Using Bookmarks</a></p>
-<p class="rvps30"><span class="rvts42"><br/></span></p>
-<p class="rvps10"><a name="CompareEvent"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">1. Comparing presence/absence of the event.</span></p>
-<p class="rvps10"><span class="rvts21">Choose the approach where the needed event happens / unneeded event doesn't happen. The occurrence of the event is only the first (and often easy) step in creating the Input for current segment, and next step is to try speeding up the time of the occurrence.</span></p>
-<p class="rvps10"><span class="rvts37">The search for approaches goes on until the first successful approach is found, or until you're tired (then the event is considered to be unfeasible).</span></p>
-<p class="rvps10"><span class="rvts70">Programming analogy: comparing two Booleans, comparing &nbsp;two arrays of Booleans.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="CompareEvent-A"></a>
-<span class="rvts21">A. Most of time it's enough to simply keep in mind the fact that target event didn't occur in previous approaches. Example: </span><a class="rvts27" href="SemiautomaticTASing.html#FindStartButtonPress">finding the </a><a class="rvts72" href="SemiautomaticTASing.html#FindStartButtonPress">Start buttonpress</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="CompareEvent-B"></a>
-<span class="rvts21">B. When the target event is complex (e.g. you plan to shoot 3 enemies simultaneously), it's recommended to save the most promising approaches into Bookmarks (e.g. an approach where you shot 2 enemies simultaneously and 3rd one shortly after), because if the target event is unfeasible, you might be satisfied with such partial success.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="CompareTime"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">2. Comparing the time of occurrence.</span></p>
-<p class="rvps10"><span class="rvts21">Choose the approach where the target event occurs earlier. The time of occurrence is defined by the frame in which the event can be detected, while in previous frame it cannot be detected. The number of this frame is found by bringing the Playback cursor to the frame and watching the FCEUX screen (or Memory Watch) for confirming.</span></p>
-<p class="rvps10"><span class="rvts37">The search for approaches goes on until you're tired, or until all possible types of approaches are exhausted (then the current best approach is considered to be frame perfect, until new factors are found).</span></p>
-<p class="rvps10"><span class="rvts70">Programming analogy: comparing two Integer Numbers.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="CompareTime-A"></a>
-<span class="rvts21">A. For simplest segments and small subsegments it may be enough to just keep in mind the current fastest frame number and compare results of all new approaches with this number. But in general it's not recommended to rely on human memory. Details: </span><a class="rvts27" href="TASingProcess.html#EndOfSegment">TASing Process</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="CompareTime-B"></a>
-<span class="rvts21">B. On simple segments you can refer to the green arrow of Taseditor. When using it, you're supposed to always leave the Playback cursor at the frame of target event (which is only natural). Thus if the new frame of target event is located above the green arrow, it means the new approach is faster than previous approach. Details:</span><a class="rvts27" href="NonlinearTASing.html#GreenArrow">TASing Methodology</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="CompareTime-C"></a>
-<span class="rvts21">C. On complex segments use an unbound Marker that always points at the current fastest frame number in the Piano Roll. Every time you beat the old result you're supposed to manually move the Marker higher. Thus if the new frame of target event is located above the Marker, it means the new approach is faster than the old best approach.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="CompareTime-D"></a>
-<span class="rvts21">D. On segments of any level of complexity it's recommended to use Bookmarks that are displayed in the icons column of the Piano Roll. Every time you beat the old result you're supposed to manually save the current approach to the same Bookmark slot, replacing the old best approach stored there. Thus if the new frame of target event is located above the Bookmark icon, it means the new approach is faster than the old best approach.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="CompareState"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">3. Comparing the state of the game at the same frame.</span></p>
-<p class="rvps10"><span class="rvts21">Choose the approach where properties of the game are more advantageous in a whole. This type of comparison is useful when you need to evaluate compound in-game situations. For example, in Formula 1 racing you have to care both about being as fast as possible and wearing tyres as little as possible, so you need to find an optimal balance on each segment of the track instead of simply rushing.</span></p>
-<p class="rvps10"><span class="rvts21">Here our segment has defined end frame, and every new test is supposed to replay the segment up to that frame. Taseditor stores this frame number in the form of the green arrow, which automatically pauses emulation when you watch new approaches. So TASer only needs to edit Input (creating new approaches), launch replaying, wait for the stopping and evaluate the result (judging by FCEUX screen or Memory Watch).</span></p>
-<p class="rvps10"><span class="rvts37">The search of approaches goes on until you're tired, or until all possible types of approaches are exhausted (then the current best approach is considered to be perfect, until new factors are found).</span></p>
-<p class="rvps10"><span class="rvts70">Programming analogy: comparing two Strings, comparing &nbsp;two arrays of Integer Numbers.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="CompareState-A"></a>
-<span class="rvts21">A. For simple segments it may be enough to just keep in mind the value of the most important property of the game state achieved in the old best approach. Every time you watch the replaying of a new approach, you can compare results of the new approach with this value. If you decide the new value is better, you have to memorize it in place of old value. Example: </span><a class="rvts27" href="NonlinearTASing.html#LuckManipulation">luck manipulation</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">When there's more than one important property, it's not recommended to rely on human memory.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="CompareState-B"></a>
-<span class="rvts21">B. On complex segments and especially on gigantic segments (e.g. with the size of a whole level of the game) use Bookmarks that store alternative branches of the movie. The best approach for playing the segment is saved into one Bookmark slot and the new approach is saved into another slot. Then you can easily switch between these slots and compare values of each property of the game state. In addition, you can point the mouse cursor to respective Bookmarks to see screenshots of the game state and visually compare their properties with current image on FCEUX screen.</span></p>
-<p class="rvps10"><span class="rvts21">To display important RAM data on screenshots you should use Lua graphical output, then Memory Watch window won't be required to judge about hidden properties, and you will be able to successfully judge by screenshots only. Details: </span><a class="rvts27" href="ProgramCustomization.html#DisplayBranchScreenshots">Program Customization</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">In the situation when some properties in the new approach are better and some others are worse you'll have to thoroughly weigh all of them (either in your mind or using a Lua-powered aggregate formula) and then decide which state of the game is better.</span></p>
-<p class="rvps10"><span class="rvts21">Every time you beat the old result you're supposed to manually save the new approach to the same Bookmark slot, replacing the old best approach stored there.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">After finding the fastest approach of playing the segment, a good TASer is expected to improve the entertainment value of the play through the segment. The optimality criteria in such activity may be very diverse, but the general requirement is to keep the same time of playing through the segment.</span></p>
-<p class="rvps10"><span class="rvts21">Alternatively, you can postpone the entertainment improvement of the segment and proceed to the next.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Respectively, when you're comparing any pair of approaches you are doing one of the three possible actions:</span></p>
+<p class="rvps7"><a class="rvts24" href="SpeedrunningSynopsis.html#CompareEvent">1. Comparing presence/absence of the event.</a></p>
+<p class="rvps19"><a class="rvts43" href="SpeedrunningSynopsis.html#CompareEvent-A">A. By memory</a></p>
+<p class="rvps19"><a class="rvts43" href="SpeedrunningSynopsis.html#CompareEvent-B">B. Using Bookmarks</a></p>
+<p class="rvps7"><a class="rvts24" href="SpeedrunningSynopsis.html#CompareTime">2. Comparing the time of occurrence.</a></p>
+<p class="rvps19"><a class="rvts43" href="SpeedrunningSynopsis.html#CompareTime-A">A. By memory</a></p>
+<p class="rvps19"><a class="rvts43" href="SpeedrunningSynopsis.html#CompareTime-B">B. Using the green arrow</a></p>
+<p class="rvps19"><a class="rvts43" href="SpeedrunningSynopsis.html#CompareTime-C">C. Using a Marker</a></p>
+<p class="rvps19"><a class="rvts43" href="SpeedrunningSynopsis.html#CompareTime-D">D. Using Bookmarks</a></p>
+<p class="rvps7"><a class="rvts24" href="SpeedrunningSynopsis.html#CompareState">3. Comparing the state of the game at one and the same frame.</a></p>
+<p class="rvps19"><a class="rvts43" href="SpeedrunningSynopsis.html#CompareState-A">A. By memory</a></p>
+<p class="rvps19"><a class="rvts43" href="SpeedrunningSynopsis.html#CompareState-B">B. Using Bookmarks</a></p>
+<p class="rvps18"><span class="rvts6"><br/></span></p>
+<p class="rvps7"><a name="CompareEvent"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">1. Comparing presence/absence of the event.</span></p>
+<p class="rvps7"><span class="rvts20">Choose the approach where the needed event happens / unneeded event doesn't happen. The occurrence of the event is only the first (and often easy) step in creating the Input for current segment, and next step is to try speeding up the time of the occurrence.</span></p>
+<p class="rvps7"><span class="rvts33">The search for approaches goes on until the first successful approach is found, or until you're tired (then the event is considered to be unfeasible).</span></p>
+<p class="rvps7"><span class="rvts63">Programming analogy: comparing two Booleans, comparing &nbsp;two arrays of Booleans.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="CompareEvent-A"></a><span class="rvts20">A. Most of time it's enough to simply keep in mind the fact that target event didn't occur in previous approaches. Example: </span><a class="rvts24" href="SemiautomaticTASing.html#FindStartButtonPress">finding the </a><a class="rvts24" href="SemiautomaticTASing.html#FindStartButtonPress">Start buttonpress</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="CompareEvent-B"></a><span class="rvts20">B. When the target event is complex (e.g. you plan to shoot 3 enemies simultaneously), it's recommended to save the most promising approaches into Bookmarks (e.g. an approach where you shot 2 enemies simultaneously and 3rd one shortly after), because if the target event is unfeasible, you might be satisfied with such partial success.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="CompareTime"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">2. Comparing the time of occurrence.</span></p>
+<p class="rvps7"><span class="rvts20">Choose the approach where the target event occurs earlier. The time of occurrence is defined by the frame in which the event can be detected, while in previous frame it cannot be detected. The number of this frame is found by bringing the Playback cursor to the frame and watching the FCEUX screen (or Memory Watch) for confirming.</span></p>
+<p class="rvps7"><span class="rvts33">The search for approaches goes on until you're tired, or until all possible types of approaches are exhausted (then the current best approach is considered to be frame perfect, until new factors are found).</span></p>
+<p class="rvps7"><span class="rvts63">Programming analogy: comparing two Integer Numbers.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="CompareTime-A"></a><span class="rvts20">A. For simplest segments and small subsegments it may be enough to just keep in mind the current fastest frame number and compare results of all new approaches with this number. But in general it's not recommended to rely on human memory. Details: </span><a class="rvts24" href="TASingProcess.html#EndOfSegment">TASing Process</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="CompareTime-B"></a><span class="rvts20">B. On simple segments you can refer to the green arrow of Taseditor. When using it, you're supposed to always leave the Playback cursor at the frame of target event (which is only natural). Thus if the new frame of target event is located above the green arrow, it means the new approach is faster than previous approach. Details:</span><a class="rvts24" href="NonlinearTASing.html#GreenArrow">TASing Methodology</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="CompareTime-C"></a><span class="rvts20">C. On complex segments use an unbound Marker that always points at the current fastest frame number in the Piano Roll. Every time you beat the old result you're supposed to manually move the Marker higher. Thus if the new frame of target event is located above the Marker, it means the new approach is faster than the old best approach.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="CompareTime-D"></a><span class="rvts20">D. On segments of any level of complexity it's recommended to use Bookmarks that are displayed in the icons column of the Piano Roll. Every time you beat the old result you're supposed to manually save the current approach to the same Bookmark slot, replacing the old best approach stored there. Thus if the new frame of target event is located above the Bookmark icon, it means the new approach is faster than the old best approach.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="CompareState"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">3. Comparing the state of the game at the same frame.</span></p>
+<p class="rvps7"><span class="rvts20">Choose the approach where properties of the game are more advantageous in a whole. This type of comparison is useful when you need to evaluate compound in-game situations. For example, in Formula 1 racing you have to care both about being as fast as possible and wearing tyres as little as possible, so you need to find an optimal balance on each segment of the track instead of simply rushing.</span></p>
+<p class="rvps7"><span class="rvts20">Here our segment has defined end frame, and every new test is supposed to replay the segment up to that frame. Taseditor stores this frame number in the form of the green arrow, which automatically pauses emulation when you watch new approaches. So TASer only needs to edit Input (creating new approaches), launch replaying, wait for the stopping and evaluate the result (judging by FCEUX screen or Memory Watch).</span></p>
+<p class="rvps7"><span class="rvts33">The search of approaches goes on until you're tired, or until all possible types of approaches are exhausted (then the current best approach is considered to be perfect, until new factors are found).</span></p>
+<p class="rvps7"><span class="rvts63">Programming analogy: comparing two Strings, comparing &nbsp;two arrays of Integer Numbers.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="CompareState-A"></a><span class="rvts20">A. For simple segments it may be enough to just keep in mind the value of the most important property of the game state achieved in the old best approach. Every time you watch the replaying of a new approach, you can compare results of the new approach with this value. If you decide the new value is better, you have to memorize it in place of old value. Example: </span><a class="rvts24" href="NonlinearTASing.html#LuckManipulation">luck manipulation</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">When there's more than one important property, it's not recommended to rely on human memory.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="CompareState-B"></a><span class="rvts20">B. On complex segments and especially on gigantic segments (e.g. with the size of a whole level of the game) use Bookmarks that store alternative branches of the movie. The best approach for playing the segment is saved into one Bookmark slot and the new approach is saved into another slot. Then you can easily switch between these slots and compare values of each property of the game state. In addition, you can point the mouse cursor to respective Bookmarks to see screenshots of the game state and visually compare their properties with current image on FCEUX screen.</span></p>
+<p class="rvps7"><span class="rvts20">To display important RAM data on screenshots you should use Lua graphical output, then Memory Watch window won't be required to judge about hidden properties, and you will be able to successfully judge by screenshots only. Details: </span><a class="rvts24" href="ProgramCustomization.html#DisplayBranchScreenshots">Program Customization</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">In the situation when some properties in the new approach are better and some others are worse you'll have to thoroughly weigh all of them (either in your mind or using a Lua-powered aggregate formula) and then decide which state of the game is better.</span></p>
+<p class="rvps7"><span class="rvts20">Every time you beat the old result you're supposed to manually save the new approach to the same Bookmark slot, replacing the old best approach stored there.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">After finding the fastest approach of playing the segment, a good TASer is expected to improve the entertainment value of the play through the segment. The optimality criteria in such activity may be very diverse, but the general requirement is to keep the same time of playing through the segment.</span></p>
+<p class="rvps7"><span class="rvts20">Alternatively, you can postpone the entertainment improvement of the segment and proceed to the next.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/help-authoring-tool">Single source CHM, PDF, DOC and HTML Help creation</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/feature-tour/create-help-files-for-the-qt-help-framework">Create help files for the Qt Help Framework</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

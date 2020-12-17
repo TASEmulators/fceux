@@ -1,283 +1,455 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>5. Program customization</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("ProgramCustomization");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>5. Program customization</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="5. Program customization">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="5. Program customization" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>5. Program customization</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="BeginnersGuide.html">Beginner's Guide</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="BeginnersGuide.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="SemiautomaticTASing.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="AdvancedFeatures.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="ProgramCustomization"
+		  data-hnd-context="13"
+		  data-hnd-title="5. Program customization"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="BeginnersGuide.html">Beginner's Guide</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="BeginnersGuide.html" title="Beginner's Guide" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="SemiautomaticTASing.html" title="4.3. Semiautomatic TASing" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="AdvancedFeatures.html" title="6. Advanced Features" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>5. Program customization</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">Program customization</span></p>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Certain useful features of Taseditor are disabled by default, because using them requires understanding of their working principles. This chapter describes all Taseditor options and settings, as well as FCEUX settings that affect your work in Taseditor.</span></p>
-<p class="rvps10"><span class="rvts21">Settings are kept in the </span><span class="rvts37">fceux.cfg</span><span class="rvts21"> file in the emulator's main folder. If you delete this file, all settings will reset to default values when you launch FCEUX.</span></p>
-<div class="rvps10"><table width="100%" border="0" cellpadding="4" cellspacing="0" style="border-width: 0px;">
-<tr valign="top">
-<td style="width: 847px;"><p class="rvps10"><span class="rvts21">First, if you've already read the </span><a class="rvts27" href="ProgramInterface.html">chapter 2</a><span class="rvts21"> and understood the purpose of all GUI elements, you should disable pop-up tooltips (intended for newbies only). Go to the "Help" submenu of Taseditor main menu and uncheck the option "Enable Tooltips". Before doing it you may want to actually read all the tooltips by pointing the mouse cursor at different elements of TAS Editor window, and thus consolidate your knowledge of the GUI.</span></p>
-</td>
-<td valign="top" style="width: 148px;"><p class="rvps19"><img alt="" style="padding : 1px;" src="lib/help-menu.png"/></p>
-</td>
-</tr>
+<p class="rvps2"><span class="rvts18">Program customization</span></p>
+<p class="rvps2"><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Certain useful features of Taseditor are disabled by default, because using them requires understanding of their working principles. This chapter describes all Taseditor options and settings, as well as FCEUX settings that affect your work in Taseditor.</span></p>
+<p class="rvps7"><span class="rvts20">Settings are kept in the </span><span class="rvts33">fceux.cfg</span><span class="rvts20"> file in the emulator's main folder. If you delete this file, all settings will reset to default values when you launch FCEUX.</span></p>
+<div class="rvps7">
+<table width="100%" border="0" cellpadding="4" cellspacing="0" style="border-width: 0px; border-spacing: 0px;">
+ <tr valign="top">
+  <td width="847" style="padding: 4px;">
+   <p class="rvps7"><span class="rvts20">First, if you've already read the </span><a class="rvts24" href="ProgramInterface.html">chapter 2</a><span class="rvts20"> and understood the purpose of all GUI elements, you should disable pop-up tooltips (intended for newbies only). Go to the "Help" submenu of Taseditor main menu and uncheck the option "Enable Tooltips". Before doing it you may want to actually read all the tooltips by pointing the mouse cursor at different elements of TAS Editor window, and thus consolidate your knowledge of the GUI.</span></p>
+  </td>
+  <td width="148" valign="top" style="padding: 4px;">
+   <p class="rvps12"><img alt="" style="padding : 1px;" src="lib/help-menu.png"></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps10"><span class="rvts21">Now open the "View" submenu.</span></p>
-<p class="rvps10"><img align="left" alt="" style="padding : 6px;" src="lib/view-menu.png"/></p>
-<p class="rvps10"><span class="rvts21">The "Find Note window" brings up the window dedicated to searching text in Marker Notes. This function is useful when you're documenting your movie with Notes. It's described in the next chapter.</span></p>
-<p class="rvps10"><span class="rvts21">Then there are several checkboxes allowing to customize the program interface. To try the customization possibilities, create a test project and experiment with it.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="DisplayBranchScreenshots"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">View -&gt; Display Branch Screenshots</span></p>
-<p class="rvps10"><span class="rvts21">Displays pop-up screenshots when you point mouse cursor over Bookmarks. The screenshot helps you to recall movie events saved to the Bookmark, which simplifies searching for the needed branch of the movie, as you don't have to actually load the Bookmark when you need to have an idea on its contents. This way you can also quickly compare results of several alternative approaches.</span></p>
-<p class="rvps10"><span class="rvts21">This option is enabled by default. If disabled, no screenshots will pop up on mouse hover.</span></p>
-<p class="rvps10"><span class="rvts21">It's recommended to have it enabled, unless you're annoyed with pop-up pictures partially obstructing the view on the Piano Roll.</span></p>
-<p class="rvps10"><a name="DisplayBranchDescriptions"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">View -&gt; Display Branch Descriptions</span></p>
-<p class="rvps10"><span class="rvts21">Displays pop-up descriptions </span><span class="rvts21">when you point mouse cursor over Bookmarks.</span><span class="rvts21"> The text, as well as the screenshot, gives you additional information about the contents of the Bookmark, helping to decide whether this branch should be loaded or not.</span></p>
-<p class="rvps10"><span class="rvts21">The description text is taken from the Marker above the frame of that Bookmark. The Marker itself may be actually removed from the working movie long ago, but if the Bookmark was created while the Marked existed, then this Marker still exists in the branch of this Bookmark. And if you load this Bookmark, the Marker will reappear on its place.</span></p>
-<p class="rvps10"><span class="rvts21">So, when trying alternative strategies of playing through a large segment (e.g. whole level of the game), before saving every approach to a separate branch, you can make a name for the approach by setting a Marker at the Playback cursor position and typing a text message like "</span><span class="rvts37">here I chose upper way</span><span class="rvts21">" or just "</span><span class="rvts37">upper way</span><span class="rvts21">". After that, save a Bookmark on that frame. Then you can remove the Marker together with the Input of the old approach and create next approach by applying another strategy of playing the segment. When the new approach if finished and replayed, you can again create a Marker with a Note like "</span><span class="rvts37">here I chose lower way</span><span class="rvts21">" and save all that to another Bookmark. After that you can save the project and, say, close Taseditor. Next day you can easily recall all pros and cons of the two strategies you tried. Each Bookmark will show you the screenshot of the bookmarked frame and the text you wrote for that Bookmark. While it can be hard to distinguish the strategies by screenshots (since both approaches end at the same event of the game), but text descriptions will make them easy to recognize.</span></p>
-<p class="rvps10"><span class="rvts21">This option is enabled by default. </span><span class="rvts21">If disabled, no descriptions will pop up on mouse hover.</span></p>
-<p class="rvps10"><span class="rvts21">It's recommended to have it enabled, unless you're annoyed with pop-up text fields.</span></p>
-<p class="rvps10"><a name="EnableHotChanges"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">View -&gt; Enable Hot Changes</span></p>
-<p class="rvps10"><span class="rvts21">Switches the Hot Changes feature on and off.</span></p>
-<p class="rvps10"><span class="rvts21">Enabled by default. If disabled, all buttonpress symbols will be displayed in a standard black color. Otherwise, each symbol will have its own level of "hotness", depending on how long ago the corresponding Piano Roll cell was edited. Recently modified buttonpresses are more hot, so they are displayed by more intense shade of red. As the hotness decreases, the symbol colors become darker (more cold) and finally turn into standard black.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps18"><img alt="" style="padding : 1px;" src="lib/hotchanges-colors.png"/></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">In total, Taseditor supports 15 shades of hotness + zeroth black color. When you change the state of an Input cell, it receives maximum hotness value (15), and all the previously edited cells cool down by 1. Thereby you only need a quick look at the Piano Roll to get an idea which edits were done just recently and which were done before, or long ago.</span></p>
-<p class="rvps10"><span class="rvts21">Also, with Hot Changes you can see which buttonpresses were recently removed – instead of an empty cell there will be a dash of the corresponding color. The dash also changes its color while cooling down, and after 15 levels it finally disappears.</span></p>
-<p class="rvps10"><span class="rvts21">The same dashes appear when you insert new frames in the movie.</span></p>
-<p class="rvps10"><span class="rvts21">It's recommended to </span><span class="rvts21">enable this feature to increase the usability of Taseditor. In theory it should even increase your working speed, because this way you never have to recall which actions you did a minute ago. Of course even without Hot Changes you can always remind the sequence of last actions by reverting History (making several </span><span class="rvts30">Ctrl + Z</span><span class="rvts21"> keypresses) and then returning the movie to normal state again (making as many </span><span class="rvts30">Ctrl + Y</span><span class="rvts21"> keypresses). But in this case you will also truncate the Greenzone. So better just leave the Hot Changes enabled.</span></p>
-<p class="rvps10"><span class="rvts21">The only downside of this feature is that Hot Changes data will be stored in the History Log and in FM3 project file, thus increasing the amount of occupied memory.</span></p>
-<p class="rvps10"><a name="Followundocontext"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">View -&gt; Follow undo context</span></p>
-<p class="rvps10"><span class="rvts21">Scrolls the Piano Roll to relevant place every time you make an undo or redo. A purple pointer appears on the modified frame </span><span class="rvts21">for a brief moment</span><span class="rvts21">, thus drawing your attention to the movie changes.</span></p>
-<p class="rvps10"><span class="rvts21">This option is enabled by default. </span><span class="rvts21">If disabled, the Piano Roll won't automatically scroll to the purple pointer.</span></p>
-<p class="rvps10"><span class="rvts21">It's recommended to have it enabled, in order</span><span class="rvts21"> to be able to backtrack undos. Usually, right after you revert an operation you want to make another edit on the same frame or nearby, so the autoscrolling is useful.</span></p>
-<p class="rvps10"><a name="FollowMarkerNotecontext"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">View -&gt; Follow Marker Note context</span></p>
-<p class="rvps10"><span class="rvts21">Scrolls the Piano Roll to relevant Marker when you start editing its Note.</span><span class="rvts21"> For example, when you click the upper edit field to start editing the Note of the Marker above the Playback cursor, Piano Roll jumps to that Marker, allowing you to see its context (neighbor Markers and Input). And when you click the lower edit field (a Note above the Selection cursor), Piano Roll scrolls to the Marker above the Selection. This way you can observe the surroundings of the relevant Marker while editing its Note.</span></p>
-<p class="rvps10"><span class="rvts21">This option is enabled by default. </span><span class="rvts21">If disabled, the Piano Roll won't automatically scroll to the Markers.</span></p>
-<p class="rvps10"><span class="rvts21">It's recommended to have it enabled.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">And the View settings are over. During your future work you likely won't need to change these checkboxes.</span></p>
-<p class="rvps10"><img align="left" alt="" style="padding : 6px;" src="lib/config-menu.png"/></p>
-<p class="rvps10"><span class="rvts21">Now open the "Config" submenu. Options listed in this menu affect Taseditor workflow more significantly. You may need reconfiguring some of them more than once.</span></p>
-<p class="rvps10"><a name="Projectfilesavingoptions"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Project file saving options</span></p>
-<p class="rvps10"><span class="rvts21">Opens the dialog window where you can configure the autosave function and </span><span class="rvts21">select which aspects should be saved to FM3 files.</span></p>
-<p class="rvps10"><span class="rvts21">Taseditor has the feature of automatically saving current project to disk when user doesn't save it manually </span><span class="rvts21">(</span><span class="rvts30">Ctrl + S</span><span class="rvts21">)</span><span class="rvts21"> for too long. Before Taseditor, TASers saved their movie to disk every time they saved a savestate. But Taseditor projects store much more data, and saving FM3 files can take several seconds, so it's not reasonable to resave them too often.</span></p>
-<p class="rvps10"><span class="rvts21">The default autosave period is 15 minutes. This means, if you've made some substantial changes to the project (e.g. you edited Input, and an asterisk appeared in the TAS Editor window caption), and then didn't save project for 15 minutes, Taseditor will remind you about that or just execute saving itself, depending on the state of the "silently" checkbox. </span><span class="rvts21">If the checkbox is enabled, Taseditor silently saves the project to disk under the same filename. If it is disabled, Taseditor brings up the "Save As" dialog, where you can confirm the saving or cancel it. In the latter case Taseditor will wait another period of time until reminding you about the unsaved data.</span></p>
-<p class="rvps10"><span class="rvts21">The autosave function only works when current project already has a filename.</span></p>
-<p class="rvps10"><span class="rvts21">Maximum possible value of the period is 1440 minutes (24 hours). You can disable this function by switching off the "Autosave project" checkbox, but that's not recommended.</span></p>
-<p class="rvps10"><a name="Setmaxundolevels"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Set max undo levels</span></p>
-<p class="rvps10"><span class="rvts21">Specifies</span><span class="rvts21"> the maximum number of undo steps, how many times you can restore previous state of the project by pressing </span><span class="rvts30">Ctrl + Z</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">The History Log needs a lot of computer memory and takes some disk space to save FM3 files. The whole Log is stored in project files in compressed state. The compression is done in background – when the emulator is idle, Taseditor gradually compresses new items of the History Log. Thanks to this behavior, the History Log size doesn't affect FM3 saving time much.</span></p>
-<p class="rvps10"><span class="rvts21">With this setting you can adjust the amount of memory occupied by History Log. By default you have 100 undo levels, which means you can revert up to hundred of recent movie edits. It's not very much, because during real TASing you make lots of various edits within a small time span, as the time runs imperceptibly. If your computer has enough RAM, you can increase the "max undo levels" value up to the maximum possible number – 1000.</span></p>
-<p class="rvps10"><a name="SetGreenzonecapacity"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/greenzone-capacity.png"/></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Set Greenzone capacity</span></p>
-<p class="rvps10"><span class="rvts21">Defines the maximum size of the Greenzone. The Greenzone is used for easier Playback cursor navigation, allowing to instantly return to any frame that has been emulated. It needs a lot of computer memory to store emulator's information and a lot of disk space for saving FM3 projects.</span></p>
-<p class="rvps10"><span class="rvts21">The more of green and red frames there are in the Piano Roll, the more memory the Greenzone occupies. For most NES games 1 frame costs about 10 kilobytes (compressed data). So, big movie projects may take hundreds of megabytes. It affects the project loading and saving time.</span></p>
-<p class="rvps10"><span class="rvts21">To decrease the amount of needed memory, Taseditor regularly cleans the Greenzone tail, forgetting the info about segments that are too far from the Playback cursor.</span></p>
-<p class="rvps10"><span class="rvts21">This cleaning doesn't mean the Greenzone becomes inaccessible (white) on those frames. That would be very inconvenient, because to replay these frames you would need to wait until the emulation runs from the beginning of the movie. </span><span class="rvts21">To avoid such inconvenience and still free some memory from old Greenzone sections, Taseditor uses </span><span class="rvts37">gradual rarefication</span><span class="rvts21"> of the Greenzone tail.</span></p>
-<p class="rvps10"><span class="rvts21">This process works like shown on the picture to the right. The light-blue cursor runs down along the Piano Roll. The cursor is the head of the Greenzone. It leaves green/red lines behind, but far above it some of the lines become pale again. At first, every odd frame is cleared, then 3 of every 4, then 7 of 8, and finally 15 of 16.</span></p>
-<p class="rvps10"><span class="rvts21">Thus the Greenzone tail contains many hollow sections. And if you decide to send emulator to a frame inside such hollow section, you'll need to wait while emulation runs to it from the nearest bright Greenzone frame. But since bright frames alternate every 2 or 4 frames, the waiting will only last a split second, so you won't likely notice the difference between jumping to a regular Greenzone frame (instant jump) and jumping to a cleared tail (instant seeking).</span></p>
-<p class="rvps10"><span class="rvts21">By adjusting the "</span><span class="rvts21">Set greenzone capacity</span><span class="rvts21">" setting you can specify how many Greenzone frames (starting from its head) must stay untouched. On the picture to the right this number is 8.</span></p>
-<p class="rvps10"><span class="rvts21">For an experiment, choose the "</span><span class="rvts21">Set greenzone capacity</span><span class="rvts21">" item, a dialog window will appear asking you to enter a number, type 100 and press OK. This will mean that first hundred of frames above the Playback cursor should not be cleaned. Any cursor navigation along this area will be instant, so you may drag the light-blue cursor and use rewind with maximum comfort. After the first hundred of frames the cleaning will be removing every other frame – you'll see alternation of bright and pale lines in the Piano Roll. This alternation will last for about 200 frames. The Playback cursor navigation along the area of 200 frames will also be almost instant.</span></p>
-<p class="rvps10"><span class="rvts21">This way the Greenzone covers 100 + 200 = 300 frames, while only 100 + 100 = 200 frames are stored in memory. Then, during next 400 frames, every filled line will alternate with 3 cleared lines, and so on. In total, the Greenzone will only occupy memory needed for storing the data of 500 frames (about 5 MB), while the accessible area will be 3100 frames (about a minute).</span></p>
-<p class="rvps10"><span class="rvts21">By default, the Greenzone capacity is 10000 frames. This should be enough for most TASes. </span><span class="rvts21">It's recommended to TAS with</span><span class="rvts21"> no less than 1000 frames of Greenzone capacity, because the further economy would be impractical.</span></p>
-<p class="rvps10"><span class="rvts21">The maximum number for that parameter is 50000.</span></p>
-<p class="rvps10"><a name="EnableGreenzoning"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Enable Greenzoning</span></p>
-<p class="rvps10"><span class="rvts21">Controls the process of collecting data to the Greenzone.</span></p>
-<p class="rvps10"><span class="rvts21">If the option is enabled, every new frame is saved into the Greenzone right after it has been emulated. This is intended behavior of Taseditor, so the option is enabled by default.</span></p>
-<p class="rvps10"><span class="rvts21">Disabling this option may be useful in rare cases, for example, when running bots which need high performance. But in normal situations it's recommended to have this function enabled.</span></p>
-<p class="rvps10"><a name="AutofirePatternskipsLag"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Autofire Pattern skips Lag</span></p>
-<p class="rvps10"><span class="rvts21">Accounts for lag when you're using patterns (</span><span class="rvts30">Alt</span><span class="rvts21"> + clicks on Input).</span></p>
-<p class="rvps10"><span class="rvts21">If the option is disabled, patterns appear in the Piano Roll exactly like they were coded (e.g. for the pattern "</span><span class="rvts37">Alternating (1010...)</span><span class="rvts21">" the new buttonpresses will indeed alternate one after another).</span></p>
-<p class="rvps10"><span class="rvts21">If </span><span class="rvts21">the option is</span><span class="rvts21"> enabled, the resulting sequence of buttonpresses may differ from original pattern (lag frames will have additional gaps not present in the pattern).</span></p>
-<p class="rvps10"><span class="rvts21">Since lag frames aren't accounted by most games, you have to skip red lines of the Piano Roll to correctly calculate the gaps between presses. For instance, if there must be exactly 3 blank frames between every buttonpress (pattern "10001000"), but there's also one lag frame in the middle of current segment, you have to add 1 more blank frame &nbsp;(100</span><span class="rvts25">0</span><span class="rvts21">01000).</span></p>
-<p class="rvps10"><span class="rvts21">This option is enabled by default.</span><span class="rvts21"> It's recommended to leave it enabled, because in vast majority of cases you'll need to skip lag frames, in order to adapt buttonpresses to how the game interprets Input.</span></p>
-<p class="rvps10"><a name="AutoAdjustInputAccordingtoLag"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Auto-adjust Input according to Lag</span></p>
-<p class="rvps10"><span class="rvts21">Enables automatic adjustment of Input according to changes of lag data.</span></p>
-<p class="rvps10"><span class="rvts21">Basically, games only care about Input at green lines of the Piano Roll. It's pointless to draw any Input on red lines, because during lag frames the game doesn't poll Input. Those frames simply don't exist from the point of view of the game engine.</span></p>
-<p class="rvps10"><span class="rvts21">When you edit Input, you change the flow of game events, and lag may appear on different frames too. If those frames previously had a meaningful Input, this Input must be shifted to the frames without lag, to allow it to affect the game.</span></p>
-<p class="rvps10"><span class="rvts21">If this checkbox is enabled, you won't have to adjust the Input manually every time the Lag appears on different frames. Taseditor will insert an extra line at every new lag frame, thus shifting Input 1 frame down. And when an old lag frame disappears, Taseditor will remove respective frames from the movie, thus shifting Input up. As a result, you can be sure that the game will always perceive your old Input correctly, no matter any Lag changes.</span></p>
-<p class="rvps10"><span class="rvts21">Auto-adjustment operations are done by Taseditor only when you're watching (emulating) a segment, i.e. when Playback cursor runs through pale Piano Roll lines. The result of these operations is saved into the current History Log item.</span></p>
-<p class="rvps10"><span class="rvts21">This feature is enabled by default, and it's recommended to always work with the function enabled. It significantly increases the comfort of TASing, especially when dealing with lag-heavy games.</span></p>
-<p class="rvps10"><a name="DrawInputbydragging"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Draw Input by dragging</span></p>
-<p class="rvps10"><span class="rvts21">Allows to literally draw Input by holding the left mouse button and moving the mouse cursor over the Piano Roll.</span></p>
-<p class="rvps10"><span class="rvts21">This option is enabled by default, so you can </span><span class="rvts21">quickly draw or erase a long line of buttonpresses.</span></p>
-<p class="rvps10"><span class="rvts21">Drawing/erasing is usually constrained by single column, which allows user to do sweeping motions with the mouse. But if you hold the </span><span class="rvts30">Shift</span><span class="rvts21"> key while drawing, you will be able to draw/erase Input freely (it's rather impractical, but fun).</span></p>
-<p class="rvps10"><span class="rvts21">If you disable this option, your clicks will only set/unset single buttonpresses. It may be necessary, for example, if you have trembling hands. But otherwise enabling this feature is recommended.</span></p>
-<p class="rvps10"><a name="CombineconsecutiveRecordings"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Combine consecutive Recordings/Draws</span></p>
-<p class="rvps10"><span class="rvts21">Combines consecutive operations of Input Recording into single item of the History Log. Also combines all Input drawn with the same press of mouse button.</span></p>
-<p class="rvps10"><span class="rvts21">This feature is disabled by default. So when you're recording Input, </span><span class="rvts21">every recorded frame will create a separate item in the History Log, and you can undo changes for any frame. Also, when you're drawing Input, every new stroke will create a new History Log item, and you can undo each of them separately.</span></p>
-<p class="rvps10"><span class="rvts21">However, in real TASing you don't need such precision of the undo. In fact, it may even become irritating when you have to undo every buttonpress separately. So, to save considerable amount of space in History Log, it's recommended to enable this option.</span></p>
-<p class="rvps10"><a name="Use1PkeysforallsingleRecordings"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Use 1P keys for all single Recordings</span></p>
-<p class="rvps10"><span class="rvts21">Allows to record any joypad Input using only the first gamepad (1P). This function is used when you record Input traditional way using multitracking method to take turns for different players, e.g. first you record a short segment of Input for player one (1P), then record the Input for 2P and so on.</span></p>
-<p class="rvps10"><span class="rvts21">Thanks to multitracking, you don't have to press buttons on both controllers at once. And with the "Use 1P keys for all single Recordings" option you don't even have to configure 2P controls, because the same keys used for 1P can be used for all the rest joypads too.</span></p>
-<p class="rvps10"><span class="rvts21">The option is enabled by default. If you disable it, emulator will use the second controller keys for recording 2P.</span></p>
-<p class="rvps10"><span class="rvts21">It's recommended to have it enabled, in order to save the space on the keyboard.</span></p>
-<p class="rvps10"><a name="UseInputkeysforColumnSet"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Use Input keys for Column Set</span></p>
-<p class="rvps10"><span class="rvts21">Allows editing Input in selected frames by pressing corresponding joypad keys.</span></p>
-<p class="rvps10"><span class="rvts21">This feature is intended to speed up the Input editing process. To mass-set/mass-unset buttonpresses in a given segment, you usually either draw with mouse, or select a range of frames and click the necessary symbol in the Piano Roll Header – the symbol flashes and the respective Input changes in all the selected frames.</span></p>
-<p class="rvps10"><span class="rvts21">With the "Use Input keys for Column Set" option you can press real keys (assigned to joypads) instead of clicking the Piano Roll Header. The result will be the same.</span></p>
-<p class="rvps10"><span class="rvts21">The option is disabled by default. </span><span class="rvts21">Turn it on if you mostly use the new TASing methods and don't record Input traditional way. But when you're using Recording, either disable it or just remove the Selection to avoid Input changes on the selected frames when pressing joypad buttons.</span></p>
-<p class="rvps10"><span class="rvts21">With this feature you can record joypad buttons even when Recording is off. Put the Selection cursor to the frame you want to apply Input to, and press the needed joypad buttons.</span></p>
-<p class="rvps10"><span class="rvts21">Multitracking mode in this case works the same way as with regular Recording. For example, if the "2P" radiobutton is chosen at the moment, pressing the key assigned to the </span><span class="rvts29">A</span><span class="rvts21"> button will only record Input for the "A" column of the 2nd player.</span></p>
-<p class="rvps10"><a name="BindMarkerstoInput"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Bind Markers to Input</span></p>
-<p class="rvps10"><span class="rvts21">Attaches Markers to Input. If the option is enabled, various Input editing functions will also affect Markers. For example, inserting blank frames into the movie will shift down both Input and Markers.</span></p>
-<p class="rvps10"><span class="rvts21">Usually Markers are set to frames where certain in-game events occur. And when you improve previous result and reach the given place earlier than before, the corresponding Marker (set there after previous attempt) should point to an earlier frame now. Sometimes you have to drag such Markers manually. But thanks to the binding feature, Markers will shift themselves during Input modifications, so the manual adjustment of Markers is rarely needed.</span></p>
-<p class="rvps10"><span class="rvts21">Detaching Markers may be necessary when you need to edit Input without shifting Markers. For example, when you need to remove a part of Input, leaving Markers intact.</span></p>
-<p class="rvps10"><span class="rvts21">The option is on by default. It's</span><span class="rvts21"> recommended to work with attached Markers most of the time, temporarily detaching them when necessary.</span></p>
-<p class="rvps10"><span class="rvts21">For clarification, Taseditor highlights attached Markers with a pale yellow color, and detached Markers with more bright yellow.</span></p>
-<p class="rvps10"><a name="EmptynewMarkerNotes"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Empty new Marker Notes</span></p>
-<p class="rvps10"><span class="rvts21">Defines the default Notes text. If the option is set, each newly created Marker will have an empty Note. If not set, the new Marker will copy the above Marker's Note text.</span></p>
-<p class="rvps10"><span class="rvts21">The option is enabled by default. It's</span><span class="rvts21"> recommended to </span><span class="rvts21">left it on and type original Notes for important Markers, thus not leaving all Notes blank.</span></p>
-<p class="rvps10"><a name="OldcontrolschemeforBranching"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Old control scheme for Branching</span></p>
-<p class="rvps10"><span class="rvts21">Imitates certain limitations of the traditional TASing method, particularly related to handling the Bookmarks (savestates).</span></p>
-<p class="rvps10"><span class="rvts21">The option is disabled by default</span><span class="rvts21">, so hotkeys </span><span class="rvts26">F1</span><span class="rvts21">-</span><span class="rvts26">F10</span><span class="rvts21"> are used to load branch of the the corresponding Bookmarks, and the numeric keys </span><span class="rvts26">1</span><span class="rvts21">-</span><span class="rvts26">10</span><span class="rvts21"> are used for simple jumps to bookmarked frames without changing the movie.</span></p>
-<p class="rvps10"><span class="rvts21">Also, Input Recording is switched on with a simple press of the </span><span class="rvts26">Toggle Read-Only</span><span class="rvts21"> hotkey.</span></p>
-<p class="rvps10"><span class="rvts21">But if you enable this option, the controls scheme will be the same as in old emulators. Pressing </span><span class="rvts26">F1</span><span class="rvts21">-</span><span class="rvts26">F10</span><span class="rvts21"> will work depending on the Recording mode. When the Recording is off, functional keys jump to respective Bookmark frame, and when Recording is on, </span><span class="rvts26">F1</span><span class="rvts21">-</span><span class="rvts26">F10</span><span class="rvts21"> keys load the branch of the Bookmark.</span></p>
-<p class="rvps10"><span class="rvts21">Also, Input Recording won't work until you load some Bookmark. This behavior allows you to press the </span><span class="rvts26">Toggle Read-Only</span><span class="rvts21"> hotkey in the middle of watching the movie, without overwriting old Input until you actually load a savestate.</span></p>
-<p class="rvps10"><span class="rvts21">Plus, there will be a red frame around the "current slot" number in the Bookmarks List. Press numeric keys </span><span class="rvts26">1</span><span class="rvts21">-</span><span class="rvts26">10</span><span class="rvts21"> to switch the current slot.</span></p>
-<p class="rvps10"><span class="rvts21">This option is only left here to help old TASers move to Taseditor. But it's recommended to use the new controls scheme, because it fits the specifics of TASing process in Taseditor much better.</span></p>
-<p class="rvps10"><a name="BranchesrestoreentireMovie"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Branches restore entire Movie</span></p>
-<p class="rvps10"><span class="rvts21">Defines the way a branch is restored when you load its Bookmark.</span></p>
-<p class="rvps10"><span class="rvts21">The option is enabled by default, so </span><span class="rvts21">when you're loading a Bookmark, you replace the current movie with the movie state stored in that Bookmark.</span></p>
-<p class="rvps10"><span class="rvts21">If this option is disabled, when you're loading a Bookmark, the current movie is replaced with a truncated version of the bookmarked movie state. The movie will be truncated at the bookmarked frame, thus imitating the traditional behavior of loading a savestate: savestates only recover the part of the movie before the Playback cursor, and the rest frames (from the light-blue cursor to the movie end) aren't loaded. This makes sense when TASing traditional way, because after loading a savestate TASer usually records a new Input starting from the position of the Playback cursor, so there's no need to load the data that is going to be be overwritten anyway. But in Taseditor the movie is edited independently from the Playback cursor position, so you can load the entire movie state from Bookmarks, without caring if the Playback cursor is in the end of the movie or it is in the middle.</span></p>
-<p class="rvps10"><span class="rvts21">It's recommended to leave this option enabled.</span></p>
-<p class="rvps10"><a name="HUDinBranchscreenshots"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; HUD in Branch screenshots</span></p>
-<p class="rvps10"><span class="rvts21">Defines the way to capture screenshots when creating Bookmarks.</span></p>
-<p class="rvps10"><span class="rvts21">If the option is on, it takes a snapshot of the whole emulator window, including icons and emulator messages, Lua output and other data placed over the game picture. If the option is disabled, Bookmarks will only capture the game output.</span></p>
-<p class="rvps10"><span class="rvts21">The option is enabled by default. </span><span class="rvts21">It's recommended to leave it on, in order to use Lua output and frame counter when comparing alternate approaches to playing through a segment.</span></p>
-<p class="rvps10"><a name="AutopauseattheendofMovie"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Config -&gt; Autopause at the end of Movie</span></p>
-<p class="rvps10"><span class="rvts21">Automatically stops movie playback at the last frame, unless it started playing from the last frame.</span></p>
-<p class="rvps10"><span class="rvts21">When replaying a finished (or partially finished) movie, you usually don't want to pass over the boundary of its Input. That's why the "Autopause at the end of Movie" option is enabled by default. If you disable it, the emulator will play infinitely after the current movie Input ended, expanding the movie size until you press </span><span class="rvts26">Pause</span><span class="rvts21"> or the middle mouse button.</span></p>
-<p class="rvps10"><span class="rvts49">It's recommended to leave this option enabled.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><a name="fceux-config"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Now you are aware of all Taseditor settings, the remaining part of the chapter describes FCEUX emulator settings that may be useful for a TASer.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">If you are going to TAS traditional way, it's obligatory to set the first controller buttons to such keys that would be easy to press together with the </span><span class="rvts26">Frame Advance</span><span class="rvts21"> hotkey. While FCEUX supports binding the virtual NES joypad to a real PC gamepad, it's recommended to use the keyboard for recording Input, in order to have fast access to </span><span class="rvts26">Frame Advance</span><span class="rvts21">, </span><span class="rvts26">Frame Rewind</span><span class="rvts21">, </span><span class="rvts26">Pause</span><span class="rvts21">, and to all 10 savestate slots.</span></p>
-<p class="rvps10"><span class="rvts21">However, if you use Taseditor as intended, you won't need to use Recording too much, and even in cases when you use it (for example, when recording a test playthrough of a level), an access to functional keys isn't critical. So, you can reassign the game controls to a USB gamepad, if you have one.</span></p>
-<p class="rvps10"><span class="rvts21">Virtual controller buttons are configured in FCEUX the following way. Choose </span><span class="rvts25">Config -&gt; Input</span><span class="rvts21"> in emulator main menu. In the appeared dialog, select the "Gamepad" item from the leftmost drop-down listbox (usually it's already selected). Click the left </span><span class="rvts29">Configure</span><span class="rvts21"> button (since you need to configure the first gamepad). In the new window click the </span><span class="rvts29">Up</span><span class="rvts21"> button, then a small window will appear, now press the keyboard key you want to set for the virtual </span><span class="rvts29">Up</span><span class="rvts21"> button. Press that key 2nd time to confirms your choice, or just click </span><span class="rvts29">Close</span><span class="rvts21">. Then you need to do the same for the rest buttons of NES gamepad – </span><span class="rvts29">Down</span><span class="rvts21">, </span><span class="rvts29">Left</span><span class="rvts21">, </span><span class="rvts29">Right</span><span class="rvts21">, </span><span class="rvts29">Select</span><span class="rvts21">, </span><span class="rvts29">Start</span><span class="rvts21">, </span><span class="rvts29">B</span><span class="rvts21">, </span><span class="rvts29">A</span><span class="rvts21">. After you're done with the first controller buttons (Virtual Gamepad 1), you may close both windows: Gamepad and Input Configuration.</span></p>
-<p class="rvps10"><span class="rvts21">You can check the assigned buttons while playing the game or while Taseditor is engaged – as you press them, the corresponding symbols in the Piano Roll Header will shine with green color. Besides, if you enable Input display (FCEUX: </span><span class="rvts25">Config -&gt; Display -&gt; Input Display -&gt; 2 player</span><span class="rvts21">), FCEUX screen will show you the pressed buttons too.</span></p>
-<p class="rvps10"><span class="rvts21">In addition to recording the regular gaming session, virtual gamepad buttons may be used to quickly set Input when editing movie (see </span><a class="rvts27" href="ProgramCustomization.html#UseInputkeysforColumnSet">Config -&gt; Use Input keys for Column Set</a><span class="rvts21">). Select a range of frames where you want to change Input and press the key you assigned to a button of the virtual gamepad.</span></p>
-<p class="rvps10"><span class="rvts21">When you map the virtual buttons to keyboard keys, make sure none of the emulator or Taseditor hotkeys are already assigned to those keys. The full list of default hotkeys can be found in the </span><a class="rvts27" href="Controls.html#hotkeys">Reference</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">Some FCEUX hotkeys don't have default mapping (they're not mapped to any key yet). You can configure them the following way. In the emulator main menu choose </span><span class="rvts25">Config -&gt; Map Hotkeys</span><span class="rvts21">. A window listing all possible emulator hotkeys will appear. Choose the necessary hotkey, double-click it and then press the desired keyboard key.</span></p>
-<p class="rvps10"><span class="rvts21">First of all, find the item called "</span><span class="rvts25">Open TAS Editor</span><span class="rvts21">" and double-click it. In the appeared window press the key that you will always use to quickly launch Taseditor.</span></p>
-<p class="rvps10"><span class="rvts21">Second, find the item "</span><span class="rvts26">Reload ROM or TAS Editor Project</span><span class="rvts21">" and either remap it or remember the default combination (</span><span class="rvts26">Ctrl + F1</span><span class="rvts21">). This hotkey will help you quickly return to your interrupted work – just launch FCEUX, press the </span><span class="rvts26">Reload ROM</span><span class="rvts21"> hotkey, then press the aforementioned </span><span class="rvts25">Open TAS Editor</span><span class="rvts21"> hotkey, and then again </span><span class="rvts26">Reload ROM</span><span class="rvts21"> (this time it will work as </span><span class="rvts26">Reload TAS Editor Project</span><span class="rvts21">). This way you'll return to the state of your paused work in a split second.</span></p>
-<p class="rvps10"><span class="rvts21">Now look at the hotkeys "</span><span class="rvts26">Frame Advance</span><span class="rvts21">" и "</span><span class="rvts26">Frame Rewind</span><span class="rvts21">". They are used for Playback cursor navigation. By default they are mapped to "</span><span class="rvts26">\</span><span class="rvts21">" and "</span><span class="rvts26">Backspace</span><span class="rvts21">". You can reconfigure them to more handy keys or just use the mouse wheel for the Playback cursor frame-by-frame navigation.</span></p>
-<p class="rvps10"><span class="rvts21">Also see the "</span><span class="rvts26">Speed Down</span><span class="rvts21">" and "</span><span class="rvts26">Speed Up</span><span class="rvts21">" hotkeys. You may consider remapping them to Numpad keys "</span><span class="rvts25">+</span><span class="rvts21">" and "</span><span class="rvts25">-</span><span class="rvts21">".</span></p>
-<p class="rvps10"><span class="rvts21">The "</span><span class="rvts26">Pause</span><span class="rvts21">" и "</span><span class="rvts26">Restore Playback</span><span class="rvts21">" hotkeys are set to "</span><span class="rvts26">Pause/Break</span><span class="rvts21">" and "</span><span class="rvts26">Spacebar</span><span class="rvts21">" keys by default, but in most cases it's easier to use the middle mouse button instead of these hotkeys, so you can even reassign the "</span><span class="rvts26">Spacebar</span><span class="rvts21">" for something else if you wish.</span></p>
-<p class="rvps10"><span class="rvts21">Finally, there is the "</span><span class="rvts26">Cancel Seeking</span><span class="rvts21">" hotkey ("</span><span class="rvts26">Esc</span><span class="rvts21">" key by default). Pressing it is the same as clicking the Taseditor progressbar – if the Playback was seeking to a target frame, the seeking will be aborted.</span></p>
-<p class="rvps10"><span class="rvts21">Some FCEUX hotkeys don't work when Taseditor is engaged. For example, the "</span><span class="rvts25">Open ROM</span><span class="rvts21">" won't work – you have to load ROM before running Taseditor. This is done for </span><a class="rvts27" href="MistakeProofing.html#DisabledHotkeys">mistake-proofing</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The next chapter describes </span><a class="rvts27" href="AdvancedFeatures.html">additional features of Taseditor</a><span class="rvts21">. You may postpone reading it until you are used to main features. Anyway, now you're ready enough for productive work in Taseditor.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Now open the "View" submenu.</span></p>
+<p class="rvps7"><img alt="" style="float: left; padding : 6px;" src="lib/view-menu.png"></p>
+<p class="rvps7"><span class="rvts20">The "Find Note window" brings up the window dedicated to searching text in Marker Notes. This function is useful when you're documenting your movie with Notes. It's described in the next chapter.</span></p>
+<p class="rvps7"><span class="rvts20">Then there are several checkboxes allowing to customize the program interface. To try the customization possibilities, create a test project and experiment with it.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="DisplayBranchScreenshots"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">View -&gt; Display Branch Screenshots</span></p>
+<p class="rvps7"><span class="rvts20">Displays pop-up screenshots when you point mouse cursor over Bookmarks. The screenshot helps you to recall movie events saved to the Bookmark, which simplifies searching for the needed branch of the movie, as you don't have to actually load the Bookmark when you need to have an idea on its contents. This way you can also quickly compare results of several alternative approaches.</span></p>
+<p class="rvps7"><span class="rvts20">This option is enabled by default. If disabled, no screenshots will pop up on mouse hover.</span></p>
+<p class="rvps7"><span class="rvts20">It's recommended to have it enabled, unless you're annoyed with pop-up pictures partially obstructing the view on the Piano Roll.</span></p>
+<p class="rvps7"><a name="DisplayBranchDescriptions"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">View -&gt; Display Branch Descriptions</span></p>
+<p class="rvps7"><span class="rvts20">Displays pop-up descriptions </span><span class="rvts20">when you point mouse cursor over Bookmarks.</span><span class="rvts20"> The text, as well as the screenshot, gives you additional information about the contents of the Bookmark, helping to decide whether this branch should be loaded or not.</span></p>
+<p class="rvps7"><span class="rvts20">The description text is taken from the Marker above the frame of that Bookmark. The Marker itself may be actually removed from the working movie long ago, but if the Bookmark was created while the Marked existed, then this Marker still exists in the branch of this Bookmark. And if you load this Bookmark, the Marker will reappear on its place.</span></p>
+<p class="rvps7"><span class="rvts20">So, when trying alternative strategies of playing through a large segment (e.g. whole level of the game), before saving every approach to a separate branch, you can make a name for the approach by setting a Marker at the Playback cursor position and typing a text message like "</span><span class="rvts33">here I chose upper way</span><span class="rvts20">" or just "</span><span class="rvts33">upper way</span><span class="rvts20">". After that, save a Bookmark on that frame. Then you can remove the Marker together with the Input of the old approach and create next approach by applying another strategy of playing the segment. When the new approach if finished and replayed, you can again create a Marker with a Note like "</span><span class="rvts33">here I chose lower way</span><span class="rvts20">" and save all that to another Bookmark. After that you can save the project and, say, close Taseditor. Next day you can easily recall all pros and cons of the two strategies you tried. Each Bookmark will show you the screenshot of the bookmarked frame and the text you wrote for that Bookmark. While it can be hard to distinguish the strategies by screenshots (since both approaches end at the same event of the game), but text descriptions will make them easy to recognize.</span></p>
+<p class="rvps7"><span class="rvts20">This option is enabled by default. </span><span class="rvts20">If disabled, no descriptions will pop up on mouse hover.</span></p>
+<p class="rvps7"><span class="rvts20">It's recommended to have it enabled, unless you're annoyed with pop-up text fields.</span></p>
+<p class="rvps7"><a name="EnableHotChanges"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">View -&gt; Enable Hot Changes</span></p>
+<p class="rvps7"><span class="rvts20">Switches the Hot Changes feature on and off.</span></p>
+<p class="rvps7"><span class="rvts20">Enabled by default. If disabled, all buttonpress symbols will be displayed in a standard black color. Otherwise, each symbol will have its own level of "hotness", depending on how long ago the corresponding Piano Roll cell was edited. Recently modified buttonpresses are more hot, so they are displayed by more intense shade of red. As the hotness decreases, the symbol colors become darker (more cold) and finally turn into standard black.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps3"><img alt="" style="padding : 1px;" src="lib/hotchanges-colors.png"></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">In total, Taseditor supports 15 shades of hotness + zeroth black color. When you change the state of an Input cell, it receives maximum hotness value (15), and all the previously edited cells cool down by 1. Thereby you only need a quick look at the Piano Roll to get an idea which edits were done just recently and which were done before, or long ago.</span></p>
+<p class="rvps7"><span class="rvts20">Also, with Hot Changes you can see which buttonpresses were recently removed – instead of an empty cell there will be a dash of the corresponding color. The dash also changes its color while cooling down, and after 15 levels it finally disappears.</span></p>
+<p class="rvps7"><span class="rvts20">The same dashes appear when you insert new frames in the movie.</span></p>
+<p class="rvps7"><span class="rvts20">It's recommended to </span><span class="rvts20">enable this feature to increase the usability of Taseditor. In theory it should even increase your working speed, because this way you never have to recall which actions you did a minute ago. Of course even without Hot Changes you can always remind the sequence of last actions by reverting History (making several </span><span class="rvts27">Ctrl + Z</span><span class="rvts20"> keypresses) and then returning the movie to normal state again (making as many </span><span class="rvts27">Ctrl + Y</span><span class="rvts20"> keypresses). But in this case you will also truncate the Greenzone. So better just leave the Hot Changes enabled.</span></p>
+<p class="rvps7"><span class="rvts20">The only downside of this feature is that Hot Changes data will be stored in the History Log and in FM3 project file, thus increasing the amount of occupied memory.</span></p>
+<p class="rvps7"><a name="Followundocontext"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">View -&gt; Follow undo context</span></p>
+<p class="rvps7"><span class="rvts20">Scrolls the Piano Roll to relevant place every time you make an undo or redo. A purple pointer appears on the modified frame </span><span class="rvts20">for a brief moment</span><span class="rvts20">, thus drawing your attention to the movie changes.</span></p>
+<p class="rvps7"><span class="rvts20">This option is enabled by default. </span><span class="rvts20">If disabled, the Piano Roll won't automatically scroll to the purple pointer.</span></p>
+<p class="rvps7"><span class="rvts20">It's recommended to have it enabled, in order</span><span class="rvts20"> to be able to backtrack undos. Usually, right after you revert an operation you want to make another edit on the same frame or nearby, so the autoscrolling is useful.</span></p>
+<p class="rvps7"><a name="FollowMarkerNotecontext"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">View -&gt; Follow Marker Note context</span></p>
+<p class="rvps7"><span class="rvts20">Scrolls the Piano Roll to relevant Marker when you start editing its Note.</span><span class="rvts20"> For example, when you click the upper edit field to start editing the Note of the Marker above the Playback cursor, Piano Roll jumps to that Marker, allowing you to see its context (neighbor Markers and Input). And when you click the lower edit field (a Note above the Selection cursor), Piano Roll scrolls to the Marker above the Selection. This way you can observe the surroundings of the relevant Marker while editing its Note.</span></p>
+<p class="rvps7"><span class="rvts20">This option is enabled by default. </span><span class="rvts20">If disabled, the Piano Roll won't automatically scroll to the Markers.</span></p>
+<p class="rvps7"><span class="rvts20">It's recommended to have it enabled.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">And the View settings are over. During your future work you likely won't need to change these checkboxes.</span></p>
+<p class="rvps7"><img alt="" style="float: left; padding : 6px;" src="lib/config-menu.png"></p>
+<p class="rvps7"><span class="rvts20">Now open the "Config" submenu. Options listed in this menu affect Taseditor workflow more significantly. You may need reconfiguring some of them more than once.</span></p>
+<p class="rvps7"><a name="Projectfilesavingoptions"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Project file saving options</span></p>
+<p class="rvps7"><span class="rvts20">Opens the dialog window where you can configure the autosave function and </span><span class="rvts20">select which aspects should be saved to FM3 files.</span></p>
+<p class="rvps7"><span class="rvts20">Taseditor has the feature of automatically saving current project to disk when user doesn't save it manually </span><span class="rvts20">(</span><span class="rvts27">Ctrl + S</span><span class="rvts20">)</span><span class="rvts20"> for too long. Before Taseditor, TASers saved their movie to disk every time they saved a savestate. But Taseditor projects store much more data, and saving FM3 files can take several seconds, so it's not reasonable to resave them too often.</span></p>
+<p class="rvps7"><span class="rvts20">The default autosave period is 15 minutes. This means, if you've made some substantial changes to the project (e.g. you edited Input, and an asterisk appeared in the TAS Editor window caption), and then didn't save project for 15 minutes, Taseditor will remind you about that or just execute saving itself, depending on the state of the "silently" checkbox. </span><span class="rvts20">If the checkbox is enabled, Taseditor silently saves the project to disk under the same filename. If it is disabled, Taseditor brings up the "Save As" dialog, where you can confirm the saving or cancel it. In the latter case Taseditor will wait another period of time until reminding you about the unsaved data.</span></p>
+<p class="rvps7"><span class="rvts20">The autosave function only works when current project already has a filename.</span></p>
+<p class="rvps7"><span class="rvts20">Maximum possible value of the period is 1440 minutes (24 hours). You can disable this function by switching off the "Autosave project" checkbox, but that's not recommended.</span></p>
+<p class="rvps7"><a name="Setmaxundolevels"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Set max undo levels</span></p>
+<p class="rvps7"><span class="rvts20">Specifies</span><span class="rvts20"> the maximum number of undo steps, how many times you can restore previous state of the project by pressing </span><span class="rvts27">Ctrl + Z</span><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">The History Log needs a lot of computer memory and takes some disk space to save FM3 files. The whole Log is stored in project files in compressed state. The compression is done in background – when the emulator is idle, Taseditor gradually compresses new items of the History Log. Thanks to this behavior, the History Log size doesn't affect FM3 saving time much.</span></p>
+<p class="rvps7"><span class="rvts20">With this setting you can adjust the amount of memory occupied by History Log. By default you have 100 undo levels, which means you can revert up to hundred of recent movie edits. It's not very much, because during real TASing you make lots of various edits within a small time span, as the time runs imperceptibly. If your computer has enough RAM, you can increase the "max undo levels" value up to the maximum possible number – 1000.</span></p>
+<p class="rvps7"><a name="SetGreenzonecapacity"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/greenzone-capacity.png"></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Set Greenzone capacity</span></p>
+<p class="rvps7"><span class="rvts20">Defines the maximum size of the Greenzone. The Greenzone is used for easier Playback cursor navigation, allowing to instantly return to any frame that has been emulated. It needs a lot of computer memory to store emulator's information and a lot of disk space for saving FM3 projects.</span></p>
+<p class="rvps7"><span class="rvts20">The more of green and red frames there are in the Piano Roll, the more memory the Greenzone occupies. For most NES games 1 frame costs about 10 kilobytes (compressed data). So, big movie projects may take hundreds of megabytes. It affects the project loading and saving time.</span></p>
+<p class="rvps7"><span class="rvts20">To decrease the amount of needed memory, Taseditor regularly cleans the Greenzone tail, forgetting the info about segments that are too far from the Playback cursor.</span></p>
+<p class="rvps7"><span class="rvts20">This cleaning doesn't mean the Greenzone becomes inaccessible (white) on those frames. That would be very inconvenient, because to replay these frames you would need to wait until the emulation runs from the beginning of the movie. </span><span class="rvts20">To avoid such inconvenience and still free some memory from old Greenzone sections, Taseditor uses </span><span class="rvts33">gradual rarefication</span><span class="rvts20"> of the Greenzone tail.</span></p>
+<p class="rvps7"><span class="rvts20">This process works like shown on the picture to the right. The light-blue cursor runs down along the Piano Roll. The cursor is the head of the Greenzone. It leaves green/red lines behind, but far above it some of the lines become pale again. At first, every odd frame is cleared, then 3 of every 4, then 7 of 8, and finally 15 of 16.</span></p>
+<p class="rvps7"><span class="rvts20">Thus the Greenzone tail contains many hollow sections. And if you decide to send emulator to a frame inside such hollow section, you'll need to wait while emulation runs to it from the nearest bright Greenzone frame. But since bright frames alternate every 2 or 4 frames, the waiting will only last a split second, so you won't likely notice the difference between jumping to a regular Greenzone frame (instant jump) and jumping to a cleared tail (instant seeking).</span></p>
+<p class="rvps7"><span class="rvts20">By adjusting the "</span><span class="rvts20">Set greenzone capacity</span><span class="rvts20">" setting you can specify how many Greenzone frames (starting from its head) must stay untouched. On the picture to the right this number is 8.</span></p>
+<p class="rvps7"><span class="rvts20">For an experiment, choose the "</span><span class="rvts20">Set greenzone capacity</span><span class="rvts20">" item, a dialog window will appear asking you to enter a number, type 100 and press OK. This will mean that first hundred of frames above the Playback cursor should not be cleaned. Any cursor navigation along this area will be instant, so you may drag the light-blue cursor and use rewind with maximum comfort. After the first hundred of frames the cleaning will be removing every other frame – you'll see alternation of bright and pale lines in the Piano Roll. This alternation will last for about 200 frames. The Playback cursor navigation along the area of 200 frames will also be almost instant.</span></p>
+<p class="rvps7"><span class="rvts20">This way the Greenzone covers 100 + 200 = 300 frames, while only 100 + 100 = 200 frames are stored in memory. Then, during next 400 frames, every filled line will alternate with 3 cleared lines, and so on. In total, the Greenzone will only occupy memory needed for storing the data of 500 frames (about 5 MB), while the accessible area will be 3100 frames (about a minute).</span></p>
+<p class="rvps7"><span class="rvts20">By default, the Greenzone capacity is 10000 frames. This should be enough for most TASes. </span><span class="rvts20">It's recommended to TAS with</span><span class="rvts20"> no less than 1000 frames of Greenzone capacity, because the further economy would be impractical.</span></p>
+<p class="rvps7"><span class="rvts20">The maximum number for that parameter is 50000.</span></p>
+<p class="rvps7"><a name="EnableGreenzoning"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Enable Greenzoning</span></p>
+<p class="rvps7"><span class="rvts20">Controls the process of collecting data to the Greenzone.</span></p>
+<p class="rvps7"><span class="rvts20">If the option is enabled, every new frame is saved into the Greenzone right after it has been emulated. This is intended behavior of Taseditor, so the option is enabled by default.</span></p>
+<p class="rvps7"><span class="rvts20">Disabling this option may be useful in rare cases, for example, when running bots which need high performance. But in normal situations it's recommended to have this function enabled.</span></p>
+<p class="rvps7"><a name="AutofirePatternskipsLag"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Autofire Pattern skips Lag</span></p>
+<p class="rvps7"><span class="rvts20">Accounts for lag when you're using patterns (</span><span class="rvts27">Alt</span><span class="rvts20"> + clicks on Input).</span></p>
+<p class="rvps7"><span class="rvts20">If the option is disabled, patterns appear in the Piano Roll exactly like they were coded (e.g. for the pattern "</span><span class="rvts33">Alternating (1010...)</span><span class="rvts20">" the new buttonpresses will indeed alternate one after another).</span></p>
+<p class="rvps7"><span class="rvts20">If </span><span class="rvts20">the option is</span><span class="rvts20"> enabled, the resulting sequence of buttonpresses may differ from original pattern (lag frames will have additional gaps not present in the pattern).</span></p>
+<p class="rvps7"><span class="rvts20">Since lag frames aren't accounted by most games, you have to skip red lines of the Piano Roll to correctly calculate the gaps between presses. For instance, if there must be exactly 3 blank frames between every buttonpress (pattern "10001000"), but there's also one lag frame in the middle of current segment, you have to add 1 more blank frame &nbsp;(100</span><span class="rvts22">0</span><span class="rvts20">01000).</span></p>
+<p class="rvps7"><span class="rvts20">This option is enabled by default.</span><span class="rvts20"> It's recommended to leave it enabled, because in vast majority of cases you'll need to skip lag frames, in order to adapt buttonpresses to how the game interprets Input.</span></p>
+<p class="rvps7"><a name="AutoAdjustInputAccordingtoLag"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Auto-adjust Input according to Lag</span></p>
+<p class="rvps7"><span class="rvts20">Enables automatic adjustment of Input according to changes of lag data.</span></p>
+<p class="rvps7"><span class="rvts20">Basically, games only care about Input at green lines of the Piano Roll. It's pointless to draw any Input on red lines, because during lag frames the game doesn't poll Input. Those frames simply don't exist from the point of view of the game engine.</span></p>
+<p class="rvps7"><span class="rvts20">When you edit Input, you change the flow of game events, and lag may appear on different frames too. If those frames previously had a meaningful Input, this Input must be shifted to the frames without lag, to allow it to affect the game.</span></p>
+<p class="rvps7"><span class="rvts20">If this checkbox is enabled, you won't have to adjust the Input manually every time the Lag appears on different frames. Taseditor will insert an extra line at every new lag frame, thus shifting Input 1 frame down. And when an old lag frame disappears, Taseditor will remove respective frames from the movie, thus shifting Input up. As a result, you can be sure that the game will always perceive your old Input correctly, no matter any Lag changes.</span></p>
+<p class="rvps7"><span class="rvts20">Auto-adjustment operations are done by Taseditor only when you're watching (emulating) a segment, i.e. when Playback cursor runs through pale Piano Roll lines. The result of these operations is saved into the current History Log item.</span></p>
+<p class="rvps7"><span class="rvts20">This feature is enabled by default, and it's recommended to always work with the function enabled. It significantly increases the comfort of TASing, especially when dealing with lag-heavy games.</span></p>
+<p class="rvps7"><a name="DrawInputbydragging"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Draw Input by dragging</span></p>
+<p class="rvps7"><span class="rvts20">Allows to literally draw Input by holding the left mouse button and moving the mouse cursor over the Piano Roll.</span></p>
+<p class="rvps7"><span class="rvts20">This option is enabled by default, so you can </span><span class="rvts20">quickly draw or erase a long line of buttonpresses.</span></p>
+<p class="rvps7"><span class="rvts20">Drawing/erasing is usually constrained by single column, which allows user to do sweeping motions with the mouse. But if you hold the </span><span class="rvts27">Shift</span><span class="rvts20"> key while drawing, you will be able to draw/erase Input freely (it's rather impractical, but fun).</span></p>
+<p class="rvps7"><span class="rvts20">If you disable this option, your clicks will only set/unset single buttonpresses. It may be necessary, for example, if you have trembling hands. But otherwise enabling this feature is recommended.</span></p>
+<p class="rvps7"><a name="CombineconsecutiveRecordings"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Combine consecutive Recordings/Draws</span></p>
+<p class="rvps7"><span class="rvts20">Combines consecutive operations of Input Recording into single item of the History Log. Also combines all Input drawn with the same press of mouse button.</span></p>
+<p class="rvps7"><span class="rvts20">This feature is disabled by default. So when you're recording Input, </span><span class="rvts20">every recorded frame will create a separate item in the History Log, and you can undo changes for any frame. Also, when you're drawing Input, every new stroke will create a new History Log item, and you can undo each of them separately.</span></p>
+<p class="rvps7"><span class="rvts20">However, in real TASing you don't need such precision of the undo. In fact, it may even become irritating when you have to undo every buttonpress separately. So, to save considerable amount of space in History Log, it's recommended to enable this option.</span></p>
+<p class="rvps7"><a name="Use1PkeysforallsingleRecordings"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Use 1P keys for all single Recordings</span></p>
+<p class="rvps7"><span class="rvts20">Allows to record any joypad Input using only the first gamepad (1P). This function is used when you record Input traditional way using multitracking method to take turns for different players, e.g. first you record a short segment of Input for player one (1P), then record the Input for 2P and so on.</span></p>
+<p class="rvps7"><span class="rvts20">Thanks to multitracking, you don't have to press buttons on both controllers at once. And with the "Use 1P keys for all single Recordings" option you don't even have to configure 2P controls, because the same keys used for 1P can be used for all the rest joypads too.</span></p>
+<p class="rvps7"><span class="rvts20">The option is enabled by default. If you disable it, emulator will use the second controller keys for recording 2P.</span></p>
+<p class="rvps7"><span class="rvts20">It's recommended to have it enabled, in order to save the space on the keyboard.</span></p>
+<p class="rvps7"><a name="UseInputkeysforColumnSet"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Use Input keys for Column Set</span></p>
+<p class="rvps7"><span class="rvts20">Allows editing Input in selected frames by pressing corresponding joypad keys.</span></p>
+<p class="rvps7"><span class="rvts20">This feature is intended to speed up the Input editing process. To mass-set/mass-unset buttonpresses in a given segment, you usually either draw with mouse, or select a range of frames and click the necessary symbol in the Piano Roll Header – the symbol flashes and the respective Input changes in all the selected frames.</span></p>
+<p class="rvps7"><span class="rvts20">With the "Use Input keys for Column Set" option you can press real keys (assigned to joypads) instead of clicking the Piano Roll Header. The result will be the same.</span></p>
+<p class="rvps7"><span class="rvts20">The option is disabled by default. </span><span class="rvts20">Turn it on if you mostly use the new TASing methods and don't record Input traditional way. But when you're using Recording, either disable it or just remove the Selection to avoid Input changes on the selected frames when pressing joypad buttons.</span></p>
+<p class="rvps7"><span class="rvts20">With this feature you can record joypad buttons even when Recording is off. Put the Selection cursor to the frame you want to apply Input to, and press the needed joypad buttons.</span></p>
+<p class="rvps7"><span class="rvts20">Multitracking mode in this case works the same way as with regular Recording. For example, if the "2P" radiobutton is chosen at the moment, pressing the key assigned to the </span><span class="rvts26">A</span><span class="rvts20"> button will only record Input for the "A" column of the 2nd player.</span></p>
+<p class="rvps7"><a name="BindMarkerstoInput"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Bind Markers to Input</span></p>
+<p class="rvps7"><span class="rvts20">Attaches Markers to Input. If the option is enabled, various Input editing functions will also affect Markers. For example, inserting blank frames into the movie will shift down both Input and Markers.</span></p>
+<p class="rvps7"><span class="rvts20">Usually Markers are set to frames where certain in-game events occur. And when you improve previous result and reach the given place earlier than before, the corresponding Marker (set there after previous attempt) should point to an earlier frame now. Sometimes you have to drag such Markers manually. But thanks to the binding feature, Markers will shift themselves during Input modifications, so the manual adjustment of Markers is rarely needed.</span></p>
+<p class="rvps7"><span class="rvts20">Detaching Markers may be necessary when you need to edit Input without shifting Markers. For example, when you need to remove a part of Input, leaving Markers intact.</span></p>
+<p class="rvps7"><span class="rvts20">The option is on by default. It's</span><span class="rvts20"> recommended to work with attached Markers most of the time, temporarily detaching them when necessary.</span></p>
+<p class="rvps7"><span class="rvts20">For clarification, Taseditor highlights attached Markers with a pale yellow color, and detached Markers with more bright yellow.</span></p>
+<p class="rvps7"><a name="EmptynewMarkerNotes"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Empty new Marker Notes</span></p>
+<p class="rvps7"><span class="rvts20">Defines the default Notes text. If the option is set, each newly created Marker will have an empty Note. If not set, the new Marker will copy the above Marker's Note text.</span></p>
+<p class="rvps7"><span class="rvts20">The option is enabled by default. It's</span><span class="rvts20"> recommended to </span><span class="rvts20">left it on and type original Notes for important Markers, thus not leaving all Notes blank.</span></p>
+<p class="rvps7"><a name="OldcontrolschemeforBranching"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Old control scheme for Branching</span></p>
+<p class="rvps7"><span class="rvts20">Imitates certain limitations of the traditional TASing method, particularly related to handling the Bookmarks (savestates).</span></p>
+<p class="rvps7"><span class="rvts20">The option is disabled by default</span><span class="rvts20">, so hotkeys </span><span class="rvts23">F1</span><span class="rvts20">-</span><span class="rvts23">F10</span><span class="rvts20"> are used to load branch of the the corresponding Bookmarks, and the numeric keys </span><span class="rvts23">1</span><span class="rvts20">-</span><span class="rvts23">10</span><span class="rvts20"> are used for simple jumps to bookmarked frames without changing the movie.</span></p>
+<p class="rvps7"><span class="rvts20">Also, Input Recording is switched on with a simple press of the </span><span class="rvts23">Toggle Read-Only</span><span class="rvts20"> hotkey.</span></p>
+<p class="rvps7"><span class="rvts20">But if you enable this option, the controls scheme will be the same as in old emulators. Pressing </span><span class="rvts23">F1</span><span class="rvts20">-</span><span class="rvts23">F10</span><span class="rvts20"> will work depending on the Recording mode. When the Recording is off, functional keys jump to respective Bookmark frame, and when Recording is on, </span><span class="rvts23">F1</span><span class="rvts20">-</span><span class="rvts23">F10</span><span class="rvts20"> keys load the branch of the Bookmark.</span></p>
+<p class="rvps7"><span class="rvts20">Also, Input Recording won't work until you load some Bookmark. This behavior allows you to press the </span><span class="rvts23">Toggle Read-Only</span><span class="rvts20"> hotkey in the middle of watching the movie, without overwriting old Input until you actually load a savestate.</span></p>
+<p class="rvps7"><span class="rvts20">Plus, there will be a red frame around the "current slot" number in the Bookmarks List. Press numeric keys </span><span class="rvts23">1</span><span class="rvts20">-</span><span class="rvts23">10</span><span class="rvts20"> to switch the current slot.</span></p>
+<p class="rvps7"><span class="rvts20">This option is only left here to help old TASers move to Taseditor. But it's recommended to use the new controls scheme, because it fits the specifics of TASing process in Taseditor much better.</span></p>
+<p class="rvps7"><a name="BranchesrestoreentireMovie"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Branches restore entire Movie</span></p>
+<p class="rvps7"><span class="rvts20">Defines the way a branch is restored when you load its Bookmark.</span></p>
+<p class="rvps7"><span class="rvts20">The option is enabled by default, so </span><span class="rvts20">when you're loading a Bookmark, you replace the current movie with the movie state stored in that Bookmark.</span></p>
+<p class="rvps7"><span class="rvts20">If this option is disabled, when you're loading a Bookmark, the current movie is replaced with a truncated version of the bookmarked movie state. The movie will be truncated at the bookmarked frame, thus imitating the traditional behavior of loading a savestate: savestates only recover the part of the movie before the Playback cursor, and the rest frames (from the light-blue cursor to the movie end) aren't loaded. This makes sense when TASing traditional way, because after loading a savestate TASer usually records a new Input starting from the position of the Playback cursor, so there's no need to load the data that is going to be be overwritten anyway. But in Taseditor the movie is edited independently from the Playback cursor position, so you can load the entire movie state from Bookmarks, without caring if the Playback cursor is in the end of the movie or it is in the middle.</span></p>
+<p class="rvps7"><span class="rvts20">It's recommended to leave this option enabled.</span></p>
+<p class="rvps7"><a name="HUDinBranchscreenshots"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; HUD in Branch screenshots</span></p>
+<p class="rvps7"><span class="rvts20">Defines the way to capture screenshots when creating Bookmarks.</span></p>
+<p class="rvps7"><span class="rvts20">If the option is on, it takes a snapshot of the whole emulator window, including icons and emulator messages, Lua output and other data placed over the game picture. If the option is disabled, Bookmarks will only capture the game output.</span></p>
+<p class="rvps7"><span class="rvts20">The option is enabled by default. </span><span class="rvts20">It's recommended to leave it on, in order to use Lua output and frame counter when comparing alternate approaches to playing through a segment.</span></p>
+<p class="rvps7"><a name="AutopauseattheendofMovie"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Config -&gt; Autopause at the end of Movie</span></p>
+<p class="rvps7"><span class="rvts20">Automatically stops movie playback at the last frame, unless it started playing from the last frame.</span></p>
+<p class="rvps7"><span class="rvts20">When replaying a finished (or partially finished) movie, you usually don't want to pass over the boundary of its Input. That's why the "Autopause at the end of Movie" option is enabled by default. If you disable it, the emulator will play infinitely after the current movie Input ended, expanding the movie size until you press </span><span class="rvts23">Pause</span><span class="rvts20"> or the middle mouse button.</span></p>
+<p class="rvps7"><span class="rvts20">It's recommended to leave this option enabled.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><a name="fceux-config"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Now you are aware of all Taseditor settings, the remaining part of the chapter describes FCEUX emulator settings that may be useful for a TASer.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">If you are going to TAS traditional way, it's obligatory to set the first controller buttons to such keys that would be easy to press together with the </span><span class="rvts23">Frame Advance</span><span class="rvts20"> hotkey. While FCEUX supports binding the virtual NES joypad to a real PC gamepad, it's recommended to use the keyboard for recording Input, in order to have fast access to </span><span class="rvts23">Frame Advance</span><span class="rvts20">, </span><span class="rvts23">Frame Rewind</span><span class="rvts20">, </span><span class="rvts23">Pause</span><span class="rvts20">, and to all 10 savestate slots.</span></p>
+<p class="rvps7"><span class="rvts20">However, if you use Taseditor as intended, you won't need to use Recording too much, and even in cases when you use it (for example, when recording a test playthrough of a level), an access to functional keys isn't critical. So, you can reassign the game controls to a USB gamepad, if you have one.</span></p>
+<p class="rvps7"><span class="rvts20">Virtual controller buttons are configured in FCEUX the following way. Choose </span><span class="rvts22">Config -&gt; Input</span><span class="rvts20"> in emulator main menu. In the appeared dialog, select the "Gamepad" item from the leftmost drop-down listbox (usually it's already selected). Click the left </span><span class="rvts26">Configure</span><span class="rvts20"> button (since you need to configure the first gamepad). In the new window click the </span><span class="rvts26">Up</span><span class="rvts20"> button, then a small window will appear, now press the keyboard key you want to set for the virtual </span><span class="rvts26">Up</span><span class="rvts20"> button. Press that key 2nd time to confirms your choice, or just click </span><span class="rvts26">Close</span><span class="rvts20">. Then you need to do the same for the rest buttons of NES gamepad – </span><span class="rvts26">Down</span><span class="rvts20">, </span><span class="rvts26">Left</span><span class="rvts20">, </span><span class="rvts26">Right</span><span class="rvts20">, </span><span class="rvts26">Select</span><span class="rvts20">, </span><span class="rvts26">Start</span><span class="rvts20">, </span><span class="rvts26">B</span><span class="rvts20">, </span><span class="rvts26">A</span><span class="rvts20">. After you're done with the first controller buttons (Virtual Gamepad 1), you may close both windows: Gamepad and Input Configuration.</span></p>
+<p class="rvps7"><span class="rvts20">You can check the assigned buttons while playing the game or while Taseditor is engaged – as you press them, the corresponding symbols in the Piano Roll Header will shine with green color. Besides, if you enable Input display (FCEUX: </span><span class="rvts22">Config -&gt; Display -&gt; Input Display -&gt; 2 player</span><span class="rvts20">), FCEUX screen will show you the pressed buttons too.</span></p>
+<p class="rvps7"><span class="rvts20">In addition to recording the regular gaming session, virtual gamepad buttons may be used to quickly set Input when editing movie (see </span><a class="rvts24" href="ProgramCustomization.html#UseInputkeysforColumnSet">Config -&gt; Use Input keys for Column Set</a><span class="rvts20">). Select a range of frames where you want to change Input and press the key you assigned to a button of the virtual gamepad.</span></p>
+<p class="rvps7"><span class="rvts20">When you map the virtual buttons to keyboard keys, make sure none of the emulator or Taseditor hotkeys are already assigned to those keys. The full list of default hotkeys can be found in the </span><a class="rvts24" href="Controls.html#hotkeys">Reference</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">Some FCEUX hotkeys don't have default mapping (they're not mapped to any key yet). You can configure them the following way. In the emulator main menu choose </span><span class="rvts22">Config -&gt; Map Hotkeys</span><span class="rvts20">. A window listing all possible emulator hotkeys will appear. Choose the necessary hotkey, double-click it and then press the desired keyboard key.</span></p>
+<p class="rvps7"><span class="rvts20">First of all, find the item called "</span><span class="rvts22">Open TAS Editor</span><span class="rvts20">" and double-click it. In the appeared window press the key that you will always use to quickly launch Taseditor.</span></p>
+<p class="rvps7"><span class="rvts20">Second, find the item "</span><span class="rvts23">Reload ROM or TAS Editor Project</span><span class="rvts20">" and either remap it or remember the default combination (</span><span class="rvts23">Ctrl + F1</span><span class="rvts20">). This hotkey will help you quickly return to your interrupted work – just launch FCEUX, press the </span><span class="rvts23">Reload ROM</span><span class="rvts20"> hotkey, then press the aforementioned </span><span class="rvts22">Open TAS Editor</span><span class="rvts20"> hotkey, and then again </span><span class="rvts23">Reload ROM</span><span class="rvts20"> (this time it will work as </span><span class="rvts23">Reload TAS Editor Project</span><span class="rvts20">). This way you'll return to the state of your paused work in a split second.</span></p>
+<p class="rvps7"><span class="rvts20">Now look at the hotkeys "</span><span class="rvts23">Frame Advance</span><span class="rvts20">" и "</span><span class="rvts23">Frame Rewind</span><span class="rvts20">". They are used for Playback cursor navigation. By default they are mapped to "</span><span class="rvts23">\</span><span class="rvts20">" and "</span><span class="rvts23">Backspace</span><span class="rvts20">". You can reconfigure them to more handy keys or just use the mouse wheel for the Playback cursor frame-by-frame navigation.</span></p>
+<p class="rvps7"><span class="rvts20">Also see the "</span><span class="rvts23">Speed Down</span><span class="rvts20">" and "</span><span class="rvts23">Speed Up</span><span class="rvts20">" hotkeys. You may consider remapping them to Numpad keys "</span><span class="rvts22">+</span><span class="rvts20">" and "</span><span class="rvts22">-</span><span class="rvts20">".</span></p>
+<p class="rvps7"><span class="rvts20">The "</span><span class="rvts23">Pause</span><span class="rvts20">" и "</span><span class="rvts23">Restore Playback</span><span class="rvts20">" hotkeys are set to "</span><span class="rvts23">Pause/Break</span><span class="rvts20">" and "</span><span class="rvts23">Spacebar</span><span class="rvts20">" keys by default, but in most cases it's easier to use the middle mouse button instead of these hotkeys, so you can even reassign the "</span><span class="rvts23">Spacebar</span><span class="rvts20">" for something else if you wish.</span></p>
+<p class="rvps7"><span class="rvts20">Finally, there is the "</span><span class="rvts23">Cancel Seeking</span><span class="rvts20">" hotkey ("</span><span class="rvts23">Esc</span><span class="rvts20">" key by default). Pressing it is the same as clicking the Taseditor progressbar – if the Playback was seeking to a target frame, the seeking will be aborted.</span></p>
+<p class="rvps7"><span class="rvts20">Some FCEUX hotkeys don't work when Taseditor is engaged. For example, the "</span><span class="rvts22">Open ROM</span><span class="rvts20">" won't work – you have to load ROM before running Taseditor. This is done for </span><a class="rvts24" href="MistakeProofing.html#DisabledHotkeys">mistake-proofing</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The next chapter describes </span><a class="rvts24" href="AdvancedFeatures.html">additional features of Taseditor</a><span class="rvts20">. You may postpone reading it until you are used to main features. Anyway, now you're ready enough for productive work in Taseditor.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/create-epub-ebooks">Write EPub books for the iPad</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/help-authoring-tool">Free help authoring environment</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

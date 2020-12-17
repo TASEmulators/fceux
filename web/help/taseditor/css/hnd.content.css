@@ -1,0 +1,600 @@
+/* ========== Text Styles ========== */
+hr { color: #000000}
+.main-content, .main-content table span.rvts0 /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6
+{
+}
+span.rvts7
+{
+ font-size: 14pt;
+ font-weight: bold;
+ color: #365f91;
+}
+span.rvts8
+{
+ font-size: 24pt;
+ font-weight: bold;
+}
+span.rvts9
+{
+ font-size: 12pt;
+}
+span.rvts10
+{
+ font-size: 14pt;
+}
+a.rvts11, span.rvts11
+{
+ font-size: 12pt;
+ font-weight: bold;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts11:hover
+{
+ color: #0000ff;
+}
+a.rvts12, span.rvts12
+{
+ font-size: 12pt;
+ font-weight: bold;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts12:hover
+{
+ color: #0000ff;
+}
+span.rvts13
+{
+ font-size: 9pt;
+}
+a.rvts14, span.rvts14
+{
+ font-size: 14pt;
+ font-weight: bold;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts14:hover
+{
+ color: #0000ff;
+}
+a.rvts15, span.rvts15
+{
+ font-size: 14pt;
+ font-weight: bold;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts15:hover
+{
+ color: #0000ff;
+}
+span.rvts16 /* Font Style */
+{
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts17, span.rvts17 /* Font Style */
+{
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+span.rvts18
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+span.rvts19
+{
+ font-size: 11pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000080;
+}
+span.rvts20
+{
+ font-size: 11pt;
+}
+span.rvts21
+{
+ font-size: 12pt;
+ font-weight: bold;
+}
+span.rvts22
+{
+ font-size: 11pt;
+ font-weight: bold;
+}
+span.rvts23
+{
+ font-size: 11pt;
+ font-weight: bold;
+ color: #0096bb;
+}
+a.rvts24, span.rvts24
+{
+ font-size: 11pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts24:hover
+{
+ color: #0000ff;
+}
+a.rvts25, span.rvts25
+{
+ font-size: 11pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts25:hover
+{
+ color: #0000ff;
+}
+span.rvts26
+{
+ font-size: 11pt;
+ font-weight: bold;
+ color: #008817;
+}
+span.rvts27
+{
+ font-size: 11pt;
+ color: #c10031;
+}
+a.rvts28, span.rvts28
+{
+ font-size: 11pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts28:hover
+{
+ color: #0000ff;
+}
+a.rvts29, span.rvts29
+{
+ font-size: 11pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts29:hover
+{
+ color: #0000ff;
+}
+a.rvts30, span.rvts30
+{
+ font-size: 11pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts30:hover
+{
+ color: #0000ff;
+}
+span.rvts31
+{
+ font-size: 11pt;
+ text-decoration: underline;
+}
+a.rvts32, span.rvts32
+{
+ font-size: 11pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts32:hover
+{
+ color: #0000ff;
+}
+span.rvts33
+{
+ font-size: 11pt;
+ font-style: italic;
+}
+a.rvts34, span.rvts34
+{
+ font-size: 11pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts34:hover
+{
+ color: #0000ff;
+}
+span.rvts35
+{
+ font-size: 9pt;
+ font-weight: bold;
+}
+span.rvts36
+{
+ font-size: 11pt;
+ font-weight: bold;
+ color: #008817;
+ text-decoration: underline;
+}
+span.rvts37
+{
+ font-weight: bold;
+}
+a.rvts38, span.rvts38
+{
+ font-size: 11pt;
+ font-weight: bold;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts38:hover
+{
+ color: #0000ff;
+}
+a.rvts39, span.rvts39
+{
+ font-size: 11pt;
+ font-weight: bold;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts39:hover
+{
+ color: #0000ff;
+}
+a.rvts40, span.rvts40
+{
+ font-size: 11pt;
+ font-weight: bold;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts40:hover
+{
+ color: #0000ff;
+}
+span.rvts41
+{
+ font-size: 11pt;
+ color: #4f81bd;
+}
+span.rvts42
+{
+ color: #004000;
+}
+a.rvts43, span.rvts43
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts43:hover
+{
+ color: #0000ff;
+}
+span.rvts44
+{
+ font-size: 6pt;
+}
+span.rvts45
+{
+ font-size: 16pt;
+ text-decoration: underline;
+}
+span.rvts46
+{
+ color: #000000;
+}
+span.rvts47
+{
+ font-size: 11pt;
+ font-weight: bold;
+ color: #000000;
+}
+a.rvts48, span.rvts48
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts48:hover
+{
+ color: #0000ff;
+}
+a.rvts49, span.rvts49
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts49:hover
+{
+ color: #0000ff;
+}
+a.rvts50, span.rvts50
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts50:hover
+{
+ color: #0000ff;
+}
+a.rvts51, span.rvts51
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts51:hover
+{
+ color: #0000ff;
+}
+a.rvts52, span.rvts52
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts52:hover
+{
+ color: #0000ff;
+}
+span.rvts53
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts54
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts55
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts56, span.rvts56
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts57
+{
+ font-size: 11pt;
+ color: #0a8200;
+}
+span.rvts58
+{
+ font-size: 11pt;
+ color: #000000;
+}
+span.rvts59
+{
+ font-weight: bold;
+ color: #ffffff;
+}
+a.rvts60, span.rvts60
+{
+ font-size: 9pt;
+ font-weight: bold;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts60:hover
+{
+ color: #0000ff;
+}
+span.rvts61
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000080;
+}
+span.rvts62
+{
+ font-size: 11pt;
+ font-style: italic;
+ color: #243f60;
+}
+span.rvts63
+{
+ font-size: 11pt;
+ color: #333399;
+}
+span.rvts64
+{
+ font-size: 11pt;
+ font-style: italic;
+ font-weight: bold;
+}
+a.rvts65, span.rvts65
+{
+ font-weight: bold;
+ color: #ffffff;
+ text-decoration: underline;
+}
+a.rvts65:hover
+{
+ color: #0000ff;
+}
+span.rvts66
+{
+ color: #ffffff;
+}
+span.rvts67
+{
+ color: #333399;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2
+{
+}
+.rvps3
+{
+ text-align: center;
+}
+.rvps4
+{
+ text-align: center;
+ margin: 4px 0px 0px 0px;
+}
+.rvps5
+{
+ text-align: center;
+ line-height: 21px;
+ margin: 0px 0px 10px 0px;
+}
+.rvps6 /* Paragraph Style */
+{
+ text-align: center;
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-left: none;
+ padding: 2px 0px 2px 0px;
+ margin: 7px 0px 7px 0px;
+}
+.rvps7
+{
+ text-align: justify;
+ text-justify: inter-word;
+ text-align-last: auto;
+ text-indent: 30px;
+}
+.rvps8
+{
+ text-indent: 20px;
+ margin: 8px 0px 0px 30px;
+}
+.rvps9
+{
+ text-indent: 30px;
+}
+.rvps10
+{
+ text-align: justify;
+ text-align-last: auto;
+ text-indent: 30px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps11
+{
+ text-indent: 30px;
+ margin: 0px 0px 6px 0px;
+}
+.rvps12
+{
+ text-align: right;
+}
+.rvps13
+{
+ text-align: center;
+ text-indent: 30px;
+}
+.rvps14
+{
+ margin: 0px 0px 0px 50px;
+}
+.rvps15
+{
+ text-align: justify;
+ text-justify: inter-word;
+ text-align-last: auto;
+}
+.rvps16
+{
+ text-align: justify;
+ text-justify: inter-word;
+ text-align-last: auto;
+ margin: 0px 0px 0px 50px;
+}
+.rvps17
+{
+ text-align: justify;
+ text-justify: inter-word;
+ text-align-last: auto;
+ text-indent: 20px;
+}
+.rvps18
+{
+ text-indent: 30px;
+ margin: 0px 0px 0px 30px;
+}
+.rvps19
+{
+ text-align: justify;
+ text-justify: inter-word;
+ text-align-last: auto;
+ text-indent: 30px;
+ margin: 0px 0px 0px 30px;
+}
+/* ========== Lists ========== */
+.list0 {text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: decimal;}
+.list1 {text-indent: 0px; padding: 0; margin: 0 0 0 72px; list-style-position: outside; list-style-type: decimal;}
+.list2 {text-indent: 0px; padding: 0; margin: 0 0 0 48px; list-style-position: outside; list-style-type: decimal;}
+.list3 {text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;}
+.list4 {text-indent: 0px; padding: 0; margin: 0 0 0 72px; list-style-position: outside; list-style-type: circle;}
+.list5 {text-indent: 0px; padding: 0; margin: 0 0 0 48px; list-style-position: outside; list-style-type: square;}
+.list6 {text-indent: 0px; padding: 0; margin: 0 0 0 48px; list-style-position: outside; list-style-type: disc;}
+.list7 {text-indent: 0px; padding: 0; margin: 0 0 0 48px; list-style-position: outside; list-style-type: circle;}
+.list8 {text-indent: 0px; padding: 0; margin: 0 0 0 72px; list-style-position: outside; list-style-type: square;}
+.list9 {text-indent: 0px; padding: 0; margin: 0 0 0 50px; list-style-position: outside;}
+.list10 {text-indent: 0px; padding: 0; margin: 0 0 0 22px; list-style-position: outside; list-style-type: square;}
+.list11 {text-indent: 0px; padding: 0; margin: 0 0 0 55px; list-style-position: outside; list-style-type: disc;}
+.list12 {text-indent: 0px; padding: 0; margin: 0 0 0 17px; list-style-position: outside; list-style-type: circle;}
+.list13 {text-indent: 32px; padding: 0; margin: 0 0 0 20px; list-style-position: inside; list-style-type: decimal;}
+.list14 {text-indent: 0px; padding: 0; margin: 0 0 0 52px; list-style-position: outside; list-style-type: decimal;}
+.list15 {text-indent: 25px; padding: 0; margin: 0 0 0 5px; list-style-position: inside; list-style-type: disc;}
+.list16 {text-indent: 0px; padding: 0; margin: 0 0 0 67px; list-style-position: outside; list-style-type: circle;}
+.list17 {text-indent: 30px; padding: 0; margin: 0 0 0 40px; list-style-position: inside; list-style-type: disc;}
+.list18 {text-indent: 0px; padding: 0; margin: 0 0 0 32px; list-style-position: outside; list-style-type: circle;}
+.list19 {text-indent: 30px; padding: 0; margin: 0 0 0 40px; list-style-position: inside; list-style-type: decimal;}
+.list20 {text-indent: 0px; padding: 0; margin: 0 0 0 32px; list-style-position: outside; list-style-type: decimal;}
+.list21 {text-indent: 30px; padding: 0; margin: 0 0 0 70px; list-style-position: inside; list-style-type: disc;}
+.list22 {text-indent: 0px; padding: 0; margin: 0 0 0 2px; list-style-position: outside; list-style-type: circle;}
+.list23 {text-indent: 60px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;}

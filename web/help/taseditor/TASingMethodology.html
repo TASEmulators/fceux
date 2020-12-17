@@ -1,210 +1,411 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>4. TASing Methodology</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("TASingMethodology");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>4. TASing Methodology</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="4. TASing Methodology">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="4. TASing Methodology" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>4. TASing Methodology</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="BeginnersGuide.html">Beginner's Guide</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="BeginnersGuide.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="TASingProcess.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="TraditionalTASing.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="TASingMethodology"
+		  data-hnd-context="9"
+		  data-hnd-title="4. TASing Methodology"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="BeginnersGuide.html">Beginner's Guide</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="BeginnersGuide.html" title="Beginner's Guide" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="TASingProcess.html" title="3. TASing Process" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="TraditionalTASing.html" title="4.1. Traditional TASing" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>4. TASing Methodology</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">TASing Methodology</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">This chapter is dedicated to the principal activity in TASing – the way of creating an optimal Input for any given segment of the movie. TASes look so shiny exactly because of persistent manual polishing of Input. The size of working segment can be anything, criteria and factors of optimality can vary, but the method is basically one and the same</span><span class="rvts21">: retry all sorts of approaches and choose the best one. The only question is how to do it with minimum time and effort.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts34">Gamers</span><span class="rvts21"> erroneously think that to make a TAS you only have to complete the game once, using savestates when you make some fatal mistakes (those resulting in inability to complete current segment, for example, death of the character).</span></li>
-<li class="rvps10"><span class="rvts34">Newbie TASers</span><span class="rvts21"> understand that to make a beautiful TAS you have to revert and fix </span><span class="rvts25">all</span><span class="rvts21"> noticed mistakes (e.g. even such minor flaws as stumbling over a threshold). They also complete each segment only once, but spend more time than regular players, because of saving and loading savestates much more often. For TASing simple games this can be sufficient.</span></li>
-<li class="rvps10"><span class="rvts34">Experienced TASers</span><span class="rvts21"> know that to make a perfect TAS it's not enough to fix all noticed mistakes. You also have to fix unnoticed mistakes. Consider unknown factors. Approach the task from an unobvious side. To do all this they play through the same segment several times, both fixing all noticed mistakes and trying to somehow avert unnoticeable mistakes.</span></li>
+<p class="rvps2"><span class="rvts18">TASing Methodology</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">This chapter is dedicated to the principal activity in TASing – the way of creating an optimal Input for any given segment of the movie. TASes look so shiny exactly because of persistent manual polishing of Input. The size of working segment can be anything, criteria and factors of optimality can vary, but the method is basically one and the same</span><span class="rvts20">: retry all sorts of approaches and choose the best one. The only question is how to do it with minimum time and effort.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts31">Gamers</span><span class="rvts20"> erroneously think that to make a TAS you only have to complete the game once, using savestates when you make some fatal mistakes (those resulting in inability to complete current segment, for example, death of the character).</span></li>
+ <li class="rvps7"><span class="rvts31">Newbie TASers</span><span class="rvts20"> understand that to make a beautiful TAS you have to revert and fix </span><span class="rvts22">all</span><span class="rvts20"> noticed mistakes (e.g. even such minor flaws as stumbling over a threshold). They also complete each segment only once, but spend more time than regular players, because of saving and loading savestates much more often. For TASing simple games this can be sufficient.</span></li>
+ <li class="rvps7"><span class="rvts31">Experienced TASers</span><span class="rvts20"> know that to make a perfect TAS it's not enough to fix all noticed mistakes. You also have to fix unnoticed mistakes. Consider unknown factors. Approach the task from an unobvious side. To do all this they play through the same segment several times, both fixing all noticed mistakes and trying to somehow avert unnoticeable mistakes.</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">It's rather difficult to convince yourself to spend time on alternative ways to play through the segment once it's already completed and all obvious mistakes are already fixed. After achieving the current in-game goal people usually want to set another in-game goal. But you must remember that TASer's goal is different from player's goals. So try to abstract away from the game rules and not to retreat from the segment until you complete real goal, not just player's small goal.</span></p>
-<p class="rvps10"><span class="rvts21">That's actually the most difficult part – to invent new approaches to solving one and the same task. TASers mainly consider the same approach a regular player would have used in this place of the game. That's why people mostly use evolutionary way instead of revolutionary. You keep modifying the existing basic approach, both fixing its mistakes and conducting experiments. In the process of these thoughtful modifications you enrich your knowledge base about the game, and as a result you produce an Input that isn't immediately obvious.</span></p>
-<p class="rvps10"><span class="rvts21">Of course, sometimes you have a flash of inspiration, when a revolutionary idea leads to tremendous improvements that surpass all polishing gains. People love TASing exactly for these emotional moments. Yet it doesn't exempt you from the need to polish this new revolutionary approach using the same methods to bring it even closer to an ideal.</span></p>
-<p class="rvps10"><span class="rvts21">Instead of reading the techniques described here you can just immediately start real TASing, so in a course of several projects you would work out your own methods. But most likely after a year of TASing you'll come to the described scheme of work.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">So, the process of creating the best Input for the segment of optimization can be basically described as a loop of fixing mistakes in previous versions of Input of the segment. A mistake is any kind of divergence from the perfect yet unknown Input. Such statement of question is very advantageous, because it means that you can gradually approach the perfect Input by making small steps that you can elaborate even without being a genius. </span><span class="rvts25">The majority of mistakes can be successfully fixed by repeated examination and modification.</span><span class="rvts21"> That is, even when you don't have any original ideas, you can achieve a success by persistence. The successful progress motivates you to continue the work and thus prepare the ground for breakthrough ideas.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">To correct a mistake in the Input of a movie you have to:</span></p>
-<ol style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">Become aware of the mistake.</span></li>
-<li class="rvps10"><span class="rvts21">Conjecture a solution.</span></li>
-<li class="rvps10"><span class="rvts21">Navigate to the place.</span></li>
-<li class="rvps10"><span class="rvts21">Apply changes.</span></li>
-<li class="rvps10"><span class="rvts21">Verify the outcome.</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">It's rather difficult to convince yourself to spend time on alternative ways to play through the segment once it's already completed and all obvious mistakes are already fixed. After achieving the current in-game goal people usually want to set another in-game goal. But you must remember that TASer's goal is different from player's goals. So try to abstract away from the game rules and not to retreat from the segment until you complete real goal, not just player's small goal.</span></p>
+<p class="rvps7"><span class="rvts20">That's actually the most difficult part – to invent new approaches to solving one and the same task. TASers mainly consider the same approach a regular player would have used in this place of the game. That's why people mostly use evolutionary way instead of revolutionary. You keep modifying the existing basic approach, both fixing its mistakes and conducting experiments. In the process of these thoughtful modifications you enrich your knowledge base about the game, and as a result you produce an Input that isn't immediately obvious.</span></p>
+<p class="rvps7"><span class="rvts20">Of course, sometimes you have a flash of inspiration, when a revolutionary idea leads to tremendous improvements that surpass all polishing gains. People love TASing exactly for these emotional moments. Yet it doesn't exempt you from the need to polish this new revolutionary approach using the same methods to bring it even closer to an ideal.</span></p>
+<p class="rvps7"><span class="rvts20">Instead of reading the techniques described here you can just immediately start real TASing, so in a course of several projects you would work out your own methods. But most likely after a year of TASing you'll come to the described scheme of work.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">So, the process of creating the best Input for the segment of optimization can be basically described as a loop of fixing mistakes in previous versions of Input of the segment. A mistake is any kind of divergence from the perfect yet unknown Input. Such statement of question is very advantageous, because it means that you can gradually approach the perfect Input by making small steps that you can elaborate even without being a genius. </span><span class="rvts22">The majority of mistakes can be successfully fixed by repeated examination and modification.</span><span class="rvts20"> That is, even when you don't have any original ideas, you can achieve a success by persistence. The successful progress motivates you to continue the work and thus prepare the ground for breakthrough ideas.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">To correct a mistake in the Input of a movie you have to:</span></p>
+<ol style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: decimal;">
+ <li value="1" class="rvps7"><span class="rvts20">Become aware of the mistake.</span></li>
+ <li value="2" class="rvps7"><span class="rvts20">Conjecture a solution.</span></li>
+ <li value="3" class="rvps7"><span class="rvts20">Navigate to the place.</span></li>
+ <li value="4" class="rvps7"><span class="rvts20">Apply changes.</span></li>
+ <li value="5" class="rvps7"><span class="rvts20">Verify the outcome.</span></li>
 </ol>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">1. </span><span class="rvts21">Realizing a mistake happens either when watching the movie in Read-Only mode or right when recording/editing the Input.</span></p>
-<div class="rvps10"><table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid; height: 15px;"><p class="rvps10"><span class="rvts41">Comment: </span><span class="rvts42">Instead of detecting a tangible mistake TASers often just assume that current segment is still improvable. It's always wise to doubt the perfectness of current result and try experimenting with the Input – sometimes you indeed find unused possibilities.</span></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">1. </span><span class="rvts20">Realizing a mistake happens either when watching the movie in Read-Only mode or right when recording/editing the Input.</span></p>
+<div class="rvps7">
+<table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid; border-spacing: 2px;">
+ <tr valign="top">
+  <td height="27" style="border-color: #000000; border-style: solid; padding: 6px;">
+   <p class="rvps7"><span class="rvts37">Comment: </span><span class="rvts6">Instead of detecting a tangible mistake TASers often just assume that current segment is still improvable. It's always wise to doubt the perfectness of current result and try experimenting with the Input – sometimes you indeed find unused possibilities.</span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps10"><a name="loop"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">2. </span><span class="rvts21">The means of solving the mistake are either immediately obvious or are found experimentally. In rare cases you have to resort to calculations and comparisons. A correctly chosen segment usually encompasses all key factors of optimality. The information from previous or next segments is rarely needed.</span></p>
-<div class="rvps10"><table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid; height: 15px;"><p class="rvps10"><span class="rvts41">Comment: </span><span class="rvts42">Sometimes while fixing one mistake we unwittingly create another mistake. In this case the optimization process would go in wrong direction, but fortunately such situations are extremely rare in TASing, because videogames are much more straightforward than real life, so player can find all factors and an unambiguous criterion of optimality. Taseditor additionally simplifies the process by data visualization.</span></p>
-</td>
-</tr>
+<p class="rvps7"><a name="loop"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">2. </span><span class="rvts20">The means of solving the mistake are either immediately obvious or are found experimentally. In rare cases you have to resort to calculations and comparisons. A correctly chosen segment usually encompasses all key factors of optimality. The information from previous or next segments is rarely needed.</span></p>
+<div class="rvps7">
+<table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid; border-spacing: 2px;">
+ <tr valign="top">
+  <td height="27" style="border-color: #000000; border-style: solid; padding: 6px;">
+   <p class="rvps7"><span class="rvts37">Comment: </span><span class="rvts6">Sometimes while fixing one mistake we unwittingly create another mistake. In this case the optimization process would go in wrong direction, but fortunately such situations are extremely rare in TASing, because videogames are much more straightforward than real life, so player can find all factors and an unambiguous criterion of optimality. Taseditor additionally simplifies the process by data visualization.</span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">3. </span><span class="rvts21">The ability to navigate to the place of making the mistake is the essential distinction between TASing and normal speedrunning. Regular players can detect the mistake post factum, but it's TASers who always return back to correct it.</span></p>
-<p class="rvps10"><span class="rvts21">In traditional method of TASing the navigation may take noticeable amount of time and effort. Taseditor makes the navigation much faster.</span></p>
-<div class="rvps10"><table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid; height: 15px;"><p class="rvps10"><span class="rvts41">Comment: </span><span class="rvts42">Sometimes the place of making the mistake is located long before the segment where it is revealed. In this case you have to find the segment affecting the mistake and edit it according to the information given by the played segment. And in this case the speed of navigation between those two segments is even more important.</span></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">3. </span><span class="rvts20">The ability to navigate to the place of making the mistake is the essential distinction between TASing and normal speedrunning. Regular players can detect the mistake post factum, but it's TASers who always return back to correct it.</span></p>
+<p class="rvps7"><span class="rvts20">In traditional method of TASing the navigation may take noticeable amount of time and effort. Taseditor makes the navigation much faster.</span></p>
+<div class="rvps7">
+<table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid; border-spacing: 2px;">
+ <tr valign="top">
+  <td height="27" style="border-color: #000000; border-style: solid; padding: 6px;">
+   <p class="rvps7"><span class="rvts37">Comment: </span><span class="rvts6">Sometimes the place of making the mistake is located long before the segment where it is revealed. In this case you have to find the segment affecting the mistake and edit it according to the information given by the played segment. And in this case the speed of navigation between those two segments is even more important.</span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">4. </span><span class="rvts21">Applying modifications to Input is how you make your thoughts real. The less the delay between an idea and its implementation is, the better.</span></p>
-<p class="rvps10"><span class="rvts21">In the traditional method of TASing the Input modification generally takes longer, because in addition to rewriting erroneous frames you also have to rewrite adjacent frames &nbsp;In Taseditor this is often not necessary.</span></p>
-<div class="rvps10"><table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid; height: 15px;"><p class="rvps10"><span class="rvts41">Comment: </span><span class="rvts42">Since any Input modification entails a change in the game flow, sometimes even in Taseditor you have to resync the old Input that follows the place of fixing mistake.</span></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">4. </span><span class="rvts20">Applying modifications to Input is how you make your thoughts real. The less the delay between an idea and its implementation is, the better.</span></p>
+<p class="rvps7"><span class="rvts20">In the traditional method of TASing the Input modification generally takes longer, because in addition to rewriting erroneous frames you also have to rewrite adjacent frames &nbsp;In Taseditor this is often not necessary.</span></p>
+<div class="rvps7">
+<table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid; border-spacing: 2px;">
+ <tr valign="top">
+  <td height="27" style="border-color: #000000; border-style: solid; padding: 6px;">
+   <p class="rvps7"><span class="rvts37">Comment: </span><span class="rvts6">Since any Input modification entails a change in the game flow, sometimes even in Taseditor you have to resync the old Input that follows the place of fixing mistake.</span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">5. </span><span class="rvts21">To see the outcome you need to resume playing the movie from the beginning of current segment of right from the frame of fixing the mistake. There's no need to re-check previous segments of the movie, because the mistake fixing affects only subsequent events.</span></p>
-<div class="rvps10"><table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid; height: 15px;"><p class="rvps10"><span class="rvts41">Comment: </span><span class="rvts42">Although, when you're making an entertaining playthrough instead of a pure speedrun, after fixing a mistake (e.g. making the movement trajectory more smooth) you should ensure that this correction fits with the general sequence of in-game events, so it's recommended to rewatch some previous events together with the current segment.</span></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">5. </span><span class="rvts20">To see the outcome you need to resume playing the movie from the beginning of current segment of right from the frame of fixing the mistake. There's no need to re-check previous segments of the movie, because the mistake fixing affects only subsequent events.</span></p>
+<div class="rvps7">
+<table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid; border-spacing: 2px;">
+ <tr valign="top">
+  <td height="27" style="border-color: #000000; border-style: solid; padding: 6px;">
+   <p class="rvps7"><span class="rvts37">Comment: </span><span class="rvts6">Although, when you're making an entertaining playthrough instead of a pure speedrun, after fixing a mistake (e.g. making the movement trajectory more smooth) you should ensure that this correction fits with the general sequence of in-game events, so it's recommended to rewatch some previous events together with the current segment.</span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps10"><span class="rvts21">You almost always have to watch the current segment up to its end, that is, to the moment when the target event occurs, so that you can confidently apply the optimality criterion. Because the correction may seem profitable at first but appear worse in the end.</span></p>
-<p class="rvps10"><span class="rvts21">After evaluating the outcome, the mistake is either considered to be fixed/non-existent, or you have to return to </span><a class="rvts27" href="TASingMethodology.html#loop">step 2</a><span class="rvts21"> and rethink the situation.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><a name="linear-tasing"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Before Taseditor, all mistakes (both explicit and supposed) were being fixed by creating and reloading savestates. If you're not familiar with the traditional method of TASing, here's its basic principles:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">The game emulation is almost always paused. You only unpause it to rewatch finished segments.</span></li>
-<li class="rvps10"><span class="rvts21">TASer sequentially types the Input into frames pointed by the Playback cursor. You see the outcome of the committed Input next frame (or sometimes in several frames). Experienced TASers create a new savestate after each </span><span class="rvts37">hard-to-reproduce action</span><span class="rvts21">, so they are able to return back without the need to replay the whole segment from the beginning.</span></li>
-<li class="rvps10"><span class="rvts21">To correct a mistake, TASer returns to the supposed place of making the mistake and rerecords the whole Input, starting from the frame that needs to be changed. If there was a savestate created at this frame, you can instantly load the savestate in Read+Write mode and begin typing buttonpresses right away. But if you only have a savestate created at some distance before the frame, there are two options. </span><span class="rvts34">Option 1:</span><span class="rvts21"> load the nearest savestate in Read-Only mode and replay the movie up to the needed frame, then switch back to Read+Write mode and start the correction, thus not touching the Input in the interval from the savestate frame to the mistake frame. </span><span class="rvts34">Option 2:</span><span class="rvts21"> just load the nearest savestate in Read+Write mode and repeat the old Input by memory, thus rewriting it up to the needed frame, and then start the correction. The 2nd way is used more often, because after the nearest savestate there's usually an </span><span class="rvts37">easy-to-reproduce Input</span><span class="rvts21"> (e.g. simply holding </span><span class="rvts29">R + B</span><span class="rvts21">). Also, upon arriving to the supposed frame of the mistake, an experienced TASer mechanically creates a savestate (just in case!), so next time he will be able to return directly to the frame, without wasting time on navigation. Such a prudence makes sense, because mistakes are seldom fixed at the first attempt, usually you need to repeatedly rerecord the same section of Input, starting from about the same frame.</span></li>
-<li class="rvps10"><span class="rvts21">The disadvantages of the traditional method clearly reveal when you need to see a distant result of your Input (for example, you press the button now, but the roulette only stops in several seconds). In such cases TASer makes a savestate before entering the Input, records the decisive Input and makes a savestate after it, then unpauses the emulator and carelessly (suboptimally) plays through the game up to the point of seeing the result. If the result is satisfactory, TASer loads the savestate made after the decisive Input and records an optimal playthrough, already being sure in successful outcome. And if the result is unsatisfactory, TASer loads the initial savestate, changes the decisive Input and repeats previous actions (creates a savestate after the Input and hastily plays up to the result). And this process may go for a long while.</span></li>
-<li class="rvps10"><span class="rvts21">In order to copy an old Input (for example, the complex acceleration of Mario at the beginning of every level), TASer either learns the button combination by heart or copies it in parts by making several jumps between the source and the destination. First the game is sent to the place of old Input (by loading the savestate prepared at that frame) to watch the replay in Read-Only mode and memorize a few buttonpresses, then it's sent to the current segment (by loading the latest savestate in Read+Write mode) to lay out the buttonpresses. This way sounds tiresome, but if you keep moving both savestates a bit forward after every jump, the navigation between source and destination becomes rather quick. Still, when TASers need to copy a long sequence of buttonpresses, they use an external editor of Input, allowing to copy/paste. But the downside is that switching contexts is very distracting, so often it's less troublesome to just copy the Input manually.</span></li>
-<li class="rvps10"><span class="rvts21">To examine the current progress, TASer makes a savestate, turns off the Recording and loads the savestate left at the beginning of current level (usually it's the slot assigned to a rarely used key, such as </span><span class="rvts26">F10</span><span class="rvts21">). Then he unpaused the emulator and watches the movie like an outsider. To continue the recording, he switches to Read+Write mode and returns directly to the latest recorded frame by loading the latest savestate (usually it's the most often used slot, like </span><span class="rvts26">F1</span><span class="rvts21">). If while watching TASer decides to modify the old Input, he makes a savestate at this point, switches to Read+Write and loads the just created savestate. Beforehand, you should make sure the last state of the movie is saved to both </span><span class="rvts26">F1</span><span class="rvts21"> and another slot that won't be used in your experiments with the old Input. This is necessary in case your experiments fail, so you could restore the old movie even if the </span><span class="rvts26">F1</span><span class="rvts21"> slot becomes overwritten in the course of the experiments.</span></li>
-<li class="rvps10"><span class="rvts21">So, the majority of the 10 available slots is used for navigation between different moments of the game. Or, using Taseditor's terms, they are used for Playback cursor navigation along the movie. The 10 slots are more than enough to teleport back and forth among all places of interest, even when current segment is very large. Usually 3-5 slots are enough. Experienced TASers juggle these slots with astounding speed.</span></li>
-<li class="rvps10"><span class="rvts21">A couple of another slots are used to store alternative strategies of playing. When you don't know which approach to playing a large segment (e.g. a whole level of the game) will be better, you first polish the 1st approach and save it into a separate slot (say, </span><span class="rvts26">F8</span><span class="rvts21">), then you polish the 2nd approach and save it into an adjacent slot (e.g. </span><span class="rvts26">F7</span><span class="rvts21">). After that you can alternately load these slots (or even alternately watch the two branches of the movie) and choose the best one, save it to </span><span class="rvts26">F1</span><span class="rvts21"> and continue TASing in this branch.</span></li>
+<p class="rvps7"><span class="rvts20">You almost always have to watch the current segment up to its end, that is, to the moment when the target event occurs, so that you can confidently apply the optimality criterion. Because the correction may seem profitable at first but appear worse in the end.</span></p>
+<p class="rvps7"><span class="rvts20">After evaluating the outcome, the mistake is either considered to be fixed/non-existent, or you have to return to </span><a class="rvts24" href="TASingMethodology.html#loop">step 2</a><span class="rvts20"> and rethink the situation.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><a name="linear-tasing"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Before Taseditor, all mistakes (both explicit and supposed) were being fixed by creating and reloading savestates. If you're not familiar with the traditional method of TASing, here's its basic principles:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">The game emulation is almost always paused. You only unpause it to rewatch finished segments.</span></li>
+ <li class="rvps7"><span class="rvts20">TASer sequentially types the Input into frames pointed by the Playback cursor. You see the outcome of the committed Input next frame (or sometimes in several frames). Experienced TASers create a new savestate after each </span><span class="rvts33">hard-to-reproduce action</span><span class="rvts20">, so they are able to return back without the need to replay the whole segment from the beginning.</span></li>
+ <li class="rvps7"><span class="rvts20">To correct a mistake, TASer returns to the supposed place of making the mistake and rerecords the whole Input, starting from the frame that needs to be changed. If there was a savestate created at this frame, you can instantly load the savestate in Read+Write mode and begin typing buttonpresses right away. But if you only have a savestate created at some distance before the frame, there are two options. </span><span class="rvts31">Option 1:</span><span class="rvts20"> load the nearest savestate in Read-Only mode and replay the movie up to the needed frame, then switch back to Read+Write mode and start the correction, thus not touching the Input in the interval from the savestate frame to the mistake frame. </span><span class="rvts31">Option 2:</span><span class="rvts20"> just load the nearest savestate in Read+Write mode and repeat the old Input by memory, thus rewriting it up to the needed frame, and then start the correction. The 2nd way is used more often, because after the nearest savestate there's usually an </span><span class="rvts33">easy-to-reproduce Input</span><span class="rvts20"> (e.g. simply holding </span><span class="rvts26">R + B</span><span class="rvts20">). Also, upon arriving to the supposed frame of the mistake, an experienced TASer mechanically creates a savestate (just in case!), so next time he will be able to return directly to the frame, without wasting time on navigation. Such a prudence makes sense, because mistakes are seldom fixed at the first attempt, usually you need to repeatedly rerecord the same section of Input, starting from about the same frame.</span></li>
+ <li class="rvps7"><span class="rvts20">The disadvantages of the traditional method clearly reveal when you need to see a distant result of your Input (for example, you press the button now, but the roulette only stops in several seconds). In such cases TASer makes a savestate before entering the Input, records the decisive Input and makes a savestate after it, then unpauses the emulator and carelessly (suboptimally) plays through the game up to the point of seeing the result. If the result is satisfactory, TASer loads the savestate made after the decisive Input and records an optimal playthrough, already being sure in successful outcome. And if the result is unsatisfactory, TASer loads the initial savestate, changes the decisive Input and repeats previous actions (creates a savestate after the Input and hastily plays up to the result). And this process may go for a long while.</span></li>
+ <li class="rvps7"><span class="rvts20">In order to copy an old Input (for example, the complex acceleration of Mario at the beginning of every level), TASer either learns the button combination by heart or copies it in parts by making several jumps between the source and the destination. First the game is sent to the place of old Input (by loading the savestate prepared at that frame) to watch the replay in Read-Only mode and memorize a few buttonpresses, then it's sent to the current segment (by loading the latest savestate in Read+Write mode) to lay out the buttonpresses. This way sounds tiresome, but if you keep moving both savestates a bit forward after every jump, the navigation between source and destination becomes rather quick. Still, when TASers need to copy a long sequence of buttonpresses, they use an external editor of Input, allowing to copy/paste. But the downside is that switching contexts is very distracting, so often it's less troublesome to just copy the Input manually.</span></li>
+ <li class="rvps7"><span class="rvts20">To examine the current progress, TASer makes a savestate, turns off the Recording and loads the savestate left at the beginning of current level (usually it's the slot assigned to a rarely used key, such as </span><span class="rvts23">F10</span><span class="rvts20">). Then he unpaused the emulator and watches the movie like an outsider. To continue the recording, he switches to Read+Write mode and returns directly to the latest recorded frame by loading the latest savestate (usually it's the most often used slot, like </span><span class="rvts23">F1</span><span class="rvts20">). If while watching TASer decides to modify the old Input, he makes a savestate at this point, switches to Read+Write and loads the just created savestate. Beforehand, you should make sure the last state of the movie is saved to both </span><span class="rvts23">F1</span><span class="rvts20"> and another slot that won't be used in your experiments with the old Input. This is necessary in case your experiments fail, so you could restore the old movie even if the </span><span class="rvts23">F1</span><span class="rvts20"> slot becomes overwritten in the course of the experiments.</span></li>
+ <li class="rvps7"><span class="rvts20">So, the majority of the 10 available slots is used for navigation between different moments of the game. Or, using Taseditor's terms, they are used for Playback cursor navigation along the movie. The 10 slots are more than enough to teleport back and forth among all places of interest, even when current segment is very large. Usually 3-5 slots are enough. Experienced TASers juggle these slots with astounding speed.</span></li>
+ <li class="rvps7"><span class="rvts20">A couple of another slots are used to store alternative strategies of playing. When you don't know which approach to playing a large segment (e.g. a whole level of the game) will be better, you first polish the 1st approach and save it into a separate slot (say, </span><span class="rvts23">F8</span><span class="rvts20">), then you polish the 2nd approach and save it into an adjacent slot (e.g. </span><span class="rvts23">F7</span><span class="rvts20">). After that you can alternately load these slots (or even alternately watch the two branches of the movie) and choose the best one, save it to </span><span class="rvts23">F1</span><span class="rvts20"> and continue TASing in this branch.</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">As you see, almost everything in the traditional method of TASing is done using savestates (Bookmarks). In Taseditor some of their functions are replaced by the Greenzone and the History Log, yet Bookmarks still play important role, allowing to keep alternative branches of the movie in a single project. The Playback cursor navigation now can be done faster by either drag'n'drop or mouse wheel. In fact, now you don't need to put Playback cursor to the frame of modification, you can just scroll the Piano Roll to the place and change the Input by mouse.</span></p>
-<p class="rvps10"><span class="rvts21">Since the Recording is less effective than direct editing, there's no more need to constantly switch modes. Now the emulator is always in Read-Only mode.</span></p>
-<p class="rvps10"><span class="rvts21">The game is always paused, as before. But now you are seeing the outcome of your Input only when you actually want to see it. At first this may seem inconvenient (as you don't feel the habitual feedback from your keypresses), but it's actually very advantageous, because it means the higher level of independence from the game. Instead of the standard mechanism of "involvement into the gameplay" there are other mechanisms of data transmission. So in any case you will receive all needed information on how the game interprets your Input, it's just that this data stream won't continually flow into your mind, it will be delivered on command.</span></p>
-<p class="rvps10"><span class="rvts21">And when it's really necessary, you can have an intensified feedback by switching to the third method of TASing in Taseditor.</span></p>
-<p class="rvps10"><span class="rvts21">Let's review pros and cons of all three methods, one by one.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<div class="rvps10"><table width="100%" border="1" cellpadding="1" cellspacing="2" style="border-color: #000000; border-style: solid;">
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid; height: 39px;"><p class="rvps10"><span class="rvts22"><br/></span></p>
-<p class="rvps10"><span class="rvts22">The three methods of TASing in Taseditor:</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 0px; margin-left: 50px; list-style-position: outside;">
-<li class="rvps14" style="text-indent: 0px"><a class="rvts43" href="TraditionalTASing.html">Traditional method</a></li>
-</ul>
-<ul style="text-indent: 0px; margin-left: 55px; list-style-position: outside;">
-<li class="rvps14" style="text-indent: 0px"><span class="rvts21">navigating the Input using the Playback cursor by jumping to Bookmarks</span></li>
-<li class="rvps14" style="text-indent: 0px"><span class="rvts21">recording sequences of Input using the keyboard/joypad</span></li>
-<li class="rvps14" style="text-indent: 0px"><span class="rvts21">watching interim results of the Input automatically</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 0px; margin-left: 50px; list-style-position: outside;">
-<li class="rvps14" style="text-indent: 0px"><a class="rvts44" href="NonlinearTASing.html">Nonlinear method</a></li>
-</ul>
-<ul style="text-indent: 0px; margin-left: 55px; list-style-position: outside;">
-<li class="rvps14" style="text-indent: 0px"><span class="rvts21">navigating the Input using the mouse</span></li>
-<li class="rvps14" style="text-indent: 0px"><span class="rvts21">editing the Input using the mouse/</span><span class="rvts21">keyboard/joypad</span></li>
-<li class="rvps14" style="text-indent: 0px"><span class="rvts21">watching interim or final results of the Input by user command</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 0px; margin-left: 50px; list-style-position: outside;">
-<li class="rvps14" style="text-indent: 0px"><a class="rvts45" href="SemiautomaticTASing.html">Semiautomatic method</a></li>
-</ul>
-<ul style="text-indent: 0px; margin-left: 55px; list-style-position: outside;">
-<li class="rvps14" style="text-indent: 0px"><span class="rvts21">navigating the Input using the mouse</span></li>
-<li class="rvps14" style="text-indent: 0px"><span class="rvts21">editing the Input using the mouse/</span><span class="rvts21">keyboard/joypad</span></li>
-<li class="rvps14" style="text-indent: 0px"><span class="rvts21">watching interim or final results of the Input </span><span class="rvts21">automatically</span></li>
-</ul>
-<p class="rvps14"><span class="rvts21"><br/></span></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">As you see, almost everything in the traditional method of TASing is done using savestates (Bookmarks). In Taseditor some of their functions are replaced by the Greenzone and the History Log, yet Bookmarks still play important role, allowing to keep alternative branches of the movie in a single project. The Playback cursor navigation now can be done faster by either drag'n'drop or mouse wheel. In fact, now you don't need to put Playback cursor to the frame of modification, you can just scroll the Piano Roll to the place and change the Input by mouse.</span></p>
+<p class="rvps7"><span class="rvts20">Since the Recording is less effective than direct editing, there's no more need to constantly switch modes. Now the emulator is always in Read-Only mode.</span></p>
+<p class="rvps7"><span class="rvts20">The game is always paused, as before. But now you are seeing the outcome of your Input only when you actually want to see it. At first this may seem inconvenient (as you don't feel the habitual feedback from your keypresses), but it's actually very advantageous, because it means the higher level of independence from the game. Instead of the standard mechanism of "involvement into the gameplay" there are other mechanisms of data transmission. So in any case you will receive all needed information on how the game interprets your Input, it's just that this data stream won't continually flow into your mind, it will be delivered on command.</span></p>
+<p class="rvps7"><span class="rvts20">And when it's really necessary, you can have an intensified feedback by switching to the third method of TASing in Taseditor.</span></p>
+<p class="rvps7"><span class="rvts20">Let's review pros and cons of all three methods, one by one.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<div class="rvps7">
+<table width="100%" border="1" cellpadding="1" cellspacing="2" style="border-color: #000000; border-style: solid; border-spacing: 2px;">
+ <tr valign="top">
+  <td height="41" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps7"><span class="rvts21"><br/></span></p>
+   <p class="rvps7"><span class="rvts21">The three methods of TASing in Taseditor:</span></p>
+   <p class="rvps7"><span class="rvts20"><br/></span></p>
+   <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 50px; list-style-position: outside;">
+    <li style="text-indent: 0px" class="rvps9"><a class="rvts38" href="TraditionalTASing.html">Traditional method</a></li>
+   </ul>
+   <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 55px; list-style-position: outside; list-style-type: disc;">
+    <li style="text-indent: 0px" class="rvps9"><span class="rvts20">navigating the Input using the Playback cursor by jumping to Bookmarks</span></li>
+    <li style="text-indent: 0px" class="rvps9"><span class="rvts20">recording sequences of Input using the keyboard/joypad</span></li>
+    <li style="text-indent: 0px" class="rvps9"><span class="rvts20">watching interim results of the Input automatically</span></li>
+   </ul>
+   <p class="rvps7"><span class="rvts20"><br/></span></p>
+   <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 50px; list-style-position: outside;">
+    <li style="text-indent: 0px" class="rvps9"><a class="rvts39" href="NonlinearTASing.html">Nonlinear method</a></li>
+   </ul>
+   <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 55px; list-style-position: outside; list-style-type: disc;">
+    <li style="text-indent: 0px" class="rvps9"><span class="rvts20">navigating the Input using the mouse</span></li>
+    <li style="text-indent: 0px" class="rvps9"><span class="rvts20">editing the Input using the mouse/</span><span class="rvts20">keyboard/joypad</span></li>
+    <li style="text-indent: 0px" class="rvps9"><span class="rvts20">watching interim or final results of the Input by user command</span></li>
+   </ul>
+   <p class="rvps7"><span class="rvts20"><br/></span></p>
+   <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 50px; list-style-position: outside;">
+    <li style="text-indent: 0px" class="rvps9"><a class="rvts40" href="SemiautomaticTASing.html">Semiautomatic method</a></li>
+   </ul>
+   <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 55px; list-style-position: outside; list-style-type: disc;">
+    <li style="text-indent: 0px" class="rvps9"><span class="rvts20">navigating the Input using the mouse</span></li>
+    <li style="text-indent: 0px" class="rvps9"><span class="rvts20">editing the Input using the mouse/</span><span class="rvts20">keyboard/joypad</span></li>
+    <li style="text-indent: 0px" class="rvps9"><span class="rvts20">watching interim or final results of the Input </span><span class="rvts20">automatically</span></li>
+   </ul>
+   <p class="rvps9"><span class="rvts20"><br/></span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/feature-tour">Easily create Web Help sites</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/feature-tour/create-help-files-for-the-qt-help-framework">Produce online help for Qt applications</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

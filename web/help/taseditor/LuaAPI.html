@@ -1,328 +1,495 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Lua API</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("LuaAPI");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Lua API</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Lua API">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Lua API" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Lua API</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Reference.html">Reference</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Reference.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="Operations.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="FAQ.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="LuaAPI"
+		  data-hnd-context="20"
+		  data-hnd-title="Lua API"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Reference.html">Reference</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Reference.html" title="Reference" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="Operations.html" title="Operations" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="FAQ.html" title="FAQ" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Lua API</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">Lua API</span></p>
+<p class="rvps2"><span class="rvts18">Lua API</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">TAS Editor v1.0 comes with the library of 24 functions available for Lua scripts running in FCEUX emulator. With Lua scripts you can automate some aspects of TASing and even create your own tools for movie editing.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">In FCEUX folder there's </span><span class="rvts20">/luaScripts</span><span class="rvts21"> folder with </span><span class="rvts20">/taseditor</span><span class="rvts21"> subfolder in it. There you can find examples of scripts using functions of this library.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">If you don't know how to make and run Lua scripts in emulators, read </span><a class="rvts27" href="AdvancedFeatures.html#UsingLua">Advanced Features</a><span class="rvts21"> and also refer to </span><a class="rvts27" href="http://www.fceux.com/web/help/fceux.html?Commands.html" target="_blank">FCEUX Help</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps3"><span class="rvts7">Full list of functions:</span></p>
-<p class="rvps2"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#registerauto">taseditor.registerauto(function func)</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#registermanual">taseditor.registermanual(function func, [string name])</a></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#engaged">bool taseditor.engaged()</a></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#markedframe">bool taseditor.markedframe(int frame)</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#getmarker">int taseditor.getmarker(int frame)</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#setmarker">int taseditor.setmarker(int frame)</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#removemarker">taseditor.removemarker(int frame)</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#getnote">string taseditor.getnote(int index)</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#setnote">taseditor.setnote(int index, string newtext)</a></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#getcurrentbranch">int taseditor.getcurrentbranch()</a></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#getrecordermode">string taseditor.getrecordermode()</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#getsuperimpose">int taseditor.getsuperimpose()</a></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#getlostplayback">int taseditor.getlostplayback()</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#getplaybacktarget">int taseditor.getplaybacktarget()</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#setplayback">taseditor.setplayback(int frame)</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#stopseeking">taseditor.stopseeking()</a></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#getselection">table taseditor.getselection()</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#setselection">taseditor.setselection(table new_set)</a></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#getinput">int taseditor.getinput(int frame, int joypad)</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#submitinputchange">taseditor.submitinputchange(int frame, int joypad, int input)</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#submitinsertframes">taseditor.submitinsertframes(int frame, int number)</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#submitdeleteframes">taseditor.submitdeleteframes(int frame, int number)</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#applyinputchanges">int taseditor.applyinputchanges([string name])</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#clearinputchanges">taseditor.clearinputchanges()</a></p>
-<p class="rvps10"><a class="rvts27" href="LuaAPI.html#clearinputchanges"><br/></a></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><a name="registerauto"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">taseditor.registerauto(function func)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Registers a callback function ("Auto Function") that runs periodically. The Auto Function can be registered and will be called even when TAS Editor isn't engaged.</span></p>
-<p class="rvps10"><span class="rvts21">When FCEUX is unpaused, your function will be called at the end of every frame (running 60 times per second on NTSC and 50 times per second on PAL).</span></p>
-<p class="rvps10"><span class="rvts21">When FCEUX is paused, your function will be called 20 times per second.</span></p>
-<p class="rvps10"><span class="rvts21">User can switch on/off auto-calling by checking "Auto function" checkbox in TAS Editor GUI.</span></p>
-<p class="rvps10"><span class="rvts21">Like other callback-registering functions provided by FCEUX, there is only one registered callback at a time per registering function per script. If you register two callbacks, the second one will replace the first, and the call to </span><span class="rvts20">taseditor.registerauto()</span><span class="rvts21"> will return the old callback. You may register </span><span class="rvts71">nil</span><span class="rvts21"> instead of a function to clear a previously-registered callback.</span></p>
-<p class="rvps10"><span class="rvts21">If a script returns while it still has registered callbacks, FCEUX will keep it alive to call those callbacks when appropriate, until either the script is stopped by the user or all of the callbacks are de-registered.</span></p>
-<p class="rvps10"><a name="registermanual"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">taseditor.registermanual(function func, [string name])</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Registers a callback function ("Manual Function") that can be called manually by TAS Editor user. The function can be registered even when TAS Editor isn't engaged.</span></p>
-<p class="rvps10"><span class="rvts21">The Manual function doesn't depend on paused or unpaused FCEUX status. It will be called once every time user presses </span><span class="rvts29">Run function</span><span class="rvts21"> button in TAS Editor GUI.</span></p>
-<p class="rvps10"><span class="rvts21">You can provide a new name for this button.</span></p>
-<p class="rvps10"><span class="rvts21">The Manual function cannot be run more often than TAS Editor window updates (60/50 FPS or 20FPS when emulator is paused).</span></p>
-<p class="rvps10"><span class="rvts21">In FCEUX code Manual function runs right after Auto Function.</span></p>
-<p class="rvps10"><span class="rvts21">You can use this feature to create new tools for TAS Editor. For example, you can write a script that reverses currently selected input, so user will be able to reverse input by selecting a range and clicking </span><span class="rvts29">Run function</span><span class="rvts21"> button.</span></p>
-<p class="rvps10"><span class="rvts21">Like other callback-registering functions provided by FCEUX, there is only one registered callback at a time per registering function per script. If you register two callbacks, the second one will replace the first, and the call to </span><span class="rvts20">taseditor.registermanual()</span><span class="rvts21"> will return the old callback. You may call </span><span class="rvts20">taseditor.registermanual(</span><span class="rvts71">nil</span><span class="rvts20">)</span><span class="rvts21"> to clear a previously-registered callback.</span></p>
-<p class="rvps10"><span class="rvts21">If a script returns while it still has registered callbacks, FCEUX will keep it alive to call those callbacks when appropriate, until either the script is stopped by the user or all of the callbacks are de-registered.</span></p>
-<p class="rvps10"><a name="engaged"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">bool taseditor.engaged()</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Returns </span><span class="rvts71">true</span><span class="rvts21"> if TAS Editor is currently engaged, </span><span class="rvts71">false</span><span class="rvts21"> if otherwise.</span></p>
-<p class="rvps10"><span class="rvts21">Also when TAS Editor is engaged, </span><span class="rvts20">movie.mode()</span><span class="rvts21"> returns "taseditor" string.</span></p>
-<p class="rvps10"><a name="markedframe"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">bool taseditor.markedframe(int frame)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Returns </span><span class="rvts71">true</span><span class="rvts21"> if given frame is marked in TAS Editor, </span><span class="rvts71">false</span><span class="rvts21"> if not marked.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, returns </span><span class="rvts71">false</span><span class="rvts21">.</span></p>
-<p class="rvps10"><a name="getmarker"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">int taseditor.getmarker(int frame)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Returns index number of the Marker under which given frame is located.</span></p>
-<p class="rvps10"><span class="rvts21">Returns -1 if TAS Editor is not engaged.</span></p>
-<p class="rvps10"><a name="setmarker"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">int taseditor.setmarker(int frame)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Sets Marker on given frame. Returns index number of the Marker created.</span></p>
-<p class="rvps10"><span class="rvts21">If that frame is already marked, no changes will be made, and the function will return the index number of existing Marker.</span></p>
-<p class="rvps10"><span class="rvts21">You can set markers even outside input range.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, returns -1.</span></p>
-<p class="rvps10"><a name="removemarker"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">taseditor.removemarker(int frame)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Removes marker from given frame. If that frame was not marked, no changes will be made.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, no changes will be made.</span></p>
-<p class="rvps10"><a name="getnote"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">string taseditor.getnote(int index)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Returns string representing the Note of given Marker.</span></p>
-<p class="rvps10"><span class="rvts21">Returns </span><span class="rvts71">nil</span><span class="rvts21"> if TAS Editor is not engaged.</span></p>
-<p class="rvps10"><span class="rvts21">If given index is invalid (if Marker with this index number doesn't exist), returns note of the zeroth marker.</span></p>
-<p class="rvps10"><a name="setnote"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">taseditor.setnote(int index, string newtext)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Sets text of the Note of given Marker.</span></p>
-<p class="rvps10"><span class="rvts21">If given index is invalid (if Marker with this index number doesn't exist), no changes will be made.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, no changes will be made.</span></p>
-<p class="rvps10"><a name="getcurrentbranch"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">int taseditor.getcurrentbranch()</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Returns number from 0 to 9 representing current Branch.</span></p>
-<p class="rvps10"><span class="rvts21">Returns -1 if there's no Branches or if TAS Editor is not engaged.</span></p>
-<p class="rvps10"><a name="getrecordermode"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">string taseditor.getrecordermode()</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Returns string representing current recorder mode.</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">"All"</span></li>
-<li class="rvps10"><span class="rvts21">"1P"</span></li>
-<li class="rvps10"><span class="rvts21">"2P"</span></li>
-<li class="rvps10"><span class="rvts21">"3P"</span></li>
-<li class="rvps10"><span class="rvts21">"4P"</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">TAS Editor v1.0 comes with the library of 24 functions available for Lua scripts running in FCEUX emulator. With Lua scripts you can automate some aspects of TASing and even create your own tools for movie editing.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">In FCEUX folder there's </span><span class="rvts19">/luaScripts</span><span class="rvts20"> folder with </span><span class="rvts19">/taseditor</span><span class="rvts20"> subfolder in it. There you can find examples of scripts using functions of this library.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">If you don't know how to make and run Lua scripts in emulators, read </span><a class="rvts24" href="AdvancedFeatures.html#UsingLua">Advanced Features</a><span class="rvts20"> and also refer to </span><a class="rvts24" href="http://www.fceux.com/web/help/fceux.html?Commands.html" target="_blank">FCEUX Help</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><span class="rvts7">Full list of functions:</span></p>
+<p class="rvps2"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#registerauto">taseditor.registerauto(function func)</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#registermanual">taseditor.registermanual(function func, [string name])</a></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#engaged">bool taseditor.engaged()</a></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#markedframe">bool taseditor.markedframe(int frame)</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#getmarker">int taseditor.getmarker(int frame)</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#setmarker">int taseditor.setmarker(int frame)</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#removemarker">taseditor.removemarker(int frame)</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#getnote">string taseditor.getnote(int index)</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#setnote">taseditor.setnote(int index, string newtext)</a></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#getcurrentbranch">int taseditor.getcurrentbranch()</a></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#getrecordermode">string taseditor.getrecordermode()</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#getsuperimpose">int taseditor.getsuperimpose()</a></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#getlostplayback">int taseditor.getlostplayback()</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#getplaybacktarget">int taseditor.getplaybacktarget()</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#setplayback">taseditor.setplayback(int frame)</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#stopseeking">taseditor.stopseeking()</a></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#getselection">table taseditor.getselection()</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#setselection">taseditor.setselection(table new_set)</a></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#getinput">int taseditor.getinput(int frame, int joypad)</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#submitinputchange">taseditor.submitinputchange(int frame, int joypad, int input)</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#submitinsertframes">taseditor.submitinsertframes(int frame, int number)</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#submitdeleteframes">taseditor.submitdeleteframes(int frame, int number)</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#applyinputchanges">int taseditor.applyinputchanges([string name])</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#clearinputchanges">taseditor.clearinputchanges()</a></p>
+<p class="rvps7"><a class="rvts24" href="LuaAPI.html#clearinputchanges"><br/></a></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><a name="registerauto"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">taseditor.registerauto(function func)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Registers a callback function ("Auto Function") that runs periodically. The Auto Function can be registered and will be called even when TAS Editor isn't engaged.</span></p>
+<p class="rvps7"><span class="rvts20">When FCEUX is unpaused, your function will be called at the end of every frame (running 60 times per second on NTSC and 50 times per second on PAL).</span></p>
+<p class="rvps7"><span class="rvts20">When FCEUX is paused, your function will be called 20 times per second.</span></p>
+<p class="rvps7"><span class="rvts20">User can switch on/off auto-calling by checking "Auto function" checkbox in TAS Editor GUI.</span></p>
+<p class="rvps7"><span class="rvts20">Like other callback-registering functions provided by FCEUX, there is only one registered callback at a time per registering function per script. If you register two callbacks, the second one will replace the first, and the call to </span><span class="rvts19">taseditor.registerauto()</span><span class="rvts20"> will return the old callback. You may register </span><span class="rvts63">nil</span><span class="rvts20"> instead of a function to clear a previously-registered callback.</span></p>
+<p class="rvps7"><span class="rvts20">If a script returns while it still has registered callbacks, FCEUX will keep it alive to call those callbacks when appropriate, until either the script is stopped by the user or all of the callbacks are de-registered.</span></p>
+<p class="rvps7"><a name="registermanual"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">taseditor.registermanual(function func, [string name])</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Registers a callback function ("Manual Function") that can be called manually by TAS Editor user. The function can be registered even when TAS Editor isn't engaged.</span></p>
+<p class="rvps7"><span class="rvts20">The Manual function doesn't depend on paused or unpaused FCEUX status. It will be called once every time user presses </span><span class="rvts26">Run function</span><span class="rvts20"> button in TAS Editor GUI.</span></p>
+<p class="rvps7"><span class="rvts20">You can provide a new name for this button.</span></p>
+<p class="rvps7"><span class="rvts20">The Manual function cannot be run more often than TAS Editor window updates (60/50 FPS or 20FPS when emulator is paused).</span></p>
+<p class="rvps7"><span class="rvts20">In FCEUX code Manual function runs right after Auto Function.</span></p>
+<p class="rvps7"><span class="rvts20">You can use this feature to create new tools for TAS Editor. For example, you can write a script that reverses currently selected input, so user will be able to reverse input by selecting a range and clicking </span><span class="rvts26">Run function</span><span class="rvts20"> button.</span></p>
+<p class="rvps7"><span class="rvts20">Like other callback-registering functions provided by FCEUX, there is only one registered callback at a time per registering function per script. If you register two callbacks, the second one will replace the first, and the call to </span><span class="rvts19">taseditor.registermanual()</span><span class="rvts20"> will return the old callback. You may call </span><span class="rvts19">taseditor.registermanual(</span><span class="rvts63">nil</span><span class="rvts19">)</span><span class="rvts20"> to clear a previously-registered callback.</span></p>
+<p class="rvps7"><span class="rvts20">If a script returns while it still has registered callbacks, FCEUX will keep it alive to call those callbacks when appropriate, until either the script is stopped by the user or all of the callbacks are de-registered.</span></p>
+<p class="rvps7"><a name="engaged"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">bool taseditor.engaged()</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Returns </span><span class="rvts63">true</span><span class="rvts20"> if TAS Editor is currently engaged, </span><span class="rvts63">false</span><span class="rvts20"> if otherwise.</span></p>
+<p class="rvps7"><span class="rvts20">Also when TAS Editor is engaged, </span><span class="rvts19">movie.mode()</span><span class="rvts20"> returns "taseditor" string.</span></p>
+<p class="rvps7"><a name="markedframe"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">bool taseditor.markedframe(int frame)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Returns </span><span class="rvts63">true</span><span class="rvts20"> if given frame is marked in TAS Editor, </span><span class="rvts63">false</span><span class="rvts20"> if not marked.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, returns </span><span class="rvts63">false</span><span class="rvts20">.</span></p>
+<p class="rvps7"><a name="getmarker"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">int taseditor.getmarker(int frame)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Returns index number of the Marker under which given frame is located.</span></p>
+<p class="rvps7"><span class="rvts20">Returns -1 if TAS Editor is not engaged.</span></p>
+<p class="rvps7"><a name="setmarker"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">int taseditor.setmarker(int frame)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Sets Marker on given frame. Returns index number of the Marker created.</span></p>
+<p class="rvps7"><span class="rvts20">If that frame is already marked, no changes will be made, and the function will return the index number of existing Marker.</span></p>
+<p class="rvps7"><span class="rvts20">You can set markers even outside input range.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, returns -1.</span></p>
+<p class="rvps7"><a name="removemarker"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">taseditor.removemarker(int frame)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Removes marker from given frame. If that frame was not marked, no changes will be made.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, no changes will be made.</span></p>
+<p class="rvps7"><a name="getnote"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">string taseditor.getnote(int index)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Returns string representing the Note of given Marker.</span></p>
+<p class="rvps7"><span class="rvts20">Returns </span><span class="rvts63">nil</span><span class="rvts20"> if TAS Editor is not engaged.</span></p>
+<p class="rvps7"><span class="rvts20">If given index is invalid (if Marker with this index number doesn't exist), returns note of the zeroth marker.</span></p>
+<p class="rvps7"><a name="setnote"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">taseditor.setnote(int index, string newtext)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Sets text of the Note of given Marker.</span></p>
+<p class="rvps7"><span class="rvts20">If given index is invalid (if Marker with this index number doesn't exist), no changes will be made.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, no changes will be made.</span></p>
+<p class="rvps7"><a name="getcurrentbranch"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">int taseditor.getcurrentbranch()</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Returns number from 0 to 9 representing current Branch.</span></p>
+<p class="rvps7"><span class="rvts20">Returns -1 if there's no Branches or if TAS Editor is not engaged.</span></p>
+<p class="rvps7"><a name="getrecordermode"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">string taseditor.getrecordermode()</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Returns string representing current recorder mode.</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">"All"</span></li>
+ <li class="rvps7"><span class="rvts20">"1P"</span></li>
+ <li class="rvps7"><span class="rvts20">"2P"</span></li>
+ <li class="rvps7"><span class="rvts20">"3P"</span></li>
+ <li class="rvps7"><span class="rvts20">"4P"</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21">Returns </span><span class="rvts71">nil</span><span class="rvts21"> if TAS Editor is not engaged.</span></p>
-<p class="rvps10"><span class="rvts21">When you want to check Recorder's read-only state, use </span><span class="rvts20">emu.readonly()</span><span class="rvts21">.</span></p>
-<p class="rvps10"><a name="getsuperimpose"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">int taseditor.getsuperimpose()</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Returns number representing current state of Superimpose checkbox in TAS Editor GUI.</span></p>
-<p class="rvps10"><span class="rvts21">0 – unchecked</span></p>
-<p class="rvps10"><span class="rvts21">1 – checked</span></p>
-<p class="rvps10"><span class="rvts21">2 – indeterminate (you can interpret is as half-checked)</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, returns -1.</span></p>
-<p class="rvps10"><a name="getlostplayback"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">int taseditor.getlostplayback()</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Returns the number of the frame where Playback cursor was before input was changed.</span></p>
-<p class="rvps10"><span class="rvts21">If Playback didn't lose position during Greenzone invalidation, returns -1.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, returns -1.</span></p>
-<p class="rvps10"><a name="getplaybacktarget"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">int taseditor.getplaybacktarget()</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor's Playback is currently seeking, returns number of target frame.</span></p>
-<p class="rvps10"><span class="rvts21">If Playback is not seeking or if TAS Editor is not engaged, returns -1.</span></p>
-<p class="rvps10"><a name="setplayback"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">taseditor.setplayback(int frame)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Sends Playback cursor (current frame counter) to given frame.</span></p>
-<p class="rvps10"><span class="rvts21">If given frame wasn't found in TAS Editor Greenzone, starts seeking to the frame.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, nothing will be done.</span></p>
-<p class="rvps10"><a name="stopseeking"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">taseditor.stopseeking()</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Stops Playback seeking and pauses emulation.</span></p>
-<p class="rvps10"><span class="rvts21">If Playback wasn't seeking, this function only pauses emulation.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, nothing will be done.</span></p>
-<p class="rvps10"><a name="getselection"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">table taseditor.getselection()</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Returns a table (array) containing numbers of currently selected frames. These numbers are sorted in ascending order.</span></p>
-<p class="rvps10"><span class="rvts21">If no frames are selected at the moment, returns </span><span class="rvts71">nil</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, returns </span><span class="rvts71">nil</span><span class="rvts21">.</span></p>
-<p class="rvps10"><a name="setselection"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">taseditor.setselection(table new_set)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Changes current selection to the given set of frames. Frame number in your table don't have to be sorted.</span></p>
-<p class="rvps10"><span class="rvts21">Call </span><span class="rvts20">taseditor.setselection(</span><span class="rvts71">nil</span><span class="rvts20">)</span><span class="rvts21"> to clear selection.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, nothing will be done.</span></p>
-<p class="rvps10"><a name="getinput"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">int taseditor.getinput(int frame, int joypad)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Returns a number representing input of given joypad stored in current movie at given frame.</span></p>
-<p class="rvps10"><span class="rvts21">If given frame is negative, returns -1.</span></p>
-<p class="rvps10"><span class="rvts21">If given frame is outside current input range, returns 0, which can be interpreted as a blank frame (no buttons pressed at this frame yet).</span></p>
-<p class="rvps10"><span class="rvts21">Joypad value must be one of the following:</span></p>
-<p class="rvps10"><span class="rvts21">0 – </span><span class="rvts21">to get hardware commands (bit 0 = reset, bit 1 = poweron, bit 2 = FDS insert disk, bit 3 = FDS switch side)</span></p>
-<p class="rvps10"><span class="rvts21">1 – </span><span class="rvts21">to get 1P buttons</span><span class="rvts21"> (</span><span class="rvts21">bit</span><span class="rvts21"> 0 = A, </span><span class="rvts21">bit</span><span class="rvts21"> 1 = B, </span><span class="rvts21">bit</span><span class="rvts21"> 2 = Select, </span><span class="rvts21">bit</span><span class="rvts21"> 3 = Start, </span><span class="rvts21">bit</span><span class="rvts21"> 4 = Up, </span><span class="rvts21">bit</span><span class="rvts21"> 5 = Down, </span><span class="rvts21">bit</span><span class="rvts21"> 6 = Left, </span><span class="rvts21">bit</span><span class="rvts21"> 7 = Right)</span></p>
-<p class="rvps10"><span class="rvts21">2 – </span><span class="rvts21">to get 2P buttons</span></p>
-<p class="rvps10"><span class="rvts21">3 – </span><span class="rvts21">to get 3P buttons</span></p>
-<p class="rvps10"><span class="rvts21">4 – </span><span class="rvts21">to get 4P buttons</span></p>
-<p class="rvps10"><span class="rvts21">You should handle returned number (if it's not equal to -1) as a byte, each bit corresponds to one button (e.g. if bit 1 is set that means A button is pressed). Use Bitwise Operations to retrieve the state of specific buttons.</span></p>
-<p class="rvps10"><span class="rvts21">If given joypad is outside [0-4] range, returns -1.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, returns -1.</span></p>
-<p class="rvps10"><a name="submitinputchange"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">taseditor.submitinputchange(int frame, int joypad, int input)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Sends request to TAS Editor asking to change input of given joypad at given frame.</span></p>
-<p class="rvps10"><span class="rvts21">Actual movie input won't be changed until the moment you call </span><span class="rvts20">taseditor.applyinputchanges()</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">Using several consecutive requests and then calling </span><span class="rvts20">applyinputchanges()</span><span class="rvts21"> at the end, you can change several frames of current movie in one moment.</span></p>
-<p class="rvps10"><span class="rvts21">When applying the pile of requests, TAS Editor will execute them in consecutive order.</span></p>
-<p class="rvps10"><span class="rvts21">If given frame is negative, TAS Editor will ignore such request.</span></p>
-<p class="rvps10"><span class="rvts21">If given frame is outside current input range, TAS Editor will expand movie during </span><span class="rvts20">applyinputchanges()</span><span class="rvts21"> to fit the frame.</span></p>
-<p class="rvps10"><span class="rvts21">If given joypad is outside [0-4] range, TAS Editor will ignore such request.</span></p>
-<p class="rvps10"><span class="rvts21">Given input will be treated by TAS Editor as a sequence of bits representing state of each button of given joypad </span><span class="rvts21">(</span><span class="rvts21">bit</span><span class="rvts21"> 0 = A, </span><span class="rvts21">bit</span><span class="rvts21"> 1 = B, </span><span class="rvts21">bit</span><span class="rvts21"> 2 = Select, </span><span class="rvts21">bit</span><span class="rvts21"> 3 = Start, </span><span class="rvts21">bit</span><span class="rvts21"> 4 = Up, </span><span class="rvts21">bit</span><span class="rvts21"> 5 = Down, </span><span class="rvts21">bit</span><span class="rvts21"> 6 = Left, </span><span class="rvts21">bit</span><span class="rvts21"> 7 = Right)</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, nothing will be done.</span></p>
-<p class="rvps10"><a name="submitinsertframes"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">taseditor.submitinsertframes(int frame, int number)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Sends request to TAS Editor asking to insert given number of blank frames before given frame.</span></p>
-<p class="rvps10"><span class="rvts21">Actual movie won't be changed until the moment you call </span><span class="rvts20">taseditor.applyinputchanges()</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">Insertion can move down some old input and Markers (if "</span><a class="rvts27" href="ProgramCustomization.html#BindMarkerstoInput">Bind Markers to Input</a><span class="rvts21">" option is checked by user).</span></p>
-<p class="rvps10"><span class="rvts21">If given number is less or equal to zero, TAS Editor will ignore such request.</span></p>
-<p class="rvps10"><span class="rvts21">If given frame is negative, TAS Editor will ignore such request.</span></p>
-<p class="rvps10"><span class="rvts21">If given frame is outside current input range, TAS Editor will expand movie during </span><span class="rvts20">applyinputchanges()</span><span class="rvts21"> to fit the frame.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, nothing will be done.</span></p>
-<p class="rvps10"><a name="submitdeleteframes"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">taseditor.submitdeleteframes(int frame, int number)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Sends request to TAS Editor asking to delete given number of frames starting from given frame.</span></p>
-<p class="rvps10"><span class="rvts21">Actual movie won't be changed until the moment you call </span><span class="rvts20">taseditor.applyinputchanges()</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">Deletion can move up some old input and Markers (if "</span><a class="rvts27" href="ProgramCustomization.html#BindMarkerstoInput">Bind Markers to Input</a><span class="rvts21">" option is checked by user).</span></p>
-<p class="rvps10"><span class="rvts21">If given number is less or equal to zero, TAS Editor will ignore such request.</span></p>
-<p class="rvps10"><span class="rvts21">If given frame is negative, TAS Editor will ignore such request.</span></p>
-<p class="rvps10"><span class="rvts21">If given frame is outside current input range, TAS Editor will expand movie during </span><span class="rvts20">applyinputchanges()</span><span class="rvts21"> to fit the frame.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, nothing will be done.</span></p>
-<p class="rvps10"><a name="applyinputchanges"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">int taseditor.applyinputchanges([string name])</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Instantly applies the list of previously requested changes to current movie. If these requests actually modified movie data, new item will appear in History Log (so user can undo these changes), and Greenzone may become truncated, Playback cursor may lose its position, auto-seeking may be triggered.</span></p>
-<p class="rvps10"><span class="rvts21">Returns number of frame where first actual changes occurred.</span></p>
-<p class="rvps10"><span class="rvts21">If no actual changes were found (for example, you asked TAS Editor to set buttons that were already pressed), returns -1.</span></p>
-<p class="rvps10"><span class="rvts21">If pending list of changes is empty, returns -1.</span></p>
-<p class="rvps10"><span class="rvts21">You can provide a name that will be assigned to this change. This name will be shown in History Log. If you don't provide a name, TAS Editor will use default name ("Change").</span></p>
-<p class="rvps10"><span class="rvts21">After applying all requests TAS Editor clears the list of requests.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, nothing will be done.</span></p>
-<p class="rvps10"><a name="clearinputchanges"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps9"><span class="rvts68">taseditor.clearinputchanges()</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Clears the list of previously requested changes, making TAS Editor forget about them before you call </span><span class="rvts20">applyinputchanges()</span><span class="rvts21">. Use this function to discard previously submitted input changes.</span></p>
-<p class="rvps10"><span class="rvts21">It's also recommended to call this function before making several requests in a row, so that you'll be sure that only your new changes will apply.</span></p>
-<p class="rvps10"><span class="rvts21">If TAS Editor is not engaged, nothing will be done.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Returns </span><span class="rvts63">nil</span><span class="rvts20"> if TAS Editor is not engaged.</span></p>
+<p class="rvps7"><span class="rvts20">When you want to check Recorder's read-only state, use </span><span class="rvts19">emu.readonly()</span><span class="rvts20">.</span></p>
+<p class="rvps7"><a name="getsuperimpose"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">int taseditor.getsuperimpose()</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Returns number representing current state of Superimpose checkbox in TAS Editor GUI.</span></p>
+<p class="rvps7"><span class="rvts20">0 – unchecked</span></p>
+<p class="rvps7"><span class="rvts20">1 – checked</span></p>
+<p class="rvps7"><span class="rvts20">2 – indeterminate (you can interpret is as half-checked)</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, returns -1.</span></p>
+<p class="rvps7"><a name="getlostplayback"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">int taseditor.getlostplayback()</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Returns the number of the frame where Playback cursor was before input was changed.</span></p>
+<p class="rvps7"><span class="rvts20">If Playback didn't lose position during Greenzone invalidation, returns -1.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, returns -1.</span></p>
+<p class="rvps7"><a name="getplaybacktarget"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">int taseditor.getplaybacktarget()</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor's Playback is currently seeking, returns number of target frame.</span></p>
+<p class="rvps7"><span class="rvts20">If Playback is not seeking or if TAS Editor is not engaged, returns -1.</span></p>
+<p class="rvps7"><a name="setplayback"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">taseditor.setplayback(int frame)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Sends Playback cursor (current frame counter) to given frame.</span></p>
+<p class="rvps7"><span class="rvts20">If given frame wasn't found in TAS Editor Greenzone, starts seeking to the frame.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, nothing will be done.</span></p>
+<p class="rvps7"><a name="stopseeking"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">taseditor.stopseeking()</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Stops Playback seeking and pauses emulation.</span></p>
+<p class="rvps7"><span class="rvts20">If Playback wasn't seeking, this function only pauses emulation.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, nothing will be done.</span></p>
+<p class="rvps7"><a name="getselection"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">table taseditor.getselection()</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Returns a table (array) containing numbers of currently selected frames. These numbers are sorted in ascending order.</span></p>
+<p class="rvps7"><span class="rvts20">If no frames are selected at the moment, returns </span><span class="rvts63">nil</span><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, returns </span><span class="rvts63">nil</span><span class="rvts20">.</span></p>
+<p class="rvps7"><a name="setselection"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">taseditor.setselection(table new_set)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Changes current selection to the given set of frames. Frame number in your table don't have to be sorted.</span></p>
+<p class="rvps7"><span class="rvts20">Call </span><span class="rvts19">taseditor.setselection(</span><span class="rvts63">nil</span><span class="rvts19">)</span><span class="rvts20"> to clear selection.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, nothing will be done.</span></p>
+<p class="rvps7"><a name="getinput"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">int taseditor.getinput(int frame, int joypad)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Returns a number representing input of given joypad stored in current movie at given frame.</span></p>
+<p class="rvps7"><span class="rvts20">If given frame is negative, returns -1.</span></p>
+<p class="rvps7"><span class="rvts20">If given frame is outside current input range, returns 0, which can be interpreted as a blank frame (no buttons pressed at this frame yet).</span></p>
+<p class="rvps7"><span class="rvts20">Joypad value must be one of the following:</span></p>
+<p class="rvps7"><span class="rvts20">0 – </span><span class="rvts20">to get hardware commands (bit 0 = reset, bit 1 = poweron, bit 2 = FDS insert disk, bit 3 = FDS switch side)</span></p>
+<p class="rvps7"><span class="rvts20">1 – </span><span class="rvts20">to get 1P buttons</span><span class="rvts20"> (</span><span class="rvts20">bit</span><span class="rvts20"> 0 = A, </span><span class="rvts20">bit</span><span class="rvts20"> 1 = B, </span><span class="rvts20">bit</span><span class="rvts20"> 2 = Select, </span><span class="rvts20">bit</span><span class="rvts20"> 3 = Start, </span><span class="rvts20">bit</span><span class="rvts20"> 4 = Up, </span><span class="rvts20">bit</span><span class="rvts20"> 5 = Down, </span><span class="rvts20">bit</span><span class="rvts20"> 6 = Left, </span><span class="rvts20">bit</span><span class="rvts20"> 7 = Right)</span></p>
+<p class="rvps7"><span class="rvts20">2 – </span><span class="rvts20">to get 2P buttons</span></p>
+<p class="rvps7"><span class="rvts20">3 – </span><span class="rvts20">to get 3P buttons</span></p>
+<p class="rvps7"><span class="rvts20">4 – </span><span class="rvts20">to get 4P buttons</span></p>
+<p class="rvps7"><span class="rvts20">You should handle returned number (if it's not equal to -1) as a byte, each bit corresponds to one button (e.g. if bit 1 is set that means A button is pressed). Use Bitwise Operations to retrieve the state of specific buttons.</span></p>
+<p class="rvps7"><span class="rvts20">If given joypad is outside [0-4] range, returns -1.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, returns -1.</span></p>
+<p class="rvps7"><a name="submitinputchange"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">taseditor.submitinputchange(int frame, int joypad, int input)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Sends request to TAS Editor asking to change input of given joypad at given frame.</span></p>
+<p class="rvps7"><span class="rvts20">Actual movie input won't be changed until the moment you call </span><span class="rvts19">taseditor.applyinputchanges()</span><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">Using several consecutive requests and then calling </span><span class="rvts19">applyinputchanges()</span><span class="rvts20"> at the end, you can change several frames of current movie in one moment.</span></p>
+<p class="rvps7"><span class="rvts20">When applying the pile of requests, TAS Editor will execute them in consecutive order.</span></p>
+<p class="rvps7"><span class="rvts20">If given frame is negative, TAS Editor will ignore such request.</span></p>
+<p class="rvps7"><span class="rvts20">If given frame is outside current input range, TAS Editor will expand movie during </span><span class="rvts19">applyinputchanges()</span><span class="rvts20"> to fit the frame.</span></p>
+<p class="rvps7"><span class="rvts20">If given joypad is outside [0-4] range, TAS Editor will ignore such request.</span></p>
+<p class="rvps7"><span class="rvts20">Given input will be treated by TAS Editor as a sequence of bits representing state of each button of given joypad </span><span class="rvts20">(</span><span class="rvts20">bit</span><span class="rvts20"> 0 = A, </span><span class="rvts20">bit</span><span class="rvts20"> 1 = B, </span><span class="rvts20">bit</span><span class="rvts20"> 2 = Select, </span><span class="rvts20">bit</span><span class="rvts20"> 3 = Start, </span><span class="rvts20">bit</span><span class="rvts20"> 4 = Up, </span><span class="rvts20">bit</span><span class="rvts20"> 5 = Down, </span><span class="rvts20">bit</span><span class="rvts20"> 6 = Left, </span><span class="rvts20">bit</span><span class="rvts20"> 7 = Right)</span><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, nothing will be done.</span></p>
+<p class="rvps7"><a name="submitinsertframes"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">taseditor.submitinsertframes(int frame, int number)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Sends request to TAS Editor asking to insert given number of blank frames before given frame.</span></p>
+<p class="rvps7"><span class="rvts20">Actual movie won't be changed until the moment you call </span><span class="rvts19">taseditor.applyinputchanges()</span><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">Insertion can move down some old input and Markers (if "</span><a class="rvts24" href="ProgramCustomization.html#BindMarkerstoInput">Bind Markers to Input</a><span class="rvts20">" option is checked by user).</span></p>
+<p class="rvps7"><span class="rvts20">If given number is less or equal to zero, TAS Editor will ignore such request.</span></p>
+<p class="rvps7"><span class="rvts20">If given frame is negative, TAS Editor will ignore such request.</span></p>
+<p class="rvps7"><span class="rvts20">If given frame is outside current input range, TAS Editor will expand movie during </span><span class="rvts19">applyinputchanges()</span><span class="rvts20"> to fit the frame.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, nothing will be done.</span></p>
+<p class="rvps7"><a name="submitdeleteframes"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">taseditor.submitdeleteframes(int frame, int number)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Sends request to TAS Editor asking to delete given number of frames starting from given frame.</span></p>
+<p class="rvps7"><span class="rvts20">Actual movie won't be changed until the moment you call </span><span class="rvts19">taseditor.applyinputchanges()</span><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">Deletion can move up some old input and Markers (if "</span><a class="rvts24" href="ProgramCustomization.html#BindMarkerstoInput">Bind Markers to Input</a><span class="rvts20">" option is checked by user).</span></p>
+<p class="rvps7"><span class="rvts20">If given number is less or equal to zero, TAS Editor will ignore such request.</span></p>
+<p class="rvps7"><span class="rvts20">If given frame is negative, TAS Editor will ignore such request.</span></p>
+<p class="rvps7"><span class="rvts20">If given frame is outside current input range, TAS Editor will expand movie during </span><span class="rvts19">applyinputchanges()</span><span class="rvts20"> to fit the frame.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, nothing will be done.</span></p>
+<p class="rvps7"><a name="applyinputchanges"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">int taseditor.applyinputchanges([string name])</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Instantly applies the list of previously requested changes to current movie. If these requests actually modified movie data, new item will appear in History Log (so user can undo these changes), and Greenzone may become truncated, Playback cursor may lose its position, auto-seeking may be triggered.</span></p>
+<p class="rvps7"><span class="rvts20">Returns number of frame where first actual changes occurred.</span></p>
+<p class="rvps7"><span class="rvts20">If no actual changes were found (for example, you asked TAS Editor to set buttons that were already pressed), returns -1.</span></p>
+<p class="rvps7"><span class="rvts20">If pending list of changes is empty, returns -1.</span></p>
+<p class="rvps7"><span class="rvts20">You can provide a name that will be assigned to this change. This name will be shown in History Log. If you don't provide a name, TAS Editor will use default name ("Change").</span></p>
+<p class="rvps7"><span class="rvts20">After applying all requests TAS Editor clears the list of requests.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, nothing will be done.</span></p>
+<p class="rvps7"><a name="clearinputchanges"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts61">taseditor.clearinputchanges()</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Clears the list of previously requested changes, making TAS Editor forget about them before you call </span><span class="rvts19">applyinputchanges()</span><span class="rvts20">. Use this function to discard previously submitted input changes.</span></p>
+<p class="rvps7"><span class="rvts20">It's also recommended to call this function before making several requests in a row, so that you'll be sure that only your new changes will apply.</span></p>
+<p class="rvps7"><span class="rvts20">If TAS Editor is not engaged, nothing will be done.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com">Full-featured Documentation generator</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/create-epub-ebooks">Full-featured EPub generator</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

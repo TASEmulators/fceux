@@ -1,132 +1,323 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>What's New? 2.1.3 (changelog)</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("WhatsNew213");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>What's New? 2.1.3 (changelog)</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="What's New? 2.1.3 (changelog)">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="What's New? 2.1.3 (changelog)" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>What's New? 2.1.3 (changelog)</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="WhatsNew214.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="WhatsNew212.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts17">What's New? </span><span class="rvts20">2.1.3</span></p>
-<p>Released April 8, 2010</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts21">The 2.1.3 release fixes some bugs of 2.1.2, increases game compatibility, and adds usability enhancements to the windows port and adds a GUI to the SDL port.</span></p>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts22">Common </span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts21">Fixed mappers 82, 25, 21, and 18. &nbsp;Games such as SD Kiji Blader, Ganbare Goemon Gaiden, and Ganbare Goemon Gaiden 2, Jajamaru Gekimadden are now playable</span></li>
-<li><span class="rvts21">Fixes for mappers 253 &amp; 226 - fixes games such as Fire Emblem (J) and Fire Emblem Gaiden (J)</span></li>
-<li><span class="rvts21">Fix crashing on game loading for any battery backed ROMs with mappers from MapInitTab (fixes Esper Dream 2 - Aratanaru Tatakai (J)</span></li>
-<li><span class="rvts21">FDS - show name of missing bios file in error message</span></li>
-<li><span class="rvts21">NewPPU - fixed sprite hit before 255 and for non transparent hits only, thanks to dwedit for providing the fix</span></li>
-<li><span class="rvts21">.fm2 file format header now has an FDS flag</span></li>
-</ul>
-<p><span class="rvts23"><br/></span></p>
-<p><span class="rvts23">SDL</span></p>
-<p><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts21">A GUI! &nbsp;A graphic user interface (using GTK) with many basic menu options</span></li>
-<li><span class="rvts21">ported to SDL 1.3; compatibility maintained with 1.2</span></li>
-<li><span class="rvts21">unix netplay is now functional; gtk network gui created</span></li>
-<li><span class="rvts21">now prints the name of the mapper on ROM load</span></li>
-<li><span class="rvts21">fixed dpad/joyhat support</span></li>
-<li><span class="rvts21">VS unisystem keys now configable</span></li>
-<li><span class="rvts21">changed default hotkeys and keys to match Win32</span></li>
-<li><span class="rvts21">disallow --inputcfg gamepad0 and gamepad5</span></li>
-</ul>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts23">Win32</span></p>
-<p><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts21">Made savestate backups optional (config - enable - backup savestates)</span></li>
-<li><span class="rvts21">Made savestate compression togglable (config - enable - compress savestates)</span></li>
-<li><span class="rvts21">Cheats dialog - Pause while active checkbox</span></li>
-<li><span class="rvts21">Cheats dialog - Toggling a cheat in the cheats list now updates the active cheats count</span></li>
-<li><span class="rvts21">Debugger - added an auto-load feature</span></li>
-<li><span class="rvts21">Debugger - Fix so it doesn't crash if unminimized with no game loaded </span></li>
-<li><span class="rvts21">Closing minimized windows no longer moves them the next time they get opened</span></li>
-<li><span class="rvts21">Lua console - added a menu</span></li>
-<li><span class="rvts21">Lua console - filename updates when lua scripts are dragged to emulator or recent filenames invoked</span></li>
-<li><span class="rvts21">Name Table Viewer - Fix for use with New PPU</span></li>
-<li><span class="rvts21">Trace Logger - Trace logger now logs the values of the stack pointer register</span></li>
-<li><span class="rvts21">If a .fm2 file is drag and dropped with no ROM load, the open ROM dialog will appear</span></li>
-<li><span class="rvts21">disable movie messages menu item</span></li>
-<li><span class="rvts21">Added more window positions bounds checks. Accounts for -32000 positions and less out-of-range too</span></li>
-<li><span class="rvts21">TASEdit - Added interface functionality (save/load, running TASEdit mid-movie, etc.)</span></li>
-</ul>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts23">Lua</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts21">New lua functions: gui.parsecolor(), joypad.getup(), joypad.getdown(), emu.emulating()</span></li>
-<li><span class="rvts21">Change gui.line, gui.box, joypad.get to function consistently with other lua emulators such as GENS rerecording</span></li>
-<li><span class="rvts21">fixed zapper.read() to read movie data if a movie is playing. &nbsp;Also changed the struct values to x,y,fire. This breaks lua scripts that used it previous, sorry</span></li>
-<li><span class="rvts21">gui.text() now has out of bounds checking</span></li>
-<li><span class="rvts21">Lua no longer unpauses the emulator when a script is loaded</span></li>
-</ul>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts21"><br/></span></p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/create-epub-ebooks">Full-featured EBook editor</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="WhatsNew213"
+		  data-hnd-context="75"
+		  data-hnd-title="What's New? 2.1.3 (changelog)"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Intro.html">Introduction</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew214.html" title="What's New? 2.1.4 (changelog)" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew212.html" title="What's New? 2.1.2 (changelog)" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>What's New? 2.1.3 (changelog)</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.1.3</span></p>
+<p class="rvps2"><span class="rvts6">Released April 8, 2010</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts32">The 2.1.3 release fixes some bugs of 2.1.2, increases game compatibility, and adds usability enhancements to the windows port and adds a GUI to the SDL port.</span></p>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts33">Common&nbsp;</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts32">Fixed mappers 82, 25, 21, and 18. &nbsp;Games such as SD Kiji Blader, Ganbare Goemon Gaiden, and Ganbare Goemon Gaiden 2, Jajamaru Gekimadden are now playable</span></li>
+ <li class="rvps2"><span class="rvts32">Fixes for mappers 253 &amp; 226 - fixes games such as Fire Emblem (J) and Fire Emblem Gaiden (J)</span></li>
+ <li class="rvps2"><span class="rvts32">Fix crashing on game loading for any battery backed ROMs with mappers from MapInitTab (fixes Esper Dream 2 - Aratanaru Tatakai (J)</span></li>
+ <li class="rvps2"><span class="rvts32">FDS - show name of missing bios file in error message</span></li>
+ <li class="rvps2"><span class="rvts32">NewPPU - fixed sprite hit before 255 and for non transparent hits only, thanks to dwedit for providing the fix</span></li>
+ <li class="rvps2"><span class="rvts32">.fm2 file format header now has an FDS flag</span></li>
+</ul>
+<p class="rvps2"><span class="rvts34"><br/></span></p>
+<p class="rvps2"><span class="rvts34">SDL</span></p>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts32">A GUI! &nbsp;A graphic user interface (using GTK) with many basic menu options</span></li>
+ <li class="rvps2"><span class="rvts32">ported to SDL 1.3; compatibility maintained with 1.2</span></li>
+ <li class="rvps2"><span class="rvts32">unix netplay is now functional; gtk network gui created</span></li>
+ <li class="rvps2"><span class="rvts32">now prints the name of the mapper on ROM load</span></li>
+ <li class="rvps2"><span class="rvts32">fixed dpad/joyhat support</span></li>
+ <li class="rvps2"><span class="rvts32">VS unisystem keys now configable</span></li>
+ <li class="rvps2"><span class="rvts32">changed default hotkeys and keys to match Win32</span></li>
+ <li class="rvps2"><span class="rvts32">disallow --inputcfg gamepad0 and gamepad5</span></li>
+</ul>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts34">Win32</span></p>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts32">Made savestate backups optional (config - enable - backup savestates)</span></li>
+ <li class="rvps2"><span class="rvts32">Made savestate compression togglable (config - enable - compress savestates)</span></li>
+ <li class="rvps2"><span class="rvts32">Cheats dialog - Pause while active checkbox</span></li>
+ <li class="rvps2"><span class="rvts32">Cheats dialog - Toggling a cheat in the cheats list now updates the active cheats count</span></li>
+ <li class="rvps2"><span class="rvts32">Debugger - added an auto-load feature</span></li>
+ <li class="rvps2"><span class="rvts32">Debugger - Fix so it doesn't crash if unminimized with no game loaded&nbsp;</span></li>
+ <li class="rvps2"><span class="rvts32">Closing minimized windows no longer moves them the next time they get opened</span></li>
+ <li class="rvps2"><span class="rvts32">Lua console - added a menu</span></li>
+ <li class="rvps2"><span class="rvts32">Lua console - filename updates when lua scripts are dragged to emulator or recent filenames invoked</span></li>
+ <li class="rvps2"><span class="rvts32">Name Table Viewer - Fix for use with New PPU</span></li>
+ <li class="rvps2"><span class="rvts32">Trace Logger - Trace logger now logs the values of the stack pointer register</span></li>
+ <li class="rvps2"><span class="rvts32">If a .fm2 file is drag and dropped with no ROM load, the open ROM dialog will appear</span></li>
+ <li class="rvps2"><span class="rvts32">disable movie messages menu item</span></li>
+ <li class="rvps2"><span class="rvts32">Added more window positions bounds checks. Accounts for -32000 positions and less out-of-range too</span></li>
+ <li class="rvps2"><span class="rvts32">TASEdit - Added interface functionality (save/load, running TASEdit mid-movie, etc.)</span></li>
+</ul>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts34">Lua</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts32">New lua functions: gui.parsecolor(), joypad.getup(), joypad.getdown(), emu.emulating()</span></li>
+ <li class="rvps2"><span class="rvts32">Change gui.line, gui.box, joypad.get to function consistently with other lua emulators such as GENS rerecording</span></li>
+ <li class="rvps2"><span class="rvts32">fixed zapper.read() to read movie data if a movie is playing. &nbsp;Also changed the struct values to x,y,fire. This breaks lua scripts that used it previous, sorry</span></li>
+ <li class="rvps2"><span class="rvts32">gui.text() now has out of bounds checking</span></li>
+ <li class="rvps2"><span class="rvts32">Lua no longer unpauses the emulator when a script is loaded</span></li>
+</ul>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/help-authoring-tool">Full-featured multi-format Help generator</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

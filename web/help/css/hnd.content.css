@@ -1,0 +1,755 @@
+/* ========== Text Styles ========== */
+hr { color: #000000}
+.main-content, .main-content table span.rvts0 /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6
+{
+}
+span.rvts7
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts8
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts9
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts10, span.rvts10
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts11
+{
+ color: #a0a0a0;
+}
+span.rvts12
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #696969;
+}
+span.rvts13
+{
+ font-weight: bold;
+ color: #a0a0a0;
+}
+span.rvts14
+{
+ font-style: italic;
+ color: #a0a0a0;
+}
+span.rvts15
+{
+ font-size: 12pt;
+}
+a.rvts16, span.rvts16
+{
+ font-size: 12pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts16:hover
+{
+ color: #0000ff;
+}
+span.rvts17
+{
+ font-size: 18pt;
+}
+span.rvts18 /* Font Style */
+{
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts19, span.rvts19 /* Font Style */
+{
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+span.rvts20
+{
+ text-decoration: underline;
+}
+span.rvts21
+{
+ font-size: 14pt;
+}
+span.rvts22
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+a.rvts23, span.rvts23
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts23:hover
+{
+ color: #0000ff;
+}
+a.rvts24, span.rvts24
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts24:hover
+{
+ color: #0000ff;
+}
+span.rvts25
+{
+ font-size: 12pt;
+ text-decoration: underline;
+}
+span.rvts26
+{
+ font-size: 18pt;
+ text-decoration: underline;
+}
+span.rvts27
+{
+ color: #000000;
+}
+span.rvts28
+{
+ font-size: 16pt;
+ color: #000000;
+}
+span.rvts29
+{
+ font-size: 14pt;
+ color: #000000;
+}
+span.rvts30
+{
+ font-size: 12pt;
+ color: #000000;
+}
+span.rvts31
+{
+ font-size: 12pt;
+ font-family: 'Times New Roman', 'Times', serif;
+ color: #000000;
+}
+span.rvts32
+{
+}
+span.rvts33
+{
+ font-size: 14pt;
+}
+span.rvts34
+{
+ font-size: 16pt;
+}
+a.rvts35, span.rvts35
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts35:hover
+{
+ color: #0000ff;
+}
+a.rvts36, span.rvts36
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts36:hover
+{
+ color: #0000ff;
+}
+span.rvts37
+{
+ font-size: 16pt;
+}
+a.rvts38, span.rvts38
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts38:hover
+{
+ color: #0000ff;
+}
+span.rvts39
+{
+ font-family: 'Lucida Console', 'Monaco', monospace;
+}
+span.rvts40
+{
+ font-style: italic;
+}
+a.rvts41, span.rvts41
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts41:hover
+{
+ color: #0000ff;
+}
+span.rvts42
+{
+ font-family: 'Times New Roman', 'Times', serif;
+}
+span.rvts43
+{
+ font-size: 11pt;
+ font-family: 'Courier New', 'Courier', monospace;
+}
+a.rvts44, span.rvts44
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts44:hover
+{
+ color: #0000ff;
+}
+span.rvts45
+{
+ font-weight: bold;
+}
+a.rvts46, span.rvts46
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts46:hover
+{
+ color: #0000ff;
+}
+a.rvts47, span.rvts47
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts47:hover
+{
+ color: #0000ff;
+}
+span.rvts48
+{
+ font-size: 16pt;
+ text-decoration: underline;
+}
+a.rvts49, span.rvts49
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts49:hover
+{
+ color: #0000ff;
+}
+span.rvts50
+{
+ font-size: 24pt;
+}
+a.rvts51, span.rvts51
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts51:hover
+{
+ color: #0000ff;
+}
+span.rvts52
+{
+ font-size: 14pt;
+ text-decoration: underline;
+}
+span.rvts53
+{
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts54
+{
+ font-size: 9pt;
+}
+a.rvts55, span.rvts55
+{
+ font-size: 9pt;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts55:hover
+{
+ color: #0000ff;
+}
+span.rvts56
+{
+ font-family: 'Courier New', 'Courier', monospace;
+}
+a.rvts57, span.rvts57
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts57:hover
+{
+ color: #0000ff;
+}
+a.rvts58, span.rvts58
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts58:hover
+{
+ color: #0000ff;
+}
+a.rvts59, span.rvts59
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts59:hover
+{
+ color: #0000ff;
+}
+span.rvts60
+{
+ font-size: 12pt;
+ font-weight: bold;
+}
+a.rvts61, span.rvts61
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts61:hover
+{
+ color: #0000ff;
+}
+a.rvts62, span.rvts62
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts62:hover
+{
+ color: #0000ff;
+}
+a.rvts63, span.rvts63
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts63:hover
+{
+ color: #0000ff;
+}
+a.rvts64, span.rvts64
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts64:hover
+{
+ color: #0000ff;
+}
+a.rvts65, span.rvts65
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts65:hover
+{
+ color: #0000ff;
+}
+a.rvts66, span.rvts66
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts66:hover
+{
+ color: #0000ff;
+}
+a.rvts67, span.rvts67
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts67:hover
+{
+ color: #0000ff;
+}
+span.rvts68
+{
+ font-size: 12pt;
+ font-weight: bold;
+ text-decoration: underline;
+}
+a.rvts69, span.rvts69
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts69:hover
+{
+ color: #0000ff;
+}
+a.rvts70, span.rvts70
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts70:hover
+{
+ color: #0000ff;
+}
+a.rvts71, span.rvts71
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts71:hover
+{
+ color: #0000ff;
+}
+span.rvts72
+{
+ font-size: 11pt;
+ font-weight: bold;
+}
+span.rvts73
+{
+ font-size: 8pt;
+}
+a.rvts74, span.rvts74
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts74:hover
+{
+ color: #0000ff;
+}
+a.rvts75, span.rvts75
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts75:hover
+{
+ color: #0000ff;
+}
+span.rvts76
+{
+ color: #0000ff;
+}
+span.rvts77
+{
+ color: #00cc00;
+}
+span.rvts78
+{
+ color: #ff0000;
+}
+span.rvts79
+{
+ color: #00be00;
+}
+span.rvts80
+{
+ color: #a08c00;
+}
+span.rvts81
+{
+ color: #0000c3;
+}
+span.rvts82
+{
+ color: #0082a0;
+}
+span.rvts83
+{
+ color: #d2be00;
+}
+span.rvts84
+{
+ color: #0a0aff;
+}
+span.rvts85
+{
+ color: #05ff05;
+}
+span.rvts86
+{
+ font-size: 22pt;
+ text-decoration: underline;
+}
+a.rvts87, span.rvts87
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts87:hover
+{
+ color: #0000ff;
+}
+a.rvts88, span.rvts88
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts88:hover
+{
+ color: #0000ff;
+}
+a.rvts89, span.rvts89
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts89:hover
+{
+ color: #0000ff;
+}
+span.rvts90
+{
+ font-size: 18pt;
+ font-weight: bold;
+}
+a.rvts91, span.rvts91
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts91:hover
+{
+ color: #0000ff;
+}
+a.rvts92, span.rvts92
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts92:hover
+{
+ color: #0000ff;
+}
+span.rvts93
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts94
+{
+ font-size: 14pt;
+ font-weight: bold;
+}
+span.rvts95
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000080;
+}
+span.rvts96
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #333399;
+}
+span.rvts97
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000080;
+}
+span.rvts98
+{
+ font-size: 16pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts99
+{
+ font-size: 11pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts100
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts101
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000080;
+}
+a.rvts102, span.rvts102
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts102:hover
+{
+ color: #0000ff;
+}
+span.rvts103
+{
+ font-size: 14pt;
+ font-weight: bold;
+}
+span.rvts104
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+ text-decoration: underline;
+}
+span.rvts105
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #00007f;
+}
+span.rvts106
+{
+ font-size: 14pt;
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts107
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts108
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #00007f;
+}
+span.rvts109
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ color: ;
+}
+span.rvts110
+{
+ font-family: 'Lucida Console', 'Monaco', monospace;
+ text-decoration: underline;
+}
+span.rvts111
+{
+ font-weight: bold;
+ text-decoration: underline;
+}
+span.rvts112
+{
+ font-size: 11pt;
+ text-decoration: underline;
+}
+span.rvts113
+{
+ font-size: 5pt;
+}
+span.rvts114
+{
+ font-size: 5pt;
+ font-weight: bold;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2
+{
+}
+.rvps3
+{
+ text-align: center;
+}
+.rvps4 /* Paragraph Style */
+{
+ text-align: center;
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-left: none;
+ padding: 2px 0px 2px 0px;
+ margin: 7px 0px 7px 0px;
+}
+.rvps5
+{
+ background: #ffffff;
+}
+.rvps6
+{
+ text-indent: 48px;
+}
+.rvps7
+{
+ text-indent: 48px;
+ margin: 0px 0px 0px 48px;
+}
+/* ========== Lists ========== */
+.list0 {text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;}
+.list1 {text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: circle;}
+.list2 {text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: square;}
+.list3 {text-indent: 0px; padding: 0; margin: 0 0 0 48px; list-style-position: outside; list-style-type: circle;}
+.list4 {text-indent: 0px; padding: 0; margin: 0 0 0 48px; list-style-position: outside; list-style-type: square;}
+.list5 {text-indent: 0px; padding: 0; margin: 0 0 0 48px; list-style-position: outside; list-style-type: disc;}
+.list6 {text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside;}
+.list7 {text-indent: 0px; padding: 0; margin: 0 0 0 36px; list-style-position: outside; list-style-type: circle;}

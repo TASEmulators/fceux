@@ -1,140 +1,331 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>FAQ</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("FAQ");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>FAQ</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="FAQ">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="FAQ" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>FAQ</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Reference.html">Reference</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Reference.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="LuaAPI.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="SpeedrunningSynopsis.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="FAQ"
+		  data-hnd-context="16"
+		  data-hnd-title="FAQ"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Reference.html">Reference</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Reference.html" title="Reference" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="LuaAPI.html" title="Lua API" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="SpeedrunningSynopsis.html" title="Speedrunning synopsis" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>FAQ</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">FAQ</span></p>
+<p class="rvps2"><span class="rvts18">FAQ</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps10"><span class="rvts21">If after reading the Manual you still have any questions on the topic, feel free to ask them at </span><a class="rvts27" href="http://tasvideos.org/forum/index.php" target="_blank">TASVideos</a><span class="rvts21"> forum.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">I think I've found a bug in the program, what should I do?</span></p>
-<p class="rvps10"><span class="rvts21">Post a message in the </span><a class="rvts27" href="http://tasvideos.org/forum/viewforum.php?f=15" target="_blank">FCEUX</a><span class="rvts21"> subforum of TASVideos. Try to explain the issue precisely, to help author reproduce the situation. Attach a screenshot if you think it reflects the essence of the problem.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Is it possible to use Taseditor with other emulators?</span></p>
-<p class="rvps10"><span class="rvts21">No. Even though the program code of Taseditor is mostly isolated from the emulator code, it is by no means a plug-in. So it's necessary to manually port its source code and modify it according to specifications of target platform.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">How can I TAS the traditional way, yet with Taseditor interface?</span></p>
-<p class="rvps10"><span class="rvts21">Basically, you can start traditional TASing right away, no additional settings are required. But if you must keep some old habits intact, you can fine-tune the program. Try the following options:</span></p>
-<ul style="text-indent: 25px; margin-left: 5px; list-style-position: inside;">
-<li class="rvps10" style="text-indent: 25px"><span class="rvts21">switch on the </span><a class="rvts27" href="ProgramCustomization.html#OldcontrolschemeforBranching">Config -&gt; Old control scheme for Branching</a><span class="rvts21"> option</span></li>
-<li class="rvps10" style="text-indent: 25px"><span class="rvts21">switch off the </span><a class="rvts27" href="ProgramCustomization.html#BranchesrestoreentireMovie">Config -&gt; Branches restore entire Movie</a><span class="rvts21"> option</span></li>
-<li class="rvps10" style="text-indent: 25px"><span class="rvts21">switch on the </span><a class="rvts27" href="ProgramCustomization.html#CombineconsecutiveRecordings">Config -&gt; Combine consecutive Recordings/Draws</a><span class="rvts21"> option</span></li>
-<li class="rvps10" style="text-indent: 25px"><span class="rvts21">switch off the </span><a class="rvts27" href="ProgramCustomization.html#UseInputkeysforColumnSet">Config -&gt; Use Input keys for Column Set</a><span class="rvts21"> option</span></li>
+<p class="rvps7"><span class="rvts20">If after reading the Manual you still have any questions on the topic, feel free to ask them at </span><a class="rvts24" href="http://tasvideos.org/forum/index.php" target="_blank">TASVideos</a><span class="rvts20"> forum.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">I think I've found a bug in the program, what should I do?</span></p>
+<p class="rvps7"><span class="rvts20">Post a message in the </span><a class="rvts24" href="http://tasvideos.org/forum/viewforum.php?f=15" target="_blank">FCEUX</a><span class="rvts20"> subforum of TASVideos. Try to explain the issue precisely, to help author reproduce the situation. Attach a screenshot if you think it reflects the essence of the problem.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Is it possible to use Taseditor with other emulators?</span></p>
+<p class="rvps7"><span class="rvts20">No. Even though the program code of Taseditor is mostly isolated from the emulator code, it is by no means a plug-in. So it's necessary to manually port its source code and modify it according to specifications of target platform.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">How can I TAS the traditional way, yet with Taseditor interface?</span></p>
+<p class="rvps7"><span class="rvts20">Basically, you can start traditional TASing right away, no additional settings are required. But if you must keep some old habits intact, you can fine-tune the program. Try the following options:</span></p>
+<ul style="text-indent: 25px; padding: 0; margin: 0 0 0 5px; list-style-position: inside; list-style-type: disc;">
+ <li style="text-indent: 25px" class="rvps7"><span class="rvts20">switch on the </span><a class="rvts24" href="ProgramCustomization.html#OldcontrolschemeforBranching">Config -&gt; Old control scheme for Branching</a><span class="rvts20"> option</span></li>
+ <li style="text-indent: 25px" class="rvps7"><span class="rvts20">switch off the </span><a class="rvts24" href="ProgramCustomization.html#BranchesrestoreentireMovie">Config -&gt; Branches restore entire Movie</a><span class="rvts20"> option</span></li>
+ <li style="text-indent: 25px" class="rvps7"><span class="rvts20">switch on the </span><a class="rvts24" href="ProgramCustomization.html#CombineconsecutiveRecordings">Config -&gt; Combine consecutive Recordings/Draws</a><span class="rvts20"> option</span></li>
+ <li style="text-indent: 25px" class="rvps7"><span class="rvts20">switch off the </span><a class="rvts24" href="ProgramCustomization.html#UseInputkeysforColumnSet">Config -&gt; Use Input keys for Column Set</a><span class="rvts20"> option</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21">Also, it's recommended to switch the Bookmarks List to the "Branches Tree" view.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Why the right-click on the FCEUX window doesn't prompt the usual context menu?</span></p>
-<p class="rvps10"><span class="rvts21">It's done to facilitate the </span><a class="rvts27" href="Navigation.html#rewinding-by-wheel">Playback cursor navigation with the mouse wheel</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">Usually users move the mouse cursor in such a manner that it's in sight. Thus when TASer is watching the game events the cursor will often be inside the FCEUX window. Context menus would obstruct the view when you want to rewind the Playback by holding the right mouse button and rolling the mouse wheel. So, since there's no important items in the menu while TAS Editor is engaged, the menu was removed.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Why the right-click on the Piano Roll sometimes prompts a context menu and sometimes doesn't?</span></p>
-<p class="rvps10"><span class="rvts21">Taseditor's context menu only appears when you right-click on the number of a selected frame. If you right-click on a frame that is not selected, or you right-click on the Input of a selected frame, the menu won't appear.</span></p>
-<p class="rvps10"><span class="rvts21">It's done to facilitate the Piano Roll scrolling by right-clicking and dragging.</span></p>
-<p class="rvps10"><span class="rvts21">Generally, it's recommended to use keyboard shortcuts and other means of accessing Taseditor features instead of using context menu.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">How do I insert a Reset command into the movie?</span></p>
-<p class="rvps10"><span class="rvts21">You should use Input Recording here. Place the Playback cursor to the target frame, switch on Recording, then choose </span><span class="rvts25">NES -&gt; Reset</span><span class="rvts21"> in FCEUX main menu and press </span><span class="rvts26">Frame Advance</span><span class="rvts21">. Also, it's recommended to set a Marker to this frame, since there's no other way to mark a Reset/Power switch in the Piano Roll (there's no columns for commands, only for buttons).</span></p>
-<p class="rvps10"><span class="rvts21">Then you can switch Recording off and continue usual movie editing. The frame with the Reset command can be transposed up or down by inserting or deleting frames above it.</span></p>
-<p class="rvps10"><span class="rvts21">Other hardware commands are invoked the same way, see </span><a class="rvts27" href="Controls.html#virtual_joypad">Controls</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">How do I change the order of columns in the Piano Roll?</span></p>
-<p class="rvps10"><span class="rvts21">Unfortunately, this feature is not supported in TAS Editor 1.0. &nbsp;This will be </span><a class="rvts27" href="Ideas.html#BetterColumns">fixed</a><span class="rvts21"> in next versions.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">How do I change the number of players (joypads) in my movie?</span></p>
-<p class="rvps10"><span class="rvts21">You should create a new project, copying the Input and Markers from the current one.</span></p>
-<p class="rvps10"><span class="rvts21">Choose </span><span class="rvts25">File -&gt; New</span><span class="rvts21"> in TAS Editor main menu. In the "Create New Project" window: choose the needed Input type, check "Copy current Input" and "Copy current Markers" checkboxes and click "OK".</span></p>
-<p class="rvps10"><span class="rvts21">Old project's Bookmarks won't be copied to the new project this way. But you can recreate them using Input export/import features.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">How can I quickly compare two movies?</span></p>
-<ol style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">Make sure that </span><a class="rvts27" href="ProgramCustomization.html#EnableHotChanges">Hot Changes</a><span class="rvts21"> are enabled.</span></li>
-<li class="rvps10"><span class="rvts21">Create an empty project, import the first movie into it (using </span><span class="rvts25">File -&gt; Import Input</span><span class="rvts21">), replay the movie to the end and save it to Bookmark 1.</span></li>
-<li class="rvps10"><span class="rvts21">Import the second movie over the existing Input and save the result to Bookmark 2.</span></li>
+<p class="rvps7"><span class="rvts20">Also, it's recommended to switch the Bookmarks List to the "Branches Tree" view.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Why the right-click on the FCEUX window doesn't prompt the usual context menu?</span></p>
+<p class="rvps7"><span class="rvts20">It's done to facilitate the </span><a class="rvts24" href="Navigation.html#rewinding-by-wheel">Playback cursor navigation with the mouse wheel</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">Usually users move the mouse cursor in such a manner that it's in sight. Thus when TASer is watching the game events the cursor will often be inside the FCEUX window. Context menus would obstruct the view when you want to rewind the Playback by holding the right mouse button and rolling the mouse wheel. So, since there's no important items in the menu while TAS Editor is engaged, the menu was removed.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Why the right-click on the Piano Roll sometimes prompts a context menu and sometimes doesn't?</span></p>
+<p class="rvps7"><span class="rvts20">Taseditor's context menu only appears when you right-click on the number of a selected frame. If you right-click on a frame that is not selected, or you right-click on the Input of a selected frame, the menu won't appear.</span></p>
+<p class="rvps7"><span class="rvts20">It's done to facilitate the Piano Roll scrolling by right-clicking and dragging.</span></p>
+<p class="rvps7"><span class="rvts20">Generally, it's recommended to use keyboard shortcuts and other means of accessing Taseditor features instead of using context menu.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">How do I insert a Reset command into the movie?</span></p>
+<p class="rvps7"><span class="rvts20">You should use Input Recording here. Place the Playback cursor to the target frame, switch on Recording, then choose </span><span class="rvts22">NES -&gt; Reset</span><span class="rvts20"> in FCEUX main menu and press </span><span class="rvts23">Frame Advance</span><span class="rvts20">. Also, it's recommended to set a Marker to this frame, since there's no other way to mark a Reset/Power switch in the Piano Roll (there's no columns for commands, only for buttons).</span></p>
+<p class="rvps7"><span class="rvts20">Then you can switch Recording off and continue usual movie editing. The frame with the Reset command can be transposed up or down by inserting or deleting frames above it.</span></p>
+<p class="rvps7"><span class="rvts20">Other hardware commands are invoked the same way, see </span><a class="rvts24" href="Controls.html#virtual_joypad">Controls</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">How do I change the order of columns in the Piano Roll?</span></p>
+<p class="rvps7"><span class="rvts20">Unfortunately, this feature is not supported in TAS Editor 1.0. &nbsp;This will be </span><a class="rvts24" href="Ideas.html#BetterColumns">fixed</a><span class="rvts20"> in next versions.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">How do I change the number of players (joypads) in my movie?</span></p>
+<p class="rvps7"><span class="rvts20">You should create a new project, copying the Input and Markers from the current one.</span></p>
+<p class="rvps7"><span class="rvts20">Choose </span><span class="rvts22">File -&gt; New</span><span class="rvts20"> in TAS Editor main menu. In the "Create New Project" window: choose the needed Input type, check "Copy current Input" and "Copy current Markers" checkboxes and click "OK".</span></p>
+<p class="rvps7"><span class="rvts20">Old project's Bookmarks won't be copied to the new project this way. But you can recreate them using Input export/import features.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">How can I quickly compare two movies?</span></p>
+<ol style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: decimal;">
+ <li value="1" class="rvps7"><span class="rvts20">Make sure that </span><a class="rvts24" href="ProgramCustomization.html#EnableHotChanges">Hot Changes</a><span class="rvts20"> are enabled.</span></li>
+ <li value="2" class="rvps7"><span class="rvts20">Create an empty project, import the first movie into it (using </span><span class="rvts22">File -&gt; Import Input</span><span class="rvts20">), replay the movie to the end and save it to Bookmark 1.</span></li>
+ <li value="3" class="rvps7"><span class="rvts20">Import the second movie over the existing Input and save the result to Bookmark 2.</span></li>
 </ol>
-<p class="rvps10"><span class="rvts21">The import operation will truncate the Greenzone after the frame where the first difference between Input of the two movies was found. Other places of discrepancy can be detected by observing the Input in the Piano Roll:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">buttonpresses that match in both movies are colored black</span></li>
-<li class="rvps10"><span class="rvts21">new buttonpresses (added by the 2nd movie) are colored bright-red</span></li>
-<li class="rvps10"><span class="rvts21">deleted buttonpresses are marked by dash</span></li>
+<p class="rvps7"><span class="rvts20">The import operation will truncate the Greenzone after the frame where the first difference between Input of the two movies was found. Other places of discrepancy can be detected by observing the Input in the Piano Roll:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">buttonpresses that match in both movies are colored black</span></li>
+ <li class="rvps7"><span class="rvts20">new buttonpresses (added by the 2nd movie) are colored bright-red</span></li>
+ <li class="rvps7"><span class="rvts20">deleted buttonpresses are marked by dash</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21">For extra convenience it's recommended to name both Bookmarks, for example, copy/paste the filename of the imported movie into the upper Marker Note just before creating a Bookmark.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Why are those fm3 files so large?</span></p>
-<p class="rvps10"><span class="rvts21">An FM3 file usually contains full snapshot of the working process, including the Greenzone data (which takes the most part of the file). See </span><a class="rvts27" href="AdvancedFeatures.html#ProjectsSharing">Advanced Features</a><span class="rvts21"> for details. You can customize this in the </span><a class="rvts27" href="ProgramCustomization.html#Projectfilesavingoptions">Config</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Why is the Manual so long?</span></p>
-<p class="rvps10"><span class="rvts21">Because besides the program specifications the Manual contains a comprehensive tutorial (the </span><a class="rvts27" href="BeginnersGuide.html">Beginner's Guide</a><span class="rvts21">) which systematizes known principles of effective TASing. Since there was no similar endeavors before, the author decided that lengthy explanations are the lesser evil than possible inexactitude.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps7"><span class="rvts20">For extra convenience it's recommended to name both Bookmarks, for example, copy/paste the filename of the imported movie into the upper Marker Note just before creating a Bookmark.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Why are those fm3 files so large?</span></p>
+<p class="rvps7"><span class="rvts20">An FM3 file usually contains full snapshot of the working process, including the Greenzone data (which takes the most part of the file). See </span><a class="rvts24" href="AdvancedFeatures.html#ProjectsSharing">Advanced Features</a><span class="rvts20"> for details. You can customize this in the </span><a class="rvts24" href="ProgramCustomization.html#Projectfilesavingoptions">Config</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Why is the Manual so long?</span></p>
+<p class="rvps7"><span class="rvts20">Because besides the program specifications the Manual contains a comprehensive tutorial (the </span><a class="rvts24" href="BeginnersGuide.html">Beginner's Guide</a><span class="rvts20">) which systematizes known principles of effective TASing. Since there was no similar endeavors before, the author decided that lengthy explanations are the lesser evil than possible inexactitude.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/feature-tour">Full-featured Help generator</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/help-authoring-tool">Create HTML Help, DOC, PDF and print manuals from 1 single source</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

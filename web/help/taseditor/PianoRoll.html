@@ -1,156 +1,348 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>2.1. Piano Roll</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("PianoRoll");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>2.1. Piano Roll</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="2.1. Piano Roll">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="2.1. Piano Roll" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>2.1. Piano Roll</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="BeginnersGuide.html">Beginner's Guide</a> &rsaquo;&rsaquo; <a href="ProgramInterface.html">2. Program Interface</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="ProgramInterface.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="ProgramInterface.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="Toolbox.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="PianoRoll"
+		  data-hnd-context="6"
+		  data-hnd-title="2.1. Piano Roll"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="BeginnersGuide.html">Beginner's Guide</a></li><li><a href="ProgramInterface.html">2. Program Interface</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="ProgramInterface.html" title="2. Program Interface" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="ProgramInterface.html" title="2. Program Interface" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="Toolbox.html" title="2.2. Toolbox" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>2.1. Piano Roll</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">Piano Roll</span></p>
-<p class="rvps5"><span class="rvts36"><br/></span></p>
-<p class="rvps5"><img alt="" style="padding : 1px;" src="lib/taseditor-smb.png"/></p>
-<p class="rvps21"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Taseditor's workspace is similar to the interface found in many music-sequencing programs. Piano Roll is a table containing the most necessary data about the edited project. Users can both observe that data and edit it by mouse clicks on various cells of the table.</span></p>
-<p class="rvps10"><span class="rvts21">If you just opened the Taseditor window you will most likely see an empty project that contains only the starting (zeroth) frame of the movie. So, before you begin any experiments, you should temporarily unpause the emulator to let the movie reach at least the title screen of the game, the point where players can already affect the game with buttons Input. By default the hotkey to pause/unpause emulator is the </span><span class="rvts26">Pause</span><span class="rvts21"> key on the keyboard, but in Taseditor you can use </span><span class="rvts34">middle mouse button</span><span class="rvts21"> (the wheel) instead. Try watching the running game for a couple of seconds, then again press the </span><span class="rvts26">Pause</span><span class="rvts21"> key or make the middle-click (anywhere) to stop emulation.</span></p>
-<p class="rvps10"><span class="rvts21">During the emulation, Piano Roll contents become filled with the information about the processed frames. Each line in the Piano Roll list is responsible for a single frame. The index number of the frame is shown at the beginning of the line, the numeration goes top-down. When the window size is not enough to display all the frames, the list gets a vertical scrollbar.</span></p>
-<p class="rvps10"><span class="rvts21">By the color of each line you can tell the following data about the corresponding frame:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">Pale (almost white) lines stand for frames that are outside of the Greenzone. This means that the emulator haven't processed these frames yet and thus it knows nothing about them. For example, if you import some finished movie into Taseditor, at first Piano Roll will display all frames in whitish colors, before running through them. In the above picture such lines begin from the frame 21, because the Greenzone ends at the frame 20.</span></li>
-<li class="rvps10"><span class="rvts21">Green and red lines mean that those frames are contained in the Greenzone, the emulator has already played back that part of the movie, and you've already seen on the FCEUX screen what happens with the game during these frames. Lag frames are marked red, otherwise there's no difference between red and green lines.</span></li>
-<li class="rvps10"><span class="rvts21">The light-blue line (frame 18 on the picture) shows the currently emulated frame. Events of the frame are displayed on the FCEUX screen at the moment. This is always a sole line. In this Manual we will call it the </span><span class="rvts25">Playback cursor</span><span class="rvts21">. When emulator is paused, the Playback cursor stays at the same frame, and while emulation the cursor runs down, leaving the trail of green and red Greenzone frames behind. You can put the Playback cursor at any frame of the movie to see the game events of that frame. To do that, click the very left column of the Piano Roll (the column where the blue triangle pointer travels down) in the line you wish to observe – the blue pointer will jump to the chosen line along with the Playback cursor, and the FCEUX window will update accordingly, showing the in-game state of the frame. Now, if you don't let go of the left mouse button, you can drag the light-blue cursor up and down.</span></li>
-<li class="rvps10"><span class="rvts21">The dark-blue line highlights the selected movie segment. The actual color may differ depending on your Windows settings (the Visual theme chosen). Piano Roll lines become selected as you left-click on them. </span><span class="rvts21">In the above picture the</span><span class="rvts21"> single frame 27 is selected, but you can select any number of frames. To select a range of frames, click on the number of the first frame and stretch the selection by dragging the mouse up or down. </span><span class="rvts34">Note:</span><span class="rvts21"> Piano Roll lines will also be selected by clicking on the Input (i.e. almost any other column), but the column with frame numbers is specifically dedicated to working with the Selection. In this Manual we will call all dark-blue lines the </span><span class="rvts25">Selection</span><span class="rvts21">, and a single selected line will be called the </span><span class="rvts25">Selection cursor</span><span class="rvts21">. Unlike the Playback cursor, the Selection cursor isn't tied to the game state. To totally remove the Selection you could right-click the number of a selected frame and choose "Deselect" in the context menu, but usually there's no need to remove the Selection left from previous operations with the movie, because the next operation will automatically bring the Selection cursor to a new place.</span></li>
-<li class="rvps10"><span class="rvts21">A purple line appears for a brief moment when you use the Undo feature. This way the program shows you the exact place of the reverted changes. A huge convenience of Taseditor is that absolutely any change can be reverted with the standard key combination </span><span class="rvts30">Ctrl + Z</span><span class="rvts21">, so don't be afraid to experiment.</span></li>
+<p class="rvps2"><span class="rvts18">Piano Roll</span></p>
+<p class="rvps3"><span class="rvts20"><br/></span></p>
+<p class="rvps3"><img alt="" style="padding : 1px;" src="lib/taseditor-smb.png"></p>
+<p class="rvps13"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Taseditor's workspace is similar to the interface found in many music-sequencing programs. Piano Roll is a table containing the most necessary data about the edited project. Users can both observe that data and edit it by mouse clicks on various cells of the table.</span></p>
+<p class="rvps7"><span class="rvts20">If you just opened the Taseditor window you will most likely see an empty project that contains only the starting (zeroth) frame of the movie. So, before you begin any experiments, you should temporarily unpause the emulator to let the movie reach at least the title screen of the game, the point where players can already affect the game with buttons Input. By default the hotkey to pause/unpause emulator is the </span><span class="rvts23">Pause</span><span class="rvts20"> key on the keyboard, but in Taseditor you can use </span><span class="rvts31">middle mouse button</span><span class="rvts20"> (the wheel) instead. Try watching the running game for a couple of seconds, then again press the </span><span class="rvts23">Pause</span><span class="rvts20"> key or make the middle-click (anywhere) to stop emulation.</span></p>
+<p class="rvps7"><span class="rvts20">During the emulation, Piano Roll contents become filled with the information about the processed frames. Each line in the Piano Roll list is responsible for a single frame. The index number of the frame is shown at the beginning of the line, the numeration goes top-down. When the window size is not enough to display all the frames, the list gets a vertical scrollbar.</span></p>
+<p class="rvps7"><span class="rvts20">By the color of each line you can tell the following data about the corresponding frame:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">Pale (almost white) lines stand for frames that are outside of the Greenzone. This means that the emulator haven't processed these frames yet and thus it knows nothing about them. For example, if you import some finished movie into Taseditor, at first Piano Roll will display all frames in whitish colors, before running through them. In the above picture such lines begin from the frame 21, because the Greenzone ends at the frame 20.</span></li>
+ <li class="rvps7"><span class="rvts20">Green and red lines mean that those frames are contained in the Greenzone, the emulator has already played back that part of the movie, and you've already seen on the FCEUX screen what happens with the game during these frames. Lag frames are marked red, otherwise there's no difference between red and green lines.</span></li>
+ <li class="rvps7"><span class="rvts20">The light-blue line (frame 18 on the picture) shows the currently emulated frame. Events of the frame are displayed on the FCEUX screen at the moment. This is always a sole line. In this Manual we will call it the </span><span class="rvts22">Playback cursor</span><span class="rvts20">. When emulator is paused, the Playback cursor stays at the same frame, and while emulation the cursor runs down, leaving the trail of green and red Greenzone frames behind. You can put the Playback cursor at any frame of the movie to see the game events of that frame. To do that, click the very left column of the Piano Roll (the column where the blue triangle pointer travels down) in the line you wish to observe – the blue pointer will jump to the chosen line along with the Playback cursor, and the FCEUX window will update accordingly, showing the in-game state of the frame. Now, if you don't let go of the left mouse button, you can drag the light-blue cursor up and down.</span></li>
+ <li class="rvps7"><span class="rvts20">The dark-blue line highlights the selected movie segment. The actual color may differ depending on your Windows settings (the Visual theme chosen). Piano Roll lines become selected as you left-click on them. </span><span class="rvts20">In the above picture the</span><span class="rvts20"> single frame 27 is selected, but you can select any number of frames. To select a range of frames, click on the number of the first frame and stretch the selection by dragging the mouse up or down. </span><span class="rvts31">Note:</span><span class="rvts20"> Piano Roll lines will also be selected by clicking on the Input (i.e. almost any other column), but the column with frame numbers is specifically dedicated to working with the Selection. In this Manual we will call all dark-blue lines the </span><span class="rvts22">Selection</span><span class="rvts20">, and a single selected line will be called the </span><span class="rvts22">Selection cursor</span><span class="rvts20">. Unlike the Playback cursor, the Selection cursor isn't tied to the game state. To totally remove the Selection you could right-click the number of a selected frame and choose "Deselect" in the context menu, but usually there's no need to remove the Selection left from previous operations with the movie, because the next operation will automatically bring the Selection cursor to a new place.</span></li>
+ <li class="rvps7"><span class="rvts20">A purple line appears for a brief moment when you use the Undo feature. This way the program shows you the exact place of the reverted changes. A huge convenience of Taseditor is that absolutely any change can be reverted with the standard key combination </span><span class="rvts27">Ctrl + Z</span><span class="rvts20">, so don't be afraid to experiment.</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">To start adding and changing the movie Input, click cells of those columns to the right from the column with frame numbers. If you click an empty cell, a symbol corresponding to the real joypad button will appear there.</span></p>
-<div class="rvps21"><table width="600" border="0" cellpadding="6" cellspacing="0" style="border-width: 0px;">
-<tr valign="middle">
-<td style="width: 586px; height: 14px;"><p class="rvps14"><span class="rvts25">A</span><span class="rvts21"> – </span><span class="rvts29">A </span><span class="rvts21">button</span></p>
-<p class="rvps14"><span class="rvts25">B</span><span class="rvts21"> – </span><span class="rvts29">B </span><span class="rvts21">button</span></p>
-<p class="rvps14"><span class="rvts25">S</span><span class="rvts21"> – </span><span class="rvts29">Select </span><span class="rvts21">button</span></p>
-<p class="rvps14"><span class="rvts25">T</span><span class="rvts21"> – </span><span class="rvts29">Start </span><span class="rvts21">button</span></p>
-<p class="rvps14"><span class="rvts25">U</span><span class="rvts21"> – D-pad </span><span class="rvts29">Up</span></p>
-<p class="rvps14"><span class="rvts25">D</span><span class="rvts21"> – </span><span class="rvts21">D-pad</span><span class="rvts21"> </span><span class="rvts29">Down</span></p>
-<p class="rvps14"><span class="rvts25">L</span><span class="rvts21"> – </span><span class="rvts21">D-pad</span><span class="rvts21"> </span><span class="rvts29">Left</span></p>
-<p class="rvps14"><span class="rvts25">R</span><span class="rvts21"> – </span><span class="rvts21">D-pad</span><span class="rvts21"> </span><span class="rvts29">Right</span></p>
-</td>
-<td style="width: 258px; height: 178px;"><p class="rvps5"><img alt="" style="padding : 1px;" src="lib/NES-controller.png"/></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">To start adding and changing the movie Input, click cells of those columns to the right from the column with frame numbers. If you click an empty cell, a symbol corresponding to the real joypad button will appear there.</span></p>
+<div class="rvps13">
+<table width="600" border="0" cellpadding="6" cellspacing="0" style="border-width: 0px; border-spacing: 0px; margin: 0px auto;">
+ <tr valign="middle">
+  <td width="586" height="26" style="padding: 6px;">
+   <p class="rvps9"><span class="rvts22">A</span><span class="rvts20"> – </span><span class="rvts26">A </span><span class="rvts20">button</span></p>
+   <p class="rvps9"><span class="rvts22">B</span><span class="rvts20"> – </span><span class="rvts26">B </span><span class="rvts20">button</span></p>
+   <p class="rvps9"><span class="rvts22">S</span><span class="rvts20"> – </span><span class="rvts26">Select </span><span class="rvts20">button</span></p>
+   <p class="rvps9"><span class="rvts22">T</span><span class="rvts20"> – </span><span class="rvts26">Start </span><span class="rvts20">button</span></p>
+   <p class="rvps9"><span class="rvts22">U</span><span class="rvts20"> – D-pad </span><span class="rvts26">Up</span></p>
+   <p class="rvps9"><span class="rvts22">D</span><span class="rvts20"> – </span><span class="rvts20">D-pad</span><span class="rvts20"> </span><span class="rvts26">Down</span></p>
+   <p class="rvps9"><span class="rvts22">L</span><span class="rvts20"> – </span><span class="rvts20">D-pad</span><span class="rvts20"> </span><span class="rvts26">Left</span></p>
+   <p class="rvps9"><span class="rvts22">R</span><span class="rvts20"> – </span><span class="rvts20">D-pad</span><span class="rvts20"> </span><span class="rvts26">Right</span></p>
+  </td>
+  <td width="258" height="190" style="padding: 6px;">
+   <p class="rvps3"><img alt="" style="padding : 1px;" src="lib/NES-controller.png"></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps10"><span class="rvts21">If you click on an occupied cell, it will become cleared, and the corresponding button will be considered released on that frame. There is no other button states except these two: either pressed or released.</span></p>
-<p class="rvps10"><span class="rvts21">At first it might not be very trivial to correlate these 8 symbols with plastic buttons of a real joypad, but try pressing the first player input keys (set in your emulator) while you are in Taseditor. As you tap the buttons, the corresponding letters will flash in the Piano Roll Header, and you can easily associate the columns with buttons.</span></p>
-<p class="rvps10"><span class="rvts21">When working in Taseditor, the most of time is spent on that very process of setting and removing buttons at different frames. This way you form the </span><span class="rvts34">sequence of button states</span><span class="rvts21">, which is then fed to the game and reflected by actions of the game character(s). For example, if you put the letter "A" to a chosen Piano Roll cell at the middle of Super Mario Bros gameplay, Mario will perform a low jump, because a short </span><span class="rvts29">A</span><span class="rvts21"> button press occurred in the movie. And if you set several "A" symbols in a row (vertically), Mario will do a high jump, because </span><span class="rvts29">A</span><span class="rvts21"> was held longer.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Every time you change the Input above the line with the Playback cursor, the light-blue cursor steps back (up in the Piano Roll) also clearing some part of the Greenzone. This happens because the change of Input leads to a change in the game events, so the game data memorized inside the Greenzone becomes irrelevant. Thus after you change Input you need to replay some frames of the movie again – either by unpausing the emulator, or by manually dragging the Playback cursor to the frame of interest – and you will see results of the latest Input changes on FCEUX screen (and also restore a part of the Greenzone).</span></p>
-<p class="rvps10"><span class="rvts21">Besides, you can hold the </span><span class="rvts25">right mouse button</span><span class="rvts21"> and roll the mouse wheel down to move the Playback cursor to the needed frame manually. Wheel-based navigation is the most responsive way to observe a little segment of the movie. You may use a single hand, and the mouse pointer may be anywhere, e.g. it may be left over the edited Input cells. Try this method, it's a very effective way to rewind back and forth. Just hold the right mouse button with one finger and roll the wheel with another finger while looking at the FCEUX window.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">In addition to single cell clicks, you can also change button states in many frames at once. For instance, if you want the </span><span class="rvts29">R</span><span class="rvts21"> button (</span><span class="rvts29">Right</span><span class="rvts21">) to be pressed for 20 straight frames, you don't have to click all 20 cells. You can just click on one of them, hold the left mouse button and move the mouse cursor up or down – it will leave a trail of symbols, thus you will draw a vertical row of buttonpresses. Similarly, you can quickly erase a row of symbols by clicking the first one and moving the eraser up or down. As you may notice, erasing starts when you click an occupied cell, and drawing starts when you click an empty cell.</span></p>
-<p class="rvps10"><span class="rvts21">Moreover, you can hold the </span><span class="rvts30">Shift</span><span class="rvts21"> key before clicking on the Input to spread the effect of the click across all frames between the point of click and the Selection cursor. For example, you can set "R" in the first frame, then scroll the Piano Roll to the end, hold </span><span class="rvts30">Shift</span><span class="rvts21"> and set "R" in the last frame – the </span><span class="rvts29">R</span><span class="rvts21"> button press will appear in all frames.</span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/piano-roll-header-l.png"/></p>
-<p class="rvps10"><span class="rvts21">There's one more way to mass set or mass remove buttonpresses. First, select several frames, for example, the 5th, the 10th and the 20th (to do it you have to hold </span><span class="rvts30">Ctrl</span><span class="rvts21"> while clicking on numbers </span><span class="rvts21">0000005, 0000010 and 0000020)</span><span class="rvts21">. Then click on the "L" letter in the Piano Roll Header. If the selected frames didn't have the </span><span class="rvts29">Left</span><span class="rvts21"> button symbols, they will get it. And if all of the frames had the </span><span class="rvts29">Left</span><span class="rvts21"> button already pressed, the click will clear it.</span></p>
-<p class="rvps10"><span class="rvts21">Later you will find a few other ways to edit the Input, but these were the main ones. At first it might look unnatural to draw buttonpresses with the mouse instead of simulating them using keyboard keys. But this discomfort feeling will disappear soon after you devote a few days to Taseditor.</span></p>
-<p class="rvps10"><a name="HotChanges"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When drawing the Input you've probably noticed that previously drawn letters have different color, and as you add new buttonpresses the old letters change their color from orange to violet and blue, eventually becoming standard black. This is one of experimental features of Taseditor, called "Hot Changes". It was invented to unobtrusively increase TASer's awareness about recent changes. Every time you modify the Input, the latest buttonpresses receive the hottest color (bright orange), and all the previous edits cool down by one level, becoming less bright.</span></p>
-<p class="rvps10"><span class="rvts21">Because of the coloring, even a cursory glance on the Piano Roll is enough to get the idea which buttonpresses were added just recently and which were set long ago. Also, you can see which of them were recently removed (they are replaced with a dash).</span></p>
-<p class="rvps10"><span class="rvts21">If you don't like this feature, you can disable it, but within this Guide we'll imply that you have the "Hot Changes" enabled.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The narrow column to the left from the column with frame numbers is not just for dragging the Playback cursor. It also displays various informational icons. The blue arrow pointer always points to the frame where the Playback cursor is now. The green arrow pointer shows where the Playback cursor was before the Input above it has changed. And the digit cards in this column indicate Bookmarks, they will be described later.</span></p>
-<p class="rvps10"><a name="markers"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The yellow marks on the numbers of some frames (frames 12 and 22 on the above picture) are called </span><span class="rvts25">Markers</span><span class="rvts21">. Besides the yellow color, they can be recognized by the wide font of the frame number.</span></p>
-<p class="rvps10"><span class="rvts21">Markers are meant to facilitate the movie navigation and improve TASer's self-organization. You decide how to use them on your own: whether to put them at the beginning of each level or to mark every jump, shot or any in-game event. Essentially, by setting Markers you logically break your movie down into sections, and then you can cross the movie not just by jumping from frame to frame, but from section to section. This allows you to interpret the movie on a higher level of abstraction.</span></p>
-<p class="rvps10"><span class="rvts21">Such structuring helps to keep a precise image of the entire movie in mind. That kind of an image exists in each TASer's mind, but usually it's rather fuzzy – we remember a rough sequence of the evens, but omit the details (because most of time they are insignificant). When TASer turns emulator off, the image starts to gradually become vague and forgotten. Thus at the next session one needs to re-watch his own movie from the beginning in order to refresh memories, figure key events, arrange priorities and, in general, mentally prepare for resumption of TASing. Sometimes this is needed even more often – depending on the complexity of the TAS. That's why it's recommended to consolidate that image by setting real Markers, not just in your mind but in actual movie.</span></p>
-<p class="rvps10"><span class="rvts21">A Marker can be set at any frame. Unlike the Input, Markers don't affect the game events. There are several ways to set Markers:</span></p>
-<p class="rvps10"><span class="rvts25">Example 1. </span><span class="rvts21">Double-click on a frame number. If there was no Marker at this frame, it will appear there. If the Marker already exists, you can drag it while the left button is still held after the double-click. This way you can move any Marker to a different frame or simply dump it outside the Piano Roll, thus removing it from the movie.</span></p>
-<p class="rvps10"><span class="rvts25">Example 2. </span><span class="rvts21">Select one or several frames by clicking the frame number(s), then click the "Frame#" label in the Piano Roll Header. If some of the selected frames didn't have Markers, they will all become marked. If all of them were already marked, all the Markers will be removed. This way you may mass set or mass remove Markers the same way as Input.</span></p>
-<p class="rvps10"><span class="rvts25">Example 3. </span><span class="rvts21">Select one or several frames in the Piano Roll, right-click on any of the selected frame numbers and choose "Set Markers" or "Remove Markers" in the context menu. This is the slowest way, so the other two are more preferred.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Any Marker operation may be undone (</span><span class="rvts30">Ctrl + Z</span><span class="rvts21">) anytime, just like any Input operation.</span></p>
-<p class="rvps10"><span class="rvts21">Markers are automatically numbered by the order they are located in the movie – top-down from first to last. In the upper left corner of TAS Editor window you can see the number of the Marker that is located just above the Playback cursor in the movie (light-blue "Marker </span><span class="rvts37">#</span><span class="rvts21">" label). This label both informs you and serves as a button for auto-scrolling. E.g. if you left the Playback cursor in one part of the movie and scrolled the Piano Roll far from that point, you can immediately return to the light-blue cursor anytime by clicking the "Marker" label (or tapping the </span><span class="rvts30">Shift</span><span class="rvts21"> key twice). You are definitely going to need this feature when editing large movies.</span></p>
-<p class="rvps10"><span class="rvts21">A similar button can be found in the lower left corner of Taseditor. The "Marker </span><span class="rvts37">#</span><span class="rvts21">" label of a dark blue color (the same color as the Selection cursor) displays the number of the Marker located just above the Selection. If you click this label, the Piano Roll will automatically jump to Selection. This button is going to be used as often as the upper one. Its keyboard alternative is tapping the </span><span class="rvts30">Ctrl</span><span class="rvts21"> key twice.</span></p>
-<p class="rvps10"><span class="rvts21">It should be easy to remember that the </span><span class="rvts30">Shift</span><span class="rvts21"> key is almost always used to control the Playback cursor, while the </span><span class="rvts30">Ctrl</span><span class="rvts21"> key is to control the Selection cursor.</span></p>
-<p class="rvps10"><span class="rvts21">If both Playback and Selection cursors are under the same Marker, the numbers in both corners will obviously be the same.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Markers can do more than just divide the movie into logical parts. They may also contain text records (comments and work notes). The Marker </span><span class="rvts25">Note</span><span class="rvts21"> is displayed right near its number. The upper edit field contains the Note of the Marker above the Playback Cursor, and the lower field shows the Note of the Marker above the Selection cursor.</span></p>
-<p class="rvps10"><span class="rvts21">By default, every new Marker contains an empty Note. When you create a new Marker by double-click, the lower edit field automatically becomes active, because the Selection cursor points to the just marked frame. So you may quickly type any text for the Note of that Marker and then resume your work with the movie. Text changes are saved automatically.</span></p>
-<p class="rvps10"><span class="rvts21">You can edit an old Marker Note in any of the following ways:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">Put the Selection cursor to that frame and click the lower edit field to activate it.</span></li>
-<li class="rvps10"><span class="rvts21">Simply double-click on the Marker, and the lower edit field will activate automatically.</span></li>
-<li class="rvps10"><span class="rvts21">Put the Playback cursor to that frame and click the upper edit field to activate it.</span></li>
+<p class="rvps7"><span class="rvts20">If you click on an occupied cell, it will become cleared, and the corresponding button will be considered released on that frame. There is no other button states except these two: either pressed or released.</span></p>
+<p class="rvps7"><span class="rvts20">At first it might not be very trivial to correlate these 8 symbols with plastic buttons of a real joypad, but try pressing the first player input keys (set in your emulator) while you are in Taseditor. As you tap the buttons, the corresponding letters will flash in the Piano Roll Header, and you can easily associate the columns with buttons.</span></p>
+<p class="rvps7"><span class="rvts20">When working in Taseditor, the most of time is spent on that very process of setting and removing buttons at different frames. This way you form the </span><span class="rvts31">sequence of button states</span><span class="rvts20">, which is then fed to the game and reflected by actions of the game character(s). For example, if you put the letter "A" to a chosen Piano Roll cell at the middle of Super Mario Bros gameplay, Mario will perform a low jump, because a short </span><span class="rvts26">A</span><span class="rvts20"> button press occurred in the movie. And if you set several "A" symbols in a row (vertically), Mario will do a high jump, because </span><span class="rvts26">A</span><span class="rvts20"> was held longer.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Every time you change the Input above the line with the Playback cursor, the light-blue cursor steps back (up in the Piano Roll) also clearing some part of the Greenzone. This happens because the change of Input leads to a change in the game events, so the game data memorized inside the Greenzone becomes irrelevant. Thus after you change Input you need to replay some frames of the movie again – either by unpausing the emulator, or by manually dragging the Playback cursor to the frame of interest – and you will see results of the latest Input changes on FCEUX screen (and also restore a part of the Greenzone).</span></p>
+<p class="rvps7"><span class="rvts20">Besides, you can hold the </span><span class="rvts22">right mouse button</span><span class="rvts20"> and roll the mouse wheel down to move the Playback cursor to the needed frame manually. Wheel-based navigation is the most responsive way to observe a little segment of the movie. You may use a single hand, and the mouse pointer may be anywhere, e.g. it may be left over the edited Input cells. Try this method, it's a very effective way to rewind back and forth. Just hold the right mouse button with one finger and roll the wheel with another finger while looking at the FCEUX window.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">In addition to single cell clicks, you can also change button states in many frames at once. For instance, if you want the </span><span class="rvts26">R</span><span class="rvts20"> button (</span><span class="rvts26">Right</span><span class="rvts20">) to be pressed for 20 straight frames, you don't have to click all 20 cells. You can just click on one of them, hold the left mouse button and move the mouse cursor up or down – it will leave a trail of symbols, thus you will draw a vertical row of buttonpresses. Similarly, you can quickly erase a row of symbols by clicking the first one and moving the eraser up or down. As you may notice, erasing starts when you click an occupied cell, and drawing starts when you click an empty cell.</span></p>
+<p class="rvps7"><span class="rvts20">Moreover, you can hold the </span><span class="rvts27">Shift</span><span class="rvts20"> key before clicking on the Input to spread the effect of the click across all frames between the point of click and the Selection cursor. For example, you can set "R" in the first frame, then scroll the Piano Roll to the end, hold </span><span class="rvts27">Shift</span><span class="rvts20"> and set "R" in the last frame – the </span><span class="rvts26">R</span><span class="rvts20"> button press will appear in all frames.</span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/piano-roll-header-l.png"></p>
+<p class="rvps7"><span class="rvts20">There's one more way to mass set or mass remove buttonpresses. First, select several frames, for example, the 5th, the 10th and the 20th (to do it you have to hold </span><span class="rvts27">Ctrl</span><span class="rvts20"> while clicking on numbers </span><span class="rvts20">0000005, 0000010 and 0000020)</span><span class="rvts20">. Then click on the "L" letter in the Piano Roll Header. If the selected frames didn't have the </span><span class="rvts26">Left</span><span class="rvts20"> button symbols, they will get it. And if all of the frames had the </span><span class="rvts26">Left</span><span class="rvts20"> button already pressed, the click will clear it.</span></p>
+<p class="rvps7"><span class="rvts20">Later you will find a few other ways to edit the Input, but these were the main ones. At first it might look unnatural to draw buttonpresses with the mouse instead of simulating them using keyboard keys. But this discomfort feeling will disappear soon after you devote a few days to Taseditor.</span></p>
+<p class="rvps7"><a name="HotChanges"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When drawing the Input you've probably noticed that previously drawn letters have different color, and as you add new buttonpresses the old letters change their color from orange to violet and blue, eventually becoming standard black. This is one of experimental features of Taseditor, called "Hot Changes". It was invented to unobtrusively increase TASer's awareness about recent changes. Every time you modify the Input, the latest buttonpresses receive the hottest color (bright orange), and all the previous edits cool down by one level, becoming less bright.</span></p>
+<p class="rvps7"><span class="rvts20">Because of the coloring, even a cursory glance on the Piano Roll is enough to get the idea which buttonpresses were added just recently and which were set long ago. Also, you can see which of them were recently removed (they are replaced with a dash).</span></p>
+<p class="rvps7"><span class="rvts20">If you don't like this feature, you can disable it, but within this Guide we'll imply that you have the "Hot Changes" enabled.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The narrow column to the left from the column with frame numbers is not just for dragging the Playback cursor. It also displays various informational icons. The blue arrow pointer always points to the frame where the Playback cursor is now. The green arrow pointer shows where the Playback cursor was before the Input above it has changed. And the digit cards in this column indicate Bookmarks, they will be described later.</span></p>
+<p class="rvps7"><a name="markers"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The yellow marks on the numbers of some frames (frames 12 and 22 on the above picture) are called </span><span class="rvts22">Markers</span><span class="rvts20">. Besides the yellow color, they can be recognized by the wide font of the frame number.</span></p>
+<p class="rvps7"><span class="rvts20">Markers are meant to facilitate the movie navigation and improve TASer's self-organization. You decide how to use them on your own: whether to put them at the beginning of each level or to mark every jump, shot or any in-game event. Essentially, by setting Markers you logically break your movie down into sections, and then you can cross the movie not just by jumping from frame to frame, but from section to section. This allows you to interpret the movie on a higher level of abstraction.</span></p>
+<p class="rvps7"><span class="rvts20">Such structuring helps to keep a precise image of the entire movie in mind. That kind of an image exists in each TASer's mind, but usually it's rather fuzzy – we remember a rough sequence of the evens, but omit the details (because most of time they are insignificant). When TASer turns emulator off, the image starts to gradually become vague and forgotten. Thus at the next session one needs to re-watch his own movie from the beginning in order to refresh memories, figure key events, arrange priorities and, in general, mentally prepare for resumption of TASing. Sometimes this is needed even more often – depending on the complexity of the TAS. That's why it's recommended to consolidate that image by setting real Markers, not just in your mind but in actual movie.</span></p>
+<p class="rvps7"><span class="rvts20">A Marker can be set at any frame. Unlike the Input, Markers don't affect the game events. There are several ways to set Markers:</span></p>
+<p class="rvps7"><span class="rvts22">Example 1. </span><span class="rvts20">Double-click on a frame number. If there was no Marker at this frame, it will appear there. If the Marker already exists, you can drag it while the left button is still held after the double-click. This way you can move any Marker to a different frame or simply dump it outside the Piano Roll, thus removing it from the movie.</span></p>
+<p class="rvps7"><span class="rvts22">Example 2. </span><span class="rvts20">Select one or several frames by clicking the frame number(s), then click the "Frame#" label in the Piano Roll Header. If some of the selected frames didn't have Markers, they will all become marked. If all of them were already marked, all the Markers will be removed. This way you may mass set or mass remove Markers the same way as Input.</span></p>
+<p class="rvps7"><span class="rvts22">Example 3. </span><span class="rvts20">Select one or several frames in the Piano Roll, right-click on any of the selected frame numbers and choose "Set Markers" or "Remove Markers" in the context menu. This is the slowest way, so the other two are more preferred.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Any Marker operation may be undone (</span><span class="rvts27">Ctrl + Z</span><span class="rvts20">) anytime, just like any Input operation.</span></p>
+<p class="rvps7"><span class="rvts20">Markers are automatically numbered by the order they are located in the movie – top-down from first to last. In the upper left corner of TAS Editor window you can see the number of the Marker that is located just above the Playback cursor in the movie (light-blue "Marker </span><span class="rvts33">#</span><span class="rvts20">" label). This label both informs you and serves as a button for auto-scrolling. E.g. if you left the Playback cursor in one part of the movie and scrolled the Piano Roll far from that point, you can immediately return to the light-blue cursor anytime by clicking the "Marker" label (or tapping the </span><span class="rvts27">Shift</span><span class="rvts20"> key twice). You are definitely going to need this feature when editing large movies.</span></p>
+<p class="rvps7"><span class="rvts20">A similar button can be found in the lower left corner of Taseditor. The "Marker </span><span class="rvts33">#</span><span class="rvts20">" label of a dark blue color (the same color as the Selection cursor) displays the number of the Marker located just above the Selection. If you click this label, the Piano Roll will automatically jump to Selection. This button is going to be used as often as the upper one. Its keyboard alternative is tapping the </span><span class="rvts27">Ctrl</span><span class="rvts20"> key twice.</span></p>
+<p class="rvps7"><span class="rvts20">It should be easy to remember that the </span><span class="rvts27">Shift</span><span class="rvts20"> key is almost always used to control the Playback cursor, while the </span><span class="rvts27">Ctrl</span><span class="rvts20"> key is to control the Selection cursor.</span></p>
+<p class="rvps7"><span class="rvts20">If both Playback and Selection cursors are under the same Marker, the numbers in both corners will obviously be the same.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Markers can do more than just divide the movie into logical parts. They may also contain text records (comments and work notes). The Marker </span><span class="rvts22">Note</span><span class="rvts20"> is displayed right near its number. The upper edit field contains the Note of the Marker above the Playback Cursor, and the lower field shows the Note of the Marker above the Selection cursor.</span></p>
+<p class="rvps7"><span class="rvts20">By default, every new Marker contains an empty Note. When you create a new Marker by double-click, the lower edit field automatically becomes active, because the Selection cursor points to the just marked frame. So you may quickly type any text for the Note of that Marker and then resume your work with the movie. Text changes are saved automatically.</span></p>
+<p class="rvps7"><span class="rvts20">You can edit an old Marker Note in any of the following ways:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">Put the Selection cursor to that frame and click the lower edit field to activate it.</span></li>
+ <li class="rvps7"><span class="rvts20">Simply double-click on the Marker, and the lower edit field will activate automatically.</span></li>
+ <li class="rvps7"><span class="rvts20">Put the Playback cursor to that frame and click the upper edit field to activate it.</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21">When typing a Note, press </span><span class="rvts25">Enter</span><span class="rvts21"> or just click any unrelated element of TAS Editor window to finish editing. If you changed your mind, press </span><span class="rvts25">Esc</span><span class="rvts21"> to cancel the editing. All the controls when editing Notes are listed in the </span><a class="rvts35" href="Controls.html#notes">Reference</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">It is recommended to enter Notes when creating Markers, so you won't forget why the Marker was set there. This won't take much time if you set Markers by double-clicks and type laconic messages at the same second.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps17"><a class="rvts23" href="Toolbox.html">Proceed to the Toolbox description</a></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When typing a Note, press </span><span class="rvts22">Enter</span><span class="rvts20"> or just click any unrelated element of TAS Editor window to finish editing. If you changed your mind, press </span><span class="rvts22">Esc</span><span class="rvts20"> to cancel the editing. All the controls when editing Notes are listed in the </span><a class="rvts32" href="Controls.html#notes">Reference</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">It is recommended to enter Notes when creating Markers, so you won't forget why the Marker was set there. This won't take much time if you set Markers by double-clicks and type laconic messages at the same second.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps11"><a class="rvts11" href="Toolbox.html">Proceed to the Toolbox description</a></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com">Full-featured Documentation generator</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Generate Kindle eBooks with ease</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

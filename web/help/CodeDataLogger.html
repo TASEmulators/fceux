@@ -1,198 +1,407 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Code/Data Logger</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("CodeDataLogger");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Code/Data Logger</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="Code/Data Logger">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Code/Data Logger">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Code/Data Logger" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Code/Data Logger</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Debug.html">Debug</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Debug.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="TraceLogger.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="GameGenieEncoderDecoder.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="CodeDataLogger"
+		  data-hnd-context="39"
+		  data-hnd-title="Code/Data Logger"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Debug.html">Debug</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Debug.html" title="Debug" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="TraceLogger.html" title="Trace Logger" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="GameGenieEncoderDecoder.html" title="Game Genie Encoder/Decoder" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Code/Data Logger</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts17">Code/Data Logger</span></p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Introduction</span></p>
-<p><br/></p>
-<p>The Code/Data Logger makes it much easier to reverse-engineer NES ROMs. The basic idea behind it is that a normal NES disassembler cannot distinguish between code (which is executed) and data (which is read). The Code/Data Logger keeps track of what is executed and what is read while the game is played, and then you can save this information into a .cdl file, which is essentially a <span class="rvts32">mask</span> that tells which bytes in the ROM are code and which are data. The file can be used in conjunction with a suitable disassembler to disassemble only the actual game code, resulting in a much cleaner source code where code and data are properly separated.</p>
-<p><br/></p>
-<p><span class="rvts16">Using the Code/Data Logger</span></p>
-<p><br/></p>
-<p>The Code/Data Logger keeps track of every byte in the ROM and records whether it's code (is executed) or data (is read).</p>
-<p>You can combine this logging feature with other tools to make them much more powerful:</p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li>combine with <a class="rvts18" href="Debugger.html">Debugger</a> to see which branches of the game code were executed and which weren't yet</li>
-<li>combine with <a class="rvts18" href="TraceLogger.html">Trace Logger</a> to let it log the code selectively</li>
-<li>combine with <a class="rvts18" href="PPUViewer.html">PPU Viewer</a> to let it only display graphics that was drawn on screen at least once</li>
-<li>combine with <a class="rvts18" href="HexEditor.html">Hex Editor</a> to enable smart coloring of bytes (so you can observe which bytes are used by the game and how/when they are used)</li>
-<li>combine with (an external) Tile Viewer to see which graphics was used during certain play session, and which was not</li>
-<li>combine with (an external) ROM Corruptor to make it only corrupt data, but not code</li>
-<li>combine with (an external) Disassembler to help it separate code from data</li>
+<p class="rvps2"><span class="rvts22">Code/Data Logger</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Introduction</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The Code/Data Logger makes it much easier to reverse-engineer NES ROMs. The basic idea behind it is that a normal NES disassembler cannot distinguish between code (which is executed) and data (which is read). The Code/Data Logger keeps track of what is executed and what is read while the game is played, and then you can save this information into a .cdl file, which is essentially a </span><span class="rvts45">mask</span><span class="rvts6"> that tells which bytes in the ROM are code and which are data. The file can be used in conjunction with a suitable disassembler to disassemble only the actual game code, resulting in a much cleaner source code where code and data are properly separated.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Using the Code/Data Logger</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The Code/Data Logger keeps track of every byte in the ROM and records whether it's code (is executed) or data (is read).</span></p>
+<p class="rvps2"><span class="rvts6">You can combine this logging feature with other tools to make them much more powerful:</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts88" href="Debugger.html">Debugger</a><span class="rvts6"> to see which branches of the game code were executed and which weren't yet</span></li>
+ <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts88" href="TraceLogger.html">Trace Logger</a><span class="rvts6"> to let it log the code selectively</span></li>
+ <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts88" href="PPUViewer.html">PPU Viewer</a><span class="rvts6"> to let it only display graphics that was drawn on screen at least once</span></li>
+ <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts88" href="HexEditor.html">Hex Editor</a><span class="rvts6"> to enable smart coloring of bytes (so you can observe which bytes are used by the game and how/when they are used)</span></li>
+ <li class="rvps2"><span class="rvts6">combine with (an external) Tile Viewer to see which graphics was used during certain play session, and which was not</span></li>
+ <li class="rvps2"><span class="rvts6">combine with (an external) ROM Corruptor to make it only corrupt data, but not code</span></li>
+ <li class="rvps2"><span class="rvts6">combine with (an external) Disassembler to help it separate code from data</span></li>
 </ul>
-<p><br/></p>
-<p>See, it is very useful for finding certain types of data or code branches. It also makes debugging work more visual, since you can always see which lines of the disassembled code were executed and which weren't.</p>
-<p><br/></p>
-<p>Furthermore, while the Code/Data Logger is running, the <a class="rvts18" href="HexEditor.html">Hex Editor</a> will color-code ROM bytes depending on whether they were logged as code or data:</p>
-<p><br/></p>
-<p>For PRG ROM:</p>
-<p><span class="rvts52">Dark-yellow</span> - the byte is code</p>
-<p><span class="rvts53">Blue</span> - the byte is data</p>
-<p><span class="rvts54">Cyan</span> - the byte is PCM audio data</p>
-<p><span class="rvts51">Green</span> - the byte is both code and data</p>
-<p><br/></p>
-<p>For CHR ROM:</p>
-<p><span class="rvts55">Yellow</span> - the byte was rendered</p>
-<p><span class="rvts56">Light-blue</span> - the byte was read programmatically</p>
-<p><span class="rvts57">Light-green</span> - the byte was both rendered and read programmatically</p>
-<p><br/></p>
-<p>The Code/Data Logger can also be used to generate a stripped NES ROM.</p>
-<p>"Stripped" NES ROM is a ROM in which everything that was not logged by the Code/Data Logger is removed. It can be useful in many ways, for example, you can view the ROM in an external Hex Editor or a Tile Viewer, and you'll see only the parts that were used while playing. Furthermore, you could use it to create a demo ROM by only playing through the parts you would like others to see.</p>
-<p><span class="rvts32">Example of such usage:</span></p>
-<p>1. Open the Code/Data Logger, and press Start to begin logging.</p>
-<p>2. Perform a soft and a hard reset while logging, in order to capture the ROM's startup sequence. If you don't do so, you can distribute a save-state file so they will start from within the game.</p>
-<p>3. If the game has Save-RAM (e.g. Zelda), you will need to capture the game's Save-RAM initialization routines; you can try to do so by deleting the game's *.sav file and then perform a soft and hard reset again while logging.</p>
-<p>4. Play through whatever levels you want present in the demo ROM. Be sure to perform every move, get every item, etc., so that the code and data necessary for those things are logged. If, for example, you fail to perform some special move, and then someone plays the stripped ROM and attempts to perform that move, the game may very well crash or glitch up, because there are zeros in the stripped ROM instead of the code responsible for handling this special move.</p>
-<p>5. Save the stripped NES ROM.</p>
-<p><br/></p>
-<p>Alternatively, you can save Unused Data (a ROM which is the opposite to the Stripped ROM). For example, you can play through the game, then save Unused Data ROM and watch it in a Tile Viewer to find unused graphics (possibly stumble upon secrets and easter eggs).</p>
-<p><br/></p>
-<p>Note: When you "Load" another .cdl file, it does not clear the current log; instead, it combines ("arithmetical OR") it with the information in the file. This can be useful if you're trying to obtain a complete log of certain game, as multiple people can play through the game and keep own code/data logs, and then the results can be combined into an all-encompassing log. But if you would like to actually clear the code/data log, press the "Reset Log" button.</p>
-<p><br/></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p><br/></p>
-<p>CDL files are just a mask of the ROM; that is, they are of the same size as the ROM, and each byte represents the corresponding byte of the ROM. The format of each byte is like so (in binary):</p>
-<p><br/></p>
-<p>For PRG ROM:</p>
-<div><table width="256" border="1" cellpadding="1" cellspacing="1" style="border-color: #000000; border-style: solid;">
-<tr valign="middle">
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">x</p>
-</td>
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">P</p>
-</td>
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">d</p>
-</td>
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">c</p>
-</td>
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">A</p>
-</td>
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">A</p>
-</td>
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">D</p>
-</td>
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">C</p>
-</td>
-</tr>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">See, it is very useful for finding certain types of data or code branches. It also makes debugging work more visual, since you can always see which lines of the disassembled code were executed and which weren't.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Furthermore, while the Code/Data Logger is running, the </span><a class="rvts88" href="HexEditor.html">Hex Editor</a><span class="rvts6"> will color-code ROM bytes depending on whether they were logged as code or data:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">For PRG ROM:</span></p>
+<p class="rvps2"><span class="rvts80">Dark-yellow</span><span class="rvts6"> - the byte is code</span></p>
+<p class="rvps2"><span class="rvts81">Blue</span><span class="rvts6"> - the byte is data</span></p>
+<p class="rvps2"><span class="rvts82">Cyan</span><span class="rvts6"> - the byte is PCM audio data</span></p>
+<p class="rvps2"><span class="rvts79">Green</span><span class="rvts6"> - the byte is both code and data</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">For CHR ROM:</span></p>
+<p class="rvps2"><span class="rvts83">Yellow</span><span class="rvts6"> - the byte was rendered</span></p>
+<p class="rvps2"><span class="rvts84">Light-blue</span><span class="rvts6"> - the byte was read programmatically</span></p>
+<p class="rvps2"><span class="rvts85">Light-green</span><span class="rvts6"> - the byte was both rendered and read programmatically</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The Code/Data Logger can also be used to generate a stripped NES ROM.</span></p>
+<p class="rvps2"><span class="rvts6">"Stripped" NES ROM is a ROM in which everything that was not logged by the Code/Data Logger is removed. It can be useful in many ways, for example, you can view the ROM in an external Hex Editor or a Tile Viewer, and you'll see only the parts that were used while playing. Furthermore, you could use it to create a demo ROM by only playing through the parts you would like others to see.</span></p>
+<p class="rvps2"><span class="rvts45">Example of such usage:</span></p>
+<p class="rvps2"><span class="rvts6">1. Open the Code/Data Logger, and press Start to begin logging.</span></p>
+<p class="rvps2"><span class="rvts6">2. Perform a soft and a hard reset while logging, in order to capture the ROM's startup sequence. If you don't do so, you can distribute a save-state file so they will start from within the game.</span></p>
+<p class="rvps2"><span class="rvts6">3. If the game has Save-RAM (e.g. Zelda), you will need to capture the game's Save-RAM initialization routines; you can try to do so by deleting the game's *.sav file and then perform a soft and hard reset again while logging.</span></p>
+<p class="rvps2"><span class="rvts6">4. Play through whatever levels you want present in the demo ROM. Be sure to perform every move, get every item, etc., so that the code and data necessary for those things are logged. If, for example, you fail to perform some special move, and then someone plays the stripped ROM and attempts to perform that move, the game may very well crash or glitch up, because there are zeros in the stripped ROM instead of the code responsible for handling this special move.</span></p>
+<p class="rvps2"><span class="rvts6">5. Save the stripped NES ROM.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Alternatively, you can save Unused Data (a ROM which is the opposite to the Stripped ROM). For example, you can play through the game, then save Unused Data ROM and watch it in a Tile Viewer to find unused graphics (possibly stumble upon secrets and easter eggs).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Note: When you "Load" another .cdl file, it does not clear the current log; instead, it combines ("arithmetical OR") it with the information in the file. This can be useful if you're trying to obtain a complete log of certain game, as multiple people can play through the game and keep own code/data logs, and then the results can be combined into an all-encompassing log. But if you would like to actually clear the code/data log, press the "Reset Log" button.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">CDL files are just a mask of the ROM; that is, they are of the same size as the ROM, and each byte represents the corresponding byte of the ROM. The format of each byte is like so (in binary):</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">For PRG ROM:</span></p>
+<div class="rvps2">
+<table width="256" border="1" cellpadding="1" cellspacing="1" style="border-color: #000000; border-style: solid; border-spacing: 1px;">
+ <tr valign="middle">
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">x</span></p>
+  </td>
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">P</span></p>
+  </td>
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">d</span></p>
+  </td>
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">c</span></p>
+  </td>
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">A</span></p>
+  </td>
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">A</span></p>
+  </td>
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">D</span></p>
+  </td>
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">C</span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;C = Whether it was accessed as code.</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;D = Whether it was accessed as data.</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;AA = Into which ROM bank it was mapped when last accessed:</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;00 = $8000-$9FFF &nbsp; &nbsp; &nbsp; &nbsp;01 = $A000-$BFFF</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;10 = $C000-$DFFF &nbsp; &nbsp; &nbsp; &nbsp;11 = $E000-$FFFF</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;c = Whether indirectly accessed as code.</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(e.g. as the destination of a JMP ($nnnn) instruction)</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;d = Whether indirectly accessed as data.</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(e.g. as the destination of an LDA ($nn),Y instruction)</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;P = If logged as PCM audio data.</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;x = unused.</p>
-<p><br/></p>
-<p>For CHR ROM:</p>
-<div><table width="256" border="1" cellpadding="1" cellspacing="1" style="border-color: #000000; border-style: solid;">
-<tr valign="middle">
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">x</p>
-</td>
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">x</p>
-</td>
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">x</p>
-</td>
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">x</p>
-</td>
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">x</p>
-</td>
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">x</p>
-</td>
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">R</p>
-</td>
-<td valign="middle" style="border-color: #000000; border-style: solid;"><p class="rvps1">D</p>
-</td>
-</tr>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">C = Whether it was accessed as code.</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">D = Whether it was accessed as data.</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">AA = Into which ROM bank it was mapped when last accessed:</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">00 = $8000-$9FFF</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">01 = $A000-$BFFF</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">10 = $C000-$DFFF</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">11 = $E000-$FFFF</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">c = Whether indirectly accessed as code.</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">(e.g. as the destination of a JMP ($nnnn) instruction)</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">d = Whether indirectly accessed as data.</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">(e.g. as the destination of an LDA ($nn),Y instruction)</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">P = If logged as PCM audio data.</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">x = unused.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">For CHR ROM:</span></p>
+<div class="rvps2">
+<table width="256" border="1" cellpadding="1" cellspacing="1" style="border-color: #000000; border-style: solid; border-spacing: 1px;">
+ <tr valign="middle">
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">x</span></p>
+  </td>
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">x</span></p>
+  </td>
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">x</span></p>
+  </td>
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">x</span></p>
+  </td>
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">x</span></p>
+  </td>
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">x</span></p>
+  </td>
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">R</span></p>
+  </td>
+  <td valign="middle" style="border-color: #000000; border-style: solid; padding: 1px;">
+   <p class="rvps3"><span class="rvts6">D</span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;D = Whether it was drawn on screen (rendered by PPU at runtime)</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;R = Whether it was read programmatically using port $2007</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(e.g. Argus_(J).nes checks if the bankswitching works by reading the same byte of CHR data before and after switching)</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;x = unused.</p>
-<p><br/></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p><br/></p>
-<p><br/></p>
-<p>CDL files make possible a number of things never done before. First, a PCM data ripper could be created that scans for data that has the 'P' bit set, in order to find/rip/play every PCM sample in a ROM. Also, it is possible for someone to make a more intelligent ROM corruptor that only corrupts data (by checking the 'D' bit). In any case, the Code/Data Logger opens many new possibilities for discovering useful things in games. Another interesting possibility would be to use the Code/Data Logger on an NSF file to create a stripped NSF. Such an NSF would contain nothing but the relevant subroutines and data required by each tune played; this would be helpful to NSF rippers by removing irrelevant information. Thus, an NSF ripper could create a stripped NSF by listening to each track while the Code/Data Logger operates on it, and then saving the stripped NSF. It should be noted that this capability, though tested and working on private builds, is detrimental to the process of fixing broken NSF files. For this reason, data logging is allowed for NSF files, but stripping NSF files of unused data is disabled.</p>
-<p><br/></p>
-<p>The Code/Data Logger becomes the most useful when you need to restore a full source code of a game using e.g. IDA or another disassembler. There you can write a custom IDC script that uses a CDL file and calls MakeCode()/MakeData() functions to help the disassembler distinguish code from data. Making full and working/reassemblable disassembly becomes really easy this way.</p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
+<p class="rvps2"><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">D = Whether it was drawn on screen (rendered by PPU at runtime)</span></p>
+<p class="rvps2"><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">R = Whether it was read programmatically using port $2007</span></p>
+<p class="rvps2"><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">(e.g. Argus_(J).nes checks if the bankswitching works by reading the same byte of CHR data before and after switching)</span></p>
+<p class="rvps2"><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">x = unused.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">CDL files make possible a number of things never done before. First, a PCM data ripper could be created that scans for data that has the 'P' bit set, in order to find/rip/play every PCM sample in a ROM. Also, it is possible for someone to make a more intelligent ROM corruptor that only corrupts data (by checking the 'D' bit). In any case, the Code/Data Logger opens many new possibilities for discovering useful things in games. Another interesting possibility would be to use the Code/Data Logger on an NSF file to create a stripped NSF. Such an NSF would contain nothing but the relevant subroutines and data required by each tune played; this would be helpful to NSF rippers by removing irrelevant information. Thus, an NSF ripper could create a stripped NSF by listening to each track while the Code/Data Logger operates on it, and then saving the stripped NSF. It should be noted that this capability, though tested and working on private builds, is detrimental to the process of fixing broken NSF files. For this reason, data logging is allowed for NSF files, but stripping NSF files of unused data is disabled.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The Code/Data Logger becomes the most useful when you need to restore a full source code of a game using e.g. IDA or another disassembler. There you can write a custom IDC script that uses a CDL file and calls MakeCode()/MakeData() functions to help the disassembler distinguish code from data. Making full and working/reassemblable disassembly becomes really easy this way.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
 <p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com">Free HTML Help documentation generator</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/create-epub-ebooks">Free EPub producer</a></p>
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

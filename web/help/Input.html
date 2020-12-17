@@ -1,123 +1,314 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Input</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("Input");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Input</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="Arkanoid Paddle,Auto-Hold,Disable left+right/up+down,Famicom Controllers,Input Configuration,Input Presets,Power Pad,Setting up controllers,Zapper">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Input">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Input" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Input</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Config.html">Config</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Config.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="GUI.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="NetworkPlay.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts17">Input Configuration</span></p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts27">Setting up controllers</span></p>
-<p><br/></p>
-<p>On the pull down menus, you can select the device you want to be emulated on input ports 1 and 2 (game pad, zapper, pad, paddle). Note: you can't change this setting while a movie is being played or recorded.</p>
-<p>If you check the box labeled "Attach four-score(implies four gamepads)", you won't be able to select any of these options, because the four-score allows to use 2 extra controllers.</p>
-<p>The device currently being emulated on each port is listed above the drop down list; loading certain games will override your settings, but only temporarily.</p>
-<p><br/></p>
-<p>To bind these controls to specific keys/joystick controls use the &nbsp;"configure" the device listed above each drop-down list.</p>
-<p><br/></p>
-<p><span class="rvts16">Zapper / Arkanoid Paddle</span></p>
-<p><br/></p>
-<p>Most Zapper NES games expect the Zapper to be plugged into port 2. and most VS Unisystem games expect the Zapper to be plugged into port 1.</p>
-<p><br/></p>
-<p>The left mouse button is the emulated trigger button for the Zapper. The right mouse button is also emulated as the trigger, but as long as you have the right mouse button held down, no color detection will take place, which is effectively like pulling the trigger while the Zapper is pointed away from the television screen. Note that you must hold the right button down for a short time to have the desired effect. </p>
-<p><br/></p>
-<p>The Arkanoid Paddle emulates the same way the zapper.</p>
-<p><br/></p>
-<p><span class="rvts16">Power Pad A / B</span></p>
-<p><br/></p>
-<p>Emulates the NES Power pad. &nbsp;The 12 pad buttons can be routed via the configure button. &nbsp;FCEUX allows up to 2 Power Pads to be emulated at once (Power Pad A and B).</p>
-<p><br/></p>
-<p><span class="rvts16">Famicom Controllers</span></p>
-<p><br/></p>
-<p>You can also select the input device to be emulated on the Famicom Expansion port. &nbsp;If you select a device for the Famicom Expansion Port, you should probably have emulated game pads on the emulated NES-style input ports. </p>
-<p><br/></p>
-<p>In addition to the traditional famicom controller, FCEUX can emulate the Famicom version of the Arkanoid controller, the "Space Shadow" gun, the Famicom 4-player adapter, the Family Keyboard, the HyperShot controller, the Mahjong controller, the Oeka Kids tablet, the Quiz King buzzers, the Family Trainer, and the Barcode World barcode reader.</p>
-<p><br/></p>
-<p><span class="rvts16">Replace Port 2 Start With Microphone</span></p>
-<p><br/></p>
-<p>Checking this box will replace the Start button used by controller 2 with the microphone option found on the famicom. Pressing the Microphone button is like blowing or yelling into it on the console equipment. The Port 2 controller used for the Famicom included a microphone and a volume control in place of the Start and Select buttons. This option isn't automatically detected, so it has to be manually enabled by the user. Movie files may also enable and use this feature. Both Famicom Cartridges and Famicom Disks have made use of this feature, such as both the cartridge and disk version of Zelda 1, Hikari Shinwa, and Takeshi no Chosenjo. Games other than those listed here use this feature.</p>
-<p><br/></p>
-<p><span class="rvts27">Input Presets</span></p>
-<p><span class="rvts27"><br/></span></p>
-<p>This feature allow you to set the current input configuration to one of three presets. &nbsp;This gives you the option to quickly change from one input configuration to another (such as toggling between 1 or 2 controllers and/or toggling from controller 2 being bound to controller 1 or having its own controls).</p>
-<p><br/></p>
-<p>To assign the current input configuration to a preset press the down arrow next to one of the presets. &nbsp;To assign the preset as the current input configuration press the up arrow or use the hotkey assigned to that specific preset. &nbsp;Preset hotkeys can be assigned in the <a class="rvts18" href="MapHotkeys.html">Map Hotkeys</a> menu.</p>
-<p><br/></p>
-<p><span class="rvts27">Disable left+right/up+down</span></p>
-<p><br/></p>
-<p>By default FCEUX allows you to press both the left and right controls at the same time (or up and down). &nbsp;To disable this feature uncheck the checkbox on the left. </p>
-<p><br/></p>
-<p><span class="rvts27">Auto-Hold</span></p>
-<p><br/></p>
-<p>Clicking the auto hold button will allow you to assign a hotkey to the auto-hold feature. &nbsp;</p>
-<p>Clicking the clear button will allow you to assign a hotkey to the clear auto-holds feature.</p>
-<p><br/></p>
-<p>To use this feature, close the input config window and return to the FCEUX main window. &nbsp;Hold down the auto-hold hotkey and press one of your controller inputs. &nbsp;This will add it as one of the auto-hold assignments. &nbsp;The game will keep auto-hold assigned buttons held be default. &nbsp;Pressing one of these keys will release the button for the duration that it is held.</p>
-<p><br/></p>
-<p>To turn off all auto-hold assignments press the clear auto-holds hotkey.</p>
-<p><span class="rvts10"><br/></span></p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/create-epub-ebooks">Generate EPub eBooks with ease</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="Input"
+		  data-hnd-context="42"
+		  data-hnd-title="Input"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Config.html">Config</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Config.html" title="Config" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="GUI.html" title="GUI" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="NetworkPlay.html" title="Network Play" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Input</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts22">Input Configuration</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Setting up controllers</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">On the pull down menus, you can select the device you want to be emulated on input ports 1 and 2 (game pad, zapper, pad, paddle). Note: you can't change this setting while a movie is being played or recorded.</span></p>
+<p class="rvps2"><span class="rvts6">If you check the box labeled "Attach four-score(implies four gamepads)", you won't be able to select any of these options, because the four-score allows to use 2 extra controllers.</span></p>
+<p class="rvps2"><span class="rvts6">The device currently being emulated on each port is listed above the drop down list; loading certain games will override your settings, but only temporarily.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">To bind these controls to specific keys/joystick controls use the &nbsp;"configure" the device listed above each drop-down list.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Zapper / Arkanoid Paddle</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Most Zapper NES games expect the Zapper to be plugged into port 2. and most VS Unisystem games expect the Zapper to be plugged into port 1.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The left mouse button is the emulated trigger button for the Zapper. The right mouse button is also emulated as the trigger, but as long as you have the right mouse button held down, no color detection will take place, which is effectively like pulling the trigger while the Zapper is pointed away from the television screen. Note that you must hold the right button down for a short time to have the desired effect.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The Arkanoid Paddle emulates the same way the zapper.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Power Pad A / B</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Emulates the NES Power pad. &nbsp;The 12 pad buttons can be routed via the configure button. &nbsp;FCEUX allows up to 2 Power Pads to be emulated at once (Power Pad A and B).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Famicom Controllers</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">You can also select the input device to be emulated on the Famicom Expansion port. &nbsp;If you select a device for the Famicom Expansion Port, you should probably have emulated game pads on the emulated NES-style input ports.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">In addition to the traditional famicom controller, FCEUX can emulate the Famicom version of the Arkanoid controller, the "Space Shadow" gun, the Famicom 4-player adapter, the Family Keyboard, the HyperShot controller, the Mahjong controller, the Oeka Kids tablet, the Quiz King buzzers, the Family Trainer, and the Barcode World barcode reader.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Replace Port 2 Start With Microphone</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Checking this box will replace the Start button used by controller 2 with the microphone option found on the famicom. Pressing the Microphone button is like blowing or yelling into it on the console equipment. The Port 2 controller used for the Famicom included a microphone and a volume control in place of the Start and Select buttons. This option isn't automatically detected, so it has to be manually enabled by the user. Movie files may also enable and use this feature. Both Famicom Cartridges and Famicom Disks have made use of this feature, such as both the cartridge and disk version of Zelda 1, Hikari Shinwa, and Takeshi no Chosenjo. Games other than those listed here use this feature.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Input Presets</span></p>
+<p class="rvps2"><span class="rvts37"><br/></span></p>
+<p class="rvps2"><span class="rvts6">This feature allow you to set the current input configuration to one of three presets. &nbsp;This gives you the option to quickly change from one input configuration to another (such as toggling between 1 or 2 controllers and/or toggling from controller 2 being bound to controller 1 or having its own controls).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">To assign the current input configuration to a preset press the down arrow next to one of the presets. &nbsp;To assign the preset as the current input configuration press the up arrow or use the hotkey assigned to that specific preset. &nbsp;Preset hotkeys can be assigned in the </span><a class="rvts58" href="MapHotkeys.html">Map Hotkeys</a><span class="rvts6"> menu.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Disable left+right/up+down</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">By default FCEUX allows you to press both the left and right controls at the same time (or up and down). &nbsp;To disable this feature uncheck the checkbox on the left.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Auto-Hold</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Clicking the auto hold button will allow you to assign a hotkey to the auto-hold feature. &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">Clicking the clear button will allow you to assign a hotkey to the clear auto-holds feature.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">To use this feature, close the input config window and return to the FCEUX main window. &nbsp;Hold down the auto-hold hotkey and press one of your controller inputs. &nbsp;This will add it as one of the auto-hold assignments. &nbsp;The game will keep auto-hold assigned buttons held be default. &nbsp;Pressing one of these keys will release the button for the duration that it is held.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">To turn off all auto-hold assignments press the clear auto-holds hotkey.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpauthoringsoftware.com">What is a Help Authoring tool?</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

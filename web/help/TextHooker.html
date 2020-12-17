@@ -1,167 +1,358 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Text Hooker</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("TextHooker");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Text Hooker</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Text Hooker">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Text Hooker" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Text Hooker</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Tools2.html">Tools</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Tools2.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="AutoFireConfigurations.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="Debug.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts17">Text Hooker</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">(written by Ugly Joe, author of the Text Hooker tool)</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts27">What is Text Hooker? </span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Here's a premise for you. Suppose you've pirated a bunch of Japanese NES roms and you load one of them up at random. Cool music. Cool title screen. You go to start a game, put in ???? at the name entry screen, and get to the actual game. Well, big surprise here, it's an RPG. You soon realize that you have no idea what people are saying, what shops are selling, or what your battle options are. It can be fun to trial-and-error for a while, but you're ultimately stuck in the first town. Time to load up a new ROM.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Well, being the aspiring Japanophile that I am, I have all kinds of translation tools and websites at my disposal. It's not impossible for me to figure out the kana for an item name, put it into a website somewhere, and figure out what it is. It's a slow process, but I can figure out short, simple strings of Japanese text. Sometimes, this is all I need to know to get by.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">This is why I made the Text Hooker. What it allows you to do is highlight text boxes in the game and copy the kana right to the clipboard. I no longer have to look up stuff, I can just copy from the emulator, paste into the website, and go from there. While developing it, I took it a bit further by adding a (shoddy) translator right into the app, and added features such as word substitutions (so you only have to look up the word once and then the app will know what it is as soon as you copy it). What you end up with is kind of like a translator's notebook. It keeps commonly used words in a dictionary and helps you get through a Japanese game without having too much knowledge of the Japanese language.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts27">What do I need to use to use it?</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts16">Some knowledge of the Japanese language</span></p>
-<p><span class="rvts10">I really can't say how much you need to know, but I suppose the more you know the better. I could be wrong, but I think you need to know at least something about the language before you can start copy/pasting translations.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts16">Know how to make a Japanese table file</span></p>
-<p><span class="rvts10">I'm not going to explain how to do this since there are adequate tutorials already out there. You'll need to be able to do this per game in order for the Text Hooker to work.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Japanese font support</span></p>
-<p><span class="rvts10">Okay, I have tested this thing on a Win98 installation with no Japanese font. It still works. However, I didn't test it for very long and I'm not sure how well translation websites are going to work without it. So, it might work without Japanese font support, but I'm not officially saying it does.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">A Japanese ROM</span></p>
-<p><span class="rvts10">Duh, you'll need a game to play. Find it yourself.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts27">How do I use the Text Hooker?</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">First of all, you need to make your table file. The text hooker doesn't use Thingy tables, but uses a modified Thingy table instead. So, make your standard Thingy table file, but save it with a .tht extension (instead of .tbl). What you need to add to the table are the dakuten and handakuten marks (tenten and maru). The byte for the dakuten mark needs to be set to tenten and the byte for the handakuten mark needs to be set to tenten. Like:</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">DC=tenten</span></p>
-<p><span class="rvts10">DD=maru</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">If you don't do this, the Text Hooker will fail miserabley when copying the text over from the game.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Once you have your table file ready, open up your rom in FCEUXDSP CE and open the text hooker window (Tools -&gt; Text Hooker). Click on the "Load Table" button and open up your .tht file. Now you can really get ready to work.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts16">Basic Usage</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">A warning</span></p>
-<p><span class="rvts10">All information is saved in the table file. You have to save your table manually using the Save Table button. If you close the Text Hooker window or load a different table, your changes since the last save will be lost. You will not be prompted to save changes. Please remember to save!</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Making Selections</span></p>
-<p><span class="rvts10">The Selection Window is where you select the text in the game. It is basically the same view as the actual emulator window, but it updates less often and does not show sprites (text is not drawn with sprites, so they are not needed). To make a selection, click on a deselected tile and drag your mouse. To remove a selection, click on a selected tile and drag your mouse. It works a lot like a pen tool and an eraser tool in standard paint programs.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Once you have made a selection, you can save it for later use. This comes in handy since most RPGs will display their text boxes and battle menus in the same place throughout the entire game. To save a selection, type a name for the selection into the New Selection Name field and press the Save Selection button. Note that this selection will not be saved to your table file until you press the Save Table button.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">You can also use the Clear Selection button to deselect all of the tiles in the selection window.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Please note that when you select text, you should not select the mostly blank rows that contains the dakuten and handakuten marks. You're essentially selecting every other row. Please see the UI image above for an example.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Translating Text</span></p>
-<p><span class="rvts10">Once you've made a selection, press the big Snap button to copy the text into the Hooked Text window. Only the tiles that are defined in your table file will be copied over. All other tiles will be ignored. Once you have some Japanese text in your Hooked Text window, you have a few options. You can press the Excite.co.jp button to receive a really bad translation (better than Babelfish, but still bad) in the Translated Text window, or you can select all or part of the text in the Hooked Text window and copy/paste it into another translation tool or website. If you're translating a block of text (as opposed to item names or menus), you should probably use the Trim button to clean up the excess whitespace.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Please bear in mind that, due to the limitations of the NES, Japenese games use very little kanji. This means you'll have to look up the kana representation of what would normally be a kanji. Most translation tools will give you a hard time about this.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">The word substitution feature can be used to process the selected text before it is sent to the Hooked Text window. By entering in Japanese-to-English definitions, you build up your word subs dictionary. If word subs are enabled and you press the snap button, the selected text is checked against your dictionary and any words that it finds are replaced by their definition.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">This is useful for a few reason. One, many words written in katakana don't translate too well. You can use this to stop the translators from mangling them. Two, character names are often the same thing as words. For example, if your character's name is ??? (Sakura), the translator will likely translate it to “cherry blossom”. If you define ??? as Sakura, then you won't have to worry about that. Three, you only really need to translate menus and items once. Once you have them figured out, add them to your dictionary. This way, you can just select your menu (perhaps from a saved selection?) and press Snap -- instant menu translation! Four, I'm not positive about this, but if you know that a string of kana is going to always mean a particular kanji, you could put the kana in the Japanese side and the kanji in the English side. This would aid translators since it wouldn't have to try and figure it out itself. Note that I haven't tested that last one since I don't know enough kanji to put it to the test.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Again, please remember that your dictionary will not be saved unless you use the Save Table button.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts16">Tweaking</span></p>
-<p><span class="rvts10">Here are some other helpful features.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Pause Button: this is used to pause and unpause the emulator.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Scanline: this is used to determine on what scanline the Selection Window will be updated. Some games will switch their font tiles in and out of the PPU. If this happens, you may need to change the scanline to a bigger number in order to see the tiles you're looking for. For example, this happens a lot in the game Metal Slader Glory.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Update every x frames: this is used to determine how often the Selection Window is updated. The smaller the number, the slower the emulator will go.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Selection Window checkbox: this is used to determine whether or not the selection window should be updated. If you're not going to be needing the Text Hooker for a while, you should probably uncheck this box while you play.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Word Substitution checkbox: this is used to determine whether or not word substitution will be used.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">(han)dakuten mark position checkbox: this is used to tell the text hooker where the dakuten and handakuten marks are located in relation to the kana. Most games will use Above, but some games that try to squeeze in as much text into a small area as possible will use Right.</span></p>
-<p><span class="rvts10">Features &gt; Text Hooker &gt; Reference</span></p>
-<p><span class="rvts10">Features &gt; Text Hooker &gt; Reference &gt; Text Hooker Table file reference</span></p>
-<p><span class="rvts10">I suppose this is the kind of thing that should be documented, so here it is. When I started to make this thing, I was just using Thingy tables. When I started to add other features, I knew I needed to save them somewhere. It seemed kind of dumb to me to store this information in separate files, so I decided I would append the other sections to the end of the table files. In the far off chance that there becomes some kind of archive for Text Hooker table files, I decided to use a different extension.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">A .tht file is comprised of three parts (and possibly more in the future). The first part resembles a Thingy table, since it's more or less that same thing. You have a hex byte value, and equals sign, and the corresponding character after the equals sign. The biggest difference from Thingy tables is that the tenten and maru marks must be defined using the words tenten and maru.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">The next section is the Selections storage. This section begins with a</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">[selections]</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">declaration. What follows are hashes for saved selections (name of selection, equals sign, hash). The hashes should be safe for viewing and saving in any text editor that is capable of viewing and saving Japanese text. These hashes are, admittedly, under tested. If anyone can find a situation in which the selection hashes are corrupted but the rest of the table file is not, please let me know.</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Up next is the Word Substitution Dictionary. This section begins with a</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">[words]</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">declaration. These lines are formatted in a Japanese=English manner. You should be able to have Japanese or English on either or both sides. It's nothing more than a list of values used during a search and replace function. </span></p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com">Easy EPub and documentation editor</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="TextHooker"
+		  data-hnd-context="60"
+		  data-hnd-title="Text Hooker"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Tools2.html">Tools</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Tools2.html" title="Tools" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="AutoFireConfigurations.html" title="Auto Fire Settings" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="Debug.html" title="Debug" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Text Hooker</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts22">Text Hooker</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">(written by Ugly Joe, author of the Text Hooker tool)</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts37">What is Text Hooker?&nbsp;</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Here's a premise for you. Suppose you've pirated a bunch of Japanese NES roms and you load one of them up at random. Cool music. Cool title screen. You go to start a game, put in ???? at the name entry screen, and get to the actual game. Well, big surprise here, it's an RPG. You soon realize that you have no idea what people are saying, what shops are selling, or what your battle options are. It can be fun to trial-and-error for a while, but you're ultimately stuck in the first town. Time to load up a new ROM.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Well, being the aspiring Japanophile that I am, I have all kinds of translation tools and websites at my disposal. It's not impossible for me to figure out the kana for an item name, put it into a website somewhere, and figure out what it is. It's a slow process, but I can figure out short, simple strings of Japanese text. Sometimes, this is all I need to know to get by.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">This is why I made the Text Hooker. What it allows you to do is highlight text boxes in the game and copy the kana right to the clipboard. I no longer have to look up stuff, I can just copy from the emulator, paste into the website, and go from there. While developing it, I took it a bit further by adding a (shoddy) translator right into the app, and added features such as word substitutions (so you only have to look up the word once and then the app will know what it is as soon as you copy it). What you end up with is kind of like a translator's notebook. It keeps commonly used words in a dictionary and helps you get through a Japanese game without having too much knowledge of the Japanese language.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts37">What do I need to use to use it?</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Some knowledge of the Japanese language</span></p>
+<p class="rvps2"><span class="rvts15">I really can't say how much you need to know, but I suppose the more you know the better. I could be wrong, but I think you need to know at least something about the language before you can start copy/pasting translations.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Know how to make a Japanese table file</span></p>
+<p class="rvps2"><span class="rvts15">I'm not going to explain how to do this since there are adequate tutorials already out there. You'll need to be able to do this per game in order for the Text Hooker to work.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Japanese font support</span></p>
+<p class="rvps2"><span class="rvts15">Okay, I have tested this thing on a Win98 installation with no Japanese font. It still works. However, I didn't test it for very long and I'm not sure how well translation websites are going to work without it. So, it might work without Japanese font support, but I'm not officially saying it does.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">A Japanese ROM</span></p>
+<p class="rvps2"><span class="rvts15">Duh, you'll need a game to play. Find it yourself.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts37">How do I use the Text Hooker?</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">First of all, you need to make your table file. The text hooker doesn't use Thingy tables, but uses a modified Thingy table instead. So, make your standard Thingy table file, but save it with a .tht extension (instead of .tbl). What you need to add to the table are the dakuten and handakuten marks (tenten and maru). The byte for the dakuten mark needs to be set to tenten and the byte for the handakuten mark needs to be set to tenten. Like:</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">DC=tenten</span></p>
+<p class="rvps2"><span class="rvts15">DD=maru</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">If you don't do this, the Text Hooker will fail miserabley when copying the text over from the game.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Once you have your table file ready, open up your rom in FCEUXDSP CE and open the text hooker window (Tools -&gt; Text Hooker). Click on the "Load Table" button and open up your .tht file. Now you can really get ready to work.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Basic Usage</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">A warning</span></p>
+<p class="rvps2"><span class="rvts15">All information is saved in the table file. You have to save your table manually using the Save Table button. If you close the Text Hooker window or load a different table, your changes since the last save will be lost. You will not be prompted to save changes. Please remember to save!</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Making Selections</span></p>
+<p class="rvps2"><span class="rvts15">The Selection Window is where you select the text in the game. It is basically the same view as the actual emulator window, but it updates less often and does not show sprites (text is not drawn with sprites, so they are not needed). To make a selection, click on a deselected tile and drag your mouse. To remove a selection, click on a selected tile and drag your mouse. It works a lot like a pen tool and an eraser tool in standard paint programs.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Once you have made a selection, you can save it for later use. This comes in handy since most RPGs will display their text boxes and battle menus in the same place throughout the entire game. To save a selection, type a name for the selection into the New Selection Name field and press the Save Selection button. Note that this selection will not be saved to your table file until you press the Save Table button.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">You can also use the Clear Selection button to deselect all of the tiles in the selection window.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Please note that when you select text, you should not select the mostly blank rows that contains the dakuten and handakuten marks. You're essentially selecting every other row. Please see the UI image above for an example.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Translating Text</span></p>
+<p class="rvps2"><span class="rvts15">Once you've made a selection, press the big Snap button to copy the text into the Hooked Text window. Only the tiles that are defined in your table file will be copied over. All other tiles will be ignored. Once you have some Japanese text in your Hooked Text window, you have a few options. You can press the Excite.co.jp button to receive a really bad translation (better than Babelfish, but still bad) in the Translated Text window, or you can select all or part of the text in the Hooked Text window and copy/paste it into another translation tool or website. If you're translating a block of text (as opposed to item names or menus), you should probably use the Trim button to clean up the excess whitespace.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Please bear in mind that, due to the limitations of the NES, Japenese games use very little kanji. This means you'll have to look up the kana representation of what would normally be a kanji. Most translation tools will give you a hard time about this.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">The word substitution feature can be used to process the selected text before it is sent to the Hooked Text window. By entering in Japanese-to-English definitions, you build up your word subs dictionary. If word subs are enabled and you press the snap button, the selected text is checked against your dictionary and any words that it finds are replaced by their definition.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">This is useful for a few reason. One, many words written in katakana don't translate too well. You can use this to stop the translators from mangling them. Two, character names are often the same thing as words. For example, if your character's name is ??? (Sakura), the translator will likely translate it to “cherry blossom”. If you define ??? as Sakura, then you won't have to worry about that. Three, you only really need to translate menus and items once. Once you have them figured out, add them to your dictionary. This way, you can just select your menu (perhaps from a saved selection?) and press Snap -- instant menu translation! Four, I'm not positive about this, but if you know that a string of kana is going to always mean a particular kanji, you could put the kana in the Japanese side and the kanji in the English side. This would aid translators since it wouldn't have to try and figure it out itself. Note that I haven't tested that last one since I don't know enough kanji to put it to the test.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Again, please remember that your dictionary will not be saved unless you use the Save Table button.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Tweaking</span></p>
+<p class="rvps2"><span class="rvts15">Here are some other helpful features.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Pause Button: this is used to pause and unpause the emulator.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Scanline: this is used to determine on what scanline the Selection Window will be updated. Some games will switch their font tiles in and out of the PPU. If this happens, you may need to change the scanline to a bigger number in order to see the tiles you're looking for. For example, this happens a lot in the game Metal Slader Glory.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Update every x frames: this is used to determine how often the Selection Window is updated. The smaller the number, the slower the emulator will go.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Selection Window checkbox: this is used to determine whether or not the selection window should be updated. If you're not going to be needing the Text Hooker for a while, you should probably uncheck this box while you play.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Word Substitution checkbox: this is used to determine whether or not word substitution will be used.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">(han)dakuten mark position checkbox: this is used to tell the text hooker where the dakuten and handakuten marks are located in relation to the kana. Most games will use Above, but some games that try to squeeze in as much text into a small area as possible will use Right.</span></p>
+<p class="rvps2"><span class="rvts15">Features &gt; Text Hooker &gt; Reference</span></p>
+<p class="rvps2"><span class="rvts15">Features &gt; Text Hooker &gt; Reference &gt; Text Hooker Table file reference</span></p>
+<p class="rvps2"><span class="rvts15">I suppose this is the kind of thing that should be documented, so here it is. When I started to make this thing, I was just using Thingy tables. When I started to add other features, I knew I needed to save them somewhere. It seemed kind of dumb to me to store this information in separate files, so I decided I would append the other sections to the end of the table files. In the far off chance that there becomes some kind of archive for Text Hooker table files, I decided to use a different extension.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">A .tht file is comprised of three parts (and possibly more in the future). The first part resembles a Thingy table, since it's more or less that same thing. You have a hex byte value, and equals sign, and the corresponding character after the equals sign. The biggest difference from Thingy tables is that the tenten and maru marks must be defined using the words tenten and maru.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">The next section is the Selections storage. This section begins with a</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">[selections]</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">declaration. What follows are hashes for saved selections (name of selection, equals sign, hash). The hashes should be safe for viewing and saving in any text editor that is capable of viewing and saving Japanese text. These hashes are, admittedly, under tested. If anyone can find a situation in which the selection hashes are corrupted but the rest of the table file is not, please let me know.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Up next is the Word Substitution Dictionary. This section begins with a</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">[words]</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">declaration. These lines are formatted in a Japanese=English manner. You should be able to have Japanese or English on either or both sides. It's nothing more than a list of values used during a search and replace function.&nbsp;</span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com">Free EPub and documentation generator</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

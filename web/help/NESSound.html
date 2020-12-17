@@ -1,622 +1,813 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>NES Sound</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("NESSound");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>NES Sound</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="NES Sound">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="NES Sound" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>NES Sound</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Technicalinformation.html">Technical Information</a> &rsaquo;&rsaquo; <a href="Sound.html">Sound</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Sound.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="NSFFormat.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="NESProcessor.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p>*******************************************</p>
-<p>*2A03 sound channel hardware documentation*</p>
-<p>*******************************************</p>
-<p>Brad Taylor (big_time_software@hotmail.com)</p>
-<p><br/></p>
-<p> 4th release: &nbsp; &nbsp; &nbsp; &nbsp;February 19th, 2K3</p>
-<p><br/></p>
-<p><br/></p>
-<p> All results were obtained by studying prior information available (from nestech 1.00, and postings on NESDev from miscellanious people), and through a series of experiments conducted by me. Results acquired by individuals prior to my reverse-engineering have been double checked, and final results have been confirmed. Credit is due to those individual(s) who contributed miscellanious information in regards to NES sound channel hardware. Such individuals are:</p>
-<p><br/></p>
-<p> Goroh</p>
-<p> Memblers</p>
-<p> FluBBa</p>
-<p> Izumi</p>
-<p> Chibi-Tech</p>
-<p> Quietust</p>
-<p> SnowBro</p>
-<p><br/></p>
-<p> Kentaro Ishihara (Ki) is responsible for posting (on the NESdev mailing list) differrences in the 2 square wave channels, including the operation of 2A03 hardware publically undocumented (until now) such as the frame IRQ counter, and it's ties with sound hardware. Goroh had originally discovered some of this information, and Ki confirmed it.</p>
-<p><br/></p>
-<p> A special thanks goes out to Matthew Conte, for his expertise on pseudo-random number generation (amoung other things), which allowed for the full reverse engineering of the NES's noise channel to take place. Without his help, I would still be trying to find a needle in a haystack, as far as the noise's method of pseudo-random number generation goes. Additionally, his previous findings / reverse engineering work on the NES's sound hardware really got the ball of NES sound emulation rolling. If it weren't for Matt's original work, this document wouldn't exist.</p>
-<p><br/></p>
-<p><br/></p>
-<p>****************</p>
-<p>* Introduction *</p>
-<p>****************</p>
-<p> The 2A03 (NES's integrated CPU) has 4 internal channels to it that have the ability to generate semi-analog sound, for musical playback purposes. These channels are 2 square wave channels, one triangle wave channel, and a noise generation channel. This document will go into full detail on every aspect of the operation and timing of the mentioned sound channels.</p>
-<p><br/></p>
-<p><br/></p>
-<p>*******************</p>
-<p>* Channel details *</p>
-<p>*******************</p>
-<p> Each channel has different characteristics to it that make up it's operation.</p>
-<p><br/></p>
-<p> The square channel(s) have the ability to generate a square wave frequency in the range of 54.6 Hz to 12.4 KHz. It's key features are frequency sweep abilities, and output duty cycle adjustment.</p>
-<p><br/></p>
-<p> The triangle wave channel has the ability to generate an output triangle wave with a resolution of 4-bits (16 steps), in the range of 27.3 Hz to 55.9 KHz. The key features this channel has is it's analog triangle wave output, and it's linear counter, which can be set to automatically disable the channel's sound after a certain period of time has gone by.</p>
-<p><br/></p>
-<p> The noise channel is used for producing random frequencys, which results in a "noisey" sounding output. Output frequencys can range anywhere from 29.3 Hz to 447 KHz. It's key feature is it's pseudo- random number generator, which generates the random output frequencys heard by the channel.</p>
-<p><br/></p>
-<p><br/></p>
-<p>*****************</p>
-<p>* Frame counter *</p>
-<p>*****************</p>
-<p> The 2A03 has an internal frame counter. The purpose of it is to generate the various low frequency signals (60, 120, 240 Hz, and 48, 96, 192 Hz) required to clock several of the sound hardware's counters. It also has the ability to generate IRQ's.</p>
-<p><br/></p>
-<p> The smallest unit of timing the frame counter operates around is 240Hz; all other frequencies are generated by multiples of this base frequency. A clock divider of 14915 (clocked at twice the CPU speed) is used to get 240Hz (this was the actual measured ratio).</p>
-<p><br/></p>
-<p><br/></p>
-<p>+---------------+</p>
-<p>|$4017 operation|</p>
-<p>+---------------+</p>
-<p> Writes to register $4017 control operation of both the clock divider, and the frame counter.</p>
-<p><br/></p>
-<p> - Any write to $4017 resets both the frame counter, and the clock divider. Sometimes, games will write to this register in order to synchronize the sound hardware's internal timing, to the sound routine's timing (usually tied into the NMI code). The frame IRQ is slightly longer than the PPU's, so you can see why games would desire this syncronization.</p>
-<p><br/></p>
-<p> - bit 7 of $4017 controls the frame counter's divide rate. Every time the counter cycles (reaches terminal count (0)), a frame IRQ will be generated, if enabled by clearing bit 6 of $4017. $4015.6 holds the status of the frame counter IRQ; it will be set if the frame counter is responsible for the interrupt.</p>
-<p><br/></p>
-<p>$4017.7 &nbsp;divider &nbsp;frame IRQ freq.</p>
-<p>------- &nbsp;------- &nbsp;---------------</p>
-<p>0 &nbsp; &nbsp; &nbsp; &nbsp;4 &nbsp; &nbsp; &nbsp; &nbsp;60</p>
-<p>1 &nbsp; &nbsp; &nbsp; &nbsp;5 &nbsp; &nbsp; &nbsp; &nbsp;48</p>
-<p><br/></p>
-<p> On 2A03 reset, both bits of $4017 (6 &amp; 7) will be cleared, enabling frame IRQ's off the hop. The reason why the existence of frame IRQ's are generally unknown is because the 6502's maskable interrupt is disabled on reset, and this blocks out the frame IRQ's. Most games don't use any IRQ-generating hardware in general, therefore they don't bother enabling maskable interrupts.</p>
-<p><br/></p>
-<p> Note that the IRQ line will be held down by the frame counter until it is acknowledged (by reading $4015). Before this, the 6502 will generate an IRQ *every* time interrupts are enabled (either by CLI or RTI), since the IRQ design on the 6502 is level-triggered, and not edge. If you've written a program that does not read $4015 in the IRQ handler, and you execute CLI, the processor will immediately go into a infinite IRQ call-return loop.</p>
-<p><br/></p>
-<p><br/></p>
-<p>+-----------------------+</p>
-<p>|Frame counter operation|</p>
-<p>+-----------------------+</p>
-<p> Depending on the status of $4017.7, the frame counter will follow 2 different count sequences. These sequences determine when sound hardware counters will be clocked. The sequences are initialized immediately following any write to $4017.</p>
-<p><br/></p>
-<p>$4017.7 &nbsp;sequence</p>
-<p>------- &nbsp;--------</p>
-<p>0 &nbsp; &nbsp; &nbsp; &nbsp;4, 0,1,2,3, 0,1,2,3,..., etc.</p>
-<p>1 &nbsp; &nbsp; &nbsp; &nbsp;0,1,2,3,4, 0,1,2,3,4,..., etc.</p>
-<p><br/></p>
-<p> During count sequences 0..3, the linear (triangle) and envelope decay (square &amp; noise) counters recieve a clock for each count. This means that both these counters are clocked once immediately after $4017.7 is written with a value of 1.</p>
-<p><br/></p>
-<p> Count sequences 1 &amp; 3 clock (update) the frequency sweep (square), and length (all channels) counters. Even though the length counter's smallest unit of time counting is a frame, it seems that it is actually being clocked twice per frame. That said, you can consider the length counters to contain an extra stage to divide this clock signal by 2.</p>
-<p><br/></p>
-<p> No aforementioned sound hardware counters are clocked on count sequence #4. You should now see how this causes the 96, and 192 Hz signals to be generated when $4017.7=1.</p>
-<p><br/></p>
-<p> The rest of the document will describe the operation of the sound channels using the $4017.7=0 frequencies (60, 120, and 240 Hz). For $4017.7=1 operation, replace those frequencies with 48, 96, and 192 Hz (respectively).</p>
-<p><br/></p>
-<p><br/></p>
-<p>************************</p>
-<p>* Sound hardware delay *</p>
-<p>************************</p>
-<p> After resetting the 2A03, the first time any sound channel(s) length counter contains a non-zero value (channel is enabled), there will be a 2048 CPU clock cycle delay before any of the sound hardware is clocked. After the 2K clock cycles go by, the NES sound hardware will be clocked normally. This phenomenon only occurs prior to a system reset, and only occurs during the first 2048 CPU clocks after the activation of any of the 4 basic sound channels.</p>
-<p><br/></p>
-<p> The information in regards to this delay is only provided to keep this document accurate with all information that is currently known about the 2A03's sound hardware. I haven't done much tests on the behaviour of this delay (mainly because I don't care, as I view it as a inconvenience anyway), so this information should be taken with a grain of salt.</p>
-<p><br/></p>
-<p><br/></p>
-<p>************************</p>
-<p>* Register Assignments *</p>
-<p>************************</p>
-<p> The sound hardware internal to the 2A03 has been designated these special memory addresses in the CPU's memory map.</p>
-<p><br/></p>
-<p>$4000-$4003 &nbsp; &nbsp; &nbsp; &nbsp;Square wave 1</p>
-<p>$4004-$4007 &nbsp; &nbsp; &nbsp; &nbsp;Square wave 2 (identical to the first, except for upward frequency sweeps (see "sweep unit" section))</p>
-<p>$4008-$400B &nbsp; &nbsp; &nbsp; &nbsp;Triangle</p>
-<p>$400C-$400F &nbsp; &nbsp; &nbsp; &nbsp;Noise</p>
-<p>$4015 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Channel enable / length/frame counter status</p>
-<p>$4017 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;frame counter control</p>
-<p><br/></p>
-<p> Note that $4015 (and $4017, but is unrelated to sound hardware) are the only R/W registers. All others are write only (attempt to read them will most likely return the last byte on the bus (usually 040H), due to heavy capacitance on the NES's data bus). Reading a "write only" register, will have no effect on the specific register, or channel.</p>
-<p><br/></p>
-<p> Every sound channel has 4 registers affiliated with it. The description of the register sets are as follows:</p>
-<p><br/></p>
-<p>+----------------+</p>
-<p>| Register set 1 |</p>
-<p>+----------------+</p>
-<p><br/></p>
-<p>$4000(sq1)/$4004(sq2)/$400C(noise) bits</p>
-<p>---------------------------------------</p>
-<p>0-3 &nbsp; &nbsp; &nbsp; &nbsp;volume / envelope decay rate</p>
-<p>4 &nbsp; &nbsp; &nbsp; &nbsp;envelope decay disable</p>
-<p>5 &nbsp; &nbsp; &nbsp; &nbsp;length counter clock disable / envelope decay looping enable</p>
-<p>6-7 &nbsp; &nbsp; &nbsp; &nbsp;duty cycle type (unused on noise channel)</p>
-<p><br/></p>
-<p>$4008(tri) bits</p>
-<p>---------------</p>
-<p>0-6 &nbsp; &nbsp; &nbsp; &nbsp;linear counter load register</p>
-<p>7 &nbsp; &nbsp; &nbsp; &nbsp;length counter clock disable / linear counter start</p>
-<p><br/></p>
-<p><br/></p>
-<p>+----------------+</p>
-<p>| Register set 2 |</p>
-<p>+----------------+</p>
-<p><br/></p>
-<p>$4001(sq1)/$4005(sq2) bits</p>
-<p>--------------------------</p>
-<p>0-2 &nbsp; &nbsp; &nbsp; &nbsp;right shift amount</p>
-<p>3 &nbsp; &nbsp; &nbsp; &nbsp;decrease / increase (1/0) wavelength</p>
-<p>4-6 &nbsp; &nbsp; &nbsp; &nbsp;sweep update rate</p>
-<p>7 &nbsp; &nbsp; &nbsp; &nbsp;sweep enable</p>
-<p><br/></p>
-<p>$4009(tri)/$400D(noise) bits</p>
-<p>----------------------------</p>
-<p>0-7 &nbsp; &nbsp; &nbsp; &nbsp;unused</p>
-<p><br/></p>
-<p><br/></p>
-<p>+----------------+</p>
-<p>| Register set 3 |</p>
-<p>+----------------+</p>
-<p><br/></p>
-<p>$4002(sq1)/$4006(sq2)/$400A(Tri) bits</p>
-<p>-------------------------------------</p>
-<p>0-7 &nbsp; &nbsp; &nbsp; &nbsp;8 LSB of wavelength</p>
-<p><br/></p>
-<p>$400E(noise) bits</p>
-<p>-----------------</p>
-<p>0-3 &nbsp; &nbsp; &nbsp; &nbsp;playback sample rate</p>
-<p>4-6 &nbsp; &nbsp; &nbsp; &nbsp;unused</p>
-<p>7 &nbsp; &nbsp; &nbsp; &nbsp;random number type generation</p>
-<p><br/></p>
-<p><br/></p>
-<p>+----------------+</p>
-<p>| Register set 4 |</p>
-<p>+----------------+</p>
-<p><br/></p>
-<p>$4003(sq1)/$4007(sq2)/$400B(tri)/$400F(noise) bits</p>
-<p>--------------------------------------------------</p>
-<p>0-2 &nbsp; &nbsp; &nbsp; &nbsp;3 MS bits of wavelength (unused on noise channel)</p>
-<p>3-7 &nbsp; &nbsp; &nbsp; &nbsp;length counter load register</p>
-<p><br/></p>
-<p><br/></p>
-<p>+--------------------------------+</p>
-<p>| length counter status register |</p>
-<p>+--------------------------------+</p>
-<p><br/></p>
-<p>$4015(read)</p>
-<p>-----------</p>
-<p>0 &nbsp; &nbsp; &nbsp; &nbsp;square wave channel 1</p>
-<p>1 &nbsp; &nbsp; &nbsp; &nbsp;square wave channel 2</p>
-<p>2 &nbsp; &nbsp; &nbsp; &nbsp;triangle wave channel</p>
-<p>3 &nbsp; &nbsp; &nbsp; &nbsp;noise channel</p>
-<p>4 &nbsp; &nbsp; &nbsp; &nbsp;DMC (see "DMC.TXT" for details)</p>
-<p>5-6 &nbsp; &nbsp; &nbsp; &nbsp;unused</p>
-<p>7 &nbsp; &nbsp; &nbsp; &nbsp;IRQ status of DMC (see "DMC.TXT" for details)</p>
-<p><br/></p>
-<p><br/></p>
-<p>+-------------------------+</p>
-<p>| channel enable register |</p>
-<p>+-------------------------+</p>
-<p><br/></p>
-<p>$4015(write)</p>
-<p>------------</p>
-<p>0 &nbsp; &nbsp; &nbsp; &nbsp;square wave channel 1</p>
-<p>1 &nbsp; &nbsp; &nbsp; &nbsp;square wave channel 2</p>
-<p>2 &nbsp; &nbsp; &nbsp; &nbsp;triangle wave channel</p>
-<p>3 &nbsp; &nbsp; &nbsp; &nbsp;noise channel</p>
-<p>4 &nbsp; &nbsp; &nbsp; &nbsp;DMC channel (see "DMC.TXT" for details)</p>
-<p>5-7 &nbsp; &nbsp; &nbsp; &nbsp;unused</p>
-<p><br/></p>
-<p><br/></p>
-<p>************************</p>
-<p>* Channel architecture *</p>
-<p>************************</p>
-<p> This section will describe the internal components making up each individual channel. Each component will then be described in full detail.</p>
-<p><br/></p>
-<p><span class="rvts40">Device</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> Triangle Noise &nbsp;Square</span></p>
-<p><span class="rvts40">------</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> -------- ------ ------</span></p>
-<p><span class="rvts40">triangle step generator</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40">X</span></p>
-<p><span class="rvts40">linear counter</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40">X</span></p>
-<p><span class="rvts40">programmable timer</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40">X &nbsp; &nbsp; &nbsp;X &nbsp; &nbsp; &nbsp;X</span></p>
-<p><span class="rvts40">length counter</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40">X &nbsp; &nbsp; &nbsp;X &nbsp; &nbsp; &nbsp;X</span></p>
-<p><span class="rvts40">4-bit DAC</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40">X &nbsp; &nbsp; &nbsp;X &nbsp; &nbsp; &nbsp;X</span></p>
-<p><span class="rvts40">volume/envelope decay unit</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> X &nbsp; &nbsp; &nbsp;X</span></p>
-<p><span class="rvts40">sweep unit</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp;X</span></p>
-<p><span class="rvts40">duty cycle generator</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp;X</span></p>
-<p><span class="rvts40">wavelength converter</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> X</span></p>
-<p><span class="rvts40">random number generator</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts40"> X</span></p>
-<p><br/></p>
-<p><br/></p>
-<p>+-------------------------+</p>
-<p>| Triangle step generator |</p>
-<p>+-------------------------+</p>
-<p> This is a 5-bit, single direction counter, and it is only used in the triangle channel. Each of the 4 LSB outputs of the counter lead to one input on a corresponding mutually exclusive XNOR gate. The 4 XNOR gates have been strobed together, which results in the inverted representation of the 4 LSB of the counter appearing on the outputs of the gates when the strobe is 0, and a non-inverting action taking place when the strobe is 1. The strobe is naturally connected to the MSB of the counter, which effectively produces on the output of the XNOR gates a count sequence which reflects the scenario of a near- ideal triangle step generator (D,E,F,F,E,D,...,2,1,0,0,1,2,...). At this point, the outputs of the XNOR gates will be fed into the input of a 4-bit DAC.</p>
-<p><br/></p>
-<p> This 5-bit counter will be halted whenever the Triangle channel's length or linear counter contains a count of 0. This results in a "latching" behaviour; the counter will NOT be reset to any definite state.</p>
-<p><br/></p>
-<p> On system reset, this counter is loaded with 0.</p>
-<p><br/></p>
-<p> The counter's clock input is connected directly to the terminal count output pin of the 11-bit programmable timer in the triangle channel. As a result of the 5-bit triangle step generator, the output triangle wave frequency will be 32 times less than the frequency of the triangle channel's programmable timer is set to generate.</p>
-<p><br/></p>
-<p><br/></p>
-<p>+----------------+</p>
-<p>| Linear counter |</p>
-<p>+----------------+</p>
-<p> The linear counter is only found in the triangle channel. It is a 7-bit presettable down counter, with a decoded output condition of 0 available (not exactly the same as terminal count). Here's the bit assignments:</p>
-<p><br/></p>
-<p>$4008 bits</p>
-<p>----------</p>
-<p>0-6 &nbsp; &nbsp; &nbsp; &nbsp;bits 0-6 of the linear counter load register (NOT the linear counter itself)</p>
-<p>7 &nbsp; &nbsp; &nbsp; &nbsp;linear counter start</p>
-<p><br/></p>
-<p> The counter is clocked at 240 Hz (1/4 framerate), and the calculated length in frames is 0.25*N, where N is the 7-bit loaded value. The counter is always being clocked, except when 0 appears on the output of the counter. At this point, the linear counter &amp; triangle step counter clocks signals are disabled, which results in both counters latching their current state (the linear counter will stay at 0, and the triangle step counter will stop, and the channel will be silenced due to this).</p>
-<p><br/></p>
-<p> The linear counter has 2 modes: load, and count. When the linear counter is in load mode, it essentially becomes transparent (i.e. whatever value is currently in, or being written to $4008, will appear on the output of the counter). Because of this, no count action can occur in load mode. When the mode changes from load to count, the counter will now latch the value currently in it, and start counting down from there. In the count mode, the current value of $4008 is ignored by the counter (but still retained in $4008). Described below is how the mode of the linear counter is set:</p>
-<p><br/></p>
-<p><br/></p>
-<p>Writes to $400B</p>
-<p>---------------</p>
-<p>cur &nbsp; &nbsp; &nbsp; &nbsp;mode</p>
-<p>--- &nbsp; &nbsp; &nbsp; &nbsp;----</p>
-<p>1 &nbsp; &nbsp; &nbsp; &nbsp;load</p>
-<p>0 &nbsp; &nbsp; &nbsp; &nbsp;load (on next linear counter clock), count</p>
-<p><br/></p>
-<p> Cur is the current state of the MSB of $4008.</p>
-<p><br/></p>
-<p><br/></p>
-<p>Writes to $4008</p>
-<p>---------------</p>
-<p>old &nbsp; &nbsp; &nbsp; &nbsp;new &nbsp; &nbsp; &nbsp; &nbsp;mode</p>
-<p>--- &nbsp; &nbsp; &nbsp; &nbsp;--- &nbsp; &nbsp; &nbsp; &nbsp;----</p>
-<p>0 &nbsp; &nbsp; &nbsp; &nbsp;X &nbsp; &nbsp; &nbsp; &nbsp;count</p>
-<p>1 &nbsp; &nbsp; &nbsp; &nbsp;0 &nbsp; &nbsp; &nbsp; &nbsp;no change (during the CPU write cycle), count</p>
-<p>1 &nbsp; &nbsp; &nbsp; &nbsp;1 &nbsp; &nbsp; &nbsp; &nbsp;no change</p>
-<p><br/></p>
-<p> Old and new represent the state(s) of the MSB of $4008. Old is the value being replaced in the MSB of $4008 on the write, and new is the value replacing the old one.</p>
-<p><br/></p>
-<p> "no change" indicates that the mode of the linear counter will not change from the last.</p>
-<p><br/></p>
-<p> Note that writes to $400B when $4008.7=0 only loads the linear counter with the value in $4008 on the next *linear* counter clock (and NOT at the end of the CPU write cycle). This is a correction from older versions of this doc.</p>
-<p><br/></p>
-<p><br/></p>
-<p>+--------------------+</p>
-<p>| Programmable timer |</p>
-<p>+--------------------+</p>
-<p> The programmable timer is a 11-bit presettable down counter, and is found in the square, triangle, and noise channel(s). The bit assignments are as follows:</p>
-<p><br/></p>
-<p>$4002(sq1)/$4006(sq2)/$400A(Tri) bits</p>
-<p>-------------------------------------</p>
-<p>0-7 &nbsp; &nbsp; &nbsp; &nbsp;represent bits 0-7 of the 11-bit wavelength</p>
-<p><br/></p>
-<p>$4003(sq1)/$4007(sq2)/$400B(Tri) bits</p>
-<p>-------------------------------------</p>
-<p>0-2 &nbsp; &nbsp; &nbsp; &nbsp;represent bits 8-A of the 11-bit wavelength</p>
-<p><br/></p>
-<p> Note that on the noise channel, the 11 bits are not available directly. See the wavelength converter section, for more details.</p>
-<p><br/></p>
-<p> The counter has automatic syncronous reloading upon terminal count (count=0), therefore the counter will count for N+1 (N is the 11-bit loaded value) clock cycles before arriving at terminal count, and reloading. This counter will typically be clocked at the 2A03's internal 6502 speed (1.79 MHz), and produces an output frequency of 1.79 MHz/(N+1). The terminal count's output spike length is typically no longer than half a CPU clock. The TC signal will then be fed to the appropriate device for the particular sound channel (for square, this terminal count spike will lead to the duty cycle generator. For the triangle, the spike will be fed to the triangle step generator. For noise, this signal will go to the random number generator unit).</p>
-<p><br/></p>
-<p><br/></p>
-<p>+----------------+</p>
-<p>| Length counter |</p>
-<p>+----------------+</p>
-<p> The length counter is found in all sound channels. It is essentially a 7-bit down counter, and is conditionally clocked at a frequency of 60 Hz.</p>
-<p><br/></p>
-<p> When the length counter arrives at a count of 0, the counter will be stopped (stay on 0), and the appropriate channel will be silenced.</p>
-<p><br/></p>
-<p> The length counter clock disable bit, found in all the channels, can also be used to halt the count sequence of the length counter for the appropriate channel, by writing a 1 out to it. A 0 condition will permit counting (unless of course, the counter's current count = 0). Location(s) of the length counter clock disable bit:</p>
-<p><br/></p>
-<p>$4000(sq1)/$4004(sq2)/$400C(noise) bits</p>
-<p>---------------------------------------</p>
-<p>5 &nbsp; &nbsp; &nbsp; &nbsp;length counter clock disable</p>
-<p><br/></p>
-<p>$4008(tri) bits</p>
-<p>---------------</p>
-<p>7 &nbsp; &nbsp; &nbsp; &nbsp;length counter clock disable</p>
-<p><br/></p>
-<p> To load the length counter with a specified count, a write must be made out to the length register. Location(s) of the length register:</p>
-<p><br/></p>
-<p>$4003(sq1)/$4007(sq2)/$400B(tri)/$400F(noise) bits</p>
-<p>--------------------------------------------------</p>
-<p>3-7 &nbsp; &nbsp; &nbsp; &nbsp;length</p>
-<p><br/></p>
-<p> The 5-bit length value written, determines what 7-bit value the length counter will start counting from. A conversion table here will show how the values are translated.</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;+-----------------------+</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;| &nbsp; &nbsp; &nbsp; &nbsp;bit3=0 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;+-------+---------------+</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;| &nbsp; &nbsp; &nbsp; &nbsp;|frames &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|bits &nbsp; &nbsp; &nbsp; &nbsp;+-------+-------+</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|4-6 &nbsp; &nbsp; &nbsp; &nbsp;|bit7=0 &nbsp; &nbsp; &nbsp; &nbsp;|bit7=1 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;+-------+-------+-------+</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|0 &nbsp; &nbsp; &nbsp; &nbsp;|05 &nbsp; &nbsp; &nbsp; &nbsp;|06 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|1 &nbsp; &nbsp; &nbsp; &nbsp;|0A &nbsp; &nbsp; &nbsp; &nbsp;|0C &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|2 &nbsp; &nbsp; &nbsp; &nbsp;|14 &nbsp; &nbsp; &nbsp; &nbsp;|18 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|3 &nbsp; &nbsp; &nbsp; &nbsp;|28 &nbsp; &nbsp; &nbsp; &nbsp;|30 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|4 &nbsp; &nbsp; &nbsp; &nbsp;|50 &nbsp; &nbsp; &nbsp; &nbsp;|60 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|5 &nbsp; &nbsp; &nbsp; &nbsp;|1E &nbsp; &nbsp; &nbsp; &nbsp;|24 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|6 &nbsp; &nbsp; &nbsp; &nbsp;|07 &nbsp; &nbsp; &nbsp; &nbsp;|08 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|7 &nbsp; &nbsp; &nbsp; &nbsp;|0D &nbsp; &nbsp; &nbsp; &nbsp;|10 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;+-------+-------+-------+</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;+---------------+</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;| &nbsp; &nbsp; &nbsp; &nbsp;bit3=1 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;+-------+-------+</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|bits &nbsp; &nbsp; &nbsp; &nbsp;| &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|4-7 &nbsp; &nbsp; &nbsp; &nbsp;|frames &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;+-------+-------+</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|0 &nbsp; &nbsp; &nbsp; &nbsp;|7F &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|1 &nbsp; &nbsp; &nbsp; &nbsp;|01 &nbsp; &nbsp; &nbsp; &nbsp;| &nbsp; &nbsp; &nbsp; &nbsp;</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|2 &nbsp; &nbsp; &nbsp; &nbsp;|02 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|3 &nbsp; &nbsp; &nbsp; &nbsp;|03 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|4 &nbsp; &nbsp; &nbsp; &nbsp;|04 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|5 &nbsp; &nbsp; &nbsp; &nbsp;|05 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|6 &nbsp; &nbsp; &nbsp; &nbsp;|06 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|7 &nbsp; &nbsp; &nbsp; &nbsp;|07 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|8 &nbsp; &nbsp; &nbsp; &nbsp;|08 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|9 &nbsp; &nbsp; &nbsp; &nbsp;|09 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|A &nbsp; &nbsp; &nbsp; &nbsp;|0A &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|B &nbsp; &nbsp; &nbsp; &nbsp;|0B &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|C &nbsp; &nbsp; &nbsp; &nbsp;|0C &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|D &nbsp; &nbsp; &nbsp; &nbsp;|0D &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|E &nbsp; &nbsp; &nbsp; &nbsp;|0E &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;|F &nbsp; &nbsp; &nbsp; &nbsp;|0F &nbsp; &nbsp; &nbsp; &nbsp;|</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;+-------+-------+</p>
-<p><br/></p>
-<p> The length counter's real-time status for each channel can be attained. A 0 is returned for a zero count status in the length counter (channel's sound is disabled), and 1 for a non-zero status. Here's the bit description of the length counter status register:</p>
-<p><br/></p>
-<p>$4015(read)</p>
-<p>-----------</p>
-<p>0 &nbsp; &nbsp; &nbsp; &nbsp;length counter status of square wave channel 1</p>
-<p>1 &nbsp; &nbsp; &nbsp; &nbsp;length counter status of square wave channel 2</p>
-<p>2 &nbsp; &nbsp; &nbsp; &nbsp;length counter status of triangle wave channel</p>
-<p>3 &nbsp; &nbsp; &nbsp; &nbsp;length counter status of noise channel</p>
-<p>4 &nbsp; &nbsp; &nbsp; &nbsp;length counter status of DMC (see "DMC.TXT" for details)</p>
-<p>5 &nbsp; &nbsp; &nbsp; &nbsp;unknown</p>
-<p>6 &nbsp; &nbsp; &nbsp; &nbsp;frame IRQ status</p>
-<p>7 &nbsp; &nbsp; &nbsp; &nbsp;IRQ status of DMC (see "DMC.TXT" for details)</p>
-<p><br/></p>
-<p> Writing a 0 to the channel enable register will force the length counters to always contain a count equal to 0, which renders that specific channel disabled (as if it doesn't exist). Writing a 1 to the channel enable register disables the forced length counter value of 0, but will not change the count itself (it will still be whatever it was prior to the writing of 1).</p>
-<p><br/></p>
-<p> Bit description of the channel enable register:</p>
-<p><br/></p>
-<p>$4015(write)</p>
-<p>------------</p>
-<p>0 &nbsp; &nbsp; &nbsp; &nbsp;enable square wave channel 1</p>
-<p>1 &nbsp; &nbsp; &nbsp; &nbsp;enable square wave channel 2</p>
-<p>2 &nbsp; &nbsp; &nbsp; &nbsp;enable triangle wave channel</p>
-<p>3 &nbsp; &nbsp; &nbsp; &nbsp;enable noise channel</p>
-<p>4 &nbsp; &nbsp; &nbsp; &nbsp;enable DMC channel (see "DMC.TXT" for details)</p>
-<p>5-7 &nbsp; &nbsp; &nbsp; &nbsp;unknown</p>
-<p><br/></p>
-<p> Note that all 5 used bits in this register will be set to 0 upon system reset.</p>
-<p><br/></p>
-<p><br/></p>
-<p>+-----------+</p>
-<p>| 4-bit DAC |</p>
-<p>+-----------+</p>
-<p> This is just a standard 4-bit DAC with 16 steps of output voltage resolution, and is used by all 4 sound channels. On the 2A03, square wave 1 &amp; 2 are mixed together, and are available via pin 1. Triangle &amp; noise are available on pin 2.</p>
-<p><br/></p>
-<p> These analog outputs require a negative current source, to attain linear symmetry on the various output voltage levels generated by the channel(s) (moreover, to get the sound to be audible). Instead of current sources, the NES uses external 100 ohm pull-down resistors. This results in the output waveforms having some linear asymmetry (i.e., as the desired output voltage increases on a linear scale, the actual outputted voltage increases less and less each step).</p>
-<p><br/></p>
-<p> The side effect of this is that the DMC's 7-bit DAC port ($4011) is able to indirectly control the volume (somewhat) of both triangle &amp; noise channels. While I have not measured the voltage asymmetery, others on the NESdev messageboards have posted their findings. The conclusion is that when $4011 is 0, triangle &amp; noise volume outputs are at maximum. When $4011 = 7F, the triangle &amp; noise channel outputs operate at only 57% total volume.</p>
-<p><br/></p>
-<p> The odd thing is that a few games actually take advantage of this "volume" feature, and write values to $4011 in order to regulate the amplitude of the triangle wave channel's output.</p>
-<p><br/></p>
-<p><br/></p>
-<p>+------------------------------+</p>
-<p>| Volume / envelope decay unit |</p>
-<p>+------------------------------+</p>
-<p> The volume / envelope decay hardware is found only in the square wave and noise channels.</p>
-<p><br/></p>
-<p>$4000(sq1)/$4004(sq2)/$400C(noise)</p>
-<p>----------------------------------</p>
-<p>0-3 &nbsp; &nbsp; &nbsp; &nbsp;volume / envelope decay rate</p>
-<p>4 &nbsp; &nbsp; &nbsp; &nbsp;envelope decay disable</p>
-<p>5 &nbsp; &nbsp; &nbsp; &nbsp;envelope decay looping enable</p>
-<p><br/></p>
-<p> When the envelope decay disable bit (bit 4) is set (1), the current volume value (bits 0-3) is sent directly to the channel's DAC. However, depending on certain conditions, this 4-bit volume value will be ignored, and a value of 0 will be sent to the DAC instead. This means that while the channel is enabled (producing sound), the output of the channel (what you'll hear from the DAC) will either be the 4-bit volume value, or 0. This also means that a 4-bit volume value of 0 will result in no audible sound. These conditions are as follows:</p>
-<p><br/></p>
-<p> - When hardware in the channel wants to disable it's sound output (like the length counter, or sweep unit (square channels only)).</p>
-<p><br/></p>
-<p> - On the negative portion of the output frequency signal coming from the duty cycle / random number generator hardware (square wave channel / noise channel).</p>
-<p><br/></p>
-<p> When the envelope decay disable bit is cleared, bits 0-3 now control the envelope decay rate, and an internal 4-bit down counter (hereon the envelope decay counter) now controls the channel's volume level. "Envelope decay" is used to describe the action of the channel's audio output volume starting from a certain value, and decreasing by 1 at a fixed (linear) rate (which produces a "fade-out" sounding effect). This fixed decrement rate is controlled by the envelope decay rate (bits 0-3). The calculated decrement rate is 240Hz/(N+1), where N is any value between $0-$F.</p>
-<p><br/></p>
-<p> When the channel's envelope decay counter reaches a value of 0, depending on the status of the envelope decay looping enable bit (bit 5, which is shared with the length counter's clock disable bit), 2 different things will happen:</p>
-<p><br/></p>
-<p>bit 5 &nbsp; &nbsp; &nbsp; &nbsp;action</p>
-<p>----- &nbsp; &nbsp; &nbsp; &nbsp;------</p>
-<p>0 &nbsp; &nbsp; &nbsp; &nbsp;The envelope decay count will stay at 0 (channel silenced).</p>
-<p>1 &nbsp; &nbsp; &nbsp; &nbsp;The envelope decay count will wrap-around to $F (upon the next clock cycle). The envelope decay counter will then continue to count down normally.</p>
-<p><br/></p>
-<p> Only a write out to $4003/$4007/$400F will reset the current envelope decay counter to a known state (to $F, the maximum volume level) for the appropriate channel's envelope decay hardware. Otherwise, the envelope decay counter is always counting down (by 1) at the frequency currently contained in the volume / envelope decay rate bits (even when envelope decays are disabled (setting bit 4)), except when the envelope decay counter contains a value of 0, and envelope decay looping (bit 5) is disabled (0).</p>
-<p><br/></p>
-<p><br/></p>
-<p>+------------+</p>
-<p>| Sweep unit |</p>
-<p>+------------+</p>
-<p> The sweep unit is only found in the square wave channels. The controls for the sweep unit have been mapped in at $4001 for square 1, and $4005 for square 2.</p>
-<p><br/></p>
-<p> The controls</p>
-<p> ------------</p>
-<p> Bit 7 &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;when this bit is set (1), sweeping is active. This results in real-time increasing or decreasing of the the current wavelength value (the audible frequency will decrease or increase, respectively). The wavelength value in $4002/3 ($4006/7) is constantly read &amp; updated by the sweep. Modifying the contents of $4002/3 will be immediately audible, and will result in the sweep now starting from this new wavelength value.</p>
-<p><br/></p>
-<p> Bits 6-4 &nbsp; &nbsp; &nbsp; &nbsp;These 3 bits represent the sweep refresh rate, or the frequency at which $4002/3 is updated with the new calculated wavelength. The refresh rate frequency is 120Hz/(N+1), where N is the value written, between 0 and 7.</p>
-<p><br/></p>
-<p> Bit 3 &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;This bit controls the sweep mode. When this bit is set (1), sweeps will decrease the current wavelength value, as a 0 will increase the current wavelength.</p>
-<p><br/></p>
-<p> Bits 2-0 &nbsp; &nbsp; &nbsp; &nbsp;These bits control the right shift amount of the new calculated sweep update wavelength. Code that shows how the sweep unit calculates a new sweep wavelength is as follows:</p>
-<p> </p>
-<p>bit 3</p>
-<p>-----</p>
-<p>0 &nbsp; &nbsp; &nbsp; &nbsp;New = Wavelength + (Wavelength &gt;&gt; N)</p>
-<p>1 &nbsp; &nbsp; &nbsp; &nbsp;New = Wavelength - (Wavelength &gt;&gt; N) (minus an additional 1, if using square wave channel 1)</p>
-<p><br/></p>
-<p> where N is the the shift right value, between 0-7.</p>
-<p><br/></p>
-<p> Note that in decrease mode, for subtracting the 2 values:</p>
-<p> 1's compliment (NOT) is being used for square wave channel 1</p>
-<p> 2's compliment (NEG) is being used for square wave channel 2</p>
-<p><br/></p>
-<p> This information is currently the only known difference between the 2 square wave channels.</p>
-<p><br/></p>
-<p> On each sweep refresh clock, the Wavelength register will be updated with the New value, but only if all 3 of these conditions are met:</p>
-<p><br/></p>
-<p> - bit 7 is set (sweeping enabled)</p>
-<p> - the shift value (which is N in the formula) does not equal to 0</p>
-<p> - the channel's length counter contains a non-zero value</p>
-<p><br/></p>
-<p> Notes</p>
-<p> -----</p>
-<p> There are certain conditions that will cause the sweep unit to silence the channel, and halt the sweep refresh clock (which effectively stops sweep action, if any). Note that these conditions pertain regardless of any sweep refresh rate values, or if sweeping is enabled/disabled (via bit 7).</p>
-<p><br/></p>
-<p> - an 11-bit wavelength value less than $008 will cause this condition</p>
-<p> - if the sweep unit is currently set to increase mode, the New calculated wavelength value will always be tested to see if a carry (bit $B) was generated or not (if sweeping is enabled, this carry will be examined before the Wavelength register is updated) from the shift addition calculation. If carry equals 1, the channel is silenced, and sweep action is halted.</p>
-<p><br/></p>
-<p><br/></p>
-<p>+----------------------+</p>
-<p>| Duty cycle generator |</p>
-<p>+----------------------+</p>
-<p> The duty cycle generator takes the fequency produced from the 11-bit programmable timer, and uses a 4 bit counter to produce 4 types of duty cycles. The output frequency is then 1/16 that of the programmable timer. The duty cycle hardware is only found in the square wave channels. The bit assignments are as follows:</p>
-<p><br/></p>
-<p>$4000(sq1)/$4004(sq2)</p>
-<p>---------------------</p>
-<p>6-7 &nbsp; &nbsp; &nbsp; &nbsp;Duty cycle type</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;duty (positive/negative)</p>
-<p>val &nbsp; &nbsp; &nbsp; &nbsp;in clock cycles</p>
-<p>--- &nbsp; &nbsp; &nbsp; &nbsp;---------------</p>
-<p>00 &nbsp; &nbsp; &nbsp; &nbsp; 2/14</p>
-<p>01 &nbsp; &nbsp; &nbsp; &nbsp; 4/12</p>
-<p>10 &nbsp; &nbsp; &nbsp; &nbsp; 8/ 8</p>
-<p>11 &nbsp; &nbsp; &nbsp; &nbsp;12/ 4</p>
-<p><br/></p>
-<p> Where val represents bits 6-7 of $4000/$4004.</p>
-<p><br/></p>
-<p> This counter is reset when the length counter of the same channel is written to (via $4003/$4007).</p>
-<p><br/></p>
-<p> The output frequency at this point will now be fed to the volume/envelope decay hardware.</p>
-<p><br/></p>
-<p><br/></p>
-<p>+----------------------+</p>
-<p>| Wavelength converter |</p>
-<p>+----------------------+</p>
-<p> The wavelength converter is only used in the noise channel. It is used to convert a given 4-bit value to an 11-bit wavelength, which then is sent to the noise's own programmable timer. Here is the bit descriptions:</p>
-<p><br/></p>
-<p>$400E bits</p>
-<p>----------</p>
-<p>0-3 &nbsp; &nbsp; &nbsp; &nbsp;The 4-bit value to be converted</p>
-<p><br/></p>
-<p> Below is a conversion chart that shows what 4-bit value will represent the 11-bit wavelength to be fed to the channel's programmable timer:</p>
-<p><br/></p>
-<p>value &nbsp; &nbsp; &nbsp; &nbsp;octave &nbsp; &nbsp; &nbsp; &nbsp;scale &nbsp; &nbsp; &nbsp; &nbsp;CPU clock cycles (11-bit wavelength+1)</p>
-<p>----- &nbsp; &nbsp; &nbsp; &nbsp;------ &nbsp; &nbsp; &nbsp; &nbsp;----- &nbsp; &nbsp; &nbsp; &nbsp;--------------------------------------</p>
-<p>0 &nbsp; &nbsp; &nbsp; &nbsp;15 &nbsp; &nbsp; &nbsp; &nbsp;A &nbsp; &nbsp; &nbsp; &nbsp;002</p>
-<p>1 &nbsp; &nbsp; &nbsp; &nbsp;14 &nbsp; &nbsp; &nbsp; &nbsp;A &nbsp; &nbsp; &nbsp; &nbsp;004</p>
-<p>2 &nbsp; &nbsp; &nbsp; &nbsp;13 &nbsp; &nbsp; &nbsp; &nbsp;A &nbsp; &nbsp; &nbsp; &nbsp;008</p>
-<p>3 &nbsp; &nbsp; &nbsp; &nbsp;12 &nbsp; &nbsp; &nbsp; &nbsp;A &nbsp; &nbsp; &nbsp; &nbsp;010</p>
-<p>4 &nbsp; &nbsp; &nbsp; &nbsp;11 &nbsp; &nbsp; &nbsp; &nbsp;A &nbsp; &nbsp; &nbsp; &nbsp;020</p>
-<p>5 &nbsp; &nbsp; &nbsp; &nbsp;11 &nbsp; &nbsp; &nbsp; &nbsp;D &nbsp; &nbsp; &nbsp; &nbsp;030</p>
-<p>6 &nbsp; &nbsp; &nbsp; &nbsp;10 &nbsp; &nbsp; &nbsp; &nbsp;A &nbsp; &nbsp; &nbsp; &nbsp;040</p>
-<p>7 &nbsp; &nbsp; &nbsp; &nbsp;10 &nbsp; &nbsp; &nbsp; &nbsp;F &nbsp; &nbsp; &nbsp; &nbsp;050</p>
-<p>8 &nbsp; &nbsp; &nbsp; &nbsp;10 &nbsp; &nbsp; &nbsp; &nbsp;C &nbsp; &nbsp; &nbsp; &nbsp;065</p>
-<p>9 &nbsp; &nbsp; &nbsp; &nbsp; 9 &nbsp; &nbsp; &nbsp; &nbsp;A &nbsp; &nbsp; &nbsp; &nbsp;07F</p>
-<p>A &nbsp; &nbsp; &nbsp; &nbsp; 9 &nbsp; &nbsp; &nbsp; &nbsp;D &nbsp; &nbsp; &nbsp; &nbsp;0BE</p>
-<p>B &nbsp; &nbsp; &nbsp; &nbsp; 8 &nbsp; &nbsp; &nbsp; &nbsp;A &nbsp; &nbsp; &nbsp; &nbsp;0FE</p>
-<p>C &nbsp; &nbsp; &nbsp; &nbsp; 8 &nbsp; &nbsp; &nbsp; &nbsp;D &nbsp; &nbsp; &nbsp; &nbsp;17D</p>
-<p>D &nbsp; &nbsp; &nbsp; &nbsp; 7 &nbsp; &nbsp; &nbsp; &nbsp;A &nbsp; &nbsp; &nbsp; &nbsp;1FC</p>
-<p>E &nbsp; &nbsp; &nbsp; &nbsp; 6 &nbsp; &nbsp; &nbsp; &nbsp;A &nbsp; &nbsp; &nbsp; &nbsp;3F9</p>
-<p>F &nbsp; &nbsp; &nbsp; &nbsp; 5 &nbsp; &nbsp; &nbsp; &nbsp;A &nbsp; &nbsp; &nbsp; &nbsp;7F2</p>
-<p><br/></p>
-<p> Octave and scale information is provided for the music enthusiast programmer who is more familiar with notes than clock cycles.</p>
-<p><br/></p>
-<p><br/></p>
-<p>+-------------------------+</p>
-<p>| Random number generator |</p>
-<p>+-------------------------+</p>
-<p> The noise channel has a 1-bit pseudo-random number generator. It's based on a 15-bit shift register, and an exclusive or gate. The generator can produce two types of random number sequences: long, and short. The long sequence generates 32,767-bit long number patterns. The short sequence generates 93-bit long number patterns. The 93-bit mode will generally produce higher sounding playback frequencys on the channel. Here is the bit that controls the mode:</p>
-<p><br/></p>
-<p>$400E bits</p>
-<p>----------</p>
-<p>7 &nbsp; &nbsp; &nbsp; &nbsp;mode</p>
-<p><br/></p>
-<p> If mode=0, then 32,767-bit long number sequences will be produced (32K mode), otherwise 93-bit long number sequences will be produced (93-bit mode).</p>
-<p><br/></p>
-<p> The following diagram shows where the XOR taps are taken off the shift register to produce the 1-bit pseudo-random number sequences for each mode.</p>
-<p><br/></p>
-<p>mode &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;-----</p>
-<p>---- &nbsp; &nbsp; &nbsp; &nbsp;EDCBA9876543210</p>
-<p>32K &nbsp; &nbsp; &nbsp; &nbsp;**</p>
-<p>93-bit &nbsp; &nbsp; &nbsp; &nbsp;* &nbsp; &nbsp; *</p>
-<p><br/></p>
-<p> The current result of the XOR will be transferred into bit position 0 of the SR, upon the next shift cycle. The 1-bit random number output is taken from pin E, is inverted, then is sent to the volume/envelope decay hardware for the noise channel. The shift register is shifted upon recieving 2 clock pulses from the programmable timer (the shift frequency will be half that of the frequency from the programmable timer (one octave lower)).</p>
-<p><br/></p>
-<p> On system reset, this shift register is loaded with a value of 1.</p>
-<p><br/></p>
-<p><br/></p>
-<p>RP2A03E quirk</p>
-<p>-------------</p>
-<p> I have been informed that revisions of the 2A03 before "F" actually lacked support for the 93-bit looped noise playback mode. While the Famicom's 2A03 went through 4 revisions (E..H), I think that only one was ever used for the front loading NES: "G". Other differences between 2A03 revisions are unknown.</p>
-<p><br/></p>
-<p><br/></p>
-<p>EOF</p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/iphone-website-generation">Create iPhone web-based documentation</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="NESSound"
+		  data-hnd-context="30"
+		  data-hnd-title="NES Sound"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Technicalinformation.html">Technical Information</a></li><li><a href="Sound.html">Sound</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Sound.html" title="Sound" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="NSFFormat.html" title="NSF Format" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="NESProcessor.html" title="NES Processing" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>NES Sound</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts6">*******************************************</span></p>
+<p class="rvps2"><span class="rvts6">*2A03 sound channel hardware documentation*</span></p>
+<p class="rvps2"><span class="rvts6">*******************************************</span></p>
+<p class="rvps2"><span class="rvts6">Brad Taylor (big_time_software@hotmail.com)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;4th release:</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">February 19th, 2K3</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;All results were obtained by studying prior information available (from nestech 1.00, and postings on NESDev from miscellanious people), and through a series of experiments conducted by me. Results acquired by individuals prior to my reverse-engineering have been double checked, and final results have been confirmed. Credit is due to those individual(s) who contributed miscellanious information in regards to NES sound channel hardware. Such individuals are:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Goroh</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Memblers</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;FluBBa</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Izumi</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Chibi-Tech</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Quietust</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;SnowBro</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Kentaro Ishihara (Ki) is responsible for posting (on the NESdev mailing list) differrences in the 2 square wave channels, including the operation of 2A03 hardware publically undocumented (until now) such as the frame IRQ counter, and it's ties with sound hardware. Goroh had originally discovered some of this information, and Ki confirmed it.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;A special thanks goes out to Matthew Conte, for his expertise on pseudo-random number generation (amoung other things), which allowed for the full reverse engineering of the NES's noise channel to take place. Without his help, I would still be trying to find a needle in a haystack, as far as the noise's method of pseudo-random number generation goes. Additionally, his previous findings / reverse engineering work on the NES's sound hardware really got the ball of NES sound emulation rolling. If it weren't for Matt's original work, this document wouldn't exist.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">****************</span></p>
+<p class="rvps2"><span class="rvts6">* Introduction *</span></p>
+<p class="rvps2"><span class="rvts6">****************</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The 2A03 (NES's integrated CPU) has 4 internal channels to it that have the ability to generate semi-analog sound, for musical playback purposes. These channels are 2 square wave channels, one triangle wave channel, and a noise generation channel. This document will go into full detail on every aspect of the operation and timing of the mentioned sound channels.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*******************</span></p>
+<p class="rvps2"><span class="rvts6">* Channel details *</span></p>
+<p class="rvps2"><span class="rvts6">*******************</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Each channel has different characteristics to it that make up it's operation.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The square channel(s) have the ability to generate a square wave frequency in the range of 54.6 Hz to 12.4 KHz. It's key features are frequency sweep abilities, and output duty cycle adjustment.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The triangle wave channel has the ability to generate an output triangle wave with a resolution of 4-bits (16 steps), in the range of 27.3 Hz to 55.9 KHz. The key features this channel has is it's analog triangle wave output, and it's linear counter, which can be set to automatically disable the channel's sound after a certain period of time has gone by.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The noise channel is used for producing random frequencys, which results in a "noisey" sounding output. Output frequencys can range anywhere from 29.3 Hz to 447 KHz. It's key feature is it's pseudo- random number generator, which generates the random output frequencys heard by the channel.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*****************</span></p>
+<p class="rvps2"><span class="rvts6">* Frame counter *</span></p>
+<p class="rvps2"><span class="rvts6">*****************</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The 2A03 has an internal frame counter. The purpose of it is to generate the various low frequency signals (60, 120, 240 Hz, and 48, 96, 192 Hz) required to clock several of the sound hardware's counters. It also has the ability to generate IRQ's.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The smallest unit of timing the frame counter operates around is 240Hz; all other frequencies are generated by multiples of this base frequency. A clock divider of 14915 (clocked at twice the CPU speed) is used to get 240Hz (this was the actual measured ratio).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+---------------+</span></p>
+<p class="rvps2"><span class="rvts6">|$4017 operation|</span></p>
+<p class="rvps2"><span class="rvts6">+---------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Writes to register $4017 control operation of both the clock divider, and the frame counter.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- Any write to $4017 resets both the frame counter, and the clock divider. Sometimes, games will write to this register in order to synchronize the sound hardware's internal timing, to the sound routine's timing (usually tied into the NMI code). The frame IRQ is slightly longer than the PPU's, so you can see why games would desire this syncronization.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- bit 7 of $4017 controls the frame counter's divide rate. Every time the counter cycles (reaches terminal count (0)), a frame IRQ will be generated, if enabled by clearing bit 6 of $4017. $4015.6 holds the status of the frame counter IRQ; it will be set if the frame counter is responsible for the interrupt.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4017.7 &nbsp;divider &nbsp;frame IRQ freq.</span></p>
+<p class="rvps2"><span class="rvts6">------- &nbsp;------- &nbsp;---------------</span></p>
+<p class="rvps2"><span class="rvts6">0 &nbsp; &nbsp; &nbsp; &nbsp;4 &nbsp; &nbsp; &nbsp; &nbsp;60</span></p>
+<p class="rvps2"><span class="rvts6">1 &nbsp; &nbsp; &nbsp; &nbsp;5 &nbsp; &nbsp; &nbsp; &nbsp;48</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;On 2A03 reset, both bits of $4017 (6 &amp; 7) will be cleared, enabling frame IRQ's off the hop. The reason why the existence of frame IRQ's are generally unknown is because the 6502's maskable interrupt is disabled on reset, and this blocks out the frame IRQ's. Most games don't use any IRQ-generating hardware in general, therefore they don't bother enabling maskable interrupts.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Note that the IRQ line will be held down by the frame counter until it is acknowledged (by reading $4015). Before this, the 6502 will generate an IRQ *every* time interrupts are enabled (either by CLI or RTI), since the IRQ design on the 6502 is level-triggered, and not edge. If you've written a program that does not read $4015 in the IRQ handler, and you execute CLI, the processor will immediately go into a infinite IRQ call-return loop.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+-----------------------+</span></p>
+<p class="rvps2"><span class="rvts6">|Frame counter operation|</span></p>
+<p class="rvps2"><span class="rvts6">+-----------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Depending on the status of $4017.7, the frame counter will follow 2 different count sequences. These sequences determine when sound hardware counters will be clocked. The sequences are initialized immediately following any write to $4017.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4017.7 &nbsp;sequence</span></p>
+<p class="rvps2"><span class="rvts6">------- &nbsp;--------</span></p>
+<p class="rvps2"><span class="rvts6">0 &nbsp; &nbsp; &nbsp; &nbsp;4, 0,1,2,3, 0,1,2,3,..., etc.</span></p>
+<p class="rvps2"><span class="rvts6">1 &nbsp; &nbsp; &nbsp; &nbsp;0,1,2,3,4, 0,1,2,3,4,..., etc.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;During count sequences 0..3, the linear (triangle) and envelope decay (square &amp; noise) counters recieve a clock for each count. This means that both these counters are clocked once immediately after $4017.7 is written with a value of 1.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Count sequences 1 &amp; 3 clock (update) the frequency sweep (square), and length (all channels) counters. Even though the length counter's smallest unit of time counting is a frame, it seems that it is actually being clocked twice per frame. That said, you can consider the length counters to contain an extra stage to divide this clock signal by 2.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;No aforementioned sound hardware counters are clocked on count sequence #4. You should now see how this causes the 96, and 192 Hz signals to be generated when $4017.7=1.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The rest of the document will describe the operation of the sound channels using the $4017.7=0 frequencies (60, 120, and 240 Hz). For $4017.7=1 operation, replace those frequencies with 48, 96, and 192 Hz (respectively).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">************************</span></p>
+<p class="rvps2"><span class="rvts6">* Sound hardware delay *</span></p>
+<p class="rvps2"><span class="rvts6">************************</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;After resetting the 2A03, the first time any sound channel(s) length counter contains a non-zero value (channel is enabled), there will be a 2048 CPU clock cycle delay before any of the sound hardware is clocked. After the 2K clock cycles go by, the NES sound hardware will be clocked normally. This phenomenon only occurs prior to a system reset, and only occurs during the first 2048 CPU clocks after the activation of any of the 4 basic sound channels.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The information in regards to this delay is only provided to keep this document accurate with all information that is currently known about the 2A03's sound hardware. I haven't done much tests on the behaviour of this delay (mainly because I don't care, as I view it as a inconvenience anyway), so this information should be taken with a grain of salt.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">************************</span></p>
+<p class="rvps2"><span class="rvts6">* Register Assignments *</span></p>
+<p class="rvps2"><span class="rvts6">************************</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The sound hardware internal to the 2A03 has been designated these special memory addresses in the CPU's memory map.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4000-$4003</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">Square wave 1</span></p>
+<p class="rvps2"><span class="rvts6">$4004-$4007</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">Square wave 2 (identical to the first, except for upward frequency sweeps (see "sweep unit" section))</span></p>
+<p class="rvps2"><span class="rvts6">$4008-$400B</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">Triangle</span></p>
+<p class="rvps2"><span class="rvts6">$400C-$400F</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">Noise</span></p>
+<p class="rvps2"><span class="rvts6">$4015</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">Channel enable / length/frame counter status</span></p>
+<p class="rvps2"><span class="rvts6">$4017</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">frame counter control</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Note that $4015 (and $4017, but is unrelated to sound hardware) are the only R/W registers. All others are write only (attempt to read them will most likely return the last byte on the bus (usually 040H), due to heavy capacitance on the NES's data bus). Reading a "write only" register, will have no effect on the specific register, or channel.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Every sound channel has 4 registers affiliated with it. The description of the register sets are as follows:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+----------------+</span></p>
+<p class="rvps2"><span class="rvts6">| Register set 1 |</span></p>
+<p class="rvps2"><span class="rvts6">+----------------+</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4000(sq1)/$4004(sq2)/$400C(noise) bits</span></p>
+<p class="rvps2"><span class="rvts6">---------------------------------------</span></p>
+<p class="rvps2"><span class="rvts6">0-3</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">volume / envelope decay rate</span></p>
+<p class="rvps2"><span class="rvts6">4</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">envelope decay disable</span></p>
+<p class="rvps2"><span class="rvts6">5</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">length counter clock disable / envelope decay looping enable</span></p>
+<p class="rvps2"><span class="rvts6">6-7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">duty cycle type (unused on noise channel)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4008(tri) bits</span></p>
+<p class="rvps2"><span class="rvts6">---------------</span></p>
+<p class="rvps2"><span class="rvts6">0-6</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">linear counter load register</span></p>
+<p class="rvps2"><span class="rvts6">7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">length counter clock disable / linear counter start</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+----------------+</span></p>
+<p class="rvps2"><span class="rvts6">| Register set 2 |</span></p>
+<p class="rvps2"><span class="rvts6">+----------------+</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4001(sq1)/$4005(sq2) bits</span></p>
+<p class="rvps2"><span class="rvts6">--------------------------</span></p>
+<p class="rvps2"><span class="rvts6">0-2</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">right shift amount</span></p>
+<p class="rvps2"><span class="rvts6">3</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">decrease / increase (1/0) wavelength</span></p>
+<p class="rvps2"><span class="rvts6">4-6</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">sweep update rate</span></p>
+<p class="rvps2"><span class="rvts6">7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">sweep enable</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4009(tri)/$400D(noise) bits</span></p>
+<p class="rvps2"><span class="rvts6">----------------------------</span></p>
+<p class="rvps2"><span class="rvts6">0-7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">unused</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+----------------+</span></p>
+<p class="rvps2"><span class="rvts6">| Register set 3 |</span></p>
+<p class="rvps2"><span class="rvts6">+----------------+</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4002(sq1)/$4006(sq2)/$400A(Tri) bits</span></p>
+<p class="rvps2"><span class="rvts6">-------------------------------------</span></p>
+<p class="rvps2"><span class="rvts6">0-7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">8 LSB of wavelength</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$400E(noise) bits</span></p>
+<p class="rvps2"><span class="rvts6">-----------------</span></p>
+<p class="rvps2"><span class="rvts6">0-3</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">playback sample rate</span></p>
+<p class="rvps2"><span class="rvts6">4-6</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">unused</span></p>
+<p class="rvps2"><span class="rvts6">7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">random number type generation</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+----------------+</span></p>
+<p class="rvps2"><span class="rvts6">| Register set 4 |</span></p>
+<p class="rvps2"><span class="rvts6">+----------------+</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4003(sq1)/$4007(sq2)/$400B(tri)/$400F(noise) bits</span></p>
+<p class="rvps2"><span class="rvts6">--------------------------------------------------</span></p>
+<p class="rvps2"><span class="rvts6">0-2</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">3 MS bits of wavelength (unused on noise channel)</span></p>
+<p class="rvps2"><span class="rvts6">3-7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">length counter load register</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+--------------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">| length counter status register |</span></p>
+<p class="rvps2"><span class="rvts6">+--------------------------------+</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4015(read)</span></p>
+<p class="rvps2"><span class="rvts6">-----------</span></p>
+<p class="rvps2"><span class="rvts6">0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">square wave channel 1</span></p>
+<p class="rvps2"><span class="rvts6">1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">square wave channel 2</span></p>
+<p class="rvps2"><span class="rvts6">2</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">triangle wave channel</span></p>
+<p class="rvps2"><span class="rvts6">3</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">noise channel</span></p>
+<p class="rvps2"><span class="rvts6">4</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">DMC (see "DMC.TXT" for details)</span></p>
+<p class="rvps2"><span class="rvts6">5-6</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">unused</span></p>
+<p class="rvps2"><span class="rvts6">7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">IRQ status of DMC (see "DMC.TXT" for details)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+-------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">| channel enable register |</span></p>
+<p class="rvps2"><span class="rvts6">+-------------------------+</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4015(write)</span></p>
+<p class="rvps2"><span class="rvts6">------------</span></p>
+<p class="rvps2"><span class="rvts6">0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">square wave channel 1</span></p>
+<p class="rvps2"><span class="rvts6">1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">square wave channel 2</span></p>
+<p class="rvps2"><span class="rvts6">2</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">triangle wave channel</span></p>
+<p class="rvps2"><span class="rvts6">3</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">noise channel</span></p>
+<p class="rvps2"><span class="rvts6">4</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">DMC channel (see "DMC.TXT" for details)</span></p>
+<p class="rvps2"><span class="rvts6">5-7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">unused</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">************************</span></p>
+<p class="rvps2"><span class="rvts6">* Channel architecture *</span></p>
+<p class="rvps2"><span class="rvts6">************************</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;This section will describe the internal components making up each individual channel. Each component will then be described in full detail.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts56">Device</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> Triangle Noise &nbsp;Square</span></p>
+<p class="rvps2"><span class="rvts56">------</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> -------- ------ ------</span></p>
+<p class="rvps2"><span class="rvts56">triangle step generator</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56">X</span></p>
+<p class="rvps2"><span class="rvts56">linear counter</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56">X</span></p>
+<p class="rvps2"><span class="rvts56">programmable timer</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56">X &nbsp; &nbsp; &nbsp;X &nbsp; &nbsp; &nbsp;X</span></p>
+<p class="rvps2"><span class="rvts56">length counter</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56">X &nbsp; &nbsp; &nbsp;X &nbsp; &nbsp; &nbsp;X</span></p>
+<p class="rvps2"><span class="rvts56">4-bit DAC</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56">X &nbsp; &nbsp; &nbsp;X &nbsp; &nbsp; &nbsp;X</span></p>
+<p class="rvps2"><span class="rvts56">volume/envelope decay unit</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> X &nbsp; &nbsp; &nbsp;X</span></p>
+<p class="rvps2"><span class="rvts56">sweep unit</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp;X</span></p>
+<p class="rvps2"><span class="rvts56">duty cycle generator</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp;X</span></p>
+<p class="rvps2"><span class="rvts56">wavelength converter</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> X</span></p>
+<p class="rvps2"><span class="rvts56">random number generator</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts56"> X</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+-------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">| Triangle step generator |</span></p>
+<p class="rvps2"><span class="rvts6">+-------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;This is a 5-bit, single direction counter, and it is only used in the triangle channel. Each of the 4 LSB outputs of the counter lead to one input on a corresponding mutually exclusive XNOR gate. The 4 XNOR gates have been strobed together, which results in the inverted representation of the 4 LSB of the counter appearing on the outputs of the gates when the strobe is 0, and a non-inverting action taking place when the strobe is 1. The strobe is naturally connected to the MSB of the counter, which effectively produces on the output of the XNOR gates a count sequence which reflects the scenario of a near- ideal triangle step generator (D,E,F,F,E,D,...,2,1,0,0,1,2,...). At this point, the outputs of the XNOR gates will be fed into the input of a 4-bit DAC.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;This 5-bit counter will be halted whenever the Triangle channel's length or linear counter contains a count of 0. This results in a "latching" behaviour; the counter will NOT be reset to any definite state.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;On system reset, this counter is loaded with 0.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The counter's clock input is connected directly to the terminal count output pin of the 11-bit programmable timer in the triangle channel. As a result of the 5-bit triangle step generator, the output triangle wave frequency will be 32 times less than the frequency of the triangle channel's programmable timer is set to generate.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+----------------+</span></p>
+<p class="rvps2"><span class="rvts6">| Linear counter |</span></p>
+<p class="rvps2"><span class="rvts6">+----------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The linear counter is only found in the triangle channel. It is a 7-bit presettable down counter, with a decoded output condition of 0 available (not exactly the same as terminal count). Here's the bit assignments:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4008 bits</span></p>
+<p class="rvps2"><span class="rvts6">----------</span></p>
+<p class="rvps2"><span class="rvts6">0-6</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">bits 0-6 of the linear counter load register (NOT the linear counter itself)</span></p>
+<p class="rvps2"><span class="rvts6">7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">linear counter start</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The counter is clocked at 240 Hz (1/4 framerate), and the calculated length in frames is 0.25*N, where N is the 7-bit loaded value. The counter is always being clocked, except when 0 appears on the output of the counter. At this point, the linear counter &amp; triangle step counter clocks signals are disabled, which results in both counters latching their current state (the linear counter will stay at 0, and the triangle step counter will stop, and the channel will be silenced due to this).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The linear counter has 2 modes: load, and count. When the linear counter is in load mode, it essentially becomes transparent (i.e. whatever value is currently in, or being written to $4008, will appear on the output of the counter). Because of this, no count action can occur in load mode. When the mode changes from load to count, the counter will now latch the value currently in it, and start counting down from there. In the count mode, the current value of $4008 is ignored by the counter (but still retained in $4008). Described below is how the mode of the linear counter is set:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Writes to $400B</span></p>
+<p class="rvps2"><span class="rvts6">---------------</span></p>
+<p class="rvps2"><span class="rvts6">cur</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">mode</span></p>
+<p class="rvps2"><span class="rvts6">---</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">----</span></p>
+<p class="rvps2"><span class="rvts6">1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">load</span></p>
+<p class="rvps2"><span class="rvts6">0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">load (on next linear counter clock), count</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Cur is the current state of the MSB of $4008.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Writes to $4008</span></p>
+<p class="rvps2"><span class="rvts6">---------------</span></p>
+<p class="rvps2"><span class="rvts6">old</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">new</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">mode</span></p>
+<p class="rvps2"><span class="rvts6">---</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">---</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">----</span></p>
+<p class="rvps2"><span class="rvts6">0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">X</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">count</span></p>
+<p class="rvps2"><span class="rvts6">1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">no change (during the CPU write cycle), count</span></p>
+<p class="rvps2"><span class="rvts6">1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">no change</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Old and new represent the state(s) of the MSB of $4008. Old is the value being replaced in the MSB of $4008 on the write, and new is the value replacing the old one.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;"no change" indicates that the mode of the linear counter will not change from the last.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Note that writes to $400B when $4008.7=0 only loads the linear counter with the value in $4008 on the next *linear* counter clock (and NOT at the end of the CPU write cycle). This is a correction from older versions of this doc.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+--------------------+</span></p>
+<p class="rvps2"><span class="rvts6">| Programmable timer |</span></p>
+<p class="rvps2"><span class="rvts6">+--------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The programmable timer is a 11-bit presettable down counter, and is found in the square, triangle, and noise channel(s). The bit assignments are as follows:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4002(sq1)/$4006(sq2)/$400A(Tri) bits</span></p>
+<p class="rvps2"><span class="rvts6">-------------------------------------</span></p>
+<p class="rvps2"><span class="rvts6">0-7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">represent bits 0-7 of the 11-bit wavelength</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4003(sq1)/$4007(sq2)/$400B(Tri) bits</span></p>
+<p class="rvps2"><span class="rvts6">-------------------------------------</span></p>
+<p class="rvps2"><span class="rvts6">0-2</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">represent bits 8-A of the 11-bit wavelength</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Note that on the noise channel, the 11 bits are not available directly. See the wavelength converter section, for more details.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The counter has automatic syncronous reloading upon terminal count (count=0), therefore the counter will count for N+1 (N is the 11-bit loaded value) clock cycles before arriving at terminal count, and reloading. This counter will typically be clocked at the 2A03's internal 6502 speed (1.79 MHz), and produces an output frequency of 1.79 MHz/(N+1). The terminal count's output spike length is typically no longer than half a CPU clock. The TC signal will then be fed to the appropriate device for the particular sound channel (for square, this terminal count spike will lead to the duty cycle generator. For the triangle, the spike will be fed to the triangle step generator. For noise, this signal will go to the random number generator unit).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+----------------+</span></p>
+<p class="rvps2"><span class="rvts6">| Length counter |</span></p>
+<p class="rvps2"><span class="rvts6">+----------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The length counter is found in all sound channels. It is essentially a 7-bit down counter, and is conditionally clocked at a frequency of 60 Hz.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;When the length counter arrives at a count of 0, the counter will be stopped (stay on 0), and the appropriate channel will be silenced.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The length counter clock disable bit, found in all the channels, can also be used to halt the count sequence of the length counter for the appropriate channel, by writing a 1 out to it. A 0 condition will permit counting (unless of course, the counter's current count = 0). Location(s) of the length counter clock disable bit:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4000(sq1)/$4004(sq2)/$400C(noise) bits</span></p>
+<p class="rvps2"><span class="rvts6">---------------------------------------</span></p>
+<p class="rvps2"><span class="rvts6">5</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">length counter clock disable</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4008(tri) bits</span></p>
+<p class="rvps2"><span class="rvts6">---------------</span></p>
+<p class="rvps2"><span class="rvts6">7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">length counter clock disable</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;To load the length counter with a specified count, a write must be made out to the length register. Location(s) of the length register:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4003(sq1)/$4007(sq2)/$400B(tri)/$400F(noise) bits</span></p>
+<p class="rvps2"><span class="rvts6">--------------------------------------------------</span></p>
+<p class="rvps2"><span class="rvts6">3-7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">length</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The 5-bit length value written, determines what 7-bit value the length counter will start counting from. A conversion table here will show how the values are translated.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">+-----------------------+</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">bit3=0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">+-------+---------------+</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|frames</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|bits</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">+-------+-------+</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|4-6</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|bit7=0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|bit7=1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">+-------+-------+-------+</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|05</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|06</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|0A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|0C</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|2</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|14</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|18</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|3</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|28</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|30</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|4</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|50</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|60</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|5</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|1E</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|24</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|6</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|07</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|08</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|0D</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|10</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">+-------+-------+-------+</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">+---------------+</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">bit3=1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">+-------+-------+</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|bits</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|4-7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|frames</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">+-------+-------+</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|7F</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|01</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"></span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|2</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|02</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|3</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|03</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|4</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|04</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|5</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|05</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|6</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|06</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|07</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|8</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|08</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|9</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|09</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|0A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|B</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|0B</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|C</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|0C</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|D</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|0D</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|E</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|0E</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|F</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|0F</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">|</span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">+-------+-------+</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The length counter's real-time status for each channel can be attained. A 0 is returned for a zero count status in the length counter (channel's sound is disabled), and 1 for a non-zero status. Here's the bit description of the length counter status register:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4015(read)</span></p>
+<p class="rvps2"><span class="rvts6">-----------</span></p>
+<p class="rvps2"><span class="rvts6">0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">length counter status of square wave channel 1</span></p>
+<p class="rvps2"><span class="rvts6">1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">length counter status of square wave channel 2</span></p>
+<p class="rvps2"><span class="rvts6">2</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">length counter status of triangle wave channel</span></p>
+<p class="rvps2"><span class="rvts6">3</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">length counter status of noise channel</span></p>
+<p class="rvps2"><span class="rvts6">4</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">length counter status of DMC (see "DMC.TXT" for details)</span></p>
+<p class="rvps2"><span class="rvts6">5</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">unknown</span></p>
+<p class="rvps2"><span class="rvts6">6</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">frame IRQ status</span></p>
+<p class="rvps2"><span class="rvts6">7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">IRQ status of DMC (see "DMC.TXT" for details)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Writing a 0 to the channel enable register will force the length counters to always contain a count equal to 0, which renders that specific channel disabled (as if it doesn't exist). Writing a 1 to the channel enable register disables the forced length counter value of 0, but will not change the count itself (it will still be whatever it was prior to the writing of 1).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Bit description of the channel enable register:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4015(write)</span></p>
+<p class="rvps2"><span class="rvts6">------------</span></p>
+<p class="rvps2"><span class="rvts6">0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">enable square wave channel 1</span></p>
+<p class="rvps2"><span class="rvts6">1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">enable square wave channel 2</span></p>
+<p class="rvps2"><span class="rvts6">2</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">enable triangle wave channel</span></p>
+<p class="rvps2"><span class="rvts6">3</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">enable noise channel</span></p>
+<p class="rvps2"><span class="rvts6">4</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">enable DMC channel (see "DMC.TXT" for details)</span></p>
+<p class="rvps2"><span class="rvts6">5-7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">unknown</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Note that all 5 used bits in this register will be set to 0 upon system reset.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+-----------+</span></p>
+<p class="rvps2"><span class="rvts6">| 4-bit DAC |</span></p>
+<p class="rvps2"><span class="rvts6">+-----------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;This is just a standard 4-bit DAC with 16 steps of output voltage resolution, and is used by all 4 sound channels. On the 2A03, square wave 1 &amp; 2 are mixed together, and are available via pin 1. Triangle &amp; noise are available on pin 2.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;These analog outputs require a negative current source, to attain linear symmetry on the various output voltage levels generated by the channel(s) (moreover, to get the sound to be audible). Instead of current sources, the NES uses external 100 ohm pull-down resistors. This results in the output waveforms having some linear asymmetry (i.e., as the desired output voltage increases on a linear scale, the actual outputted voltage increases less and less each step).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The side effect of this is that the DMC's 7-bit DAC port ($4011) is able to indirectly control the volume (somewhat) of both triangle &amp; noise channels. While I have not measured the voltage asymmetery, others on the NESdev messageboards have posted their findings. The conclusion is that when $4011 is 0, triangle &amp; noise volume outputs are at maximum. When $4011 = 7F, the triangle &amp; noise channel outputs operate at only 57% total volume.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The odd thing is that a few games actually take advantage of this "volume" feature, and write values to $4011 in order to regulate the amplitude of the triangle wave channel's output.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+------------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">| Volume / envelope decay unit |</span></p>
+<p class="rvps2"><span class="rvts6">+------------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The volume / envelope decay hardware is found only in the square wave and noise channels.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4000(sq1)/$4004(sq2)/$400C(noise)</span></p>
+<p class="rvps2"><span class="rvts6">----------------------------------</span></p>
+<p class="rvps2"><span class="rvts6">0-3</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">volume / envelope decay rate</span></p>
+<p class="rvps2"><span class="rvts6">4</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">envelope decay disable</span></p>
+<p class="rvps2"><span class="rvts6">5</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">envelope decay looping enable</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;When the envelope decay disable bit (bit 4) is set (1), the current volume value (bits 0-3) is sent directly to the channel's DAC. However, depending on certain conditions, this 4-bit volume value will be ignored, and a value of 0 will be sent to the DAC instead. This means that while the channel is enabled (producing sound), the output of the channel (what you'll hear from the DAC) will either be the 4-bit volume value, or 0. This also means that a 4-bit volume value of 0 will result in no audible sound. These conditions are as follows:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- When hardware in the channel wants to disable it's sound output (like the length counter, or sweep unit (square channels only)).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- On the negative portion of the output frequency signal coming from the duty cycle / random number generator hardware (square wave channel / noise channel).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;When the envelope decay disable bit is cleared, bits 0-3 now control the envelope decay rate, and an internal 4-bit down counter (hereon the envelope decay counter) now controls the channel's volume level. "Envelope decay" is used to describe the action of the channel's audio output volume starting from a certain value, and decreasing by 1 at a fixed (linear) rate (which produces a "fade-out" sounding effect). This fixed decrement rate is controlled by the envelope decay rate (bits 0-3). The calculated decrement rate is 240Hz/(N+1), where N is any value between $0-$F.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;When the channel's envelope decay counter reaches a value of 0, depending on the status of the envelope decay looping enable bit (bit 5, which is shared with the length counter's clock disable bit), 2 different things will happen:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">bit 5</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">action</span></p>
+<p class="rvps2"><span class="rvts6">-----</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">------</span></p>
+<p class="rvps2"><span class="rvts6">0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">The envelope decay count will stay at 0 (channel silenced).</span></p>
+<p class="rvps2"><span class="rvts6">1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">The envelope decay count will wrap-around to $F (upon the next clock cycle). The envelope decay counter will then continue to count down normally.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Only a write out to $4003/$4007/$400F will reset the current envelope decay counter to a known state (to $F, the maximum volume level) for the appropriate channel's envelope decay hardware. Otherwise, the envelope decay counter is always counting down (by 1) at the frequency currently contained in the volume / envelope decay rate bits (even when envelope decays are disabled (setting bit 4)), except when the envelope decay counter contains a value of 0, and envelope decay looping (bit 5) is disabled (0).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+------------+</span></p>
+<p class="rvps2"><span class="rvts6">| Sweep unit |</span></p>
+<p class="rvps2"><span class="rvts6">+------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The sweep unit is only found in the square wave channels. The controls for the sweep unit have been mapped in at $4001 for square 1, and $4005 for square 2.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The controls</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;------------</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Bit 7 &nbsp;&nbsp;</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">when this bit is set (1), sweeping is active. This results in real-time increasing or decreasing of the the current wavelength value (the audible frequency will decrease or increase, respectively). The wavelength value in $4002/3 ($4006/7) is constantly read &amp; updated by the sweep. Modifying the contents of $4002/3 will be immediately audible, and will result in the sweep now starting from this new wavelength value.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Bits 6-4</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">These 3 bits represent the sweep refresh rate, or the frequency at which $4002/3 is updated with the new calculated wavelength. The refresh rate frequency is 120Hz/(N+1), where N is the value written, between 0 and 7.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Bit 3 &nbsp;&nbsp;</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">This bit controls the sweep mode. When this bit is set (1), sweeps will decrease the current wavelength value, as a 0 will increase the current wavelength.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Bits 2-0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">These bits control the right shift amount of the new calculated sweep update wavelength. Code that shows how the sweep unit calculates a new sweep wavelength is as follows:</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">bit 3</span></p>
+<p class="rvps2"><span class="rvts6">-----</span></p>
+<p class="rvps2"><span class="rvts6">0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">New = Wavelength + (Wavelength &gt;&gt; N)</span></p>
+<p class="rvps2"><span class="rvts6">1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">New = Wavelength - (Wavelength &gt;&gt; N) (minus an additional 1, if using square wave channel 1)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;where N is the the shift right value, between 0-7.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Note that in decrease mode, for subtracting the 2 values:</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;1's compliment (NOT) is being used for square wave channel 1</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;2's compliment (NEG) is being used for square wave channel 2</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;This information is currently the only known difference between the 2 square wave channels.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;On each sweep refresh clock, the Wavelength register will be updated with the New value, but only if all 3 of these conditions are met:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- bit 7 is set (sweeping enabled)</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- the shift value (which is N in the formula) does not equal to 0</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- the channel's length counter contains a non-zero value</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Notes</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;-----</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;There are certain conditions that will cause the sweep unit to silence the channel, and halt the sweep refresh clock (which effectively stops sweep action, if any). Note that these conditions pertain regardless of any sweep refresh rate values, or if sweeping is enabled/disabled (via bit 7).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- an 11-bit wavelength value less than $008 will cause this condition</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- if the sweep unit is currently set to increase mode, the New calculated wavelength value will always be tested to see if a carry (bit $B) was generated or not (if sweeping is enabled, this carry will be examined before the Wavelength register is updated) from the shift addition calculation. If carry equals 1, the channel is silenced, and sweep action is halted.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+----------------------+</span></p>
+<p class="rvps2"><span class="rvts6">| Duty cycle generator |</span></p>
+<p class="rvps2"><span class="rvts6">+----------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The duty cycle generator takes the fequency produced from the 11-bit programmable timer, and uses a 4 bit counter to produce 4 types of duty cycles. The output frequency is then 1/16 that of the programmable timer. The duty cycle hardware is only found in the square wave channels. The bit assignments are as follows:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$4000(sq1)/$4004(sq2)</span></p>
+<p class="rvps2"><span class="rvts6">---------------------</span></p>
+<p class="rvps2"><span class="rvts6">6-7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">Duty cycle type</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"></span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">duty (positive/negative)</span></p>
+<p class="rvps2"><span class="rvts6">val</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">in clock cycles</span></p>
+<p class="rvps2"><span class="rvts6">---</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">---------------</span></p>
+<p class="rvps2"><span class="rvts6">00</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> 2/14</span></p>
+<p class="rvps2"><span class="rvts6">01</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> 4/12</span></p>
+<p class="rvps2"><span class="rvts6">10</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> 8/ 8</span></p>
+<p class="rvps2"><span class="rvts6">11</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">12/ 4</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Where val represents bits 6-7 of $4000/$4004.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;This counter is reset when the length counter of the same channel is written to (via $4003/$4007).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The output frequency at this point will now be fed to the volume/envelope decay hardware.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+----------------------+</span></p>
+<p class="rvps2"><span class="rvts6">| Wavelength converter |</span></p>
+<p class="rvps2"><span class="rvts6">+----------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The wavelength converter is only used in the noise channel. It is used to convert a given 4-bit value to an 11-bit wavelength, which then is sent to the noise's own programmable timer. Here is the bit descriptions:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$400E bits</span></p>
+<p class="rvps2"><span class="rvts6">----------</span></p>
+<p class="rvps2"><span class="rvts6">0-3</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">The 4-bit value to be converted</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Below is a conversion chart that shows what 4-bit value will represent the 11-bit wavelength to be fed to the channel's programmable timer:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">value</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">octave</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">scale</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">CPU clock cycles (11-bit wavelength+1)</span></p>
+<p class="rvps2"><span class="rvts6">-----</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">------</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">-----</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">--------------------------------------</span></p>
+<p class="rvps2"><span class="rvts6">0</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">15</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">002</span></p>
+<p class="rvps2"><span class="rvts6">1</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">14</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">004</span></p>
+<p class="rvps2"><span class="rvts6">2</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">13</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">008</span></p>
+<p class="rvps2"><span class="rvts6">3</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">12</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">010</span></p>
+<p class="rvps2"><span class="rvts6">4</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">11</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">020</span></p>
+<p class="rvps2"><span class="rvts6">5</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">11</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">D</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">030</span></p>
+<p class="rvps2"><span class="rvts6">6</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">10</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">040</span></p>
+<p class="rvps2"><span class="rvts6">7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">10</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">F</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">050</span></p>
+<p class="rvps2"><span class="rvts6">8</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">10</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">C</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">065</span></p>
+<p class="rvps2"><span class="rvts6">9</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> 9</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">07F</span></p>
+<p class="rvps2"><span class="rvts6">A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> 9</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">D</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">0BE</span></p>
+<p class="rvps2"><span class="rvts6">B</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> 8</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">0FE</span></p>
+<p class="rvps2"><span class="rvts6">C</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> 8</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">D</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">17D</span></p>
+<p class="rvps2"><span class="rvts6">D</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> 7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">1FC</span></p>
+<p class="rvps2"><span class="rvts6">E</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> 6</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">3F9</span></p>
+<p class="rvps2"><span class="rvts6">F</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> 5</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">A</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">7F2</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Octave and scale information is provided for the music enthusiast programmer who is more familiar with notes than clock cycles.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+-------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">| Random number generator |</span></p>
+<p class="rvps2"><span class="rvts6">+-------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The noise channel has a 1-bit pseudo-random number generator. It's based on a 15-bit shift register, and an exclusive or gate. The generator can produce two types of random number sequences: long, and short. The long sequence generates 32,767-bit long number patterns. The short sequence generates 93-bit long number patterns. The 93-bit mode will generally produce higher sounding playback frequencys on the channel. Here is the bit that controls the mode:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">$400E bits</span></p>
+<p class="rvps2"><span class="rvts6">----------</span></p>
+<p class="rvps2"><span class="rvts6">7</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">mode</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;If mode=0, then 32,767-bit long number sequences will be produced (32K mode), otherwise 93-bit long number sequences will be produced (93-bit mode).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The following diagram shows where the XOR taps are taken off the shift register to produce the 1-bit pseudo-random number sequences for each mode.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">mode</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6"> &nbsp; &nbsp;&lt;-----</span></p>
+<p class="rvps2"><span class="rvts6">----</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">EDCBA9876543210</span></p>
+<p class="rvps2"><span class="rvts6">32K</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">**</span></p>
+<p class="rvps2"><span class="rvts6">93-bit</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">* &nbsp; &nbsp; *</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The current result of the XOR will be transferred into bit position 0 of the SR, upon the next shift cycle. The 1-bit random number output is taken from pin E, is inverted, then is sent to the volume/envelope decay hardware for the noise channel. The shift register is shifted upon recieving 2 clock pulses from the programmable timer (the shift frequency will be half that of the frequency from the programmable timer (one octave lower)).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;On system reset, this shift register is loaded with a value of 1.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">RP2A03E quirk</span></p>
+<p class="rvps2"><span class="rvts6">-------------</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;I have been informed that revisions of the 2A03 before "F" actually lacked support for the 93-bit looped noise playback mode. While the Famicom's 2A03 went through 4 revisions (E..H), I think that only one was ever used for the front loading NES: "G". Other differences between 2A03 revisions are unknown.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">EOF</span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/help-authoring-tool">Single source CHM, PDF, DOC and HTML Help creation</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 
