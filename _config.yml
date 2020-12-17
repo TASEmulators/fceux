@@ -6,43 +6,44 @@
 # - fceux.png
 # - index.html
 include:
-- web/help/_translations.js
-- web/help/_keywords.json
-- web/help/_toc.json
-- web/help/taseditor/_translations.json
-- web/help/taseditor/_keywords.json
-- web/help/taseditor/_toc.json
+  - web/help/_translations.js
+  - web/help/_keywords.json
+  - web/help/_toc.json
+  - web/help/taseditor/_translations.json
+  - web/help/taseditor/_keywords.json
+  - web/help/taseditor/_toc.json
+
 exclude:
-- attic
-- fceux-server
-- getSDLKey
-- gfceu
-- m4
-- output
-- pipelines
-- src
-- vc
-- .gitignore
-- COPYING
-- ChangeLog
-- INSTALL
-- Makefile.am
-- NEWS
-- NewPPUtests.txt
-- README
-- STYLE-GUIDELINES-SDL
-- TODO-SDL
-- _config.yml
-- appveyor.yml
-- autogen.sh
-- azure-pipelines.yml
-- changelog.txt
-- configure.ac
-- doxygen
-- fceux.desktop
-- readme.md
-- fceux-server/fceux-net-server.exe
-- vc/BizHawk.Build.Tool.exe
-- vc/pscp.exe
-- vc/upx.exe
-- vc/zip.exe
+  - attic
+  - fceux-server
+  - getSDLKey
+  - gfceu
+  - m4
+  - output
+  - pipelines
+  - src
+  - vc
+  - .gitignore
+  - COPYING
+  - ChangeLog
+  - INSTALL
+  - Makefile.am
+  - NEWS
+  - NewPPUtests.txt
+  - README
+  - STYLE-GUIDELINES-SDL
+  - TODO-SDL
+  - _config.yml
+  - appveyor.yml
+  - autogen.sh
+  - azure-pipelines.yml
+  - changelog.txt
+  - configure.ac
+  - doxygen
+  - fceux.desktop
+  - readme.md
+  - fceux-server/fceux-net-server.exe
+  - vc/BizHawk.Build.Tool.exe
+  - vc/pscp.exe
+  - vc/upx.exe
+  - vc/zip.exe
