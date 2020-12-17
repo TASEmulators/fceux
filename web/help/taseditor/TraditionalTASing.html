@@ -1,147 +1,337 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>4.1. Traditional TASing</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("TraditionalTASing");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>4.1. Traditional TASing</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="4.1. Traditional TASing">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="4.1. Traditional TASing" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>4.1. Traditional TASing</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="BeginnersGuide.html">Beginner's Guide</a> &rsaquo;&rsaquo; <a href="TASingMethodology.html">4. TASing Methodology</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="TASingMethodology.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="TASingMethodology.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="NonlinearTASing.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="TraditionalTASing"
+		  data-hnd-context="10"
+		  data-hnd-title="4.1. Traditional TASing"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="BeginnersGuide.html">Beginner's Guide</a></li><li><a href="TASingMethodology.html">4. TASing Methodology</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="TASingMethodology.html" title="4. TASing Methodology" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="TASingMethodology.html" title="4. TASing Methodology" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="NonlinearTASing.html" title="4.2. Nonlinear TASing" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>4.1. Traditional TASing</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">Traditional TASing</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-method1.png"/></p>
-<p class="rvps10"><span class="rvts21">This method is similar in form to normal videogames playing, however it is completely different in content and requires different way of thinking.</span></p>
-<p class="rvps10"><span class="rvts21">Editing Input is done here by recording a new Input over existing Input.</span></p>
-<p class="rvps10"><span class="rvts21">To switch between movie watching and editing you have to turn the Recording mode off and on (default hotkey is </span><span class="rvts26">Q</span><span class="rvts21">). It's recommended to enable the "Follow cursor" checkbox, in order to observe the recorded Input in the Piano Roll.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">General activity:</span></p>
-<p class="rvps10"><span class="rvts48"><br/></span></p>
-<ol style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">Put the Playback cursor at the beginning of the edited segment, create a Bookmark, define the goal.</span></li>
-<li class="rvps10"><span class="rvts21">Suppose there's a mistake in the segment, weigh known factors of optimality and figure out the way to fix the mistake.</span></li>
-<li class="rvps10"><span class="rvts21">Navigate to the place of fixing the mistake (e.g. load a Bookmark and, if necessary, quickly repeat the existing Input up to the needed frame).</span></li>
-<li class="rvps10"><span class="rvts21">Play the game in Read+Write mode up to the moment when the target event occurs. The newly recorded Input should be different from old Input in this segment. While recording, create Bookmarks in free slots from time to time to speed up navigation.</span></li>
-<li class="rvps10"><span class="rvts21">If you make a mistake while typing the Input, return to step 3. If you fail to reach the target event using the chosen approach, you can retreat and go to step 8.</span></li>
-<li class="rvps10"><span class="rvts21">[</span><span class="rvts34">optional step</span><span class="rvts21">] Save the finished approach to a temporary Bookmark, e.g. to slot </span><span class="rvts26">8</span><span class="rvts21"> or </span><span class="rvts26">7</span><span class="rvts21">.</span></li>
-<li class="rvps10"><span class="rvts21">If this isn't the first approach to the segment, compare the new result to the best old result, using the optimality criterion. If the new approach is better (or it's the first approach), save the result to the Bookmark </span><span class="rvts26">9</span><span class="rvts21">. The slot </span><span class="rvts26">9</span><span class="rvts21"> will be used for keeping the best result of polishing the segment.</span></li>
-<li class="rvps10"><span class="rvts21">If you still want to try different approaches, return to step 2, until you run out of ideas.</span></li>
-<li class="rvps10"><span class="rvts21">[</span><span class="rvts34">optional step</span><span class="rvts21">] If you need more ideas, you can get some information from the past by replaying the old segments of the movie (e.g. load the Bookmark </span><span class="rvts26">0</span><span class="rvts21"> left at the beginning of current level). Also you can get some food for the mind from the future, by playing with the game events happening after the current segment.</span></li>
-<li class="rvps10"><span class="rvts21">When there's no more ideas, restore the best approach from the Bookmark </span><span class="rvts26">9</span><span class="rvts21"> into the current movie and proceed to the next segment.</span></li>
+<p class="rvps2"><span class="rvts18">Traditional TASing</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/toolbox-method1.png"></p>
+<p class="rvps7"><span class="rvts20">This method is similar in form to normal videogames playing, however it is completely different in content and requires different way of thinking.</span></p>
+<p class="rvps7"><span class="rvts20">Editing Input is done here by recording a new Input over existing Input.</span></p>
+<p class="rvps7"><span class="rvts20">To switch between movie watching and editing you have to turn the Recording mode off and on (default hotkey is </span><span class="rvts23">Q</span><span class="rvts20">). It's recommended to enable the "Follow cursor" checkbox, in order to observe the recorded Input in the Piano Roll.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">General activity:</span></p>
+<p class="rvps7"><span class="rvts22"><br/></span></p>
+<ol style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: decimal;">
+ <li value="1" class="rvps7"><span class="rvts20">Put the Playback cursor at the beginning of the edited segment, create a Bookmark, define the goal.</span></li>
+ <li value="2" class="rvps7"><span class="rvts20">Suppose there's a mistake in the segment, weigh known factors of optimality and figure out the way to fix the mistake.</span></li>
+ <li value="3" class="rvps7"><span class="rvts20">Navigate to the place of fixing the mistake (e.g. load a Bookmark and, if necessary, quickly repeat the existing Input up to the needed frame).</span></li>
+ <li value="4" class="rvps7"><span class="rvts20">Play the game in Read+Write mode up to the moment when the target event occurs. The newly recorded Input should be different from old Input in this segment. While recording, create Bookmarks in free slots from time to time to speed up navigation.</span></li>
+ <li value="5" class="rvps7"><span class="rvts20">If you make a mistake while typing the Input, return to step 3. If you fail to reach the target event using the chosen approach, you can retreat and go to step 8.</span></li>
+ <li value="6" class="rvps7"><span class="rvts20">[</span><span class="rvts31">optional step</span><span class="rvts20">] Save the finished approach to a temporary Bookmark, e.g. to slot </span><span class="rvts23">8</span><span class="rvts20"> or </span><span class="rvts23">7</span><span class="rvts20">.</span></li>
+ <li value="7" class="rvps7"><span class="rvts20">If this isn't the first approach to the segment, compare the new result to the best old result, using the optimality criterion. If the new approach is better (or it's the first approach), save the result to the Bookmark </span><span class="rvts23">9</span><span class="rvts20">. The slot </span><span class="rvts23">9</span><span class="rvts20"> will be used for keeping the best result of polishing the segment.</span></li>
+ <li value="8" class="rvps7"><span class="rvts20">If you still want to try different approaches, return to step 2, until you run out of ideas.</span></li>
+ <li value="9" class="rvps7"><span class="rvts20">[</span><span class="rvts31">optional step</span><span class="rvts20">] If you need more ideas, you can get some information from the past by replaying the old segments of the movie (e.g. load the Bookmark </span><span class="rvts23">0</span><span class="rvts20"> left at the beginning of current level). Also you can get some food for the mind from the future, by playing with the game events happening after the current segment.</span></li>
+ <li value="10" class="rvps7"><span class="rvts20">When there's no more ideas, restore the best approach from the Bookmark </span><span class="rvts23">9</span><span class="rvts20"> into the current movie and proceed to the next segment.</span></li>
 </ol>
-<p class="rvps14"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps2"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When you're making a test playthrough of the game (i.e. playing with savestates, but without polishing), you only do steps 3 – 5. And you are satisfied with any successful accomplishment of a segment, so after reaching the target for the first time you proceed to the next segment right away. In this kind of playing you only use savestates to speed up navigation in case you make a fatal mistake (e.g. didn't press the </span><span class="rvts29">A</span><span class="rvts21"> button in time and fell into the pit), only because you don't want to rewrite existing Input from the very beginning of the game.</span></p>
-<p class="rvps10"><span class="rvts21">But when you're seriously TASing the game, you need to try many different approaches in order to find the best one. So you have to repeat steps 2 – 8 many times, until you think the segment is played perfectly. The steps 6 – 9 are what distinguishes real TASing from casual playing with savestates.</span></p>
-<p class="rvps10"><span class="rvts21">The process of Input Recording (step 4) means that you're editing the Input right while watching the results. That is, when watching the paused game state at the frame 200 you prepare the Input for the frame 201 (lay fingers on necessary buttons) and then pass the Input to the game using </span><span class="rvts26">Frame Advance</span><span class="rvts21">, and immediately see the outcome – the game state at the frame 201 (granted that you look at the Memory Watch, because the game screen rendering is one frame behind). Usually this outcome is only an intermediate result, which means you can use it to estimate your progress (step 5) but should not use it to compare current and previous approaches of playing the segment (step 7). So you shouldn't apply the optimality criterion after every frame. Even if at the beginning of the segment you outrun the previous approach, you may fall behind somewhere in the middle. Only when you reach the end of the segment (step 6) you get an objective base for comparing.</span></p>
-<p class="rvps10"><span class="rvts21">Steps 3 and 4 take the most of time in this cycle. Often before reaching the target event you have to repeat steps 3, 5 and 5 several times in a row, recording and discarding decisions that are obviously wrong even without comparing them to old approaches. For example, if in the middle of acceleration Mario gets killed by an enemy, there's no point in entering the remaining buttons needed for acceleration. You have to return back and rewrite the Input in such a way that the enemy misses. In a tough situation it's even better to break current segment into two subsegments (before and after the interaction with the enemy), in order to optimize them separately. If you don't do so, you will probably become tired after finishing the first approach, and you'll decide to leave the segment as it is. See, you've got to manage your effort optimally as well!</span></p>
-<p class="rvps10"><a name="savestates"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Since the Input editing in this method is done using the Playback cursor (and not the mouse cursor), for an effective work you must learn to quickly deliver the light-blue cursor to any frame necessary. Upon gaining an experience, TASers accustom themselves to "juggle" with Bookmarks using the motor memory. They mechanically create intermediate and auxiliary Bookmarks while recording the Input, and find the necessary Bookmark slot without looking.</span></p>
-<p class="rvps10"><span class="rvts21">This virtuosity comes with time, usually after having finished a couple of TASes. You cultivate certain habits, one finger adheres to </span><span class="rvts26">Frame Advance</span><span class="rvts21"> key, Bookmark slots become logically distributed according to their duties, so that fingers press right keys at right moments on their own. For example, that's how some TASers distribute 10 slots:</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps21"><img alt="" style="padding : 1px;" src="lib/savestate_slots.png"/></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts26">F10</span><span class="rvts21"> points to the beginning of current level of the game, so you can see recent segments without rewatching the whole movie. </span><span class="rvts34">Used for navigation.</span></li>
-<li class="rvps10"><span class="rvts26">F9</span><span class="rvts21"> is responsible for keeping the best result of current segment. </span><span class="rvts34">Used for storing.</span></li>
-<li class="rvps10"><span class="rvts26">F2</span><span class="rvts21">-</span><span class="rvts26">F6</span><span class="rvts21"> serve as Bookmarks left after every </span><span class="rvts37">hard-to-reproduce action</span><span class="rvts21"> of the current approach to the segment. These Bookmarks are needed for a quick navigation along the current segment. One of them points to the beginning of the segment, and other are used when necessary (may be left unused, if the segment is short and simple). These Bookmarks are created mechanically while successfully progressing with Input Recording. </span><span class="rvts34">Used for navigation.</span></li>
-<li class="rvps10"><span class="rvts26">F1</span><span class="rvts21"> stores a backup copy of the movie at the last successful frame. Current movie state is saved to this slot with paranoid frequency, so you could always return to this stable state from any situation (e.g. after loading some other Bookmarks, or after recording an experiment). This is how the traditional method implements simple undo feature. Sometimes in addition to the </span><span class="rvts26">F1</span><span class="rvts21"> people use </span><span class="rvts26">F2</span><span class="rvts21"> to provide two levels of undo, but this complicates the logic of backups (as you'd have to alternate the slots), and usually one slot is sufficient. </span><span class="rvts34">Used for storing.</span></li>
-<li class="rvps10"><span class="rvts26">F7</span><span class="rvts21">-</span><span class="rvts26">F8</span><span class="rvts21"> may store results of alternative strategies that aren't better than the contents of the </span><span class="rvts26">F9</span><span class="rvts21">, yet they are of some interest. Also, one of these slots (or one of </span><span class="rvts26">F2</span><span class="rvts21">-</span><span class="rvts26">F6</span><span class="rvts21">) is used during step 6 to temporarily save the result of the newly finished approach, in order to compare it to the old best result more precisely (by quickly switching between </span><span class="rvts26">F8</span><span class="rvts21"> and </span><span class="rvts26">F9</span><span class="rvts21">). </span><span class="rvts34">Used for storing.</span></li>
-<li class="rvps10"><span class="rvts21">When creating an improvement for someone else's TAS, slots </span><span class="rvts26">F5</span><span class="rvts21">-</span><span class="rvts26">F7</span><span class="rvts21"> may be allotted for various points of the old movie. For example, </span><span class="rvts26">F5</span><span class="rvts21"> is responsible for the beginning of current level in old movie, </span><span class="rvts26">F6</span><span class="rvts21"> – for the beginning of current segment in old movie, </span><span class="rvts26">F7</span><span class="rvts21"> – for the end of the current segment in old movie. </span><span class="rvts34">Used for storing and navigating the old movie contents.</span></li>
+<p class="rvps9"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When you're making a test playthrough of the game (i.e. playing with savestates, but without polishing), you only do steps 3 – 5. And you are satisfied with any successful accomplishment of a segment, so after reaching the target for the first time you proceed to the next segment right away. In this kind of playing you only use savestates to speed up navigation in case you make a fatal mistake (e.g. didn't press the </span><span class="rvts26">A</span><span class="rvts20"> button in time and fell into the pit), only because you don't want to rewrite existing Input from the very beginning of the game.</span></p>
+<p class="rvps7"><span class="rvts20">But when you're seriously TASing the game, you need to try many different approaches in order to find the best one. So you have to repeat steps 2 – 8 many times, until you think the segment is played perfectly. The steps 6 – 9 are what distinguishes real TASing from casual playing with savestates.</span></p>
+<p class="rvps7"><span class="rvts20">The process of Input Recording (step 4) means that you're editing the Input right while watching the results. That is, when watching the paused game state at the frame 200 you prepare the Input for the frame 201 (lay fingers on necessary buttons) and then pass the Input to the game using </span><span class="rvts23">Frame Advance</span><span class="rvts20">, and immediately see the outcome – the game state at the frame 201 (granted that you look at the Memory Watch, because the game screen rendering is one frame behind). Usually this outcome is only an intermediate result, which means you can use it to estimate your progress (step 5) but should not use it to compare current and previous approaches of playing the segment (step 7). So you shouldn't apply the optimality criterion after every frame. Even if at the beginning of the segment you outrun the previous approach, you may fall behind somewhere in the middle. Only when you reach the end of the segment (step 6) you get an objective base for comparing.</span></p>
+<p class="rvps7"><span class="rvts20">Steps 3 and 4 take the most of time in this cycle. Often before reaching the target event you have to repeat steps 3, 5 and 5 several times in a row, recording and discarding decisions that are obviously wrong even without comparing them to old approaches. For example, if in the middle of acceleration Mario gets killed by an enemy, there's no point in entering the remaining buttons needed for acceleration. You have to return back and rewrite the Input in such a way that the enemy misses. In a tough situation it's even better to break current segment into two subsegments (before and after the interaction with the enemy), in order to optimize them separately. If you don't do so, you will probably become tired after finishing the first approach, and you'll decide to leave the segment as it is. See, you've got to manage your effort optimally as well!</span></p>
+<p class="rvps7"><a name="savestates"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Since the Input editing in this method is done using the Playback cursor (and not the mouse cursor), for an effective work you must learn to quickly deliver the light-blue cursor to any frame necessary. Upon gaining an experience, TASers accustom themselves to "juggle" with Bookmarks using the motor memory. They mechanically create intermediate and auxiliary Bookmarks while recording the Input, and find the necessary Bookmark slot without looking.</span></p>
+<p class="rvps7"><span class="rvts20">This virtuosity comes with time, usually after having finished a couple of TASes. You cultivate certain habits, one finger adheres to </span><span class="rvts23">Frame Advance</span><span class="rvts20"> key, Bookmark slots become logically distributed according to their duties, so that fingers press right keys at right moments on their own. For example, that's how some TASers distribute 10 slots:</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps13"><img alt="" style="padding : 1px;" src="lib/savestate_slots.png"></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts23">F10</span><span class="rvts20"> points to the beginning of current level of the game, so you can see recent segments without rewatching the whole movie. </span><span class="rvts31">Used for navigation.</span></li>
+ <li class="rvps7"><span class="rvts23">F9</span><span class="rvts20"> is responsible for keeping the best result of current segment. </span><span class="rvts31">Used for storing.</span></li>
+ <li class="rvps7"><span class="rvts23">F2</span><span class="rvts20">-</span><span class="rvts23">F6</span><span class="rvts20"> serve as Bookmarks left after every </span><span class="rvts33">hard-to-reproduce action</span><span class="rvts20"> of the current approach to the segment. These Bookmarks are needed for a quick navigation along the current segment. One of them points to the beginning of the segment, and other are used when necessary (may be left unused, if the segment is short and simple). These Bookmarks are created mechanically while successfully progressing with Input Recording. </span><span class="rvts31">Used for navigation.</span></li>
+ <li class="rvps7"><span class="rvts23">F1</span><span class="rvts20"> stores a backup copy of the movie at the last successful frame. Current movie state is saved to this slot with paranoid frequency, so you could always return to this stable state from any situation (e.g. after loading some other Bookmarks, or after recording an experiment). This is how the traditional method implements simple undo feature. Sometimes in addition to the </span><span class="rvts23">F1</span><span class="rvts20"> people use </span><span class="rvts23">F2</span><span class="rvts20"> to provide two levels of undo, but this complicates the logic of backups (as you'd have to alternate the slots), and usually one slot is sufficient. </span><span class="rvts31">Used for storing.</span></li>
+ <li class="rvps7"><span class="rvts23">F7</span><span class="rvts20">-</span><span class="rvts23">F8</span><span class="rvts20"> may store results of alternative strategies that aren't better than the contents of the </span><span class="rvts23">F9</span><span class="rvts20">, yet they are of some interest. Also, one of these slots (or one of </span><span class="rvts23">F2</span><span class="rvts20">-</span><span class="rvts23">F6</span><span class="rvts20">) is used during step 6 to temporarily save the result of the newly finished approach, in order to compare it to the old best result more precisely (by quickly switching between </span><span class="rvts23">F8</span><span class="rvts20"> and </span><span class="rvts23">F9</span><span class="rvts20">). </span><span class="rvts31">Used for storing.</span></li>
+ <li class="rvps7"><span class="rvts20">When creating an improvement for someone else's TAS, slots </span><span class="rvts23">F5</span><span class="rvts20">-</span><span class="rvts23">F7</span><span class="rvts20"> may be allotted for various points of the old movie. For example, </span><span class="rvts23">F5</span><span class="rvts20"> is responsible for the beginning of current level in old movie, </span><span class="rvts23">F6</span><span class="rvts20"> – for the beginning of current segment in old movie, </span><span class="rvts23">F7</span><span class="rvts20"> – for the end of the current segment in old movie. </span><span class="rvts31">Used for storing and navigating the old movie contents.</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">This skill is very similar to the skill of playing a musical instrument. The quicker you work it out, the better, because until you master it you will think the traditional TASing is too tiresome. That's why many people consider the bar to be too high. But once you master the technique of rapid savestates usage, other intricacies of TASing will come easier.</span></p>
-<p class="rvps10"><span class="rvts21">However, now there is Taseditor. It revokes the need to train fingers, allowing to quickly navigate the movie without using Bookmarks. Also, you don't need to accustom to constant backups into </span><span class="rvts26">F1</span><span class="rvts21">, since there is the History Log. So technically you can forget about the traditional method and right away start editing the movie and testing approaches using the </span><a class="rvts27" href="NonlinearTASing.html">nonlinear method of TASing</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">Anyway, Taseditor slightly expands possibilities of the traditional method:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps24" style="text-indent: 30px"><span class="rvts21">New ways to navigate with the Playback cursor, allowing to get to the needed place faster and create savestates less often.</span></li>
-<li class="rvps24" style="text-indent: 30px"><span class="rvts21">When loading a Bookmark, the movie doesn't truncate after the bookmarked frame. This allows, for example, to record the segment of frames 900-1000 and then rerecord the segment 700-900 without losing the data from 900-1000.</span></li>
-<li class="rvps10"><span class="rvts21">All possibilities of an external Input editor (copy/paste, etc).</span></li>
-<li class="rvps10"><span class="rvts21">Visualization of Bookmarks, Input, lag and so on.</span></li>
-<li class="rvps10"><span class="rvts21">Additional tools: multitracking, superimposing, auto-adjustment of Input, etc.</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">This skill is very similar to the skill of playing a musical instrument. The quicker you work it out, the better, because until you master it you will think the traditional TASing is too tiresome. That's why many people consider the bar to be too high. But once you master the technique of rapid savestates usage, other intricacies of TASing will come easier.</span></p>
+<p class="rvps7"><span class="rvts20">However, now there is Taseditor. It revokes the need to train fingers, allowing to quickly navigate the movie without using Bookmarks. Also, you don't need to accustom to constant backups into </span><span class="rvts23">F1</span><span class="rvts20">, since there is the History Log. So technically you can forget about the traditional method and right away start editing the movie and testing approaches using the </span><a class="rvts24" href="NonlinearTASing.html">nonlinear method of TASing</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">Anyway, Taseditor slightly expands possibilities of the traditional method:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li style="text-indent: 30px" class="rvps15"><span class="rvts20">New ways to navigate with the Playback cursor, allowing to get to the needed place faster and create savestates less often.</span></li>
+ <li style="text-indent: 30px" class="rvps15"><span class="rvts20">When loading a Bookmark, the movie doesn't truncate after the bookmarked frame. This allows, for example, to record the segment of frames 900-1000 and then rerecord the segment 700-900 without losing the data from 900-1000.</span></li>
+ <li class="rvps7"><span class="rvts20">All possibilities of an external Input editor (copy/paste, etc).</span></li>
+ <li class="rvps7"><span class="rvts20">Visualization of Bookmarks, Input, lag and so on.</span></li>
+ <li class="rvps7"><span class="rvts20">Additional tools: multitracking, superimposing, auto-adjustment of Input, etc.</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Pros of the method:</span></p>
-<p class="rvps14"><span class="rvts46">+ </span><span class="rvts21">The process is intuitive for any gamer.</span></p>
-<p class="rvps14"><span class="rvts46">+ </span><span class="rvts21">Constant feedback allows to adapt to the game while editing the Input, adjust your decisions and discard incorrect approaches prematurely.</span></p>
-<p class="rvps14"><span class="rvts46">+ </span><span class="rvts21">The boundaries of current segment are always marked with Bookmarks (for navigation), thus training TASer to be orderly (which will pay off).</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Cons of the method:</span></p>
-<p class="rvps14"><span class="rvts46">– </span><span class="rvts21">The insistent game feedback provokes TASer to discard some illogical but potentially advantageous approaches.</span></p>
-<p class="rvps14"><span class="rvts46">–</span><span class="rvts25"> </span><span class="rvts21">Slow navigation may distract and increase fatigability.</span></p>
-<p class="rvps14"><span class="rvts46">–</span><span class="rvts25"> </span><span class="rvts21">Since the number of Bookmarks is limited, the markings of previous segments are lost when creating a new segment, so you have to write down some things in a text file.</span></p>
-<p class="rvps14"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">When the method is recommended to use: </span><span class="rvts21">never. You can use the Recording to make the first test playthrough of a segment (or the whole game), i.e. when you don't need precision. But for polishing a segment this method is inferior. Yet it's reasonable to learn it, because many modern emulators have sufficient tools for applying the method, while Taseditor is only in FCEUX as yet.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a class="rvts27" href="NonlinearTASing.html">The next method</a><span class="rvts21"> is more effective, but it even less resembles a normal gaming.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Pros of the method:</span></p>
+<p class="rvps9"><span class="rvts21">+ </span><span class="rvts20">The process is intuitive for any gamer.</span></p>
+<p class="rvps9"><span class="rvts21">+ </span><span class="rvts20">Constant feedback allows to adapt to the game while editing the Input, adjust your decisions and discard incorrect approaches prematurely.</span></p>
+<p class="rvps9"><span class="rvts21">+ </span><span class="rvts20">The boundaries of current segment are always marked with Bookmarks (for navigation), thus training TASer to be orderly (which will pay off).</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Cons of the method:</span></p>
+<p class="rvps9"><span class="rvts21">– </span><span class="rvts20">The insistent game feedback provokes TASer to discard some illogical but potentially advantageous approaches.</span></p>
+<p class="rvps9"><span class="rvts21">–</span><span class="rvts22"> </span><span class="rvts20">Slow navigation may distract and increase fatigability.</span></p>
+<p class="rvps9"><span class="rvts21">–</span><span class="rvts22"> </span><span class="rvts20">Since the number of Bookmarks is limited, the markings of previous segments are lost when creating a new segment, so you have to write down some things in a text file.</span></p>
+<p class="rvps9"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">When the method is recommended to use: </span><span class="rvts20">never. You can use the Recording to make the first test playthrough of a segment (or the whole game), i.e. when you don't need precision. But for polishing a segment this method is inferior. Yet it's reasonable to learn it, because many modern emulators have sufficient tools for applying the method, while Taseditor is only in FCEUX as yet.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a class="rvts34" href="NonlinearTASing.html">The next method</a><span class="rvts20"> is more effective, but it even less resembles a normal gaming.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/feature-tour">Easily create CHM Help documents</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/feature-tour">Easily create Web Help sites</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

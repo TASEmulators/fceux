@@ -1,145 +1,336 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>1. Introduction</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("Introduction");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>1. Introduction</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="1. Introduction">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="1. Introduction" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>1. Introduction</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="BeginnersGuide.html">Beginner's Guide</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="BeginnersGuide.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="BeginnersGuide.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="ProgramInterface.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="Introduction"
+		  data-hnd-context="4"
+		  data-hnd-title="1. Introduction"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="BeginnersGuide.html">Beginner's Guide</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="BeginnersGuide.html" title="Beginner's Guide" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="BeginnersGuide.html" title="Beginner's Guide" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="ProgramInterface.html" title="2. Program Interface" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>1. Introduction</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">Introduction</span></p>
+<p class="rvps2"><span class="rvts18">Introduction</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/famtasia-smb3j.png"/></p>
-<p class="rvps10"><span class="rvts21">TASing – the process of creating an extraordinary game playthrough. For a true TASer, just simply beating the game is not enough. You must do something unique, something that would justify the use of tools.</span></p>
-<p class="rvps10"><span class="rvts21">And that requires a non-standard way of thinking. During a regular playing, almost entire flow of our thoughts is determined by the gameplay rules, and those who try to question the rules are quickly fined with a game over and other means. These trivial psychological methods help the game to direct player's fantasy to an intended path, giving him a credible atmosphere of integral world and keeping him within a craftily devised comfort zone.</span></p>
-<p class="rvps10"><span class="rvts21">So, to create an extraordinary playthrough, TASer needs to both use emulator tools masterfully and be able to mentally abstract from the original game rules, while still obeying them physically (because TASing is not cheating, we won't influence the game other way than by joypad input).</span></p>
-<p class="rvps10"><span class="rvts21">Early TASing, just as regular speedrunning, was not too far away from the "normal" gaming process. TASer simply launched an emulator, switched on buttons logging and played a game, saving and loading often enough to fix the most obvious mistakes, slowing down the gameplay at the most intense moments, thus compensating for the slow reaction of the human organism.</span></p>
-<p class="rvps10"><span class="rvts21">The ability to fix mistakes emancipates man's imagination and incites him to experiment. Illusions of the game realm now confine his mind much less than before. But real-world stereotypes still affect his thinking. For instance, if a harmful object usually kills you, it's only natural to assume it always kills. But in truth it may appear to be killing only at even frame numbers, or when the subpixel value is equal to zero. But how would you guess it using only savestates and slowdown?</span></p>
-<p class="rvps10"><span class="rvts21">You have to stop being a gamer and become a researcher. And there are tools made exactly for this mental transformation.</span></p>
-<p class="rvps10"><span class="rvts21">A huge breakthrough in the TASing history was the introduction of </span><span class="rvts25">Frame Advance</span><span class="rvts21"> – a frame-by-frame emulation. Now when you're TASing, the game is constantly being held paused, thus allowing to analyze every in-game aspect separately. Before, even with a strong slowdown the game still appeared as a coherent stream of events. The stream that the player had to perceive as a complex emotional cocktail. And now with frame-by-frame play TASer can mentally isolate any given event of the current frame. This drastically changes the principles of consuming an in-game information. Material world stereotypes don't dictate how to act in the virtual world anymore, and you see the game more objectively, thus finding imperfections and loopholes in its rules.</span></p>
-<p class="rvps10"><span class="rvts21">Of course the game still keeps trying to impose typical behavior templates, and they are harder to resist when you're newbie rather than experienced TASer. That's the main reason why a skilled TASer can beat someone's speedrun (even his own old TAS) – not because of handling the tools better, but because of "Déformation professionnelle" that helps to notice vulnerabilities in games.</span></p>
-<p class="rvps10"><span class="rvts21">Many more TASing tools were invented since then, but the very way of interaction between a TASer and a game remained the same. Using rerecords, TASer edits Input in the same succession as the flow of in-game time. This linearity of TASing process builds certain limits in TASer's thinking. When you get used to receiving the game reaction on each button press, you involuntarily associate yourself with a game character. This makes it harder to look at the events from an outsider's viewpoint. And yet a TASer is expected to have the most objective point of view possible. Thus we need further transformation of TASer's way of perception.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The development of the toolset named "TAS Editor" aims for 2 main goals:</span></p>
-<ol style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps14"><span class="rvts21">to lower the threshold of joining TASing</span></li>
-<li class="rvps14"><span class="rvts21">to raise the objectivity of gameplay analysis</span></li>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/famtasia-smb3j.png"></p>
+<p class="rvps7"><span class="rvts20">TASing – the process of creating an extraordinary game playthrough. For a true TASer, just simply beating the game is not enough. You must do something unique, something that would justify the use of tools.</span></p>
+<p class="rvps7"><span class="rvts20">And that requires a non-standard way of thinking. During a regular playing, almost entire flow of our thoughts is determined by the gameplay rules, and those who try to question the rules are quickly fined with a game over and other means. These trivial psychological methods help the game to direct player's fantasy to an intended path, giving him a credible atmosphere of integral world and keeping him within a craftily devised comfort zone.</span></p>
+<p class="rvps7"><span class="rvts20">So, to create an extraordinary playthrough, TASer needs to both use emulator tools masterfully and be able to mentally abstract from the original game rules, while still obeying them physically (because TASing is not cheating, we won't influence the game other way than by joypad input).</span></p>
+<p class="rvps7"><span class="rvts20">Early TASing, just as regular speedrunning, was not too far away from the "normal" gaming process. TASer simply launched an emulator, switched on buttons logging and played a game, saving and loading often enough to fix the most obvious mistakes, slowing down the gameplay at the most intense moments, thus compensating for the slow reaction of the human organism.</span></p>
+<p class="rvps7"><span class="rvts20">The ability to fix mistakes emancipates man's imagination and incites him to experiment. Illusions of the game realm now confine his mind much less than before. But real-world stereotypes still affect his thinking. For instance, if a harmful object usually kills you, it's only natural to assume it always kills. But in truth it may appear to be killing only at even frame numbers, or when the subpixel value is equal to zero. But how would you guess it using only savestates and slowdown?</span></p>
+<p class="rvps7"><span class="rvts20">You have to stop being a gamer and become a researcher. And there are tools made exactly for this mental transformation.</span></p>
+<p class="rvps7"><span class="rvts20">A huge breakthrough in the TASing history was the introduction of </span><span class="rvts22">Frame Advance</span><span class="rvts20"> – a frame-by-frame emulation. Now when you're TASing, the game is constantly being held paused, thus allowing to analyze every in-game aspect separately. Before, even with a strong slowdown the game still appeared as a coherent stream of events. The stream that the player had to perceive as a complex emotional cocktail. And now with frame-by-frame play TASer can mentally isolate any given event of the current frame. This drastically changes the principles of consuming an in-game information. Material world stereotypes don't dictate how to act in the virtual world anymore, and you see the game more objectively, thus finding imperfections and loopholes in its rules.</span></p>
+<p class="rvps7"><span class="rvts20">Of course the game still keeps trying to impose typical behavior templates, and they are harder to resist when you're newbie rather than experienced TASer. That's the main reason why a skilled TASer can beat someone's speedrun (even his own old TAS) – not because of handling the tools better, but because of "Déformation professionnelle" that helps to notice vulnerabilities in games.</span></p>
+<p class="rvps7"><span class="rvts20">Many more TASing tools were invented since then, but the very way of interaction between a TASer and a game remained the same. Using rerecords, TASer edits Input in the same succession as the flow of in-game time. This linearity of TASing process builds certain limits in TASer's thinking. When you get used to receiving the game reaction on each button press, you involuntarily associate yourself with a game character. This makes it harder to look at the events from an outsider's viewpoint. And yet a TASer is expected to have the most objective point of view possible. Thus we need further transformation of TASer's way of perception.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The development of the toolset named "TAS Editor" aims for 2 main goals:</span></p>
+<ol style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: decimal;">
+ <li value="1" class="rvps9"><span class="rvts20">to lower the threshold of joining TASing</span></li>
+ <li value="2" class="rvps9"><span class="rvts20">to raise the objectivity of gameplay analysis</span></li>
 </ol>
-<p class="rvps14"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The first goal is achieved by detailed visualization of all major aspects of TASing.</span></p>
-<p class="rvps10"><span class="rvts21">The second goal is achieved by switching from linear recording of movie segments to non-linear Input editing. The higher level of abstracting from in-game rules is reached by giving the TASer the following new abilities:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps15"><span class="rvts0"><span class="rvts21">changing Input in any arbitrary order (not just in the order the events flow in the game) – thanks to Piano Roll interface</span></span></li>
-<li class="rvps15"><span class="rvts0"><span class="rvts21">watching game events in an arbitrary order (not just frame by frame) – thanks to Greenzone</span></span></li>
-<li class="rvps15"><span class="rvts0"><span class="rvts21">emphasizing the Cause-Effect relation between Input and its remote consequences (not just the nearest ones) – thanks to Turbo-seeking</span></span></li>
-<li class="rvps15"><span class="rvts0"><span class="rvts21">enforcing custom logic of the movie segmentation (not just dividing into TV frames or into in-game levels) – thanks to Markers</span></span></li>
+<p class="rvps9"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The first goal is achieved by detailed visualization of all major aspects of TASing.</span></p>
+<p class="rvps7"><span class="rvts20">The second goal is achieved by switching from linear recording of movie segments to non-linear Input editing. The higher level of abstracting from in-game rules is reached by giving the TASer the following new abilities:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps10"><span class="rvts0"><span class="rvts20">changing Input in any arbitrary order (not just in the order the events flow in the game) – thanks to Piano Roll interface</span></span></li>
+ <li class="rvps10"><span class="rvts0"><span class="rvts20">watching game events in an arbitrary order (not just frame by frame) – thanks to Greenzone</span></span></li>
+ <li class="rvps10"><span class="rvts0"><span class="rvts20">emphasizing the Cause-Effect relation between Input and its remote consequences (not just the nearest ones) – thanks to Turbo-seeking</span></span></li>
+ <li class="rvps10"><span class="rvts0"><span class="rvts20">enforcing custom logic of the movie segmentation (not just dividing into TV frames or into in-game levels) – thanks to Markers</span></span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">In addition, TAS Editor 1.0 developed some old TASing tools up to a new level:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps14"><span class="rvts21">Lag log – evolved from Lag counter</span></li>
-<li class="rvps14"><span class="rvts21">Input log – evolved from Input Display</span></li>
-<li class="rvps14"><span class="rvts21">step-by-step undo – in addition to movie state reloads</span></li>
-<li class="rvps14"><span class="rvts21">inbuilt editor – in place of hex-editors and a Notepad</span></li>
-<li class="rvps14"><span class="rvts21">auto-identification of current logical segment – in addition to current frame number display</span></li>
-<li class="rvps14"><span class="rvts21">Selection counter (ruler) – in addition to frame counter</span></li>
-<li class="rvps14"><span class="rvts21">patterns – in place of Autofire settings</span></li>
-<li class="rvps14"><span class="rvts21">Superimpose – in place of Auto-hold</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">In addition, TAS Editor 1.0 developed some old TASing tools up to a new level:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps9"><span class="rvts20">Lag log – evolved from Lag counter</span></li>
+ <li class="rvps9"><span class="rvts20">Input log – evolved from Input Display</span></li>
+ <li class="rvps9"><span class="rvts20">step-by-step undo – in addition to movie state reloads</span></li>
+ <li class="rvps9"><span class="rvts20">inbuilt editor – in place of hex-editors and a Notepad</span></li>
+ <li class="rvps9"><span class="rvts20">auto-identification of current logical segment – in addition to current frame number display</span></li>
+ <li class="rvps9"><span class="rvts20">Selection counter (ruler) – in addition to frame counter</span></li>
+ <li class="rvps9"><span class="rvts20">patterns – in place of Autofire settings</span></li>
+ <li class="rvps9"><span class="rvts20">Superimpose – in place of Auto-hold</span></li>
 </ul>
-<p class="rvps14"><span class="rvts21"><br/></span></p>
-<p class="rvps14"><span class="rvts21">When launching Taseditor, get ready to control the game from bird's eye view. The following chapters of this tutorial will explain you almost everything a prolific TASer needs to know. If you already have an experience in traditional TASing, some learning aspects should come easier, but some may appear more difficult to you than to a newcomer. Either way, try to finish the whole Guide, and you will likely learn a thing or two about TASing in general.</span></p>
-<p class="rvps14"><span class="rvts21">One of the most unconventional features of TASing with Taseditor is the stress on mouse control. Mouse allows high speed of Input editing and unparalleled convenience of Playback navigation. Even though most of Taseditor functions also have keyboard shortcuts, the comfortable work would be impossible without a mouse.</span></p>
-<p class="rvps14"><span class="rvts21">The gamepad is useful when you need to quickly record an Input without caring about accuracy. But most of his time TASer spends on various manipulations with once created Input. And here the mouse or keyboard becomes much more handy than gamepad. For example, using a key combination you can move any part of Input one frame back or forth. And when you need to adjust the jump height (the duration of holding the </span><span class="rvts29">A</span><span class="rvts21"> button), it's easier to do it with single click, than to switch Recording on and retype the whole range of frames.</span></p>
-<p class="rvps10"><span class="rvts21">Nevertheless, it's still possible to work in Taseditor the same way people were TASing before. The program interface supports all essential aspects of the traditional TASing method. If you were to use the TAS Editor window only as an informational panel left in a corner of the desktop, you probably would not even notice any difference from usual flow of TASing. It can be good reason to smoothly move from the old method of TASing to the new one. At first you may only like some accessory features of Taseditor, such as the Lag visualization or the Branches Tree. Then you'll need some Input copy/paste, and Taseditor is better alternative to an external editor. After some time you'll notice that direct Input editing turns out faster than rerecording.</span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/chip-and-dale.png"/></p>
-<p class="rvps10"><span class="rvts21">Advantages of the new method reveal themselves quicker when you're making a TAS controlling 2 and more players simultaneously. In old times people invented plenty of hacks and workarounds to make such kind of TASing easier, e.g. binding several buttons to one key, using "Auto-hold", macros and custom multitracking scripts. Now all of this is irrelevant with Taseditor, because here TASer does not play the role of a gamer that associates himself with the controlled character. Now you are not playing the game, you are meditating over the decomposed continuum of the game, while creating a scenario of events via Input. And thus it's does not matter whether you control 1 character, or 2, or many.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Taseditor was also designed to reduce the rut. There are always lots of tedious recurring activities in TASing. Surely, the program won't save you from the necessity to test all possible branches of gameplay development, but it automates some actions and increases the efficiency in many little things, allowing TASer to keep patience longer than during raw TASing.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Interesting facts:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">During the development of TAS Editor the actual programming took less time than was spent on figuring out the ways to improve the TASing process.</span></li>
-<li class="rvps10"><span class="rvts21">Most of the actions in Taseditor can be done multiple ways.</span></li>
-<li class="rvps10"><span class="rvts21">Any operation can be undone and redone.</span></li>
-<li class="rvps10"><span class="rvts21">You can totally ignore any part of Taseditor's functionality, using only the features you actually like.</span></li>
+<p class="rvps9"><span class="rvts20"><br/></span></p>
+<p class="rvps9"><span class="rvts20">When launching Taseditor, get ready to control the game from bird's eye view. The following chapters of this tutorial will explain you almost everything a prolific TASer needs to know. If you already have an experience in traditional TASing, some learning aspects should come easier, but some may appear more difficult to you than to a newcomer. Either way, try to finish the whole Guide, and you will likely learn a thing or two about TASing in general.</span></p>
+<p class="rvps9"><span class="rvts20">One of the most unconventional features of TASing with Taseditor is the stress on mouse control. Mouse allows high speed of Input editing and unparalleled convenience of Playback navigation. Even though most of Taseditor functions also have keyboard shortcuts, the comfortable work would be impossible without a mouse.</span></p>
+<p class="rvps9"><span class="rvts20">The gamepad is useful when you need to quickly record an Input without caring about accuracy. But most of his time TASer spends on various manipulations with once created Input. And here the mouse or keyboard becomes much more handy than gamepad. For example, using a key combination you can move any part of Input one frame back or forth. And when you need to adjust the jump height (the duration of holding the </span><span class="rvts26">A</span><span class="rvts20"> button), it's easier to do it with single click, than to switch Recording on and retype the whole range of frames.</span></p>
+<p class="rvps7"><span class="rvts20">Nevertheless, it's still possible to work in Taseditor the same way people were TASing before. The program interface supports all essential aspects of the traditional TASing method. If you were to use the TAS Editor window only as an informational panel left in a corner of the desktop, you probably would not even notice any difference from usual flow of TASing. It can be good reason to smoothly move from the old method of TASing to the new one. At first you may only like some accessory features of Taseditor, such as the Lag visualization or the Branches Tree. Then you'll need some Input copy/paste, and Taseditor is better alternative to an external editor. After some time you'll notice that direct Input editing turns out faster than rerecording.</span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/chip-and-dale.png"></p>
+<p class="rvps7"><span class="rvts20">Advantages of the new method reveal themselves quicker when you're making a TAS controlling 2 and more players simultaneously. In old times people invented plenty of hacks and workarounds to make such kind of TASing easier, e.g. binding several buttons to one key, using "Auto-hold", macros and custom multitracking scripts. Now all of this is irrelevant with Taseditor, because here TASer does not play the role of a gamer that associates himself with the controlled character. Now you are not playing the game, you are meditating over the decomposed continuum of the game, while creating a scenario of events via Input. And thus it's does not matter whether you control 1 character, or 2, or many.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Taseditor was also designed to reduce the rut. There are always lots of tedious recurring activities in TASing. Surely, the program won't save you from the necessity to test all possible branches of gameplay development, but it automates some actions and increases the efficiency in many little things, allowing TASer to keep patience longer than during raw TASing.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Interesting facts:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">During the development of TAS Editor the actual programming took less time than was spent on figuring out the ways to improve the TASing process.</span></li>
+ <li class="rvps7"><span class="rvts20">Most of the actions in Taseditor can be done multiple ways.</span></li>
+ <li class="rvps7"><span class="rvts20">Any operation can be undone and redone.</span></li>
+ <li class="rvps7"><span class="rvts20">You can totally ignore any part of Taseditor's functionality, using only the features you actually like.</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Special attention was paid to user interface. When you gain enough experience, you'll be able to do most of things mechanically, staying focused on the in-game situation analysis.</span></p>
-<p class="rvps10"><span class="rvts21">If you happen to get a nice idea how to reduce the rut some more, feel free to post on TASVideos forums. Many ideas implemented in TAS Editor were first voiced on these forums as "dream tools".</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Besides the new approach to TASing, Taseditor offers simple means for organization of your working process. Because of unsystematic approach to TASing many newcomers waste their time ineffectively, dissipate the effort and get tired quickly, then start to save the energy by reducing the amount of tests. As a result, they end up with a very suboptimal TAS. Then, as the time goes, they acquire a set of methods and habits, become experienced TASers. But every newbie had to learn by his own mistakes. In this Guide we will try to formulate a clear notion on a methodical TASing (both traditional and new), so that newcomers can realize the essence of the process faster.</span></p>
-<p class="rvps10"><span class="rvts21">Working with Taseditor is pretty similar to an interactive programming using an interpreted language. You just edit the code and instantly see the result of its execution on the screen. TASer can either immediately observe the effect of his interim actions, or he can get carried away by the construction of a code section and watch the result only after the section is finished.</span></p>
-<p class="rvps10"><span class="rvts21">Programmers have the valuable ability to increase the code readability with comments. It allows to keep more clear picture of the project in mind, and proceed without constant re-inspection of results, because in most cases the result is rather predictable, when the context is known. </span><span class="rvts21">Also, good code readability allows to quickly refresh all necessary memories when you return to a project delayed long ago. Granted that this project was well documented.</span></p>
-<p class="rvps10"><span class="rvts21">Taseditor encourages documenting of TAS projects on the fly – you can write comments, assign clear names to structures (patterns and Input sections), test different code versions in separate branches of the repository (see "Branches Tree") and efficiently work in co-authorship. And no, there's no strict conventions to follow. You set your own rules for when and how to shape your project. For example, if you didn't hesitate to describe a trick used in the first level, in next levels you'll be able to quickly duplicate the trick's Input by several key strokes. If you didn't – you'll have to search the trick location manually. In simple TASes you can disregard comments and any long-term plans, but in complicated projects this program functionality should be very appropriate.</span></p>
-<p class="rvps10"><a class="rvts27" href="http://tasvideos.org" target="_blank">TASVideos.org</a><span class="rvts21"> site supports uploading and publishing Taseditor projects (.fm3 files), so you can publish not just the TAS movie, but your groundwork as well, encouraging the spirit of openness and mutual aid. If you don't want to share, export the data to .fm2 format and upload that.</span></p>
-<p class="rvps10"><span class="rvts21">FM3 files are played back by FCEUX emulator since version 2.2.0 the same way as FM2 files. Older versions of FCEUX can also play such files if you change the extension to fm2.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Next chapter: </span><a class="rvts28" href="ProgramInterface.html">learning the basics of the program usage</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Special attention was paid to user interface. When you gain enough experience, you'll be able to do most of things mechanically, staying focused on the in-game situation analysis.</span></p>
+<p class="rvps7"><span class="rvts20">If you happen to get a nice idea how to reduce the rut some more, feel free to post on TASVideos forums. Many ideas implemented in TAS Editor were first voiced on these forums as "dream tools".</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Besides the new approach to TASing, Taseditor offers simple means for organization of your working process. Because of unsystematic approach to TASing many newcomers waste their time ineffectively, dissipate the effort and get tired quickly, then start to save the energy by reducing the amount of tests. As a result, they end up with a very suboptimal TAS. Then, as the time goes, they acquire a set of methods and habits, become experienced TASers. But every newbie had to learn by his own mistakes. In this Guide we will try to formulate a clear notion on a methodical TASing (both traditional and new), so that newcomers can realize the essence of the process faster.</span></p>
+<p class="rvps7"><span class="rvts20">Working with Taseditor is pretty similar to an interactive programming using an interpreted language. You just edit the code and instantly see the result of its execution on the screen. TASer can either immediately observe the effect of his interim actions, or he can get carried away by the construction of a code section and watch the result only after the section is finished.</span></p>
+<p class="rvps7"><span class="rvts20">Programmers have the valuable ability to increase the code readability with comments. It allows to keep more clear picture of the project in mind, and proceed without constant re-inspection of results, because in most cases the result is rather predictable, when the context is known. </span><span class="rvts20">Also, good code readability allows to quickly refresh all necessary memories when you return to a project delayed long ago. Granted that this project was well documented.</span></p>
+<p class="rvps7"><span class="rvts20">Taseditor encourages documenting of TAS projects on the fly – you can write comments, assign clear names to structures (patterns and Input sections), test different code versions in separate branches of the repository (see "Branches Tree") and efficiently work in co-authorship. And no, there's no strict conventions to follow. You set your own rules for when and how to shape your project. For example, if you didn't hesitate to describe a trick used in the first level, in next levels you'll be able to quickly duplicate the trick's Input by several key strokes. If you didn't – you'll have to search the trick location manually. In simple TASes you can disregard comments and any long-term plans, but in complicated projects this program functionality should be very appropriate.</span></p>
+<p class="rvps7"><a class="rvts24" href="http://tasvideos.org" target="_blank">TASVideos.org</a><span class="rvts20"> site supports uploading and publishing Taseditor projects (.fm3 files), so you can publish not just the TAS movie, but your groundwork as well, encouraging the spirit of openness and mutual aid. If you don't want to share, export the data to .fm2 format and upload that.</span></p>
+<p class="rvps7"><span class="rvts20">FM3 files are played back by FCEUX emulator since version 2.2.0 the same way as FM2 files. Older versions of FCEUX can also play such files if you change the extension to fm2.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Next chapter: </span><a class="rvts25" href="ProgramInterface.html">learning the basics of the program usage</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/feature-tour/iphone-website-generation">Easily create iPhone documentation</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/feature-tour">Easily create Qt Help files</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

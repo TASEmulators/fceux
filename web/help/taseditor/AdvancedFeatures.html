@@ -1,232 +1,423 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>6. Advanced Features</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("AdvancedFeatures");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>6. Advanced Features</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="6. Advanced Features">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="6. Advanced Features" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>6. Advanced Features</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="BeginnersGuide.html">Beginner's Guide</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="BeginnersGuide.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="ProgramCustomization.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="Reference.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="AdvancedFeatures"
+		  data-hnd-context="14"
+		  data-hnd-title="6. Advanced Features"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="BeginnersGuide.html">Beginner's Guide</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="BeginnersGuide.html" title="Beginner's Guide" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="ProgramCustomization.html" title="5. Program customization" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="Reference.html" title="Reference" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>6. Advanced Features</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">Advanced Features</span></p>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps14"><a class="rvts27" href="AdvancedFeatures.html#ProjectsSharing">1. How to share projects.</a></p>
-<p class="rvps14"><a class="rvts27" href="AdvancedFeatures.html#UsingPatterns">2. Patterns usage.</a></p>
-<p class="rvps14"><a class="rvts27" href="AdvancedFeatures.html#UsingMarkers">3. Effective usage of Markers.</a></p>
-<p class="rvps14"><a class="rvts27" href="AdvancedFeatures.html#UsingLua">4. Lua usage.</a></p>
-<p class="rvps10"><span class="rvts22"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps2"><a name="ProjectsSharing"></a>
-<span class="rvts48"><br/></span></p>
-<p class="rvps10"><span class="rvts22">1. How to share projects.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">A Taseditor project is saved to disk as an .fm3 file. All essential aspects of the work process are saved into this file, making it possible to restore the postponed work in its exact state. The size of such "instant snapshot" may be pretty huge (depending on the Greenzone size, it may take hundreds of megabytes).</span></p>
-<p class="rvps10"><span class="rvts21">When you want to publish your project in the Internet (for example, as a TASVideos submission), it's better to share only the most important information, but not the whole snapshot of your working process. To do that, choose </span><span class="rvts25">File -&gt; Save Compact</span><span class="rvts21"> in Taseditor's main menu. The "Save Compact" window will appear, prompting you to select which aspects you want to save to the new FM3 file.</span></p>
-<p class="rvps10"><img align="left" alt="" style="padding : 6px;" src="lib/save-compact.png"/></p>
-<p class="rvps10"><span class="rvts25">Binary format of Input</span><span class="rvts21"> – save movie Input in binary form. This option is related to fm2 format, which is the base of the fm3 format. If you uncheck it, Input will be saved to the fm3 file in text format, which will increase file size but leave the possibility to edit it in any text editor. However, Taseditor is much better suited for editing movies, so it's recommended to keep that checkbox set, and avoid changing FM3 projects outside Taseditor. Anyway, in non-compact fm3 projects (saved regular way) Input is always stored in binary.</span></p>
-<p class="rvps10"><span class="rvts25">Markers</span><span class="rvts21"> – save Markers to the file. The movie Input is always saved to fm3 file, because without it emulator won't be able to open fm3 files. But without Markers the movie replay is still possible, so you can uncheck the checkbox if you don't want to share them. Although this way your fm3 won't differ much from an fm2 movie, so it's recommended to leave that checkbox checked, to share all current Markers and their Notes in the compact project. The file size will increase insignificantly.</span></p>
-<p class="rvps10"><span class="rvts25">Bookmarks</span><span class="rvts21"> – save all Bookmarks and their branches data to the file. It's recommended to leave this option checked. The file size will increase insignificantly.</span></p>
-<p class="rvps10"><span class="rvts25">History</span><span class="rvts21"> – save History Log to the file. The file size will increase by several megabytes. Usually there's no need to publish the data. So it's recommended to uncheck this option. When you open an fm3 project with no History Log, Taseditor creates a new History automatically.</span></p>
-<p class="rvps10"><span class="rvts25">Piano Roll</span><span class="rvts21"> – save current position of vertical scrolling of the Piano Roll, in order to see the exact segment of the movie after loading the compact fm3 file. The file size will increase insignificantly, so you may keep that option checked.</span></p>
-<p class="rvps10"><span class="rvts25">Selection</span><span class="rvts21"> – save all Selection data to the file. Both current Selection and whole Selection History is saved. The file size will increase insignificantly, but usually there's no need to publish the data. So it's recommended to uncheck this option.</span></p>
-<p class="rvps10"><span class="rvts25">Greenzone saving options</span><span class="rvts21"> – here you can choose how the Greenzone should be saved. Greenzone is the main factor causing huge project file size. So it's recommended to choose partial saving or not save the Greenzone at all.</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts25">all frames</span><span class="rvts21"> – save entire Greenzone. The file size will increase dramatically!</span></li>
-<li class="rvps10"><span class="rvts25">every 16th frame</span><span class="rvts21"> – save only every 16th frame. The file size will increase dramatically.</span></li>
-<li class="rvps10"><span class="rvts25">marked frames</span><span class="rvts21"> – save only marked frames. The file size will increase depending on the number of Markers in your project.</span></li>
-<li class="rvps10"><span class="rvts25">don't save</span><span class="rvts21"> – the Greenzone will not be saved. If during the compact saving the Playback cursor is at the very first frame of the movie, there will be no single Greenzone savestate in the fm3 project. But if the cursor was left at some frame in the middle of the movie, the compact fm3 will contain one Greenzone savestate, allowing to restore the emulator state on the Playback cursor frame when you open the project. Since one savestate uses very little disk space, the file is still compact.</span></li>
+<p class="rvps2"><span class="rvts18">Advanced Features</span></p>
+<p class="rvps2"><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts20"><br/></span></p>
+<p class="rvps9"><a class="rvts24" href="AdvancedFeatures.html#ProjectsSharing">1. How to share projects.</a></p>
+<p class="rvps9"><a class="rvts24" href="AdvancedFeatures.html#UsingPatterns">2. Patterns usage.</a></p>
+<p class="rvps9"><a class="rvts24" href="AdvancedFeatures.html#UsingMarkers">3. Effective usage of Markers.</a></p>
+<p class="rvps9"><a class="rvts24" href="AdvancedFeatures.html#UsingLua">4. Lua usage.</a></p>
+<p class="rvps7"><span class="rvts21"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><a name="ProjectsSharing"></a><span class="rvts22"><br/></span></p>
+<p class="rvps7"><span class="rvts21">1. How to share projects.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">A Taseditor project is saved to disk as an .fm3 file. All essential aspects of the work process are saved into this file, making it possible to restore the postponed work in its exact state. The size of such "instant snapshot" may be pretty huge (depending on the Greenzone size, it may take hundreds of megabytes).</span></p>
+<p class="rvps7"><span class="rvts20">When you want to publish your project in the Internet (for example, as a TASVideos submission), it's better to share only the most important information, but not the whole snapshot of your working process. To do that, choose </span><span class="rvts22">File -&gt; Save Compact</span><span class="rvts20"> in Taseditor's main menu. The "Save Compact" window will appear, prompting you to select which aspects you want to save to the new FM3 file.</span></p>
+<p class="rvps7"><img alt="" style="float: left; padding : 6px;" src="lib/save-compact.png"></p>
+<p class="rvps7"><span class="rvts22">Binary format of Input</span><span class="rvts20"> – save movie Input in binary form. This option is related to fm2 format, which is the base of the fm3 format. If you uncheck it, Input will be saved to the fm3 file in text format, which will increase file size but leave the possibility to edit it in any text editor. However, Taseditor is much better suited for editing movies, so it's recommended to keep that checkbox set, and avoid changing FM3 projects outside Taseditor. Anyway, in non-compact fm3 projects (saved regular way) Input is always stored in binary.</span></p>
+<p class="rvps7"><span class="rvts22">Markers</span><span class="rvts20"> – save Markers to the file. The movie Input is always saved to fm3 file, because without it emulator won't be able to open fm3 files. But without Markers the movie replay is still possible, so you can uncheck the checkbox if you don't want to share them. Although this way your fm3 won't differ much from an fm2 movie, so it's recommended to leave that checkbox checked, to share all current Markers and their Notes in the compact project. The file size will increase insignificantly.</span></p>
+<p class="rvps7"><span class="rvts22">Bookmarks</span><span class="rvts20"> – save all Bookmarks and their branches data to the file. It's recommended to leave this option checked. The file size will increase insignificantly.</span></p>
+<p class="rvps7"><span class="rvts22">History</span><span class="rvts20"> – save History Log to the file. The file size will increase by several megabytes. Usually there's no need to publish the data. So it's recommended to uncheck this option. When you open an fm3 project with no History Log, Taseditor creates a new History automatically.</span></p>
+<p class="rvps7"><span class="rvts22">Piano Roll</span><span class="rvts20"> – save current position of vertical scrolling of the Piano Roll, in order to see the exact segment of the movie after loading the compact fm3 file. The file size will increase insignificantly, so you may keep that option checked.</span></p>
+<p class="rvps7"><span class="rvts22">Selection</span><span class="rvts20"> – save all Selection data to the file. Both current Selection and whole Selection History is saved. The file size will increase insignificantly, but usually there's no need to publish the data. So it's recommended to uncheck this option.</span></p>
+<p class="rvps7"><span class="rvts22">Greenzone saving options</span><span class="rvts20"> – here you can choose how the Greenzone should be saved. Greenzone is the main factor causing huge project file size. So it's recommended to choose partial saving or not save the Greenzone at all.</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts22">all frames</span><span class="rvts20"> – save entire Greenzone. The file size will increase dramatically!</span></li>
+ <li class="rvps7"><span class="rvts22">every 16th frame</span><span class="rvts20"> – save only every 16th frame. The file size will increase dramatically.</span></li>
+ <li class="rvps7"><span class="rvts22">marked frames</span><span class="rvts20"> – save only marked frames. The file size will increase depending on the number of Markers in your project.</span></li>
+ <li class="rvps7"><span class="rvts22">don't save</span><span class="rvts20"> – the Greenzone will not be saved. If during the compact saving the Playback cursor is at the very first frame of the movie, there will be no single Greenzone savestate in the fm3 project. But if the cursor was left at some frame in the middle of the movie, the compact fm3 will contain one Greenzone savestate, allowing to restore the emulator state on the Playback cursor frame when you open the project. Since one savestate uses very little disk space, the file is still compact.</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Using compact saving you can get an fm3 project being less than 500KB in size, while still sharing all essential data the recipient may need. For example, if you are working in co-authorship with another TASer(s), you will need to share not only Input, but also Markers and Bookmarks. As for the Greenzone, the recipient can recreate it by replaying the project movie in Taseditor.</span></p>
-<p class="rvps10"><span class="rvts21">On compact saving, your project name receives the "-compact" suffix. Compact saving doesn't replace normal project saving, so if you have any unsaved changes in the project, the asterisk in the window caption will not disappear after Save Compact.</span></p>
-<p class="rvps10"><img align="left" alt="" style="padding : 6px;" src="lib/export-to-fm2.png"/></p>
-<p class="rvps10"><span class="rvts21">Besides saving a compact fm3 you can also export movie data to fm2 format, accepted at TASVideos before Taseditor even existed. But in such files you will share only Input. To do that, choose </span><span class="rvts25">File -&gt; Export to FM2</span><span class="rvts21"> in Taseditor's main menu. The "Export to FM2" window will appear, prompting you to choose target movie type (1P, 2P, Fourscore).</span></p>
-<p class="rvps10"><span class="rvts21">Since FM2 format also supports text subtitles, you can use existing Marker Notes as a source for generating movie subtitles. For that, enable the "Convert Marker Notes to Movie Subtitles" checkbox. Then while watching the fm2 file the viewers will see text messages appearing when passing certain frames (the frames where your project had Markers at). If necessary, you can then convert those fm2 subtitles into the commonly used .srt format to post the TAS on Youtube. To do that, right-click the FCEUX window while replaying the subtitled movie and choose "Dump Subtitles to SRT file" command.</span></p>
-<p class="rvps10"><span class="rvts21">FM2 files can be opened in Taseditor similarly to loading fm3 projects. In the "Open TAS Editor Project" window (</span><span class="rvts25">File -&gt; Open</span><span class="rvts21">) switch to the filter "All Files (*.*)" and then choose your fm2 movie file. Taseditor will bring the message box saying that this is not a project file, and will ask confirmation. After you click "Yes" it will create new project using Input and settings from the fm2 file.</span></p>
-<p class="rvps10"><span class="rvts21">Also, you can import Input from any fm2 or fm3 file using </span><span class="rvts25">File -&gt; Import Input</span><span class="rvts21">. This time no new project will be created, but Input of current project will be replaced with Input from the file. This operation is very similar to pasting Input from the Clipboard, it is registered in History Log and can be undone by </span><span class="rvts30">Ctrl + Z</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><a name="UsingPatterns"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">2. Patterns usage.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When editing Input, TASer actually creates a unique sequence of presses and releases for every button of joypad. But, despite the uniqueness, this large sequence still contains many typical segments, which are are short sequences of presses and releases that repeat many times in succession, or appear many times in different places of the movie.</span></p>
-<p class="rvps10"><span class="rvts21">To speed up the work, you can remember the most typical or frequent sequences as </span><span class="rvts37">patterns</span><span class="rvts21">, to be able to put them with a couple of clicks, not drawing every single buttonpress manually each time.</span></p>
-<p class="rvps10"><span class="rvts21">Patterns are useful in several cases:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">when one sequence is frequently used in the movie (for example, an accurate alternation of pressing and releasing the </span><span class="rvts29">B</span><span class="rvts21"> button)</span></li>
-<li class="rvps10"><span class="rvts21">when you need the same sequence for several buttons (for example, alternating </span><span class="rvts29">L</span><span class="rvts21"> and </span><span class="rvts29">R</span><span class="rvts21">)</span></li>
-<li class="rvps10"><span class="rvts21">when a certain sequence needs to be drawn (or redrawn) many times (for example, making a running start by tapping </span><span class="rvts29">R</span><span class="rvts21"> twice)</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Using compact saving you can get an fm3 project being less than 500KB in size, while still sharing all essential data the recipient may need. For example, if you are working in co-authorship with another TASer(s), you will need to share not only Input, but also Markers and Bookmarks. As for the Greenzone, the recipient can recreate it by replaying the project movie in Taseditor.</span></p>
+<p class="rvps7"><span class="rvts20">On compact saving, your project name receives the "-compact" suffix. Compact saving doesn't replace normal project saving, so if you have any unsaved changes in the project, the asterisk in the window caption will not disappear after Save Compact.</span></p>
+<p class="rvps7"><img alt="" style="float: left; padding : 6px;" src="lib/export-to-fm2.png"></p>
+<p class="rvps7"><span class="rvts20">Besides saving a compact fm3 you can also export movie data to fm2 format, accepted at TASVideos before Taseditor even existed. But in such files you will share only Input. To do that, choose </span><span class="rvts22">File -&gt; Export to FM2</span><span class="rvts20"> in Taseditor's main menu. The "Export to FM2" window will appear, prompting you to choose target movie type (1P, 2P, Fourscore).</span></p>
+<p class="rvps7"><span class="rvts20">Since FM2 format also supports text subtitles, you can use existing Marker Notes as a source for generating movie subtitles. For that, enable the "Convert Marker Notes to Movie Subtitles" checkbox. Then while watching the fm2 file the viewers will see text messages appearing when passing certain frames (the frames where your project had Markers at). If necessary, you can then convert those fm2 subtitles into the commonly used .srt format to post the TAS on Youtube. To do that, right-click the FCEUX window while replaying the subtitled movie and choose "Dump Subtitles to SRT file" command.</span></p>
+<p class="rvps7"><span class="rvts20">FM2 files can be opened in Taseditor similarly to loading fm3 projects. In the "Open TAS Editor Project" window (</span><span class="rvts22">File -&gt; Open</span><span class="rvts20">) switch to the filter "All Files (*.*)" and then choose your fm2 movie file. Taseditor will bring the message box saying that this is not a project file, and will ask confirmation. After you click "Yes" it will create new project using Input and settings from the fm2 file.</span></p>
+<p class="rvps7"><span class="rvts20">Also, you can import Input from any fm2 or fm3 file using </span><span class="rvts22">File -&gt; Import Input</span><span class="rvts20">. This time no new project will be created, but Input of current project will be replaced with Input from the file. This operation is very similar to pasting Input from the Clipboard, it is registered in History Log and can be undone by </span><span class="rvts27">Ctrl + Z</span><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><a name="UsingPatterns"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">2. Patterns usage.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When editing Input, TASer actually creates a unique sequence of presses and releases for every button of joypad. But, despite the uniqueness, this large sequence still contains many typical segments, which are are short sequences of presses and releases that repeat many times in succession, or appear many times in different places of the movie.</span></p>
+<p class="rvps7"><span class="rvts20">To speed up the work, you can remember the most typical or frequent sequences as </span><span class="rvts33">patterns</span><span class="rvts20">, to be able to put them with a couple of clicks, not drawing every single buttonpress manually each time.</span></p>
+<p class="rvps7"><span class="rvts20">Patterns are useful in several cases:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">when one sequence is frequently used in the movie (for example, an accurate alternation of pressing and releasing the </span><span class="rvts26">B</span><span class="rvts20"> button)</span></li>
+ <li class="rvps7"><span class="rvts20">when you need the same sequence for several buttons (for example, alternating </span><span class="rvts26">L</span><span class="rvts20"> and </span><span class="rvts26">R</span><span class="rvts20">)</span></li>
+ <li class="rvps7"><span class="rvts20">when a certain sequence needs to be drawn (or redrawn) many times (for example, making a running start by tapping </span><span class="rvts26">R</span><span class="rvts20"> twice)</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21">Some of the most obvious patterns are already added by author. To add your own pattern you need to edit the </span><span class="rvts20">taseditor_patterns.txt</span><span class="rvts21"> file in any text editor (like Notepad), this file is stored in </span><span class="rvts20">/tools</span><span class="rvts21"> subfolder of FCEUX main folder. Every second line in this file constitutes an encoded sequence of button states. The code is straightforward: "button pressed" is encoded by 1, "button released" – by 0.</span></p>
-<p class="rvps10"><span class="rvts21">Every pattern is looped, which means, when a long sequence of Input is created using a short pattern, the pattern is repeated the necessary amount of times to fill the whole given interval.</span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/patterns-menu.png"/></p>
-<p class="rvps10"><span class="rvts21">After adding or editing the patterns file, restart Taseditor to reread the file changes. The list of all available patterns is always in the upper right corner of the TAS Editor window. To change the current pattern, enter that menu and click the needed pattern name. For easy orientation in patterns it's recommended to call each pattern by a distinct name that reflects its in-game meaning.</span></p>
-<p class="rvps10"><span class="rvts21">To apply current pattern, Taseditor needs to know the beginning and the end of the interval where the chosen button is going to be pressed and released according to the rule. There are 3 different ways to apply a pattern:</span></p>
-<p class="rvps10"><span class="rvts25">Example 1. </span><span class="rvts21">Point and click the start frame (click in any Piano Roll column except the icons column), thus selecting that frame. Then hold the </span><span class="rvts30">Alt</span><span class="rvts21"> key and left-click the end frame in the column of the button you are editing. In the interval between those two frames you will get the needed sequence of the chosen button presses. This method is rather handy when the start frame is already selected by previous clicks in Piano Roll, and you only need to to hold down </span><span class="rvts30">Alt</span><span class="rvts21"> and click the end frame.</span></p>
-<p class="rvps10"><span class="rvts25">Example 2. </span><span class="rvts21">Left-click the start frame in the column of the button you are editing, and hold the mouse button to start drawing. Hold </span><span class="rvts30">Alt</span><span class="rvts21"> and move the mouse cursor up or down. This way you will be </span><span class="rvts37">drawing</span><span class="rvts21"> the pattern sequence of buttonpresses.</span></p>
-<p class="rvps10"><span class="rvts25">Example 3. </span><span class="rvts21">Select a range of frames, then hold </span><span class="rvts30">Alt</span><span class="rvts21"> and left-click on the edited button symbol in the Piano Roll Header. The pattern will be applied to the selected area.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When using traditional method of TASing you are also able to apply patterns to recorded sequences, although in a less convenient manner. To do that you should set the "</span><a class="rvts27" href="Toolbox.html#UsePattern">Use pattern</a><span class="rvts21">" checkbox on Recorder panel. Before that you may want to record the buttons you don't need to alternate (record them without using patterns), and then record the needed button(s) with pattern, using the "Superimpose" function for the segment.</span></p>
-<p class="rvps10"><span class="rvts21">For example, you need to record a burst of fire while jumping over the pit. At first, record that jump without shooting, then return the Playback cursor to the beginning of the segment (by jumping to the Bookmark left here), check "Superimpose" and "Use pattern", hold the </span><span class="rvts29">B</span><span class="rvts21"> button and unpause the emulation. You'll see how the shooting Input superimposes over jump Input.</span></p>
-<p class="rvps10"><span class="rvts21">Before Taseditor there was the "Autofire" concept similar to patterns. But due to inconveniences of the Recording method that feature was rarely used, because when you are typing Input it's usually easier to press and release the needed buttons manually. So if you stick to traditional method of TASing, you won't likely use patterns. But in the non-linear or semi-automatic TASing, patterns are drawn as quickly as regular buttonpresses, so that's where they can really speed up the work.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Patterns are used when creating sequences for a single button. But when you want to use a typical macro involving several buttons, use Copy/Paste.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><a name="UsingMarkers"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">3. Effective usage of Markers.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Markers exist to simplify complicated situations by structurizing the problem. When the game requires you to perform (or think over) several complex actions, you should break the large segment into separate intervals, in order to understand clearly where one action stops and another one starts. Even if the initial subdividing appears to be wrong, it still helps you to get thoughts in order.</span></p>
-<p class="rvps10"><span class="rvts21">Obviously, you are not expected to set Markers on commonplace segments, most of which aren't even polished (e.g. where it's enough to hold </span><span class="rvts29">R</span><span class="rvts21"> to win). But key moments and memorable situations of the movie should be marked and commented with Notes. It will help you to keep the whole picture of the project in mind and navigate the movie by text.</span></p>
-<p class="rvps10"><span class="rvts21">No need to write works of literature inside the Notes. You may just confine yourself with simple label words, numbers, tags. Invent the words on the fly, but try to keep systematic approach. As in, if at the beginning of the first level (on the transition screen) you've set a Marker with the Note "level 1 start", you should also write "level 2 start" at the beginning of the second level, and not "act II begin" or something. During the creation of TAS you naturally form a unique glossary in your mind using various terms that are topical for that specific game. And the more systematic approach you apply to writing the Notes, the easier it will be to describe another (similar) segment and understand its task. The easier it'll be to find similar Input segments, recalling only their vague in-game appearance.</span></p>
-<p class="rvps10"><span class="rvts21">The tasks you meet in video games are often repeatable. Details and environment may be different, but player actions remain more or less the same. In some cases you can just copy the Input (solution of the similar task) from the previous level, and it will successfully sync with the new in-game situation (probably after a little adjustment). Though, after the copy/paste it's recommended to diversify the Input to prevent the TAS viewers from noticing the repetition and getting bored.</span></p>
-<p class="rvps10"><span class="rvts21">For example, at the beginning of many levels in Super Mario Bros you need to use the same button sequence to accelerate to maximum speed optimally. Let's imagine, you are honestly commenting Input during TASing. Then in World 1-1 in the acceleration section you probably left a Note with words like "acceleration" or similar. Now, when you start creating Input for a segment with that task again, in a new level you put a Marker at the beginning of the segment and write a Note, describing your current task. Obviously enough, you are going to use the word "acceleration" there as well, because you need to accelerate.</span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-selection.png"/></p>
-<p class="rvps10"><span class="rvts21">And that's where you can use Taseditor's function of automatic searching for similar Notes. Leave the Playback cursor inside the current segment and press the "</span><span class="rvts29">Similar</span><span class="rvts21">" button at the bottom of the Toolbox. The Selection cursor will instantly jump to the Marker that contains the most resembling Note, in Taseditor's opinion. Most likely, it will be the Marker left at the beginning of the acceleration segment in the World 1-1. Therefore you can instantly select all Input in that segment by pressing </span><span class="rvts30">Ctrl + A</span><span class="rvts21">, then copy the Input to the Clipboard (</span><span class="rvts30">Ctrl + C</span><span class="rvts21">), return to the current segment (press </span><span class="rvts30">Shift</span><span class="rvts21"> twice) and paste from the Clipboard (</span><span class="rvts30">Ctrl + V</span><span class="rvts21">).</span></p>
-<p class="rvps10"><span class="rvts21">If the first search result doesn't bring you to the intended segment, you can press the "</span><span class="rvts29">More</span><span class="rvts21">" button to try next result of the search. Usually the right segment is among the first offered finds, granted that you marked the segment with a sensible Note.</span></p>
-<p class="rvps10"><span class="rvts21">Interesting fact: while writing the Note for the second appearance of the acceleration segment, you use the word "acceleration" without an intent to correlate to previous cases, but only according to the in-game situation. So you are not expected to actually remember the text of old Notes. The right words will come to your mind in the right time.</span></p>
-<p class="rvps10"><span class="rvts21">This way, right during the TASing process you form a </span><span class="rvts25">library of useful Input combinations</span><span class="rvts21">, not unlike the pattern list described above, except that you don't have to purposely prepare the button sequences – they appear natural way during the segments shaping and optimization, and they are stored inside the movie, not in an external file. And when you improve a combination for some segment (e.g. find a faster way to accelerate), you can easily find and fix all related segments with similar button sequence. Also, here you don't have to remember the exact description or the name of the needed sequence, because, if you use systematic approach to describe tasks, the words will partially match (and a perfect match is not required, since the searching algorithm is rather smart).</span></p>
-<p class="rvps10"><span class="rvts21">The auto-search is also useful when you need to jump between two (or more) related segments, located far from each other in the movie. Scrolling the Piano Roll with the mouse wheel or jumping through dozens of Markers from one segment to another is not as handy as clicking the "</span><span class="rvts29">Similar</span><span class="rvts21">" or "</span><span class="rvts29">More</span><span class="rvts21">" button. To let the algorithm instantly find the twin segment (or the</span><span class="rvts37"> source</span><span class="rvts21"> segment and the </span><span class="rvts37">destination</span><span class="rvts21"> segment), consider using some unique word in their Notes, one that isn't used in other places of the movie.</span></p>
-<p class="rvps10"><span class="rvts21">For example, in the "Megaman" game each robot master must be beaten twice (second time it's in the end of the game). It's logical to suppose that both battles will be entitled by Marker Notes containing the name of the robot and the word "boss" or "fight", or something like that. As a result, when the Playback cursor is in one of those 2 places, pressing the "</span><span class="rvts29">Similar</span><span class="rvts21">" button will get you to another one.</span></p>
-<p class="rvps10"><span class="rvts21">In this example the proper words for the Notes text are no-brainer, yet they are unique enough not to repeat in other places (at least not in that combination), so the auto-search will work perfectly. In a different case you may have to invent a unique label, but usually the first description you think of is enough.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/find-note.png"/></p>
-<p class="rvps10"><span class="rvts21">You can also use standard search for Note text. For example, it's common to leave a Note beginning with the "TODO" word at some places where you are not sure the best solution is found (the segment Input is optimal). So, when you have mood to make fixes, you could skim through all Markers with that tag by bringing the "Find Note" window (</span><span class="rvts30">Ctrl + F</span><span class="rvts21">) and typing the word "TODO" to search for.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">If you don't like all these big ideas with Markers, you can TAS without them. After all, many games provide rather simple tasks for a TASer, they don't require a highly organized approach to the solving process. If the problem can be solved on impulse, don't spend time on preparation and fortification. Markers provide advantages only in long-term goals.</span></p>
-<p class="rvps10"><span class="rvts21">So, just like in programming, in most cases you can successfully write the so-called "dirty code" (here it would be a project without Markers and Notes) that is fast to create, but hard to maintain and extend. Or you can make a lovingly formatted project which is nice to watch and modify. Since TASers have to modify their movies very often (in order to beat previous records), the today's time costs for the project formatting are likely to be repaid by the fact that the looks of the project motivate to continue the work on it.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><a name="UsingLua"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">4. Lua usage.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">With the Lua language you can write scripts that can be executed by FCEUX along with game emulation. Writing scripts requires minimal programming skill, while the range of possibilities is pretty huge. You can create your own TAS tools, modify the game at the time of execution, have access to images and sound on the fly, send data via network or record it to disk, etc. And you can make custom extensions for TAS Editor.</span></p>
-<p class="rvps10"><span class="rvts21">To master the Lua language completely you would need to read its documentation and gain actual experience, but for making simple scripts it should be enough to read this Manual and the </span><a class="rvts27" href="http://www.fceux.com/web/help/fceux.html?LuaScripting.html" target="_blank">Lua chapter in FCEUX docs</a><span class="rvts21">. At first, try to run scripts created for FCEUX by various people. They are stored in the </span><span class="rvts20">/luaScripts</span><span class="rvts21"> subfolder. Each script is a text file with </span><span class="rvts20">.lua</span><span class="rvts21"> extension, such file may be created and modified in any text editor. Before running scripts you need to open some game ROM in FCEUX. To run a script, open the Lua console (</span><span class="rvts25">File -&gt; Lua -&gt; New Lua Script Window</span><span class="rvts21">), in this window press the "</span><span class="rvts29">Browse</span><span class="rvts21">" button and load the script file, then press "</span><span class="rvts29">Run</span><span class="rvts21">". If emulator is paused, either unpause it or advance a frame to activate the script. As for the Lua console, the window may be hidden or minimized.</span></p>
-<p class="rvps10"><span class="rvts21">Program code in Lua scripts for FCEUX usually consists of 2 parts: the first part is executed once the script is activated, another part runs on certain emulation events, such as the end of a frame emulation, loading a savestate and so on.</span></p>
-<p class="rvps10"><span class="rvts21">The first part, which runs on script activation, is usually executed only once (unless you made an infinite loop in it). The code is executed line by line, from top to down. Usually the task of that part is to initialize global variables and register functions to be launched by FCEUX when certain events occur.</span></p>
-<p class="rvps10"><span class="rvts21">In most of cases the main code of the script is contained in the single function that is automatically executed at the end of every frame. For example, this is how Mario hitbox drawing code for SMB may look:</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<div class="rvps10"><table width="98%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid;"><p class="rvps2"><span class="rvts50">marioWidth = 16</span></p>
-<p class="rvps2"><span class="rvts50">marioHeight = 32</span></p>
-<p class="rvps2"><span class="rvts50"><br/></span></p>
-<p class="rvps2"><span class="rvts50">function everyframe()</span></p>
-<p class="rvps2"><span class="rvts50"></span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50">marioX = memory.readbyte(0x3AD)</span></p>
-<p class="rvps2"><span class="rvts50"></span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50">marioY = memory.readbyte(0xCE)</span></p>
-<p class="rvps2"><span class="rvts50"></span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50">gui.drawbox(marioX, marioY, marioX + marioWidth, marioY + marioHeight)</span></p>
-<p class="rvps2"><span class="rvts50">end</span></p>
-<p class="rvps2"><span class="rvts50"><br/></span></p>
-<p class="rvps2"><span class="rvts50">emu.registerafter(everyframe)</span></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20">Some of the most obvious patterns are already added by author. To add your own pattern you need to edit the </span><span class="rvts19">taseditor_patterns.txt</span><span class="rvts20"> file in any text editor (like Notepad), this file is stored in </span><span class="rvts19">/tools</span><span class="rvts20"> subfolder of FCEUX main folder. Every second line in this file constitutes an encoded sequence of button states. The code is straightforward: "button pressed" is encoded by 1, "button released" – by 0.</span></p>
+<p class="rvps7"><span class="rvts20">Every pattern is looped, which means, when a long sequence of Input is created using a short pattern, the pattern is repeated the necessary amount of times to fill the whole given interval.</span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/patterns-menu.png"></p>
+<p class="rvps7"><span class="rvts20">After adding or editing the patterns file, restart Taseditor to reread the file changes. The list of all available patterns is always in the upper right corner of the TAS Editor window. To change the current pattern, enter that menu and click the needed pattern name. For easy orientation in patterns it's recommended to call each pattern by a distinct name that reflects its in-game meaning.</span></p>
+<p class="rvps7"><span class="rvts20">To apply current pattern, Taseditor needs to know the beginning and the end of the interval where the chosen button is going to be pressed and released according to the rule. There are 3 different ways to apply a pattern:</span></p>
+<p class="rvps7"><span class="rvts22">Example 1. </span><span class="rvts20">Point and click the start frame (click in any Piano Roll column except the icons column), thus selecting that frame. Then hold the </span><span class="rvts27">Alt</span><span class="rvts20"> key and left-click the end frame in the column of the button you are editing. In the interval between those two frames you will get the needed sequence of the chosen button presses. This method is rather handy when the start frame is already selected by previous clicks in Piano Roll, and you only need to to hold down </span><span class="rvts27">Alt</span><span class="rvts20"> and click the end frame.</span></p>
+<p class="rvps7"><span class="rvts22">Example 2. </span><span class="rvts20">Left-click the start frame in the column of the button you are editing, and hold the mouse button to start drawing. Hold </span><span class="rvts27">Alt</span><span class="rvts20"> and move the mouse cursor up or down. This way you will be </span><span class="rvts33">drawing</span><span class="rvts20"> the pattern sequence of buttonpresses.</span></p>
+<p class="rvps7"><span class="rvts22">Example 3. </span><span class="rvts20">Select a range of frames, then hold </span><span class="rvts27">Alt</span><span class="rvts20"> and left-click on the edited button symbol in the Piano Roll Header. The pattern will be applied to the selected area.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When using traditional method of TASing you are also able to apply patterns to recorded sequences, although in a less convenient manner. To do that you should set the "</span><a class="rvts24" href="Toolbox.html#UsePattern">Use pattern</a><span class="rvts20">" checkbox on Recorder panel. Before that you may want to record the buttons you don't need to alternate (record them without using patterns), and then record the needed button(s) with pattern, using the "Superimpose" function for the segment.</span></p>
+<p class="rvps7"><span class="rvts20">For example, you need to record a burst of fire while jumping over the pit. At first, record that jump without shooting, then return the Playback cursor to the beginning of the segment (by jumping to the Bookmark left here), check "Superimpose" and "Use pattern", hold the </span><span class="rvts26">B</span><span class="rvts20"> button and unpause the emulation. You'll see how the shooting Input superimposes over jump Input.</span></p>
+<p class="rvps7"><span class="rvts20">Before Taseditor there was the "Autofire" concept similar to patterns. But due to inconveniences of the Recording method that feature was rarely used, because when you are typing Input it's usually easier to press and release the needed buttons manually. So if you stick to traditional method of TASing, you won't likely use patterns. But in the non-linear or semi-automatic TASing, patterns are drawn as quickly as regular buttonpresses, so that's where they can really speed up the work.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Patterns are used when creating sequences for a single button. But when you want to use a typical macro involving several buttons, use Copy/Paste.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><a name="UsingMarkers"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">3. Effective usage of Markers.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Markers exist to simplify complicated situations by structurizing the problem. When the game requires you to perform (or think over) several complex actions, you should break the large segment into separate intervals, in order to understand clearly where one action stops and another one starts. Even if the initial subdividing appears to be wrong, it still helps you to get thoughts in order.</span></p>
+<p class="rvps7"><span class="rvts20">Obviously, you are not expected to set Markers on commonplace segments, most of which aren't even polished (e.g. where it's enough to hold </span><span class="rvts26">R</span><span class="rvts20"> to win). But key moments and memorable situations of the movie should be marked and commented with Notes. It will help you to keep the whole picture of the project in mind and navigate the movie by text.</span></p>
+<p class="rvps7"><span class="rvts20">No need to write works of literature inside the Notes. You may just confine yourself with simple label words, numbers, tags. Invent the words on the fly, but try to keep systematic approach. As in, if at the beginning of the first level (on the transition screen) you've set a Marker with the Note "level 1 start", you should also write "level 2 start" at the beginning of the second level, and not "act II begin" or something. During the creation of TAS you naturally form a unique glossary in your mind using various terms that are topical for that specific game. And the more systematic approach you apply to writing the Notes, the easier it will be to describe another (similar) segment and understand its task. The easier it'll be to find similar Input segments, recalling only their vague in-game appearance.</span></p>
+<p class="rvps7"><span class="rvts20">The tasks you meet in video games are often repeatable. Details and environment may be different, but player actions remain more or less the same. In some cases you can just copy the Input (solution of the similar task) from the previous level, and it will successfully sync with the new in-game situation (probably after a little adjustment). Though, after the copy/paste it's recommended to diversify the Input to prevent the TAS viewers from noticing the repetition and getting bored.</span></p>
+<p class="rvps7"><span class="rvts20">For example, at the beginning of many levels in Super Mario Bros you need to use the same button sequence to accelerate to maximum speed optimally. Let's imagine, you are honestly commenting Input during TASing. Then in World 1-1 in the acceleration section you probably left a Note with words like "acceleration" or similar. Now, when you start creating Input for a segment with that task again, in a new level you put a Marker at the beginning of the segment and write a Note, describing your current task. Obviously enough, you are going to use the word "acceleration" there as well, because you need to accelerate.</span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/toolbox-selection.png"></p>
+<p class="rvps7"><span class="rvts20">And that's where you can use Taseditor's function of automatic searching for similar Notes. Leave the Playback cursor inside the current segment and press the "</span><span class="rvts26">Similar</span><span class="rvts20">" button at the bottom of the Toolbox. The Selection cursor will instantly jump to the Marker that contains the most resembling Note, in Taseditor's opinion. Most likely, it will be the Marker left at the beginning of the acceleration segment in the World 1-1. Therefore you can instantly select all Input in that segment by pressing </span><span class="rvts27">Ctrl + A</span><span class="rvts20">, then copy the Input to the Clipboard (</span><span class="rvts27">Ctrl + C</span><span class="rvts20">), return to the current segment (press </span><span class="rvts27">Shift</span><span class="rvts20"> twice) and paste from the Clipboard (</span><span class="rvts27">Ctrl + V</span><span class="rvts20">).</span></p>
+<p class="rvps7"><span class="rvts20">If the first search result doesn't bring you to the intended segment, you can press the "</span><span class="rvts26">More</span><span class="rvts20">" button to try next result of the search. Usually the right segment is among the first offered finds, granted that you marked the segment with a sensible Note.</span></p>
+<p class="rvps7"><span class="rvts20">Interesting fact: while writing the Note for the second appearance of the acceleration segment, you use the word "acceleration" without an intent to correlate to previous cases, but only according to the in-game situation. So you are not expected to actually remember the text of old Notes. The right words will come to your mind in the right time.</span></p>
+<p class="rvps7"><span class="rvts20">This way, right during the TASing process you form a </span><span class="rvts22">library of useful Input combinations</span><span class="rvts20">, not unlike the pattern list described above, except that you don't have to purposely prepare the button sequences – they appear natural way during the segments shaping and optimization, and they are stored inside the movie, not in an external file. And when you improve a combination for some segment (e.g. find a faster way to accelerate), you can easily find and fix all related segments with similar button sequence. Also, here you don't have to remember the exact description or the name of the needed sequence, because, if you use systematic approach to describe tasks, the words will partially match (and a perfect match is not required, since the searching algorithm is rather smart).</span></p>
+<p class="rvps7"><span class="rvts20">The auto-search is also useful when you need to jump between two (or more) related segments, located far from each other in the movie. Scrolling the Piano Roll with the mouse wheel or jumping through dozens of Markers from one segment to another is not as handy as clicking the "</span><span class="rvts26">Similar</span><span class="rvts20">" or "</span><span class="rvts26">More</span><span class="rvts20">" button. To let the algorithm instantly find the twin segment (or the</span><span class="rvts33"> source</span><span class="rvts20"> segment and the </span><span class="rvts33">destination</span><span class="rvts20"> segment), consider using some unique word in their Notes, one that isn't used in other places of the movie.</span></p>
+<p class="rvps7"><span class="rvts20">For example, in the "Megaman" game each robot master must be beaten twice (second time it's in the end of the game). It's logical to suppose that both battles will be entitled by Marker Notes containing the name of the robot and the word "boss" or "fight", or something like that. As a result, when the Playback cursor is in one of those 2 places, pressing the "</span><span class="rvts26">Similar</span><span class="rvts20">" button will get you to another one.</span></p>
+<p class="rvps7"><span class="rvts20">In this example the proper words for the Notes text are no-brainer, yet they are unique enough not to repeat in other places (at least not in that combination), so the auto-search will work perfectly. In a different case you may have to invent a unique label, but usually the first description you think of is enough.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/find-note.png"></p>
+<p class="rvps7"><span class="rvts20">You can also use standard search for Note text. For example, it's common to leave a Note beginning with the "TODO" word at some places where you are not sure the best solution is found (the segment Input is optimal). So, when you have mood to make fixes, you could skim through all Markers with that tag by bringing the "Find Note" window (</span><span class="rvts27">Ctrl + F</span><span class="rvts20">) and typing the word "TODO" to search for.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">If you don't like all these big ideas with Markers, you can TAS without them. After all, many games provide rather simple tasks for a TASer, they don't require a highly organized approach to the solving process. If the problem can be solved on impulse, don't spend time on preparation and fortification. Markers provide advantages only in long-term goals.</span></p>
+<p class="rvps7"><span class="rvts20">So, just like in programming, in most cases you can successfully write the so-called "dirty code" (here it would be a project without Markers and Notes) that is fast to create, but hard to maintain and extend. Or you can make a lovingly formatted project which is nice to watch and modify. Since TASers have to modify their movies very often (in order to beat previous records), the today's time costs for the project formatting are likely to be repaid by the fact that the looks of the project motivate to continue the work on it.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><a name="UsingLua"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">4. Lua usage.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">With the Lua language you can write scripts that can be executed by FCEUX along with game emulation. Writing scripts requires minimal programming skill, while the range of possibilities is pretty huge. You can create your own TAS tools, modify the game at the time of execution, have access to images and sound on the fly, send data via network or record it to disk, etc. And you can make custom extensions for TAS Editor.</span></p>
+<p class="rvps7"><span class="rvts20">To master the Lua language completely you would need to read its documentation and gain actual experience, but for making simple scripts it should be enough to read this Manual and the </span><a class="rvts24" href="http://www.fceux.com/web/help/fceux.html?LuaScripting.html" target="_blank">Lua chapter in FCEUX docs</a><span class="rvts20">. At first, try to run scripts created for FCEUX by various people. They are stored in the </span><span class="rvts19">/luaScripts</span><span class="rvts20"> subfolder. Each script is a text file with </span><span class="rvts19">.lua</span><span class="rvts20"> extension, such file may be created and modified in any text editor. Before running scripts you need to open some game ROM in FCEUX. To run a script, open the Lua console (</span><span class="rvts22">File -&gt; Lua -&gt; New Lua Script Window</span><span class="rvts20">), in this window press the "</span><span class="rvts26">Browse</span><span class="rvts20">" button and load the script file, then press "</span><span class="rvts26">Run</span><span class="rvts20">". If emulator is paused, either unpause it or advance a frame to activate the script. As for the Lua console, the window may be hidden or minimized.</span></p>
+<p class="rvps7"><span class="rvts20">Program code in Lua scripts for FCEUX usually consists of 2 parts: the first part is executed once the script is activated, another part runs on certain emulation events, such as the end of a frame emulation, loading a savestate and so on.</span></p>
+<p class="rvps7"><span class="rvts20">The first part, which runs on script activation, is usually executed only once (unless you made an infinite loop in it). The code is executed line by line, from top to down. Usually the task of that part is to initialize global variables and register functions to be launched by FCEUX when certain events occur.</span></p>
+<p class="rvps7"><span class="rvts20">In most of cases the main code of the script is contained in the single function that is automatically executed at the end of every frame. For example, this is how Mario hitbox drawing code for SMB may look:</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<div class="rvps7">
+<table width="98%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid; border-spacing: 2px;">
+ <tr valign="top">
+  <td style="border-color: #000000; border-style: solid; padding: 6px;">
+   <p class="rvps2"><span class="rvts42">marioWidth = 16</span></p>
+   <p class="rvps2"><span class="rvts42">marioHeight = 32</span></p>
+   <p class="rvps2"><span class="rvts42"><br/></span></p>
+   <p class="rvps2"><span class="rvts42">function everyframe()</span></p>
+   <p class="rvps2"><span class="rvts42"></span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42">marioX = memory.readbyte(0x3AD)</span></p>
+   <p class="rvps2"><span class="rvts42"></span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42">marioY = memory.readbyte(0xCE)</span></p>
+   <p class="rvps2"><span class="rvts42"></span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42">gui.drawbox(marioX, marioY, marioX + marioWidth, marioY + marioHeight)</span></p>
+   <p class="rvps2"><span class="rvts42">end</span></p>
+   <p class="rvps2"><span class="rvts42"><br/></span></p>
+   <p class="rvps2"><span class="rvts42">emu.registerafter(everyframe)</span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When activating this script, FCEUX creates and initializes two variables ("marioWidth" and "marioHeight"), then registers the function called everyframe() to the "frame end" event (registerafter). After that the text ends and the script finishes its execution, but the registered function remains in emulator memory, and if you unpause it or press </span><span class="rvts26">Frame Advance</span><span class="rvts21">, after every frame it will run the code stored within the everyframe() function. That code consists of 3 lines. The first two create variables for the hitbox position and initialize them with current values from RAM of the emulated console. The third line draws graphics over the game picture output.</span></p>
-<p class="rvps10"><span class="rvts21">Actual RAM addresses can be found in public resources (like </span><a class="rvts27" href="http://tasvideos.org/GameResources/NES/SuperMarioBros.html" target="_blank">http://tasvideos.org/GameResources/NES/SuperMarioBros.html</a><span class="rvts21">) or found on your own using the Cheat Search tool or the RAM Search tool built in FCEUX. In this case we know that Mario's X position is stored in memory address 0x3AD, and his Y position is in 0xCE. So, the script just takes their current values and draws the rectangle in the corresponding screen position. Sometimes there's need to recalculate the values to translate the in-game world coordinates into on-screen coordinates, but in this case they match.</span></p>
-<p class="rvps10"><span class="rvts21">The standard functions readbyte(), drawbox() and other useful functions are described in the </span><a class="rvts27" href="http://www.fceux.com/web/help/fceux.html?LuaFunctionsList.html" target="_blank">FCEUX documentation</a><span class="rvts21">. It also describes how to use mathematical expressions and make loops and conditions.</span></p>
-<p class="rvps10"><span class="rvts21">The standard functions available only when Taseditor is engaged are listed in the </span><a class="rvts27" href="LuaAPI.html">Reference</a><span class="rvts21">. Using all this knowledge you can not only draw and write messages over the emulator screen, but also control Playback and Selection, and most importantly, modify the movie Input and Markers.</span></p>
-<p class="rvps10"><span class="rvts21">For example, this code copies one joypad Input to the second one's place:</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<div class="rvps10"><table width="98%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid;"><p class="rvps2"><span class="rvts50">function doCopy()</span></p>
-<p class="rvps2"><span class="rvts50"></span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50">selection_table = taseditor.getselection()</span></p>
-<p class="rvps2"><span class="rvts50"></span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50">if (selection_table ~= nil) then</span></p>
-<p class="rvps2"><span class="rvts50"></span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50">for i = 1, #selection_table do</span></p>
-<p class="rvps2"><span class="rvts50"></span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50">selected_frame = selection_table[i]</span></p>
-<p class="rvps2"><span class="rvts50"></span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50">joypad1data = taseditor.getinput(selected_frame, 1)</span></p>
-<p class="rvps2"><span class="rvts50"></span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50">taseditor.submitinputchange(selected_frame, 2, joypad1data)</span></p>
-<p class="rvps2"><span class="rvts50"></span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50">end</span></p>
-<p class="rvps2"><span class="rvts50"></span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50">taseditor.applyinputchanges("Copy 1P-&gt;2P")</span></p>
-<p class="rvps2"><span class="rvts50"></span><span class="rvts50"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts50">end</span></p>
-<p class="rvps2"><span class="rvts50">end</span></p>
-<p class="rvps2"><span class="rvts50"><br/></span></p>
-<p class="rvps2"><span class="rvts50">taseditor.registermanual(doCopy, "Copy 1P to 2P")</span></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When activating this script, FCEUX creates and initializes two variables ("marioWidth" and "marioHeight"), then registers the function called everyframe() to the "frame end" event (registerafter). After that the text ends and the script finishes its execution, but the registered function remains in emulator memory, and if you unpause it or press </span><span class="rvts23">Frame Advance</span><span class="rvts20">, after every frame it will run the code stored within the everyframe() function. That code consists of 3 lines. The first two create variables for the hitbox position and initialize them with current values from RAM of the emulated console. The third line draws graphics over the game picture output.</span></p>
+<p class="rvps7"><span class="rvts20">Actual RAM addresses can be found in public resources (like </span><a class="rvts24" href="http://tasvideos.org/GameResources/NES/SuperMarioBros.html" target="_blank">http://tasvideos.org/GameResources/NES/SuperMarioBros.html</a><span class="rvts20">) or found on your own using the Cheat Search tool or the RAM Search tool built in FCEUX. In this case we know that Mario's X position is stored in memory address 0x3AD, and his Y position is in 0xCE. So, the script just takes their current values and draws the rectangle in the corresponding screen position. Sometimes there's need to recalculate the values to translate the in-game world coordinates into on-screen coordinates, but in this case they match.</span></p>
+<p class="rvps7"><span class="rvts20">The standard functions readbyte(), drawbox() and other useful functions are described in the </span><a class="rvts24" href="http://www.fceux.com/web/help/fceux.html?LuaFunctionsList.html" target="_blank">FCEUX documentation</a><span class="rvts20">. It also describes how to use mathematical expressions and make loops and conditions.</span></p>
+<p class="rvps7"><span class="rvts20">The standard functions available only when Taseditor is engaged are listed in the </span><a class="rvts24" href="LuaAPI.html">Reference</a><span class="rvts20">. Using all this knowledge you can not only draw and write messages over the emulator screen, but also control Playback and Selection, and most importantly, modify the movie Input and Markers.</span></p>
+<p class="rvps7"><span class="rvts20">For example, this code copies one joypad Input to the second one's place:</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<div class="rvps7">
+<table width="98%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid; border-spacing: 2px;">
+ <tr valign="top">
+  <td style="border-color: #000000; border-style: solid; padding: 6px;">
+   <p class="rvps2"><span class="rvts42">function doCopy()</span></p>
+   <p class="rvps2"><span class="rvts42"></span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42">selection_table = taseditor.getselection()</span></p>
+   <p class="rvps2"><span class="rvts42"></span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42">if (selection_table ~= nil) then</span></p>
+   <p class="rvps2"><span class="rvts42"></span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42">for i = 1, #selection_table do</span></p>
+   <p class="rvps2"><span class="rvts42"></span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42">selected_frame = selection_table[i]</span></p>
+   <p class="rvps2"><span class="rvts42"></span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42">joypad1data = taseditor.getinput(selected_frame, 1)</span></p>
+   <p class="rvps2"><span class="rvts42"></span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42">taseditor.submitinputchange(selected_frame, 2, joypad1data)</span></p>
+   <p class="rvps2"><span class="rvts42"></span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42">end</span></p>
+   <p class="rvps2"><span class="rvts42"></span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42">taseditor.applyinputchanges("Copy 1P-&gt;2P")</span></p>
+   <p class="rvps2"><span class="rvts42"></span><span class="rvts42"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts42">end</span></p>
+   <p class="rvps2"><span class="rvts42">end</span></p>
+   <p class="rvps2"><span class="rvts42"><br/></span></p>
+   <p class="rvps2"><span class="rvts42">taseditor.registermanual(doCopy, "Copy 1P to 2P")</span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When launching this script, FCEUX registers the doCopy() function to the event of pressing the "</span><span class="rvts29">Run function</span><span class="rvts21">" button (registermanual). Now any click on the button will run the code of that function, consisting of 9 lines. At first, the function gets information about Selection from Taseditor, and if it's not blank (i.e. at least one frame is selected in the Piano Roll) it runs the FOR loop, going through all the selected frames from the first to the last. For each selected frame the function requests the Input of the first player from Taseditor (and stores this data to the "joypad1data" variable), then it submits the claim to change the second player Input for that frame. All these submissions are accumulated in Taseditor memory until the FOR loop ends, after that they all are applied by calling the applyinputchanges(). As a result, the second joypad in the selected range of frames contains the same Input as the first joypad.</span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/lua-run-manual.png"/></p>
-<p class="rvps10"><span class="rvts21">This simple script is already a useful mini-tool that may be needed when making a TAS for 2 or more players. Launch it, and while TASing you will be able to select a range of frames in the Piano Roll and click the "</span><span class="rvts29">Copy 1P to 2P</span><span class="rvts21">" button (or press the "</span><span class="rvts25">Run Manual Lua function</span><span class="rvts21">" hotkey) to synchronize both players. Every time the script work results in an Input change, the Greenzone is automatically truncated, and a new item is added to the History Log, allowing you to undo the changes done by the script. This way you've got a feature completely integrated into Taseditor, and you've programmed the behavior of the feature yourself.</span></p>
-<p class="rvps10"><span class="rvts21">Even though you can successfully TAS without Lua knowledge, its support can save you much time and even hint on a less obvious solutions during the Input optimization (or more exactly, during the game Output analysis).</span></p>
-<p class="rvps10"><span class="rvts21">Videogames often hide important details of the situation, and TASer has to watch memory state directly in order to know for sure what's going on and to precisely perceive the optimality factors while polishing segments.</span></p>
-<p class="rvps10"><span class="rvts21">For example, many games don't show boss HP on screen. So, to know exactly the damage you inflict, you need to watch the numeric value of the corresponding RAM address in the Memory Watch window. And when there is a plenty of hidden factors (for example, several timers of invulnerability and boss attack, and some special counters of the player character), TASer needs to watch and analyze many memory addresses as they change according to different rules. In this case an on-screen visualization of some data would be huge helper. For example, boss HP can be displayed as a bar or a number above his head, and a red color can indicate the damage frames or other events. As a result, your mind is relieved by moving from deciphering an abstract data format to the format that instantly delivers the main idea (e.g. "the boss was damaged", "good/bad").</span></p>
-<p class="rvps10"><span class="rvts21">So it's recommended to learn Lua at least to the level of being able to sensibly modify others' scripts. For the long time FCEUX existed, people wrote and published a lot of scripts serving for various purposes, and you'll probably only need to change some RAM addresses to adjust a script to your game. Oftentimes it also makes sense to ask for help at </span><a class="rvts27" href="http://tasvideos.org/forum/viewforum.php?f=25" target="_blank">TASVideos forums</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The Taseditor guide is over. If you were reading carefully, you should now know everything necessary to make a TAS up to the high standards of TASVideos. The only thing left is to gain an experience in real work, master some actions to automatism in order to feel no trace of routine and have fun from the process of armed playthrough and investigation of games.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When launching this script, FCEUX registers the doCopy() function to the event of pressing the "</span><span class="rvts26">Run function</span><span class="rvts20">" button (registermanual). Now any click on the button will run the code of that function, consisting of 9 lines. At first, the function gets information about Selection from Taseditor, and if it's not blank (i.e. at least one frame is selected in the Piano Roll) it runs the FOR loop, going through all the selected frames from the first to the last. For each selected frame the function requests the Input of the first player from Taseditor (and stores this data to the "joypad1data" variable), then it submits the claim to change the second player Input for that frame. All these submissions are accumulated in Taseditor memory until the FOR loop ends, after that they all are applied by calling the applyinputchanges(). As a result, the second joypad in the selected range of frames contains the same Input as the first joypad.</span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/lua-run-manual.png"></p>
+<p class="rvps7"><span class="rvts20">This simple script is already a useful mini-tool that may be needed when making a TAS for 2 or more players. Launch it, and while TASing you will be able to select a range of frames in the Piano Roll and click the "</span><span class="rvts26">Copy 1P to 2P</span><span class="rvts20">" button (or press the "</span><span class="rvts22">Run Manual Lua function</span><span class="rvts20">" hotkey) to synchronize both players. Every time the script work results in an Input change, the Greenzone is automatically truncated, and a new item is added to the History Log, allowing you to undo the changes done by the script. This way you've got a feature completely integrated into Taseditor, and you've programmed the behavior of the feature yourself.</span></p>
+<p class="rvps7"><span class="rvts20">Even though you can successfully TAS without Lua knowledge, its support can save you much time and even hint on a less obvious solutions during the Input optimization (or more exactly, during the game Output analysis).</span></p>
+<p class="rvps7"><span class="rvts20">Videogames often hide important details of the situation, and TASer has to watch memory state directly in order to know for sure what's going on and to precisely perceive the optimality factors while polishing segments.</span></p>
+<p class="rvps7"><span class="rvts20">For example, many games don't show boss HP on screen. So, to know exactly the damage you inflict, you need to watch the numeric value of the corresponding RAM address in the Memory Watch window. And when there is a plenty of hidden factors (for example, several timers of invulnerability and boss attack, and some special counters of the player character), TASer needs to watch and analyze many memory addresses as they change according to different rules. In this case an on-screen visualization of some data would be huge helper. For example, boss HP can be displayed as a bar or a number above his head, and a red color can indicate the damage frames or other events. As a result, your mind is relieved by moving from deciphering an abstract data format to the format that instantly delivers the main idea (e.g. "the boss was damaged", "good/bad").</span></p>
+<p class="rvps7"><span class="rvts20">So it's recommended to learn Lua at least to the level of being able to sensibly modify others' scripts. For the long time FCEUX existed, people wrote and published a lot of scripts serving for various purposes, and you'll probably only need to change some RAM addresses to adjust a script to your game. Oftentimes it also makes sense to ask for help at </span><a class="rvts24" href="http://tasvideos.org/forum/viewforum.php?f=25" target="_blank">TASVideos forums</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The Taseditor guide is over. If you were reading carefully, you should now know everything necessary to make a TAS up to the high standards of TASVideos. The only thing left is to gain an experience in real work, master some actions to automatism in order to feel no trace of routine and have fun from the process of armed playthrough and investigation of games.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/help-authoring-tool">Single source CHM, PDF, DOC and HTML Help creation</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com">Free CHM Help documentation generator</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

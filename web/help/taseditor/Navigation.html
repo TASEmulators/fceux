@@ -1,373 +1,538 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Navigation</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("Navigation");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Navigation</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Navigation">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Navigation" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Navigation</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Reference.html">Reference</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Reference.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="Controls.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="Operations.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="Navigation"
+		  data-hnd-context="18"
+		  data-hnd-title="Navigation"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Reference.html">Reference</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Reference.html" title="Reference" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="Controls.html" title="Controls" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="Operations.html" title="Operations" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Navigation</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">Navigation</span></p>
+<p class="rvps2"><span class="rvts18">Navigation</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Emulator's main window can only display data of a single frame of the movie at any given moment.</span></p>
-<p class="rvps10"><span class="rvts21">The Piano Roll can cover data for tens of frames at the same time.</span></p>
-<p class="rvps10"><span class="rvts21">But an average movie has tens of thousands of frames. So TASer must often scroll the Piano Roll up and down to see the data about needed segment, and rewind emulator playback to see the data about needed frame.</span></p>
-<p class="rvps10"><span class="rvts21">Throughout the documentation this behavior is called "movie navigation". It takes major part of TASing, and Taseditor introduces many new ways of navigation, striving to make it as fast as possible. Depending on the situation some of them are better then others, so it's not recommended to stick to a single method.</span></p>
-<p class="rvps10"><span class="rvts21">Ideally, the navigation skills should move to your muscle memory, allowing you to always appear at the necessary place of the movie without interrupting the mental analysis of the current task.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">All ways of navigating a movie:</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><a class="rvts57" href="Navigation.html#scrolling-piano-roll">Scrolling the Piano Roll</a></li>
+<p class="rvps7"><span class="rvts20">Emulator's main window can only display data of a single frame of the movie at any given moment.</span></p>
+<p class="rvps7"><span class="rvts20">The Piano Roll can cover data for tens of frames at the same time.</span></p>
+<p class="rvps7"><span class="rvts20">But an average movie has tens of thousands of frames. So TASer must often scroll the Piano Roll up and down to see the data about needed segment, and rewind emulator playback to see the data about needed frame.</span></p>
+<p class="rvps7"><span class="rvts20">Throughout the documentation this behavior is called "movie navigation". It takes major part of TASing, and Taseditor introduces many new ways of navigation, striving to make it as fast as possible. Depending on the situation some of them are better then others, so it's not recommended to stick to a single method.</span></p>
+<p class="rvps7"><span class="rvts20">Ideally, the navigation skills should move to your muscle memory, allowing you to always appear at the necessary place of the movie without interrupting the mental analysis of the current task.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">All ways of navigating a movie:</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><a class="rvts48" href="Navigation.html#scrolling-piano-roll">Scrolling the Piano Roll</a></li>
 </ul>
-<ol style="text-indent: 32px; margin-left: 20px; list-style-position: inside;">
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#scrollbar-drag">Using vertical scrollbar</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#wheel">Rolling mouse wheel</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#crossing-gaps">Crossing gaps</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#jumping-by-pages">Paging through</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#jump-home-end">Jumping to the beginning / to the end of the movie</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#scroll-to-playback">Jumping to the Playback cursor</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#scroll-to-selection">Jumping to the Selection cursor</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#scroll-to-playback-marker">Jumping to the Marker above Playback cursor</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#scroll-to-selection-marker">Jumping to the Marker above Selection cursor</a></li>
+<ol style="text-indent: 32px; padding: 0; margin: 0 0 0 20px; list-style-position: inside; list-style-type: decimal;">
+ <li value="1" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#scrollbar-drag">Using vertical scrollbar</a></li>
+ <li value="2" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#wheel">Rolling mouse wheel</a></li>
+ <li value="3" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#crossing-gaps">Crossing gaps</a></li>
+ <li value="4" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#jumping-by-pages">Paging through</a></li>
+ <li value="5" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#jump-home-end">Jumping to the beginning / to the end of the movie</a></li>
+ <li value="6" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#scroll-to-playback">Jumping to the Playback cursor</a></li>
+ <li value="7" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#scroll-to-selection">Jumping to the Selection cursor</a></li>
+ <li value="8" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#scroll-to-playback-marker">Jumping to the Marker above Playback cursor</a></li>
+ <li value="9" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#scroll-to-selection-marker">Jumping to the Marker above Selection cursor</a></li>
 </ol>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><a class="rvts58" href="Navigation.html#playback-cursor">Playback cursor navigation</a></li>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><a class="rvts49" href="Navigation.html#playback-cursor">Playback cursor navigation</a></li>
 </ul>
-<ol style="text-indent: 32px; margin-left: 20px; list-style-position: inside;">
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#frame-advance-rewind">Frame-by-frame shift</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#rewinding-by-wheel">Rewinding by mouse wheel</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts61" href="Navigation.html#drag-playback">Dragging with mouse</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#playback-jumping-markers">Jumping on Markers</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#jump-bookmark">Jumping to Bookmarks</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#playback-home-end">Jumping to the beginning / to the end of the movie</a></li>
+<ol style="text-indent: 32px; padding: 0; margin: 0 0 0 20px; list-style-position: inside; list-style-type: decimal;">
+ <li value="1" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#frame-advance-rewind">Frame-by-frame shift</a></li>
+ <li value="2" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#rewinding-by-wheel">Rewinding by mouse wheel</a></li>
+ <li value="3" style="text-indent: 32px" class="rvps7"><a class="rvts52" href="Navigation.html#drag-playback">Dragging with mouse</a></li>
+ <li value="4" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#playback-jumping-markers">Jumping on Markers</a></li>
+ <li value="5" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#jump-bookmark">Jumping to Bookmarks</a></li>
+ <li value="6" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#playback-home-end">Jumping to the beginning / to the end of the movie</a></li>
 </ol>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><a class="rvts60" href="Navigation.html#selection-cursor">Selection cursor navigation</a></li>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><a class="rvts51" href="Navigation.html#selection-cursor">Selection cursor navigation</a></li>
 </ul>
-<ol style="text-indent: 32px; margin-left: 20px; list-style-position: inside;">
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#selection-up-down">Frame-by-frame shift</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#selection-home-end">Moving Selection to the beginning / to the end of the movie</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#selection-jumping-markers">Jumping on Markers</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#selection-history">Tracking the Selection History</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#reselect-clipboard">Returning to the origin of Clipboard data</a></li>
+<ol style="text-indent: 32px; padding: 0; margin: 0 0 0 20px; list-style-position: inside; list-style-type: decimal;">
+ <li value="1" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#selection-up-down">Frame-by-frame shift</a></li>
+ <li value="2" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#selection-home-end">Moving Selection to the beginning / to the end of the movie</a></li>
+ <li value="3" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#selection-jumping-markers">Jumping on Markers</a></li>
+ <li value="4" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#selection-history">Tracking the Selection History</a></li>
+ <li value="5" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#reselect-clipboard">Returning to the origin of Clipboard data</a></li>
 </ol>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><a class="rvts59" href="Navigation.html#special">Special</a></li>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><a class="rvts50" href="Navigation.html#special">Special</a></li>
 </ul>
-<ol style="text-indent: 32px; margin-left: 20px; list-style-position: inside;">
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#find-note">Finding Markers with a given text</a></li>
-<li class="rvps10" style="text-indent: 32px"><a class="rvts57" href="Navigation.html#similar-note">Jumping to segment with similar description</a></li>
+<ol style="text-indent: 32px; padding: 0; margin: 0 0 0 20px; list-style-position: inside; list-style-type: decimal;">
+ <li value="1" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#find-note">Finding Markers with a given text</a></li>
+ <li value="2" style="text-indent: 32px" class="rvps7"><a class="rvts48" href="Navigation.html#similar-note">Jumping to segment with similar description</a></li>
 </ol>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps2"><a name="scrolling-piano-roll"></a>
-<span class="rvts21"><br/></span></p>
-<p><span class="rvts53">Scrolling the Piano Roll</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="scrollbar-drag"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">1. Using vertical scrollbar</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Click on the scrollbar or drag its thumb to scroll the Piano Roll like any other list.</span></p>
-<p class="rvps10"><span class="rvts21">Playback cursor and Selection cursor positions are not affected by the Piano Roll scrolling.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">when you need to get to a far away section of the movie. The scrollbar allows to traverse thousands of frames at once</span></li>
-<li class="rvps10"><span class="rvts21">when you're searching for a segment which can be anywhere in the movie</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><a name="scrolling-piano-roll"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts45">Scrolling the Piano Roll</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="scrollbar-drag"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">1. Using vertical scrollbar</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Click on the scrollbar or drag its thumb to scroll the Piano Roll like any other list.</span></p>
+<p class="rvps7"><span class="rvts20">Playback cursor and Selection cursor positions are not affected by the Piano Roll scrolling.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">when you need to get to a far away section of the movie. The scrollbar allows to traverse thousands of frames at once</span></li>
+ <li class="rvps7"><span class="rvts20">when you're searching for a segment which can be anywhere in the movie</span></li>
 </ul>
-<p class="rvps10"><a name="wheel"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">2. Rolling mouse wheel</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Roll mouse wheel up or down </span><span class="rvts21">to scroll the Piano Roll like any other list.</span></p>
-<p class="rvps10"><span class="rvts21">The mouse cursor can be pointing anywhere, except History Log window.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">when you're observing a segment that doesn't fit into the Piano Roll visible area</span></li>
-<li class="rvps10"><span class="rvts21">when you're searching for a nearby segment</span></li>
+<p class="rvps7"><a name="wheel"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">2. Rolling mouse wheel</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Roll mouse wheel up or down </span><span class="rvts20">to scroll the Piano Roll like any other list.</span></p>
+<p class="rvps7"><span class="rvts20">The mouse cursor can be pointing anywhere, except History Log window.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">when you're observing a segment that doesn't fit into the Piano Roll visible area</span></li>
+ <li class="rvps7"><span class="rvts20">when you're searching for a nearby segment</span></li>
 </ul>
-<p><a name="crossing-gaps"></a>
-<span class="rvts62"><br/></span></p>
-<p class="rvps10"><span class="rvts22">3. Crossing gaps</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Point mouse cursor to any cell in Input/Markers/icons, hold </span><span class="rvts30">Alt</span><span class="rvts21"> and roll the mouse wheel up or down to scroll the Piano Roll to the closest cell that contains a data different from the data of adjacent cell.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">when you see an emptiness in specific button column and you want to find the nearest frame where the button becomes pressed</span></li>
-<li class="rvps10"><span class="rvts21">when you see the specific button is held for many frames and you want to find exactly the first frame where the button was pressed, or the frame where it will be released</span></li>
-<li class="rvps10"><span class="rvts21">when you need to find previous/next Marker</span></li>
-<li class="rvps10"><span class="rvts21">when you need to find previous/next buttonpress</span></li>
-<li class="rvps10"><span class="rvts21">when you need to find the Bookmark above/below (in the icons column)</span></li>
+<p class="rvps2"><a name="crossing-gaps"></a><span class="rvts31"><br/></span></p>
+<p class="rvps7"><span class="rvts21">3. Crossing gaps</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Point mouse cursor to any cell in Input/Markers/icons, hold </span><span class="rvts27">Alt</span><span class="rvts20"> and roll the mouse wheel up or down to scroll the Piano Roll to the closest cell that contains a data different from the data of adjacent cell.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">when you see an emptiness in specific button column and you want to find the nearest frame where the button becomes pressed</span></li>
+ <li class="rvps7"><span class="rvts20">when you see the specific button is held for many frames and you want to find exactly the first frame where the button was pressed, or the frame where it will be released</span></li>
+ <li class="rvps7"><span class="rvts20">when you need to find previous/next Marker</span></li>
+ <li class="rvps7"><span class="rvts20">when you need to find previous/next buttonpress</span></li>
+ <li class="rvps7"><span class="rvts20">when you need to find the Bookmark above/below (in the icons column)</span></li>
 </ul>
-<p class="rvps10"><a name="jumping-by-pages"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">4. Paging through</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Press</span><span class="rvts21"> </span><span class="rvts30">Page Up</span><span class="rvts21"> or </span><span class="rvts30">Page Down</span><span class="rvts21"> key </span><span class="rvts21">to scroll the Piano Roll like any other list. The amount of scrolling depends on the size of the Piano Roll visible area.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">when you're searching for a segment which is likely somewhere nearby</span></li>
+<p class="rvps7"><a name="jumping-by-pages"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">4. Paging through</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Press</span><span class="rvts20"> </span><span class="rvts27">Page Up</span><span class="rvts20"> or </span><span class="rvts27">Page Down</span><span class="rvts20"> key </span><span class="rvts20">to scroll the Piano Roll like any other list. The amount of scrolling depends on the size of the Piano Roll visible area.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">when you're searching for a segment which is likely somewhere nearby</span></li>
 </ul>
-<p class="rvps10"><a name="jump-home-end"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">5. Jumping to the beginning / to the end of the movie</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Press</span><span class="rvts21"> </span><span class="rvts30">Home</span><span class="rvts21"> or </span><span class="rvts30">End</span><span class="rvts21"> </span><span class="rvts21">to scroll Piano Roll to the beginning or to the end of the movie.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you need to observe </span><span class="rvts21">the beginning or the end of the movie</span></li>
+<p class="rvps7"><a name="jump-home-end"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">5. Jumping to the beginning / to the end of the movie</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Press</span><span class="rvts20"> </span><span class="rvts27">Home</span><span class="rvts20"> or </span><span class="rvts27">End</span><span class="rvts20"> </span><span class="rvts20">to scroll Piano Roll to the beginning or to the end of the movie.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you need to observe </span><span class="rvts20">the beginning or the end of the movie</span></li>
 </ul>
-<p class="rvps10"><a name="scroll-to-playback"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">6. Jumping to the Playback cursor</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Click on the upper "Marker #" label (colored light-blue) to immediately scroll the Piano Roll to the Playback cursor position. Alternative way to do it is to press </span><span class="rvts30">Shift</span><span class="rvts21"> key twice within a short amount of time.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you need to see the context of currently played frame of the movie</span></li>
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you wish to return to the currently played segment from any other place</span></li>
+<p class="rvps7"><a name="scroll-to-playback"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">6. Jumping to the Playback cursor</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Click on the upper "Marker #" label (colored light-blue) to immediately scroll the Piano Roll to the Playback cursor position. Alternative way to do it is to press </span><span class="rvts27">Shift</span><span class="rvts20"> key twice within a short amount of time.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you need to see the context of currently played frame of the movie</span></li>
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you wish to return to the currently played segment from any other place</span></li>
 </ul>
-<p class="rvps10"><a name="scroll-to-selection"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">7. Jumping to the Selection cursor</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Click on the lower "Marker #" label to immediately scroll the Piano Roll to the Selection cursor position. Alternative way to do it is to press </span><span class="rvts30">Ctrl</span><span class="rvts21"> key twice within a short amount of time.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you wish to return to the currently edited segment from any other place</span></li>
+<p class="rvps7"><a name="scroll-to-selection"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">7. Jumping to the Selection cursor</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Click on the lower "Marker #" label to immediately scroll the Piano Roll to the Selection cursor position. Alternative way to do it is to press </span><span class="rvts27">Ctrl</span><span class="rvts20"> key twice within a short amount of time.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you wish to return to the currently edited segment from any other place</span></li>
 </ul>
-<p class="rvps10"><a name="scroll-to-playback-marker"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">8. Jumping to the Marker above Playback cursor</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Click on the upper edit field to immediately scroll the Piano Roll to the Marker which Note is going to be edited.</span></p>
-<p class="rvps10"><span class="rvts21">Works only when the </span><a class="rvts27" href="ProgramCustomization.html#FollowMarkerNotecontext">View -&gt; Follow Marker Note context</a><span class="rvts21"> option is enabled.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you need to see the beginning of the </span><span class="rvts21">currently played segment</span></li>
+<p class="rvps7"><a name="scroll-to-playback-marker"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">8. Jumping to the Marker above Playback cursor</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Click on the upper edit field to immediately scroll the Piano Roll to the Marker which Note is going to be edited.</span></p>
+<p class="rvps7"><span class="rvts20">Works only when the </span><a class="rvts24" href="ProgramCustomization.html#FollowMarkerNotecontext">View -&gt; Follow Marker Note context</a><span class="rvts20"> option is enabled.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you need to see the beginning of the </span><span class="rvts20">currently played segment</span></li>
 </ul>
-<p class="rvps14"><a name="scroll-to-selection-marker"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">9. Jumping to the Marker above Selection cursor</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Click on the lower edit field to immediately scroll the Piano Roll to the Marker which Note is going to be edited.</span></p>
-<p class="rvps10"><span class="rvts21">Works only when the </span><a class="rvts27" href="ProgramCustomization.html#FollowMarkerNotecontext">View -&gt; Follow Marker Note context</a><span class="rvts21"> option is enabled.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you need to see the beginning of the </span><span class="rvts21">currently edited segment</span></li>
+<p class="rvps9"><a name="scroll-to-selection-marker"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">9. Jumping to the Marker above Selection cursor</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Click on the lower edit field to immediately scroll the Piano Roll to the Marker which Note is going to be edited.</span></p>
+<p class="rvps7"><span class="rvts20">Works only when the </span><a class="rvts24" href="ProgramCustomization.html#FollowMarkerNotecontext">View -&gt; Follow Marker Note context</a><span class="rvts20"> option is enabled.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you need to see the beginning of the </span><span class="rvts20">currently edited segment</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="playback-cursor"></a>
-<span class="rvts21"><br/></span></p>
-<p><span class="rvts53">Playback cursor navigation</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The Playback cursor is always bound to current state of emulated game. This means that emulator affects this cursor when emulating the game, and vice versa, when you move this cursor, you affect the emulator.</span></p>
-<p class="rvps10"><span class="rvts21">There's one limitation in the controlling of the cursor: sometimes it can't immediately move to the desired frame, seeking takes some time.</span></p>
-<p class="rvps10"><span class="rvts21">When the "Follow cursor" checkbox in the Playback panel is checked, the Piano Roll automatically scrolls after the Playback cursor (except when seeking).</span></p>
-<p class="rvps10"><a name="frame-advance-rewind"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">1. Frame-by-frame shift</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Click on </span><span class="rvts29">&lt;</span><span class="rvts21"> or </span><span class="rvts29">&gt;</span><span class="rvts21"> button in the Playback panel, or press </span><span class="rvts30">Shift + Up</span><span class="rvts21"> or </span><span class="rvts30">Shift + Down</span><span class="rvts21">, or use </span><span class="rvts26">Frame Rewind </span><span class="rvts21">or </span><span class="rvts26">Frame Advance</span><span class="rvts21"> hotkey to move the Playback cursor 1 frame back of forward.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you need to explore events of current segment carefully</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="playback-cursor"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts45">Playback cursor navigation</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The Playback cursor is always bound to current state of emulated game. This means that emulator affects this cursor when emulating the game, and vice versa, when you move this cursor, you affect the emulator.</span></p>
+<p class="rvps7"><span class="rvts20">There's one limitation in the controlling of the cursor: sometimes it can't immediately move to the desired frame, seeking takes some time.</span></p>
+<p class="rvps7"><span class="rvts20">When the "Follow cursor" checkbox in the Playback panel is checked, the Piano Roll automatically scrolls after the Playback cursor (except when seeking).</span></p>
+<p class="rvps7"><a name="frame-advance-rewind"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">1. Frame-by-frame shift</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Click on </span><span class="rvts26">&lt;</span><span class="rvts20"> or </span><span class="rvts26">&gt;</span><span class="rvts20"> button in the Playback panel, or press </span><span class="rvts27">Shift + Up</span><span class="rvts20"> or </span><span class="rvts27">Shift + Down</span><span class="rvts20">, or use </span><span class="rvts23">Frame Rewind </span><span class="rvts20">or </span><span class="rvts23">Frame Advance</span><span class="rvts20"> hotkey to move the Playback cursor 1 frame back of forward.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you need to explore events of current segment carefully</span></li>
 </ul>
-<p class="rvps10"><a name="rewinding-by-wheel"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">2. Rewinding by mouse wheel</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Hold the right mouse button and r</span><span class="rvts21">oll mouse wheel up or down </span><span class="rvts21">to move the Playback cursor.</span></p>
-<p class="rvps10"><span class="rvts21">The mouse cursor can be pointing anywhere.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you need to explore events of current segment carefully/quickly</span></li>
+<p class="rvps7"><a name="rewinding-by-wheel"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">2. Rewinding by mouse wheel</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Hold the right mouse button and r</span><span class="rvts20">oll mouse wheel up or down </span><span class="rvts20">to move the Playback cursor.</span></p>
+<p class="rvps7"><span class="rvts20">The mouse cursor can be pointing anywhere.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you need to explore events of current segment carefully/quickly</span></li>
 </ul>
-<p class="rvps10"><a name="drag-playback"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">3. Dragging with mouse</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Click on any cell in the leftmost column of the Piano Roll ("Icons" column) to send the Playback cursor to the frame. Also, click on any cell of the column and hold the left mouse button to drag the Playback cursor by moving the mouse. This method also allows to scroll the Piano Roll by dragging the Playback cursor outside (above or below the Piano Roll).</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen </span><span class="rvts21">you're </span><span class="rvts21">searching for an in-game event of the movie</span></li>
+<p class="rvps7"><a name="drag-playback"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">3. Dragging with mouse</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Click on any cell in the leftmost column of the Piano Roll ("Icons" column) to send the Playback cursor to the frame. Also, click on any cell of the column and hold the left mouse button to drag the Playback cursor by moving the mouse. This method also allows to scroll the Piano Roll by dragging the Playback cursor outside (above or below the Piano Roll).</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen </span><span class="rvts20">you're </span><span class="rvts20">searching for an in-game event of the movie</span></li>
 </ul>
-<p class="rvps10"><a name="playback-jumping-markers"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">4. Jumping on Markers</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Click on </span><span class="rvts29">&lt;&lt;</span><span class="rvts21"> or </span><span class="rvts29">&gt;&gt;</span><span class="rvts21"> button in the Playback panel, or press </span><span class="rvts30">Shift + Page Up</span><span class="rvts21"> or </span><span class="rvts30">Shift + Page Down</span><span class="rvts21">, or hold </span><span class="rvts30">Shift</span><span class="rvts21"> and roll the mouse wheel to move the Playback cursor to previous or next Marker.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you need to set the Playback cursor to the beginning of currently played segment (provided that the frame of the beginning is marked)</span></li>
-<li class="rvps10"><span class="rvts21">when you want to see </span><span class="rvts21">events of previous/next segments</span></li>
+<p class="rvps7"><a name="playback-jumping-markers"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">4. Jumping on Markers</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Click on </span><span class="rvts26">&lt;&lt;</span><span class="rvts20"> or </span><span class="rvts26">&gt;&gt;</span><span class="rvts20"> button in the Playback panel, or press </span><span class="rvts27">Shift + Page Up</span><span class="rvts20"> or </span><span class="rvts27">Shift + Page Down</span><span class="rvts20">, or hold </span><span class="rvts27">Shift</span><span class="rvts20"> and roll the mouse wheel to move the Playback cursor to previous or next Marker.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you need to set the Playback cursor to the beginning of currently played segment (provided that the frame of the beginning is marked)</span></li>
+ <li class="rvps7"><span class="rvts20">when you want to see </span><span class="rvts20">events of previous/next segments</span></li>
 </ul>
-<p class="rvps10"><a name="jump-bookmark"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">5. Jumping to Bookmarks</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Press the hotkey (</span><span class="rvts26">0-9</span><span class="rvts21">) corresponding to the number of desired Bookmark, or click on a frame number in Bookmarks List, or click on a Bookmark icon in the Branches Tree to send the Playback cursor to the bookmarked frame.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you need to re-watch events of the movie starting from a bookmarked frame (e.g. watch the movie from the beginning of Level 2)</span></li>
-<li class="rvps10"><span class="rvts21">when you changed Input before the bookmarked frame and want to see new events at the frame</span></li>
+<p class="rvps7"><a name="jump-bookmark"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">5. Jumping to Bookmarks</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Press the hotkey (</span><span class="rvts23">0-9</span><span class="rvts20">) corresponding to the number of desired Bookmark, or click on a frame number in Bookmarks List, or click on a Bookmark icon in the Branches Tree to send the Playback cursor to the bookmarked frame.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you need to re-watch events of the movie starting from a bookmarked frame (e.g. watch the movie from the beginning of Level 2)</span></li>
+ <li class="rvps7"><span class="rvts20">when you changed Input before the bookmarked frame and want to see new events at the frame</span></li>
 </ul>
-<p class="rvps10"><a name="playback-home-end"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">6. Jumping to the beginning / to the end of the movie</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Press </span><span class="rvts30">Shift + </span><span class="rvts30">Home</span><span class="rvts21"> or </span><span class="rvts30">Shift + </span><span class="rvts30">End</span><span class="rvts21">, or click the cloudlet or the fireball in the Branches Tree to move the Playback cursor to the beginning or to the end of the movie.</span></p>
-<p class="rvps10"><span class="rvts21">You can also press the </span><span class="rvts26">Play movie from the beginning</span><span class="rvts21"> hotkey (</span><span class="rvts26">Shift + R</span><span class="rvts21"> by default) to move the Playback cursor to the beginning of the movie.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you want to watch the movie from the very beginning</span></li>
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you need to fill all movie frames with Greenzone data</span></li>
+<p class="rvps7"><a name="playback-home-end"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">6. Jumping to the beginning / to the end of the movie</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Press </span><span class="rvts27">Shift + </span><span class="rvts27">Home</span><span class="rvts20"> or </span><span class="rvts27">Shift + </span><span class="rvts27">End</span><span class="rvts20">, or click the cloudlet or the fireball in the Branches Tree to move the Playback cursor to the beginning or to the end of the movie.</span></p>
+<p class="rvps7"><span class="rvts20">You can also press the </span><span class="rvts23">Play movie from the beginning</span><span class="rvts20"> hotkey (</span><span class="rvts23">Shift + R</span><span class="rvts20"> by default) to move the Playback cursor to the beginning of the movie.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you want to watch the movie from the very beginning</span></li>
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you need to fill all movie frames with Greenzone data</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="selection-cursor"></a>
-<span class="rvts21"><br/></span></p>
-<p><span class="rvts53">Selection cursor navigation</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Selection cursor is usually located on the frame where the most recent changes of Input were made, but you can also move the cursor to any other frame when needed.</span></p>
-<p class="rvps10"><span class="rvts21">The Piano Roll automatically scrolls after the Selection.</span></p>
-<p class="rvps10"><a name="selection-up-down"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">1. Frame-by-frame shift</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Press </span><span class="rvts30">Ctrl + Up</span><span class="rvts21"> or </span><span class="rvts30">Ctrl + Down</span><span class="rvts21"> to move current Selection 1 frame up or down.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you need to transpose Selection up or down</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="selection-cursor"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts45">Selection cursor navigation</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Selection cursor is usually located on the frame where the most recent changes of Input were made, but you can also move the cursor to any other frame when needed.</span></p>
+<p class="rvps7"><span class="rvts20">The Piano Roll automatically scrolls after the Selection.</span></p>
+<p class="rvps7"><a name="selection-up-down"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">1. Frame-by-frame shift</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Press </span><span class="rvts27">Ctrl + Up</span><span class="rvts20"> or </span><span class="rvts27">Ctrl + Down</span><span class="rvts20"> to move current Selection 1 frame up or down.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you need to transpose Selection up or down</span></li>
 </ul>
-<p class="rvps10"><a name="selection-home-end"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">2. Moving Selection to the beginning / to the end of the movie</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Press </span><span class="rvts30">Ctrl + </span><span class="rvts30">Home</span><span class="rvts21"> or </span><span class="rvts30">Ctrl + </span><span class="rvts30">End</span><span class="rvts21"> to move current Selection to the beginning or to the end of the movie.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you need to select the same set of frames at the beginning or at the end of the movie</span></li>
+<p class="rvps7"><a name="selection-home-end"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">2. Moving Selection to the beginning / to the end of the movie</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Press </span><span class="rvts27">Ctrl + </span><span class="rvts27">Home</span><span class="rvts20"> or </span><span class="rvts27">Ctrl + </span><span class="rvts27">End</span><span class="rvts20"> to move current Selection to the beginning or to the end of the movie.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you need to select the same set of frames at the beginning or at the end of the movie</span></li>
 </ul>
-<p class="rvps10"><a name="selection-jumping-markers"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">3. Jumping on Markers</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Click on </span><span class="rvts29">&lt;&lt;</span><span class="rvts21"> or </span><span class="rvts29">&gt;&gt;</span><span class="rvts21"> button at the bottom of the Toolbox, or press </span><span class="rvts30">Ctrl + Page Up</span><span class="rvts21"> or </span><span class="rvts30">Ctrl + Page Down</span><span class="rvts21">, or hold </span><span class="rvts30">Ctrl</span><span class="rvts21"> and roll the mouse wheel</span><span class="rvts21"> to move Selection cursor </span><span class="rvts21">to previous or next Marker.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">when you need to set the Selection cursor to the beginning of currently edited segment (provided that the frame of the beginning is marked)</span></li>
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you want to move to </span><span class="rvts21">previous/next segments</span></li>
+<p class="rvps7"><a name="selection-jumping-markers"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">3. Jumping on Markers</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Click on </span><span class="rvts26">&lt;&lt;</span><span class="rvts20"> or </span><span class="rvts26">&gt;&gt;</span><span class="rvts20"> button at the bottom of the Toolbox, or press </span><span class="rvts27">Ctrl + Page Up</span><span class="rvts20"> or </span><span class="rvts27">Ctrl + Page Down</span><span class="rvts20">, or hold </span><span class="rvts27">Ctrl</span><span class="rvts20"> and roll the mouse wheel</span><span class="rvts20"> to move Selection cursor </span><span class="rvts20">to previous or next Marker.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">when you need to set the Selection cursor to the beginning of currently edited segment (provided that the frame of the beginning is marked)</span></li>
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you want to move to </span><span class="rvts20">previous/next segments</span></li>
 </ul>
-<p class="rvps10"><a name="selection-history"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">4. Tracking the Selection History</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Press </span><span class="rvts30">Ctrl + Q</span><span class="rvts21"> or </span><span class="rvts30">Ctrl + W</span><span class="rvts21"> to revert Selection to its previous or next state.</span></p>
-<p class="rvps10"><span class="rvts21">This method of navigation allows to return to previously edited segments and quickly recollect the sequence of recent changes. </span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you need to return to previously edited segment</span></li>
-<li class="rvps10"><span class="rvts21">w</span><span class="rvts21">hen you need to select the same set of frames as before</span></li>
+<p class="rvps7"><a name="selection-history"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">4. Tracking the Selection History</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Press </span><span class="rvts27">Ctrl + Q</span><span class="rvts20"> or </span><span class="rvts27">Ctrl + W</span><span class="rvts20"> to revert Selection to its previous or next state.</span></p>
+<p class="rvps7"><span class="rvts20">This method of navigation allows to return to previously edited segments and quickly recollect the sequence of recent changes.&nbsp;</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you need to return to previously edited segment</span></li>
+ <li class="rvps7"><span class="rvts20">w</span><span class="rvts20">hen you need to select the same set of frames as before</span></li>
 </ul>
-<p class="rvps10"><a name="reselect-clipboard"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">5. Returning to the origin of Clipboard data</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Press </span><span class="rvts30">Ctrl + B</span><span class="rvts21"> to revert Selection to its state at the moment of the last "Copy to Clipboard" operation.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">when you need to remember where the Input was copied from</span></li>
+<p class="rvps7"><a name="reselect-clipboard"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">5. Returning to the origin of Clipboard data</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Press </span><span class="rvts27">Ctrl + B</span><span class="rvts20"> to revert Selection to its state at the moment of the last "Copy to Clipboard" operation.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">when you need to remember where the Input was copied from</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="special"></a>
-<span class="rvts21"><br/></span></p>
-<p><span class="rvts53">Special</span></p>
-<p><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="find-note"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">1. Finding Markers with a given text</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Open the </span><span class="rvts25">Find Note</span><span class="rvts21"> window, enter the text to search and click </span><span class="rvts29">Find next</span><span class="rvts21"> or press Enter key to set the Selection cursor to the closest Marker which Note contains the text. </span><span class="rvts21">The Piano Roll automatically scrolls after the Selection. You can search up or down from the current position of the Selection cursor.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">when you need to find the segment, knowing some of the exact text it is labeled with</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="special"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts45">Special</span></p>
+<p class="rvps2"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="find-note"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">1. Finding Markers with a given text</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Open the </span><span class="rvts22">Find Note</span><span class="rvts20"> window, enter the text to search and click </span><span class="rvts26">Find next</span><span class="rvts20"> or press Enter key to set the Selection cursor to the closest Marker which Note contains the text. </span><span class="rvts20">The Piano Roll automatically scrolls after the Selection. You can search up or down from the current position of the Selection cursor.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">when you need to find the segment, knowing some of the exact text it is labeled with</span></li>
 </ul>
-<p class="rvps10"><a name="similar-note"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">2. Jumping to the segment with similar description</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Leave the Playback cursor in the current segment and click the </span><span class="rvts29">Similar</span><span class="rvts21"> or </span><span class="rvts29">More</span><span class="rvts21"> button to set the Selection cursor to the Marker containing the most relevant Note. </span><span class="rvts21">The Piano Roll automatically scrolls after the Selection.</span></p>
-<p class="rvps10"><span class="rvts21">This method is described in the </span><a class="rvts27" href="AdvancedFeatures.html#UsingMarkers">Advanced Features</a><span class="rvts21"> chapter.</span></p>
-<p class="rvps10"><span class="rvts21">When to use:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">when you need to find the segment with a description similar to currently played segment.</span></li>
+<p class="rvps7"><a name="similar-note"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">2. Jumping to the segment with similar description</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Leave the Playback cursor in the current segment and click the </span><span class="rvts26">Similar</span><span class="rvts20"> or </span><span class="rvts26">More</span><span class="rvts20"> button to set the Selection cursor to the Marker containing the most relevant Note. </span><span class="rvts20">The Piano Roll automatically scrolls after the Selection.</span></p>
+<p class="rvps7"><span class="rvts20">This method is described in the </span><a class="rvts24" href="AdvancedFeatures.html#UsingMarkers">Advanced Features</a><span class="rvts20"> chapter.</span></p>
+<p class="rvps7"><span class="rvts20">When to use:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">when you need to find the segment with a description similar to currently played segment.</span></li>
 </ul>
-<p class="rvps14"><span class="rvts21"><br/></span></p>
-<p class="rvps14"><span class="rvts21"><br/></span></p>
-<p class="rvps14"><span class="rvts21"><br/></span></p>
-<p class="rvps14"><span class="rvts21"><br/></span></p>
-<p class="rvps14"><span class="rvts21"><br/></span></p>
+<p class="rvps9"><span class="rvts20"><br/></span></p>
+<p class="rvps9"><span class="rvts20"><br/></span></p>
+<p class="rvps9"><span class="rvts20"><br/></span></p>
+<p class="rvps9"><span class="rvts20"><br/></span></p>
+<p class="rvps9"><span class="rvts20"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/create-epub-ebooks">Write EPub books for the iPad</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/feature-tour">Easily create PDF Help documents</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

@@ -1,135 +1,344 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Title</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("Title");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Title</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Title">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Title" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Title</h1>
-				
-				</div>
-			<div id="topic_header_nav">
-				<a href="BeginnersGuide.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="Title"
+		  data-hnd-context="0"
+		  data-hnd-title="Title"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="BeginnersGuide.html" title="Beginner's Guide" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Title</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p class="rvps5"><span class="rvts6"><br/></span></p>
-<p class="rvps5"><span class="rvts6"><br/></span></p>
-<p class="rvps4"><span class="rvts8">TAS Editor 1.01</span></p>
-<p class="rvps1"><span class="rvts9"><br/></span></p>
-<p class="rvps1"><span class="rvts9"><br/></span></p>
-<p class="rvps1"><span class="rvts9">Welcome to the TAS Editor Manual!</span></p>
-<p class="rvps1"><span class="rvts9"><br/></span></p>
-<div class="rvps1"><table width="90%" border="0" cellpadding="0" cellspacing="0" style="border-width: 0px;">
-<tr valign="top">
-<td><p class="rvps1"><span class="rvts9">Taseditor is an Integrated development environment dedicated to TASing.</span></p>
-<p class="rvps1"><span class="rvts9">Playing videogames in Taseditor resembles both interactive programming and drawing notes by mouse in a music editor.</span></p>
-</td>
-</tr>
+<p class="rvps3"><span class="rvts6"><br/></span></p>
+<p class="rvps3"><span class="rvts6"><br/></span></p>
+<p class="rvps3"><span class="rvts8">TAS Editor 1.01</span></p>
+<p class="rvps3"><span class="rvts9"><br/></span></p>
+<p class="rvps3"><span class="rvts9"><br/></span></p>
+<p class="rvps3"><span class="rvts9">Welcome to the TAS Editor Manual!</span></p>
+<p class="rvps3"><span class="rvts9"><br/></span></p>
+<div class="rvps3">
+<table width="90%" border="0" cellpadding="0" cellspacing="0" style="border-width: 0px; border-spacing: 0px; margin: 0px auto;">
+ <tr valign="top">
+  <td style="padding: 0px;">
+   <p class="rvps3"><span class="rvts9">Taseditor is an Integrated development environment dedicated to TASing.</span></p>
+   <p class="rvps3"><span class="rvts9">Playing videogames in Taseditor resembles both interactive programming and drawing notes by mouse in a music editor.</span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps4"><span class="rvts6"><br/></span></p>
-<div class="rvps4"><table width="700" border="1" cellpadding="8" cellspacing="0" style="border-color: #000000; border-style: solid;">
-<tr valign="bottom">
-<td style="border-color: #000000; border-style: solid; border-bottom: none; background-color: #ffe5e3; width: 32%; height: 20px;"><p class="rvps6"><a class="rvts15" href="BeginnersGuide.html">Beginner's Guide</a></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-bottom: none; background-color: #d9ffdd; width: 32%; height: 20px;"><p class="rvps6"><a class="rvts15" href="Reference.html">Reference</a></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-bottom: none; background-color: #d0ffff; width: 30%; height: 20px;"><p class="rvps6"><a class="rvts16" href="TASEditorInside.html">TAS Editor Inside</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid; border-top: none; border-bottom: none; background-color: #ffe5e3; width: 32%; height: 38px;"><p class="rvps5"><span class="rvts14">If you're seeing the Manual for the first time, please study this whole course</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-top: none; border-bottom: none; background-color: #d9ffdd; width: 32%; height: 38px;"><p class="rvps5"><span class="rvts14">Look here when you need to know comprehensive specifications about limits and possibilities of TAS Editor</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-top: none; border-bottom: none; background-color: #d0ffff; width: 30%; height: 38px;"><p class="rvps5"><span class="rvts14">Read these docs when you wish to learn details of the system</span></p>
-</td>
-</tr>
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid; border-top: none; background-color: #ffe5e3; width: 32%; height: 163px;"><p class="rvps7"><a class="rvts12" href="Introduction.html">Introduction</a></p>
-<p class="rvps7"><a class="rvts12" href="ProgramInterface.html">Program Interface</a></p>
-<p class="rvps7"><a class="rvts13" href="TASingProcess.html">TASing Process</a></p>
-<p class="rvps7"><a class="rvts13" href="TASingMethodology.html">TASing Methodology</a></p>
-<p class="rvps7"><a class="rvts13" href="ProgramCustomization.html">Program Customization</a></p>
-<p class="rvps7"><a class="rvts13" href="AdvancedFeatures.html">Advanced Features</a></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-top: none; background-color: #d9ffdd; width: 32%; height: 163px;"><p class="rvps7"><a class="rvts13" href="Glossary.html">Glossary</a></p>
-<p class="rvps7"><a class="rvts13" href="Controls.html">Controls</a></p>
-<p class="rvps7"><a class="rvts13" href="Navigation.html">Navigation</a></p>
-<p class="rvps7"><a class="rvts13" href="Operations.html">Operations</a></p>
-<p class="rvps7"><a class="rvts13" href="LuaAPI.html">Lua API</a></p>
-<p class="rvps7"><a class="rvts13" href="FAQ.html">FAQ</a></p>
-<p class="rvps7"><a class="rvts13" href="SpeedrunningSynopsis.html">Speedrunning Synopsis</a></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-top: none; background-color: #d0ffff; width: 30%; height: 163px;"><p class="rvps7"><a class="rvts13" href="Ideas.html">Ideas</a></p>
-<p class="rvps7"><a class="rvts13" href="Implementation.html">Implementation</a></p>
-<p class="rvps7"><a class="rvts13" href="MistakeProofing.html">Mistake-proofing</a></p>
-<p class="rvps7"><a class="rvts13" href="FM3format.html">FM3 format</a></p>
-</td>
-</tr>
+<p class="rvps3"><span class="rvts6"><br/></span></p>
+<div class="rvps3">
+<table width="700" border="1" cellpadding="8" cellspacing="0" style="border-color: #000000; border-style: solid; border-spacing: 0px; margin: 0px auto;">
+ <tr valign="bottom">
+  <td width="32%" height="36" style="border-color: #000000; border-style: solid; padding: 8px; border-bottom: none; background-color: #ffe5e3;">
+   <p class="rvps4"><a class="rvts14" href="BeginnersGuide.html">Beginner's Guide</a></p>
+  </td>
+  <td width="32%" height="36" style="border-color: #000000; border-style: solid; padding: 8px; border-bottom: none; background-color: #d9ffdd;">
+   <p class="rvps4"><a class="rvts14" href="Reference.html">Reference</a></p>
+  </td>
+  <td width="30%" height="36" style="border-color: #000000; border-style: solid; padding: 8px; border-bottom: none; background-color: #d0ffff;">
+   <p class="rvps4"><a class="rvts15" href="TASEditorInside.html">TAS Editor Inside</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td width="32%" height="54" style="border-color: #000000; border-style: solid; padding: 8px; border-top: none; border-bottom: none; background-color: #ffe5e3;">
+   <p class="rvps3"><span class="rvts13">If you're seeing the Manual for the first time, please study this whole course</span></p>
+  </td>
+  <td width="32%" height="54" style="border-color: #000000; border-style: solid; padding: 8px; border-top: none; border-bottom: none; background-color: #d9ffdd;">
+   <p class="rvps3"><span class="rvts13">Look here when you need to know comprehensive specifications about limits and possibilities of TAS Editor</span></p>
+  </td>
+  <td width="30%" height="54" style="border-color: #000000; border-style: solid; padding: 8px; border-top: none; border-bottom: none; background-color: #d0ffff;">
+   <p class="rvps3"><span class="rvts13">Read these docs when you wish to learn details of the system</span></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td width="32%" height="179" style="border-color: #000000; border-style: solid; padding: 8px; border-top: none; background-color: #ffe5e3;">
+   <p class="rvps5"><a class="rvts11" href="Introduction.html">Introduction</a></p>
+   <p class="rvps5"><a class="rvts11" href="ProgramInterface.html">Program Interface</a></p>
+   <p class="rvps5"><a class="rvts12" href="TASingProcess.html">TASing Process</a></p>
+   <p class="rvps5"><a class="rvts12" href="TASingMethodology.html">TASing Methodology</a></p>
+   <p class="rvps5"><a class="rvts12" href="ProgramCustomization.html">Program Customization</a></p>
+   <p class="rvps5"><a class="rvts12" href="AdvancedFeatures.html">Advanced Features</a></p>
+  </td>
+  <td width="32%" height="179" style="border-color: #000000; border-style: solid; padding: 8px; border-top: none; background-color: #d9ffdd;">
+   <p class="rvps5"><a class="rvts12" href="Glossary.html">Glossary</a></p>
+   <p class="rvps5"><a class="rvts12" href="Controls.html">Controls</a></p>
+   <p class="rvps5"><a class="rvts12" href="Navigation.html">Navigation</a></p>
+   <p class="rvps5"><a class="rvts12" href="Operations.html">Operations</a></p>
+   <p class="rvps5"><a class="rvts12" href="LuaAPI.html">Lua API</a></p>
+   <p class="rvps5"><a class="rvts12" href="FAQ.html">FAQ</a></p>
+   <p class="rvps5"><a class="rvts12" href="SpeedrunningSynopsis.html">Speedrunning Synopsis</a></p>
+  </td>
+  <td width="30%" height="179" style="border-color: #000000; border-style: solid; padding: 8px; border-top: none; background-color: #d0ffff;">
+   <p class="rvps5"><a class="rvts12" href="Ideas.html">Ideas</a></p>
+   <p class="rvps5"><a class="rvts12" href="Implementation.html">Implementation</a></p>
+   <p class="rvps5"><a class="rvts12" href="MistakeProofing.html">Mistake-proofing</a></p>
+   <p class="rvps5"><a class="rvts12" href="FM3format.html">FM3 format</a></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps4"><span class="rvts6"><br/></span></p>
-<p class="rvps4"><span class="rvts6"><br/></span></p>
-<p class="rvps4"><span class="rvts6"><br/></span></p>
-<p class="rvps3"><span class="rvts6">Author of TAS Editor v1.01: AnS</span></p>
-<p class="rvps3"><span class="rvts6">Assistance in testing: feos</span></p>
-<p class="rvps3"><span class="rvts6"><br/></span></p>
-<p class="rvps3"><span class="rvts6">Author of this Manual: AnS</span></p>
-<p class="rvps3"><span class="rvts6">English translation: AnS, feos</span></p>
 <p class="rvps3"><span class="rvts6"><br/></span></p>
 <p class="rvps3"><span class="rvts6"><br/></span></p>
 <p class="rvps3"><span class="rvts6"><br/></span></p>
-<p class="rvps3"><span class="rvts6"><br/></span></p>
-<p class="rvps3"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Author of TAS Editor v1.01: AnS</span></p>
+<p class="rvps2"><span class="rvts6">Assistance in testing: feos</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Author of this Manual: AnS</span></p>
+<p class="rvps2"><span class="rvts6">English translation: AnS, feos</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com">Free HTML Help documentation generator</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com">Free PDF documentation generator</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

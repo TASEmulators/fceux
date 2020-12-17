@@ -1,501 +1,680 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Controls</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("Controls");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Controls</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Controls">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Controls" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Controls</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Reference.html">Reference</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Reference.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="Glossary.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="Navigation.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts19">Controls</span></p>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Taseditor is controlled by </span><a class="rvts27" href="Controls.html#mouse">mouse</a><span class="rvts21"> and </span><a class="rvts27" href="Controls.html#keyboard">keyboard</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">Every operation can be done in several alternative ways (via menu, hotkey or GUI element).</span></p>
-<p class="rvps10"><span class="rvts21">Any action can be done using mouse, but some are faster to do with keyboard. The Manual assumes that one hand of user is holding the mouse and other hand is placed on a side of the keyboard, occasionally holding </span><span class="rvts30">Shift</span><span class="rvts21">/</span><span class="rvts30">Ctrl</span><span class="rvts21">/</span><span class="rvts30">Alt</span><span class="rvts21"> or pressing a key combination.</span></p>
-<p class="rvps10"><span class="rvts21">Some actions (e.g. switching the </span><span class="rvts21">"Follow cursor")</span><span class="rvts21"> can be done by mouse only.</span></p>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps2"><a name="mouse"></a>
-<span class="rvts6"><br/></span></p>
-<p><span class="rvts53">Mouse controls</span></p>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps25" style="text-indent: 30px"><a class="rvts51" href="Controls.html#mouseover">pointing with mouse</a></li>
-<li class="rvps25" style="text-indent: 30px"><a class="rvts51" href="Controls.html#leftbutton">left mouse button</a></li>
-<li class="rvps25" style="text-indent: 30px"><a class="rvts51" href="Controls.html#rightbutton">right mouse button</a></li>
-<li class="rvps25" style="text-indent: 30px"><a class="rvts51" href="Controls.html#middlebutton">middle mouse button</a></li>
-<li class="rvps25" style="text-indent: 30px"><a class="rvts51" href="Controls.html#wheel">mouse wheel</a></li>
-</ul>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><a name="mouseover"></a>
-<span class="rvts6"><br/></span></p>
-<p class="rvps10"><span class="rvts46">Pointing with mouse</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">A. </span><span class="rvts34">Displaying Bookmarks screenshots and descriptions</span></p>
-<p class="rvps10"><span class="rvts21">Hover mouse cursor over the right half of Bookmarks List to see the game screenshot of the bookmarked frame in the movie branch you're pointing at. Optionally there can be a description of the branch under the screenshot.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">B. </span><span class="rvts34">Displaying information of the Bookmark</span></p>
-<p class="rvps10"><span class="rvts21">Hover mouse cursor over an icon of any Bookmark in the Branches Tree to see the information about the Bookmark (real time of creation, bookmarked frame, full timeline, screenshot and description). When you point at a Bookmark that doesn't belong to the timeline of current movie branch, the mouse cursor changes to "arrow with question mark".</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">C. </span><span class="rvts34">Illuminating button symbols in the Piano Roll Header</span></p>
-<p class="rvps10"><span class="rvts21">Hover mouse cursor over a button symbol in the Piano Roll Header to see if you can change the movie by clicking this symbol. When some rows of Piano Roll are selected, symbols in the Header will illuminate on mouse hover.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="leftbutton"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">Left mouse button</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The main button.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">A. </span><span class="rvts34">Standard Windows actions</span></p>
-<p class="rvps10"><span class="rvts21">Most of GUI elements of TAS Editor window are controlled the same way as in other Windows applications.</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">press a button by left-click (also works with the progressbar, "Bookmarks/Branches" caption and "Marker #" labels)</span><span class="rvts21"> – fires on button press</span></li>
-<li class="rvps10"><span class="rvts21">check/uncheck checkboxes and radiobuttons</span><span class="rvts21"> – fires on button release</span></li>
-<li class="rvps10"><span class="rvts21">open the window menu, choose menu item, set/remove ticks from menu items</span></li>
-<li class="rvps10"><span class="rvts21">scroll Piano Roll or History Log using scrollbars</span></li>
-<li class="rvps10"><span class="rvts21">move or resize TAS Editor window</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">B. </span><span class="rvts34">Moving the Playback cursor</span></p>
-<p class="rvps10"><span class="rvts21">Click on any row in the "Icons" column of the Piano Roll to send the Playback cursor to the frame pointed. If you hold the left mouse button, you can drag the Playback cursor up and down. This way you can also move the Playback cursor to frames outside the currently visible area of the movie – drag the cursor below or above the Piano Roll, the farther you lead the mouse, the faster will be scrolling and Playback rewinding.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">C. </span><span class="rvts34">Selecting rows in the Piano Roll</span></p>
-<p class="rvps10"><span class="rvts21">Click on a frame number in the "Frame#" column of the Piano Roll to select this frame and remove selection from other frames (if there was any selection before). </span><span class="rvts21">If you hold the left mouse button, you can stretch the selection by moving mouse up or down.</span></p>
-<p class="rvps10"><span class="rvts21">If you need to append new selection to the already existing selection, hold </span><span class="rvts30">Ctrl</span><span class="rvts21"> while clicking on a frame number. This way you can select several non-overlapping segments. Also this way you can remove some parts of existing Selection, by holding </span><span class="rvts30">Ctrl</span><span class="rvts21"> while clicking on a selected frame.</span></p>
-<p class="rvps10"><span class="rvts21">If you hold </span><span class="rvts30">Shift</span><span class="rvts21"> instead of </span><span class="rvts30">Ctrl</span><span class="rvts21">, the click will select a region of frames starting from the beginning of previous Selection.</span></p>
-<p class="rvps10"><span class="rvts21">If you hold </span><span class="rvts30">Alt</span><span class="rvts21">, the click will select rows using current Pattern.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">D. </span><span class="rvts34">Setting/unsetting Input in the Piano Roll</span></p>
-<p class="rvps10"><span class="rvts21">Point mouse cursor at needed cell of Input (find crossing point of the needed frame row and the needed button column) and press left mouse button. The Input in this cell changes at the moment you press the button. Empty cell will become occupied and vice versa.</span></p>
-<p class="rvps10"><span class="rvts21">The row containing this cell will also become selected, and other rows of the Piano Roll will become unselected. This feature ensures that Selection cursor always appears in the context of Input editing.</span></p>
-<p class="rvps10"><span class="rvts21">If you hold the left mouse button, you can draw or erase Input in other cells of the Piano Roll by moving mouse cursor over them. Drawing starts when you click on an empty cell, erasing starts by clicking on an occupied cell.</span></p>
-<p class="rvps10"><span class="rvts21">If you hold </span><span class="rvts30">Shift</span><span class="rvts21"> while clicking on a cell, the Input change will apply to all frames from the Selection cursor to the row containing the cell.</span></p>
-<p class="rvps10"><span class="rvts21">If you hold </span><span class="rvts30">Alt</span><span class="rvts21"> instead of </span><span class="rvts30">Shift</span><span class="rvts21">. the click will set Input (</span><span class="rvts21">from the Selection cursor to the row containing the cell) using</span><span class="rvts21"> current Pattern.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">E. </span><span class="rvts34">Setting/unsetting Input using the Header of the Piano Roll</span></p>
-<p class="rvps10"><span class="rvts21">Click on a button symbol </span><span class="rvts21">in the Piano Roll Header to change Input of this button in selected frames. If no frames are selected, nothing will happen. If in some of the selected frames the button in not set, your click will set the button in all selected frames, otherwise the click will unset the button in all selected frames.</span></p>
-<p class="rvps10"><span class="rvts21">If you hold </span><span class="rvts30">Alt </span><span class="rvts21">while clicking on a button symbol, </span><span class="rvts21">the click will set the button in selected frames using</span><span class="rvts21"> current Pattern</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">If you click on the </span><span class="rvts21">"Frame#" label, the click will apply to Markers instead of Input.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">F. </span><span class="rvts34">Creating and moving Markers</span></p>
-<p class="rvps10"><span class="rvts21">Double-click on a frame number in the Piano Roll to set a Marker to this frame. </span><span class="rvts21">If you hold the left mouse button, you can drag the Marker freely. Release the button to leave the Marker at the frame number it was held over. This way you can move Markers from place to place. If you release the Marker over Input columns, the dragging will be cancelled, and the Marker will return to the frame it was picked from. If you release the Marker over another Marker, those two Markers will switch places.</span></p>
-<p class="rvps10"><span class="rvts21">If you release the Marker outside the Piano Roll, this Marker will be dumped. Thus, to remove a Marker, double-click on it and drag it somewhere outside TAS Editor window.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">G. </span><span class="rvts34">Entering/exiting Note editing mode</span></p>
-<p class="rvps10"><span class="rvts21">Click on the upper or the lower edit field to start editing Note text displayed in this field at the moment.</span></p>
-<p class="rvps10"><span class="rvts21">To finish editing (and save changes) click on anything outside the edit field.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">H. </span><span class="rvts34">Controlling the Bookmarks List</span></p>
-<p class="rvps10"><span class="rvts21">Click on a frame number in the Bookmarks List (on the left side of the list) to send the Playback cursor to the bookmarked frame.</span></p>
-<p class="rvps10"><span class="rvts21">Click on a timestamp in the Bookmarks List (on the right side of the list) to restore movie state saved into the Bookmark and send the Playback cursor to the bookmarked frame.</span></p>
-<p class="rvps10"><span class="rvts21">Those operations fire on the button release.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">I. </span><span class="rvts34">Controlling the Branches Tree</span></p>
-<p class="rvps10"><span class="rvts21">Click on icon of a Bookmark to send the Playback cursor to the bookmarked frame.</span></p>
-<p class="rvps10"><span class="rvts21">Double-click on icon of a Bookmark to restore movie state saved into the Bookmark and send the Playback cursor to the bookmarked frame.</span></p>
-<p class="rvps10"><span class="rvts21">Those operations fire on the button press.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">J. </span><span class="rvts34">Controlling the History Log</span></p>
-<p class="rvps10"><span class="rvts21">Click on any row of the History Log to </span><span class="rvts21">restore movie state to the point of time registered in the Log record.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="rightbutton"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">Right mouse button</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Auxiliary button.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">A. </span><span class="rvts34">Moving the Playback cursor with mouse wheel</span></p>
-<p class="rvps10"><span class="rvts21">Hold the right button and roll the mouse wheel up or down to move the Playback cursor respectively.</span></p>
-<p class="rvps10"><span class="rvts21">The mouse cursor can be anywhere over the TAS Editor window or emulator main window.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">B. </span><span class="rvts34">Scrolling the Piano Roll</span></p>
-<p class="rvps10"><span class="rvts21">Place mouse cursor over the Piano Roll, hold right button and move mouse cursor anywhere outside the Piano Roll to scroll visible area to that side. This is especially useful for horizontal scrolling, because using scrollbar would be too slow.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">C. </span><span class="rvts34">Setting a Bookmark</span></p>
-<p class="rvps10"><span class="rvts21">Right-click on a row of the Bookmarks List to set the Bookmark to the frame where the Playback cursor currently is.</span></p>
-<p class="rvps10"><span class="rvts21">Alternatively, right-click on icon of a Bookmark in the Branches Tree to set the Bookmark to the frame where the Playback cursor currently is.</span></p>
-<p class="rvps10"><span class="rvts21">Those operations fire on the button release.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">D. </span><span class="rvts34">Context menu</span></p>
-<p class="rvps10"><span class="rvts21">Right-click on a frame number of any selected frame in the Piano Roll to bring the context menu containing the following items:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps26" style="margin-left: 0; text-indent: 30px"><span class="rvts39">Set Markers</span></li>
-<li class="rvps26" style="margin-left: 0; text-indent: 30px"><span class="rvts39">Remove Markers</span></li>
-<li class="rvps26" style="margin-left: 0; text-indent: 30px"><span class="rvts39">Deselect</span></li>
-<li class="rvps26" style="margin-left: 0; text-indent: 30px"><span class="rvts39">Select between Markers</span></li>
-<li class="rvps26" style="margin-left: 0; text-indent: 30px"><span class="rvts39">Ungreenzone</span></li>
-<li class="rvps26" style="margin-left: 0; text-indent: 30px"><span class="rvts39">Clear</span></li>
-<li class="rvps26" style="margin-left: 0; text-indent: 30px"><span class="rvts39">Delete</span></li>
-<li class="rvps26" style="margin-left: 0; text-indent: 30px"><span class="rvts39">Insert</span></li>
-<li class="rvps26" style="margin-left: 0; text-indent: 30px"><span class="rvts39">Insert # of Frames</span></li>
-<li class="rvps26" style="margin-left: 0; text-indent: 30px"><span class="rvts39">Clone</span></li>
-<li class="rvps26" style="margin-left: 0; text-indent: 30px"><span class="rvts39">Truncate movie</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Scrollbars and Note editing fields also have their own context menus.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="middlebutton"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">Middle mouse button</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The middle mouse button serves one major role – to pause and unpause emulator, no matter where mouse cursor is &nbsp;The button</span><span class="rvts21"> fires on button press.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When the emulator is paused, pressing the middle mouse button will unpause it (same was as pressing </span><span class="rvts26">Pause</span><span class="rvts21"> hotkey). Moreover, if there is the green arrow outside the Greenzone in the Piano Roll, the middle-click will launch seeking to the frame of the green arrow (same way as pressing </span><span class="rvts26">Restore Playback</span><span class="rvts21"> hotkey).</span></p>
-<p class="rvps10"><span class="rvts21">If you hold </span><span class="rvts30">Shift </span><span class="rvts21">while mid-clicking, this will launch seeking to the nearest Marker.</span></p>
-<p class="rvps10"><span class="rvts21">If you hold </span><span class="rvts30">Ctrl </span><span class="rvts21">while mid-clicking, this will either launch seeking to the Selection cursor (if it's below the Playback cursor) or re-watch the movie segment starting from the Selection cursor (if it's above the Playback cursor).</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When the emulator is unpaused, </span><span class="rvts21">pressing the middle mouse button will pause it (same way as pressing </span><span class="rvts26">Pause</span><span class="rvts21"> hotkey).</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Usually the middle mouse button is the mouse wheel.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="wheel"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">Mouse wheel</span></p>
-<p class="rvps10"><span class="rvts46"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The wheel can be rolled up and down with different speed. When you need precision, roll the wheel slowly. When you need speed, roll the wheel quickly.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">A. </span><span class="rvts34">Scrolling the Piano Roll or the History Log</span></p>
-<p class="rvps10"><span class="rvts21">When mouse cursor is over the History Log, roll the mouse wheel to scroll visible area of the History Log.</span></p>
-<p class="rvps10"><span class="rvts21">When mouse cursor is anywhere else, roll the mouse wheel to scroll visible area of the Piano Roll.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">B. </span><span class="rvts34">Moving the Playback cursor</span></p>
-<p class="rvps10"><span class="rvts21">Hold right mouse button and roll the mouse wheel up or down to move the Playback cursor respectively.</span></p>
-<p class="rvps10"><span class="rvts21">If you want to always see the Playback cursor position in the Piano Roll, check the "Follow cursor" checkbox in the Playback section of TAS Editor window.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">C. </span><span class="rvts34">Jumping on Markers</span></p>
-<p class="rvps10"><span class="rvts21">This is similar to pressing </span><span class="rvts29">&lt;&lt;</span><span class="rvts21"> and </span><span class="rvts29">&gt;&gt;</span><span class="rvts21"> buttons or using </span><span class="rvts30">Ctrl</span><span class="rvts21">/</span><span class="rvts30">Shift</span><span class="rvts21"> + </span><span class="rvts30">Page Up</span><span class="rvts21">/</span><span class="rvts30">Page Down </span><span class="rvts21">hotkeys.</span></p>
-<p class="rvps10"><span class="rvts21">Hold </span><span class="rvts30">Shift</span><span class="rvts21"> and roll the wheel to make jumps with the Playback cursor. The Piano Roll will follow it if </span><span class="rvts21">the "Follow cursor" checkbox</span><span class="rvts21"> is checked.</span></p>
-<p class="rvps10"><span class="rvts21">Hold </span><span class="rvts30">Ctrl</span><span class="rvts21"> and roll the wheel to make jumps with the Selection cursor. The Piano Roll will follow it automatically.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">D. </span><span class="rvts34">Crossing gaps</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Point mouse cursor to any member of a long column of buttonpresses or to an empty cell among other empty cells in its neighborhood, then hold the </span><span class="rvts30">Alt</span><span class="rvts21"> key and roll the wheel up or down to scroll the Piano Roll in such a manner that mouse cursor immediately points at the upper end or the lower end of the column / emptiness.</span></p>
-<p class="rvps10"><span class="rvts21">This allows you to quickly navigate among long sequences of Input.</span></p>
-<p class="rvps10"><span class="rvts21">The same approach can be used to find previous/next Markers (when mouse cursor is over the column with frame numbers) and Bookmarks (when it's over the icons column).</span></p>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps2"><a name="keyboard"></a>
-<span class="rvts6"><br/></span></p>
-<p><span class="rvts53">Keyboard controls</span></p>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps5"><img alt="" style="padding : 1px;" src="lib/keyboard-all-keys.png"/></p>
-<p class="rvps5"><span class="rvts36"><br/></span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps25" style="text-indent: 30px"><a class="rvts56" href="Controls.html#modifiers">modifiers (Shift, Ctrl, Alt)</a></li>
-<li class="rvps25" style="text-indent: 30px"><a class="rvts56" href="Controls.html#accelerators">accelerator hotkeys</a></li>
-<li class="rvps25" style="text-indent: 30px"><a class="rvts56" href="Controls.html#hotkeys">FCEUX hotkeys</a></li>
-<li class="rvps25" style="text-indent: 30px"><a class="rvts56" href="Controls.html#virtual_joypad">virtual gamepad</a></li>
-</ul>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><a name="modifiers"></a>
-<span class="rvts6"><br/></span></p>
-<p class="rvps10"><span class="rvts46">Modifiers (Shift, Ctrl, Alt)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When you hold one of these keys, the functions of left mouse button and mouse wheel are modified.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts30">Shift</span><span class="rvts21"> is responsible for the Playback cursor navigation and for selecting whole region of frames.</span></li>
-<li class="rvps10"><span class="rvts30">Ctrl</span><span class="rvts21"> </span><span class="rvts21">is responsible for the Selection cursor navigation and for appending frames to current Selection</span><span class="rvts21">.</span></li>
-<li class="rvps10"><span class="rvts30">Alt</span><span class="rvts21"> </span><span class="rvts21">is responsible for Patterns and for crossing gaps using mouse wheel.</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">If you tap the </span><span class="rvts30">Shift </span><span class="rvts21">key twice in a row, the Piano Roll will automatically scroll to the Playback cursor</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">If you tap the </span><span class="rvts30">Ctrl </span><span class="rvts21">key twice in a row, the Piano Roll will automatically scroll to the Selection cursor</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When you're drawing/erasing Input, hold </span><span class="rvts30">Shift</span><span class="rvts21"> key to remove the "single-column" confinement.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="accelerators"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">Accelerator hotkeys</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">These are key combinations typical for many Windows applications. You cannot redefine those combinations. In this documentation they are highlighted with red color.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps18"><img alt="" style="padding : 1px;" src="lib/keyboard-accelerator-keys.png"/></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + S</span><span class="rvts21"> = save project to disk</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + Z</span><span class="rvts21"> = undo (step back in History Log)</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + Y</span><span class="rvts21"> = re</span><span class="rvts21">do (step forward in History Log)</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + Q</span><span class="rvts21"> = restore previous Selection (Selection undo)</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + W</span><span class="rvts21"> = </span><span class="rvts21">restore next Selection</span><span class="rvts21"> (Selection redo)</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + A</span><span class="rvts21"> = select all frames between two Markers surrounding the Selection cursor</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + B</span><span class="rvts21"> = reselect frames that contain Input that was copied to the Clipboard</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + C</span><span class="rvts21"> = copy selected Input to the Clipboard (Copy)</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + X</span><span class="rvts21"> = </span><span class="rvts21">copy selected Input to the Clipboard and then clear selected frames (Cut)</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + V</span><span class="rvts21"> = paste Input from the Clipboard to Selection cursor (Paste)</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + </span><span class="rvts30">Shift + V</span><span class="rvts21"> = insert</span><span class="rvts21"> Input from the Clipboard to the Selection cursor (PasteInsert)</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<p class="rvps10"><span class="rvts30">Delete</span><span class="rvts21"> = clear selected frames</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + Delete</span><span class="rvts21"> = remove selected frames from the movie</span></p>
-<p class="rvps10"><span class="rvts30">Insert</span><span class="rvts21"> = insert given number of blank frames before the Selection cursor</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + Insert</span><span class="rvts21"> = clone selected frames</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + </span><span class="rvts30">Shift + Insert</span><span class="rvts21"> = insert blank frames before selected frames</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + F</span><span class="rvts21"> = bring the "Find Note" dialog</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + PageUp</span><span class="rvts21"> / </span><span class="rvts30">Ctrl + </span><span class="rvts30">Page</span><span class="rvts30">Down</span><span class="rvts21"> = jump on Markers with the Selection cursor</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + Home</span><span class="rvts21"> / </span><span class="rvts30">Ctrl + </span><span class="rvts30">End</span><span class="rvts21"> </span><span class="rvts21">=</span><span class="rvts21"> move current Selection to the beginning / to the end of the movie</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + Up</span><span class="rvts21"> / </span><span class="rvts30">Ctrl + Down</span><span class="rvts21"> = transpose current Selection 1 frame up / down</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + Right</span><span class="rvts21"> / </span><span class="rvts30">Ctrl + Left</span><span class="rvts21"> = scroll the Piano Roll right / left</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<p class="rvps10"><span class="rvts30">Shift + </span><span class="rvts30">Page</span><span class="rvts30">Up</span><span class="rvts21"> / </span><span class="rvts30">Shift + </span><span class="rvts30">PageD</span><span class="rvts30">own</span><span class="rvts21"> </span><span class="rvts21">=</span><span class="rvts21"> </span><span class="rvts21">jump on Markers with the Playback cursor</span></p>
-<p class="rvps10"><span class="rvts30">Shift + Home</span><span class="rvts21"> / </span><span class="rvts30">Shift + </span><span class="rvts30">End</span><span class="rvts21"> </span><span class="rvts21">=</span><span class="rvts21"> send the</span><span class="rvts21"> Playback cursor </span><span class="rvts21">to the beginning / to the end of the movie</span></p>
-<p class="rvps10"><span class="rvts30">Shift + Up</span><span class="rvts21"> / </span><span class="rvts30">Shift</span><span class="rvts30"> + Down</span><span class="rvts21"> = move the Playback cursor 1 frame up / down</span></p>
-<p class="rvps10"><span class="rvts30">Shift + Right</span><span class="rvts21"> / </span><span class="rvts30">Shift</span><span class="rvts30"> + Left</span><span class="rvts21"> = scroll the Piano Roll right / left</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<p class="rvps10"><span class="rvts30">PageUp</span><span class="rvts21"> / </span><span class="rvts30">Page</span><span class="rvts30">Down</span><span class="rvts21"> = scroll the Piano Roll up / down</span></p>
-<p class="rvps10"><span class="rvts30">Home</span><span class="rvts21"> / </span><span class="rvts30">End</span><span class="rvts21"> = scroll the Piano Roll </span><span class="rvts21">to the beginning / to the end of the movie</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="hotkeys"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">FCEUX hotkeys</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Emulator allows to map keyboard keys to different functions, see the </span><a class="rvts27" href="ProgramCustomization.html#fceux-config">Program Customization</a><span class="rvts21"> chapter. Keys that are already mapped by default are highlighted by light-blue color in this documentation.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps18"><img alt="" style="padding : 1px;" src="lib/keyboard-hotkeys.png"/></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts26">Ctrl + F1</span><span class="rvts21"> = reload last project</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<p class="rvps10"><span class="rvts26">Pause</span><span class="rvts21"> = pause/unpause emulator</span></p>
-<p class="rvps10"><span class="rvts26">Esc</span><span class="rvts21"> = cancel seeking</span></p>
-<p class="rvps10"><span class="rvts26">Spacebar</span><span class="rvts21"> = restore Playback cursor position (launch seeking to the green arrow)</span></p>
-<p class="rvps10"><span class="rvts26">Ctrl + </span><span class="rvts26">Spacebar</span><span class="rvts21"> = toggle "Auto-restore last position" checkbox</span></p>
-<p class="rvps10"><span class="rvts26">\</span><span class="rvts21"> (backslash) = </span><span class="rvts26">Frame Advance</span><span class="rvts21"> (emulate 1 frame)</span></p>
-<p class="rvps10"><span class="rvts26">Backspace </span><span class="rvts21">= </span><span class="rvts26">Frame Rewind</span><span class="rvts21"> (move Playback cursor 1 frame up)</span></p>
-<p class="rvps10"><span class="rvts26">Shift + R</span><span class="rvts21"> = play movie from the beginning</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<p class="rvps10"><span class="rvts26">-</span><span class="rvts21"> (white "minus") = decrease emulation speed</span></p>
-<p class="rvps10"><span class="rvts26">=</span><span class="rvts21"> (white "plus") = increase emulation speed</span></p>
-<p class="rvps10"><span class="rvts26">Tab</span><span class="rvts21"> = Turbo speed (applies as long as the key is being held)</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<p class="rvps10"><span class="rvts26">F1</span><span class="rvts26">-</span><span class="rvts26">F10</span><span class="rvts21"> = load movie branch from the respective Bookmark slot (1-10)</span></p>
-<p class="rvps10"><span class="rvts26">1-0</span><span class="rvts21"> = </span><span class="rvts21">jump to the frame of the Bookmark (1-10)</span></p>
-<p class="rvps10"><span class="rvts26">Shift + F1-F10</span><span class="rvts21"> = set Bookmark (1-10)</span></p>
-<p class="rvps10"><span class="rvts26">I </span><span class="rvts21">= set currently selected Bookmark</span></p>
-<p class="rvps10"><span class="rvts26">P</span><span class="rvts21"> = </span><span class="rvts21">load movie branch from </span><span class="rvts21">currently selected Bookmark</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<p class="rvps10"><span class="rvts26">M</span><span class="rvts21"> = show/hide rerecord counter</span></p>
-<p class="rvps10"><span class="rvts26">, </span><span class="rvts21">(comma) = switch Input display</span></p>
-<p class="rvps10"><span class="rvts26">. </span><span class="rvts21">(dot) = show/hide frame counter</span></p>
-<p class="rvps10"><span class="rvts26">/ </span><span class="rvts21">(slash) = show/hide lag counter</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<p class="rvps10"><span class="rvts26">Shift + L</span><span class="rvts21"> = reload current Lua script</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<p class="rvps10"><span class="rvts26">Q</span><span class="rvts21"> = toggle Recording mode</span></p>
-<p class="rvps10"><span class="rvts26">W</span><span class="rvts21"> = switch current multitracking mode</span></p>
-<p class="rvps10"><span class="rvts26">Ctrl + R</span><span class="rvts21"> = invoke Reset command</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Full list of FCEUX hotkeys that can be used when Taseditor is engaged:</span></p>
-<p class="rvps10"><span class="rvts52"><br/></span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts42">Power</span></li>
-<li class="rvps10"><span class="rvts26">Reset</span></li>
-<li class="rvps10"><span class="rvts26">Pause</span></li>
-<li class="rvps10"><span class="rvts26">Frame Advance</span></li>
-<li class="rvps10"><span class="rvts42">Screenshot</span></li>
-<li class="rvps10"><span class="rvts42">Exit</span></li>
-<li class="rvps10"><span class="rvts42">Slowest Speed</span></li>
-<li class="rvps10"><span class="rvts26">Speed Down</span></li>
-<li class="rvps10"><span class="rvts42">Normal Speed</span></li>
-<li class="rvps10"><span class="rvts26">Speed Up</span></li>
-<li class="rvps10"><span class="rvts26">Turbo</span></li>
-<li class="rvps10"><span class="rvts42">Turbo Toggle</span></li>
-<li class="rvps10"><span class="rvts26">Savestate Slot 0</span></li>
-<li class="rvps10"><span class="rvts26">Savestate Slot 1</span></li>
-<li class="rvps10"><span class="rvts26">Savestate Slot 2</span></li>
-<li class="rvps10"><span class="rvts26">Savestate Slot 3</span></li>
-<li class="rvps10"><span class="rvts26">Savestate Slot 4</span></li>
-<li class="rvps10"><span class="rvts26">Savestate Slot 5</span></li>
-<li class="rvps10"><span class="rvts26">Savestate Slot 6</span></li>
-<li class="rvps10"><span class="rvts26">Savestate Slot 7</span></li>
-<li class="rvps10"><span class="rvts26">Savestate Slot 8</span></li>
-<li class="rvps10"><span class="rvts26">Savestate Slot 9</span></li>
-<li class="rvps10"><span class="rvts54">Next Savestate Slot</span></li>
-<li class="rvps10"><span class="rvts54">Previous Savestate Slot</span></li>
-<li class="rvps10"><span class="rvts26">Save State</span></li>
-<li class="rvps10"><span class="rvts26">Save State to Slot 0</span></li>
-<li class="rvps10"><span class="rvts26">Save State to Slot 1</span></li>
-<li class="rvps10"><span class="rvts26">Save State to Slot 2</span></li>
-<li class="rvps10"><span class="rvts26">Save State to Slot 3</span></li>
-<li class="rvps10"><span class="rvts26">Save State to Slot 4</span></li>
-<li class="rvps10"><span class="rvts26">Save State to Slot 5</span></li>
-<li class="rvps10"><span class="rvts26">Save State to Slot 6</span></li>
-<li class="rvps10"><span class="rvts26">Save State to Slot 7</span></li>
-<li class="rvps10"><span class="rvts26">Save State to Slot 8</span></li>
-<li class="rvps10"><span class="rvts26">Save State to Slot 9</span></li>
-<li class="rvps10"><span class="rvts26">Load State</span></li>
-<li class="rvps10"><span class="rvts26">Load State from Slot 0</span></li>
-<li class="rvps10"><span class="rvts26">Load State from Slot 1</span></li>
-<li class="rvps10"><span class="rvts26">Load State from Slot 2</span></li>
-<li class="rvps10"><span class="rvts26">Load State from Slot 3</span></li>
-<li class="rvps10"><span class="rvts26">Load State from Slot 4</span></li>
-<li class="rvps10"><span class="rvts26">Load State from Slot 5</span></li>
-<li class="rvps10"><span class="rvts26">Load State from Slot 6</span></li>
-<li class="rvps10"><span class="rvts26">Load State from Slot 7</span></li>
-<li class="rvps10"><span class="rvts26">Load State from Slot 8</span></li>
-<li class="rvps10"><span class="rvts26">Load State from Slot 9</span></li>
-<li class="rvps10"><span class="rvts26">Play Movie From Beginning</span></li>
-<li class="rvps10"><span class="rvts26">Toggle Read-Only</span></li>
-<li class="rvps10"><span class="rvts26">Toggle Frame Display</span></li>
-<li class="rvps10"><span class="rvts26">Toggle Input Display</span></li>
-<li class="rvps10"><span class="rvts42">Toggle Status Icon</span></li>
-<li class="rvps10"><span class="rvts26">Reload current Lua script</span></li>
-<li class="rvps10"><span class="rvts42">Sound Mute Toggle</span></li>
-<li class="rvps10"><span class="rvts42">Sound Volume Up</span></li>
-<li class="rvps10"><span class="rvts42">Sound Volume Down</span></li>
-<li class="rvps10"><span class="rvts42">Sound Volume Normal</span></li>
-<li class="rvps10"><span class="rvts42">Record AVI As...</span></li>
-<li class="rvps10"><span class="rvts42">Stop AVI</span></li>
-<li class="rvps10"><span class="rvts42">Eject or Insert FDS Disk</span></li>
-<li class="rvps10"><span class="rvts42">Switch FDS Disk Side</span></li>
-<li class="rvps10"><span class="rvts42">Insert Coin</span></li>
-<li class="rvps10"><span class="rvts42">Use Input Preset 1</span></li>
-<li class="rvps10"><span class="rvts42">Use Input Preset 2</span></li>
-<li class="rvps10"><span class="rvts42">Use Input Preset 3</span></li>
-<li class="rvps10"><span class="rvts42">Toggle Background Display</span></li>
-<li class="rvps10"><span class="rvts42">Toggle Object Display</span></li>
-<li class="rvps10"><span class="rvts26">Lag Counter Toggle</span></li>
-<li class="rvps10"><span class="rvts42">Open TAS Editor</span></li>
-<li class="rvps10"><span class="rvts42">Open Memory Watch</span></li>
-<li class="rvps10"><span class="rvts42">Open Cheats</span></li>
-<li class="rvps10"><span class="rvts42">Open Debugger</span></li>
-<li class="rvps10"><span class="rvts42">Open Hex Editor</span></li>
-<li class="rvps10"><span class="rvts42">Open PPU Viewer</span></li>
-<li class="rvps10"><span class="rvts42">Open Name Table Viewer</span></li>
-<li class="rvps10"><span class="rvts42">Open Trace Logger</span></li>
-<li class="rvps10"><span class="rvts42">Open Code/Data Logger</span></li>
-<li class="rvps10"><span class="rvts42">Frame Adv.-Skip Lag</span></li>
-<li class="rvps10"><span class="rvts26">Reload ROM or TAS Editor Project</span></li>
-<li class="rvps10"><span class="rvts42">Toggle Movie Subtitles</span></li>
-<li class="rvps10"><span class="rvts42">Open Ram Watch</span></li>
-<li class="rvps10"><span class="rvts42">Open Ram Search</span></li>
-<li class="rvps10"><span class="rvts26">Toggle Rerecord Display</span></li>
-<li class="rvps10"><span class="rvts26">Frame Rewind</span></li>
-<li class="rvps10"><span class="rvts26">Restore Playback</span></li>
-<li class="rvps10"><span class="rvts26">Cancel Seeking</span></li>
-<li class="rvps10"><span class="rvts26">Switch Auto-restore last position</span></li>
-<li class="rvps10"><span class="rvts26">Switch current Multitracking mode</span></li>
-<li class="rvps10"><span class="rvts42">Run Manual Lua function</span></li>
-<li class="rvps10"><span class="rvts42">Toggle FPS Display</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Other FCEUX hotkeys will not work when Taseditor is running, for more details see </span><a class="rvts27" href="MistakeProofing.html">Mistake-proofing</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="virtual_joypad"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts46">Virtual gamepad</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Emulator also allows to map keyboard keys to buttons of emulated console. You can use these keys for Input Recording and for </span><a class="rvts27" href="ProgramCustomization.html#fceux-config">Changing Input in Selection</a><span class="rvts21"> chapter.</span></p>
-<p class="rvps10"><span class="rvts21">By default, the following keys are mapped to the Player 1 buttons:</span></p>
-<p class="rvps10"><span class="rvts25">D</span><span class="rvts21"> – </span><span class="rvts29">B</span></p>
-<p class="rvps10"><span class="rvts25">F</span><span class="rvts21"> – </span><span class="rvts29">A</span></p>
-<p class="rvps10"><span class="rvts25">Enter</span><span class="rvts21"> – </span><span class="rvts29">Start</span></p>
-<p class="rvps10"><span class="rvts25">S</span><span class="rvts21"> – </span><span class="rvts29">Select</span></p>
-<p class="rvps10"><span class="rvts25">Keypad up</span><span class="rvts21"> – </span><span class="rvts29">Up</span></p>
-<p class="rvps10"><span class="rvts25">Keypad left</span><span class="rvts21"> – </span><span class="rvts29">Left</span></p>
-<p class="rvps10"><span class="rvts25">Keypad down</span><span class="rvts21"> – </span><span class="rvts29">Down</span></p>
-<p class="rvps10"><span class="rvts25">Keypad right</span><span class="rvts21"> – </span><span class="rvts29">Right</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When you need to input hardware commands, use FCEUX menu or hotkeys:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts34">NES -&gt; Reset</span><span class="rvts21"> or "</span><span class="rvts26">Reset</span><span class="rvts21">" hotkey (</span><span class="rvts26">Ctrl + R </span><span class="rvts21">by default) – to invoke the "Reset" command</span></li>
-<li class="rvps10"><span class="rvts34">NES -&gt; Power</span><span class="rvts21"> or "</span><span class="rvts55">Power</span><span class="rvts21">" </span><span class="rvts21">hotkey</span><span class="rvts21"> – to invoke the "Power switch" command (not used in practical TASing)</span></li>
-<li class="rvps10"><span class="rvts34">NES -&gt; Eject/Insert Disk</span><span class="rvts21"> or "</span><span class="rvts55">Eject or Insert FDS Disk</span><span class="rvts21">" hotkey – to invoke the disk command (only useful for a Famicom Disk System game)</span></li>
-<li class="rvps10"><span class="rvts34">NES -&gt; Switch Disk Side</span><span class="rvts21"> or "</span><span class="rvts55">Switch FDS Disk Side</span><span class="rvts21">"</span><span class="rvts21"> hotkey – to invoke the disk command (only useful for a Famicom Disk System game)</span></li>
-<li class="rvps10"><span class="rvts34">NES -&gt; Insert Coin</span><span class="rvts21"> or "I</span><span class="rvts55">nsert Coin</span><span class="rvts21">"</span><span class="rvts21"> hotkey – to invoke the arcade machine command (only useful for a VS System game)</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">These commands work only when Recording mode is on. After invoking a command you need to advance at least 1 frame to actually activate the command and insert it into the movie.</span></p>
-<p class="rvps10"><span class="rvts21">Since in </span><span class="rvts21">TAS Editor 1.0 the Piano Roll doesn't have columns for displaying hardware commands (they are rarely used), it's recommended to set Markers to frames where a command was inserted.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps2"><a name="notes"></a>
-<span class="rvts6"><br/></span></p>
-<p><span class="rvts53">Controls in Note editing mode</span></p>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When you enter Note editing mode, the keyboard is used for typing the text.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">1. Accelerator hotkeys </span><span class="rvts21">do not work.</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + A</span><span class="rvts21"> – select all text of the Note</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + Z</span><span class="rvts21"> – undo/redo the last change in the text</span></p>
-<p class="rvps10"><span class="rvts30">Ctrl + X</span><span class="rvts21">, </span><span class="rvts30">Ctrl + C</span><span class="rvts21">, </span><span class="rvts30">Ctrl + V</span><span class="rvts21"> – text copy/cut/paste</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">2. FCEUX hotkeys do not work.</span></p>
-<p class="rvps10"><span class="rvts26">Backspace</span><span class="rvts21"> – </span><span class="rvts21">delete previous symbol</span></p>
-<p class="rvps10"><span class="rvts26">Esc</span><span class="rvts21"> – exit Note editing mode without saving any changes</span></p>
-<p class="rvps10"><span class="rvts26">Tab</span><span class="rvts21"> – toggle between upper and lower Note editing field</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">3. Virtual gamepad keys do not work. Note: they will work if you check the </span><span class="rvts21">Config -&gt; Enable -&gt; Background Input in FCEUX menu, so it's not recommended to enable the feature.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">4. Mouse controls are the same as usual. &nbsp;Any click outside the text edit field (except for mid-clicks) will exit Note editing mode and save text changes. Also, if the Playback cursor or the Selection cursor move away from the Marker while you're editing its Note, the text changes will be saved and you'll begin editing another Marker's Note. So it's recommended to only edit Notes when the emulator is paused.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Full-featured Kindle eBooks generator</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="Controls"
+		  data-hnd-context="17"
+		  data-hnd-title="Controls"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Reference.html">Reference</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Reference.html" title="Reference" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="Glossary.html" title="Glossary" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="Navigation.html" title="Navigation" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Controls</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts18">Controls</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Taseditor is controlled by </span><a class="rvts24" href="Controls.html#mouse">mouse</a><span class="rvts20"> and </span><a class="rvts24" href="Controls.html#keyboard">keyboard</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">Every operation can be done in several alternative ways (via menu, hotkey or GUI element).</span></p>
+<p class="rvps7"><span class="rvts20">Any action can be done using mouse, but some are faster to do with keyboard. The Manual assumes that one hand of user is holding the mouse and other hand is placed on a side of the keyboard, occasionally holding </span><span class="rvts27">Shift</span><span class="rvts20">/</span><span class="rvts27">Ctrl</span><span class="rvts20">/</span><span class="rvts27">Alt</span><span class="rvts20"> or pressing a key combination.</span></p>
+<p class="rvps7"><span class="rvts20">Some actions (e.g. switching the </span><span class="rvts20">"Follow cursor")</span><span class="rvts20"> can be done by mouse only.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><a name="mouse"></a><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts45">Mouse controls</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li style="text-indent: 30px" class="rvps15"><a class="rvts43" href="Controls.html#mouseover">pointing with mouse</a></li>
+ <li style="text-indent: 30px" class="rvps15"><a class="rvts43" href="Controls.html#leftbutton">left mouse button</a></li>
+ <li style="text-indent: 30px" class="rvps15"><a class="rvts43" href="Controls.html#rightbutton">right mouse button</a></li>
+ <li style="text-indent: 30px" class="rvps15"><a class="rvts43" href="Controls.html#middlebutton">middle mouse button</a></li>
+ <li style="text-indent: 30px" class="rvps15"><a class="rvts43" href="Controls.html#wheel">mouse wheel</a></li>
+</ul>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><a name="mouseover"></a><span class="rvts6"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Pointing with mouse</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">A. </span><span class="rvts31">Displaying Bookmarks screenshots and descriptions</span></p>
+<p class="rvps7"><span class="rvts20">Hover mouse cursor over the right half of Bookmarks List to see the game screenshot of the bookmarked frame in the movie branch you're pointing at. Optionally there can be a description of the branch under the screenshot.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">B. </span><span class="rvts31">Displaying information of the Bookmark</span></p>
+<p class="rvps7"><span class="rvts20">Hover mouse cursor over an icon of any Bookmark in the Branches Tree to see the information about the Bookmark (real time of creation, bookmarked frame, full timeline, screenshot and description). When you point at a Bookmark that doesn't belong to the timeline of current movie branch, the mouse cursor changes to "arrow with question mark".</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">C. </span><span class="rvts31">Illuminating button symbols in the Piano Roll Header</span></p>
+<p class="rvps7"><span class="rvts20">Hover mouse cursor over a button symbol in the Piano Roll Header to see if you can change the movie by clicking this symbol. When some rows of Piano Roll are selected, symbols in the Header will illuminate on mouse hover.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="leftbutton"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Left mouse button</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The main button.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">A. </span><span class="rvts31">Standard Windows actions</span></p>
+<p class="rvps7"><span class="rvts20">Most of GUI elements of TAS Editor window are controlled the same way as in other Windows applications.</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">press a button by left-click (also works with the progressbar, "Bookmarks/Branches" caption and "Marker #" labels)</span><span class="rvts20"> – fires on button press</span></li>
+ <li class="rvps7"><span class="rvts20">check/uncheck checkboxes and radiobuttons</span><span class="rvts20"> – fires on button release</span></li>
+ <li class="rvps7"><span class="rvts20">open the window menu, choose menu item, set/remove ticks from menu items</span></li>
+ <li class="rvps7"><span class="rvts20">scroll Piano Roll or History Log using scrollbars</span></li>
+ <li class="rvps7"><span class="rvts20">move or resize TAS Editor window</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">B. </span><span class="rvts31">Moving the Playback cursor</span></p>
+<p class="rvps7"><span class="rvts20">Click on any row in the "Icons" column of the Piano Roll to send the Playback cursor to the frame pointed. If you hold the left mouse button, you can drag the Playback cursor up and down. This way you can also move the Playback cursor to frames outside the currently visible area of the movie – drag the cursor below or above the Piano Roll, the farther you lead the mouse, the faster will be scrolling and Playback rewinding.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">C. </span><span class="rvts31">Selecting rows in the Piano Roll</span></p>
+<p class="rvps7"><span class="rvts20">Click on a frame number in the "Frame#" column of the Piano Roll to select this frame and remove selection from other frames (if there was any selection before). </span><span class="rvts20">If you hold the left mouse button, you can stretch the selection by moving mouse up or down.</span></p>
+<p class="rvps7"><span class="rvts20">If you need to append new selection to the already existing selection, hold </span><span class="rvts27">Ctrl</span><span class="rvts20"> while clicking on a frame number. This way you can select several non-overlapping segments. Also this way you can remove some parts of existing Selection, by holding </span><span class="rvts27">Ctrl</span><span class="rvts20"> while clicking on a selected frame.</span></p>
+<p class="rvps7"><span class="rvts20">If you hold </span><span class="rvts27">Shift</span><span class="rvts20"> instead of </span><span class="rvts27">Ctrl</span><span class="rvts20">, the click will select a region of frames starting from the beginning of previous Selection.</span></p>
+<p class="rvps7"><span class="rvts20">If you hold </span><span class="rvts27">Alt</span><span class="rvts20">, the click will select rows using current Pattern.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">D. </span><span class="rvts31">Setting/unsetting Input in the Piano Roll</span></p>
+<p class="rvps7"><span class="rvts20">Point mouse cursor at needed cell of Input (find crossing point of the needed frame row and the needed button column) and press left mouse button. The Input in this cell changes at the moment you press the button. Empty cell will become occupied and vice versa.</span></p>
+<p class="rvps7"><span class="rvts20">The row containing this cell will also become selected, and other rows of the Piano Roll will become unselected. This feature ensures that Selection cursor always appears in the context of Input editing.</span></p>
+<p class="rvps7"><span class="rvts20">If you hold the left mouse button, you can draw or erase Input in other cells of the Piano Roll by moving mouse cursor over them. Drawing starts when you click on an empty cell, erasing starts by clicking on an occupied cell.</span></p>
+<p class="rvps7"><span class="rvts20">If you hold </span><span class="rvts27">Shift</span><span class="rvts20"> while clicking on a cell, the Input change will apply to all frames from the Selection cursor to the row containing the cell.</span></p>
+<p class="rvps7"><span class="rvts20">If you hold </span><span class="rvts27">Alt</span><span class="rvts20"> instead of </span><span class="rvts27">Shift</span><span class="rvts20">. the click will set Input (</span><span class="rvts20">from the Selection cursor to the row containing the cell) using</span><span class="rvts20"> current Pattern.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">E. </span><span class="rvts31">Setting/unsetting Input using the Header of the Piano Roll</span></p>
+<p class="rvps7"><span class="rvts20">Click on a button symbol </span><span class="rvts20">in the Piano Roll Header to change Input of this button in selected frames. If no frames are selected, nothing will happen. If in some of the selected frames the button in not set, your click will set the button in all selected frames, otherwise the click will unset the button in all selected frames.</span></p>
+<p class="rvps7"><span class="rvts20">If you hold </span><span class="rvts27">Alt </span><span class="rvts20">while clicking on a button symbol, </span><span class="rvts20">the click will set the button in selected frames using</span><span class="rvts20"> current Pattern</span><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">If you click on the </span><span class="rvts20">"Frame#" label, the click will apply to Markers instead of Input.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">F. </span><span class="rvts31">Creating and moving Markers</span></p>
+<p class="rvps7"><span class="rvts20">Double-click on a frame number in the Piano Roll to set a Marker to this frame. </span><span class="rvts20">If you hold the left mouse button, you can drag the Marker freely. Release the button to leave the Marker at the frame number it was held over. This way you can move Markers from place to place. If you release the Marker over Input columns, the dragging will be cancelled, and the Marker will return to the frame it was picked from. If you release the Marker over another Marker, those two Markers will switch places.</span></p>
+<p class="rvps7"><span class="rvts20">If you release the Marker outside the Piano Roll, this Marker will be dumped. Thus, to remove a Marker, double-click on it and drag it somewhere outside TAS Editor window.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">G. </span><span class="rvts31">Entering/exiting Note editing mode</span></p>
+<p class="rvps7"><span class="rvts20">Click on the upper or the lower edit field to start editing Note text displayed in this field at the moment.</span></p>
+<p class="rvps7"><span class="rvts20">To finish editing (and save changes) click on anything outside the edit field.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">H. </span><span class="rvts31">Controlling the Bookmarks List</span></p>
+<p class="rvps7"><span class="rvts20">Click on a frame number in the Bookmarks List (on the left side of the list) to send the Playback cursor to the bookmarked frame.</span></p>
+<p class="rvps7"><span class="rvts20">Click on a timestamp in the Bookmarks List (on the right side of the list) to restore movie state saved into the Bookmark and send the Playback cursor to the bookmarked frame.</span></p>
+<p class="rvps7"><span class="rvts20">Those operations fire on the button release.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">I. </span><span class="rvts31">Controlling the Branches Tree</span></p>
+<p class="rvps7"><span class="rvts20">Click on icon of a Bookmark to send the Playback cursor to the bookmarked frame.</span></p>
+<p class="rvps7"><span class="rvts20">Double-click on icon of a Bookmark to restore movie state saved into the Bookmark and send the Playback cursor to the bookmarked frame.</span></p>
+<p class="rvps7"><span class="rvts20">Those operations fire on the button press.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">J. </span><span class="rvts31">Controlling the History Log</span></p>
+<p class="rvps7"><span class="rvts20">Click on any row of the History Log to </span><span class="rvts20">restore movie state to the point of time registered in the Log record.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="rightbutton"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Right mouse button</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Auxiliary button.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">A. </span><span class="rvts31">Moving the Playback cursor with mouse wheel</span></p>
+<p class="rvps7"><span class="rvts20">Hold the right button and roll the mouse wheel up or down to move the Playback cursor respectively.</span></p>
+<p class="rvps7"><span class="rvts20">The mouse cursor can be anywhere over the TAS Editor window or emulator main window.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">B. </span><span class="rvts31">Scrolling the Piano Roll</span></p>
+<p class="rvps7"><span class="rvts20">Place mouse cursor over the Piano Roll, hold right button and move mouse cursor anywhere outside the Piano Roll to scroll visible area to that side. This is especially useful for horizontal scrolling, because using scrollbar would be too slow.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">C. </span><span class="rvts31">Setting a Bookmark</span></p>
+<p class="rvps7"><span class="rvts20">Right-click on a row of the Bookmarks List to set the Bookmark to the frame where the Playback cursor currently is.</span></p>
+<p class="rvps7"><span class="rvts20">Alternatively, right-click on icon of a Bookmark in the Branches Tree to set the Bookmark to the frame where the Playback cursor currently is.</span></p>
+<p class="rvps7"><span class="rvts20">Those operations fire on the button release.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">D. </span><span class="rvts31">Context menu</span></p>
+<p class="rvps7"><span class="rvts20">Right-click on a frame number of any selected frame in the Piano Roll to bring the context menu containing the following items:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li style="margin-left: 0px; text-indent: 30px" class="rvps16"><span class="rvts35">Set Markers</span></li>
+ <li style="margin-left: 0px; text-indent: 30px" class="rvps16"><span class="rvts35">Remove Markers</span></li>
+ <li style="margin-left: 0px; text-indent: 30px" class="rvps16"><span class="rvts35">Deselect</span></li>
+ <li style="margin-left: 0px; text-indent: 30px" class="rvps16"><span class="rvts35">Select between Markers</span></li>
+ <li style="margin-left: 0px; text-indent: 30px" class="rvps16"><span class="rvts35">Ungreenzone</span></li>
+ <li style="margin-left: 0px; text-indent: 30px" class="rvps16"><span class="rvts35">Clear</span></li>
+ <li style="margin-left: 0px; text-indent: 30px" class="rvps16"><span class="rvts35">Delete</span></li>
+ <li style="margin-left: 0px; text-indent: 30px" class="rvps16"><span class="rvts35">Insert</span></li>
+ <li style="margin-left: 0px; text-indent: 30px" class="rvps16"><span class="rvts35">Insert # of Frames</span></li>
+ <li style="margin-left: 0px; text-indent: 30px" class="rvps16"><span class="rvts35">Clone</span></li>
+ <li style="margin-left: 0px; text-indent: 30px" class="rvps16"><span class="rvts35">Truncate movie</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Scrollbars and Note editing fields also have their own context menus.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="middlebutton"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Middle mouse button</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The middle mouse button serves one major role – to pause and unpause emulator, no matter where mouse cursor is &nbsp;The button</span><span class="rvts20"> fires on button press.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When the emulator is paused, pressing the middle mouse button will unpause it (same was as pressing </span><span class="rvts23">Pause</span><span class="rvts20"> hotkey). Moreover, if there is the green arrow outside the Greenzone in the Piano Roll, the middle-click will launch seeking to the frame of the green arrow (same way as pressing </span><span class="rvts23">Restore Playback</span><span class="rvts20"> hotkey).</span></p>
+<p class="rvps7"><span class="rvts20">If you hold </span><span class="rvts27">Shift </span><span class="rvts20">while mid-clicking, this will launch seeking to the nearest Marker.</span></p>
+<p class="rvps7"><span class="rvts20">If you hold </span><span class="rvts27">Ctrl </span><span class="rvts20">while mid-clicking, this will either launch seeking to the Selection cursor (if it's below the Playback cursor) or re-watch the movie segment starting from the Selection cursor (if it's above the Playback cursor).</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When the emulator is unpaused, </span><span class="rvts20">pressing the middle mouse button will pause it (same way as pressing </span><span class="rvts23">Pause</span><span class="rvts20"> hotkey).</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Usually the middle mouse button is the mouse wheel.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="wheel"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Mouse wheel</span></p>
+<p class="rvps7"><span class="rvts21"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The wheel can be rolled up and down with different speed. When you need precision, roll the wheel slowly. When you need speed, roll the wheel quickly.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">A. </span><span class="rvts31">Scrolling the Piano Roll or the History Log</span></p>
+<p class="rvps7"><span class="rvts20">When mouse cursor is over the History Log, roll the mouse wheel to scroll visible area of the History Log.</span></p>
+<p class="rvps7"><span class="rvts20">When mouse cursor is anywhere else, roll the mouse wheel to scroll visible area of the Piano Roll.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">B. </span><span class="rvts31">Moving the Playback cursor</span></p>
+<p class="rvps7"><span class="rvts20">Hold right mouse button and roll the mouse wheel up or down to move the Playback cursor respectively.</span></p>
+<p class="rvps7"><span class="rvts20">If you want to always see the Playback cursor position in the Piano Roll, check the "Follow cursor" checkbox in the Playback section of TAS Editor window.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">C. </span><span class="rvts31">Jumping on Markers</span></p>
+<p class="rvps7"><span class="rvts20">This is similar to pressing </span><span class="rvts26">&lt;&lt;</span><span class="rvts20"> and </span><span class="rvts26">&gt;&gt;</span><span class="rvts20"> buttons or using </span><span class="rvts27">Ctrl</span><span class="rvts20">/</span><span class="rvts27">Shift</span><span class="rvts20"> + </span><span class="rvts27">Page Up</span><span class="rvts20">/</span><span class="rvts27">Page Down </span><span class="rvts20">hotkeys.</span></p>
+<p class="rvps7"><span class="rvts20">Hold </span><span class="rvts27">Shift</span><span class="rvts20"> and roll the wheel to make jumps with the Playback cursor. The Piano Roll will follow it if </span><span class="rvts20">the "Follow cursor" checkbox</span><span class="rvts20"> is checked.</span></p>
+<p class="rvps7"><span class="rvts20">Hold </span><span class="rvts27">Ctrl</span><span class="rvts20"> and roll the wheel to make jumps with the Selection cursor. The Piano Roll will follow it automatically.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">D. </span><span class="rvts31">Crossing gaps</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Point mouse cursor to any member of a long column of buttonpresses or to an empty cell among other empty cells in its neighborhood, then hold the </span><span class="rvts27">Alt</span><span class="rvts20"> key and roll the wheel up or down to scroll the Piano Roll in such a manner that mouse cursor immediately points at the upper end or the lower end of the column / emptiness.</span></p>
+<p class="rvps7"><span class="rvts20">This allows you to quickly navigate among long sequences of Input.</span></p>
+<p class="rvps7"><span class="rvts20">The same approach can be used to find previous/next Markers (when mouse cursor is over the column with frame numbers) and Bookmarks (when it's over the icons column).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><a name="keyboard"></a><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts45">Keyboard controls</span></p>
+<p class="rvps2"><span class="rvts20"><br/></span></p>
+<p class="rvps3"><img alt="" style="padding : 1px;" src="lib/keyboard-all-keys.png"></p>
+<p class="rvps3"><span class="rvts20"><br/></span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li style="text-indent: 30px" class="rvps15"><a class="rvts24" href="Controls.html#modifiers">modifiers (Shift, Ctrl, Alt)</a></li>
+ <li style="text-indent: 30px" class="rvps15"><a class="rvts24" href="Controls.html#accelerators">accelerator hotkeys</a></li>
+ <li style="text-indent: 30px" class="rvps15"><a class="rvts24" href="Controls.html#hotkeys">FCEUX hotkeys</a></li>
+ <li style="text-indent: 30px" class="rvps15"><a class="rvts24" href="Controls.html#virtual_joypad">virtual gamepad</a></li>
+</ul>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><a name="modifiers"></a><span class="rvts6"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Modifiers (Shift, Ctrl, Alt)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When you hold one of these keys, the functions of left mouse button and mouse wheel are modified.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts27">Shift</span><span class="rvts20"> is responsible for the Playback cursor navigation and for selecting whole region of frames.</span></li>
+ <li class="rvps7"><span class="rvts27">Ctrl</span><span class="rvts20"> </span><span class="rvts20">is responsible for the Selection cursor navigation and for appending frames to current Selection</span><span class="rvts20">.</span></li>
+ <li class="rvps7"><span class="rvts27">Alt</span><span class="rvts20"> </span><span class="rvts20">is responsible for Patterns and for crossing gaps using mouse wheel.</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">If you tap the </span><span class="rvts27">Shift </span><span class="rvts20">key twice in a row, the Piano Roll will automatically scroll to the Playback cursor</span><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">If you tap the </span><span class="rvts27">Ctrl </span><span class="rvts20">key twice in a row, the Piano Roll will automatically scroll to the Selection cursor</span><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When you're drawing/erasing Input, hold </span><span class="rvts27">Shift</span><span class="rvts20"> key to remove the "single-column" confinement.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="accelerators"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Accelerator hotkeys</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">These are key combinations typical for many Windows applications. You cannot redefine those combinations. In this documentation they are highlighted with red color.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps3"><img alt="" style="padding : 1px;" src="lib/keyboard-accelerator-keys.png"></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + S</span><span class="rvts20"> = save project to disk</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + Z</span><span class="rvts20"> = undo (step back in History Log)</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + Y</span><span class="rvts20"> = re</span><span class="rvts20">do (step forward in History Log)</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + Q</span><span class="rvts20"> = restore previous Selection (Selection undo)</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + W</span><span class="rvts20"> = </span><span class="rvts20">restore next Selection</span><span class="rvts20"> (Selection redo)</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + A</span><span class="rvts20"> = select all frames between two Markers surrounding the Selection cursor</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + B</span><span class="rvts20"> = reselect frames that contain Input that was copied to the Clipboard</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + C</span><span class="rvts20"> = copy selected Input to the Clipboard (Copy)</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + X</span><span class="rvts20"> = </span><span class="rvts20">copy selected Input to the Clipboard and then clear selected frames (Cut)</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + V</span><span class="rvts20"> = paste Input from the Clipboard to Selection cursor (Paste)</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + </span><span class="rvts27">Shift + V</span><span class="rvts20"> = insert</span><span class="rvts20"> Input from the Clipboard to the Selection cursor (PasteInsert)</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<p class="rvps7"><span class="rvts27">Delete</span><span class="rvts20"> = clear selected frames</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + Delete</span><span class="rvts20"> = remove selected frames from the movie</span></p>
+<p class="rvps7"><span class="rvts27">Insert</span><span class="rvts20"> = insert given number of blank frames before the Selection cursor</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + Insert</span><span class="rvts20"> = clone selected frames</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + </span><span class="rvts27">Shift + Insert</span><span class="rvts20"> = insert blank frames before selected frames</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + F</span><span class="rvts20"> = bring the "Find Note" dialog</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + PageUp</span><span class="rvts20"> / </span><span class="rvts27">Ctrl + </span><span class="rvts27">Page</span><span class="rvts27">Down</span><span class="rvts20"> = jump on Markers with the Selection cursor</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + Home</span><span class="rvts20"> / </span><span class="rvts27">Ctrl + </span><span class="rvts27">End</span><span class="rvts20"> </span><span class="rvts20">=</span><span class="rvts20"> move current Selection to the beginning / to the end of the movie</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + Up</span><span class="rvts20"> / </span><span class="rvts27">Ctrl + Down</span><span class="rvts20"> = transpose current Selection 1 frame up / down</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + Right</span><span class="rvts20"> / </span><span class="rvts27">Ctrl + Left</span><span class="rvts20"> = scroll the Piano Roll right / left</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<p class="rvps7"><span class="rvts27">Shift + </span><span class="rvts27">Page</span><span class="rvts27">Up</span><span class="rvts20"> / </span><span class="rvts27">Shift + </span><span class="rvts27">PageD</span><span class="rvts27">own</span><span class="rvts20"> </span><span class="rvts20">=</span><span class="rvts20"> </span><span class="rvts20">jump on Markers with the Playback cursor</span></p>
+<p class="rvps7"><span class="rvts27">Shift + Home</span><span class="rvts20"> / </span><span class="rvts27">Shift + </span><span class="rvts27">End</span><span class="rvts20"> </span><span class="rvts20">=</span><span class="rvts20"> send the</span><span class="rvts20"> Playback cursor </span><span class="rvts20">to the beginning / to the end of the movie</span></p>
+<p class="rvps7"><span class="rvts27">Shift + Up</span><span class="rvts20"> / </span><span class="rvts27">Shift</span><span class="rvts27"> + Down</span><span class="rvts20"> = move the Playback cursor 1 frame up / down</span></p>
+<p class="rvps7"><span class="rvts27">Shift + Right</span><span class="rvts20"> / </span><span class="rvts27">Shift</span><span class="rvts27"> + Left</span><span class="rvts20"> = scroll the Piano Roll right / left</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<p class="rvps7"><span class="rvts27">PageUp</span><span class="rvts20"> / </span><span class="rvts27">Page</span><span class="rvts27">Down</span><span class="rvts20"> = scroll the Piano Roll up / down</span></p>
+<p class="rvps7"><span class="rvts27">Home</span><span class="rvts20"> / </span><span class="rvts27">End</span><span class="rvts20"> = scroll the Piano Roll </span><span class="rvts20">to the beginning / to the end of the movie</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="hotkeys"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">FCEUX hotkeys</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Emulator allows to map keyboard keys to different functions, see the </span><a class="rvts24" href="ProgramCustomization.html#fceux-config">Program Customization</a><span class="rvts20"> chapter. Keys that are already mapped by default are highlighted by light-blue color in this documentation.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps3"><img alt="" style="padding : 1px;" src="lib/keyboard-hotkeys.png"></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts23">Ctrl + F1</span><span class="rvts20"> = reload last project</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<p class="rvps7"><span class="rvts23">Pause</span><span class="rvts20"> = pause/unpause emulator</span></p>
+<p class="rvps7"><span class="rvts23">Esc</span><span class="rvts20"> = cancel seeking</span></p>
+<p class="rvps7"><span class="rvts23">Spacebar</span><span class="rvts20"> = restore Playback cursor position (launch seeking to the green arrow)</span></p>
+<p class="rvps7"><span class="rvts23">Ctrl + </span><span class="rvts23">Spacebar</span><span class="rvts20"> = toggle "Auto-restore last position" checkbox</span></p>
+<p class="rvps7"><span class="rvts23">\</span><span class="rvts20"> (backslash) = </span><span class="rvts23">Frame Advance</span><span class="rvts20"> (emulate 1 frame)</span></p>
+<p class="rvps7"><span class="rvts23">Backspace </span><span class="rvts20">= </span><span class="rvts23">Frame Rewind</span><span class="rvts20"> (move Playback cursor 1 frame up)</span></p>
+<p class="rvps7"><span class="rvts23">Shift + R</span><span class="rvts20"> = play movie from the beginning</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<p class="rvps7"><span class="rvts23">-</span><span class="rvts20"> (white "minus") = decrease emulation speed</span></p>
+<p class="rvps7"><span class="rvts23">=</span><span class="rvts20"> (white "plus") = increase emulation speed</span></p>
+<p class="rvps7"><span class="rvts23">Tab</span><span class="rvts20"> = Turbo speed (applies as long as the key is being held)</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<p class="rvps7"><span class="rvts23">F1</span><span class="rvts23">-</span><span class="rvts23">F10</span><span class="rvts20"> = load movie branch from the respective Bookmark slot (1-10)</span></p>
+<p class="rvps7"><span class="rvts23">1-0</span><span class="rvts20"> = </span><span class="rvts20">jump to the frame of the Bookmark (1-10)</span></p>
+<p class="rvps7"><span class="rvts23">Shift + F1-F10</span><span class="rvts20"> = set Bookmark (1-10)</span></p>
+<p class="rvps7"><span class="rvts23">I </span><span class="rvts20">= set currently selected Bookmark</span></p>
+<p class="rvps7"><span class="rvts23">P</span><span class="rvts20"> = </span><span class="rvts20">load movie branch from </span><span class="rvts20">currently selected Bookmark</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<p class="rvps7"><span class="rvts23">M</span><span class="rvts20"> = show/hide rerecord counter</span></p>
+<p class="rvps7"><span class="rvts23">, </span><span class="rvts20">(comma) = switch Input display</span></p>
+<p class="rvps7"><span class="rvts23">. </span><span class="rvts20">(dot) = show/hide frame counter</span></p>
+<p class="rvps7"><span class="rvts23">/ </span><span class="rvts20">(slash) = show/hide lag counter</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<p class="rvps7"><span class="rvts23">Shift + L</span><span class="rvts20"> = reload current Lua script</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<p class="rvps7"><span class="rvts23">Q</span><span class="rvts20"> = toggle Recording mode</span></p>
+<p class="rvps7"><span class="rvts23">W</span><span class="rvts20"> = switch current multitracking mode</span></p>
+<p class="rvps7"><span class="rvts23">Ctrl + R</span><span class="rvts20"> = invoke Reset command</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Full list of FCEUX hotkeys that can be used when Taseditor is engaged:</span></p>
+<p class="rvps7"><span class="rvts44"><br/></span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts6">Power</span></li>
+ <li class="rvps7"><span class="rvts23">Reset</span></li>
+ <li class="rvps7"><span class="rvts23">Pause</span></li>
+ <li class="rvps7"><span class="rvts23">Frame Advance</span></li>
+ <li class="rvps7"><span class="rvts6">Screenshot</span></li>
+ <li class="rvps7"><span class="rvts6">Exit</span></li>
+ <li class="rvps7"><span class="rvts6">Slowest Speed</span></li>
+ <li class="rvps7"><span class="rvts23">Speed Down</span></li>
+ <li class="rvps7"><span class="rvts6">Normal Speed</span></li>
+ <li class="rvps7"><span class="rvts23">Speed Up</span></li>
+ <li class="rvps7"><span class="rvts23">Turbo</span></li>
+ <li class="rvps7"><span class="rvts6">Turbo Toggle</span></li>
+ <li class="rvps7"><span class="rvts23">Savestate Slot 0</span></li>
+ <li class="rvps7"><span class="rvts23">Savestate Slot 1</span></li>
+ <li class="rvps7"><span class="rvts23">Savestate Slot 2</span></li>
+ <li class="rvps7"><span class="rvts23">Savestate Slot 3</span></li>
+ <li class="rvps7"><span class="rvts23">Savestate Slot 4</span></li>
+ <li class="rvps7"><span class="rvts23">Savestate Slot 5</span></li>
+ <li class="rvps7"><span class="rvts23">Savestate Slot 6</span></li>
+ <li class="rvps7"><span class="rvts23">Savestate Slot 7</span></li>
+ <li class="rvps7"><span class="rvts23">Savestate Slot 8</span></li>
+ <li class="rvps7"><span class="rvts23">Savestate Slot 9</span></li>
+ <li class="rvps7"><span class="rvts46">Next Savestate Slot</span></li>
+ <li class="rvps7"><span class="rvts46">Previous Savestate Slot</span></li>
+ <li class="rvps7"><span class="rvts23">Save State</span></li>
+ <li class="rvps7"><span class="rvts23">Save State to Slot 0</span></li>
+ <li class="rvps7"><span class="rvts23">Save State to Slot 1</span></li>
+ <li class="rvps7"><span class="rvts23">Save State to Slot 2</span></li>
+ <li class="rvps7"><span class="rvts23">Save State to Slot 3</span></li>
+ <li class="rvps7"><span class="rvts23">Save State to Slot 4</span></li>
+ <li class="rvps7"><span class="rvts23">Save State to Slot 5</span></li>
+ <li class="rvps7"><span class="rvts23">Save State to Slot 6</span></li>
+ <li class="rvps7"><span class="rvts23">Save State to Slot 7</span></li>
+ <li class="rvps7"><span class="rvts23">Save State to Slot 8</span></li>
+ <li class="rvps7"><span class="rvts23">Save State to Slot 9</span></li>
+ <li class="rvps7"><span class="rvts23">Load State</span></li>
+ <li class="rvps7"><span class="rvts23">Load State from Slot 0</span></li>
+ <li class="rvps7"><span class="rvts23">Load State from Slot 1</span></li>
+ <li class="rvps7"><span class="rvts23">Load State from Slot 2</span></li>
+ <li class="rvps7"><span class="rvts23">Load State from Slot 3</span></li>
+ <li class="rvps7"><span class="rvts23">Load State from Slot 4</span></li>
+ <li class="rvps7"><span class="rvts23">Load State from Slot 5</span></li>
+ <li class="rvps7"><span class="rvts23">Load State from Slot 6</span></li>
+ <li class="rvps7"><span class="rvts23">Load State from Slot 7</span></li>
+ <li class="rvps7"><span class="rvts23">Load State from Slot 8</span></li>
+ <li class="rvps7"><span class="rvts23">Load State from Slot 9</span></li>
+ <li class="rvps7"><span class="rvts23">Play Movie From Beginning</span></li>
+ <li class="rvps7"><span class="rvts23">Toggle Read-Only</span></li>
+ <li class="rvps7"><span class="rvts23">Toggle Frame Display</span></li>
+ <li class="rvps7"><span class="rvts23">Toggle Input Display</span></li>
+ <li class="rvps7"><span class="rvts6">Toggle Status Icon</span></li>
+ <li class="rvps7"><span class="rvts23">Reload current Lua script</span></li>
+ <li class="rvps7"><span class="rvts6">Sound Mute Toggle</span></li>
+ <li class="rvps7"><span class="rvts6">Sound Volume Up</span></li>
+ <li class="rvps7"><span class="rvts6">Sound Volume Down</span></li>
+ <li class="rvps7"><span class="rvts6">Sound Volume Normal</span></li>
+ <li class="rvps7"><span class="rvts6">Record AVI As...</span></li>
+ <li class="rvps7"><span class="rvts6">Stop AVI</span></li>
+ <li class="rvps7"><span class="rvts6">Eject or Insert FDS Disk</span></li>
+ <li class="rvps7"><span class="rvts6">Switch FDS Disk Side</span></li>
+ <li class="rvps7"><span class="rvts6">Insert Coin</span></li>
+ <li class="rvps7"><span class="rvts6">Use Input Preset 1</span></li>
+ <li class="rvps7"><span class="rvts6">Use Input Preset 2</span></li>
+ <li class="rvps7"><span class="rvts6">Use Input Preset 3</span></li>
+ <li class="rvps7"><span class="rvts6">Toggle Background Display</span></li>
+ <li class="rvps7"><span class="rvts6">Toggle Object Display</span></li>
+ <li class="rvps7"><span class="rvts23">Lag Counter Toggle</span></li>
+ <li class="rvps7"><span class="rvts6">Open TAS Editor</span></li>
+ <li class="rvps7"><span class="rvts6">Open Memory Watch</span></li>
+ <li class="rvps7"><span class="rvts6">Open Cheats</span></li>
+ <li class="rvps7"><span class="rvts6">Open Debugger</span></li>
+ <li class="rvps7"><span class="rvts6">Open Hex Editor</span></li>
+ <li class="rvps7"><span class="rvts6">Open PPU Viewer</span></li>
+ <li class="rvps7"><span class="rvts6">Open Name Table Viewer</span></li>
+ <li class="rvps7"><span class="rvts6">Open Trace Logger</span></li>
+ <li class="rvps7"><span class="rvts6">Open Code/Data Logger</span></li>
+ <li class="rvps7"><span class="rvts6">Frame Adv.-Skip Lag</span></li>
+ <li class="rvps7"><span class="rvts23">Reload ROM or TAS Editor Project</span></li>
+ <li class="rvps7"><span class="rvts6">Toggle Movie Subtitles</span></li>
+ <li class="rvps7"><span class="rvts6">Open Ram Watch</span></li>
+ <li class="rvps7"><span class="rvts6">Open Ram Search</span></li>
+ <li class="rvps7"><span class="rvts23">Toggle Rerecord Display</span></li>
+ <li class="rvps7"><span class="rvts23">Frame Rewind</span></li>
+ <li class="rvps7"><span class="rvts23">Restore Playback</span></li>
+ <li class="rvps7"><span class="rvts23">Cancel Seeking</span></li>
+ <li class="rvps7"><span class="rvts23">Switch Auto-restore last position</span></li>
+ <li class="rvps7"><span class="rvts23">Switch current Multitracking mode</span></li>
+ <li class="rvps7"><span class="rvts6">Run Manual Lua function</span></li>
+ <li class="rvps7"><span class="rvts6">Toggle FPS Display</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Other FCEUX hotkeys will not work when Taseditor is running, for more details see </span><a class="rvts24" href="MistakeProofing.html">Mistake-proofing</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="virtual_joypad"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Virtual gamepad</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Emulator also allows to map keyboard keys to buttons of emulated console. You can use these keys for Input Recording and for </span><a class="rvts24" href="ProgramCustomization.html#fceux-config">Changing Input in Selection</a><span class="rvts20"> chapter.</span></p>
+<p class="rvps7"><span class="rvts20">By default, the following keys are mapped to the Player 1 buttons:</span></p>
+<p class="rvps7"><span class="rvts22">D</span><span class="rvts20"> – </span><span class="rvts26">B</span></p>
+<p class="rvps7"><span class="rvts22">F</span><span class="rvts20"> – </span><span class="rvts26">A</span></p>
+<p class="rvps7"><span class="rvts22">Enter</span><span class="rvts20"> – </span><span class="rvts26">Start</span></p>
+<p class="rvps7"><span class="rvts22">S</span><span class="rvts20"> – </span><span class="rvts26">Select</span></p>
+<p class="rvps7"><span class="rvts22">Keypad up</span><span class="rvts20"> – </span><span class="rvts26">Up</span></p>
+<p class="rvps7"><span class="rvts22">Keypad left</span><span class="rvts20"> – </span><span class="rvts26">Left</span></p>
+<p class="rvps7"><span class="rvts22">Keypad down</span><span class="rvts20"> – </span><span class="rvts26">Down</span></p>
+<p class="rvps7"><span class="rvts22">Keypad right</span><span class="rvts20"> – </span><span class="rvts26">Right</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When you need to input hardware commands, use FCEUX menu or hotkeys:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts31">NES -&gt; Reset</span><span class="rvts20"> or "</span><span class="rvts23">Reset</span><span class="rvts20">" hotkey (</span><span class="rvts23">Ctrl + R </span><span class="rvts20">by default) – to invoke the "Reset" command</span></li>
+ <li class="rvps7"><span class="rvts31">NES -&gt; Power</span><span class="rvts20"> or "</span><span class="rvts47">Power</span><span class="rvts20">" </span><span class="rvts20">hotkey</span><span class="rvts20"> – to invoke the "Power switch" command (not used in practical TASing)</span></li>
+ <li class="rvps7"><span class="rvts31">NES -&gt; Eject/Insert Disk</span><span class="rvts20"> or "</span><span class="rvts47">Eject or Insert FDS Disk</span><span class="rvts20">" hotkey – to invoke the disk command (only useful for a Famicom Disk System game)</span></li>
+ <li class="rvps7"><span class="rvts31">NES -&gt; Switch Disk Side</span><span class="rvts20"> or "</span><span class="rvts47">Switch FDS Disk Side</span><span class="rvts20">"</span><span class="rvts20"> hotkey – to invoke the disk command (only useful for a Famicom Disk System game)</span></li>
+ <li class="rvps7"><span class="rvts31">NES -&gt; Insert Coin</span><span class="rvts20"> or "I</span><span class="rvts47">nsert Coin</span><span class="rvts20">"</span><span class="rvts20"> hotkey – to invoke the arcade machine command (only useful for a VS System game)</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">These commands work only when Recording mode is on. After invoking a command you need to advance at least 1 frame to actually activate the command and insert it into the movie.</span></p>
+<p class="rvps7"><span class="rvts20">Since in </span><span class="rvts20">TAS Editor 1.0 the Piano Roll doesn't have columns for displaying hardware commands (they are rarely used), it's recommended to set Markers to frames where a command was inserted.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><a name="notes"></a><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts45">Controls in Note editing mode</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When you enter Note editing mode, the keyboard is used for typing the text.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">1. Accelerator hotkeys </span><span class="rvts20">do not work.</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + A</span><span class="rvts20"> – select all text of the Note</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + Z</span><span class="rvts20"> – undo/redo the last change in the text</span></p>
+<p class="rvps7"><span class="rvts27">Ctrl + X</span><span class="rvts20">, </span><span class="rvts27">Ctrl + C</span><span class="rvts20">, </span><span class="rvts27">Ctrl + V</span><span class="rvts20"> – text copy/cut/paste</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">2. FCEUX hotkeys do not work.</span></p>
+<p class="rvps7"><span class="rvts23">Backspace</span><span class="rvts20"> – </span><span class="rvts20">delete previous symbol</span></p>
+<p class="rvps7"><span class="rvts23">Esc</span><span class="rvts20"> – exit Note editing mode without saving any changes</span></p>
+<p class="rvps7"><span class="rvts23">Tab</span><span class="rvts20"> – toggle between upper and lower Note editing field</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">3. Virtual gamepad keys do not work. Note: they will work if you check the </span><span class="rvts20">Config -&gt; Enable -&gt; Background Input in FCEUX menu, so it's not recommended to enable the feature.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">4. Mouse controls are the same as usual. &nbsp;Any click outside the text edit field (except for mid-clicks) will exit Note editing mode and save text changes. Also, if the Playback cursor or the Selection cursor move away from the Marker while you're editing its Note, the text changes will be saved and you'll begin editing another Marker's Note. So it's recommended to only edit Notes when the emulator is paused.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p></p>
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Free Kindle producer</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

@@ -1,392 +1,635 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>FM3 format</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("FM3format");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>FM3 format</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="FM3 format">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="FM3 format" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>FM3 format</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="TASEditorInside.html">TAS Editor Inside</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="TASEditorInside.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="MistakeProofing.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="FM3format"
+		  data-hnd-context="26"
+		  data-hnd-title="FM3 format"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="TASEditorInside.html">TAS Editor Inside</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="TASEditorInside.html" title="TAS Editor Inside" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="MistakeProofing.html" title="Mistake-proofing" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>FM3 format</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">FM3 format</span></p>
+<p class="rvps2"><span class="rvts18">FM3 format</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The FM3 format is a simple extension of the FM2 format. FM2 files contain data which is needed for replaying the movie, and FM3 just adds Taseditor's working data to the end of FM2 file.</span></p>
-<p class="rvps10"><span class="rvts21">You can read full specifications of FM2 format in the FCEUX Help and on </span><a class="rvts27" href="http://www.fceux.com/web/FM2.html" target="_blank">official site</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Every FM3 consists of 3 parts:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><a class="rvts27" href="FM3format.html#Header">Header</a><span class="rvts21"> (as in fm2)</span></li>
-<li class="rvps10"><a class="rvts27" href="FM3format.html#InputLog">Input Log</a><span class="rvts21"> (as in fm2)</span></li>
-<li class="rvps10"><a class="rvts27" href="FM3format.html#TaseditorData">Taseditor data</a></li>
+<p class="rvps7"><span class="rvts20">The FM3 format is a simple extension of the FM2 format. FM2 files contain data which is needed for replaying the movie, and FM3 just adds Taseditor's working data to the end of FM2 file.</span></p>
+<p class="rvps7"><span class="rvts20">You can read full specifications of FM2 format in the FCEUX Help and on </span><a class="rvts24" href="http://www.fceux.com/web/FM2.html" target="_blank">official site</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Every FM3 consists of 3 parts:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><a class="rvts24" href="FM3format.html#Header">Header</a><span class="rvts20"> (as in fm2)</span></li>
+ <li class="rvps7"><a class="rvts24" href="FM3format.html#InputLog">Input Log</a><span class="rvts20"> (as in fm2)</span></li>
+ <li class="rvps7"><a class="rvts24" href="FM3format.html#TaseditorData">Taseditor data</a></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><a name="Header"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Header</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The Header is always in ASCII plain text format.</span></p>
-<p class="rvps10"><span class="rvts21">It consists of several key-value pairs (lines of text where all symbols before the first space separator are considered to be the keyword and all symbols after this separator are considered to be the text representation of the value).</span></p>
-<p class="rvps10"><span class="rvts21">Newlines may be </span><span class="rvts70">\r\n</span><span class="rvts21"> or </span><span class="rvts70">\n</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">If a line starts from "|" (pipe), it means the end of Header and the beginning of Input Log.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The key-value pairs may be in any order, except that the first key must be </span><span class="rvts25">version</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">Value text is always terminated by a newline, which the value text does not include.</span></p>
-<p class="rvps10"><span class="rvts21">The value text is parsed differently depending on the keyword, it can be either integer or string.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts34">Keys with integer value:</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">(also used for booleans, with a 1 for </span><span class="rvts70">true</span><span class="rvts21"> and 0 for </span><span class="rvts70">false</span><span class="rvts21">)</span></p>
-<p class="rvps10"><span class="rvts21">(the value can be stored as </span><span class="rvts70">int32</span><span class="rvts21">)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts25">version</span><span class="rvts21"> (required) – the version of the movie file format; for now it is always </span><span class="rvts25">3</span></li>
-<li class="rvps10"><span class="rvts25">emuVersion</span><span class="rvts21"> (required) – the version of the emulator used to produce the file (e.g. </span><span class="rvts25">21060</span><span class="rvts21">)</span></li>
-<li class="rvps10"><span class="rvts25">rerecordCount</span><span class="rvts21"> (optional) – the rerecord count</span></li>
-<li class="rvps10"><span class="rvts25">palFlag</span><span class="rvts21"> (</span><span class="rvts70">bool</span><span class="rvts21">) (optional) – </span><span class="rvts70">true </span><span class="rvts21">if the movie uses PAL timing</span></li>
-<li class="rvps10"><span class="rvts25">NewPPU</span><span class="rvts21"> (</span><span class="rvts70">bool</span><span class="rvts21">) (optional) – </span><span class="rvts70">true </span><span class="rvts21">if the movie uses New PPU</span></li>
-<li class="rvps10"><span class="rvts25">FDS</span><span class="rvts21"> (</span><span class="rvts70">bool</span><span class="rvts21">) (optional) – </span><span class="rvts70">true </span><span class="rvts21">if the movie was recorded on a Famicom Disk System (FDS) game</span></li>
-<li class="rvps10"><span class="rvts25">fourscore</span><span class="rvts21"> (</span><span class="rvts70">bool</span><span class="rvts21">) – </span><span class="rvts70">true</span><span class="rvts21"> if a fourscore was used. If fourscore is not used, then </span><span class="rvts25">port0</span><span class="rvts21"> and </span><span class="rvts25">port1</span><span class="rvts21"> are required</span></li>
-<li class="rvps10"><span class="rvts25">port0</span><span class="rvts21"> – the type of input device attached to the port 0. Supported values are:</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><a name="Header"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Header</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The Header is always in ASCII plain text format.</span></p>
+<p class="rvps7"><span class="rvts20">It consists of several key-value pairs (lines of text where all symbols before the first space separator are considered to be the keyword and all symbols after this separator are considered to be the text representation of the value).</span></p>
+<p class="rvps7"><span class="rvts20">Newlines may be </span><span class="rvts63">\r\n</span><span class="rvts20"> or </span><span class="rvts63">\n</span><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">If a line starts from "|" (pipe), it means the end of Header and the beginning of Input Log.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The key-value pairs may be in any order, except that the first key must be </span><span class="rvts22">version</span><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">Value text is always terminated by a newline, which the value text does not include.</span></p>
+<p class="rvps7"><span class="rvts20">The value text is parsed differently depending on the keyword, it can be either integer or string.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts31">Keys with integer value:</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">(also used for booleans, with a 1 for </span><span class="rvts63">true</span><span class="rvts20"> and 0 for </span><span class="rvts63">false</span><span class="rvts20">)</span></p>
+<p class="rvps7"><span class="rvts20">(the value can be stored as </span><span class="rvts63">int32</span><span class="rvts20">)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts22">version</span><span class="rvts20"> (required) – the version of the movie file format; for now it is always </span><span class="rvts22">3</span></li>
+ <li class="rvps7"><span class="rvts22">emuVersion</span><span class="rvts20"> (required) – the version of the emulator used to produce the file (e.g. </span><span class="rvts22">21060</span><span class="rvts20">)</span></li>
+ <li class="rvps7"><span class="rvts22">rerecordCount</span><span class="rvts20"> (optional) – the rerecord count</span></li>
+ <li class="rvps7"><span class="rvts22">palFlag</span><span class="rvts20"> (</span><span class="rvts63">bool</span><span class="rvts20">) (optional) – </span><span class="rvts63">true </span><span class="rvts20">if the movie uses PAL timing</span></li>
+ <li class="rvps7"><span class="rvts22">NewPPU</span><span class="rvts20"> (</span><span class="rvts63">bool</span><span class="rvts20">) (optional) – </span><span class="rvts63">true </span><span class="rvts20">if the movie uses New PPU</span></li>
+ <li class="rvps7"><span class="rvts22">FDS</span><span class="rvts20"> (</span><span class="rvts63">bool</span><span class="rvts20">) (optional) – </span><span class="rvts63">true </span><span class="rvts20">if the movie was recorded on a Famicom Disk System (FDS) game</span></li>
+ <li class="rvps7"><span class="rvts22">fourscore</span><span class="rvts20"> (</span><span class="rvts63">bool</span><span class="rvts20">) – </span><span class="rvts63">true</span><span class="rvts20"> if a fourscore was used. If fourscore is not used, then </span><span class="rvts22">port0</span><span class="rvts20"> and </span><span class="rvts22">port1</span><span class="rvts20"> are required</span></li>
+ <li class="rvps7"><span class="rvts22">port0</span><span class="rvts20"> – the type of input device attached to the port 0. Supported values are:</span></li>
 </ul>
-<ul style="text-indent: 60px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10" style="text-indent: 60px"><span class="rvts21">SI_NONE = 0</span></li>
-<li class="rvps10" style="text-indent: 60px"><span class="rvts21">SI_GAMEPAD = 1</span></li>
-<li class="rvps10" style="text-indent: 60px"><span class="rvts21">SI_ZAPPER = 2</span></li>
+<ul style="text-indent: 60px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts20">SI_NONE = 0</span></li>
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts20">SI_GAMEPAD = 1</span></li>
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts20">SI_ZAPPER = 2</span></li>
 </ul>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts25">port1</span><span class="rvts21"> – the type of input device attached to the port 1. Supported values are:</span></li>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts22">port1</span><span class="rvts20"> – the type of input device attached to the port 1. Supported values are:</span></li>
 </ul>
-<ul style="text-indent: 60px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10" style="text-indent: 60px"><span class="rvts21">SI_NONE = 0</span></li>
-<li class="rvps10" style="text-indent: 60px"><span class="rvts21">SI_GAMEPAD = 1</span></li>
-<li class="rvps10" style="text-indent: 60px"><span class="rvts21">SI_ZAPPER = 2</span></li>
+<ul style="text-indent: 60px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts20">SI_NONE = 0</span></li>
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts20">SI_GAMEPAD = 1</span></li>
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts20">SI_ZAPPER = 2</span></li>
 </ul>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts25">port2</span><span class="rvts21"> (required) – the type of the FCExp port device which was attached. Supported values are:</span></li>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts22">port2</span><span class="rvts20"> (required) – the type of the FCExp port device which was attached. Supported values are:</span></li>
 </ul>
-<ul style="text-indent: 60px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10" style="text-indent: 60px"><span class="rvts21">SIFC_NONE = 0</span></li>
+<ul style="text-indent: 60px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts20">SIFC_NONE = 0</span></li>
 </ul>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts25">binary</span><span class="rvts21"> (</span><span class="rvts70">bool</span><span class="rvts21">) (optional) – </span><span class="rvts70">true </span><span class="rvts21">if Input Log is stored in binary format. FM2 files usually contain Input in text format, for easy editing and splicing. FM3 files usually contain Input in binary format, to save disk space</span></li>
-<li class="rvps10"><span class="rvts25">length</span><span class="rvts21"> (required in FM3) – &nbsp;movie size (number of frames in the input log). If this key is specified and the number is &gt;= 0, the Input Log ends after specified number of records, and any remaining data should not be parsed (because it's Taseditor data). The Header of FM3s always has this keyword, the Header of FM2s doesn't have it.</span></li>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts22">binary</span><span class="rvts20"> (</span><span class="rvts63">bool</span><span class="rvts20">) (optional) – </span><span class="rvts63">true </span><span class="rvts20">if Input Log is stored in binary format. FM2 files usually contain Input in text format, for easy editing and splicing. FM3 files usually contain Input in binary format, to save disk space</span></li>
+ <li class="rvps7"><span class="rvts22">length</span><span class="rvts20"> (required in FM3) – &nbsp;movie size (number of frames in the input log). If this key is specified and the number is &gt;= 0, the Input Log ends after specified number of records, and any remaining data should not be parsed (because it's Taseditor data). The Header of FM3s always has this keyword, the Header of FM2s doesn't have it.</span></li>
 </ul>
-<p class="rvps14"><span class="rvts21"><br/></span></p>
-<p class="rvps14"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts34">Keys with string value:</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">(their values cannot contain newlines)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">romFilename</span><span class="rvts21"> (required) – the name of the file used to record the movie</span></p>
-<p class="rvps10"><span class="rvts25">romChecksum</span><span class="rvts21"> (required) – the base64 of the hexified MD5 hash of the ROM which was used to record the movie</span></p>
-<p class="rvps10"><span class="rvts25">comment</span><span class="rvts21"> (optional) – simply a memo. By convention, the author of the movie should be stored in a comment with the subject "author". Example: "comment author AnS"</span></p>
-<p class="rvps10"><span class="rvts25">subtitle</span><span class="rvts21"> (optional) – a message that will be displayed on screen when movie is played back (unless Subtitles are turned off). Right after the word "subtitle" and following space separator there must be an integer value indicating the frame that the subtitle will be displayed. &nbsp;Any remaining text after the integer and following space separator is considered to be the string displayed. Example: "subtitle 100 Level Two" – at frame 100 the words "Level Two" will be displayed on the screen</span></p>
-<p class="rvps10"><span class="rvts25">guid</span><span class="rvts21"> (required) – a unique identifier for a movie, generated when the movie is created. Meaningless in FM3, because all there's no external savestates associated with the project file.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><a name="InputLog"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Input Log</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The Input Log section consists of movie records either in the form of text lines or in the form of binary data.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts34">Text format:</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Every frame of the movie is represented by line of text beginning and ending with a "|" (pipe).</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">If fourscore is not used, the fields in the line are as follows:</span></p>
-<p class="rvps10"><span class="rvts25">|commands|port0|port1|port2|</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Field </span><span class="rvts25">commands</span><span class="rvts21"> is a variable length decimal integer which is interpreted as a bit field corresponding to miscellaneous input states which are valid at the start of the frame. Current values for this are:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">bit 0 (number = 1) – Soft Reset</span></li>
-<li class="rvps10"><span class="rvts21">bit 1 (number = 2) – Power</span></li>
-<li class="rvps10"><span class="rvts21">bit 2 (number = 4) – Eject/Insert Disk</span></li>
-<li class="rvps10"><span class="rvts21">bit 3 (number = 8) – Switch Disk Side</span></li>
+<p class="rvps9"><span class="rvts20"><br/></span></p>
+<p class="rvps9"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts31">Keys with string value:</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">(their values cannot contain newlines)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">romFilename</span><span class="rvts20"> (required) – the name of the file used to record the movie</span></p>
+<p class="rvps7"><span class="rvts22">romChecksum</span><span class="rvts20"> (required) – the base64 of the hexified MD5 hash of the ROM which was used to record the movie</span></p>
+<p class="rvps7"><span class="rvts22">comment</span><span class="rvts20"> (optional) – simply a memo. By convention, the author of the movie should be stored in a comment with the subject "author". Example: "comment author AnS"</span></p>
+<p class="rvps7"><span class="rvts22">subtitle</span><span class="rvts20"> (optional) – a message that will be displayed on screen when movie is played back (unless Subtitles are turned off). Right after the word "subtitle" and following space separator there must be an integer value indicating the frame that the subtitle will be displayed. &nbsp;Any remaining text after the integer and following space separator is considered to be the string displayed. Example: "subtitle 100 Level Two" – at frame 100 the words "Level Two" will be displayed on the screen</span></p>
+<p class="rvps7"><span class="rvts22">guid</span><span class="rvts20"> (required) – a unique identifier for a movie, generated when the movie is created. Meaningless in FM3, because all there's no external savestates associated with the project file.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><a name="InputLog"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Input Log</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The Input Log section consists of movie records either in the form of text lines or in the form of binary data.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts31">Text format:</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Every frame of the movie is represented by line of text beginning and ending with a "|" (pipe).</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">If fourscore is not used, the fields in the line are as follows:</span></p>
+<p class="rvps7"><span class="rvts22">|commands|port0|port1|port2|</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Field </span><span class="rvts22">commands</span><span class="rvts20"> is a variable length decimal integer which is interpreted as a bit field corresponding to miscellaneous input states which are valid at the start of the frame. Current values for this are:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">bit 0 (number = 1) – Soft Reset</span></li>
+ <li class="rvps7"><span class="rvts20">bit 1 (number = 2) – Power</span></li>
+ <li class="rvps7"><span class="rvts20">bit 2 (number = 4) – Eject/Insert Disk</span></li>
+ <li class="rvps7"><span class="rvts20">bit 3 (number = 8) – Switch Disk Side</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The format of </span><span class="rvts25">port0</span><span class="rvts21">, </span><span class="rvts25">port1</span><span class="rvts21">, </span><span class="rvts25">port2</span><span class="rvts21"> depends on which types of devices were attached.</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">SI_NONE: the field must be empty</span></li>
-<li class="rvps10"><span class="rvts21">SI_GAMEPAD: the field consists of eight characters which constitute a bit field. Any character other than ' ' (spacebar) or '.' (dot) means that the button was pressed. By convention, the following mnemonics are used in a column to remind us of which button corresponds to which column: RLDUTSBA (</span><span class="rvts29">Right</span><span class="rvts21">, </span><span class="rvts29">Left</span><span class="rvts21">, </span><span class="rvts29">Down</span><span class="rvts21">, </span><span class="rvts29">Up</span><span class="rvts21">, </span><span class="rvts29">Start</span><span class="rvts21">, </span><span class="rvts29">Select</span><span class="rvts21">, </span><span class="rvts29">B</span><span class="rvts21">, </span><span class="rvts29">A</span><span class="rvts21">)</span></li>
-<li class="rvps10"><span class="rvts21">SI_ZAPPER: the field consists of several characters in the following pattern </span><span class="rvts25">XXX YYY B Q Z</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The format of </span><span class="rvts22">port0</span><span class="rvts20">, </span><span class="rvts22">port1</span><span class="rvts20">, </span><span class="rvts22">port2</span><span class="rvts20"> depends on which types of devices were attached.</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">SI_NONE: the field must be empty</span></li>
+ <li class="rvps7"><span class="rvts20">SI_GAMEPAD: the field consists of eight characters which constitute a bit field. Any character other than ' ' (spacebar) or '.' (dot) means that the button was pressed. By convention, the following mnemonics are used in a column to remind us of which button corresponds to which column: RLDUTSBA (</span><span class="rvts26">Right</span><span class="rvts20">, </span><span class="rvts26">Left</span><span class="rvts20">, </span><span class="rvts26">Down</span><span class="rvts20">, </span><span class="rvts26">Up</span><span class="rvts20">, </span><span class="rvts26">Start</span><span class="rvts20">, </span><span class="rvts26">Select</span><span class="rvts20">, </span><span class="rvts26">B</span><span class="rvts20">, </span><span class="rvts26">A</span><span class="rvts20">)</span></li>
+ <li class="rvps7"><span class="rvts20">SI_ZAPPER: the field consists of several characters in the following pattern </span><span class="rvts22">XXX YYY B Q Z</span></li>
 </ul>
-<ul style="text-indent: 60px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10" style="text-indent: 60px"><span class="rvts25">XXX</span><span class="rvts21">: %03d – the X position of the mouse</span></li>
-<li class="rvps10" style="text-indent: 60px"><span class="rvts25">YYY</span><span class="rvts21">: %03d – the Y position of the mouse</span></li>
-<li class="rvps10" style="text-indent: 60px"><span class="rvts25">B</span><span class="rvts21">: %01d – 1 if the mouse button is pressed; 0 if not</span></li>
-<li class="rvps10" style="text-indent: 60px"><span class="rvts25">Q</span><span class="rvts21">: %01d – an internal value used by the emulator's zapper code</span></li>
-<li class="rvps10" style="text-indent: 60px"><span class="rvts25">Z</span><span class="rvts21">: %d – a variable-length decimal integer; an internal value used by the emulator's zapper code </span></li>
+<ul style="text-indent: 60px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts22">XXX</span><span class="rvts20">: %03d – the X position of the mouse</span></li>
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts22">YYY</span><span class="rvts20">: %03d – the Y position of the mouse</span></li>
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts22">B</span><span class="rvts20">: %01d – 1 if the mouse button is pressed; 0 if not</span></li>
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts22">Q</span><span class="rvts20">: %01d – an internal value used by the emulator's zapper code</span></li>
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts22">Z</span><span class="rvts20">: %d – a variable-length decimal integer; an internal value used by the emulator's zapper code&nbsp;</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">If fourscore is used, then port0 and port1 are irrelevant and ignored. The input types must all be gamepads, and each input log record must be in the following format:</span></p>
-<p class="rvps10"><span class="rvts25">|commands|RLDUTSBA|RLDUTSBA|RLDUTSBA|RLDUTSBA|port2|</span></p>
-<p class="rvps10"><span class="rvts21">(commands, player 1, player 2, player 3, player 4, port2)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts34">Binary format:</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Input Log section starts with a | (pipe).</span></p>
-<p class="rvps10"><span class="rvts21">Every frame of the movie is represented by a record of a fixed length. The length can be determined by the devices on </span><span class="rvts25">port0</span><span class="rvts21"> and </span><span class="rvts25">port1</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The first byte of each record stores "commands" bit field:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">bit 0 – Soft Reset</span></li>
-<li class="rvps10"><span class="rvts21">bit 1 – Power</span></li>
-<li class="rvps10"><span class="rvts21">bit 2 – Eject/Insert Disk</span></li>
-<li class="rvps10"><span class="rvts21">bit 3 – Switch Disk Side</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">If fourscore is used, then port0 and port1 are irrelevant and ignored. The input types must all be gamepads, and each input log record must be in the following format:</span></p>
+<p class="rvps7"><span class="rvts22">|commands|RLDUTSBA|RLDUTSBA|RLDUTSBA|RLDUTSBA|port2|</span></p>
+<p class="rvps7"><span class="rvts20">(commands, player 1, player 2, player 3, player 4, port2)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts31">Binary format:</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Input Log section starts with a | (pipe).</span></p>
+<p class="rvps7"><span class="rvts20">Every frame of the movie is represented by a record of a fixed length. The length can be determined by the devices on </span><span class="rvts22">port0</span><span class="rvts20"> and </span><span class="rvts22">port1</span><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The first byte of each record stores "commands" bit field:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">bit 0 – Soft Reset</span></li>
+ <li class="rvps7"><span class="rvts20">bit 1 – Power</span></li>
+ <li class="rvps7"><span class="rvts20">bit 2 – Eject/Insert Disk</span></li>
+ <li class="rvps7"><span class="rvts20">bit 3 – Switch Disk Side</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">If fourscore is not used, the remaining bytes in the record depend on which types of devices are attached to </span><span class="rvts25">port0</span><span class="rvts21"> and </span><span class="rvts25">port1</span><span class="rvts21">:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">SI_NONE: 0 bytes added to the size of record</span></li>
-<li class="rvps10"><span class="rvts21">SI_GAMEPAD: 1 byte added to the size of record. Bits of the byte represent the state of buttons (bit0 = </span><span class="rvts29">A</span><span class="rvts21">, bit1 = </span><span class="rvts29">B</span><span class="rvts21">, bit2 = </span><span class="rvts29">Select</span><span class="rvts21">, bit3 = S</span><span class="rvts29">Start</span><span class="rvts21">, bit4 = </span><span class="rvts29">Up</span><span class="rvts21">, bit5 = </span><span class="rvts29">Down</span><span class="rvts21">, bit6 = </span><span class="rvts29">Left</span><span class="rvts21">, bit7 = </span><span class="rvts29">Right</span><span class="rvts21">). If the bit is set, respective button is considered to be pressed, if the bit is clear, the button is not pressed</span></li>
-<li class="rvps10"><span class="rvts21">SI_ZAPPER: 12 bytes added to the size of record:</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">If fourscore is not used, the remaining bytes in the record depend on which types of devices are attached to </span><span class="rvts22">port0</span><span class="rvts20"> and </span><span class="rvts22">port1</span><span class="rvts20">:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">SI_NONE: 0 bytes added to the size of record</span></li>
+ <li class="rvps7"><span class="rvts20">SI_GAMEPAD: 1 byte added to the size of record. Bits of the byte represent the state of buttons (bit0 = </span><span class="rvts26">A</span><span class="rvts20">, bit1 = </span><span class="rvts26">B</span><span class="rvts20">, bit2 = </span><span class="rvts26">Select</span><span class="rvts20">, bit3 = S</span><span class="rvts26">Start</span><span class="rvts20">, bit4 = </span><span class="rvts26">Up</span><span class="rvts20">, bit5 = </span><span class="rvts26">Down</span><span class="rvts20">, bit6 = </span><span class="rvts26">Left</span><span class="rvts20">, bit7 = </span><span class="rvts26">Right</span><span class="rvts20">). If the bit is set, respective button is considered to be pressed, if the bit is clear, the button is not pressed</span></li>
+ <li class="rvps7"><span class="rvts20">SI_ZAPPER: 12 bytes added to the size of record:</span></li>
 </ul>
-<ul style="text-indent: 60px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10" style="text-indent: 60px"><span class="rvts21">1st byte – the X position of the mouse</span></li>
-<li class="rvps10" style="text-indent: 60px"><span class="rvts21">2nd byte – the Y position of the mouse</span></li>
-<li class="rvps10" style="text-indent: 60px"><span class="rvts21">3rd byte – 1 if the mouse button is pressed; 0 if not</span></li>
-<li class="rvps10" style="text-indent: 60px"><span class="rvts21">4th byte – an internal value used by the emulator's zapper code</span></li>
-<li class="rvps10" style="text-indent: 60px"><span class="rvts21">bytes 5-12 (</span><span class="rvts70">uint64</span><span class="rvts21">) – an internal value used by the emulator's zapper code</span></li>
+<ul style="text-indent: 60px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts20">1st byte – the X position of the mouse</span></li>
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts20">2nd byte – the Y position of the mouse</span></li>
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts20">3rd byte – 1 if the mouse button is pressed; 0 if not</span></li>
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts20">4th byte – an internal value used by the emulator's zapper code</span></li>
+ <li style="text-indent: 60px" class="rvps7"><span class="rvts20">bytes 5-12 (</span><span class="rvts63">uint64</span><span class="rvts20">) – an internal value used by the emulator's zapper code</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">If fourscore is used, then </span><span class="rvts25">port0</span><span class="rvts21"> and </span><span class="rvts25">port1</span><span class="rvts21"> are irrelevant and ignored. 4 bytes are added to the size of record. The bits of the 1st byte represent the state of buttons of the 1st joypad (bit0 = </span><span class="rvts29">A</span><span class="rvts21">, bit1 = </span><span class="rvts29">B</span><span class="rvts21">, bit2 = </span><span class="rvts29">Select</span><span class="rvts21">, bit3 = </span><span class="rvts29">Start</span><span class="rvts21">, bit4 = </span><span class="rvts29">Up</span><span class="rvts21">, bit5 = </span><span class="rvts29">Down</span><span class="rvts21">, bit6 = </span><span class="rvts29">Left</span><span class="rvts21">, bit7 = </span><span class="rvts29">Right</span><span class="rvts21">); bits of the 2nd byte represent the state of buttons of the 2nd joypad, and so on.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><a name="TaseditorData"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">Taseditor Data</span></p>
-<p class="rvps21"><span class="rvts21"><br/></span></p>
-<div class="rvps21"><table width="450" border="1" cellpadding="0" cellspacing="0" style="border-color: #d3c4af #000000 #000000 #d3c4af; border-style: solid;">
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">4 bytes</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts79">unsigned int32</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">FM3 version</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">4 bytes</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts79">unsigned int32</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">Saved modules</span></p>
-</td>
-</tr>
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">4 bytes</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts79">unsigned int32</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">Number of offsets (N = 6)</span></p>
-</td>
-</tr>
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">4 * 6 bytes</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">pointers</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">Offsets</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">???</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">stream</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">MARKERS DATA</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">???</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">stream</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">BOOKMARKS DATA</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">???</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">stream</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">GREENZONE DATA</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">???</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">stream</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">HISTORY DATA</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">???</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">stream</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">PIANO ROLL DATA</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">???</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">stream</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">SELECTION DATA</span></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">If fourscore is used, then </span><span class="rvts22">port0</span><span class="rvts20"> and </span><span class="rvts22">port1</span><span class="rvts20"> are irrelevant and ignored. 4 bytes are added to the size of record. The bits of the 1st byte represent the state of buttons of the 1st joypad (bit0 = </span><span class="rvts26">A</span><span class="rvts20">, bit1 = </span><span class="rvts26">B</span><span class="rvts20">, bit2 = </span><span class="rvts26">Select</span><span class="rvts20">, bit3 = </span><span class="rvts26">Start</span><span class="rvts20">, bit4 = </span><span class="rvts26">Up</span><span class="rvts20">, bit5 = </span><span class="rvts26">Down</span><span class="rvts20">, bit6 = </span><span class="rvts26">Left</span><span class="rvts20">, bit7 = </span><span class="rvts26">Right</span><span class="rvts20">); bits of the 2nd byte represent the state of buttons of the 2nd joypad, and so on.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><a name="TaseditorData"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">Taseditor Data</span></p>
+<p class="rvps13"><span class="rvts20"><br/></span></p>
+<div class="rvps13">
+<table width="450" border="1" cellpadding="0" cellspacing="0" style="border-color: #ffffff #000000 #000000 #ffffff; border-style: solid; border-spacing: 0px; margin: 0px auto;">
+ <tr valign="middle">
+  <td width="104" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">4 bytes</span></p>
+  </td>
+  <td width="146" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts67">unsigned int32</span></p>
+  </td>
+  <td width="192" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">FM3 version</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="104" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">4 bytes</span></p>
+  </td>
+  <td width="146" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts67">unsigned int32</span></p>
+  </td>
+  <td width="192" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">Saved modules</span></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td width="104" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">4 bytes</span></p>
+  </td>
+  <td width="146" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts67">unsigned int32</span></p>
+  </td>
+  <td width="192" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">Number of offsets (N = 6)</span></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td width="104" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">4 * 6 bytes</span></p>
+  </td>
+  <td width="146" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">pointers</span></p>
+  </td>
+  <td width="192" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">Offsets</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="104" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">???</span></p>
+  </td>
+  <td width="146" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">stream</span></p>
+  </td>
+  <td width="192" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">MARKERS DATA</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="104" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">???</span></p>
+  </td>
+  <td width="146" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">stream</span></p>
+  </td>
+  <td width="192" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">BOOKMARKS DATA</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="104" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">???</span></p>
+  </td>
+  <td width="146" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">stream</span></p>
+  </td>
+  <td width="192" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">GREENZONE DATA</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="104" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">???</span></p>
+  </td>
+  <td width="146" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">stream</span></p>
+  </td>
+  <td width="192" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">HISTORY DATA</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="104" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">???</span></p>
+  </td>
+  <td width="146" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">stream</span></p>
+  </td>
+  <td width="192" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">PIANO ROLL DATA</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="104" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">???</span></p>
+  </td>
+  <td width="146" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">stream</span></p>
+  </td>
+  <td width="192" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">SELECTION DATA</span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps21"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The data starts right after the last record of the Input Log. If there's EOF after the last record, TAS Editor will interpret the file as an FM2 file.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">First 4 bytes of Taseditor Data contain the version of the project file format. The first release version of TAS Editor 1.0 saves projects with version = 3.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Next 4 bytes contain bit field that can be used for determining which modules of Taseditor were saved to the FM3 file:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">bit 0 – Markers were saved</span></li>
-<li class="rvps10"><span class="rvts21">bit 1 – Bookmarks were saved</span></li>
-<li class="rvps10"><span class="rvts21">bit 2 – entire Greenzone was saved</span></li>
-<li class="rvps10"><span class="rvts21">bit 3 – History Log was saved</span></li>
-<li class="rvps10"><span class="rvts21">bit 4 – Piano Roll position was saved</span></li>
-<li class="rvps10"><span class="rvts21">bit 5 – Selection History was saved</span></li>
+<p class="rvps13"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The data starts right after the last record of the Input Log. If there's EOF after the last record, TAS Editor will interpret the file as an FM2 file.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">First 4 bytes of Taseditor Data contain the version of the project file format. The first release version of TAS Editor 1.0 saves projects with version = 3.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Next 4 bytes contain bit field that can be used for determining which modules of Taseditor were saved to the FM3 file:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">bit 0 – Markers were saved</span></li>
+ <li class="rvps7"><span class="rvts20">bit 1 – Bookmarks were saved</span></li>
+ <li class="rvps7"><span class="rvts20">bit 2 – entire Greenzone was saved</span></li>
+ <li class="rvps7"><span class="rvts20">bit 3 – History Log was saved</span></li>
+ <li class="rvps7"><span class="rvts20">bit 4 – Piano Roll position was saved</span></li>
+ <li class="rvps7"><span class="rvts20">bit 5 – Selection History was saved</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Next 4 bytes contain the total number of modules, in the version 3 this number must be 6.</span></p>
-<p class="rvps10"><span class="rvts21">Then there are six offsets (4 bytes each) pointing at the data of each module. The offsets are counted from the beginning of the file.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When Taseditor saves the project, it calls all 6 modules that need saving. Each of them saves current writing offset and then serializes its own data into the file stream and moves current write position forward. The order of calling modules is always the same (Markers, Bookmarks, Greenzone, History, Piano Roll, Selection). When loading a project Taseditor calls those modules in the same order and they seek to the given offset and load / deserialize the data from the file.</span></p>
-<p class="rvps10"><span class="rvts21">To check the integrity of the data loaded, every module writes its own ID (string) into the file stream before writing the data. When loading the data it expects the ID to match, if it doesn't match then the module refuses to load following data, creates default state and reports "loading error" to Taseditor.</span></p>
-<p class="rvps10"><span class="rvts21">When using Save Compact settings, modules either save all their data as usual or write dummy ID which indicates that this module didn't save its data into the file. When loading the file a module that detects dummy ID refuses to load following data, creates default state but then reports "loading success" to Taseditor.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<div class="rvps21"><table width="450" border="1" cellpadding="0" cellspacing="0" style="border-color: #d3c4af #000000 #000000 #d3c4af; border-style: solid;">
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; background-color: #0000ff; width: 106px;"><p class="rvps5"><span class="rvts78">Module</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; background-color: #0000ff; width: 174px;"><p class="rvps5"><span class="rvts78">ID when saved</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; background-color: #0000ff; width: 162px;"><p class="rvps5"><span class="rvts78">ID when not saved</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 106px;"><p class="rvps5"><span class="rvts6">Markers</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 174px;"><p class="rvps5"><span class="rvts6">MARKERS</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 162px;"><p class="rvps5"><span class="rvts6">MARKERX</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 106px;"><p class="rvps5"><span class="rvts6">Bookmarks</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 174px;"><p class="rvps5"><span class="rvts6">BOOKMARKS</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 162px;"><p class="rvps5"><span class="rvts6">BOOKMARKX</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 106px;"><p class="rvps5"><span class="rvts6">Greenzone</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 174px;"><p class="rvps5"><span class="rvts6">GREENZONE</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 162px;"><p class="rvps5"><span class="rvts6">GREENZONX</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 106px;"><p class="rvps5"><span class="rvts6">History</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 174px;"><p class="rvps5"><span class="rvts6">HISTORY</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 162px;"><p class="rvps5"><span class="rvts6">HISTORX</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 106px;"><p class="rvps5"><span class="rvts6">Piano Roll</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 174px;"><p class="rvps5"><span class="rvts6">PIANO_ROLL</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 162px;"><p class="rvps5"><span class="rvts6">PIANO_ROLX</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 106px;"><p class="rvps5"><span class="rvts6">Selection</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 174px;"><p class="rvps5"><span class="rvts6">SELECTION</span></p>
-</td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 162px;"><p class="rvps5"><span class="rvts6">SELECTIOX</span></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Next 4 bytes contain the total number of modules, in the version 3 this number must be 6.</span></p>
+<p class="rvps7"><span class="rvts20">Then there are six offsets (4 bytes each) pointing at the data of each module. The offsets are counted from the beginning of the file.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When Taseditor saves the project, it calls all 6 modules that need saving. Each of them saves current writing offset and then serializes its own data into the file stream and moves current write position forward. The order of calling modules is always the same (Markers, Bookmarks, Greenzone, History, Piano Roll, Selection). When loading a project Taseditor calls those modules in the same order and they seek to the given offset and load / deserialize the data from the file.</span></p>
+<p class="rvps7"><span class="rvts20">To check the integrity of the data loaded, every module writes its own ID (string) into the file stream before writing the data. When loading the data it expects the ID to match, if it doesn't match then the module refuses to load following data, creates default state and reports "loading error" to Taseditor.</span></p>
+<p class="rvps7"><span class="rvts20">When using Save Compact settings, modules either save all their data as usual or write dummy ID which indicates that this module didn't save its data into the file. When loading the file a module that detects dummy ID refuses to load following data, creates default state but then reports "loading success" to Taseditor.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<div class="rvps13">
+<table width="450" border="1" cellpadding="0" cellspacing="0" style="border-color: #ffffff #000000 #000000 #ffffff; border-style: solid; border-spacing: 0px; margin: 0px auto;">
+ <tr valign="middle">
+  <td width="106" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none; background-color: #0000ff;">
+   <p class="rvps3"><span class="rvts66">Module</span></p>
+  </td>
+  <td width="174" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none; background-color: #0000ff;">
+   <p class="rvps3"><span class="rvts66">ID when saved</span></p>
+  </td>
+  <td width="162" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none; background-color: #0000ff;">
+   <p class="rvps3"><span class="rvts66">ID when not saved</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="106" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">Markers</span></p>
+  </td>
+  <td width="174" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">MARKERS</span></p>
+  </td>
+  <td width="162" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">MARKERX</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="106" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">Bookmarks</span></p>
+  </td>
+  <td width="174" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">BOOKMARKS</span></p>
+  </td>
+  <td width="162" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">BOOKMARKX</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="106" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">Greenzone</span></p>
+  </td>
+  <td width="174" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">GREENZONE</span></p>
+  </td>
+  <td width="162" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">GREENZONX</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="106" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">History</span></p>
+  </td>
+  <td width="174" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">HISTORY</span></p>
+  </td>
+  <td width="162" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">HISTORX</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="106" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">Piano Roll</span></p>
+  </td>
+  <td width="174" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">PIANO_ROLL</span></p>
+  </td>
+  <td width="162" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">PIANO_ROLX</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="106" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">Selection</span></p>
+  </td>
+  <td width="174" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">SELECTION</span></p>
+  </td>
+  <td width="162" style="border-color: #000000; border-style: solid; padding: 0px; border-right: none; border-bottom: none;">
+   <p class="rvps3"><span class="rvts6">SELECTIOX</span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps21"><span class="rvts21"><br/></span></p>
-<p class="rvps21"><span class="rvts21"><br/></span></p>
-<p class="rvps21"><span class="rvts21"><br/></span></p>
-<p class="rvps21"><span class="rvts21"><br/></span></p>
-<p class="rvps21"><span class="rvts21"><br/></span></p>
+<p class="rvps13"><span class="rvts20"><br/></span></p>
+<p class="rvps13"><span class="rvts20"><br/></span></p>
+<p class="rvps13"><span class="rvts20"><br/></span></p>
+<p class="rvps13"><span class="rvts20"><br/></span></p>
+<p class="rvps13"><span class="rvts20"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/help-authoring-tool">Single source CHM, PDF, DOC and HTML Help creation</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com">Free PDF documentation generator</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

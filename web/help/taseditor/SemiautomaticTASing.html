@@ -1,168 +1,359 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>4.3. Semiautomatic TASing</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("SemiautomaticTASing");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>4.3. Semiautomatic TASing</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="4.3. Semiautomatic TASing">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="4.3. Semiautomatic TASing" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>4.3. Semiautomatic TASing</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="BeginnersGuide.html">Beginner's Guide</a> &rsaquo;&rsaquo; <a href="TASingMethodology.html">4. TASing Methodology</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="TASingMethodology.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="NonlinearTASing.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="ProgramCustomization.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="SemiautomaticTASing"
+		  data-hnd-context="12"
+		  data-hnd-title="4.3. Semiautomatic TASing"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="BeginnersGuide.html">Beginner's Guide</a></li><li><a href="TASingMethodology.html">4. TASing Methodology</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="TASingMethodology.html" title="4. TASing Methodology" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="NonlinearTASing.html" title="4.2. Nonlinear TASing" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="ProgramCustomization.html" title="5. Program customization" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>4.3. Semiautomatic TASing</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">Semiautomatic TASing</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-method3.png"/></p>
-<p class="rvps10"><span class="rvts21">This method further develops the ideas of the nonlinear TASing method.</span></p>
-<p class="rvps10"><span class="rvts21">In many cases TASer needs to see the result of the Input modification immediately. Ideally, he should realize all the consequences of his decision right at the moment of making the decision. But in reality he has to spend precious time on inputting the decision and navigating with the Playback cursor to the end of the segment.</span></p>
-<p class="rvps10"><span class="rvts21">In these cases you can leave the Playback navigation to Taseditor and just focus on editing. Taseditor will immediately react on any Input modification and display the new result.by bringing the Playback cursor to the end of the current segment.</span></p>
-<p class="rvps10"><span class="rvts21">When you feel the influence of every click, you build very high level of interconnection between TASer and the game. In such close interaction both TASer controls the game and the game urges TASer's actions into right direction. Of course, such high level of interdependency is not always useful, because it narrows your spectrum of thoughts, not allowing to look down on the game and apply a logic from different games and other fields of life.</span></p>
-<p class="rvps10"><span class="rvts21">However, when the current segment is simple and all optimality factors are already known (and you only need to find the perfect combination of them), it's useful to abstract from everything else and devote full attention to going over the possible options. This way you can test a lot of approaches before you become bored with the current segment.</span></p>
-<p class="rvps10"><span class="rvts21">The Recording mode should be off. The </span><span class="rvts21">"Auto-restore last position" checkbox should be on. </span><span class="rvts21">The "Turbo seek" and "Follow cursor" checkboxes are usually disabled, but may be enabled when necessary.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">General activity:</span></p>
-<p class="rvps10"><span class="rvts48"><br/></span></p>
-<ol style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">Scroll the Piano Roll to the beginning of the edited segment, put the Playback cursor here, define the goal.</span></li>
-<li class="rvps10"><span class="rvts21">Detect the end of the segment and leave the Playback cursor there.</span></li>
-<li class="rvps10"><span class="rvts21">Suppose there's a mistake in the segment, weigh known factors of optimality and figure out the way to fix the mistake.</span></li>
-<li class="rvps10"><span class="rvts21">The mouse cursor navigation to any frame of the current segment is practically instant.</span></li>
-<li class="rvps10"><span class="rvts21">Edit the segment with the mouse. After every Input modification the Playback cursor will automatically replay the segment and stop at the frame that was considered to be the end of the segment. If necessary, you can shift the end of the segment by moving the Playback cursor manually (e.g. using the mouse wheel). The steps 4 and 5 are constantly alternating until you consider the editing complete, according to the optimality criterion.</span></li>
-<li class="rvps10"><span class="rvts21">[</span><span class="rvts34">optional step</span><span class="rvts21">] Save the finished approach to any free Bookmark, e.g. to slot </span><span class="rvts26">8</span><span class="rvts21"> or </span><span class="rvts26">7</span><span class="rvts21">.</span></li>
-<li class="rvps10"><span class="rvts21">If this isn't the first approach to the segment, compare the new result to the best old result, using the optimality criterion. If the new approach is better (or it's the first approach), save the result to the Bookmark </span><span class="rvts26">9</span><span class="rvts21">. The slot </span><span class="rvts26">9</span><span class="rvts21"> will be used for keeping the best result of polishing the segment.</span></li>
-<li class="rvps10"><span class="rvts21">If you still want to try different series of approaches, return to step 3, until you run out of ideas.</span></li>
-<li class="rvps10"><span class="rvts21">[</span><span class="rvts34">optional step</span><span class="rvts21">] If you need more ideas, you can get some information from the past or the future by moving the Playback cursor to different segments of the movie or unpausing the emulator. When necessary, you can quickly draw a rough Input for watching the upcoming events of the game. But when returning to the segment modification you have to return the Playback cursor to the frame of the target event.</span></li>
-<li class="rvps10"><span class="rvts21">When there's no more ideas, restore the best approach from the History Log or the Bookmark </span><span class="rvts26">9</span><span class="rvts21"> into the current movie and proceed to the next segment.</span></li>
+<p class="rvps2"><span class="rvts18">Semiautomatic TASing</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/toolbox-method3.png"></p>
+<p class="rvps7"><span class="rvts20">This method further develops the ideas of the nonlinear TASing method.</span></p>
+<p class="rvps7"><span class="rvts20">In many cases TASer needs to see the result of the Input modification immediately. Ideally, he should realize all the consequences of his decision right at the moment of making the decision. But in reality he has to spend precious time on inputting the decision and navigating with the Playback cursor to the end of the segment.</span></p>
+<p class="rvps7"><span class="rvts20">In these cases you can leave the Playback navigation to Taseditor and just focus on editing. Taseditor will immediately react on any Input modification and display the new result.by bringing the Playback cursor to the end of the current segment.</span></p>
+<p class="rvps7"><span class="rvts20">When you feel the influence of every click, you build very high level of interconnection between TASer and the game. In such close interaction both TASer controls the game and the game urges TASer's actions into right direction. Of course, such high level of interdependency is not always useful, because it narrows your spectrum of thoughts, not allowing to look down on the game and apply a logic from different games and other fields of life.</span></p>
+<p class="rvps7"><span class="rvts20">However, when the current segment is simple and all optimality factors are already known (and you only need to find the perfect combination of them), it's useful to abstract from everything else and devote full attention to going over the possible options. This way you can test a lot of approaches before you become bored with the current segment.</span></p>
+<p class="rvps7"><span class="rvts20">The Recording mode should be off. The </span><span class="rvts20">"Auto-restore last position" checkbox should be on. </span><span class="rvts20">The "Turbo seek" and "Follow cursor" checkboxes are usually disabled, but may be enabled when necessary.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">General activity:</span></p>
+<p class="rvps7"><span class="rvts22"><br/></span></p>
+<ol style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: decimal;">
+ <li value="1" class="rvps7"><span class="rvts20">Scroll the Piano Roll to the beginning of the edited segment, put the Playback cursor here, define the goal.</span></li>
+ <li value="2" class="rvps7"><span class="rvts20">Detect the end of the segment and leave the Playback cursor there.</span></li>
+ <li value="3" class="rvps7"><span class="rvts20">Suppose there's a mistake in the segment, weigh known factors of optimality and figure out the way to fix the mistake.</span></li>
+ <li value="4" class="rvps7"><span class="rvts20">The mouse cursor navigation to any frame of the current segment is practically instant.</span></li>
+ <li value="5" class="rvps7"><span class="rvts20">Edit the segment with the mouse. After every Input modification the Playback cursor will automatically replay the segment and stop at the frame that was considered to be the end of the segment. If necessary, you can shift the end of the segment by moving the Playback cursor manually (e.g. using the mouse wheel). The steps 4 and 5 are constantly alternating until you consider the editing complete, according to the optimality criterion.</span></li>
+ <li value="6" class="rvps7"><span class="rvts20">[</span><span class="rvts31">optional step</span><span class="rvts20">] Save the finished approach to any free Bookmark, e.g. to slot </span><span class="rvts23">8</span><span class="rvts20"> or </span><span class="rvts23">7</span><span class="rvts20">.</span></li>
+ <li value="7" class="rvps7"><span class="rvts20">If this isn't the first approach to the segment, compare the new result to the best old result, using the optimality criterion. If the new approach is better (or it's the first approach), save the result to the Bookmark </span><span class="rvts23">9</span><span class="rvts20">. The slot </span><span class="rvts23">9</span><span class="rvts20"> will be used for keeping the best result of polishing the segment.</span></li>
+ <li value="8" class="rvps7"><span class="rvts20">If you still want to try different series of approaches, return to step 3, until you run out of ideas.</span></li>
+ <li value="9" class="rvps7"><span class="rvts20">[</span><span class="rvts31">optional step</span><span class="rvts20">] If you need more ideas, you can get some information from the past or the future by moving the Playback cursor to different segments of the movie or unpausing the emulator. When necessary, you can quickly draw a rough Input for watching the upcoming events of the game. But when returning to the segment modification you have to return the Playback cursor to the frame of the target event.</span></li>
+ <li value="10" class="rvps7"><span class="rvts20">When there's no more ideas, restore the best approach from the History Log or the Bookmark </span><span class="rvts23">9</span><span class="rvts20"> into the current movie and proceed to the next segment.</span></li>
 </ol>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The main difference between this and previous method is that here the Playback cursor is generally located at the end of the current segment, and not at the beginning. Every time the Greenzone truncates, the Playback cursor seeks to the end of the segment, or rather to the frame where the segment end was before you modified the Input. If the Input modification also changed the frame of the target event, you can additionally move the light-blue cursor by mouse wheel if needed. But often there's no need for precise positioning, because you may only need to know the sequence of events occurring in the segment due to the Input modification.</span></p>
-<p class="rvps10"><span class="rvts21">The replay of the current segment is automatically launched after every interim step of the Input modifications, even when you haven't finished the thought yet and are not ready to compare the current result to the result of the previous approach. Fortunately, when TASer is carried away by the editing process, he doesn't look at FCEUX screen and only clicks the Piano Roll, until his idea is implemented in the form of a full-fledged button combination. And when the Input is starting to become interesting, TASer pays attention to the emulator screen or the Memory Watch window.</span></p>
-<p class="rvps10"><span class="rvts21">For example, when you need to create a jump over a pit, you first draw a long row of the </span><span class="rvts29">R</span><span class="rvts21"> button presses, and you don't care that at the same time the FCEUX screen displays how Mario runs and falls into the pit. You just draw some </span><span class="rvts29">A</span><span class="rvts21"> buttonpresses, then look at the emulator window and erase or draw additional </span><span class="rvts29">A</span><span class="rvts21"> buttonpresses, thus changing the beginning and the duration of the jump while watching the trajectory of Mario sprite.</span></p>
-<p class="rvps10"><span class="rvts21">So, the process of polishing the Input in this method is a simultaneous editing and watching the segment. TASer gets in close informational contact with the game and soon starts to think synchronously with its responses. The game starts to help you filter and accept decisions. As a result, you may lose impartiality of your mind and stick to obvious decisions encouraged by the game. That's why you shouldn't use this method all the time, it's recommended to alternate it with the previous one.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Like with the simple nonlinear method, you can change the speed of emulation and get different variations of the semiautomatic method:</span></p>
-<ol style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">editing and watching the changes in real time</span></li>
-<li class="rvps10"><span class="rvts21">editing and watching the changes in slow motion</span></li>
-<li class="rvps10"><span class="rvts21">editing and instantly seeing the final result (turbo)</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The main difference between this and previous method is that here the Playback cursor is generally located at the end of the current segment, and not at the beginning. Every time the Greenzone truncates, the Playback cursor seeks to the end of the segment, or rather to the frame where the segment end was before you modified the Input. If the Input modification also changed the frame of the target event, you can additionally move the light-blue cursor by mouse wheel if needed. But often there's no need for precise positioning, because you may only need to know the sequence of events occurring in the segment due to the Input modification.</span></p>
+<p class="rvps7"><span class="rvts20">The replay of the current segment is automatically launched after every interim step of the Input modifications, even when you haven't finished the thought yet and are not ready to compare the current result to the result of the previous approach. Fortunately, when TASer is carried away by the editing process, he doesn't look at FCEUX screen and only clicks the Piano Roll, until his idea is implemented in the form of a full-fledged button combination. And when the Input is starting to become interesting, TASer pays attention to the emulator screen or the Memory Watch window.</span></p>
+<p class="rvps7"><span class="rvts20">For example, when you need to create a jump over a pit, you first draw a long row of the </span><span class="rvts26">R</span><span class="rvts20"> button presses, and you don't care that at the same time the FCEUX screen displays how Mario runs and falls into the pit. You just draw some </span><span class="rvts26">A</span><span class="rvts20"> buttonpresses, then look at the emulator window and erase or draw additional </span><span class="rvts26">A</span><span class="rvts20"> buttonpresses, thus changing the beginning and the duration of the jump while watching the trajectory of Mario sprite.</span></p>
+<p class="rvps7"><span class="rvts20">So, the process of polishing the Input in this method is a simultaneous editing and watching the segment. TASer gets in close informational contact with the game and soon starts to think synchronously with its responses. The game starts to help you filter and accept decisions. As a result, you may lose impartiality of your mind and stick to obvious decisions encouraged by the game. That's why you shouldn't use this method all the time, it's recommended to alternate it with the previous one.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Like with the simple nonlinear method, you can change the speed of emulation and get different variations of the semiautomatic method:</span></p>
+<ol style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: decimal;">
+ <li value="1" class="rvps7"><span class="rvts20">editing and watching the changes in real time</span></li>
+ <li value="2" class="rvps7"><span class="rvts20">editing and watching the changes in slow motion</span></li>
+ <li value="3" class="rvps7"><span class="rvts20">editing and instantly seeing the final result (turbo)</span></li>
 </ol>
-<p class="rvps10"><a name="turbo-seeking"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Turbo-seeking creates an association between two distant events (the beginning and the end of the segment). Here the association is even more efficient, because there's even less intermediaries – the seeking starts before you even release the mouse button when drawing the Input. So you see the distant result almost at the same time you change the decisive Input, even if the game normally only shows the result in a several seconds.</span></p>
-<p class="rvps10"><a name="LuckManipulation"></a>
-<span class="rvts21">A good example would be the process of searching for the first possible frame of pressing the </span><span class="rvts29">Start</span><span class="rvts21"> button. Some games actually allow to press the button before there's even any graphics on screen. Besides, after the </span><span class="rvts29">Start</span><span class="rvts21"> button is activated, games often meditate for some time, not giving you any information if the button worked or not. Only after a second or two you can see the changes in the scenery, thus learning the buttonpress was successful.</span></p>
-<p class="rvps10"><span class="rvts21">In the traditional method of TASing you would need to spend 5-10 minutes on examination of approaches (searching for the very first frame), but the semiautomatic method allows to go over all the approaches much faster:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">Switch on the </span><span class="rvts21">"Auto-restore last position" and </span><span class="rvts21">"Turbo seek" checkboxes. Switch off the </span><span class="rvts21">"Follow cursor" checkbox.</span></li>
+<p class="rvps7"><a name="turbo-seeking"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Turbo-seeking creates an association between two distant events (the beginning and the end of the segment). Here the association is even more efficient, because there's even less intermediaries – the seeking starts before you even release the mouse button when drawing the Input. So you see the distant result almost at the same time you change the decisive Input, even if the game normally only shows the result in a several seconds.</span></p>
+<p class="rvps7"><a name="LuckManipulation"></a><span class="rvts20">A good example would be the process of searching for the first possible frame of pressing the </span><span class="rvts26">Start</span><span class="rvts20"> button. Some games actually allow to press the button before there's even any graphics on screen. Besides, after the </span><span class="rvts26">Start</span><span class="rvts20"> button is activated, games often meditate for some time, not giving you any information if the button worked or not. Only after a second or two you can see the changes in the scenery, thus learning the buttonpress was successful.</span></p>
+<p class="rvps7"><span class="rvts20">In the traditional method of TASing you would need to spend 5-10 minutes on examination of approaches (searching for the very first frame), but the semiautomatic method allows to go over all the approaches much faster:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">Switch on the </span><span class="rvts20">"Auto-restore last position" and </span><span class="rvts20">"Turbo seek" checkboxes. Switch off the </span><span class="rvts20">"Follow cursor" checkbox.</span></li>
 </ul>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">Set a trial </span><span class="rvts29">Start</span><span class="rvts21"> button press at the frame where it definitely works, e.g. at the frame 100.</span></li>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">Set a trial </span><span class="rvts26">Start</span><span class="rvts20"> button press at the frame where it definitely works, e.g. at the frame 100.</span></li>
 </ul>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">Watch the game up to the frame where you can already tell by the picture that the </span><span class="rvts29">Start</span><span class="rvts21"> was successful (e.g. the screen changed to "World 1-1" text). For example, it's the frame 150. Leave the Playback cursor at this frame – this will be the end of the segment.</span></li>
-<li class="rvps10"><span class="rvts21">Now remove the trial buttonpress (the FCEUX window will flash and the "World 1-1" will disappear, leaving only the title screen, since there's no more </span><span class="rvts29">Start</span><span class="rvts21"> button press).</span></li>
-<li class="rvps10"><span class="rvts21">Set the </span><span class="rvts29">Start </span><span class="rvts21">buttonpress to the beginning of the segment, which is the place where you know it's too early for the buttonpress to be registered. For example, set it to the first frame of the movie. The image in the FCEUX window will flash but then still show the title screen, because the </span><span class="rvts29">Start</span><span class="rvts21"> didn't work.</span></li>
-<li class="rvps10"><span class="rvts21">Hold </span><span class="rvts30">Ctrl + Shift</span><span class="rvts21"> by one hand and begin pressing </span><span class="rvts30">Insert</span><span class="rvts21"> key once per a second or so (that really depends on your computer performance). After every </span><span class="rvts30">Ctrl + Shift + Insert</span><span class="rvts21"> combination the </span><span class="rvts29">Start</span><span class="rvts21"> buttonpress moves one frame forward, and the FCEUX window shows you if the buttonpress changed the state of the game at frame 150 or not.</span></li>
-<li class="rvps10"><span class="rvts21">Until the </span><span class="rvts29">Start</span><span class="rvts21"> doesn't reach the moment when the game is ready to accept the Input, the FCEUX window will show you the title screen. But when another press of </span><span class="rvts30">Ctrl + Shift + Insert</span><span class="rvts21"> moves the </span><span class="rvts29">Start</span><span class="rvts21"> to a suitable frame, the emulator will display the "</span><span class="rvts21">World 1-1" screen.</span></li>
-<li class="rvps10"><span class="rvts21">This way you've found the very first frame to press the </span><span class="rvts29">Start</span><span class="rvts21"> button. Most likely the frame number will be much less than 100.</span></li>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">Watch the game up to the frame where you can already tell by the picture that the </span><span class="rvts26">Start</span><span class="rvts20"> was successful (e.g. the screen changed to "World 1-1" text). For example, it's the frame 150. Leave the Playback cursor at this frame – this will be the end of the segment.</span></li>
+ <li class="rvps7"><span class="rvts20">Now remove the trial buttonpress (the FCEUX window will flash and the "World 1-1" will disappear, leaving only the title screen, since there's no more </span><span class="rvts26">Start</span><span class="rvts20"> button press).</span></li>
+ <li class="rvps7"><span class="rvts20">Set the </span><span class="rvts26">Start </span><span class="rvts20">buttonpress to the beginning of the segment, which is the place where you know it's too early for the buttonpress to be registered. For example, set it to the first frame of the movie. The image in the FCEUX window will flash but then still show the title screen, because the </span><span class="rvts26">Start</span><span class="rvts20"> didn't work.</span></li>
+ <li class="rvps7"><span class="rvts20">Hold </span><span class="rvts27">Ctrl + Shift</span><span class="rvts20"> by one hand and begin pressing </span><span class="rvts27">Insert</span><span class="rvts20"> key once per a second or so (that really depends on your computer performance). After every </span><span class="rvts27">Ctrl + Shift + Insert</span><span class="rvts20"> combination the </span><span class="rvts26">Start</span><span class="rvts20"> buttonpress moves one frame forward, and the FCEUX window shows you if the buttonpress changed the state of the game at frame 150 or not.</span></li>
+ <li class="rvps7"><span class="rvts20">Until the </span><span class="rvts26">Start</span><span class="rvts20"> doesn't reach the moment when the game is ready to accept the Input, the FCEUX window will show you the title screen. But when another press of </span><span class="rvts27">Ctrl + Shift + Insert</span><span class="rvts20"> moves the </span><span class="rvts26">Start</span><span class="rvts20"> to a suitable frame, the emulator will display the "</span><span class="rvts20">World 1-1" screen.</span></li>
+ <li class="rvps7"><span class="rvts20">This way you've found the very first frame to press the </span><span class="rvts26">Start</span><span class="rvts20"> button. Most likely the frame number will be much less than 100.</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">In the same way you can search for an optimal duration of holding the </span><span class="rvts29">A</span><span class="rvts21"> button, trying to land at certain point. Also consider using this method for quick luck manipulation in many games. The automatic turbo-seeking works best when you deal with a single factor of optimality and need to quickly test a hundred of similar approaches.</span></p>
-<p class="rvps10"><span class="rvts21">In general, the semiautomatic method induces you to think less and experiment more. Sure, many videogames allow this way of solving tasks, but TASing requires more from you, so try not to take a fancy to the comfort of this method.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Pros of the method:</span></p>
-<p class="rvps14"><span class="rvts22">+ </span><span class="rvts21">Instant navigation and high</span><span class="rvts21"> speed of the working process incites to conduct more tests.</span></p>
-<p class="rvps14"><span class="rvts22">+ </span><span class="rvts21">Constant feedback allows to adapt to the game while editing the Input, adjust your decisions and discard incorrect approaches prematurely.</span></p>
-<p class="rvps14"><span class="rvts22">+ </span><span class="rvts21">Possibility to skip useless scenes.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Cons of the method:</span></p>
-<p class="rvps14"><span class="rvts22">– </span><span class="rvts21">The insistent game feedback provokes TASer to discard some illogical but potentially advantageous approaches.</span></p>
-<p class="rvps14"><span class="rvts22">– </span><span class="rvts21">Emphasis on the mouse controls.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">When the method is recommended to use:</span><span class="rvts21"> when you need to polish the segment already knowing all of its optimality factors. E.g. for quick resyncing of the old Input this method is better than previous. Also it may be better for making an initial playthrough of a segment.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Now that you know the main principles of working in Taseditor, you can begin TASing your game of interest. Practice is the best teacher, so you'll only learn all intricacies of the activity by engaging in a real development of your own TAS.</span></p>
-<p class="rvps10"><span class="rvts21">After several weeks of practical TASing it's recommended to reread the 3rd and 4th chapters of this Guide, in order to understand the text on a deeper level.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">In the next chapter: </span><a class="rvts27" href="ProgramCustomization.html">tweaking the program</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<div class="rvps10"><table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid;"><p class="rvps10"><span class="rvts25">PRACTICE: </span><span class="rvts21">Thoroughly polish the Input in the segments of your test movie. If the initial dividing appears to be wrong – just redo it on the fly.</span></p>
-<p class="rvps10"><span class="rvts21">Use only the 2nd and the 3rd method of TASing, because traditional method is obsolete. Also try using turbo when suitable.</span></p>
-<p class="rvps10"><span class="rvts25">Estimated time: </span><span class="rvts21">30-60 minutes.</span></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">In the same way you can search for an optimal duration of holding the </span><span class="rvts26">A</span><span class="rvts20"> button, trying to land at certain point. Also consider using this method for quick luck manipulation in many games. The automatic turbo-seeking works best when you deal with a single factor of optimality and need to quickly test a hundred of similar approaches.</span></p>
+<p class="rvps7"><span class="rvts20">In general, the semiautomatic method induces you to think less and experiment more. Sure, many videogames allow this way of solving tasks, but TASing requires more from you, so try not to take a fancy to the comfort of this method.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Pros of the method:</span></p>
+<p class="rvps9"><span class="rvts21">+ </span><span class="rvts20">Instant navigation and high</span><span class="rvts20"> speed of the working process incites to conduct more tests.</span></p>
+<p class="rvps9"><span class="rvts21">+ </span><span class="rvts20">Constant feedback allows to adapt to the game while editing the Input, adjust your decisions and discard incorrect approaches prematurely.</span></p>
+<p class="rvps9"><span class="rvts21">+ </span><span class="rvts20">Possibility to skip useless scenes.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Cons of the method:</span></p>
+<p class="rvps9"><span class="rvts21">– </span><span class="rvts20">The insistent game feedback provokes TASer to discard some illogical but potentially advantageous approaches.</span></p>
+<p class="rvps9"><span class="rvts21">– </span><span class="rvts20">Emphasis on the mouse controls.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">When the method is recommended to use:</span><span class="rvts20"> when you need to polish the segment already knowing all of its optimality factors. E.g. for quick resyncing of the old Input this method is better than previous. Also it may be better for making an initial playthrough of a segment.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Now that you know the main principles of working in Taseditor, you can begin TASing your game of interest. Practice is the best teacher, so you'll only learn all intricacies of the activity by engaging in a real development of your own TAS.</span></p>
+<p class="rvps7"><span class="rvts20">After several weeks of practical TASing it's recommended to reread the 3rd and 4th chapters of this Guide, in order to understand the text on a deeper level.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">In the next chapter: </span><a class="rvts24" href="ProgramCustomization.html">tweaking the program</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<div class="rvps7">
+<table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid; border-spacing: 2px;">
+ <tr valign="top">
+  <td style="border-color: #000000; border-style: solid; padding: 6px;">
+   <p class="rvps7"><span class="rvts22">PRACTICE: </span><span class="rvts20">Thoroughly polish the Input in the segments of your test movie. If the initial dividing appears to be wrong – just redo it on the fly.</span></p>
+   <p class="rvps7"><span class="rvts20">Use only the 2nd and the 3rd method of TASing, because traditional method is obsolete. Also try using turbo when suitable.</span></p>
+   <p class="rvps7"><span class="rvts22">Estimated time: </span><span class="rvts20">30-60 minutes.</span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Produce Kindle eBooks easily</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/help-authoring-tool">Free help authoring environment</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 
