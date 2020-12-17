@@ -41,10 +41,5 @@ exclude:
   - vc/upx.exe
   - vc/zip.exe
 
-include:
-  - web/help/_translations.js
-  - web/help/_keywords.json
-  - web/help/_toc.json
-  - web/help/taseditor/_translations.js
-  - web/help/taseditor/_keywords.json
-  - web/help/taseditor/_toc.json
+# Include all .js and .json files that start with an '_'
+include: [ "_*.js", "_*.json" ]
