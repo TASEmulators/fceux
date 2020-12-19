@@ -368,7 +368,7 @@ Name* parse(char* lines, const char* filename)
 		
 		size = strstr(cur->offset, "/");
 			
-		if (size) // Array definition line
+		if (size && cur->name) // Array definition line
 		{
 			int arrlen, offset;
 			
