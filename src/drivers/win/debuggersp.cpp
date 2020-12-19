@@ -368,7 +368,7 @@ Name* parse(char* lines, const char* filename)
 		
 		size = strstr(cur->offset, "/");
 			
-		if (size) // Array definition line
+		if (size && cur->name) // Array definition line
 		{
 			int arrlen, offset;
 			
@@ -485,7 +485,6 @@ Name* parseNameFile(const char* filename)
 			n = parse(buffer, filename);
 
 			fclose(f);
-			
 			free(buffer);
 		}
 	}
@@ -1024,7 +1023,7 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 			break;
 	}
 
-	if (*newName)
+	if (*newName || *newComment)
 	{
 		if (!initialNode)
 		{
@@ -1033,8 +1032,15 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 			node->offset = (char*)malloc(strlen(newOffset) + 1);
 			strcpy(node->offset, newOffset);
 			node->offsetNumeric = newAddress;
-			node->name = (char*)malloc(strlen(newName) + 1);
-			strcpy(node->name, newName);
+			if (strlen(newName))
+			{
+				node->name = (char*)malloc(strlen(newName) + 1);
+				strcpy(node->name, newName);
+			}
+			else
+			{
+				node->name = 0;
+			}
 			if (strlen(newComment))
 			{
 				node->comment = (char*)malloc(strlen(newComment) + 1);
@@ -1055,17 +1061,25 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 					// found matching address - replace its name and comment
 					if (node->name)
 						free(node->name);
-					node->name = (char*)malloc(strlen(newName) + 1);
-					strcpy(node->name, newName);
+					if (strlen(newName))
+					{
+						node->name = (char*)malloc(strlen(newName) + 1);
+						strcpy(node->name, newName);
+					} else
+					{
+						node->name = 0;
+					}
 					if (node->comment)
 					{
 						free(node->comment);
-						node->comment = 0;
 					}
 					if (strlen(newComment))
 					{
 						node->comment = (char*)malloc(strlen(newComment) + 1);
 						strcpy(node->comment, newComment);
+					} else
+					{
+						node->comment = 0;
 					}
 					break;
 				}
@@ -1080,14 +1094,20 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 					newNode->offset = (char*)malloc(strlen(newOffset) + 1);
 					strcpy(newNode->offset, newOffset);
 					newNode->offsetNumeric = newAddress;
-					newNode->name = (char*)malloc(strlen(newName) + 1);
-					strcpy(newNode->name, newName);
+					
+					if (strlen(newName))
+					{
+						newNode->name = (char*)malloc(strlen(newName) + 1);
+						strcpy(newNode->name, newName);
+					}
+					else {
+						newNode->name = 0;
+					}
 					if (strlen(newComment))
 					{
 						newNode->comment = (char*)malloc(strlen(newComment) + 1);
 						strcpy(newNode->comment, newComment);
-					} else
-					{
+					} else {
 						newNode->comment = 0;
 					}
 					newNode->next = 0;
@@ -1097,7 +1117,7 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 		}
 	} else
 	{
-		// name field is empty - remove the address from the list
+		// name and comment field are all empty - remove the address from the list
 		Name* previousNode = 0;
 		while (node)
 		{
