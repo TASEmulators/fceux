@@ -485,7 +485,6 @@ Name* parseNameFile(const char* filename)
 			n = parse(buffer, filename);
 
 			fclose(f);
-			
 			free(buffer);
 		}
 	}

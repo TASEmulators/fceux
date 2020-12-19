@@ -2429,7 +2429,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 								if (discardBookmarkCount || outOfRangeBookmarkCount)
 								{
 									char reason[64];
-									sprintf(buffer, "Import complete, but %d bookmark%s %s are not imported:\n", discardBookmarkCount + outOfRangeBookmarkCount, discardBookmarkCount + outOfRangeBookmarkCount == 1 ? "" : "s", discardBookmarkCount + outOfRangeBookmarkCount == 1 ? "is" : "are");
+									sprintf(buffer, "Import complete, but %d bookmark%s %s not imported:\n", discardBookmarkCount + outOfRangeBookmarkCount, discardBookmarkCount + outOfRangeBookmarkCount == 1 ? "" : "s", discardBookmarkCount + outOfRangeBookmarkCount == 1 ? "is" : "are");
 									if (outOfRangeBookmarkCount)
 									{
 										sprintf(reason, "%d %s outside the valid address range of the game.", outOfRangeBookmarkCount, outOfRangeBookmarkCount == 1 ? "is" : "are");

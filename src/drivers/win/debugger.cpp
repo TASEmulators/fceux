@@ -546,13 +546,14 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 				{
 					// make a copy
 					strcpy(debug_str_decoration_comment, node->comment);
-					strcat(debug_str_decoration_comment, "\n");
+					strcat(debug_str_decoration_comment, "\r\n");
 					// divide the debug_str_decoration_comment into strings (Comment1, Comment2, ...)
 					debug_decoration_comment = debug_str_decoration_comment;
-					debug_decoration_comment_end_pos = strstr(debug_decoration_comment, "\n");
+					debug_decoration_comment_end_pos = strstr(debug_decoration_comment, "\r\n");
 					while (debug_decoration_comment_end_pos)
 					{
 						debug_decoration_comment_end_pos[0] = 0;		// set \0 instead of \r
+						debug_decoration_comment_end_pos[1] = 0;		// set \0 instead of \n
 						strcat(debug_str, "; ");
 						strcat(debug_str, debug_decoration_comment);
 						strcat(debug_str, "\n");
@@ -563,7 +564,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 
 						debug_decoration_comment_end_pos += 2;
 						debug_decoration_comment = debug_decoration_comment_end_pos;
-						debug_decoration_comment_end_pos = strstr(debug_decoration_comment_end_pos, "\n");
+						debug_decoration_comment_end_pos = strstr(debug_decoration_comment_end_pos, "\r\n");
 					}
 				}
 			}
